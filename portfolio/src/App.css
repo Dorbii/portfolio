@@ -4,3 +4,18 @@
   padding: 2rem;
   text-align: center;
 }
+
+.snake-game {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+  width: 10vh;
+  cursor: pointer;
+}
+
+.snake-game-icon {
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

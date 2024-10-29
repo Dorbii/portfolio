@@ -7,7 +7,7 @@ import SnakeGame from './Components/SnakeGame/SnakeGame.jsx'
 function main() {
   const container = document.getElementById('root');
   const root = createRoot(container);
-  root.render(<SnakeGame />);
+  root.render(<App />);
 }
 main();
 

@@ -1,65 +1,114 @@
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useRef, useState } from "react";
 import Food from "./Food";
 import Button from "./Button";
 import Menu from "./Menu";
 import Snake from "./Snake";
 import './css/SnakeGame.css';
+import GameOver from "./GameOver";
 
 const spawnFood = () => {
     return Array.from({ length: 2 }, () => Math.floor(Math.random() * 100 / 2) * 2);
 }
 
-const initialState = {
-    food: spawnFood(), //make random
-    speed: 200,
-    direction: "RIGHT",
-    snakeDots: [[0, 0], [0, 2]],
-    gameState: 'menu'
-};
+export default function SnakeGame() {
+    const [gameOver, setGameOver] = useState(false);
+    const [snakeDots, setSnakeDots] = useState([[0, 0], [0, 2]]);
+    const [food, setFood] = useState(spawnFood());
+    const [speed, setSpeed] = useState(200);
+    const [direction, setDirection] = useState("RIGHT");
+    const [gameState, setGameState] = useState('menu');
 
+    const initSnakeGame = () => {
+        setGameOver(false);
+        setSnakeDots([[0, 0], [0, 2]]);
+        setFood(spawnFood());
+        setSpeed(200);
+        setDirection("RIGHT");
+        setGameState('menu');
+    }
+    //check out of bounds
+    useEffect(() => {
+        let head = snakeDots[snakeDots.length - 1];
+        if (gameState === 'game' && (
+            head[0] >= 100 || head[1] >= 100 || head[0] < 0 || head[1] < 0)) {
+            return () => setGameOver(true);
+        };
+    }, [snakeDots, gameState]);
 
-class SnakeGame extends Component {
-    constructor() {
-        super(); //allows for parent class to be called
-        this.state = initialState; //sets the state to the initial state
-        this.handleKeyDown = this.handleKeyDown.bind(this)
+    // check if collapsed
+    useEffect(() => {
+        let snake = [...snakeDots];
+        let head = snake[snake.length - 1];
+        // Remove the head from the snake body to avoid detecting collision with itself
+        snake.pop();
+        const hasCollided = snake.some(dot => head[0] === dot[0] && head[1] === dot[1]);
+        if (hasCollided && gameState === 'game' && snakeDots.length > 2) {
+            setGameOver(true);
+        }
+    }, [snakeDots, direction]);
+
+    useEffect(() => {
+        if (gameState === 'menu') {
+            initSnakeGame();
+        }
+    }, [gameState]);
+
+    useEffect(() => {
+        const interval = setInterval(() => { moveSnake(); }, speed);
+        return () => clearInterval(interval);;
+    }, [snakeDots, speed, gameState]);
+
+    useEffect(() => {
+        function handleKeyDown(e) {
+            switch (e.key) {
+                case "a":
+                case "ArrowLeft":
+                    onLeft();
+                    break;
+                case "w":
+                case "ArrowUp":
+                    onUp();
+                    break;
+                case "d":
+                case "ArrowRight":
+                    onRight();
+                    break;
+                case "s":
+                case "ArrowDown":
+                    onDown();
+                    break;
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [snakeDots]);
+
+    useEffect(() => {
+        let head = snakeDots[snakeDots.length - 1];
+        if (head[0] === food[0] && head[1] === food[1]) {
+            setFood(spawnFood());
+            increaseSnake();
+            increaseSpeed();
+        }
+    }, [food, snakeDots]);
+
+    const increaseSnake = () => {
+        let newSnake = [...snakeDots];
+        newSnake.unshift([]);
+        setSnakeDots(newSnake);
     };
-    componentDidMount() {
-        setInterval(this.moveSnake, this.state.speed); //executes a function at specified intervals(speed)
-        //document.onkeydown = this.onKeyDown;
-        window.addEventListener('keydown', this.handleKeyDown)
-    };
-    componentDidUpdate() {
-        this.checkIfOutOfBonds();
-        this.checkIfCollapsed();
-        this.onEat();
-    };
-    handleKeyDown = (e) => {
-        switch (e.key) {
-            case "a":
-            case "ArrowLeft":
-                this.onLeft();
-                break;
-            case "w":
-            case "ArrowUp":
-                this.onUp();
-                break;
-            case "d":
-            case "ArrowRight":
-                this.onRight();
-                break;
-            case "s":
-            case "ArrowDown":
-                this.onDown();
-                break;
+
+    const increaseSpeed = () => {
+        if (speed > 10) {
+            setSpeed(speed - 20);
         }
     };
 
-    moveSnake = () => {
-        let dots = [...this.state.snakeDots];
+    const moveSnake = () => {
+        let dots = [...snakeDots];
         let head = dots[dots.length - 1];
-        if (this.state.gameState === 'game') {
-            switch (this.state.direction) {
+        if (gameState === 'game' && !gameOver) {
+            switch (direction) {
                 case 'RIGHT':
                     head = [head[0] + 2, head[1]];
                     break;
@@ -73,151 +122,82 @@ class SnakeGame extends Component {
                     head = [head[0], head[1] - 2];
                     break;
             }
-            dots.push(head);
-            dots.shift();
-            this.setState({
-                snakeDots: dots
-            });
         }
-    };
+        dots.push(head);
+        dots.shift();
+        setSnakeDots(dots);
+    }
 
-    checkIfOutOfBonds() {
-        let head = this.state.snakeDots[this.state.snakeDots.length - 1];
-        if (this.state.gameState === 'game' && (
-            head[0] >= 100 || head[1] >= 100 || head[0] < 0 || head[1] < 0
-        )) {
-            this.gameOver();
-        }
-    };
-
-    checkIfCollapsed() {
-        let snake = [...this.state.snakeDots];
-        let head = snake[snake.length - 1];
-        snake.pop();
-        snake.forEach(dot => {
-            if (head[0] === dot[0] && head[1] === dot[1]) {
-                this.gameOver();
-            }
-        });
-    };
-
-    gameOver() {
-        alert(`Game Over. you ate ${this.state.snakeDots.length - 2}`);
-        this.setState(initialState);
-    };
-
-    onEat() {
-        let head = this.state.snakeDots[this.state.snakeDots.length - 1];
-        let food = this.state.food;
-        if (head[0] === food[0] && head[1] === food[1]) { //if the head is at the same location as the food
-            this.setState({
-                food: spawnFood() //create another food at random location
-            });
-            this.increaseSnake();
-            this.increaseSpeed();
-        }
-    };
-
-    increaseSnake() {
-        let newSnake = [...this.state.snakeDots];
-        newSnake.unshift([]);
-        this.setState({
-            snakeDots: newSnake
-        });
-    };
-
-    increaseSpeed() {
-        if (this.state.speed > 10) {
-            this.setState({
-                speed: this.state.speed - 20 //we decrease to increase rate of interval
-            });
-        }
-    };
-
-    onDown = () => {
-        let dots = [...this.state.snakeDots];
+    const onDown = () => {
+        let dots = [...snakeDots];
         let head = dots[dots.length - 1];
-
         head = [head[0], head[1] + 2];
         dots.push(head);
         dots.shift();
-        this.setState({
-            direction: "DOWN",
-            snakeDots: dots
-        });
+        setDirection("DOWN");
+        setSnakeDots(dots);
     };
 
-    onUp = () => {
-        let dots = [...this.state.snakeDots];
+    const onUp = () => {
+        let dots = [...snakeDots];
         let head = dots[dots.length - 1];
-
         head = [head[0], head[1] - 2];
         dots.push(head);
         dots.shift();
-        this.setState({
-            direction: "UP",
-            snakeDots: dots
-        });
+        setDirection("UP");
+        setSnakeDots(dots);
     };
 
-    onRight = () => {
-        let dots = [...this.state.snakeDots];
+    const onRight = () => {
+        let dots = [...snakeDots];
         let head = dots[dots.length - 1];
-
         head = [head[0] + 2, head[1]];
         dots.push(head);
         dots.shift();
-        this.setState({
-            direction: "RIGHT",
-            snakeDots: dots
-        });
+        setDirection("RIGHT");
+        setSnakeDots(dots);
     };
 
-    onLeft = () => {
-        let dots = [...this.state.snakeDots];
+    const onLeft = () => {
+        let dots = [...snakeDots];
         let head = dots[dots.length - 1];
-
         head = [head[0] - 2, head[1]];
         dots.push(head);
         dots.shift();
-        this.setState({
-            direction: "LEFT",
-            snakeDots: dots
-        });
+        setDirection("LEFT");
+        setSnakeDots(dots);
     };
-    onGameStateChange = () => {
-        this.setState({
-            gameState: 'game'
-        });
-    };
-
-    render() {
-        const { gameState, snakeDots, food } = this.state;
-        return (
+    return (
+        <>
             <div>
-                {gameState === 'menu' ? (
-                    <div>
-                        <Menu onGameStateChange={this.onGameStateChange} />
-                    </div>
-                ) : (
-                    <div>
-                        <div className='snake-container'>
-                            <Snake snakeDots={snakeDots} />
-                            <Food dot={food} />
+                <GameOver gameOver={gameOver} score={snakeDots.length - 2}><button onClick={() => { setGameState('menu') }}>Play Again</button> </GameOver>
+                {
+                    gameState === 'menu' ? (
+                        <div className="wrapper">
+                            <div>
+                                <input
+                                    className="start"
+                                    type="button"
+                                    value="Start"
+                                    onClick={() => setGameState('game')} />
+                            </div>
                         </div>
-                        <Button
-                            onDown={this.onDown}
-                            onLeft={this.onLeft}
-                            onRight={this.onRight}
-                            onUp={this.onUp}
-                        />
-                    </div>
-                )}
+                    ) : (
+                        <div>
+                            <div className='snake-container'>
+                                <Snake snakeDots={snakeDots} />
+                                <Food dot={food} />
+                            </div>
+                            <Button
+                                onDown={onDown}
+                                onLeft={onLeft}
+                                onRight={onRight}
+                                onUp={onUp}
+                            />
+                        </div>
+                    )}
             </div>
-        );
-    }
+        </>
+
+    );
 }
-
-
-
-export default SnakeGame;

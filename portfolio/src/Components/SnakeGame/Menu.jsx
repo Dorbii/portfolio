@@ -1,6 +1,7 @@
 import React from "react";
 import './css/Menu.css';
-const Menu = ({ onGameStateChange }) => {
+const Menu = ({ gameState, setGameState }) => {
+    if (gameState !== 'menu') return;
     return (
         <div className="wrapper">
             <div>
@@ -8,7 +9,7 @@ const Menu = ({ onGameStateChange }) => {
                     className="start"
                     type="button"
                     value="Start"
-                    onClick={onGameStateChange} />
+                    onClick={setGameState('game')} />
             </div>
         </div>
     )
