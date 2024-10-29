@@ -1,7 +1,6 @@
-import React, { Component, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Food from "./Food";
 import Button from "./Button";
-import Menu from "./Menu";
 import Snake from "./Snake";
 import './css/SnakeGame.css';
 import GameOver from "./GameOver";
