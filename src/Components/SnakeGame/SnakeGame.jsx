@@ -33,7 +33,7 @@ export default function SnakeGame() {
 
     const increaseSpeed = useCallback(() => {
         if (speed > 10) {
-            setSpeed(speed - 20);
+            setSpeed(speed - 10);
         }
     }, [speed]);
 
@@ -104,6 +104,7 @@ export default function SnakeGame() {
         setDirection("LEFT");
         setSnakeDots(dots);
     }, [snakeDots, direction]);
+
     //check out of bounds
     useEffect(() => {
         let head = snakeDots[snakeDots.length - 1];

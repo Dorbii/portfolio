@@ -8,5 +8,6 @@
 }
 
 .snake:last-child {
+    border: 1px solid lightgreen;
     background-color: #04dc33;
 }

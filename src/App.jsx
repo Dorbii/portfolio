@@ -8,7 +8,8 @@ function App() {
   const [appVisible, setAppVisible] = useState(false);
   return (
     <>
-      <h1>Select App</h1>
+      <header><button onClick={() => { setAppVisible(false); setCurrentApp(false) }} > Home </button> </header>
+      <h1 hidden={appVisible}>Select App</h1>
       <div className='app-container' hidden={appVisible}>
         <button className="snake-game" key="snake-game" id="snake-game" onClick={() => {
           currentApp === 'snake-game' ? setCurrentApp('') : setCurrentApp('snake-game')
