@@ -1,4 +1,3 @@
-import React from "react";
 import './css/Food.css';
 const Food = (props) => {
     const style = {

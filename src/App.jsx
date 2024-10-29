@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import SnakeGame from './Components/SnakeGame/SnakeGame'
 import snakeGameIcon from './assets/snake-game-appIcon.png'
 
