@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Food from "./Food";
 import Button from "./Button";
 import Snake from "./Snake";
@@ -25,6 +25,85 @@ export default function SnakeGame() {
         setDirection("RIGHT");
         setGameState('menu');
     }
+    const increaseSnake = useCallback(() => {
+        let newSnake = [...snakeDots];
+        newSnake.unshift([]);
+        setSnakeDots(newSnake);
+    }, [snakeDots]);
+
+    const increaseSpeed = useCallback(() => {
+        if (speed > 10) {
+            setSpeed(speed - 20);
+        }
+    }, [speed]);
+
+    const moveSnake = useCallback(() => {
+        let dots = [...snakeDots];
+        let head = dots[dots.length - 1];
+        if (gameState === 'game' && !gameOver) {
+            switch (direction) {
+                case 'RIGHT':
+                    head = [head[0] + 2, head[1]];
+                    break;
+                case 'LEFT':
+                    head = [head[0] - 2, head[1]];
+                    break;
+                case 'DOWN':
+                    head = [head[0], head[1] + 2];
+                    break;
+                case 'UP':
+                    head = [head[0], head[1] - 2];
+                    break;
+            }
+        }
+        dots.push(head);
+        dots.shift();
+        setSnakeDots(dots);
+    }, [direction, gameOver, gameState, snakeDots]);
+
+    const onDown = useCallback(() => {
+        if (direction === 'UP') return;
+        let dots = [...snakeDots];
+        let head = dots[dots.length - 1];
+        head = [head[0], head[1] + 2];
+        dots.push(head);
+        dots.shift();
+        setDirection("DOWN");
+        setSnakeDots(dots);
+    }, [snakeDots, direction]);
+
+    const onUp = useCallback(() => {
+        if (direction === 'DOWN') return;
+        let dots = [...snakeDots];
+        let head = dots[dots.length - 1];
+        head = [head[0], head[1] - 2];
+        dots.push(head);
+        dots.shift();
+        setDirection("UP");
+        setSnakeDots(dots);
+    }, [snakeDots, direction]);
+
+    const onRight = useCallback(() => {
+        if (direction === 'LEFT') return
+        let dots = [...snakeDots];
+        let head = dots[dots.length - 1];
+        head = [head[0] + 2, head[1]];
+        dots.push(head);
+        dots.shift();
+        setDirection("RIGHT");
+        setSnakeDots(dots);
+    }, [snakeDots, direction]);
+
+    const onLeft = useCallback(() => {
+        if (direction === 'RIGHT') return
+        let dots = [...snakeDots];
+        let head = dots[dots.length - 1];
+        head = [head[0] - 2, head[1]];
+        dots.push(head);
+        dots.shift();
+        setDirection("LEFT");
+        setSnakeDots(dots);
+    }, [snakeDots, direction]);
     //check out of bounds
     useEffect(() => {
         let head = snakeDots[snakeDots.length - 1];
@@ -44,7 +123,7 @@ export default function SnakeGame() {
         if (hasCollided && gameState === 'game' && snakeDots.length > 2) {
             setGameOver(true);
         }
-    }, [snakeDots, direction]);
+    }, [snakeDots, direction, gameState]);
 
     useEffect(() => {
         if (gameState === 'menu') {
@@ -55,7 +134,7 @@ export default function SnakeGame() {
     useEffect(() => {
         const interval = setInterval(() => { moveSnake(); }, speed);
         return () => clearInterval(interval);;
-    }, [snakeDots, speed, gameState]);
+    }, [snakeDots, speed, gameState, moveSnake]);
 
     useEffect(() => {
         function handleKeyDown(e) {
@@ -80,7 +159,7 @@ export default function SnakeGame() {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [snakeDots]);
+    }, [onDown, onLeft, onRight, onUp, snakeDots]);
 
     useEffect(() => {
         let head = snakeDots[snakeDots.length - 1];
@@ -89,83 +168,7 @@ export default function SnakeGame() {
             increaseSnake();
             increaseSpeed();
         }
-    }, [food, snakeDots]);
-
-    const increaseSnake = () => {
-        let newSnake = [...snakeDots];
-        newSnake.unshift([]);
-        setSnakeDots(newSnake);
-    };
-
-    const increaseSpeed = () => {
-        if (speed > 10) {
-            setSpeed(speed - 20);
-        }
-    };
-
-    const moveSnake = () => {
-        let dots = [...snakeDots];
-        let head = dots[dots.length - 1];
-        if (gameState === 'game' && !gameOver) {
-            switch (direction) {
-                case 'RIGHT':
-                    head = [head[0] + 2, head[1]];
-                    break;
-                case 'LEFT':
-                    head = [head[0] - 2, head[1]];
-                    break;
-                case 'DOWN':
-                    head = [head[0], head[1] + 2];
-                    break;
-                case 'UP':
-                    head = [head[0], head[1] - 2];
-                    break;
-            }
-        }
-        dots.push(head);
-        dots.shift();
-        setSnakeDots(dots);
-    }
-
-    const onDown = () => {
-        let dots = [...snakeDots];
-        let head = dots[dots.length - 1];
-        head = [head[0], head[1] + 2];
-        dots.push(head);
-        dots.shift();
-        setDirection("DOWN");
-        setSnakeDots(dots);
-    };
-
-    const onUp = () => {
-        let dots = [...snakeDots];
-        let head = dots[dots.length - 1];
-        head = [head[0], head[1] - 2];
-        dots.push(head);
-        dots.shift();
-        setDirection("UP");
-        setSnakeDots(dots);
-    };
-
-    const onRight = () => {
-        let dots = [...snakeDots];
-        let head = dots[dots.length - 1];
-        head = [head[0] + 2, head[1]];
-        dots.push(head);
-        dots.shift();
-        setDirection("RIGHT");
-        setSnakeDots(dots);
-    };
-
-    const onLeft = () => {
-        let dots = [...snakeDots];
-        let head = dots[dots.length - 1];
-        head = [head[0] - 2, head[1]];
-        dots.push(head);
-        dots.shift();
-        setDirection("LEFT");
-        setSnakeDots(dots);
-    };
+    }, [food, increaseSnake, increaseSpeed, snakeDots]);
     return (
         <>
             <div>
@@ -199,4 +202,5 @@ export default function SnakeGame() {
         </>
 
     );
+
 }

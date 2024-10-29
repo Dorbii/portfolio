@@ -6,3 +6,7 @@
     border: 1px solid white;
     z-index: 2;
 }
+
+.snake:last-child {
+    background-color: #04dc33;
+}
