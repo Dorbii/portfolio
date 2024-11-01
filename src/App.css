@@ -5,17 +5,39 @@
   text-align: center;
 }
 
-.snake-game {
+.app-container {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  height: 100%;
+}
+
+button {
+  display: flex;
   align-items: center;
-  height: 10vh;
-  width: 10vh;
+  justify-content: center;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
   cursor: pointer;
 }
 
-.snake-game-icon {
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+button:hover {
+  border: 2px solid #f0f0f0;
+}
+
+button img {
+  width: 15vh;
+  /* Ensure buttons have the same width */
+  height: 12vh;
+  /* Set a consistent height */
+}
+
+.snake-btn,
+.algo-btn {
+  width: 15vh;
+  /* Ensure buttons have the same width */
+  height: 12vh;
+  /* Ensure buttons have the same height */
+  margin: 10px;
+  /* Add some margin for spacing */
 }
