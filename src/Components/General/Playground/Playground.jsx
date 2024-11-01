@@ -11,7 +11,7 @@ export default function Playground() {
                 <PreferenceNav />
                 <div className="playground-editor">
                     <CodeMirror
-                        value={"// Write your code here"}
+                        value={"var f = function(nums, target) {\n\tconsole.log(nums);\n\tconsole.log(target)\n};"}
                         theme={vscodeDark}
                         extensions={[javascript()]}
                         style={{ fontSize: 16 }} />
