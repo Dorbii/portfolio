@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <header className='header'><button onClick={() => { setAppVisible(false); setCurrentApp('') }} > Home </button> </header>
-      <body>
+      <div className="body">
         <div className="app-title" hidden={appVisible}>Select App</div>
         <div className='app-container' hidden={appVisible}>
           <div className='snake-app' hidden={appVisible}>
@@ -36,7 +36,7 @@ function App() {
               return null;
           }
         })()}
-      </body>
+      </div>
 
 
     </>
