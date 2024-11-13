@@ -1,23 +1,26 @@
 import './css/DataStructure.css';
 import { useContext, useState } from 'react';
 import { DsContext } from './DsContext.jsx';
+import PlaygroundFooter from "./PlaygroundFooter";
 
 export default function DataStructure() {
-    const { updateDS } = useContext(DsContext);
-    const [getType, setType] = useState("");
+    const { updateDS, updateParams } = useContext(DsContext);
+    const [getType, setType] = useState("TP");
+    const [input, setInput] = useState("");
+    const [target, setTarget] = useState("");
 
-
-
+    const onInputChange = (e) => {
+        setInput(e.target.value);
+    }
+    const onTargetChange = (e) => {
+        setTarget(e.target.value);
+    }
+    const handleSubmit = () => {
+        updateParams(input, target);
+    }
     const handleClick = (dsType) => {
-        if (getType === dsType) {
-            setType("");
-            updateDS("");
-        } else {
-            setType(dsType);
-        }
-        if (getType === "TP") {
-            updateDS("TP");
-        }
+        setType(dsType);
+        updateDS(getType);
     }
 
     return (
@@ -43,17 +46,20 @@ export default function DataStructure() {
                     </div>
                     <div className="data-structure-case-content">
                         <p className="data-structure-case-content-section">Array:</p>
-                        <div className="data-structure-case-content-section-content">
-                            nums = [1,2,3,4,5,6,7,8,9]
-                        </div>
+                        <input className="data-structure-case-content-section-content"
+                            type='text'
+                            placeholder='[1,2,3,4,5,6]'
+                            onChange={onInputChange} />
                         <p className="data-structure-case-content-section">Output:</p>
-                        <div className="data-structure-case-content-section-content">
-                            target = 321
-                        </div>
+                        <input className="data-structure-case-content-section-content"
+                            type='text'
+                            placeholder='4'
+                            onChange={onTargetChange} />
                     </div>
                 </div>
 
             </div>
+            <PlaygroundFooter handleSubmit={handleSubmit} />
         </>
     );
 }

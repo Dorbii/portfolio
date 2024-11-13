@@ -25,6 +25,7 @@ export default function Playground() {
                     </div>
                     <div className="data-structure">
                         <DataStructure />
+
                     </div>
                 </Split>
             </div>

@@ -9,15 +9,35 @@ const DsContext = createContext(
 
 const DsProvider = ({ children }) => {
     const [ds, setDS] = useState(null);
+
+    const updateParams = (i, t) => {
+        const substr = i.substring(1, i.length - 1);
+        const input = substr.split(",");
+        for (let j = 0; j < input.length; j++) {
+            input[j] = parseInt(input[j]);
+        }
+        setDS({ ...ds, input: input, target: parseInt(t) });
+    };
+
     const updateDS = (dsType) => {
         if (dsType === "TP") {
-            setDS({ ds: "TP", code: "def two_pointer(nums, target):\n    left = 0\n    right = len(nums) - 1\n    while left < right:\n        if nums[left] + nums[right] == target:\n            return [left, right]\n        elif nums[left] + nums[right] < target:\n            left += 1\n        else:\n            right -= 1\n    return []" });
+            setDS({
+                ds: "TP",
+                code: "def two_pointer(array, target):\n\tleft = 0\n\tright = len(array) - 1\n\twhile left < right:\n\t\tif array[left] + array[right] == target:\n\t\t\treturn [left, right]\n\t\telif array[left] + array[right] < target:\n\t\t\tleft += 1\n\t\telse:\n\t\t\tright -= 1\n\treturn []",
+                input: [],
+                target: -1
+            });
         } else {
-            setDS(" ");
+            setDS({
+                ds: "",
+                code: "",
+                input: [],
+                target: -1
+            });
         };
     };
     return (
-        <DsContext.Provider value={{ ds, updateDS }}>
+        <DsContext.Provider value={{ ds, updateDS, updateParams }}>
             {children}
         </DsContext.Provider>
     );
