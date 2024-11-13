@@ -1,4 +1,4 @@
-.test-cases-header-container {
+.data-structure-header-container {
     display: flex;
     justify-items: center;
     height: 2.5rem;
@@ -7,11 +7,11 @@
     padding-right: 1.25rem;
 }
 
-.test-cases-header-container>*+* {
+.data-structure-header-container>*+* {
     margin-left: 1.5rem;
 }
 
-.test-cases-header-items {
+.data-structure-header-items {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -20,32 +20,32 @@
 
 }
 
-.test-cases-header-content {
+.data-structure-header-content {
     font-weight: bold;
     font-size: medium;
     line-height: 1.25rem;
 
 }
 
-.test-cases-header-hr {
+.data-structure-header-hr {
 
     position: absolute;
     bottom: 0;
     height: 0.125rem;
-    width: 5rem;
+    width: 7rem;
     border: none;
     background-color: #f0f0f0;
     border-radius: 9999px;
 }
 
-.test-cases-case-container {
+.data-structure-case-container {
     display: flex;
 
     padding-left: 1.25rem;
     padding-right: 1.25rem;
 }
 
-.test-cases-case {
+.data-structure-case {
     justify-items: start;
     margin-top: 0.25rem;
     height: 2rem;
@@ -53,13 +53,13 @@
 
 }
 
-.test-cases-case-selection {
+.data-structure-case-selection {
     display: flex;
     justify-items: center;
     column-gap: .5rem;
 }
 
-.test-cases-case-selection-title {
+.data-structure-case-selection-title {
     font-size: medium;
     font-weight: bold;
     justify-items: center;
@@ -75,17 +75,17 @@
     white-space: nowrap;
 }
 
-.test-cases-case-selection-title:focus {
+.data-structure-case-selection-title:focus {
     outline: none;
 }
 
-.test-cases-case-selection-title:hover {
+.data-structure-case-selection-title:hover {
     background-color: hsl(0 0% 66%);
     color: #f5f5f5;
     border: none;
 }
 
-.test-cases-case-content {
+.data-structure-case-content {
     font-weight: semibold;
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -94,7 +94,7 @@
 }
 
 
-.test-cases-case-content-section {
+.data-structure-case-content-section {
     font-size: .875rem;
     font-weight: bold;
     margin-top: 1rem;
@@ -104,7 +104,7 @@
     text-align: left;
 }
 
-.test-cases-case-content-section-content {
+.data-structure-case-content-section-content {
     cursor: text;
     border-radius: 0.5rem;
     border: 1px solid transparent;

@@ -1,4 +1,4 @@
-import { BsChevronUp } from "react-icons/bs";
+//import { BsChevronUp } from "react-icons/bs";
 import './css/playgroundFooter.css';
 
 export default function PlaygroundFooter({ handleSubmit }) {
@@ -6,20 +6,20 @@ export default function PlaygroundFooter({ handleSubmit }) {
         <div className='playground-footer'>
             <div className='playground-footer-inner'>
                 <div className='playground-footer-left'>
-                    <button className='playground-footer-button playground-footer-button-console'>
+                    {/* <button className='playground-footer-button playground-footer-button-console'>
                         Console
                         <div className='playground-footer-icon'>
                             <BsChevronUp className='playground-footer-icon-chevron' />
                         </div>
-                    </button>
+                    </button> */}
                 </div>
                 <div className='playground-footer-right'>
-                    <button
+                    {/* <button
                         className='playground-footer-button-run'
                         onClick={handleSubmit}
                     >
                         Run
-                    </button>
+                    </button> */}
                     <button
                         className='playground-footer-button-submit'
                         onClick={handleSubmit}

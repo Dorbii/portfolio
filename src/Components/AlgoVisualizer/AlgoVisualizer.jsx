@@ -2,13 +2,11 @@ import Playground from "../General/Playground/Playground";
 import "./css/algoVisualizer.css";
 import Split from 'react-split';
 import TwoDArray from "../General/Playground/TwoDArray.jsx";
-import { useState } from 'react';
-import { dsContext } from '../General/Playground/DsContext.js';
+import { DsProvider } from '../General/Playground/DsContext.jsx';
 export default function AlgoVisualizer() {
-    const [getCode, setCode] = useState({ array: [] })
     return (
         <>
-            <dsContext.Provider value={{ getCode, setCode }}>
+            <DsProvider>
                 <div className="algo-visualizer">
                     <Split className="split-v" minSize={0}>
                         <div className='flex h-11 w-full'>
@@ -18,7 +16,7 @@ export default function AlgoVisualizer() {
 
                     </Split>
                 </div>
-            </dsContext.Provider>
+            </DsProvider>
         </>
     );
 }

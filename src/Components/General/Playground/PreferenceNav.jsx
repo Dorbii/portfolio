@@ -6,7 +6,7 @@ export default function PreferenceNav() {
         <>
             <div className="preference-nav">
                 <div className="preference-nav-item">
-                    <button className='preference-nav-item-lang'>JavaScript</button>
+                    <button className='preference-nav-item-lang'>Python</button>
                 </div>
 
                 <div className="preference-nav-item">
