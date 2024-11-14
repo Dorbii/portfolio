@@ -45,15 +45,15 @@ export default function DataStructure() {
                         </button>
                     </div>
                     <div className="data-structure-case-content">
-                        <p className="data-structure-case-content-section">Array:</p>
+                        <p className="data-structure-case-content-section">String:</p>
                         <input className="data-structure-case-content-section-content"
                             type='text'
                             placeholder='[1,2,3,4,5,6]'
                             onChange={onInputChange} />
-                        <p className="data-structure-case-content-section">Output:</p>
+                        <p className="data-structure-case-content-section">Expected:</p>
                         <input className="data-structure-case-content-section-content"
                             type='text'
-                            placeholder='4'
+                            placeholder='True'
                             onChange={onTargetChange} />
                     </div>
                 </div>

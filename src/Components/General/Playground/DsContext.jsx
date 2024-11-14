@@ -11,28 +11,24 @@ const DsProvider = ({ children }) => {
     const [ds, setDS] = useState(null);
 
     const updateParams = (i, t) => {
-        const substr = i.substring(1, i.length - 1);
-        const input = substr.split(",");
-        for (let j = 0; j < input.length; j++) {
-            input[j] = parseInt(input[j]);
-        }
-        setDS({ ...ds, input: input, target: parseInt(t) });
+        const input = [...i];
+        setDS({ ...ds, input: input, target: t });
     };
 
     const updateDS = (dsType) => {
         if (dsType === "TP") {
             setDS({
                 ds: "TP",
-                code: "def two_pointer(array, target):\n\tleft = 0\n\tright = len(array) - 1\n\twhile left < right:\n\t\tif array[left] + array[right] == target:\n\t\t\treturn [left, right]\n\t\telif array[left] + array[right] < target:\n\t\t\tleft += 1\n\t\telse:\n\t\t\tright -= 1\n\treturn []",
+                code: "def isPalindrome(self, s: str) -> bool:\n\tleft = 0\n\tright = len(s) - 1\n\twhile left < right:\n\t\twhile left < right and not s[left].isalnum():\n\t\t\tleft += 1\n\t\twhile left < right and not s[right].isalnum():\n\t\t\tright -= 1\n\t\tif s[left].lower() != s[right].lower():\n\t\t\treturn False\n\t\tleft += 1\n\t\tright -= 1\n\treturn True",
                 input: [],
-                target: -1
+                target: ""
             });
         } else {
             setDS({
                 ds: "",
                 code: "",
                 input: [],
-                target: -1
+                target: ""
             });
         };
     };
