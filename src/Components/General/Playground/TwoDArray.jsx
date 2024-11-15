@@ -25,7 +25,7 @@ export default function TwoDArray() {
         <>
             <Grid container rowSpacing={1} columnSpacing={1} direction="column" className="data-structure-visualizer-content">
                 <Grid >
-                    <Grid container spacing={1} direction="row">
+                    <Grid container spacing={1} direction="row" flexWrap={"nowrap"} >
                         {arr.map((_, i) => (
                             <Grid key={`square-${i}`}>
                                 <div className="square">
@@ -38,7 +38,7 @@ export default function TwoDArray() {
                     </Grid>
                 </Grid>
                 <Grid >
-                    <Grid container spacing={1} direction="row">
+                    <Grid container spacing={1} direction="row" flexWrap={"nowrap"}>
                         {getArrowArray.map((v, i) => (
                             <Grid key={`pointer-${i}`} hidden={v}>
                                 <div className="pointer" >
@@ -49,6 +49,7 @@ export default function TwoDArray() {
                     </Grid>
                 </Grid>
             </Grid >
+
         </>
     );
 }
