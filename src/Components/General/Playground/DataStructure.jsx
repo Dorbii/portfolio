@@ -7,16 +7,17 @@ export default function DataStructure() {
     const { updateDS, updateParams } = useContext(DsContext);
     const [getType, setType] = useState("TP");
     const [input, setInput] = useState("");
-    const [target, setTarget] = useState("");
+    //const [target, setTarget] = useState("");
 
     const onInputChange = (e) => {
         setInput(e.target.value);
     }
-    const onTargetChange = (e) => {
-        setTarget(e.target.value);
-    }
+    // const onTargetChange = (e) => {
+    //     setTarget(e.target.value);
+    // }
     const handleSubmit = () => {
-        updateParams(input, target);
+        //updateParams(input, target);
+        updateParams(input);
     }
     const handleClick = (dsType) => {
         setType(dsType);
@@ -48,13 +49,13 @@ export default function DataStructure() {
                         <p className="data-structure-case-content-section">String:</p>
                         <input className="data-structure-case-content-section-content"
                             type='text'
-                            placeholder='[1,2,3,4,5,6]'
+                            placeholder='racecar'
                             onChange={onInputChange} />
-                        <p className="data-structure-case-content-section">Expected:</p>
+                        {/* <p className="data-structure-case-content-section">Expected:</p>
                         <input className="data-structure-case-content-section-content"
                             type='text'
                             placeholder='True'
-                            onChange={onTargetChange} />
+                            onChange={onTargetChange} /> */}
                     </div>
                 </div>
 
