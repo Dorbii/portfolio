@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { DsContext } from '../../General/Playground/DsContext.jsx';
-import TwoDArray from '../../General/Playground/TwoDArray.jsx';
+import TwoDArray from '../../DataStructures/TwoDArray/TwoDArray.jsx';
 import { Button } from '@mui/material';
 
 const isAlphaNumeric = (str) => {

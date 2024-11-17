@@ -1,4 +1,4 @@
-import "./css/twoDArray.css";
+import './twoDArray.css';
 
 import Grid from '@mui/material/Grid2';
 
