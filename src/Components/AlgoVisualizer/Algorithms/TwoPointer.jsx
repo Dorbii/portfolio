@@ -94,7 +94,7 @@ export default function TwoPointer() {
     return (
         <>
             <Button onClick={handleClick} >Play</Button>
-            <TwoDArray dataArray={getDataArray} arrowArray={getArrowArray} squareCSS=".tpSquare" />
+            <TwoDArray dataArray={getDataArray} arrowArray={getArrowArray} />
             {
                 showReset && <Button onClick={handleReset}>Reset</Button>
             }
