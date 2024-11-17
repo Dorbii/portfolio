@@ -3,7 +3,7 @@ import "./css/twoDArray.css";
 import Grid from '@mui/material/Grid2';
 
 
-export default function TwoDArray({ dataArray, arrowArray }) {
+export default function TwoDArray({ dataArray, arrowArray, }) {
     return (
         <>
             <Grid container rowSpacing={1} columnSpacing={1} direction="column" className="data-structure-visualizer-content">

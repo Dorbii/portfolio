@@ -1,8 +1,8 @@
-//import { TwoPointer } from '../AlgoVisualizer/Algorithms/TwoPointer.jsx';
+import './css/viewer.css';
 import TwoPointer from "./Algorithms/TwoPointer";
 export default function Viewer() {
     return (
-        <div>
+        <div className='viewer'>
             <TwoPointer />
         </div>
     );
