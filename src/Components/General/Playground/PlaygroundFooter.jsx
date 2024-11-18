@@ -6,24 +6,11 @@ export default function PlaygroundFooter({ handleSubmit }) {
         <div className='playground-footer'>
             <div className='playground-footer-inner'>
                 <div className='playground-footer-left'>
-                    {/* <button className='playground-footer-button playground-footer-button-console'>
-                        Console
-                        <div className='playground-footer-icon'>
-                            <BsChevronUp className='playground-footer-icon-chevron' />
-                        </div>
-                    </button> */}
                 </div>
                 <div className='playground-footer-right'>
-                    {/* <button
-                        className='playground-footer-button-run'
-                        onClick={handleSubmit}
-                    >
-                        Run
-                    </button> */}
                     <button
                         className='playground-footer-button-submit'
-                        onClick={handleSubmit}
-                    >
+                        onClick={handleSubmit}>
                         Submit
                     </button>
                 </div>

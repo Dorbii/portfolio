@@ -7,14 +7,13 @@ export default function DataStructure() {
     const { updateDS, updateParams } = useContext(DsContext);
     const [getType, setType] = useState("TP");
     const [input, setInput] = useState("");
-    //const [target, setTarget] = useState("");
-
+    //section input handlers start
     const onInputChange = (e) => {
         setInput(e.target.value);
     }
-    // const onTargetChange = (e) => {
-    //     setTarget(e.target.value);
-    // }
+    //section input handlers end
+
+    //section click handlers start
     const handleSubmit = () => {
         //updateParams(input, target);
         updateParams(input);
@@ -23,7 +22,7 @@ export default function DataStructure() {
         setType(dsType);
         updateDS(getType);
     }
-
+    //section click handlers end
     return (
         <>
             <div className="data-structure-header-container">

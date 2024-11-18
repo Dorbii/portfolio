@@ -3,9 +3,12 @@ import { DsContext } from '../../General/Playground/DsContext.jsx';
 import TwoDArray from '../../DataStructures/TwoDArray/TwoDArray.jsx';
 import { Button } from '@mui/material';
 
+//section helper functions start
 const isAlphaNumeric = (str) => {
     return /^[a-z0-9]+$/i.test(str);
 }
+//section helper functions end
+
 export default function TwoPointer() {
     const { ds } = useContext(DsContext);
     const [getArrowArray, setArrowArray] = useState([]);
@@ -16,6 +19,10 @@ export default function TwoPointer() {
     const [prevRight, setPrevRight] = useState(0);
     const [showReset, setShowReset] = useState();
     const [isPalindrome, setIsPalindrome] = useState(true);
+
+
+    //section useEffects start
+    // *Init data and arrow array
     useEffect(() => {
         if (ds && ds.input) {
             setDataArray(ds.input);
@@ -32,6 +39,7 @@ export default function TwoPointer() {
             setRight(ds.input.length - 1);
         }
     }, [ds]);
+    //* Is palindrome logic with react rendering
     useEffect(() => {
         if (left < right) {
             let newLeft = left;
@@ -62,10 +70,10 @@ export default function TwoPointer() {
         } else if (left === right) {
             setShowReset(true);
         }
-
-
     }, [getDataArray, left, prevLeft, prevRight, right]);
+    //section useEffects end
 
+    //section click handlers start
     const handleClick = () => {
         let newLeft = left + 1;
         let newRight = right - 1;
@@ -90,7 +98,7 @@ export default function TwoPointer() {
         setArrowArray(newArr);
         setShowReset(false);
     }
-
+    //section click handlers end
     return (
         <>
             <Button onClick={handleClick} >Play</Button>
