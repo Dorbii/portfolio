@@ -6,10 +6,14 @@ export default defineConfig({
   plugins: [
     react({
       jsxImportSource: '@emotion/react',
+      jsxRuntime: 'automatic',
     })
   ],
   optimizeDeps: {
-    include: ['@emotion/styled'],
+    include: [
+      '@emotion/styled',
+      '@mui/material',
+    ],
   },
   base: '',
   build: {
