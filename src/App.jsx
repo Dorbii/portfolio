@@ -2,43 +2,26 @@ import './App.css'
 import { useState } from 'react'
 import SnakeGame from './Components/SnakeGame/SnakeGame'
 import AlgoVisualizer from './Components/AlgoVisualizer/AlgoVisualizer'
-import snakeGameIcon from './assets/snake-game-appIcon.png'
-import algoIcon from './assets/algo-icon.png'
+import snakeGameIcon from './assets/Applications/SnakeGame/snake_game_icon.png'
+import algoIcon from './assets/Applications/AlgoVisualizer/dsa_icon.png'
+import Taskbar from './Components/Desktop/Taskbar/Taskbar'
+import Shortcut from './Components/Desktop/Shortcuts/Shortcut'
 function App() {
-  const [currentApp, setCurrentApp] = useState('');
-  const [appVisible, setAppVisible] = useState(false);
   return (
     <>
-      <header className='header'><button onClick={() => { setAppVisible(false); setCurrentApp('') }} > Home </button> </header>
-      <div className="body">
-        <div className="app-title" hidden={appVisible}>Select App</div>
-        <div className='app-container' hidden={appVisible}>
-          <div className='snake-app' hidden={appVisible}>
-            <button className="snake-btn" key="snake-btn" id="snake-btn" onClick={() => {
-              setCurrentApp('snake-game')
-              setAppVisible(true)
-            }}><img key="snake-game-icon" className="snake-game-icon" src={snakeGameIcon} /></button>
-          </div>
-          <div className='algo-app' hidden={appVisible}>
-            <button className="algo-btn" key="algo-btn" id="algo-btn" onClick={() => {
-              setCurrentApp('algo-visualizer')
-              setAppVisible(true)
-            }}><img key="algo-icon" className="algo-icon" src={algoIcon} /></button>
+      <div className="app-container">
+        <div className="shortcut-container">
+          <div className="shortcuts">
+            <div className='shortcut-item'>
+              <Shortcut icon={snakeGameIcon} name="Snake Game" onClick={() => <SnakeGame />} />
+            </div>
+            <div className='shortcut-item'>
+              <Shortcut icon={algoIcon} name="Algo Visualizer" onClick={() => <AlgoVisualizer />} />
+            </div>
           </div>
         </div>
-        {(() => {
-          switch (currentApp) {
-            case 'algo-visualizer':
-              return <AlgoVisualizer />;
-            case 'snake-game':
-              return <SnakeGame />;
-            default:
-              return null;
-          }
-        })()}
+        <Taskbar />
       </div>
-
-
     </>
   )
 
