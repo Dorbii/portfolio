@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FaHome } from 'react-icons/fa';
+import React, { useState, useRef, useReducer } from "react";
+import eventReducer from '../../../hooks/eventReducer';
+import { defaultAppState } from '../../index';
 
 import "./Shortcut.css";
-
-export default function Shortcut({ icon, name, onClick }) {
+const initState = {
+    apps: defaultAppState
+}
+export default function Shortcut({ icon, name, open }) {
     const [isDragging, setIsDragging] = useState(false);
-    //const [currPos, setPos] = useState({ x: 0, y: 0 });
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const shortcutRef = useRef(null);
+    const [state, dispatch] = useReducer(eventReducer, initState)
     const handleMouseDown = (e) => {
         setIsDragging(true);
         const rect = shortcutRef.current.getBoundingClientRect();
@@ -27,7 +30,8 @@ export default function Shortcut({ icon, name, onClick }) {
     }
 
     const handleDoubleClick = () => {
-        console.log("Double Clicked");
+        dispatch({ type: 'LAUNCH_APP', payload: { data: { name } } })
+        console.log(state)
     }
     return (
         <>
