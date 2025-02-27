@@ -1,4 +1,4 @@
-import React, { useState, useRef, useReducer } from "react";
+import React, { useState, useRef } from "react";
 
 
 import "./Shortcut.css";

@@ -17,8 +17,8 @@ body {
 @media only screen and (max-width: 800px) {
     .snake-container {
         position: relative;
-        width: 350px;
-        height: 300px;
+        width: 100%;
+        height: 100%;
     }
 
     .snake {
@@ -29,12 +29,10 @@ body {
 
 .wrapper {
     position: relative;
-    width: 200px;
-    height: 250px;
+    width: 100%;
+    height: 100%;
     border: 2px solid #dc042c;
     /* border-radius: 10px; */
-    margin: 50px auto;
-    margin-top: 200px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
