@@ -9,14 +9,13 @@ const spawnFood = () => {
     return Array.from({ length: 2 }, () => Math.floor(Math.random() * 100 / 2) * 2);
 }
 
-export default function SnakeGame() {
+function SnakeGame() {
     const [gameOver, setGameOver] = useState(false);
     const [snakeDots, setSnakeDots] = useState([[0, 0], [0, 2]]);
     const [food, setFood] = useState(spawnFood());
     const [speed, setSpeed] = useState(200);
     const [direction, setDirection] = useState("RIGHT");
     const [gameState, setGameState] = useState('menu');
-
     const initSnakeGame = () => {
         setGameOver(false);
         setSnakeDots([[0, 0], [0, 2]]);
@@ -205,3 +204,4 @@ export default function SnakeGame() {
     );
 
 }
+export default SnakeGame;
