@@ -35,6 +35,7 @@ function AppWindow({
                         ref={ref}
                         onMouseDown={(e) => handleMouseDown(e, ref)}
                         onMouseMove={(e) => handleMouseMove(e, ref)}
+                        onClose={() => onClose(app.component)}
                         onMouseUp={handleMouseUp}
                         show={app.status.isRunning}
                         key={app.data.id}
@@ -50,20 +51,28 @@ const Window = memo(forwardRef(function ({
     onMouseDown,
     onMouseMove,
     onMouseUp,
+    onClose,
     component,
     className
 }, ref) {
     return (
-        <div
-            className={className}
-            onMouseDown={onMouseDown}
-            ref={ref}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}>
-            <div className="app_window_content">
-                {component({ ...data })}
+        <>
+
+            <div
+                className={className}
+                onMouseDown={onMouseDown}
+                ref={ref}
+                onMouseMove={onMouseMove}
+                onMouseUp={onMouseUp}>
+                <div>
+                    <Header onClose={onClose} />
+                </div>
+                <div className="app_window_content">
+                    {component({ ...data })}
+                </div>
             </div>
-        </div>
+        </>
+
     );
 }));
 
@@ -83,4 +92,12 @@ const StyledWindow = styled(Window)`
     }
 `;
 
+
+function Header({ onClose }) {
+    return (
+        <div className={"header_btn_close"} key={"close_btn"}>
+            <button onClick={onClose}>Close</button>
+        </div>
+    );
+}
 export default AppWindow;

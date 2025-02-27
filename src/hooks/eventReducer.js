@@ -1,8 +1,9 @@
 
 export default function eventReducer(state, action) {
+    let apps;
     switch (action.type) {
         case 'LAUNCH_APP':
-            const apps = state.apps?.map(app =>
+            apps = state.apps?.map(app =>
                 app.component === action.payload.component ?
                     { ...app, status: { ...app.status, isRunning: true } } :
                     app

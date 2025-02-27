@@ -20,10 +20,9 @@ function App() {
     dispatch({ type: 'LAUNCH_APP', payload: appConfig })
   }
 
-  const _getAppStatus = (component) => {
-    const app = state.apps.find(app => app.component === component)
-    return app?.status?.isRunning
-  }
+  const _handleCloseApp = (component) => {
+    dispatch({ type: 'CLOSE_APP', payload: { component } });
+  };
   return (
     <div className="app-container">
       <div className="shortcut-container">
@@ -40,7 +39,7 @@ function App() {
       <AppWindow
         apps={state.apps}
         onMouseDown={() => { }}
-        onClose={() => { }}
+        onClose={_handleCloseApp}
       />
       <Taskbar />
     </div>
