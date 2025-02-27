@@ -19,7 +19,7 @@ function App() {
     const appConfig = Object.values(appConfigs).find(config => config.component === component)
     dispatch({ type: 'LAUNCH_APP', payload: appConfig })
   }
-
+  //TODO: need to set app to init state after close
   const _handleCloseApp = (component) => {
     dispatch({ type: 'CLOSE_APP', payload: { component } });
   };
