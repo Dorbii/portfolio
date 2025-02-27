@@ -51,5 +51,28 @@ export const defaultAppState = [
 
     }
 ];
-
+export const appConfigs = {
+    'Snake Game': {
+        component: SnakeGame,
+        data: {
+            icon: SnakeGameIcon,
+            name: "Snake Game",
+        },
+        default_size: {
+            width: 800,
+            height: 600,
+        },
+    },
+    'Algo Visualizer': {
+        component: AlgoVisualizer,
+        data: {
+            icon: AlgoVisualizerIcon,
+            name: "Algo Visualizer",
+        },
+        default_size: {
+            width: 800,
+            height: 600,
+        },
+    },
+}
 export { SnakeGame, AlgoVisualizer };
