@@ -3,12 +3,9 @@ import SnakeGame from './SnakeGame/SnakeGame';
 import SnakeGameIcon from '../assets/Applications/SnakeGame/snake_game_icon.png';
 import AlgoVisualizer from './AlgoVisualizer/AlgoVisualizer';
 import AlgoVisualizerIcon from '../assets/Applications/AlgoVisualizer/dsa_icon.png';
+let id = -1;
 const genId = () => {
-    let id = -1;
-    return () => {
-        id += 1;
-        return id;
-    };
+    return id++;
 };
 
 export const defaultAppState = [

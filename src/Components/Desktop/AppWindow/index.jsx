@@ -1,6 +1,6 @@
 import React, { memo, useState, useRef, forwardRef } from "react";
 import { styled } from "styled-components";
-
+import { appConfigs } from "../..";
 function AppWindow({
     apps,
     onMouseDown,

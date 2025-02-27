@@ -25,35 +25,26 @@ function App() {
     return app?.status?.isRunning
   }
   return (
-    <>
-      <div className="app-container">
-        <div className='shortcut-container'>
-          <div className='shortcut'>
-            <div className='shortcut-item'>
-              <Shortcut
-                icon={snakeGameIcon}
-                name="Snake Game"
-                handleDoubleClick={() => _handleShortcutDoubleClick(SnakeGame)}
-              />
-            </div>
-            <div className='shortcut-item'>
-              <Shortcut
-                icon={algoIcon}
-                name="Algo Visualizer"
-                handleDoubleClick={() => _handleShortcutDoubleClick(AlgoVisualizer)}
-              />
-            </div>
+    <div className="app-container">
+      <div className="shortcut-container">
+        {state.apps.map(app => (
+          <div className="shortcut-item" key={app.data.id}>
+            <Shortcut
+              icon={app.data.icon}
+              name={app.data.name}
+              handleDoubleClick={() => _handleShortcutDoubleClick(app.component)}
+            />
           </div>
-        </div>
-        {<AppWindow
-          apps={state.apps}
-          onMouseDown={() => { }}
-          onClose={() => { }}
-        />}
-        <Taskbar />
+        ))}
       </div>
-    </>
-  )
+      <AppWindow
+        apps={state.apps}
+        onMouseDown={() => { }}
+        onClose={() => { }}
+      />
+      <Taskbar />
+    </div>
+  );
 }
 
 export default App
