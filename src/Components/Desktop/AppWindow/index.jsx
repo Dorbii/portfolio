@@ -1,6 +1,6 @@
 import React, { memo, useState, useRef, forwardRef } from "react";
-import { styled } from "styled-components";
-import { appConfigs } from "../..";
+import "./css/window.css";
+import Header from "./Header";
 function AppWindow({
     apps,
     onMouseDown,
@@ -31,15 +31,21 @@ function AppWindow({
             {apps.map(app => {
                 const ref = useRef(null);
                 return (
-                    <StyledWindow
+                    <div
                         ref={ref}
                         onMouseDown={(e) => handleMouseDown(e, ref)}
                         onMouseMove={(e) => handleMouseMove(e, ref)}
-                        onClose={() => onClose(app.component)}
                         onMouseUp={handleMouseUp}
+                        className={`styled-window ${app.status.isRunning ? '' : 'hidden'}`}
                         show={app.status.isRunning}
                         key={app.data.id}
-                        {...app} />
+                    >
+                        <Window
+                            data={app.data}
+                            component={app.component}
+                            onClose={() => onClose(app.component)}
+                        />
+                    </div>
                 );
             })}
         </div>
@@ -67,7 +73,7 @@ const Window = memo(forwardRef(function ({
                 <div>
                     <Header onClose={onClose} />
                 </div>
-                <div className="app_window_content">
+                <div className="app-window-content">
                     {component({ ...data })}
                 </div>
             </div>
@@ -76,28 +82,7 @@ const Window = memo(forwardRef(function ({
     );
 }));
 
-const StyledWindow = styled(Window)`
-    display: ${({ show }) => (show ? 'flex' : 'none')};
-    flex-direction: column;
-    width: 900px;
-    height: 900px;
-    background-color: grey;
-    position: absolute;
-    
-    .app_window_content {
-        flex: 1;
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-`;
 
 
-function Header({ onClose }) {
-    return (
-        <div className={"header_btn_close"} key={"close_btn"} style={{ userSelect: "none" }}>
-            <button onClick={onClose}>Close</button>
-        </div>
-    );
-}
+
 export default AppWindow;

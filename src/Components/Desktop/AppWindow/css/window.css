@@ -1,0 +1,19 @@
+.styled-window {
+    display: flex;
+    flex-direction: column;
+    width: 900px;
+    height: 900px;
+    background-color: grey;
+    position: absolute;
+}
+
+.styled-window.hidden {
+    display: none;
+}
+
+.app-window-content {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}

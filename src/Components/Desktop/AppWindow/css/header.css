@@ -1,0 +1,20 @@
+.close-btn {
+    cursor: pointer;
+    background-image: url("/src/assets/Desktop/window/close_btn.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 20px;
+    width: 20px;
+    background-color: transparent;
+    border: none;
+    margin-top: 2.5px;
+    margin-left: auto;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(95, 94, 94, 0.9);
+    height: 25px;
+}
