@@ -17,4 +17,5 @@ p {
     margin: 0;
     color: #f0f0f0;
     text-shadow: #000000 1px 1px 1px;
+    user-select: none;
 }

@@ -95,7 +95,7 @@ const StyledWindow = styled(Window)`
 
 function Header({ onClose }) {
     return (
-        <div className={"header_btn_close"} key={"close_btn"}>
+        <div className={"header_btn_close"} key={"close_btn"} style={{ userSelect: "none" }}>
             <button onClick={onClose}>Close</button>
         </div>
     );
