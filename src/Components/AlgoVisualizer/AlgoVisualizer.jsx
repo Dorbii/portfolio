@@ -9,7 +9,7 @@ export default function AlgoVisualizer() {
             <DsProvider>
                 <div className="algo-visualizer">
                     <Split className="split-v" minSize={0}>
-                        <div className='flex h-11 w-full'>
+                        <div >
                             <Viewer />
                         </div>
                         <Playground />

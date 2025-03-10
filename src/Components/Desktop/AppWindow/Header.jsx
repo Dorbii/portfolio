@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import './css/header.css';
 
-function Header({ onClose, onMaximize, onMinimize }) {
+const Header = forwardRef(({ onClose, onMaximize, onMinimize, onMouseDown, onMouseMove, onMouseUp }, ref) => {
     return (
-        <div className="header-container">
+        <div className="header-container"
+            ref={ref}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}>
             <div className="btn-tile">
                 <div className='btn-container'>
                     <button className="min-btn" onClick={onMinimize}></button>
@@ -18,10 +22,9 @@ function Header({ onClose, onMaximize, onMinimize }) {
                 <div className='btn-container'>
                     <button className="close-btn" onClick={onClose}></button>
                 </div>
-
             </div>
-        </div >
+        </div>
     );
-}
+});
 
 export default Header;

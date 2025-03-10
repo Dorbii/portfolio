@@ -5,6 +5,8 @@
     height: 900px;
     background-color: grey;
     position: absolute;
+    resize: both;
+    overflow: hidden;
 }
 
 .styled-window.hidden {
@@ -16,4 +18,5 @@
     position: relative;
     width: 100%;
     height: 100%;
+
 }

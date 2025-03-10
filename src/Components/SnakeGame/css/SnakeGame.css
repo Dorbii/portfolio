@@ -4,8 +4,8 @@ body {
 
 .snake-container {
     position: relative;
-    width: 600px;
-    height: 500px;
+    width: 100%;
+    height: 100%;
     border: 2px solid #dc042c;
     border-radius: 10px;
     margin: 50px auto;

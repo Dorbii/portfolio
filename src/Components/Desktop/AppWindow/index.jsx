@@ -1,9 +1,10 @@
-import React, { memo, useState, useRef, forwardRef } from "react";
+import React, { memo, useState, useRef } from "react";
 import "./css/window.css";
 import Header from "./Header";
+import useComponentResize from "../../../hooks/useComponentResize.js";
+
 function AppWindow({
     apps,
-    onMouseDown,
     onClose,
 }) {
     const [isDragging, setIsDragging] = useState(false);
@@ -13,37 +14,57 @@ function AppWindow({
         setIsDragging(true);
         const rect = ref.current.getBoundingClientRect();
         setOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    }
+    };
 
     const handleMouseMove = (e, ref) => {
         if (isDragging) {
             ref.current.style.left = `${e.clientX - offset.x}px`;
             ref.current.style.top = `${e.clientY - offset.y}px`;
         }
-    }
+    };
 
     const handleMouseUp = () => {
         setIsDragging(false);
-    }
+    };
 
     return (
         <div>
             {apps.map(app => {
                 const ref = useRef(null);
+                const dragRef = useRef(null);
+
+                const options = {
+                    default_offset: { x: 0, y: 0 },
+                    default_size: { width: app.viewer.width, height: app.viewer.height },
+                    boundary: { top: 1, right: window.innerWidth, bottom: window.innerHeight, left: 1 },
+                    resizable: true,
+                    constraintSize: 200,
+                    dragRef: dragRef,
+                };
+
+                const { offset, size } = useComponentResize(ref, options);
+
                 return (
                     <div
                         ref={ref}
-                        onMouseDown={(e) => handleMouseDown(e, ref)}
-                        onMouseMove={(e) => handleMouseMove(e, ref)}
-                        onMouseUp={handleMouseUp}
+                        style={{
+                            position: 'absolute',
+                            left: `${offset.x}px`,
+                            top: `${offset.y}px`,
+                            width: `${size.width}px`,
+                            height: `${size.height}px`,
+                        }}
                         className={`styled-window ${app.status.isRunning ? '' : 'hidden'}`}
-                        show={app.status.isRunning}
                         key={app.data.id}
                     >
                         <Window
                             data={app.data}
                             component={app.component}
                             onClose={() => onClose(app.component)}
+                            headerRef={dragRef}
+                            onMouseDown={(e) => handleMouseDown(e, ref)}
+                            onMouseMove={(e) => handleMouseMove(e, ref)}
+                            onMouseUp={handleMouseUp}
                         />
                     </div>
                 );
@@ -52,37 +73,30 @@ function AppWindow({
     );
 }
 
-const Window = memo(forwardRef(function ({
+const Window = memo(function ({
     data,
-    onMouseDown,
-    onMouseMove,
-    onMouseUp,
     onClose,
     component,
-    className
-}, ref) {
+    className,
+    headerRef,
+    onMouseDown,
+    onMouseMove,
+    onMouseUp
+}) {
     return (
-        <>
-
-            <div
-                className={className}
+        <div className={className}>
+            <Header
+                onClose={onClose}
+                ref={headerRef}
                 onMouseDown={onMouseDown}
-                ref={ref}
                 onMouseMove={onMouseMove}
-                onMouseUp={onMouseUp}>
-                <div>
-                    <Header onClose={onClose} />
-                </div>
-                <div className="app-window-content">
-                    {component({ ...data })}
-                </div>
+                onMouseUp={onMouseUp}
+            />
+            <div className="app-window-content">
+                {component({ ...data })}
             </div>
-        </>
-
+        </div>
     );
-}));
-
-
-
+});
 
 export default AppWindow;

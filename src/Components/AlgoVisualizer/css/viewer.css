@@ -4,4 +4,12 @@
     align-items: center;
     justify-content: center;
     margin-top: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+.algo-visualizer {
+    background-color: #262626;
+    width: 100%;
+    height: 100%;
 }
