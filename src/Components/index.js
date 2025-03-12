@@ -5,6 +5,8 @@ import AlgoVisualizer from './AlgoVisualizer/AlgoVisualizer';
 import AlgoVisualizerIcon from '../assets/Applications/AlgoVisualizer/dsa_icon.png';
 import DocViewer from './DocumentViewer';
 import DocViewerIcon from '../assets/Applications/DocViewer/word_icon.png';
+import FallingSand from './FallingSand/FallingSand';
+import FallingSandIcon from '../assets/Applications/FallingSand/falling_sand_icon.png';
 let id = -1;
 const genId = () => {
     return id++;
@@ -68,6 +70,24 @@ export const defaultAppState = [
         }
 
     },
+    {
+        component: FallingSand,
+        data: {
+            icon: FallingSandIcon,
+            name: "Falling Sand",
+            id: genId(),
+        },
+        viewer: {
+            width: 400,
+            height: 400,
+            resizable: false,
+        },
+        status: {
+            isRunning: false,
+            isMinimized: false,
+            isMaximized: false,
+        }
+    },
 ];
 export const appConfigs = {
     'Snake Game': {
@@ -103,5 +123,16 @@ export const appConfigs = {
             height: 600,
         },
     },
+    'Falling Sand': {
+        component: FallingSand,
+        data: {
+            icon: FallingSandIcon,
+            name: "Falling Sand",
+        },
+        default_size: {
+            width: 400,
+            height: 400,
+        },
+    },
 }
-export { SnakeGame, AlgoVisualizer, DocViewer };
+export { SnakeGame, AlgoVisualizer, DocViewer, FallingSand };

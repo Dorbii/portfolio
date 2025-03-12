@@ -1,7 +1,7 @@
 import './css/DataStructure.css';
 import { useContext, useState } from 'react';
 import { DsContext } from './DsContext.jsx';
-import PlaygroundFooter from "./PlaygroundFooter";
+import PlaygroundFooter from "./PlaygroundFooter.jsx";
 
 export default function DataStructure() {
     const { updateDS, updateParams } = useContext(DsContext);

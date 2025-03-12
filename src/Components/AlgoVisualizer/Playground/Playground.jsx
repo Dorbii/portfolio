@@ -1,4 +1,4 @@
-import PreferenceNav from "./PreferenceNav";
+import PreferenceNav from "./PreferenceNav.jsx";
 import './css/playground.css';
 import CodeMirror from "@uiw/react-codemirror";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode"

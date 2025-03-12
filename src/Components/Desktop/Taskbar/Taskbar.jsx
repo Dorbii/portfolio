@@ -6,11 +6,11 @@ export default function Taskbar() {
     return (
         <>
             <footer className="taskbar">
-                <div class="taskbar-container">
-                    <div class="start-icon-container">
-                        <div class="start-icon"></div>
+                <div className="taskbar-container">
+                    <div className="start-icon-container">
+                        <div className="start-icon"></div>
                     </div>
-                    <div class="app-icons-container">
+                    <div className="app-icons-container">
                     </div>
                 </div>
             </footer>

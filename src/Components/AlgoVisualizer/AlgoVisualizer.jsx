@@ -1,7 +1,7 @@
-import Playground from "../General/Playground/Playground";
+import Playground from "./Playground/Playground.jsx";
 import "./css/algoVisualizer.css";
 import Split from 'react-split';
-import { DsProvider } from '../General/Playground/DsContext.jsx';
+import { DsProvider } from './Playground/DsContext.jsx';
 import Viewer from "./Viewer";
 export default function AlgoVisualizer() {
     return (
