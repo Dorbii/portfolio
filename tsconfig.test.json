@@ -8,5 +8,5 @@
     "rootDir": ".",
     "sourceMap": false
   },
-  "include": ["apps/worker/**/*.ts", "packages/**/*.ts"]
+  "include": ["apps/worker/**/*.ts", "apps/web/src/agent/**/*.ts", "packages/**/*.ts"]
 }

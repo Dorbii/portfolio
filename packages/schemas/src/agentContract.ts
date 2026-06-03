@@ -11,6 +11,25 @@ export function createAgentContract() {
       agentSpec: 'https://arena.dorbii.net/agent-spec.json',
       apiBase: 'https://arena-api.dorbii.net',
     },
+    inviteFragment: {
+      required: ['session', 'role', 'api'],
+      claimTokenField: 'claimToken',
+      acceptedClaimTokenAliases: ['invite'],
+      example:
+        'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
+    },
+    browserApi: {
+      global: 'window.AgentArenaRole',
+      stateScriptTagId: 'agent-arena-state',
+      methods: [
+        'getContract',
+        'getState',
+        'getValidActions',
+        'submitRoundPlan',
+        'getMatchLog',
+        'waitForPhase',
+      ],
+    },
     roles: TEAM_ROLES,
     phases: SESSION_PHASES,
     rules: {
@@ -110,7 +129,7 @@ export function createAgentContract() {
     ],
     examples: {
       inviteUrl:
-        'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&invite=cap_red_...',
+        'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
       roundPlanSubmission: {
         action: 'submit_round_plan',
         purchases: [

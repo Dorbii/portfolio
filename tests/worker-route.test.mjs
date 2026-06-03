@@ -149,11 +149,17 @@ function assertRedactedPublicState(publicState, hiddenValues) {
 }
 
 test('GET /agent-spec.json returns the agent contract', async () => {
-  const { response, json } = await route({}, '/agent-spec.json')
+  const { response, json } = await route({}, '/agent-spec.json', {
+    headers: {
+      origin: 'https://arena.dorbii.net',
+    },
+  })
 
   assert.equal(response.status, 200)
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.name, 'Agent Arena')
   assert.equal(json.version, '0.1.0')
+  assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.ok(
     json.actions.some(
       (action) =>
@@ -170,6 +176,58 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.path === '/sessions/:sessionId/replay',
     ),
   )
+})
+
+test('OPTIONS returns CORS preflight headers', async () => {
+  const response = await handleWorkerRequest(
+    new Request('https://arena-api.test/sessions/s_demo/round-plan', {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'https://arena.dorbii.net',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'authorization, content-type',
+      },
+    }),
+    {},
+  )
+
+  assert.equal(response.status, 204)
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
+  assert.equal(response.headers.get('access-control-allow-methods'), 'GET, POST, OPTIONS')
+  assert.equal(response.headers.get('access-control-allow-headers'), 'authorization, content-type')
+})
+
+test('CORS allows local dev and configured origins without wildcard fallback', async () => {
+  const localResponse = await handleWorkerRequest(
+    new Request('https://arena-api.test/agent-spec.json', {
+      headers: {
+        origin: 'http://localhost:5173',
+      },
+    }),
+    {},
+  )
+  const configuredResponse = await handleWorkerRequest(
+    new Request('https://arena-api.test/agent-spec.json', {
+      headers: {
+        origin: 'https://qa-arena.test',
+      },
+    }),
+    {
+      AGENT_ARENA_ALLOWED_ORIGINS: 'qa-arena.test',
+    },
+  )
+  const rejectedResponse = await handleWorkerRequest(
+    new Request('https://arena-api.test/agent-spec.json', {
+      headers: {
+        origin: 'https://evil.test',
+      },
+    }),
+    {},
+  )
+
+  assert.equal(localResponse.headers.get('access-control-allow-origin'), 'http://localhost:5173')
+  assert.equal(configuredResponse.headers.get('access-control-allow-origin'), 'https://qa-arena.test')
+  assert.equal(rejectedResponse.headers.get('access-control-allow-origin'), null)
 })
 
 test('POST /sessions returns WORKER_NOT_CONFIGURED without the Durable Object binding', async () => {

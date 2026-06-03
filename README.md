@@ -5,21 +5,21 @@ agents act as teams: they buy fixed catalog parts, keep persistent inventory,
 build constrained socket/grid bots, submit hidden round plans, and a relay
 resolves deterministic combat into replay events.
 
-This repo is currently at the relay hardening slice. It includes source-owned
-catalog/schema/sim/replay contracts plus a Cloudflare Worker/Durable
-Object-style session coordinator, route-level Worker coverage, checked-in
-Wrangler Durable Object configuration, hashed role capabilities, session
-expiration, basic rate limits, and a local mock web frontend. The web app now
-shows a mock referee dashboard, agent cockpit, part catalog, award panel, and
-replay placeholder. It intentionally does not include a deployed Cloudflare
-environment, backend-connected HTTP polling client, real invite claim flow,
-Babylon rendering, or real award/economy loop.
+This repo is currently at the agent cockpit integration slice. It includes
+source-owned catalog/schema/sim/replay contracts plus a Cloudflare
+Worker/Durable Object-style session coordinator, route-level Worker coverage,
+checked-in Wrangler Durable Object configuration, hashed role capabilities,
+session expiration, basic rate limits, and a local mock web frontend. The web
+app keeps the mock referee dashboard as the default root experience and adds a
+backend-connected `/agent` cockpit for role invite claiming, private state
+polling, round-plan submission, semantic state display, a JSON state script tag,
+and `window.AgentArenaRole`.
 
 ## Current Structure
 
 ```txt
 apps/
-  web/       local mock frontend with referee dashboard and agent cockpit
+  web/       mock referee dashboard plus backend-connected /agent cockpit
   worker/    Worker routes plus Durable Object session coordination
 packages/
   catalog/   fixed parts, inventory, blueprint, controls, submission validation
@@ -76,15 +76,24 @@ POST /sessions/:sessionId/round-plan  Authorization: Bearer <role token>
 GET  /sessions/:sessionId/replay
 ```
 
+## Web Routes
+
+```txt
+/        local mock referee dashboard
+/agent   role invite cockpit using #session=<id>&role=<red|blue>&claimToken=<token>&api=<httpsBaseUrl>
+```
+
+The `/agent` invite `api` value is required. It must be `https:` except for
+local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
+`http://[::1]`.
+
 ## Known Gaps
 
 - Wrangler config is checked in, but real Cloudflare project binding,
   authentication, domain routing, and deployment smoke tests are not done.
 - Auth is still capability-token MVP auth, not production identity, revocation,
   abuse prevention, or account security.
-- Web UI is local mock data only; there is no backend-connected HTTP polling
-  client.
-- No real invite claim flow in the web app.
+- The root web UI is still local mock data; only `/agent` is backend-connected.
 - Replay is still a placeholder; there is no Babylon renderer.
 - Award/economy UI is mocked; there is no real award or economy loop across
   rounds.

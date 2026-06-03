@@ -1,5 +1,25 @@
 # Codex Trust Calibration
 
+## 2026-06-03 Phase 4 Agent Cockpit Integration
+
+Scope: `apps/web/src/App.tsx`, `apps/web/src/agent/agentClient.ts`, `apps/web/src/agent/LiveAgentCockpit.tsx`, `apps/web/src/styles.css`, `apps/worker/src/index.ts`, `packages/schemas/src/agentContract.ts`, `tsconfig.test.json`, `tests/agent-client.test.mjs`, `tests/worker-route.test.mjs`, `README.md`.
+
+Intent: make `/agent` invite links functional by parsing fragment capabilities, claiming a role, storing the role bearer token in browser session storage, polling role/public state, submitting round plans, exposing `window.AgentArenaRole`, publishing machine-readable state in `#agent-arena-state`, and allowing cross-origin Worker API calls from a Pages-hosted cockpit.
+
+Risk: interface and behavioral.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review questions:
+- Verify the `/agent` route against a real deployed Pages + Worker domain pair, not only local build and route-level tests.
+- Decide whether session storage is the right MVP token lifetime or whether tab restore behavior should be tighter.
+
+Review status note: CORS/API validation gaps and browser API tests, including `window.AgentArenaRole.getValidActions()`, were fixed after review. Final Phase 4 QA passed with typecheck, lint, Vite build, test TypeScript emit, and the Node test suite. Deployed Pages + Worker smoke and the session storage lifetime decision remain open.
+
+Reason for sidecar: Agent Arena code quality rules say no comments in production code, so provenance markers are tracked here instead of inline.
+
 ## 2026-06-03 Relay Foundation Markers
 
 Scope: `packages/schemas/src/relay.ts`, `packages/schemas/src/agentContract.ts`, `apps/worker/src/index.ts`, `apps/worker/src/session.ts`.

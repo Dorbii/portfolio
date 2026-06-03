@@ -14,6 +14,7 @@ import {
   visibleCatalogParts,
   type AwardOption,
 } from './mockSession'
+import { LiveAgentCockpit } from './agent/LiveAgentCockpit'
 
 type ViewMode = 'human' | 'agent'
 
@@ -27,9 +28,14 @@ const orderedCategories: PartCategory[] = [
 ]
 
 export default function App() {
+  const isAgentRoute = isAgentPath(window.location.pathname)
   const [viewMode, setViewMode] = useState<ViewMode>('human')
   const [selectedRole, setSelectedRole] = useState<TeamRole>('red')
   const selectedRoleState = mockRoleStates[selectedRole]
+
+  if (isAgentRoute) {
+    return <LiveAgentCockpit />
+  }
 
   return (
     <main className="arena-app">
@@ -499,4 +505,10 @@ function formatStat([name, value]: [string, number]) {
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function isAgentPath(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/agent' || normalized.endsWith('/agent')
 }

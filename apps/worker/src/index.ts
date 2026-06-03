@@ -35,10 +35,124 @@ export type DurableObjectNamespace = {
 
 export type WorkerEnv = {
   AGENT_ARENA_SESSION?: DurableObjectNamespace
+  AGENT_ARENA_ALLOWED_ORIGINS?: string
 }
 
-function jsonResponse(value: unknown, init: ResponseInit = {}): Response {
-  const headers = new Headers(init.headers)
+const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
+const LOCAL_DEV_CORS_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+
+function normalizeConfiguredOrigin(value: string): string | undefined {
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return undefined
+  }
+
+  try {
+    const originValue = /^[a-z][a-z\d+\-.]*:\/\//i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`
+
+    return new URL(originValue).origin
+  } catch {
+    return undefined
+  }
+}
+
+function configuredCorsOrigins(env: WorkerEnv): Set<string> {
+  const origins = new Set(
+    DEFAULT_ALLOWED_CORS_ORIGINS
+      .map(normalizeConfiguredOrigin)
+      .filter((origin): origin is string => Boolean(origin)),
+  )
+
+  for (const value of env.AGENT_ARENA_ALLOWED_ORIGINS?.split(/[\s,]+/) ?? []) {
+    const origin = normalizeConfiguredOrigin(value)
+
+    if (origin) {
+      origins.add(origin)
+    }
+  }
+
+  return origins
+}
+
+function allowedCorsOrigin(request: Request, env: WorkerEnv): string | undefined {
+  const originHeader = request.headers.get('origin')
+
+  if (!originHeader) {
+    return undefined
+  }
+
+  try {
+    const origin = new URL(originHeader)
+
+    if (
+      (origin.protocol === 'http:' || origin.protocol === 'https:') &&
+      LOCAL_DEV_CORS_HOSTS.has(origin.hostname)
+    ) {
+      return origin.origin
+    }
+
+    if (configuredCorsOrigins(env).has(origin.origin)) {
+      return origin.origin
+    }
+  } catch {
+    return undefined
+  }
+
+  return undefined
+}
+
+function appendVaryOrigin(headers: Headers): void {
+  const vary = headers.get('vary')
+
+  if (!vary) {
+    headers.set('vary', 'Origin')
+
+    return
+  }
+
+  if (!vary.split(',').some((value) => value.trim().toLowerCase() === 'origin')) {
+    headers.set('vary', `${vary}, Origin`)
+  }
+}
+
+function corsHeaders(
+  request?: Request,
+  env: WorkerEnv = {},
+  headersInit?: HeadersInit,
+): Headers {
+  const headers = new Headers(headersInit)
+  const origin = request ? allowedCorsOrigin(request, env) : undefined
+
+  if (origin) {
+    headers.set('access-control-allow-origin', origin)
+    appendVaryOrigin(headers)
+  }
+
+  headers.set('access-control-allow-methods', 'GET, POST, OPTIONS')
+  headers.set('access-control-allow-headers', 'authorization, content-type')
+  headers.set('access-control-max-age', '86400')
+
+  return headers
+}
+
+function withCors(response: Response, request: Request, env: WorkerEnv): Response {
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: corsHeaders(request, env, response.headers),
+  })
+}
+
+function jsonResponse(
+  value: unknown,
+  init: ResponseInit = {},
+  request?: Request,
+  env?: WorkerEnv,
+): Response {
+  const headers = corsHeaders(request, env, init.headers)
   headers.set('content-type', 'application/json')
 
   return new Response(JSON.stringify(value, null, 2), {
@@ -47,11 +161,20 @@ function jsonResponse(value: unknown, init: ResponseInit = {}): Response {
   })
 }
 
+function preflightResponse(request: Request, env: WorkerEnv): Response {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(request, env),
+  })
+}
+
 function errorResponse(
   status: number,
   code: RelayErrorResponse['error']['code'],
   message: string,
   issues?: RelayErrorResponse['error']['issues'],
+  request?: Request,
+  env?: WorkerEnv,
 ): Response {
   return jsonResponse(
     {
@@ -63,6 +186,8 @@ function errorResponse(
       },
     },
     { status },
+    request,
+    env,
   )
 }
 
@@ -161,13 +286,16 @@ async function forwardToSessionObject(
       500,
       'WORKER_NOT_CONFIGURED',
       'AGENT_ARENA_SESSION Durable Object binding is missing.',
+      undefined,
+      request,
+      env,
     )
   }
 
   const id = env.AGENT_ARENA_SESSION.idFromName(sessionId)
   const stub = env.AGENT_ARENA_SESSION.get(id)
 
-  return stub.fetch(request)
+  return withCors(await stub.fetch(request), request, env)
 }
 
 export async function handleWorkerRequest(
@@ -176,15 +304,19 @@ export async function handleWorkerRequest(
 ): Promise<Response> {
   const url = new URL(request.url)
 
+  if (request.method === 'OPTIONS') {
+    return preflightResponse(request, env)
+  }
+
   if (request.method === 'GET' && url.pathname === '/agent-spec.json') {
-    return jsonResponse(createAgentContract())
+    return jsonResponse(createAgentContract(), {}, request, env)
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
     const body = await readJsonBody(request)
 
     if (body === undefined || !isRecord(body)) {
-      return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.')
+      return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.', undefined, request, env)
     }
 
     const sessionId =
@@ -197,6 +329,9 @@ export async function handleWorkerRequest(
         400,
         'INVALID_REQUEST',
         'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
+        undefined,
+        request,
+        env,
       )
     }
 
@@ -218,13 +353,16 @@ export async function handleWorkerRequest(
         400,
         'INVALID_REQUEST',
         'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
+        undefined,
+        request,
+        env,
       )
     }
 
     return forwardToSessionObject(request, env, route.sessionId)
   }
 
-  return errorResponse(404, 'INVALID_REQUEST', 'Route not found.')
+  return errorResponse(404, 'INVALID_REQUEST', 'Route not found.', undefined, request, env)
 }
 
 export class AgentArenaSession {
