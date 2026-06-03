@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chooseBotAction } from './game/bots'
 import AgentConsole from './hex-sovereign/components/AgentConsole'
+import BoardPanel from './hex-sovereign/components/BoardPanel'
 import CaseStudy from './hex-sovereign/components/CaseStudy'
 import EventLog from './hex-sovereign/components/EventLog'
 import PlayerPanel from './hex-sovereign/components/PlayerPanel'
@@ -508,173 +509,30 @@ function GameExperience() {
             />
           </aside>
 
-          <section className="board-wrap" aria-label="Hex board">
-            <div className="board-meta">
-              <div>
-                <span>Active request</span>
-                <strong>{activeRequest.requestId}</strong>
-              </div>
-              <div>
-                <span>Legal moves</span>
-                <strong>{activeRequest.legalActions.length}</strong>
-              </div>
-              <div>
-                <span>Era</span>
-                <strong>{victoryState?.era.label ?? 'Era I'}</strong>
-              </div>
-              <div>
-                <span>Domains held</span>
-                <strong>{controlledDomains.length}</strong>
-              </div>
-            </div>
-
-            <div className="hex-board" role="grid" aria-label="Playable hex board">
-              {state.board.cells.map((cell) => {
-                const position = boardPositions.get(cell.id)
-                const legalAction = legalActionByCell.get(cell.id)
-                const reinforcementAction = reinforcementActionByCell.get(cell.id)
-                const isSelected = selectedCellId === cell.id
-                const isLastMove = state.lastMove?.cellId === cell.id
-                const zoneTone = zoneToneByCell.get(cell.id)
-                const pressureTone = pressureToneByCell.get(cell.id)
-
-                return (
-                  <button
-                    className={[
-                      'hex-cell',
-                      `region-${cell.regionId}`,
-                      cell.type,
-                      cell.occupant ? `occupied-${cell.occupant}` : '',
-                      legalAction ? 'legal' : '',
-                      reinforcementAction ? 'reinforcement-legal' : '',
-                      isSelected ? 'selected' : '',
-                      isLastMove ? 'last-move' : '',
-                      zoneTone ? `zone-${zoneTone}` : '',
-                      pressureTone ? `pressure-${pressureTone}` : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    key={cell.id}
-                    type="button"
-                    role="gridcell"
-                    style={{
-                      left: `${position.left}%`,
-                      top: `${position.top}%`,
-                    }}
-                    aria-label={getCellLabel(
-                      cell,
-                      legalAction,
-                      reinforcementAction,
-                      zoneTone,
-                      pressureTone,
-                    )}
-                    onClick={() => handleCellClick(cell)}
-                  >
-                    {cell.type === 'anchor' ? (
-                      <span className="anchor-mark" aria-hidden="true">
-                        {cell.anchorMark}
-                      </span>
-                    ) : null}
-                    {cell.occupant ? (
-                      <span
-                        className={`stone stone-${cell.occupant}`}
-                        aria-hidden="true"
-                      />
-                    ) : null}
-                    {legalAction ? <span className="legal-dot" /> : null}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="action-bar" aria-label="Current turn actions">
-              <div className="action-summary">
-                <span className="small-label">Action tray</span>
-                <strong>{SEAT_LABELS[state.activeSeat]}</strong>
-              </div>
-              {activeReinforcements ? (
-                <div className="reinforcement-tray">
-                  <label>
-                    <span>Reinforcement target</span>
-                    <select
-                      value={selectedReinforcementAction?.payload.cellId ?? ''}
-                      disabled={!canHumanAct || reinforcementActions.length === 0}
-                      onChange={(event) =>
-                        selectReinforcementTarget(event.target.value)
-                      }
-                    >
-                      <option value="">Select cell</option>
-                      {reinforcementActions.map((action) => (
-                        <option key={action.id} value={action.payload.cellId}>
-                          {action.payload.q}, {action.payload.r}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    className="control-button reinforcement-button"
-                    type="button"
-                    disabled={!selectedReinforcementAction || !canHumanAct}
-                    onClick={() =>
-                      submitActiveAction(
-                        selectedReinforcementAction.id,
-                        'reinforcement-tray',
-                      )
-                    }
-                  >
-                    Spend
-                  </button>
-                </div>
-              ) : null}
-              {upkeepActions.map((action) => (
-                <button
-                  className="control-button upkeep-button"
-                  key={action.id}
-                  type="button"
-                  disabled={!canHumanAct}
-                  onClick={() => submitActiveAction(action.id, 'upkeep-button')}
-                >
-                  {action.label}
-                </button>
-              ))}
-              {cardActions.length > 0 ? (
-                <div className="card-action-tray">
-                  {cardActions.map((action) => (
-                    <button
-                      className="control-button card-button"
-                      key={action.id}
-                      type="button"
-                      disabled={!canHumanAct}
-                      onClick={() => submitActiveAction(action.id, 'card-tray')}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-              <button
-                className="control-button"
-                type="button"
-                disabled={!passAction || !canHumanAct}
-                onClick={() => submitActiveAction(passAction.id, 'pass-button')}
-              >
-                Pass
-              </button>
-              {surrenderAction ? (
-                <button
-                  className="control-button danger"
-                  type="button"
-                  disabled={!canHumanAct}
-                  onClick={() => submitActiveAction(surrenderAction.id, 'surrender-button')}
-                >
-                  Surrender
-                </button>
-              ) : null}
-              <button className="control-button secondary" type="button" onClick={resetMatch}>
-                Reset
-              </button>
-            </div>
-          </section>
+          <BoardPanel
+            state={state}
+            activeRequest={activeRequest}
+            victoryState={victoryState}
+            controlledDomains={controlledDomains}
+            boardPositions={boardPositions}
+            legalActionByCell={legalActionByCell}
+            reinforcementActionByCell={reinforcementActionByCell}
+            selectedCellId={selectedCellId}
+            zoneToneByCell={zoneToneByCell}
+            pressureToneByCell={pressureToneByCell}
+            activeReinforcements={activeReinforcements}
+            selectedReinforcementAction={selectedReinforcementAction}
+            reinforcementActions={reinforcementActions}
+            upkeepActions={upkeepActions}
+            cardActions={cardActions}
+            passAction={passAction}
+            surrenderAction={surrenderAction}
+            canHumanAct={canHumanAct}
+            onCellClick={handleCellClick}
+            onSelectReinforcementTarget={selectReinforcementTarget}
+            onSubmitAction={submitActiveAction}
+            onReset={resetMatch}
+          />
 
           <aside className="right-rail" aria-label="Protocol and log">
             <PlayerPanel
@@ -708,42 +566,6 @@ function GameExperience() {
       <CaseStudy />
     </main>
   )
-}
-
-function getCellLabel(
-  cell,
-  legalAction,
-  reinforcementAction,
-  zoneTone,
-  pressureTone,
-) {
-  const parts = [`Cell ${cell.q}, ${cell.r}`]
-
-  if (cell.type === 'anchor') {
-    parts.push(cell.anchorLabel)
-  }
-
-  if (cell.occupant) {
-    parts.push(`${SEAT_LABELS[cell.occupant]} stone`)
-  }
-
-  if (legalAction) {
-    parts.push('legal move')
-  }
-
-  if (reinforcementAction) {
-    parts.push('reinforcement available')
-  }
-
-  if (zoneTone) {
-    parts.push(`${zoneTone} Domain zone`)
-  }
-
-  if (pressureTone) {
-    parts.push(`${pressureTone} pressure`)
-  }
-
-  return parts.join(', ')
 }
 
 export default App
