@@ -160,6 +160,11 @@ const DEFAULT_ECONOMY_RULES = Object.freeze({
   },
 })
 
+const DECREE_TYPES = Object.freeze({
+  TAX_OFFICE: 'Tax Office',
+  BRIBE_NETWORK: 'Bribe Network',
+})
+
 const DEFAULT_DECREE_RULES = Object.freeze({
   decreeUpkeepByLevel: {
     1: 0,
@@ -171,7 +176,7 @@ const DEFAULT_DECREE_RULES = Object.freeze({
     2: 2,
     3: 3,
   },
-  decreeType: 'Tax Office',
+  decreeType: DECREE_TYPES.TAX_OFFICE,
   decreePurchaseCostByLevel: {
     1: 1,
     2: 2,
@@ -185,6 +190,38 @@ const DEFAULT_DECREE_RULES = Object.freeze({
   convertRuinBonus: 1,
   convertRuinCost: 2,
   scrapRuinGold: 1,
+})
+
+const DEFAULT_BRIBE_NETWORK_RULES = Object.freeze({
+  purchaseCost: 4,
+  upgradeCostByLevel: {
+    1: 5,
+    2: 7,
+  },
+  upkeepByLevel: {
+    1: 2,
+    2: 3,
+    3: 4,
+  },
+  corruptionByLevel: {
+    1: 2,
+    2: 3,
+    3: 4,
+  },
+  siphonBonusByLevel: {
+    3: 1,
+  },
+})
+
+const DEFAULT_PRESSURE_RULES = Object.freeze({
+  influenceBySize: {
+    small: 2,
+    medium: 3,
+    large: 4,
+  },
+  counterBribeCost: 2,
+  counterBribeReduction: 1,
+  purgeReduction: 2,
 })
 
 function getDomainDecreeSlots(size, anchorKind) {
@@ -302,6 +339,50 @@ function resolveDecreeRules(config = {}) {
   }
 }
 
+function getDecreePurchaseCost(decreeType, level = 1) {
+  if (decreeType === DECREE_TYPES.BRIBE_NETWORK) {
+    return level === 1 ? DEFAULT_BRIBE_NETWORK_RULES.purchaseCost : 0
+  }
+
+  return resolveDecreeRules().decreePurchaseCostByLevel[level] ?? 1
+}
+
+function getDecreeUpgradeCost(decreeType, level) {
+  if (decreeType === DECREE_TYPES.BRIBE_NETWORK) {
+    return DEFAULT_BRIBE_NETWORK_RULES.upgradeCostByLevel[level] ?? 0
+  }
+
+  return resolveDecreeRules().decreeUpgradeCostByLevel[level] ?? 1
+}
+
+function getDecreeIncomeValue(decree) {
+  if (decree.type === DECREE_TYPES.BRIBE_NETWORK) {
+    return 0
+  }
+
+  return resolveDecreeRules().decreeIncomeByLevel[decree.level] ?? 0
+}
+
+function getDecreeUpkeepValue(decree) {
+  if (decree.type === DECREE_TYPES.BRIBE_NETWORK) {
+    return DEFAULT_BRIBE_NETWORK_RULES.upkeepByLevel[decree.level] ?? 0
+  }
+
+  return resolveDecreeRules().decreeUpkeepByLevel[decree.level] ?? 0
+}
+
+function getBribeNetworkCorruption(decree) {
+  if (decree.type !== DECREE_TYPES.BRIBE_NETWORK) return 0
+
+  return DEFAULT_BRIBE_NETWORK_RULES.corruptionByLevel[decree.level] ?? 0
+}
+
+function getBribeNetworkSiphonBonus(decree) {
+  if (decree.type !== DECREE_TYPES.BRIBE_NETWORK) return 0
+
+  return DEFAULT_BRIBE_NETWORK_RULES.siphonBonusByLevel[decree.level] ?? 0
+}
+
 function normalizeDecree(decree = {}) {
   const level = normalizeWholeNumber(decree.level, 1, { min: 1, max: 3 })
 
@@ -402,7 +483,8 @@ function createPlayerState(seat, config, featureFlags) {
   if (
     featureFlags.income ||
     featureFlags.stability ||
-    featureFlags.decrees
+    featureFlags.decrees ||
+    featureFlags.corruption
   ) {
     const economyRules = resolveEconomyRules(config)
     player.gold = normalizeWholeNumber(
@@ -438,6 +520,57 @@ function createDomainEconomyState(config = {}) {
       },
     ]),
   )
+}
+
+function normalizePressureAssignments(assignments = []) {
+  return (assignments ?? [])
+    .filter((assignment) =>
+      [
+        'ASSIGN_INFLUENCE_PRESSURE',
+        'ASSIGN_INFLUENCE_SUPPORT',
+        'TARGET_BRIBE_NETWORK',
+      ].includes(assignment.type),
+    )
+    .map((assignment) => ({
+      type: assignment.type,
+      seat: assignment.seat,
+      sourceId: assignment.sourceId,
+      sourceAnchorId: assignment.sourceAnchorId,
+      targetAnchorId: assignment.targetAnchorId,
+      createdCycle: normalizeWholeNumber(assignment.createdCycle, 1, { min: 1 }),
+    }))
+}
+
+function normalizePressureDefenses(defenses = [], defaultType) {
+  return (defenses ?? [])
+    .filter((defense) => defense.targetAnchorId)
+    .map((defense) => ({
+      type: defense.type ?? defaultType,
+      seat: defense.seat,
+      sourceId: defense.sourceId ?? null,
+      targetAnchorId: defense.targetAnchorId,
+      reduction: normalizeWholeNumber(defense.reduction, 1, { min: 1 }),
+      cost: normalizeWholeNumber(defense.cost, 0),
+      createdCycle: normalizeWholeNumber(defense.createdCycle, 1, { min: 1 }),
+    }))
+}
+
+function createPressureState(config = {}) {
+  const initial = config.initialPressure ?? {}
+
+  return {
+    assignments: normalizePressureAssignments(initial.assignments),
+    counterBribes: normalizePressureDefenses(
+      initial.counterBribes,
+      'SPEND_COUNTER_BRIBE',
+    ),
+    purges: normalizePressureDefenses(initial.purges, 'PURGE_CORRUPTION'),
+    metrics: {
+      culturalMandateWatch: {},
+      ...(initial.metrics ?? {}),
+    },
+    lastResolvedCycle: initial.lastResolvedCycle ?? null,
+  }
 }
 
 export function getOpponent(seat) {
@@ -485,7 +618,7 @@ function makeCell(q, r) {
   }
 }
 
-function createBoard(radius) {
+function createBoard(radius, initialStones = STARTING_STONES) {
   const cells = []
 
   for (let q = -radius; q <= radius; q += 1) {
@@ -497,11 +630,11 @@ function createBoard(radius) {
   }
 
   const cellsWithStarts = cells.map((cell) => {
-    const startingStone = STARTING_STONES.find(
+    const startingStone = initialStones.find(
       (stone) => stone.q === cell.q && stone.r === cell.r,
     )
 
-    if (!startingStone || cell.type !== 'playable') {
+    if (!startingStone || !SEATS.includes(startingStone.seat) || cell.type !== 'playable') {
       return cell
     }
 
@@ -542,7 +675,7 @@ export function createMatch(config = {}) {
     round: 1,
     turn: 1,
     activeSeat: 'black',
-    board: createBoard(radius),
+    board: createBoard(radius, config.initialStones ?? STARTING_STONES),
     players: {
       black: createPlayerState('black', config, featureFlags),
       white: createPlayerState('white', config, featureFlags),
@@ -551,6 +684,10 @@ export function createMatch(config = {}) {
       featureFlags.income || featureFlags.stability || featureFlags.decrees
         ? createDomainEconomyState(config)
         : {},
+    pressure:
+      featureFlags.influence || featureFlags.corruption
+        ? createPressureState(config)
+        : null,
     anchors: ANCHORS,
     passStreak: 0,
     lastMove: null,
@@ -803,21 +940,17 @@ function getDomainIncome(domain, state) {
 }
 
 function getDomainDecreeIncome(decrees) {
-  const decreeRules = resolveDecreeRules()
-
   return decrees.reduce(
     (sum, decree) =>
-      sum + (decree.active && !decree.ruined ? decreeRules.decreeIncomeByLevel[decree.level] ?? 0 : 0),
+      sum + (decree.active && !decree.ruined ? getDecreeIncomeValue(decree) : 0),
     0,
   )
 }
 
 function getDomainDecreeUpkeep(decrees) {
-  const decreeRules = resolveDecreeRules()
-
   return decrees.reduce(
     (sum, decree) =>
-      sum + (decree.active && !decree.ruined ? decreeRules.decreeUpkeepByLevel[decree.level] ?? 0 : 0),
+      sum + (decree.active && !decree.ruined ? getDecreeUpkeepValue(decree) : 0),
     0,
   )
 }
@@ -935,6 +1068,413 @@ function enrichDomainEconomy(domain, state) {
   }
 }
 
+function pressureEnabled(state) {
+  return state.featureFlags.influence || state.featureFlags.corruption
+}
+
+function getCurrentPressure(state) {
+  return state.pressure ?? createPressureState()
+}
+
+function getCyclePressureEntries(entries, state) {
+  return (entries ?? []).filter((entry) => entry.createdCycle === state.cycle)
+}
+
+function isStableControlledDomain(domain, state) {
+  return (
+    domain.status === 'controlled' &&
+    domain.owner &&
+    domain.size &&
+    (!state.featureFlags.stability || domain.stability > 0)
+  )
+}
+
+function isPressureTargetForSeat(domain, seat) {
+  return (
+    domain.status === 'contested' ||
+    (domain.status === 'controlled' && domain.owner && domain.owner !== seat)
+  )
+}
+
+function isSupportTargetForSeat(domain, seat) {
+  return domain.status === 'controlled' && domain.owner === seat
+}
+
+function domainsAreAdjacent(state, sourceDomain, targetDomain) {
+  if (sourceDomain.anchorId === targetDomain.anchorId) return false
+
+  const targetIds = new Set(targetDomain.zoneCellIds)
+
+  if (sourceDomain.zoneCellIds.some((cellIdValue) => targetIds.has(cellIdValue))) {
+    return true
+  }
+
+  return sourceDomain.zoneCellIds.some((cellIdValue) =>
+    getNeighborIds(state, cellIdValue).some((neighborId) => targetIds.has(neighborId)),
+  )
+}
+
+function createInfluenceSource(domain) {
+  const strength = DEFAULT_PRESSURE_RULES.influenceBySize[domain.size] ?? 0
+
+  if (strength <= 0 || domain.anchorKind !== 'Temple') return null
+
+  return {
+    id: `influence:${domain.anchorId}`,
+    kind: 'influence',
+    sourceType: 'Temple Domain',
+    seat: domain.owner,
+    anchorId: domain.anchorId,
+    label: `${domain.label} influence`,
+    regionId: domain.regionId,
+    strength,
+    corruption: 0,
+    siphonBonus: 0,
+    level: null,
+  }
+}
+
+function createBribeNetworkSource(domain, decree) {
+  const strength = getBribeNetworkCorruption(decree)
+
+  if (strength <= 0) return null
+
+  return {
+    id: `bribe:${domain.anchorId}:${decree.index}`,
+    kind: 'corruption',
+    sourceType: DECREE_TYPES.BRIBE_NETWORK,
+    seat: domain.owner,
+    anchorId: domain.anchorId,
+    label: `${DECREE_TYPES.BRIBE_NETWORK} L${decree.level} in ${domain.label}`,
+    regionId: domain.regionId,
+    strength,
+    corruption: strength,
+    siphonBonus: getBribeNetworkSiphonBonus(decree),
+    level: decree.level,
+  }
+}
+
+function derivePressureSources(state, domains = deriveDomainsWithoutPressure(state)) {
+  if (!pressureEnabled(state)) return []
+
+  const sources = []
+
+  for (const domain of domains) {
+    if (!isStableControlledDomain(domain, state)) continue
+
+    if (state.featureFlags.influence) {
+      const influenceSource = createInfluenceSource(domain)
+
+      if (influenceSource) {
+        sources.push(influenceSource)
+      }
+    }
+
+    if (state.featureFlags.corruption) {
+      for (const decree of domain.decrees ?? []) {
+        if (!decree.active || decree.ruined) continue
+
+        const bribeSource = createBribeNetworkSource(domain, decree)
+
+        if (bribeSource) {
+          sources.push(bribeSource)
+        }
+      }
+    }
+  }
+
+  return sources
+}
+
+function canSourcePressureTarget(state, source, sourceDomain, targetDomain) {
+  if (!source || !sourceDomain || !targetDomain) return false
+  if (!isPressureTargetForSeat(targetDomain, source.seat)) return false
+
+  if (source.kind === 'corruption' && source.level >= 3) {
+    return (
+      sourceDomain.regionId === targetDomain.regionId ||
+      domainsAreAdjacent(state, sourceDomain, targetDomain)
+    )
+  }
+
+  return domainsAreAdjacent(state, sourceDomain, targetDomain)
+}
+
+function canSourceSupportTarget(source, targetDomain) {
+  return (
+    source?.kind === 'influence' &&
+    isSupportTargetForSeat(targetDomain, source.seat) &&
+    source.regionId === targetDomain.regionId
+  )
+}
+
+function createEmptyDomainPressure() {
+  return {
+    incomingInfluence: 0,
+    incomingCorruption: 0,
+    effectiveCorruption: 0,
+    friendlySupport: 0,
+    defensiveReduction: 0,
+    counterBribeReduction: 0,
+    purgeReduction: 0,
+    netPressure: 0,
+    pressureOwner: null,
+    projectedEffects: {
+      siphon: 0,
+      stabilityDamage: 0,
+      passiveRepair: 0,
+      threshold: 'none',
+    },
+    warningChips: [],
+    assignments: [],
+    defenses: [],
+  }
+}
+
+function getPressureThresholdEffect(netPressure, domainIncome, siphonBonus = 0) {
+  if (netPressure <= 2) {
+    return {
+      siphon: 0,
+      stabilityDamage: 0,
+      threshold: '0-2 no effect',
+    }
+  }
+
+  if (netPressure <= 4) {
+    return {
+      siphon: Math.min(domainIncome, domainIncome > 0 ? 1 + siphonBonus : 0),
+      stabilityDamage: 0,
+      threshold: '3-4 siphon 1',
+    }
+  }
+
+  if (netPressure <= 6) {
+    return {
+      siphon: Math.min(
+        domainIncome,
+        domainIncome > 0 ? Math.max(1, Math.floor(domainIncome * 0.25)) + siphonBonus : 0,
+      ),
+      stabilityDamage: 0,
+      threshold: '5-6 siphon 25%',
+    }
+  }
+
+  if (netPressure <= 9) {
+    return {
+      siphon: Math.min(
+        domainIncome,
+        domainIncome > 0 ? Math.max(1, Math.floor(domainIncome * 0.25)) + siphonBonus : 0,
+      ),
+      stabilityDamage: 1,
+      threshold: '7-9 siphon 25%, -1 stability',
+    }
+  }
+
+  return {
+    siphon: Math.min(
+      domainIncome,
+      domainIncome > 0 ? Math.max(1, Math.floor(domainIncome * 0.5)) + siphonBonus : 0,
+    ),
+    stabilityDamage: 2,
+    threshold: '10+ siphon 50%, -2 stability',
+  }
+}
+
+function addWarningChips(pressure, hasCorruption) {
+  const chips = []
+
+  if (pressure.netPressure >= 3 && pressure.projectedEffects.siphon > 0) {
+    chips.push('siphon')
+  }
+
+  if (pressure.projectedEffects.stabilityDamage > 0) {
+    chips.push('stability damage')
+  }
+
+  if (hasCorruption) {
+    chips.push('corruption')
+  }
+
+  if (pressure.projectedEffects.passiveRepair > 0) {
+    chips.push('support repair')
+  }
+
+  return chips
+}
+
+function derivePressureProjection(state, domains = deriveDomainsWithoutPressure(state)) {
+  const pressureState = getCurrentPressure(state)
+  const domainsById = new Map(domains.map((domain) => [domain.anchorId, domain]))
+  const sourceList = derivePressureSources(state, domains)
+  const sourcesById = new Map(sourceList.map((source) => [source.id, source]))
+  const domainPressure = Object.fromEntries(
+    domains.map((domain) => [domain.anchorId, createEmptyDomainPressure()]),
+  )
+  const assignments = []
+  const pressureBySeatAndDomain = new Map()
+
+  for (const assignment of getCyclePressureEntries(pressureState.assignments, state)) {
+    const source = sourcesById.get(assignment.sourceId)
+    const sourceDomain = source ? domainsById.get(source.anchorId) : null
+    const targetDomain = domainsById.get(assignment.targetAnchorId)
+    const targetPressure = domainPressure[assignment.targetAnchorId]
+
+    if (!targetPressure) continue
+
+    const publicAssignment = {
+      ...assignment,
+      sourceLabel: source?.label ?? 'Inactive source',
+      targetLabel: targetDomain?.label ?? assignment.targetAnchorId,
+      pressureType: source?.kind ?? 'inactive',
+      strength: source?.strength ?? 0,
+      status: 'inactive',
+      reason: 'Source is not stable or no longer exists.',
+    }
+
+    if (
+      source &&
+      assignment.type === 'ASSIGN_INFLUENCE_PRESSURE' &&
+      canSourcePressureTarget(state, source, sourceDomain, targetDomain)
+    ) {
+      publicAssignment.status = 'projected'
+      publicAssignment.reason = null
+      targetPressure.incomingInfluence += source.strength
+      assignments.push(publicAssignment)
+    } else if (
+      source &&
+      assignment.type === 'ASSIGN_INFLUENCE_SUPPORT' &&
+      canSourceSupportTarget(source, targetDomain)
+    ) {
+      publicAssignment.status = 'projected'
+      publicAssignment.reason = null
+      targetPressure.friendlySupport += source.strength
+      assignments.push(publicAssignment)
+    } else if (
+      source &&
+      assignment.type === 'TARGET_BRIBE_NETWORK' &&
+      canSourcePressureTarget(state, source, sourceDomain, targetDomain)
+    ) {
+      publicAssignment.status = 'projected'
+      publicAssignment.reason = null
+      publicAssignment.siphonBonus = source.siphonBonus
+      targetPressure.incomingCorruption += source.strength
+      assignments.push(publicAssignment)
+    } else {
+      targetPressure.assignments.push(publicAssignment)
+      assignments.push(publicAssignment)
+      continue
+    }
+
+    targetPressure.assignments.push(publicAssignment)
+
+    if (
+      publicAssignment.status === 'projected' &&
+      publicAssignment.type !== 'ASSIGN_INFLUENCE_SUPPORT'
+    ) {
+      const key = `${source.seat}:${assignment.targetAnchorId}`
+      const previous = pressureBySeatAndDomain.get(key) ?? {
+        seat: source.seat,
+        anchorId: assignment.targetAnchorId,
+        pressure: 0,
+        siphonBonus: 0,
+      }
+
+      pressureBySeatAndDomain.set(key, {
+        ...previous,
+        pressure: previous.pressure + source.strength,
+        siphonBonus: previous.siphonBonus + (source.siphonBonus ?? 0),
+      })
+    }
+  }
+
+  for (const counterBribe of getCyclePressureEntries(pressureState.counterBribes, state)) {
+    const targetPressure = domainPressure[counterBribe.targetAnchorId]
+
+    if (!targetPressure) continue
+
+    targetPressure.counterBribeReduction += counterBribe.reduction
+    targetPressure.defenses.push(counterBribe)
+  }
+
+  for (const purge of getCyclePressureEntries(pressureState.purges, state)) {
+    const targetPressure = domainPressure[purge.targetAnchorId]
+
+    if (!targetPressure) continue
+
+    targetPressure.purgeReduction += purge.reduction
+    targetPressure.defenses.push(purge)
+  }
+
+  for (const domain of domains) {
+    const pressure = domainPressure[domain.anchorId]
+    const strongestPressure = Array.from(pressureBySeatAndDomain.values())
+      .filter((entry) => entry.anchorId === domain.anchorId)
+      .sort((left, right) => right.pressure - left.pressure)[0]
+    const corruptionReduction = Math.min(
+      pressure.incomingCorruption,
+      pressure.counterBribeReduction + pressure.purgeReduction,
+    )
+    const effectiveCorruption = Math.max(
+      0,
+      pressure.incomingCorruption - corruptionReduction,
+    )
+    const rawEnemyPressure = pressure.incomingInfluence + effectiveCorruption
+    const netPressure = Math.max(0, rawEnemyPressure - pressure.friendlySupport)
+    const projectedEffects = getPressureThresholdEffect(
+      netPressure,
+      domain.income ?? 0,
+      strongestPressure?.siphonBonus ?? 0,
+    )
+    const supportRepair =
+      state.featureFlags.stability &&
+      domain.status === 'controlled' &&
+      pressure.friendlySupport > rawEnemyPressure &&
+      domain.stability < domain.baseStability
+        ? 1
+        : 0
+
+    pressure.counterBribeReduction = corruptionReduction
+    pressure.purgeReduction = Math.min(
+      pressure.incomingCorruption - pressure.counterBribeReduction,
+      pressure.purgeReduction,
+    )
+    pressure.defensiveReduction = corruptionReduction
+    pressure.effectiveCorruption = effectiveCorruption
+    pressure.netPressure = netPressure
+    pressure.pressureOwner =
+      strongestPressure && strongestPressure.pressure > 0
+        ? strongestPressure.seat
+        : null
+    pressure.projectedEffects = {
+      ...projectedEffects,
+      passiveRepair: supportRepair,
+    }
+    pressure.warningChips = addWarningChips(
+      pressure,
+      pressure.incomingCorruption > 0,
+    )
+  }
+
+  return {
+    sources: sourceList,
+    assignments,
+    counterBribes: getCyclePressureEntries(pressureState.counterBribes, state),
+    purges: getCyclePressureEntries(pressureState.purges, state),
+    domains: domainPressure,
+    metrics: pressureState.metrics ?? { culturalMandateWatch: {} },
+    lastResolvedCycle: pressureState.lastResolvedCycle,
+  }
+}
+
+function enrichDomainPressure(domain, state, pressureProjection) {
+  if (!pressureEnabled(state)) return domain
+
+  return {
+    ...domain,
+    pressure: pressureProjection.domains[domain.anchorId] ?? createEmptyDomainPressure(),
+  }
+}
+
 function createRepairActions(state, seat, domains) {
   if (!state.featureFlags.stability) return []
 
@@ -1021,6 +1561,9 @@ export function getLegalActions(state, seat) {
   }
 
   const domains = deriveDomains(state)
+  const pressureProjection = pressureEnabled(state)
+    ? derivePressureProjection(state, domains)
+    : null
   const legalPlacements = state.board.cells
     .filter((cell) => cell.type === 'playable' && cell.occupant === null)
     .map((cell) => {
@@ -1054,6 +1597,15 @@ export function getLegalActions(state, seat) {
   actions.push(...createBuyDecreeActions(state, seat, domains))
   actions.push(...createUpgradeDecreeActions(state, seat, domains))
   actions.push(...createRuinConversionActions(state, seat, domains))
+  if (pressureProjection) {
+    actions.push(
+      ...createPressureAssignmentActions(state, seat, domains, pressureProjection),
+    )
+    actions.push(...createCounterBribeActions(state, seat, domains))
+    actions.push(
+      ...createPurgeCorruptionActions(state, seat, domains, pressureProjection),
+    )
+  }
 
   actions.push({
     id: passActionId(state),
@@ -1073,6 +1625,60 @@ export function getLegalActions(state, seat) {
 
 function createEconomyCycleEvent(state, kind, seat, message, detail) {
   return createEvent(state, kind, seat, message, detail)
+}
+
+function projectCyclePressureState(state, domains) {
+  if (!pressureEnabled(state)) return null
+
+  return derivePressureProjection(state, domains)
+}
+
+function clearCurrentPressureCycle(pressureState, state, metrics) {
+  return {
+    ...pressureState,
+    assignments: (pressureState.assignments ?? []).filter(
+      (assignment) => assignment.createdCycle !== state.cycle,
+    ),
+    counterBribes: (pressureState.counterBribes ?? []).filter(
+      (counterBribe) => counterBribe.createdCycle !== state.cycle,
+    ),
+    purges: (pressureState.purges ?? []).filter(
+      (purge) => purge.createdCycle !== state.cycle,
+    ),
+    metrics,
+    lastResolvedCycle: state.cycle,
+  }
+}
+
+function updateCulturalMandateWatch(metrics, domains, state) {
+  const nextWatch = { ...(metrics?.culturalMandateWatch ?? {}) }
+
+  for (const seat of SEATS) {
+    const pressuredEnemyDomains = domains.filter(
+      (domain) =>
+        domain.status === 'controlled' &&
+        domain.owner &&
+        domain.owner !== seat &&
+        domain.pressure?.pressureOwner === seat &&
+        domain.pressure.netPressure > 0,
+    )
+    const thresholdPressuredEnemyDomains = pressuredEnemyDomains.filter(
+      (domain) => domain.pressure.netPressure >= 5,
+    )
+    const regions = new Set(pressuredEnemyDomains.map((domain) => domain.regionId))
+
+    nextWatch[seat] = {
+      pressuredEnemyDomains: pressuredEnemyDomains.length,
+      thresholdPressuredEnemyDomains: thresholdPressuredEnemyDomains.length,
+      pressuredRegions: regions.size,
+      cycle: state.cycle,
+    }
+  }
+
+  return {
+    ...(metrics ?? {}),
+    culturalMandateWatch: nextWatch,
+  }
 }
 
 function getDomainRecoveryStability(domain, state) {
@@ -1168,7 +1774,8 @@ function resolveCycleEconomy(state) {
   if (
     !state.featureFlags.income &&
     !state.featureFlags.stability &&
-    !state.featureFlags.decrees
+    !state.featureFlags.decrees &&
+    !pressureEnabled(state)
   ) {
     return {
       state,
@@ -1177,7 +1784,22 @@ function resolveCycleEconomy(state) {
   }
 
   const economyRules = resolveEconomyRules()
-  const domains = deriveDomains(state)
+  const pressureResolutionState = pressureEnabled(state)
+    ? {
+        ...state,
+        cycle: Math.max(1, state.cycle - 1),
+      }
+    : state
+  const baseDomains = deriveDomainsWithoutPressure(state)
+  const pressureProjection = projectCyclePressureState(
+    pressureResolutionState,
+    baseDomains,
+  )
+  const domains = pressureProjection
+    ? baseDomains.map((domain) =>
+        enrichDomainPressure(domain, state, pressureProjection),
+      )
+    : baseDomains
   const nextPlayers = projectPlayers(state.players)
   const nextDomainState = { ...(state.domains ?? {}) }
   const events = []
@@ -1320,7 +1942,11 @@ function resolveCycleEconomy(state) {
     const resolved = projectDomainDecrees(domain, state, nextDecrees)
     const decreeIncome = getDomainDecreeIncome(resolved.decrees)
     const decreeUpkeep = getDomainDecreeUpkeep(resolved.decrees, state)
-    const totalIncome = domain.income + decreeIncome
+    const pressure = domain.pressure ?? createEmptyDomainPressure()
+    const pressureEffects = pressure.projectedEffects
+    const siphonedIncome = Math.min(domain.income, pressureEffects.siphon ?? 0)
+    const retainedDomainIncome = Math.max(0, domain.income - siphonedIncome)
+    const totalIncome = retainedDomainIncome + decreeIncome
 
     if (totalIncome > 0) {
       nextPlayers[domain.owner] = {
@@ -1333,7 +1959,12 @@ function resolveCycleEconomy(state) {
           'DOMAIN_INCOME',
           domain.owner,
           `${SEAT_LABELS[domain.owner]} gained ${totalIncome} gold from ${domain.label}.`,
-          { ...detail, income: totalIncome },
+          {
+            ...detail,
+            income: totalIncome,
+            domainIncome: retainedDomainIncome,
+            decreeIncome,
+          },
         ),
       )
     } else {
@@ -1344,6 +1975,28 @@ function resolveCycleEconomy(state) {
           domain.owner,
           `${domain.label} produced no income because stability is depleted.`,
           detail,
+        ),
+      )
+    }
+
+    if (siphonedIncome > 0 && pressure.pressureOwner) {
+      nextPlayers[pressure.pressureOwner] = {
+        ...nextPlayers[pressure.pressureOwner],
+        gold: (nextPlayers[pressure.pressureOwner].gold ?? 0) + siphonedIncome,
+      }
+      events.push(
+        createEconomyCycleEvent(
+          state,
+          'PRESSURE_SIPHON',
+          pressure.pressureOwner,
+          `${SEAT_LABELS[pressure.pressureOwner]} siphoned ${siphonedIncome} gold from ${domain.label}.`,
+          {
+            ...detail,
+            pressureOwner: pressure.pressureOwner,
+            siphonedIncome,
+            netPressure: pressure.netPressure,
+            threshold: pressureEffects.threshold,
+          },
         ),
       )
     }
@@ -1392,14 +2045,59 @@ function resolveCycleEconomy(state) {
       )
     }
 
+    const stabilityDamage = pressureEffects.stabilityDamage ?? 0
+    const passiveRepair = pressureEffects.passiveRepair ?? 0
     const nextStability = state.featureFlags.stability
-      ? Math.max(0, domain.stability - economyRules.repairAmount)
+      ? Math.min(
+          domain.baseStability,
+          Math.max(
+            0,
+            domain.stability -
+              economyRules.repairAmount -
+              stabilityDamage +
+              passiveRepair,
+          ),
+        )
       : domain.stability
 
     nextDomainState[domain.anchorId] = {
       stability: nextStability,
       lastOwner: domain.owner,
       decrees: projectPersistedDecrees(resolved.decrees),
+    }
+
+    if (stabilityDamage > 0) {
+      events.push(
+        createEconomyCycleEvent(
+          state,
+          'PRESSURE_STABILITY_DAMAGE',
+          pressure.pressureOwner,
+          `${domain.label} lost ${stabilityDamage} stability to pressure.`,
+          {
+            ...detail,
+            pressureOwner: pressure.pressureOwner,
+            stabilityDamage,
+            netPressure: pressure.netPressure,
+          },
+        ),
+      )
+    }
+
+    if (passiveRepair > 0) {
+      events.push(
+        createEconomyCycleEvent(
+          state,
+          'PRESSURE_SUPPORT_REPAIR',
+          domain.owner,
+          `${domain.label} restored ${passiveRepair} stability from friendly support.`,
+          {
+            ...detail,
+            passiveRepair,
+            friendlySupport: pressure.friendlySupport,
+            netPressure: pressure.netPressure,
+          },
+        ),
+      )
     }
 
     if (state.featureFlags.stability && domain.stability !== nextStability) {
@@ -1420,6 +2118,17 @@ function resolveCycleEconomy(state) {
       ...state,
       players: nextPlayers,
       domains: nextDomainState,
+      pressure: pressureEnabled(state)
+        ? clearCurrentPressureCycle(
+            getCurrentPressure(state),
+            pressureResolutionState,
+            updateCulturalMandateWatch(
+              pressureProjection?.metrics,
+              domains,
+              pressureResolutionState,
+            ),
+          )
+        : state.pressure,
     },
     events,
   }
@@ -1441,41 +2150,75 @@ function convertRuinedDecreeActionId(state, anchorId, decreeIndex) {
   return `turn-${state.turn}-${state.activeSeat}-convert-ruined-${anchorId}-${decreeIndex}`
 }
 
+function pressureActionId(state, type, sourceId, targetAnchorId) {
+  return `turn-${state.turn}-${state.activeSeat}-${type.toLowerCase()}-${sourceId}-${targetAnchorId}`
+}
+
+function counterBribeActionId(state, targetAnchorId) {
+  return `turn-${state.turn}-${state.activeSeat}-counter-bribe-${targetAnchorId}`
+}
+
+function purgeCorruptionActionId(state, sourceId, targetAnchorId) {
+  return `turn-${state.turn}-${state.activeSeat}-purge-corruption-${sourceId}-${targetAnchorId}`
+}
+
 function createBuyDecreeActions(state, seat, domains) {
   if (!state.featureFlags.decrees || seat !== state.activeSeat) return []
 
   const player = state.players[seat]
   const rules = resolveDecreeRules(state)
-  const cost = rules.decreePurchaseCostByLevel[1] ?? 1
+  const decreeTypes = [
+    DECREE_TYPES.TAX_OFFICE,
+    ...(state.featureFlags.corruption ? [DECREE_TYPES.BRIBE_NETWORK] : []),
+  ]
+  const actions = []
 
-  return domains
+  for (const domain of domains
     .filter((domain) => domain.owner === seat)
     .filter((domain) => domain.economyStatus === 'active')
-    .filter((domain) => domain.decreeSlotsUsed < domain.decreeSlots)
-    .filter(() => player.gold >= cost)
-    .map((domain) => ({
-      id: buyDecreeActionId(state, domain.anchorId),
+    .filter((domain) => domain.decreeSlotsUsed < domain.decreeSlots)) {
+    for (const decreeType of decreeTypes) {
+      const cost = getDecreePurchaseCost(decreeType, 1)
+
+      if (player.gold < cost) continue
+
+      actions.push({
+        id:
+          decreeType === DECREE_TYPES.TAX_OFFICE
+            ? buyDecreeActionId(state, domain.anchorId)
+            : `${buyDecreeActionId(state, domain.anchorId)}-bribe-network`,
       type: 'BUY_DECREE',
       seat,
-      label: `Buy ${rules.decreeType} on ${domain.label}`,
+        label: `Buy ${decreeType} on ${domain.label}`,
       payload: {
         anchorId: domain.anchorId,
-        decreeType: rules.decreeType,
+          decreeType,
         level: 1,
         cost,
       },
       preview: {
         decreesAfter: domain.decreeSlotsUsed + 1,
-        decreeIncomeAfter: domain.decreeIncome + (rules.decreeIncomeByLevel[1] ?? 0),
+          decreeIncomeAfter:
+            domain.decreeIncome +
+            (decreeType === DECREE_TYPES.TAX_OFFICE
+              ? rules.decreeIncomeByLevel[1] ?? 0
+              : 0),
+          corruptionAfter:
+            decreeType === DECREE_TYPES.BRIBE_NETWORK
+              ? DEFAULT_BRIBE_NETWORK_RULES.corruptionByLevel[1]
+              : 0,
       },
-    }))
+      })
+    }
+  }
+
+  return actions
 }
 
 function createUpgradeDecreeActions(state, seat, domains) {
   if (!state.featureFlags.decrees || seat !== state.activeSeat) return []
 
   const player = state.players[seat]
-  const rules = resolveDecreeRules(state)
   const actions = []
 
   for (const domain of domains.filter((candidate) => candidate.owner === seat)) {
@@ -1484,7 +2227,7 @@ function createUpgradeDecreeActions(state, seat, domains) {
         continue
       }
 
-      const cost = rules.decreeUpgradeCostByLevel[decree.level] ?? 1
+      const cost = getDecreeUpgradeCost(decree.type, decree.level)
 
       if (player.gold < cost) {
         continue
@@ -1498,18 +2241,209 @@ function createUpgradeDecreeActions(state, seat, domains) {
         payload: {
           anchorId: domain.anchorId,
           decreeIndex: decree.index,
+          decreeType: decree.type,
           level: decree.level,
           cost,
         },
         preview: {
           levelAfter: decree.level + 1,
           cost,
+          corruptionAfter:
+            decree.type === DECREE_TYPES.BRIBE_NETWORK
+              ? DEFAULT_BRIBE_NETWORK_RULES.corruptionByLevel[decree.level + 1]
+              : 0,
         },
       })
     }
   }
 
   return actions
+}
+
+function createPressureAssignmentActions(state, seat, domains, pressureProjection) {
+  if (!pressureEnabled(state) || seat !== state.activeSeat) return []
+
+  const domainsById = new Map(domains.map((domain) => [domain.anchorId, domain]))
+  const purgedSourceIds = new Set(
+    getCyclePressureEntries(getCurrentPressure(state).purges, state).map(
+      (purge) => purge.sourceId,
+    ),
+  )
+  const actions = []
+
+  for (const source of pressureProjection.sources.filter(
+    (candidate) =>
+      candidate.seat === seat && !purgedSourceIds.has(candidate.id),
+  )) {
+    const sourceDomain = domainsById.get(source.anchorId)
+
+    for (const targetDomain of domains) {
+      if (
+        source.kind === 'influence' &&
+        canSourcePressureTarget(state, source, sourceDomain, targetDomain)
+      ) {
+        actions.push({
+          id: pressureActionId(
+            state,
+            'ASSIGN_INFLUENCE_PRESSURE',
+            source.id,
+            targetDomain.anchorId,
+          ),
+          type: 'ASSIGN_INFLUENCE_PRESSURE',
+          seat,
+          label: `Pressure ${targetDomain.label} from ${source.label}`,
+          payload: {
+            sourceId: source.id,
+            sourceAnchorId: source.anchorId,
+            targetAnchorId: targetDomain.anchorId,
+            strength: source.strength,
+          },
+          preview: {
+            incomingInfluenceAfter:
+              (targetDomain.pressure?.incomingInfluence ?? 0) + source.strength,
+          },
+        })
+      }
+
+      if (source.kind === 'influence' && canSourceSupportTarget(source, targetDomain)) {
+        actions.push({
+          id: pressureActionId(
+            state,
+            'ASSIGN_INFLUENCE_SUPPORT',
+            source.id,
+            targetDomain.anchorId,
+          ),
+          type: 'ASSIGN_INFLUENCE_SUPPORT',
+          seat,
+          label: `Support ${targetDomain.label} from ${source.label}`,
+          payload: {
+            sourceId: source.id,
+            sourceAnchorId: source.anchorId,
+            targetAnchorId: targetDomain.anchorId,
+            strength: source.strength,
+          },
+          preview: {
+            friendlySupportAfter:
+              (targetDomain.pressure?.friendlySupport ?? 0) + source.strength,
+          },
+        })
+      }
+
+      if (
+        source.kind === 'corruption' &&
+        canSourcePressureTarget(state, source, sourceDomain, targetDomain)
+      ) {
+        actions.push({
+          id: pressureActionId(
+            state,
+            'TARGET_BRIBE_NETWORK',
+            source.id,
+            targetDomain.anchorId,
+          ),
+          type: 'TARGET_BRIBE_NETWORK',
+          seat,
+          label: `Target ${targetDomain.label} with ${source.label}`,
+          payload: {
+            sourceId: source.id,
+            sourceAnchorId: source.anchorId,
+            targetAnchorId: targetDomain.anchorId,
+            strength: source.strength,
+          },
+          preview: {
+            incomingCorruptionAfter:
+              (targetDomain.pressure?.incomingCorruption ?? 0) + source.strength,
+            siphonBonus: source.siphonBonus,
+          },
+        })
+      }
+    }
+  }
+
+  return actions
+}
+
+function createCounterBribeActions(state, seat, domains) {
+  if (!state.featureFlags.corruption || seat !== state.activeSeat) return []
+
+  const player = state.players[seat]
+  const cost = DEFAULT_PRESSURE_RULES.counterBribeCost
+
+  if ((player.gold ?? 0) < cost) return []
+
+  return domains
+    .filter((domain) => {
+      const pressure = domain.pressure
+      return (
+        pressure &&
+        pressure.incomingCorruption > pressure.defensiveReduction
+      )
+    })
+    .map((domain) => ({
+      id: counterBribeActionId(state, domain.anchorId),
+      type: 'SPEND_COUNTER_BRIBE',
+      seat,
+      label: `Counter-bribe against ${domain.label}`,
+      payload: {
+        targetAnchorId: domain.anchorId,
+        cost,
+        reduction: DEFAULT_PRESSURE_RULES.counterBribeReduction,
+      },
+      preview: {
+        effectiveCorruptionAfter: Math.max(
+          0,
+          domain.pressure.effectiveCorruption -
+            DEFAULT_PRESSURE_RULES.counterBribeReduction,
+        ),
+      },
+    }))
+}
+
+function createPurgeCorruptionActions(state, seat, domains, pressureProjection) {
+  if (!state.featureFlags.corruption || seat !== state.activeSeat) return []
+
+  const existingSourceIds = new Set(
+    [
+      ...getCyclePressureEntries(
+        getCurrentPressure(state).assignments,
+        state,
+      ).map((assignment) => assignment.sourceId),
+      ...getCyclePressureEntries(getCurrentPressure(state).purges, state).map(
+        (purge) => purge.sourceId,
+      ),
+    ],
+  )
+  const sources = pressureProjection.sources.filter(
+    (source) =>
+      source.kind === 'influence' &&
+      source.seat === seat &&
+      !existingSourceIds.has(source.id),
+  )
+
+  return sources.flatMap((source) =>
+    domains
+      .filter((domain) => isSupportTargetForSeat(domain, seat))
+      .filter((domain) => domain.regionId === source.regionId)
+      .filter((domain) => (domain.pressure?.incomingCorruption ?? 0) > 0)
+      .map((domain) => ({
+        id: purgeCorruptionActionId(state, source.id, domain.anchorId),
+        type: 'PURGE_CORRUPTION',
+        seat,
+        label: `Purge corruption in ${domain.label}`,
+        payload: {
+          sourceId: source.id,
+          sourceAnchorId: source.anchorId,
+          targetAnchorId: domain.anchorId,
+          reduction: DEFAULT_PRESSURE_RULES.purgeReduction,
+        },
+        preview: {
+          effectiveCorruptionAfter: Math.max(
+            0,
+            domain.pressure.effectiveCorruption -
+              DEFAULT_PRESSURE_RULES.purgeReduction,
+          ),
+        },
+      })),
+  )
 }
 
 function createRuinConversionActions(state, seat, domains) {
@@ -2141,6 +3075,169 @@ function applyConvertRuinedDecreeAction(state, seat, legalAction) {
   }
 }
 
+function upsertPressureAssignment(assignments, nextAssignment) {
+  const withoutSameSource = getCyclePressureEntries(assignments, {
+    cycle: nextAssignment.createdCycle,
+  }).some(
+    (assignment) =>
+      assignment.sourceId === nextAssignment.sourceId &&
+      assignment.seat === nextAssignment.seat,
+  )
+    ? assignments.filter(
+        (assignment) =>
+          !(
+            assignment.createdCycle === nextAssignment.createdCycle &&
+            assignment.sourceId === nextAssignment.sourceId &&
+            assignment.seat === nextAssignment.seat
+          ),
+      )
+    : assignments
+
+  return [...withoutSameSource, nextAssignment]
+}
+
+function applyPressureAssignmentAction(state, seat, legalAction) {
+  const nextAssignment = {
+    type: legalAction.type,
+    seat,
+    sourceId: legalAction.payload.sourceId,
+    sourceAnchorId: legalAction.payload.sourceAnchorId,
+    targetAnchorId: legalAction.payload.targetAnchorId,
+    createdCycle: state.cycle,
+  }
+  const pressureState = getCurrentPressure(state)
+  const event = createEvent(
+    state,
+    legalAction.type,
+    seat,
+    `${SEAT_LABELS[seat]} assigned ${legalAction.label.toLowerCase()}.`,
+    {
+      sourceId: nextAssignment.sourceId,
+      sourceAnchorId: nextAssignment.sourceAnchorId,
+      targetAnchorId: nextAssignment.targetAnchorId,
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Pressure assignment updated.',
+    action: legalAction,
+    state: {
+      ...state,
+      pressure: {
+        ...pressureState,
+        assignments: upsertPressureAssignment(
+          pressureState.assignments,
+          nextAssignment,
+        ),
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
+function applyCounterBribeAction(state, seat, legalAction) {
+  const player = state.players[seat]
+  const cost = legalAction.payload.cost
+
+  if ((player.gold ?? 0) < cost) {
+    return {
+      accepted: false,
+      reason: 'ILLEGAL_ACTION',
+      message: 'Not enough gold to spend a counter-bribe.',
+      state,
+    }
+  }
+
+  const pressureState = getCurrentPressure(state)
+  const counterBribe = {
+    type: 'SPEND_COUNTER_BRIBE',
+    seat,
+    sourceId: null,
+    targetAnchorId: legalAction.payload.targetAnchorId,
+    reduction: legalAction.payload.reduction,
+    cost,
+    createdCycle: state.cycle,
+  }
+  const event = createEvent(
+    state,
+    'SPEND_COUNTER_BRIBE',
+    seat,
+    `${SEAT_LABELS[seat]} spent ${cost} gold to reduce corruption on ${domainLabel(state, legalAction.payload.targetAnchorId)}.`,
+    {
+      targetAnchorId: legalAction.payload.targetAnchorId,
+      cost,
+      reduction: legalAction.payload.reduction,
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Counter-bribe spent.',
+    action: legalAction,
+    state: {
+      ...state,
+      players: {
+        ...state.players,
+        [seat]: {
+          ...player,
+          gold: player.gold - cost,
+        },
+      },
+      pressure: {
+        ...pressureState,
+        counterBribes: [...pressureState.counterBribes, counterBribe],
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
+function applyPurgeCorruptionAction(state, seat, legalAction) {
+  const pressureState = getCurrentPressure(state)
+  const purge = {
+    type: 'PURGE_CORRUPTION',
+    seat,
+    sourceId: legalAction.payload.sourceId,
+    targetAnchorId: legalAction.payload.targetAnchorId,
+    reduction: legalAction.payload.reduction,
+    cost: 0,
+    createdCycle: state.cycle,
+  }
+  const event = createEvent(
+    state,
+    'PURGE_CORRUPTION',
+    seat,
+    `${SEAT_LABELS[seat]} purged corruption from ${domainLabel(state, legalAction.payload.targetAnchorId)}.`,
+    {
+      sourceId: legalAction.payload.sourceId,
+      sourceAnchorId: legalAction.payload.sourceAnchorId,
+      targetAnchorId: legalAction.payload.targetAnchorId,
+      reduction: legalAction.payload.reduction,
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Corruption purged.',
+    action: legalAction,
+    state: {
+      ...state,
+      pressure: {
+        ...pressureState,
+        purges: [...pressureState.purges, purge],
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
 export function applyAction(state, actionId, seat) {
   if (seat !== state.activeSeat) {
     return {
@@ -2215,6 +3312,22 @@ export function applyAction(state, actionId, seat) {
 
   if (legalAction.type === 'CONVERT_RUINED_DECREE') {
     return applyConvertRuinedDecreeAction(state, seat, legalAction)
+  }
+
+  if (
+    legalAction.type === 'ASSIGN_INFLUENCE_PRESSURE' ||
+    legalAction.type === 'ASSIGN_INFLUENCE_SUPPORT' ||
+    legalAction.type === 'TARGET_BRIBE_NETWORK'
+  ) {
+    return applyPressureAssignmentAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'SPEND_COUNTER_BRIBE') {
+    return applyCounterBribeAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'PURGE_CORRUPTION') {
+    return applyPurgeCorruptionAction(state, seat, legalAction)
   }
 
   const placement = simulatePlacement(state, seat, legalAction.payload.cellId)
@@ -2307,7 +3420,7 @@ function getDomainSize(count) {
   return null
 }
 
-export function deriveDomains(state) {
+function deriveDomainsWithoutPressure(state) {
   const cellMap = getCellMap(state)
 
   const domains = state.anchors.map((anchor) => {
@@ -2405,6 +3518,20 @@ export function deriveDomains(state) {
   return domains.map((domain) => enrichDomainEconomy(domain, state))
 }
 
+export function deriveDomains(state) {
+  const domains = deriveDomainsWithoutPressure(state)
+
+  if (!pressureEnabled(state)) {
+    return domains
+  }
+
+  const pressureProjection = derivePressureProjection(state, domains)
+
+  return domains.map((domain) =>
+    enrichDomainPressure(domain, state, pressureProjection),
+  )
+}
+
 function projectPlayerState(player) {
   const projected = { ...player }
 
@@ -2421,12 +3548,35 @@ function projectPlayers(players) {
   )
 }
 
+function projectPressureState(state) {
+  if (!pressureEnabled(state)) return null
+
+  const pressureProjection = derivePressureProjection(state)
+
+  return {
+    assignments: pressureProjection.assignments,
+    counterBribes: pressureProjection.counterBribes,
+    purges: pressureProjection.purges,
+    sources: pressureProjection.sources,
+    metrics: pressureProjection.metrics,
+    lastResolvedCycle: pressureProjection.lastResolvedCycle,
+  }
+}
+
 function projectLastMove(lastMove) {
   if (!lastMove) return null
 
   return {
     ...lastMove,
     capturedIds: lastMove.capturedIds ? [...lastMove.capturedIds] : undefined,
+  }
+}
+
+function projectEvent(event) {
+  return {
+    ...event,
+    detail: event.detail ? { ...event.detail } : {},
+    public: event.public ?? true,
   }
 }
 
@@ -2456,6 +3606,8 @@ export function getPublicState(state) {
       })),
     },
     domains: deriveDomains(state),
+    pressure: projectPressureState(state),
+    eventLog: state.eventLog.map(projectEvent),
   }
 }
 
@@ -2469,6 +3621,19 @@ export function getSeatState(state, seat) {
 
 export function createRequestId(state, seat = state.activeSeat) {
   return `${state.matchId}:turn-${state.turn}:request-${state.requestCounter}:${seat}`
+}
+
+function createExplanationHints(state) {
+  if (!pressureEnabled(state)) {
+    return {}
+  }
+
+  return {
+    pressure:
+      'Pressure assignments are public after reveal. Net pressure can siphon Domain income and damage stability at cycle resolution.',
+    corruption:
+      'Corruption is pressure from Bribe Networks and can be reduced by counter-bribes or purge actions before cycle resolution.',
+  }
 }
 
 export function createAgentRequest(state, seat = state.activeSeat) {
@@ -2486,6 +3651,7 @@ export function createAgentRequest(state, seat = state.activeSeat) {
     publicState: getPublicState(state),
     privateState: getSeatState(state, seat),
     legalActions: getLegalActions(state, seat),
+    explanationHints: createExplanationHints(state),
   }
 }
 
@@ -2501,7 +3667,7 @@ export function submitProtocolAction(state, submission, options = {}) {
     }
   }
 
-  if (expectedToken && submission.token !== expectedToken) {
+  if (!expectedToken || submission.token !== expectedToken) {
     return {
       accepted: false,
       reason: 'BAD_TOKEN',
@@ -2548,11 +3714,21 @@ export function chooseBotAction(agentRequest) {
       'CONVERT_RUINED_DECREE',
     ].includes(action.type),
   )
+  const pressureActions = agentRequest.legalActions.filter((action) =>
+    [
+      'ASSIGN_INFLUENCE_PRESSURE',
+      'ASSIGN_INFLUENCE_SUPPORT',
+      'TARGET_BRIBE_NETWORK',
+      'SPEND_COUNTER_BRIBE',
+      'PURGE_CORRUPTION',
+    ].includes(action.type),
+  )
 
   if (
     placements.length === 0 &&
     repairs.length === 0 &&
-    economyActions.length === 0
+    economyActions.length === 0 &&
+    pressureActions.length === 0
   ) {
     return agentRequest.legalActions.find((action) => action.type === 'PASS')?.id
   }
@@ -2580,9 +3756,32 @@ export function chooseBotAction(agentRequest) {
       const scoreByType = {
         PAY_UPKEEP: 60,
         CONVERT_RUINED_DECREE: 36 + (action.preview.levelAfter ?? 1) * 4,
-        BUY_DECREE: 30 + (action.preview.decreeIncomeAfter ?? 0),
-        UPGRADE_DECREE: 26 + (action.preview.levelAfter ?? 1) * 4,
+        BUY_DECREE:
+          30 +
+          (action.preview.decreeIncomeAfter ?? 0) +
+          (action.preview.corruptionAfter ?? 0),
+        UPGRADE_DECREE:
+          26 +
+          (action.preview.levelAfter ?? 1) * 4 +
+          (action.preview.corruptionAfter ?? 0),
         SCRAP_RUINED_DECREE: 20 + (action.preview.goldGain ?? 0) * 3,
+      }
+
+      return {
+        action,
+        score: scoreByType[action.type] ?? 0,
+      }
+    }),
+    ...pressureActions.map((action) => {
+      const scoreByType = {
+        TARGET_BRIBE_NETWORK:
+          44 + (action.preview.incomingCorruptionAfter ?? 0) * 3,
+        ASSIGN_INFLUENCE_PRESSURE:
+          40 + (action.preview.incomingInfluenceAfter ?? 0) * 2,
+        ASSIGN_INFLUENCE_SUPPORT:
+          34 + (action.preview.friendlySupportAfter ?? 0) * 2,
+        PURGE_CORRUPTION: 38,
+        SPEND_COUNTER_BRIBE: 24,
       }
 
       return {

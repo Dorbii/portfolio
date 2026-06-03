@@ -67,6 +67,21 @@ function passActionFor(state, seat) {
   return action
 }
 
+function advanceOneCycle(state) {
+  let nextState = state
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = nextState.activeSeat
+    nextState = applyAction(
+      nextState,
+      passActionFor(nextState, seat).id,
+      seat,
+    ).state
+  }
+
+  return nextState
+}
+
 function protocolSubmission(state, seat, selectedActionId) {
   const request = createAgentRequest(state, seat)
 
@@ -685,6 +700,20 @@ test('rejects wrong seats, bad tokens, and unlisted actions without mutation', (
       token: 'wrong-token',
     },
     { expectedToken: tokenFor('black') },
+    'BAD_TOKEN',
+  )
+
+  expectProtocolRejection(
+    state,
+    {
+      type: 'AGENT_SUBMIT_ACTION',
+      requestId: request.requestId,
+      matchId: state.matchId,
+      seat: 'black',
+      selectedActionId: request.legalActions[0].id,
+      token: tokenFor('black'),
+    },
+    {},
     'BAD_TOKEN',
   )
 
@@ -1338,4 +1367,277 @@ test('bot can choose decree legal actions through the request action set', () =>
   )
 
   assert.equal(selected.type, 'BUY_DECREE')
+})
+
+test('influence sources expose legal pressure targets and public projections', () => {
+  let state = stateWithStones(
+    {
+      '-2,1': 'black',
+      '-2,0': 'black',
+      '-1,0': 'white',
+      '-1,1': 'white',
+    },
+    {
+      featureFlags: {
+        influence: true,
+      },
+    },
+  )
+  const action = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'ASSIGN_INFLUENCE_PRESSURE' &&
+      candidate.payload.sourceAnchorId === 'temple' &&
+      candidate.payload.targetAnchorId === 'ruins',
+  )
+
+  assert.ok(action)
+  assert.equal(action.payload.strength, 2)
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.turn, 1)
+  assert.equal(result.state.activeSeat, 'black')
+  assert.equal(result.state.requestCounter, 2)
+  state = result.state
+
+  const request = createAgentRequest(state, 'black')
+  const publicRuins = request.publicState.domains.find(
+    (domain) => domain.anchorId === 'ruins',
+  )
+
+  assert.equal(publicRuins.pressure.incomingInfluence, 2)
+  assert.equal(publicRuins.pressure.netPressure, 2)
+  assert.equal(publicRuins.pressure.assignments[0].status, 'projected')
+  assert.equal(request.publicState.pressure.assignments.length, 1)
+  assert.match(request.explanationHints.pressure, /Pressure assignments/)
+})
+
+test('influence support can offset decay with passive repair at cycle resolution', () => {
+  let state = stateWithStones(
+    {
+      '-2,1': 'black',
+      '-2,0': 'black',
+    },
+    {
+      featureFlags: {
+        stability: true,
+        influence: true,
+      },
+      initialDomains: {
+        temple: {
+          stability: 1,
+          lastOwner: 'black',
+        },
+      },
+    },
+  )
+  const support = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'ASSIGN_INFLUENCE_SUPPORT' &&
+      candidate.payload.sourceAnchorId === 'temple' &&
+      candidate.payload.targetAnchorId === 'temple',
+  )
+
+  assert.ok(support)
+  state = applyAction(state, support.id, 'black').state
+  state = advanceOneCycle(state)
+
+  assert.equal(state.domains.temple.stability, 1)
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'PRESSURE_SUPPORT_REPAIR'),
+  )
+})
+
+test('corruption pressure siphons Domain income and damages stability deterministically', () => {
+  let state = stateWithStones(
+    {
+      '-2,1': 'black',
+      '-2,0': 'black',
+      '-3,0': 'black',
+      '-3,2': 'black',
+      '-1,0': 'white',
+      '-1,1': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        decrees: true,
+        influence: true,
+        corruption: true,
+      },
+      initialDomains: {
+        temple: {
+          stability: 3,
+          lastOwner: 'black',
+          decrees: [
+            {
+              type: 'Bribe Network',
+              level: 3,
+            },
+          ],
+        },
+        ruins: {
+          stability: 2,
+          lastOwner: 'white',
+        },
+      },
+    },
+  )
+  const influence = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'ASSIGN_INFLUENCE_PRESSURE' &&
+      candidate.payload.sourceAnchorId === 'temple' &&
+      candidate.payload.targetAnchorId === 'ruins',
+  )
+  state = applyAction(state, influence.id, 'black').state
+
+  const bribe = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'TARGET_BRIBE_NETWORK' &&
+      candidate.payload.sourceAnchorId === 'temple' &&
+      candidate.payload.targetAnchorId === 'ruins',
+  )
+
+  assert.ok(bribe)
+  state = applyAction(state, bribe.id, 'black').state
+
+  const projectedRuins = deriveDomains(state).find(
+    (domain) => domain.anchorId === 'ruins',
+  )
+
+  assert.equal(projectedRuins.pressure.incomingInfluence, 3)
+  assert.equal(projectedRuins.pressure.incomingCorruption, 4)
+  assert.equal(projectedRuins.pressure.netPressure, 7)
+  assert.equal(projectedRuins.pressure.projectedEffects.siphon, 1)
+  assert.equal(projectedRuins.pressure.projectedEffects.stabilityDamage, 1)
+  assert.ok(projectedRuins.pressure.warningChips.includes('corruption'))
+
+  state = advanceOneCycle(state)
+
+  assert.equal(state.domains.ruins.stability, 0)
+  assert.equal(state.pressure.assignments.length, 0)
+  assert.equal(
+    state.pressure.metrics.culturalMandateWatch.black.pressuredEnemyDomains,
+    1,
+  )
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'PRESSURE_SIPHON'),
+  )
+  assert.ok(
+    state.eventLog.some(
+      (event) => event.kind === 'PRESSURE_STABILITY_DAMAGE',
+    ),
+  )
+})
+
+test('counter-bribes and purge actions reduce public corruption projections', () => {
+  let state = stateWithStones(
+    {
+      '-1,0': 'black',
+      '-1,1': 'black',
+      '-2,1': 'white',
+      '-2,0': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        decrees: true,
+        influence: true,
+        corruption: true,
+      },
+      initialGold: {
+        white: 4,
+      },
+      initialDomains: {
+        ruins: {
+          stability: 2,
+          lastOwner: 'black',
+          decrees: [
+            {
+              type: 'Bribe Network',
+              level: 2,
+            },
+          ],
+        },
+        temple: {
+          stability: 2,
+          lastOwner: 'white',
+        },
+      },
+    },
+  )
+  const bribe = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'TARGET_BRIBE_NETWORK' &&
+      candidate.payload.sourceAnchorId === 'ruins' &&
+      candidate.payload.targetAnchorId === 'temple',
+  )
+
+  assert.ok(bribe)
+  state = applyAction(state, bribe.id, 'black').state
+  state = {
+    ...state,
+    activeSeat: 'white',
+  }
+
+  const counterBribe = getLegalActions(state, 'white').find(
+    (candidate) =>
+      candidate.type === 'SPEND_COUNTER_BRIBE' &&
+      candidate.payload.targetAnchorId === 'temple',
+  )
+  const purge = getLegalActions(state, 'white').find(
+    (candidate) =>
+      candidate.type === 'PURGE_CORRUPTION' &&
+      candidate.payload.targetAnchorId === 'temple',
+  )
+
+  assert.ok(counterBribe)
+  assert.ok(purge)
+
+  state = applyAction(state, counterBribe.id, 'white').state
+  state = applyAction(state, purge.id, 'white').state
+
+  const temple = deriveDomains(state).find((domain) => domain.anchorId === 'temple')
+
+  assert.equal(state.players.white.gold, 2)
+  assert.equal(temple.pressure.incomingCorruption, 3)
+  assert.equal(temple.pressure.defensiveReduction, 3)
+  assert.equal(temple.pressure.effectiveCorruption, 0)
+  assert.equal(temple.pressure.netPressure, 0)
+  assert.equal(
+    getLegalActions(state, 'white').some(
+      (candidate) =>
+        candidate.type === 'PURGE_CORRUPTION' &&
+        candidate.payload.sourceId === purge.payload.sourceId,
+    ),
+    false,
+  )
+})
+
+test('bot can choose pressure legal actions through the request action set', () => {
+  const state = stateWithStones(
+    {
+      '-2,1': 'black',
+      '-2,0': 'black',
+      '-1,0': 'white',
+      '-1,1': 'white',
+    },
+    {
+      radius: 4,
+      featureFlags: {
+        influence: true,
+      },
+    },
+  )
+  const request = createAgentRequest(state, 'black')
+  const selectedActionId = chooseBotAction(request)
+  const selected = request.legalActions.find(
+    (action) => action.id === selectedActionId,
+  )
+
+  assert.ok(selected)
+  assert.equal(selected.type, 'ASSIGN_INFLUENCE_PRESSURE')
 })

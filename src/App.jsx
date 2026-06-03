@@ -26,7 +26,21 @@ const demoMatchConfig = {
     income: true,
     stability: true,
     decrees: true,
+    influence: true,
+    corruption: true,
   },
+  initialStones: [
+    { q: -1, r: 2, seat: 'black' },
+    { q: 0, r: 2, seat: 'black' },
+    { q: 1, r: -2, seat: 'white' },
+    { q: 0, r: -2, seat: 'white' },
+    { q: -2, r: 1, seat: 'black' },
+    { q: -2, r: 0, seat: 'black' },
+    { q: -3, r: 0, seat: 'black' },
+    { q: -3, r: 2, seat: 'black' },
+    { q: -1, r: 0, seat: 'white' },
+    { q: -1, r: 1, seat: 'white' },
+  ],
   initialReinforcements: {
     black: 1,
     white: 1,
@@ -34,6 +48,22 @@ const demoMatchConfig = {
   initialGold: {
     black: 6,
     white: 6,
+  },
+  initialDomains: {
+    temple: {
+      stability: 3,
+      lastOwner: 'black',
+      decrees: [
+        {
+          type: 'Bribe Network',
+          level: 3,
+        },
+      ],
+    },
+    ruins: {
+      stability: 2,
+      lastOwner: 'white',
+    },
   },
 }
 
@@ -45,6 +75,14 @@ const domainActionTypes = new Set([
 ])
 
 const economyActionTypes = new Set([...domainActionTypes, 'PAY_UPKEEP'])
+
+const pressureActionTypes = new Set([
+  'ASSIGN_INFLUENCE_PRESSURE',
+  'ASSIGN_INFLUENCE_SUPPORT',
+  'TARGET_BRIBE_NETWORK',
+  'SPEND_COUNTER_BRIBE',
+  'PURGE_CORRUPTION',
+])
 
 const seatCopy = {
   black: {
@@ -103,6 +141,15 @@ function compactResult(result, source) {
           label: result.action.label,
         }
       : null,
+  }
+}
+
+function createAgentApiRejection(reason, message) {
+  return {
+    type: 'AGENT_REQUEST_REJECTED',
+    accepted: false,
+    reason,
+    message,
   }
 }
 
@@ -237,6 +284,13 @@ function GameExperience() {
       activeRequest.legalActions.filter((action) => action.type === 'PAY_UPKEEP'),
     [activeRequest],
   )
+  const pressureActions = useMemo(
+    () =>
+      activeRequest.legalActions.filter((action) =>
+        pressureActionTypes.has(action.type),
+      ),
+    [activeRequest],
+  )
   const boardPositions = useMemo(
     () => computeBoardPositions(state.board.cells),
     [state.board.cells],
@@ -268,6 +322,29 @@ function GameExperience() {
 
     return zoneMap
   }, [domains, selectedDomain, state.activeSeat])
+  const pressureToneByCell = useMemo(() => {
+    const pressureMap = new Map()
+
+    for (const domain of domains) {
+      let tone = null
+
+      if ((domain.pressure?.incomingCorruption ?? 0) > 0) {
+        tone = 'corrupted'
+      } else if ((domain.pressure?.netPressure ?? 0) > 0) {
+        tone = 'pressured'
+      } else if ((domain.pressure?.friendlySupport ?? 0) > 0) {
+        tone = 'supported'
+      }
+
+      if (!tone) continue
+
+      for (const cellId of domain.zoneCellIds) {
+        pressureMap.set(cellId, tone)
+      }
+    }
+
+    return pressureMap
+  }, [domains])
   const inviteUrls = useMemo(
     () => ({
       black: createInviteUrl(state.matchId, 'black', seatTokens.black),
@@ -293,6 +370,13 @@ function GameExperience() {
   const selectedDecreeActions = selectedDomain
     ? decreeActions.filter(
         (action) => action.payload.anchorId === selectedDomain.anchorId,
+      )
+    : []
+  const selectedPressureActions = selectedDomain
+    ? pressureActions.filter(
+        (action) =>
+          action.payload.targetAnchorId === selectedDomain.anchorId ||
+          action.payload.sourceAnchorId === selectedDomain.anchorId,
       )
     : []
 
@@ -376,9 +460,27 @@ function GameExperience() {
       // The in-page API still works when storage is unavailable.
     }
 
+    const verifyReadToken = (seat, token) => {
+      if (seatTokens[seat] !== token) {
+        return createAgentApiRejection(
+          'BAD_TOKEN',
+          'Seat token is required to read a seat-scoped agent request.',
+        )
+      }
+
+      return null
+    }
+
     window.HexSovereignAgent = {
-      getRequest: (seat = state.activeSeat) => createAgentRequest(state, seat),
-      getLegalActions: (seat = state.activeSeat) => getLegalActions(state, seat),
+      getRequest: (seat = state.activeSeat, token) =>
+        verifyReadToken(seat, token) ?? createAgentRequest(state, seat),
+      getLegalActions: (seat = state.activeSeat, token) => {
+        const rejection = verifyReadToken(seat, token)
+
+        if (rejection) return rejection
+
+        return getLegalActions(state, seat)
+      },
       submitAction: (selectedActionId, seat = state.activeSeat, token) => {
         return submitFromProtocol(
           {
@@ -387,7 +489,7 @@ function GameExperience() {
             matchId: state.matchId,
             seat,
             selectedActionId,
-            token: token ?? seatTokens[seat],
+            token,
           },
           'window-api',
         )
@@ -537,10 +639,14 @@ function GameExperience() {
               reinforcements={activeReinforcements}
               repairAction={selectedRepairAction}
               decreeActions={selectedDecreeActions}
+              pressureActions={selectedPressureActions}
               canHumanAct={canHumanAct}
               onRepair={(actionId) => submitActiveAction(actionId, 'repair-panel')}
               onDecreeAction={(actionId) =>
                 submitActiveAction(actionId, 'decree-panel')
+              }
+              onPressureAction={(actionId) =>
+                submitActiveAction(actionId, 'pressure-panel')
               }
             />
           </aside>
@@ -569,6 +675,7 @@ function GameExperience() {
                 const isSelected = selectedCellId === cell.id
                 const isLastMove = state.lastMove?.cellId === cell.id
                 const zoneTone = zoneToneByCell.get(cell.id)
+                const pressureTone = pressureToneByCell.get(cell.id)
 
                 return (
                   <button
@@ -582,6 +689,7 @@ function GameExperience() {
                       isSelected ? 'selected' : '',
                       isLastMove ? 'last-move' : '',
                       zoneTone ? `zone-${zoneTone}` : '',
+                      pressureTone ? `pressure-${pressureTone}` : '',
                     ]
                       .filter(Boolean)
                       .join(' ')}
@@ -597,6 +705,7 @@ function GameExperience() {
                       legalAction,
                       reinforcementAction,
                       zoneTone,
+                      pressureTone,
                     )}
                     onClick={() => handleCellClick(cell)}
                   >
@@ -710,7 +819,13 @@ function GameExperience() {
   )
 }
 
-function getCellLabel(cell, legalAction, reinforcementAction, zoneTone) {
+function getCellLabel(
+  cell,
+  legalAction,
+  reinforcementAction,
+  zoneTone,
+  pressureTone,
+) {
   const parts = [`Cell ${cell.q}, ${cell.r}`]
 
   if (cell.type === 'anchor') {
@@ -731,6 +846,10 @@ function getCellLabel(cell, legalAction, reinforcementAction, zoneTone) {
 
   if (zoneTone) {
     parts.push(`${zoneTone} Domain zone`)
+  }
+
+  if (pressureTone) {
+    parts.push(`${pressureTone} pressure`)
   }
 
   return parts.join(', ')
@@ -855,9 +974,11 @@ function SelectedPanel({
   reinforcements,
   repairAction,
   decreeActions,
+  pressureActions,
   canHumanAct,
   onRepair,
   onDecreeAction,
+  onPressureAction,
 }) {
   if (!cell) {
     return (
@@ -975,6 +1096,12 @@ function SelectedPanel({
                 </dd>
               </div>
             ) : null}
+            {domain.pressure ? (
+              <div>
+                <dt>Net pressure</dt>
+                <dd>{domain.pressure.netPressure}</dd>
+              </div>
+            ) : null}
           </dl>
           <p>{domain.reason}</p>
           {domain.inactiveReason ? <p>{domain.inactiveReason}</p> : null}
@@ -1012,6 +1139,79 @@ function SelectedPanel({
                       type="button"
                       disabled={!canHumanAct}
                       onClick={() => onDecreeAction(action.id)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {domain.pressure ? (
+            <div className="pressure-section">
+              <div className="section-heading-row">
+                <p className="small-label">Pressure</p>
+                <strong>{domain.pressure.projectedEffects.threshold}</strong>
+              </div>
+              <dl className="detail-list pressure-detail-list">
+                <div>
+                  <dt>Influence</dt>
+                  <dd>{domain.pressure.incomingInfluence}</dd>
+                </div>
+                <div>
+                  <dt>Corruption</dt>
+                  <dd>{domain.pressure.effectiveCorruption}</dd>
+                </div>
+                <div>
+                  <dt>Support</dt>
+                  <dd>{domain.pressure.friendlySupport}</dd>
+                </div>
+                <div>
+                  <dt>Reduction</dt>
+                  <dd>{domain.pressure.defensiveReduction}</dd>
+                </div>
+                <div>
+                  <dt>Siphon</dt>
+                  <dd>{domain.pressure.projectedEffects.siphon}</dd>
+                </div>
+                <div>
+                  <dt>Damage</dt>
+                  <dd>{domain.pressure.projectedEffects.stabilityDamage}</dd>
+                </div>
+              </dl>
+              {domain.pressure.warningChips.length > 0 ? (
+                <div className="warning-chip-row">
+                  {domain.pressure.warningChips.map((chip) => (
+                    <span className="warning-chip" key={chip}>
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {domain.pressure.assignments.length > 0 ? (
+                <ol className="pressure-list">
+                  {domain.pressure.assignments.map((assignment) => (
+                    <li
+                      className={`pressure-item ${assignment.pressureType}`}
+                      key={`${assignment.sourceId}-${assignment.targetAnchorId}`}
+                    >
+                      <strong>{assignment.sourceLabel}</strong>
+                      <span>
+                        {assignment.strength} / {assignment.status}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+              {pressureActions.length > 0 ? (
+                <div className="domain-action-list">
+                  {pressureActions.map((action) => (
+                    <button
+                      className="control-button"
+                      key={action.id}
+                      type="button"
+                      disabled={!canHumanAct}
+                      onClick={() => onPressureAction(action.id)}
                     >
                       {action.label}
                     </button>
@@ -1062,6 +1262,17 @@ function compactEconomyAction(action) {
     label: action.label,
     payload: action.payload,
     preview: action.preview,
+  }
+}
+
+function compactPressureState(pressure) {
+  if (!pressure) return null
+
+  return {
+    assignments: pressure.assignments,
+    counterBribes: pressure.counterBribes,
+    purges: pressure.purges,
+    metrics: pressure.metrics,
   }
 }
 
@@ -1121,6 +1332,11 @@ function ProtocolPanel({
               economyActions: activeRequest.legalActions
                 .filter((action) => economyActionTypes.has(action.type))
                 .map(compactEconomyAction),
+              pressureActions: activeRequest.legalActions
+                .filter((action) => pressureActionTypes.has(action.type))
+                .map(compactEconomyAction),
+              pressure: compactPressureState(activeRequest.publicState.pressure),
+              eventLog: activeRequest.publicState.eventLog.slice(0, 8),
               legalActions: activeRequest.legalActions.slice(0, 8),
               omittedActions: Math.max(activeRequest.legalActions.length - 8, 0),
             },
@@ -1195,8 +1411,15 @@ function EventLog({ events }) {
         {events.map((event) => (
           <li key={event.id}>
             <span className={`event-dot ${event.seat ?? 'neutral'}`} />
-            <p>{event.message}</p>
-            <small>Turn {event.turn}</small>
+            <div>
+              <p>{event.message}</p>
+              <small>
+                {event.kind} | Cycle {event.cycle} | Turn {event.turn}
+              </small>
+              {event.detail && Object.keys(event.detail).length > 0 ? (
+                <code>{JSON.stringify(event.detail)}</code>
+              ) : null}
+            </div>
           </li>
         ))}
       </ol>
