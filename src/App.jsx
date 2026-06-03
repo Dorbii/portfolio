@@ -18,6 +18,7 @@ import {
 import {
   compactResult,
   computeBoardPositions,
+  createAgentChannelName,
   createAgentApiRejection,
   createInviteUrl,
   getDomainTone,
@@ -287,10 +288,7 @@ function GameExperience() {
     const latestState = getPublicState(state)
 
     try {
-      localStorage.setItem(
-        `hex-sovereign:${state.matchId}:latest-request`,
-        JSON.stringify(activeRequest, null, 2),
-      )
+      localStorage.removeItem(`hex-sovereign:${state.matchId}:latest-request`)
       localStorage.setItem(
         `hex-sovereign:${state.matchId}:latest-state`,
         JSON.stringify(latestState, null, 2),
@@ -334,62 +332,74 @@ function GameExperience() {
         )
       },
     }
-  }, [activeRequest, seatTokens, state, submitFromProtocol])
+  }, [seatTokens, state, submitFromProtocol])
 
   useEffect(() => {
     if (!('BroadcastChannel' in window)) return undefined
 
-    const channel = new BroadcastChannel(`hex-sovereign:${state.matchId}`)
+    const channelEntries = Object.entries(seatTokens).map(([seat, token]) => {
+      const channel = new BroadcastChannel(
+        createAgentChannelName(state.matchId, seat, token),
+      )
 
-    const postResult = (result, source) => {
-      channel.postMessage(compactResult(result, source))
-    }
+      const postResult = (result, source) => {
+        channel.postMessage({
+          ...compactResult(result, source),
+          matchId: state.matchId,
+          seat,
+        })
+      }
 
-    const handleMessage = (event) => {
-      const message = event.data
+      const handleMessage = (event) => {
+        const message = event.data
 
-      if (!message || message.matchId !== state.matchId) return
+        if (
+          !message ||
+          message.matchId !== state.matchId ||
+          message.seat !== seat ||
+          message.token !== token
+        ) {
+          return
+        }
 
-      if (
-        message.type === 'AGENT_HELLO' ||
-        message.type === 'AGENT_REQUEST_STATE'
-      ) {
-        if (seatTokens[message.seat] !== message.token) {
+        if (
+          message.type === 'AGENT_HELLO' ||
+          message.type === 'AGENT_REQUEST_STATE'
+        ) {
           channel.postMessage({
-            type: 'AGENT_ACTION_RESULT',
-            accepted: false,
-            reason: 'BAD_TOKEN',
-            message: 'Seat token did not match this browser-local invitation.',
+            type: 'AGENT_STATE',
+            matchId: state.matchId,
+            seat,
+            request: createAgentRequest(state, seat),
+            activeSeat: state.activeSeat,
           })
           return
         }
 
-        channel.postMessage({
-          type: 'AGENT_STATE',
-          request: createAgentRequest(state, message.seat),
-          activeSeat: state.activeSeat,
-        })
-      }
+        if (message.type === 'AGENT_SUBMIT_ACTION') {
+          const result = submitProtocolAction(state, message, {
+            expectedToken: token,
+          })
 
-      if (message.type === 'AGENT_SUBMIT_ACTION') {
-        const result = submitProtocolAction(state, message, {
-          expectedToken: seatTokens[message.seat],
-        })
+          setLastResult(compactResult(result, 'broadcast'))
 
-        setLastResult(compactResult(result, 'broadcast'))
+          if (result.accepted) {
+            setState(result.state)
+          }
 
-        if (result.accepted) {
-          setState(result.state)
+          postResult(result, 'broadcast')
         }
-
-        postResult(result, 'broadcast')
       }
-    }
 
-    channel.addEventListener('message', handleMessage)
+      channel.addEventListener('message', handleMessage)
+      return { channel, handleMessage }
+    })
+
     return () => {
-      channel.removeEventListener('message', handleMessage)
-      channel.close()
+      for (const { channel, handleMessage } of channelEntries) {
+        channel.removeEventListener('message', handleMessage)
+        channel.close()
+      }
     }
   }, [seatTokens, state])
 

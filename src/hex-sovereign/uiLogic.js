@@ -16,10 +16,82 @@ export function getAgentParams() {
 }
 
 export function makeSeatTokens() {
-  return {
-    black: `black-${Math.random().toString(36).slice(2, 8)}`,
-    white: `white-${Math.random().toString(36).slice(2, 8)}`,
+  const createToken = (seat) => {
+    const bytes = new Uint8Array(16)
+
+    if (globalThis.crypto?.getRandomValues) {
+      globalThis.crypto.getRandomValues(bytes)
+      return `${seat}-${Array.from(bytes, (byte) =>
+        byte.toString(16).padStart(2, '0'),
+      ).join('')}`
+    }
+
+    return `${seat}-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`
   }
+
+  return {
+    black: createToken('black'),
+    white: createToken('white'),
+  }
+}
+
+export function createAgentChannelName(matchId, seat, token) {
+  return [
+    'hex-sovereign',
+    encodeURIComponent(matchId),
+    encodeURIComponent(seat),
+    encodeURIComponent(token),
+  ].join(':')
+}
+
+function isObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function isLegalActionShape(action) {
+  return (
+    isObject(action) &&
+    typeof action.id === 'string' &&
+    typeof action.type === 'string' &&
+    typeof action.label === 'string'
+  )
+}
+
+function isOptionalString(value) {
+  return value === undefined || typeof value === 'string'
+}
+
+export function isAgentStateMessage(message, context) {
+  return (
+    isObject(message) &&
+    message.type === 'AGENT_STATE' &&
+    message.matchId === context.matchId &&
+    message.seat === context.seat &&
+    (message.activeSeat === 'black' || message.activeSeat === 'white') &&
+    isObject(message.request) &&
+    message.request.type === 'AGENT_REQUEST' &&
+    message.request.matchId === context.matchId &&
+    message.request.seat === context.seat &&
+    typeof message.request.requestId === 'string' &&
+    Array.isArray(message.request.legalActions) &&
+    message.request.legalActions.every(isLegalActionShape)
+  )
+}
+
+export function isAgentActionResultMessage(message, context) {
+  return (
+    isObject(message) &&
+    message.type === 'AGENT_ACTION_RESULT' &&
+    message.matchId === context.matchId &&
+    message.seat === context.seat &&
+    typeof message.accepted === 'boolean' &&
+    isOptionalString(message.source) &&
+    isOptionalString(message.reason) &&
+    isOptionalString(message.message) &&
+    (message.action === null ||
+      message.action === undefined ||
+      isLegalActionShape(message.action))
+  )
 }
 
 export function compactResult(result, source) {

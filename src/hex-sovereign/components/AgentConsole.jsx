@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { SEAT_LABELS } from '../../game/engine'
 import { assets } from '../config'
-import { getAgentParams } from '../uiLogic'
+import {
+  createAgentChannelName,
+  getAgentParams,
+  isAgentActionResultMessage,
+  isAgentStateMessage,
+} from '../uiLogic'
 
 export default function AgentConsole() {
   const [{ matchId, seat, token }, setParams] = useState(getAgentParams)
@@ -16,12 +21,18 @@ export default function AgentConsole() {
   }, [])
 
   useEffect(() => {
+    setRequest(null)
+    setLastResult(null)
+    setConnection('connecting')
+
     if (!('BroadcastChannel' in window)) {
       setConnection('unsupported')
       return undefined
     }
 
-    const channel = new BroadcastChannel(`hex-sovereign:${matchId}`)
+    const channel = new BroadcastChannel(
+      createAgentChannelName(matchId, seat, token),
+    )
 
     const requestState = () => {
       channel.postMessage({
@@ -35,12 +46,12 @@ export default function AgentConsole() {
     channel.addEventListener('message', (event) => {
       const message = event.data
 
-      if (message?.type === 'AGENT_STATE') {
+      if (isAgentStateMessage(message, { matchId, seat })) {
         setRequest(message.request)
         setConnection(message.activeSeat === seat ? 'active' : 'waiting')
       }
 
-      if (message?.type === 'AGENT_ACTION_RESULT') {
+      if (isAgentActionResultMessage(message, { matchId, seat })) {
         setLastResult(message)
       }
     })
@@ -64,7 +75,9 @@ export default function AgentConsole() {
   const submitAgentAction = (actionId) => {
     if (!request || !('BroadcastChannel' in window)) return
 
-    const channel = new BroadcastChannel(`hex-sovereign:${matchId}`)
+    const channel = new BroadcastChannel(
+      createAgentChannelName(matchId, seat, token),
+    )
     channel.postMessage({
       type: 'AGENT_SUBMIT_ACTION',
       requestId: request.requestId,
