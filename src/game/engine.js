@@ -3455,11 +3455,18 @@ function createPressureAssignmentActions(state, seat, domains, pressureProjectio
       (purge) => purge.sourceId,
     ),
   )
+  const assignedSourceIds = new Set(
+    getCyclePressureEntries(getCurrentPressure(state).assignments, state).map(
+      (assignment) => assignment.sourceId,
+    ),
+  )
   const actions = []
 
   for (const source of pressureProjection.sources.filter(
     (candidate) =>
-      candidate.seat === seat && !purgedSourceIds.has(candidate.id),
+      candidate.seat === seat &&
+      !purgedSourceIds.has(candidate.id) &&
+      !assignedSourceIds.has(candidate.id),
   )) {
     const sourceDomain = domainsById.get(source.anchorId)
 
@@ -4261,27 +4268,6 @@ function applyConvertRuinedDecreeAction(state, seat, legalAction) {
   }
 }
 
-function upsertPressureAssignment(assignments, nextAssignment) {
-  const withoutSameSource = getCyclePressureEntries(assignments, {
-    cycle: nextAssignment.createdCycle,
-  }).some(
-    (assignment) =>
-      assignment.sourceId === nextAssignment.sourceId &&
-      assignment.seat === nextAssignment.seat,
-  )
-    ? assignments.filter(
-        (assignment) =>
-          !(
-            assignment.createdCycle === nextAssignment.createdCycle &&
-            assignment.sourceId === nextAssignment.sourceId &&
-            assignment.seat === nextAssignment.seat
-          ),
-      )
-    : assignments
-
-  return [...withoutSameSource, nextAssignment]
-}
-
 function applyPressureAssignmentAction(state, seat, legalAction) {
   const nextAssignment = {
     type: legalAction.type,
@@ -4307,16 +4293,13 @@ function applyPressureAssignmentAction(state, seat, legalAction) {
   return {
     accepted: true,
     reason: null,
-    message: 'Pressure assignment updated.',
+    message: 'Pressure assignment created.',
     action: legalAction,
     state: {
       ...state,
       pressure: {
         ...pressureState,
-        assignments: upsertPressureAssignment(
-          pressureState.assignments,
-          nextAssignment,
-        ),
+        assignments: [...pressureState.assignments, nextAssignment],
       },
       requestCounter: state.requestCounter + 1,
       eventLog: [event, ...state.eventLog].slice(0, 36),

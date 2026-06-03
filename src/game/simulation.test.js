@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import { createMatch } from './engine.js'
 import {
+  DEFAULT_SIMULATION_MATCH_CONFIG,
   createSeededActionStrategy,
   runSimulationTurn,
   simulateBatch,
@@ -271,5 +272,40 @@ test('simulation batches aggregate source balance contract fields', () => {
         },
       },
     }).results[0].acceptedActionIds.join('|'),
+  )
+})
+
+test('default simulation config exercises promoted full-game rules', () => {
+  const result = simulateMatch({
+    maxTurns: 180,
+    seatStrategies: {
+      black: 'simulation',
+      white: 'simulation',
+    },
+  })
+
+  assert.equal(DEFAULT_SIMULATION_MATCH_CONFIG.featureFlags.victoryWarnings, true)
+  assert.equal(result.endReason, 'VICTORY')
+  assert.equal(result.history.length < 180, true)
+  assert.equal(result.metrics.predictionSummary.comparable > 0, true)
+})
+
+test('seeded random strategy avoids surrender when other actions are legal', () => {
+  const chooseAction = createSeededActionStrategy('avoid-surrender')
+
+  assert.equal(
+    chooseAction({
+      legalActions: [
+        {
+          id: 'surrender',
+          type: 'SURRENDER',
+        },
+        {
+          id: 'pass',
+          type: 'PASS',
+        },
+      ],
+    }),
+    'pass',
   )
 })

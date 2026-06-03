@@ -10,6 +10,70 @@ const SEATS = ['black', 'white']
 const DEFAULT_MAX_TURNS = 256
 const DEFAULT_BATCH_RUNS = 4
 const DEFAULT_LONG_GAME_CYCLE_THRESHOLD = 9
+export const DEFAULT_SIMULATION_MATCH_CONFIG = Object.freeze({
+  matchId: 'hex-sovereign-simulation',
+  featureFlags: {
+    reinforcements: true,
+    income: true,
+    stability: true,
+    decrees: true,
+    influence: true,
+    corruption: true,
+    regionCards: true,
+    setCashIns: true,
+    counterDraft: true,
+    victoryWarnings: true,
+    mandates: true,
+  },
+  initialStones: [
+    { q: -1, r: 2, seat: 'black' },
+    { q: 0, r: 2, seat: 'black' },
+    { q: 1, r: -2, seat: 'white' },
+    { q: 0, r: -2, seat: 'white' },
+    { q: -2, r: 1, seat: 'black' },
+    { q: -2, r: 0, seat: 'black' },
+    { q: -3, r: 0, seat: 'black' },
+    { q: -3, r: 2, seat: 'black' },
+    { q: -1, r: 0, seat: 'white' },
+    { q: -1, r: 1, seat: 'white' },
+  ],
+  initialReinforcements: {
+    black: 1,
+    white: 1,
+  },
+  initialGold: {
+    black: 6,
+    white: 6,
+  },
+  initialDomains: {
+    temple: {
+      stability: 3,
+      lastOwner: 'black',
+      decrees: [
+        {
+          type: 'Bribe Network',
+          level: 3,
+        },
+      ],
+    },
+    ruins: {
+      stability: 2,
+      lastOwner: 'white',
+    },
+  },
+  initialCards: {
+    black: [
+      { regionId: 'temple-coast' },
+      { regionId: 'temple-coast' },
+      { regionId: 'temple-coast' },
+    ],
+    white: [
+      { regionId: 'ash-marsh' },
+      { regionId: 'ash-marsh' },
+      { regionId: 'wild' },
+    ],
+  },
+})
 const BOT_STRATEGY_BY_ID = new Map(
   BOT_STRATEGIES.map((strategy) => [strategy.id, strategy]),
 )
@@ -425,11 +489,17 @@ export function createSeededActionStrategy(seed) {
   const nextRandom = createMulberry32(hashSeed(seed))
 
   function chooseSeededAction(agentRequest) {
-    if (agentRequest.legalActions.length === 0) {
+    const selectableActions = agentRequest.legalActions.filter(
+      (action) => action.type !== 'SURRENDER',
+    )
+    const legalActions =
+      selectableActions.length > 0 ? selectableActions : agentRequest.legalActions
+
+    if (legalActions.length === 0) {
       return null
     }
 
-    const sortedActionIds = agentRequest.legalActions
+    const sortedActionIds = legalActions
       .map((action) => action.id)
       .sort((left, right) => left.localeCompare(right))
     const index = Math.floor(nextRandom() * sortedActionIds.length)
@@ -450,7 +520,7 @@ export function simulateMatch(options = {}) {
   const strategyArchetypes = getStrategyArchetypes(strategyPlan)
   const history = []
   const acceptedActionIds = []
-  let state = createMatch(options.matchConfig ?? {})
+  let state = createMatch(options.matchConfig ?? DEFAULT_SIMULATION_MATCH_CONFIG)
   let endReason = 'MAX_TURNS'
 
   while (history.length < maxTurns) {

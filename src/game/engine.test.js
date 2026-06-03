@@ -1553,7 +1553,7 @@ test('influence support can offset decay with passive repair at cycle resolution
   )
 })
 
-test('corruption pressure siphons Domain income and damages stability deterministically', () => {
+test('corruption pressure assigns each source once per cycle, siphons income, and damages stability', () => {
   let state = stateWithStones(
     {
       '-2,1': 'black',
@@ -1606,6 +1606,12 @@ test('corruption pressure siphons Domain income and damages stability determinis
 
   assert.ok(bribe)
   state = applyAction(state, bribe.id, 'black').state
+  assert.equal(
+    getLegalActions(state, 'black').some(
+      (candidate) => candidate.payload?.sourceId === bribe.payload.sourceId,
+    ),
+    false,
+  )
 
   const projectedRuins = deriveDomains(state).find(
     (domain) => domain.anchorId === 'ruins',
