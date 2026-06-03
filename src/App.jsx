@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { BOT_STRATEGIES, chooseBotAction } from './game/bots'
 import {
   REGIONS,
   SEAT_LABELS,
-  chooseBotAction,
   createAgentRequest,
   createMatch,
   deriveDomains,
@@ -260,6 +260,10 @@ function GameExperience() {
     black: 'human',
     white: 'bot',
   })
+  const [botStrategies, setBotStrategies] = useState({
+    black: 'balanced',
+    white: 'simulation',
+  })
   const [seatTokens] = useState(makeSeatTokens)
   const [selectedCellId, setSelectedCellId] = useState(null)
   const [protocolTab, setProtocolTab] = useState('request')
@@ -467,7 +471,10 @@ function GameExperience() {
     if (seatModes[state.activeSeat] !== 'bot') return undefined
 
     const timer = window.setTimeout(() => {
-      const selectedActionId = chooseBotAction(activeRequest)
+      const selectedActionId = chooseBotAction(activeRequest, {
+        strategy: botStrategies[state.activeSeat],
+        seed: `${state.matchId}:${state.turn}:${state.activeSeat}`,
+      })
 
       if (selectedActionId) {
         submitActiveAction(selectedActionId, 'bot')
@@ -475,7 +482,7 @@ function GameExperience() {
     }, 620)
 
     return () => window.clearTimeout(timer)
-  }, [activeRequest, seatModes, state.activeSeat, submitActiveAction])
+  }, [activeRequest, botStrategies, seatModes, state, submitActiveAction])
 
   useEffect(() => {
     const latestState = getPublicState(state)
@@ -673,8 +680,12 @@ function GameExperience() {
               mode={seatModes.black}
               reinforcements={getReinforcementSummary(state, 'black')}
               activeRequest={activeRequest}
+              botStrategy={botStrategies.black}
               onModeChange={(mode) =>
                 setSeatModes((current) => ({ ...current, black: mode }))
+              }
+              onBotStrategyChange={(strategy) =>
+                setBotStrategies((current) => ({ ...current, black: strategy }))
               }
             />
             <SelectedPanel
@@ -875,8 +886,12 @@ function GameExperience() {
               mode={seatModes.white}
               reinforcements={getReinforcementSummary(state, 'white')}
               activeRequest={activeRequest}
+              botStrategy={botStrategies.white}
               onModeChange={(mode) =>
                 setSeatModes((current) => ({ ...current, white: mode }))
+              }
+              onBotStrategyChange={(strategy) =>
+                setBotStrategies((current) => ({ ...current, white: strategy }))
               }
             />
             <ProtocolPanel
@@ -981,7 +996,9 @@ function PlayerPanel({
   mode,
   reinforcements,
   activeRequest,
+  botStrategy,
   onModeChange,
+  onBotStrategyChange,
 }) {
   const controlled = domains.filter((domain) => domain.owner === seat)
   const active = state.activeSeat === seat
@@ -1115,6 +1132,20 @@ function PlayerPanel({
           Bot
         </button>
       </div>
+      <label className="bot-strategy-select">
+        <span>Bot plan</span>
+        <select
+          value={botStrategy}
+          disabled={mode !== 'bot'}
+          onChange={(event) => onBotStrategyChange(event.target.value)}
+        >
+          {BOT_STRATEGIES.map((strategy) => (
+            <option key={strategy.id} value={strategy.id}>
+              {strategy.label}
+            </option>
+          ))}
+        </select>
+      </label>
     </section>
   )
 }

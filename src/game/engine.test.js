@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   applyAction,
+  BOT_STRATEGIES,
   cellId,
   chooseBotAction,
   createAgentRequest,
@@ -756,6 +757,92 @@ test('bot choices stay inside the legal action ID set', () => {
   const legalIds = new Set(request.legalActions.map((action) => action.id))
 
   assert.equal(legalIds.has(selectedActionId), true)
+})
+
+test('bot strategies consume request-shaped data and return only legal action IDs', () => {
+  const request = {
+    type: 'AGENT_REQUEST',
+    requestId: 'request-only-bot-proof',
+    matchId: 'request-only-match',
+    seat: 'black',
+    publicState: {
+      victory: {
+        activeWarnings: [
+          {
+            seat: 'black',
+            label: 'Dominance',
+          },
+        ],
+      },
+    },
+    privateState: {
+      seat: 'black',
+      cards: {
+        mustDiscard: false,
+        completedSets: [],
+      },
+    },
+    legalActions: [
+      {
+        id: 'legal-pass',
+        type: 'PASS',
+        payload: {},
+        preview: {},
+      },
+      {
+        id: 'legal-placement',
+        type: 'PLACE_STONE',
+        payload: {
+          q: 0,
+          r: 0,
+        },
+        preview: {
+          adjacentAnchors: [],
+          capturedCount: 0,
+        },
+      },
+      {
+        id: 'legal-purge',
+        type: 'PURGE_CORRUPTION',
+        payload: {
+          sourceId: 'bribe-1',
+        },
+        preview: {},
+      },
+    ],
+  }
+  const legalIds = new Set(request.legalActions.map((action) => action.id))
+
+  for (const strategy of BOT_STRATEGIES) {
+    const selectedActionId = chooseBotAction(request, {
+      strategy: strategy.id,
+      seed: 'request-only-fixed-seed',
+    })
+
+    assert.equal(
+      legalIds.has(selectedActionId),
+      true,
+      `${strategy.id} selected a non-legal action id`,
+    )
+  }
+
+  assert.equal(
+    chooseBotAction(request, {
+      strategy: 'simulation',
+      seed: 'request-only-fixed-seed',
+    }),
+    'legal-purge',
+  )
+  assert.equal(
+    chooseBotAction(request, {
+      strategy: 'random',
+      seed: 'request-only-fixed-seed',
+    }),
+    chooseBotAction(request, {
+      strategy: 'random',
+      seed: 'request-only-fixed-seed',
+    }),
+  )
 })
 
 test('bot can choose a high-value legal reinforcement action from request actions', () => {
