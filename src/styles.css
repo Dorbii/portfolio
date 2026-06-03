@@ -432,6 +432,44 @@ dd {
   margin-bottom: 0;
 }
 
+.section-heading-row.compact {
+  margin-bottom: 8px;
+}
+
+.card-summary {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 125, 95, 0.28);
+}
+
+.card-summary p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.card-chip-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+}
+
+.card-chip-list li {
+  max-width: 100%;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(62, 119, 146, 0.34);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(62, 119, 146, 0.12);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
 .decree-section {
   margin-top: 18px;
   padding-top: 16px;
@@ -868,6 +906,17 @@ dd {
   border-radius: 8px;
   color: var(--ink);
   background: var(--paper-2);
+}
+
+.card-action-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-button {
+  border-color: rgba(62, 119, 146, 0.88);
+  background: #2f657c;
 }
 
 .control-button,

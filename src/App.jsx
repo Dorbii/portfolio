@@ -28,6 +28,9 @@ const demoMatchConfig = {
     decrees: true,
     influence: true,
     corruption: true,
+    regionCards: true,
+    setCashIns: true,
+    counterDraft: true,
   },
   initialStones: [
     { q: -1, r: 2, seat: 'black' },
@@ -65,6 +68,18 @@ const demoMatchConfig = {
       lastOwner: 'white',
     },
   },
+  initialCards: {
+    black: [
+      { regionId: 'temple-coast' },
+      { regionId: 'temple-coast' },
+      { regionId: 'temple-coast' },
+    ],
+    white: [
+      { regionId: 'ash-marsh' },
+      { regionId: 'ash-marsh' },
+      { regionId: 'wild' },
+    ],
+  },
 }
 
 const domainActionTypes = new Set([
@@ -82,6 +97,15 @@ const pressureActionTypes = new Set([
   'TARGET_BRIBE_NETWORK',
   'SPEND_COUNTER_BRIBE',
   'PURGE_CORRUPTION',
+])
+
+const cardActionTypes = new Set([
+  'DRAFT_CARD',
+  'DISCARD_CARD',
+  'CASH_SET',
+  'COUNTER_IMMEDIATE',
+  'COUNTER_SEEK_MISSING',
+  'COUNTER_SAFE_FALLBACK',
 ])
 
 const seatCopy = {
@@ -288,6 +312,13 @@ function GameExperience() {
     () =>
       activeRequest.legalActions.filter((action) =>
         pressureActionTypes.has(action.type),
+      ),
+    [activeRequest],
+  )
+  const cardActions = useMemo(
+    () =>
+      activeRequest.legalActions.filter((action) =>
+        cardActionTypes.has(action.type),
       ),
     [activeRequest],
   )
@@ -626,6 +657,7 @@ function GameExperience() {
               domains={domains}
               mode={seatModes.black}
               reinforcements={getReinforcementSummary(state, 'black')}
+              activeRequest={activeRequest}
               onModeChange={(mode) =>
                 setSeatModes((current) => ({ ...current, black: mode }))
               }
@@ -776,6 +808,21 @@ function GameExperience() {
                   {action.label}
                 </button>
               ))}
+              {cardActions.length > 0 ? (
+                <div className="card-action-tray">
+                  {cardActions.map((action) => (
+                    <button
+                      className="control-button card-button"
+                      key={action.id}
+                      type="button"
+                      disabled={!canHumanAct}
+                      onClick={() => submitActiveAction(action.id, 'card-tray')}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <button
                 className="control-button"
                 type="button"
@@ -797,6 +844,7 @@ function GameExperience() {
               domains={domains}
               mode={seatModes.white}
               reinforcements={getReinforcementSummary(state, 'white')}
+              activeRequest={activeRequest}
               onModeChange={(mode) =>
                 setSeatModes((current) => ({ ...current, white: mode }))
               }
@@ -855,9 +903,22 @@ function getCellLabel(
   return parts.join(', ')
 }
 
-function PlayerPanel({ seat, state, domains, mode, reinforcements, onModeChange }) {
+function PlayerPanel({
+  seat,
+  state,
+  domains,
+  mode,
+  reinforcements,
+  activeRequest,
+  onModeChange,
+}) {
   const controlled = domains.filter((domain) => domain.owner === seat)
   const active = state.activeSeat === seat
+  const publicCards = activeRequest.publicState.cards?.players?.[seat] ?? null
+  const privateCards = active ? activeRequest.privateState.cards : null
+  const cardCount = publicCards?.cardCount ?? privateCards?.hand.length ?? 0
+  const handLimit =
+    activeRequest.publicState.cards?.handLimit ?? privateCards?.handLimit ?? null
 
   return (
     <section className={`player-card ${seat} ${active ? 'active' : ''}`}>
@@ -905,7 +966,39 @@ function PlayerPanel({ seat, state, domains, mode, reinforcements, onModeChange 
             <dd>{state.players[seat].upkeepDue}</dd>
           </div>
         ) : null}
+        {publicCards ? (
+          <div>
+            <dt>Cards</dt>
+            <dd>
+              {cardCount}
+              {handLimit ? `/${handLimit}` : ''}
+            </dd>
+          </div>
+        ) : null}
       </dl>
+      {publicCards ? (
+        <div className="card-summary">
+          <div className="section-heading-row compact">
+            <p className="small-label">Region cards</p>
+            <strong>{publicCards.completedSetCountVisibleIfRevealed} revealed</strong>
+          </div>
+          {privateCards ? (
+            <>
+              <ol className="card-chip-list">
+                {privateCards.hand.map((card) => (
+                  <li key={card.id}>{card.name}</li>
+                ))}
+              </ol>
+              {privateCards.completedSets.length > 0 ? (
+                <p>{privateCards.completedSets.length} cashable set</p>
+              ) : null}
+              {privateCards.mustDiscard ? <p>Discard down to hand limit.</p> : null}
+            </>
+          ) : (
+            <p>{cardCount} hidden card{cardCount === 1 ? '' : 's'}.</p>
+          )}
+        </div>
+      ) : null}
       <div className="segmented-control" aria-label={`${seatCopy[seat].role} mode`}>
         <button
           className={mode === 'human' ? 'selected' : ''}
@@ -1276,6 +1369,36 @@ function compactPressureState(pressure) {
   }
 }
 
+function compactCardState(cards) {
+  if (!cards) return null
+
+  return {
+    handLimit: cards.handLimit,
+    players: cards.players,
+    pendingCounterDraft: cards.pendingCounterDraft,
+    metrics: cards.metrics,
+  }
+}
+
+function compactPrivateCards(cards) {
+  if (!cards) return null
+
+  return {
+    hand: cards.hand.map((card) => ({
+      id: card.id,
+      name: card.name,
+      cashableAfterCycle: card.cashableAfterCycle,
+    })),
+    completedSets: cards.completedSets.map((set) => ({
+      id: set.id,
+      setType: set.setType,
+      regionName: set.regionName,
+      cardIds: set.cardIds,
+    })),
+    mustDiscard: cards.mustDiscard,
+  }
+}
+
 function ProtocolPanel({
   activeRequest,
   protocolTab,
@@ -1336,6 +1459,11 @@ function ProtocolPanel({
                 .filter((action) => pressureActionTypes.has(action.type))
                 .map(compactEconomyAction),
               pressure: compactPressureState(activeRequest.publicState.pressure),
+              cardActions: activeRequest.legalActions
+                .filter((action) => cardActionTypes.has(action.type))
+                .map(compactEconomyAction),
+              cards: compactCardState(activeRequest.publicState.cards),
+              privateCards: compactPrivateCards(activeRequest.privateState.cards),
               eventLog: activeRequest.publicState.eventLog.slice(0, 8),
               legalActions: activeRequest.legalActions.slice(0, 8),
               omittedActions: Math.max(activeRequest.legalActions.length - 8, 0),

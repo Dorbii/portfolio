@@ -224,6 +224,48 @@ const DEFAULT_PRESSURE_RULES = Object.freeze({
   purgeReduction: 2,
 })
 
+const WILD_CARD = Object.freeze({
+  id: 'wild',
+  name: 'Wild',
+})
+
+const CARD_TYPES = Object.freeze([
+  ...REGIONS.map((region) => ({
+    id: region.id,
+    name: region.name,
+  })),
+  WILD_CARD,
+])
+
+const DEFAULT_CARD_RULES = Object.freeze({
+  handLimit: 5,
+  fallbackGold: 1,
+  majorSetPerCycle: 1,
+  era: 1,
+  eraFallbacks: {
+    1: {
+      gold: 2,
+      reinforcements: 2,
+      repair: 2,
+    },
+    2: {
+      gold: 3,
+      reinforcements: 2,
+      repair: 2,
+    },
+    3: {
+      gold: 4,
+      reinforcements: 2,
+      repair: 3,
+    },
+    4: {
+      gold: 5,
+      reinforcements: 3,
+      repair: 3,
+    },
+  },
+})
+
 function getDomainDecreeSlots(size, anchorKind) {
   const baseSlotsBySize = {
     small: 1,
@@ -484,7 +526,10 @@ function createPlayerState(seat, config, featureFlags) {
     featureFlags.income ||
     featureFlags.stability ||
     featureFlags.decrees ||
-    featureFlags.corruption
+    featureFlags.corruption ||
+    featureFlags.regionCards ||
+    featureFlags.setCashIns ||
+    featureFlags.counterDraft
   ) {
     const economyRules = resolveEconomyRules(config)
     player.gold = normalizeWholeNumber(
@@ -570,6 +615,97 @@ function createPressureState(config = {}) {
       ...(initial.metrics ?? {}),
     },
     lastResolvedCycle: initial.lastResolvedCycle ?? null,
+  }
+}
+
+function getCardType(regionId) {
+  return CARD_TYPES.find((cardType) => cardType.id === regionId) ?? WILD_CARD
+}
+
+function normalizeCard(card = {}, fallback = {}) {
+  const regionId = CARD_TYPES.some((cardType) => cardType.id === card.regionId)
+    ? card.regionId
+    : fallback.regionId ?? 'central-plain'
+  const cardType = getCardType(regionId)
+
+  return {
+    id:
+      card.id ??
+      fallback.id ??
+      `card-${fallback.seat ?? 'neutral'}-${regionId}-${fallback.index ?? 0}`,
+    regionId,
+    name: card.name ?? cardType.name,
+    source: card.source ?? fallback.source ?? 'seeded',
+    gainedCycle: normalizeWholeNumber(
+      card.gainedCycle,
+      fallback.gainedCycle ?? 1,
+      { min: 1 },
+    ),
+    cashableAfterCycle: normalizeWholeNumber(
+      card.cashableAfterCycle,
+      fallback.cashableAfterCycle ?? card.gainedCycle ?? 1,
+      { min: 1 },
+    ),
+  }
+}
+
+function normalizeCards(cards = [], seat) {
+  return (cards ?? []).map((card, index) =>
+    normalizeCard(card, {
+      id: `card-${seat}-seed-${index}`,
+      seat,
+      index,
+      gainedCycle: 1,
+      cashableAfterCycle: 1,
+    }),
+  )
+}
+
+function normalizeRevealedSets(sets = []) {
+  return (sets ?? []).map((set, index) => ({
+    id: set.id ?? `revealed-set-${index}`,
+    owner: set.owner,
+    setType: set.setType,
+    regionId: set.regionId ?? null,
+    cycle: normalizeWholeNumber(set.cycle, 1, { min: 1 }),
+    strength: normalizeWholeNumber(set.strength, 1, { min: 1 }),
+    counterDraftChoice: set.counterDraftChoice ?? null,
+  }))
+}
+
+function createCardState(config = {}) {
+  const initial = config.initialCards ?? {}
+  const initialState = config.initialCardState ?? {}
+  const handLimit = normalizeWholeNumber(
+    config.cardRules?.handLimit,
+    DEFAULT_CARD_RULES.handLimit,
+    { min: 1 },
+  )
+
+  return {
+    handLimit,
+    players: Object.fromEntries(
+      SEATS.map((seat) => {
+        const seeded = initialState.players?.[seat] ?? {}
+
+        return [
+          seat,
+          {
+            hand: normalizeCards(seeded.hand ?? initial[seat], seat),
+            revealedSets: normalizeRevealedSets(seeded.revealedSets),
+            lastDraftCycle: seeded.lastDraftCycle ?? null,
+            majorSetCashedCycle: seeded.majorSetCashedCycle ?? null,
+          },
+        ]
+      }),
+    ),
+    pendingCounterDraft: initialState.pendingCounterDraft ?? null,
+    discardReturnSeat: initialState.discardReturnSeat ?? null,
+    metrics: {
+      counterDraftChoices: {},
+      seekMissingChoices: {},
+      ...(initialState.metrics ?? {}),
+    },
   }
 }
 
@@ -687,6 +823,12 @@ export function createMatch(config = {}) {
     pressure:
       featureFlags.influence || featureFlags.corruption
         ? createPressureState(config)
+        : null,
+    cards:
+      featureFlags.regionCards ||
+      featureFlags.setCashIns ||
+      featureFlags.counterDraft
+        ? createCardState(config)
         : null,
     anchors: ANCHORS,
     passStreak: 0,
@@ -1555,12 +1697,383 @@ function resetReinforcementRoundSpends(players) {
   return changed ? nextPlayers : players
 }
 
+function cardsEnabled(state) {
+  return (
+    state.featureFlags.regionCards ||
+    state.featureFlags.setCashIns ||
+    state.featureFlags.counterDraft
+  )
+}
+
+function getCurrentCards(state) {
+  return state.cards ?? createCardState()
+}
+
+function getCardPlayer(state, seat) {
+  return getCurrentCards(state).players[seat]
+}
+
+function getControlledCardRegions(domains, seat) {
+  const regionIds = domains
+    .filter((domain) => domain.owner === seat && domain.status === 'controlled')
+    .map((domain) => domain.regionId)
+
+  return Array.from(new Set(regionIds)).sort()
+}
+
+function createCardFromRegion(
+  state,
+  seat,
+  regionId,
+  source,
+  sequence = 0,
+  overrides = {},
+) {
+  const cardType = getCardType(regionId)
+
+  return normalizeCard(
+    {
+      id: `card-${seat}-${state.cycle}-${state.turn}-${state.requestCounter}-${source}-${regionId}-${sequence}`,
+      regionId,
+      name: cardType.name,
+      source,
+      gainedCycle: state.cycle,
+      cashableAfterCycle: state.cycle,
+      ...overrides,
+    },
+    { seat, index: sequence },
+  )
+}
+
+function cashableCards(hand, cycle) {
+  return hand.filter((card) => card.cashableAfterCycle <= cycle)
+}
+
+export function detectCompletedCardSets(hand, cycle = Number.MAX_SAFE_INTEGER) {
+  const availableCards = cashableCards(hand, cycle)
+  const wildCards = availableCards.filter((card) => card.regionId === WILD_CARD.id)
+  const regionCards = availableCards.filter((card) => card.regionId !== WILD_CARD.id)
+  const byRegion = new Map()
+  const sets = []
+
+  for (const card of regionCards) {
+    const cards = byRegion.get(card.regionId) ?? []
+    cards.push(card)
+    byRegion.set(card.regionId, cards)
+  }
+
+  for (const [regionId, cards] of byRegion.entries()) {
+    if (cards.length >= 3) {
+      const setCards = cards.slice(0, 3)
+      sets.push(createDetectedCardSet('MATCHING_REGION', regionId, setCards))
+    }
+
+    if (cards.length >= 2 && wildCards.length > 0) {
+      const setCards = [...cards.slice(0, 2), wildCards[0]]
+      sets.push(createDetectedCardSet('MATCHING_REGION', regionId, setCards))
+    }
+  }
+
+  if (byRegion.size >= 3) {
+    const setCards = Array.from(byRegion.values()).map((cards) => cards[0]).slice(0, 3)
+    sets.push(createDetectedCardSet('MIXED_REGION', null, setCards))
+  }
+
+  return sets
+}
+
+function createDetectedCardSet(setType, regionId, cards) {
+  const regionName = regionId ? getCardType(regionId).name : 'Mixed Regions'
+  const cardIds = cards.map((card) => card.id)
+
+  return {
+    id: `${setType}-${regionId ?? 'mixed'}-${cardIds.join('-')}`,
+    setType,
+    regionId,
+    regionName,
+    cardIds,
+    cards: cards.map((card) => ({
+      id: card.id,
+      regionId: card.regionId,
+      name: card.name,
+    })),
+    label:
+      setType === 'MATCHING_REGION'
+        ? `${regionName} major set`
+        : 'Mixed region set',
+  }
+}
+
+function chooseSeekMissingRegion(state, seat) {
+  const hand = getCardPlayer(state, seat).hand
+  const nonWild = hand.filter((card) => card.regionId !== WILD_CARD.id)
+  const wildCount = hand.length - nonWild.length
+  const counts = nonWild.reduce((summary, card) => {
+    summary[card.regionId] = (summary[card.regionId] ?? 0) + 1
+    return summary
+  }, {})
+
+  const matchingNeed = Object.entries(counts)
+    .filter(([, count]) => count >= 2)
+    .map(([regionId]) => regionId)
+    .sort()[0]
+
+  if (matchingNeed) return matchingNeed
+
+  if (wildCount > 0) {
+    const wildNeed = Object.entries(counts)
+      .filter(([, count]) => count >= 1)
+      .map(([regionId]) => regionId)
+      .sort()[0]
+
+    if (wildNeed) return wildNeed
+  }
+
+  const domains = deriveDomains(state)
+  return getControlledCardRegions(domains, seat)[0] ?? 'central-plain'
+}
+
+function cardDraftActionId(state, regionId) {
+  return `turn-${state.turn}-${state.activeSeat}-draft-${regionId ?? 'fallback'}`
+}
+
+function discardCardActionId(state, cardId) {
+  return `turn-${state.turn}-${state.activeSeat}-discard-${cardId}`
+}
+
+function cashSetActionId(state, detectedSet) {
+  return `turn-${state.turn}-${state.activeSeat}-cash-${detectedSet.id}`
+}
+
+function counterDraftActionId(state, type, option = 'base') {
+  return `turn-${state.turn}-${state.activeSeat}-${type.toLowerCase()}-${option}`
+}
+
+function createDraftCardActions(state, seat, domains) {
+  if (!state.featureFlags.regionCards || seat !== state.activeSeat) return []
+  if (getCardPlayer(state, seat).lastDraftCycle === state.cycle) return []
+
+  const controlledRegions = getControlledCardRegions(domains, seat)
+  const cardCountAfter = getCardPlayer(state, seat).hand.length + 1
+
+  if (controlledRegions.length === 0) {
+    return [
+      {
+        id: cardDraftActionId(state, null),
+        type: 'DRAFT_CARD',
+        seat,
+        label: 'Take provisional gold instead of drafting',
+        payload: {
+          regionId: null,
+          fallback: 'gold',
+          gold: DEFAULT_CARD_RULES.fallbackGold,
+        },
+        preview: {
+          cardCountAfter: getCardPlayer(state, seat).hand.length,
+          handLimit: getCurrentCards(state).handLimit,
+        },
+      },
+    ]
+  }
+
+  return controlledRegions.map((regionId) => {
+    const cardType = getCardType(regionId)
+
+    return {
+      id: cardDraftActionId(state, regionId),
+      type: 'DRAFT_CARD',
+      seat,
+      label: `Draft hidden ${cardType.name} card`,
+      payload: {
+        regionId,
+      },
+      preview: {
+        cardName: cardType.name,
+        cardCountAfter,
+        handLimit: getCurrentCards(state).handLimit,
+      },
+    }
+  })
+}
+
+function createDiscardCardActions(state, seat) {
+  if (!cardsEnabled(state) || seat !== state.activeSeat) return []
+
+  const playerCards = getCardPlayer(state, seat)
+
+  if (playerCards.hand.length <= getCurrentCards(state).handLimit) return []
+
+  return playerCards.hand.map((card) => ({
+    id: discardCardActionId(state, card.id),
+    type: 'DISCARD_CARD',
+    seat,
+    label: `Discard ${card.name}`,
+    payload: {
+      cardId: card.id,
+    },
+    preview: {
+      cardCountAfter: playerCards.hand.length - 1,
+      handLimit: getCurrentCards(state).handLimit,
+    },
+  }))
+}
+
+function createCashSetActions(state, seat) {
+  if (!state.featureFlags.setCashIns || seat !== state.activeSeat) return []
+
+  const playerCards = getCardPlayer(state, seat)
+
+  if (playerCards.majorSetCashedCycle === state.cycle) return []
+
+  return detectCompletedCardSets(playerCards.hand, state.cycle).map((detectedSet) => ({
+    id: cashSetActionId(state, detectedSet),
+    type: 'CASH_SET',
+    seat,
+    label: `Cash ${detectedSet.label}`,
+    payload: {
+      setId: detectedSet.id,
+      setType: detectedSet.setType,
+      regionId: detectedSet.regionId,
+      cardIds: detectedSet.cardIds,
+      strength: DEFAULT_CARD_RULES.era,
+    },
+    preview: {
+      setType: detectedSet.setType,
+      regionName: detectedSet.regionName,
+      cardsSpent: detectedSet.cardIds.length,
+      counterDraftRequired: state.featureFlags.counterDraft,
+    },
+  }))
+}
+
+function createCounterDraftActions(state, seat, domains) {
+  const pending = getCurrentCards(state).pendingCounterDraft
+  if (!state.featureFlags.counterDraft || !pending || pending.responder !== seat) {
+    return []
+  }
+
+  const eraFallback =
+    DEFAULT_CARD_RULES.eraFallbacks[pending.strength] ??
+    DEFAULT_CARD_RULES.eraFallbacks[DEFAULT_CARD_RULES.era]
+  const actions = [
+    {
+      id: counterDraftActionId(state, 'COUNTER_IMMEDIATE'),
+      type: 'COUNTER_IMMEDIATE',
+      seat,
+      label: 'Immediate Counter',
+      payload: {
+        pendingId: pending.id,
+        category: 'Immediate Counter',
+      },
+      preview: {
+        mitigation: pending.strength,
+      },
+    },
+    {
+      id: counterDraftActionId(state, 'COUNTER_SEEK_MISSING'),
+      type: 'COUNTER_SEEK_MISSING',
+      seat,
+      label: 'Seek Missing Card',
+      payload: {
+        pendingId: pending.id,
+        category: 'Seek Missing Card',
+      },
+      preview: {
+        cardCountAfter: getCardPlayer(state, seat).hand.length + 1,
+        cashableAfterCycle: state.cycle + 1,
+      },
+    },
+    {
+      id: counterDraftActionId(state, 'COUNTER_SAFE_FALLBACK', 'gold'),
+      type: 'COUNTER_SAFE_FALLBACK',
+      seat,
+      label: `Safe Fallback: gain ${eraFallback.gold} gold`,
+      payload: {
+        pendingId: pending.id,
+        category: 'Safe Fallback',
+        fallback: 'gold',
+        amount: eraFallback.gold,
+      },
+      preview: {
+        goldAfter: (state.players[seat].gold ?? 0) + eraFallback.gold,
+      },
+    },
+  ]
+
+  if (state.featureFlags.reinforcements) {
+    actions.push({
+      id: counterDraftActionId(state, 'COUNTER_SAFE_FALLBACK', 'reinforcements'),
+      type: 'COUNTER_SAFE_FALLBACK',
+      seat,
+      label: `Safe Fallback: gain ${eraFallback.reinforcements} reinforcements`,
+      payload: {
+        pendingId: pending.id,
+        category: 'Safe Fallback',
+        fallback: 'reinforcements',
+        amount: eraFallback.reinforcements,
+      },
+      preview: {
+        tokensAfter:
+          (state.players[seat].reinforcements?.tokens ?? 0) +
+          eraFallback.reinforcements,
+      },
+    })
+  }
+
+  const repairTargets = domains
+    .filter((domain) => domain.owner === seat)
+    .filter((domain) => domain.canRepair)
+
+  for (const domain of repairTargets) {
+    actions.push({
+      id: counterDraftActionId(
+        state,
+        'COUNTER_SAFE_FALLBACK',
+        `repair-${domain.anchorId}`,
+      ),
+      type: 'COUNTER_SAFE_FALLBACK',
+      seat,
+      label: `Safe Fallback: repair ${domain.label}`,
+      payload: {
+        pendingId: pending.id,
+        category: 'Safe Fallback',
+        fallback: 'repair',
+        anchorId: domain.anchorId,
+        amount: eraFallback.repair,
+      },
+      preview: {
+        stabilityAfter: Math.min(
+          domain.baseStability,
+          domain.stability + eraFallback.repair,
+        ),
+      },
+    })
+  }
+
+  return actions
+}
+
 export function getLegalActions(state, seat) {
   if (seat !== state.activeSeat) {
     return []
   }
 
   const domains = deriveDomains(state)
+
+  if (cardsEnabled(state)) {
+    const pending = getCurrentCards(state).pendingCounterDraft
+
+    if (pending) {
+      return createCounterDraftActions(state, seat, domains)
+    }
+
+    const discardActions = createDiscardCardActions(state, seat)
+
+    if (discardActions.length > 0) {
+      return discardActions
+    }
+  }
+
   const pressureProjection = pressureEnabled(state)
     ? derivePressureProjection(state, domains)
     : null
@@ -1605,6 +2118,10 @@ export function getLegalActions(state, seat) {
     actions.push(
       ...createPurgeCorruptionActions(state, seat, domains, pressureProjection),
     )
+  }
+  if (cardsEnabled(state)) {
+    actions.push(...createDraftCardActions(state, seat, domains))
+    actions.push(...createCashSetActions(state, seat))
   }
 
   actions.push({
@@ -3238,6 +3755,426 @@ function applyPurgeCorruptionAction(state, seat, legalAction) {
   }
 }
 
+function updateCardPlayer(cards, seat, updater) {
+  return {
+    ...cards,
+    players: {
+      ...cards.players,
+      [seat]: updater(cards.players[seat]),
+    },
+  }
+}
+
+function withDiscardPhaseIfNeeded(state, cards, seat, fallbackReturnSeat = null) {
+  const needsDiscard = cards.players[seat].hand.length > cards.handLimit
+
+  return {
+    ...state,
+    phase: needsDiscard ? 'DISCARD_PHASE' : 'BOARD_PHASE',
+    activeSeat: needsDiscard ? seat : fallbackReturnSeat ?? state.activeSeat,
+    cards: {
+      ...cards,
+      discardReturnSeat: needsDiscard ? fallbackReturnSeat ?? state.activeSeat : null,
+    },
+  }
+}
+
+function applyDraftCardAction(state, seat, legalAction) {
+  const cards = getCurrentCards(state)
+  const playerCards = getCardPlayer(state, seat)
+
+  if (playerCards.lastDraftCycle === state.cycle) {
+    return {
+      accepted: false,
+      reason: 'ILLEGAL_ACTION',
+      message: 'This seat already drafted during the current cycle.',
+      state,
+    }
+  }
+
+  if (legalAction.payload.fallback === 'gold') {
+    const gold = legalAction.payload.gold ?? DEFAULT_CARD_RULES.fallbackGold
+    const event = createEvent(
+      state,
+      'DRAFT_CARD_FALLBACK',
+      seat,
+      `${SEAT_LABELS[seat]} had no controlled regions and took provisional gold.`,
+      {
+        cardCountAfter: playerCards.hand.length,
+      },
+    )
+
+    return {
+      accepted: true,
+      reason: null,
+      message: 'Draft fallback accepted.',
+      action: legalAction,
+      state: {
+        ...state,
+        players: {
+          ...state.players,
+          [seat]: {
+            ...state.players[seat],
+            gold: (state.players[seat].gold ?? 0) + gold,
+          },
+        },
+        cards: updateCardPlayer(cards, seat, (current) => ({
+          ...current,
+          lastDraftCycle: state.cycle,
+        })),
+        requestCounter: state.requestCounter + 1,
+        eventLog: [event, ...state.eventLog].slice(0, 36),
+      },
+    }
+  }
+
+  const card = createCardFromRegion(
+    state,
+    seat,
+    legalAction.payload.regionId,
+    'draft',
+  )
+  const nextCards = updateCardPlayer(cards, seat, (current) => ({
+    ...current,
+    hand: [...current.hand, card],
+    lastDraftCycle: state.cycle,
+  }))
+  const event = createEvent(
+    state,
+    'DRAFT_CARD',
+    seat,
+    `${SEAT_LABELS[seat]} drafted 1 hidden region card.`,
+    {
+      cardCountAfter: nextCards.players[seat].hand.length,
+    },
+  )
+  const nextState = withDiscardPhaseIfNeeded(
+    {
+      ...state,
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+    nextCards,
+    seat,
+    state.activeSeat,
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Card drafted.',
+    action: legalAction,
+    state: nextState,
+  }
+}
+
+function applyDiscardCardAction(state, seat, legalAction) {
+  const cards = getCurrentCards(state)
+  const playerCards = getCardPlayer(state, seat)
+  const discarded = playerCards.hand.find(
+    (card) => card.id === legalAction.payload.cardId,
+  )
+
+  if (!discarded || playerCards.hand.length <= cards.handLimit) {
+    return {
+      accepted: false,
+      reason: 'ILLEGAL_ACTION',
+      message: 'That card cannot be discarded now.',
+      state,
+    }
+  }
+
+  const nextCards = updateCardPlayer(cards, seat, (current) => ({
+    ...current,
+    hand: current.hand.filter((card) => card.id !== discarded.id),
+  }))
+  const stillOverLimit = nextCards.players[seat].hand.length > nextCards.handLimit
+  const returnSeat = cards.discardReturnSeat ?? seat
+  const event = createEvent(
+    state,
+    'DISCARD_CARD',
+    seat,
+    `${SEAT_LABELS[seat]} discarded 1 hidden card to meet the hand limit.`,
+    {
+      cardCountAfter: nextCards.players[seat].hand.length,
+      handLimit: nextCards.handLimit,
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Card discarded.',
+    action: legalAction,
+    state: {
+      ...state,
+      activeSeat: stillOverLimit ? seat : returnSeat,
+      phase: stillOverLimit ? 'DISCARD_PHASE' : 'BOARD_PHASE',
+      cards: {
+        ...nextCards,
+        discardReturnSeat: stillOverLimit ? returnSeat : null,
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
+function applyCashSetAction(state, seat, legalAction) {
+  const cards = getCurrentCards(state)
+  const playerCards = getCardPlayer(state, seat)
+  const detectedSet = detectCompletedCardSets(playerCards.hand, state.cycle).find(
+    (candidate) => candidate.id === legalAction.payload.setId,
+  )
+
+  if (!detectedSet || playerCards.majorSetCashedCycle === state.cycle) {
+    return {
+      accepted: false,
+      reason: 'ILLEGAL_ACTION',
+      message: 'That set cannot be cashed now.',
+      state,
+    }
+  }
+
+  const responder = getOpponent(seat)
+  const publicSetId = `revealed-set-${state.cycle}-${state.turn}-${state.requestCounter}-${seat}`
+  const revealedSet = {
+    id: publicSetId,
+    owner: seat,
+    setType: detectedSet.setType,
+    regionId: detectedSet.regionId,
+    cycle: state.cycle,
+    strength: legalAction.payload.strength ?? DEFAULT_CARD_RULES.era,
+    counterDraftChoice: null,
+  }
+  const pendingCounterDraft = state.featureFlags.counterDraft
+    ? {
+        id: `counter-${state.cycle}-${state.turn}-${state.requestCounter}-${seat}`,
+        setId: revealedSet.id,
+        setOwner: seat,
+        responder,
+        setType: revealedSet.setType,
+        regionId: revealedSet.regionId,
+        strength: revealedSet.strength,
+        createdCycle: state.cycle,
+      }
+    : null
+  const nextCards = updateCardPlayer(cards, seat, (current) => ({
+    ...current,
+    hand: current.hand.filter(
+      (card) => !detectedSet.cardIds.includes(card.id),
+    ),
+    revealedSets: [...current.revealedSets, revealedSet],
+    majorSetCashedCycle: state.cycle,
+  }))
+  const event = createEvent(
+    state,
+    'CASH_SET',
+    seat,
+    pendingCounterDraft
+      ? `${SEAT_LABELS[seat]} cashed a ${detectedSet.label}; ${SEAT_LABELS[responder]} must choose a counter-draft.`
+      : `${SEAT_LABELS[seat]} cashed a ${detectedSet.label}.`,
+    {
+      setId: revealedSet.id,
+      setType: revealedSet.setType,
+      regionId: revealedSet.regionId,
+      strength: revealedSet.strength,
+      counterDraftRequired: Boolean(pendingCounterDraft),
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: pendingCounterDraft ? 'Set cashed; counter-draft pending.' : 'Set cashed.',
+    action: legalAction,
+    state: {
+      ...state,
+      activeSeat: pendingCounterDraft ? responder : state.activeSeat,
+      phase: pendingCounterDraft ? 'COUNTER_DRAFT' : state.phase,
+      cards: {
+        ...nextCards,
+        pendingCounterDraft,
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
+function incrementCardMetric(metrics, bucket, seat, key) {
+  return {
+    ...metrics,
+    [bucket]: {
+      ...(metrics[bucket] ?? {}),
+      [seat]: {
+        ...(metrics[bucket]?.[seat] ?? {}),
+        [key]: (metrics[bucket]?.[seat]?.[key] ?? 0) + 1,
+      },
+    },
+  }
+}
+
+function updateRevealedSetCounterChoice(cards, pending, choice) {
+  return updateCardPlayer(cards, pending.setOwner, (current) => ({
+    ...current,
+    revealedSets: current.revealedSets.map((set) =>
+      set.id === pending.setId
+        ? {
+            ...set,
+            counterDraftChoice: choice,
+          }
+        : set,
+    ),
+  }))
+}
+
+function applySafeFallbackReward(state, seat, legalAction) {
+  const fallback = legalAction.payload.fallback
+  const amount = legalAction.payload.amount ?? 0
+  const nextPlayers = { ...state.players }
+  const nextDomains = { ...(state.domains ?? {}) }
+
+  if (fallback === 'gold') {
+    nextPlayers[seat] = {
+      ...nextPlayers[seat],
+      gold: (nextPlayers[seat].gold ?? 0) + amount,
+    }
+  }
+
+  if (fallback === 'reinforcements' && nextPlayers[seat].reinforcements) {
+    const resource = nextPlayers[seat].reinforcements
+    nextPlayers[seat] = {
+      ...nextPlayers[seat],
+      reinforcements: {
+        ...resource,
+        tokens: Math.min(resource.reserveCap, resource.tokens + amount),
+      },
+    }
+  }
+
+  if (fallback === 'repair') {
+    const domain = deriveDomains(state).find(
+      (candidate) => candidate.anchorId === legalAction.payload.anchorId,
+    )
+
+    if (domain && domain.owner === seat && domain.baseStability !== undefined) {
+      nextDomains[domain.anchorId] = {
+        ...(nextDomains[domain.anchorId] ?? {}),
+        stability: Math.min(domain.baseStability, domain.stability + amount),
+        lastOwner: seat,
+      }
+    }
+  }
+
+  return {
+    players: nextPlayers,
+    domains: nextDomains,
+  }
+}
+
+function applyCounterDraftAction(state, seat, legalAction) {
+  const cards = getCurrentCards(state)
+  const pending = cards.pendingCounterDraft
+
+  if (
+    !pending ||
+    pending.responder !== seat ||
+    legalAction.payload.pendingId !== pending.id
+  ) {
+    return {
+      accepted: false,
+      reason: 'ILLEGAL_ACTION',
+      message: 'No counter-draft is pending for this seat.',
+      state,
+    }
+  }
+
+  const choice = legalAction.type
+  let nextCards = updateRevealedSetCounterChoice(cards, pending, choice)
+  let nextPlayers = state.players
+  let nextDomains = state.domains
+
+  if (choice === 'COUNTER_SEEK_MISSING') {
+    const rewardRegionId = chooseSeekMissingRegion(state, seat)
+    const rewardCard = createCardFromRegion(
+      state,
+      seat,
+      rewardRegionId,
+      'counter-seek',
+      getCardPlayer(state, seat).hand.length,
+      {
+        cashableAfterCycle: state.cycle + 1,
+      },
+    )
+
+    nextCards = updateCardPlayer(nextCards, seat, (current) => ({
+      ...current,
+      hand: [...current.hand, rewardCard],
+    }))
+    nextCards = {
+      ...nextCards,
+      metrics: incrementCardMetric(
+        nextCards.metrics,
+        'seekMissingChoices',
+        seat,
+        'total',
+      ),
+    }
+  }
+
+  if (choice === 'COUNTER_SAFE_FALLBACK') {
+    const reward = applySafeFallbackReward(state, seat, legalAction)
+    nextPlayers = reward.players
+    nextDomains = reward.domains
+  }
+
+  nextCards = {
+    ...nextCards,
+    pendingCounterDraft: null,
+    metrics: incrementCardMetric(
+      nextCards.metrics,
+      'counterDraftChoices',
+      seat,
+      choice,
+    ),
+  }
+
+  const event = createEvent(
+    state,
+    choice,
+    seat,
+    `${SEAT_LABELS[seat]} chose ${legalAction.payload.category} for the counter-draft.`,
+    {
+      setId: pending.setId,
+      choice,
+    },
+  )
+  const baseState = {
+    ...state,
+    players: nextPlayers,
+    domains: nextDomains,
+    activeSeat: pending.setOwner,
+    phase: 'BOARD_PHASE',
+    requestCounter: state.requestCounter + 1,
+    eventLog: [event, ...state.eventLog].slice(0, 36),
+  }
+  const nextState = withDiscardPhaseIfNeeded(
+    baseState,
+    nextCards,
+    seat,
+    pending.setOwner,
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Counter-draft resolved.',
+    action: legalAction,
+    state: nextState,
+  }
+}
+
 export function applyAction(state, actionId, seat) {
   if (seat !== state.activeSeat) {
     return {
@@ -3328,6 +4265,26 @@ export function applyAction(state, actionId, seat) {
 
   if (legalAction.type === 'PURGE_CORRUPTION') {
     return applyPurgeCorruptionAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'DRAFT_CARD') {
+    return applyDraftCardAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'DISCARD_CARD') {
+    return applyDiscardCardAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'CASH_SET') {
+    return applyCashSetAction(state, seat, legalAction)
+  }
+
+  if (
+    legalAction.type === 'COUNTER_IMMEDIATE' ||
+    legalAction.type === 'COUNTER_SEEK_MISSING' ||
+    legalAction.type === 'COUNTER_SAFE_FALLBACK'
+  ) {
+    return applyCounterDraftAction(state, seat, legalAction)
   }
 
   const placement = simulatePlacement(state, seat, legalAction.payload.cellId)
@@ -3548,6 +4505,23 @@ function projectPlayers(players) {
   )
 }
 
+function projectPublicPlayers(state) {
+  const players = projectPlayers(state.players)
+
+  if (!cardsEnabled(state)) return players
+
+  for (const seat of SEATS) {
+    const cardPlayer = getCardPlayer(state, seat)
+    players[seat] = {
+      ...players[seat],
+      cardCount: cardPlayer.hand.length,
+      completedSetCountVisibleIfRevealed: cardPlayer.revealedSets.length,
+    }
+  }
+
+  return players
+}
+
 function projectPressureState(state) {
   if (!pressureEnabled(state)) return null
 
@@ -3560,6 +4534,78 @@ function projectPressureState(state) {
     sources: pressureProjection.sources,
     metrics: pressureProjection.metrics,
     lastResolvedCycle: pressureProjection.lastResolvedCycle,
+  }
+}
+
+function projectRevealedSet(set) {
+  return {
+    id: set.id,
+    owner: set.owner,
+    setType: set.setType,
+    regionId: set.regionId,
+    cycle: set.cycle,
+    strength: set.strength,
+    counterDraftChoice: set.counterDraftChoice,
+  }
+}
+
+function projectPublicCardState(state) {
+  if (!cardsEnabled(state)) return null
+
+  const cards = getCurrentCards(state)
+  const pending = cards.pendingCounterDraft
+
+  return {
+    handLimit: cards.handLimit,
+    players: Object.fromEntries(
+      SEATS.map((seat) => {
+        const playerCards = getCardPlayer(state, seat)
+
+        return [
+          seat,
+          {
+            cardCount: playerCards.hand.length,
+            completedSetCountVisibleIfRevealed: playerCards.revealedSets.length,
+            revealedSets: playerCards.revealedSets.map(projectRevealedSet),
+          },
+        ]
+      }),
+    ),
+    pendingCounterDraft: pending
+      ? {
+          id: pending.id,
+          setOwner: pending.setOwner,
+          responder: pending.responder,
+          setType: pending.setType,
+          regionId: pending.regionId,
+          strength: pending.strength,
+          createdCycle: pending.createdCycle,
+        }
+      : null,
+    metrics: cards.metrics,
+  }
+}
+
+function projectPrivateCardState(state, seat) {
+  if (!cardsEnabled(state)) return null
+
+  const cards = getCurrentCards(state)
+  const playerCards = getCardPlayer(state, seat)
+
+  return {
+    handLimit: cards.handLimit,
+    hand: playerCards.hand.map((card) => ({ ...card })),
+    completedSets: detectCompletedCardSets(playerCards.hand, state.cycle).map(
+      (set) => ({
+        ...set,
+        cards: set.cards.map((card) => ({ ...card })),
+        cardIds: [...set.cardIds],
+      }),
+    ),
+    revealedSets: playerCards.revealedSets.map(projectRevealedSet),
+    lastDraftCycle: playerCards.lastDraftCycle,
+    majorSetCashedCycle: playerCards.majorSetCashedCycle,
+    mustDiscard: playerCards.hand.length > cards.handLimit,
   }
 }
 
@@ -3590,7 +4636,7 @@ export function getPublicState(state) {
     round: state.round,
     turn: state.turn,
     activeSeat: state.activeSeat,
-    players: projectPlayers(state.players),
+    players: projectPublicPlayers(state),
     lastMove: projectLastMove(state.lastMove),
     board: {
       radius: state.board.radius,
@@ -3607,6 +4653,7 @@ export function getPublicState(state) {
     },
     domains: deriveDomains(state),
     pressure: projectPressureState(state),
+    cards: projectPublicCardState(state),
     eventLog: state.eventLog.map(projectEvent),
   }
 }
@@ -3615,7 +4662,10 @@ export function getSeatState(state, seat) {
   return {
     seat,
     isActive: seat === state.activeSeat,
-    hiddenInformation: 'MVP has no hidden hand. Future card state is seat-scoped.',
+    hiddenInformation: cardsEnabled(state)
+      ? 'Region card hands are seat-scoped. Opponent hands are redacted to public counts.'
+      : 'MVP has no hidden hand. Future card state is seat-scoped.',
+    cards: projectPrivateCardState(state, seat),
   }
 }
 
@@ -3624,16 +4674,21 @@ export function createRequestId(state, seat = state.activeSeat) {
 }
 
 function createExplanationHints(state) {
-  if (!pressureEnabled(state)) {
-    return {}
+  const hints = {}
+
+  if (pressureEnabled(state)) {
+    hints.pressure =
+      'Pressure assignments are public after reveal. Net pressure can siphon Domain income and damage stability at cycle resolution.'
+    hints.corruption =
+      'Corruption is pressure from Bribe Networks and can be reduced by counter-bribes or purge actions before cycle resolution.'
   }
 
-  return {
-    pressure:
-      'Pressure assignments are public after reveal. Net pressure can siphon Domain income and damage stability at cycle resolution.',
-    corruption:
-      'Corruption is pressure from Bribe Networks and can be reduced by counter-bribes or purge actions before cycle resolution.',
+  if (cardsEnabled(state)) {
+    hints.cards =
+      'Exact card hands are private to the requesting seat. Public state exposes card counts, revealed sets, and counter-draft categories only.'
   }
+
+  return hints
 }
 
 export function createAgentRequest(state, seat = state.activeSeat) {
@@ -3723,12 +4778,23 @@ export function chooseBotAction(agentRequest) {
       'PURGE_CORRUPTION',
     ].includes(action.type),
   )
+  const cardActions = agentRequest.legalActions.filter((action) =>
+    [
+      'DRAFT_CARD',
+      'DISCARD_CARD',
+      'CASH_SET',
+      'COUNTER_IMMEDIATE',
+      'COUNTER_SEEK_MISSING',
+      'COUNTER_SAFE_FALLBACK',
+    ].includes(action.type),
+  )
 
   if (
     placements.length === 0 &&
     repairs.length === 0 &&
     economyActions.length === 0 &&
-    pressureActions.length === 0
+    pressureActions.length === 0 &&
+    cardActions.length === 0
   ) {
     return agentRequest.legalActions.find((action) => action.type === 'PASS')?.id
   }
@@ -3782,6 +4848,21 @@ export function chooseBotAction(agentRequest) {
           34 + (action.preview.friendlySupportAfter ?? 0) * 2,
         PURGE_CORRUPTION: 38,
         SPEND_COUNTER_BRIBE: 24,
+      }
+
+      return {
+        action,
+        score: scoreByType[action.type] ?? 0,
+      }
+    }),
+    ...cardActions.map((action) => {
+      const scoreByType = {
+        DISCARD_CARD: 90,
+        COUNTER_IMMEDIATE: 78,
+        COUNTER_SAFE_FALLBACK: 74,
+        COUNTER_SEEK_MISSING: 70,
+        CASH_SET: 66,
+        DRAFT_CARD: action.payload.fallback === 'gold' ? 18 : 42,
       }
 
       return {

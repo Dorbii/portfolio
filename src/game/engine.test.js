@@ -8,6 +8,7 @@ import {
   createMatch,
   DEFAULT_FEATURE_FLAGS,
   DEFAULT_RULES_VERSION,
+  detectCompletedCardSets,
   deriveDomains,
   getLegalActions,
   getNeighborIdsForCoord,
@@ -1640,4 +1641,250 @@ test('bot can choose pressure legal actions through the request action set', () 
 
   assert.ok(selected)
   assert.equal(selected.type, 'ASSIGN_INFLUENCE_PRESSURE')
+})
+
+test('card draft pools derive from controlled regions and redact opponent hands', () => {
+  let state = stateWithStones(
+    {
+      '-2,1': 'black',
+      '-2,0': 'black',
+    },
+    {
+      featureFlags: {
+        regionCards: true,
+      },
+    },
+  )
+  const draftActions = getLegalActions(state, 'black').filter(
+    (action) => action.type === 'DRAFT_CARD',
+  )
+
+  assert.deepEqual(
+    draftActions.map((action) => action.payload.regionId),
+    ['temple-coast'],
+  )
+
+  state = applyAction(state, draftActions[0].id, 'black').state
+
+  const blackRequest = createAgentRequest(state, 'black')
+  const whiteRequest = createAgentRequest(state, 'white')
+
+  assert.equal(blackRequest.privateState.cards.hand.length, 1)
+  assert.equal(blackRequest.privateState.cards.hand[0].name, 'Temple Coast')
+  assert.equal(blackRequest.publicState.players.black.cardCount, 1)
+  assert.equal(blackRequest.publicState.cards.players.black.cardCount, 1)
+  assert.equal(blackRequest.publicState.cards.players.black.hand, undefined)
+  assert.equal(whiteRequest.privateState.cards.hand.length, 0)
+  assert.equal(
+    JSON.stringify(whiteRequest.publicState.cards).includes(
+      blackRequest.privateState.cards.hand[0].id,
+    ),
+    false,
+  )
+  assert.match(blackRequest.explanationHints.cards, /private/)
+})
+
+test('card fallback grants gold when a player controls no draft regions', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+    },
+  })
+  state = {
+    ...state,
+    board: {
+      ...state.board,
+      cells: state.board.cells.map((cell) => ({
+        ...cell,
+        occupant: null,
+      })),
+    },
+  }
+
+  const fallback = getLegalActions(state, 'black').find(
+    (action) => action.type === 'DRAFT_CARD' && action.payload.fallback === 'gold',
+  )
+
+  assert.ok(fallback)
+
+  const result = applyAction(state, fallback.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.players.black.gold, 1)
+  assert.equal(result.state.cards.players.black.hand.length, 0)
+  assert.equal(result.state.cards.players.black.lastDraftCycle, 1)
+})
+
+test('completed sets are detected and cash-ins create counter-draft choices', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+      setCashIns: true,
+      counterDraft: true,
+    },
+    initialCards: {
+      black: [
+        { id: 'black-temple-1', regionId: 'temple-coast' },
+        { id: 'black-temple-2', regionId: 'temple-coast' },
+        { id: 'black-temple-3', regionId: 'temple-coast' },
+      ],
+    },
+  })
+  const detected = detectCompletedCardSets(state.cards.players.black.hand, state.cycle)
+
+  assert.equal(detected.length, 1)
+  assert.equal(detected[0].setType, 'MATCHING_REGION')
+
+  const request = createAgentRequest(state, 'black')
+  const cashSet = request.legalActions.find((action) => action.type === 'CASH_SET')
+
+  assert.ok(cashSet)
+
+  state = applyAction(state, cashSet.id, 'black').state
+
+  assert.equal(state.activeSeat, 'white')
+  assert.equal(state.phase, 'COUNTER_DRAFT')
+  assert.equal(state.cards.players.black.hand.length, 0)
+  assert.equal(state.cards.players.black.revealedSets.length, 1)
+  assert.equal(state.cards.pendingCounterDraft.responder, 'white')
+  assert.equal(
+    state.eventLog[0].detail.cardIds,
+    undefined,
+  )
+  assert.equal(state.eventLog[0].detail.setId.includes('black-temple'), false)
+
+  const publicState = getPublicState(state)
+
+  assert.equal(publicState.cards.players.black.cardCount, 0)
+  assert.equal(publicState.cards.players.black.revealedSets.length, 1)
+  assert.equal(publicState.cards.pendingCounterDraft.responder, 'white')
+  assert.equal(JSON.stringify(publicState.cards).includes('black-temple'), false)
+
+  const counterActions = getLegalActions(state, 'white').filter((action) =>
+    action.type.startsWith('COUNTER_'),
+  )
+
+  assert.deepEqual(
+    counterActions.map((action) => action.type).sort(),
+    ['COUNTER_IMMEDIATE', 'COUNTER_SAFE_FALLBACK', 'COUNTER_SEEK_MISSING'],
+  )
+})
+
+test('seek-missing counter-draft rewards stay hidden and cannot cash this cycle', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+      setCashIns: true,
+      counterDraft: true,
+    },
+    initialCards: {
+      black: [
+        { id: 'black-temple-1', regionId: 'temple-coast' },
+        { id: 'black-temple-2', regionId: 'temple-coast' },
+        { id: 'black-temple-3', regionId: 'temple-coast' },
+      ],
+      white: [
+        { id: 'white-ash-1', regionId: 'ash-marsh' },
+        { id: 'white-ash-2', regionId: 'ash-marsh' },
+      ],
+    },
+  })
+  const cashSet = getLegalActions(state, 'black').find(
+    (action) => action.type === 'CASH_SET',
+  )
+  state = applyAction(state, cashSet.id, 'black').state
+
+  const seekMissing = getLegalActions(state, 'white').find(
+    (action) => action.type === 'COUNTER_SEEK_MISSING',
+  )
+  state = applyAction(state, seekMissing.id, 'white').state
+
+  const whitePrivate = createAgentRequest(state, 'white').privateState.cards
+  const blackPublic = createAgentRequest(state, 'black').publicState.cards
+
+  assert.equal(state.activeSeat, 'black')
+  assert.equal(whitePrivate.hand.length, 3)
+  assert.equal(whitePrivate.hand[2].regionId, 'ash-marsh')
+  assert.equal(whitePrivate.hand[2].cashableAfterCycle, 2)
+  assert.equal(whitePrivate.completedSets.length, 0)
+  assert.equal(blackPublic.players.white.cardCount, 3)
+  assert.equal(blackPublic.players.white.hand, undefined)
+  assert.equal(
+    JSON.stringify(blackPublic).includes(whitePrivate.hand[2].id),
+    false,
+  )
+  assert.equal(
+    state.cards.metrics.counterDraftChoices.white.COUNTER_SEEK_MISSING,
+    1,
+  )
+  assert.equal(state.cards.metrics.seekMissingChoices.white.total, 1)
+  assert.equal(state.eventLog[0].detail.choice, 'COUNTER_SEEK_MISSING')
+  assert.equal(state.eventLog[0].detail.regionId, undefined)
+})
+
+test('discard flow blocks other actions until hand limit is restored', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+      setCashIns: true,
+    },
+    initialCardState: {
+      handLimit: 5,
+    },
+    initialCards: {
+      black: [
+        { id: 'card-1', regionId: 'temple-coast' },
+        { id: 'card-2', regionId: 'temple-coast' },
+        { id: 'card-3', regionId: 'temple-coast' },
+        { id: 'card-4', regionId: 'ash-marsh' },
+        { id: 'card-5', regionId: 'northwood' },
+        { id: 'card-6', regionId: 'central-plain' },
+      ],
+    },
+  })
+  const actions = getLegalActions(state, 'black')
+
+  assert.ok(actions.length > 0)
+  assert.equal(actions.every((action) => action.type === 'DISCARD_CARD'), true)
+
+  state = applyAction(state, actions[0].id, 'black').state
+
+  assert.equal(state.phase, 'BOARD_PHASE')
+  assert.equal(state.activeSeat, 'black')
+  assert.equal(state.cards.players.black.hand.length, 5)
+  assert.equal(
+    getLegalActions(state, 'black').some((action) => action.type === 'PASS'),
+    true,
+  )
+})
+
+test('bot can choose card and counter-draft legal actions through the request action set', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+      setCashIns: true,
+      counterDraft: true,
+    },
+    initialCards: {
+      black: [
+        { id: 'black-temple-1', regionId: 'temple-coast' },
+        { id: 'black-temple-2', regionId: 'temple-coast' },
+        { id: 'black-temple-3', regionId: 'temple-coast' },
+      ],
+    },
+  })
+  let request = createAgentRequest(state, 'black')
+  let selected = request.legalActions.find(
+    (action) => action.id === chooseBotAction(request),
+  )
+
+  assert.equal(selected.type, 'CASH_SET')
+
+  state = applyAction(state, selected.id, 'black').state
+  request = createAgentRequest(state, 'white')
+  selected = request.legalActions.find(
+    (action) => action.id === chooseBotAction(request),
+  )
+
+  assert.ok(selected.type.startsWith('COUNTER_'))
 })
