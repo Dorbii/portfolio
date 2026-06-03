@@ -236,6 +236,33 @@ h3 {
   align-items: start;
 }
 
+.victory-banner {
+  grid-column: 1 / -1;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 14px;
+  align-items: start;
+  border: 1px solid rgba(184, 75, 62, 0.42);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(184, 75, 62, 0.14);
+}
+
+.victory-banner.sudden {
+  border-color: rgba(106, 86, 141, 0.46);
+  background: rgba(106, 86, 141, 0.14);
+}
+
+.victory-banner.won {
+  border-color: rgba(59, 118, 91, 0.46);
+  background: rgba(59, 118, 91, 0.16);
+}
+
+.victory-banner strong {
+  display: block;
+}
+
 .game-layout > *,
 .left-rail > *,
 .right-rail > * {
@@ -442,11 +469,61 @@ dd {
   border-top: 1px solid rgba(143, 125, 95, 0.28);
 }
 
+.victory-summary {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 125, 95, 0.28);
+}
+
+.selected-victory-summary {
+  border-color: rgba(245, 158, 11, 0.38);
+}
+
 .card-summary p {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 750;
+}
+
+.victory-summary p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.warning-list {
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.warning-list li {
+  padding: 9px 10px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(184, 75, 62, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.warning-list strong,
+.warning-list span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.warning-list span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.banner-warning-list {
+  margin-top: 0;
 }
 
 .card-chip-list {
@@ -940,6 +1017,11 @@ dd {
   background: transparent;
 }
 
+.control-button.danger {
+  border-color: rgba(184, 75, 62, 0.95);
+  background: #8e332c;
+}
+
 .panel-header {
   margin-bottom: 12px;
   display: flex;
@@ -1377,6 +1459,10 @@ dd {
 
   .board-meta,
   .invite-row {
+    grid-template-columns: 1fr;
+  }
+
+  .victory-banner {
     grid-template-columns: 1fr;
   }
 

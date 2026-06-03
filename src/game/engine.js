@@ -241,7 +241,6 @@ const DEFAULT_CARD_RULES = Object.freeze({
   handLimit: 5,
   fallbackGold: 1,
   majorSetPerCycle: 1,
-  era: 1,
   eraFallbacks: {
     1: {
       gold: 2,
@@ -264,6 +263,93 @@ const DEFAULT_CARD_RULES = Object.freeze({
       repair: 3,
     },
   },
+})
+
+const ERA_RULES = Object.freeze([
+  {
+    id: 1,
+    label: 'Era I',
+    cycleStart: 1,
+    cycleEnd: 2,
+    stipend: 2,
+  },
+  {
+    id: 2,
+    label: 'Era II',
+    cycleStart: 3,
+    cycleEnd: 5,
+    stipend: 3,
+  },
+  {
+    id: 3,
+    label: 'Era III',
+    cycleStart: 6,
+    cycleEnd: 8,
+    stipend: 4,
+  },
+  {
+    id: 4,
+    label: 'Era IV',
+    cycleStart: 9,
+    cycleEnd: Number.MAX_SAFE_INTEGER,
+    stipend: 5,
+  },
+])
+
+const DOMAIN_REGION_VALUE_BY_KIND = Object.freeze({
+  Capital: 4,
+  Mine: 3,
+  Village: 2,
+  Temple: 2,
+  Fort: 2,
+  Ruins: 1,
+})
+
+const MANDATE_BY_REGION = Object.freeze({
+  'iron-basin': {
+    type: 'ECONOMIC_MANDATE',
+    label: 'Economic Mandate',
+    conditionText: 'Control 3 stable Mine or Village Domains.',
+    howToStop:
+      'Contest or deplete enough Mine/Village Domains so fewer than 3 remain stable.',
+  },
+  'temple-coast': {
+    type: 'CULTURAL_MANDATE',
+    label: 'Cultural Mandate',
+    conditionText: 'Have net influence pressure on 3 enemy Domains.',
+    howToStop:
+      'Break influence sources, add support, or reduce pressure below 3 enemy Domains.',
+  },
+  'central-plain': {
+    type: 'MILITARY_MANDATE',
+    label: 'Military Mandate',
+    conditionText:
+      'Contest or dispute the enemy Capital or control Central Plain plus one adjacent region.',
+    howToStop:
+      'Stabilize the Capital and break Central Plain or adjacent-region control.',
+  },
+  northwood: {
+    type: 'SOVEREIGN_MANDATE',
+    label: 'Sovereign Mandate',
+    conditionText: 'Control 4 stable Domains with total stability above 20.',
+    howToStop:
+      'Contest or damage enough stable Domains to drop below 4 Domains or 21 stability.',
+  },
+  'ash-marsh': {
+    type: 'SHADOW_MANDATE',
+    label: 'Shadow Mandate',
+    conditionText: 'Have 3 enemy decrees inactive, ruined, or disabled.',
+    howToStop:
+      'Convert, repair, pay upkeep, or contest corruption engines until fewer than 3 enemy decrees are compromised.',
+  },
+})
+
+const REGION_ADJACENCY = Object.freeze({
+  'central-plain': ['iron-basin', 'temple-coast', 'northwood', 'ash-marsh'],
+  'iron-basin': ['central-plain', 'temple-coast'],
+  'temple-coast': ['central-plain', 'iron-basin', 'ash-marsh'],
+  northwood: ['central-plain', 'ash-marsh'],
+  'ash-marsh': ['central-plain', 'temple-coast', 'northwood'],
 })
 
 function getDomainDecreeSlots(size, anchorKind) {
@@ -709,6 +795,76 @@ function createCardState(config = {}) {
   }
 }
 
+export function getEraForCycle(cycle) {
+  const normalizedCycle = normalizeWholeNumber(cycle, 1, { min: 1 })
+  return (
+    ERA_RULES.find(
+      (era) =>
+        normalizedCycle >= era.cycleStart &&
+        normalizedCycle <= era.cycleEnd,
+    ) ?? ERA_RULES[ERA_RULES.length - 1]
+  )
+}
+
+function victoryEnabledFromFlags(featureFlags) {
+  return featureFlags.victoryWarnings || featureFlags.mandates
+}
+
+function victoryEnabled(state) {
+  return victoryEnabledFromFlags(state.featureFlags)
+}
+
+function normalizeWarning(warning = {}) {
+  return {
+    id: warning.id,
+    seat: warning.seat,
+    type: warning.type,
+    label: warning.label ?? warning.type,
+    triggeredCycle: normalizeWholeNumber(warning.triggeredCycle, 1, { min: 1 }),
+    conditionText: warning.conditionText ?? '',
+    howToStop: warning.howToStop ?? '',
+    conditionSnapshot: warning.conditionSnapshot ?? {},
+  }
+}
+
+function normalizeMandate(mandate = null) {
+  if (!mandate) return null
+
+  const source = MANDATE_BY_REGION[mandate.sourceRegionId] ?? mandate
+
+  return {
+    type: mandate.type ?? source.type,
+    label: mandate.label ?? source.label ?? mandate.type,
+    sourceRegionId: mandate.sourceRegionId ?? null,
+    unlockedCycle: normalizeWholeNumber(mandate.unlockedCycle, 1, { min: 1 }),
+    conditionText: mandate.conditionText ?? source.conditionText ?? '',
+    howToStop: mandate.howToStop ?? source.howToStop ?? '',
+  }
+}
+
+function createVictoryState(config = {}) {
+  const initial = config.initialVictory ?? {}
+
+  return {
+    era: getEraForCycle(1),
+    activeWarnings: (initial.activeWarnings ?? []).map(normalizeWarning),
+    suddenDeath: Boolean(initial.suddenDeath),
+    winner: initial.winner ?? null,
+    winReason: initial.winReason ?? null,
+    mandates: Object.fromEntries(
+      SEATS.map((seat) => [
+        seat,
+        normalizeMandate(initial.mandates?.[seat] ?? null),
+      ]),
+    ),
+    lastResolvedCycle: initial.lastResolvedCycle ?? null,
+  }
+}
+
+function getCurrentVictory(state) {
+  return state.victory ?? createVictoryState()
+}
+
 export function getOpponent(seat) {
   return OPPONENT[seat]
 }
@@ -830,6 +986,9 @@ export function createMatch(config = {}) {
       featureFlags.counterDraft
         ? createCardState(config)
         : null,
+    victory: victoryEnabledFromFlags(featureFlags)
+      ? createVictoryState(config)
+      : null,
     anchors: ANCHORS,
     passStreak: 0,
     lastMove: null,
@@ -1094,6 +1253,19 @@ function getDomainDecreeUpkeep(decrees) {
     (sum, decree) =>
       sum + (decree.active && !decree.ruined ? getDecreeUpkeepValue(decree) : 0),
     0,
+  )
+}
+
+function getDomainRegionValue(domain) {
+  return DOMAIN_REGION_VALUE_BY_KIND[domain.anchorKind] ?? 1
+}
+
+function isDisputedDomain(domain, state) {
+  return (
+    state.featureFlags.stability &&
+    domain.status === 'controlled' &&
+    domain.owner &&
+    (domain.stability ?? 0) <= 0
   )
 }
 
@@ -1849,6 +2021,10 @@ function counterDraftActionId(state, type, option = 'base') {
   return `turn-${state.turn}-${state.activeSeat}-${type.toLowerCase()}-${option}`
 }
 
+function surrenderActionId(state) {
+  return `turn-${state.turn}-${state.activeSeat}-surrender`
+}
+
 function createDraftCardActions(state, seat, domains) {
   if (!state.featureFlags.regionCards || seat !== state.activeSeat) return []
   if (getCardPlayer(state, seat).lastDraftCycle === state.cycle) return []
@@ -1935,7 +2111,7 @@ function createCashSetActions(state, seat) {
       setType: detectedSet.setType,
       regionId: detectedSet.regionId,
       cardIds: detectedSet.cardIds,
-      strength: DEFAULT_CARD_RULES.era,
+      strength: getEraForCycle(state.cycle).id,
     },
     preview: {
       setType: detectedSet.setType,
@@ -1954,7 +2130,7 @@ function createCounterDraftActions(state, seat, domains) {
 
   const eraFallback =
     DEFAULT_CARD_RULES.eraFallbacks[pending.strength] ??
-    DEFAULT_CARD_RULES.eraFallbacks[DEFAULT_CARD_RULES.era]
+    DEFAULT_CARD_RULES.eraFallbacks[getEraForCycle(state.cycle).id]
   const actions = [
     {
       id: counterDraftActionId(state, 'COUNTER_IMMEDIATE'),
@@ -2058,6 +2234,10 @@ export function getLegalActions(state, seat) {
     return []
   }
 
+  if (victoryEnabled(state) && getCurrentVictory(state).winner) {
+    return []
+  }
+
   const domains = deriveDomains(state)
 
   if (cardsEnabled(state)) {
@@ -2122,6 +2302,20 @@ export function getLegalActions(state, seat) {
   if (cardsEnabled(state)) {
     actions.push(...createDraftCardActions(state, seat, domains))
     actions.push(...createCashSetActions(state, seat))
+  }
+  if (victoryEnabled(state) && !getCurrentVictory(state).winner) {
+    actions.push({
+      id: surrenderActionId(state),
+      type: 'SURRENDER',
+      seat,
+      label: 'Surrender',
+      payload: {
+        winner: getOpponent(seat),
+      },
+      preview: {
+        immediate: true,
+      },
+    })
   }
 
   actions.push({
@@ -2195,6 +2389,458 @@ function updateCulturalMandateWatch(metrics, domains, state) {
   return {
     ...(metrics ?? {}),
     culturalMandateWatch: nextWatch,
+  }
+}
+
+function warningKeyFor(warning) {
+  return `${warning.seat}:${warning.type}`
+}
+
+function controlledStableDomainsForSeat(domains, state, seat) {
+  return domains.filter(
+    (domain) => domain.owner === seat && isStableControlledDomain(domain, state),
+  )
+}
+
+function createDominanceCondition(seat, domains, state) {
+  const activeDomains = domains.filter((domain) =>
+    isStableControlledDomain(domain, state),
+  )
+  const totalValue = activeDomains.reduce(
+    (sum, domain) => sum + getDomainRegionValue(domain),
+    0,
+  )
+
+  if (totalValue <= 0) return null
+
+  const seatDomains = activeDomains.filter((domain) => domain.owner === seat)
+  const seatValue = seatDomains.reduce(
+    (sum, domain) => sum + getDomainRegionValue(domain),
+    0,
+  )
+  const share = seatValue / totalValue
+
+  if (share < 0.65) return null
+
+  return {
+    seat,
+    type: 'DOMINANCE',
+    label: 'Dominance Warning',
+    conditionText: 'Control 65% or more of active controlled Domain value.',
+    howToStop:
+      'Contest, capture, or deplete enough active Domains to drop the warning owner below 65%.',
+    conditionSnapshot: {
+      seatValue,
+      totalValue,
+      share: Math.round(share * 1000) / 1000,
+      anchorIds: seatDomains.map((domain) => domain.anchorId),
+    },
+  }
+}
+
+function createCapitalCondition(seat, domains, state) {
+  const enemyCapitalId = seat === 'black' ? 'white-capital' : 'black-capital'
+  const enemyCapital = domains.find(
+    (domain) => domain.anchorId === enemyCapitalId,
+  )
+
+  if (!enemyCapital || !isDisputedDomain(enemyCapital, state)) return null
+
+  return {
+    seat,
+    type: 'CAPITAL',
+    label: 'Capital Warning',
+    conditionText: 'Enemy Capital Domain is disputed.',
+    howToStop:
+      'Restore the threatened Capital above 0 stability and keep clear Domain control.',
+    conditionSnapshot: {
+      anchorIds: [enemyCapital.anchorId],
+      stability: enemyCapital.stability,
+      owner: enemyCapital.owner,
+      status: enemyCapital.status,
+    },
+  }
+}
+
+function createMandateCondition(seat, domains, state, mandate) {
+  if (!mandate) return null
+
+  const stableDomains = controlledStableDomainsForSeat(domains, state, seat)
+  const opponent = getOpponent(seat)
+
+  if (mandate.type === 'ECONOMIC_MANDATE') {
+    const economicDomains = stableDomains.filter((domain) =>
+      ['Mine', 'Village'].includes(domain.anchorKind),
+    )
+
+    if (economicDomains.length < 3) return null
+
+    return {
+      seat,
+      type: mandate.type,
+      label: mandate.label,
+      conditionText: mandate.conditionText,
+      howToStop: mandate.howToStop,
+      conditionSnapshot: {
+        anchorIds: economicDomains.map((domain) => domain.anchorId),
+        stableEconomicDomains: economicDomains.length,
+      },
+    }
+  }
+
+  if (mandate.type === 'CULTURAL_MANDATE') {
+    const pressuredEnemyDomains = domains.filter(
+      (domain) =>
+        domain.owner === opponent &&
+        domain.pressure?.pressureOwner === seat &&
+        domain.pressure.netPressure > 0,
+    )
+
+    if (pressuredEnemyDomains.length < 3) return null
+
+    return {
+      seat,
+      type: mandate.type,
+      label: mandate.label,
+      conditionText: mandate.conditionText,
+      howToStop: mandate.howToStop,
+      conditionSnapshot: {
+        anchorIds: pressuredEnemyDomains.map((domain) => domain.anchorId),
+        pressuredEnemyDomains: pressuredEnemyDomains.length,
+      },
+    }
+  }
+
+  if (mandate.type === 'MILITARY_MANDATE') {
+    const enemyCapitalId = seat === 'black' ? 'white-capital' : 'black-capital'
+    const enemyCapital = domains.find(
+      (domain) => domain.anchorId === enemyCapitalId,
+    )
+    const enemyCapitalThreatened =
+      enemyCapital &&
+      (enemyCapital.status === 'contested' || isDisputedDomain(enemyCapital, state))
+    const controlsCentral = stableDomains.some(
+      (domain) => domain.regionId === 'central-plain',
+    )
+    const adjacentRegions = REGION_ADJACENCY['central-plain']
+    const controlsAdjacentRegion = stableDomains.some(
+      (domain) => adjacentRegions.includes(domain.regionId),
+    )
+
+    if (!enemyCapitalThreatened && !(controlsCentral && controlsAdjacentRegion)) {
+      return null
+    }
+
+    return {
+      seat,
+      type: mandate.type,
+      label: mandate.label,
+      conditionText: mandate.conditionText,
+      howToStop: mandate.howToStop,
+      conditionSnapshot: {
+        anchorIds: [
+          ...(enemyCapitalThreatened ? [enemyCapital.anchorId] : []),
+          ...stableDomains.map((domain) => domain.anchorId),
+        ],
+        enemyCapitalThreatened: Boolean(enemyCapitalThreatened),
+        controlsCentral,
+        controlsAdjacentRegion,
+      },
+    }
+  }
+
+  if (mandate.type === 'SOVEREIGN_MANDATE') {
+    const totalStability = stableDomains.reduce(
+      (sum, domain) => sum + (domain.stability ?? 0),
+      0,
+    )
+
+    if (stableDomains.length < 4 || totalStability <= 20) return null
+
+    return {
+      seat,
+      type: mandate.type,
+      label: mandate.label,
+      conditionText: mandate.conditionText,
+      howToStop: mandate.howToStop,
+      conditionSnapshot: {
+        anchorIds: stableDomains.map((domain) => domain.anchorId),
+        stableDomains: stableDomains.length,
+        totalStability,
+      },
+    }
+  }
+
+  if (mandate.type === 'SHADOW_MANDATE') {
+    const compromisedDecrees = domains
+      .filter((domain) => domain.owner === opponent)
+      .flatMap((domain) =>
+        (domain.decrees ?? [])
+          .filter((decree) =>
+            ['inactive', 'ruined', 'disabled'].includes(decree.status),
+          )
+          .map((decree) => ({
+            anchorId: domain.anchorId,
+            decreeIndex: decree.index,
+          })),
+      )
+
+    if (compromisedDecrees.length < 3) return null
+
+    return {
+      seat,
+      type: mandate.type,
+      label: mandate.label,
+      conditionText: mandate.conditionText,
+      howToStop: mandate.howToStop,
+      conditionSnapshot: {
+        anchorIds: Array.from(
+          new Set(compromisedDecrees.map((decree) => decree.anchorId)),
+        ),
+        compromisedDecrees: compromisedDecrees.length,
+      },
+    }
+  }
+
+  return null
+}
+
+function evaluateVictoryConditions(state, domains) {
+  if (!victoryEnabled(state)) return []
+
+  const victory = getCurrentVictory(state)
+  const conditions = []
+
+  for (const seat of SEATS) {
+    const dominance = createDominanceCondition(seat, domains, state)
+    const capital = createCapitalCondition(seat, domains, state)
+    const mandate = state.featureFlags.mandates
+      ? createMandateCondition(seat, domains, state, victory.mandates[seat])
+      : null
+
+    if (dominance) conditions.push(dominance)
+    if (capital) conditions.push(capital)
+    if (mandate) conditions.push(mandate)
+  }
+
+  return conditions
+}
+
+function createWarningFromCondition(condition, resolvedCycle) {
+  return normalizeWarning({
+    id: `warning-${resolvedCycle}-${condition.seat}-${condition.type}`,
+    seat: condition.seat,
+    type: condition.type,
+    label: condition.label,
+    triggeredCycle: resolvedCycle,
+    conditionText: condition.conditionText,
+    howToStop: condition.howToStop,
+    conditionSnapshot: condition.conditionSnapshot,
+  })
+}
+
+function createVictoryEvent(state, kind, seat, message, detail = {}) {
+  return createEvent(state, kind, seat, message, detail)
+}
+
+function confirmVictory(state, victory, warning) {
+  return {
+    victory: {
+      ...victory,
+      activeWarnings: [warning],
+      suddenDeath: false,
+      winner: warning.seat,
+      winReason: warning.type,
+    },
+    events: [
+      createVictoryEvent(
+        state,
+        'VICTORY_CONFIRMED',
+        warning.seat,
+        `${SEAT_LABELS[warning.seat]} won by ${warning.label}.`,
+        { warningId: warning.id, type: warning.type },
+      ),
+    ],
+  }
+}
+
+function resolveSuddenDeath(state, victory, conditionMap) {
+  const stillWinning = victory.activeWarnings.filter((warning) =>
+    conditionMap.has(warningKeyFor(warning)),
+  )
+
+  if (stillWinning.length === 1) {
+    return confirmVictory(state, victory, stillWinning[0])
+  }
+
+  if (stillWinning.length > 1) {
+    return {
+      victory: {
+        ...victory,
+        activeWarnings: stillWinning,
+        suddenDeath: true,
+      },
+      events: [
+        createVictoryEvent(
+          state,
+          'SUDDEN_DEATH_CONTINUES',
+          null,
+          'Sudden Death continues; both players still satisfy warning conditions.',
+          { warnings: stillWinning.map((warning) => warning.id) },
+        ),
+      ],
+    }
+  }
+
+  return {
+    victory: {
+      ...victory,
+      activeWarnings: [],
+      suddenDeath: false,
+    },
+    events: [
+      createVictoryEvent(
+        state,
+        'SUDDEN_DEATH_CLEARED',
+        null,
+        'Sudden Death ended because no active warning condition remains true.',
+      ),
+    ],
+  }
+}
+
+function resolveCycleVictory(state, domains, resolvedCycle) {
+  if (!victoryEnabled(state)) {
+    return {
+      state,
+      events: [],
+    }
+  }
+
+  const currentVictory = getCurrentVictory(state)
+  const baseVictory = {
+    ...currentVictory,
+    era: getEraForCycle(state.cycle),
+    lastResolvedCycle: resolvedCycle,
+  }
+
+  if (baseVictory.winner) {
+    return {
+      state: {
+        ...state,
+        victory: baseVictory,
+      },
+      events: [],
+    }
+  }
+
+  const conditions = evaluateVictoryConditions(
+    {
+      ...state,
+      victory: baseVictory,
+    },
+    domains,
+  )
+  const conditionMap = new Map(
+    conditions.map((condition) => [warningKeyFor(condition), condition]),
+  )
+
+  if (baseVictory.suddenDeath) {
+    const resolved = resolveSuddenDeath(state, baseVictory, conditionMap)
+
+    return {
+      state: {
+        ...state,
+        victory: resolved.victory,
+      },
+      events: resolved.events,
+    }
+  }
+
+  const maturedWarnings = baseVictory.activeWarnings.filter(
+    (warning) =>
+      conditionMap.has(warningKeyFor(warning)) &&
+      resolvedCycle > warning.triggeredCycle,
+  )
+
+  if (maturedWarnings.length === 1) {
+    const resolved = confirmVictory(state, baseVictory, maturedWarnings[0])
+
+    return {
+      state: {
+        ...state,
+        victory: resolved.victory,
+      },
+      events: resolved.events,
+    }
+  }
+
+  if (maturedWarnings.length > 1) {
+    return {
+      state: {
+        ...state,
+        victory: {
+          ...baseVictory,
+          activeWarnings: maturedWarnings,
+          suddenDeath: true,
+        },
+      },
+      events: [
+        createVictoryEvent(
+          state,
+          'SUDDEN_DEATH_STARTED',
+          null,
+          'Multiple victory warnings matured together; Sudden Death begins.',
+          { warnings: maturedWarnings.map((warning) => warning.id) },
+        ),
+      ],
+    }
+  }
+
+  const events = []
+  const retainedWarnings = baseVictory.activeWarnings.filter((warning) => {
+    const stillTrue = conditionMap.has(warningKeyFor(warning))
+
+    if (!stillTrue) {
+      events.push(
+        createVictoryEvent(
+          state,
+          'VICTORY_WARNING_CLEARED',
+          warning.seat,
+          `${warning.label} for ${SEAT_LABELS[warning.seat]} was stopped.`,
+          { warningId: warning.id, type: warning.type },
+        ),
+      )
+    }
+
+    return stillTrue
+  })
+  const retainedKeys = new Set(retainedWarnings.map(warningKeyFor))
+  const newWarnings = conditions
+    .filter((condition) => !retainedKeys.has(warningKeyFor(condition)))
+    .map((condition) => createWarningFromCondition(condition, resolvedCycle))
+
+  for (const warning of newWarnings) {
+    events.push(
+      createVictoryEvent(
+        state,
+        'VICTORY_WARNING_STARTED',
+        warning.seat,
+        `${warning.label} started for ${SEAT_LABELS[warning.seat]}.`,
+        { warningId: warning.id, type: warning.type },
+      ),
+    )
+  }
+
+  return {
+    state: {
+      ...state,
+      victory: {
+        ...baseVictory,
+        activeWarnings: [...retainedWarnings, ...newWarnings],
+      },
+    },
+    events,
   }
 }
 
@@ -2288,12 +2934,18 @@ function resolveImmediateDecreeTransitions(previousState, nextState) {
 }
 
 function resolveCycleEconomy(state) {
-  if (
-    !state.featureFlags.income &&
-    !state.featureFlags.stability &&
-    !state.featureFlags.decrees &&
-    !pressureEnabled(state)
-  ) {
+  const resolvedCycle = Math.max(1, state.cycle - 1)
+  const hasEconomyResolution =
+    state.featureFlags.income ||
+    state.featureFlags.stability ||
+    state.featureFlags.decrees ||
+    pressureEnabled(state)
+
+  if (!hasEconomyResolution) {
+    if (victoryEnabled(state)) {
+      return resolveCycleVictory(state, deriveDomains(state), resolvedCycle)
+    }
+
     return {
       state,
       events: [],
@@ -2630,24 +3282,41 @@ function resolveCycleEconomy(state) {
     }
   })
 
+  const pressureState = pressureEnabled(state)
+    ? clearCurrentPressureCycle(
+        getCurrentPressure(state),
+        pressureResolutionState,
+        updateCulturalMandateWatch(
+          pressureProjection?.metrics,
+          domains,
+          pressureResolutionState,
+        ),
+      )
+    : state.pressure
+  const postEconomyState = {
+    ...state,
+    players: nextPlayers,
+    domains: nextDomainState,
+    pressure: pressureState,
+  }
+  const pressureByAnchor = new Map(
+    domains.map((domain) => [domain.anchorId, domain.pressure]),
+  )
+  const victoryDomains = deriveDomainsWithoutPressure(postEconomyState).map(
+    (domain) => ({
+      ...domain,
+      pressure: pressureByAnchor.get(domain.anchorId) ?? domain.pressure,
+    }),
+  )
+  const victoryResolution = resolveCycleVictory(
+    postEconomyState,
+    victoryDomains,
+    resolvedCycle,
+  )
+
   return {
-    state: {
-      ...state,
-      players: nextPlayers,
-      domains: nextDomainState,
-      pressure: pressureEnabled(state)
-        ? clearCurrentPressureCycle(
-            getCurrentPressure(state),
-            pressureResolutionState,
-            updateCulturalMandateWatch(
-              pressureProjection?.metrics,
-              domains,
-              pressureResolutionState,
-            ),
-          )
-        : state.pressure,
-    },
-    events,
+    state: victoryResolution.state,
+    events: [...events, ...victoryResolution.events],
   }
 }
 
@@ -3944,7 +4613,7 @@ function applyCashSetAction(state, seat, legalAction) {
     setType: detectedSet.setType,
     regionId: detectedSet.regionId,
     cycle: state.cycle,
-    strength: legalAction.payload.strength ?? DEFAULT_CARD_RULES.era,
+    strength: legalAction.payload.strength ?? getEraForCycle(state.cycle).id,
     counterDraftChoice: null,
   }
   const pendingCounterDraft = state.featureFlags.counterDraft
@@ -3967,6 +4636,22 @@ function applyCashSetAction(state, seat, legalAction) {
     revealedSets: [...current.revealedSets, revealedSet],
     majorSetCashedCycle: state.cycle,
   }))
+  const revealedSetsAfter = nextCards.players[seat].revealedSets
+  const regionSetsAfter = revealedSetsAfter.filter((set) => set.regionId)
+  const mandateSource =
+    state.featureFlags.mandates &&
+    !getCurrentVictory(state).mandates[seat] &&
+    regionSetsAfter.length >= 3 &&
+    revealedSet.regionId
+      ? MANDATE_BY_REGION[revealedSet.regionId]
+      : null
+  const unlockedMandate = mandateSource
+    ? normalizeMandate({
+        ...mandateSource,
+        sourceRegionId: revealedSet.regionId,
+        unlockedCycle: state.cycle,
+      })
+    : null
   const event = createEvent(
     state,
     'CASH_SET',
@@ -3982,6 +4667,28 @@ function applyCashSetAction(state, seat, legalAction) {
       counterDraftRequired: Boolean(pendingCounterDraft),
     },
   )
+  const mandateEvent = unlockedMandate
+    ? createEvent(
+        state,
+        'MANDATE_UNLOCKED',
+        seat,
+        `${SEAT_LABELS[seat]} unlocked ${unlockedMandate.label}.`,
+        {
+          mandateType: unlockedMandate.type,
+          sourceRegionId: unlockedMandate.sourceRegionId,
+        },
+      )
+    : null
+  const nextVictory =
+    unlockedMandate && victoryEnabled(state)
+      ? {
+          ...getCurrentVictory(state),
+          mandates: {
+            ...getCurrentVictory(state).mandates,
+            [seat]: unlockedMandate,
+          },
+        }
+      : state.victory
 
   return {
     accepted: true,
@@ -3996,8 +4703,9 @@ function applyCashSetAction(state, seat, legalAction) {
         ...nextCards,
         pendingCounterDraft,
       },
+      victory: nextVictory,
       requestCounter: state.requestCounter + 1,
-      eventLog: [event, ...state.eventLog].slice(0, 36),
+      eventLog: [event, mandateEvent, ...state.eventLog].filter(Boolean).slice(0, 36),
     },
   }
 }
@@ -4175,6 +4883,36 @@ function applyCounterDraftAction(state, seat, legalAction) {
   }
 }
 
+function applySurrenderAction(state, seat, legalAction) {
+  const winner = legalAction.payload.winner ?? getOpponent(seat)
+  const event = createEvent(
+    state,
+    'SURRENDER',
+    seat,
+    `${SEAT_LABELS[seat]} surrendered. ${SEAT_LABELS[winner]} wins immediately.`,
+    {
+      winner,
+    },
+  )
+
+  return {
+    accepted: true,
+    reason: null,
+    message: 'Surrender accepted.',
+    action: legalAction,
+    state: {
+      ...state,
+      victory: {
+        ...getCurrentVictory(state),
+        winner,
+        winReason: 'SURRENDER',
+      },
+      requestCounter: state.requestCounter + 1,
+      eventLog: [event, ...state.eventLog].slice(0, 36),
+    },
+  }
+}
+
 export function applyAction(state, actionId, seat) {
   if (seat !== state.activeSeat) {
     return {
@@ -4285,6 +5023,10 @@ export function applyAction(state, actionId, seat) {
     legalAction.type === 'COUNTER_SAFE_FALLBACK'
   ) {
     return applyCounterDraftAction(state, seat, legalAction)
+  }
+
+  if (legalAction.type === 'SURRENDER') {
+    return applySurrenderAction(state, seat, legalAction)
   }
 
   const placement = simulatePlacement(state, seat, legalAction.payload.cellId)
@@ -4586,6 +5328,60 @@ function projectPublicCardState(state) {
   }
 }
 
+function projectWarning(warning, seat = null) {
+  return {
+    id: warning.id,
+    seat: warning.seat,
+    type: warning.type,
+    label: warning.label,
+    triggeredCycle: warning.triggeredCycle,
+    conditionText: warning.conditionText,
+    howToStop: warning.howToStop,
+    conditionSnapshot: { ...warning.conditionSnapshot },
+    threatensSeat: seat ? warning.seat !== seat : undefined,
+  }
+}
+
+function projectMandate(mandate) {
+  if (!mandate) return null
+
+  return {
+    type: mandate.type,
+    label: mandate.label,
+    sourceRegionId: mandate.sourceRegionId,
+    unlockedCycle: mandate.unlockedCycle,
+    conditionText: mandate.conditionText,
+    howToStop: mandate.howToStop,
+  }
+}
+
+function projectVictoryState(state, seat = null) {
+  if (!victoryEnabled(state)) return null
+
+  const victory = getCurrentVictory(state)
+
+  return {
+    era: getEraForCycle(state.cycle),
+    activeWarnings: victory.activeWarnings.map((warning) =>
+      projectWarning(warning, seat),
+    ),
+    warningOwner: victory.activeWarnings[0]?.seat ?? null,
+    threatened: seat
+      ? victory.activeWarnings.some((warning) => warning.seat !== seat)
+      : false,
+    suddenDeath: victory.suddenDeath,
+    winner: victory.winner,
+    winReason: victory.winReason,
+    mandates: Object.fromEntries(
+      SEATS.map((candidateSeat) => [
+        candidateSeat,
+        projectMandate(victory.mandates[candidateSeat]),
+      ]),
+    ),
+    lastResolvedCycle: victory.lastResolvedCycle,
+  }
+}
+
 function projectPrivateCardState(state, seat) {
   if (!cardsEnabled(state)) return null
 
@@ -4654,6 +5450,7 @@ export function getPublicState(state) {
     domains: deriveDomains(state),
     pressure: projectPressureState(state),
     cards: projectPublicCardState(state),
+    victory: projectVictoryState(state),
     eventLog: state.eventLog.map(projectEvent),
   }
 }
@@ -4666,6 +5463,7 @@ export function getSeatState(state, seat) {
       ? 'Region card hands are seat-scoped. Opponent hands are redacted to public counts.'
       : 'MVP has no hidden hand. Future card state is seat-scoped.',
     cards: projectPrivateCardState(state, seat),
+    victory: projectVictoryState(state, seat),
   }
 }
 
@@ -4686,6 +5484,11 @@ function createExplanationHints(state) {
   if (cardsEnabled(state)) {
     hints.cards =
       'Exact card hands are private to the requesting seat. Public state exposes card counts, revealed sets, and counter-draft categories only.'
+  }
+
+  if (victoryEnabled(state)) {
+    hints.victory =
+      'Non-surrender wins require a public warning at cycle resolution and one full response cycle before confirmation.'
   }
 
   return hints

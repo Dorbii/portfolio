@@ -31,6 +31,8 @@ const demoMatchConfig = {
     regionCards: true,
     setCashIns: true,
     counterDraft: true,
+    victoryWarnings: true,
+    mandates: true,
   },
   initialStones: [
     { q: -1, r: 2, seat: 'black' },
@@ -611,7 +613,17 @@ function GameExperience() {
   const passAction = activeRequest.legalActions.find(
     (action) => action.type === 'PASS',
   )
+  const surrenderAction = activeRequest.legalActions.find(
+    (action) => action.type === 'SURRENDER',
+  )
   const canHumanAct = seatModes[state.activeSeat] === 'human'
+  const victoryState = activeRequest.publicState.victory
+  const selectedVictoryWarnings =
+    selectedDomain && victoryState
+      ? victoryState.activeWarnings.filter((warning) =>
+          warning.conditionSnapshot?.anchorIds?.includes(selectedDomain.anchorId),
+        )
+      : []
 
   return (
     <main
@@ -650,6 +662,9 @@ function GameExperience() {
         </div>
 
         <div className="game-layout">
+          {victoryState?.activeWarnings.length > 0 || victoryState?.winner ? (
+            <VictoryBanner victory={victoryState} />
+          ) : null}
           <aside className="left-rail" aria-label="Player and selected details">
             <PlayerPanel
               seat="black"
@@ -672,6 +687,7 @@ function GameExperience() {
               repairAction={selectedRepairAction}
               decreeActions={selectedDecreeActions}
               pressureActions={selectedPressureActions}
+              victoryWarnings={selectedVictoryWarnings}
               canHumanAct={canHumanAct}
               onRepair={(actionId) => submitActiveAction(actionId, 'repair-panel')}
               onDecreeAction={(actionId) =>
@@ -692,6 +708,10 @@ function GameExperience() {
               <div>
                 <span>Legal moves</span>
                 <strong>{activeRequest.legalActions.length}</strong>
+              </div>
+              <div>
+                <span>Era</span>
+                <strong>{victoryState?.era.label ?? 'Era I'}</strong>
               </div>
               <div>
                 <span>Domains held</span>
@@ -831,6 +851,16 @@ function GameExperience() {
               >
                 Pass
               </button>
+              {surrenderAction ? (
+                <button
+                  className="control-button danger"
+                  type="button"
+                  disabled={!canHumanAct}
+                  onClick={() => submitActiveAction(surrenderAction.id, 'surrender-button')}
+                >
+                  Surrender
+                </button>
+              ) : null}
               <button className="control-button secondary" type="button" onClick={resetMatch}>
                 Reset
               </button>
@@ -903,6 +933,47 @@ function getCellLabel(
   return parts.join(', ')
 }
 
+function VictoryBanner({ victory }) {
+  if (victory.winner) {
+    return (
+      <section className="victory-banner won" aria-live="assertive">
+        <div>
+          <p className="small-label">Game over</p>
+          <strong>
+            {SEAT_LABELS[victory.winner]} wins by {victory.winReason}
+          </strong>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section
+      className={`victory-banner ${victory.suddenDeath ? 'sudden' : ''}`}
+      aria-live="assertive"
+    >
+      <div>
+        <p className="small-label">
+          {victory.suddenDeath ? 'Sudden Death' : 'Victory warning'}
+        </p>
+        <strong>
+          {victory.activeWarnings
+            .map((warning) => `${SEAT_LABELS[warning.seat]} ${warning.label}`)
+            .join(' / ')}
+        </strong>
+      </div>
+      <ol className="warning-list banner-warning-list">
+        {victory.activeWarnings.map((warning) => (
+          <li key={warning.id}>
+            <strong>{warning.conditionText}</strong>
+            <span>{warning.howToStop}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
 function PlayerPanel({
   seat,
   state,
@@ -919,6 +990,10 @@ function PlayerPanel({
   const cardCount = publicCards?.cardCount ?? privateCards?.hand.length ?? 0
   const handLimit =
     activeRequest.publicState.cards?.handLimit ?? privateCards?.handLimit ?? null
+  const victory = activeRequest.publicState.victory
+  const warningsForSeat =
+    victory?.activeWarnings.filter((warning) => warning.seat === seat) ?? []
+  const mandate = victory?.mandates?.[seat] ?? null
 
   return (
     <section className={`player-card ${seat} ${active ? 'active' : ''}`}>
@@ -975,7 +1050,32 @@ function PlayerPanel({
             </dd>
           </div>
         ) : null}
+        {victory ? (
+          <div>
+            <dt>Warnings</dt>
+            <dd>{warningsForSeat.length}</dd>
+          </div>
+        ) : null}
       </dl>
+      {victory ? (
+        <div className="victory-summary">
+          <div className="section-heading-row compact">
+            <p className="small-label">Victory</p>
+            <strong>{victory.era.label}</strong>
+          </div>
+          {mandate ? <p>{mandate.label}</p> : <p>No mandate unlocked.</p>}
+          {warningsForSeat.length > 0 ? (
+            <ol className="warning-list">
+              {warningsForSeat.map((warning) => (
+                <li key={warning.id}>
+                  <strong>{warning.label}</strong>
+                  <span>{warning.conditionText}</span>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </div>
+      ) : null}
       {publicCards ? (
         <div className="card-summary">
           <div className="section-heading-row compact">
@@ -1068,6 +1168,7 @@ function SelectedPanel({
   repairAction,
   decreeActions,
   pressureActions,
+  victoryWarnings = [],
   canHumanAct,
   onRepair,
   onDecreeAction,
@@ -1198,6 +1299,20 @@ function SelectedPanel({
           </dl>
           <p>{domain.reason}</p>
           {domain.inactiveReason ? <p>{domain.inactiveReason}</p> : null}
+          {victoryWarnings.length > 0 ? (
+            <div className="victory-summary selected-victory-summary">
+              <p className="small-label">Victory pressure</p>
+              <ol className="warning-list">
+                {victoryWarnings.map((warning) => (
+                  <li key={warning.id}>
+                    <strong>{warning.label}</strong>
+                    <span>{warning.conditionText}</span>
+                    <span>{warning.howToStop}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
           {domain.decrees ? (
             <div className="decree-section">
               <div className="section-heading-row">
@@ -1399,6 +1514,20 @@ function compactPrivateCards(cards) {
   }
 }
 
+function compactVictoryState(victory) {
+  if (!victory) return null
+
+  return {
+    era: victory.era,
+    activeWarnings: victory.activeWarnings,
+    threatened: victory.threatened,
+    suddenDeath: victory.suddenDeath,
+    winner: victory.winner,
+    winReason: victory.winReason,
+    mandates: victory.mandates,
+  }
+}
+
 function ProtocolPanel({
   activeRequest,
   protocolTab,
@@ -1464,6 +1593,7 @@ function ProtocolPanel({
                 .map(compactEconomyAction),
               cards: compactCardState(activeRequest.publicState.cards),
               privateCards: compactPrivateCards(activeRequest.privateState.cards),
+              victory: compactVictoryState(activeRequest.privateState.victory),
               eventLog: activeRequest.publicState.eventLog.slice(0, 8),
               legalActions: activeRequest.legalActions.slice(0, 8),
               omittedActions: Math.max(activeRequest.legalActions.length - 8, 0),

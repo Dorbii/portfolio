@@ -10,6 +10,7 @@ import {
   DEFAULT_RULES_VERSION,
   detectCompletedCardSets,
   deriveDomains,
+  getEraForCycle,
   getLegalActions,
   getNeighborIdsForCoord,
   getPublicState,
@@ -81,6 +82,21 @@ function advanceOneCycle(state) {
   }
 
   return nextState
+}
+
+function warningFor(state, seat, type) {
+  return state.victory?.activeWarnings.find(
+    (warning) => warning.seat === seat && warning.type === type,
+  )
+}
+
+function domainById(state, anchorId) {
+  const domain = deriveDomains(state).find(
+    (candidate) => candidate.anchorId === anchorId,
+  )
+
+  assert.ok(domain, `Expected ${anchorId} to derive a Domain`)
+  return domain
 }
 
 function protocolSubmission(state, seat, selectedActionId) {
@@ -1887,4 +1903,385 @@ test('bot can choose card and counter-draft legal actions through the request ac
   )
 
   assert.ok(selected.type.startsWith('COUNTER_'))
+})
+
+test('maps source eras to cycle ranges and stipends', () => {
+  assert.deepEqual(
+    [1, 2, 3, 5, 6, 8, 9, 20].map((cycle) => getEraForCycle(cycle).id),
+    [1, 1, 2, 2, 3, 3, 4, 4],
+  )
+  assert.equal(getEraForCycle(1).stipend, 2)
+  assert.equal(getEraForCycle(6).stipend, 4)
+  assert.equal(getEraForCycle(9).stipend, 5)
+})
+
+test('surrender wins immediately and closes future legal actions', () => {
+  const state = createMatch({
+    featureFlags: {
+      victoryWarnings: true,
+    },
+  })
+  const surrender = getLegalActions(state, 'black').find(
+    (action) => action.type === 'SURRENDER',
+  )
+
+  assert.ok(surrender)
+
+  const result = applyAction(state, surrender.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.victory.winner, 'white')
+  assert.equal(result.state.victory.winReason, 'SURRENDER')
+  assert.equal(getLegalActions(result.state, 'black').length, 0)
+  assert.equal(result.state.eventLog[0].kind, 'SURRENDER')
+})
+
+test('dominance victory starts as a warning and confirms after a full cycle', () => {
+  let state = stateWithStones(
+    {
+      '0,-3': 'black',
+      '1,-4': 'black',
+      '-1,-1': 'black',
+      '-2,-1': 'black',
+      '-3,0': 'black',
+      '-2,0': 'black',
+      '3,-2': 'black',
+      '4,-2': 'black',
+      '2,-1': 'black',
+      '2,0': 'black',
+      '1,1': 'black',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        victoryWarnings: true,
+      },
+    },
+  )
+
+  state = advanceOneCycle(state)
+
+  const warning = warningFor(state, 'black', 'DOMINANCE')
+
+  assert.ok(warning)
+  assert.equal(state.victory.winner, null)
+  assert.equal(warning.triggeredCycle, 1)
+  assert.equal(
+    createAgentRequest(state, 'black').explanationHints.victory,
+    'Non-surrender wins require a public warning at cycle resolution and one full response cycle before confirmation.',
+  )
+  assert.equal(
+    getPublicState(state).victory.activeWarnings[0].conditionText,
+    'Control 65% or more of active controlled Domain value.',
+  )
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'VICTORY_WARNING_STARTED'),
+  )
+
+  state = advanceOneCycle(state)
+
+  assert.equal(state.victory.winner, 'black')
+  assert.equal(state.victory.winReason, 'DOMINANCE')
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'VICTORY_CONFIRMED'),
+  )
+})
+
+test('contested enemy Capital does not start Capital Victory warning', () => {
+  let state = stateWithStones(
+    {
+      '0,-3': 'black',
+      '1,-4': 'black',
+      '2,-3': 'white',
+      '2,-4': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        victoryWarnings: true,
+      },
+    },
+  )
+
+  assert.equal(domainById(state, 'white-capital').status, 'contested')
+
+  state = advanceOneCycle(state)
+
+  assert.equal(warningFor(state, 'black', 'CAPITAL'), undefined)
+  assert.equal(
+    state.victory.activeWarnings.some((warning) => warning.type === 'CAPITAL'),
+    false,
+  )
+  assert.equal(state.victory.winner, null)
+})
+
+test('disputed enemy Capital starts Capital warning and confirms if unresolved', () => {
+  let state = stateWithStones(
+    {
+      '0,-3': 'black',
+      '1,-4': 'black',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        victoryWarnings: true,
+      },
+      initialDomains: {
+        'white-capital': {
+          stability: 0,
+          lastOwner: 'black',
+        },
+      },
+    },
+  )
+
+  assert.equal(domainById(state, 'white-capital').status, 'controlled')
+  assert.equal(domainById(state, 'white-capital').stability, 0)
+
+  state = advanceOneCycle(state)
+
+  const warning = warningFor(state, 'black', 'CAPITAL')
+
+  assert.ok(warning)
+  assert.equal(warning.conditionText, 'Enemy Capital Domain is disputed.')
+  assert.equal(warning.conditionSnapshot.status, 'controlled')
+  assert.equal(warning.conditionSnapshot.stability, 0)
+  assert.equal(getPublicState(state).victory.threatened, false)
+  assert.equal(createAgentRequest(state, 'white').privateState.victory.threatened, true)
+
+  state = advanceOneCycle(state)
+
+  assert.equal(state.victory.winner, 'black')
+  assert.equal(state.victory.winReason, 'CAPITAL')
+})
+
+test('simultaneous matured warnings enter sudden death until one condition breaks', () => {
+  let state = stateWithStones(
+    {
+      '0,-3': 'black',
+      '1,-4': 'black',
+      '-2,3': 'white',
+      '-1,2': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        victoryWarnings: true,
+      },
+      initialDomains: {
+        'white-capital': {
+          stability: 0,
+          lastOwner: 'black',
+        },
+        'black-capital': {
+          stability: 0,
+          lastOwner: 'white',
+        },
+      },
+    },
+  )
+
+  state = advanceOneCycle(state)
+
+  assert.ok(warningFor(state, 'black', 'CAPITAL'))
+  assert.ok(warningFor(state, 'white', 'CAPITAL'))
+  assert.equal(state.victory.suddenDeath, false)
+
+  state = advanceOneCycle(state)
+
+  assert.equal(state.victory.winner, null)
+  assert.equal(state.victory.suddenDeath, true)
+  assert.equal(state.victory.activeWarnings.length, 2)
+
+  state = {
+    ...state,
+    board: {
+      ...state.board,
+      cells: state.board.cells.map((cell) =>
+        ['-2,3', '-1,2'].includes(cell.id)
+          ? {
+              ...cell,
+              occupant: null,
+            }
+          : cell,
+      ),
+    },
+  }
+  state = advanceOneCycle(state)
+
+  assert.equal(state.victory.winner, 'black')
+  assert.equal(state.victory.winReason, 'CAPITAL')
+})
+
+test('Military Mandate requires Central Plain plus an adjacent region', () => {
+  const whiteSafeDomains = {
+    '-2,3': 'white',
+    '-1,2': 'white',
+    '0,-3': 'white',
+    '1,-4': 'white',
+    '0,-1': 'white',
+    '1,-1': 'white',
+  }
+  const config = {
+    featureFlags: {
+      income: true,
+      stability: true,
+      victoryWarnings: true,
+      mandates: true,
+    },
+    initialVictory: {
+      mandates: {
+        black: {
+          sourceRegionId: 'central-plain',
+          unlockedCycle: 1,
+        },
+      },
+    },
+  }
+  let state = stateWithStones(
+    {
+      ...whiteSafeDomains,
+      '1,1': 'black',
+      '2,0': 'black',
+    },
+    config,
+  )
+
+  state = advanceOneCycle(state)
+
+  assert.equal(warningFor(state, 'black', 'MILITARY_MANDATE'), undefined)
+  assert.equal(
+    getPublicState(state).victory.mandates.black.conditionText.includes(
+      'one adjacent region',
+    ),
+    true,
+  )
+
+  state = stateWithStones(
+    {
+      ...whiteSafeDomains,
+      '1,1': 'black',
+      '2,0': 'black',
+      '-1,-1': 'black',
+      '-2,-1': 'black',
+    },
+    config,
+  )
+  state = advanceOneCycle(state)
+
+  const warning = warningFor(state, 'black', 'MILITARY_MANDATE')
+
+  assert.ok(warning)
+  assert.equal(
+    warning.conditionText,
+    'Contest or dispute the enemy Capital or control Central Plain plus one adjacent region.',
+  )
+  assert.equal(warning.conditionSnapshot.controlsCentral, true)
+  assert.equal(warning.conditionSnapshot.controlsAdjacentRegion, true)
+})
+
+test('Military Mandate can use contested enemy Capital without Capital Victory', () => {
+  let state = stateWithStones(
+    {
+      '0,-3': 'black',
+      '1,-4': 'black',
+      '2,-3': 'white',
+      '2,-4': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        victoryWarnings: true,
+        mandates: true,
+      },
+      initialVictory: {
+        mandates: {
+          black: {
+            sourceRegionId: 'central-plain',
+            unlockedCycle: 1,
+          },
+        },
+      },
+    },
+  )
+
+  assert.equal(domainById(state, 'white-capital').status, 'contested')
+
+  state = advanceOneCycle(state)
+
+  const warning = warningFor(state, 'black', 'MILITARY_MANDATE')
+
+  assert.ok(warning)
+  assert.equal(warningFor(state, 'black', 'CAPITAL'), undefined)
+  assert.equal(warning.conditionSnapshot.enemyCapitalThreatened, true)
+  assert.equal(warning.conditionSnapshot.controlsCentral, false)
+  assert.equal(warning.conditionSnapshot.controlsAdjacentRegion, false)
+
+  state = advanceOneCycle(state)
+
+  assert.equal(state.victory.winner, 'black')
+  assert.equal(state.victory.winReason, 'MILITARY_MANDATE')
+})
+
+test('third region set unlocks a mandate without immediate victory', () => {
+  let state = createMatch({
+    featureFlags: {
+      regionCards: true,
+      setCashIns: true,
+      victoryWarnings: true,
+      mandates: true,
+    },
+    initialCardState: {
+      players: {
+        black: {
+          revealedSets: [
+            {
+              id: 'revealed-iron',
+              owner: 'black',
+              setType: 'MATCHING_REGION',
+              regionId: 'iron-basin',
+              cycle: 1,
+              strength: 1,
+            },
+            {
+              id: 'revealed-temple',
+              owner: 'black',
+              setType: 'MATCHING_REGION',
+              regionId: 'temple-coast',
+              cycle: 1,
+              strength: 1,
+            },
+          ],
+        },
+      },
+    },
+    initialCards: {
+      black: [
+        { id: 'central-1', regionId: 'central-plain' },
+        { id: 'central-2', regionId: 'central-plain' },
+        { id: 'central-3', regionId: 'central-plain' },
+      ],
+    },
+  })
+  const cashSet = getLegalActions(state, 'black').find(
+    (action) => action.type === 'CASH_SET',
+  )
+
+  assert.ok(cashSet)
+
+  state = applyAction(state, cashSet.id, 'black').state
+
+  assert.equal(state.victory.mandates.black.type, 'MILITARY_MANDATE')
+  assert.equal(state.victory.activeWarnings.length, 0)
+  assert.equal(state.victory.winner, null)
+  assert.equal(state.eventLog[1].kind, 'MANDATE_UNLOCKED')
+  assert.equal(
+    getPublicState(state).victory.mandates.black.conditionText,
+    'Contest or dispute the enemy Capital or control Central Plain plus one adjacent region.',
+  )
 })
