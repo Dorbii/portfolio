@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "isolatedModules": false,
+    "noEmit": false,
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "sourceMap": false
+  },
+  "include": ["apps/worker/**/*.ts", "packages/**/*.ts"]
+}

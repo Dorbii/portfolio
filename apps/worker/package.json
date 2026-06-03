@@ -1,0 +1,6 @@
+{
+  "name": "@agent-arena/worker",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts"
+}

@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
-    "allowJs": true,
-    "checkJs": false,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -17,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "vite.config.js", "eslint.config.js"]
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts"]
 }

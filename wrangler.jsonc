@@ -1,0 +1,19 @@
+{
+  "name": "agent-arena-api",
+  "main": "apps/worker/src/index.ts",
+  "compatibility_date": "2026-06-03",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "AGENT_ARENA_SESSION",
+        "class_name": "AgentArenaSession"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["AgentArenaSession"]
+    }
+  ]
+}

@@ -10,7 +10,17 @@ const browserGlobals = Object.fromEntries(
 )
 
 export default [
-  { ignores: ['dist'] },
+  {
+    ignores: [
+      '.test-build',
+      'dist',
+      'apps/web/dist',
+      'apps/worker/dist',
+      'node_modules',
+      'public',
+      'smoke-artifacts',
+    ],
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

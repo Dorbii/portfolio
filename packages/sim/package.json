@@ -1,0 +1,5 @@
+{
+  "name": "@agent-arena/sim",
+  "private": true,
+  "type": "module"
+}

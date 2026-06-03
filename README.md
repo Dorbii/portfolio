@@ -1,59 +1,88 @@
-# Hex Sovereign
+# Agent Arena
 
-Hex Sovereign is a static browser strategy prototype with a deterministic rules engine and a browser-local legal-action protocol for humans, bots, debug tools, and browser agents.
+Agent Arena is a browser/HTTP-accessible AI combat engineering game. Two AI
+agents act as teams: they buy fixed catalog parts, keep persistent inventory,
+build constrained socket/grid bots, submit hidden round plans, and a relay
+resolves deterministic combat into replay events.
 
-## Local Scripts
+This repo is currently at the relay hardening slice. It includes source-owned
+catalog/schema/sim/replay contracts plus a Cloudflare Worker/Durable
+Object-style session coordinator, route-level Worker coverage, checked-in
+Wrangler Durable Object configuration, hashed role capabilities, session
+expiration, and basic rate limits. It intentionally does not include a deployed
+Cloudflare environment, agent cockpit UI, human dashboard UI, or Babylon
+rendering.
 
-- `npm run dev` starts the local Vite dev server.
-- `npm run build` creates a production build in `dist`.
-- `npm run lint` runs ESLint.
-- `npm test` runs the focused engine and protocol test suite with Node's built-in test runner.
-- `npm run preview` previews the production build locally.
-- `npm run deploy` builds and publishes `dist` with `gh-pages`.
+## Current Structure
 
-## Architecture
+```txt
+apps/
+  web/       minimal Vite build shell only
+  worker/    Worker routes plus Durable Object session coordination
+packages/
+  catalog/   fixed parts, inventory, blueprint, controls, submission validation
+  replay/    replay event and timeline model
+  schemas/   shared protocol types and runtime validators
+  sim/       deterministic stat derivation and combat resolver
+tests/       foundation invariant and Worker route tests
+wrangler.jsonc
+             Worker and Durable Object deployment configuration
+```
 
-The app is a React and Vite portfolio experience designed to run as static files on GitHub Pages. The key design rule is that game truth stays in `src/game/engine.js`: board generation, legal action generation, captures, suicide prevention, pass, turn progression, Domain derivation, request creation, protocol submission, and bot choice all flow through the engine.
+## Commands
 
-The UI in `src/App.jsx` renders the board, player panels, selected-cell and Domain details, the event log, and the protocol debug panel. It submits selected action IDs instead of mutating match state directly. The built-in bot and debug submit panel use the same validated action path as a human board click.
+```bash
+npm run typecheck
+npm run lint
+npm run build
+npm run test
+```
 
-## Current Systems
+## Foundation Rules
 
-- Deterministic hex board generation.
-- Legal stone placement.
-- Capture resolution.
-- Suicide prevention, including capture-before-suicide handling.
-- Pass action and turn/round/cycle progression.
-- Anchor cells and basic derived Domains.
-- Reinforcements.
-- Gold income, stability, repairs, upkeep, and decree lifecycle.
-- Influence, corruption, pressure assignment, counter-bribes, and purges.
-- Region card drafting, set cash-ins, discard limits, and counter-draft choices.
-- Era-based victory warnings, sudden death, and mandate unlocks.
-- Request-only bot strategies and fixed-seed simulation metrics.
-- Human vs human and human vs bot play.
-- Manual legal-action JSON inspection and submission.
-- Browser Agent Mode through a local invite URL, `BroadcastChannel`, `localStorage` debug snapshots, and an optional `window.HexSovereignAgent` page API.
+- Agents can only use known catalog part IDs.
+- Purchases must be affordable and have positive integer quantities.
+- Inventory persists; builds consume owned quantities for the submitted
+  blueprint but do not destroy inventory.
+- Blueprints use bounded integer grid coordinates, stable block IDs, 90-degree
+  rotations, occupied-cell checks, owned quantity checks, and connected-grid
+  checks.
+- Strategically bad builds are valid if they are processable.
+- Controls are generated from installed modules.
+- Turn plans must use generated controls.
+- Resolver output is deterministic for identical seed and input.
+- Replay output is compact event data, not rendered animation.
+- Session creation returns red/blue claim capabilities to the creator only.
+- Claimed roles receive bearer tokens for private state and plan submission.
+- Stored claim and role tokens are hashed before Durable Object persistence.
+- Sessions expire after a bounded TTL.
+- Claim, state, and submission calls have basic per-action rate limits.
+- Public state redacts claim tokens, bearer tokens, inventories, blueprints,
+  turn plans, and controls.
+- The session opens plan submission only after both roles are claimed.
+- Combat resolves automatically when both valid round plans are submitted.
 
-## Browser Agent Mode
+## Worker Routes
 
-Browser Agent Mode lets a browser-control agent inspect the current request, choose from legal actions, and submit a selected action ID inside the static frontend. The controller validates match ID, seat token, active seat, request ID, and legal action before applying an engine transition.
+```txt
+GET  /agent-spec.json
+POST /sessions
+POST /sessions/:sessionId/claim
+GET  /sessions/:sessionId/public
+GET  /sessions/:sessionId/state       Authorization: Bearer <role token>
+POST /sessions/:sessionId/round-plan  Authorization: Bearer <role token>
+GET  /sessions/:sessionId/replay
+```
 
-This is a browser-local legal-action protocol. It is not a public HTTP API, real online multiplayer, remote AI multiplayer, or backend persistence layer.
+## Known Gaps
 
-## Bridge And Backend Boundary
-
-The localhost bridge is deferred until Browser Agent Mode is proven in a real browser session. It must not change the hosted app's public claim: the portfolio build remains a static frontend with a browser-local protocol.
-
-An optional backend or shared-match service would need persistence, an action validation endpoint, an event stream or websocket, a persistent match store, and seat tokens. Those are product expansion requirements, not part of the current GitHub Pages build.
-
-## Limitations
-
-- There is no backend, localhost bridge, public HTTP API, or real online multiplayer in the current build.
-- Seat tokens are browser-local demo authorization, not network security.
-- Balance is prototype-level.
-- Simulation metrics are a balance aid, not proof of production-grade game balance.
-
-## Source Notes
-
-The implementation follows the Hex Sovereign design and completion notes under `architecture-notes/`, with the current build scoped to deterministic engine behavior, playable board state, legal-action protocol validation, browser-local agent support, and honest portfolio case-study framing.
+- Wrangler config is checked in, but real Cloudflare project binding,
+  authentication, domain routing, and deployment smoke tests are not done.
+- Auth is still capability-token MVP auth, not production identity, revocation,
+  abuse prevention, or account security.
+- No HTTP polling client.
+- No agent cockpit or referee dashboard UI.
+- No Babylon replay renderer.
+- No economy phase machine across rounds.
+- Resolver is intentionally shallow and suitable only as a first deterministic
+  contract, not as balanced combat.
