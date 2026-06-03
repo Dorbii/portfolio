@@ -1,0 +1,1341 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import {
+  applyAction,
+  cellId,
+  chooseBotAction,
+  createAgentRequest,
+  createMatch,
+  DEFAULT_FEATURE_FLAGS,
+  DEFAULT_RULES_VERSION,
+  deriveDomains,
+  getLegalActions,
+  getNeighborIdsForCoord,
+  getPublicState,
+  submitProtocolAction,
+} from './engine.js'
+
+const tokenFor = (seat) => `${seat}-token`
+
+function stateWithStones(stones, config = {}) {
+  const state = createMatch({ matchId: 'test-match', ...config })
+
+  return {
+    ...state,
+    board: {
+      ...state.board,
+      cells: state.board.cells.map((cell) => ({
+        ...cell,
+        occupant: Object.hasOwn(stones, cell.id) ? stones[cell.id] : null,
+      })),
+    },
+    players: {
+      black: {
+        ...state.players.black,
+        captures: 0,
+      },
+      white: {
+        ...state.players.white,
+        captures: 0,
+      },
+    },
+    passStreak: 0,
+    lastMove: null,
+  }
+}
+
+function occupantAt(state, targetId) {
+  return state.board.cells.find((cell) => cell.id === targetId)?.occupant
+}
+
+function actionForCell(state, seat, targetId, type = 'PLACE_STONE') {
+  const action = getLegalActions(state, seat).find(
+    (candidate) =>
+      candidate.type === type && candidate.payload.cellId === targetId,
+  )
+
+  assert.ok(action, `Expected a legal ${type} at ${targetId}`)
+  return action
+}
+
+function passActionFor(state, seat) {
+  const action = getLegalActions(state, seat).find(
+    (candidate) => candidate.type === 'PASS',
+  )
+
+  assert.ok(action, `Expected ${seat} to have a pass action`)
+  return action
+}
+
+function protocolSubmission(state, seat, selectedActionId) {
+  const request = createAgentRequest(state, seat)
+
+  return {
+    type: 'AGENT_SUBMIT_ACTION',
+    requestId: request.requestId,
+    matchId: state.matchId,
+    seat,
+    selectedActionId,
+    token: tokenFor(seat),
+  }
+}
+
+function expectProtocolRejection(state, submission, options, reason) {
+  const before = JSON.stringify(state)
+  const result = submitProtocolAction(state, submission, options)
+
+  assert.equal(result.accepted, false)
+  assert.equal(result.reason, reason)
+  assert.equal(result.state, state)
+  assert.equal(JSON.stringify(state), before)
+}
+
+test('creates a deterministic radius board and stable neighbor IDs', () => {
+  const state = createMatch()
+  const ids = state.board.cells.map((cell) => cell.id)
+
+  assert.equal(state.board.cells.length, 61)
+  assert.equal(new Set(ids).size, ids.length)
+  assert.equal(ids[0], '-4,0')
+  assert.equal(ids.at(-1), '4,0')
+  assert.equal(cellId(-2, 3), '-2,3')
+  assert.equal(getNeighborIdsForCoord(0, 0, state.board.radius).length, 6)
+  assert.equal(getNeighborIdsForCoord(4, 0, state.board.radius).length, 3)
+})
+
+test('creates matches with deterministic default rules config', () => {
+  const state = createMatch()
+
+  assert.equal(state.rulesVersion, DEFAULT_RULES_VERSION)
+  assert.deepEqual(state.featureFlags, DEFAULT_FEATURE_FLAGS)
+  assert.notEqual(state.featureFlags, DEFAULT_FEATURE_FLAGS)
+})
+
+test('merges explicit feature flag overrides without changing default flags', () => {
+  const state = createMatch({
+    rulesVersion: 'expansion-prep',
+    featureFlags: {
+      reinforcements: true,
+    },
+  })
+
+  assert.equal(state.rulesVersion, 'expansion-prep')
+  assert.equal(state.featureFlags.reinforcements, true)
+  assert.equal(state.featureFlags.income, false)
+  assert.equal(DEFAULT_FEATURE_FLAGS.reinforcements, false)
+})
+
+test('generates placements and pass actions only for the active seat', () => {
+  const state = createMatch()
+  const actions = getLegalActions(state, 'black')
+  const placementCellIds = new Set(
+    actions
+      .filter((action) => action.type === 'PLACE_STONE')
+      .map((action) => action.payload.cellId),
+  )
+
+  assert.equal(getLegalActions(state, 'white').length, 0)
+  assert.ok(actions.some((action) => action.type === 'PASS'))
+  assert.equal(placementCellIds.has('-1,2'), false)
+  assert.equal(placementCellIds.has('0,0'), false)
+  assert.equal(actions.every((action) => action.seat === 'black'), true)
+})
+
+test('feature flag off has no reinforcement legal actions', () => {
+  const state = createMatch({
+    initialReinforcements: {
+      black: 1,
+      white: 1,
+    },
+  })
+  const actions = getLegalActions(state, 'black')
+
+  assert.equal(state.featureFlags.reinforcements, false)
+  assert.equal(state.players.black.reinforcements, undefined)
+  assert.equal(actions.some((action) => action.type === 'SPEND_REINFORCEMENT'), false)
+  assert.ok(actions.some((action) => action.type === 'PLACE_STONE'))
+  assert.ok(actions.some((action) => action.type === 'PASS'))
+})
+
+test('seeded reinforcement tokens expose state and legal spend actions', () => {
+  const state = createMatch({
+    featureFlags: {
+      reinforcements: true,
+    },
+    initialReinforcements: {
+      black: 5,
+      white: -1,
+    },
+    reinforcements: {
+      reserveCap: 2,
+    },
+  })
+  const actions = getLegalActions(state, 'black')
+  const placements = actions.filter((action) => action.type === 'PLACE_STONE')
+  const reinforcements = actions.filter(
+    (action) => action.type === 'SPEND_REINFORCEMENT',
+  )
+
+  assert.deepEqual(state.players.black.reinforcements, {
+    tokens: 2,
+    maxPerRound: 1,
+    reserveCap: 2,
+    spentThisRound: 0,
+    lastSpentRound: null,
+    lastSpentCycle: null,
+  })
+  assert.equal(state.players.white.reinforcements.tokens, 0)
+  assert.equal(reinforcements.length, placements.length)
+  assert.ok(reinforcements.length > 0)
+  assert.equal(
+    reinforcements.every((action) => action.seat === 'black'),
+    true,
+  )
+})
+
+test('captures a single surrounded group', () => {
+  const state = stateWithStones({
+    '0,1': 'white',
+    '1,0': 'black',
+    '-1,1': 'black',
+    '-1,2': 'black',
+    '0,2': 'black',
+  })
+  const action = actionForCell(state, 'black', '1,1')
+
+  assert.equal(action.preview.capturedCount, 1)
+  assert.deepEqual(action.preview.capturedIds, ['0,1'])
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(occupantAt(result.state, '1,1'), 'black')
+  assert.equal(occupantAt(result.state, '0,1'), null)
+  assert.equal(result.state.players.black.captures, 1)
+  assert.equal(occupantAt(state, '0,1'), 'white')
+})
+
+test('reinforcement capture mirrors normal single-capture placement', () => {
+  const state = stateWithStones(
+    {
+      '0,1': 'white',
+      '1,0': 'black',
+      '-1,1': 'black',
+      '-1,2': 'black',
+      '0,2': 'black',
+    },
+    {
+      featureFlags: {
+        reinforcements: true,
+      },
+      initialReinforcements: {
+        black: 1,
+      },
+    },
+  )
+  const action = actionForCell(state, 'black', '1,1', 'SPEND_REINFORCEMENT')
+
+  assert.equal(action.preview.capturedCount, 1)
+  assert.deepEqual(action.preview.capturedIds, ['0,1'])
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(occupantAt(result.state, '1,1'), 'black')
+  assert.equal(occupantAt(result.state, '0,1'), null)
+  assert.equal(result.state.players.black.captures, 1)
+  assert.equal(result.state.players.black.reinforcements.tokens, 0)
+  assert.equal(result.state.players.black.reinforcements.spentThisRound, 1)
+  assert.equal(result.state.players.black.reinforcements.lastSpentRound, 1)
+  assert.equal(result.state.players.black.reinforcements.lastSpentCycle, 1)
+  assert.equal(result.state.activeSeat, 'black')
+  assert.equal(result.state.turn, 1)
+  assert.equal(result.state.round, 1)
+  assert.equal(result.state.cycle, 1)
+  assert.equal(result.state.requestCounter, 2)
+  assert.equal(result.state.passStreak, 0)
+  assert.deepEqual(result.state.lastMove, {
+    type: 'SPEND_REINFORCEMENT',
+    seat: 'black',
+    cellId: '1,1',
+    capturedIds: ['0,1'],
+  })
+  assert.equal(occupantAt(state, '0,1'), 'white')
+})
+
+test('captures multiple adjacent groups with one placement', () => {
+  const state = stateWithStones({
+    '-1,1': 'white',
+    '1,1': 'white',
+    '-1,0': 'black',
+    '-2,1': 'black',
+    '-2,2': 'black',
+    '-1,2': 'black',
+    '2,0': 'black',
+    '1,0': 'black',
+    '0,2': 'black',
+    '1,2': 'black',
+  })
+  const action = actionForCell(state, 'black', '0,1')
+
+  assert.equal(action.preview.capturedCount, 2)
+  assert.deepEqual([...action.preview.capturedIds].sort(), ['-1,1', '1,1'])
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(occupantAt(result.state, '0,1'), 'black')
+  assert.equal(occupantAt(result.state, '-1,1'), null)
+  assert.equal(occupantAt(result.state, '1,1'), null)
+  assert.equal(result.state.players.black.captures, 2)
+})
+
+test('rejects suicidal placements without mutating state', () => {
+  const state = stateWithStones({
+    '1,1': 'white',
+    '1,0': 'white',
+    '-1,1': 'white',
+    '-1,2': 'white',
+    '0,2': 'white',
+  })
+  const actionIds = getLegalActions(state, 'black').map((action) => action.id)
+  const suicideActionId = 'turn-1-black-place-0,1'
+  const before = JSON.stringify(state)
+  const result = applyAction(state, suicideActionId, 'black')
+
+  assert.equal(actionIds.includes(suicideActionId), false)
+  assert.equal(result.accepted, false)
+  assert.equal(result.reason, 'ACTION_NOT_FOUND')
+  assert.equal(result.state, state)
+  assert.equal(JSON.stringify(state), before)
+})
+
+test('reinforcement suicide is not legal and protocol submit does not mutate', () => {
+  const state = stateWithStones(
+    {
+      '1,1': 'white',
+      '1,0': 'white',
+      '-1,1': 'white',
+      '-1,2': 'white',
+      '0,2': 'white',
+    },
+    {
+      featureFlags: {
+        reinforcements: true,
+      },
+      initialReinforcements: {
+        black: 1,
+      },
+    },
+  )
+  const actionIds = getLegalActions(state, 'black').map((action) => action.id)
+  const suicideActionId = 'turn-1-black-reinforcement-0,1'
+
+  assert.equal(actionIds.includes(suicideActionId), false)
+  expectProtocolRejection(
+    state,
+    protocolSubmission(state, 'black', suicideActionId),
+    { expectedToken: tokenFor('black') },
+    'ACTION_NOT_FOUND',
+  )
+})
+
+test('allows capture before suicide is evaluated', () => {
+  const state = stateWithStones(
+    {
+      '0,-1': 'white',
+      '-1,1': 'white',
+      '1,-1': 'black',
+      '0,1': 'black',
+    },
+    { radius: 1 },
+  )
+  const action = actionForCell(state, 'black', '-1,0')
+
+  assert.equal(action.preview.capturedCount, 2)
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(occupantAt(result.state, '-1,0'), 'black')
+  assert.equal(occupantAt(result.state, '0,-1'), null)
+  assert.equal(occupantAt(result.state, '-1,1'), null)
+})
+
+test('pass actions alternate seats and advance rounds and cycles', () => {
+  let state = createMatch()
+  const firstPass = applyAction(state, passActionFor(state, 'black').id, 'black')
+
+  assert.equal(firstPass.accepted, true)
+  assert.equal(firstPass.state.turn, 2)
+  assert.equal(firstPass.state.round, 1)
+  assert.equal(firstPass.state.cycle, 1)
+  assert.equal(firstPass.state.activeSeat, 'white')
+  assert.equal(firstPass.state.passStreak, 1)
+
+  state = firstPass.state
+
+  for (let index = 0; index < 7; index += 1) {
+    const seat = state.activeSeat
+    const result = applyAction(state, passActionFor(state, seat).id, seat)
+
+    assert.equal(result.accepted, true)
+    state = result.state
+  }
+
+  assert.equal(state.turn, 9)
+  assert.equal(state.round, 1)
+  assert.equal(state.cycle, 2)
+  assert.equal(state.activeSeat, 'black')
+  assert.equal(state.passStreak, 8)
+})
+
+test('reinforcement spend cap resets for the seat next round', () => {
+  let state = createMatch({
+    featureFlags: {
+      reinforcements: true,
+    },
+    initialReinforcements: {
+      black: 2,
+    },
+  })
+  const spendAction = actionForCell(
+    state,
+    'black',
+    '0,1',
+    'SPEND_REINFORCEMENT',
+  )
+  let result = applyAction(state, spendAction.id, 'black')
+
+  assert.equal(result.accepted, true)
+  state = result.state
+  assert.equal(state.players.black.reinforcements.tokens, 1)
+  assert.equal(
+    getLegalActions(state, 'black').some(
+      (action) => action.type === 'SPEND_REINFORCEMENT',
+    ),
+    false,
+  )
+
+  result = applyAction(state, passActionFor(state, 'black').id, 'black')
+  assert.equal(result.accepted, true)
+  state = result.state
+
+  result = applyAction(state, passActionFor(state, 'white').id, 'white')
+  assert.equal(result.accepted, true)
+  state = result.state
+
+  assert.equal(state.activeSeat, 'black')
+  assert.equal(state.round, 2)
+  assert.equal(state.players.black.reinforcements.tokens, 1)
+  assert.equal(state.players.black.reinforcements.spentThisRound, 0)
+  assert.equal(
+    getLegalActions(state, 'black').some(
+      (action) => action.type === 'SPEND_REINFORCEMENT',
+    ),
+    true,
+  )
+})
+
+test('derives controlled Domains from connected anchor-zone groups', () => {
+  const domains = deriveDomains(createMatch())
+  const blackCapital = domains.find((domain) => domain.anchorId === 'black-capital')
+  const whiteCapital = domains.find((domain) => domain.anchorId === 'white-capital')
+
+  assert.equal(blackCapital.status, 'controlled')
+  assert.equal(blackCapital.owner, 'black')
+  assert.equal(blackCapital.size, 'small')
+  assert.equal(whiteCapital.status, 'controlled')
+  assert.equal(whiteCapital.owner, 'white')
+  assert.equal(whiteCapital.size, 'small')
+})
+
+test('derives contested Domains when valid groups tie', () => {
+  const state = stateWithStones({
+    '-1,0': 'black',
+    '-1,1': 'black',
+    '1,0': 'white',
+    '1,-1': 'white',
+  })
+  const ruins = deriveDomains(state).find((domain) => domain.anchorId === 'ruins')
+
+  assert.equal(ruins.status, 'contested')
+  assert.equal(ruins.owner, null)
+  assert.deepEqual(ruins.zoneOccupancy, { black: 2, white: 2 })
+})
+
+test('creates protocol requests with public state, private state, and legal actions', () => {
+  const state = createMatch({
+    matchId: 'protocol-match',
+    featureFlags: { reinforcements: true },
+  })
+  const request = createAgentRequest(state, 'black')
+
+  assert.equal(request.type, 'AGENT_REQUEST')
+  assert.equal(request.matchId, 'protocol-match')
+  assert.equal(request.requestId, 'protocol-match:turn-1:request-1:black')
+  assert.equal(request.seat, 'black')
+  assert.equal(request.rulesVersion, DEFAULT_RULES_VERSION)
+  assert.equal(request.featureFlags.reinforcements, true)
+  assert.equal(request.publicState.matchId, state.matchId)
+  assert.equal(request.publicState.rulesVersion, DEFAULT_RULES_VERSION)
+  assert.equal(request.publicState.featureFlags.reinforcements, true)
+  assert.equal(request.privateState.seat, 'black')
+  assert.ok(request.legalActions.length > 0)
+})
+
+test('projects public state and agent requests with safe projection copies', () => {
+  const state = {
+    ...createMatch({
+      featureFlags: {
+        reinforcements: true,
+      },
+      initialReinforcements: {
+        black: 1,
+      },
+    }),
+    lastMove: {
+      type: 'PLACE_STONE',
+      seat: 'black',
+      cellId: '1,1',
+      capturedIds: ['0,1'],
+    },
+  }
+  const publicState = getPublicState(state)
+  const request = createAgentRequest(state, 'black')
+
+  assert.notEqual(publicState.featureFlags, state.featureFlags)
+  assert.notEqual(request.featureFlags, state.featureFlags)
+  assert.notEqual(request.publicState.featureFlags, state.featureFlags)
+  assert.notEqual(publicState.players, state.players)
+  assert.notEqual(publicState.players.black, state.players.black)
+  assert.notEqual(
+    publicState.players.black.reinforcements,
+    state.players.black.reinforcements,
+  )
+  assert.notEqual(
+    request.publicState.players.black.reinforcements,
+    state.players.black.reinforcements,
+  )
+  assert.notEqual(publicState.lastMove, state.lastMove)
+  assert.notEqual(publicState.lastMove.capturedIds, state.lastMove.capturedIds)
+
+  publicState.featureFlags.reinforcements = false
+  request.featureFlags.reinforcements = false
+  request.publicState.featureFlags.reinforcements = false
+  publicState.players.black.reinforcements.tokens = 99
+  request.publicState.players.black.reinforcements.tokens = 88
+  publicState.lastMove.capturedIds.push('1,0')
+
+  assert.equal(state.featureFlags.reinforcements, true)
+  assert.equal(state.players.black.reinforcements.tokens, 1)
+  assert.deepEqual(state.lastMove.capturedIds, ['0,1'])
+})
+
+test('accepts current protocol submissions through the engine transition', () => {
+  const state = createMatch({ matchId: 'protocol-match' })
+  const action = getLegalActions(state, 'black').find(
+    (candidate) => candidate.type === 'PLACE_STONE',
+  )
+  const result = submitProtocolAction(
+    state,
+    protocolSubmission(state, 'black', action.id),
+    { expectedToken: tokenFor('black') },
+  )
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.action.id, action.id)
+  assert.notEqual(result.state, state)
+  assert.equal(result.state.activeSeat, 'white')
+  assert.equal(result.state.turn, 2)
+  assert.equal(occupantAt(result.state, action.payload.cellId), 'black')
+})
+
+test('rejects stale protocol requests after a same-turn reinforcement spend', () => {
+  let state = createMatch({
+    matchId: 'same-turn-stale-match',
+    featureFlags: {
+      reinforcements: true,
+    },
+    initialReinforcements: {
+      black: 1,
+    },
+  })
+  const oldRequest = createAgentRequest(state, 'black')
+  const oldPassSubmission = {
+    type: 'AGENT_SUBMIT_ACTION',
+    requestId: oldRequest.requestId,
+    matchId: state.matchId,
+    seat: 'black',
+    selectedActionId: oldRequest.legalActions.find(
+      (action) => action.type === 'PASS',
+    ).id,
+    token: tokenFor('black'),
+  }
+  const spendAction = oldRequest.legalActions.find(
+    (action) =>
+      action.type === 'SPEND_REINFORCEMENT' && action.payload.cellId === '0,1',
+  )
+  assert.ok(spendAction)
+  const result = submitProtocolAction(
+    state,
+    {
+      type: 'AGENT_SUBMIT_ACTION',
+      requestId: oldRequest.requestId,
+      matchId: state.matchId,
+      seat: 'black',
+      selectedActionId: spendAction.id,
+      token: tokenFor('black'),
+    },
+    { expectedToken: tokenFor('black') },
+  )
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.turn, 1)
+  assert.equal(result.state.activeSeat, 'black')
+  assert.equal(result.state.requestCounter, 2)
+  state = result.state
+  expectProtocolRejection(
+    state,
+    oldPassSubmission,
+    { expectedToken: tokenFor('black') },
+    'STALE_REQUEST',
+  )
+
+  const currentRequest = createAgentRequest(state, 'black')
+
+  expectProtocolRejection(
+    state,
+    {
+      type: 'AGENT_SUBMIT_ACTION',
+      requestId: currentRequest.requestId,
+      matchId: state.matchId,
+      seat: 'black',
+      selectedActionId: 'turn-1-black-reinforcement-1,1',
+      token: tokenFor('black'),
+    },
+    { expectedToken: tokenFor('black') },
+    'ACTION_NOT_FOUND',
+  )
+})
+
+test('rejects stale protocol requests after the turn returns to the same seat', () => {
+  let state = createMatch({ matchId: 'stale-match' })
+  const oldRequest = createAgentRequest(state, 'black')
+  const oldSubmission = {
+    type: 'AGENT_SUBMIT_ACTION',
+    requestId: oldRequest.requestId,
+    matchId: state.matchId,
+    seat: 'black',
+    selectedActionId: oldRequest.legalActions.find(
+      (action) => action.type === 'PASS',
+    ).id,
+    token: tokenFor('black'),
+  }
+  let result = submitProtocolAction(state, oldSubmission, {
+    expectedToken: tokenFor('black'),
+  })
+
+  assert.equal(result.accepted, true)
+  state = result.state
+
+  const whitePass = passActionFor(state, 'white')
+  result = submitProtocolAction(
+    state,
+    protocolSubmission(state, 'white', whitePass.id),
+    { expectedToken: tokenFor('white') },
+  )
+
+  assert.equal(result.accepted, true)
+  state = result.state
+  expectProtocolRejection(
+    state,
+    oldSubmission,
+    { expectedToken: tokenFor('black') },
+    'STALE_REQUEST',
+  )
+})
+
+test('rejects wrong seats, bad tokens, and unlisted actions without mutation', () => {
+  const state = createMatch({ matchId: 'reject-match' })
+  const request = createAgentRequest(state, 'black')
+
+  expectProtocolRejection(
+    state,
+    {
+      type: 'AGENT_SUBMIT_ACTION',
+      requestId: request.requestId,
+      matchId: state.matchId,
+      seat: 'white',
+      selectedActionId: request.legalActions[0].id,
+      token: tokenFor('white'),
+    },
+    { expectedToken: tokenFor('white') },
+    'WRONG_SEAT',
+  )
+
+  expectProtocolRejection(
+    state,
+    {
+      type: 'AGENT_SUBMIT_ACTION',
+      requestId: request.requestId,
+      matchId: state.matchId,
+      seat: 'black',
+      selectedActionId: request.legalActions[0].id,
+      token: 'wrong-token',
+    },
+    { expectedToken: tokenFor('black') },
+    'BAD_TOKEN',
+  )
+
+  expectProtocolRejection(
+    state,
+    protocolSubmission(state, 'black', 'not-a-real-action'),
+    { expectedToken: tokenFor('black') },
+    'ACTION_NOT_FOUND',
+  )
+
+  expectProtocolRejection(
+    state,
+    protocolSubmission(state, 'black', 'turn-1-black-place--1,2'),
+    { expectedToken: tokenFor('black') },
+    'ACTION_NOT_FOUND',
+  )
+})
+
+test('bot choices stay inside the legal action ID set', () => {
+  const state = createMatch()
+  const request = createAgentRequest(state, 'black')
+  const selectedActionId = chooseBotAction(request)
+  const legalIds = new Set(request.legalActions.map((action) => action.id))
+
+  assert.equal(legalIds.has(selectedActionId), true)
+})
+
+test('bot can choose a high-value legal reinforcement action from request actions', () => {
+  const state = stateWithStones(
+    {
+      '0,1': 'white',
+      '1,0': 'black',
+      '-1,1': 'black',
+      '-1,2': 'black',
+      '0,2': 'black',
+    },
+    {
+      featureFlags: {
+        reinforcements: true,
+      },
+      initialReinforcements: {
+        black: 1,
+      },
+    },
+  )
+  const request = createAgentRequest(state, 'black')
+  const reinforcementAction = request.legalActions.find(
+    (action) =>
+      action.type === 'SPEND_REINFORCEMENT' && action.payload.cellId === '1,1',
+  )
+  const selectedActionId = chooseBotAction(request)
+  const legalIds = new Set(request.legalActions.map((action) => action.id))
+
+  assert.ok(reinforcementAction)
+  assert.equal(reinforcementAction.preview.capturedCount, 1)
+  assert.equal(selectedActionId, reinforcementAction.id)
+  assert.equal(legalIds.has(selectedActionId), true)
+})
+
+test('cycle resolution grants income from stable controlled Domains and decays stability', () => {
+  let state = createMatch({
+    featureFlags: {
+      income: true,
+      stability: true,
+    },
+  })
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    const result = applyAction(state, passActionFor(state, seat).id, seat)
+
+    assert.equal(result.accepted, true)
+    state = result.state
+  }
+
+  const blackCapital = deriveDomains(state).find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+  const whiteCapital = deriveDomains(state).find(
+    (domain) => domain.anchorId === 'white-capital',
+  )
+
+  assert.equal(state.cycle, 2)
+  assert.equal(state.players.black.gold, 1)
+  assert.equal(state.players.white.gold, 1)
+  assert.equal(blackCapital.income, 1)
+  assert.equal(blackCapital.stability, 1)
+  assert.equal(blackCapital.baseStability, 2)
+  assert.equal(whiteCapital.stability, 1)
+  assert.ok(
+    state.eventLog.some(
+      (event) =>
+        event.kind === 'DOMAIN_INCOME' &&
+        event.message.includes('Black gained 1 gold'),
+    ),
+  )
+  assert.ok(
+    state.eventLog.some(
+      (event) =>
+        event.kind === 'DOMAIN_DECAY' &&
+        event.message.includes('stability fell to 1/2'),
+    ),
+  )
+})
+
+test('contested Domains shut down income and clear persisted stability owner', () => {
+  let state = stateWithStones(
+    {
+      '-1,0': 'black',
+      '-1,1': 'black',
+      '1,0': 'white',
+      '1,-1': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+      },
+      initialGold: {
+        black: 0,
+        white: 0,
+      },
+      initialDomains: {
+        ruins: {
+          stability: 2,
+          lastOwner: 'black',
+        },
+      },
+    },
+  )
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    state = applyAction(state, passActionFor(state, seat).id, seat).state
+  }
+
+  const ruins = deriveDomains(state).find((domain) => domain.anchorId === 'ruins')
+
+  assert.equal(ruins.status, 'contested')
+  assert.equal(ruins.income, 0)
+  assert.equal(ruins.economyStatus, 'shutdown')
+  assert.deepEqual(state.domains.ruins, {
+    stability: 0,
+    lastOwner: 'black',
+    decrees: [],
+  })
+  assert.equal(state.players.black.gold, 0)
+  assert.equal(state.players.white.gold, 0)
+  assert.ok(
+    state.eventLog.some(
+      (event) =>
+        event.kind === 'DOMAIN_SHUTDOWN' &&
+        event.message.includes('Ash Marsh Ruins'),
+    ),
+  )
+})
+
+test('repair actions spend gold and refresh the same-turn request without advancing time', () => {
+  const state = createMatch({
+    featureFlags: {
+      income: true,
+      stability: true,
+    },
+    initialGold: {
+      black: 2,
+    },
+    initialDomains: {
+      'black-capital': {
+        stability: 1,
+        lastOwner: 'black',
+      },
+    },
+  })
+  const action = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'REPAIR_DOMAIN' &&
+      candidate.payload.anchorId === 'black-capital',
+  )
+
+  assert.ok(action)
+  assert.deepEqual(action.preview, {
+    stabilityBefore: 1,
+    stabilityAfter: 2,
+  })
+
+  const result = applyAction(state, action.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.turn, 1)
+  assert.equal(result.state.activeSeat, 'black')
+  assert.equal(result.state.players.black.gold, 0)
+  assert.equal(result.state.domains['black-capital'].stability, 2)
+  assert.equal(result.state.requestCounter, 2)
+  assert.ok(
+    result.state.eventLog.some((event) => event.kind === 'REPAIR_DOMAIN'),
+  )
+})
+
+test('protocol exposes economy state and repair choices through safe projections', () => {
+  const state = createMatch({
+    matchId: 'economy-protocol',
+    featureFlags: {
+      income: true,
+      stability: true,
+    },
+    initialGold: {
+      black: 2,
+    },
+    initialDomains: {
+      'black-capital': {
+        stability: 1,
+        lastOwner: 'black',
+      },
+    },
+  })
+  const request = createAgentRequest(state, 'black')
+  const publicBlackCapital = request.publicState.domains.find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+  const repair = request.legalActions.find(
+    (action) => action.type === 'REPAIR_DOMAIN',
+  )
+
+  assert.equal(request.publicState.players.black.gold, 2)
+  assert.equal(request.publicState.players.black.upkeepDue, 0)
+  assert.equal(publicBlackCapital.stability, 1)
+  assert.equal(publicBlackCapital.baseStability, 2)
+  assert.equal(publicBlackCapital.income, 1)
+  assert.equal(publicBlackCapital.canRepair, true)
+  assert.ok(repair)
+  assert.equal(repair.payload.cost, 2)
+
+  request.publicState.players.black.gold = 99
+  publicBlackCapital.stability = 99
+
+  assert.equal(state.players.black.gold, 2)
+  assert.equal(deriveDomains(state).find((domain) => domain.anchorId === 'black-capital').stability, 1)
+})
+
+test('bot can choose repair legal actions when no placement scores higher', () => {
+  const state = createMatch({
+    radius: 1,
+    featureFlags: {
+      income: true,
+      stability: true,
+    },
+    initialGold: {
+      black: 2,
+    },
+    initialDomains: {
+      ruins: {
+        stability: 1,
+        lastOwner: 'black',
+      },
+    },
+  })
+  const controlledState = {
+    ...state,
+    board: {
+      ...state.board,
+      cells: state.board.cells.map((cell) => ({
+        ...cell,
+        occupant:
+          cell.id === '-1,0' || cell.id === '0,-1' ? 'black' : cell.occupant,
+      })),
+    },
+  }
+  const request = createAgentRequest(controlledState, 'black')
+  const selectedActionId = chooseBotAction(request)
+  const legalIds = new Set(request.legalActions.map((action) => action.id))
+
+  assert.ok(request.legalActions.some((action) => action.type === 'REPAIR_DOMAIN'))
+  assert.equal(legalIds.has(selectedActionId), true)
+})
+
+test('decree slots expose buy actions through public protocol and enforce capacity', () => {
+  let state = createMatch({
+    matchId: 'decree-capacity',
+    featureFlags: {
+      income: true,
+      stability: true,
+      decrees: true,
+    },
+    initialGold: {
+      black: 6,
+    },
+  })
+  let request = createAgentRequest(state, 'black')
+  const publicCapital = request.publicState.domains.find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+
+  assert.equal(publicCapital.decreeSlots, 2)
+  assert.equal(publicCapital.decreeSlotsUsed, 0)
+  assert.equal(publicCapital.decreeSlotsFree, 2)
+
+  for (let index = 0; index < 2; index += 1) {
+    const action = getLegalActions(state, 'black').find(
+      (candidate) =>
+        candidate.type === 'BUY_DECREE' &&
+        candidate.payload.anchorId === 'black-capital',
+    )
+
+    assert.ok(action)
+    const result = submitProtocolAction(
+      state,
+      protocolSubmission(state, 'black', action.id),
+      { expectedToken: tokenFor('black') },
+    )
+
+    assert.equal(result.accepted, true)
+    state = result.state
+  }
+
+  request = createAgentRequest(state, 'black')
+  const filledCapital = request.publicState.domains.find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+
+  assert.equal(filledCapital.decreeSlotsUsed, 2)
+  assert.equal(filledCapital.decreeSlotsFree, 0)
+  assert.equal(
+    request.legalActions.some(
+      (action) =>
+        action.type === 'BUY_DECREE' &&
+        action.payload.anchorId === 'black-capital',
+    ),
+    false,
+  )
+  assert.equal(state.players.black.gold, 4)
+  assert.ok(state.eventLog.some((event) => event.kind === 'BUY_DECREE'))
+})
+
+test('upgraded decrees produce income, create upkeep obligations, and pay through legal actions', () => {
+  let state = createMatch({
+    matchId: 'decree-upkeep',
+    featureFlags: {
+      income: true,
+      stability: true,
+      decrees: true,
+    },
+    initialGold: {
+      black: 6,
+    },
+  })
+
+  let action = getLegalActions(state, 'black').find(
+    (candidate) =>
+      candidate.type === 'BUY_DECREE' &&
+      candidate.payload.anchorId === 'black-capital',
+  )
+  state = applyAction(state, action.id, 'black').state
+
+  for (let level = 1; level < 3; level += 1) {
+    action = getLegalActions(state, 'black').find(
+      (candidate) =>
+        candidate.type === 'UPGRADE_DECREE' &&
+        candidate.payload.anchorId === 'black-capital',
+    )
+
+    assert.ok(action)
+    state = applyAction(state, action.id, 'black').state
+  }
+
+  const upgradedCapital = deriveDomains(state).find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+
+  assert.equal(upgradedCapital.decrees[0].level, 3)
+  assert.equal(upgradedCapital.decreeIncome, 3)
+  assert.equal(upgradedCapital.decreeUpkeep, 1)
+  assert.equal(state.players.black.gold, 2)
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    state = applyAction(state, passActionFor(state, seat).id, seat).state
+  }
+
+  assert.equal(state.cycle, 2)
+  assert.equal(state.players.black.gold, 6)
+  assert.equal(state.players.black.upkeepDue, 1)
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'DOMAIN_DECREE_UPKEEP'),
+  )
+
+  const upkeep = getLegalActions(state, 'black').find(
+    (candidate) => candidate.type === 'PAY_UPKEEP',
+  )
+  const result = applyAction(state, upkeep.id, 'black')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.players.black.gold, 5)
+  assert.equal(result.state.players.black.upkeepDue, 0)
+  assert.ok(result.state.eventLog.some((event) => event.kind === 'PAY_UPKEEP'))
+})
+
+test('contested Domains deactivate and decay decrees at cycle resolution', () => {
+  let state = stateWithStones(
+    {
+      '-1,0': 'black',
+      '-1,1': 'black',
+      '1,0': 'white',
+      '1,-1': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        decrees: true,
+      },
+      initialDomains: {
+        ruins: {
+          stability: 2,
+          lastOwner: 'black',
+          decrees: [
+            {
+              type: 'Tax Office',
+              level: 2,
+            },
+          ],
+        },
+      },
+    },
+  )
+
+  let ruins = deriveDomains(state).find((domain) => domain.anchorId === 'ruins')
+
+  assert.equal(ruins.status, 'contested')
+  assert.equal(ruins.decrees[0].status, 'inactive')
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    state = applyAction(state, passActionFor(state, seat).id, seat).state
+  }
+
+  assert.equal(state.domains.ruins.decrees[0].level, 1)
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'DOMAIN_DECREE_DECAY'),
+  )
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    state = applyAction(state, passActionFor(state, seat).id, seat).state
+  }
+
+  assert.deepEqual(state.domains.ruins.decrees, [])
+  assert.ok(
+    state.eventLog.some(
+      (event) =>
+        event.kind === 'DOMAIN_DECREE_DECAY' &&
+        event.message.includes('destroyed'),
+    ),
+  )
+})
+
+test('ownership flips ruin previous decrees and expose convert or scrap legal actions', () => {
+  let state = stateWithStones(
+    {
+      '-1,0': 'white',
+      '-1,1': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        decrees: true,
+      },
+      initialGold: {
+        white: 3,
+      },
+      initialDomains: {
+        ruins: {
+          stability: 2,
+          lastOwner: 'black',
+          decrees: [
+            {
+              type: 'Tax Office',
+              level: 2,
+            },
+          ],
+        },
+      },
+    },
+  )
+  state = {
+    ...state,
+    activeSeat: 'white',
+  }
+
+  let result = applyAction(state, passActionFor(state, 'white').id, 'white')
+
+  assert.equal(result.accepted, true)
+  state = result.state
+  assert.equal(state.domains.ruins.lastOwner, 'white')
+  assert.equal(state.domains.ruins.stability, 1)
+  assert.equal(state.domains.ruins.decrees[0].ruined, true)
+  assert.ok(
+    state.eventLog.some((event) => event.kind === 'DOMAIN_DECREES_RUINED'),
+  )
+
+  state = applyAction(state, passActionFor(state, 'black').id, 'black').state
+
+  const convert = getLegalActions(state, 'white').find(
+    (candidate) => candidate.type === 'CONVERT_RUINED_DECREE',
+  )
+  const scrap = getLegalActions(state, 'white').find(
+    (candidate) => candidate.type === 'SCRAP_RUINED_DECREE',
+  )
+
+  assert.ok(convert)
+  assert.equal(convert.preview.levelAfter, 2)
+  assert.ok(scrap)
+  assert.equal(scrap.preview.goldGain, 1)
+
+  result = applyAction(state, convert.id, 'white')
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.players.white.gold, 1)
+  assert.equal(result.state.domains.ruins.decrees[0].ruined, false)
+  assert.equal(result.state.domains.ruins.decrees[0].level, 2)
+
+  result = applyAction(state, scrap.id, 'white')
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.players.white.gold, 4)
+  assert.deepEqual(result.state.domains.ruins.decrees, [])
+  assert.ok(
+    result.state.eventLog.some(
+      (event) => event.kind === 'SCRAP_RUINED_DECREE',
+    ),
+  )
+})
+
+test('converting a ruined decree resets stability to the documented recovery value', () => {
+  const state = stateWithStones(
+    {
+      '-1,0': 'white',
+      '-1,1': 'white',
+    },
+    {
+      featureFlags: {
+        income: true,
+        stability: true,
+        decrees: true,
+      },
+      initialGold: {
+        white: 3,
+      },
+      initialDomains: {
+        ruins: {
+          stability: 2,
+          lastOwner: 'white',
+          decrees: [
+            {
+              type: 'Tax Office',
+              level: 2,
+              ruined: true,
+            },
+          ],
+        },
+      },
+    },
+  )
+  const whiteState = {
+    ...state,
+    activeSeat: 'white',
+  }
+  const convert = getLegalActions(whiteState, 'white').find(
+    (candidate) => candidate.type === 'CONVERT_RUINED_DECREE',
+  )
+
+  assert.ok(convert)
+  assert.equal(convert.preview.stabilityAfter, 1)
+
+  const result = applyAction(whiteState, convert.id, 'white')
+
+  assert.equal(result.accepted, true)
+  assert.equal(result.state.domains.ruins.stability, 1)
+  assert.equal(result.state.domains.ruins.decrees[0].ruined, false)
+})
+
+test('controlled depleted Domains deactivate and decay decrees at cycle resolution', () => {
+  let state = createMatch({
+    featureFlags: {
+      income: true,
+      stability: true,
+      decrees: true,
+    },
+    initialDomains: {
+      'black-capital': {
+        stability: 0,
+        lastOwner: 'black',
+        decrees: [
+          {
+            type: 'Tax Office',
+            level: 2,
+          },
+        ],
+      },
+    },
+  })
+  const blackCapital = deriveDomains(state).find(
+    (domain) => domain.anchorId === 'black-capital',
+  )
+
+  assert.equal(blackCapital.status, 'controlled')
+  assert.equal(blackCapital.economyStatus, 'shutdown')
+  assert.equal(blackCapital.decrees[0].status, 'inactive')
+
+  for (let index = 0; index < 8; index += 1) {
+    const seat = state.activeSeat
+    state = applyAction(state, passActionFor(state, seat).id, seat).state
+  }
+
+  assert.equal(state.domains['black-capital'].decrees[0].level, 1)
+  assert.ok(
+    state.eventLog.some(
+      (event) =>
+        event.kind === 'DOMAIN_DECREE_DECAY' &&
+        event.message.includes('depleted'),
+    ),
+  )
+})
+
+test('bot can choose decree legal actions through the request action set', () => {
+  const base = createMatch({
+    radius: 1,
+    featureFlags: {
+      decrees: true,
+    },
+    initialGold: {
+      black: 3,
+    },
+  })
+  const occupied = Object.fromEntries(
+    base.board.cells
+      .filter((cell) => cell.type === 'playable')
+      .map((cell) => [cell.id, 'black']),
+  )
+  const state = stateWithStones(occupied, {
+    radius: 1,
+    featureFlags: {
+      decrees: true,
+    },
+    initialGold: {
+      black: 3,
+    },
+  })
+  const request = createAgentRequest(state, 'black')
+  const selectedActionId = chooseBotAction(request)
+  const selected = request.legalActions.find(
+    (action) => action.id === selectedActionId,
+  )
+
+  assert.equal(selected.type, 'BUY_DECREE')
+})
