@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { chooseBotAction } from './game/bots'
-import AgentConsole from './hex-sovereign/components/AgentConsole'
-import BoardPanel from './hex-sovereign/components/BoardPanel'
-import CaseStudy from './hex-sovereign/components/CaseStudy'
-import EventLog from './hex-sovereign/components/EventLog'
-import PlayerPanel from './hex-sovereign/components/PlayerPanel'
-import ProtocolPanel from './hex-sovereign/components/ProtocolPanel'
-import SelectedPanel from './hex-sovereign/components/SelectedPanel'
-import VictoryBanner from './hex-sovereign/components/VictoryBanner'
+import { chooseBotAction } from '../../game/bots'
+import BoardPanel from '../../hex-sovereign/components/BoardPanel'
+import CaseStudy from '../../hex-sovereign/components/CaseStudy'
+import EventLog from '../../hex-sovereign/components/EventLog'
+import PlayerPanel from '../../hex-sovereign/components/PlayerPanel'
+import ProtocolPanel from '../../hex-sovereign/components/ProtocolPanel'
+import SelectedPanel from '../../hex-sovereign/components/SelectedPanel'
+import VictoryBanner from '../../hex-sovereign/components/VictoryBanner'
 import {
   assets,
   cardActionTypes,
   demoMatchConfig,
   domainActionTypes,
   pressureActionTypes,
-} from './hex-sovereign/config'
+} from '../../hex-sovereign/config'
 import {
   compactResult,
   computeBoardPositions,
@@ -22,10 +21,9 @@ import {
   createAgentApiRejection,
   createInviteUrl,
   getDomainTone,
-  getInitialRoute,
   getReinforcementSummary,
   makeSeatTokens,
-} from './hex-sovereign/uiLogic'
+} from '../../hex-sovereign/uiLogic'
 import {
   SEAT_LABELS,
   createAgentRequest,
@@ -34,25 +32,9 @@ import {
   getLegalActions,
   getPublicState,
   submitProtocolAction,
-} from './game/engine'
+} from '../../game/engine'
 
-function App() {
-  const [route, setRoute] = useState(getInitialRoute)
-
-  useEffect(() => {
-    const handleHashChange = () => setRoute(getInitialRoute())
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
-
-  if (route === 'agent') {
-    return <AgentConsole />
-  }
-
-  return <GameExperience />
-}
-
-function GameExperience() {
+export default function HexSovereignApp() {
   const [state, setState] = useState(() =>
     createMatch(demoMatchConfig),
   )
@@ -577,5 +559,3 @@ function GameExperience() {
     </main>
   )
 }
-
-export default App
