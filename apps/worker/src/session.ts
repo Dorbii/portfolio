@@ -1,5 +1,7 @@
 import {
   TEAM_ROLES,
+  validateSubmitRefereeAwardsRequestShape,
+  type AppliedRefereeAward,
   type ArenaConfig,
   type CombatSummary,
   type CreateSessionRequest,
@@ -7,6 +9,8 @@ import {
   type GeneratedControls,
   type InventoryItem,
   type PublicSessionState,
+  type RefereeAwardOption,
+  type RefereeAwardsResponse,
   type RelayErrorResponse,
   type RoleClaimRequest,
   type RoleClaimResponse,
@@ -16,10 +20,12 @@ import {
   type RoundSubmissionResponse,
   type SessionLogEvent,
   type SessionPhase,
+  type SubmitRefereeAwardsRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import { validateRoundSubmission } from '../../../packages/catalog/src/index.js'
 import {
+  createSeededRng,
   resolveCombat,
   type CombatResult,
 } from '../../../packages/sim/src/index.js'
@@ -34,16 +40,21 @@ const DEFAULT_ARENA: ArenaConfig = {
 
 const DEFAULT_MAX_ROUNDS = 7
 const DEFAULT_STARTING_GOLD = 100
+const DEFAULT_BASE_INCOME = 50
+const DEFAULT_INTEREST_RATE = 0.1
+const DEFAULT_INTEREST_CAP = 25
+const DEFAULT_WIN_STREAK_TARGET = 3
 const MAX_ROUNDS_LIMIT = 25
 const DEFAULT_SESSION_TTL_MS = 6 * 60 * 60 * 1000
 const MIN_SESSION_TTL_MS = 60 * 1000
 const MAX_SESSION_TTL_MS = 24 * 60 * 60 * 1000
 
-type TokenKind = 'claim' | 'role'
-type TokenFactory = (role: TeamRole, kind: TokenKind) => string
+type TokenKind = 'claim' | 'role' | 'referee'
+type TokenOwner = TeamRole | 'referee'
+type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
 type Clock = () => string
 type TokenHasher = (token: string) => Promise<string>
-type RateLimitAction = 'claim' | 'state' | 'submit'
+type RateLimitAction = 'claim' | 'state' | 'submit' | 'referee_awards'
 type RateLimitRule = {
   windowMs: number
   max: number
@@ -53,7 +64,78 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   claim: { windowMs: 60 * 1000, max: 20 },
   state: { windowMs: 60 * 1000, max: 120 },
   submit: { windowMs: 60 * 1000, max: 20 },
+  referee_awards: { windowMs: 60 * 1000, max: 20 },
 }
+
+type RefereeAwardCard = {
+  id: string
+  title: string
+  description: string
+  gold: number
+}
+
+const REFEREE_AWARD_CARDS: RefereeAwardCard[] = [
+  {
+    id: 'most-stylish',
+    title: 'Most Stylish',
+    description: 'Readable silhouette, memorable identity, and enough restraint to still look engineered.',
+    gold: 25,
+  },
+  {
+    id: 'coolest-idea',
+    title: 'Coolest Idea',
+    description: 'The build tried something specific instead of drifting into generic weapon mass.',
+    gold: 20,
+  },
+  {
+    id: 'best-engineering',
+    title: 'Best Engineering',
+    description: 'The design had the cleanest relationship between parts, motion, and fight plan.',
+    gold: 25,
+  },
+  {
+    id: 'budget-genius',
+    title: 'Budget Genius',
+    description: 'The team preserved economy without submitting a throwaway machine.',
+    gold: 20,
+  },
+  {
+    id: 'most-chaotic',
+    title: 'Most Chaotic',
+    description: 'The fight became stranger because this bot existed, and that deserves a sponsor.',
+    gold: 20,
+  },
+  {
+    id: 'best-use-of-parts',
+    title: 'Best Use of Parts',
+    description: 'Parts were arranged with intent instead of merely spending the available budget.',
+    gold: 25,
+  },
+  {
+    id: 'funniest-bot',
+    title: 'Funniest Bot',
+    description: 'The machine made a bad idea legible enough to become entertaining.',
+    gold: 20,
+  },
+  {
+    id: 'most-improved',
+    title: 'Most Improved',
+    description: 'This round showed clearer adaptation than the previous submitted approach.',
+    gold: 25,
+  },
+  {
+    id: 'best-counterbuild',
+    title: 'Best Counterbuild',
+    description: 'The bot answered the opponent instead of pretending the matchup did not exist.',
+    gold: 25,
+  },
+  {
+    id: 'sponsor-favorite',
+    title: 'Sponsor Favorite',
+    description: 'The broadcast booth can explain this bot in one sentence and sell the shirt.',
+    gold: 20,
+  },
+]
 
 export type StoredRoleState = {
   role: TeamRole
@@ -63,6 +145,9 @@ export type StoredRoleState = {
   claimedAt?: string
   submittedAt?: string
   gold: number
+  wins: number
+  losses: number
+  winStreak: number
   inventory: InventoryItem[]
   controls?: GeneratedControls
   submission?: RoundPlanSubmission
@@ -79,6 +164,9 @@ export type StoredSessionState = {
   expiresAt: string
   updatedAt: string
   roles: Record<TeamRole, StoredRoleState>
+  refereeTokenHash?: string
+  awardOptions: RefereeAwardOption[]
+  awardHistory: AppliedRefereeAward[]
   replay?: ReplayTimeline
   lastResult?: CombatSummary
   eventLog: SessionLogEvent[]
@@ -133,10 +221,14 @@ function randomTokenPart(): string {
   throw new Error('Secure random token generation is unavailable.')
 }
 
-function defaultTokenFactory(role: TeamRole, kind: TokenKind): string {
+function defaultTokenFactory(owner: TokenOwner, kind: TokenKind): string {
+  if (kind === 'referee') {
+    return `cap_ref_${randomTokenPart()}`
+  }
+
   const prefix = kind === 'claim' ? 'cap' : 'role'
 
-  return `${prefix}_${role}_${randomTokenPart()}`
+  return `${prefix}_${owner}_${randomTokenPart()}`
 }
 
 function relayError(
@@ -219,6 +311,7 @@ function mergeRateLimits(
     claim: overrides?.claim ?? DEFAULT_RATE_LIMITS.claim,
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
+    referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
   }
 }
 
@@ -227,6 +320,9 @@ function rolePublicState(role: StoredRoleState): RolePublicState {
     role: role.role,
     claimed: Boolean(role.claimedAt),
     submitted: Boolean(role.submittedAt),
+    wins: role.wins,
+    losses: role.losses,
+    winStreak: role.winStreak,
   }
 }
 
@@ -237,6 +333,36 @@ function combatSummary(result: CombatResult): CombatSummary {
     damage: result.damage,
     remainingHealth: result.remainingHealth,
   }
+}
+
+export function calculateInterest(unspentGold: number): number {
+  return Math.min(
+    Math.floor(Math.max(0, unspentGold) * DEFAULT_INTEREST_RATE),
+    DEFAULT_INTEREST_CAP,
+  )
+}
+
+export function generateRefereeAwardOptions(
+  seed: string,
+  round: number,
+): RefereeAwardOption[] {
+  const rng = createSeededRng(`${seed}:awards:${round}`)
+  const cards = [...REFEREE_AWARD_CARDS]
+  const options: RefereeAwardOption[] = []
+
+  while (options.length < 3 && cards.length > 0) {
+    const index = Math.floor(rng() * cards.length)
+    const [card] = cards.splice(index, 1)
+
+    options.push({
+      id: `${card.id}-r${round}`,
+      title: card.title,
+      description: card.description,
+      gold: card.gold,
+    })
+  }
+
+  return options
 }
 
 export function createSessionId(): string {
@@ -256,6 +382,8 @@ export class SessionCoordinator {
 
   private readonly pendingClaimTokens?: Record<TeamRole, string>
 
+  private readonly pendingRefereeToken?: string
+
   private constructor(
     state: StoredSessionState,
     options: {
@@ -264,15 +392,24 @@ export class SessionCoordinator {
       tokenHasher?: TokenHasher
       rateLimits?: Partial<Record<RateLimitAction, RateLimitRule>>
       pendingClaimTokens?: Record<TeamRole, string>
+      pendingRefereeToken?: string
     } = {},
   ) {
     this.state = state
     this.state.rateLimits ??= {}
+    this.state.awardOptions ??= []
+    this.state.awardHistory ??= []
+    for (const role of TEAM_ROLES) {
+      this.state.roles[role].wins ??= 0
+      this.state.roles[role].losses ??= 0
+      this.state.roles[role].winStreak ??= 0
+    }
     this.clock = options.clock ?? defaultClock
     this.tokenFactory = options.tokenFactory ?? defaultTokenFactory
     this.tokenHasher = options.tokenHasher ?? defaultTokenHasher
     this.rateLimits = mergeRateLimits(options.rateLimits)
     this.pendingClaimTokens = options.pendingClaimTokens
+    this.pendingRefereeToken = options.pendingRefereeToken
   }
 
   static async create(
@@ -295,6 +432,7 @@ export class SessionCoordinator {
       red: tokenFactory('red', 'claim'),
       blue: tokenFactory('blue', 'claim'),
     }
+    const refereeToken = tokenFactory('referee', 'referee')
 
     const state: StoredSessionState = {
       id: sessionId,
@@ -311,15 +449,24 @@ export class SessionCoordinator {
           role: 'red',
           claimTokenHash: await tokenHasher(claimTokens.red),
           gold: DEFAULT_STARTING_GOLD,
+          wins: 0,
+          losses: 0,
+          winStreak: 0,
           inventory: [],
         },
         blue: {
           role: 'blue',
           claimTokenHash: await tokenHasher(claimTokens.blue),
           gold: DEFAULT_STARTING_GOLD,
+          wins: 0,
+          losses: 0,
+          winStreak: 0,
           inventory: [],
         },
       },
+      refereeTokenHash: await tokenHasher(refereeToken),
+      awardOptions: [],
+      awardHistory: [],
       rateLimits: {},
       eventLog: [
         {
@@ -336,6 +483,7 @@ export class SessionCoordinator {
       tokenHasher,
       rateLimits: options.rateLimits,
       pendingClaimTokens: claimTokens,
+      pendingRefereeToken: refereeToken,
     })
   }
 
@@ -356,8 +504,8 @@ export class SessionCoordinator {
   }
 
   createResponse(): CreateSessionResponse {
-    if (!this.pendingClaimTokens) {
-      throw new Error('Claim tokens are only available immediately after session creation.')
+    if (!this.pendingClaimTokens || !this.pendingRefereeToken) {
+      throw new Error('Capability tokens are only available immediately after session creation.')
     }
 
     const claimTokens = this.pendingClaimTokens
@@ -370,6 +518,7 @@ export class SessionCoordinator {
         claimToken: claimTokens[role],
         claimPath: `/sessions/${this.state.id}/claim`,
       })),
+      refereeToken: this.pendingRefereeToken,
       publicState: this.getPublicState(),
     }
   }
@@ -389,6 +538,7 @@ export class SessionCoordinator {
         blue: rolePublicState(this.state.roles.blue),
       },
       replayAvailable: Boolean(this.state.replay),
+      ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
       ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
       eventLog: this.state.eventLog,
     })
@@ -532,6 +682,64 @@ export class SessionCoordinator {
     }
   }
 
+  async submitRefereeAwards(
+    refereeToken: string,
+    request: unknown,
+  ): Promise<SessionResult<RefereeAwardsResponse>> {
+    const now = this.clock()
+    const activeError = this.requireActive(now)
+
+    if (activeError) {
+      return activeError
+    }
+
+    const hasRefereeToken = await this.hasRefereeToken(refereeToken)
+    const rateLimitError = this.takeRateLimit(
+      'referee_awards',
+      hasRefereeToken ? 'referee' : 'invalid',
+      now,
+    )
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    if (!hasRefereeToken) {
+      return relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
+    }
+
+    if (this.state.phase !== 'referee_awards') {
+      return relayError(
+        'PHASE_CLOSED',
+        `Referee awards are only accepted during referee_awards; current phase is ${this.state.phase}.`,
+      )
+    }
+
+    if (!this.state.lastResult) {
+      return relayError('INVALID_REQUEST', 'Combat result is required before awards can be applied.')
+    }
+
+    const validation = validateSubmitRefereeAwardsRequestShape(
+      request,
+      this.state.awardOptions,
+    )
+
+    if (!validation.ok) {
+      return relayError('SUBMISSION_INVALID', 'Referee awards failed validation.', validation.issues)
+    }
+
+    const selections = cloneJson((request as SubmitRefereeAwardsRequest).awards)
+    const appliedAwards = this.applyAwardsAndAdvance(selections, now)
+
+    return {
+      ok: true,
+      value: {
+        appliedAwards,
+        publicState: this.getPublicState(),
+      },
+    }
+  }
+
   getReplay(): SessionResult<ReplayTimeline> {
     const activeError = this.requireActive()
 
@@ -559,12 +767,17 @@ export class SessionCoordinator {
       round: this.state.round,
       expiresAt: this.state.expiresAt,
       gold: role.gold,
+      wins: role.wins,
+      losses: role.losses,
+      winStreak: role.winStreak,
       inventory: role.inventory,
       ...(role.controls ? { controls: role.controls } : {}),
       submitted: Boolean(role.submittedAt),
       ...(role.submission ? { ownSubmission: role.submission } : {}),
       opponent: rolePublicState(opponent),
       replayAvailable: Boolean(this.state.replay),
+      ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
+      ...(this.state.awardHistory.length > 0 ? { awardHistory: this.state.awardHistory } : {}),
       ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
       eventLog: this.state.eventLog,
     })
@@ -580,6 +793,131 @@ export class SessionCoordinator {
     return TEAM_ROLES.map((role) => this.state.roles[role]).find(
       (role) => role.roleTokenHash === roleTokenHash,
     )
+  }
+
+  private async hasRefereeToken(refereeToken: string): Promise<boolean> {
+    if (!refereeToken.trim() || !this.state.refereeTokenHash) {
+      return false
+    }
+
+    return (await this.tokenHasher(refereeToken)) === this.state.refereeTokenHash
+  }
+
+  private applyAwardsAndAdvance(
+    selections: SubmitRefereeAwardsRequest['awards'],
+    now: string,
+  ): AppliedRefereeAward[] {
+    const optionById = new Map(this.state.awardOptions.map((option) => [option.id, option]))
+    const appliedAwards = selections.map((selection) => {
+      const option = optionById.get(selection.awardId)!
+
+      return {
+        awardId: selection.awardId,
+        targetTeam: selection.targetTeam,
+        round: this.state.round,
+        title: option.title,
+        gold: option.gold,
+      }
+    })
+
+    this.state.awardHistory.push(...appliedAwards)
+    this.appendEvent(
+      'referee_awards_submitted',
+      `${appliedAwards.length} referee award${appliedAwards.length === 1 ? '' : 's'} accepted.`,
+      now,
+    )
+    this.changePhase('apply_awards', 'Referee awards accepted.', now)
+    this.applyCombatResultToScore()
+
+    if (this.shouldCompleteMatch()) {
+      this.completeMatch(now)
+
+      return appliedAwards
+    }
+
+    this.advanceToNextRound(appliedAwards, now)
+
+    return appliedAwards
+  }
+
+  private applyCombatResultToScore(): void {
+    const result = this.state.lastResult
+
+    if (!result) {
+      return
+    }
+
+    if (result.winner === 'draw') {
+      for (const role of TEAM_ROLES) {
+        this.state.roles[role].winStreak = 0
+      }
+
+      return
+    }
+
+    const winner = this.state.roles[result.winner]
+    const loserRole = result.winner === 'red' ? 'blue' : 'red'
+    const loser = this.state.roles[loserRole]
+
+    winner.wins += 1
+    winner.winStreak += 1
+    loser.losses += 1
+    loser.winStreak = 0
+  }
+
+  private shouldCompleteMatch(): boolean {
+    return (
+      TEAM_ROLES.some(
+        (role) => this.state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
+      ) || this.state.round >= this.state.maxRounds
+    )
+  }
+
+  private completeMatch(now: string): void {
+    const red = this.state.roles.red
+    const blue = this.state.roles.blue
+    const winner =
+      red.wins === blue.wins ? 'draw' : red.wins > blue.wins ? 'red' : 'blue'
+    const streakWinner = TEAM_ROLES.find(
+      (role) => this.state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
+    )
+    const finalWinner = streakWinner ?? winner
+    const reason = streakWinner
+      ? `${streakWinner} reached a ${DEFAULT_WIN_STREAK_TARGET}-win streak.`
+      : `Max rounds reached with score Red ${red.wins} - Blue ${blue.wins}.`
+
+    this.state.awardOptions = []
+    this.appendEvent('session_completed', reason, now)
+    this.changePhase('session_complete', `Session complete: ${finalWinner}.`, now)
+  }
+
+  private advanceToNextRound(appliedAwards: AppliedRefereeAward[], now: string): void {
+    const awardGold = TEAM_ROLES.reduce<Record<TeamRole, number>>(
+      (totals, role) => {
+        totals[role] = appliedAwards
+          .filter((award) => award.targetTeam === role)
+          .reduce((total, award) => total + award.gold, 0)
+
+        return totals
+      },
+      { red: 0, blue: 0 },
+    )
+
+    for (const role of TEAM_ROLES) {
+      const team = this.state.roles[role]
+      const interest = calculateInterest(team.gold)
+
+      team.gold += DEFAULT_BASE_INCOME + interest + awardGold[role]
+      team.controls = undefined
+      team.submission = undefined
+      team.submittedAt = undefined
+    }
+
+    this.state.round += 1
+    this.state.replay = undefined
+    this.state.awardOptions = []
+    this.appendEvent('economy_applied', `Round ${this.state.round} economy applied.`, now)
+    this.changePhase('submission_phase', `Round ${this.state.round} plans are open.`, now)
   }
 
   expireIfNeeded(now = this.clock()): boolean {
@@ -671,9 +1009,14 @@ export class SessionCoordinator {
 
     this.state.replay = result.replay
     this.state.lastResult = combatSummary(result)
+    this.state.awardOptions = generateRefereeAwardOptions(
+      `${this.state.id}:${this.state.seed}`,
+      this.state.round,
+    )
     this.appendEvent('combat_resolved', result.reason, now)
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
     this.changePhase('replay_phase', 'Replay timeline is available.', now)
+    this.changePhase('referee_awards', 'Referee award options are ready.', now)
   }
 
   private changePhase(phase: SessionPhase, message: string, at: string): void {

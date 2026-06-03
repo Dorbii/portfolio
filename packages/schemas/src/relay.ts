@@ -1,9 +1,13 @@
 import type {
   ArenaConfig,
+  AppliedRefereeAward,
   GeneratedControls,
   InventoryItem,
+  RefereeAwardOption,
+  RefereeAwardSelection,
   RoundPlanSubmission,
   SessionPhase,
+  TeamEconomySummary,
   TeamRole,
   ValidationIssue,
 } from './types.js'
@@ -43,10 +47,13 @@ export type SessionLogEvent = {
     | 'phase_changed'
     | 'round_plan_submitted'
     | 'combat_resolved'
+    | 'referee_awards_submitted'
+    | 'economy_applied'
+    | 'session_completed'
   message: string
 }
 
-export type RolePublicState = {
+export type RolePublicState = Partial<TeamEconomySummary> & {
   role: TeamRole
   claimed: boolean
   submitted: boolean
@@ -61,11 +68,12 @@ export type PublicSessionState = {
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
   replayAvailable: boolean
+  awardOptions?: RefereeAwardOption[]
   lastResult?: CombatSummary
   eventLog: SessionLogEvent[]
 }
 
-export type RolePrivateState = {
+export type RolePrivateState = Partial<TeamEconomySummary> & {
   sessionId: string
   role: TeamRole
   phase: SessionPhase
@@ -78,6 +86,8 @@ export type RolePrivateState = {
   ownSubmission?: RoundPlanSubmission
   opponent: RolePublicState
   replayAvailable: boolean
+  awardOptions?: RefereeAwardOption[]
+  awardHistory?: AppliedRefereeAward[]
   lastResult?: CombatSummary
   eventLog: SessionLogEvent[]
 }
@@ -86,6 +96,7 @@ export type CreateSessionResponse = {
   sessionId: string
   phase: SessionPhase
   invites: RoleInvite[]
+  refereeToken: string
   publicState: PublicSessionState
 }
 
@@ -98,6 +109,15 @@ export type RoleClaimResponse = {
 
 export type RoundSubmissionResponse = {
   state: RolePrivateState
+  publicState: PublicSessionState
+}
+
+export type SubmitRefereeAwardsRequest = {
+  awards: RefereeAwardSelection[]
+}
+
+export type RefereeAwardsResponse = {
+  appliedAwards: AppliedRefereeAward[]
   publicState: PublicSessionState
 }
 

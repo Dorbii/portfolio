@@ -13,7 +13,16 @@ export type AwardOption = {
   title: string
   gold: number
   description: string
-  suggestedTeam: TeamRole
+}
+
+export type TeamEconomySnapshot = {
+  role: TeamRole
+  gold: number
+  wins: number
+  streak: number
+  damage: number
+  baseIncome: number
+  interestPreview: number
 }
 
 export const arenaConfig: ArenaConfig = {
@@ -28,24 +37,42 @@ export const mockAwards: AwardOption[] = [
     id: 'style-blackout',
     title: 'Most Stylish',
     gold: 25,
-    description: 'Readable silhouette, unnecessary neon, still survived.',
-    suggestedTeam: 'red',
+    description: 'Readable silhouette and clean identity under pressure.',
   },
   {
     id: 'counter-net',
     title: 'Best Counterbuild',
     gold: 25,
-    description: 'Net timing forced a spinner to waste two weapon windows.',
-    suggestedTeam: 'blue',
+    description: 'Plan directly punished the opponent build.',
   },
   {
     id: 'budget-clean',
     title: 'Budget Genius',
     gold: 20,
-    description: 'Banked gold without entering the round underbuilt.',
-    suggestedTeam: 'red',
+    description: 'Saved money without entering the fight underbuilt.',
   },
 ]
+
+export const mockTeamEconomy: Record<TeamRole, TeamEconomySnapshot> = {
+  red: {
+    role: 'red',
+    gold: 68,
+    wins: 2,
+    streak: 0,
+    damage: 64,
+    baseIncome: 50,
+    interestPreview: 6,
+  },
+  blue: {
+    role: 'blue',
+    gold: 92,
+    wins: 1,
+    streak: 1,
+    damage: 31,
+    baseIncome: 50,
+    interestPreview: 9,
+  },
+}
 
 export const mockReplay: ReplayTimeline = createReplayTimeline({
   round: 3,
@@ -154,6 +181,7 @@ export const mockPublicSession: PublicSessionState = {
     },
   },
   replayAvailable: true,
+  awardOptions: mockAwards,
   lastResult: {
     winner: 'blue',
     reason: 'Red drive disabled after rail trap',

@@ -34,10 +34,13 @@ export function createAgentContract() {
     phases: SESSION_PHASES,
     rules: {
       maxRounds: 7,
+      winStreakTarget: 3,
       startingGold: 100,
       baseIncome: 50,
       interestRate: 0.1,
       interestCap: 25,
+      maxRefereeAwardsPerRound: 2,
+      maxRefereeAwardsPerTeamPerRound: 1,
       sessionTtlSeconds: 21600,
       turnTicks: 5,
       maxBlocksPerBot: 48,
@@ -96,7 +99,22 @@ export function createAgentContract() {
         name: 'get_replay',
         method: 'GET',
         path: '/sessions/:sessionId/replay',
-        phase: 'replay_phase',
+        phase: 'replay_phase | referee_awards',
+        returns:
+          'compact replay timeline after combat while replayAvailable is true; Phase 6 sessions usually remain in referee_awards until awards are submitted',
+      },
+      {
+        name: 'submit_referee_awards',
+        method: 'POST',
+        path: '/sessions/:sessionId/referee-awards',
+        phase: 'referee_awards',
+        auth: 'referee capability token',
+        body: {
+          awards:
+            'array of up to 2 { awardId, targetTeam } selections; max 1 per team',
+        },
+        returns:
+          'accepted awards plus public state after either next-round economy or session completion',
       },
     ],
     phaseTransitions: [
@@ -104,6 +122,9 @@ export function createAgentContract() {
       ['submission_phase', 'submissions_locked', 'both plans accepted'],
       ['submissions_locked', 'combat_resolved', 'deterministic resolver completed'],
       ['combat_resolved', 'replay_phase', 'compact replay timeline available'],
+      ['replay_phase', 'referee_awards', 'award options generated'],
+      ['referee_awards', 'submission_phase', 'awards applied and next round opened'],
+      ['referee_awards', 'session_complete', 'win streak or max rounds reached'],
     ],
     errorCodes: [
       'BAD_JSON',

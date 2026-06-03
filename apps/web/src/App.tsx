@@ -12,6 +12,7 @@ import {
   mockPublicSession,
   mockReplay,
   mockRoleStates,
+  mockTeamEconomy,
   visibleCatalogParts,
   type AwardOption,
 } from './mockSession'
@@ -19,6 +20,7 @@ import { LiveAgentCockpit } from './agent/LiveAgentCockpit'
 import { ReplayViewer } from './replay/ReplayViewer'
 
 type ViewMode = 'human' | 'agent'
+type AwardSelections = Partial<Record<string, TeamRole>>
 
 const orderedCategories: PartCategory[] = [
   'body',
@@ -28,6 +30,9 @@ const orderedCategories: PartCategory[] = [
   'utility',
   'style',
 ]
+const awardTeams: TeamRole[] = ['red', 'blue']
+const maxVisibleAwards = 3
+const maxSelectedAwards = 2
 
 export default function App() {
   const isAgentRoute = isAgentPath(window.location.pathname)
@@ -98,6 +103,41 @@ function TopBar({
 }
 
 function HumanDashboard() {
+  const awards = useMemo(() => mockAwards.slice(0, maxVisibleAwards), [])
+  const [selectedAwards, setSelectedAwards] = useState<AwardSelections>({})
+  const [awardsConfirmed, setAwardsConfirmed] = useState(false)
+  const awardBonuses = calculateAwardBonuses(awards, selectedAwards)
+
+  const toggleAward = (awardId: string, team: TeamRole) => {
+    const currentTeam = selectedAwards[awardId]
+
+    if (currentTeam === team) {
+      const nextSelections = { ...selectedAwards }
+
+      delete nextSelections[awardId]
+      setSelectedAwards(nextSelections)
+      setAwardsConfirmed(false)
+      return
+    }
+
+    const teamAlreadySelected = teamHasSelection(selectedAwards, team, awardId)
+    const wouldAddSelection = !currentTeam
+    const selectedCount = countAwardSelections(selectedAwards)
+
+    if (
+      teamAlreadySelected ||
+      (wouldAddSelection && selectedCount >= maxSelectedAwards)
+    ) {
+      return
+    }
+
+    setSelectedAwards({
+      ...selectedAwards,
+      [awardId]: team,
+    })
+    setAwardsConfirmed(false)
+  }
+
   return (
     <div className="human-grid">
       <nav className="rail" aria-label="Dashboard sections">
@@ -125,40 +165,110 @@ function HumanDashboard() {
           botBlueprints={mockBotBlueprints}
           timeline={mockReplay}
         />
-        <AwardPanel awards={mockAwards} />
+        <AwardPanel
+          awards={awards}
+          selections={selectedAwards}
+          bonuses={awardBonuses}
+          confirmed={awardsConfirmed}
+          onToggleAward={toggleAward}
+          onConfirmAwards={() => setAwardsConfirmed(true)}
+        />
       </section>
       <aside className="summary-column" aria-label="Match summary">
         <MatchSummary />
-        <EconomyPanel />
+        <EconomyPanel awardBonuses={awardBonuses} />
         <EventLog />
       </aside>
     </div>
   )
 }
 
-function AwardPanel({ awards }: { awards: AwardOption[] }) {
+function AwardPanel({
+  awards,
+  selections,
+  bonuses,
+  confirmed,
+  onToggleAward,
+  onConfirmAwards,
+}: {
+  awards: AwardOption[]
+  selections: AwardSelections
+  bonuses: Record<TeamRole, number>
+  confirmed: boolean
+  onToggleAward: (awardId: string, team: TeamRole) => void
+  onConfirmAwards: () => void
+}) {
+  const selectedCount = countAwardSelections(selections)
+
   return (
     <section className="award-panel" aria-labelledby="awards-heading">
       <SectionHeader
         kicker="Referee awards"
         title="Pick up to 2"
-        aside="Max 1 per team, applied next round"
+        aside="Max 1 per team. Applies next round."
         id="awards-heading"
       />
       <div className="award-grid">
-        {awards.map((award) => (
-          <article className="award-card" key={award.id}>
-            <div>
-              <span className={`team-dot ${award.suggestedTeam}`} />
-              <h3>{award.title}</h3>
-            </div>
-            <p>{award.description}</p>
-            <footer>
-              <strong>+{award.gold} gold</strong>
-              <span>{capitalize(award.suggestedTeam)} lean</span>
-            </footer>
-          </article>
-        ))}
+        {awards.map((award) => {
+          const selectedTeam = selections[award.id]
+
+          return (
+            <article
+              className={selectedTeam ? 'award-card selected' : 'award-card'}
+              key={award.id}
+            >
+              <div className="award-card-header">
+                <h3>{award.title}</h3>
+                <strong>+{award.gold}g</strong>
+              </div>
+              <p>{award.description}</p>
+              <div
+                className="award-team-actions"
+                aria-label={`Select recipient for ${award.title}`}
+              >
+                {awardTeams.map((team) => {
+                  const isSelected = selectedTeam === team
+                  const isDisabled =
+                    !isSelected &&
+                    (teamHasSelection(selections, team, award.id) ||
+                      (!selectedTeam && selectedCount >= maxSelectedAwards))
+
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className={`team-choice ${team}${isSelected ? ' selected' : ''}`}
+                      disabled={isDisabled}
+                      key={team}
+                      type="button"
+                      onClick={() => onToggleAward(award.id, team)}
+                    >
+                      Award {capitalize(team)}
+                    </button>
+                  )
+                })}
+              </div>
+              <footer>
+                <span>Next round bonus</span>
+                <strong>
+                  {selectedTeam ? `${capitalize(selectedTeam)} +${award.gold}g` : 'None'}
+                </strong>
+              </footer>
+            </article>
+          )
+        })}
+      </div>
+      <div className="award-action-bar">
+        <strong>
+          {selectedCount} / {maxSelectedAwards} selected
+        </strong>
+        <span>{formatAwardBonusSummary(bonuses)}</span>
+        <button
+          type="button"
+          disabled={confirmed}
+          onClick={onConfirmAwards}
+        >
+          {confirmed ? 'Awards Confirmed' : 'Confirm Awards'}
+        </button>
       </div>
     </section>
   )
@@ -192,13 +302,32 @@ function MatchSummary() {
   )
 }
 
-function EconomyPanel() {
+function EconomyPanel({
+  awardBonuses,
+}: {
+  awardBonuses: Record<TeamRole, number>
+}) {
   return (
     <section className="panel">
       <SectionHeader kicker="Teams" title="Economy" aside="Round 4 preview" />
       <div className="team-table">
-        <TeamEconomy role="red" gold={68} wins={2} streak={0} damage={64} />
-        <TeamEconomy role="blue" gold={92} wins={1} streak={1} damage={31} />
+        {awardTeams.map((role) => {
+          const economy = mockTeamEconomy[role]
+
+          return (
+            <TeamEconomy
+              key={role}
+              role={role}
+              gold={economy.gold}
+              wins={economy.wins}
+              streak={economy.streak}
+              damage={economy.damage}
+              baseIncome={economy.baseIncome}
+              interestPreview={economy.interestPreview}
+              awardBonus={awardBonuses[role]}
+            />
+          )
+        })}
       </div>
     </section>
   )
@@ -210,12 +339,18 @@ function TeamEconomy({
   wins,
   streak,
   damage,
+  baseIncome,
+  interestPreview,
+  awardBonus,
 }: {
   role: TeamRole
   gold: number
   wins: number
   streak: number
   damage: number
+  baseIncome: number
+  interestPreview: number
+  awardBonus: number
 }) {
   return (
     <div className={`team-row ${role}`}>
@@ -224,6 +359,10 @@ function TeamEconomy({
       <span>{wins} wins</span>
       <span>{streak} streak</span>
       <span>{damage} dmg</span>
+      <small>
+        Next: +{baseIncome} income, +{interestPreview} interest, +{awardBonus}{' '}
+        awards
+      </small>
     </div>
   )
 }
@@ -472,6 +611,48 @@ function formatPhase(phase: string) {
 
 function formatStat([name, value]: [string, number]) {
   return `${name}+${value}`
+}
+
+function countAwardSelections(selections: AwardSelections) {
+  return Object.keys(selections).length
+}
+
+function teamHasSelection(
+  selections: AwardSelections,
+  team: TeamRole,
+  exceptAwardId?: string,
+) {
+  return Object.entries(selections).some(
+    ([awardId, selectedTeam]) =>
+      awardId !== exceptAwardId && selectedTeam === team,
+  )
+}
+
+function calculateAwardBonuses(
+  awards: AwardOption[],
+  selections: AwardSelections,
+): Record<TeamRole, number> {
+  return awards.reduce<Record<TeamRole, number>>(
+    (bonuses, award) => {
+      const selectedTeam = selections[award.id]
+
+      if (selectedTeam) {
+        bonuses[selectedTeam] += award.gold
+      }
+
+      return bonuses
+    },
+    { red: 0, blue: 0 },
+  )
+}
+
+function formatAwardBonusSummary(bonuses: Record<TeamRole, number>) {
+  const summary = awardTeams
+    .filter((team) => bonuses[team] > 0)
+    .map((team) => `${capitalize(team)} +${bonuses[team]}g`)
+    .join(', ')
+
+  return summary ? `Next round: ${summary}` : 'Next round: no award bonus'
 }
 
 function capitalize(value: string) {

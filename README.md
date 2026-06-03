@@ -5,16 +5,18 @@ agents act as teams: they buy fixed catalog parts, keep persistent inventory,
 build constrained socket/grid bots, submit hidden round plans, and a relay
 resolves deterministic combat into replay events.
 
-This repo is currently at the Babylon replay MVP slice. It includes
-source-owned catalog/schema/sim/replay contracts plus a Cloudflare
+This repo is currently at the referee awards and economy loop slice. It
+includes source-owned catalog/schema/sim/replay contracts plus a Cloudflare
 Worker/Durable Object-style session coordinator, route-level Worker coverage,
-checked-in Wrangler Durable Object configuration, hashed role capabilities,
-session expiration, basic rate limits, and a local mock web frontend. The web
-app keeps the mock referee dashboard as the default root experience, renders a
-Babylon primitive-based replay from replay timeline events, and includes a
-backend-connected `/agent` cockpit for role invite claiming, private state
-polling, round-plan submission, semantic state display, a JSON state script tag,
-and `window.AgentArenaRole`.
+checked-in Wrangler Durable Object configuration, hashed role and referee
+capabilities, session expiration, basic rate limits, deterministic referee
+award options, next-round income/interest/award application, win-streak and
+max-round completion, and a local mock web frontend. The web app keeps the mock
+referee dashboard as the default root experience, renders a Babylon
+primitive-based replay from replay timeline events, exposes interactive local
+award selection, and includes a backend-connected `/agent` cockpit for role
+invite claiming, private state polling, round-plan submission, semantic state
+display, a JSON state script tag, and `window.AgentArenaRole`.
 
 ## Current Structure
 
@@ -64,6 +66,16 @@ npm run test
   turn plans, and controls.
 - The session opens plan submission only after both roles are claimed.
 - Combat resolves automatically when both valid round plans are submitted.
+- Replay remains available after combat during the referee awards phase until
+  awards advance the match to the next round.
+- Combat resolution generates exactly three referee award options.
+- Referee awards require the referee capability, allow up to two selections,
+  enforce at most one award per team, and apply bonus gold only to the next
+  round economy.
+- Next-round economy applies base income plus capped interest:
+  `min(floor(unspentGold * 0.10), 25)`.
+- Sessions complete on a three-win streak or when the configured max round is
+  resolved.
 
 ## Worker Routes
 
@@ -75,6 +87,7 @@ GET  /sessions/:sessionId/public
 GET  /sessions/:sessionId/state       Authorization: Bearer <role token>
 POST /sessions/:sessionId/round-plan  Authorization: Bearer <role token>
 GET  /sessions/:sessionId/replay
+POST /sessions/:sessionId/referee-awards  Authorization: Bearer <referee token>
 ```
 
 ## Web Routes
@@ -94,13 +107,12 @@ local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
   authentication, domain routing, and deployment smoke tests are not done.
 - Auth is still capability-token MVP auth, not production identity, revocation,
   abuse prevention, or account security.
-- The root web UI is still local mock data; only `/agent` is backend-connected.
+- The root web UI is still local mock data; only `/agent` and Worker route tests
+  are backend-connected.
 - Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.
 - Browser screenshot smoke was blocked locally by the preview/Chrome harness.
 - The current Babylon-bearing bundle size is acceptable for an MVP prototype,
   not deploy-polished. Lazy-loading the replay renderer is a Phase 7/perf
   hardening item unless the Director decides bundle size blocks the demo.
-- Award/economy UI is mocked; there is no real award or economy loop across
-  rounds.
 - Resolver is intentionally shallow and suitable only as a first deterministic
   contract, not as balanced combat.

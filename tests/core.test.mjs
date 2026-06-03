@@ -10,7 +10,11 @@ import {
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 import { resolveCombat } from '../.test-build/packages/sim/src/index.js'
-import { SessionCoordinator } from '../.test-build/apps/worker/src/session.js'
+import {
+  SessionCoordinator,
+  calculateInterest,
+  generateRefereeAwardOptions,
+} from '../.test-build/apps/worker/src/session.js'
 
 const brakePlan = {
   commands: [
@@ -216,11 +220,14 @@ test('session creation returns role invites without leaking tokens publicly', as
     response.invites.map((invite) => invite.claimToken),
     ['claim_red', 'claim_blue'],
   )
+  assert.equal(response.refereeToken, 'referee_referee')
   assert.equal(publicJson.includes('claim_red'), false)
   assert.equal(publicJson.includes('claim_blue'), false)
+  assert.equal(publicJson.includes('referee_referee'), false)
   assert.equal(publicJson.includes('role_red'), false)
   assert.equal(storedJson.includes('claim_red'), false)
   assert.equal(storedJson.includes('claim_blue'), false)
+  assert.equal(storedJson.includes('referee_referee'), false)
   assert.equal(response.publicState.roles.red.claimed, false)
   assert.equal(response.publicState.roles.blue.submitted, false)
 })
@@ -303,9 +310,10 @@ test('session resolves after both valid plans while keeping public state redacte
   const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
 
   assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'replay_phase')
+  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
   assert.equal(blueSubmission.value.publicState.replayAvailable, true)
   assert.equal(blueSubmission.value.publicState.lastResult.winner, 'draw')
+  assert.equal(blueSubmission.value.publicState.awardOptions.length, 3)
 
   const replay = session.getReplay()
   assert.equal(replay.ok, true)
@@ -326,4 +334,147 @@ test('session resolves after both valid plans while keeping public state redacte
   const duplicate = await session.submitRoundPlan(redToken, validSpinnerSubmission)
   assert.equal(duplicate.ok, false)
   assert.equal(duplicate.error.code, 'ALREADY_SUBMITTED')
+})
+
+test('referee award options and interest are deterministic bounded economy rules', () => {
+  const first = generateRefereeAwardOptions('s_test:test-seed', 2)
+  const second = generateRefereeAwardOptions('s_test:test-seed', 2)
+  const nextRound = generateRefereeAwardOptions('s_test:test-seed', 3)
+
+  assert.equal(first.length, 3)
+  assert.equal(new Set(first.map((award) => award.id)).size, 3)
+  assert.deepEqual(first, second)
+  assert.notDeepEqual(first, nextRound)
+  assert.equal(calculateInterest(68), 6)
+  assert.equal(calculateInterest(260), 25)
+})
+
+test('referee awards validate selections and apply future economy to the next round', async () => {
+  const session = await createTestSession('s_awards')
+  const refereeToken = session.createResponse().refereeToken
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await session.submitRoundPlan(redToken, validSpinnerSubmission)
+  const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
+
+  const awardOptions = blueSubmission.value.publicState.awardOptions
+  const redBefore = await session.getRoleStateForToken(redToken)
+  const blueBefore = await session.getRoleStateForToken(blueToken)
+
+  assert.equal(redBefore.ok, true)
+  assert.equal(blueBefore.ok, true)
+
+  const duplicateTeam = await session.submitRefereeAwards(refereeToken, {
+    awards: [
+      { awardId: awardOptions[0].id, targetTeam: 'red' },
+      { awardId: awardOptions[1].id, targetTeam: 'red' },
+    ],
+  })
+
+  assert.equal(duplicateTeam.ok, false)
+  assert.equal(duplicateTeam.error.code, 'SUBMISSION_INVALID')
+  assert.ok(
+    duplicateTeam.error.issues.some(
+      (issue) => issue.code === 'TOO_MANY_AWARDS_FOR_TEAM',
+    ),
+  )
+
+  const awards = await session.submitRefereeAwards(refereeToken, {
+    awards: [
+      { awardId: awardOptions[0].id, targetTeam: 'red' },
+      { awardId: awardOptions[1].id, targetTeam: 'blue' },
+    ],
+  })
+
+  assert.equal(awards.ok, true)
+  assert.equal(awards.value.appliedAwards.length, 2)
+  assert.equal(awards.value.publicState.phase, 'submission_phase')
+  assert.equal(awards.value.publicState.round, 2)
+  assert.equal(awards.value.publicState.roles.red.submitted, false)
+  assert.equal(awards.value.publicState.roles.blue.submitted, false)
+  assert.equal(awards.value.publicState.awardOptions, undefined)
+
+  const redAfter = await session.getRoleStateForToken(redToken)
+  const blueAfter = await session.getRoleStateForToken(blueToken)
+
+  assert.equal(redAfter.ok, true)
+  assert.equal(blueAfter.ok, true)
+  assert.equal(
+    redAfter.value.gold,
+    redBefore.value.gold +
+      50 +
+      calculateInterest(redBefore.value.gold) +
+      awardOptions[0].gold,
+  )
+  assert.equal(
+    blueAfter.value.gold,
+    blueBefore.value.gold +
+      50 +
+      calculateInterest(blueBefore.value.gold) +
+      awardOptions[1].gold,
+  )
+  assert.equal(redAfter.value.submitted, false)
+  assert.equal(blueAfter.value.submitted, false)
+  assert.equal(redAfter.value.awardHistory.length, 2)
+})
+
+test('session completes on max rounds and win streak target', async () => {
+  const maxRoundSession = await SessionCoordinator.create(
+    { sessionId: 's_max_rounds', seed: 'test-seed', maxRounds: 1 },
+    {
+      clock: () => '2026-06-03T00:00:00.000Z',
+      tokenFactory: (role, kind) => `${kind}_${role}`,
+    },
+  )
+  const maxRoundRefereeToken = maxRoundSession.createResponse().refereeToken
+  const maxRoundTokens = await claimBothRoles(maxRoundSession)
+
+  await maxRoundSession.submitRoundPlan(maxRoundTokens.redToken, validSpinnerSubmission)
+  await maxRoundSession.submitRoundPlan(maxRoundTokens.blueToken, validSpinnerSubmission)
+
+  const maxRoundAwards = await maxRoundSession.submitRefereeAwards(
+    maxRoundRefereeToken,
+    { awards: [] },
+  )
+
+  assert.equal(maxRoundAwards.ok, true)
+  assert.equal(maxRoundAwards.value.publicState.phase, 'session_complete')
+  assert.equal(maxRoundAwards.value.publicState.round, 1)
+
+  const streakSession = await createTestSession('s_streak')
+  const streakRefereeToken = streakSession.createResponse().refereeToken
+  const stored = streakSession.exportState()
+
+  stored.phase = 'referee_awards'
+  stored.round = 3
+  stored.roles.red.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.blue.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.red.wins = 2
+  stored.roles.red.winStreak = 2
+  stored.roles.blue.losses = 2
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 10, blue: 50 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
+  stored.awardOptions = generateRefereeAwardOptions(
+    `${stored.id}:${stored.seed}`,
+    stored.round,
+  )
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:00:00.000Z',
+  })
+  const streakAwards = await loaded.submitRefereeAwards(streakRefereeToken, {
+    awards: [],
+  })
+
+  assert.equal(streakAwards.ok, true)
+  assert.equal(streakAwards.value.publicState.phase, 'session_complete')
+  assert.equal(streakAwards.value.publicState.roles.red.wins, 3)
+  assert.equal(streakAwards.value.publicState.roles.red.winStreak, 3)
 })

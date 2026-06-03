@@ -364,7 +364,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
 
         <section className="agent-live-panel" aria-labelledby="awards-heading">
           <SectionTitle id="awards-heading" title="Available award incentives" />
-          <p className="agent-empty">No referee award incentives are exposed by the Phase 4 relay.</p>
+          <AwardIncentives state={roleState} publicState={publicState} />
         </section>
 
         <section className="agent-live-panel" aria-labelledby="opponent-heading">
@@ -444,6 +444,32 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  )
+}
+
+function AwardIncentives({
+  state,
+  publicState,
+}: {
+  state: RolePrivateState | null
+  publicState: PublicSessionState | null
+}) {
+  const awards = state?.awardOptions ?? publicState?.awardOptions ?? []
+
+  if (awards.length === 0) {
+    return <p className="agent-empty">No referee award incentives are available for this phase.</p>
+  }
+
+  return (
+    <ul className="agent-award-list">
+      {awards.map((award) => (
+        <li key={award.id}>
+          <strong>{award.title}</strong>
+          <span>+{award.gold}g next round</span>
+          <p>{award.description}</p>
+        </li>
+      ))}
+    </ul>
   )
 }
 

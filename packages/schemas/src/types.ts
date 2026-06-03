@@ -2,6 +2,12 @@ export const TEAM_ROLES = ['red', 'blue'] as const
 
 export type TeamRole = (typeof TEAM_ROLES)[number]
 
+export type TeamEconomySummary = {
+  wins: number
+  losses: number
+  winStreak: number
+}
+
 export const SESSION_PHASES = [
   'created',
   'waiting_for_agents',
@@ -63,6 +69,28 @@ export type InventoryItem = {
   partId: string
   quantity: number
 }
+
+export type RefereeAwardOption = {
+  id: string
+  title: string
+  description: string
+  gold: number
+}
+
+export type RefereeAwardSelection = {
+  awardId: string
+  targetTeam: TeamRole
+}
+
+export type AppliedRefereeAward = RefereeAwardSelection & {
+  round: number
+  title: string
+  gold: number
+}
+
+export const REFEREE_AWARD_OPTION_COUNT = 3
+export const MAX_REFEREE_AWARDS_PER_ROUND = 2
+export const MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND = 1
 
 export type Purchase = {
   partId: string

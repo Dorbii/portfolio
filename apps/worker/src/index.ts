@@ -424,6 +424,10 @@ export class AgentArenaSession {
       return this.submitRoundPlan(request, coordinator)
     }
 
+    if (route.action === 'referee-awards' && request.method === 'POST') {
+      return this.submitRefereeAwards(request, coordinator)
+    }
+
     if (route.action === 'replay' && request.method === 'GET') {
       const result = coordinator.getReplay()
       await this.saveSession(coordinator)
@@ -491,6 +495,26 @@ export class AgentArenaSession {
     }
 
     const result = await coordinator.submitRoundPlan(bearerToken(request) ?? '', body)
+    await this.saveSession(coordinator)
+
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
+    }
+
+    return jsonResponse(result.value)
+  }
+
+  private async submitRefereeAwards(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const body = await readJsonBody(request)
+
+    if (body === undefined) {
+      return errorResponse(400, 'BAD_JSON', 'Referee awards body must be JSON.')
+    }
+
+    const result = await coordinator.submitRefereeAwards(bearerToken(request) ?? '', body)
     await this.saveSession(coordinator)
 
     if (!result.ok) {

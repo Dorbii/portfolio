@@ -1,5 +1,25 @@
 # Codex Trust Calibration
 
+## 2026-06-03 Phase 6 Referee Awards and Economy Loop
+
+Scope: `packages/schemas/src/types.ts`, `packages/schemas/src/relay.ts`, `packages/schemas/src/validators.ts`, `packages/schemas/src/agentContract.ts`, `apps/worker/src/session.ts`, `apps/worker/src/index.ts`, `apps/web/src/App.tsx`, `apps/web/src/mockSession.ts`, `apps/web/src/agent/LiveAgentCockpit.tsx`, `apps/web/src/styles.css`, `tests/core.test.mjs`, `tests/worker-route.test.mjs`, `README.md`.
+
+Intent: add referee capability-backed award submission, deterministic three-card award generation, award validation, next-round base income plus capped interest plus award bonus application, win/loss/streak tracking, max-round and streak completion, public/private redacted award option exposure, and an interactive local referee award panel.
+
+Risk: behavioral, interface, and visual.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review status note: Direct implementation was used after backend and frontend worker subagents did not return usable output within a bounded wait. Typecheck, test TypeScript emit, and focused Node tests passed during implementation; final full validation is recorded in the phase handoff.
+
+Review questions:
+- Decide whether the MVP should preserve access to the previous round replay after awards advance into the next submission phase.
+- Verify the root mock award panel and live `/agent` award exposure in a normal browser after the local browser automation path is available.
+
+Reason for sidecar: Agent Arena code quality rules say no comments in production code, so provenance markers are tracked here instead of inline.
+
 ## 2026-06-03 Phase 5 Babylon Replay MVP
 
 Scope: `apps/web/src/replay/replayMapping.ts`, `apps/web/src/replay/babylonPartRenderer.ts`, `apps/web/src/replay/BabylonReplayScene.tsx`, `apps/web/src/replay/ReplayViewer.tsx`, `apps/web/src/App.tsx`, `apps/web/src/mockSession.ts`, `apps/web/src/styles.css`, `tsconfig.test.json`, `tests/replay-mapping.test.mjs`, `package.json`, `package-lock.json`, `README.md`.
