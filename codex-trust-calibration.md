@@ -36,3 +36,21 @@ Review questions:
 - Confirm the session TTL and rate-limit thresholds before exposing a public demo.
 - Verify Cloudflare Wrangler deploy behavior and Durable Object migration naming in a real Cloudflare account.
 - Decide whether polling rate-limit writes are acceptable for the MVP cost model.
+
+## 2026-06-03 Phase 2 Local Mock Frontend
+
+Scope: `apps/web/src/App.tsx`, `apps/web/src/styles.css`, `apps/web/src/mockSession.ts`, `README.md`.
+
+Intent: replace the foundation shell with a local mock referee dashboard, replay placeholder, award panel, agent cockpit, inventory/submission views, and part catalog display without introducing backend coupling.
+
+Risk: behavioral and interface.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review status note: Independent QA passed Phase 2 with README fixes. README status was corrected. Typecheck, lint, build, and core tests passed. Browser automation was attempted through the in-app browser, CDP, and headless Chrome CLI but remained inconclusive due local browser runtime failures.
+
+Review questions:
+- Verify the mock UI visually in a real browser before treating the layout as accepted.
+- Decide whether inert replay controls should be disabled or left as mock controls before the next UI integration phase.

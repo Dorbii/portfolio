@@ -9,15 +9,17 @@ This repo is currently at the relay hardening slice. It includes source-owned
 catalog/schema/sim/replay contracts plus a Cloudflare Worker/Durable
 Object-style session coordinator, route-level Worker coverage, checked-in
 Wrangler Durable Object configuration, hashed role capabilities, session
-expiration, and basic rate limits. It intentionally does not include a deployed
-Cloudflare environment, agent cockpit UI, human dashboard UI, or Babylon
-rendering.
+expiration, basic rate limits, and a local mock web frontend. The web app now
+shows a mock referee dashboard, agent cockpit, part catalog, award panel, and
+replay placeholder. It intentionally does not include a deployed Cloudflare
+environment, backend-connected HTTP polling client, real invite claim flow,
+Babylon rendering, or real award/economy loop.
 
 ## Current Structure
 
 ```txt
 apps/
-  web/       minimal Vite build shell only
+  web/       local mock frontend with referee dashboard and agent cockpit
   worker/    Worker routes plus Durable Object session coordination
 packages/
   catalog/   fixed parts, inventory, blueprint, controls, submission validation
@@ -80,9 +82,11 @@ GET  /sessions/:sessionId/replay
   authentication, domain routing, and deployment smoke tests are not done.
 - Auth is still capability-token MVP auth, not production identity, revocation,
   abuse prevention, or account security.
-- No HTTP polling client.
-- No agent cockpit or referee dashboard UI.
-- No Babylon replay renderer.
-- No economy phase machine across rounds.
+- Web UI is local mock data only; there is no backend-connected HTTP polling
+  client.
+- No real invite claim flow in the web app.
+- Replay is still a placeholder; there is no Babylon renderer.
+- Award/economy UI is mocked; there is no real award or economy loop across
+  rounds.
 - Resolver is intentionally shallow and suitable only as a first deterministic
   contract, not as balanced combat.
