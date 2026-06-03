@@ -122,11 +122,11 @@ const seatCopy = {
 }
 
 const roadmap = [
-  'MVP engine and legal-action protocol',
+  'Engine, legal-action protocol, and Browser Agent Mode',
   'Domains, economy, stability, and decrees',
-  'Region cards, sets, and counter-draft',
-  'Influence, corruption, pressure, and warnings',
-  'Mandates, stronger bots, and Browser Agent Console polish',
+  'Influence, corruption, region cards, and counter-draft',
+  'Victory warnings, mandates, stronger bots, and simulations',
+  'Deferred bridge and backend options only when product need is clear',
 ]
 
 function getInitialRoute() {
@@ -1679,7 +1679,8 @@ function ProtocolPanel({
           ))}
           <p>
             Browser Agent Mode is local to this browser session. It is a
-            structured page protocol, not a public HTTP API.
+            structured page protocol, not a public HTTP API, localhost bridge,
+            or backend.
           </p>
         </div>
       ) : null}
@@ -1723,7 +1724,7 @@ function CaseStudy() {
         <p className="eyebrow">Portfolio case study</p>
         <h2 id="case-title">A deterministic game engine behind a playable UI</h2>
         <p>
-          The prototype is scoped around the strongest engineering idea from the
+          The prototype is scoped around the central engineering idea from the
           design docs: every actor receives legal actions, submits an action ID,
           and lets the engine validate state changes.
         </p>
@@ -1735,7 +1736,8 @@ function CaseStudy() {
           <h3>Pure rules</h3>
           <p>
             Board generation, neighbor lookup, liberties, captures, suicide
-            prevention, and Domain control live outside React.
+            prevention, Domains, economy, pressure, cards, warnings, and
+            mandates live outside React.
           </p>
         </article>
         <article>
@@ -1751,7 +1753,17 @@ function CaseStudy() {
           <h3>Browser-local agents</h3>
           <p>
             The hosted app can expose an in-page protocol and invite URL without
-            claiming real online multiplayer or public endpoints.
+            claiming real online multiplayer, a public HTTP API, or remote shared
+            matches.
+          </p>
+        </article>
+        <article>
+          <p className="small-label">Bridge options</p>
+          <h3>Deferred by design</h3>
+          <p>
+            A localhost bridge stays optional until Browser Agent Mode is proven.
+            A real backend would need persistence, an action validation endpoint,
+            an event stream, a match store, and seat tokens.
           </p>
         </article>
       </div>
@@ -1767,7 +1779,7 @@ function CaseStudy() {
         </figure>
         <figure>
           <img src={assets.cards} alt="Hex Sovereign cards and decrees sheet" />
-          <figcaption>Future cards and decrees</figcaption>
+          <figcaption>Cards and decree reference</figcaption>
         </figure>
       </div>
 
@@ -1777,8 +1789,8 @@ function CaseStudy() {
         style={{ '--roadmap-backdrop': `url(${assets.cards})` }}
       >
         <div>
-          <p className="eyebrow">Expansion path</p>
-          <h2>Grow one readable system at a time</h2>
+          <p className="eyebrow">Implemented path</p>
+          <h2>Playable rules first, bridges only when needed</h2>
         </div>
         <ol>
           {roadmap.map((item) => (
