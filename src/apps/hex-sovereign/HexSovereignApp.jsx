@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chooseBotAction } from '../../game/bots'
 import BoardPanel from '../../hex-sovereign/components/BoardPanel'
-import CaseStudy from '../../hex-sovereign/components/CaseStudy'
 import EventLog from '../../hex-sovereign/components/EventLog'
+import HandPanel from '../../hex-sovereign/components/HandPanel'
 import PlayerPanel from '../../hex-sovereign/components/PlayerPanel'
 import ProtocolPanel from '../../hex-sovereign/components/ProtocolPanel'
 import SelectedPanel from '../../hex-sovereign/components/SelectedPanel'
+import TurnCoach from '../../hex-sovereign/components/TurnCoach'
 import VictoryBanner from '../../hex-sovereign/components/VictoryBanner'
 import {
   assets,
@@ -48,6 +49,7 @@ export default function HexSovereignApp() {
   })
   const [seatTokens] = useState(makeSeatTokens)
   const [selectedCellId, setSelectedCellId] = useState(null)
+  const [localSeat, setLocalSeat] = useState('black')
   const [protocolTab, setProtocolTab] = useState('request')
   const [lastResult, setLastResult] = useState(null)
 
@@ -55,6 +57,10 @@ export default function HexSovereignApp() {
   const activeRequest = useMemo(
     () => createAgentRequest(state, state.activeSeat),
     [state],
+  )
+  const viewerRequest = useMemo(
+    () => createAgentRequest(state, localSeat),
+    [localSeat, state],
   )
   const legalActionByCell = useMemo(() => {
     return new Map(
@@ -75,6 +81,11 @@ export default function HexSovereignApp() {
       activeRequest.legalActions.filter(
         (action) => action.type === 'SPEND_REINFORCEMENT',
       ),
+    [activeRequest],
+  )
+  const placementActions = useMemo(
+    () =>
+      activeRequest.legalActions.filter((action) => action.type === 'PLACE_STONE'),
     [activeRequest],
   )
   const repairActions = useMemo(
@@ -415,6 +426,8 @@ export default function HexSovereignApp() {
     (action) => action.type === 'SURRENDER',
   )
   const canHumanAct = seatModes[state.activeSeat] === 'human'
+  const canLocalSeatAct = state.activeSeat === localSeat && canHumanAct
+  const localCardActions = state.activeSeat === localSeat ? cardActions : []
   const victoryState = activeRequest.publicState.victory
   const selectedVictoryWarnings =
     selectedDomain && victoryState
@@ -442,42 +455,107 @@ export default function HexSovereignApp() {
           <span>{SEAT_LABELS[state.activeSeat]} turn</span>
         </div>
         <nav className="top-links" aria-label="Page sections">
-          <a href="#protocol">Protocol</a>
-          <a href="#architecture">Architecture</a>
-          <a href="#roadmap">Roadmap</a>
+          <a href="#hand">Hand</a>
+          <a href="#inspector">Inspector</a>
+          <a href="#debug">Debug</a>
         </nav>
       </header>
 
-      <section className="game-screen" id="board" aria-labelledby="game-title">
-        <div className="game-heading">
-          <p className="eyebrow">Static browser strategy game</p>
-          <h1 id="game-title">Hex Sovereign</h1>
-          <p>
-            Place stones, fight for anchor Domains, and inspect every turn as a
-            validated legal-action request that humans, bots, and browser agents
-            can all use.
-          </p>
+      <section className="game-screen play-screen" id="board" aria-labelledby="game-title">
+        <div className="match-command">
+          <div>
+            <p className="eyebrow">Hex Sovereign</p>
+            <h1 id="game-title">Live match</h1>
+          </div>
+          <div className="seat-switcher" aria-label="Local seat">
+            <span>Your seat</span>
+            <div>
+              {['black', 'white'].map((seat) => (
+                <button
+                  className={localSeat === seat ? 'selected' : ''}
+                  key={seat}
+                  type="button"
+                  onClick={() => setLocalSeat(seat)}
+                >
+                  {SEAT_LABELS[seat]}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="game-layout">
-          {victoryState?.activeWarnings.length > 0 || victoryState?.winner ? (
-            <VictoryBanner victory={victoryState} />
-          ) : null}
-          <aside className="left-rail" aria-label="Player and selected details">
+        {victoryState?.activeWarnings.length > 0 || victoryState?.winner ? (
+          <VictoryBanner victory={victoryState} />
+        ) : null}
+
+        <div className="player-strip" aria-label="Players">
+          {['black', 'white'].map((seat) => (
             <PlayerPanel
-              seat="black"
+              key={seat}
+              seat={seat}
+              viewerRequest={viewerRequest}
               state={state}
               domains={domains}
-              mode={seatModes.black}
-              reinforcements={getReinforcementSummary(state, 'black')}
-              activeRequest={activeRequest}
-              botStrategy={botStrategies.black}
+              mode={seatModes[seat]}
+              reinforcements={getReinforcementSummary(state, seat)}
+              botStrategy={botStrategies[seat]}
               onModeChange={(mode) =>
-                setSeatModes((current) => ({ ...current, black: mode }))
+                setSeatModes((current) => ({ ...current, [seat]: mode }))
               }
               onBotStrategyChange={(strategy) =>
-                setBotStrategies((current) => ({ ...current, black: strategy }))
+                setBotStrategies((current) => ({ ...current, [seat]: strategy }))
               }
+            />
+          ))}
+        </div>
+
+        <div className="game-table">
+          <section className="table-main" aria-label="Match board and hand">
+            <TurnCoach
+              state={state}
+              localSeat={localSeat}
+              activeRequest={activeRequest}
+              seatModes={seatModes}
+              selectedCell={selectedCell}
+              selectedPlacementAction={selectedPlacementAction}
+              selectedReinforcementAction={selectedReinforcementAction}
+              placementCount={placementActions.length}
+              reinforcementCount={reinforcementActions.length}
+              cardActions={localCardActions}
+              canHumanAct={canHumanAct}
+              victoryState={victoryState}
+            />
+            <BoardPanel
+              state={state}
+              controlledDomains={controlledDomains}
+              boardPositions={boardPositions}
+              legalActionByCell={legalActionByCell}
+              reinforcementActionByCell={reinforcementActionByCell}
+              selectedCellId={selectedCellId}
+              zoneToneByCell={zoneToneByCell}
+              pressureToneByCell={pressureToneByCell}
+              activeReinforcements={activeReinforcements}
+              selectedReinforcementAction={selectedReinforcementAction}
+              reinforcementActions={reinforcementActions}
+              upkeepActions={upkeepActions}
+              passAction={passAction}
+              surrenderAction={surrenderAction}
+              canHumanAct={canHumanAct}
+              onCellClick={handleCellClick}
+              onSelectReinforcementTarget={selectReinforcementTarget}
+              onSubmitAction={submitActiveAction}
+              onReset={resetMatch}
+            />
+          </section>
+
+          <aside className="inspector-rail" id="inspector" aria-label="Inspector">
+            <HandPanel
+              seat={localSeat}
+              cycle={state.cycle}
+              viewerRequest={viewerRequest}
+              cardActions={localCardActions}
+              canAct={canLocalSeatAct}
+              onSubmitAction={submitActiveAction}
             />
             <SelectedPanel
               cell={selectedCell}
@@ -499,63 +577,26 @@ export default function HexSovereignApp() {
                 submitActiveAction(actionId, 'pressure-panel')
               }
             />
-          </aside>
-
-          <BoardPanel
-            state={state}
-            activeRequest={activeRequest}
-            victoryState={victoryState}
-            controlledDomains={controlledDomains}
-            boardPositions={boardPositions}
-            legalActionByCell={legalActionByCell}
-            reinforcementActionByCell={reinforcementActionByCell}
-            selectedCellId={selectedCellId}
-            zoneToneByCell={zoneToneByCell}
-            pressureToneByCell={pressureToneByCell}
-            activeReinforcements={activeReinforcements}
-            selectedReinforcementAction={selectedReinforcementAction}
-            reinforcementActions={reinforcementActions}
-            upkeepActions={upkeepActions}
-            cardActions={cardActions}
-            passAction={passAction}
-            surrenderAction={surrenderAction}
-            canHumanAct={canHumanAct}
-            onCellClick={handleCellClick}
-            onSelectReinforcementTarget={selectReinforcementTarget}
-            onSubmitAction={submitActiveAction}
-            onReset={resetMatch}
-          />
-
-          <aside className="right-rail" aria-label="Protocol and log">
-            <PlayerPanel
-              seat="white"
-              state={state}
-              domains={domains}
-              mode={seatModes.white}
-              reinforcements={getReinforcementSummary(state, 'white')}
-              activeRequest={activeRequest}
-              botStrategy={botStrategies.white}
-              onModeChange={(mode) =>
-                setSeatModes((current) => ({ ...current, white: mode }))
-              }
-              onBotStrategyChange={(strategy) =>
-                setBotStrategies((current) => ({ ...current, white: strategy }))
-              }
-            />
-            <ProtocolPanel
-              activeRequest={activeRequest}
-              protocolTab={protocolTab}
-              setProtocolTab={setProtocolTab}
-              lastResult={lastResult}
-              onSubmitAction={(actionId) => submitActiveAction(actionId, 'debug')}
-              inviteUrls={inviteUrls}
-            />
-            <EventLog events={state.eventLog} />
+            <details className="debug-drawer" id="debug">
+              <summary>
+                <span>Protocol and match log</span>
+                <small>Agent/debug panels</small>
+              </summary>
+              <div className="debug-stack">
+                <ProtocolPanel
+                  activeRequest={activeRequest}
+                  protocolTab={protocolTab}
+                  setProtocolTab={setProtocolTab}
+                  lastResult={lastResult}
+                  onSubmitAction={(actionId) => submitActiveAction(actionId, 'debug')}
+                  inviteUrls={inviteUrls}
+                />
+                <EventLog events={state.eventLog} />
+              </div>
+            </details>
           </aside>
         </div>
       </section>
-
-      <CaseStudy />
     </main>
   )
 }

@@ -3,26 +3,23 @@ import { seatCopy } from '../config'
 
 export default function PlayerPanel({
   seat,
+  viewerRequest,
   state,
   domains,
   mode,
   reinforcements,
-  activeRequest,
   botStrategy,
   onModeChange,
   onBotStrategyChange,
 }) {
   const controlled = domains.filter((domain) => domain.owner === seat)
   const active = state.activeSeat === seat
-  const publicCards = activeRequest.publicState.cards?.players?.[seat] ?? null
-  const privateCards = active ? activeRequest.privateState.cards : null
-  const cardCount = publicCards?.cardCount ?? privateCards?.hand.length ?? 0
-  const handLimit =
-    activeRequest.publicState.cards?.handLimit ?? privateCards?.handLimit ?? null
-  const victory = activeRequest.publicState.victory
+  const publicCards = viewerRequest.publicState.cards?.players?.[seat] ?? null
+  const cardCount = publicCards?.cardCount ?? 0
+  const handLimit = viewerRequest.publicState.cards?.handLimit ?? null
+  const victory = viewerRequest.publicState.victory
   const warningsForSeat =
     victory?.activeWarnings.filter((warning) => warning.seat === seat) ?? []
-  const mandate = victory?.mandates?.[seat] ?? null
 
   return (
     <section className={`player-card ${seat} ${active ? 'active' : ''}`}>
@@ -46,10 +43,6 @@ export default function PlayerPanel({
           <dt>Domains</dt>
           <dd>{controlled.length}</dd>
         </div>
-        <div>
-          <dt>Mode</dt>
-          <dd>{mode === 'bot' ? 'Bot' : 'Human'}</dd>
-        </div>
         {reinforcements ? (
           <div>
             <dt>Reserve</dt>
@@ -64,7 +57,7 @@ export default function PlayerPanel({
             <dd>{state.players[seat].gold}</dd>
           </div>
         ) : null}
-        {state.players[seat].upkeepDue !== undefined ? (
+        {state.players[seat].upkeepDue > 0 ? (
           <div>
             <dt>Upkeep</dt>
             <dd>{state.players[seat].upkeepDue}</dd>
@@ -86,48 +79,6 @@ export default function PlayerPanel({
           </div>
         ) : null}
       </dl>
-      {victory ? (
-        <div className="victory-summary">
-          <div className="section-heading-row compact">
-            <p className="small-label">Victory</p>
-            <strong>{victory.era.label}</strong>
-          </div>
-          {mandate ? <p>{mandate.label}</p> : <p>No mandate unlocked.</p>}
-          {warningsForSeat.length > 0 ? (
-            <ol className="warning-list">
-              {warningsForSeat.map((warning) => (
-                <li key={warning.id}>
-                  <strong>{warning.label}</strong>
-                  <span>{warning.conditionText}</span>
-                </li>
-              ))}
-            </ol>
-          ) : null}
-        </div>
-      ) : null}
-      {publicCards ? (
-        <div className="card-summary">
-          <div className="section-heading-row compact">
-            <p className="small-label">Region cards</p>
-            <strong>{publicCards.completedSetCountVisibleIfRevealed} revealed</strong>
-          </div>
-          {privateCards ? (
-            <>
-              <ol className="card-chip-list">
-                {privateCards.hand.map((card) => (
-                  <li key={card.id}>{card.name}</li>
-                ))}
-              </ol>
-              {privateCards.completedSets.length > 0 ? (
-                <p>{privateCards.completedSets.length} cashable set</p>
-              ) : null}
-              {privateCards.mustDiscard ? <p>Discard down to hand limit.</p> : null}
-            </>
-          ) : (
-            <p>{cardCount} hidden card{cardCount === 1 ? '' : 's'}.</p>
-          )}
-        </div>
-      ) : null}
       <div className="segmented-control" aria-label={`${seatCopy[seat].role} mode`}>
         <button
           className={mode === 'human' ? 'selected' : ''}
@@ -144,20 +95,21 @@ export default function PlayerPanel({
           Bot
         </button>
       </div>
-      <label className="bot-strategy-select">
-        <span>Bot plan</span>
-        <select
-          value={botStrategy}
-          disabled={mode !== 'bot'}
-          onChange={(event) => onBotStrategyChange(event.target.value)}
-        >
-          {BOT_STRATEGIES.map((strategy) => (
-            <option key={strategy.id} value={strategy.id}>
-              {strategy.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {mode === 'bot' ? (
+        <label className="bot-strategy-select">
+          <span>Bot plan</span>
+          <select
+            value={botStrategy}
+            onChange={(event) => onBotStrategyChange(event.target.value)}
+          >
+            {BOT_STRATEGIES.map((strategy) => (
+              <option key={strategy.id} value={strategy.id}>
+                {strategy.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
     </section>
   )
 }

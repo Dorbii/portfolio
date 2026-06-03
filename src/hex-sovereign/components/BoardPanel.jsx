@@ -1,5 +1,15 @@
 import { SEAT_LABELS } from '../../game/engine'
 
+const PHASE_LABELS = {
+  BOARD_PHASE: 'Board',
+  DISCARD_PHASE: 'Discard',
+  COUNTER_DRAFT: 'Counter',
+}
+
+function formatPhase(phase) {
+  return PHASE_LABELS[phase] ?? phase.replaceAll('_', ' ').toLowerCase()
+}
+
 function getCellLabel(
   cell,
   legalAction,
@@ -38,8 +48,6 @@ function getCellLabel(
 
 export default function BoardPanel({
   state,
-  activeRequest,
-  victoryState,
   controlledDomains,
   boardPositions,
   legalActionByCell,
@@ -51,7 +59,6 @@ export default function BoardPanel({
   selectedReinforcementAction,
   reinforcementActions,
   upkeepActions,
-  cardActions,
   passAction,
   surrenderAction,
   canHumanAct,
@@ -60,20 +67,24 @@ export default function BoardPanel({
   onSubmitAction,
   onReset,
 }) {
+  const reserveLabel = activeReinforcements
+    ? `${activeReinforcements.tokens}/${activeReinforcements.reserveCap}`
+    : 'Off'
+
   return (
     <section className="board-wrap" aria-label="Hex board">
       <div className="board-meta">
         <div>
-          <span>Active request</span>
-          <strong>{activeRequest.requestId}</strong>
+          <span>Phase</span>
+          <strong>{formatPhase(state.phase)}</strong>
         </div>
         <div>
-          <span>Legal moves</span>
-          <strong>{activeRequest.legalActions.length}</strong>
+          <span>Legal hexes</span>
+          <strong>{legalActionByCell.size}</strong>
         </div>
         <div>
-          <span>Era</span>
-          <strong>{victoryState?.era.label ?? 'Era I'}</strong>
+          <span>Reserve</span>
+          <strong>{reserveLabel}</strong>
         </div>
         <div>
           <span>Domains held</span>
@@ -142,7 +153,7 @@ export default function BoardPanel({
 
       <div className="action-bar" aria-label="Current turn actions">
         <div className="action-summary">
-          <span className="small-label">Action tray</span>
+          <span className="small-label">Board actions</span>
           <strong>{SEAT_LABELS[state.activeSeat]}</strong>
         </div>
         {activeReinforcements ? (
@@ -187,21 +198,6 @@ export default function BoardPanel({
             {action.label}
           </button>
         ))}
-        {cardActions.length > 0 ? (
-          <div className="card-action-tray">
-            {cardActions.map((action) => (
-              <button
-                className="control-button card-button"
-                key={action.id}
-                type="button"
-                disabled={!canHumanAct}
-                onClick={() => onSubmitAction(action.id, 'card-tray')}
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
         <button
           className="control-button"
           type="button"
