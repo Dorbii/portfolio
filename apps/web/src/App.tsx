@@ -8,6 +8,7 @@ import type {
 } from '../../../packages/schemas/src/index.js'
 import {
   mockAwards,
+  mockBotBlueprints,
   mockPublicSession,
   mockReplay,
   mockRoleStates,
@@ -15,6 +16,7 @@ import {
   type AwardOption,
 } from './mockSession'
 import { LiveAgentCockpit } from './agent/LiveAgentCockpit'
+import { ReplayViewer } from './replay/ReplayViewer'
 
 type ViewMode = 'human' | 'agent'
 
@@ -118,7 +120,11 @@ function HumanDashboard() {
           aside={mockReplay.summary}
           id="replay-heading"
         />
-        <ReplayViewer />
+        <ReplayViewer
+          arena={mockPublicSession.arena}
+          botBlueprints={mockBotBlueprints}
+          timeline={mockReplay}
+        />
         <AwardPanel awards={mockAwards} />
       </section>
       <aside className="summary-column" aria-label="Match summary">
@@ -127,37 +133,6 @@ function HumanDashboard() {
         <EventLog />
       </aside>
     </div>
-  )
-}
-
-function ReplayViewer() {
-  return (
-    <section className="replay-shell" aria-label="Replay viewport placeholder">
-      <div className="viewport-grid">
-        <div className="bot-token bot-red">RED</div>
-        <div className="bot-token bot-blue">BLUE</div>
-        <div className="hazard hazard-center">SAW</div>
-        <div className="viewport-label">
-          <span>Renderer shell</span>
-          <strong>Replay viewport placeholder</strong>
-          <small>{mockPublicSession.arena.name}</small>
-        </div>
-      </div>
-      <div className="replay-controls" aria-label="Replay controls">
-        <button type="button">Play</button>
-        <button type="button">1x</button>
-        <button type="button">Wide camera</button>
-        <button type="button">Next event</button>
-      </div>
-      <ol className="timeline-list" aria-label="Replay event timeline">
-        {mockReplay.events.map((event, index) => (
-          <li key={`${event.t}-${event.type}-${index}`}>
-            <span>{event.t}s</span>
-            <strong>{formatEvent(event.type)}</strong>
-          </li>
-        ))}
-      </ol>
-    </section>
   )
 }
 
@@ -493,10 +468,6 @@ function formatPhase(phase: string) {
     .split('_')
     .map((word) => capitalize(word))
     .join(' ')
-}
-
-function formatEvent(eventType: string) {
-  return formatPhase(eventType)
 }
 
 function formatStat([name, value]: [string, number]) {

@@ -1,5 +1,27 @@
 # Codex Trust Calibration
 
+## 2026-06-03 Phase 5 Babylon Replay MVP
+
+Scope: `apps/web/src/replay/replayMapping.ts`, `apps/web/src/replay/babylonPartRenderer.ts`, `apps/web/src/replay/BabylonReplayScene.tsx`, `apps/web/src/replay/ReplayViewer.tsx`, `apps/web/src/App.tsx`, `apps/web/src/mockSession.ts`, `apps/web/src/styles.css`, `tsconfig.test.json`, `tests/replay-mapping.test.mjs`, `package.json`, `package-lock.json`, `README.md`.
+
+Intent: replace the placeholder replay shell with a Babylon.js primitive arena renderer, catalog-driven bot part meshes, deterministic replay-time visual mapping, replay controls, camera presets, effect playback, WebGL fallback copy, and focused mapping tests.
+
+Risk: behavioral, interface, visual, and performance.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review status note: Typecheck, lint, Vite build, test TypeScript emit, and Node tests passed. Browser visual QA passed through a bounded headless Chrome/CDP fallback after both in-app Browser and Chrome extension paths failed with `windows sandbox failed: spawn setup refresh`. The canvas rendered nonblank, red/blue bots were readable, replay play/scrub states advanced through weapon fire, impact, hazard, and KO events, and the `/agent` route loaded without crashing.
+
+Review questions:
+- Verify the Babylon replay in normal Chrome or the in-app Browser after the local browser bridge/runtime issue is fixed.
+- Re-check camera framing once real replay timelines contain denser motion, impacts, and hazards.
+
+Bundle decision: the 1.35 MB minified Babylon-bearing build chunk is acceptable for the MVP prototype. It is not deploy-polished. Lazy-loading the replay renderer should be a Phase 7/perf hardening item unless the Director decides bundle size blocks the demo.
+
+Reason for sidecar: Agent Arena code quality rules say no comments in production code, so provenance markers are tracked here instead of inline.
+
 ## 2026-06-03 Phase 4 Agent Cockpit Integration
 
 Scope: `apps/web/src/App.tsx`, `apps/web/src/agent/agentClient.ts`, `apps/web/src/agent/LiveAgentCockpit.tsx`, `apps/web/src/styles.css`, `apps/worker/src/index.ts`, `packages/schemas/src/agentContract.ts`, `tsconfig.test.json`, `tests/agent-client.test.mjs`, `tests/worker-route.test.mjs`, `README.md`.

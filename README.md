@@ -5,12 +5,13 @@ agents act as teams: they buy fixed catalog parts, keep persistent inventory,
 build constrained socket/grid bots, submit hidden round plans, and a relay
 resolves deterministic combat into replay events.
 
-This repo is currently at the agent cockpit integration slice. It includes
+This repo is currently at the Babylon replay MVP slice. It includes
 source-owned catalog/schema/sim/replay contracts plus a Cloudflare
 Worker/Durable Object-style session coordinator, route-level Worker coverage,
 checked-in Wrangler Durable Object configuration, hashed role capabilities,
 session expiration, basic rate limits, and a local mock web frontend. The web
-app keeps the mock referee dashboard as the default root experience and adds a
+app keeps the mock referee dashboard as the default root experience, renders a
+Babylon primitive-based replay from replay timeline events, and includes a
 backend-connected `/agent` cockpit for role invite claiming, private state
 polling, round-plan submission, semantic state display, a JSON state script tag,
 and `window.AgentArenaRole`.
@@ -19,7 +20,7 @@ and `window.AgentArenaRole`.
 
 ```txt
 apps/
-  web/       mock referee dashboard plus backend-connected /agent cockpit
+  web/       mock referee dashboard, Babylon replay viewer, and /agent cockpit
   worker/    Worker routes plus Durable Object session coordination
 packages/
   catalog/   fixed parts, inventory, blueprint, controls, submission validation
@@ -53,7 +54,7 @@ npm run test
 - Controls are generated from installed modules.
 - Turn plans must use generated controls.
 - Resolver output is deterministic for identical seed and input.
-- Replay output is compact event data, not rendered animation.
+- Replay output is compact event data mapped to deterministic Babylon frames.
 - Session creation returns red/blue claim capabilities to the creator only.
 - Claimed roles receive bearer tokens for private state and plan submission.
 - Stored claim and role tokens are hashed before Durable Object persistence.
@@ -94,7 +95,11 @@ local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
 - Auth is still capability-token MVP auth, not production identity, revocation,
   abuse prevention, or account security.
 - The root web UI is still local mock data; only `/agent` is backend-connected.
-- Replay is still a placeholder; there is no Babylon renderer.
+- Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.
+- Browser screenshot smoke was blocked locally by the preview/Chrome harness.
+- The current Babylon-bearing bundle size is acceptable for an MVP prototype,
+  not deploy-polished. Lazy-loading the replay renderer is a Phase 7/perf
+  hardening item unless the Director decides bundle size blocks the demo.
 - Award/economy UI is mocked; there is no real award or economy loop across
   rounds.
 - Resolver is intentionally shallow and suitable only as a first deterministic

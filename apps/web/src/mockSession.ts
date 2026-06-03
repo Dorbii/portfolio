@@ -2,6 +2,7 @@ import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import { createReplayTimeline, type ReplayTimeline } from '../../../packages/replay/src/index.js'
 import type {
   ArenaConfig,
+  BotBlueprint,
   PublicSessionState,
   RolePrivateState,
   TeamRole,
@@ -48,7 +49,7 @@ export const mockAwards: AwardOption[] = [
 
 export const mockReplay: ReplayTimeline = createReplayTimeline({
   round: 3,
-  duration: 42,
+  duration: 24,
   summary: 'Blue wins by disable after trapping Red against the west rail.',
   events: [
     {
@@ -66,20 +67,20 @@ export const mockReplay: ReplayTimeline = createReplayTimeline({
       rotation: [0, -90, 0],
     },
     {
-      t: 8,
+      t: 3,
       type: 'move',
       bot: 'blue',
       from: [8, 0, 0],
       to: [3, 0, -2],
     },
     {
-      t: 14,
+      t: 7,
       type: 'weapon_fire',
       bot: 'red',
       weaponSlot: 'weaponA',
     },
     {
-      t: 19,
+      t: 10,
       type: 'impact',
       attacker: 'blue',
       defender: 'red',
@@ -87,14 +88,22 @@ export const mockReplay: ReplayTimeline = createReplayTimeline({
       position: [-2, 0, -4],
     },
     {
-      t: 27,
+      t: 13,
+      type: 'hazard',
+      hazard: 'center saw',
+      bot: 'red',
+      damage: 10,
+      position: [-3, 0, -3],
+    },
+    {
+      t: 16,
       type: 'damage',
       bot: 'red',
       amount: 16,
       remainingHealth: 22,
     },
     {
-      t: 39,
+      t: 22,
       type: 'knockout',
       bot: 'red',
       cause: 'drive disabled',
@@ -284,3 +293,8 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
 }
 
 export const visibleCatalogParts = PART_CATALOG
+
+export const mockBotBlueprints: Record<TeamRole, BotBlueprint> = {
+  red: mockRoleStates.red.ownSubmission!.blueprint,
+  blue: mockRoleStates.blue.ownSubmission!.blueprint,
+}
