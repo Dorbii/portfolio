@@ -174,6 +174,33 @@ const chatLog = [
   },
 ]
 
+const privateChatLogByRole = {
+  red: [
+    {
+      id: 's_mock_7f2:red:private-chat:1',
+      at: '14:17',
+      round: 3,
+      phase: 'referee_awards' as const,
+      role: 'red' as const,
+      agentName: 'red-agent',
+      kind: 'strategy' as const,
+      message: 'Spinner traded damage but could not steer out of the trap; buy drive control next.',
+    },
+  ],
+  blue: [
+    {
+      id: 's_mock_7f2:blue:private-chat:1',
+      at: '14:17',
+      round: 3,
+      phase: 'referee_awards' as const,
+      role: 'blue' as const,
+      agentName: 'blue-agent',
+      kind: 'reflection' as const,
+      message: 'Net control created the win condition; keep distance and add durability.',
+    },
+  ],
+}
+
 export const mockPublicSession: PublicSessionState = {
   sessionId: 's_mock_7f2',
   stateVersion: 'mock|referee_awards|3|red-submitted|blue-submitted|4',
@@ -229,7 +256,19 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       { partId: 'Style_Neon', quantity: 1 },
     ],
     controls: {
-      movement: ['forward', 'backward', 'turn_left', 'turn_right', 'brake'],
+      movement: [
+        'forward',
+        'backward',
+        'dash_forward',
+        'dash_backward',
+        'strafe_left',
+        'strafe_right',
+        'circle_left',
+        'circle_right',
+        'turn_left',
+        'turn_right',
+        'brake',
+      ],
       weaponA: ['fire', 'hold'],
       utility: ['activate', 'hold'],
     },
@@ -260,9 +299,9 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       },
       turnPlan: {
         commands: [
-          { tick: 1, move: 'forward', weaponA: 'hold' },
-          { tick: 2, move: 'forward', weaponA: 'fire' },
-          { tick: 3, move: 'turn_right', weaponA: 'hold' },
+          { tick: 1, move: 'dash_forward', weaponA: 'hold' },
+          { tick: 2, move: 'circle_right', weaponA: 'fire' },
+          { tick: 3, move: 'strafe_left', weaponA: 'hold' },
           { tick: 4, move: 'forward', weaponA: 'fire' },
           { tick: 5, move: 'brake', weaponA: 'hold' },
         ],
@@ -273,6 +312,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
     chatLog,
+    privateChatLog: privateChatLogByRole.red,
     eventLog,
   },
   blue: {
@@ -291,7 +331,19 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       { partId: 'Armor_Light', quantity: 2 },
     ],
     controls: {
-      movement: ['forward', 'backward', 'turn_left', 'turn_right', 'brake'],
+      movement: [
+        'forward',
+        'backward',
+        'dash_forward',
+        'dash_backward',
+        'strafe_left',
+        'strafe_right',
+        'circle_left',
+        'circle_right',
+        'turn_left',
+        'turn_right',
+        'brake',
+      ],
       weaponA: ['fire', 'hold'],
       utility: ['activate', 'hold'],
     },
@@ -322,19 +374,20 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       },
       turnPlan: {
         commands: [
-          { tick: 1, move: 'forward', weaponA: 'hold' },
-          { tick: 2, move: 'turn_left', weaponA: 'hold' },
-          { tick: 3, move: 'forward', weaponA: 'fire' },
-          { tick: 4, move: 'forward', utility: 'activate' },
-          { tick: 5, move: 'brake', weaponA: 'hold' },
+          { tick: 1, move: 'dash_forward', weaponA: 'hold' },
+          { tick: 2, move: 'circle_left', weaponA: 'hold' },
+          { tick: 3, move: 'strafe_right', weaponA: 'fire' },
+          { tick: 4, move: 'dash_backward', utility: 'activate' },
+          { tick: 5, move: 'circle_right', weaponA: 'fire' },
         ],
       },
-      rationale: 'Avoid the spinner until the net lands.',
+      rationale: 'Run the lane, fire while sliding, and retreat before the spinner gets a clean trade.',
     },
     opponent: mockPublicSession.roles.red,
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
     chatLog,
+    privateChatLog: privateChatLogByRole.blue,
     eventLog,
   },
 }

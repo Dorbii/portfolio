@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PART_CATALOG, getPart } from '../../../../packages/catalog/src/index.js'
+import { MOVEMENT_COMMANDS } from '../../../../packages/schemas/src/index.js'
 import type {
+  AgentChatMessageKind,
   MovementCommand,
   UtilityCommand,
   WeaponCommand,
@@ -9,6 +11,7 @@ import type {
   RoleClaimResponse,
   RolePrivateState,
   RoundPlanSubmission,
+  SessionChatMessage,
   ValidationIssue,
   TurnCommand,
 } from '../../../../packages/schemas/src/index.js'
@@ -96,6 +99,12 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const [lastError, setLastError] = useState<UiError | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [submissionMode, setSubmissionMode] = useState<SubmissionMode>('structured')
+  const [chatKind, setChatKind] = useState<AgentChatMessageKind>('reflection')
+  const [chatMessage, setChatMessage] = useState('')
+  const [chatStatus, setChatStatus] = useState<'idle' | 'posting'>('idle')
+  const [privateChatKind, setPrivateChatKind] = useState<AgentChatMessageKind>('strategy')
+  const [privateChatMessage, setPrivateChatMessage] = useState('')
+  const [privateChatStatus, setPrivateChatStatus] = useState<'idle' | 'posting'>('idle')
   const sampleSubmission = useMemo(() => createSampleSubmission(), [])
   const [submissionDraft, setSubmissionDraft] = useState(() =>
     createDraftFromSubmission(sampleSubmission),
@@ -347,6 +356,89 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     }
   }
 
+  const submitChatMessage = async () => {
+    if (!roleState) {
+      setLastError({
+        title: 'Role state is missing',
+        message: 'Load role state before posting chat.',
+        code: 'MISSING_ROLE_STATE',
+      })
+      return
+    }
+
+    const trimmedMessage = chatMessage.trim()
+
+    if (!trimmedMessage) {
+      setLastError({
+        title: 'Chat message is empty',
+        message: 'Write a short public taunt, observation, strategy note, or reflection.',
+        code: 'EMPTY_CHAT_MESSAGE',
+      })
+      return
+    }
+
+    setLastError(null)
+    setNotice(null)
+    setChatStatus('posting')
+
+    try {
+      const result = await client.submitChatMessage({
+        kind: chatKind,
+        message: trimmedMessage,
+      })
+
+      setRoleState(result.state)
+      setPublicState(result.publicState)
+      setChatMessage('')
+      setNotice('Chat message posted.')
+    } catch (error) {
+      setLastError(toUiError(error, 'Chat post failed'))
+    } finally {
+      setChatStatus('idle')
+    }
+  }
+
+  const submitPrivateChatMessage = async () => {
+    if (!roleState) {
+      setLastError({
+        title: 'Role state is missing',
+        message: 'Load role state before saving private notes.',
+        code: 'MISSING_ROLE_STATE',
+      })
+      return
+    }
+
+    const trimmedMessage = privateChatMessage.trim()
+
+    if (!trimmedMessage) {
+      setLastError({
+        title: 'Private note is empty',
+        message: 'Write a short private note before saving it to this role.',
+        code: 'EMPTY_PRIVATE_CHAT_MESSAGE',
+      })
+      return
+    }
+
+    setLastError(null)
+    setNotice(null)
+    setPrivateChatStatus('posting')
+
+    try {
+      const result = await client.submitPrivateChatMessage({
+        kind: privateChatKind,
+        message: trimmedMessage,
+      })
+
+      setRoleState(result.state)
+      setPrivateChatMessage('')
+      setNotice('Private note saved.')
+    } catch (error) {
+      setLastError(toUiError(error, 'Private note failed'))
+    } finally {
+      setPrivateChatStatus('idle')
+    }
+  }
+
   const stateScript = useMemo(
     () =>
       serializeJsonForScript({
@@ -398,7 +490,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
       : 'Claim role'
   const refreshButtonLabel = status === 'loading' ? 'Refreshing...' : 'Refresh state'
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
+  const chatLog = roleState?.chatLog ?? publicState?.chatLog ?? []
+  const privateChatLog = roleState?.privateChatLog ?? []
   const roleHasMatchLog = matchLog.length > 0
+  const roleHasChatLog = chatLog.length > 0
+  const roleHasPrivateChatLog = privateChatLog.length > 0
   const draftSubmission = useMemo(
     () => buildSubmissionFromDraft(submissionDraft),
     [submissionDraft],
@@ -408,6 +504,22 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     [roleState?.gold, submissionDraft],
   )
   const canSubmitPlan = Boolean(roleToken) && !isBusy && !roleState?.submitted
+  const canPostChat = Boolean(
+    roleToken &&
+      roleState &&
+      !isBusy &&
+      chatStatus !== 'posting' &&
+      !isTerminalPhase(roleState.phase) &&
+      chatMessage.trim().length > 0,
+  )
+  const canPostPrivateChat = Boolean(
+    roleToken &&
+      roleState &&
+      !isBusy &&
+      privateChatStatus !== 'posting' &&
+      !isTerminalPhase(roleState.phase) &&
+      privateChatMessage.trim().length > 0,
+  )
 
   const copyExternalAgentBrief = useCallback(() => {
     return navigator.clipboard
@@ -941,11 +1053,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                           }
                         >
                           <option value="">-</option>
-                          <option value="forward">forward</option>
-                          <option value="backward">backward</option>
-                          <option value="turn_left">turn_left</option>
-                          <option value="turn_right">turn_right</option>
-                          <option value="brake">brake</option>
+                          {MOVEMENT_COMMANDS.map((move) => (
+                            <option key={move} value={move}>
+                              {move}
+                            </option>
+                          ))}
                         </select>
                       </label>
                       <label>
@@ -1099,6 +1211,98 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
           <section className="agent-live-panel" aria-labelledby="awards-heading">
             <SectionTitle id="awards-heading" title="Award incentives" />
             <AwardIncentives state={roleState} publicState={publicState} />
+          </section>
+
+          <section className="agent-live-panel chat-panel private-chat-panel" aria-labelledby="private-chat-heading">
+            <div className="plan-section-header">
+              <SectionTitle id="private-chat-heading" title="Private notes" />
+              <span className="chat-count">{privateChatLog.length} role-only</span>
+            </div>
+            <form
+              className="agent-chat-form private-chat-form"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void submitPrivateChatMessage()
+              }}
+            >
+              <label>
+                Kind
+                <select
+                  value={privateChatKind}
+                  onChange={(event) => setPrivateChatKind(event.target.value as AgentChatMessageKind)}
+                  disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
+                >
+                  <option value="strategy">Strategy</option>
+                  <option value="reflection">Reflection</option>
+                  <option value="observation">Observation</option>
+                  <option value="taunt">Taunt</option>
+                </select>
+              </label>
+              <label className="agent-chat-message-field">
+                Note
+                <textarea
+                  maxLength={420}
+                  value={privateChatMessage}
+                  onChange={(event) => setPrivateChatMessage(event.target.value)}
+                  placeholder="Role-private conclusions for the next build."
+                  disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
+                />
+              </label>
+              <div className="agent-chat-actions">
+                <span>{privateChatMessage.trim().length} / 420</span>
+                <button type="submit" disabled={!canPostPrivateChat}>
+                  {privateChatStatus === 'posting' ? 'Saving...' : 'Save note'}
+                </button>
+              </div>
+            </form>
+            <AgentChatLog messages={privateChatLog} />
+            {!roleHasPrivateChatLog ? <p className="agent-empty">No private notes loaded.</p> : null}
+          </section>
+
+          <section className="agent-live-panel chat-panel" aria-labelledby="chat-heading">
+            <div className="plan-section-header">
+              <SectionTitle id="chat-heading" title="Bot chat" />
+              <span className="chat-count">{chatLog.length} public</span>
+            </div>
+            <form
+              className="agent-chat-form"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void submitChatMessage()
+              }}
+            >
+              <label>
+                Kind
+                <select
+                  value={chatKind}
+                  onChange={(event) => setChatKind(event.target.value as AgentChatMessageKind)}
+                  disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
+                >
+                  <option value="reflection">Reflection</option>
+                  <option value="strategy">Strategy</option>
+                  <option value="observation">Observation</option>
+                  <option value="taunt">Taunt</option>
+                </select>
+              </label>
+              <label className="agent-chat-message-field">
+                Message
+                <textarea
+                  maxLength={420}
+                  value={chatMessage}
+                  onChange={(event) => setChatMessage(event.target.value)}
+                  placeholder="Public, concise, and useful. No secrets or hidden reasoning."
+                  disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
+                />
+              </label>
+              <div className="agent-chat-actions">
+                <span>{chatMessage.trim().length} / 420</span>
+                <button type="submit" disabled={!canPostChat}>
+                  {chatStatus === 'posting' ? 'Posting...' : 'Post chat'}
+                </button>
+              </div>
+            </form>
+            <AgentChatLog messages={chatLog} />
+            {!roleHasChatLog ? <p className="agent-empty">No bot chat loaded.</p> : null}
           </section>
 
           <section className="agent-live-panel match-log-panel" aria-labelledby="match-log-heading">
@@ -1257,6 +1461,31 @@ function AwardIncentives({
   )
 }
 
+function AgentChatLog({ messages }: { messages: SessionChatMessage[] }) {
+  if (messages.length === 0) {
+    return null
+  }
+
+  return (
+    <ol className="chat-log agent-chat-log">
+      {messages.map((message) => (
+        <li className={`chat-message ${message.role}`} key={message.id}>
+          <div className="chat-message-header">
+            <span className={`role-chip ${message.role}`}>{capitalize(message.role)}</span>
+            <strong>{formatPhase(message.kind)}</strong>
+            <time dateTime={message.at}>{formatDateTime(message.at)}</time>
+          </div>
+          <p>{message.message}</p>
+          <small>
+            Round {message.round} / {formatPhase(message.phase)}
+            {message.agentName ? ` / ${message.agentName}` : ''}
+          </small>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 function InventoryTable({ state }: { state: RolePrivateState | null }) {
   const items = state?.inventory ?? []
 
@@ -1356,11 +1585,11 @@ function createSampleSubmission(): RoundPlanSubmission {
     },
     turnPlan: {
       commands: [
-        { tick: 1, move: 'forward', weaponA: 'hold' },
-        { tick: 2, move: 'forward', weaponA: 'fire' },
-        { tick: 3, move: 'turn_left', weaponA: 'hold' },
-        { tick: 4, move: 'forward', weaponA: 'fire' },
-        { tick: 5, move: 'brake', weaponA: 'hold' },
+        { tick: 1, move: 'dash_forward', weaponA: 'hold' },
+        { tick: 2, move: 'circle_left', weaponA: 'fire' },
+        { tick: 3, move: 'strafe_right', weaponA: 'hold' },
+        { tick: 4, move: 'dash_backward', weaponA: 'fire' },
+        { tick: 5, move: 'circle_right', weaponA: 'hold' },
       ],
     },
     rationale: 'A compact baseline that keeps budget clear and produces repeatable timing.',
@@ -1638,13 +1867,7 @@ function normalizeTurnPlan(value: unknown): RoundPlanSubmission['turnPlan'] {
 }
 
 function isMovementCommand(value: unknown): value is MovementCommand {
-  return (
-    value === 'forward' ||
-    value === 'backward' ||
-    value === 'turn_left' ||
-    value === 'turn_right' ||
-    value === 'brake'
-  )
+  return MOVEMENT_COMMANDS.includes(value as MovementCommand)
 }
 
 function isWeaponCommand(value: unknown): value is WeaponCommand {

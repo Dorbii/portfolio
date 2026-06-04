@@ -114,6 +114,12 @@ export type BotBlueprint = {
 export const MOVEMENT_COMMANDS = [
   'forward',
   'backward',
+  'dash_forward',
+  'dash_backward',
+  'strafe_left',
+  'strafe_right',
+  'circle_left',
+  'circle_right',
   'turn_left',
   'turn_right',
   'brake',

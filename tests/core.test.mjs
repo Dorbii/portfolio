@@ -194,6 +194,12 @@ test('controls are generated from installed modules', () => {
   assert.deepEqual(controls.movement, [
     'forward',
     'backward',
+    'dash_forward',
+    'dash_backward',
+    'strafe_left',
+    'strafe_right',
+    'circle_left',
+    'circle_right',
     'turn_left',
     'turn_right',
     'brake',
@@ -292,6 +298,53 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
   assert.equal(first.replay.duration, 60)
   assert.equal(first.reason, 'No bot took damage for a full minute; the round ended as a draw.')
   assert.equal(first.log[0].startsWith('Round 3'), true)
+})
+
+test('resolver gives fast control weapon builds run-and-gun fallback movement', () => {
+  const fastSkirmisherBlueprint = {
+    name: 'Blue Runner',
+    blocks: [
+      { id: 'core', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'frontLeft', partId: 'Wheel_Omni', position: [-1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'frontRight', partId: 'Wheel_Omni', position: [1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'rearLeft', partId: 'Wheel_Omni', position: [-1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'rearRight', partId: 'Wheel_Omni', position: [1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'net', partId: 'Weapon_Net', position: [0, 0, 2], rotation: [0, 0, 0] },
+      { id: 'booster', partId: 'Utility_Booster', position: [0, 0, -2], rotation: [0, 0, 0] },
+    ],
+  }
+  const heavyBruiserBlueprint = {
+    name: 'Red Bruiser',
+    blocks: [
+      { id: 'core', partId: 'Body_Heavy_Block', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'leftTread', partId: 'Tread_Heavy', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'rightTread', partId: 'Tread_Heavy', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 2,
+    seed: 'run-and-gun-check',
+    red: {
+      blueprint: heavyBruiserBlueprint,
+      turnPlan: { commands: [] },
+    },
+    blue: {
+      blueprint: fastSkirmisherBlueprint,
+      turnPlan: { commands: [] },
+    },
+  })
+  const blueMoves = result.replay.events.filter(
+    (event) => event.type === 'move' && event.bot === 'blue' && event.t > 5,
+  )
+  const blueWeaponFire = result.replay.events.filter(
+    (event) => event.type === 'weapon_fire' && event.bot === 'blue' && event.t > 5,
+  )
+
+  assert.ok(blueMoves.some((event) => Math.abs(event.to[0] - event.from[0]) > 2.5))
+  assert.ok(blueMoves.some((event) => Math.abs(event.to[2] - event.from[2]) > 1.5))
+  assert.ok(blueWeaponFire.length > 0)
+  assert.ok(result.damage.red > 0)
 })
 
 test('session creation returns role invites without leaking tokens publicly', async () => {
@@ -430,6 +483,43 @@ test('agents can publish public chat and reflection messages', async () => {
   assert.equal(invalid.error.issues[0].code, 'INVALID_CHAT_KIND')
 })
 
+test('private chat is scoped to the bearer role and hidden from public state', async () => {
+  const session = await createTestSession('s_private_chat')
+  const { redToken, blueToken } = await claimBothRoles(session)
+  const beforeVersion = session.getPublicState().stateVersion
+  const noteText = 'Prefer flanks next round; the front armor plan trades poorly.'
+  const note = await session.submitPrivateChatMessage(redToken, {
+    kind: 'strategy',
+    message: `  ${noteText}  `,
+  })
+
+  assert.equal(note.ok, true)
+  assert.equal(note.value.message.role, 'red')
+  assert.equal(note.value.message.kind, 'strategy')
+  assert.equal(note.value.message.message, noteText)
+  assert.equal(note.value.state.privateChatLog.length, 1)
+  assert.equal(note.value.state.privateChatLog[0].message, noteText)
+
+  const redState = await session.getRoleStateForToken(redToken)
+  const blueState = await session.getRoleStateForToken(blueToken)
+  const publicState = session.getPublicState()
+
+  assert.equal(redState.ok, true)
+  assert.equal(blueState.ok, true)
+  assert.equal(redState.value.privateChatLog[0].message, noteText)
+  assert.equal(blueState.value.privateChatLog.length, 0)
+  assert.equal(publicState.stateVersion, beforeVersion)
+  assert.equal(JSON.stringify(publicState).includes(noteText), false)
+  assert.equal(JSON.stringify(blueState.value).includes(noteText), false)
+
+  const invalidToken = await session.submitPrivateChatMessage('role_not_real', {
+    message: 'nope',
+  })
+
+  assert.equal(invalidToken.ok, false)
+  assert.equal(invalidToken.error.code, 'INVALID_TOKEN')
+})
+
 test('session rate limits repeated private state attempts', async () => {
   const session = await createTestSession('s_rate_limit', {
     rateLimits: {
@@ -544,6 +634,10 @@ test('referee can reset a claimed role and refresh claim capability before comba
   assert.equal(blueClaim.ok, true)
 
   const redToken = redClaim.value.roleToken
+  await session.submitPrivateChatMessage(redToken, {
+    kind: 'strategy',
+    message: 'Keep this note tied to the first red claimant only.',
+  })
   const redSubmission = await session.submitRoundPlan(redToken, validSpinnerSubmission)
 
   assert.equal(redSubmission.ok, true)
@@ -581,6 +675,7 @@ test('referee can reset a claimed role and refresh claim capability before comba
   assert.equal(replacementClaim.value.state.phase, 'submission_phase')
   assert.equal(replacementClaim.value.state.gold, 100)
   assert.deepEqual(replacementClaim.value.state.inventory, [])
+  assert.deepEqual(replacementClaim.value.state.privateChatLog, [])
 })
 
 test('referee role reset cannot rewrite a resolved round', async () => {

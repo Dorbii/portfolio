@@ -49,6 +49,17 @@ const roleState = {
       message: 'Try turning faster.',
     },
   ],
+  privateChatLog: [
+    {
+      id: 's_demo:red:private-chat:1',
+      at: '2026-06-03T12:01:30.000Z',
+      round: 1,
+      phase: 'submission_phase',
+      role: 'red',
+      kind: 'strategy',
+      message: 'Keep traction budget available for round two.',
+    },
+  ],
   eventLog: [
     {
       at: '2026-06-03T12:00:00.000Z',
@@ -228,6 +239,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/private-chat'))
+  assert.ok(brief.includes('window.AgentArenaRole.submitPrivateChatMessage'))
   assert.ok(brief.includes('Do not submit hidden chain-of-thought'))
   assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
   assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
@@ -468,12 +481,14 @@ test('browser role API exposes valid actions from current role state', async () 
       ['get_role_state', true],
       ['get_match_log', true],
       ['get_chat_log', true],
+      ['get_private_chat_log', true],
       ['wait_for_state_change', true],
       ['wait_for_next_submission_window', false],
       ['get_fallback_round_plan', true],
       ['submit_fallback_round_plan', true],
       ['submit_round_plan', true],
       ['submit_chat_message', true],
+      ['submit_private_chat_message', true],
     ],
   )
 })
@@ -498,7 +513,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, true, true, false, false, false, false, false, true, false, false, false],
+    [true, true, true, false, false, false, false, false, false, true, false, false, false, false],
   )
 })
 
@@ -687,6 +702,68 @@ test('browser role API posts and reads public chat through authenticated endpoin
   assert.deepEqual(calls[0].body, {
     kind: 'reflection',
     message: 'Armor held; add drive next.',
+  })
+})
+
+test('browser role API posts and reads private notes through authenticated endpoints', async () => {
+  const calls = []
+  const privateMessage = {
+    id: 's_demo:red:private-chat:2',
+    at: '2026-06-03T12:03:00.000Z',
+    round: 1,
+    phase: 'submission_phase',
+    role: 'red',
+    kind: 'strategy',
+    message: 'Keep the next build compact and invest in turning.',
+  }
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async (url, init = {}) => {
+      const headers = new Headers(init.headers)
+      calls.push({
+        url: String(url),
+        method: init.method ?? 'GET',
+        authorization: headers.get('authorization'),
+        body: init.body ? JSON.parse(String(init.body)) : undefined,
+      })
+
+      if (String(url).endsWith('/private-chat')) {
+        return jsonResponse({
+          message: privateMessage,
+          state: {
+            ...roleState,
+            privateChatLog: [
+              ...roleState.privateChatLog,
+              privateMessage,
+            ],
+          },
+        })
+      }
+
+      return jsonResponse(roleState)
+    },
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => roleState)
+  const posted = await roleApi.submitPrivateChatMessage({
+    kind: 'strategy',
+    message: 'Keep the next build compact and invest in turning.',
+  })
+  const privateChatLog = await roleApi.getPrivateChatLog()
+
+  assert.equal(posted.message.kind, 'strategy')
+  assert.equal(posted.state.privateChatLog.at(-1).message, privateMessage.message)
+  assert.deepEqual(privateChatLog, roleState.privateChatLog)
+  assert.deepEqual(
+    calls.map((call) => [call.method, call.url.replace(invite.apiBase, ''), call.authorization]),
+    [
+      ['POST', '/sessions/s_demo/private-chat', 'Bearer role_red'],
+      ['GET', '/sessions/s_demo/state', 'Bearer role_red'],
+    ],
+  )
+  assert.deepEqual(calls[0].body, {
+    kind: 'strategy',
+    message: 'Keep the next build compact and invest in turning.',
   })
 })
 

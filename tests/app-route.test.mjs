@@ -8,6 +8,15 @@ const cockpitSource = readFileSync(
   'utf8',
 )
 
+function functionSource(source, functionName) {
+  const start = source.indexOf(`function ${functionName}(`)
+  const next = source.indexOf('\nfunction ', start + 1)
+
+  assert.notEqual(start, -1)
+
+  return next === -1 ? source.slice(start) : source.slice(start, next)
+}
+
 test('app keeps a dedicated /agent route gate tolerant of nested paths', () => {
   assert.match(appSource, /function isAgentPathname\(/)
   assert.match(appSource, /const normalized = pathname\.replace\(/)
@@ -16,13 +25,18 @@ test('app keeps a dedicated /agent route gate tolerant of nested paths', () => {
 })
 
 test('root console is wired to live referee session helpers', () => {
-  assert.equal(appSource.includes('./mockSession'), false)
+  const refereeConsoleSource = functionSource(appSource, 'RefereeConsole')
+
+  assert.equal(refereeConsoleSource.includes('mockPublicSession'), false)
+  assert.equal(refereeConsoleSource.includes('mockRoleStates'), false)
   assert.ok(appSource.includes('./referee/refereeClient'))
   assert.ok(appSource.includes('createSession'))
   assert.ok(appSource.includes('loadPublicSession'))
   assert.ok(appSource.includes('loadReplayPayload'))
   assert.ok(appSource.includes('ReplayViewer'))
   assert.ok(appSource.includes('ReplayOutcome'))
+  assert.ok(appSource.includes('PublicChatLog'))
+  assert.ok(appSource.includes('Post-round chatter'))
   assert.ok(appSource.includes('submitRefereeAwards'))
   assert.ok(appSource.includes('resetRoleClaim'))
   assert.equal(appSource.includes('Create capability token'), false)
@@ -39,6 +53,12 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitSource.includes('agent-empty'))
   assert.ok(cockpitSource.includes('Last validation error'))
   assert.ok(cockpitSource.includes('Match log'))
+  assert.ok(cockpitSource.includes('Bot chat'))
+  assert.ok(cockpitSource.includes('Private notes'))
+  assert.ok(cockpitSource.includes('agent-chat-form'))
+  assert.ok(cockpitSource.includes('submitChatMessage'))
+  assert.ok(cockpitSource.includes('submitPrivateChatMessage'))
+  assert.ok(cockpitSource.includes('privateChatLog'))
   assert.ok(cockpitSource.includes('agent-arena-state'))
   assert.ok(cockpitSource.includes('agent-arena-brief'))
   assert.ok(cockpitSource.includes('External agent brief'))

@@ -1,5 +1,25 @@
 # Codex Trust Calibration
 
+## 2026-06-04 Expanded Movement Commands and Run-and-Gun Fallback
+
+Scope: `packages/schemas/src/types.ts`, `packages/catalog/src/controls.ts`, `packages/sim/src/resolveCombat.ts`, `packages/schemas/src/agentContract.ts`, `apps/web/src/agent/agentClient.ts`, `apps/web/src/agent/LiveAgentCockpit.tsx`, `apps/web/src/mockSession.ts`, `tests/core.test.mjs`.
+
+Intent: expand legal movement commands beyond the original five-command set, expose them through generated controls and the cockpit editor, make high-mobility control/weapon builds choose skirmish, kite, dash, strafe, and circle fallback movement, and update agent-facing examples so default plans stop teaching direct-only movement.
+
+Risk: behavioral and interface.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review status note: Typecheck, test TypeScript emit, lint, production build, and the full Node test suite passed. Added a regression test proving a fast control weapon build emits post-opener high-displacement lateral/forward movement, fires while moving, and deals damage.
+
+Review questions:
+- Watch a real replay and decide whether the new movement distances are readable or too twitchy at normal playback speed.
+- Decide whether movement profiles should become explicit part tags or archetypes instead of inferred from mobility/control/weapon stats.
+
+Reason for sidecar: Agent Arena code quality rules already use this sidecar for provenance instead of inline marker comments in production code.
+
 ## 2026-06-04 Combat Duration, Tactical Fallback, and Replay Damage Feedback
 
 Scope: `packages/sim/src/resolveCombat.ts`, `apps/web/src/replay/replayMapping.ts`, `apps/web/src/replay/BabylonReplayScene.tsx`, `apps/web/src/App.tsx`, `apps/web/src/styles.css`, `tests/core.test.mjs`, `tests/replay-mapping.test.mjs`.

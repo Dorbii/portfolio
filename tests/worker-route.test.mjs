@@ -165,6 +165,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.browserApi.methods.includes('getFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('submitFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('submitChatMessage'))
+  assert.ok(json.browserApi.methods.includes('submitPrivateChatMessage'))
+  assert.ok(json.browserApi.methods.includes('getPrivateChatLog'))
   assert.ok(json.browserApi.methods.includes('waitForStateChange'))
   assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
   assert.ok(json.objective.includes('Build and submit'))
@@ -174,6 +176,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('public chat')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private notes')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
   assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole()'))
   assert.ok(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan() only if'))
@@ -206,6 +209,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.method === 'POST' &&
         action.path === '/sessions' &&
         action.auth === 'none; protected by Cloudflare rate limiting/WAF',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'submit_private_chat_message' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/private-chat' &&
+        action.returns.includes('opponent private state do not include this note'),
     ),
   )
   assert.ok(
@@ -442,6 +454,54 @@ test('POST /sessions/:id/chat stores public role-authored chat', async () => {
     redInvite.claimToken,
     blueInvite.claimToken,
   ])
+})
+
+test('POST /sessions/:id/private-chat stores bearer-scoped notes only in private role state', async () => {
+  const env = createEnv()
+  const sessionId = 's_private_chat_route'
+  const create = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = create.json.invites.find((invite) => invite.role === 'red')
+  const blueInvite = create.json.invites.find((invite) => invite.role === 'blue')
+  const noteText = 'Private flank plan: keep distance until blue commits drive.'
+
+  await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: { agentName: 'Red Private' },
+  })
+  await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: { agentName: 'Blue Private' },
+  })
+
+  const note = await route(env, `/sessions/${sessionId}/private-chat`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      kind: 'strategy',
+      message: noteText,
+    },
+  })
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const publicState = await route(env, `/sessions/${sessionId}/public`)
+
+  assert.equal(note.response.status, 200)
+  assert.equal(note.json.message.role, 'red')
+  assert.equal(note.json.message.agentName, 'Red Private')
+  assert.equal(note.json.state.privateChatLog[0].message, noteText)
+  assert.equal(redState.json.privateChatLog[0].message, noteText)
+  assert.equal(blueState.json.privateChatLog.length, 0)
+  assert.equal(JSON.stringify(publicState.json).includes(noteText), false)
+  assert.equal(JSON.stringify(blueState.json).includes(noteText), false)
 })
 
 test('POST /sessions rejects oversized JSON bodies before validation', async () => {

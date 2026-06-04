@@ -6,6 +6,8 @@ import {
   validateRoleResetRequestShape,
   type AgentChatMessagePostRequest,
   type AgentChatMessageResponse,
+  type AgentPrivateChatMessagePostRequest,
+  type AgentPrivateChatMessageResponse,
   type AgentBootstrapRequest,
   type AgentBootstrapResponse,
   type AgentNextAction,
@@ -65,7 +67,14 @@ type TokenOwner = TeamRole | 'referee'
 type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
 type Clock = () => string
 type TokenHasher = (token: string) => Promise<string>
-type RateLimitAction = 'claim' | 'state' | 'submit' | 'chat' | 'referee_awards' | 'reset_role'
+type RateLimitAction =
+  | 'claim'
+  | 'state'
+  | 'submit'
+  | 'chat'
+  | 'private_chat'
+  | 'referee_awards'
+  | 'reset_role'
 type RateLimitRule = {
   windowMs: number
   max: number
@@ -76,6 +85,7 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   state: { windowMs: 60 * 1000, max: 120 },
   submit: { windowMs: 60 * 1000, max: 20 },
   chat: { windowMs: 60 * 1000, max: 30 },
+  private_chat: { windowMs: 60 * 1000, max: 30 },
   referee_awards: { windowMs: 60 * 1000, max: 20 },
   reset_role: { windowMs: 60 * 1000, max: 20 },
 }
@@ -168,6 +178,7 @@ export type StoredRoleState = {
     gold: number
     inventory: InventoryItem[]
   }
+  privateChatLog: SessionChatMessage[]
 }
 
 export type StoredSessionState = {
@@ -334,6 +345,7 @@ function mergeRateLimits(
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
     chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
+    private_chat: overrides?.private_chat ?? DEFAULT_RATE_LIMITS.private_chat,
     referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
     reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
   }
@@ -448,6 +460,7 @@ export class SessionCoordinator {
       this.state.roles[role].wins ??= 0
       this.state.roles[role].losses ??= 0
       this.state.roles[role].winStreak ??= 0
+      this.state.roles[role].privateChatLog ??= []
     }
     this.clock = options.clock ?? defaultClock
     this.tokenFactory = options.tokenFactory ?? defaultTokenFactory
@@ -498,6 +511,7 @@ export class SessionCoordinator {
           losses: 0,
           winStreak: 0,
           inventory: [],
+          privateChatLog: [],
         },
         blue: {
           role: 'blue',
@@ -507,6 +521,7 @@ export class SessionCoordinator {
           losses: 0,
           winStreak: 0,
           inventory: [],
+          privateChatLog: [],
         },
       },
       refereeTokenHash: await tokenHasher(refereeToken),
@@ -855,6 +870,49 @@ export class SessionCoordinator {
     }
   }
 
+  async submitPrivateChatMessage(
+    roleToken: string,
+    request: unknown,
+  ): Promise<SessionResult<AgentPrivateChatMessageResponse>> {
+    const now = this.clock()
+    const activeError = this.requireActive(now)
+
+    if (activeError) {
+      return activeError
+    }
+
+    const role = await this.findRoleByToken(roleToken)
+    const rateLimitError = this.takeRateLimit('private_chat', role?.role ?? 'invalid', now)
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    if (!role) {
+      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
+    }
+
+    const validation = validateAgentChatMessageRequestShape(request)
+
+    if (!validation.ok) {
+      return relayError('INVALID_REQUEST', 'Private chat message failed validation.', validation.issues)
+    }
+
+    const [message] = this.appendPrivateChatMessages(
+      role,
+      [request as AgentPrivateChatMessagePostRequest],
+      now,
+    )
+
+    return {
+      ok: true,
+      value: {
+        message,
+        state: this.buildRoleState(role),
+      },
+    }
+  }
+
   async submitRefereeAwards(
     refereeToken: string,
     request: unknown,
@@ -977,6 +1035,7 @@ export class SessionCoordinator {
     role.controls = undefined
     role.submission = undefined
     role.submissionBaseline = undefined
+    role.privateChatLog = []
 
     this.touch(now)
     this.appendEvent('role_reset', `${roleName} role reset by referee.`, now)
@@ -1039,6 +1098,7 @@ export class SessionCoordinator {
       ...(this.state.awardHistory.length > 0 ? { awardHistory: this.state.awardHistory } : {}),
       ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
       chatLog: this.state.chatLog,
+      privateChatLog: role.privateChatLog,
       eventLog: this.state.eventLog,
     })
   }
@@ -1366,6 +1426,31 @@ export class SessionCoordinator {
     })
 
     this.state.chatLog.push(...messages)
+
+    return cloneJson(messages)
+  }
+
+  private appendPrivateChatMessages(
+    role: StoredRoleState,
+    requests: AgentPrivateChatMessagePostRequest[],
+    at: string,
+  ): SessionChatMessage[] {
+    const messages = requests.map((request, index) => {
+      const message = safeText(request.message)!
+
+      return {
+        id: `${this.state.id}:${role.role}:private-chat:${role.privateChatLog.length + index + 1}`,
+        at,
+        round: this.state.round,
+        phase: this.state.phase,
+        role: role.role,
+        ...(role.agentName ? { agentName: role.agentName } : {}),
+        kind: request.kind ?? 'observation',
+        message,
+      }
+    })
+
+    role.privateChatLog.push(...messages)
 
     return cloneJson(messages)
   }

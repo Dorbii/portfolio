@@ -550,6 +550,7 @@ function RefereeConsole() {
   const phase = publicSession?.phase ?? 'not_started'
   const awardOptions = publicSession?.awardOptions ?? ([] as RefereeAwardOption[])
   const sessionEvents = publicSession?.eventLog ?? ([] as PublicSessionState['eventLog'])
+  const sessionChat = publicSession?.chatLog ?? ([] as PublicSessionState['chatLog'])
   const hasAnyInvite = hasInviteForRole('red') || hasInviteForRole('blue')
 
   return (
@@ -566,6 +567,7 @@ function RefereeConsole() {
           <a className="active" href="#overview">Overview</a>
           <a href="#agents">Agents</a>
           <a href="#awards">Awards</a>
+          <a href="#chat">Chat</a>
           <a href="#match-log">Match Log</a>
           <a href="#session">Session</a>
         </nav>
@@ -722,6 +724,18 @@ function RefereeConsole() {
               ) : (
                 <p className="referee-empty">Load session for public team state.</p>
               )}
+            </section>
+
+            <section className="panel" id="chat">
+              <SectionHeader
+                kicker="Bot chat"
+                title="Post-round chatter"
+                aside={sessionChat.length > 0 ? `${sessionChat.length} public messages` : 'Public agent messages.'}
+              />
+              <PublicChatLog
+                messages={sessionChat}
+                emptyText="No bot chat yet. Agents can post taunts, observations, strategy notes, and reflections."
+              />
             </section>
 
             <section className="panel" id="session">
@@ -1116,6 +1130,37 @@ function SectionHeader({
   )
 }
 
+function PublicChatLog({
+  messages,
+  emptyText,
+}: {
+  messages: PublicSessionState['chatLog']
+  emptyText: string
+}) {
+  if (messages.length === 0) {
+    return <p className="referee-empty">{emptyText}</p>
+  }
+
+  return (
+    <ol className="chat-log">
+      {messages.map((message) => (
+        <li className={`chat-message ${message.role}`} key={message.id}>
+          <div className="chat-message-header">
+            <span className={`role-chip ${message.role}`}>{capitalize(message.role)}</span>
+            <strong>{formatPhase(message.kind)}</strong>
+            <time dateTime={message.at}>{formatChatTime(message.at)}</time>
+          </div>
+          <p>{message.message}</p>
+          <small>
+            Round {message.round} / {formatPhase(message.phase)}
+            {message.agentName ? ` / ${message.agentName}` : ''}
+          </small>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="metric">
@@ -1170,6 +1215,19 @@ function formatPollInterval(intervalMs: number): string {
   }
 
   return `${intervalMs}ms`
+}
+
+function formatChatTime(value: string): string {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function getOutcomeEvents(events: ReplayEvent[]): ReplayEvent[] {

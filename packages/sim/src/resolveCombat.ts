@@ -77,6 +77,15 @@ function weaponReach(bot: BotRuntime): number {
   return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28
 }
 
+function isRunAndGunBot(bot: BotRuntime, opponent: BotRuntime): boolean {
+  return (
+    bot.hasWeaponControl &&
+    bot.stats.mobility >= 10 &&
+    bot.stats.control >= 4 &&
+    bot.stats.mobility >= opponent.stats.mobility + 2
+  )
+}
+
 function commandAt(
   plan: TurnPlan,
   tick: number,
@@ -107,12 +116,18 @@ function fallbackCommand(
   const reach = weaponReach(bot)
   const recentlyDamaged = tick - bot.lastDamagedTick <= 4
   const healthRatio = bot.health / bot.maxHealth
+  const runAndGun = isRunAndGunBot(bot, opponent)
   const wantsRange =
+    runAndGun ||
     bot.stats.control >= bot.stats.weaponThreat * 0.55 ||
     bot.stats.mobility > opponent.stats.mobility + 3 ||
     healthRatio < 0.34 ||
     recentlyDamaged
-  const idealRange = wantsRange ? Math.max(2.4, reach * 0.82) : Math.max(0.9, reach * 0.42)
+  const idealRange = runAndGun
+    ? Math.max(2.8, reach * 0.98)
+    : wantsRange
+      ? Math.max(2.4, reach * 0.82)
+      : Math.max(0.9, reach * 0.42)
   const inCenterHazard = centerHazardActive(arena) && isNearCenterHazard(bot.position, 1.55)
   const command: TurnCommand = {
     tick,
@@ -125,17 +140,18 @@ function fallbackCommand(
       idealRange,
       inCenterHazard,
       recentlyDamaged,
+      runAndGun,
       wantsRange,
     }),
   }
 
   if (bot.hasWeaponControl) {
-    command.weaponA = gap <= reach * 1.08
+    command.weaponA = gap <= reach * (runAndGun ? 1.18 : 1.08)
       ? 'fire'
       : 'hold'
   }
 
-  if (bot.hasUtilityControl && inCenterHazard) {
+  if (bot.hasUtilityControl && (inCenterHazard || (runAndGun && tick % 3 === 0))) {
     command.utility = 'activate'
   }
 
@@ -151,6 +167,7 @@ function chooseFallbackMove({
   idealRange,
   inCenterHazard,
   recentlyDamaged,
+  runAndGun,
   wantsRange,
 }: {
   tick: number
@@ -161,6 +178,7 @@ function chooseFallbackMove({
   idealRange: number
   inCenterHazard: boolean
   recentlyDamaged: boolean
+  runAndGun: boolean
   wantsRange: boolean
 }): TurnCommand['move'] {
   if (bot.stats.mobility <= 0) {
@@ -169,6 +187,10 @@ function chooseFallbackMove({
 
   if (inCenterHazard) {
     return moveAwayFromPoint(bot, [0, 0, 0], tick)
+  }
+
+  if (runAndGun) {
+    return runAndGunMove({ tick, bot, opponent, gap, idealRange })
   }
 
   if (recentlyDamaged && gap < idealRange * 1.35) {
@@ -190,6 +212,40 @@ function chooseFallbackMove({
   }
 
   return moveTowardPoint(bot, opponent.position)
+}
+
+function runAndGunMove({
+  tick,
+  bot,
+  opponent,
+  gap,
+  idealRange,
+}: {
+  tick: number
+  bot: BotRuntime
+  opponent: BotRuntime
+  gap: number
+  idealRange: number
+}): TurnCommand['move'] {
+  if (gap < idealRange * 0.72) {
+    return 'dash_backward'
+  }
+
+  if (gap > idealRange * 1.45) {
+    return 'dash_forward'
+  }
+
+  if (gap < idealRange * 0.95) {
+    return tick % 2 === 0 ? 'strafe_right' : 'strafe_left'
+  }
+
+  const side = bot.position[2] - opponent.position[2]
+
+  if (Math.abs(side) < 0.8) {
+    return tick % 2 === 0 ? 'circle_right' : 'circle_left'
+  }
+
+  return side > 0 ? 'circle_left' : 'circle_right'
 }
 
 function centerHazardActive(arena: ArenaConfig): boolean {
@@ -261,12 +317,36 @@ function lateralMove(
   return currentSide > 0 ? 'turn_left' : 'turn_right'
 }
 
+function movementImpactMultiplier(command: TurnCommand): number {
+  switch (command.move) {
+    case 'dash_forward':
+      return 1.35
+    case 'forward':
+      return 1
+    case 'turn_left':
+    case 'turn_right':
+      return 0.85
+    case 'circle_left':
+    case 'circle_right':
+      return 0.78
+    case 'backward':
+    case 'dash_backward':
+    case 'strafe_left':
+    case 'strafe_right':
+      return 0.65
+    case 'brake':
+    case undefined:
+      return 0
+  }
+}
+
 function moveBot(bot: BotRuntime, command: TurnCommand, arena: ArenaConfig): Vector3 {
   if (bot.stats.mobility <= 0) {
     return bot.position
   }
 
-  const speed = Math.max(0.2, Math.min(2.2, 0.45 + bot.stats.mobility / 18))
+  const utilityBoost = command.utility === 'activate' && bot.hasUtilityControl ? 1.28 : 1
+  const speed = Math.max(0.2, Math.min(2.75, 0.45 + bot.stats.mobility / 18)) * utilityBoost
   const direction = bot.role === 'red' ? 1 : -1
   const from = bot.position
   let x = from[0]
@@ -278,6 +358,26 @@ function moveBot(bot: BotRuntime, command: TurnCommand, arena: ArenaConfig): Vec
       break
     case 'backward':
       x -= direction * speed * 0.7
+      break
+    case 'dash_forward':
+      x += direction * speed * 1.55
+      break
+    case 'dash_backward':
+      x -= direction * speed * 1.25
+      break
+    case 'strafe_left':
+      z -= speed * 1.05
+      break
+    case 'strafe_right':
+      z += speed * 1.05
+      break
+    case 'circle_left':
+      z -= speed * 0.95
+      x += direction * speed * 0.35
+      break
+    case 'circle_right':
+      z += speed * 0.95
+      x += direction * speed * 0.35
       break
     case 'turn_left':
       z -= speed * 0.65
@@ -473,8 +573,17 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
       distance(red.position, blue.position) < CONTACT_DISTANCE &&
       (isContactMove(redCommand) || isContactMove(blueCommand))
     ) {
-      applyDamage(events, tick, red, blue, red.stats.mass / 7 + red.stats.stability / 3, 'ram')
-      applyDamage(events, tick, blue, red, blue.stats.mass / 7 + blue.stats.stability / 3, 'ram')
+      const redRamDamage =
+        (red.stats.mass / 7 + red.stats.stability / 3) * movementImpactMultiplier(redCommand)
+      const blueRamDamage =
+        (blue.stats.mass / 7 + blue.stats.stability / 3) * movementImpactMultiplier(blueCommand)
+
+      if (redRamDamage > 0) {
+        applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+      }
+      if (blueRamDamage > 0) {
+        applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+      }
     }
 
     resolveHazard(events, tick, arena, red)

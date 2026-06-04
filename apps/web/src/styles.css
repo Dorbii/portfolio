@@ -924,6 +924,89 @@ button.active {
   overflow-wrap: anywhere;
 }
 
+.chat-log {
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  list-style: none;
+}
+
+.chat-message {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(238, 242, 243, 0.12);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chat-message.red {
+  border-left: 3px solid #ff5c6c;
+}
+
+.chat-message.blue {
+  border-left: 3px solid #5c91ff;
+}
+
+.chat-message-header {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-message-header strong,
+.chat-message-header time,
+.chat-message small,
+.role-chip,
+.chat-count {
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.chat-message-header strong {
+  min-width: 0;
+  color: #eef2f3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-message-header time,
+.chat-message small {
+  color: #8fa3a3;
+}
+
+.chat-message p {
+  margin: 8px 0 0;
+  color: #dbe6e4;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.chat-message small {
+  display: block;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.role-chip {
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: #0b0e0d;
+}
+
+.role-chip.red {
+  background: #ff7b86;
+}
+
+.role-chip.blue {
+  background: #7fa8ff;
+}
+
 .replay-shell {
   width: 100%;
   max-width: 100%;
@@ -1816,6 +1899,62 @@ textarea:focus-visible {
   white-space: pre;
 }
 
+.chat-count {
+  color: #8fa3a3;
+}
+
+.agent-chat-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.agent-chat-form label {
+  color: #8fa3a3;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.agent-chat-form select {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.agent-chat-form textarea {
+  min-height: 82px;
+  max-height: 180px;
+}
+
+.agent-chat-actions {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.agent-chat-actions span {
+  color: #8fa3a3;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.agent-chat-actions button {
+  min-height: 36px;
+}
+
+.agent-chat-log {
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.private-chat-panel .chat-message {
+  background: rgba(183, 243, 204, 0.06);
+  border-color: rgba(183, 243, 204, 0.18);
+}
+
 .agent-notice,
 .agent-waiting,
 .agent-empty {
@@ -2327,6 +2466,7 @@ textarea:focus-visible {
   .team-row,
   .catalog-head,
   .catalog-row,
+  .chat-message-header,
   .agent-log li,
   .key-event-list li,
   .replay-status-strip {

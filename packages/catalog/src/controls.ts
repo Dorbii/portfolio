@@ -20,7 +20,19 @@ export function deriveControls(
 
   return {
     movement: hasMovement
-      ? ['forward', 'backward', 'turn_left', 'turn_right', 'brake']
+      ? [
+          'forward',
+          'backward',
+          'dash_forward',
+          'dash_backward',
+          'strafe_left',
+          'strafe_right',
+          'circle_left',
+          'circle_right',
+          'turn_left',
+          'turn_right',
+          'brake',
+        ]
       : ['brake'],
     ...(weaponCount >= 1 ? { weaponA: ['fire', 'hold'] } : {}),
     ...(weaponCount >= 2 ? { weaponB: ['fire', 'hold'] } : {}),

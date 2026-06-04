@@ -109,6 +109,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   awardHistory?: AppliedRefereeAward[]
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]
+  privateChatLog: SessionChatMessage[]
   eventLog: SessionLogEvent[]
 }
 
@@ -173,6 +174,13 @@ export type AgentChatMessageResponse = {
 }
 
 export type AgentChatMessagePostRequest = AgentChatMessageRequest
+
+export type AgentPrivateChatMessageResponse = {
+  message: SessionChatMessage
+  state: RolePrivateState
+}
+
+export type AgentPrivateChatMessagePostRequest = AgentChatMessageRequest
 
 export type SubmitRefereeAwardsRequest = {
   awards: RefereeAwardSelection[]

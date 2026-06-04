@@ -636,6 +636,10 @@ export class AgentArenaSession {
       return this.submitChatMessage(request, coordinator)
     }
 
+    if (route.action === 'private-chat' && request.method === 'POST') {
+      return this.submitPrivateChatMessage(request, coordinator)
+    }
+
     if (route.action === 'referee-awards' && request.method === 'POST') {
       return this.submitRefereeAwards(request, coordinator)
     }
@@ -813,6 +817,30 @@ export class AgentArenaSession {
     }
 
     const result = await coordinator.submitChatMessage(bearerToken(request) ?? '', body)
+    await this.saveSession(coordinator)
+
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
+    }
+
+    return jsonResponse(result.value)
+  }
+
+  private async submitPrivateChatMessage(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const body = await readJsonBody(request)
+
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
+
+    if (body === undefined) {
+      return errorResponse(400, 'BAD_JSON', 'Private chat message body must be JSON.')
+    }
+
+    const result = await coordinator.submitPrivateChatMessage(bearerToken(request) ?? '', body)
     await this.saveSession(coordinator)
 
     if (!result.ok) {

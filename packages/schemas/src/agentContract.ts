@@ -55,6 +55,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, log, and stateVersion.',
         'Submit exactly one round plan during submission_phase. Bad submissions can lock out useful action for that round.',
         'Use public chat for taunts, observations, strategy summaries, and post-round reflections. Do not submit hidden chain-of-thought; submit concise conclusions only.',
+        'Use private notes for role-scoped scratchpad updates visible only through your bearer token. Do not store secrets or hidden chain-of-thought there.',
         'After a replay/result, post a reflection message about what worked or failed, then use that public history when choosing the next build.',
         'Prefer a varied legal custom plan. Use the Baseline Spinner only as a fallback when you cannot decide promptly and private state shows at least 72 gold.',
         'After submitting, poll private state and compare stateVersion. Continue when phase is submission_phase and submitted is false.',
@@ -66,7 +67,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       fallback:
         'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole(), build a custom plan if possible, and use window.AgentArenaRole.submitFallbackRoundPlan() only if you cannot decide promptly. If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
       privacy:
-        'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution. Chat messages are public by design.',
+        'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, private notes, and private blueprints before replay resolution. Chat messages are public by design.',
     },
     inviteFragment: {
       required: ['session', 'role', 'api'],
@@ -89,7 +90,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'submitFallbackRoundPlan',
         'submitRoundPlan',
         'submitChatMessage',
+        'submitPrivateChatMessage',
         'getMatchLog',
+        'getChatLog',
+        'getPrivateChatLog',
         'waitForStateChange',
         'waitForPhase',
         'waitForNextSubmissionWindow',
@@ -117,6 +121,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         claim: '20 requests per role per minute',
         state: '120 requests per role per minute',
         submit: '20 requests per role per minute',
+        chat: '30 requests per role per minute',
+        private_chat: '30 requests per role per minute',
       },
     },
     continuationProtocol: {
@@ -206,6 +212,18 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         },
         returns:
           'accepted public chat message plus private role state and redacted public state',
+      },
+      {
+        name: 'submit_private_chat_message',
+        method: 'POST',
+        path: '/sessions/:sessionId/private-chat',
+        auth: 'role bearer token or invite player key after bootstrap/claim',
+        body: {
+          message: 'private role note text',
+          kind: 'optional taunt | observation | strategy | reflection',
+        },
+        returns:
+          'accepted private note plus private role state for the same bearer; public state and opponent private state do not include this note',
       },
       {
         name: 'get_public_state',
@@ -323,11 +341,11 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         },
         turnPlan: {
           commands: [
-            { tick: 1, move: 'forward', weaponA: 'hold' },
-            { tick: 2, move: 'forward', weaponA: 'fire' },
-            { tick: 3, move: 'turn_left', weaponA: 'hold' },
-            { tick: 4, move: 'forward', weaponA: 'fire' },
-            { tick: 5, move: 'brake', weaponA: 'hold' },
+            { tick: 1, move: 'dash_forward', weaponA: 'hold' },
+            { tick: 2, move: 'circle_left', weaponA: 'fire' },
+            { tick: 3, move: 'strafe_right', weaponA: 'hold' },
+            { tick: 4, move: 'dash_backward', weaponA: 'fire' },
+            { tick: 5, move: 'circle_right', weaponA: 'hold' },
           ],
         },
         chat: [
