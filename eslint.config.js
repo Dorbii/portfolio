@@ -13,6 +13,7 @@ export default [
   {
     ignores: [
       '.test-build',
+      '.wrangler',
       'dist',
       'apps/web/dist',
       'apps/worker/dist',

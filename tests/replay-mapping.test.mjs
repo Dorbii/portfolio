@@ -57,6 +57,18 @@ const timeline = createReplayTimeline({
       bot: 'red',
       amount: 14,
       remainingHealth: 0,
+      blockId: 'left-wheel',
+      partId: 'Wheel_Large',
+      partRemainingHealth: 0,
+      partMaxHealth: 12,
+    },
+    {
+      t: 3.25,
+      type: 'part_detach',
+      bot: 'red',
+      blockId: 'left-wheel',
+      partId: 'Wheel_Large',
+      position: [3.5, 0.2, 0.2],
     },
     {
       t: 4,
@@ -71,6 +83,41 @@ const timeline = createReplayTimeline({
       type: 'knockout',
       bot: 'red',
       cause: 'drive disabled',
+    },
+  ],
+})
+
+const movingWeaponTimeline = createReplayTimeline({
+  round: 1,
+  duration: 3,
+  summary: 'Red fires while crossing the center.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [5, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1,
+      type: 'move',
+      bot: 'red',
+      from: [0, 0, 0],
+      to: [4, 0, 0],
+    },
+    {
+      t: 1.5,
+      type: 'weapon_fire',
+      bot: 'red',
+      weaponSlot: 'weaponA',
     },
   ],
 })
@@ -102,6 +149,16 @@ test('replay mapping exposes weapon fire effects with team and slot context', ()
   assert.equal(weaponFire.label, 'weaponA')
   assert.ok(weaponFire.intensity > 0)
   assert.ok(weaponFire.intensity < 1)
+})
+
+test('replay mapping anchors weapon fire effects to the firing state', () => {
+  const frame = buildReplayFrame(movingWeaponTimeline, 1.75)
+  const weaponFire = frame.effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(weaponFire)
+  assert.deepEqual(weaponFire.position, [2, 0, 0])
+  assert.equal(weaponFire.rotationY, Math.PI / 2)
+  assert.ok(frame.bots.red.position[0] > weaponFire.position[0])
 })
 
 test('replay mapping exposes impact effects and knockout end state', () => {
@@ -187,4 +244,17 @@ test('replay timeline validation rejects empty-duration and out-of-range events'
 
   assert.equal(validateReplayTimeline(ordered), true)
   assert.equal(ordered.events[0].t, 0.5)
+})
+
+test('replay mapping exposes part detach only after the detach event time', () => {
+  const before = buildReplayFrame(timeline, 3.2)
+  const after = buildReplayFrame(timeline, 3.4)
+
+  assert.equal(before.parts.red['left-wheel'].status, 'attached')
+  assert.equal(before.parts.red['left-wheel'].health, 0)
+  assert.equal(after.parts.red['left-wheel'].status, 'detached')
+  assert.equal(after.parts.red['left-wheel'].blockId, 'left-wheel')
+  assert.equal(after.parts.red['left-wheel'].partId, 'Wheel_Large')
+  assert.deepEqual(after.parts.red['left-wheel'].detachPosition, [3.5, 0.2, 0.2])
+  assert.ok(after.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'))
 })

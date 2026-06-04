@@ -38,6 +38,10 @@ export type DamageEvent = {
   bot: TeamRole
   amount: number
   remainingHealth: number
+  blockId?: string
+  partId?: string
+  partRemainingHealth?: number
+  partMaxHealth?: number
 }
 
 export type HazardEvent = {
@@ -46,6 +50,15 @@ export type HazardEvent = {
   hazard: string
   bot: TeamRole
   damage: number
+  position: Vector3
+}
+
+export type PartDetachEvent = {
+  t: number
+  type: 'part_detach'
+  bot: TeamRole
+  blockId: string
+  partId?: string
   position: Vector3
 }
 
@@ -71,6 +84,7 @@ export type ReplayEvent =
   | ImpactEvent
   | DamageEvent
   | HazardEvent
+  | PartDetachEvent
   | KnockoutEvent
   | AwardEvent
 

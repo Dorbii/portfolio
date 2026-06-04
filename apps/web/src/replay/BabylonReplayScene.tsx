@@ -10,6 +10,7 @@ import { Color3, Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import type {
   ArenaConfig,
@@ -22,6 +23,7 @@ import { createBotNode, createTeamMaterials } from './babylonPartRenderer'
 import {
   buildReplayFrame,
   type CameraPreset,
+  type PartFrameState,
   type ReplayEffectKind,
   type ReplayEffectState,
   type ReplayVisualFrame,
@@ -42,12 +44,34 @@ type SceneResources = {
   scene: Scene
   camera: ArcRotateCamera
   bots: Record<TeamRole, ReturnType<typeof createBotNode>>
+  botProfiles: Record<TeamRole, BotVisualProfile>
   effectPool: EffectPool
   hazards: BabylonHazardVisual[]
   centerSpinner: Mesh
 }
 
 type EffectPool = Record<ReplayEffectKind, Mesh[]>
+
+type BotVisualProfile = {
+  primaryWeapon: 'net' | 'turret' | 'spinner' | 'hammer' | 'melee' | 'generic'
+  hasBooster: boolean
+  hasMagnet: boolean
+  hasSmoke: boolean
+}
+
+type BotPartNodeMetadata = {
+  kind: 'bot_part'
+  blockId: string
+  partId: string
+  basePosition: [number, number, number]
+  baseRotation: [number, number, number]
+}
+
+type WeaponEffectPartMetadata = {
+  weaponEffectPart?: 'muzzle' | 'net-hoop' | 'net-strand' | 'net-weight'
+  baseX?: number
+  baseY?: number
+}
 
 type RendererState = {
   status: 'booting' | 'ready' | 'unavailable' | 'context_lost'
@@ -144,6 +168,7 @@ export function BabylonReplayScene({
         red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red),
         blue: createBotNode(scene, botBlueprints.blue, 'blue', teamMaterials.blue),
       }
+      const botProfiles = createBotVisualProfiles(botBlueprints)
       const effectPool = createEffectPool(scene)
       const centerSpinner = createCenterSpinner(scene)
       const glow = new GlowLayer('replay-glow', scene)
@@ -155,6 +180,7 @@ export function BabylonReplayScene({
         scene,
         camera,
         bots,
+        botProfiles,
         effectPool,
         hazards,
         centerSpinner,
@@ -225,7 +251,7 @@ export function BabylonReplayScene({
 
     const frame = buildReplayFrame(timeline, time)
     updateBots(resources, frame)
-    updateEffects(resources.effectPool, frame.effects)
+    updateEffects(resources.effectPool, frame.effects, resources.botProfiles)
     updateHazards(resources.hazards, frame)
     updateCamera(resources.camera, cameraPreset, frame, arena)
     resources.centerSpinner.rotation.y = time * 4
@@ -247,6 +273,55 @@ export function BabylonReplayScene({
       ) : null}
     </div>
   )
+}
+
+function createBotVisualProfiles(
+  botBlueprints: ReplayBotBlueprints,
+): Record<TeamRole, BotVisualProfile> {
+  return {
+    red: createBotVisualProfile(botBlueprints.red),
+    blue: createBotVisualProfile(botBlueprints.blue),
+  }
+}
+
+function createBotVisualProfile(blueprint: BotBlueprint): BotVisualProfile {
+  const partIds = blueprint.blocks.map((block) => block.partId)
+  const primaryWeapon = partIds.find((partId) => partId.startsWith('Weapon_'))
+
+  return {
+    primaryWeapon: classifyWeaponVisual(primaryWeapon),
+    hasBooster: partIds.some((partId) => partId.includes('Booster')),
+    hasMagnet: partIds.some((partId) => partId.includes('Magnet')),
+    hasSmoke: partIds.some((partId) => partId.includes('Smoke')),
+  }
+}
+
+function classifyWeaponVisual(partId: string | undefined): BotVisualProfile['primaryWeapon'] {
+  if (!partId) {
+    return 'generic'
+  }
+
+  if (partId.includes('Net')) {
+    return 'net'
+  }
+
+  if (partId.includes('Turret')) {
+    return 'turret'
+  }
+
+  if (partId.includes('Spinner') || partId.includes('Saw')) {
+    return 'spinner'
+  }
+
+  if (partId.includes('Hammer')) {
+    return 'hammer'
+  }
+
+  if (partId.includes('Flipper') || partId.includes('Grabber') || partId.includes('Ram') || partId.includes('Spear')) {
+    return 'melee'
+  }
+
+  return 'generic'
 }
 
 function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
@@ -1035,6 +1110,7 @@ function createEffectPool(scene: Scene): EffectPool {
   const sparkMaterial = createSceneMaterial(scene, 'spark-mat', '#ffd35f', '#ff8a24')
   const smokeMaterial = createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42)
   const weaponMaterial = createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b')
+  const netMaterial = createSceneMaterial(scene, 'net-flash-mat', '#f5d47a', '#9d6c12', 0.82, 0.2)
   const debrisMaterial = createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d')
   const damageMaterial = createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e')
   const hazardMaterial = createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f')
@@ -1042,7 +1118,7 @@ function createEffectPool(scene: Scene): EffectPool {
 
   return {
     weapon_fire: Array.from({ length: 6 }, (_, index) =>
-      createPooledBox(scene, `weapon-effect-${index}`, weaponMaterial, [0.14, 0.14, 1.25]),
+      createPooledWeaponEffect(scene, `weapon-effect-${index}`, weaponMaterial, netMaterial),
     ),
     impact: Array.from({ length: 12 }, (_, index) =>
       createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
@@ -1063,6 +1139,84 @@ function createEffectPool(scene: Scene): EffectPool {
       createPooledTorus(scene, `knockout-effect-${index}`, koMaterial, 1.8),
     ),
   }
+}
+
+function createPooledWeaponEffect(
+  scene: Scene,
+  name: string,
+  material: StandardMaterial,
+  netMaterial: StandardMaterial,
+): Mesh {
+  const mesh = MeshBuilder.CreateBox(name, { width: 0.14, height: 0.14, depth: 1.25 }, scene)
+  const muzzle = MeshBuilder.CreateTorus(
+    `${name}-muzzle`,
+    { diameter: 0.44, thickness: 0.04, tessellation: 18 },
+    scene,
+  )
+  const netHoop = MeshBuilder.CreateTorus(
+    `${name}-net-hoop`,
+    { diameter: 1, thickness: 0.04, tessellation: 24 },
+    scene,
+  )
+
+  mesh.material = material
+  muzzle.material = material
+  muzzle.parent = mesh
+  muzzle.rotation.x = Math.PI / 2
+  muzzle.position.z = 0.2
+  muzzle.metadata = { weaponEffectPart: 'muzzle' }
+
+  netHoop.material = netMaterial
+  netHoop.parent = mesh
+  netHoop.rotation.x = Math.PI / 2
+  netHoop.position.z = 0.34
+  netHoop.metadata = { weaponEffectPart: 'net-hoop', baseX: 0, baseY: 0 }
+
+  for (let index = -2; index <= 2; index += 1) {
+    const vertical = MeshBuilder.CreateBox(
+      `${name}-net-vertical-${index + 2}`,
+      { width: 0.035, height: 0.82, depth: 0.025 },
+      scene,
+    )
+    const horizontal = MeshBuilder.CreateBox(
+      `${name}-net-horizontal-${index + 2}`,
+      { width: 0.82, height: 0.035, depth: 0.025 },
+      scene,
+    )
+
+    vertical.position.set(index * 0.16, 0, 0.34)
+    horizontal.position.set(0, index * 0.14, 0.34)
+    vertical.parent = mesh
+    horizontal.parent = mesh
+    vertical.material = netMaterial
+    horizontal.material = netMaterial
+    vertical.metadata = { weaponEffectPart: 'net-strand', baseX: vertical.position.x, baseY: vertical.position.y }
+    horizontal.metadata = { weaponEffectPart: 'net-strand', baseX: horizontal.position.x, baseY: horizontal.position.y }
+  }
+
+  const weights: Array<[number, number]> = [
+    [-0.42, -0.36],
+    [0.42, -0.36],
+    [-0.42, 0.36],
+    [0.42, 0.36],
+  ]
+
+  weights.forEach(([x, y], index) => {
+    const weight = MeshBuilder.CreateSphere(
+      `${name}-net-weight-${index}`,
+      { diameter: 0.11, segments: 8 },
+      scene,
+    )
+
+    weight.position.set(x, y, 0.34)
+    weight.parent = mesh
+    weight.material = netMaterial
+    weight.metadata = { weaponEffectPart: 'net-weight', baseX: x, baseY: y }
+  })
+
+  mesh.setEnabled(false)
+
+  return mesh
 }
 
 function createPooledBox(
@@ -1127,6 +1281,7 @@ function updateBots(resources: SceneResources, frame: ReplayVisualFrame): void {
       ? (role === 'red' ? -0.2 : 0.2)
       : Math.sin(frame.time * 42) * flinch * 0.14
     bot.scaling.setAll(hit ? 0.96 : 1 + flinch * 0.035)
+    updateBotPartNodes(bot, role, frame.parts[role], frame.time)
 
     const meshes = bot.getChildMeshes()
 
@@ -1146,13 +1301,74 @@ function updateBots(resources: SceneResources, frame: ReplayVisualFrame): void {
       }
 
       if (metadata.kind === 'smoke') {
-        mesh.position.y = 0.1 + Math.sin(frame.time * 20) * 0.06
+        mesh.position.y = 0.18 + Math.sin(frame.time * 9 + (metadata.speed ?? 0.04) * 40) * 0.08
+      }
+
+      if (metadata.kind === 'thrust') {
+        const pulse = 0.82 + Math.sin(frame.time * 18) * 0.18
+
+        mesh.scaling.set(1, pulse, 1)
+      }
+
+      if (metadata.kind === 'pulse') {
+        const pulse = 1 + Math.sin(frame.time * 5) * (metadata.speed ?? 0.04)
+
+        mesh.scaling.setAll(pulse)
       }
     })
   })
 }
 
-function updateEffects(pool: EffectPool, effects: ReplayEffectState[]): void {
+function updateBotPartNodes(
+  bot: ReturnType<typeof createBotNode>,
+  role: TeamRole,
+  partStates: Record<string, PartFrameState>,
+  time: number,
+): void {
+  const nodes = bot.getChildren((node) => {
+    const metadata = node.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.kind === 'bot_part'
+  }, true) as TransformNode[]
+
+  nodes.forEach((node) => {
+    const metadata = node.metadata as BotPartNodeMetadata
+    const state = partStates[metadata.blockId]
+    const basePosition = metadata.basePosition
+    const baseRotation = metadata.baseRotation
+
+    if (state?.status === 'detached' && state.detachTime !== undefined) {
+      const age = Math.max(0, time - state.detachTime)
+      const angle = deterministicAngle(`${role}-${metadata.blockId}`) + (role === 'red' ? 0.25 : -0.25)
+      const distance = Math.min(2.7, age * 1.05)
+      const drop = Math.max(0.02, basePosition[1] + 0.38 + age * 0.95 - age * age * 0.36)
+
+      node.position.set(
+        basePosition[0] + Math.cos(angle) * distance,
+        drop,
+        basePosition[2] + Math.sin(angle) * distance,
+      )
+      node.rotation.set(
+        baseRotation[0] + age * (1.9 + Math.abs(Math.sin(angle))),
+        baseRotation[1] + age * 2.5,
+        baseRotation[2] + age * (1.4 + Math.abs(Math.cos(angle))),
+      )
+      node.scaling.setAll(0.92)
+
+      return
+    }
+
+    node.position.set(basePosition[0], basePosition[1], basePosition[2])
+    node.rotation.set(baseRotation[0], baseRotation[1], baseRotation[2])
+    node.scaling.setAll(1)
+  })
+}
+
+function updateEffects(
+  pool: EffectPool,
+  effects: ReplayEffectState[],
+  profiles: Record<TeamRole, BotVisualProfile>,
+): void {
   const used: Record<ReplayEffectKind, number> = {
     weapon_fire: 0,
     impact: 0,
@@ -1177,9 +1393,38 @@ function updateEffects(pool: EffectPool, effects: ReplayEffectState[]): void {
     mesh.position = toBabylonVector(effect.position)
 
     if (effect.kind === 'weapon_fire') {
-      mesh.scaling.setAll(0.2 + effect.intensity * 1.1)
+      const profile = effect.team ? profiles[effect.team] : undefined
+      const weaponStyle = profile?.primaryWeapon ?? 'generic'
+      const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
+      const heading = effect.rotationY ?? (effect.team === 'blue' ? -Math.PI / 2 : Math.PI / 2)
+
+      mesh.visibility = 1
       mesh.position.y += 0.25
-      mesh.rotation.y = (effect.team === 'blue' ? -1 : 1) * (Math.PI / 2 + effect.intensity * 0.45)
+      mesh.rotation.x = 0
+      mesh.rotation.y = heading
+      mesh.rotation.z = 0
+      setWeaponEffectMode(mesh, weaponStyle, progress)
+
+      if (weaponStyle === 'net') {
+        const travel = 0.55 + easeOutCubic(progress) * 2.55
+        const lift = Math.sin(progress * Math.PI) * 0.58
+
+        mesh.position.x += Math.sin(heading) * travel
+        mesh.position.z += Math.cos(heading) * travel
+        mesh.position.y += 0.42 + lift
+        mesh.scaling.set(0.8 + progress * 0.32, 0.8 + progress * 0.32, 0.38 + progress * 0.42)
+        mesh.rotation.z = Math.sin(effect.age * 11) * 0.18
+        mesh.visibility = 0.35
+      } else if (weaponStyle === 'turret') {
+        mesh.scaling.set(0.42, 0.42, 0.88 + effect.intensity * 1.8)
+        mesh.position.y += 0.12
+        mesh.rotation.y = heading + (effect.team === 'blue' ? -1 : 1) * effect.intensity * 0.18
+      } else if (weaponStyle === 'spinner') {
+        mesh.scaling.set(0.34 + effect.intensity * 0.8, 0.34 + effect.intensity * 0.8, 0.62)
+        mesh.rotation.z = effect.age * 14
+      } else {
+        mesh.scaling.setAll(0.2 + effect.intensity * 1.1)
+      }
     }
 
     if (effect.kind === 'impact') {
@@ -1227,6 +1472,45 @@ function updateEffects(pool: EffectPool, effects: ReplayEffectState[]): void {
       const pulse = 1 + Math.min(effect.age, 3) * 0.15
       mesh.scaling.setAll(pulse)
       mesh.rotation.x = effect.age * 1.8
+    }
+  })
+}
+
+function setWeaponEffectMode(mesh: Mesh, mode: BotVisualProfile['primaryWeapon'], progress: number): void {
+  const showNet = mode === 'net'
+  const showMuzzle = mode === 'turret' || mode === 'spinner' || mode === 'generic'
+  const spread = 0.78 + easeOutCubic(progress) * 0.72
+  const bow = Math.sin(progress * Math.PI) * 0.14
+
+  mesh.getChildMeshes().forEach((child) => {
+    const metadata = child.metadata as WeaponEffectPartMetadata | undefined
+    const part = metadata?.weaponEffectPart
+
+    if (!part) {
+      return
+    }
+
+    if (part === 'muzzle') {
+      child.setEnabled(showMuzzle)
+      return
+    }
+
+    child.setEnabled(showNet)
+
+    if (!showNet) {
+      return
+    }
+
+    child.position.x = (metadata.baseX ?? child.position.x) * spread
+    child.position.y = (metadata.baseY ?? child.position.y) * spread
+    child.position.z = 0.34 + bow
+
+    if (part === 'net-hoop') {
+      child.scaling.setAll(0.85 + progress * 0.28)
+    } else if (part === 'net-weight') {
+      child.scaling.setAll(1 + progress * 0.35)
+    } else {
+      child.scaling.setAll(0.92 + progress * 0.18)
     }
   })
 }
@@ -1388,6 +1672,12 @@ function lerpAngle(from: number, to: number, amount: number): number {
   }
 
   return from + delta * amount
+}
+
+function easeOutCubic(value: number): number {
+  const clamped = Math.min(Math.max(value, 0), 1)
+
+  return 1 - (1 - clamped) ** 3
 }
 
 function createSceneMaterial(

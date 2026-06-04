@@ -33,6 +33,24 @@ const bareBodyBlueprint = {
   ],
 }
 
+const partBreakTargetBlueprint = {
+  name: 'Breakable Target',
+  blocks: [
+    { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+    { id: 'flag', partId: 'Style_Flag', position: [0, 1, 0], rotation: [0, 0, 0] },
+  ],
+}
+
+const partBreakAttackerBlueprint = {
+  name: 'Breaker',
+  blocks: [
+    { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+    { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+    { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+    { id: 'spinner', partId: 'Weapon_Spinner_Large', position: [0, 0, 1], rotation: [0, 0, 0] },
+  ],
+}
+
 const sparseTurnPlan = { commands: [{ tick: 3, move: 'turn_left' }] }
 
 const validSpinnerSubmission = {
@@ -260,6 +278,61 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
   assert.ok(first.replay.duration > 6)
   assert.ok(first.damage.red > 0)
   assert.ok(first.damage.blue > 0)
+})
+
+test('resolver emits a block-tied detach event when a part reaches zero HP', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'part-break-check',
+    red: {
+      blueprint: partBreakAttackerBlueprint,
+      turnPlan: { commands: [] },
+    },
+    blue: {
+      blueprint: partBreakTargetBlueprint,
+      turnPlan: { commands: [] },
+    },
+  })
+  const detach = result.replay.events.find(
+    (event) => event.type === 'part_detach' && event.bot === 'blue' && event.blockId === 'flag',
+  )
+
+  assert.ok(detach)
+  assert.equal(detach.partId, 'Style_Flag')
+  assert.equal(result.partHealth.blue[detach.blockId], 0)
+
+  const breakDamage = result.replay.events.find(
+    (event) =>
+      event.type === 'damage' &&
+      event.bot === detach.bot &&
+      event.blockId === detach.blockId &&
+      event.partRemainingHealth === 0,
+  )
+
+  assert.ok(breakDamage)
+  assert.equal(breakDamage.partId, detach.partId)
+  assert.ok(breakDamage.remainingHealth > 0)
+})
+
+test('resolver knockout occurs only after all parts on the losing bot are depleted', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'all-parts-depleted-check',
+    red: {
+      blueprint: partBreakAttackerBlueprint,
+      turnPlan: { commands: [] },
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      turnPlan: { commands: [] },
+    },
+  })
+  const knockout = result.replay.events.find((event) => event.type === 'knockout')
+
+  assert.ok(knockout)
+  assert.equal(knockout.bot, 'blue')
+  assert.equal(result.remainingHealth.blue, 0)
+  assert.equal(Object.values(result.partHealth.blue).every((health) => health === 0), true)
 })
 
 test('resolver handles sparse plans deterministically and keeps replay timeline bounded/ordered', () => {

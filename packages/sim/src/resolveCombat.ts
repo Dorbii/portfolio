@@ -6,6 +6,7 @@ import {
 import type {
   ArenaConfig,
   BotBlueprint,
+  PartCategory,
   TeamRole,
   TurnCommand,
   TurnPlan,
@@ -26,6 +27,7 @@ export type CombatResult = {
   reason: string
   damage: Record<TeamRole, number>
   remainingHealth: Record<TeamRole, number>
+  partHealth: Record<TeamRole, Record<string, number>>
   stats: Record<TeamRole, BotStats>
   replay: ReplayTimeline
   log: string[]
@@ -42,6 +44,7 @@ export type ResolveCombatInput = {
 type BotRuntime = {
   role: TeamRole
   stats: BotStats
+  parts: RuntimePart[]
   health: number
   maxHealth: number
   hasUtilityControl: boolean
@@ -49,6 +52,24 @@ type BotRuntime = {
   position: Vector3
   lastDamagedTick: number
   lastDealtDamageTick: number
+}
+
+type RuntimePart = {
+  blockId: string
+  partId: string
+  category: PartCategory
+  position: Vector3
+  health: number
+  maxHealth: number
+}
+
+type PartDamageHit = {
+  blockId: string
+  partId: string
+  remainingHealth: number
+  maxHealth: number
+  broke: boolean
+  position: Vector3
 }
 
 const NO_DAMAGE_STALEMATE_TICKS = 60
@@ -296,6 +317,139 @@ function hasControlledPart(blueprint: BotBlueprint, control: 'utility' | 'weapon
   return blueprint.blocks.some((block) => Boolean(getPart(block.partId)?.controls?.[control]))
 }
 
+function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePart[] {
+  const rawParts = blueprint.blocks.map((block) => {
+    const part = getPart(block.partId)
+
+    return {
+      block,
+      category: part?.category ?? 'body',
+      durability: Math.max(1, part?.durability ?? 1),
+    }
+  })
+  const rawTotal = rawParts.reduce((total, part) => total + part.durability, 0)
+  const healthScale = stats.durability / Math.max(1, rawTotal)
+
+  return rawParts.map(({ block, category, durability }) => {
+    const maxHealth = round(Math.max(1, durability * healthScale))
+
+    return {
+      blockId: block.id,
+      partId: block.partId,
+      category,
+      position: [...block.position],
+      health: maxHealth,
+      maxHealth,
+    }
+  })
+}
+
+function sumPartHealth(parts: RuntimePart[]): number {
+  return parts.reduce((total, part) => total + part.health, 0)
+}
+
+function partHealthByBlock(parts: RuntimePart[]): Record<string, number> {
+  return Object.fromEntries(parts.map((part) => [part.blockId, round(part.health)]))
+}
+
+function isBotDestroyed(bot: BotRuntime): boolean {
+  return bot.parts.every((part) => part.health <= 0)
+}
+
+function partWorldPosition(bot: BotRuntime, part: RuntimePart): Vector3 {
+  return [
+    round(bot.position[0] + part.position[0] * 0.35),
+    round(0.22 + part.position[1] * 0.18),
+    round(bot.position[2] + part.position[2] * 0.35),
+  ]
+}
+
+function orderedDamageTargets(bot: BotRuntime, cause: string, tick: number): RuntimePart[] {
+  const alive = bot.parts.filter((part) => part.health > 0)
+  const priorities: PartCategory[] = cause === 'ram'
+    ? ['defense', 'mobility', 'weapon', 'utility', 'style', 'body']
+    : cause === 'hazard'
+      ? ['mobility', 'defense', 'utility', 'weapon', 'style', 'body']
+      : ['defense', 'weapon', 'mobility', 'utility', 'style', 'body']
+  const categoryRank = new Map(priorities.map((category, index) => [category, index]))
+
+  return alive.sort((left, right) => {
+    const rankDelta = (categoryRank.get(left.category) ?? 99) - (categoryRank.get(right.category) ?? 99)
+
+    if (rankDelta !== 0) {
+      return rankDelta
+    }
+
+    if (left.health !== right.health) {
+      return left.health - right.health
+    }
+
+    return stablePartOrder(left, tick) - stablePartOrder(right, tick)
+  })
+}
+
+function stablePartOrder(part: RuntimePart, tick: number): number {
+  let hash = tick
+
+  for (let index = 0; index < part.blockId.length; index += 1) {
+    hash = (hash * 33 + part.blockId.charCodeAt(index)) >>> 0
+  }
+
+  return hash
+}
+
+function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: string): PartDamageHit[] {
+  let remainingDamage = amount
+  const hits: PartDamageHit[] = []
+
+  for (const part of orderedDamageTargets(bot, cause, tick)) {
+    if (remainingDamage <= 0) {
+      break
+    }
+
+    const before = part.health
+    const applied = Math.min(before, remainingDamage)
+
+    part.health = round(Math.max(0, before - applied))
+    remainingDamage = round(remainingDamage - applied)
+    hits.push({
+      blockId: part.blockId,
+      partId: part.partId,
+      remainingHealth: part.health,
+      maxHealth: part.maxHealth,
+      broke: before > 0 && part.health <= 0,
+      position: partWorldPosition(bot, part),
+    })
+  }
+
+  bot.health = round(sumPartHealth(bot.parts))
+
+  return hits
+}
+
+function emitPartDetachEvents(
+  events: ReplayEvent[],
+  tick: number,
+  bot: BotRuntime,
+  hits: PartDamageHit[],
+  startTime = tick + 0.36,
+): void {
+  hits.forEach((hit, index) => {
+    if (!hit.broke) {
+      return
+    }
+
+    events.push({
+      t: startTime + index * 0.03,
+      type: 'part_detach',
+      bot: bot.role,
+      blockId: hit.blockId,
+      partId: hit.partId,
+      position: hit.position,
+    })
+  })
+}
+
 function evadeMove(
   bot: BotRuntime,
   opponent: BotRuntime,
@@ -487,9 +641,11 @@ function applyDamage(
   baseDamage: number,
   cause: string,
 ): void {
-  const wasAlive = defender.health > 0
+  const wasAlive = !isBotDestroyed(defender)
   const mitigated = Math.max(1, Math.round(baseDamage - defender.stats.armor * 0.35))
-  defender.health = Math.max(0, defender.health - mitigated)
+  const hits = applyPartDamage(defender, mitigated, tick, cause)
+  const primaryHit = hits[0]
+
   defender.lastDamagedTick = tick
   attacker.lastDealtDamageTick = tick
 
@@ -511,9 +667,14 @@ function applyDamage(
     bot: defender.role,
     amount: mitigated,
     remainingHealth: round(defender.health),
+    blockId: primaryHit?.blockId,
+    partId: primaryHit?.partId,
+    partRemainingHealth: primaryHit?.remainingHealth,
+    partMaxHealth: primaryHit?.maxHealth,
   })
+  emitPartDetachEvents(events, tick, defender, hits)
 
-  if (wasAlive && defender.health <= 0) {
+  if (wasAlive && isBotDestroyed(defender)) {
     events.push({
       t: tick + 0.45,
       type: 'knockout',
@@ -569,7 +730,10 @@ function resolveHazard(
   }
 
   const damage = Math.max(1, Math.round(6 - bot.stats.stability * 0.12))
-  bot.health = Math.max(0, bot.health - damage)
+  const wasAlive = !isBotDestroyed(bot)
+  const hits = applyPartDamage(bot, damage, tick, 'hazard')
+  const primaryHit = hits[0]
+
   bot.lastDamagedTick = tick
   events.push({
     t: tick + 0.35,
@@ -579,16 +743,42 @@ function resolveHazard(
     damage,
     position: bot.position,
   })
+  events.push({
+    t: tick + 0.38,
+    type: 'damage',
+    bot: bot.role,
+    amount: damage,
+    remainingHealth: round(bot.health),
+    blockId: primaryHit?.blockId,
+    partId: primaryHit?.partId,
+    partRemainingHealth: primaryHit?.remainingHealth,
+    partMaxHealth: primaryHit?.maxHealth,
+  })
+  emitPartDetachEvents(events, tick, bot, hits, tick + 0.44)
+
+  if (wasAlive && isBotDestroyed(bot)) {
+    events.push({
+      t: tick + 0.52,
+      type: 'knockout',
+      bot: bot.role,
+      cause: 'hazard',
+    })
+  }
 }
 
 export function resolveCombat(input: ResolveCombatInput): CombatResult {
   const arena = input.arena ?? DEFAULT_ARENA
   const rng = createSeededRng(`${input.seed}:${input.round}`)
+  const redStats = deriveBotStats(input.red.blueprint)
+  const blueStats = deriveBotStats(input.blue.blueprint)
+  const redParts = createRuntimeParts(input.red.blueprint, redStats)
+  const blueParts = createRuntimeParts(input.blue.blueprint, blueStats)
   const red: BotRuntime = {
     role: 'red',
-    stats: deriveBotStats(input.red.blueprint),
-    health: 0,
-    maxHealth: 0,
+    stats: redStats,
+    parts: redParts,
+    health: sumPartHealth(redParts),
+    maxHealth: sumPartHealth(redParts),
     hasUtilityControl: hasControlledPart(input.red.blueprint, 'utility'),
     hasWeaponControl: hasControlledPart(input.red.blueprint, 'weapon'),
     position: [-6, 0, 0],
@@ -597,20 +787,16 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   }
   const blue: BotRuntime = {
     role: 'blue',
-    stats: deriveBotStats(input.blue.blueprint),
-    health: 0,
-    maxHealth: 0,
+    stats: blueStats,
+    parts: blueParts,
+    health: sumPartHealth(blueParts),
+    maxHealth: sumPartHealth(blueParts),
     hasUtilityControl: hasControlledPart(input.blue.blueprint, 'utility'),
     hasWeaponControl: hasControlledPart(input.blue.blueprint, 'weapon'),
     position: [6, 0, 0],
     lastDamagedTick: -Infinity,
     lastDealtDamageTick: -Infinity,
   }
-
-  red.health = red.stats.durability
-  blue.health = blue.stats.durability
-  red.maxHealth = red.health
-  blue.maxHealth = blue.health
 
   const events: ReplayEvent[] = [
     { t: 0, type: 'spawn', bot: 'red', position: red.position, rotation: [0, 90, 0] },
@@ -639,8 +825,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
       events.push({ t: tick, type: 'move', bot: 'blue', from: blueFrom, to: blue.position })
     }
 
-    resolveWeapon(events, tick, red, blue, redCommand, rng())
-    resolveWeapon(events, tick, blue, red, blueCommand, rng())
+    const weaponRandom = rng()
+
+    resolveWeapon(events, tick, red, blue, redCommand, weaponRandom)
+    resolveWeapon(events, tick, blue, red, blueCommand, weaponRandom)
 
     if (
       distance(red.position, blue.position) < CONTACT_DISTANCE &&
@@ -666,7 +854,7 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
       lastDamageTick = tick
     }
 
-    if (red.health <= 0 || blue.health <= 0) {
+    if (isBotDestroyed(red) || isBotDestroyed(blue)) {
       break
     }
 
@@ -681,10 +869,12 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     blue: round(blue.health),
   }
   const damage = {
-    red: round(red.stats.durability - red.health),
-    blue: round(blue.stats.durability - blue.health),
+    red: round(red.maxHealth - red.health),
+    blue: round(blue.maxHealth - blue.health),
   }
-  const hardCapped = red.health > 0 && blue.health > 0 && elapsedTicks >= HARD_MAX_COMBAT_TICKS
+  const redDestroyed = isBotDestroyed(red)
+  const blueDestroyed = isBotDestroyed(blue)
+  const hardCapped = !redDestroyed && !blueDestroyed && elapsedTicks >= HARD_MAX_COMBAT_TICKS
   const noDamageStalemate = damage.red === 0 && damage.blue === 0
   let winner: TeamRole | 'draw' = 'draw'
   let reason = stoppedByNoDamage
@@ -693,15 +883,15 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
       ? 'Both bots survived the hard combat safety cap with equivalent combat score.'
     : 'Both bots survived with equivalent combat score.'
 
-  if (red.health <= 0 && blue.health <= 0) {
+  if (redDestroyed && blueDestroyed) {
     winner = damage.blue > damage.red ? 'red' : damage.red > damage.blue ? 'blue' : 'draw'
     reason = winner === 'draw'
       ? 'Both bots were knocked out with equal damage.'
       : 'Both bots were knocked out; damage dealt decided the result.'
-  } else if (blue.health <= 0) {
+  } else if (blueDestroyed) {
     winner = 'red'
     reason = 'Blue was knocked out.'
-  } else if (red.health <= 0) {
+  } else if (redDestroyed) {
     winner = 'blue'
     reason = 'Red was knocked out.'
   } else if (noDamageStalemate) {
@@ -731,6 +921,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     reason,
     damage,
     remainingHealth,
+    partHealth: {
+      red: partHealthByBlock(red.parts),
+      blue: partHealthByBlock(blue.parts),
+    },
     stats: {
       red: red.stats,
       blue: blue.stats,

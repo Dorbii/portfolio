@@ -15,6 +15,16 @@ export type BotFrameState = {
   status: 'active' | 'knocked_out'
 }
 
+export type PartFrameState = {
+  blockId: string
+  partId?: string
+  health?: number
+  maxHealth?: number
+  status: 'attached' | 'detached'
+  detachTime?: number
+  detachPosition?: Vector3
+}
+
 export type ReplayEffectKind =
   | 'weapon_fire'
   | 'impact'
@@ -28,6 +38,7 @@ export type ReplayEffectState = {
   id: string
   kind: ReplayEffectKind
   position: Vector3
+  rotationY?: number
   age: number
   intensity: number
   team?: TeamRole
@@ -45,6 +56,7 @@ export type ReplayVisualFrame = {
   time: number
   progress: number
   bots: Record<TeamRole, BotFrameState>
+  parts: Record<TeamRole, Record<string, PartFrameState>>
   effects: ReplayEffectState[]
   endState?: ReplayEndState
 }
@@ -85,11 +97,16 @@ export function buildReplayFrame(
     red: resolveBotState(events, 'red', time),
     blue: resolveBotState(events, 'blue', time),
   }
+  const parts = {
+    red: resolvePartStates(events, 'red', time),
+    blue: resolvePartStates(events, 'blue', time),
+  }
 
   return {
     time,
     progress: timeline.duration > 0 ? time / timeline.duration : 0,
     bots,
+    parts,
     effects: buildEffects(events, bots, time),
     endState: resolveEndState(events, time),
   }
@@ -162,6 +179,45 @@ function resolveBotState(
   return state
 }
 
+function resolvePartStates(
+  events: ReplayEvent[],
+  role: TeamRole,
+  time: number,
+): Record<string, PartFrameState> {
+  const parts: Record<string, PartFrameState> = {}
+
+  for (const event of events) {
+    if (event.t > time) {
+      break
+    }
+
+    if (event.type === 'damage' && event.bot === role && event.blockId) {
+      parts[event.blockId] = {
+        ...parts[event.blockId],
+        blockId: event.blockId,
+        partId: event.partId ?? parts[event.blockId]?.partId,
+        health: event.partRemainingHealth,
+        maxHealth: event.partMaxHealth,
+        status: parts[event.blockId]?.status ?? 'attached',
+      }
+    }
+
+    if (event.type === 'part_detach' && event.bot === role) {
+      parts[event.blockId] = {
+        ...parts[event.blockId],
+        blockId: event.blockId,
+        partId: event.partId ?? parts[event.blockId]?.partId,
+        health: 0,
+        status: 'detached',
+        detachTime: event.t,
+        detachPosition: event.position,
+      }
+    }
+  }
+
+  return parts
+}
+
 function buildEffects(
   events: ReplayEvent[],
   bots: Record<TeamRole, BotFrameState>,
@@ -174,10 +230,13 @@ function buildEffects(
       const age = time - event.t
 
       if (age >= 0 && age <= WEAPON_WINDOW) {
+        const firingBot = resolveBotState(events, event.bot, event.t)
+
         effects.push({
           id: `${index}-weapon-${event.bot}`,
           kind: 'weapon_fire',
-          position: bots[event.bot].position,
+          position: firingBot.position,
+          rotationY: firingBot.rotationY,
           age,
           intensity: 1 - age / WEAPON_WINDOW,
           team: event.bot,
@@ -277,6 +336,23 @@ function buildEffects(
         team: event.bot,
         label: event.cause,
       })
+    }
+
+    if (event.type === 'part_detach') {
+      const age = time - event.t
+
+      if (age >= 0 && age <= DEBRIS_WINDOW) {
+        effects.push({
+          id: `${index}-part-detach-${event.blockId}`,
+          kind: 'debris',
+          position: event.position,
+          age,
+          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
+          team: event.bot,
+          damage: 18,
+          label: event.blockId,
+        })
+      }
     }
   })
 
