@@ -118,6 +118,46 @@ const movingWeaponTimeline = createReplayTimeline({
       type: 'weapon_fire',
       bot: 'red',
       weaponSlot: 'weaponA',
+      controlCue: 'deploy',
+      targetPosition: [4, 0, 0],
+    },
+  ],
+})
+
+const abilityTimeline = createReplayTimeline({
+  round: 3,
+  duration: 4,
+  summary: 'Blue opens a laser lance and cuts across the lane.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [4, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1,
+      type: 'move',
+      bot: 'blue',
+      from: [4, 0, 0],
+      to: [2, 0, -2],
+    },
+    {
+      t: 1.6,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'laser_lance',
+      weaponSlot: 'weaponA',
+      target: 'red',
+      targetPosition: [0.8, 0, -0.4],
     },
   ],
 })
@@ -257,4 +297,51 @@ test('replay mapping exposes part detach only after the detach event time', () =
   assert.equal(after.parts.red['left-wheel'].partId, 'Wheel_Large')
   assert.deepEqual(after.parts.red['left-wheel'].detachPosition, [3.5, 0.2, 0.2])
   assert.ok(after.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'))
+})
+
+test('replay mapping exposes laser_lance ability effects with deterministic placement', () => {
+  const frame = buildReplayFrame(abilityTimeline, 2.1)
+  const laserCore = frame.effects.find(
+    (effect) => effect.kind === 'laser_lance',
+  )
+
+  assert.ok(laserCore)
+  assert.ok(Math.abs(laserCore.position[0] - 2.7) < 0.1)
+  assert.ok(Math.abs(laserCore.position[2] + 1.3) < 0.1)
+  assert.deepEqual(laserCore.endPosition, [0.8, 0, -0.4])
+  assert.equal(laserCore.label, 'laser_lance')
+  assert.ok(laserCore.intensity > 0)
+  assert.ok(laserCore.intensity < 1)
+  assert.equal(
+    frame.effects.some((effect) => effect.kind === 'weapon_fire' && effect.label === 'laser_lance'),
+    false,
+  )
+  assert.equal(frame.effects.some((effect) => effect.kind === 'debris' && effect.label === 'laser_lance'), false)
+})
+
+test('replay mapping does not reveal laser_lance effects before ability event time', () => {
+  const before = buildReplayFrame(abilityTimeline, 1.59)
+  const atEvent = buildReplayFrame(abilityTimeline, 1.8)
+
+  assert.equal(before.effects.some((effect) => effect.label === 'laser_lance'), false)
+  assert.equal(atEvent.effects.some((effect) => effect.label === 'laser_lance'), true)
+})
+
+test('replay mapping emits a larger deploy control cue for net/control-linked weapon fire', () => {
+  const frame = buildReplayFrame(movingWeaponTimeline, 2)
+  const deploy = frame.effects.find((effect) => effect.label === 'weaponA-deploy')
+  const cue = frame.effects.find((effect) => effect.kind === 'control_net')
+
+  assert.ok(deploy)
+  assert.ok(cue)
+  assert.equal(deploy.kind, 'weapon_fire')
+  assert.equal(cue.label, 'control_net')
+  assert.equal(deploy.rotationY, Math.PI / 2)
+  assert.equal(cue.damage, undefined)
+  assert.ok(deploy.intensity >= cue.intensity)
+  assert.deepEqual(cue.endPosition, [4, 0, 0])
+  assert.ok(cue.intensity > 0)
+  assert.ok(cue.intensity <= 1)
+  assert.equal(frame.effects.some((effect) => effect.kind === 'damage_marker'), false)
+  assert.deepEqual(frame.parts.red, {})
 })

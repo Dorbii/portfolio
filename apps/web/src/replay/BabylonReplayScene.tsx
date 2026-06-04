@@ -1111,6 +1111,9 @@ function createEffectPool(scene: Scene): EffectPool {
   const smokeMaterial = createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42)
   const weaponMaterial = createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b')
   const netMaterial = createSceneMaterial(scene, 'net-flash-mat', '#f5d47a', '#9d6c12', 0.82, 0.2)
+  const controlNetMaterial = createSceneMaterial(scene, 'control-net-mat', '#75f6ff', '#1ccfd6', 0.72, 0.12)
+  const laserMaterial = createSceneMaterial(scene, 'laser-lance-mat', '#fff3d6', '#ff4dd8', 0.96, 0.08)
+  const laserGlowMaterial = createSceneMaterial(scene, 'laser-lance-glow-mat', '#ffb24d', '#ff4dd8', 0.38, 0.04)
   const debrisMaterial = createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d')
   const damageMaterial = createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e')
   const hazardMaterial = createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f')
@@ -1119,6 +1122,12 @@ function createEffectPool(scene: Scene): EffectPool {
   return {
     weapon_fire: Array.from({ length: 6 }, (_, index) =>
       createPooledWeaponEffect(scene, `weapon-effect-${index}`, weaponMaterial, netMaterial),
+    ),
+    control_net: Array.from({ length: 4 }, (_, index) =>
+      createPooledControlNetEffect(scene, `control-net-effect-${index}`, controlNetMaterial),
+    ),
+    laser_lance: Array.from({ length: 3 }, (_, index) =>
+      createPooledLaserLanceEffect(scene, `laser-lance-effect-${index}`, laserMaterial, laserGlowMaterial),
     ),
     impact: Array.from({ length: 12 }, (_, index) =>
       createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
@@ -1139,6 +1148,70 @@ function createEffectPool(scene: Scene): EffectPool {
       createPooledTorus(scene, `knockout-effect-${index}`, koMaterial, 1.8),
     ),
   }
+}
+
+function createPooledControlNetEffect(
+  scene: Scene,
+  name: string,
+  material: StandardMaterial,
+): Mesh {
+  const mesh = MeshBuilder.CreateTorus(
+    name,
+    { diameter: 1.8, thickness: 0.075, tessellation: 36 },
+    scene,
+  )
+
+  mesh.material = material
+  mesh.rotation.x = Math.PI / 2
+
+  for (let index = -2; index <= 2; index += 1) {
+    const vertical = MeshBuilder.CreateBox(
+      `${name}-vertical-${index + 2}`,
+      { width: 0.035, height: 1.54, depth: 0.035 },
+      scene,
+    )
+    const horizontal = MeshBuilder.CreateBox(
+      `${name}-horizontal-${index + 2}`,
+      { width: 1.54, height: 0.035, depth: 0.035 },
+      scene,
+    )
+
+    vertical.position.set(index * 0.28, 0, 0)
+    horizontal.position.set(0, index * 0.28, 0)
+    vertical.parent = mesh
+    horizontal.parent = mesh
+    vertical.material = material
+    horizontal.material = material
+  }
+
+  mesh.setEnabled(false)
+
+  return mesh
+}
+
+function createPooledLaserLanceEffect(
+  scene: Scene,
+  name: string,
+  material: StandardMaterial,
+  glowMaterial: StandardMaterial,
+): Mesh {
+  const mesh = MeshBuilder.CreateBox(
+    name,
+    { width: 0.26, height: 0.18, depth: 1 },
+    scene,
+  )
+  const glow = MeshBuilder.CreateBox(
+    `${name}-glow`,
+    { width: 0.85, height: 0.38, depth: 1.04 },
+    scene,
+  )
+
+  mesh.material = material
+  glow.material = glowMaterial
+  glow.parent = mesh
+  mesh.setEnabled(false)
+
+  return mesh
 }
 
 function createPooledWeaponEffect(
@@ -1371,6 +1444,8 @@ function updateEffects(
 ): void {
   const used: Record<ReplayEffectKind, number> = {
     weapon_fire: 0,
+    control_net: 0,
+    laser_lance: 0,
     impact: 0,
     debris: 0,
     damage_marker: 0,
@@ -1412,9 +1487,9 @@ function updateEffects(
         mesh.position.x += Math.sin(heading) * travel
         mesh.position.z += Math.cos(heading) * travel
         mesh.position.y += 0.42 + lift
-        mesh.scaling.set(0.8 + progress * 0.32, 0.8 + progress * 0.32, 0.38 + progress * 0.42)
+        mesh.scaling.set(1.1 + progress * 0.54, 1.1 + progress * 0.54, 0.46 + progress * 0.55)
         mesh.rotation.z = Math.sin(effect.age * 11) * 0.18
-        mesh.visibility = 0.35
+        mesh.visibility = 0.7
       } else if (weaponStyle === 'turret') {
         mesh.scaling.set(0.42, 0.42, 0.88 + effect.intensity * 1.8)
         mesh.position.y += 0.12
@@ -1425,6 +1500,39 @@ function updateEffects(
       } else {
         mesh.scaling.setAll(0.2 + effect.intensity * 1.1)
       }
+    }
+
+    if (effect.kind === 'control_net') {
+      const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
+      const target = effect.endPosition ? toBabylonVector(effect.endPosition) : toBabylonVector(effect.position)
+
+      mesh.position = target
+      mesh.position.y = 0.16 + Math.sin(progress * Math.PI) * 0.1
+      mesh.rotation.x = Math.PI / 2
+      mesh.rotation.y = (effect.rotationY ?? 0) + effect.age * 2.8
+      mesh.rotation.z = 0
+      mesh.scaling.setAll(0.92 + easeOutCubic(progress) * 1.25 + effect.intensity * 0.24)
+      mesh.visibility = 0.52 + effect.intensity * 0.34
+    }
+
+    if (effect.kind === 'laser_lance') {
+      const start = toBabylonVector(effect.position)
+      const end = effect.endPosition ? toBabylonVector(effect.endPosition) : start
+      const midpoint = Vector3.Center(start, end)
+      const length = Math.max(0.2, Vector3.Distance(start, end))
+      const dx = end.x - start.x
+      const dz = end.z - start.z
+      const heading = Math.abs(dx) + Math.abs(dz) < 0.001
+        ? effect.rotationY ?? 0
+        : Math.atan2(dx, dz)
+      const pulse = 0.18 + effect.intensity * 0.24
+
+      mesh.position.set(midpoint.x, 0.82 + Math.sin(effect.age * 18) * 0.04, midpoint.z)
+      mesh.rotation.x = 0
+      mesh.rotation.y = heading
+      mesh.rotation.z = Math.sin(effect.age * 22) * 0.035
+      mesh.scaling.set(pulse, 0.72 + effect.intensity * 0.3, length)
+      mesh.visibility = 0.68 + effect.intensity * 0.3
     }
 
     if (effect.kind === 'impact') {
@@ -1564,18 +1672,27 @@ function updateCamera(
   const midpoint = Vector3.Center(red, blue)
   const activeImpact = frame.effects.find((effect) => effect.kind === 'impact' && effect.age < 1.2)
   const activeHazard = frame.effects.find((effect) => effect.kind === 'hazard' && effect.age < 0.9)
+  const activeAbility = frame.effects.find(
+    (effect) =>
+      (effect.kind === 'laser_lance' || effect.kind === 'control_net') &&
+      effect.age < 1.2,
+  )
   const activeKnockout = frame.effects.find((effect) => effect.kind === 'knockout')
   const target = activeImpact
     ? toBabylonVector([activeImpact.position[0], activeImpact.position[1], activeImpact.position[2]])
     : activeHazard
       ? toBabylonVector([activeHazard.position[0], activeHazard.position[1], activeHazard.position[2]])
+      : activeAbility
+        ? abilityCameraTarget(activeAbility)
       : midpoint
 
   const shake = activeImpact
     ? (1 - activeImpact.age / 1.2) * 0.5
     : activeKnockout
       ? 0.35
-      : 0
+      : activeAbility
+        ? activeAbility.intensity * 0.18
+        : 0
   const knockoutPulse = activeKnockout?.kind === 'knockout' ? activeKnockout.age <= 1.6 : false
   const knockBack = knockoutPulse ? 0.24 : 0
   const arenaRadius = Math.max(arena.width, arena.height)
@@ -1654,6 +1771,14 @@ function setCamera(
   camera.alpha = lerpAngle(camera.alpha, desiredAlpha, settle)
   camera.beta = lerpNumber(camera.beta, desiredBeta, settle)
   camera.radius = lerpNumber(camera.radius, desiredRadius, settle)
+}
+
+function abilityCameraTarget(effect: ReplayEffectState): Vector3 {
+  if (!effect.endPosition) {
+    return toBabylonVector(effect.position)
+  }
+
+  return Vector3.Center(toBabylonVector(effect.position), toBabylonVector(effect.endPosition))
 }
 
 function lerpNumber(from: number, to: number, amount: number): number {

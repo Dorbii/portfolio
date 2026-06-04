@@ -7,6 +7,10 @@ const cockpitSource = readFileSync(
   new URL('../apps/web/src/agent/LiveAgentCockpit.tsx', import.meta.url),
   'utf8',
 )
+const replayViewerSource = readFileSync(
+  new URL('../apps/web/src/replay/ReplayViewer.tsx', import.meta.url),
+  'utf8',
+)
 
 function functionSource(source, functionName) {
   const start = source.indexOf(`function ${functionName}(`)
@@ -79,4 +83,11 @@ test('agent cockpit includes structured plan editor section labels and advanced 
   assert.ok(cockpitSource.includes('Turn plan commands'))
   assert.ok(cockpitSource.includes('Rationale'))
   assert.ok(cockpitSource.includes('Advanced JSON mode'))
+})
+
+test('replay viewer does not render future event timeline markers', () => {
+  assert.ok(replayViewerSource.includes('findActiveEvent'))
+  assert.equal(replayViewerSource.includes('timeline.events.map'), false)
+  assert.equal(replayViewerSource.includes('key-event-list'), false)
+  assert.equal(replayViewerSource.includes('event-marker'), false)
 })

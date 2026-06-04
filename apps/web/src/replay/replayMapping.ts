@@ -27,6 +27,8 @@ export type PartFrameState = {
 
 export type ReplayEffectKind =
   | 'weapon_fire'
+  | 'control_net'
+  | 'laser_lance'
   | 'impact'
   | 'debris'
   | 'damage_marker'
@@ -43,6 +45,7 @@ export type ReplayEffectState = {
   intensity: number
   team?: TeamRole
   damage?: number
+  endPosition?: Vector3
   label?: string
 }
 
@@ -63,10 +66,12 @@ export type ReplayVisualFrame = {
 
 const MOVE_DURATION = 1
 const WEAPON_WINDOW = 0.75
+const CONTROL_CUE_WINDOW = 1.15
 const IMPACT_WINDOW = 1.35
 const DEBRIS_WINDOW = 1.9
 const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
+const LASER_LANCE_WINDOW = 0.95
 
 const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
   red: {
@@ -228,9 +233,12 @@ function buildEffects(
   events.forEach((event, index) => {
     if (event.type === 'weapon_fire') {
       const age = time - event.t
+      const isControlDeploy = event.controlCue === 'deploy'
+      const duration = isControlDeploy ? CONTROL_CUE_WINDOW : WEAPON_WINDOW
 
-      if (age >= 0 && age <= WEAPON_WINDOW) {
+      if (age >= 0 && age <= duration) {
         const firingBot = resolveBotState(events, event.bot, event.t)
+        const intensity = Math.max(0, 1 - age / duration)
 
         effects.push({
           id: `${index}-weapon-${event.bot}`,
@@ -238,9 +246,45 @@ function buildEffects(
           position: firingBot.position,
           rotationY: firingBot.rotationY,
           age,
-          intensity: 1 - age / WEAPON_WINDOW,
+          intensity,
           team: event.bot,
-          label: event.weaponSlot,
+          label: isControlDeploy ? `${event.weaponSlot}-deploy` : event.weaponSlot,
+        })
+
+        if (isControlDeploy) {
+          effects.push({
+            id: `${index}-weapon-control-${event.bot}`,
+            kind: 'control_net',
+            position: firingBot.position,
+            rotationY: firingBot.rotationY,
+            age,
+            intensity,
+            team: event.bot,
+            endPosition:
+              event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.4),
+            label: 'control_net',
+          })
+        }
+      }
+    }
+
+    if (event.type === 'ability' && event.ability === 'laser_lance') {
+      const age = time - event.t
+      const firingBot = resolveBotState(events, event.bot, event.t)
+      const endPosition = event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 5.6)
+      const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+
+      if (age >= 0 && age <= LASER_LANCE_WINDOW) {
+        effects.push({
+          id: `${index}-laser-${event.bot}`,
+          kind: 'laser_lance',
+          position: firingBot.position,
+          rotationY,
+          age,
+          intensity: Math.max(0, 1 - age / LASER_LANCE_WINDOW),
+          team: event.bot,
+          endPosition,
+          label: event.ability,
         })
       }
     }
@@ -434,6 +478,14 @@ function headingForMove(from: Vector3, to: Vector3, fallback: number): number {
   }
 
   return Math.atan2(dx, dz)
+}
+
+function forwardPoint(position: Vector3, rotationY: number, distance: number): Vector3 {
+  return [
+    round(position[0] + Math.sin(rotationY) * distance),
+    position[1],
+    round(position[2] + Math.cos(rotationY) * distance),
+  ]
 }
 
 function easeInOut(progress: number): number {

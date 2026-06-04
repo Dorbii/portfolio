@@ -1,5 +1,8 @@
 import type { TeamRole, Vector3 } from '../../schemas/src/index.js'
 
+export type AbilityName = 'laser_lance'
+export type WeaponFireCue = 'deploy' | 'release'
+
 export type SpawnEvent = {
   t: number
   type: 'spawn'
@@ -21,6 +24,18 @@ export type WeaponFireEvent = {
   type: 'weapon_fire'
   bot: TeamRole
   weaponSlot: 'weaponA' | 'weaponB'
+  controlCue?: WeaponFireCue
+  targetPosition?: Vector3
+}
+
+export type AbilityEvent = {
+  t: number
+  type: 'ability'
+  bot: TeamRole
+  ability: AbilityName
+  weaponSlot?: 'weaponA' | 'weaponB'
+  target?: TeamRole
+  targetPosition?: Vector3
 }
 
 export type ImpactEvent = {
@@ -81,6 +96,7 @@ export type ReplayEvent =
   | SpawnEvent
   | MoveEvent
   | WeaponFireEvent
+  | AbilityEvent
   | ImpactEvent
   | DamageEvent
   | HazardEvent

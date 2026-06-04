@@ -111,6 +111,17 @@ export const mockReplay: ReplayTimeline = createReplayTimeline({
       type: 'weapon_fire',
       bot: 'blue',
       weaponSlot: 'weaponA',
+      controlCue: 'deploy',
+      targetPosition: [-2, 0, -4],
+    },
+    {
+      t: 9.65,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'laser_lance',
+      weaponSlot: 'weaponA',
+      target: 'red',
+      targetPosition: [-2, 0, -4],
     },
     {
       t: 10,
