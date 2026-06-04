@@ -24,7 +24,12 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(appSource.includes('ReplayViewer'))
   assert.ok(appSource.includes('ReplayOutcome'))
   assert.ok(appSource.includes('submitRefereeAwards'))
+  assert.ok(appSource.includes('resetRoleClaim'))
   assert.ok(appSource.includes('Referee capability token'))
+  assert.ok(appSource.includes('createExternalAgentBriefMarkdown'))
+  assert.ok(appSource.includes('Copy brief'))
+  assert.ok(appSource.includes('Refresh claim'))
+  assert.ok(appSource.includes('replaceInvite'))
 })
 
 test('agent cockpit renders reliability and debug hooks', () => {
@@ -33,6 +38,10 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitSource.includes('Last validation error'))
   assert.ok(cockpitSource.includes('Match log'))
   assert.ok(cockpitSource.includes('agent-arena-state'))
+  assert.ok(cockpitSource.includes('agent-arena-brief'))
+  assert.ok(cockpitSource.includes('External agent brief'))
+  assert.ok(cockpitSource.includes('createExternalAgentBriefMarkdown'))
+  assert.ok(cockpitSource.includes('stateVersion'))
   assert.ok(cockpitSource.includes('claimButtonLabel'))
   assert.ok(cockpitSource.includes('Clear role token'))
 })

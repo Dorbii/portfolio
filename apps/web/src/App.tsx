@@ -9,6 +9,7 @@ import type {
 } from '../../../packages/schemas/src/index.js'
 import type { ReplayEvent } from '../../../packages/replay/src/index.js'
 import { LiveAgentCockpit } from './agent/LiveAgentCockpit'
+import { createExternalAgentBriefMarkdown } from './agent/agentClient'
 import {
   buildInviteUrl,
   clearStoredSession,
@@ -21,6 +22,7 @@ import {
   loadReplayPayload,
   normalizeSessionId,
   parseSessionIdFromLocation,
+  resetRoleClaim,
   readStoredSession,
   setSessionIdInUrl,
   submitRefereeAwards,
@@ -82,11 +84,17 @@ function RefereeConsole() {
   }, [selectedAwards])
   const activeRefereeToken = manualRefereeToken.trim() || storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
+  const isActiveSession = activeSessionId.length > 0
   const canSubmitAwards =
     publicSession?.phase === 'referee_awards' &&
     selectedCount > 0 &&
     hasRefereeToken &&
     submitState !== 'submitting'
+  const canRefreshRoleClaim =
+    isActiveSession &&
+    hasRefereeToken &&
+    loadState !== 'busy' &&
+    (publicSession?.phase === 'waiting_for_agents' || publicSession?.phase === 'submission_phase')
 
   const clearSessionState = useCallback(() => {
     setPublicSession(null)
@@ -357,6 +365,76 @@ function RefereeConsole() {
       })
   }, [])
 
+  const copyAgentBrief = useCallback((brief: string) => {
+    return navigator.clipboard
+      .writeText(brief)
+      .then(() => {
+        setMessage('Agent brief copied.')
+      })
+      .catch(() => {
+        setError('Clipboard copy blocked. Select and copy manually.')
+      })
+  }, [])
+
+  const refreshRoleClaim = useCallback(
+    async (role: TeamRole) => {
+      if (!activeSessionId) {
+        setError('Load a session before refreshing a role claim.')
+        return
+      }
+
+      if (!hasRefereeToken) {
+        setError('Referee token is required to refresh role claims.')
+        return
+      }
+
+      if (publicSession?.phase !== 'waiting_for_agents' && publicSession?.phase !== 'submission_phase') {
+        setError(
+          `Role claims can be refreshed only before combat resolves. Current phase: ${publicSession?.phase ?? 'unknown'}.`,
+        )
+        return
+      }
+
+      setLoadState('busy')
+      setError('')
+      setMessage('')
+
+      try {
+        const response = await resetRoleClaim(
+          apiBase,
+          activeSessionId,
+          activeRefereeToken,
+          role,
+        )
+        const nextInvites = replaceInvite(invites, response.invite)
+
+        setInvites(nextInvites)
+        setPublicSession(response.publicState)
+        setStoredRefereeToken(activeRefereeToken)
+        writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+          refereeToken: activeRefereeToken,
+          invites: nextInvites,
+        })
+        setSelectedAwards({})
+        setReplayPayload(null)
+        setReplayError('')
+        setMessage(`${capitalize(role)} role reset. Share the refreshed invite.`)
+      } catch (resetError) {
+        setError(toUserMessage(resetError))
+      } finally {
+        setLoadState('idle')
+      }
+    },
+    [
+      activeRefereeToken,
+      activeSessionId,
+      apiBase,
+      hasRefereeToken,
+      invites,
+      publicSession?.phase,
+    ],
+  )
+
   const toggleAwardSelection = useCallback(
     (awardId: string, team: TeamRole) => {
       setSelectedAwards((previous) => {
@@ -415,9 +493,32 @@ function RefereeConsole() {
         apiBase,
       })
     : ''
+  const redAgentBrief = redInvite && redInviteUrl && activeSessionId
+    ? createExternalAgentBriefMarkdown({
+        invite: {
+          sessionId: activeSessionId,
+          role: 'red',
+          apiBase,
+          claimToken: redInvite.claimToken,
+        },
+        inviteUrl: redInviteUrl,
+        publicState: publicSession,
+      })
+    : ''
+  const blueAgentBrief = blueInvite && blueInviteUrl && activeSessionId
+    ? createExternalAgentBriefMarkdown({
+        invite: {
+          sessionId: activeSessionId,
+          role: 'blue',
+          apiBase,
+          claimToken: blueInvite.claimToken,
+        },
+        inviteUrl: blueInviteUrl,
+        publicState: publicSession,
+      })
+    : ''
 
   const phase = publicSession?.phase ?? 'not_started'
-  const isActiveSession = activeSessionId.length > 0
   const awardOptions = publicSession?.awardOptions ?? ([] as RefereeAwardOption[])
   const sessionEvents = publicSession?.eventLog ?? ([] as PublicSessionState['eventLog'])
 
@@ -542,16 +643,24 @@ function RefereeConsole() {
           <InvitePanel
             role="red"
             inviteUrl={redInviteUrl}
+            agentBrief={redAgentBrief}
             hasInvite={hasInviteForRole('red')}
             onCopy={() => void copyInvite(redInviteUrl)}
+            onCopyBrief={() => void copyAgentBrief(redAgentBrief)}
             onOpen={() => window.open(redInviteUrl, '_blank')}
+            onRefreshClaim={() => void refreshRoleClaim('red')}
+            canRefreshClaim={canRefreshRoleClaim}
           />
           <InvitePanel
             role="blue"
             inviteUrl={blueInviteUrl}
+            agentBrief={blueAgentBrief}
             hasInvite={hasInviteForRole('blue')}
             onCopy={() => void copyInvite(blueInviteUrl)}
+            onCopyBrief={() => void copyAgentBrief(blueAgentBrief)}
             onOpen={() => window.open(blueInviteUrl, '_blank')}
+            onRefreshClaim={() => void refreshRoleClaim('blue')}
+            canRefreshClaim={canRefreshRoleClaim}
           />
           {!hasInviteForRole('red') && !hasInviteForRole('blue') ? (
             <p className="referee-empty">
@@ -792,17 +901,32 @@ function InvitePanel({
   role,
   hasInvite,
   inviteUrl,
+  agentBrief,
   onCopy,
+  onCopyBrief,
   onOpen,
+  onRefreshClaim,
+  canRefreshClaim,
 }: {
   role: TeamRole
   hasInvite: boolean
   inviteUrl: string
+  agentBrief: string
   onCopy: () => Promise<void> | void
+  onCopyBrief: () => Promise<void> | void
   onOpen: () => void
+  onRefreshClaim: () => Promise<void> | void
+  canRefreshClaim: boolean
 }) {
   if (!hasInvite) {
-    return <p className="referee-empty">{capitalize(role)} invite unavailable.</p>
+    return (
+      <div className="invite-panel">
+        <p className="referee-empty">{capitalize(role)} invite unavailable.</p>
+        <button type="button" onClick={onRefreshClaim} disabled={!canRefreshClaim}>
+          Refresh {capitalize(role)} claim
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -815,10 +939,26 @@ function InvitePanel({
         <button type="button" onClick={onCopy} disabled={!inviteUrl}>
           Copy {capitalize(role)}
         </button>
+        <button type="button" onClick={onCopyBrief} disabled={!agentBrief}>
+          Copy brief
+        </button>
+        <button type="button" onClick={onRefreshClaim} disabled={!canRefreshClaim}>
+          Refresh claim
+        </button>
       </div>
       <p className="invite-link-text">{inviteUrl}</p>
     </div>
   )
+}
+
+function replaceInvite(invites: RoleInvite[], invite: RoleInvite): RoleInvite[] {
+  const nextByRole = new Map(invites.map((entry) => [entry.role, entry]))
+
+  nextByRole.set(invite.role, invite)
+
+  return (['red', 'blue'] as TeamRole[])
+    .map((role) => nextByRole.get(role))
+    .filter((entry): entry is RoleInvite => entry !== undefined)
 }
 
 function SectionHeader({

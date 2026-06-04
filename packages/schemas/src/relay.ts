@@ -33,6 +33,10 @@ export type RoleClaimRequest = {
   agentName?: string
 }
 
+export type RoleResetRequest = {
+  role: TeamRole
+}
+
 export type CombatSummary = {
   winner: TeamRole | 'draw'
   reason: string
@@ -45,6 +49,7 @@ export type SessionLogEvent = {
   type:
     | 'session_created'
     | 'role_claimed'
+    | 'role_reset'
     | 'phase_changed'
     | 'round_plan_submitted'
     | 'combat_resolved'
@@ -62,6 +67,7 @@ export type RolePublicState = Partial<TeamEconomySummary> & {
 
 export type PublicSessionState = {
   sessionId: string
+  stateVersion: string
   phase: SessionPhase
   round: number
   maxRounds: number
@@ -76,6 +82,7 @@ export type PublicSessionState = {
 
 export type RolePrivateState = Partial<TeamEconomySummary> & {
   sessionId: string
+  stateVersion: string
   role: TeamRole
   phase: SessionPhase
   round: number
@@ -118,6 +125,11 @@ export type RoleClaimResponse = {
   role: TeamRole
   roleToken: string
   state: RolePrivateState
+}
+
+export type RoleResetResponse = {
+  invite: RoleInvite
+  publicState: PublicSessionState
 }
 
 export type RoundSubmissionResponse = {

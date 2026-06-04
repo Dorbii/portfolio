@@ -7,6 +7,7 @@ import type {
   RelayErrorCode,
   RelayErrorResponse,
   RoleInvite,
+  RoleResetResponse,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
@@ -125,6 +126,24 @@ export async function submitRefereeAwards(
         authorization: `Bearer ${refereeToken}`,
       },
       body: JSON.stringify({ awards }),
+    },
+  )
+}
+
+export async function resetRoleClaim(
+  apiBase: string,
+  sessionId: string,
+  refereeToken: string,
+  role: TeamRole,
+): Promise<RoleResetResponse> {
+  return requestJson<RoleResetResponse>(
+    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/reset-role`,
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${refereeToken}`,
+      },
+      body: JSON.stringify({ role }),
     },
   )
 }

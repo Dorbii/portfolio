@@ -6,6 +6,7 @@ import {
   type RelayErrorResponse,
   type RoleClaimRequest,
 } from '../../../packages/schemas/src/index.js'
+import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import {
   SessionCoordinator,
   createSessionId,
@@ -319,7 +320,7 @@ export async function handleWorkerRequest(
   }
 
   if (request.method === 'GET' && url.pathname === '/agent-spec.json') {
-    return jsonResponse(createAgentContract(), {}, request, env)
+    return jsonResponse(createAgentContract({ partCatalog: PART_CATALOG }), {}, request, env)
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
@@ -451,6 +452,10 @@ export class AgentArenaSession {
       return this.submitRefereeAwards(request, coordinator)
     }
 
+    if (route.action === 'reset-role' && request.method === 'POST') {
+      return this.resetRole(request, coordinator)
+    }
+
     if (route.action === 'replay' && request.method === 'GET') {
       const result = coordinator.getReplay()
       await this.saveSession(coordinator)
@@ -560,6 +565,26 @@ export class AgentArenaSession {
     }
 
     const result = await coordinator.submitRefereeAwards(bearerToken(request) ?? '', body)
+    await this.saveSession(coordinator)
+
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
+    }
+
+    return jsonResponse(result.value)
+  }
+
+  private async resetRole(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const body = await readJsonBody(request)
+
+    if (body === undefined) {
+      return errorResponse(400, 'BAD_JSON', 'Role reset body must be JSON.')
+    }
+
+    const result = await coordinator.resetRole(bearerToken(request) ?? '', body)
     await this.saveSession(coordinator)
 
     if (!result.ok) {

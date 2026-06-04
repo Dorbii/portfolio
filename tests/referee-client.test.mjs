@@ -8,6 +8,7 @@ import {
   createSession,
   loadReplayPayload,
   loadPublicSession,
+  resetRoleClaim,
   submitRefereeAwards,
   writeStoredSession,
   readStoredSession,
@@ -158,6 +159,44 @@ test('referee submitRefereeAwards posts /referee-awards with bearer token', asyn
     )
     assert.equal(calls[0].headers.get('authorization'), `Bearer ${refereeToken}`)
     assert.equal(calls[0].body, JSON.stringify({ awards }))
+  } finally {
+    restore()
+  }
+})
+
+test('referee resetRoleClaim posts /reset-role with bearer token', async () => {
+  const sessionId = 's_demo'
+  const refereeToken = 'r_ref'
+  const response = {
+    invite: { role: 'red', claimToken: 'cap_red_fresh', claimPath: '/sessions/s_demo/claim' },
+    publicState: {
+      sessionId,
+      stateVersion: 'v_2',
+      phase: 'waiting_for_agents',
+      round: 1,
+      maxRounds: 3,
+      expiresAt: '2026-06-03T12:00:00.000Z',
+      arena: { width: 16, height: 16, name: 'Test Arena', activeHazards: [] },
+      roles: {
+        red: { role: 'red', claimed: false, submitted: false },
+        blue: { role: 'blue', claimed: true, submitted: false },
+      },
+      replayAvailable: false,
+      eventLog: [],
+    },
+  }
+  const { calls, restore } = withFetchStub(() => jsonResponse(response))
+
+  try {
+    await resetRoleClaim(DEFAULT_ARENA_API_BASE, sessionId, refereeToken, 'red')
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].method, 'POST')
+    assert.equal(
+      calls[0].url,
+      `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/reset-role`,
+    )
+    assert.equal(calls[0].headers.get('authorization'), `Bearer ${refereeToken}`)
+    assert.equal(calls[0].body, JSON.stringify({ role: 'red' }))
   } finally {
     restore()
   }

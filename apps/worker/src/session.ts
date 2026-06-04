@@ -1,6 +1,7 @@
 import {
   TEAM_ROLES,
   validateSubmitRefereeAwardsRequestShape,
+  validateRoleResetRequestShape,
   type AppliedRefereeAward,
   type ArenaConfig,
   type CombatSummary,
@@ -17,6 +18,8 @@ import {
   type RoleClaimResponse,
   type RolePrivateState,
   type RolePublicState,
+  type RoleResetRequest,
+  type RoleResetResponse,
   type RoundPlanSubmission,
   type RoundSubmissionResponse,
   type SessionLogEvent,
@@ -54,7 +57,7 @@ type TokenOwner = TeamRole | 'referee'
 type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
 type Clock = () => string
 type TokenHasher = (token: string) => Promise<string>
-type RateLimitAction = 'claim' | 'state' | 'submit' | 'referee_awards'
+type RateLimitAction = 'claim' | 'state' | 'submit' | 'referee_awards' | 'reset_role'
 type RateLimitRule = {
   windowMs: number
   max: number
@@ -65,6 +68,7 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   state: { windowMs: 60 * 1000, max: 120 },
   submit: { windowMs: 60 * 1000, max: 20 },
   referee_awards: { windowMs: 60 * 1000, max: 20 },
+  reset_role: { windowMs: 60 * 1000, max: 20 },
 }
 
 type RefereeAwardCard = {
@@ -151,6 +155,10 @@ export type StoredRoleState = {
   inventory: InventoryItem[]
   controls?: GeneratedControls
   submission?: RoundPlanSubmission
+  submissionBaseline?: {
+    gold: number
+    inventory: InventoryItem[]
+  }
 }
 
 export type StoredSessionState = {
@@ -312,6 +320,7 @@ function mergeRateLimits(
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
     referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
+    reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
   }
 }
 
@@ -528,6 +537,7 @@ export class SessionCoordinator {
 
     return cloneJson({
       sessionId: this.state.id,
+      stateVersion: this.stateVersion(),
       phase: this.state.phase,
       round: this.state.round,
       maxRounds: this.state.maxRounds,
@@ -663,6 +673,10 @@ export class SessionCoordinator {
       return relayError('SUBMISSION_INVALID', 'Round plan failed validation.', validation.issues)
     }
 
+    role.submissionBaseline = {
+      gold: role.gold,
+      inventory: cloneJson(role.inventory),
+    }
     role.gold = validation.goldRemaining
     role.inventory = validation.inventory
     role.controls = validation.controls
@@ -740,6 +754,91 @@ export class SessionCoordinator {
     }
   }
 
+  async resetRole(
+    refereeToken: string,
+    request: unknown,
+  ): Promise<SessionResult<RoleResetResponse>> {
+    const now = this.clock()
+    const activeError = this.requireActive(now)
+
+    if (activeError) {
+      return activeError
+    }
+
+    const hasRefereeToken = await this.hasRefereeToken(refereeToken)
+    const rateLimitError = this.takeRateLimit(
+      'reset_role',
+      hasRefereeToken ? 'referee' : 'invalid',
+      now,
+    )
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    if (!hasRefereeToken) {
+      return relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
+    }
+
+    const validation = validateRoleResetRequestShape(request)
+
+    if (!validation.ok) {
+      return relayError('INVALID_REQUEST', 'Role reset request failed validation.', validation.issues)
+    }
+
+    if (this.state.phase !== 'waiting_for_agents' && this.state.phase !== 'submission_phase') {
+      return relayError(
+        'PHASE_CLOSED',
+        `Roles can be reset only before combat resolves; current phase is ${this.state.phase}.`,
+      )
+    }
+
+    const roleName = (request as RoleResetRequest).role
+    const role = this.state.roles[roleName]
+
+    if (role.submittedAt) {
+      if (!role.submissionBaseline) {
+        return relayError(
+          'INVALID_REQUEST',
+          `${role.role} cannot be reset because its accepted submission cannot be rolled back.`,
+        )
+      }
+
+      role.gold = role.submissionBaseline.gold
+      role.inventory = cloneJson(role.submissionBaseline.inventory)
+    }
+
+    const claimToken = this.tokenFactory(roleName, 'claim')
+
+    role.claimTokenHash = await this.tokenHasher(claimToken)
+    role.roleTokenHash = undefined
+    role.agentName = undefined
+    role.claimedAt = undefined
+    role.submittedAt = undefined
+    role.controls = undefined
+    role.submission = undefined
+    role.submissionBaseline = undefined
+
+    this.touch(now)
+    this.appendEvent('role_reset', `${roleName} role reset by referee.`, now)
+
+    if (this.state.phase === 'submission_phase') {
+      this.changePhase('waiting_for_agents', `${roleName} role needs a fresh claim.`, now)
+    }
+
+    return {
+      ok: true,
+      value: {
+        invite: {
+          role: roleName,
+          claimToken,
+          claimPath: `/sessions/${this.state.id}/claim`,
+        },
+        publicState: this.getPublicState(),
+      },
+    }
+  }
+
   getReplay(): SessionResult<ReplayPayload> {
     const activeError = this.requireActive()
 
@@ -762,6 +861,7 @@ export class SessionCoordinator {
 
     return cloneJson({
       sessionId: this.state.id,
+      stateVersion: this.stateVersion(),
       role: role.role,
       phase: this.state.phase,
       round: this.state.round,
@@ -911,6 +1011,7 @@ export class SessionCoordinator {
       team.controls = undefined
       team.submission = undefined
       team.submittedAt = undefined
+      team.submissionBaseline = undefined
     }
 
     this.state.round += 1
@@ -1041,5 +1142,16 @@ export class SessionCoordinator {
 
   private touch(at = this.clock()): void {
     this.state.updatedAt = at
+  }
+
+  private stateVersion(): string {
+    return [
+      this.state.updatedAt,
+      this.state.phase,
+      this.state.round,
+      this.state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
+      this.state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
+      this.state.eventLog.length,
+    ].join('|')
   }
 }

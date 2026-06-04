@@ -179,6 +179,23 @@ export function validateRoleClaimRequestShape(value: unknown): ValidationResult 
   return result(issues)
 }
 
+export function validateRoleResetRequestShape(value: unknown): ValidationResult {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      issues: [issue('INVALID_RESET_REQUEST', 'reset', 'Expected role reset object.')],
+    }
+  }
+
+  if (!TEAM_ROLES.includes(value.role as never)) {
+    issues.push(issue('INVALID_ROLE', 'reset.role', 'Reset role must be red or blue.'))
+  }
+
+  return result(issues)
+}
+
 function validateArenaConfigShape(value: unknown, path: string): ValidationIssue[] {
   const issues: ValidationIssue[] = []
 

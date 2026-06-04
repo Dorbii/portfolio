@@ -423,6 +423,97 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(duplicate.error.code, 'ALREADY_SUBMITTED')
 })
 
+test('referee can reset a claimed role and refresh claim capability before combat resolves', async () => {
+  const issued = []
+  const session = await SessionCoordinator.create(
+    { sessionId: 's_reset_role', seed: 'test-seed' },
+    {
+      clock: () => '2026-06-03T00:00:00.000Z',
+      tokenFactory: (owner, kind) => {
+        const token = `${kind}_${owner}_${issued.length + 1}`
+
+        issued.push(token)
+
+        return token
+      },
+    },
+  )
+  const createResponse = session.createResponse()
+  const refereeToken = createResponse.refereeToken
+  const redInvite = createResponse.invites.find((invite) => invite.role === 'red')
+  const blueInvite = createResponse.invites.find((invite) => invite.role === 'blue')
+
+  assert.notEqual(redInvite, undefined)
+  assert.notEqual(blueInvite, undefined)
+
+  const redClaim = await session.claimRole({
+    role: 'red',
+    claimToken: redInvite.claimToken,
+    agentName: 'stuck-red',
+  })
+  const blueClaim = await session.claimRole({
+    role: 'blue',
+    claimToken: blueInvite.claimToken,
+    agentName: 'blue',
+  })
+
+  assert.equal(redClaim.ok, true)
+  assert.equal(blueClaim.ok, true)
+
+  const redToken = redClaim.value.roleToken
+  const redSubmission = await session.submitRoundPlan(redToken, validSpinnerSubmission)
+
+  assert.equal(redSubmission.ok, true)
+  assert.equal(redSubmission.value.state.gold, 28)
+  assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
+
+  const reset = await session.resetRole(refereeToken, { role: 'red' })
+
+  assert.equal(reset.ok, true)
+  assert.equal(reset.value.invite.role, 'red')
+  assert.notEqual(reset.value.invite.claimToken, redInvite.claimToken)
+  assert.equal(reset.value.publicState.phase, 'waiting_for_agents')
+  assert.equal(reset.value.publicState.roles.red.claimed, false)
+  assert.equal(reset.value.publicState.roles.red.submitted, false)
+  assert.equal(reset.value.publicState.roles.blue.claimed, true)
+
+  const oldTokenState = await session.getRoleStateForToken(redToken)
+  const oldInviteClaim = await session.claimRole({
+    role: 'red',
+    claimToken: redInvite.claimToken,
+  })
+
+  assert.equal(oldTokenState.ok, false)
+  assert.equal(oldTokenState.error.code, 'INVALID_TOKEN')
+  assert.equal(oldInviteClaim.ok, false)
+  assert.equal(oldInviteClaim.error.code, 'INVALID_TOKEN')
+
+  const replacementClaim = await session.claimRole({
+    role: 'red',
+    claimToken: reset.value.invite.claimToken,
+    agentName: 'replacement-red',
+  })
+
+  assert.equal(replacementClaim.ok, true)
+  assert.equal(replacementClaim.value.state.phase, 'submission_phase')
+  assert.equal(replacementClaim.value.state.gold, 100)
+  assert.deepEqual(replacementClaim.value.state.inventory, [])
+})
+
+test('referee role reset cannot rewrite a resolved round', async () => {
+  const session = await createTestSession('s_reset_closed')
+  const refereeToken = session.createResponse().refereeToken
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await session.submitRoundPlan(redToken, validSpinnerSubmission)
+  await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+
+  const reset = await session.resetRole(refereeToken, { role: 'red' })
+
+  assert.equal(reset.ok, false)
+  assert.equal(reset.error.code, 'PHASE_CLOSED')
+})
+
 test('referee award options and interest are deterministic bounded economy rules', () => {
   const first = generateRefereeAwardOptions('s_test:test-seed', 2)
   const second = generateRefereeAwardOptions('s_test:test-seed', 2)

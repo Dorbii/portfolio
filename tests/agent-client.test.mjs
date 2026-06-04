@@ -5,6 +5,8 @@ import {
   AgentArenaApiError,
   AgentArenaClient,
   createAgentArenaRoleApi,
+  createAgentInviteUrl,
+  createExternalAgentBriefMarkdown,
   createAgentRoleStorageKey,
   createSafeAgentHash,
   getValidAgentActions,
@@ -21,6 +23,7 @@ const invite = {
 
 const roleState = {
   sessionId: 's_demo',
+  stateVersion: 'v1',
   role: 'red',
   phase: 'submission_phase',
   round: 1,
@@ -167,11 +170,59 @@ test('agent invite fragment parser rejects unusable fragments', () => {
 test('agent token helpers avoid writing invite capability into the scrubbed hash', () => {
   const key = createAgentRoleStorageKey(invite)
   const hash = createSafeAgentHash(invite)
+  const inviteUrl = createAgentInviteUrl(invite)
 
   assert.equal(key.includes('cap_red'), false)
   assert.equal(hash.includes('cap_red'), false)
   assert.equal(hash.includes('claimToken'), false)
+  assert.equal(inviteUrl.includes('claimToken=cap_red'), true)
   assert.equal(hash.includes('session=s_demo'), true)
+})
+
+test('external agent brief is self-contained enough to claim and submit', () => {
+  const brief = createExternalAgentBriefMarkdown({
+    invite,
+    inviteUrl: createAgentInviteUrl(invite, 'https://arena.test'),
+    state: roleState,
+    publicState: {
+      sessionId: invite.sessionId,
+      stateVersion: 'v1',
+      phase: 'submission_phase',
+      round: 1,
+      maxRounds: 7,
+      expiresAt: roleState.expiresAt,
+      arena: {
+        name: 'Compact Box',
+        width: 24,
+        height: 16,
+        activeHazards: ['floor_saw'],
+      },
+      roles: {
+        red: { role: 'red', claimed: true, submitted: false },
+        blue: { role: 'blue', claimed: true, submitted: false },
+      },
+      replayAvailable: false,
+      eventLog: roleState.eventLog,
+    },
+  })
+
+  assert.ok(brief.includes('You are the RED agent for session s_demo.'))
+  assert.ok(brief.includes('https://arena.test/agent#session=s_demo&role=red&claimToken=cap_red&api=https%3A%2F%2Farena-api.test'))
+  assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
+  assert.ok(brief.includes('Preferred path: use the HTTP API directly.'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
+  assert.ok(brief.includes('If Browser, Chrome, Playwright, or another UI bridge fails'))
+  assert.ok(brief.includes('Authorization: Bearer <roleToken>'))
+  assert.ok(brief.includes('## HTTP requests'))
+  assert.ok(brief.includes('Phase: submission_phase'))
+  assert.ok(brief.includes('Gold: 100'))
+  assert.ok(brief.includes('State version: v1'))
+  assert.ok(brief.includes('## Continuation loop'))
+  assert.ok(brief.includes('Watch field: stateVersion'))
+  assert.ok(brief.includes('window.AgentArenaRole.waitForNextSubmissionWindow()'))
+  assert.ok(brief.includes('Body_Square_Medium'))
+  assert.ok(brief.includes('Weapon_Spinner_Small'))
+  assert.ok(brief.includes('script#agent-arena-brief'))
 })
 
 test('agent state script serialization escapes html-sensitive text', () => {
@@ -221,6 +272,7 @@ test('agent client claims, reads state, and submits with bearer auth', async () 
           },
           publicState: {
             sessionId: invite.sessionId,
+            stateVersion: 'v2',
             phase: 'submission_phase',
             round: 1,
             maxRounds: 7,
@@ -320,6 +372,8 @@ test('browser role API exposes valid actions from current role state', async () 
       ['get_contract', true],
       ['get_role_state', true],
       ['get_match_log', true],
+      ['wait_for_state_change', true],
+      ['wait_for_next_submission_window', false],
       ['submit_round_plan', true],
     ],
   )
@@ -345,7 +399,7 @@ test('browser role API marks all actions unavailable before claim', async () => 
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, false, false, false],
+    [true, false, false, false, false, false],
   )
 })
 
@@ -396,4 +450,33 @@ test('browser role API waitForPhase returns matching phase and rejects terminal 
       return true
     },
   )
+})
+
+test('browser role API can wait on stateVersion or the next submission window', async () => {
+  const changedClient = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async () => jsonResponse({ ...roleState, stateVersion: 'v2' }),
+  })
+  const changedApi = createAgentArenaRoleApi(changedClient, () => roleState)
+  const changedState = await changedApi.waitForStateChange('v1')
+
+  assert.equal(changedState.stateVersion, 'v2')
+
+  const playableClient = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async () =>
+      jsonResponse({
+        ...roleState,
+        stateVersion: 'v3',
+        phase: 'submission_phase',
+        submitted: false,
+      }),
+  })
+  const playableApi = createAgentArenaRoleApi(playableClient, () => roleState)
+  const playableState = await playableApi.waitForNextSubmissionWindow()
+
+  assert.equal(playableState.phase, 'submission_phase')
+  assert.equal(playableState.submitted, false)
 })

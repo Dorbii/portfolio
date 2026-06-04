@@ -232,7 +232,7 @@ button.active {
 .invite-links {
   min-width: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -1160,6 +1160,7 @@ pre {
 }
 
 .role-summary,
+.agent-handoff-panel,
 .submission-editor,
 .match-log-panel {
   min-height: 300px;
@@ -1314,9 +1315,19 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.agent-button-row.single-action {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 12px;
+}
+
 .agent-button-row button,
 .submission-editor + button {
   min-height: 36px;
+}
+
+.agent-brief-text {
+  min-height: 260px;
+  white-space: pre;
 }
 
 .agent-notice,

@@ -1,15 +1,62 @@
-import { MOVEMENT_COMMANDS, SESSION_PHASES, TEAM_ROLES } from './types.js'
+import {
+  MOVEMENT_COMMANDS,
+  SESSION_PHASES,
+  TEAM_ROLES,
+  UTILITY_COMMANDS,
+  WEAPON_COMMANDS,
+  type PartDefinition,
+} from './types.js'
 
-export function createAgentContract() {
+export type AgentContractPartSummary = Pick<
+  PartDefinition,
+  | 'id'
+  | 'category'
+  | 'displayName'
+  | 'cost'
+  | 'mass'
+  | 'durability'
+  | 'size'
+  | 'controls'
+  | 'stats'
+  | 'tags'
+>
+
+export type CreateAgentContractOptions = {
+  partCatalog?: PartDefinition[]
+}
+
+export function createAgentContract(options: CreateAgentContractOptions = {}) {
   return {
     name: 'Agent Arena',
     version: '0.1.0',
+    objective:
+      'Build and submit a legal BattleBots-style robot plan for your assigned role. Win rounds through deterministic combat, then adapt after referee awards and economy updates.',
     runtime: 'browser_and_http',
     entrypoints: {
       humanArena: 'https://arena.dorbii.net/arena',
       agentCockpit: 'https://arena.dorbii.net/agent',
       agentSpec: 'https://arena.dorbii.net/agent-spec.json',
       apiBase: 'https://arena-api.dorbii.net',
+    },
+    externalAgentGuide: {
+      firstRead: [
+        'Use the invite URL fragment for session, role, claimToken, and api.',
+        'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog.',
+        'Prefer the HTTP workflow below. Browser automation is optional and should not block play.',
+        'POST /sessions/:sessionId/claim with { role, claimToken, agentName } before reading private state.',
+        'Store the returned roleToken privately and send it as Authorization: Bearer <roleToken>.',
+        'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, log, and stateVersion.',
+        'Submit exactly one round plan during submission_phase. Bad submissions can lock out useful action for that round.',
+        'After submitting, poll private state and compare stateVersion. Continue when phase is submission_phase and submitted is false.',
+      ],
+      currentStateSources: [
+        'Browser agents can read script#agent-arena-state and script#agent-arena-brief on /agent.',
+        'HTTP agents should use GET /sessions/:sessionId/public for public state and GET /sessions/:sessionId/state with bearer auth for private state.',
+      ],
+      fallback:
+        'If Browser, Chrome, Playwright, or another UI automation bridge fails, do not keep retrying UI tooling. Use the HTTP endpoints directly.',
+      privacy:
+        'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution.',
     },
     inviteFragment: {
       required: ['session', 'role', 'api'],
@@ -21,13 +68,16 @@ export function createAgentContract() {
     browserApi: {
       global: 'window.AgentArenaRole',
       stateScriptTagId: 'agent-arena-state',
+      briefScriptTagId: 'agent-arena-brief',
       methods: [
         'getContract',
         'getState',
         'getValidActions',
         'submitRoundPlan',
         'getMatchLog',
+        'waitForStateChange',
         'waitForPhase',
+        'waitForNextSubmissionWindow',
       ],
     },
     roles: TEAM_ROLES,
@@ -46,12 +96,42 @@ export function createAgentContract() {
       maxBlocksPerBot: 48,
       maxCoordinate: 8,
       movementCommands: MOVEMENT_COMMANDS,
+      weaponCommands: WEAPON_COMMANDS,
+      utilityCommands: UTILITY_COMMANDS,
       rateLimits: {
         claim: '20 requests per role per minute',
         state: '120 requests per role per minute',
         submit: '20 requests per role per minute',
       },
     },
+    continuationProtocol: {
+      transport: 'polling',
+      pollIntervalMs: 4000,
+      watchField: 'stateVersion',
+      nextPlayableCondition:
+        'A role can continue playing when private state has phase=submission_phase and submitted=false.',
+      terminalPhases: ['session_complete', 'expired'],
+      waitingPhases: [
+        'waiting_for_agents',
+        'submissions_locked',
+        'combat_resolved',
+        'replay_phase',
+        'referee_awards',
+        'apply_awards',
+      ],
+      browserHelpers: ['waitForStateChange(previousStateVersion)', 'waitForNextSubmissionWindow()'],
+      note:
+        'No push notification transport exists in the MVP. Agents should poll private role state within the rate limit.',
+    },
+    submissionChecklist: [
+      'First round starts with 100 gold and empty inventory; spend only gold you have.',
+      'Buy every part used by the blueprint unless it is already in inventory.',
+      'Use at least one body part and enough mobility/control parts for the commands you plan to issue.',
+      'Blueprint block ids must be unique, grid positions must be unoccupied, and the assembly must be connected.',
+      'Use only commands granted by generated controls; weaponA/weaponB require weapon parts and utility requires utility parts.',
+      'Turn commands use ticks 1 through 5.',
+      'Strategically weak plans may pass; malformed or impossible plans are rejected.',
+    ],
     actions: [
       {
         name: 'create_session',
@@ -116,7 +196,22 @@ export function createAgentContract() {
         returns:
           'accepted awards plus public state after either next-round economy or session completion',
       },
+      {
+        name: 'reset_role_claim',
+        method: 'POST',
+        path: '/sessions/:sessionId/reset-role',
+        phase: 'waiting_for_agents | submission_phase',
+        auth: 'referee capability token',
+        body: {
+          role: 'red | blue',
+        },
+        returns:
+          'fresh role invite plus public state; old role bearer token is invalidated and accepted current-round submission is rolled back when possible',
+      },
     ],
+    ...(options.partCatalog
+      ? { partCatalog: options.partCatalog.map(toPartSummary) }
+      : {}),
     phaseTransitions: [
       ['waiting_for_agents', 'submission_phase', 'both roles claimed'],
       ['submission_phase', 'submissions_locked', 'both plans accepted'],
@@ -181,5 +276,20 @@ export function createAgentContract() {
           'Cheap control build that preserves interest while threatening fast opponents.',
       },
     },
+  }
+}
+
+function toPartSummary(part: PartDefinition): AgentContractPartSummary {
+  return {
+    id: part.id,
+    category: part.category,
+    displayName: part.displayName,
+    cost: part.cost,
+    mass: part.mass,
+    durability: part.durability,
+    size: part.size,
+    controls: part.controls,
+    stats: part.stats,
+    tags: part.tags,
   }
 }

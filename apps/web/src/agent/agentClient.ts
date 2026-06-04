@@ -36,6 +36,8 @@ export type AgentArenaValidAction = {
     | 'get_contract'
     | 'get_role_state'
     | 'get_match_log'
+    | 'wait_for_state_change'
+    | 'wait_for_next_submission_window'
     | 'submit_round_plan'
   available: boolean
   reason?: string
@@ -49,7 +51,43 @@ export type AgentArenaRoleApi = {
     plan: RoundPlanSubmission,
   ): Promise<RoundSubmissionResponse>
   getMatchLog(): Promise<SessionLogEvent[]>
+  waitForStateChange(previousStateVersion?: string): Promise<RolePrivateState>
   waitForPhase(phase: SessionPhase): Promise<RolePrivateState>
+  waitForNextSubmissionWindow(): Promise<RolePrivateState>
+}
+
+export type ExternalAgentBriefInput = {
+  invite: AgentInvite
+  inviteUrl?: string
+  state?: RolePrivateState | null
+  publicState?: PublicSessionState | null
+}
+
+export type ExternalAgentBrief = {
+  title: string
+  sessionId: string
+  role: TeamRole
+  apiBase: string
+  inviteUrl: string
+  contractUrl: string
+  currentState: {
+    phase: string
+    round: number | null
+    gold: number | null
+    submitted: boolean | null
+    opponent: string
+    replayAvailable: boolean | null
+    stateVersion: string | null
+  }
+  continuationProtocol: {
+    transport: 'polling'
+    pollIntervalMs: number
+    watchField: 'stateVersion'
+    nextPlayableCondition: string
+  }
+  workflow: string[]
+  validationChecklist: string[]
+  sampleRoundPlan: RoundPlanSubmission
 }
 
 type FetchLike = (
@@ -63,6 +101,7 @@ const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 const TEAM_ROLE_VALUES = ['red', 'blue'] as const
 const DEFAULT_WAIT_POLL_MS = 4_000
 const TERMINAL_PHASES = new Set<SessionPhase>(['session_complete', 'expired'])
+const DEFAULT_AGENT_SITE_BASE = 'https://arena.dorbii.net'
 
 function firstPresent(...values: Array<string | null>): string | undefined {
   return values
@@ -180,6 +219,23 @@ export function parseAgentInviteFragment(
   }
 }
 
+export function createAgentInviteUrl(
+  invite: AgentInvite,
+  siteBase = DEFAULT_AGENT_SITE_BASE,
+): string {
+  const params = new URLSearchParams()
+  const normalizedSiteBase = siteBase.replace(/\/+$/, '')
+
+  params.set('session', invite.sessionId)
+  params.set('role', invite.role)
+  if (invite.claimToken) {
+    params.set('claimToken', invite.claimToken)
+  }
+  params.set('api', invite.apiBase)
+
+  return `${normalizedSiteBase}/agent#${params.toString()}`
+}
+
 export function createSafeAgentHash(invite: AgentInvite): string {
   const params = new URLSearchParams()
 
@@ -188,6 +244,206 @@ export function createSafeAgentHash(invite: AgentInvite): string {
   params.set('api', invite.apiBase)
 
   return `#${params.toString()}`
+}
+
+export function createExternalAgentBrief(input: ExternalAgentBriefInput): ExternalAgentBrief {
+  const state = input.state
+  const publicState = input.publicState
+  const inviteUrl = input.inviteUrl ?? createAgentInviteUrl(input.invite)
+  const phase = state?.phase ?? publicState?.phase ?? 'unknown'
+  const round = state?.round ?? publicState?.round ?? null
+  const opponent = state
+    ? `${state.opponent.role}: claimed=${state.opponent.claimed}, submitted=${state.opponent.submitted}`
+    : publicState
+      ? Object.values(publicState.roles)
+          .filter((role) => role.role !== input.invite.role)
+          .map((role) => `${role.role}: claimed=${role.claimed}, submitted=${role.submitted}`)
+          .join('; ') || 'unknown'
+      : 'unknown'
+
+  return {
+    title: 'Agent Arena external role brief',
+    sessionId: input.invite.sessionId,
+    role: input.invite.role,
+    apiBase: input.invite.apiBase,
+    inviteUrl,
+    contractUrl: `${input.invite.apiBase}/agent-spec.json`,
+    currentState: {
+      phase,
+      round,
+      gold: state?.gold ?? null,
+      submitted: state?.submitted ?? null,
+      opponent,
+      replayAvailable: state?.replayAvailable ?? publicState?.replayAvailable ?? null,
+      stateVersion: state?.stateVersion ?? publicState?.stateVersion ?? null,
+    },
+    continuationProtocol: {
+      transport: 'polling',
+      pollIntervalMs: DEFAULT_WAIT_POLL_MS,
+      watchField: 'stateVersion',
+      nextPlayableCondition:
+        'Continue when private state has phase=submission_phase and submitted=false. Stop on session_complete or expired.',
+    },
+    workflow: [
+      'Preferred path: use the HTTP API directly. The browser cockpit is useful for humans but is not required for agent play.',
+      `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract.`,
+      `Claim this role with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/claim and body ${claimBodyForBrief(input.invite)}.`,
+      'Store the returned roleToken privately. Do not paste it into public logs.',
+      `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <roleToken>.`,
+      `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
+      `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <roleToken>.`,
+      'After submitting, save stateVersion and poll private state until stateVersion changes. Continue playing when phase is submission_phase and submitted is false.',
+      'If Browser, Chrome, Playwright, or another UI bridge fails, stop retrying UI tooling and continue through the HTTP API.',
+    ],
+    validationChecklist: [
+      'First round starts with 100 gold and empty inventory unless private state says otherwise.',
+      'Every blueprint part must be owned after purchases are applied.',
+      'Blueprint block ids must be unique; block positions must be connected and unoccupied.',
+      'Movement commands require movement controls. weaponA/weaponB require weapon controls. utility requires utility controls.',
+      'Use ticks 1 through 5. Invalid JSON or impossible builds are rejected with validation issues.',
+      'Public state redacts pending opponent submissions, claim tokens, role tokens, referee tokens, and private blueprints before replay resolution.',
+    ],
+    sampleRoundPlan: createBaselineRoundPlan(),
+  }
+}
+
+export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput): string {
+  const brief = createExternalAgentBrief(input)
+  const claimToken = input.invite.claimToken ?? 'not present in this sanitized URL'
+
+  return [
+    '# Agent Arena role brief',
+    '',
+    `You are the ${brief.role.toUpperCase()} agent for session ${brief.sessionId}.`,
+    `Invite URL: ${brief.inviteUrl}`,
+    `API base: ${brief.apiBase}`,
+    `Contract: ${brief.contractUrl}`,
+    `Claim token: ${claimToken}`,
+    '',
+    '## Current known state',
+    `Phase: ${brief.currentState.phase}`,
+    `Round: ${brief.currentState.round ?? 'unknown'}`,
+    `Gold: ${brief.currentState.gold ?? 'unknown until role state is loaded'}`,
+    `Submitted: ${brief.currentState.submitted ?? 'unknown until role state is loaded'}`,
+    `Opponent: ${brief.currentState.opponent}`,
+    `Replay available: ${brief.currentState.replayAvailable ?? 'unknown'}`,
+    `State version: ${brief.currentState.stateVersion ?? 'unknown until state is loaded'}`,
+    '',
+    '## Workflow',
+    ...brief.workflow.map((item, index) => `${index + 1}. ${item}`),
+    '',
+    '## HTTP requests',
+    'Claim role:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/claim`,
+    'Content-Type: application/json',
+    '',
+    claimBodyForBrief(input.invite),
+    '```',
+    '',
+    'Read private role state:',
+    '```http',
+    `GET ${brief.apiBase}/sessions/${brief.sessionId}/state`,
+    'Authorization: Bearer <roleToken>',
+    '```',
+    '',
+    'Submit round plan:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/round-plan`,
+    'Authorization: Bearer <roleToken>',
+    'Content-Type: application/json',
+    '',
+    '<roundPlan JSON>',
+    '```',
+    '',
+    '## Continuation loop',
+    `Transport: ${brief.continuationProtocol.transport}`,
+    `Poll interval: ${brief.continuationProtocol.pollIntervalMs}ms`,
+    `Watch field: ${brief.continuationProtocol.watchField}`,
+    `Next playable condition: ${brief.continuationProtocol.nextPlayableCondition}`,
+    '',
+    'Algorithm:',
+    '1. After claiming or submitting, keep the latest private stateVersion.',
+    `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <roleToken>.`,
+    '3. If stateVersion is unchanged, wait and poll again.',
+    '4. If phase is submission_phase and submitted is false, it is your turn to submit the next round plan.',
+    '5. If phase is referee_awards, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
+    '6. If phase is session_complete or expired, stop playing.',
+    '',
+    'Browser helper, if you are using the cockpit:',
+    '```js',
+    'const nextState = await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    '```',
+    '',
+    '## Validation checklist',
+    ...brief.validationChecklist.map((item) => `- ${item}`),
+    '',
+    '## Sample round plan shape',
+    '```json',
+    JSON.stringify(brief.sampleRoundPlan, null, 2),
+    '```',
+    '',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.getState().',
+  ].join('\n')
+}
+
+function claimBodyForBrief(invite: AgentInvite): string {
+  return JSON.stringify({
+    role: invite.role,
+    claimToken: invite.claimToken ?? '<claimToken from invite URL>',
+    agentName: `${invite.role}-agent`,
+  })
+}
+
+function createBaselineRoundPlan(): RoundPlanSubmission {
+  return {
+    action: 'submit_round_plan',
+    purchases: [
+      { partId: 'Body_Square_Medium', quantity: 1 },
+      { partId: 'Wheel_Large', quantity: 2 },
+      { partId: 'Weapon_Spinner_Small', quantity: 1 },
+    ],
+    blueprint: {
+      name: 'Baseline Spinner',
+      blocks: [
+        {
+          id: 'core',
+          partId: 'Body_Square_Medium',
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+        },
+        {
+          id: 'leftWheel',
+          partId: 'Wheel_Large',
+          position: [-1, 0, 0],
+          rotation: [0, 0, 90],
+        },
+        {
+          id: 'rightWheel',
+          partId: 'Wheel_Large',
+          position: [1, 0, 0],
+          rotation: [0, 0, 90],
+        },
+        {
+          id: 'spinner',
+          partId: 'Weapon_Spinner_Small',
+          position: [0, 0, 1],
+          rotation: [0, 0, 0],
+        },
+      ],
+    },
+    turnPlan: {
+      commands: [
+        { tick: 1, move: 'forward', weaponA: 'hold' },
+        { tick: 2, move: 'forward', weaponA: 'fire' },
+        { tick: 3, move: 'turn_left', weaponA: 'hold' },
+        { tick: 4, move: 'forward', weaponA: 'fire' },
+        { tick: 5, move: 'brake', weaponA: 'hold' },
+      ],
+    },
+    rationale:
+      'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
+  }
 }
 
 export function createAgentRoleStorageKey(invite: AgentInvite): string {
@@ -333,6 +589,48 @@ export class AgentArenaClient {
     }
   }
 
+  async waitForStateChange(previousStateVersion?: string): Promise<RolePrivateState> {
+    const baseline = previousStateVersion ?? (await this.getState()).stateVersion
+
+    for (;;) {
+      const state = await this.getState()
+
+      if (state.stateVersion !== baseline) {
+        return state
+      }
+
+      if (TERMINAL_PHASES.has(state.phase)) {
+        throw new AgentArenaApiError({
+          status: 409,
+          code: state.phase === 'expired' ? 'SESSION_EXPIRED' : 'PHASE_CLOSED',
+          message: `Session reached ${state.phase} without a later state change.`,
+        })
+      }
+
+      await delay(DEFAULT_WAIT_POLL_MS)
+    }
+  }
+
+  async waitForNextSubmissionWindow(): Promise<RolePrivateState> {
+    for (;;) {
+      const state = await this.getState()
+
+      if (state.phase === 'submission_phase' && !state.submitted) {
+        return state
+      }
+
+      if (TERMINAL_PHASES.has(state.phase)) {
+        throw new AgentArenaApiError({
+          status: 409,
+          code: state.phase === 'expired' ? 'SESSION_EXPIRED' : 'PHASE_CLOSED',
+          message: `Session reached ${state.phase} before another submission window opened.`,
+        })
+      }
+
+      await delay(DEFAULT_WAIT_POLL_MS)
+    }
+  }
+
   private authorizationHeaders(): Headers {
     const roleToken = this.getRoleToken?.()
 
@@ -414,6 +712,26 @@ export function getValidAgentActions(
       ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
+      name: 'wait_for_state_change',
+      available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
+      ...(state
+        ? TERMINAL_PHASES.has(state.phase)
+          ? { reason: `Session is terminal: ${state.phase}.` }
+          : {}
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
+      name: 'wait_for_next_submission_window',
+      available: Boolean(state && !TERMINAL_PHASES.has(state.phase) && !(state.phase === 'submission_phase' && !state.submitted)),
+      ...(state
+        ? TERMINAL_PHASES.has(state.phase)
+          ? { reason: `Session is terminal: ${state.phase}.` }
+          : state.phase === 'submission_phase' && !state.submitted
+            ? { reason: 'Submission window is already open.' }
+            : {}
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
       name: 'submit_round_plan',
       available: Boolean(state && state.phase === 'submission_phase' && !state.submitted),
       ...(state?.phase !== 'submission_phase'
@@ -435,7 +753,9 @@ export function createAgentArenaRoleApi(
     getValidActions: async () => getValidAgentActions(getCurrentState()),
     submitRoundPlan: (plan) => client.submitRoundPlan(plan),
     getMatchLog: () => client.getMatchLog(),
+    waitForStateChange: (previousStateVersion) => client.waitForStateChange(previousStateVersion),
     waitForPhase: (phase) => client.waitForPhase(phase),
+    waitForNextSubmissionWindow: () => client.waitForNextSubmissionWindow(),
   }
 }
 

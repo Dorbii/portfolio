@@ -160,6 +160,20 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.name, 'Agent Arena')
   assert.equal(json.version, '0.1.0')
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
+  assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
+  assert.ok(json.browserApi.methods.includes('waitForStateChange'))
+  assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
+  assert.ok(json.objective.includes('Build and submit'))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('HTTP workflow')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
+  assert.ok(json.externalAgentGuide.fallback.includes('Use the HTTP endpoints directly'))
+  assert.equal(json.continuationProtocol.transport, 'polling')
+  assert.equal(json.continuationProtocol.watchField, 'stateVersion')
+  assert.ok(json.continuationProtocol.browserHelpers.includes('waitForNextSubmissionWindow()'))
+  assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
+  assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
+  assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(
     json.actions.some(
       (action) =>
@@ -185,6 +199,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'submit_referee_awards' &&
         action.method === 'POST' &&
         action.path === '/sessions/:sessionId/referee-awards',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'reset_role_claim' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/reset-role' &&
+        action.auth === 'referee capability token',
     ),
   )
 })
@@ -314,6 +337,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(created.response.status, 201)
   assert.equal(created.json.sessionId, sessionId)
   assert.equal(created.json.publicState.phase, 'waiting_for_agents')
+  assert.equal(typeof created.json.publicState.stateVersion, 'string')
   assert.equal(typeof created.json.refereeToken, 'string')
 
   const duplicate = await route(env, '/sessions', {
@@ -326,6 +350,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   const redInvite = inviteFor(created.json.invites, 'red')
   const blueInvite = inviteFor(created.json.invites, 'blue')
+  const refereeToken = created.json.refereeToken
   const malformedClaim = await route(env, `/sessions/${sessionId}/claim`, {
     method: 'POST',
     body: {
@@ -341,12 +366,62 @@ test('worker routes session traffic through the Durable Object relay boundary', 
     malformedClaim.json.error.issues.some((issue) => issue.code === 'INVALID_AGENT_NAME'),
   )
 
-  const redClaim = await route(env, `/sessions/${sessionId}/claim`, {
+  const initialRedClaim = await route(env, `/sessions/${sessionId}/claim`, {
     method: 'POST',
     body: {
       role: 'red',
       claimToken: redInvite.claimToken,
       agentName: 'Red Bot',
+    },
+  })
+
+  assert.equal(initialRedClaim.response.status, 201)
+  assert.equal(initialRedClaim.json.role, 'red')
+  assert.equal(initialRedClaim.json.state.phase, 'waiting_for_agents')
+
+  const invalidReset = await route(env, `/sessions/${sessionId}/reset-role`, {
+    method: 'POST',
+    token: initialRedClaim.json.roleToken,
+    body: { role: 'red' },
+  })
+
+  assert.equal(invalidReset.response.status, 401)
+  assert.equal(invalidReset.json.error.code, 'INVALID_TOKEN')
+
+  const resetRed = await route(env, `/sessions/${sessionId}/reset-role`, {
+    method: 'POST',
+    token: refereeToken,
+    body: { role: 'red' },
+  })
+
+  assert.equal(resetRed.response.status, 200)
+  assert.equal(resetRed.json.invite.role, 'red')
+  assert.notEqual(resetRed.json.invite.claimToken, redInvite.claimToken)
+  assert.equal(resetRed.json.publicState.roles.red.claimed, false)
+  assert.equal(resetRed.json.publicState.roles.red.submitted, false)
+
+  const staleRedState = await route(env, `/sessions/${sessionId}/state`, {
+    token: initialRedClaim.json.roleToken,
+  })
+  const staleRedClaim = await route(env, `/sessions/${sessionId}/claim`, {
+    method: 'POST',
+    body: {
+      role: 'red',
+      claimToken: redInvite.claimToken,
+    },
+  })
+
+  assert.equal(staleRedState.response.status, 401)
+  assert.equal(staleRedState.json.error.code, 'INVALID_TOKEN')
+  assert.equal(staleRedClaim.response.status, 401)
+  assert.equal(staleRedClaim.json.error.code, 'INVALID_TOKEN')
+
+  const redClaim = await route(env, `/sessions/${sessionId}/claim`, {
+    method: 'POST',
+    body: {
+      role: 'red',
+      claimToken: resetRed.json.invite.claimToken,
+      agentName: 'Replacement Red Bot',
     },
   })
 
@@ -369,7 +444,6 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   const redToken = redClaim.json.roleToken
   const blueToken = blueClaim.json.roleToken
-  const refereeToken = created.json.refereeToken
   const invalidState = await route(env, `/sessions/${sessionId}/state`, {
     token: 'not-a-real-token',
   })
@@ -383,11 +457,13 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   assert.equal(redState.response.status, 200)
   assert.equal(redState.json.role, 'red')
+  assert.equal(typeof redState.json.stateVersion, 'string')
   assert.equal(redState.json.opponent.role, 'blue')
   assert.equal(redState.json.opponent.claimed, true)
   assert.equal(redState.json.ownSubmission, undefined)
   assertRedactedPublicState(redState.json.opponent, [
     redInvite.claimToken,
+    resetRed.json.invite.claimToken,
     blueInvite.claimToken,
     redToken,
     blueToken,
@@ -505,9 +581,11 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   assert.equal(publicState.response.status, 200)
   assert.equal(publicState.json.phase, 'submission_phase')
+  assert.equal(typeof publicState.json.stateVersion, 'string')
   assert.equal(publicState.json.replayAvailable, false)
   assertRedactedPublicState(publicState.json, [
     redInvite.claimToken,
+    resetRed.json.invite.claimToken,
     blueInvite.claimToken,
     redToken,
     blueToken,

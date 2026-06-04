@@ -15,6 +15,9 @@ import {
   AgentArenaApiError,
   AgentArenaClient,
   createAgentArenaRoleApi,
+  createAgentInviteUrl,
+  createExternalAgentBrief,
+  createExternalAgentBriefMarkdown,
   createSafeAgentHash,
   clearStoredRoleToken,
   getValidAgentActions,
@@ -98,6 +101,10 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   )
   const [submissionText, setSubmissionText] = useState(() =>
     JSON.stringify(sampleSubmission, null, 2),
+  )
+  const agentInviteUrl = useMemo(
+    () => createAgentInviteUrl(invite, window.location.origin),
+    [invite],
   )
 
   const client = useMemo(
@@ -315,6 +322,30 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
       }),
     [invite, publicState, roleState],
   )
+  const externalAgentBrief = useMemo(
+    () =>
+      createExternalAgentBrief({
+        invite,
+        inviteUrl: agentInviteUrl,
+        state: roleState,
+        publicState,
+      }),
+    [agentInviteUrl, invite, publicState, roleState],
+  )
+  const externalAgentBriefMarkdown = useMemo(
+    () =>
+      createExternalAgentBriefMarkdown({
+        invite,
+        inviteUrl: agentInviteUrl,
+        state: roleState,
+        publicState,
+      }),
+    [agentInviteUrl, invite, publicState, roleState],
+  )
+  const externalAgentBriefScript = useMemo(
+    () => serializeJsonForScript(externalAgentBrief),
+    [externalAgentBrief],
+  )
   const canClaimRole = !isBusy && (!roleToken || lastError?.code === 'INVALID_TOKEN')
   const claimButtonLabel = isBusy
     ? status === 'claiming'
@@ -326,6 +357,20 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const refreshButtonLabel = status === 'loading' ? 'Refreshing...' : 'Refresh state'
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const roleHasMatchLog = matchLog.length > 0
+
+  const copyExternalAgentBrief = useCallback(() => {
+    return navigator.clipboard
+      .writeText(externalAgentBriefMarkdown)
+      .then(() => {
+        setNotice('External agent brief copied.')
+      })
+      .catch(() => {
+        setLastError({
+          title: 'Clipboard copy blocked',
+          message: 'Select and copy the external agent brief manually.',
+        })
+      })
+  }, [externalAgentBriefMarkdown])
 
   const toggleSubmissionMode = (next: SubmissionMode) => {
     if (next === submissionMode) {
@@ -417,6 +462,22 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
           ) : null}
         </section>
 
+        <section className="agent-live-panel agent-handoff-panel" aria-labelledby="handoff-heading">
+          <SectionTitle id="handoff-heading" title="External agent brief" />
+          <div className="agent-button-row single-action">
+            <button type="button" onClick={() => void copyExternalAgentBrief()}>
+              Copy brief
+            </button>
+          </div>
+          <textarea
+            className="agent-brief-text"
+            spellCheck={false}
+            readOnly
+            value={externalAgentBriefMarkdown}
+            aria-label="External agent brief"
+          />
+        </section>
+
         <section className="agent-live-panel" aria-labelledby="phase-heading">
           <SectionTitle id="phase-heading" title="Current phase" />
           {roleState ? (
@@ -425,6 +486,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <Fact label="Round" value={String(roleState.round)} />
               <Fact label="Gold" value={String(roleState.gold)} />
               <Fact label="Submitted" value={roleState.submitted ? 'Yes' : 'No'} />
+              <Fact label="State version" value={roleState.stateVersion} />
               <Fact label="Opponent" value={opponentLabel(roleState)} />
               <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
             </dl>
@@ -1004,6 +1066,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         id="agent-arena-state"
         type="application/json"
         dangerouslySetInnerHTML={{ __html: stateScript }}
+      />
+      <script
+        id="agent-arena-brief"
+        type="application/json"
+        dangerouslySetInnerHTML={{ __html: externalAgentBriefScript }}
       />
     </main>
   )

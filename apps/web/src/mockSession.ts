@@ -163,6 +163,7 @@ const eventLog = [
 
 export const mockPublicSession: PublicSessionState = {
   sessionId: 's_mock_7f2',
+  stateVersion: 'mock|referee_awards|3|red-submitted|blue-submitted|4',
   phase: 'referee_awards',
   round: 3,
   maxRounds: 7,
@@ -200,6 +201,7 @@ export const mockPublicSession: PublicSessionState = {
 export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
   red: {
     sessionId: mockPublicSession.sessionId,
+    stateVersion: mockPublicSession.stateVersion,
     role: 'red',
     phase: mockPublicSession.phase,
     round: mockPublicSession.round,
@@ -260,6 +262,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
   },
   blue: {
     sessionId: mockPublicSession.sessionId,
+    stateVersion: mockPublicSession.stateVersion,
     role: 'blue',
     phase: mockPublicSession.phase,
     round: mockPublicSession.round,
