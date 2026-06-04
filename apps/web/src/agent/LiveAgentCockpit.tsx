@@ -32,6 +32,7 @@ import {
   type AgentInvite,
   type AgentInviteParseResult,
 } from './agentClient'
+import { BotAssemblyScene } from './BotAssemblyScene'
 
 type LoadStatus = 'idle' | 'claiming' | 'loading' | 'ready'
 type SubmissionMode = 'structured' | 'json'
@@ -703,6 +704,20 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
             <PlanMetric label="Weapons" value={String(draftSummary.weaponParts)} />
             <PlanMetric label="Commands" value={`${draftSummary.commandCount} / 5`} />
           </div>
+
+          <section className="assembly-bay-panel" aria-labelledby="assembly-bay-heading">
+            <div className="plan-section-header">
+              <SectionTitle id="assembly-bay-heading" title="Assembly bay" />
+              <span className="assembly-state">
+                {roleState?.submitted ? 'Ready' : 'Building'}
+              </span>
+            </div>
+            <BotAssemblyScene
+              blueprint={draftSubmission.blueprint}
+              role={invite.role}
+              submitted={Boolean(roleState?.submitted)}
+            />
+          </section>
 
           {submissionMode === 'structured' ? (
             <div className="plan-workbench-grid">

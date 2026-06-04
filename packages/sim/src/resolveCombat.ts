@@ -51,12 +51,11 @@ type BotRuntime = {
   lastDealtDamageTick: number
 }
 
-const OPENING_TICKS = 5
 const NO_DAMAGE_STALEMATE_TICKS = 60
 const HARD_MAX_COMBAT_TICKS = 600
-const MIN_REPLAY_DURATION = OPENING_TICKS + 1
+const MIN_REPLAY_DURATION = 6
 const REPLAY_TRAILING_SECONDS = 1
-const CONTACT_DISTANCE = 1.1
+const CONTACT_DISTANCE = 1.28
 
 const DEFAULT_ARENA: ArenaConfig = {
   name: 'Compact Box',
@@ -99,10 +98,6 @@ function commandAt(
     return planned
   }
 
-  if (tick <= OPENING_TICKS) {
-    return { tick, move: 'brake' }
-  }
-
   return fallbackCommand(tick, bot, opponent, arena)
 }
 
@@ -114,20 +109,20 @@ function fallbackCommand(
 ): TurnCommand {
   const gap = distance(bot.position, opponent.position)
   const reach = weaponReach(bot)
-  const recentlyDamaged = tick - bot.lastDamagedTick <= 4
+  const recentlyDamaged = tick - bot.lastDamagedTick <= 3
+  const recentlyScored = tick - bot.lastDealtDamageTick <= 4
   const healthRatio = bot.health / bot.maxHealth
   const runAndGun = isRunAndGunBot(bot, opponent)
+  const pressure = pressureScore(bot, opponent)
   const wantsRange =
     runAndGun ||
-    bot.stats.control >= bot.stats.weaponThreat * 0.55 ||
-    bot.stats.mobility > opponent.stats.mobility + 3 ||
-    healthRatio < 0.34 ||
-    recentlyDamaged
+    healthRatio < 0.28 ||
+    (recentlyDamaged && !recentlyScored && pressure < 1.05)
   const idealRange = runAndGun
-    ? Math.max(2.8, reach * 0.98)
+    ? Math.max(2.7, reach * 0.95)
     : wantsRange
-      ? Math.max(2.4, reach * 0.82)
-      : Math.max(0.9, reach * 0.42)
+      ? Math.max(2.2, reach * 0.78)
+      : Math.max(CONTACT_DISTANCE * 0.82, reach * 0.5)
   const inCenterHazard = centerHazardActive(arena) && isNearCenterHazard(bot.position, 1.55)
   const command: TurnCommand = {
     tick,
@@ -139,19 +134,24 @@ function fallbackCommand(
       gap,
       idealRange,
       inCenterHazard,
+      pressure,
       recentlyDamaged,
+      recentlyScored,
       runAndGun,
       wantsRange,
     }),
   }
 
   if (bot.hasWeaponControl) {
-    command.weaponA = gap <= reach * (runAndGun ? 1.18 : 1.08)
+    command.weaponA = gap <= reach * (runAndGun ? 1.22 : 1.14)
       ? 'fire'
       : 'hold'
   }
 
-  if (bot.hasUtilityControl && (inCenterHazard || (runAndGun && tick % 3 === 0))) {
+  if (
+    bot.hasUtilityControl &&
+    (inCenterHazard || gap < reach * 1.2 || (runAndGun && tick % 3 === 0))
+  ) {
     command.utility = 'activate'
   }
 
@@ -166,7 +166,9 @@ function chooseFallbackMove({
   gap,
   idealRange,
   inCenterHazard,
+  pressure,
   recentlyDamaged,
+  recentlyScored,
   runAndGun,
   wantsRange,
 }: {
@@ -177,7 +179,9 @@ function chooseFallbackMove({
   gap: number
   idealRange: number
   inCenterHazard: boolean
+  pressure: number
   recentlyDamaged: boolean
+  recentlyScored: boolean
   runAndGun: boolean
   wantsRange: boolean
 }): TurnCommand['move'] {
@@ -193,7 +197,7 @@ function chooseFallbackMove({
     return runAndGunMove({ tick, bot, opponent, gap, idealRange })
   }
 
-  if (recentlyDamaged && gap < idealRange * 1.35) {
+  if (recentlyDamaged && !recentlyScored && gap < idealRange * 1.2) {
     return evadeMove(bot, opponent, arena, tick)
   }
 
@@ -201,17 +205,35 @@ function chooseFallbackMove({
     return evadeMove(bot, opponent, arena, tick)
   }
 
-  if (!wantsRange && centerHazardActive(arena) && gap < 2.2 && !isNearCenterHazard(opponent.position, 1.25)) {
+  if (!wantsRange && centerHazardActive(arena) && gap < 2.45 && !isNearCenterHazard(opponent.position, 1.25)) {
     const shoveTarget: Vector3 = [0, 0, 0]
 
-    return moveTowardPoint(bot, shoveTarget)
+    return closeMove(bot, shoveTarget, tick, true)
+  }
+
+  if (gap > idealRange * 1.55) {
+    return closeMove(bot, opponent.position, tick, pressure >= 0.92)
+  }
+
+  if (gap > idealRange) {
+    return tick % 3 === 0
+      ? flankingMove(bot, opponent, tick)
+      : closeMove(bot, opponent.position, tick, pressure >= 1)
+  }
+
+  if (gap <= CONTACT_DISTANCE * 1.15 && pressure >= 0.95) {
+    return tick % 4 === 0 ? 'dash_forward' : flankingMove(bot, opponent, tick)
+  }
+
+  if (bot.hasWeaponControl && gap <= weaponReach(bot) * 1.05) {
+    return tick % 2 === 0 ? flankingMove(bot, opponent, tick) : 'forward'
   }
 
   if (wantsRange && gap <= idealRange * 1.35) {
     return lateralMove(bot, opponent, tick)
   }
 
-  return moveTowardPoint(bot, opponent.position)
+  return closeMove(bot, opponent.position, tick, pressure >= 1.08)
 }
 
 function runAndGunMove({
@@ -252,6 +274,20 @@ function centerHazardActive(arena: ArenaConfig): boolean {
   return arena.activeHazards.some((hazard) => hazard.toLowerCase().includes('saw'))
 }
 
+function pressureScore(bot: BotRuntime, opponent: BotRuntime): number {
+  const offense =
+    bot.stats.weaponThreat * 1.15 +
+    bot.stats.stability * 0.36 +
+    bot.stats.mass * 0.18 +
+    bot.stats.mobility * 0.18
+  const opponentDefense =
+    opponent.stats.armor * 0.55 +
+    opponent.stats.stability * 0.24 +
+    opponent.stats.mobility * 0.12
+
+  return offense / Math.max(1, opponentDefense)
+}
+
 function isNearCenterHazard(position: Vector3, radius: number): boolean {
   return Math.abs(position[0]) < radius && Math.abs(position[2]) < radius
 }
@@ -288,6 +324,25 @@ function moveTowardPoint(bot: BotRuntime, point: Vector3): TurnCommand['move'] {
   return forwardDelta >= -0.35 ? 'forward' : 'backward'
 }
 
+function closeMove(
+  bot: BotRuntime,
+  point: Vector3,
+  tick: number,
+  urgent: boolean,
+): TurnCommand['move'] {
+  const move = moveTowardPoint(bot, point)
+
+  if (move === 'forward' && urgent && bot.stats.mobility >= 5) {
+    return 'dash_forward'
+  }
+
+  if (move === 'forward' && tick % 5 === 0 && bot.stats.mobility >= 8) {
+    return 'dash_forward'
+  }
+
+  return move
+}
+
 function moveAwayFromPoint(
   bot: BotRuntime,
   point: Vector3,
@@ -315,6 +370,24 @@ function lateralMove(
   }
 
   return currentSide > 0 ? 'turn_left' : 'turn_right'
+}
+
+function flankingMove(
+  bot: BotRuntime,
+  opponent: BotRuntime,
+  tick: number,
+): TurnCommand['move'] {
+  const side = bot.position[2] - opponent.position[2]
+
+  if (Math.abs(side) < 0.85) {
+    return tick % 2 === 0 ? 'circle_right' : 'circle_left'
+  }
+
+  if (Math.abs(side) > 2.2 && tick % 3 === 0) {
+    return moveTowardPoint(bot, opponent.position)
+  }
+
+  return side > 0 ? 'circle_left' : 'circle_right'
 }
 
 function movementImpactMultiplier(command: TurnCommand): number {

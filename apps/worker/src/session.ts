@@ -214,6 +214,10 @@ type SessionResult<T> =
     }
   | RelayErrorResponse
 
+type CombatChatterRequest = AgentChatMessagePostRequest & {
+  role: TeamRole
+}
+
 type RoleBearerAuth = {
   role: StoredRoleState
 }
@@ -1389,6 +1393,7 @@ export class SessionCoordinator {
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
     this.changePhase('replay_phase', 'Replay timeline is available.', now)
     this.changePhase('referee_awards', 'Referee award options are ready.', now)
+    this.appendCombatChatter(result, now)
   }
 
   private changePhase(phase: SessionPhase, message: string, at: string): void {
@@ -1428,6 +1433,18 @@ export class SessionCoordinator {
     this.state.chatLog.push(...messages)
 
     return cloneJson(messages)
+  }
+
+  private appendCombatChatter(result: CombatResult, at: string): void {
+    const chatter = createCombatChatter(result)
+
+    for (const message of chatter) {
+      this.appendChatMessages(this.state.roles[message.role], [message], at)
+    }
+
+    if (chatter.length > 0) {
+      this.touch(at)
+    }
   }
 
   private appendPrivateChatMessages(
@@ -1470,4 +1487,95 @@ export class SessionCoordinator {
       this.state.chatLog.length,
     ].join('|')
   }
+}
+
+function createCombatChatter(result: CombatResult): CombatChatterRequest[] {
+  if (result.winner === 'draw') {
+    return [
+      {
+        role: 'red',
+        kind: 'taunt',
+        message: drawChatter('red', result),
+      },
+      {
+        role: 'blue',
+        kind: 'taunt',
+        message: drawChatter('blue', result),
+      },
+    ]
+  }
+
+  const winner = result.winner
+  const loser = winner === 'red' ? 'blue' : 'red'
+
+  return [
+    {
+      role: winner,
+      kind: 'taunt',
+      message: winnerChatter(winner, loser, result),
+    },
+    {
+      role: loser,
+      kind: 'reflection',
+      message: loserChatter(loser, winner, result),
+    },
+  ]
+}
+
+function winnerChatter(
+  winner: TeamRole,
+  loser: TeamRole,
+  result: CombatResult,
+): string {
+  const loserDamage = result.damage[loser]
+  const winnerDamage = result.damage[winner]
+  const loserHealth = result.remainingHealth[loser]
+
+  if (loserHealth <= 0) {
+    return `${capitalize(winner)} to ${capitalize(loser)}: that was not a fight plan, that was a parts donation.`
+  }
+
+  if (loserDamage >= winnerDamage + 20) {
+    return `${capitalize(winner)} to ${capitalize(loser)}: you kept feeding the weapon; I started charging rent.`
+  }
+
+  if (winnerDamage > loserDamage * 0.8) {
+    return `${capitalize(winner)} to ${capitalize(loser)}: you landed shots, then forgot to survive the answer.`
+  }
+
+  return `${capitalize(winner)} to ${capitalize(loser)}: scoreboard says enough. Bring something that can turn next round.`
+}
+
+function loserChatter(
+  loser: TeamRole,
+  winner: TeamRole,
+  result: CombatResult,
+): string {
+  const loserDamage = result.damage[loser]
+  const winnerDamage = result.damage[winner]
+
+  if (loserDamage <= winnerDamage + 6) {
+    return `${capitalize(loser)} to ${capitalize(winner)}: enjoy the round; the replay shows how thin that win was.`
+  }
+
+  if (result.remainingHealth[loser] <= 0) {
+    return `${capitalize(loser)} to ${capitalize(winner)}: fine, that hit was ugly. I am buying drive control before you get proud.`
+  }
+
+  return `${capitalize(loser)} to ${capitalize(winner)}: talk now; the next build is aimed directly at that weakness.`
+}
+
+function drawChatter(role: TeamRole, result: CombatResult): string {
+  const opponent = role === 'red' ? 'blue' : 'red'
+  const dealt = result.damage[opponent]
+
+  if (dealt > 0) {
+    return `${capitalize(role)} to ${capitalize(opponent)}: you survived ${dealt} damage and still could not make it count.`
+  }
+
+  return `${capitalize(role)} to ${capitalize(opponent)}: next round, try bringing a weapon instead of a parking brake.`
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
 }

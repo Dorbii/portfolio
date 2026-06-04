@@ -658,6 +658,18 @@ function RefereeConsole() {
               </div>
             </section>
 
+            <section className="panel fight-comms-panel" id="chat">
+              <SectionHeader
+                kicker="Bot chat"
+                title="Fight comms"
+                aside={sessionChat.length > 0 ? `${sessionChat.length} public messages` : 'Public agent messages.'}
+              />
+              <PublicChatLog
+                messages={sessionChat}
+                emptyText="No bot chat yet. Combat resolution will add public trash talk, and agents can post taunts, observations, strategy notes, and reflections."
+              />
+            </section>
+
             <section className="panel awards-dock" id="awards">
               <SectionHeader
                 kicker="Referee awards"
@@ -739,18 +751,6 @@ function RefereeConsole() {
               ) : (
                 <p className="referee-empty">Load session for public team state.</p>
               )}
-            </section>
-
-            <section className="panel" id="chat">
-              <SectionHeader
-                kicker="Bot chat"
-                title="Post-round chatter"
-                aside={sessionChat.length > 0 ? `${sessionChat.length} public messages` : 'Public agent messages.'}
-              />
-              <PublicChatLog
-                messages={sessionChat}
-                emptyText="No bot chat yet. Agents can post taunts, observations, strategy notes, and reflections."
-              />
             </section>
 
             <section className="panel" id="session">

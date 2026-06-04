@@ -402,6 +402,17 @@ button.active {
   height: clamp(500px, 61vh, 720px);
 }
 
+.fight-comms-panel .chat-log {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  max-height: 282px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.fight-comms-panel .chat-message {
+  min-height: 118px;
+}
+
 .replay-placeholder {
   min-height: 480px;
   display: grid;
@@ -2256,6 +2267,61 @@ textarea:focus-visible {
 .plan-metric.tone-danger {
   border-color: rgba(255, 92, 108, 0.5);
   background: rgba(142, 47, 56, 0.12);
+}
+
+.assembly-bay-panel {
+  min-width: 0;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(238, 242, 243, 0.1);
+}
+
+.assembly-state {
+  min-height: 26px;
+  padding: 5px 9px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(93, 210, 146, 0.28);
+  border-radius: 6px;
+  color: #b7f3cc;
+  background: rgba(93, 210, 146, 0.08);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bot-assembly-stage {
+  position: relative;
+  min-width: 0;
+  height: clamp(260px, 32vh, 430px);
+  min-height: 0;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(143, 208, 255, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(19, 27, 33, 0.52), rgba(4, 6, 8, 0.94)),
+    #050708;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+.bot-assembly-stage::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 28%, transparent 72%, rgba(92, 145, 255, 0.08)),
+    linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.24));
+  content: "";
+}
+
+.bot-assembly-stage canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
 }
 
 .plan-workbench-grid {

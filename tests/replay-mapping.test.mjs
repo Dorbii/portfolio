@@ -88,8 +88,8 @@ test('replay mapping clamps time and interpolates active moves', () => {
 
   const frame = buildReplayFrame(timeline, 1.41)
 
-  assert.ok(frame.bots.red.position[0] > 2.8)
-  assert.ok(frame.bots.red.position[0] < 3.2)
+  assert.ok(frame.bots.red.position[0] > 1.3)
+  assert.ok(frame.bots.red.position[0] < 1.6)
   assert.equal(frame.bots.red.status, 'active')
 })
 

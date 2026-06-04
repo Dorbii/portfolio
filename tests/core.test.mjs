@@ -571,6 +571,8 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(blueSubmission.value.publicState.replayAvailable, true)
   assert.equal(blueSubmission.value.publicState.lastResult.winner, 'draw')
   assert.equal(blueSubmission.value.publicState.awardOptions.length, 3)
+  assert.ok(blueSubmission.value.publicState.chatLog.length >= 3)
+  assert.ok(blueSubmission.value.publicState.chatLog.some((message) => message.kind === 'taunt'))
 
   const replay = session.getReplay()
 

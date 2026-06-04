@@ -49,7 +49,7 @@ export type ReplayVisualFrame = {
   endState?: ReplayEndState
 }
 
-const MOVE_DURATION = 0.82
+const MOVE_DURATION = 1
 const WEAPON_WINDOW = 0.75
 const IMPACT_WINDOW = 1.35
 const DEBRIS_WINDOW = 1.9
@@ -154,7 +154,7 @@ function resolveBotState(
     const progress = (time - activeMove.t) / MOVE_DURATION
     state = {
       ...state,
-      position: lerpVector(activeMove.from, activeMove.to, easeOut(progress)),
+      position: lerpVector(activeMove.from, activeMove.to, easeInOut(progress)),
       rotationY: headingForMove(activeMove.from, activeMove.to, state.rotationY),
     }
   }
@@ -360,10 +360,10 @@ function headingForMove(from: Vector3, to: Vector3, fallback: number): number {
   return Math.atan2(dx, dz)
 }
 
-function easeOut(progress: number): number {
+function easeInOut(progress: number): number {
   const clamped = Math.min(Math.max(progress, 0), 1)
 
-  return 1 - (1 - clamped) * (1 - clamped)
+  return clamped * clamped * (3 - 2 * clamped)
 }
 
 function degreesToRadians(degrees: number): number {

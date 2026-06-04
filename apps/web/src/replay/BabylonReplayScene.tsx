@@ -1354,16 +1354,40 @@ function setCamera(
   time: number,
   shake: number,
 ): void {
-  camera.setTarget(target.clone().add(
+  const desiredTarget = target.clone().add(
     new Vector3(
       Math.sin(time * 30) * shake,
       Math.sin(time * 23) * shake * 0.2,
       Math.cos(time * 30) * shake,
     ),
-  ))
-  camera.alpha = alpha + Math.sin(time * 9) * shake * 0.05
-  camera.beta = beta + Math.cos(time * 8) * shake * 0.03
-  camera.radius = Math.max(4.1, radius + shake * 0.8)
+  )
+  const desiredAlpha = alpha + Math.sin(time * 9) * shake * 0.05
+  const desiredBeta = beta + Math.cos(time * 8) * shake * 0.03
+  const desiredRadius = Math.max(4.1, radius + shake * 0.8)
+  const settle = shake > 0 ? 0.36 : 0.2
+
+  camera.setTarget(Vector3.Lerp(camera.getTarget(), desiredTarget, settle))
+  camera.alpha = lerpAngle(camera.alpha, desiredAlpha, settle)
+  camera.beta = lerpNumber(camera.beta, desiredBeta, settle)
+  camera.radius = lerpNumber(camera.radius, desiredRadius, settle)
+}
+
+function lerpNumber(from: number, to: number, amount: number): number {
+  return from + (to - from) * amount
+}
+
+function lerpAngle(from: number, to: number, amount: number): number {
+  let delta = to - from
+
+  while (delta > Math.PI) {
+    delta -= Math.PI * 2
+  }
+
+  while (delta < -Math.PI) {
+    delta += Math.PI * 2
+  }
+
+  return from + delta * amount
 }
 
 function createSceneMaterial(
