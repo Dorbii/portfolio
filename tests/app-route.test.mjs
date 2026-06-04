@@ -25,7 +25,7 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(appSource.includes('ReplayOutcome'))
   assert.ok(appSource.includes('submitRefereeAwards'))
   assert.ok(appSource.includes('resetRoleClaim'))
-  assert.ok(appSource.includes('Create capability token'))
+  assert.equal(appSource.includes('Create capability token'), false)
   assert.ok(appSource.includes('Referee capability token'))
   assert.ok(appSource.includes('createExternalAgentBriefMarkdown'))
   assert.ok(appSource.includes('Copy brief'))

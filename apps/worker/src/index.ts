@@ -39,7 +39,6 @@ export type DurableObjectNamespace = {
 export type WorkerEnv = {
   AGENT_ARENA_SESSION?: DurableObjectNamespace
   AGENT_ARENA_ALLOWED_ORIGINS?: string
-  AGENT_ARENA_CREATE_TOKEN?: string
 }
 
 const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
@@ -312,40 +311,6 @@ function bearerToken(request: Request): string | undefined {
   return match?.[1]
 }
 
-function configuredCreateToken(env: WorkerEnv): string | undefined {
-  const token = env.AGENT_ARENA_CREATE_TOKEN?.trim()
-
-  return token ? token : undefined
-}
-
-function requireCreateToken(request: Request, env: WorkerEnv): Response | undefined {
-  const expectedToken = configuredCreateToken(env)
-
-  if (!expectedToken) {
-    return errorResponse(
-      500,
-      'WORKER_NOT_CONFIGURED',
-      'AGENT_ARENA_CREATE_TOKEN secret is required for session creation.',
-      undefined,
-      request,
-      env,
-    )
-  }
-
-  if (bearerToken(request) !== expectedToken) {
-    return errorResponse(
-      401,
-      'INVALID_TOKEN',
-      'Session creation capability token is missing or invalid.',
-      undefined,
-      request,
-      env,
-    )
-  }
-
-  return undefined
-}
-
 function sessionRoute(pathname: string):
   | {
       sessionId: string
@@ -451,12 +416,6 @@ export async function handleWorkerRequest(
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
-    const createTokenError = requireCreateToken(request, env)
-
-    if (createTokenError) {
-      return createTokenError
-    }
-
     const body = await readJsonBody(request)
 
     if (isBodyTooLarge(body)) {
@@ -520,12 +479,8 @@ export async function handleWorkerRequest(
       )
     }
 
-    if (route.action === 'create' && request.method === 'POST') {
-      const createTokenError = requireCreateToken(request, env)
-
-      if (createTokenError) {
-        return createTokenError
-      }
+    if (route.action === 'create') {
+      return errorResponse(404, 'INVALID_ACTION', 'Unsupported session action.', undefined, request, env)
     }
 
     return forwardToSessionObject(request, env, route.sessionId)

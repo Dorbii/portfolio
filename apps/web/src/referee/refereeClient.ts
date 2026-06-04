@@ -18,7 +18,6 @@ export const POLL_INTERVAL_MS = 1_500
 export const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 
 const SESSION_STORAGE_KEY_PREFIX = 'agent-arena:referee-console'
-const CREATE_TOKEN_STORAGE_KEY_PREFIX = 'agent-arena:create-token'
 
 type TokenStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
@@ -75,15 +74,9 @@ export function buildInviteUrl({
   return `${DEFAULT_ARENA_SITE_BASE}/agent#session=${sessionId}&role=${role}&claimToken=${claimToken}&api=${apiBase}`
 }
 
-export async function createSession(
-  apiBase: string,
-  createToken: string,
-): Promise<CreateSessionResponse> {
+export async function createSession(apiBase: string): Promise<CreateSessionResponse> {
   return requestJson<CreateSessionResponse>(`${apiBase}/sessions`, {
     method: 'POST',
-    headers: {
-      authorization: `Bearer ${createToken}`,
-    },
     body: JSON.stringify({}),
   })
 }
@@ -230,37 +223,12 @@ export function clearStoredSession(storage: TokenStorage, apiBase: string, sessi
   storage.removeItem(storageKey(apiBase, sessionId))
 }
 
-export function readStoredCreateToken(
-  storage: TokenStorage,
-  apiBase: string,
-): string | undefined {
-  const token = storage.getItem(createTokenStorageKey(apiBase))?.trim()
-
-  return token || undefined
-}
-
-export function writeStoredCreateToken(
-  storage: TokenStorage,
-  apiBase: string,
-  createToken: string,
-) {
-  storage.setItem(createTokenStorageKey(apiBase), createToken)
-}
-
-export function clearStoredCreateToken(storage: TokenStorage, apiBase: string) {
-  storage.removeItem(createTokenStorageKey(apiBase))
-}
-
 export function isValidSessionId(value: string): boolean {
   return SESSION_ID_PATTERN.test(normalizeSessionId(value))
 }
 
 function storageKey(apiBase: string, sessionId: string): string {
   return `${SESSION_STORAGE_KEY_PREFIX}:${apiBase}:${sessionId}`
-}
-
-function createTokenStorageKey(apiBase: string): string {
-  return `${CREATE_TOKEN_STORAGE_KEY_PREFIX}:${apiBase}`
 }
 
 function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {

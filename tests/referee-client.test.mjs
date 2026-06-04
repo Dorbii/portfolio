@@ -13,9 +13,6 @@ import {
   writeStoredSession,
   readStoredSession,
   clearStoredSession,
-  writeStoredCreateToken,
-  readStoredCreateToken,
-  clearStoredCreateToken,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
 
 function jsonResponse(value, init = {}) {
@@ -69,17 +66,16 @@ test('referee invite URLs use production defaults and claimToken', () => {
 })
 
 test('referee createSession posts to /sessions', async () => {
-  const createToken = 'create_referee_token'
   const { calls, restore } = withFetchStub(() =>
     jsonResponse({ sessionId: 's_demo', phase: 'submission_phase', invites: [], refereeToken: 'r_token', publicState: {} }),
   )
 
   try {
-    await createSession(DEFAULT_ARENA_API_BASE, createToken)
+    await createSession(DEFAULT_ARENA_API_BASE)
     assert.equal(calls.length, 1)
     assert.equal(calls[0].method, 'POST')
     assert.equal(calls[0].url, `${DEFAULT_ARENA_API_BASE}/sessions`)
-    assert.equal(calls[0].headers.get('authorization'), `Bearer ${createToken}`)
+    assert.equal(calls[0].headers.get('authorization'), null)
     assert.equal(calls[0].body, '{}')
   } finally {
     restore()
@@ -284,28 +280,4 @@ test('referee session storage drops expired or malformed records', () => {
   assert.equal(readStoredSession(mockStorage, apiBase, sessionId), null)
   assert.equal(storage.has(key), false)
   assert.equal(calls.some(([op, storedKey]) => op === 'remove' && storedKey === key), true)
-})
-
-test('referee create token storage is scoped by api base', () => {
-  const storage = new Map()
-  const apiBase = DEFAULT_ARENA_API_BASE
-  const otherApiBase = 'https://arena-api.preview.test'
-  const mockStorage = {
-    getItem: (key) => storage.get(key) ?? null,
-    setItem: (key, value) => {
-      storage.set(key, value)
-    },
-    removeItem: (key) => {
-      storage.delete(key)
-    },
-  }
-
-  writeStoredCreateToken(mockStorage, apiBase, 'create_ref')
-
-  assert.equal(readStoredCreateToken(mockStorage, apiBase), 'create_ref')
-  assert.equal(readStoredCreateToken(mockStorage, otherApiBase), undefined)
-
-  clearStoredCreateToken(mockStorage, apiBase)
-
-  assert.equal(readStoredCreateToken(mockStorage, apiBase), undefined)
 })

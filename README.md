@@ -83,9 +83,15 @@ Complete this before production traffic:
   - API: `arena-api.dorbii.net`
 - [ ] Add a Worker project and configure Durable Object binding + namespace to match `wrangler` config.
 - [ ] Add Worker routes/custom domain and CORS origin for Pages domain + localhost dev origins.
-- [ ] Set the required Worker session creation secret:
-  - `wrangler secret put AGENT_ARENA_CREATE_TOKEN`
-- [ ] Wire required environment variables/secrets and keep secrets out of source control.
+- [ ] Add a Cloudflare WAF rate limiting rule for public session creation.
+  - Free-plan-safe match expression: `(http.request.uri.path eq "/sessions")`
+  - If the active Cloudflare plan supports host/method fields in rate limiting
+    expressions, use:
+    `(http.host eq "arena-api.dorbii.net" and http.request.method eq "POST" and http.request.uri.path eq "/sessions")`
+  - Count by source IP, account for CORS preflight requests if using the
+    path-only rule, start with a low per-minute threshold for a portfolio demo,
+    and tune from real traffic.
+- [ ] Wire required environment variables and keep secrets out of source control.
 - [ ] Deploy staging, then production.
 - [ ] Run an API smoke test against staging before production.
 
@@ -96,6 +102,7 @@ If any row above remains unchecked, the deployment should be treated as incomple
 Assumptions for MVP cost safety are:
 
 - Turn-based API calls only.
+- Cloudflare edge rate limiting on `POST /sessions`.
 - Compact JSON payloads and short-lived session data.
 - Compact event logs.
 - No WebSocket by default.
@@ -126,8 +133,10 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
 - Turn plans must use generated controls.
 - Resolver output is deterministic for identical seed and input.
 - Replay output is compact event data mapped to deterministic Babylon frames.
-- Session creation requires a referee create capability token and returns
-  red/blue claim capabilities to the creator only.
+- Session creation is public self-service and returns red/blue claim
+  capabilities to the creator only.
+- Public session creation must be protected by Cloudflare WAF/rate limiting
+  before production traffic.
 - Claimed roles receive bearer tokens for private state and plan submission.
 - Stored claim and role tokens are hashed before Durable Object persistence.
 - Sessions expire after a bounded TTL.
@@ -151,7 +160,7 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
 
 ```txt
 GET  /agent-spec.json
-POST /sessions                     Authorization: Bearer <create token>
+POST /sessions
 POST /sessions/:sessionId/claim
 GET  /sessions/:sessionId/public
 GET  /sessions/:sessionId/state       Authorization: Bearer <role token>
@@ -176,10 +185,12 @@ local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
 - Wrangler config is checked in, but real Cloudflare project binding,
   authentication, domain routing, and deployment smoke tests are not done.
 - Phase 7 deployment hardening is incomplete: Cloudflare account/plan checks,
-  Pages+Worker project setup, route/CORS verification, and production smoke
-  testing are still pending.
-- Auth is still capability-token MVP auth, not production identity, revocation,
-  account security, or a public self-service lobby.
+  Pages+Worker project setup, session-creation rate limiting, route/CORS
+  verification, and production smoke testing are still pending.
+- Role and referee auth are still capability-token MVP auth, not production
+  identity, revocation, or account security.
+- Public session creation depends on Cloudflare WAF/rate limiting for abuse
+  control; the Worker does not authenticate `POST /sessions`.
 - The root web UI is still local mock data; only `/agent` and Worker route tests
   are backend-connected.
 - Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.

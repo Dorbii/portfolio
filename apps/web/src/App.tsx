@@ -23,13 +23,10 @@ import {
   normalizeSessionId,
   parseSessionIdFromLocation,
   resetRoleClaim,
-  clearStoredCreateToken,
-  readStoredCreateToken,
   readStoredSession,
   setSessionIdInUrl,
   submitRefereeAwards,
   toUserMessage,
-  writeStoredCreateToken,
   writeStoredSession,
   type ReplayPayload,
 } from './referee/refereeClient'
@@ -56,9 +53,6 @@ function RefereeConsole() {
   const [activeSessionId, setActiveSessionId] = useState(() => parseSessionIdFromLocation())
   const [publicSession, setPublicSession] = useState<PublicSessionState | null>(null)
   const [invites, setInvites] = useState<RoleInvite[]>([])
-  const [createCapabilityToken, setCreateCapabilityToken] = useState(
-    () => readStoredCreateToken(window.sessionStorage, DEFAULT_ARENA_API_BASE) ?? '',
-  )
   const [storedRefereeToken, setStoredRefereeToken] = useState('')
   const [manualRefereeToken, setManualRefereeToken] = useState('')
   const [loadState, setLoadState] = useState<SessionLoadState>('idle')
@@ -281,21 +275,12 @@ function RefereeConsole() {
   }, [activeSessionId, apiBase, publicSession?.replayAvailable, publicSession?.round])
 
   const createNewSession = useCallback(async () => {
-    const createToken = createCapabilityToken.trim()
-
-    if (!createToken) {
-      setError('Create capability token is required to create sessions.')
-      return
-    }
-
     setLoadState('busy')
     setError('')
     setMessage('')
 
     try {
-      writeStoredCreateToken(window.sessionStorage, apiBase, createToken)
-
-      const response = await createSession(apiBase, createToken)
+      const response = await createSession(apiBase)
 
       skipNextActiveLoadRef.current = true
       setActiveSessionId(response.sessionId)
@@ -318,7 +303,7 @@ function RefereeConsole() {
     } finally {
       setLoadState('idle')
     }
-  }, [apiBase, createCapabilityToken])
+  }, [apiBase])
 
   const submitAwards = useCallback(async () => {
     if (!activeSessionId) {
@@ -590,27 +575,6 @@ function RefereeConsole() {
               disabled={loadState === 'busy'}
             >
               {loadState === 'busy' ? 'Creating...' : 'Create new session'}
-            </button>
-            <label>
-              Create capability token
-              <input
-                type="password"
-                value={createCapabilityToken}
-                onChange={(event) => setCreateCapabilityToken(event.target.value)}
-                placeholder="Required to create sessions"
-                disabled={loadState === 'busy'}
-              />
-            </label>
-            <button
-              type="button"
-              disabled={!createCapabilityToken.trim()}
-              onClick={() => {
-                clearStoredCreateToken(window.sessionStorage, apiBase)
-                setCreateCapabilityToken('')
-                setMessage('Create token cleared for this tab.')
-              }}
-            >
-              Clear create token
             </button>
             <label>
               Referee capability token
