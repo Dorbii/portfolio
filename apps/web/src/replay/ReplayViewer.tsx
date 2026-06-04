@@ -19,8 +19,8 @@ type ReplayViewerProps = {
 }
 
 const cameraOptions: { label: string; value: CameraPreset }[] = [
-  { label: 'Wide', value: 'wide' },
   { label: 'Broadcast', value: 'broadcast' },
+  { label: 'Wide', value: 'wide' },
   { label: 'Red follow', value: 'red_follow' },
   { label: 'Blue follow', value: 'blue_follow' },
   { label: 'Impact', value: 'impact' },
@@ -33,7 +33,7 @@ export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerPro
   const [time, setTime] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [cameraPreset, setCameraPreset] = useState<CameraPreset>('wide')
+  const [cameraPreset, setCameraPreset] = useState<CameraPreset>('broadcast')
   const frame = useMemo(() => buildReplayFrame(timeline, time), [timeline, time])
   const sortedEvents = useMemo(
     () => sortTimelineEvents(timeline.events),

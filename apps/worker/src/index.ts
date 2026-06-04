@@ -39,10 +39,14 @@ export type DurableObjectNamespace = {
 export type WorkerEnv = {
   AGENT_ARENA_SESSION?: DurableObjectNamespace
   AGENT_ARENA_ALLOWED_ORIGINS?: string
+  AGENT_ARENA_CREATE_TOKEN?: string
 }
 
 const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
 const LOCAL_DEV_CORS_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+const MAX_JSON_BODY_BYTES = 64 * 1024
+const BODY_TOO_LARGE = Symbol('BODY_TOO_LARGE')
+const textEncoder = new TextEncoder()
 
 function normalizeConfiguredOrigin(value: string): string | undefined {
   const trimmed = value.trim()
@@ -194,8 +198,28 @@ function errorResponse(
   )
 }
 
-async function readJsonBody(request: Request): Promise<unknown> {
+function contentLengthTooLarge(request: Request): boolean {
+  const contentLength = request.headers.get('content-length')
+
+  if (!contentLength) {
+    return false
+  }
+
+  const parsedLength = Number(contentLength)
+
+  return Number.isFinite(parsedLength) && parsedLength > MAX_JSON_BODY_BYTES
+}
+
+async function readJsonBody(request: Request): Promise<unknown | typeof BODY_TOO_LARGE> {
+  if (contentLengthTooLarge(request)) {
+    return BODY_TOO_LARGE
+  }
+
   const text = await request.text()
+
+  if (textEncoder.encode(text).byteLength > MAX_JSON_BODY_BYTES) {
+    return BODY_TOO_LARGE
+  }
 
   if (text.trim().length === 0) {
     return {}
@@ -234,6 +258,40 @@ function bearerToken(request: Request): string | undefined {
   return match?.[1]
 }
 
+function configuredCreateToken(env: WorkerEnv): string | undefined {
+  const token = env.AGENT_ARENA_CREATE_TOKEN?.trim()
+
+  return token ? token : undefined
+}
+
+function requireCreateToken(request: Request, env: WorkerEnv): Response | undefined {
+  const expectedToken = configuredCreateToken(env)
+
+  if (!expectedToken) {
+    return errorResponse(
+      500,
+      'WORKER_NOT_CONFIGURED',
+      'AGENT_ARENA_CREATE_TOKEN secret is required for session creation.',
+      undefined,
+      request,
+      env,
+    )
+  }
+
+  if (bearerToken(request) !== expectedToken) {
+    return errorResponse(
+      401,
+      'INVALID_TOKEN',
+      'Session creation capability token is missing or invalid.',
+      undefined,
+      request,
+      env,
+    )
+  }
+
+  return undefined
+}
+
 function sessionRoute(pathname: string):
   | {
       sessionId: string
@@ -258,6 +316,21 @@ function sessionRoute(pathname: string):
     sessionId,
     action: match[2],
   }
+}
+
+function isBodyTooLarge(value: unknown): value is typeof BODY_TOO_LARGE {
+  return value === BODY_TOO_LARGE
+}
+
+function bodyTooLargeResponse(request?: Request, env?: WorkerEnv): Response {
+  return errorResponse(
+    413,
+    'INVALID_REQUEST',
+    `JSON request body must be ${MAX_JSON_BODY_BYTES} bytes or smaller.`,
+    undefined,
+    request,
+    env,
+  )
 }
 
 function statusForRelayError(error: RelayErrorResponse['error']): number {
@@ -324,7 +397,17 @@ export async function handleWorkerRequest(
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
+    const createTokenError = requireCreateToken(request, env)
+
+    if (createTokenError) {
+      return createTokenError
+    }
+
     const body = await readJsonBody(request)
+
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse(request, env)
+    }
 
     if (body === undefined || !isRecord(body)) {
       return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.', undefined, request, env)
@@ -381,6 +464,14 @@ export async function handleWorkerRequest(
         request,
         env,
       )
+    }
+
+    if (route.action === 'create' && request.method === 'POST') {
+      const createTokenError = requireCreateToken(request, env)
+
+      if (createTokenError) {
+        return createTokenError
+      }
     }
 
     return forwardToSessionObject(request, env, route.sessionId)
@@ -479,6 +570,10 @@ export class AgentArenaSession {
 
     const body = await readJsonBody(request)
 
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
+
     if (body === undefined || !isRecord(body)) {
       return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.')
     }
@@ -508,6 +603,10 @@ export class AgentArenaSession {
     coordinator: SessionCoordinator,
   ): Promise<Response> {
     const body = await readJsonBody(request)
+
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
 
     if (body === undefined || !isRecord(body)) {
       return errorResponse(400, 'BAD_JSON', 'Claim request body must be JSON.')
@@ -540,6 +639,10 @@ export class AgentArenaSession {
   ): Promise<Response> {
     const body = await readJsonBody(request)
 
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
+
     if (body === undefined) {
       return errorResponse(400, 'BAD_JSON', 'Round plan body must be JSON.')
     }
@@ -560,6 +663,10 @@ export class AgentArenaSession {
   ): Promise<Response> {
     const body = await readJsonBody(request)
 
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
+
     if (body === undefined) {
       return errorResponse(400, 'BAD_JSON', 'Referee awards body must be JSON.')
     }
@@ -579,6 +686,10 @@ export class AgentArenaSession {
     coordinator: SessionCoordinator,
   ): Promise<Response> {
     const body = await readJsonBody(request)
+
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
 
     if (body === undefined) {
       return errorResponse(400, 'BAD_JSON', 'Role reset body must be JSON.')

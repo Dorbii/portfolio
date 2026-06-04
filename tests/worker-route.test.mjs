@@ -38,6 +38,7 @@ const validSpinnerSubmission = {
     ],
   },
 }
+const CREATE_TOKEN = 'create_test_token'
 
 function cloneJson(value) {
   return JSON.parse(JSON.stringify(value))
@@ -104,6 +105,7 @@ class FakeDurableObjectNamespace {
 function createEnv() {
   return {
     AGENT_ARENA_SESSION: new FakeDurableObjectNamespace(),
+    AGENT_ARENA_CREATE_TOKEN: CREATE_TOKEN,
   }
 }
 
@@ -179,7 +181,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
       (action) =>
         action.name === 'create_session' &&
         action.method === 'POST' &&
-        action.path === '/sessions',
+        action.path === '/sessions' &&
+        action.auth === 'referee create capability token',
     ),
   )
   assert.ok(
@@ -265,20 +268,67 @@ test('CORS allows local dev and configured origins without wildcard fallback', a
 })
 
 test('POST /sessions returns WORKER_NOT_CONFIGURED without the Durable Object binding', async () => {
-  const { response, json } = await route({}, '/sessions', {
-    method: 'POST',
-    body: { sessionId: 's_missing_binding' },
-  })
+  const { response, json } = await route(
+    {
+      AGENT_ARENA_CREATE_TOKEN: CREATE_TOKEN,
+    },
+    '/sessions',
+    {
+      method: 'POST',
+      token: CREATE_TOKEN,
+      body: { sessionId: 's_missing_binding' },
+    },
+  )
 
   assert.equal(response.status, 500)
   assert.equal(json.ok, false)
   assert.equal(json.error.code, 'WORKER_NOT_CONFIGURED')
 })
 
+test('POST /sessions requires the create capability token', async () => {
+  const env = createEnv()
+  const missingToken = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId: 's_missing_create_token' },
+  })
+  const badToken = await route(env, '/sessions', {
+    method: 'POST',
+    token: 'wrong-token',
+    body: { sessionId: 's_bad_create_token' },
+  })
+  const directCreate = await route(env, '/sessions/s_direct_create/create', {
+    method: 'POST',
+    body: { sessionId: 's_direct_create' },
+  })
+
+  assert.equal(missingToken.response.status, 401)
+  assert.equal(missingToken.json.error.code, 'INVALID_TOKEN')
+  assert.equal(badToken.response.status, 401)
+  assert.equal(badToken.json.error.code, 'INVALID_TOKEN')
+  assert.equal(directCreate.response.status, 401)
+  assert.equal(directCreate.json.error.code, 'INVALID_TOKEN')
+})
+
+test('POST /sessions rejects oversized JSON bodies before validation', async () => {
+  const env = createEnv()
+  const oversized = await route(env, '/sessions', {
+    method: 'POST',
+    token: CREATE_TOKEN,
+    body: {
+      sessionId: 's_oversized_body',
+      seed: 'x'.repeat(70_000),
+    },
+  })
+
+  assert.equal(oversized.response.status, 413)
+  assert.equal(oversized.json.error.code, 'INVALID_REQUEST')
+})
+
 test('worker rejects invalid session ids before Durable Object routing', async () => {
   const env = createEnv()
   const created = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: { sessionId: 'not valid' },
   })
   const routed = await route(env, '/sessions/not%20valid/public')
@@ -296,6 +346,7 @@ test('worker validates create-session payload shape before Durable Object routin
   const env = createEnv()
   const invalidTtl = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: {
       sessionId: 's_invalid_ttl',
       ttlSeconds: '3600',
@@ -303,6 +354,7 @@ test('worker validates create-session payload shape before Durable Object routin
   })
   const invalidArena = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: {
       sessionId: 's_invalid_arena',
       arena: {
@@ -331,6 +383,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   const sessionId = 's_route_integration'
   const created = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: { sessionId, seed: 'route-seed' },
   })
 
@@ -342,6 +395,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   const duplicate = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: { sessionId, seed: 'route-seed' },
   })
 
@@ -615,6 +669,7 @@ test('worker returns expired and rate-limited statuses through the Durable Objec
   const sessionId = 's_route_limits'
   const created = await route(env, '/sessions', {
     method: 'POST',
+    token: CREATE_TOKEN,
     body: { sessionId, seed: 'route-limits' },
   })
 

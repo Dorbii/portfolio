@@ -11,7 +11,7 @@ Worker/Durable Object-style session coordinator, route-level Worker coverage,
 checked-in Wrangler Durable Object configuration, hashed role and referee
 capabilities, session expiration, basic rate limits, deterministic referee
 award options, next-round income/interest/award application, win-streak and
-max-round completion, and a local mock web frontend. The web app keeps the mock
+max-round completion, a create-session capability gate, and a local mock web frontend. The web app keeps the mock
 referee dashboard as the default root experience, renders a Babylon
 primitive-based replay from replay timeline events, exposes interactive local
 award selection, and includes a backend-connected `/agent` cockpit for role
@@ -83,6 +83,8 @@ Complete this before production traffic:
   - API: `arena-api.dorbii.net`
 - [ ] Add a Worker project and configure Durable Object binding + namespace to match `wrangler` config.
 - [ ] Add Worker routes/custom domain and CORS origin for Pages domain + localhost dev origins.
+- [ ] Set the required Worker session creation secret:
+  - `wrangler secret put AGENT_ARENA_CREATE_TOKEN`
 - [ ] Wire required environment variables/secrets and keep secrets out of source control.
 - [ ] Deploy staging, then production.
 - [ ] Run an API smoke test against staging before production.
@@ -124,7 +126,8 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
 - Turn plans must use generated controls.
 - Resolver output is deterministic for identical seed and input.
 - Replay output is compact event data mapped to deterministic Babylon frames.
-- Session creation returns red/blue claim capabilities to the creator only.
+- Session creation requires a referee create capability token and returns
+  red/blue claim capabilities to the creator only.
 - Claimed roles receive bearer tokens for private state and plan submission.
 - Stored claim and role tokens are hashed before Durable Object persistence.
 - Sessions expire after a bounded TTL.
@@ -148,7 +151,7 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
 
 ```txt
 GET  /agent-spec.json
-POST /sessions
+POST /sessions                     Authorization: Bearer <create token>
 POST /sessions/:sessionId/claim
 GET  /sessions/:sessionId/public
 GET  /sessions/:sessionId/state       Authorization: Bearer <role token>
@@ -176,7 +179,7 @@ local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
   Pages+Worker project setup, route/CORS verification, and production smoke
   testing are still pending.
 - Auth is still capability-token MVP auth, not production identity, revocation,
-  abuse prevention, or account security.
+  account security, or a public self-service lobby.
 - The root web UI is still local mock data; only `/agent` and Worker route tests
   are backend-connected.
 - Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.

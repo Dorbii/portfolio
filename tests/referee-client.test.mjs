@@ -13,6 +13,9 @@ import {
   writeStoredSession,
   readStoredSession,
   clearStoredSession,
+  writeStoredCreateToken,
+  readStoredCreateToken,
+  clearStoredCreateToken,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
 
 function jsonResponse(value, init = {}) {
@@ -66,15 +69,17 @@ test('referee invite URLs use production defaults and claimToken', () => {
 })
 
 test('referee createSession posts to /sessions', async () => {
+  const createToken = 'create_referee_token'
   const { calls, restore } = withFetchStub(() =>
     jsonResponse({ sessionId: 's_demo', phase: 'submission_phase', invites: [], refereeToken: 'r_token', publicState: {} }),
   )
 
   try {
-    await createSession(DEFAULT_ARENA_API_BASE)
+    await createSession(DEFAULT_ARENA_API_BASE, createToken)
     assert.equal(calls.length, 1)
     assert.equal(calls[0].method, 'POST')
     assert.equal(calls[0].url, `${DEFAULT_ARENA_API_BASE}/sessions`)
+    assert.equal(calls[0].headers.get('authorization'), `Bearer ${createToken}`)
     assert.equal(calls[0].body, '{}')
   } finally {
     restore()
@@ -202,17 +207,15 @@ test('referee resetRoleClaim posts /reset-role with bearer token', async () => {
   }
 })
 
-test('referee session storage persists by api and session, not by URL token', () => {
+test('referee session storage persists only referee token until session expiry', () => {
   const storage = new Map()
   const sessionId = 's_demo'
   const apiBase = DEFAULT_ARENA_API_BASE
   const data = {
     refereeToken: 'r_ref',
-    invites: [
-      { role: 'red', claimToken: 'cap_red', claimPath: '#session=s_demo&role=red&claimToken=cap_red&api=https://arena-api.dorbii.net' },
-      { role: 'blue', claimToken: 'cap_blue', claimPath: '#session=s_demo&role=blue&claimToken=cap_blue&api=https://arena-api.dorbii.net' },
-    ],
+    expiresAt: '9999-01-01T00:00:00.000Z',
   }
+  const invite = { role: 'red', claimToken: 'cap_red' }
   const calls = []
   const mockStorage = {
     getItem: (key) => {
@@ -232,8 +235,8 @@ test('referee session storage persists by api and session, not by URL token', ()
   writeStoredSession(mockStorage, apiBase, sessionId, data)
   const loaded = readStoredSession(mockStorage, apiBase, sessionId)
   const inviteLink = buildInviteUrl({
-    role: data.invites[0].role,
-    claimToken: data.invites[0].claimToken,
+    role: invite.role,
+    claimToken: invite.claimToken,
     sessionId,
     apiBase,
   })
@@ -241,7 +244,8 @@ test('referee session storage persists by api and session, not by URL token', ()
   assert.equal(loaded?.sessionId, sessionId)
   assert.equal(loaded?.apiBase, apiBase)
   assert.equal(loaded?.refereeToken, data.refereeToken)
-  assert.deepEqual(loaded?.invites, data.invites)
+  assert.equal(loaded?.expiresAt, data.expiresAt)
+  assert.equal(JSON.stringify(storage.get(`agent-arena:referee-console:${apiBase}:${sessionId}`)).includes('cap_red'), false)
   assert.equal(calls.some(([op, key]) => op === 'set' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
   assert.equal(inviteLink.includes('invite='), false)
   assert.equal(inviteLink.includes('refereeToken'), false)
@@ -249,7 +253,7 @@ test('referee session storage persists by api and session, not by URL token', ()
   assert.equal(calls.some(([op, key]) => op === 'remove' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
 })
 
-test('referee session storage rejects malformed invite records', () => {
+test('referee session storage drops expired or malformed records', () => {
   const storage = new Map()
   const sessionId = 's_demo'
   const apiBase = DEFAULT_ARENA_API_BASE
@@ -274,10 +278,34 @@ test('referee session storage rejects malformed invite records', () => {
     sessionId,
     apiBase,
     refereeToken: 'r_ref',
-    invites: [{ role: 'red', claimPath: '/sessions/s_demo/claim' }],
+    expiresAt: '2000-01-01T00:00:00.000Z',
   }))
 
   assert.equal(readStoredSession(mockStorage, apiBase, sessionId), null)
   assert.equal(storage.has(key), false)
   assert.equal(calls.some(([op, storedKey]) => op === 'remove' && storedKey === key), true)
+})
+
+test('referee create token storage is scoped by api base', () => {
+  const storage = new Map()
+  const apiBase = DEFAULT_ARENA_API_BASE
+  const otherApiBase = 'https://arena-api.preview.test'
+  const mockStorage = {
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => {
+      storage.set(key, value)
+    },
+    removeItem: (key) => {
+      storage.delete(key)
+    },
+  }
+
+  writeStoredCreateToken(mockStorage, apiBase, 'create_ref')
+
+  assert.equal(readStoredCreateToken(mockStorage, apiBase), 'create_ref')
+  assert.equal(readStoredCreateToken(mockStorage, otherApiBase), undefined)
+
+  clearStoredCreateToken(mockStorage, apiBase)
+
+  assert.equal(readStoredCreateToken(mockStorage, apiBase), undefined)
 })

@@ -137,8 +137,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         name: 'create_session',
         method: 'POST',
         path: '/sessions',
+        auth: 'referee create capability token',
         returns:
-          'sessionId plus red/blue claim tokens. Claim tokens are never returned by public state endpoints.',
+          'sessionId plus red/blue claim tokens. Requires Authorization: Bearer <createToken>. Claim tokens are never returned by public state endpoints.',
       },
       {
         name: 'claim_role',

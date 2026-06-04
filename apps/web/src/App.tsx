@@ -23,10 +23,13 @@ import {
   normalizeSessionId,
   parseSessionIdFromLocation,
   resetRoleClaim,
+  clearStoredCreateToken,
+  readStoredCreateToken,
   readStoredSession,
   setSessionIdInUrl,
   submitRefereeAwards,
   toUserMessage,
+  writeStoredCreateToken,
   writeStoredSession,
   type ReplayPayload,
 } from './referee/refereeClient'
@@ -53,6 +56,9 @@ function RefereeConsole() {
   const [activeSessionId, setActiveSessionId] = useState(() => parseSessionIdFromLocation())
   const [publicSession, setPublicSession] = useState<PublicSessionState | null>(null)
   const [invites, setInvites] = useState<RoleInvite[]>([])
+  const [createCapabilityToken, setCreateCapabilityToken] = useState(
+    () => readStoredCreateToken(window.sessionStorage, DEFAULT_ARENA_API_BASE) ?? '',
+  )
   const [storedRefereeToken, setStoredRefereeToken] = useState('')
   const [manualRefereeToken, setManualRefereeToken] = useState('')
   const [loadState, setLoadState] = useState<SessionLoadState>('idle')
@@ -115,11 +121,16 @@ function RefereeConsole() {
         return
       }
 
-      const stored = readStoredSession(window.localStorage, apiBase, normalizedSessionId)
+      try {
+        clearStoredSession(window.localStorage, apiBase, normalizedSessionId)
+      } catch {
+        // Browser privacy settings can disable localStorage; sessionStorage is the active store.
+      }
+
+      const stored = readStoredSession(window.sessionStorage, apiBase, normalizedSessionId)
 
       if (stored) {
         setStoredRefereeToken(stored.refereeToken)
-        setInvites(stored.invites)
         return
       }
 
@@ -270,12 +281,21 @@ function RefereeConsole() {
   }, [activeSessionId, apiBase, publicSession?.replayAvailable, publicSession?.round])
 
   const createNewSession = useCallback(async () => {
+    const createToken = createCapabilityToken.trim()
+
+    if (!createToken) {
+      setError('Create capability token is required to create sessions.')
+      return
+    }
+
     setLoadState('busy')
     setError('')
     setMessage('')
 
     try {
-      const response = await createSession(apiBase)
+      writeStoredCreateToken(window.sessionStorage, apiBase, createToken)
+
+      const response = await createSession(apiBase, createToken)
 
       skipNextActiveLoadRef.current = true
       setActiveSessionId(response.sessionId)
@@ -289,16 +309,16 @@ function RefereeConsole() {
       setReplayError('')
       setSelectedAwards({})
       setMessage('Session created. Keep this tab open to retain the referee capability token.')
-      writeStoredSession(window.localStorage, apiBase, response.sessionId, {
+      writeStoredSession(window.sessionStorage, apiBase, response.sessionId, {
         refereeToken: response.refereeToken,
-        invites: response.invites,
+        expiresAt: response.publicState.expiresAt,
       })
     } catch (createError) {
       setError(toUserMessage(createError))
     } finally {
       setLoadState('idle')
     }
-  }, [apiBase])
+  }, [apiBase, createCapabilityToken])
 
   const submitAwards = useCallback(async () => {
     if (!activeSessionId) {
@@ -339,9 +359,9 @@ function RefereeConsole() {
         payload,
       )
 
-      writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+      writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
         refereeToken: activeRefereeToken,
-        invites: invites,
+        expiresAt: response.publicState.expiresAt,
       })
       setPublicSession(response.publicState)
       setStoredRefereeToken(activeRefereeToken)
@@ -352,7 +372,7 @@ function RefereeConsole() {
     } finally {
       setSubmitState('idle')
     }
-  }, [activeRefereeToken, activeSessionId, apiBase, hasRefereeToken, invites, publicSession?.phase, selectedAwards])
+  }, [activeRefereeToken, activeSessionId, apiBase, hasRefereeToken, publicSession?.phase, selectedAwards])
 
   const copyInvite = useCallback((url: string) => {
     return navigator.clipboard
@@ -411,9 +431,9 @@ function RefereeConsole() {
         setInvites(nextInvites)
         setPublicSession(response.publicState)
         setStoredRefereeToken(activeRefereeToken)
-        writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+        writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
           refereeToken: activeRefereeToken,
-          invites: nextInvites,
+          expiresAt: response.publicState.expiresAt,
         })
         setSelectedAwards({})
         setReplayPayload(null)
@@ -572,6 +592,27 @@ function RefereeConsole() {
               {loadState === 'busy' ? 'Creating...' : 'Create new session'}
             </button>
             <label>
+              Create capability token
+              <input
+                type="password"
+                value={createCapabilityToken}
+                onChange={(event) => setCreateCapabilityToken(event.target.value)}
+                placeholder="Required to create sessions"
+                disabled={loadState === 'busy'}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={!createCapabilityToken.trim()}
+              onClick={() => {
+                clearStoredCreateToken(window.sessionStorage, apiBase)
+                setCreateCapabilityToken('')
+                setMessage('Create token cleared for this tab.')
+              }}
+            >
+              Clear create token
+            </button>
+            <label>
               Referee capability token
               <input
                 type="password"
@@ -599,13 +640,18 @@ function RefereeConsole() {
                   return
                 }
 
+                if (!publicSession) {
+                  setError('Load public session state before saving token.')
+                  return
+                }
+
                 setStoredRefereeToken(manualRefereeToken.trim())
-                writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+                writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
                   refereeToken: manualRefereeToken.trim(),
-                  invites,
+                  expiresAt: publicSession.expiresAt,
                 })
                 setError('')
-                setMessage('Token saved for this session on this browser.')
+                setMessage('Token saved for this session in this tab.')
               }}
             >
               Save manual token for this session
@@ -617,14 +663,14 @@ function RefereeConsole() {
                   setError('Load a session before clearing token.')
                   return
                 }
-                clearStoredSession(window.localStorage, apiBase, activeSessionId)
+                clearStoredSession(window.sessionStorage, apiBase, activeSessionId)
                 setStoredRefereeToken('')
                 setInvites([])
-                setMessage('Stored referee token and invite links cleared.')
+                setMessage('Stored referee token cleared for this tab.')
               }}
               disabled={!storedRefereeToken}
             >
-              Clear stored token and invites
+              Clear stored token
             </button>
           </div>
         </section>

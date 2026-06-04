@@ -6,7 +6,6 @@ import type {
   RefereeAwardsResponse,
   RelayErrorCode,
   RelayErrorResponse,
-  RoleInvite,
   RoleResetResponse,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
@@ -19,7 +18,7 @@ export const POLL_INTERVAL_MS = 1_500
 export const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 
 const SESSION_STORAGE_KEY_PREFIX = 'agent-arena:referee-console'
-const TEAM_ROLE_VALUES = new Set<TeamRole>(['red', 'blue'])
+const CREATE_TOKEN_STORAGE_KEY_PREFIX = 'agent-arena:create-token'
 
 type TokenStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
@@ -27,7 +26,7 @@ export type StoredSessionSecrets = {
   sessionId: string
   apiBase: string
   refereeToken: string
-  invites: RoleInvite[]
+  expiresAt: string
 }
 
 export type ReplayPayload = {
@@ -76,9 +75,15 @@ export function buildInviteUrl({
   return `${DEFAULT_ARENA_SITE_BASE}/agent#session=${sessionId}&role=${role}&claimToken=${claimToken}&api=${apiBase}`
 }
 
-export async function createSession(apiBase: string): Promise<CreateSessionResponse> {
+export async function createSession(
+  apiBase: string,
+  createToken: string,
+): Promise<CreateSessionResponse> {
   return requestJson<CreateSessionResponse>(`${apiBase}/sessions`, {
     method: 'POST',
+    headers: {
+      authorization: `Bearer ${createToken}`,
+    },
     body: JSON.stringify({}),
   })
 }
@@ -180,14 +185,20 @@ export function readStoredSession(
       typeof parsed.sessionId === 'string' &&
       typeof parsed.apiBase === 'string' &&
       typeof parsed.refereeToken === 'string' &&
-      Array.isArray(parsed.invites) &&
-      parsed.invites.every(isRoleInvite)
+      typeof parsed.expiresAt === 'string'
     ) {
+      const expiresAtMs = Date.parse(parsed.expiresAt)
+
+      if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+        storage.removeItem(key)
+        return null
+      }
+
       return {
         sessionId: parsed.sessionId,
         apiBase: parsed.apiBase,
         refereeToken: parsed.refereeToken,
-        invites: parsed.invites,
+        expiresAt: parsed.expiresAt,
       }
     }
   } catch {
@@ -203,13 +214,13 @@ export function writeStoredSession(
   storage: TokenStorage,
   apiBase: string,
   sessionId: string,
-  data: { refereeToken: string; invites: RoleInvite[] },
+  data: { refereeToken: string; expiresAt: string },
 ) {
   const payload: StoredSessionSecrets = {
     sessionId,
     apiBase,
     refereeToken: data.refereeToken,
-    invites: data.invites,
+    expiresAt: data.expiresAt,
   }
 
   storage.setItem(storageKey(apiBase, sessionId), JSON.stringify(payload))
@@ -217,6 +228,27 @@ export function writeStoredSession(
 
 export function clearStoredSession(storage: TokenStorage, apiBase: string, sessionId: string) {
   storage.removeItem(storageKey(apiBase, sessionId))
+}
+
+export function readStoredCreateToken(
+  storage: TokenStorage,
+  apiBase: string,
+): string | undefined {
+  const token = storage.getItem(createTokenStorageKey(apiBase))?.trim()
+
+  return token || undefined
+}
+
+export function writeStoredCreateToken(
+  storage: TokenStorage,
+  apiBase: string,
+  createToken: string,
+) {
+  storage.setItem(createTokenStorageKey(apiBase), createToken)
+}
+
+export function clearStoredCreateToken(storage: TokenStorage, apiBase: string) {
+  storage.removeItem(createTokenStorageKey(apiBase))
 }
 
 export function isValidSessionId(value: string): boolean {
@@ -227,20 +259,8 @@ function storageKey(apiBase: string, sessionId: string): string {
   return `${SESSION_STORAGE_KEY_PREFIX}:${apiBase}:${sessionId}`
 }
 
-function isRoleInvite(value: unknown): value is RoleInvite {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false
-  }
-
-  const invite = value as Record<string, unknown>
-
-  return (
-    typeof invite.role === 'string' &&
-    TEAM_ROLE_VALUES.has(invite.role as TeamRole) &&
-    typeof invite.claimToken === 'string' &&
-    invite.claimToken.length > 0 &&
-    typeof invite.claimPath === 'string'
-  )
+function createTokenStorageKey(apiBase: string): string {
+  return `${CREATE_TOKEN_STORAGE_KEY_PREFIX}:${apiBase}`
 }
 
 function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
