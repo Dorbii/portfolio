@@ -1,4 +1,5 @@
 import type {
+  AgentBootstrapResponse,
   PublicSessionState,
   RelayErrorCode,
   RelayErrorResponse,
@@ -34,6 +35,7 @@ export type AgentInviteParseResult =
 export type AgentArenaValidAction = {
   name:
     | 'get_contract'
+    | 'bootstrap_role'
     | 'claim_role'
     | 'get_role_state'
     | 'get_match_log'
@@ -48,6 +50,7 @@ export type AgentArenaValidAction = {
 
 export type AgentArenaRoleApi = {
   getContract(): Promise<AgentContract>
+  bootstrapRole(input?: { agentName?: string }): Promise<AgentBootstrapResponse>
   claimRole(input?: { agentName?: string }): Promise<RoleClaimResponse>
   getState(): Promise<RolePrivateState>
   getValidActions(): Promise<AgentArenaValidAction[]>
@@ -252,6 +255,10 @@ export function createSafeAgentHash(invite: AgentInvite): string {
   return `#${params.toString()}`
 }
 
+// CODEX_INTENT: make copied external-agent briefs lead with the idempotent player-key bootstrap flow.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
 export function createExternalAgentBrief(input: ExternalAgentBriefInput): ExternalAgentBrief {
   const state = input.state
   const publicState = input.publicState
@@ -291,18 +298,19 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
         'Continue when private state has phase=submission_phase and submitted=false. Stop on session_complete or expired.',
     },
     workflow: [
-      'If you have an invite page open and can execute page JavaScript, prefer window.AgentArenaRole helpers because they use the same browser fetch context and stored role token as the cockpit.',
-      'If you are not operating inside the invite page, use the HTTP API directly.',
-      `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract.`,
-      `Claim this role with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/claim and body ${claimBodyForBrief(input.invite)}.`,
-      'Store the returned roleToken privately. Do not paste it into public logs.',
-      `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <roleToken>.`,
+      'Treat claimToken as your private player key. Do not paste it into public logs.',
+      `First call POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/roles/${input.invite.role}/bootstrap with Authorization: Bearer <claimToken>. Use body ${bootstrapBodyForBrief(input.invite)}.`,
+      'Bootstrap is idempotent for the same player key: it claims the role if needed, resumes if already claimed by that key, and returns private state plus nextAction.',
+      'Use the same claimToken/player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
+      `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract after bootstrap succeeds or when you need custom-plan details.`,
+      `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <claimToken>.`,
       `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
-      `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <roleToken>.`,
+      `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <claimToken>.`,
       'Preferred play: use private state, inventory, controls, and the part catalog to create a varied legal plan.',
       'Fallback only: if you cannot produce a legal custom plan promptly, and private state shows phase=submission_phase, submitted=false, and gold>=72, submit the provided Baseline Spinner fallback.',
       'After submitting, save stateVersion and poll private state until stateVersion changes. Continue playing when phase is submission_phase and submitted is false.',
-      'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.claimRole() and window.AgentArenaRole.submitRoundPlan(plan).',
+      `Legacy fallback: if bootstrap is unavailable, claim this role with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/claim and body ${claimBodyForBrief(input.invite)}, then store the returned roleToken privately.`,
+      'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole() and window.AgentArenaRole.submitRoundPlan(plan).',
       'If both raw HTTP POST and page JavaScript execution are blocked, report that this runtime cannot play the role; do not keep retrying the same blocked path.',
     ],
     validationChecklist: [
@@ -328,7 +336,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `Invite URL: ${brief.inviteUrl}`,
     `API base: ${brief.apiBase}`,
     `Contract: ${brief.contractUrl}`,
-    `Claim token: ${claimToken}`,
+    `Player key / claimToken: ${claimToken}`,
     '',
     '## Current known state',
     `Phase: ${brief.currentState.phase}`,
@@ -345,8 +353,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Browser page API',
     'Use this path when you are controlling the invite page and your runtime blocks direct authenticated POST requests:',
     '```js',
-    `const claim = await window.AgentArenaRole.claimRole({ agentName: '${brief.role}-agent' })`,
-    'const state = await window.AgentArenaRole.getState()',
+    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
+    'const state = boot.state',
     'const nextState = state.phase === "submission_phase" && !state.submitted',
     '  ? state',
     '  : await window.AgentArenaRole.waitForNextSubmissionWindow()',
@@ -355,9 +363,22 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '  await window.AgentArenaRole.submitFallbackRoundPlan()',
     '}',
     '```',
-    'Do not keep retrying if window.AgentArenaRole is unavailable or claimRole/submitRoundPlan throws the same capability/network error.',
+    'Do not keep retrying if window.AgentArenaRole is unavailable or bootstrapRole/submitRoundPlan throws the same capability/network error.',
     '',
     '## HTTP requests',
+    'Bootstrap or resume role first:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/roles/${brief.role}/bootstrap`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    bootstrapBodyForBrief(input.invite),
+    '```',
+    '',
+    'Use the same `<claimToken>` bearer for the private state and submit requests below.',
+    '',
+    'Legacy claim role, only if bootstrap is unavailable:',
+    '',
     'Claim role:',
     '```http',
     `POST ${brief.apiBase}/sessions/${brief.sessionId}/claim`,
@@ -369,13 +390,13 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     'Read private role state:',
     '```http',
     `GET ${brief.apiBase}/sessions/${brief.sessionId}/state`,
-    'Authorization: Bearer <roleToken>',
+    'Authorization: Bearer <claimToken>',
     '```',
     '',
     'Submit round plan:',
     '```http',
     `POST ${brief.apiBase}/sessions/${brief.sessionId}/round-plan`,
-    'Authorization: Bearer <roleToken>',
+    'Authorization: Bearer <claimToken>',
     'Content-Type: application/json',
     '',
     '<roundPlan JSON>',
@@ -388,8 +409,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `Next playable condition: ${brief.continuationProtocol.nextPlayableCondition}`,
     '',
     'Algorithm:',
-    '1. After claiming or submitting, keep the latest private stateVersion.',
-    `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <roleToken>.`,
+    '1. After bootstrapping or submitting, keep the latest private stateVersion.',
+    `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <claimToken>.`,
     '3. If stateVersion is unchanged, wait and poll again.',
     '4. If phase is submission_phase and submitted is false, it is your turn to submit the next round plan.',
     '5. If phase is referee_awards, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
@@ -409,7 +430,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     JSON.stringify(brief.sampleRoundPlan, null, 2),
     '```',
     '',
-    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.claimRole(), getState(), waitForNextSubmissionWindow(), and submitRoundPlan(plan).',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole(), getState(), waitForNextSubmissionWindow(), and submitRoundPlan(plan).',
   ].join('\n')
 }
 
@@ -417,6 +438,12 @@ function claimBodyForBrief(invite: AgentInvite): string {
   return JSON.stringify({
     role: invite.role,
     claimToken: invite.claimToken ?? '<claimToken from invite URL>',
+    agentName: `${invite.role}-agent`,
+  })
+}
+
+function bootstrapBodyForBrief(invite: AgentInvite): string {
+  return JSON.stringify({
     agentName: `${invite.role}-agent`,
   })
 }
@@ -578,6 +605,32 @@ export class AgentArenaClient {
     })
   }
 
+  async bootstrapRole(input: {
+    agentName?: string
+    playerKey?: string
+  } = {}): Promise<AgentBootstrapResponse> {
+    const playerKey = input.playerKey ?? this.invite.claimToken ?? this.getRoleToken?.()
+
+    if (!playerKey) {
+      throw new AgentArenaApiError({
+        status: 401,
+        code: 'INVALID_TOKEN',
+        message: 'Player key is missing. Use an invite with claimToken or a stored role token.',
+      })
+    }
+
+    return this.requestJson<AgentBootstrapResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/roles/${this.invite.role}/bootstrap`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(playerKey),
+        body: JSON.stringify({
+          ...(input.agentName?.trim() ? { agentName: input.agentName.trim() } : {}),
+        }),
+      },
+    )
+  }
+
   async getPublicState(): Promise<PublicSessionState> {
     return this.requestJson<PublicSessionState>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/public`,
@@ -678,14 +731,14 @@ export class AgentArenaClient {
     }
   }
 
-  private authorizationHeaders(): Headers {
-    const roleToken = this.getRoleToken?.()
+  private authorizationHeaders(token = this.getRoleToken?.() ?? this.invite.claimToken): Headers {
+    const roleToken = token
 
     if (!roleToken) {
       throw new AgentArenaApiError({
         status: 401,
         code: 'INVALID_TOKEN',
-        message: 'Role bearer token is missing. Claim the role first.',
+        message: 'Role bearer token or invite player key is missing. Bootstrap or claim the role first.',
       })
     }
 
@@ -746,6 +799,10 @@ export function getValidAgentActions(
   return [
     {
       name: 'get_contract',
+      available: true,
+    },
+    {
+      name: 'bootstrap_role',
       available: true,
     },
     {
@@ -819,6 +876,7 @@ export function createAgentArenaRoleApi(
 ): AgentArenaRoleApi {
   return {
     getContract: () => client.getContract(),
+    bootstrapRole: (input) => client.bootstrapRole(input),
     claimRole: (input) => options.claimRole?.(input) ?? client.claimInviteRole(input),
     getState: () => client.getState(),
     getValidActions: async () => getValidAgentActions(getCurrentState()),

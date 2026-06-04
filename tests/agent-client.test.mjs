@@ -210,12 +210,14 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('You are the RED agent for session s_demo.'))
   assert.ok(brief.includes('https://arena.test/agent#session=s_demo&role=red&claimToken=cap_red&api=https%3A%2F%2Farena-api.test'))
   assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
-  assert.ok(brief.includes('window.AgentArenaRole helpers'))
+  assert.ok(brief.includes('Player key / claimToken: cap_red'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
+  assert.ok(brief.includes('Authorization: Bearer <claimToken>'))
+  assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
-  assert.ok(brief.includes('window.AgentArenaRole.claimRole'))
+  assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
   assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
   assert.ok(brief.includes('Do not keep retrying'))
-  assert.ok(brief.includes('Authorization: Bearer <roleToken>'))
   assert.ok(brief.includes('## HTTP requests'))
   assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('Prefer a custom legal plan'))
@@ -230,6 +232,63 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Body_Square_Medium'))
   assert.ok(brief.includes('Weapon_Spinner_Small'))
   assert.ok(brief.includes('script#agent-arena-brief'))
+})
+
+test('agent client bootstraps with invite claim token as bearer player key', async () => {
+  const calls = []
+  const client = new AgentArenaClient({
+    invite,
+    fetchImpl: async (url, init = {}) => {
+      const headers = new Headers(init.headers)
+      calls.push({
+        url: String(url),
+        method: init.method ?? 'GET',
+        authorization: headers.get('authorization'),
+        body: init.body ? JSON.parse(String(init.body)) : undefined,
+      })
+
+      return jsonResponse({
+        sessionId: invite.sessionId,
+        role: invite.role,
+        claimedNow: true,
+        state: roleState,
+        publicState: {
+          sessionId: invite.sessionId,
+          stateVersion: 'v1',
+          phase: 'waiting_for_agents',
+          round: 1,
+          maxRounds: 7,
+          expiresAt: '2026-06-03T18:00:00.000Z',
+          arena: {
+            name: 'Test Box',
+            width: 24,
+            height: 16,
+            activeHazards: [],
+          },
+          roles: {
+            red: { role: 'red', claimed: true, submitted: false },
+            blue: { role: 'blue', claimed: false, submitted: false },
+          },
+          replayAvailable: false,
+          eventLog: roleState.eventLog,
+        },
+        nextAction: 'wait_for_opponent_claim',
+      })
+    },
+  })
+
+  const bootstrap = await client.bootstrapRole({ agentName: 'External Red' })
+
+  assert.equal(bootstrap.claimedNow, true)
+  assert.equal(bootstrap.nextAction, 'wait_for_opponent_claim')
+  assert.deepEqual(calls, [
+    {
+      url: 'https://arena-api.test/sessions/s_demo/roles/red/bootstrap',
+      method: 'POST',
+      authorization: 'Bearer cap_red',
+      body: { agentName: 'External Red' },
+    },
+  ])
 })
 
 test('baseline round plan is a concrete first-round opener', () => {
@@ -390,6 +449,7 @@ test('browser role API exposes valid actions from current role state', async () 
     actions.map((action) => [action.name, action.available]),
     [
       ['get_contract', true],
+      ['bootstrap_role', true],
       ['claim_role', false],
       ['get_role_state', true],
       ['get_match_log', true],
@@ -417,12 +477,12 @@ test('browser role API marks submit action unavailable when role is locked', asy
   assert.ok(Boolean(submitAction?.reason))
 })
 
-test('browser role API marks all actions unavailable before claim', async () => {
+test('browser role API marks role-gated actions unavailable before claim', async () => {
   const actions = getValidAgentActions(null)
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, true, false, false, false, false, true, false, false],
+    [true, true, true, false, false, false, false, true, false, false],
   )
 })
 

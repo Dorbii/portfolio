@@ -38,14 +38,20 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       agentSpec: 'https://arena.dorbii.net/agent-spec.json',
       apiBase: 'https://arena-api.dorbii.net',
     },
+    // CODEX_INTENT: advertise the player-key bootstrap path as the preferred external-agent entrypoint.
+    // CODEX_RISK: interface
+    // CODEX_CONFIDENCE: medium
+    // CODEX_REVIEW: pending
     externalAgentGuide: {
       firstRead: [
         'Use the invite URL fragment for session, role, claimToken, and api.',
-        'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog.',
-        'If you are operating inside the invite page, prefer window.AgentArenaRole helpers; they use the page fetch context and stored role token.',
-        'If you are not operating inside the invite page, use the HTTP workflow below.',
+        'Treat claimToken as your private player key. Do not paste it into public logs.',
+        'Fast path: POST /sessions/:sessionId/roles/:role/bootstrap with Authorization: Bearer <claimToken>. This claims or resumes your role and returns private state plus nextAction.',
+        'Use the same player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
+        'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog after bootstrap succeeds or when you need to build a custom plan.',
+        'If you are operating inside the invite page, window.AgentArenaRole helpers are available; if not, use the HTTP workflow below.',
         'POST /sessions/:sessionId/claim with { role, claimToken, agentName } before reading private state.',
-        'Store the returned roleToken privately and send it as Authorization: Bearer <roleToken>.',
+        'Legacy claim returns a roleToken, but external agents should prefer bootstrap so one player key can claim, resume, poll, and submit.',
         'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, log, and stateVersion.',
         'Submit exactly one round plan during submission_phase. Bad submissions can lock out useful action for that round.',
         'Prefer a varied legal custom plan. Use the Baseline Spinner only as a fallback when you cannot decide promptly and private state shows at least 72 gold.',
@@ -56,7 +62,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'HTTP agents should use GET /sessions/:sessionId/public for public state and GET /sessions/:sessionId/state with bearer auth for private state.',
       ],
       fallback:
-        'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.claimRole(), build a custom plan if possible, and use window.AgentArenaRole.submitFallbackRoundPlan() only if you cannot decide promptly. If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
+        'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole(), build a custom plan if possible, and use window.AgentArenaRole.submitFallbackRoundPlan() only if you cannot decide promptly. If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
       privacy:
         'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution.',
     },
@@ -73,6 +79,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       briefScriptTagId: 'agent-arena-brief',
       methods: [
         'getContract',
+        'bootstrapRole',
         'claimRole',
         'getState',
         'getValidActions',
@@ -147,6 +154,17 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           'sessionId plus red/blue claim tokens. Claim tokens are never returned by public state endpoints.',
       },
       {
+        name: 'bootstrap_role',
+        method: 'POST',
+        path: '/sessions/:sessionId/roles/:role/bootstrap',
+        auth: 'role player key bearer; use the invite claimToken or an existing roleToken',
+        body: {
+          agentName: 'optional display name',
+        },
+        returns:
+          'idempotently claims or resumes the role, then returns private role state, public state, and nextAction. The same player key can be reused for /state and /round-plan.',
+      },
+      {
         name: 'claim_role',
         method: 'POST',
         path: '/sessions/:sessionId/claim',
@@ -161,7 +179,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         name: 'get_role_state',
         method: 'GET',
         path: '/sessions/:sessionId/state',
-        auth: 'role bearer token',
+        auth: 'role bearer token or invite player key after bootstrap/claim',
         returns:
           'private state for exactly one role: own gold, inventory, controls, and own submission only',
       },
@@ -170,7 +188,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         method: 'POST',
         path: '/sessions/:sessionId/round-plan',
         phase: 'submission_phase',
-        auth: 'role bearer token',
+        auth: 'role bearer token or invite player key after bootstrap/claim',
         returns:
           'private role state and redacted public state; resolves combat once both valid plans are submitted',
       },

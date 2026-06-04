@@ -179,6 +179,38 @@ export function validateRoleClaimRequestShape(value: unknown): ValidationResult 
   return result(issues)
 }
 
+// CODEX_INTENT: validate the optional metadata accepted by the player-key bootstrap route.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export function validateAgentBootstrapRequestShape(value: unknown): ValidationResult {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      issues: [issue('INVALID_BOOTSTRAP_REQUEST', 'bootstrap', 'Expected bootstrap object.')],
+    }
+  }
+
+  if ('agentName' in value && typeof value.agentName !== 'string') {
+    issues.push(issue('INVALID_AGENT_NAME', 'bootstrap.agentName', 'Agent name must be text.'))
+  } else if (
+    typeof value.agentName === 'string' &&
+    value.agentName.length > MAX_ROLE_CLAIM_AGENT_NAME_LENGTH
+  ) {
+    issues.push(
+      issue(
+        'AGENT_NAME_TOO_LONG',
+        'bootstrap.agentName',
+        `Agent name max length is ${MAX_ROLE_CLAIM_AGENT_NAME_LENGTH}.`,
+      ),
+    )
+  }
+
+  return result(issues)
+}
+
 export function validateRoleResetRequestShape(value: unknown): ValidationResult {
   const issues: ValidationIssue[] = []
 

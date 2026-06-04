@@ -332,6 +332,47 @@ test('sessions require both roles before opening plan submission', async () => {
   assert.equal(blue.value.state.phase, 'submission_phase')
 })
 
+test('agent bootstrap uses the invite claim token as a reusable player key', async () => {
+  const session = await createTestSession()
+  const badBootstrap = await session.bootstrapRole('red', 'claim_not_real', {})
+
+  assert.equal(badBootstrap.ok, false)
+  assert.equal(badBootstrap.error.code, 'INVALID_TOKEN')
+
+  const bootstrap = await session.bootstrapRole('red', 'claim_red', {
+    agentName: 'external-red',
+  })
+
+  assert.equal(bootstrap.ok, true)
+  assert.equal(bootstrap.value.claimedNow, true)
+  assert.equal(bootstrap.value.role, 'red')
+  assert.equal(bootstrap.value.state.role, 'red')
+  assert.equal(bootstrap.value.state.phase, 'waiting_for_agents')
+  assert.equal(bootstrap.value.nextAction, 'wait_for_opponent_claim')
+
+  const resume = await session.bootstrapRole('red', 'claim_red', {})
+
+  assert.equal(resume.ok, true)
+  assert.equal(resume.value.claimedNow, false)
+  assert.equal(resume.value.state.role, 'red')
+
+  const duplicate = await session.bootstrapRole('red', 'claim_blue', {})
+
+  assert.equal(duplicate.ok, false)
+  assert.equal(duplicate.error.code, 'ROLE_ALREADY_CLAIMED')
+
+  const privateState = await session.getRoleStateForToken('claim_red')
+
+  assert.equal(privateState.ok, true)
+  assert.equal(privateState.value.role, 'red')
+
+  const blue = await session.bootstrapRole('blue', 'claim_blue', {})
+
+  assert.equal(blue.ok, true)
+  assert.equal(blue.value.state.phase, 'submission_phase')
+  assert.equal(blue.value.nextAction, 'submit_round_plan')
+})
+
 test('session rejects invalid role tokens for private state', async () => {
   const session = await createTestSession()
   const state = await session.getRoleStateForToken('role_not_real')

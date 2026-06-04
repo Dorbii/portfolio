@@ -1,10 +1,14 @@
 import {
+  TEAM_ROLES,
   createAgentContract,
+  validateAgentBootstrapRequestShape,
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
+  type AgentBootstrapRequest,
   type CreateSessionRequest,
   type RelayErrorResponse,
   type RoleClaimRequest,
+  type TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import {
@@ -337,6 +341,45 @@ function sessionRoute(pathname: string):
   }
 }
 
+function sessionRoleRoute(pathname: string):
+  | {
+      sessionId: string
+      role: TeamRole
+      action: string
+    }
+  | undefined {
+  const match = /^\/sessions\/([^/]+)\/roles\/([^/]+)\/([^/]+)$/.exec(pathname)
+
+  if (!match) {
+    return undefined
+  }
+
+  let sessionId = ''
+  let role = ''
+
+  try {
+    sessionId = decodeURIComponent(match[1])
+    role = decodeURIComponent(match[2])
+  } catch {
+    sessionId = ''
+    role = ''
+  }
+
+  if (!isTeamRole(role)) {
+    return undefined
+  }
+
+  return {
+    sessionId,
+    role,
+    action: match[3],
+  }
+}
+
+function isTeamRole(value: unknown): value is TeamRole {
+  return typeof value === 'string' && TEAM_ROLES.includes(value as TeamRole)
+}
+
 function isBodyTooLarge(value: unknown): value is typeof BODY_TOO_LARGE {
   return value === BODY_TOO_LARGE
 }
@@ -465,6 +508,23 @@ export async function handleWorkerRequest(
     )
   }
 
+  const roleRoute = sessionRoleRoute(url.pathname)
+
+  if (roleRoute) {
+    if (!isSessionId(roleRoute.sessionId)) {
+      return errorResponse(
+        400,
+        'INVALID_REQUEST',
+        'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
+        undefined,
+        request,
+        env,
+      )
+    }
+
+    return forwardToSessionObject(request, env, roleRoute.sessionId)
+  }
+
   const route = sessionRoute(url.pathname)
 
   if (route) {
@@ -498,6 +558,30 @@ export class AgentArenaSession {
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url)
+    const roleRoute = sessionRoleRoute(url.pathname)
+
+    if (roleRoute) {
+      if (!isSessionId(roleRoute.sessionId)) {
+        return errorResponse(
+          400,
+          'INVALID_REQUEST',
+          'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
+        )
+      }
+
+      const coordinator = await this.loadSession()
+
+      if (!coordinator) {
+        return errorResponse(404, 'SESSION_NOT_FOUND', 'Session has not been created.')
+      }
+
+      if (roleRoute.action === 'bootstrap' && request.method === 'POST') {
+        return this.bootstrapRole(request, coordinator, roleRoute.role)
+      }
+
+      return errorResponse(404, 'INVALID_ACTION', 'Unsupported role session action.')
+    }
+
     const route = sessionRoute(url.pathname)
 
     if (!route) {
@@ -640,6 +724,50 @@ export class AgentArenaSession {
     }
 
     return jsonResponse(result.value, { status: 201 })
+  }
+
+  // CODEX_INTENT: expose an idempotent player-key bootstrap path for non-browser agents.
+  // CODEX_RISK: interface
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  private async bootstrapRole(
+    request: Request,
+    coordinator: SessionCoordinator,
+    role: TeamRole,
+  ): Promise<Response> {
+    const body = await readJsonBody(request)
+
+    if (isBodyTooLarge(body)) {
+      return bodyTooLargeResponse()
+    }
+
+    if (body === undefined || !isRecord(body)) {
+      return errorResponse(400, 'BAD_JSON', 'Bootstrap request body must be JSON.')
+    }
+
+    const validation = validateAgentBootstrapRequestShape(body)
+
+    if (!validation.ok) {
+      return errorResponse(
+        400,
+        'INVALID_REQUEST',
+        'Bootstrap request failed validation.',
+        validation.issues,
+      )
+    }
+
+    const result = await coordinator.bootstrapRole(
+      role,
+      bearerToken(request) ?? '',
+      body as AgentBootstrapRequest,
+    )
+    await this.saveSession(coordinator)
+
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
+    }
+
+    return jsonResponse(result.value, { status: result.value.claimedNow ? 201 : 200 })
   }
 
   private async submitRoundPlan(

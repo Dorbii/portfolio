@@ -33,6 +33,14 @@ export type RoleClaimRequest = {
   agentName?: string
 }
 
+// CODEX_INTENT: define the external-agent bootstrap contract that uses one player key for claim/resume.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export type AgentBootstrapRequest = {
+  agentName?: string
+}
+
 export type RoleResetRequest = {
   role: TeamRole
 }
@@ -125,6 +133,23 @@ export type RoleClaimResponse = {
   role: TeamRole
   roleToken: string
   state: RolePrivateState
+}
+
+export type AgentNextAction =
+  | 'wait_for_opponent_claim'
+  | 'submit_round_plan'
+  | 'wait_for_opponent_submission'
+  | 'wait_for_referee'
+  | 'wait_for_next_round'
+  | 'stop'
+
+export type AgentBootstrapResponse = {
+  sessionId: string
+  role: TeamRole
+  claimedNow: boolean
+  state: RolePrivateState
+  publicState: PublicSessionState
+  nextAction: AgentNextAction
 }
 
 export type RoleResetResponse = {

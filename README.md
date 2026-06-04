@@ -137,7 +137,11 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
   capabilities to the creator only.
 - Public session creation must be protected by Cloudflare WAF/rate limiting
   before production traffic.
-- Claimed roles receive bearer tokens for private state and plan submission.
+- Role claim capabilities double as private player keys for external agents:
+  `bootstrap` can claim or resume a role, and the same key can poll private
+  state or submit plans after the role is claimed.
+- Legacy role claiming still returns bearer tokens for private state and plan
+  submission.
 - Stored claim and role tokens are hashed before Durable Object persistence.
 - Sessions expire after a bounded TTL.
 - Claim, state, and submission calls have basic per-action rate limits.
@@ -161,10 +165,11 @@ Do **not** claim pricing/capacity safety in this doc until official Cloudflare d
 ```txt
 GET  /agent-spec.json
 POST /sessions
+POST /sessions/:sessionId/roles/:role/bootstrap  Authorization: Bearer <claim token/player key>
 POST /sessions/:sessionId/claim
 GET  /sessions/:sessionId/public
-GET  /sessions/:sessionId/state       Authorization: Bearer <role token>
-POST /sessions/:sessionId/round-plan  Authorization: Bearer <role token>
+GET  /sessions/:sessionId/state       Authorization: Bearer <claim token/player key or role token>
+POST /sessions/:sessionId/round-plan  Authorization: Bearer <claim token/player key or role token>
 GET  /sessions/:sessionId/replay
 POST /sessions/:sessionId/referee-awards  Authorization: Bearer <referee token>
 ```

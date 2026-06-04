@@ -160,17 +160,20 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.version, '0.1.0')
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
+  assert.ok(json.browserApi.methods.includes('bootstrapRole'))
   assert.ok(json.browserApi.methods.includes('claimRole'))
   assert.ok(json.browserApi.methods.includes('getFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('submitFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('waitForStateChange'))
   assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
   assert.ok(json.objective.includes('Build and submit'))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
-  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.claimRole()'))
+  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole()'))
   assert.ok(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan() only if'))
   assert.ok(json.externalAgentGuide.fallback.includes('do not keep retrying'))
   assert.equal(json.continuationProtocol.transport, 'polling')
@@ -183,6 +186,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(
     json.examples.roundPlanSubmission.purchases.some(
       (purchase) => purchase.partId === 'Body_Square_Medium',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'bootstrap_role' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/roles/:role/bootstrap' &&
+        action.auth.includes('player key'),
     ),
   )
   assert.ok(
@@ -306,6 +318,74 @@ test('POST /sessions is public while direct Durable Object create action is not 
   assert.equal(created.json.sessionId, 's_public_create')
   assert.equal(directCreate.response.status, 404)
   assert.equal(directCreate.json.error.code, 'INVALID_ACTION')
+})
+
+test('worker exposes idempotent role bootstrap for external agents', async () => {
+  const env = createEnv()
+  const sessionId = 's_bootstrap_route'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const blueInvite = inviteFor(created.json.invites, 'blue')
+  const invalidBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: 'not-a-player-key',
+    body: {},
+  })
+
+  assert.equal(invalidBootstrap.response.status, 401)
+  assert.equal(invalidBootstrap.json.error.code, 'INVALID_TOKEN')
+
+  const redBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: { agentName: 'External Red' },
+  })
+
+  assert.equal(redBootstrap.response.status, 201)
+  assert.equal(redBootstrap.json.claimedNow, true)
+  assert.equal(redBootstrap.json.state.role, 'red')
+  assert.equal(redBootstrap.json.state.phase, 'waiting_for_agents')
+  assert.equal(redBootstrap.json.publicState.roles.red.claimed, true)
+  assert.equal(redBootstrap.json.nextAction, 'wait_for_opponent_claim')
+
+  const resumedRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {},
+  })
+
+  assert.equal(resumedRed.response.status, 200)
+  assert.equal(resumedRed.json.claimedNow, false)
+  assert.equal(resumedRed.json.state.role, 'red')
+
+  const stolenRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {},
+  })
+
+  assert.equal(stolenRed.response.status, 409)
+  assert.equal(stolenRed.json.error.code, 'ROLE_ALREADY_CLAIMED')
+
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redState.response.status, 200)
+  assert.equal(redState.json.role, 'red')
+
+  const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {},
+  })
+
+  assert.equal(blueBootstrap.response.status, 201)
+  assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
+  assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
 })
 
 test('POST /sessions rejects oversized JSON bodies before validation', async () => {

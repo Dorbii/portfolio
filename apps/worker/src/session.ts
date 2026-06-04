@@ -1,7 +1,11 @@
 import {
   TEAM_ROLES,
+  validateAgentBootstrapRequestShape,
   validateSubmitRefereeAwardsRequestShape,
   validateRoleResetRequestShape,
+  type AgentBootstrapRequest,
+  type AgentBootstrapResponse,
+  type AgentNextAction,
   type AppliedRefereeAward,
   type ArenaConfig,
   type CombatSummary,
@@ -193,6 +197,10 @@ type SessionResult<T> =
     }
   | RelayErrorResponse
 
+type RoleBearerAuth = {
+  role: StoredRoleState
+}
+
 function cloneJson<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
@@ -342,6 +350,26 @@ function combatSummary(result: CombatResult): CombatSummary {
     damage: result.damage,
     remainingHealth: result.remainingHealth,
   }
+}
+
+function nextActionForRole(state: RolePrivateState): AgentNextAction {
+  if (state.phase === 'expired' || state.phase === 'session_complete') {
+    return 'stop'
+  }
+
+  if (state.phase === 'waiting_for_agents') {
+    return 'wait_for_opponent_claim'
+  }
+
+  if (state.phase === 'submission_phase') {
+    return state.submitted ? 'wait_for_opponent_submission' : 'submit_round_plan'
+  }
+
+  if (state.phase === 'referee_awards') {
+    return 'wait_for_referee'
+  }
+
+  return 'wait_for_next_round'
 }
 
 export function calculateInterest(unspentGold: number): number {
@@ -601,6 +629,80 @@ export class SessionCoordinator {
         role: request.role,
         roleToken,
         state: this.buildRoleState(role),
+      },
+    }
+  }
+
+  // CODEX_INTENT: let external agents use one stable invite player key to claim or resume a role.
+  // CODEX_RISK: interface
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  async bootstrapRole(
+    roleName: TeamRole,
+    playerKey: string,
+    request: AgentBootstrapRequest = {},
+  ): Promise<SessionResult<AgentBootstrapResponse>> {
+    const validation = validateAgentBootstrapRequestShape(request)
+
+    if (!validation.ok) {
+      return relayError(
+        'INVALID_REQUEST',
+        'Bootstrap request failed validation.',
+        validation.issues,
+      )
+    }
+
+    const now = this.clock()
+    const activeError = this.requireActive(now)
+
+    if (activeError) {
+      return activeError
+    }
+
+    const role = this.state.roles[roleName]
+    const rateLimitAction: RateLimitAction = role.claimedAt ? 'state' : 'claim'
+    const rateLimitError = this.takeRateLimit(rateLimitAction, roleName, now)
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    const auth = await this.findRoleBearer(roleName, playerKey, {
+      allowUnclaimedClaimKey: true,
+    })
+
+    if (!auth) {
+      return role.claimedAt
+        ? relayError('ROLE_ALREADY_CLAIMED', `${roleName} has already been claimed by another player key.`)
+        : relayError('INVALID_TOKEN', 'Player key does not match the requested role.')
+    }
+
+    let claimedNow = false
+
+    if (!auth.role.claimedAt) {
+      auth.role.claimedAt = now
+      claimedNow = true
+
+      if (request.agentName?.trim()) {
+        auth.role.agentName = request.agentName.trim().slice(0, 80)
+      }
+
+      this.touch(now)
+      this.appendEvent('role_claimed', `${roleName} role claimed.`, now)
+      this.advanceClaimPhase(now)
+    }
+
+    const state = this.buildRoleState(auth.role)
+
+    return {
+      ok: true,
+      value: {
+        sessionId: this.state.id,
+        role: roleName,
+        claimedNow,
+        state,
+        publicState: this.getPublicState(),
+        nextAction: nextActionForRole(state),
       },
     }
   }
@@ -884,15 +986,60 @@ export class SessionCoordinator {
   }
 
   private async findRoleByToken(roleToken: string): Promise<StoredRoleState | undefined> {
+    const auth = await this.findAnyRoleBearer(roleToken)
+
+    return auth?.role
+  }
+
+  private async findAnyRoleBearer(roleToken: string): Promise<RoleBearerAuth | undefined> {
     if (!roleToken.trim()) {
       return undefined
     }
 
     const roleTokenHash = await this.tokenHasher(roleToken)
 
-    return TEAM_ROLES.map((role) => this.state.roles[role]).find(
-      (role) => role.roleTokenHash === roleTokenHash,
-    )
+    for (const roleName of TEAM_ROLES) {
+      const role = this.state.roles[roleName]
+      const auth = this.matchRoleBearer(role, roleTokenHash, {
+        allowUnclaimedClaimKey: false,
+      })
+
+      if (auth) {
+        return auth
+      }
+    }
+
+    return undefined
+  }
+
+  private async findRoleBearer(
+    roleName: TeamRole,
+    token: string,
+    options: { allowUnclaimedClaimKey: boolean },
+  ): Promise<RoleBearerAuth | undefined> {
+    if (!token.trim()) {
+      return undefined
+    }
+
+    const tokenHash = await this.tokenHasher(token)
+
+    return this.matchRoleBearer(this.state.roles[roleName], tokenHash, options)
+  }
+
+  private matchRoleBearer(
+    role: StoredRoleState,
+    tokenHash: string,
+    options: { allowUnclaimedClaimKey: boolean },
+  ): RoleBearerAuth | undefined {
+    if (role.roleTokenHash === tokenHash) {
+      return { role }
+    }
+
+    if ((role.claimedAt || options.allowUnclaimedClaimKey) && role.claimTokenHash === tokenHash) {
+      return { role }
+    }
+
+    return undefined
   }
 
   private async hasRefereeToken(refereeToken: string): Promise<boolean> {
