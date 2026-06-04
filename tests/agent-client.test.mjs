@@ -7,6 +7,7 @@ import {
   createAgentArenaRoleApi,
   createAgentRoleStorageKey,
   createSafeAgentHash,
+  getValidAgentActions,
   parseAgentInviteFragment,
   serializeJsonForScript,
 } from '../.test-build/apps/web/src/agent/agentClient.js'
@@ -321,6 +322,30 @@ test('browser role API exposes valid actions from current role state', async () 
       ['get_match_log', true],
       ['submit_round_plan', true],
     ],
+  )
+})
+
+test('browser role API marks submit action unavailable when role is locked', async () => {
+  const lockedState = { ...roleState, phase: 'referee_awards' }
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async () => jsonResponse(lockedState),
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => lockedState)
+  const actions = await roleApi.getValidActions()
+  const submitAction = actions.find((action) => action.name === 'submit_round_plan')
+
+  assert.equal(submitAction?.available, false)
+  assert.ok(Boolean(submitAction?.reason))
+})
+
+test('browser role API marks all actions unavailable before claim', async () => {
+  const actions = getValidAgentActions(null)
+
+  assert.deepEqual(
+    actions.map((action) => action.available),
+    [true, false, false, false],
   )
 })
 

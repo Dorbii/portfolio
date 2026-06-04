@@ -6,7 +6,10 @@ import {
   clampReplayTime,
 } from '../.test-build/apps/web/src/replay/replayMapping.js'
 import { mockReplay } from '../.test-build/apps/web/src/mockSession.js'
-import { createReplayTimeline } from '../.test-build/packages/replay/src/index.js'
+import {
+  createReplayTimeline,
+  validateReplayTimeline,
+} from '../.test-build/packages/replay/src/index.js'
 
 const timeline = createReplayTimeline({
   round: 2,
@@ -130,4 +133,56 @@ test('mock replay stays inside the MVP segment duration cap', () => {
   assert.ok(mockReplay.duration >= 15)
   assert.ok(mockReplay.duration <= 30)
   assert.ok(mockReplay.events.every((event) => event.t <= mockReplay.duration))
+})
+
+test('replay timeline validation rejects empty-duration and out-of-range events', () => {
+  const outOfRange = createReplayTimeline({
+    round: 1,
+    duration: 1,
+    summary: 'Out of bounds',
+    events: [
+      {
+        t: 3,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      },
+    ],
+  })
+
+  assert.equal(
+    validateReplayTimeline({
+      round: 1,
+      duration: 0,
+      summary: 'Invalid duration',
+      events: [],
+    }),
+    false,
+  )
+  assert.equal(validateReplayTimeline(outOfRange), false)
+  const ordered = createReplayTimeline({
+    round: 2,
+    duration: 2.5,
+    summary: 'Unordered',
+    events: [
+      {
+        t: 2,
+        type: 'spawn',
+        bot: 'blue',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      },
+      {
+        t: 0.5,
+        type: 'spawn',
+        bot: 'red',
+        position: [1, 0, 0],
+        rotation: [0, 0, 0],
+      },
+    ],
+  })
+
+  assert.equal(validateReplayTimeline(ordered), true)
+  assert.equal(ordered.events[0].t, 0.5)
 })

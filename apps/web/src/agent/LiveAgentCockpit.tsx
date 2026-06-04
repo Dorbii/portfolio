@@ -12,6 +12,7 @@ import {
   AgentArenaClient,
   createAgentArenaRoleApi,
   createSafeAgentHash,
+  clearStoredRoleToken,
   getValidAgentActions,
   parseAgentInviteFragment,
   readStoredRoleToken,
@@ -72,6 +73,8 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     [invite],
   )
 
+  const isBusy = status === 'claiming' || status === 'loading'
+
   useEffect(() => {
     roleTokenRef.current = roleToken || undefined
   }, [roleToken])
@@ -95,6 +98,10 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const loadState = useCallback(
     async (options: { quiet?: boolean } = {}) => {
       if (!roleTokenRef.current) {
+        setLastError({
+          title: 'No role token',
+          message: 'Claim this role or reuse a stored token before loading state.',
+        })
         return
       }
 
@@ -111,9 +118,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         setRoleState(privateState)
         setPublicState(redactedState)
         setLastError(null)
-        setStatus('ready')
       } catch (error) {
         setLastError(toUiError(error, 'State load failed'))
+        setRoleState(null)
+        setPublicState(null)
+      } finally {
         setStatus('ready')
       }
     },
@@ -171,8 +180,9 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         `${window.location.pathname}${window.location.search}${createSafeAgentHash(invite)}`,
       )
     } catch (error) {
-      setStatus('ready')
       setLastError(toUiError(error, 'Claim failed'))
+    } finally {
+      setStatus('ready')
     }
   }, [agentName, client, invite])
 
@@ -191,7 +201,26 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     void claimRole()
   }, [claimRole, invite, roleToken])
 
+  const clearRoleToken = useCallback(() => {
+    clearStoredRoleToken(window.sessionStorage, invite)
+    roleTokenRef.current = undefined
+    setRoleToken('')
+    setRoleState(null)
+    setPublicState(null)
+    setLastError(null)
+    setNotice('Stored token removed. Claim this role again to continue.')
+  }, [invite])
+
   const submitRoundPlan = async () => {
+    if (!roleState) {
+      setLastError({
+        title: 'Role state is missing',
+        message: 'Load role state before submitting a round plan.',
+        code: 'MISSING_ROLE_STATE',
+      })
+      return
+    }
+
     setLastError(null)
     setNotice(null)
 
@@ -202,7 +231,8 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     } catch (error) {
       setLastError({
         title: 'Submission JSON is invalid',
-        message: error instanceof Error ? error.message : 'The form body is not valid JSON.',
+        message:
+          error instanceof Error ? error.message : 'The form body is not valid JSON.',
         code: 'BAD_JSON',
       })
       return
@@ -215,11 +245,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
 
       setRoleState(result.state)
       setPublicState(result.publicState)
-      setStatus('ready')
       setNotice(submissionNotice(result.state))
     } catch (error) {
-      setStatus('ready')
       setLastError(toUiError(error, 'Submission failed'))
+    } finally {
+      setStatus('ready')
     }
   }
 
@@ -240,6 +270,17 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
       }),
     [invite, publicState, roleState],
   )
+  const canClaimRole = !isBusy && (!roleToken || lastError?.code === 'INVALID_TOKEN')
+  const claimButtonLabel = isBusy
+    ? status === 'claiming'
+      ? 'Claiming role...'
+      : 'Loading...'
+    : roleToken
+      ? 'Role token loaded'
+      : 'Claim role'
+  const refreshButtonLabel = status === 'loading' ? 'Refreshing...' : 'Refresh state'
+  const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
+  const roleHasMatchLog = matchLog.length > 0
 
   return (
     <main className="agent-live-app">
@@ -275,16 +316,23 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <button
                 type="button"
                 onClick={() => void claimRole()}
-                disabled={status === 'claiming' || Boolean(roleToken)}
+                disabled={!canClaimRole}
               >
-                Claim role
+                {claimButtonLabel}
               </button>
               <button
                 type="button"
                 onClick={() => void loadState()}
-                disabled={!roleToken || status === 'loading'}
+                disabled={!roleToken || isBusy}
               >
-                Refresh state
+                {refreshButtonLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => void clearRoleToken()}
+                disabled={!roleToken || isBusy}
+              >
+                Clear role token
               </button>
             </div>
           </div>
@@ -307,7 +355,13 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
             </dl>
           ) : (
-            <p className="agent-empty">Claim this role or reuse a stored bearer token to load private state.</p>
+            <p className="agent-empty">
+              {isBusy
+                ? 'Loading role state from the API.'
+                : roleToken
+                  ? 'Role token loaded. Use Refresh state if the previous load failed.'
+                  : 'Claim this role or reuse a stored bearer token to load private state.'}
+            </p>
           )}
           {roleState?.submitted ? (
             <p className="agent-waiting">{submissionNotice(roleState)}</p>
@@ -327,7 +381,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
           <button
             type="button"
             onClick={() => void submitRoundPlan()}
-            disabled={!roleToken || status === 'loading' || Boolean(roleState?.submitted)}
+            disabled={!roleToken || isBusy || Boolean(roleState?.submitted)}
           >
             Submit round plan
           </button>
@@ -384,7 +438,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         <section className="agent-live-panel match-log-panel" aria-labelledby="match-log-heading">
           <SectionTitle id="match-log-heading" title="Match log" />
           <ol className="agent-log">
-            {(roleState?.eventLog ?? publicState?.eventLog ?? []).map((event) => (
+            {matchLog.map((event) => (
               <li key={`${event.at}-${event.type}-${event.message}`}>
                 <time dateTime={event.at}>{formatDateTime(event.at)}</time>
                 <strong>{formatPhase(event.type)}</strong>
@@ -392,7 +446,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               </li>
             ))}
           </ol>
-          {!roleState && !publicState ? <p className="agent-empty">No match events loaded.</p> : null}
+          {!roleHasMatchLog ? <p className="agent-empty">No match events loaded.</p> : null}
         </section>
       </div>
 

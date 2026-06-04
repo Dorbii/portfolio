@@ -257,11 +257,48 @@ test('worker rejects invalid session ids before Durable Object routing', async (
     body: { sessionId: 'not valid' },
   })
   const routed = await route(env, '/sessions/not%20valid/public')
+  const malformedEncoded = await route(env, '/sessions/%E0%A4%A/public')
 
   assert.equal(created.response.status, 400)
   assert.equal(created.json.error.code, 'INVALID_REQUEST')
   assert.equal(routed.response.status, 400)
   assert.equal(routed.json.error.code, 'INVALID_REQUEST')
+  assert.equal(malformedEncoded.response.status, 400)
+  assert.equal(malformedEncoded.json.error.code, 'INVALID_REQUEST')
+})
+
+test('worker validates create-session payload shape before Durable Object routing', async () => {
+  const env = createEnv()
+  const invalidTtl = await route(env, '/sessions', {
+    method: 'POST',
+    body: {
+      sessionId: 's_invalid_ttl',
+      ttlSeconds: '3600',
+    },
+  })
+  const invalidArena = await route(env, '/sessions', {
+    method: 'POST',
+    body: {
+      sessionId: 's_invalid_arena',
+      arena: {
+        name: 'Bad Arena',
+        width: 24,
+        height: -1,
+        activeHazards: ['floor_saw'],
+      },
+    },
+  })
+
+  assert.equal(invalidTtl.response.status, 400)
+  assert.equal(invalidTtl.json.error.code, 'INVALID_REQUEST')
+  assert.ok(
+    invalidTtl.json.error.issues.some((issue) => issue.code === 'INVALID_TTL'),
+  )
+  assert.equal(invalidArena.response.status, 400)
+  assert.equal(invalidArena.json.error.code, 'INVALID_REQUEST')
+  assert.ok(
+    invalidArena.json.error.issues.some((issue) => issue.code === 'INVALID_ARENA_SIZE'),
+  )
 })
 
 test('worker routes session traffic through the Durable Object relay boundary', async () => {
@@ -287,6 +324,21 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   const redInvite = inviteFor(created.json.invites, 'red')
   const blueInvite = inviteFor(created.json.invites, 'blue')
+  const malformedClaim = await route(env, `/sessions/${sessionId}/claim`, {
+    method: 'POST',
+    body: {
+      role: 'red',
+      claimToken: redInvite.claimToken,
+      agentName: 42,
+    },
+  })
+
+  assert.equal(malformedClaim.response.status, 400)
+  assert.equal(malformedClaim.json.error.code, 'INVALID_REQUEST')
+  assert.ok(
+    malformedClaim.json.error.issues.some((issue) => issue.code === 'INVALID_AGENT_NAME'),
+  )
+
   const redClaim = await route(env, `/sessions/${sessionId}/claim`, {
     method: 'POST',
     body: {

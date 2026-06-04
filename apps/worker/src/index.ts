@@ -1,5 +1,7 @@
 import {
   createAgentContract,
+  validateCreateSessionRequestShape,
+  validateRoleClaimRequestShape,
   type CreateSessionRequest,
   type RelayErrorResponse,
   type RoleClaimRequest,
@@ -243,8 +245,16 @@ function sessionRoute(pathname: string):
     return undefined
   }
 
+  let sessionId = ''
+
+  try {
+    sessionId = decodeURIComponent(match[1])
+  } catch {
+    sessionId = ''
+  }
+
   return {
-    sessionId: decodeURIComponent(match[1]),
+    sessionId,
     action: match[2],
   }
 }
@@ -317,6 +327,19 @@ export async function handleWorkerRequest(
 
     if (body === undefined || !isRecord(body)) {
       return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.', undefined, request, env)
+    }
+
+    const validation = validateCreateSessionRequestShape(body)
+
+    if (!validation.ok) {
+      return errorResponse(
+        400,
+        'INVALID_REQUEST',
+        'Create session request failed validation.',
+        validation.issues,
+        request,
+        env,
+      )
     }
 
     const sessionId =
@@ -455,6 +478,17 @@ export class AgentArenaSession {
       return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.')
     }
 
+    const validation = validateCreateSessionRequestShape(body)
+
+    if (!validation.ok) {
+      return errorResponse(
+        400,
+        'INVALID_REQUEST',
+        'Create session request failed validation.',
+        validation.issues,
+      )
+    }
+
     const coordinator = await SessionCoordinator.create({
       ...(body as CreateSessionRequest),
       sessionId,
@@ -472,6 +506,17 @@ export class AgentArenaSession {
 
     if (body === undefined || !isRecord(body)) {
       return errorResponse(400, 'BAD_JSON', 'Claim request body must be JSON.')
+    }
+
+    const validation = validateRoleClaimRequestShape(body)
+
+    if (!validation.ok) {
+      return errorResponse(
+        400,
+        'INVALID_REQUEST',
+        'Claim request failed validation.',
+        validation.issues,
+      )
     }
 
     const result = await coordinator.claimRole(body as RoleClaimRequest)

@@ -43,6 +43,73 @@ npm run build
 npm run test
 ```
 
+## Phase 7 Setup and Reliability Guardrails
+
+Use this section as the canonical checklist before claiming any deployment is complete.
+
+### Fresh setup (local)
+
+1. Install Node.js LTS.
+2. Use npm for this repo unless the package manager is intentionally changed; the current repo has `package-lock.json` and npm scripts.
+3. Install Wrangler CLI if you are doing Cloudflare setup:
+   - `npm install -g wrangler`
+4. Clone the repository and run from project root:
+   - `npm install`
+   - `npm run typecheck`
+   - `npm run lint`
+   - `npm run build`
+   - `npm run test`
+   - `npm run dev`
+5. Authenticate Wrangler:
+   - `wrangler login`
+6. Validate credentials before any deploy:
+   - `wrangler whoami`
+
+If Steve later decides to use `pnpm`, update the lockfile and setup commands in the same change.
+
+### Cloudflare Pages + Worker setup (not pre-completed)
+
+Complete this before production traffic:
+
+- [ ] Confirm Cloudflare zone is on the Free plan.
+- [ ] Confirm Workers Free is enabled for the account.
+- [ ] Confirm Durable Objects free allotment is sufficient for expected concurrency.
+- [ ] Confirm no paid plan is currently selected for this project without explicit approval.
+- [ ] Create a Pages project and connect to the GitHub repository branch you plan to deploy.
+- [ ] Set Pages build command to `npm run build`.
+- [ ] Set Pages output directory to `dist`.
+- [ ] Add recommended production domains:
+  - frontend: `arena.dorbii.net`
+  - API: `arena-api.dorbii.net`
+- [ ] Add a Worker project and configure Durable Object binding + namespace to match `wrangler` config.
+- [ ] Add Worker routes/custom domain and CORS origin for Pages domain + localhost dev origins.
+- [ ] Wire required environment variables/secrets and keep secrets out of source control.
+- [ ] Deploy staging, then production.
+- [ ] Run an API smoke test against staging before production.
+
+If any row above remains unchecked, the deployment should be treated as incomplete.
+
+### Cost guardrails
+
+Assumptions for MVP cost safety are:
+
+- Turn-based API calls only.
+- Compact JSON payloads and short-lived session data.
+- Compact event logs.
+- No WebSocket by default.
+- No always-on server animation loop.
+- No large replay blobs stored in Durable Object state.
+
+Traffic assumptions for guardrail estimation are currently 100-300 API requests/match.
+That range may be safe only after you verify current Cloudflare limits for:
+
+- Workers request ceilings
+- Durable Object CPU/memory/request constraints
+- Log/write usage and namespace/storage quotas
+- Free-tier and paid-tier plan behavior
+
+Do **not** claim pricing/capacity safety in this doc until official Cloudflare docs are checked on this date and confirmed for the active account.
+
 ## Foundation Rules
 
 - Agents can only use known catalog part IDs.
@@ -105,12 +172,17 @@ local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
 
 - Wrangler config is checked in, but real Cloudflare project binding,
   authentication, domain routing, and deployment smoke tests are not done.
+- Phase 7 deployment hardening is incomplete: Cloudflare account/plan checks,
+  Pages+Worker project setup, route/CORS verification, and production smoke
+  testing are still pending.
 - Auth is still capability-token MVP auth, not production identity, revocation,
   abuse prevention, or account security.
 - The root web UI is still local mock data; only `/agent` and Worker route tests
   are backend-connected.
 - Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.
-- Browser screenshot smoke was blocked locally by the preview/Chrome harness.
+- Browser screenshot smoke was blocked locally by the preview/Chrome harness in prior
+  environment sessions; no replacement browser verification has been confirmed in
+  this repository state.
 - The current Babylon-bearing bundle size is acceptable for an MVP prototype,
   not deploy-polished. Lazy-loading the replay renderer is a Phase 7/perf
   hardening item unless the Director decides bundle size blocks the demo.

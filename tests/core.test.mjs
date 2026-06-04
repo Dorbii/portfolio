@@ -26,6 +26,15 @@ const brakePlan = {
   ],
 }
 
+const bareBodyBlueprint = {
+  name: 'Bare Core',
+  blocks: [
+    { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+  ],
+}
+
+const sparseTurnPlan = { commands: [{ tick: 3, move: 'turn_left' }] }
+
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
   purchases: [
@@ -94,11 +103,45 @@ test('catalog exposes unique MVP part ids', () => {
 test('purchase validation rejects unknown parts and overspend', () => {
   const unknown = applyPurchases(100, [], [{ partId: 'Weapon_NukeLaserDragon', quantity: 1 }])
   const overspend = applyPurchases(5, [], [{ partId: 'Weapon_Spinner_Large', quantity: 1 }])
+  const exact = applyPurchases(14, [], [{ partId: 'Body_Square_Small', quantity: 1 }])
 
   assert.equal(unknown.ok, false)
   assert.equal(overspend.ok, false)
+  assert.equal(exact.ok, true)
+  assert.equal(exact.goldRemaining, 0)
+  assert.deepEqual(exact.inventory, [{ partId: 'Body_Square_Small', quantity: 1 }])
   assert.equal(unknown.issues[0].code, 'UNKNOWN_PART')
   assert.equal(overspend.issues[0].code, 'INSUFFICIENT_GOLD')
+})
+
+test('blueprint validation catches empty-processable edge cases', () => {
+  const noBody = validateBlueprintAssembly(
+    {
+      name: 'No Core',
+      blocks: [{ id: 'style', partId: 'Style_Flag', position: [0, 0, 0], rotation: [0, 0, 0] }],
+    },
+    [{ partId: 'Style_Flag', quantity: 1 }],
+  )
+  const duplicatedCell = validateBlueprintAssembly(
+    {
+      name: 'Stacked',
+      blocks: [
+        { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+        { id: 'dup', partId: 'Style_Flag', position: [0, 0, 0], rotation: [0, 0, 0] },
+      ],
+    },
+    [
+      { partId: 'Body_Square_Small', quantity: 1 },
+      { partId: 'Style_Flag', quantity: 1 },
+    ],
+  )
+
+  assert.equal(noBody.ok, false)
+  assert.ok(noBody.issues.some((entry) => entry.code === 'MISSING_BODY'))
+  assert.equal(duplicatedCell.ok, false)
+  assert.ok(
+    duplicatedCell.issues.some((entry) => entry.code === 'OCCUPIED_GRID_CELL'),
+  )
 })
 
 test('bad but processable weaponless body is accepted', () => {
@@ -205,6 +248,42 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
   assert.equal(validateReplayTimeline(first.replay), true)
   assert.ok(first.replay.events.some((event) => event.type === 'spawn'))
   assert.ok(first.replay.events.some((event) => event.type === 'move'))
+})
+
+test('resolver handles sparse plans deterministically and keeps replay timeline bounded/ordered', () => {
+  const input = {
+    round: 3,
+    seed: 'sparse-plan',
+    red: {
+      blueprint: bareBodyBlueprint,
+      turnPlan: sparseTurnPlan,
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      turnPlan: { commands: [] },
+    },
+  }
+  const first = resolveCombat(input)
+  const second = resolveCombat(input)
+
+  assert.deepEqual(first, second)
+  assert.equal(validateReplayTimeline(first.replay), true)
+  assert.equal(
+    first.replay.events.every(
+      (event) => event.t >= 0 && event.t <= first.replay.duration,
+    ),
+    true,
+  )
+  assert.equal(
+    first.replay.events.every(
+      (event, index, events) => index === 0 || events[index - 1].t <= event.t,
+    ),
+    true,
+  )
+  assert.equal(first.winner, 'draw')
+  assert.equal(first.damage.red, 0)
+  assert.equal(first.damage.blue, 0)
+  assert.equal(first.log[0].startsWith('Round 3'), true)
 })
 
 test('session creation returns role invites without leaking tokens publicly', async () => {
