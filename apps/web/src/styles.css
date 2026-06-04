@@ -2453,22 +2453,50 @@ textarea:focus-visible {
 .assembly-bay-panel {
   min-width: 0;
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(238, 242, 243, 0.1);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(143, 208, 255, 0.2);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(18, 24, 30, 0.86), rgba(10, 14, 18, 0.82)),
+    rgba(8, 11, 14, 0.9);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.assembly-bay-panel .plan-section-header {
+  align-items: center;
+  gap: 10px;
 }
 
 .assembly-state {
+  justify-self: end;
   min-height: 26px;
-  padding: 5px 9px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid rgba(93, 210, 146, 0.28);
+  padding: 4px 10px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid rgba(93, 210, 146, 0.34);
   border-radius: 6px;
   color: #b7f3cc;
-  background: rgba(93, 210, 146, 0.08);
+  background:
+    linear-gradient(180deg, rgba(93, 210, 146, 0.16), rgba(93, 210, 146, 0.03)),
+    rgba(93, 210, 146, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   font-size: 0.68rem;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.assembly-state::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  content: "";
 }
 
 .bot-assembly-stage {
@@ -2480,13 +2508,38 @@ textarea:focus-visible {
   overflow: hidden;
   border: 1px solid rgba(143, 208, 255, 0.18);
   border-radius: 8px;
+  isolation: isolate;
   background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 40px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 40px
+    ),
     linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 32%, transparent 68%, rgba(92, 145, 255, 0.08)),
     linear-gradient(180deg, rgba(25, 33, 40, 0.7), rgba(4, 6, 8, 0.96)),
     #050708;
+  background-size: 34px 34px, 34px 34px, auto, auto, auto;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.025),
     0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+.bot-assembly-stage::before {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(143, 208, 255, 0.16);
+  border-radius: 5px;
+  pointer-events: none;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent 42%, transparent 58%, rgba(255, 255, 255, 0.08)),
+    radial-gradient(circle at 50% 50%, rgba(143, 208, 255, 0.15), transparent 58%);
+  content: "";
+  opacity: 0.7;
 }
 
 .bot-assembly-stage::after {
@@ -2499,11 +2552,53 @@ textarea:focus-visible {
   content: "";
 }
 
+.bot-assembly-stage[data-renderer-state='ready'] {
+  border-color: rgba(93, 210, 146, 0.3);
+}
+
+.bot-assembly-stage[data-renderer-state='booting'] {
+  border-color: rgba(247, 184, 75, 0.32);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 14px 32px rgba(0, 0, 0, 0.28),
+    0 0 24px rgba(247, 184, 75, 0.16);
+}
+
+.bot-assembly-stage[data-renderer-state='context_lost'],
+.bot-assembly-stage[data-renderer-state='unavailable'] {
+  border-color: rgba(255, 92, 108, 0.4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 93, 108, 0.2),
+    0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
 .bot-assembly-stage canvas {
+  position: relative;
+  z-index: 0;
   width: 100%;
   height: 100%;
   display: block;
   touch-action: none;
+}
+
+.assembly-renderer-status {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  max-width: min(170px, calc(100% - 24px));
+  min-height: 26px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(247, 184, 75, 0.28);
+  border-radius: 6px;
+  color: #f6d995;
+  background: rgba(8, 11, 14, 0.78);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .plan-workbench-grid {
@@ -2787,6 +2882,10 @@ textarea:focus-visible {
     padding: 12px;
   }
 
+  .agent-command-header {
+    position: static;
+  }
+
   .session-strip,
   .award-grid,
   .category-strip,
@@ -2931,6 +3030,35 @@ textarea:focus-visible {
 
   .bot-part-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .assembly-bay-panel {
+    padding: 10px;
+    margin-top: 10px;
+    gap: 8px;
+  }
+
+  .assembly-bay-panel .plan-section-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .assembly-state {
+    min-height: 24px;
+    padding: 4px 8px;
+    font-size: 0.62rem;
+  }
+
+  .bot-assembly-stage {
+    height: clamp(260px, 58vh, 340px);
+    margin-top: 6px;
+    border-radius: 7px;
+  }
+
+  .bot-assembly-stage::before {
+    inset: 6px;
   }
 }
 

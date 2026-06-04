@@ -29,12 +29,22 @@ type AssemblyResources = {
   scanBar: AbstractMesh
   rig: {
     trolley: AbstractMesh
+    hoistCable: AbstractMesh
+    suspendedPanel: AbstractMesh
     leftArm: AbstractMesh
     rightArm: AbstractMesh
+    leftToolHead: AbstractMesh
+    rightToolHead: AbstractMesh
     leftClamp: AbstractMesh
     rightClamp: AbstractMesh
     clampRing: AbstractMesh
+    sparks: Array<{
+      mesh: AbstractMesh
+      basePosition: Vector3
+      phase: number
+    }>
     trolleyBaseX: number
+    suspendedPanelBaseY: number
     leftClampBaseY: number
     rightClampBaseY: number
     leftArmBaseZ: number
@@ -64,8 +74,13 @@ export function BotAssemblyScene({
 }: BotAssemblySceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const resourcesRef = useRef<AssemblyResources | null>(null)
+  const submittedRef = useRef(submitted)
   const [status, setStatus] = useState<AssemblyStatus>('booting')
   const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    submittedRef.current = submitted
+  }, [submitted])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -138,7 +153,7 @@ export function BotAssemblyScene({
 
       const bayLights = createTeamBayLights(scene, role)
       bayLights.forEach((light) => {
-        light.intensity *= submitted ? 1 : 0.88
+        light.intensity *= submittedRef.current ? 1 : 0.88
       })
 
       resources = {
@@ -158,7 +173,7 @@ export function BotAssemblyScene({
           return
         }
 
-        animateAssembly(resources, submitted)
+        animateAssembly(resources, submittedRef.current)
         scene.render()
       })
 
@@ -178,7 +193,7 @@ export function BotAssemblyScene({
         engine.resize()
         engine.runRenderLoop(() => {
           if (!disposed && resources) {
-            animateAssembly(resources, submitted)
+            animateAssembly(resources, submittedRef.current)
             scene.render()
           }
         })
@@ -206,7 +221,7 @@ export function BotAssemblyScene({
 
       return undefined
     }
-  }, [role, submitted])
+  }, [role])
 
   useEffect(() => {
     const resources = resourcesRef.current
@@ -251,6 +266,11 @@ export function BotAssemblyScene({
         aria-hidden={status === 'unavailable'}
         hidden={status === 'unavailable'}
       />
+      {status === 'booting' ? (
+        <div className="assembly-renderer-status" role="status">
+          Renderer starting
+        </div>
+      ) : null}
       {status !== 'ready' && status !== 'booting' ? (
         <div className="replay-error" role="status">
           <strong>Assembly renderer unavailable</strong>
@@ -264,6 +284,7 @@ export function BotAssemblyScene({
 function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['rig'] {
   const teamPrimary = role === 'red' ? '#fc4f5d' : '#5eb2ff'
   const teamAccent = role === 'red' ? '#ff2e44' : '#338eff'
+  const teamSoft = role === 'red' ? '#ff8f92' : '#8bc7ff'
   const floorMaterial = createMaterial(scene, 'assembly-floor-mat', '#171d24', '#06070c')
   const pitMaterial = createMaterial(scene, 'assembly-pit-mat', '#212a33', '#0a0c11')
   const wallMaterial = createMaterial(scene, 'assembly-wall-mat', '#1f272f', '#090a0c')
@@ -271,7 +292,11 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
   const trimMaterial = createMaterial(scene, 'assembly-trim-mat', '#0b0d12', '#020203')
   const detailMaterial = createMaterial(scene, 'assembly-detail-mat', '#4c5d6d', '#1a1f24')
   const teamMaterial = createMaterial(scene, 'assembly-team-mat', teamPrimary, teamAccent)
+  const teamSignalMaterial = createMaterial(scene, 'assembly-team-signal-mat', teamSoft, teamAccent, 0.78)
+  const workLightMaterial = createMaterial(scene, 'assembly-work-light-mat', '#fff3c4', '#ffcf6d', 0.86)
+  const toolHeadMaterial = createMaterial(scene, 'assembly-tool-head-mat', '#a9bbc8', '#303942')
   const warningMaterial = createMaterial(scene, 'assembly-warning-mat', '#d4ae42', '#473005')
+  const sparkMaterial = createMaterial(scene, 'assembly-spark-mat', '#ffe8a3', '#ffba32', 0.88)
 
   const shell = MeshBuilder.CreateBox('assembly-shell-floor', { width: 8, height: 0.14, depth: 5.8 }, scene)
   shell.position.y = -0.13
@@ -288,9 +313,43 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
     marker.material = detailMaterial
   }
 
+  for (let index = 0; index < 4; index += 1) {
+    const seam = MeshBuilder.CreateBox(`assembly-floor-panel-seam-${index}`, { width: 5.4, height: 0.012, depth: 0.045 }, scene)
+
+    seam.position.set(0, -0.015, -1.32 + index * 0.82)
+    seam.material = trimMaterial
+  }
+
   const backWall = MeshBuilder.CreateBox('assembly-back-wall', { width: 8, height: 2.8, depth: 0.14 }, scene)
   backWall.position.set(0, 1.1, 2.77)
   backWall.material = wallMaterial
+
+  for (let index = 0; index < 5; index += 1) {
+    const wallPanel = MeshBuilder.CreateBox(`assembly-back-wall-panel-${index}`, { width: 1.18, height: 1.05, depth: 0.04 }, scene)
+
+    wallPanel.position.set(-2.7 + index * 1.35, 1.25, 2.68)
+    wallPanel.material = index % 2 === 0 ? wallMaterial : trimMaterial
+  }
+
+  const toolRack = MeshBuilder.CreateBox('assembly-tool-rack', { width: 1.55, height: 0.5, depth: 0.08 }, scene)
+  toolRack.position.set(-2.7, 1.33, 2.55)
+  toolRack.material = trimMaterial
+
+  for (let index = 0; index < 4; index += 1) {
+    const toolPeg = MeshBuilder.CreateCylinder(
+      `assembly-tool-peg-${index}`,
+      { height: 0.34, diameter: 0.035, tessellation: 8 },
+      scene,
+    )
+    const toolGrip = MeshBuilder.CreateBox(`assembly-tool-grip-${index}`, { width: 0.08, height: 0.26, depth: 0.05 }, scene)
+
+    toolPeg.position.set(-3.22 + index * 0.35, 1.36, 2.45)
+    toolPeg.rotation.x = Math.PI / 2
+    toolPeg.material = detailMaterial
+    toolGrip.position.set(-3.22 + index * 0.35, 1.2, 2.42)
+    toolGrip.rotation.z = index % 2 === 0 ? 0.2 : -0.14
+    toolGrip.material = toolHeadMaterial
+  }
 
   const leftWall = MeshBuilder.CreateBox('assembly-left-wall', { width: 0.14, height: 2.8, depth: 5.8 }, scene)
   const rightWall = MeshBuilder.CreateBox('assembly-right-wall', { width: 0.14, height: 2.8, depth: 5.8 }, scene)
@@ -330,6 +389,31 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
   cradlePostL.material = detailMaterial
   cradlePostR.material = detailMaterial
 
+  for (let side = -1; side <= 1; side += 2) {
+    const jackBase = MeshBuilder.CreateCylinder(
+      `assembly-cradle-jack-base-${side}`,
+      { height: 0.08, diameter: 0.44, tessellation: 10 },
+      scene,
+    )
+    const jackPiston = MeshBuilder.CreateCylinder(
+      `assembly-cradle-jack-piston-${side}`,
+      { height: 0.58, diameter: 0.08, tessellation: 8 },
+      scene,
+    )
+    const jackPad = MeshBuilder.CreateBox(
+      `assembly-cradle-jack-pad-${side}`,
+      { width: 0.5, height: 0.08, depth: 0.28 },
+      scene,
+    )
+
+    jackBase.position.set(side * 1.55, 0.1, -0.7)
+    jackPiston.position.set(side * 1.55, 0.4, -0.7)
+    jackPad.position.set(side * 1.55, 0.72, -0.7)
+    jackBase.material = trimMaterial
+    jackPiston.material = detailMaterial
+    jackPad.material = warningMaterial
+  }
+
   const clampRing = MeshBuilder.CreateTorus('assembly-rig-clamp-ring', { diameter: 1.8, thickness: 0.1, tessellation: 24 }, scene)
   clampRing.position.y = 0.54
   clampRing.rotation.x = Math.PI / 2
@@ -353,6 +437,23 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
   )
   trolley.position.set(0.08, 2.66, -0.45)
   trolley.material = detailMaterial
+
+  const hoistCable = MeshBuilder.CreateCylinder(
+    'assembly-hoist-cable',
+    { height: 1.08, diameter: 0.035, tessellation: 8 },
+    scene,
+  )
+  hoistCable.position.set(0.08, 2.05, -0.45)
+  hoistCable.material = trimMaterial
+
+  const suspendedPanel = MeshBuilder.CreateBox(
+    'assembly-suspended-armor-panel',
+    { width: 1.0, height: 0.08, depth: 0.48 },
+    scene,
+  )
+  suspendedPanel.position.set(0.08, 1.46, -0.45)
+  suspendedPanel.rotation.z = role === 'red' ? -0.12 : 0.12
+  suspendedPanel.material = teamMaterial
 
   const leftRigArm = MeshBuilder.CreateBox(
     'assembly-tool-arm-left',
@@ -378,9 +479,45 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
   leftClamp.material = teamMaterial
   rightClamp.material = teamMaterial
 
+  const leftToolHead = MeshBuilder.CreateCylinder(
+    'assembly-tool-head-left',
+    { height: 0.34, diameterTop: 0.08, diameterBottom: 0.18, tessellation: 10 },
+    scene,
+  )
+  const rightToolHead = MeshBuilder.CreateCylinder(
+    'assembly-tool-head-right',
+    { height: 0.34, diameterTop: 0.08, diameterBottom: 0.18, tessellation: 10 },
+    scene,
+  )
+  leftToolHead.position.set(-0.18, 1.18, 0.85)
+  rightToolHead.position.set(0.18, 1.18, 0.85)
+  leftToolHead.rotation.x = Math.PI / 2
+  rightToolHead.rotation.x = Math.PI / 2
+  leftToolHead.material = toolHeadMaterial
+  rightToolHead.material = toolHeadMaterial
+
   const overheadRails = MeshBuilder.CreateBox('assembly-gantry-rails', { width: 5.6, height: 0.06, depth: 0.06 }, scene)
   overheadRails.position.set(0, 2.34, 0.32)
   overheadRails.material = detailMaterial
+
+  for (let index = 0; index < 3; index += 1) {
+    const taskLight = MeshBuilder.CreateBox(`assembly-task-light-${index}`, { width: 0.62, height: 0.05, depth: 0.12 }, scene)
+
+    taskLight.position.set(-1.35 + index * 1.35, 2.18, 1.68)
+    taskLight.rotation.x = -0.22
+    taskLight.material = workLightMaterial
+  }
+
+  for (let side = -1; side <= 1; side += 2) {
+    const teamStrip = MeshBuilder.CreateBox(
+      `assembly-team-light-strip-${side}`,
+      { width: 0.08, height: 0.08, depth: 2.1 },
+      scene,
+    )
+
+    teamStrip.position.set(side * 3.08, 0.34, 0.25)
+    teamStrip.material = teamSignalMaterial
+  }
 
   for (let index = 0; index < 4; index += 1) {
     const monitor = MeshBuilder.CreateBox(`assembly-control-node-${index}`, { width: 0.26, height: 0.2, depth: 0.12 }, scene)
@@ -402,6 +539,49 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
   ventStack.position.set(-2.8, 0.7, 0.6)
   ventStack.material = trimMaterial
 
+  const leftPartsCart = MeshBuilder.CreateBox('assembly-left-parts-cart', { width: 1.0, height: 0.14, depth: 0.78 }, scene)
+  const rightPartsCart = MeshBuilder.CreateBox('assembly-right-parts-cart', { width: 1.0, height: 0.14, depth: 0.78 }, scene)
+  leftPartsCart.position.set(-2.45, 0.14, -1.62)
+  rightPartsCart.position.set(2.45, 0.14, -1.62)
+  leftPartsCart.material = trimMaterial
+  rightPartsCart.material = trimMaterial
+
+  for (let side = -1; side <= 1; side += 2) {
+    const stagedWheel = MeshBuilder.CreateCylinder(
+      `assembly-staged-wheel-${side}`,
+      { height: 0.22, diameter: 0.46, tessellation: 14 },
+      scene,
+    )
+    const stagedArmor = MeshBuilder.CreateBox(
+      `assembly-staged-armor-${side}`,
+      { width: 0.56, height: 0.08, depth: 0.36 },
+      scene,
+    )
+    const stagedWeaponDisc = MeshBuilder.CreateCylinder(
+      `assembly-staged-disc-${side}`,
+      { height: 0.09, diameter: 0.5, tessellation: 18 },
+      scene,
+    )
+
+    stagedWheel.position.set(side * 2.62, 0.38, -1.82)
+    stagedWheel.rotation.z = Math.PI / 2
+    stagedArmor.position.set(side * 2.28, 0.32, -1.48)
+    stagedArmor.rotation.y = side * 0.22
+    stagedWeaponDisc.position.set(side * 2.54, 0.35, -1.32)
+    stagedWeaponDisc.rotation.x = Math.PI / 2
+    stagedWheel.material = trimMaterial
+    stagedArmor.material = side === -1 ? teamMaterial : detailMaterial
+    stagedWeaponDisc.material = warningMaterial
+  }
+
+  for (let index = 0; index < 5; index += 1) {
+    const crate = MeshBuilder.CreateBox(`assembly-part-crate-${index}`, { width: 0.38, height: 0.26, depth: 0.34 }, scene)
+
+    crate.position.set(-3.05 + index * 0.34, 0.22 + (index % 2) * 0.11, -2.0)
+    crate.rotation.y = index * 0.18
+    crate.material = index === 2 ? teamMaterial : detailMaterial
+  }
+
   for (let index = 0; index < 3; index += 1) {
     const beam = MeshBuilder.CreateBox(
       `assembly-floor-beam-${index}`,
@@ -413,14 +593,38 @@ function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['ri
     beam.material = trimMaterial
   }
 
+  const sparks = Array.from({ length: 14 }, (_, index) => {
+    const spark = MeshBuilder.CreateSphere(`assembly-weld-spark-${index}`, { diameter: 0.045, segments: 6 }, scene)
+    const basePosition = new Vector3(
+      -0.22 + (index % 4) * 0.14,
+      0.86 + (index % 3) * 0.08,
+      0.55 + (index % 5) * 0.08,
+    )
+
+    spark.position.copyFrom(basePosition)
+    spark.material = sparkMaterial
+
+    return {
+      mesh: spark,
+      basePosition,
+      phase: index * 0.37,
+    }
+  })
+
   return {
     trolley,
+    hoistCable,
+    suspendedPanel,
     leftArm: leftRigArm,
     rightArm: rightRigArm,
+    leftToolHead,
+    rightToolHead,
     leftClamp,
     rightClamp,
     clampRing,
+    sparks,
     trolleyBaseX: trolley.position.x,
+    suspendedPanelBaseY: suspendedPanel.position.y,
     leftClampBaseY: leftClamp.position.y,
     rightClampBaseY: rightClamp.position.y,
     leftArmBaseZ: leftRigArm.position.z,
@@ -477,6 +681,27 @@ function animateAssembly(resources: AssemblyResources, submitted: boolean): void
   resources.rig.clampRing.rotation.y += 0.0022 + 0.0009 * scan
   resources.rig.leftArm.position.z = resources.rig.leftArmBaseZ + Math.cos(busSpeed) * 0.08
   resources.rig.rightArm.position.z = resources.rig.rightArmBaseZ + Math.sin(busSpeed) * 0.08
+  resources.rig.hoistCable.position.x = resources.rig.trolley.position.x
+  resources.rig.suspendedPanel.position.x = resources.rig.trolley.position.x
+  resources.rig.suspendedPanel.position.y = resources.rig.suspendedPanelBaseY + Math.sin(elapsed * 1.25) * 0.05
+  resources.rig.suspendedPanel.rotation.y = Math.sin(elapsed * 0.85) * 0.12
+  resources.rig.leftToolHead.position.x = -0.18 + Math.sin(elapsed * 1.7) * 0.08
+  resources.rig.rightToolHead.position.x = 0.18 + Math.cos(elapsed * 1.55) * 0.08
+  resources.rig.leftToolHead.position.y = 1.18 + Math.cos(elapsed * 1.2) * 0.04
+  resources.rig.rightToolHead.position.y = 1.18 + Math.sin(elapsed * 1.28) * 0.04
+
+  resources.rig.sparks.forEach((spark) => {
+    const phase = (elapsed * 2.4 + spark.phase) % 1
+    const drift = phase * phase
+
+    spark.mesh.setEnabled(phase < 0.58 && !submitted)
+    spark.mesh.position.set(
+      spark.basePosition.x + Math.sin(spark.phase * 3.1) * drift * 0.26,
+      spark.basePosition.y + drift * 0.42,
+      spark.basePosition.z + Math.cos(spark.phase * 2.4) * drift * 0.2,
+    )
+    spark.mesh.scaling.setAll(1 - phase * 0.62)
+  })
 
   if (!bot) {
     return
