@@ -5,6 +5,7 @@ import {
   AgentArenaApiError,
   AgentArenaClient,
   createAgentArenaRoleApi,
+  createBaselineRoundPlan,
   createAgentInviteUrl,
   createExternalAgentBriefMarkdown,
   createAgentRoleStorageKey,
@@ -209,11 +210,17 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('You are the RED agent for session s_demo.'))
   assert.ok(brief.includes('https://arena.test/agent#session=s_demo&role=red&claimToken=cap_red&api=https%3A%2F%2Farena-api.test'))
   assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
-  assert.ok(brief.includes('Preferred path: use the HTTP API directly.'))
+  assert.ok(brief.includes('window.AgentArenaRole helpers'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
-  assert.ok(brief.includes('If Browser, Chrome, Playwright, or another UI bridge fails'))
+  assert.ok(brief.includes('window.AgentArenaRole.claimRole'))
+  assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
+  assert.ok(brief.includes('Do not keep retrying'))
   assert.ok(brief.includes('Authorization: Bearer <roleToken>'))
   assert.ok(brief.includes('## HTTP requests'))
+  assert.ok(brief.includes('## Browser page API'))
+  assert.ok(brief.includes('Prefer a custom legal plan'))
+  assert.ok(brief.includes('## Fallback round plan'))
+  assert.ok(brief.includes('not the preferred strategy'))
   assert.ok(brief.includes('Phase: submission_phase'))
   assert.ok(brief.includes('Gold: 100'))
   assert.ok(brief.includes('State version: v1'))
@@ -223,6 +230,19 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Body_Square_Medium'))
   assert.ok(brief.includes('Weapon_Spinner_Small'))
   assert.ok(brief.includes('script#agent-arena-brief'))
+})
+
+test('baseline round plan is a concrete first-round opener', () => {
+  const plan = createBaselineRoundPlan()
+
+  assert.equal(plan.action, 'submit_round_plan')
+  assert.deepEqual(plan.purchases, [
+    { partId: 'Body_Square_Medium', quantity: 1 },
+    { partId: 'Wheel_Large', quantity: 2 },
+    { partId: 'Weapon_Spinner_Small', quantity: 1 },
+  ])
+  assert.equal(plan.blueprint.blocks.length, 4)
+  assert.equal(plan.turnPlan.commands.length, 5)
 })
 
 test('agent state script serialization escapes html-sensitive text', () => {
@@ -370,10 +390,13 @@ test('browser role API exposes valid actions from current role state', async () 
     actions.map((action) => [action.name, action.available]),
     [
       ['get_contract', true],
+      ['claim_role', false],
       ['get_role_state', true],
       ['get_match_log', true],
       ['wait_for_state_change', true],
       ['wait_for_next_submission_window', false],
+      ['get_fallback_round_plan', true],
+      ['submit_fallback_round_plan', true],
       ['submit_round_plan', true],
     ],
   )
@@ -399,8 +422,88 @@ test('browser role API marks all actions unavailable before claim', async () => 
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, false, false, false, false, false],
+    [true, true, false, false, false, false, true, false, false],
   )
+})
+
+test('browser role API can claim through the invite page helper', async () => {
+  let claimedName
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => undefined,
+    fetchImpl: async () => jsonResponse(roleState),
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => null, {
+    claimRole: async (input) => {
+      claimedName = input?.agentName
+
+      return {
+        sessionId: invite.sessionId,
+        role: invite.role,
+        roleToken: 'role_red',
+        state: roleState,
+      }
+    },
+  })
+  const claim = await roleApi.claimRole({ agentName: 'Browser Red' })
+
+  assert.equal(claimedName, 'Browser Red')
+  assert.equal(claim.roleToken, 'role_red')
+})
+
+test('browser role API can submit the fallback plan', async () => {
+  let submittedPlan
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async (url, init = {}) => {
+      if (String(url).endsWith('/round-plan')) {
+        submittedPlan = JSON.parse(String(init.body))
+
+        return jsonResponse({
+          state: { ...roleState, submitted: true },
+          publicState: {
+            sessionId: invite.sessionId,
+            stateVersion: 'v2',
+            phase: 'submission_phase',
+            round: 1,
+            maxRounds: 7,
+            expiresAt: roleState.expiresAt,
+            arena: {
+              name: 'Compact Box',
+              width: 24,
+              height: 16,
+              activeHazards: ['floor_saw'],
+            },
+            roles: {
+              red: { role: 'red', claimed: true, submitted: true },
+              blue: { role: 'blue', claimed: true, submitted: false },
+            },
+            replayAvailable: false,
+            eventLog: roleState.eventLog,
+          },
+        })
+      }
+
+      throw new Error(`Unexpected URL ${String(url)}`)
+    },
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => roleState)
+  const fallback = roleApi.getFallbackRoundPlan()
+  const submission = await roleApi.submitFallbackRoundPlan()
+
+  assert.deepEqual(fallback, createBaselineRoundPlan())
+  assert.deepEqual(submittedPlan, createBaselineRoundPlan())
+  assert.equal(submission.state.submitted, true)
+})
+
+test('browser valid actions disable fallback plan below its gold cost', async () => {
+  const poorState = { ...roleState, gold: 50 }
+  const actions = getValidAgentActions(poorState)
+  const fallbackAction = actions.find((action) => action.name === 'submit_fallback_round_plan')
+
+  assert.equal(fallbackAction?.available, false)
+  assert.ok(fallbackAction?.reason?.includes('72 gold'))
 })
 
 test('browser role API reads match log through the client state endpoint', async () => {

@@ -13,7 +13,7 @@ import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
 
 export const DEFAULT_ARENA_API_BASE = 'https://arena-api.dorbii.net'
 export const DEFAULT_ARENA_SITE_BASE = 'https://arena.dorbii.net'
-export const POLL_INTERVAL_MS = 1_500
+export const POLL_INTERVAL_MS = 10_000
 
 export const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 

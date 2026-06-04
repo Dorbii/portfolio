@@ -160,19 +160,31 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.version, '0.1.0')
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
+  assert.ok(json.browserApi.methods.includes('claimRole'))
+  assert.ok(json.browserApi.methods.includes('getFallbackRoundPlan'))
+  assert.ok(json.browserApi.methods.includes('submitFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('waitForStateChange'))
   assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
   assert.ok(json.objective.includes('Build and submit'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('HTTP workflow')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
-  assert.ok(json.externalAgentGuide.fallback.includes('Use the HTTP endpoints directly'))
+  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.claimRole()'))
+  assert.ok(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan() only if'))
+  assert.ok(json.externalAgentGuide.fallback.includes('do not keep retrying'))
   assert.equal(json.continuationProtocol.transport, 'polling')
   assert.equal(json.continuationProtocol.watchField, 'stateVersion')
   assert.ok(json.continuationProtocol.browserHelpers.includes('waitForNextSubmissionWindow()'))
   assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
+  assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
+  assert.ok(
+    json.examples.roundPlanSubmission.purchases.some(
+      (purchase) => purchase.partId === 'Body_Square_Medium',
+    ),
+  )
   assert.ok(
     json.actions.some(
       (action) =>

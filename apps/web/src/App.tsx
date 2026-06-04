@@ -228,6 +228,10 @@ function RefereeConsole() {
 
     const id = window.setInterval(() => {
       if (sessionIdRef.current === activeSessionId) {
+        if (document.visibilityState === 'hidden') {
+          return
+        }
+
         void loadPublicState(activeSessionId, { silent: true })
       }
     }, POLL_INTERVAL_MS)
@@ -359,22 +363,11 @@ function RefereeConsole() {
     }
   }, [activeRefereeToken, activeSessionId, apiBase, hasRefereeToken, publicSession?.phase, selectedAwards])
 
-  const copyInvite = useCallback((url: string) => {
-    return navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        setMessage('Invite copied.')
-      })
-      .catch(() => {
-        setError('Clipboard copy blocked. Select and copy manually.')
-      })
-  }, [])
-
-  const copyAgentBrief = useCallback((brief: string) => {
+  const copyAgentBrief = useCallback((role: TeamRole, brief: string) => {
     return navigator.clipboard
       .writeText(brief)
       .then(() => {
-        setMessage('Agent brief copied.')
+        setMessage(`${capitalize(role)} wake brief copied.`)
       })
       .catch(() => {
         setError('Clipboard copy blocked. Select and copy manually.')
@@ -646,17 +639,16 @@ function RefereeConsole() {
 
         <section className="panel">
           <SectionHeader
-            kicker="Invite links"
-            title="Agent URLs"
-            aside="Claim token is in URL fragment."
+            kicker="Agent handoff"
+            title="Wake agents"
+            aside="Brief includes the invite URL."
           />
           <InvitePanel
             role="red"
             inviteUrl={redInviteUrl}
             agentBrief={redAgentBrief}
             hasInvite={hasInviteForRole('red')}
-            onCopy={() => void copyInvite(redInviteUrl)}
-            onCopyBrief={() => void copyAgentBrief(redAgentBrief)}
+            onCopyBrief={() => void copyAgentBrief('red', redAgentBrief)}
             onOpen={() => window.open(redInviteUrl, '_blank')}
             onRefreshClaim={() => void refreshRoleClaim('red')}
             canRefreshClaim={canRefreshRoleClaim}
@@ -666,8 +658,7 @@ function RefereeConsole() {
             inviteUrl={blueInviteUrl}
             agentBrief={blueAgentBrief}
             hasInvite={hasInviteForRole('blue')}
-            onCopy={() => void copyInvite(blueInviteUrl)}
-            onCopyBrief={() => void copyAgentBrief(blueAgentBrief)}
+            onCopyBrief={() => void copyAgentBrief('blue', blueAgentBrief)}
             onOpen={() => window.open(blueInviteUrl, '_blank')}
             onRefreshClaim={() => void refreshRoleClaim('blue')}
             canRefreshClaim={canRefreshRoleClaim}
@@ -802,7 +793,11 @@ function RefereeConsole() {
             </div>
             <div>
               <dt>Live polls</dt>
-              <dd>{publicSession && !isTerminalPhase(publicSession.phase) ? 'Active (1.5s)' : 'Stopped'}</dd>
+              <dd>
+                {publicSession && !isTerminalPhase(publicSession.phase)
+                  ? `Active (${formatPollInterval(POLL_INTERVAL_MS)})`
+                  : 'Stopped'}
+              </dd>
             </div>
             <div>
               <dt>Resume behavior</dt>
@@ -912,7 +907,6 @@ function InvitePanel({
   hasInvite,
   inviteUrl,
   agentBrief,
-  onCopy,
   onCopyBrief,
   onOpen,
   onRefreshClaim,
@@ -922,7 +916,6 @@ function InvitePanel({
   hasInvite: boolean
   inviteUrl: string
   agentBrief: string
-  onCopy: () => Promise<void> | void
   onCopyBrief: () => Promise<void> | void
   onOpen: () => void
   onRefreshClaim: () => Promise<void> | void
@@ -941,22 +934,18 @@ function InvitePanel({
 
   return (
     <div className="invite-panel">
-      <p>{capitalize(role)} role invite</p>
+      <p>{capitalize(role)} agent handoff</p>
       <div className="invite-links">
         <button type="button" onClick={onOpen} disabled={!inviteUrl}>
-          Open {capitalize(role)}
-        </button>
-        <button type="button" onClick={onCopy} disabled={!inviteUrl}>
-          Copy {capitalize(role)}
+          Open cockpit
         </button>
         <button type="button" onClick={onCopyBrief} disabled={!agentBrief}>
-          Copy brief
+          Wake {role} agent
         </button>
         <button type="button" onClick={onRefreshClaim} disabled={!canRefreshClaim}>
           Refresh claim
         </button>
       </div>
-      <p className="invite-link-text">{inviteUrl}</p>
     </div>
   )
 }
@@ -1011,6 +1000,14 @@ function formatPhase(phase: string) {
     .split('_')
     .map((word) => capitalize(word))
     .join(' ')
+}
+
+function formatPollInterval(intervalMs: number): string {
+  if (intervalMs >= 1_000) {
+    return `${intervalMs / 1_000}s`
+  }
+
+  return `${intervalMs}ms`
 }
 
 function getOutcomeEvents(events: ReplayEvent[]): ReplayEvent[] {

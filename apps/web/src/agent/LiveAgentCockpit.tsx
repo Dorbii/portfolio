@@ -6,6 +6,7 @@ import type {
   WeaponCommand,
   PartDefinition,
   PublicSessionState,
+  RoleClaimResponse,
   RolePrivateState,
   RoundPlanSubmission,
   ValidationIssue,
@@ -126,18 +127,6 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     roleStateRef.current = roleState
   }, [roleState])
 
-  useEffect(() => {
-    const api = createAgentArenaRoleApi(client, () => roleStateRef.current)
-
-    window.AgentArenaRole = api
-
-    return () => {
-      if (window.AgentArenaRole === api) {
-        delete window.AgentArenaRole
-      }
-    }
-  }, [client])
-
   const loadState = useCallback(
     async (options: { quiet?: boolean } = {}) => {
       if (!roleTokenRef.current) {
@@ -190,15 +179,28 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     return () => window.clearInterval(intervalId)
   }, [loadState, roleState?.phase, roleToken])
 
-  const claimRole = useCallback(async () => {
+  const claimRole = useCallback(async (
+    input: { agentName?: string; throwOnError?: boolean } = {},
+  ): Promise<RoleClaimResponse | null> => {
     if (!invite.claimToken) {
-      setLastError({
-        title: 'Claim token missing',
+      const error = new AgentArenaApiError({
+        status: 400,
+        code: 'INVALID_TOKEN',
         message:
           'This invite can load a stored role token, but it cannot claim a new role.',
+      })
+
+      setLastError({
+        title: 'Claim token missing',
+        message: error.message,
         code: 'INVALID_INVITE',
       })
-      return
+
+      if (input.throwOnError) {
+        throw error
+      }
+
+      return null
     }
 
     setStatus('claiming')
@@ -206,10 +208,15 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     setNotice(null)
 
     try {
+      const submittedAgentName = input.agentName?.trim() ?? agentName
       const claim = await client.claimRole({
         claimToken: invite.claimToken,
-        agentName,
+        agentName: submittedAgentName,
       })
+
+      if (submittedAgentName) {
+        setAgentName(submittedAgentName)
+      }
 
       writeStoredRoleToken(window.sessionStorage, invite, claim.roleToken)
       roleTokenRef.current = claim.roleToken
@@ -223,12 +230,47 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         '',
         `${window.location.pathname}${window.location.search}${createSafeAgentHash(invite)}`,
       )
+      return claim
     } catch (error) {
       setLastError(toUiError(error, 'Claim failed'))
+
+      if (input.throwOnError) {
+        throw error
+      }
+
+      return null
     } finally {
       setStatus('ready')
     }
   }, [agentName, client, invite])
+
+  useEffect(() => {
+    const api = createAgentArenaRoleApi(client, () => roleStateRef.current, {
+      claimRole: async (input) => {
+        const claim = await claimRole({
+          ...input,
+          throwOnError: true,
+        })
+
+        if (!claim) {
+          throw new AgentArenaApiError({
+            status: 409,
+            message: 'Role claim did not complete.',
+          })
+        }
+
+        return claim
+      },
+    })
+
+    window.AgentArenaRole = api
+
+    return () => {
+      if (window.AgentArenaRole === api) {
+        delete window.AgentArenaRole
+      }
+    }
+  }, [claimRole, client])
 
   useEffect(() => {
     if (roleToken || !invite.claimToken) {

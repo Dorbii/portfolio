@@ -34,10 +34,13 @@ export type AgentInviteParseResult =
 export type AgentArenaValidAction = {
   name:
     | 'get_contract'
+    | 'claim_role'
     | 'get_role_state'
     | 'get_match_log'
     | 'wait_for_state_change'
     | 'wait_for_next_submission_window'
+    | 'get_fallback_round_plan'
+    | 'submit_fallback_round_plan'
     | 'submit_round_plan'
   available: boolean
   reason?: string
@@ -45,8 +48,11 @@ export type AgentArenaValidAction = {
 
 export type AgentArenaRoleApi = {
   getContract(): Promise<AgentContract>
+  claimRole(input?: { agentName?: string }): Promise<RoleClaimResponse>
   getState(): Promise<RolePrivateState>
   getValidActions(): Promise<AgentArenaValidAction[]>
+  getFallbackRoundPlan(): RoundPlanSubmission
+  submitFallbackRoundPlan(): Promise<RoundSubmissionResponse>
   submitRoundPlan(
     plan: RoundPlanSubmission,
   ): Promise<RoundSubmissionResponse>
@@ -285,15 +291,19 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
         'Continue when private state has phase=submission_phase and submitted=false. Stop on session_complete or expired.',
     },
     workflow: [
-      'Preferred path: use the HTTP API directly. The browser cockpit is useful for humans but is not required for agent play.',
+      'If you have an invite page open and can execute page JavaScript, prefer window.AgentArenaRole helpers because they use the same browser fetch context and stored role token as the cockpit.',
+      'If you are not operating inside the invite page, use the HTTP API directly.',
       `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract.`,
       `Claim this role with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/claim and body ${claimBodyForBrief(input.invite)}.`,
       'Store the returned roleToken privately. Do not paste it into public logs.',
       `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <roleToken>.`,
       `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
       `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <roleToken>.`,
+      'Preferred play: use private state, inventory, controls, and the part catalog to create a varied legal plan.',
+      'Fallback only: if you cannot produce a legal custom plan promptly, and private state shows phase=submission_phase, submitted=false, and gold>=72, submit the provided Baseline Spinner fallback.',
       'After submitting, save stateVersion and poll private state until stateVersion changes. Continue playing when phase is submission_phase and submitted is false.',
-      'If Browser, Chrome, Playwright, or another UI bridge fails, stop retrying UI tooling and continue through the HTTP API.',
+      'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.claimRole() and window.AgentArenaRole.submitRoundPlan(plan).',
+      'If both raw HTTP POST and page JavaScript execution are blocked, report that this runtime cannot play the role; do not keep retrying the same blocked path.',
     ],
     validationChecklist: [
       'First round starts with 100 gold and empty inventory unless private state says otherwise.',
@@ -331,6 +341,21 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '',
     '## Workflow',
     ...brief.workflow.map((item, index) => `${index + 1}. ${item}`),
+    '',
+    '## Browser page API',
+    'Use this path when you are controlling the invite page and your runtime blocks direct authenticated POST requests:',
+    '```js',
+    `const claim = await window.AgentArenaRole.claimRole({ agentName: '${brief.role}-agent' })`,
+    'const state = await window.AgentArenaRole.getState()',
+    'const nextState = state.phase === "submission_phase" && !state.submitted',
+    '  ? state',
+    '  : await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    '// Prefer a custom legal plan. Use the fallback only if you cannot decide promptly.',
+    'if (nextState.gold >= 72) {',
+    '  await window.AgentArenaRole.submitFallbackRoundPlan()',
+    '}',
+    '```',
+    'Do not keep retrying if window.AgentArenaRole is unavailable or claimRole/submitRoundPlan throws the same capability/network error.',
     '',
     '## HTTP requests',
     'Claim role:',
@@ -370,7 +395,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '5. If phase is referee_awards, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
     '6. If phase is session_complete or expired, stop playing.',
     '',
-    'Browser helper, if you are using the cockpit:',
+    'Browser helper, if you are already claimed in the cockpit:',
     '```js',
     'const nextState = await window.AgentArenaRole.waitForNextSubmissionWindow()',
     '```',
@@ -378,12 +403,13 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Validation checklist',
     ...brief.validationChecklist.map((item) => `- ${item}`),
     '',
-    '## Sample round plan shape',
+    '## Fallback round plan',
+    'This is not the preferred strategy. Use it only when you cannot produce a legal custom plan promptly, the role has not submitted, and private state shows at least 72 gold.',
     '```json',
     JSON.stringify(brief.sampleRoundPlan, null, 2),
     '```',
     '',
-    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.getState().',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.claimRole(), getState(), waitForNextSubmissionWindow(), and submitRoundPlan(plan).',
   ].join('\n')
 }
 
@@ -395,7 +421,7 @@ function claimBodyForBrief(invite: AgentInvite): string {
   })
 }
 
-function createBaselineRoundPlan(): RoundPlanSubmission {
+export function createBaselineRoundPlan(): RoundPlanSubmission {
   return {
     action: 'submit_round_plan',
     purchases: [
@@ -535,6 +561,23 @@ export class AgentArenaClient {
     )
   }
 
+  async claimInviteRole(input: {
+    agentName?: string
+  } = {}): Promise<RoleClaimResponse> {
+    if (!this.invite.claimToken) {
+      throw new AgentArenaApiError({
+        status: 400,
+        code: 'INVALID_TOKEN',
+        message: 'Claim token is missing from this invite URL. Ask the referee for a refreshed invite.',
+      })
+    }
+
+    return this.claimRole({
+      claimToken: this.invite.claimToken,
+      agentName: input.agentName,
+    })
+  }
+
   async getPublicState(): Promise<PublicSessionState> {
     return this.requestJson<PublicSessionState>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/public`,
@@ -561,6 +604,10 @@ export class AgentArenaClient {
         body: JSON.stringify(plan),
       },
     )
+  }
+
+  async submitFallbackRoundPlan(): Promise<RoundSubmissionResponse> {
+    return this.submitRoundPlan(createBaselineRoundPlan())
   }
 
   async getMatchLog(): Promise<SessionLogEvent[]> {
@@ -702,6 +749,11 @@ export function getValidAgentActions(
       available: true,
     },
     {
+      name: 'claim_role',
+      available: !state,
+      ...(state ? { reason: 'Role is already claimed in this browser.' } : {}),
+    },
+    {
       name: 'get_role_state',
       available: Boolean(state),
       ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
@@ -732,6 +784,21 @@ export function getValidAgentActions(
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
+      name: 'get_fallback_round_plan',
+      available: true,
+    },
+    {
+      name: 'submit_fallback_round_plan',
+      available: Boolean(state && state.phase === 'submission_phase' && !state.submitted && state.gold >= 72),
+      ...(state?.phase !== 'submission_phase'
+        ? { reason: `Round plans are not open during ${state?.phase ?? 'unclaimed'}.` }
+        : state.submitted
+          ? { reason: 'This role has already submitted a round plan.' }
+          : state.gold < 72
+            ? { reason: 'Baseline Spinner requires 72 gold.' }
+            : {}),
+    },
+    {
       name: 'submit_round_plan',
       available: Boolean(state && state.phase === 'submission_phase' && !state.submitted),
       ...(state?.phase !== 'submission_phase'
@@ -746,11 +813,17 @@ export function getValidAgentActions(
 export function createAgentArenaRoleApi(
   client: AgentArenaClient,
   getCurrentState: () => RolePrivateState | null,
+  options: {
+    claimRole?: (input?: { agentName?: string }) => Promise<RoleClaimResponse>
+  } = {},
 ): AgentArenaRoleApi {
   return {
     getContract: () => client.getContract(),
+    claimRole: (input) => options.claimRole?.(input) ?? client.claimInviteRole(input),
     getState: () => client.getState(),
     getValidActions: async () => getValidAgentActions(getCurrentState()),
+    getFallbackRoundPlan: () => createBaselineRoundPlan(),
+    submitFallbackRoundPlan: () => client.submitFallbackRoundPlan(),
     submitRoundPlan: (plan) => client.submitRoundPlan(plan),
     getMatchLog: () => client.getMatchLog(),
     waitForStateChange: (previousStateVersion) => client.waitForStateChange(previousStateVersion),

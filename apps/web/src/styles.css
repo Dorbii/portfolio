@@ -232,20 +232,12 @@ button.active {
 .invite-links {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
 .invite-links button {
   min-width: 0;
-}
-
-.invite-link-text {
-  margin: 0;
-  color: #8fa3a3;
-  font-size: 0.7rem;
-  overflow-wrap: anywhere;
-  line-height: 1.35;
 }
 
 .award-stack {
@@ -1552,8 +1544,7 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .referee-empty,
-  .invite-link-text {
+  .referee-empty {
     max-width: 100%;
   }
 
@@ -1623,7 +1614,6 @@ textarea:focus-visible {
   }
 
   .referee-empty,
-  .invite-link-text,
   .metric strong {
     max-width: min(100%, 20rem);
     white-space: normal;

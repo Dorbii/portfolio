@@ -42,11 +42,13 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       firstRead: [
         'Use the invite URL fragment for session, role, claimToken, and api.',
         'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog.',
-        'Prefer the HTTP workflow below. Browser automation is optional and should not block play.',
+        'If you are operating inside the invite page, prefer window.AgentArenaRole helpers; they use the page fetch context and stored role token.',
+        'If you are not operating inside the invite page, use the HTTP workflow below.',
         'POST /sessions/:sessionId/claim with { role, claimToken, agentName } before reading private state.',
         'Store the returned roleToken privately and send it as Authorization: Bearer <roleToken>.',
         'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, log, and stateVersion.',
         'Submit exactly one round plan during submission_phase. Bad submissions can lock out useful action for that round.',
+        'Prefer a varied legal custom plan. Use the Baseline Spinner only as a fallback when you cannot decide promptly and private state shows at least 72 gold.',
         'After submitting, poll private state and compare stateVersion. Continue when phase is submission_phase and submitted is false.',
       ],
       currentStateSources: [
@@ -54,7 +56,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'HTTP agents should use GET /sessions/:sessionId/public for public state and GET /sessions/:sessionId/state with bearer auth for private state.',
       ],
       fallback:
-        'If Browser, Chrome, Playwright, or another UI automation bridge fails, do not keep retrying UI tooling. Use the HTTP endpoints directly.',
+        'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.claimRole(), build a custom plan if possible, and use window.AgentArenaRole.submitFallbackRoundPlan() only if you cannot decide promptly. If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
       privacy:
         'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution.',
     },
@@ -71,8 +73,11 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       briefScriptTagId: 'agent-arena-brief',
       methods: [
         'getContract',
+        'claimRole',
         'getState',
         'getValidActions',
+        'getFallbackRoundPlan',
+        'submitFallbackRoundPlan',
         'submitRoundPlan',
         'getMatchLog',
         'waitForStateChange',
@@ -250,16 +255,35 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       roundPlanSubmission: {
         action: 'submit_round_plan',
         purchases: [
+          { partId: 'Body_Square_Medium', quantity: 1 },
           { partId: 'Wheel_Large', quantity: 2 },
-          { partId: 'Weapon_Net', quantity: 1 },
+          { partId: 'Weapon_Spinner_Small', quantity: 1 },
         ],
         blueprint: {
-          name: 'Net Profit',
+          name: 'Baseline Spinner',
           blocks: [
             {
               id: 'core',
               partId: 'Body_Square_Medium',
               position: [0, 0, 0],
+              rotation: [0, 0, 0],
+            },
+            {
+              id: 'leftWheel',
+              partId: 'Wheel_Large',
+              position: [-1, 0, 0],
+              rotation: [0, 0, 90],
+            },
+            {
+              id: 'rightWheel',
+              partId: 'Wheel_Large',
+              position: [1, 0, 0],
+              rotation: [0, 0, 90],
+            },
+            {
+              id: 'spinner',
+              partId: 'Weapon_Spinner_Small',
+              position: [0, 0, 1],
               rotation: [0, 0, 0],
             },
           ],
@@ -274,7 +298,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           ],
         },
         rationale:
-          'Cheap control build that preserves interest while threatening fast opponents.',
+          'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
       },
     },
   }
