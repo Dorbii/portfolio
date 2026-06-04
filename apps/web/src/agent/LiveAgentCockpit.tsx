@@ -399,6 +399,15 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const refreshButtonLabel = status === 'loading' ? 'Refreshing...' : 'Refresh state'
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const roleHasMatchLog = matchLog.length > 0
+  const draftSubmission = useMemo(
+    () => buildSubmissionFromDraft(submissionDraft),
+    [submissionDraft],
+  )
+  const draftSummary = useMemo(
+    () => summarizeDraft(submissionDraft, roleState?.gold),
+    [roleState?.gold, submissionDraft],
+  )
+  const canSubmitPlan = Boolean(roleToken) && !isBusy && !roleState?.submitted
 
   const copyExternalAgentBrief = useCallback(() => {
     return navigator.clipboard
@@ -442,133 +451,169 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
 
   return (
     <main className="agent-live-app">
-      <header className="agent-live-header">
-        <div>
+      <header className="agent-live-header agent-command-header">
+        <div className="agent-title-block">
           <span className="eyebrow">Agent Arena</span>
           <h1>{capitalize(invite.role)} Agent Cockpit</h1>
         </div>
-        <a href={`${invite.apiBase}/agent-spec.json`}>agent-spec.json</a>
+        <div className="agent-command-actions">
+          <label>
+            <span>Agent name</span>
+            <input
+              value={agentName}
+              onChange={(event) => setAgentName(event.target.value)}
+              maxLength={80}
+            />
+          </label>
+          <button type="button" onClick={() => void claimRole()} disabled={!canClaimRole}>
+            {claimButtonLabel}
+          </button>
+          <button type="button" onClick={() => void loadState()} disabled={!roleToken || isBusy}>
+            {refreshButtonLabel}
+          </button>
+          <button type="button" onClick={() => void clearRoleToken()} disabled={!roleToken || isBusy}>
+            Clear role token
+          </button>
+          <a href={`${invite.apiBase}/agent-spec.json`}>agent-spec.json</a>
+        </div>
       </header>
 
-      <div className="agent-live-grid">
-        <section
-          className="agent-live-panel role-summary"
-          aria-labelledby="role-summary-heading"
-        >
-          <SectionTitle id="role-summary-heading" title="Role summary" />
-          <dl className="agent-facts">
-            <Fact label="Session" value={invite.sessionId} />
-            <Fact label="Role" value={capitalize(invite.role)} />
-            <Fact label="API" value={invite.apiBase} />
-            <Fact label="Claim token" value={invite.claimToken ? 'Present' : 'Not in fragment'} />
-            <Fact label="Bearer token" value={roleToken ? 'Stored in this tab' : 'Not claimed'} />
-            <Fact label="Status" value={formatStatus(status)} />
-          </dl>
-          <div className="claim-controls">
-            <label>
-              Agent name
-              <input
-                value={agentName}
-                onChange={(event) => setAgentName(event.target.value)}
-                maxLength={80}
-              />
-            </label>
-            <div className="agent-button-row">
+      <div className="agent-cockpit-layout">
+        <aside className="agent-live-panel cockpit-rail" aria-labelledby="role-summary-heading">
+          <section>
+            <SectionTitle id="role-summary-heading" title="Role summary" />
+            <dl className="agent-facts">
+              <Fact label="Session" value={invite.sessionId} />
+              <Fact label="Role" value={capitalize(invite.role)} />
+              <Fact label="API" value={invite.apiBase} />
+              <Fact label="Claim token" value={invite.claimToken ? 'Present' : 'Not in fragment'} />
+              <Fact label="Bearer token" value={roleToken ? 'Stored in this tab' : 'Not claimed'} />
+              <Fact label="Status" value={formatStatus(status)} />
+            </dl>
+            {notice ? (
+              <p className="agent-notice" aria-live="polite">
+                {notice}
+              </p>
+            ) : null}
+          </section>
+
+          <section aria-labelledby="phase-heading">
+            <SectionTitle id="phase-heading" title="Current phase" />
+            {roleState ? (
+              <dl className="agent-facts">
+                <Fact label="Phase" value={formatPhase(roleState.phase)} />
+                <Fact label="Round" value={String(roleState.round)} />
+                <Fact label="Gold" value={String(roleState.gold)} />
+                <Fact label="Submitted" value={roleState.submitted ? 'Yes' : 'No'} />
+                <Fact label="State version" value={roleState.stateVersion} />
+                <Fact label="Opponent" value={opponentLabel(roleState)} />
+                <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
+              </dl>
+            ) : (
+              <p className="agent-empty">
+                {isBusy
+                  ? 'Loading role state from the API.'
+                  : roleToken
+                    ? 'Role token loaded. Use Refresh state if the previous load failed.'
+                    : 'Claim this role or reuse a stored bearer token to load private state.'}
+              </p>
+            )}
+            {roleState?.submitted ? (
+              <p className="agent-waiting">{submissionNotice(roleState)}</p>
+            ) : null}
+          </section>
+
+          <section aria-labelledby="arena-heading">
+            <SectionTitle id="arena-heading" title="Arena" />
+            {publicState ? (
+              <dl className="agent-facts">
+                <Fact label="Name" value={publicState.arena.name} />
+                <Fact label="Size" value={`${publicState.arena.width} x ${publicState.arena.height}`} />
+                <Fact label="Hazards" value={publicState.arena.activeHazards.join(', ')} />
+                <Fact label="Replay" value={publicState.replayAvailable ? 'Available' : 'Unavailable'} />
+              </dl>
+            ) : (
+              <p className="agent-empty">Public arena state has not loaded.</p>
+            )}
+          </section>
+
+          <section aria-labelledby="opponent-heading">
+            <SectionTitle id="opponent-heading" title="Opponent" />
+            {roleState ? (
+              <dl className="agent-facts">
+                <Fact label="Role" value={capitalize(roleState.opponent.role)} />
+                <Fact label="Claimed" value={roleState.opponent.claimed ? 'Yes' : 'No'} />
+                <Fact label="Submitted" value={roleState.opponent.submitted ? 'Yes' : 'No'} />
+                <Fact label="Replay" value={roleState.replayAvailable ? 'Available' : 'Unavailable'} />
+              </dl>
+            ) : (
+              <p className="agent-empty">Opponent state is available after role state loads.</p>
+            )}
+          </section>
+        </aside>
+
+        <section className="agent-live-panel cockpit-workbench" aria-labelledby="submission-heading">
+          <div className="workbench-header">
+            <div>
+              <SectionTitle id="submission-heading" title="Round plan workbench" />
+              <strong>{submissionDraft.blueprintName || draftSubmission.blueprint.name}</strong>
+            </div>
+            <div className="submission-mode-toggle" role="group" aria-label="Submission mode">
               <button
                 type="button"
-                onClick={() => void claimRole()}
-                disabled={!canClaimRole}
+                className={submissionMode === 'structured' ? 'active' : ''}
+                onClick={() => void toggleSubmissionMode('structured')}
               >
-                {claimButtonLabel}
+                Structured
               </button>
               <button
                 type="button"
-                onClick={() => void loadState()}
-                disabled={!roleToken || isBusy}
+                className={submissionMode === 'json' ? 'active' : ''}
+                onClick={() => void toggleSubmissionMode('json')}
               >
-                {refreshButtonLabel}
-              </button>
-              <button
-                type="button"
-                onClick={() => void clearRoleToken()}
-                disabled={!roleToken || isBusy}
-              >
-                Clear role token
+                Advanced JSON mode
               </button>
             </div>
           </div>
-          {notice ? (
-            <p className="agent-notice" aria-live="polite">
-              {notice}
-            </p>
-          ) : null}
-        </section>
 
-        <section className="agent-live-panel agent-handoff-panel" aria-labelledby="handoff-heading">
-          <SectionTitle id="handoff-heading" title="External agent brief" />
-          <div className="agent-button-row single-action">
-            <button type="button" onClick={() => void copyExternalAgentBrief()}>
-              Copy brief
-            </button>
+          <div className="plan-metric-strip" aria-label="Draft summary">
+            <PlanMetric
+              label="Budget"
+              tone={draftSummary.remainingGold !== undefined && draftSummary.remainingGold < 0 ? 'danger' : 'ok'}
+              value={
+                draftSummary.remainingGold === undefined
+                  ? `${draftSummary.purchaseCost}g`
+                  : `${draftSummary.remainingGold}g left`
+              }
+            />
+            <PlanMetric label="Blocks" value={String(draftSummary.blockCount)} />
+            <PlanMetric label="Mobility" value={String(draftSummary.mobilityParts)} />
+            <PlanMetric label="Weapons" value={String(draftSummary.weaponParts)} />
+            <PlanMetric label="Commands" value={`${draftSummary.commandCount} / 5`} />
           </div>
-          <textarea
-            className="agent-brief-text"
-            spellCheck={false}
-            readOnly
-            value={externalAgentBriefMarkdown}
-            aria-label="External agent brief"
-          />
-        </section>
 
-        <section className="agent-live-panel" aria-labelledby="phase-heading">
-          <SectionTitle id="phase-heading" title="Current phase" />
-          {roleState ? (
-            <dl className="agent-facts">
-              <Fact label="Phase" value={formatPhase(roleState.phase)} />
-              <Fact label="Round" value={String(roleState.round)} />
-              <Fact label="Gold" value={String(roleState.gold)} />
-              <Fact label="Submitted" value={roleState.submitted ? 'Yes' : 'No'} />
-              <Fact label="State version" value={roleState.stateVersion} />
-              <Fact label="Opponent" value={opponentLabel(roleState)} />
-              <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
-            </dl>
-          ) : (
-            <p className="agent-empty">
-              {isBusy
-                ? 'Loading role state from the API.'
-                : roleToken
-                  ? 'Role token loaded. Use Refresh state if the previous load failed.'
-                  : 'Claim this role or reuse a stored bearer token to load private state.'}
-            </p>
-          )}
-          {roleState?.submitted ? (
-            <p className="agent-waiting">{submissionNotice(roleState)}</p>
-          ) : null}
-        </section>
-
-        <section className="agent-live-panel" aria-labelledby="submission-heading">
-          <SectionTitle id="submission-heading" title="Submission form" />
-          <div className="submission-mode-toggle">
-            <label>
-              <input
-                type="checkbox"
-                checked={submissionMode === 'json'}
-                onChange={() =>
-                  void toggleSubmissionMode(submissionMode === 'structured' ? 'json' : 'structured')
-                }
-              />
-              <span>Advanced JSON mode</span>
-            </label>
-          </div>
           {submissionMode === 'structured' ? (
-            <>
-              <section aria-labelledby="purchases-heading">
-                <h3 id="purchases-heading">Purchases</h3>
-                <div className="agent-plan-list">
+            <div className="plan-workbench-grid">
+              <section className="plan-section" aria-labelledby="purchases-heading">
+                <div className="plan-section-header">
+                  <h3 id="purchases-heading">Purchases</h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSubmissionDraft((draft) => ({
+                        ...draft,
+                        purchases: [...draft.purchases, { partId: '', quantity: '1' }],
+                      }))
+                    }
+                  >
+                    Add purchase
+                  </button>
+                </div>
+                <div className="purchase-list">
                   {submissionDraft.purchases.map((purchase, index) => (
-                    <div className="agent-plan-row" key={`purchase-${index}`}>
+                    <div className="purchase-row" key={`purchase-${index}`}>
                       <label>
-                        Part
+                        <span>Part</span>
                         <select
                           value={purchase.partId}
                           onChange={(event) =>
@@ -589,7 +634,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                         </select>
                       </label>
                       <label>
-                        Qty
+                        <span>Qty</span>
                         <input
                           type="number"
                           min={0}
@@ -606,232 +651,26 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                           }
                         />
                       </label>
-                      <div className="agent-row-actions">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              purchases: draft.purchases.filter((_, itemIndex) => itemIndex !== index),
-                            }))
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      <strong>{purchaseCostLabel(purchase)}</strong>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSubmissionDraft((draft) => ({
+                            ...draft,
+                            purchases: draft.purchases.filter((_, itemIndex) => itemIndex !== index),
+                          }))
+                        }
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
-                </div>
-                <div className="agent-button-row">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSubmissionDraft((draft) => ({
-                        ...draft,
-                        purchases: [...draft.purchases, { partId: '', quantity: '1' }],
-                      }))
-                    }
-                  >
-                    Add purchase
-                  </button>
                 </div>
               </section>
 
-              <section aria-labelledby="blueprint-heading">
-                <h3 id="blueprint-heading">Blueprint</h3>
-                <label>
-                  Name
-                  <input
-                    value={submissionDraft.blueprintName}
-                    onChange={(event) =>
-                      setSubmissionDraft((draft) => ({
-                        ...draft,
-                        blueprintName: event.target.value,
-                      }))
-                    }
-                  />
-                </label>
-                <div className="agent-plan-list">
-                  {submissionDraft.blueprintBlocks.map((block, index) => (
-                    <div className="agent-plan-row" key={`block-${index}`}>
-                      <label>
-                        Block ID
-                        <input
-                          value={block.id}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index ? { ...item, id: event.target.value } : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Part
-                        <select
-                          value={block.partId}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, partId: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        >
-                          <option value="">Select part</option>
-                          {PART_CATALOG.map((part) => (
-                            <option key={part.id} value={part.id}>
-                              {part.displayName}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        Label
-                        <input
-                          value={block.label}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index ? { ...item, label: event.target.value } : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Position X
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.positionX}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, positionX: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Position Y
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.positionY}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, positionY: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Position Z
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.positionZ}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, positionZ: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Rotation X
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.rotationX}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, rotationX: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Rotation Y
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.rotationY}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, rotationY: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <label>
-                        Rotation Z
-                        <input
-                          type="number"
-                          step="0.25"
-                          value={block.rotationZ}
-                          onChange={(event) =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, rotationZ: event.target.value }
-                                  : item,
-                              ),
-                            }))
-                          }
-                        />
-                      </label>
-                      <div className="agent-row-actions">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              blueprintBlocks: draft.blueprintBlocks.filter(
-                                (_, itemIndex) => itemIndex !== index,
-                              ),
-                            }))
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="agent-button-row">
+              <section className="plan-section blueprint-editor" aria-labelledby="blueprint-heading">
+                <div className="plan-section-header">
+                  <h3 id="blueprint-heading">Blueprint</h3>
                   <button
                     type="button"
                     onClick={() =>
@@ -854,18 +693,224 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                       }))
                     }
                   >
-                    Add blueprint block
+                    Add block
                   </button>
+                </div>
+                <label className="blueprint-name-field">
+                  <span>Name</span>
+                  <input
+                    value={submissionDraft.blueprintName}
+                    onChange={(event) =>
+                      setSubmissionDraft((draft) => ({
+                        ...draft,
+                        blueprintName: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <div className="blueprint-block-list">
+                  {submissionDraft.blueprintBlocks.map((block, index) => (
+                    <div className="blueprint-block-row" key={`block-${index}`}>
+                      <label>
+                        <span>Block ID</span>
+                        <input
+                          value={block.id}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, id: event.target.value } : item,
+                              ),
+                            }))
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Part</span>
+                        <select
+                          value={block.partId}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, partId: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        >
+                          <option value="">Select part</option>
+                          {PART_CATALOG.map((part) => (
+                            <option key={part.id} value={part.id}>
+                              {part.displayName}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>Label</span>
+                        <input
+                          value={block.label}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index ? { ...item, label: event.target.value } : item,
+                              ),
+                            }))
+                          }
+                        />
+                      </label>
+                      <fieldset>
+                        <legend>Position</legend>
+                        <input
+                          aria-label={`${block.id || 'block'} position x`}
+                          type="number"
+                          step="0.25"
+                          value={block.positionX}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, positionX: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                        <input
+                          aria-label={`${block.id || 'block'} position y`}
+                          type="number"
+                          step="0.25"
+                          value={block.positionY}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, positionY: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                        <input
+                          aria-label={`${block.id || 'block'} position z`}
+                          type="number"
+                          step="0.25"
+                          value={block.positionZ}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, positionZ: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                      </fieldset>
+                      <fieldset>
+                        <legend>Rotation</legend>
+                        <input
+                          aria-label={`${block.id || 'block'} rotation x`}
+                          type="number"
+                          step="0.25"
+                          value={block.rotationX}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, rotationX: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                        <input
+                          aria-label={`${block.id || 'block'} rotation y`}
+                          type="number"
+                          step="0.25"
+                          value={block.rotationY}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, rotationY: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                        <input
+                          aria-label={`${block.id || 'block'} rotation z`}
+                          type="number"
+                          step="0.25"
+                          value={block.rotationZ}
+                          onChange={(event) =>
+                            setSubmissionDraft((draft) => ({
+                              ...draft,
+                              blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, rotationZ: event.target.value }
+                                  : item,
+                              ),
+                            }))
+                          }
+                        />
+                      </fieldset>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSubmissionDraft((draft) => ({
+                            ...draft,
+                            blueprintBlocks: draft.blueprintBlocks.filter(
+                              (_, itemIndex) => itemIndex !== index,
+                            ),
+                          }))
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </section>
 
-              <section aria-labelledby="turn-plan-heading">
-                <h3 id="turn-plan-heading">Turn plan commands</h3>
-                <div className="agent-plan-list">
+              <section className="plan-section turn-plan-editor" aria-labelledby="turn-plan-heading">
+                <div className="plan-section-header">
+                  <h3 id="turn-plan-heading">Turn plan commands</h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSubmissionDraft((draft) => ({
+                        ...draft,
+                        turnCommands: [
+                          ...draft.turnCommands,
+                          {
+                            tick: String(draft.turnCommands.length + 1),
+                            move: '',
+                            weaponA: '',
+                            weaponB: '',
+                            utility: '',
+                          },
+                        ],
+                      }))
+                    }
+                  >
+                    Add command
+                  </button>
+                </div>
+                <div className="turn-command-list">
                   {submissionDraft.turnCommands.map((command, index) => (
-                    <div className="agent-plan-row" key={`command-${index}`}>
+                    <div className="turn-command-row" key={`command-${index}`}>
                       <label>
-                        Tick
+                        <span>Tick</span>
                         <input
                           type="number"
                           min={1}
@@ -881,7 +926,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                         />
                       </label>
                       <label>
-                        Move
+                        <span>Move</span>
                         <select
                           value={command.move}
                           onChange={(event) =>
@@ -904,7 +949,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                         </select>
                       </label>
                       <label>
-                        Weapon A
+                        <span>Weapon A</span>
                         <select
                           value={command.weaponA}
                           onChange={(event) =>
@@ -924,7 +969,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                         </select>
                       </label>
                       <label>
-                        Weapon B
+                        <span>Weapon B</span>
                         <select
                           value={command.weaponB}
                           onChange={(event) =>
@@ -944,7 +989,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                         </select>
                       </label>
                       <label>
-                        Utility
+                        <span>Utility</span>
                         <select
                           value={command.utility}
                           onChange={(event) =>
@@ -963,47 +1008,23 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                           <option value="hold">hold</option>
                         </select>
                       </label>
-                      <div className="agent-row-actions">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSubmissionDraft((draft) => ({
-                              ...draft,
-                              turnCommands: draft.turnCommands.filter((_, itemIndex) => itemIndex !== index),
-                            }))
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSubmissionDraft((draft) => ({
+                            ...draft,
+                            turnCommands: draft.turnCommands.filter((_, itemIndex) => itemIndex !== index),
+                          }))
+                        }
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                 </div>
-                <div className="agent-button-row">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSubmissionDraft((draft) => ({
-                        ...draft,
-                        turnCommands: [
-                          ...draft.turnCommands,
-                          {
-                            tick: String(draft.turnCommands.length + 1),
-                            move: '',
-                            weaponA: '',
-                            weaponB: '',
-                            utility: '',
-                          },
-                        ],
-                      }))
-                    }
-                  >
-                    Add command
-                  </button>
-                </div>
               </section>
 
-              <section aria-labelledby="rationale-heading">
+              <section className="plan-section rationale-panel" aria-labelledby="rationale-heading">
                 <h3 id="rationale-heading">Rationale</h3>
                 <label className="submission-editor">
                   <span>Notes</span>
@@ -1019,10 +1040,10 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                   />
                 </label>
               </section>
-            </>
+            </div>
           ) : (
-            <label className="submission-editor">
-              Round plan JSON
+            <label className="submission-editor json-editor">
+              <span>Round plan JSON</span>
               <textarea
                 spellCheck={false}
                 value={submissionText}
@@ -1030,78 +1051,70 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               />
             </label>
           )}
-          <div className="agent-button-row">
-            <button
-              type="button"
-              onClick={() => void submitRoundPlan()}
-              disabled={!roleToken || isBusy || Boolean(roleState?.submitted)}
-            >
+
+          <div className="submit-dock">
+            <dl className="agent-facts">
+              <Fact label="Action" value={roleState?.submitted ? 'Submitted' : 'Ready to submit'} />
+              <Fact label="Blueprint" value={`${draftSubmission.blueprint.blocks.length} blocks`} />
+              <Fact label="Plan" value={`${draftSubmission.turnPlan.commands.length} commands`} />
+            </dl>
+            <button type="button" onClick={() => void submitRoundPlan()} disabled={!canSubmitPlan}>
               Submit round plan
             </button>
           </div>
         </section>
 
-        <section className="agent-live-panel" aria-labelledby="error-heading">
-          <SectionTitle id="error-heading" title="Last validation error" />
-          {lastError ? <ErrorPanel error={lastError} /> : <p className="agent-empty">No hard error from the last action.</p>}
-        </section>
+        <aside className="cockpit-reference-stack">
+          <section className="agent-live-panel agent-handoff-panel" aria-labelledby="handoff-heading">
+            <div className="plan-section-header">
+              <SectionTitle id="handoff-heading" title="External agent brief" />
+              <button type="button" onClick={() => void copyExternalAgentBrief()}>
+                Copy brief
+              </button>
+            </div>
+            <textarea
+              className="agent-brief-text"
+              spellCheck={false}
+              readOnly
+              value={externalAgentBriefMarkdown}
+              aria-label="External agent brief"
+            />
+          </section>
 
-        <section className="agent-live-panel" aria-labelledby="inventory-heading">
-          <SectionTitle id="inventory-heading" title="Inventory" />
-          <InventoryTable state={roleState} />
-        </section>
+          <section className="agent-live-panel" aria-labelledby="error-heading">
+            <SectionTitle id="error-heading" title="Last validation error" />
+            {lastError ? <ErrorPanel error={lastError} /> : <p className="agent-empty">No hard error from the last action.</p>}
+          </section>
 
-        <section className="agent-live-panel" aria-labelledby="shop-heading">
-          <SectionTitle id="shop-heading" title="Shop offers" />
-          <PartTable parts={PART_CATALOG.slice(0, 20)} />
-        </section>
+          <section className="agent-live-panel" aria-labelledby="inventory-heading">
+            <SectionTitle id="inventory-heading" title="Inventory" />
+            <InventoryTable state={roleState} />
+          </section>
 
-        <section className="agent-live-panel" aria-labelledby="arena-heading">
-          <SectionTitle id="arena-heading" title="Current arena state" />
-          {publicState ? (
-            <dl className="agent-facts">
-              <Fact label="Arena" value={publicState.arena.name} />
-              <Fact label="Size" value={`${publicState.arena.width} x ${publicState.arena.height}`} />
-              <Fact label="Hazards" value={publicState.arena.activeHazards.join(', ')} />
-              <Fact label="Replay" value={publicState.replayAvailable ? 'Available' : 'Unavailable'} />
-            </dl>
-          ) : (
-            <p className="agent-empty">Public arena state has not loaded.</p>
-          )}
-        </section>
+          <section className="agent-live-panel" aria-labelledby="shop-heading">
+            <SectionTitle id="shop-heading" title="Shop offers" />
+            <PartTable parts={PART_CATALOG.slice(0, 20)} />
+          </section>
 
-        <section className="agent-live-panel" aria-labelledby="awards-heading">
-          <SectionTitle id="awards-heading" title="Available award incentives" />
-          <AwardIncentives state={roleState} publicState={publicState} />
-        </section>
+          <section className="agent-live-panel" aria-labelledby="awards-heading">
+            <SectionTitle id="awards-heading" title="Award incentives" />
+            <AwardIncentives state={roleState} publicState={publicState} />
+          </section>
 
-        <section className="agent-live-panel" aria-labelledby="opponent-heading">
-          <SectionTitle id="opponent-heading" title="Opponent public history" />
-          {roleState ? (
-            <dl className="agent-facts">
-              <Fact label="Opponent role" value={capitalize(roleState.opponent.role)} />
-              <Fact label="Claimed" value={roleState.opponent.claimed ? 'Yes' : 'No'} />
-              <Fact label="Submitted" value={roleState.opponent.submitted ? 'Yes' : 'No'} />
-              <Fact label="Replay" value={roleState.replayAvailable ? 'Available' : 'Unavailable'} />
-            </dl>
-          ) : (
-            <p className="agent-empty">Opponent state is available after role state loads.</p>
-          )}
-        </section>
-
-        <section className="agent-live-panel match-log-panel" aria-labelledby="match-log-heading">
-          <SectionTitle id="match-log-heading" title="Match log" />
-          <ol className="agent-log">
-            {matchLog.map((event) => (
-              <li key={`${event.at}-${event.type}-${event.message}`}>
-                <time dateTime={event.at}>{formatDateTime(event.at)}</time>
-                <strong>{formatPhase(event.type)}</strong>
-                <span>{event.message}</span>
-              </li>
-            ))}
-          </ol>
-          {!roleHasMatchLog ? <p className="agent-empty">No match events loaded.</p> : null}
-        </section>
+          <section className="agent-live-panel match-log-panel" aria-labelledby="match-log-heading">
+            <SectionTitle id="match-log-heading" title="Match log" />
+            <ol className="agent-log">
+              {matchLog.map((event) => (
+                <li key={`${event.at}-${event.type}-${event.message}`}>
+                  <time dateTime={event.at}>{formatDateTime(event.at)}</time>
+                  <strong>{formatPhase(event.type)}</strong>
+                  <span>{event.message}</span>
+                </li>
+              ))}
+            </ol>
+            {!roleHasMatchLog ? <p className="agent-empty">No match events loaded.</p> : null}
+          </section>
+        </aside>
       </div>
 
       <script
@@ -1158,6 +1171,64 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dd>{value}</dd>
     </div>
   )
+}
+
+function PlanMetric({
+  label,
+  tone,
+  value,
+}: {
+  label: string
+  tone?: 'danger' | 'ok'
+  value: string
+}) {
+  return (
+    <div className={`plan-metric ${tone ? `tone-${tone}` : ''}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
+type DraftSummary = {
+  blockCount: number
+  commandCount: number
+  mobilityParts: number
+  purchaseCost: number
+  remainingGold?: number
+  weaponParts: number
+}
+
+function summarizeDraft(draft: RoundPlanDraft, availableGold: number | undefined): DraftSummary {
+  const purchaseCost = draft.purchases.reduce((total, purchase) => {
+    const part = getPart(purchase.partId)
+    const quantity = Math.max(0, Math.trunc(safeNumber(purchase.quantity, 0)))
+
+    return total + (part?.cost ?? 0) * quantity
+  }, 0)
+  const blueprintParts = draft.blueprintBlocks
+    .map((block) => getPart(block.partId))
+    .filter((part): part is PartDefinition => Boolean(part))
+
+  return {
+    blockCount: draft.blueprintBlocks.filter((block) => block.partId.trim()).length,
+    commandCount: draft.turnCommands.length,
+    mobilityParts: blueprintParts.filter((part) => Boolean(part.controls?.movement)).length,
+    purchaseCost,
+    remainingGold: availableGold === undefined ? undefined : availableGold - purchaseCost,
+    weaponParts: blueprintParts.filter((part) => Boolean(part.controls?.weapon)).length,
+  }
+}
+
+function purchaseCostLabel(purchase: PurchaseDraft): string {
+  const part = getPart(purchase.partId)
+  const quantity = Math.max(0, Math.trunc(safeNumber(purchase.quantity, 0)))
+
+  if (!part || quantity <= 0) {
+    return '-'
+  }
+
+  return `${part.cost * quantity}g`
 }
 
 function AwardIncentives({

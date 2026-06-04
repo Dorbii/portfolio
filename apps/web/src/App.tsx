@@ -519,305 +519,410 @@ function RefereeConsole() {
   const phase = publicSession?.phase ?? 'not_started'
   const awardOptions = publicSession?.awardOptions ?? ([] as RefereeAwardOption[])
   const sessionEvents = publicSession?.eventLog ?? ([] as PublicSessionState['eventLog'])
+  const hasAnyInvite = hasInviteForRole('red') || hasInviteForRole('blue')
 
   return (
-    <main className="arena-app">
-      <header className="top-bar">
-        <div className="brand-block">
-          <span className="eyebrow">Agent Arena</span>
-          <h1>Referee Console</h1>
-        </div>
-        <div className="session-strip" aria-live="polite">
-          <Metric label="Session" value={activeSessionId || 'Not loaded'} />
-          <Metric label="Phase" value={formatPhase(phase)} />
-          <Metric label="Round" value={publicSession ? `${publicSession.round} / ${publicSession.maxRounds}` : '0 / 0'} />
-          <Metric
-            label="Replay"
-            value={publicSession ? (publicSession.replayAvailable ? 'Ready' : 'Unavailable') : 'Unavailable'}
-          />
-        </div>
-      </header>
-
-      <section className="referee-grid">
-        <section className="panel">
-          <SectionHeader
-            kicker="Session control"
-            title="Create or load"
-            aside={isActiveSession ? 'Session id controls public visibility.' : 'No active session'}
-          />
-          <div className="referee-form">
-            <label>
-              Session ID
-              <input
-                value={sessionInput}
-                maxLength={64}
-                onChange={(event) => setSessionInput(event.target.value)}
-                disabled={loadState === 'busy'}
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => void setActiveSession(sessionInput)}
-              disabled={loadState === 'busy' || !sessionInput.trim()}
-            >
-              {loadState === 'busy' ? 'Loading...' : 'Load session'}
-            </button>
-            <button
-              type="button"
-              onClick={() => void createNewSession()}
-              disabled={loadState === 'busy'}
-            >
-              {loadState === 'busy' ? 'Creating...' : 'Create new session'}
-            </button>
-            <label>
-              Referee capability token
-              <input
-                type="password"
-                value={manualRefereeToken}
-                onChange={(event) => setManualRefereeToken(event.target.value)}
-                placeholder={
-                  storedRefereeToken
-                    ? 'Stored token loaded from this browser'
-                    : 'Paste token to submit awards'
-                }
-                disabled={submitState === 'submitting'}
-              />
-            </label>
-            <button
-              type="button"
-              disabled={loadState === 'busy'}
-              onClick={() => {
-                if (!activeSessionId) {
-                  setError('Load a session before saving token.')
-                  return
-                }
-
-                if (!manualRefereeToken.trim()) {
-                  setError('Referee token cannot be blank.')
-                  return
-                }
-
-                if (!publicSession) {
-                  setError('Load public session state before saving token.')
-                  return
-                }
-
-                setStoredRefereeToken(manualRefereeToken.trim())
-                writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
-                  refereeToken: manualRefereeToken.trim(),
-                  expiresAt: publicSession.expiresAt,
-                })
-                setError('')
-                setMessage('Token saved for this session in this tab.')
-              }}
-            >
-              Save manual token for this session
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (!activeSessionId) {
-                  setError('Load a session before clearing token.')
-                  return
-                }
-                clearStoredSession(window.sessionStorage, apiBase, activeSessionId)
-                setStoredRefereeToken('')
-                setInvites([])
-                setMessage('Stored referee token cleared for this tab.')
-              }}
-              disabled={!storedRefereeToken}
-            >
-              Clear stored token
-            </button>
+    <main className="arena-app match-console">
+      <aside className="director-sidebar" aria-label="Referee navigation">
+        <div className="director-brand">
+          <span className="brand-mark" aria-hidden="true">A</span>
+          <div>
+            <span className="eyebrow">Agent Arena</span>
+            <h1>Referee Console</h1>
           </div>
-        </section>
+        </div>
+        <nav className="director-nav">
+          <a className="active" href="#overview">Overview</a>
+          <a href="#agents">Agents</a>
+          <a href="#awards">Awards</a>
+          <a href="#match-log">Match Log</a>
+          <a href="#session">Session</a>
+        </nav>
+        <div className="referee-identity">
+          <span className="referee-avatar" aria-hidden="true">R</span>
+          <div>
+            <strong>Referee</strong>
+            <span>{hasRefereeToken ? 'Capability token loaded' : 'Token not loaded'}</span>
+          </div>
+        </div>
+      </aside>
 
-        <section className="panel">
-          <SectionHeader kicker="Role visibility" title="Claimed / Submitted" />
-          {publicSession ? <PublicRoleStatus roles={publicSession.roles} /> : <p className="referee-empty">Load session for role status.</p>}
-        </section>
+      <div className="director-workspace">
+        <header className="score-header">
+          <div className="round-block">
+            <strong>{publicSession ? `Round ${publicSession.round} / ${publicSession.maxRounds}` : 'No Session'}</strong>
+            <span>{publicSession ? `Best of ${publicSession.maxRounds}` : 'Create or load a session'}</span>
+          </div>
+          <div className="score-cluster" aria-live="polite">
+            <TeamScoreCard
+              role="red"
+              roleState={publicSession?.roles.red}
+              winner={publicSession?.lastResult?.winner}
+            />
+            <span className="versus">vs</span>
+            <TeamScoreCard
+              role="blue"
+              roleState={publicSession?.roles.blue}
+              winner={publicSession?.lastResult?.winner}
+            />
+          </div>
+          <div className="phase-block">
+            <span>Phase</span>
+            <strong>{formatPhase(phase)}</strong>
+          </div>
+          <button
+            type="button"
+            className="header-action"
+            disabled={!canSubmitAwards}
+            onClick={() => void submitAwards()}
+          >
+            {submitState === 'submitting' ? 'Submitting' : 'Submit Awards'}
+          </button>
+        </header>
 
-        <section className="panel">
-          <SectionHeader
-            kicker="Agent handoff"
-            title="Wake agents"
-            aside="Brief includes the invite URL."
-          />
-          <InvitePanel
-            role="red"
-            inviteUrl={redInviteUrl}
-            agentBrief={redAgentBrief}
-            hasInvite={hasInviteForRole('red')}
-            onCopyBrief={() => void copyAgentBrief('red', redAgentBrief)}
-            onOpen={() => window.open(redInviteUrl, '_blank')}
-            onRefreshClaim={() => void refreshRoleClaim('red')}
-            canRefreshClaim={canRefreshRoleClaim}
-          />
-          <InvitePanel
-            role="blue"
-            inviteUrl={blueInviteUrl}
-            agentBrief={blueAgentBrief}
-            hasInvite={hasInviteForRole('blue')}
-            onCopyBrief={() => void copyAgentBrief('blue', blueAgentBrief)}
-            onOpen={() => window.open(blueInviteUrl, '_blank')}
-            onRefreshClaim={() => void refreshRoleClaim('blue')}
-            canRefreshClaim={canRefreshRoleClaim}
-          />
-          {!hasInviteForRole('red') && !hasInviteForRole('blue') ? (
-            <p className="referee-empty">
-              Invite URLs are available only for sessions created in this console.
-            </p>
-          ) : null}
-        </section>
+        <section className="director-content" id="overview">
+          <section className="director-main-column">
+            <section className="panel arena-stage-card">
+              <SectionHeader
+                kicker="Arena replay"
+                title={publicSession?.arena.name ?? 'Combat replay'}
+                aside={
+                  publicSession?.replayAvailable
+                    ? replayPayload
+                      ? 'Post-combat public blueprints.'
+                      : 'Fetching replay payload.'
+                    : 'Available after both agents submit.'
+                }
+              />
+              <div className="referee-replay-frame">
+                {publicSession?.replayAvailable && replayPayload ? (
+                  <ReplayViewer
+                    arena={publicSession.arena}
+                    botBlueprints={replayPayload.botBlueprints}
+                    timeline={replayPayload.timeline}
+                  />
+                ) : publicSession?.replayAvailable ? (
+                  <p className={replayError ? 'referee-error replay-inline-error' : 'referee-empty'}>
+                    {replayError || (replayLoadState === 'busy' ? 'Loading replay data.' : 'Replay data is not loaded yet.')}
+                  </p>
+                ) : (
+                  <p className="referee-empty replay-placeholder">Replay appears here after both role plans resolve.</p>
+                )}
+              </div>
+            </section>
 
-        <section className="panel live-replay-panel">
-          <SectionHeader
-            kicker="Live replay"
-            title="Combat replay"
-            aside={
-              publicSession?.replayAvailable
-                ? replayPayload
-                  ? 'Rendering post-combat public blueprints.'
-                  : 'Fetching replay payload.'
-                : 'Available after both agents submit.'
-            }
-          />
-          <div className="referee-replay-layout">
-            <div className="referee-replay-frame">
-              {publicSession?.replayAvailable && replayPayload ? (
-                <ReplayViewer
-                  arena={publicSession.arena}
-                  botBlueprints={replayPayload.botBlueprints}
-                  timeline={replayPayload.timeline}
-                />
-              ) : publicSession?.replayAvailable ? (
-                <p className={replayError ? 'referee-error replay-inline-error' : 'referee-empty'}>
-                  {replayError || (replayLoadState === 'busy' ? 'Loading replay data.' : 'Replay data is not loaded yet.')}
-                </p>
+            <section className="panel awards-dock" id="awards">
+              <SectionHeader
+                kicker="Referee awards"
+                title="Pick round awards"
+                aside="Max 2 total, max 1 per team."
+              />
+              {(awardOptions.length === 0) ? (
+                <p className="referee-empty">No award options in current phase.</p>
               ) : (
-                <p className="referee-empty">Replay appears here after both role plans resolve.</p>
+                <div className="award-stack">
+                  {awardOptions.map((option) => {
+                    const selectedTeam = selectedAwards[option.id]
+
+                    return (
+                      <article className="award-card" key={option.id}>
+                        <div className="award-card-header">
+                          <h3>{option.title}</h3>
+                          <strong>+{option.gold}g</strong>
+                        </div>
+                        <p>{option.description}</p>
+                        <div className="award-team-actions">
+                          <button
+                            type="button"
+                            className={`team-choice red ${selectedTeam === 'red' ? 'selected' : ''}`}
+                            aria-pressed={selectedTeam === 'red'}
+                            onClick={() => toggleAwardSelection(option.id, 'red')}
+                            disabled={publicSession?.phase !== 'referee_awards'}
+                          >
+                            Red
+                          </button>
+                          <button
+                            type="button"
+                            className={`team-choice blue ${selectedTeam === 'blue' ? 'selected' : ''}`}
+                            aria-pressed={selectedTeam === 'blue'}
+                            onClick={() => toggleAwardSelection(option.id, 'blue')}
+                            disabled={publicSession?.phase !== 'referee_awards'}
+                          >
+                            Blue
+                          </button>
+                        </div>
+                      </article>
+                    )
+                  })}
+                  <div className="award-action-bar">
+                    <strong>
+                      {selectedCount} / {MAX_AWARDS_PER_ROUND} selected
+                    </strong>
+                    <span>
+                      Red {selectedForTeam.red} / {MAX_AWARDS_PER_TEAM}, Blue{' '}
+                      {selectedForTeam.blue} / {MAX_AWARDS_PER_TEAM}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={!canSubmitAwards}
+                      onClick={() => void submitAwards()}
+                    >
+                      {submitState === 'submitting' ? 'Submitting awards...' : 'Submit awards'}
+                    </button>
+                  </div>
+                </div>
               )}
-            </div>
+            </section>
+          </section>
+
+          <aside className="director-right-rail">
             <ReplayOutcome
               publicSession={publicSession}
               replayPayload={replayPayload}
             />
-          </div>
-        </section>
 
-        <section className="panel">
-          <SectionHeader
-            kicker="Awards"
-            title="Referee award options"
-            aside="Max 2 total, max 1 per team."
-          />
-          {(awardOptions.length === 0) ? (
-            <p className="referee-empty">No award options in current phase.</p>
-          ) : (
-            <div className="award-stack">
-              {awardOptions.map((option) => {
-                const selectedTeam = selectedAwards[option.id]
+            <section className="panel team-record-panel">
+              <SectionHeader kicker="Team record" title="Public standings" />
+              {publicSession ? (
+                <div className="team-record-grid">
+                  <TeamRecordCard role="red" roleState={publicSession.roles.red} />
+                  <TeamRecordCard role="blue" roleState={publicSession.roles.blue} />
+                </div>
+              ) : (
+                <p className="referee-empty">Load session for public team state.</p>
+              )}
+            </section>
 
-                return (
-                  <article className="award-card" key={option.id}>
-                    <div className="award-card-header">
-                      <h3>{option.title}</h3>
-                      <strong>+{option.gold}g</strong>
-                    </div>
-                    <p>{option.description}</p>
-                    <div className="award-team-actions">
-                      <button
-                        type="button"
-                        className={`team-choice red ${selectedTeam === 'red' ? 'selected' : ''}`}
-                        aria-pressed={selectedTeam === 'red'}
-                        onClick={() => toggleAwardSelection(option.id, 'red')}
-                        disabled={
-                          publicSession?.phase !== 'referee_awards'
-                        }
-                      >
-                        Red
-                      </button>
-                      <button
-                        type="button"
-                        className={`team-choice blue ${selectedTeam === 'blue' ? 'selected' : ''}`}
-                        aria-pressed={selectedTeam === 'blue'}
-                        onClick={() => toggleAwardSelection(option.id, 'blue')}
-                        disabled={
-                          publicSession?.phase !== 'referee_awards'
-                        }
-                      >
-                        Blue
-                      </button>
-                    </div>
-                  </article>
-                )
-              })}
-              <div className="award-action-bar">
-                <strong>
-                  {selectedCount} / {MAX_AWARDS_PER_ROUND} selected
-                </strong>
-                <span>
-                  Team split: red {selectedForTeam.red} / {MAX_AWARDS_PER_TEAM} , blue{' '}
-                  {selectedForTeam.blue} / {MAX_AWARDS_PER_TEAM}
-                </span>
-                <button
-                  type="button"
-                  disabled={!canSubmitAwards}
-                  onClick={() => void submitAwards()}
-                >
-                  {submitState === 'submitting' ? 'Submitting awards...' : 'Submit awards'}
-                </button>
+            <section className="panel" id="session">
+              <SectionHeader
+                kicker="Session control"
+                title="Create or load"
+                aside={isActiveSession ? 'Public state by session id.' : 'No active session'}
+              />
+              <div className="session-metrics">
+                <Metric label="Session" value={activeSessionId || 'Not loaded'} />
+                <Metric
+                  label="Replay"
+                  value={publicSession ? (publicSession.replayAvailable ? 'Ready' : 'Unavailable') : 'Unavailable'}
+                />
               </div>
-            </div>
-          )}
+              <div className="referee-form compact-form">
+                <label>
+                  Session ID
+                  <input
+                    value={sessionInput}
+                    maxLength={64}
+                    onChange={(event) => setSessionInput(event.target.value)}
+                    disabled={loadState === 'busy'}
+                  />
+                </label>
+                <div className="button-pair">
+                  <button
+                    type="button"
+                    onClick={() => void setActiveSession(sessionInput)}
+                    disabled={loadState === 'busy' || !sessionInput.trim()}
+                  >
+                    {loadState === 'busy' ? 'Loading...' : 'Load session'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void createNewSession()}
+                    disabled={loadState === 'busy'}
+                  >
+                    {loadState === 'busy' ? 'Creating...' : 'Create new'}
+                  </button>
+                </div>
+                <label>
+                  Referee capability token
+                  <input
+                    type="password"
+                    value={manualRefereeToken}
+                    onChange={(event) => setManualRefereeToken(event.target.value)}
+                    placeholder={
+                      storedRefereeToken
+                        ? 'Stored token loaded from this browser'
+                        : 'Paste token to submit awards'
+                    }
+                    disabled={submitState === 'submitting'}
+                  />
+                </label>
+                <div className="button-pair">
+                  <button
+                    type="button"
+                    disabled={loadState === 'busy'}
+                    onClick={() => {
+                      if (!activeSessionId) {
+                        setError('Load a session before saving token.')
+                        return
+                      }
+
+                      if (!manualRefereeToken.trim()) {
+                        setError('Referee token cannot be blank.')
+                        return
+                      }
+
+                      if (!publicSession) {
+                        setError('Load public session state before saving token.')
+                        return
+                      }
+
+                      setStoredRefereeToken(manualRefereeToken.trim())
+                      writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
+                        refereeToken: manualRefereeToken.trim(),
+                        expiresAt: publicSession.expiresAt,
+                      })
+                      setError('')
+                      setMessage('Token saved for this session in this tab.')
+                    }}
+                  >
+                    Save token
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!activeSessionId) {
+                        setError('Load a session before clearing token.')
+                        return
+                      }
+                      clearStoredSession(window.sessionStorage, apiBase, activeSessionId)
+                      setStoredRefereeToken('')
+                      setInvites([])
+                      setMessage('Stored referee token cleared for this tab.')
+                    }}
+                    disabled={!storedRefereeToken}
+                  >
+                    Clear token
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section className="panel" id="agents">
+              <SectionHeader
+                kicker="Agent handoff"
+                title="Wake agents"
+                aside={hasAnyInvite ? 'Invite URL included.' : 'Create session first.'}
+              />
+              {publicSession ? <PublicRoleStatus roles={publicSession.roles} /> : null}
+              <InvitePanel
+                role="red"
+                inviteUrl={redInviteUrl}
+                agentBrief={redAgentBrief}
+                hasInvite={hasInviteForRole('red')}
+                onCopyBrief={() => void copyAgentBrief('red', redAgentBrief)}
+                onOpen={() => window.open(redInviteUrl, '_blank')}
+                onRefreshClaim={() => void refreshRoleClaim('red')}
+                canRefreshClaim={canRefreshRoleClaim}
+              />
+              <InvitePanel
+                role="blue"
+                inviteUrl={blueInviteUrl}
+                agentBrief={blueAgentBrief}
+                hasInvite={hasInviteForRole('blue')}
+                onCopyBrief={() => void copyAgentBrief('blue', blueAgentBrief)}
+                onOpen={() => window.open(blueInviteUrl, '_blank')}
+                onRefreshClaim={() => void refreshRoleClaim('blue')}
+                canRefreshClaim={canRefreshRoleClaim}
+              />
+              {!hasAnyInvite ? (
+                <p className="referee-empty">
+                  Invite URLs are available only for sessions created in this console.
+                </p>
+              ) : null}
+            </section>
+
+            <section className="panel" id="match-log">
+              <SectionHeader kicker="Match log" title="Public events" />
+              <ol className="event-log">
+                {sessionEvents.map((event) => (
+                  <li key={`${event.at}-${event.type}-${event.message}`}>
+                    <span>{event.at}</span>
+                    <p>{event.message}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <section className="panel">
+              <SectionHeader kicker="Status" title="Diagnostics" />
+              <dl className="status-list">
+                <div>
+                  <dt>Token</dt>
+                  <dd>{hasRefereeToken ? 'Loaded' : 'Not loaded'}</dd>
+                </div>
+                <div>
+                  <dt>Polls</dt>
+                  <dd>
+                    {publicSession && !isTerminalPhase(publicSession.phase)
+                      ? `Active (${formatPollInterval(POLL_INTERVAL_MS)})`
+                      : 'Stopped'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Auth</dt>
+                  <dd>Bearer referee token</dd>
+                </div>
+              </dl>
+            </section>
+          </aside>
         </section>
 
-        <section className="panel">
-          <SectionHeader kicker="Session log" title="Public events" />
-          <ol className="event-log">
-            {sessionEvents.map((event) => (
-              <li key={`${event.at}-${event.type}-${event.message}`}>
-                <span>{event.at}</span>
-                <p>{event.message}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="panel">
-          <SectionHeader kicker="Status" title="Session diagnostics" />
-          <dl className="status-list">
-            <div>
-              <dt>Referee token</dt>
-              <dd>{hasRefereeToken ? 'Loaded' : 'Not loaded'}</dd>
-            </div>
-            <div>
-              <dt>Live polls</dt>
-              <dd>
-                {publicSession && !isTerminalPhase(publicSession.phase)
-                  ? `Active (${formatPollInterval(POLL_INTERVAL_MS)})`
-                  : 'Stopped'}
-              </dd>
-            </div>
-            <div>
-              <dt>Resume behavior</dt>
-              <dd>Public state loads with session id only.</dd>
-            </div>
-            <div>
-              <dt>Submit auth</dt>
-              <dd>Bearer referee token required.</dd>
-            </div>
-            <div>
-              <dt>Invite token field</dt>
-              <dd>Uses claimToken for role invites.</dd>
-            </div>
-          </dl>
-        </section>
-      </section>
-
-      {message ? <p className="referee-message" role="status">{message}</p> : null}
-      {error ? <p className="referee-error" role="alert">{error}</p> : null}
+        {message ? <p className="referee-message" role="status">{message}</p> : null}
+        {error ? <p className="referee-error" role="alert">{error}</p> : null}
+      </div>
     </main>
+  )
+}
+
+function TeamScoreCard({
+  role,
+  roleState,
+  winner,
+}: {
+  role: TeamRole
+  roleState?: RolePublicState
+  winner?: TeamRole | 'draw'
+}) {
+  const isWinner = winner === role
+
+  return (
+    <div className={`score-team ${role} ${isWinner ? 'winner' : ''}`}>
+      <span>{teamName(role)}</span>
+      <strong>{roleState?.wins ?? 0}</strong>
+      <small>{roleStatus(roleState)}</small>
+    </div>
+  )
+}
+
+function TeamRecordCard({
+  role,
+  roleState,
+}: {
+  role: TeamRole
+  roleState: RolePublicState
+}) {
+  return (
+    <article className={`team-record-card ${role}`}>
+      <h3>{teamName(role)}</h3>
+      <dl>
+        <div>
+          <dt>Wins</dt>
+          <dd>{roleState.wins ?? 0}</dd>
+        </div>
+        <div>
+          <dt>Losses</dt>
+          <dd>{roleState.losses ?? 0}</dd>
+        </div>
+        <div>
+          <dt>Streak</dt>
+          <dd>{roleState.winStreak ?? 0}</dd>
+        </div>
+        <div>
+          <dt>State</dt>
+          <dd>{roleStatus(roleState)}</dd>
+        </div>
+      </dl>
+    </article>
   )
 }
 
@@ -993,6 +1098,26 @@ function isAgentPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
   return normalized === '/agent' || normalized.endsWith('/agent')
+}
+
+function teamName(role: TeamRole): string {
+  return `${capitalize(role)} Team`
+}
+
+function roleStatus(roleState: RolePublicState | undefined): string {
+  if (!roleState) {
+    return 'Waiting'
+  }
+
+  if (roleState.submitted) {
+    return 'Submitted'
+  }
+
+  if (roleState.claimed) {
+    return 'Claimed'
+  }
+
+  return 'Open'
 }
 
 function formatPhase(phase: string) {

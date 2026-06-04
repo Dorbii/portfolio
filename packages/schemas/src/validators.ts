@@ -1,10 +1,12 @@
 import {
+  AGENT_CHAT_MESSAGE_KINDS,
   MAX_REFEREE_AWARDS_PER_ROUND,
   MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND,
   MOVEMENT_COMMANDS,
   TEAM_ROLES,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
+  type AgentChatMessageRequest,
   type ArenaConfig,
   type RefereeAwardOption,
   type RefereeAwardSelection,
@@ -27,6 +29,8 @@ const MAX_CREATE_SESSION_HAZARDS = 12
 const MAX_CREATE_SESSION_HAZARD_LENGTH = 64
 const MAX_ROLE_CLAIM_TOKEN_LENGTH = 256
 const MAX_ROLE_CLAIM_AGENT_NAME_LENGTH = 80
+const MAX_AGENT_CHAT_MESSAGE_LENGTH = 420
+const MAX_AGENT_CHAT_MESSAGES_PER_SUBMISSION = 3
 const MIN_CREATE_SESSION_TTL_SECONDS = 60
 const MAX_CREATE_SESSION_TTL_SECONDS = 24 * 60 * 60
 const MIN_CREATE_SESSION_ROUNDS = 1
@@ -693,7 +697,94 @@ export function validateRoundPlanSubmissionShape(
     )
   }
 
+  if ('chat' in value) {
+    const chatResult = validateAgentChatMessageBatchShape(
+      value.chat,
+      'submission.chat',
+      MAX_AGENT_CHAT_MESSAGES_PER_SUBMISSION,
+    )
+
+    if (!chatResult.ok) {
+      issues.push(...chatResult.issues)
+    }
+  }
+
   return result(issues)
+}
+
+export function validateAgentChatMessageRequestShape(
+  value: unknown,
+): ValidationResult {
+  return result(validateAgentChatMessageShape(value, 'chat'))
+}
+
+function validateAgentChatMessageBatchShape(
+  value: unknown,
+  path: string,
+  maxMessages: number,
+): ValidationResult {
+  const issues: ValidationIssue[] = []
+
+  if (!Array.isArray(value)) {
+    return {
+      ok: false,
+      issues: [issue('INVALID_CHAT', path, 'Expected chat message array.')],
+    }
+  }
+
+  if (value.length > maxMessages) {
+    issues.push(
+      issue(
+        'TOO_MANY_CHAT_MESSAGES',
+        path,
+        `Submit at most ${maxMessages} chat messages with a round plan.`,
+      ),
+    )
+  }
+
+  value.forEach((message, index) => {
+    issues.push(...validateAgentChatMessageShape(message, `${path}.${index}`))
+  })
+
+  return result(issues)
+}
+
+function validateAgentChatMessageShape(
+  value: unknown,
+  path: string,
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return [issue('INVALID_CHAT_MESSAGE', path, 'Expected chat message object.')]
+  }
+
+  if (typeof value.message !== 'string' || value.message.trim().length === 0) {
+    issues.push(issue('INVALID_CHAT_MESSAGE', `${path}.message`, 'Message must be non-empty text.'))
+  } else if (value.message.length > MAX_AGENT_CHAT_MESSAGE_LENGTH) {
+    issues.push(
+      issue(
+        'CHAT_MESSAGE_TOO_LONG',
+        `${path}.message`,
+        `Message max length is ${MAX_AGENT_CHAT_MESSAGE_LENGTH}.`,
+      ),
+    )
+  }
+
+  if (
+    'kind' in value &&
+    !AGENT_CHAT_MESSAGE_KINDS.includes(value.kind as AgentChatMessageRequest['kind'])
+  ) {
+    issues.push(
+      issue(
+        'INVALID_CHAT_KIND',
+        `${path}.kind`,
+        `Chat kind must be one of ${AGENT_CHAT_MESSAGE_KINDS.join(', ')}.`,
+      ),
+    )
+  }
+
+  return issues
 }
 
 export function asRoundPlanSubmission(value: unknown): RoundPlanSubmission | null {

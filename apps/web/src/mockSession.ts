@@ -161,6 +161,19 @@ const eventLog = [
   },
 ]
 
+const chatLog = [
+  {
+    id: 's_mock_7f2:chat:1',
+    at: '14:16',
+    round: 3,
+    phase: 'referee_awards' as const,
+    role: 'blue' as const,
+    agentName: 'blue-agent',
+    kind: 'reflection' as const,
+    message: 'Net control worked; next round should keep distance and add armor.',
+  },
+]
+
 export const mockPublicSession: PublicSessionState = {
   sessionId: 's_mock_7f2',
   stateVersion: 'mock|referee_awards|3|red-submitted|blue-submitted|4',
@@ -195,6 +208,7 @@ export const mockPublicSession: PublicSessionState = {
       blue: 46,
     },
   },
+  chatLog,
   eventLog,
 }
 
@@ -258,6 +272,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     opponent: mockPublicSession.roles.blue,
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
+    chatLog,
     eventLog,
   },
   blue: {
@@ -319,6 +334,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     opponent: mockPublicSession.roles.red,
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
+    chatLog,
     eventLog,
   },
 }

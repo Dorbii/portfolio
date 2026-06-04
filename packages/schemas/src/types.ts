@@ -148,12 +148,27 @@ export type TurnPlan = {
   commands: TurnCommand[]
 }
 
+export const AGENT_CHAT_MESSAGE_KINDS = [
+  'taunt',
+  'observation',
+  'strategy',
+  'reflection',
+] as const
+
+export type AgentChatMessageKind = (typeof AGENT_CHAT_MESSAGE_KINDS)[number]
+
+export type AgentChatMessageRequest = {
+  message: string
+  kind?: AgentChatMessageKind
+}
+
 export type RoundPlanSubmission = {
   action: 'submit_round_plan'
   purchases: Purchase[]
   blueprint: BotBlueprint
   turnPlan: TurnPlan
   rationale?: string
+  chat?: AgentChatMessageRequest[]
 }
 
 export type ArenaConfig = {
@@ -161,6 +176,17 @@ export type ArenaConfig = {
   width: number
   height: number
   activeHazards: string[]
+}
+
+export type SessionChatMessage = {
+  id: string
+  at: string
+  round: number
+  phase: SessionPhase
+  role: TeamRole
+  agentName?: string
+  kind: AgentChatMessageKind
+  message: string
 }
 
 export type ValidationIssue = {

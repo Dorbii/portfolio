@@ -121,12 +121,19 @@ export function BabylonReplayScene({
       const fill = new DirectionalLight('fill', new Vector3(0.35, -0.75, -0.35), scene)
       const accent = new PointLight('accent', new Vector3(0, 3.8, 0), scene)
       const rim = new PointLight('rim', new Vector3(0, 1.4, 0), scene)
+      const redSide = new PointLight('red-side', new Vector3(-arena.width * 0.42, 2.1, 0), scene)
+      const blueSide = new PointLight('blue-side', new Vector3(arena.width * 0.42, 2.1, 0), scene)
 
-      hemi.intensity = 0.8
-      key.intensity = 0.9
-      fill.intensity = 0.45
-      accent.intensity = 0.4
-      rim.intensity = 0.25
+      hemi.intensity = 0.48
+      key.intensity = 1.05
+      fill.intensity = 0.38
+      accent.intensity = 0.58
+      rim.intensity = 0.34
+      redSide.intensity = 0.65
+      blueSide.intensity = 0.65
+      redSide.diffuse = Color3.FromHexString('#ff4356')
+      blueSide.diffuse = Color3.FromHexString('#4ca9ff')
+      accent.diffuse = Color3.FromHexString('#ffd36a')
 
       accent.position = new Vector3(0, 5.8, 0)
       rim.position = new Vector3(0, 5.1, -3)
@@ -243,14 +250,29 @@ export function BabylonReplayScene({
 }
 
 function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
-  const floorMaterial = createSceneMaterial(scene, 'floor-mat', '#101716', '#030404')
-  const seamMaterial = createSceneMaterial(scene, 'panel-mat', '#262f2d', '#070b0b')
-  const wallMaterial = createSceneMaterial(scene, 'wall-mat', '#4a5655', '#090d0e')
-  const glassMaterial = createSceneMaterial(scene, 'glass-mat', '#86d1fc', '#04101a', 0.24)
-  const redPadMaterial = createSceneMaterial(scene, 'red-pad-mat', '#72232f', '#2a080d', 0.9)
-  const bluePadMaterial = createSceneMaterial(scene, 'blue-pad-mat', '#1c3e65', '#061626', 0.9)
-  const hazardMaterial = createSceneMaterial(scene, 'hazard-mat', '#d6ad43', '#4f330a')
-  const centerMaterial = createSceneMaterial(scene, 'center-mark-mat', '#2d3940', '#06090c')
+  const floorMaterial = createSceneMaterial(scene, 'floor-mat', '#151a1a', '#020303', 1, 0.24)
+  const seamMaterial = createSceneMaterial(scene, 'panel-mat', '#334043', '#060808', 1, 0.28)
+  const wallMaterial = createSceneMaterial(scene, 'wall-mat', '#2b3134', '#050607', 1, 0.22)
+  const apronMaterial = createSceneMaterial(scene, 'arena-apron-mat', '#080b0d', '#010202')
+  const glassMaterial = createSceneMaterial(scene, 'glass-mat', '#8bdfff', '#061824', 0.24, 0.5)
+  const trimMaterial = createSceneMaterial(scene, 'arena-trim-mat', '#101315', '#030404')
+  const warningMaterial = createSceneMaterial(scene, 'arena-warning-mat', '#d8ae33', '#4c3105', 1, 0.18)
+  const redPadMaterial = createSceneMaterial(scene, 'red-pad-mat', '#8f2632', '#37080e', 0.9, 0.28)
+  const bluePadMaterial = createSceneMaterial(scene, 'blue-pad-mat', '#1f5c97', '#061d34', 0.9, 0.28)
+  const redLightMaterial = createSceneMaterial(scene, 'red-led-mat', '#ff5968', '#ff2438', 1, 0.1)
+  const blueLightMaterial = createSceneMaterial(scene, 'blue-led-mat', '#57adff', '#167fff', 1, 0.1)
+  const whiteLightMaterial = createSceneMaterial(scene, 'white-led-mat', '#dfefff', '#9bd7ff', 1, 0.1)
+  const hazardMaterial = createSceneMaterial(scene, 'hazard-mat', '#f0bd3c', '#654006', 1, 0.18)
+  const hatchMaterial = createSceneMaterial(scene, 'hatch-mat', '#101416', '#020303')
+  const centerMaterial = createSceneMaterial(scene, 'center-mark-mat', '#5b676c', '#10161b', 0.78)
+
+  const apron = MeshBuilder.CreateBox(
+    'arena-apron',
+    { width: arena.width + 1.2, height: 0.32, depth: arena.height + 1.2 },
+    scene,
+  )
+  apron.position.y = -0.26
+  apron.material = apronMaterial
 
   const floor = MeshBuilder.CreateBox(
     'arena-floor',
@@ -259,6 +281,7 @@ function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
   )
   floor.position.y = -0.08
   floor.material = floorMaterial
+  createFloorPlateDetails(scene, arena.width, arena.height, seamMaterial, trimMaterial)
 
   const seamColumns = 8
   const seamRows = 6
@@ -289,10 +312,13 @@ function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
   createWall(scene, 'south-wall', 0, -arena.height / 2 - 0.03, arena.width, 0.26, wallMaterial)
   createWall(scene, 'east-wall', arena.width / 2 + 0.03, 0, 0.26, arena.height, wallMaterial)
   createWall(scene, 'west-wall', -arena.width / 2 - 0.03, 0, 0.26, arena.height, wallMaterial)
+  createBumperSegments(scene, arena.width, arena.height, warningMaterial, trimMaterial)
   createGlass(scene, 'north-glass', 0, arena.height / 2 - 0.14, arena.width, 0.08, glassMaterial)
   createGlass(scene, 'south-glass', 0, -arena.height / 2 + 0.14, arena.width, 0.08, glassMaterial)
   createGlass(scene, 'east-glass', arena.width / 2 - 0.14, 0, 0.08, arena.height, glassMaterial)
   createGlass(scene, 'west-glass', -arena.width / 2 + 0.14, 0, 0.08, arena.height, glassMaterial)
+  createGlassPosts(scene, arena.width, arena.height, trimMaterial)
+  createArenaLightBars(scene, arena.width, arena.height, redLightMaterial, blueLightMaterial, whiteLightMaterial)
 
   const marker = MeshBuilder.CreateTorus(
     'arena-center-mark',
@@ -301,41 +327,31 @@ function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
   )
   marker.position.y = 0.04
   marker.material = centerMaterial
+  marker.rotation.x = Math.PI / 2
+  createCenterLogo(scene, centerMaterial, whiteLightMaterial)
 
-  const redPad = MeshBuilder.CreateBox(
-    'red-spawn-pad',
-    { width: 5.2, height: 0.036, depth: 3.4 },
+  createSpawnPad(
     scene,
+    'red',
+    -arena.width * 0.34,
+    0,
+    redPadMaterial,
+    redLightMaterial,
+    trimMaterial,
   )
-  redPad.position.set(-arena.width * 0.34, 0.015, 0)
-  redPad.material = redPadMaterial
-  const redPadBeacon = MeshBuilder.CreateTorus(
-    'red-spawn-beacon',
-    { diameter: 2.6, thickness: 0.09, tessellation: 24 },
+  createSpawnPad(
     scene,
+    'blue',
+    arena.width * 0.34,
+    0,
+    bluePadMaterial,
+    blueLightMaterial,
+    trimMaterial,
   )
-
-  redPadBeacon.position.set(redPad.position.x, 0.08, redPad.position.z)
-  redPadBeacon.material = redPadMaterial
-
-  const bluePad = MeshBuilder.CreateBox(
-    'blue-spawn-pad',
-    { width: 5.2, height: 0.036, depth: 3.4 },
-    scene,
-  )
-  bluePad.position.set(arena.width * 0.34, 0.015, 0)
-  bluePad.material = bluePadMaterial
-
-  const bluePadBeacon = MeshBuilder.CreateTorus(
-    'blue-spawn-beacon',
-    { diameter: 2.6, thickness: 0.09, tessellation: 24 },
-    scene,
-  )
-  bluePadBeacon.position.set(bluePad.position.x, 0.08, bluePad.position.z)
-  bluePadBeacon.material = bluePadMaterial
+  createStaticTrapDoors(scene, arena.width, arena.height, hatchMaterial, warningMaterial, trimMaterial)
 
   const hazardPlates = createHazardVisuals(scene, arena)
-  const arenaBoundaryPostMaterial = createSceneMaterial(scene, 'post-mat', '#1b1e23', '#08090b')
+  const arenaBoundaryPostMaterial = createSceneMaterial(scene, 'post-mat', '#171b20', '#050608')
 
   createBoundaryPosts(scene, arenaBoundaryPostMaterial, arena.width, arena.height)
   createCornerMarkers(scene, arena.width, arena.height, arenaBoundaryPostMaterial)
@@ -364,6 +380,306 @@ function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
   return hazardPlates
 }
 
+function createFloorPlateDetails(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  seamMaterial: StandardMaterial,
+  trimMaterial: StandardMaterial,
+): void {
+  const panelWidth = arenaWidth / 4
+  const panelDepth = arenaHeight / 3
+
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 3; row += 1) {
+      const x = -arenaWidth / 2 + panelWidth * (column + 0.5)
+      const z = -arenaHeight / 2 + panelDepth * (row + 0.5)
+      const plate = MeshBuilder.CreateBox(
+        `floor-plate-${column}-${row}`,
+        { width: panelWidth - 0.24, height: 0.018, depth: panelDepth - 0.24 },
+        scene,
+      )
+
+      plate.position.set(x, -0.002, z)
+      plate.material = column === 1 || column === 2 ? seamMaterial : trimMaterial
+    }
+  }
+
+  for (let column = 0; column <= 4; column += 1) {
+    for (let row = 0; row <= 3; row += 1) {
+      const bolt = MeshBuilder.CreateCylinder(
+        `floor-bolt-${column}-${row}`,
+        { height: 0.035, diameter: 0.09, tessellation: 8 },
+        scene,
+      )
+
+      bolt.position.set(
+        -arenaWidth / 2 + column * panelWidth,
+        0.028,
+        -arenaHeight / 2 + row * panelDepth,
+      )
+      bolt.rotation.x = Math.PI / 2
+      bolt.material = trimMaterial
+    }
+  }
+}
+
+function createBumperSegments(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  warningMaterial: StandardMaterial,
+  trimMaterial: StandardMaterial,
+): void {
+  const segmentCount = 11
+  const northZ = arenaHeight / 2 - 0.45
+  const southZ = -arenaHeight / 2 + 0.45
+
+  for (let index = 0; index < segmentCount; index += 1) {
+    const x = -arenaWidth / 2 + 1.3 + index * ((arenaWidth - 2.6) / (segmentCount - 1))
+
+    createRailSegment(scene, `north-bumper-${index}`, x, northZ, 0, warningMaterial, trimMaterial)
+    createRailSegment(scene, `south-bumper-${index}`, x, southZ, 0, warningMaterial, trimMaterial)
+  }
+
+  const sideSegmentCount = 7
+
+  for (let index = 0; index < sideSegmentCount; index += 1) {
+    const z = -arenaHeight / 2 + 1.3 + index * ((arenaHeight - 2.6) / (sideSegmentCount - 1))
+
+    createRailSegment(scene, `east-bumper-${index}`, arenaWidth / 2 - 0.45, z, Math.PI / 2, warningMaterial, trimMaterial)
+    createRailSegment(scene, `west-bumper-${index}`, -arenaWidth / 2 + 0.45, z, Math.PI / 2, warningMaterial, trimMaterial)
+  }
+}
+
+function createRailSegment(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  rotationY: number,
+  warningMaterial: StandardMaterial,
+  trimMaterial: StandardMaterial,
+): void {
+  const base = MeshBuilder.CreateBox(name, { width: 1.05, height: 0.3, depth: 0.18 }, scene)
+  const cap = MeshBuilder.CreateBox(`${name}-cap`, { width: 1.02, height: 0.08, depth: 0.2 }, scene)
+
+  base.position.set(x, 0.23, z)
+  base.rotation.y = rotationY
+  base.material = warningMaterial
+  cap.position.set(x, 0.43, z)
+  cap.rotation.y = rotationY
+  cap.material = trimMaterial
+}
+
+function createGlassPosts(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  material: StandardMaterial,
+): void {
+  const postsPerLongSide = 6
+  const postsPerShortSide = 4
+
+  for (let index = 0; index <= postsPerLongSide; index += 1) {
+    const x = -arenaWidth / 2 + (arenaWidth / postsPerLongSide) * index
+
+    createGlassPost(scene, `north-glass-post-${index}`, x, arenaHeight / 2 - 0.15, material)
+    createGlassPost(scene, `south-glass-post-${index}`, x, -arenaHeight / 2 + 0.15, material)
+  }
+
+  for (let index = 1; index < postsPerShortSide; index += 1) {
+    const z = -arenaHeight / 2 + (arenaHeight / postsPerShortSide) * index
+
+    createGlassPost(scene, `east-glass-post-${index}`, arenaWidth / 2 - 0.15, z, material)
+    createGlassPost(scene, `west-glass-post-${index}`, -arenaWidth / 2 + 0.15, z, material)
+  }
+}
+
+function createGlassPost(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  material: StandardMaterial,
+): void {
+  const post = MeshBuilder.CreateBox(name, { width: 0.12, height: 1.38, depth: 0.12 }, scene)
+
+  post.position.set(x, 1.08, z)
+  post.material = material
+}
+
+function createArenaLightBars(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  redMaterial: StandardMaterial,
+  blueMaterial: StandardMaterial,
+  whiteMaterial: StandardMaterial,
+): void {
+  createLightBar(scene, 'red-back-light', -arenaWidth * 0.34, arenaHeight / 2 - 0.28, 1.32, 0, redMaterial)
+  createLightBar(scene, 'blue-back-light', arenaWidth * 0.34, -arenaHeight / 2 + 0.28, 1.32, 0, blueMaterial)
+  createLightBar(scene, 'north-center-light', 0, arenaHeight / 2 - 0.28, 1.1, 0, whiteMaterial)
+  createLightBar(scene, 'south-center-light', 0, -arenaHeight / 2 + 0.28, 1.1, 0, whiteMaterial)
+  createLightBar(scene, 'east-side-light', arenaWidth / 2 - 0.28, 0, 1.1, Math.PI / 2, redMaterial)
+  createLightBar(scene, 'west-side-light', -arenaWidth / 2 + 0.28, 0, 1.1, Math.PI / 2, blueMaterial)
+}
+
+function createLightBar(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  width: number,
+  rotationY: number,
+  material: StandardMaterial,
+): void {
+  const bar = MeshBuilder.CreateBox(name, { width, height: 0.08, depth: 0.08 }, scene)
+
+  bar.position.set(x, 0.84, z)
+  bar.rotation.y = rotationY
+  bar.material = material
+}
+
+function createCenterLogo(
+  scene: Scene,
+  markMaterial: StandardMaterial,
+  lightMaterial: StandardMaterial,
+): void {
+  const leftWing = MeshBuilder.CreateBox(
+    'center-logo-left',
+    { width: 0.72, height: 0.028, depth: 0.22 },
+    scene,
+  )
+  const rightWing = MeshBuilder.CreateBox(
+    'center-logo-right',
+    { width: 0.72, height: 0.028, depth: 0.22 },
+    scene,
+  )
+  const core = MeshBuilder.CreateBox(
+    'center-logo-core',
+    { width: 0.34, height: 0.03, depth: 0.68 },
+    scene,
+  )
+
+  leftWing.position.set(-0.36, 0.055, 0)
+  rightWing.position.set(0.36, 0.055, 0)
+  core.position.set(0, 0.058, 0)
+  leftWing.rotation.y = -0.34
+  rightWing.rotation.y = 0.34
+  leftWing.material = markMaterial
+  rightWing.material = markMaterial
+  core.material = lightMaterial
+}
+
+function createSpawnPad(
+  scene: Scene,
+  role: TeamRole,
+  x: number,
+  z: number,
+  padMaterial: StandardMaterial,
+  lightMaterial: StandardMaterial,
+  trimMaterial: StandardMaterial,
+): void {
+  const pad = MeshBuilder.CreateBox(
+    `${role}-spawn-pad`,
+    { width: 5.2, height: 0.036, depth: 3.4 },
+    scene,
+  )
+  const beacon = MeshBuilder.CreateTorus(
+    `${role}-spawn-beacon`,
+    { diameter: 2.6, thickness: 0.09, tessellation: 24 },
+    scene,
+  )
+
+  pad.position.set(x, 0.015, z)
+  pad.material = padMaterial
+  beacon.position.set(x, 0.08, z)
+  beacon.rotation.x = Math.PI / 2
+  beacon.material = lightMaterial
+
+  createPadFrame(scene, `${role}-spawn-frame`, x, z, 5.5, 3.7, trimMaterial)
+  createFloorLightStrip(scene, `${role}-spawn-led-front`, x, z - 1.72, 2.2, 0, lightMaterial)
+  createFloorLightStrip(scene, `${role}-spawn-led-back`, x, z + 1.72, 2.2, 0, lightMaterial)
+}
+
+function createPadFrame(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  width: number,
+  depth: number,
+  material: StandardMaterial,
+): void {
+  const north = MeshBuilder.CreateBox(`${name}-north`, { width, height: 0.055, depth: 0.14 }, scene)
+  const south = MeshBuilder.CreateBox(`${name}-south`, { width, height: 0.055, depth: 0.14 }, scene)
+  const east = MeshBuilder.CreateBox(`${name}-east`, { width: 0.14, height: 0.055, depth }, scene)
+  const west = MeshBuilder.CreateBox(`${name}-west`, { width: 0.14, height: 0.055, depth }, scene)
+
+  north.position.set(x, 0.055, z + depth / 2)
+  south.position.set(x, 0.055, z - depth / 2)
+  east.position.set(x + width / 2, 0.055, z)
+  west.position.set(x - width / 2, 0.055, z)
+  north.material = material
+  south.material = material
+  east.material = material
+  west.material = material
+}
+
+function createFloorLightStrip(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  width: number,
+  rotationY: number,
+  material: StandardMaterial,
+): void {
+  const strip = MeshBuilder.CreateBox(name, { width, height: 0.05, depth: 0.08 }, scene)
+
+  strip.position.set(x, 0.085, z)
+  strip.rotation.y = rotationY
+  strip.material = material
+}
+
+function createStaticTrapDoors(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  hatchMaterial: StandardMaterial,
+  warningMaterial: StandardMaterial,
+  trimMaterial: StandardMaterial,
+): void {
+  const trapPositions = [
+    [-arenaWidth * 0.28, -arenaHeight * 0.27],
+    [arenaWidth * 0.28, -arenaHeight * 0.27],
+    [-arenaWidth * 0.28, arenaHeight * 0.27],
+    [arenaWidth * 0.28, arenaHeight * 0.27],
+  ]
+
+  trapPositions.forEach(([x, z], index) => {
+    const hatch = MeshBuilder.CreateBox(
+      `static-hazard-hatch-${index}`,
+      { width: 1.7, height: 0.028, depth: 1.05 },
+      scene,
+    )
+
+    hatch.position.set(x, 0.03, z)
+    hatch.material = hatchMaterial
+    createPadFrame(scene, `static-hazard-hatch-frame-${index}`, x, z, 1.95, 1.3, warningMaterial)
+
+    const handle = MeshBuilder.CreateBox(
+      `static-hazard-hatch-handle-${index}`,
+      { width: 0.72, height: 0.06, depth: 0.12 },
+      scene,
+    )
+
+    handle.position.set(x, 0.08, z)
+    handle.material = trimMaterial
+  })
+}
+
 function createHazardVisuals(
   scene: Scene,
   arena: ArenaConfig,
@@ -372,6 +688,34 @@ function createHazardVisuals(
 
   arena.activeHazards.forEach((rawName, index) => {
     const normalized = normalizeHazard(rawName)
+
+    if (normalized.includes('corner')) {
+      const cornerSlots = ['northwest', 'northeast', 'southwest', 'southeast'] as const
+
+      cornerSlots.forEach((slot, slotIndex) => {
+        const { x, z } = slotToPosition(slot, arena.width, arena.height)
+
+        hazards.push({
+          kind: 'flipper',
+          label: normalized,
+          mesh: createHazardPlate(
+            scene,
+            `hazard-${normalized}-${index}-${slotIndex}`,
+            x,
+            z,
+            0.06,
+            1.1,
+            0.72,
+            `${normalized} ${slot}`,
+          ),
+          baseScale: 1,
+          spinSpeed: 0,
+        })
+      })
+
+      return
+    }
+
     const visual = buildHazardVisual(
       scene,
       `${normalized}-${index}`,
@@ -501,6 +845,27 @@ function buildHazardVisual(
       mesh: magnet,
       baseScale: 1,
       spinSpeed: 0.08,
+    }
+  }
+
+  if (kind === 'flipper') {
+    const flipper = createHazardPlate(
+      scene,
+      `hazard-${id}`,
+      x,
+      z,
+      0.055,
+      1.12,
+      0.68,
+      `flipper ${slot}`,
+    )
+
+    return {
+      kind: 'flipper',
+      label: normalized,
+      mesh: flipper,
+      baseScale: 1,
+      spinSpeed: 0,
     }
   }
 
@@ -641,11 +1006,27 @@ function createCenterSpinner(scene: Scene): Mesh {
     scene,
   )
   const material = createSceneMaterial(scene, 'center-spinner-mat', '#e6b95d', '#3f2a09')
+  const toothMaterial = createSceneMaterial(scene, 'center-spinner-tooth-mat', '#f2d174', '#573803')
+
   spinner.material = material
   glow.material = material
   glow.position.set(0, 0.06, 0)
   glow.parent = spinner
   glow.rotation.x = Math.PI / 2
+
+  for (let index = 0; index < 8; index += 1) {
+    const tooth = MeshBuilder.CreateBox(
+      `center-spinner-tooth-${index}`,
+      { width: 0.18, height: 0.09, depth: 0.38 },
+      scene,
+    )
+    const angle = (Math.PI * 2 * index) / 8
+
+    tooth.position.set(Math.cos(angle) * 0.54, 0.05, Math.sin(angle) * 0.54)
+    tooth.rotation.y = angle
+    tooth.parent = spinner
+    tooth.material = toothMaterial
+  }
 
   return spinner
 }
@@ -863,8 +1244,14 @@ function updateHazards(hazards: BabylonHazardVisual[], frame: ReplayVisualFrame)
 
     hazard.mesh.position.y = 0.08 + (active ? active.intensity * 0.14 : 0)
     hazard.mesh.scaling.setAll(hazard.baseScale * pulse)
-    hazard.mesh.rotation.y += spin
-    hazard.mesh.rotation.z = Math.sin(frame.time * 2 + index) * 0.02
+
+    if (hazard.kind === 'flipper') {
+      hazard.mesh.rotation.x = active ? -active.intensity * 0.45 : 0
+      hazard.mesh.rotation.z = Math.sin(frame.time * 2 + index) * 0.015
+    } else {
+      hazard.mesh.rotation.y += spin
+      hazard.mesh.rotation.z = Math.sin(frame.time * 2 + index) * 0.02
+    }
   })
 }
 
@@ -985,13 +1372,15 @@ function createSceneMaterial(
   diffuse: string,
   emissive: string,
   alpha = 1,
+  specular = 0.16,
 ): StandardMaterial {
   const material = new StandardMaterial(name, scene)
 
   material.diffuseColor = Color3.FromHexString(diffuse)
   material.emissiveColor = Color3.FromHexString(emissive)
-  material.specularColor = new Color3(0.16, 0.16, 0.14)
+  material.specularColor = new Color3(specular, specular, Math.max(0.12, specular * 0.82))
   material.alpha = alpha
+  material.backFaceCulling = alpha >= 1
 
   return material
 }
@@ -1003,6 +1392,10 @@ function toBabylonVector(vector: ReplayVector3): Vector3 {
 function classifyHazardKind(raw: string): string {
   if (raw.includes('saw')) {
     return 'saw'
+  }
+
+  if (raw.includes('flipper')) {
+    return 'flipper'
   }
 
   if (raw.includes('pit')) {
@@ -1049,6 +1442,22 @@ function classifyHazardSlot(raw: string): string {
 }
 
 function slotToPosition(slot: string, arenaWidth: number, arenaHeight: number): { x: number; z: number } {
+  if (slot === 'northwest') {
+    return { x: -arenaWidth * 0.34, z: arenaHeight * 0.28 }
+  }
+
+  if (slot === 'northeast') {
+    return { x: arenaWidth * 0.34, z: arenaHeight * 0.28 }
+  }
+
+  if (slot === 'southwest') {
+    return { x: -arenaWidth * 0.34, z: -arenaHeight * 0.28 }
+  }
+
+  if (slot === 'southeast') {
+    return { x: arenaWidth * 0.34, z: -arenaHeight * 0.28 }
+  }
+
   if (slot === 'north') {
     return { x: 0, z: arenaHeight * 0.26 }
   }

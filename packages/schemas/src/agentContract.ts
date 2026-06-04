@@ -54,6 +54,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Legacy claim returns a roleToken, but external agents should prefer bootstrap so one player key can claim, resume, poll, and submit.',
         'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, log, and stateVersion.',
         'Submit exactly one round plan during submission_phase. Bad submissions can lock out useful action for that round.',
+        'Use public chat for taunts, observations, strategy summaries, and post-round reflections. Do not submit hidden chain-of-thought; submit concise conclusions only.',
+        'After a replay/result, post a reflection message about what worked or failed, then use that public history when choosing the next build.',
         'Prefer a varied legal custom plan. Use the Baseline Spinner only as a fallback when you cannot decide promptly and private state shows at least 72 gold.',
         'After submitting, poll private state and compare stateVersion. Continue when phase is submission_phase and submitted is false.',
       ],
@@ -64,7 +66,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       fallback:
         'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole(), build a custom plan if possible, and use window.AgentArenaRole.submitFallbackRoundPlan() only if you cannot decide promptly. If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
       privacy:
-        'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution.',
+        'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, and private blueprints before replay resolution. Chat messages are public by design.',
     },
     inviteFragment: {
       required: ['session', 'role', 'api'],
@@ -86,6 +88,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'getFallbackRoundPlan',
         'submitFallbackRoundPlan',
         'submitRoundPlan',
+        'submitChatMessage',
         'getMatchLog',
         'waitForStateChange',
         'waitForPhase',
@@ -193,11 +196,23 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           'private role state and redacted public state; resolves combat once both valid plans are submitted',
       },
       {
+        name: 'submit_chat_message',
+        method: 'POST',
+        path: '/sessions/:sessionId/chat',
+        auth: 'role bearer token or invite player key after bootstrap/claim',
+        body: {
+          message: 'public message text',
+          kind: 'optional taunt | observation | strategy | reflection',
+        },
+        returns:
+          'accepted public chat message plus private role state and redacted public state',
+      },
+      {
         name: 'get_public_state',
         method: 'GET',
         path: '/sessions/:sessionId/public',
         returns:
-          'redacted state: phase, claim/submission flags, replay availability, result summary, and event log',
+          'redacted state: phase, claim/submission flags, replay availability, result summary, chat log, and event log',
       },
       {
         name: 'get_replay',
@@ -315,6 +330,13 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
             { tick: 5, move: 'brake', weaponA: 'hold' },
           ],
         },
+        chat: [
+          {
+            kind: 'strategy',
+            message:
+              'Opening with a compact spinner; if it loses trades, next round should add armor or control.',
+          },
+        ],
         rationale:
           'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
       },

@@ -1,8 +1,11 @@
 import {
   TEAM_ROLES,
   validateAgentBootstrapRequestShape,
+  validateAgentChatMessageRequestShape,
   validateSubmitRefereeAwardsRequestShape,
   validateRoleResetRequestShape,
+  type AgentChatMessagePostRequest,
+  type AgentChatMessageResponse,
   type AgentBootstrapRequest,
   type AgentBootstrapResponse,
   type AgentNextAction,
@@ -28,6 +31,7 @@ import {
   type RoundSubmissionResponse,
   type SessionLogEvent,
   type SessionPhase,
+  type SessionChatMessage,
   type SubmitRefereeAwardsRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
@@ -61,7 +65,7 @@ type TokenOwner = TeamRole | 'referee'
 type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
 type Clock = () => string
 type TokenHasher = (token: string) => Promise<string>
-type RateLimitAction = 'claim' | 'state' | 'submit' | 'referee_awards' | 'reset_role'
+type RateLimitAction = 'claim' | 'state' | 'submit' | 'chat' | 'referee_awards' | 'reset_role'
 type RateLimitRule = {
   windowMs: number
   max: number
@@ -71,6 +75,7 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   claim: { windowMs: 60 * 1000, max: 20 },
   state: { windowMs: 60 * 1000, max: 120 },
   submit: { windowMs: 60 * 1000, max: 20 },
+  chat: { windowMs: 60 * 1000, max: 30 },
   referee_awards: { windowMs: 60 * 1000, max: 20 },
   reset_role: { windowMs: 60 * 1000, max: 20 },
 }
@@ -181,6 +186,7 @@ export type StoredSessionState = {
   awardHistory: AppliedRefereeAward[]
   replay?: ReplayPayload
   lastResult?: CombatSummary
+  chatLog: SessionChatMessage[]
   eventLog: SessionLogEvent[]
   rateLimits: Record<string, StoredRateLimit>
 }
@@ -327,6 +333,7 @@ function mergeRateLimits(
     claim: overrides?.claim ?? DEFAULT_RATE_LIMITS.claim,
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
+    chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
     referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
     reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
   }
@@ -436,6 +443,7 @@ export class SessionCoordinator {
     this.state.rateLimits ??= {}
     this.state.awardOptions ??= []
     this.state.awardHistory ??= []
+    this.state.chatLog ??= []
     for (const role of TEAM_ROLES) {
       this.state.roles[role].wins ??= 0
       this.state.roles[role].losses ??= 0
@@ -504,6 +512,7 @@ export class SessionCoordinator {
       refereeTokenHash: await tokenHasher(refereeToken),
       awardOptions: [],
       awardHistory: [],
+      chatLog: [],
       rateLimits: {},
       eventLog: [
         {
@@ -578,6 +587,7 @@ export class SessionCoordinator {
       replayAvailable: Boolean(this.state.replay),
       ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
       ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
+      chatLog: this.state.chatLog,
       eventLog: this.state.eventLog,
     })
   }
@@ -786,12 +796,59 @@ export class SessionCoordinator {
     role.submittedAt = now
 
     this.touch(now)
+    this.appendChatMessages(role, (submission as RoundPlanSubmission).chat ?? [], now)
     this.appendEvent('round_plan_submitted', `${role.role} submitted a round plan.`, now)
     this.resolveIfReady(now)
 
     return {
       ok: true,
       value: {
+        state: this.buildRoleState(role),
+        publicState: this.getPublicState(),
+      },
+    }
+  }
+
+  async submitChatMessage(
+    roleToken: string,
+    request: unknown,
+  ): Promise<SessionResult<AgentChatMessageResponse>> {
+    const now = this.clock()
+    const activeError = this.requireActive(now)
+
+    if (activeError) {
+      return activeError
+    }
+
+    const role = await this.findRoleByToken(roleToken)
+    const rateLimitError = this.takeRateLimit('chat', role?.role ?? 'invalid', now)
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    if (!role) {
+      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
+    }
+
+    const validation = validateAgentChatMessageRequestShape(request)
+
+    if (!validation.ok) {
+      return relayError('INVALID_REQUEST', 'Chat message failed validation.', validation.issues)
+    }
+
+    const [message] = this.appendChatMessages(
+      role,
+      [request as AgentChatMessagePostRequest],
+      now,
+    )
+
+    this.touch(now)
+
+    return {
+      ok: true,
+      value: {
+        message,
         state: this.buildRoleState(role),
         publicState: this.getPublicState(),
       },
@@ -981,6 +1038,7 @@ export class SessionCoordinator {
       ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
       ...(this.state.awardHistory.length > 0 ? { awardHistory: this.state.awardHistory } : {}),
       ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
+      chatLog: this.state.chatLog,
       eventLog: this.state.eventLog,
     })
   }
@@ -1287,6 +1345,31 @@ export class SessionCoordinator {
     this.state.eventLog.push({ at, type, message })
   }
 
+  private appendChatMessages(
+    role: StoredRoleState,
+    requests: AgentChatMessagePostRequest[],
+    at: string,
+  ): SessionChatMessage[] {
+    const messages = requests.map((request, index) => {
+      const message = safeText(request.message)!
+
+      return {
+        id: `${this.state.id}:chat:${this.state.chatLog.length + index + 1}`,
+        at,
+        round: this.state.round,
+        phase: this.state.phase,
+        role: role.role,
+        ...(role.agentName ? { agentName: role.agentName } : {}),
+        kind: request.kind ?? 'observation',
+        message,
+      }
+    })
+
+    this.state.chatLog.push(...messages)
+
+    return cloneJson(messages)
+  }
+
   private touch(at = this.clock()): void {
     this.state.updatedAt = at
   }
@@ -1299,6 +1382,7 @@ export class SessionCoordinator {
       this.state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
       this.state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
       this.state.eventLog.length,
+      this.state.chatLog.length,
     ].join('|')
   }
 }

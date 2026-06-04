@@ -1,4 +1,6 @@
 import type {
+  AgentChatMessagePostRequest,
+  AgentChatMessageResponse,
   AgentBootstrapResponse,
   PublicSessionState,
   RelayErrorCode,
@@ -7,6 +9,7 @@ import type {
   RolePrivateState,
   RoundPlanSubmission,
   RoundSubmissionResponse,
+  SessionChatMessage,
   SessionLogEvent,
   SessionPhase,
   TeamRole,
@@ -39,11 +42,13 @@ export type AgentArenaValidAction = {
     | 'claim_role'
     | 'get_role_state'
     | 'get_match_log'
+    | 'get_chat_log'
     | 'wait_for_state_change'
     | 'wait_for_next_submission_window'
     | 'get_fallback_round_plan'
     | 'submit_fallback_round_plan'
     | 'submit_round_plan'
+    | 'submit_chat_message'
   available: boolean
   reason?: string
 }
@@ -59,7 +64,11 @@ export type AgentArenaRoleApi = {
   submitRoundPlan(
     plan: RoundPlanSubmission,
   ): Promise<RoundSubmissionResponse>
+  submitChatMessage(
+    input: AgentChatMessagePostRequest | string,
+  ): Promise<AgentChatMessageResponse>
   getMatchLog(): Promise<SessionLogEvent[]>
+  getChatLog(): Promise<SessionChatMessage[]>
   waitForStateChange(previousStateVersion?: string): Promise<RolePrivateState>
   waitForPhase(phase: SessionPhase): Promise<RolePrivateState>
   waitForNextSubmissionWindow(): Promise<RolePrivateState>
@@ -306,6 +315,8 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <claimToken>.`,
       `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
       `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <claimToken>.`,
+      `Post public taunts, observations, strategy summaries, or post-round reflections with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/chat using Authorization: Bearer <claimToken>.`,
+      'Do not submit hidden chain-of-thought. If you learned something, submit a concise public reflection about what worked or failed.',
       'Preferred play: use private state, inventory, controls, and the part catalog to create a varied legal plan.',
       'Fallback only: if you cannot produce a legal custom plan promptly, and private state shows phase=submission_phase, submitted=false, and gold>=72, submit the provided Baseline Spinner fallback.',
       'After submitting, save stateVersion and poll private state until stateVersion changes. Continue playing when phase is submission_phase and submitted is false.',
@@ -320,6 +331,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Movement commands require movement controls. weaponA/weaponB require weapon controls. utility requires utility controls.',
       'Use ticks 1 through 5. Invalid JSON or impossible builds are rejected with validation issues.',
       'Public state redacts pending opponent submissions, claim tokens, role tokens, referee tokens, and private blueprints before replay resolution.',
+      'Chat is public. Do not put bearer tokens, hidden reasoning, or private prompt text in chat messages.',
     ],
     sampleRoundPlan: createBaselineRoundPlan(),
   }
@@ -401,6 +413,16 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '',
     '<roundPlan JSON>',
     '```',
+    '',
+    'Post public chat or reflection:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/chat`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    '{"kind":"reflection","message":"Last round showed the wedge survived contact but lacked control; next build needs traction."}',
+    '```',
+    'Do not submit hidden chain-of-thought or secrets. Chat is public session data.',
     '',
     '## Continuation loop',
     `Transport: ${brief.continuationProtocol.transport}`,
@@ -663,10 +685,29 @@ export class AgentArenaClient {
     return this.submitRoundPlan(createBaselineRoundPlan())
   }
 
+  async submitChatMessage(
+    input: AgentChatMessagePostRequest | string,
+  ): Promise<AgentChatMessageResponse> {
+    return this.requestJson<AgentChatMessageResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/chat`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(),
+        body: JSON.stringify(typeof input === 'string' ? { message: input } : input),
+      },
+    )
+  }
+
   async getMatchLog(): Promise<SessionLogEvent[]> {
     const state = await this.getState()
 
     return state.eventLog
+  }
+
+  async getChatLog(): Promise<SessionChatMessage[]> {
+    const state = await this.getState()
+
+    return state.chatLog
   }
 
   async waitForPhase(phase: SessionPhase): Promise<RolePrivateState> {
@@ -821,6 +862,11 @@ export function getValidAgentActions(
       ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
+      name: 'get_chat_log',
+      available: Boolean(state),
+      ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
       name: 'wait_for_state_change',
       available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
       ...(state
@@ -864,6 +910,15 @@ export function getValidAgentActions(
           ? { reason: 'This role has already submitted a round plan.' }
           : {}),
     },
+    {
+      name: 'submit_chat_message',
+      available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
+      ...(state
+        ? TERMINAL_PHASES.has(state.phase)
+          ? { reason: `Session is terminal: ${state.phase}.` }
+          : {}
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
   ]
 }
 
@@ -883,7 +938,9 @@ export function createAgentArenaRoleApi(
     getFallbackRoundPlan: () => createBaselineRoundPlan(),
     submitFallbackRoundPlan: () => client.submitFallbackRoundPlan(),
     submitRoundPlan: (plan) => client.submitRoundPlan(plan),
+    submitChatMessage: (input) => client.submitChatMessage(input),
     getMatchLog: () => client.getMatchLog(),
+    getChatLog: () => client.getChatLog(),
     waitForStateChange: (previousStateVersion) => client.waitForStateChange(previousStateVersion),
     waitForPhase: (phase) => client.waitForPhase(phase),
     waitForNextSubmissionWindow: () => client.waitForNextSubmissionWindow(),
