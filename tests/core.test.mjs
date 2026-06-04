@@ -386,6 +386,11 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(redSubmission.value.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.value.publicState.replayAvailable, false)
 
+  const preReplay = session.getReplay()
+
+  assert.equal(preReplay.ok, false)
+  assert.equal(preReplay.error.code, 'REPLAY_NOT_AVAILABLE')
+
   const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
 
   assert.equal(blueSubmission.ok, true)
@@ -395,7 +400,10 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(blueSubmission.value.publicState.awardOptions.length, 3)
 
   const replay = session.getReplay()
+
   assert.equal(replay.ok, true)
+  assert.equal(replay.value.botBlueprints.red.name, 'Spinner')
+  assert.equal(replay.value.botBlueprints.blue.name, 'Spinner')
   assert.equal(validateReplayTimeline(replay.value), true)
 
   const publicJson = JSON.stringify(blueSubmission.value.publicState)

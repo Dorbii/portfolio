@@ -1,572 +1,822 @@
-import { useMemo, useState } from 'react'
-import { getPart } from '../../../packages/catalog/src/index.js'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
-  PartCategory,
-  PartDefinition,
-  RolePrivateState,
+  PublicSessionState,
+  RefereeAwardSelection,
+  RefereeAwardOption,
+  RoleInvite,
+  RolePublicState,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
-import {
-  mockAwards,
-  mockBotBlueprints,
-  mockPublicSession,
-  mockReplay,
-  mockRoleStates,
-  mockTeamEconomy,
-  visibleCatalogParts,
-  type AwardOption,
-} from './mockSession'
+import type { ReplayEvent } from '../../../packages/replay/src/index.js'
 import { LiveAgentCockpit } from './agent/LiveAgentCockpit'
+import {
+  buildInviteUrl,
+  clearStoredSession,
+  createSession,
+  DEFAULT_ARENA_API_BASE,
+  POLL_INTERVAL_MS,
+  isTerminalPhase,
+  isValidSessionId,
+  loadPublicSession,
+  loadReplayPayload,
+  normalizeSessionId,
+  parseSessionIdFromLocation,
+  readStoredSession,
+  setSessionIdInUrl,
+  submitRefereeAwards,
+  toUserMessage,
+  writeStoredSession,
+  type ReplayPayload,
+} from './referee/refereeClient'
 import { ReplayViewer } from './replay/ReplayViewer'
 
-type ViewMode = 'human' | 'agent'
+type SessionLoadState = 'idle' | 'busy'
 type AwardSelections = Partial<Record<string, TeamRole>>
 
-const orderedCategories: PartCategory[] = [
-  'body',
-  'mobility',
-  'weapon',
-  'defense',
-  'utility',
-  'style',
-]
-const awardTeams: TeamRole[] = ['red', 'blue']
-const maxVisibleAwards = 3
-const maxSelectedAwards = 2
+const MAX_AWARDS_PER_ROUND = 2
+const MAX_AWARDS_PER_TEAM = 1
 
 export default function App() {
-  const isAgentRoute = isAgentPath(window.location.pathname)
-  const [viewMode, setViewMode] = useState<ViewMode>('human')
-  const [selectedRole, setSelectedRole] = useState<TeamRole>('red')
-  const selectedRoleState = mockRoleStates[selectedRole]
+  const isAgentPath = isAgentPathname(window.location.pathname)
 
-  if (isAgentRoute) {
+  if (isAgentPath) {
     return <LiveAgentCockpit />
   }
 
+  return <RefereeConsole />
+}
+
+function RefereeConsole() {
+  const [sessionInput, setSessionInput] = useState(() => parseSessionIdFromLocation())
+  const [activeSessionId, setActiveSessionId] = useState(() => parseSessionIdFromLocation())
+  const [publicSession, setPublicSession] = useState<PublicSessionState | null>(null)
+  const [invites, setInvites] = useState<RoleInvite[]>([])
+  const [storedRefereeToken, setStoredRefereeToken] = useState('')
+  const [manualRefereeToken, setManualRefereeToken] = useState('')
+  const [loadState, setLoadState] = useState<SessionLoadState>('idle')
+  const [replayLoadState, setReplayLoadState] = useState<SessionLoadState>('idle')
+  const [submitState, setSubmitState] = useState<'idle' | 'submitting'>('idle')
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [replayError, setReplayError] = useState('')
+  const [replayPayload, setReplayPayload] = useState<ReplayPayload | null>(null)
+  const [selectedAwards, setSelectedAwards] = useState<AwardSelections>({})
+  const sessionIdRef = useRef(activeSessionId)
+  const skipNextActiveLoadRef = useRef(false)
+  const apiBase = DEFAULT_ARENA_API_BASE
+
+  const selectedCount = useMemo(
+    () => Object.keys(selectedAwards).length,
+    [selectedAwards],
+  )
+  const selectedForTeam = useMemo(() => {
+    const totals: Record<TeamRole, number> = { red: 0, blue: 0 }
+
+    Object.values(selectedAwards).forEach((team) => {
+      if (team) {
+        totals[team] += 1
+      }
+    })
+
+    return totals
+  }, [selectedAwards])
+  const activeRefereeToken = manualRefereeToken.trim() || storedRefereeToken
+  const hasRefereeToken = activeRefereeToken.length > 0
+  const canSubmitAwards =
+    publicSession?.phase === 'referee_awards' &&
+    selectedCount > 0 &&
+    hasRefereeToken &&
+    submitState !== 'submitting'
+
+  const clearSessionState = useCallback(() => {
+    setPublicSession(null)
+    setInvites([])
+    setStoredRefereeToken('')
+    setReplayPayload(null)
+    setReplayError('')
+    setSelectedAwards({})
+    setMessage('')
+    setError('')
+  }, [])
+
+  const hydrateStoredSession = useCallback(
+    (sessionId: string) => {
+      const normalizedSessionId = normalizeSessionId(sessionId)
+
+      if (!normalizedSessionId) {
+        return
+      }
+
+      const stored = readStoredSession(window.localStorage, apiBase, normalizedSessionId)
+
+      if (stored) {
+        setStoredRefereeToken(stored.refereeToken)
+        setInvites(stored.invites)
+        return
+      }
+
+      setStoredRefereeToken('')
+      setInvites([])
+    },
+    [apiBase],
+  )
+
+  const loadPublicState = useCallback(
+    async (sessionId: string, options: { silent?: boolean } = {}) => {
+      const normalizedSessionId = normalizeSessionId(sessionId)
+
+      if (!isValidSessionId(normalizedSessionId)) {
+        setError('Invalid session id. It should look like s_xxxx.')
+        setLoadState('idle')
+        return
+      }
+
+      if (!options.silent) {
+        setLoadState('busy')
+      }
+      setError('')
+
+      try {
+        const state = await loadPublicSession(apiBase, normalizedSessionId)
+
+        setPublicSession(state)
+        if (!options.silent) {
+          setMessage('Public session state loaded.')
+        }
+      } catch (loadError) {
+        setPublicSession(null)
+        setError(toUserMessage(loadError))
+      } finally {
+        if (!options.silent) {
+          setLoadState('idle')
+        }
+      }
+    },
+    [apiBase],
+  )
+
+  const setActiveSession = useCallback(
+    (sessionId: string) => {
+      const normalizedSessionId = normalizeSessionId(sessionId)
+
+      if (!normalizedSessionId) {
+        clearSessionState()
+        setActiveSessionId('')
+        setSessionInput('')
+        return
+      }
+
+      if (!isValidSessionId(normalizedSessionId)) {
+        setError('Invalid session id. It should look like s_xxxx.')
+        return
+      }
+
+      setError('')
+      setMessage('')
+      setSessionInput(normalizedSessionId)
+      setSessionIdInUrl(normalizedSessionId)
+      setManualRefereeToken('')
+      setSelectedAwards({})
+
+      if (normalizedSessionId === activeSessionId) {
+        hydrateStoredSession(normalizedSessionId)
+        void loadPublicState(normalizedSessionId)
+        return
+      }
+
+      setActiveSessionId(normalizedSessionId)
+    },
+    [activeSessionId, clearSessionState, hydrateStoredSession, loadPublicState],
+  )
+
+  useEffect(() => {
+    sessionIdRef.current = activeSessionId
+  }, [activeSessionId])
+
+  useEffect(() => {
+    if (!activeSessionId) {
+      clearSessionState()
+      return
+    }
+
+    hydrateStoredSession(activeSessionId)
+    if (skipNextActiveLoadRef.current) {
+      skipNextActiveLoadRef.current = false
+      return
+    }
+
+    void loadPublicState(activeSessionId)
+  }, [activeSessionId, clearSessionState, hydrateStoredSession, loadPublicState])
+
+  useEffect(() => {
+    if (!activeSessionId || isTerminalPhase(publicSession?.phase)) {
+      return
+    }
+
+    const id = window.setInterval(() => {
+      if (sessionIdRef.current === activeSessionId) {
+        void loadPublicState(activeSessionId, { silent: true })
+      }
+    }, POLL_INTERVAL_MS)
+
+    return () => {
+      window.clearInterval(id)
+    }
+  }, [activeSessionId, publicSession?.phase, loadPublicState])
+
+  useEffect(() => {
+    if (!activeSessionId || !publicSession?.replayAvailable) {
+      setReplayPayload(null)
+      setReplayError('')
+      setReplayLoadState('idle')
+      return
+    }
+
+    let canceled = false
+
+    setReplayLoadState('busy')
+    setReplayError('')
+
+    void loadReplayPayload(apiBase, activeSessionId)
+      .then((payload) => {
+        if (canceled) {
+          return
+        }
+
+        setReplayPayload(payload)
+        setReplayLoadState('idle')
+      })
+      .catch((loadError) => {
+        if (canceled) {
+          return
+        }
+
+        setReplayPayload(null)
+        setReplayLoadState('idle')
+        setReplayError(toUserMessage(loadError))
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [activeSessionId, apiBase, publicSession?.replayAvailable, publicSession?.round])
+
+  const createNewSession = useCallback(async () => {
+    setLoadState('busy')
+    setError('')
+    setMessage('')
+
+    try {
+      const response = await createSession(apiBase)
+
+      skipNextActiveLoadRef.current = true
+      setActiveSessionId(response.sessionId)
+      setSessionInput(response.sessionId)
+      setSessionIdInUrl(response.sessionId)
+      setPublicSession(response.publicState)
+      setInvites(response.invites)
+      setStoredRefereeToken(response.refereeToken)
+      setManualRefereeToken('')
+      setReplayPayload(null)
+      setReplayError('')
+      setSelectedAwards({})
+      setMessage('Session created. Keep this tab open to retain the referee capability token.')
+      writeStoredSession(window.localStorage, apiBase, response.sessionId, {
+        refereeToken: response.refereeToken,
+        invites: response.invites,
+      })
+    } catch (createError) {
+      setError(toUserMessage(createError))
+    } finally {
+      setLoadState('idle')
+    }
+  }, [apiBase])
+
+  const submitAwards = useCallback(async () => {
+    if (!activeSessionId) {
+      setError('Load a session before submitting awards.')
+      return
+    }
+
+    if (!hasRefereeToken) {
+      setError('Referee token is required to submit awards.')
+      return
+    }
+
+    if (publicSession?.phase !== 'referee_awards') {
+      setError(`Awards can be submitted only during referee_awards. Current phase: ${publicSession?.phase ?? 'unknown'}.`)
+      return
+    }
+
+    const payload = Object.entries(selectedAwards)
+      .map(([awardId, targetTeam]) =>
+        targetTeam === undefined ? null : ({ awardId, targetTeam } as RefereeAwardSelection),
+      )
+      .filter((selection): selection is RefereeAwardSelection => selection !== null)
+
+    if (payload.length === 0) {
+      setError('Select at least one award before submitting.')
+      return
+    }
+
+    setSubmitState('submitting')
+    setError('')
+    setMessage('')
+
+    try {
+      const response = await submitRefereeAwards(
+        apiBase,
+        activeSessionId,
+        activeRefereeToken,
+        payload,
+      )
+
+      writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+        refereeToken: activeRefereeToken,
+        invites: invites,
+      })
+      setPublicSession(response.publicState)
+      setStoredRefereeToken(activeRefereeToken)
+      setSelectedAwards({})
+      setMessage('Referee awards submitted.')
+    } catch (awardError) {
+      setError(toUserMessage(awardError))
+    } finally {
+      setSubmitState('idle')
+    }
+  }, [activeRefereeToken, activeSessionId, apiBase, hasRefereeToken, invites, publicSession?.phase, selectedAwards])
+
+  const copyInvite = useCallback((url: string) => {
+    return navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setMessage('Invite copied.')
+      })
+      .catch(() => {
+        setError('Clipboard copy blocked. Select and copy manually.')
+      })
+  }, [])
+
+  const toggleAwardSelection = useCallback(
+    (awardId: string, team: TeamRole) => {
+      setSelectedAwards((previous) => {
+        const currentTeam = previous[awardId]
+        const next = { ...previous }
+
+        if (currentTeam === team) {
+          delete next[awardId]
+          return next
+        }
+
+        const nextCount = Object.keys(previous).length
+        const currentTeamCount = selectedForTeam[team]
+
+        if (!currentTeam && nextCount >= MAX_AWARDS_PER_ROUND) {
+          return previous
+        }
+
+        if (currentTeam && currentTeam !== team && currentTeamCount >= MAX_AWARDS_PER_TEAM) {
+          return previous
+        }
+
+        if (!currentTeam && currentTeamCount >= MAX_AWARDS_PER_TEAM) {
+          return previous
+        }
+
+        next[awardId] = team
+        return next
+      })
+    },
+    [selectedForTeam],
+  )
+
+  const hasInviteForRole = useCallback(
+    (role: TeamRole) => {
+      return invites.some((invite) => invite.role === role && invite.claimToken.length > 0)
+    },
+    [invites],
+  )
+
+  const redInvite = invites.find((invite) => invite.role === 'red')
+  const blueInvite = invites.find((invite) => invite.role === 'blue')
+  const redInviteUrl = redInvite && activeSessionId
+    ? buildInviteUrl({
+        role: 'red',
+        claimToken: redInvite.claimToken,
+        sessionId: activeSessionId,
+        apiBase,
+      })
+    : ''
+  const blueInviteUrl = blueInvite && activeSessionId
+    ? buildInviteUrl({
+        role: 'blue',
+        claimToken: blueInvite.claimToken,
+        sessionId: activeSessionId,
+        apiBase,
+      })
+    : ''
+
+  const phase = publicSession?.phase ?? 'not_started'
+  const isActiveSession = activeSessionId.length > 0
+  const awardOptions = publicSession?.awardOptions ?? ([] as RefereeAwardOption[])
+  const sessionEvents = publicSession?.eventLog ?? ([] as PublicSessionState['eventLog'])
+
   return (
     <main className="arena-app">
-      <TopBar viewMode={viewMode} onViewModeChange={setViewMode} />
-      {viewMode === 'human' ? (
-        <HumanDashboard />
-      ) : (
-        <AgentCockpit
-          roleState={selectedRoleState}
-          selectedRole={selectedRole}
-          onSelectedRoleChange={setSelectedRole}
-        />
-      )}
+      <header className="top-bar">
+        <div className="brand-block">
+          <span className="eyebrow">Agent Arena</span>
+          <h1>Referee Console</h1>
+        </div>
+        <div className="session-strip" aria-live="polite">
+          <Metric label="Session" value={activeSessionId || 'Not loaded'} />
+          <Metric label="Phase" value={formatPhase(phase)} />
+          <Metric label="Round" value={publicSession ? `${publicSession.round} / ${publicSession.maxRounds}` : '0 / 0'} />
+          <Metric
+            label="Replay"
+            value={publicSession ? (publicSession.replayAvailable ? 'Ready' : 'Unavailable') : 'Unavailable'}
+          />
+        </div>
+      </header>
+
+      <section className="referee-grid">
+        <section className="panel">
+          <SectionHeader
+            kicker="Session control"
+            title="Create or load"
+            aside={isActiveSession ? 'Session id controls public visibility.' : 'No active session'}
+          />
+          <div className="referee-form">
+            <label>
+              Session ID
+              <input
+                value={sessionInput}
+                maxLength={64}
+                onChange={(event) => setSessionInput(event.target.value)}
+                disabled={loadState === 'busy'}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void setActiveSession(sessionInput)}
+              disabled={loadState === 'busy' || !sessionInput.trim()}
+            >
+              {loadState === 'busy' ? 'Loading...' : 'Load session'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void createNewSession()}
+              disabled={loadState === 'busy'}
+            >
+              {loadState === 'busy' ? 'Creating...' : 'Create new session'}
+            </button>
+            <label>
+              Referee capability token
+              <input
+                type="password"
+                value={manualRefereeToken}
+                onChange={(event) => setManualRefereeToken(event.target.value)}
+                placeholder={
+                  storedRefereeToken
+                    ? 'Stored token loaded from this browser'
+                    : 'Paste token to submit awards'
+                }
+                disabled={submitState === 'submitting'}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={loadState === 'busy'}
+              onClick={() => {
+                if (!activeSessionId) {
+                  setError('Load a session before saving token.')
+                  return
+                }
+
+                if (!manualRefereeToken.trim()) {
+                  setError('Referee token cannot be blank.')
+                  return
+                }
+
+                setStoredRefereeToken(manualRefereeToken.trim())
+                writeStoredSession(window.localStorage, apiBase, activeSessionId, {
+                  refereeToken: manualRefereeToken.trim(),
+                  invites,
+                })
+                setError('')
+                setMessage('Token saved for this session on this browser.')
+              }}
+            >
+              Save manual token for this session
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeSessionId) {
+                  setError('Load a session before clearing token.')
+                  return
+                }
+                clearStoredSession(window.localStorage, apiBase, activeSessionId)
+                setStoredRefereeToken('')
+                setInvites([])
+                setMessage('Stored referee token and invite links cleared.')
+              }}
+              disabled={!storedRefereeToken}
+            >
+              Clear stored token and invites
+            </button>
+          </div>
+        </section>
+
+        <section className="panel">
+          <SectionHeader kicker="Role visibility" title="Claimed / Submitted" />
+          {publicSession ? <PublicRoleStatus roles={publicSession.roles} /> : <p className="referee-empty">Load session for role status.</p>}
+        </section>
+
+        <section className="panel">
+          <SectionHeader
+            kicker="Invite links"
+            title="Agent URLs"
+            aside="Claim token is in URL fragment."
+          />
+          <InvitePanel
+            role="red"
+            inviteUrl={redInviteUrl}
+            hasInvite={hasInviteForRole('red')}
+            onCopy={() => void copyInvite(redInviteUrl)}
+            onOpen={() => window.open(redInviteUrl, '_blank')}
+          />
+          <InvitePanel
+            role="blue"
+            inviteUrl={blueInviteUrl}
+            hasInvite={hasInviteForRole('blue')}
+            onCopy={() => void copyInvite(blueInviteUrl)}
+            onOpen={() => window.open(blueInviteUrl, '_blank')}
+          />
+          {!hasInviteForRole('red') && !hasInviteForRole('blue') ? (
+            <p className="referee-empty">
+              Invite URLs are available only for sessions created in this console.
+            </p>
+          ) : null}
+        </section>
+
+        <section className="panel live-replay-panel">
+          <SectionHeader
+            kicker="Live replay"
+            title="Combat replay"
+            aside={
+              publicSession?.replayAvailable
+                ? replayPayload
+                  ? 'Rendering post-combat public blueprints.'
+                  : 'Fetching replay payload.'
+                : 'Available after both agents submit.'
+            }
+          />
+          <div className="referee-replay-layout">
+            <div className="referee-replay-frame">
+              {publicSession?.replayAvailable && replayPayload ? (
+                <ReplayViewer
+                  arena={publicSession.arena}
+                  botBlueprints={replayPayload.botBlueprints}
+                  timeline={replayPayload.timeline}
+                />
+              ) : publicSession?.replayAvailable ? (
+                <p className={replayError ? 'referee-error replay-inline-error' : 'referee-empty'}>
+                  {replayError || (replayLoadState === 'busy' ? 'Loading replay data.' : 'Replay data is not loaded yet.')}
+                </p>
+              ) : (
+                <p className="referee-empty">Replay appears here after both role plans resolve.</p>
+              )}
+            </div>
+            <ReplayOutcome
+              publicSession={publicSession}
+              replayPayload={replayPayload}
+            />
+          </div>
+        </section>
+
+        <section className="panel">
+          <SectionHeader
+            kicker="Awards"
+            title="Referee award options"
+            aside="Max 2 total, max 1 per team."
+          />
+          {(awardOptions.length === 0) ? (
+            <p className="referee-empty">No award options in current phase.</p>
+          ) : (
+            <div className="award-stack">
+              {awardOptions.map((option) => {
+                const selectedTeam = selectedAwards[option.id]
+
+                return (
+                  <article className="award-card" key={option.id}>
+                    <div className="award-card-header">
+                      <h3>{option.title}</h3>
+                      <strong>+{option.gold}g</strong>
+                    </div>
+                    <p>{option.description}</p>
+                    <div className="award-team-actions">
+                      <button
+                        type="button"
+                        className={`team-choice red ${selectedTeam === 'red' ? 'selected' : ''}`}
+                        aria-pressed={selectedTeam === 'red'}
+                        onClick={() => toggleAwardSelection(option.id, 'red')}
+                        disabled={
+                          publicSession?.phase !== 'referee_awards'
+                        }
+                      >
+                        Red
+                      </button>
+                      <button
+                        type="button"
+                        className={`team-choice blue ${selectedTeam === 'blue' ? 'selected' : ''}`}
+                        aria-pressed={selectedTeam === 'blue'}
+                        onClick={() => toggleAwardSelection(option.id, 'blue')}
+                        disabled={
+                          publicSession?.phase !== 'referee_awards'
+                        }
+                      >
+                        Blue
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+              <div className="award-action-bar">
+                <strong>
+                  {selectedCount} / {MAX_AWARDS_PER_ROUND} selected
+                </strong>
+                <span>
+                  Team split: red {selectedForTeam.red} / {MAX_AWARDS_PER_TEAM} , blue{' '}
+                  {selectedForTeam.blue} / {MAX_AWARDS_PER_TEAM}
+                </span>
+                <button
+                  type="button"
+                  disabled={!canSubmitAwards}
+                  onClick={() => void submitAwards()}
+                >
+                  {submitState === 'submitting' ? 'Submitting awards...' : 'Submit awards'}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="panel">
+          <SectionHeader kicker="Session log" title="Public events" />
+          <ol className="event-log">
+            {sessionEvents.map((event) => (
+              <li key={`${event.at}-${event.type}-${event.message}`}>
+                <span>{event.at}</span>
+                <p>{event.message}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="panel">
+          <SectionHeader kicker="Status" title="Session diagnostics" />
+          <dl className="status-list">
+            <div>
+              <dt>Referee token</dt>
+              <dd>{hasRefereeToken ? 'Loaded' : 'Not loaded'}</dd>
+            </div>
+            <div>
+              <dt>Live polls</dt>
+              <dd>{publicSession && !isTerminalPhase(publicSession.phase) ? 'Active (1.5s)' : 'Stopped'}</dd>
+            </div>
+            <div>
+              <dt>Resume behavior</dt>
+              <dd>Public state loads with session id only.</dd>
+            </div>
+            <div>
+              <dt>Submit auth</dt>
+              <dd>Bearer referee token required.</dd>
+            </div>
+            <div>
+              <dt>Invite token field</dt>
+              <dd>Uses claimToken for role invites.</dd>
+            </div>
+          </dl>
+        </section>
+      </section>
+
+      {message ? <p className="referee-message" role="status">{message}</p> : null}
+      {error ? <p className="referee-error" role="alert">{error}</p> : null}
     </main>
   )
 }
 
-function TopBar({
-  viewMode,
-  onViewModeChange,
+function ReplayOutcome({
+  publicSession,
+  replayPayload,
 }: {
-  viewMode: ViewMode
-  onViewModeChange: (mode: ViewMode) => void
+  publicSession: PublicSessionState | null
+  replayPayload: ReplayPayload | null
 }) {
+  const result = publicSession?.lastResult
+  const keyEvents = useMemo(
+    () => getOutcomeEvents(replayPayload?.timeline.events ?? []),
+    [replayPayload],
+  )
+
   return (
-    <header className="top-bar">
-      <div className="brand-block">
-        <span className="eyebrow">Agent Arena</span>
-        <h1>Referee Console</h1>
-      </div>
-      <div className="session-strip" aria-label="Match status">
-        <Metric label="Session" value={mockPublicSession.sessionId} />
-        <Metric
-          label="Round"
-          value={`${mockPublicSession.round} / ${mockPublicSession.maxRounds}`}
-        />
-        <Metric label="Score" value="Red 2 - Blue 1" />
-        <Metric label="Phase" value={formatPhase(mockPublicSession.phase)} />
-      </div>
-      <div className="view-switch" aria-label="Screen selector">
-        <button
-          className={viewMode === 'human' ? 'active' : ''}
-          type="button"
-          onClick={() => onViewModeChange('human')}
-        >
-          Human
-        </button>
-        <button
-          className={viewMode === 'agent' ? 'active' : ''}
-          type="button"
-          onClick={() => onViewModeChange('agent')}
-        >
-          Agent
-        </button>
-      </div>
-    </header>
+    <aside className="replay-outcome">
+      <SectionHeader kicker="Combat outcome" title="Result" />
+      {result ? (
+        <>
+          <dl className="status-list">
+            <div>
+              <dt>Winner</dt>
+              <dd>{formatWinner(result.winner)}</dd>
+            </div>
+            <div>
+              <dt>Reason</dt>
+              <dd>{result.reason}</dd>
+            </div>
+            <div>
+              <dt>Damage</dt>
+              <dd>{`Red ${result.damage.red} / Blue ${result.damage.blue}`}</dd>
+            </div>
+            <div>
+              <dt>Health</dt>
+              <dd>{`Red ${result.remainingHealth.red} / Blue ${result.remainingHealth.blue}`}</dd>
+            </div>
+          </dl>
+          <h3>Key events</h3>
+          {keyEvents.length > 0 ? (
+            <ol className="key-event-list">
+              {keyEvents.map((event, index) => (
+                <li key={`${event.t}-${event.type}-${index}`}>
+                  <span>{formatReplayTime(event.t)}</span>
+                  <p>{formatReplayEvent(event)}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="referee-empty">Replay events load with the replay payload.</p>
+          )}
+        </>
+      ) : (
+        <p className="referee-empty">No combat result yet.</p>
+      )}
+    </aside>
   )
 }
 
-function HumanDashboard() {
-  const awards = useMemo(() => mockAwards.slice(0, maxVisibleAwards), [])
-  const [selectedAwards, setSelectedAwards] = useState<AwardSelections>({})
-  const [awardsConfirmed, setAwardsConfirmed] = useState(false)
-  const awardBonuses = calculateAwardBonuses(awards, selectedAwards)
+function PublicRoleStatus({ roles }: { roles: PublicSessionState['roles'] }) {
+  const roleEntries = useMemo(
+    () => Object.entries(roles) as [TeamRole, RolePublicState][],
+    [roles],
+  )
 
-  const toggleAward = (awardId: string, team: TeamRole) => {
-    const currentTeam = selectedAwards[awardId]
+  return (
+    <div className="role-status-list">
+      {roleEntries.map(([role, roleState]) => (
+        <dl className="status-list" key={role}>
+          <div>
+            <dt>{capitalize(role)} claimed</dt>
+            <dd>{roleState.claimed ? 'Yes' : 'No'}</dd>
+          </div>
+          <div>
+            <dt>{capitalize(role)} submitted</dt>
+            <dd>{roleState.submitted ? 'Yes' : 'No'}</dd>
+          </div>
+        </dl>
+      ))}
+    </div>
+  )
+}
 
-    if (currentTeam === team) {
-      const nextSelections = { ...selectedAwards }
-
-      delete nextSelections[awardId]
-      setSelectedAwards(nextSelections)
-      setAwardsConfirmed(false)
-      return
-    }
-
-    const teamAlreadySelected = teamHasSelection(selectedAwards, team, awardId)
-    const wouldAddSelection = !currentTeam
-    const selectedCount = countAwardSelections(selectedAwards)
-
-    if (
-      teamAlreadySelected ||
-      (wouldAddSelection && selectedCount >= maxSelectedAwards)
-    ) {
-      return
-    }
-
-    setSelectedAwards({
-      ...selectedAwards,
-      [awardId]: team,
-    })
-    setAwardsConfirmed(false)
+function InvitePanel({
+  role,
+  hasInvite,
+  inviteUrl,
+  onCopy,
+  onOpen,
+}: {
+  role: TeamRole
+  hasInvite: boolean
+  inviteUrl: string
+  onCopy: () => Promise<void> | void
+  onOpen: () => void
+}) {
+  if (!hasInvite) {
+    return <p className="referee-empty">{capitalize(role)} invite unavailable.</p>
   }
 
   return (
-    <div className="human-grid">
-      <nav className="rail" aria-label="Dashboard sections">
-        {['Overview', 'Match Log', 'Agents', 'Parts', 'Replays', 'Settings'].map(
-          (item) => (
-            <button
-              className={item === 'Overview' ? 'active' : ''}
-              key={item}
-              type="button"
-            >
-              {item}
-            </button>
-          ),
-        )}
-      </nav>
-      <section className="replay-column" aria-labelledby="replay-heading">
-        <SectionHeader
-          kicker="Replay"
-          title="Round 3 Rail Trap"
-          aside={mockReplay.summary}
-          id="replay-heading"
-        />
-        <ReplayViewer
-          arena={mockPublicSession.arena}
-          botBlueprints={mockBotBlueprints}
-          timeline={mockReplay}
-        />
-        <AwardPanel
-          awards={awards}
-          selections={selectedAwards}
-          bonuses={awardBonuses}
-          confirmed={awardsConfirmed}
-          onToggleAward={toggleAward}
-          onConfirmAwards={() => setAwardsConfirmed(true)}
-        />
-      </section>
-      <aside className="summary-column" aria-label="Match summary">
-        <MatchSummary />
-        <EconomyPanel awardBonuses={awardBonuses} />
-        <EventLog />
-      </aside>
-    </div>
-  )
-}
-
-function AwardPanel({
-  awards,
-  selections,
-  bonuses,
-  confirmed,
-  onToggleAward,
-  onConfirmAwards,
-}: {
-  awards: AwardOption[]
-  selections: AwardSelections
-  bonuses: Record<TeamRole, number>
-  confirmed: boolean
-  onToggleAward: (awardId: string, team: TeamRole) => void
-  onConfirmAwards: () => void
-}) {
-  const selectedCount = countAwardSelections(selections)
-
-  return (
-    <section className="award-panel" aria-labelledby="awards-heading">
-      <SectionHeader
-        kicker="Referee awards"
-        title="Pick up to 2"
-        aside="Max 1 per team. Applies next round."
-        id="awards-heading"
-      />
-      <div className="award-grid">
-        {awards.map((award) => {
-          const selectedTeam = selections[award.id]
-
-          return (
-            <article
-              className={selectedTeam ? 'award-card selected' : 'award-card'}
-              key={award.id}
-            >
-              <div className="award-card-header">
-                <h3>{award.title}</h3>
-                <strong>+{award.gold}g</strong>
-              </div>
-              <p>{award.description}</p>
-              <div
-                className="award-team-actions"
-                aria-label={`Select recipient for ${award.title}`}
-              >
-                {awardTeams.map((team) => {
-                  const isSelected = selectedTeam === team
-                  const isDisabled =
-                    !isSelected &&
-                    (teamHasSelection(selections, team, award.id) ||
-                      (!selectedTeam && selectedCount >= maxSelectedAwards))
-
-                  return (
-                    <button
-                      aria-pressed={isSelected}
-                      className={`team-choice ${team}${isSelected ? ' selected' : ''}`}
-                      disabled={isDisabled}
-                      key={team}
-                      type="button"
-                      onClick={() => onToggleAward(award.id, team)}
-                    >
-                      Award {capitalize(team)}
-                    </button>
-                  )
-                })}
-              </div>
-              <footer>
-                <span>Next round bonus</span>
-                <strong>
-                  {selectedTeam ? `${capitalize(selectedTeam)} +${award.gold}g` : 'None'}
-                </strong>
-              </footer>
-            </article>
-          )
-        })}
-      </div>
-      <div className="award-action-bar">
-        <strong>
-          {selectedCount} / {maxSelectedAwards} selected
-        </strong>
-        <span>{formatAwardBonusSummary(bonuses)}</span>
-        <button
-          type="button"
-          disabled={confirmed}
-          onClick={onConfirmAwards}
-        >
-          {confirmed ? 'Awards Confirmed' : 'Confirm Awards'}
+    <div className="invite-panel">
+      <p>{capitalize(role)} role invite</p>
+      <div className="invite-links">
+        <button type="button" onClick={onOpen} disabled={!inviteUrl}>
+          Open {capitalize(role)}
+        </button>
+        <button type="button" onClick={onCopy} disabled={!inviteUrl}>
+          Copy {capitalize(role)}
         </button>
       </div>
-    </section>
-  )
-}
-
-function MatchSummary() {
-  const result = mockPublicSession.lastResult
-
-  return (
-    <section className="panel">
-      <SectionHeader kicker="Match" title="Status" aside="Mock state" />
-      <dl className="status-list">
-        <div>
-          <dt>Phase</dt>
-          <dd>{formatPhase(mockPublicSession.phase)}</dd>
-        </div>
-        <div>
-          <dt>Replay</dt>
-          <dd>{mockPublicSession.replayAvailable ? 'Ready' : 'Unavailable'}</dd>
-        </div>
-        <div>
-          <dt>Winner</dt>
-          <dd>{result ? capitalize(result.winner) : 'Pending'}</dd>
-        </div>
-        <div>
-          <dt>Reason</dt>
-          <dd>{result?.reason ?? 'Awaiting combat'}</dd>
-        </div>
-      </dl>
-    </section>
-  )
-}
-
-function EconomyPanel({
-  awardBonuses,
-}: {
-  awardBonuses: Record<TeamRole, number>
-}) {
-  return (
-    <section className="panel">
-      <SectionHeader kicker="Teams" title="Economy" aside="Round 4 preview" />
-      <div className="team-table">
-        {awardTeams.map((role) => {
-          const economy = mockTeamEconomy[role]
-
-          return (
-            <TeamEconomy
-              key={role}
-              role={role}
-              gold={economy.gold}
-              wins={economy.wins}
-              streak={economy.streak}
-              damage={economy.damage}
-              baseIncome={economy.baseIncome}
-              interestPreview={economy.interestPreview}
-              awardBonus={awardBonuses[role]}
-            />
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-function TeamEconomy({
-  role,
-  gold,
-  wins,
-  streak,
-  damage,
-  baseIncome,
-  interestPreview,
-  awardBonus,
-}: {
-  role: TeamRole
-  gold: number
-  wins: number
-  streak: number
-  damage: number
-  baseIncome: number
-  interestPreview: number
-  awardBonus: number
-}) {
-  return (
-    <div className={`team-row ${role}`}>
-      <strong>{capitalize(role)}</strong>
-      <span>{gold}g</span>
-      <span>{wins} wins</span>
-      <span>{streak} streak</span>
-      <span>{damage} dmg</span>
-      <small>
-        Next: +{baseIncome} income, +{interestPreview} interest, +{awardBonus}{' '}
-        awards
-      </small>
-    </div>
-  )
-}
-
-function EventLog() {
-  return (
-    <section className="panel">
-      <SectionHeader kicker="Log" title="Session events" aside="Latest first" />
-      <ol className="event-log">
-        {[...mockPublicSession.eventLog].reverse().map((event) => (
-          <li key={`${event.at}-${event.type}`}>
-            <span>{event.at}</span>
-            <p>{event.message}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
-}
-
-function AgentCockpit({
-  roleState,
-  selectedRole,
-  onSelectedRoleChange,
-}: {
-  roleState: RolePrivateState
-  selectedRole: TeamRole
-  onSelectedRoleChange: (role: TeamRole) => void
-}) {
-  return (
-    <div className="agent-grid">
-      <section className="agent-overview">
-        <SectionHeader
-          kicker="Agent cockpit"
-          title={`${capitalize(roleState.role)} role state`}
-          aside="Read-only mock"
-        />
-        <div className="role-tabs" aria-label="Mock role selector">
-          {(['red', 'blue'] as TeamRole[]).map((role) => (
-            <button
-              className={selectedRole === role ? 'active' : ''}
-              key={role}
-              type="button"
-              onClick={() => onSelectedRoleChange(role)}
-            >
-              {capitalize(role)}
-            </button>
-          ))}
-        </div>
-        <dl className="cockpit-stats">
-          <div>
-            <dt>Phase</dt>
-            <dd>{formatPhase(roleState.phase)}</dd>
-          </div>
-          <div>
-            <dt>Gold</dt>
-            <dd>{roleState.gold}</dd>
-          </div>
-          <div>
-            <dt>Submitted</dt>
-            <dd>{roleState.submitted ? 'Yes' : 'No'}</dd>
-          </div>
-          <div>
-            <dt>Opponent</dt>
-            <dd>
-              {capitalize(roleState.opponent.role)}{' '}
-              {roleState.opponent.submitted ? 'locked' : 'waiting'}
-            </dd>
-          </div>
-        </dl>
-        <ControlsPanel roleState={roleState} />
-      </section>
-      <InventoryPanel roleState={roleState} />
-      <SubmissionPanel roleState={roleState} />
-      <PartCatalog />
-    </div>
-  )
-}
-
-function ControlsPanel({ roleState }: { roleState: RolePrivateState }) {
-  const controls = roleState.controls
-
-  return (
-    <section className="compact-panel">
-      <h2>Available controls</h2>
-      <div className="control-groups">
-        <ControlGroup label="Movement" values={controls?.movement ?? []} />
-        <ControlGroup label="Weapon A" values={controls?.weaponA ?? []} />
-        <ControlGroup label="Utility" values={controls?.utility ?? []} />
-      </div>
-    </section>
-  )
-}
-
-function ControlGroup({ label, values }: { label: string; values: string[] }) {
-  return (
-    <div>
-      <span>{label}</span>
-      <p>{values.length > 0 ? values.join(', ') : 'None'}</p>
-    </div>
-  )
-}
-
-function InventoryPanel({ roleState }: { roleState: RolePrivateState }) {
-  return (
-    <section className="panel inventory-panel">
-      <SectionHeader kicker="Private" title="Inventory" aside="Owned parts" />
-      <div className="inventory-list">
-        {roleState.inventory.map((item) => {
-          const part = getPart(item.partId)
-
-          return (
-            <div className="inventory-row" key={item.partId}>
-              <strong>{part?.displayName ?? item.partId}</strong>
-              <span>x{item.quantity}</span>
-              <span>{part ? part.category : 'unknown'}</span>
-            </div>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-function SubmissionPanel({ roleState }: { roleState: RolePrivateState }) {
-  const submission = roleState.ownSubmission
-
-  return (
-    <section className="panel submission-panel">
-      <SectionHeader kicker="Round plan" title="Last submission" aside="Locked" />
-      {submission ? (
-        <div className="submission-body">
-          <dl className="status-list">
-            <div>
-              <dt>Bot</dt>
-              <dd>{submission.blueprint.name}</dd>
-            </div>
-            <div>
-              <dt>Purchases</dt>
-              <dd>{submission.purchases.length}</dd>
-            </div>
-            <div>
-              <dt>Commands</dt>
-              <dd>{submission.turnPlan.commands.length}</dd>
-            </div>
-          </dl>
-          <pre>{JSON.stringify(submission.turnPlan.commands, null, 2)}</pre>
-        </div>
-      ) : (
-        <p className="empty-state">No submission for this role.</p>
-      )}
-    </section>
-  )
-}
-
-function PartCatalog() {
-  const categoryCounts = useMemo(() => {
-    return orderedCategories.map((category) => ({
-      category,
-      count: visibleCatalogParts.filter((part) => part.category === category)
-        .length,
-    }))
-  }, [])
-
-  return (
-    <section className="panel catalog-panel">
-      <SectionHeader
-        kicker="Catalog"
-        title="Available parts"
-        aside={`${visibleCatalogParts.length} total`}
-      />
-      <div className="category-strip">
-        {categoryCounts.map((item) => (
-          <span key={item.category}>
-            {item.category} {item.count}
-          </span>
-        ))}
-      </div>
-      <div className="catalog-table" role="table" aria-label="Part catalog">
-        <div className="catalog-head" role="row">
-          <span>Name</span>
-          <span>Type</span>
-          <span>Cost</span>
-          <span>Stats</span>
-        </div>
-        {visibleCatalogParts.slice(0, 18).map((part) => (
-          <CatalogRow key={part.id} part={part} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function CatalogRow({ part }: { part: PartDefinition }) {
-  const stats = Object.entries(part.stats).filter(
-    (entry): entry is [string, number] => typeof entry[1] === 'number',
-  )
-
-  return (
-    <div className="catalog-row" role="row">
-      <strong>{part.displayName}</strong>
-      <span>{part.category}</span>
-      <span>{part.cost}g</span>
-      <span>{stats.length > 0 ? stats.slice(0, 3).map(formatStat).join(' ') : '-'}</span>
+      <p className="invite-link-text">{inviteUrl}</p>
     </div>
   )
 }
@@ -575,18 +825,16 @@ function SectionHeader({
   kicker,
   title,
   aside,
-  id,
 }: {
   kicker: string
   title: string
   aside?: string
-  id?: string
 }) {
   return (
     <div className="section-header">
       <div>
         <span>{kicker}</span>
-        <h2 id={id}>{title}</h2>
+        <h2>{title}</h2>
       </div>
       {aside ? <p>{aside}</p> : null}
     </div>
@@ -602,6 +850,12 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
+function isAgentPathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/agent' || normalized.endsWith('/agent')
+}
+
 function formatPhase(phase: string) {
   return phase
     .split('_')
@@ -609,58 +863,50 @@ function formatPhase(phase: string) {
     .join(' ')
 }
 
-function formatStat([name, value]: [string, number]) {
-  return `${name}+${value}`
+function getOutcomeEvents(events: ReplayEvent[]): ReplayEvent[] {
+  return events
+    .filter((event) =>
+      event.type === 'weapon_fire' ||
+      event.type === 'impact' ||
+      event.type === 'damage' ||
+      event.type === 'hazard' ||
+      event.type === 'knockout',
+    )
+    .slice(0, 8)
 }
 
-function countAwardSelections(selections: AwardSelections) {
-  return Object.keys(selections).length
+function formatReplayTime(value: number): string {
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}s`
 }
 
-function teamHasSelection(
-  selections: AwardSelections,
-  team: TeamRole,
-  exceptAwardId?: string,
-) {
-  return Object.entries(selections).some(
-    ([awardId, selectedTeam]) =>
-      awardId !== exceptAwardId && selectedTeam === team,
-  )
+function formatWinner(winner: TeamRole | 'draw'): string {
+  return winner === 'draw' ? 'Draw' : `${capitalize(winner)} wins`
 }
 
-function calculateAwardBonuses(
-  awards: AwardOption[],
-  selections: AwardSelections,
-): Record<TeamRole, number> {
-  return awards.reduce<Record<TeamRole, number>>(
-    (bonuses, award) => {
-      const selectedTeam = selections[award.id]
+function formatReplayEvent(event: ReplayEvent): string {
+  if (event.type === 'weapon_fire') {
+    return `${capitalize(event.bot)} fired ${event.weaponSlot}.`
+  }
 
-      if (selectedTeam) {
-        bonuses[selectedTeam] += award.gold
-      }
+  if (event.type === 'impact') {
+    return `${capitalize(event.attacker)} hit ${capitalize(event.defender)} for ${event.damage}.`
+  }
 
-      return bonuses
-    },
-    { red: 0, blue: 0 },
-  )
+  if (event.type === 'damage') {
+    return `${capitalize(event.bot)} took ${event.amount}; ${event.remainingHealth} health remains.`
+  }
+
+  if (event.type === 'hazard') {
+    return `${capitalize(event.bot)} took ${event.damage} from ${event.hazard}.`
+  }
+
+  if (event.type === 'knockout') {
+    return `${capitalize(event.bot)} knocked out by ${event.cause}.`
+  }
+
+  return formatPhase(event.type)
 }
 
-function formatAwardBonusSummary(bonuses: Record<TeamRole, number>) {
-  const summary = awardTeams
-    .filter((team) => bonuses[team] > 0)
-    .map((team) => `${capitalize(team)} +${bonuses[team]}g`)
-    .join(', ')
-
-  return summary ? `Next round: ${summary}` : 'Next round: no award bonus'
-}
-
-function capitalize(value: string) {
+function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
-function isAgentPath(pathname: string) {
-  const normalized = pathname.replace(/\/+$/, '')
-
-  return normalized === '/agent' || normalized.endsWith('/agent')
 }

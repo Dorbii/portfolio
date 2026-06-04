@@ -30,20 +30,20 @@ export function createTeamMaterials(
 ): Record<TeamRole, TeamMaterialSet> {
   return {
     red: {
-      chassis: createMaterial(scene, 'red-chassis', '#b83342', '#2a080d'),
-      armor: createMaterial(scene, 'red-armor', '#f06471', '#26070b'),
-      mobility: createMaterial(scene, 'red-mobility', '#2a2426', '#080707'),
-      weapon: createMaterial(scene, 'red-weapon', '#f7c24b', '#302004'),
-      utility: createMaterial(scene, 'red-utility', '#e46f4d', '#2b0d05'),
-      style: createMaterial(scene, 'red-style', '#ff86a1', '#3a0d18'),
+      chassis: createMaterial(scene, 'red-chassis', '#8f2a37', '#2a080d'),
+      armor: createMaterial(scene, 'red-armor', '#c83b4f', '#26070b'),
+      mobility: createMaterial(scene, 'red-mobility', '#312929', '#0a0a0a'),
+      weapon: createMaterial(scene, 'red-weapon', '#f3bb55', '#4a2c08'),
+      utility: createMaterial(scene, 'red-utility', '#ea6f52', '#2b0d05'),
+      style: createMaterial(scene, 'red-style', '#ff8ea6', '#3a0d18'),
     },
     blue: {
-      chassis: createMaterial(scene, 'blue-chassis', '#2469b2', '#061626'),
-      armor: createMaterial(scene, 'blue-armor', '#5aa9ff', '#06172b'),
-      mobility: createMaterial(scene, 'blue-mobility', '#222a31', '#070a0d'),
-      weapon: createMaterial(scene, 'blue-weapon', '#f7c24b', '#302004'),
-      utility: createMaterial(scene, 'blue-utility', '#50c2c8', '#082426'),
-      style: createMaterial(scene, 'blue-style', '#92d8ff', '#0a2638'),
+      chassis: createMaterial(scene, 'blue-chassis', '#215e9f', '#05111f'),
+      armor: createMaterial(scene, 'blue-armor', '#5ea5ff', '#06172b'),
+      mobility: createMaterial(scene, 'blue-mobility', '#29323a', '#070a0d'),
+      weapon: createMaterial(scene, 'blue-weapon', '#f3bb55', '#302004'),
+      utility: createMaterial(scene, 'blue-utility', '#2fb5bf', '#082426'),
+      style: createMaterial(scene, 'blue-style', '#9be2ff', '#0a2638'),
     },
   }
 }
@@ -91,39 +91,79 @@ function createPartNode(
 
   const material = materialForCategory(materials, category)
 
-  if (block.partId.includes('Cylinder')) {
-    const cylinder = MeshBuilder.CreateCylinder(
-      `${role}-${block.id}-cylinder`,
-      { height, diameter: Math.max(width, depth), tessellation: 18 },
-      scene,
-    )
-    attachMesh(cylinder, partNode, material)
+  if (category === 'body') {
+    createBodyPart(scene, partNode, material, block.partId, width, height, depth)
   } else if (category === 'mobility') {
-    createMobilityPart(
-      scene,
-      partNode,
-      material,
-      role,
-      block.id,
-      block.partId,
-      width,
-      height,
-      depth,
-    )
+    createMobilityPart(scene, partNode, material, role, block.id, block.partId, width, height, depth)
   } else if (category === 'weapon') {
     createWeaponPart(scene, partNode, material, role, block.id, block.partId, width, height, depth)
-  } else if (category === 'style' && block.partId === 'Style_Flag') {
-    createFlagPart(scene, partNode, material, role, block.id)
+  } else if (category === 'defense') {
+    createDefensePart(scene, partNode, material, role, block.id, block.partId, width, height, depth)
+  } else if (category === 'utility') {
+    createUtilityPart(scene, partNode, material, role, block.id, block.partId, width, height, depth)
+  } else if (category === 'style') {
+    createStylePart(scene, partNode, material, role, block.id, block.partId)
   } else {
-    const box = MeshBuilder.CreateBox(
-      `${role}-${block.id}-box`,
-      { width, height, depth },
-      scene,
-    )
-    attachMesh(box, partNode, material)
+    createSolidBlock(scene, partNode, material, `${role}-${block.id}-box`, width, height, depth)
   }
 
   return partNode
+}
+
+function createBodyPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  partId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  if (partId.includes('Cylinder')) {
+    const cylinder = MeshBuilder.CreateCylinder(
+      `${parent.name}-chassis-cyl`,
+      { height: Math.max(height * 0.95, 0.32), diameter: Math.max(width, depth), tessellation: 18 },
+      scene,
+    )
+    cylinder.rotation.z = Math.PI / 2
+    attachMesh(cylinder, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Wedge')) {
+    const wedge = MeshBuilder.CreateBox(
+      `${parent.name}-wedge`,
+      { width, height: Math.max(height, 0.35), depth },
+      scene,
+    )
+    wedge.scaling = new Vector3(1.25, 0.9, 1)
+    wedge.position.set(0, -height * 0.18, -depth * 0.16)
+    attachMesh(wedge, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Heavy')) {
+    const core = MeshBuilder.CreateBox(
+      `${parent.name}-core`,
+      { width, height: Math.max(height, 0.55), depth },
+      scene,
+    )
+    const top = MeshBuilder.CreateBox(
+      `${parent.name}-core-top`,
+      { width: width * 0.88, height: Math.max(height * 0.45, 0.2), depth: depth * 0.88 },
+      scene,
+    )
+
+    top.position.y = height * 0.55
+    attachMesh(core, parent, material)
+    attachMesh(top, parent, material)
+
+    return
+  }
+
+  createSolidBlock(scene, parent, material, `${parent.name}-body`, width, height, depth)
 }
 
 function createMobilityPart(
@@ -138,23 +178,111 @@ function createMobilityPart(
   depth: number,
 ): void {
   if (partId.includes('Tread') || partId.includes('Tank')) {
-    const tread = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread`,
-      { width: Math.max(width, 0.7), height: Math.max(height * 0.7, 0.18), depth },
+    const base = MeshBuilder.CreateBox(
+      `${role}-${blockId}-tread-base`,
+      {
+        width: Math.max(width * 1.4, 0.72),
+        height: Math.max(height * 0.55, 0.15),
+        depth: Math.max(depth * 1.55, 0.75),
+      },
       scene,
     )
-    attachMesh(tread, parent, material)
+    const top = MeshBuilder.CreateBox(
+      `${role}-${blockId}-tread-top`,
+      {
+        width: Math.max(width * 1.32, 0.64),
+        height: Math.max(height * 0.3, 0.09),
+        depth: Math.max(depth * 1.35, 0.57),
+      },
+      scene,
+    )
+
+    top.position.y = Math.max(height * 0.37, 0.11)
+    attachMesh(base, parent, material)
+    attachMesh(top, parent, material)
+
+    const linkLeft = MeshBuilder.CreateBox(
+      `${role}-${blockId}-tread-link-l`,
+      {
+        width: width * 0.18,
+        height: Math.max(height * 0.32, 0.08),
+        depth: Math.max(depth * 1.35, 0.5),
+      },
+      scene,
+    )
+
+    const linkRight = MeshBuilder.CreateBox(
+      `${role}-${blockId}-tread-link-r`,
+      {
+        width: width * 0.18,
+        height: Math.max(height * 0.32, 0.08),
+        depth: Math.max(depth * 1.35, 0.5),
+      },
+      scene,
+    )
+    linkLeft.position.x = Math.max(width * -0.55, -0.22)
+    linkRight.position.x = Math.max(width * 0.55, 0.22)
+    attachMesh(linkLeft, parent, material)
+    attachMesh(linkRight, parent, material)
+
+    const rollerMesh = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-roller`,
+      {
+        height: Math.max(depth * 0.45, 0.16),
+        diameter: Math.max(width * 0.35, 0.2),
+        tessellation: 16,
+      },
+      scene,
+    )
+
+    rollerMesh.rotation.x = Math.PI / 2
+    rollerMesh.metadata = { kind: 'roll', speed: 0.06 }
+    rollerMesh.parent = parent
+    rollerMesh.material = material
 
     return
   }
 
   const wheel = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel`,
-    { height: Math.max(depth, 0.26), diameter: Math.max(width, 0.44), tessellation: 18 },
+    {
+      height: Math.max(depth * 0.86, 0.22),
+      diameter: Math.max(width * 1.08, 0.52),
+      tessellation: 22,
+    },
     scene,
   )
+  const rim = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-wheel-rim`,
+    {
+      diameter: Math.max(width * 1.08, 0.52),
+      thickness: Math.max(width * 0.18, 0.09),
+      tessellation: 20,
+    },
+    scene,
+  )
+
   wheel.rotation.z = Math.PI / 2
-  attachMesh(wheel, parent, material)
+  rim.rotation.z = Math.PI / 2
+  rim.position.y = 0
+
+  wheel.metadata = { kind: 'roll', speed: 0.2 }
+  wheel.parent = parent
+  wheel.material = material
+  rim.parent = parent
+  rim.material = material
+
+  const hub = MeshBuilder.CreateBox(
+    `${role}-${blockId}-wheel-hub`,
+    {
+      width: Math.max(width * 0.28, 0.2),
+      height: Math.max(depth * 0.12, 0.08),
+      depth: Math.max(width * 0.28, 0.2),
+    },
+    scene,
+  )
+  hub.parent = parent
+  hub.material = material
 }
 
 function createWeaponPart(
@@ -170,39 +298,513 @@ function createWeaponPart(
 ): void {
   if (partId.includes('Spinner') || partId.includes('Saw')) {
     const disc = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-disc`,
-      { height: Math.max(height * 0.34, 0.12), diameter: Math.max(width, depth, 0.72), tessellation: 28 },
+      `${role}-${blockId}-spinner-disc`,
+      {
+        height: Math.max(height * 0.2, 0.1),
+        diameter: Math.max(Math.max(width, depth), 0.7),
+        tessellation: 26,
+      },
       scene,
     )
-    attachMesh(disc, parent, material)
+    const hub = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-spinner-hub`,
+      { height: Math.max(height * 0.28, 0.14), diameter: Math.max(Math.max(width, depth) * 0.45, 0.2) },
+      scene,
+    )
+    disc.rotation.z = Math.PI / 2
+    hub.rotation.z = Math.PI / 2
+    disc.metadata = { kind: 'spin', speed: 0.15 }
+    hub.metadata = { kind: 'spin', speed: 0.15 }
+    disc.parent = parent
+    hub.parent = parent
+    disc.material = material
+    hub.material = material
+
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (Math.PI * 2 * index) / 6
+      const bar = MeshBuilder.CreateBox(
+        `${role}-${blockId}-spinner-blade-${index}`,
+        { width: Math.max(depth * 0.1, 0.08), height: Math.max(width * 0.24, 0.15), depth: Math.max(width * 0.85, 0.55) },
+        scene,
+      )
+      bar.position.set(Math.cos(angle) * 0.35, 0, Math.sin(angle) * 0.35)
+      bar.rotation.y = angle
+      attachMesh(bar, parent, material)
+    }
 
     return
   }
 
   if (partId.includes('Hammer')) {
-    const handle = MeshBuilder.CreateBox(
-      `${role}-${blockId}-handle`,
-      { width: 0.18, height: Math.max(height, 0.8), depth: 0.18 },
+    const shaft = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-hammer-shaft`,
+      { height: Math.max(height * 1.05, 0.8), diameter: Math.max(width * 0.18, 0.1), tessellation: 12 },
       scene,
     )
     const head = MeshBuilder.CreateBox(
-      `${role}-${blockId}-head`,
-      { width: Math.max(width, 0.72), height: 0.22, depth: Math.max(depth, 0.34) },
+      `${role}-${blockId}-hammer-head`,
+      { width: Math.max(width * 1.1, 0.6), height: Math.max(height * 0.24, 0.18), depth: Math.max(depth * 1.7, 0.56) },
       scene,
     )
-    head.position.y = Math.max(height, 0.8) * 0.42
-    attachMesh(handle, parent, material)
+
+    shaft.rotation.z = Math.PI / 2
+    shaft.position.y = Math.max(height * 0.1, 0.15)
+    head.position.set(0, Math.max(height * 0.72, 0.46), 0)
+    attachMesh(shaft, parent, material)
     attachMesh(head, parent, material)
 
     return
   }
 
-  const barrel = MeshBuilder.CreateBox(
+  if (partId.includes('Net')) {
+    const frame = MeshBuilder.CreateBox(
+      `${role}-${blockId}-net-frame`,
+      { width: Math.max(width * 0.9, 0.5), height: Math.max(height * 0.55, 0.35), depth: Math.max(depth * 0.7, 0.35) },
+      scene,
+    )
+    const string01 = MeshBuilder.CreateBox(
+      `${role}-${blockId}-net-string-01`,
+      { width: Math.max(width * 1.08, 0.55), height: 0.06, depth: 0.06 },
+      scene,
+    )
+    const string02 = MeshBuilder.CreateBox(
+      `${role}-${blockId}-net-string-02`,
+      { width: Math.max(width * 1.08, 0.55), height: 0.06, depth: 0.06 },
+      scene,
+    )
+
+    string01.position.y = Math.max(height * 0.42, 0.25)
+    string02.position.y = Math.max(height * 0.24, 0.12)
+    string01.parent = parent
+    string02.parent = parent
+    frame.parent = parent
+    frame.material = material
+    string01.material = material
+    string02.material = material
+
+    return
+  }
+
+  if (partId.includes('Turret')) {
+    const base = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-turret-base`,
+      {
+        height: Math.max(height * 0.48, 0.22),
+        diameter: Math.max(Math.max(width, depth), 0.5),
+        tessellation: 14,
+      },
+      scene,
+    )
+    const barrel = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-turret-barrel`,
+      {
+        height: Math.max(depth * 0.2, 0.14),
+        diameter: Math.max(width * 0.22, 0.14),
+        tessellation: 16,
+      },
+      scene,
+    )
+
+    base.rotation.x = Math.PI / 2
+    barrel.rotation.x = Math.PI / 2
+    barrel.position.z = Math.max(depth * 0.75, 0.45)
+    barrel.position.y = Math.max(height * 0.18, 0.18)
+    attachMesh(base, parent, material)
+    attachMesh(barrel, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Spear')) {
+    const shaft = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-spear-shaft`,
+      { height: Math.max(depth * 0.28, 0.16), diameter: Math.max(width * 0.18, 0.12), tessellation: 10 },
+      scene,
+    )
+    const tip = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-spear-tip`,
+      {
+        height: Math.max(depth * 0.22, 0.14),
+        diameterTop: 0,
+        diameterBottom: Math.max(width * 0.18, 0.12),
+        tessellation: 12,
+      },
+      scene,
+    )
+
+    shaft.rotation.x = Math.PI / 2
+    shaft.position.z = Math.max(depth * 0.35, 0.25)
+    tip.rotation.x = Math.PI / 2
+    tip.position.z = Math.max(depth * 0.78, 0.48)
+    attachMesh(shaft, parent, material)
+    attachMesh(tip, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Flipper') || partId.includes('Grabber') || partId.includes('Ram')) {
+    const plate = MeshBuilder.CreateBox(
+      `${role}-${blockId}-grabber`,
+      {
+        width: Math.max(width * 1.25, 0.65),
+        height: Math.max(height * 0.3, 0.16),
+        depth: Math.max(depth * 1.25, 0.55),
+      },
+      scene,
+    )
+    const sideL = MeshBuilder.CreateBox(
+      `${role}-${blockId}-grabber-l`,
+      {
+        width: Math.max(width * 0.18, 0.13),
+        height: Math.max(height * 1.05, 0.45),
+        depth: Math.max(depth * 0.35, 0.2),
+      },
+      scene,
+    )
+    const sideR = MeshBuilder.CreateBox(
+      `${role}-${blockId}-grabber-r`,
+      {
+        width: Math.max(width * 0.18, 0.13),
+        height: Math.max(height * 1.05, 0.45),
+        depth: Math.max(depth * 0.35, 0.2),
+      },
+      scene,
+    )
+
+    sideL.position.set(-Math.max(width * 0.35, 0.26), Math.max(height * 0.4, 0.22), 0)
+    sideR.position.set(Math.max(width * 0.35, 0.26), Math.max(height * 0.4, 0.22), 0)
+    attachMesh(plate, parent, material)
+    attachMesh(sideL, parent, material)
+    attachMesh(sideR, parent, material)
+
+    return
+  }
+
+  const weapon = MeshBuilder.CreateBox(
     `${role}-${blockId}-weapon`,
-    { width: Math.max(width, 0.34), height: Math.max(height, 0.24), depth: Math.max(depth, 0.78) },
+    {
+      width: Math.max(width, 0.34),
+      height: Math.max(height, 0.24),
+      depth: Math.max(depth, 0.68),
+    },
     scene,
   )
-  attachMesh(barrel, parent, material)
+  weapon.position.z = Math.max(depth * 0.45, 0.32)
+  attachMesh(weapon, parent, material)
+}
+
+function createDefensePart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  partId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  if (partId.includes('Cage')) {
+    const frame = MeshBuilder.CreateBox(
+      `${role}-${blockId}-cage`,
+      { width, height: Math.max(height * 1.2, 0.45), depth },
+      scene,
+    )
+    const railL = MeshBuilder.CreateBox(
+      `${role}-${blockId}-cage-l`,
+      { width: Math.max(width * 0.15, 0.09), height: Math.max(height * 1.2, 0.45), depth: Math.max(depth * 0.12, 0.08) },
+      scene,
+    )
+    const railR = MeshBuilder.CreateBox(
+      `${role}-${blockId}-cage-r`,
+      { width: Math.max(width * 0.15, 0.09), height: Math.max(height * 1.2, 0.45), depth: Math.max(depth * 0.12, 0.08) },
+      scene,
+    )
+    const roof = MeshBuilder.CreateBox(
+      `${role}-${blockId}-cage-top`,
+      { width: Math.max(width * 0.9, 0.6), height: Math.max(height * 0.1, 0.07), depth: Math.max(depth * 0.9, 0.6) },
+      scene,
+    )
+
+    railL.position.set(-width * 0.5, height * 0.3, 0)
+    railR.position.set(width * 0.5, height * 0.3, 0)
+    roof.position.y = Math.max(height * 0.7, 0.28)
+
+    attachMesh(frame, parent, material)
+    attachMesh(railL, parent, material)
+    attachMesh(railR, parent, material)
+    attachMesh(roof, parent, material)
+
+    return
+  }
+
+  const plate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-plate`,
+    { width: Math.max(width * 0.95, 0.55), height: Math.max(height * 0.2, 0.14), depth: Math.max(depth, 0.5) },
+    scene,
+  )
+
+  if (partId.includes('Front') || partId.includes('Shield')) {
+    const brace = MeshBuilder.CreateBox(
+      `${role}-${blockId}-front-brace`,
+      { width: Math.max(width * 1.05, 0.55), height: Math.max(height * 0.2, 0.16), depth: Math.max(depth * 0.6, 0.3) },
+      scene,
+    )
+
+    brace.position.z = Math.max(depth * 0.25, 0.2)
+    attachMesh(plate, parent, material)
+    attachMesh(brace, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Light') || partId.includes('Reactive')) {
+    for (let index = 0; index < 3; index += 1) {
+      const spike = MeshBuilder.CreateBox(
+        `${role}-${blockId}-def-spike-${index}`,
+        {
+          width: Math.max(width * 0.2, 0.11),
+          height: Math.max(height * 0.9, 0.35),
+          depth: Math.max(depth * 0.2, 0.11),
+        },
+        scene,
+      )
+
+      spike.position.set(Math.cos((Math.PI * 2 * index) / 3) * 0.16, Math.max(height * 0.42, 0.25), Math.sin((Math.PI * 2 * index) / 3) * 0.16)
+      attachMesh(spike, parent, material)
+    }
+  }
+
+  attachMesh(plate, parent, material)
+}
+
+function createUtilityPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  partId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  const box = MeshBuilder.CreateBox(
+    `${role}-${blockId}-utility`,
+    {
+      width: Math.max(width * 0.85, 0.45),
+      height: Math.max(height * 0.85, 0.45),
+      depth: Math.max(depth * 0.85, 0.45),
+    },
+    scene,
+  )
+
+  if (partId.includes('Booster')) {
+    const core = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-booster-core`,
+      { height: Math.max(height * 0.45, 0.18), diameter: Math.max(width * 0.35, 0.18), tessellation: 12 },
+      scene,
+    )
+    core.rotation.z = Math.PI / 2
+    core.position.z = Math.max(depth * 0.42, 0.2)
+    core.material = material
+    core.parent = parent
+    core.metadata = { kind: 'smoke' }
+  }
+
+  if (partId.includes('Magnet')) {
+    const ring = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-magnet-ring`,
+      {
+        diameter: Math.max(Math.max(width, depth), 0.52),
+        thickness: Math.max(width * 0.15, 0.08),
+        tessellation: 20,
+      },
+      scene,
+    )
+    ring.rotation.x = Math.PI / 2
+    attachMesh(ring, parent, material)
+  }
+
+  if (partId.includes('Smoke') || partId.includes('Sensor') || partId.includes('RepairKit')) {
+    const detail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-utility-detail`,
+      {
+        width: Math.max(width * 0.3, 0.12),
+        height: Math.max(height * 0.3, 0.12),
+        depth: Math.max(depth * 0.7, 0.28),
+      },
+      scene,
+    )
+    detail.position.z = Math.max(depth * 0.28, 0.22)
+    attachMesh(detail, parent, material)
+  }
+
+  attachMesh(box, parent, material)
+}
+
+function createStylePart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  partId: string,
+): void {
+  if (partId === 'Style_Flag') {
+    createFlagPart(scene, parent, material, role, blockId)
+    return
+  }
+
+  if (partId.includes('Wings')) {
+    const body = MeshBuilder.CreateBox(
+      `${role}-${blockId}-wings-body`,
+      { width: 0.26, height: 0.16, depth: 0.96 },
+      scene,
+    )
+    const left = MeshBuilder.CreateBox(
+      `${role}-${blockId}-wing-l`,
+      { width: 0.64, height: 0.14, depth: 0.56 },
+      scene,
+    )
+    const right = MeshBuilder.CreateBox(
+      `${role}-${blockId}-wing-r`,
+      { width: 0.64, height: 0.14, depth: 0.56 },
+      scene,
+    )
+    left.position.set(-0.45, 0.28, 0.01)
+    right.position.set(0.45, 0.28, 0.01)
+    left.rotation.z = 0.5
+    right.rotation.z = -0.5
+    attachMesh(body, parent, material)
+    attachMesh(left, parent, material)
+    attachMesh(right, parent, material)
+
+    return
+  }
+
+  if (partId.includes('DragonHead')) {
+    const skull = MeshBuilder.CreateBox(
+      `${role}-${blockId}-dragon-head`,
+      { width: 0.5, height: 0.32, depth: 0.52 },
+      scene,
+    )
+    const jaw = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-jaw`,
+      { height: 0.16, diameter: 0.42, tessellation: 12 },
+      scene,
+    )
+    const hornL = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-horn-l`,
+      { height: 0.36, diameterTop: 0, diameterBottom: 0.09, tessellation: 12 },
+      scene,
+    )
+    const hornR = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-horn-r`,
+      { height: 0.36, diameterTop: 0, diameterBottom: 0.09, tessellation: 12 },
+      scene,
+    )
+    jaw.rotation.z = Math.PI / 2
+    jaw.position.set(0, -0.1, 0.16)
+    hornL.position.set(-0.18, 0.26, 0.01)
+    hornR.position.set(0.18, 0.26, 0.01)
+    attachMesh(skull, parent, material)
+    attachMesh(jaw, parent, material)
+    attachMesh(hornL, parent, material)
+    attachMesh(hornR, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Spikes')) {
+    const plate = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spike-plate`,
+      { width: 0.62, height: 0.08, depth: 0.62 },
+      scene,
+    )
+    attachMesh(plate, parent, material)
+
+    for (let index = 0; index < 4; index += 1) {
+      const spike = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-spike-${index}`,
+        { height: 0.3, diameterTop: 0, diameterBottom: 0.08, tessellation: 8 },
+        scene,
+      )
+      spike.rotation.z = Math.PI / 2
+      spike.position.set(
+        (index % 2 === 0 ? -0.2 : 0.2) + (index > 1 ? 0 : 0),
+        0.2,
+        (index < 2 ? -0.2 : 0.2),
+      )
+      attachMesh(spike, parent, material)
+    }
+    return
+  }
+
+  if (partId.includes('Neon')) {
+    const strip = MeshBuilder.CreateBox(
+      `${role}-${blockId}-neon-strip`,
+      { width: 0.68, height: 0.1, depth: 0.12 },
+      scene,
+    )
+    const glow = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-neon-halo`,
+      { diameter: 0.48, thickness: 0.08, tessellation: 12 },
+      scene,
+    )
+    glow.rotation.x = Math.PI / 2
+    glow.position.set(0, 0.33, 0)
+    attachMesh(strip, parent, material)
+    attachMesh(glow, parent, material)
+
+    return
+  }
+
+  if (partId.includes('Crown')) {
+    const band = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-crown-band`,
+      { diameter: 0.52, thickness: 0.12, tessellation: 18 },
+      scene,
+    )
+    for (let index = 0; index < 3; index += 1) {
+      const tooth = MeshBuilder.CreateBox(
+        `${role}-${blockId}-crown-tooth-${index}`,
+        { width: 0.09, height: 0.18, depth: 0.2 },
+        scene,
+      )
+      tooth.position.set(-0.19 + index * 0.19, 0.14, 0)
+      attachMesh(tooth, parent, material)
+    }
+    band.rotation.x = Math.PI / 2
+    attachMesh(band, parent, material)
+
+    return
+  }
+
+  if (partId.includes('TrashCan')) {
+    const shell = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-trash-shell`,
+      {
+        height: 0.52,
+        diameter: 0.36,
+        tessellation: 12,
+      },
+      scene,
+    )
+    const lid = MeshBuilder.CreateBox(
+      `${role}-${blockId}-trash-lid`,
+      { width: 0.24, height: 0.08, depth: 0.46 },
+      scene,
+    )
+    lid.position.set(0, 0.32, 0)
+    shell.rotation.z = Math.PI / 2
+    attachMesh(shell, parent, material)
+    attachMesh(lid, parent, material)
+
+    return
+  }
+
+  createSolidBlock(scene, parent, material, `${role}-${blockId}-style`, 0.5, 0.3, 0.5)
 }
 
 function createFlagPart(
@@ -212,28 +814,41 @@ function createFlagPart(
   role: TeamRole,
   blockId: string,
 ): void {
-  const pole = MeshBuilder.CreateBox(
+  const pole = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-pole`,
-    { width: 0.08, height: 0.86, depth: 0.08 },
+    { height: 0.9, diameter: 0.07, tessellation: 10 },
     scene,
   )
-  const flag = MeshBuilder.CreateBox(
+  const flag = MeshBuilder.CreatePlane(
     `${role}-${blockId}-flag`,
-    { width: 0.46, height: 0.26, depth: 0.04 },
+    { width: 0.46, height: 0.26 },
     scene,
   )
 
-  pole.position.y = 0.2
-  flag.position.set(0.24, 0.5, 0)
+  pole.rotation.z = Math.PI / 2
+  flag.rotation.z = Math.PI / 2
+  pole.position.y = 0.15
+  flag.position.set(0.24, 0.56, 0)
+
   attachMesh(pole, parent, material)
   attachMesh(flag, parent, material)
 }
 
-function attachMesh(
-  mesh: Mesh,
+function createSolidBlock(
+  scene: Scene,
   parent: TransformNode,
   material: StandardMaterial,
+  name: string,
+  width: number,
+  height: number,
+  depth: number,
 ): void {
+  const mesh = MeshBuilder.CreateBox(name, { width, height, depth }, scene)
+
+  attachMesh(mesh, parent, material)
+}
+
+function attachMesh(mesh: Mesh, parent: TransformNode, material: StandardMaterial): void {
   mesh.parent = parent
   mesh.material = material
 }
@@ -265,12 +880,7 @@ function materialForCategory(
   return materials.chassis
 }
 
-function createMaterial(
-  scene: Scene,
-  name: string,
-  diffuse: string,
-  emissive: string,
-): StandardMaterial {
+function createMaterial(scene: Scene, name: string, diffuse: string, emissive: string): StandardMaterial {
   const material = new StandardMaterial(name, scene)
 
   material.diffuseColor = Color3.FromHexString(diffuse)

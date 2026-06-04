@@ -5,7 +5,7 @@ import type {
 } from '../../../../packages/replay/src/index.js'
 import type { TeamRole, Vector3 } from '../../../../packages/schemas/src/index.js'
 
-export type CameraPreset = 'wide' | 'broadcast' | 'red_follow' | 'blue_follow' | 'impact'
+export type CameraPreset = 'wide' | 'broadcast' | 'red_follow' | 'blue_follow' | 'impact' | 'cinematic'
 
 export type BotFrameState = {
   role: TeamRole

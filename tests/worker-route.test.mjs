@@ -5,6 +5,7 @@ import {
   AgentArenaSession,
   handleWorkerRequest,
 } from '../.test-build/apps/worker/src/index.js'
+import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
@@ -174,7 +175,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.method === 'GET' &&
         action.path === '/sessions/:sessionId/replay' &&
         action.phase === 'replay_phase | referee_awards' &&
-        action.returns.includes('while replayAvailable is true'),
+        action.returns.includes('botBlueprints') &&
+        action.returns.includes('pending submissions are not public before resolution'),
     ),
   )
   assert.ok(
@@ -409,6 +411,24 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(earlyReplay.response.status, 404)
   assert.equal(earlyReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
 
+  const preResolveState = await route(env, `/sessions/${sessionId}/state`, { token: redToken })
+
+  assert.equal(preResolveState.response.status, 200)
+  assert.equal(preResolveState.json.role, 'red')
+  assert.deepEqual(preResolveState.json.opponent, {
+    role: 'blue',
+    claimed: true,
+    submitted: false,
+    wins: 0,
+    losses: 0,
+    winStreak: 0,
+  })
+
+  const preResolveReplay = await route(env, `/sessions/${sessionId}/replay`)
+
+  assert.equal(preResolveReplay.response.status, 404)
+  assert.equal(preResolveReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
+
   const blueSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
     method: 'POST',
     token: blueToken,
@@ -421,6 +441,17 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(blueSubmission.json.publicState.roles.blue.submitted, true)
   assert.equal(blueSubmission.json.publicState.replayAvailable, true)
   assert.equal(blueSubmission.json.publicState.awardOptions.length, 3)
+
+  const replay = await route(env, `/sessions/${sessionId}/replay`)
+
+  assert.equal(replay.response.status, 200)
+  assert.equal(validateReplayTimeline(replay.json), true)
+  assert.equal(replay.json.botBlueprints?.red?.name, 'Spinner')
+  assert.equal(replay.json.botBlueprints?.blue?.name, 'Spinner')
+  assert.equal(replay.json.botBlueprints?.red?.blocks?.length > 0, true)
+  assert.equal(replay.json.botBlueprints?.blue?.blocks?.length > 0, true)
+  assert.equal(replay.json.botBlueprints?.red?.blocks[0].id, 'core')
+  assert.equal(replay.json.botBlueprints?.red?.blocks[0].partId, 'Body_Square_Medium')
 
   const invalidAwardsToken = await route(env, `/sessions/${sessionId}/referee-awards`, {
     method: 'POST',
@@ -495,10 +526,10 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(finalRedState.json.round, 2)
   assert.equal(JSON.stringify(finalRedState.json.opponent).includes('Spinner'), false)
 
-  const replay = await route(env, `/sessions/${sessionId}/replay`)
+  const staleReplay = await route(env, `/sessions/${sessionId}/replay`)
 
-  assert.equal(replay.response.status, 404)
-  assert.equal(replay.json.error.code, 'REPLAY_NOT_AVAILABLE')
+  assert.equal(staleReplay.response.status, 404)
+  assert.equal(staleReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
 })
 
 test('worker returns expired and rate-limited statuses through the Durable Object boundary', async () => {

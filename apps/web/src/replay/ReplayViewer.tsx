@@ -24,6 +24,7 @@ const cameraOptions: { label: string; value: CameraPreset }[] = [
   { label: 'Red follow', value: 'red_follow' },
   { label: 'Blue follow', value: 'blue_follow' },
   { label: 'Impact', value: 'impact' },
+  { label: 'Cinematic', value: 'cinematic' },
 ]
 
 const speedOptions = [0.5, 1, 1.5, 2]
@@ -34,9 +35,13 @@ export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerPro
   const [speed, setSpeed] = useState(1)
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('wide')
   const frame = useMemo(() => buildReplayFrame(timeline, time), [timeline, time])
+  const sortedEvents = useMemo(
+    () => sortTimelineEvents(timeline.events),
+    [timeline.events],
+  )
   const activeEvent = useMemo(
-    () => findActiveEvent(timeline.events, time),
-    [timeline.events, time],
+    () => findActiveEvent(sortedEvents, time),
+    [sortedEvents, time],
   )
 
   useEffect(() => {
@@ -149,7 +154,7 @@ export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerPro
         )}
       </div>
       <ol className="timeline-list" aria-label="Replay event timeline">
-        {timeline.events.map((event, index) => (
+        {sortedEvents.map((event, index) => (
           <li
             className={isEventActive(event, time) ? 'active' : ''}
             key={`${event.t}-${event.type}-${index}`}
@@ -161,6 +166,16 @@ export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerPro
       </ol>
     </section>
   )
+}
+
+function sortTimelineEvents(events: ReplayEvent[]): ReplayEvent[] {
+  return [...events].sort((left, right) => {
+    if (left.t !== right.t) {
+      return left.t - right.t
+    }
+
+    return left.type.localeCompare(right.type)
+  })
 }
 
 function findActiveEvent(events: ReplayEvent[], time: number): ReplayEvent | undefined {
@@ -178,7 +193,7 @@ function findActiveEvent(events: ReplayEvent[], time: number): ReplayEvent | und
 }
 
 function isEventActive(event: ReplayEvent, time: number): boolean {
-  return time >= event.t && time < event.t + 0.75
+  return time >= event.t && time < event.t + eventWindow(event.type)
 }
 
 function formatTime(value: number): string {
@@ -194,4 +209,20 @@ function formatEvent(eventType: string): string {
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function eventWindow(type: ReplayEvent['type']): number {
+  if (type === 'weapon_fire') {
+    return 0.95
+  }
+
+  if (type === 'impact' || type === 'hazard') {
+    return 1.2
+  }
+
+  if (type === 'knockout') {
+    return 2
+  }
+
+  return 0.75
 }

@@ -9,6 +9,7 @@ import {
   type GeneratedControls,
   type InventoryItem,
   type PublicSessionState,
+  type ReplayPayload,
   type RefereeAwardOption,
   type RefereeAwardsResponse,
   type RelayErrorResponse,
@@ -29,7 +30,6 @@ import {
   resolveCombat,
   type CombatResult,
 } from '../../../packages/sim/src/index.js'
-import type { ReplayTimeline } from '../../../packages/replay/src/index.js'
 
 const DEFAULT_ARENA: ArenaConfig = {
   name: 'Compact Box',
@@ -167,7 +167,7 @@ export type StoredSessionState = {
   refereeTokenHash?: string
   awardOptions: RefereeAwardOption[]
   awardHistory: AppliedRefereeAward[]
-  replay?: ReplayTimeline
+  replay?: ReplayPayload
   lastResult?: CombatSummary
   eventLog: SessionLogEvent[]
   rateLimits: Record<string, StoredRateLimit>
@@ -740,7 +740,7 @@ export class SessionCoordinator {
     }
   }
 
-  getReplay(): SessionResult<ReplayTimeline> {
+  getReplay(): SessionResult<ReplayPayload> {
     const activeError = this.requireActive()
 
     if (activeError) {
@@ -1007,7 +1007,13 @@ export class SessionCoordinator {
       },
     })
 
-    this.state.replay = result.replay
+    this.state.replay = {
+      ...result.replay,
+      botBlueprints: {
+        red: cloneJson(red.submission.blueprint),
+        blue: cloneJson(blue.submission.blueprint),
+      },
+    }
     this.state.lastResult = combatSummary(result)
     this.state.awardOptions = generateRefereeAwardOptions(
       `${this.state.id}:${this.state.seed}`,

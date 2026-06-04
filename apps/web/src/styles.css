@@ -20,6 +20,11 @@ body {
   min-height: 100vh;
 }
 
+#root {
+  min-width: 0;
+  max-width: 100%;
+}
+
 button {
   border: 1px solid rgba(238, 242, 243, 0.16);
   border-radius: 6px;
@@ -67,6 +72,7 @@ button.active {
 }
 
 .arena-app {
+  min-width: 0;
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -78,12 +84,231 @@ button.active {
 }
 
 .top-bar {
+  min-width: 0;
   min-height: 76px;
   display: grid;
   grid-template-columns: minmax(180px, 260px) 1fr auto;
   align-items: stretch;
   border-bottom: 1px solid rgba(238, 242, 243, 0.14);
   background: rgba(16, 19, 18, 0.95);
+}
+
+.referee-grid {
+  min-width: 0;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.live-replay-panel {
+  grid-column: 1 / -1;
+}
+
+.referee-replay-layout {
+  min-width: 0;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(260px, 340px);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.referee-replay-frame {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 243, 0.12);
+  background: #050707;
+}
+
+.referee-replay-frame .replay-shell {
+  min-height: 520px;
+}
+
+.replay-outcome {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(238, 242, 243, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.replay-outcome h3 {
+  margin: 18px 0 0;
+  color: #eef2f3;
+  font-size: 0.82rem;
+  letter-spacing: 0;
+}
+
+.key-event-list {
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.key-event-list li {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.key-event-list span {
+  color: #d4ae42;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.key-event-list p {
+  margin: 0;
+  color: #c2cccc;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.replay-inline-error {
+  margin: 12px;
+}
+
+.referee-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.referee-form label {
+  display: grid;
+  gap: 6px;
+  color: #8fa3a3;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.referee-empty {
+  margin: 12px 0 0;
+  color: #c2cccc;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.referee-message {
+  margin: 0 14px 14px;
+  padding: 12px;
+  border: 1px solid rgba(93, 210, 146, 0.35);
+  border-radius: 6px;
+  background: rgba(93, 210, 146, 0.08);
+  color: #5dd292;
+  font-size: 0.84rem;
+}
+
+.referee-error {
+  margin: 0 14px 14px;
+  padding: 12px;
+  border: 1px solid rgba(255, 92, 108, 0.45);
+  border-radius: 6px;
+  background: rgba(142, 47, 56, 0.18);
+  color: #ffd9de;
+  font-size: 0.84rem;
+}
+
+.role-status-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.invite-panel {
+  min-width: 0;
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.invite-links {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.invite-links button {
+  min-width: 0;
+}
+
+.invite-link-text {
+  margin: 0;
+  color: #8fa3a3;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.award-stack {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.referee-grid .award-card {
+  min-height: 0;
+  padding: 12px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 10px;
+  border: 1px solid rgba(238, 242, 243, 0.14);
+  border-radius: 8px;
+  background: rgba(238, 242, 243, 0.055);
+}
+
+.referee-grid .award-action-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(132px, auto);
+  gap: 10px;
+  align-items: center;
+}
+
+.referee-grid .award-card h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.94rem;
+}
+
+.referee-grid .award-card p {
+  margin: 0;
+  color: #c2cccc;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.referee-grid .award-team-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.referee-grid .award-action-bar span {
+  color: #c2cccc;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.event-log {
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  list-style: none;
+}
+
+.referee-grid .event-log {
+  max-height: 356px;
+  overflow: auto;
 }
 
 .brand-block,
@@ -223,9 +448,12 @@ button.active {
   font-size: 0.76rem;
   line-height: 1.35;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .replay-shell {
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   min-height: 420px;
   display: grid;
@@ -235,6 +463,8 @@ button.active {
 }
 
 .babylon-stage {
+  min-width: 0;
+  max-width: 100%;
   position: relative;
   min-height: 340px;
   overflow: hidden;
@@ -242,6 +472,7 @@ button.active {
 }
 
 .babylon-stage canvas {
+  max-width: 100%;
   width: 100%;
   height: 100%;
   display: block;
@@ -350,6 +581,7 @@ button.active {
 }
 
 .replay-controls {
+  min-width: 0;
   min-height: 64px;
   padding: 10px;
   display: grid;
@@ -360,6 +592,7 @@ button.active {
 }
 
 .replay-controls button {
+  min-width: 0;
   min-height: 34px;
 }
 
@@ -374,6 +607,7 @@ button.active {
 }
 
 .replay-controls select {
+  min-width: 0;
   width: 100%;
 }
 
@@ -384,6 +618,7 @@ button.active {
 }
 
 .replay-status-strip {
+  min-width: 0;
   min-height: 42px;
   padding: 8px 10px;
   display: grid;
@@ -404,7 +639,14 @@ button.active {
   white-space: nowrap;
 }
 
+.replay-status-strip span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .timeline-list {
+  max-width: 100%;
+  min-width: 0;
   margin: 0;
   padding: 10px;
   display: grid;
@@ -960,6 +1202,69 @@ pre {
   gap: 10px;
 }
 
+.submission-mode-toggle {
+  margin: 12px 0 4px;
+}
+
+.submission-mode-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #c2cccc;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.submission-mode-toggle input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+.agent-live-panel section + section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(238, 242, 243, 0.1);
+}
+
+.agent-live-panel h3 {
+  margin: 0 0 10px;
+  color: #eef2f3;
+  font-size: 0.84rem;
+  letter-spacing: 0;
+}
+
+.agent-plan-list {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.agent-plan-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.agent-plan-row label,
+.agent-live-panel section > label {
+  color: #8fa3a3;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.agent-row-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.agent-row-actions button {
+  min-height: 36px;
+  min-width: 96px;
+}
+
 .claim-controls label,
 .submission-editor {
   color: #8fa3a3;
@@ -1160,7 +1465,9 @@ textarea:focus-visible {
   .top-bar,
   .human-grid,
   .agent-grid,
-  .agent-live-grid {
+  .agent-live-grid,
+  .referee-replay-layout,
+  .referee-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1195,6 +1502,11 @@ textarea:focus-visible {
   .agent-live-panel {
     border-right: 0;
   }
+
+  .referee-grid .award-stack,
+  .event-log {
+    max-height: 320px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1211,6 +1523,7 @@ textarea:focus-visible {
   .catalog-head,
   .catalog-row,
   .agent-log li,
+  .key-event-list li,
   .replay-status-strip {
     grid-template-columns: 1fr;
   }
@@ -1225,11 +1538,118 @@ textarea:focus-visible {
   }
 
   .replay-controls {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .referee-empty,
+  .invite-link-text {
+    max-width: 100%;
+  }
+
+  .referee-replay-frame,
+  .referee-replay-frame .replay-shell {
+    max-width: 100%;
+  }
+
+  .replay-scrubber {
+    grid-column: 1 / -1;
+  }
+
+  .agent-plan-row {
+    grid-template-columns: 1fr;
   }
 
   .timeline-list {
     grid-auto-columns: minmax(106px, 62%);
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-block,
+  .session-strip,
+  .view-switch,
+  .replay-column,
+  .agent-overview,
+  .panel,
+  .compact-panel,
+  .agent-live-header,
+  .agent-live-panel {
+    padding: 12px;
+  }
+
+  .session-strip,
+  .award-grid,
+  .category-strip,
+  .cockpit-stats,
+  .status-list div,
+  .inventory-row,
+  .agent-facts div,
+  .agent-button-row,
+  .invite-links,
+  .replay-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .referee-replay-frame {
+    width: 100%;
+    max-width: 100%;
+    justify-self: stretch;
+  }
+
+  .top-bar,
+  .session-strip,
+  .referee-grid,
+  .referee-grid > *,
+  .referee-replay-layout,
+  .referee-replay-layout > *,
+  .referee-replay-frame,
+  .referee-replay-frame .replay-shell,
+  .replay-controls,
+  .replay-status-strip {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .referee-empty,
+  .invite-link-text,
+  .metric strong {
+    max-width: min(100%, 20rem);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .referee-grid {
+    grid-template-columns: minmax(0, calc(100vw - 28px));
+  }
+
+  .referee-grid > * {
+    max-width: calc(100vw - 28px);
+  }
+
+  .referee-replay-frame,
+  .referee-replay-frame .replay-shell {
+    max-width: calc(100vw - 52px);
+  }
+
+  .referee-grid,
+  .referee-replay-frame,
+  .replay-shell {
+    overflow-x: clip;
+  }
+
+  .replay-shell {
+    min-height: 380px;
+    grid-template-rows: minmax(260px, 1fr) auto auto 74px;
+  }
+
+  .referee-replay-frame .replay-shell {
+    min-height: 420px;
+  }
+
+  .babylon-stage {
+    min-height: 260px;
   }
 }
 
@@ -1253,7 +1673,9 @@ textarea:focus-visible {
   .status-list div,
   .inventory-row,
   .agent-facts div,
-  .agent-button-row {
+  .agent-button-row,
+  .invite-links,
+  .replay-controls {
     grid-template-columns: 1fr;
   }
 
@@ -1263,5 +1685,13 @@ textarea:focus-visible {
 
   .replay-shell {
     min-height: 380px;
+  }
+
+  .referee-replay-frame .replay-shell {
+    min-height: 420px;
+  }
+
+  .replay-controls {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

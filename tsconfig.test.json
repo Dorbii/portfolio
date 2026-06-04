@@ -11,6 +11,7 @@
   "include": [
     "apps/worker/**/*.ts",
     "apps/web/src/agent/**/*.ts",
+    "apps/web/src/referee/**/*.ts",
     "apps/web/src/mockSession.ts",
     "apps/web/src/replay/replayMapping.ts",
     "packages/**/*.ts"

@@ -101,7 +101,7 @@ export function createAgentContract() {
         path: '/sessions/:sessionId/replay',
         phase: 'replay_phase | referee_awards',
         returns:
-          'compact replay timeline after combat while replayAvailable is true; Phase 6 sessions usually remain in referee_awards until awards are submitted',
+          'replay timeline plus post-combat red and blue botBlueprints after combat while replayAvailable is true; pending submissions are not public before resolution',
       },
       {
         name: 'submit_referee_awards',
@@ -121,7 +121,7 @@ export function createAgentContract() {
       ['waiting_for_agents', 'submission_phase', 'both roles claimed'],
       ['submission_phase', 'submissions_locked', 'both plans accepted'],
       ['submissions_locked', 'combat_resolved', 'deterministic resolver completed'],
-      ['combat_resolved', 'replay_phase', 'compact replay timeline available'],
+      ['combat_resolved', 'replay_phase', 'replay payload available'],
       ['replay_phase', 'referee_awards', 'award options generated'],
       ['referee_awards', 'submission_phase', 'awards applied and next round opened'],
       ['referee_awards', 'session_complete', 'win streak or max rounds reached'],

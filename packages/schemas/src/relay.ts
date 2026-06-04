@@ -1,6 +1,7 @@
 import type {
   ArenaConfig,
   AppliedRefereeAward,
+  BotBlueprint,
   GeneratedControls,
   InventoryItem,
   RefereeAwardOption,
@@ -90,6 +91,18 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   awardHistory?: AppliedRefereeAward[]
   lastResult?: CombatSummary
   eventLog: SessionLogEvent[]
+}
+
+export type ReplayPayload = {
+  round: number
+  duration: number
+  events: {
+    t: number
+    type: string
+    [key: string]: unknown
+  }[]
+  summary: string
+  botBlueprints: Record<TeamRole, BotBlueprint>
 }
 
 export type CreateSessionResponse = {
