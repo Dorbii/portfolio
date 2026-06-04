@@ -6,7 +6,6 @@ import {
   TEAM_ROLES,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
-  type AgentChatMessageRequest,
   type ArenaConfig,
   type RefereeAwardOption,
   type RefereeAwardSelection,
@@ -773,7 +772,7 @@ function validateAgentChatMessageShape(
 
   if (
     'kind' in value &&
-    !AGENT_CHAT_MESSAGE_KINDS.includes(value.kind as AgentChatMessageRequest['kind'])
+    !AGENT_CHAT_MESSAGE_KINDS.includes(value.kind as never)
   ) {
     issues.push(
       issue(

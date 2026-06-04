@@ -31,6 +31,11 @@ import {
   type ReplayPayload,
 } from './referee/refereeClient'
 import { ReplayViewer } from './replay/ReplayViewer'
+import {
+  arenaConfig as previewArenaConfig,
+  mockBotBlueprints,
+  mockReplay,
+} from './mockSession'
 
 type SessionLoadState = 'idle' | 'busy'
 type AwardSelections = Partial<Record<string, TeamRole>>
@@ -39,13 +44,39 @@ const MAX_AWARDS_PER_ROUND = 2
 const MAX_AWARDS_PER_TEAM = 1
 
 export default function App() {
-  const isAgentPath = isAgentPathname(window.location.pathname)
+  const pathname = window.location.pathname
+  const isAgentPath = isAgentPathname(pathname)
+
+  if (isReplayPreviewPathname(pathname)) {
+    return <ReplayPreview />
+  }
 
   if (isAgentPath) {
     return <LiveAgentCockpit />
   }
 
   return <RefereeConsole />
+}
+
+function ReplayPreview() {
+  return (
+    <main className="replay-preview-page">
+      <header className="replay-preview-header">
+        <div>
+          <span className="eyebrow">Art preview</span>
+          <h1>Agent Arena</h1>
+        </div>
+        <strong>{previewArenaConfig.name}</strong>
+      </header>
+      <section className="replay-preview-frame">
+        <ReplayViewer
+          arena={previewArenaConfig}
+          botBlueprints={mockBotBlueprints}
+          timeline={mockReplay}
+        />
+      </section>
+    </main>
+  )
 }
 
 function RefereeConsole() {
@@ -1098,6 +1129,12 @@ function isAgentPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
   return normalized === '/agent' || normalized.endsWith('/agent')
+}
+
+function isReplayPreviewPathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/replay-preview' || normalized.endsWith('/replay-preview')
 }
 
 function teamName(role: TeamRole): string {

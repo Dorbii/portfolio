@@ -164,6 +164,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.browserApi.methods.includes('claimRole'))
   assert.ok(json.browserApi.methods.includes('getFallbackRoundPlan'))
   assert.ok(json.browserApi.methods.includes('submitFallbackRoundPlan'))
+  assert.ok(json.browserApi.methods.includes('submitChatMessage'))
   assert.ok(json.browserApi.methods.includes('waitForStateChange'))
   assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
   assert.ok(json.objective.includes('Build and submit'))
@@ -172,6 +173,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('public chat')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
   assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole()'))
   assert.ok(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan() only if'))
@@ -223,6 +225,14 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'submit_referee_awards' &&
         action.method === 'POST' &&
         action.path === '/sessions/:sessionId/referee-awards',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'submit_chat_message' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/chat',
     ),
   )
   assert.ok(
@@ -386,6 +396,52 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(blueBootstrap.response.status, 201)
   assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
   assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
+})
+
+test('POST /sessions/:id/chat stores public role-authored chat', async () => {
+  const env = createEnv()
+  const sessionId = 's_chat_route'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const blueInvite = inviteFor(created.json.invites, 'blue')
+
+  await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: { agentName: 'Red Talker' },
+  })
+  await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {},
+  })
+
+  const chat = await route(env, `/sessions/${sessionId}/chat`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      kind: 'taunt',
+      message: 'Bring something that can turn.',
+    },
+  })
+
+  assert.equal(chat.response.status, 200)
+  assert.equal(chat.json.message.role, 'red')
+  assert.equal(chat.json.message.agentName, 'Red Talker')
+  assert.equal(chat.json.message.kind, 'taunt')
+  assert.equal(chat.json.publicState.chatLog.length, 1)
+  assert.equal(chat.json.state.chatLog[0].message, 'Bring something that can turn.')
+
+  const publicState = await route(env, `/sessions/${sessionId}/public`)
+
+  assert.equal(publicState.json.chatLog[0].message, 'Bring something that can turn.')
+  assertRedactedPublicState(publicState.json, [
+    redInvite.claimToken,
+    blueInvite.claimToken,
+  ])
 })
 
 test('POST /sessions rejects oversized JSON bodies before validation', async () => {

@@ -38,6 +38,17 @@ const roleState = {
     submitted: false,
   },
   replayAvailable: false,
+  chatLog: [
+    {
+      id: 's_demo:chat:1',
+      at: '2026-06-03T12:01:00.000Z',
+      round: 1,
+      phase: 'submission_phase',
+      role: 'blue',
+      kind: 'taunt',
+      message: 'Try turning faster.',
+    },
+  ],
   eventLog: [
     {
       at: '2026-06-03T12:00:00.000Z',
@@ -203,6 +214,7 @@ test('external agent brief is self-contained enough to claim and submit', () => 
         blue: { role: 'blue', claimed: true, submitted: false },
       },
       replayAvailable: false,
+      chatLog: roleState.chatLog,
       eventLog: roleState.eventLog,
     },
   })
@@ -215,6 +227,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Authorization: Bearer <claimToken>'))
   assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
+  assert.ok(brief.includes('Do not submit hidden chain-of-thought'))
   assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
   assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
   assert.ok(brief.includes('Do not keep retrying'))
@@ -453,11 +467,13 @@ test('browser role API exposes valid actions from current role state', async () 
       ['claim_role', false],
       ['get_role_state', true],
       ['get_match_log', true],
+      ['get_chat_log', true],
       ['wait_for_state_change', true],
       ['wait_for_next_submission_window', false],
       ['get_fallback_round_plan', true],
       ['submit_fallback_round_plan', true],
       ['submit_round_plan', true],
+      ['submit_chat_message', true],
     ],
   )
 })
@@ -482,7 +498,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, true, true, false, false, false, false, true, false, false],
+    [true, true, true, false, false, false, false, false, true, false, false, false],
   )
 })
 
@@ -583,6 +599,95 @@ test('browser role API reads match log through the client state endpoint', async
   const matchLog = await roleApi.getMatchLog()
 
   assert.deepEqual(matchLog, roleState.eventLog)
+})
+
+test('browser role API posts and reads public chat through authenticated endpoints', async () => {
+  const calls = []
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async (url, init = {}) => {
+      const headers = new Headers(init.headers)
+      calls.push({
+        url: String(url),
+        method: init.method ?? 'GET',
+        authorization: headers.get('authorization'),
+        body: init.body ? JSON.parse(String(init.body)) : undefined,
+      })
+
+      if (String(url).endsWith('/chat')) {
+        return jsonResponse({
+          message: {
+            id: 's_demo:chat:2',
+            at: '2026-06-03T12:02:00.000Z',
+            round: 1,
+            phase: 'submission_phase',
+            role: 'red',
+            kind: 'reflection',
+            message: 'Armor held; add drive next.',
+          },
+          state: {
+            ...roleState,
+            chatLog: [
+              ...roleState.chatLog,
+              {
+                id: 's_demo:chat:2',
+                at: '2026-06-03T12:02:00.000Z',
+                round: 1,
+                phase: 'submission_phase',
+                role: 'red',
+                kind: 'reflection',
+                message: 'Armor held; add drive next.',
+              },
+            ],
+          },
+          publicState: {
+            sessionId: invite.sessionId,
+            stateVersion: 'v2',
+            phase: 'submission_phase',
+            round: 1,
+            maxRounds: 7,
+            expiresAt: roleState.expiresAt,
+            arena: {
+              name: 'Compact Box',
+              width: 24,
+              height: 16,
+              activeHazards: ['floor_saw'],
+            },
+            roles: {
+              red: { role: 'red', claimed: true, submitted: false },
+              blue: { role: 'blue', claimed: true, submitted: false },
+            },
+            replayAvailable: false,
+            chatLog: roleState.chatLog,
+            eventLog: roleState.eventLog,
+          },
+        })
+      }
+
+      return jsonResponse(roleState)
+    },
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => roleState)
+  const posted = await roleApi.submitChatMessage({
+    kind: 'reflection',
+    message: 'Armor held; add drive next.',
+  })
+  const chatLog = await roleApi.getChatLog()
+
+  assert.equal(posted.message.kind, 'reflection')
+  assert.deepEqual(chatLog, roleState.chatLog)
+  assert.deepEqual(
+    calls.map((call) => [call.method, call.url.replace(invite.apiBase, ''), call.authorization]),
+    [
+      ['POST', '/sessions/s_demo/chat', 'Bearer role_red'],
+      ['GET', '/sessions/s_demo/state', 'Bearer role_red'],
+    ],
+  )
+  assert.deepEqual(calls[0].body, {
+    kind: 'reflection',
+    message: 'Armor held; add drive next.',
+  })
 })
 
 test('browser role API waitForPhase returns matching phase and rejects terminal phases', async () => {

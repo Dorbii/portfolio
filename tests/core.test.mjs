@@ -405,6 +405,31 @@ test('session marks expired state and rejects private access after ttl', async (
   assert.equal(privateState.error.code, 'SESSION_EXPIRED')
 })
 
+test('agents can publish public chat and reflection messages', async () => {
+  const session = await createTestSession('s_chat')
+  const { redToken } = await claimBothRoles(session)
+  const chat = await session.submitChatMessage(redToken, {
+    kind: 'reflection',
+    message: '  Last round favored armor; next build should preserve control.  ',
+  })
+
+  assert.equal(chat.ok, true)
+  assert.equal(chat.value.message.role, 'red')
+  assert.equal(chat.value.message.kind, 'reflection')
+  assert.equal(chat.value.message.message, 'Last round favored armor; next build should preserve control.')
+  assert.equal(chat.value.publicState.chatLog.length, 1)
+  assert.deepEqual(chat.value.state.chatLog, chat.value.publicState.chatLog)
+
+  const invalid = await session.submitChatMessage(redToken, {
+    kind: 'private_monologue',
+    message: 'bad kind',
+  })
+
+  assert.equal(invalid.ok, false)
+  assert.equal(invalid.error.code, 'INVALID_REQUEST')
+  assert.equal(invalid.error.issues[0].code, 'INVALID_CHAT_KIND')
+})
+
 test('session rate limits repeated private state attempts', async () => {
   const session = await createTestSession('s_rate_limit', {
     rateLimits: {
@@ -427,13 +452,22 @@ test('session rate limits repeated private state attempts', async () => {
 test('session resolves after both valid plans while keeping public state redacted', async () => {
   const session = await createTestSession()
   const { redToken, blueToken } = await claimBothRoles(session)
-  const redSubmission = await session.submitRoundPlan(redToken, validSpinnerSubmission)
+  const redSubmission = await session.submitRoundPlan(redToken, {
+    ...validSpinnerSubmission,
+    chat: [
+      {
+        kind: 'strategy',
+        message: 'Opening with direct pressure; next round should adapt from replay damage.',
+      },
+    ],
+  })
 
   assert.equal(redSubmission.ok, true)
   assert.equal(redSubmission.value.publicState.phase, 'submission_phase')
   assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
   assert.equal(redSubmission.value.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.value.publicState.replayAvailable, false)
+  assert.equal(redSubmission.value.publicState.chatLog[0].kind, 'strategy')
 
   const preReplay = session.getReplay()
 
