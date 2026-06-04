@@ -121,6 +121,19 @@ function RefereeConsole() {
     selectedCount > 0 &&
     hasRefereeToken &&
     submitState !== 'submitting'
+  const awardSubmitBlocker = getAwardSubmitBlocker({
+    phase: publicSession?.phase,
+    selectedCount,
+    hasRefereeToken,
+    submitState,
+  })
+  const awardSubmitLabel =
+    submitState === 'submitting'
+      ? 'Submitting awards...'
+      : awardSubmitBlocker === 'missing_token'
+        ? 'Token required'
+        : 'Submit awards'
+  const awardSubmitHint = formatAwardSubmitBlocker(awardSubmitBlocker)
   const canRefreshRoleClaim =
     isActiveSession &&
     hasRefereeToken &&
@@ -607,9 +620,10 @@ function RefereeConsole() {
             type="button"
             className="header-action"
             disabled={!canSubmitAwards}
+            title={awardSubmitHint}
             onClick={() => void submitAwards()}
           >
-            {submitState === 'submitting' ? 'Submitting' : 'Submit Awards'}
+            {submitState === 'submitting' ? 'Submitting' : awardSubmitLabel}
           </button>
         </header>
 
@@ -692,15 +706,16 @@ function RefereeConsole() {
                       {selectedCount} / {MAX_AWARDS_PER_ROUND} selected
                     </strong>
                     <span>
-                      Red {selectedForTeam.red} / {MAX_AWARDS_PER_TEAM}, Blue{' '}
-                      {selectedForTeam.blue} / {MAX_AWARDS_PER_TEAM}
+                      {awardSubmitHint ??
+                        `Red ${selectedForTeam.red} / ${MAX_AWARDS_PER_TEAM}, Blue ${selectedForTeam.blue} / ${MAX_AWARDS_PER_TEAM}`}
                     </span>
                     <button
                       type="button"
                       disabled={!canSubmitAwards}
+                      title={awardSubmitHint}
                       onClick={() => void submitAwards()}
                     >
-                      {submitState === 'submitting' ? 'Submitting awards...' : 'Submit awards'}
+                      {awardSubmitLabel}
                     </button>
                   </div>
                 </div>
@@ -1200,6 +1215,63 @@ function roleStatus(roleState: RolePublicState | undefined): string {
   }
 
   return 'Open'
+}
+
+type AwardSubmitBlocker =
+  | 'wrong_phase'
+  | 'no_awards'
+  | 'missing_token'
+  | 'submitting'
+  | undefined
+
+function getAwardSubmitBlocker({
+  phase,
+  selectedCount,
+  hasRefereeToken,
+  submitState,
+}: {
+  phase: PublicSessionState['phase'] | undefined
+  selectedCount: number
+  hasRefereeToken: boolean
+  submitState: 'idle' | 'submitting'
+}): AwardSubmitBlocker {
+  if (phase !== 'referee_awards') {
+    return 'wrong_phase'
+  }
+
+  if (selectedCount === 0) {
+    return 'no_awards'
+  }
+
+  if (!hasRefereeToken) {
+    return 'missing_token'
+  }
+
+  if (submitState === 'submitting') {
+    return 'submitting'
+  }
+
+  return undefined
+}
+
+function formatAwardSubmitBlocker(blocker: AwardSubmitBlocker): string | undefined {
+  if (blocker === 'wrong_phase') {
+    return 'Awards can be submitted only during Referee Awards.'
+  }
+
+  if (blocker === 'no_awards') {
+    return 'Select at least one award.'
+  }
+
+  if (blocker === 'missing_token') {
+    return 'Paste and save the referee capability token before submitting awards.'
+  }
+
+  if (blocker === 'submitting') {
+    return 'Award submission is already in progress.'
+  }
+
+  return undefined
 }
 
 function formatPhase(phase: string) {

@@ -32,6 +32,7 @@
     "globals": "^17.6.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.1",
-    "vite": "^5.4.9"
+    "vite": "^5.4.9",
+    "wrangler": "^4.97.0"
   }
 }
