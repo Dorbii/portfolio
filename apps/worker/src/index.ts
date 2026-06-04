@@ -46,7 +46,7 @@ const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
 const LOCAL_DEV_CORS_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
 const MAX_JSON_BODY_BYTES = 64 * 1024
 const BODY_TOO_LARGE = Symbol('BODY_TOO_LARGE')
-const textEncoder = new TextEncoder()
+const textDecoder = new TextDecoder()
 
 function normalizeConfiguredOrigin(value: string): string | undefined {
   const trimmed = value.trim()
@@ -210,14 +210,68 @@ function contentLengthTooLarge(request: Request): boolean {
   return Number.isFinite(parsedLength) && parsedLength > MAX_JSON_BODY_BYTES
 }
 
-async function readJsonBody(request: Request): Promise<unknown | typeof BODY_TOO_LARGE> {
+async function readRequestText(request: Request): Promise<string | typeof BODY_TOO_LARGE> {
   if (contentLengthTooLarge(request)) {
     return BODY_TOO_LARGE
   }
 
-  const text = await request.text()
+  if (!request.body) {
+    return ''
+  }
 
-  if (textEncoder.encode(text).byteLength > MAX_JSON_BODY_BYTES) {
+  const reader = request.body.getReader()
+  const chunks: Uint8Array[] = []
+  let totalBytes = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+
+    if (done) {
+      break
+    }
+
+    if (!value) {
+      continue
+    }
+
+    totalBytes += value.byteLength
+
+    if (totalBytes > MAX_JSON_BODY_BYTES) {
+      try {
+        await reader.cancel()
+      } catch {
+        // The stream may already be closed by the runtime after the oversized chunk.
+      }
+
+      return BODY_TOO_LARGE
+    }
+
+    chunks.push(value)
+  }
+
+  if (chunks.length === 0) {
+    return ''
+  }
+
+  if (chunks.length === 1) {
+    return textDecoder.decode(chunks[0])
+  }
+
+  const bodyBytes = new Uint8Array(totalBytes)
+  let offset = 0
+
+  for (const chunk of chunks) {
+    bodyBytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+
+  return textDecoder.decode(bodyBytes)
+}
+
+async function readJsonBody(request: Request): Promise<unknown | typeof BODY_TOO_LARGE> {
+  const text = await readRequestText(request)
+
+  if (isBodyTooLarge(text)) {
     return BODY_TOO_LARGE
   }
 
