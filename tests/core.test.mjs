@@ -248,6 +248,12 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
   assert.equal(validateReplayTimeline(first.replay), true)
   assert.ok(first.replay.events.some((event) => event.type === 'spawn'))
   assert.ok(first.replay.events.some((event) => event.type === 'move'))
+  assert.ok(first.replay.events.some((event) => event.type === 'impact'))
+  assert.ok(first.replay.events.some((event) => event.type === 'impact' && event.t > 5))
+  assert.ok(first.replay.events.some((event) => event.type === 'damage'))
+  assert.ok(first.replay.duration > 6)
+  assert.ok(first.damage.red > 0)
+  assert.ok(first.damage.blue > 0)
 })
 
 test('resolver handles sparse plans deterministically and keeps replay timeline bounded/ordered', () => {
@@ -283,6 +289,8 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
   assert.equal(first.winner, 'draw')
   assert.equal(first.damage.red, 0)
   assert.equal(first.damage.blue, 0)
+  assert.equal(first.replay.duration, 60)
+  assert.equal(first.reason, 'No bot took damage for a full minute; the round ended as a draw.')
   assert.equal(first.log[0].startsWith('Round 3'), true)
 })
 

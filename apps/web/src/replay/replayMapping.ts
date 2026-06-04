@@ -18,6 +18,8 @@ export type BotFrameState = {
 export type ReplayEffectKind =
   | 'weapon_fire'
   | 'impact'
+  | 'debris'
+  | 'damage_marker'
   | 'smoke'
   | 'hazard'
   | 'knockout'
@@ -50,6 +52,8 @@ export type ReplayVisualFrame = {
 const MOVE_DURATION = 0.82
 const WEAPON_WINDOW = 0.75
 const IMPACT_WINDOW = 1.35
+const DEBRIS_WINDOW = 1.9
+const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
 
 const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
@@ -204,6 +208,36 @@ function buildEffects(
           team: event.defender,
         })
       }
+
+      if (age >= 0 && age <= DEBRIS_WINDOW) {
+        for (let debrisIndex = 0; debrisIndex < 3; debrisIndex += 1) {
+          effects.push({
+            id: `${index}-debris-${debrisIndex}`,
+            kind: 'debris',
+            position: event.position,
+            age,
+            intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
+            team: event.defender,
+            damage: event.damage,
+          })
+        }
+      }
+    }
+
+    if (event.type === 'damage') {
+      const age = time - event.t
+
+      if (age >= 0 && age <= DAMAGE_MARKER_WINDOW) {
+        effects.push({
+          id: `${index}-damage-${event.bot}`,
+          kind: 'damage_marker',
+          position: bots[event.bot].position,
+          age,
+          intensity: Math.max(0, 1 - age / DAMAGE_MARKER_WINDOW),
+          team: event.bot,
+          damage: event.amount,
+        })
+      }
     }
 
     if (event.type === 'hazard') {
@@ -213,6 +247,16 @@ function buildEffects(
         effects.push({
           id: `${index}-hazard-${event.hazard}`,
           kind: 'hazard',
+          position: event.position,
+          age,
+          intensity: 1 - age / HAZARD_WINDOW,
+          team: event.bot,
+          damage: event.damage,
+          label: event.hazard,
+        })
+        effects.push({
+          id: `${index}-hazard-damage-${event.bot}`,
+          kind: 'damage_marker',
           position: event.position,
           age,
           intensity: 1 - age / HAZARD_WINDOW,

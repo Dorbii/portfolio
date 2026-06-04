@@ -1,5 +1,25 @@
 # Codex Trust Calibration
 
+## 2026-06-04 Combat Duration, Tactical Fallback, and Replay Damage Feedback
+
+Scope: `packages/sim/src/resolveCombat.ts`, `apps/web/src/replay/replayMapping.ts`, `apps/web/src/replay/BabylonReplayScene.tsx`, `apps/web/src/App.tsx`, `apps/web/src/styles.css`, `tests/core.test.mjs`, `tests/replay-mapping.test.mjs`.
+
+Intent: replace the six-second health-tiebreak combat outcome with deterministic extended resolution that continues until knockout, no-damage-for-one-minute stalemate, or a hard safety cap; add post-opener tactical fallback movement, center-hazard avoidance/use, weapon-control-aware firing, replay damage markers, debris, bot flinch, and tighter replay viewport sizing.
+
+Risk: behavioral and visual.
+
+Confidence: medium.
+
+Review: needs_followup.
+
+Review status note: Typecheck, test TypeScript emit, focused lint, focused Node tests, production build, and a direct resolver smoke passed. In-app Browser verification was blocked by the local browser bridge failure `windows sandbox failed: spawn setup refresh`; normal-browser replay QA remains required.
+
+Review questions:
+- Verify in a normal browser that damage markers, debris, bot flinch, and the wider camera framing are readable during real session replays.
+- Decide whether the tactical fallback should become a first-class combat policy model before adding drones, flying bots, turrets, nets, or true detachable part damage.
+
+Reason for sidecar: Agent Arena code quality rules already use this sidecar for provenance instead of inline marker comments in production code.
+
 ## 2026-06-03 Phase 6 Referee Awards and Economy Loop
 
 Scope: `packages/schemas/src/types.ts`, `packages/schemas/src/relay.ts`, `packages/schemas/src/validators.ts`, `packages/schemas/src/agentContract.ts`, `apps/worker/src/session.ts`, `apps/worker/src/index.ts`, `apps/web/src/App.tsx`, `apps/web/src/mockSession.ts`, `apps/web/src/agent/LiveAgentCockpit.tsx`, `apps/web/src/styles.css`, `tests/core.test.mjs`, `tests/worker-route.test.mjs`, `README.md`.

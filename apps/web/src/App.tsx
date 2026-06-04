@@ -1013,7 +1013,6 @@ function formatPollInterval(intervalMs: number): string {
 function getOutcomeEvents(events: ReplayEvent[]): ReplayEvent[] {
   return events
     .filter((event) =>
-      event.type === 'weapon_fire' ||
       event.type === 'impact' ||
       event.type === 'damage' ||
       event.type === 'hazard' ||

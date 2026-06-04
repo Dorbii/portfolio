@@ -654,6 +654,8 @@ function createEffectPool(scene: Scene): EffectPool {
   const sparkMaterial = createSceneMaterial(scene, 'spark-mat', '#ffd35f', '#ff8a24')
   const smokeMaterial = createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42)
   const weaponMaterial = createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b')
+  const debrisMaterial = createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d')
+  const damageMaterial = createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e')
   const hazardMaterial = createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f')
   const koMaterial = createSceneMaterial(scene, 'ko-mat', '#f4eef2', '#b83342')
 
@@ -663,6 +665,12 @@ function createEffectPool(scene: Scene): EffectPool {
     ),
     impact: Array.from({ length: 12 }, (_, index) =>
       createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
+    ),
+    debris: Array.from({ length: 24 }, (_, index) =>
+      createPooledBox(scene, `debris-effect-${index}`, debrisMaterial, [0.22, 0.1, 0.16]),
+    ),
+    damage_marker: Array.from({ length: 16 }, (_, index) =>
+      createPooledTorus(scene, `damage-marker-effect-${index}`, damageMaterial, 1.25),
     ),
     smoke: Array.from({ length: 10 }, (_, index) =>
       createPooledSphere(scene, `smoke-effect-${index}`, smokeMaterial, 0.48),
@@ -725,12 +733,19 @@ function updateBots(resources: SceneResources, frame: ReplayVisualFrame): void {
     const bot = resources.bots[role]
     const state = frame.bots[role]
     const hit = frame.endState?.knockedOut === role
+    const damagePulse = frame.effects.find(
+      (effect) => effect.kind === 'damage_marker' && effect.team === role,
+    )
     const bounce = Math.sin(frame.time * 18) * 0.02
+    const flinch = damagePulse ? damagePulse.intensity : 0
 
     bot.position = toBabylonVector(state.position)
     bot.position.y = hit ? 0.08 + bounce : 0.16
     bot.rotation.y = state.rotationY
-    bot.rotation.z = hit ? (role === 'red' ? -0.2 : 0.2) : 0
+    bot.rotation.z = hit
+      ? (role === 'red' ? -0.2 : 0.2)
+      : Math.sin(frame.time * 42) * flinch * 0.14
+    bot.scaling.setAll(hit ? 0.96 : 1 + flinch * 0.035)
 
     const meshes = bot.getChildMeshes()
 
@@ -760,6 +775,8 @@ function updateEffects(pool: EffectPool, effects: ReplayEffectState[]): void {
   const used: Record<ReplayEffectKind, number> = {
     weapon_fire: 0,
     impact: 0,
+    debris: 0,
+    damage_marker: 0,
     smoke: 0,
     hazard: 0,
     knockout: 0,
@@ -788,6 +805,26 @@ function updateEffects(pool: EffectPool, effects: ReplayEffectState[]): void {
       mesh.position.y += 0.52
       mesh.scaling.setAll(0.34 + effect.intensity * 1.2)
       mesh.rotation.y = effect.age * 7
+    }
+
+    if (effect.kind === 'debris') {
+      const angle = deterministicAngle(effect.id)
+      const distance = effect.age * (1.5 + (effect.damage ?? 0) / 18)
+      mesh.position.x += Math.cos(angle) * distance
+      mesh.position.z += Math.sin(angle) * distance
+      mesh.position.y += 0.38 + effect.age * 1.2 - effect.age * effect.age * 0.28
+      mesh.scaling.setAll(0.72 + effect.intensity * 0.45)
+      mesh.rotation.x = effect.age * 5 + angle
+      mesh.rotation.y = effect.age * 7
+      mesh.rotation.z = effect.age * 3.5 + angle / 2
+    }
+
+    if (effect.kind === 'damage_marker') {
+      mesh.position.y += 0.78 + effect.age * 0.35
+      const pulse = 0.45 + effect.intensity * (0.72 + Math.min(effect.damage ?? 0, 18) / 36)
+      mesh.scaling.setAll(pulse)
+      mesh.rotation.x = Math.PI / 2
+      mesh.rotation.y = effect.age * 6
     }
 
     if (effect.kind === 'smoke') {
@@ -835,6 +872,16 @@ function hazardsMatch(left: string, right: string): boolean {
   return left.includes(right) || right.includes(left) || left === right
 }
 
+function deterministicAngle(value: string): number {
+  let hash = 0
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
+  }
+
+  return (hash % 6283) / 1000
+}
+
 function updateCamera(
   camera: ArcRotateCamera,
   preset: CameraPreset,
@@ -865,20 +912,20 @@ function updateCamera(
   if (preset === 'wide') {
     setCamera(
       camera,
-      target,
+      Vector3.Zero(),
       -Math.PI / 2.2,
       1.22,
-      arenaRadius * 1.05,
+      arenaRadius * 1.18,
       frame.time,
       shake + knockBack,
     )
   } else if (preset === 'broadcast') {
     setCamera(
       camera,
-      midpoint,
+      Vector3.Center(midpoint, Vector3.Zero()),
       -Math.PI * 0.72,
       0.9,
-      arenaRadius * 0.68,
+      arenaRadius * 0.94,
       frame.time,
       shake + knockBack,
     )

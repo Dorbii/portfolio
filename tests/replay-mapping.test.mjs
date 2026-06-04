@@ -109,6 +109,8 @@ test('replay mapping exposes impact effects and knockout end state', () => {
   const endFrame = buildReplayFrame(timeline, 5.2)
 
   assert.ok(impactFrame.effects.some((effect) => effect.kind === 'impact'))
+  assert.ok(impactFrame.effects.some((effect) => effect.kind === 'debris'))
+  assert.ok(impactFrame.effects.some((effect) => effect.kind === 'damage_marker'))
   assert.ok(impactFrame.effects.some((effect) => effect.kind === 'smoke'))
   assert.equal(endFrame.bots.red.status, 'knocked_out')
   assert.deepEqual(endFrame.endState, {

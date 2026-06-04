@@ -124,7 +124,8 @@ button.active {
 }
 
 .referee-replay-frame .replay-shell {
-  min-height: 520px;
+  height: clamp(460px, 58vh, 680px);
+  min-height: 0;
 }
 
 .replay-outcome {
@@ -447,9 +448,10 @@ button.active {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 420px;
+  height: clamp(420px, 64vh, 720px);
+  min-height: 0;
   display: grid;
-  grid-template-rows: minmax(340px, 1fr) auto auto 74px;
+  grid-template-rows: minmax(0, 1fr) auto auto 74px;
   overflow: hidden;
   background: #050707;
 }
@@ -458,7 +460,7 @@ button.active {
   min-width: 0;
   max-width: 100%;
   position: relative;
-  min-height: 340px;
+  min-height: 0;
   overflow: hidden;
   background: #050707;
 }
@@ -1641,16 +1643,18 @@ textarea:focus-visible {
   }
 
   .replay-shell {
-    min-height: 380px;
+    height: clamp(380px, 78vh, 560px);
+    min-height: 0;
     grid-template-rows: minmax(260px, 1fr) auto auto 74px;
   }
 
   .referee-replay-frame .replay-shell {
-    min-height: 420px;
+    height: clamp(420px, 82vh, 620px);
+    min-height: 0;
   }
 
   .babylon-stage {
-    min-height: 260px;
+    min-height: 0;
   }
 }
 
@@ -1685,11 +1689,13 @@ textarea:focus-visible {
   }
 
   .replay-shell {
-    min-height: 380px;
+    height: clamp(380px, 82vh, 560px);
+    min-height: 0;
   }
 
   .referee-replay-frame .replay-shell {
-    min-height: 420px;
+    height: clamp(420px, 86vh, 620px);
+    min-height: 0;
   }
 
   .replay-controls {
