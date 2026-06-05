@@ -3,78 +3,32 @@ import type {
   ReplayEvent,
   ReplayTimeline,
 } from '../../../../packages/replay/src/index.js'
-import type { TeamRole, Vector3 } from '../../../../packages/schemas/src/index.js'
+import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import { buildReplayEffects } from './replayEffectMapping.js'
+import type {
+  BotFrameState,
+  PartFrameState,
+  ReplayEndState,
+  ReplayVisualFrame,
+} from './replayMappingTypes.js'
+import {
+  degreesToRadians,
+  easeInOut,
+  headingForMove,
+  lerpVector,
+} from './replayVectorMath.js'
 
-export type CameraPreset = 'wide' | 'broadcast' | 'red_follow' | 'blue_follow' | 'impact' | 'cinematic'
-
-export type BotFrameState = {
-  role: TeamRole
-  position: Vector3
-  rotationY: number
-  health?: number
-  status: 'active' | 'knocked_out'
-}
-
-export type PartFrameState = {
-  blockId: string
-  partId?: string
-  health?: number
-  maxHealth?: number
-  status: 'attached' | 'detached'
-  detachTime?: number
-  detachPosition?: Vector3
-}
-
-export type ReplayEffectKind =
-  | 'weapon_fire'
-  | 'control_net'
-  | 'laser_lance'
-  | 'drone_swarm'
-  | 'part_detach'
-  | 'impact'
-  | 'debris'
-  | 'damage_marker'
-  | 'smoke'
-  | 'hazard'
-  | 'knockout'
-
-export type ReplayEffectState = {
-  id: string
-  kind: ReplayEffectKind
-  position: Vector3
-  rotationY?: number
-  age: number
-  intensity: number
-  team?: TeamRole
-  damage?: number
-  endPosition?: Vector3
-  label?: string
-}
-
-export type ReplayEndState = {
-  knockedOut?: TeamRole
-  winner?: TeamRole
-  cause?: string
-}
-
-export type ReplayVisualFrame = {
-  time: number
-  progress: number
-  bots: Record<TeamRole, BotFrameState>
-  parts: Record<TeamRole, Record<string, PartFrameState>>
-  effects: ReplayEffectState[]
-  endState?: ReplayEndState
-}
+export type {
+  BotFrameState,
+  CameraPreset,
+  PartFrameState,
+  ReplayEffectKind,
+  ReplayEffectState,
+  ReplayEndState,
+  ReplayVisualFrame,
+} from './replayMappingTypes.js'
 
 const MOVE_DURATION = 1
-const WEAPON_WINDOW = 0.75
-const CONTROL_CUE_WINDOW = 1.15
-const IMPACT_WINDOW = 1.35
-const DEBRIS_WINDOW = 1.9
-const DAMAGE_MARKER_WINDOW = 1.4
-const HAZARD_WINDOW = 0.9
-const LASER_LANCE_WINDOW = 0.95
-const DRONE_SWARM_WINDOW = 1.2
 
 const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
   red: {
@@ -115,7 +69,9 @@ export function buildReplayFrame(
     progress: timeline.duration > 0 ? time / timeline.duration : 0,
     bots,
     parts,
-    effects: buildEffects(events, bots, time),
+    effects: buildReplayEffects(events, bots, time, (role, eventTime) =>
+      resolveBotState(events, role, eventTime),
+    ),
     endState: resolveEndState(events, time),
   }
 }
@@ -226,216 +182,6 @@ function resolvePartStates(
   return parts
 }
 
-function buildEffects(
-  events: ReplayEvent[],
-  bots: Record<TeamRole, BotFrameState>,
-  time: number,
-): ReplayEffectState[] {
-  const effects: ReplayEffectState[] = []
-
-  events.forEach((event, index) => {
-    if (event.type === 'weapon_fire') {
-      const age = time - event.t
-      const isControlDeploy = event.controlCue === 'deploy'
-      const duration = isControlDeploy ? CONTROL_CUE_WINDOW : WEAPON_WINDOW
-
-      if (age >= 0 && age <= duration) {
-        const firingBot = resolveBotState(events, event.bot, event.t)
-        const intensity = Math.max(0, 1 - age / duration)
-
-        effects.push({
-          id: `${index}-weapon-${event.bot}`,
-          kind: 'weapon_fire',
-          position: firingBot.position,
-          rotationY: firingBot.rotationY,
-          age,
-          intensity,
-          team: event.bot,
-          label: isControlDeploy ? `${event.weaponSlot}-deploy` : event.weaponSlot,
-        })
-
-        if (isControlDeploy) {
-          effects.push({
-            id: `${index}-weapon-control-${event.bot}`,
-            kind: 'control_net',
-            position: firingBot.position,
-            rotationY: firingBot.rotationY,
-            age,
-            intensity,
-            team: event.bot,
-            endPosition:
-              event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.4),
-            label: 'control_net',
-          })
-        }
-      }
-    }
-
-    if (event.type === 'ability' && event.ability === 'laser_lance') {
-      const age = time - event.t
-      const firingBot = resolveBotState(events, event.bot, event.t)
-      const endPosition = event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 5.6)
-      const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
-
-      if (age >= 0 && age <= LASER_LANCE_WINDOW) {
-        effects.push({
-          id: `${index}-laser-${event.bot}`,
-          kind: 'laser_lance',
-          position: firingBot.position,
-          rotationY,
-          age,
-          intensity: Math.max(0, 1 - age / LASER_LANCE_WINDOW),
-          team: event.bot,
-          endPosition,
-          label: event.ability,
-        })
-      }
-    }
-
-    if (event.type === 'ability' && event.ability === 'drone_swarm') {
-      const age = time - event.t
-      const firingBot = resolveBotState(events, event.bot, event.t)
-      const endPosition = event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 6.5)
-      const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
-
-      if (age >= 0 && age <= DRONE_SWARM_WINDOW) {
-        effects.push({
-          id: `${index}-drone-swarm-${event.bot}`,
-          kind: 'drone_swarm',
-          position: firingBot.position,
-          rotationY,
-          age,
-          intensity: Math.max(0, 1 - age / DRONE_SWARM_WINDOW),
-          team: event.bot,
-          endPosition,
-          label: event.ability,
-        })
-      }
-    }
-
-    if (event.type === 'impact') {
-      const age = time - event.t
-
-      if (age >= 0 && age <= IMPACT_WINDOW) {
-        effects.push({
-          id: `${index}-impact`,
-          kind: 'impact',
-          position: event.position,
-          age,
-          intensity: 1 - age / IMPACT_WINDOW,
-          team: event.attacker,
-          damage: event.damage,
-        })
-        effects.push({
-          id: `${index}-smoke`,
-          kind: 'smoke',
-          position: [event.position[0], event.position[1] + 0.35, event.position[2]],
-          age,
-          intensity: Math.max(0, 1 - age / IMPACT_WINDOW),
-          team: event.defender,
-        })
-      }
-
-      if (age >= 0 && age <= DEBRIS_WINDOW) {
-        for (let debrisIndex = 0; debrisIndex < 3; debrisIndex += 1) {
-          effects.push({
-            id: `${index}-debris-${debrisIndex}`,
-            kind: 'debris',
-            position: event.position,
-            age,
-            intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
-            team: event.defender,
-            damage: event.damage,
-          })
-        }
-      }
-    }
-
-    if (event.type === 'damage') {
-      const age = time - event.t
-
-      if (age >= 0 && age <= DAMAGE_MARKER_WINDOW) {
-        effects.push({
-          id: `${index}-damage-${event.bot}`,
-          kind: 'damage_marker',
-          position: bots[event.bot].position,
-          age,
-          intensity: Math.max(0, 1 - age / DAMAGE_MARKER_WINDOW),
-          team: event.bot,
-          damage: event.amount,
-        })
-      }
-    }
-
-    if (event.type === 'hazard') {
-      const age = time - event.t
-
-      if (age >= 0 && age <= HAZARD_WINDOW) {
-        effects.push({
-          id: `${index}-hazard-${event.hazard}`,
-          kind: 'hazard',
-          position: event.position,
-          age,
-          intensity: 1 - age / HAZARD_WINDOW,
-          team: event.bot,
-          damage: event.damage,
-          label: event.hazard,
-        })
-        effects.push({
-          id: `${index}-hazard-damage-${event.bot}`,
-          kind: 'damage_marker',
-          position: event.position,
-          age,
-          intensity: 1 - age / HAZARD_WINDOW,
-          team: event.bot,
-          damage: event.damage,
-          label: event.hazard,
-        })
-      }
-    }
-
-    if (event.type === 'knockout' && event.t <= time) {
-      effects.push({
-        id: `${index}-knockout-${event.bot}`,
-        kind: 'knockout',
-        position: bots[event.bot].position,
-        age: time - event.t,
-        intensity: 1,
-        team: event.bot,
-        label: event.cause,
-      })
-    }
-
-    if (event.type === 'part_detach') {
-      const age = time - event.t
-
-      if (age >= 0 && age <= DEBRIS_WINDOW) {
-        effects.push({
-          id: `${index}-part-detach-focus-${event.blockId}`,
-          kind: 'part_detach',
-          position: event.position,
-          age,
-          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
-          team: event.bot,
-          label: event.blockId,
-        })
-        effects.push({
-          id: `${index}-part-detach-${event.blockId}`,
-          kind: 'debris',
-          position: event.position,
-          age,
-          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
-          team: event.bot,
-          damage: 18,
-          label: event.blockId,
-        })
-      }
-    }
-  })
-
-  return effects
-}
-
 function resolveEndState(events: ReplayEvent[], time: number): ReplayEndState | undefined {
   const knockout = findLastEvent(
     events,
@@ -490,47 +236,4 @@ function cloneBotState(state: BotFrameState): BotFrameState {
     ...state,
     position: [...state.position],
   }
-}
-
-function lerpVector(from: Vector3, to: Vector3, progress: number): Vector3 {
-  const clamped = Math.min(Math.max(progress, 0), 1)
-
-  return [
-    round(from[0] + (to[0] - from[0]) * clamped),
-    round(from[1] + (to[1] - from[1]) * clamped),
-    round(from[2] + (to[2] - from[2]) * clamped),
-  ]
-}
-
-function headingForMove(from: Vector3, to: Vector3, fallback: number): number {
-  const dx = to[0] - from[0]
-  const dz = to[2] - from[2]
-
-  if (Math.abs(dx) + Math.abs(dz) < 0.001) {
-    return fallback
-  }
-
-  return Math.atan2(dx, dz)
-}
-
-function forwardPoint(position: Vector3, rotationY: number, distance: number): Vector3 {
-  return [
-    round(position[0] + Math.sin(rotationY) * distance),
-    position[1],
-    round(position[2] + Math.cos(rotationY) * distance),
-  ]
-}
-
-function easeInOut(progress: number): number {
-  const clamped = Math.min(Math.max(progress, 0), 1)
-
-  return clamped * clamped * (3 - 2 * clamped)
-}
-
-function degreesToRadians(degrees: number): number {
-  return (degrees * Math.PI) / 180
-}
-
-function round(value: number): number {
-  return Math.round(value * 1000) / 1000
 }

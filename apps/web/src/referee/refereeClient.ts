@@ -10,9 +10,13 @@ import type {
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
+import {
+  DEFAULT_AGENT_SITE_BASE,
+  createAgentInviteUrl,
+} from '../shared/agentInvite.js'
 
 export const DEFAULT_ARENA_API_BASE = 'https://arena-api.dorbii.net'
-export const DEFAULT_ARENA_SITE_BASE = 'https://arena.dorbii.net'
+export const DEFAULT_ARENA_SITE_BASE = DEFAULT_AGENT_SITE_BASE
 export const POLL_INTERVAL_MS = 10_000
 
 export const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
@@ -71,7 +75,12 @@ export function buildInviteUrl({
   sessionId: string
   apiBase: string
 }) {
-  return `${DEFAULT_ARENA_SITE_BASE}/agent#session=${sessionId}&role=${role}&claimToken=${claimToken}&api=${apiBase}`
+  return createAgentInviteUrl({
+    role,
+    claimToken,
+    sessionId,
+    apiBase,
+  })
 }
 
 export async function createSession(apiBase: string): Promise<CreateSessionResponse> {

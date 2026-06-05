@@ -1,0 +1,103 @@
+import {
+  TEAM_ROLES,
+  type AppliedRefereeAward,
+  type TeamRole,
+} from '../../../packages/schemas/src/index.js'
+import { calculateInterest } from './refereeAwards.js'
+import {
+  DEFAULT_BASE_INCOME,
+  DEFAULT_WIN_STREAK_TARGET,
+} from './sessionSupport.js'
+import type { StoredSessionState } from './sessionTypes.js'
+
+export type MatchCompletion = {
+  reason: string
+  winner: TeamRole | 'draw'
+}
+
+export function applyCombatResultToScore(state: StoredSessionState): void {
+  const result = state.lastResult
+
+  if (!result) {
+    return
+  }
+
+  if (result.winner === 'draw') {
+    for (const role of TEAM_ROLES) {
+      state.roles[role].winStreak = 0
+    }
+
+    return
+  }
+
+  const winner = state.roles[result.winner]
+  const loserRole = result.winner === 'red' ? 'blue' : 'red'
+  const loser = state.roles[loserRole]
+
+  winner.wins += 1
+  winner.winStreak += 1
+  loser.losses += 1
+  loser.winStreak = 0
+}
+
+export function shouldCompleteMatch(state: StoredSessionState): boolean {
+  return (
+    TEAM_ROLES.some(
+      (role) => state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
+    ) || state.round >= state.maxRounds
+  )
+}
+
+export function resolveMatchCompletion(state: StoredSessionState): MatchCompletion {
+  const red = state.roles.red
+  const blue = state.roles.blue
+  const scoreWinner =
+    red.wins === blue.wins ? 'draw' : red.wins > blue.wins ? 'red' : 'blue'
+  const streakWinner = TEAM_ROLES.find(
+    (role) => state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
+  )
+
+  if (streakWinner) {
+    return {
+      reason: `${streakWinner} reached a ${DEFAULT_WIN_STREAK_TARGET}-win streak.`,
+      winner: streakWinner,
+    }
+  }
+
+  return {
+    reason: `Max rounds reached with score Red ${red.wins} - Blue ${blue.wins}.`,
+    winner: scoreWinner,
+  }
+}
+
+export function applyNextRoundEconomy(
+  state: StoredSessionState,
+  appliedAwards: AppliedRefereeAward[],
+): void {
+  const awardGold = TEAM_ROLES.reduce<Record<TeamRole, number>>(
+    (totals, role) => {
+      totals[role] = appliedAwards
+        .filter((award) => award.targetTeam === role)
+        .reduce((total, award) => total + award.gold, 0)
+
+      return totals
+    },
+    { red: 0, blue: 0 },
+  )
+
+  for (const role of TEAM_ROLES) {
+    const team = state.roles[role]
+    const interest = calculateInterest(team.gold)
+
+    team.gold += DEFAULT_BASE_INCOME + interest + awardGold[role]
+    team.controls = undefined
+    team.submission = undefined
+    team.normalizedSubmission = undefined
+    team.submittedAt = undefined
+    team.submissionBaseline = undefined
+  }
+
+  state.round += 1
+  state.replay = undefined
+  state.awardOptions = []
+}

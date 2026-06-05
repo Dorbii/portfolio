@@ -10,31 +10,23 @@ import {
   type AgentPrivateChatMessageResponse,
   type AgentBootstrapRequest,
   type AgentBootstrapResponse,
-  type AgentNextAction,
   type AppliedRefereeAward,
-  type ArenaConfig,
-  type CombatSummary,
   type CreateSessionRequest,
   type CreateSessionResponse,
-  type GeneratedControls,
-  type InventoryItem,
-  type NormalizedRoundPlanSubmission,
   type PublicSessionState,
   type ReplayPayload,
-  type RefereeAwardOption,
   type RefereeAwardsResponse,
   type RelayErrorResponse,
   type RoleClaimRequest,
   type RoleClaimResponse,
   type RolePrivateState,
-  type RolePublicState,
   type RoleResetRequest,
   type RoleResetResponse,
   type RoundPlanSubmission,
   type RoundSubmissionResponse,
+  type SessionChatMessage,
   type SessionLogEvent,
   type SessionPhase,
-  type SessionChatMessage,
   type SubmitRefereeAwardsRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
@@ -43,396 +35,63 @@ import {
   validateRoundSubmission,
 } from '../../../packages/catalog/src/index.js'
 import {
-  createSeededRng,
   resolveCombat,
   type CombatResult,
 } from '../../../packages/sim/src/index.js'
+import {
+  appendCombatChatterMessages,
+  appendPrivateRoleChatMessages,
+  appendRoleChatMessages,
+  appendSessionEvent,
+} from './sessionMessages.js'
+import { ensureStoredSessionDefaults } from './sessionDefaults.js'
+import {
+  findRoleBearer,
+  findRoleByToken,
+  hasRefereeCapabilityToken,
+} from './sessionAuth.js'
+import { generateRefereeAwardOptions } from './refereeAwards.js'
+import { takeSessionRateLimit } from './sessionRateLimits.js'
+import {
+  applyCombatResultToScore,
+  applyNextRoundEconomy,
+  resolveMatchCompletion,
+  shouldCompleteMatch,
+} from './sessionRoundLifecycle.js'
+import { resetStoredRoleClaim } from './sessionRoleReset.js'
+import {
+  cloneJson,
+  combatSummary,
+  defaultClock,
+  defaultTokenFactory,
+  defaultTokenHasher,
+  isTeamRole,
+  mergeRateLimits,
+  nextActionForRole,
+  relayError,
+} from './sessionSupport.js'
+import { createInitialSessionState } from './sessionCreation.js'
+import {
+  buildPublicSessionState,
+  buildRolePrivateState,
+} from './sessionStateViews.js'
+import type {
+  Clock,
+  RateLimitAction,
+  RateLimitRule,
+  SessionResult,
+  StoredRoleState,
+  StoredSessionState,
+  TokenFactory,
+  TokenHasher,
+} from './sessionTypes.js'
 
-const DEFAULT_ARENA: ArenaConfig = {
-  name: 'Compact Box',
-  width: 24,
-  height: 16,
-  activeHazards: ['floor_saw'],
-}
-
-const DEFAULT_MAX_ROUNDS = 7
-const DEFAULT_STARTING_GOLD = 100
-const DEFAULT_BASE_INCOME = 50
-const DEFAULT_INTEREST_RATE = 0.1
-const DEFAULT_INTEREST_CAP = 25
-const DEFAULT_WIN_STREAK_TARGET = 3
-const MAX_ROUNDS_LIMIT = 25
-const DEFAULT_SESSION_TTL_MS = 6 * 60 * 60 * 1000
-const MIN_SESSION_TTL_MS = 60 * 1000
-const MAX_SESSION_TTL_MS = 24 * 60 * 60 * 1000
-
-type TokenKind = 'claim' | 'role' | 'referee'
-type TokenOwner = TeamRole | 'referee'
-type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
-type Clock = () => string
-type TokenHasher = (token: string) => Promise<string>
-type RateLimitAction =
-  | 'claim'
-  | 'state'
-  | 'submit'
-  | 'chat'
-  | 'private_chat'
-  | 'referee_awards'
-  | 'reset_role'
-type RateLimitRule = {
-  windowMs: number
-  max: number
-}
-
-const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
-  claim: { windowMs: 60 * 1000, max: 20 },
-  state: { windowMs: 60 * 1000, max: 120 },
-  submit: { windowMs: 60 * 1000, max: 20 },
-  chat: { windowMs: 60 * 1000, max: 30 },
-  private_chat: { windowMs: 60 * 1000, max: 30 },
-  referee_awards: { windowMs: 60 * 1000, max: 20 },
-  reset_role: { windowMs: 60 * 1000, max: 20 },
-}
-
-type RefereeAwardCard = {
-  id: string
-  title: string
-  description: string
-  gold: number
-}
-
-const REFEREE_AWARD_CARDS: RefereeAwardCard[] = [
-  {
-    id: 'most-stylish',
-    title: 'Most Stylish',
-    description: 'Readable silhouette, memorable identity, and enough restraint to still look engineered.',
-    gold: 25,
-  },
-  {
-    id: 'coolest-idea',
-    title: 'Coolest Idea',
-    description: 'The build tried something specific instead of drifting into generic weapon mass.',
-    gold: 20,
-  },
-  {
-    id: 'best-engineering',
-    title: 'Best Engineering',
-    description: 'The design had the cleanest relationship between parts, motion, and fight plan.',
-    gold: 25,
-  },
-  {
-    id: 'budget-genius',
-    title: 'Budget Genius',
-    description: 'The team preserved economy without submitting a throwaway machine.',
-    gold: 20,
-  },
-  {
-    id: 'most-chaotic',
-    title: 'Most Chaotic',
-    description: 'The fight became stranger because this bot existed, and that deserves a sponsor.',
-    gold: 20,
-  },
-  {
-    id: 'best-use-of-parts',
-    title: 'Best Use of Parts',
-    description: 'Parts were arranged with intent instead of merely spending the available budget.',
-    gold: 25,
-  },
-  {
-    id: 'funniest-bot',
-    title: 'Funniest Bot',
-    description: 'The machine made a bad idea legible enough to become entertaining.',
-    gold: 20,
-  },
-  {
-    id: 'most-improved',
-    title: 'Most Improved',
-    description: 'This round showed clearer adaptation than the previous submitted approach.',
-    gold: 25,
-  },
-  {
-    id: 'best-counterbuild',
-    title: 'Best Counterbuild',
-    description: 'The bot answered the opponent instead of pretending the matchup did not exist.',
-    gold: 25,
-  },
-  {
-    id: 'sponsor-favorite',
-    title: 'Sponsor Favorite',
-    description: 'The broadcast booth can explain this bot in one sentence and sell the shirt.',
-    gold: 20,
-  },
-]
-
-export type StoredRoleState = {
-  role: TeamRole
-  claimTokenHash: string
-  roleTokenHash?: string
-  agentName?: string
-  claimedAt?: string
-  submittedAt?: string
-  gold: number
-  wins: number
-  losses: number
-  winStreak: number
-  inventory: InventoryItem[]
-  controls?: GeneratedControls
-  submission?: RoundPlanSubmission
-  normalizedSubmission?: NormalizedRoundPlanSubmission
-  submissionBaseline?: {
-    gold: number
-    inventory: InventoryItem[]
-  }
-  privateChatLog: SessionChatMessage[]
-}
-
-export type StoredSessionState = {
-  id: string
-  phase: SessionPhase
-  round: number
-  maxRounds: number
-  seed: string
-  arena: ArenaConfig
-  createdAt: string
-  expiresAt: string
-  updatedAt: string
-  roles: Record<TeamRole, StoredRoleState>
-  refereeTokenHash?: string
-  awardOptions: RefereeAwardOption[]
-  awardHistory: AppliedRefereeAward[]
-  replay?: ReplayPayload
-  lastResult?: CombatSummary
-  chatLog: SessionChatMessage[]
-  eventLog: SessionLogEvent[]
-  rateLimits: Record<string, StoredRateLimit>
-}
-
-type StoredRateLimit = {
-  count: number
-  resetAt: string
-}
-
-type SessionResult<T> =
-  | {
-      ok: true
-      value: T
-    }
-  | RelayErrorResponse
-
-type CombatChatterRequest = AgentChatMessagePostRequest & {
-  role: TeamRole
-}
-
-type RoleBearerAuth = {
-  role: StoredRoleState
-}
-
-function cloneJson<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T
-}
-
-function defaultClock(): string {
-  return new Date().toISOString()
-}
-
-async function defaultTokenHasher(token: string): Promise<string> {
-  const bytes = new TextEncoder().encode(token)
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes)
-
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
-}
-
-function randomTokenPart(): string {
-  const uuid = globalThis.crypto?.randomUUID?.()
-
-  if (uuid) {
-    return uuid.replaceAll('-', '')
-  }
-
-  const bytes = new Uint8Array(16)
-  globalThis.crypto?.getRandomValues?.(bytes)
-
-  if (bytes.some((byte) => byte !== 0)) {
-    return Array.from(bytes)
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('')
-  }
-
-  throw new Error('Secure random token generation is unavailable.')
-}
-
-function defaultTokenFactory(owner: TokenOwner, kind: TokenKind): string {
-  if (kind === 'referee') {
-    return `cap_ref_${randomTokenPart()}`
-  }
-
-  const prefix = kind === 'claim' ? 'cap' : 'role'
-
-  return `${prefix}_${owner}_${randomTokenPart()}`
-}
-
-function relayError(
-  code: RelayErrorResponse['error']['code'],
-  message: string,
-  issues?: RelayErrorResponse['error']['issues'],
-): RelayErrorResponse {
-  return {
-    ok: false,
-    error: {
-      code,
-      message,
-      ...(issues ? { issues } : {}),
-    },
-  }
-}
-
-function isTeamRole(value: unknown): value is TeamRole {
-  return typeof value === 'string' && TEAM_ROLES.includes(value as TeamRole)
-}
-
-function isArenaConfig(value: unknown): value is ArenaConfig {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false
-  }
-
-  const arena = value as Record<string, unknown>
-  const width = arena.width
-  const height = arena.height
-  const activeHazards = arena.activeHazards
-
-  return (
-    typeof arena.name === 'string' &&
-    typeof width === 'number' &&
-    Number.isInteger(width) &&
-    typeof height === 'number' &&
-    Number.isInteger(height) &&
-    width > 0 &&
-    height > 0 &&
-    Array.isArray(activeHazards) &&
-    activeHazards.every((hazard) => typeof hazard === 'string')
-  )
-}
-
-function safeText(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined
-}
-
-function safeMaxRounds(value: unknown): number {
-  return typeof value === 'number' &&
-    Number.isInteger(value) &&
-    value >= 1 &&
-    value <= MAX_ROUNDS_LIMIT
-    ? value
-    : DEFAULT_MAX_ROUNDS
-}
-
-function safeTtlMs(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return DEFAULT_SESSION_TTL_MS
-  }
-
-  const ttlMs = Math.floor(value * 1000)
-
-  if (ttlMs < MIN_SESSION_TTL_MS || ttlMs > MAX_SESSION_TTL_MS) {
-    return DEFAULT_SESSION_TTL_MS
-  }
-
-  return ttlMs
-}
-
-function addMilliseconds(value: string, ms: number): string {
-  return new Date(Date.parse(value) + ms).toISOString()
-}
-
-function mergeRateLimits(
-  overrides?: Partial<Record<RateLimitAction, RateLimitRule>>,
-): Record<RateLimitAction, RateLimitRule> {
-  return {
-    claim: overrides?.claim ?? DEFAULT_RATE_LIMITS.claim,
-    state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
-    submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
-    chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
-    private_chat: overrides?.private_chat ?? DEFAULT_RATE_LIMITS.private_chat,
-    referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
-    reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
-  }
-}
-
-function rolePublicState(role: StoredRoleState): RolePublicState {
-  return {
-    role: role.role,
-    claimed: Boolean(role.claimedAt),
-    submitted: Boolean(role.submittedAt),
-    wins: role.wins,
-    losses: role.losses,
-    winStreak: role.winStreak,
-  }
-}
-
-function combatSummary(result: CombatResult): CombatSummary {
-  return {
-    winner: result.winner,
-    reason: result.reason,
-    damage: result.damage,
-    remainingHealth: result.remainingHealth,
-  }
-}
-
-function nextActionForRole(state: RolePrivateState): AgentNextAction {
-  if (state.phase === 'expired' || state.phase === 'session_complete') {
-    return 'stop'
-  }
-
-  if (state.phase === 'waiting_for_agents') {
-    return 'wait_for_opponent_claim'
-  }
-
-  if (state.phase === 'submission_phase') {
-    return state.submitted ? 'wait_for_opponent_submission' : 'submit_round_plan'
-  }
-
-  if (state.phase === 'referee_awards') {
-    return 'wait_for_referee'
-  }
-
-  return 'wait_for_next_round'
-}
-
-export function calculateInterest(unspentGold: number): number {
-  return Math.min(
-    Math.floor(Math.max(0, unspentGold) * DEFAULT_INTEREST_RATE),
-    DEFAULT_INTEREST_CAP,
-  )
-}
-
-export function generateRefereeAwardOptions(
-  seed: string,
-  round: number,
-): RefereeAwardOption[] {
-  const rng = createSeededRng(`${seed}:awards:${round}`)
-  const cards = [...REFEREE_AWARD_CARDS]
-  const options: RefereeAwardOption[] = []
-
-  while (options.length < 3 && cards.length > 0) {
-    const index = Math.floor(rng() * cards.length)
-    const [card] = cards.splice(index, 1)
-
-    options.push({
-      id: `${card.id}-r${round}`,
-      title: card.title,
-      description: card.description,
-      gold: card.gold,
-    })
-  }
-
-  return options
-}
-
-export function createSessionId(): string {
-  return `s_${randomTokenPart().slice(0, 12)}`
-}
+export {
+  calculateInterest,
+  generateRefereeAwardOptions,
+} from './refereeAwards.js'
+export { createSessionId } from './sessionSupport.js'
+export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
 export class SessionCoordinator {
   private state: StoredSessionState
@@ -461,16 +120,7 @@ export class SessionCoordinator {
     } = {},
   ) {
     this.state = state
-    this.state.rateLimits ??= {}
-    this.state.awardOptions ??= []
-    this.state.awardHistory ??= []
-    this.state.chatLog ??= []
-    for (const role of TEAM_ROLES) {
-      this.state.roles[role].wins ??= 0
-      this.state.roles[role].losses ??= 0
-      this.state.roles[role].winStreak ??= 0
-      this.state.roles[role].privateChatLog ??= []
-    }
+    ensureStoredSessionDefaults(this.state)
     this.clock = options.clock ?? defaultClock
     this.tokenFactory = options.tokenFactory ?? defaultTokenFactory
     this.tokenHasher = options.tokenHasher ?? defaultTokenHasher
@@ -488,72 +138,15 @@ export class SessionCoordinator {
       rateLimits?: Partial<Record<RateLimitAction, RateLimitRule>>
     } = {},
   ): Promise<SessionCoordinator> {
-    const clock = options.clock ?? defaultClock
-    const tokenFactory = options.tokenFactory ?? defaultTokenFactory
-    const tokenHasher = options.tokenHasher ?? defaultTokenHasher
-    const now = clock()
-    const sessionId = safeText(request.sessionId) ?? createSessionId()
-    const seed = safeText(request.seed) ?? sessionId
-    const arena = isArenaConfig(request.arena) ? request.arena : DEFAULT_ARENA
-    const claimTokens: Record<TeamRole, string> = {
-      red: tokenFactory('red', 'claim'),
-      blue: tokenFactory('blue', 'claim'),
-    }
-    const refereeToken = tokenFactory('referee', 'referee')
+    const created = await createInitialSessionState(request, options)
 
-    const state: StoredSessionState = {
-      id: sessionId,
-      phase: 'waiting_for_agents',
-      round: 1,
-      maxRounds: safeMaxRounds(request.maxRounds),
-      seed,
-      arena,
-      createdAt: now,
-      expiresAt: addMilliseconds(now, safeTtlMs(request.ttlSeconds)),
-      updatedAt: now,
-      roles: {
-        red: {
-          role: 'red',
-          claimTokenHash: await tokenHasher(claimTokens.red),
-          gold: DEFAULT_STARTING_GOLD,
-          wins: 0,
-          losses: 0,
-          winStreak: 0,
-          inventory: [],
-          privateChatLog: [],
-        },
-        blue: {
-          role: 'blue',
-          claimTokenHash: await tokenHasher(claimTokens.blue),
-          gold: DEFAULT_STARTING_GOLD,
-          wins: 0,
-          losses: 0,
-          winStreak: 0,
-          inventory: [],
-          privateChatLog: [],
-        },
-      },
-      refereeTokenHash: await tokenHasher(refereeToken),
-      awardOptions: [],
-      awardHistory: [],
-      chatLog: [],
-      rateLimits: {},
-      eventLog: [
-        {
-          at: now,
-          type: 'session_created',
-          message: `Session ${sessionId} opened for role claims.`,
-        },
-      ],
-    }
-
-    return new SessionCoordinator(state, {
-      clock,
-      tokenFactory,
-      tokenHasher,
+    return new SessionCoordinator(created.state, {
+      clock: created.clock,
+      tokenFactory: created.tokenFactory,
+      tokenHasher: created.tokenHasher,
       rateLimits: options.rateLimits,
-      pendingClaimTokens: claimTokens,
-      pendingRefereeToken: refereeToken,
+      pendingClaimTokens: created.claimTokens,
+      pendingRefereeToken: created.refereeToken,
     })
   }
 
@@ -596,24 +189,7 @@ export class SessionCoordinator {
   getPublicState(): PublicSessionState {
     this.expireIfNeeded()
 
-    return cloneJson({
-      sessionId: this.state.id,
-      stateVersion: this.stateVersion(),
-      phase: this.state.phase,
-      round: this.state.round,
-      maxRounds: this.state.maxRounds,
-      expiresAt: this.state.expiresAt,
-      arena: this.state.arena,
-      roles: {
-        red: rolePublicState(this.state.roles.red),
-        blue: rolePublicState(this.state.roles.blue),
-      },
-      replayAvailable: Boolean(this.state.replay),
-      ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
-      ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
-      chatLog: this.state.chatLog,
-      eventLog: this.state.eventLog,
-    })
+    return buildPublicSessionState(this.state)
   }
 
   async claimRole(request: RoleClaimRequest): Promise<SessionResult<RoleClaimResponse>> {
@@ -662,7 +238,7 @@ export class SessionCoordinator {
         sessionId: this.state.id,
         role: request.role,
         roleToken,
-        state: this.buildRoleState(role),
+        state: buildRolePrivateState(this.state, role),
       },
     }
   }
@@ -701,9 +277,13 @@ export class SessionCoordinator {
       return rateLimitError
     }
 
-    const auth = await this.findRoleBearer(roleName, playerKey, {
-      allowUnclaimedClaimKey: true,
-    })
+    const auth = await findRoleBearer(
+      this.state,
+      this.tokenHasher,
+      roleName,
+      playerKey,
+      { allowUnclaimedClaimKey: true },
+    )
 
     if (!auth) {
       return role.claimedAt
@@ -726,7 +306,7 @@ export class SessionCoordinator {
       this.advanceClaimPhase(now)
     }
 
-    const state = this.buildRoleState(auth.role)
+    const state = buildRolePrivateState(this.state, auth.role)
 
     return {
       ok: true,
@@ -743,26 +323,15 @@ export class SessionCoordinator {
 
   async getRoleStateForToken(roleToken: string): Promise<SessionResult<RolePrivateState>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const auth = await this.authorizeRoleAction(roleToken, 'state', now)
 
-    if (activeError) {
-      return activeError
-    }
-
-    const role = await this.findRoleByToken(roleToken)
-    const rateLimitError = this.takeRateLimit('state', role?.role ?? 'invalid', now)
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!role) {
-      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
+    if (!auth.ok) {
+      return auth
     }
 
     return {
       ok: true,
-      value: this.buildRoleState(role),
+      value: buildRolePrivateState(this.state, auth.value),
     }
   }
 
@@ -771,22 +340,13 @@ export class SessionCoordinator {
     submission: unknown,
   ): Promise<SessionResult<RoundSubmissionResponse>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const auth = await this.authorizeRoleAction(roleToken, 'submit', now)
 
-    if (activeError) {
-      return activeError
+    if (!auth.ok) {
+      return auth
     }
 
-    const role = await this.findRoleByToken(roleToken)
-    const rateLimitError = this.takeRateLimit('submit', role?.role ?? 'invalid', now)
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!role) {
-      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
-    }
+    const role = auth.value
 
     if (role.submittedAt) {
       return relayError('ALREADY_SUBMITTED', `${role.role} already submitted this round.`)
@@ -828,7 +388,7 @@ export class SessionCoordinator {
     return {
       ok: true,
       value: {
-        state: this.buildRoleState(role),
+        state: buildRolePrivateState(this.state, role),
         publicState: this.getPublicState(),
       },
     }
@@ -839,23 +399,13 @@ export class SessionCoordinator {
     request: unknown,
   ): Promise<SessionResult<AgentChatMessageResponse>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const auth = await this.authorizeRoleAction(roleToken, 'chat', now)
 
-    if (activeError) {
-      return activeError
+    if (!auth.ok) {
+      return auth
     }
 
-    const role = await this.findRoleByToken(roleToken)
-    const rateLimitError = this.takeRateLimit('chat', role?.role ?? 'invalid', now)
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!role) {
-      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
-    }
-
+    const role = auth.value
     const validation = validateAgentChatMessageRequestShape(request)
 
     if (!validation.ok) {
@@ -874,7 +424,7 @@ export class SessionCoordinator {
       ok: true,
       value: {
         message,
-        state: this.buildRoleState(role),
+        state: buildRolePrivateState(this.state, role),
         publicState: this.getPublicState(),
       },
     }
@@ -885,23 +435,13 @@ export class SessionCoordinator {
     request: unknown,
   ): Promise<SessionResult<AgentPrivateChatMessageResponse>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const auth = await this.authorizeRoleAction(roleToken, 'private_chat', now)
 
-    if (activeError) {
-      return activeError
+    if (!auth.ok) {
+      return auth
     }
 
-    const role = await this.findRoleByToken(roleToken)
-    const rateLimitError = this.takeRateLimit('private_chat', role?.role ?? 'invalid', now)
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!role) {
-      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
-    }
-
+    const role = auth.value
     const validation = validateAgentChatMessageRequestShape(request)
 
     if (!validation.ok) {
@@ -918,7 +458,7 @@ export class SessionCoordinator {
       ok: true,
       value: {
         message,
-        state: this.buildRoleState(role),
+        state: buildRolePrivateState(this.state, role),
       },
     }
   }
@@ -928,25 +468,10 @@ export class SessionCoordinator {
     request: unknown,
   ): Promise<SessionResult<RefereeAwardsResponse>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const authError = await this.authorizeRefereeAction(refereeToken, 'referee_awards', now)
 
-    if (activeError) {
-      return activeError
-    }
-
-    const hasRefereeToken = await this.hasRefereeToken(refereeToken)
-    const rateLimitError = this.takeRateLimit(
-      'referee_awards',
-      hasRefereeToken ? 'referee' : 'invalid',
-      now,
-    )
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!hasRefereeToken) {
-      return relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
+    if (authError) {
+      return authError
     }
 
     if (this.state.phase !== 'referee_awards') {
@@ -986,25 +511,10 @@ export class SessionCoordinator {
     request: unknown,
   ): Promise<SessionResult<RoleResetResponse>> {
     const now = this.clock()
-    const activeError = this.requireActive(now)
+    const authError = await this.authorizeRefereeAction(refereeToken, 'reset_role', now)
 
-    if (activeError) {
-      return activeError
-    }
-
-    const hasRefereeToken = await this.hasRefereeToken(refereeToken)
-    const rateLimitError = this.takeRateLimit(
-      'reset_role',
-      hasRefereeToken ? 'referee' : 'invalid',
-      now,
-    )
-
-    if (rateLimitError) {
-      return rateLimitError
-    }
-
-    if (!hasRefereeToken) {
-      return relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
+    if (authError) {
+      return authError
     }
 
     const validation = validateRoleResetRequestShape(request)
@@ -1021,32 +531,18 @@ export class SessionCoordinator {
     }
 
     const roleName = (request as RoleResetRequest).role
-    const role = this.state.roles[roleName]
+    const reset = await resetStoredRoleClaim(
+      this.state,
+      roleName,
+      this.tokenFactory,
+      this.tokenHasher,
+    )
 
-    if (role.submittedAt) {
-      if (!role.submissionBaseline) {
-        return relayError(
-          'INVALID_REQUEST',
-          `${role.role} cannot be reset because its accepted submission cannot be rolled back.`,
-        )
-      }
-
-      role.gold = role.submissionBaseline.gold
-      role.inventory = cloneJson(role.submissionBaseline.inventory)
+    if (!reset.ok) {
+      return reset
     }
 
-    const claimToken = this.tokenFactory(roleName, 'claim')
-
-    role.claimTokenHash = await this.tokenHasher(claimToken)
-    role.roleTokenHash = undefined
-    role.agentName = undefined
-    role.claimedAt = undefined
-    role.submittedAt = undefined
-    role.controls = undefined
-    role.submission = undefined
-    role.normalizedSubmission = undefined
-    role.submissionBaseline = undefined
-    role.privateChatLog = []
+    const { claimToken } = reset.value
 
     this.touch(now)
     this.appendEvent('role_reset', `${roleName} role reset by referee.`, now)
@@ -1085,98 +581,56 @@ export class SessionCoordinator {
     }
   }
 
-  private buildRoleState(role: StoredRoleState): RolePrivateState {
-    const opponent = role.role === 'red' ? this.state.roles.blue : this.state.roles.red
+  private async authorizeRoleAction(
+    roleToken: string,
+    action: RateLimitAction,
+    now: string,
+  ): Promise<SessionResult<StoredRoleState>> {
+    const activeError = this.requireActive(now)
 
-    return cloneJson({
-      sessionId: this.state.id,
-      stateVersion: this.stateVersion(),
-      role: role.role,
-      phase: this.state.phase,
-      round: this.state.round,
-      expiresAt: this.state.expiresAt,
-      gold: role.gold,
-      wins: role.wins,
-      losses: role.losses,
-      winStreak: role.winStreak,
-      inventory: role.inventory,
-      ...(role.controls ? { controls: role.controls } : {}),
-      submitted: Boolean(role.submittedAt),
-      ...(role.submission ? { ownSubmission: role.submission } : {}),
-      opponent: rolePublicState(opponent),
-      replayAvailable: Boolean(this.state.replay),
-      ...(this.state.awardOptions.length > 0 ? { awardOptions: this.state.awardOptions } : {}),
-      ...(this.state.awardHistory.length > 0 ? { awardHistory: this.state.awardHistory } : {}),
-      ...(this.state.lastResult ? { lastResult: this.state.lastResult } : {}),
-      chatLog: this.state.chatLog,
-      privateChatLog: role.privateChatLog,
-      eventLog: this.state.eventLog,
-    })
+    if (activeError) {
+      return activeError
+    }
+
+    const role = await findRoleByToken(this.state, this.tokenHasher, roleToken)
+    const rateLimitError = this.takeRateLimit(action, role?.role ?? 'invalid', now)
+
+    if (rateLimitError) {
+      return rateLimitError
+    }
+
+    if (!role) {
+      return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
+    }
+
+    return { ok: true, value: role }
   }
 
-  private async findRoleByToken(roleToken: string): Promise<StoredRoleState | undefined> {
-    const auth = await this.findAnyRoleBearer(roleToken)
+  private async authorizeRefereeAction(
+    refereeToken: string,
+    action: RateLimitAction,
+    now: string,
+  ): Promise<RelayErrorResponse | undefined> {
+    const activeError = this.requireActive(now)
 
-    return auth?.role
-  }
-
-  private async findAnyRoleBearer(roleToken: string): Promise<RoleBearerAuth | undefined> {
-    if (!roleToken.trim()) {
-      return undefined
+    if (activeError) {
+      return activeError
     }
 
-    const roleTokenHash = await this.tokenHasher(roleToken)
+    const hasRefereeToken = await hasRefereeCapabilityToken(this.state, this.tokenHasher, refereeToken)
+    const rateLimitError = this.takeRateLimit(
+      action,
+      hasRefereeToken ? 'referee' : 'invalid',
+      now,
+    )
 
-    for (const roleName of TEAM_ROLES) {
-      const role = this.state.roles[roleName]
-      const auth = this.matchRoleBearer(role, roleTokenHash, {
-        allowUnclaimedClaimKey: false,
-      })
-
-      if (auth) {
-        return auth
-      }
+    if (rateLimitError) {
+      return rateLimitError
     }
 
-    return undefined
-  }
-
-  private async findRoleBearer(
-    roleName: TeamRole,
-    token: string,
-    options: { allowUnclaimedClaimKey: boolean },
-  ): Promise<RoleBearerAuth | undefined> {
-    if (!token.trim()) {
-      return undefined
-    }
-
-    const tokenHash = await this.tokenHasher(token)
-
-    return this.matchRoleBearer(this.state.roles[roleName], tokenHash, options)
-  }
-
-  private matchRoleBearer(
-    role: StoredRoleState,
-    tokenHash: string,
-    options: { allowUnclaimedClaimKey: boolean },
-  ): RoleBearerAuth | undefined {
-    if (role.roleTokenHash === tokenHash) {
-      return { role }
-    }
-
-    if ((role.claimedAt || options.allowUnclaimedClaimKey) && role.claimTokenHash === tokenHash) {
-      return { role }
-    }
-
-    return undefined
-  }
-
-  private async hasRefereeToken(refereeToken: string): Promise<boolean> {
-    if (!refereeToken.trim() || !this.state.refereeTokenHash) {
-      return false
-    }
-
-    return (await this.tokenHasher(refereeToken)) === this.state.refereeTokenHash
+    return hasRefereeToken
+      ? undefined
+      : relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
   }
 
   private applyAwardsAndAdvance(
@@ -1203,9 +657,9 @@ export class SessionCoordinator {
       now,
     )
     this.changePhase('apply_awards', 'Referee awards accepted.', now)
-    this.applyCombatResultToScore()
+    applyCombatResultToScore(this.state)
 
-    if (this.shouldCompleteMatch()) {
+    if (shouldCompleteMatch(this.state)) {
       this.completeMatch(now)
 
       return appliedAwards
@@ -1216,84 +670,16 @@ export class SessionCoordinator {
     return appliedAwards
   }
 
-  private applyCombatResultToScore(): void {
-    const result = this.state.lastResult
-
-    if (!result) {
-      return
-    }
-
-    if (result.winner === 'draw') {
-      for (const role of TEAM_ROLES) {
-        this.state.roles[role].winStreak = 0
-      }
-
-      return
-    }
-
-    const winner = this.state.roles[result.winner]
-    const loserRole = result.winner === 'red' ? 'blue' : 'red'
-    const loser = this.state.roles[loserRole]
-
-    winner.wins += 1
-    winner.winStreak += 1
-    loser.losses += 1
-    loser.winStreak = 0
-  }
-
-  private shouldCompleteMatch(): boolean {
-    return (
-      TEAM_ROLES.some(
-        (role) => this.state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
-      ) || this.state.round >= this.state.maxRounds
-    )
-  }
-
   private completeMatch(now: string): void {
-    const red = this.state.roles.red
-    const blue = this.state.roles.blue
-    const winner =
-      red.wins === blue.wins ? 'draw' : red.wins > blue.wins ? 'red' : 'blue'
-    const streakWinner = TEAM_ROLES.find(
-      (role) => this.state.roles[role].winStreak >= DEFAULT_WIN_STREAK_TARGET,
-    )
-    const finalWinner = streakWinner ?? winner
-    const reason = streakWinner
-      ? `${streakWinner} reached a ${DEFAULT_WIN_STREAK_TARGET}-win streak.`
-      : `Max rounds reached with score Red ${red.wins} - Blue ${blue.wins}.`
+    const completion = resolveMatchCompletion(this.state)
 
     this.state.awardOptions = []
-    this.appendEvent('session_completed', reason, now)
-    this.changePhase('session_complete', `Session complete: ${finalWinner}.`, now)
+    this.appendEvent('session_completed', completion.reason, now)
+    this.changePhase('session_complete', `Session complete: ${completion.winner}.`, now)
   }
 
   private advanceToNextRound(appliedAwards: AppliedRefereeAward[], now: string): void {
-    const awardGold = TEAM_ROLES.reduce<Record<TeamRole, number>>(
-      (totals, role) => {
-        totals[role] = appliedAwards
-          .filter((award) => award.targetTeam === role)
-          .reduce((total, award) => total + award.gold, 0)
-
-        return totals
-      },
-      { red: 0, blue: 0 },
-    )
-
-    for (const role of TEAM_ROLES) {
-      const team = this.state.roles[role]
-      const interest = calculateInterest(team.gold)
-
-      team.gold += DEFAULT_BASE_INCOME + interest + awardGold[role]
-      team.controls = undefined
-      team.submission = undefined
-      team.normalizedSubmission = undefined
-      team.submittedAt = undefined
-      team.submissionBaseline = undefined
-    }
-
-    this.state.round += 1
-    this.state.replay = undefined
-    this.state.awardOptions = []
+    applyNextRoundEconomy(this.state, appliedAwards)
     this.appendEvent('economy_applied', `Round ${this.state.round} economy applied.`, now)
     this.changePhase('submission_phase', `Round ${this.state.round} plans are open.`, now)
   }
@@ -1327,30 +713,7 @@ export class SessionCoordinator {
     key: string,
     now: string,
   ): RelayErrorResponse | undefined {
-    const rule = this.rateLimits[action]
-    const bucketKey = `${action}:${key}`
-    const current = this.state.rateLimits[bucketKey]
-    const nowMs = Date.parse(now)
-
-    if (!current || Date.parse(current.resetAt) <= nowMs) {
-      this.state.rateLimits[bucketKey] = {
-        count: 1,
-        resetAt: addMilliseconds(now, rule.windowMs),
-      }
-
-      return undefined
-    }
-
-    if (current.count >= rule.max) {
-      return relayError(
-        'RATE_LIMITED',
-        `${action} rate limit exceeded. Try again after ${current.resetAt}.`,
-      )
-    }
-
-    current.count += 1
-
-    return undefined
+    return takeSessionRateLimit(this.state, this.rateLimits, action, key, now)
   }
 
   private advanceClaimPhase(now: string): void {
@@ -1420,7 +783,7 @@ export class SessionCoordinator {
     message: string,
     at = this.clock(),
   ): void {
-    this.state.eventLog.push({ at, type, message })
+    appendSessionEvent(this.state, type, message, at)
   }
 
   private appendChatMessages(
@@ -1428,34 +791,11 @@ export class SessionCoordinator {
     requests: AgentChatMessagePostRequest[],
     at: string,
   ): SessionChatMessage[] {
-    const messages = requests.map((request, index) => {
-      const message = safeText(request.message)!
-
-      return {
-        id: `${this.state.id}:chat:${this.state.chatLog.length + index + 1}`,
-        at,
-        round: this.state.round,
-        phase: this.state.phase,
-        role: role.role,
-        ...(role.agentName ? { agentName: role.agentName } : {}),
-        kind: request.kind ?? 'observation',
-        message,
-      }
-    })
-
-    this.state.chatLog.push(...messages)
-
-    return cloneJson(messages)
+    return appendRoleChatMessages(this.state, role, requests, at)
   }
 
   private appendCombatChatter(result: CombatResult, at: string): void {
-    const chatter = createCombatChatter(result)
-
-    for (const message of chatter) {
-      this.appendChatMessages(this.state.roles[message.role], [message], at)
-    }
-
-    if (chatter.length > 0) {
+    if (appendCombatChatterMessages(this.state, result, at)) {
       this.touch(at)
     }
   }
@@ -1465,130 +805,11 @@ export class SessionCoordinator {
     requests: AgentPrivateChatMessagePostRequest[],
     at: string,
   ): SessionChatMessage[] {
-    const messages = requests.map((request, index) => {
-      const message = safeText(request.message)!
-
-      return {
-        id: `${this.state.id}:${role.role}:private-chat:${role.privateChatLog.length + index + 1}`,
-        at,
-        round: this.state.round,
-        phase: this.state.phase,
-        role: role.role,
-        ...(role.agentName ? { agentName: role.agentName } : {}),
-        kind: request.kind ?? 'observation',
-        message,
-      }
-    })
-
-    role.privateChatLog.push(...messages)
-
-    return cloneJson(messages)
+    return appendPrivateRoleChatMessages(this.state, role, requests, at)
   }
 
   private touch(at = this.clock()): void {
     this.state.updatedAt = at
   }
 
-  private stateVersion(): string {
-    return [
-      this.state.updatedAt,
-      this.state.phase,
-      this.state.round,
-      this.state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
-      this.state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
-      this.state.eventLog.length,
-      this.state.chatLog.length,
-    ].join('|')
-  }
-}
-
-function createCombatChatter(result: CombatResult): CombatChatterRequest[] {
-  if (result.winner === 'draw') {
-    return [
-      {
-        role: 'red',
-        kind: 'taunt',
-        message: drawChatter('red', result),
-      },
-      {
-        role: 'blue',
-        kind: 'taunt',
-        message: drawChatter('blue', result),
-      },
-    ]
-  }
-
-  const winner = result.winner
-  const loser = winner === 'red' ? 'blue' : 'red'
-
-  return [
-    {
-      role: winner,
-      kind: 'taunt',
-      message: winnerChatter(winner, loser, result),
-    },
-    {
-      role: loser,
-      kind: 'reflection',
-      message: loserChatter(loser, winner, result),
-    },
-  ]
-}
-
-function winnerChatter(
-  winner: TeamRole,
-  loser: TeamRole,
-  result: CombatResult,
-): string {
-  const loserDamage = result.damage[loser]
-  const winnerDamage = result.damage[winner]
-  const loserHealth = result.remainingHealth[loser]
-
-  if (loserHealth <= 0) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: that was not a fight plan, that was a parts donation.`
-  }
-
-  if (loserDamage >= winnerDamage + 20) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: you kept feeding the weapon; I started charging rent.`
-  }
-
-  if (winnerDamage > loserDamage * 0.8) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: you landed shots, then forgot to survive the answer.`
-  }
-
-  return `${capitalize(winner)} to ${capitalize(loser)}: scoreboard says enough. Bring something that can turn next round.`
-}
-
-function loserChatter(
-  loser: TeamRole,
-  winner: TeamRole,
-  result: CombatResult,
-): string {
-  const loserDamage = result.damage[loser]
-  const winnerDamage = result.damage[winner]
-
-  if (loserDamage <= winnerDamage + 6) {
-    return `${capitalize(loser)} to ${capitalize(winner)}: enjoy the round; the replay shows how thin that win was.`
-  }
-
-  if (result.remainingHealth[loser] <= 0) {
-    return `${capitalize(loser)} to ${capitalize(winner)}: fine, that hit was ugly. I am buying drive control before you get proud.`
-  }
-
-  return `${capitalize(loser)} to ${capitalize(winner)}: talk now; the next build is aimed directly at that weakness.`
-}
-
-function drawChatter(role: TeamRole, result: CombatResult): string {
-  const opponent = role === 'red' ? 'blue' : 'red'
-  const dealt = result.damage[opponent]
-
-  if (dealt > 0) {
-    return `${capitalize(role)} to ${capitalize(opponent)}: you survived ${dealt} damage and still could not make it count.`
-  }
-
-  return `${capitalize(role)} to ${capitalize(opponent)}: next round, try bringing a weapon instead of a parking brake.`
-}
-
-function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1)
 }

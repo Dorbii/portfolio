@@ -1,448 +1,60 @@
 import {
-  TEAM_ROLES,
   createAgentContract,
   validateAgentBootstrapRequestShape,
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
   type CreateSessionRequest,
-  type RelayErrorResponse,
   type RoleClaimRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import {
   SessionCoordinator,
-  createSessionId,
   type StoredSessionState,
 } from './session.js'
+import {
+  bodyTooLargeResponse,
+  errorResponse,
+  isBodyTooLarge,
+  isJsonRecord,
+  jsonResponse,
+  preflightResponse,
+  readJsonBody,
+  statusForRelayError,
+} from './workerHttp.js'
+import {
+  bearerToken,
+  isSessionId,
+  sessionRoleRoute,
+  sessionRoute,
+} from './workerRoutes.js'
+import type { SessionResult } from './sessionTypes.js'
+import {
+  forwardToSessionObject,
+  handlePublicCreateSessionRequest,
+  invalidSessionIdResponse,
+} from './workerSessionDispatch.js'
+import type {
+  DurableObjectState,
+  WorkerEnv,
+} from './workerTypes.js'
+export type {
+  DurableObjectNamespace,
+  WorkerEnv,
+} from './workerTypes.js'
 
 const STORAGE_KEY = 'agent-arena-session'
-const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 
-type DurableObjectId = unknown
-
-type DurableObjectStorage = {
-  get<T>(key: string): Promise<T | undefined>
-  put<T>(key: string, value: T): Promise<void>
-}
-
-type DurableObjectState = {
-  storage: DurableObjectStorage
-}
-
-type DurableObjectStub = {
-  fetch(request: Request): Promise<Response>
-}
-
-export type DurableObjectNamespace = {
-  idFromName(name: string): DurableObjectId
-  get(id: DurableObjectId): DurableObjectStub
-}
-
-export type WorkerEnv = {
-  AGENT_ARENA_SESSION?: DurableObjectNamespace
-  AGENT_ARENA_ALLOWED_ORIGINS?: string
-}
-
-const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
-const LOCAL_DEV_CORS_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
-const MAX_JSON_BODY_BYTES = 64 * 1024
-const BODY_TOO_LARGE = Symbol('BODY_TOO_LARGE')
-const textDecoder = new TextDecoder()
-
-function normalizeConfiguredOrigin(value: string): string | undefined {
-  const trimmed = value.trim()
-
-  if (!trimmed) {
-    return undefined
-  }
-
-  try {
-    const originValue = /^[a-z][a-z\d+\-.]*:\/\//i.test(trimmed)
-      ? trimmed
-      : `https://${trimmed}`
-
-    return new URL(originValue).origin
-  } catch {
-    return undefined
-  }
-}
-
-function configuredCorsOrigins(env: WorkerEnv): Set<string> {
-  const origins = new Set(
-    DEFAULT_ALLOWED_CORS_ORIGINS
-      .map(normalizeConfiguredOrigin)
-      .filter((origin): origin is string => Boolean(origin)),
-  )
-
-  for (const value of env.AGENT_ARENA_ALLOWED_ORIGINS?.split(/[\s,]+/) ?? []) {
-    const origin = normalizeConfiguredOrigin(value)
-
-    if (origin) {
-      origins.add(origin)
-    }
-  }
-
-  return origins
-}
-
-function allowedCorsOrigin(request: Request, env: WorkerEnv): string | undefined {
-  const originHeader = request.headers.get('origin')
-
-  if (!originHeader) {
-    return undefined
-  }
-
-  try {
-    const origin = new URL(originHeader)
-
-    if (
-      (origin.protocol === 'http:' || origin.protocol === 'https:') &&
-      LOCAL_DEV_CORS_HOSTS.has(origin.hostname)
-    ) {
-      return origin.origin
-    }
-
-    if (configuredCorsOrigins(env).has(origin.origin)) {
-      return origin.origin
-    }
-  } catch {
-    return undefined
-  }
-
-  return undefined
-}
-
-function appendVaryOrigin(headers: Headers): void {
-  const vary = headers.get('vary')
-
-  if (!vary) {
-    headers.set('vary', 'Origin')
-
-    return
-  }
-
-  if (!vary.split(',').some((value) => value.trim().toLowerCase() === 'origin')) {
-    headers.set('vary', `${vary}, Origin`)
-  }
-}
-
-function corsHeaders(
-  request?: Request,
-  env: WorkerEnv = {},
-  headersInit?: HeadersInit,
-): Headers {
-  const headers = new Headers(headersInit)
-  const origin = request ? allowedCorsOrigin(request, env) : undefined
-
-  if (origin) {
-    headers.set('access-control-allow-origin', origin)
-    appendVaryOrigin(headers)
-  }
-
-  headers.set('access-control-allow-methods', 'GET, POST, OPTIONS')
-  headers.set('access-control-allow-headers', 'authorization, content-type')
-  headers.set('access-control-max-age', '86400')
-
-  return headers
-}
-
-function withCors(response: Response, request: Request, env: WorkerEnv): Response {
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: corsHeaders(request, env, response.headers),
-  })
-}
-
-function jsonResponse(
-  value: unknown,
-  init: ResponseInit = {},
-  request?: Request,
-  env?: WorkerEnv,
-): Response {
-  const headers = corsHeaders(request, env, init.headers)
-  headers.set('content-type', 'application/json')
-
-  return new Response(JSON.stringify(value, null, 2), {
-    ...init,
-    headers,
-  })
-}
-
-function preflightResponse(request: Request, env: WorkerEnv): Response {
-  return new Response(null, {
-    status: 204,
-    headers: corsHeaders(request, env),
-  })
-}
-
-function errorResponse(
-  status: number,
-  code: RelayErrorResponse['error']['code'],
-  message: string,
-  issues?: RelayErrorResponse['error']['issues'],
-  request?: Request,
-  env?: WorkerEnv,
-): Response {
-  return jsonResponse(
-    {
-      ok: false,
-      error: {
-        code,
-        message,
-        ...(issues ? { issues } : {}),
-      },
-    },
-    { status },
-    request,
-    env,
-  )
-}
-
-function contentLengthTooLarge(request: Request): boolean {
-  const contentLength = request.headers.get('content-length')
-
-  if (!contentLength) {
-    return false
-  }
-
-  const parsedLength = Number(contentLength)
-
-  return Number.isFinite(parsedLength) && parsedLength > MAX_JSON_BODY_BYTES
-}
-
-async function readRequestText(request: Request): Promise<string | typeof BODY_TOO_LARGE> {
-  if (contentLengthTooLarge(request)) {
-    return BODY_TOO_LARGE
-  }
-
-  if (!request.body) {
-    return ''
-  }
-
-  const reader = request.body.getReader()
-  const chunks: Uint8Array[] = []
-  let totalBytes = 0
-
-  while (true) {
-    const { done, value } = await reader.read()
-
-    if (done) {
-      break
-    }
-
-    if (!value) {
-      continue
-    }
-
-    totalBytes += value.byteLength
-
-    if (totalBytes > MAX_JSON_BODY_BYTES) {
-      try {
-        await reader.cancel()
-      } catch {
-        // The stream may already be closed by the runtime after the oversized chunk.
-      }
-
-      return BODY_TOO_LARGE
-    }
-
-    chunks.push(value)
-  }
-
-  if (chunks.length === 0) {
-    return ''
-  }
-
-  if (chunks.length === 1) {
-    return textDecoder.decode(chunks[0])
-  }
-
-  const bodyBytes = new Uint8Array(totalBytes)
-  let offset = 0
-
-  for (const chunk of chunks) {
-    bodyBytes.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-
-  return textDecoder.decode(bodyBytes)
-}
-
-async function readJsonBody(request: Request): Promise<unknown | typeof BODY_TOO_LARGE> {
-  const text = await readRequestText(request)
-
-  if (isBodyTooLarge(text)) {
-    return BODY_TOO_LARGE
-  }
-
-  if (text.trim().length === 0) {
-    return {}
-  }
-
-  try {
-    return JSON.parse(text) as unknown
-  } catch {
-    return undefined
-  }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isSessionId(value: string): boolean {
-  return SESSION_ID_PATTERN.test(value)
-}
-
-function requestWithJson(request: Request, url: URL, body: unknown): Request {
-  const headers = new Headers(request.headers)
-  headers.set('content-type', 'application/json')
-
-  return new Request(url, {
-    method: request.method,
-    headers,
-    body: JSON.stringify(body),
-  })
-}
-
-function bearerToken(request: Request): string | undefined {
-  const authorization = request.headers.get('authorization')
-  const match = /^Bearer\s+(.+)$/i.exec(authorization ?? '')
-
-  return match?.[1]
-}
-
-function sessionRoute(pathname: string):
+type JsonRequestReadResult =
   | {
-      sessionId: string
-      action: string
+      ok: true
+      body: unknown
     }
-  | undefined {
-  const match = /^\/sessions\/([^/]+)\/([^/]+)$/.exec(pathname)
-
-  if (!match) {
-    return undefined
-  }
-
-  let sessionId = ''
-
-  try {
-    sessionId = decodeURIComponent(match[1])
-  } catch {
-    sessionId = ''
-  }
-
-  return {
-    sessionId,
-    action: match[2],
-  }
-}
-
-function sessionRoleRoute(pathname: string):
   | {
-      sessionId: string
-      role: TeamRole
-      action: string
+      ok: false
+      response: Response
     }
-  | undefined {
-  const match = /^\/sessions\/([^/]+)\/roles\/([^/]+)\/([^/]+)$/.exec(pathname)
-
-  if (!match) {
-    return undefined
-  }
-
-  let sessionId = ''
-  let role = ''
-
-  try {
-    sessionId = decodeURIComponent(match[1])
-    role = decodeURIComponent(match[2])
-  } catch {
-    sessionId = ''
-    role = ''
-  }
-
-  if (!isTeamRole(role)) {
-    return undefined
-  }
-
-  return {
-    sessionId,
-    role,
-    action: match[3],
-  }
-}
-
-function isTeamRole(value: unknown): value is TeamRole {
-  return typeof value === 'string' && TEAM_ROLES.includes(value as TeamRole)
-}
-
-function isBodyTooLarge(value: unknown): value is typeof BODY_TOO_LARGE {
-  return value === BODY_TOO_LARGE
-}
-
-function bodyTooLargeResponse(request?: Request, env?: WorkerEnv): Response {
-  return errorResponse(
-    413,
-    'INVALID_REQUEST',
-    `JSON request body must be ${MAX_JSON_BODY_BYTES} bytes or smaller.`,
-    undefined,
-    request,
-    env,
-  )
-}
-
-function statusForRelayError(error: RelayErrorResponse['error']): number {
-  switch (error.code) {
-    case 'BAD_JSON':
-    case 'INVALID_ACTION':
-    case 'INVALID_REQUEST':
-    case 'INVALID_ROLE':
-    case 'SUBMISSION_INVALID':
-      return 400
-    case 'INVALID_TOKEN':
-      return 401
-    case 'SESSION_NOT_FOUND':
-    case 'REPLAY_NOT_AVAILABLE':
-      return 404
-    case 'SESSION_EXPIRED':
-      return 410
-    case 'ROLE_ALREADY_CLAIMED':
-    case 'SESSION_EXISTS':
-    case 'PHASE_CLOSED':
-    case 'ALREADY_SUBMITTED':
-      return 409
-    case 'RATE_LIMITED':
-      return 429
-    case 'WORKER_NOT_CONFIGURED':
-      return 500
-  }
-}
-
-async function forwardToSessionObject(
-  request: Request,
-  env: WorkerEnv,
-  sessionId: string,
-): Promise<Response> {
-  if (!env.AGENT_ARENA_SESSION) {
-    return errorResponse(
-      500,
-      'WORKER_NOT_CONFIGURED',
-      'AGENT_ARENA_SESSION Durable Object binding is missing.',
-      undefined,
-      request,
-      env,
-    )
-  }
-
-  const id = env.AGENT_ARENA_SESSION.idFromName(sessionId)
-  const stub = env.AGENT_ARENA_SESSION.get(id)
-
-  return withCors(await stub.fetch(request), request, env)
-}
 
 export async function handleWorkerRequest(
   request: Request,
@@ -459,67 +71,14 @@ export async function handleWorkerRequest(
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
-    const body = await readJsonBody(request)
-
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse(request, env)
-    }
-
-    if (body === undefined || !isRecord(body)) {
-      return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.', undefined, request, env)
-    }
-
-    const validation = validateCreateSessionRequestShape(body)
-
-    if (!validation.ok) {
-      return errorResponse(
-        400,
-        'INVALID_REQUEST',
-        'Create session request failed validation.',
-        validation.issues,
-        request,
-        env,
-      )
-    }
-
-    const sessionId =
-      typeof body.sessionId === 'string' && body.sessionId.trim().length > 0
-        ? body.sessionId.trim()
-        : createSessionId()
-
-    if (!isSessionId(sessionId)) {
-      return errorResponse(
-        400,
-        'INVALID_REQUEST',
-        'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
-        undefined,
-        request,
-        env,
-      )
-    }
-
-    const internalUrl = new URL(request.url)
-    internalUrl.pathname = `/sessions/${encodeURIComponent(sessionId)}/create`
-
-    return forwardToSessionObject(
-      requestWithJson(request, internalUrl, { ...body, sessionId }),
-      env,
-      sessionId,
-    )
+    return handlePublicCreateSessionRequest(request, env)
   }
 
   const roleRoute = sessionRoleRoute(url.pathname)
 
   if (roleRoute) {
     if (!isSessionId(roleRoute.sessionId)) {
-      return errorResponse(
-        400,
-        'INVALID_REQUEST',
-        'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
-        undefined,
-        request,
-        env,
-      )
+      return invalidSessionIdResponse(request, env)
     }
 
     return forwardToSessionObject(request, env, roleRoute.sessionId)
@@ -529,14 +88,7 @@ export async function handleWorkerRequest(
 
   if (route) {
     if (!isSessionId(route.sessionId)) {
-      return errorResponse(
-        400,
-        'INVALID_REQUEST',
-        'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
-        undefined,
-        request,
-        env,
-      )
+      return invalidSessionIdResponse(request, env)
     }
 
     if (route.action === 'create') {
@@ -619,13 +171,8 @@ export class AgentArenaSession {
 
     if (route.action === 'state' && request.method === 'GET') {
       const result = await coordinator.getRoleStateForToken(bearerToken(request) ?? '')
-      await this.saveSession(coordinator)
 
-      if (!result.ok) {
-        return jsonResponse(result, { status: statusForRelayError(result.error) })
-      }
-
-      return jsonResponse(result.value)
+      return this.sessionResultResponse(coordinator, result)
     }
 
     if (route.action === 'round-plan' && request.method === 'POST') {
@@ -650,13 +197,8 @@ export class AgentArenaSession {
 
     if (route.action === 'replay' && request.method === 'GET') {
       const result = coordinator.getReplay()
-      await this.saveSession(coordinator)
 
-      if (!result.ok) {
-        return jsonResponse(result, { status: statusForRelayError(result.error) })
-      }
-
-      return jsonResponse(result.value)
+      return this.sessionResultResponse(coordinator, result)
     }
 
     return errorResponse(404, 'INVALID_ACTION', 'Unsupported session action.')
@@ -669,16 +211,15 @@ export class AgentArenaSession {
       return errorResponse(409, 'SESSION_EXISTS', 'Session already exists.')
     }
 
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Create session body must be JSON.', {
+      requireRecord: true,
+    })
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined || !isRecord(body)) {
-      return errorResponse(400, 'BAD_JSON', 'Create session body must be JSON.')
-    }
-
+    const body = readResult.body as Record<string, unknown>
     const validation = validateCreateSessionRequestShape(body)
 
     if (!validation.ok) {
@@ -703,16 +244,15 @@ export class AgentArenaSession {
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Claim request body must be JSON.', {
+      requireRecord: true,
+    })
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined || !isRecord(body)) {
-      return errorResponse(400, 'BAD_JSON', 'Claim request body must be JSON.')
-    }
-
+    const body = readResult.body as Record<string, unknown>
     const validation = validateRoleClaimRequestShape(body)
 
     if (!validation.ok) {
@@ -724,14 +264,9 @@ export class AgentArenaSession {
       )
     }
 
-    const result = await coordinator.claimRole(body as RoleClaimRequest)
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value, { status: 201 })
+    return this.sessionResultResponse(coordinator, await coordinator.claimRole(body as RoleClaimRequest), {
+      status: 201,
+    })
   }
 
   // CODEX_INTENT: expose an idempotent player-key bootstrap path for non-browser agents.
@@ -743,16 +278,15 @@ export class AgentArenaSession {
     coordinator: SessionCoordinator,
     role: TeamRole,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Bootstrap request body must be JSON.', {
+      requireRecord: true,
+    })
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined || !isRecord(body)) {
-      return errorResponse(400, 'BAD_JSON', 'Bootstrap request body must be JSON.')
-    }
-
+    const body = readResult.body as Record<string, unknown>
     const validation = validateAgentBootstrapRequestShape(body)
 
     if (!validation.ok) {
@@ -764,138 +298,127 @@ export class AgentArenaSession {
       )
     }
 
-    const result = await coordinator.bootstrapRole(
-      role,
-      bearerToken(request) ?? '',
-      body as AgentBootstrapRequest,
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.bootstrapRole(
+        role,
+        bearerToken(request) ?? '',
+        body as AgentBootstrapRequest,
+      ),
+      (value) => ({ status: value.claimedNow ? 201 : 200 }),
     )
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value, { status: result.value.claimedNow ? 201 : 200 })
   }
 
   private async submitRoundPlan(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Round plan body must be JSON.')
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined) {
-      return errorResponse(400, 'BAD_JSON', 'Round plan body must be JSON.')
-    }
-
-    const result = await coordinator.submitRoundPlan(bearerToken(request) ?? '', body)
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value)
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitRoundPlan(bearerToken(request) ?? '', readResult.body),
+    )
   }
 
   private async submitChatMessage(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Chat message body must be JSON.')
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined) {
-      return errorResponse(400, 'BAD_JSON', 'Chat message body must be JSON.')
-    }
-
-    const result = await coordinator.submitChatMessage(bearerToken(request) ?? '', body)
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value)
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitChatMessage(bearerToken(request) ?? '', readResult.body),
+    )
   }
 
   private async submitPrivateChatMessage(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Private chat message body must be JSON.')
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined) {
-      return errorResponse(400, 'BAD_JSON', 'Private chat message body must be JSON.')
-    }
-
-    const result = await coordinator.submitPrivateChatMessage(bearerToken(request) ?? '', body)
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value)
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitPrivateChatMessage(bearerToken(request) ?? '', readResult.body),
+    )
   }
 
   private async submitRefereeAwards(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const body = await readJsonBody(request)
+    const readResult = await this.readJsonRequest(request, 'Referee awards body must be JSON.')
 
-    if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+    if (!readResult.ok) {
+      return readResult.response
     }
 
-    if (body === undefined) {
-      return errorResponse(400, 'BAD_JSON', 'Referee awards body must be JSON.')
-    }
-
-    const result = await coordinator.submitRefereeAwards(bearerToken(request) ?? '', body)
-    await this.saveSession(coordinator)
-
-    if (!result.ok) {
-      return jsonResponse(result, { status: statusForRelayError(result.error) })
-    }
-
-    return jsonResponse(result.value)
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitRefereeAwards(bearerToken(request) ?? '', readResult.body),
+    )
   }
 
   private async resetRole(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Role reset body must be JSON.')
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.resetRole(bearerToken(request) ?? '', readResult.body),
+    )
+  }
+
+  private async readJsonRequest(
+    request: Request,
+    badJsonMessage: string,
+    options: { requireRecord?: boolean } = {},
+  ): Promise<JsonRequestReadResult> {
     const body = await readJsonBody(request)
 
     if (isBodyTooLarge(body)) {
-      return bodyTooLargeResponse()
+      return { ok: false, response: bodyTooLargeResponse() }
     }
 
-    if (body === undefined) {
-      return errorResponse(400, 'BAD_JSON', 'Role reset body must be JSON.')
+    if (body === undefined || (options.requireRecord === true && !isJsonRecord(body))) {
+      return { ok: false, response: errorResponse(400, 'BAD_JSON', badJsonMessage) }
     }
 
-    const result = await coordinator.resetRole(bearerToken(request) ?? '', body)
+    return { ok: true, body }
+  }
+
+  private async sessionResultResponse<T>(
+    coordinator: SessionCoordinator,
+    result: SessionResult<T>,
+    init: ResponseInit | ((value: T) => ResponseInit) = {},
+  ): Promise<Response> {
     await this.saveSession(coordinator)
 
     if (!result.ok) {
       return jsonResponse(result, { status: statusForRelayError(result.error) })
     }
 
-    return jsonResponse(result.value)
+    return jsonResponse(result.value, typeof init === 'function' ? init(result.value) : init)
   }
 
   private async loadSession(): Promise<SessionCoordinator | undefined> {

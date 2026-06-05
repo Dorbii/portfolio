@@ -57,10 +57,16 @@ test('referee invite URLs use production defaults and claimToken', () => {
     sessionId: 's_demo',
     apiBase: DEFAULT_ARENA_API_BASE,
   })
+  const params = new URLSearchParams({
+    session: 's_demo',
+    role: 'red',
+    claimToken: 'cap_red',
+    api: DEFAULT_ARENA_API_BASE,
+  })
 
   assert.equal(
     inviteUrl,
-    `${DEFAULT_ARENA_SITE_BASE}/agent#session=s_demo&role=red&claimToken=cap_red&api=${DEFAULT_ARENA_API_BASE}`,
+    `${DEFAULT_ARENA_SITE_BASE}/agent#${params.toString()}`,
   )
   assert.equal(inviteUrl.includes('invite='), false)
 })

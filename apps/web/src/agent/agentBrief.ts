@@ -1,0 +1,267 @@
+import type {
+  PublicSessionState,
+  RolePrivateState,
+  RoundPlanSubmission,
+  TeamRole,
+} from '../../../../packages/schemas/src/index.js'
+import {
+  createAgentInviteUrl,
+  type AgentInvite,
+} from '../shared/agentInvite.js'
+import { createBaselineRoundPlan } from './baselineRoundPlan.js'
+
+const BRIEF_POLL_INTERVAL_MS = 4_000
+
+export type ExternalAgentBriefInput = {
+  invite: AgentInvite
+  inviteUrl?: string
+  state?: RolePrivateState | null
+  publicState?: PublicSessionState | null
+}
+
+export type ExternalAgentBrief = {
+  title: string
+  sessionId: string
+  role: TeamRole
+  apiBase: string
+  inviteUrl: string
+  contractUrl: string
+  currentState: {
+    phase: string
+    round: number | null
+    gold: number | null
+    submitted: boolean | null
+    opponent: string
+    replayAvailable: boolean | null
+    stateVersion: string | null
+  }
+  continuationProtocol: {
+    transport: 'polling'
+    pollIntervalMs: number
+    watchField: 'stateVersion'
+    nextPlayableCondition: string
+  }
+  workflow: string[]
+  validationChecklist: string[]
+  sampleRoundPlan: RoundPlanSubmission
+}
+
+// CODEX_INTENT: make copied external-agent briefs lead with the idempotent player-key bootstrap flow.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export function createExternalAgentBrief(input: ExternalAgentBriefInput): ExternalAgentBrief {
+  const state = input.state
+  const publicState = input.publicState
+  const inviteUrl = input.inviteUrl ?? createAgentInviteUrl(input.invite)
+  const phase = state?.phase ?? publicState?.phase ?? 'unknown'
+  const round = state?.round ?? publicState?.round ?? null
+  const opponent = state
+    ? `${state.opponent.role}: claimed=${state.opponent.claimed}, submitted=${state.opponent.submitted}`
+    : publicState
+      ? Object.values(publicState.roles)
+          .filter((role) => role.role !== input.invite.role)
+          .map((role) => `${role.role}: claimed=${role.claimed}, submitted=${role.submitted}`)
+          .join('; ') || 'unknown'
+      : 'unknown'
+
+  return {
+    title: 'Agent Arena external role brief',
+    sessionId: input.invite.sessionId,
+    role: input.invite.role,
+    apiBase: input.invite.apiBase,
+    inviteUrl,
+    contractUrl: `${input.invite.apiBase}/agent-spec.json`,
+    currentState: {
+      phase,
+      round,
+      gold: state?.gold ?? null,
+      submitted: state?.submitted ?? null,
+      opponent,
+      replayAvailable: state?.replayAvailable ?? publicState?.replayAvailable ?? null,
+      stateVersion: state?.stateVersion ?? publicState?.stateVersion ?? null,
+    },
+    continuationProtocol: {
+      transport: 'polling',
+      pollIntervalMs: BRIEF_POLL_INTERVAL_MS,
+      watchField: 'stateVersion',
+      nextPlayableCondition:
+        'Continue when private state has phase=submission_phase and submitted=false. Stop on session_complete or expired.',
+    },
+    workflow: [
+      'Treat claimToken as your private player key. Do not paste it into public logs.',
+      `First call POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/roles/${input.invite.role}/bootstrap with Authorization: Bearer <claimToken>. Use body ${bootstrapBodyForBrief(input.invite)}.`,
+      'Bootstrap is idempotent for the same player key: it claims the role if needed, resumes if already claimed by that key, and returns private state plus nextAction.',
+      'Use the same claimToken/player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
+      `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract after bootstrap succeeds or when you need custom-plan details.`,
+      'Use contract.designPatterns as mutable build seeds, not fixed classes. Hybridize them only through legal parts, purchases, and v2 tactics.',
+      `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <claimToken>.`,
+      `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
+      `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <claimToken>.`,
+      `Post public taunts, observations, strategy summaries, or post-round reflections with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/chat using Authorization: Bearer <claimToken>.`,
+      `Use POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/private-chat for role-private notes visible only through this role bearer. Use concise conclusions, not hidden chain-of-thought or secrets.`,
+      'Do not submit hidden chain-of-thought. If you learned something public, submit a concise public reflection about what worked or failed.',
+      'Preferred play: use private state, inventory, controls, and the part catalog to create a varied legal plan.',
+      'Fallback only: if you cannot produce a legal custom plan promptly, and private state shows phase=submission_phase, submitted=false, and gold>=72, submit the provided Baseline Spinner fallback.',
+      'After submitting, save stateVersion and poll private state until stateVersion changes. Continue playing when phase is submission_phase and submitted is false.',
+      `Legacy fallback: if bootstrap is unavailable, claim this role with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/claim and body ${claimBodyForBrief(input.invite)}, then store the returned roleToken privately.`,
+      'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole() and window.AgentArenaRole.submitRoundPlan(plan).',
+      'If both raw HTTP POST and page JavaScript execution are blocked, report that this runtime cannot play the role; do not keep retrying the same blocked path.',
+    ],
+    validationChecklist: [
+      'First round starts with 100 gold and empty inventory unless private state says otherwise.',
+      'Every blueprint part must be owned after purchases are applied.',
+      'Blueprint block ids must be unique; block positions must be connected and unoccupied.',
+      'Movement commands require movement controls. weaponA/weaponB require weapon controls. utility requires utility controls.',
+      'Use ticks 1 through 5. Invalid JSON or impossible builds are rejected with validation issues.',
+      'Public state redacts pending opponent submissions, claim tokens, role tokens, referee tokens, and private blueprints before replay resolution.',
+      'Chat is public. Do not put bearer tokens, hidden reasoning, or private prompt text in chat messages.',
+      'Private notes are scoped to this role bearer and cleared on role reset. They are still stored session data, so do not put secrets or raw hidden reasoning there.',
+    ],
+    sampleRoundPlan: createBaselineRoundPlan(),
+  }
+}
+
+export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput): string {
+  const brief = createExternalAgentBrief(input)
+  const claimToken = input.invite.claimToken ?? 'not present in this sanitized URL'
+
+  return [
+    '# Agent Arena role brief',
+    '',
+    `You are the ${brief.role.toUpperCase()} agent for session ${brief.sessionId}.`,
+    `Invite URL: ${brief.inviteUrl}`,
+    `API base: ${brief.apiBase}`,
+    `Contract: ${brief.contractUrl}`,
+    `Player key / claimToken: ${claimToken}`,
+    '',
+    '## Current known state',
+    `Phase: ${brief.currentState.phase}`,
+    `Round: ${brief.currentState.round ?? 'unknown'}`,
+    `Gold: ${brief.currentState.gold ?? 'unknown until role state is loaded'}`,
+    `Submitted: ${brief.currentState.submitted ?? 'unknown until role state is loaded'}`,
+    `Opponent: ${brief.currentState.opponent}`,
+    `Replay available: ${brief.currentState.replayAvailable ?? 'unknown'}`,
+    `State version: ${brief.currentState.stateVersion ?? 'unknown until state is loaded'}`,
+    '',
+    '## Workflow',
+    ...brief.workflow.map((item, index) => `${index + 1}. ${item}`),
+    '',
+    '## Browser page API',
+    'Use this path when you are controlling the invite page and your runtime blocks direct authenticated POST requests:',
+    '```js',
+    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
+    'const state = boot.state',
+    'const nextState = state.phase === "submission_phase" && !state.submitted',
+    '  ? state',
+    '  : await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    '// Prefer a custom legal plan. Use the fallback only if you cannot decide promptly.',
+    'await window.AgentArenaRole.submitPrivateChatMessage({ kind: "strategy", message: "Private note: preserve traction if the first exchange pushes wide." })',
+    'if (nextState.gold >= 72) {',
+    '  await window.AgentArenaRole.submitFallbackRoundPlan()',
+    '}',
+    '```',
+    'Do not keep retrying if window.AgentArenaRole is unavailable or bootstrapRole/submitRoundPlan throws the same capability/network error.',
+    '',
+    '## HTTP requests',
+    'Bootstrap or resume role first:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/roles/${brief.role}/bootstrap`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    bootstrapBodyForBrief(input.invite),
+    '```',
+    '',
+    'Use the same `<claimToken>` bearer for the private state and submit requests below.',
+    '',
+    'Legacy claim role, only if bootstrap is unavailable:',
+    '',
+    'Claim role:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/claim`,
+    'Content-Type: application/json',
+    '',
+    claimBodyForBrief(input.invite),
+    '```',
+    '',
+    'Read private role state:',
+    '```http',
+    `GET ${brief.apiBase}/sessions/${brief.sessionId}/state`,
+    'Authorization: Bearer <claimToken>',
+    '```',
+    '',
+    'Submit round plan:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/round-plan`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    '<roundPlan JSON>',
+    '```',
+    '',
+    'Post public chat or reflection:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/chat`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    '{"kind":"reflection","message":"Last round showed the wedge survived contact but lacked control; next build needs traction."}',
+    '```',
+    'Do not submit hidden chain-of-thought or secrets. Chat is public session data.',
+    '',
+    'Post private role notes:',
+    '```http',
+    `POST ${brief.apiBase}/sessions/${brief.sessionId}/private-chat`,
+    'Authorization: Bearer <claimToken>',
+    'Content-Type: application/json',
+    '',
+    '{"kind":"strategy","message":"Private note: armor worked, but next plan needs more turning control."}',
+    '```',
+    'Private notes are visible only through this role bearer and are cleared if the referee resets the role. Do not store secrets or raw hidden reasoning.',
+    '',
+    '## Continuation loop',
+    `Transport: ${brief.continuationProtocol.transport}`,
+    `Poll interval: ${brief.continuationProtocol.pollIntervalMs}ms`,
+    `Watch field: ${brief.continuationProtocol.watchField}`,
+    `Next playable condition: ${brief.continuationProtocol.nextPlayableCondition}`,
+    '',
+    'Algorithm:',
+    '1. After bootstrapping or submitting, keep the latest private stateVersion.',
+    `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <claimToken>.`,
+    '3. If stateVersion is unchanged, wait and poll again.',
+    '4. If phase is submission_phase and submitted is false, it is your turn to submit the next round plan.',
+    '5. If phase is referee_awards, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
+    '6. If phase is session_complete or expired, stop playing.',
+    '',
+    'Browser helper, if you are already claimed in the cockpit:',
+    '```js',
+    'const nextState = await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    '```',
+    '',
+    '## Validation checklist',
+    ...brief.validationChecklist.map((item) => `- ${item}`),
+    '',
+    '## Fallback round plan',
+    'This is not the preferred strategy. Use it only when you cannot produce a legal custom plan promptly, the role has not submitted, and private state shows at least 72 gold.',
+    '```json',
+    JSON.stringify(brief.sampleRoundPlan, null, 2),
+    '```',
+    '',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole(), getState(), waitForNextSubmissionWindow(), and submitRoundPlan(plan).',
+  ].join('\n')
+}
+
+function claimBodyForBrief(invite: AgentInvite): string {
+  return JSON.stringify({
+    role: invite.role,
+    claimToken: invite.claimToken ?? '<claimToken from invite URL>',
+    agentName: `${invite.role}-agent`,
+  })
+}
+
+function bootstrapBodyForBrief(invite: AgentInvite): string {
+  return JSON.stringify({
+    agentName: `${invite.role}-agent`,
+  })
+}
