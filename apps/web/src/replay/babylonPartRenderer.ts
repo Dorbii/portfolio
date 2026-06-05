@@ -566,6 +566,20 @@ function wheelVisualFor(partId: string): WheelVisual {
     }
   }
 
+  if (partId === 'Wheel_Medium') {
+    return {
+      diameterScale: 1.0,
+      widthScale: 0.9,
+      rimScale: 0.17,
+      hubScale: 0.34,
+      motorScale: 0.95,
+      treadCount: 9,
+      treadScale: 0.9,
+      tessellation: 22,
+      rollSpeed: 0.21,
+    }
+  }
+
   if (partId === 'Wheel_Large') {
     return {
       diameterScale: 1.08,
@@ -2213,15 +2227,28 @@ function createStylePart(
       { width: 0.68, height: 0.1, depth: 0.12 },
       scene,
     )
-    const glow = MeshBuilder.CreateTorus(
-      `${role}-${blockId}-neon-halo`,
-      { diameter: 0.48, thickness: 0.08, tessellation: 12 },
+    const topRail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-neon-top-rail`,
+      { width: 0.56, height: 0.07, depth: 0.1 },
       scene,
     )
-    glow.rotation.x = Math.PI / 2
-    glow.position.set(0, 0.33, 0)
+    const leftRail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-neon-left-rail`,
+      { width: 0.07, height: 0.24, depth: 0.1 },
+      scene,
+    )
+    const rightRail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-neon-right-rail`,
+      { width: 0.07, height: 0.24, depth: 0.1 },
+      scene,
+    )
+    topRail.position.set(0, 0.33, 0)
+    leftRail.position.set(-0.34, 0.22, 0)
+    rightRail.position.set(0.34, 0.22, 0)
     attachMesh(strip, parent, material)
-    attachMesh(glow, parent, materials.light)
+    attachMesh(topRail, parent, materials.light)
+    attachMesh(leftRail, parent, materials.light)
+    attachMesh(rightRail, parent, materials.light)
 
     return
   }

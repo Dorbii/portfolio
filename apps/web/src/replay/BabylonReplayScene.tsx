@@ -558,7 +558,7 @@ function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
   hazardPlates.forEach((hazard, index) => {
     if (hazard.kind === 'saw') {
       const ring = MeshBuilder.CreateTorus(
-        `hazard-${index}-halo`,
+        `hazard-${index}-warning-ring`,
         { diameter: 1.55, thickness: 0.13, tessellation: 26 },
         scene,
       )

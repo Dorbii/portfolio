@@ -126,7 +126,18 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { movement: true },
-    stats: { drive: 6, traction: 2 },
+    stats: { drive: 7, traction: 2 },
+  }),
+  part({
+    id: 'Wheel_Medium',
+    category: 'mobility',
+    displayName: 'Medium Wheel',
+    cost: 9,
+    mass: 4,
+    durability: 14,
+    size: [1.5, 1, 1],
+    controls: { movement: true },
+    stats: { drive: 6, traction: 4, stability: 1 },
   }),
   part({
     id: 'Wheel_Large',
@@ -137,7 +148,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 20,
     size: [2, 1, 1],
     controls: { movement: true },
-    stats: { drive: 6, traction: 6, stability: 2 },
+    stats: { drive: 5, traction: 6, stability: 2 },
   }),
   part({
     id: 'Wheel_Tank',
