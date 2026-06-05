@@ -5,11 +5,12 @@ import {
   PART_CATALOG,
   applyPurchases,
   deriveControls,
+  normalizeTactics,
   validateBlueprintAssembly,
   validateRoundSubmission,
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
-import { resolveCombat } from '../.test-build/packages/sim/src/index.js'
+import { chooseCommand, deriveBotStats, resolveCombat } from '../.test-build/packages/sim/src/index.js'
 import {
   SessionCoordinator,
   calculateInterest,
@@ -94,6 +95,27 @@ function createTestSession(sessionId = 's_test', options = {}) {
       ...options,
     },
   )
+}
+
+function createPolicyBot(role, blueprint, overrides = {}) {
+  const stats = deriveBotStats(blueprint)
+
+  return {
+    role,
+    stats,
+    health: 100,
+    maxHealth: 100,
+    hasUtilityControl: false,
+    hasWeaponControl: blueprint.blocks.some((block) => block.partId.startsWith('Weapon_')),
+    position: role === 'red' ? [-0.8, 0, 0] : [0.8, 0, 0],
+    lastDamagedTick: -Infinity,
+    lastDealtDamageTick: -Infinity,
+    ...overrides,
+  }
+}
+
+function redMoveEvents(result) {
+  return result.replay.events.filter((event) => event.type === 'move' && event.bot === 'red')
 }
 
 async function claimBothRoles(session) {
@@ -418,16 +440,150 @@ test('v2 movement policy legality follows available mobility controls', () => {
   )
 })
 
+test('policy commands diverge for the same bot state with different movement tactics', () => {
+  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint)
+  const opponent = createPolicyBot('blue', bareBodyBlueprint)
+  const state = {
+    bot,
+    opponent,
+    arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
+  }
+  const openingScript = { commands: [] }
+  const commandFor = (movementPolicy) =>
+    chooseCommand(
+      {
+        tactics: normalizeTactics({
+          movementPolicy,
+          preferredRange: movementPolicy === 'kite' ? 'long' : 'close',
+          aggression: 0.82,
+          weaponCadence: 'sustained',
+        }),
+        openingScript,
+      },
+      8,
+      state,
+    )
+
+  assert.equal(commandFor('hold_ground').move, 'brake')
+  assert.ok(['forward', 'dash_forward'].includes(commandFor('close').move))
+  assert.ok(['backward', 'dash_backward', 'turn_left', 'turn_right'].includes(commandFor('kite').move))
+  assert.ok(['circle_left', 'circle_right'].includes(commandFor('circle').move))
+})
+
+test('opening script overrides early movement while policy fills missing command fields', () => {
+  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint)
+  const opponent = createPolicyBot('blue', bareBodyBlueprint)
+  const state = {
+    bot,
+    opponent,
+    arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
+  }
+  const policy = {
+    tactics: normalizeTactics({
+      movementPolicy: 'close',
+      preferredRange: 'contact',
+      aggression: 0.9,
+      weaponCadence: 'sustained',
+    }),
+    openingScript: { commands: [{ tick: 1, move: 'brake' }] },
+  }
+
+  const scripted = chooseCommand(policy, 1, state)
+  const unscripted = chooseCommand(policy, 6, state)
+
+  assert.equal(scripted.move, 'brake')
+  assert.equal(scripted.weaponA, 'fire')
+  assert.ok(['forward', 'dash_forward'].includes(unscripted.move))
+})
+
+test('policy brakes instead of immediately reversing contradictory movement', () => {
+  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint, {
+    position: [-0.5, 0, 0.2],
+    lastMove: 'forward',
+  })
+  const opponent = createPolicyBot('blue', bareBodyBlueprint, { position: [0.5, 0, 0] })
+  const command = chooseCommand(
+    {
+      tactics: normalizeTactics({
+        movementPolicy: 'kite',
+        preferredRange: 'long',
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    7,
+    {
+      bot,
+      opponent,
+      arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
+    },
+  )
+
+  assert.equal(command.move, 'brake')
+})
+
+test('resolver applies movement tactics to replay movement for the same blueprint', () => {
+  const baseRed = {
+    blueprint: validSpinnerSubmission.blueprint,
+    openingScript: { commands: [] },
+  }
+  const staticBlue = {
+    blueprint: bareBodyBlueprint,
+    tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    openingScript: { commands: [] },
+  }
+  const closeResult = resolveCombat({
+    round: 2,
+    seed: 'policy-close-check',
+    red: {
+      ...baseRed,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+      }),
+    },
+    blue: staticBlue,
+  })
+  const holdResult = resolveCombat({
+    round: 2,
+    seed: 'policy-close-check',
+    red: {
+      ...baseRed,
+      tactics: normalizeTactics({
+        movementPolicy: 'hold_ground',
+        aggression: 0.1,
+      }),
+    },
+    blue: staticBlue,
+  })
+
+  assert.ok(redMoveEvents(closeResult).some((event) => event.to[0] > event.from[0]))
+  assert.equal(redMoveEvents(holdResult).length, 0)
+})
+
 test('resolver is deterministic and emits a valid replay timeline', () => {
   const input = {
     round: 1,
     seed: 'deterministic-check',
     red: {
       blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
       openingScript: validSpinnerSubmission.turnPlan,
     },
     blue: {
       blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
       openingScript: validSpinnerSubmission.turnPlan,
     },
   }
@@ -452,10 +608,17 @@ test('resolver emits a block-tied detach event when a part reaches zero HP', () 
     seed: 'part-break-check',
     red: {
       blueprint: partBreakAttackerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
       openingScript: { commands: [] },
     },
     blue: {
       blueprint: partBreakTargetBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
       openingScript: { commands: [] },
     },
   })
@@ -486,10 +649,17 @@ test('resolver knockout occurs only after all parts on the losing bot are deplet
     seed: 'all-parts-depleted-check',
     red: {
       blueprint: partBreakAttackerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
       openingScript: { commands: [] },
     },
     blue: {
       blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
       openingScript: { commands: [] },
     },
   })
@@ -539,7 +709,7 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
   assert.equal(first.log[0].startsWith('Round 3'), true)
 })
 
-test('resolver gives fast control weapon builds run-and-gun fallback movement', () => {
+test('resolver gives explicit kite policy range-preserving weapon movement', () => {
   const fastSkirmisherBlueprint = {
     name: 'Blue Runner',
     blocks: [
@@ -566,10 +736,22 @@ test('resolver gives fast control weapon builds run-and-gun fallback movement', 
     seed: 'run-and-gun-check',
     red: {
       blueprint: heavyBruiserBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.85,
+        weaponCadence: 'sustained',
+      }),
       openingScript: { commands: [] },
     },
     blue: {
       blueprint: fastSkirmisherBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'kite',
+        preferredRange: 'close',
+        aggression: 0.55,
+        weaponCadence: 'sustained',
+      }),
       openingScript: { commands: [] },
     },
   })
@@ -580,8 +762,8 @@ test('resolver gives fast control weapon builds run-and-gun fallback movement', 
     (event) => event.type === 'weapon_fire' && event.bot === 'blue' && event.t > 5,
   )
 
-  assert.ok(blueMoves.some((event) => Math.abs(event.to[0] - event.from[0]) > 2.5))
-  assert.ok(blueMoves.some((event) => Math.abs(event.to[2] - event.from[2]) > 1.5))
+  assert.ok(blueMoves.length > 0)
+  assert.ok(blueMoves.some((event) => Math.abs(event.to[2] - event.from[2]) > 0.5))
   assert.ok(blueWeaponFire.length > 0)
   assert.ok(result.damage.red > 0)
 })

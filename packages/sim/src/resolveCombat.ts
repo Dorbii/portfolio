@@ -6,6 +6,7 @@ import {
 import type {
   ArenaConfig,
   BotBlueprint,
+  MovementCommand,
   NormalizedBotTactics,
   OpeningScript,
   PartCategory,
@@ -13,8 +14,9 @@ import type {
   TurnCommand,
   Vector3,
 } from '../../schemas/src/index.js'
-import { getPart } from '../../catalog/src/index.js'
+import { DEFAULT_BOT_TACTICS, getPart } from '../../catalog/src/index.js'
 import { deriveBotStats, type BotStats } from './deriveStats.js'
+import { chooseCommand } from './policy.js'
 import { createSeededRng } from './seededRng.js'
 
 export type CombatantInput = {
@@ -54,6 +56,7 @@ type BotRuntime = {
   position: Vector3
   lastDamagedTick: number
   lastDealtDamageTick: number
+  lastMove?: MovementCommand
 }
 
 type RuntimePart = {
@@ -97,222 +100,6 @@ function distance(left: Vector3, right: Vector3): number {
 
 function weaponReach(bot: BotRuntime): number {
   return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28
-}
-
-function isRunAndGunBot(bot: BotRuntime, opponent: BotRuntime): boolean {
-  return (
-    bot.hasWeaponControl &&
-    bot.stats.mobility >= 10 &&
-    bot.stats.control >= 4 &&
-    bot.stats.mobility >= opponent.stats.mobility + 2
-  )
-}
-
-function commandAt(
-  plan: OpeningScript,
-  tick: number,
-  bot: BotRuntime,
-  opponent: BotRuntime,
-  arena: ArenaConfig,
-): TurnCommand {
-  const planned = plan.commands.find((command) => command.tick === tick)
-
-  if (planned) {
-    return planned
-  }
-
-  return fallbackCommand(tick, bot, opponent, arena)
-}
-
-function fallbackCommand(
-  tick: number,
-  bot: BotRuntime,
-  opponent: BotRuntime,
-  arena: ArenaConfig,
-): TurnCommand {
-  const gap = distance(bot.position, opponent.position)
-  const reach = weaponReach(bot)
-  const recentlyDamaged = tick - bot.lastDamagedTick <= 3
-  const recentlyScored = tick - bot.lastDealtDamageTick <= 4
-  const healthRatio = bot.health / bot.maxHealth
-  const runAndGun = isRunAndGunBot(bot, opponent)
-  const pressure = pressureScore(bot, opponent)
-  const wantsRange =
-    runAndGun ||
-    healthRatio < 0.28 ||
-    (recentlyDamaged && !recentlyScored && pressure < 1.05)
-  const idealRange = runAndGun
-    ? Math.max(2.7, reach * 0.95)
-    : wantsRange
-      ? Math.max(2.2, reach * 0.78)
-      : Math.max(CONTACT_DISTANCE * 0.82, reach * 0.5)
-  const inCenterHazard = centerHazardActive(arena) && isNearCenterHazard(bot.position, 1.55)
-  const command: TurnCommand = {
-    tick,
-    move: chooseFallbackMove({
-      tick,
-      bot,
-      opponent,
-      arena,
-      gap,
-      idealRange,
-      inCenterHazard,
-      pressure,
-      recentlyDamaged,
-      recentlyScored,
-      runAndGun,
-      wantsRange,
-    }),
-  }
-
-  if (bot.hasWeaponControl) {
-    command.weaponA = gap <= reach * (runAndGun ? 1.22 : 1.14)
-      ? 'fire'
-      : 'hold'
-  }
-
-  if (
-    bot.hasUtilityControl &&
-    (inCenterHazard || gap < reach * 1.2 || (runAndGun && tick % 3 === 0))
-  ) {
-    command.utility = 'activate'
-  }
-
-  return command
-}
-
-function chooseFallbackMove({
-  tick,
-  bot,
-  opponent,
-  arena,
-  gap,
-  idealRange,
-  inCenterHazard,
-  pressure,
-  recentlyDamaged,
-  recentlyScored,
-  runAndGun,
-  wantsRange,
-}: {
-  tick: number
-  bot: BotRuntime
-  opponent: BotRuntime
-  arena: ArenaConfig
-  gap: number
-  idealRange: number
-  inCenterHazard: boolean
-  pressure: number
-  recentlyDamaged: boolean
-  recentlyScored: boolean
-  runAndGun: boolean
-  wantsRange: boolean
-}): TurnCommand['move'] {
-  if (bot.stats.mobility <= 0) {
-    return 'brake'
-  }
-
-  if (inCenterHazard) {
-    return moveAwayFromPoint(bot, [0, 0, 0], tick)
-  }
-
-  if (runAndGun) {
-    return runAndGunMove({ tick, bot, opponent, gap, idealRange })
-  }
-
-  if (recentlyDamaged && !recentlyScored && gap < idealRange * 1.2) {
-    return evadeMove(bot, opponent, arena, tick)
-  }
-
-  if (wantsRange && gap < idealRange) {
-    return evadeMove(bot, opponent, arena, tick)
-  }
-
-  if (!wantsRange && centerHazardActive(arena) && gap < 2.45 && !isNearCenterHazard(opponent.position, 1.25)) {
-    const shoveTarget: Vector3 = [0, 0, 0]
-
-    return closeMove(bot, shoveTarget, tick, true)
-  }
-
-  if (gap > idealRange * 1.55) {
-    return closeMove(bot, opponent.position, tick, pressure >= 0.92)
-  }
-
-  if (gap > idealRange) {
-    return tick % 3 === 0
-      ? flankingMove(bot, opponent, tick)
-      : closeMove(bot, opponent.position, tick, pressure >= 1)
-  }
-
-  if (gap <= CONTACT_DISTANCE * 1.15 && pressure >= 0.95) {
-    return tick % 4 === 0 ? 'dash_forward' : flankingMove(bot, opponent, tick)
-  }
-
-  if (bot.hasWeaponControl && gap <= weaponReach(bot) * 1.05) {
-    return tick % 2 === 0 ? flankingMove(bot, opponent, tick) : 'forward'
-  }
-
-  if (wantsRange && gap <= idealRange * 1.35) {
-    return lateralMove(bot, opponent, tick)
-  }
-
-  return closeMove(bot, opponent.position, tick, pressure >= 1.08)
-}
-
-function runAndGunMove({
-  tick,
-  bot,
-  opponent,
-  gap,
-  idealRange,
-}: {
-  tick: number
-  bot: BotRuntime
-  opponent: BotRuntime
-  gap: number
-  idealRange: number
-}): TurnCommand['move'] {
-  if (gap < idealRange * 0.72) {
-    return 'dash_backward'
-  }
-
-  if (gap > idealRange * 1.45) {
-    return 'dash_forward'
-  }
-
-  if (gap < idealRange * 0.95) {
-    return tick % 2 === 0 ? 'strafe_right' : 'strafe_left'
-  }
-
-  const side = bot.position[2] - opponent.position[2]
-
-  if (Math.abs(side) < 0.8) {
-    return tick % 2 === 0 ? 'circle_right' : 'circle_left'
-  }
-
-  return side > 0 ? 'circle_left' : 'circle_right'
-}
-
-function centerHazardActive(arena: ArenaConfig): boolean {
-  return arena.activeHazards.some((hazard) => hazard.toLowerCase().includes('saw'))
-}
-
-function pressureScore(bot: BotRuntime, opponent: BotRuntime): number {
-  const offense =
-    bot.stats.weaponThreat * 1.15 +
-    bot.stats.stability * 0.36 +
-    bot.stats.mass * 0.18 +
-    bot.stats.mobility * 0.18
-  const opponentDefense =
-    opponent.stats.armor * 0.55 +
-    opponent.stats.stability * 0.24 +
-    opponent.stats.mobility * 0.12
-
-  return offense / Math.max(1, opponentDefense)
-}
-
-function isNearCenterHazard(position: Vector3, radius: number): boolean {
-  return Math.abs(position[0]) < radius && Math.abs(position[2]) < radius
 }
 
 function hasControlledPart(blueprint: BotBlueprint, control: 'utility' | 'weapon'): boolean {
@@ -450,100 +237,6 @@ function emitPartDetachEvents(
       position: hit.position,
     })
   })
-}
-
-function evadeMove(
-  bot: BotRuntime,
-  opponent: BotRuntime,
-  arena: ArenaConfig,
-  tick: number,
-): TurnCommand['move'] {
-  if (centerHazardActive(arena) && !isNearCenterHazard(opponent.position, 1.35)) {
-    const lurePoint: Vector3 = [0, 0, tick % 2 === 0 ? 1 : -1]
-
-    return moveTowardPoint(bot, lurePoint)
-  }
-
-  return moveAwayFromPoint(bot, opponent.position, tick)
-}
-
-function moveTowardPoint(bot: BotRuntime, point: Vector3): TurnCommand['move'] {
-  const zDelta = point[2] - bot.position[2]
-
-  if (Math.abs(zDelta) > 0.7) {
-    return zDelta < 0 ? 'turn_left' : 'turn_right'
-  }
-
-  const roleDirection = bot.role === 'red' ? 1 : -1
-  const forwardDelta = (point[0] - bot.position[0]) * roleDirection
-
-  return forwardDelta >= -0.35 ? 'forward' : 'backward'
-}
-
-function closeMove(
-  bot: BotRuntime,
-  point: Vector3,
-  tick: number,
-  urgent: boolean,
-): TurnCommand['move'] {
-  const move = moveTowardPoint(bot, point)
-
-  if (move === 'forward' && urgent && bot.stats.mobility >= 5) {
-    return 'dash_forward'
-  }
-
-  if (move === 'forward' && tick % 5 === 0 && bot.stats.mobility >= 8) {
-    return 'dash_forward'
-  }
-
-  return move
-}
-
-function moveAwayFromPoint(
-  bot: BotRuntime,
-  point: Vector3,
-  tick: number,
-): TurnCommand['move'] {
-  const awayPoint: Vector3 = [
-    bot.position[0] + (bot.position[0] - point[0]),
-    0,
-    bot.position[2] + (bot.position[2] - point[2] || (tick % 2 === 0 ? 1 : -1)),
-  ]
-
-  return moveTowardPoint(bot, awayPoint)
-}
-
-function lateralMove(
-  bot: BotRuntime,
-  opponent: BotRuntime,
-  tick: number,
-): TurnCommand['move'] {
-  const preferred = bot.role === 'red' ? -1 : 1
-  const currentSide = bot.position[2] - opponent.position[2]
-
-  if (Math.abs(currentSide) < 1.4) {
-    return (tick + (preferred > 0 ? 0 : 1)) % 2 === 0 ? 'turn_right' : 'turn_left'
-  }
-
-  return currentSide > 0 ? 'turn_left' : 'turn_right'
-}
-
-function flankingMove(
-  bot: BotRuntime,
-  opponent: BotRuntime,
-  tick: number,
-): TurnCommand['move'] {
-  const side = bot.position[2] - opponent.position[2]
-
-  if (Math.abs(side) < 0.85) {
-    return tick % 2 === 0 ? 'circle_right' : 'circle_left'
-  }
-
-  if (Math.abs(side) > 2.2 && tick % 3 === 0) {
-    return moveTowardPoint(bot, opponent.position)
-  }
-
-  return side > 0 ? 'circle_left' : 'circle_right'
 }
 
 function movementImpactMultiplier(command: TurnCommand): number {
@@ -811,11 +504,28 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
     elapsedTicks = tick
-    const redCommand = commandAt(input.red.openingScript, tick, red, blue, arena)
-    const blueCommand = commandAt(input.blue.openingScript, tick, blue, red, arena)
+    const redCommand = chooseCommand(
+      {
+        tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
+        openingScript: input.red.openingScript,
+      },
+      tick,
+      { bot: red, opponent: blue, arena },
+    )
+    const blueCommand = chooseCommand(
+      {
+        tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS,
+        openingScript: input.blue.openingScript,
+      },
+      tick,
+      { bot: blue, opponent: red, arena },
+    )
     const redFrom = red.position
     const blueFrom = blue.position
     const healthBeforeTick = red.health + blue.health
+
+    red.lastMove = redCommand.move
+    blue.lastMove = blueCommand.move
 
     red.position = moveBot(red, redCommand, arena)
     blue.position = moveBot(blue, blueCommand, arena)
