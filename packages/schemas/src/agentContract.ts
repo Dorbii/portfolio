@@ -1,9 +1,15 @@
 import {
+  HAZARD_PREFERENCES,
   MOVEMENT_COMMANDS,
+  MOVEMENT_POLICIES,
+  PREFERRED_RANGES,
   SESSION_PHASES,
   TEAM_ROLES,
+  TACTIC_STYLES,
+  TARGET_PRIORITIES,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
+  WEAPON_CADENCES,
   type PartDefinition,
 } from './types.js'
 
@@ -112,6 +118,29 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       maxRefereeAwardsPerTeamPerRound: 1,
       sessionTtlSeconds: 21600,
       turnTicks: 5,
+      submissionSchemas: {
+        preferred: {
+          schemaVersion: 2,
+          required: ['action', 'schemaVersion', 'purchases', 'blueprint', 'tactics'],
+          optional: ['openingScript', 'rationale', 'chat'],
+          openingScript: 'optional 0-5 command ticks used only as an early fight script',
+          tactics: {
+            style: TACTIC_STYLES,
+            targetPriority: TARGET_PRIORITIES,
+            preferredRange: PREFERRED_RANGES,
+            movementPolicy: MOVEMENT_POLICIES,
+            aggression: 'number from 0 through 1',
+            retreatAtHealthPct: 'number from 0 through 1',
+            weaponCadence: WEAPON_CADENCES,
+            hazardPreference: HAZARD_PREFERENCES,
+          },
+        },
+        legacyV1: {
+          schemaVersion: 'omit or 1',
+          required: ['action', 'purchases', 'blueprint', 'turnPlan'],
+          turnPlan: 'exactly 5 command ticks; accepted for compatibility',
+        },
+      },
       maxBlocksPerBot: 48,
       maxCoordinate: 8,
       movementCommands: MOVEMENT_COMMANDS,
@@ -150,7 +179,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       'Use at least one body part and enough mobility/control parts for the commands you plan to issue.',
       'Blueprint block ids must be unique, grid positions must be unoccupied, and the assembly must be connected.',
       'Use only commands granted by generated controls; weaponA/weaponB require weapon parts and utility requires utility parts.',
-      'Turn commands use ticks 1 through 5.',
+      'Preferred v2 submissions use schemaVersion=2, tactics, and optional openingScript with 0-5 ticks.',
+      'Legacy v1 submissions omit schemaVersion or use schemaVersion=1 and must include exactly 5 turnPlan commands.',
+      'movementPolicy=hold_ground is legal without mobility; close, kite, circle, and bait_hazard require movement controls.',
       'Strategically weak plans may pass; malformed or impossible plans are rejected.',
     ],
     actions: [
@@ -198,6 +229,18 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         path: '/sessions/:sessionId/round-plan',
         phase: 'submission_phase',
         auth: 'role bearer token or invite player key after bootstrap/claim',
+        body: {
+          action: 'submit_round_plan',
+          schemaVersion: '2 preferred; omit or 1 for legacy v1',
+          purchases: 'array of { partId, quantity }',
+          blueprint: 'bot blueprint built from owned or newly purchased parts',
+          tactics:
+            'v2 tactics object with movementPolicy, preferredRange, aggression, targetPriority, weaponCadence, and related fields',
+          openingScript:
+            'v2 optional { commands: [] } with 0-5 ticks; legacy v1 uses turnPlan with exactly 5 ticks',
+          rationale: 'optional concise public design rationale',
+          chat: 'optional public chat messages',
+        },
         returns:
           'private role state and redacted public state; resolves combat once both valid plans are submitted',
       },
@@ -305,6 +348,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
       roundPlanSubmission: {
         action: 'submit_round_plan',
+        schemaVersion: 2,
         purchases: [
           { partId: 'Body_Square_Medium', quantity: 1 },
           { partId: 'Wheel_Large', quantity: 2 },
@@ -312,6 +356,71 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         ],
         blueprint: {
           name: 'Baseline Spinner',
+          blocks: [
+            {
+              id: 'core',
+              partId: 'Body_Square_Medium',
+              position: [0, 0, 0],
+              rotation: [0, 0, 0],
+            },
+            {
+              id: 'leftWheel',
+              partId: 'Wheel_Large',
+              position: [-1, 0, 0],
+              rotation: [0, 0, 90],
+            },
+            {
+              id: 'rightWheel',
+              partId: 'Wheel_Large',
+              position: [1, 0, 0],
+              rotation: [0, 0, 90],
+            },
+            {
+              id: 'spinner',
+              partId: 'Weapon_Spinner_Small',
+              position: [0, 0, 1],
+              rotation: [0, 0, 0],
+            },
+          ],
+        },
+        tactics: {
+          style: 'aggressive',
+          targetPriority: 'closest',
+          preferredRange: 'close',
+          movementPolicy: 'close',
+          aggression: 0.8,
+          retreatAtHealthPct: 0.15,
+          weaponCadence: 'opportunistic',
+          hazardPreference: 'avoid',
+        },
+        openingScript: {
+          commands: [
+            { tick: 1, move: 'dash_forward', weaponA: 'hold' },
+            { tick: 2, move: 'circle_left', weaponA: 'fire' },
+            { tick: 3, move: 'strafe_right', weaponA: 'hold' },
+            { tick: 4, move: 'dash_backward', weaponA: 'fire' },
+            { tick: 5, move: 'circle_right', weaponA: 'hold' },
+          ],
+        },
+        chat: [
+          {
+            kind: 'strategy',
+            message:
+              'Opening with a compact spinner; if it loses trades, next round should add armor or control.',
+          },
+        ],
+        rationale:
+          'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
+      },
+      legacyRoundPlanSubmission: {
+        action: 'submit_round_plan',
+        purchases: [
+          { partId: 'Body_Square_Medium', quantity: 1 },
+          { partId: 'Wheel_Large', quantity: 2 },
+          { partId: 'Weapon_Spinner_Small', quantity: 1 },
+        ],
+        blueprint: {
+          name: 'Legacy Baseline Spinner',
           blocks: [
             {
               id: 'core',
@@ -348,15 +457,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
             { tick: 5, move: 'circle_right', weaponA: 'hold' },
           ],
         },
-        chat: [
-          {
-            kind: 'strategy',
-            message:
-              'Opening with a compact spinner; if it loses trades, next round should add armor or control.',
-          },
-        ],
-        rationale:
-          'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
+        rationale: 'Legacy v1 shape remains valid for existing agents.',
       },
     },
   }

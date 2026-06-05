@@ -185,9 +185,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.continuationProtocol.watchField, 'stateVersion')
   assert.ok(json.continuationProtocol.browserHelpers.includes('waitForNextSubmissionWindow()'))
   assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
+  assert.equal(json.rules.submissionSchemas.preferred.schemaVersion, 2)
+  assert.ok(json.rules.submissionSchemas.preferred.tactics.movementPolicy.includes('hold_ground'))
+  assert.ok(json.rules.submissionSchemas.legacyV1.turnPlan.includes('exactly 5'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
+  assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
+  assert.equal(json.examples.roundPlanSubmission.openingScript.commands.length, 5)
+  assert.equal(json.examples.legacyRoundPlanSubmission.turnPlan.commands.length, 5)
   assert.ok(
     json.examples.roundPlanSubmission.purchases.some(
       (purchase) => purchase.partId === 'Body_Square_Medium',
@@ -408,6 +414,65 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(blueBootstrap.response.status, 201)
   assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
   assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
+})
+
+test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () => {
+  const env = createEnv()
+  const sessionId = 's_v2_route'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const blueInvite = inviteFor(created.json.invites, 'blue')
+
+  await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {},
+  })
+  await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {},
+  })
+
+  const v2Submission = {
+    action: 'submit_round_plan',
+    schemaVersion: 2,
+    purchases: validSpinnerSubmission.purchases,
+    blueprint: validSpinnerSubmission.blueprint,
+    tactics: {
+      movementPolicy: 'close',
+      preferredRange: 'close',
+      aggression: 0.75,
+      weaponCadence: 'opportunistic',
+    },
+    openingScript: {
+      commands: [
+        { tick: 1, move: 'forward', weaponA: 'hold' },
+        { tick: 2, move: 'forward', weaponA: 'fire' },
+      ],
+    },
+  }
+
+  const redSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: v2Submission,
+  })
+  const blueSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: v2Submission,
+  })
+
+  assert.equal(redSubmission.response.status, 200)
+  assert.equal(redSubmission.json.state.ownSubmission.schemaVersion, 2)
+  assert.equal('turnPlan' in redSubmission.json.state.ownSubmission, false)
+  assert.equal(blueSubmission.response.status, 200)
+  assert.equal(blueSubmission.json.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.json.publicState.replayAvailable, true)
 })
 
 test('POST /sessions/:id/chat stores public role-authored chat', async () => {

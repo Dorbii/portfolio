@@ -154,6 +154,70 @@ export type TurnPlan = {
   commands: TurnCommand[]
 }
 
+export type OpeningScript = TurnPlan
+
+export const TACTIC_STYLES = [
+  'balanced',
+  'aggressive',
+  'defensive',
+  'control',
+  'evasive',
+] as const
+
+export type TacticStyle = (typeof TACTIC_STYLES)[number]
+
+export const TARGET_PRIORITIES = [
+  'closest',
+  'weakest',
+  'strongest',
+  'weapons',
+  'mobility',
+  'utility',
+  'body',
+] as const
+
+export type TargetPriority = (typeof TARGET_PRIORITIES)[number]
+
+export const PREFERRED_RANGES = ['contact', 'close', 'mid', 'long'] as const
+
+export type PreferredRange = (typeof PREFERRED_RANGES)[number]
+
+export const MOVEMENT_POLICIES = [
+  'hold_ground',
+  'close',
+  'kite',
+  'circle',
+  'bait_hazard',
+] as const
+
+export type MovementPolicy = (typeof MOVEMENT_POLICIES)[number]
+
+export const WEAPON_CADENCES = [
+  'opportunistic',
+  'sustained',
+  'burst',
+  'hold_fire',
+] as const
+
+export type WeaponCadence = (typeof WEAPON_CADENCES)[number]
+
+export const HAZARD_PREFERENCES = ['avoid', 'neutral', 'bait', 'force'] as const
+
+export type HazardPreference = (typeof HAZARD_PREFERENCES)[number]
+
+export type BotTactics = {
+  style?: TacticStyle
+  targetPriority?: TargetPriority
+  preferredRange?: PreferredRange
+  movementPolicy?: MovementPolicy
+  aggression?: number
+  retreatAtHealthPct?: number
+  weaponCadence?: WeaponCadence
+  hazardPreference?: HazardPreference
+}
+
+export type NormalizedBotTactics = Required<BotTactics>
+
 export const AGENT_CHAT_MESSAGE_KINDS = [
   'taunt',
   'observation',
@@ -168,11 +232,36 @@ export type AgentChatMessageRequest = {
   kind?: AgentChatMessageKind
 }
 
-export type RoundPlanSubmission = {
+export type RoundPlanSubmissionV1 = {
   action: 'submit_round_plan'
+  schemaVersion?: 1
   purchases: Purchase[]
   blueprint: BotBlueprint
   turnPlan: TurnPlan
+  rationale?: string
+  chat?: AgentChatMessageRequest[]
+}
+
+export type RoundPlanSubmissionV2 = {
+  action: 'submit_round_plan'
+  schemaVersion: 2
+  purchases: Purchase[]
+  blueprint: BotBlueprint
+  tactics: BotTactics
+  openingScript?: OpeningScript
+  rationale?: string
+  chat?: AgentChatMessageRequest[]
+}
+
+export type RoundPlanSubmission = RoundPlanSubmissionV1 | RoundPlanSubmissionV2
+
+export type NormalizedRoundPlanSubmission = {
+  action: 'submit_round_plan'
+  schemaVersion: 2
+  purchases: Purchase[]
+  blueprint: BotBlueprint
+  tactics: NormalizedBotTactics
+  openingScript: OpeningScript
   rationale?: string
   chat?: AgentChatMessageRequest[]
 }

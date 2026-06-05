@@ -6,10 +6,11 @@ import {
 import type {
   ArenaConfig,
   BotBlueprint,
+  NormalizedBotTactics,
+  OpeningScript,
   PartCategory,
   TeamRole,
   TurnCommand,
-  TurnPlan,
   Vector3,
 } from '../../schemas/src/index.js'
 import { getPart } from '../../catalog/src/index.js'
@@ -19,7 +20,8 @@ import { createSeededRng } from './seededRng.js'
 export type CombatantInput = {
   role: TeamRole
   blueprint: BotBlueprint
-  turnPlan: TurnPlan
+  tactics: NormalizedBotTactics
+  openingScript: OpeningScript
 }
 
 export type CombatResult = {
@@ -107,7 +109,7 @@ function isRunAndGunBot(bot: BotRuntime, opponent: BotRuntime): boolean {
 }
 
 function commandAt(
-  plan: TurnPlan,
+  plan: OpeningScript,
   tick: number,
   bot: BotRuntime,
   opponent: BotRuntime,
@@ -809,8 +811,8 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
     elapsedTicks = tick
-    const redCommand = commandAt(input.red.turnPlan, tick, red, blue, arena)
-    const blueCommand = commandAt(input.blue.turnPlan, tick, blue, red, arena)
+    const redCommand = commandAt(input.red.openingScript, tick, red, blue, arena)
+    const blueCommand = commandAt(input.blue.openingScript, tick, blue, red, arena)
     const redFrom = red.position
     const blueFrom = blue.position
     const healthBeforeTick = red.health + blue.health

@@ -1,6 +1,8 @@
 import type {
   GeneratedControls,
   InventoryItem,
+  MovementPolicy,
+  NormalizedRoundPlanSubmission,
   RoundPlanSubmission,
   ValidationIssue,
 } from '../../schemas/src/index.js'
@@ -11,6 +13,7 @@ import {
 import { validateBlueprintAssembly } from './blueprint.js'
 import { deriveControls } from './controls.js'
 import { applyPurchases } from './inventory.js'
+import { normalizeRoundSubmission } from './normalizeSubmission.js'
 
 export type RoundSubmissionValidation =
   | {
@@ -18,6 +21,7 @@ export type RoundSubmissionValidation =
       controls: GeneratedControls
       goldRemaining: number
       inventory: InventoryItem[]
+      normalizedSubmission: NormalizedRoundPlanSubmission
     }
   | {
       ok: false
@@ -55,13 +59,24 @@ export function validateRoundSubmission(input: {
   }
 
   const controls = deriveControls(input.submission.blueprint)
+  const normalizedSubmission = normalizeRoundSubmission(input.submission)
   const turnPlanResult = validateTurnPlanAgainstControls(
-    input.submission.turnPlan,
+    normalizedSubmission.openingScript,
     controls,
+    getOpeningScriptPath(input.submission),
   )
 
   if (!turnPlanResult.ok) {
     return { ok: false, issues: turnPlanResult.issues }
+  }
+
+  const movementPolicyResult = validateMovementPolicyAgainstControls(
+    normalizedSubmission.tactics.movementPolicy,
+    controls,
+  )
+
+  if (!movementPolicyResult.ok) {
+    return { ok: false, issues: movementPolicyResult.issues }
   }
 
   return {
@@ -69,5 +84,33 @@ export function validateRoundSubmission(input: {
     controls,
     goldRemaining: purchaseResult.goldRemaining,
     inventory: purchaseResult.inventory,
+    normalizedSubmission,
   }
+}
+
+function getOpeningScriptPath(submission: RoundPlanSubmission): string {
+  return submission.schemaVersion === 2 ? 'submission.openingScript' : 'turnPlan'
+}
+
+function validateMovementPolicyAgainstControls(
+  movementPolicy: MovementPolicy,
+  controls: GeneratedControls,
+): { ok: true } | { ok: false; issues: ValidationIssue[] } {
+  const requiresMovement = movementPolicy !== 'hold_ground'
+  const hasMovementModule = controls.movement.some((command) => command !== 'brake')
+
+  if (requiresMovement && !hasMovementModule) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: 'MOVEMENT_POLICY_NOT_AVAILABLE',
+          path: 'submission.tactics.movementPolicy',
+          message: `${movementPolicy} requires movement controls.`,
+        },
+      ],
+    }
+  }
+
+  return { ok: true }
 }

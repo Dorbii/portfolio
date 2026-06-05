@@ -287,17 +287,148 @@ test('round submission rejects commands for absent modules', () => {
   assert.ok(result.issues.some((entry) => entry.code === 'WEAPON_A_NOT_AVAILABLE'))
 })
 
+test('legacy round submissions still require exactly five turn plan commands', () => {
+  const result = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      ...validSpinnerSubmission,
+      turnPlan: {
+        commands: [{ tick: 1, move: 'forward', weaponA: 'fire' }],
+      },
+    },
+  })
+
+  assert.equal(result.ok, false)
+  assert.ok(result.issues.some((entry) => entry.code === 'INVALID_TICK_COUNT'))
+})
+
+test('legacy round submissions normalize into v2 combat input', () => {
+  const result = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: validSpinnerSubmission,
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.normalizedSubmission.schemaVersion, 2)
+  assert.equal(result.normalizedSubmission.openingScript.commands.length, 5)
+  assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'hold_ground')
+})
+
+test('v2 tactics submissions accept a short opening script', () => {
+  const result = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      action: 'submit_round_plan',
+      schemaVersion: 2,
+      purchases: validSpinnerSubmission.purchases,
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: {
+        style: 'aggressive',
+        targetPriority: 'closest',
+        preferredRange: 'close',
+        movementPolicy: 'close',
+        aggression: 0.8,
+        retreatAtHealthPct: 0.15,
+        weaponCadence: 'sustained',
+        hazardPreference: 'avoid',
+      },
+      openingScript: {
+        commands: [
+          { tick: 1, move: 'forward', weaponA: 'hold' },
+          { tick: 2, move: 'forward', weaponA: 'fire' },
+        ],
+      },
+    },
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.normalizedSubmission.openingScript.commands.length, 2)
+  assert.equal(result.normalizedSubmission.tactics.weaponCadence, 'sustained')
+})
+
+test('v2 tactics errors use path-specific issue locations', () => {
+  const result = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      action: 'submit_round_plan',
+      schemaVersion: 2,
+      purchases: validSpinnerSubmission.purchases,
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: {
+        movementPolicy: 'teleport',
+        aggression: 1.4,
+      },
+      openingScript: { commands: [] },
+    },
+  })
+
+  assert.equal(result.ok, false)
+  assert.ok(
+    result.issues.some(
+      (entry) =>
+        entry.code === 'INVALID_MOVEMENT_POLICY' &&
+        entry.path === 'submission.tactics.movementPolicy',
+    ),
+  )
+  assert.ok(
+    result.issues.some(
+      (entry) =>
+        entry.code === 'INVALID_AGGRESSION' &&
+        entry.path === 'submission.tactics.aggression',
+    ),
+  )
+})
+
+test('v2 movement policy legality follows available mobility controls', () => {
+  const holdGround = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      action: 'submit_round_plan',
+      schemaVersion: 2,
+      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
+      blueprint: bareBodyBlueprint,
+      tactics: { movementPolicy: 'hold_ground' },
+    },
+  })
+  const closeWithoutMobility = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      action: 'submit_round_plan',
+      schemaVersion: 2,
+      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
+      blueprint: bareBodyBlueprint,
+      tactics: { movementPolicy: 'close' },
+    },
+  })
+
+  assert.equal(holdGround.ok, true)
+  assert.equal(closeWithoutMobility.ok, false)
+  assert.ok(
+    closeWithoutMobility.issues.some(
+      (entry) =>
+        entry.code === 'MOVEMENT_POLICY_NOT_AVAILABLE' &&
+        entry.path === 'submission.tactics.movementPolicy',
+    ),
+  )
+})
+
 test('resolver is deterministic and emits a valid replay timeline', () => {
   const input = {
     round: 1,
     seed: 'deterministic-check',
     red: {
       blueprint: validSpinnerSubmission.blueprint,
-      turnPlan: validSpinnerSubmission.turnPlan,
+      openingScript: validSpinnerSubmission.turnPlan,
     },
     blue: {
       blueprint: validSpinnerSubmission.blueprint,
-      turnPlan: validSpinnerSubmission.turnPlan,
+      openingScript: validSpinnerSubmission.turnPlan,
     },
   }
   const first = resolveCombat(input)
@@ -321,11 +452,11 @@ test('resolver emits a block-tied detach event when a part reaches zero HP', () 
     seed: 'part-break-check',
     red: {
       blueprint: partBreakAttackerBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
     blue: {
       blueprint: partBreakTargetBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
   })
   const detach = result.replay.events.find(
@@ -355,11 +486,11 @@ test('resolver knockout occurs only after all parts on the losing bot are deplet
     seed: 'all-parts-depleted-check',
     red: {
       blueprint: partBreakAttackerBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
     blue: {
       blueprint: bareBodyBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
   })
   const knockout = result.replay.events.find((event) => event.type === 'knockout')
@@ -376,11 +507,11 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
     seed: 'sparse-plan',
     red: {
       blueprint: bareBodyBlueprint,
-      turnPlan: sparseTurnPlan,
+      openingScript: sparseTurnPlan,
     },
     blue: {
       blueprint: bareBodyBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
   }
   const first = resolveCombat(input)
@@ -435,11 +566,11 @@ test('resolver gives fast control weapon builds run-and-gun fallback movement', 
     seed: 'run-and-gun-check',
     red: {
       blueprint: heavyBruiserBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
     blue: {
       blueprint: fastSkirmisherBlueprint,
-      turnPlan: { commands: [] },
+      openingScript: { commands: [] },
     },
   })
   const blueMoves = result.replay.events.filter(
@@ -704,6 +835,43 @@ test('session resolves after both valid plans while keeping public state redacte
   const duplicate = await session.submitRoundPlan(redToken, validSpinnerSubmission)
   assert.equal(duplicate.ok, false)
   assert.equal(duplicate.error.code, 'ALREADY_SUBMITTED')
+})
+
+test('session accepts v2 tactics without a legacy turnPlan', async () => {
+  const session = await createTestSession('s_v2_submission')
+  const { redToken, blueToken } = await claimBothRoles(session)
+  const v2Submission = {
+    action: 'submit_round_plan',
+    schemaVersion: 2,
+    purchases: validSpinnerSubmission.purchases,
+    blueprint: validSpinnerSubmission.blueprint,
+    tactics: {
+      movementPolicy: 'close',
+      preferredRange: 'close',
+      aggression: 0.75,
+      weaponCadence: 'opportunistic',
+    },
+    openingScript: {
+      commands: [
+        { tick: 1, move: 'forward', weaponA: 'hold' },
+        { tick: 2, move: 'forward', weaponA: 'fire' },
+      ],
+    },
+  }
+
+  const redSubmission = await session.submitRoundPlan(redToken, v2Submission)
+
+  assert.equal(redSubmission.ok, true)
+  assert.equal(redSubmission.value.state.ownSubmission.schemaVersion, 2)
+  assert.equal('turnPlan' in redSubmission.value.state.ownSubmission, false)
+  assert.equal(redSubmission.value.state.ownSubmission.openingScript.commands.length, 2)
+
+  const blueSubmission = await session.submitRoundPlan(blueToken, v2Submission)
+
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.value.publicState.replayAvailable, true)
+  assert.equal(validateReplayTimeline(session.getReplay().value), true)
 })
 
 test('referee can reset a claimed role and refresh claim capability before combat resolves', async () => {

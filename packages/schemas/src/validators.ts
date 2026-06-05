@@ -1,12 +1,19 @@
 import {
   AGENT_CHAT_MESSAGE_KINDS,
+  HAZARD_PREFERENCES,
   MAX_REFEREE_AWARDS_PER_ROUND,
   MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND,
   MOVEMENT_COMMANDS,
+  MOVEMENT_POLICIES,
+  PREFERRED_RANGES,
   TEAM_ROLES,
+  TACTIC_STYLES,
+  TARGET_PRIORITIES,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
+  WEAPON_CADENCES,
   type ArenaConfig,
+  type BotTactics,
   type RefereeAwardOption,
   type RefereeAwardSelection,
   type BotBlueprint,
@@ -34,6 +41,11 @@ const MIN_CREATE_SESSION_TTL_SECONDS = 60
 const MAX_CREATE_SESSION_TTL_SECONDS = 24 * 60 * 60
 const MIN_CREATE_SESSION_ROUNDS = 1
 const MAX_CREATE_SESSION_ROUNDS = 25
+
+type TurnPlanShapeOptions = {
+  exactCommandCount?: boolean
+  path?: string
+}
 
 function issue(code: string, path: string, message: string): ValidationIssue {
   return { code, path, message }
@@ -507,12 +519,32 @@ export function validateBlueprintShape(
 }
 
 export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationResult {
+  return validateTurnPlanShapeWithOptions(value, maxTicks)
+}
+
+export function validateOpeningScriptShape(
+  value: unknown,
+  path = 'submission.openingScript',
+): ValidationResult {
+  return validateTurnPlanShapeWithOptions(value, 5, {
+    exactCommandCount: false,
+    path,
+  })
+}
+
+function validateTurnPlanShapeWithOptions(
+  value: unknown,
+  maxTicks = 5,
+  options: TurnPlanShapeOptions = {},
+): ValidationResult {
   const issues: ValidationIssue[] = []
+  const path = options.path ?? 'turnPlan'
+  const exactCommandCount = options.exactCommandCount ?? true
 
   if (!isRecord(value)) {
     return {
       ok: false,
-      issues: [issue('INVALID_TURN_PLAN', 'turnPlan', 'Expected turn plan object.')],
+      issues: [issue('INVALID_TURN_PLAN', path, 'Expected turn plan object.')],
     }
   }
 
@@ -520,17 +552,25 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
     return {
       ok: false,
       issues: [
-        issue('INVALID_COMMANDS', 'turnPlan.commands', 'Expected commands array.'),
+        issue('INVALID_COMMANDS', `${path}.commands`, 'Expected commands array.'),
       ],
     }
   }
 
-  if (value.commands.length !== maxTicks) {
+  if (exactCommandCount && value.commands.length !== maxTicks) {
     issues.push(
       issue(
         'INVALID_TICK_COUNT',
-        'turnPlan.commands',
+        `${path}.commands`,
         `Turn plan must include exactly ${maxTicks} command ticks.`,
+      ),
+    )
+  } else if (!exactCommandCount && value.commands.length > maxTicks) {
+    issues.push(
+      issue(
+        'TOO_MANY_COMMANDS',
+        `${path}.commands`,
+        `Opening script can include at most ${maxTicks} command ticks.`,
       ),
     )
   }
@@ -538,10 +578,10 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
   const ticks = new Set<number>()
 
   value.commands.forEach((command, index) => {
-    const path = `turnPlan.commands.${index}`
+    const commandPath = `${path}.commands.${index}`
 
     if (!isRecord(command)) {
-      issues.push(issue('INVALID_COMMAND', path, 'Expected command object.'))
+      issues.push(issue('INVALID_COMMAND', commandPath, 'Expected command object.'))
       return
     }
 
@@ -551,13 +591,13 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
       issues.push(
         issue(
           'INVALID_TICK',
-          `${path}.tick`,
+          `${commandPath}.tick`,
           `Tick must be an integer from 1 through ${maxTicks}.`,
         ),
       )
     } else if (ticks.has(tick)) {
       issues.push(
-        issue('DUPLICATE_TICK', `${path}.tick`, `Duplicate tick ${tick}.`),
+        issue('DUPLICATE_TICK', `${commandPath}.tick`, `Duplicate tick ${tick}.`),
       )
     } else {
       ticks.add(tick)
@@ -567,7 +607,7 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
       command.move !== undefined &&
       !MOVEMENT_COMMANDS.includes(command.move as never)
     ) {
-      issues.push(issue('INVALID_MOVE', `${path}.move`, 'Unknown move command.'))
+      issues.push(issue('INVALID_MOVE', `${commandPath}.move`, 'Unknown move command.'))
     }
 
     if (
@@ -575,7 +615,7 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
       !WEAPON_COMMANDS.includes(command.weaponA as never)
     ) {
       issues.push(
-        issue('INVALID_WEAPON_A', `${path}.weaponA`, 'Unknown weaponA command.'),
+        issue('INVALID_WEAPON_A', `${commandPath}.weaponA`, 'Unknown weaponA command.'),
       )
     }
 
@@ -584,7 +624,7 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
       !WEAPON_COMMANDS.includes(command.weaponB as never)
     ) {
       issues.push(
-        issue('INVALID_WEAPON_B', `${path}.weaponB`, 'Unknown weaponB command.'),
+        issue('INVALID_WEAPON_B', `${commandPath}.weaponB`, 'Unknown weaponB command.'),
       )
     }
 
@@ -593,7 +633,7 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
       !UTILITY_COMMANDS.includes(command.utility as never)
     ) {
       issues.push(
-        issue('INVALID_UTILITY', `${path}.utility`, 'Unknown utility command.'),
+        issue('INVALID_UTILITY', `${commandPath}.utility`, 'Unknown utility command.'),
       )
     }
   })
@@ -604,15 +644,16 @@ export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationR
 export function validateTurnPlanAgainstControls(
   plan: TurnPlan,
   controls: GeneratedControls,
+  path = 'turnPlan',
 ): ValidationResult {
   const issues: ValidationIssue[] = []
 
   plan.commands.forEach((command, index) => {
-    const path = `turnPlan.commands.${index}`
+    const commandPath = `${path}.commands.${index}`
 
     if (command.move !== undefined && !controls.movement.includes(command.move)) {
       issues.push(
-        issue('MOVE_NOT_AVAILABLE', `${path}.move`, `${command.move} is unavailable.`),
+        issue('MOVE_NOT_AVAILABLE', `${commandPath}.move`, `${command.move} is unavailable.`),
       )
     }
 
@@ -620,7 +661,7 @@ export function validateTurnPlanAgainstControls(
       issues.push(
         issue(
           'WEAPON_A_NOT_AVAILABLE',
-          `${path}.weaponA`,
+          `${commandPath}.weaponA`,
           'weaponA is unavailable for this blueprint.',
         ),
       )
@@ -630,7 +671,7 @@ export function validateTurnPlanAgainstControls(
       issues.push(
         issue(
           'WEAPON_B_NOT_AVAILABLE',
-          `${path}.weaponB`,
+          `${commandPath}.weaponB`,
           'weaponB is unavailable for this blueprint.',
         ),
       )
@@ -640,7 +681,7 @@ export function validateTurnPlanAgainstControls(
       issues.push(
         issue(
           'UTILITY_NOT_AVAILABLE',
-          `${path}.utility`,
+          `${commandPath}.utility`,
           'utility controls are unavailable for this blueprint.',
         ),
       )
@@ -648,6 +689,114 @@ export function validateTurnPlanAgainstControls(
   })
 
   return result(issues)
+}
+
+export function validateBotTacticsShape(
+  value: unknown,
+  path = 'submission.tactics',
+): ValidationResult {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      issues: [issue('INVALID_TACTICS', path, 'Expected tactics object.')],
+    }
+  }
+
+  validateOptionalEnum(
+    issues,
+    value,
+    'style',
+    TACTIC_STYLES,
+    path,
+    'INVALID_TACTIC_STYLE',
+  )
+  validateOptionalEnum(
+    issues,
+    value,
+    'targetPriority',
+    TARGET_PRIORITIES,
+    path,
+    'INVALID_TARGET_PRIORITY',
+  )
+  validateOptionalEnum(
+    issues,
+    value,
+    'preferredRange',
+    PREFERRED_RANGES,
+    path,
+    'INVALID_PREFERRED_RANGE',
+  )
+  validateOptionalEnum(
+    issues,
+    value,
+    'movementPolicy',
+    MOVEMENT_POLICIES,
+    path,
+    'INVALID_MOVEMENT_POLICY',
+  )
+  validateOptionalUnitNumber(issues, value, 'aggression', path, 'INVALID_AGGRESSION')
+  validateOptionalUnitNumber(
+    issues,
+    value,
+    'retreatAtHealthPct',
+    path,
+    'INVALID_RETREAT_THRESHOLD',
+  )
+  validateOptionalEnum(
+    issues,
+    value,
+    'weaponCadence',
+    WEAPON_CADENCES,
+    path,
+    'INVALID_WEAPON_CADENCE',
+  )
+  validateOptionalEnum(
+    issues,
+    value,
+    'hazardPreference',
+    HAZARD_PREFERENCES,
+    path,
+    'INVALID_HAZARD_PREFERENCE',
+  )
+
+  return result(issues)
+}
+
+function validateOptionalEnum<T extends string>(
+  issues: ValidationIssue[],
+  value: Record<string, unknown>,
+  key: keyof BotTactics & string,
+  allowed: readonly T[],
+  path: string,
+  code: string,
+): void {
+  if (key in value && !allowed.includes(value[key] as T)) {
+    issues.push(
+      issue(
+        code,
+        `${path}.${key}`,
+        `${key} must be one of ${allowed.join(', ')}.`,
+      ),
+    )
+  }
+}
+
+function validateOptionalUnitNumber(
+  issues: ValidationIssue[],
+  value: Record<string, unknown>,
+  key: keyof BotTactics & string,
+  path: string,
+  code: string,
+): void {
+  if (key in value) {
+    const candidate = value[key]
+
+    if (typeof candidate !== 'number' || !Number.isFinite(candidate) || candidate < 0 || candidate > 1) {
+      issues.push(issue(code, `${path}.${key}`, `${key} must be a number from 0 through 1.`))
+    }
+  }
 }
 
 export function validateRoundPlanSubmissionShape(
@@ -676,7 +825,18 @@ export function validateRoundPlanSubmissionShape(
 
   const purchaseResult = validatePurchaseShape(value.purchases)
   const blueprintResult = validateBlueprintShape(value.blueprint)
-  const turnPlanResult = validateTurnPlanShape(value.turnPlan)
+  const schemaVersion = value.schemaVersion ?? 1
+  const isKnownSchemaVersion = schemaVersion === 1 || schemaVersion === 2
+
+  if (!isKnownSchemaVersion) {
+    issues.push(
+      issue(
+        'INVALID_SCHEMA_VERSION',
+        'submission.schemaVersion',
+        'schemaVersion must be 1 or 2.',
+      ),
+    )
+  }
 
   if (!purchaseResult.ok) {
     issues.push(...purchaseResult.issues)
@@ -686,8 +846,36 @@ export function validateRoundPlanSubmissionShape(
     issues.push(...blueprintResult.issues)
   }
 
-  if (!turnPlanResult.ok) {
-    issues.push(...turnPlanResult.issues)
+  if (schemaVersion === 1) {
+    const turnPlanResult = validateTurnPlanShape(value.turnPlan)
+
+    if (!turnPlanResult.ok) {
+      issues.push(...turnPlanResult.issues)
+    }
+  } else if (schemaVersion === 2) {
+    if ('turnPlan' in value) {
+      issues.push(
+        issue(
+          'LEGACY_TURN_PLAN_IN_V2',
+          'submission.turnPlan',
+          'schemaVersion 2 uses openingScript instead of turnPlan.',
+        ),
+      )
+    }
+
+    const tacticsResult = validateBotTacticsShape(value.tactics)
+
+    if (!tacticsResult.ok) {
+      issues.push(...tacticsResult.issues)
+    }
+
+    if ('openingScript' in value) {
+      const openingScriptResult = validateOpeningScriptShape(value.openingScript)
+
+      if (!openingScriptResult.ok) {
+        issues.push(...openingScriptResult.issues)
+      }
+    }
   }
 
   if ('rationale' in value && typeof value.rationale !== 'string') {

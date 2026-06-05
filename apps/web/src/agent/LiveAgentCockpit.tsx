@@ -11,9 +11,11 @@ import type {
   RoleClaimResponse,
   RolePrivateState,
   RoundPlanSubmission,
+  RoundPlanSubmissionV1,
   SessionChatMessage,
   ValidationIssue,
   TurnCommand,
+  TurnPlan,
 } from '../../../../packages/schemas/src/index.js'
 import {
   AgentArenaApiError,
@@ -1612,6 +1614,10 @@ function createSampleSubmission(): RoundPlanSubmission {
 }
 
 function createDraftFromSubmission(submission: RoundPlanSubmission): RoundPlanDraft {
+  const turnPlan = 'turnPlan' in submission
+    ? submission.turnPlan
+    : submission.openingScript ?? { commands: [] }
+
   return {
     purchases: submission.purchases.map((purchase) => ({
       partId: purchase.partId,
@@ -1629,7 +1635,7 @@ function createDraftFromSubmission(submission: RoundPlanSubmission): RoundPlanDr
       rotationZ: String(block.rotation[2]),
       label: block.label ?? '',
     })),
-    turnCommands: submission.turnPlan.commands.map((command) => ({
+    turnCommands: turnPlan.commands.map((command) => ({
       tick: String(command.tick),
       move: command.move ?? '',
       weaponA: command.weaponA ?? '',
@@ -1655,10 +1661,11 @@ function normalizeSubmissionForDraft(submission: RoundPlanSubmission): RoundPlan
     purchases?: unknown
     blueprint?: unknown
     turnPlan?: unknown
+    openingScript?: unknown
     rationale?: unknown
   }
   const blueprint = normalizeBlueprint(value.blueprint)
-  const turnPlan = normalizeTurnPlan(value.turnPlan)
+  const turnPlan = normalizeTurnPlan(value.turnPlan ?? value.openingScript)
 
   return {
     action: 'submit_round_plan',
@@ -1672,7 +1679,7 @@ function normalizeSubmissionForDraft(submission: RoundPlanSubmission): RoundPlan
   }
 }
 
-function buildSubmissionFromDraft(draft: RoundPlanDraft): RoundPlanSubmission {
+function buildSubmissionFromDraft(draft: RoundPlanDraft): RoundPlanSubmissionV1 {
   return {
     action: 'submit_round_plan',
     purchases: draft.purchases
@@ -1831,7 +1838,7 @@ function asVector3(value: unknown[]): [number, number, number] {
   ]
 }
 
-function normalizeTurnPlan(value: unknown): RoundPlanSubmission['turnPlan'] {
+function normalizeTurnPlan(value: unknown): TurnPlan {
   if (!value || typeof value !== 'object') {
     return { commands: [] }
   }

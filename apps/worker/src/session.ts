@@ -18,6 +18,7 @@ import {
   type CreateSessionResponse,
   type GeneratedControls,
   type InventoryItem,
+  type NormalizedRoundPlanSubmission,
   type PublicSessionState,
   type ReplayPayload,
   type RefereeAwardOption,
@@ -37,7 +38,10 @@ import {
   type SubmitRefereeAwardsRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
-import { validateRoundSubmission } from '../../../packages/catalog/src/index.js'
+import {
+  normalizeRoundSubmission,
+  validateRoundSubmission,
+} from '../../../packages/catalog/src/index.js'
 import {
   createSeededRng,
   resolveCombat,
@@ -174,6 +178,7 @@ export type StoredRoleState = {
   inventory: InventoryItem[]
   controls?: GeneratedControls
   submission?: RoundPlanSubmission
+  normalizedSubmission?: NormalizedRoundPlanSubmission
   submissionBaseline?: {
     gold: number
     inventory: InventoryItem[]
@@ -812,6 +817,7 @@ export class SessionCoordinator {
     role.inventory = validation.inventory
     role.controls = validation.controls
     role.submission = cloneJson(submission as RoundPlanSubmission)
+    role.normalizedSubmission = validation.normalizedSubmission
     role.submittedAt = now
 
     this.touch(now)
@@ -1038,6 +1044,7 @@ export class SessionCoordinator {
     role.submittedAt = undefined
     role.controls = undefined
     role.submission = undefined
+    role.normalizedSubmission = undefined
     role.submissionBaseline = undefined
     role.privateChatLog = []
 
@@ -1279,6 +1286,7 @@ export class SessionCoordinator {
       team.gold += DEFAULT_BASE_INCOME + interest + awardGold[role]
       team.controls = undefined
       team.submission = undefined
+      team.normalizedSubmission = undefined
       team.submittedAt = undefined
       team.submissionBaseline = undefined
     }
@@ -1363,17 +1371,22 @@ export class SessionCoordinator {
 
     this.changePhase('submissions_locked', 'Both round plans accepted.', now)
 
+    const redSubmission = red.normalizedSubmission ?? normalizeRoundSubmission(red.submission)
+    const blueSubmission = blue.normalizedSubmission ?? normalizeRoundSubmission(blue.submission)
+
     const result = resolveCombat({
       round: this.state.round,
       seed: `${this.state.id}:${this.state.seed}`,
       arena: this.state.arena,
       red: {
-        blueprint: red.submission.blueprint,
-        turnPlan: red.submission.turnPlan,
+        blueprint: redSubmission.blueprint,
+        tactics: redSubmission.tactics,
+        openingScript: redSubmission.openingScript,
       },
       blue: {
-        blueprint: blue.submission.blueprint,
-        turnPlan: blue.submission.turnPlan,
+        blueprint: blueSubmission.blueprint,
+        tactics: blueSubmission.tactics,
+        openingScript: blueSubmission.openingScript,
       },
     })
 
