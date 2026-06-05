@@ -76,7 +76,7 @@ const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = 
   part_detach: {
     capacity: 6,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `part-detach-effect-${index}`, materials.partDetach, 0.95),
+      createPooledTorus(scene, `part-detach-effect-${index}`, materials.partDetach, 1.12),
     update: updatePartDetachEffect,
   },
   impact: {
@@ -166,7 +166,7 @@ function createEffectMaterials(scene: Scene): EffectMaterials {
     laser: createSceneMaterial(scene, 'laser-lance-mat', '#fff8df', '#ff34d2', 1, 0.04),
     laserGlow: createSceneMaterial(scene, 'laser-lance-glow-mat', '#ffcf5b', '#ff4dd8', 0.5, 0.03),
     net: createSceneMaterial(scene, 'net-flash-mat', '#f5d47a', '#9d6c12', 0.82, 0.2),
-    partDetach: createSceneMaterial(scene, 'part-detach-mat', '#ffe4a8', '#ff6b2e', 0.68, 0.08),
+    partDetach: createSceneMaterial(scene, 'part-detach-mat', '#fff0b8', '#ff7f2a', 0.82, 0.08),
     smoke: createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42),
     spark: createSceneMaterial(scene, 'spark-mat', '#ffd35f', '#ff8a24'),
     weapon: createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b'),
@@ -271,15 +271,15 @@ function updateWeaponFireEffect({ effect, mesh, profiles }: EffectUpdateInput): 
     mesh.position.x += Math.sin(heading) * travel
     mesh.position.z += Math.cos(heading) * travel
     mesh.position.y += 0.42 + lift
-    mesh.scaling.set(1.1 + progress * 0.54, 1.1 + progress * 0.54, 0.46 + progress * 0.55)
+    mesh.scaling.set(1.22 + progress * 0.64, 1.22 + progress * 0.64, 0.54 + progress * 0.64)
     mesh.rotation.z = Math.sin(effect.age * 11) * 0.18
-    mesh.visibility = 0.7
+    mesh.visibility = 0.82
 
     return
   }
 
   if (weaponStyle === 'turret') {
-    mesh.scaling.set(0.42, 0.42, 0.88 + effect.intensity * 1.8)
+    mesh.scaling.set(0.52, 0.52, 1.04 + effect.intensity * 2.1)
     mesh.position.y += 0.12
     mesh.rotation.y = heading + (effect.team === 'blue' ? -1 : 1) * effect.intensity * 0.18
 
@@ -287,13 +287,13 @@ function updateWeaponFireEffect({ effect, mesh, profiles }: EffectUpdateInput): 
   }
 
   if (weaponStyle === 'spinner') {
-    mesh.scaling.set(0.34 + effect.intensity * 0.8, 0.34 + effect.intensity * 0.8, 0.62)
+    mesh.scaling.set(0.42 + effect.intensity * 0.94, 0.42 + effect.intensity * 0.94, 0.72)
     mesh.rotation.z = effect.age * 14
 
     return
   }
 
-  mesh.scaling.setAll(0.2 + effect.intensity * 1.1)
+  mesh.scaling.setAll(0.34 + effect.intensity * 1.32)
 }
 
 function setWeaponEffectMode(mesh: Mesh, mode: BotVisualProfile['primaryWeapon'], progress: number): void {

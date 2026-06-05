@@ -8,6 +8,12 @@ import type {
   StoredSessionState,
 } from './sessionTypes.js'
 
+type LegacyStoredSessionState = Omit<StoredSessionState, 'phase'> & {
+  phase: StoredSessionState['phase'] | 'referee_awards' | 'apply_awards'
+  awardOptions?: unknown
+  awardHistory?: unknown
+}
+
 export function createInitialRoleState(
   role: TeamRole,
   claimTokenHash: string,
@@ -25,9 +31,16 @@ export function createInitialRoleState(
 }
 
 export function ensureStoredSessionDefaults(state: StoredSessionState): void {
+  const legacyState = state as LegacyStoredSessionState
+
+  if (legacyState.phase === 'referee_awards' || legacyState.phase === 'apply_awards') {
+    state.phase = 'round_review'
+  }
+
+  delete legacyState.awardOptions
+  delete legacyState.awardHistory
+
   state.rateLimits ??= {}
-  state.awardOptions ??= []
-  state.awardHistory ??= []
   state.chatLog ??= []
 
   for (const role of TEAM_ROLES) {

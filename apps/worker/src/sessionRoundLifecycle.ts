@@ -1,9 +1,11 @@
 import {
   TEAM_ROLES,
-  type AppliedRefereeAward,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
-import { calculateInterest } from './refereeAwards.js'
+import {
+  calculateInterest,
+  calculateWinnerBonus,
+} from './roundEconomy.js'
 import {
   DEFAULT_BASE_INCOME,
   DEFAULT_WIN_STREAK_TARGET,
@@ -70,26 +72,13 @@ export function resolveMatchCompletion(state: StoredSessionState): MatchCompleti
   }
 }
 
-export function applyNextRoundEconomy(
-  state: StoredSessionState,
-  appliedAwards: AppliedRefereeAward[],
-): void {
-  const awardGold = TEAM_ROLES.reduce<Record<TeamRole, number>>(
-    (totals, role) => {
-      totals[role] = appliedAwards
-        .filter((award) => award.targetTeam === role)
-        .reduce((total, award) => total + award.gold, 0)
-
-      return totals
-    },
-    { red: 0, blue: 0 },
-  )
-
+export function applyNextRoundEconomy(state: StoredSessionState): void {
   for (const role of TEAM_ROLES) {
     const team = state.roles[role]
     const interest = calculateInterest(team.gold)
+    const winnerBonus = calculateWinnerBonus(state.lastResult, role)
 
-    team.gold += DEFAULT_BASE_INCOME + interest + awardGold[role]
+    team.gold += DEFAULT_BASE_INCOME + interest + winnerBonus
     team.controls = undefined
     team.submission = undefined
     team.normalizedSubmission = undefined
@@ -99,5 +88,4 @@ export function applyNextRoundEconomy(
 
   state.round += 1
   state.replay = undefined
-  state.awardOptions = []
 }

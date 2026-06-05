@@ -1,7 +1,11 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
-import { createBotNode } from './babylonPartRenderer'
+import {
+  createBotNode,
+  type BotPartNodeMetadata,
+} from './babylonPartRenderer'
 import {
   deterministicAngle,
   toBabylonVector,
@@ -11,13 +15,9 @@ import type {
   ReplayVisualFrame,
 } from './replayMapping'
 
-export type BotPartNodeMetadata = {
-  kind: 'bot_part'
-  blockId: string
-  partId: string
-  basePosition: [number, number, number]
-  baseRotation: [number, number, number]
-}
+export type { BotPartNodeMetadata } from './babylonPartRenderer'
+
+const basePartMaterials = new WeakMap<AbstractMesh, AbstractMesh['material']>()
 
 export function updateBots(
   bots: Record<TeamRole, ReturnType<typeof createBotNode>>,
@@ -102,6 +102,9 @@ function updateBotPartNodes(
     const state = partStates[metadata.blockId]
     const basePosition = metadata.basePosition
     const baseRotation = metadata.baseRotation
+    const damageSeverity = partDamageSeverity(state)
+
+    applyPartMaterialState(node, metadata, damageSeverity)
 
     if (state?.status === 'detached' && state.detachTime !== undefined) {
       const age = Math.max(0, time - state.detachTime)
@@ -130,8 +133,50 @@ function updateBotPartNodes(
       return
     }
 
-    node.position.set(basePosition[0], basePosition[1], basePosition[2])
-    node.rotation.set(baseRotation[0], baseRotation[1], baseRotation[2])
-    node.scaling.setAll(1)
+    const damageTremor = damageSeverity > 0
+      ? Math.sin(time * 28 + deterministicAngle(`${role}-${metadata.blockId}-damage`)) * 0.025 * damageSeverity
+      : 0
+
+    node.position.set(basePosition[0], basePosition[1] + Math.abs(damageTremor) * 0.35, basePosition[2])
+    node.rotation.set(baseRotation[0], baseRotation[1], baseRotation[2] + damageTremor)
+    node.scaling.setAll(1 + damageSeverity * 0.055)
   })
+}
+
+function applyPartMaterialState(
+  node: TransformNode,
+  metadata: BotPartNodeMetadata,
+  damageSeverity: number,
+): void {
+  const isDamaged = damageSeverity > 0
+
+  node.getChildMeshes().forEach((mesh) => {
+    const baseMaterial = getBasePartMaterial(mesh)
+
+    if (!baseMaterial || baseMaterial.name !== metadata.primaryMaterialName) {
+      return
+    }
+
+    mesh.material = isDamaged ? metadata.damagedMaterial : baseMaterial
+  })
+}
+
+function getBasePartMaterial(mesh: AbstractMesh): AbstractMesh['material'] {
+  if (!basePartMaterials.has(mesh)) {
+    basePartMaterials.set(mesh, mesh.material)
+  }
+
+  return basePartMaterials.get(mesh) ?? null
+}
+
+function partDamageSeverity(state: PartFrameState | undefined): number {
+  if (!state || typeof state.health !== 'number') {
+    return 0
+  }
+
+  if (typeof state.maxHealth === 'number' && state.maxHealth > 0) {
+    return Math.min(1, Math.max(0, 1 - state.health / state.maxHealth))
+  }
+
+  return state.health <= 0 ? 1 : 0
 }

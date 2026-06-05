@@ -39,7 +39,7 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   submit: { windowMs: 60 * 1000, max: 20 },
   chat: { windowMs: 60 * 1000, max: 30 },
   private_chat: { windowMs: 60 * 1000, max: 30 },
-  referee_awards: { windowMs: 60 * 1000, max: 20 },
+  advance_round: { windowMs: 60 * 1000, max: 20 },
   reset_role: { windowMs: 60 * 1000, max: 20 },
 }
 
@@ -175,7 +175,7 @@ export function mergeRateLimits(
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
     chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
     private_chat: overrides?.private_chat ?? DEFAULT_RATE_LIMITS.private_chat,
-    referee_awards: overrides?.referee_awards ?? DEFAULT_RATE_LIMITS.referee_awards,
+    advance_round: overrides?.advance_round ?? DEFAULT_RATE_LIMITS.advance_round,
     reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
   }
 }
@@ -213,7 +213,7 @@ export function nextActionForRole(state: RolePrivateState): AgentNextAction {
     return state.submitted ? 'wait_for_opponent_submission' : 'submit_round_plan'
   }
 
-  if (state.phase === 'referee_awards') {
+  if (state.phase === 'round_review') {
     return 'wait_for_referee'
   }
 

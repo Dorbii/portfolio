@@ -2,6 +2,12 @@ import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { ArenaConfig } from '../../../../packages/schemas/src/index.js'
 import { toBabylonVector } from './babylonSceneUtils'
+import {
+  BROADCAST_CAMERA_ALPHA,
+  BROADCAST_CAMERA_BETA,
+  calculateBroadcastFrameForBothBotsAndActiveEffect,
+  capBroadcastShakeForNoExcessiveShake,
+} from './replayCameraFraming.js'
 import type {
   CameraPreset,
   ReplayEffectState,
@@ -63,14 +69,20 @@ export function updateCamera(
       shake + knockBack,
     )
   } else if (preset === 'broadcast') {
+    const broadcastFrame = calculateBroadcastFrameForBothBotsAndActiveEffect(
+      frame,
+      arena,
+      getCameraAspectRatio(camera),
+    )
+
     setCamera(
       camera,
-      Vector3.Center(midpoint, Vector3.Zero()),
-      -Math.PI * 0.72,
-      0.9,
-      arenaRadius * 0.94,
+      toBabylonVector(broadcastFrame.target),
+      BROADCAST_CAMERA_ALPHA,
+      BROADCAST_CAMERA_BETA,
+      broadcastFrame.radius,
       frame.time,
-      shake + knockBack,
+      capBroadcastShakeForNoExcessiveShake(shake + knockBack),
     )
   } else if (preset === 'impact') {
     setCamera(
@@ -99,6 +111,17 @@ export function updateCamera(
   } else {
     setCamera(camera, midpoint, -Math.PI * 0.65, 0.9, 8, frame.time, shake)
   }
+}
+
+function getCameraAspectRatio(camera: ArcRotateCamera): number {
+  const engine = camera.getScene().getEngine()
+  const height = engine.getRenderHeight()
+
+  if (height <= 0) {
+    return 16 / 9
+  }
+
+  return engine.getRenderWidth() / height
 }
 
 function setCamera(

@@ -4,16 +4,17 @@ import test from 'node:test'
 import {
   DEFAULT_ARENA_API_BASE,
   DEFAULT_ARENA_SITE_BASE,
+  advanceRound,
   buildInviteUrl,
   createSession,
   loadReplayPayload,
   loadPublicSession,
   resetRoleClaim,
-  submitRefereeAwards,
   writeStoredSession,
   readStoredSession,
   clearStoredSession,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
+import { getInvitePanelMode } from '../.test-build/apps/web/src/referee/refereeInvitePanelState.js'
 
 function jsonResponse(value, init = {}) {
   return new Response(JSON.stringify(value), {
@@ -149,23 +150,22 @@ test('referee loadReplayPayload normalizes top-level replay payloads with bot bl
   }
 })
 
-test('referee submitRefereeAwards posts /referee-awards with bearer token', async () => {
+test('referee advanceRound posts /advance-round with bearer token', async () => {
   const sessionId = 's_demo'
   const refereeToken = 'r_ref'
-  const awards = [{ awardId: 'a1', targetTeam: 'red' }]
-  const response = { publicState: { eventLog: [], replayAvailable: false }, appliedAwards: [] }
+  const response = { publicState: { eventLog: [], replayAvailable: false } }
   const { calls, restore } = withFetchStub(() => jsonResponse(response))
 
   try {
-    await submitRefereeAwards(DEFAULT_ARENA_API_BASE, sessionId, refereeToken, awards)
+    await advanceRound(DEFAULT_ARENA_API_BASE, sessionId, refereeToken)
     assert.equal(calls.length, 1)
     assert.equal(calls[0].method, 'POST')
     assert.equal(
       calls[0].url,
-      `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/referee-awards`,
+      `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/advance-round`,
     )
     assert.equal(calls[0].headers.get('authorization'), `Bearer ${refereeToken}`)
-    assert.equal(calls[0].body, JSON.stringify({ awards }))
+    assert.equal(calls[0].body, JSON.stringify({}))
   } finally {
     restore()
   }
@@ -207,6 +207,30 @@ test('referee resetRoleClaim posts /reset-role with bearer token', async () => {
   } finally {
     restore()
   }
+})
+
+test('referee invite panel mode separates unclaimed handoff from claimed reset', () => {
+  assert.equal(
+    getInvitePanelMode({
+      hasInvite: true,
+      roleState: { claimed: false },
+    }),
+    'unclaimed',
+  )
+  assert.equal(
+    getInvitePanelMode({
+      hasInvite: true,
+      roleState: { claimed: true },
+    }),
+    'claimed',
+  )
+  assert.equal(
+    getInvitePanelMode({
+      hasInvite: false,
+      roleState: { claimed: false },
+    }),
+    'unavailable',
+  )
 })
 
 test('referee session storage persists only referee token until session expiry', () => {

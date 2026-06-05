@@ -11,7 +11,9 @@ import {
   formatDurationSeconds,
   formatLabel,
 } from '../shared/format'
+import { Button } from '../shared/Button'
 import type { ReplayPayload } from './refereeClient'
+import { getInvitePanelMode } from './refereeInvitePanelState'
 
 export function TeamScoreCard({
   role,
@@ -150,28 +152,62 @@ export function InvitePanel({
   role,
   hasInvite,
   inviteUrl,
+  roleState,
   agentBrief,
   onCopyBrief,
   onOpen,
-  onRefreshClaim,
-  canRefreshClaim,
+  onResetClaim,
+  canResetClaim,
 }: {
   role: TeamRole
   hasInvite: boolean
   inviteUrl: string
+  roleState?: RolePublicState
   agentBrief: string
   onCopyBrief: () => Promise<void> | void
   onOpen: () => void
-  onRefreshClaim: () => Promise<void> | void
-  canRefreshClaim: boolean
+  onResetClaim: () => Promise<void> | void
+  canResetClaim: boolean
 }) {
-  if (!hasInvite) {
+  const panelMode = getInvitePanelMode({ hasInvite, roleState })
+
+  if (panelMode === 'claimed') {
+    return (
+      <div className="invite-panel invite-panel-claimed">
+        <p>
+          <strong>{capitalize(role)} agent claimed.</strong>
+          <span>Normal handoff actions hidden.</span>
+        </p>
+        <div className="invite-reset-actions">
+          <Button
+            type="button"
+            variant="danger"
+            onClick={onResetClaim}
+            disabled={!canResetClaim}
+            title="Available only before combat resolves."
+          >
+            Reset agent claim
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (panelMode === 'unavailable') {
     return (
       <div className="invite-panel">
         <p className="referee-empty">{capitalize(role)} invite unavailable.</p>
-        <button type="button" onClick={onRefreshClaim} disabled={!canRefreshClaim}>
-          Refresh {capitalize(role)} claim
-        </button>
+        <div className="invite-reset-actions">
+          <Button
+            type="button"
+            variant="danger"
+            onClick={onResetClaim}
+            disabled={!canResetClaim}
+            title="Available only before combat resolves."
+          >
+            Reset agent claim
+          </Button>
+        </div>
       </div>
     )
   }
@@ -180,15 +216,33 @@ export function InvitePanel({
     <div className="invite-panel">
       <p>{capitalize(role)} agent handoff</p>
       <div className="invite-links">
-        <button type="button" onClick={onOpen} disabled={!inviteUrl}>
+        <Button
+          type="button"
+          variant="primary"
+          onClick={onOpen}
+          disabled={!inviteUrl}
+        >
           Open cockpit
-        </button>
-        <button type="button" onClick={onCopyBrief} disabled={!agentBrief}>
-          Wake {role} agent
-        </button>
-        <button type="button" onClick={onRefreshClaim} disabled={!canRefreshClaim}>
-          Refresh claim
-        </button>
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCopyBrief}
+          disabled={!agentBrief}
+        >
+          Copy handoff
+        </Button>
+      </div>
+      <div className="invite-reset-actions">
+        <Button
+          type="button"
+          variant="danger"
+          onClick={onResetClaim}
+          disabled={!canResetClaim}
+          title="Available only before combat resolves."
+        >
+          Reset agent claim
+        </Button>
       </div>
     </div>
   )

@@ -277,8 +277,10 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mandatory fixed classes')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('public chat')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private notes')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Table Talk')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('state.chatLog')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted/deceptive input')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Agent Journal')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('waitForNextAction({ timeoutMs: 600000 })')))
   assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole()'))
@@ -329,7 +331,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'submit_private_chat_message' &&
         action.method === 'POST' &&
         action.path === '/sessions/:sessionId/private-chat' &&
-        action.returns.includes('opponent private state do not include this note'),
+        action.returns.includes('Agent Journal') &&
+        action.returns.includes('opponent private state do not include this entry'),
     ),
   )
   assert.ok(
@@ -338,7 +341,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'get_replay' &&
         action.method === 'GET' &&
         action.path === '/sessions/:sessionId/replay' &&
-        action.phase === 'replay_phase | referee_awards' &&
+        action.phase === 'replay_phase | round_review' &&
         action.returns.includes('botBlueprints') &&
         action.returns.includes('pending submissions are not public before resolution'),
     ),
@@ -346,9 +349,9 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(
     json.actions.some(
       (action) =>
-        action.name === 'submit_referee_awards' &&
+        action.name === 'advance_round' &&
         action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/referee-awards',
+        action.path === '/sessions/:sessionId/advance-round',
     ),
   )
   assert.ok(
@@ -356,7 +359,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
       (action) =>
         action.name === 'submit_chat_message' &&
         action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/chat',
+        action.path === '/sessions/:sessionId/chat' &&
+        action.returns.includes('opponent role context includes the same message in state.chatLog'),
     ),
   )
   assert.ok(
@@ -577,7 +581,7 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   assert.equal(redSubmission.json.state.ownSubmission.schemaVersion, 2)
   assert.equal('turnPlan' in redSubmission.json.state.ownSubmission, false)
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.json.publicState.phase, 'round_review')
   assert.equal(blueSubmission.json.publicState.replayAvailable, true)
 })
 
@@ -617,10 +621,24 @@ test('POST /sessions/:id/chat stores public role-authored chat', async () => {
   assert.equal(chat.json.message.kind, 'taunt')
   assert.equal(chat.json.publicState.chatLog.length, 1)
   assert.equal(chat.json.state.chatLog[0].message, 'Bring something that can turn.')
+  assert.equal(
+    chat.json.state.eventLog.some((event) => event.message.includes('Bring something that can turn.')),
+    false,
+  )
 
   const publicState = await route(env, `/sessions/${sessionId}/public`)
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
 
   assert.equal(publicState.json.chatLog[0].message, 'Bring something that can turn.')
+  assert.equal(blueState.response.status, 200)
+  assert.equal(blueState.json.chatLog[0].role, 'red')
+  assert.equal(blueState.json.chatLog[0].message, 'Bring something that can turn.')
+  assert.equal(
+    blueState.json.eventLog.some((event) => event.message.includes('Bring something that can turn.')),
+    false,
+  )
   assertRedactedPublicState(publicState.json, [
     redInvite.claimToken,
     blueInvite.claimToken,
@@ -926,11 +944,11 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   })
 
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.json.publicState.phase, 'round_review')
   assert.equal(blueSubmission.json.publicState.roles.red.submitted, true)
   assert.equal(blueSubmission.json.publicState.roles.blue.submitted, true)
   assert.equal(blueSubmission.json.publicState.replayAvailable, true)
-  assert.equal(blueSubmission.json.publicState.awardOptions.length, 3)
+  assert.equal('awardOptions' in blueSubmission.json.publicState, false)
 
   const replay = await route(env, `/sessions/${sessionId}/replay`)
 
@@ -943,53 +961,34 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].id, 'core')
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].partId, 'Body_Square_Medium')
 
-  const invalidAwardsToken = await route(env, `/sessions/${sessionId}/referee-awards`, {
+  const invalidAdvanceToken = await route(env, `/sessions/${sessionId}/advance-round`, {
     method: 'POST',
     token: redToken,
-    body: { awards: [] },
+    body: {},
   })
 
-  assert.equal(invalidAwardsToken.response.status, 401)
-  assert.equal(invalidAwardsToken.json.error.code, 'INVALID_TOKEN')
+  assert.equal(invalidAdvanceToken.response.status, 401)
+  assert.equal(invalidAdvanceToken.json.error.code, 'INVALID_TOKEN')
 
-  const invalidAwards = await route(env, `/sessions/${sessionId}/referee-awards`, {
+  const advance = await route(env, `/sessions/${sessionId}/advance-round`, {
     method: 'POST',
     token: refereeToken,
-    body: {
-      awards: [
-        {
-          awardId: blueSubmission.json.publicState.awardOptions[0].id,
-          targetTeam: 'red',
-        },
-        {
-          awardId: blueSubmission.json.publicState.awardOptions[1].id,
-          targetTeam: 'red',
-        },
-      ],
-    },
+    body: {},
   })
 
-  assert.equal(invalidAwards.response.status, 400)
-  assert.equal(invalidAwards.json.error.code, 'SUBMISSION_INVALID')
+  assert.equal(advance.response.status, 200)
+  assert.equal(advance.json.publicState.phase, 'submission_phase')
+  assert.equal(advance.json.publicState.round, 2)
+  assert.equal(advance.json.publicState.roles.red.submitted, false)
+  assert.equal(advance.json.publicState.roles.blue.submitted, false)
 
-  const awards = await route(env, `/sessions/${sessionId}/referee-awards`, {
-    method: 'POST',
-    token: refereeToken,
-    body: {
-      awards: [
-        {
-          awardId: blueSubmission.json.publicState.awardOptions[0].id,
-          targetTeam: 'blue',
-        },
-      ],
-    },
-  })
+  const redAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: redToken })
+  const blueAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: blueToken })
 
-  assert.equal(awards.response.status, 200)
-  assert.equal(awards.json.publicState.phase, 'submission_phase')
-  assert.equal(awards.json.publicState.round, 2)
-  assert.equal(awards.json.publicState.roles.red.submitted, false)
-  assert.equal(awards.json.publicState.roles.blue.submitted, false)
+  assert.equal(redAfterAdvance.response.status, 200)
+  assert.equal(blueAfterAdvance.response.status, 200)
+  assert.equal(redAfterAdvance.json.gold, 78)
+  assert.equal(blueAfterAdvance.json.gold, 78)
 
   const publicState = await route(env, `/sessions/${sessionId}/public`)
 

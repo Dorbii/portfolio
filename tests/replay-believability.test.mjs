@@ -7,7 +7,11 @@ import {
   resolveCombat,
 } from '../.test-build/packages/sim/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
-import { createReplayBelievabilityScenarios } from './fixtures/archetypeScenarios.mjs'
+import {
+  createReplayBelievabilityScenarios,
+  fastSprinterBlueprint,
+  stationarySpinnerBlueprint,
+} from './fixtures/archetypeScenarios.mjs'
 
 const TURRET_REACH_BONUS = 2.25
 const SENSOR_REACH_BONUS = 0.9
@@ -162,6 +166,24 @@ function distance(left, right) {
   return Math.hypot(left[0] - right[0], left[2] - right[2])
 }
 
+function segmentDistanceToPoint(start, end, point) {
+  const dx = end[0] - start[0]
+  const dz = end[2] - start[2]
+  const lengthSquared = dx * dx + dz * dz
+
+  if (lengthSquared <= 0) {
+    return distance(start, point)
+  }
+
+  const t = Math.min(
+    1,
+    Math.max(0, ((point[0] - start[0]) * dx + (point[2] - start[2]) * dz) / lengthSquared),
+  )
+  const closest = [start[0] + dx * t, 0, start[2] + dz * t]
+
+  return distance(closest, point)
+}
+
 function positionAt(result, bot, time) {
   let position
 
@@ -272,6 +294,54 @@ test('stationary spinner vs brawler stays anchored and punishes contact with rep
   assert.equal(weaponFireEvents(withoutSpinner, 'red').length, 0)
   assert.ok(result.damage.blue > withoutSpinner.damage.blue * 4)
   assert.ok(result.damage.red < withoutSpinner.damage.red)
+})
+
+test('mobile low-commitment bot bends around saw and refuses spinner danger', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'mobile-spinner-hazard-believability',
+    red: {
+      blueprint: fastSprinterBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.65,
+        hazardPreference: 'avoid',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: stationarySpinnerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'hold_ground',
+        preferredRange: 'contact',
+        aggression: 0.85,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: {
+      name: 'Mobile Hazard Avoidance',
+      width: 24,
+      height: 16,
+      activeHazards: ['floor_saw'],
+    },
+  })
+  const redMoves = moveEvents(result, 'red')
+  const redProfile = movementProfile(result, 'red')
+
+  assertValidBoundedTimeline(result, 'mobile spinner hazard avoidance')
+  assert.equal(hazardEvents(result, 'red').length, 0)
+  assert.equal(movementProfile(result, 'blue').count, 0)
+  assert.ok(redMoves.length > 0)
+  assert.ok(redProfile.zDistance > redProfile.xDistance)
+  assert.ok(
+    redMoves.every(
+      (event) => segmentDistanceToPoint(event.from, event.to, [0, 0, 0]) >= 1.2,
+    ),
+  )
+  assert.equal(result.damage.red, 0)
+  assert.equal(result.damage.blue, 0)
 })
 
 test('turret kiter vs brawler preserves range, fires while moving, and needs the turret', () => {

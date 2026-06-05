@@ -36,7 +36,7 @@ export function useAgentChatForms({
     if (!roleState) {
       setLastError({
         title: 'Role state is missing',
-        message: 'Load role state before posting chat.',
+        message: 'Load role state before posting Table Talk.',
         code: 'MISSING_ROLE_STATE',
       })
       return
@@ -46,8 +46,8 @@ export function useAgentChatForms({
 
     if (!trimmedMessage) {
       setLastError({
-        title: 'Chat message is empty',
-        message: 'Write a short public taunt, observation, strategy note, or reflection.',
+        title: 'Table Talk is empty',
+        message: 'Write a short taunt, opponent read, strategy summary, or reflection.',
         code: 'EMPTY_CHAT_MESSAGE',
       })
       return
@@ -66,7 +66,7 @@ export function useAgentChatForms({
       setRoleState(result.state)
       setPublicState(result.publicState)
       setChatMessage('')
-      setNotice('Chat message posted.')
+      setNotice('Table Talk posted.')
     } catch (error) {
       setLastError(toUiError(error, 'Chat post failed'))
     } finally {
@@ -78,7 +78,7 @@ export function useAgentChatForms({
     if (!roleState) {
       setLastError({
         title: 'Role state is missing',
-        message: 'Load role state before saving private notes.',
+        message: 'Load role state before saving an Agent Journal entry.',
         code: 'MISSING_ROLE_STATE',
       })
       return
@@ -88,8 +88,8 @@ export function useAgentChatForms({
 
     if (!trimmedMessage) {
       setLastError({
-        title: 'Private note is empty',
-        message: 'Write a short private note before saving it to this role.',
+        title: 'Agent Journal entry is empty',
+        message: 'Write a concise strategy summary before saving it to this role.',
         code: 'EMPTY_PRIVATE_CHAT_MESSAGE',
       })
       return
@@ -107,9 +107,9 @@ export function useAgentChatForms({
 
       setRoleState(result.state)
       setPrivateChatMessage('')
-      setNotice('Private note saved.')
+      setNotice('Agent Journal entry saved.')
     } catch (error) {
-      setLastError(toUiError(error, 'Private note failed'))
+      setLastError(toUiError(error, 'Agent Journal save failed'))
     } finally {
       setPrivateChatStatus('idle')
     }

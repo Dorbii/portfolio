@@ -1,10 +1,12 @@
 import type {
+  BotBlueprint,
   BotTactics,
   NormalizedBotTactics,
   NormalizedRoundPlanSubmission,
   OpeningScript,
   RoundPlanSubmission,
 } from '../../schemas/src/index.js'
+import { deriveControls } from './controls.js'
 
 export const DEFAULT_BOT_TACTICS: NormalizedBotTactics = {
   style: 'balanced',
@@ -39,7 +41,7 @@ export function normalizeRoundSubmission(
     return {
       ...common,
       schemaVersion: 2,
-      tactics: normalizeTactics(submission.tactics),
+      tactics: normalizeTacticsForBlueprint(submission.tactics, submission.blueprint),
       openingScript: cloneOpeningScript(submission.openingScript ?? EMPTY_OPENING_SCRIPT),
     }
   }
@@ -47,7 +49,7 @@ export function normalizeRoundSubmission(
   return {
     ...common,
     schemaVersion: 2,
-    tactics: { ...DEFAULT_BOT_TACTICS },
+    tactics: defaultTacticsForBlueprint(submission.blueprint),
     openingScript: cloneOpeningScript(submission.turnPlan),
   }
 }
@@ -55,6 +57,26 @@ export function normalizeRoundSubmission(
 export function normalizeTactics(tactics: BotTactics = {}): NormalizedBotTactics {
   return {
     ...DEFAULT_BOT_TACTICS,
+    ...tactics,
+  }
+}
+
+export function defaultTacticsForBlueprint(blueprint: BotBlueprint): NormalizedBotTactics {
+  const controls = deriveControls(blueprint)
+  const hasMovementControl = controls.movement.some((command) => command !== 'brake')
+
+  return {
+    ...DEFAULT_BOT_TACTICS,
+    movementPolicy: hasMovementControl ? 'close' : 'hold_ground',
+  }
+}
+
+function normalizeTacticsForBlueprint(
+  tactics: BotTactics = {},
+  blueprint: BotBlueprint,
+): NormalizedBotTactics {
+  return {
+    ...defaultTacticsForBlueprint(blueprint),
     ...tactics,
   }
 }

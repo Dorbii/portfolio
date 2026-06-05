@@ -9,10 +9,11 @@ import {
   headingForMove,
 } from './replayVectorMath.js'
 
-const WEAPON_WINDOW = 0.75
+const WEAPON_WINDOW = 0.95
 const CONTROL_CUE_WINDOW = 1.15
 const IMPACT_WINDOW = 1.35
 const DEBRIS_WINDOW = 1.9
+const PART_DETACH_WINDOW = 1.9
 const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
 const LASER_LANCE_WINDOW = 0.95
@@ -202,13 +203,13 @@ export function buildReplayEffects(
     if (event.type === 'part_detach') {
       const age = time - event.t
 
-      if (age >= 0 && age <= DEBRIS_WINDOW) {
+      if (age >= 0 && age <= PART_DETACH_WINDOW) {
         effects.push({
           id: `${index}-part-detach-focus-${event.blockId}`,
           kind: 'part_detach',
           position: event.position,
           age,
-          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
+          intensity: Math.max(0, 1 - age / PART_DETACH_WINDOW),
           team: event.bot,
           label: event.blockId,
         })
@@ -217,7 +218,7 @@ export function buildReplayEffects(
           kind: 'debris',
           position: event.position,
           age,
-          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
+          intensity: Math.max(0, 1 - age / PART_DETACH_WINDOW),
           team: event.bot,
           damage: 18,
           label: event.blockId,

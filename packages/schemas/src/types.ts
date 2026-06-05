@@ -16,8 +16,7 @@ export const SESSION_PHASES = [
   'submissions_locked',
   'combat_resolved',
   'replay_phase',
-  'referee_awards',
-  'apply_awards',
+  'round_review',
   'session_complete',
   'expired',
 ] as const
@@ -77,28 +76,6 @@ export type InventoryItem = {
   partId: string
   quantity: number
 }
-
-export type RefereeAwardOption = {
-  id: string
-  title: string
-  description: string
-  gold: number
-}
-
-export type RefereeAwardSelection = {
-  awardId: string
-  targetTeam: TeamRole
-}
-
-export type AppliedRefereeAward = RefereeAwardSelection & {
-  round: number
-  title: string
-  gold: number
-}
-
-export const REFEREE_AWARD_OPTION_COUNT = 3
-export const MAX_REFEREE_AWARDS_PER_ROUND = 2
-export const MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND = 1
 
 export type Purchase = {
   partId: string

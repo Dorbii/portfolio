@@ -29,6 +29,8 @@ export type PolicyBotState = {
   anchoredStance?: boolean
   hazardBaitControl?: boolean
   weaponReachBonus?: number
+  contactDanger?: number
+  controlDanger?: number
 }
 
 export type PolicyState = {
@@ -151,21 +153,30 @@ function choosePolicyMove(context: PolicyContext): MovementCommand {
   }
 
   if (healthRatio <= tactics.retreatAtHealthPct) {
-    return kiteMove(context)
+    return safeReactiveMove(context, kiteMove(context))
   }
+
+  let move: MovementCommand
 
   switch (tactics.movementPolicy) {
     case 'hold_ground':
-      return holdGroundMove(context)
+      move = holdGroundMove(context)
+      break
     case 'close':
-      return closePolicyMove(context)
+      move = closePolicyMove(context)
+      break
     case 'kite':
-      return kiteMove(context)
+      move = kiteMove(context)
+      break
     case 'circle':
-      return circleMove(context)
+      move = circleMove(context)
+      break
     case 'bait_hazard':
-      return baitHazardMove(context)
+      move = baitHazardMove(context)
+      break
   }
+
+  return safeReactiveMove(context, move)
 }
 
 function holdGroundMove({
@@ -405,6 +416,233 @@ function pressureScore(bot: PolicyBotState, opponent: PolicyBotState): number {
 
 function isNearCenterHazard(position: Vector3, radius: number): boolean {
   return Math.abs(position[0]) < radius && Math.abs(position[2]) < radius
+}
+
+function safeReactiveMove(
+  context: PolicyContext,
+  move: MovementCommand,
+): MovementCommand {
+  const hazardMove = saferCenterHazardMove(context, move)
+
+  if (hazardMove !== move) {
+    return hazardMove
+  }
+
+  return saferOpponentDangerMove(context, move)
+}
+
+function saferCenterHazardMove(
+  context: PolicyContext,
+  move: MovementCommand,
+): MovementCommand {
+  const { arena, bot, tactics, tick } = context
+
+  if (
+    tactics.hazardPreference === 'force' ||
+    !shouldAvoidProjectedHazard(context) ||
+    !centerHazardActive(arena) ||
+    !movePathTouchesCenterHazard(bot, arena, move)
+  ) {
+    return move
+  }
+
+  return firstSafeMove(
+    context,
+    [
+      moveAwayFromPoint(bot, [0, 0, 0], tick),
+      lateralMove(bot, context.opponent, tick),
+      tick % 2 === 0 ? 'turn_left' : 'turn_right',
+      'backward',
+      'dash_backward',
+      'brake',
+    ],
+    { avoidCenterHazard: true },
+  )
+}
+
+function saferOpponentDangerMove(
+  context: PolicyContext,
+  move: MovementCommand,
+): MovementCommand {
+  const { bot, opponent, tactics, gap, tick } = context
+  const opponentDanger = (opponent.contactDanger ?? 0) + (opponent.controlDanger ?? 0) * 0.55
+  const isLowCommitment =
+    tactics.aggression < 0.82 &&
+    bot.stats.weaponThreat <= opponent.stats.weaponThreat * 0.65
+  const nextGap = projectedGap(bot, opponent, move, context.arena)
+  const isClosing = nextGap < gap - 0.05
+  const entersDangerRange = nextGap <= CONTACT_DISTANCE * 2.45
+
+  if (
+    tactics.hazardPreference === 'force' ||
+    opponentDanger < 1.05 ||
+    (gap > CONTACT_DISTANCE * 2.45 && !entersDangerRange) ||
+    !isLowCommitment ||
+    !isClosing
+  ) {
+    return move
+  }
+
+  return firstSafeMove(
+    context,
+    [
+      lateralMove(bot, opponent, tick),
+      evadeMove(bot, opponent, context.arena, tick),
+      tick % 2 === 0 ? 'circle_left' : 'circle_right',
+      'brake',
+    ],
+    { avoidOpponentDanger: true },
+  )
+}
+
+function firstSafeMove(
+  context: PolicyContext,
+  moves: MovementCommand[],
+  options: {
+    avoidCenterHazard?: boolean
+    avoidOpponentDanger?: boolean
+  },
+): MovementCommand {
+  const { arena, bot, opponent, gap } = context
+
+  for (const move of uniqueMoves(moves)) {
+    if (options.avoidCenterHazard && movePathTouchesCenterHazard(bot, arena, move)) {
+      continue
+    }
+    if (
+      options.avoidOpponentDanger &&
+      projectedGap(bot, opponent, move, arena) < gap - 0.05
+    ) {
+      continue
+    }
+
+    return move
+  }
+
+  return 'brake'
+}
+
+function uniqueMoves(moves: MovementCommand[]): MovementCommand[] {
+  return [...new Set(moves)]
+}
+
+function shouldAvoidProjectedHazard({
+  bot,
+  opponent,
+  tactics,
+}: PolicyContext): boolean {
+  const opponentDanger = (opponent.contactDanger ?? 0) + (opponent.controlDanger ?? 0) * 0.55
+
+  return (
+    tactics.hazardPreference === 'avoid' &&
+    (tactics.aggression < 0.82 ||
+      opponentDanger >= 1.05 ||
+      bot.stats.weaponThreat <= opponent.stats.weaponThreat * 0.45)
+  )
+}
+
+function movePathTouchesCenterHazard(
+  bot: PolicyBotState,
+  arena: ArenaConfig,
+  move: MovementCommand,
+): boolean {
+  const projected = projectMove(bot, move, arena)
+
+  return segmentDistanceToPoint(bot.position, projected, [0, 0, 0]) < 1.22
+}
+
+function projectedGap(
+  bot: PolicyBotState,
+  opponent: PolicyBotState,
+  move: MovementCommand,
+  arena: ArenaConfig,
+): number {
+  return distance(projectMove(bot, move, arena), opponent.position)
+}
+
+function projectMove(
+  bot: PolicyBotState,
+  move: MovementCommand,
+  arena: ArenaConfig,
+): Vector3 {
+  const speed = Math.max(0.2, Math.min(2.75, 0.45 + bot.stats.mobility / 18))
+  const direction = bot.role === 'red' ? 1 : -1
+  let x = bot.position[0]
+  let z = bot.position[2]
+
+  switch (move) {
+    case 'forward':
+      x += direction * speed
+      break
+    case 'backward':
+      x -= direction * speed * 0.7
+      break
+    case 'dash_forward':
+      x += direction * speed * 1.55
+      break
+    case 'dash_backward':
+      x -= direction * speed * 1.25
+      break
+    case 'strafe_left':
+      z -= speed * 1.05
+      break
+    case 'strafe_right':
+      z += speed * 1.05
+      break
+    case 'circle_left':
+      z -= speed * 0.95
+      x += direction * speed * 0.35
+      break
+    case 'circle_right':
+      z += speed * 0.95
+      x += direction * speed * 0.35
+      break
+    case 'turn_left':
+      z -= speed * 0.65
+      x += direction * speed * 0.25
+      break
+    case 'turn_right':
+      z += speed * 0.65
+      x += direction * speed * 0.25
+      break
+    case 'brake':
+      break
+  }
+
+  return clampPosition([x, 0, z], arena)
+}
+
+function segmentDistanceToPoint(
+  start: Vector3,
+  end: Vector3,
+  point: Vector3,
+): number {
+  const dx = end[0] - start[0]
+  const dz = end[2] - start[2]
+  const lengthSquared = dx * dx + dz * dz
+
+  if (lengthSquared <= 0) {
+    return distance(start, point)
+  }
+
+  const t = Math.min(
+    1,
+    Math.max(0, ((point[0] - start[0]) * dx + (point[2] - start[2]) * dz) / lengthSquared),
+  )
+  const closest: Vector3 = [start[0] + dx * t, 0, start[2] + dz * t]
+
+  return distance(closest, point)
+}
+
+function clampPosition(position: Vector3, arena: ArenaConfig): Vector3 {
+  const xLimit = Math.max(1, arena.width / 2 - 0.85)
+  const zLimit = Math.max(1, arena.height / 2 - 0.85)
+
+  return [
+    Math.min(Math.max(position[0], -xLimit), xLimit),
+    0,
+    Math.min(Math.max(position[2], -zLimit), zLimit),
+  ]
 }
 
 function evadeMove(

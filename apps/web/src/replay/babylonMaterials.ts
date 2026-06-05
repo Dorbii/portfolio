@@ -14,13 +14,25 @@ export type TeamMaterialSet = {
   weapon: StandardMaterial
   utility: StandardMaterial
   style: StandardMaterial
+  damaged: StandardMaterial
   trim: StandardMaterial
   rubber: StandardMaterial
   light: StandardMaterial
   warning: StandardMaterial
 }
 
-type SurfacePattern = 'panel' | 'armor' | 'mobility' | 'weapon' | 'utility' | 'style' | 'trim' | 'rubber' | 'light' | 'warning'
+type SurfacePattern =
+  | 'panel'
+  | 'armor'
+  | 'mobility'
+  | 'weapon'
+  | 'utility'
+  | 'style'
+  | 'damaged'
+  | 'trim'
+  | 'rubber'
+  | 'light'
+  | 'warning'
 type TextureDrawingContext = ReturnType<DynamicTexture['getContext']>
 
 export function createTeamMaterials(
@@ -34,6 +46,7 @@ export function createTeamMaterials(
       weapon: createMaterial(scene, 'red-weapon', '#f6bd4f', '#4d2a05', 0.36, 'weapon'),
       utility: createMaterial(scene, 'red-utility', '#f47b54', '#321005', 0.34, 'utility'),
       style: createMaterial(scene, 'red-style', '#ff92a8', '#3c1019', 0.4, 'style'),
+      damaged: createMaterial(scene, 'red-damaged', '#4a3232', '#32110c', 0.22, 'damaged'),
       trim: createMaterial(scene, 'red-trim', '#17191b', '#050505', 0.26, 'trim'),
       rubber: createMaterial(scene, 'red-rubber', '#0d0e10', '#020202', 0.18, 'rubber'),
       light: createMaterial(scene, 'red-light', '#ff5b68', '#ff1f35', 0.72, 'light'),
@@ -46,6 +59,7 @@ export function createTeamMaterials(
       weapon: createMaterial(scene, 'blue-weapon', '#f6bd4f', '#3a2503', 0.36, 'weapon'),
       utility: createMaterial(scene, 'blue-utility', '#33c4ca', '#082629', 0.34, 'utility'),
       style: createMaterial(scene, 'blue-style', '#98e5ff', '#09283b', 0.4, 'style'),
+      damaged: createMaterial(scene, 'blue-damaged', '#2f3b46', '#061f2a', 0.22, 'damaged'),
       trim: createMaterial(scene, 'blue-trim', '#171b20', '#050608', 0.26, 'trim'),
       rubber: createMaterial(scene, 'blue-rubber', '#0d0f12', '#020203', 0.18, 'rubber'),
       light: createMaterial(scene, 'blue-light', '#58a9ff', '#167cff', 0.78, 'light'),
@@ -119,6 +133,8 @@ function createSurfaceTexture(
     drawWarningTexture(context, dark, light)
   } else if (pattern === 'utility') {
     drawUtilityTexture(context, dark, light)
+  } else if (pattern === 'damaged') {
+    drawDamageTexture(context)
   } else if (pattern === 'light') {
     drawLightTexture(context, light)
   } else {
@@ -128,6 +144,10 @@ function createSurfaceTexture(
   drawScuffs(context)
   texture.uScale = pattern === 'rubber' || pattern === 'mobility' ? 3 : 2
   texture.vScale = pattern === 'rubber' || pattern === 'mobility' ? 2.6 : 2
+  if (pattern === 'damaged') {
+    texture.uScale = 2.7
+    texture.vScale = 2.25
+  }
   texture.update(false)
 
   return texture
@@ -231,6 +251,40 @@ function drawLightTexture(context: TextureDrawingContext, light: string): void {
 
   for (let y = 24; y < 256; y += 42) {
     drawLine(context, 0, y, 256, y)
+  }
+}
+
+function drawDamageTexture(context: TextureDrawingContext): void {
+  context.fillStyle = rgbaFromHex('#050607', 0.44)
+  context.fillRect(0, 0, 256, 256)
+  context.strokeStyle = rgbaFromHex('#000000', 0.82)
+  context.lineWidth = 9
+
+  for (let index = 0; index < 7; index += 1) {
+    const x = (index * 43 + 18) % 256
+    const y = (index * 61 + 34) % 256
+
+    drawLine(context, x, y, x + 72, y + 18)
+    drawLine(context, x + 26, y + 6, x + 42, y + 48)
+  }
+
+  context.strokeStyle = rgbaFromHex('#ffb25c', 0.5)
+  context.lineWidth = 4
+
+  for (let index = 0; index < 6; index += 1) {
+    const x = (index * 53 + 24) % 256
+    const y = (index * 37 + 42) % 256
+
+    drawLine(context, x, y, x + 28, y + 7)
+  }
+
+  context.fillStyle = rgbaFromHex('#ff6b2e', 0.34)
+
+  for (let index = 0; index < 5; index += 1) {
+    const x = (index * 67 + 39) % 238
+    const y = (index * 29 + 57) % 238
+
+    context.fillRect(x, y, 18, 8)
   }
 }
 

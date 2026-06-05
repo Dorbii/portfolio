@@ -1,12 +1,9 @@
 import type {
   ArenaConfig,
   AgentChatMessageRequest,
-  AppliedRefereeAward,
   BotBlueprint,
   GeneratedControls,
   InventoryItem,
-  RefereeAwardOption,
-  RefereeAwardSelection,
   RoundPlanSubmission,
   SessionPhase,
   SessionChatMessage,
@@ -63,7 +60,7 @@ export type SessionLogEvent = {
     | 'phase_changed'
     | 'round_plan_submitted'
     | 'combat_resolved'
-    | 'referee_awards_submitted'
+    | 'round_advanced'
     | 'economy_applied'
     | 'session_completed'
   message: string
@@ -85,7 +82,6 @@ export type PublicSessionState = {
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
   replayAvailable: boolean
-  awardOptions?: RefereeAwardOption[]
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]
   eventLog: SessionLogEvent[]
@@ -105,8 +101,6 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   ownSubmission?: RoundPlanSubmission
   opponent: RolePublicState
   replayAvailable: boolean
-  awardOptions?: RefereeAwardOption[]
-  awardHistory?: AppliedRefereeAward[]
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]
   privateChatLog: SessionChatMessage[]
@@ -182,12 +176,7 @@ export type AgentPrivateChatMessageResponse = {
 
 export type AgentPrivateChatMessagePostRequest = AgentChatMessageRequest
 
-export type SubmitRefereeAwardsRequest = {
-  awards: RefereeAwardSelection[]
-}
-
-export type RefereeAwardsResponse = {
-  appliedAwards: AppliedRefereeAward[]
+export type AdvanceRoundResponse = {
   publicState: PublicSessionState
 }
 
