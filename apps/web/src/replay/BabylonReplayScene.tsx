@@ -917,7 +917,6 @@ function createHazardVisuals(
     const visual = buildHazardVisual(
       scene,
       `${normalized}-${index}`,
-      rawName,
       normalized,
       arena.width,
       arena.height,
@@ -955,7 +954,6 @@ function createHazardVisuals(
 function buildHazardVisual(
   scene: Scene,
   id: string,
-  rawName: string,
   normalized: string,
   arenaWidth: number,
   arenaHeight: number,

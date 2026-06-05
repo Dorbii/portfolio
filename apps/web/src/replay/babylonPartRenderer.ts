@@ -68,6 +68,8 @@ type BotBounds = {
   depth: number
 }
 
+type BotFoundationArchetype = 'compact_assault' | 'long_control' | 'modular_default'
+
 export function createTeamMaterials(
   scene: Scene,
 ): Record<TeamRole, TeamMaterialSet> {
@@ -108,8 +110,9 @@ export function createBotNode(
   const root = new TransformNode(`${role}-bot-root`, scene)
   const blocks = blueprint.blocks.slice(0, MAX_RENDERED_BLOCKS)
   const bounds = measureBotBounds(blocks)
+  const archetype = resolveFoundationArchetype(blocks)
 
-  createBotFoundation(scene, root, role, materials, bounds)
+  createBotFoundation(scene, root, role, materials, bounds, archetype)
 
   blocks.forEach((block) => {
     const partNode = createPartNode(scene, block, role, materials)
@@ -159,6 +162,39 @@ function measureBotBounds(blocks: BlueprintBlock[]): BotBounds {
   }
 }
 
+// CODEX_INTENT: infer visual foundations from real blueprint parts so replay bots do not share one generic hull.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function resolveFoundationArchetype(blocks: BlueprintBlock[]): BotFoundationArchetype {
+  const partIds = new Set(blocks.map((block) => block.partId))
+  const hasLongBody = partIds.has('Body_Rectangle_Long') || partIds.has('Body_Light_Frame')
+  const hasControlLoadout =
+    partIds.has('Weapon_Net') ||
+    partIds.has('Weapon_Turret') ||
+    partIds.has('Utility_Magnet') ||
+    partIds.has('Utility_Sensor')
+  const hasHeavyDrive =
+    partIds.has('Tread_Heavy') || partIds.has('Wheel_Tank') || partIds.has('Body_Heavy_Block')
+  const hasContactWeapon =
+    partIds.has('Weapon_Spinner_Large') ||
+    partIds.has('Weapon_Spinner_Small') ||
+    partIds.has('Weapon_Flipper') ||
+    partIds.has('Weapon_Ram') ||
+    partIds.has('Weapon_Saw') ||
+    partIds.has('Body_Wedge')
+
+  if (hasLongBody || (hasControlLoadout && partIds.has('Wheel_Omni'))) {
+    return 'long_control'
+  }
+
+  if (hasHeavyDrive || hasContactWeapon) {
+    return 'compact_assault'
+  }
+
+  return 'modular_default'
+}
+
 function heightForCategory(category: PartCategory, cellHeight: number): number {
   const base = cellHeight * CELL_SCALE
 
@@ -191,7 +227,18 @@ function createBotFoundation(
   role: TeamRole,
   materials: TeamMaterialSet,
   bounds: BotBounds,
+  archetype: BotFoundationArchetype,
 ): void {
+  if (archetype === 'compact_assault') {
+    createCompactAssaultFoundation(scene, root, role, materials, bounds)
+    return
+  }
+
+  if (archetype === 'long_control') {
+    createLongControlFoundation(scene, root, role, materials, bounds)
+    return
+  }
+
   const base = MeshBuilder.CreateBox(
     `${role}-foundation-hull`,
     { width: bounds.width, height: 0.2, depth: bounds.depth },
@@ -388,6 +435,196 @@ function createBotFoundation(
   attachMesh(beacon, root, materials.light)
 }
 
+function createCompactAssaultFoundation(
+  scene: Scene,
+  root: TransformNode,
+  role: TeamRole,
+  materials: TeamMaterialSet,
+  bounds: BotBounds,
+): void {
+  const hullWidth = Math.max(1.42, bounds.width * 0.58)
+  const hullDepth = Math.max(1.68, bounds.depth * 0.74)
+  const coreHeight = 0.28
+
+  const base = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-hull`,
+    { width: hullWidth, height: coreHeight, depth: hullDepth },
+    scene,
+  )
+  const prow = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-prow`,
+    { width: hullWidth * 0.64, height: 0.2, depth: hullDepth * 0.25 },
+    scene,
+  )
+  const weaponPlinth = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-weapon-plinth`,
+    { width: hullWidth * 0.48, height: 0.24, depth: hullDepth * 0.34 },
+    scene,
+  )
+  const rearBlock = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-rear-block`,
+    { width: hullWidth * 0.52, height: 0.22, depth: hullDepth * 0.22 },
+    scene,
+  )
+  const topArmor = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-top-armor`,
+    { width: hullWidth * 0.76, height: 0.08, depth: hullDepth * 0.56 },
+    scene,
+  )
+
+  base.position.set(bounds.centerX, 0.18, bounds.centerZ)
+  prow.position.set(bounds.centerX, 0.34, bounds.centerZ + hullDepth * 0.42)
+  weaponPlinth.position.set(bounds.centerX, 0.48, bounds.centerZ - hullDepth * 0.3)
+  rearBlock.position.set(bounds.centerX, 0.36, bounds.centerZ - hullDepth * 0.48)
+  topArmor.position.set(bounds.centerX, 0.38, bounds.centerZ - hullDepth * 0.03)
+  attachMesh(base, root, materials.chassis)
+  attachMesh(prow, root, materials.armor)
+  attachMesh(weaponPlinth, root, materials.trim)
+  attachMesh(rearBlock, root, materials.trim)
+  attachMesh(topArmor, root, materials.armor)
+
+  for (let side = -1; side <= 1; side += 2) {
+    const cheek = MeshBuilder.CreateBox(
+      `${role}-foundation-compact-cheek-${side}`,
+      { width: 0.2, height: 0.3, depth: hullDepth * 0.72 },
+      scene,
+    )
+    const lowerSkid = MeshBuilder.CreateBox(
+      `${role}-foundation-compact-lower-skid-${side}`,
+      { width: 0.14, height: 0.08, depth: hullDepth * 0.92 },
+      scene,
+    )
+    const strikeTooth = MeshBuilder.CreateBox(
+      `${role}-foundation-compact-strike-tooth-${side}`,
+      { width: hullWidth * 0.18, height: 0.16, depth: 0.2 },
+      scene,
+    )
+
+    cheek.position.set(bounds.centerX + side * hullWidth * 0.49, 0.32, bounds.centerZ + hullDepth * 0.03)
+    lowerSkid.position.set(bounds.centerX + side * hullWidth * 0.57, 0.13, bounds.centerZ)
+    strikeTooth.position.set(
+      bounds.centerX + side * hullWidth * 0.25,
+      0.28,
+      bounds.centerZ + hullDepth * 0.58,
+    )
+    strikeTooth.rotation.y = side * 0.08
+    attachMesh(cheek, root, materials.trim)
+    attachMesh(lowerSkid, root, materials.rubber)
+    attachMesh(strikeTooth, root, materials.warning)
+  }
+
+  const tower = MeshBuilder.CreateBox(
+    `${role}-foundation-compact-control-tower`,
+    { width: hullWidth * 0.22, height: 0.26, depth: hullDepth * 0.18 },
+    scene,
+  )
+  const beacon = MeshBuilder.CreateSphere(
+    `${role}-foundation-compact-beacon`,
+    { diameter: 0.15, segments: 10 },
+    scene,
+  )
+
+  tower.position.set(bounds.centerX + hullWidth * 0.18, 0.64, bounds.centerZ - hullDepth * 0.03)
+  beacon.position.set(bounds.centerX + hullWidth * 0.18, 0.84, bounds.centerZ + hullDepth * 0.05)
+  attachMesh(tower, root, materials.utility)
+  attachMesh(beacon, root, materials.light)
+}
+
+function createLongControlFoundation(
+  scene: Scene,
+  root: TransformNode,
+  role: TeamRole,
+  materials: TeamMaterialSet,
+  bounds: BotBounds,
+): void {
+  const spineWidth = Math.max(1.05, bounds.width * 0.42)
+  const spineDepth = Math.max(2.62, bounds.depth * 1.08)
+  const outriggerOffset = spineWidth * 0.72
+
+  const spine = MeshBuilder.CreateBox(
+    `${role}-foundation-long-spine`,
+    { width: spineWidth, height: 0.18, depth: spineDepth },
+    scene,
+  )
+  const nose = MeshBuilder.CreateBox(
+    `${role}-foundation-long-sensor-nose`,
+    { width: spineWidth * 0.62, height: 0.16, depth: spineDepth * 0.18 },
+    scene,
+  )
+  const rearDeck = MeshBuilder.CreateBox(
+    `${role}-foundation-long-rear-deck`,
+    { width: spineWidth * 0.78, height: 0.2, depth: spineDepth * 0.2 },
+    scene,
+  )
+  const controlDeck = MeshBuilder.CreateBox(
+    `${role}-foundation-long-control-deck`,
+    { width: spineWidth * 0.54, height: 0.24, depth: spineDepth * 0.28 },
+    scene,
+  )
+
+  spine.position.set(bounds.centerX, 0.17, bounds.centerZ)
+  nose.position.set(bounds.centerX, 0.31, bounds.centerZ + spineDepth * 0.47)
+  rearDeck.position.set(bounds.centerX, 0.34, bounds.centerZ - spineDepth * 0.42)
+  controlDeck.position.set(bounds.centerX - spineWidth * 0.08, 0.5, bounds.centerZ - spineDepth * 0.03)
+  attachMesh(spine, root, materials.chassis)
+  attachMesh(nose, root, materials.utility)
+  attachMesh(rearDeck, root, materials.trim)
+  attachMesh(controlDeck, root, materials.trim)
+
+  for (let side = -1; side <= 1; side += 2) {
+    const rail = MeshBuilder.CreateBox(
+      `${role}-foundation-long-outrigger-rail-${side}`,
+      { width: 0.12, height: 0.12, depth: spineDepth * 0.82 },
+      scene,
+    )
+    const sensorStrip = MeshBuilder.CreateBox(
+      `${role}-foundation-long-sensor-strip-${side}`,
+      { width: 0.05, height: 0.08, depth: spineDepth * 0.34 },
+      scene,
+    )
+    const endCap = MeshBuilder.CreateBox(
+      `${role}-foundation-long-end-cap-${side}`,
+      { width: 0.22, height: 0.14, depth: 0.22 },
+      scene,
+    )
+
+    rail.position.set(bounds.centerX + side * outriggerOffset, 0.32, bounds.centerZ - spineDepth * 0.02)
+    sensorStrip.position.set(
+      bounds.centerX + side * (outriggerOffset + 0.08),
+      0.46,
+      bounds.centerZ + spineDepth * 0.18,
+    )
+    endCap.position.set(bounds.centerX + side * outriggerOffset, 0.35, bounds.centerZ + spineDepth * 0.48)
+    attachMesh(rail, root, materials.trim)
+    attachMesh(sensorStrip, root, materials.light)
+    attachMesh(endCap, root, materials.utility)
+  }
+
+  const launcherCradle = MeshBuilder.CreateBox(
+    `${role}-foundation-long-launcher-cradle`,
+    { width: spineWidth * 0.42, height: 0.16, depth: spineDepth * 0.18 },
+    scene,
+  )
+  const commsMast = MeshBuilder.CreateCylinder(
+    `${role}-foundation-long-comms-mast`,
+    { height: 0.56, diameter: 0.035, tessellation: 8 },
+    scene,
+  )
+  const scanner = MeshBuilder.CreateSphere(
+    `${role}-foundation-long-scanner`,
+    { diameter: 0.14, segments: 10 },
+    scene,
+  )
+
+  launcherCradle.position.set(bounds.centerX + spineWidth * 0.24, 0.62, bounds.centerZ - spineDepth * 0.22)
+  commsMast.position.set(bounds.centerX - spineWidth * 0.32, 0.86, bounds.centerZ + spineDepth * 0.12)
+  commsMast.rotation.z = role === 'red' ? 0.12 : -0.12
+  scanner.position.set(bounds.centerX - spineWidth * 0.32, 1.14, bounds.centerZ + spineDepth * 0.12)
+  attachMesh(launcherCradle, root, materials.weapon)
+  attachMesh(commsMast, root, materials.warning)
+  attachMesh(scanner, root, materials.light)
+}
+
 function createPartNode(
   scene: Scene,
   block: BlueprintBlock,
@@ -455,6 +692,53 @@ function createBodyPart(
   depth: number,
   materials: TeamMaterialSet,
 ): void {
+  // CODEX_INTENT: make the long chassis read nose-to-tail in replay without changing catalog or sim semantics.
+  // CODEX_RISK: behavioral
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  if (partId === 'Body_Rectangle_Long') {
+    const visualWidth = Math.max(width * 0.56, 0.86)
+    const visualDepth = Math.max(depth * 1.68, 1.72)
+    const spine = MeshBuilder.CreateBox(
+      `${parent.name}-long-control-spine`,
+      { width: visualWidth, height: Math.max(height, 0.42), depth: visualDepth },
+      scene,
+    )
+    const noseDeck = MeshBuilder.CreateBox(
+      `${parent.name}-long-control-nose-deck`,
+      { width: visualWidth * 0.72, height: 0.12, depth: visualDepth * 0.2 },
+      scene,
+    )
+    const rearModule = MeshBuilder.CreateBox(
+      `${parent.name}-long-control-rear-module`,
+      { width: visualWidth * 0.82, height: 0.18, depth: visualDepth * 0.22 },
+      scene,
+    )
+
+    noseDeck.position.set(0, Math.max(height * 0.58, 0.31), visualDepth * 0.38)
+    rearModule.position.set(0, Math.max(height * 0.7, 0.36), -visualDepth * 0.36)
+    attachMesh(spine, parent, material)
+    attachMesh(noseDeck, parent, materials.utility)
+    attachMesh(rearModule, parent, materials.trim)
+
+    for (let side = -1; side <= 1; side += 2) {
+      createBoxDetail(
+        scene,
+        parent,
+        materials.light,
+        `${parent.name}-long-control-side-light-${side}`,
+        0.045,
+        0.07,
+        visualDepth * 0.52,
+        side * visualWidth * 0.55,
+        Math.max(height * 0.58, 0.3),
+        visualDepth * 0.04,
+      )
+    }
+
+    return
+  }
+
   if (partId.includes('Cylinder')) {
     const cylinder = MeshBuilder.CreateCylinder(
       `${parent.name}-chassis-cyl`,
