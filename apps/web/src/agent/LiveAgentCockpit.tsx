@@ -9,6 +9,7 @@ import {
 import {
   AgentChatLog,
   AwardIncentives,
+  ConnectionGuide,
   ErrorPanel,
   Fact,
   InvalidInvite,
@@ -49,11 +50,13 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
     chatMessage,
     chatStatus,
     claimButtonLabel,
-    claimRole,
+    connectRole,
     clearRoleToken,
+    connectionGuidance,
     copyExternalAgentBrief,
     externalAgentBriefMarkdown,
     externalAgentBriefScript,
+    hasPlayerKey,
     isBusy,
     lastError,
     loadState,
@@ -103,14 +106,14 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               maxLength={80}
             />
           </label>
-          <button type="button" onClick={() => void claimRole()} disabled={!canClaimRole}>
+          <button type="button" onClick={() => void connectRole()} disabled={!canClaimRole}>
             {claimButtonLabel}
           </button>
-          <button type="button" onClick={() => void loadState()} disabled={!roleToken || isBusy}>
+          <button type="button" onClick={() => void loadState()} disabled={!hasPlayerKey || isBusy}>
             {refreshButtonLabel}
           </button>
           <button type="button" onClick={() => void clearRoleToken()} disabled={!roleToken || isBusy}>
-            Clear role token
+            Clear player key
           </button>
           <a href={`${invite.apiBase}/agent-spec.json`}>agent-spec.json</a>
         </div>
@@ -125,7 +128,16 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <Fact label="Role" value={capitalize(invite.role)} />
               <Fact label="API" value={invite.apiBase} />
               <Fact label="Claim token" value={invite.claimToken ? 'Present' : 'Not in fragment'} />
-              <Fact label="Bearer token" value={roleToken ? 'Stored in this tab' : 'Not claimed'} />
+              <Fact
+                label="Player key"
+                value={
+                  roleToken
+                    ? 'Stored in this tab'
+                    : invite.claimToken
+                      ? 'Available from invite'
+                      : 'Missing'
+                }
+              />
               <Fact label="Status" value={formatLabel(status)} />
             </dl>
             {notice ? (
@@ -133,6 +145,11 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                 {notice}
               </p>
             ) : null}
+          </section>
+
+          <section aria-labelledby="connection-heading">
+            <SectionTitle id="connection-heading" title="Connection" />
+            <ConnectionGuide guidance={connectionGuidance} />
           </section>
 
           <section aria-labelledby="phase-heading">
@@ -151,9 +168,9 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <p className="agent-empty">
                 {isBusy
                   ? 'Loading role state from the API.'
-                  : roleToken
-                    ? 'Role token loaded. Use Refresh state if the previous load failed.'
-                    : 'Claim this role or reuse a stored bearer token to load private state.'}
+                  : hasPlayerKey
+                    ? 'Player key loaded. Use Refresh state if the previous load failed.'
+                    : 'Connect this role or reuse a stored player key to load private state.'}
               </p>
             )}
             {roleState?.submitted ? (

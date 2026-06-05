@@ -2,6 +2,7 @@ import type {
   AgentChatMessagePostRequest,
   AgentChatMessageResponse,
   AgentBootstrapResponse,
+  AgentNextAction,
   AgentPrivateChatMessagePostRequest,
   AgentPrivateChatMessageResponse,
   PublicSessionState,
@@ -23,6 +24,7 @@ import {
 import { createBaselineRoundPlan } from './baselineRoundPlan.js'
 import type {
   AgentContract,
+  AgentWaitOptions,
   FetchLike,
 } from './agentClientTypes.js'
 import { TERMINAL_PHASES } from './agentRoleApi.js'
@@ -41,6 +43,7 @@ export type {
   AgentArenaValidAction,
   AgentContract,
   AgentInviteParseResult,
+  AgentWaitOptions,
 } from './agentClientTypes.js'
 export {
   clearStoredRoleToken,
@@ -55,6 +58,9 @@ export {
 } from './agentRoleApi.js'
 
 const DEFAULT_WAIT_POLL_MS = 4_000
+const DEFAULT_WAIT_TIMEOUT_MS = 10 * 60_000
+const MIN_WAIT_POLL_MS = 1_000
+const PLAYABLE_NEXT_ACTIONS = new Set<AgentNextAction>(['submit_round_plan', 'stop'])
 
 function isRelayErrorResponse(value: unknown): value is RelayErrorResponse {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -86,8 +92,45 @@ function headersWithJson(init?: RequestInit): Headers {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
-    window.setTimeout(resolve, ms)
+    globalThis.setTimeout(resolve, ms)
   })
+}
+
+function waitConfig(options: AgentWaitOptions = {}) {
+  const pollMs = Math.max(MIN_WAIT_POLL_MS, options.pollMs ?? DEFAULT_WAIT_POLL_MS)
+  const timeoutMs = Math.max(pollMs, options.timeoutMs ?? DEFAULT_WAIT_TIMEOUT_MS)
+
+  return {
+    deadline: Date.now() + timeoutMs,
+    pollMs,
+    timeoutMs,
+  }
+}
+
+async function waitBeforePollingAgain(
+  config: ReturnType<typeof waitConfig>,
+  input: {
+    target: string
+    lastPhase?: SessionPhase
+    lastNextAction?: AgentNextAction
+    lastStateVersion?: string
+  },
+): Promise<void> {
+  const remainingMs = config.deadline - Date.now()
+
+  if (remainingMs <= 0) {
+    throw new AgentArenaApiError({
+      status: 408,
+      message: [
+        `Timed out after ${Math.ceil(config.timeoutMs / 1000)}s waiting for ${input.target}.`,
+        input.lastPhase ? `Last phase: ${input.lastPhase}.` : '',
+        input.lastNextAction ? `Last nextAction: ${input.lastNextAction}.` : '',
+        input.lastStateVersion ? `Last stateVersion: ${input.lastStateVersion}.` : '',
+      ].filter(Boolean).join(' '),
+    })
+  }
+
+  await delay(Math.min(config.pollMs, remainingMs))
 }
 
 export function serializeJsonForScript(value: unknown): string {
@@ -272,7 +315,12 @@ export class AgentArenaClient {
     return state.privateChatLog
   }
 
-  async waitForPhase(phase: SessionPhase): Promise<RolePrivateState> {
+  async waitForPhase(
+    phase: SessionPhase,
+    options?: AgentWaitOptions,
+  ): Promise<RolePrivateState> {
+    const config = waitConfig(options)
+
     for (;;) {
       const state = await this.getState()
 
@@ -288,12 +336,20 @@ export class AgentArenaClient {
         })
       }
 
-      await delay(DEFAULT_WAIT_POLL_MS)
+      await waitBeforePollingAgain(config, {
+        target: phase,
+        lastPhase: state.phase,
+        lastStateVersion: state.stateVersion,
+      })
     }
   }
 
-  async waitForStateChange(previousStateVersion?: string): Promise<RolePrivateState> {
+  async waitForStateChange(
+    previousStateVersion?: string,
+    options?: AgentWaitOptions,
+  ): Promise<RolePrivateState> {
     const baseline = previousStateVersion ?? (await this.getState()).stateVersion
+    const config = waitConfig(options)
 
     for (;;) {
       const state = await this.getState()
@@ -310,11 +366,19 @@ export class AgentArenaClient {
         })
       }
 
-      await delay(DEFAULT_WAIT_POLL_MS)
+      await waitBeforePollingAgain(config, {
+        target: 'stateVersion change',
+        lastPhase: state.phase,
+        lastStateVersion: state.stateVersion,
+      })
     }
   }
 
-  async waitForNextSubmissionWindow(): Promise<RolePrivateState> {
+  async waitForNextSubmissionWindow(
+    options?: AgentWaitOptions,
+  ): Promise<RolePrivateState> {
+    const config = waitConfig(options)
+
     for (;;) {
       const state = await this.getState()
 
@@ -330,7 +394,30 @@ export class AgentArenaClient {
         })
       }
 
-      await delay(DEFAULT_WAIT_POLL_MS)
+      await waitBeforePollingAgain(config, {
+        target: 'next submission window',
+        lastPhase: state.phase,
+        lastStateVersion: state.stateVersion,
+      })
+    }
+  }
+
+  async waitForNextAction(options?: AgentWaitOptions): Promise<AgentBootstrapResponse> {
+    const config = waitConfig(options)
+
+    for (;;) {
+      const bootstrap = await this.bootstrapRole()
+
+      if (PLAYABLE_NEXT_ACTIONS.has(bootstrap.nextAction)) {
+        return bootstrap
+      }
+
+      await waitBeforePollingAgain(config, {
+        target: 'next playable action',
+        lastPhase: bootstrap.state.phase,
+        lastNextAction: bootstrap.nextAction,
+        lastStateVersion: bootstrap.state.stateVersion,
+      })
     }
   }
 

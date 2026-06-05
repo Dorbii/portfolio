@@ -45,6 +45,7 @@ export type AgentArenaValidAction = {
     | 'get_private_chat_log'
     | 'wait_for_state_change'
     | 'wait_for_next_submission_window'
+    | 'wait_for_next_action'
     | 'get_fallback_round_plan'
     | 'submit_fallback_round_plan'
     | 'submit_round_plan'
@@ -52,6 +53,11 @@ export type AgentArenaValidAction = {
     | 'submit_private_chat_message'
   available: boolean
   reason?: string
+}
+
+export type AgentWaitOptions = {
+  pollMs?: number
+  timeoutMs?: number
 }
 
 export type AgentArenaRoleApi = {
@@ -74,7 +80,11 @@ export type AgentArenaRoleApi = {
   getMatchLog(): Promise<SessionLogEvent[]>
   getChatLog(): Promise<SessionChatMessage[]>
   getPrivateChatLog(): Promise<SessionChatMessage[]>
-  waitForStateChange(previousStateVersion?: string): Promise<RolePrivateState>
-  waitForPhase(phase: SessionPhase): Promise<RolePrivateState>
-  waitForNextSubmissionWindow(): Promise<RolePrivateState>
+  waitForStateChange(
+    previousStateVersion?: string,
+    options?: AgentWaitOptions,
+  ): Promise<RolePrivateState>
+  waitForPhase(phase: SessionPhase, options?: AgentWaitOptions): Promise<RolePrivateState>
+  waitForNextSubmissionWindow(options?: AgentWaitOptions): Promise<RolePrivateState>
+  waitForNextAction(options?: AgentWaitOptions): Promise<AgentBootstrapResponse>
 }

@@ -1987,6 +1987,51 @@ pre {
   font-weight: 800;
 }
 
+.agent-connection {
+  margin-top: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(238, 242, 243, 0.14);
+  border-radius: 6px;
+  background: rgba(238, 242, 243, 0.04);
+}
+
+.agent-connection strong {
+  color: #eef2f3;
+  font-size: 0.88rem;
+}
+
+.agent-connection p,
+.agent-connection small {
+  margin: 0;
+  color: #c2cccc;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.agent-connection code {
+  min-width: 0;
+  padding: 7px 8px;
+  overflow-wrap: anywhere;
+  border-radius: 5px;
+  color: #f3d46f;
+  background: #0b0e0d;
+  font-size: 0.72rem;
+}
+
+.agent-connection.tone-ready {
+  border-color: rgba(96, 214, 148, 0.34);
+}
+
+.agent-connection.tone-working {
+  border-color: rgba(143, 208, 255, 0.34);
+}
+
+.agent-connection.tone-blocked {
+  border-color: rgba(255, 115, 115, 0.34);
+}
+
 .claim-controls,
 .submission-editor {
   margin-top: 14px;

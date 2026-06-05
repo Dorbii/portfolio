@@ -237,7 +237,7 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('## Do this first'))
   assert.ok(brief.includes('Default path: use the invite page helpers.'))
   assert.ok(brief.includes('## If you are confused'))
-  assert.ok(brief.includes('If submit returns `state.submitted=true`, stop submitting and wait.'))
+  assert.ok(brief.includes('keep this role thread alive with `waitForNextAction({ timeoutMs: 600000 })`'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
   assert.ok(brief.includes('Authorization: Bearer <claimToken>'))
   assert.ok(brief.includes('## Browser page API'))
@@ -247,8 +247,9 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('window.AgentArenaRole.submitPrivateChatMessage'))
   assert.ok(brief.includes('Do not submit hidden chain-of-thought'))
   assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
+  assert.ok(brief.includes('window.AgentArenaRole.waitForNextAction({ timeoutMs: 600000 })'))
   assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
-  assert.ok(brief.includes('If a submit response has state.submitted=true, stop submitting for this round.'))
+  assert.ok(brief.includes('If a submit response has state.submitted=true, stop submitting for this round and keep waiting'))
   assert.ok(brief.includes('Do not keep retrying'))
   assert.ok(brief.includes('## Only if browser helpers fail'))
   assert.ok(brief.includes('## Browser page API'))
@@ -261,8 +262,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Gold: 100'))
   assert.ok(brief.includes('State version: v1'))
   assert.ok(brief.includes('## Continuation loop'))
+  assert.ok(brief.includes('Timeout: 600000ms'))
   assert.ok(brief.includes('Watch field: stateVersion'))
-  assert.ok(brief.includes('window.AgentArenaRole.waitForNextSubmissionWindow()'))
   assert.ok(brief.includes('Body_Square_Medium'))
   assert.ok(brief.includes('Weapon_Spinner_Small'))
   assert.ok(brief.includes('script#agent-arena-brief'))
@@ -323,6 +324,55 @@ test('agent client bootstraps with invite claim token as bearer player key', asy
       body: { agentName: 'External Red' },
     },
   ])
+})
+
+test('agent client waits for the next playable action with a bounded timer', async () => {
+  let bootstrapCalls = 0
+  const client = new AgentArenaClient({
+    invite,
+    fetchImpl: async (url) => {
+      assert.equal(String(url), `${invite.apiBase}/sessions/s_demo/roles/red/bootstrap`)
+      bootstrapCalls += 1
+
+      return jsonResponse({
+        sessionId: invite.sessionId,
+        role: invite.role,
+        claimedNow: false,
+        state: {
+          ...roleState,
+          submitted: bootstrapCalls === 1,
+          stateVersion: bootstrapCalls === 1 ? 'v1' : 'v2',
+        },
+        publicState: {
+          sessionId: invite.sessionId,
+          stateVersion: bootstrapCalls === 1 ? 'v1' : 'v2',
+          phase: 'submission_phase',
+          round: 1,
+          maxRounds: 7,
+          expiresAt: roleState.expiresAt,
+          arena: {
+            name: 'Compact Box',
+            width: 24,
+            height: 16,
+            activeHazards: [],
+          },
+          roles: {
+            red: { role: 'red', claimed: true, submitted: bootstrapCalls === 1 },
+            blue: { role: 'blue', claimed: true, submitted: true },
+          },
+          replayAvailable: false,
+          eventLog: roleState.eventLog,
+        },
+        nextAction: bootstrapCalls === 1 ? 'wait_for_opponent_submission' : 'submit_round_plan',
+      })
+    },
+  })
+
+  const next = await client.waitForNextAction({ pollMs: 1, timeoutMs: 2_500 })
+
+  assert.equal(bootstrapCalls, 2)
+  assert.equal(next.nextAction, 'submit_round_plan')
+  assert.equal(next.state.stateVersion, 'v2')
 })
 
 test('baseline round plan is a concrete first-round opener', () => {
@@ -491,6 +541,7 @@ test('browser role API exposes valid actions from current role state', async () 
       ['get_private_chat_log', true],
       ['wait_for_state_change', true],
       ['wait_for_next_submission_window', false],
+      ['wait_for_next_action', true],
       ['get_fallback_round_plan', true],
       ['submit_fallback_round_plan', true],
       ['submit_round_plan', true],
@@ -520,7 +571,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, true, true, false, false, false, false, false, false, true, false, false, false, false],
+    [true, true, true, false, false, false, false, false, false, false, true, false, false, false, false],
   )
 })
 
@@ -547,6 +598,55 @@ test('browser role API can claim through the invite page helper', async () => {
 
   assert.equal(claimedName, 'Browser Red')
   assert.equal(claim.roleToken, 'role_red')
+})
+
+test('browser role API bootstrap override keeps follow-up actions state-aware', async () => {
+  let currentState = null
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'cap_red',
+    fetchImpl: async () => jsonResponse(roleState),
+  })
+  const roleApi = createAgentArenaRoleApi(client, () => currentState, {
+    bootstrapRole: async () => {
+      currentState = roleState
+
+      return {
+        sessionId: invite.sessionId,
+        role: invite.role,
+        claimedNow: false,
+        state: roleState,
+        publicState: {
+          sessionId: invite.sessionId,
+          stateVersion: 'v1',
+          phase: 'submission_phase',
+          round: 1,
+          maxRounds: 7,
+          expiresAt: roleState.expiresAt,
+          arena: {
+            name: 'Compact Box',
+            width: 24,
+            height: 16,
+            activeHazards: [],
+          },
+          roles: {
+            red: { role: 'red', claimed: true, submitted: false },
+            blue: { role: 'blue', claimed: true, submitted: false },
+          },
+          replayAvailable: false,
+          eventLog: roleState.eventLog,
+        },
+        nextAction: 'submit_round_plan',
+      }
+    },
+  })
+
+  const bootstrap = await roleApi.bootstrapRole()
+  const actions = await roleApi.getValidActions()
+  const submitAction = actions.find((action) => action.name === 'submit_round_plan')
+
+  assert.equal(bootstrap.nextAction, 'submit_round_plan')
+  assert.equal(submitAction?.available, true)
 })
 
 test('browser role API can submit the fallback plan', async () => {

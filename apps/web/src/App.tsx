@@ -1,4 +1,5 @@
-import { Suspense, lazy } from 'react'
+import { Component, Suspense, lazy, type ReactNode } from 'react'
+import { AgentRoutePreflight } from './agent/AgentRoutePreflight'
 import { RefereeConsole } from './referee/RefereeConsole'
 
 const LiveAgentCockpit = lazy(() =>
@@ -22,9 +23,22 @@ export default function App() {
 
   if (isAgentPath) {
     return (
-      <Suspense fallback={<RouteFallback label="Loading agent cockpit." />}>
-        <LiveAgentCockpit />
-      </Suspense>
+      <>
+        <AgentRoutePreflight />
+        <RouteErrorBoundary
+          fallback={
+            <RouteFallback label="Agent cockpit failed to load. Browser helper is available as window.AgentArenaRole." />
+          }
+        >
+          <Suspense
+            fallback={
+              <RouteFallback label="Loading agent cockpit. Browser helper is available as window.AgentArenaRole." />
+            }
+          >
+            <LiveAgentCockpit />
+          </Suspense>
+        </RouteErrorBoundary>
+      </>
     )
   }
 
@@ -37,6 +51,28 @@ function RouteFallback({ label }: { label: string }) {
       {label}
     </main>
   )
+}
+
+class RouteErrorBoundary extends Component<
+  {
+    children: ReactNode
+    fallback: ReactNode
+  },
+  {
+    hasError: boolean
+  }
+> {
+  state = {
+    hasError: false,
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children
+  }
 }
 
 function isAgentPathname(pathname: string) {

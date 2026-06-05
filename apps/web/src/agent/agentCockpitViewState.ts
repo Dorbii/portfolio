@@ -16,6 +16,7 @@ import type { UiError } from './AgentCockpitPanels'
 import { capitalize, formatLabel } from '../shared/format'
 
 export type LoadStatus = 'idle' | 'claiming' | 'loading' | 'ready'
+export const AGENT_CONTINUATION_TIMEOUT_MS = 10 * 60_000
 
 type CockpitBriefArtifactsInput = {
   agentInviteUrl: string
@@ -33,6 +34,7 @@ export type CockpitBriefArtifacts = {
 type CockpitDerivedStateInput = {
   chatMessage: string
   chatStatus: 'idle' | 'posting'
+  invite: AgentInvite
   lastError: UiError | null
   privateChatMessage: string
   privateChatStatus: 'idle' | 'posting'
@@ -42,6 +44,14 @@ type CockpitDerivedStateInput = {
   status: LoadStatus
 }
 
+export type AgentConnectionGuidance = {
+  detail: string
+  helperCall: string
+  nextAction: string
+  status: string
+  tone: 'blocked' | 'idle' | 'ready' | 'working'
+}
+
 export type CockpitDerivedState = {
   canClaimRole: boolean
   canPostChat: boolean
@@ -49,6 +59,8 @@ export type CockpitDerivedState = {
   canSubmitPlan: boolean
   chatLog: SessionChatMessage[]
   claimButtonLabel: string
+  connectionGuidance: AgentConnectionGuidance
+  hasPlayerKey: boolean
   isBusy: boolean
   matchLog: SessionLogEvent[]
   privateChatLog: SessionChatMessage[]
@@ -98,6 +110,7 @@ export function createCockpitBriefArtifacts({
 export function createCockpitDerivedState({
   chatMessage,
   chatStatus,
+  invite,
   lastError,
   privateChatMessage,
   privateChatStatus,
@@ -107,14 +120,15 @@ export function createCockpitDerivedState({
   status,
 }: CockpitDerivedStateInput): CockpitDerivedState {
   const isBusy = status === 'claiming' || status === 'loading'
+  const hasPlayerKey = Boolean(roleToken || invite.claimToken)
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const chatLog = roleState?.chatLog ?? publicState?.chatLog ?? []
   const privateChatLog = roleState?.privateChatLog ?? []
 
   return {
-    canClaimRole: !isBusy && (!roleToken || lastError?.code === 'INVALID_TOKEN'),
+    canClaimRole: !isBusy && Boolean(invite.claimToken) && !roleState,
     canPostChat: Boolean(
-      roleToken &&
+      hasPlayerKey &&
         roleState &&
         !isBusy &&
         chatStatus !== 'posting' &&
@@ -122,16 +136,30 @@ export function createCockpitDerivedState({
         chatMessage.trim().length > 0,
     ),
     canPostPrivateChat: Boolean(
-      roleToken &&
+      hasPlayerKey &&
         roleState &&
         !isBusy &&
         privateChatStatus !== 'posting' &&
         !isTerminalPhase(roleState.phase) &&
         privateChatMessage.trim().length > 0,
     ),
-    canSubmitPlan: Boolean(roleToken) && !isBusy && !roleState?.submitted,
+    canSubmitPlan: Boolean(
+      hasPlayerKey &&
+        roleState &&
+        !isBusy &&
+        roleState.phase === 'submission_phase' &&
+        !roleState.submitted,
+    ),
     chatLog,
-    claimButtonLabel: createClaimButtonLabel(status, roleToken, isBusy),
+    claimButtonLabel: createClaimButtonLabel(status, roleState, hasPlayerKey, isBusy),
+    connectionGuidance: createAgentConnectionGuidance({
+      invite,
+      lastError,
+      roleState,
+      roleToken,
+      status,
+    }),
+    hasPlayerKey,
     isBusy,
     matchLog,
     privateChatLog,
@@ -183,10 +211,123 @@ export function isTerminalPhase(phase: RolePrivateState['phase'] | undefined): b
   return phase === 'session_complete' || phase === 'expired'
 }
 
-function createClaimButtonLabel(status: LoadStatus, roleToken: string, isBusy: boolean): string {
-  if (isBusy) {
-    return status === 'claiming' ? 'Claiming role...' : 'Loading...'
+export function createAgentConnectionGuidance({
+  invite,
+  lastError,
+  roleState,
+  roleToken,
+  status,
+}: {
+  invite: AgentInvite
+  lastError: UiError | null
+  roleState: RolePrivateState | null
+  roleToken: string
+  status: LoadStatus
+}): AgentConnectionGuidance {
+  const bootstrapCall = `await window.AgentArenaRole.bootstrapRole({ agentName: '${invite.role}-agent' })`
+
+  if (roleState) {
+    return {
+      detail: `Private state loaded for round ${roleState.round}; phase ${formatLabel(roleState.phase)}.`,
+      helperCall: helperCallForRoleState(roleState),
+      nextAction: nextActionForRoleState(roleState),
+      status: `Connected as ${capitalize(roleState.role)}`,
+      tone: isTerminalPhase(roleState.phase) ? 'blocked' : 'ready',
+    }
   }
 
-  return roleToken ? 'Role token loaded' : 'Claim role'
+  if (status === 'claiming' || status === 'loading') {
+    return {
+      detail: 'The page is claiming or resuming the role and loading private state.',
+      helperCall: bootstrapCall,
+      nextAction: 'Wait for the role state to finish loading before submitting.',
+      status: 'Connecting',
+      tone: 'working',
+    }
+  }
+
+  if (lastError) {
+    return {
+      detail: `${lastError.title}: ${lastError.message}`,
+      helperCall: bootstrapCall,
+      nextAction: 'Run bootstrap once. If the same capability or network error repeats, report that blocker instead of retrying raw HTTP.',
+      status: 'Connection needs attention',
+      tone: 'blocked',
+    }
+  }
+
+  if (roleToken || invite.claimToken) {
+    return {
+      detail: invite.claimToken
+        ? 'Invite player key is present; the page can claim or resume this role.'
+        : 'Stored player key is present; the page can resume this role.',
+      helperCall: bootstrapCall,
+      nextAction: 'Bootstrap the role, then follow the returned state and nextAction.',
+      status: 'Player key available',
+      tone: 'idle',
+    }
+  }
+
+  return {
+    detail: 'This page has no claimToken in the URL fragment and no stored player key for this session.',
+    helperCall: 'Ask the referee for a refreshed invite URL.',
+    nextAction: 'Open a valid invite URL before trying to submit a plan.',
+    status: 'Not connected',
+    tone: 'blocked',
+  }
+}
+
+function nextActionForRoleState(state: RolePrivateState): string {
+  if (isTerminalPhase(state.phase)) {
+    return `Stop. The session is ${formatLabel(state.phase)}.`
+  }
+
+  if (state.phase === 'waiting_for_agents') {
+    return 'Wait for the opponent to claim; keep polling with the bounded continuation helper.'
+  }
+
+  if (state.phase === 'submission_phase') {
+    return state.submitted
+      ? 'Do not resubmit this round. Keep this role thread alive until the next action is ready or the wait times out.'
+      : 'Submit exactly one legal round plan for this round.'
+  }
+
+  if (state.phase === 'referee_awards') {
+    return 'Wait for referee awards; keep polling with the bounded continuation helper.'
+  }
+
+  return 'Wait for the next submission window with the bounded continuation helper.'
+}
+
+function helperCallForRoleState(state: RolePrivateState): string {
+  if (isTerminalPhase(state.phase)) {
+    return 'await window.AgentArenaRole.getState()'
+  }
+
+  if (state.phase === 'submission_phase' && !state.submitted) {
+    return 'await window.AgentArenaRole.submitRoundPlan(plan)'
+  }
+
+  if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'referee_awards') {
+    return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+  }
+
+  return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+}
+
+function createClaimButtonLabel(
+  status: LoadStatus,
+  roleState: RolePrivateState | null,
+  hasPlayerKey: boolean,
+  isBusy: boolean,
+): string {
+  if (isBusy) {
+    return status === 'claiming' ? 'Connecting...' : 'Loading...'
+  }
+
+  if (roleState) {
+    return 'Role connected'
+  }
+
+  return hasPlayerKey ? 'Connect role' : 'Claim role'
 }

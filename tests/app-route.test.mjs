@@ -15,6 +15,10 @@ const agentRoleSessionSource = readFileSync(
   new URL('../apps/web/src/agent/useAgentRoleSession.ts', import.meta.url),
   'utf8',
 )
+const agentRoutePreflightSource = readFileSync(
+  new URL('../apps/web/src/agent/AgentRoutePreflight.tsx', import.meta.url),
+  'utf8',
+)
 const agentChatFormsSource = readFileSync(
   new URL('../apps/web/src/agent/useAgentChatForms.ts', import.meta.url),
   'utf8',
@@ -151,13 +155,27 @@ test('agent cockpit renders reliability and debug hooks', () => {
     cockpitSource,
     cockpitControllerSource,
     agentRoleSessionSource,
+    agentRoutePreflightSource,
     agentChatFormsSource,
     roundPlanSubmissionSource,
     cockpitViewStateSource,
   ].join('\n')
 
   assert.match(cockpitRuntimeSource, /window\.AgentArenaRole/)
+  assert.ok(appSource.includes('AgentRoutePreflight'))
+  assert.ok(appSource.includes('Browser helper is available as window.AgentArenaRole'))
+  assert.ok(appSource.includes('RouteErrorBoundary'))
+  assert.ok(appSource.includes('Agent cockpit failed to load. Browser helper is available as window.AgentArenaRole.'))
+  assert.ok(agentRoutePreflightSource.includes('window.AgentArenaRole = api'))
+  assert.ok(agentRoutePreflightSource.includes('bootstrapRole: async'))
+  assert.ok(agentRoutePreflightSource.includes('waitForNextAction: async'))
   assert.ok(cockpitPanelsSource.includes('agent-empty'))
+  assert.ok(cockpitPanelsSource.includes('agent-connection'))
+  assert.ok(cockpitSource.includes('Connection'))
+  assert.ok(cockpitViewStateSource.includes('createAgentConnectionGuidance'))
+  assert.ok(cockpitViewStateSource.includes("await window.AgentArenaRole.bootstrapRole({ agentName: '${invite.role}-agent' })"))
+  assert.ok(cockpitViewStateSource.includes('waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })'))
+  assert.ok(cockpitViewStateSource.includes('Submit exactly one legal round plan for this round.'))
   assert.ok(cockpitSource.includes('Last validation error'))
   assert.ok(cockpitSource.includes('Match log'))
   assert.ok(cockpitSource.includes('Bot chat'))
@@ -174,7 +192,7 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitRuntimeSource.includes('createExternalAgentBriefMarkdown'))
   assert.ok(cockpitRuntimeSource.includes('stateVersion'))
   assert.ok(cockpitRuntimeSource.includes('claimButtonLabel'))
-  assert.ok(cockpitSource.includes('Clear role token'))
+  assert.ok(cockpitSource.includes('Clear player key'))
 })
 
 test('agent cockpit includes structured plan editor section labels and advanced JSON mode', () => {

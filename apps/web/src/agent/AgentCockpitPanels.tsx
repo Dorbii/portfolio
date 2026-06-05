@@ -59,6 +59,27 @@ export function Fact({ label, value }: { label: string; value: string }) {
   )
 }
 
+export function ConnectionGuide({
+  guidance,
+}: {
+  guidance: {
+    detail: string
+    helperCall: string
+    nextAction: string
+    status: string
+    tone: 'blocked' | 'idle' | 'ready' | 'working'
+  }
+}) {
+  return (
+    <div className={`agent-connection tone-${guidance.tone}`} aria-live="polite">
+      <strong>{guidance.status}</strong>
+      <p>{guidance.nextAction}</p>
+      <code>{guidance.helperCall}</code>
+      <small>{guidance.detail}</small>
+    </div>
+  )
+}
+
 export function PlanMetric({
   label,
   tone,

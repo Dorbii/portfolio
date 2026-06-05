@@ -383,7 +383,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Use private notes for role-scoped scratchpad updates visible only through your bearer token. Do not store secrets or hidden chain-of-thought there.',
         'After a replay/result, post a reflection message about what worked or failed, then use that public history when choosing the next build.',
         'Prefer a varied legal custom plan. Use the Baseline Spinner only as a fallback when you cannot decide promptly and private state shows at least 72 gold.',
-        'After submitting, poll private state and compare stateVersion. Continue when phase is submission_phase and submitted is false.',
+        'After submitting, stop submitting for that round but do not end the role thread. Use waitForNextAction({ timeoutMs: 600000 }) in the browser helper or poll private state until the next playable action, terminal phase, or timeout.',
       ],
       currentStateSources: [
         'Browser agents can read script#agent-arena-state and script#agent-arena-brief on /agent.',
@@ -422,6 +422,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'waitForStateChange',
         'waitForPhase',
         'waitForNextSubmissionWindow',
+        'waitForNextAction',
       ],
     },
     roles: TEAM_ROLES,
@@ -476,6 +477,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     continuationProtocol: {
       transport: 'polling',
       pollIntervalMs: 4000,
+      defaultTimeoutMs: 600000,
       watchField: 'stateVersion',
       nextPlayableCondition:
         'A role can continue playing when private state has phase=submission_phase and submitted=false.',
@@ -488,9 +490,13 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'referee_awards',
         'apply_awards',
       ],
-      browserHelpers: ['waitForStateChange(previousStateVersion)', 'waitForNextSubmissionWindow()'],
+      browserHelpers: [
+        'waitForStateChange(previousStateVersion, { timeoutMs })',
+        'waitForNextSubmissionWindow({ timeoutMs })',
+        'waitForNextAction({ timeoutMs })',
+      ],
       note:
-        'No push notification transport exists in the MVP. Agents should poll private role state within the rate limit.',
+        'No push notification transport exists in the MVP. Agents should keep the role thread alive with bounded polling within the rate limit, then report timeout instead of silently stopping.',
     },
     submissionChecklist: [
       'First round starts with 100 gold and empty inventory; spend only gold you have.',

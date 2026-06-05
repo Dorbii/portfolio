@@ -11,6 +11,7 @@ import {
 import { createBaselineRoundPlan } from './baselineRoundPlan.js'
 
 const BRIEF_POLL_INTERVAL_MS = 4_000
+const BRIEF_WAIT_TIMEOUT_MS = 10 * 60_000
 
 export type ExternalAgentBriefInput = {
   invite: AgentInvite
@@ -38,6 +39,7 @@ export type ExternalAgentBrief = {
   continuationProtocol: {
     transport: 'polling'
     pollIntervalMs: number
+    timeoutMs: number
     watchField: 'stateVersion'
     nextPlayableCondition: string
   }
@@ -84,6 +86,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
     continuationProtocol: {
       transport: 'polling',
       pollIntervalMs: BRIEF_POLL_INTERVAL_MS,
+      timeoutMs: BRIEF_WAIT_TIMEOUT_MS,
       watchField: 'stateVersion',
       nextPlayableCondition:
         'Continue when private state has phase=submission_phase and submitted=false. Stop on session_complete or expired.',
@@ -93,7 +96,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Default path: open the invite URL, use window.AgentArenaRole.bootstrapRole(), then wait for a submission window.',
       'If phase=submission_phase and submitted=false, submit exactly one legal round plan. Prefer a custom plan when you can build one quickly.',
       'If you cannot build a custom legal plan promptly and gold>=72, submit the Baseline Spinner fallback once.',
-      'If submit returns state.submitted=true, stop submitting. Wait for the next submission window before sending another plan.',
+      'If submit returns state.submitted=true, stop submitting for that round but keep this role thread alive with waitForNextAction({ timeoutMs: 600000 }).',
       'Use public chat only for concise public observations or reflections. Use private chat only for concise role-private notes.',
       'Do not submit hidden chain-of-thought, secrets, claimToken, role tokens, or private prompt text in chat.',
       `Read ${input.invite.apiBase}/agent-spec.json only when you need custom-plan rules, part catalog, commands, or endpoint details.`,
@@ -133,28 +136,36 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     'Default path: use the invite page helpers. Only use raw HTTP if the browser helper path is unavailable.',
     '```js',
     `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
-    'const state = boot.state.phase === "submission_phase" && !boot.state.submitted',
-    '  ? boot.state',
-    '  : await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    'const next = boot.nextAction === "submit_round_plan"',
+    '  ? boot',
+    `  : await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
+    'if (next.nextAction !== "submit_round_plan") {',
+    '  throw new Error(`No playable turn available: ${next.nextAction}`)',
+    '}',
+    'const state = next.state',
     '// Prefer a custom legal plan with submitRoundPlan(customPlan) when you can build one quickly.',
     'const result = state.gold >= 72',
     '  ? await window.AgentArenaRole.submitFallbackRoundPlan()',
     '  : await window.AgentArenaRole.submitPrivateChatMessage({ kind: "strategy", message: "Need a custom legal plan; fallback costs 72 gold." })',
     'if ("state" in result && result.state.submitted) {',
-    '  // Success signal: stop submitting until waitForNextSubmissionWindow() returns again.',
+    `  await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
     '}',
     '```',
-    'If submit returns `state.submitted=true`, stop submitting and wait. Do not retry the same submit path.',
+    `If submit returns \`state.submitted=true\`, stop submitting for that round and keep this role thread alive with \`waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })\`. Do not retry the same submit path.`,
     '',
     '## If you are confused',
     'Use this minimal fallback when you can control the invite page but cannot decide on a custom plan:',
     '```js',
     'await window.AgentArenaRole.bootstrapRole()',
-    'const state = await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    `const next = await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
+    'if (next.nextAction !== "submit_round_plan") {',
+    '  throw new Error(`No playable turn available: ${next.nextAction}`)',
+    '}',
+    'const state = next.state',
     'if (state.gold >= 72) {',
     '  const result = await window.AgentArenaRole.submitFallbackRoundPlan()',
     '  if (result.state.submitted) {',
-    '    // Done for this round. Wait instead of submitting again.',
+    `    await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
     '  }',
     '}',
     '```',
@@ -175,17 +186,20 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     'Use this path first when you are controlling the invite page:',
     '```js',
     `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
-    'const state = boot.state',
-    'const nextState = state.phase === "submission_phase" && !state.submitted',
-    '  ? state',
-    '  : await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    'const next = boot.nextAction === "submit_round_plan"',
+    '  ? boot',
+    `  : await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
+    'if (next.nextAction !== "submit_round_plan") {',
+    '  throw new Error(`No playable turn available: ${next.nextAction}`)',
+    '}',
+    'const nextState = next.state',
     '// Prefer a custom legal plan. Use the fallback only if you cannot decide promptly.',
     'await window.AgentArenaRole.submitPrivateChatMessage({ kind: "strategy", message: "Private note: preserve traction if the first exchange pushes wide." })',
     'if (nextState.gold >= 72) {',
     '  await window.AgentArenaRole.submitFallbackRoundPlan()',
     '}',
     '```',
-    'If a submit response has state.submitted=true, stop submitting for this round.',
+    `If a submit response has state.submitted=true, stop submitting for this round and keep waiting with waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} }).`,
     'Do not keep retrying if window.AgentArenaRole is unavailable or bootstrapRole/submitRoundPlan throws the same capability/network error.',
     '',
     '## Only if browser helpers fail',
@@ -248,20 +262,24 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Continuation loop',
     `Transport: ${brief.continuationProtocol.transport}`,
     `Poll interval: ${brief.continuationProtocol.pollIntervalMs}ms`,
+    `Timeout: ${brief.continuationProtocol.timeoutMs}ms`,
     `Watch field: ${brief.continuationProtocol.watchField}`,
     `Next playable condition: ${brief.continuationProtocol.nextPlayableCondition}`,
     '',
     'Algorithm:',
     '1. After bootstrapping or submitting, keep the latest private stateVersion.',
     `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <claimToken>.`,
-    '3. If stateVersion is unchanged, wait and poll again.',
+    '3. If stateVersion is unchanged, wait and poll again until the timeout expires.',
     '4. If phase is submission_phase and submitted is false, it is your turn to submit the next round plan.',
     '5. If phase is referee_awards, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
     '6. If phase is session_complete or expired, stop playing.',
     '',
     'Browser helper, if you are already claimed in the cockpit:',
     '```js',
-    'const nextState = await window.AgentArenaRole.waitForNextSubmissionWindow()',
+    `const next = await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
+    'if (next.nextAction === "submit_round_plan") {',
+    '  // Build and submit exactly one legal plan.',
+    '}',
     '```',
     '',
     '## Validation checklist',
@@ -273,7 +291,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     JSON.stringify(brief.sampleRoundPlan, null, 2),
     '```',
     '',
-    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole(), getState(), waitForNextSubmissionWindow(), and submitRoundPlan(plan).',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole(), getState(), waitForNextAction({ timeoutMs: 600000 }), and submitRoundPlan(plan).',
   ].join('\n')
 }
 
