@@ -104,12 +104,22 @@ export type ReplayEvent =
   | KnockoutEvent
   | AwardEvent
 
-export function sortReplayEvents(events: ReplayEvent[]): ReplayEvent[] {
-  return [...events].sort((left, right) => {
-    if (left.t !== right.t) {
-      return left.t - right.t
-    }
+export function compareReplayEvents(left: ReplayEvent, right: ReplayEvent): number {
+  if (left.t !== right.t) {
+    return left.t - right.t
+  }
 
-    return left.type.localeCompare(right.type)
-  })
+  if (left.type < right.type) {
+    return -1
+  }
+
+  if (left.type > right.type) {
+    return 1
+  }
+
+  return 0
+}
+
+export function sortReplayEvents(events: ReplayEvent[]): ReplayEvent[] {
+  return [...events].sort(compareReplayEvents)
 }

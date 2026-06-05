@@ -26,6 +26,9 @@ export type PolicyBotState = {
   lastDamagedTick: number
   lastDealtDamageTick: number
   lastMove?: MovementCommand
+  anchoredStance?: boolean
+  hazardBaitControl?: boolean
+  weaponReachBonus?: number
 }
 
 export type PolicyState = {
@@ -174,6 +177,10 @@ function holdGroundMove({
   pressure,
   tick,
 }: PolicyContext): MovementCommand {
+  if (bot.anchoredStance) {
+    return 'brake'
+  }
+
   if (
     bot.hasWeaponControl &&
     tactics.aggression >= 0.55 &&
@@ -203,6 +210,11 @@ function closePolicyMove(context: PolicyContext): MovementCommand {
 
 function kiteMove(context: PolicyContext): MovementCommand {
   const { bot, opponent, arena, gap, idealRange, tick } = context
+  const edgeRecovery = edgeRecoveryMove(bot, arena)
+
+  if (edgeRecovery) {
+    return edgeRecovery
+  }
 
   if (gap < idealRange * 0.92) {
     return evadeMove(bot, opponent, arena, tick)
@@ -217,6 +229,11 @@ function kiteMove(context: PolicyContext): MovementCommand {
 
 function circleMove(context: PolicyContext): MovementCommand {
   const { bot, opponent, arena, gap, idealRange, pressure, tick } = context
+  const edgeRecovery = edgeRecoveryMove(bot, arena)
+
+  if (edgeRecovery) {
+    return edgeRecovery
+  }
 
   if (gap < CONTACT_DISTANCE * 1.18) {
     return evadeMove(bot, opponent, arena, tick)
@@ -231,17 +248,25 @@ function circleMove(context: PolicyContext): MovementCommand {
 
 function baitHazardMove(context: PolicyContext): MovementCommand {
   const { arena, bot, opponent, gap, tick } = context
+  const edgeRecovery = edgeRecoveryMove(bot, arena)
 
   if (!centerHazardActive(arena)) {
     return circleMove(context)
+  }
+
+  if (edgeRecovery) {
+    return edgeRecovery
   }
 
   if (isNearCenterHazard(bot.position, 1.35)) {
     return moveAwayFromPoint(bot, [0, 0, 0], tick)
   }
 
-  if (!isNearCenterHazard(opponent.position, 1.5) && gap < 5.5) {
-    const lurePoint: Vector3 = [0, 0, tick % 4 < 2 ? 1.2 : -1.2]
+  const lureRange = bot.hazardBaitControl ? 7 : 5.5
+
+  if (!isNearCenterHazard(opponent.position, 1.5) && gap < lureRange) {
+    const lateralOffset = bot.hazardBaitControl ? 0.85 : 1.2
+    const lurePoint: Vector3 = [0, 0, tick % 4 < 2 ? lateralOffset : -lateralOffset]
 
     return moveTowardPoint(bot, lurePoint)
   }
@@ -357,7 +382,7 @@ function distance(left: Vector3, right: Vector3): number {
 }
 
 function weaponReach(bot: PolicyBotState): number {
-  return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28
+  return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28 + (bot.weaponReachBonus ?? 0)
 }
 
 function centerHazardActive(arena: ArenaConfig): boolean {
@@ -388,6 +413,12 @@ function evadeMove(
   arena: ArenaConfig,
   tick: number,
 ): MovementCommand {
+  const edgeRecovery = edgeRecoveryMove(bot, arena)
+
+  if (edgeRecovery) {
+    return edgeRecovery
+  }
+
   if (centerHazardActive(arena) && !isNearCenterHazard(opponent.position, 1.35)) {
     const lurePoint: Vector3 = [0, 0, tick % 2 === 0 ? 1 : -1]
 
@@ -395,6 +426,24 @@ function evadeMove(
   }
 
   return moveAwayFromPoint(bot, opponent.position, tick)
+}
+
+function edgeRecoveryMove(
+  bot: PolicyBotState,
+  arena: ArenaConfig,
+): MovementCommand | undefined {
+  const xLimit = Math.max(1, arena.width / 2 - 0.85)
+  const zLimit = Math.max(1, arena.height / 2 - 0.85)
+
+  if (Math.abs(bot.position[0]) >= xLimit - 0.1) {
+    return moveTowardPoint(bot, [0, 0, bot.position[2]])
+  }
+
+  if (Math.abs(bot.position[2]) >= zLimit - 0.1) {
+    return moveTowardPoint(bot, [bot.position[0], 0, 0])
+  }
+
+  return undefined
 }
 
 function moveTowardPoint(bot: PolicyBotState, point: Vector3): MovementCommand {

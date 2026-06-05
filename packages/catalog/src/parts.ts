@@ -4,6 +4,7 @@ import type {
   PartStats,
   Vector3,
 } from '../../schemas/src/index.js'
+import { PART_BEHAVIORS } from '../../sim/src/partBehaviors.js'
 
 type PartInput = {
   id: string
@@ -15,6 +16,7 @@ type PartInput = {
   size: Vector3
   tags?: string[]
   stats?: PartStats
+  behavior?: PartDefinition['behavior']
   controls?: PartDefinition['controls']
 }
 
@@ -96,6 +98,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 36,
     size: [2, 1, 2],
     stats: { stability: 6, control: 2 },
+    behavior: PART_BEHAVIORS.wedge,
   }),
   part({
     id: 'Body_Heavy_Block',
@@ -236,6 +239,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 11, chaos: 3 },
+    behavior: PART_BEHAVIORS.spinner,
   }),
   part({
     id: 'Weapon_Spinner_Large',
@@ -247,6 +251,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [2, 1, 2],
     controls: { weapon: true },
     stats: { weapon: 18, chaos: 5, stability: -2 },
+    behavior: PART_BEHAVIORS.spinner,
   }),
   part({
     id: 'Weapon_Hammer',
@@ -269,6 +274,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [2, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 8, control: 8, stability: 1 },
+    behavior: PART_BEHAVIORS.flipper,
   }),
   part({
     id: 'Weapon_Saw',
@@ -280,6 +286,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 10, control: 2 },
+    behavior: PART_BEHAVIORS.saw,
   }),
   part({
     id: 'Weapon_Net',
@@ -291,6 +298,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 4, control: 12 },
+    behavior: PART_BEHAVIORS.net,
   }),
   part({
     id: 'Weapon_Turret',
@@ -302,6 +310,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 2],
     controls: { weapon: true },
     stats: { weapon: 12, control: 5 },
+    behavior: PART_BEHAVIORS.turret,
   }),
   part({
     id: 'Weapon_Spear',
@@ -324,6 +333,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 5, control: 9 },
+    behavior: PART_BEHAVIORS.grabber,
   }),
   part({
     id: 'Weapon_Ram',
@@ -335,6 +345,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [2, 1, 1],
     controls: { weapon: true },
     stats: { weapon: 6, armor: 2, stability: 2 },
+    behavior: PART_BEHAVIORS.ram,
   }),
   part({
     id: 'Armor_Light',
@@ -365,6 +376,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [1, 1, 1],
     stats: { armor: 5, weapon: 2, chaos: 1 },
+    behavior: PART_BEHAVIORS.spiked_armor,
   }),
   part({
     id: 'Armor_Front_Plate',
@@ -375,6 +387,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 22,
     size: [2, 1, 1],
     stats: { armor: 5, control: 1 },
+    behavior: PART_BEHAVIORS.front_plate,
   }),
   part({
     id: 'Armor_Cage',
@@ -405,6 +418,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [1, 1, 1],
     stats: { armor: 6, chaos: 4 },
+    behavior: PART_BEHAVIORS.reactive_armor,
   }),
   part({
     id: 'Utility_Booster',
@@ -416,6 +430,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { drive: 5, chaos: 2 },
+    behavior: PART_BEHAVIORS.booster,
   }),
   part({
     id: 'Utility_Gyro',
@@ -427,6 +442,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { stability: 8 },
+    behavior: PART_BEHAVIORS.gyro,
   }),
   part({
     id: 'Utility_Magnet',
@@ -438,6 +454,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { control: 7, chaos: 1 },
+    behavior: PART_BEHAVIORS.magnet,
   }),
   part({
     id: 'Utility_Anchor',
@@ -449,6 +466,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { traction: 8, stability: 4, drive: -2 },
+    behavior: PART_BEHAVIORS.anchor,
   }),
   part({
     id: 'Utility_RepairKit',
@@ -460,6 +478,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { armor: 1 },
+    behavior: PART_BEHAVIORS.repair_kit,
   }),
   part({
     id: 'Utility_Smoke',
@@ -471,6 +490,7 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { control: 3, chaos: 4 },
+    behavior: PART_BEHAVIORS.smoke,
   }),
   part({
     id: 'Utility_Sensor',
@@ -482,6 +502,19 @@ export const PART_CATALOG: PartDefinition[] = [
     size: [1, 1, 1],
     controls: { utility: true },
     stats: { control: 4 },
+    behavior: PART_BEHAVIORS.sensor,
+  }),
+  part({
+    id: 'Utility_DroneController',
+    category: 'utility',
+    displayName: 'Drone Controller',
+    cost: 28,
+    mass: 6,
+    durability: 12,
+    size: [1, 1, 1],
+    controls: { utility: true },
+    stats: { control: 6, chaos: 2 },
+    behavior: PART_BEHAVIORS.drone_controller,
   }),
   part({
     id: 'Style_Flag',

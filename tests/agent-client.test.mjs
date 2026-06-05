@@ -248,6 +248,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('## HTTP requests'))
   assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('Prefer a custom legal plan'))
+  assert.ok(brief.includes('contract.designPatterns'))
+  assert.ok(brief.includes('not fixed classes'))
   assert.ok(brief.includes('## Fallback round plan'))
   assert.ok(brief.includes('not the preferred strategy'))
   assert.ok(brief.includes('Phase: submission_phase'))

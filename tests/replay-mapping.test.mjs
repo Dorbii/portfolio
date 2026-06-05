@@ -298,6 +298,47 @@ test('replay timeline validation rejects empty-duration and out-of-range events'
     false,
   )
   assert.equal(validateReplayTimeline(outOfRange), false)
+  assert.equal(
+    validateReplayTimeline({
+      round: 1,
+      duration: 602,
+      summary: 'Too long',
+      events: [],
+    }),
+    false,
+  )
+  assert.equal(
+    validateReplayTimeline({
+      round: 1.5,
+      duration: 2,
+      summary: 'Fractional round',
+      events: [],
+    }),
+    false,
+  )
+  assert.equal(
+    validateReplayTimeline({
+      round: 1,
+      duration: 2,
+      summary: 'Unsorted equal-time types',
+      events: [
+        {
+          t: 1,
+          type: 'weapon_fire',
+          bot: 'red',
+          weaponSlot: 'weaponA',
+        },
+        {
+          t: 1,
+          type: 'spawn',
+          bot: 'red',
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+        },
+      ],
+    }),
+    false,
+  )
   const ordered = createReplayTimeline({
     round: 2,
     duration: 2.5,
@@ -364,6 +405,32 @@ test('replay mapping does not reveal laser_lance effects before ability event ti
 
   assert.equal(before.effects.some((effect) => effect.label === 'laser_lance'), false)
   assert.equal(atEvent.effects.some((effect) => effect.label === 'laser_lance'), true)
+})
+
+test('replay mapping does not reveal future control, ability, impact, damage, hazard, or detach cues', () => {
+  const beforeControl = buildReplayFrame(movingWeaponTimeline, 1.49)
+  const beforeDroneSwarm = buildReplayFrame(droneSwarmTimeline, 1.59)
+  const beforeImpact = buildReplayFrame(timeline, 2.99)
+  const beforeDamage = buildReplayFrame(timeline, 3.09)
+  const beforeDetach = buildReplayFrame(timeline, 3.24)
+  const beforeHazard = buildReplayFrame(timeline, 3.99)
+
+  assert.equal(
+    beforeControl.effects.some((effect) => effect.label === 'weaponA-deploy' || effect.kind === 'control_net'),
+    false,
+  )
+  assert.equal(beforeDroneSwarm.effects.some((effect) => effect.kind === 'drone_swarm'), false)
+  assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'impact'), false)
+  assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'debris'), false)
+  assert.equal(beforeDamage.effects.some((effect) => effect.kind === 'damage_marker'), false)
+  assert.equal(
+    beforeDetach.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'),
+    false,
+  )
+  assert.equal(
+    beforeHazard.effects.some((effect) => effect.kind === 'hazard' && effect.label === 'center saw'),
+    false,
+  )
 })
 
 test('replay mapping exposes drone_swarm ability effects with separate lane semantics', () => {

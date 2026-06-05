@@ -10,6 +10,7 @@ import {
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
   WEAPON_CADENCES,
+  type BotTactics,
   type PartDefinition,
 } from './types.js'
 
@@ -25,11 +26,328 @@ export type AgentContractPartSummary = Pick<
   | 'controls'
   | 'stats'
   | 'tags'
+  | 'behavior'
 >
+
+export type AgentDesignPatternSuggestedPart = Readonly<{
+  partId: string
+  quantity: number
+  purpose: string
+}>
+
+export type AgentDesignPattern = Readonly<{
+  id: string
+  name: string
+  fantasy: string
+  budgetPhase: 'first_round_legal' | 'later_round_upgrade'
+  suggestedParts: readonly AgentDesignPatternSuggestedPart[]
+  suggestedTactics: BotTactics
+  counters: readonly string[]
+  simBackedEffects: readonly string[]
+}>
 
 export type CreateAgentContractOptions = {
   partCatalog?: PartDefinition[]
 }
+
+export const AGENT_DESIGN_PATTERNS = [
+  {
+    id: 'stationary_spinner',
+    name: 'Stationary Spinner',
+    fantasy:
+      'Anchor a dangerous contact zone and make rushdown bots pay for entering it. Treat this as a mutation seed, not a class lock.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Cylinder_Small', quantity: 1, purpose: 'compact central core' },
+      { partId: 'Weapon_Spinner_Large', quantity: 1, purpose: 'main contact threat' },
+      { partId: 'Utility_Gyro', quantity: 1, purpose: 'spinner stability support' },
+      { partId: 'Armor_Spiked', quantity: 1, purpose: 'contact punishment shell' },
+    ],
+    suggestedTactics: {
+      style: 'defensive',
+      targetPriority: 'closest',
+      preferredRange: 'contact',
+      movementPolicy: 'hold_ground',
+      aggression: 0.72,
+      retreatAtHealthPct: 0.12,
+      weaponCadence: 'sustained',
+      hazardPreference: 'avoid',
+    },
+    counters: [
+      'Long-range kiting can avoid the contact zone.',
+      'Net, magnet, or grabber control can interrupt the spinner before it trades.',
+      'Heavy armor can absorb the first exchanges while targeting the weapon.',
+    ],
+    simBackedEffects: ['spinner', 'gyro', 'spiked_armor'],
+  },
+  {
+    id: 'black_hole_control',
+    name: 'Black Hole Control',
+    fantasy:
+      'Pull the opponent into bad positions with net and magnet pressure, then hybridize into damage or hazard bait after reading the enemy build.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Square_Medium', quantity: 1, purpose: 'stable control chassis' },
+      { partId: 'Wheel_Tank', quantity: 2, purpose: 'traction for dragging contests' },
+      { partId: 'Weapon_Net', quantity: 1, purpose: 'forced movement and slow pressure' },
+      { partId: 'Utility_Magnet', quantity: 1, purpose: 'positional control utility' },
+    ],
+    suggestedTactics: {
+      style: 'control',
+      targetPriority: 'mobility',
+      preferredRange: 'close',
+      movementPolicy: 'close',
+      aggression: 0.58,
+      retreatAtHealthPct: 0.22,
+      weaponCadence: 'sustained',
+      hazardPreference: 'force',
+    },
+    counters: [
+      'Fast kite builds can stay outside the control window.',
+      'Anchored or very heavy bots can reduce displacement value.',
+      'Weapon-focused rushdown can win before the control loop stabilizes.',
+    ],
+    simBackedEffects: ['net', 'magnet'],
+  },
+  {
+    id: 'glass_cannon_saw',
+    name: 'Glass Cannon Saw',
+    fantasy:
+      'Win short trades with a light chassis, saw pressure, and booster repositioning; mutate by adding armor if the first exchange is too fragile.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Light_Frame', quantity: 1, purpose: 'low-mass aggressive core' },
+      { partId: 'Wheel_Omni', quantity: 2, purpose: 'quick side movement' },
+      { partId: 'Weapon_Saw', quantity: 1, purpose: 'close-range damage source' },
+      { partId: 'Utility_Booster', quantity: 1, purpose: 'burst repositioning' },
+      { partId: 'Armor_Light', quantity: 1, purpose: 'minimal survival padding' },
+    ],
+    suggestedTactics: {
+      style: 'aggressive',
+      targetPriority: 'weapons',
+      preferredRange: 'contact',
+      movementPolicy: 'circle',
+      aggression: 0.88,
+      retreatAtHealthPct: 0.18,
+      weaponCadence: 'burst',
+      hazardPreference: 'avoid',
+    },
+    counters: [
+      'Spiked or reactive armor punishes fragile contact plans.',
+      'High-traction wedges can pin the light chassis.',
+      'Sustained turret pressure can punish failed approaches.',
+    ],
+    simBackedEffects: ['saw', 'booster'],
+  },
+  {
+    id: 'wedge_bully',
+    name: 'Wedge Bully',
+    fantasy:
+      'Use wedge geometry, traction, and front armor to win shove-heavy exchanges; mutate by swapping ram for flipper or grabber when the matchup asks for disruption.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Wedge', quantity: 1, purpose: 'contact-control chassis' },
+      { partId: 'Wheel_Tank', quantity: 2, purpose: 'traction under contact' },
+      { partId: 'Weapon_Ram', quantity: 1, purpose: 'front-loaded impact behavior' },
+      { partId: 'Armor_Front_Plate', quantity: 1, purpose: 'front contact mitigation' },
+      { partId: 'Utility_Gyro', quantity: 1, purpose: 'stability while bullying' },
+    ],
+    suggestedTactics: {
+      style: 'aggressive',
+      targetPriority: 'mobility',
+      preferredRange: 'contact',
+      movementPolicy: 'close',
+      aggression: 0.84,
+      retreatAtHealthPct: 0.16,
+      weaponCadence: 'sustained',
+      hazardPreference: 'neutral',
+    },
+    counters: [
+      'Kite or circle builds can deny straight-line contact.',
+      'Nets and magnets can turn the bully into a stationary target.',
+      'Large spinners can punish repeated nose-first entries.',
+    ],
+    simBackedEffects: ['wedge', 'ram', 'front_plate', 'gyro'],
+  },
+  {
+    id: 'crab_turret',
+    name: 'Crab Turret',
+    fantasy:
+      'Strafe while firing instead of committing to a head-on lane; hybridize by adding more mobility or armor depending on the threat.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Light_Frame', quantity: 1, purpose: 'mobile firing platform' },
+      { partId: 'Wheel_Omni', quantity: 2, purpose: 'lateral movement controls' },
+      { partId: 'Weapon_Turret', quantity: 1, purpose: 'fire while moving' },
+      { partId: 'Utility_Sensor', quantity: 1, purpose: 'range and targeting support' },
+    ],
+    suggestedTactics: {
+      style: 'evasive',
+      targetPriority: 'weapons',
+      preferredRange: 'long',
+      movementPolicy: 'kite',
+      aggression: 0.54,
+      retreatAtHealthPct: 0.32,
+      weaponCadence: 'sustained',
+      hazardPreference: 'avoid',
+    },
+    counters: [
+      'Fast rushdown can close before the turret creates value.',
+      'Armor-heavy tanks can soak weak long-range trades.',
+      'Control builds can force the turret into bad positions.',
+    ],
+    simBackedEffects: ['turret', 'sensor'],
+  },
+  {
+    id: 'trash_tank',
+    name: 'Trash Tank',
+    fantasy:
+      'Absorb punishment with a heavy shell and awkward durability, then mutate into ram, repair, or control once income arrives.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Heavy_Block', quantity: 1, purpose: 'durable center mass' },
+      { partId: 'Tread_Heavy', quantity: 2, purpose: 'slow high-traction drive' },
+      { partId: 'Armor_Reactive', quantity: 1, purpose: 'contact punishment armor' },
+      { partId: 'Style_TrashCan', quantity: 1, purpose: 'cheap extra armor and identity' },
+    ],
+    suggestedTactics: {
+      style: 'defensive',
+      targetPriority: 'closest',
+      preferredRange: 'contact',
+      movementPolicy: 'close',
+      aggression: 0.42,
+      retreatAtHealthPct: 0.08,
+      weaponCadence: 'hold_fire',
+      hazardPreference: 'neutral',
+    },
+    counters: [
+      'Dedicated control can farm position against low speed.',
+      'Saws and sustained weapons can chew through the shell over time.',
+      'Hazard bait punishes slow pathing.',
+    ],
+    simBackedEffects: ['reactive_armor'],
+  },
+  {
+    id: 'hazard_matador',
+    name: 'Hazard Matador',
+    fantasy:
+      'Bait heavier bots across arena hazards with burst movement and smoke; hybridize into a weapon only if the hazard plan is not enough.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Light_Frame', quantity: 1, purpose: 'fast bait chassis' },
+      { partId: 'Wheel_Omni', quantity: 2, purpose: 'lateral escape routes' },
+      { partId: 'Utility_Booster', quantity: 1, purpose: 'burst movement bait' },
+      { partId: 'Utility_Smoke', quantity: 1, purpose: 'evasive disruption' },
+      { partId: 'Armor_Front_Plate', quantity: 1, purpose: 'survive brief contact' },
+    ],
+    suggestedTactics: {
+      style: 'evasive',
+      targetPriority: 'strongest',
+      preferredRange: 'close',
+      movementPolicy: 'bait_hazard',
+      aggression: 0.34,
+      retreatAtHealthPct: 0.3,
+      weaponCadence: 'hold_fire',
+      hazardPreference: 'bait',
+    },
+    counters: [
+      'No active hazards means the plan loses much of its payoff.',
+      'Long-range turret or net builds can punish the approach path.',
+      'Very fast bots can mirror the escape route.',
+    ],
+    simBackedEffects: ['booster', 'smoke', 'front_plate'],
+  },
+  {
+    id: 'porcupine_shell',
+    name: 'Porcupine Shell',
+    fantasy:
+      'Make contact expensive with spikes and anchoring, then mutate toward mobility or a real weapon if opponents refuse to engage.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Cylinder_Large', quantity: 1, purpose: 'round durable shell core' },
+      { partId: 'Wheel_Spiked', quantity: 2, purpose: 'mobile contact punishment' },
+      { partId: 'Armor_Spiked', quantity: 2, purpose: 'extra contact retaliation' },
+      { partId: 'Utility_Anchor', quantity: 1, purpose: 'hold-ground contact stance' },
+    ],
+    suggestedTactics: {
+      style: 'defensive',
+      targetPriority: 'closest',
+      preferredRange: 'contact',
+      movementPolicy: 'hold_ground',
+      aggression: 0.38,
+      retreatAtHealthPct: 0.1,
+      weaponCadence: 'hold_fire',
+      hazardPreference: 'avoid',
+    },
+    counters: [
+      'Patient kiting can avoid taking contact damage.',
+      'Control tools can move the shell without committing to trades.',
+      'Sustained saw damage can eventually break armor pieces.',
+    ],
+    simBackedEffects: ['spiked_armor', 'anchor'],
+  },
+  {
+    id: 'control_jailer',
+    name: 'Control Jailer',
+    fantasy:
+      'Pin, drag, and deny movement with grabber and anchor pressure; mutate by swapping the control weapon for net when range matters more.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Wedge', quantity: 1, purpose: 'close-control chassis' },
+      { partId: 'Wheel_Tank', quantity: 2, purpose: 'traction for pins' },
+      { partId: 'Weapon_Grabber', quantity: 1, purpose: 'anchoring disruption weapon' },
+      { partId: 'Utility_Anchor', quantity: 1, purpose: 'hold position after contact' },
+      { partId: 'Armor_Front_Plate', quantity: 1, purpose: 'survive nose-first control' },
+    ],
+    suggestedTactics: {
+      style: 'control',
+      targetPriority: 'mobility',
+      preferredRange: 'contact',
+      movementPolicy: 'close',
+      aggression: 0.62,
+      retreatAtHealthPct: 0.18,
+      weaponCadence: 'opportunistic',
+      hazardPreference: 'force',
+    },
+    counters: [
+      'Large spinners punish repeated contact attempts.',
+      'Fast evasive builds can deny the grabber window.',
+      'Reactive armor and spikes punish prolonged clinches.',
+    ],
+    simBackedEffects: ['wedge', 'grabber', 'anchor', 'front_plate'],
+  },
+  {
+    id: 'commander_drone_swarm',
+    name: 'Commander Drone Swarm',
+    fantasy:
+      'Play around charged drone pressure and sensor support; mutate with weapons or armor once the opponent shows whether they rush or turtle.',
+    budgetPhase: 'first_round_legal',
+    suggestedParts: [
+      { partId: 'Body_Square_Small', quantity: 1, purpose: 'cheap command core' },
+      { partId: 'Wheel_Medium', quantity: 2, purpose: 'basic repositioning' },
+      { partId: 'Utility_DroneController', quantity: 1, purpose: 'charged drone pressure' },
+      { partId: 'Utility_Sensor', quantity: 1, purpose: 'support and range control' },
+      { partId: 'Utility_Anchor', quantity: 1, purpose: 'hold while drones cycle' },
+      { partId: 'Armor_Cage', quantity: 1, purpose: 'protect the utility stack' },
+    ],
+    suggestedTactics: {
+      style: 'control',
+      targetPriority: 'weakest',
+      preferredRange: 'mid',
+      movementPolicy: 'circle',
+      aggression: 0.5,
+      retreatAtHealthPct: 0.24,
+      weaponCadence: 'hold_fire',
+      hazardPreference: 'avoid',
+    },
+    counters: [
+      'Immediate weapon rush can kill the utility stack before charges matter.',
+      'Long-range turret pressure can trade without entering drone-friendly space.',
+      'High armor can outlast the charged pressure if the commander lacks a weapon.',
+    ],
+    simBackedEffects: ['drone_controller', 'sensor', 'anchor'],
+  },
+] as const satisfies readonly AgentDesignPattern[]
 
 export function createAgentContract(options: CreateAgentContractOptions = {}) {
   return {
@@ -55,6 +373,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Fast path: POST /sessions/:sessionId/roles/:role/bootstrap with Authorization: Bearer <claimToken>. This claims or resumes your role and returns private state plus nextAction.',
         'Use the same player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
         'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog after bootstrap succeeds or when you need to build a custom plan.',
+        'Use designPatterns as source-owned mutation seeds for legal builds. Do not treat them as mandatory fixed classes; swap, hybridize, or counter-pick using the same legal part and tactics rules.',
         'If you are operating inside the invite page, window.AgentArenaRole helpers are available; if not, use the HTTP workflow below.',
         'POST /sessions/:sessionId/claim with { role, claimToken, agentName } before reading private state.',
         'Legacy claim returns a roleToken, but external agents should prefer bootstrap so one player key can claim, resume, poll, and submit.',
@@ -184,6 +503,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       'movementPolicy=hold_ground is legal without mobility; close, kite, circle, and bait_hazard require movement controls.',
       'Strategically weak plans may pass; malformed or impossible plans are rejected.',
     ],
+    designPatterns: AGENT_DESIGN_PATTERNS,
     actions: [
       {
         name: 'create_session',
@@ -475,5 +795,6 @@ function toPartSummary(part: PartDefinition): AgentContractPartSummary {
     controls: part.controls,
     stats: part.stats,
     tags: part.tags,
+    behavior: part.behavior,
   }
 }

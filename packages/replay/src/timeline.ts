@@ -1,5 +1,7 @@
 import type { ReplayEvent } from './events.js'
-import { sortReplayEvents } from './events.js'
+import { compareReplayEvents, sortReplayEvents } from './events.js'
+
+const MAX_REPLAY_DURATION_SECONDS = 601
 
 export type ReplayTimeline = {
   round: number
@@ -16,7 +18,13 @@ export function createReplayTimeline(input: ReplayTimeline): ReplayTimeline {
 }
 
 export function validateReplayTimeline(timeline: ReplayTimeline): boolean {
-  if (timeline.duration <= 0 || timeline.round < 1) {
+  if (
+    !Number.isFinite(timeline.duration) ||
+    !Number.isInteger(timeline.round) ||
+    timeline.duration <= 0 ||
+    timeline.duration > MAX_REPLAY_DURATION_SECONDS ||
+    timeline.round < 1
+  ) {
     return false
   }
 
@@ -26,7 +34,8 @@ export function validateReplayTimeline(timeline: ReplayTimeline): boolean {
     return (
       event.t >= 0 &&
       event.t <= timeline.duration &&
-      (!previous || previous.t <= event.t)
+      Number.isFinite(event.t) &&
+      (!previous || compareReplayEvents(previous, event) <= 0)
     )
   })
 }

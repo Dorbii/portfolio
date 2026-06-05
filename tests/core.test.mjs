@@ -10,7 +10,12 @@ import {
   validateRoundSubmission,
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
-import { chooseCommand, deriveBotStats, resolveCombat } from '../.test-build/packages/sim/src/index.js'
+import {
+  PART_BEHAVIOR_IDS,
+  chooseCommand,
+  deriveBotStats,
+  resolveCombat,
+} from '../.test-build/packages/sim/src/index.js'
 import {
   SessionCoordinator,
   calculateInterest,
@@ -129,6 +134,26 @@ function redMoveEvents(result) {
   return result.replay.events.filter((event) => event.type === 'move' && event.bot === 'red')
 }
 
+function moveEvents(result, bot) {
+  return result.replay.events.filter((event) => event.type === 'move' && event.bot === bot)
+}
+
+function movementDelta(event) {
+  return Math.hypot(event.to[0] - event.from[0], event.to[2] - event.from[2])
+}
+
+function repeatedScript(ticks, commandForTick) {
+  return {
+    commands: Array.from({ length: ticks }, (_, index) => {
+      const tick = index + 1
+      const fields =
+        typeof commandForTick === 'function' ? commandForTick(tick) : commandForTick
+
+      return { tick, ...fields }
+    }),
+  }
+}
+
 async function claimBothRoles(session) {
   const red = await session.claimRole({ role: 'red', claimToken: 'claim_red' })
   const blue = await session.claimRole({ role: 'blue', claimToken: 'claim_blue' })
@@ -149,6 +174,54 @@ test('catalog exposes unique MVP part ids', () => {
   assert.ok(ids.includes('Body_Square_Small'))
   assert.ok(ids.includes('Weapon_Net'))
   assert.ok(ids.includes('Style_TrashCan'))
+})
+
+test('catalog exposes required source-owned part behavior metadata', () => {
+  const requiredBehaviorIds = [
+    'anchor',
+    'booster',
+    'drone_controller',
+    'flipper',
+    'front_plate',
+    'grabber',
+    'gyro',
+    'magnet',
+    'net',
+    'ram',
+    'reactive_armor',
+    'repair_kit',
+    'saw',
+    'sensor',
+    'smoke',
+    'spiked_armor',
+    'spinner',
+    'turret',
+    'wedge',
+  ]
+  const expectedBehaviorIds = [...PART_BEHAVIOR_IDS].sort()
+  const partsWithBehavior = PART_CATALOG.filter((part) => part.behavior)
+  const catalogBehaviorIds = [
+    ...new Set(partsWithBehavior.map((part) => part.behavior.id)),
+  ].sort()
+  const droneController = PART_CATALOG.find(
+    (part) => part.id === 'Utility_DroneController',
+  )
+
+  assert.deepEqual(expectedBehaviorIds, requiredBehaviorIds)
+  assert.deepEqual(catalogBehaviorIds, expectedBehaviorIds)
+  assert.ok(partsWithBehavior.every((part) => part.behavior.slot === part.category))
+  assert.equal(droneController?.category, 'utility')
+  assert.equal(droneController?.displayName, 'Drone Controller')
+  assert.equal(droneController?.cost, 28)
+  assert.equal(droneController?.mass, 6)
+  assert.equal(droneController?.durability, 12)
+  assert.deepEqual(droneController?.size, [1, 1, 1])
+  assert.deepEqual(droneController?.controls, { utility: true })
+  assert.deepEqual(droneController?.stats, { control: 6, chaos: 2 })
+  assert.deepEqual(droneController?.behavior, {
+    id: 'drone_controller',
+    slot: 'utility',
+  })
 })
 
 test('mobility catalog differentiates wheel and tread archetypes mechanically', () => {
@@ -696,6 +769,671 @@ test('resolver ignores weaponB fire commands when only one weapon slot exists', 
     ),
     false,
   )
+})
+
+test('resolver applies net status to slow movement on later ticks', () => {
+  const netControlBlueprint = {
+    name: 'Net Control',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'net', partId: 'Weapon_Net', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const runnerBlueprint = {
+    name: 'Runner',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'net-slow-check',
+    red: {
+      blueprint: netControlBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close', weaponCadence: 'sustained' }),
+      openingScript: repeatedScript(10, { move: 'forward', weaponA: 'fire' }),
+    },
+    blue: {
+      blueprint: runnerBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+      openingScript: repeatedScript(10, { move: 'forward' }),
+    },
+    arena: { name: 'Status Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const firstNetHit = result.replay.events.find(
+    (event) => event.type === 'damage' && event.bot === 'blue',
+  )
+
+  assert.ok(firstNetHit)
+
+  const hitTick = Math.trunc(firstNetHit.t)
+  const blueMoves = new Map(moveEvents(result, 'blue').map((event) => [event.t, event]))
+  const beforeSlow = blueMoves.get(hitTick)
+  const afterSlow = blueMoves.get(hitTick + 1)
+
+  assert.ok(beforeSlow)
+  assert.ok(afterSlow)
+  assert.ok(movementDelta(afterSlow) < movementDelta(beforeSlow) * 0.7)
+})
+
+test('resolver gates booster burst with a runtime-part cooldown', () => {
+  const boosterBlueprint = {
+    name: 'Burst Runner',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'booster', partId: 'Utility_Booster', position: [0, 0, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'booster-cooldown-check',
+    red: {
+      blueprint: boosterBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+      openingScript: repeatedScript(6, { move: 'forward', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Cooldown Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const deltas = new Map(redMoveEvents(result).map((event) => [event.t, movementDelta(event)]))
+
+  assert.ok(deltas.get(1) > deltas.get(2) * 1.25)
+  assert.ok(deltas.get(5) > deltas.get(4) * 1.25)
+  assert.ok(Math.abs(deltas.get(2) - deltas.get(3)) < 0.001)
+  assert.ok(Math.abs(deltas.get(3) - deltas.get(4)) < 0.001)
+})
+
+test('resolver limits repair kit to one runtime-part charge', () => {
+  const repairBlueprint = {
+    name: 'Repair Target',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'repair', partId: 'Utility_RepairKit', position: [0, 0, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'repair-charge-check',
+    red: {
+      blueprint: repairBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: repeatedScript(14, { move: 'brake', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: partBreakAttackerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Repair Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const redDamageEvents = result.replay.events.filter(
+    (event) => event.type === 'damage' && event.bot === 'red',
+  )
+  const repairedBeforeNonOverkillDamage = redDamageEvents.reduce((total, event, index) => {
+    const previous = redDamageEvents[index - 1]
+
+    if (!previous || previous.remainingHealth <= event.amount) {
+      return total
+    }
+
+    const observedHealthLoss = previous.remainingHealth - event.remainingHealth
+
+    return total + Math.max(0, event.amount - observedHealthLoss)
+  }, 0)
+
+  assert.ok(redDamageEvents.length > 2)
+  assert.equal(Math.round(repairedBeforeNonOverkillDamage * 100) / 100, 8)
+})
+
+test('resolver limits drone controller with charges and cooldown', () => {
+  const droneBlueprint = {
+    name: 'Drone Team',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'drone', partId: 'Utility_DroneController', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'drone-charge-cooldown-check',
+    red: {
+      blueprint: droneBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: repeatedScript(12, { move: 'brake', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Drone Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const droneTicks = result.replay.events
+    .filter((event) => event.type === 'ability' && event.bot === 'red')
+    .map((event) => Math.trunc(event.t))
+
+  assert.deepEqual(droneTicks, [1, 5])
+})
+
+test('resolver stops destroyed utility behavior before later utility resolution', () => {
+  const droneBlueprint = {
+    name: 'Fragile Drone Team',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'drone', partId: 'Utility_DroneController', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'destroyed-utility-check',
+    red: {
+      blueprint: droneBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: repeatedScript(4, { move: 'brake', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: droneBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: repeatedScript(4, { move: 'brake', utility: 'activate' }),
+    },
+    arena: { name: 'Destroyed Utility Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const blueDroneDetach = result.replay.events.find(
+    (event) => event.type === 'part_detach' && event.bot === 'blue' && event.blockId === 'drone',
+  )
+  const blueDroneAbilities = result.replay.events.filter(
+    (event) => event.type === 'ability' && event.bot === 'blue',
+  )
+
+  assert.ok(blueDroneDetach)
+  assert.equal(blueDroneAbilities.length, 0)
+})
+
+test('resolver keeps status and cooldown ordering deterministic', () => {
+  const mixedRuntimeBlueprint = {
+    name: 'Mixed Runtime Bot',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'net', partId: 'Weapon_Net', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'booster', partId: 'Utility_Booster', position: [0, 0, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const input = {
+    round: 2,
+    seed: 'status-cooldown-ordering-check',
+    red: {
+      blueprint: mixedRuntimeBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.85,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: repeatedScript(12, { move: 'forward', weaponA: 'fire', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: mixedRuntimeBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.85,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: repeatedScript(12, { move: 'forward', weaponA: 'fire', utility: 'activate' }),
+    },
+    arena: { name: 'Ordering Test', width: 24, height: 16, activeHazards: [] },
+  }
+  const first = resolveCombat(input)
+  const second = resolveCombat(input)
+
+  assert.deepEqual(first, second)
+  assert.equal(validateReplayTimeline(first.replay), true)
+  assert.equal(
+    first.replay.events.every(
+      (event, index, events) => index === 0 || events[index - 1].t <= event.t,
+    ),
+    true,
+  )
+})
+
+test('resolver gives stationary spinner a part-backed contact threat without chasing', () => {
+  const stationarySpinnerBlueprint = {
+    name: 'Stationary Spinner',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Tank', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Tank', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'spinner', partId: 'Weapon_Spinner_Large', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'gyro', partId: 'Utility_Gyro', position: [-1, 0, -1], rotation: [0, 0, 0] },
+      { id: 'anchor', partId: 'Utility_Anchor', position: [1, 0, -1], rotation: [0, 0, 0] },
+      { id: 'spikes', partId: 'Armor_Spiked', position: [0, 1, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const withoutSpinnerBlueprint = {
+    ...stationarySpinnerBlueprint,
+    name: 'Stationary Hammer',
+    blocks: stationarySpinnerBlueprint.blocks.map((block) =>
+      block.id === 'spinner' ? { ...block, partId: 'Weapon_Hammer' } : block,
+    ),
+  }
+  const brawlerBlueprint = {
+    name: 'Closing Brawler',
+    blocks: [
+      { id: 'core', partId: 'Body_Wedge', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Tank', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Tank', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'stationary-spinner-archetype-check',
+    red: {
+      blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'hold_ground',
+        preferredRange: 'contact',
+        aggression: 0.85,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: brawlerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Spinner Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const spinnerResult = fight(stationarySpinnerBlueprint)
+  const withoutSpinnerResult = fight(withoutSpinnerBlueprint)
+
+  assert.equal(redMoveEvents(spinnerResult).length, 0)
+  assert.ok(spinnerResult.damage.red < withoutSpinnerResult.damage.red)
+  assert.ok(spinnerResult.replay.duration < withoutSpinnerResult.replay.duration)
+})
+
+test('resolver lets turret kiters fire while moving and lose that behavior without turret', () => {
+  const turretKiterBlueprint = {
+    name: 'Turret Kiter',
+    blocks: [
+      { id: 'core', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'frontLeft', partId: 'Wheel_Omni', position: [-1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'frontRight', partId: 'Wheel_Omni', position: [1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'rearLeft', partId: 'Wheel_Omni', position: [-1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'rearRight', partId: 'Wheel_Omni', position: [1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'turret', partId: 'Weapon_Turret', position: [0, 0, 2], rotation: [0, 0, 0] },
+      { id: 'sensor', partId: 'Utility_Sensor', position: [0, 1, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const withoutTurretBlueprint = {
+    ...turretKiterBlueprint,
+    name: 'Sensor Runner',
+    blocks: turretKiterBlueprint.blocks.filter((block) => block.id !== 'turret'),
+  }
+  const bruiserBlueprint = {
+    name: 'Mobile Bruiser',
+    blocks: [
+      { id: 'core', partId: 'Body_Wedge', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'turret-kiter-archetype-check',
+    red: {
+      blueprint: bruiserBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'kite',
+        preferredRange: 'long',
+        aggression: 0.55,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Turret Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const turretResult = fight(turretKiterBlueprint)
+  const withoutTurretResult = fight(withoutTurretBlueprint)
+  const blueMoveTicks = new Set(moveEvents(turretResult, 'blue').map((event) => Math.trunc(event.t)))
+  const blueFire = turretResult.replay.events.filter(
+    (event) => event.type === 'weapon_fire' && event.bot === 'blue',
+  )
+
+  assert.ok(blueFire.some((event) => blueMoveTicks.has(Math.trunc(event.t))))
+  assert.equal(
+    withoutTurretResult.replay.events.some(
+      (event) => event.type === 'weapon_fire' && event.bot === 'blue',
+    ),
+    false,
+  )
+  assert.ok(turretResult.damage.red > withoutTurretResult.damage.red)
+})
+
+test('resolver gives net control forced movement and slow effects from live control parts', () => {
+  const jailerBlueprint = {
+    name: 'Net Jailer',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'net', partId: 'Weapon_Net', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'grabber', partId: 'Weapon_Grabber', position: [0, 0, -1], rotation: [0, 0, 0] },
+      { id: 'magnet', partId: 'Utility_Magnet', position: [-1, 0, -1], rotation: [0, 0, 0] },
+      { id: 'anchor', partId: 'Utility_Anchor', position: [1, 0, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const runnerBlueprint = {
+    name: 'Runner',
+    blocks: [
+      { id: 'core', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'net-jailer-archetype-check',
+    red: {
+      blueprint: jailerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'close',
+        aggression: 0.6,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: repeatedScript(14, {
+        move: 'forward',
+        weaponA: 'fire',
+        weaponB: 'fire',
+        utility: 'activate',
+      }),
+    },
+    blue: {
+      blueprint: runnerBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+      openingScript: repeatedScript(14, { move: 'forward' }),
+    },
+    arena: { name: 'Jailer Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const forcedBlueMoves = moveEvents(result, 'blue').filter((event) => event.t % 1 !== 0)
+
+  assert.ok(
+    result.replay.events.some(
+      (event) => event.type === 'weapon_fire' && event.bot === 'red' && event.controlCue === 'deploy',
+    ),
+  )
+  assert.ok(forcedBlueMoves.some((event) => event.to[0] < event.from[0]))
+})
+
+test('resolver lets booster hazard bait lure a heavier bot into active hazards', () => {
+  const hazardBaitBlueprint = {
+    name: 'Hazard Bait',
+    blocks: [
+      { id: 'core', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'frontLeft', partId: 'Wheel_Omni', position: [-1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'frontRight', partId: 'Wheel_Omni', position: [1, 0, 1], rotation: [0, 0, 90] },
+      { id: 'rearLeft', partId: 'Wheel_Omni', position: [-1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'rearRight', partId: 'Wheel_Omni', position: [1, 0, -1], rotation: [0, 0, 90] },
+      { id: 'booster', partId: 'Utility_Booster', position: [0, 0, -1], rotation: [0, 0, 0] },
+      { id: 'smoke', partId: 'Utility_Smoke', position: [0, 1, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const withoutBaitUtilityBlueprint = {
+    ...hazardBaitBlueprint,
+    name: 'Plain Fast Runner',
+    blocks: hazardBaitBlueprint.blocks.filter(
+      (block) => block.id !== 'booster' && block.id !== 'smoke',
+    ),
+  }
+  const mobileBruiserBlueprint = {
+    name: 'Mobile Hazard Target',
+    blocks: [
+      { id: 'core', partId: 'Body_Wedge', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'hazard-bait-archetype-check',
+    red: {
+      blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'bait_hazard',
+        preferredRange: 'close',
+        aggression: 0.35,
+        hazardPreference: 'bait',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: mobileBruiserBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Hazard Test', width: 24, height: 16, activeHazards: ['floor_saw'] },
+  })
+  const baitResult = fight(hazardBaitBlueprint)
+  const withoutBaitUtilityResult = fight(withoutBaitUtilityBlueprint)
+  const blueHazards = baitResult.replay.events.filter(
+    (event) => event.type === 'hazard' && event.bot === 'blue',
+  )
+  const blueHazardsWithoutUtility = withoutBaitUtilityResult.replay.events.filter(
+    (event) => event.type === 'hazard' && event.bot === 'blue',
+  )
+
+  assert.ok(blueHazards.length > 0)
+  assert.ok(blueHazards.length > blueHazardsWithoutUtility.length)
+})
+
+test('resolver gives wedge flipper bully extra contact damage and disruption', () => {
+  const wedgeBullyBlueprint = {
+    name: 'Wedge Flipper Bully',
+    blocks: [
+      { id: 'core', partId: 'Body_Wedge', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Tank', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Tank', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'flipper', partId: 'Weapon_Flipper', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, -1], rotation: [0, 0, 0] },
+      { id: 'frontPlate', partId: 'Armor_Front_Plate', position: [0, 1, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const plainChargerBlueprint = {
+    name: 'Plain Charger',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Tank', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Tank', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'hammer', partId: 'Weapon_Hammer', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const targetBlueprint = {
+    name: 'Contact Target',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+    ],
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'wedge-bully-archetype-check',
+    red: {
+      blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: targetBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close', preferredRange: 'contact' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Bully Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const bullyResult = fight(wedgeBullyBlueprint)
+  const plainResult = fight(plainChargerBlueprint)
+
+  assert.ok(bullyResult.damage.red < plainResult.damage.red)
+  assert.ok(bullyResult.replay.duration < plainResult.replay.duration)
+})
+
+test('resolver makes porcupine shell punish contact through armor and anchor parts', () => {
+  const porcupineBlueprint = {
+    name: 'Porcupine Shell',
+    blocks: [
+      { id: 'core', partId: 'Body_Heavy_Block', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Tank', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Tank', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'spikes', partId: 'Armor_Spiked', position: [-1, 1, 0], rotation: [0, 0, 0] },
+      { id: 'reactive', partId: 'Armor_Reactive', position: [1, 1, 0], rotation: [0, 0, 0] },
+      { id: 'anchor', partId: 'Utility_Anchor', position: [0, 0, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const plainShellBlueprint = {
+    ...porcupineBlueprint,
+    name: 'Plain Shell',
+    blocks: porcupineBlueprint.blocks.map((block) => {
+      if (block.id === 'spikes' || block.id === 'reactive') {
+        return { ...block, partId: 'Armor_Heavy' }
+      }
+
+      return block
+    }),
+  }
+  const brawlerBlueprint = {
+    name: 'Shell Tester',
+    blocks: [
+      { id: 'core', partId: 'Body_Wedge', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+      { id: 'ram', partId: 'Weapon_Ram', position: [0, 0, 1], rotation: [0, 0, 0] },
+    ],
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'porcupine-archetype-check',
+    red: {
+      blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'hold_ground',
+        preferredRange: 'contact',
+        aggression: 0.3,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: brawlerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Porcupine Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const porcupineResult = fight(porcupineBlueprint)
+  const plainShellResult = fight(plainShellBlueprint)
+
+  assert.equal(redMoveEvents(porcupineResult).length, 0)
+  assert.ok(porcupineResult.damage.red < plainShellResult.damage.red)
+  assert.ok(porcupineResult.replay.duration < plainShellResult.replay.duration)
+})
+
+test('resolver models commander drone as charged ability pressure, not mini-bot entities', () => {
+  const commanderDroneBlueprint = {
+    name: 'Commander Drone',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'drone', partId: 'Utility_DroneController', position: [0, 0, 1], rotation: [0, 0, 0] },
+      { id: 'sensor', partId: 'Utility_Sensor', position: [0, 1, 0], rotation: [0, 0, 0] },
+      { id: 'anchor', partId: 'Utility_Anchor', position: [0, 0, -1], rotation: [0, 0, 0] },
+      { id: 'cage', partId: 'Armor_Cage', position: [0, 1, -1], rotation: [0, 0, 0] },
+    ],
+  }
+  const withoutDroneBlueprint = {
+    ...commanderDroneBlueprint,
+    name: 'Sensor Bunker',
+    blocks: commanderDroneBlueprint.blocks.filter((block) => block.id !== 'drone'),
+  }
+  const fight = (blueprint) => resolveCombat({
+    round: 1,
+    seed: 'commander-drone-archetype-check',
+    red: {
+      blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: repeatedScript(10, { move: 'brake', utility: 'activate' }),
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Drone Archetype Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const droneResult = fight(commanderDroneBlueprint)
+  const withoutDroneResult = fight(withoutDroneBlueprint)
+  const droneAbilities = droneResult.replay.events.filter(
+    (event) => event.type === 'ability' && event.ability === 'drone_swarm',
+  )
+
+  assert.deepEqual(droneAbilities.map((event) => Math.trunc(event.t)), [1, 5])
+  assert.equal(
+    withoutDroneResult.replay.events.some((event) => event.type === 'ability'),
+    false,
+  )
+  assert.ok(droneResult.damage.blue > withoutDroneResult.damage.blue)
 })
 
 test('resolver emits a block-tied detach event when a part reaches zero HP', () => {

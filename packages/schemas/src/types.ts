@@ -48,6 +48,13 @@ export type PartStats = {
   weapon?: number
 }
 
+export type PartBehaviorSlot = Extract<PartCategory, 'body' | 'defense' | 'weapon' | 'utility'>
+
+export type PartBehavior = {
+  id: string
+  slot: PartBehaviorSlot
+}
+
 export type PartDefinition = {
   id: string
   category: PartCategory
@@ -58,6 +65,7 @@ export type PartDefinition = {
   size: Vector3
   tags: string[]
   stats: PartStats
+  behavior?: PartBehavior
   controls?: {
     movement?: boolean
     utility?: boolean

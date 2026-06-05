@@ -11,6 +11,10 @@ const replayViewerSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayViewer.tsx', import.meta.url),
   'utf8',
 )
+const babylonReplaySceneSource = readFileSync(
+  new URL('../apps/web/src/replay/BabylonReplayScene.tsx', import.meta.url),
+  'utf8',
+)
 
 function functionSource(source, functionName) {
   const start = source.indexOf(`function ${functionName}(`)
@@ -101,4 +105,21 @@ test('ability proof preview can render a clean canvas without replay overlays', 
   assert.ok(replayViewerSource.includes('replay-controls'))
   assert.ok(replayViewerSource.includes('replay-status-strip'))
   assert.ok(replayViewerSource.includes('replay-damage-schematic'))
+})
+
+test('Babylon replay scene has render branches for accepted replay cue kinds', () => {
+  const requiredEffectKinds = [
+    'weapon_fire',
+    'control_net',
+    'drone_swarm',
+    'part_detach',
+    'impact',
+    'damage_marker',
+    'hazard',
+  ]
+
+  for (const kind of requiredEffectKinds) {
+    assert.ok(babylonReplaySceneSource.includes(`${kind}: Array.from`), kind)
+    assert.ok(babylonReplaySceneSource.includes(`effect.kind === '${kind}'`), kind)
+  }
 })

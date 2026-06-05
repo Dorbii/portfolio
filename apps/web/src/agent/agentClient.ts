@@ -320,6 +320,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Bootstrap is idempotent for the same player key: it claims the role if needed, resumes if already claimed by that key, and returns private state plus nextAction.',
       'Use the same claimToken/player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
       `Read ${input.invite.apiBase}/agent-spec.json for the canonical rules, part catalog, commands, and endpoint contract after bootstrap succeeds or when you need custom-plan details.`,
+      'Use contract.designPatterns as mutable build seeds, not fixed classes. Hybridize them only through legal parts, purchases, and v2 tactics.',
       `Read private state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/state using Authorization: Bearer <claimToken>.`,
       `Read public match state with GET ${input.invite.apiBase}/sessions/${input.invite.sessionId}/public.`,
       `During submission_phase, submit one legal plan with POST ${input.invite.apiBase}/sessions/${input.invite.sessionId}/round-plan using Authorization: Bearer <claimToken>.`,

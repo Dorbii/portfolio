@@ -6,6 +6,14 @@ import {
   handleWorkerRequest,
 } from '../.test-build/apps/worker/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
+import {
+  HAZARD_PREFERENCES,
+  MOVEMENT_POLICIES,
+  PREFERRED_RANGES,
+  TACTIC_STYLES,
+  TARGET_PRIORITIES,
+  WEAPON_CADENCES,
+} from '../.test-build/packages/schemas/src/index.js'
 
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
@@ -147,6 +155,97 @@ function assertRedactedPublicState(publicState, hiddenValues) {
   }
 }
 
+const requiredDesignPatternIds = [
+  'stationary_spinner',
+  'black_hole_control',
+  'glass_cannon_saw',
+  'wedge_bully',
+  'crab_turret',
+  'trash_tank',
+  'hazard_matador',
+  'porcupine_shell',
+  'control_jailer',
+  'commander_drone_swarm',
+]
+
+function assertLegalDesignPatterns(contract) {
+  const partCatalog = new Map(contract.partCatalog.map((part) => [part.id, part]))
+  const behaviorIds = new Set(
+    contract.partCatalog
+      .map((part) => part.behavior?.id)
+      .filter((behaviorId) => behaviorId !== undefined),
+  )
+
+  assert.deepEqual(contract.designPatterns.map((pattern) => pattern.id), requiredDesignPatternIds)
+
+  for (const pattern of contract.designPatterns) {
+    assert.equal(typeof pattern.name, 'string')
+    assert.equal(typeof pattern.fantasy, 'string')
+    assert.ok(pattern.fantasy.includes('mutat') || pattern.fantasy.includes('hybrid'))
+    assert.ok(['first_round_legal', 'later_round_upgrade'].includes(pattern.budgetPhase))
+    assert.equal(pattern.suggestedParts.length > 0, true)
+    assert.equal(pattern.counters.length > 0, true)
+    assert.equal(pattern.simBackedEffects.length > 0, true)
+
+    let totalCost = 0
+    const suggestedBehaviorIds = new Set()
+    const controls = {
+      movement: false,
+      weapon: false,
+    }
+
+    for (const suggestedPart of pattern.suggestedParts) {
+      const catalogPart = partCatalog.get(suggestedPart.partId)
+
+      assert.ok(catalogPart, `${pattern.id} suggests unknown part ${suggestedPart.partId}`)
+      assert.equal(Number.isInteger(suggestedPart.quantity), true)
+      assert.equal(suggestedPart.quantity > 0, true)
+
+      totalCost += catalogPart.cost * suggestedPart.quantity
+      controls.movement ||= catalogPart.controls?.movement === true
+      controls.weapon ||= catalogPart.controls?.weapon === true
+
+      if (catalogPart.behavior) {
+        suggestedBehaviorIds.add(catalogPart.behavior.id)
+      }
+    }
+
+    if (pattern.budgetPhase === 'first_round_legal') {
+      assert.ok(totalCost <= contract.rules.startingGold, `${pattern.id} costs ${totalCost}`)
+    } else {
+      assert.ok(pattern.budgetPhase.includes('later'))
+    }
+
+    for (const effect of pattern.simBackedEffects) {
+      assert.ok(behaviorIds.has(effect), `${pattern.id} claims unknown behavior ${effect}`)
+      assert.ok(
+        suggestedBehaviorIds.has(effect),
+        `${pattern.id} claims ${effect} without a suggested source part`,
+      )
+    }
+
+    assert.ok(TACTIC_STYLES.includes(pattern.suggestedTactics.style))
+    assert.ok(TARGET_PRIORITIES.includes(pattern.suggestedTactics.targetPriority))
+    assert.ok(PREFERRED_RANGES.includes(pattern.suggestedTactics.preferredRange))
+    assert.ok(MOVEMENT_POLICIES.includes(pattern.suggestedTactics.movementPolicy))
+    assert.ok(WEAPON_CADENCES.includes(pattern.suggestedTactics.weaponCadence))
+    assert.ok(HAZARD_PREFERENCES.includes(pattern.suggestedTactics.hazardPreference))
+    assert.ok(pattern.suggestedTactics.aggression >= 0 && pattern.suggestedTactics.aggression <= 1)
+    assert.ok(
+      pattern.suggestedTactics.retreatAtHealthPct >= 0 &&
+        pattern.suggestedTactics.retreatAtHealthPct <= 1,
+    )
+
+    if (pattern.suggestedTactics.movementPolicy !== 'hold_ground') {
+      assert.ok(controls.movement, `${pattern.id} needs movement controls`)
+    }
+
+    if (pattern.suggestedTactics.weaponCadence !== 'hold_fire') {
+      assert.ok(controls.weapon, `${pattern.id} needs weapon controls`)
+    }
+  }
+}
+
 test('GET /agent-spec.json returns the agent contract', async () => {
   const { response, json } = await route({}, '/agent-spec.json', {
     headers: {
@@ -173,6 +272,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('designPatterns')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mandatory fixed classes')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('public chat')))
@@ -190,6 +291,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.rules.submissionSchemas.legacyV1.turnPlan.includes('exactly 5'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
+  assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
+  assertLegalDesignPatterns(json)
   assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
   assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
   assert.equal(json.examples.roundPlanSubmission.openingScript.commands.length, 5)
