@@ -53,6 +53,7 @@ type BotRuntime = {
   maxHealth: number
   hasUtilityControl: boolean
   hasWeaponControl: boolean
+  weaponSlotCount: number
   position: Vector3
   lastDamagedTick: number
   lastDealtDamageTick: number
@@ -63,6 +64,7 @@ type RuntimePart = {
   blockId: string
   partId: string
   category: PartCategory
+  hasWeaponControl: boolean
   position: Vector3
   health: number
   maxHealth: number
@@ -77,6 +79,9 @@ type PartDamageHit = {
   position: Vector3
 }
 
+type WeaponSlot = 'weaponA' | 'weaponB'
+
+const WEAPON_SLOTS: readonly WeaponSlot[] = ['weaponA', 'weaponB']
 const NO_DAMAGE_STALEMATE_TICKS = 60
 const HARD_MAX_COMBAT_TICKS = 600
 const MIN_REPLAY_DURATION = 6
@@ -126,11 +131,28 @@ function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePa
       blockId: block.id,
       partId: block.partId,
       category,
+      hasWeaponControl: Boolean(getPart(block.partId)?.controls?.weapon),
       position: [...block.position],
       health: maxHealth,
       maxHealth,
     }
   })
+}
+
+// CODEX_INTENT: tie weapon slot availability to live runtime weapon-control parts.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function countAliveWeaponSlots(parts: RuntimePart[]): number {
+  return Math.min(
+    WEAPON_SLOTS.length,
+    parts.filter((part) => part.hasWeaponControl && part.health > 0).length,
+  )
+}
+
+function updateWeaponSlotState(bot: BotRuntime): void {
+  bot.weaponSlotCount = countAliveWeaponSlots(bot.parts)
+  bot.hasWeaponControl = bot.weaponSlotCount > 0
 }
 
 function sumPartHealth(parts: RuntimePart[]): number {
@@ -379,29 +401,52 @@ function applyDamage(
   }
 }
 
-function resolveWeapon(
+// CODEX_INTENT: resolve each fired weapon slot independently while preserving replay slot identity.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function resolveWeapons(
   events: ReplayEvent[],
   tick: number,
   attacker: BotRuntime,
   defender: BotRuntime,
   command: TurnCommand,
-  random: number,
+  nextRandom: () => number,
 ): void {
-  if (command.weaponA !== 'fire' && command.weaponB !== 'fire') {
+  const firingSlots = WEAPON_SLOTS.filter(
+    (slot, index) => index < attacker.weaponSlotCount && command[slot] === 'fire',
+  )
+
+  if (firingSlots.length === 0) {
     return
   }
 
-  const slot = command.weaponA === 'fire' ? 'weaponA' : 'weaponB'
-  events.push({ t: tick + 0.1, type: 'weapon_fire', bot: attacker.role, weaponSlot: slot })
+  const inRange = distance(attacker.position, defender.position) <= weaponReach(attacker)
 
-  if (distance(attacker.position, defender.position) > weaponReach(attacker)) {
-    return
+  for (const slot of firingSlots) {
+    events.push({
+      t: weaponFireTime(tick, slot),
+      type: 'weapon_fire',
+      bot: attacker.role,
+      weaponSlot: slot,
+    })
+
+    if (!inRange) {
+      continue
+    }
+
+    applyDamage(events, tick, attacker, defender, weaponSlotDamage(attacker, nextRandom()), 'weapon')
   }
+}
 
-  const damage =
-    3 + attacker.stats.weaponThreat * 0.8 + attacker.stats.control * 0.2 + random * 5
+function weaponFireTime(tick: number, slot: WeaponSlot): number {
+  return round(tick + 0.1 + WEAPON_SLOTS.indexOf(slot) * 0.02)
+}
 
-  applyDamage(events, tick, attacker, defender, damage, 'weapon')
+function weaponSlotDamage(attacker: BotRuntime, random: number): number {
+  const slotCount = Math.max(1, attacker.weaponSlotCount)
+
+  return 3 + (attacker.stats.weaponThreat * 0.8 + attacker.stats.control * 0.2) / slotCount + random * 5
 }
 
 function isContactMove(command: TurnCommand): boolean {
@@ -468,6 +513,8 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   const blueStats = deriveBotStats(input.blue.blueprint)
   const redParts = createRuntimeParts(input.red.blueprint, redStats)
   const blueParts = createRuntimeParts(input.blue.blueprint, blueStats)
+  const redWeaponSlotCount = countAliveWeaponSlots(redParts)
+  const blueWeaponSlotCount = countAliveWeaponSlots(blueParts)
   const red: BotRuntime = {
     role: 'red',
     stats: redStats,
@@ -475,7 +522,8 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     health: sumPartHealth(redParts),
     maxHealth: sumPartHealth(redParts),
     hasUtilityControl: hasControlledPart(input.red.blueprint, 'utility'),
-    hasWeaponControl: hasControlledPart(input.red.blueprint, 'weapon'),
+    hasWeaponControl: redWeaponSlotCount > 0,
+    weaponSlotCount: redWeaponSlotCount,
     position: [-6, 0, 0],
     lastDamagedTick: -Infinity,
     lastDealtDamageTick: -Infinity,
@@ -487,7 +535,8 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     health: sumPartHealth(blueParts),
     maxHealth: sumPartHealth(blueParts),
     hasUtilityControl: hasControlledPart(input.blue.blueprint, 'utility'),
-    hasWeaponControl: hasControlledPart(input.blue.blueprint, 'weapon'),
+    hasWeaponControl: blueWeaponSlotCount > 0,
+    weaponSlotCount: blueWeaponSlotCount,
     position: [6, 0, 0],
     lastDamagedTick: -Infinity,
     lastDealtDamageTick: -Infinity,
@@ -504,6 +553,9 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
     elapsedTicks = tick
+    updateWeaponSlotState(red)
+    updateWeaponSlotState(blue)
+
     const redCommand = chooseCommand(
       {
         tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
@@ -537,10 +589,8 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
       events.push({ t: tick, type: 'move', bot: 'blue', from: blueFrom, to: blue.position })
     }
 
-    const weaponRandom = rng()
-
-    resolveWeapon(events, tick, red, blue, redCommand, weaponRandom)
-    resolveWeapon(events, tick, blue, red, blueCommand, weaponRandom)
+    resolveWeapons(events, tick, red, blue, redCommand, rng)
+    resolveWeapons(events, tick, blue, red, blueCommand, rng)
 
     if (
       distance(red.position, blue.position) < CONTACT_DISTANCE &&

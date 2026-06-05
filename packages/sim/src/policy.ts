@@ -21,6 +21,7 @@ export type PolicyBotState = {
   maxHealth: number
   hasUtilityControl: boolean
   hasWeaponControl: boolean
+  weaponSlotCount?: number
   position: Vector3
   lastDamagedTick: number
   lastDealtDamageTick: number
@@ -112,15 +113,27 @@ function choosePolicyCommand(
     tick,
     move: choosePolicyMove(context),
   }
+  const weaponSlotCount = availableWeaponSlotCount(bot)
 
-  if (bot.hasWeaponControl) {
+  if (weaponSlotCount >= 1) {
     command.weaponA = chooseWeaponCommand(context)
+  }
+  if (weaponSlotCount >= 2) {
+    command.weaponB = chooseWeaponCommand(context)
   }
   if (bot.hasUtilityControl) {
     command.utility = chooseUtilityCommand(context)
   }
 
   return command
+}
+
+// CODEX_INTENT: expose the second weapon control slot to policy command selection.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function availableWeaponSlotCount(bot: PolicyBotState): number {
+  return Math.min(2, bot.weaponSlotCount ?? (bot.hasWeaponControl ? 1 : 0))
 }
 
 function choosePolicyMove(context: PolicyContext): MovementCommand {

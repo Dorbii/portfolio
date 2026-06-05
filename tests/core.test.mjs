@@ -52,6 +52,17 @@ const partBreakAttackerBlueprint = {
   ],
 }
 
+const dualWeaponBlueprint = {
+  name: 'Dual Slot Bot',
+  blocks: [
+    { id: 'core', partId: 'Body_Square_Medium', position: [0, 0, 0], rotation: [0, 0, 0] },
+    { id: 'left', partId: 'Wheel_Large', position: [-1, 0, 0], rotation: [0, 0, 90] },
+    { id: 'right', partId: 'Wheel_Large', position: [1, 0, 0], rotation: [0, 0, 90] },
+    { id: 'spinner', partId: 'Weapon_Spinner_Small', position: [0, 0, 1], rotation: [0, 0, 0] },
+    { id: 'saw', partId: 'Weapon_Saw', position: [0, 0, -1], rotation: [0, 0, 0] },
+  ],
+}
+
 const sparseTurnPlan = { commands: [{ tick: 3, move: 'turn_left' }] }
 
 const validSpinnerSubmission = {
@@ -265,6 +276,7 @@ test('blueprint validation enforces inventory and connected grid', () => {
 
 test('controls are generated from installed modules', () => {
   const controls = deriveControls(validSpinnerSubmission.blueprint)
+  const dualControls = deriveControls(dualWeaponBlueprint)
 
   assert.deepEqual(controls.movement, [
     'forward',
@@ -281,6 +293,8 @@ test('controls are generated from installed modules', () => {
   ])
   assert.deepEqual(controls.weaponA, ['fire', 'hold'])
   assert.equal(controls.weaponB, undefined)
+  assert.deepEqual(dualControls.weaponA, ['fire', 'hold'])
+  assert.deepEqual(dualControls.weaponB, ['fire', 'hold'])
 })
 
 test('round submission rejects commands for absent modules', () => {
@@ -600,6 +614,88 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
   assert.ok(first.replay.duration > 6)
   assert.ok(first.damage.red > 0)
   assert.ok(first.damage.blue > 0)
+})
+
+test('resolver emits independent weaponA and weaponB fire from two weapon slots', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'dual-weapon-slot-check',
+    red: {
+      blueprint: dualWeaponBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+      openingScript: { commands: [] },
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Slot Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const redWeaponFire = result.replay.events.filter(
+    (event) => event.type === 'weapon_fire' && event.bot === 'red',
+  )
+  const slotsByTick = new Map()
+
+  for (const event of redWeaponFire) {
+    const tick = Math.trunc(event.t)
+    const slots = slotsByTick.get(tick) ?? new Set()
+
+    slots.add(event.weaponSlot)
+    slotsByTick.set(tick, slots)
+  }
+
+  assert.ok(redWeaponFire.some((event) => event.weaponSlot === 'weaponB'))
+  assert.ok(
+    [...slotsByTick.values()].some(
+      (slots) => slots.has('weaponA') && slots.has('weaponB'),
+    ),
+  )
+  assert.ok(result.damage.blue > 0)
+})
+
+test('resolver ignores weaponB fire commands when only one weapon slot exists', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'absent-weapon-b-check',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'hold_ground',
+        weaponCadence: 'hold_fire',
+      }),
+      openingScript: {
+        commands: [
+          { tick: 1, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
+          { tick: 2, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
+          { tick: 3, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
+          { tick: 4, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
+          { tick: 5, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
+        ],
+      },
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Slot Test', width: 24, height: 16, activeHazards: [] },
+  })
+
+  assert.equal(
+    result.replay.events.some(
+      (event) =>
+        event.type === 'weapon_fire' &&
+        event.bot === 'red' &&
+        event.weaponSlot === 'weaponB',
+    ),
+    false,
+  )
 })
 
 test('resolver emits a block-tied detach event when a part reaches zero HP', () => {
