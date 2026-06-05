@@ -30,6 +30,7 @@ export type ReplayEffectKind =
   | 'control_net'
   | 'laser_lance'
   | 'drone_swarm'
+  | 'part_detach'
   | 'impact'
   | 'debris'
   | 'damage_marker'
@@ -409,6 +410,15 @@ function buildEffects(
       const age = time - event.t
 
       if (age >= 0 && age <= DEBRIS_WINDOW) {
+        effects.push({
+          id: `${index}-part-detach-focus-${event.blockId}`,
+          kind: 'part_detach',
+          position: event.position,
+          age,
+          intensity: Math.max(0, 1 - age / DEBRIS_WINDOW),
+          team: event.bot,
+          label: event.blockId,
+        })
         effects.push({
           id: `${index}-part-detach-${event.blockId}`,
           kind: 'debris',

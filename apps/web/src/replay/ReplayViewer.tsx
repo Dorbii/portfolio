@@ -18,6 +18,8 @@ import {
 type ReplayViewerProps = {
   arena: ArenaConfig
   botBlueprints: Record<TeamRole, BotBlueprint>
+  initialCameraPreset?: CameraPreset
+  initialTime?: number
   timeline: ReplayTimeline
 }
 
@@ -47,11 +49,17 @@ const cameraOptions: { label: string; value: CameraPreset }[] = [
 
 const speedOptions = [0.5, 1, 1.5, 2]
 
-export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerProps) {
-  const [time, setTime] = useState(0)
+export function ReplayViewer({
+  arena,
+  botBlueprints,
+  initialCameraPreset = 'broadcast',
+  initialTime = 0,
+  timeline,
+}: ReplayViewerProps) {
+  const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [cameraPreset, setCameraPreset] = useState<CameraPreset>('broadcast')
+  const [cameraPreset, setCameraPreset] = useState<CameraPreset>(initialCameraPreset)
   const frame = useMemo(() => buildReplayFrame(timeline, time), [timeline, time])
   const sortedEvents = useMemo(
     () => sortTimelineEvents(timeline.events),
@@ -63,8 +71,12 @@ export function ReplayViewer({ arena, botBlueprints, timeline }: ReplayViewerPro
   )
 
   useEffect(() => {
-    setTime((current) => clampReplayTime(timeline, current))
-  }, [timeline])
+    setTime(clampReplayTime(timeline, initialTime))
+  }, [initialTime, timeline])
+
+  useEffect(() => {
+    setCameraPreset(initialCameraPreset)
+  }, [initialCameraPreset])
 
   useEffect(() => {
     if (!playing) {

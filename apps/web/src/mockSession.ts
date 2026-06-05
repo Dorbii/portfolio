@@ -176,6 +176,95 @@ export const mockReplay: ReplayTimeline = createReplayTimeline({
   ],
 })
 
+export const abilityProofReplay: ReplayTimeline = createReplayTimeline({
+  round: 4,
+  duration: 6,
+  summary: 'Ability and part detach readability proof.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [-3, 0, -1],
+      rotation: [0, 70, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [4, 0, 1.5],
+      rotation: [0, -110, 0],
+    },
+    {
+      t: 0.65,
+      type: 'move',
+      bot: 'red',
+      from: [-3, 0, -1],
+      to: [-1.4, 0, -2.3],
+    },
+    {
+      t: 0.65,
+      type: 'move',
+      bot: 'blue',
+      from: [4, 0, 1.5],
+      to: [1.6, 0, -0.5],
+    },
+    {
+      t: 1.55,
+      type: 'weapon_fire',
+      bot: 'blue',
+      weaponSlot: 'weaponA',
+      controlCue: 'deploy',
+      targetPosition: [-1.2, 0, -2.2],
+    },
+    {
+      t: 1.72,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'laser_lance',
+      weaponSlot: 'weaponA',
+      target: 'red',
+      targetPosition: [-1.1, 0, -2.15],
+    },
+    {
+      t: 1.88,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'drone_swarm',
+      weaponSlot: 'weaponB',
+      target: 'red',
+      targetPosition: [-1.6, 0, -1.9],
+    },
+    {
+      t: 2.06,
+      type: 'impact',
+      attacker: 'blue',
+      defender: 'red',
+      damage: 20,
+      position: [-1.2, 0, -2.15],
+    },
+    {
+      t: 2.14,
+      type: 'damage',
+      bot: 'red',
+      amount: 20,
+      remainingHealth: 32,
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      partRemainingHealth: 0,
+      partMaxHealth: 16,
+    },
+    {
+      t: 2.2,
+      type: 'part_detach',
+      bot: 'red',
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      position: [-1.2, 0.28, -2.15],
+    },
+  ],
+})
+
 const eventLog = [
   {
     at: '14:03',

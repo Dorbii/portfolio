@@ -142,9 +142,9 @@ export function BabylonReplayScene({
       return undefined
     }
 
-      let resources: SceneResources | null = null
-      let disposed = false
-      let statsFrame = 0
+    let resources: SceneResources | null = null
+    let disposed = false
+    let statsFrame = 0
 
     try {
       if (!Engine.isSupported()) {
@@ -1233,6 +1233,7 @@ function createEffectPool(scene: Scene): EffectPool {
   const controlNetMaterial = createSceneMaterial(scene, 'control-net-mat', '#75f6ff', '#1ccfd6', 0.72, 0.12)
   const laserMaterial = createSceneMaterial(scene, 'laser-lance-mat', '#fff3d6', '#ff4dd8', 0.96, 0.08)
   const laserGlowMaterial = createSceneMaterial(scene, 'laser-lance-glow-mat', '#ffb24d', '#ff4dd8', 0.38, 0.04)
+  const partDetachMaterial = createSceneMaterial(scene, 'part-detach-mat', '#ffe4a8', '#ff6b2e', 0.86, 0.08)
   const debrisMaterial = createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d')
   const damageMaterial = createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e')
   const hazardMaterial = createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f')
@@ -1250,6 +1251,9 @@ function createEffectPool(scene: Scene): EffectPool {
     ),
     drone_swarm: Array.from({ length: 3 }, (_, index) =>
       createPooledDroneSwarmEffect(scene, `drone-swarm-effect-${index}`),
+    ),
+    part_detach: Array.from({ length: 6 }, (_, index) =>
+      createPooledTorus(scene, `part-detach-effect-${index}`, partDetachMaterial, 0.95),
     ),
     impact: Array.from({ length: 12 }, (_, index) =>
       createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
@@ -1604,6 +1608,11 @@ function updateBotPartNodes(
   partStates: Record<string, PartFrameState>,
   time: number,
 ): void {
+  const botWorldMatrix = bot.computeWorldMatrix(true).clone()
+  const inverseBotWorld = botWorldMatrix.clone()
+
+  inverseBotWorld.invert()
+
   const nodes = bot.getChildren((node) => {
     const metadata = node.metadata as BotPartNodeMetadata | undefined
 
@@ -1620,19 +1629,25 @@ function updateBotPartNodes(
       const age = Math.max(0, time - state.detachTime)
       const angle = deterministicAngle(`${role}-${metadata.blockId}`) + (role === 'red' ? 0.25 : -0.25)
       const distance = Math.min(2.7, age * 1.05)
-      const drop = Math.max(0.02, basePosition[1] + 0.38 + age * 0.95 - age * age * 0.36)
-
-      node.position.set(
-        basePosition[0] + Math.cos(angle) * distance,
-        drop,
-        basePosition[2] + Math.sin(angle) * distance,
+      const origin = state.detachPosition
+        ? toBabylonVector(state.detachPosition)
+        : Vector3.TransformCoordinates(new Vector3(basePosition[0], basePosition[1], basePosition[2]), botWorldMatrix)
+      const hop = Math.max(0, 0.38 + age * 1.08 - age * age * 0.42)
+      const worldPosition = new Vector3(
+        origin.x + Math.cos(angle) * distance,
+        Math.max(0.08, origin.y + hop),
+        origin.z + Math.sin(angle) * distance,
       )
+      const localPosition = Vector3.TransformCoordinates(worldPosition, inverseBotWorld)
+      const freshBreak = Math.max(0, 1 - age / 0.7)
+
+      node.position.copyFrom(localPosition)
       node.rotation.set(
         baseRotation[0] + age * (1.9 + Math.abs(Math.sin(angle))),
         baseRotation[1] + age * 2.5,
         baseRotation[2] + age * (1.4 + Math.abs(Math.cos(angle))),
       )
-      node.scaling.setAll(0.92)
+      node.scaling.setAll(0.92 + freshBreak * 0.18)
 
       return
     }
@@ -1653,6 +1668,7 @@ function updateEffects(
     control_net: 0,
     laser_lance: 0,
     drone_swarm: 0,
+    part_detach: 0,
     impact: 0,
     debris: 0,
     damage_marker: 0,
@@ -1758,6 +1774,15 @@ function updateEffects(
       mesh.scaling.setAll(pulse)
       mesh.visibility = 0.78 + effect.intensity * 0.2
       updateDroneSwarmParts(mesh, effect, progress)
+    }
+
+    if (effect.kind === 'part_detach') {
+      mesh.position.y += 0.36
+      mesh.rotation.x = Math.PI / 2
+      mesh.rotation.y = effect.age * 3.2
+      mesh.rotation.z = Math.sin(effect.age * 12) * 0.08
+      mesh.scaling.setAll(0.7 + effect.intensity * 1.2)
+      mesh.visibility = 0.34 + effect.intensity * 0.5
     }
 
     if (effect.kind === 'impact') {
@@ -1947,15 +1972,21 @@ function updateCamera(
   const red = toBabylonVector(frame.bots.red.position)
   const blue = toBabylonVector(frame.bots.blue.position)
   const midpoint = Vector3.Center(red, blue)
-  const activeImpact = frame.effects.find((effect) => effect.kind === 'impact' && effect.age < 1.2)
-  const activeHazard = frame.effects.find((effect) => effect.kind === 'hazard' && effect.age < 0.9)
-  const activeAbility = frame.effects.find(
+  const activePartDetach = findLatestReplayEffect(frame.effects, (effect) =>
+    effect.kind === 'part_detach' && effect.age < 1.35,
+  )
+  const activeImpact = findLatestReplayEffect(frame.effects, (effect) => effect.kind === 'impact' && effect.age < 1.2)
+  const activeHazard = findLatestReplayEffect(frame.effects, (effect) => effect.kind === 'hazard' && effect.age < 0.9)
+  const activeAbility = findLatestReplayEffect(
+    frame.effects,
     (effect) =>
       (effect.kind === 'laser_lance' || effect.kind === 'control_net' || effect.kind === 'drone_swarm') &&
       effect.age < 1.2,
   )
-  const activeKnockout = frame.effects.find((effect) => effect.kind === 'knockout')
-  const target = activeImpact
+  const activeKnockout = findLatestReplayEffect(frame.effects, (effect) => effect.kind === 'knockout')
+  const target = activePartDetach
+    ? toBabylonVector(activePartDetach.position)
+    : activeImpact
     ? toBabylonVector([activeImpact.position[0], activeImpact.position[1], activeImpact.position[2]])
     : activeHazard
       ? toBabylonVector([activeHazard.position[0], activeHazard.position[1], activeHazard.position[2]])
@@ -1965,6 +1996,8 @@ function updateCamera(
 
   const shake = activeImpact
     ? (1 - activeImpact.age / 1.2) * 0.5
+    : activePartDetach
+      ? activePartDetach.intensity * 0.24
     : activeKnockout
       ? 0.35
       : activeAbility
@@ -2002,12 +2035,12 @@ function updateCamera(
       0.79,
       Math.max(5.4, arenaRadius * 0.44),
       frame.time,
-      shake + knockBack * 1.3,
+      shake + knockBack * 1.3 + (activePartDetach ? 0.1 : 0),
     )
   } else if (preset === 'cinematic') {
     setCamera(
       camera,
-      activeImpact ? target : activeHazard ? target : midpoint,
+      activePartDetach ? target : activeImpact ? target : activeHazard ? target : midpoint,
       -Math.PI * 0.58,
       0.72,
       Math.max(6.2, arenaRadius * 0.52),
@@ -2056,6 +2089,21 @@ function abilityCameraTarget(effect: ReplayEffectState): Vector3 {
   }
 
   return Vector3.Center(toBabylonVector(effect.position), toBabylonVector(effect.endPosition))
+}
+
+function findLatestReplayEffect(
+  effects: ReplayEffectState[],
+  predicate: (effect: ReplayEffectState) => boolean,
+): ReplayEffectState | undefined {
+  for (let index = effects.length - 1; index >= 0; index -= 1) {
+    const effect = effects[index]
+
+    if (predicate(effect)) {
+      return effect
+    }
+  }
+
+  return undefined
 }
 
 function lerpNumber(from: number, to: number, amount: number): number {

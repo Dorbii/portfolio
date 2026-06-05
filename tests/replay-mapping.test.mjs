@@ -334,6 +334,7 @@ test('replay mapping exposes part detach only after the detach event time', () =
   assert.equal(after.parts.red['left-wheel'].blockId, 'left-wheel')
   assert.equal(after.parts.red['left-wheel'].partId, 'Wheel_Large')
   assert.deepEqual(after.parts.red['left-wheel'].detachPosition, [3.5, 0.2, 0.2])
+  assert.ok(after.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'))
   assert.ok(after.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'))
 })
 

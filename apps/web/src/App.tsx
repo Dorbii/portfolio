@@ -31,8 +31,10 @@ import {
   type ReplayPayload,
 } from './referee/refereeClient'
 import { ReplayViewer } from './replay/ReplayViewer'
+import type { CameraPreset } from './replay/replayMapping'
 import {
   arenaConfig as previewArenaConfig,
+  abilityProofReplay,
   mockBotBlueprints,
   mockReplay,
 } from './mockSession'
@@ -59,8 +61,11 @@ export default function App() {
 }
 
 function ReplayPreview() {
+  const previewOptions = resolveReplayPreviewOptions(window.location.search)
+  const timeline = previewOptions.proofMode ? abilityProofReplay : mockReplay
+
   return (
-    <main className="replay-preview-page">
+    <main className={`replay-preview-page${previewOptions.proofMode ? ' replay-preview-proof' : ''}`}>
       <header className="replay-preview-header">
         <div>
           <span className="eyebrow">Art preview</span>
@@ -72,11 +77,43 @@ function ReplayPreview() {
         <ReplayViewer
           arena={previewArenaConfig}
           botBlueprints={mockBotBlueprints}
-          timeline={mockReplay}
+          initialCameraPreset={previewOptions.cameraPreset}
+          initialTime={previewOptions.time}
+          timeline={timeline}
         />
       </section>
     </main>
   )
+}
+
+function resolveReplayPreviewOptions(search: string): {
+  cameraPreset: CameraPreset
+  proofMode: boolean
+  time: number
+} {
+  const params = new URLSearchParams(search)
+  const parsedTime = Number(params.get('time'))
+
+  return {
+    cameraPreset: resolveCameraPreset(params.get('camera')),
+    proofMode: params.get('proof') === 'ability',
+    time: Number.isFinite(parsedTime) ? parsedTime : 0,
+  }
+}
+
+function resolveCameraPreset(value: string | null): CameraPreset {
+  if (
+    value === 'wide' ||
+    value === 'broadcast' ||
+    value === 'red_follow' ||
+    value === 'blue_follow' ||
+    value === 'impact' ||
+    value === 'cinematic'
+  ) {
+    return value
+  }
+
+  return 'broadcast'
 }
 
 function RefereeConsole() {

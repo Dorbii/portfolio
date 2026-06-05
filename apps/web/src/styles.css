@@ -621,6 +621,25 @@ button.active {
   min-height: 560px;
 }
 
+.replay-preview-proof {
+  padding: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.replay-preview-proof .replay-preview-header {
+  display: none;
+}
+
+.replay-preview-proof .replay-preview-frame {
+  border: 0;
+  box-shadow: none;
+}
+
+.replay-preview-proof .replay-preview-frame .replay-shell {
+  height: 100vh;
+  min-height: 0;
+}
+
 .replay-outcome {
   min-width: 0;
   padding: 12px;
