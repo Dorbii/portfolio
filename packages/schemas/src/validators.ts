@@ -1,8 +1,6 @@
 import {
   AGENT_CHAT_MESSAGE_KINDS,
   HAZARD_PREFERENCES,
-  MAX_REFEREE_AWARDS_PER_ROUND,
-  MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND,
   MOVEMENT_COMMANDS,
   MOVEMENT_POLICIES,
   PREFERRED_RANGES,
@@ -14,8 +12,6 @@ import {
   WEAPON_CADENCES,
   type ArenaConfig,
   type BotTactics,
-  type RefereeAwardOption,
-  type RefereeAwardSelection,
   type BotBlueprint,
   type GeneratedControls,
   type RoundPlanSubmission,
@@ -982,89 +978,4 @@ export function asRoundPlanSubmission(value: unknown): RoundPlanSubmission | nul
 
 export function asBotBlueprint(value: unknown): BotBlueprint | null {
   return validateBlueprintShape(value).ok ? (value as BotBlueprint) : null
-}
-
-export function validateSubmitRefereeAwardsRequestShape(
-  value: unknown,
-  awardOptions: readonly RefereeAwardOption[],
-): ValidationResult {
-  const issues: ValidationIssue[] = []
-
-  if (!isRecord(value)) {
-    return {
-      ok: false,
-      issues: [
-        issue('INVALID_AWARD_REQUEST', 'awards', 'Expected referee awards request object.'),
-      ],
-    }
-  }
-
-  if (!Array.isArray(value.awards)) {
-    return {
-      ok: false,
-      issues: [issue('INVALID_AWARDS', 'awards', 'Expected awards array.')],
-    }
-  }
-
-  if (value.awards.length > MAX_REFEREE_AWARDS_PER_ROUND) {
-    issues.push(
-      issue(
-        'TOO_MANY_AWARDS',
-        'awards',
-        `Select at most ${MAX_REFEREE_AWARDS_PER_ROUND} awards.`,
-      ),
-    )
-  }
-
-  const validAwardIds = new Set(awardOptions.map((option) => option.id))
-  const selectedAwardIds = new Set<string>()
-  const selectedTeams = new Set<string>()
-
-  value.awards.forEach((selection, index) => {
-    const path = `awards.${index}`
-
-    if (!isRecord(selection)) {
-      issues.push(issue('INVALID_AWARD_SELECTION', path, 'Expected award selection object.'))
-      return
-    }
-
-    const awardId = selection.awardId
-
-    if (typeof awardId !== 'string' || awardId.length === 0) {
-      issues.push(issue('INVALID_AWARD_ID', `${path}.awardId`, 'Expected award ID.'))
-    } else if (!validAwardIds.has(awardId)) {
-      issues.push(issue('UNKNOWN_AWARD_ID', `${path}.awardId`, 'Award ID is not available.'))
-    } else if (selectedAwardIds.has(awardId)) {
-      issues.push(issue('DUPLICATE_AWARD_ID', `${path}.awardId`, 'Award ID was selected more than once.'))
-    } else {
-      selectedAwardIds.add(awardId)
-    }
-
-    const targetTeam = selection.targetTeam
-
-    if (!TEAM_ROLES.includes(targetTeam as never)) {
-      issues.push(issue('INVALID_TARGET_TEAM', `${path}.targetTeam`, 'Target team must be red or blue.'))
-    } else if (selectedTeams.has(targetTeam as string)) {
-      issues.push(
-        issue(
-          'TOO_MANY_AWARDS_FOR_TEAM',
-          `${path}.targetTeam`,
-          `Select at most ${MAX_REFEREE_AWARDS_PER_TEAM_PER_ROUND} award per team.`,
-        ),
-      )
-    } else {
-      selectedTeams.add(targetTeam as string)
-    }
-  })
-
-  return result(issues)
-}
-
-export function asRefereeAwardSelections(
-  value: unknown,
-  awardOptions: readonly RefereeAwardOption[],
-): RefereeAwardSelection[] | null {
-  return validateSubmitRefereeAwardsRequestShape(value, awardOptions).ok
-    ? ((value as { awards: RefereeAwardSelection[] }).awards)
-    : null
 }

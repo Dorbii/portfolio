@@ -552,7 +552,7 @@ test('browser role API exposes valid actions from current role state', async () 
 })
 
 test('browser role API marks submit action unavailable when role is locked', async () => {
-  const lockedState = { ...roleState, phase: 'referee_awards' }
+  const lockedState = { ...roleState, phase: 'round_review' }
   const client = new AgentArenaClient({
     invite,
     getRoleToken: () => 'role_red',

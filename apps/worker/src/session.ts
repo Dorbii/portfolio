@@ -2,20 +2,18 @@ import {
   TEAM_ROLES,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
-  validateSubmitRefereeAwardsRequestShape,
   validateRoleResetRequestShape,
+  type AdvanceRoundResponse,
   type AgentChatMessagePostRequest,
   type AgentChatMessageResponse,
   type AgentPrivateChatMessagePostRequest,
   type AgentPrivateChatMessageResponse,
   type AgentBootstrapRequest,
   type AgentBootstrapResponse,
-  type AppliedRefereeAward,
   type CreateSessionRequest,
   type CreateSessionResponse,
   type PublicSessionState,
   type ReplayPayload,
-  type RefereeAwardsResponse,
   type RelayErrorResponse,
   type RoleClaimRequest,
   type RoleClaimResponse,
@@ -27,7 +25,6 @@ import {
   type SessionChatMessage,
   type SessionLogEvent,
   type SessionPhase,
-  type SubmitRefereeAwardsRequest,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import {
@@ -50,7 +47,6 @@ import {
   findRoleByToken,
   hasRefereeCapabilityToken,
 } from './sessionAuth.js'
-import { generateRefereeAwardOptions } from './refereeAwards.js'
 import { takeSessionRateLimit } from './sessionRateLimits.js'
 import {
   applyCombatResultToScore,
@@ -88,8 +84,7 @@ import type {
 
 export {
   calculateInterest,
-  generateRefereeAwardOptions,
-} from './refereeAwards.js'
+} from './roundEconomy.js'
 export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
@@ -463,44 +458,32 @@ export class SessionCoordinator {
     }
   }
 
-  async submitRefereeAwards(
+  async advanceRound(
     refereeToken: string,
-    request: unknown,
-  ): Promise<SessionResult<RefereeAwardsResponse>> {
+  ): Promise<SessionResult<AdvanceRoundResponse>> {
     const now = this.clock()
-    const authError = await this.authorizeRefereeAction(refereeToken, 'referee_awards', now)
+    const authError = await this.authorizeRefereeAction(refereeToken, 'advance_round', now)
 
     if (authError) {
       return authError
     }
 
-    if (this.state.phase !== 'referee_awards') {
+    if (this.state.phase !== 'round_review') {
       return relayError(
         'PHASE_CLOSED',
-        `Referee awards are only accepted during referee_awards; current phase is ${this.state.phase}.`,
+        `Rounds can be advanced only during round_review; current phase is ${this.state.phase}.`,
       )
     }
 
     if (!this.state.lastResult) {
-      return relayError('INVALID_REQUEST', 'Combat result is required before awards can be applied.')
+      return relayError('INVALID_REQUEST', 'Combat result is required before the round can advance.')
     }
 
-    const validation = validateSubmitRefereeAwardsRequestShape(
-      request,
-      this.state.awardOptions,
-    )
-
-    if (!validation.ok) {
-      return relayError('SUBMISSION_INVALID', 'Referee awards failed validation.', validation.issues)
-    }
-
-    const selections = cloneJson((request as SubmitRefereeAwardsRequest).awards)
-    const appliedAwards = this.applyAwardsAndAdvance(selections, now)
+    this.applyReviewAndAdvance(now)
 
     return {
       ok: true,
       value: {
-        appliedAwards,
         publicState: this.getPublicState(),
       },
     }
@@ -633,53 +616,31 @@ export class SessionCoordinator {
       : relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
   }
 
-  private applyAwardsAndAdvance(
-    selections: SubmitRefereeAwardsRequest['awards'],
-    now: string,
-  ): AppliedRefereeAward[] {
-    const optionById = new Map(this.state.awardOptions.map((option) => [option.id, option]))
-    const appliedAwards = selections.map((selection) => {
-      const option = optionById.get(selection.awardId)!
-
-      return {
-        awardId: selection.awardId,
-        targetTeam: selection.targetTeam,
-        round: this.state.round,
-        title: option.title,
-        gold: option.gold,
-      }
-    })
-
-    this.state.awardHistory.push(...appliedAwards)
+  private applyReviewAndAdvance(now: string): void {
     this.appendEvent(
-      'referee_awards_submitted',
-      `${appliedAwards.length} referee award${appliedAwards.length === 1 ? '' : 's'} accepted.`,
+      'round_advanced',
+      'Referee advanced round review.',
       now,
     )
-    this.changePhase('apply_awards', 'Referee awards accepted.', now)
     applyCombatResultToScore(this.state)
 
     if (shouldCompleteMatch(this.state)) {
       this.completeMatch(now)
-
-      return appliedAwards
+      return
     }
 
-    this.advanceToNextRound(appliedAwards, now)
-
-    return appliedAwards
+    this.advanceToNextRound(now)
   }
 
   private completeMatch(now: string): void {
     const completion = resolveMatchCompletion(this.state)
 
-    this.state.awardOptions = []
     this.appendEvent('session_completed', completion.reason, now)
     this.changePhase('session_complete', `Session complete: ${completion.winner}.`, now)
   }
 
-  private advanceToNextRound(appliedAwards: AppliedRefereeAward[], now: string): void {
-    applyNextRoundEconomy(this.state, appliedAwards)
+  private advanceToNextRound(now: string): void {
+    applyNextRoundEconomy(this.state)
     this.appendEvent('economy_applied', `Round ${this.state.round} economy applied.`, now)
     this.changePhase('submission_phase', `Round ${this.state.round} plans are open.`, now)
   }
@@ -761,14 +722,10 @@ export class SessionCoordinator {
       },
     }
     this.state.lastResult = combatSummary(result)
-    this.state.awardOptions = generateRefereeAwardOptions(
-      `${this.state.id}:${this.state.seed}`,
-      this.state.round,
-    )
     this.appendEvent('combat_resolved', result.reason, now)
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
     this.changePhase('replay_phase', 'Replay timeline is available.', now)
-    this.changePhase('referee_awards', 'Referee award options are ready.', now)
+    this.changePhase('round_review', 'Round review is ready for referee advance.', now)
     this.appendCombatChatter(result, now)
   }
 

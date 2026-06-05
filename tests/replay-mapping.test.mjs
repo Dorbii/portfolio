@@ -5,6 +5,11 @@ import {
   buildReplayFrame,
   clampReplayTime,
 } from '../.test-build/apps/web/src/replay/replayMapping.js'
+import {
+  calculateBroadcastFrameForBothBotsAndActiveEffect,
+  capBroadcastShakeForNoExcessiveShake,
+  NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT,
+} from '../.test-build/apps/web/src/replay/replayCameraFraming.js'
 import { mockReplay } from '../.test-build/apps/web/src/mockSession.js'
 import {
   createReplayTimeline,
@@ -368,15 +373,24 @@ test('replay timeline validation rejects empty-duration and out-of-range events'
 test('replay mapping exposes part detach only after the detach event time', () => {
   const before = buildReplayFrame(timeline, 3.2)
   const after = buildReplayFrame(timeline, 3.4)
+  const afterVisualWindow = buildReplayFrame(timeline, 5.2)
 
   assert.equal(before.parts.red['left-wheel'].status, 'attached')
   assert.equal(before.parts.red['left-wheel'].health, 0)
+  assert.equal(before.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'), false)
+  assert.equal(before.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'), false)
   assert.equal(after.parts.red['left-wheel'].status, 'detached')
   assert.equal(after.parts.red['left-wheel'].blockId, 'left-wheel')
   assert.equal(after.parts.red['left-wheel'].partId, 'Wheel_Large')
   assert.deepEqual(after.parts.red['left-wheel'].detachPosition, [3.5, 0.2, 0.2])
   assert.ok(after.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'))
   assert.ok(after.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'))
+  assert.equal(afterVisualWindow.parts.red['left-wheel'].status, 'detached')
+  assert.equal(
+    afterVisualWindow.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'),
+    false,
+  )
+  assert.equal(afterVisualWindow.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'), false)
 })
 
 test('replay mapping exposes laser_lance ability effects with deterministic placement', () => {
@@ -407,6 +421,43 @@ test('replay mapping does not reveal laser_lance effects before ability event ti
   assert.equal(atEvent.effects.some((effect) => effect.label === 'laser_lance'), true)
 })
 
+const cameraTestArena = {
+  name: 'Camera test box',
+  width: 26,
+  height: 18,
+  activeHazards: [],
+}
+
+function createCameraFrame({
+  blue = [1, 0, 0],
+  effects = [],
+  red = [-1, 0, 0],
+} = {}) {
+  return {
+    time: 0,
+    progress: 0,
+    bots: {
+      red: {
+        role: 'red',
+        position: red,
+        rotationY: Math.PI / 2,
+        status: 'active',
+      },
+      blue: {
+        role: 'blue',
+        position: blue,
+        rotationY: -Math.PI / 2,
+        status: 'active',
+      },
+    },
+    parts: {
+      red: {},
+      blue: {},
+    },
+    effects,
+  }
+}
+
 test('replay mapping does not reveal future control, ability, impact, damage, hazard, or detach cues', () => {
   const beforeControl = buildReplayFrame(movingWeaponTimeline, 1.49)
   const beforeDroneSwarm = buildReplayFrame(droneSwarmTimeline, 1.59)
@@ -423,6 +474,8 @@ test('replay mapping does not reveal future control, ability, impact, damage, ha
   assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'impact'), false)
   assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'debris'), false)
   assert.equal(beforeDamage.effects.some((effect) => effect.kind === 'damage_marker'), false)
+  assert.equal(beforeDetach.parts.red['left-wheel'].status, 'attached')
+  assert.equal(beforeDetach.parts.red['left-wheel'].health, 0)
   assert.equal(
     beforeDetach.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'left-wheel'),
     false,
@@ -466,4 +519,108 @@ test('replay mapping emits a larger deploy control cue for net/control-linked we
   assert.ok(cue.intensity <= 1)
   assert.equal(frame.effects.some((effect) => effect.kind === 'damage_marker'), false)
   assert.deepEqual(frame.parts.red, {})
+})
+
+test('broadcast camera framing keeps both bots visible and expands for bot spread', () => {
+  const closeFrame = createCameraFrame()
+  const spreadFrame = createCameraFrame({
+    red: [-8, 0, 0],
+    blue: [8, 0, 0],
+  })
+  const closeCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    closeFrame,
+    cameraTestArena,
+    16 / 9,
+  )
+  const spreadCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    spreadFrame,
+    cameraTestArena,
+    16 / 9,
+  )
+
+  assert.equal(spreadCamera.focusPoints.length, 2)
+  assert.deepEqual(spreadCamera.target, [0, 0, 0])
+  assert.ok(spreadCamera.radius > closeCamera.radius)
+})
+
+test('broadcast camera framing includes active effect endpoints in target and radius', () => {
+  const baselineCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    createCameraFrame(),
+    cameraTestArena,
+    16 / 9,
+  )
+  const effectCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    createCameraFrame({
+      effects: [
+        {
+          id: 'laser',
+          kind: 'laser_lance',
+          position: [0, 0, 0],
+          endPosition: [10, 0, -6],
+          age: 0.2,
+          intensity: 0.8,
+          team: 'blue',
+        },
+      ],
+    }),
+    cameraTestArena,
+    16 / 9,
+  )
+
+  assert.equal(effectCamera.activeEffectFocusPoints.length, 2)
+  assert.ok(effectCamera.focusPoints.some((point) => point[0] === 10 && point[2] === -6))
+  assert.ok(effectCamera.target[0] > baselineCamera.target[0])
+  assert.ok(effectCamera.radius > baselineCamera.radius)
+})
+
+test('broadcast camera framing widens for a narrow viewport instead of cropping the fight', () => {
+  const frame = createCameraFrame({
+    red: [-3, 0, 0],
+    blue: [3, 0, 0],
+  })
+  const desktopCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    frame,
+    cameraTestArena,
+    16 / 9,
+  )
+  const narrowCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    frame,
+    cameraTestArena,
+    390 / 844,
+  )
+  const edgeFrame = createCameraFrame({
+    red: [-8, 0, 0],
+    blue: [3, 0, -2],
+    effects: [
+      {
+        id: 'knockout',
+        kind: 'knockout',
+        position: [-8, 0, 0],
+        age: 2,
+        intensity: 1,
+        team: 'red',
+      },
+    ],
+  })
+  const edgeDesktopCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    edgeFrame,
+    cameraTestArena,
+    16 / 9,
+  )
+  const edgeActualCanvasNarrowCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    edgeFrame,
+    cameraTestArena,
+    353 / 439,
+  )
+
+  assert.ok(narrowCamera.radius > desktopCamera.radius)
+  assert.ok(edgeActualCanvasNarrowCamera.radius > edgeDesktopCamera.radius * 2)
+})
+
+test('broadcast camera framing caps shake for no excessive shake invariant', () => {
+  assert.equal(
+    capBroadcastShakeForNoExcessiveShake(10),
+    NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT,
+  )
+  assert.equal(capBroadcastShakeForNoExcessiveShake(-1), 0)
 })

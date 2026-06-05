@@ -334,6 +334,8 @@ function policyStateFor(bot: BotRuntime): PolicyBotState {
     anchoredStance: hasAnchoredStance(bot),
     hazardBaitControl: hasHazardBaitControl(bot),
     weaponReachBonus: weaponReachBonus(bot),
+    contactDanger: contactDangerScore(bot),
+    controlDanger: controlDangerScore(bot),
   }
 }
 
@@ -362,6 +364,38 @@ function weaponReachBonus(bot: BotRuntime): number {
   }
 
   return bonus
+}
+
+function contactDangerScore(bot: BotRuntime): number {
+  let score = 0
+
+  if (hasAliveBehavior(bot, 'spinner')) {
+    score += 1.35
+  }
+  if (hasAliveBehavior(bot, 'saw')) {
+    score += 1.05
+  }
+  if (hasAliveBehavior(bot, 'ram') || hasAliveBehavior(bot, 'flipper')) {
+    score += 0.65
+  }
+  if (hasAliveBehavior(bot, 'spiked_armor')) {
+    score += 0.45
+  }
+
+  return score
+}
+
+function controlDangerScore(bot: BotRuntime): number {
+  let score = bot.stats.control / 24
+
+  if (hasAliveBehavior(bot, 'net') || hasAliveBehavior(bot, 'grabber')) {
+    score += 0.85
+  }
+  if (hasAliveBehavior(bot, 'magnet')) {
+    score += 0.65
+  }
+
+  return score
 }
 
 function sumPartHealth(parts: RuntimePart[]): number {

@@ -65,6 +65,7 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     setRoleState,
   })
   const {
+    hasLocalDraftEdits,
     setSubmissionDraft,
     setSubmissionText,
     submissionDraft,
@@ -112,11 +113,13 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     roleHasChatLog,
     roleHasMatchLog,
     roleHasPrivateChatLog,
+    workflow,
   } = useMemo(
     () =>
       createCockpitDerivedState({
         chatMessage,
         chatStatus,
+        hasLocalDraftEdits,
         invite,
         lastError,
         privateChatMessage,
@@ -129,6 +132,7 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     [
       chatMessage,
       chatStatus,
+      hasLocalDraftEdits,
       invite,
       lastError,
       privateChatMessage,
@@ -173,6 +177,7 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     copyExternalAgentBrief,
     externalAgentBriefMarkdown,
     externalAgentBriefScript,
+    hasLocalDraftEdits,
     hasPlayerKey,
     isBusy,
     lastError,
@@ -206,5 +211,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     submissionMode,
     submissionText,
     toggleSubmissionMode,
+    workflow,
   }
 }

@@ -1,11 +1,9 @@
 import type {
-  AppliedRefereeAward,
   ArenaConfig,
   CombatSummary,
   GeneratedControls,
   InventoryItem,
   NormalizedRoundPlanSubmission,
-  RefereeAwardOption,
   RelayErrorResponse,
   ReplayPayload,
   RoundPlanSubmission,
@@ -27,7 +25,7 @@ export type RateLimitAction =
   | 'submit'
   | 'chat'
   | 'private_chat'
-  | 'referee_awards'
+  | 'advance_round'
   | 'reset_role'
 
 export type RateLimitRule = {
@@ -69,8 +67,6 @@ export type StoredSessionState = {
   updatedAt: string
   roles: Record<TeamRole, StoredRoleState>
   refereeTokenHash?: string
-  awardOptions: RefereeAwardOption[]
-  awardHistory: AppliedRefereeAward[]
   replay?: ReplayPayload
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]

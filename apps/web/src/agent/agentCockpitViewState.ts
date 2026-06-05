@@ -34,6 +34,7 @@ export type CockpitBriefArtifacts = {
 type CockpitDerivedStateInput = {
   chatMessage: string
   chatStatus: 'idle' | 'posting'
+  hasLocalDraftEdits: boolean
   invite: AgentInvite
   lastError: UiError | null
   privateChatMessage: string
@@ -52,6 +53,24 @@ export type AgentConnectionGuidance = {
   tone: 'blocked' | 'idle' | 'ready' | 'working'
 }
 
+export type AgentCockpitTaskKey = 'connect' | 'build' | 'submit' | 'review'
+
+export type AgentCockpitTaskStep = {
+  key: AgentCockpitTaskKey
+  label: string
+  status: string
+  tone: 'blocked' | 'complete' | 'current' | 'idle' | 'waiting'
+}
+
+export type AgentCockpitWorkflow = {
+  activeTask: AgentCockpitTaskKey
+  detail: string
+  headline: string
+  helperCall: string
+  stateLabel: string
+  steps: AgentCockpitTaskStep[]
+}
+
 export type CockpitDerivedState = {
   canClaimRole: boolean
   canPostChat: boolean
@@ -68,6 +87,7 @@ export type CockpitDerivedState = {
   roleHasChatLog: boolean
   roleHasMatchLog: boolean
   roleHasPrivateChatLog: boolean
+  workflow: AgentCockpitWorkflow
 }
 
 export function createCockpitBriefArtifacts({
@@ -76,11 +96,12 @@ export function createCockpitBriefArtifacts({
   publicState,
   roleState,
 }: CockpitBriefArtifactsInput): CockpitBriefArtifacts {
+  const briefPublicState = getBriefPublicState(publicState)
   const externalAgentBrief = createExternalAgentBrief({
     invite,
     inviteUrl: agentInviteUrl,
     state: roleState,
-    publicState,
+    publicState: briefPublicState,
   })
 
   return {
@@ -88,7 +109,7 @@ export function createCockpitBriefArtifacts({
       invite,
       inviteUrl: agentInviteUrl,
       state: roleState,
-      publicState,
+      publicState: briefPublicState,
     }),
     externalAgentBriefScript: serializeJsonForScript(externalAgentBrief),
     stateScript: serializeJsonForScript({
@@ -107,9 +128,27 @@ export function createCockpitBriefArtifacts({
   }
 }
 
+function getBriefPublicState(publicState: PublicSessionState | null): PublicSessionState | null {
+  if (!publicState) {
+    return null
+  }
+
+  const roles = Object.values((publicState as { roles?: Record<string, unknown> }).roles ?? {})
+  const hasOnlyUsableRoles = roles.every((role) => {
+    return Boolean(
+      role &&
+        typeof role === 'object' &&
+        typeof (role as { role?: unknown }).role === 'string',
+    )
+  })
+
+  return roles.length > 0 && hasOnlyUsableRoles ? publicState : null
+}
+
 export function createCockpitDerivedState({
   chatMessage,
   chatStatus,
+  hasLocalDraftEdits,
   invite,
   lastError,
   privateChatMessage,
@@ -124,6 +163,20 @@ export function createCockpitDerivedState({
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const chatLog = roleState?.chatLog ?? publicState?.chatLog ?? []
   const privateChatLog = roleState?.privateChatLog ?? []
+  const canSubmitPlan = Boolean(
+    hasPlayerKey &&
+      roleState &&
+      !isBusy &&
+      roleState.phase === 'submission_phase' &&
+      !roleState.submitted,
+  )
+  const connectionGuidance = createAgentConnectionGuidance({
+    invite,
+    lastError,
+    roleState,
+    roleToken,
+    status,
+  })
 
   return {
     canClaimRole: !isBusy && Boolean(invite.claimToken) && !roleState,
@@ -143,22 +196,10 @@ export function createCockpitDerivedState({
         !isTerminalPhase(roleState.phase) &&
         privateChatMessage.trim().length > 0,
     ),
-    canSubmitPlan: Boolean(
-      hasPlayerKey &&
-        roleState &&
-        !isBusy &&
-        roleState.phase === 'submission_phase' &&
-        !roleState.submitted,
-    ),
+    canSubmitPlan,
     chatLog,
     claimButtonLabel: createClaimButtonLabel(status, roleState, hasPlayerKey, isBusy),
-    connectionGuidance: createAgentConnectionGuidance({
-      invite,
-      lastError,
-      roleState,
-      roleToken,
-      status,
-    }),
+    connectionGuidance,
     hasPlayerKey,
     isBusy,
     matchLog,
@@ -167,6 +208,279 @@ export function createCockpitDerivedState({
     roleHasChatLog: chatLog.length > 0,
     roleHasMatchLog: matchLog.length > 0,
     roleHasPrivateChatLog: privateChatLog.length > 0,
+    workflow: createAgentCockpitWorkflow({
+      connectionGuidance,
+      hasLocalDraftEdits,
+      hasPlayerKey,
+      roleState,
+      status,
+    }),
+  }
+}
+
+function createAgentCockpitWorkflow({
+  connectionGuidance,
+  hasLocalDraftEdits,
+  hasPlayerKey,
+  roleState,
+  status,
+}: {
+  connectionGuidance: AgentConnectionGuidance
+  hasLocalDraftEdits: boolean
+  hasPlayerKey: boolean
+  roleState: RolePrivateState | null
+  status: LoadStatus
+}): AgentCockpitWorkflow {
+  const activeTask = getActiveCockpitTask(roleState, hasLocalDraftEdits)
+  const stateLabel = getCockpitStateLabel(roleState, hasLocalDraftEdits, status)
+
+  return {
+    activeTask,
+    detail: connectionGuidance.nextAction,
+    headline: getCockpitWorkflowHeadline(activeTask, roleState, hasPlayerKey),
+    helperCall: connectionGuidance.helperCall,
+    stateLabel,
+    steps: [
+      createConnectStep(roleState, hasPlayerKey, status, activeTask),
+      createBuildStep(roleState, hasLocalDraftEdits, activeTask),
+      createSubmitStep(roleState, activeTask),
+      createReviewStep(roleState, activeTask),
+    ],
+  }
+}
+
+function getCockpitStateLabel(
+  roleState: RolePrivateState | null,
+  hasLocalDraftEdits: boolean,
+  status: LoadStatus,
+): string {
+  if (!roleState) {
+    return status === 'claiming' || status === 'loading' ? 'Connecting' : 'Unclaimed'
+  }
+
+  if (roleState.phase === 'expired') {
+    return 'Expired'
+  }
+
+  if (roleState.phase === 'session_complete') {
+    return 'Complete'
+  }
+
+  if (roleState.phase === 'round_review' || roleState.phase === 'replay_phase') {
+    return 'Review'
+  }
+
+  if (roleState.submitted) {
+    return roleState.opponent.submitted ? 'Submitted' : 'Waiting'
+  }
+
+  if (roleState.phase === 'waiting_for_agents') {
+    return 'Waiting'
+  }
+
+  if (hasLocalDraftEdits) {
+    return 'Draft'
+  }
+
+  return 'Claimed'
+}
+
+function getActiveCockpitTask(
+  roleState: RolePrivateState | null,
+  hasLocalDraftEdits: boolean,
+): AgentCockpitTaskKey {
+  if (!roleState || roleState.phase === 'waiting_for_agents') {
+    return 'connect'
+  }
+
+  if (isTerminalPhase(roleState.phase)) {
+    return 'review'
+  }
+
+  if (roleState.phase === 'submission_phase' && !roleState.submitted) {
+    return hasLocalDraftEdits ? 'submit' : 'build'
+  }
+
+  return 'review'
+}
+
+function getCockpitWorkflowHeadline(
+  activeTask: AgentCockpitTaskKey,
+  roleState: RolePrivateState | null,
+  hasPlayerKey: boolean,
+): string {
+  if (activeTask === 'connect') {
+    if (roleState?.phase === 'waiting_for_agents') {
+      return 'Wait for opponent claim'
+    }
+
+    return hasPlayerKey ? 'Connect role' : 'Claim role'
+  }
+
+  if (activeTask === 'build') {
+    return 'Build round plan'
+  }
+
+  if (activeTask === 'submit') {
+    return 'Submit round plan'
+  }
+
+  if (roleState?.phase === 'round_review' || roleState?.phase === 'replay_phase') {
+    return 'Review round result'
+  }
+
+  return 'Wait for next round'
+}
+
+function createConnectStep(
+  roleState: RolePrivateState | null,
+  hasPlayerKey: boolean,
+  status: LoadStatus,
+  activeTask: AgentCockpitTaskKey,
+): AgentCockpitTaskStep {
+  if (roleState) {
+    return {
+      key: 'connect',
+      label: 'Connect',
+      status: roleState.phase === 'waiting_for_agents' ? 'Waiting' : 'Claimed',
+      tone: roleState.phase === 'waiting_for_agents' ? 'current' : 'complete',
+    }
+  }
+
+  const isConnecting = status === 'claiming' || status === 'loading'
+
+  return {
+    key: 'connect',
+    label: 'Connect',
+    status: isConnecting ? 'Connecting' : 'Unclaimed',
+    tone: isConnecting || activeTask === 'connect' ? 'current' : hasPlayerKey ? 'idle' : 'blocked',
+  }
+}
+
+function createBuildStep(
+  roleState: RolePrivateState | null,
+  hasLocalDraftEdits: boolean,
+  activeTask: AgentCockpitTaskKey,
+): AgentCockpitTaskStep {
+  if (!roleState) {
+    return {
+      key: 'build',
+      label: 'Build',
+      status: 'Locked',
+      tone: 'idle',
+    }
+  }
+
+  if (roleState.submitted) {
+    return {
+      key: 'build',
+      label: 'Build',
+      status: 'Submitted bot',
+      tone: 'complete',
+    }
+  }
+
+  if (roleState.phase !== 'submission_phase') {
+    return {
+      key: 'build',
+      label: 'Build',
+      status: 'Waiting',
+      tone: 'waiting',
+    }
+  }
+
+  return {
+    key: 'build',
+    label: 'Build',
+    status: hasLocalDraftEdits ? 'Draft' : 'Ready',
+    tone: activeTask === 'build' ? 'current' : 'complete',
+  }
+}
+
+function createSubmitStep(
+  roleState: RolePrivateState | null,
+  activeTask: AgentCockpitTaskKey,
+): AgentCockpitTaskStep {
+  if (!roleState) {
+    return {
+      key: 'submit',
+      label: 'Submit',
+      status: 'Locked',
+      tone: 'idle',
+    }
+  }
+
+  if (roleState.submitted) {
+    return {
+      key: 'submit',
+      label: 'Submit',
+      status: 'Submitted',
+      tone: 'complete',
+    }
+  }
+
+  if (roleState.phase !== 'submission_phase') {
+    return {
+      key: 'submit',
+      label: 'Submit',
+      status: 'Waiting',
+      tone: 'waiting',
+    }
+  }
+
+  return {
+    key: 'submit',
+    label: 'Submit',
+    status: 'Ready',
+    tone: activeTask === 'submit' ? 'current' : 'idle',
+  }
+}
+
+function createReviewStep(
+  roleState: RolePrivateState | null,
+  activeTask: AgentCockpitTaskKey,
+): AgentCockpitTaskStep {
+  if (!roleState) {
+    return {
+      key: 'review',
+      label: 'Review',
+      status: 'Locked',
+      tone: 'idle',
+    }
+  }
+
+  if (roleState.phase === 'expired') {
+    return {
+      key: 'review',
+      label: 'Review',
+      status: 'Expired',
+      tone: 'blocked',
+    }
+  }
+
+  if (roleState.phase === 'session_complete') {
+    return {
+      key: 'review',
+      label: 'Review',
+      status: 'Complete',
+      tone: 'complete',
+    }
+  }
+
+  if (roleState.phase === 'round_review' || roleState.phase === 'replay_phase') {
+    return {
+      key: 'review',
+      label: 'Review',
+      status: 'Review',
+      tone: 'current',
+    }
+  }
+
+  return {
+    key: 'review',
+    label: 'Review',
+    status: 'Waiting',
+    tone: activeTask === 'review' ? 'current' : 'waiting',
   }
 }
 
@@ -292,8 +606,8 @@ function nextActionForRoleState(state: RolePrivateState): string {
       : 'Submit exactly one legal round plan for this round.'
   }
 
-  if (state.phase === 'referee_awards') {
-    return 'Wait for referee awards; keep polling with the bounded continuation helper.'
+  if (state.phase === 'round_review') {
+    return 'Wait for the referee to advance the round; keep polling with the bounded continuation helper.'
   }
 
   return 'Wait for the next submission window with the bounded continuation helper.'
@@ -308,7 +622,7 @@ function helperCallForRoleState(state: RolePrivateState): string {
     return 'await window.AgentArenaRole.submitRoundPlan(plan)'
   }
 
-  if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'referee_awards') {
+  if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'round_review') {
     return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
   }
 

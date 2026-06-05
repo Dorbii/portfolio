@@ -10,13 +10,10 @@ import {
   TeamScoreCard,
 } from './RefereeConsolePanels'
 import { isTerminalPhase, POLL_INTERVAL_MS } from './refereeClient'
+import { Button } from '../shared/Button'
 import { openExternalUrl } from '../shared/browser'
 import { formatLabel, formatMsInterval } from '../shared/format'
-import {
-  MAX_AWARDS_PER_ROUND,
-  MAX_AWARDS_PER_TEAM,
-  useRefereeConsoleController,
-} from './useRefereeConsoleController'
+import { useRefereeConsoleController } from './useRefereeConsoleController'
 
 const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
@@ -29,13 +26,13 @@ function ReplayFrameFallback() {
 export function RefereeConsole() {
   const {
     activeSessionId,
-    awardOptions,
-    awardSubmitHint,
-    awardSubmitLabel,
+    advanceRoundHint,
+    advanceRoundLabel,
+    advanceState,
     blueAgentBrief,
     blueInviteUrl,
-    canRefreshRoleClaim,
-    canSubmitAwards,
+    canResetAgentClaim,
+    canAdvanceRound,
     clearStoredRefereeToken,
     copyAgentBrief,
     createNewSession,
@@ -51,14 +48,11 @@ export function RefereeConsole() {
     publicSession,
     redAgentBrief,
     redInviteUrl,
-    refreshRoleClaim,
+    resetAgentClaim,
     replayError,
     replayLoadState,
     replayPayload,
     saveManualRefereeToken,
-    selectedAwards,
-    selectedCount,
-    selectedForTeam,
     sessionChat,
     sessionEvents,
     sessionInput,
@@ -66,13 +60,11 @@ export function RefereeConsole() {
     setManualRefereeToken,
     setSessionInput,
     storedRefereeToken,
-    submitAwards,
-    submitState,
-    toggleAwardSelection,
+    submitRoundAdvance,
   } = useRefereeConsoleController()
   return (
     <main className="arena-app match-console">
-      <aside className="director-sidebar" aria-label="Referee navigation">
+      <aside className="director-sidebar" aria-label="Referee status">
         <div className="director-brand">
           <span className="brand-mark" aria-hidden="true">A</span>
           <div>
@@ -80,14 +72,6 @@ export function RefereeConsole() {
             <h1>Referee Console</h1>
           </div>
         </div>
-        <nav className="director-nav">
-          <a className="active" href="#overview">Overview</a>
-          <a href="#agents">Agents</a>
-          <a href="#awards">Awards</a>
-          <a href="#chat">Chat</a>
-          <a href="#match-log">Match Log</a>
-          <a href="#session">Session</a>
-        </nav>
         <div className="referee-identity">
           <span className="referee-avatar" aria-hidden="true">R</span>
           <div>
@@ -120,15 +104,15 @@ export function RefereeConsole() {
             <span>Phase</span>
             <strong>{formatLabel(phase)}</strong>
           </div>
-          <button
+          <Button
             type="button"
-            className="header-action"
-            disabled={!canSubmitAwards}
-            title={awardSubmitHint}
-            onClick={() => void submitAwards()}
+            variant="primary"
+            disabled={!canAdvanceRound}
+            title={advanceRoundHint}
+            onClick={() => void submitRoundAdvance()}
           >
-            {submitState === 'submitting' ? 'Submitting' : awardSubmitLabel}
-          </button>
+            {advanceRoundLabel}
+          </Button>
         </header>
 
         <section className="director-content" id="overview">
@@ -176,68 +160,34 @@ export function RefereeConsole() {
               />
             </section>
 
-            <section className="panel awards-dock" id="awards">
+            <section className="panel round-review-dock" id="review">
               <SectionHeader
-                kicker="Referee awards"
-                title="Pick round awards"
-                aside="Max 2 total, max 1 per team."
+                kicker="Round review"
+                title="Advance the match"
+                aside={publicSession?.phase === 'round_review' ? 'Replay is ready.' : 'Available after combat.'}
               />
-              {(awardOptions.length === 0) ? (
-                <p className="referee-empty">No award options in current phase.</p>
-              ) : (
-                <div className="award-stack">
-                  {awardOptions.map((option) => {
-                    const selectedTeam = selectedAwards[option.id]
-
-                    return (
-                      <article className="award-card" key={option.id}>
-                        <div className="award-card-header">
-                          <h3>{option.title}</h3>
-                          <strong>+{option.gold}g</strong>
-                        </div>
-                        <p>{option.description}</p>
-                        <div className="award-team-actions">
-                          <button
-                            type="button"
-                            className={`team-choice red ${selectedTeam === 'red' ? 'selected' : ''}`}
-                            aria-pressed={selectedTeam === 'red'}
-                            onClick={() => toggleAwardSelection(option.id, 'red')}
-                            disabled={publicSession?.phase !== 'referee_awards'}
-                          >
-                            Red
-                          </button>
-                          <button
-                            type="button"
-                            className={`team-choice blue ${selectedTeam === 'blue' ? 'selected' : ''}`}
-                            aria-pressed={selectedTeam === 'blue'}
-                            onClick={() => toggleAwardSelection(option.id, 'blue')}
-                            disabled={publicSession?.phase !== 'referee_awards'}
-                          >
-                            Blue
-                          </button>
-                        </div>
-                      </article>
-                    )
-                  })}
-                  <div className="award-action-bar">
-                    <strong>
-                      {selectedCount} / {MAX_AWARDS_PER_ROUND} selected
-                    </strong>
-                    <span>
-                      {awardSubmitHint ??
-                        `Red ${selectedForTeam.red} / ${MAX_AWARDS_PER_TEAM}, Blue ${selectedForTeam.blue} / ${MAX_AWARDS_PER_TEAM}`}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={!canSubmitAwards}
-                      title={awardSubmitHint}
-                      onClick={() => void submitAwards()}
-                    >
-                      {awardSubmitLabel}
-                    </button>
+              <div className="round-review-stack">
+                {publicSession?.lastResult ? (
+                  <div className="round-review-summary">
+                    <strong>{publicSession.lastResult.winner === 'draw' ? 'Draw' : `${formatLabel(publicSession.lastResult.winner)} wins`}</strong>
+                    <span>{publicSession.lastResult.reason}</span>
                   </div>
+                ) : (
+                  <p className="referee-empty">Round outcome appears after combat resolves.</p>
+                )}
+                <div className="round-review-action-bar">
+                  <span>{advanceRoundHint ?? 'Base income, interest, and any winner bonus apply automatically.'}</span>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    disabled={!canAdvanceRound}
+                    title={advanceRoundHint}
+                    onClick={() => void submitRoundAdvance()}
+                  >
+                    {advanceRoundLabel}
+                  </Button>
                 </div>
-              )}
+              </div>
             </section>
           </section>
 
@@ -283,20 +233,22 @@ export function RefereeConsole() {
                   />
                 </label>
                 <div className="button-pair">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => void setActiveSession(sessionInput)}
                     disabled={loadState === 'busy' || !sessionInput.trim()}
                   >
                     {loadState === 'busy' ? 'Loading...' : 'Load session'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="primary"
                     onClick={() => void createNewSession()}
                     disabled={loadState === 'busy'}
                   >
                     {loadState === 'busy' ? 'Creating...' : 'Create new'}
-                  </button>
+                  </Button>
                 </div>
                 <label>
                   Referee capability token
@@ -307,26 +259,28 @@ export function RefereeConsole() {
                     placeholder={
                       storedRefereeToken
                         ? 'Stored token loaded from this browser'
-                        : 'Paste token to submit awards'
+                        : 'Paste token to advance rounds'
                     }
-                    disabled={submitState === 'submitting'}
+                    disabled={advanceState === 'submitting'}
                   />
                 </label>
                 <div className="button-pair">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     disabled={loadState === 'busy'}
                     onClick={saveManualRefereeToken}
                   >
                     Save token
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="danger"
                     onClick={clearStoredRefereeToken}
                     disabled={!storedRefereeToken}
                   >
                     Clear token
-                  </button>
+                  </Button>
                 </div>
               </div>
             </section>
@@ -334,8 +288,8 @@ export function RefereeConsole() {
             <section className="panel" id="agents">
               <SectionHeader
                 kicker="Agent handoff"
-                title="Wake agents"
-                aside={hasAnyInvite ? 'Invite URL included.' : 'Create session first.'}
+                title="Agent handoffs"
+                aside={hasAnyInvite ? 'Open roles show handoffs.' : 'Create session first.'}
               />
               {publicSession ? <PublicRoleStatus roles={publicSession.roles} /> : null}
               <InvitePanel
@@ -343,20 +297,22 @@ export function RefereeConsole() {
                 inviteUrl={redInviteUrl}
                 agentBrief={redAgentBrief}
                 hasInvite={hasInviteForRole('red')}
+                roleState={publicSession?.roles.red}
                 onCopyBrief={() => void copyAgentBrief('red', redAgentBrief)}
                 onOpen={() => openExternalUrl(redInviteUrl)}
-                onRefreshClaim={() => void refreshRoleClaim('red')}
-                canRefreshClaim={canRefreshRoleClaim}
+                onResetClaim={() => void resetAgentClaim('red')}
+                canResetClaim={canResetAgentClaim}
               />
               <InvitePanel
                 role="blue"
                 inviteUrl={blueInviteUrl}
                 agentBrief={blueAgentBrief}
                 hasInvite={hasInviteForRole('blue')}
+                roleState={publicSession?.roles.blue}
                 onCopyBrief={() => void copyAgentBrief('blue', blueAgentBrief)}
                 onOpen={() => openExternalUrl(blueInviteUrl)}
-                onRefreshClaim={() => void refreshRoleClaim('blue')}
-                canRefreshClaim={canRefreshRoleClaim}
+                onResetClaim={() => void resetAgentClaim('blue')}
+                canResetClaim={canResetAgentClaim}
               />
               {!hasAnyInvite ? (
                 <p className="referee-empty">

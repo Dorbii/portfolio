@@ -19,7 +19,6 @@ import {
 import {
   SessionCoordinator,
   calculateInterest,
-  generateRefereeAwardOptions,
 } from '../.test-build/apps/worker/src/session.js'
 
 const brakePlan = {
@@ -36,6 +35,17 @@ const bareBodyBlueprint = {
   name: 'Bare Core',
   blocks: [
     { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+  ],
+}
+
+const fastMobileBlueprint = {
+  name: 'Fast Mobile',
+  blocks: [
+    { id: 'core', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+    { id: 'frontLeft', partId: 'Wheel_Omni', position: [-1, 0, 1], rotation: [0, 0, 90] },
+    { id: 'frontRight', partId: 'Wheel_Omni', position: [1, 0, 1], rotation: [0, 0, 90] },
+    { id: 'rearLeft', partId: 'Wheel_Omni', position: [-1, 0, -1], rotation: [0, 0, 90] },
+    { id: 'rearRight', partId: 'Wheel_Omni', position: [1, 0, -1], rotation: [0, 0, 90] },
   ],
 }
 
@@ -422,6 +432,22 @@ test('legacy round submissions normalize into v2 combat input', () => {
   assert.equal(result.ok, true)
   assert.equal(result.normalizedSubmission.schemaVersion, 2)
   assert.equal(result.normalizedSubmission.openingScript.commands.length, 5)
+  assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'close')
+})
+
+test('legacy default tactics stay legal for immobile submissions', () => {
+  const result = validateRoundSubmission({
+    gold: 100,
+    inventory: [],
+    submission: {
+      action: 'submit_round_plan',
+      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
+      blueprint: bareBodyBlueprint,
+      turnPlan: brakePlan,
+    },
+  })
+
+  assert.equal(result.ok, true)
   assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'hold_ground')
 })
 
@@ -607,6 +633,39 @@ test('policy brakes instead of immediately reversing contradictory movement', ()
   )
 
   assert.equal(command.move, 'brake')
+})
+
+test('policy avoids projected center saw instead of walking mobile bot into spinner hazard', () => {
+  const bot = createPolicyBot('red', fastMobileBlueprint, {
+    position: [-1.65, 0, 0],
+  })
+  const opponent = createPolicyBot('blue', validSpinnerSubmission.blueprint, {
+    position: [1.55, 0, 0],
+    anchoredStance: true,
+    contactDanger: 1.35,
+    controlDanger: 0.35,
+  })
+  const command = chooseCommand(
+    {
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.65,
+        hazardPreference: 'avoid',
+      }),
+      openingScript: { commands: [] },
+    },
+    8,
+    {
+      bot,
+      opponent,
+      arena: { name: 'Policy Hazard Test', width: 24, height: 16, activeHazards: ['floor_saw'] },
+    },
+  )
+
+  assert.notEqual(command.move, 'forward')
+  assert.notEqual(command.move, 'dash_forward')
+  assert.ok(['turn_left', 'turn_right', 'backward', 'dash_backward', 'brake'].includes(command.move))
 })
 
 test('resolver applies movement tactics to replay movement for the same blueprint', () => {
@@ -1822,10 +1881,10 @@ test('session resolves after both valid plans while keeping public state redacte
   const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
 
   assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.value.publicState.phase, 'round_review')
   assert.equal(blueSubmission.value.publicState.replayAvailable, true)
   assert.equal(blueSubmission.value.publicState.lastResult.winner, 'draw')
-  assert.equal(blueSubmission.value.publicState.awardOptions.length, 3)
+  assert.equal('awardOptions' in blueSubmission.value.publicState, false)
   assert.ok(blueSubmission.value.publicState.chatLog.length >= 3)
   assert.ok(blueSubmission.value.publicState.chatLog.some((message) => message.kind === 'taunt'))
 
@@ -1885,7 +1944,7 @@ test('session accepts v2 tactics without a legacy turnPlan', async () => {
   const blueSubmission = await session.submitRoundPlan(blueToken, v2Submission)
 
   assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
+  assert.equal(blueSubmission.value.publicState.phase, 'round_review')
   assert.equal(blueSubmission.value.publicState.replayAvailable, true)
   assert.equal(validateReplayTimeline(session.getReplay().value), true)
 })
@@ -1986,89 +2045,85 @@ test('referee role reset cannot rewrite a resolved round', async () => {
   assert.equal(reset.error.code, 'PHASE_CLOSED')
 })
 
-test('referee award options and interest are deterministic bounded economy rules', () => {
-  const first = generateRefereeAwardOptions('s_test:test-seed', 2)
-  const second = generateRefereeAwardOptions('s_test:test-seed', 2)
-  const nextRound = generateRefereeAwardOptions('s_test:test-seed', 3)
-
-  assert.equal(first.length, 3)
-  assert.equal(new Set(first.map((award) => award.id)).size, 3)
-  assert.deepEqual(first, second)
-  assert.notDeepEqual(first, nextRound)
+test('interest is deterministic and bounded', () => {
   assert.equal(calculateInterest(68), 6)
   assert.equal(calculateInterest(260), 25)
 })
 
-test('referee awards validate selections and apply future economy to the next round', async () => {
-  const session = await createTestSession('s_awards')
+test('referee advances round review and applies automatic economy to the next round', async () => {
+  const session = await createTestSession('s_advance_round')
   const refereeToken = session.createResponse().refereeToken
-  const { redToken, blueToken } = await claimBothRoles(session)
+  const stored = session.exportState()
 
-  await session.submitRoundPlan(redToken, validSpinnerSubmission)
-  const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+  stored.phase = 'round_review'
+  stored.round = 1
+  stored.roles.red.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.blue.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.red.submittedAt = '2026-06-03T00:01:00.000Z'
+  stored.roles.blue.submittedAt = '2026-06-03T00:01:00.000Z'
+  stored.roles.red.gold = 68
+  stored.roles.blue.gold = 260
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 10, blue: 50 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
 
-  assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'referee_awards')
-
-  const awardOptions = blueSubmission.value.publicState.awardOptions
-  const redBefore = await session.getRoleStateForToken(redToken)
-  const blueBefore = await session.getRoleStateForToken(blueToken)
-
-  assert.equal(redBefore.ok, true)
-  assert.equal(blueBefore.ok, true)
-
-  const duplicateTeam = await session.submitRefereeAwards(refereeToken, {
-    awards: [
-      { awardId: awardOptions[0].id, targetTeam: 'red' },
-      { awardId: awardOptions[1].id, targetTeam: 'red' },
-    ],
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:02:00.000Z',
   })
+  const advance = await loaded.advanceRound(refereeToken)
 
-  assert.equal(duplicateTeam.ok, false)
-  assert.equal(duplicateTeam.error.code, 'SUBMISSION_INVALID')
-  assert.ok(
-    duplicateTeam.error.issues.some(
-      (issue) => issue.code === 'TOO_MANY_AWARDS_FOR_TEAM',
-    ),
-  )
+  assert.equal(advance.ok, true)
+  assert.equal(advance.value.publicState.phase, 'submission_phase')
+  assert.equal(advance.value.publicState.round, 2)
+  assert.equal(advance.value.publicState.roles.red.submitted, false)
+  assert.equal(advance.value.publicState.roles.blue.submitted, false)
+  assert.equal(advance.value.publicState.roles.red.wins, 1)
+  assert.equal(advance.value.publicState.roles.red.winStreak, 1)
+  assert.equal(advance.value.publicState.roles.blue.losses, 1)
+  assert.equal('awardOptions' in advance.value.publicState, false)
 
-  const awards = await session.submitRefereeAwards(refereeToken, {
-    awards: [
-      { awardId: awardOptions[0].id, targetTeam: 'red' },
-      { awardId: awardOptions[1].id, targetTeam: 'blue' },
-    ],
+  const exported = loaded.exportState()
+
+  assert.equal(exported.roles.red.gold, 68 + 50 + calculateInterest(68) + 25)
+  assert.equal(exported.roles.blue.gold, 260 + 50 + calculateInterest(260))
+  assert.equal(exported.roles.red.submittedAt, undefined)
+  assert.equal(exported.roles.blue.submittedAt, undefined)
+})
+
+test('draw advance applies no winner bonus', async () => {
+  const session = await createTestSession('s_draw_advance')
+  const refereeToken = session.createResponse().refereeToken
+  const stored = session.exportState()
+
+  stored.phase = 'round_review'
+  stored.round = 1
+  stored.roles.red.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.blue.claimedAt = '2026-06-03T00:00:00.000Z'
+  stored.roles.red.gold = 68
+  stored.roles.blue.gold = 92
+  stored.lastResult = {
+    winner: 'draw',
+    reason: 'No bot took damage.',
+    damage: { red: 0, blue: 0 },
+    remainingHealth: { red: 40, blue: 40 },
+  }
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:02:00.000Z',
   })
+  const advance = await loaded.advanceRound(refereeToken)
 
-  assert.equal(awards.ok, true)
-  assert.equal(awards.value.appliedAwards.length, 2)
-  assert.equal(awards.value.publicState.phase, 'submission_phase')
-  assert.equal(awards.value.publicState.round, 2)
-  assert.equal(awards.value.publicState.roles.red.submitted, false)
-  assert.equal(awards.value.publicState.roles.blue.submitted, false)
-  assert.equal(awards.value.publicState.awardOptions, undefined)
+  assert.equal(advance.ok, true)
 
-  const redAfter = await session.getRoleStateForToken(redToken)
-  const blueAfter = await session.getRoleStateForToken(blueToken)
+  const exported = loaded.exportState()
 
-  assert.equal(redAfter.ok, true)
-  assert.equal(blueAfter.ok, true)
-  assert.equal(
-    redAfter.value.gold,
-    redBefore.value.gold +
-      50 +
-      calculateInterest(redBefore.value.gold) +
-      awardOptions[0].gold,
-  )
-  assert.equal(
-    blueAfter.value.gold,
-    blueBefore.value.gold +
-      50 +
-      calculateInterest(blueBefore.value.gold) +
-      awardOptions[1].gold,
-  )
-  assert.equal(redAfter.value.submitted, false)
-  assert.equal(blueAfter.value.submitted, false)
-  assert.equal(redAfter.value.awardHistory.length, 2)
+  assert.equal(exported.roles.red.gold, 68 + 50 + calculateInterest(68))
+  assert.equal(exported.roles.blue.gold, 92 + 50 + calculateInterest(92))
+  assert.equal(exported.roles.red.wins, 0)
+  assert.equal(exported.roles.blue.wins, 0)
 })
 
 test('session completes on max rounds and win streak target', async () => {
@@ -2085,20 +2140,17 @@ test('session completes on max rounds and win streak target', async () => {
   await maxRoundSession.submitRoundPlan(maxRoundTokens.redToken, validSpinnerSubmission)
   await maxRoundSession.submitRoundPlan(maxRoundTokens.blueToken, validSpinnerSubmission)
 
-  const maxRoundAwards = await maxRoundSession.submitRefereeAwards(
-    maxRoundRefereeToken,
-    { awards: [] },
-  )
+  const maxRoundAdvance = await maxRoundSession.advanceRound(maxRoundRefereeToken)
 
-  assert.equal(maxRoundAwards.ok, true)
-  assert.equal(maxRoundAwards.value.publicState.phase, 'session_complete')
-  assert.equal(maxRoundAwards.value.publicState.round, 1)
+  assert.equal(maxRoundAdvance.ok, true)
+  assert.equal(maxRoundAdvance.value.publicState.phase, 'session_complete')
+  assert.equal(maxRoundAdvance.value.publicState.round, 1)
 
   const streakSession = await createTestSession('s_streak')
   const streakRefereeToken = streakSession.createResponse().refereeToken
   const stored = streakSession.exportState()
 
-  stored.phase = 'referee_awards'
+  stored.phase = 'round_review'
   stored.round = 3
   stored.roles.red.claimedAt = '2026-06-03T00:00:00.000Z'
   stored.roles.blue.claimedAt = '2026-06-03T00:00:00.000Z'
@@ -2111,20 +2163,13 @@ test('session completes on max rounds and win streak target', async () => {
     damage: { red: 10, blue: 50 },
     remainingHealth: { red: 40, blue: 0 },
   }
-  stored.awardOptions = generateRefereeAwardOptions(
-    `${stored.id}:${stored.seed}`,
-    stored.round,
-  )
-
   const loaded = SessionCoordinator.fromState(stored, {
     clock: () => '2026-06-03T00:00:00.000Z',
   })
-  const streakAwards = await loaded.submitRefereeAwards(streakRefereeToken, {
-    awards: [],
-  })
+  const streakAdvance = await loaded.advanceRound(streakRefereeToken)
 
-  assert.equal(streakAwards.ok, true)
-  assert.equal(streakAwards.value.publicState.phase, 'session_complete')
-  assert.equal(streakAwards.value.publicState.roles.red.wins, 3)
-  assert.equal(streakAwards.value.publicState.roles.red.winStreak, 3)
+  assert.equal(streakAdvance.ok, true)
+  assert.equal(streakAdvance.value.publicState.phase, 'session_complete')
+  assert.equal(streakAdvance.value.publicState.roles.red.wins, 3)
+  assert.equal(streakAdvance.value.publicState.roles.red.winStreak, 3)
 })

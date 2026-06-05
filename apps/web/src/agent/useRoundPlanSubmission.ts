@@ -1,4 +1,12 @@
-import { useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from 'react'
 import type {
   PublicSessionState,
   RolePrivateState,
@@ -14,6 +22,7 @@ import {
 import {
   buildSubmissionFromDraft,
   createDraftFromSubmission,
+  createEmptySubmission,
   createSampleSubmission,
   normalizeSubmissionForDraft,
   parseSubmissionText,
@@ -42,11 +51,47 @@ export function useRoundPlanSubmission({
 }: RoundPlanSubmissionInput) {
   const [submissionMode, setSubmissionMode] = useState<SubmissionMode>('structured')
   const sampleSubmission = useMemo(() => createSampleSubmission(), [])
-  const [submissionDraft, setSubmissionDraft] = useState<RoundPlanDraft>(() =>
-    createDraftFromSubmission(sampleSubmission),
+  const draftSourceKeyRef = useRef(createDraftSourceKey(roleState))
+  const [hasLocalDraftEdits, setHasLocalDraftEdits] = useState(false)
+  const [submissionDraft, setSubmissionDraftState] = useState<RoundPlanDraft>(() =>
+    createDraftFromSubmission(createSubmissionForRoleState(roleState, sampleSubmission)),
   )
-  const [submissionText, setSubmissionText] = useState(() =>
-    JSON.stringify(sampleSubmission, null, 2),
+  const [submissionText, setSubmissionTextState] = useState(() =>
+    JSON.stringify(createSubmissionForRoleState(roleState, sampleSubmission), null, 2),
+  )
+
+  useEffect(() => {
+    const nextSourceKey = createDraftSourceKey(roleState)
+
+    if (draftSourceKeyRef.current === nextSourceKey) {
+      return
+    }
+
+    if (hasLocalDraftEdits) {
+      return
+    }
+
+    const nextSubmission = createSubmissionForRoleState(roleState, sampleSubmission)
+
+    setSubmissionDraftState(createDraftFromSubmission(nextSubmission))
+    setSubmissionTextState(JSON.stringify(nextSubmission, null, 2))
+    setHasLocalDraftEdits(false)
+    draftSourceKeyRef.current = nextSourceKey
+  }, [hasLocalDraftEdits, roleState, sampleSubmission])
+
+  const setSubmissionDraft = useCallback<Dispatch<SetStateAction<RoundPlanDraft>>>(
+    (nextDraft) => {
+      setHasLocalDraftEdits(true)
+      setSubmissionDraftState(nextDraft)
+    },
+    [],
+  )
+  const setSubmissionText = useCallback<Dispatch<SetStateAction<string>>>(
+    (nextText) => {
+      setHasLocalDraftEdits(true)
+      setSubmissionTextState(nextText)
+    },
+    [],
   )
 
   const submitRoundPlan = async () => {
@@ -80,17 +125,23 @@ export function useRoundPlanSubmission({
       }
     } else {
       submission = buildSubmissionFromDraft(submissionDraft)
-      setSubmissionText(JSON.stringify(submission, null, 2))
+      setSubmissionTextState(JSON.stringify(submission, null, 2))
     }
 
     setStatus('loading')
 
     try {
       const result = await client.submitRoundPlan(submission)
+      const acceptedSubmission = normalizeSubmissionForDraft(
+        result.state.ownSubmission ?? submission,
+      )
 
       setRoleState(result.state)
       setPublicState(result.publicState)
-      setSubmissionDraft(createDraftFromSubmission(result.state.ownSubmission ?? submission))
+      setSubmissionDraftState(createDraftFromSubmission(acceptedSubmission))
+      setSubmissionTextState(JSON.stringify(acceptedSubmission, null, 2))
+      setHasLocalDraftEdits(false)
+      draftSourceKeyRef.current = createDraftSourceKey(result.state)
       setNotice(submissionNotice(result.state))
     } catch (error) {
       setLastError(toUiError(error, 'Submission failed'))
@@ -105,14 +156,14 @@ export function useRoundPlanSubmission({
     }
 
     if (next === 'json') {
-      setSubmissionText(JSON.stringify(buildSubmissionFromDraft(submissionDraft), null, 2))
+      setSubmissionTextState(JSON.stringify(buildSubmissionFromDraft(submissionDraft), null, 2))
       setLastError(null)
       setSubmissionMode('json')
       return
     }
 
     try {
-      setSubmissionDraft(
+      setSubmissionDraftState(
         createDraftFromSubmission(
           normalizeSubmissionForDraft(parseSubmissionText(submissionText)),
         ),
@@ -130,6 +181,7 @@ export function useRoundPlanSubmission({
   }
 
   return {
+    hasLocalDraftEdits,
     setSubmissionDraft,
     setSubmissionText,
     submissionDraft,
@@ -138,4 +190,35 @@ export function useRoundPlanSubmission({
     submitRoundPlan,
     toggleSubmissionMode,
   }
+}
+
+function createSubmissionForRoleState(
+  roleState: RolePrivateState | null,
+  sampleSubmission: RoundPlanSubmission,
+): RoundPlanSubmission {
+  if (roleState?.ownSubmission) {
+    return normalizeSubmissionForDraft(roleState.ownSubmission)
+  }
+
+  if (roleState) {
+    return createEmptySubmission()
+  }
+
+  return sampleSubmission
+}
+
+function createDraftSourceKey(roleState: RolePrivateState | null): string {
+  if (!roleState) {
+    return 'sample'
+  }
+
+  const source = roleState.ownSubmission ? 'submitted' : 'empty'
+
+  return [
+    roleState.sessionId,
+    roleState.role,
+    roleState.round,
+    roleState.stateVersion,
+    source,
+  ].join(':')
 }

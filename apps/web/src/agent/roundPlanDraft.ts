@@ -21,6 +21,20 @@ export type {
   TurnCommandDraft,
 } from './roundPlanDraftTypes'
 
+export function createEmptySubmission(): RoundPlanSubmission {
+  return {
+    action: 'submit_round_plan',
+    purchases: [],
+    blueprint: {
+      name: '',
+      blocks: [],
+    },
+    turnPlan: {
+      commands: [],
+    },
+  }
+}
+
 export function createSampleSubmission(): RoundPlanSubmission {
   return {
     action: 'submit_round_plan',

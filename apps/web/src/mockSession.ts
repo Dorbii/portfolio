@@ -6,12 +6,10 @@ export {
 } from './mockReplayTimelines.js'
 export {
   arenaConfig,
-  mockAwards,
   mockBotBlueprints,
   mockPublicSession,
   mockRoleStates,
   mockTeamEconomy,
-  type AwardOption,
   type TeamEconomySnapshot,
 } from './mockSessionState.js'
 

@@ -26,16 +26,10 @@ import {
   hasInviteForRole as inviteListHasRole,
   replaceInvite,
 } from './refereeAgentBriefs'
-import {
-  MAX_AWARDS_PER_ROUND,
-  MAX_AWARDS_PER_TEAM,
-} from './refereeAwardSelection'
-import { useRefereeAwards } from './useRefereeAwards'
+import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
 
 type SessionLoadState = 'idle' | 'busy'
-
-export { MAX_AWARDS_PER_ROUND, MAX_AWARDS_PER_TEAM }
 
 export function useRefereeConsoleController() {
   const [sessionInput, setSessionInput] = useState(() => parseSessionIdFromLocation())
@@ -65,24 +59,18 @@ export function useRefereeConsoleController() {
   const activeRefereeToken = manualRefereeToken.trim() || storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
   const isActiveSession = activeSessionId.length > 0
-  const canRefreshRoleClaim =
+  const canResetAgentClaim =
     isActiveSession &&
     hasRefereeToken &&
     loadState !== 'busy' &&
     (publicSession?.phase === 'waiting_for_agents' || publicSession?.phase === 'submission_phase')
   const {
-    awardOptions,
-    awardSubmitHint,
-    awardSubmitLabel,
-    canSubmitAwards,
-    clearAwardSelection,
-    selectedAwards,
-    selectedCount,
-    selectedForTeam,
-    submitAwards,
-    submitState,
-    toggleAwardSelection,
-  } = useRefereeAwards({
+    advanceRoundHint,
+    advanceRoundLabel,
+    advanceState,
+    canAdvanceRound,
+    submitRoundAdvance,
+  } = useRefereeRoundAdvance({
     activeRefereeToken,
     activeSessionId,
     apiBase,
@@ -99,10 +87,9 @@ export function useRefereeConsoleController() {
     setInvites([])
     setStoredRefereeToken('')
     clearReplayState()
-    clearAwardSelection()
     setMessage('')
     setError('')
-  }, [clearAwardSelection, clearReplayState])
+  }, [clearReplayState])
 
   const hydrateStoredSession = useCallback(
     (sessionId: string) => {
@@ -186,7 +173,6 @@ export function useRefereeConsoleController() {
       setSessionInput(normalizedSessionId)
       setSessionIdInUrl(normalizedSessionId)
       setManualRefereeToken('')
-      clearAwardSelection()
 
       if (normalizedSessionId === activeSessionId) {
         hydrateStoredSession(normalizedSessionId)
@@ -198,7 +184,6 @@ export function useRefereeConsoleController() {
     },
     [
       activeSessionId,
-      clearAwardSelection,
       clearSessionState,
       hydrateStoredSession,
       loadPublicState,
@@ -261,7 +246,6 @@ export function useRefereeConsoleController() {
       setStoredRefereeToken(response.refereeToken)
       setManualRefereeToken('')
       clearReplayState()
-      clearAwardSelection()
       setMessage('Session created. Keep this tab open to retain the referee capability token.')
       writeStoredSession(window.sessionStorage, apiBase, response.sessionId, {
         refereeToken: response.refereeToken,
@@ -272,34 +256,34 @@ export function useRefereeConsoleController() {
     } finally {
       setLoadState('idle')
     }
-  }, [apiBase, clearAwardSelection, clearReplayState])
+  }, [apiBase, clearReplayState])
 
   const copyAgentBrief = useCallback((role: TeamRole, brief: string) => {
     return navigator.clipboard
       .writeText(brief)
       .then(() => {
-        setMessage(`${capitalize(role)} wake brief copied.`)
+        setMessage(`${capitalize(role)} handoff copied.`)
       })
       .catch(() => {
         setError('Clipboard copy blocked. Select and copy manually.')
       })
   }, [])
 
-  const refreshRoleClaim = useCallback(
+  const resetAgentClaim = useCallback(
     async (role: TeamRole) => {
       if (!activeSessionId) {
-        setError('Load a session before refreshing a role claim.')
+        setError('Load a session before resetting an agent claim.')
         return
       }
 
       if (!hasRefereeToken) {
-        setError('Referee token is required to refresh role claims.')
+        setError('Referee token is required to reset agent claims.')
         return
       }
 
       if (publicSession?.phase !== 'waiting_for_agents' && publicSession?.phase !== 'submission_phase') {
         setError(
-          `Role claims can be refreshed only before combat resolves. Current phase: ${publicSession?.phase ?? 'unknown'}.`,
+          `Agent claims can be reset only before combat resolves. Current phase: ${publicSession?.phase ?? 'unknown'}.`,
         )
         return
       }
@@ -324,9 +308,8 @@ export function useRefereeConsoleController() {
           refereeToken: activeRefereeToken,
           expiresAt: response.publicState.expiresAt,
         })
-        clearAwardSelection()
         clearReplayState()
-        setMessage(`${capitalize(role)} role reset. Share the refreshed invite.`)
+        setMessage(`${capitalize(role)} agent claim reset. Share the new handoff.`)
       } catch (resetError) {
         setError(toUserMessage(resetError))
       } finally {
@@ -337,7 +320,6 @@ export function useRefereeConsoleController() {
       activeRefereeToken,
       activeSessionId,
       apiBase,
-      clearAwardSelection,
       hasRefereeToken,
       invites,
       clearReplayState,
@@ -411,14 +393,14 @@ export function useRefereeConsoleController() {
   }, [activeSessionId, apiBase])
   return {
     activeSessionId,
+    advanceRoundHint,
+    advanceRoundLabel,
+    advanceState,
     apiBase,
-    awardOptions,
-    awardSubmitHint,
-    awardSubmitLabel,
     blueAgentBrief,
     blueInviteUrl,
-    canRefreshRoleClaim,
-    canSubmitAwards,
+    canResetAgentClaim,
+    canAdvanceRound,
     clearStoredRefereeToken,
     copyAgentBrief,
     createNewSession,
@@ -434,14 +416,11 @@ export function useRefereeConsoleController() {
     publicSession,
     redAgentBrief,
     redInviteUrl,
-    refreshRoleClaim,
+    resetAgentClaim,
     replayError,
     replayLoadState,
     replayPayload,
     saveManualRefereeToken,
-    selectedAwards,
-    selectedCount,
-    selectedForTeam,
     sessionChat,
     sessionEvents,
     sessionInput,
@@ -449,8 +428,6 @@ export function useRefereeConsoleController() {
     setManualRefereeToken,
     setSessionInput,
     storedRefereeToken,
-    submitAwards,
-    submitState,
-    toggleAwardSelection,
+    submitRoundAdvance,
   }
 }

@@ -51,18 +51,18 @@ function winnerChatter(
   const loserHealth = result.remainingHealth[loser]
 
   if (loserHealth <= 0) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: that was not a fight plan, that was a parts donation.`
+    return `${capitalize(winner)} to ${capitalize(loser)}: knockout confirmed. Your build exposed a survival gap; I am planning for armor or kiting next.`
   }
 
   if (loserDamage >= winnerDamage + 20) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: you kept feeding the weapon; I started charging rent.`
+    return `${capitalize(winner)} to ${capitalize(loser)}: your approach kept feeding my weapon arc. If you add control next round, I need a cleaner escape plan.`
   }
 
   if (winnerDamage > loserDamage * 0.8) {
-    return `${capitalize(winner)} to ${capitalize(loser)}: you landed shots, then forgot to survive the answer.`
+    return `${capitalize(winner)} to ${capitalize(loser)}: you landed enough shots to matter, but not enough to survive the answer. I expect heavier front armor.`
   }
 
-  return `${capitalize(winner)} to ${capitalize(loser)}: scoreboard says enough. Bring something that can turn next round.`
+  return `${capitalize(winner)} to ${capitalize(loser)}: scoreboard says enough. Your turning looked weak; I am watching for a mobility correction.`
 }
 
 function loserChatter(
@@ -74,14 +74,14 @@ function loserChatter(
   const winnerDamage = result.damage[winner]
 
   if (loserDamage <= winnerDamage + 6) {
-    return `${capitalize(loser)} to ${capitalize(winner)}: enjoy the round; the replay shows how thin that win was.`
+    return `${capitalize(loser)} to ${capitalize(winner)}: enjoy the round; the replay says that margin was thin. I can punish the same lane with one adjustment.`
   }
 
   if (result.remainingHealth[loser] <= 0) {
-    return `${capitalize(loser)} to ${capitalize(winner)}: fine, that hit was ugly. I am buying drive control before you get proud.`
+    return `${capitalize(loser)} to ${capitalize(winner)}: that hit exposed my drive control. Next build needs traction before extra damage.`
   }
 
-  return `${capitalize(loser)} to ${capitalize(winner)}: talk now; the next build is aimed directly at that weakness.`
+  return `${capitalize(loser)} to ${capitalize(winner)}: the loss points at a specific weakness, and the next build is aimed there.`
 }
 
 function drawChatter(role: TeamRole, result: CombatResult): string {
@@ -89,10 +89,10 @@ function drawChatter(role: TeamRole, result: CombatResult): string {
   const dealt = result.damage[opponent]
 
   if (dealt > 0) {
-    return `${capitalize(role)} to ${capitalize(opponent)}: you survived ${dealt} damage and still could not make it count.`
+    return `${capitalize(role)} to ${capitalize(opponent)}: ${dealt} damage landed, but neither plan converted. I need a sharper win condition next round.`
   }
 
-  return `${capitalize(role)} to ${capitalize(opponent)}: next round, try bringing a weapon instead of a parking brake.`
+  return `${capitalize(role)} to ${capitalize(opponent)}: no one proved a damage plan. Next round needs pressure, not just survival.`
 }
 
 function capitalize(value: string): string {

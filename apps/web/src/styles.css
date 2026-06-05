@@ -71,6 +71,69 @@ button.active {
   background: #5dd292;
 }
 
+.ui-button {
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 12px;
+  display: inline-grid;
+  place-items: center;
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.ui-button-secondary {
+  border-color: rgba(143, 208, 255, 0.26);
+  color: #e8f3ff;
+  background: rgba(143, 208, 255, 0.08);
+}
+
+.ui-button-primary {
+  border-color: rgba(93, 210, 146, 0.72);
+  color: #07110c;
+  background: #5dd292;
+}
+
+.ui-button-danger {
+  border-color: rgba(255, 92, 108, 0.58);
+  color: #ffd9de;
+  background: rgba(255, 92, 108, 0.12);
+}
+
+.ui-button-ghost {
+  border-color: transparent;
+  color: #c2cccc;
+  background: transparent;
+}
+
+.ui-button-secondary:not(:disabled):hover,
+.ui-button-secondary:not(:disabled):focus-visible {
+  border-color: rgba(143, 208, 255, 0.64);
+  color: #ffffff;
+  background: rgba(143, 208, 255, 0.14);
+}
+
+.ui-button-primary:not(:disabled):hover,
+.ui-button-primary:not(:disabled):focus-visible {
+  border-color: rgba(183, 243, 204, 0.92);
+  color: #030806;
+  background: #78e3a7;
+}
+
+.ui-button-danger:not(:disabled):hover,
+.ui-button-danger:not(:disabled):focus-visible {
+  border-color: rgba(255, 92, 108, 0.88);
+  color: #ffffff;
+  background: rgba(255, 92, 108, 0.22);
+}
+
+.ui-button-ghost:not(:disabled):hover,
+.ui-button-ghost:not(:disabled):focus-visible {
+  border-color: rgba(238, 242, 243, 0.2);
+  color: #ffffff;
+  background: rgba(238, 242, 243, 0.06);
+}
+
 .arena-app {
   min-width: 0;
   min-height: 100vh;
@@ -98,7 +161,8 @@ button.active {
   min-height: 100vh;
   padding: 18px 14px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto;
+  align-content: start;
   gap: 22px;
   border-right: 1px solid rgba(238, 242, 247, 0.12);
   background:
@@ -134,36 +198,6 @@ button.active {
   line-height: 1.08;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.director-nav {
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.director-nav a {
-  min-width: 0;
-  min-height: 44px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: #c8d0dc;
-  font-size: 0.92rem;
-  font-weight: 850;
-  text-decoration: none;
-}
-
-.director-nav a:hover,
-.director-nav a:focus-visible,
-.director-nav a.active {
-  border-color: rgba(247, 184, 75, 0.5);
-  outline: none;
-  color: #f6f7fb;
-  background: linear-gradient(90deg, rgba(247, 184, 75, 0.16), rgba(92, 145, 255, 0.08));
 }
 
 .referee-identity {
@@ -340,19 +374,9 @@ button.active {
   text-transform: uppercase;
 }
 
-.header-action {
+.score-header > .ui-button {
   min-height: 42px;
   padding: 0 14px;
-  border-color: rgba(255, 92, 108, 0.44);
-  color: #ffb8bf;
-  background: rgba(255, 92, 108, 0.1);
-}
-
-.header-action:not(:disabled):hover,
-.header-action:not(:disabled):focus-visible {
-  border-color: rgba(255, 92, 108, 0.82);
-  color: #fff;
-  background: rgba(255, 92, 108, 0.2);
 }
 
 .director-content {
@@ -422,12 +446,38 @@ button.active {
   text-align: center;
 }
 
-.awards-dock .award-stack {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.round-review-stack {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
 }
 
-.awards-dock .award-action-bar {
-  grid-column: 1 / -1;
+.round-review-summary,
+.round-review-action-bar {
+  min-width: 0;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(238, 242, 247, 0.12);
+  border-radius: 8px;
+  background: rgba(238, 242, 247, 0.045);
+}
+
+.round-review-summary strong {
+  color: #eef2f7;
+  font-size: 0.98rem;
+}
+
+.round-review-summary span,
+.round-review-action-bar span {
+  color: #c2cccc;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.round-review-action-bar {
+  grid-template-columns: minmax(0, 1fr) minmax(132px, auto);
+  align-items: center;
 }
 
 .director-right-rail .replay-outcome {
@@ -742,65 +792,53 @@ button.active {
   gap: 8px;
 }
 
-.invite-links {
+.invite-panel p {
   min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.invite-links button {
-  min-width: 0;
-}
-
-.award-stack {
-  margin-top: 12px;
-  display: grid;
-  gap: 10px;
-}
-
-.referee-grid .award-card {
-  min-height: 0;
-  padding: 12px;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 10px;
-  border: 1px solid rgba(238, 242, 243, 0.14);
-  border-radius: 8px;
-  background: rgba(238, 242, 243, 0.055);
-}
-
-.referee-grid .award-action-bar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(132px, auto);
-  gap: 10px;
-  align-items: center;
-}
-
-.referee-grid .award-card h3 {
-  margin-top: 0;
-  margin-bottom: 0;
-  font-size: 0.94rem;
-}
-
-.referee-grid .award-card p {
   margin: 0;
   color: #c2cccc;
   font-size: 0.82rem;
-  line-height: 1.35;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
-.referee-grid .award-team-actions {
+.invite-panel p strong,
+.invite-panel p span {
+  display: block;
+}
+
+.invite-panel p strong {
+  color: #eef2f7;
+  font-size: 0.84rem;
+}
+
+.invite-panel p span {
+  margin-top: 2px;
+  color: #aab5c2;
+  font-size: 0.76rem;
+}
+
+.invite-panel-claimed {
+  padding: 10px;
+  border: 1px solid rgba(255, 92, 108, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 92, 108, 0.06);
+}
+
+.invite-links {
+  min-width: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-.referee-grid .award-action-bar span {
-  color: #c2cccc;
-  font-size: 0.8rem;
-  font-weight: 800;
-  line-height: 1.2;
+.invite-links button,
+.invite-reset-actions button {
+  min-width: 0;
+}
+
+.invite-reset-actions {
+  min-width: 0;
+  display: grid;
 }
 
 .event-log {
@@ -840,7 +878,6 @@ button.active {
 
 .brand-block h1,
 .section-header h2,
-.award-card h3,
 .compact-panel h2 {
   margin: 0;
   letter-spacing: 0;
@@ -1469,130 +1506,6 @@ button.active {
 
 .part-category-style {
   box-shadow: inset 2px 0 0 rgba(181, 143, 255, 0.54);
-}
-
-.award-panel {
-  padding: 0;
-}
-
-.award-grid {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.award-card {
-  min-height: 182px;
-  padding: 12px;
-  display: grid;
-  grid-template-rows: auto 1fr auto auto;
-  gap: 10px;
-  border: 1px solid rgba(238, 242, 243, 0.14);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 243, 0.07), rgba(238, 242, 243, 0.03)),
-    rgba(238, 242, 243, 0.045);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.award-card.selected {
-  border-color: rgba(93, 210, 146, 0.6);
-  background:
-    linear-gradient(180deg, rgba(93, 210, 146, 0.12), rgba(93, 210, 146, 0.05)),
-    rgba(93, 210, 146, 0.08);
-}
-
-.award-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.award-card h3 {
-  font-size: 0.94rem;
-}
-
-.award-card-header strong {
-  color: #f3d46f;
-  font-size: 0.82rem;
-}
-
-.award-card p {
-  margin: 0;
-  color: #c2cccc;
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.award-team-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.award-team-actions button {
-  min-height: 34px;
-  text-transform: uppercase;
-}
-
-.team-choice.red.selected {
-  border-color: rgba(255, 92, 108, 0.9);
-  color: #23080c;
-  background: #ff5c6c;
-}
-
-.team-choice.blue.selected {
-  border-color: rgba(92, 179, 255, 0.9);
-  color: #06101a;
-  background: #5cb3ff;
-}
-
-.award-card footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: #f3d46f;
-  font-size: 0.78rem;
-}
-
-.award-card footer span {
-  color: #8fa3a3;
-  font-weight: 800;
-}
-
-.award-action-bar {
-  min-height: 46px;
-  margin-top: 10px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(132px, auto);
-  gap: 10px;
-  align-items: center;
-  border: 1px solid rgba(238, 242, 243, 0.14);
-  border-radius: 8px;
-  background: rgba(238, 242, 243, 0.055);
-}
-
-.award-action-bar strong {
-  color: #eef2f3;
-  font-size: 0.84rem;
-}
-
-.award-action-bar span {
-  min-width: 0;
-  overflow: hidden;
-  color: #c2cccc;
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.award-action-bar button {
-  min-height: 34px;
 }
 
 .team-dot {
@@ -2237,46 +2150,6 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
-.agent-award-list {
-  margin: 12px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-  list-style: none;
-}
-
-.agent-award-list li {
-  min-width: 0;
-  padding: 10px;
-  border: 1px solid rgba(238, 242, 243, 0.12);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.agent-award-list strong,
-.agent-award-list span {
-  display: block;
-}
-
-.agent-award-list strong {
-  color: #eef2f3;
-  font-size: 0.84rem;
-}
-
-.agent-award-list span {
-  margin-top: 3px;
-  color: #f3d46f;
-  font-size: 0.74rem;
-  font-weight: 900;
-}
-
-.agent-award-list p {
-  margin: 6px 0 0;
-  color: #c2cccc;
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
 .agent-error {
   margin-top: 12px;
   padding: 12px;
@@ -2413,35 +2286,198 @@ textarea:focus-visible {
   text-align: center;
 }
 
+.agent-task-panel {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+  gap: 14px;
+  align-items: stretch;
+  border-right: 0;
+  border-bottom: 1px solid rgba(238, 242, 243, 0.12);
+  background:
+    linear-gradient(90deg, rgba(93, 210, 146, 0.08), rgba(143, 208, 255, 0.055)),
+    rgba(6, 11, 14, 0.78);
+}
+
+.agent-next-task {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.agent-next-task p,
+.agent-next-task small {
+  margin: 0;
+  color: #c2cccc;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.agent-next-task code {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 8px;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(143, 208, 255, 0.22);
+  border-radius: 5px;
+  color: #e8f3ff;
+  background: rgba(143, 208, 255, 0.08);
+}
+
+.agent-state-chip {
+  width: fit-content;
+  min-height: 24px;
+  padding: 4px 9px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(93, 210, 146, 0.42);
+  border-radius: 999px;
+  color: #b7f3cc;
+  background: rgba(93, 210, 146, 0.1);
+  font-size: 0.66rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.agent-task-list {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  list-style: none;
+}
+
+.agent-task-step {
+  min-width: 0;
+  min-height: 74px;
+  padding: 10px;
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  border: 1px solid rgba(238, 242, 243, 0.12);
+  border-radius: 8px;
+  background: rgba(238, 242, 243, 0.045);
+}
+
+.agent-task-step span,
+.agent-task-step strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-task-step span {
+  color: #8fa3a3;
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.agent-task-step strong {
+  color: #eef2f3;
+  font-size: 0.9rem;
+}
+
+.agent-task-step.is-active {
+  border-color: rgba(93, 210, 146, 0.58);
+  box-shadow: inset 3px 0 0 rgba(93, 210, 146, 0.8);
+}
+
+.agent-task-step.tone-complete {
+  border-color: rgba(93, 210, 146, 0.3);
+}
+
+.agent-task-step.tone-current {
+  background:
+    linear-gradient(180deg, rgba(93, 210, 146, 0.13), rgba(93, 210, 146, 0.04)),
+    rgba(93, 210, 146, 0.055);
+}
+
+.agent-task-step.tone-waiting {
+  border-color: rgba(247, 184, 75, 0.3);
+}
+
+.agent-task-step.tone-blocked {
+  border-color: rgba(255, 92, 108, 0.36);
+}
+
 .agent-cockpit-layout {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(260px, 320px) minmax(620px, 1fr) minmax(300px, 380px);
+  grid-template-columns: minmax(620px, 1fr) minmax(300px, 360px);
   align-items: start;
 }
 
-.cockpit-rail,
+.cockpit-primary-column,
 .cockpit-workbench,
-.cockpit-reference-stack {
+.cockpit-secondary-stack {
   min-width: 0;
 }
 
-.cockpit-rail {
+.cockpit-workbench {
+  min-height: calc(100vh - 202px);
+  border-left: 0;
+  border-right: 1px solid rgba(238, 242, 243, 0.12);
+}
+
+.cockpit-secondary-stack {
   position: sticky;
   top: 76px;
   max-height: calc(100vh - 76px);
   overflow: auto;
-}
-
-.cockpit-workbench {
-  min-height: calc(100vh - 76px);
-  border-left: 1px solid rgba(238, 242, 243, 0.12);
-  border-right: 1px solid rgba(238, 242, 243, 0.12);
-}
-
-.cockpit-reference-stack {
   display: grid;
   align-content: start;
+}
+
+.cockpit-secondary-panel {
+  min-height: 0;
+  padding: 12px;
+  border-right: 0;
+  border-bottom: 1px solid rgba(238, 242, 243, 0.1);
+  background:
+    linear-gradient(180deg, rgba(238, 242, 243, 0.035), rgba(238, 242, 243, 0.015)),
+    rgba(8, 13, 16, 0.7);
+}
+
+.secondary-panel-header {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.secondary-panel-header span {
+  min-width: 0;
+  color: #8fa3a3;
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.cockpit-secondary-panel .agent-facts {
+  grid-template-columns: 1fr;
+}
+
+.cockpit-secondary-panel .agent-handoff-panel,
+.cockpit-secondary-panel.match-log-panel {
+  min-height: 0;
+}
+
+.cockpit-secondary-scroll {
+  max-height: 220px;
+  margin-top: 10px;
+  overflow: auto;
+}
+
+.cockpit-secondary-scroll .agent-table {
+  margin-top: 0;
 }
 
 .workbench-header,
@@ -2546,8 +2582,33 @@ textarea:focus-visible {
   gap: 10px;
 }
 
-.assembly-state {
+.assembly-preview-meta {
   justify-self: end;
+  min-width: 0;
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  text-align: right;
+}
+
+.assembly-preview-meta strong {
+  max-width: 240px;
+  overflow: hidden;
+  color: #eef2f3;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assembly-preview-meta > span:last-child {
+  max-width: 260px;
+  color: #8fa3a3;
+  font-size: 0.66rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.assembly-state {
   min-height: 26px;
   padding: 4px 10px;
   display: inline-flex;
@@ -2572,6 +2633,24 @@ textarea:focus-visible {
   background: currentColor;
   box-shadow: 0 0 8px currentColor;
   content: "";
+}
+
+.assembly-state.is-draft {
+  border-color: rgba(247, 184, 75, 0.42);
+  color: #f3d46f;
+  background:
+    linear-gradient(180deg, rgba(247, 184, 75, 0.16), rgba(247, 184, 75, 0.03)),
+    rgba(247, 184, 75, 0.08);
+}
+
+.assembly-empty {
+  margin: 0;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(143, 208, 255, 0.24);
+  border-radius: 8px;
+  text-align: center;
 }
 
 .bot-assembly-stage {
@@ -2772,13 +2851,17 @@ textarea:focus-visible {
 .submit-dock {
   grid-template-columns: minmax(0, 1fr) minmax(160px, auto);
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(238, 242, 243, 0.12);
+  padding: 12px;
+  border: 1px solid rgba(93, 210, 146, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(93, 210, 146, 0.1), rgba(143, 208, 255, 0.035)),
+    rgba(93, 210, 146, 0.04);
 }
 
 .submit-dock .agent-facts {
   margin: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .submit-dock button {
@@ -2787,10 +2870,6 @@ textarea:focus-visible {
 
 .agent-handoff-panel textarea {
   min-height: 190px;
-}
-
-.cockpit-reference-stack .agent-live-panel {
-  border-right: 0;
 }
 
 @media (max-width: 1180px) {
@@ -2832,6 +2911,7 @@ textarea:focus-visible {
   }
 
   .agent-command-header,
+  .agent-task-panel,
   .agent-cockpit-layout,
   .plan-workbench-grid {
     grid-template-columns: 1fr;
@@ -2841,9 +2921,10 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .cockpit-rail {
+  .cockpit-secondary-stack {
     position: static;
     max-height: none;
+    overflow: visible;
   }
 
   .cockpit-workbench {
@@ -2856,6 +2937,10 @@ textarea:focus-visible {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .agent-task-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .blueprint-block-row,
   .turn-command-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2865,7 +2950,6 @@ textarea:focus-visible {
     border-right: 0;
   }
 
-  .referee-grid .award-stack,
   .event-log {
     max-height: 320px;
   }
@@ -2873,14 +2957,14 @@ textarea:focus-visible {
 
 @media (max-width: 720px) {
   .session-strip,
-  .award-grid,
   .category-strip,
   .cockpit-stats {
     grid-template-columns: 1fr 1fr;
   }
 
   .section-header,
-  .award-action-bar,
+  .round-review-action-bar,
+  .agent-task-panel,
   .team-row,
   .catalog-head,
   .catalog-row,
@@ -2894,10 +2978,6 @@ textarea:focus-visible {
   .section-header p {
     max-width: none;
     text-align: left;
-  }
-
-  .award-action-bar span {
-    white-space: normal;
   }
 
   .replay-controls {
@@ -2938,6 +3018,7 @@ textarea:focus-visible {
   }
 
   .plan-metric-strip,
+  .agent-task-list,
   .submit-dock .agent-facts {
     grid-template-columns: 1fr 1fr;
   }
@@ -2962,7 +3043,6 @@ textarea:focus-visible {
   }
 
   .session-strip,
-  .award-grid,
   .category-strip,
   .cockpit-stats,
   .status-list div,
@@ -2972,6 +3052,7 @@ textarea:focus-visible {
     .invite-links,
     .replay-controls,
     .agent-command-actions,
+    .agent-task-list,
     .plan-metric-strip,
     .submit-dock .agent-facts,
     .submission-mode-toggle {
@@ -3061,7 +3142,6 @@ textarea:focus-visible {
   }
 
   .session-strip,
-  .award-grid,
   .category-strip,
   .cockpit-stats,
   .status-list div,
@@ -3126,6 +3206,11 @@ textarea:focus-visible {
     font-size: 0.62rem;
   }
 
+  .assembly-preview-meta strong,
+  .assembly-preview-meta > span:last-child {
+    max-width: 160px;
+  }
+
   .bot-assembly-stage {
     height: clamp(260px, 58vh, 340px);
     margin-top: 6px;
@@ -3168,16 +3253,6 @@ textarea:focus-visible {
     border-bottom: 1px solid rgba(238, 242, 247, 0.12);
   }
 
-  .director-nav {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(112px, 1fr);
-    overflow-x: auto;
-  }
-
-  .referee-identity {
-    display: none;
-  }
-
   .score-header {
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
@@ -3187,7 +3262,7 @@ textarea:focus-visible {
     order: -1;
   }
 
-  .header-action {
+  .score-header > .ui-button {
     width: 100%;
   }
 }
@@ -3201,7 +3276,7 @@ textarea:focus-visible {
 
   .score-cluster,
   .director-right-rail,
-  .awards-dock .award-stack,
+  .round-review-action-bar,
   .team-record-grid,
   .session-metrics,
   .button-pair {
@@ -3210,11 +3285,6 @@ textarea:focus-visible {
 
   .score-team {
     grid-template-columns: minmax(0, 1fr) 48px;
-  }
-
-  .director-nav a {
-    min-height: 40px;
-    padding: 0 12px;
   }
 
   .match-console .referee-replay-frame,

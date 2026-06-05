@@ -1,4 +1,5 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import { getPart } from '../../../../packages/catalog/src/index.js'
@@ -31,6 +32,16 @@ import { createWeaponPart } from './babylonWeaponParts'
 export { createTeamMaterials, type TeamMaterialSet } from './babylonMaterials'
 
 const MAX_RENDERED_BLOCKS = 48
+
+export type BotPartNodeMetadata = {
+  kind: 'bot_part'
+  blockId: string
+  partId: string
+  primaryMaterialName: string
+  damagedMaterial: StandardMaterial
+  basePosition: [number, number, number]
+  baseRotation: [number, number, number]
+}
 
 export function createBotNode(
   scene: Scene,
@@ -77,15 +88,17 @@ function createPartNode(
     degreesToRadians(block.rotation[1]),
     degreesToRadians(block.rotation[2]),
   )
+  const material = materialForCategory(materials, category)
+
   partNode.metadata = {
     kind: 'bot_part',
     blockId: block.id,
     partId: block.partId,
+    primaryMaterialName: material.name,
+    damagedMaterial: materials.damaged,
     basePosition: [partNode.position.x, partNode.position.y, partNode.position.z],
     baseRotation: [partNode.rotation.x, partNode.rotation.y, partNode.rotation.z],
-  }
-
-  const material = materialForCategory(materials, category)
+  } satisfies BotPartNodeMetadata
 
   if (category === 'body') {
     createBodyPart(scene, partNode, material, block.partId, width, height, depth, materials)

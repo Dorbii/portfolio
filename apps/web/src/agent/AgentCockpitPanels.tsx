@@ -1,7 +1,6 @@
 import { getPart } from '../../../../packages/catalog/src/index.js'
 import type {
   PartDefinition,
-  PublicSessionState,
   RolePrivateState,
   SessionChatMessage,
   ValidationIssue,
@@ -94,32 +93,6 @@ export function PlanMetric({
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
-  )
-}
-
-export function AwardIncentives({
-  state,
-  publicState,
-}: {
-  state: RolePrivateState | null
-  publicState: PublicSessionState | null
-}) {
-  const awards = state?.awardOptions ?? publicState?.awardOptions ?? []
-
-  if (awards.length === 0) {
-    return <p className="agent-empty">No referee award incentives are available for this phase.</p>
-  }
-
-  return (
-    <ul className="agent-award-list">
-      {awards.map((award) => (
-        <li key={award.id}>
-          <strong>{award.title}</strong>
-          <span>+{award.gold}g next round</span>
-          <p>{award.description}</p>
-        </li>
-      ))}
-    </ul>
   )
 }
 

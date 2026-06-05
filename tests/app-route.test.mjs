@@ -27,6 +27,10 @@ const roundPlanSubmissionSource = readFileSync(
   new URL('../apps/web/src/agent/useRoundPlanSubmission.ts', import.meta.url),
   'utf8',
 )
+const roundPlanDraftSource = readFileSync(
+  new URL('../apps/web/src/agent/roundPlanDraft.ts', import.meta.url),
+  'utf8',
+)
 const cockpitViewStateSource = readFileSync(
   new URL('../apps/web/src/agent/agentCockpitViewState.ts', import.meta.url),
   'utf8',
@@ -83,8 +87,8 @@ const refereeReplayPayloadSource = readFileSync(
   new URL('../apps/web/src/referee/useRefereeReplayPayload.ts', import.meta.url),
   'utf8',
 )
-const refereeAwardsSource = readFileSync(
-  new URL('../apps/web/src/referee/useRefereeAwards.ts', import.meta.url),
+const refereeRoundAdvanceSource = readFileSync(
+  new URL('../apps/web/src/referee/useRefereeRoundAdvance.ts', import.meta.url),
   'utf8',
 )
 const refereeAgentBriefsSource = readFileSync(
@@ -122,7 +126,7 @@ test('root console is wired to live referee session helpers', () => {
     refereeConsoleSource,
     refereeConsoleControllerSource,
     refereeReplayPayloadSource,
-    refereeAwardsSource,
+    refereeRoundAdvanceSource,
     refereeAgentBriefsSource,
   ].join('\n')
 
@@ -139,14 +143,19 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(refereeConsoleSource.includes('ReplayOutcome'))
   assert.ok(refereeConsoleSource.includes('PublicChatLog'))
   assert.ok(refereeConsoleSource.includes('Fight comms'))
-  assert.ok(refereeRuntimeSource.includes('submitRefereeAwards'))
+  assert.ok(refereeRuntimeSource.includes('advanceRound'))
   assert.ok(refereeRuntimeSource.includes('resetRoleClaim'))
   assert.equal(refereeRuntimeSource.includes('Create capability token'), false)
   assert.ok(refereeConsoleSource.includes('Referee capability token'))
   assert.ok(refereeRuntimeSource.includes('createExternalAgentBriefMarkdown'))
-  assert.ok(refereePanelsSource.includes('Wake {role} agent'))
-  assert.ok(refereeRuntimeSource.includes('wake brief copied'))
-  assert.ok(refereePanelsSource.includes('Refresh claim'))
+  assert.ok(refereePanelsSource.includes('getInvitePanelMode'))
+  assert.ok(refereePanelsSource.includes("panelMode === 'claimed'"))
+  assert.ok(refereePanelsSource.includes('Copy handoff'))
+  assert.ok(refereePanelsSource.includes('Reset agent claim'))
+  assert.ok(refereeRuntimeSource.includes('handoff copied'))
+  assert.ok(refereeRuntimeSource.includes('resetAgentClaim'))
+  assert.equal(refereeRuntimeSource.includes(['wake', 'brief', 'copied'].join(' ')), false)
+  assert.equal(refereeRuntimeSource.includes(['Refresh', 'claim'].join(' ')), false)
   assert.ok(refereeRuntimeSource.includes('replaceInvite'))
 })
 
@@ -178,10 +187,13 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitViewStateSource.includes('Submit exactly one legal round plan for this round.'))
   assert.ok(cockpitSource.includes('Last validation error'))
   assert.ok(cockpitSource.includes('Match log'))
-  assert.ok(cockpitSource.includes('Bot chat'))
+  assert.ok(cockpitSource.includes('Table Talk'))
   assert.ok(roundPlanWorkbenchSource.includes('Assembly bay'))
   assert.ok(roundPlanWorkbenchSource.includes('BotAssemblyScene'))
-  assert.ok(cockpitSource.includes('Private notes'))
+  assert.ok(cockpitSource.includes('Agent Journal'))
+  assert.ok(cockpitSource.includes('No hidden chain-of-thought'))
+  assert.ok(agentChatFormsSource.includes('Table Talk posted.'))
+  assert.ok(agentChatFormsSource.includes('Agent Journal entry saved.'))
   assert.ok(cockpitSource.includes('agent-chat-form'))
   assert.ok(cockpitRuntimeSource.includes('submitChatMessage'))
   assert.ok(cockpitRuntimeSource.includes('submitPrivateChatMessage'))
@@ -215,6 +227,39 @@ test('agent cockpit includes structured plan editor section labels and advanced 
   assert.ok(roundPlanEditorSource.includes('Turn plan commands'))
   assert.ok(roundPlanEditorSource.includes('Rationale'))
   assert.ok(roundPlanWorkbenchSource.includes('Advanced JSON mode'))
+})
+
+test('agent cockpit prioritizes active task workflow over secondary panels', () => {
+  assert.ok(cockpitViewStateSource.includes('createAgentCockpitWorkflow'))
+  assert.ok(cockpitViewStateSource.includes("'connect' | 'build' | 'submit' | 'review'"))
+  assert.ok(cockpitViewStateSource.includes('Unclaimed'))
+  assert.ok(cockpitViewStateSource.includes('Claimed'))
+  assert.ok(cockpitViewStateSource.includes('Draft'))
+  assert.ok(cockpitViewStateSource.includes('Submitted'))
+  assert.ok(cockpitViewStateSource.includes('Waiting'))
+  assert.ok(cockpitViewStateSource.includes('Review'))
+  assert.ok(cockpitSource.includes('AgentTaskPanel'))
+  assert.ok(cockpitSource.includes('agent-task-panel'))
+  assert.ok(cockpitSource.includes('cockpit-primary-column'))
+  assert.ok(cockpitSource.includes('cockpit-secondary-stack'))
+  assert.ok(cockpitSource.indexOf('<AgentTaskPanel') < cockpitSource.indexOf('<RoundPlanWorkbench'))
+  assert.ok(roundPlanWorkbenchSource.indexOf('submit-dock') < roundPlanWorkbenchSource.indexOf('assembly-bay-panel'))
+})
+
+test('agent cockpit separates submitted truth from editable round plan draft', () => {
+  assert.ok(roundPlanSubmissionSource.includes('roleState?.ownSubmission'))
+  assert.ok(roundPlanSubmissionSource.includes('createEmptySubmission()'))
+  assert.ok(roundPlanSubmissionSource.includes('hasLocalDraftEdits'))
+  assert.ok(roundPlanSubmissionSource.includes('if (hasLocalDraftEdits)'))
+  assert.ok(roundPlanDraftSource.includes('function createEmptySubmission'))
+  assert.ok(roundPlanWorkbenchSource.includes('const submittedSubmission = roleState?.ownSubmission ?? null'))
+  assert.ok(roundPlanWorkbenchSource.includes('const previewSubmission = submittedSubmission ?? draftSubmission'))
+  assert.ok(roundPlanWorkbenchSource.includes('blueprint={previewBlueprint}'))
+  assert.ok(roundPlanWorkbenchSource.includes('Submitted bot'))
+  assert.ok(roundPlanWorkbenchSource.includes('Local draft'))
+  assert.ok(roundPlanWorkbenchSource.includes('Sample draft'))
+  assert.ok(roundPlanWorkbenchSource.includes('Draft seeded from submitted bot'))
+  assert.ok(roundPlanWorkbenchSource.includes('No submitted bot or local draft blueprint loaded.'))
 })
 
 test('replay viewer does not render future event timeline markers', () => {

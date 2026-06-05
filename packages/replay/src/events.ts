@@ -84,14 +84,6 @@ export type KnockoutEvent = {
   cause: string
 }
 
-export type AwardEvent = {
-  t: number
-  type: 'award'
-  team: TeamRole
-  awardId: string
-  gold: number
-}
-
 export type ReplayEvent =
   | SpawnEvent
   | MoveEvent
@@ -102,7 +94,6 @@ export type ReplayEvent =
   | HazardEvent
   | PartDetachEvent
   | KnockoutEvent
-  | AwardEvent
 
 export function compareReplayEvents(left: ReplayEvent, right: ReplayEvent): number {
   if (left.t !== right.t) {

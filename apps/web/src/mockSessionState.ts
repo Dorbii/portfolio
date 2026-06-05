@@ -6,13 +6,6 @@ import type {
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
 
-export type AwardOption = {
-  id: string
-  title: string
-  gold: number
-  description: string
-}
-
 export type TeamEconomySnapshot = {
   role: TeamRole
   gold: number
@@ -29,27 +22,6 @@ export const arenaConfig: ArenaConfig = {
   height: 18,
   activeHazards: ['center saw', 'corner flippers'],
 }
-
-export const mockAwards: AwardOption[] = [
-  {
-    id: 'style-blackout',
-    title: 'Most Stylish',
-    gold: 25,
-    description: 'Readable silhouette and clean identity under pressure.',
-  },
-  {
-    id: 'counter-net',
-    title: 'Best Counterbuild',
-    gold: 25,
-    description: 'Plan directly punished the opponent build.',
-  },
-  {
-    id: 'budget-clean',
-    title: 'Budget Genius',
-    gold: 20,
-    description: 'Saved money without entering the fight underbuilt.',
-  },
-]
 
 export const mockTeamEconomy: Record<TeamRole, TeamEconomySnapshot> = {
   red: {
@@ -91,7 +63,7 @@ const eventLog = [
   {
     at: '14:15',
     type: 'combat_resolved' as const,
-    message: 'Combat resolved. Replay and referee awards are ready.',
+    message: 'Combat resolved. Replay and round review are ready.',
   },
 ]
 
@@ -100,7 +72,7 @@ const chatLog = [
     id: 's_mock_7f2:chat:1',
     at: '14:16',
     round: 3,
-    phase: 'referee_awards' as const,
+    phase: 'round_review' as const,
     role: 'blue' as const,
     agentName: 'blue-agent',
     kind: 'reflection' as const,
@@ -114,7 +86,7 @@ const privateChatLogByRole = {
       id: 's_mock_7f2:red:private-chat:1',
       at: '14:17',
       round: 3,
-      phase: 'referee_awards' as const,
+      phase: 'round_review' as const,
       role: 'red' as const,
       agentName: 'red-agent',
       kind: 'strategy' as const,
@@ -126,7 +98,7 @@ const privateChatLogByRole = {
       id: 's_mock_7f2:blue:private-chat:1',
       at: '14:17',
       round: 3,
-      phase: 'referee_awards' as const,
+      phase: 'round_review' as const,
       role: 'blue' as const,
       agentName: 'blue-agent',
       kind: 'reflection' as const,
@@ -137,8 +109,8 @@ const privateChatLogByRole = {
 
 export const mockPublicSession: PublicSessionState = {
   sessionId: 's_mock_7f2',
-  stateVersion: 'mock|referee_awards|3|red-submitted|blue-submitted|4',
-  phase: 'referee_awards',
+  stateVersion: 'mock|round_review|3|red-submitted|blue-submitted|4',
+  phase: 'round_review',
   round: 3,
   maxRounds: 7,
   expiresAt: '2026-06-03T20:00:00.000Z',
@@ -156,7 +128,6 @@ export const mockPublicSession: PublicSessionState = {
     },
   },
   replayAvailable: true,
-  awardOptions: mockAwards,
   lastResult: {
     winner: 'blue',
     reason: 'Red drive disabled after rail trap',

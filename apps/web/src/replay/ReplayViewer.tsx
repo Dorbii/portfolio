@@ -10,6 +10,7 @@ import {
   buildReplayFrame,
   clampReplayTime,
   type CameraPreset,
+  type ReplayEffectState,
 } from './replayMapping'
 import { BotPartMap } from './ReplayPartMap'
 import { capitalize, formatDurationSeconds, formatLabel } from '../shared/format'
@@ -52,8 +53,8 @@ export function ReplayViewer({
     [timeline.events],
   )
   const activeEvent = useMemo(
-    () => findActiveEvent(sortedEvents, time),
-    [sortedEvents, time],
+    () => findActiveEvent(sortedEvents, time, frame.effects),
+    [frame.effects, sortedEvents, time],
   )
 
   useEffect(() => {
@@ -203,7 +204,11 @@ function sortTimelineEvents(events: ReplayEvent[]): ReplayEvent[] {
   })
 }
 
-function findActiveEvent(events: ReplayEvent[], time: number): ReplayEvent | undefined {
+function findActiveEvent(
+  events: ReplayEvent[],
+  time: number,
+  effects: ReplayEffectState[],
+): ReplayEvent | undefined {
   let current: ReplayEvent | undefined
 
   for (const event of events) {
@@ -214,5 +219,22 @@ function findActiveEvent(events: ReplayEvent[], time: number): ReplayEvent | und
     current = event
   }
 
+  if (current?.type === 'part_detach' && !hasVisiblePartDetach(current, effects)) {
+    return undefined
+  }
+
   return current
+}
+
+function hasVisiblePartDetach(
+  event: ReplayEvent,
+  effects: ReplayEffectState[],
+): boolean {
+  if (event.type !== 'part_detach') {
+    return true
+  }
+
+  return effects.some(
+    (effect) => effect.kind === 'part_detach' && effect.label === event.blockId,
+  )
 }

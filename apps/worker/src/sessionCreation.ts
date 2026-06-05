@@ -74,8 +74,6 @@ export async function createInitialSessionState(
         blue: createInitialRoleState('blue', claimTokenHashes.blue),
       },
       refereeTokenHash: await tokenHasher(refereeToken),
-      awardOptions: [],
-      awardHistory: [],
       chatLog: [],
       rateLimits: {},
       eventLog: [

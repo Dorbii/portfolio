@@ -1,9 +1,8 @@
 import type {
+  AdvanceRoundResponse,
   BotBlueprint,
   CreateSessionResponse,
   PublicSessionState,
-  RefereeAwardSelection,
-  RefereeAwardsResponse,
   RelayErrorCode,
   RelayErrorResponse,
   RoleResetResponse,
@@ -119,20 +118,19 @@ export async function loadReplayPayload(
   return replayPayload
 }
 
-export async function submitRefereeAwards(
+export async function advanceRound(
   apiBase: string,
   sessionId: string,
   refereeToken: string,
-  awards: RefereeAwardSelection[],
-): Promise<RefereeAwardsResponse> {
-  return requestJson<RefereeAwardsResponse>(
-    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/referee-awards`,
+): Promise<AdvanceRoundResponse> {
+  return requestJson<AdvanceRoundResponse>(
+    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/advance-round`,
     {
       method: 'POST',
       headers: {
         authorization: `Bearer ${refereeToken}`,
       },
-      body: JSON.stringify({ awards }),
+      body: JSON.stringify({}),
     },
   )
 }

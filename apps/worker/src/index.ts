@@ -187,8 +187,8 @@ export class AgentArenaSession {
       return this.submitPrivateChatMessage(request, coordinator)
     }
 
-    if (route.action === 'referee-awards' && request.method === 'POST') {
-      return this.submitRefereeAwards(request, coordinator)
+    if (route.action === 'advance-round' && request.method === 'POST') {
+      return this.advanceRound(request, coordinator)
     }
 
     if (route.action === 'reset-role' && request.method === 'POST') {
@@ -357,11 +357,13 @@ export class AgentArenaSession {
     )
   }
 
-  private async submitRefereeAwards(
+  private async advanceRound(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const readResult = await this.readJsonRequest(request, 'Referee awards body must be JSON.')
+    const readResult = await this.readJsonRequest(request, 'Advance round body must be JSON.', {
+      requireRecord: true,
+    })
 
     if (!readResult.ok) {
       return readResult.response
@@ -369,7 +371,7 @@ export class AgentArenaSession {
 
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitRefereeAwards(bearerToken(request) ?? '', readResult.body),
+      await coordinator.advanceRound(bearerToken(request) ?? ''),
     )
   }
 

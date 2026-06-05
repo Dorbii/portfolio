@@ -72,12 +72,12 @@ export function createPooledTorus(
 }
 
 export function updatePartDetachEffect({ effect, mesh }: EffectUpdateInput): void {
-  mesh.position.y += 0.34
+  mesh.position.y += 0.46
   mesh.rotation.x = Math.PI / 2
-  mesh.rotation.y = effect.age * 3.2
-  mesh.rotation.z = Math.sin(effect.age * 12) * 0.08
-  mesh.scaling.setAll(0.82 + effect.intensity * 1.05)
-  mesh.visibility = 0.28 + effect.intensity * 0.38
+  mesh.rotation.y = effect.age * 3.8
+  mesh.rotation.z = Math.sin(effect.age * 12) * 0.12
+  mesh.scaling.setAll(1.02 + effect.intensity * 1.28)
+  mesh.visibility = 0.42 + effect.intensity * 0.46
 }
 
 export function updateImpactEffect({ effect, mesh }: EffectUpdateInput): void {
