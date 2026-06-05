@@ -29,6 +29,7 @@ export type ReplayEffectKind =
   | 'weapon_fire'
   | 'control_net'
   | 'laser_lance'
+  | 'drone_swarm'
   | 'impact'
   | 'debris'
   | 'damage_marker'
@@ -72,6 +73,7 @@ const DEBRIS_WINDOW = 1.9
 const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
 const LASER_LANCE_WINDOW = 0.95
+const DRONE_SWARM_WINDOW = 1.2
 
 const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
   red: {
@@ -282,6 +284,27 @@ function buildEffects(
           rotationY,
           age,
           intensity: Math.max(0, 1 - age / LASER_LANCE_WINDOW),
+          team: event.bot,
+          endPosition,
+          label: event.ability,
+        })
+      }
+    }
+
+    if (event.type === 'ability' && event.ability === 'drone_swarm') {
+      const age = time - event.t
+      const firingBot = resolveBotState(events, event.bot, event.t)
+      const endPosition = event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 6.5)
+      const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+
+      if (age >= 0 && age <= DRONE_SWARM_WINDOW) {
+        effects.push({
+          id: `${index}-drone-swarm-${event.bot}`,
+          kind: 'drone_swarm',
+          position: firingBot.position,
+          rotationY,
+          age,
+          intensity: Math.max(0, 1 - age / DRONE_SWARM_WINDOW),
           team: event.bot,
           endPosition,
           label: event.ability,

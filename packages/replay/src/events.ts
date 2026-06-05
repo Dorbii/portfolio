@@ -1,6 +1,6 @@
 import type { TeamRole, Vector3 } from '../../schemas/src/index.js'
 
-export type AbilityName = 'laser_lance'
+export type AbilityName = 'laser_lance' | 'drone_swarm'
 export type WeaponFireCue = 'deploy' | 'release'
 
 export type SpawnEvent = {

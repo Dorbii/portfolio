@@ -1,4 +1,5 @@
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture'
 import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
@@ -29,6 +30,37 @@ export type TeamMaterialSet = {
 const CELL_SCALE = 0.58
 const MAX_RENDERED_BLOCKS = 48
 
+type SurfacePattern = 'panel' | 'armor' | 'mobility' | 'weapon' | 'utility' | 'style' | 'trim' | 'rubber' | 'light' | 'warning'
+type TextureDrawingContext = ReturnType<DynamicTexture['getContext']>
+
+type WheelVisual = {
+  diameterScale: number
+  widthScale: number
+  rimScale: number
+  hubScale: number
+  motorScale: number
+  treadCount: number
+  treadScale: number
+  tessellation: number
+  rollSpeed: number
+}
+
+type TreadVisual = {
+  baseWidthScale: number
+  baseHeightScale: number
+  baseDepthScale: number
+  topWidthScale: number
+  topHeightScale: number
+  topDepthScale: number
+  shroudHeightScale: number
+  shroudDepthScale: number
+  padCount: number
+  rollerCount: number
+  rollerScale: number
+  suspensionScale: number
+  rollSpeed: number
+}
+
 type BotBounds = {
   centerX: number
   centerZ: number
@@ -41,28 +73,28 @@ export function createTeamMaterials(
 ): Record<TeamRole, TeamMaterialSet> {
   return {
     red: {
-      chassis: createMaterial(scene, 'red-chassis', '#b72e3b', '#23070a'),
-      armor: createMaterial(scene, 'red-armor', '#e84c5a', '#2b080c'),
-      mobility: createMaterial(scene, 'red-mobility', '#2d3032', '#050606'),
-      weapon: createMaterial(scene, 'red-weapon', '#f6bd4f', '#4d2a05'),
-      utility: createMaterial(scene, 'red-utility', '#f47b54', '#321005'),
-      style: createMaterial(scene, 'red-style', '#ff92a8', '#3c1019'),
-      trim: createMaterial(scene, 'red-trim', '#17191b', '#050505'),
-      rubber: createMaterial(scene, 'red-rubber', '#0d0e10', '#020202'),
-      light: createMaterial(scene, 'red-light', '#ff5b68', '#ff1f35', 0.72),
-      warning: createMaterial(scene, 'red-warning', '#f4c95b', '#5b3605'),
+      chassis: createMaterial(scene, 'red-chassis', '#b72e3b', '#23070a', 0.34, 'panel'),
+      armor: createMaterial(scene, 'red-armor', '#e84c5a', '#2b080c', 0.3, 'armor'),
+      mobility: createMaterial(scene, 'red-mobility', '#474b4e', '#070808', 0.32, 'mobility'),
+      weapon: createMaterial(scene, 'red-weapon', '#f6bd4f', '#4d2a05', 0.36, 'weapon'),
+      utility: createMaterial(scene, 'red-utility', '#f47b54', '#321005', 0.34, 'utility'),
+      style: createMaterial(scene, 'red-style', '#ff92a8', '#3c1019', 0.4, 'style'),
+      trim: createMaterial(scene, 'red-trim', '#17191b', '#050505', 0.26, 'trim'),
+      rubber: createMaterial(scene, 'red-rubber', '#0d0e10', '#020202', 0.18, 'rubber'),
+      light: createMaterial(scene, 'red-light', '#ff5b68', '#ff1f35', 0.72, 'light'),
+      warning: createMaterial(scene, 'red-warning', '#f4c95b', '#5b3605', 0.3, 'warning'),
     },
     blue: {
-      chassis: createMaterial(scene, 'blue-chassis', '#1f6fc2', '#051323'),
-      armor: createMaterial(scene, 'blue-armor', '#55a9ff', '#06182d'),
-      mobility: createMaterial(scene, 'blue-mobility', '#29333a', '#06090c'),
-      weapon: createMaterial(scene, 'blue-weapon', '#f6bd4f', '#3a2503'),
-      utility: createMaterial(scene, 'blue-utility', '#33c4ca', '#082629'),
-      style: createMaterial(scene, 'blue-style', '#98e5ff', '#09283b'),
-      trim: createMaterial(scene, 'blue-trim', '#171b20', '#050608'),
-      rubber: createMaterial(scene, 'blue-rubber', '#0d0f12', '#020203'),
-      light: createMaterial(scene, 'blue-light', '#58a9ff', '#167cff', 0.78),
-      warning: createMaterial(scene, 'blue-warning', '#f4c95b', '#4b3205'),
+      chassis: createMaterial(scene, 'blue-chassis', '#1f6fc2', '#051323', 0.34, 'panel'),
+      armor: createMaterial(scene, 'blue-armor', '#55a9ff', '#06182d', 0.3, 'armor'),
+      mobility: createMaterial(scene, 'blue-mobility', '#3f4c55', '#070b0d', 0.32, 'mobility'),
+      weapon: createMaterial(scene, 'blue-weapon', '#f6bd4f', '#3a2503', 0.36, 'weapon'),
+      utility: createMaterial(scene, 'blue-utility', '#33c4ca', '#082629', 0.34, 'utility'),
+      style: createMaterial(scene, 'blue-style', '#98e5ff', '#09283b', 0.4, 'style'),
+      trim: createMaterial(scene, 'blue-trim', '#171b20', '#050608', 0.26, 'trim'),
+      rubber: createMaterial(scene, 'blue-rubber', '#0d0f12', '#020203', 0.18, 'rubber'),
+      light: createMaterial(scene, 'blue-light', '#58a9ff', '#167cff', 0.78, 'light'),
+      warning: createMaterial(scene, 'blue-warning', '#f4c95b', '#4b3205', 0.3, 'warning'),
     },
   }
 }
@@ -125,6 +157,32 @@ function measureBotBounds(blocks: BlueprintBlock[]): BotBounds {
     width,
     depth,
   }
+}
+
+function heightForCategory(category: PartCategory, cellHeight: number): number {
+  const base = cellHeight * CELL_SCALE
+
+  if (category === 'mobility') {
+    return Math.max(0.38, base * 0.88)
+  }
+
+  if (category === 'weapon') {
+    return Math.max(0.48, base * 0.98)
+  }
+
+  if (category === 'utility') {
+    return Math.max(0.46, base)
+  }
+
+  if (category === 'defense') {
+    return Math.max(0.36, base * 0.86)
+  }
+
+  if (category === 'style') {
+    return Math.max(0.28, base * 0.72)
+  }
+
+  return Math.max(0.44, base * 0.94)
 }
 
 function createBotFoundation(
@@ -341,7 +399,7 @@ function createPartNode(
   const size = part?.size ?? [1, 1, 1]
   const partNode = new TransformNode(`${role}-${block.id}`, scene)
   const width = Math.max(0.22, size[0] * CELL_SCALE)
-  const height = Math.max(0.2, size[1] * CELL_SCALE * 0.72)
+  const height = heightForCategory(category, size[1])
   const depth = Math.max(0.22, size[2] * CELL_SCALE)
 
   partNode.position = new Vector3(
@@ -475,142 +533,368 @@ function createMobilityPart(
   depth: number,
   materials: TeamMaterialSet,
 ): void {
-  if (partId.includes('Tread') || partId.includes('Tank')) {
-    const base = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-base`,
-      {
-        width: Math.max(width * 1.4, 0.72),
-        height: Math.max(height * 0.55, 0.15),
-        depth: Math.max(depth * 1.55, 0.75),
-      },
-      scene,
-    )
-    const top = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-top`,
-      {
-        width: Math.max(width * 1.32, 0.64),
-        height: Math.max(height * 0.3, 0.09),
-        depth: Math.max(depth * 1.35, 0.57),
-      },
-      scene,
-    )
-
-    top.position.y = Math.max(height * 0.37, 0.11)
-    attachMesh(base, parent, materials.rubber)
-    attachMesh(top, parent, material)
-
-    const linkLeft = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-link-l`,
-      {
-        width: width * 0.18,
-        height: Math.max(height * 0.32, 0.08),
-        depth: Math.max(depth * 1.35, 0.5),
-      },
-      scene,
-    )
-
-    const linkRight = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-link-r`,
-      {
-        width: width * 0.18,
-        height: Math.max(height * 0.32, 0.08),
-        depth: Math.max(depth * 1.35, 0.5),
-      },
-      scene,
-    )
-    linkLeft.position.x = Math.max(width * -0.55, -0.22)
-    linkRight.position.x = Math.max(width * 0.55, 0.22)
-    attachMesh(linkLeft, parent, materials.trim)
-    attachMesh(linkRight, parent, materials.trim)
-
-    const driveModule = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-drive-module`,
-      {
-        width: Math.max(width * 0.5, 0.3),
-        height: Math.max(height * 0.34, 0.12),
-        depth: Math.max(depth * 0.52, 0.3),
-      },
-      scene,
-    )
-
-    driveModule.position.set(0, Math.max(height * 0.58, 0.2), -Math.max(depth * 0.18, 0.12))
-    attachMesh(driveModule, parent, materials.utility)
-
-    for (let side = -1; side <= 1; side += 2) {
-      const treadArmorShroud = MeshBuilder.CreateBox(
-        `${role}-${blockId}-tread-armor-shroud-${side}`,
-        {
-          width: Math.max(width * 0.16, 0.1),
-          height: Math.max(height * 0.64, 0.18),
-          depth: Math.max(depth * 1.64, 0.8),
-        },
-        scene,
-      )
-
-      treadArmorShroud.position.set(side * Math.max(width * 0.78, 0.36), Math.max(height * 0.22, 0.08), 0)
-      attachMesh(treadArmorShroud, parent, material)
-
-      const cableRail = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-tread-cable-rail-${side}`,
-        { height: Math.max(depth * 1.12, 0.54), diameter: 0.032, tessellation: 8 },
-        scene,
-      )
-
-      cableRail.rotation.x = Math.PI / 2
-      cableRail.position.set(side * Math.max(width * 0.42, 0.24), Math.max(height * 0.66, 0.23), 0)
-      attachMesh(cableRail, parent, materials.trim)
-    }
-
-    for (let index = -2; index <= 2; index += 1) {
-      const treadPad = MeshBuilder.CreateBox(
-        `${role}-${blockId}-tread-pad-${index + 2}`,
-        {
-          width: Math.max(width * 1.24, 0.54),
-          height: Math.max(height * 0.12, 0.055),
-          depth: Math.max(depth * 0.14, 0.07),
-        },
-        scene,
-      )
-
-      treadPad.position.set(0, Math.max(height * 0.02, 0.04), index * Math.max(depth * 0.28, 0.13))
-      attachMesh(treadPad, parent, materials.rubber)
-    }
-
-    for (let index = -1; index <= 1; index += 1) {
-      const rollerMesh = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-roller-${index + 1}`,
-        {
-          height: Math.max(depth * 0.42, 0.16),
-          diameter: Math.max(width * (index === 0 ? 0.34 : 0.44), 0.2),
-          tessellation: 16,
-        },
-        scene,
-      )
-
-      rollerMesh.rotation.x = Math.PI / 2
-      rollerMesh.position.z = index * Math.max(depth * 0.52, 0.26)
-      rollerMesh.metadata = { kind: 'roll', speed: 0.06 }
-      rollerMesh.parent = parent
-      rollerMesh.material = materials.rubber
-    }
-
+  if (partId === 'Leg_Spring') {
+    createSpringLegPart(scene, parent, material, role, blockId, width, height, depth, materials)
     return
   }
 
+  if (partId === 'Skid_Plate') {
+    createSkidPlatePart(scene, parent, material, role, blockId, width, height, depth, materials)
+    return
+  }
+
+  if (partId.includes('Tread') || partId.includes('Tank')) {
+    createTreadPart(scene, parent, material, role, blockId, partId, width, height, depth, materials)
+    return
+  }
+
+  createWheelPart(scene, parent, material, role, blockId, partId, width, height, depth, materials)
+}
+
+function wheelVisualFor(partId: string): WheelVisual {
+  if (partId === 'Wheel_Small') {
+    return {
+      diameterScale: 0.9,
+      widthScale: 0.74,
+      rimScale: 0.16,
+      hubScale: 0.32,
+      motorScale: 0.7,
+      treadCount: 8,
+      treadScale: 0.75,
+      tessellation: 18,
+      rollSpeed: 0.26,
+    }
+  }
+
+  if (partId === 'Wheel_Large') {
+    return {
+      diameterScale: 1.08,
+      widthScale: 1.08,
+      rimScale: 0.2,
+      hubScale: 0.42,
+      motorScale: 1.22,
+      treadCount: 10,
+      treadScale: 1.08,
+      tessellation: 28,
+      rollSpeed: 0.16,
+    }
+  }
+
+  if (partId === 'Wheel_Omni') {
+    return {
+      diameterScale: 1.0,
+      widthScale: 0.9,
+      rimScale: 0.13,
+      hubScale: 0.28,
+      motorScale: 0.82,
+      treadCount: 6,
+      treadScale: 0.56,
+      tessellation: 22,
+      rollSpeed: 0.3,
+    }
+  }
+
+  if (partId === 'Wheel_Spiked') {
+    return {
+      diameterScale: 1.0,
+      widthScale: 0.96,
+      rimScale: 0.17,
+      hubScale: 0.34,
+      motorScale: 1,
+      treadCount: 8,
+      treadScale: 0.9,
+      tessellation: 22,
+      rollSpeed: 0.19,
+    }
+  }
+
+  return {
+    diameterScale: 1,
+    widthScale: 0.9,
+    rimScale: 0.17,
+    hubScale: 0.32,
+    motorScale: 1,
+    treadCount: 8,
+    treadScale: 0.9,
+    tessellation: 22,
+    rollSpeed: 0.2,
+  }
+}
+
+function treadVisualFor(partId: string): TreadVisual {
+  if (partId === 'Tread_Heavy') {
+    return {
+      baseWidthScale: 1.52,
+      baseHeightScale: 0.72,
+      baseDepthScale: 1.7,
+      topWidthScale: 1.42,
+      topHeightScale: 0.42,
+      topDepthScale: 1.48,
+      shroudHeightScale: 0.88,
+      shroudDepthScale: 1.86,
+      padCount: 7,
+      rollerCount: 4,
+      rollerScale: 0.5,
+      suspensionScale: 1.24,
+      rollSpeed: 0.045,
+    }
+  }
+
+  if (partId === 'Wheel_Tank') {
+    return {
+      baseWidthScale: 1.28,
+      baseHeightScale: 0.64,
+      baseDepthScale: 1.46,
+      topWidthScale: 1.16,
+      topHeightScale: 0.34,
+      topDepthScale: 1.18,
+      shroudHeightScale: 0.78,
+      shroudDepthScale: 1.48,
+      padCount: 5,
+      rollerCount: 3,
+      rollerScale: 0.44,
+      suspensionScale: 1.12,
+      rollSpeed: 0.052,
+    }
+  }
+
+  return {
+    baseWidthScale: 1.24,
+    baseHeightScale: 0.48,
+    baseDepthScale: 1.42,
+    topWidthScale: 1.08,
+    topHeightScale: 0.24,
+    topDepthScale: 1.16,
+    shroudHeightScale: 0.52,
+    shroudDepthScale: 1.46,
+    padCount: 5,
+    rollerCount: 3,
+    rollerScale: 0.38,
+    suspensionScale: 0.86,
+    rollSpeed: 0.064,
+  }
+}
+
+function createTreadPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  partId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const visual = treadVisualFor(partId)
+  const base = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-base`,
+    {
+      width: Math.max(width * visual.baseWidthScale, 0.68),
+      height: Math.max(height * visual.baseHeightScale, 0.15),
+      depth: Math.max(depth * visual.baseDepthScale, 0.7),
+    },
+    scene,
+  )
+  const top = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-top`,
+    {
+      width: Math.max(width * visual.topWidthScale, 0.56),
+      height: Math.max(height * visual.topHeightScale, 0.08),
+      depth: Math.max(depth * visual.topDepthScale, 0.5),
+    },
+    scene,
+  )
+
+  top.position.y = Math.max(height * (0.26 + visual.topHeightScale), 0.11)
+  attachMesh(base, parent, materials.rubber)
+  attachMesh(top, parent, material)
+
+  const topStripe = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-top-stripe`,
+    {
+      width: Math.max(width * visual.topWidthScale * 0.58, 0.34),
+      height: Math.max(height * 0.06, 0.04),
+      depth: Math.max(depth * 0.16, 0.08),
+    },
+    scene,
+  )
+
+  topStripe.position.set(0, top.position.y + Math.max(height * 0.22, 0.1), Math.max(depth * 0.22, 0.12))
+  attachMesh(topStripe, parent, partId === 'Tread_Light' ? materials.utility : materials.warning)
+
+  const linkLeft = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-link-l`,
+    {
+      width: Math.max(width * 0.18, 0.1),
+      height: Math.max(height * 0.32, 0.08),
+      depth: Math.max(depth * visual.topDepthScale, 0.5),
+    },
+    scene,
+  )
+  const linkRight = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-link-r`,
+    {
+      width: Math.max(width * 0.18, 0.1),
+      height: Math.max(height * 0.32, 0.08),
+      depth: Math.max(depth * visual.topDepthScale, 0.5),
+    },
+    scene,
+  )
+
+  linkLeft.position.x = -Math.max(width * 0.54, 0.22)
+  linkRight.position.x = Math.max(width * 0.54, 0.22)
+  attachMesh(linkLeft, parent, materials.trim)
+  attachMesh(linkRight, parent, materials.trim)
+
+  const driveModule = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-drive-module`,
+    {
+      width: Math.max(width * 0.54 * visual.suspensionScale, 0.32),
+      height: Math.max(height * 0.48 * visual.suspensionScale, 0.22),
+      depth: Math.max(depth * 0.5 * visual.suspensionScale, 0.28),
+    },
+    scene,
+  )
+
+  driveModule.position.set(0, Math.max(height * 0.68, 0.3), -Math.max(depth * 0.18, 0.12))
+  attachMesh(driveModule, parent, partId === 'Tread_Heavy' ? materials.warning : materials.utility)
+
+  for (let side = -1; side <= 1; side += 2) {
+    createTreadSideDetails(scene, parent, material, role, blockId, width, height, depth, materials, visual, side)
+  }
+
+  for (let index = 0; index < visual.padCount; index += 1) {
+    const offset = index - (visual.padCount - 1) / 2
+    const treadPad = MeshBuilder.CreateBox(
+      `${role}-${blockId}-tread-pad-${index}`,
+      {
+        width: Math.max(width * visual.topWidthScale * 0.94, 0.48),
+        height: Math.max(height * 0.1, 0.05),
+        depth: Math.max(depth * 0.12, 0.065),
+      },
+      scene,
+    )
+
+    treadPad.position.set(0, Math.max(height * 0.02, 0.04), offset * Math.max(depth * 0.24, 0.13))
+    attachMesh(treadPad, parent, materials.rubber)
+  }
+
+  for (let index = 0; index < visual.rollerCount; index += 1) {
+    const offset = index - (visual.rollerCount - 1) / 2
+    const rollerMesh = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-roller-${index}`,
+      {
+        height: Math.max(depth * 0.42, 0.16),
+        diameter: Math.max(width * visual.rollerScale * (index === 1 ? 0.82 : 1), 0.2),
+        tessellation: 16,
+      },
+      scene,
+    )
+
+    rollerMesh.rotation.x = Math.PI / 2
+    rollerMesh.position.z = offset * Math.max(depth * 0.5, 0.24)
+    rollerMesh.metadata = { kind: 'roll', speed: visual.rollSpeed }
+    attachMesh(rollerMesh, parent, materials.rubber)
+  }
+}
+
+function createTreadSideDetails(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+  visual: TreadVisual,
+  side: number,
+): void {
+  const treadArmorShroud = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-armor-shroud-${side}`,
+    {
+      width: Math.max(width * 0.16 * visual.suspensionScale, 0.1),
+      height: Math.max(height * visual.shroudHeightScale, 0.18),
+      depth: Math.max(depth * visual.shroudDepthScale, 0.72),
+    },
+    scene,
+  )
+  const cableRail = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-tread-cable-rail-${side}`,
+    { height: Math.max(depth * visual.shroudDepthScale * 0.7, 0.5), diameter: 0.032, tessellation: 8 },
+    scene,
+  )
+  const suspensionPod = MeshBuilder.CreateBox(
+    `${role}-${blockId}-tread-suspension-pod-${side}`,
+    {
+      width: Math.max(width * 0.2 * visual.suspensionScale, 0.14),
+      height: Math.max(height * 0.72 * visual.suspensionScale, 0.3),
+      depth: Math.max(depth * 0.36 * visual.suspensionScale, 0.22),
+    },
+    scene,
+  )
+  const shockTower = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-tread-shock-tower-${side}`,
+    {
+      height: Math.max(height * 0.72 * visual.suspensionScale, 0.34),
+      diameter: Math.max(width * 0.09, 0.07),
+      tessellation: 8,
+    },
+    scene,
+  )
+
+  treadArmorShroud.position.set(side * Math.max(width * 0.76, 0.34), Math.max(height * 0.22, 0.08), 0)
+  cableRail.rotation.x = Math.PI / 2
+  cableRail.position.set(side * Math.max(width * 0.4, 0.22), Math.max(height * 0.64, 0.22), 0)
+  suspensionPod.position.set(
+    side * Math.max(width * 0.46, 0.28),
+    Math.max(height * 0.68, 0.3),
+    -Math.max(depth * 0.34, 0.18),
+  )
+  shockTower.position.set(
+    side * Math.max(width * 0.3, 0.22),
+    Math.max(height * 0.74, 0.34),
+    Math.max(depth * 0.24, 0.14),
+  )
+  shockTower.rotation.z = side * 0.18
+  attachMesh(treadArmorShroud, parent, material)
+  attachMesh(cableRail, parent, materials.trim)
+  attachMesh(suspensionPod, parent, material)
+  attachMesh(shockTower, parent, materials.trim)
+}
+
+function createWheelPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  partId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const visual = wheelVisualFor(partId)
+  const diameter = Math.max(width * visual.diameterScale, 0.46)
+  const wheelWidth = Math.max(depth * visual.widthScale, 0.2)
   const wheel = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel`,
     {
-      height: Math.max(depth * 0.86, 0.22),
-      diameter: Math.max(width * 1.08, 0.52),
-      tessellation: 22,
+      height: wheelWidth,
+      diameter,
+      tessellation: visual.tessellation,
     },
     scene,
   )
   const rim = MeshBuilder.CreateTorus(
     `${role}-${blockId}-wheel-rim`,
     {
-      diameter: Math.max(width * 1.08, 0.52),
-      thickness: Math.max(width * 0.18, 0.09),
+      diameter,
+      thickness: Math.max(diameter * visual.rimScale, 0.065),
       tessellation: 20,
     },
     scene,
@@ -620,51 +904,52 @@ function createMobilityPart(
   rim.rotation.z = Math.PI / 2
   rim.position.y = 0
 
-  wheel.metadata = { kind: 'roll', speed: 0.2 }
+  wheel.metadata = { kind: 'roll', speed: visual.rollSpeed }
   wheel.parent = parent
   wheel.material = materials.rubber
   rim.parent = parent
   rim.material = material
 
-  const hub = MeshBuilder.CreateBox(
+  const hub = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel-hub`,
     {
-      width: Math.max(width * 0.28, 0.2),
-      height: Math.max(depth * 0.12, 0.08),
-      depth: Math.max(width * 0.28, 0.2),
+      height: Math.max(wheelWidth * 1.14, 0.18),
+      diameter: Math.max(diameter * visual.hubScale, 0.16),
+      tessellation: 14,
     },
     scene,
   )
+  hub.rotation.z = Math.PI / 2
   hub.parent = parent
   hub.material = materials.trim
 
   const axle = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel-axle`,
-    { height: Math.max(depth * 1.08, 0.28), diameter: Math.max(width * 0.18, 0.12), tessellation: 12 },
+    { height: Math.max(wheelWidth * 1.18, 0.28), diameter: Math.max(diameter * 0.12, 0.1), tessellation: 12 },
     scene,
   )
   const motorPod = MeshBuilder.CreateBox(
     `${role}-${blockId}-wheel-motor-pod`,
     {
-      width: Math.max(width * 0.46, 0.24),
-      height: Math.max(height * 0.34, 0.16),
-      depth: Math.max(depth * 0.48, 0.2),
+      width: Math.max(width * 0.48 * visual.motorScale, 0.22),
+      height: Math.max(height * 0.5 * visual.motorScale, 0.2),
+      depth: Math.max(depth * 0.45 * visual.motorScale, 0.18),
     },
     scene,
   )
   const linkageRail = MeshBuilder.CreateBox(
     `${role}-${blockId}-wheel-linkage-rail`,
     {
-      width: Math.max(width * 0.72, 0.34),
+      width: Math.max(width * 0.64 * visual.motorScale, 0.3),
       height: Math.max(height * 0.14, 0.08),
-      depth: Math.max(depth * 0.22, 0.12),
+      depth: Math.max(depth * 0.2, 0.1),
     },
     scene,
   )
 
   axle.rotation.x = Math.PI / 2
-  motorPod.position.set(0, Math.max(width * 0.5, 0.28), -Math.max(depth * 0.22, 0.12))
-  linkageRail.position.set(0, Math.max(width * 0.62, 0.34), Math.max(depth * 0.24, 0.12))
+  motorPod.position.set(0, Math.max(height * 0.78, 0.36), -Math.max(depth * 0.22, 0.12))
+  linkageRail.position.set(0, Math.max(height * 1.02, 0.48), Math.max(depth * 0.24, 0.12))
   axle.parent = parent
   axle.material = materials.trim
   attachMesh(motorPod, parent, material)
@@ -673,30 +958,250 @@ function createMobilityPart(
   for (let side = -1; side <= 1; side += 2) {
     const actuator = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-wheel-actuator-${side}`,
-      { height: Math.max(width * 0.46, 0.22), diameter: 0.05, tessellation: 8 },
+      { height: Math.max(height * 0.74 * visual.motorScale, 0.28), diameter: 0.05, tessellation: 8 },
       scene,
     )
 
-    actuator.position.set(side * Math.max(width * 0.26, 0.16), Math.max(width * 0.44, 0.25), Math.max(depth * 0.08, 0.06))
+    actuator.position.set(
+      side * Math.max(width * 0.26, 0.16),
+      Math.max(height * 0.82, 0.36),
+      Math.max(depth * 0.08, 0.06),
+    )
+    actuator.rotation.z = side * 0.18
     attachMesh(actuator, parent, materials.trim)
   }
 
-  for (let index = 0; index < 8; index += 1) {
-    const angle = (Math.PI * 2 * index) / 8
+  for (let index = 0; index < visual.treadCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / visual.treadCount
     const tread = MeshBuilder.CreateBox(
       `${role}-${blockId}-wheel-tread-${index}`,
       {
-        width: Math.max(width * 0.18, 0.08),
-        height: Math.max(depth * 0.13, 0.055),
-        depth: Math.max(width * 0.22, 0.09),
+        width: Math.max(diameter * 0.16 * visual.treadScale, 0.06),
+        height: Math.max(wheelWidth * 0.13, 0.045),
+        depth: Math.max(diameter * 0.2 * visual.treadScale, 0.075),
       },
       scene,
     )
 
-    tread.position.set(Math.cos(angle) * Math.max(width * 0.55, 0.26), 0, Math.sin(angle) * Math.max(width * 0.55, 0.26))
+    tread.position.set(Math.cos(angle) * diameter * 0.52, 0, Math.sin(angle) * diameter * 0.52)
     tread.rotation.y = angle
     tread.parent = wheel
     tread.material = materials.rubber
+  }
+
+  if (partId === 'Wheel_Large') {
+    createLargeWheelDetails(scene, wheel, material, role, blockId, diameter, wheelWidth)
+  }
+
+  if (partId === 'Wheel_Omni') {
+    createOmniWheelRollers(scene, wheel, materials, role, blockId, diameter, wheelWidth)
+  }
+
+  if (partId === 'Wheel_Spiked') {
+    createSpikedWheelRim(scene, wheel, materials, role, blockId, diameter)
+  }
+}
+
+function createLargeWheelDetails(
+  scene: Scene,
+  wheel: Mesh,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  diameter: number,
+  wheelWidth: number,
+): void {
+  const outerBand = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-large-wheel-outer-band`,
+    {
+      diameter: diameter * 1.08,
+      thickness: Math.max(diameter * 0.065, 0.08),
+      tessellation: 24,
+    },
+    scene,
+  )
+
+  outerBand.rotation.z = Math.PI / 2
+  outerBand.parent = wheel
+  outerBand.material = material
+
+  for (let index = 0; index < 4; index += 1) {
+    const angle = (Math.PI * index) / 4
+    const spoke = MeshBuilder.CreateBox(
+      `${role}-${blockId}-large-wheel-spoke-${index}`,
+      {
+        width: Math.max(diameter * 0.08, 0.08),
+        height: Math.max(wheelWidth * 0.08, 0.045),
+        depth: diameter * 0.82,
+      },
+      scene,
+    )
+
+    spoke.rotation.y = angle
+    spoke.parent = wheel
+    spoke.material = material
+  }
+}
+
+function createOmniWheelRollers(
+  scene: Scene,
+  wheel: Mesh,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  diameter: number,
+  wheelWidth: number,
+): void {
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8
+    const roller = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-omni-roller-${index}`,
+      {
+        height: Math.max(wheelWidth * 0.62, 0.13),
+        diameter: Math.max(diameter * 0.11, 0.07),
+        tessellation: 8,
+      },
+      scene,
+    )
+
+    roller.position.set(Math.cos(angle) * diameter * 0.48, 0, Math.sin(angle) * diameter * 0.48)
+    roller.rotation.x = Math.PI / 2
+    roller.rotation.y = angle + Math.PI / 4
+    roller.metadata = { kind: 'roll', speed: 0.1 }
+    roller.parent = wheel
+    roller.material = materials.warning
+  }
+}
+
+function createSpikedWheelRim(
+  scene: Scene,
+  wheel: Mesh,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  diameter: number,
+): void {
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8
+    const spike = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-wheel-spike-${index}`,
+      {
+        height: Math.max(diameter * 0.24, 0.12),
+        diameterTop: 0,
+        diameterBottom: Math.max(diameter * 0.11, 0.06),
+        tessellation: 8,
+      },
+      scene,
+    )
+
+    spike.position.set(Math.cos(angle) * diameter * 0.62, 0, Math.sin(angle) * diameter * 0.62)
+    spike.rotation.z = -angle
+    spike.parent = wheel
+    spike.material = materials.warning
+  }
+}
+
+function createSpringLegPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const foot = MeshBuilder.CreateBox(
+    `${role}-${blockId}-spring-leg-foot`,
+    { width: Math.max(width * 0.72, 0.36), height: 0.08, depth: Math.max(depth * 0.74, 0.34) },
+    scene,
+  )
+  const knee = MeshBuilder.CreateBox(
+    `${role}-${blockId}-spring-leg-knee`,
+    {
+      width: Math.max(width * 0.36, 0.18),
+      height: Math.max(height * 0.22, 0.12),
+      depth: Math.max(depth * 0.38, 0.18),
+    },
+    scene,
+  )
+  const spring = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-spring-leg-coil`,
+    { diameter: Math.max(width * 0.54, 0.32), thickness: 0.035, tessellation: 18 },
+    scene,
+  )
+
+  foot.position.y = -Math.max(height * 0.18, 0.12)
+  knee.position.y = Math.max(height * 0.5, 0.3)
+  spring.rotation.x = Math.PI / 2
+  spring.position.y = Math.max(height * 0.24, 0.17)
+  spring.metadata = { kind: 'pulse', speed: 0.035 }
+  attachMesh(foot, parent, materials.rubber)
+  attachMesh(knee, parent, material)
+  attachMesh(spring, parent, materials.warning)
+
+  for (let side = -1; side <= 1; side += 2) {
+    const strut = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-spring-leg-strut-${side}`,
+      { height: Math.max(height * 0.82, 0.42), diameter: 0.055, tessellation: 8 },
+      scene,
+    )
+
+    strut.position.set(side * Math.max(width * 0.24, 0.14), Math.max(height * 0.22, 0.18), 0)
+    strut.rotation.z = side * 0.28
+    attachMesh(strut, parent, materials.trim)
+  }
+}
+
+function createSkidPlatePart(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const plate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-skid-plate`,
+    {
+      width: Math.max(width * 1.12, 0.62),
+      height: Math.max(height * 0.16, 0.08),
+      depth: Math.max(depth * 0.8, 0.36),
+    },
+    scene,
+  )
+  const frontLip = MeshBuilder.CreateBox(
+    `${role}-${blockId}-skid-plate-lip`,
+    {
+      width: Math.max(width * 1.02, 0.56),
+      height: Math.max(height * 0.22, 0.1),
+      depth: Math.max(depth * 0.14, 0.08),
+    },
+    scene,
+  )
+
+  plate.position.y = -Math.max(height * 0.12, 0.08)
+  frontLip.position.set(0, Math.max(height * 0.02, 0.04), Math.max(depth * 0.42, 0.2))
+  attachMesh(plate, parent, material)
+  attachMesh(frontLip, parent, materials.rubber)
+
+  for (let index = -1; index <= 1; index += 1) {
+    const skidRib = MeshBuilder.CreateBox(
+      `${role}-${blockId}-skid-rib-${index + 1}`,
+      {
+        width: Math.max(width * 0.14, 0.08),
+        height: Math.max(height * 0.08, 0.045),
+        depth: Math.max(depth * 0.72, 0.3),
+      },
+      scene,
+    )
+
+    skidRib.position.set(index * Math.max(width * 0.3, 0.18), 0.02, 0)
+    attachMesh(skidRib, parent, materials.trim)
   }
 }
 
@@ -712,15 +1217,24 @@ function createRaisedTechCluster(
     `${parent.name}-raised-electronics-deck`,
     {
       width: Math.max(width * 0.46, 0.28),
-      height: 0.12,
+      height: Math.max(height * 0.24, 0.16),
       depth: Math.max(depth * 0.34, 0.24),
+    },
+    scene,
+  )
+  const equipmentStack = MeshBuilder.CreateBox(
+    `${parent.name}-equipment-stack`,
+    {
+      width: Math.max(width * 0.28, 0.18),
+      height: Math.max(height * 0.48, 0.24),
+      depth: Math.max(depth * 0.22, 0.16),
     },
     scene,
   )
   const sensor = MeshBuilder.CreateCylinder(
     `${parent.name}-modular-sensor-pod`,
     {
-      height: 0.16,
+      height: Math.max(height * 0.22, 0.16),
       diameter: Math.max(Math.min(width, depth) * 0.22, 0.14),
       tessellation: 10,
     },
@@ -745,15 +1259,32 @@ function createRaisedTechCluster(
     scene,
   )
 
-  deck.position.set(-width * 0.08, Math.max(height * 0.78, 0.31), -depth * 0.07)
-  sensor.position.set(width * 0.12, Math.max(height * 0.96, 0.43), depth * 0.12)
-  electronicsBay.position.set(width * 0.42, Math.max(height * 0.52, 0.24), -depth * 0.2)
+  deck.position.set(-width * 0.08, Math.max(height * 0.9, 0.4), -depth * 0.07)
+  equipmentStack.position.set(width * 0.12, Math.max(height * 1.12, 0.54), -depth * 0.08)
+  sensor.position.set(width * 0.12, Math.max(height * 1.42, 0.72), depth * 0.12)
+  electronicsBay.position.set(width * 0.42, Math.max(height * 0.66, 0.32), -depth * 0.2)
   cableRun.rotation.x = Math.PI / 2
-  cableRun.position.set(-width * 0.36, Math.max(height * 0.64, 0.27), 0)
+  cableRun.position.set(-width * 0.36, Math.max(height * 0.78, 0.34), 0)
   attachMesh(deck, parent, materials.trim)
+  attachMesh(equipmentStack, parent, materials.utility)
   attachMesh(sensor, parent, materials.light)
   attachMesh(electronicsBay, parent, materials.utility)
   attachMesh(cableRun, parent, materials.trim)
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(
+      scene,
+      parent,
+      materials.trim,
+      `${parent.name}-electronics-fin-${index + 1}`,
+      0.035,
+      Math.max(height * 0.38, 0.18),
+      Math.max(depth * 0.2, 0.12),
+      width * 0.2 + index * Math.max(width * 0.075, 0.06),
+      Math.max(height * 1.22, 0.58),
+      -depth * 0.12,
+    )
+  }
 }
 
 function createWeaponPart(
@@ -819,28 +1350,56 @@ function createWeaponPart(
   attachMesh(controlCable, parent, materials.trim)
 
   if (partId.includes('Spinner') || partId.includes('Saw')) {
+    const spinnerDiameter = Math.max(Math.max(width, depth) * 1.18, 0.98)
+    const spinnerCenterY = Math.max(height * 0.72, 0.42)
+    const spinnerCenterZ = Math.max(depth * 0.2, 0.16)
     const disc = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-spinner-disc`,
       {
-        height: Math.max(height * 0.2, 0.1),
-        diameter: Math.max(Math.max(width, depth), 0.7),
+        height: Math.max(height * 0.2, 0.12),
+        diameter: spinnerDiameter,
         tessellation: 26,
       },
       scene,
     )
     const hub = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-spinner-hub`,
-      { height: Math.max(height * 0.28, 0.14), diameter: Math.max(Math.max(width, depth) * 0.45, 0.2) },
+      { height: Math.max(height * 0.3, 0.16), diameter: Math.max(spinnerDiameter * 0.38, 0.26) },
       scene,
     )
+    const gearbox = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spinner-gearbox`,
+      {
+        width: Math.max(width * 0.62, 0.42),
+        height: Math.max(height * 0.7, 0.34),
+        depth: Math.max(depth * 0.38, 0.3),
+      },
+      scene,
+    )
+    const upperCowl = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spinner-upper-cowl`,
+      {
+        width: Math.max(width * 0.82, 0.56),
+        height: Math.max(height * 0.22, 0.13),
+        depth: Math.max(depth * 0.28, 0.2),
+      },
+      scene,
+    )
+
     disc.rotation.z = Math.PI / 2
     hub.rotation.z = Math.PI / 2
+    disc.position.set(0, spinnerCenterY, spinnerCenterZ)
+    hub.position.set(0, spinnerCenterY, spinnerCenterZ)
+    gearbox.position.set(0, Math.max(height * 0.52, 0.3), -Math.max(depth * 0.24, 0.18))
+    upperCowl.position.set(0, Math.max(height * 1.04, 0.58), -Math.max(depth * 0.04, 0.04))
     disc.metadata = { kind: 'spin', speed: 0.15 }
     hub.metadata = { kind: 'spin', speed: 0.15 }
     disc.parent = parent
     hub.parent = parent
     disc.material = materials.trim
     hub.material = material
+    attachMesh(gearbox, parent, material)
+    attachMesh(upperCowl, parent, materials.trim)
 
     const forkLeft = MeshBuilder.CreateBox(
       `${role}-${blockId}-spinner-fork-l`,
@@ -862,11 +1421,12 @@ function createWeaponPart(
       const angle = (Math.PI * 2 * index) / 6
       const bar = MeshBuilder.CreateBox(
         `${role}-${blockId}-spinner-blade-${index}`,
-        { width: Math.max(depth * 0.1, 0.08), height: Math.max(width * 0.24, 0.15), depth: Math.max(width * 0.85, 0.55) },
+        { width: Math.max(depth * 0.1, 0.08), height: Math.max(width * 0.18, 0.12), depth: spinnerDiameter * 0.86 },
         scene,
       )
-      bar.position.set(Math.cos(angle) * 0.35, 0, Math.sin(angle) * 0.35)
-      bar.rotation.y = angle
+
+      bar.position.set(0, spinnerCenterY, spinnerCenterZ)
+      bar.rotation.x = angle
       attachMesh(bar, parent, materials.warning)
     }
 
@@ -1960,14 +2520,184 @@ function createMaterial(
   diffuse: string,
   emissive: string,
   specular = 0.34,
+  pattern: SurfacePattern = 'panel',
 ): StandardMaterial {
   const material = new StandardMaterial(name, scene)
 
   material.diffuseColor = Color3.FromHexString(diffuse)
   material.specularColor = new Color3(specular, specular, Math.max(0.18, specular * 0.86))
   material.emissiveColor = Color3.FromHexString(emissive)
+  material.diffuseTexture = createSurfaceTexture(scene, name, diffuse, pattern)
 
   return material
+}
+
+function createSurfaceTexture(
+  scene: Scene,
+  name: string,
+  baseColor: string,
+  pattern: SurfacePattern,
+): DynamicTexture {
+  const texture = new DynamicTexture(`${name}-surface`, { width: 256, height: 256 }, scene, true)
+  const context = texture.getContext()
+  const dark = rgbaFromHex('#050607', 0.52)
+  const light = rgbaFromHex('#f6f0d0', pattern === 'light' ? 0.34 : 0.16)
+
+  context.fillStyle = baseColor
+  context.fillRect(0, 0, 256, 256)
+
+  if (pattern === 'rubber' || pattern === 'mobility') {
+    drawTreadTexture(context, dark, light)
+  } else if (pattern === 'warning' || pattern === 'weapon') {
+    drawWarningTexture(context, dark, light)
+  } else if (pattern === 'utility') {
+    drawUtilityTexture(context, dark, light)
+  } else if (pattern === 'light') {
+    drawLightTexture(context, light)
+  } else {
+    drawPanelTexture(context, dark, light, pattern === 'armor' ? 58 : 64)
+  }
+
+  drawScuffs(context)
+  texture.uScale = pattern === 'rubber' || pattern === 'mobility' ? 3 : 2
+  texture.vScale = pattern === 'rubber' || pattern === 'mobility' ? 2.6 : 2
+  texture.update(false)
+
+  return texture
+}
+
+function drawPanelTexture(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+  step: number,
+): void {
+  context.strokeStyle = dark
+  context.lineWidth = 3
+
+  for (let offset = step; offset < 256; offset += step) {
+    drawLine(context, offset, 0, offset, 256)
+    drawLine(context, 0, offset, 256, offset)
+  }
+
+  context.strokeStyle = light
+  context.lineWidth = 2
+
+  for (let x = 28; x < 256; x += 68) {
+    for (let y = 28; y < 256; y += 68) {
+      drawLine(context, x - 8, y, x + 8, y)
+      drawLine(context, x, y - 8, x, y + 8)
+    }
+  }
+}
+
+function drawTreadTexture(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+): void {
+  context.fillStyle = rgbaFromHex('#030303', 0.34)
+
+  for (let y = 8; y < 256; y += 24) {
+    context.fillRect(0, y, 256, 10)
+  }
+
+  context.strokeStyle = dark
+  context.lineWidth = 6
+
+  for (let x = -32; x < 256; x += 34) {
+    drawLine(context, x, 256, x + 72, 0)
+  }
+
+  context.strokeStyle = light
+  context.lineWidth = 2
+
+  for (let x = 20; x < 256; x += 52) {
+    drawLine(context, x, 12, x, 244)
+  }
+}
+
+function drawWarningTexture(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+): void {
+  context.strokeStyle = rgbaFromHex('#101010', 0.54)
+  context.lineWidth = 18
+
+  for (let x = -220; x < 256; x += 52) {
+    drawLine(context, x, 256, x + 256, 0)
+  }
+
+  context.strokeStyle = dark
+  context.lineWidth = 3
+  drawLine(context, 0, 42, 256, 42)
+  drawLine(context, 0, 214, 256, 214)
+  context.strokeStyle = light
+  context.lineWidth = 2
+  drawLine(context, 20, 128, 236, 128)
+}
+
+function drawUtilityTexture(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+): void {
+  drawPanelTexture(context, dark, light, 72)
+  context.strokeStyle = rgbaFromHex('#0a1012', 0.62)
+  context.lineWidth = 5
+
+  for (let y = 30; y < 256; y += 56) {
+    drawLine(context, 28, y, 228, y)
+  }
+
+  context.fillStyle = light
+
+  for (let x = 40; x < 256; x += 72) {
+    context.fillRect(x, 112, 18, 18)
+  }
+}
+
+function drawLightTexture(context: TextureDrawingContext, light: string): void {
+  context.strokeStyle = light
+  context.lineWidth = 12
+
+  for (let y = 24; y < 256; y += 42) {
+    drawLine(context, 0, y, 256, y)
+  }
+}
+
+function drawScuffs(context: TextureDrawingContext): void {
+  context.strokeStyle = rgbaFromHex('#ffffff', 0.13)
+  context.lineWidth = 2
+
+  for (let index = 0; index < 18; index += 1) {
+    const x = (index * 47 + 19) % 256
+    const y = (index * 71 + 31) % 256
+    drawLine(context, x, y, x + 18, y + 5)
+  }
+}
+
+function drawLine(
+  context: TextureDrawingContext,
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+): void {
+  context.beginPath()
+  context.moveTo(fromX, fromY)
+  context.lineTo(toX, toY)
+  context.stroke()
+}
+
+function rgbaFromHex(hex: string, alpha: number): string {
+  const normalized = hex.replace('#', '')
+  const red = Number.parseInt(normalized.slice(0, 2), 16)
+  const green = Number.parseInt(normalized.slice(2, 4), 16)
+  const blue = Number.parseInt(normalized.slice(4, 6), 16)
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`
 }
 
 function degreesToRadians(degrees: number): number {

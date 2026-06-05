@@ -162,6 +162,44 @@ const abilityTimeline = createReplayTimeline({
   ],
 })
 
+const droneSwarmTimeline = createReplayTimeline({
+  round: 4,
+  duration: 4.5,
+  summary: 'Blue drops a coordinated drone swarm across the lane.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [4, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1,
+      type: 'move',
+      bot: 'blue',
+      from: [4, 0, 0],
+      to: [2, 0, -2],
+    },
+    {
+      t: 1.6,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'drone_swarm',
+      weaponSlot: 'weaponA',
+      target: 'red',
+      targetPosition: [0.8, 0, -0.4],
+    },
+  ],
+})
+
 test('replay mapping is deterministic for the same timeline and time', () => {
   const first = buildReplayFrame(timeline, 3.2)
   const second = buildReplayFrame(timeline, 3.2)
@@ -325,6 +363,22 @@ test('replay mapping does not reveal laser_lance effects before ability event ti
 
   assert.equal(before.effects.some((effect) => effect.label === 'laser_lance'), false)
   assert.equal(atEvent.effects.some((effect) => effect.label === 'laser_lance'), true)
+})
+
+test('replay mapping exposes drone_swarm ability effects with separate lane semantics', () => {
+  const frame = buildReplayFrame(droneSwarmTimeline, 2.1)
+  const droneSwarm = frame.effects.find((effect) => effect.kind === 'drone_swarm')
+
+  assert.ok(droneSwarm)
+  assert.ok(Math.abs(droneSwarm.position[0] - 2.7) < 0.1)
+  assert.ok(Math.abs(droneSwarm.position[2] + 1.3) < 0.1)
+  assert.deepEqual(droneSwarm.endPosition, [0.8, 0, -0.4])
+  assert.equal(droneSwarm.team, 'blue')
+  assert.equal(droneSwarm.label, 'drone_swarm')
+  assert.equal(droneSwarm.kind, 'drone_swarm')
+  assert.ok(droneSwarm.intensity > 0)
+  assert.ok(droneSwarm.intensity < 1)
+  assert.equal(frame.effects.every((effect) => effect.kind !== 'laser_lance'), true)
 })
 
 test('replay mapping emits a larger deploy control cue for net/control-linked weapon fire', () => {

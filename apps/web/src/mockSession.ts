@@ -132,6 +132,15 @@ export const mockReplay: ReplayTimeline = createReplayTimeline({
       position: [-2, 0, -4],
     },
     {
+      t: 11.15,
+      type: 'ability',
+      bot: 'blue',
+      ability: 'drone_swarm',
+      weaponSlot: 'weaponB',
+      target: 'red',
+      targetPosition: [-3, 0, -3],
+    },
+    {
       t: 13,
       type: 'hazard',
       hazard: 'center saw',
@@ -381,6 +390,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       { partId: 'Wheel_Omni', quantity: 4 },
       { partId: 'Weapon_Net', quantity: 1 },
       { partId: 'Utility_Magnet', quantity: 1 },
+      { partId: 'Utility_Sensor', quantity: 1 },
       { partId: 'Armor_Light', quantity: 2 },
     ],
     controls: {
@@ -406,6 +416,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       purchases: [
         { partId: 'Weapon_Net', quantity: 1 },
         { partId: 'Utility_Magnet', quantity: 1 },
+        { partId: 'Utility_Sensor', quantity: 1 },
       ],
       blueprint: {
         name: 'Snare Account',
@@ -426,6 +437,12 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
             id: 'magnet',
             partId: 'Utility_Magnet',
             position: [0, 0, 1],
+            rotation: [0, 0, 0],
+          },
+          {
+            id: 'sensor',
+            partId: 'Utility_Sensor',
+            position: [1, 1, 1],
             rotation: [0, 0, 0],
           },
           {

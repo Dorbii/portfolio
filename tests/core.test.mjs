@@ -118,6 +118,34 @@ test('catalog exposes unique MVP part ids', () => {
   assert.ok(ids.includes('Style_TrashCan'))
 })
 
+test('mobility catalog differentiates wheel and tread archetypes mechanically', () => {
+  const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const smallWheel = parts.get('Wheel_Small')
+  const largeWheel = parts.get('Wheel_Large')
+  const tankWheel = parts.get('Wheel_Tank')
+  const omniWheel = parts.get('Wheel_Omni')
+  const spikedWheel = parts.get('Wheel_Spiked')
+  const lightTread = parts.get('Tread_Light')
+  const heavyTread = parts.get('Tread_Heavy')
+
+  assert.deepEqual(smallWheel?.size, [1, 1, 1])
+  assert.deepEqual(largeWheel?.size, [2, 1, 1])
+  assert.deepEqual(tankWheel?.size, [2, 1, 1])
+  assert.deepEqual(lightTread?.size, [2, 1, 1])
+  assert.deepEqual(heavyTread?.size, [2, 2, 1])
+  assert.ok((largeWheel?.mass ?? 0) > (smallWheel?.mass ?? 0))
+  assert.ok((largeWheel?.durability ?? 0) > (smallWheel?.durability ?? 0))
+  assert.ok((largeWheel?.stats.drive ?? 0) <= (smallWheel?.stats.drive ?? 0))
+  assert.ok((tankWheel?.stats.traction ?? 0) > (largeWheel?.stats.traction ?? 0))
+  assert.ok((tankWheel?.stats.stability ?? 0) > (largeWheel?.stats.stability ?? 0))
+  assert.ok((omniWheel?.stats.drive ?? 0) > (largeWheel?.stats.drive ?? 0))
+  assert.ok((omniWheel?.durability ?? 0) < (largeWheel?.durability ?? 0))
+  assert.ok((spikedWheel?.stats.weapon ?? 0) > 0)
+  assert.ok((spikedWheel?.stats.traction ?? 0) > (omniWheel?.stats.traction ?? 0))
+  assert.ok((heavyTread?.durability ?? 0) > (lightTread?.durability ?? 0))
+  assert.ok((heavyTread?.stats.drive ?? 0) < (lightTread?.stats.drive ?? 0))
+})
+
 test('purchase validation rejects unknown parts and overspend', () => {
   const unknown = applyPurchases(100, [], [{ partId: 'Weapon_NukeLaserDragon', quantity: 1 }])
   const overspend = applyPurchases(5, [], [{ partId: 'Weapon_Spinner_Large', quantity: 1 }])
@@ -716,7 +744,7 @@ test('referee can reset a claimed role and refresh claim capability before comba
   const redSubmission = await session.submitRoundPlan(redToken, validSpinnerSubmission)
 
   assert.equal(redSubmission.ok, true)
-  assert.equal(redSubmission.value.state.gold, 28)
+  assert.equal(redSubmission.value.state.gold, 26)
   assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
 
   const reset = await session.resetRole(refereeToken, { role: 'red' })

@@ -73,9 +73,38 @@ type WeaponEffectPartMetadata = {
   baseY?: number
 }
 
+type DroneEffectPartMetadata = {
+  droneEffectPart?: 'pod' | 'rotor' | 'sensor' | 'scan' | 'trail'
+  droneIndex?: number
+}
+
 type RendererState = {
   status: 'booting' | 'ready' | 'unavailable' | 'context_lost'
   message?: string
+}
+
+type ReplaySceneStats = {
+  activeIndices: number
+  activeMeshes: number
+  fps: number
+  materials: number
+  meshes: number
+  textures: number
+  totalVertices: number
+}
+
+type ReplayDebugFocusOptions = {
+  alpha?: number
+  beta?: number
+  blockId: string
+  radius?: number
+  role: TeamRole
+  targetYOffset?: number
+}
+
+type ReplaySceneDebugApi = {
+  focusPart?: (options: ReplayDebugFocusOptions) => boolean
+  getStats: () => ReplaySceneStats
 }
 
 type BabylonReplaySceneProps = {
@@ -84,6 +113,12 @@ type BabylonReplaySceneProps = {
   cameraPreset: CameraPreset
   timeline: ReplayTimeline
   time: number
+}
+
+declare global {
+  interface Window {
+    AgentArenaReplayDebug?: ReplaySceneDebugApi
+  }
 }
 
 export function BabylonReplayScene({
@@ -98,6 +133,7 @@ export function BabylonReplayScene({
   const [rendererState, setRendererState] = useState<RendererState>({
     status: 'booting',
   })
+  const [sceneStats, setSceneStats] = useState<ReplaySceneStats | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -106,8 +142,9 @@ export function BabylonReplayScene({
       return undefined
     }
 
-    let resources: SceneResources | null = null
-    let disposed = false
+      let resources: SceneResources | null = null
+      let disposed = false
+      let statsFrame = 0
 
     try {
       if (!Engine.isSupported()) {
@@ -174,6 +211,21 @@ export function BabylonReplayScene({
       const glow = new GlowLayer('replay-glow', scene)
 
       glow.intensity = 0.32
+      const replayDebugApi: ReplaySceneDebugApi = {
+        getStats: () => createReplaySceneStats(scene, engine),
+      }
+
+      if (import.meta.env.DEV) {
+        replayDebugApi.focusPart = (options) => {
+          if (!resources) {
+            return false
+          }
+
+          return focusReplayPart(resources, options)
+        }
+      }
+
+      window.AgentArenaReplayDebug = replayDebugApi
 
       resources = {
         engine,
@@ -187,12 +239,28 @@ export function BabylonReplayScene({
       }
       resourcesRef.current = resources
       setRendererState({ status: 'ready' })
+      setSceneStats(replayDebugApi.getStats())
 
       engine.runRenderLoop(() => {
         if (!disposed) {
           scene.render()
         }
       })
+
+      let pendingStatsFrames = 10
+      const refreshSceneStats = () => {
+        if (!disposed) {
+          if (pendingStatsFrames <= 0) {
+            setSceneStats(replayDebugApi.getStats())
+            return
+          }
+
+          pendingStatsFrames -= 1
+          statsFrame = window.requestAnimationFrame(refreshSceneStats)
+        }
+      }
+
+      statsFrame = window.requestAnimationFrame(refreshSceneStats)
 
       const resize = () => engine.resize()
       const handleContextLost = (event: Event) => {
@@ -227,6 +295,10 @@ export function BabylonReplayScene({
         window.removeEventListener('resize', resize)
         canvas.removeEventListener('webglcontextlost', handleContextLost)
         canvas.removeEventListener('webglcontextrestored', handleContextRestored)
+        window.cancelAnimationFrame(statsFrame)
+        if (window.AgentArenaReplayDebug === replayDebugApi) {
+          delete window.AgentArenaReplayDebug
+        }
         resourcesRef.current = null
         resources?.scene.dispose()
         resources?.engine.dispose()
@@ -234,6 +306,8 @@ export function BabylonReplayScene({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Replay renderer failed to start.'
       setRendererState({ status: 'unavailable', message })
+      delete window.AgentArenaReplayDebug
+      setSceneStats(null)
       resourcesRef.current = null
       resources?.scene.dispose()
       resources?.engine.dispose()
@@ -258,7 +332,16 @@ export function BabylonReplayScene({
   }, [arena, cameraPreset, timeline, time])
 
   return (
-    <div className="babylon-stage" data-renderer-state={rendererState.status}>
+    <div
+      className="babylon-stage"
+      data-renderer-state={rendererState.status}
+      data-replay-active-meshes={sceneStats?.activeMeshes}
+      data-replay-fps={sceneStats?.fps.toFixed(1)}
+      data-replay-materials={sceneStats?.materials}
+      data-replay-meshes={sceneStats?.meshes}
+      data-replay-textures={sceneStats?.textures}
+      data-replay-total-vertices={sceneStats?.totalVertices}
+    >
       <canvas
         ref={canvasRef}
         aria-label="Babylon replay scene"
@@ -273,6 +356,42 @@ export function BabylonReplayScene({
       ) : null}
     </div>
   )
+}
+
+function createReplaySceneStats(scene: Scene, engine: Engine): ReplaySceneStats {
+  const fps = engine.getFps()
+
+  return {
+    activeIndices: scene.getActiveIndices(),
+    activeMeshes: scene.getActiveMeshes().length,
+    fps: Number.isFinite(fps) ? fps : 0,
+    materials: scene.materials.length,
+    meshes: scene.meshes.length,
+    textures: scene.textures.length,
+    totalVertices: scene.getTotalVertices(),
+  }
+}
+
+function focusReplayPart(resources: SceneResources, options: ReplayDebugFocusOptions): boolean {
+  const bot = resources.bots[options.role]
+  const node = bot.getChildren((candidate) => {
+    const metadata = candidate.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.kind === 'bot_part' && metadata.blockId === options.blockId
+  }, true)[0] as TransformNode | undefined
+
+  if (!node) {
+    return false
+  }
+
+  const partCenter = node.getAbsolutePosition().add(new Vector3(0, options.targetYOffset ?? 0.45, 0))
+
+  resources.camera.setTarget(partCenter)
+  resources.camera.alpha = options.alpha ?? -Math.PI * 0.58
+  resources.camera.beta = options.beta ?? 1.02
+  resources.camera.radius = options.radius ?? 2.6
+
+  return true
 }
 
 function createBotVisualProfiles(
@@ -1129,6 +1248,9 @@ function createEffectPool(scene: Scene): EffectPool {
     laser_lance: Array.from({ length: 3 }, (_, index) =>
       createPooledLaserLanceEffect(scene, `laser-lance-effect-${index}`, laserMaterial, laserGlowMaterial),
     ),
+    drone_swarm: Array.from({ length: 3 }, (_, index) =>
+      createPooledDroneSwarmEffect(scene, `drone-swarm-effect-${index}`),
+    ),
     impact: Array.from({ length: 12 }, (_, index) =>
       createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
     ),
@@ -1209,6 +1331,90 @@ function createPooledLaserLanceEffect(
   mesh.material = material
   glow.material = glowMaterial
   glow.parent = mesh
+  mesh.setEnabled(false)
+
+  return mesh
+}
+
+function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
+  const bodyMaterial = createSceneMaterial(scene, `${name}-body-mat`, '#263238', '#071113')
+  const accentMaterial = createSceneMaterial(scene, `${name}-accent-mat`, '#b6ff4d', '#7cff28', 1, 0.08)
+  const scanMaterial = createSceneMaterial(scene, `${name}-scan-mat`, '#d5ff8a', '#6dff40', 0.34, 0.04)
+  const trailMaterial = createSceneMaterial(scene, `${name}-trail-mat`, '#a7ffeb', '#4dffc3', 0.42, 0.04)
+  const mesh = MeshBuilder.CreateBox(name, { width: 0.18, height: 0.12, depth: 0.18 }, scene)
+
+  mesh.material = bodyMaterial
+
+  for (let index = 0; index < 3; index += 1) {
+    const angle = (Math.PI * 2 * index) / 3
+    const x = Math.cos(angle) * 0.72
+    const z = Math.sin(angle) * 0.72
+    const tangent = angle + Math.PI / 2
+    const pod = MeshBuilder.CreateBox(
+      `${name}-pod-${index}`,
+      { width: 0.42, height: 0.18, depth: 0.34 },
+      scene,
+    )
+    const rotor = MeshBuilder.CreateTorus(
+      `${name}-rotor-${index}`,
+      { diameter: 0.4, thickness: 0.035, tessellation: 18 },
+      scene,
+    )
+    const sensor = MeshBuilder.CreateSphere(
+      `${name}-sensor-${index}`,
+      { diameter: 0.14, segments: 8 },
+      scene,
+    )
+    const trail = MeshBuilder.CreateBox(
+      `${name}-trail-${index}`,
+      { width: 0.06, height: 0.045, depth: 0.58 },
+      scene,
+    )
+
+    pod.position.set(x, 0, z)
+    pod.rotation.y = tangent
+    pod.parent = mesh
+    pod.material = bodyMaterial
+    pod.metadata = { droneEffectPart: 'pod', droneIndex: index }
+
+    rotor.position.set(x, 0.18, z)
+    rotor.rotation.x = Math.PI / 2
+    rotor.parent = mesh
+    rotor.material = accentMaterial
+    rotor.metadata = { droneEffectPart: 'rotor', droneIndex: index }
+
+    sensor.position.set(x + Math.cos(angle) * 0.18, -0.02, z + Math.sin(angle) * 0.18)
+    sensor.parent = mesh
+    sensor.material = accentMaterial
+    sensor.metadata = { droneEffectPart: 'sensor', droneIndex: index }
+
+    trail.position.set(x - Math.cos(angle) * 0.32, -0.02, z - Math.sin(angle) * 0.32)
+    trail.rotation.y = tangent
+    trail.parent = mesh
+    trail.material = trailMaterial
+    trail.metadata = { droneEffectPart: 'trail', droneIndex: index }
+  }
+
+  const scanCone = MeshBuilder.CreateCylinder(
+    `${name}-scan-cone`,
+    { height: 1.25, diameterTop: 0.16, diameterBottom: 0.9, tessellation: 18 },
+    scene,
+  )
+  const scanRing = MeshBuilder.CreateTorus(
+    `${name}-scan-ring`,
+    { diameter: 1.15, thickness: 0.045, tessellation: 28 },
+    scene,
+  )
+
+  scanCone.position.y = -0.68
+  scanCone.parent = mesh
+  scanCone.material = scanMaterial
+  scanCone.metadata = { droneEffectPart: 'scan' }
+  scanRing.position.y = -1.25
+  scanRing.rotation.x = Math.PI / 2
+  scanRing.parent = mesh
+  scanRing.material = scanMaterial
+  scanRing.metadata = { droneEffectPart: 'scan' }
   mesh.setEnabled(false)
 
   return mesh
@@ -1446,6 +1652,7 @@ function updateEffects(
     weapon_fire: 0,
     control_net: 0,
     laser_lance: 0,
+    drone_swarm: 0,
     impact: 0,
     debris: 0,
     damage_marker: 0,
@@ -1535,6 +1742,24 @@ function updateEffects(
       mesh.visibility = 0.68 + effect.intensity * 0.3
     }
 
+    if (effect.kind === 'drone_swarm') {
+      const start = toBabylonVector(effect.position)
+      const end = effect.endPosition ? toBabylonVector(effect.endPosition) : start
+      const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
+      const travel = easeOutCubic(Math.min(progress / 0.62, 1))
+      const position = Vector3.Lerp(start, end, travel)
+      const orbit = effect.age * 4.2 + progress * Math.PI
+      const pulse = 0.86 + Math.sin(effect.age * 16) * 0.05 + effect.intensity * 0.12
+
+      mesh.position.set(position.x, 1.08 + Math.sin(progress * Math.PI) * 0.46, position.z)
+      mesh.rotation.x = Math.sin(effect.age * 7) * 0.04
+      mesh.rotation.y = orbit
+      mesh.rotation.z = Math.cos(effect.age * 6) * 0.04
+      mesh.scaling.setAll(pulse)
+      mesh.visibility = 0.78 + effect.intensity * 0.2
+      updateDroneSwarmParts(mesh, effect, progress)
+    }
+
     if (effect.kind === 'impact') {
       mesh.position.y += 0.52
       mesh.scaling.setAll(0.34 + effect.intensity * 1.2)
@@ -1580,6 +1805,58 @@ function updateEffects(
       const pulse = 1 + Math.min(effect.age, 3) * 0.15
       mesh.scaling.setAll(pulse)
       mesh.rotation.x = effect.age * 1.8
+    }
+  })
+}
+
+function updateDroneSwarmParts(mesh: Mesh, effect: ReplayEffectState, progress: number): void {
+  const teamColor = effect.team === 'red'
+    ? Color3.FromHexString('#ff4f5f')
+    : Color3.FromHexString('#58b7ff')
+  const teamGlow = effect.team === 'red'
+    ? Color3.FromHexString('#ff2c42')
+    : Color3.FromHexString('#1f8fff')
+
+  mesh.getChildMeshes().forEach((child) => {
+    const metadata = child.metadata as DroneEffectPartMetadata | undefined
+
+    if (!metadata?.droneEffectPart) {
+      return
+    }
+
+    if (child.material instanceof StandardMaterial) {
+      if (metadata.droneEffectPart === 'rotor' || metadata.droneEffectPart === 'sensor') {
+        child.material.diffuseColor = teamColor
+        child.material.emissiveColor = teamGlow
+      }
+
+      if (metadata.droneEffectPart === 'scan') {
+        child.material.diffuseColor = Color3.FromHexString('#d5ff8a')
+        child.material.emissiveColor = Color3.FromHexString('#6dff40')
+      }
+    }
+
+    if (metadata.droneEffectPart === 'rotor') {
+      child.rotation.y = effect.age * 26 + (metadata.droneIndex ?? 0) * 0.8
+      child.scaling.setAll(0.86 + effect.intensity * 0.26)
+    }
+
+    if (metadata.droneEffectPart === 'pod') {
+      const bob = Math.sin(effect.age * 12 + (metadata.droneIndex ?? 0) * 1.8) * 0.05
+
+      child.position.y = bob
+    }
+
+    if (metadata.droneEffectPart === 'trail') {
+      child.visibility = Math.max(0.16, effect.intensity * 0.48)
+      child.scaling.set(0.82, 0.82, 0.68 + progress * 0.7)
+    }
+
+    if (metadata.droneEffectPart === 'scan') {
+      const scanPulse = 0.76 + Math.sin(effect.age * 10) * 0.12 + progress * 0.36
+
+      child.visibility = 0.2 + effect.intensity * 0.32
+      child.scaling.set(scanPulse, 0.82 + effect.intensity * 0.22, scanPulse)
     }
   })
 }
@@ -1674,7 +1951,7 @@ function updateCamera(
   const activeHazard = frame.effects.find((effect) => effect.kind === 'hazard' && effect.age < 0.9)
   const activeAbility = frame.effects.find(
     (effect) =>
-      (effect.kind === 'laser_lance' || effect.kind === 'control_net') &&
+      (effect.kind === 'laser_lance' || effect.kind === 'control_net' || effect.kind === 'drone_swarm') &&
       effect.age < 1.2,
   )
   const activeKnockout = frame.effects.find((effect) => effect.kind === 'knockout')
