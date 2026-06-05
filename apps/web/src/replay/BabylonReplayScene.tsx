@@ -111,6 +111,7 @@ type BabylonReplaySceneProps = {
   arena: ArenaConfig
   botBlueprints: ReplayBotBlueprints
   cameraPreset: CameraPreset
+  immediateCamera?: boolean
   timeline: ReplayTimeline
   time: number
 }
@@ -125,6 +126,7 @@ export function BabylonReplayScene({
   arena,
   botBlueprints,
   cameraPreset,
+  immediateCamera = false,
   timeline,
   time,
 }: BabylonReplaySceneProps) {
@@ -327,9 +329,11 @@ export function BabylonReplayScene({
     updateBots(resources, frame)
     updateEffects(resources.effectPool, frame.effects, resources.botProfiles)
     updateHazards(resources.hazards, frame)
-    updateCamera(resources.camera, cameraPreset, frame, arena)
+    for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
+      updateCamera(resources.camera, cameraPreset, frame, arena)
+    }
     resources.centerSpinner.rotation.y = time * 4
-  }, [arena, cameraPreset, timeline, time])
+  }, [arena, cameraPreset, immediateCamera, timeline, time])
 
   return (
     <div
@@ -1230,10 +1234,10 @@ function createEffectPool(scene: Scene): EffectPool {
   const smokeMaterial = createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42)
   const weaponMaterial = createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b')
   const netMaterial = createSceneMaterial(scene, 'net-flash-mat', '#f5d47a', '#9d6c12', 0.82, 0.2)
-  const controlNetMaterial = createSceneMaterial(scene, 'control-net-mat', '#75f6ff', '#1ccfd6', 0.72, 0.12)
-  const laserMaterial = createSceneMaterial(scene, 'laser-lance-mat', '#fff3d6', '#ff4dd8', 0.96, 0.08)
-  const laserGlowMaterial = createSceneMaterial(scene, 'laser-lance-glow-mat', '#ffb24d', '#ff4dd8', 0.38, 0.04)
-  const partDetachMaterial = createSceneMaterial(scene, 'part-detach-mat', '#ffe4a8', '#ff6b2e', 0.86, 0.08)
+  const controlNetMaterial = createSceneMaterial(scene, 'control-net-mat', '#b8ffff', '#1cf4ff', 0.88, 0.08)
+  const laserMaterial = createSceneMaterial(scene, 'laser-lance-mat', '#fff8df', '#ff34d2', 1, 0.04)
+  const laserGlowMaterial = createSceneMaterial(scene, 'laser-lance-glow-mat', '#ffcf5b', '#ff4dd8', 0.5, 0.03)
+  const partDetachMaterial = createSceneMaterial(scene, 'part-detach-mat', '#ffe4a8', '#ff6b2e', 0.68, 0.08)
   const debrisMaterial = createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d')
   const damageMaterial = createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e')
   const hazardMaterial = createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f')
@@ -1256,7 +1260,7 @@ function createEffectPool(scene: Scene): EffectPool {
       createPooledTorus(scene, `part-detach-effect-${index}`, partDetachMaterial, 0.95),
     ),
     impact: Array.from({ length: 12 }, (_, index) =>
-      createPooledSphere(scene, `impact-effect-${index}`, sparkMaterial, 0.34),
+      createPooledImpactBurstEffect(scene, `impact-effect-${index}`, sparkMaterial),
     ),
     debris: Array.from({ length: 24 }, (_, index) =>
       createPooledBox(scene, `debris-effect-${index}`, debrisMaterial, [0.22, 0.1, 0.16]),
@@ -1310,6 +1314,25 @@ function createPooledControlNetEffect(
     horizontal.material = material
   }
 
+  const cornerOffsets: Array<[number, number]> = [
+    [-0.82, -0.82],
+    [0.82, -0.82],
+    [-0.82, 0.82],
+    [0.82, 0.82],
+  ]
+
+  cornerOffsets.forEach(([x, z], index) => {
+    const anchor = MeshBuilder.CreateSphere(
+      `${name}-anchor-${index}`,
+      { diameter: 0.16, segments: 10 },
+      scene,
+    )
+
+    anchor.position.set(x, 0, z)
+    anchor.parent = mesh
+    anchor.material = material
+  })
+
   mesh.setEnabled(false)
 
   return mesh
@@ -1328,13 +1351,36 @@ function createPooledLaserLanceEffect(
   )
   const glow = MeshBuilder.CreateBox(
     `${name}-glow`,
-    { width: 0.85, height: 0.38, depth: 1.04 },
+    { width: 1.05, height: 0.44, depth: 1.04 },
+    scene,
+  )
+  const startNode = MeshBuilder.CreateSphere(
+    `${name}-start-node`,
+    { diameter: 0.36, segments: 12 },
+    scene,
+  )
+  const endNode = MeshBuilder.CreateSphere(
+    `${name}-end-node`,
+    { diameter: 0.42, segments: 12 },
+    scene,
+  )
+  const hotCore = MeshBuilder.CreateBox(
+    `${name}-hot-core`,
+    { width: 0.08, height: 0.52, depth: 1.08 },
     scene,
   )
 
   mesh.material = material
   glow.material = glowMaterial
   glow.parent = mesh
+  startNode.position.z = -0.5
+  endNode.position.z = 0.5
+  startNode.parent = mesh
+  endNode.parent = mesh
+  startNode.material = material
+  endNode.material = material
+  hotCore.parent = mesh
+  hotCore.material = material
   mesh.setEnabled(false)
 
   return mesh
@@ -1342,10 +1388,10 @@ function createPooledLaserLanceEffect(
 
 function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
   const bodyMaterial = createSceneMaterial(scene, `${name}-body-mat`, '#263238', '#071113')
-  const accentMaterial = createSceneMaterial(scene, `${name}-accent-mat`, '#b6ff4d', '#7cff28', 1, 0.08)
-  const scanMaterial = createSceneMaterial(scene, `${name}-scan-mat`, '#d5ff8a', '#6dff40', 0.34, 0.04)
-  const trailMaterial = createSceneMaterial(scene, `${name}-trail-mat`, '#a7ffeb', '#4dffc3', 0.42, 0.04)
-  const mesh = MeshBuilder.CreateBox(name, { width: 0.18, height: 0.12, depth: 0.18 }, scene)
+  const accentMaterial = createSceneMaterial(scene, `${name}-accent-mat`, '#dfff75', '#8cff2a', 1, 0.04)
+  const scanMaterial = createSceneMaterial(scene, `${name}-scan-mat`, '#e8ffb0', '#75ff47', 0.44, 0.03)
+  const trailMaterial = createSceneMaterial(scene, `${name}-trail-mat`, '#b8fff0', '#4dffc3', 0.5, 0.03)
+  const mesh = MeshBuilder.CreateBox(name, { width: 0.24, height: 0.16, depth: 0.24 }, scene)
 
   mesh.material = bodyMaterial
 
@@ -1356,12 +1402,12 @@ function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
     const tangent = angle + Math.PI / 2
     const pod = MeshBuilder.CreateBox(
       `${name}-pod-${index}`,
-      { width: 0.42, height: 0.18, depth: 0.34 },
+      { width: 0.54, height: 0.22, depth: 0.42 },
       scene,
     )
     const rotor = MeshBuilder.CreateTorus(
       `${name}-rotor-${index}`,
-      { diameter: 0.4, thickness: 0.035, tessellation: 18 },
+      { diameter: 0.5, thickness: 0.045, tessellation: 20 },
       scene,
     )
     const sensor = MeshBuilder.CreateSphere(
@@ -1371,7 +1417,7 @@ function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
     )
     const trail = MeshBuilder.CreateBox(
       `${name}-trail-${index}`,
-      { width: 0.06, height: 0.045, depth: 0.58 },
+      { width: 0.08, height: 0.055, depth: 0.78 },
       scene,
     )
 
@@ -1401,12 +1447,12 @@ function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
 
   const scanCone = MeshBuilder.CreateCylinder(
     `${name}-scan-cone`,
-    { height: 1.25, diameterTop: 0.16, diameterBottom: 0.9, tessellation: 18 },
+    { height: 1.45, diameterTop: 0.18, diameterBottom: 1.15, tessellation: 18 },
     scene,
   )
   const scanRing = MeshBuilder.CreateTorus(
     `${name}-scan-ring`,
-    { diameter: 1.15, thickness: 0.045, tessellation: 28 },
+    { diameter: 1.42, thickness: 0.055, tessellation: 30 },
     scene,
   )
 
@@ -1496,6 +1542,30 @@ function createPooledWeaponEffect(
     weight.material = netMaterial
     weight.metadata = { weaponEffectPart: 'net-weight', baseX: x, baseY: y }
   })
+
+  mesh.setEnabled(false)
+
+  return mesh
+}
+
+function createPooledImpactBurstEffect(scene: Scene, name: string, material: StandardMaterial): Mesh {
+  const mesh = MeshBuilder.CreateSphere(name, { diameter: 0.38, segments: 12 }, scene)
+
+  mesh.material = material
+
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8
+    const spark = MeshBuilder.CreateBox(
+      `${name}-spark-${index}`,
+      { width: 0.07, height: 0.07, depth: 0.58 },
+      scene,
+    )
+
+    spark.position.set(Math.sin(angle) * 0.26, 0, Math.cos(angle) * 0.26)
+    spark.rotation.y = angle
+    spark.parent = mesh
+    spark.material = material
+  }
 
   mesh.setEnabled(false)
 
@@ -1628,11 +1698,11 @@ function updateBotPartNodes(
     if (state?.status === 'detached' && state.detachTime !== undefined) {
       const age = Math.max(0, time - state.detachTime)
       const angle = deterministicAngle(`${role}-${metadata.blockId}`) + (role === 'red' ? 0.25 : -0.25)
-      const distance = Math.min(2.7, age * 1.05)
+      const distance = Math.min(3.4, 0.45 + age * 1.85)
       const origin = state.detachPosition
         ? toBabylonVector(state.detachPosition)
         : Vector3.TransformCoordinates(new Vector3(basePosition[0], basePosition[1], basePosition[2]), botWorldMatrix)
-      const hop = Math.max(0, 0.38 + age * 1.08 - age * age * 0.42)
+      const hop = Math.max(0, 0.5 + age * 1.24 - age * age * 0.38)
       const worldPosition = new Vector3(
         origin.x + Math.cos(angle) * distance,
         Math.max(0.08, origin.y + hop),
@@ -1647,7 +1717,7 @@ function updateBotPartNodes(
         baseRotation[1] + age * 2.5,
         baseRotation[2] + age * (1.4 + Math.abs(Math.cos(angle))),
       )
-      node.scaling.setAll(0.92 + freshBreak * 0.18)
+      node.scaling.setAll(1.04 + freshBreak * 0.16)
 
       return
     }
@@ -1730,12 +1800,12 @@ function updateEffects(
       const target = effect.endPosition ? toBabylonVector(effect.endPosition) : toBabylonVector(effect.position)
 
       mesh.position = target
-      mesh.position.y = 0.16 + Math.sin(progress * Math.PI) * 0.1
+      mesh.position.y = 0.22 + Math.sin(progress * Math.PI) * 0.16
       mesh.rotation.x = Math.PI / 2
       mesh.rotation.y = (effect.rotationY ?? 0) + effect.age * 2.8
       mesh.rotation.z = 0
-      mesh.scaling.setAll(0.92 + easeOutCubic(progress) * 1.25 + effect.intensity * 0.24)
-      mesh.visibility = 0.52 + effect.intensity * 0.34
+      mesh.scaling.setAll(1.1 + easeOutCubic(progress) * 1.45 + effect.intensity * 0.28)
+      mesh.visibility = 0.72 + effect.intensity * 0.28
     }
 
     if (effect.kind === 'laser_lance') {
@@ -1748,14 +1818,14 @@ function updateEffects(
       const heading = Math.abs(dx) + Math.abs(dz) < 0.001
         ? effect.rotationY ?? 0
         : Math.atan2(dx, dz)
-      const pulse = 0.18 + effect.intensity * 0.24
+      const pulse = 0.24 + effect.intensity * 0.32
 
-      mesh.position.set(midpoint.x, 0.82 + Math.sin(effect.age * 18) * 0.04, midpoint.z)
+      mesh.position.set(midpoint.x, 0.9 + Math.sin(effect.age * 18) * 0.04, midpoint.z)
       mesh.rotation.x = 0
       mesh.rotation.y = heading
       mesh.rotation.z = Math.sin(effect.age * 22) * 0.035
-      mesh.scaling.set(pulse, 0.72 + effect.intensity * 0.3, length)
-      mesh.visibility = 0.68 + effect.intensity * 0.3
+      mesh.scaling.set(pulse, 0.88 + effect.intensity * 0.34, length)
+      mesh.visibility = 0.76 + effect.intensity * 0.24
     }
 
     if (effect.kind === 'drone_swarm') {
@@ -1765,29 +1835,29 @@ function updateEffects(
       const travel = easeOutCubic(Math.min(progress / 0.62, 1))
       const position = Vector3.Lerp(start, end, travel)
       const orbit = effect.age * 4.2 + progress * Math.PI
-      const pulse = 0.86 + Math.sin(effect.age * 16) * 0.05 + effect.intensity * 0.12
+      const pulse = 1.1 + Math.sin(effect.age * 16) * 0.06 + effect.intensity * 0.16
 
-      mesh.position.set(position.x, 1.08 + Math.sin(progress * Math.PI) * 0.46, position.z)
+      mesh.position.set(position.x, 1.26 + Math.sin(progress * Math.PI) * 0.56, position.z)
       mesh.rotation.x = Math.sin(effect.age * 7) * 0.04
       mesh.rotation.y = orbit
       mesh.rotation.z = Math.cos(effect.age * 6) * 0.04
       mesh.scaling.setAll(pulse)
-      mesh.visibility = 0.78 + effect.intensity * 0.2
+      mesh.visibility = 0.86 + effect.intensity * 0.14
       updateDroneSwarmParts(mesh, effect, progress)
     }
 
     if (effect.kind === 'part_detach') {
-      mesh.position.y += 0.36
+      mesh.position.y += 0.34
       mesh.rotation.x = Math.PI / 2
       mesh.rotation.y = effect.age * 3.2
       mesh.rotation.z = Math.sin(effect.age * 12) * 0.08
-      mesh.scaling.setAll(0.7 + effect.intensity * 1.2)
-      mesh.visibility = 0.34 + effect.intensity * 0.5
+      mesh.scaling.setAll(0.82 + effect.intensity * 1.05)
+      mesh.visibility = 0.28 + effect.intensity * 0.38
     }
 
     if (effect.kind === 'impact') {
-      mesh.position.y += 0.52
-      mesh.scaling.setAll(0.34 + effect.intensity * 1.2)
+      mesh.position.y += 0.58
+      mesh.scaling.setAll(0.44 + effect.intensity * 1.35)
       mesh.rotation.y = effect.age * 7
     }
 
@@ -1812,8 +1882,8 @@ function updateEffects(
     }
 
     if (effect.kind === 'smoke') {
-      mesh.position.y += effect.age * 0.53
-      const scale = 0.4 + effect.intensity * 0.55
+      mesh.position.y += effect.age * 0.62
+      const scale = 0.55 + effect.intensity * 0.72
       mesh.scaling.setAll(scale)
       mesh.position.z += Math.sin(effect.age * 12) * 0.1
     }

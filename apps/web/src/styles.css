@@ -1053,6 +1053,17 @@ button.active {
     #030606;
 }
 
+.replay-shell-proof {
+  height: 100vh;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.replay-shell-proof .babylon-stage::after {
+  background:
+    linear-gradient(90deg, rgba(92, 179, 255, 0.06), transparent 30%, transparent 70%, rgba(255, 92, 108, 0.06)),
+    linear-gradient(180deg, transparent 70%, rgba(0, 0, 0, 0.14));
+}
+
 .babylon-stage {
   min-width: 0;
   max-width: 100%;
@@ -3190,6 +3201,12 @@ textarea:focus-visible {
     grid-template-rows: minmax(260px, 52vh) auto auto auto;
     overflow-x: clip;
     overflow-y: visible;
+  }
+
+  .replay-preview-proof .replay-preview-frame .replay-shell {
+    height: 100vh;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
   }
 
   .director-brand h1,

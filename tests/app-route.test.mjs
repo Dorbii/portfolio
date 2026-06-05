@@ -91,3 +91,14 @@ test('replay viewer does not render future event timeline markers', () => {
   assert.equal(replayViewerSource.includes('key-event-list'), false)
   assert.equal(replayViewerSource.includes('event-marker'), false)
 })
+
+test('ability proof preview can render a clean canvas without replay overlays', () => {
+  assert.ok(appSource.includes('proofMode={previewOptions.proofMode}'))
+  assert.ok(replayViewerSource.includes('proofMode?: boolean'))
+  assert.ok(replayViewerSource.includes("proofMode ? ' replay-shell-proof' : ''"))
+  assert.ok(replayViewerSource.includes('immediateCamera={proofMode}'))
+  assert.ok(replayViewerSource.includes('{proofMode ? null : ('))
+  assert.ok(replayViewerSource.includes('replay-controls'))
+  assert.ok(replayViewerSource.includes('replay-status-strip'))
+  assert.ok(replayViewerSource.includes('replay-damage-schematic'))
+})

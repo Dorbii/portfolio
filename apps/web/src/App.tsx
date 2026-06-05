@@ -79,6 +79,7 @@ function ReplayPreview() {
           botBlueprints={mockBotBlueprints}
           initialCameraPreset={previewOptions.cameraPreset}
           initialTime={previewOptions.time}
+          proofMode={previewOptions.proofMode}
           timeline={timeline}
         />
       </section>
