@@ -13,7 +13,10 @@ const captureSourcePath = path.join(webRoot, 'src', 'part-render-capture.ts')
 const catalogPath = path.join(root, 'packages', 'catalog', 'src', 'parts.ts')
 const exportRoot = path.join(root, 'exports')
 const stamp = timestamp()
-const packageName = `agent-arena-actual-part-renders-obsidian-${stamp}`
+const teamColorHex = normalizeHexColor(process.env.PART_RENDER_TEAM_COLOR ?? '#ff4c5d')
+const teamColorSlug = teamColorHex.slice(1).toLowerCase()
+const teamName = process.env.PART_RENDER_TEAM_NAME ?? `${teamColorSlug} Team`
+const packageName = `agent-arena-actual-part-renders-${teamColorSlug}-${stamp}`
 const packageDir = path.join(exportRoot, packageName)
 const imageDir = path.join(packageDir, 'part-renders')
 const markdownPath = path.join(packageDir, 'Agent Arena Actual Part Renders.md')
@@ -237,7 +240,14 @@ async function render(): Promise<void> {
     camera.detachControl()
     createCaptureLightingPreset(scene)
 
-    const materials = createTeamMaterials(scene).red
+    const materials = createTeamMaterials(scene, {
+      identities: {
+        red: {
+          name: ${JSON.stringify(teamName)},
+          primaryColor: ${JSON.stringify(teamColorHex)},
+        },
+      },
+    }).red
     const blueprint: BotBlueprint = {
       name: part.displayName,
       blocks: [
@@ -445,7 +455,7 @@ async function writeMarkdown() {
   const lines = [
     '# Agent Arena Actual Part Renders',
     '',
-    `Captured from the current Babylon renderer on 2026-06-05 using \`createBotNode()\`, \`createTeamMaterials()\`, and the red team material set. The capture uses brighter inspection lighting and tight framing, but the part meshes and procedural materials are the app renderer's own output. Includes ${parts.length} catalog parts (${counts}).`,
+    `Captured from the current Babylon renderer on 2026-06-06 using \`createBotNode()\`, \`createTeamMaterials()\`, and a ${teamColorHex} team identity. The capture uses brighter inspection lighting and tight framing, but the part meshes and procedural materials are the app renderer's own output. Includes ${parts.length} catalog parts (${counts}).`,
     '',
     'These are actual WebGL render captures of each part in isolation. The surrounding bot foundation is hidden so the part geometry and procedural material are easier to inspect. They are not balance proof and they do not show blue-team palette variants.',
     '',
@@ -575,4 +585,14 @@ function timestamp() {
     pad(now.getMinutes()),
     pad(now.getSeconds()),
   ].join('')
+}
+
+function normalizeHexColor(value) {
+  const normalized = String(value).trim()
+
+  if (!/^#[0-9a-f]{6}$/i.test(normalized)) {
+    throw new Error(`Expected PART_RENDER_TEAM_COLOR to be a #RRGGBB hex color, got ${value}.`)
+  }
+
+  return normalized.toLowerCase()
 }

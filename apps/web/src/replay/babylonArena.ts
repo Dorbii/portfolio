@@ -1,3 +1,4 @@
+import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import type { ArenaConfig } from '../../../../packages/schemas/src/index.js'
@@ -8,6 +9,7 @@ import {
 import {
   createHazardVisuals,
   updateHazards,
+  updateHazardsAtTime,
   type BabylonHazardVisual,
 } from './babylonHazards'
 import {
@@ -27,7 +29,7 @@ import {
   createWall,
 } from './babylonArenaStructures'
 export { updateHazards }
-export { createCenterSpinner } from './babylonArenaStructures'
+export { updateHazardsAtTime }
 export type { BabylonHazardVisual }
 
 export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
@@ -44,6 +46,10 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
   const blueLightMaterial = createSceneMaterial(scene, 'blue-led-mat', '#57adff', '#167fff', 1, 0.1)
   const whiteLightMaterial = createSceneMaterial(scene, 'white-led-mat', '#dfefff', '#9bd7ff', 1, 0.1)
   const hazardMaterial = createSceneMaterial(scene, 'hazard-mat', '#f0bd3c', '#654006', 1, 0.18)
+  const hazardBladeMaterial = createSceneMaterial(scene, 'hazard-blade-mat', '#b9b5a0', '#1c1607', 1, 0.24)
+  const hazardGuardMaterial = createSceneMaterial(scene, 'hazard-guard-mat', '#a87922', '#241604', 1, 0.2)
+  const hazardHubMaterial = createSceneMaterial(scene, 'hazard-hub-mat', '#879098', '#090d10', 1, 0.18)
+  const hazardTrimMaterial = createSceneMaterial(scene, 'hazard-trim-mat', '#0e1112', '#010101', 1, 0.08)
   const hazardPitMaterial = createSceneMaterial(scene, 'hazard-pit-mat', '#08090a', '#010101', 1, 0.08)
   const hazardOilMaterial = createSceneMaterial(scene, 'hazard-oil-mat', '#0f1518', '#11202a', 0.74, 0.35)
   const hazardMagnetMaterial = createSceneMaterial(scene, 'hazard-magnet-mat', '#45515b', '#141b22', 1, 0.18)
@@ -81,14 +87,6 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
   createGlassPosts(scene, arena.width, arena.height, trimMaterial)
   createArenaLightBars(scene, arena.width, arena.height, redLightMaterial, blueLightMaterial, whiteLightMaterial)
 
-  const marker = MeshBuilder.CreateTorus(
-    'arena-center-mark',
-    { diameter: 2.2, thickness: 0.03, tessellation: 40 },
-    scene,
-  )
-  marker.position.y = 0.04
-  marker.material = centerMaterial
-  marker.rotation.x = Math.PI / 2
   createCenterLogo(scene, centerMaterial, whiteLightMaterial)
 
   createSpawnPad(
@@ -116,20 +114,17 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
 
   createBoundaryPosts(scene, arenaBoundaryPostMaterial, arena.width, arena.height)
   createCornerMarkers(scene, arena.width, arena.height, arenaBoundaryPostMaterial)
-  marker.material = centerMaterial
 
-  hazardPlates.forEach((hazard, index) => {
-    if (hazard.kind === 'saw') {
-      const ring = MeshBuilder.CreateTorus(
-        `hazard-${index}-warning-ring`,
-        { diameter: 1.55, thickness: 0.13, tessellation: 26 },
-        scene,
-      )
-      ring.parent = hazard.mesh
-      ring.material = hazardMaterial
-      ring.position.y = 0.08
-    }
+  const hazardMaterialSlots = {
+    base: hazardMaterial,
+    blade: hazardBladeMaterial,
+    guard: hazardGuardMaterial,
+    hub: hazardHubMaterial,
+    trim: hazardTrimMaterial,
+    warning: warningMaterial,
+  }
 
+  hazardPlates.forEach((hazard) => {
     const material =
       hazard.kind === 'pit'
         ? hazardPitMaterial
@@ -139,15 +134,47 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
             ? hazardMagnetMaterial
             : hazard.kind === 'flipper'
               ? hazardFlipperMaterial
-              : hazardMaterial
+            : hazardMaterial
 
-    hazard.mesh.material = material
+    hazard.mesh.material = materialForHazardMesh(hazard.mesh, material, hazardMaterialSlots)
     hazard.mesh.getChildMeshes(false).forEach((child) => {
-      child.material = material
+      child.material = materialForHazardMesh(child, material, hazardMaterialSlots)
     })
   })
 
   return hazardPlates
 }
 
+type HazardMaterialSlots = Record<'base' | 'blade' | 'guard' | 'hub' | 'trim' | 'warning', StandardMaterial>
+
+function materialForHazardMesh(
+  mesh: { metadata: unknown },
+  fallback: StandardMaterial,
+  slots: HazardMaterialSlots,
+): StandardMaterial {
+  const slot = hazardMaterialSlot(mesh.metadata)
+
+  return slot ? slots[slot] : fallback
+}
+
+function hazardMaterialSlot(metadata: unknown): keyof HazardMaterialSlots | null {
+  if (!metadata || typeof metadata !== 'object' || !('hazardMaterialSlot' in metadata)) {
+    return null
+  }
+
+  const slot = (metadata as { hazardMaterialSlot?: unknown }).hazardMaterialSlot
+
+  if (
+    slot === 'base' ||
+    slot === 'blade' ||
+    slot === 'guard' ||
+    slot === 'hub' ||
+    slot === 'trim' ||
+    slot === 'warning'
+  ) {
+    return slot
+  }
+
+  return null
+}
 

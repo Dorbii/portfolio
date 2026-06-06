@@ -1152,6 +1152,7 @@ test('resolver emits independent weaponA and weaponB fire from two weapon slots'
   )
   assert.ok(redWeaponFire.every((event) => event.phase === 'release'))
   assert.ok(redWeaponFire.every((event) => typeof event.style === 'string' && event.style.length > 0))
+  assert.ok(redWeaponFire.every((event) => Array.isArray(event.targetPosition)))
   assert.ok(
     [...slotsByTick.values()].some(
       (slots) => slots.has('weaponA') && slots.has('weaponB'),

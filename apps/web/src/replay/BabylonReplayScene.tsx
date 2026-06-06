@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
   ArenaConfig,
@@ -11,7 +10,6 @@ import type {
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
 import {
   createArena,
-  createCenterSpinner,
   updateHazards,
   type BabylonHazardVisual,
 } from './babylonArena'
@@ -55,7 +53,6 @@ type SceneResources = BabylonRendererCore & {
   botProfiles: Record<TeamRole, BotVisualProfile>
   effectPool: EffectPool
   hazards: BabylonHazardVisual[]
-  centerSpinner: Mesh
 }
 
 type RendererState = {
@@ -160,7 +157,6 @@ export function BabylonReplayScene({
       }
       const botProfiles = createBotVisualProfiles(botBlueprints, { identities: teamIdentities })
       const effectPool = createEffectPool(scene)
-      const centerSpinner = createCenterSpinner(scene)
       createRendererGlow(scene, 'replay-glow', 0.32)
       const replayDebugApi: ReplaySceneDebugApi = {
         getStats: () => createRendererStats(scene, engine),
@@ -184,7 +180,6 @@ export function BabylonReplayScene({
         botProfiles,
         effectPool,
         hazards,
-        centerSpinner,
       }
       resourcesRef.current = resources
       setRendererState({ status: 'ready' })
@@ -277,7 +272,6 @@ export function BabylonReplayScene({
     for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
       updateCamera(resources.camera, cameraPreset, frame, arena)
     }
-    resources.centerSpinner.rotation.y = time * 4
   }, [arena, cameraPreset, immediateCamera, timeline, time])
 
   const rendererBudgetState = sceneStats

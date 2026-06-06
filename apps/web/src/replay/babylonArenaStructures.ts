@@ -1,8 +1,6 @@
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
-import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import type { Scene } from '@babylonjs/core/scene'
-import { createSceneMaterial } from './babylonSceneUtils'
 
 export function createWall(
   scene: Scene,
@@ -84,41 +82,4 @@ export function createCornerMarkers(
     marker.material = material
     marker.rotation.x = Math.PI / 2
   })
-}
-
-export function createCenterSpinner(scene: Scene): Mesh {
-  const spinner = MeshBuilder.CreateCylinder(
-    'center-anim-spinner',
-    { height: 0.06, diameter: 1.2, tessellation: 24 },
-    scene,
-  )
-  const glow = MeshBuilder.CreateTorus(
-    'center-anim-spinner-glow',
-    { diameter: 1.28, thickness: 0.06, tessellation: 22 },
-    scene,
-  )
-  const material = createSceneMaterial(scene, 'center-spinner-mat', '#e6b95d', '#3f2a09')
-  const toothMaterial = createSceneMaterial(scene, 'center-spinner-tooth-mat', '#f2d174', '#573803')
-
-  spinner.material = material
-  glow.material = material
-  glow.position.set(0, 0.06, 0)
-  glow.parent = spinner
-  glow.rotation.x = Math.PI / 2
-
-  for (let index = 0; index < 8; index += 1) {
-    const tooth = MeshBuilder.CreateBox(
-      `center-spinner-tooth-${index}`,
-      { width: 0.18, height: 0.09, depth: 0.38 },
-      scene,
-    )
-    const angle = (Math.PI * 2 * index) / 8
-
-    tooth.position.set(Math.cos(angle) * 0.54, 0.05, Math.sin(angle) * 0.54)
-    tooth.rotation.y = angle
-    tooth.parent = spinner
-    tooth.material = toothMaterial
-  }
-
-  return spinner
 }

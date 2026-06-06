@@ -1171,7 +1171,7 @@ function resolveWeapons(
       bot: attacker.role,
       weaponSlot: slot,
       controlCue: isNet ? 'deploy' : undefined,
-      targetPosition: isNet ? defender.position : undefined,
+      targetPosition: defender.position,
       sourceBlockId: part.blockId,
       sourcePartId: part.partId,
       phase: isNet ? 'deploy' : 'release',

@@ -35,24 +35,36 @@ export function createPooledControlNetEffect(
   mesh.material = netMaterial
   mesh.rotation.x = Math.PI / 2
 
-  for (let index = -2; index <= 2; index += 1) {
-    const vertical = MeshBuilder.CreateBox(
-      `${name}-vertical-${index + 2}`,
-      { width: 0.035, height: 1.54, depth: 0.035 },
+  const centerKnot = MeshBuilder.CreateSphere(
+    `${name}-center-knot`,
+    { diameter: 0.16, segments: 10 },
+    scene,
+  )
+
+  centerKnot.parent = mesh
+  centerKnot.material = netMaterial
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6
+    const tether = MeshBuilder.CreateBox(
+      `${name}-tether-${index}`,
+      { width: 0.62, height: 0.038, depth: 0.03 },
       scene,
     )
-    const horizontal = MeshBuilder.CreateBox(
-      `${name}-horizontal-${index + 2}`,
-      { width: 1.54, height: 0.035, depth: 0.035 },
+    const clamp = MeshBuilder.CreateBox(
+      `${name}-clamp-${index}`,
+      { width: 0.18, height: 0.07, depth: 0.045 },
       scene,
     )
 
-    vertical.position.set(index * 0.28, 0, 0)
-    horizontal.position.set(0, index * 0.28, 0)
-    vertical.parent = mesh
-    horizontal.parent = mesh
-    vertical.material = netMaterial
-    horizontal.material = netMaterial
+    tether.position.set(Math.cos(angle) * 0.34, Math.sin(angle) * 0.34, 0)
+    tether.rotation.z = angle
+    tether.parent = mesh
+    tether.material = netMaterial
+    clamp.position.set(Math.cos(angle) * 0.72, Math.sin(angle) * 0.72, 0)
+    clamp.rotation.z = angle + Math.PI / 2
+    clamp.parent = mesh
+    clamp.material = netMaterial
   }
 
   const cornerOffsets: Array<[number, number]> = [
@@ -218,18 +230,27 @@ export function updateControlNetEffect({ effect, mesh, profiles }: EffectUpdateI
   const palette = resolveReplayEffectPalette(effect.team, profiles)
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
   const target = effect.endPosition ? toBabylonVector(effect.endPosition) : toBabylonVector(effect.position)
+  const alpha = 0.34 + effect.intensity * 0.2
 
-  tintStandardMaterial(mesh.material, palette.soft, palette.glow, 0.7)
+  tintStandardMaterial(mesh.material, palette.soft, palette.glow, alpha)
   mesh.getChildMeshes().forEach((child) => {
-    tintStandardMaterial(child.material, palette.soft, palette.glow, 0.7)
+    const isAnchor = child.name.includes('anchor')
+    const isKnot = child.name.includes('knot')
+
+    tintStandardMaterial(
+      child.material,
+      isAnchor || isKnot ? palette.hot : palette.soft,
+      palette.glow,
+      isAnchor || isKnot ? 0.62 : alpha,
+    )
   })
   mesh.position = target
-  mesh.position.y = 0.22 + Math.sin(progress * Math.PI) * 0.16
+  mesh.position.y = 0.14 + Math.sin(progress * Math.PI) * 0.1
   mesh.rotation.x = Math.PI / 2
   mesh.rotation.y = (effect.rotationY ?? 0) + effect.age * 2.8
   mesh.rotation.z = 0
-  mesh.scaling.setAll(1.1 + easeOutCubic(progress) * 1.45 + effect.intensity * 0.28)
-  mesh.visibility = 0.72 + effect.intensity * 0.28
+  mesh.scaling.setAll(0.84 + easeOutCubic(progress) * 0.82 + effect.intensity * 0.14)
+  mesh.visibility = 0.5 + effect.intensity * 0.28
 }
 
 export function updateLaserLanceEffect({ effect, mesh, profiles }: EffectUpdateInput): void {

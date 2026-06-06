@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import type { ArenaConfig } from '../../../../packages/schemas/src/index.js'
 import {
   createArena,
-  createCenterSpinner,
+  updateHazardsAtTime,
   type BabylonHazardVisual,
 } from './babylonArena'
 import {
@@ -24,7 +23,6 @@ import {
 } from './babylonRendererKit'
 
 type ArenaPreviewResources = BabylonRendererCore & {
-  centerSpinner: Mesh
   hazards: BabylonHazardVisual[]
 }
 
@@ -91,13 +89,11 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
       createReplayLightingPreset(scene, sceneArena.width)
 
       const hazards = createArena(scene, sceneArena)
-      const centerSpinner = createCenterSpinner(scene)
 
       createRendererGlow(scene, 'arena-preview-glow', 0.28)
 
       resources = {
         ...core,
-        centerSpinner,
         hazards,
       }
       setRendererState({ status: 'ready' })
@@ -110,12 +106,7 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
 
         const time = (performance.now() - start) / 1000
 
-        resources.centerSpinner.rotation.y = time * 2.2
-        for (const hazard of resources.hazards) {
-          if (hazard.spinSpeed > 0) {
-            hazard.mesh.rotation.y += hazard.spinSpeed
-          }
-        }
+        updateHazardsAtTime(resources.hazards, time)
         resources.scene.render()
       }
 

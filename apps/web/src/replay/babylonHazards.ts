@@ -1,5 +1,6 @@
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import {
   type ArenaConfig,
@@ -10,9 +11,17 @@ import {
   hazardCenter,
   hazardEffectKind,
 } from '../../../../packages/sim/src/arenaTopology.js'
-import type { ReplayVisualFrame } from './replayMapping'
+import {
+  createAnnularSectorMesh,
+  createToothedBladeMesh,
+} from './babylonBladeGeometry'
+import type {
+  ReplayEffectState,
+  ReplayVisualFrame,
+} from './replayMapping'
 
 export type BabylonHazardVisual = {
+  blade?: TransformNode
   kind: string
   label: string
   mesh: Mesh
@@ -33,19 +42,16 @@ export function createHazardVisuals(
       {
         kind: 'saw',
         label: 'center',
-        mesh: createHazardPlate(
+        ...createSawHazard(
           scene,
           'hazard-default',
           0,
           0,
-          0,
-          0.7,
-          0.7,
           'center',
         ),
         baseScale: 1,
         baseScaleZ: 1,
-        spinSpeed: 0,
+        spinSpeed: 24,
       },
     ]
   }
@@ -62,26 +68,21 @@ function buildHazardVisual(
   const label = normalizeHazardLabel(hazard.type)
 
   if (kind === 'saw') {
-    const sawPlate = createHazardPlate(
+    const sawHazard = createSawHazard(
       scene,
       `hazard-${hazard.id}`,
       x,
       z,
-      0.06,
-      0.84,
-      1.05,
       hazard.type,
     )
-    createSawTeeth(scene, `hazard-${hazard.id}-tooth`, sawPlate)
-    createHazardHub(scene, `hazard-${hazard.id}-hub`, sawPlate)
 
     return {
       kind: 'saw',
       label,
-      mesh: sawPlate,
+      ...sawHazard,
       baseScale: 1,
-      baseScaleZ: sawPlate.scaling.z,
-      spinSpeed: 0.05,
+      baseScaleZ: sawHazard.mesh.scaling.z,
+      spinSpeed: 26,
     }
   }
 
@@ -148,7 +149,7 @@ function buildHazardVisual(
       mesh: magnet,
       baseScale: 1,
       baseScaleZ: magnet.scaling.z,
-      spinSpeed: 0.08,
+      spinSpeed: 3.2,
     }
   }
 
@@ -218,15 +219,23 @@ function createHazardPlate(
 }
 
 export function updateHazards(hazards: BabylonHazardVisual[], frame: ReplayVisualFrame): void {
+  updateHazardsAtTime(hazards, frame.time, frame.effects)
+}
+
+export function updateHazardsAtTime(
+  hazards: BabylonHazardVisual[],
+  time: number,
+  effects: ReplayEffectState[] = [],
+): void {
   hazards.forEach((hazard, index) => {
-    const active = frame.effects.find(
+    const active = effects.find(
       (effect) =>
         effect.kind === 'hazard' &&
         effect.label !== undefined &&
         hazardsMatch(normalizeHazardLabel(effect.label), hazard.label),
     )
     const pulse = active ? 1 + (1 - active.age / 0.9) * 0.3 : 1
-    const spin = hazard.spinSpeed > 0 ? hazard.spinSpeed + (frame.effects.some((effect) => effect.kind === 'impact') ? 0.08 : 0) : 0
+    const impactSpinBoost = effects.some((effect) => effect.kind === 'impact') ? 5.5 : 0
 
     hazard.mesh.position.y = 0.08 + (active ? active.intensity * 0.14 : 0)
     hazard.mesh.scaling.set(
@@ -237,10 +246,15 @@ export function updateHazards(hazards: BabylonHazardVisual[], frame: ReplayVisua
 
     if (hazard.kind === 'flipper') {
       hazard.mesh.rotation.x = active ? -active.intensity * 0.45 : 0
-      hazard.mesh.rotation.z = Math.sin(frame.time * 2 + index) * 0.015
+      hazard.mesh.rotation.z = Math.sin(time * 2 + index) * 0.015
+    } else if (hazard.kind === 'saw') {
+      hazard.mesh.rotation.set(0, 0, 0)
+      if (hazard.blade) {
+        hazard.blade.rotation.y = time * (hazard.spinSpeed + impactSpinBoost)
+      }
     } else {
-      hazard.mesh.rotation.y += spin
-      hazard.mesh.rotation.z = Math.sin(frame.time * 2 + index) * 0.02
+      hazard.mesh.rotation.y = hazard.spinSpeed > 0 ? time * hazard.spinSpeed : 0
+      hazard.mesh.rotation.z = Math.sin(time * 2 + index) * 0.02
     }
   })
 }
@@ -253,30 +267,153 @@ function normalizeHazardLabel(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
-function createSawTeeth(scene: Scene, name: string, parent: Mesh): void {
-  for (let index = 0; index < 12; index += 1) {
-    const tooth = MeshBuilder.CreateBox(
-      `${name}-${index}`,
-      { width: 0.14, height: 0.085, depth: 0.34 },
-      scene,
-    )
-    const angle = (Math.PI * 2 * index) / 12
+function createSawHazard(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  label: string,
+): Pick<BabylonHazardVisual, 'blade' | 'mesh'> {
+  const deck = MeshBuilder.CreateBox(
+    name,
+    { width: 1.62, height: 0.08, depth: 1.2 },
+    scene,
+  )
+  const blade = new TransformNode(`${name}-blade-root`, scene)
 
-    tooth.parent = parent
-    tooth.position.set(Math.cos(angle) * 0.46, 0.07, Math.sin(angle) * 0.46)
-    tooth.rotation.y = angle
+  deck.position.set(x, 0.06, z)
+  deck.metadata = { label, hazardMaterialSlot: 'base' }
+  blade.parent = deck
+  blade.position.set(0, 0.13, 0)
+  createSawBlade(scene, `${name}-blade`, blade)
+  createSawGuard(scene, `${name}-guard`, deck)
+  createSawDeckDetails(scene, `${name}-deck`, deck)
+
+  return { blade, mesh: deck }
+}
+
+function createSawBlade(scene: Scene, name: string, parent: TransformNode): void {
+  const blade = markHazardMaterial(
+    createToothedBladeMesh(scene, `${name}-toothed-disc`, 1.02, 0.08, 30, 0.24),
+    'blade',
+  )
+  const hub = markHazardMaterial(
+    MeshBuilder.CreateCylinder(`${name}-arbor-hub`, { height: 0.13, diameter: 0.28, tessellation: 18 }, scene),
+    'hub',
+  )
+  const arbor = markHazardMaterial(
+    MeshBuilder.CreateTorus(`${name}-arbor-ring`, { diameter: 0.38, thickness: 0.035, tessellation: 20 }, scene),
+    'hub',
+  )
+
+  blade.parent = parent
+  blade.rotation.z = Math.PI / 2
+  hub.parent = parent
+  hub.position.y = 0.035
+  arbor.parent = parent
+  arbor.position.y = 0.078
+  arbor.rotation.x = Math.PI / 2
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6
+    const balanceSlot = markHazardMaterial(
+      MeshBuilder.CreateBox(
+        `${name}-balance-slot-${index}`,
+        { width: 0.05, height: 0.02, depth: 0.42 },
+        scene,
+      ),
+      'hub',
+    )
+
+    balanceSlot.parent = parent
+    balanceSlot.position.y = 0.084
+    balanceSlot.rotation.y = angle
   }
 }
 
-function createHazardHub(scene: Scene, name: string, parent: Mesh): void {
-  const hub = MeshBuilder.CreateCylinder(name, { height: 0.1, diameter: 0.28, tessellation: 18 }, scene)
-  const arbor = MeshBuilder.CreateTorus(`${name}-arbor`, { diameter: 0.34, thickness: 0.035, tessellation: 18 }, scene)
+function createSawGuard(scene: Scene, name: string, parent: Mesh): void {
+  const guard = markHazardMaterial(
+    createAnnularSectorMesh(scene, `${name}-upper-cowl`, 1.4, 1.06, 0.11, Math.PI * 0.05, Math.PI * 0.95),
+    'guard',
+  )
 
-  hub.parent = parent
-  hub.position.set(0, 0.085, 0)
-  arbor.parent = parent
-  arbor.position.set(0, 0.14, 0)
-  arbor.rotation.x = Math.PI / 2
+  guard.parent = parent
+  guard.position.set(0, 0.18, -0.04)
+  guard.rotation.z = Math.PI / 2
+
+  for (const side of [-1, 1]) {
+    const mount = markHazardMaterial(
+      MeshBuilder.CreateBox(
+        `${name}-side-mount-${side}`,
+        { width: 0.18, height: 0.15, depth: 0.44 },
+        scene,
+      ),
+      'warning',
+    )
+
+    mount.parent = parent
+    mount.position.set(side * 0.62, 0.14, -0.08)
+    mount.rotation.z = side * 0.08
+  }
+}
+
+function createSawDeckDetails(scene: Scene, name: string, parent: Mesh): void {
+  for (const z of [-0.48, 0.48]) {
+    const rail = markHazardMaterial(
+      MeshBuilder.CreateBox(
+        `${name}-recess-rail-${z > 0 ? 'front' : 'rear'}`,
+        { width: 1.32, height: 0.025, depth: 0.045 },
+        scene,
+      ),
+      'trim',
+    )
+
+    rail.parent = parent
+    rail.position.set(0, 0.065, z)
+  }
+
+  for (let index = 0; index < 8; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1
+    const row = Math.floor(index / 2)
+    const bolt = markHazardMaterial(
+      MeshBuilder.CreateCylinder(
+        `${name}-mount-bolt-${index}`,
+        { height: 0.025, diameter: 0.055, tessellation: 10 },
+        scene,
+      ),
+      'hub',
+    )
+
+    bolt.parent = parent
+    bolt.position.set(side * 0.68, 0.075, -0.42 + row * 0.28)
+  }
+
+  for (const x of [-0.38, 0.38]) {
+    const caution = markHazardMaterial(
+      MeshBuilder.CreateBox(
+        `${name}-caution-bar-${x > 0 ? 'right' : 'left'}`,
+        { width: 0.32, height: 0.028, depth: 0.075 },
+        scene,
+      ),
+      'warning',
+    )
+
+    caution.parent = parent
+    caution.position.set(x, 0.078, 0.58)
+  }
+}
+
+function markHazardMaterial<T extends Mesh>(mesh: T, slot: string): T {
+  mesh.metadata = {
+    ...(isObjectMetadata(mesh.metadata) ? mesh.metadata : {}),
+    hazardMaterialSlot: slot,
+  }
+
+  return mesh
+}
+
+function isObjectMetadata(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
 function createPitDetails(scene: Scene, name: string, parent: Mesh): void {
