@@ -926,12 +926,10 @@ export class SessionCoordinator {
       red: {
         blueprint: redSubmission.blueprint,
         tactics: redSubmission.tactics,
-        openingScript: redSubmission.openingScript,
       },
       blue: {
         blueprint: blueSubmission.blueprint,
         tactics: blueSubmission.tactics,
-        openingScript: blueSubmission.openingScript,
       },
     }
   }

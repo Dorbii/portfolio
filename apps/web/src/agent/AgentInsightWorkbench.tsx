@@ -2,7 +2,6 @@ import type {
   RolePrivateState,
   RoundPlanSubmission,
   TeamRole,
-  TurnCommand,
 } from '../../../../packages/schemas/src/index.js'
 import { MetricGrid } from '../shared/ui'
 import { capitalize, formatLabel } from '../shared/format'
@@ -24,7 +23,6 @@ export function AgentInsightWorkbench({
 }: AgentInsightWorkbenchProps) {
   const submission = roleState?.ownSubmission ?? null
   const blueprint = submission?.blueprint ?? null
-  const commands = submission?.openingScript?.commands ?? []
   const decision = roleState?.combat?.decision
   const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
@@ -45,7 +43,6 @@ export function AgentInsightWorkbench({
         <PlanMetric label="Phase" value={formatLabel(roleState?.phase ?? 'not_loaded')} />
         <PlanMetric label="Plan" tone={roleState?.submitted ? 'ok' : undefined} value={submissionLabel} />
         <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No plan'} />
-        <PlanMetric label="Opening" value={`${commands.length} commands`} />
         <PlanMetric
           label="Combat"
           tone={decision ? 'ok' : undefined}
@@ -98,24 +95,8 @@ export function AgentInsightWorkbench({
             </>
           ) : (
             <p className="agent-empty">
-              No accepted plan is available yet. That means this agent has not committed a bot, tactics, opening script, or rationale for this round.
+              No accepted plan is available yet. That means this agent has not committed a bot, tactics, or rationale for this round.
             </p>
-          )}
-        </section>
-
-        <section className="plan-section insight-panel" aria-labelledby="opening-read-heading">
-          <SectionTitle id="opening-read-heading" title="Opening script" />
-          {commands.length > 0 ? (
-            <ol className="insight-command-list">
-              {commands.map((command) => (
-                <li key={command.tick}>
-                  <strong>Tick {command.tick}</strong>
-                  <span>{turnCommandSummary(command)}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="agent-empty">No opening commands were submitted.</p>
           )}
         </section>
 
@@ -198,7 +179,7 @@ function NoRoleStatePanel() {
     <section className="insight-empty-state" aria-labelledby="empty-state-heading">
       <SectionTitle id="empty-state-heading" title="State not loaded" />
       <p>
-        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the agent plan, rationale, opening script, and combat decision context.
+        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the agent plan, rationale, and combat decision context.
       </p>
     </section>
   )
@@ -294,15 +275,6 @@ function InsightList({
       )}
     </div>
   )
-}
-
-function turnCommandSummary(command: TurnCommand): string {
-  return [
-    command.move ? `move ${formatLabel(command.move)}` : '',
-    command.weaponA ? `weapon A ${formatLabel(command.weaponA)}` : '',
-    command.weaponB ? `weapon B ${formatLabel(command.weaponB)}` : '',
-    command.utility ? `utility ${formatLabel(command.utility)}` : '',
-  ].filter(Boolean).join(' / ') || 'no-op'
 }
 
 function formatOptionalLabel(value: string | undefined): string {

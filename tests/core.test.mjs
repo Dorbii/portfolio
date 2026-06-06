@@ -10,6 +10,7 @@ import {
   normalizeTactics,
   validateBlueprintAssembly,
   validateRoundSubmission,
+  validateSubmittedTurnCommand,
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 import {
@@ -17,21 +18,19 @@ import {
   PART_BEHAVIOR_IDS,
   activeHazardTypes,
   chooseCommand,
-  compileCommandPolicy,
   compileArenaTopology,
   compareDamageTargets,
   createBotRuntimeIndex,
-  createOpeningScriptIndex,
   deriveBotStats,
   damageCategoryPriorityFor,
   findFirstAliveBehaviorPart,
   getAliveBehaviorParts,
-  getOpeningScriptCommand,
   hasArenaLineOfSight,
   hasAliveBehaviorPart,
   hazardsAtPosition,
   pathHazards,
   resolveCombat,
+  resolveSubmittedCombat,
   stablePartOrder,
   worldToArenaCell,
 } from '../.test-build/packages/sim/src/index.js'
@@ -39,16 +38,6 @@ import {
   SessionCoordinator,
   calculateInterest,
 } from '../.test-build/apps/worker/src/session.js'
-
-const brakePlan = {
-  commands: [
-    { tick: 1, move: 'brake' },
-    { tick: 2, move: 'brake' },
-    { tick: 3, move: 'brake' },
-    { tick: 4, move: 'brake' },
-    { tick: 5, move: 'brake' },
-  ],
-}
 
 const bareBodyBlueprint = {
   name: 'Bare Core',
@@ -97,8 +86,6 @@ const dualWeaponBlueprint = {
   ],
 }
 
-const sparseOpeningScript = { commands: [{ tick: 3, move: 'turn_left' }] }
-
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
   schemaVersion: 2,
@@ -126,15 +113,6 @@ const validSpinnerSubmission = {
     preferredRange: 'close',
     aggression: 0.75,
     weaponCadence: 'opportunistic',
-  },
-  openingScript: {
-    commands: [
-      { tick: 1, move: 'forward', weaponA: 'hold' },
-      { tick: 2, move: 'forward', weaponA: 'fire' },
-      { tick: 3, move: 'turn_left', weaponA: 'hold' },
-      { tick: 4, move: 'forward', weaponA: 'fire' },
-      { tick: 5, move: 'brake', weaponA: 'hold' },
-    ],
   },
 }
 
@@ -178,16 +156,14 @@ function movementDelta(event) {
   return Math.hypot(event.to[0] - event.from[0], event.to[2] - event.from[2])
 }
 
-function repeatedScript(ticks, commandForTick) {
-  return {
-    commands: Array.from({ length: ticks }, (_, index) => {
-      const tick = index + 1
-      const fields =
-        typeof commandForTick === 'function' ? commandForTick(tick) : commandForTick
+function repeatedCommands(ticks, commandForTick) {
+  return Array.from({ length: ticks }, (_, index) => {
+    const tick = index + 1
+    const fields =
+      typeof commandForTick === 'function' ? commandForTick(tick) : commandForTick
 
-      return { tick, ...fields }
-    }),
-  }
+    return { tick, ...fields }
+  })
 }
 
 async function claimBothRoles(session) {
@@ -475,7 +451,6 @@ test('bad but processable weaponless body is accepted', () => {
     },
     schemaVersion: 2,
     tactics: { movementPolicy: 'hold_ground' },
-    openingScript: brakePlan,
   }
   const result = validateRoundSubmission({ gold: 100, inventory: [], submission })
 
@@ -532,29 +507,11 @@ test('controls are generated from installed modules', () => {
   assert.deepEqual(dualControls.weaponB, ['fire', 'hold'])
 })
 
-test('round submission rejects commands for absent modules', () => {
-  const submission = {
-    action: 'submit_round_plan',
-    purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
-    blueprint: {
-      name: 'No Weapon',
-      blocks: [
-        { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
-      ],
-    },
-    schemaVersion: 2,
-    tactics: { movementPolicy: 'hold_ground' },
-    openingScript: {
-      commands: [
-        { tick: 1, move: 'brake', weaponA: 'fire' },
-        { tick: 2, move: 'brake' },
-        { tick: 3, move: 'brake' },
-        { tick: 4, move: 'brake' },
-        { tick: 5, move: 'brake' },
-      ],
-    },
-  }
-  const result = validateRoundSubmission({ gold: 100, inventory: [], submission })
+test('live turn command validation rejects commands for absent modules', () => {
+  const result = validateSubmittedTurnCommand({
+    controls: deriveControls(bareBodyBlueprint),
+    command: { tick: 1, move: 'brake', weaponA: 'fire' },
+  })
 
   assert.equal(result.ok, false)
   assert.ok(result.issues.some((entry) => entry.code === 'WEAPON_A_NOT_AVAILABLE'))
@@ -585,7 +542,7 @@ test('v2 round submissions normalize into combat input', () => {
 
   assert.equal(result.ok, true)
   assert.equal(result.normalizedSubmission.schemaVersion, 2)
-  assert.equal(result.normalizedSubmission.openingScript.commands.length, 5)
+  assert.equal('openingScript' in result.normalizedSubmission, false)
   assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'close')
 })
 
@@ -599,7 +556,6 @@ test('v2 hold-ground tactics stay legal for immobile submissions', () => {
       purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
       blueprint: bareBodyBlueprint,
       tactics: { movementPolicy: 'hold_ground' },
-      openingScript: brakePlan,
     },
   })
 
@@ -607,7 +563,7 @@ test('v2 hold-ground tactics stay legal for immobile submissions', () => {
   assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'hold_ground')
 })
 
-test('v2 tactics submissions accept a short opening script', () => {
+test('v2 tactics submissions reject removed opening scripts', () => {
   const result = validateRoundSubmission({
     gold: 100,
     inventory: [],
@@ -635,9 +591,8 @@ test('v2 tactics submissions accept a short opening script', () => {
     },
   })
 
-  assert.equal(result.ok, true)
-  assert.equal(result.normalizedSubmission.openingScript.commands.length, 2)
-  assert.equal(result.normalizedSubmission.tactics.weaponCadence, 'sustained')
+  assert.equal(result.ok, false)
+  assert.ok(result.issues.some((entry) => entry.code === 'OPENING_SCRIPT_REMOVED'))
 })
 
 test('v2 tactics errors use path-specific issue locations', () => {
@@ -653,7 +608,6 @@ test('v2 tactics errors use path-specific issue locations', () => {
         movementPolicy: 'teleport',
         aggression: 1.4,
       },
-      openingScript: { commands: [] },
     },
   })
 
@@ -717,7 +671,6 @@ test('policy commands diverge for the same bot state with different movement tac
     opponent,
     arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
   }
-  const openingScript = { commands: [] }
   const commandFor = (movementPolicy) =>
     chooseCommand(
       {
@@ -727,7 +680,6 @@ test('policy commands diverge for the same bot state with different movement tac
           aggression: 0.82,
           weaponCadence: 'sustained',
         }),
-        openingScript,
       },
       8,
       state,
@@ -737,32 +689,6 @@ test('policy commands diverge for the same bot state with different movement tac
   assert.ok(['forward', 'dash_forward'].includes(commandFor('close').move))
   assert.ok(['backward', 'dash_backward', 'turn_left', 'turn_right'].includes(commandFor('kite').move))
   assert.ok(['circle_left', 'circle_right'].includes(commandFor('circle').move))
-})
-
-test('opening script overrides early movement while policy fills missing command fields', () => {
-  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint)
-  const opponent = createPolicyBot('blue', bareBodyBlueprint)
-  const state = {
-    bot,
-    opponent,
-    arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
-  }
-  const policy = {
-    tactics: normalizeTactics({
-      movementPolicy: 'close',
-      preferredRange: 'contact',
-      aggression: 0.9,
-      weaponCadence: 'sustained',
-    }),
-    openingScript: { commands: [{ tick: 1, move: 'brake' }] },
-  }
-
-  const scripted = chooseCommand(policy, 1, state)
-  const unscripted = chooseCommand(policy, 6, state)
-
-  assert.equal(scripted.move, 'brake')
-  assert.equal(scripted.weaponA, 'fire')
-  assert.ok(['forward', 'dash_forward'].includes(unscripted.move))
 })
 
 test('catalog exposes visual descriptors for renderer dispatch and material language', () => {
@@ -792,45 +718,6 @@ test('catalog exposes visual descriptors for renderer dispatch and material lang
   assert.equal(visualFamilyFor('Utility_AIModule'), 'sensor')
   assert.equal(visualFamilyFor('Style_LightBar'), 'light_bar')
   assert.equal(visualFamilyFor('Tread_Heavy'), 'tread')
-})
-
-test('compiled opening script lookup preserves command overrides without per-tick scanning', () => {
-  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint)
-  const opponent = createPolicyBot('blue', bareBodyBlueprint)
-  const state = {
-    bot,
-    opponent,
-    arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
-  }
-  const policy = compileCommandPolicy({
-    tactics: normalizeTactics({
-      movementPolicy: 'close',
-      preferredRange: 'contact',
-      aggression: 0.9,
-      weaponCadence: 'sustained',
-    }),
-    openingScript: { commands: [{ tick: 1, move: 'brake' }] },
-  })
-
-  policy.openingScript.commands.find = () => {
-    throw new Error('compiled policy should not scan openingScript.commands')
-  }
-
-  const command = chooseCommand(policy, 1, state)
-
-  assert.equal(command.move, 'brake')
-  assert.equal(command.weaponA, 'fire')
-})
-
-test('opening script index preserves first-command precedence for duplicate ticks', () => {
-  const index = createOpeningScriptIndex({
-    commands: [
-      { tick: 3, move: 'brake' },
-      { tick: 3, move: 'dash_forward' },
-    ],
-  })
-
-  assert.equal(getOpeningScriptCommand(index, 3)?.move, 'brake')
 })
 
 test('damage target ordering centralizes cause category, health, and stable tie-break rules', () => {
@@ -953,7 +840,6 @@ test('policy brakes instead of immediately reversing contradictory movement', ()
         preferredRange: 'long',
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     7,
     {
@@ -984,7 +870,6 @@ test('policy avoids projected center saw instead of walking mobile bot into spin
         aggression: 0.65,
         hazardPreference: 'avoid',
       }),
-      openingScript: { commands: [] },
     },
     8,
     {
@@ -1064,12 +949,10 @@ test('resolver applies non-damaging arena trap effects instead of rendering them
     red: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: brakePlan,
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: brakePlan,
     },
     arena: { name: 'Trap Test', width: 24, height: 16, activeHazards: ['blue magnet'] },
   })
@@ -1089,12 +972,10 @@ test('resolver applies non-damaging arena trap effects instead of rendering them
 test('resolver applies movement tactics to replay movement for the same blueprint', () => {
   const baseRed = {
     blueprint: validSpinnerSubmission.blueprint,
-    openingScript: { commands: [] },
   }
   const staticBlue = {
     blueprint: bareBodyBlueprint,
     tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-    openingScript: { commands: [] },
   }
   const closeResult = resolveCombat({
     round: 2,
@@ -1133,12 +1014,10 @@ test('resolver emits semantic movement metadata for actual move events', () => {
     red: {
       blueprint: fastMobileBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close' }),
-      openingScript: repeatedScript(3, { move: 'dash_forward' }),
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Move Metadata Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1166,7 +1045,6 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: validSpinnerSubmission.openingScript,
     },
     blue: {
       blueprint: validSpinnerSubmission.blueprint,
@@ -1176,7 +1054,6 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: validSpinnerSubmission.openingScript,
     },
     arena: { name: 'Deterministic Impact Test', width: 24, height: 16, activeHazards: [] },
   }
@@ -1207,12 +1084,10 @@ test('resolver emits independent weaponA and weaponB fire from two weapon slots'
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Slot Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1266,20 +1141,10 @@ test('resolver ignores weaponB fire commands when only one weapon slot exists', 
         movementPolicy: 'hold_ground',
         weaponCadence: 'hold_fire',
       }),
-      openingScript: {
-        commands: [
-          { tick: 1, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
-          { tick: 2, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
-          { tick: 3, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
-          { tick: 4, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
-          { tick: 5, move: 'brake', weaponA: 'hold', weaponB: 'fire' },
-        ],
-      },
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Slot Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1319,12 +1184,10 @@ test('resolver applies net status to slow movement on later ticks', () => {
     red: {
       blueprint: netControlBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close', weaponCadence: 'sustained' }),
-      openingScript: repeatedScript(10, { move: 'forward', weaponA: 'fire' }),
     },
     blue: {
       blueprint: runnerBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close' }),
-      openingScript: repeatedScript(10, { move: 'forward' }),
     },
     arena: { name: 'Status Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1360,12 +1223,10 @@ test('resolver gates booster burst with a runtime-part cooldown', () => {
     red: {
       blueprint: boosterBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close' }),
-      openingScript: repeatedScript(6, { move: 'forward', utility: 'activate' }),
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Cooldown Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1387,13 +1248,12 @@ test('resolver limits repair kit to one runtime-part charge', () => {
       { id: 'repair', partId: 'Utility_RepairKit', position: [0, 0, -1], rotation: [0, 0, 0] },
     ],
   }
-  const result = resolveCombat({
+  const resolution = resolveSubmittedCombat({
     round: 1,
-    seed: 'repair-charge-check',
+    seed: 'repair-submitted-charge-check',
     red: {
       blueprint: repairBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: repeatedScript(14, { move: 'brake', utility: 'activate' }),
     },
     blue: {
       blueprint: partBreakAttackerBlueprint,
@@ -1403,27 +1263,17 @@ test('resolver limits repair kit to one runtime-part charge', () => {
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Repair Test', width: 24, height: 16, activeHazards: [] },
+  }, {
+    red: repeatedCommands(12, { move: 'brake', utility: 'activate' }),
+    blue: repeatedCommands(12, { move: 'dash_forward', weaponA: 'fire' }),
   })
-  const redDamageEvents = result.replay.events.filter(
-    (event) => event.type === 'damage' && event.bot === 'red',
-  )
-  const repairedBeforeNonOverkillDamage = redDamageEvents.reduce((total, event, index) => {
-    const previous = redDamageEvents[index - 1]
 
-    if (!previous || previous.remainingHealth <= event.amount) {
-      return total
-    }
-
-    const observedHealthLoss = previous.remainingHealth - event.remainingHealth
-
-    return total + Math.max(0, event.amount - observedHealthLoss)
-  }, 0)
-
-  assert.ok(redDamageEvents.length > 2)
-  assert.equal(Math.round(repairedBeforeNonOverkillDamage * 100) / 100, 8)
+  assert.equal(resolution.status, 'active')
+  assert.equal(resolution.snapshot.red.charges['repair:repair_kit'], 0)
+  assert.ok(resolution.snapshot.red.cooldowns['repair:repair_kit'] > 0)
+  assert.ok(resolution.snapshot.red.health > 17)
 })
 
 test('resolver limits drone controller with charges and cooldown', () => {
@@ -1440,12 +1290,10 @@ test('resolver limits drone controller with charges and cooldown', () => {
     red: {
       blueprint: droneBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: repeatedScript(12, { move: 'brake', utility: 'activate' }),
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Drone Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1470,12 +1318,10 @@ test('resolver stops destroyed utility behavior before later utility resolution'
     red: {
       blueprint: droneBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: repeatedScript(4, { move: 'brake', utility: 'activate' }),
     },
     blue: {
       blueprint: droneBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: repeatedScript(4, { move: 'brake', utility: 'activate' }),
     },
     arena: { name: 'Destroyed Utility Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1512,7 +1358,6 @@ test('resolver keeps status and cooldown ordering deterministic', () => {
         aggression: 0.85,
         weaponCadence: 'sustained',
       }),
-      openingScript: repeatedScript(12, { move: 'forward', weaponA: 'fire', utility: 'activate' }),
     },
     blue: {
       blueprint: mixedRuntimeBlueprint,
@@ -1522,7 +1367,6 @@ test('resolver keeps status and cooldown ordering deterministic', () => {
         aggression: 0.85,
         weaponCadence: 'sustained',
       }),
-      openingScript: repeatedScript(12, { move: 'forward', weaponA: 'fire', utility: 'activate' }),
     },
     arena: { name: 'Ordering Test', width: 24, height: 16, activeHazards: [] },
   }
@@ -1579,7 +1423,6 @@ test('resolver gives stationary spinner a part-backed contact threat without cha
         aggression: 0.85,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: brawlerBlueprint,
@@ -1589,7 +1432,6 @@ test('resolver gives stationary spinner a part-backed contact threat without cha
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Spinner Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1639,7 +1481,6 @@ test('resolver lets turret kiters fire while moving and lose that behavior witho
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint,
@@ -1649,7 +1490,6 @@ test('resolver lets turret kiters fire while moving and lose that behavior witho
         aggression: 0.55,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Turret Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1702,17 +1542,10 @@ test('resolver gives net control forced movement and slow effects from live cont
         aggression: 0.6,
         weaponCadence: 'sustained',
       }),
-      openingScript: repeatedScript(14, {
-        move: 'forward',
-        weaponA: 'fire',
-        weaponB: 'fire',
-        utility: 'activate',
-      }),
     },
     blue: {
       blueprint: runnerBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close' }),
-      openingScript: repeatedScript(14, { move: 'forward' }),
     },
     arena: { name: 'Jailer Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1766,7 +1599,6 @@ test('resolver lets booster hazard bait lure a heavier bot into active hazards',
         aggression: 0.35,
         hazardPreference: 'bait',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: mobileBruiserBlueprint,
@@ -1776,7 +1608,6 @@ test('resolver lets booster hazard bait lure a heavier bot into active hazards',
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Hazard Test', width: 24, height: 16, activeHazards: ['floor_saw'] },
   })
@@ -1838,12 +1669,10 @@ test('resolver gives wedge flipper bully extra contact damage and disruption', (
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: targetBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'close', preferredRange: 'contact' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Bully Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1898,7 +1727,6 @@ test('resolver makes porcupine shell punish contact through armor and anchor par
         aggression: 0.3,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: brawlerBlueprint,
@@ -1908,7 +1736,6 @@ test('resolver makes porcupine shell punish contact through armor and anchor par
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Porcupine Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1942,12 +1769,10 @@ test('resolver models commander drone as charged ability pressure, not mini-bot 
     red: {
       blueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: repeatedScript(10, { move: 'brake', utility: 'activate' }),
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
     arena: { name: 'Drone Archetype Test', width: 24, height: 16, activeHazards: [] },
   })
@@ -1977,12 +1802,10 @@ test('resolver emits a block-tied detach event when a part reaches zero HP', () 
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: partBreakTargetBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
   })
   const detach = result.replay.events.find(
@@ -2027,12 +1850,10 @@ test('resolver knockout occurs only after all parts on the losing bot are deplet
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: bareBodyBlueprint,
       tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
-      openingScript: { commands: [] },
     },
   })
   const knockout = result.replay.events.find((event) => event.type === 'knockout')
@@ -2049,11 +1870,9 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
     seed: 'sparse-plan',
     red: {
       blueprint: bareBodyBlueprint,
-      openingScript: sparseOpeningScript,
     },
     blue: {
       blueprint: bareBodyBlueprint,
-      openingScript: { commands: [] },
     },
   }
   const first = resolveCombat(input)
@@ -2114,7 +1933,6 @@ test('resolver gives explicit kite policy range-preserving weapon movement', () 
         aggression: 0.85,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
     blue: {
       blueprint: fastSkirmisherBlueprint,
@@ -2124,7 +1942,6 @@ test('resolver gives explicit kite policy range-preserving weapon movement', () 
         aggression: 0.55,
         weaponCadence: 'sustained',
       }),
-      openingScript: { commands: [] },
     },
   })
   const blueMoves = result.replay.events.filter(
@@ -2479,12 +2296,6 @@ test('session accepts v2 tactics without a legacy turnPlan', async () => {
       aggression: 0.75,
       weaponCadence: 'opportunistic',
     },
-    openingScript: {
-      commands: [
-        { tick: 1, move: 'forward', weaponA: 'hold' },
-        { tick: 2, move: 'forward', weaponA: 'fire' },
-      ],
-    },
   }
 
   const redSubmission = await session.submitRoundPlan(redToken, v2Submission)
@@ -2492,7 +2303,7 @@ test('session accepts v2 tactics without a legacy turnPlan', async () => {
   assert.equal(redSubmission.ok, true)
   assert.equal(redSubmission.value.state.ownSubmission.schemaVersion, 2)
   assert.equal('turnPlan' in redSubmission.value.state.ownSubmission, false)
-  assert.equal(redSubmission.value.state.ownSubmission.openingScript.commands.length, 2)
+  assert.equal('openingScript' in redSubmission.value.state.ownSubmission, false)
 
   const blueSubmission = await session.submitRoundPlan(blueToken, v2Submission)
 

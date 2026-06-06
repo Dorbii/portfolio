@@ -2,7 +2,6 @@ import {
   MOVEMENT_COMMANDS,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
-  type CommandSequence,
   type GeneratedControls,
   type TurnCommand,
   type TurnCommandSubmission,
@@ -13,72 +12,13 @@ import { isRecord, issue, result } from './common.js'
 
 const MAX_COMBAT_TURN_TICKS = 600
 
-type CommandSequenceShapeOptions = {
-  exactCommandCount?: boolean
-  path?: string
-}
-
-export function validateCommandSequenceShape(value: unknown, maxTicks = 5): ValidationResult {
-  return validateCommandSequenceShapeWithOptions(value, maxTicks)
-}
-
-export function validateOpeningScriptShape(
-  value: unknown,
-  path = 'submission.openingScript',
-): ValidationResult {
-  return validateCommandSequenceShapeWithOptions(value, 5, {
-    exactCommandCount: false,
-    path,
-  })
-}
-
-export function validateCommandSequenceAgainstControls(
-  sequence: CommandSequence,
+export function validateTurnCommandAgainstControls(
+  command: TurnCommand,
   controls: GeneratedControls,
-  path = 'commandSequence',
+  path = 'turnCommand',
 ): ValidationResult {
   const issues: ValidationIssue[] = []
-
-  sequence.commands.forEach((command, index) => {
-    const commandPath = `${path}.commands.${index}`
-
-    if (command.move !== undefined && !controls.movement.includes(command.move)) {
-      issues.push(
-        issue('MOVE_NOT_AVAILABLE', `${commandPath}.move`, `${command.move} is unavailable.`),
-      )
-    }
-
-    if (command.weaponA !== undefined && !controls.weaponA?.includes(command.weaponA)) {
-      issues.push(
-        issue(
-          'WEAPON_A_NOT_AVAILABLE',
-          `${commandPath}.weaponA`,
-          'weaponA is unavailable for this blueprint.',
-        ),
-      )
-    }
-
-    if (command.weaponB !== undefined && !controls.weaponB?.includes(command.weaponB)) {
-      issues.push(
-        issue(
-          'WEAPON_B_NOT_AVAILABLE',
-          `${commandPath}.weaponB`,
-          'weaponB is unavailable for this blueprint.',
-        ),
-      )
-    }
-
-    if (command.utility !== undefined && !controls.utility?.includes(command.utility)) {
-      issues.push(
-        issue(
-          'UTILITY_NOT_AVAILABLE',
-          `${commandPath}.utility`,
-          'utility controls are unavailable for this blueprint.',
-        ),
-      )
-    }
-  })
-
+  validateTurnCommandControls(command, controls, path, issues)
   return result(issues)
 }
 
@@ -114,12 +54,45 @@ export function validateTurnCommandSubmissionShape(
   return result(issues)
 }
 
-export function validateTurnCommandAgainstControls(
+function validateTurnCommandControls(
   command: TurnCommand,
   controls: GeneratedControls,
-  path = 'turnCommand',
-): ValidationResult {
-  return validateCommandSequenceAgainstControls({ commands: [command] }, controls, path)
+  path: string,
+  issues: ValidationIssue[],
+): void {
+  if (command.move !== undefined && !controls.movement.includes(command.move)) {
+    issues.push(issue('MOVE_NOT_AVAILABLE', `${path}.move`, `${command.move} is unavailable.`))
+  }
+
+  if (command.weaponA !== undefined && !controls.weaponA?.includes(command.weaponA)) {
+    issues.push(
+      issue(
+        'WEAPON_A_NOT_AVAILABLE',
+        `${path}.weaponA`,
+        'weaponA is unavailable for this blueprint.',
+      ),
+    )
+  }
+
+  if (command.weaponB !== undefined && !controls.weaponB?.includes(command.weaponB)) {
+    issues.push(
+      issue(
+        'WEAPON_B_NOT_AVAILABLE',
+        `${path}.weaponB`,
+        'weaponB is unavailable for this blueprint.',
+      ),
+    )
+  }
+
+  if (command.utility !== undefined && !controls.utility?.includes(command.utility)) {
+    issues.push(
+      issue(
+        'UTILITY_NOT_AVAILABLE',
+        `${path}.utility`,
+        'utility controls are unavailable for this blueprint.',
+      ),
+    )
+  }
 }
 
 export function asTurnCommandSubmission(
@@ -129,75 +102,6 @@ export function asTurnCommandSubmission(
   return validateTurnCommandSubmissionShape(value, expectedTick).ok
     ? (value as TurnCommandSubmission)
     : null
-}
-
-function validateCommandSequenceShapeWithOptions(
-  value: unknown,
-  maxTicks = 5,
-  options: CommandSequenceShapeOptions = {},
-): ValidationResult {
-  const issues: ValidationIssue[] = []
-  const path = options.path ?? 'commandSequence'
-  const exactCommandCount = options.exactCommandCount ?? true
-
-  if (!isRecord(value)) {
-    return {
-      ok: false,
-      issues: [issue('INVALID_COMMAND_SEQUENCE', path, 'Expected command sequence object.')],
-    }
-  }
-
-  if (!Array.isArray(value.commands)) {
-    return {
-      ok: false,
-      issues: [
-        issue('INVALID_COMMANDS', `${path}.commands`, 'Expected commands array.'),
-      ],
-    }
-  }
-
-  if (exactCommandCount && value.commands.length !== maxTicks) {
-    issues.push(
-      issue(
-        'INVALID_TICK_COUNT',
-        `${path}.commands`,
-        `Command sequence must include exactly ${maxTicks} command ticks.`,
-      ),
-    )
-  } else if (!exactCommandCount && value.commands.length > maxTicks) {
-    issues.push(
-      issue(
-        'TOO_MANY_COMMANDS',
-        `${path}.commands`,
-        `Opening script can include at most ${maxTicks} command ticks.`,
-      ),
-    )
-  }
-
-  const ticks = new Set<number>()
-
-  value.commands.forEach((command, index) => {
-    const commandPath = `${path}.commands.${index}`
-
-    if (!isRecord(command)) {
-      issues.push(issue('INVALID_COMMAND', commandPath, 'Expected command object.'))
-      return
-    }
-
-    const tick = validateTurnCommandFields(command, commandPath, issues, {
-      maxTick: maxTicks,
-    })
-
-    if (tick !== undefined && ticks.has(tick)) {
-      issues.push(
-        issue('DUPLICATE_TICK', `${commandPath}.tick`, `Duplicate tick ${tick}.`),
-      )
-    } else if (tick !== undefined) {
-      ticks.add(tick)
-    }
-  })
-
-  return result(issues)
 }
 
 function validateTurnCommandFields(

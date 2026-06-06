@@ -8,7 +8,6 @@ import { MAX_AGENT_CHAT_MESSAGES_PER_SUBMISSION, isRecord, issue, result } from 
 import { validateBlueprintShape, validatePurchaseShape } from './blueprint.js'
 import { validateAgentChatMessageBatchShape } from './chat.js'
 import { validateBotTacticsShape } from './tactics.js'
-import { validateOpeningScriptShape } from './commandSequence.js'
 
 export function validateRoundPlanSubmissionShape(
   value: unknown,
@@ -61,7 +60,7 @@ export function validateRoundPlanSubmissionShape(
       issue(
         'LEGACY_TURN_PLAN_REMOVED',
         'submission.turnPlan',
-        'Round submissions use openingScript only; submit live turns with submit_turn_command.',
+        'Round submissions use tactics only; submit live turns with submit_turn_command.',
       ),
     )
   }
@@ -73,11 +72,13 @@ export function validateRoundPlanSubmissionShape(
   }
 
   if ('openingScript' in value) {
-    const openingScriptResult = validateOpeningScriptShape(value.openingScript)
-
-    if (!openingScriptResult.ok) {
-      issues.push(...openingScriptResult.issues)
-    }
+    issues.push(
+      issue(
+        'OPENING_SCRIPT_REMOVED',
+        'submission.openingScript',
+        'Opening scripts were removed; submit high-level tactics for planning and live turn commands during combat.',
+      ),
+    )
   }
 
   if ('rationale' in value && typeof value.rationale !== 'string') {

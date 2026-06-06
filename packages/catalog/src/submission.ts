@@ -10,7 +10,6 @@ import type {
 import {
   validateRoundPlanSubmissionShape,
   validateTurnCommandAgainstControls,
-  validateCommandSequenceAgainstControls,
 } from '../../schemas/src/index.js'
 import { validateBlueprintAssembly } from './blueprint.js'
 import { deriveControls } from './controls.js'
@@ -62,16 +61,6 @@ export function validateRoundSubmission(input: {
 
   const controls = deriveControls(input.submission.blueprint)
   const normalizedSubmission = normalizeRoundSubmission(input.submission)
-  const openingScriptResult = validateCommandSequenceAgainstControls(
-    normalizedSubmission.openingScript,
-    controls,
-    getOpeningScriptPath(),
-  )
-
-  if (!openingScriptResult.ok) {
-    return { ok: false, issues: openingScriptResult.issues }
-  }
-
   const movementPolicyResult = validateMovementPolicyAgainstControls(
     normalizedSubmission.tactics.movementPolicy,
     controls,
@@ -101,10 +90,6 @@ export function validateSubmittedTurnCommand(input: {
   )
 
   return validation.ok ? { ok: true } : { ok: false, issues: validation.issues }
-}
-
-function getOpeningScriptPath(): string {
-  return 'submission.openingScript'
 }
 
 function validateMovementPolicyAgainstControls(

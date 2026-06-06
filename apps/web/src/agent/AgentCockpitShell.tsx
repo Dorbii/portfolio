@@ -3,7 +3,6 @@ import { capitalize } from '../shared/format'
 import {
   Button,
   Panel,
-  StatusBadge,
 } from '../shared/ui'
 import { JsonScriptPanel, SectionTitle } from './AgentCockpitPanels'
 import type { AgentCockpitWorkflow } from './agentCockpitViewState'
@@ -19,11 +18,6 @@ export function AgentCockpitHeader({
   invite: AgentInvite
 }) {
   const isObserverCockpit = Boolean(invite.observerToken && !invite.claimToken)
-  const accessLabel = isObserverCockpit
-    ? 'Observer'
-    : controller.canMutateRole
-      ? 'Agent'
-      : 'No key'
 
   return (
     <header className="agent-live-header agent-command-header">
@@ -32,19 +26,15 @@ export function AgentCockpitHeader({
         <h1>{capitalize(invite.role)} Agent Cockpit</h1>
       </div>
       <div className="agent-command-actions">
-        <div className="agent-observer-access" aria-label="Cockpit access">
-          <span>Access</span>
-          <StatusBadge tone={controller.hasPlayerKey ? 'ok' : 'warning'}>{accessLabel}</StatusBadge>
-        </div>
         {!isObserverCockpit ? (
-            <Button
-              type="button"
-              variant="primary"
-              onClick={() => void controller.connectRole({ agentName: `${invite.role}-agent` })}
-              disabled={!controller.canClaimRole}
-            >
-              {controller.claimButtonLabel}
-            </Button>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => void controller.connectRole({ agentName: `${invite.role}-agent` })}
+            disabled={!controller.canClaimRole}
+          >
+            {controller.claimButtonLabel}
+          </Button>
         ) : null}
         <Button
           type="button"

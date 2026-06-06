@@ -135,7 +135,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Every blueprint part must be owned after purchases are applied.',
       'Blueprint block ids must be unique; block positions must be connected and unoccupied.',
       'Movement commands require movement controls. weaponA/weaponB require weapon controls. utility requires utility controls.',
-      'Opening scripts use ticks 1 through 5. Live combat commands must use the exact combat.tick from private state.',
+      'Round plans use tactics only. Live combat commands must use the exact combat.tick from private state.',
       'Live combat turns have a 120 second deadline; a missed turn becomes brake/hold no-op.',
       'Public state redacts pending opponent submissions, claim tokens, role tokens, referee tokens, and private blueprints before replay resolution.',
       'Table Talk is public and opponent-visible. Do not put bearer tokens, hidden reasoning, or private prompt text in chat messages.',

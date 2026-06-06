@@ -2,17 +2,11 @@ import {
   type ArenaConfig,
   type MovementCommand,
   type NormalizedBotTactics,
-  type OpeningScript,
   type TeamRole,
   type TurnCommand,
   type Vector3,
 } from '../../schemas/src/index.js'
 import type { BotStats } from './deriveStats.js'
-import {
-  createOpeningScriptIndex,
-  getOpeningScriptCommand,
-  type OpeningScriptIndex,
-} from './openingScriptIndex.js'
 import {
   clampPositionToArena,
   compileArenaTopology,
@@ -25,11 +19,6 @@ import {
 
 export type CommandPolicy = {
   tactics: NormalizedBotTactics
-  openingScript: OpeningScript
-}
-
-export type CompiledCommandPolicy = CommandPolicy & {
-  openingScriptIndex: OpeningScriptIndex
 }
 
 export type PolicyBotState = {
@@ -49,6 +38,9 @@ export type PolicyBotState = {
   weaponReachBonus?: number
   contactDanger?: number
   controlDanger?: number
+  hasBoosterUtility?: boolean
+  hasRepairUtility?: boolean
+  hasDroneUtility?: boolean
 }
 
 export type PolicyState = {
@@ -72,64 +64,19 @@ type PolicyContext = PolicyState & {
 const CONTACT_DISTANCE = 1.28
 
 export function chooseCommand(
-  policy: CommandPolicy | CompiledCommandPolicy,
+  policy: CommandPolicy,
   tick: number,
   state: PolicyState,
 ): TurnCommand {
   const policyCommand = choosePolicyCommand(policy.tactics, tick, state)
-  const scripted = getScriptedCommand(policy, tick)
-  const scriptedFields = definedScriptedFields(scripted)
   const command: TurnCommand = {
     ...policyCommand,
-    ...scriptedFields,
     tick,
   }
 
-  if (scriptedFields.move === undefined) {
-    command.move = smoothContradictoryMove(state.bot.lastMove, command.move)
-  }
+  command.move = smoothContradictoryMove(state.bot.lastMove, command.move)
 
   return command
-}
-
-export function compileCommandPolicy(policy: CommandPolicy): CompiledCommandPolicy {
-  return {
-    ...policy,
-    openingScriptIndex: createOpeningScriptIndex(policy.openingScript),
-  }
-}
-
-function getScriptedCommand(
-  policy: CommandPolicy | CompiledCommandPolicy,
-  tick: number,
-): TurnCommand | undefined {
-  if ('openingScriptIndex' in policy) {
-    return getOpeningScriptCommand(policy.openingScriptIndex, tick)
-  }
-
-  return policy.openingScript.commands.find((command) => command.tick === tick)
-}
-
-function definedScriptedFields(command: TurnCommand | undefined): Omit<
-  Partial<TurnCommand>,
-  'tick'
-> {
-  const fields: Omit<Partial<TurnCommand>, 'tick'> = {}
-
-  if (command?.move !== undefined) {
-    fields.move = command.move
-  }
-  if (command?.weaponA !== undefined) {
-    fields.weaponA = command.weaponA
-  }
-  if (command?.weaponB !== undefined) {
-    fields.weaponB = command.weaponB
-  }
-  if (command?.utility !== undefined) {
-    fields.utility = command.utility
-  }
-
-  return fields
 }
 
 function choosePolicyCommand(
@@ -383,6 +330,7 @@ function chooseUtilityCommand({
   tactics,
   gap,
   idealRange,
+  healthRatio,
   inActiveHazard,
   topology,
   tick,
@@ -393,6 +341,18 @@ function chooseUtilityCommand({
 
   if (tactics.movementPolicy === 'kite' && gap < idealRange * 0.85) {
     return 'activate'
+  }
+
+  if (bot.hasBoosterUtility && tactics.movementPolicy === 'close') {
+    return tick % 4 === 1 ? 'activate' : 'hold'
+  }
+
+  if (bot.hasRepairUtility && healthRatio < 0.96) {
+    return 'activate'
+  }
+
+  if (bot.hasDroneUtility) {
+    return tick % 4 === 1 ? 'activate' : 'hold'
   }
 
   if (tactics.movementPolicy === 'bait_hazard' && hasActiveHazard(topology)) {

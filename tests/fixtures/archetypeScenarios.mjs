@@ -12,20 +12,6 @@ const hazardArena = {
   activeHazards: ['floor_saw'],
 }
 
-export function repeatedScript(ticks, fieldsOrFactory) {
-  return {
-    commands: Array.from({ length: ticks }, (_, index) => {
-      const tick = index + 1
-      const fields =
-        typeof fieldsOrFactory === 'function'
-          ? fieldsOrFactory(tick)
-          : fieldsOrFactory
-
-      return { tick, ...fields }
-    }),
-  }
-}
-
 function block(id, partId, position, rotation = [0, 0, 0]) {
   return { id, partId, position, rotation }
 }
@@ -149,7 +135,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.85,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         blue: {
           blueprint: brawlerBlueprint,
@@ -159,7 +144,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.9,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         arena: noHazardArena,
       },
@@ -186,7 +170,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.9,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         blue: {
           blueprint: turretKiterBlueprint,
@@ -196,7 +179,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.55,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         arena: noHazardArena,
       },
@@ -219,7 +201,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.6,
             weaponCadence: 'sustained',
           }),
-          openingScript: repeatedScript(14, { move: 'forward' }),
         },
         blue: {
           blueprint: fastSprinterBlueprint,
@@ -228,7 +209,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             preferredRange: 'contact',
             aggression: 0.85,
           }),
-          openingScript: repeatedScript(14, { move: 'forward' }),
         },
         arena: noHazardArena,
       },
@@ -251,7 +231,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.35,
             hazardPreference: 'bait',
           }),
-          openingScript: emptyScript,
         },
         blue: {
           blueprint: heavyTreadTankBlueprint,
@@ -261,7 +240,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.9,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         arena: hazardArena,
       },
@@ -283,7 +261,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             preferredRange: 'mid',
             aggression: 0.5,
           }),
-          openingScript: repeatedScript(10, { utility: 'activate' }),
         },
         blue: {
           blueprint: stationarySpinnerBlueprint,
@@ -293,7 +270,6 @@ export function createReplayBelievabilityScenarios(normalizeTactics) {
             aggression: 0.85,
             weaponCadence: 'sustained',
           }),
-          openingScript: emptyScript,
         },
         arena: noHazardArena,
       },

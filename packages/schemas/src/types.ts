@@ -200,12 +200,6 @@ export type TurnCommandSubmission = {
   utility?: UtilityCommand
 }
 
-export type CommandSequence = {
-  commands: TurnCommand[]
-}
-
-export type OpeningScript = CommandSequence
-
 export const TACTIC_STYLES = [
   'balanced',
   'aggressive',
@@ -275,6 +269,12 @@ export const AGENT_CHAT_MESSAGE_KINDS = [
   'reflection',
 ] as const
 
+export const PUBLIC_AGENT_CHAT_MESSAGE_KINDS = [
+  'taunt',
+  'observation',
+  'strategy',
+] as const
+
 export type AgentChatMessageKind = (typeof AGENT_CHAT_MESSAGE_KINDS)[number]
 
 export type AgentChatMessageRequest = {
@@ -288,7 +288,6 @@ export type RoundPlanSubmissionV2 = {
   purchases: Purchase[]
   blueprint: BotBlueprint
   tactics: BotTactics
-  openingScript?: OpeningScript
   rationale?: string
   chat?: AgentChatMessageRequest[]
 }
@@ -301,7 +300,6 @@ export type NormalizedRoundPlanSubmission = {
   purchases: Purchase[]
   blueprint: BotBlueprint
   tactics: NormalizedBotTactics
-  openingScript: OpeningScript
   rationale?: string
   chat?: AgentChatMessageRequest[]
 }

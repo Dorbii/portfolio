@@ -13,7 +13,6 @@ import {
 import {
   ActionGroup,
   Button,
-  ProgressMeter,
   SectionHeading,
   StatusBadge,
 } from '../shared/ui'
@@ -242,78 +241,6 @@ function ScoreboardTeam({
   )
 }
 
-export function TeamStatusDashboard({
-  publicSession,
-  replayPayload,
-}: {
-  publicSession: PublicSessionState | null
-  replayPayload: ReplayPayload | null
-}) {
-  const red = getTeamDashboardData('red', publicSession, replayPayload)
-  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
-  const maxDamage = Math.max(red.damageTaken, blue.damageTaken, 1)
-  const maxHits = Math.max(red.hitCount, blue.hitCount, 1)
-
-  return (
-    <div className="team-status-dashboard">
-      {[red, blue].map((team) => (
-        <section className={`team-status-column ${team.role}`} key={team.role}>
-          <h3>{team.name}</h3>
-          <div className="team-status-facts">
-            <StatusFact
-              label="Connection"
-              tone={team.claimed ? 'ok' : 'warning'}
-              value={team.claimed ? 'Connected' : 'Open'}
-            />
-            <StatusFact
-              label="Plan"
-              tone={team.submitted ? 'ok' : 'neutral'}
-              value={team.submitted ? 'Locked' : 'Pending'}
-            />
-          </div>
-          <ProgressMeter
-            label="Health Left"
-            tone={team.role}
-            value={team.healthPercent}
-            valueLabel={team.healthLabel}
-          />
-          <ProgressMeter
-            label="Damage Taken"
-            max={maxDamage}
-            tone={team.role}
-            value={team.damageTaken}
-            valueLabel={`${team.damageTaken}`}
-          />
-          <ProgressMeter
-            label="Weapon Hits"
-            max={maxHits}
-            tone={team.role}
-            value={team.hitCount}
-            valueLabel={`${team.hitCount}`}
-          />
-        </section>
-      ))}
-    </div>
-  )
-}
-
-function StatusFact({
-  label,
-  tone,
-  value,
-}: {
-  label: string
-  tone: 'neutral' | 'ok' | 'warning'
-  value: string
-}) {
-  return (
-    <div className="team-status-fact">
-      <span>{label}</span>
-      <StatusBadge tone={tone}>{value}</StatusBadge>
-    </div>
-  )
-}
-
 export function KeyStatsDashboard({
   publicSession,
   replayPayload,
@@ -359,39 +286,27 @@ function DashboardStatRow({
   )
 }
 
-export function RoundSummaryDashboard({
+export function ArenaImpactDashboard({
   publicSession,
   replayPayload,
 }: {
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
 }) {
-  const red = getTeamDashboardData('red', publicSession, replayPayload)
-  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
-  const result = publicSession?.lastResult
+  const impact = summarizeArenaImpact(publicSession, replayPayload)
 
   return (
-    <div className="round-summary-dashboard">
-      <div className="dashboard-panel-tabs" aria-label="Round summary view">
-        <span className="is-active">Round Summary</span>
-        <span>Event Log</span>
+    <div className="arena-impact-dashboard">
+      <div className="arena-impact-table">
+        <DashboardStatRow label="Hazard Damage Taken" red={`${impact.damage.red}`} blue={`${impact.damage.blue}`} />
+        <DashboardStatRow label="Hazard Triggers" red={`${impact.triggers.red}`} blue={`${impact.triggers.blue}`} />
+        <DashboardStatRow label="Damaging Hits" red={`${impact.damagingHits.red}`} blue={`${impact.damagingHits.blue}`} />
       </div>
-      <div className="round-summary-table">
-        <DashboardStatRow label="Damage Taken" red={`${red.damageTaken}`} blue={`${blue.damageTaken}`} />
-        <DashboardStatRow label="Effective Hits" red={`${red.hitCount}`} blue={`${blue.hitCount}`} />
-        <DashboardStatRow label="Health Left" red={red.healthLabel} blue={blue.healthLabel} />
-        <DashboardStatRow
-          label="Submitted"
-          red={red.submitted ? 'Yes' : 'No'}
-          blue={blue.submitted ? 'Yes' : 'No'}
-        />
-        <DashboardStatRow
-          label="Round Winner"
-          red={result?.winner === 'red' ? 'Winner' : '-'}
-          blue={result?.winner === 'blue' ? 'Winner' : '-'}
-        />
+      <div className="arena-impact-summary">
+        <span>Active hazards</span>
+        <strong>{impact.activeHazards}</strong>
+        <p>{impact.summary}</p>
       </div>
-      <p>{result?.reason ?? 'Round outcome appears after combat resolves.'}</p>
     </div>
   )
 }
@@ -429,20 +344,28 @@ export function PublicChatLog({
   return (
     <ol className="chat-log">
       {messages.map((message) => (
-        <li className={`chat-message ${message.role}`} key={message.id}>
-          <div className="chat-message-header">
-            <span className={`role-chip ${message.role}`}>{capitalize(message.role)}</span>
-            <strong>{formatLabel(message.kind)}</strong>
-            <time dateTime={message.at}>{formatClockTime(message.at)}</time>
-          </div>
-          <p>{message.message}</p>
-          <small>
-            Round {message.round} / {formatLabel(message.phase)}
-            {message.agentName ? ` / ${message.agentName}` : ''}
-          </small>
-        </li>
+        <ChatMessageItem message={message} key={message.id} />
       ))}
     </ol>
+  )
+}
+
+function ChatMessageItem({ message }: { message: PublicSessionState['chatLog'][number] }) {
+  const body = message.message.trim()
+
+  return (
+    <li className={`chat-message ${message.role}`}>
+      <div className="chat-message-header">
+        <span className={`role-chip ${message.role}`}>{capitalize(message.role)}</span>
+        <strong>{formatLabel(message.kind)}</strong>
+        <time dateTime={message.at}>{formatClockTime(message.at)}</time>
+      </div>
+      <p className={body ? undefined : 'is-empty'}>{body || 'No message body supplied.'}</p>
+      <small>
+        Round {message.round} / {formatLabel(message.phase)}
+        {message.agentName ? ` / ${message.agentName}` : ''}
+      </small>
+    </li>
   )
 }
 
@@ -530,4 +453,67 @@ function getWinsRequired(maxRounds: number | undefined): number {
 
 function countImpactEvents(events: ReplayEvent[], role: TeamRole): number {
   return events.filter((event) => event.type === 'impact' && event.attacker === role).length
+}
+
+function summarizeArenaImpact(
+  publicSession: PublicSessionState | null,
+  replayPayload: ReplayPayload | null,
+) {
+  const hazardEvents = replayPayload?.timeline.events.filter((event) => event.type === 'hazard') ?? []
+  const damage = {
+    red: sumHazardDamage(hazardEvents, 'red'),
+    blue: sumHazardDamage(hazardEvents, 'blue'),
+  }
+  const triggers = {
+    red: countHazardTriggers(hazardEvents, 'red'),
+    blue: countHazardTriggers(hazardEvents, 'blue'),
+  }
+  const damagingHits = {
+    red: countDamagingHazardHits(hazardEvents, 'red'),
+    blue: countDamagingHazardHits(hazardEvents, 'blue'),
+  }
+  const totalDamage = damage.red + damage.blue
+  const activeHazards = publicSession?.arena.activeHazards.join(', ') || 'No hazards loaded'
+  const topHazard = mostDamagingHazard(hazardEvents)
+  const summary = !replayPayload
+    ? 'Arena impact appears after combat replay data resolves.'
+    : totalDamage > 0 && topHazard
+      ? `${formatLabel(topHazard.hazard)} dealt ${topHazard.damage} of ${totalDamage} total environment damage.`
+      : hazardEvents.length > 0
+        ? 'Arena hazards triggered, but no environment damage was applied.'
+        : 'No arena hazard events have resolved this round.'
+
+  return {
+    activeHazards,
+    damage,
+    damagingHits,
+    summary,
+    triggers,
+  }
+}
+
+function sumHazardDamage(events: Extract<ReplayEvent, { type: 'hazard' }>[], role: TeamRole): number {
+  return events
+    .filter((event) => event.bot === role)
+    .reduce((total, event) => total + event.damage, 0)
+}
+
+function countHazardTriggers(events: Extract<ReplayEvent, { type: 'hazard' }>[], role: TeamRole): number {
+  return events.filter((event) => event.bot === role).length
+}
+
+function countDamagingHazardHits(events: Extract<ReplayEvent, { type: 'hazard' }>[], role: TeamRole): number {
+  return events.filter((event) => event.bot === role && event.damage > 0).length
+}
+
+function mostDamagingHazard(events: Extract<ReplayEvent, { type: 'hazard' }>[]) {
+  const hazards = new Map<string, number>()
+
+  for (const event of events) {
+    hazards.set(event.hazard, (hazards.get(event.hazard) ?? 0) + event.damage)
+  }
+
+  return [...hazards.entries()]
+    .map(([hazard, damage]) => ({ hazard, damage }))
+    .sort((left, right) => right.damage - left.damage)[0]
 }

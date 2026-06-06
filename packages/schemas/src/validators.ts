@@ -11,9 +11,6 @@ export {
 } from './validators/blueprint.js'
 export {
   asTurnCommandSubmission,
-  validateCommandSequenceAgainstControls,
-  validateCommandSequenceShape,
-  validateOpeningScriptShape,
   validateTurnCommandAgainstControls,
   validateTurnCommandSubmissionShape,
 } from './validators/commandSequence.js'

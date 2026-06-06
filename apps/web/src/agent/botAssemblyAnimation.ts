@@ -62,9 +62,9 @@ export function attachAssemblyBot(
 
   const bot = createBotNode(resources.scene, blueprint, role, resources.materials)
 
-  bot.position.set(0, 0.16, 0)
+  bot.position.set(0, 0.22, -0.24)
   bot.rotation.y = role === 'red' ? -0.28 : 0.28
-  bot.scaling.setAll(1.28)
+  bot.scaling.setAll(1.08)
 
   const botMeshes = bot.getChildMeshes()
 
@@ -90,8 +90,8 @@ export function animateAssembly(resources: AssemblyResources, submitted: boolean
   const elapsed = (now - resources.startedAt) / 1000
   const bot = resources.bot
 
-  resources.scanBar.position.y = 0.34 + ((elapsed * 0.68) % 1.55)
-  resources.scanBar.scaling.x = 0.72 + Math.sin(elapsed * 2.4) * 0.08
+  resources.scanBar.position.y = 0.72 + ((elapsed * 0.5) % 1.35)
+  resources.scanBar.scaling.x = 0.66 + Math.sin(elapsed * 2.1) * 0.06
 
   const scan = submitted ? 0.9 : 0.7
   const rigSweep = Math.sin(elapsed * (submitted ? 1 : 1.45))
@@ -134,7 +134,7 @@ export function animateAssembly(resources: AssemblyResources, submitted: boolean
   const readyPulse = submitted ? 0.02 : 0.045
 
   bot.rotation.y += submitted ? 0.002 : 0.004
-  bot.position.y = 0.16 + Math.sin(elapsed * 2.2) * readyPulse
+  bot.position.y = 0.22 + Math.sin(elapsed * 2.2) * readyPulse
 
   resources.botMeshes.forEach((mesh) => {
     const metadata = mesh.metadata as AssemblyMetadata | undefined

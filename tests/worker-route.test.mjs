@@ -43,15 +43,6 @@ const validSpinnerSubmission = {
     aggression: 0.75,
     weaponCadence: 'opportunistic',
   },
-  openingScript: {
-    commands: [
-      { tick: 1, move: 'forward', weaponA: 'hold' },
-      { tick: 2, move: 'forward', weaponA: 'fire' },
-      { tick: 3, move: 'turn_left', weaponA: 'hold' },
-      { tick: 4, move: 'forward', weaponA: 'fire' },
-      { tick: 5, move: 'brake', weaponA: 'hold' },
-    ],
-  },
 }
 function cloneJson(value) {
   return JSON.parse(JSON.stringify(value))
@@ -427,7 +418,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assertCatalogGuidance(json)
   assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
   assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
-  assert.equal(json.examples.roundPlanSubmission.openingScript.commands.length, 5)
+  assert.equal('openingScript' in json.examples.roundPlanSubmission, false)
   assert.equal(json.examples.turnCommandSubmission.action, 'submit_turn_command')
   assert.ok(
     json.examples.roundPlanSubmission.purchases.some(
@@ -738,12 +729,6 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
       preferredRange: 'close',
       aggression: 0.75,
       weaponCadence: 'opportunistic',
-    },
-    openingScript: {
-      commands: [
-        { tick: 1, move: 'forward', weaponA: 'hold' },
-        { tick: 2, move: 'forward', weaponA: 'fire' },
-      ],
     },
   }
 

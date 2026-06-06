@@ -35,10 +35,6 @@ const agentRolePollingSource = readFileSync(
   new URL('../apps/web/src/agent/agentRolePolling.ts', import.meta.url),
   'utf8',
 )
-const agentChatFormsSource = readFileSync(
-  new URL('../apps/web/src/agent/useAgentChatForms.ts', import.meta.url),
-  'utf8',
-)
 const cockpitViewStateSource = readFileSync(
   new URL('../apps/web/src/agent/agentCockpitViewState.ts', import.meta.url),
   'utf8',
@@ -202,7 +198,9 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(refereeConsoleSource.includes('ReplayViewer'))
   assert.ok(refereeConsoleSource.includes("import('../replay/ReplayViewer')"))
   assert.ok(refereeConsoleSource.includes('PublicChatLog'))
-  assert.ok(refereeConsoleSource.includes('Fight comms'))
+  assert.ok(refereeConsoleSource.includes('Fight Comms'))
+  assert.ok(refereeConsoleSource.includes('ArenaImpactDashboard'))
+  assert.ok(refereeConsoleSource.indexOf('fight-comms-panel') < refereeConsoleSource.indexOf('key-stats-panel'))
   assert.ok(refereeRuntimeSource.includes('advanceRound'))
   assert.equal(refereeRuntimeSource.includes('Create capability token'), false)
   assert.equal(refereeConsoleSource.includes('Referee capability token'), false)
@@ -212,11 +210,21 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(refereePanelsSource.includes('scoreboard-session-actions'))
   assert.ok(refereePanelsSource.includes('Refresh Session'))
   assert.ok(refereePanelsSource.includes('scoreboard-handoff-actions'))
-  assert.ok(refereePanelsSource.includes('team-status-facts'))
-  assert.ok(refereePanelsSource.includes('StatusFact'))
+  assert.ok(refereePanelsSource.includes('scoreboard-team-status'))
+  assert.ok(refereePanelsSource.includes('ArenaImpactDashboard'))
+  assert.ok(refereePanelsSource.includes('Hazard Damage Taken'))
+  assert.ok(refereePanelsSource.includes('summarizeArenaImpact'))
+  assert.ok(refereePanelsSource.includes('No message body supplied.'))
   assert.ok(refereePanelsSource.includes('View cockpit'))
   assert.ok(refereePanelsSource.includes('Copy handoff'))
-  assert.ok(refereeRuntimeSource.includes('handoff copied'))
+  assert.equal(refereePanelsSource.includes('team-status-facts'), false)
+  assert.equal(refereePanelsSource.includes('StatusFact'), false)
+  assert.equal(refereeConsoleSource.includes('TeamStatusDashboard'), false)
+  assert.equal(refereeConsoleSource.includes('RoundSummaryDashboard'), false)
+  assert.equal(refereeConsoleSource.includes('match-ops-dock'), false)
+  assert.equal(refereeConsoleSource.includes('referee-message'), false)
+  assert.equal(refereeRuntimeSource.includes('Public session state loaded.'), false)
+  assert.equal(refereeRuntimeSource.includes('handoff copied'), false)
   assert.ok(refereeConsoleControllerSource.includes('writeStoredSession(window.sessionStorage'))
   assert.ok(refereeConsoleControllerSource.includes('refreshStoredSession'))
   assert.equal(refereeConsoleSource.includes('FormField'), false)
@@ -237,7 +245,6 @@ test('agent cockpit renders reliability and debug hooks', () => {
     agentRoutePreflightSource,
     agentRoleApiInstallerSource,
     agentRolePollingSource,
-    agentChatFormsSource,
     agentInsightSource,
     cockpitViewStateSource,
   ].join('\n')
@@ -253,7 +260,7 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(agentRoleApiInstallerSource.includes('bootstrapRole: async'))
   assert.ok(agentRoleApiInstallerSource.includes('waitForNextAction: async'))
   assert.ok(agentRolePollingSource.includes('startAgentRoleStatePolling'))
-  assert.ok(cockpitPanelsSource.includes('agent-empty'))
+  assert.ok(cockpitRuntimeSource.includes('agent-empty'))
   assert.ok(cockpitPanelsSource.includes('agent-connection'))
   assert.ok(cockpitRuntimeSource.includes('Connection'))
   assert.ok(cockpitViewStateSource.includes('createAgentConnectionGuidance'))
@@ -262,8 +269,6 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitViewStateSource.includes('Submit exactly one legal round plan for this round.'))
   assert.ok(cockpitViewStateSource.includes('combat.decision'))
   assert.ok(cockpitViewStateSource.includes('decision.movementOptions.recommended[0]'))
-  assert.ok(cockpitRuntimeSource.includes('Last validation error'))
-  assert.ok(cockpitRuntimeSource.includes('Match log'))
   assert.ok(cockpitRuntimeSource.includes('Table Talk'))
   assert.ok(agentInsightSource.includes('Assembly bay'))
   assert.ok(agentInsightSource.includes('BotAssemblyScene'))
@@ -274,19 +279,15 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(botAssemblyAnimationSource.includes('resources.materials'))
   assert.equal(botAssemblyAnimationSource.includes('createTeamMaterials'), false)
   assert.ok(cockpitRuntimeSource.includes('Agent Journal'))
-  assert.ok(cockpitRuntimeSource.includes('No hidden chain-of-thought'))
-  assert.ok(agentChatFormsSource.includes('Table Talk posted.'))
-  assert.ok(agentChatFormsSource.includes('Agent Journal entry saved.'))
-  assert.ok(cockpitRuntimeSource.includes('agent-chat-form'))
-  assert.ok(cockpitRuntimeSource.includes('submitChatMessage'))
-  assert.ok(cockpitRuntimeSource.includes('submitPrivateChatMessage'))
   assert.ok(cockpitRuntimeSource.includes('privateChatLog'))
   assert.ok(cockpitRuntimeSource.includes('agent-arena-state'))
   assert.ok(cockpitRuntimeSource.includes('agent-arena-brief'))
-  assert.ok(cockpitRuntimeSource.includes('External agent brief'))
-  assert.ok(cockpitRuntimeSource.includes('createExternalAgentBriefMarkdown'))
   assert.ok(cockpitRuntimeSource.includes('claimButtonLabel'))
   assert.ok(cockpitRuntimeSource.includes('Clear player key'))
+  assert.equal(cockpitRuntimeSource.includes('Last validation error'), false)
+  assert.equal(cockpitRuntimeSource.includes('Match log'), false)
+  assert.equal(cockpitRuntimeSource.includes('agent-chat-form'), false)
+  assert.equal(cockpitRuntimeSource.includes('External agent brief'), false)
 })
 
 test('agent cockpit is a read-only insight surface instead of a bot editor', () => {
@@ -301,12 +302,13 @@ test('agent cockpit is a read-only insight surface instead of a bot editor', () 
   assert.ok(cockpitSource.includes('AgentInsightWorkbench'))
   assert.ok(agentInsightSource.includes('Agent insight'))
   assert.ok(agentInsightSource.includes('Plan read'))
-  assert.ok(agentInsightSource.includes('Opening script'))
   assert.ok(agentInsightSource.includes('Combat decision'))
   assert.ok(agentInsightSource.includes('NoRoleStatePanel'))
   assert.ok(agentInsightSource.includes('roleState?.ownSubmission'))
   assert.ok(agentInsightSource.includes('tacticalCues'))
   assert.ok(agentInsightSource.includes('movementOptions.recommended'))
+  assert.equal(agentInsightSource.includes('Opening script'), false)
+  assert.equal(agentInsightSource.includes('opening-read-heading'), false)
   assert.equal(cockpitRuntimeSource.includes('RoundPlanWorkbench'), false)
   assert.equal(cockpitRuntimeSource.includes('useRoundPlanSubmission'), false)
   assert.equal(cockpitRuntimeSource.includes('setSubmissionDraft'), false)
@@ -369,7 +371,7 @@ test('Agent Arena operational surfaces use shared UI primitives', () => {
   assert.ok(refereePanelsSource.includes('formatCountdown'))
   assert.ok(refereePanelsSource.includes('<SectionHeading'))
   assert.ok(cockpitSurfaceSource.includes('<Panel className="agent-live-panel cockpit-secondary-panel'))
-  assert.ok(cockpitSurfaceSource.includes('<MetricGrid className="agent-facts">'))
+  assert.ok(cockpitSurfaceSource.includes('StatusBadge'))
   assert.ok(replayViewerSource.includes('<ActionGroup className="replay-controls"'))
   assert.ok(replayViewerSource.includes('<FormField label="Camera">'))
   assert.ok(refereeConsoleSource.includes("import('../replay/ArenaPreviewScene')"))

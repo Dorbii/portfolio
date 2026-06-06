@@ -19,7 +19,6 @@ import {
   toUserMessage,
   writeStoredSession,
 } from './refereeClient'
-import { capitalize } from '../shared/format'
 import {
   createRefereeAgentBriefs,
   hasInviteForRole as inviteListHasRole,
@@ -35,7 +34,6 @@ export function useRefereeConsoleController() {
   const [invites, setInvites] = useState<RoleInvite[]>([])
   const [storedRefereeToken, setStoredRefereeToken] = useState('')
   const [loadState, setLoadState] = useState<SessionLoadState>('idle')
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const sessionIdRef = useRef(activeSessionId)
   const skipNextActiveLoadRef = useRef(false)
@@ -66,7 +64,6 @@ export function useRefereeConsoleController() {
     hasRefereeToken,
     publicSession,
     setError,
-    setMessage,
     setPublicSession,
     setStoredRefereeToken,
   })
@@ -76,7 +73,6 @@ export function useRefereeConsoleController() {
     setInvites([])
     setStoredRefereeToken('')
     clearReplayState()
-    setMessage('')
     setError('')
   }, [clearReplayState])
 
@@ -127,9 +123,6 @@ export function useRefereeConsoleController() {
         const state = await loadPublicSession(apiBase, normalizedSessionId)
 
         setPublicSession(state)
-        if (!options.silent) {
-          setMessage('Public session state loaded.')
-        }
       } catch (loadError) {
         setPublicSession(null)
         setError(toUserMessage(loadError))
@@ -184,7 +177,6 @@ export function useRefereeConsoleController() {
   const createNewSession = useCallback(async () => {
     setLoadState('busy')
     setError('')
-    setMessage('')
 
     try {
       const response = await createSession(apiBase)
@@ -196,7 +188,6 @@ export function useRefereeConsoleController() {
       setInvites(response.invites)
       setStoredRefereeToken(response.refereeToken)
       clearReplayState()
-      setMessage('Session created. Keep this tab open to retain the referee capability token.')
       writeStoredSession(window.sessionStorage, apiBase, response.sessionId, {
         refereeToken: response.refereeToken,
         invites: response.invites,
@@ -209,12 +200,9 @@ export function useRefereeConsoleController() {
     }
   }, [apiBase, clearReplayState])
 
-  const copyAgentBrief = useCallback((role: TeamRole, brief: string) => {
+  const copyAgentBrief = useCallback((brief: string) => {
     return navigator.clipboard
       .writeText(brief)
-      .then(() => {
-        setMessage(`${capitalize(role)} handoff copied.`)
-      })
       .catch(() => {
         setError('Clipboard copy blocked. Select and copy manually.')
       })
@@ -230,11 +218,8 @@ export function useRefereeConsoleController() {
   const {
     blueAgentBrief,
     blueCockpitUrl,
-    blueInviteUrl,
-    hasAnyInvite,
     redAgentBrief,
     redCockpitUrl,
-    redInviteUrl,
   } = useMemo(
     () =>
       createRefereeAgentBriefs({
@@ -264,7 +249,6 @@ export function useRefereeConsoleController() {
     setStoredRefereeToken('')
     setInvites([])
     setError('')
-    setMessage('Stored session token cleared. Public session refreshed.')
     void loadPublicState(activeSessionId, { silent: true })
   }, [activeSessionId, apiBase, loadPublicState])
 
@@ -272,24 +256,18 @@ export function useRefereeConsoleController() {
     activeSessionId,
     advanceRoundHint,
     advanceRoundLabel,
-    apiBase,
     blueAgentBrief,
     blueCockpitUrl,
-    blueInviteUrl,
     canAdvanceRound,
     copyAgentBrief,
     createNewSession,
     error,
-    hasAnyInvite,
     hasInviteForRole,
-    hasRefereeToken,
     loadState,
-    message,
     phase,
     publicSession,
     redAgentBrief,
     redCockpitUrl,
-    redInviteUrl,
     refreshStoredSession,
     replayError,
     replayLoadState,

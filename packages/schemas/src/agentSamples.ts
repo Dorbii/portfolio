@@ -1,7 +1,4 @@
-import type {
-  RoundPlanSubmissionV2,
-  TurnCommand,
-} from './types.js'
+import type { RoundPlanSubmissionV2 } from './types.js'
 
 const BASELINE_SPINNER_PURCHASES = [
   { partId: 'Body_Square_Medium', quantity: 1 },
@@ -36,16 +33,8 @@ const BASELINE_SPINNER_BLOCKS = [
   },
 ] as const
 
-const BASELINE_SPINNER_COMMANDS = [
-  { tick: 1, move: 'dash_forward', weaponA: 'hold' },
-  { tick: 2, move: 'circle_left', weaponA: 'fire' },
-  { tick: 3, move: 'strafe_right', weaponA: 'hold' },
-  { tick: 4, move: 'dash_backward', weaponA: 'fire' },
-  { tick: 5, move: 'circle_right', weaponA: 'hold' },
-] as const satisfies readonly TurnCommand[]
-
 const BASELINE_SPINNER_RATIONALE =
-  'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.'
+  'A compact legal plan that buys a body, mobility, and one weapon inside the first-round budget.'
 
 export function createBaselineRoundPlan(): RoundPlanSubmissionV2 {
   return {
@@ -69,9 +58,6 @@ export function createBaselineRoundPlan(): RoundPlanSubmissionV2 {
       retreatAtHealthPct: 0.15,
       weaponCadence: 'opportunistic',
       hazardPreference: 'avoid',
-    },
-    openingScript: {
-      commands: BASELINE_SPINNER_COMMANDS.map((command) => ({ ...command })),
     },
     rationale: BASELINE_SPINNER_RATIONALE,
   }

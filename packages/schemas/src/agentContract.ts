@@ -514,14 +514,12 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       interestCap: 25,
       winnerBonus: 25,
       sessionTtlSeconds: 21600,
-      openingScriptTicks: 5,
       combatTurnSeconds: 120,
       submissionSchemas: {
         preferred: {
           schemaVersion: 2,
           required: ['action', 'schemaVersion', 'purchases', 'blueprint', 'tactics'],
-          optional: ['openingScript', 'rationale', 'chat'],
-          openingScript: 'optional 0-5 command ticks used only as baseline opening guidance',
+          optional: ['rationale', 'chat'],
           tactics: {
             style: TACTIC_STYLES,
             targetPriority: TARGET_PRIORITIES,
@@ -614,7 +612,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       'Use at least one body part and enough mobility/control parts for the commands you plan to issue.',
       'Blueprint block ids must be unique, grid positions must be unoccupied, and the assembly must be connected.',
       'Use only commands granted by generated controls; weaponA/weaponB require weapon parts and utility requires utility parts.',
-      'Preferred v2 submissions use schemaVersion=2, tactics, and optional openingScript with 0-5 ticks.',
+      'Preferred v2 submissions use schemaVersion=2 and tactics. Opening scripts are removed; use live submit_turn_command during combat.',
       'Do not submit legacy turnPlan. During combat, use submit_turn_command with the exact combat tick from private state.',
       'movementPolicy is strategic guidance and fallback vocabulary; live combat movement is decided by submitted turn commands.',
       'During combat_turn, prefer state.combat.decision over ad hoc inference from raw snapshot fields.',
@@ -677,8 +675,6 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           blueprint: 'bot blueprint built from owned or newly purchased parts',
           tactics:
             'v2 tactics object with movementPolicy, preferredRange, aggression, targetPriority, weaponCadence, and related fields',
-          openingScript:
-            'optional { commands: [] } with 0-5 ticks; baseline opening guidance only, not the live combat brain',
           rationale: 'optional concise public design rationale',
           chat: 'optional public Table Talk messages',
         },

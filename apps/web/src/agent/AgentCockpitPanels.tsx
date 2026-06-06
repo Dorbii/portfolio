@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react'
-import { getPart } from '../../../../packages/catalog/src/index.js'
 import type {
-  RolePrivateState,
   SessionChatMessage,
-  SessionLogEvent,
   ValidationIssue,
 } from '../../../../packages/schemas/src/index.js'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
@@ -62,8 +59,10 @@ export function Fact({ label, value }: { label: string; value: ReactNode }) {
 }
 
 export function ConnectionGuide({
+  compact = false,
   guidance,
 }: {
+  compact?: boolean
   guidance: {
     detail: string
     helperCall: string
@@ -76,8 +75,12 @@ export function ConnectionGuide({
     <div className={`agent-connection tone-${guidance.tone}`} aria-live="polite">
       <strong>{guidance.status}</strong>
       <p>{guidance.nextAction}</p>
-      <code>{guidance.helperCall}</code>
-      <small>{guidance.detail}</small>
+      {compact ? null : (
+        <>
+          <code>{guidance.helperCall}</code>
+          <small>{guidance.detail}</small>
+        </>
+      )}
     </div>
   )
 }
@@ -121,64 +124,6 @@ export function AgentChatLog({ messages }: { messages: SessionChatMessage[] }) {
         </li>
       ))}
     </ol>
-  )
-}
-
-export function ActivityLog({
-  emptyText,
-  events,
-  hasEvents,
-}: {
-  emptyText: string
-  events: SessionLogEvent[]
-  hasEvents: boolean
-}) {
-  return (
-    <>
-      <ol className="agent-log">
-        {events.map((event) => (
-          <li key={`${event.at}-${event.type}-${event.message}`}>
-            <time dateTime={event.at}>{formatDateTime(event.at)}</time>
-            <strong>{formatLabel(event.type)}</strong>
-            <span>{event.message}</span>
-          </li>
-        ))}
-      </ol>
-      {!hasEvents ? <p className="agent-empty">{emptyText}</p> : null}
-    </>
-  )
-}
-
-export function InventoryTable({ state }: { state: RolePrivateState | null }) {
-  const items = state?.inventory ?? []
-
-  if (items.length === 0) {
-    return <p className="agent-empty">No owned parts in current role state.</p>
-  }
-
-  return (
-    <table className="agent-table">
-      <thead>
-        <tr>
-          <th>Part</th>
-          <th>Qty</th>
-          <th>Category</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((item) => {
-          const part = getPart(item.partId)
-
-          return (
-            <tr key={item.partId}>
-              <td>{part?.displayName ?? item.partId}</td>
-              <td>{item.quantity}</td>
-              <td>{part?.category ?? 'unknown'}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
   )
 }
 

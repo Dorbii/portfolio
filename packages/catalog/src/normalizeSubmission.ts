@@ -3,7 +3,6 @@ import type {
   BotTactics,
   NormalizedBotTactics,
   NormalizedRoundPlanSubmission,
-  OpeningScript,
   RoundPlanSubmission,
 } from '../../schemas/src/index.js'
 import { deriveControls } from './controls.js'
@@ -18,8 +17,6 @@ export const DEFAULT_BOT_TACTICS: NormalizedBotTactics = {
   weaponCadence: 'opportunistic',
   hazardPreference: 'avoid',
 }
-
-const EMPTY_OPENING_SCRIPT: OpeningScript = { commands: [] }
 
 export function normalizeRoundSubmission(
   submission: RoundPlanSubmission,
@@ -41,7 +38,6 @@ export function normalizeRoundSubmission(
     ...common,
     schemaVersion: 2,
     tactics: normalizeTacticsForBlueprint(submission.tactics, submission.blueprint),
-    openingScript: cloneOpeningScript(submission.openingScript ?? EMPTY_OPENING_SCRIPT),
   }
 }
 
@@ -72,8 +68,3 @@ function normalizeTacticsForBlueprint(
   }
 }
 
-function cloneOpeningScript(openingScript: OpeningScript): OpeningScript {
-  return {
-    commands: openingScript.commands.map((command) => ({ ...command })),
-  }
-}

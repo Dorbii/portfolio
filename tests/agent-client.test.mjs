@@ -126,15 +126,6 @@ const roundPlan = {
   tactics: {
     movementPolicy: 'hold_ground',
   },
-  openingScript: {
-    commands: [
-      { tick: 1, move: 'brake' },
-      { tick: 2, move: 'brake' },
-      { tick: 3, move: 'brake' },
-      { tick: 4, move: 'brake' },
-      { tick: 5, move: 'brake' },
-    ],
-  },
 }
 
 function jsonResponse(value, init = {}) {
@@ -427,7 +418,7 @@ test('agent client waits for the next playable action with a bounded timer', asy
   assert.equal(next.state.stateVersion, 'v2')
 })
 
-test('baseline round plan is a concrete first-round opener', () => {
+test('baseline round plan is a concrete first-round tactical plan', () => {
   const plan = createBaselineRoundPlan()
 
   assert.equal(plan.action, 'submit_round_plan')
@@ -438,7 +429,8 @@ test('baseline round plan is a concrete first-round opener', () => {
   ])
   assert.equal(plan.blueprint.blocks.length, 4)
   assert.equal(plan.schemaVersion, 2)
-  assert.equal(plan.openingScript.commands.length, 5)
+  assert.equal('openingScript' in plan, false)
+  assert.equal(plan.tactics.movementPolicy, 'close')
 })
 
 test('agent state script serialization escapes html-sensitive text', () => {

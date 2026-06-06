@@ -237,15 +237,6 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
         weaponCadence: 'opportunistic',
         hazardPreference: 'avoid',
       },
-      openingScript: {
-        commands: [
-          { tick: 1, move: 'dash_forward', weaponA: 'hold' },
-          { tick: 2, move: 'circle_right', weaponA: 'fire' },
-          { tick: 3, move: 'strafe_left', weaponA: 'hold' },
-          { tick: 4, move: 'forward', weaponA: 'fire' },
-          { tick: 5, move: 'brake', weaponA: 'hold' },
-        ],
-      },
       rationale: 'Force a direct exchange before Blue can kite.',
     },
     opponent: mockPublicSession.roles.blue,
@@ -354,15 +345,6 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
         retreatAtHealthPct: 0.25,
         weaponCadence: 'opportunistic',
         hazardPreference: 'force',
-      },
-      openingScript: {
-        commands: [
-          { tick: 1, move: 'dash_forward', weaponA: 'hold' },
-          { tick: 2, move: 'circle_left', weaponA: 'hold' },
-          { tick: 3, move: 'strafe_right', weaponA: 'fire' },
-          { tick: 4, move: 'dash_backward', utility: 'activate' },
-          { tick: 5, move: 'circle_right', weaponA: 'fire' },
-        ],
       },
       rationale: 'Run the lane, fire while sliding, and retreat before the spinner gets a clean trade.',
     },

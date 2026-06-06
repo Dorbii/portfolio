@@ -1,17 +1,15 @@
 import { Suspense, lazy } from 'react'
 import { DEFAULT_ARENA_CONFIG } from '../../../../packages/schemas/src/index.js'
 import {
+  ArenaImpactDashboard,
   KeyStatsDashboard,
   MatchScoreboard,
   PublicChatLog,
-  RoundSummaryDashboard,
   SectionHeader,
-  TeamStatusDashboard,
 } from './RefereeConsolePanels'
 import {
   Panel,
 } from '../shared/ui'
-import { formatLabel } from '../shared/format'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 
 const ReplayViewer = lazy(() =>
@@ -75,11 +73,8 @@ export function RefereeConsole() {
     copyAgentBrief,
     createNewSession,
     error,
-    hasAnyInvite,
     hasInviteForRole,
-    hasRefereeToken,
     loadState,
-    message,
     phase,
     publicSession,
     redAgentBrief,
@@ -92,12 +87,11 @@ export function RefereeConsole() {
     storedRefereeToken,
     submitRoundAdvance,
   } = useRefereeConsoleController()
-  const roleAccessSummary = hasAnyInvite
-    ? 'Cockpit handoffs stored'
+  const chatSummary = sessionChat.length > 0
+    ? `${sessionChat.length} message${sessionChat.length === 1 ? '' : 's'}`
     : activeSessionId
-      ? 'Cockpit tokens unavailable'
-      : 'No cockpit handoffs yet'
-  const dockChat = sessionChat.slice(-2)
+      ? 'No agent chat yet'
+      : 'Create session first'
   const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
   const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
   const shouldShowReplayStatus = Boolean(publicSession?.replayAvailable && !replayPayload)
@@ -136,13 +130,13 @@ export function RefereeConsole() {
               agentBrief: redAgentBrief,
               hasInvite: hasInviteForRole('red'),
               inviteUrl: redCockpitUrl,
-              onCopyBrief: () => void copyAgentBrief('red', redAgentBrief),
+              onCopyBrief: () => void copyAgentBrief(redAgentBrief),
             },
             blue: {
               agentBrief: blueAgentBrief,
               hasInvite: hasInviteForRole('blue'),
               inviteUrl: blueCockpitUrl,
-              onCopyBrief: () => void copyAgentBrief('blue', blueAgentBrief),
+              onCopyBrief: () => void copyAgentBrief(blueAgentBrief),
             },
           }}
           sessionControl={{
@@ -160,9 +154,12 @@ export function RefereeConsole() {
         />
 
         <section className="match-dashboard-panels" aria-label="Match dashboard">
-          <Panel className="panel dashboard-panel team-status-panel">
-            <SectionHeader kicker="Team status" title="Team Status" />
-            <TeamStatusDashboard publicSession={publicSession} replayPayload={replayPayload} />
+          <Panel className="panel dashboard-panel fight-comms-panel">
+            <SectionHeader kicker="Agent chat" title="Fight Comms" aside={chatSummary} />
+            <PublicChatLog
+              messages={sessionChat}
+              emptyText="No fight comms yet."
+            />
           </Panel>
 
           <Panel className="panel dashboard-panel key-stats-panel">
@@ -170,38 +167,12 @@ export function RefereeConsole() {
             <KeyStatsDashboard publicSession={publicSession} replayPayload={replayPayload} />
           </Panel>
 
-          <Panel className="panel dashboard-panel round-summary-panel" id="review">
-            <SectionHeader kicker="Round review" title="Round Review" />
-            <RoundSummaryDashboard publicSession={publicSession} replayPayload={replayPayload} />
+          <Panel className="panel dashboard-panel arena-impact-panel" id="arena-impact">
+            <SectionHeader kicker="Environment" title="Arena Impact" />
+            <ArenaImpactDashboard publicSession={publicSession} replayPayload={replayPayload} />
           </Panel>
         </section>
 
-        <section className="match-ops-dock" aria-label="Referee operations">
-          <div className="ops-cell arena-info">
-            <span>Arena</span>
-            <strong>{visibleArena.name}</strong>
-            <small>{visibleArena.activeHazards.join(', ') || 'Hazards unavailable'}</small>
-          </div>
-          <div className="ops-cell">
-            <span>Match info</span>
-            <strong>{publicSession ? `Best of ${publicSession.maxRounds}` : 'No session'}</strong>
-            <small>{publicSession ? `Phase ${formatLabel(publicSession.phase)}` : 'Create or load'}</small>
-          </div>
-          <div className="ops-cell referee-notes">
-            <span>Referee notes</span>
-            <strong>{hasRefereeToken ? 'Token loaded' : 'No token'}</strong>
-            <small>{roleAccessSummary}</small>
-          </div>
-          <div className="ops-cell fight-comms-panel">
-            <span>Fight comms</span>
-            <PublicChatLog
-              messages={dockChat}
-              emptyText="No fight comms yet."
-            />
-          </div>
-        </section>
-
-        {message ? <p className="referee-message" role="status">{message}</p> : null}
         {error ? <p className="referee-error" role="alert">{error}</p> : null}
       </div>
     </main>

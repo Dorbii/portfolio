@@ -2,12 +2,10 @@ import type {
   PublicSessionState,
   RolePrivateState,
   SessionChatMessage,
-  SessionLogEvent,
 } from '../../../../packages/schemas/src/index.js'
 import {
   AgentArenaApiError,
   createExternalAgentBrief,
-  createExternalAgentBriefMarkdown,
   getValidAgentActions,
   serializeJsonForScript,
   type AgentInvite,
@@ -26,18 +24,13 @@ type CockpitBriefArtifactsInput = {
 }
 
 export type CockpitBriefArtifacts = {
-  externalAgentBriefMarkdown: string
   externalAgentBriefScript: string
   stateScript: string
 }
 
 type CockpitDerivedStateInput = {
-  chatMessage: string
-  chatStatus: 'idle' | 'posting'
   invite: AgentInvite
   lastError: UiError | null
-  privateChatMessage: string
-  privateChatStatus: 'idle' | 'posting'
   publicState: PublicSessionState | null
   roleState: RolePrivateState | null
   roleToken: string
@@ -73,18 +66,14 @@ export type AgentCockpitWorkflow = {
 export type CockpitDerivedState = {
   canClaimRole: boolean
   canMutateRole: boolean
-  canPostChat: boolean
-  canPostPrivateChat: boolean
   chatLog: SessionChatMessage[]
   claimButtonLabel: string
   connectionGuidance: AgentConnectionGuidance
   hasPlayerKey: boolean
   isBusy: boolean
-  matchLog: SessionLogEvent[]
   privateChatLog: SessionChatMessage[]
   refreshButtonLabel: string
   roleHasChatLog: boolean
-  roleHasMatchLog: boolean
   roleHasPrivateChatLog: boolean
   workflow: AgentCockpitWorkflow
 }
@@ -104,12 +93,6 @@ export function createCockpitBriefArtifacts({
   })
 
   return {
-    externalAgentBriefMarkdown: createExternalAgentBriefMarkdown({
-      invite,
-      inviteUrl: agentInviteUrl,
-      state: roleState,
-      publicState: briefPublicState,
-    }),
     externalAgentBriefScript: serializeJsonForScript(externalAgentBrief),
     stateScript: serializeJsonForScript({
       ok: Boolean(roleState),
@@ -146,12 +129,8 @@ function getBriefPublicState(publicState: PublicSessionState | null): PublicSess
 }
 
 export function createCockpitDerivedState({
-  chatMessage,
-  chatStatus,
   invite,
   lastError,
-  privateChatMessage,
-  privateChatStatus,
   publicState,
   roleState,
   roleToken,
@@ -161,7 +140,6 @@ export function createCockpitDerivedState({
   const isObserverCockpit = Boolean(invite.observerToken && !invite.claimToken)
   const hasAccessKey = Boolean(roleToken || invite.claimToken || invite.observerToken)
   const canMutateRole = Boolean(!isObserverCockpit && (roleToken || invite.claimToken))
-  const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const chatLog = roleState?.chatLog ?? publicState?.chatLog ?? []
   const privateChatLog = roleState?.privateChatLog ?? []
   const connectionGuidance = createAgentConnectionGuidance({
@@ -176,32 +154,14 @@ export function createCockpitDerivedState({
   return {
     canClaimRole: !isBusy && canMutateRole && Boolean(invite.claimToken) && !roleState,
     canMutateRole,
-    canPostChat: Boolean(
-      canMutateRole &&
-        roleState &&
-        !isBusy &&
-        chatStatus !== 'posting' &&
-        !isTerminalPhase(roleState.phase) &&
-        chatMessage.trim().length > 0,
-    ),
-    canPostPrivateChat: Boolean(
-      canMutateRole &&
-        roleState &&
-        !isBusy &&
-        privateChatStatus !== 'posting' &&
-        !isTerminalPhase(roleState.phase) &&
-        privateChatMessage.trim().length > 0,
-    ),
     chatLog,
     claimButtonLabel: createClaimButtonLabel(status, roleState, hasAccessKey, isBusy, isObserverCockpit),
     connectionGuidance,
     hasPlayerKey: hasAccessKey,
     isBusy,
-    matchLog,
     privateChatLog,
     refreshButtonLabel: status === 'loading' ? 'Refreshing...' : 'Refresh state',
     roleHasChatLog: chatLog.length > 0,
-    roleHasMatchLog: matchLog.length > 0,
     roleHasPrivateChatLog: privateChatLog.length > 0,
     workflow: createAgentCockpitWorkflow({
       connectionGuidance,
@@ -642,7 +602,7 @@ function nextActionForRoleState(
   if (state.phase === 'submission_phase') {
     if (state.submitted) {
       return isObserverCockpit
-        ? 'Inspect the submitted bot, tactics, opening script, and rationale while waiting for the opponent.'
+        ? 'Inspect the submitted bot, tactics, and rationale while waiting for the opponent.'
         : 'Do not resubmit this round. Keep this role thread alive until the next action is ready or the wait times out.'
     }
 

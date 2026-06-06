@@ -1,26 +1,16 @@
-import type { AgentChatMessageKind } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
-import { capitalize, formatLabel } from '../shared/format'
+import { formatLabel } from '../shared/format'
 import {
-  ActionGroup,
-  Button,
-  MetricGrid,
   Panel,
   StatusBadge,
 } from '../shared/ui'
 import {
-  ActivityLog,
   AgentChatLog,
   ConnectionGuide,
-  ErrorPanel,
-  Fact,
-  InventoryTable,
   SectionTitle,
 } from './AgentCockpitPanels'
 import {
-  isTerminalPhase,
   opponentLabel,
-  submissionNotice,
 } from './agentCockpitViewState'
 import type { useLiveAgentCockpitController } from './useLiveAgentCockpitController'
 
@@ -28,48 +18,35 @@ type AgentCockpitController = ReturnType<typeof useLiveAgentCockpitController>
 
 export function AgentCockpitSidebar({
   controller,
-  invite,
 }: {
   controller: AgentCockpitController
   invite: AgentInvite
 }) {
-  const showReference = controller.canMutateRole
-  const showComms = controller.canMutateRole || controller.roleHasChatLog || controller.roleHasPrivateChatLog
-  const showActivity = Boolean(controller.lastError || controller.roleHasMatchLog)
+  const showComms = controller.roleHasChatLog || controller.roleHasPrivateChatLog
 
   return (
     <aside className="cockpit-secondary-stack" aria-label="Secondary cockpit data">
-      <AgentStatePanel controller={controller} invite={invite} />
-      {showReference ? <AgentReferencePanel controller={controller} invite={invite} /> : null}
+      <AgentStatePanel controller={controller} />
       {showComms ? <AgentCommsPanel controller={controller} /> : null}
-      {showActivity ? <AgentActivityPanel controller={controller} /> : null}
     </aside>
   )
 }
 function AgentStatePanel({
   controller,
-  invite,
 }: {
   controller: AgentCockpitController
-  invite: AgentInvite
 }) {
   const {
     connectionGuidance,
-    canMutateRole,
-    hasPlayerKey,
     isBusy,
     publicState,
     roleState,
-    roleToken,
     status,
     workflow,
   } = controller
-  const accessLabel = canMutateRole
-    ? 'Agent key'
-    : invite.observerToken || roleToken
-      ? 'Observer'
-      : 'Missing'
   const phaseLabel = roleState ? formatLabel(roleState.phase) : isBusy ? 'Loading' : 'Not loaded'
+  const planLabel = roleState?.submitted ? 'Submitted' : 'Pending'
+  const planDetail = roleState?.ownSubmission?.blueprint.name ?? (roleState ? 'No accepted plan' : 'Awaiting state')
   const opponentStatus = roleState
     ? roleState.opponent.submitted
       ? 'Submitted'
@@ -92,21 +69,21 @@ function AgentStatePanel({
 
       <section aria-labelledby="connection-heading">
         <SectionTitle id="connection-heading" title="Connection" />
-        <ConnectionGuide guidance={connectionGuidance} />
+        <ConnectionGuide guidance={connectionGuidance} compact />
       </section>
 
       <div className="cockpit-signal-grid" aria-label="Role state summary">
-        <SignalCard
-          label="Access"
-          tone={hasPlayerKey ? 'ok' : 'warning'}
-          value={accessLabel}
-          detail={canMutateRole ? 'Can act for this role' : 'Read-only state view'}
-        />
         <SignalCard
           label="Phase"
           tone={roleState ? 'ok' : 'warning'}
           value={phaseLabel}
           detail={roleState ? `Round ${roleState.round}` : formatLabel(status)}
+        />
+        <SignalCard
+          label="Plan"
+          tone={roleState?.submitted ? 'ok' : 'warning'}
+          value={planLabel}
+          detail={planDetail}
         />
         <SignalCard
           label="Opponent"
@@ -121,46 +98,6 @@ function AgentStatePanel({
           detail={publicState ? publicState.arena.name : 'Public state pending'}
         />
       </div>
-
-      <section aria-labelledby="phase-heading">
-        <SectionTitle id="phase-heading" title="Round snapshot" />
-        {roleState ? (
-          <MetricGrid className="agent-facts">
-            <Fact label="Session" value={shortSessionId(invite.sessionId)} />
-            <Fact label="Role" value={capitalize(invite.role)} />
-            <Fact label="Round" value={String(roleState.round)} />
-            <Fact label="Gold" value={String(roleState.gold)} />
-            <Fact label="Submitted" value={roleState.submitted ? 'Yes' : 'No'} />
-            <Fact label="Opponent" value={opponentLabel(roleState)} />
-          </MetricGrid>
-        ) : (
-          <p className="agent-empty">
-            {isBusy
-              ? 'Loading role state from the API.'
-              : hasPlayerKey
-                ? canMutateRole
-                  ? 'Agent key loaded. Use Refresh state if the previous load failed.'
-                  : 'Observer key loaded. Use Refresh state if the previous load failed.'
-                : 'Connect this role or reuse a stored player key to load private state.'}
-          </p>
-        )}
-        {roleState?.submitted ? (
-          <p className="agent-waiting">{submissionNotice(roleState)}</p>
-        ) : null}
-      </section>
-
-      <section aria-labelledby="arena-heading">
-        <SectionTitle id="arena-heading" title="Arena / replay" />
-        {publicState ? (
-          <MetricGrid className="agent-facts">
-            <Fact label="Name" value={publicState.arena.name} />
-            <Fact label="Hazards" value={publicState.arena.activeHazards.join(', ')} />
-            <Fact label="Replay" value={publicState.replayAvailable ? 'Available' : 'Unavailable'} />
-          </MetricGrid>
-        ) : (
-          <p className="agent-empty">Public arena state has not loaded.</p>
-        )}
-      </section>
     </Panel>
   )
 }
@@ -185,86 +122,12 @@ function SignalCard({
   )
 }
 
-function shortSessionId(sessionId: string): string {
-  if (sessionId.length <= 18) {
-    return sessionId
-  }
-
-  return `${sessionId.slice(0, 9)}...${sessionId.slice(-5)}`
-}
-
-function AgentReferencePanel({
-  controller,
-}: {
-  controller: AgentCockpitController
-  invite: AgentInvite
-}) {
-  const {
-    copyExternalAgentBrief,
-    externalAgentBriefMarkdown,
-    roleState,
-  } = controller
-
-  return (
-    <Panel className="agent-live-panel cockpit-secondary-panel" aria-labelledby="reference-heading">
-      <div className="secondary-panel-header">
-        <SectionTitle id="reference-heading" title="Reference" />
-        <span>Brief / inventory</span>
-      </div>
-
-      <section className="agent-handoff-panel" aria-labelledby="handoff-heading">
-        <div className="plan-section-header">
-          <SectionTitle id="handoff-heading" title="External agent brief" />
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => void copyExternalAgentBrief()}
-          >
-            Copy brief
-          </Button>
-        </div>
-        <textarea
-          className="agent-brief-text"
-          spellCheck={false}
-          readOnly
-          value={externalAgentBriefMarkdown}
-          aria-label="External agent brief"
-        />
-      </section>
-
-      <section aria-labelledby="inventory-heading">
-        <SectionTitle id="inventory-heading" title="Inventory" />
-        <div className="cockpit-secondary-scroll">
-          <InventoryTable state={roleState} />
-        </div>
-      </section>
-
-    </Panel>
-  )
-}
-
 function AgentCommsPanel({ controller }: { controller: AgentCockpitController }) {
   const {
-    canPostChat,
-    canPostPrivateChat,
-    canMutateRole,
-    chatKind,
     chatLog,
-    chatMessage,
-    chatStatus,
-    privateChatKind,
     privateChatLog,
-    privateChatMessage,
-    privateChatStatus,
     roleHasChatLog,
     roleHasPrivateChatLog,
-    roleState,
-    setChatKind,
-    setChatMessage,
-    setPrivateChatKind,
-    setPrivateChatMessage,
-    submitChatMessage,
-    submitPrivateChatMessage,
   } = controller
 
   return (
@@ -274,90 +137,33 @@ function AgentCommsPanel({ controller }: { controller: AgentCockpitController })
         <span>{chatLog.length + privateChatLog.length} messages</span>
       </div>
 
-      {canMutateRole ? (
-        <>
-          <AgentChatSection
-            canPost={canPostPrivateChat}
-            countLabel={`${privateChatLog.length} role-only`}
-            emptyText="No journal entries loaded."
-            formClassName="agent-chat-form private-chat-form"
-            hasMessages={roleHasPrivateChatLog}
-            id="private-chat"
-            kind={privateChatKind}
-            kindOptions={['strategy', 'reflection', 'observation', 'taunt']}
-            message={privateChatMessage}
-            messageLabel="Entry"
-            messages={privateChatLog}
-            onKindChange={setPrivateChatKind}
-            onMessageChange={setPrivateChatMessage}
-            onSubmit={submitPrivateChatMessage}
-            placeholder="Private strategy summary: plan rationale, opponent read, post-round reflection, or next adjustment. No hidden chain-of-thought."
-            sectionClassName="private-chat-panel"
-            status={privateChatStatus}
-            submitLabel="Save entry"
-            submittingLabel="Saving..."
-            title="Agent Journal"
-            disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
-          />
-
-          <AgentChatSection
-            canPost={canPostChat}
-            countLabel={`${chatLog.length} public`}
-            emptyText="No Table Talk loaded."
-            formClassName="agent-chat-form"
-            hasMessages={roleHasChatLog}
-            id="chat"
-            kind={chatKind}
-            kindOptions={['reflection', 'strategy', 'observation', 'taunt']}
-            message={chatMessage}
-            messageLabel="Public message"
-            messages={chatLog}
-            onKindChange={setChatKind}
-            onMessageChange={setChatMessage}
-            onSubmit={submitChatMessage}
-            placeholder="Opponent-visible Table Talk. Bluff, taunt, summarize strategy, or reflect without secrets."
-            status={chatStatus}
-            submitLabel="Post Table Talk"
-            submittingLabel="Posting..."
-            title="Table Talk"
-            disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
-          />
-        </>
-      ) : (
-        <>
-          <ReadOnlyChatSection
-            countLabel={`${privateChatLog.length} role-only`}
-            emptyText="No journal entries loaded."
-            hasMessages={roleHasPrivateChatLog}
-            id="private-chat"
-            messages={privateChatLog}
-            title="Agent Journal"
-          />
-          <ReadOnlyChatSection
-            countLabel={`${chatLog.length} public`}
-            emptyText="No Table Talk loaded."
-            hasMessages={roleHasChatLog}
-            id="chat"
-            messages={chatLog}
-            title="Table Talk"
-          />
-        </>
-      )}
+      {roleHasPrivateChatLog ? (
+        <ReadOnlyChatSection
+          countLabel={`${privateChatLog.length} role-only`}
+          id="private-chat"
+          messages={privateChatLog}
+          title="Agent Journal"
+        />
+      ) : null}
+      {roleHasChatLog ? (
+        <ReadOnlyChatSection
+          countLabel={`${chatLog.length} public`}
+          id="chat"
+          messages={chatLog}
+          title="Table Talk"
+        />
+      ) : null}
     </Panel>
   )
 }
 
 function ReadOnlyChatSection({
   countLabel,
-  emptyText,
-  hasMessages,
   id,
   messages,
   title,
 }: {
   countLabel: string
-  emptyText: string
-  hasMessages: boolean
   id: string
   messages: AgentCockpitController['chatLog']
   title: string
@@ -369,133 +175,6 @@ function ReadOnlyChatSection({
         <span className="chat-count">{countLabel}</span>
       </div>
       <AgentChatLog messages={messages} />
-      {!hasMessages ? <p className="agent-empty">{emptyText}</p> : null}
     </section>
-  )
-}
-
-function AgentChatSection({
-  canPost,
-  countLabel,
-  disabled,
-  emptyText,
-  formClassName,
-  hasMessages,
-  id,
-  kind,
-  kindOptions,
-  message,
-  messageLabel,
-  messages,
-  onKindChange,
-  onMessageChange,
-  onSubmit,
-  placeholder,
-  sectionClassName,
-  status,
-  submitLabel,
-  submittingLabel,
-  title,
-}: {
-  canPost: boolean
-  countLabel: string
-  disabled: boolean
-  emptyText: string
-  formClassName: string
-  hasMessages: boolean
-  id: string
-  kind: AgentChatMessageKind
-  kindOptions: AgentChatMessageKind[]
-  message: string
-  messageLabel: string
-  messages: AgentCockpitController['chatLog']
-  onKindChange: (kind: AgentChatMessageKind) => void
-  onMessageChange: (message: string) => void
-  onSubmit: () => Promise<void> | void
-  placeholder: string
-  sectionClassName?: string
-  status: 'idle' | 'posting'
-  submitLabel: string
-  submittingLabel: string
-  title: string
-}) {
-  return (
-    <section className={sectionClassName} aria-labelledby={`${id}-heading`}>
-      <div className="plan-section-header">
-        <SectionTitle id={`${id}-heading`} title={title} />
-        <span className="chat-count">{countLabel}</span>
-      </div>
-      <form
-        className={formClassName}
-        onSubmit={(event) => {
-          event.preventDefault()
-          void onSubmit()
-        }}
-      >
-        <label>
-          Kind
-          <select
-            value={kind}
-            onChange={(event) => onKindChange(event.target.value as AgentChatMessageKind)}
-            disabled={disabled}
-          >
-            {kindOptions.map((option) => (
-              <option key={option} value={option}>
-                {capitalize(option)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="agent-chat-message-field">
-          {messageLabel}
-          <textarea
-            maxLength={420}
-            value={message}
-            onChange={(event) => onMessageChange(event.target.value)}
-            placeholder={placeholder}
-            disabled={disabled}
-          />
-        </label>
-        <ActionGroup className="agent-chat-actions">
-          <span>{message.trim().length} / 420</span>
-          <Button type="submit" variant="primary" disabled={!canPost}>
-            {status === 'posting' ? submittingLabel : submitLabel}
-          </Button>
-        </ActionGroup>
-      </form>
-      <AgentChatLog messages={messages} />
-      {!hasMessages ? <p className="agent-empty">{emptyText}</p> : null}
-    </section>
-  )
-}
-
-function AgentActivityPanel({ controller }: { controller: AgentCockpitController }) {
-  const {
-    lastError,
-    matchLog,
-    roleHasMatchLog,
-  } = controller
-
-  return (
-    <Panel className="agent-live-panel cockpit-secondary-panel match-log-panel" aria-labelledby="activity-heading">
-      <div className="secondary-panel-header">
-        <SectionTitle id="activity-heading" title="Activity" />
-        <span>{matchLog.length} events</span>
-      </div>
-
-      <section aria-labelledby="error-heading">
-        <SectionTitle id="error-heading" title="Last validation error" />
-        {lastError ? <ErrorPanel error={lastError} /> : <p className="agent-empty">No hard error from the last action.</p>}
-      </section>
-
-      <section aria-labelledby="match-log-heading">
-        <SectionTitle id="match-log-heading" title="Match log" />
-        <ActivityLog
-          emptyText="No match events loaded."
-          events={matchLog}
-          hasEvents={roleHasMatchLog}
-        />
-      </section>
-    </Panel>
   )
 }

@@ -33,6 +33,7 @@ dist-ssr
 # other
 pkg
 smoke-artifacts*
+exports*
 
 # Codex-generated catalog/render reference artifacts
 /docs/agent-arena-parts-catalog.md

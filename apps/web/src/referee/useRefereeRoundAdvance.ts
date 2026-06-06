@@ -13,7 +13,6 @@ type RoundAdvanceInput = {
   hasRefereeToken: boolean
   publicSession: PublicSessionState | null
   setError: (message: string) => void
-  setMessage: (message: string) => void
   setPublicSession: (state: PublicSessionState) => void
   setStoredRefereeToken: (token: string) => void
 }
@@ -47,7 +46,6 @@ export function useRefereeRoundAdvance({
   hasRefereeToken,
   publicSession,
   setError,
-  setMessage,
   setPublicSession,
   setStoredRefereeToken,
 }: RoundAdvanceInput) {
@@ -94,7 +92,6 @@ export function useRefereeRoundAdvance({
 
     setAdvanceState('submitting')
     setError('')
-    setMessage('')
 
     try {
       const response = await advanceRound(
@@ -109,7 +106,6 @@ export function useRefereeRoundAdvance({
       })
       setPublicSession(response.publicState)
       setStoredRefereeToken(activeRefereeToken)
-      setMessage('Round advanced.')
     } catch (advanceError) {
       setError(toUserMessage(advanceError))
     } finally {
@@ -122,7 +118,6 @@ export function useRefereeRoundAdvance({
     hasRefereeToken,
     publicSession?.phase,
     setError,
-    setMessage,
     setPublicSession,
     setStoredRefereeToken,
   ])

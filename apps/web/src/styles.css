@@ -253,14 +253,114 @@ button:disabled {
 }
 
 .fight-comms-panel .chat-log {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 10px;
+  padding: 8px 10px;
+  grid-template-columns: minmax(0, 1fr);
   max-height: 282px;
   overflow: auto;
-  padding-right: 2px;
+  border: 1px solid rgba(238, 242, 247, 0.08);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(4, 7, 10, 0.58), rgba(4, 7, 10, 0.28)),
+    rgba(238, 242, 247, 0.018);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -18px 32px rgba(0, 0, 0, 0.16);
+  gap: 4px;
+  scrollbar-color: rgba(139, 223, 255, 0.46) rgba(4, 7, 10, 0.52);
+  scrollbar-width: thin;
+}
+
+.fight-comms-panel .chat-log::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fight-comms-panel .chat-log::-webkit-scrollbar-track {
+  border-left: 1px solid rgba(238, 242, 247, 0.06);
+  background: rgba(4, 7, 10, 0.52);
+}
+
+.fight-comms-panel .chat-log::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(4, 7, 10, 0.66);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(139, 223, 255, 0.68), rgba(247, 184, 75, 0.5));
+}
+
+.fight-comms-panel .chat-log::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, rgba(139, 223, 255, 0.86), rgba(247, 184, 75, 0.66));
 }
 
 .fight-comms-panel .chat-message {
-  min-height: 118px;
+  min-height: 0;
+  padding: 3px 0 3px 8px;
+  display: grid;
+  grid-template-areas: "role body time";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: baseline;
+  border: 0;
+  border-left: 2px solid rgba(238, 242, 247, 0.18);
+  border-radius: 0;
+  background: transparent;
+}
+
+.fight-comms-panel .chat-message.red {
+  border-left-color: rgba(255, 92, 108, 0.82);
+}
+
+.fight-comms-panel .chat-message.blue {
+  border-left-color: rgba(92, 145, 255, 0.82);
+}
+
+.fight-comms-panel .chat-message-header {
+  display: contents;
+}
+
+.fight-comms-panel .role-chip {
+  grid-area: role;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #dbe6e4;
+}
+
+.fight-comms-panel .role-chip::before {
+  content: "[";
+}
+
+.fight-comms-panel .role-chip::after {
+  content: "]";
+}
+
+.fight-comms-panel .role-chip.red {
+  color: #ff7b86;
+}
+
+.fight-comms-panel .role-chip.blue {
+  color: #87acff;
+}
+
+.fight-comms-panel .chat-message-header strong {
+  display: none;
+}
+
+.fight-comms-panel .chat-message-header time {
+  grid-area: time;
+  color: rgba(196, 215, 213, 0.72);
+}
+
+.fight-comms-panel .chat-message p {
+  grid-area: body;
+  margin: 0;
+  color: #dbe6e4;
+  font-size: 0.8rem;
+  line-height: 1.32;
+}
+
+.fight-comms-panel .chat-message small {
+  display: none;
 }
 
 .replay-placeholder {
@@ -270,7 +370,6 @@ button:disabled {
   text-align: center;
 }
 
-.match-console .referee-message,
 .match-console .referee-error {
   margin: 0 14px 14px;
 }
@@ -357,16 +456,6 @@ button:disabled {
   font-size: 0.82rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
-}
-
-.referee-message {
-  margin: 0 14px 14px;
-  padding: 12px;
-  border: 1px solid rgba(93, 210, 146, 0.35);
-  border-radius: 6px;
-  background: rgba(93, 210, 146, 0.08);
-  color: #5dd292;
-  font-size: 0.84rem;
 }
 
 .referee-error {
@@ -1375,11 +1464,6 @@ pre {
   line-height: 1.15;
 }
 
-.agent-handoff-panel,
-.match-log-panel {
-  min-height: 300px;
-}
-
 .agent-facts {
   margin: 12px 0 0;
   display: grid;
@@ -1628,54 +1712,8 @@ textarea:focus-visible {
   outline: none;
 }
 
-.agent-brief-text {
-  min-height: 260px;
-  white-space: pre;
-}
-
 .chat-count {
   color: #8fa3a3;
-}
-
-.agent-chat-form {
-  margin-top: 12px;
-  display: grid;
-  gap: 10px;
-}
-
-.agent-chat-form label {
-  color: #8fa3a3;
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.agent-chat-form select {
-  width: 100%;
-  margin-top: 6px;
-}
-
-.agent-chat-form textarea {
-  min-height: 82px;
-  max-height: 180px;
-}
-
-.agent-chat-actions {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.agent-chat-actions span {
-  color: #8fa3a3;
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.agent-chat-actions button {
-  min-height: 36px;
 }
 
 .agent-chat-log {
@@ -1684,7 +1722,7 @@ textarea:focus-visible {
   padding-right: 2px;
 }
 
-.private-chat-panel .chat-message {
+.chat-panel .chat-message {
   background: rgba(183, 243, 204, 0.06);
   border-color: rgba(183, 243, 204, 0.18);
 }
@@ -1735,55 +1773,6 @@ textarea:focus-visible {
   color: #f3d46f;
 }
 
-.agent-table {
-  width: 100%;
-  margin-top: 12px;
-  border-collapse: collapse;
-  overflow-wrap: anywhere;
-  font-size: 0.78rem;
-}
-
-.agent-table th,
-.agent-table td {
-  padding: 8px;
-  border-bottom: 1px solid rgba(238, 242, 243, 0.1);
-  text-align: left;
-  vertical-align: top;
-}
-
-.agent-table th {
-  color: #8fa3a3;
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.agent-log {
-  margin: 12px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-  list-style: none;
-}
-
-.agent-log li {
-  display: grid;
-  grid-template-columns: 150px 132px minmax(0, 1fr);
-  gap: 10px;
-  color: #c2cccc;
-  font-size: 0.78rem;
-  line-height: 1.4;
-}
-
-.agent-log time {
-  color: #d4ae42;
-  font-weight: 900;
-}
-
-.agent-log strong {
-  color: #eef2f3;
-}
-
 .invalid-invite {
   max-width: 680px;
   min-height: 0;
@@ -1819,7 +1808,7 @@ textarea:focus-visible {
 .agent-command-actions {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(116px, auto) repeat(3, minmax(104px, auto)) minmax(112px, auto);
+  grid-template-columns: repeat(4, minmax(104px, 1fr));
   gap: 8px;
   align-items: end;
 }
@@ -1841,27 +1830,6 @@ textarea:focus-visible {
 
 .agent-command-actions input {
   margin-top: 0;
-}
-
-.agent-observer-access {
-  min-height: 36px;
-  padding: 5px 10px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid rgba(93, 210, 146, 0.24);
-  border-radius: 6px;
-  background:
-    linear-gradient(180deg, rgba(93, 210, 146, 0.1), rgba(93, 210, 146, 0.025)),
-    rgba(4, 9, 7, 0.76);
-}
-
-.agent-observer-access > span {
-  color: #8fa3a3;
-  font-size: 0.62rem;
-  font-weight: 950;
-  text-transform: uppercase;
 }
 
 .agent-command-actions .ui-button,
@@ -2187,21 +2155,6 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.cockpit-secondary-panel .agent-handoff-panel,
-.cockpit-secondary-panel.match-log-panel {
-  min-height: 0;
-}
-
-.cockpit-secondary-scroll {
-  max-height: 220px;
-  margin-top: 10px;
-  overflow: auto;
-}
-
-.cockpit-secondary-scroll .agent-table {
-  margin-top: 0;
 }
 
 .workbench-header,
@@ -2613,7 +2566,6 @@ textarea:focus-visible {
   line-height: 1.45;
 }
 
-.insight-command-list,
 .insight-list {
   margin: 10px 0 0;
   padding: 0;
@@ -2622,7 +2574,6 @@ textarea:focus-visible {
   list-style: none;
 }
 
-.insight-command-list li,
 .insight-list li {
   min-width: 0;
   padding: 8px;
@@ -2635,12 +2586,6 @@ textarea:focus-visible {
     rgba(5, 9, 12, 0.62);
 }
 
-.insight-command-list strong {
-  color: #f3d46f;
-  font-size: 0.74rem;
-}
-
-.insight-command-list span,
 .insight-list li {
   color: #d8dedf;
   font-size: 0.82rem;
@@ -2693,10 +2638,6 @@ textarea:focus-visible {
   color: #b6c1c3;
   font-size: 0.72rem;
   line-height: 1.35;
-}
-
-.agent-handoff-panel textarea {
-  min-height: 190px;
 }
 
 @media (max-width: 1180px) {
@@ -2782,7 +2723,6 @@ textarea:focus-visible {
   .catalog-head,
   .catalog-row,
   .chat-message-header,
-  .agent-log li,
   .replay-status-strip {
     grid-template-columns: 1fr;
   }
@@ -3073,8 +3013,7 @@ textarea:focus-visible {
 .scoreboard-team-block,
 .scoreboard-core,
 .match-stage-card,
-.dashboard-panel,
-.match-ops-dock {
+.dashboard-panel {
   border: 1px solid rgba(238, 242, 247, 0.12);
   background:
     linear-gradient(180deg, rgba(18, 23, 30, 0.92), rgba(6, 8, 12, 0.94)),
@@ -3582,73 +3521,8 @@ textarea:focus-visible {
   margin-bottom: 12px;
 }
 
-.team-status-dashboard {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.team-status-column {
-  min-width: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.team-status-column h3 {
-  margin: 0 0 2px;
-  overflow: hidden;
-  font-size: 0.86rem;
-  font-weight: 950;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.team-status-column.red h3 {
-  color: #ff4c5d;
-}
-
-.team-status-column.blue h3 {
-  color: #5b9dff;
-}
-
-.team-status-facts {
-  min-width: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.team-status-fact {
-  min-width: 0;
-  min-height: 28px;
-  padding: 6px 8px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  border: 1px solid rgba(238, 242, 247, 0.1);
-  border-radius: 6px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 247, 0.06), rgba(238, 242, 247, 0.022)),
-    rgba(6, 8, 12, 0.36);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    inset 0 -8px 14px rgba(0, 0, 0, 0.11);
-}
-
-.team-status-fact > span {
-  min-width: 0;
-  overflow: hidden;
-  color: #aeb7c1;
-  font-size: 0.72rem;
-  font-weight: 850;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .key-stats-dashboard,
-.round-summary-table {
+.arena-impact-table {
   min-width: 0;
   display: grid;
   gap: 0;
@@ -3705,38 +3579,47 @@ textarea:focus-visible {
   color: #65a6ff;
 }
 
-.round-summary-dashboard {
+.arena-impact-dashboard {
   min-width: 0;
   display: grid;
   gap: 12px;
 }
 
-.dashboard-panel-tabs {
+.arena-impact-summary {
   min-width: 0;
+  padding: 11px 12px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-bottom: 1px solid rgba(238, 242, 247, 0.1);
+  gap: 5px;
+  border: 1px solid rgba(238, 242, 247, 0.08);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(247, 184, 75, 0.055), rgba(238, 242, 247, 0.018)),
+    rgba(6, 8, 12, 0.34);
 }
 
-.dashboard-panel-tabs span {
+.arena-impact-summary span {
   min-width: 0;
-  padding: 0 0 10px;
   overflow: hidden;
-  color: #8f98a5;
-  font-size: 0.75rem;
-  font-weight: 900;
-  text-align: center;
+  color: #aeb7c1;
+  font-size: 0.68rem;
+  font-weight: 950;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.dashboard-panel-tabs .is-active {
+.arena-impact-summary strong {
+  min-width: 0;
+  overflow: hidden;
   color: #f4f6fb;
-  border-bottom: 1px solid #f7b84b;
+  font-size: 0.84rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.round-summary-dashboard p {
+.arena-impact-summary p {
   margin: 0;
   color: #c9d1dc;
   font-size: 0.82rem;
@@ -3744,86 +3627,14 @@ textarea:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.match-ops-dock {
-  min-width: 0;
-  min-height: 118px;
-  display: grid;
-  grid-template-columns: minmax(150px, 0.8fr) minmax(170px, 0.95fr) minmax(210px, 1fr) minmax(320px, 1.65fr);
-  align-items: stretch;
-  border-radius: 6px;
-}
-
-.ops-cell {
-  min-width: 0;
-  padding: 14px 16px;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  border-right: 1px solid rgba(238, 242, 247, 0.1);
-}
-
-.ops-cell:last-child {
-  border-right: 0;
-}
-
-.ops-cell > span {
-  color: #aeb7c1;
-  font-size: 0.74rem;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.ops-cell strong {
-  min-width: 0;
-  overflow: hidden;
-  color: #f4f6fb;
-  font-size: 0.88rem;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.ops-cell small {
-  min-width: 0;
-  color: #aeb7c1;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-.match-ops-dock .chat-log {
-  margin: 0;
-  max-height: 74px;
-  overflow: auto;
-  display: grid;
-  gap: 6px;
-}
-
-.match-ops-dock .chat-message {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.match-ops-dock .chat-message-header {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-
-.match-ops-dock .chat-message p,
-.match-ops-dock .chat-message small {
-  display: none;
-}
-
-.match-ops-dock .referee-empty {
-  margin: 0;
-  align-self: center;
+.chat-message p.is-empty {
+  color: #8fa3a3;
+  font-style: italic;
 }
 
 @media (max-width: 1280px) {
   .match-scoreboard,
-  .match-dashboard-panels,
-  .match-ops-dock {
+  .match-dashboard-panels {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -3839,15 +3650,6 @@ textarea:focus-visible {
 
   .scoreboard-team-block.blue .scoreboard-pips {
     justify-content: flex-start;
-  }
-
-  .ops-cell {
-    border-right: 0;
-    border-bottom: 1px solid rgba(238, 242, 247, 0.1);
-  }
-
-  .ops-cell:last-child {
-    border-bottom: 0;
   }
 }
 
@@ -3884,10 +3686,6 @@ textarea:focus-visible {
     height: clamp(460px, 72vh, 620px);
   }
 
-  .team-status-dashboard {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .key-stats-row {
     grid-template-columns: minmax(0, 1fr) minmax(52px, auto) minmax(52px, auto);
     padding: 0 10px;
@@ -3904,9 +3702,7 @@ textarea:focus-visible {
   .scoreboard-team-copy span,
   .scoreboard-team-block small,
   .scoreboard-core span,
-  .scoreboard-core small,
-  .ops-cell > span,
-  .ops-cell small {
+  .scoreboard-core small {
     white-space: normal;
   }
 
@@ -3919,8 +3715,7 @@ textarea:focus-visible {
     height: 10px;
   }
 
-  .match-dashboard-shell .dashboard-panel,
-  .ops-cell {
+  .match-dashboard-shell .dashboard-panel {
     padding: 12px;
   }
 }

@@ -30,31 +30,36 @@ export function createAssemblyResources(
 ): AssemblyResources {
   const { camera, engine, scene } = createBabylonRendererCore(canvas, {
     camera: {
-      alpha: -Math.PI * 0.58,
-      beta: 1.05,
-      lowerRadiusLimit: 4.8,
+      alpha: -Math.PI * 0.46,
+      beta: 0.98,
+      lowerRadiusLimit: 4.9,
       name: 'assembly-camera',
-      radius: 7.4,
-      target: new Vector3(0, 0.62, 0),
-      upperRadiusLimit: 10,
-      wheelPrecision: 32,
+      radius: 6.3,
+      target: new Vector3(0, 0.58, -0.32),
+      upperRadiusLimit: 7.6,
+      wheelPrecision: 54,
     },
     clearColor: new Color4(0.025, 0.03, 0.035, 1),
   })
 
+  camera.lowerAlphaLimit = camera.alpha
+  camera.upperAlphaLimit = camera.alpha
+  camera.lowerBetaLimit = camera.beta
+  camera.upperBetaLimit = camera.beta
+  camera.panningSensibility = 0
   camera.attachControl(canvas, true)
   createAssemblyLightingPreset(scene, role, submitted)
   const materials = createBotMaterialSet(scene, role, DEFAULT_TEAM_PALETTES[role])
 
-  const scanBarMaterial = createAssemblyMaterial(scene, 'assembly-scan-mat', '#dff5ff', '#8bdfff', 0.72)
+  const scanBarMaterial = createAssemblyMaterial(scene, 'assembly-scan-mat', '#dff5ff', '#8bdfff', 0.52)
   const scanBar = createRendererBox(
     scene,
     'assembly-scan-bar',
-    { width: 3.2, height: 0.045, depth: 0.1 },
+    { width: 2.2, height: 0.026, depth: 0.06 },
     scanBarMaterial,
   )
 
-  scanBar.position.set(0, 1.45, 0)
+  scanBar.position.set(0, 1.48, -0.28)
 
   const rig = createAssemblyRoom(scene, role)
   createRendererGlow(scene, 'assembly-glow', 0.42)

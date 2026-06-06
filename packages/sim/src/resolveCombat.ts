@@ -15,7 +15,6 @@ import {
   type CombatTurnSnapshot,
   type MovementCommand,
   type NormalizedBotTactics,
-  type OpeningScript,
   type PartCategory,
   type PartBehaviorSlot,
   type TeamRole,
@@ -39,7 +38,6 @@ import {
 import { compareDamageTargets } from './damagePriority.js'
 import {
   chooseCommand,
-  compileCommandPolicy,
   type PolicyBotState,
 } from './policy.js'
 import { createSeededRng } from './seededRng.js'
@@ -64,7 +62,6 @@ export type CombatantInput = {
   role: TeamRole
   blueprint: BotBlueprint
   tactics: NormalizedBotTactics
-  openingScript: OpeningScript
 }
 
 export type CombatResult = {
@@ -406,6 +403,9 @@ function policyStateFor(bot: BotRuntime): PolicyBotState {
     weaponReachBonus: weaponReachBonus(bot),
     contactDanger: contactDangerScore(bot),
     controlDanger: controlDangerScore(bot),
+    hasBoosterUtility: hasAliveBehaviorPart(bot.index, 'booster'),
+    hasRepairUtility: hasAliveBehaviorPart(bot.index, 'repair_kit'),
+    hasDroneUtility: hasAliveBehaviorPart(bot.index, 'drone_controller'),
   }
 }
 
@@ -1158,6 +1158,10 @@ function resolveWeapons(
 
   const inRange = distance(attacker.position, defender.position) <= weaponReach(attacker)
 
+  if (!inRange) {
+    return
+  }
+
   for (const { slot, part } of firingSlots) {
     const isNet = part.behaviorId === 'net'
 
@@ -1173,10 +1177,6 @@ function resolveWeapons(
       phase: isNet ? 'deploy' : 'release',
       style: part.behaviorId ?? part.category,
     })
-
-    if (!inRange) {
-      continue
-    }
 
     applyDamage(events, tick, attacker, defender, weaponSlotDamage(attacker, nextRandom()), 'weapon')
     applyWeaponBehavior(events, tick, arena, attacker, defender, part)
@@ -1607,14 +1607,8 @@ function applyCombatTick(
 
 export function resolveCombat(input: ResolveCombatInput): CombatResult {
   const state = createCombatRuntime(input)
-  const redPolicy = compileCommandPolicy({
-    tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
-    openingScript: input.red.openingScript,
-  })
-  const bluePolicy = compileCommandPolicy({
-    tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS,
-    openingScript: input.blue.openingScript,
-  })
+  const redPolicy = { tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS }
+  const bluePolicy = { tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS }
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
     const redCommand = chooseCommand(
