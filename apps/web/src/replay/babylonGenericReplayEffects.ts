@@ -3,12 +3,36 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import { deterministicAngle } from './babylonSceneUtils'
-import type { EffectUpdateInput } from './babylonReplayEffectTypes'
+import {
+  cloneStandardMaterial,
+  resolveReplayEffectPalette,
+  tintStandardMaterial,
+} from './babylonEffectPalette'
+import type {
+  EffectUpdateInput,
+  ImpactEffectPartMetadata,
+} from './babylonReplayEffectTypes'
 
 export function createPooledImpactBurstEffect(scene: Scene, name: string, material: StandardMaterial): Mesh {
   const mesh = MeshBuilder.CreateSphere(name, { diameter: 0.38, segments: 12 }, scene)
+  const coreMaterial = cloneStandardMaterial(material, `${name}-core-mat`)
+  const sparkMaterial = cloneStandardMaterial(material, `${name}-spark-mat`)
+  const ringMaterial = cloneStandardMaterial(material, `${name}-ring-mat`, 0.46)
 
-  mesh.material = material
+  mesh.material = coreMaterial
+  mesh.metadata = { impactEffectPart: 'core' }
+
+  const ring = MeshBuilder.CreateTorus(
+    `${name}-ring`,
+    { diameter: 0.86, thickness: 0.045, tessellation: 28 },
+    scene,
+  )
+
+  ring.parent = mesh
+  ring.position.y = -0.2
+  ring.rotation.x = Math.PI / 2
+  ring.material = ringMaterial
+  ring.metadata = { impactEffectPart: 'ring' }
 
   for (let index = 0; index < 8; index += 1) {
     const angle = (Math.PI * 2 * index) / 8
@@ -21,7 +45,8 @@ export function createPooledImpactBurstEffect(scene: Scene, name: string, materi
     spark.position.set(Math.sin(angle) * 0.26, 0, Math.cos(angle) * 0.26)
     spark.rotation.y = angle
     spark.parent = mesh
-    spark.material = material
+    spark.material = sparkMaterial
+    spark.metadata = { impactEffectPart: 'spark' }
   }
 
   mesh.setEnabled(false)
@@ -80,9 +105,29 @@ export function updatePartDetachEffect({ effect, mesh }: EffectUpdateInput): voi
   mesh.visibility = 0.42 + effect.intensity * 0.46
 }
 
-export function updateImpactEffect({ effect, mesh }: EffectUpdateInput): void {
-  mesh.position.y += 0.58
-  mesh.scaling.setAll(0.44 + effect.intensity * 1.35)
+export function updateImpactEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
+  const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
+
+  tintStandardMaterial(mesh.material, palette.hot, palette.glow)
+  mesh.getChildMeshes().forEach((child) => {
+    const metadata = child.metadata as ImpactEffectPartMetadata | undefined
+
+    if (metadata?.impactEffectPart === 'ring') {
+      tintStandardMaterial(child.material, palette.soft, palette.accent, 0.36 + effect.intensity * 0.18)
+      child.scaling.setAll(0.72 + progress * 0.82)
+      child.visibility = 0.28 + effect.intensity * 0.4
+      return
+    }
+
+    if (metadata?.impactEffectPart === 'spark') {
+      tintStandardMaterial(child.material, palette.hot, palette.glow)
+      child.scaling.set(0.72 + effect.intensity * 0.36, 0.72, 0.76 + progress * 0.86)
+      child.visibility = 0.46 + effect.intensity * 0.48
+    }
+  })
+  mesh.position.y += 0.42
+  mesh.scaling.setAll(0.48 + effect.intensity * 1.18)
   mesh.rotation.y = effect.age * 7
 }
 

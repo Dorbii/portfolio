@@ -1,5 +1,4 @@
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
-import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
@@ -9,6 +8,11 @@ import {
   easeOutCubic,
   toBabylonVector,
 } from './babylonSceneUtils'
+import {
+  cloneStandardMaterial,
+  resolveReplayEffectPalette,
+  tintStandardMaterial,
+} from './babylonEffectPalette'
 import type {
   DroneEffectPartMetadata,
   EffectUpdateInput,
@@ -26,7 +30,9 @@ export function createPooledControlNetEffect(
     scene,
   )
 
-  mesh.material = material
+  const netMaterial = cloneStandardMaterial(material, `${name}-mat`, 0.72)
+
+  mesh.material = netMaterial
   mesh.rotation.x = Math.PI / 2
 
   for (let index = -2; index <= 2; index += 1) {
@@ -45,8 +51,8 @@ export function createPooledControlNetEffect(
     horizontal.position.set(0, index * 0.28, 0)
     vertical.parent = mesh
     horizontal.parent = mesh
-    vertical.material = material
-    horizontal.material = material
+    vertical.material = netMaterial
+    horizontal.material = netMaterial
   }
 
   const cornerOffsets: Array<[number, number]> = [
@@ -65,7 +71,7 @@ export function createPooledControlNetEffect(
 
     anchor.position.set(x, 0, z)
     anchor.parent = mesh
-    anchor.material = material
+    anchor.material = netMaterial
   })
 
   mesh.setEnabled(false)
@@ -105,17 +111,20 @@ export function createPooledLaserLanceEffect(
     scene,
   )
 
-  mesh.material = material
-  glow.material = glowMaterial
+  const beamMaterial = cloneStandardMaterial(material, `${name}-mat`)
+  const clonedGlowMaterial = cloneStandardMaterial(glowMaterial, `${name}-glow-mat`, 0.38)
+
+  mesh.material = beamMaterial
+  glow.material = clonedGlowMaterial
   glow.parent = mesh
   startNode.position.z = -0.5
   endNode.position.z = 0.5
   startNode.parent = mesh
   endNode.parent = mesh
-  startNode.material = material
-  endNode.material = material
+  startNode.material = beamMaterial
+  endNode.material = beamMaterial
   hotCore.parent = mesh
-  hotCore.material = material
+  hotCore.material = beamMaterial
   mesh.setEnabled(false)
 
   return mesh
@@ -205,10 +214,15 @@ export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
   return mesh
 }
 
-export function updateControlNetEffect({ effect, mesh }: EffectUpdateInput): void {
+export function updateControlNetEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
   const target = effect.endPosition ? toBabylonVector(effect.endPosition) : toBabylonVector(effect.position)
 
+  tintStandardMaterial(mesh.material, palette.soft, palette.glow, 0.7)
+  mesh.getChildMeshes().forEach((child) => {
+    tintStandardMaterial(child.material, palette.soft, palette.glow, 0.7)
+  })
   mesh.position = target
   mesh.position.y = 0.22 + Math.sin(progress * Math.PI) * 0.16
   mesh.rotation.x = Math.PI / 2
@@ -218,7 +232,8 @@ export function updateControlNetEffect({ effect, mesh }: EffectUpdateInput): voi
   mesh.visibility = 0.72 + effect.intensity * 0.28
 }
 
-export function updateLaserLanceEffect({ effect, mesh }: EffectUpdateInput): void {
+export function updateLaserLanceEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
   const start = toBabylonVector(effect.position)
   const end = effect.endPosition ? toBabylonVector(effect.endPosition) : start
   const midpoint = Vector3.Center(start, end)
@@ -230,6 +245,12 @@ export function updateLaserLanceEffect({ effect, mesh }: EffectUpdateInput): voi
     : Math.atan2(dx, dz)
   const pulse = 0.24 + effect.intensity * 0.32
 
+  tintStandardMaterial(mesh.material, palette.hot, palette.glow)
+  mesh.getChildMeshes().forEach((child) => {
+    const isGlow = child.name.includes('glow')
+
+    tintStandardMaterial(child.material, isGlow ? palette.soft : palette.hot, palette.glow, isGlow ? 0.38 : undefined)
+  })
   mesh.position.set(midpoint.x, 0.9 + Math.sin(effect.age * 18) * 0.04, midpoint.z)
   mesh.rotation.x = 0
   mesh.rotation.y = heading
@@ -238,7 +259,7 @@ export function updateLaserLanceEffect({ effect, mesh }: EffectUpdateInput): voi
   mesh.visibility = 0.76 + effect.intensity * 0.24
 }
 
-export function updateDroneSwarmEffect({ effect, mesh }: EffectUpdateInput): void {
+export function updateDroneSwarmEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
   const start = toBabylonVector(effect.position)
   const end = effect.endPosition ? toBabylonVector(effect.endPosition) : start
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
@@ -253,17 +274,15 @@ export function updateDroneSwarmEffect({ effect, mesh }: EffectUpdateInput): voi
   mesh.rotation.z = Math.cos(effect.age * 6) * 0.04
   mesh.scaling.setAll(pulse)
   mesh.visibility = 0.86 + effect.intensity * 0.14
-  updateDroneSwarmParts(mesh, effect, progress)
+  updateDroneSwarmParts(mesh, effect, progress, resolveReplayEffectPalette(effect.team, profiles))
 }
 
-function updateDroneSwarmParts(mesh: Mesh, effect: ReplayEffectState, progress: number): void {
-  const teamColor = effect.team === 'red'
-    ? Color3.FromHexString('#ff4f5f')
-    : Color3.FromHexString('#58b7ff')
-  const teamGlow = effect.team === 'red'
-    ? Color3.FromHexString('#ff2c42')
-    : Color3.FromHexString('#1f8fff')
-
+function updateDroneSwarmParts(
+  mesh: Mesh,
+  effect: ReplayEffectState,
+  progress: number,
+  palette: ReturnType<typeof resolveReplayEffectPalette>,
+): void {
   mesh.getChildMeshes().forEach((child) => {
     const metadata = child.metadata as DroneEffectPartMetadata | undefined
 
@@ -273,13 +292,11 @@ function updateDroneSwarmParts(mesh: Mesh, effect: ReplayEffectState, progress: 
 
     if (child.material instanceof StandardMaterial) {
       if (metadata.droneEffectPart === 'rotor' || metadata.droneEffectPart === 'sensor') {
-        child.material.diffuseColor = teamColor
-        child.material.emissiveColor = teamGlow
+        tintStandardMaterial(child.material, palette.hot, palette.glow)
       }
 
       if (metadata.droneEffectPart === 'scan') {
-        child.material.diffuseColor = Color3.FromHexString('#d5ff8a')
-        child.material.emissiveColor = Color3.FromHexString('#6dff40')
+        tintStandardMaterial(child.material, palette.soft, palette.glow, 0.36)
       }
     }
 

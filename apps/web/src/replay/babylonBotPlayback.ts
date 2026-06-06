@@ -47,37 +47,47 @@ export function updateBots(
     bot.scaling.setAll(hit ? 0.96 : 1 + flinch * 0.035)
     updateBotPartNodes(bot, role, frame.parts[role], frame.time)
 
-    const meshes = bot.getChildMeshes()
+    const animatedNodes = bot.getChildren((node) => {
+      const metadata = node.metadata as { kind?: string } | undefined
 
-    meshes.forEach((mesh) => {
-      const metadata = mesh.metadata as { kind?: string; speed?: number } | undefined
+      return (
+        metadata?.kind === 'spin' ||
+        metadata?.kind === 'roll' ||
+        metadata?.kind === 'smoke' ||
+        metadata?.kind === 'thrust' ||
+        metadata?.kind === 'pulse'
+      )
+    }, true) as TransformNode[]
+
+    animatedNodes.forEach((node) => {
+      const metadata = node.metadata as { kind?: string; speed?: number } | undefined
 
       if (!metadata) {
         return
       }
 
       if (metadata.kind === 'spin') {
-        mesh.rotation.y += (metadata.speed ?? 0.06) * 1.6
+        node.rotation.y += (metadata.speed ?? 0.06) * 1.6
       }
 
       if (metadata.kind === 'roll') {
-        mesh.rotation.x += (metadata.speed ?? 0.05)
+        node.rotation.x += (metadata.speed ?? 0.05)
       }
 
       if (metadata.kind === 'smoke') {
-        mesh.position.y = 0.18 + Math.sin(frame.time * 9 + (metadata.speed ?? 0.04) * 40) * 0.08
+        node.position.y = 0.18 + Math.sin(frame.time * 9 + (metadata.speed ?? 0.04) * 40) * 0.08
       }
 
       if (metadata.kind === 'thrust') {
         const pulse = 0.82 + Math.sin(frame.time * 18) * 0.18
 
-        mesh.scaling.set(1, pulse, 1)
+        node.scaling.set(1, pulse, 1)
       }
 
       if (metadata.kind === 'pulse') {
         const pulse = 1 + Math.sin(frame.time * 5) * (metadata.speed ?? 0.04)
 
-        mesh.scaling.setAll(pulse)
+        node.scaling.setAll(pulse)
       }
     })
   })

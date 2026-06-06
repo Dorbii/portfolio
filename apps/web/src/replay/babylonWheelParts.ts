@@ -1,5 +1,6 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh } from './babylonMeshHelpers'
 import type { MobilityPartRenderArgs } from './babylonMobilityPartTypes'
 import { wheelVisualFor } from './babylonPartVisuals'
@@ -255,6 +256,7 @@ function createOmniWheelPart(
   diameter: number,
   wheelWidth: number,
 ): void {
+  const wheelRoot = new TransformNode(`${role}-${blockId}-omni-wheel-root`, scene)
   const core = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-omni-core`,
     {
@@ -283,13 +285,14 @@ function createOmniWheelPart(
     scene,
   )
 
+  wheelRoot.metadata = { kind: 'roll', speed: 0.3 }
+  wheelRoot.parent = parent
   core.rotation.z = Math.PI / 2
   outerRing.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
-  core.metadata = { kind: 'roll', speed: 0.3 }
-  attachMesh(core, parent, materials.steel)
-  attachMesh(outerRing, parent, materials.steel)
-  attachMesh(hub, parent, materials.steel)
+  attachMesh(core, wheelRoot, materials.steel)
+  attachMesh(outerRing, wheelRoot, materials.steel)
+  attachMesh(hub, wheelRoot, materials.steel)
 
   const sidePlateDiameter = Math.max(diameter * 0.62, 0.36)
   const sidePlateOffset = Math.max(wheelWidth * 0.34, 0.1)
@@ -307,8 +310,8 @@ function createOmniWheelPart(
 
     sidePlate.rotation.z = Math.PI / 2
     sidePlate.position.x = side * sidePlateOffset
-    attachMesh(sidePlate, parent, materials.trim)
-    createOmniBoltCircle(scene, parent, materials.steel, `${role}-${blockId}-omni-side-bolt-${side}`, {
+    attachMesh(sidePlate, wheelRoot, materials.trim)
+    createOmniBoltCircle(scene, wheelRoot, materials.steel, `${role}-${blockId}-omni-side-bolt-${side}`, {
       diameter: sidePlateDiameter,
       faceX: side * (sidePlateOffset + Math.max(wheelWidth * 0.04, 0.025)),
       side,
@@ -347,15 +350,14 @@ function createOmniWheelPart(
     )
     roller.rotation.x = -angle
     roller.rotation.y = rowSide * 0.78
-    roller.metadata = { kind: 'roll', speed: 0.1 }
     mount.position.copyFrom(roller.position)
     mount.rotation.x = -angle
     mount.rotation.y = rowSide * 0.34
-    attachMesh(roller, parent, materials.rubber)
-    attachMesh(mount, parent, materials.steel)
+    attachMesh(roller, wheelRoot, materials.rubber)
+    attachMesh(mount, wheelRoot, materials.steel)
   }
 
-  createOmniSpokes(scene, parent, materials.steel, role, blockId, diameter, wheelWidth)
+  createOmniSpokes(scene, wheelRoot, materials.steel, role, blockId, diameter, wheelWidth)
 }
 
 function createOmniBoltCircle(
@@ -423,6 +425,7 @@ function createMecanumWheelPart(
   diameter: number,
   wheelWidth: number,
 ): void {
+  const wheelRoot = new TransformNode(`${role}-${blockId}-mecanum-wheel-root`, scene)
   const core = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-mecanum-core`,
     {
@@ -442,11 +445,12 @@ function createMecanumWheelPart(
     scene,
   )
 
+  wheelRoot.metadata = { kind: 'roll', speed: 0.28 }
+  wheelRoot.parent = parent
   core.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
-  core.metadata = { kind: 'roll', speed: 0.28 }
-  attachMesh(core, parent, materials.steel)
-  attachMesh(hub, parent, materials.trim)
+  attachMesh(core, wheelRoot, materials.steel)
+  attachMesh(hub, wheelRoot, materials.trim)
 
   const rollerCount = 12
   const rollerRadius = diameter * 0.48
@@ -479,16 +483,15 @@ function createMecanumWheelPart(
     )
     roller.rotation.x = -angle
     roller.rotation.y = 0.82
-    roller.metadata = { kind: 'roll', speed: 0.13 }
     cheek.position.copyFrom(roller.position)
     cheek.rotation.x = -angle
     cheek.rotation.y = 0.35
-    attachMesh(roller, parent, materials.rubber)
-    attachMesh(cheek, parent, materials.steel)
+    attachMesh(roller, wheelRoot, materials.rubber)
+    attachMesh(cheek, wheelRoot, materials.steel)
   }
 
   createWheelFaceHardware(
-    { scene, parent, materials, role, blockId, partId: 'Wheel_Mecanum', material: materials.mobility, width: diameter, height: diameter, depth: wheelWidth },
+    { scene, parent: wheelRoot, materials, role, blockId, partId: 'Wheel_Mecanum', material: materials.mobility, width: diameter, height: diameter, depth: wheelWidth },
     diameter,
     wheelWidth,
     0.34,

@@ -1132,6 +1132,30 @@ test('broadcast camera framing includes active effect endpoints in target and ra
   assert.ok(effectCamera.radius > baselineCamera.radius)
 })
 
+test('broadcast camera framing clamps tall effect focus to an above-floor target band', () => {
+  const effectCamera = calculateBroadcastFrameForBothBotsAndActiveEffect(
+    createCameraFrame({
+      effects: [
+        {
+          id: 'tall-effect',
+          kind: 'control_net',
+          position: [0, 8, 0],
+          endPosition: [4, 6, 2],
+          age: 0.2,
+          intensity: 0.8,
+          team: 'red',
+        },
+      ],
+    }),
+    cameraTestArena,
+    16 / 9,
+  )
+
+  assert.ok(effectCamera.activeEffectFocusPoints.some((point) => point[1] > 1))
+  assert.ok(effectCamera.target[1] >= 0)
+  assert.ok(effectCamera.target[1] <= 0.9)
+})
+
 test('broadcast camera framing widens for a narrow viewport instead of cropping the fight', () => {
   const frame = createCameraFrame({
     red: [-3, 0, 0],

@@ -14,6 +14,8 @@ export const NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT = 0.32
 export const TEAM_FOLLOW_CAMERA_ALPHA = -Math.PI * 0.58
 export const TEAM_FOLLOW_CAMERA_BETA = 1.08
 
+const BROADCAST_TARGET_MAX_Y = 0.9
+const BROADCAST_TARGET_MIN_Y = 0
 const DEFAULT_VIEWPORT_ASPECT = 16 / 9
 const BROADCAST_VERTICAL_FOV = 0.8
 const BROADCAST_BOT_VISIBILITY_PADDING = 2.2
@@ -70,7 +72,7 @@ export function calculateBroadcastFrameForBothBotsAndActiveEffect(
     frame.bots.blue.position,
     ...activeEffectFocusPoints,
   ]
-  const target = centerBounds(focusPoints)
+  const target = clampBroadcastTarget(centerBounds(focusPoints))
 
   return {
     activeEffectFocusPoints,
@@ -225,6 +227,14 @@ function centerBounds(points: ReplayVector3[]): ReplayVector3 {
     (minX + maxX) / 2,
     (minY + maxY) / 2,
     (minZ + maxZ) / 2,
+  ]
+}
+
+function clampBroadcastTarget(target: ReplayVector3): ReplayVector3 {
+  return [
+    target[0],
+    clampNumber(target[1], BROADCAST_TARGET_MIN_Y, BROADCAST_TARGET_MAX_Y),
+    target[2],
   ]
 }
 

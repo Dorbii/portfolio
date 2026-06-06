@@ -105,7 +105,7 @@ function setCamera(
     ),
   )
   const desiredAlpha = alpha + Math.sin(time * 9) * shake * 0.05
-  const desiredBeta = beta + Math.cos(time * 8) * shake * 0.03
+  const desiredBeta = clampNumber(beta + Math.cos(time * 8) * shake * 0.03, 0.56, 1.26)
   const desiredRadius = Math.max(4.1, radius + shake * 0.8)
   const settle = shake > 0 ? 0.36 : 0.2
 
@@ -132,6 +132,10 @@ function findLatestReplayEffect(
 
 function lerpNumber(from: number, to: number, amount: number): number {
   return from + (to - from) * amount
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
 }
 
 function lerpAngle(from: number, to: number, amount: number): number {

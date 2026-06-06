@@ -17,6 +17,11 @@ import {
   toBabylonVector,
 } from './babylonSceneUtils'
 import {
+  cloneStandardMaterial,
+  resolveReplayEffectPalette,
+  tintStandardMaterial,
+} from './babylonEffectPalette'
+import {
   createPooledControlNetEffect,
   createPooledDroneSwarmEffect,
   createPooledLaserLanceEffect,
@@ -183,7 +188,22 @@ function createPooledWeaponEffect(
   material: StandardMaterial,
   netMaterial: StandardMaterial,
 ): Mesh {
-  const mesh = MeshBuilder.CreateBox(name, { width: 0.14, height: 0.14, depth: 1.25 }, scene)
+  const mesh = MeshBuilder.CreateBox(name, { width: 0.04, height: 0.04, depth: 0.04 }, scene)
+  const tracerCore = MeshBuilder.CreateBox(
+    `${name}-tracer-core`,
+    { width: 0.08, height: 0.06, depth: 1.22 },
+    scene,
+  )
+  const tracerGlow = MeshBuilder.CreateBox(
+    `${name}-tracer-glow`,
+    { width: 0.24, height: 0.16, depth: 1.38 },
+    scene,
+  )
+  const tracerTip = MeshBuilder.CreateSphere(
+    `${name}-tracer-tip`,
+    { diameter: 0.18, segments: 10 },
+    scene,
+  )
   const muzzle = MeshBuilder.CreateTorus(
     `${name}-muzzle`,
     { diameter: 0.44, thickness: 0.04, tessellation: 18 },
@@ -195,14 +215,32 @@ function createPooledWeaponEffect(
     scene,
   )
 
-  mesh.material = material
-  muzzle.material = material
+  const carrierMaterial = cloneStandardMaterial(material, `${name}-carrier-mat`, 0)
+  const tracerMaterial = cloneStandardMaterial(material, `${name}-tracer-mat`)
+  const tracerGlowMaterial = cloneStandardMaterial(material, `${name}-tracer-glow-mat`, 0.42)
+  const netEffectMaterial = cloneStandardMaterial(netMaterial, `${name}-net-mat`, 0.76)
+
+  mesh.material = carrierMaterial
+  tracerCore.parent = mesh
+  tracerCore.material = tracerMaterial
+  tracerCore.metadata = { weaponEffectPart: 'tracer-core' }
+
+  tracerGlow.parent = mesh
+  tracerGlow.material = tracerGlowMaterial
+  tracerGlow.metadata = { weaponEffectPart: 'tracer-glow' }
+
+  tracerTip.position.z = 0.66
+  tracerTip.parent = mesh
+  tracerTip.material = tracerMaterial
+  tracerTip.metadata = { weaponEffectPart: 'tracer-tip' }
+
+  muzzle.material = tracerMaterial
   muzzle.parent = mesh
   muzzle.rotation.x = Math.PI / 2
-  muzzle.position.z = 0.2
+  muzzle.position.z = -0.5
   muzzle.metadata = { weaponEffectPart: 'muzzle' }
 
-  netHoop.material = netMaterial
+  netHoop.material = netEffectMaterial
   netHoop.parent = mesh
   netHoop.rotation.x = Math.PI / 2
   netHoop.position.z = 0.34
@@ -224,8 +262,8 @@ function createPooledWeaponEffect(
     horizontal.position.set(0, index * 0.14, 0.34)
     vertical.parent = mesh
     horizontal.parent = mesh
-    vertical.material = netMaterial
-    horizontal.material = netMaterial
+    vertical.material = netEffectMaterial
+    horizontal.material = netEffectMaterial
     vertical.metadata = { weaponEffectPart: 'net-strand', baseX: vertical.position.x, baseY: vertical.position.y }
     horizontal.metadata = { weaponEffectPart: 'net-strand', baseX: horizontal.position.x, baseY: horizontal.position.y }
   }
@@ -246,7 +284,7 @@ function createPooledWeaponEffect(
 
     weight.position.set(x, y, 0.34)
     weight.parent = mesh
-    weight.material = netMaterial
+    weight.material = netEffectMaterial
     weight.metadata = { weaponEffectPart: 'net-weight', baseX: x, baseY: y }
   })
 
@@ -257,6 +295,7 @@ function createPooledWeaponEffect(
 
 function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateInput): void {
   const profile = effect.team ? profiles[effect.team] : undefined
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
   const weaponStyle = resolveWeaponStyle(effect.weaponStyle, profile)
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
   const heading = effect.rotationY ?? (effect.team === 'blue' ? -Math.PI / 2 : Math.PI / 2)
@@ -271,7 +310,8 @@ function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateIn
   mesh.rotation.x = 0
   mesh.rotation.y = heading
   mesh.rotation.z = 0
-  setWeaponEffectMode(mesh, weaponStyle, progress)
+  applyWeaponEffectPalette(mesh, palette)
+  setWeaponEffectMode(mesh, weaponStyle, progress, effect.intensity)
 
   if (weaponStyle === 'net') {
     const travel = 0.55 + easeOutCubic(progress) * 2.55
@@ -311,13 +351,20 @@ function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateIn
   }
 
   if (weaponStyle === 'turret') {
-    const tracerReach = effect.endPosition
-      ? Math.min(5.2, Vector3.Distance(mesh.position, toBabylonVector(effect.endPosition)))
-      : 2.6
+    const start = mesh.position.clone()
+    const end = effect.endPosition ? toBabylonVector(effect.endPosition) : null
+    const tracerReach = end ? Math.min(5.2, Vector3.Distance(start, end)) : 2.6
 
-    mesh.scaling.set(0.42, 0.42, 1.04 + effect.intensity * 1.35 + tracerReach * 0.16)
+    if (end) {
+      const midpoint = Vector3.Center(start, end)
+
+      mesh.position.set(midpoint.x, start.y + 0.08, midpoint.z)
+      mesh.rotation.y = Math.atan2(end.x - start.x, end.z - start.z)
+    }
+
+    mesh.scaling.set(0.58, 0.58, 0.7 + tracerReach * 0.7)
     mesh.position.y += 0.12
-    mesh.rotation.y = heading + (effect.team === 'blue' ? -1 : 1) * effect.intensity * 0.18
+    mesh.rotation.z = Math.sin(effect.age * 20) * 0.02
 
     return
   }
@@ -371,9 +418,34 @@ function resolveSourceAnchor(
   return node?.getAbsolutePosition().clone()
 }
 
-function setWeaponEffectMode(mesh: Mesh, mode: string, progress: number): void {
+function applyWeaponEffectPalette(
+  mesh: Mesh,
+  palette: ReturnType<typeof resolveReplayEffectPalette>,
+): void {
+  mesh.getChildMeshes().forEach((child) => {
+    const metadata = child.metadata as WeaponEffectPartMetadata | undefined
+
+    if (!metadata?.weaponEffectPart) {
+      return
+    }
+
+    if (metadata.weaponEffectPart === 'tracer-glow') {
+      tintStandardMaterial(child.material, palette.soft, palette.glow, 0.38)
+      return
+    }
+
+    if (metadata.weaponEffectPart.startsWith('net-')) {
+      tintStandardMaterial(child.material, palette.soft, palette.accent, 0.72)
+      return
+    }
+
+    tintStandardMaterial(child.material, palette.hot, palette.glow)
+  })
+}
+
+function setWeaponEffectMode(mesh: Mesh, mode: string, progress: number, intensity: number): void {
   const showNet = mode === 'net'
-  const showMuzzle = !showNet
+  const showTracer = !showNet
   const spread = 0.78 + easeOutCubic(progress) * 0.72
   const bow = Math.sin(progress * Math.PI) * 0.14
 
@@ -385,8 +457,25 @@ function setWeaponEffectMode(mesh: Mesh, mode: string, progress: number): void {
       return
     }
 
-    if (part === 'muzzle') {
-      child.setEnabled(showMuzzle)
+    if (part === 'muzzle' || part === 'tracer-core' || part === 'tracer-glow' || part === 'tracer-tip') {
+      child.setEnabled(showTracer)
+
+      if (showTracer) {
+        if (part === 'muzzle') {
+          child.scaling.setAll(0.78 + intensity * 0.42)
+          child.visibility = 0.35 + intensity * 0.45
+        } else if (part === 'tracer-glow') {
+          child.scaling.set(1, 0.92, 0.78 + intensity * 0.28)
+          child.visibility = 0.36 + intensity * 0.28
+        } else if (part === 'tracer-tip') {
+          child.scaling.setAll(0.78 + intensity * 0.3)
+          child.visibility = 0.74 + intensity * 0.26
+        } else {
+          child.scaling.set(1, 1, 0.82 + intensity * 0.42)
+          child.visibility = 0.86
+        }
+      }
+
       return
     }
 

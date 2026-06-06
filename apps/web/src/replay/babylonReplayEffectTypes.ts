@@ -35,9 +35,13 @@ export type EffectUpdateInput = {
 }
 
 export type WeaponEffectPartMetadata = {
-  weaponEffectPart?: 'muzzle' | 'net-hoop' | 'net-strand' | 'net-weight'
+  weaponEffectPart?: 'muzzle' | 'net-hoop' | 'net-strand' | 'net-weight' | 'tracer-core' | 'tracer-glow' | 'tracer-tip'
   baseX?: number
   baseY?: number
+}
+
+export type ImpactEffectPartMetadata = {
+  impactEffectPart?: 'core' | 'ring' | 'spark'
 }
 
 export type DroneEffectPartMetadata = {

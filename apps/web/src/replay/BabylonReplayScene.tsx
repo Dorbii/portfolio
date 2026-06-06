@@ -148,6 +148,7 @@ export function BabylonReplayScene({
       })
       const { camera, engine, scene } = core
 
+      configureReplayCameraControls(camera)
       camera.attachControl(canvas, true)
       createReplayLightingPreset(scene, arena.width)
 
@@ -157,7 +158,7 @@ export function BabylonReplayScene({
         red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red),
         blue: createBotNode(scene, botBlueprints.blue, 'blue', teamMaterials.blue),
       }
-      const botProfiles = createBotVisualProfiles(botBlueprints)
+      const botProfiles = createBotVisualProfiles(botBlueprints, { identities: teamIdentities })
       const effectPool = createEffectPool(scene)
       const centerSpinner = createCenterSpinner(scene)
       createRendererGlow(scene, 'replay-glow', 0.32)
@@ -343,4 +344,10 @@ function focusReplayPart(resources: SceneResources, options: ReplayDebugFocusOpt
   resources.camera.radius = options.radius ?? 2.6
 
   return true
+}
+
+function configureReplayCameraControls(camera: BabylonRendererCore['camera']): void {
+  camera.lowerBetaLimit = 0.56
+  camera.upperBetaLimit = 1.26
+  camera.panningSensibility = 0
 }
