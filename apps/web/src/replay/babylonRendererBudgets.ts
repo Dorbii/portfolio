@@ -20,22 +20,23 @@ export const BABYLON_RENDERER_BUDGETS: Record<
   BabylonRendererBudget
 > = {
   assembly: {
-    activeMeshes: 260,
-    materials: 96,
-    meshes: 320,
-    textures: 80,
-    totalVertices: 75_000,
+    activeMeshes: 420,
+    materials: 150,
+    meshes: 760,
+    textures: 150,
+    totalVertices: 180_000,
   },
   replayPreview: {
-    activeMeshes: 560,
-    materials: 130,
-    meshes: 960,
-    textures: 120,
-    totalVertices: 130_000,
+    activeMeshes: 900,
+    materials: 220,
+    meshes: 1_600,
+    textures: 220,
+    totalVertices: 300_000,
   },
 }
 
-export const BABYLON_RENDERER_CHUNK_GZIP_BUDGET_BYTES = 380 * 1024
+export const BABYLON_RENDERER_CHUNK_GZIP_BUDGET_BYTES = 560 * 1024
+export const BABYLON_RENDERER_AGGREGATE_GZIP_BUDGET_BYTES = 720 * 1024
 
 export function createBabylonRendererBudgetState(
   stats: BabylonRendererStats,

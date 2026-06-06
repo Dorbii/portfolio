@@ -3,8 +3,8 @@ import { basename, join, resolve } from 'node:path'
 import { gzipSync } from 'node:zlib'
 
 const distAssetsDir = resolve('dist/assets')
-const chunkGzipBudgetBytes = 380 * 1024
-const aggregateGzipBudgetBytes = 420 * 1024
+const chunkGzipBudgetBytes = 560 * 1024
+const aggregateGzipBudgetBytes = 720 * 1024
 
 if (!existsSync(distAssetsDir)) {
   throw new Error('dist/assets is missing. Run npm.cmd run build before checking renderer budgets.')

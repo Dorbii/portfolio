@@ -246,6 +246,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '}',
     '```',
     `If a submit response succeeds, stop submitting that same build or turn and keep waiting with waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} }).`,
+    'Use window.AgentArenaRole.submitPrivateChatMessage({ kind: "reflection", message }) for role-only Agent Journal conclusions after replay or opponent reads.',
     'Do not keep retrying if window.AgentArenaRole is unavailable or bootstrapRole/submitRoundPlan throws the same capability/network error.',
     '',
     '## Only if browser helpers fail',
