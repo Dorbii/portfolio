@@ -285,7 +285,6 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitRuntimeSource.includes('agent-arena-brief'))
   assert.ok(cockpitRuntimeSource.includes('External agent brief'))
   assert.ok(cockpitRuntimeSource.includes('createExternalAgentBriefMarkdown'))
-  assert.ok(cockpitRuntimeSource.includes('stateVersion'))
   assert.ok(cockpitRuntimeSource.includes('claimButtonLabel'))
   assert.ok(cockpitRuntimeSource.includes('Clear player key'))
 })

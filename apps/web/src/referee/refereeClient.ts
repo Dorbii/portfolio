@@ -82,12 +82,14 @@ export function buildInviteUrl({
   observerToken,
   sessionId,
   apiBase,
+  siteBase,
 }: {
   role: TeamRole
   claimToken?: string
   observerToken?: string
   sessionId: string
   apiBase: string
+  siteBase?: string
 }) {
   return createAgentInviteUrl({
     role,
@@ -95,7 +97,7 @@ export function buildInviteUrl({
     observerToken,
     sessionId,
     apiBase,
-  })
+  }, siteBase)
 }
 
 export async function createSession(apiBase: string): Promise<CreateSessionResponse> {

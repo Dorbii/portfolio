@@ -44,6 +44,10 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
   const blueLightMaterial = createSceneMaterial(scene, 'blue-led-mat', '#57adff', '#167fff', 1, 0.1)
   const whiteLightMaterial = createSceneMaterial(scene, 'white-led-mat', '#dfefff', '#9bd7ff', 1, 0.1)
   const hazardMaterial = createSceneMaterial(scene, 'hazard-mat', '#f0bd3c', '#654006', 1, 0.18)
+  const hazardPitMaterial = createSceneMaterial(scene, 'hazard-pit-mat', '#08090a', '#010101', 1, 0.08)
+  const hazardOilMaterial = createSceneMaterial(scene, 'hazard-oil-mat', '#0f1518', '#11202a', 0.74, 0.35)
+  const hazardMagnetMaterial = createSceneMaterial(scene, 'hazard-magnet-mat', '#45515b', '#141b22', 1, 0.18)
+  const hazardFlipperMaterial = createSceneMaterial(scene, 'hazard-flipper-mat', '#9b7722', '#3e2606', 1, 0.16)
   const hatchMaterial = createSceneMaterial(scene, 'hatch-mat', '#101416', '#020303')
   const centerMaterial = createSceneMaterial(scene, 'center-mark-mat', '#30383b', '#070b0e', 0.66)
 
@@ -126,7 +130,21 @@ export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisu
       ring.position.y = 0.08
     }
 
-    hazard.mesh.material = hazardMaterial
+    const material =
+      hazard.kind === 'pit'
+        ? hazardPitMaterial
+        : hazard.kind === 'oil'
+          ? hazardOilMaterial
+          : hazard.kind === 'magnet'
+            ? hazardMagnetMaterial
+            : hazard.kind === 'flipper'
+              ? hazardFlipperMaterial
+              : hazardMaterial
+
+    hazard.mesh.material = material
+    hazard.mesh.getChildMeshes(false).forEach((child) => {
+      child.material = material
+    })
   })
 
   return hazardPlates

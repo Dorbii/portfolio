@@ -1,7 +1,15 @@
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
-import type { ArenaConfig } from '../../../../packages/schemas/src/index.js'
+import {
+  type ArenaConfig,
+  type ArenaHazardDefinition,
+} from '../../../../packages/schemas/src/index.js'
+import {
+  compileArenaTopology,
+  hazardCenter,
+  hazardEffectKind,
+} from '../../../../packages/sim/src/arenaTopology.js'
 import type { ReplayVisualFrame } from './replayMapping'
 
 export type BabylonHazardVisual = {
@@ -9,56 +17,16 @@ export type BabylonHazardVisual = {
   label: string
   mesh: Mesh
   baseScale: number
+  baseScaleZ: number
   spinSpeed: number
 }
 export function createHazardVisuals(
   scene: Scene,
   arena: ArenaConfig,
 ): BabylonHazardVisual[] {
-  const hazards: BabylonHazardVisual[] = []
-
-  arena.activeHazards.forEach((rawName, index) => {
-    const normalized = normalizeHazard(rawName)
-
-    if (normalized.includes('corner')) {
-      const cornerSlots = ['northwest', 'northeast', 'southwest', 'southeast'] as const
-
-      cornerSlots.forEach((slot, slotIndex) => {
-        const { x, z } = slotToPosition(slot, arena.width, arena.height)
-
-        hazards.push({
-          kind: 'flipper',
-          label: normalized,
-          mesh: createHazardPlate(
-            scene,
-            `hazard-${normalized}-${index}-${slotIndex}`,
-            x,
-            z,
-            0.06,
-            1.1,
-            0.72,
-            `${normalized} ${slot}`,
-          ),
-          baseScale: 1,
-          spinSpeed: 0,
-        })
-      })
-
-      return
-    }
-
-    const visual = buildHazardVisual(
-      scene,
-      `${normalized}-${index}`,
-      normalized,
-      arena.width,
-      arena.height,
-    )
-
-    if (visual) {
-      hazards.push(visual)
-    }
-  })
+  const hazards = compileArenaTopology(arena).hazards
+    .map((hazard) => buildHazardVisual(scene, hazard))
+    .filter((hazard): hazard is BabylonHazardVisual => hazard !== undefined)
 
   if (hazards.length === 0) {
     return [
@@ -76,6 +44,7 @@ export function createHazardVisuals(
           'center',
         ),
         baseScale: 1,
+        baseScaleZ: 1,
         spinSpeed: 0,
       },
     ]
@@ -86,32 +55,32 @@ export function createHazardVisuals(
 
 function buildHazardVisual(
   scene: Scene,
-  id: string,
-  normalized: string,
-  arenaWidth: number,
-  arenaHeight: number,
+  hazard: ArenaHazardDefinition,
 ): BabylonHazardVisual | undefined {
-  const kind = classifyHazardKind(normalized)
-  const slot = classifyHazardSlot(normalized)
-  const { x, z } = slotToPosition(slot, arenaWidth, arenaHeight)
+  const kind = hazardEffectKind(hazard.type)
+  const [x, , z] = hazardCenter(hazard)
+  const label = normalizeHazardLabel(hazard.type)
 
   if (kind === 'saw') {
     const sawPlate = createHazardPlate(
       scene,
-      `hazard-${id}`,
+      `hazard-${hazard.id}`,
       x,
       z,
       0.06,
       0.84,
       1.05,
-      `saw ${slot}`,
+      hazard.type,
     )
+    createSawTeeth(scene, `hazard-${hazard.id}-tooth`, sawPlate)
+    createHazardHub(scene, `hazard-${hazard.id}-hub`, sawPlate)
 
     return {
       kind: 'saw',
-      label: normalized,
+      label,
       mesh: sawPlate,
       baseScale: 1,
+      baseScaleZ: sawPlate.scaling.z,
       spinSpeed: 0.05,
     }
   }
@@ -119,20 +88,22 @@ function buildHazardVisual(
   if (kind === 'pit') {
     const pit = createHazardPlate(
       scene,
-      `hazard-${id}`,
+      `hazard-${hazard.id}`,
       x,
       z,
       -0.07,
       0.76,
       0.8,
-      `pit ${slot}`,
+      hazard.type,
     )
+    createPitDetails(scene, `hazard-${hazard.id}-pit`, pit)
 
     return {
       kind: 'pit',
-      label: normalized,
+      label,
       mesh: pit,
       baseScale: 1,
+      baseScaleZ: pit.scaling.z,
       spinSpeed: 0,
     }
   }
@@ -140,80 +111,85 @@ function buildHazardVisual(
   if (kind === 'oil') {
     const oil = createHazardPlate(
       scene,
-      `hazard-${id}`,
+      `hazard-${hazard.id}`,
       x,
       z,
       0.03,
       1.02,
       1.08,
-      `oil ${slot}`,
+      hazard.type,
     )
 
     oil.metadata = { materialTint: true }
+    createOilSlickDetails(scene, `hazard-${hazard.id}-oil`, oil)
 
     return {
       kind: 'oil',
-      label: normalized,
+      label,
       mesh: oil,
       baseScale: 1,
+      baseScaleZ: oil.scaling.z,
       spinSpeed: 0,
     }
   }
 
   if (kind === 'magnet') {
     const magnet = MeshBuilder.CreateTorus(
-      `hazard-${id}`,
+      `hazard-${hazard.id}`,
       { diameter: 1.2, thickness: 0.12, tessellation: 28 },
       scene,
     )
     magnet.position.set(x, 0.07, z)
+    createMagnetDetails(scene, `hazard-${hazard.id}-magnet`, magnet)
 
     return {
       kind: 'magnet',
-      label: normalized,
+      label,
       mesh: magnet,
       baseScale: 1,
+      baseScaleZ: magnet.scaling.z,
       spinSpeed: 0.08,
     }
   }
 
   if (kind === 'flipper') {
-    const flipper = createHazardPlate(
+    const flipper = MeshBuilder.CreateBox(
+      `hazard-${hazard.id}`,
+      { width: 1.35, height: 0.08, depth: 0.88 },
       scene,
-      `hazard-${id}`,
-      x,
-      z,
-      0.055,
-      1.12,
-      0.68,
-      `flipper ${slot}`,
     )
+
+    flipper.position.set(x, 0.055, z)
+    flipper.metadata = { label: hazard.type }
+    createFlipperDetails(scene, `hazard-${hazard.id}-flipper`, flipper)
 
     return {
       kind: 'flipper',
-      label: normalized,
+      label,
       mesh: flipper,
       baseScale: 1,
+      baseScaleZ: flipper.scaling.z,
       spinSpeed: 0,
     }
   }
 
-  const fallback = createHazardPlate(
+  const genericHazard = createHazardPlate(
     scene,
-    `hazard-${id}`,
+    `hazard-${hazard.id}`,
     x,
     z,
     0.05,
     0.9,
     0.9,
-    `hazard ${slot}`,
+    hazard.type,
   )
 
   return {
     kind: 'generic',
-    label: normalized,
-    mesh: fallback,
+    label,
+    mesh: genericHazard,
     baseScale: 1,
+    baseScaleZ: genericHazard.scaling.z,
     spinSpeed: 0,
   }
 }
@@ -247,13 +223,17 @@ export function updateHazards(hazards: BabylonHazardVisual[], frame: ReplayVisua
       (effect) =>
         effect.kind === 'hazard' &&
         effect.label !== undefined &&
-        hazardsMatch(normalizeHazard(effect.label), hazard.label),
+        hazardsMatch(normalizeHazardLabel(effect.label), hazard.label),
     )
     const pulse = active ? 1 + (1 - active.age / 0.9) * 0.3 : 1
     const spin = hazard.spinSpeed > 0 ? hazard.spinSpeed + (frame.effects.some((effect) => effect.kind === 'impact') ? 0.08 : 0) : 0
 
     hazard.mesh.position.y = 0.08 + (active ? active.intensity * 0.14 : 0)
-    hazard.mesh.scaling.setAll(hazard.baseScale * pulse)
+    hazard.mesh.scaling.set(
+      hazard.baseScale * pulse,
+      hazard.baseScale * pulse,
+      hazard.baseScaleZ * pulse,
+    )
 
     if (hazard.kind === 'flipper') {
       hazard.mesh.rotation.x = active ? -active.intensity * 0.45 : 0
@@ -269,102 +249,85 @@ function hazardsMatch(left: string, right: string): boolean {
   return left.includes(right) || right.includes(left) || left === right
 }
 
-function classifyHazardKind(raw: string): string {
-  if (raw.includes('saw')) {
-    return 'saw'
-  }
-
-  if (raw.includes('flipper')) {
-    return 'flipper'
-  }
-
-  if (raw.includes('pit')) {
-    return 'pit'
-  }
-
-  if (raw.includes('oil')) {
-    return 'oil'
-  }
-
-  if (raw.includes('magnet')) {
-    return 'magnet'
-  }
-
-  return 'generic'
-}
-
-function classifyHazardSlot(raw: string): string {
-  if (raw.includes('north')) {
-    return 'north'
-  }
-
-  if (raw.includes('south')) {
-    return 'south'
-  }
-
-  if (raw.includes('east')) {
-    return 'east'
-  }
-
-  if (raw.includes('west')) {
-    return 'west'
-  }
-
-  if (raw.includes('red')) {
-    return 'red'
-  }
-
-  if (raw.includes('blue')) {
-    return 'blue'
-  }
-
-  return 'center'
-}
-
-function slotToPosition(slot: string, arenaWidth: number, arenaHeight: number): { x: number; z: number } {
-  if (slot === 'northwest') {
-    return { x: -arenaWidth * 0.34, z: arenaHeight * 0.28 }
-  }
-
-  if (slot === 'northeast') {
-    return { x: arenaWidth * 0.34, z: arenaHeight * 0.28 }
-  }
-
-  if (slot === 'southwest') {
-    return { x: -arenaWidth * 0.34, z: -arenaHeight * 0.28 }
-  }
-
-  if (slot === 'southeast') {
-    return { x: arenaWidth * 0.34, z: -arenaHeight * 0.28 }
-  }
-
-  if (slot === 'north') {
-    return { x: 0, z: arenaHeight * 0.26 }
-  }
-
-  if (slot === 'south') {
-    return { x: 0, z: -arenaHeight * 0.26 }
-  }
-
-  if (slot === 'east') {
-    return { x: arenaWidth * 0.33, z: 0 }
-  }
-
-  if (slot === 'west') {
-    return { x: -arenaWidth * 0.33, z: 0 }
-  }
-
-  if (slot === 'red') {
-    return { x: -arenaWidth * 0.2, z: 0 }
-  }
-
-  if (slot === 'blue') {
-    return { x: arenaWidth * 0.2, z: 0 }
-  }
-
-  return { x: 0, z: 0 }
-}
-
-function normalizeHazard(value: string): string {
+function normalizeHazardLabel(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+function createSawTeeth(scene: Scene, name: string, parent: Mesh): void {
+  for (let index = 0; index < 12; index += 1) {
+    const tooth = MeshBuilder.CreateBox(
+      `${name}-${index}`,
+      { width: 0.14, height: 0.085, depth: 0.34 },
+      scene,
+    )
+    const angle = (Math.PI * 2 * index) / 12
+
+    tooth.parent = parent
+    tooth.position.set(Math.cos(angle) * 0.46, 0.07, Math.sin(angle) * 0.46)
+    tooth.rotation.y = angle
+  }
+}
+
+function createHazardHub(scene: Scene, name: string, parent: Mesh): void {
+  const hub = MeshBuilder.CreateCylinder(name, { height: 0.1, diameter: 0.28, tessellation: 18 }, scene)
+  const arbor = MeshBuilder.CreateTorus(`${name}-arbor`, { diameter: 0.34, thickness: 0.035, tessellation: 18 }, scene)
+
+  hub.parent = parent
+  hub.position.set(0, 0.085, 0)
+  arbor.parent = parent
+  arbor.position.set(0, 0.14, 0)
+  arbor.rotation.x = Math.PI / 2
+}
+
+function createPitDetails(scene: Scene, name: string, parent: Mesh): void {
+  const inner = MeshBuilder.CreateBox(`${name}-shadow`, { width: 0.88, height: 0.035, depth: 0.52 }, scene)
+  const hinge = MeshBuilder.CreateCylinder(`${name}-hinge`, { height: 0.78, diameter: 0.05, tessellation: 8 }, scene)
+
+  inner.parent = parent
+  inner.position.set(0, 0.07, 0)
+  hinge.parent = parent
+  hinge.position.set(0, 0.12, 0.34)
+  hinge.rotation.z = Math.PI / 2
+}
+
+function createOilSlickDetails(scene: Scene, name: string, parent: Mesh): void {
+  for (let index = 0; index < 3; index += 1) {
+    const ripple = MeshBuilder.CreateTorus(
+      `${name}-ripple-${index}`,
+      { diameter: 0.45 + index * 0.28, thickness: 0.025, tessellation: 22 },
+      scene,
+    )
+
+    ripple.parent = parent
+    ripple.position.set(index * 0.06 - 0.08, 0.085, index * -0.05 + 0.04)
+    ripple.rotation.x = Math.PI / 2
+  }
+}
+
+function createMagnetDetails(scene: Scene, name: string, parent: Mesh): void {
+  for (const side of [-1, 1]) {
+    const pole = MeshBuilder.CreateBox(
+      `${name}-pole-${side}`,
+      { width: 0.24, height: 0.18, depth: 0.46 },
+      scene,
+    )
+
+    pole.parent = parent
+    pole.position.set(side * 0.36, 0.04, 0)
+  }
+}
+
+function createFlipperDetails(scene: Scene, name: string, parent: Mesh): void {
+  const hinge = MeshBuilder.CreateCylinder(`${name}-hinge`, { height: 1.1, diameter: 0.08, tessellation: 10 }, scene)
+  const ram = MeshBuilder.CreateBox(`${name}-ram`, { width: 0.18, height: 0.08, depth: 0.55 }, scene)
+  const lip = MeshBuilder.CreateBox(`${name}-lip`, { width: 1.22, height: 0.075, depth: 0.12 }, scene)
+
+  hinge.parent = parent
+  hinge.position.set(0, 0.05, -0.38)
+  hinge.rotation.z = Math.PI / 2
+  ram.parent = parent
+  ram.position.set(0, 0.06, 0.12)
+  ram.rotation.x = -0.24
+  lip.parent = parent
+  lip.position.set(0, 0.06, 0.44)
 }

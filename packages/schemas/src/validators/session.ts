@@ -263,5 +263,146 @@ function validateArenaConfigShape(value: unknown, path: string): ValidationIssue
     })
   }
 
+  if ('topology' in value && value.topology !== undefined) {
+    issues.push(...validateArenaTopologyShape(value.topology, `${path}.topology`))
+  }
+
   return issues
+}
+
+function validateArenaTopologyShape(value: unknown, path: string): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return [issue('INVALID_ARENA_TOPOLOGY', path, 'Expected arena topology object.')]
+  }
+
+  if (!isRecord(value.grid) || !isPositiveFiniteNumber(value.grid.cellSize)) {
+    issues.push(issue('INVALID_ARENA_GRID', `${path}.grid.cellSize`, 'Grid cellSize must be a positive number.'))
+  }
+
+  for (const key of ['spawnZones', 'hazards', 'terrain', 'obstacles'] as const) {
+    if (!Array.isArray(value[key])) {
+      issues.push(issue('INVALID_ARENA_TOPOLOGY', `${path}.${key}`, 'Expected array.'))
+    }
+  }
+
+  if (Array.isArray(value.spawnZones)) {
+    value.spawnZones.forEach((spawnZone, index) => {
+      const entryPath = `${path}.spawnZones.${index}`
+
+      if (!isRecord(spawnZone)) {
+        issues.push(issue('INVALID_ARENA_SPAWN_ZONE', entryPath, 'Expected spawn zone object.'))
+        return
+      }
+
+      if (!TEAM_ROLES.includes(spawnZone.role as never)) {
+        issues.push(issue('INVALID_ARENA_SPAWN_ZONE', `${entryPath}.role`, 'Spawn zone role must be red or blue.'))
+      }
+      issues.push(...validateArenaZoneShape(spawnZone.shape, `${entryPath}.shape`))
+    })
+  }
+
+  if (Array.isArray(value.hazards)) {
+    value.hazards.forEach((hazard, index) => {
+      const entryPath = `${path}.hazards.${index}`
+
+      if (!isRecord(hazard)) {
+        issues.push(issue('INVALID_ARENA_HAZARD', entryPath, 'Expected hazard object.'))
+        return
+      }
+
+      validateTopologyText(issues, hazard.id, `${entryPath}.id`, 'Hazard id')
+      validateTopologyText(issues, hazard.type, `${entryPath}.type`, 'Hazard type')
+      if (typeof hazard.damage !== 'number' || !Number.isFinite(hazard.damage) || hazard.damage < 0) {
+        issues.push(issue('INVALID_ARENA_HAZARD_DAMAGE', `${entryPath}.damage`, 'Hazard damage must be a non-negative number.'))
+      }
+      issues.push(...validateArenaZoneShape(hazard.shape, `${entryPath}.shape`))
+    })
+  }
+
+  if (Array.isArray(value.terrain)) {
+    value.terrain.forEach((terrain, index) => {
+      const entryPath = `${path}.terrain.${index}`
+
+      if (!isRecord(terrain)) {
+        issues.push(issue('INVALID_ARENA_TERRAIN', entryPath, 'Expected terrain object.'))
+        return
+      }
+
+      validateTopologyText(issues, terrain.id, `${entryPath}.id`, 'Terrain id')
+      validateTopologyText(issues, terrain.type, `${entryPath}.type`, 'Terrain type')
+      issues.push(...validateArenaZoneShape(terrain.shape, `${entryPath}.shape`))
+    })
+  }
+
+  if (Array.isArray(value.obstacles)) {
+    value.obstacles.forEach((obstacle, index) => {
+      const entryPath = `${path}.obstacles.${index}`
+
+      if (!isRecord(obstacle)) {
+        issues.push(issue('INVALID_ARENA_OBSTACLE', entryPath, 'Expected obstacle object.'))
+        return
+      }
+
+      validateTopologyText(issues, obstacle.id, `${entryPath}.id`, 'Obstacle id')
+      validateTopologyText(issues, obstacle.type, `${entryPath}.type`, 'Obstacle type')
+      if (typeof obstacle.blocksMovement !== 'boolean') {
+        issues.push(issue('INVALID_ARENA_OBSTACLE', `${entryPath}.blocksMovement`, 'blocksMovement must be boolean.'))
+      }
+      issues.push(...validateArenaZoneShape(obstacle.shape, `${entryPath}.shape`))
+    })
+  }
+
+  return issues
+}
+
+function validateArenaZoneShape(value: unknown, path: string): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return [issue('INVALID_ARENA_SHAPE', path, 'Expected shape object.')]
+  }
+
+  if (!isVector2(value.center)) {
+    issues.push(issue('INVALID_ARENA_SHAPE', `${path}.center`, 'Shape center must be [x, z].'))
+  }
+
+  if (value.kind === 'circle') {
+    if (!isPositiveFiniteNumber(value.radius)) {
+      issues.push(issue('INVALID_ARENA_SHAPE', `${path}.radius`, 'Circle radius must be a positive number.'))
+    }
+    return issues
+  }
+
+  if (value.kind === 'rect') {
+    if (!isVector2(value.size) || value.size.some((entry) => entry <= 0)) {
+      issues.push(issue('INVALID_ARENA_SHAPE', `${path}.size`, 'Rect size must be [width, height] with positive numbers.'))
+    }
+    return issues
+  }
+
+  issues.push(issue('INVALID_ARENA_SHAPE', `${path}.kind`, 'Shape kind must be circle or rect.'))
+  return issues
+}
+
+function validateTopologyText(
+  issues: ValidationIssue[],
+  value: unknown,
+  path: string,
+  label: string,
+): void {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    issues.push(issue('INVALID_ARENA_TOPOLOGY_TEXT', path, `${label} must be non-empty text.`))
+  }
+}
+
+function isVector2(value: unknown): value is [number, number] {
+  return Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+}
+
+function isPositiveFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
 }

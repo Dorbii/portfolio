@@ -3,14 +3,15 @@ import type {
   RoleInvite,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import { createExternalAgentBriefMarkdown } from '../agent/agentClient'
-import { buildInviteUrl } from './refereeClient'
+import { createExternalAgentBriefMarkdown } from '../agent/agentClient.js'
+import { buildInviteUrl } from './refereeClient.js'
 
 type RefereeAgentBriefInput = {
   activeSessionId: string
   apiBase: string
   invites: RoleInvite[]
   publicSession: PublicSessionState | null
+  siteBase?: string
 }
 
 export type RefereeAgentBriefs = {
@@ -28,13 +29,14 @@ export function createRefereeAgentBriefs({
   apiBase,
   invites,
   publicSession,
+  siteBase,
 }: RefereeAgentBriefInput): RefereeAgentBriefs {
   const redInvite = inviteForRole(invites, 'red')
   const blueInvite = inviteForRole(invites, 'blue')
-  const redInviteUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'agent')
-  const blueInviteUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'agent')
-  const redCockpitUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'observer')
-  const blueCockpitUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'observer')
+  const redInviteUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'agent', siteBase)
+  const blueInviteUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'agent', siteBase)
+  const redCockpitUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'observer', siteBase)
+  const blueCockpitUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'observer', siteBase)
 
   return {
     blueAgentBrief: createRoleBrief(blueInvite, blueInviteUrl, activeSessionId, apiBase, publicSession),
@@ -51,8 +53,7 @@ export function hasInviteForRole(invites: RoleInvite[], role: TeamRole): boolean
   return invites.some(
     (invite) =>
       invite.role === role &&
-      invite.claimToken.length > 0 &&
-      invite.observerToken.length > 0,
+      (tokenValue(invite.claimToken).length > 0 || tokenValue(invite.observerToken).length > 0),
   )
 }
 
@@ -65,18 +66,28 @@ function createRoleInviteUrl(
   activeSessionId: string,
   apiBase: string,
   kind: 'agent' | 'observer',
+  siteBase?: string,
 ): string {
   if (!invite || !activeSessionId) {
     return ''
   }
 
+  const claimToken = tokenValue(invite.claimToken)
+  const observerToken = tokenValue(invite.observerToken)
+  const token = kind === 'agent' ? claimToken : observerToken || claimToken
+
+  if (!token) {
+    return ''
+  }
+
   return buildInviteUrl({
     role: invite.role,
-    ...(kind === 'agent'
-      ? { claimToken: invite.claimToken }
-      : { observerToken: invite.observerToken }),
+    ...(kind === 'observer' && observerToken
+      ? { observerToken }
+      : { claimToken: token }),
     sessionId: activeSessionId,
     apiBase,
+    siteBase,
   })
 }
 
@@ -91,14 +102,24 @@ function createRoleBrief(
     return ''
   }
 
+  const claimToken = tokenValue(invite.claimToken)
+
+  if (!claimToken) {
+    return ''
+  }
+
   return createExternalAgentBriefMarkdown({
     invite: {
       sessionId: activeSessionId,
       role: invite.role,
       apiBase,
-      claimToken: invite.claimToken,
+      claimToken,
     },
     inviteUrl,
     publicState: publicSession,
   })
+}
+
+function tokenValue(value: unknown): string {
+  return typeof value === 'string' ? value : ''
 }

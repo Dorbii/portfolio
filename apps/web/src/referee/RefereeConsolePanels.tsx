@@ -24,7 +24,6 @@ type TeamBannerHandoff = {
   hasInvite: boolean
   inviteUrl: string
   onCopyBrief: () => Promise<void> | void
-  onOpen: () => void
 }
 
 type ScoreboardSessionControl = {
@@ -212,14 +211,20 @@ function ScoreboardTeam({
       <div className="scoreboard-handoff">
         {handoff.hasInvite ? (
           <ActionGroup className="scoreboard-handoff-actions">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handoff.onOpen}
-              disabled={!handoff.inviteUrl}
-            >
-              View cockpit
-            </Button>
+            {handoff.inviteUrl ? (
+              <a
+                className="ui-button ui-button-ghost"
+                href={handoff.inviteUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                View cockpit
+              </a>
+            ) : (
+              <Button type="button" variant="ghost" disabled>
+                View cockpit
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"

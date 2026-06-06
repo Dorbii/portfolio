@@ -1,6 +1,7 @@
 import type {
   ArenaConfig,
   ArenaGridCell,
+  ArenaGridDefinition,
   ArenaHazardDefinition,
   ArenaHazardThreat,
   ArenaObstacleDefinition,
@@ -10,6 +11,20 @@ import type {
   ArenaZoneShape,
   Vector3,
 } from '../../schemas/src/index.js'
+
+export type ArenaHazardEffectKind = 'saw' | 'flipper' | 'pit' | 'oil' | 'magnet' | 'generic'
+type ActiveArenaHazardSlot =
+  | 'center'
+  | 'north'
+  | 'south'
+  | 'east'
+  | 'west'
+  | 'northwest'
+  | 'northeast'
+  | 'southwest'
+  | 'southeast'
+  | 'red'
+  | 'blue'
 
 export type CompiledArenaTopology = Readonly<{
   arena: ArenaConfig
@@ -23,12 +38,15 @@ export type CompiledArenaTopology = Readonly<{
 }>
 
 const DEFAULT_CELL_SIZE = 1
-const LEGACY_CENTER_SAW_RADIUS = 1.2
-const LEGACY_CENTER_SAW_DAMAGE = 6
+const ACTIVE_CENTER_SAW_RADIUS = 1.2
+const ACTIVE_CENTER_SAW_DAMAGE = 6
 const WALL_PADDING = 0.85
+const CORNER_SLOTS: readonly ActiveArenaHazardSlot[] = ['northwest', 'northeast', 'southwest', 'southeast']
 
 export function compileArenaTopology(arena: ArenaConfig): CompiledArenaTopology {
-  const definition = arena.topology ?? legacyTopologyForArena(arena)
+  const definition = isArenaTopologyDefinition(arena.topology)
+    ? arena.topology
+    : topologyFromActiveHazards(arena)
   const cellSize = definition.grid.cellSize > 0 ? definition.grid.cellSize : DEFAULT_CELL_SIZE
 
   return {
@@ -128,8 +146,44 @@ export function pathHazards(
     .map((hazard) => hazardThreat(topology, hazard, to))
 }
 
+export function hasArenaLineOfSight(
+  topology: CompiledArenaTopology,
+  from: Vector3,
+  to: Vector3,
+): boolean {
+  return !topology.obstacles.some((obstacle) =>
+    obstacle.blocksMovement && segmentDistanceToShape(from, to, obstacle.shape) <= 0,
+  )
+}
+
 export function hazardCenter(hazard: ArenaHazardDefinition): Vector3 {
   return [hazard.shape.center[0], 0, hazard.shape.center[1]]
+}
+
+export function hazardEffectKind(type: string): ArenaHazardEffectKind {
+  const normalized = normalizeWords(type)
+
+  if (normalized.includes('saw') || normalized.includes('spinner')) {
+    return 'saw'
+  }
+
+  if (normalized.includes('flipper')) {
+    return 'flipper'
+  }
+
+  if (normalized.includes('pit') || normalized.includes('trap')) {
+    return 'pit'
+  }
+
+  if (normalized.includes('oil') || normalized.includes('slick')) {
+    return 'oil'
+  }
+
+  if (normalized.includes('magnet')) {
+    return 'magnet'
+  }
+
+  return 'generic'
 }
 
 export function distanceToNearestArenaWall(
@@ -158,7 +212,7 @@ export function clampPositionToArena(
   ]
 }
 
-function legacyTopologyForArena(arena: ArenaConfig): ArenaTopologyDefinition {
+function topologyFromActiveHazards(arena: ArenaConfig): ArenaTopologyDefinition {
   return {
     grid: { cellSize: DEFAULT_CELL_SIZE },
     spawnZones: [
@@ -171,26 +225,148 @@ function legacyTopologyForArena(arena: ArenaConfig): ArenaTopologyDefinition {
         shape: { kind: 'rect', center: [arena.width / 4, 0], size: [3, 3] },
       },
     ],
-    hazards: legacyHazardsForArena(arena),
+    hazards: hazardsFromActiveHazards(arena),
     terrain: [],
     obstacles: [],
   }
 }
 
-function legacyHazardsForArena(arena: ArenaConfig): ArenaHazardDefinition[] {
-  if (!arena.activeHazards.some((hazard) => normalizeToken(hazard).includes('saw'))) {
-    return []
+function hazardsFromActiveHazards(arena: ArenaConfig): ArenaHazardDefinition[] {
+  return arena.activeHazards.flatMap((raw, index) => hazardsForActiveLabel(raw, index, arena))
+}
+
+function hazardsForActiveLabel(
+  raw: string,
+  index: number,
+  arena: ArenaConfig,
+): ArenaHazardDefinition[] {
+  const normalizedWords = normalizeWords(raw)
+  const kind = hazardEffectKind(raw)
+  const slots = normalizedWords.includes('corner')
+    ? CORNER_SLOTS
+    : [activeHazardSlot(normalizedWords)]
+
+  return slots.map((slot) => {
+    const type = normalizeToken(raw) || 'hazard'
+    const id = `${type}_${slot}_${index}`
+
+    return {
+      id,
+      type,
+      shape: {
+        kind: 'circle',
+        center: activeHazardCenter(slot, arena.width, arena.height),
+        radius: activeHazardRadius(kind),
+      },
+      damage: activeHazardDamage(kind),
+      tags: ['active_hazard', slot, kind],
+    }
+  })
+}
+
+function activeHazardSlot(normalizedWords: string): ActiveArenaHazardSlot {
+  if (normalizedWords.includes('northwest') || (normalizedWords.includes('north') && normalizedWords.includes('west'))) {
+    return 'northwest'
   }
 
-  return [
-    {
-      id: 'floor_saw_center',
-      type: 'floor_saw',
-      shape: { kind: 'circle', center: [0, 0], radius: LEGACY_CENTER_SAW_RADIUS },
-      damage: LEGACY_CENTER_SAW_DAMAGE,
-      tags: ['legacy', 'center', 'contact_damage'],
-    },
-  ]
+  if (normalizedWords.includes('northeast') || (normalizedWords.includes('north') && normalizedWords.includes('east'))) {
+    return 'northeast'
+  }
+
+  if (normalizedWords.includes('southwest') || (normalizedWords.includes('south') && normalizedWords.includes('west'))) {
+    return 'southwest'
+  }
+
+  if (normalizedWords.includes('southeast') || (normalizedWords.includes('south') && normalizedWords.includes('east'))) {
+    return 'southeast'
+  }
+
+  if (normalizedWords.includes('north')) {
+    return 'north'
+  }
+
+  if (normalizedWords.includes('south')) {
+    return 'south'
+  }
+
+  if (normalizedWords.includes('east')) {
+    return 'east'
+  }
+
+  if (normalizedWords.includes('west')) {
+    return 'west'
+  }
+
+  if (normalizedWords.includes('red')) {
+    return 'red'
+  }
+
+  if (normalizedWords.includes('blue')) {
+    return 'blue'
+  }
+
+  return 'center'
+}
+
+function activeHazardCenter(
+  slot: ActiveArenaHazardSlot,
+  arenaWidth: number,
+  arenaHeight: number,
+): [number, number] {
+  switch (slot) {
+    case 'northwest':
+      return [-arenaWidth * 0.34, arenaHeight * 0.28]
+    case 'northeast':
+      return [arenaWidth * 0.34, arenaHeight * 0.28]
+    case 'southwest':
+      return [-arenaWidth * 0.34, -arenaHeight * 0.28]
+    case 'southeast':
+      return [arenaWidth * 0.34, -arenaHeight * 0.28]
+    case 'north':
+      return [0, arenaHeight * 0.26]
+    case 'south':
+      return [0, -arenaHeight * 0.26]
+    case 'east':
+      return [arenaWidth * 0.33, 0]
+    case 'west':
+      return [-arenaWidth * 0.33, 0]
+    case 'red':
+      return [-arenaWidth * 0.2, 0]
+    case 'blue':
+      return [arenaWidth * 0.2, 0]
+    case 'center':
+      return [0, 0]
+  }
+}
+
+function activeHazardRadius(kind: ArenaHazardEffectKind): number {
+  switch (kind) {
+    case 'oil':
+    case 'magnet':
+      return 1.35
+    case 'flipper':
+      return 1.1
+    case 'pit':
+      return 1
+    case 'saw':
+      return ACTIVE_CENTER_SAW_RADIUS
+    case 'generic':
+      return 0.9
+  }
+}
+
+function activeHazardDamage(kind: ArenaHazardEffectKind): number {
+  switch (kind) {
+    case 'saw':
+      return ACTIVE_CENTER_SAW_DAMAGE
+    case 'pit':
+      return 8
+    case 'flipper':
+    case 'generic':
+    case 'magnet':
+    case 'oil':
+      return 0
+  }
 }
 
 function isArenaHazardActive(
@@ -221,10 +397,95 @@ function hazardThreat(
     id: hazard.id,
     type: hazard.type,
     cell: worldToArenaCell(topology, hazardCenter(hazard)),
+    position: hazardCenter(hazard),
     distance,
     inside: distance <= 0,
     damage: hazard.damage,
   }
+}
+
+function isArenaTopologyDefinition(
+  value: ArenaTopologyDefinition | undefined,
+): value is ArenaTopologyDefinition {
+  return (
+    value !== undefined &&
+    isArenaGridDefinition(value.grid) &&
+    Array.isArray(value.spawnZones) &&
+    value.spawnZones.every(isArenaSpawnZone) &&
+    Array.isArray(value.hazards) &&
+    value.hazards.every(isArenaHazardDefinition) &&
+    Array.isArray(value.terrain) &&
+    value.terrain.every(isArenaTerrainDefinition) &&
+    Array.isArray(value.obstacles) &&
+    value.obstacles.every(isArenaObstacleDefinition)
+  )
+}
+
+function isArenaGridDefinition(value: unknown): value is ArenaGridDefinition {
+  return isRecord(value) && isFinitePositiveNumber(value.cellSize)
+}
+
+function isArenaSpawnZone(value: unknown): value is ArenaSpawnZone {
+  return isRecord(value) &&
+    (value.role === 'red' || value.role === 'blue') &&
+    isArenaZoneShape(value.shape)
+}
+
+function isArenaHazardDefinition(value: unknown): value is ArenaHazardDefinition {
+  return isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.type === 'string' &&
+    isArenaZoneShape(value.shape) &&
+    typeof value.damage === 'number' &&
+    Number.isFinite(value.damage) &&
+    (value.tags === undefined || stringArray(value.tags))
+}
+
+function isArenaTerrainDefinition(value: unknown): value is ArenaTerrainDefinition {
+  return isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.type === 'string' &&
+    isArenaZoneShape(value.shape) &&
+    (value.tags === undefined || stringArray(value.tags))
+}
+
+function isArenaObstacleDefinition(value: unknown): value is ArenaObstacleDefinition {
+  return isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.type === 'string' &&
+    isArenaZoneShape(value.shape) &&
+    typeof value.blocksMovement === 'boolean' &&
+    (value.tags === undefined || stringArray(value.tags))
+}
+
+function isArenaZoneShape(value: unknown): value is ArenaZoneShape {
+  if (!isRecord(value) || !isVector2(value.center)) {
+    return false
+  }
+
+  if (value.kind === 'circle') {
+    return isFinitePositiveNumber(value.radius)
+  }
+
+  return value.kind === 'rect' && isVector2(value.size) && value.size.every((entry) => entry > 0)
+}
+
+function isVector2(value: unknown): value is [number, number] {
+  return Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+}
+
+function stringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+}
+
+function isFinitePositiveNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
 function distanceToShape(position: Vector3, shape: ArenaZoneShape): number {
@@ -270,6 +531,10 @@ function segmentDistanceToShape(
 
 function normalizeToken(value: string): string {
   return value.toLowerCase().replaceAll(/[^a-z0-9]+/g, '_').replaceAll(/^_+|_+$/g, '')
+}
+
+function normalizeWords(value: string): string {
+  return value.toLowerCase().replaceAll(/[^a-z0-9]+/g, ' ').trim()
 }
 
 function round(value: number): number {

@@ -375,6 +375,7 @@ export type ArenaHazardThreat = {
   id: string
   type: string
   cell: ArenaGridCell
+  position: Vector3
   distance: number
   inside: boolean
   damage: number

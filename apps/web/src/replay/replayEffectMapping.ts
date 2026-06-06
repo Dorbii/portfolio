@@ -236,16 +236,18 @@ export function buildReplayEffects(
           damage: event.damage,
           label: event.hazard,
         })
-        effects.push({
-          id: `${sequence}-hazard-damage-${event.bot}`,
-          kind: 'damage_marker',
-          position: event.position,
-          age,
-          intensity: 1 - age / HAZARD_WINDOW,
-          team: event.bot,
-          damage: event.damage,
-          label: event.hazard,
-        })
+        if (event.damage > 0) {
+          effects.push({
+            id: `${sequence}-hazard-damage-${event.bot}`,
+            kind: 'damage_marker',
+            position: event.position,
+            age,
+            intensity: 1 - age / HAZARD_WINDOW,
+            team: event.bot,
+            damage: event.damage,
+            label: event.hazard,
+          })
+        }
       }
     }
 

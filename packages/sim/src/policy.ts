@@ -1,5 +1,4 @@
 import {
-  hasCenterArenaHazard,
   type ArenaConfig,
   type MovementCommand,
   type NormalizedBotTactics,
@@ -14,6 +13,15 @@ import {
   getOpeningScriptCommand,
   type OpeningScriptIndex,
 } from './openingScriptIndex.js'
+import {
+  clampPositionToArena,
+  compileArenaTopology,
+  hasActiveHazard,
+  hazardsAtPosition,
+  nearestHazardThreat,
+  pathHazards,
+  type CompiledArenaTopology,
+} from './arenaTopology.js'
 
 export type CommandPolicy = {
   tactics: NormalizedBotTactics
@@ -57,7 +65,8 @@ type PolicyContext = PolicyState & {
   idealRange: number
   pressure: number
   healthRatio: number
-  inCenterHazard: boolean
+  topology: CompiledArenaTopology
+  inActiveHazard: boolean
 }
 
 const CONTACT_DISTANCE = 1.28
@@ -129,6 +138,7 @@ function choosePolicyCommand(
   state: PolicyState,
 ): TurnCommand {
   const { bot, opponent, arena } = state
+  const topology = compileArenaTopology(arena)
   const gap = distance(bot.position, opponent.position)
   const reach = weaponReach(bot)
   const context: PolicyContext = {
@@ -140,7 +150,8 @@ function choosePolicyCommand(
     idealRange: idealRangeFor(tactics, reach),
     pressure: pressureScore(bot, opponent),
     healthRatio: bot.health / bot.maxHealth,
-    inCenterHazard: centerHazardActive(arena) && isNearCenterHazard(bot.position, 1.55),
+    topology,
+    inActiveHazard: hazardsAtPosition(topology, bot.position, 0.35).length > 0,
   }
   const command: TurnCommand = {
     tick,
@@ -170,14 +181,14 @@ function availableWeaponSlotCount(bot: PolicyBotState): number {
 }
 
 function choosePolicyMove(context: PolicyContext): MovementCommand {
-  const { bot, tactics, healthRatio, inCenterHazard } = context
+  const { bot, tactics, healthRatio, inActiveHazard, topology } = context
 
   if (bot.stats.mobility <= 0) {
     return 'brake'
   }
 
-  if (inCenterHazard && tactics.hazardPreference !== 'force') {
-    return moveAwayFromPoint(bot, [0, 0, 0], context.tick)
+  if (inActiveHazard && tactics.hazardPreference !== 'force') {
+    return moveAwayFromPoint(bot, nearestHazardPoint(topology, bot.position), context.tick)
   }
 
   if (healthRatio <= tactics.retreatAtHealthPct) {
@@ -286,10 +297,10 @@ function circleMove(context: PolicyContext): MovementCommand {
 }
 
 function baitHazardMove(context: PolicyContext): MovementCommand {
-  const { arena, bot, opponent, gap, tick } = context
+  const { arena, bot, opponent, gap, tick, topology } = context
   const edgeRecovery = edgeRecoveryMove(bot, arena)
 
-  if (!centerHazardActive(arena)) {
+  if (!hasActiveHazard(topology)) {
     return circleMove(context)
   }
 
@@ -297,17 +308,42 @@ function baitHazardMove(context: PolicyContext): MovementCommand {
     return edgeRecovery
   }
 
-  if (isNearCenterHazard(bot.position, 1.35)) {
-    return moveAwayFromPoint(bot, [0, 0, 0], tick)
+  const hazardPoint = nearestHazardPoint(topology, bot.position)
+  const selfHazardPadding = bot.hazardBaitControl ? 0.35 : 0.15
+
+  if (hazardsAtPosition(topology, bot.position, selfHazardPadding).length > 0) {
+    return moveAwayFromPoint(bot, hazardPoint, tick)
   }
 
   const lureRange = bot.hazardBaitControl ? 7 : 5.5
 
-  if (!isNearCenterHazard(opponent.position, 1.5) && gap < lureRange) {
-    const lateralOffset = bot.hazardBaitControl ? 0.85 : 1.2
-    const lurePoint: Vector3 = [0, 0, tick % 4 < 2 ? lateralOffset : -lateralOffset]
+  if (hazardsAtPosition(topology, opponent.position, 0.3).length === 0 && gap < lureRange) {
+    const lateralOffset = bot.hazardBaitControl ? 1.65 : 1.2
+    const roleDirection = bot.role === 'red' ? 1 : -1
+    const lurePoint: Vector3 = [
+      bot.hazardBaitControl ? hazardPoint[0] - roleDirection * 0.8 : hazardPoint[0],
+      0,
+      hazardPoint[2] + (tick % 4 < 2 ? lateralOffset : -lateralOffset),
+    ]
+    const lureMove = bot.hazardBaitControl
+      ? strafeTowardPoint(bot, lurePoint)
+      : moveTowardPoint(bot, lurePoint)
 
-    return moveTowardPoint(bot, lurePoint)
+    if (bot.hazardBaitControl) {
+      return firstSafeMove(
+        context,
+        [
+          lureMove,
+          lateralMove(bot, opponent, tick),
+          moveAwayFromPoint(bot, hazardPoint, tick),
+          tick % 2 === 0 ? 'turn_left' : 'turn_right',
+          'brake',
+        ],
+        { avoidHazards: true },
+      )
+    }
+
+    return lureMove
   }
 
   return kiteMove(context)
@@ -343,15 +379,15 @@ function chooseWeaponCommand({
 }
 
 function chooseUtilityCommand({
-  arena,
   bot,
   tactics,
   gap,
   idealRange,
-  inCenterHazard,
+  inActiveHazard,
+  topology,
   tick,
 }: PolicyContext): TurnCommand['utility'] {
-  if (inCenterHazard) {
+  if (inActiveHazard) {
     return 'activate'
   }
 
@@ -359,7 +395,7 @@ function chooseUtilityCommand({
     return 'activate'
   }
 
-  if (tactics.movementPolicy === 'bait_hazard' && centerHazardActive(arena)) {
+  if (tactics.movementPolicy === 'bait_hazard' && hasActiveHazard(topology)) {
     return tick % 3 === 0 ? 'activate' : 'hold'
   }
 
@@ -424,10 +460,6 @@ function weaponReach(bot: PolicyBotState): number {
   return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28 + (bot.weaponReachBonus ?? 0)
 }
 
-function centerHazardActive(arena: ArenaConfig): boolean {
-  return hasCenterArenaHazard(arena.activeHazards)
-}
-
 function pressureScore(bot: PolicyBotState, opponent: PolicyBotState): number {
   const offense =
     bot.stats.weaponThreat * 1.15 +
@@ -442,15 +474,11 @@ function pressureScore(bot: PolicyBotState, opponent: PolicyBotState): number {
   return offense / Math.max(1, opponentDefense)
 }
 
-function isNearCenterHazard(position: Vector3, radius: number): boolean {
-  return Math.abs(position[0]) < radius && Math.abs(position[2]) < radius
-}
-
 function safeReactiveMove(
   context: PolicyContext,
   move: MovementCommand,
 ): MovementCommand {
-  const hazardMove = saferCenterHazardMove(context, move)
+  const hazardMove = saferHazardMove(context, move)
 
   if (hazardMove !== move) {
     return hazardMove
@@ -459,32 +487,34 @@ function safeReactiveMove(
   return saferOpponentDangerMove(context, move)
 }
 
-function saferCenterHazardMove(
+function saferHazardMove(
   context: PolicyContext,
   move: MovementCommand,
 ): MovementCommand {
-  const { arena, bot, tactics, tick } = context
+  const { bot, tactics, tick, topology } = context
 
   if (
     tactics.hazardPreference === 'force' ||
     !shouldAvoidProjectedHazard(context) ||
-    !centerHazardActive(arena) ||
-    !movePathTouchesCenterHazard(bot, arena, move)
+    !hasActiveHazard(topology) ||
+    !movePathTouchesHazard(context, move)
   ) {
     return move
   }
 
+  const hazardPoint = nearestHazardPoint(topology, bot.position)
+
   return firstSafeMove(
     context,
     [
-      moveAwayFromPoint(bot, [0, 0, 0], tick),
+      moveAwayFromPoint(bot, hazardPoint, tick),
       lateralMove(bot, context.opponent, tick),
       tick % 2 === 0 ? 'turn_left' : 'turn_right',
       'backward',
       'dash_backward',
       'brake',
     ],
-    { avoidCenterHazard: true },
+    { avoidHazards: true },
   )
 }
 
@@ -527,14 +557,14 @@ function firstSafeMove(
   context: PolicyContext,
   moves: MovementCommand[],
   options: {
-    avoidCenterHazard?: boolean
+    avoidHazards?: boolean
     avoidOpponentDanger?: boolean
   },
 ): MovementCommand {
   const { arena, bot, opponent, gap } = context
 
   for (const move of uniqueMoves(moves)) {
-    if (options.avoidCenterHazard && movePathTouchesCenterHazard(bot, arena, move)) {
+    if (options.avoidHazards && movePathTouchesHazard(context, move)) {
       continue
     }
     if (
@@ -559,24 +589,22 @@ function shouldAvoidProjectedHazard({
   opponent,
   tactics,
 }: PolicyContext): boolean {
-  const opponentDanger = (opponent.contactDanger ?? 0) + (opponent.controlDanger ?? 0) * 0.55
+  if (tactics.hazardPreference === 'bait' && bot.hazardBaitControl) {
+    return true
+  }
 
   return (
     tactics.hazardPreference === 'avoid' &&
     (tactics.aggression < 0.82 ||
-      opponentDanger >= 1.05 ||
       bot.stats.weaponThreat <= opponent.stats.weaponThreat * 0.45)
   )
 }
 
-function movePathTouchesCenterHazard(
-  bot: PolicyBotState,
-  arena: ArenaConfig,
-  move: MovementCommand,
-): boolean {
+function movePathTouchesHazard(context: PolicyContext, move: MovementCommand): boolean {
+  const { arena, bot, topology } = context
   const projected = projectMove(bot, move, arena)
 
-  return segmentDistanceToPoint(bot.position, projected, [0, 0, 0]) < 1.22
+  return pathHazards(topology, bot.position, projected).length > 0
 }
 
 function projectedGap(
@@ -637,40 +665,7 @@ function projectMove(
       break
   }
 
-  return clampPosition([x, 0, z], arena)
-}
-
-function segmentDistanceToPoint(
-  start: Vector3,
-  end: Vector3,
-  point: Vector3,
-): number {
-  const dx = end[0] - start[0]
-  const dz = end[2] - start[2]
-  const lengthSquared = dx * dx + dz * dz
-
-  if (lengthSquared <= 0) {
-    return distance(start, point)
-  }
-
-  const t = Math.min(
-    1,
-    Math.max(0, ((point[0] - start[0]) * dx + (point[2] - start[2]) * dz) / lengthSquared),
-  )
-  const closest: Vector3 = [start[0] + dx * t, 0, start[2] + dz * t]
-
-  return distance(closest, point)
-}
-
-function clampPosition(position: Vector3, arena: ArenaConfig): Vector3 {
-  const xLimit = Math.max(1, arena.width / 2 - 0.85)
-  const zLimit = Math.max(1, arena.height / 2 - 0.85)
-
-  return [
-    Math.min(Math.max(position[0], -xLimit), xLimit),
-    0,
-    Math.min(Math.max(position[2], -zLimit), zLimit),
-  ]
+  return clampPositionToArena(arena, [x, 0, z])
 }
 
 function evadeMove(
@@ -685,8 +680,18 @@ function evadeMove(
     return edgeRecovery
   }
 
-  if (centerHazardActive(arena) && !isNearCenterHazard(opponent.position, 1.35)) {
-    const lurePoint: Vector3 = [0, 0, tick % 2 === 0 ? 1 : -1]
+  const topology = compileArenaTopology(arena)
+
+  if (
+    hasActiveHazard(topology) &&
+    hazardsAtPosition(topology, opponent.position, 0.3).length === 0
+  ) {
+    const hazardPoint = nearestHazardPoint(topology, bot.position)
+    const lurePoint: Vector3 = [
+      hazardPoint[0],
+      0,
+      hazardPoint[2] + (tick % 2 === 0 ? 1 : -1),
+    ]
 
     return moveTowardPoint(bot, lurePoint)
   }
@@ -723,6 +728,16 @@ function moveTowardPoint(bot: PolicyBotState, point: Vector3): MovementCommand {
   const forwardDelta = (point[0] - bot.position[0]) * roleDirection
 
   return forwardDelta >= -0.35 ? 'forward' : 'backward'
+}
+
+function strafeTowardPoint(bot: PolicyBotState, point: Vector3): MovementCommand {
+  const zDelta = point[2] - bot.position[2]
+
+  if (Math.abs(zDelta) > 0.35) {
+    return zDelta < 0 ? 'strafe_left' : 'strafe_right'
+  }
+
+  return moveTowardPoint(bot, point)
 }
 
 function closeMove(
@@ -789,4 +804,13 @@ function flankingMove(
   }
 
   return side > 0 ? 'circle_left' : 'circle_right'
+}
+
+function nearestHazardPoint(
+  topology: CompiledArenaTopology,
+  position: Vector3,
+): Vector3 {
+  const threat = nearestHazardThreat(topology, position)
+
+  return threat?.position ?? [0, 0, 0]
 }

@@ -11,7 +11,6 @@ import {
 import {
   Panel,
 } from '../shared/ui'
-import { openExternalUrl } from '../shared/browser'
 import { formatLabel } from '../shared/format'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 
@@ -138,14 +137,12 @@ export function RefereeConsole() {
               hasInvite: hasInviteForRole('red'),
               inviteUrl: redCockpitUrl,
               onCopyBrief: () => void copyAgentBrief('red', redAgentBrief),
-              onOpen: () => openExternalUrl(redCockpitUrl),
             },
             blue: {
               agentBrief: blueAgentBrief,
               hasInvite: hasInviteForRole('blue'),
               inviteUrl: blueCockpitUrl,
               onCopyBrief: () => void copyAgentBrief('blue', blueAgentBrief),
-              onOpen: () => openExternalUrl(blueCockpitUrl),
             },
           }}
           sessionControl={{

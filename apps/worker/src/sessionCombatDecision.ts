@@ -1,5 +1,4 @@
 import {
-  hasCenterArenaHazard,
   type ArenaConfig,
   type CombatBotSnapshot,
   type CombatRangeBand,
@@ -11,6 +10,19 @@ import {
   type TeamRole,
   type WeaponCommand,
 } from '../../../packages/schemas/src/index.js'
+import {
+  activeHazardTypes,
+  arenaCellDistance,
+  bearingBetweenCells,
+  compileArenaTopology,
+  distanceToNearestArenaWall,
+  hasArenaLineOfSight,
+  hazardsAtPosition,
+  nearestHazardThreat,
+  pathHazards,
+  worldToArenaCell,
+  type CompiledArenaTopology,
+} from '../../../packages/sim/src/arenaTopology.js'
 import type {
   StoredCombatState,
   StoredRoleState,
@@ -18,7 +30,7 @@ import type {
 } from './sessionTypes.js'
 
 const WALL_PRESSURE_DISTANCE = 2.2
-const CENTER_HAZARD_DISTANCE = 1.8
+const HAZARD_AWARENESS_DISTANCE = 1.8
 const DEFAULT_PREFERRED_RANGE: PreferredRange = 'close'
 const DEFAULT_RETREAT_HEALTH_PCT = 0.2
 
@@ -32,11 +44,12 @@ export function buildCombatTurnDecisionContext(
   const opponentRole = role.role === 'red' ? state.roles.blue : state.roles.red
   const controls = role.controls ?? { movement: ['brake'] }
   const tactics = role.normalizedSubmission?.tactics
+  const topology = compileArenaTopology(combat.snapshot.arena)
   const range = buildRangeDecision(combat, self, opponent, tactics)
-  const positioning = buildPositioning(combat, self, opponent)
-  const hazards = buildHazards(combat, controls, role.role, self, opponent)
+  const positioning = buildPositioning(topology, self, opponent)
+  const hazards = buildHazards(topology, controls, role.role, self, opponent)
   const health = buildHealthDecision(self, opponent, tactics)
-  const arenaPressure = buildArenaPressure(combat, self, opponent)
+  const arenaPressure = buildArenaPressure(combat.snapshot.arena, topology, self, opponent)
   const actionReadiness = buildActionReadiness(controls, range)
   const resolvedTurn = previousResolvedTurn(role.role, combat)
   const movementOptions = buildMovementOptions({
@@ -48,6 +61,8 @@ export function buildCombatTurnDecisionContext(
     range,
     health,
     arenaPressure,
+    topology,
+    hazards,
     previousSelfMove: resolvedTurn?.self?.move,
   })
 
@@ -85,44 +100,40 @@ export function buildCombatTurnDecisionContext(
 }
 
 function buildPositioning(
-  combat: StoredCombatState,
+  topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
 ): CombatTurnDecisionContext['positioning'] {
-  const selfCell = positionToCell(combat.snapshot.arena, self.position)
-  const opponentCell = positionToCell(combat.snapshot.arena, opponent.position)
-  const dx = opponentCell.x - selfCell.x
-  const dz = opponentCell.z - selfCell.z
+  const selfCell = worldToArenaCell(topology, self.position)
+  const opponentCell = worldToArenaCell(topology, opponent.position)
 
   return {
     selfCell,
     opponentCell,
-    distanceCells: Math.abs(dx) + Math.abs(dz),
-    bearingToOpponent: bearingToOpponent(dx, dz),
-    lineOfSight: hasLineOfSight(combat.snapshot.arena, self.position, opponent.position),
+    distanceCells: arenaCellDistance(selfCell, opponentCell),
+    bearingToOpponent: bearingBetweenCells(selfCell, opponentCell),
+    lineOfSight: hasArenaLineOfSight(topology, self.position, opponent.position),
   }
 }
 
 function buildHazards(
-  combat: StoredCombatState,
+  topology: CompiledArenaTopology,
   controls: GeneratedControls,
   role: TeamRole,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
 ): CombatTurnDecisionContext['hazards'] {
-  const arena = combat.snapshot.arena
-
   return {
-    active: arena.activeHazards,
-    selfThreats: hazardThreatsAt(arena, self.position),
-    opponentThreats: hazardThreatsAt(arena, opponent.position),
+    active: activeHazardTypes(topology),
+    selfThreats: hazardsAtPosition(topology, self.position, HAZARD_AWARENESS_DISTANCE),
+    opponentThreats: hazardsAtPosition(topology, opponent.position, HAZARD_AWARENESS_DISTANCE),
     threatenedLegalMoves: controls.movement
       .map((command) => {
         const targetPosition = projectPosition(role, self, command)
         return {
           command,
-          targetCell: positionToCell(arena, targetPosition),
-          hazards: hazardThreatsAt(arena, targetPosition),
+          targetCell: worldToArenaCell(topology, targetPosition),
+          hazards: pathHazards(topology, self.position, targetPosition),
         }
       })
       .filter((move) => move.hazards.length > 0),
@@ -167,20 +178,26 @@ function buildHealthDecision(
 }
 
 function buildArenaPressure(
-  combat: StoredCombatState,
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
 ): CombatTurnDecisionContext['arenaPressure'] {
-  const activeHazards = combat.snapshot.arena.activeHazards
+  const selfWallDistance = distanceToNearestArenaWall(arena, self.position)
+  const opponentWallDistance = distanceToNearestArenaWall(arena, opponent.position)
+  const selfNearHazard = hazardsAtPosition(topology, self.position, HAZARD_AWARENESS_DISTANCE).length > 0
+  const opponentNearHazard = hazardsAtPosition(topology, opponent.position, HAZARD_AWARENESS_DISTANCE).length > 0
 
   return {
-    selfDistanceToNearestWall: distanceToNearestWall(combat, self),
-    opponentDistanceToNearestWall: distanceToNearestWall(combat, opponent),
-    selfNearWall: distanceToNearestWall(combat, self) <= WALL_PRESSURE_DISTANCE,
-    opponentNearWall: distanceToNearestWall(combat, opponent) <= WALL_PRESSURE_DISTANCE,
-    selfNearCenterHazard: nearCenterHazard(activeHazards, self),
-    opponentNearCenterHazard: nearCenterHazard(activeHazards, opponent),
-    activeHazards,
+    selfDistanceToNearestWall: selfWallDistance,
+    opponentDistanceToNearestWall: opponentWallDistance,
+    selfNearWall: selfWallDistance <= WALL_PRESSURE_DISTANCE,
+    opponentNearWall: opponentWallDistance <= WALL_PRESSURE_DISTANCE,
+    selfNearHazard,
+    opponentNearHazard,
+    selfNearCenterHazard: selfNearHazard,
+    opponentNearCenterHazard: opponentNearHazard,
+    activeHazards: activeHazardTypes(topology),
   }
 }
 
@@ -213,10 +230,13 @@ function buildMovementOptions(input: {
   range: CombatTurnDecisionContext['range']
   health: CombatTurnDecisionContext['health']
   arenaPressure: CombatTurnDecisionContext['arenaPressure']
+  topology: CompiledArenaTopology
+  hazards: CombatTurnDecisionContext['hazards']
   previousSelfMove?: MovementCommand
 }): CombatTurnDecisionContext['movementOptions'] {
   const recommended: MovementCommand[] = []
   const reasons: string[] = []
+  const nearestSelfHazard = input.hazards.selfThreats[0]
 
   if (input.arenaPressure.selfNearWall) {
     addRecommended(recommended, commandTowardCenterX(input.role, input.self))
@@ -224,10 +244,10 @@ function buildMovementOptions(input: {
     reasons.push('You are close to a wall; prioritize a command that increases escape space.')
   }
 
-  if (input.arenaPressure.selfNearCenterHazard) {
-    addRecommended(recommended, commandAwayFromCenterX(input.role, input.self))
-    addRecommended(recommended, commandAwayFromCenterZ(input.self))
-    reasons.push('You are near the active center hazard; move out unless forcing a trade there.')
+  if (nearestSelfHazard) {
+    addRecommended(recommended, commandAwayFromPointX(input.role, input.self, nearestSelfHazard.position))
+    addRecommended(recommended, commandAwayFromPointZ(input.self, nearestSelfHazard.position))
+    reasons.push('You are near an active hazard; move out unless forcing a favorable trade there.')
   }
 
   if (input.health.selfPct <= input.health.retreatAtHealthPct) {
@@ -258,7 +278,15 @@ function buildMovementOptions(input: {
 
   const availableRecommended = recommended.filter((command) => input.controls.movement.includes(command))
   const avoid = input.controls.movement.filter((command) =>
-    shouldAvoidMovement(input.role, input.arena, input.self, input.range, input.arenaPressure, command),
+    shouldAvoidMovement(
+      input.role,
+      input.arena,
+      input.topology,
+      input.self,
+      input.range,
+      input.arenaPressure,
+      command,
+    ),
   )
 
   return {
@@ -321,8 +349,8 @@ function tacticalCues(input: {
     )
   }
 
-  if (input.arenaPressure.opponentNearCenterHazard) {
-    cues.push('Opponent is near the center hazard; lateral pressure may keep them there.')
+  if (input.arenaPressure.opponentNearHazard) {
+    cues.push('Opponent is near an active hazard; lateral or control pressure may keep them there.')
   }
 
   if (input.movementOptions.avoid.length > 0) {
@@ -418,6 +446,7 @@ function shouldCloseDistance(range: CombatTurnDecisionContext['range']): boolean
 function shouldAvoidMovement(
   role: TeamRole,
   arena: ArenaConfig,
+  topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
   range: CombatTurnDecisionContext['range'],
   arenaPressure: CombatTurnDecisionContext['arenaPressure'],
@@ -431,12 +460,24 @@ function shouldAvoidMovement(
 
   if (
     arenaPressure.selfNearWall &&
-    distanceToNearestWallForPosition(arena, projected) < arenaPressure.selfDistanceToNearestWall
+    distanceToNearestArenaWall(arena, projected) < arenaPressure.selfDistanceToNearestWall
   ) {
     return true
   }
 
-  if (arenaPressure.selfNearCenterHazard && centerDistance(projected) < centerDistance(self.position)) {
+  const currentThreat = nearestHazardThreat(topology, self.position)
+  const projectedThreat = nearestHazardThreat(topology, projected)
+
+  if (
+    currentThreat &&
+    projectedThreat &&
+    currentThreat.distance <= HAZARD_AWARENESS_DISTANCE &&
+    projectedThreat.distance < currentThreat.distance
+  ) {
+    return true
+  }
+
+  if (arenaPressure.selfNearHazard && pathHazards(topology, self.position, projected).length > 0) {
     return true
   }
 
@@ -488,22 +529,29 @@ function commandTowardCenterX(role: TeamRole, self: CombatBotSnapshot): Movement
   return x > 0 ? 'forward' : 'backward'
 }
 
-function commandAwayFromCenterX(role: TeamRole, self: CombatBotSnapshot): MovementCommand {
-  const x = self.position[0]
-
-  if (role === 'red') {
-    return x >= 0 ? 'forward' : 'backward'
-  }
-
-  return x <= 0 ? 'forward' : 'backward'
-}
-
 function commandTowardCenterZ(self: CombatBotSnapshot): MovementCommand {
   return self.position[2] > 0 ? 'strafe_left' : 'strafe_right'
 }
 
-function commandAwayFromCenterZ(self: CombatBotSnapshot): MovementCommand {
-  return self.position[2] >= 0 ? 'strafe_right' : 'strafe_left'
+function commandAwayFromPointX(
+  role: TeamRole,
+  self: CombatBotSnapshot,
+  point: readonly number[],
+): MovementCommand {
+  const movePositiveX = self.position[0] >= point[0]
+
+  if (role === 'red') {
+    return movePositiveX ? 'forward' : 'backward'
+  }
+
+  return movePositiveX ? 'backward' : 'forward'
+}
+
+function commandAwayFromPointZ(
+  self: CombatBotSnapshot,
+  point: readonly number[],
+): MovementCommand {
+  return self.position[2] >= point[2] ? 'strafe_right' : 'strafe_left'
 }
 
 function lateralEscape(self: CombatBotSnapshot, opponent: CombatBotSnapshot): MovementCommand {
@@ -520,159 +568,6 @@ function addRecommended(commands: MovementCommand[], command: MovementCommand): 
 
 function uniqueCommands(commands: MovementCommand[]): MovementCommand[] {
   return [...new Set(commands)]
-}
-
-function distanceToNearestWall(
-  combat: StoredCombatState,
-  bot: CombatBotSnapshot,
-): number {
-  const [x, , z] = bot.position
-  const halfWidth = combat.snapshot.arena.width / 2
-  const halfHeight = combat.snapshot.arena.height / 2
-
-  return round(Math.min(halfWidth - Math.abs(x), halfHeight - Math.abs(z)))
-}
-
-function distanceToNearestWallForPosition(
-  arena: ArenaConfig,
-  position: [number, number, number],
-): number {
-  const [x, , z] = position
-  const halfWidth = arena.width / 2
-  const halfHeight = arena.height / 2
-
-  return round(Math.min(halfWidth - Math.abs(x), halfHeight - Math.abs(z)))
-}
-
-function positionToCell(
-  arena: ArenaConfig,
-  position: readonly number[],
-): { x: number; z: number } {
-  const cellSize = arena.topology?.grid.cellSize ?? 1
-
-  return {
-    x: Math.round(position[0] / cellSize),
-    z: Math.round(position[2] / cellSize),
-  }
-}
-
-function bearingToOpponent(
-  dx: number,
-  dz: number,
-): CombatTurnDecisionContext['positioning']['bearingToOpponent'] {
-  if (dx === 0 && dz === 0) {
-    return 'same_cell'
-  }
-
-  if (Math.abs(dx) >= Math.abs(dz)) {
-    return dx > 0 ? 'east' : 'west'
-  }
-
-  return dz > 0 ? 'south' : 'north'
-}
-
-function hasLineOfSight(
-  arena: ArenaConfig,
-  self: readonly number[],
-  opponent: readonly number[],
-): boolean {
-  const blockingObstacles = arena.topology?.obstacles.filter((obstacle) => obstacle.blocksMovement) ?? []
-
-  return !blockingObstacles.some((obstacle) => shapeNearSegment(obstacle.shape, self, opponent))
-}
-
-function hazardThreatsAt(
-  arena: ArenaConfig,
-  position: readonly number[],
-): CombatTurnDecisionContext['hazards']['selfThreats'] {
-  const activeHazards = new Set(arena.activeHazards)
-  const hazards = arena.topology?.hazards ?? []
-
-  return hazards
-    .filter((hazard) => activeHazards.has(hazard.id) || activeHazards.has(hazard.type))
-    .map((hazard) => {
-      const distance = round(distanceToShape(hazard.shape, position))
-
-      return {
-        id: hazard.id,
-        type: hazard.type,
-        cell: positionToCell(arena, shapeCenter(hazard.shape)),
-        distance,
-        inside: distance === 0,
-        damage: hazard.damage,
-      }
-    })
-    .filter((threat) => threat.inside || threat.distance <= CENTER_HAZARD_DISTANCE)
-}
-
-function shapeNearSegment(
-  shape: NonNullable<ArenaConfig['topology']>['obstacles'][number]['shape'],
-  start: readonly number[],
-  end: readonly number[],
-): boolean {
-  const center = shapeCenter(shape)
-  const closest = closestPointOnSegment(center, start, end)
-
-  return distanceToShape(shape, closest) === 0
-}
-
-function closestPointOnSegment(
-  point: readonly number[],
-  start: readonly number[],
-  end: readonly number[],
-): [number, number, number] {
-  const startX = start[0]
-  const startZ = start[2]
-  const endX = end[0]
-  const endZ = end[2]
-  const dx = endX - startX
-  const dz = endZ - startZ
-  const lengthSquared = dx * dx + dz * dz
-
-  if (lengthSquared === 0) {
-    return [startX, 0, startZ]
-  }
-
-  const t = Math.max(0, Math.min(1, ((point[0] - startX) * dx + (point[2] - startZ) * dz) / lengthSquared))
-
-  return [startX + t * dx, 0, startZ + t * dz]
-}
-
-function distanceToShape(
-  shape: NonNullable<ArenaConfig['topology']>['hazards'][number]['shape'],
-  position: readonly number[],
-): number {
-  const x = position[0]
-  const z = position[2]
-
-  if (shape.kind === 'circle') {
-    return Math.max(0, Math.hypot(x - shape.center[0], z - shape.center[1]) - shape.radius)
-  }
-
-  const halfWidth = shape.size[0] / 2
-  const halfHeight = shape.size[1] / 2
-  const dx = Math.max(Math.abs(x - shape.center[0]) - halfWidth, 0)
-  const dz = Math.max(Math.abs(z - shape.center[1]) - halfHeight, 0)
-
-  return Math.hypot(dx, dz)
-}
-
-function shapeCenter(
-  shape: NonNullable<ArenaConfig['topology']>['hazards'][number]['shape'],
-): [number, number, number] {
-  return [shape.center[0], 0, shape.center[1]]
-}
-
-function centerDistance(position: readonly number[]): number {
-  return Math.hypot(position[0], position[2])
-}
-
-function nearCenterHazard(activeHazards: string[], bot: CombatBotSnapshot): boolean {
-  return (
-    hasCenterArenaHazard(activeHazards) &&
-    Math.abs(bot.position[0]) <= CENTER_HAZARD_DISTANCE &&
-    Math.abs(bot.position[2]) <= CENTER_HAZARD_DISTANCE
-  )
 }
 
 function healthPct(bot: CombatBotSnapshot): number {

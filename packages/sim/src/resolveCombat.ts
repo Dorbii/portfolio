@@ -8,9 +8,6 @@ import {
   type ReplayTimeline,
 } from '../../replay/src/index.js'
 import {
-  expandArenaHazards,
-  isPositionInsideArenaHazard,
-  type ArenaHazardDescriptor,
   DEFAULT_ARENA_CONFIG,
   type ArenaConfig,
   type BotBlueprint,
@@ -24,6 +21,7 @@ import {
   type TeamRole,
   type TurnCommand,
   type Vector3,
+  type ArenaHazardThreat,
 } from '../../schemas/src/index.js'
 import { DEFAULT_BOT_TACTICS, getPart } from '../../catalog/src/index.js'
 import { deriveBotStats, type BotStats } from './deriveStats.js'
@@ -54,6 +52,13 @@ import {
   type RuntimeStatusEffect,
   type RuntimeStatusEffectId,
 } from './statusEffects.js'
+import {
+  clampPositionToArena,
+  compileArenaTopology,
+  hazardEffectKind,
+  hazardsAtPosition,
+  type CompiledArenaTopology,
+} from './arenaTopology.js'
 
 export type CombatantInput = {
   role: TeamRole
@@ -133,7 +138,7 @@ type RuntimePart = {
 type CombatRuntimeState = {
   round: number
   arena: ArenaConfig
-  hazards: ArenaHazardDescriptor[]
+  topology: CompiledArenaTopology
   rng: () => number
   red: BotRuntime
   blue: BotRuntime
@@ -465,6 +470,7 @@ function controlDangerScore(bot: BotRuntime): number {
 
 function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
   const arena = input.arena ?? DEFAULT_ARENA
+  const topology = compileArenaTopology(arena)
   const redStats = deriveBotStats(input.red.blueprint)
   const blueStats = deriveBotStats(input.blue.blueprint)
   const red = createBotRuntime('red', input.red.blueprint, redStats, [-6, 0, 0])
@@ -473,7 +479,7 @@ function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
   return {
     round: input.round,
     arena,
-    hazards: expandArenaHazards(arena),
+    topology,
     rng: createSeededRng(`${input.seed}:${input.round}`),
     red,
     blue,
@@ -1028,22 +1034,11 @@ function moveBot(
       break
   }
 
-  return clampPosition([x, 0, z], arena)
+  return clampPositionToArena(arena, [x, 0, z])
 }
 
 function positionsEqual(left: Vector3, right: Vector3): boolean {
   return left[0] === right[0] && left[1] === right[1] && left[2] === right[2]
-}
-
-function clampPosition(position: Vector3, arena: ArenaConfig): Vector3 {
-  const xLimit = Math.max(1, arena.width / 2 - 0.85)
-  const zLimit = Math.max(1, arena.height / 2 - 0.85)
-
-  return [
-    round(Math.min(Math.max(position[0], -xLimit), xLimit)),
-    0,
-    round(Math.min(Math.max(position[2], -zLimit), zLimit)),
-  ]
 }
 
 function forceMoveToward(
@@ -1062,11 +1057,11 @@ function forceMoveToward(
 
   const ratio = Math.min(1, amount / gap)
   const from = bot.position
-  const to = clampPosition([
+  const to = clampPositionToArena(arena, [
     from[0] + (point[0] - from[0]) * ratio,
     0,
     from[2] + (point[2] - from[2]) * ratio,
-  ], arena)
+  ])
 
   if (positionsEqual(from, to)) {
     return
@@ -1400,35 +1395,32 @@ function resolveHazards(
   events: ReplayEvent[],
   tick: number,
   arena: ArenaConfig,
-  hazards: readonly ArenaHazardDescriptor[],
+  topology: CompiledArenaTopology,
   bot: BotRuntime,
 ): void {
-  if (hazards.length === 0) {
+  const threats = hazardsAtPosition(topology, bot.position)
+
+  if (threats.length === 0) {
     return
   }
 
-  hazards.forEach((hazard) => {
-    if (!isPositionInsideArenaHazard(bot.position, hazard)) {
-      return
-    }
-
-    applyArenaHazard(events, tick, arena, hazard, bot)
-  })
+  threats.forEach((threat) => applyArenaHazard(events, tick, arena, threat, bot))
 }
 
 function applyArenaHazard(
   events: ReplayEvent[],
   tick: number,
   arena: ArenaConfig,
-  hazard: ArenaHazardDescriptor,
+  hazard: ArenaHazardThreat,
   bot: BotRuntime,
 ): void {
-  switch (hazard.kind) {
+  switch (hazardEffectKind(hazard.type)) {
     case 'saw':
-      applyDamagingHazard(events, tick, hazard, bot, sawHazardDamage(bot))
+      applyDamagingHazard(events, tick, hazard, bot, sawHazardDamage(bot, hazard.damage))
+      applyHazardStatus(bot, 'slowed', hazard, tick)
       break
     case 'pit':
-      applyDamagingHazard(events, tick, hazard, bot, pitHazardDamage(bot))
+      applyDamagingHazard(events, tick, hazard, bot, pitHazardDamage(bot, hazard.damage))
       applyHazardStatus(bot, 'anchored', hazard, tick)
       break
     case 'oil':
@@ -1457,24 +1449,24 @@ function applyArenaHazard(
 function applyHazardStatus(
   bot: BotRuntime,
   id: RuntimeStatusEffectId,
-  hazard: ArenaHazardDescriptor,
+  hazard: ArenaHazardThreat,
   tick: number,
 ): boolean {
-  return applyStatusFromSource(bot, id, `hazard:${hazard.label}`, tick)
+  return applyStatusFromSource(bot, id, `hazard:${hazard.id}`, tick)
 }
 
-function sawHazardDamage(bot: BotRuntime): number {
-  return Math.max(1, Math.round(6 - bot.stats.stability * 0.12))
+function sawHazardDamage(bot: BotRuntime, baseDamage: number): number {
+  return Math.max(1, Math.round(baseDamage - bot.stats.stability * 0.12))
 }
 
-function pitHazardDamage(bot: BotRuntime): number {
-  return Math.max(2, Math.round(8 - bot.stats.stability * 0.1))
+function pitHazardDamage(bot: BotRuntime, baseDamage: number): number {
+  return Math.max(2, Math.round(baseDamage - bot.stats.stability * 0.1))
 }
 
 function applyDamagingHazard(
   events: ReplayEvent[],
   tick: number,
-  hazard: ArenaHazardDescriptor,
+  hazard: ArenaHazardThreat,
   bot: BotRuntime,
   damage: number,
 ): void {
@@ -1516,7 +1508,7 @@ function applyDamagingHazard(
 function emitHazardTrigger(
   events: ReplayEvent[],
   tick: number,
-  hazard: ArenaHazardDescriptor,
+  hazard: ArenaHazardThreat,
   bot: BotRuntime,
   damage: number,
   position: Vector3,
@@ -1524,7 +1516,7 @@ function emitHazardTrigger(
   events.push({
     t: tick + 0.35,
     type: 'hazard',
-    hazard: hazard.label,
+    hazard: hazard.type,
     bot: bot.role,
     damage,
     position,
@@ -1537,7 +1529,7 @@ function applyCombatTick(
   redCommand: TurnCommand,
   blueCommand: TurnCommand,
 ): CombatTickResult {
-  const { arena, events, hazards, red, blue } = state
+  const { arena, events, topology, red, blue } = state
 
   state.elapsedTicks = tick
   advanceRuntimeEffects(red, tick)
@@ -1594,8 +1586,8 @@ function applyCombatTick(
     }
   }
 
-  resolveHazards(events, tick, arena, hazards, red)
-  resolveHazards(events, tick, arena, hazards, blue)
+  resolveHazards(events, tick, arena, topology, red)
+  resolveHazards(events, tick, arena, topology, blue)
 
   if (red.health + blue.health < healthBeforeTick) {
     state.lastDamageTick = tick

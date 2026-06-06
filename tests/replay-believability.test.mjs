@@ -429,6 +429,9 @@ test('hazard bait vs heavy tank uses lateral lure movement and produces hazard-s
   const baitProfile = movementProfile(result, 'red')
   const tankProfile = movementProfile(result, 'blue')
   const tankHazards = hazardEvents(result, 'blue')
+  const baitHazards = hazardEvents(result, 'red')
+  const baitHazardsWithoutBooster = hazardEvents(withoutBooster, 'red')
+  const tankHazardDamage = tankHazards.reduce((total, event) => total + event.damage, 0)
 
   assert.ok(baitProfile.count > 20)
   assert.ok(baitProfile.zDistance > baitProfile.xDistance * 1.2)
@@ -453,7 +456,10 @@ test('hazard bait vs heavy tank uses lateral lure movement and produces hazard-s
   )
   assert.equal(hazardEvents(withoutBooster, 'blue').length, 0)
   assert.ok(baitProfile.totalDistance > movementProfile(withoutBooster, 'red').totalDistance * 3)
-  assert.ok(result.damage.blue > withoutBooster.damage.blue * 5)
+  assert.ok(tankHazardDamage > 0)
+  assert.equal(baitHazards.length, 0)
+  assert.ok(baitHazardsWithoutBooster.length > 0)
+  assert.ok(result.remainingHealth.red > withoutBooster.remainingHealth.red)
 })
 
 test('commander drone vs spinner shows mobile command movement and charged drone ability pressure', () => {

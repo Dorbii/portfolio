@@ -138,6 +138,8 @@ export type CombatTurnDecisionContext = {
     opponentDistanceToNearestWall: number
     selfNearWall: boolean
     opponentNearWall: boolean
+    selfNearHazard: boolean
+    opponentNearHazard: boolean
     selfNearCenterHazard: boolean
     opponentNearCenterHazard: boolean
     activeHazards: string[]

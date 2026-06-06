@@ -662,6 +662,23 @@ test('replay mapping exposes hazard effects with damage and hazard context', () 
   assert.deepEqual(hazard.position, [2, 0, -1])
 })
 
+test('replay mapping pulses non-damaging hazards without fake damage markers', () => {
+  const oilTimeline = createReplayTimeline({
+    round: 1,
+    duration: 3,
+    summary: 'Oil slick slows Blue.',
+    events: [
+      { t: 0, type: 'spawn', bot: 'red', position: [-5, 0, 0], rotation: [0, 90, 0] },
+      { t: 0, type: 'spawn', bot: 'blue', position: [5, 0, 0], rotation: [0, -90, 0] },
+      { t: 1, type: 'hazard', hazard: 'blue oil slick', bot: 'blue', damage: 0, position: [4.8, 0, 0] },
+    ],
+  })
+  const frame = buildReplayFrame(oilTimeline, 1.2)
+
+  assert.ok(frame.effects.some((effect) => effect.kind === 'hazard' && effect.label === 'blue oil slick'))
+  assert.equal(frame.effects.some((effect) => effect.kind === 'damage_marker'), false)
+})
+
 test('mock replay stays inside the MVP segment duration cap', () => {
   assert.ok(mockReplay.duration >= 15)
   assert.ok(mockReplay.duration <= 30)

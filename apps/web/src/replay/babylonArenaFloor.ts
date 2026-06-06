@@ -24,6 +24,7 @@ export function createFloorPlateDetails(
 
       plate.position.set(x, -0.002, z)
       plate.material = column === 1 || column === 2 ? seamMaterial : trimMaterial
+      createPlateCornerBolts(scene, `floor-plate-${column}-${row}`, x, z, panelWidth, panelDepth, trimMaterial)
     }
   }
 
@@ -44,6 +45,9 @@ export function createFloorPlateDetails(
       bolt.material = trimMaterial
     }
   }
+
+  createServiceTrenches(scene, arenaWidth, arenaHeight, seamMaterial)
+  createImpactScars(scene, arenaWidth, arenaHeight, seamMaterial, trimMaterial)
 }
 
 export function createFloorSeams(
@@ -75,5 +79,103 @@ export function createFloorSeams(
     )
     seam.position.set(0, 0.007, z)
     seam.material = seamMaterial
+  }
+}
+
+function createPlateCornerBolts(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  panelWidth: number,
+  panelDepth: number,
+  material: StandardMaterial,
+): void {
+  const insetX = panelWidth * 0.36
+  const insetZ = panelDepth * 0.34
+
+  for (const [offsetX, offsetZ] of [
+    [-insetX, -insetZ],
+    [insetX, -insetZ],
+    [-insetX, insetZ],
+    [insetX, insetZ],
+  ]) {
+    const bolt = MeshBuilder.CreateCylinder(
+      `${name}-corner-bolt-${offsetX}-${offsetZ}`,
+      { height: 0.028, diameter: 0.075, tessellation: 8 },
+      scene,
+    )
+
+    bolt.position.set(x + offsetX, 0.032, z + offsetZ)
+    bolt.rotation.x = Math.PI / 2
+    bolt.material = material
+  }
+}
+
+function createServiceTrenches(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  material: StandardMaterial,
+): void {
+  const trenchPositions = [
+    [-arenaWidth * 0.18, 0, arenaHeight * 0.5 - 2.05],
+    [arenaWidth * 0.18, 0, -arenaHeight * 0.5 + 2.05],
+    [0, Math.PI / 2, arenaHeight * 0.17],
+    [0, Math.PI / 2, -arenaHeight * 0.17],
+  ] as const
+
+  trenchPositions.forEach(([x, rotationY, z], index) => {
+    const trench = MeshBuilder.CreateBox(
+      `floor-service-trench-${index}`,
+      { width: 1.55, height: 0.018, depth: 0.095 },
+      scene,
+    )
+
+    trench.position.set(x, 0.038, z)
+    trench.rotation.y = rotationY
+    trench.material = material
+  })
+}
+
+function createImpactScars(
+  scene: Scene,
+  arenaWidth: number,
+  arenaHeight: number,
+  scarMaterial: StandardMaterial,
+  patchMaterial: StandardMaterial,
+): void {
+  const scars = [
+    [-arenaWidth * 0.16, -arenaHeight * 0.08, -0.34, 1.1],
+    [arenaWidth * 0.18, arenaHeight * 0.08, 0.42, 0.94],
+    [-arenaWidth * 0.3, arenaHeight * 0.18, 0.2, 0.78],
+    [arenaWidth * 0.31, -arenaHeight * 0.16, -0.16, 0.72],
+    [0.8, 0.42, 0.74, 0.64],
+    [-0.95, -0.5, -0.6, 0.58],
+  ] as const
+
+  scars.forEach(([x, z, rotationY, width], index) => {
+    const scar = MeshBuilder.CreateBox(
+      `floor-impact-scar-${index}`,
+      { width, height: 0.016, depth: 0.045 },
+      scene,
+    )
+
+    scar.position.set(x, 0.046, z)
+    scar.rotation.y = rotationY
+    scar.material = scarMaterial
+  })
+
+  for (let index = 0; index < 4; index += 1) {
+    const patch = MeshBuilder.CreateBox(
+      `floor-weld-patch-${index}`,
+      { width: 0.86, height: 0.014, depth: 0.42 },
+      scene,
+    )
+    const sign = index % 2 === 0 ? -1 : 1
+
+    patch.position.set(sign * arenaWidth * 0.12, 0.041, (index < 2 ? -1 : 1) * arenaHeight * 0.2)
+    patch.rotation.y = sign * 0.18
+    patch.material = patchMaterial
   }
 }

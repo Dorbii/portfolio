@@ -18,6 +18,8 @@ export function createBumperSegments(
 
     createRailSegment(scene, `north-bumper-${index}`, x, northZ, 0, warningMaterial, trimMaterial)
     createRailSegment(scene, `south-bumper-${index}`, x, southZ, 0, warningMaterial, trimMaterial)
+    createBumperBaseShoe(scene, `north-bumper-shoe-${index}`, x, northZ - 0.16, 0, trimMaterial)
+    createBumperBaseShoe(scene, `south-bumper-shoe-${index}`, x, southZ + 0.16, 0, trimMaterial)
   }
 
   const sideSegmentCount = 7
@@ -27,6 +29,8 @@ export function createBumperSegments(
 
     createRailSegment(scene, `east-bumper-${index}`, arenaWidth / 2 - 0.45, z, Math.PI / 2, warningMaterial, trimMaterial)
     createRailSegment(scene, `west-bumper-${index}`, -arenaWidth / 2 + 0.45, z, Math.PI / 2, warningMaterial, trimMaterial)
+    createBumperBaseShoe(scene, `east-bumper-shoe-${index}`, arenaWidth / 2 - 0.61, z, Math.PI / 2, trimMaterial)
+    createBumperBaseShoe(scene, `west-bumper-shoe-${index}`, -arenaWidth / 2 + 0.61, z, Math.PI / 2, trimMaterial)
   }
 }
 
@@ -44,6 +48,8 @@ export function createGlassPosts(
 
     createGlassPost(scene, `north-glass-post-${index}`, x, arenaHeight / 2 - 0.15, material)
     createGlassPost(scene, `south-glass-post-${index}`, x, -arenaHeight / 2 + 0.15, material)
+    createGlassClamp(scene, `north-glass-clamp-${index}`, x, arenaHeight / 2 - 0.33, 0, material)
+    createGlassClamp(scene, `south-glass-clamp-${index}`, x, -arenaHeight / 2 + 0.33, 0, material)
   }
 
   for (let index = 1; index < postsPerShortSide; index += 1) {
@@ -51,6 +57,8 @@ export function createGlassPosts(
 
     createGlassPost(scene, `east-glass-post-${index}`, arenaWidth / 2 - 0.15, z, material)
     createGlassPost(scene, `west-glass-post-${index}`, -arenaWidth / 2 + 0.15, z, material)
+    createGlassClamp(scene, `east-glass-clamp-${index}`, arenaWidth / 2 - 0.33, z, Math.PI / 2, material)
+    createGlassClamp(scene, `west-glass-clamp-${index}`, -arenaWidth / 2 + 0.33, z, Math.PI / 2, material)
   }
 }
 
@@ -90,6 +98,21 @@ function createRailSegment(
   cap.material = trimMaterial
 }
 
+function createBumperBaseShoe(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  rotationY: number,
+  material: StandardMaterial,
+): void {
+  const shoe = MeshBuilder.CreateBox(name, { width: 1.15, height: 0.065, depth: 0.28 }, scene)
+
+  shoe.position.set(x, 0.075, z)
+  shoe.rotation.y = rotationY
+  shoe.material = material
+}
+
 function createGlassPost(
   scene: Scene,
   name: string,
@@ -101,6 +124,30 @@ function createGlassPost(
 
   post.position.set(x, 1.08, z)
   post.material = material
+
+  const foot = MeshBuilder.CreateBox(`${name}-foot`, { width: 0.34, height: 0.08, depth: 0.34 }, scene)
+
+  foot.position.set(x, 0.38, z)
+  foot.material = material
+}
+
+function createGlassClamp(
+  scene: Scene,
+  name: string,
+  x: number,
+  z: number,
+  rotationY: number,
+  material: StandardMaterial,
+): void {
+  const clamp = MeshBuilder.CreateBox(name, { width: 0.5, height: 0.1, depth: 0.12 }, scene)
+  const brace = MeshBuilder.CreateBox(`${name}-brace`, { width: 0.36, height: 0.04, depth: 0.1 }, scene)
+
+  clamp.position.set(x, 0.62, z)
+  clamp.rotation.y = rotationY
+  clamp.material = material
+  brace.position.set(x, 1.28, z)
+  brace.rotation.y = rotationY
+  brace.material = material
 }
 
 function createLightBar(

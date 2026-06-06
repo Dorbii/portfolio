@@ -15,8 +15,10 @@ import { validateReplayTimeline } from '../.test-build/packages/replay/src/index
 import {
   PART_BEHAVIORS,
   PART_BEHAVIOR_IDS,
+  activeHazardTypes,
   chooseCommand,
   compileCommandPolicy,
+  compileArenaTopology,
   compareDamageTargets,
   createBotRuntimeIndex,
   createOpeningScriptIndex,
@@ -25,9 +27,13 @@ import {
   findFirstAliveBehaviorPart,
   getAliveBehaviorParts,
   getOpeningScriptCommand,
+  hasArenaLineOfSight,
   hasAliveBehaviorPart,
+  hazardsAtPosition,
+  pathHazards,
   resolveCombat,
   stablePartOrder,
+  worldToArenaCell,
 } from '../.test-build/packages/sim/src/index.js'
 import {
   SessionCoordinator,
@@ -993,6 +999,93 @@ test('policy avoids projected center saw instead of walking mobile bot into spin
   assert.ok(['turn_left', 'turn_right', 'backward', 'dash_backward', 'brake'].includes(command.move))
 })
 
+test('arena topology compiles active hazard labels into grid threat packets', () => {
+  const topology = compileArenaTopology({
+    name: 'Active Hazard Topology Test',
+    width: 24,
+    height: 16,
+    activeHazards: ['floor_saw', 'corner flippers', 'blue magnet'],
+  })
+
+  assert.deepEqual(activeHazardTypes(topology), [
+    'blue_magnet',
+    'corner_flippers',
+    'floor_saw',
+  ])
+  assert.deepEqual(worldToArenaCell(topology, [6, 0, 0]), { x: 6, z: 0 })
+  assert.equal(hazardsAtPosition(topology, [0, 0, 0])[0].type, 'floor_saw')
+  assert.equal(hazardsAtPosition(topology, [24 * 0.2, 0, 0])[0].type, 'blue_magnet')
+  assert.ok(
+    pathHazards(topology, [-1.5, 0, 0], [1.5, 0, 0]).some(
+      (hazard) => hazard.type === 'floor_saw',
+    ),
+  )
+})
+
+test('arena topology supports custom modular hazard placement and blockers', () => {
+  const topology = compileArenaTopology({
+    name: 'Modular Topology Test',
+    width: 24,
+    height: 16,
+    activeHazards: ['crusher_lane'],
+    topology: {
+      grid: { cellSize: 0.5 },
+      spawnZones: [],
+      hazards: [
+        {
+          id: 'crusher_lane',
+          type: 'crusher_lane',
+          shape: { kind: 'rect', center: [3, 2], size: [2, 1] },
+          damage: 4,
+        },
+      ],
+      terrain: [],
+      obstacles: [
+        {
+          id: 'center_barrier',
+          type: 'barrier',
+          shape: { kind: 'rect', center: [0, 0], size: [0.5, 4] },
+          blocksMovement: true,
+        },
+      ],
+    },
+  })
+
+  assert.deepEqual(worldToArenaCell(topology, [3, 0, 2]), { x: 6, z: 4 })
+  assert.equal(hazardsAtPosition(topology, [3, 0, 2])[0].id, 'crusher_lane')
+  assert.equal(hasArenaLineOfSight(topology, [-1, 0, 0], [1, 0, 0]), false)
+  assert.equal(hasArenaLineOfSight(topology, [-1, 0, 3], [1, 0, 3]), true)
+})
+
+test('resolver applies non-damaging arena trap effects instead of rendering them as inert props', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'blue-magnet-hazard-check',
+    red: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: brakePlan,
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: brakePlan,
+    },
+    arena: { name: 'Trap Test', width: 24, height: 16, activeHazards: ['blue magnet'] },
+  })
+  const magnetEvent = result.replay.events.find(
+    (event) => event.type === 'hazard' && event.hazard === 'blue_magnet' && event.bot === 'blue',
+  )
+  const forcedBlueMove = result.replay.events.find(
+    (event) => event.type === 'move' && event.bot === 'blue' && event.intent === 'forced',
+  )
+
+  assert.ok(magnetEvent)
+  assert.equal(magnetEvent.damage, 0)
+  assert.ok(forcedBlueMove)
+  assert.ok(forcedBlueMove.to[0] < forcedBlueMove.from[0])
+})
+
 test('resolver applies movement tactics to replay movement for the same blueprint', () => {
   const baseRed = {
     blueprint: validSpinnerSubmission.blueprint,
@@ -1085,6 +1178,7 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
       }),
       openingScript: validSpinnerSubmission.openingScript,
     },
+    arena: { name: 'Deterministic Impact Test', width: 24, height: 16, activeHazards: [] },
   }
   const first = resolveCombat(input)
   const second = resolveCombat(input)
@@ -1691,12 +1785,17 @@ test('resolver lets booster hazard bait lure a heavier bot into active hazards',
   const blueHazards = baitResult.replay.events.filter(
     (event) => event.type === 'hazard' && event.bot === 'blue',
   )
-  const blueHazardsWithoutUtility = withoutBaitUtilityResult.replay.events.filter(
-    (event) => event.type === 'hazard' && event.bot === 'blue',
+  const redHazards = baitResult.replay.events.filter(
+    (event) => event.type === 'hazard' && event.bot === 'red',
+  )
+  const redHazardsWithoutUtility = withoutBaitUtilityResult.replay.events.filter(
+    (event) => event.type === 'hazard' && event.bot === 'red',
   )
 
   assert.ok(blueHazards.length > 0)
-  assert.ok(blueHazards.length > blueHazardsWithoutUtility.length)
+  assert.equal(redHazards.length, 0)
+  assert.ok(redHazardsWithoutUtility.length > 0)
+  assert.ok(baitResult.damage.blue > withoutBaitUtilityResult.damage.blue)
 })
 
 test('resolver gives wedge flipper bully extra contact damage and disruption', () => {
@@ -2324,6 +2423,12 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(blueSubmission.value.state.combat.decision.tick, 1)
   assert.equal(blueSubmission.value.state.combat.decision.legalCommands.movement.includes('forward'), true)
   assert.equal(blueSubmission.value.state.combat.decision.range.band, 'long')
+  assert.deepEqual(blueSubmission.value.state.combat.decision.positioning.selfCell, { x: 6, z: 0 })
+  assert.deepEqual(blueSubmission.value.state.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
+  assert.equal(blueSubmission.value.state.combat.decision.positioning.distanceCells, 12)
+  assert.equal(blueSubmission.value.state.combat.decision.positioning.bearingToOpponent, 'west')
+  assert.equal(blueSubmission.value.state.combat.decision.hazards.active.includes('floor_saw'), true)
+  assert.equal(blueSubmission.value.state.combat.decision.arenaPressure.selfNearHazard, false)
   assert.ok(blueSubmission.value.state.combat.decision.movementOptions.recommended.length > 0)
   assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)

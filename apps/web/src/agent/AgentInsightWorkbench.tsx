@@ -77,14 +77,23 @@ export function AgentInsightWorkbench({
           <SectionTitle id="plan-read-heading" title="Plan read" />
           {submission ? (
             <>
-              <MetricGrid className="agent-facts">
-                <Fact label="Blueprint" value={submission.blueprint.name} />
-                <Fact label="Purchases" value={String(submission.purchases.length)} />
-                <Fact label="Movement" value={formatOptionalLabel(submission.tactics.movementPolicy)} />
-                <Fact label="Range" value={formatOptionalLabel(submission.tactics.preferredRange)} />
-                <Fact label="Weapon cadence" value={formatOptionalLabel(submission.tactics.weaponCadence)} />
-                <Fact label="Aggression" value={formatAggression(submission.tactics.aggression)} />
-              </MetricGrid>
+              <div className="insight-readout-grid">
+                <ReadoutCard
+                  label="Bot"
+                  value={submission.blueprint.name}
+                  detail={`${submission.blueprint.blocks.length} blocks / ${submission.purchases.length} bought`}
+                />
+                <ReadoutCard
+                  label="Movement"
+                  value={formatOptionalLabel(submission.tactics.movementPolicy)}
+                  detail={`${formatOptionalLabel(submission.tactics.preferredRange)} range`}
+                />
+                <ReadoutCard
+                  label="Weapons"
+                  value={formatOptionalLabel(submission.tactics.weaponCadence)}
+                  detail={`${formatAggression(submission.tactics.aggression)} aggression`}
+                />
+              </div>
               <InsightText title="Rationale" text={submission.rationale} fallback="No rationale was submitted with this plan." />
             </>
           ) : (
@@ -148,6 +157,24 @@ export function AgentInsightWorkbench({
       </div>
       ) : null}
     </section>
+  )
+}
+
+function ReadoutCard({
+  detail,
+  label,
+  value,
+}: {
+  detail: string
+  label: string
+  value: string
+}) {
+  return (
+    <div className="insight-readout-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{detail}</small>
+    </div>
   )
 }
 

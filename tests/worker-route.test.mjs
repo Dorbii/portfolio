@@ -410,6 +410,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.rules.turnCommandSchema.action, 'submit_turn_command')
   assert.ok(json.rules.turnCommandSchema.note.includes('movement plus weapon and utility'))
   assert.equal(json.rules.turnDecisionContext.location, 'private state.combat.decision')
+  assert.ok(json.rules.turnDecisionContext.fields.positioning.includes('grid cells'))
+  assert.ok(json.rules.turnDecisionContext.fields.hazards.includes('hazard threats'))
   assert.ok(json.rules.turnDecisionContext.fields.movementOptions.includes('suggestions'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('state.combat.decision')))
   assert.ok(json.turnStrategyGuidance.some((strategy) => strategy.id === 'kite_and_punish'))
@@ -771,6 +773,11 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   assert.equal(blueSubmission.json.state.combat.decision.legalCommands.movement.includes('forward'), true)
   assert.equal(blueSubmission.json.state.combat.decision.range.distance, 12)
   assert.equal(blueSubmission.json.state.combat.decision.range.band, 'long')
+  assert.deepEqual(blueSubmission.json.state.combat.decision.positioning.selfCell, { x: 6, z: 0 })
+  assert.deepEqual(blueSubmission.json.state.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
+  assert.equal(blueSubmission.json.state.combat.decision.positioning.bearingToOpponent, 'west')
+  assert.equal(blueSubmission.json.state.combat.decision.hazards.active.includes('floor_saw'), true)
+  assert.equal(blueSubmission.json.state.combat.decision.arenaPressure.selfNearHazard, false)
   assert.equal(blueSubmission.json.state.combat.decision.movementOptions.recommended.includes('dash_forward'), true)
   assert.ok(
     blueSubmission.json.state.combat.decision.tacticalCues.some((cue) =>
@@ -959,6 +966,25 @@ test('worker validates create-session payload shape before Durable Object routin
       },
     },
   })
+  const invalidTopology = await route(env, '/sessions', {
+    method: 'POST',
+    body: {
+      sessionId: 's_invalid_topology',
+      arena: {
+        name: 'Bad Topology',
+        width: 24,
+        height: 16,
+        activeHazards: ['floor_saw'],
+        topology: {
+          grid: { cellSize: 1 },
+          spawnZones: [],
+          hazards: [{ id: 'bad', type: 'pit', shape: { kind: 'circle', center: [0, 0] } }],
+          terrain: [],
+          obstacles: [],
+        },
+      },
+    },
+  })
 
   assert.equal(invalidTtl.response.status, 400)
   assert.equal(invalidTtl.json.error.code, 'INVALID_REQUEST')
@@ -969,6 +995,11 @@ test('worker validates create-session payload shape before Durable Object routin
   assert.equal(invalidArena.json.error.code, 'INVALID_REQUEST')
   assert.ok(
     invalidArena.json.error.issues.some((issue) => issue.code === 'INVALID_ARENA_SIZE'),
+  )
+  assert.equal(invalidTopology.response.status, 400)
+  assert.equal(invalidTopology.json.error.code, 'INVALID_REQUEST')
+  assert.ok(
+    invalidTopology.json.error.issues.some((issue) => issue.code === 'INVALID_ARENA_SHAPE'),
   )
 })
 

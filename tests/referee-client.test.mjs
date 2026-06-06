@@ -14,6 +14,10 @@ import {
   readStoredSession,
   clearStoredSession,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
+import {
+  createRefereeAgentBriefs,
+  hasInviteForRole,
+} from '../.test-build/apps/web/src/referee/refereeAgentBriefs.js'
 
 function jsonResponse(value, init = {}) {
   return new Response(JSON.stringify(value), {
@@ -90,6 +94,24 @@ test('referee invite URLs can use observer-only cockpit tokens', () => {
     `${DEFAULT_ARENA_SITE_BASE}/agent#${params.toString()}`,
   )
   assert.equal(inviteUrl.includes('claimToken'), false)
+})
+
+test('referee cockpit handoffs tolerate claim-only invite payloads', () => {
+  const briefs = createRefereeAgentBriefs({
+    activeSessionId: 's_demo',
+    apiBase: DEFAULT_ARENA_API_BASE,
+    invites: [{ role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' }],
+    publicSession: null,
+    siteBase: 'http://127.0.0.1:5175',
+  })
+
+  assert.equal(hasInviteForRole([{ role: 'red', claimToken: 'cap_red' }], 'red'), true)
+  assert.equal(briefs.hasAnyInvite, true)
+  assert.equal(briefs.redCockpitUrl.startsWith('http://127.0.0.1:5175/agent#'), true)
+  assert.equal(briefs.redCockpitUrl.includes('claimToken=cap_red'), true)
+  assert.equal(briefs.redCockpitUrl.includes('observerToken='), false)
+  assert.equal(briefs.redInviteUrl.includes('claimToken=cap_red'), true)
+  assert.equal(briefs.blueCockpitUrl, '')
 })
 
 test('referee createSession posts to /sessions', async () => {

@@ -1,11 +1,12 @@
 import type { AgentChatMessageKind } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
-import { capitalize, formatDateTime, formatLabel } from '../shared/format'
+import { capitalize, formatLabel } from '../shared/format'
 import {
   ActionGroup,
   Button,
   MetricGrid,
   Panel,
+  StatusBadge,
 } from '../shared/ui'
 import {
   ActivityLog,
@@ -32,14 +33,16 @@ export function AgentCockpitSidebar({
   controller: AgentCockpitController
   invite: AgentInvite
 }) {
+  const showReference = controller.canMutateRole
+  const showComms = controller.canMutateRole || controller.roleHasChatLog || controller.roleHasPrivateChatLog
+  const showActivity = Boolean(controller.lastError || controller.roleHasMatchLog)
+
   return (
     <aside className="cockpit-secondary-stack" aria-label="Secondary cockpit data">
       <AgentStatePanel controller={controller} invite={invite} />
-      {controller.canMutateRole ? (
-        <AgentReferencePanel controller={controller} invite={invite} />
-      ) : null}
-      <AgentCommsPanel controller={controller} />
-      <AgentActivityPanel controller={controller} />
+      {showReference ? <AgentReferencePanel controller={controller} invite={invite} /> : null}
+      {showComms ? <AgentCommsPanel controller={controller} /> : null}
+      {showActivity ? <AgentActivityPanel controller={controller} /> : null}
     </aside>
   )
 }
@@ -61,6 +64,24 @@ function AgentStatePanel({
     status,
     workflow,
   } = controller
+  const accessLabel = canMutateRole
+    ? 'Agent key'
+    : invite.observerToken || roleToken
+      ? 'Observer'
+      : 'Missing'
+  const phaseLabel = roleState ? formatLabel(roleState.phase) : isBusy ? 'Loading' : 'Not loaded'
+  const opponentStatus = roleState
+    ? roleState.opponent.submitted
+      ? 'Submitted'
+      : roleState.opponent.claimed
+        ? 'Connected'
+        : 'Open'
+    : 'Unknown'
+  const arenaStatus = publicState
+    ? publicState.arena.activeHazards.length > 0
+      ? `${publicState.arena.activeHazards.length} active`
+      : 'Clear'
+    : 'Unknown'
 
   return (
     <Panel className="agent-live-panel cockpit-secondary-panel" aria-labelledby="secondary-state-heading">
@@ -74,43 +95,43 @@ function AgentStatePanel({
         <ConnectionGuide guidance={connectionGuidance} />
       </section>
 
-      <section aria-labelledby="role-summary-heading">
-        <SectionTitle id="role-summary-heading" title="Role summary" />
-        <MetricGrid className="agent-facts">
-          <Fact label="Session" value={invite.sessionId} />
-          <Fact label="Role" value={capitalize(invite.role)} />
-          <Fact label="API" value={invite.apiBase} />
-          <Fact label="Claim token" value={invite.claimToken ? 'Present' : 'Not in fragment'} />
-          <Fact label="Observer token" value={invite.observerToken ? 'Present' : 'Not in fragment'} />
-          <Fact
-            label="Bearer"
-            value={
-              roleToken
-                ? canMutateRole
-                  ? 'Agent key stored'
-                  : 'Observer key stored'
-                : invite.claimToken
-                  ? 'Available from invite'
-                  : invite.observerToken
-                    ? 'Observer only'
-                    : 'Missing'
-            }
-          />
-          <Fact label="Status" value={formatLabel(status)} />
-        </MetricGrid>
-      </section>
+      <div className="cockpit-signal-grid" aria-label="Role state summary">
+        <SignalCard
+          label="Access"
+          tone={hasPlayerKey ? 'ok' : 'warning'}
+          value={accessLabel}
+          detail={canMutateRole ? 'Can act for this role' : 'Read-only state view'}
+        />
+        <SignalCard
+          label="Phase"
+          tone={roleState ? 'ok' : 'warning'}
+          value={phaseLabel}
+          detail={roleState ? `Round ${roleState.round}` : formatLabel(status)}
+        />
+        <SignalCard
+          label="Opponent"
+          tone={roleState?.opponent.submitted ? 'ok' : 'neutral'}
+          value={opponentStatus}
+          detail={roleState ? opponentLabel(roleState) : 'Loads with state'}
+        />
+        <SignalCard
+          label="Arena"
+          tone={publicState ? 'ok' : 'neutral'}
+          value={arenaStatus}
+          detail={publicState ? publicState.arena.name : 'Public state pending'}
+        />
+      </div>
 
       <section aria-labelledby="phase-heading">
-        <SectionTitle id="phase-heading" title="Current phase" />
+        <SectionTitle id="phase-heading" title="Round snapshot" />
         {roleState ? (
           <MetricGrid className="agent-facts">
-            <Fact label="Phase" value={formatLabel(roleState.phase)} />
+            <Fact label="Session" value={shortSessionId(invite.sessionId)} />
+            <Fact label="Role" value={capitalize(invite.role)} />
             <Fact label="Round" value={String(roleState.round)} />
             <Fact label="Gold" value={String(roleState.gold)} />
             <Fact label="Submitted" value={roleState.submitted ? 'Yes' : 'No'} />
-            <Fact label="State version" value={roleState.stateVersion} />
             <Fact label="Opponent" value={opponentLabel(roleState)} />
-            <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
           </MetricGrid>
         ) : (
           <p className="agent-empty">
@@ -128,26 +149,11 @@ function AgentStatePanel({
         ) : null}
       </section>
 
-      <section aria-labelledby="opponent-heading">
-        <SectionTitle id="opponent-heading" title="Opponent" />
-        {roleState ? (
-          <MetricGrid className="agent-facts">
-            <Fact label="Role" value={capitalize(roleState.opponent.role)} />
-            <Fact label="Claimed" value={roleState.opponent.claimed ? 'Yes' : 'No'} />
-            <Fact label="Submitted" value={roleState.opponent.submitted ? 'Yes' : 'No'} />
-            <Fact label="Replay" value={roleState.replayAvailable ? 'Available' : 'Unavailable'} />
-          </MetricGrid>
-        ) : (
-          <p className="agent-empty">Opponent state is available after role state loads.</p>
-        )}
-      </section>
-
       <section aria-labelledby="arena-heading">
-        <SectionTitle id="arena-heading" title="Arena" />
+        <SectionTitle id="arena-heading" title="Arena / replay" />
         {publicState ? (
           <MetricGrid className="agent-facts">
             <Fact label="Name" value={publicState.arena.name} />
-            <Fact label="Size" value={`${publicState.arena.width} x ${publicState.arena.height}`} />
             <Fact label="Hazards" value={publicState.arena.activeHazards.join(', ')} />
             <Fact label="Replay" value={publicState.replayAvailable ? 'Available' : 'Unavailable'} />
           </MetricGrid>
@@ -157,6 +163,34 @@ function AgentStatePanel({
       </section>
     </Panel>
   )
+}
+
+function SignalCard({
+  detail,
+  label,
+  tone,
+  value,
+}: {
+  detail: string
+  label: string
+  tone: 'neutral' | 'ok' | 'warning'
+  value: string
+}) {
+  return (
+    <div className="cockpit-signal-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <StatusBadge tone={tone}>{detail}</StatusBadge>
+    </div>
+  )
+}
+
+function shortSessionId(sessionId: string): string {
+  if (sessionId.length <= 18) {
+    return sessionId
+  }
+
+  return `${sessionId.slice(0, 9)}...${sessionId.slice(-5)}`
 }
 
 function AgentReferencePanel({

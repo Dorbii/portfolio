@@ -71,8 +71,17 @@ button:disabled {
   padding: 7px 12px;
   display: inline-grid;
   place-items: center;
+  border: 1px solid rgba(238, 242, 243, 0.16);
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
   text-align: center;
+  text-decoration: none;
   line-height: 1.15;
+  cursor: pointer;
   overflow-wrap: anywhere;
 }
 
@@ -2133,6 +2142,53 @@ textarea:focus-visible {
   border-bottom: 0;
 }
 
+.cockpit-signal-grid {
+  margin: 10px 0 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cockpit-signal-card {
+  min-width: 0;
+  min-height: 86px;
+  padding: 9px;
+  display: grid;
+  align-content: space-between;
+  gap: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 247, 0.1);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.05), rgba(238, 242, 247, 0.012)),
+    rgba(5, 9, 12, 0.64);
+}
+
+.cockpit-signal-card > span {
+  color: #8fa3a3;
+  font-size: 0.64rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cockpit-signal-card > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #eef2f3;
+  font-size: 0.9rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cockpit-signal-card .ui-status-badge {
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cockpit-secondary-panel .agent-handoff-panel,
 .cockpit-secondary-panel.match-log-panel {
   min-height: 0;
@@ -2485,6 +2541,53 @@ textarea:focus-visible {
   gap: 5px;
 }
 
+.insight-readout-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.insight-readout-card {
+  min-width: 0;
+  min-height: 82px;
+  padding: 9px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  border: 1px solid rgba(var(--cockpit-role), 0.18);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-role), 0.07), rgba(var(--cockpit-role), 0.014)),
+    rgba(5, 9, 12, 0.66);
+}
+
+.insight-readout-card span {
+  color: #8fa3a3;
+  font-size: 0.64rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.insight-readout-card strong,
+.insight-readout-card small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insight-readout-card strong {
+  color: #eef2f3;
+  font-size: 0.9rem;
+}
+
+.insight-readout-card small {
+  color: #aeb7c1;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .combat-decision-panel {
   grid-row: span 2;
 }
@@ -2715,7 +2818,9 @@ textarea:focus-visible {
   }
 
   .plan-metric-strip,
-  .agent-task-list {
+  .agent-task-list,
+  .cockpit-signal-grid,
+  .insight-readout-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2746,7 +2851,9 @@ textarea:focus-visible {
     .replay-controls,
     .agent-command-actions,
     .agent-task-list,
-    .plan-metric-strip {
+    .plan-metric-strip,
+    .cockpit-signal-grid,
+    .insight-readout-grid {
     grid-template-columns: 1fr;
   }
 

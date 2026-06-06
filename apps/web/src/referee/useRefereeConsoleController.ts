@@ -242,6 +242,7 @@ export function useRefereeConsoleController() {
         apiBase,
         invites,
         publicSession,
+        siteBase: window.location.origin,
       }),
     [activeSessionId, apiBase, invites, publicSession],
   )
