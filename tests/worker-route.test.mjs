@@ -415,7 +415,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Agent Journal')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('waitForNextAction({ timeoutMs: 600000 })')))
-  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole()'))
+  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })'))
   assert.ok(json.externalAgentGuide.fallback.includes('submitRoundPlan(plan)'))
   assert.equal(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan'), false)
   assert.ok(json.externalAgentGuide.fallback.includes('do not keep retrying'))
@@ -743,12 +743,12 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
     token: redInvite.claimToken,
-    body: {},
+    body: bootstrapBody('red'),
   })
   await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',
     token: blueInvite.claimToken,
-    body: {},
+    body: bootstrapBody('blue'),
   })
 
   const v2Submission = {
@@ -836,12 +836,12 @@ test('POST /sessions/:id/chat stores public role-authored chat', async () => {
   await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
     token: redInvite.claimToken,
-    body: { agentName: 'Red Talker' },
+    body: bootstrapBody('red', 'Red Talker'),
   })
   await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',
     token: blueInvite.claimToken,
-    body: {},
+    body: bootstrapBody('blue'),
   })
 
   const chat = await route(env, `/sessions/${sessionId}/chat`, {
@@ -897,12 +897,12 @@ test('POST /sessions/:id/private-chat stores bearer-scoped notes only in private
   await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
     token: redInvite.claimToken,
-    body: { agentName: 'Red Private' },
+    body: bootstrapBody('red', 'Red Private'),
   })
   await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',
     token: blueInvite.claimToken,
-    body: { agentName: 'Blue Private' },
+    body: bootstrapBody('blue', 'Blue Private'),
   })
 
   const note = await route(env, `/sessions/${sessionId}/private-chat`, {
@@ -1066,6 +1066,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
       role: 'red',
       claimToken: redInvite.claimToken,
       agentName: 'Red Bot',
+      teamIdentity: testTeamIdentity('red'),
     },
   })
 
@@ -1116,6 +1117,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
       role: 'red',
       claimToken: resetRed.json.invite.claimToken,
       agentName: 'Replacement Red Bot',
+      teamIdentity: testTeamIdentity('red', ' Replacement'),
     },
   })
 
@@ -1129,6 +1131,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
       role: 'blue',
       claimToken: blueInvite.claimToken,
       agentName: 'Blue Bot',
+      teamIdentity: testTeamIdentity('blue'),
     },
   })
 
@@ -1189,6 +1192,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assertRoundPlanWindow(preResolveState.json.roundPlan)
   assert.deepEqual(preResolveState.json.opponent, {
     role: 'blue',
+    identity: testTeamIdentity('blue'),
     claimed: true,
     submitted: false,
     wins: 0,
@@ -1236,7 +1240,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(replay.json.botBlueprints?.blue?.blocks?.length > 0, true)
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].id, 'core')
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].partId, 'Body_Square_Medium')
-  assert.deepEqual(replay.json.teamIdentities?.red, testTeamIdentity('red'))
+  assert.deepEqual(replay.json.teamIdentities?.red, testTeamIdentity('red', ' Replacement'))
   assert.deepEqual(replay.json.teamIdentities?.blue, testTeamIdentity('blue'))
 
   const invalidAdvanceToken = await route(env, `/sessions/${sessionId}/advance-round`, {

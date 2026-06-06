@@ -47,10 +47,14 @@ export type {
   AgentWaitOptions,
 } from './agentClientTypes.js'
 export {
+  clearStoredTeamIdentity,
   clearStoredRoleToken,
+  createAgentTeamIdentityStorageKey,
   createAgentRoleStorageKey,
   parseAgentInviteFragment,
+  readStoredTeamIdentity,
   readStoredRoleToken,
+  writeStoredTeamIdentity,
   writeStoredRoleToken,
 } from './agentInviteParsing.js'
 export {

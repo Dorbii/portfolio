@@ -1,4 +1,9 @@
-import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import {
+  TEAM_LOGO_MARKS,
+  type TeamIdentity,
+  type TeamLogoMark,
+  type TeamRole,
+} from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import type {
   AgentInviteParseResult,
@@ -7,6 +12,8 @@ import type {
 
 const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 const TEAM_ROLE_VALUES = ['red', 'blue'] as const
+const TEAM_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
+const DEFAULT_TEAM_LOGO_MARK: TeamLogoMark = 'shield'
 
 function firstPresent(...values: Array<string | null>): string | undefined {
   return values
@@ -43,6 +50,10 @@ function normalizeApiBase(value: string): string | undefined {
 
 function isTeamRole(value: unknown): value is TeamRole {
   return TEAM_ROLE_VALUES.includes(value as TeamRole)
+}
+
+function isTeamLogoMark(value: unknown): value is TeamLogoMark {
+  return typeof value === 'string' && TEAM_LOGO_MARKS.includes(value as TeamLogoMark)
 }
 
 export function parseAgentInviteFragment(
@@ -84,16 +95,20 @@ export function parseAgentInviteFragment(
     ok: true,
     value: {
       sessionId: sessionId as string,
-        role: role as TeamRole,
-        apiBase: apiBase as string,
-        ...(claimToken ? { claimToken } : {}),
-        ...(observerToken ? { observerToken } : {}),
-      },
+      role: role as TeamRole,
+      apiBase: apiBase as string,
+      ...(claimToken ? { claimToken } : {}),
+      ...(observerToken ? { observerToken } : {}),
+    },
   }
 }
 
 export function createAgentRoleStorageKey(invite: AgentInvite): string {
   return `agent-arena:role-token:${invite.apiBase}:${invite.sessionId}:${invite.role}`
+}
+
+export function createAgentTeamIdentityStorageKey(invite: AgentInvite): string {
+  return `agent-arena:team-identity:${invite.apiBase}:${invite.sessionId}:${invite.role}`
 }
 
 export function readStoredRoleToken(
@@ -116,4 +131,78 @@ export function clearStoredRoleToken(
   invite: AgentInvite,
 ): void {
   storage.removeItem(createAgentRoleStorageKey(invite))
+}
+
+export function readStoredTeamIdentity(
+  storage: TokenStorage,
+  invite: AgentInvite,
+): TeamIdentity | undefined {
+  const rawValue = firstPresent(storage.getItem(createAgentTeamIdentityStorageKey(invite)))
+
+  if (!rawValue) {
+    return undefined
+  }
+
+  try {
+    return normalizeStoredTeamIdentity(JSON.parse(rawValue))
+  } catch {
+    return undefined
+  }
+}
+
+export function writeStoredTeamIdentity(
+  storage: TokenStorage,
+  invite: AgentInvite,
+  identity: TeamIdentity,
+): TeamIdentity {
+  const normalizedIdentity = normalizeStoredTeamIdentity(identity)
+
+  storage.setItem(
+    createAgentTeamIdentityStorageKey(invite),
+    JSON.stringify(normalizedIdentity),
+  )
+
+  return normalizedIdentity
+}
+
+export function clearStoredTeamIdentity(
+  storage: TokenStorage,
+  invite: AgentInvite,
+): void {
+  storage.removeItem(createAgentTeamIdentityStorageKey(invite))
+}
+
+function normalizeStoredTeamIdentity(value: unknown): TeamIdentity {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('Expected team identity object.')
+  }
+
+  const identity = value as Record<string, unknown>
+  const name = typeof identity.name === 'string' ? identity.name.trim() : ''
+  const primaryColor = typeof identity.primaryColor === 'string'
+    ? identity.primaryColor.trim().toLowerCase()
+    : ''
+
+  if (!name || !TEAM_COLOR_PATTERN.test(primaryColor)) {
+    throw new Error('Invalid team identity.')
+  }
+
+  const logo = typeof identity.logo === 'object' && identity.logo !== null && !Array.isArray(identity.logo)
+    ? identity.logo as Record<string, unknown>
+    : null
+  const logoMark = isTeamLogoMark(logo?.mark)
+    ? logo.mark
+    : DEFAULT_TEAM_LOGO_MARK
+  const initials = typeof logo?.initials === 'string' && logo.initials.trim()
+    ? logo.initials.trim().slice(0, 4).toUpperCase()
+    : undefined
+
+  return {
+    name,
+    primaryColor,
+    logo: {
+      mark: logoMark,
+      ...(initials ? { initials } : {}),
+    },
+  }
 }

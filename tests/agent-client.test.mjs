@@ -5,13 +5,17 @@ import {
   AgentArenaApiError,
   AgentArenaClient,
   createAgentArenaRoleApi,
+  clearStoredTeamIdentity,
   createAgentInviteUrl,
+  createAgentTeamIdentityStorageKey,
   createExternalAgentBriefMarkdown,
   createAgentRoleStorageKey,
   createSafeAgentHash,
   getValidAgentActions,
   parseAgentInviteFragment,
+  readStoredTeamIdentity,
   serializeJsonForScript,
+  writeStoredTeamIdentity,
 } from '../.test-build/apps/web/src/agent/agentClient.js'
 
 const invite = {
@@ -233,6 +237,33 @@ test('agent token helpers avoid writing invite capability into the scrubbed hash
   assert.equal(hash.includes('claimToken'), false)
   assert.equal(inviteUrl.includes('claimToken=cap_red'), true)
   assert.equal(hash.includes('session=s_demo'), true)
+})
+
+test('agent team identity storage preserves selected team accent without claim token leakage', () => {
+  const values = new Map()
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  }
+  const key = createAgentTeamIdentityStorageKey(invite)
+
+  writeStoredTeamIdentity(storage, invite, {
+    name: '  Aqua Circuit QA  ',
+    primaryColor: '#00D6A3',
+    logo: { mark: 'gear', initials: 'acq' },
+  })
+
+  assert.equal(key.includes('cap_red'), false)
+  assert.deepEqual(readStoredTeamIdentity(storage, invite), {
+    name: 'Aqua Circuit QA',
+    primaryColor: '#00d6a3',
+    logo: { mark: 'gear', initials: 'ACQ' },
+  })
+
+  clearStoredTeamIdentity(storage, invite)
+
+  assert.equal(readStoredTeamIdentity(storage, invite), undefined)
 })
 
 test('external agent brief is self-contained enough to claim and submit', () => {
