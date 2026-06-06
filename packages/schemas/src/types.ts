@@ -2,6 +2,26 @@ export const TEAM_ROLES = ['red', 'blue'] as const
 
 export type TeamRole = (typeof TEAM_ROLES)[number]
 
+export const TEAM_LOGO_MARKS = [
+  'shield',
+  'bolt',
+  'gear',
+  'star',
+  'wedge',
+  'crosshair',
+] as const
+
+export type TeamLogoMark = (typeof TEAM_LOGO_MARKS)[number]
+
+export type TeamIdentity = {
+  name: string
+  primaryColor: string
+  logo?: {
+    mark: TeamLogoMark
+    initials?: string
+  }
+}
+
 export type TeamEconomySummary = {
   wins: number
   losses: number

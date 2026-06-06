@@ -75,7 +75,6 @@ export function RefereeConsole() {
     error,
     hasInviteForRole,
     loadState,
-    phase,
     publicSession,
     redAgentBrief,
     redCockpitUrl,
@@ -122,7 +121,6 @@ export function RefereeConsole() {
         </section>
 
         <MatchScoreboard
-          phase={phase}
           publicSession={publicSession}
           replayPayload={replayPayload}
           roleHandoffs={{

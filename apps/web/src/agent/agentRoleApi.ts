@@ -7,6 +7,7 @@ import type {
 import type {
   AgentArenaRoleApi,
   AgentArenaValidAction,
+  AgentRoleConnectInput,
   AgentWaitOptions,
 } from './agentClientTypes.js'
 import { TERMINAL_PHASES } from './agentPhases.js'
@@ -135,8 +136,8 @@ export function getValidAgentActions(
 }
 
 export type AgentArenaRoleApiOptions = {
-  bootstrapRole?: (input?: { agentName?: string }) => Promise<AgentBootstrapResponse>
-  claimRole?: (input?: { agentName?: string }) => Promise<RoleClaimResponse>
+  bootstrapRole?: (input?: AgentRoleConnectInput) => Promise<AgentBootstrapResponse>
+  claimRole?: (input?: AgentRoleConnectInput) => Promise<RoleClaimResponse>
   waitForNextAction?: (options?: AgentWaitOptions) => Promise<AgentBootstrapResponse>
   waitForNextSubmissionWindow?: (options?: AgentWaitOptions) => Promise<RolePrivateState>
   waitForPhase?: (phase: SessionPhase, options?: AgentWaitOptions) => Promise<RolePrivateState>

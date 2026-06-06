@@ -7,6 +7,7 @@ import {
   type RelayErrorResponse,
   type RolePrivateState,
   type RolePublicState,
+  type TeamIdentity,
 } from '../../../packages/schemas/src/index.js'
 import type { CombatResult } from '../../../packages/sim/src/index.js'
 import type {
@@ -181,11 +182,29 @@ export function mergeRateLimits(
 export function rolePublicState(role: StoredRoleState): RolePublicState {
   return {
     role: role.role,
+    ...(role.teamIdentity ? { identity: role.teamIdentity } : {}),
     claimed: Boolean(role.claimedAt),
     submitted: Boolean(role.submittedAt),
     wins: role.wins,
     losses: role.losses,
     winStreak: role.winStreak,
+  }
+}
+
+export function normalizeTeamIdentity(identity: TeamIdentity): TeamIdentity {
+  return {
+    name: identity.name.trim(),
+    primaryColor: identity.primaryColor.trim().toLowerCase(),
+    ...(identity.logo
+      ? {
+          logo: {
+            mark: identity.logo.mark,
+            ...(identity.logo.initials?.trim()
+              ? { initials: identity.logo.initials.trim().toUpperCase() }
+              : {}),
+          },
+        }
+      : {}),
   }
 }
 

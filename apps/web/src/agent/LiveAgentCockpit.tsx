@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+} from 'react'
 import {
   parseAgentInviteFragment,
   type AgentInvite,
@@ -13,6 +17,12 @@ import {
 import { AgentCockpitSidebar } from './AgentCockpitSidebar'
 import { AgentInsightWorkbench } from './AgentInsightWorkbench'
 import { useLiveAgentCockpitController } from './useLiveAgentCockpitController'
+import {
+  createTeamAccentCssVars,
+  type TeamAccentCssVars,
+} from '../shared/teamVisuals'
+
+type AgentLiveAppStyle = CSSProperties & TeamAccentCssVars
 
 export function LiveAgentCockpit() {
   const [parseResult, setParseResult] = useState<AgentInviteParseResult>(() =>
@@ -40,9 +50,10 @@ export function LiveAgentCockpit() {
 
 function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const cockpit = useLiveAgentCockpitController(invite)
+  const teamStyle = createTeamAccentCssVars(invite.role, cockpit.roleState?.identity) as AgentLiveAppStyle
 
   return (
-    <main className={`agent-live-app role-${invite.role}`}>
+    <main className="agent-live-app" style={teamStyle}>
       <AgentCockpitHeader controller={cockpit} invite={invite} />
 
       <AgentTaskPanel notice={cockpit.notice} workflow={cockpit.workflow} />

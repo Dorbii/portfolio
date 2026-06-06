@@ -2,6 +2,7 @@ import {
   TEAM_ROLES,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
+  validateRoleClaimRequestShape,
   validateRoleResetRequestShape,
   validateTurnCommandSubmissionShape,
   type AdvanceRoundResponse,
@@ -46,7 +47,6 @@ import {
   appendRoleChatMessages,
   appendSessionEvent,
 } from './sessionMessages.js'
-import { ensureStoredSessionDefaults } from './sessionDefaults.js'
 import {
   findRoleBearer,
   findRoleAuthByToken,
@@ -70,6 +70,7 @@ import {
   isTeamRole,
   mergeRateLimits,
   nextActionForRole,
+  normalizeTeamIdentity,
   relayError,
 } from './sessionSupport.js'
 import { createInitialSessionState } from './sessionCreation.js'
@@ -129,7 +130,6 @@ export class SessionCoordinator {
     } = {},
   ) {
     this.state = state
-    ensureStoredSessionDefaults(this.state)
     this.clock = options.clock ?? defaultClock
     this.tokenFactory = options.tokenFactory ?? defaultTokenFactory
     this.tokenHasher = options.tokenHasher ?? defaultTokenHasher
@@ -209,6 +209,16 @@ export class SessionCoordinator {
   }
 
   async claimRole(request: RoleClaimRequest): Promise<SessionResult<RoleClaimResponse>> {
+    const validation = validateRoleClaimRequestShape(request)
+
+    if (!validation.ok) {
+      return relayError(
+        'INVALID_REQUEST',
+        'Claim request failed validation.',
+        validation.issues,
+      )
+    }
+
     if (!isTeamRole(request.role)) {
       return relayError('INVALID_ROLE', 'Claim request must choose red or blue.')
     }
@@ -236,9 +246,17 @@ export class SessionCoordinator {
       return relayError('INVALID_TOKEN', 'Claim token does not match the requested role.')
     }
 
+    if (!request.teamIdentity) {
+      return relayError(
+        'INVALID_REQUEST',
+        'Claiming a role requires teamIdentity with team name, primaryColor, and optional logo.',
+      )
+    }
+
     role.claimedAt = now
     const roleToken = this.tokenFactory(request.role, 'role')
     role.roleTokenHash = await this.tokenHasher(roleToken)
+    role.teamIdentity = normalizeTeamIdentity(request.teamIdentity)
 
     if (request.agentName?.trim()) {
       role.agentName = request.agentName.trim().slice(0, 80)
@@ -309,8 +327,23 @@ export class SessionCoordinator {
 
     let claimedNow = false
 
+    if (auth.role.claimedAt && request.teamIdentity) {
+      return relayError(
+        'INVALID_REQUEST',
+        'Team identity is locked after the role is claimed.',
+      )
+    }
+
     if (!auth.role.claimedAt) {
+      if (!request.teamIdentity) {
+        return relayError(
+          'INVALID_REQUEST',
+          'Bootstrapping an unclaimed role requires teamIdentity with team name, primaryColor, and optional logo.',
+        )
+      }
+
       auth.role.claimedAt = now
+      auth.role.teamIdentity = normalizeTeamIdentity(request.teamIdentity)
       claimedNow = true
 
       if (request.agentName?.trim()) {

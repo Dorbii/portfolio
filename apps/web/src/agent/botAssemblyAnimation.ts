@@ -2,7 +2,7 @@ import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
 import type { Engine } from '@babylonjs/core/Engines/engine'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
-import type { TransformNode } from '@babylonjs/core/Meshes/transformNode'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type { Scene } from '@babylonjs/core/scene'
 import type {
   BotBlueprint,
@@ -13,6 +13,7 @@ import type { TeamMaterialSet } from '../replay/babylonMaterials'
 
 export type AssemblyResources = {
   bot?: TransformNode
+  botAssemblyNodes: TransformNode[]
   botMeshes: AbstractMesh[]
   camera: ArcRotateCamera
   engine: Engine
@@ -67,20 +68,24 @@ export function attachAssemblyBot(
   bot.scaling.setAll(1.08)
 
   const botMeshes = bot.getChildMeshes()
+  const botAssemblyNodes = bot
+    .getChildren((node) => node.parent === bot)
+    .filter((node): node is TransformNode => node instanceof TransformNode)
 
-  botMeshes.forEach((mesh, index) => {
-    const metadata = (mesh.metadata ?? {}) as AssemblyMetadata
+  botAssemblyNodes.forEach((node, index) => {
+    const metadata = (node.metadata ?? {}) as AssemblyMetadata
 
-    mesh.metadata = {
+    node.metadata = {
       ...metadata,
       assemblyIndex: index,
-      basePosition: mesh.position.clone(),
-      baseScaling: mesh.scaling.clone(),
+      basePosition: node.position.clone(),
+      baseScaling: node.scaling.clone(),
     } satisfies AssemblyMetadata
-    mesh.setEnabled(false)
+    node.setEnabled(false)
   })
 
   resources.bot = bot
+  resources.botAssemblyNodes = botAssemblyNodes
   resources.botMeshes = botMeshes
   resources.startedAt = performance.now()
 }
@@ -136,19 +141,22 @@ export function animateAssembly(resources: AssemblyResources, submitted: boolean
   bot.rotation.y += submitted ? 0.002 : 0.004
   bot.position.y = 0.22 + Math.sin(elapsed * 2.2) * readyPulse
 
-  resources.botMeshes.forEach((mesh) => {
-    const metadata = mesh.metadata as AssemblyMetadata | undefined
+  resources.botAssemblyNodes.forEach((node) => {
+    const metadata = node.metadata as AssemblyMetadata | undefined
     const index = metadata?.assemblyIndex ?? 0
     const basePosition = metadata?.basePosition ?? Vector3.Zero()
     const baseScaling = metadata?.baseScaling ?? Vector3.One()
     const progress = clamp((elapsed - index * 0.045) / 0.72, 0, 1)
     const eased = easeOutBack(progress)
 
-    mesh.setEnabled(progress > 0)
-    mesh.position.copyFrom(basePosition)
-    mesh.position.y += (1 - progress) * (1.4 + (index % 4) * 0.18)
-    mesh.scaling.copyFrom(baseScaling.scale(0.18 + eased * 0.82))
+    node.setEnabled(progress > 0)
+    node.position.copyFrom(basePosition)
+    node.position.y += (1 - progress) * (1.4 + (index % 4) * 0.18)
+    node.scaling.copyFrom(baseScaling.scale(0.18 + eased * 0.82))
+  })
 
+  resources.botMeshes.forEach((mesh) => {
+    const metadata = mesh.metadata as AssemblyMetadata | undefined
     if (metadata?.kind === 'spin') {
       mesh.rotation.y += (metadata.speed ?? 0.06) * (submitted ? 0.8 : 1.3)
     }

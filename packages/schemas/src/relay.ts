@@ -14,6 +14,7 @@ import type {
   SessionPhase,
   SessionChatMessage,
   TeamEconomySummary,
+  TeamIdentity,
   TeamRole,
   TurnCommandSubmission,
   TurnCommand,
@@ -41,6 +42,7 @@ export type RoleClaimRequest = {
   role: TeamRole
   claimToken: string
   agentName?: string
+  teamIdentity?: TeamIdentity
 }
 
 // CODEX_INTENT: define the external-agent bootstrap contract that uses one player key for claim/resume.
@@ -49,6 +51,7 @@ export type RoleClaimRequest = {
 // CODEX_REVIEW: pending
 export type AgentBootstrapRequest = {
   agentName?: string
+  teamIdentity?: TeamIdentity
 }
 
 export type RoleResetRequest = {
@@ -185,6 +188,7 @@ export type CombatTurnPrivateState = CombatTurnPublicState & {
 
 export type RolePublicState = Partial<TeamEconomySummary> & {
   role: TeamRole
+  identity?: TeamIdentity
   claimed: boolean
   submitted: boolean
 }
@@ -210,6 +214,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   sessionId: string
   stateVersion: string
   role: TeamRole
+  identity?: TeamIdentity
   phase: SessionPhase
   round: number
   expiresAt: string

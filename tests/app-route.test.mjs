@@ -51,6 +51,10 @@ const sharedUiSource = readFileSync(
   new URL('../apps/web/src/shared/ui.tsx', import.meta.url),
   'utf8',
 )
+const teamVisualsSource = readFileSync(
+  new URL('../apps/web/src/shared/teamVisuals.ts', import.meta.url),
+  'utf8',
+)
 const replayViewerSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayViewer.tsx', import.meta.url),
   'utf8',
@@ -399,7 +403,7 @@ test('agent cockpit exposes submitted truth without editable draft state', () =>
   ].join('\n')
 
   assert.ok(agentInsightSource.includes('const submission = roleState?.ownSubmission ?? null'))
-  assert.ok(agentInsightSource.includes('BotAssemblyScene blueprint={blueprint}'))
+  assert.ok(agentInsightSource.includes('BotAssemblyScene blueprint={blueprint} identity={teamIdentity}'))
   assert.ok(agentInsightSource.includes('DecisionReadiness'))
   assert.ok(agentInsightSource.includes('NoRoleStatePanel'))
   assert.ok(agentInsightSource.includes('No accepted plan is available yet.'))
@@ -525,7 +529,12 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonMaterialsSource.includes('PBRMetallicRoughnessMaterial'))
   assert.ok(babylonMaterialsSource.includes('type CombatTeamPalette'))
   assert.ok(babylonMaterialsSource.includes('DEFAULT_TEAM_PALETTES'))
-  assert.ok(babylonMaterialsSource.includes('paletteOverrides'))
+  assert.equal(babylonMaterialsSource.includes('paletteOverrides'), false)
+  assert.ok(babylonMaterialsSource.includes('function createCombatTeamPalette'))
+  assert.ok(babylonMaterialsSource.includes('resolveTeamAccentHex'))
+  assert.ok(teamVisualsSource.includes('function createTeamAccentCssVars'))
+  assert.ok(refereePanelsSource.includes('teamAccentRgb(role, roleState?.identity)'))
+  assert.equal(refereePanelsSource.includes('findBlueprintAccent'), false)
   assert.ok(babylonMaterialsSource.includes('function createBotMaterialSet'))
   assert.ok(babylonMaterialsSource.includes('type DamageMaterialSet'))
   assert.ok(babylonMaterialsSource.includes('function damageTierForSeverity'))

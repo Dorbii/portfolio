@@ -4,6 +4,7 @@ import type {
   PublicSessionState,
   RoleClaimResponse,
   RolePrivateState,
+  TeamIdentity,
 } from '../../../../packages/schemas/src/index.js'
 import {
   AgentArenaApiError,
@@ -113,7 +114,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [invite.claimToken, loadState, roleState?.phase, roleToken])
 
   const connectRole = useCallback(async (
-    input: { agentName?: string; throwOnError?: boolean } = {},
+    input: { agentName?: string; teamIdentity?: TeamIdentity; throwOnError?: boolean } = {},
   ): Promise<AgentBootstrapResponse | null> => {
     if (!invite.claimToken && !roleTokenRef.current) {
       const error = new AgentArenaApiError({
@@ -143,6 +144,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
       const submittedAgentName = input.agentName?.trim() ?? ''
       const bootstrap = await client.bootstrapRole({
         agentName: submittedAgentName,
+        teamIdentity: input.teamIdentity,
       })
 
       if (invite.claimToken) {
@@ -268,7 +270,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [client])
 
   const claimRole = useCallback(async (
-    input: { agentName?: string; throwOnError?: boolean } = {},
+    input: { agentName?: string; teamIdentity?: TeamIdentity; throwOnError?: boolean } = {},
   ): Promise<RoleClaimResponse | null> => {
     if (!invite.claimToken) {
       const error = new AgentArenaApiError({
@@ -300,6 +302,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
       const claim = await client.claimRole({
         claimToken: invite.claimToken,
         agentName: submittedAgentName,
+        teamIdentity: input.teamIdentity,
       })
 
       writeStoredRoleToken(window.sessionStorage, invite, claim.roleToken)

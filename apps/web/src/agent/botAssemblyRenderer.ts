@@ -1,6 +1,9 @@
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import type {
+  TeamIdentity,
+  TeamRole,
+} from '../../../../packages/schemas/src/index.js'
 import type { AssemblyResources } from './botAssemblyAnimation'
 import {
   createAssemblyMaterial,
@@ -16,7 +19,7 @@ import {
 } from '../replay/babylonRendererKit'
 import {
   createBotMaterialSet,
-  DEFAULT_TEAM_PALETTES,
+  createCombatTeamPalette,
 } from '../replay/babylonMaterials'
 
 export function isAssemblyRendererSupported(): boolean {
@@ -26,6 +29,7 @@ export function isAssemblyRendererSupported(): boolean {
 export function createAssemblyResources(
   canvas: HTMLCanvasElement,
   role: TeamRole,
+  identity: TeamIdentity,
   submitted: boolean,
 ): AssemblyResources {
   const { camera, engine, scene } = createBabylonRendererCore(canvas, {
@@ -48,8 +52,10 @@ export function createAssemblyResources(
   camera.upperBetaLimit = camera.beta
   camera.panningSensibility = 0
   camera.attachControl(canvas, true)
-  createAssemblyLightingPreset(scene, role, submitted)
-  const materials = createBotMaterialSet(scene, role, DEFAULT_TEAM_PALETTES[role])
+  const teamPalette = createCombatTeamPalette(role, identity)
+
+  createAssemblyLightingPreset(scene, role, submitted, teamPalette.glow)
+  const materials = createBotMaterialSet(scene, role, teamPalette)
 
   const scanBarMaterial = createAssemblyMaterial(scene, 'assembly-scan-mat', '#dff5ff', '#8bdfff', 0.52)
   const scanBar = createRendererBox(
@@ -64,7 +70,7 @@ export function createAssemblyResources(
   const rig = createAssemblyRoom(scene, role)
   createRendererGlow(scene, 'assembly-glow', 0.42)
 
-  const bayLights = createTeamBayLights(scene, role)
+  const bayLights = createTeamBayLights(scene, teamPalette.glow)
   bayLights.forEach((light) => {
     light.intensity *= submitted ? 1 : 0.88
   })
@@ -76,6 +82,7 @@ export function createAssemblyResources(
     scene,
     rig,
     scanBar,
+    botAssemblyNodes: [],
     botMeshes: [],
     startedAt: performance.now(),
   }

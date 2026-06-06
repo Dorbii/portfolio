@@ -306,8 +306,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('## Continuation loop'))
   assert.ok(brief.includes('Timeout: 600000ms'))
   assert.ok(brief.includes('Watch field: stateVersion'))
-  assert.ok(brief.includes('Body_Square_Medium'))
-  assert.ok(brief.includes('Weapon_Spinner_Small'))
+  assert.equal(brief.includes('Body_Square_Medium'), false)
+  assert.equal(brief.includes('Weapon_Spinner_Small'), false)
   assert.ok(brief.includes('script#agent-arena-brief'))
 })
 

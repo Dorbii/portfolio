@@ -22,7 +22,7 @@ const SIDE_WALL_X = 5.32
 type AssemblyMaterials = ReturnType<typeof createAssemblyMaterials>
 
 export function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['rig'] {
-  const materials = createAssemblyMaterials(scene, role)
+  const materials = createAssemblyMaterials(scene)
   const roomMeshStart = scene.meshes.length
 
   createGarageShell(scene, materials)
@@ -96,11 +96,7 @@ function mergeStaticAssemblyRoomMeshes(
   })
 }
 
-function createAssemblyMaterials(scene: Scene, role: TeamRole) {
-  const teamPrimary = role === 'red' ? '#fc4f5d' : '#5eb2ff'
-  const teamAccent = role === 'red' ? '#ff2e44' : '#338eff'
-  const teamSoft = role === 'red' ? '#ff8f92' : '#8bc7ff'
-
+function createAssemblyMaterials(scene: Scene) {
   return {
     floor: createAssemblyMaterial(scene, 'assembly-floor-mat', '#161d22', '#010203', 1, 0.48, 0.68, 'arena_floor'),
     deck: createAssemblyMaterial(scene, 'assembly-deck-mat', '#252f35', '#06080b', 1, 0.62, 0.5, 'arena_floor'),
@@ -108,10 +104,13 @@ function createAssemblyMaterials(scene: Scene, role: TeamRole) {
     rail: createAssemblyMaterial(scene, 'assembly-rail-mat', '#3a4650', '#06080c', 1, 0.72, 0.42),
     trim: createAssemblyMaterial(scene, 'assembly-trim-mat', '#080a0d', '#010101', 1, 0.55, 0.48, 'trim'),
     detail: createAssemblyMaterial(scene, 'assembly-detail-mat', '#566675', '#14191d', 1, 0.6, 0.38),
+    crate: createAssemblyMaterial(scene, 'assembly-crate-mat', '#6f5638', '#140d05', 1, 0.16, 0.78, 'trim'),
+    crateBand: createAssemblyMaterial(scene, 'assembly-crate-band-mat', '#2c2117', '#050301', 1, 0.32, 0.62, 'trim'),
+    crateLabel: createAssemblyMaterial(scene, 'assembly-crate-label-mat', '#d7c383', '#352306', 1, 0.08, 0.58),
     industrialArm: createAssemblyMaterial(scene, 'assembly-industrial-arm-mat', '#b77724', '#1e0d02', 1, 0.58, 0.44, 'warning'),
     rubber: createAssemblyMaterial(scene, 'assembly-rubber-mat', '#08090a', '#000000', 1, 0.04, 0.82, 'rubber'),
-    team: createAssemblyMaterial(scene, 'assembly-team-mat', teamPrimary, teamAccent, 1, 0.48, 0.34),
-    teamSignal: createAssemblyMaterial(scene, 'assembly-team-signal-mat', teamSoft, teamAccent, 0.78, 0.1, 0.22),
+    diagnostic: createAssemblyMaterial(scene, 'assembly-diagnostic-mat', '#4dd48c', '#65ffb2', 0.88, 0.08, 0.32),
+    primerPanel: createAssemblyMaterial(scene, 'assembly-primer-panel-mat', '#66717c', '#10161b', 1, 0.42, 0.58, 'panel'),
     workLight: createAssemblyMaterial(scene, 'assembly-work-light-mat', '#fff3c4', '#ffcf6d', 0.9, 0.02, 0.18),
     toolHead: createAssemblyMaterial(scene, 'assembly-tool-head-mat', '#b7c9d6', '#262f38', 1, 0.7, 0.28, 'weapon'),
     warning: createAssemblyMaterial(scene, 'assembly-warning-mat', '#d4ae42', '#2e2105', 1, 0.44, 0.46, 'warning'),
@@ -395,7 +394,7 @@ function createOverheadGantry(
   beam.material = materials.trim
   trolley.material = materials.detail
   hoistCable.material = materials.trim
-  suspendedPanel.material = materials.team
+  suspendedPanel.material = materials.primerPanel
   clampRing.material = materials.rail
 
   const leftArm = MeshBuilder.CreateBox('assembly-tool-arm-left', { width: 1.65, height: 0.12, depth: 0.2 }, scene)
@@ -420,8 +419,8 @@ function createOverheadGantry(
   rightArm.material = materials.rail
   leftToolHead.material = materials.toolHead
   rightToolHead.material = materials.toolHead
-  leftClamp.material = materials.team
-  rightClamp.material = materials.team
+  leftClamp.material = materials.toolHead
+  rightClamp.material = materials.toolHead
 
   return {
     trolley,
@@ -535,13 +534,17 @@ function createPartsCart(scene: Scene, name: string, x: number, z: number, rotat
 }
 
 function createGarageClutter(scene: Scene, materials: AssemblyMaterials): void {
-  for (let index = 0; index < 6; index += 1) {
-    const crate = MeshBuilder.CreateBox(`assembly-part-crate-${index}`, { width: 0.42, height: 0.28, depth: 0.36 }, scene)
+  const crateSpecs = [
+    [-4.6, 0.16, -2.94, -0.14],
+    [-4.22, 0.16, -2.98, 0.08],
+    [-3.86, 0.32, -2.92, 0.22],
+    [-3.52, 0.16, -3.02, -0.18],
+    [-4.34, 0.48, -2.68, 0.3],
+  ] as const
 
-    crate.position.set(-4.55 + index * 0.36, 0.16 + (index % 2) * 0.12, -2.94)
-    crate.rotation.y = index * 0.18
-    crate.material = index === 2 ? materials.team : materials.detail
-  }
+  crateSpecs.forEach(([x, y, z, rotationY], index) => {
+    createStorageCrate(scene, `assembly-part-crate-${index}`, x, y, z, rotationY, materials)
+  })
 
   for (let index = 0; index < 4; index += 1) {
     const bumper = MeshBuilder.CreateBox(`assembly-rubber-bumper-${index}`, { width: 0.7, height: 0.13, depth: 0.16 }, scene)
@@ -557,6 +560,75 @@ function createGarageClutter(scene: Scene, materials: AssemblyMaterials): void {
   createCircuitBoard(scene, 'assembly-floor-diagnostic-pcb', 3.62, 0.26, 1.34, materials)
   createElectronicsServiceTray(scene, 'assembly-left-electronics-tray', -2.82, 0.24, 1.94, -0.18, materials)
   createElectronicsServiceTray(scene, 'assembly-right-electronics-tray', 2.78, 0.24, 1.86, 0.16, materials)
+}
+
+function createStorageCrate(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  rotationY: number,
+  materials: AssemblyMaterials,
+): void {
+  const bodyWidth = 0.5
+  const bodyHeight = 0.32
+  const bodyDepth = 0.42
+  const crate = MeshBuilder.CreateBox(`${name}-body`, { width: bodyWidth, height: bodyHeight, depth: bodyDepth }, scene)
+
+  positionCratePart(crate, x, y, z, rotationY, 0, 0, 0)
+  crate.material = materials.crate
+
+  for (const localZ of [-bodyDepth * 0.52, bodyDepth * 0.52]) {
+    const topRail = MeshBuilder.CreateBox(`${name}-top-rail-${localZ}`, { width: 0.46, height: 0.04, depth: 0.035 }, scene)
+    const bottomRail = MeshBuilder.CreateBox(`${name}-bottom-rail-${localZ}`, { width: 0.46, height: 0.04, depth: 0.035 }, scene)
+    const leftStile = MeshBuilder.CreateBox(`${name}-left-stile-${localZ}`, { width: 0.045, height: 0.27, depth: 0.035 }, scene)
+    const rightStile = MeshBuilder.CreateBox(`${name}-right-stile-${localZ}`, { width: 0.045, height: 0.27, depth: 0.035 }, scene)
+    const label = MeshBuilder.CreateBox(`${name}-label-${localZ}`, { width: 0.24, height: 0.045, depth: 0.04 }, scene)
+
+    positionCratePart(topRail, x, y, z, rotationY, 0, 0.12, localZ)
+    positionCratePart(bottomRail, x, y, z, rotationY, 0, -0.12, localZ)
+    positionCratePart(leftStile, x, y, z, rotationY, -0.18, 0, localZ)
+    positionCratePart(rightStile, x, y, z, rotationY, 0.18, 0, localZ)
+    positionCratePart(label, x, y, z, rotationY, 0, 0.015, localZ)
+    topRail.material = materials.crateBand
+    bottomRail.material = materials.crateBand
+    leftStile.material = materials.crateBand
+    rightStile.material = materials.crateBand
+    label.material = materials.crateLabel
+  }
+
+  for (const localX of [-0.2, 0.2]) {
+    const corner = MeshBuilder.CreateBox(`${name}-corner-${localX}`, { width: 0.055, height: 0.35, depth: 0.06 }, scene)
+
+    positionCratePart(corner, x, y, z, rotationY, localX, 0, 0)
+    corner.material = materials.crateBand
+  }
+
+  const lidSeam = MeshBuilder.CreateBox(`${name}-lid-seam`, { width: 0.42, height: 0.028, depth: 0.06 }, scene)
+  const handle = MeshBuilder.CreateBox(`${name}-handle`, { width: 0.24, height: 0.035, depth: 0.08 }, scene)
+
+  positionCratePart(lidSeam, x, y, z, rotationY, 0, 0.18, 0)
+  positionCratePart(handle, x, y, z, rotationY, 0, 0.205, 0)
+  lidSeam.material = materials.crateBand
+  handle.material = materials.trim
+}
+
+function positionCratePart(
+  mesh: AbstractMesh,
+  x: number,
+  y: number,
+  z: number,
+  rotationY: number,
+  localX: number,
+  localY: number,
+  localZ: number,
+): void {
+  const cos = Math.cos(rotationY)
+  const sin = Math.sin(rotationY)
+
+  mesh.position.set(x + localX * cos + localZ * sin, y + localY, z - localX * sin + localZ * cos)
+  mesh.rotation.y = rotationY
 }
 
 function createElectronicsServiceTray(
@@ -601,7 +673,7 @@ function createElectronicsServiceTray(
     rotationY,
   })
   createWireRun(scene, `${name}-red-wire`, x - 0.36, y + 0.16, z + 0.19, rotationY, materials.warning)
-  createWireRun(scene, `${name}-signal-wire`, x - 0.1, y + 0.17, z + 0.19, rotationY, materials.teamSignal)
+  createWireRun(scene, `${name}-signal-wire`, x - 0.1, y + 0.17, z + 0.19, rotationY, materials.diagnostic)
 }
 
 function createWeldingSparks(scene: Scene, materials: AssemblyMaterials): AssemblyResources['rig']['sparks'] {
@@ -673,7 +745,7 @@ function createArmorPlateProp(scene: Scene, name: string, x: number, y: number, 
   plate.rotation.y = -0.28
   rib.position.set(x, y + 0.06, z)
   rib.rotation.y = -0.28
-  plate.material = materials.team
+  plate.material = materials.primerPanel
   rib.material = materials.warning
 }
 
@@ -724,7 +796,7 @@ function createCircuitBoard(
 
     trace.position.set(x + index * boardWidth * 0.22, y + 0.045, z)
     trace.rotation.y = rotationY
-    trace.material = index === 0 ? materials.teamSignal : materials.copper
+    trace.material = index === 0 ? materials.diagnostic : materials.copper
   }
 
   for (let index = 0; index < 4; index += 1) {
@@ -805,8 +877,7 @@ function createWireRun(
   plug.material = material
 }
 
-export function createTeamBayLights(scene: Scene, role: TeamRole): PointLight[] {
-  const teamColor = role === 'red' ? '#ff5c6c' : '#5c91ff'
+export function createTeamBayLights(scene: Scene, teamAccent: string): PointLight[] {
   const portLight = new PointLight(
     'assembly-team-port-light',
     new Vector3(-3.1, 2.25, 2.35),
@@ -827,9 +898,9 @@ export function createTeamBayLights(scene: Scene, role: TeamRole): PointLight[] 
   starboardLight.intensity = 0.55
   overheadLight.intensity = 0.45
 
-  portLight.diffuse = Color3.FromHexString(teamColor)
-  starboardLight.diffuse = Color3.FromHexString(teamColor)
-  overheadLight.diffuse = Color3.FromHexString(role === 'red' ? '#ff6f7f' : '#6ca6ff')
+  portLight.diffuse = Color3.FromHexString(teamAccent)
+  starboardLight.diffuse = Color3.FromHexString(teamAccent)
+  overheadLight.diffuse = Color3.FromHexString(teamAccent)
 
   return [portLight, starboardLight, overheadLight]
 }

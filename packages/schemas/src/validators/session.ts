@@ -1,4 +1,5 @@
 import {
+  TEAM_LOGO_MARKS,
   TEAM_ROLES,
   type ArenaConfig,
   type ValidationIssue,
@@ -21,6 +22,10 @@ import {
   issue,
   result,
 } from './common.js'
+
+const MAX_TEAM_IDENTITY_NAME_LENGTH = 40
+const TEAM_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
+const TEAM_LOGO_INITIALS_PATTERN = /^[A-Za-z0-9]{1,4}$/
 
 export function validateCreateSessionRequestShape(value: unknown): ValidationResult {
   const issues: ValidationIssue[] = []
@@ -146,6 +151,10 @@ export function validateRoleClaimRequestShape(value: unknown): ValidationResult 
     )
   }
 
+  if ('teamIdentity' in value) {
+    issues.push(...validateTeamIdentityShape(value.teamIdentity, 'claim.teamIdentity'))
+  }
+
   return result(issues)
 }
 
@@ -174,7 +183,74 @@ export function validateAgentBootstrapRequestShape(value: unknown): ValidationRe
     )
   }
 
+  if ('teamIdentity' in value) {
+    issues.push(...validateTeamIdentityShape(value.teamIdentity, 'bootstrap.teamIdentity'))
+  }
+
   return result(issues)
+}
+
+function validateTeamIdentityShape(value: unknown, path: string): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return [issue('INVALID_TEAM_IDENTITY', path, 'Expected teamIdentity object.')]
+  }
+
+  if (typeof value.name !== 'string' || value.name.trim().length === 0) {
+    issues.push(issue('INVALID_TEAM_NAME', `${path}.name`, 'Team name is required.'))
+  } else if (value.name.length > MAX_TEAM_IDENTITY_NAME_LENGTH) {
+    issues.push(
+      issue(
+        'TEAM_NAME_TOO_LONG',
+        `${path}.name`,
+        `Team name max length is ${MAX_TEAM_IDENTITY_NAME_LENGTH}.`,
+      ),
+    )
+  }
+
+  if (typeof value.primaryColor !== 'string' || !TEAM_COLOR_PATTERN.test(value.primaryColor.trim())) {
+    issues.push(
+      issue(
+        'INVALID_TEAM_COLOR',
+        `${path}.primaryColor`,
+        'Team primaryColor must be a #RRGGBB hex color.',
+      ),
+    )
+  }
+
+  if ('logo' in value) {
+    if (!isRecord(value.logo)) {
+      issues.push(issue('INVALID_TEAM_LOGO', `${path}.logo`, 'Logo must be an object.'))
+    } else {
+      const logo = value.logo
+
+      if (!TEAM_LOGO_MARKS.includes(logo.mark as never)) {
+        issues.push(
+          issue(
+            'INVALID_TEAM_LOGO_MARK',
+            `${path}.logo.mark`,
+            `Logo mark must be one of ${TEAM_LOGO_MARKS.join(', ')}.`,
+          ),
+        )
+      }
+
+      if (
+        'initials' in logo &&
+        (typeof logo.initials !== 'string' || !TEAM_LOGO_INITIALS_PATTERN.test(logo.initials.trim()))
+      ) {
+        issues.push(
+          issue(
+            'INVALID_TEAM_LOGO_INITIALS',
+            `${path}.logo.initials`,
+            'Logo initials must be 1-4 letters or numbers.',
+          ),
+        )
+      }
+    }
+  }
+
+  return issues
 }
 
 export function validateRoleResetRequestShape(value: unknown): ValidationResult {

@@ -4,8 +4,14 @@ import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Scene } from '@babylonjs/core/scene'
 import type {
   PartCategory,
+  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import {
+  hexLuminance,
+  mixHexColors,
+  resolveTeamAccentHex,
+} from '../shared/teamVisuals'
 import {
   createPbrSurfaceTextures,
   type SurfacePattern,
@@ -85,19 +91,35 @@ export const DEFAULT_TEAM_PALETTES: Record<TeamRole, CombatTeamPalette> = {
   },
 }
 
+type TeamMaterialOptions = {
+  identities?: Partial<Record<TeamRole, TeamIdentity>>
+}
+
 export function createTeamMaterials(
   scene: Scene,
-  paletteOverrides: Partial<Record<TeamRole, Partial<CombatTeamPalette>>> = {},
+  options: TeamMaterialOptions = {},
 ): Record<TeamRole, TeamMaterialSet> {
   return {
-    red: createBotMaterialSet(scene, 'red', {
-      ...DEFAULT_TEAM_PALETTES.red,
-      ...paletteOverrides.red,
-    }),
-    blue: createBotMaterialSet(scene, 'blue', {
-      ...DEFAULT_TEAM_PALETTES.blue,
-      ...paletteOverrides.blue,
-    }),
+    red: createBotMaterialSet(scene, 'red', createCombatTeamPalette('red', options.identities?.red)),
+    blue: createBotMaterialSet(scene, 'blue', createCombatTeamPalette('blue', options.identities?.blue)),
+  }
+}
+
+export function createCombatTeamPalette(
+  role: TeamRole,
+  identity: TeamIdentity | null | undefined,
+): CombatTeamPalette {
+  const base = DEFAULT_TEAM_PALETTES[role]
+  const accent = resolveTeamAccentHex(role, identity)
+  const isDarkAccent = hexLuminance(accent) < 0.18
+
+  return {
+    ...base,
+    accent,
+    armor: mixHexColors(accent, isDarkAccent ? '#77848b' : '#20262b', isDarkAccent ? 0.46 : 0.26),
+    glow: mixHexColors(accent, '#ffffff', isDarkAccent ? 0.62 : 0.18),
+    trim: mixHexColors(base.trim, accent, 0.12),
+    utility: mixHexColors(accent, isDarkAccent ? '#b7822f' : '#6f3a22', isDarkAccent ? 0.4 : 0.28),
   }
 }
 
@@ -120,7 +142,7 @@ export function createBotMaterialSet(
       roughness: 0.62,
     }),
     mobility: createCombatMaterial(scene, `${materialPrefix}-mobility`, {
-      baseColor: mixHex(palette.chassis, '#3a4144', 0.45),
+      baseColor: mixHexColors(palette.chassis, '#3a4144', 0.45),
       metallic: 0.55,
       pattern: 'mobility',
       roughness: 0.68,
@@ -242,20 +264,20 @@ function createDamageMaterialSet(
 ): DamageMaterialSet {
   return {
     light: createCombatMaterial(scene, `${materialPrefix}-damage-light`, {
-      baseColor: mixHex(palette.armor, '#5b4a3f', 0.36),
+      baseColor: mixHexColors(palette.armor, '#5b4a3f', 0.36),
       metallic: 0.5,
       pattern: 'damage_light',
       roughness: 0.62,
     }),
     medium: createCombatMaterial(scene, `${materialPrefix}-damage-medium`, {
-      baseColor: mixHex(palette.armor, '#40332d', 0.58),
+      baseColor: mixHexColors(palette.armor, '#40332d', 0.58),
       emissive: '#120604',
       metallic: 0.52,
       pattern: 'damage_medium',
       roughness: 0.72,
     }),
     critical: createCombatMaterial(scene, `${materialPrefix}-damage-critical`, {
-      baseColor: mixHex(palette.armor, '#211d1b', 0.76),
+      baseColor: mixHexColors(palette.armor, '#211d1b', 0.76),
       emissive: '#351007',
       metallic: 0.54,
       pattern: 'damage_critical',
@@ -304,34 +326,4 @@ function createPlainCombatMaterial(
   material.maxSimultaneousLights = 6
 
   return material
-}
-
-function mixHex(hex: string, targetHex: string, targetWeight: number): string {
-  const source = rgbFromHex(hex)
-  const target = rgbFromHex(targetHex)
-  const sourceWeight = 1 - targetWeight
-
-  return rgbToHex({
-    blue: Math.round(source.blue * sourceWeight + target.blue * targetWeight),
-    green: Math.round(source.green * sourceWeight + target.green * targetWeight),
-    red: Math.round(source.red * sourceWeight + target.red * targetWeight),
-  })
-}
-
-function rgbFromHex(hex: string): { blue: number; green: number; red: number } {
-  const normalized = hex.replace('#', '')
-
-  return {
-    blue: Number.parseInt(normalized.slice(4, 6), 16),
-    green: Number.parseInt(normalized.slice(2, 4), 16),
-    red: Number.parseInt(normalized.slice(0, 2), 16),
-  }
-}
-
-function rgbToHex({ blue, green, red }: { blue: number; green: number; red: number }): string {
-  return `#${hexByte(red)}${hexByte(green)}${hexByte(blue)}`
-}
-
-function hexByte(value: number): string {
-  return Math.min(255, Math.max(0, value)).toString(16).padStart(2, '0')
 }

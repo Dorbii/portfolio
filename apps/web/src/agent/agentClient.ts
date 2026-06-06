@@ -193,6 +193,7 @@ export class AgentArenaClient {
   async claimRole(input: {
     claimToken: string
     agentName?: string
+    teamIdentity?: RoleClaimResponse['state']['identity']
   }): Promise<RoleClaimResponse> {
     return this.requestJson<RoleClaimResponse>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/claim`,
@@ -202,6 +203,7 @@ export class AgentArenaClient {
           role: this.invite.role,
           claimToken: input.claimToken,
           ...(input.agentName?.trim() ? { agentName: input.agentName.trim() } : {}),
+          ...(input.teamIdentity ? { teamIdentity: input.teamIdentity } : {}),
         }),
       },
     )
@@ -209,6 +211,7 @@ export class AgentArenaClient {
 
   async claimInviteRole(input: {
     agentName?: string
+    teamIdentity?: RoleClaimResponse['state']['identity']
   } = {}): Promise<RoleClaimResponse> {
     if (!this.invite.claimToken) {
       throw new AgentArenaApiError({
@@ -221,12 +224,14 @@ export class AgentArenaClient {
     return this.claimRole({
       claimToken: this.invite.claimToken,
       agentName: input.agentName,
+      teamIdentity: input.teamIdentity,
     })
   }
 
   async bootstrapRole(input: {
     agentName?: string
     playerKey?: string
+    teamIdentity?: AgentBootstrapResponse['state']['identity']
   } = {}): Promise<AgentBootstrapResponse> {
     const playerKey = input.playerKey ?? this.invite.claimToken ?? this.getRoleToken?.()
 
@@ -245,6 +250,7 @@ export class AgentArenaClient {
         headers: this.authorizationHeaders(playerKey),
         body: JSON.stringify({
           ...(input.agentName?.trim() ? { agentName: input.agentName.trim() } : {}),
+          ...(input.teamIdentity ? { teamIdentity: input.teamIdentity } : {}),
         }),
       },
     )

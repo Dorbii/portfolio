@@ -11,6 +11,7 @@ import type {
   SessionChatMessage,
   SessionLogEvent,
   SessionPhase,
+  TeamIdentity,
   TurnCommandPostRequest,
   TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
@@ -61,10 +62,15 @@ export type AgentWaitOptions = {
   timeoutMs?: number
 }
 
+export type AgentRoleConnectInput = {
+  agentName?: string
+  teamIdentity?: TeamIdentity
+}
+
 export type AgentArenaRoleApi = {
   getContract(): Promise<AgentContract>
-  bootstrapRole(input?: { agentName?: string }): Promise<AgentBootstrapResponse>
-  claimRole(input?: { agentName?: string }): Promise<RoleClaimResponse>
+  bootstrapRole(input?: AgentRoleConnectInput): Promise<AgentBootstrapResponse>
+  claimRole(input?: AgentRoleConnectInput): Promise<RoleClaimResponse>
   getState(): Promise<RolePrivateState>
   getValidActions(): Promise<AgentArenaValidAction[]>
   submitRoundPlan(

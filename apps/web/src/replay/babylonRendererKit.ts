@@ -123,6 +123,7 @@ export function createAssemblyLightingPreset(
   scene: Scene,
   role: TeamRole,
   submitted: boolean,
+  teamAccent: string,
 ): void {
   const hemi = new HemisphericLight('assembly-hemi', new Vector3(0, 1, 0), scene)
   const key = new DirectionalLight('assembly-key', new Vector3(-0.45, -0.9, 0.35), scene)
@@ -137,7 +138,7 @@ export function createAssemblyLightingPreset(
   key.intensity = 1.15
   rim.intensity = 0.7
   teamLight.intensity = submitted ? 0.95 : 0.84
-  teamLight.diffuse = Color3.FromHexString(role === 'red' ? '#ff5c6c' : '#5c91ff')
+  teamLight.diffuse = Color3.FromHexString(teamAccent)
 }
 
 export function createCaptureLightingPreset(scene: Scene): void {

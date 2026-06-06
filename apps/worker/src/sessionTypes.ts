@@ -12,6 +12,7 @@ import type {
   SessionLogEvent,
   SessionPhase,
   TeamRole,
+  TeamIdentity,
   TurnCommand,
 } from '../../../packages/schemas/src/index.js'
 
@@ -42,6 +43,7 @@ export type StoredRoleState = {
   observerTokenHash?: string
   roleTokenHash?: string
   agentName?: string
+  teamIdentity?: TeamIdentity
   claimedAt?: string
   submittedAt?: string
   gold: number

@@ -22,6 +22,7 @@ export function buildRolePrivateState(
     sessionId: state.id,
     stateVersion: sessionStateVersion(state),
     role: role.role,
+    ...(role.teamIdentity ? { identity: role.teamIdentity } : {}),
     phase: state.phase,
     round: state.round,
     expiresAt: state.expiresAt,

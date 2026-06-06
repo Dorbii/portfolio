@@ -37,6 +37,7 @@ export async function resetStoredRoleClaim(
   role.observerTokenHash = await tokenHasher(observerToken)
   role.roleTokenHash = undefined
   role.agentName = undefined
+  role.teamIdentity = undefined
   role.claimedAt = undefined
   role.submittedAt = undefined
   role.controls = undefined

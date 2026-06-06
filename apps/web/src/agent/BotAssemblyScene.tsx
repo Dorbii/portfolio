@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   BotBlueprint,
+  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import {
@@ -25,12 +26,14 @@ type AssemblyStatus = 'booting' | 'ready' | 'unavailable' | 'context_lost'
 
 type BotAssemblySceneProps = {
   blueprint: BotBlueprint
+  identity: TeamIdentity
   role: TeamRole
   submitted: boolean
 }
 
 export function BotAssemblyScene({
   blueprint,
+  identity,
   role,
   submitted,
 }: BotAssemblySceneProps) {
@@ -80,7 +83,7 @@ export function BotAssemblyScene({
         return undefined
       }
 
-      resources = createAssemblyResources(canvas, role, submittedRef.current)
+      resources = createAssemblyResources(canvas, role, identity, submittedRef.current)
       const activeResources = resources
 
       resourcesRef.current = resources
@@ -161,7 +164,7 @@ export function BotAssemblyScene({
 
       return undefined
     }
-  }, [attachBlueprint, role])
+  }, [attachBlueprint, identity, role])
 
   useEffect(() => {
     const resources = resourcesRef.current
@@ -201,10 +204,11 @@ export function BotAssemblyScene({
       data-assembly-blueprint-blocks={blueprint.blocks.length}
       data-assembly-bot-attached={attachedMeshCount > 0 ? 'true' : 'false'}
       data-assembly-bot-meshes={attachedMeshCount}
+      data-assembly-team-color={identity.primaryColor}
     >
       <canvas
         ref={canvasRef}
-        aria-label={`${role} bot assembly bay`}
+        aria-label={`${identity.name} bot assembly bay`}
         aria-hidden={status === 'unavailable'}
         hidden={status === 'unavailable'}
       />

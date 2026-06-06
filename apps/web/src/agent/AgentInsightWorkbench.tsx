@@ -4,7 +4,7 @@ import type {
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { MetricGrid } from '../shared/ui'
-import { capitalize, formatLabel } from '../shared/format'
+import { formatLabel } from '../shared/format'
 import { BotAssemblyScene } from './BotAssemblyScene'
 import {
   Fact,
@@ -26,6 +26,7 @@ export function AgentInsightWorkbench({
   const decision = roleState?.combat?.decision
   const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
+  const teamIdentity = roleState?.identity ?? null
 
   return (
     <section className="agent-live-panel cockpit-workbench agent-insight-workbench" aria-labelledby="agent-insight-heading">
@@ -54,7 +55,7 @@ export function AgentInsightWorkbench({
         <NoRoleStatePanel />
       ) : null}
 
-      {roleState && hasBlueprint && blueprint ? (
+      {roleState && teamIdentity && hasBlueprint && blueprint ? (
         <section className="assembly-bay-panel" aria-labelledby="assembly-bay-heading">
           <div className="plan-section-header">
             <SectionTitle id="assembly-bay-heading" title="Assembly bay" />
@@ -64,7 +65,7 @@ export function AgentInsightWorkbench({
               <span>Read-only plan from role state</span>
             </div>
           </div>
-          <BotAssemblyScene blueprint={blueprint} role={role} submitted />
+          <BotAssemblyScene blueprint={blueprint} identity={teamIdentity} role={role} submitted />
         </section>
       ) : null}
 
@@ -168,10 +169,10 @@ function createInsightSubtitle(
   }
 
   if (submission) {
-    return `${capitalize(roleState.role)} submitted ${submission.blueprint.name}.`
+    return `${roleState.identity?.name ?? 'This role'} submitted ${submission.blueprint.name}.`
   }
 
-  return `${capitalize(roleState.role)} has not submitted a round plan.`
+  return `${roleState.identity?.name ?? 'This role'} has not submitted a round plan.`
 }
 
 function NoRoleStatePanel() {

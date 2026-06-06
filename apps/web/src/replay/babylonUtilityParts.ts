@@ -477,13 +477,35 @@ export function createUtilityPart(
   }
 
   if (partId.includes('RepairKit')) {
+    const terminalBase = MeshBuilder.CreateBox(
+      `${role}-${blockId}-repair-terminal-base`,
+      {
+        width: Math.max(width * 0.58, 0.28),
+        height: Math.max(height * 0.08, 0.045),
+        depth: Math.max(depth * 0.22, 0.12),
+      },
+      scene,
+    )
+
+    terminalBase.position.set(0, Math.max(height * 0.68, 0.35), -Math.max(depth * 0.28, 0.16))
+    attachMesh(terminalBase, parent, materials.trim)
+
     for (let side = -1; side <= 1; side += 2) {
       const terminal = MeshBuilder.CreateCylinder(
         `${role}-${blockId}-repair-terminal-${side}`,
         {
-          height: Math.max(height * 0.16, 0.08),
-          diameter: Math.max(width * 0.12, 0.07),
-          tessellation: 10,
+          height: Math.max(height * 0.08, 0.045),
+          diameter: Math.max(width * 0.11, 0.06),
+          tessellation: 12,
+        },
+        scene,
+      )
+      const socketGlow = MeshBuilder.CreateBox(
+        `${role}-${blockId}-repair-terminal-indicator-${side}`,
+        {
+          width: Math.max(width * 0.08, 0.045),
+          height: Math.max(height * 0.03, 0.018),
+          depth: Math.max(depth * 0.11, 0.055),
         },
         scene,
       )
@@ -497,11 +519,28 @@ export function createUtilityPart(
         scene,
       )
 
-      terminal.position.set(side * Math.max(width * 0.22, 0.12), Math.max(height * 0.72, 0.38), -Math.max(depth * 0.28, 0.16))
+      terminal.rotation.y = Math.PI / 2
+      terminal.position.set(side * Math.max(width * 0.2, 0.11), terminalBase.position.y + Math.max(height * 0.065, 0.04), terminalBase.position.z)
+      socketGlow.position.set(terminal.position.x, terminal.position.y + Math.max(height * 0.045, 0.025), terminal.position.z)
       latch.position.set(side * Math.max(width * 0.32, 0.18), Math.max(height * 0.42, 0.24), Math.max(depth * 0.44, 0.26))
-      attachMesh(terminal, parent, materials.light)
+      attachMesh(terminal, parent, materials.steel)
+      attachMesh(socketGlow, parent, materials.light)
       attachMesh(latch, parent, materials.steel)
     }
+
+    const bridgeCable = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-repair-terminal-bridge`,
+      {
+        height: Math.max(width * 0.38, 0.2),
+        diameter: Math.max(width * 0.045, 0.026),
+        tessellation: 8,
+      },
+      scene,
+    )
+
+    bridgeCable.rotation.z = Math.PI / 2
+    bridgeCable.position.set(0, terminalBase.position.y + Math.max(height * 0.09, 0.055), terminalBase.position.z - Math.max(depth * 0.1, 0.06))
+    attachMesh(bridgeCable, parent, materials.trim)
 
     const serviceArm = MeshBuilder.CreateBox(
       `${role}-${blockId}-repair-service-arm`,

@@ -1387,29 +1387,17 @@ pre {
   --cockpit-panel: rgba(12, 16, 21, 0.82);
   --cockpit-panel-deep: rgba(4, 7, 11, 0.92);
   --cockpit-text-muted: #aeb7c1;
-  --cockpit-role: 93, 210, 146;
-  --cockpit-role-strong: #5dd292;
-  --cockpit-role-soft: rgba(93, 210, 146, 0.12);
+  --cockpit-team: 93, 210, 146;
+  --cockpit-team-strong: #5dd292;
+  --cockpit-team-soft: rgba(93, 210, 146, 0.12);
   min-height: 100vh;
   color: #eef2f3;
   background:
     linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
-    radial-gradient(circle at 16% 0, rgba(var(--cockpit-role), 0.12), transparent 28%),
+    radial-gradient(circle at 16% 0, rgba(var(--cockpit-team), 0.12), transparent 28%),
     linear-gradient(180deg, #101514, #070a0d 52%, #05070a);
   background-size: 44px 44px;
-}
-
-.agent-live-app.role-red {
-  --cockpit-role: 255, 76, 93;
-  --cockpit-role-strong: #ff4c5d;
-  --cockpit-role-soft: rgba(255, 76, 93, 0.13);
-}
-
-.agent-live-app.role-blue {
-  --cockpit-role: 91, 157, 255;
-  --cockpit-role-strong: #5b9dff;
-  --cockpit-role-soft: rgba(91, 157, 255, 0.13);
 }
 
 .agent-live-header {
@@ -1421,7 +1409,7 @@ pre {
   gap: 16px;
   border-bottom: 1px solid var(--cockpit-border-strong);
   background:
-    linear-gradient(90deg, rgba(var(--cockpit-role), 0.1), transparent 32%),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.1), transparent 32%),
     linear-gradient(180deg, rgba(17, 22, 28, 0.98), rgba(7, 10, 14, 0.96));
   box-shadow:
     inset 0 -1px 0 rgba(255, 255, 255, 0.025),
@@ -1520,10 +1508,10 @@ pre {
 .agent-live-app input:focus-visible,
 .agent-live-app textarea:focus-visible,
 .agent-live-app select:focus-visible {
-  border-color: rgba(var(--cockpit-role), 0.78);
+  border-color: rgba(var(--cockpit-team), 0.78);
   box-shadow:
-    inset 0 0 0 1px rgba(var(--cockpit-role), 0.18),
-    0 0 0 2px rgba(var(--cockpit-role), 0.1);
+    inset 0 0 0 1px rgba(var(--cockpit-team), 0.18),
+    0 0 0 2px rgba(var(--cockpit-team), 0.1);
 }
 
 .agent-live-app .ui-button {
@@ -1573,10 +1561,10 @@ pre {
 .agent-live-app .ui-button:not(:disabled):focus-visible,
 .agent-live-app .agent-spec-link:hover,
 .agent-live-app .agent-spec-link:focus-visible {
-  border-color: rgba(var(--cockpit-role), 0.62);
+  border-color: rgba(var(--cockpit-team), 0.62);
   color: #ffffff;
   background:
-    linear-gradient(180deg, rgba(var(--cockpit-role), 0.18), rgba(var(--cockpit-role), 0.045)),
+    linear-gradient(180deg, rgba(var(--cockpit-team), 0.18), rgba(var(--cockpit-team), 0.045)),
     rgba(10, 14, 19, 0.94);
   outline: none;
 }
@@ -1800,8 +1788,8 @@ textarea:focus-visible {
   inset: 4px auto 4px 0;
   width: 3px;
   border-radius: 999px;
-  background: var(--cockpit-role-strong);
-  box-shadow: 0 0 14px rgba(var(--cockpit-role), 0.34);
+  background: var(--cockpit-team-strong);
+  box-shadow: 0 0 14px rgba(var(--cockpit-team), 0.34);
   content: "";
 }
 
@@ -1865,7 +1853,7 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--cockpit-border-strong);
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(var(--cockpit-role), 0.105), rgba(143, 208, 255, 0.05)),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.105), rgba(143, 208, 255, 0.05)),
     linear-gradient(180deg, rgba(12, 18, 22, 0.9), rgba(5, 9, 12, 0.9));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.028);
 }
@@ -1874,7 +1862,7 @@ textarea:focus-visible {
   position: absolute;
   inset: 0 0 auto;
   height: 1px;
-  background: linear-gradient(90deg, rgba(var(--cockpit-role), 0.72), transparent 44%, rgba(143, 208, 255, 0.34));
+  background: linear-gradient(90deg, rgba(var(--cockpit-team), 0.72), transparent 44%, rgba(143, 208, 255, 0.34));
   content: "";
 }
 
@@ -1994,11 +1982,11 @@ textarea:focus-visible {
 }
 
 .agent-task-step.is-active {
-  border-color: rgba(var(--cockpit-role), 0.58);
+  border-color: rgba(var(--cockpit-team), 0.58);
   box-shadow:
-    inset 3px 0 0 rgba(var(--cockpit-role), 0.8),
+    inset 3px 0 0 rgba(var(--cockpit-team), 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 0 20px rgba(var(--cockpit-role), 0.08);
+    0 0 20px rgba(var(--cockpit-team), 0.08);
 }
 
 .agent-task-step.tone-complete {
@@ -2011,12 +1999,12 @@ textarea:focus-visible {
 
 .agent-task-step.tone-current {
   background:
-    linear-gradient(180deg, rgba(var(--cockpit-role), 0.15), rgba(var(--cockpit-role), 0.035)),
+    linear-gradient(180deg, rgba(var(--cockpit-team), 0.15), rgba(var(--cockpit-team), 0.035)),
     rgba(8, 12, 16, 0.82);
 }
 
 .agent-task-step.tone-current::before {
-  background: var(--cockpit-role-strong);
+  background: var(--cockpit-team-strong);
 }
 
 .agent-task-step.tone-waiting {
@@ -2200,7 +2188,7 @@ textarea:focus-visible {
   border: 1px dashed rgba(143, 208, 255, 0.22);
   border-radius: 8px;
   background:
-    linear-gradient(90deg, rgba(var(--cockpit-role), 0.055), transparent 42%),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.055), transparent 42%),
     rgba(4, 8, 11, 0.58);
 }
 
@@ -2277,10 +2265,10 @@ textarea:focus-visible {
   padding: 12px;
   display: grid;
   gap: 10px;
-  border: 1px solid rgba(var(--cockpit-role), 0.24);
+  border: 1px solid rgba(var(--cockpit-team), 0.24);
   border-radius: 10px;
   background:
-    linear-gradient(90deg, rgba(var(--cockpit-role), 0.06), transparent 38%),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.06), transparent 38%),
     linear-gradient(180deg, rgba(18, 24, 30, 0.86), rgba(10, 14, 18, 0.82)),
     rgba(8, 11, 14, 0.9);
   box-shadow:
@@ -2371,7 +2359,7 @@ textarea:focus-visible {
   min-height: 0;
   margin-top: 10px;
   overflow: hidden;
-  border: 1px solid rgba(var(--cockpit-role), 0.2);
+  border: 1px solid rgba(var(--cockpit-team), 0.2);
   border-radius: 8px;
   isolation: isolate;
   background:
@@ -2385,7 +2373,7 @@ textarea:focus-visible {
       rgba(255, 255, 255, 0.05) 0 1px,
       transparent 1px 40px
     ),
-    linear-gradient(90deg, rgba(var(--cockpit-role), 0.08), transparent 36%, transparent 64%, rgba(143, 208, 255, 0.06)),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.08), transparent 36%, transparent 64%, rgba(143, 208, 255, 0.06)),
     linear-gradient(180deg, rgba(25, 33, 40, 0.7), rgba(4, 6, 8, 0.96)),
     #050708;
   background-size: 34px 34px, 34px 34px, auto, auto, auto;
@@ -2508,10 +2496,10 @@ textarea:focus-visible {
   display: grid;
   align-content: start;
   gap: 5px;
-  border: 1px solid rgba(var(--cockpit-role), 0.18);
+  border: 1px solid rgba(var(--cockpit-team), 0.18);
   border-radius: 7px;
   background:
-    linear-gradient(180deg, rgba(var(--cockpit-role), 0.07), rgba(var(--cockpit-role), 0.014)),
+    linear-gradient(180deg, rgba(var(--cockpit-team), 0.07), rgba(var(--cockpit-team), 0.014)),
     rgba(5, 9, 12, 0.66);
 }
 
@@ -3003,9 +2991,9 @@ textarea:focus-visible {
 
 .match-scoreboard {
   min-width: 0;
-  min-height: 128px;
+  min-height: 156px;
   display: grid;
-  grid-template-columns: minmax(330px, 1fr) minmax(190px, 244px) minmax(330px, 1fr);
+  grid-template-columns: minmax(360px, 1fr) minmax(244px, 284px) minmax(360px, 1fr);
   gap: 8px;
   align-items: stretch;
 }
@@ -3026,25 +3014,28 @@ textarea:focus-visible {
 .scoreboard-team-block {
   position: relative;
   min-width: 0;
-  padding: 16px 18px;
+  min-height: 156px;
+  padding: 18px 22px;
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr) 76px;
-  grid-template-rows: minmax(44px, auto) auto auto auto;
-  gap: 8px 16px;
+  grid-template-columns: 66px minmax(0, 1fr) 88px;
+  grid-template-areas: "mark main result";
+  gap: 16px;
   align-items: center;
   overflow: hidden;
 }
 
 .scoreboard-team-block.red {
   --scoreboard-accent: 255, 76, 93;
-  border-color: rgba(255, 76, 93, 0.26);
-  clip-path: polygon(0 0, calc(100% - 44px) 0, 100% 38px, 100% 100%, 0 100%);
+  border-color: rgba(var(--scoreboard-accent), 0.26);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%);
 }
 
 .scoreboard-team-block.blue {
   --scoreboard-accent: 91, 157, 255;
-  border-color: rgba(91, 157, 255, 0.28);
-  clip-path: polygon(44px 0, 100% 0, 100% 100%, 0 100%, 0 38px);
+  border-color: rgba(var(--scoreboard-accent), 0.28);
+  grid-template-columns: 88px minmax(0, 1fr) 66px;
+  grid-template-areas: "result main mark";
+  clip-path: polygon(24px 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
 }
 
 .scoreboard-team-block.red::before,
@@ -3056,38 +3047,28 @@ textarea:focus-visible {
 }
 
 .scoreboard-team-block.red::before {
-  background: linear-gradient(90deg, rgba(255, 76, 93, 0.16), transparent 54%);
+  background: linear-gradient(90deg, rgba(var(--scoreboard-accent), 0.16), transparent 54%);
 }
 
 .scoreboard-team-block.blue::before {
-  background: linear-gradient(270deg, rgba(91, 157, 255, 0.17), transparent 54%);
-}
-
-.scoreboard-team-block.blue {
-  direction: rtl;
-}
-
-.scoreboard-team-block.blue > * {
-  direction: ltr;
+  background: linear-gradient(270deg, rgba(var(--scoreboard-accent), 0.17), transparent 54%);
 }
 
 .scoreboard-team-mark {
   position: relative;
   z-index: 1;
-  width: 58px;
-  height: 64px;
+  grid-area: mark;
+  width: 54px;
+  height: 60px;
+  align-self: center;
   justify-self: center;
   clip-path: polygon(50% 0, 86% 18%, 73% 76%, 50% 100%, 27% 76%, 14% 18%);
   background: linear-gradient(135deg, currentColor, rgba(255, 255, 255, 0.28));
   box-shadow: 0 0 24px currentColor;
 }
 
-.scoreboard-team-block.red .scoreboard-team-mark {
-  color: #ff4c5d;
-}
-
-.scoreboard-team-block.blue .scoreboard-team-mark {
-  color: #5b9dff;
+.scoreboard-team-mark {
+  color: rgb(var(--scoreboard-accent));
 }
 
 .scoreboard-team-copy {
@@ -3095,14 +3076,36 @@ textarea:focus-visible {
   z-index: 1;
   min-width: 0;
   display: grid;
-  gap: 7px;
+  gap: 6px;
+}
+
+.scoreboard-team-main {
+  position: relative;
+  z-index: 1;
+  grid-area: main;
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.scoreboard-team-result {
+  position: relative;
+  z-index: 1;
+  grid-area: result;
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  justify-items: center;
 }
 
 .scoreboard-team-copy strong {
   min-width: 0;
   overflow: hidden;
   color: #f4f6fb;
-  font-size: 1.42rem;
+  font-size: 1.34rem;
   font-weight: 950;
   line-height: 1;
   text-overflow: ellipsis;
@@ -3110,12 +3113,8 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.scoreboard-team-block.red .scoreboard-team-copy strong {
-  color: #ff4c5d;
-}
-
-.scoreboard-team-block.blue .scoreboard-team-copy strong {
-  color: #5b9dff;
+.scoreboard-team-copy strong {
+  color: rgb(var(--scoreboard-accent));
 }
 
 .scoreboard-team-copy span,
@@ -3128,8 +3127,8 @@ textarea:focus-visible {
 
 .scoreboard-score {
   position: relative;
-  z-index: 1;
-  min-height: 68px;
+  width: 76px;
+  min-height: 66px;
   display: grid;
   place-items: center;
   border: 1px solid currentColor;
@@ -3143,63 +3142,41 @@ textarea:focus-visible {
     0 10px 28px rgba(0, 0, 0, 0.22);
 }
 
-.scoreboard-team-block.red .scoreboard-score {
-  color: #ff4c5d;
+.scoreboard-score {
+  color: rgb(var(--scoreboard-accent));
   background:
-    linear-gradient(180deg, rgba(255, 76, 93, 0.14), rgba(255, 76, 93, 0.045)),
-    rgba(6, 8, 12, 0.68);
-}
-
-.scoreboard-team-block.blue .scoreboard-score {
-  color: #5b9dff;
-  background:
-    linear-gradient(180deg, rgba(91, 157, 255, 0.15), rgba(91, 157, 255, 0.05)),
+    linear-gradient(180deg, rgba(var(--scoreboard-accent), 0.15), rgba(var(--scoreboard-accent), 0.05)),
     rgba(6, 8, 12, 0.68);
 }
 
 .scoreboard-pips {
-  position: relative;
-  z-index: 1;
-  grid-column: 2 / 4;
   display: flex;
-  gap: 10px;
+  width: 76px;
+  flex-wrap: wrap;
+  gap: 6px;
   align-items: center;
+  justify-content: center;
 }
 
 .scoreboard-team-block.blue .scoreboard-pips {
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .scoreboard-pips span {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 1px solid rgba(238, 242, 247, 0.13);
   border-radius: 999px;
   background: rgba(238, 242, 247, 0.09);
 }
 
-.scoreboard-team-block.red .scoreboard-pips .is-filled {
-  border-color: rgba(255, 76, 93, 0.74);
-  background: #c73443;
-  box-shadow: 0 0 12px rgba(255, 76, 93, 0.3);
-}
-
-.scoreboard-team-block.blue .scoreboard-pips .is-filled {
-  border-color: rgba(91, 157, 255, 0.74);
-  background: #2e74d6;
-  box-shadow: 0 0 12px rgba(91, 157, 255, 0.32);
-}
-
-.scoreboard-team-block small {
-  position: relative;
-  z-index: 1;
-  grid-column: 2 / 4;
+.scoreboard-pips .is-filled {
+  border-color: rgba(var(--scoreboard-accent), 0.74);
+  background: rgb(var(--scoreboard-accent));
+  box-shadow: 0 0 12px rgba(var(--scoreboard-accent), 0.32);
 }
 
 .scoreboard-team-status {
-  position: relative;
-  z-index: 1;
-  grid-column: 2 / 4;
   min-width: 0;
   display: flex;
   flex-wrap: wrap;
@@ -3208,13 +3185,10 @@ textarea:focus-visible {
 }
 
 .scoreboard-team-block.blue .scoreboard-team-status {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .scoreboard-handoff {
-  position: relative;
-  z-index: 1;
-  grid-column: 2 / 4;
   min-width: 0;
 }
 
@@ -3226,6 +3200,7 @@ textarea:focus-visible {
 }
 
 .scoreboard-handoff-actions {
+  max-width: 330px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
@@ -3262,18 +3237,20 @@ textarea:focus-visible {
 
 .scoreboard-core {
   min-width: 0;
-  padding: 12px 14px;
+  min-height: 156px;
+  padding: 16px 14px 14px;
   display: grid;
-  align-content: center;
+  grid-template-rows: auto auto auto auto;
+  align-content: stretch;
   justify-items: center;
-  gap: 6px;
+  gap: 5px;
   border-color: rgba(238, 242, 247, 0.16);
   text-align: center;
-  clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 28px, calc(100% - 18px) 100%, 18px 100%, 0 28px);
+  clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 24px), 0 24px);
 }
 
-.scoreboard-core span,
-.scoreboard-core small {
+.scoreboard-core-kicker,
+.scoreboard-core-state {
   max-width: 100%;
   overflow: hidden;
   color: #c9d1dc;
@@ -3284,15 +3261,21 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.scoreboard-core strong {
+.scoreboard-core-round {
   color: #f4f6fb;
-  font-size: 2.1rem;
+  font-size: 2.35rem;
   font-weight: 950;
   line-height: 1;
 }
 
+.scoreboard-core-state {
+  color: #dce5f0;
+  font-size: 0.78rem;
+}
+
 .scoreboard-plan-timer {
   width: min(100%, 170px);
+  margin-top: 3px;
   min-height: 38px;
   padding: 5px 10px;
   display: grid;
@@ -3344,9 +3327,13 @@ textarea:focus-visible {
 
 .scoreboard-session-actions {
   width: 100%;
-  margin-top: 4px;
-  grid-template-columns: minmax(0, 1fr);
+  margin-top: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+.scoreboard-session-actions .ui-button:first-child {
+  grid-column: 1 / -1;
 }
 
 .scoreboard-session-actions .ui-button {
@@ -3645,10 +3632,11 @@ textarea:focus-visible {
   }
 
   .scoreboard-team-block.blue {
-    direction: ltr;
+    grid-template-columns: 66px minmax(0, 1fr) 88px;
+    grid-template-areas: "mark main result";
   }
 
-  .scoreboard-team-block.blue .scoreboard-pips {
+  .scoreboard-team-block.blue .scoreboard-team-status {
     justify-content: flex-start;
   }
 }
@@ -3662,6 +3650,11 @@ textarea:focus-visible {
     grid-template-columns: 52px minmax(0, 1fr) 58px;
     gap: 8px 10px;
     padding: 12px;
+    min-height: 142px;
+  }
+
+  .scoreboard-team-block.blue {
+    grid-template-columns: 52px minmax(0, 1fr) 58px;
   }
 
   .scoreboard-team-mark {
@@ -3674,12 +3667,26 @@ textarea:focus-visible {
   }
 
   .scoreboard-score,
-  .scoreboard-core strong {
+  .scoreboard-core-round {
     font-size: 1.75rem;
   }
 
   .scoreboard-score {
+    width: 58px;
     min-height: 54px;
+  }
+
+  .scoreboard-team-main {
+    gap: 8px;
+    padding: 2px 0;
+  }
+
+  .scoreboard-team-result {
+    gap: 8px;
+  }
+
+  .scoreboard-core {
+    min-height: 142px;
   }
 
   .match-stage-frame {
@@ -3699,10 +3706,18 @@ textarea:focus-visible {
     grid-template-columns: 44px minmax(0, 1fr) 48px;
   }
 
+  .scoreboard-team-block.blue {
+    grid-template-columns: 44px minmax(0, 1fr) 48px;
+  }
+
+  .scoreboard-score {
+    width: 48px;
+    min-height: 48px;
+  }
+
   .scoreboard-team-copy span,
-  .scoreboard-team-block small,
-  .scoreboard-core span,
-  .scoreboard-core small {
+  .scoreboard-core-kicker,
+  .scoreboard-core-state {
     white-space: normal;
   }
 

@@ -1,4 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from 'react'
 import type {
   PublicSessionState,
   TeamRole,
@@ -10,6 +15,10 @@ import {
   formatDurationSeconds,
   formatLabel,
 } from '../shared/format'
+import {
+  resolveTeamIdentity,
+  teamAccentRgb,
+} from '../shared/teamVisuals'
 import {
   ActionGroup,
   Button,
@@ -39,13 +48,11 @@ type ScoreboardSessionControl = {
 }
 
 export function MatchScoreboard({
-  phase,
   publicSession,
   replayPayload,
   roleHandoffs,
   sessionControl,
 }: {
-  phase: string
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
   roleHandoffs: Record<TeamRole, TeamBannerHandoff>
@@ -57,7 +64,6 @@ export function MatchScoreboard({
   return (
     <header className="match-scoreboard" aria-label="Match scoreboard">
       <ScoreboardTeam
-        phase={phase}
         publicSession={publicSession}
         replayPayload={replayPayload}
         role="red"
@@ -65,9 +71,9 @@ export function MatchScoreboard({
         winsRequired={winsRequired}
       />
       <div className="scoreboard-core">
-        <span>Session Control</span>
-        <strong>{publicSession ? `R${publicSession.round}` : '--'}</strong>
-        <small title={sessionControl.activeSessionId || undefined}>
+        <span className="scoreboard-core-kicker">Session Control</span>
+        <strong className="scoreboard-core-round">{publicSession ? `R${publicSession.round}` : '--'}</strong>
+        <small className="scoreboard-core-state" title={sessionControl.activeSessionId || undefined}>
           {publicSession
             ? `${formatReplayClock(replayPayload)} / ${decision}`
             : sessionControl.activeSessionId || 'Create session'}
@@ -107,7 +113,6 @@ export function MatchScoreboard({
         </ActionGroup>
       </div>
       <ScoreboardTeam
-        phase={phase}
         publicSession={publicSession}
         replayPayload={replayPayload}
         role="blue"
@@ -163,14 +168,12 @@ function ScoreboardPlanTimer({ publicSession }: { publicSession: PublicSessionSt
 
 function ScoreboardTeam({
   handoff,
-  phase,
   publicSession,
   replayPayload,
   role,
   winsRequired,
 }: {
   handoff: TeamBannerHandoff
-  phase: string
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
   role: TeamRole
@@ -182,60 +185,65 @@ function ScoreboardTeam({
   const isWinner = publicSession?.lastResult?.winner === role
 
   return (
-    <section className={`scoreboard-team-block ${role} ${isWinner ? 'winner' : ''}`}>
+    <section
+      className={`scoreboard-team-block ${role} ${isWinner ? 'winner' : ''}`}
+      style={getScoreboardAccentStyle(team.accentRgb)}
+    >
       <div className="scoreboard-team-mark" aria-hidden="true" />
-      <div className="scoreboard-team-copy">
-        <strong>{team.name}</strong>
-        <span>
-          Win {team.wins} - {opponent.wins}
-        </span>
-      </div>
-      <div className="scoreboard-score">{team.wins}</div>
-      <div className="scoreboard-pips" aria-label={`${capitalize(role)} round wins`}>
-        {Array.from({ length: winsRequired }, (_, index) => (
-          <span
-            className={index < team.wins ? 'is-filled' : ''}
-            key={`${role}-pip-${index}`}
-          />
-        ))}
-      </div>
-      <div className="scoreboard-team-status">
-        <StatusBadge tone={team.claimed ? 'ok' : 'warning'}>
-          {team.claimed ? 'Connected' : 'Not connected'}
-        </StatusBadge>
-        <StatusBadge tone={team.submitted ? 'ok' : 'neutral'}>
-          {team.submitted ? 'Plan locked' : 'Plan pending'}
-        </StatusBadge>
-      </div>
-      <div className="scoreboard-handoff">
+      <div className="scoreboard-team-main">
+        <div className="scoreboard-team-copy">
+          <strong>{team.name}</strong>
+          <span>
+            Win {team.wins} - {opponent.wins}
+          </span>
+        </div>
+        <div className="scoreboard-team-status">
+          <StatusBadge tone={team.claimed ? 'ok' : 'warning'}>
+            {team.claimed ? 'Connected' : 'Not connected'}
+          </StatusBadge>
+          <StatusBadge tone={team.submitted ? 'ok' : 'neutral'}>
+            {team.submitted ? 'Plan locked' : 'Plan pending'}
+          </StatusBadge>
+        </div>
         {handoff.hasInvite ? (
-          <ActionGroup className="scoreboard-handoff-actions">
-            {handoff.inviteUrl ? (
-              <a
-                className="ui-button ui-button-ghost"
-                href={handoff.inviteUrl}
-                rel="noreferrer"
-                target="_blank"
+          <div className="scoreboard-handoff">
+            <ActionGroup className="scoreboard-handoff-actions">
+              {handoff.inviteUrl ? (
+                <a
+                  className="ui-button ui-button-ghost"
+                  href={handoff.inviteUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  View cockpit
+                </a>
+              ) : (
+                <Button type="button" variant="ghost" disabled>
+                  View cockpit
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handoff.onCopyBrief}
+                disabled={!handoff.agentBrief}
               >
-                View cockpit
-              </a>
-            ) : (
-              <Button type="button" variant="ghost" disabled>
-                View cockpit
+                Copy handoff
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handoff.onCopyBrief}
-              disabled={!handoff.agentBrief}
-            >
-              Copy handoff
-            </Button>
-          </ActionGroup>
-        ) : (
-          <span>{team.claimed ? formatLabel(phase) : 'Create session for handoff'}</span>
-        )}
+            </ActionGroup>
+          </div>
+        ) : null}
+      </div>
+      <div className="scoreboard-team-result">
+        <div className="scoreboard-score">{team.wins}</div>
+        <div className="scoreboard-pips" aria-label={`${capitalize(role)} round wins`}>
+          {Array.from({ length: winsRequired }, (_, index) => (
+            <span
+              className={index < team.wins ? 'is-filled' : ''}
+              key={`${role}-pip-${index}`}
+            />
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -370,6 +378,7 @@ function ChatMessageItem({ message }: { message: PublicSessionState['chatLog'][n
 }
 
 type TeamDashboardData = {
+  accentRgb: string
   claimed: boolean
   damageTaken: number
   healthLabel: string
@@ -388,29 +397,36 @@ function getTeamDashboardData(
   replayPayload: ReplayPayload | null,
 ): TeamDashboardData {
   const roleState = publicSession?.roles[role]
+  const blueprint = replayPayload?.botBlueprints[role]
   const damageTaken = publicSession?.lastResult?.damage[role] ?? 0
   const remainingHealth = publicSession?.lastResult?.remainingHealth[role]
   const maxHealth = remainingHealth === undefined ? 100 : Math.max(remainingHealth + damageTaken, 1)
+  const identity = resolveTeamIdentity(role, roleState?.identity)
   const healthPercent = remainingHealth === undefined
     ? (roleState?.submitted ? 100 : 0)
     : Math.round((remainingHealth / maxHealth) * 100)
 
   return {
+    accentRgb: teamAccentRgb(role, roleState?.identity),
     claimed: roleState?.claimed ?? false,
     damageTaken,
     healthLabel: remainingHealth === undefined ? 'Pending' : `${Math.max(remainingHealth, 0)}`,
     healthPercent,
     hitCount: countImpactEvents(replayPayload?.timeline.events ?? [], role),
     losses: roleState?.losses ?? 0,
-    name: replayPayload?.botBlueprints[role]?.name?.trim() || teamName(role),
+    name: roleState?.identity?.name.trim() || blueprint?.name?.trim() || identity.name,
     role,
     submitted: roleState?.submitted ?? false,
     wins: roleState?.wins ?? 0,
   }
 }
 
-function teamName(role: TeamRole): string {
-  return `${capitalize(role)} Team`
+type ScoreboardAccentStyle = CSSProperties & {
+  '--scoreboard-accent': string
+}
+
+function getScoreboardAccentStyle(accentRgb: string): ScoreboardAccentStyle {
+  return { '--scoreboard-accent': accentRgb }
 }
 
 function formatDecision(publicSession: PublicSessionState | null): string {
