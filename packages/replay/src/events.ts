@@ -114,22 +114,49 @@ export type ReplayEvent =
   | PartDetachEvent
   | KnockoutEvent
 
+const REPLAY_EVENT_TYPE_RANK: Record<ReplayEvent['type'], number> = {
+  spawn: 0,
+  move: 10,
+  weapon_fire: 20,
+  ability: 30,
+  impact: 40,
+  damage: 50,
+  hazard: 60,
+  part_detach: 70,
+  knockout: 80,
+}
+
+const REPLAY_EVENT_BOT_RANK: Record<TeamRole, number> = {
+  red: 0,
+  blue: 1,
+}
+
 export function compareReplayEvents(left: ReplayEvent, right: ReplayEvent): number {
   if (left.t !== right.t) {
     return left.t - right.t
   }
 
-  if (left.type < right.type) {
-    return -1
+  const typeRank = REPLAY_EVENT_TYPE_RANK[left.type] - REPLAY_EVENT_TYPE_RANK[right.type]
+
+  if (typeRank !== 0) {
+    return typeRank
   }
 
-  if (left.type > right.type) {
-    return 1
-  }
-
-  return 0
+  return replayEventBotRank(left) - replayEventBotRank(right)
 }
 
 export function sortReplayEvents(events: ReplayEvent[]): ReplayEvent[] {
   return [...events].sort(compareReplayEvents)
+}
+
+function replayEventBotRank(event: ReplayEvent): number {
+  if ('bot' in event) {
+    return REPLAY_EVENT_BOT_RANK[event.bot]
+  }
+
+  if ('attacker' in event) {
+    return REPLAY_EVENT_BOT_RANK[event.attacker]
+  }
+
+  return Number.MAX_SAFE_INTEGER
 }

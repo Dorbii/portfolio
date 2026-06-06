@@ -8,10 +8,19 @@ import type {
   Vector3,
 } from '../../schemas/src/index.js'
 import type { BotStats } from './deriveStats.js'
+import {
+  createOpeningScriptIndex,
+  getOpeningScriptCommand,
+  type OpeningScriptIndex,
+} from './openingScriptIndex.js'
 
 export type CommandPolicy = {
   tactics: NormalizedBotTactics
   openingScript: OpeningScript
+}
+
+export type CompiledCommandPolicy = CommandPolicy & {
+  openingScriptIndex: OpeningScriptIndex
 }
 
 export type PolicyBotState = {
@@ -53,12 +62,12 @@ type PolicyContext = PolicyState & {
 const CONTACT_DISTANCE = 1.28
 
 export function chooseCommand(
-  policy: CommandPolicy,
+  policy: CommandPolicy | CompiledCommandPolicy,
   tick: number,
   state: PolicyState,
 ): TurnCommand {
   const policyCommand = choosePolicyCommand(policy.tactics, tick, state)
-  const scripted = policy.openingScript.commands.find((command) => command.tick === tick)
+  const scripted = getScriptedCommand(policy, tick)
   const scriptedFields = definedScriptedFields(scripted)
   const command: TurnCommand = {
     ...policyCommand,
@@ -71,6 +80,24 @@ export function chooseCommand(
   }
 
   return command
+}
+
+export function compileCommandPolicy(policy: CommandPolicy): CompiledCommandPolicy {
+  return {
+    ...policy,
+    openingScriptIndex: createOpeningScriptIndex(policy.openingScript),
+  }
+}
+
+function getScriptedCommand(
+  policy: CommandPolicy | CompiledCommandPolicy,
+  tick: number,
+): TurnCommand | undefined {
+  if ('openingScriptIndex' in policy) {
+    return getOpeningScriptCommand(policy.openingScriptIndex, tick)
+  }
+
+  return policy.openingScript.commands.find((command) => command.tick === tick)
 }
 
 function definedScriptedFields(command: TurnCommand | undefined): Omit<

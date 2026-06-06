@@ -1,5 +1,11 @@
 import type { WeaponFirePhase } from '../../../../packages/replay/src/index.js'
+import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
 import type { TeamRole, Vector3 } from '../../../../packages/schemas/src/index.js'
+
+export type IndexedReplayEvent = {
+  event: ReplayEvent
+  sequence: number
+}
 
 export type { CameraPreset } from './replayCameraPresets.js'
 

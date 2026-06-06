@@ -25,7 +25,19 @@ import {
   PART_BEHAVIOR_IDS,
   type PartBehaviorId,
 } from './partBehaviors.js'
-import { chooseCommand, type PolicyBotState } from './policy.js'
+import {
+  createBotRuntimeIndex,
+  findFirstAliveBehaviorPart,
+  getAliveBehaviorParts,
+  hasAliveBehaviorPart,
+  type BotRuntimeIndex,
+} from './runtimePartIndex.js'
+import { compareDamageTargets } from './damagePriority.js'
+import {
+  chooseCommand,
+  compileCommandPolicy,
+  type PolicyBotState,
+} from './policy.js'
 import { createSeededRng } from './seededRng.js'
 import {
   addRuntimeStatus,
@@ -67,6 +79,7 @@ type BotRuntime = {
   role: TeamRole
   stats: BotStats
   parts: RuntimePart[]
+  index: BotRuntimeIndex<RuntimePart>
   health: number
   maxHealth: number
   hasUtilityControl: boolean
@@ -225,19 +238,21 @@ function knownBehaviorId(id: string | undefined): PartBehaviorId | undefined {
 // CODEX_RISK: behavioral
 // CODEX_CONFIDENCE: medium
 // CODEX_REVIEW: pending
-function countAliveWeaponSlots(parts: RuntimePart[]): number {
+function countAliveWeaponSlots(index: BotRuntimeIndex<RuntimePart>): number {
   return Math.min(
     WEAPON_SLOTS.length,
-    parts.filter((part) => part.hasWeaponControl && part.health > 0).length,
+    index.weaponControlParts.length,
   )
 }
 
 function updateRuntimeControlState(bot: BotRuntime): void {
-  bot.weaponSlotCount = countAliveWeaponSlots(bot.parts)
+  bot.weaponSlotCount = countAliveWeaponSlots(bot.index)
   bot.hasWeaponControl = bot.weaponSlotCount > 0
-  bot.hasUtilityControl = bot.parts.some(
-    (part) => part.hasUtilityControl && part.health > 0,
-  )
+  bot.hasUtilityControl = bot.index.utilityControlParts.length > 0
+}
+
+function refreshRuntimeIndex(bot: BotRuntime): void {
+  bot.index = createBotRuntimeIndex(bot.parts)
 }
 
 function advanceRuntimeEffects(bot: BotRuntime, tick: number): void {
@@ -259,7 +274,7 @@ function tickCooldowns(cooldowns: Record<string, number>): void {
 }
 
 function aliveWeaponControlParts(bot: BotRuntime): RuntimePart[] {
-  return bot.parts.filter((part) => part.hasWeaponControl && part.health > 0)
+  return [...bot.index.weaponControlParts]
 }
 
 function aliveBehaviorParts(
@@ -267,27 +282,18 @@ function aliveBehaviorParts(
   slot: PartBehaviorSlot,
   ids?: readonly PartBehaviorId[],
 ): RuntimePart[] {
-  return bot.parts.filter((part) => (
-    part.health > 0 &&
-    part.behaviorSlot === slot &&
-    part.behaviorId !== undefined &&
-    (ids === undefined || ids.includes(part.behaviorId))
-  ))
+  return getAliveBehaviorParts(bot.index, slot, ids)
 }
 
 function hasAliveBehavior(bot: BotRuntime, id: PartBehaviorId): boolean {
-  return bot.parts.some((part) => part.health > 0 && part.behaviorId === id)
+  return hasAliveBehaviorPart(bot.index, id)
 }
 
 function firstAliveBehaviorPart(
   bot: BotRuntime,
   ids: readonly PartBehaviorId[],
 ): RuntimePart | undefined {
-  return bot.parts.find((part) => (
-    part.health > 0 &&
-    part.behaviorId !== undefined &&
-    ids.includes(part.behaviorId)
-  ))
+  return findFirstAliveBehaviorPart(bot.index, ids)
 }
 
 function isReadyBehaviorPart(bot: BotRuntime, part: RuntimePart): boolean {
@@ -483,39 +489,9 @@ function activateMovementUtility(
 }
 
 function orderedDamageTargets(bot: BotRuntime, cause: string, tick: number): RuntimePart[] {
-  const alive = bot.parts.filter((part) => part.health > 0)
-  const priorities: PartCategory[] = cause === 'ram'
-    ? ['defense', 'mobility', 'weapon', 'utility', 'style', 'body']
-    : cause === 'hazard'
-      ? ['mobility', 'defense', 'utility', 'weapon', 'style', 'body']
-      : cause === 'drone'
-        ? ['utility', 'weapon', 'mobility', 'defense', 'style', 'body']
-        : ['defense', 'weapon', 'mobility', 'utility', 'style', 'body']
-  const categoryRank = new Map(priorities.map((category, index) => [category, index]))
-
-  return alive.sort((left, right) => {
-    const rankDelta = (categoryRank.get(left.category) ?? 99) - (categoryRank.get(right.category) ?? 99)
-
-    if (rankDelta !== 0) {
-      return rankDelta
-    }
-
-    if (left.health !== right.health) {
-      return left.health - right.health
-    }
-
-    return stablePartOrder(left, tick) - stablePartOrder(right, tick)
-  })
-}
-
-function stablePartOrder(part: RuntimePart, tick: number): number {
-  let hash = tick
-
-  for (let index = 0; index < part.blockId.length; index += 1) {
-    hash = (hash * 33 + part.blockId.charCodeAt(index)) >>> 0
-  }
-
-  return hash
+  return bot.parts
+    .filter((part) => part.health > 0)
+    .sort((left, right) => compareDamageTargets(left, right, cause, tick))
 }
 
 function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: string): PartDamageHit[] {
@@ -544,6 +520,7 @@ function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: s
   }
 
   bot.health = round(sumPartHealth(bot.parts))
+  refreshRuntimeIndex(bot)
 
   return hits
 }
@@ -1182,6 +1159,7 @@ function resolveRepairUtility(
 
   target.health = round(Math.min(target.maxHealth, target.health + REPAIR_AMOUNT))
   bot.health = round(sumPartHealth(bot.parts))
+  refreshRuntimeIndex(bot)
   consumeCharge(bot, key)
   startCooldown(bot, key, REPAIR_COOLDOWN_TICKS)
   applyStatus(bot, 'repairing', part, tick)
@@ -1311,15 +1289,18 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   const blueStats = deriveBotStats(input.blue.blueprint)
   const redParts = createRuntimeParts(input.red.blueprint, redStats)
   const blueParts = createRuntimeParts(input.blue.blueprint, blueStats)
-  const redWeaponSlotCount = countAliveWeaponSlots(redParts)
-  const blueWeaponSlotCount = countAliveWeaponSlots(blueParts)
+  const redIndex = createBotRuntimeIndex(redParts)
+  const blueIndex = createBotRuntimeIndex(blueParts)
+  const redWeaponSlotCount = countAliveWeaponSlots(redIndex)
+  const blueWeaponSlotCount = countAliveWeaponSlots(blueIndex)
   const red: BotRuntime = {
     role: 'red',
     stats: redStats,
     parts: redParts,
+    index: redIndex,
     health: sumPartHealth(redParts),
     maxHealth: sumPartHealth(redParts),
-    hasUtilityControl: redParts.some((part) => part.hasUtilityControl && part.health > 0),
+    hasUtilityControl: redIndex.utilityControlParts.length > 0,
     hasWeaponControl: redWeaponSlotCount > 0,
     weaponSlotCount: redWeaponSlotCount,
     position: [-6, 0, 0],
@@ -1333,9 +1314,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     role: 'blue',
     stats: blueStats,
     parts: blueParts,
+    index: blueIndex,
     health: sumPartHealth(blueParts),
     maxHealth: sumPartHealth(blueParts),
-    hasUtilityControl: blueParts.some((part) => part.hasUtilityControl && part.health > 0),
+    hasUtilityControl: blueIndex.utilityControlParts.length > 0,
     hasWeaponControl: blueWeaponSlotCount > 0,
     weaponSlotCount: blueWeaponSlotCount,
     position: [6, 0, 0],
@@ -1354,6 +1336,14 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   let elapsedTicks = 0
   let lastDamageTick = 0
   let stoppedByNoDamage = false
+  const redPolicy = compileCommandPolicy({
+    tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
+    openingScript: input.red.openingScript,
+  })
+  const bluePolicy = compileCommandPolicy({
+    tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS,
+    openingScript: input.blue.openingScript,
+  })
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
     elapsedTicks = tick
@@ -1361,18 +1351,12 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     advanceRuntimeEffects(blue, tick)
 
     const redCommand = chooseCommand(
-      {
-        tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
-        openingScript: input.red.openingScript,
-      },
+      redPolicy,
       tick,
       { bot: policyStateFor(red), opponent: policyStateFor(blue), arena },
     )
     const blueCommand = chooseCommand(
-      {
-        tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS,
-        openingScript: input.blue.openingScript,
-      },
+      bluePolicy,
       tick,
       { bot: policyStateFor(blue), opponent: policyStateFor(red), arena },
     )

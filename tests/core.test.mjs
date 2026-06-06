@@ -13,8 +13,18 @@ import { validateReplayTimeline } from '../.test-build/packages/replay/src/index
 import {
   PART_BEHAVIOR_IDS,
   chooseCommand,
+  compileCommandPolicy,
+  compareDamageTargets,
+  createBotRuntimeIndex,
+  createOpeningScriptIndex,
   deriveBotStats,
+  damageCategoryPriorityFor,
+  findFirstAliveBehaviorPart,
+  getAliveBehaviorParts,
+  getOpeningScriptCommand,
+  hasAliveBehaviorPart,
   resolveCombat,
+  stablePartOrder,
 } from '../.test-build/packages/sim/src/index.js'
 import {
   SessionCoordinator,
@@ -607,6 +617,175 @@ test('opening script overrides early movement while policy fills missing command
   assert.equal(scripted.move, 'brake')
   assert.equal(scripted.weaponA, 'fire')
   assert.ok(['forward', 'dash_forward'].includes(unscripted.move))
+})
+
+test('catalog exposes visual descriptors for renderer dispatch and material language', () => {
+  assert.equal(
+    PART_CATALOG.every((part) =>
+      Boolean(
+        part.visual?.visualFamily &&
+        part.visual.materialRole &&
+        part.visual.mountRole &&
+        part.visual.detailBudget,
+      ),
+    ),
+    true,
+  )
+
+  const visualFamilyFor = (partId) =>
+    PART_CATALOG.find((part) => part.id === partId)?.visual.visualFamily
+
+  assert.equal(visualFamilyFor('Weapon_Spinner_Small'), 'spinner')
+  assert.equal(visualFamilyFor('Weapon_Saw'), 'saw')
+  assert.equal(visualFamilyFor('Weapon_Turret'), 'turret')
+  assert.equal(visualFamilyFor('Wheel_Omni'), 'wheel')
+  assert.equal(visualFamilyFor('Tread_Heavy'), 'tread')
+})
+
+test('compiled opening script lookup preserves command overrides without per-tick scanning', () => {
+  const bot = createPolicyBot('red', validSpinnerSubmission.blueprint)
+  const opponent = createPolicyBot('blue', bareBodyBlueprint)
+  const state = {
+    bot,
+    opponent,
+    arena: { name: 'Policy Test', width: 24, height: 16, activeHazards: [] },
+  }
+  const policy = compileCommandPolicy({
+    tactics: normalizeTactics({
+      movementPolicy: 'close',
+      preferredRange: 'contact',
+      aggression: 0.9,
+      weaponCadence: 'sustained',
+    }),
+    openingScript: { commands: [{ tick: 1, move: 'brake' }] },
+  })
+
+  policy.openingScript.commands.find = () => {
+    throw new Error('compiled policy should not scan openingScript.commands')
+  }
+
+  const command = chooseCommand(policy, 1, state)
+
+  assert.equal(command.move, 'brake')
+  assert.equal(command.weaponA, 'fire')
+})
+
+test('opening script index preserves first-command precedence for duplicate ticks', () => {
+  const index = createOpeningScriptIndex({
+    commands: [
+      { tick: 3, move: 'brake' },
+      { tick: 3, move: 'dash_forward' },
+    ],
+  })
+
+  assert.equal(getOpeningScriptCommand(index, 3)?.move, 'brake')
+})
+
+test('damage target ordering centralizes cause category, health, and stable tie-break rules', () => {
+  const parts = [
+    { blockId: 'weapon-low', category: 'weapon', health: 1 },
+    { blockId: 'defense-high', category: 'defense', health: 9 },
+    { blockId: 'mobility-low', category: 'mobility', health: 1 },
+    { blockId: 'utility-low', category: 'utility', health: 1 },
+  ]
+  const orderedFor = (cause) =>
+    [...parts].sort((left, right) => compareDamageTargets(left, right, cause, 4))
+
+  assert.deepEqual(damageCategoryPriorityFor('ram').slice(0, 2), ['defense', 'mobility'])
+  assert.equal(orderedFor('ram')[0].blockId, 'defense-high')
+  assert.equal(orderedFor('hazard')[0].blockId, 'mobility-low')
+  assert.equal(orderedFor('drone')[0].blockId, 'utility-low')
+  assert.equal(orderedFor('weapon')[0].blockId, 'defense-high')
+
+  const sameCategory = [
+    { blockId: 'armor-high', category: 'defense', health: 8 },
+    { blockId: 'armor-low', category: 'defense', health: 3 },
+  ]
+
+  assert.equal(
+    [...sameCategory].sort((left, right) => compareDamageTargets(left, right, 'weapon', 4))[0].blockId,
+    'armor-low',
+  )
+
+  const left = { blockId: 'alpha', category: 'defense', health: 5 }
+  const right = { blockId: 'beta', category: 'defense', health: 5 }
+  const expectedTieBreak = stablePartOrder(left.blockId, 4) - stablePartOrder(right.blockId, 4)
+
+  assert.equal(compareDamageTargets(left, right, 'weapon', 4), expectedTieBreak)
+})
+
+test('runtime part index matches direct scans after live health and state bookkeeping changes', () => {
+  const parts = [
+    {
+      blockId: 'spinner',
+      category: 'weapon',
+      hasUtilityControl: false,
+      hasWeaponControl: true,
+      behaviorId: 'spinner',
+      behaviorSlot: 'weapon',
+      health: 10,
+    },
+    {
+      blockId: 'booster',
+      category: 'utility',
+      hasUtilityControl: true,
+      hasWeaponControl: false,
+      behaviorId: 'booster',
+      behaviorSlot: 'utility',
+      health: 8,
+    },
+    {
+      blockId: 'dead-wheel',
+      category: 'mobility',
+      hasUtilityControl: false,
+      hasWeaponControl: false,
+      behaviorId: 'omni_drive',
+      behaviorSlot: 'mobility',
+      health: 0,
+    },
+  ]
+  const assertIndexMatchesScan = () => {
+    const index = createBotRuntimeIndex(parts)
+    const alive = parts.filter((part) => part.health > 0)
+
+    assert.deepEqual([...index.partsByBlockId.keys()], parts.map((part) => part.blockId))
+    assert.deepEqual(index.aliveParts.map((part) => part.blockId), alive.map((part) => part.blockId))
+    assert.deepEqual(
+      index.weaponControlParts.map((part) => part.blockId),
+      alive.filter((part) => part.hasWeaponControl).map((part) => part.blockId),
+    )
+    assert.deepEqual(
+      index.utilityControlParts.map((part) => part.blockId),
+      alive.filter((part) => part.hasUtilityControl).map((part) => part.blockId),
+    )
+    assert.deepEqual(
+      getAliveBehaviorParts(index, 'utility', ['booster']).map((part) => part.blockId),
+      alive.filter((part) => part.behaviorSlot === 'utility' && part.behaviorId === 'booster').map((part) => part.blockId),
+    )
+    assert.equal(
+      hasAliveBehaviorPart(index, 'spinner'),
+      alive.some((part) => part.behaviorId === 'spinner'),
+    )
+    assert.equal(
+      findFirstAliveBehaviorPart(index, ['spinner'])?.blockId,
+      alive.find((part) => part.behaviorId === 'spinner')?.blockId,
+    )
+  }
+
+  assertIndexMatchesScan()
+
+  parts[0].health = 0
+  assertIndexMatchesScan()
+
+  parts[0].health = 4
+  assertIndexMatchesScan()
+
+  const cooldowns = { 'spinner:spinner': 2 }
+  const statuses = [{ id: 'slowed', sourceKey: 'booster:booster' }]
+
+  cooldowns['spinner:spinner'] -= 1
+  statuses[0].sourceKey = 'booster:booster'
+  assertIndexMatchesScan()
 })
 
 test('policy brakes instead of immediately reversing contradictory movement', () => {

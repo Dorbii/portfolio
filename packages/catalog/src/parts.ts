@@ -1,7 +1,11 @@
 import type {
   PartCategory,
   PartDefinition,
+  PartMaterialRole,
+  PartMountRole,
   PartStats,
+  PartVisualDescriptor,
+  PartVisualFamily,
   Vector3,
 } from '../../schemas/src/index.js'
 import { PART_BEHAVIORS } from '../../sim/src/partBehaviors.js'
@@ -16,6 +20,7 @@ type PartInput = {
   size: Vector3
   tags?: string[]
   stats?: PartStats
+  visual?: PartVisualDescriptor
   behavior?: PartDefinition['behavior']
   controls?: PartDefinition['controls']
 }
@@ -24,8 +29,76 @@ function part(input: PartInput): PartDefinition {
   return {
     tags: [],
     stats: {},
+    visual: input.visual ?? inferVisualDescriptor(input),
     ...input,
   }
+}
+
+function inferVisualDescriptor(input: PartInput): PartVisualDescriptor {
+  return {
+    detailBudget: inferDetailBudget(input),
+    materialRole: inferMaterialRole(input),
+    mountRole: inferMountRole(input),
+    visualFamily: inferVisualFamily(input),
+  }
+}
+
+function inferVisualFamily(input: PartInput): PartVisualFamily {
+  if (input.id.includes('Spinner')) return 'spinner'
+  if (input.id.includes('Saw')) return 'saw'
+  if (input.id.includes('Hammer')) return 'hammer'
+  if (input.id.includes('Net')) return 'net'
+  if (input.id.includes('Turret')) return 'turret'
+  if (input.id.includes('Spear')) return 'spear'
+  if (input.id.includes('Flipper')) return 'flipper'
+  if (input.id.includes('Grabber')) return 'grabber'
+  if (input.id.includes('Ram')) return 'ram'
+  if (input.id.includes('Tread')) return 'tread'
+  if (input.id.includes('Wheel')) return 'wheel'
+  if (input.id.includes('Leg')) return 'leg'
+  if (input.id.includes('Wedge')) return 'wedge'
+  if (input.id.includes('Shield') || input.id.includes('Plate')) return 'shield'
+  if (input.id.includes('Cage') || input.category === 'defense') return 'armor'
+  if (input.id.includes('Booster')) return 'booster'
+  if (input.id.includes('Gyro')) return 'gyro'
+  if (input.id.includes('Magnet')) return 'magnet'
+  if (input.id.includes('Anchor')) return 'anchor'
+  if (input.id.includes('Smoke')) return 'smoke'
+  if (input.id.includes('Sensor')) return 'sensor'
+  if (input.id.includes('RepairKit')) return 'battery'
+  if (input.id.includes('Drone')) return 'drone'
+
+  return 'body'
+}
+
+function inferMaterialRole(input: PartInput): PartMaterialRole {
+  if (input.category === 'mobility') return 'black_rubber'
+  if (input.category === 'weapon') return 'weapon_steel'
+  if (input.category === 'defense') return 'painted_armor'
+  if (input.category === 'utility') return 'electrical_casing'
+  if (input.category === 'style') return 'cosmetic_shell'
+  if (input.id.includes('Wedge') || input.id.includes('Heavy')) return 'painted_armor'
+
+  return 'raw_metal'
+}
+
+function inferMountRole(input: PartInput): PartMountRole {
+  if (input.category === 'weapon') return 'front_mount'
+  if (input.category === 'mobility') return 'side_mount'
+  if (input.category === 'utility') return 'top_mount'
+  if (input.category === 'defense') return 'exposed'
+  if (input.category === 'style') return 'top_mount'
+
+  return 'internal'
+}
+
+function inferDetailBudget(input: PartInput): PartVisualDescriptor['detailBudget'] {
+  if (input.category === 'style') return 'low'
+  if (input.cost >= 20 || input.category === 'weapon' || input.category === 'defense') {
+    return 'high'
+  }
+
+  return 'medium'
 }
 
 export const PART_CATALOG: PartDefinition[] = [

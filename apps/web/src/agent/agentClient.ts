@@ -27,7 +27,7 @@ import type {
   AgentWaitOptions,
   FetchLike,
 } from './agentClientTypes.js'
-import { TERMINAL_PHASES } from './agentRoleApi.js'
+import { TERMINAL_PHASES } from './agentPhases.js'
 
 export { createAgentInviteUrl, createSafeAgentHash }
 export type { AgentInvite }
@@ -55,7 +55,14 @@ export {
 export {
   createAgentArenaRoleApi,
   getValidAgentActions,
+  type AgentArenaRoleApiOptions,
+  type AgentArenaRoleClient,
 } from './agentRoleApi.js'
+export {
+  createInstalledAgentArenaRoleApi,
+  installAgentArenaRoleApi,
+  type AgentArenaRoleApiInstallerOptions,
+} from './agentRoleApiInstaller.js'
 
 const DEFAULT_WAIT_POLL_MS = 4_000
 const DEFAULT_WAIT_TIMEOUT_MS = 10 * 60_000

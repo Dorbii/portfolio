@@ -11,7 +11,7 @@ import { useAgentChatForms } from './useAgentChatForms'
 import { useAgentRoleSession } from './useAgentRoleSession'
 import { useRoundPlanSubmission } from './useRoundPlanSubmission'
 
-export { ROLE_STATE_POLL_MS } from './useAgentRoleSession'
+export { ROLE_STATE_POLL_MS } from './agentRolePolling'
 export {
   isTerminalPhase,
   opponentLabel,

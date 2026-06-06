@@ -1,8 +1,8 @@
-import { PART_CATALOG } from '../../../../packages/catalog/src/index.js'
 import {
   purchaseCostLabel,
 } from './roundPlanDraft'
 import type { RoundPlanEditorSectionProps } from './roundPlanEditorTypes'
+import { PartSelect } from './PartSelect'
 
 export function RoundPlanPurchaseSection({
   setSubmissionDraft,
@@ -29,24 +29,17 @@ export function RoundPlanPurchaseSection({
           <div className="purchase-row" key={`purchase-${index}`}>
             <label>
               <span>Part</span>
-              <select
+              <PartSelect
                 value={purchase.partId}
-                onChange={(event) =>
+                onChange={(partId) =>
                   setSubmissionDraft((draft) => ({
                     ...draft,
                     purchases: draft.purchases.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, partId: event.target.value } : item,
+                      itemIndex === index ? { ...item, partId } : item,
                     ),
                   }))
                 }
-              >
-                <option value="">Select part</option>
-                {PART_CATALOG.map((part) => (
-                  <option key={part.id} value={part.id}>
-                    {part.displayName}
-                  </option>
-                ))}
-              </select>
+              />
             </label>
             <label>
               <span>Qty</span>

@@ -1,3 +1,4 @@
+import { PBRMetallicRoughnessMaterial } from '@babylonjs/core/Materials/PBR/pbrMetallicRoughnessMaterial'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
@@ -19,6 +20,24 @@ export function createSceneMaterial(
   material.specularColor = new Color3(specular, specular, Math.max(0.12, specular * 0.82))
   material.alpha = alpha
   material.backFaceCulling = alpha >= 1
+
+  return material
+}
+
+export function createPbrSceneMaterial(
+  scene: Scene,
+  name: string,
+  baseColor: string,
+  emissive: string,
+  metallic: number,
+  roughness: number,
+): PBRMetallicRoughnessMaterial {
+  const material = new PBRMetallicRoughnessMaterial(name, scene)
+
+  material.baseColor = Color3.FromHexString(baseColor)
+  material.emissiveColor = Color3.FromHexString(emissive)
+  material.metallic = metallic
+  material.roughness = roughness
 
   return material
 }

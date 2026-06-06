@@ -4,6 +4,7 @@ import type {
   PartDefinition,
   RolePrivateState,
   SessionChatMessage,
+  SessionLogEvent,
   ValidationIssue,
 } from '../../../../packages/schemas/src/index.js'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
@@ -38,12 +39,18 @@ export function InvalidInvite({ errors }: { errors: string[] }) {
           }}
         />
       </section>
-      <script
-        id="agent-arena-state"
-        type="application/json"
-        dangerouslySetInnerHTML={{ __html: stateScript }}
-      />
+      <JsonScriptPanel id="agent-arena-state" json={stateScript} />
     </main>
+  )
+}
+
+export function JsonScriptPanel({ id, json }: { id: string; json: string }) {
+  return (
+    <script
+      id={id}
+      type="application/json"
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
   )
 }
 
@@ -115,6 +122,31 @@ export function AgentChatLog({ messages }: { messages: SessionChatMessage[] }) {
         </li>
       ))}
     </ol>
+  )
+}
+
+export function ActivityLog({
+  emptyText,
+  events,
+  hasEvents,
+}: {
+  emptyText: string
+  events: SessionLogEvent[]
+  hasEvents: boolean
+}) {
+  return (
+    <>
+      <ol className="agent-log">
+        {events.map((event) => (
+          <li key={`${event.at}-${event.type}-${event.message}`}>
+            <time dateTime={event.at}>{formatDateTime(event.at)}</time>
+            <strong>{formatLabel(event.type)}</strong>
+            <span>{event.message}</span>
+          </li>
+        ))}
+      </ol>
+      {!hasEvents ? <p className="agent-empty">{emptyText}</p> : null}
+    </>
   )
 }
 

@@ -1,5 +1,5 @@
-import { PART_CATALOG } from '../../../../packages/catalog/src/index.js'
 import type { RoundPlanEditorSectionProps } from './roundPlanEditorTypes'
+import { PartSelect } from './PartSelect'
 
 export function RoundPlanBlueprintSection({
   setSubmissionDraft,
@@ -65,26 +65,19 @@ export function RoundPlanBlueprintSection({
             </label>
             <label>
               <span>Part</span>
-              <select
+              <PartSelect
                 value={block.partId}
-                onChange={(event) =>
+                onChange={(partId) =>
                   setSubmissionDraft((draft) => ({
                     ...draft,
                     blueprintBlocks: draft.blueprintBlocks.map((item, itemIndex) =>
                       itemIndex === index
-                        ? { ...item, partId: event.target.value }
+                        ? { ...item, partId }
                         : item,
                     ),
                   }))
                 }
-              >
-                <option value="">Select part</option>
-                {PART_CATALOG.map((part) => (
-                  <option key={part.id} value={part.id}>
-                    {part.displayName}
-                  </option>
-                ))}
-              </select>
+              />
             </label>
             <label>
               <span>Label</span>

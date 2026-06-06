@@ -9,6 +9,7 @@ import { BabylonReplayScene } from './BabylonReplayScene'
 import {
   buildReplayFrame,
   clampReplayTime,
+  compileReplayTimeline,
   type CameraPreset,
   type ReplayEffectState,
 } from './replayMapping'
@@ -46,14 +47,11 @@ export function ReplayViewer({
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>(() =>
     normalizeCameraPreset(initialCameraPreset),
   )
-  const frame = useMemo(() => buildReplayFrame(timeline, time), [timeline, time])
-  const sortedEvents = useMemo(
-    () => sortTimelineEvents(timeline.events),
-    [timeline.events],
-  )
+  const compiledTimeline = useMemo(() => compileReplayTimeline(timeline), [timeline])
+  const frame = useMemo(() => buildReplayFrame(compiledTimeline, time), [compiledTimeline, time])
   const activeEvent = useMemo(
-    () => findActiveEvent(sortedEvents, time, frame.effects),
-    [frame.effects, sortedEvents, time],
+    () => findActiveEvent(compiledTimeline.events, time, frame.effects),
+    [compiledTimeline.events, frame.effects, time],
   )
 
   useEffect(() => {
@@ -77,9 +75,9 @@ export function ReplayViewer({
       previous = now
 
       setTime((current) => {
-        const next = clampReplayTime(timeline, current + elapsed)
+        const next = clampReplayTime(compiledTimeline, current + elapsed)
 
-        if (next >= timeline.duration) {
+        if (next >= compiledTimeline.duration) {
           setPlaying(false)
         }
 
@@ -91,7 +89,7 @@ export function ReplayViewer({
     animationFrame = window.requestAnimationFrame(tick)
 
     return () => window.cancelAnimationFrame(animationFrame)
-  }, [playing, speed, timeline])
+  }, [compiledTimeline, playing, speed])
 
   const reset = () => {
     setPlaying(false)
@@ -192,16 +190,6 @@ export function ReplayViewer({
       )}
     </section>
   )
-}
-
-function sortTimelineEvents(events: ReplayEvent[]): ReplayEvent[] {
-  return [...events].sort((left, right) => {
-    if (left.t !== right.t) {
-      return left.t - right.t
-    }
-
-    return left.type.localeCompare(right.type)
-  })
 }
 
 function findActiveEvent(

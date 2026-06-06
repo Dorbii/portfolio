@@ -34,6 +34,57 @@ export const PART_CATEGORIES = [
 
 export type PartCategory = (typeof PART_CATEGORIES)[number]
 
+export type PartVisualFamily =
+  | 'anchor'
+  | 'armor'
+  | 'battery'
+  | 'body'
+  | 'booster'
+  | 'drone'
+  | 'flipper'
+  | 'grabber'
+  | 'gyro'
+  | 'hammer'
+  | 'leg'
+  | 'magnet'
+  | 'net'
+  | 'ram'
+  | 'saw'
+  | 'sensor'
+  | 'shield'
+  | 'smoke'
+  | 'spear'
+  | 'spinner'
+  | 'tread'
+  | 'turret'
+  | 'wedge'
+  | 'wheel'
+
+export type PartMaterialRole =
+  | 'painted_armor'
+  | 'raw_metal'
+  | 'weapon_steel'
+  | 'black_rubber'
+  | 'glass_emissive'
+  | 'electrical_casing'
+  | 'hazard_marked'
+  | 'cosmetic_shell'
+
+export type PartMountRole =
+  | 'front_mount'
+  | 'rear_mount'
+  | 'side_mount'
+  | 'top_mount'
+  | 'internal'
+  | 'exposed'
+
+export type PartVisualDescriptor = {
+  detailBudget: 'low' | 'medium' | 'high'
+  materialRole: PartMaterialRole
+  mountRole: PartMountRole
+  visualFamily: PartVisualFamily
+}
+
 export type Vector3 = [number, number, number]
 
 export type PartStats = {
@@ -64,6 +115,7 @@ export type PartDefinition = {
   size: Vector3
   tags: string[]
   stats: PartStats
+  visual: PartVisualDescriptor
   behavior?: PartBehavior
   controls?: {
     movement?: boolean

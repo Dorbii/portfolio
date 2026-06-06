@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check:renderer-budget": "node tools/check-babylon-renderer-budget.mjs",
     "preview": "vite preview",
+    "scan:dead-exports": "node tools/scan-dead-exports.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.test.json && node --test tests/*.test.mjs"

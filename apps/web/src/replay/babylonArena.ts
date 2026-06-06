@@ -1,7 +1,10 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import type { ArenaConfig } from '../../../../packages/schemas/src/index.js'
-import { createSceneMaterial } from './babylonSceneUtils'
+import {
+  createPbrSceneMaterial,
+  createSceneMaterial,
+} from './babylonSceneUtils'
 import {
   createHazardVisuals,
   updateHazards,
@@ -28,10 +31,10 @@ export { createCenterSpinner } from './babylonArenaStructures'
 export type { BabylonHazardVisual }
 
 export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
-  const floorMaterial = createSceneMaterial(scene, 'floor-mat', '#151a1a', '#020303', 1, 0.24)
+  const floorMaterial = createPbrSceneMaterial(scene, 'floor-pbr-mat', '#151a1a', '#020303', 0.62, 0.48)
   const seamMaterial = createSceneMaterial(scene, 'panel-mat', '#334043', '#060808', 1, 0.28)
   const wallMaterial = createSceneMaterial(scene, 'wall-mat', '#2b3134', '#050607', 1, 0.22)
-  const apronMaterial = createSceneMaterial(scene, 'arena-apron-mat', '#080b0d', '#010202')
+  const apronMaterial = createPbrSceneMaterial(scene, 'arena-apron-pbr-mat', '#080b0d', '#010202', 0.72, 0.42)
   const glassMaterial = createSceneMaterial(scene, 'glass-mat', '#8bdfff', '#061824', 0.24, 0.5)
   const trimMaterial = createSceneMaterial(scene, 'arena-trim-mat', '#101315', '#030404')
   const warningMaterial = createSceneMaterial(scene, 'arena-warning-mat', '#d8ae33', '#4c3105', 1, 0.18)

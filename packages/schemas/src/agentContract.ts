@@ -13,6 +13,10 @@ import {
   type BotTactics,
   type PartDefinition,
 } from './types.js'
+import {
+  createBaselineRoundPlanV2Example,
+  createLegacyBaselineRoundPlanExample,
+} from './agentSamples.js'
 
 export type AgentContractPartSummary = Pick<
   PartDefinition,
@@ -666,119 +670,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     examples: {
       inviteUrl:
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
-      roundPlanSubmission: {
-        action: 'submit_round_plan',
-        schemaVersion: 2,
-        purchases: [
-          { partId: 'Body_Square_Medium', quantity: 1 },
-          { partId: 'Wheel_Large', quantity: 2 },
-          { partId: 'Weapon_Spinner_Small', quantity: 1 },
-        ],
-        blueprint: {
-          name: 'Baseline Spinner',
-          blocks: [
-            {
-              id: 'core',
-              partId: 'Body_Square_Medium',
-              position: [0, 0, 0],
-              rotation: [0, 0, 0],
-            },
-            {
-              id: 'leftWheel',
-              partId: 'Wheel_Large',
-              position: [-1, 0, 0],
-              rotation: [0, 0, 90],
-            },
-            {
-              id: 'rightWheel',
-              partId: 'Wheel_Large',
-              position: [1, 0, 0],
-              rotation: [0, 0, 90],
-            },
-            {
-              id: 'spinner',
-              partId: 'Weapon_Spinner_Small',
-              position: [0, 0, 1],
-              rotation: [0, 0, 0],
-            },
-          ],
-        },
-        tactics: {
-          style: 'aggressive',
-          targetPriority: 'closest',
-          preferredRange: 'close',
-          movementPolicy: 'close',
-          aggression: 0.8,
-          retreatAtHealthPct: 0.15,
-          weaponCadence: 'opportunistic',
-          hazardPreference: 'avoid',
-        },
-        openingScript: {
-          commands: [
-            { tick: 1, move: 'dash_forward', weaponA: 'hold' },
-            { tick: 2, move: 'circle_left', weaponA: 'fire' },
-            { tick: 3, move: 'strafe_right', weaponA: 'hold' },
-            { tick: 4, move: 'dash_backward', weaponA: 'fire' },
-            { tick: 5, move: 'circle_right', weaponA: 'hold' },
-          ],
-        },
-        chat: [
-          {
-            kind: 'strategy',
-            message:
-              'Opening with a compact spinner; if it loses trades, next round should add armor or control.',
-          },
-        ],
-        rationale:
-          'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.',
-      },
-      legacyRoundPlanSubmission: {
-        action: 'submit_round_plan',
-        purchases: [
-          { partId: 'Body_Square_Medium', quantity: 1 },
-          { partId: 'Wheel_Large', quantity: 2 },
-          { partId: 'Weapon_Spinner_Small', quantity: 1 },
-        ],
-        blueprint: {
-          name: 'Legacy Baseline Spinner',
-          blocks: [
-            {
-              id: 'core',
-              partId: 'Body_Square_Medium',
-              position: [0, 0, 0],
-              rotation: [0, 0, 0],
-            },
-            {
-              id: 'leftWheel',
-              partId: 'Wheel_Large',
-              position: [-1, 0, 0],
-              rotation: [0, 0, 90],
-            },
-            {
-              id: 'rightWheel',
-              partId: 'Wheel_Large',
-              position: [1, 0, 0],
-              rotation: [0, 0, 90],
-            },
-            {
-              id: 'spinner',
-              partId: 'Weapon_Spinner_Small',
-              position: [0, 0, 1],
-              rotation: [0, 0, 0],
-            },
-          ],
-        },
-        turnPlan: {
-          commands: [
-            { tick: 1, move: 'dash_forward', weaponA: 'hold' },
-            { tick: 2, move: 'circle_left', weaponA: 'fire' },
-            { tick: 3, move: 'strafe_right', weaponA: 'hold' },
-            { tick: 4, move: 'dash_backward', weaponA: 'fire' },
-            { tick: 5, move: 'circle_right', weaponA: 'hold' },
-          ],
-        },
-        rationale: 'Legacy v1 shape remains valid for existing agents.',
-      },
+      roundPlanSubmission: createBaselineRoundPlanV2Example(),
+      legacyRoundPlanSubmission: createLegacyBaselineRoundPlanExample(),
     },
   }
 }

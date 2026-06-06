@@ -2,7 +2,11 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
-import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import { getPart } from '../../../../packages/catalog/src/index.js'
+import type {
+  PartVisualFamily,
+  TeamRole,
+} from '../../../../packages/schemas/src/index.js'
 import { attachMesh } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
 import { createDefaultWeaponPart } from './babylonDefaultWeaponPart'
@@ -19,19 +23,17 @@ import type {
   WeaponPartRenderer,
 } from './babylonWeaponPartTypes'
 
-type WeaponRendererDefinition = {
-  includes: string[]
-  render: WeaponPartRenderer
-}
-
-const WEAPON_RENDERER_DEFINITIONS: WeaponRendererDefinition[] = [
-  { includes: ['Spinner', 'Saw'], render: createSpinnerWeaponPart },
-  { includes: ['Hammer'], render: createHammerWeaponPart },
-  { includes: ['Net'], render: createNetWeaponPart },
-  { includes: ['Turret'], render: createTurretWeaponPart },
-  { includes: ['Spear'], render: createSpearWeaponPart },
-  { includes: ['Flipper', 'Grabber', 'Ram'], render: createGrabberWeaponPart },
-]
+const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRenderer>([
+  ['flipper', createGrabberWeaponPart],
+  ['grabber', createGrabberWeaponPart],
+  ['hammer', createHammerWeaponPart],
+  ['net', createNetWeaponPart],
+  ['ram', createGrabberWeaponPart],
+  ['saw', createSpinnerWeaponPart],
+  ['spear', createSpearWeaponPart],
+  ['spinner', createSpinnerWeaponPart],
+  ['turret', createTurretWeaponPart],
+])
 
 export function createWeaponPart(
   scene: Scene,
@@ -63,9 +65,11 @@ export function createWeaponPart(
 }
 
 function weaponRendererFor(partId: string): WeaponPartRenderer {
-  return WEAPON_RENDERER_DEFINITIONS.find(({ includes }) =>
-    includes.some((token) => partId.includes(token)),
-  )?.render ?? createDefaultWeaponPart
+  const visualFamily = getPart(partId)?.visual.visualFamily
+
+  return visualFamily
+    ? WEAPON_RENDERERS_BY_VISUAL_FAMILY.get(visualFamily) ?? createDefaultWeaponPart
+    : createDefaultWeaponPart
 }
 
 function createWeaponMount({

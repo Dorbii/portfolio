@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
-import { Engine } from '@babylonjs/core/Engines/engine'
-import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
-import { PointLight } from '@babylonjs/core/Lights/pointLight'
-import { GlowLayer } from '@babylonjs/core/Layers/glowLayer'
-import { Color3, Color4 } from '@babylonjs/core/Maths/math.color'
+import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
-import { Scene } from '@babylonjs/core/scene'
 import type {
   ArenaConfig,
   TeamRole,
@@ -33,6 +26,20 @@ import {
 } from './babylonReplayEffects'
 import { updateCamera } from './babylonReplayCamera'
 import {
+  BABYLON_RENDERER_BUDGETS,
+  createBabylonRendererBudgetState,
+} from './babylonRendererBudgets'
+import {
+  createBabylonRendererCore,
+  createRendererGlow,
+  createRendererStats,
+  createReplayLightingPreset,
+  disposeBabylonRendererCore,
+  isBabylonRendererSupported,
+  type BabylonRendererCore,
+  type BabylonRendererStats,
+} from './babylonRendererKit'
+import {
   buildReplayFrame,
   type CameraPreset,
 } from './replayMapping'
@@ -42,10 +49,7 @@ import {
   type ReplayBotBlueprints,
 } from './replayVisualProfile'
 
-type SceneResources = {
-  engine: Engine
-  scene: Scene
-  camera: ArcRotateCamera
+type SceneResources = BabylonRendererCore & {
   bots: Record<TeamRole, ReturnType<typeof createBotNode>>
   botProfiles: Record<TeamRole, BotVisualProfile>
   effectPool: EffectPool
@@ -58,15 +62,7 @@ type RendererState = {
   message?: string
 }
 
-type ReplaySceneStats = {
-  activeIndices: number
-  activeMeshes: number
-  fps: number
-  materials: number
-  meshes: number
-  textures: number
-  totalVertices: number
-}
+type ReplaySceneStats = BabylonRendererStats
 
 type ReplayDebugFocusOptions = {
   alpha?: number
@@ -124,7 +120,7 @@ export function BabylonReplayScene({
     let statsFrame = 0
 
     try {
-      if (!Engine.isSupported()) {
+      if (!isBabylonRendererSupported()) {
         setRendererState({
           status: 'unavailable',
           message: 'WebGL is not available in this browser context.',
@@ -133,48 +129,23 @@ export function BabylonReplayScene({
         return undefined
       }
 
-      const engine = new Engine(canvas, true, {
-        antialias: true,
-        preserveDrawingBuffer: true,
-        stencil: true,
+      const core = createBabylonRendererCore(canvas, {
+        camera: {
+          alpha: -Math.PI / 2,
+          beta: 1.05,
+          lowerRadiusLimit: 4,
+          name: 'replay-camera',
+          radius: Math.max(arena.width, arena.height) * 0.9,
+          target: Vector3.Zero(),
+          upperRadiusLimit: Math.max(arena.width, arena.height) * 1.7,
+          wheelPrecision: 28,
+        },
+        clearColor: new Color4(0.03, 0.04, 0.04, 1),
       })
-      const scene = new Scene(engine)
-      scene.clearColor = new Color4(0.03, 0.04, 0.04, 1)
+      const { camera, engine, scene } = core
 
-      const camera = new ArcRotateCamera(
-        'replay-camera',
-        -Math.PI / 2,
-        1.05,
-        Math.max(arena.width, arena.height) * 0.9,
-        Vector3.Zero(),
-        scene,
-      )
       camera.attachControl(canvas, true)
-      camera.lowerRadiusLimit = 4
-      camera.upperRadiusLimit = Math.max(arena.width, arena.height) * 1.7
-      camera.wheelPrecision = 28
-
-      const hemi = new HemisphericLight('hemi', new Vector3(0, 1, 0), scene)
-      const key = new DirectionalLight('key', new Vector3(-0.45, -0.9, 0.4), scene)
-      const fill = new DirectionalLight('fill', new Vector3(0.35, -0.75, -0.35), scene)
-      const accent = new PointLight('accent', new Vector3(0, 3.8, 0), scene)
-      const rim = new PointLight('rim', new Vector3(0, 1.4, 0), scene)
-      const redSide = new PointLight('red-side', new Vector3(-arena.width * 0.42, 2.1, 0), scene)
-      const blueSide = new PointLight('blue-side', new Vector3(arena.width * 0.42, 2.1, 0), scene)
-
-      hemi.intensity = 0.48
-      key.intensity = 1.05
-      fill.intensity = 0.38
-      accent.intensity = 0.58
-      rim.intensity = 0.34
-      redSide.intensity = 0.65
-      blueSide.intensity = 0.65
-      redSide.diffuse = Color3.FromHexString('#ff4356')
-      blueSide.diffuse = Color3.FromHexString('#4ca9ff')
-      accent.diffuse = Color3.FromHexString('#ffd36a')
-
-      accent.position = new Vector3(0, 5.8, 0)
-      rim.position = new Vector3(0, 5.1, -3)
+      createReplayLightingPreset(scene, arena.width)
 
       const teamMaterials = createTeamMaterials(scene)
       const hazards = createArena(scene, arena)
@@ -185,11 +156,9 @@ export function BabylonReplayScene({
       const botProfiles = createBotVisualProfiles(botBlueprints)
       const effectPool = createEffectPool(scene)
       const centerSpinner = createCenterSpinner(scene)
-      const glow = new GlowLayer('replay-glow', scene)
-
-      glow.intensity = 0.32
+      createRendererGlow(scene, 'replay-glow', 0.32)
       const replayDebugApi: ReplaySceneDebugApi = {
-        getStats: () => createReplaySceneStats(scene, engine),
+        getStats: () => createRendererStats(scene, engine),
       }
 
       if (import.meta.env.DEV) {
@@ -205,9 +174,7 @@ export function BabylonReplayScene({
       window.AgentArenaReplayDebug = replayDebugApi
 
       resources = {
-        engine,
-        scene,
-        camera,
+        ...core,
         bots,
         botProfiles,
         effectPool,
@@ -277,8 +244,7 @@ export function BabylonReplayScene({
           delete window.AgentArenaReplayDebug
         }
         resourcesRef.current = null
-        resources?.scene.dispose()
-        resources?.engine.dispose()
+        disposeBabylonRendererCore(resources)
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Replay renderer failed to start.'
@@ -286,8 +252,7 @@ export function BabylonReplayScene({
       delete window.AgentArenaReplayDebug
       setSceneStats(null)
       resourcesRef.current = null
-      resources?.scene.dispose()
-      resources?.engine.dispose()
+      disposeBabylonRendererCore(resources)
 
       return undefined
     }
@@ -310,10 +275,27 @@ export function BabylonReplayScene({
     resources.centerSpinner.rotation.y = time * 4
   }, [arena, cameraPreset, immediateCamera, timeline, time])
 
+  const rendererBudgetState = sceneStats
+    ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.replayPreview)
+    : null
+
   return (
     <div
       className="babylon-stage"
       data-renderer-state={rendererState.status}
+      data-renderer-active-meshes={sceneStats?.activeMeshes}
+      data-renderer-budget-active-meshes={BABYLON_RENDERER_BUDGETS.replayPreview.activeMeshes}
+      data-renderer-budget-breaches={rendererBudgetState?.breaches.join('|')}
+      data-renderer-budget-materials={BABYLON_RENDERER_BUDGETS.replayPreview.materials}
+      data-renderer-budget-meshes={BABYLON_RENDERER_BUDGETS.replayPreview.meshes}
+      data-renderer-budget-state={rendererBudgetState?.status}
+      data-renderer-budget-textures={BABYLON_RENDERER_BUDGETS.replayPreview.textures}
+      data-renderer-budget-total-vertices={BABYLON_RENDERER_BUDGETS.replayPreview.totalVertices}
+      data-renderer-fps={sceneStats?.fps.toFixed(1)}
+      data-renderer-materials={sceneStats?.materials}
+      data-renderer-meshes={sceneStats?.meshes}
+      data-renderer-textures={sceneStats?.textures}
+      data-renderer-total-vertices={sceneStats?.totalVertices}
       data-replay-active-meshes={sceneStats?.activeMeshes}
       data-replay-fps={sceneStats?.fps.toFixed(1)}
       data-replay-materials={sceneStats?.materials}
@@ -335,20 +317,6 @@ export function BabylonReplayScene({
       ) : null}
     </div>
   )
-}
-
-function createReplaySceneStats(scene: Scene, engine: Engine): ReplaySceneStats {
-  const fps = engine.getFps()
-
-  return {
-    activeIndices: scene.getActiveIndices(),
-    activeMeshes: scene.getActiveMeshes().length,
-    fps: Number.isFinite(fps) ? fps : 0,
-    materials: scene.materials.length,
-    meshes: scene.meshes.length,
-    textures: scene.textures.length,
-    totalVertices: scene.getTotalVertices(),
-  }
 }
 
 function focusReplayPart(resources: SceneResources, options: ReplayDebugFocusOptions): boolean {

@@ -69,19 +69,116 @@ export function createPartAccents(
     )
   }
 
-  for (let index = 0; index < 4; index += 1) {
-    const x = index % 2 === 0 ? -width * 0.34 : width * 0.34
-    const z = index < 2 ? -depth * 0.34 : depth * 0.34
+  createFastenerRow(scene, parent, materials.trim, `${role}-${blockId}-front-fasteners`, {
+    count: 2,
+    xStart: -width * 0.34,
+    xStep: width * 0.68,
+    y: Math.max(height * 0.7, 0.24),
+    z: depth * 0.34,
+  })
+  createFastenerRow(scene, parent, materials.trim, `${role}-${blockId}-rear-fasteners`, {
+    count: 2,
+    xStart: -width * 0.34,
+    xStep: width * 0.68,
+    y: Math.max(height * 0.7, 0.24),
+    z: -depth * 0.34,
+  })
+
+  if (category === 'utility') {
+    createVentSlats(scene, parent, materials.trim, `${role}-${blockId}-utility-vents`, {
+      count: 4,
+      width: Math.max(width * 0.38, 0.18),
+      y: Math.max(height * 0.54, 0.2),
+      z: -Math.max(depth * 0.36, 0.12),
+    })
+  }
+
+  if (category === 'defense' || category === 'body') {
+    createPanelSeam(scene, parent, materials.trim, `${role}-${blockId}-service-seam`, {
+      width: Math.max(width * 0.58, 0.22),
+      y: Math.max(height * 0.73, 0.25),
+      z: 0,
+    })
+  }
+}
+
+function createFastenerRow(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  name: string,
+  options: {
+    count: number
+    xStart: number
+    xStep: number
+    y: number
+    z: number
+  },
+): void {
+  for (let index = 0; index < options.count; index += 1) {
     const bolt = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-bolt-${index}`,
+      `${name}-${index}`,
       { height: 0.045, diameter: 0.075, tessellation: 8 },
       scene,
     )
 
-    bolt.position.set(x, Math.max(height * 0.7, 0.24), z)
+    bolt.position.set(options.xStart + options.xStep * index, options.y, options.z)
     bolt.rotation.x = Math.PI / 2
-    attachMesh(bolt, parent, materials.trim)
+    attachMesh(bolt, parent, material)
   }
+}
+
+function createVentSlats(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  name: string,
+  options: {
+    count: number
+    width: number
+    y: number
+    z: number
+  },
+): void {
+  for (let index = 0; index < options.count; index += 1) {
+    createBoxDetail(
+      scene,
+      parent,
+      material,
+      `${name}-${index}`,
+      options.width,
+      0.025,
+      0.035,
+      0,
+      options.y,
+      options.z + (index - (options.count - 1) / 2) * 0.09,
+    )
+  }
+}
+
+function createPanelSeam(
+  scene: Scene,
+  parent: TransformNode,
+  material: StandardMaterial,
+  name: string,
+  options: {
+    width: number
+    y: number
+    z: number
+  },
+): void {
+  createBoxDetail(
+    scene,
+    parent,
+    material,
+    name,
+    options.width,
+    0.018,
+    0.032,
+    0,
+    options.y,
+    options.z,
+  )
 }
 
 export function createArmorPanel(

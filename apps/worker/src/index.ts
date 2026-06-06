@@ -104,6 +104,52 @@ export async function handleWorkerRequest(
 export class AgentArenaSession {
   private readonly state: DurableObjectState
 
+  private readonly sessionRoutes: Record<string, SessionRouteSpec> = {
+    claim: {
+      method: 'POST',
+      handle: (request, coordinator) => this.claimRole(request, coordinator),
+    },
+    public: {
+      method: 'GET',
+      handle: (_request, coordinator) => this.publicState(coordinator),
+    },
+    state: {
+      method: 'GET',
+      handle: (request, coordinator) => this.roleState(request, coordinator),
+    },
+    'round-plan': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitRoundPlan(request, coordinator),
+    },
+    chat: {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitChatMessage(request, coordinator),
+    },
+    'private-chat': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitPrivateChatMessage(request, coordinator),
+    },
+    'advance-round': {
+      method: 'POST',
+      handle: (request, coordinator) => this.advanceRound(request, coordinator),
+    },
+    'reset-role': {
+      method: 'POST',
+      handle: (request, coordinator) => this.resetRole(request, coordinator),
+    },
+    replay: {
+      method: 'GET',
+      handle: (_request, coordinator) => this.replay(coordinator),
+    },
+  }
+
+  private readonly roleRoutes: Record<string, RoleRouteSpec> = {
+    bootstrap: {
+      method: 'POST',
+      handle: (request, coordinator, role) => this.bootstrapRole(request, coordinator, role),
+    },
+  }
+
   constructor(state: DurableObjectState) {
     this.state = state
   }
@@ -113,25 +159,7 @@ export class AgentArenaSession {
     const roleRoute = sessionRoleRoute(url.pathname)
 
     if (roleRoute) {
-      if (!isSessionId(roleRoute.sessionId)) {
-        return errorResponse(
-          400,
-          'INVALID_REQUEST',
-          'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
-        )
-      }
-
-      const coordinator = await this.loadSession()
-
-      if (!coordinator) {
-        return errorResponse(404, 'SESSION_NOT_FOUND', 'Session has not been created.')
-      }
-
-      if (roleRoute.action === 'bootstrap' && request.method === 'POST') {
-        return this.bootstrapRole(request, coordinator, roleRoute.role)
-      }
-
-      return errorResponse(404, 'INVALID_ACTION', 'Unsupported role session action.')
+      return this.dispatchRoleRoute(request, roleRoute)
     }
 
     const route = sessionRoute(url.pathname)
@@ -140,12 +168,38 @@ export class AgentArenaSession {
       return errorResponse(404, 'INVALID_REQUEST', 'Session route not found.')
     }
 
+    return this.dispatchSessionRoute(request, route)
+  }
+
+  private async dispatchRoleRoute(
+    request: Request,
+    route: NonNullable<ReturnType<typeof sessionRoleRoute>>,
+  ): Promise<Response> {
     if (!isSessionId(route.sessionId)) {
-      return errorResponse(
-        400,
-        'INVALID_REQUEST',
-        'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
-      )
+      return invalidDurableObjectSessionIdResponse()
+    }
+
+    const coordinator = await this.loadSession()
+
+    if (!coordinator) {
+      return errorResponse(404, 'SESSION_NOT_FOUND', 'Session has not been created.')
+    }
+
+    const spec = this.roleRoutes[route.action]
+
+    if (!spec || spec.method !== request.method) {
+      return errorResponse(404, 'INVALID_ACTION', 'Unsupported role session action.')
+    }
+
+    return spec.handle(request, coordinator, route.role)
+  }
+
+  private async dispatchSessionRoute(
+    request: Request,
+    route: NonNullable<ReturnType<typeof sessionRoute>>,
+  ): Promise<Response> {
+    if (!isSessionId(route.sessionId)) {
+      return invalidDurableObjectSessionIdResponse()
     }
 
     if (route.action === 'create' && request.method === 'POST') {
@@ -158,50 +212,11 @@ export class AgentArenaSession {
       return errorResponse(404, 'SESSION_NOT_FOUND', 'Session has not been created.')
     }
 
-    if (route.action === 'claim' && request.method === 'POST') {
-      return this.claimRole(request, coordinator)
-    }
+    const spec = this.sessionRoutes[route.action]
 
-    if (route.action === 'public' && request.method === 'GET') {
-      const publicState = coordinator.getPublicState()
-      await this.saveSession(coordinator)
-
-      return jsonResponse(publicState)
-    }
-
-    if (route.action === 'state' && request.method === 'GET') {
-      const result = await coordinator.getRoleStateForToken(bearerToken(request) ?? '')
-
-      return this.sessionResultResponse(coordinator, result)
-    }
-
-    if (route.action === 'round-plan' && request.method === 'POST') {
-      return this.submitRoundPlan(request, coordinator)
-    }
-
-    if (route.action === 'chat' && request.method === 'POST') {
-      return this.submitChatMessage(request, coordinator)
-    }
-
-    if (route.action === 'private-chat' && request.method === 'POST') {
-      return this.submitPrivateChatMessage(request, coordinator)
-    }
-
-    if (route.action === 'advance-round' && request.method === 'POST') {
-      return this.advanceRound(request, coordinator)
-    }
-
-    if (route.action === 'reset-role' && request.method === 'POST') {
-      return this.resetRole(request, coordinator)
-    }
-
-    if (route.action === 'replay' && request.method === 'GET') {
-      const result = coordinator.getReplay()
-
-      return this.sessionResultResponse(coordinator, result)
-    }
-
-    return errorResponse(404, 'INVALID_ACTION', 'Unsupported session action.')
+    return !spec || spec.method !== request.method
+      ? errorResponse(404, 'INVALID_ACTION', 'Unsupported session action.')
+      : spec.handle(request, coordinator)
   }
 
   private async createSession(request: Request, sessionId: string): Promise<Response> {
@@ -325,6 +340,26 @@ export class AgentArenaSession {
     )
   }
 
+  private async publicState(coordinator: SessionCoordinator): Promise<Response> {
+    const publicState = coordinator.getPublicState()
+    await this.saveSession(coordinator)
+
+    return jsonResponse(publicState)
+  }
+
+  private async roleState(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const result = await coordinator.getRoleStateForToken(bearerToken(request) ?? '')
+
+    return this.sessionResultResponse(coordinator, result)
+  }
+
+  private async replay(coordinator: SessionCoordinator): Promise<Response> {
+    return this.sessionResultResponse(coordinator, coordinator.getReplay())
+  }
+
   private async submitChatMessage(
     request: Request,
     coordinator: SessionCoordinator,
@@ -432,6 +467,28 @@ export class AgentArenaSession {
   private async saveSession(coordinator: SessionCoordinator): Promise<void> {
     await this.state.storage.put(STORAGE_KEY, coordinator.exportState())
   }
+}
+
+type SessionRouteSpec = {
+  method: string
+  handle: (request: Request, coordinator: SessionCoordinator) => Promise<Response>
+}
+
+type RoleRouteSpec = {
+  method: string
+  handle: (
+    request: Request,
+    coordinator: SessionCoordinator,
+    role: TeamRole,
+  ) => Promise<Response>
+}
+
+function invalidDurableObjectSessionIdResponse(): Response {
+  return errorResponse(
+    400,
+    'INVALID_REQUEST',
+    'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
+  )
 }
 
 export default {

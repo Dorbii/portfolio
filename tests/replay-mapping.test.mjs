@@ -4,7 +4,11 @@ import test from 'node:test'
 import {
   buildReplayFrame,
   clampReplayTime,
+  compileReplayTimeline,
 } from '../.test-build/apps/web/src/replay/replayMapping.js'
+import {
+  activeEffectEventsAt,
+} from '../.test-build/apps/web/src/replay/replayCompiledTimeline.js'
 import {
   calculateTeamFollowFrame,
   calculateBroadcastFrameForBothBotsAndActiveEffect,
@@ -325,6 +329,72 @@ test('replay mapping is deterministic for the same timeline and time', () => {
   const second = buildReplayFrame(timeline, 3.2)
 
   assert.deepEqual(first, second)
+})
+
+test('compiled replay timeline preserves existing frame output', () => {
+  const compiled = compileReplayTimeline(timeline)
+  const rawFrame = buildReplayFrame(timeline, 3.4)
+  const compiledFrame = buildReplayFrame(compiled, 3.4)
+
+  assert.deepEqual(compiledFrame, rawFrame)
+  assert.deepEqual(compiled.events, timeline.events)
+})
+
+test('compiled replay effect lookup stays bounded to active windows', () => {
+  const events = [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [5, 0, 0],
+      rotation: [0, -90, 0],
+    },
+  ]
+
+  for (let index = 0; index < 5000; index += 1) {
+    events.push({
+      t: 0.01 + index * 0.001,
+      type: 'damage',
+      bot: 'red',
+      amount: 1,
+      remainingHealth: 100 - (index % 100),
+      blockId: `armor-${index}`,
+      partId: 'Armor_Front_Plate',
+      partRemainingHealth: 0,
+      partMaxHealth: 12,
+    })
+  }
+
+  events.push({
+    t: 8,
+    type: 'weapon_fire',
+    bot: 'blue',
+    weaponSlot: 'weaponA',
+    targetPosition: [0, 0, 0],
+  })
+
+  const compiled = compileReplayTimeline(createReplayTimeline({
+    round: 1,
+    duration: 10,
+    summary: 'Large inactive history plus one active weapon cue.',
+    events,
+  }))
+  const activeEffects = activeEffectEventsAt(compiled, 8.1)
+  const frame = buildReplayFrame(compiled, 8.1)
+
+  assert.equal(compiled.effectWindows.length, 5001)
+  assert.deepEqual(
+    activeEffects.map(({ event }) => event.type),
+    ['weapon_fire'],
+  )
+  assert.equal(frame.effects.some((effect) => effect.kind === 'weapon_fire'), true)
 })
 
 test('replay mapping clamps time and interpolates active moves', () => {

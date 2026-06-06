@@ -3,6 +3,7 @@ import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import type { WeaponFirePhase } from '../../../../packages/replay/src/index.js'
 import type {
   BotFrameState,
+  IndexedReplayEvent,
   ReplayEffectState,
 } from './replayMappingTypes.js'
 import {
@@ -30,15 +31,51 @@ const WEAPON_STYLES = [
   'net',
 ] as const
 
+type ReplayEffectInputEvent = ReplayEvent | IndexedReplayEvent
+
+export function getReplayEffectWindowSeconds(event: ReplayEvent): number | undefined {
+  if (event.type === 'weapon_fire') {
+    return event.controlCue === 'deploy' ? CONTROL_CUE_WINDOW : WEAPON_WINDOW
+  }
+
+  if (event.type === 'ability' && event.ability === 'laser_lance') {
+    return LASER_LANCE_WINDOW
+  }
+
+  if (event.type === 'ability' && event.ability === 'drone_swarm') {
+    return DRONE_SWARM_WINDOW
+  }
+
+  if (event.type === 'impact') {
+    return DEBRIS_WINDOW
+  }
+
+  if (event.type === 'damage') {
+    return DAMAGE_MARKER_WINDOW
+  }
+
+  if (event.type === 'hazard') {
+    return HAZARD_WINDOW
+  }
+
+  if (event.type === 'part_detach') {
+    return PART_DETACH_WINDOW
+  }
+
+  return undefined
+}
+
 export function buildReplayEffects(
-  events: ReplayEvent[],
+  events: ReplayEffectInputEvent[],
   bots: Record<TeamRole, BotFrameState>,
   time: number,
   resolveBotAtTime: (role: TeamRole, time: number) => BotFrameState,
 ): ReplayEffectState[] {
   const effects: ReplayEffectState[] = []
 
-  events.forEach((event, index) => {
+  events.forEach((entry, fallbackIndex) => {
+    const { event, sequence } = replayEffectEventSource(entry, fallbackIndex)
+
     if (event.type === 'weapon_fire') {
       const age = time - event.t
       const isControlDeploy = event.controlCue === 'deploy'
@@ -60,7 +97,7 @@ export function buildReplayEffects(
         }
 
         effects.push({
-          id: `${index}-weapon-${event.bot}`,
+          id: `${sequence}-weapon-${event.bot}`,
           kind: 'weapon_fire',
           position: firingBot.position,
           rotationY,
@@ -74,7 +111,7 @@ export function buildReplayEffects(
 
         if (isControlDeploy) {
           effects.push({
-            id: `${index}-weapon-control-${event.bot}`,
+            id: `${sequence}-weapon-control-${event.bot}`,
             kind: 'control_net',
             position: firingBot.position,
             rotationY,
@@ -97,7 +134,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= LASER_LANCE_WINDOW) {
         effects.push({
-          id: `${index}-laser-${event.bot}`,
+          id: `${sequence}-laser-${event.bot}`,
           kind: 'laser_lance',
           position: firingBot.position,
           rotationY,
@@ -118,7 +155,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= DRONE_SWARM_WINDOW) {
         effects.push({
-          id: `${index}-drone-swarm-${event.bot}`,
+          id: `${sequence}-drone-swarm-${event.bot}`,
           kind: 'drone_swarm',
           position: firingBot.position,
           rotationY,
@@ -136,7 +173,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= IMPACT_WINDOW) {
         effects.push({
-          id: `${index}-impact`,
+          id: `${sequence}-impact`,
           kind: 'impact',
           position: event.position,
           age,
@@ -145,7 +182,7 @@ export function buildReplayEffects(
           damage: event.damage,
         })
         effects.push({
-          id: `${index}-smoke`,
+          id: `${sequence}-smoke`,
           kind: 'smoke',
           position: [event.position[0], event.position[1] + 0.35, event.position[2]],
           age,
@@ -157,7 +194,7 @@ export function buildReplayEffects(
       if (age >= 0 && age <= DEBRIS_WINDOW) {
         for (let debrisIndex = 0; debrisIndex < 3; debrisIndex += 1) {
           effects.push({
-            id: `${index}-debris-${debrisIndex}`,
+            id: `${sequence}-debris-${debrisIndex}`,
             kind: 'debris',
             position: event.position,
             age,
@@ -174,7 +211,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= DAMAGE_MARKER_WINDOW) {
         effects.push({
-          id: `${index}-damage-${event.bot}`,
+          id: `${sequence}-damage-${event.bot}`,
           kind: 'damage_marker',
           position: bots[event.bot].position,
           age,
@@ -190,7 +227,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= HAZARD_WINDOW) {
         effects.push({
-          id: `${index}-hazard-${event.hazard}`,
+          id: `${sequence}-hazard-${event.hazard}`,
           kind: 'hazard',
           position: event.position,
           age,
@@ -200,7 +237,7 @@ export function buildReplayEffects(
           label: event.hazard,
         })
         effects.push({
-          id: `${index}-hazard-damage-${event.bot}`,
+          id: `${sequence}-hazard-damage-${event.bot}`,
           kind: 'damage_marker',
           position: event.position,
           age,
@@ -214,7 +251,7 @@ export function buildReplayEffects(
 
     if (event.type === 'knockout' && event.t <= time) {
       effects.push({
-        id: `${index}-knockout-${event.bot}`,
+        id: `${sequence}-knockout-${event.bot}`,
         kind: 'knockout',
         position: bots[event.bot].position,
         age: time - event.t,
@@ -229,7 +266,7 @@ export function buildReplayEffects(
 
       if (age >= 0 && age <= PART_DETACH_WINDOW) {
         effects.push({
-          id: `${index}-part-detach-focus-${event.blockId}`,
+          id: `${sequence}-part-detach-focus-${event.blockId}`,
           kind: 'part_detach',
           position: event.position,
           age,
@@ -238,7 +275,7 @@ export function buildReplayEffects(
           label: event.blockId,
         })
         effects.push({
-          id: `${index}-part-detach-${event.blockId}`,
+          id: `${sequence}-part-detach-${event.blockId}`,
           kind: 'debris',
           position: event.position,
           age,
@@ -252,6 +289,20 @@ export function buildReplayEffects(
   })
 
   return effects
+}
+
+function replayEffectEventSource(
+  input: ReplayEffectInputEvent,
+  fallbackIndex: number,
+): IndexedReplayEvent {
+  if ('event' in input) {
+    return input
+  }
+
+  return {
+    event: input,
+    sequence: fallbackIndex,
+  }
 }
 
 function normalizeWeaponStyle(style: string | undefined): string | undefined {

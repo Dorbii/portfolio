@@ -8,7 +8,6 @@ import type {
 import {
   AgentArenaApiError,
   AgentArenaClient,
-  createAgentArenaRoleApi,
   createSafeAgentHash,
   clearStoredRoleToken,
   readStoredRoleToken,
@@ -18,13 +17,15 @@ import {
 } from './agentClient'
 import type { UiError } from './AgentCockpitPanels'
 import {
-  isTerminalPhase,
   toUiError,
   type LoadStatus,
 } from './agentCockpitViewState'
+import { installAgentArenaRoleApi } from './agentRoleApiInstaller'
+import {
+  shouldPollAgentRoleState,
+  startAgentRoleStatePolling,
+} from './agentRolePolling'
 import { capitalize, formatLabel } from '../shared/format'
-
-export const ROLE_STATE_POLL_MS = 4_000
 
 const autoBootstrapAttempts = new Set<string>()
 
@@ -97,15 +98,15 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [loadState, roleToken])
 
   useEffect(() => {
-    if ((!roleToken && !invite.claimToken) || isTerminalPhase(roleState?.phase)) {
+    if (!shouldPollAgentRoleState({
+      claimToken: invite.claimToken,
+      phase: roleState?.phase,
+      roleToken,
+    })) {
       return
     }
 
-    const intervalId = window.setInterval(() => {
-      void loadState({ quiet: true })
-    }, ROLE_STATE_POLL_MS)
-
-    return () => window.clearInterval(intervalId)
+    return startAgentRoleStatePolling(loadState)
   }, [invite.claimToken, loadState, roleState?.phase, roleToken])
 
   const connectRole = useCallback(async (
@@ -333,54 +334,58 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [agentName, client, invite])
 
   useEffect(() => {
-    const api = createAgentArenaRoleApi(client, () => roleStateRef.current, {
-      bootstrapRole: async (input) => {
-        const bootstrap = await connectRole({
-          ...input,
-          throwOnError: true,
-        })
-
-        if (!bootstrap) {
-          throw new AgentArenaApiError({
-            status: 409,
-            message: 'Role bootstrap did not complete.',
+    return installAgentArenaRoleApi({
+      client,
+      getCurrentState: () => roleStateRef.current,
+      invite,
+      overrides: {
+        bootstrapRole: async (input) => {
+          const bootstrap = await connectRole({
+            ...input,
+            throwOnError: true,
           })
-        }
 
-        return bootstrap
-      },
-      waitForNextAction,
-      waitForNextSubmissionWindow,
-      waitForPhase,
-      waitForStateChange,
-      claimRole: async (input) => {
-        const claim = await claimRole({
-          ...input,
-          throwOnError: true,
-        })
+          if (!bootstrap) {
+            throw new AgentArenaApiError({
+              status: 409,
+              message: 'Role bootstrap did not complete.',
+            })
+          }
 
-        if (!claim) {
-          throw new AgentArenaApiError({
-            status: 409,
-            message: 'Role claim did not complete.',
+          return bootstrap
+        },
+        waitForNextAction,
+        waitForNextSubmissionWindow,
+        waitForPhase,
+        waitForStateChange,
+        claimRole: async (input) => {
+          const claim = await claimRole({
+            ...input,
+            throwOnError: true,
           })
-        }
 
-        return claim
+          if (!claim) {
+            throw new AgentArenaApiError({
+              status: 409,
+              message: 'Role claim did not complete.',
+            })
+          }
+
+          return claim
+        },
       },
+      setCurrentState: setRoleState,
+      setRoleToken: (token) => {
+        roleTokenRef.current = token
+        setRoleToken(token)
+      },
+      storage: window.sessionStorage,
     })
-
-    window.AgentArenaRole = api
-
-    return () => {
-      if (window.AgentArenaRole === api) {
-        delete window.AgentArenaRole
-      }
-    }
   }, [
     claimRole,
     client,
     connectRole,
+    invite,
     waitForNextAction,
     waitForNextSubmissionWindow,
     waitForPhase,

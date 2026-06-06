@@ -5,9 +5,17 @@ import type {
   ReplayTimeline,
 } from '../../../../packages/replay/src/index.js'
 import type { TeamRole, Vector3 } from '../../../../packages/schemas/src/index.js'
+import {
+  activeEffectEventsAt,
+  compileReplayTimeline,
+  isCompiledReplayTimeline,
+  replayEventsAtOrBefore,
+  type CompiledReplayTimeline,
+} from './replayCompiledTimeline.js'
 import { buildReplayEffects } from './replayEffectMapping.js'
 import type {
   BotFrameState,
+  IndexedReplayEvent,
   PartDetachMotionFrameState,
   PartFrameState,
   ReplayEndState,
@@ -29,6 +37,8 @@ export type {
   ReplayEndState,
   ReplayVisualFrame,
 } from './replayMappingTypes.js'
+export { compileReplayTimeline }
+export type { CompiledReplayTimeline }
 
 const DEFAULT_MOVE_DURATION = 1
 const MIN_MOVE_DURATION = 0.08
@@ -59,55 +69,50 @@ const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
   },
 }
 
-export function clampReplayTime(timeline: ReplayTimeline, time: number): number {
+export function clampReplayTime(timeline: Pick<ReplayTimeline, 'duration'>, time: number): number {
   return Math.min(Math.max(time, 0), timeline.duration)
 }
 
 export function buildReplayFrame(
-  timeline: ReplayTimeline,
+  timeline: ReplayTimeline | CompiledReplayTimeline,
   requestedTime: number,
 ): ReplayVisualFrame {
-  const time = clampReplayTime(timeline, requestedTime)
-  const events = sortedEvents(timeline.events)
+  const compiled = isCompiledReplayTimeline(timeline)
+    ? timeline
+    : compileReplayTimeline(timeline)
+  const time = clampReplayTime(compiled, requestedTime)
   const bots = {
-    red: resolveBotState(events, 'red', time),
-    blue: resolveBotState(events, 'blue', time),
+    red: resolveBotState(compiled.roleEvents.red, 'red', time),
+    blue: resolveBotState(compiled.roleEvents.blue, 'blue', time),
   }
   const parts = {
-    red: resolvePartStates(events, 'red', time),
-    blue: resolvePartStates(events, 'blue', time),
+    red: resolvePartStates(compiled.roleEvents.red, 'red', time),
+    blue: resolvePartStates(compiled.roleEvents.blue, 'blue', time),
   }
 
   return {
     time,
-    progress: timeline.duration > 0 ? time / timeline.duration : 0,
+    progress: compiled.duration > 0 ? time / compiled.duration : 0,
     bots,
     parts,
-    effects: buildReplayEffects(events, bots, time, (role, eventTime) =>
-      resolveBotState(events, role, eventTime),
+    effects: buildReplayEffects(
+      activeEffectEventsAt(compiled, time),
+      bots,
+      time,
+      (role, eventTime) => resolveBotState(compiled.roleEvents[role], role, eventTime),
     ),
-    endState: resolveEndState(events, time),
+    endState: resolveEndState(compiled.knockoutEvents, time),
   }
 }
 
-function sortedEvents(events: ReplayEvent[]): ReplayEvent[] {
-  return [...events].sort((left, right) => {
-    if (left.t !== right.t) {
-      return left.t - right.t
-    }
-
-    return left.type.localeCompare(right.type)
-  })
-}
-
 function resolveBotState(
-  events: ReplayEvent[],
+  events: IndexedReplayEvent[],
   role: TeamRole,
   time: number,
 ): BotFrameState {
   let state = cloneBotState(DEFAULT_BOT_STATE[role])
 
-  for (const event of events) {
+  for (const { event } of replayEventsAtOrBefore(events, time)) {
     if (event.t > time) {
       break
     }
@@ -264,13 +269,13 @@ function shortestAngleDelta(from: number, to: number): number {
 }
 
 function resolvePartStates(
-  events: ReplayEvent[],
+  events: IndexedReplayEvent[],
   role: TeamRole,
   time: number,
 ): Record<string, PartFrameState> {
   const parts: Record<string, PartFrameState> = {}
 
-  for (const event of events) {
+  for (const { event } of replayEventsAtOrBefore(events, time)) {
     if (event.t > time) {
       break
     }
@@ -473,9 +478,9 @@ function deterministicUnit(value: string): number {
   return (hash % 10000) / 10000
 }
 
-function resolveEndState(events: ReplayEvent[], time: number): ReplayEndState | undefined {
+function resolveEndState(events: IndexedReplayEvent[], time: number): ReplayEndState | undefined {
   const knockout = findLastEvent(
-    events,
+    replayEventsAtOrBefore(events, time),
     (event) => event.type === 'knockout' && event.t <= time,
   )
 
@@ -491,11 +496,11 @@ function resolveEndState(events: ReplayEvent[], time: number): ReplayEndState | 
 }
 
 function findLastEvent(
-  events: ReplayEvent[],
+  events: IndexedReplayEvent[],
   predicate: (event: ReplayEvent) => boolean,
 ): ReplayEvent | undefined {
   for (let index = events.length - 1; index >= 0; index -= 1) {
-    const event = events[index]
+    const { event } = events[index]
 
     if (predicate(event)) {
       return event

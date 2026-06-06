@@ -5,14 +5,30 @@ import type {
   SessionPhase,
 } from '../../../../packages/schemas/src/index.js'
 import { createBaselineRoundPlan } from './baselineRoundPlan.js'
-import type { AgentArenaClient } from './agentClient.js'
 import type {
   AgentArenaRoleApi,
   AgentArenaValidAction,
   AgentWaitOptions,
 } from './agentClientTypes.js'
+import { TERMINAL_PHASES } from './agentPhases.js'
 
-export const TERMINAL_PHASES = new Set<SessionPhase>(['session_complete', 'expired'])
+export type AgentArenaRoleClient = {
+  bootstrapRole: AgentArenaRoleApi['bootstrapRole']
+  claimInviteRole: AgentArenaRoleApi['claimRole']
+  getChatLog: AgentArenaRoleApi['getChatLog']
+  getContract: AgentArenaRoleApi['getContract']
+  getMatchLog: AgentArenaRoleApi['getMatchLog']
+  getPrivateChatLog: AgentArenaRoleApi['getPrivateChatLog']
+  getState: AgentArenaRoleApi['getState']
+  submitChatMessage: AgentArenaRoleApi['submitChatMessage']
+  submitFallbackRoundPlan: AgentArenaRoleApi['submitFallbackRoundPlan']
+  submitPrivateChatMessage: AgentArenaRoleApi['submitPrivateChatMessage']
+  submitRoundPlan: AgentArenaRoleApi['submitRoundPlan']
+  waitForNextAction: AgentArenaRoleApi['waitForNextAction']
+  waitForNextSubmissionWindow: AgentArenaRoleApi['waitForNextSubmissionWindow']
+  waitForPhase: AgentArenaRoleApi['waitForPhase']
+  waitForStateChange: AgentArenaRoleApi['waitForStateChange']
+}
 
 export function getValidAgentActions(
   state: RolePrivateState | null,
@@ -125,20 +141,22 @@ export function getValidAgentActions(
   ]
 }
 
+export type AgentArenaRoleApiOptions = {
+  bootstrapRole?: (input?: { agentName?: string }) => Promise<AgentBootstrapResponse>
+  claimRole?: (input?: { agentName?: string }) => Promise<RoleClaimResponse>
+  waitForNextAction?: (options?: AgentWaitOptions) => Promise<AgentBootstrapResponse>
+  waitForNextSubmissionWindow?: (options?: AgentWaitOptions) => Promise<RolePrivateState>
+  waitForPhase?: (phase: SessionPhase, options?: AgentWaitOptions) => Promise<RolePrivateState>
+  waitForStateChange?: (
+    previousStateVersion?: string,
+    options?: AgentWaitOptions,
+  ) => Promise<RolePrivateState>
+}
+
 export function createAgentArenaRoleApi(
-  client: AgentArenaClient,
+  client: AgentArenaRoleClient,
   getCurrentState: () => RolePrivateState | null,
-  options: {
-    bootstrapRole?: (input?: { agentName?: string }) => Promise<AgentBootstrapResponse>
-    claimRole?: (input?: { agentName?: string }) => Promise<RoleClaimResponse>
-    waitForNextAction?: (options?: AgentWaitOptions) => Promise<AgentBootstrapResponse>
-    waitForNextSubmissionWindow?: (options?: AgentWaitOptions) => Promise<RolePrivateState>
-    waitForPhase?: (phase: SessionPhase, options?: AgentWaitOptions) => Promise<RolePrivateState>
-    waitForStateChange?: (
-      previousStateVersion?: string,
-      options?: AgentWaitOptions,
-    ) => Promise<RolePrivateState>
-  } = {},
+  options: AgentArenaRoleApiOptions = {},
 ): AgentArenaRoleApi {
   return {
     getContract: () => client.getContract(),
