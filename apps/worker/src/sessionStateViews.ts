@@ -6,6 +6,7 @@ import {
   cloneJson,
   rolePublicState,
 } from './sessionSupport.js'
+import { buildCombatTurnDecisionContext } from './sessionCombatDecision.js'
 import type {
   StoredRoleState,
   StoredSessionState,
@@ -47,6 +48,7 @@ export function buildRolePrivateState(
             snapshot: state.combat.snapshot,
             self: role.role === 'red' ? state.combat.snapshot.red : state.combat.snapshot.blue,
             opponent: role.role === 'red' ? state.combat.snapshot.blue : state.combat.snapshot.red,
+            decision: buildCombatTurnDecisionContext(state, role, state.combat),
           },
         }
       : {}),

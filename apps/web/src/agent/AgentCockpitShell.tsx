@@ -2,8 +2,8 @@ import type { AgentInvite } from '../shared/agentInvite.js'
 import { capitalize } from '../shared/format'
 import {
   Button,
-  FormField,
   Panel,
+  StatusBadge,
 } from '../shared/ui'
 import { JsonScriptPanel, SectionTitle } from './AgentCockpitPanels'
 import type { AgentCockpitWorkflow } from './agentCockpitViewState'
@@ -18,6 +18,13 @@ export function AgentCockpitHeader({
   controller: AgentCockpitController
   invite: AgentInvite
 }) {
+  const isObserverCockpit = Boolean(invite.observerToken && !invite.claimToken)
+  const accessLabel = isObserverCockpit
+    ? 'Observer'
+    : controller.canMutateRole
+      ? 'Agent'
+      : 'No key'
+
   return (
     <header className="agent-live-header agent-command-header">
       <div className="agent-title-block">
@@ -25,21 +32,20 @@ export function AgentCockpitHeader({
         <h1>{capitalize(invite.role)} Agent Cockpit</h1>
       </div>
       <div className="agent-command-actions">
-        <FormField label="Agent name">
-          <input
-            value={controller.agentName}
-            onChange={(event) => controller.setAgentName(event.target.value)}
-            maxLength={80}
-          />
-        </FormField>
-        <Button
-          type="button"
-          variant="primary"
-          onClick={() => void controller.connectRole()}
-          disabled={!controller.canClaimRole}
-        >
-          {controller.claimButtonLabel}
-        </Button>
+        <div className="agent-observer-access" aria-label="Cockpit access">
+          <span>Access</span>
+          <StatusBadge tone={controller.hasPlayerKey ? 'ok' : 'warning'}>{accessLabel}</StatusBadge>
+        </div>
+        {!isObserverCockpit ? (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => void controller.connectRole({ agentName: `${invite.role}-agent` })}
+              disabled={!controller.canClaimRole}
+            >
+              {controller.claimButtonLabel}
+            </Button>
+        ) : null}
         <Button
           type="button"
           variant="secondary"
@@ -54,9 +60,9 @@ export function AgentCockpitHeader({
           onClick={() => void controller.clearRoleToken()}
           disabled={!controller.roleToken || controller.isBusy}
         >
-          Clear player key
+          {controller.canMutateRole ? 'Clear player key' : 'Clear stored key'}
         </Button>
-        <a href={`${invite.apiBase}/agent-spec.json`}>agent-spec.json</a>
+        <a className="agent-spec-link" href={`${invite.apiBase}/agent-spec.json`}>agent-spec.json</a>
       </div>
     </header>
   )

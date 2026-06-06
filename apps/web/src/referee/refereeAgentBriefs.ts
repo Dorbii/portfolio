@@ -15,9 +15,11 @@ type RefereeAgentBriefInput = {
 
 export type RefereeAgentBriefs = {
   blueAgentBrief: string
+  blueCockpitUrl: string
   blueInviteUrl: string
   hasAnyInvite: boolean
   redAgentBrief: string
+  redCockpitUrl: string
   redInviteUrl: string
 }
 
@@ -29,20 +31,29 @@ export function createRefereeAgentBriefs({
 }: RefereeAgentBriefInput): RefereeAgentBriefs {
   const redInvite = inviteForRole(invites, 'red')
   const blueInvite = inviteForRole(invites, 'blue')
-  const redInviteUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase)
-  const blueInviteUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase)
+  const redInviteUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'agent')
+  const blueInviteUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'agent')
+  const redCockpitUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'observer')
+  const blueCockpitUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'observer')
 
   return {
     blueAgentBrief: createRoleBrief(blueInvite, blueInviteUrl, activeSessionId, apiBase, publicSession),
+    blueCockpitUrl,
     blueInviteUrl,
     hasAnyInvite: hasInviteForRole(invites, 'red') || hasInviteForRole(invites, 'blue'),
     redAgentBrief: createRoleBrief(redInvite, redInviteUrl, activeSessionId, apiBase, publicSession),
+    redCockpitUrl,
     redInviteUrl,
   }
 }
 
 export function hasInviteForRole(invites: RoleInvite[], role: TeamRole): boolean {
-  return invites.some((invite) => invite.role === role && invite.claimToken.length > 0)
+  return invites.some(
+    (invite) =>
+      invite.role === role &&
+      invite.claimToken.length > 0 &&
+      invite.observerToken.length > 0,
+  )
 }
 
 function inviteForRole(invites: RoleInvite[], role: TeamRole): RoleInvite | undefined {
@@ -53,6 +64,7 @@ function createRoleInviteUrl(
   invite: RoleInvite | undefined,
   activeSessionId: string,
   apiBase: string,
+  kind: 'agent' | 'observer',
 ): string {
   if (!invite || !activeSessionId) {
     return ''
@@ -60,7 +72,9 @@ function createRoleInviteUrl(
 
   return buildInviteUrl({
     role: invite.role,
-    claimToken: invite.claimToken,
+    ...(kind === 'agent'
+      ? { claimToken: invite.claimToken }
+      : { observerToken: invite.observerToken }),
     sessionId: activeSessionId,
     apiBase,
   })

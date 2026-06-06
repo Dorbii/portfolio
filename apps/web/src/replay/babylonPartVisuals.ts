@@ -30,6 +30,7 @@ type WheelVisualPartId =
   | 'Wheel_Small'
   | 'Wheel_Medium'
   | 'Wheel_Large'
+  | 'Wheel_Mecanum'
   | 'Wheel_Omni'
   | 'Wheel_Spiked'
 
@@ -93,6 +94,17 @@ const WHEEL_VISUALS: Record<WheelVisualPartId, WheelVisual> = {
     treadScale: 0.56,
     tessellation: 22,
     rollSpeed: 0.3,
+  },
+  Wheel_Mecanum: {
+    diameterScale: 1.04,
+    widthScale: 1.05,
+    rimScale: 0.14,
+    hubScale: 0.34,
+    motorScale: 0.92,
+    treadCount: 8,
+    treadScale: 0.72,
+    tessellation: 22,
+    rollSpeed: 0.28,
   },
   Wheel_Spiked: {
     diameterScale: 1.0,

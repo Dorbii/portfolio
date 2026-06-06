@@ -42,11 +42,14 @@ export type PartVisualFamily =
   | 'body'
   | 'booster'
   | 'drone'
+  | 'drill'
   | 'flipper'
+  | 'flail'
   | 'grabber'
   | 'gyro'
   | 'hammer'
   | 'leg'
+  | 'light_bar'
   | 'magnet'
   | 'net'
   | 'ram'
@@ -308,6 +311,73 @@ export type ArenaConfig = {
   width: number
   height: number
   activeHazards: string[]
+  topology?: ArenaTopologyDefinition
+}
+
+export type ArenaGridCell = {
+  x: number
+  z: number
+}
+
+export type ArenaGridDefinition = {
+  cellSize: number
+}
+
+export type ArenaZoneShape =
+  | {
+      kind: 'circle'
+      center: [number, number]
+      radius: number
+    }
+  | {
+      kind: 'rect'
+      center: [number, number]
+      size: [number, number]
+    }
+
+export type ArenaSpawnZone = {
+  role: TeamRole
+  shape: ArenaZoneShape
+}
+
+export type ArenaHazardDefinition = {
+  id: string
+  type: string
+  shape: ArenaZoneShape
+  damage: number
+  tags?: string[]
+}
+
+export type ArenaTerrainDefinition = {
+  id: string
+  type: string
+  shape: ArenaZoneShape
+  tags?: string[]
+}
+
+export type ArenaObstacleDefinition = {
+  id: string
+  type: string
+  shape: ArenaZoneShape
+  blocksMovement: boolean
+  tags?: string[]
+}
+
+export type ArenaTopologyDefinition = {
+  grid: ArenaGridDefinition
+  spawnZones: ArenaSpawnZone[]
+  hazards: ArenaHazardDefinition[]
+  terrain: ArenaTerrainDefinition[]
+  obstacles: ArenaObstacleDefinition[]
+}
+
+export type ArenaHazardThreat = {
+  id: string
+  type: string
+  cell: ArenaGridCell
+  distance: number
+  inside: boolean
+  damage: number
 }
 
 export const DEFAULT_ARENA_CONFIG: ArenaConfig = {
@@ -315,6 +385,30 @@ export const DEFAULT_ARENA_CONFIG: ArenaConfig = {
   width: 24,
   height: 16,
   activeHazards: ['floor_saw'],
+  topology: {
+    grid: { cellSize: 1 },
+    spawnZones: [
+      {
+        role: 'red',
+        shape: { kind: 'rect', center: [-6, 0], size: [3, 3] },
+      },
+      {
+        role: 'blue',
+        shape: { kind: 'rect', center: [6, 0], size: [3, 3] },
+      },
+    ],
+    hazards: [
+      {
+        id: 'floor_saw_center',
+        type: 'floor_saw',
+        shape: { kind: 'circle', center: [0, 0], radius: 1.2 },
+        damage: 6,
+        tags: ['center', 'contact_damage'],
+      },
+    ],
+    terrain: [],
+    obstacles: [],
+  },
 }
 
 export type BotCombatStats = {

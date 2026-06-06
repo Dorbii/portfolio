@@ -9,7 +9,6 @@ import {
 } from './agentCockpitViewState'
 import { useAgentChatForms } from './useAgentChatForms'
 import { useAgentRoleSession } from './useAgentRoleSession'
-import { useRoundPlanSubmission } from './useRoundPlanSubmission'
 
 export { ROLE_STATE_POLL_MS } from './agentRolePolling'
 export {
@@ -20,7 +19,6 @@ export {
 
 export function useLiveAgentCockpitController(invite: AgentInvite) {
   const {
-    agentName,
     claimRole,
     connectRole,
     clearRoleToken,
@@ -31,12 +29,10 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     publicState,
     roleState,
     roleToken,
-    setAgentName,
     setLastError,
     setNotice,
     setPublicState,
     setRoleState,
-    setStatus,
     status,
   } = useAgentRoleSession(invite)
   const agentInviteUrl = useMemo(
@@ -65,25 +61,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     setRoleState,
   })
   const {
-    hasLocalDraftEdits,
-    setSubmissionDraft,
-    setSubmissionText,
-    submissionDraft,
-    submissionMode,
-    submissionText,
-    submitRoundPlan,
-    toggleSubmissionMode,
-  } = useRoundPlanSubmission({
-    client,
-    roleState,
-    setLastError,
-    setNotice,
-    setPublicState,
-    setRoleState,
-    setStatus,
-  })
-
-  const {
     externalAgentBriefMarkdown,
     externalAgentBriefScript,
     stateScript,
@@ -99,9 +76,9 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
   )
   const {
     canClaimRole,
+    canMutateRole,
     canPostChat,
     canPostPrivateChat,
-    canSubmitPlan,
     chatLog,
     claimButtonLabel,
     connectionGuidance,
@@ -119,7 +96,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
       createCockpitDerivedState({
         chatMessage,
         chatStatus,
-        hasLocalDraftEdits,
         invite,
         lastError,
         privateChatMessage,
@@ -132,7 +108,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     [
       chatMessage,
       chatStatus,
-      hasLocalDraftEdits,
       invite,
       lastError,
       privateChatMessage,
@@ -160,11 +135,10 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
 
   return {
     agentInviteUrl,
-    agentName,
     canClaimRole,
+    canMutateRole,
     canPostChat,
     canPostPrivateChat,
-    canSubmitPlan,
     chatKind,
     chatLog,
     chatMessage,
@@ -177,7 +151,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     copyExternalAgentBrief,
     externalAgentBriefMarkdown,
     externalAgentBriefScript,
-    hasLocalDraftEdits,
     hasPlayerKey,
     isBusy,
     lastError,
@@ -195,22 +168,14 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     roleHasPrivateChatLog,
     roleState,
     roleToken,
-    setAgentName,
     setChatKind,
     setChatMessage,
     setPrivateChatKind,
     setPrivateChatMessage,
-    setSubmissionDraft,
-    setSubmissionText,
     stateScript,
     status,
     submitChatMessage,
     submitPrivateChatMessage,
-    submitRoundPlan,
-    submissionDraft,
-    submissionMode,
-    submissionText,
-    toggleSubmissionMode,
     workflow,
   }
 }

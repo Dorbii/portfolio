@@ -44,6 +44,8 @@ function inferVisualDescriptor(input: PartInput): PartVisualDescriptor {
 }
 
 function inferVisualFamily(input: PartInput): PartVisualFamily {
+  if (input.id.includes('Drill')) return 'drill'
+  if (input.id.includes('Flail')) return 'flail'
   if (input.id.includes('Spinner')) return 'spinner'
   if (input.id.includes('Saw')) return 'saw'
   if (input.id.includes('Hammer')) return 'hammer'
@@ -54,6 +56,7 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Grabber')) return 'grabber'
   if (input.id.includes('Ram')) return 'ram'
   if (input.id.includes('Tread')) return 'tread'
+  if (input.id.includes('Mecanum')) return 'wheel'
   if (input.id.includes('Wheel')) return 'wheel'
   if (input.id.includes('Leg')) return 'leg'
   if (input.id.includes('Wedge')) return 'wedge'
@@ -65,13 +68,16 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Anchor')) return 'anchor'
   if (input.id.includes('Smoke')) return 'smoke'
   if (input.id.includes('Sensor')) return 'sensor'
-  if (input.id.includes('RepairKit')) return 'battery'
+  if (input.id.includes('EnergyCore') || input.id.includes('Battery') || input.id.includes('RepairKit')) return 'battery'
+  if (input.id.includes('AIModule')) return 'sensor'
   if (input.id.includes('Drone')) return 'drone'
+  if (input.id.includes('LightBar')) return 'light_bar'
 
   return 'body'
 }
 
 function inferMaterialRole(input: PartInput): PartMaterialRole {
+  if (input.id.includes('LightBar')) return 'glass_emissive'
   if (input.category === 'mobility') return 'black_rubber'
   if (input.category === 'weapon') return 'weapon_steel'
   if (input.category === 'defense') return 'painted_armor'
@@ -249,6 +255,17 @@ export const PART_CATALOG: PartDefinition[] = [
     stats: { drive: 9, traction: 3, control: 2, chaos: 1 },
   }),
   part({
+    id: 'Wheel_Mecanum',
+    category: 'mobility',
+    displayName: 'Mecanum Wheel',
+    cost: 16,
+    mass: 5,
+    durability: 12,
+    size: [1, 1, 1],
+    controls: { movement: true },
+    stats: { drive: 8, traction: 3, control: 4, chaos: 2 },
+  }),
+  part({
     id: 'Wheel_Spiked',
     category: 'mobility',
     displayName: 'Spiked Wheel',
@@ -360,6 +377,30 @@ export const PART_CATALOG: PartDefinition[] = [
     controls: { weapon: true },
     stats: { weapon: 10, control: 2 },
     behavior: PART_BEHAVIORS.saw,
+  }),
+  part({
+    id: 'Weapon_Drill',
+    category: 'weapon',
+    displayName: 'Armor Drill',
+    cost: 34,
+    mass: 11,
+    durability: 20,
+    size: [1, 1, 2],
+    controls: { weapon: true },
+    stats: { weapon: 12, control: 3, stability: -1 },
+    behavior: PART_BEHAVIORS.saw,
+  }),
+  part({
+    id: 'Weapon_Flail',
+    category: 'weapon',
+    displayName: 'Chain Flail',
+    cost: 36,
+    mass: 13,
+    durability: 18,
+    size: [1, 1, 2],
+    controls: { weapon: true },
+    stats: { weapon: 14, chaos: 5, control: -1 },
+    behavior: PART_BEHAVIORS.spinner,
   }),
   part({
     id: 'Weapon_Net',
@@ -518,6 +559,38 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.gyro,
   }),
   part({
+    id: 'Utility_EnergyCore',
+    category: 'utility',
+    displayName: 'Energy Core',
+    cost: 24,
+    mass: 5,
+    durability: 12,
+    size: [1, 1, 1],
+    stats: { control: 2, drive: 1, stability: 2 },
+  }),
+  part({
+    id: 'Utility_Battery',
+    category: 'utility',
+    displayName: 'Battery Pack',
+    cost: 12,
+    mass: 5,
+    durability: 12,
+    size: [1, 1, 1],
+    stats: { stability: 2, control: 1 },
+  }),
+  part({
+    id: 'Utility_AIModule',
+    category: 'utility',
+    displayName: 'AI Module',
+    cost: 26,
+    mass: 3,
+    durability: 8,
+    size: [1, 1, 1],
+    controls: { utility: true },
+    stats: { control: 7, chaos: 1 },
+    behavior: PART_BEHAVIORS.sensor,
+  }),
+  part({
     id: 'Utility_Magnet',
     category: 'utility',
     displayName: 'Magnet',
@@ -638,6 +711,16 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 4,
     size: [1, 1, 1],
     stats: { style: 5 },
+  }),
+  part({
+    id: 'Style_LightBar',
+    category: 'style',
+    displayName: 'Light Bar',
+    cost: 6,
+    mass: 1,
+    durability: 4,
+    size: [1, 1, 1],
+    stats: { style: 4, control: 1 },
   }),
   part({
     id: 'Style_Crown',

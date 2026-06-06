@@ -11,6 +11,8 @@ import { attachMesh } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
 import { createDefaultWeaponPart } from './babylonDefaultWeaponPart'
 import {
+  createDrillWeaponPart,
+  createFlailWeaponPart,
   createFlipperWeaponPart,
   createGrabberWeaponPart,
   createHammerWeaponPart,
@@ -29,6 +31,8 @@ import type {
 } from './babylonWeaponPartTypes'
 
 const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRenderer>([
+  ['drill', createDrillWeaponPart],
+  ['flail', createFlailWeaponPart],
   ['flipper', createFlipperWeaponPart],
   ['grabber', createGrabberWeaponPart],
   ['hammer', createHammerWeaponPart],

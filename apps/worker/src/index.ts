@@ -9,7 +9,10 @@ import {
   type TeamRole,
   type TurnCommandPostRequest,
 } from '../../../packages/schemas/src/index.js'
-import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
+import {
+  PART_CATALOG,
+  createAgentCatalogGuidance,
+} from '../../../packages/catalog/src/index.js'
 import {
   SessionCoordinator,
   type StoredSessionState,
@@ -68,7 +71,15 @@ export async function handleWorkerRequest(
   }
 
   if (request.method === 'GET' && url.pathname === '/agent-spec.json') {
-    return jsonResponse(createAgentContract({ partCatalog: PART_CATALOG }), {}, request, env)
+    return jsonResponse(
+      createAgentContract({
+        catalogGuidance: createAgentCatalogGuidance(PART_CATALOG),
+        partCatalog: PART_CATALOG,
+      }),
+      {},
+      request,
+      env,
+    )
   }
 
   if (request.method === 'POST' && url.pathname === '/sessions') {

@@ -23,6 +23,7 @@ import type {
 export type CreatedSessionState = {
   state: StoredSessionState
   claimTokens: Record<TeamRole, string>
+  observerTokens: Record<TeamRole, string>
   refereeToken: string
   clock: Clock
   tokenFactory: TokenFactory
@@ -48,9 +49,17 @@ export async function createInitialSessionState(
     red: tokenFactory('red', 'claim'),
     blue: tokenFactory('blue', 'claim'),
   }
+  const observerTokens: Record<TeamRole, string> = {
+    red: tokenFactory('red', 'observer'),
+    blue: tokenFactory('blue', 'observer'),
+  }
   const claimTokenHashes: Record<TeamRole, string> = {
     red: await tokenHasher(claimTokens.red),
     blue: await tokenHasher(claimTokens.blue),
+  }
+  const observerTokenHashes: Record<TeamRole, string> = {
+    red: await tokenHasher(observerTokens.red),
+    blue: await tokenHasher(observerTokens.blue),
   }
   const refereeToken = tokenFactory('referee', 'referee')
 
@@ -59,6 +68,7 @@ export async function createInitialSessionState(
     tokenFactory,
     tokenHasher,
     claimTokens,
+    observerTokens,
     refereeToken,
     state: {
       id: sessionId,
@@ -71,8 +81,8 @@ export async function createInitialSessionState(
       expiresAt: addMilliseconds(now, safeTtlMs(request.ttlSeconds)),
       updatedAt: now,
       roles: {
-        red: createInitialRoleState('red', claimTokenHashes.red),
-        blue: createInitialRoleState('blue', claimTokenHashes.blue),
+        red: createInitialRoleState('red', claimTokenHashes.red, observerTokenHashes.red),
+        blue: createInitialRoleState('blue', claimTokenHashes.blue, observerTokenHashes.blue),
       },
       refereeTokenHash: await tokenHasher(refereeToken),
       chatLog: [],

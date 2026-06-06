@@ -39,14 +39,6 @@ const agentChatFormsSource = readFileSync(
   new URL('../apps/web/src/agent/useAgentChatForms.ts', import.meta.url),
   'utf8',
 )
-const roundPlanSubmissionSource = readFileSync(
-  new URL('../apps/web/src/agent/useRoundPlanSubmission.ts', import.meta.url),
-  'utf8',
-)
-const roundPlanDraftSource = readFileSync(
-  new URL('../apps/web/src/agent/roundPlanDraft.ts', import.meta.url),
-  'utf8',
-)
 const cockpitViewStateSource = readFileSync(
   new URL('../apps/web/src/agent/agentCockpitViewState.ts', import.meta.url),
   'utf8',
@@ -55,36 +47,12 @@ const cockpitPanelsSource = readFileSync(
   new URL('../apps/web/src/agent/AgentCockpitPanels.tsx', import.meta.url),
   'utf8',
 )
-const roundPlanWorkbenchSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanWorkbench.tsx', import.meta.url),
+const agentInsightSource = readFileSync(
+  new URL('../apps/web/src/agent/AgentInsightWorkbench.tsx', import.meta.url),
   'utf8',
 )
 const sharedUiSource = readFileSync(
   new URL('../apps/web/src/shared/ui.tsx', import.meta.url),
-  'utf8',
-)
-const roundPlanStructuredEditorSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanStructuredEditor.tsx', import.meta.url),
-  'utf8',
-)
-const roundPlanPurchaseSectionSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanPurchaseSection.tsx', import.meta.url),
-  'utf8',
-)
-const roundPlanBlueprintSectionSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanBlueprintSection.tsx', import.meta.url),
-  'utf8',
-)
-const partSelectSource = readFileSync(
-  new URL('../apps/web/src/agent/PartSelect.tsx', import.meta.url),
-  'utf8',
-)
-const roundPlanOpeningScriptSectionSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanOpeningScriptSection.tsx', import.meta.url),
-  'utf8',
-)
-const roundPlanRationaleSectionSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanRationaleSection.tsx', import.meta.url),
   'utf8',
 )
 const replayViewerSource = readFileSync(
@@ -270,7 +238,7 @@ test('agent cockpit renders reliability and debug hooks', () => {
     agentRoleApiInstallerSource,
     agentRolePollingSource,
     agentChatFormsSource,
-    roundPlanSubmissionSource,
+    agentInsightSource,
     cockpitViewStateSource,
   ].join('\n')
 
@@ -292,11 +260,13 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitViewStateSource.includes("await window.AgentArenaRole.bootstrapRole({ agentName: '${invite.role}-agent' })"))
   assert.ok(cockpitViewStateSource.includes('waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })'))
   assert.ok(cockpitViewStateSource.includes('Submit exactly one legal round plan for this round.'))
+  assert.ok(cockpitViewStateSource.includes('combat.decision'))
+  assert.ok(cockpitViewStateSource.includes('decision.movementOptions.recommended[0]'))
   assert.ok(cockpitRuntimeSource.includes('Last validation error'))
   assert.ok(cockpitRuntimeSource.includes('Match log'))
   assert.ok(cockpitRuntimeSource.includes('Table Talk'))
-  assert.ok(roundPlanWorkbenchSource.includes('Assembly bay'))
-  assert.ok(roundPlanWorkbenchSource.includes('BotAssemblyScene'))
+  assert.ok(agentInsightSource.includes('Assembly bay'))
+  assert.ok(agentInsightSource.includes('BotAssemblyScene'))
   assert.ok(botAssemblySceneSource.includes('const blueprintRef = useRef(blueprint)'))
   assert.ok(botAssemblySceneSource.includes('attachBlueprint(activeResources, blueprintRef.current)'))
   assert.ok(botAssemblySceneSource.includes('data-assembly-bot-attached'))
@@ -320,38 +290,36 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitRuntimeSource.includes('Clear player key'))
 })
 
-test('agent cockpit includes structured plan editor section labels and advanced JSON mode', () => {
-  const roundPlanEditorSource = [
-    roundPlanWorkbenchSource,
-    roundPlanStructuredEditorSource,
-    roundPlanPurchaseSectionSource,
-    roundPlanBlueprintSectionSource,
-    roundPlanOpeningScriptSectionSource,
-    roundPlanRationaleSectionSource,
-    partSelectSource,
+test('agent cockpit is a read-only insight surface instead of a bot editor', () => {
+  const cockpitRuntimeSource = [
+    cockpitSource,
+    cockpitShellSource,
+    cockpitSidebarSource,
+    cockpitControllerSource,
+    agentInsightSource,
   ].join('\n')
 
-  assert.ok(cockpitSource.includes('RoundPlanWorkbench'))
-  assert.ok(roundPlanWorkbenchSource.includes('RoundPlanStructuredEditor'))
-  assert.ok(roundPlanEditorSource.includes('purchases-heading'))
-  assert.ok(roundPlanEditorSource.includes('Purchases'))
-  assert.ok(roundPlanEditorSource.includes('blueprint-heading'))
-  assert.ok(roundPlanEditorSource.includes('Blueprint'))
-  assert.ok(roundPlanEditorSource.includes('opening-script-heading'))
-  assert.ok(roundPlanEditorSource.includes('Opening script commands'))
-  assert.ok(roundPlanEditorSource.includes('Rationale'))
-  assert.ok(roundPlanWorkbenchSource.includes('Advanced JSON mode'))
-  assert.ok(roundPlanEditorSource.includes('function PartSelect'))
-  assert.ok(roundPlanPurchaseSectionSource.includes('PartSelect'))
-  assert.ok(roundPlanBlueprintSectionSource.includes('PartSelect'))
+  assert.ok(cockpitSource.includes('AgentInsightWorkbench'))
+  assert.ok(agentInsightSource.includes('Agent insight'))
+  assert.ok(agentInsightSource.includes('Plan read'))
+  assert.ok(agentInsightSource.includes('Opening script'))
+  assert.ok(agentInsightSource.includes('Combat decision'))
+  assert.ok(agentInsightSource.includes('NoRoleStatePanel'))
+  assert.ok(agentInsightSource.includes('roleState?.ownSubmission'))
+  assert.ok(agentInsightSource.includes('tacticalCues'))
+  assert.ok(agentInsightSource.includes('movementOptions.recommended'))
+  assert.equal(cockpitRuntimeSource.includes('RoundPlanWorkbench'), false)
+  assert.equal(cockpitRuntimeSource.includes('useRoundPlanSubmission'), false)
+  assert.equal(cockpitRuntimeSource.includes('setSubmissionDraft'), false)
+  assert.equal(cockpitRuntimeSource.includes('Advanced JSON mode'), false)
+  assert.equal(cockpitRuntimeSource.includes('PartSelect'), false)
 })
 
 test('agent cockpit prioritizes active task workflow over secondary panels', () => {
   assert.ok(cockpitViewStateSource.includes('createAgentCockpitWorkflow'))
-  assert.ok(cockpitViewStateSource.includes("'connect' | 'build' | 'submit' | 'turn' | 'review'"))
+  assert.ok(cockpitViewStateSource.includes("'connect' | 'build' | 'turn' | 'review'"))
   assert.ok(cockpitViewStateSource.includes('Unclaimed'))
   assert.ok(cockpitViewStateSource.includes('Claimed'))
-  assert.ok(cockpitViewStateSource.includes('Draft'))
   assert.ok(cockpitViewStateSource.includes('Submitted'))
   assert.ok(cockpitViewStateSource.includes('Waiting'))
   assert.ok(cockpitViewStateSource.includes('Review'))
@@ -365,8 +333,7 @@ test('agent cockpit prioritizes active task workflow over secondary panels', () 
   assert.ok(cockpitSurfaceSource.includes('agent-task-panel'))
   assert.ok(cockpitSource.includes('cockpit-primary-column'))
   assert.ok(cockpitSurfaceSource.includes('cockpit-secondary-stack'))
-  assert.ok(cockpitSource.indexOf('<AgentTaskPanel') < cockpitSource.indexOf('<RoundPlanWorkbench'))
-  assert.ok(roundPlanWorkbenchSource.indexOf('submit-dock') < roundPlanWorkbenchSource.indexOf('assembly-bay-panel'))
+  assert.ok(cockpitSource.indexOf('<AgentTaskPanel') < cockpitSource.indexOf('<AgentInsightWorkbench'))
 })
 
 test('Agent Arena operational surfaces use shared UI primitives', () => {
@@ -390,6 +357,7 @@ test('Agent Arena operational surfaces use shared UI primitives', () => {
     cockpitSource,
     cockpitShellSource,
     cockpitSidebarSource,
+    agentInsightSource,
   ].join('\n')
 
   assert.ok(cockpitSurfaceSource.includes("from '../shared/ui'"))
@@ -422,20 +390,21 @@ test('Agent Arena operational surfaces use shared UI primitives', () => {
   assert.ok(replayViewerSource.includes('findFirstReplayActionTime'))
 })
 
-test('agent cockpit separates submitted truth from editable round plan draft', () => {
-  assert.ok(roundPlanSubmissionSource.includes('roleState?.ownSubmission'))
-  assert.ok(roundPlanSubmissionSource.includes('createEmptySubmission()'))
-  assert.ok(roundPlanSubmissionSource.includes('hasLocalDraftEdits'))
-  assert.ok(roundPlanSubmissionSource.includes('if (hasLocalDraftEdits)'))
-  assert.ok(roundPlanDraftSource.includes('function createEmptySubmission'))
-  assert.ok(roundPlanWorkbenchSource.includes('const submittedSubmission = roleState?.ownSubmission ?? null'))
-  assert.ok(roundPlanWorkbenchSource.includes('const previewSubmission = submittedSubmission ?? draftSubmission'))
-  assert.ok(roundPlanWorkbenchSource.includes('blueprint={previewBlueprint}'))
-  assert.ok(roundPlanWorkbenchSource.includes('Submitted bot'))
-  assert.ok(roundPlanWorkbenchSource.includes('Local draft'))
-  assert.ok(roundPlanWorkbenchSource.includes('Sample draft'))
-  assert.ok(roundPlanWorkbenchSource.includes('Draft seeded from submitted bot'))
-  assert.ok(roundPlanWorkbenchSource.includes('No submitted bot or local draft blueprint loaded.'))
+test('agent cockpit exposes submitted truth without editable draft state', () => {
+  const cockpitRuntimeSource = [
+    cockpitSource,
+    cockpitControllerSource,
+    agentInsightSource,
+  ].join('\n')
+
+  assert.ok(agentInsightSource.includes('const submission = roleState?.ownSubmission ?? null'))
+  assert.ok(agentInsightSource.includes('BotAssemblyScene blueprint={blueprint}'))
+  assert.ok(agentInsightSource.includes('DecisionReadiness'))
+  assert.ok(agentInsightSource.includes('NoRoleStatePanel'))
+  assert.ok(agentInsightSource.includes('No accepted plan is available yet.'))
+  assert.equal(cockpitRuntimeSource.includes('hasLocalDraftEdits'), false)
+  assert.equal(cockpitRuntimeSource.includes('submissionDraft'), false)
+  assert.equal(cockpitRuntimeSource.includes('submitRoundPlan'), false)
 })
 
 test('replay viewer does not render future event timeline markers', () => {

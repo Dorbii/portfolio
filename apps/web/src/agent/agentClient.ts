@@ -447,7 +447,9 @@ export class AgentArenaClient {
     }
   }
 
-  private authorizationHeaders(token = this.getRoleToken?.() ?? this.invite.claimToken): Headers {
+  private authorizationHeaders(
+    token = this.getRoleToken?.() ?? this.invite.claimToken ?? this.invite.observerToken,
+  ): Headers {
     const roleToken = token
 
     if (!roleToken) {

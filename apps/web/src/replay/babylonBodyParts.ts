@@ -201,6 +201,11 @@ function createRaisedTechCluster(
   height: number,
   depth: number,
 ): void {
+  if (Math.max(width, depth) < 0.7) {
+    createCompactControlDeck(scene, parent, materials, width, height, depth)
+    return
+  }
+
   const deck = MeshBuilder.CreateBox(
     `${parent.name}-raised-electronics-deck`,
     {
@@ -258,6 +263,13 @@ function createRaisedTechCluster(
   attachMesh(sensor, parent, materials.light)
   attachMesh(electronicsBay, parent, materials.utility)
   attachMesh(cableRun, parent, materials.trim)
+  createCableLoop(scene, parent, materials.trim, `${parent.name}-raised-control-wire`, {
+    diameter: Math.max(Math.min(width, depth) * 0.42, 0.24),
+    thickness: 0.022,
+    x: -width * 0.08,
+    y: Math.max(height * 1.05, 0.5),
+    z: depth * 0.2,
+  })
 
   for (let index = -1; index <= 1; index += 1) {
     createBoxDetail(
@@ -273,4 +285,88 @@ function createRaisedTechCluster(
       -depth * 0.12,
     )
   }
+}
+
+function createCompactControlDeck(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  const board = MeshBuilder.CreateBox(
+    `${parent.name}-compact-pcb-deck`,
+    {
+      width: Math.max(width * 0.58, 0.3),
+      height: 0.045,
+      depth: Math.max(depth * 0.52, 0.26),
+    },
+    scene,
+  )
+  const chip = MeshBuilder.CreateBox(
+    `${parent.name}-compact-controller-chip`,
+    {
+      width: Math.max(width * 0.24, 0.14),
+      height: 0.08,
+      depth: Math.max(depth * 0.2, 0.12),
+    },
+    scene,
+  )
+
+  board.position.set(0, Math.max(height * 0.72, 0.25), -depth * 0.02)
+  chip.position.set(-width * 0.06, board.position.y + 0.065, 0)
+  attachMesh(board, parent, materials.utility)
+  attachMesh(chip, parent, materials.trim)
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(
+      scene,
+      parent,
+      materials.warning,
+      `${parent.name}-compact-pcb-trace-${index + 1}`,
+      Math.max(width * 0.06, 0.035),
+      0.025,
+      Math.max(depth * 0.38, 0.18),
+      index * Math.max(width * 0.14, 0.07),
+      board.position.y + 0.04,
+      0,
+    )
+  }
+
+  createCableLoop(scene, parent, materials.trim, `${parent.name}-compact-control-wire`, {
+    diameter: Math.max(Math.min(width, depth) * 0.42, 0.22),
+    thickness: 0.018,
+    x: width * 0.2,
+    y: board.position.y + 0.08,
+    z: depth * 0.18,
+  })
+}
+
+function createCableLoop(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  name: string,
+  options: {
+    diameter: number
+    thickness: number
+    x: number
+    y: number
+    z: number
+  },
+): void {
+  const cable = MeshBuilder.CreateTorus(
+    name,
+    {
+      diameter: options.diameter,
+      thickness: options.thickness,
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  cable.rotation.x = Math.PI / 2
+  cable.position.set(options.x, options.y, options.z)
+  attachMesh(cable, parent, material)
 }

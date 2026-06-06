@@ -1,5 +1,7 @@
 export * from './agentContract.js'
+export * from './agentCapabilities.js'
 export * from './agentSamples.js'
+export * from './arenaHazards.js'
 export * from './relay.js'
 export * from './types.js'
 export * from './validators.js'

@@ -1,3 +1,4 @@
+export * from './arenaTopology.js'
 export * from './damagePriority.js'
 export * from './deriveStats.js'
 export * from './openingScriptIndex.js'

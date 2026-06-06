@@ -24,7 +24,8 @@ export function createSawWeaponPart({
     `${role}-${blockId}-saw-toothed-blade`,
     bladeDiameter,
     bladeThickness,
-    24,
+    30,
+    bladeDiameter * 0.12,
   )
   const hub = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-saw-arbor-hub`,
@@ -35,14 +36,14 @@ export function createSawWeaponPart({
     },
     scene,
   )
-  const guard = MeshBuilder.CreateTorus(
-    `${role}-${blockId}-saw-upper-guard`,
-    {
-      diameter: bladeDiameter * 1.04,
-      thickness: Math.max(bladeDiameter * 0.055, 0.055),
-      tessellation: 28,
-    },
+  const guard = createAnnularSectorMesh(
     scene,
+    `${role}-${blockId}-saw-upper-guard`,
+    bladeDiameter * 1.08,
+    bladeDiameter * 0.88,
+    bladeThickness * 1.18,
+    Math.PI * 0.05,
+    Math.PI * 0.95,
   )
   const motor = MeshBuilder.CreateBox(
     `${role}-${blockId}-saw-motor-housing`,
@@ -57,9 +58,7 @@ export function createSawWeaponPart({
   blade.position.set(0, bladeCenterY, bladeCenterZ)
   hub.rotation.z = Math.PI / 2
   hub.position.copyFrom(blade.position)
-  guard.rotation.z = Math.PI / 2
   guard.position.copyFrom(blade.position)
-  guard.scaling.y = 0.76
   motor.position.set(0, Math.max(height * 0.42, 0.28), -Math.max(depth * 0.24, 0.18))
   blade.metadata = { kind: 'spin', speed: 0.18 }
   hub.metadata = { kind: 'spin', speed: 0.18 }
@@ -67,6 +66,16 @@ export function createSawWeaponPart({
   attachMesh(hub, parent, materials.trim)
   attachMesh(guard, parent, materials.trim)
   attachMesh(motor, parent, material)
+  createBladeFaceDetails({
+    scene,
+    parent,
+    material: materials.trim,
+    namePrefix: `${role}-${blockId}-saw`,
+    centerY: bladeCenterY,
+    centerZ: bladeCenterZ,
+    radius: bladeDiameter * 0.36,
+    thickness: bladeThickness,
+  })
 
   for (let index = 0; index < 8; index += 1) {
     const angle = (Math.PI * 2 * index) / 8
@@ -147,6 +156,16 @@ export function createSpinnerWeaponPart({
   hub.material = materials.trim
   attachMesh(gearbox, parent, material)
   attachMesh(upperCowl, parent, materials.trim)
+  createBladeFaceDetails({
+    scene,
+    parent,
+    material: materials.steel,
+    namePrefix: `${role}-${blockId}-spinner`,
+    centerY: spinnerCenterY,
+    centerZ: spinnerCenterZ,
+    radius: spinnerDiameter * 0.34,
+    thickness: Math.max(height * 0.2, 0.12),
+  })
 
   const forkLeft = MeshBuilder.CreateBox(
     `${role}-${blockId}-spinner-fork-l`,
@@ -176,6 +195,84 @@ export function createSpinnerWeaponPart({
     bar.rotation.x = angle
     attachMesh(bar, parent, materials.warning)
   }
+
+  for (let index = 0; index < 10; index += 1) {
+    const angle = (Math.PI * 2 * index) / 10
+    const bite = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spinner-rim-bite-${index}`,
+      {
+        width: Math.max(height * 0.18, 0.08),
+        height: Math.max(spinnerDiameter * 0.08, 0.06),
+        depth: Math.max(spinnerDiameter * 0.14, 0.1),
+      },
+      scene,
+    )
+
+    bite.position.set(
+      0,
+      spinnerCenterY + Math.sin(angle) * spinnerDiameter * 0.5,
+      spinnerCenterZ + Math.cos(angle) * spinnerDiameter * 0.5,
+    )
+    bite.rotation.x = angle
+    attachMesh(bite, parent, materials.steel)
+  }
+}
+
+function createBladeFaceDetails({
+  scene,
+  parent,
+  material,
+  namePrefix,
+  centerY,
+  centerZ,
+  radius,
+  thickness,
+}: {
+  scene: WeaponPartRenderArgs['scene']
+  parent: WeaponPartRenderArgs['parent']
+  material: WeaponPartRenderArgs['materials']['trim']
+  namePrefix: string
+  centerY: number
+  centerZ: number
+  radius: number
+  thickness: number
+}): void {
+  for (const faceX of [-thickness * 0.66, thickness * 0.66]) {
+    const ring = MeshBuilder.CreateTorus(
+      `${namePrefix}-machined-ring-${faceX > 0 ? 'right' : 'left'}`,
+      {
+        diameter: radius * 1.18,
+        thickness: Math.max(radius * 0.035, 0.018),
+        tessellation: 26,
+      },
+      scene,
+    )
+
+    ring.rotation.z = Math.PI / 2
+    ring.position.set(faceX, centerY, centerZ)
+    attachMesh(ring, parent, material)
+
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (Math.PI * 2 * index) / 6
+      const balanceHole = MeshBuilder.CreateCylinder(
+        `${namePrefix}-balance-hole-${faceX > 0 ? 'right' : 'left'}-${index}`,
+        {
+          height: Math.max(thickness * 0.16, 0.018),
+          diameter: Math.max(radius * 0.18, 0.05),
+          tessellation: 10,
+        },
+        scene,
+      )
+
+      balanceHole.rotation.z = Math.PI / 2
+      balanceHole.position.set(
+        faceX,
+        centerY + Math.sin(angle) * radius * 0.72,
+        centerZ + Math.cos(angle) * radius * 0.72,
+      )
+      attachMesh(balanceHole, parent, material)
+    }
+  }
 }
 
 function createToothedBladeMesh(
@@ -184,10 +281,12 @@ function createToothedBladeMesh(
   diameter: number,
   thickness: number,
   toothCount: number,
+  boreDiameter: number,
 ): Mesh {
   const mesh = new Mesh(name, scene)
   const outerRadius = diameter / 2
-  const innerRadius = outerRadius * 0.86
+  const gulletRadius = outerRadius * 0.84
+  const boreRadius = Math.max(boreDiameter / 2, outerRadius * 0.1)
   const segmentCount = toothCount * 2
   const halfThickness = thickness / 2
   const positions: number[] = []
@@ -196,28 +295,113 @@ function createToothedBladeMesh(
   for (const x of [-halfThickness, halfThickness]) {
     for (let index = 0; index < segmentCount; index += 1) {
       const angle = (Math.PI * 2 * index) / segmentCount
-      const radius = index % 2 === 0 ? outerRadius : innerRadius
+      const radius = index % 2 === 0 ? outerRadius : gulletRadius
 
       positions.push(x, Math.sin(angle) * radius, Math.cos(angle) * radius)
     }
-  }
 
-  const frontCenterIndex = positions.length / 3
-  positions.push(-halfThickness, 0, 0)
-  const backCenterIndex = positions.length / 3
-  positions.push(halfThickness, 0, 0)
+    for (let index = 0; index < segmentCount; index += 1) {
+      const angle = (Math.PI * 2 * index) / segmentCount
+
+      positions.push(x, Math.sin(angle) * boreRadius, Math.cos(angle) * boreRadius)
+    }
+  }
 
   for (let index = 0; index < segmentCount; index += 1) {
     const next = (index + 1) % segmentCount
-    const frontCurrent = index
-    const frontNext = next
-    const backCurrent = segmentCount + index
-    const backNext = segmentCount + next
+    const frontOuter = index
+    const frontOuterNext = next
+    const frontInner = segmentCount + index
+    const frontInnerNext = segmentCount + next
+    const backOuter = segmentCount * 2 + index
+    const backOuterNext = segmentCount * 2 + next
+    const backInner = segmentCount * 3 + index
+    const backInnerNext = segmentCount * 3 + next
 
-    indices.push(frontCenterIndex, frontNext, frontCurrent)
-    indices.push(backCenterIndex, backCurrent, backNext)
-    indices.push(frontCurrent, frontNext, backNext)
-    indices.push(frontCurrent, backNext, backCurrent)
+    indices.push(frontOuter, frontOuterNext, frontInnerNext)
+    indices.push(frontOuter, frontInnerNext, frontInner)
+    indices.push(backOuter, backInnerNext, backOuterNext)
+    indices.push(backOuter, backInner, backInnerNext)
+    indices.push(frontOuter, backOuter, backOuterNext)
+    indices.push(frontOuter, backOuterNext, frontOuterNext)
+    indices.push(frontInner, frontInnerNext, backInnerNext)
+    indices.push(frontInner, backInnerNext, backInner)
+  }
+
+  const normals: number[] = []
+  const vertexData = new VertexData()
+
+  VertexData.ComputeNormals(positions, indices, normals)
+  vertexData.positions = positions
+  vertexData.indices = indices
+  vertexData.normals = normals
+  vertexData.applyToMesh(mesh)
+
+  return mesh
+}
+
+function createAnnularSectorMesh(
+  scene: WeaponPartRenderArgs['scene'],
+  name: string,
+  outerDiameter: number,
+  innerDiameter: number,
+  thickness: number,
+  startAngle: number,
+  endAngle: number,
+): Mesh {
+  const mesh = new Mesh(name, scene)
+  const outerRadius = outerDiameter / 2
+  const innerRadius = innerDiameter / 2
+  const halfThickness = thickness / 2
+  const segmentCount = 22
+  const positions: number[] = []
+  const indices: number[] = []
+
+  for (const x of [-halfThickness, halfThickness]) {
+    for (let index = 0; index <= segmentCount; index += 1) {
+      const angle = startAngle + ((endAngle - startAngle) * index) / segmentCount
+
+      positions.push(x, Math.sin(angle) * outerRadius, Math.cos(angle) * outerRadius)
+    }
+
+    for (let index = 0; index <= segmentCount; index += 1) {
+      const angle = startAngle + ((endAngle - startAngle) * index) / segmentCount
+
+      positions.push(x, Math.sin(angle) * innerRadius, Math.cos(angle) * innerRadius)
+    }
+  }
+
+  const ringCount = segmentCount + 1
+
+  for (let index = 0; index < segmentCount; index += 1) {
+    const next = index + 1
+    const frontOuter = index
+    const frontOuterNext = next
+    const frontInner = ringCount + index
+    const frontInnerNext = ringCount + next
+    const backOuter = ringCount * 2 + index
+    const backOuterNext = ringCount * 2 + next
+    const backInner = ringCount * 3 + index
+    const backInnerNext = ringCount * 3 + next
+
+    indices.push(frontOuter, frontOuterNext, frontInnerNext)
+    indices.push(frontOuter, frontInnerNext, frontInner)
+    indices.push(backOuter, backInnerNext, backOuterNext)
+    indices.push(backOuter, backInner, backInnerNext)
+    indices.push(frontOuter, backOuter, backOuterNext)
+    indices.push(frontOuter, backOuterNext, frontOuterNext)
+    indices.push(frontInner, frontInnerNext, backInnerNext)
+    indices.push(frontInner, backInnerNext, backInner)
+  }
+
+  for (const index of [0, segmentCount]) {
+    const frontOuter = index
+    const frontInner = ringCount + index
+    const backOuter = ringCount * 2 + index
+    const backInner = ringCount * 3 + index
+
+    indices.push(frontOuter, frontInner, backInner)
+    indices.push(frontOuter, backInner, backOuter)
   }
 
   const normals: number[] = []

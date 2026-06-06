@@ -37,6 +37,13 @@ export type ExternalAgentBrief = {
     opponent: string
     replayAvailable: boolean | null
     stateVersion: string | null
+    combatDecision: {
+      tick: number
+      range: string
+      recommendedMove: string
+      avoidMoves: string
+      cues: string[]
+    } | null
   }
   continuationProtocol: {
     transport: 'polling'
@@ -86,6 +93,15 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       opponent,
       replayAvailable: state?.replayAvailable ?? publicState?.replayAvailable ?? null,
       stateVersion: state?.stateVersion ?? publicState?.stateVersion ?? null,
+      combatDecision: state?.combat
+        ? {
+            tick: state.combat.tick,
+            range: `${state.combat.decision.range.band} at distance ${state.combat.decision.range.distance}`,
+            recommendedMove: state.combat.decision.movementOptions.recommended[0] ?? 'brake',
+            avoidMoves: state.combat.decision.movementOptions.avoid.join(', ') || 'none',
+            cues: state.combat.decision.tacticalCues.slice(0, 4),
+          }
+        : null,
     },
     continuationProtocol: {
       transport: 'polling',
@@ -100,6 +116,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Default path: open the invite URL, use window.AgentArenaRole.bootstrapRole(), then wait for nextAction.',
       'If nextAction=submit_round_plan, submit exactly one legal v2 round plan. Prefer a custom plan when you can build one quickly.',
       'If nextAction=submit_turn_command, inspect state.combat.snapshot and submit exactly one command for state.combat.tick before the 120 second deadline.',
+      'During combat_turn, prefer state.combat.decision for legalCommands, range, health, arenaPressure, actionReadiness, movementOptions, previousResolvedTurn, and tacticalCues.',
       'A combat command can include movement plus weapon and utility actions in the same turn when those controls are legal.',
       'If you cannot build a custom legal plan promptly and gold>=72, submit the Baseline Spinner fallback once.',
       'If submit returns accepted state, stop submitting that same build/turn and keep this role thread alive with waitForNextAction({ timeoutMs: 600000 }).',
@@ -164,8 +181,18 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `    await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
     '  }',
     '} else if (next.nextAction === "submit_turn_command") {',
-    '  const tick = next.state.combat.tick',
-    '  await window.AgentArenaRole.submitTurnCommand({ action: "submit_turn_command", tick, move: "brake", weaponA: "hold", utility: "hold" })',
+    '  const { combat } = next.state',
+    '  const decision = combat.decision',
+    '  const move = decision.movementOptions.recommended[0] ?? "brake"',
+    '  await window.AgentArenaRole.submitTurnCommand({',
+    '    action: "submit_turn_command",',
+    '    tick: combat.tick,',
+    '    move,',
+    '    weaponA: decision.actionReadiness.weaponA.canFire ? "fire" : "hold",',
+    '    ...(decision.legalCommands.utility?.includes("hold") ? {',
+    '      utility: decision.legalCommands.utility.includes("activate") && decision.tacticalCues.some((cue) => cue.includes("survival")) ? "activate" : "hold",',
+    '    } : {}),',
+    '  })',
     '} else {',
     '  throw new Error(`No playable turn available: ${next.nextAction}`)',
     '}',
@@ -183,7 +210,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `    await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
     '  }',
     '} else if (next.nextAction === "submit_turn_command") {',
-    '  await window.AgentArenaRole.submitTurnCommand({ action: "submit_turn_command", tick: next.state.combat.tick, move: "brake", weaponA: "hold", utility: "hold" })',
+    '  const { combat } = next.state',
+    '  await window.AgentArenaRole.submitTurnCommand({ action: "submit_turn_command", tick: combat.tick, move: combat.decision.movementOptions.recommended[0] ?? "brake", weaponA: "hold", utility: "hold" })',
     '} else {',
     '  throw new Error(`No playable turn available: ${next.nextAction}`)',
     '}',
@@ -197,6 +225,15 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `Opponent: ${brief.currentState.opponent}`,
     `Replay available: ${brief.currentState.replayAvailable ?? 'unknown'}`,
     `State version: ${brief.currentState.stateVersion ?? 'unknown until state is loaded'}`,
+    ...(brief.currentState.combatDecision
+      ? [
+          `Combat decision tick: ${brief.currentState.combatDecision.tick}`,
+          `Combat range: ${brief.currentState.combatDecision.range}`,
+          `Recommended move: ${brief.currentState.combatDecision.recommendedMove}`,
+          `Avoid moves: ${brief.currentState.combatDecision.avoidMoves}`,
+          ...brief.currentState.combatDecision.cues.map((cue) => `Cue: ${cue}`),
+        ]
+      : []),
     '',
     '## Workflow',
     ...brief.workflow.map((item, index) => `${index + 1}. ${item}`),
@@ -220,11 +257,12 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '  await window.AgentArenaRole.submitFallbackRoundPlan()',
     '} else if (next.nextAction === "submit_turn_command") {',
     '  const { combat, controls } = next.state',
+    '  const decision = combat.decision',
     '  const command = {',
     '    action: "submit_turn_command",',
     '    tick: combat.tick,',
-    '    move: controls.movement.includes("circle_left") ? "circle_left" : "brake",',
-    '    weaponA: controls.weaponA?.includes("fire") && combat.snapshot.distance <= combat.self.weaponReach ? "fire" : "hold",',
+    '    move: decision.movementOptions.recommended.find((move) => controls.movement.includes(move)) ?? "brake",',
+    '    weaponA: decision.actionReadiness.weaponA.canFire ? "fire" : "hold",',
     '    utility: controls.utility?.includes("hold") ? "hold" : undefined,',
     '  }',
     '  await window.AgentArenaRole.submitTurnCommand(command)',
@@ -313,7 +351,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `2. Poll GET ${brief.apiBase}/sessions/${brief.sessionId}/state with Authorization: Bearer <claimToken>.`,
     '3. If stateVersion is unchanged, wait and poll again until the timeout expires.',
     '4. If nextAction is submit_round_plan, submit one legal v2 round plan.',
-    '5. If nextAction is submit_turn_command, inspect state.combat and submit one legal combat turn before deadlineAt.',
+    '5. If nextAction is submit_turn_command, inspect state.combat.decision and submit one legal combat turn before deadlineAt.',
     '6. If nextAction is wait_for_opponent_turn, wait for a stateVersion change.',
     '7. If phase is round_review, replay_phase, combat_resolved, or submissions_locked, keep waiting.',
     '8. If phase is session_complete or expired, stop playing.',
@@ -325,7 +363,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '  // Build and submit exactly one legal v2 plan.',
     '}',
     'if (next.nextAction === "submit_turn_command") {',
-    '  // Inspect next.state.combat and submit exactly one legal turn command.',
+    '  // Inspect next.state.combat.decision and submit exactly one legal turn command.',
     '}',
     '```',
     '',

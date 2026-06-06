@@ -65,12 +65,6 @@ button:disabled {
   opacity: 0.5;
 }
 
-button.active {
-  border-color: rgba(93, 210, 146, 0.95);
-  color: #07110c;
-  background: #5dd292;
-}
-
 .ui-button {
   min-width: 0;
   min-height: 36px;
@@ -1287,13 +1281,37 @@ pre {
 }
 
 .agent-live-app {
+  --cockpit-accent: 93, 210, 146;
+  --cockpit-accent-strong: #5dd292;
+  --cockpit-accent-soft: rgba(93, 210, 146, 0.12);
+  --cockpit-border: rgba(238, 242, 247, 0.12);
+  --cockpit-border-strong: rgba(238, 242, 247, 0.18);
+  --cockpit-panel: rgba(12, 16, 21, 0.82);
+  --cockpit-panel-deep: rgba(4, 7, 11, 0.92);
+  --cockpit-text-muted: #aeb7c1;
+  --cockpit-role: 93, 210, 146;
+  --cockpit-role-strong: #5dd292;
+  --cockpit-role-soft: rgba(93, 210, 146, 0.12);
   min-height: 100vh;
   color: #eef2f3;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    #101312;
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    radial-gradient(circle at 16% 0, rgba(var(--cockpit-role), 0.12), transparent 28%),
+    linear-gradient(180deg, #101514, #070a0d 52%, #05070a);
   background-size: 44px 44px;
+}
+
+.agent-live-app.role-red {
+  --cockpit-role: 255, 76, 93;
+  --cockpit-role-strong: #ff4c5d;
+  --cockpit-role-soft: rgba(255, 76, 93, 0.13);
+}
+
+.agent-live-app.role-blue {
+  --cockpit-role: 91, 157, 255;
+  --cockpit-role-strong: #5b9dff;
+  --cockpit-role-soft: rgba(91, 157, 255, 0.13);
 }
 
 .agent-live-header {
@@ -1303,8 +1321,13 @@ pre {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid rgba(238, 242, 243, 0.14);
-  background: rgba(16, 19, 18, 0.96);
+  border-bottom: 1px solid var(--cockpit-border-strong);
+  background:
+    linear-gradient(90deg, rgba(var(--cockpit-role), 0.1), transparent 32%),
+    linear-gradient(180deg, rgba(17, 22, 28, 0.98), rgba(7, 10, 14, 0.96));
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.025),
+    0 14px 26px rgba(0, 0, 0, 0.26);
 }
 
 .agent-live-header h1,
@@ -1326,19 +1349,15 @@ pre {
   font-weight: 900;
 }
 
-.agent-live-grid {
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(300px, 420px) minmax(360px, 1fr);
-  align-items: start;
-}
-
 .agent-live-panel {
   min-width: 0;
   min-height: 218px;
   padding: 14px;
-  border-right: 1px solid rgba(238, 242, 243, 0.12);
-  border-bottom: 1px solid rgba(238, 242, 243, 0.12);
-  background: rgba(16, 19, 18, 0.72);
+  border-right: 1px solid var(--cockpit-border);
+  border-bottom: 1px solid var(--cockpit-border);
+  background:
+    linear-gradient(180deg, rgba(22, 28, 35, 0.8), rgba(7, 10, 14, 0.86)),
+    var(--cockpit-panel);
 }
 
 .agent-live-panel h2 {
@@ -1347,9 +1366,7 @@ pre {
   line-height: 1.15;
 }
 
-.role-summary,
 .agent-handoff-panel,
-.submission-editor,
 .match-log-panel {
   min-height: 300px;
 }
@@ -1384,14 +1401,118 @@ pre {
   font-weight: 800;
 }
 
+.agent-live-app input,
+.agent-live-app textarea,
+.agent-live-app select {
+  border-color: rgba(238, 242, 247, 0.14);
+  color: #eef2f3;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    rgba(3, 7, 9, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
+}
+
+.agent-live-app select {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 9px;
+}
+
+.agent-live-app input:hover,
+.agent-live-app textarea:hover,
+.agent-live-app select:hover {
+  border-color: rgba(238, 242, 247, 0.24);
+}
+
+.agent-live-app input:focus-visible,
+.agent-live-app textarea:focus-visible,
+.agent-live-app select:focus-visible {
+  border-color: rgba(var(--cockpit-role), 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--cockpit-role), 0.18),
+    0 0 0 2px rgba(var(--cockpit-role), 0.1);
+}
+
+.agent-live-app .ui-button {
+  border-color: rgba(238, 242, 247, 0.15);
+  color: #edf4f7;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.08), rgba(238, 242, 247, 0.018)),
+    rgba(10, 14, 19, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 8px 16px rgba(0, 0, 0, 0.16);
+}
+
+.agent-live-app .ui-button-primary {
+  border-color: rgba(var(--cockpit-accent), 0.46);
+  color: #dffbea;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-accent), 0.26), rgba(var(--cockpit-accent), 0.08)),
+    rgba(7, 14, 12, 0.9);
+}
+
+.agent-live-app .ui-button-secondary {
+  border-color: rgba(143, 208, 255, 0.25);
+  color: #e8f3ff;
+  background:
+    linear-gradient(180deg, rgba(143, 208, 255, 0.11), rgba(143, 208, 255, 0.028)),
+    rgba(8, 13, 18, 0.9);
+}
+
+.agent-live-app .ui-button-danger {
+  border-color: rgba(255, 92, 108, 0.4);
+  color: #ffd9de;
+  background:
+    linear-gradient(180deg, rgba(255, 92, 108, 0.16), rgba(255, 92, 108, 0.04)),
+    rgba(18, 7, 10, 0.9);
+}
+
+.agent-live-app .ui-button-ghost {
+  border-color: rgba(238, 242, 247, 0.12);
+  color: #d8e0e5;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.055), rgba(238, 242, 247, 0.012)),
+    rgba(8, 11, 15, 0.72);
+}
+
+.agent-live-app .ui-button:not(:disabled):hover,
+.agent-live-app .ui-button:not(:disabled):focus-visible,
+.agent-live-app .agent-spec-link:hover,
+.agent-live-app .agent-spec-link:focus-visible {
+  border-color: rgba(var(--cockpit-role), 0.62);
+  color: #ffffff;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-role), 0.18), rgba(var(--cockpit-role), 0.045)),
+    rgba(10, 14, 19, 0.94);
+  outline: none;
+}
+
+.agent-live-app .ui-button:disabled {
+  opacity: 0.48;
+}
+
 .agent-connection {
+  position: relative;
   margin-top: 12px;
-  padding: 10px;
+  padding: 11px 11px 11px 13px;
   display: grid;
   gap: 8px;
-  border: 1px solid rgba(238, 242, 243, 0.14);
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 247, 0.14);
   border-radius: 6px;
-  background: rgba(238, 242, 243, 0.04);
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.052), rgba(238, 242, 247, 0.014)),
+    rgba(8, 12, 15, 0.74);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
+}
+
+.agent-connection::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: rgba(238, 242, 247, 0.26);
+  content: "";
 }
 
 .agent-connection strong {
@@ -1413,7 +1534,9 @@ pre {
   overflow-wrap: anywhere;
   border-radius: 5px;
   color: #f3d46f;
-  background: #0b0e0d;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.01)),
+    rgba(3, 6, 8, 0.86);
   font-size: 0.72rem;
 }
 
@@ -1421,38 +1544,24 @@ pre {
   border-color: rgba(96, 214, 148, 0.34);
 }
 
+.agent-connection.tone-ready::before {
+  background: #5dd292;
+}
+
 .agent-connection.tone-working {
   border-color: rgba(143, 208, 255, 0.34);
+}
+
+.agent-connection.tone-working::before {
+  background: #8fd0ff;
 }
 
 .agent-connection.tone-blocked {
   border-color: rgba(255, 115, 115, 0.34);
 }
 
-.claim-controls,
-.submission-editor {
-  margin-top: 14px;
-  display: grid;
-  gap: 10px;
-}
-
-.submission-mode-toggle {
-  margin: 12px 0 4px;
-}
-
-.submission-mode-toggle label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #c2cccc;
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.submission-mode-toggle input {
-  width: auto;
-  min-height: 0;
-  margin: 0;
+.agent-connection.tone-blocked::before {
+  background: #ff5c6c;
 }
 
 .agent-live-panel section + section {
@@ -1468,39 +1577,7 @@ pre {
   letter-spacing: 0;
 }
 
-.agent-plan-list {
-  display: grid;
-  gap: 10px;
-  margin: 8px 0 12px;
-}
-
-.agent-plan-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
-  gap: 8px;
-  align-items: end;
-}
-
-.agent-plan-row label,
 .agent-live-panel section > label {
-  color: #8fa3a3;
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.agent-row-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.agent-row-actions button {
-  min-height: 36px;
-  min-width: 96px;
-}
-
-.claim-controls label,
-.submission-editor {
   color: #8fa3a3;
   font-size: 0.68rem;
   font-weight: 900;
@@ -1540,22 +1617,6 @@ input:focus-visible,
 textarea:focus-visible {
   border-color: rgba(92, 179, 255, 0.82);
   outline: none;
-}
-
-.agent-button-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.agent-button-row.single-action {
-  grid-template-columns: minmax(0, 1fr);
-  margin-top: 12px;
-}
-
-.agent-button-row button,
-.submission-editor + button {
-  min-height: 36px;
 }
 
 .agent-brief-text {
@@ -1731,22 +1792,35 @@ textarea:focus-visible {
 }
 
 .agent-title-block {
+  position: relative;
   min-width: 0;
+  padding-left: 14px;
+}
+
+.agent-title-block::before {
+  position: absolute;
+  inset: 4px auto 4px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--cockpit-role-strong);
+  box-shadow: 0 0 14px rgba(var(--cockpit-role), 0.34);
+  content: "";
 }
 
 .agent-command-actions {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(160px, 240px) repeat(3, minmax(104px, auto)) minmax(112px, auto);
+  grid-template-columns: minmax(116px, auto) repeat(3, minmax(104px, auto)) minmax(112px, auto);
   gap: 8px;
   align-items: end;
 }
 
+.agent-command-actions .ui-form-field {
+  gap: 5px;
+}
+
 .agent-command-actions label,
-.plan-section label,
-.blueprint-name-field,
-.turn-command-row label,
-.purchase-row label {
+.plan-section label {
   min-width: 0;
   display: grid;
   gap: 5px;
@@ -1760,30 +1834,76 @@ textarea:focus-visible {
   margin-top: 0;
 }
 
-.agent-command-actions a {
+.agent-observer-access {
   min-height: 36px;
+  padding: 5px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(93, 210, 146, 0.24);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(93, 210, 146, 0.1), rgba(93, 210, 146, 0.025)),
+    rgba(4, 9, 7, 0.76);
+}
+
+.agent-observer-access > span {
+  color: #8fa3a3;
+  font-size: 0.62rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.agent-command-actions .ui-button,
+.agent-command-actions .agent-spec-link {
+  min-height: 36px;
+}
+
+.agent-command-actions .agent-spec-link {
+  min-width: 0;
+  padding: 7px 12px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(143, 208, 255, 0.24);
   border-radius: 6px;
-  background: rgba(143, 208, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(143, 208, 255, 0.1), rgba(143, 208, 255, 0.026)),
+    rgba(8, 13, 18, 0.9);
   text-align: center;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 8px 16px rgba(0, 0, 0, 0.16);
 }
 
 .agent-task-panel {
+  position: relative;
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
   gap: 14px;
   align-items: stretch;
   border-right: 0;
-  border-bottom: 1px solid rgba(238, 242, 243, 0.12);
+  border-bottom: 1px solid var(--cockpit-border-strong);
+  overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(93, 210, 146, 0.08), rgba(143, 208, 255, 0.055)),
-    rgba(6, 11, 14, 0.78);
+    linear-gradient(90deg, rgba(var(--cockpit-role), 0.105), rgba(143, 208, 255, 0.05)),
+    linear-gradient(180deg, rgba(12, 18, 22, 0.9), rgba(5, 9, 12, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.028);
+}
+
+.agent-task-panel::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(var(--cockpit-role), 0.72), transparent 44%, rgba(143, 208, 255, 0.34));
+  content: "";
 }
 
 .agent-next-task {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   display: grid;
   align-content: start;
@@ -1807,25 +1927,41 @@ textarea:focus-visible {
   border: 1px solid rgba(143, 208, 255, 0.22);
   border-radius: 5px;
   color: #e8f3ff;
-  background: rgba(143, 208, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(143, 208, 255, 0.1), rgba(143, 208, 255, 0.026)),
+    rgba(3, 6, 8, 0.86);
 }
 
 .agent-state-chip {
   width: fit-content;
   min-height: 24px;
   padding: 4px 9px;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
   border: 1px solid rgba(93, 210, 146, 0.42);
   border-radius: 999px;
   color: #b7f3cc;
-  background: rgba(93, 210, 146, 0.1);
+  background:
+    linear-gradient(180deg, rgba(93, 210, 146, 0.16), rgba(93, 210, 146, 0.035)),
+    rgba(3, 9, 7, 0.72);
   font-size: 0.66rem;
   font-weight: 950;
   text-transform: uppercase;
 }
 
+.agent-state-chip::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  content: "";
+}
+
 .agent-task-list {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -1836,15 +1972,28 @@ textarea:focus-visible {
 }
 
 .agent-task-step {
+  position: relative;
   min-width: 0;
   min-height: 74px;
   padding: 10px;
   display: grid;
   align-content: space-between;
   gap: 8px;
-  border: 1px solid rgba(238, 242, 243, 0.12);
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 247, 0.12);
   border-radius: 8px;
-  background: rgba(238, 242, 243, 0.045);
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.06), rgba(238, 242, 247, 0.014)),
+    rgba(8, 12, 16, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.agent-task-step::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: rgba(238, 242, 247, 0.2);
+  content: "";
 }
 
 .agent-task-step span,
@@ -1868,26 +2017,45 @@ textarea:focus-visible {
 }
 
 .agent-task-step.is-active {
-  border-color: rgba(93, 210, 146, 0.58);
-  box-shadow: inset 3px 0 0 rgba(93, 210, 146, 0.8);
+  border-color: rgba(var(--cockpit-role), 0.58);
+  box-shadow:
+    inset 3px 0 0 rgba(var(--cockpit-role), 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 20px rgba(var(--cockpit-role), 0.08);
 }
 
 .agent-task-step.tone-complete {
   border-color: rgba(93, 210, 146, 0.3);
 }
 
+.agent-task-step.tone-complete::before {
+  background: #5dd292;
+}
+
 .agent-task-step.tone-current {
   background:
-    linear-gradient(180deg, rgba(93, 210, 146, 0.13), rgba(93, 210, 146, 0.04)),
-    rgba(93, 210, 146, 0.055);
+    linear-gradient(180deg, rgba(var(--cockpit-role), 0.15), rgba(var(--cockpit-role), 0.035)),
+    rgba(8, 12, 16, 0.82);
+}
+
+.agent-task-step.tone-current::before {
+  background: var(--cockpit-role-strong);
 }
 
 .agent-task-step.tone-waiting {
   border-color: rgba(247, 184, 75, 0.3);
 }
 
+.agent-task-step.tone-waiting::before {
+  background: #f3d46f;
+}
+
 .agent-task-step.tone-blocked {
   border-color: rgba(255, 92, 108, 0.36);
+}
+
+.agent-task-step.tone-blocked::before {
+  background: #ff5c6c;
 }
 
 .agent-cockpit-layout {
@@ -1904,9 +2072,12 @@ textarea:focus-visible {
 }
 
 .cockpit-workbench {
-  min-height: calc(100vh - 202px);
+  min-height: calc(100vh - 184px);
   border-left: 0;
-  border-right: 1px solid rgba(238, 242, 243, 0.12);
+  border-right: 1px solid var(--cockpit-border);
+  background:
+    linear-gradient(180deg, rgba(11, 16, 21, 0.88), rgba(4, 7, 11, 0.92)),
+    var(--cockpit-panel-deep);
 }
 
 .cockpit-secondary-stack {
@@ -1922,18 +2093,21 @@ textarea:focus-visible {
   min-height: 0;
   padding: 12px;
   border-right: 0;
-  border-bottom: 1px solid rgba(238, 242, 243, 0.1);
+  border-bottom: 1px solid var(--cockpit-border);
   background:
-    linear-gradient(180deg, rgba(238, 242, 243, 0.035), rgba(238, 242, 243, 0.015)),
-    rgba(8, 13, 16, 0.7);
+    linear-gradient(180deg, rgba(238, 242, 247, 0.052), rgba(238, 242, 247, 0.014)),
+    rgba(7, 11, 14, 0.78);
 }
 
 .secondary-panel-header {
   min-width: 0;
+  margin: -2px 0 10px;
+  padding-bottom: 10px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
+  border-bottom: 1px solid rgba(238, 242, 247, 0.09);
 }
 
 .secondary-panel-header span {
@@ -1947,6 +2121,16 @@ textarea:focus-visible {
 
 .cockpit-secondary-panel .agent-facts {
   grid-template-columns: 1fr;
+}
+
+.cockpit-secondary-panel .agent-facts div {
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(238, 242, 247, 0.07);
+  grid-template-columns: minmax(78px, 0.42fr) minmax(0, 1fr);
+}
+
+.cockpit-secondary-panel .agent-facts div:last-child {
+  border-bottom: 0;
 }
 
 .cockpit-secondary-panel .agent-handoff-panel,
@@ -1965,8 +2149,7 @@ textarea:focus-visible {
 }
 
 .workbench-header,
-.plan-section-header,
-.submit-dock {
+.plan-section-header {
   min-width: 0;
   display: grid;
   gap: 10px;
@@ -1976,7 +2159,7 @@ textarea:focus-visible {
 .workbench-header {
   grid-template-columns: minmax(0, 1fr) auto;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(238, 242, 243, 0.1);
+  border-bottom: 1px solid rgba(238, 242, 247, 0.1);
 }
 
 .workbench-header strong {
@@ -1991,17 +2174,6 @@ textarea:focus-visible {
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.submission-mode-toggle {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-.submission-mode-toggle button {
-  min-height: 34px;
-}
-
 .plan-metric-strip {
   margin-top: 12px;
   display: grid;
@@ -2009,16 +2181,51 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.insight-empty-state {
+  min-height: 160px;
+  margin-top: 12px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border: 1px dashed rgba(143, 208, 255, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(var(--cockpit-role), 0.055), transparent 42%),
+    rgba(4, 8, 11, 0.58);
+}
+
+.insight-empty-state p {
+  max-width: 680px;
+  margin: 0;
+  color: #c2cccc;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
 .plan-metric {
+  position: relative;
   min-width: 0;
   min-height: 62px;
   padding: 9px;
   display: grid;
   align-content: center;
   gap: 4px;
-  border: 1px solid rgba(238, 242, 243, 0.12);
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 247, 0.12);
   border-radius: 6px;
-  background: rgba(238, 242, 243, 0.04);
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.06), rgba(238, 242, 247, 0.014)),
+    rgba(8, 12, 16, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.032);
+}
+
+.plan-metric::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: rgba(143, 208, 255, 0.34);
+  content: "";
 }
 
 .plan-metric span {
@@ -2040,9 +2247,19 @@ textarea:focus-visible {
   border-color: rgba(93, 210, 146, 0.35);
 }
 
+.plan-metric.tone-ok::before {
+  background: #5dd292;
+}
+
 .plan-metric.tone-danger {
   border-color: rgba(255, 92, 108, 0.5);
-  background: rgba(142, 47, 56, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 92, 108, 0.12), rgba(255, 92, 108, 0.026)),
+    rgba(18, 7, 10, 0.82);
+}
+
+.plan-metric.tone-danger::before {
+  background: #ff5c6c;
 }
 
 .assembly-bay-panel {
@@ -2051,9 +2268,10 @@ textarea:focus-visible {
   padding: 12px;
   display: grid;
   gap: 10px;
-  border: 1px solid rgba(143, 208, 255, 0.2);
+  border: 1px solid rgba(var(--cockpit-role), 0.24);
   border-radius: 10px;
   background:
+    linear-gradient(90deg, rgba(var(--cockpit-role), 0.06), transparent 38%),
     linear-gradient(180deg, rgba(18, 24, 30, 0.86), rgba(10, 14, 18, 0.82)),
     rgba(8, 11, 14, 0.9);
   box-shadow:
@@ -2144,7 +2362,7 @@ textarea:focus-visible {
   min-height: 0;
   margin-top: 10px;
   overflow: hidden;
-  border: 1px solid rgba(143, 208, 255, 0.18);
+  border: 1px solid rgba(var(--cockpit-role), 0.2);
   border-radius: 8px;
   isolation: isolate;
   background:
@@ -2158,7 +2376,7 @@ textarea:focus-visible {
       rgba(255, 255, 255, 0.05) 0 1px,
       transparent 1px 40px
     ),
-    linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 32%, transparent 68%, rgba(92, 145, 255, 0.08)),
+    linear-gradient(90deg, rgba(var(--cockpit-role), 0.08), transparent 36%, transparent 64%, rgba(143, 208, 255, 0.06)),
     linear-gradient(180deg, rgba(25, 33, 40, 0.7), rgba(4, 6, 8, 0.96)),
     #050708;
   background-size: 34px 34px, 34px 34px, auto, auto, auto;
@@ -2239,117 +2457,139 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
-.plan-workbench-grid {
-  margin-top: 12px;
-  display: grid;
-  grid-template-columns: minmax(280px, 0.72fr) minmax(380px, 1.28fr);
-  gap: 12px;
-}
-
 .plan-section {
   min-width: 0;
-  padding-top: 12px;
-  border-top: 1px solid rgba(238, 242, 243, 0.1);
+  padding: 12px;
+  border: 1px solid rgba(238, 242, 247, 0.11);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.04), rgba(238, 242, 247, 0.01)),
+    rgba(8, 12, 16, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.024);
 }
 
-.blueprint-editor,
-.opening-script-editor,
-.rationale-panel {
-  grid-column: 1 / -1;
-}
-
-.purchase-list,
-.blueprint-block-list,
-.turn-command-list {
-  margin-top: 10px;
+.insight-grid {
+  margin-top: 12px;
   display: grid;
+  grid-template-columns: minmax(260px, 0.88fr) minmax(300px, 1.12fr);
   gap: 8px;
 }
 
-.purchase-row,
-.blueprint-block-row,
-.turn-command-row {
+.insight-grid.has-decision {
+  grid-template-columns: minmax(250px, 0.74fr) minmax(320px, 1.26fr);
+}
+
+.insight-panel {
   min-width: 0;
   display: grid;
-  gap: 8px;
-  align-items: end;
-  padding: 8px;
-  border: 1px solid rgba(238, 242, 243, 0.1);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.purchase-row {
-  grid-template-columns: minmax(180px, 1fr) 72px 58px 86px;
-}
-
-.purchase-row strong {
-  min-height: 36px;
-  display: grid;
-  place-items: center;
-  color: #f3d46f;
-  font-size: 0.78rem;
-}
-
-.blueprint-name-field {
-  margin-top: 10px;
-}
-
-.blueprint-block-row {
-  grid-template-columns: minmax(112px, 0.8fr) minmax(180px, 1.1fr) minmax(110px, 0.8fr) minmax(142px, 0.9fr) minmax(142px, 0.9fr) 86px;
-}
-
-.blueprint-block-row fieldset {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
-  border: 0;
 }
 
-.blueprint-block-row legend {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 0;
+.combat-decision-panel {
+  grid-row: span 2;
+}
+
+.insight-text {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(238, 242, 247, 0.08);
+}
+
+.insight-text strong,
+.insight-list-block > strong {
   color: #8fa3a3;
-  font-size: 0.64rem;
-  font-weight: 900;
+  font-size: 0.66rem;
+  font-weight: 950;
   text-transform: uppercase;
 }
 
-.turn-command-row {
-  grid-template-columns: 64px minmax(120px, 1fr) minmax(102px, 0.8fr) minmax(102px, 0.8fr) minmax(102px, 0.8fr) 86px;
+.insight-text p {
+  margin: 5px 0 0;
+  color: #d8dedf;
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
-.rationale-panel .submission-editor textarea,
-.json-editor textarea {
-  min-height: 150px;
+.insight-command-list,
+.insight-list {
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  list-style: none;
 }
 
-.json-editor textarea {
-  min-height: 520px;
-}
-
-.submit-dock {
-  grid-template-columns: minmax(0, 1fr) minmax(160px, auto);
-  margin-top: 12px;
-  padding: 12px;
-  border: 1px solid rgba(93, 210, 146, 0.24);
-  border-radius: 8px;
+.insight-command-list li,
+.insight-list li {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(238, 242, 247, 0.09);
+  border-radius: 6px;
   background:
-    linear-gradient(90deg, rgba(93, 210, 146, 0.1), rgba(143, 208, 255, 0.035)),
-    rgba(93, 210, 146, 0.04);
+    linear-gradient(180deg, rgba(238, 242, 247, 0.036), rgba(238, 242, 247, 0.01)),
+    rgba(5, 9, 12, 0.62);
 }
 
-.submit-dock .agent-facts {
+.insight-command-list strong {
+  color: #f3d46f;
+  font-size: 0.74rem;
+}
+
+.insight-command-list span,
+.insight-list li {
+  color: #d8dedf;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.decision-readiness {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.readiness-card {
+  min-width: 0;
+  min-height: 78px;
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  border: 1px solid rgba(238, 242, 247, 0.1);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.042), rgba(238, 242, 247, 0.012)),
+    rgba(5, 9, 12, 0.7);
+}
+
+.readiness-card.is-ready {
+  border-color: rgba(93, 210, 146, 0.32);
+}
+
+.readiness-card.is-waiting {
+  border-color: rgba(247, 184, 75, 0.28);
+}
+
+.readiness-card span {
+  color: #8fa3a3;
+  font-size: 0.62rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.readiness-card strong {
+  color: #eef2f3;
+  font-size: 0.86rem;
+}
+
+.readiness-card p {
   margin: 0;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.submit-dock button {
-  min-height: 42px;
+  color: #b6c1c3;
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .agent-handoff-panel textarea {
@@ -2358,8 +2598,7 @@ textarea:focus-visible {
 
 @media (max-width: 1180px) {
   .human-grid,
-  .agent-grid,
-  .agent-live-grid {
+  .agent-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2394,7 +2633,7 @@ textarea:focus-visible {
   .agent-command-header,
   .agent-task-panel,
   .agent-cockpit-layout,
-  .plan-workbench-grid {
+  .insight-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2420,11 +2659,6 @@ textarea:focus-visible {
 
   .agent-task-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .blueprint-block-row,
-  .turn-command-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .agent-live-panel {
@@ -2475,21 +2709,13 @@ textarea:focus-visible {
     grid-column: 1 / -1;
   }
 
-  .agent-plan-row {
-    grid-template-columns: 1fr;
-  }
-
   .workbench-header,
-  .submit-dock,
-  .purchase-row,
-  .blueprint-block-row,
-  .turn-command-row {
+  .decision-readiness {
     grid-template-columns: 1fr;
   }
 
   .plan-metric-strip,
-  .agent-task-list,
-  .submit-dock .agent-facts {
+  .agent-task-list {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2517,13 +2743,10 @@ textarea:focus-visible {
   .cockpit-stats,
   .inventory-row,
     .agent-facts div,
-    .agent-button-row,
     .replay-controls,
     .agent-command-actions,
     .agent-task-list,
-    .plan-metric-strip,
-    .submit-dock .agent-facts,
-    .submission-mode-toggle {
+    .plan-metric-strip {
     grid-template-columns: 1fr;
   }
 
@@ -2581,7 +2804,6 @@ textarea:focus-visible {
   .cockpit-stats,
   .inventory-row,
   .agent-facts div,
-  .agent-button-row,
   .replay-controls {
     grid-template-columns: 1fr;
   }

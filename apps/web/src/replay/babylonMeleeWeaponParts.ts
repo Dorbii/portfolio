@@ -82,6 +82,27 @@ export function createHammerWeaponPart({
       pivot.position.z,
     )
   }
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6
+    const bolt = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-hammer-pivot-bolt-${index}`,
+      {
+        height: 0.028,
+        diameter: Math.max(width * 0.055, 0.026),
+        tessellation: 8,
+      },
+      scene,
+    )
+
+    bolt.rotation.z = Math.PI / 2
+    bolt.position.set(
+      -Math.max(width * 0.25, 0.14),
+      pivot.position.y + Math.sin(angle) * Math.max(height * 0.17, 0.08),
+      pivot.position.z + Math.cos(angle) * Math.max(height * 0.17, 0.08),
+    )
+    attachMesh(bolt, parent, materials.steel)
+  }
 }
 
 export function createSpearWeaponPart({
@@ -115,6 +136,34 @@ export function createSpearWeaponPart({
   tip.position.z = Math.max(depth * 1.14, 0.74)
   attachMesh(shaft, parent, materials.trim)
   attachMesh(tip, parent, materials.warning)
+
+  for (let side = -1; side <= 1; side += 2) {
+    const fin = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spear-stabilizer-fin-${side}`,
+      {
+        width: Math.max(width * 0.08, 0.045),
+        height: Math.max(width * 0.28, 0.13),
+        depth: Math.max(depth * 0.24, 0.16),
+      },
+      scene,
+    )
+    const collar = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-spear-collar-${side}`,
+      {
+        height: Math.max(width * 0.16, 0.08),
+        diameter: Math.max(width * 0.24, 0.14),
+        tessellation: 12,
+      },
+      scene,
+    )
+
+    fin.position.set(side * Math.max(width * 0.14, 0.08), 0, Math.max(depth * 0.82, 0.52))
+    fin.rotation.z = side * 0.24
+    collar.rotation.x = Math.PI / 2
+    collar.position.set(0, 0, Math.max(depth * 0.7, 0.46))
+    attachMesh(fin, parent, materials.steel)
+    attachMesh(collar, parent, materials.steel)
+  }
 }
 
 export function createFlipperWeaponPart({
@@ -161,6 +210,27 @@ export function createFlipperWeaponPart({
       Math.max(height * 0.28, 0.16),
       0,
     )
+  }
+
+  for (let side = -1; side <= 1; side += 2) {
+    const actuator = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-flipper-actuator-${side}`,
+      {
+        height: Math.max(depth * 0.72, 0.38),
+        diameter: Math.max(width * 0.055, 0.04),
+        tessellation: 10,
+      },
+      scene,
+    )
+
+    actuator.rotation.x = Math.PI / 2
+    actuator.rotation.z = side * 0.18
+    actuator.position.set(
+      side * Math.max(width * 0.28, 0.18),
+      Math.max(height * 0.36, 0.2),
+      -Math.max(depth * 0.02, 0.02),
+    )
+    attachMesh(actuator, parent, materials.steel)
   }
 }
 
@@ -225,6 +295,36 @@ export function createGrabberWeaponPart({
     tooth.position.set(index * Math.max(width * 0.24, 0.18), Math.max(height * 0.2, 0.14), Math.max(depth * 0.78, 0.44))
     attachMesh(tooth, parent, materials.warning)
   }
+
+  for (let side = -1; side <= 1; side += 2) {
+    const pivot = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-grabber-claw-pivot-${side}`,
+      {
+        height: Math.max(width * 0.2, 0.1),
+        diameter: Math.max(height * 0.2, 0.1),
+        tessellation: 12,
+      },
+      scene,
+    )
+    const clawTip = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-grabber-hook-tip-${side}`,
+      {
+        height: Math.max(depth * 0.3, 0.18),
+        diameterTop: 0,
+        diameterBottom: Math.max(width * 0.12, 0.08),
+        tessellation: 10,
+      },
+      scene,
+    )
+
+    pivot.rotation.z = Math.PI / 2
+    pivot.position.set(side * Math.max(width * 0.38, 0.26), Math.max(height * 0.78, 0.36), -Math.max(depth * 0.14, 0.08))
+    clawTip.rotation.x = Math.PI / 2
+    clawTip.rotation.z = side * 0.42
+    clawTip.position.set(side * Math.max(width * 0.42, 0.28), Math.max(height * 0.72, 0.34), Math.max(depth * 0.42, 0.28))
+    attachMesh(pivot, parent, materials.steel)
+    attachMesh(clawTip, parent, materials.warning)
+  }
 }
 
 export function createRamWeaponPart({
@@ -274,5 +374,170 @@ export function createRamWeaponPart({
       Math.max(height * 0.24, 0.14),
       Math.max(depth * 0.18, 0.1),
     )
+  }
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(
+      scene,
+      parent,
+      materials.steel,
+      `${role}-${blockId}-ram-rake-tooth-${index + 1}`,
+      Math.max(width * 0.12, 0.08),
+      Math.max(height * 0.16, 0.08),
+      Math.max(depth * 0.24, 0.14),
+      index * Math.max(width * 0.28, 0.16),
+      Math.max(height * 0.34, 0.18),
+      Math.max(depth * 0.92, 0.48),
+    )
+  }
+}
+
+export function createDrillWeaponPart({
+  scene,
+  parent,
+  material,
+  role,
+  blockId,
+  width,
+  height,
+  depth,
+  materials,
+}: WeaponPartRenderArgs): void {
+  const gearbox = MeshBuilder.CreateBox(
+    `${role}-${blockId}-drill-gearbox`,
+    {
+      width: Math.max(width * 0.66, 0.34),
+      height: Math.max(height * 0.46, 0.24),
+      depth: Math.max(depth * 0.34, 0.26),
+    },
+    scene,
+  )
+  const shaft = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-drill-shaft`,
+    {
+      height: Math.max(depth * 0.5, 0.32),
+      diameter: Math.max(width * 0.16, 0.08),
+      tessellation: 12,
+    },
+    scene,
+  )
+
+  gearbox.position.set(0, Math.max(height * 0.34, 0.22), -Math.max(depth * 0.16, 0.14))
+  shaft.rotation.x = Math.PI / 2
+  shaft.position.set(0, Math.max(height * 0.34, 0.22), Math.max(depth * 0.24, 0.2))
+  shaft.metadata = { kind: 'spin', speed: 0.16 }
+  attachMesh(gearbox, parent, material)
+  attachMesh(shaft, parent, materials.steel)
+
+  const bitSegments = 5
+  for (let index = 0; index < bitSegments; index += 1) {
+    const bit = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-drill-bit-section-${index}`,
+      {
+        height: Math.max(depth * 0.16, 0.1),
+        diameterTop: Math.max(width * (0.34 - index * 0.04), 0.1),
+        diameterBottom: Math.max(width * (0.42 - index * 0.04), 0.14),
+        tessellation: 14,
+      },
+      scene,
+    )
+    const flute = MeshBuilder.CreateBox(
+      `${role}-${blockId}-drill-flute-${index}`,
+      {
+        width: Math.max(width * 0.06, 0.035),
+        height: Math.max(height * 0.12, 0.055),
+        depth: Math.max(depth * 0.18, 0.1),
+      },
+      scene,
+    )
+
+    bit.rotation.x = Math.PI / 2
+    bit.position.set(0, shaft.position.y, Math.max(depth * (0.48 + index * 0.13), 0.34 + index * 0.1))
+    bit.metadata = { kind: 'spin', speed: 0.16 }
+    flute.position.copyFrom(bit.position)
+    flute.rotation.z = index * 0.72
+    flute.rotation.x = Math.PI / 2
+    attachMesh(bit, parent, materials.steel)
+    attachMesh(flute, parent, materials.warning)
+  }
+}
+
+export function createFlailWeaponPart({
+  scene,
+  parent,
+  material,
+  role,
+  blockId,
+  width,
+  height,
+  depth,
+  materials,
+}: WeaponPartRenderArgs): void {
+  const drum = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-flail-drive-drum`,
+    {
+      height: Math.max(width * 0.72, 0.36),
+      diameter: Math.max(height * 0.42, 0.2),
+      tessellation: 14,
+    },
+    scene,
+  )
+  const y = Math.max(height * 0.42, 0.26)
+
+  drum.rotation.z = Math.PI / 2
+  drum.position.set(0, y, -Math.max(depth * 0.22, 0.16))
+  drum.metadata = { kind: 'spin', speed: 0.13 }
+  attachMesh(drum, parent, material)
+
+  for (let chain = -1; chain <= 1; chain += 2) {
+    const chainX = chain * Math.max(width * 0.16, 0.1)
+
+    for (let index = 0; index < 4; index += 1) {
+      const link = MeshBuilder.CreateTorus(
+        `${role}-${blockId}-flail-chain-link-${chain}-${index}`,
+        {
+          diameter: Math.max(width * 0.18, 0.1),
+          thickness: 0.022,
+          tessellation: 10,
+        },
+        scene,
+      )
+
+      link.rotation.x = Math.PI / 2
+      link.rotation.z = index % 2 === 0 ? 0 : Math.PI / 2
+      link.position.set(chainX, y, Math.max(depth * (0.08 + index * 0.16), 0.12 + index * 0.1))
+      attachMesh(link, parent, materials.steel)
+    }
+
+    const ball = MeshBuilder.CreateSphere(
+      `${role}-${blockId}-flail-impact-ball-${chain}`,
+      { diameter: Math.max(width * 0.28, 0.16), segments: 10 },
+      scene,
+    )
+
+    ball.position.set(chainX, y, Math.max(depth * 0.78, 0.52))
+    attachMesh(ball, parent, materials.steel)
+
+    for (let spike = 0; spike < 4; spike += 1) {
+      const angle = (Math.PI * 2 * spike) / 4
+      const tooth = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-flail-ball-spike-${chain}-${spike}`,
+        {
+          height: Math.max(width * 0.16, 0.08),
+          diameterTop: 0,
+          diameterBottom: Math.max(width * 0.07, 0.04),
+          tessellation: 8,
+        },
+        scene,
+      )
+
+      tooth.position.set(
+        chainX + Math.sin(angle) * Math.max(width * 0.16, 0.08),
+        y + Math.cos(angle) * Math.max(width * 0.16, 0.08),
+        ball.position.z,
+      )
+      tooth.rotation.z = -angle
+      attachMesh(tooth, parent, materials.warning)
+    }
   }
 }

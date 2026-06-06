@@ -1,4 +1,5 @@
 export * from './blueprint.js'
+export * from './capabilities.js'
 export * from './controls.js'
 export * from './inventory.js'
 export * from './normalizeSubmission.js'

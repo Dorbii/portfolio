@@ -9,14 +9,14 @@ import type {
   TokenHasher,
 } from './sessionTypes.js'
 
-export async function findRoleByToken(
+export async function findRoleAuthByToken(
   state: StoredSessionState,
   tokenHasher: TokenHasher,
   roleToken: string,
-): Promise<StoredRoleState | undefined> {
-  const auth = await findAnyRoleBearer(state, tokenHasher, roleToken)
-
-  return auth?.role
+): Promise<RoleBearerAuth | undefined> {
+  return findAnyRoleBearer(state, tokenHasher, roleToken, {
+    allowObserver: true,
+  })
 }
 
 export async function findRoleBearer(
@@ -24,7 +24,7 @@ export async function findRoleBearer(
   tokenHasher: TokenHasher,
   roleName: TeamRole,
   token: string,
-  options: { allowUnclaimedClaimKey: boolean },
+  options: { allowObserver?: boolean; allowUnclaimedClaimKey: boolean },
 ): Promise<RoleBearerAuth | undefined> {
   if (!token.trim()) {
     return undefined
@@ -51,6 +51,7 @@ async function findAnyRoleBearer(
   state: StoredSessionState,
   tokenHasher: TokenHasher,
   roleToken: string,
+  options: { allowObserver: boolean },
 ): Promise<RoleBearerAuth | undefined> {
   if (!roleToken.trim()) {
     return undefined
@@ -60,6 +61,7 @@ async function findAnyRoleBearer(
 
   for (const roleName of TEAM_ROLES) {
     const auth = matchRoleBearer(state.roles[roleName], roleTokenHash, {
+      allowObserver: options.allowObserver,
       allowUnclaimedClaimKey: false,
     })
 
@@ -74,14 +76,18 @@ async function findAnyRoleBearer(
 function matchRoleBearer(
   role: StoredRoleState,
   tokenHash: string,
-  options: { allowUnclaimedClaimKey: boolean },
+  options: { allowObserver?: boolean; allowUnclaimedClaimKey: boolean },
 ): RoleBearerAuth | undefined {
   if (role.roleTokenHash === tokenHash) {
-    return { role }
+    return { role, scope: 'agent' }
   }
 
   if ((role.claimedAt || options.allowUnclaimedClaimKey) && role.claimTokenHash === tokenHash) {
-    return { role }
+    return { role, scope: 'agent' }
+  }
+
+  if (options.allowObserver && role.observerTokenHash === tokenHash) {
+    return { role, scope: 'observer' }
   }
 
   return undefined

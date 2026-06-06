@@ -275,6 +275,8 @@ export function statusForRelayError(error: RelayErrorResponse['error']): number 
     case 'INVALID_ROLE':
     case 'SUBMISSION_INVALID':
       return 400
+    case 'FORBIDDEN':
+      return 403
     case 'INVALID_TOKEN':
       return 401
     case 'SESSION_NOT_FOUND':

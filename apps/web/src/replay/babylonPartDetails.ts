@@ -69,6 +69,10 @@ export function createPartAccents(
     )
   }
 
+  if (category === 'body') {
+    createBodyPaintPanels(scene, parent, materials, width, height, depth)
+  }
+
   createFastenerRow(scene, parent, materials.trim, `${role}-${blockId}-front-fasteners`, {
     count: 2,
     xStart: -width * 0.34,
@@ -99,6 +103,57 @@ export function createPartAccents(
       y: Math.max(height * 0.73, 0.25),
       z: 0,
     })
+  }
+}
+
+function createBodyPaintPanels(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  const topY = Math.max(height * 0.82, 0.28)
+
+  createBoxDetail(
+    scene,
+    parent,
+    materials.armor,
+    `${parent.name}-painted-top-armor`,
+    Math.max(width * 0.56, 0.22),
+    0.05,
+    Math.max(depth * 0.42, 0.18),
+    -Math.max(width * 0.06, 0.02),
+    topY,
+    Math.max(depth * 0.08, 0.04),
+  )
+  createBoxDetail(
+    scene,
+    parent,
+    materials.armor,
+    `${parent.name}-painted-front-strike-panel`,
+    Math.max(width * 0.72, 0.26),
+    0.08,
+    0.055,
+    0,
+    Math.max(height * 0.32, 0.14),
+    Math.max(depth * 0.5, 0.18),
+  )
+
+  for (let side = -1; side <= 1; side += 2) {
+    createBoxDetail(
+      scene,
+      parent,
+      materials.armor,
+      `${parent.name}-painted-side-flank-${side}`,
+      0.05,
+      Math.max(height * 0.3, 0.12),
+      Math.max(depth * 0.52, 0.2),
+      side * Math.max(width * 0.46, 0.17),
+      Math.max(height * 0.42, 0.18),
+      -Math.max(depth * 0.04, 0.02),
+    )
   }
 }
 

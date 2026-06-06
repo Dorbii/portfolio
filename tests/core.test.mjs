@@ -3,7 +3,9 @@ import test from 'node:test'
 
 import {
   PART_CATALOG,
+  AGENT_FEATURE_GATES,
   applyPurchases,
+  createAgentCatalogGuidance,
   deriveControls,
   normalizeTactics,
   validateBlueprintAssembly,
@@ -11,6 +13,7 @@ import {
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 import {
+  PART_BEHAVIORS,
   PART_BEHAVIOR_IDS,
   chooseCommand,
   compileCommandPolicy,
@@ -228,7 +231,73 @@ test('catalog exposes unique MVP part ids', () => {
   assert.equal(new Set(ids).size, ids.length)
   assert.ok(ids.includes('Body_Square_Small'))
   assert.ok(ids.includes('Weapon_Net'))
+  assert.ok(ids.includes('Weapon_Drill'))
+  assert.ok(ids.includes('Weapon_Flail'))
+  assert.ok(ids.includes('Wheel_Mecanum'))
+  assert.ok(ids.includes('Utility_AIModule'))
+  assert.ok(ids.includes('Utility_EnergyCore'))
+  assert.ok(ids.includes('Style_LightBar'))
   assert.ok(ids.includes('Style_TrashCan'))
+})
+
+test('agent catalog guidance routes through feature gates instead of part flags', () => {
+  const guidance = createAgentCatalogGuidance(PART_CATALOG)
+  const gates = new Map(AGENT_FEATURE_GATES.map((gate) => [gate.id, gate]))
+  const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const behaviorIds = new Set(
+    PART_CATALOG
+      .map((part) => part.behavior?.id)
+      .filter((behaviorId) => behaviorId !== undefined),
+  )
+
+  assert.equal(guidance.featureGates, AGENT_FEATURE_GATES)
+  assert.ok(guidance.trustOrder[0].includes('session rules'))
+  assert.equal(gates.get('agent.plan_context')?.state, 'enabled')
+
+  for (const behaviorId of behaviorIds) {
+    assert.ok(gates.has(`combat.behavior.${behaviorId}`), `missing behavior gate ${behaviorId}`)
+  }
+
+  for (const capability of guidance.capabilities) {
+    assert.ok(capability.candidateParts.length > 0, `${capability.id} has no candidates`)
+    assert.ok(capability.excludedCandidates.length > 0, `${capability.id} has no exclusions`)
+
+    for (const candidate of capability.candidateParts) {
+      const part = parts.get(candidate.partId)
+
+      assert.ok(part, `${capability.id} recommends unknown part ${candidate.partId}`)
+      assert.equal('state' in part, false)
+      assert.equal('simBacked' in part, false)
+
+      for (const gateId of candidate.featureGateIds) {
+        const gate = gates.get(gateId)
+
+        assert.ok(gate, `${candidate.partId} references unknown gate ${gateId}`)
+        assert.notEqual(gate.state, 'disabled')
+        assert.notEqual(gate.state, 'deprecated')
+      }
+    }
+  }
+})
+
+test('agent catalog guidance excludes disabled feature-gated candidates', () => {
+  const featureGates = AGENT_FEATURE_GATES.map((gate) =>
+    gate.id === 'combat.movement_commands'
+      ? { ...gate, state: 'disabled' }
+      : gate,
+  )
+  const guidance = createAgentCatalogGuidance(PART_CATALOG, { featureGates })
+  const movementCapability = guidance.capabilities.find(
+    (capability) => capability.id === 'movement_escape',
+  )
+
+  assert.ok(movementCapability)
+  assert.equal(movementCapability.candidateParts.length, 0)
+  assert.ok(
+    movementCapability.excludedCandidates.some((candidate) =>
+      candidate.reasons.some((reason) => reason.includes('feature gate disabled')),
+    ),
+  )
 })
 
 test('catalog exposes required source-owned part behavior metadata', () => {
@@ -285,6 +354,7 @@ test('mobility catalog differentiates wheel and tread archetypes mechanically', 
   const mediumWheel = parts.get('Wheel_Medium')
   const largeWheel = parts.get('Wheel_Large')
   const tankWheel = parts.get('Wheel_Tank')
+  const mecanumWheel = parts.get('Wheel_Mecanum')
   const omniWheel = parts.get('Wheel_Omni')
   const spikedWheel = parts.get('Wheel_Spiked')
   const lightTread = parts.get('Tread_Light')
@@ -308,10 +378,39 @@ test('mobility catalog differentiates wheel and tread archetypes mechanically', 
   assert.ok((tankWheel?.stats.stability ?? 0) > (largeWheel?.stats.stability ?? 0))
   assert.ok((omniWheel?.stats.drive ?? 0) > (largeWheel?.stats.drive ?? 0))
   assert.ok((omniWheel?.durability ?? 0) < (largeWheel?.durability ?? 0))
+  assert.equal(mecanumWheel?.controls?.movement, true)
+  assert.ok((mecanumWheel?.stats.control ?? 0) > (omniWheel?.stats.control ?? 0))
+  assert.ok((mecanumWheel?.durability ?? 0) < (mediumWheel?.durability ?? 0))
   assert.ok((spikedWheel?.stats.weapon ?? 0) > 0)
   assert.ok((spikedWheel?.stats.traction ?? 0) > (omniWheel?.stats.traction ?? 0))
   assert.ok((heavyTread?.durability ?? 0) > (lightTread?.durability ?? 0))
   assert.ok((heavyTread?.stats.drive ?? 0) < (lightTread?.stats.drive ?? 0))
+})
+
+test('expanded reference-backed catalog parts preserve behavior and economy contracts', () => {
+  const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const saw = parts.get('Weapon_Saw')
+  const drill = parts.get('Weapon_Drill')
+  const flail = parts.get('Weapon_Flail')
+  const aiModule = parts.get('Utility_AIModule')
+  const energyCore = parts.get('Utility_EnergyCore')
+  const battery = parts.get('Utility_Battery')
+  const lightBar = parts.get('Style_LightBar')
+
+  assert.deepEqual(drill?.behavior, PART_BEHAVIORS.saw)
+  assert.deepEqual(flail?.behavior, PART_BEHAVIORS.spinner)
+  assert.deepEqual(aiModule?.behavior, PART_BEHAVIORS.sensor)
+  assert.equal(drill?.controls?.weapon, true)
+  assert.equal(flail?.controls?.weapon, true)
+  assert.equal(aiModule?.controls?.utility, true)
+  assert.equal(energyCore?.controls, undefined)
+  assert.equal(battery?.controls, undefined)
+  assert.ok((drill?.cost ?? 0) > (saw?.cost ?? 0))
+  assert.ok((flail?.stats.chaos ?? 0) >= 5)
+  assert.ok((energyCore?.stats.stability ?? 0) > 0)
+  assert.ok((battery?.mass ?? 0) >= 5)
+  assert.equal(lightBar?.category, 'style')
+  assert.ok((lightBar?.stats.style ?? 0) >= 4)
 })
 
 test('purchase validation rejects unknown parts and overspend', () => {
@@ -678,8 +777,14 @@ test('catalog exposes visual descriptors for renderer dispatch and material lang
 
   assert.equal(visualFamilyFor('Weapon_Spinner_Small'), 'spinner')
   assert.equal(visualFamilyFor('Weapon_Saw'), 'saw')
+  assert.equal(visualFamilyFor('Weapon_Drill'), 'drill')
+  assert.equal(visualFamilyFor('Weapon_Flail'), 'flail')
   assert.equal(visualFamilyFor('Weapon_Turret'), 'turret')
+  assert.equal(visualFamilyFor('Wheel_Mecanum'), 'wheel')
   assert.equal(visualFamilyFor('Wheel_Omni'), 'wheel')
+  assert.equal(visualFamilyFor('Utility_EnergyCore'), 'battery')
+  assert.equal(visualFamilyFor('Utility_AIModule'), 'sensor')
+  assert.equal(visualFamilyFor('Style_LightBar'), 'light_bar')
   assert.equal(visualFamilyFor('Tread_Heavy'), 'tread')
 })
 
@@ -1949,17 +2054,61 @@ test('session creation returns role invites without leaking tokens publicly', as
     response.invites.map((invite) => invite.claimToken),
     ['claim_red', 'claim_blue'],
   )
+  assert.deepEqual(
+    response.invites.map((invite) => invite.observerToken),
+    ['observer_red', 'observer_blue'],
+  )
   assert.equal(response.refereeToken, 'referee_referee')
   assert.equal(publicJson.includes('claim_red'), false)
   assert.equal(publicJson.includes('claim_blue'), false)
+  assert.equal(publicJson.includes('observer_red'), false)
+  assert.equal(publicJson.includes('observer_blue'), false)
   assert.equal(publicJson.includes('referee_referee'), false)
   assert.equal(publicJson.includes('role_red'), false)
   assert.equal(storedJson.includes('claim_red'), false)
   assert.equal(storedJson.includes('claim_blue'), false)
+  assert.equal(storedJson.includes('observer_red'), false)
+  assert.equal(storedJson.includes('observer_blue'), false)
   assert.equal(storedJson.includes('referee_referee'), false)
   assert.equal(response.publicState.roles.red.claimed, false)
   assert.equal(response.publicState.roles.blue.submitted, false)
   assert.equal(response.publicState.roundPlan, undefined)
+})
+
+test('observer cockpit tokens can read role state but cannot mutate agent state', async () => {
+  const session = await createTestSession()
+  const observerState = await session.getRoleStateForToken('observer_red')
+
+  assert.equal(observerState.ok, true)
+  assert.equal(observerState.value.role, 'red')
+
+  const observerBootstrap = await session.bootstrapRole('red', 'observer_red', {
+    agentName: 'observer-red',
+  })
+
+  assert.equal(observerBootstrap.ok, false)
+  assert.equal(observerBootstrap.error.code, 'INVALID_TOKEN')
+
+  const observerSubmission = await session.submitRoundPlan('observer_red', validSpinnerSubmission)
+
+  assert.equal(observerSubmission.ok, false)
+  assert.equal(observerSubmission.error.code, 'FORBIDDEN')
+
+  const observerChat = await session.submitChatMessage('observer_red', {
+    kind: 'observation',
+    message: 'read-only observer should not post',
+  })
+
+  assert.equal(observerChat.ok, false)
+  assert.equal(observerChat.error.code, 'FORBIDDEN')
+
+  const observerJournal = await session.submitPrivateChatMessage('observer_red', {
+    kind: 'strategy',
+    message: 'read-only observer should not write journal',
+  })
+
+  assert.equal(observerJournal.ok, false)
+  assert.equal(observerJournal.error.code, 'FORBIDDEN')
 })
 
 test('sessions require both roles before opening plan submission', async () => {
@@ -2172,6 +2321,11 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(blueSubmission.value.state.combat.turnSeconds, 120)
   assert.equal(blueSubmission.value.state.combat.self.role, 'blue')
   assert.equal(blueSubmission.value.state.combat.opponent.role, 'red')
+  assert.equal(blueSubmission.value.state.combat.decision.tick, 1)
+  assert.equal(blueSubmission.value.state.combat.decision.legalCommands.movement.includes('forward'), true)
+  assert.equal(blueSubmission.value.state.combat.decision.range.band, 'long')
+  assert.ok(blueSubmission.value.state.combat.decision.movementOptions.recommended.length > 0)
+  assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
 
   const resolved = await resolveLiveCombat(session, redToken, blueToken, blueSubmission.value.state)

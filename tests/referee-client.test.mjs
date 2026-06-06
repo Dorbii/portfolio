@@ -71,6 +71,27 @@ test('referee invite URLs use production defaults and claimToken', () => {
   assert.equal(inviteUrl.includes('invite='), false)
 })
 
+test('referee invite URLs can use observer-only cockpit tokens', () => {
+  const inviteUrl = buildInviteUrl({
+    role: 'blue',
+    observerToken: 'obs_blue',
+    sessionId: 's_demo',
+    apiBase: DEFAULT_ARENA_API_BASE,
+  })
+  const params = new URLSearchParams({
+    session: 's_demo',
+    role: 'blue',
+    observerToken: 'obs_blue',
+    api: DEFAULT_ARENA_API_BASE,
+  })
+
+  assert.equal(
+    inviteUrl,
+    `${DEFAULT_ARENA_SITE_BASE}/agent#${params.toString()}`,
+  )
+  assert.equal(inviteUrl.includes('claimToken'), false)
+})
+
 test('referee createSession posts to /sessions', async () => {
   const { calls, restore } = withFetchStub(() =>
     jsonResponse({ sessionId: 's_demo', phase: 'submission_phase', invites: [], refereeToken: 'r_token', publicState: {} }),
@@ -214,10 +235,10 @@ test('referee session storage persists referee token and role handoff tokens unt
   const apiBase = DEFAULT_ARENA_API_BASE
   const data = {
     refereeToken: 'r_ref',
-    invites: [{ role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' }],
+    invites: [{ role: 'red', claimToken: 'cap_red', observerToken: 'obs_red', claimPath: '/sessions/s_demo/claim' }],
     expiresAt: '9999-01-01T00:00:00.000Z',
   }
-  const invite = { role: 'red', claimToken: 'cap_red' }
+  const invite = { role: 'red', claimToken: 'cap_red', observerToken: 'obs_red' }
   const calls = []
   const mockStorage = {
     getItem: (key) => {
@@ -239,6 +260,7 @@ test('referee session storage persists referee token and role handoff tokens unt
   const inviteLink = buildInviteUrl({
     role: invite.role,
     claimToken: invite.claimToken,
+    observerToken: invite.observerToken,
     sessionId,
     apiBase,
   })
@@ -249,6 +271,7 @@ test('referee session storage persists referee token and role handoff tokens unt
   assert.deepEqual(loaded?.invites, data.invites)
   assert.equal(loaded?.expiresAt, data.expiresAt)
   assert.equal(JSON.stringify(storage.get(`agent-arena:referee-console:${apiBase}:${sessionId}`)).includes('cap_red'), true)
+  assert.equal(JSON.stringify(storage.get(`agent-arena:referee-console:${apiBase}:${sessionId}`)).includes('obs_red'), true)
   assert.equal(calls.some(([op, key]) => op === 'set' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
   assert.equal(inviteLink.includes('invite='), false)
   assert.equal(inviteLink.includes('refereeToken'), false)
@@ -270,8 +293,8 @@ test('referee session storage preserves existing role handoff tokens when saving
     },
   }
   const invites = [
-    { role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' },
-    { role: 'blue', claimToken: 'cap_blue', claimPath: '/sessions/s_demo/claim' },
+    { role: 'red', claimToken: 'cap_red', observerToken: 'obs_red', claimPath: '/sessions/s_demo/claim' },
+    { role: 'blue', claimToken: 'cap_blue', observerToken: 'obs_blue', claimPath: '/sessions/s_demo/claim' },
   ]
 
   writeStoredSession(mockStorage, apiBase, sessionId, {

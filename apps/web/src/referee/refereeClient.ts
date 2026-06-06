@@ -79,17 +79,20 @@ export function setSessionIdInUrl(sessionId: string) {
 export function buildInviteUrl({
   role,
   claimToken,
+  observerToken,
   sessionId,
   apiBase,
 }: {
   role: TeamRole
-  claimToken: string
+  claimToken?: string
+  observerToken?: string
   sessionId: string
   apiBase: string
 }) {
   return createAgentInviteUrl({
     role,
-    claimToken,
+    ...(claimToken ? { claimToken } : {}),
+    observerToken,
     sessionId,
     apiBase,
   })
@@ -304,6 +307,7 @@ function normalizeStoredInvites(value: unknown): RoleInvite[] {
       byRole.set(invite.role, {
         role: invite.role,
         claimToken: invite.claimToken,
+        observerToken: typeof invite.observerToken === 'string' ? invite.observerToken : '',
         claimPath: typeof invite.claimPath === 'string' ? invite.claimPath : '',
       })
     }

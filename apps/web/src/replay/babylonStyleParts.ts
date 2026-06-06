@@ -111,6 +111,20 @@ export function createStylePart(
       attachMesh(eye, parent, materials.light)
     }
 
+    for (let side = -1; side <= 1; side += 2) {
+      for (let index = 0; index < 3; index += 1) {
+        const tooth = MeshBuilder.CreateCylinder(
+          `${role}-${blockId}-dragon-tooth-${side}-${index}`,
+          { height: 0.12, diameterTop: 0, diameterBottom: 0.035, tessellation: 8 },
+          scene,
+        )
+
+        tooth.rotation.x = Math.PI / 2
+        tooth.position.set(side * (0.08 + index * 0.055), -0.18, 0.39)
+        attachMesh(tooth, parent, materials.steel)
+      }
+    }
+
     return
   }
 
@@ -171,20 +185,91 @@ export function createStylePart(
     return
   }
 
+  if (partId.includes('LightBar')) {
+    const housing = MeshBuilder.CreateBox(
+      `${role}-${blockId}-lightbar-housing`,
+      { width: 0.78, height: 0.12, depth: 0.2 },
+      scene,
+    )
+    const backRail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-lightbar-back-rail`,
+      { width: 0.82, height: 0.08, depth: 0.22 },
+      scene,
+    )
+    const frontGlow = MeshBuilder.CreateBox(
+      `${role}-${blockId}-lightbar-front-glow`,
+      { width: 0.68, height: 0.055, depth: 0.035 },
+      scene,
+    )
+
+    housing.position.y = 0.2
+    backRail.position.y = 0.12
+    frontGlow.position.set(0, 0.22, 0.12)
+    attachMesh(housing, parent, materials.trim)
+    attachMesh(backRail, parent, material)
+    attachMesh(frontGlow, parent, materials.light)
+
+    for (let index = 0; index < 6; index += 1) {
+      const lens = MeshBuilder.CreateBox(
+        `${role}-${blockId}-lightbar-lens-${index}`,
+        { width: 0.085, height: 0.085, depth: 0.04 },
+        scene,
+      )
+      const divider = MeshBuilder.CreateBox(
+        `${role}-${blockId}-lightbar-divider-${index}`,
+        { width: 0.018, height: 0.11, depth: 0.055 },
+        scene,
+      )
+
+      lens.position.set(-0.29 + index * 0.116, 0.25, 0.105)
+      divider.position.set(-0.345 + index * 0.116, 0.24, 0.105)
+      attachMesh(lens, parent, materials.light)
+      attachMesh(divider, parent, materials.steel)
+    }
+
+    for (let side = -1; side <= 1; side += 2) {
+      const bracket = MeshBuilder.CreateBox(
+        `${role}-${blockId}-lightbar-mount-bracket-${side}`,
+        { width: 0.08, height: 0.18, depth: 0.16 },
+        scene,
+      )
+
+      bracket.position.set(side * 0.46, 0.14, 0)
+      attachMesh(bracket, parent, materials.steel)
+    }
+
+    return
+  }
+
   if (partId.includes('Crown')) {
     const band = MeshBuilder.CreateTorus(
       `${role}-${blockId}-crown-band`,
       { diameter: 0.52, thickness: 0.12, tessellation: 18 },
       scene,
     )
-    for (let index = 0; index < 3; index += 1) {
-      const tooth = MeshBuilder.CreateBox(
+    for (let index = 0; index < 7; index += 1) {
+      const angle = (Math.PI * 2 * index) / 7
+      const tooth = MeshBuilder.CreateCylinder(
         `${role}-${blockId}-crown-tooth-${index}`,
-        { width: 0.09, height: 0.18, depth: 0.2 },
+        {
+          height: index % 2 === 0 ? 0.28 : 0.2,
+          diameterTop: 0.035,
+          diameterBottom: 0.09,
+          tessellation: 8,
+        },
         scene,
       )
-      tooth.position.set(-0.19 + index * 0.19, 0.14, 0)
+      const jewel = MeshBuilder.CreateSphere(
+        `${role}-${blockId}-crown-jewel-${index}`,
+        { diameter: 0.055, segments: 8 },
+        scene,
+      )
+
+      tooth.position.set(Math.sin(angle) * 0.27, 0.22, Math.cos(angle) * 0.27)
+      tooth.rotation.z = -Math.sin(angle) * 0.22
+      jewel.position.set(Math.sin(angle) * 0.29, 0.38 + (index % 2 === 0 ? 0.08 : 0), Math.cos(angle) * 0.29)
       attachMesh(tooth, parent, materials.warning)
+      attachMesh(jewel, parent, materials.light)
     }
     band.rotation.x = Math.PI / 2
     attachMesh(band, parent, material)
@@ -207,10 +292,29 @@ export function createStylePart(
       { width: 0.24, height: 0.08, depth: 0.46 },
       scene,
     )
+    const handle = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-trash-handle`,
+      { diameter: 0.18, thickness: 0.025, tessellation: 12 },
+      scene,
+    )
     lid.position.set(0, 0.32, 0)
+    handle.position.set(0, 0.42, 0)
+    handle.rotation.x = Math.PI / 2
     shell.rotation.z = Math.PI / 2
     attachMesh(shell, parent, material)
     attachMesh(lid, parent, materials.trim)
+    attachMesh(handle, parent, materials.steel)
+
+    for (let index = -2; index <= 2; index += 1) {
+      const rib = MeshBuilder.CreateBox(
+        `${role}-${blockId}-trash-rib-${index + 2}`,
+        { width: 0.025, height: 0.54, depth: 0.035 },
+        scene,
+      )
+
+      rib.position.set(index * 0.07, 0.02, 0.19)
+      attachMesh(rib, parent, materials.trim)
+    }
 
     return
   }
@@ -235,12 +339,34 @@ function createFlagPart(
     { width: 0.46, height: 0.26 },
     scene,
   )
+  const base = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-flag-base`,
+    { height: 0.08, diameter: 0.22, tessellation: 12 },
+    scene,
+  )
+  const crossbar = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-flag-crossbar`,
+    { height: 0.48, diameter: 0.025, tessellation: 8 },
+    scene,
+  )
+  const emblem = MeshBuilder.CreateBox(
+    `${role}-${blockId}-flag-emblem`,
+    { width: 0.16, height: 0.045, depth: 0.035 },
+    scene,
+  )
 
   pole.rotation.z = Math.PI / 2
   flag.rotation.z = Math.PI / 2
+  base.rotation.z = Math.PI / 2
+  crossbar.rotation.z = Math.PI / 2
   pole.position.y = 0.15
   flag.position.set(0.24, 0.56, 0)
+  crossbar.position.set(0.24, 0.66, 0)
+  emblem.position.set(0.24, 0.56, 0.02)
 
+  attachMesh(base, parent, material)
   attachMesh(pole, parent, material)
   attachMesh(flag, parent, material)
+  attachMesh(crossbar, parent, material)
+  attachMesh(emblem, parent, material)
 }

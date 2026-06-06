@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { getPart } from '../../../../packages/catalog/src/index.js'
 import type {
-  PartDefinition,
   RolePrivateState,
   SessionChatMessage,
   SessionLogEvent,
@@ -178,31 +177,6 @@ export function InventoryTable({ state }: { state: RolePrivateState | null }) {
             </tr>
           )
         })}
-      </tbody>
-    </table>
-  )
-}
-
-export function PartTable({ parts }: { parts: PartDefinition[] }) {
-  return (
-    <table className="agent-table">
-      <thead>
-        <tr>
-          <th>Part</th>
-          <th>Type</th>
-          <th>Cost</th>
-          <th>Tags</th>
-        </tr>
-      </thead>
-      <tbody>
-        {parts.map((part) => (
-          <tr key={part.id}>
-            <td>{part.displayName}</td>
-            <td>{part.category}</td>
-            <td>{part.cost}</td>
-            <td>{part.tags.length > 0 ? part.tags.join(', ') : 'none'}</td>
-          </tr>
-        ))}
       </tbody>
     </table>
   )

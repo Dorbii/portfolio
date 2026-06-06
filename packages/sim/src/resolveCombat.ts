@@ -8,6 +8,9 @@ import {
   type ReplayTimeline,
 } from '../../replay/src/index.js'
 import {
+  expandArenaHazards,
+  isPositionInsideArenaHazard,
+  type ArenaHazardDescriptor,
   DEFAULT_ARENA_CONFIG,
   type ArenaConfig,
   type BotBlueprint,
@@ -130,6 +133,7 @@ type RuntimePart = {
 type CombatRuntimeState = {
   round: number
   arena: ArenaConfig
+  hazards: ArenaHazardDescriptor[]
   rng: () => number
   red: BotRuntime
   blue: BotRuntime
@@ -469,6 +473,7 @@ function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
   return {
     round: input.round,
     arena,
+    hazards: expandArenaHazards(arena),
     rng: createSeededRng(`${input.seed}:${input.round}`),
     red,
     blue,
@@ -568,7 +573,9 @@ function describeReplayEvent(event: ReplayEvent): string {
     case 'damage':
       return `${event.bot} took ${event.amount} damage`
     case 'hazard':
-      return `${event.bot} took ${event.damage} hazard damage`
+      return event.damage > 0
+        ? `${event.bot} took ${event.damage} hazard damage`
+        : `${event.bot} triggered ${event.hazard}`
     case 'part_detach':
       return `${event.bot} lost ${event.partId}`
     case 'knockout':
@@ -606,12 +613,27 @@ function applyStatus(
 ): void {
   const sourceKey = behaviorKey(sourcePart) ?? sourcePart.blockId
 
+  applyStatusFromSource(bot, id, sourceKey, tick)
+}
+
+function applyStatusFromSource(
+  bot: BotRuntime,
+  id: RuntimeStatusEffectId,
+  sourceKey: string,
+  tick: number,
+): boolean {
+  const hadActiveStatus = bot.statuses.some(
+    (status) => status.id === id && status.sourceKey === sourceKey && status.expiresAtTick > tick,
+  )
+
   bot.statuses = addRuntimeStatus(bot.statuses, {
     id,
     sourceKey,
     appliedTick: tick,
     expiresAtTick: runtimeStatusExpiresAtTick(tick, STATUS_DURATIONS[id]),
   })
+
+  return !hadActiveStatus
 }
 
 type MovementUtilityActivation = {
@@ -1374,37 +1396,95 @@ function isContactMove(command: TurnCommand): boolean {
   return command.move !== undefined && command.move !== 'brake'
 }
 
-function resolveHazard(
+function resolveHazards(
   events: ReplayEvent[],
   tick: number,
   arena: ArenaConfig,
+  hazards: readonly ArenaHazardDescriptor[],
   bot: BotRuntime,
 ): void {
-  if (!arena.activeHazards.includes('floor_saw')) {
+  if (hazards.length === 0) {
     return
   }
 
-  const nearCenter = Math.abs(bot.position[0]) < 1.2 && Math.abs(bot.position[2]) < 1.2
+  hazards.forEach((hazard) => {
+    if (!isPositionInsideArenaHazard(bot.position, hazard)) {
+      return
+    }
 
-  if (!nearCenter) {
-    return
+    applyArenaHazard(events, tick, arena, hazard, bot)
+  })
+}
+
+function applyArenaHazard(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  hazard: ArenaHazardDescriptor,
+  bot: BotRuntime,
+): void {
+  switch (hazard.kind) {
+    case 'saw':
+      applyDamagingHazard(events, tick, hazard, bot, sawHazardDamage(bot))
+      break
+    case 'pit':
+      applyDamagingHazard(events, tick, hazard, bot, pitHazardDamage(bot))
+      applyHazardStatus(bot, 'anchored', hazard, tick)
+      break
+    case 'oil':
+      if (applyHazardStatus(bot, 'slowed', hazard, tick)) {
+        emitHazardTrigger(events, tick, hazard, bot, 0, hazard.position)
+      }
+      break
+    case 'magnet':
+      if (applyHazardStatus(bot, 'anchored', hazard, tick)) {
+        forceMoveToward(events, tick, bot, hazard.position, arena, 0.85)
+        emitHazardTrigger(events, tick, hazard, bot, 0, hazard.position)
+      }
+      break
+    case 'flipper':
+      if (applyHazardStatus(bot, 'anchored', hazard, tick)) {
+        forceMoveToward(events, tick, bot, [0, 0, 0], arena, 1.25)
+        emitHazardTrigger(events, tick, hazard, bot, 0, hazard.position)
+      }
+      break
+    case 'generic':
+      emitHazardTrigger(events, tick, hazard, bot, 0, hazard.position)
+      break
   }
+}
 
-  const damage = Math.max(1, Math.round(6 - bot.stats.stability * 0.12))
+function applyHazardStatus(
+  bot: BotRuntime,
+  id: RuntimeStatusEffectId,
+  hazard: ArenaHazardDescriptor,
+  tick: number,
+): boolean {
+  return applyStatusFromSource(bot, id, `hazard:${hazard.label}`, tick)
+}
+
+function sawHazardDamage(bot: BotRuntime): number {
+  return Math.max(1, Math.round(6 - bot.stats.stability * 0.12))
+}
+
+function pitHazardDamage(bot: BotRuntime): number {
+  return Math.max(2, Math.round(8 - bot.stats.stability * 0.1))
+}
+
+function applyDamagingHazard(
+  events: ReplayEvent[],
+  tick: number,
+  hazard: ArenaHazardDescriptor,
+  bot: BotRuntime,
+  damage: number,
+): void {
   const impactPosition: Vector3 = bot.position
   const wasAlive = !isBotDestroyed(bot)
   const hits = applyPartDamage(bot, damage, tick, 'hazard')
   const primaryHit = hits[0]
 
   bot.lastDamagedTick = tick
-  events.push({
-    t: tick + 0.35,
-    type: 'hazard',
-    hazard: 'floor_saw',
-    bot: bot.role,
-    damage,
-    position: impactPosition,
-  })
+  emitHazardTrigger(events, tick, hazard, bot, damage, impactPosition)
   events.push({
     t: tick + 0.38,
     type: 'damage',
@@ -1419,7 +1499,7 @@ function resolveHazard(
   emitPartDetachEvents(events, tick, bot, hits, tick + 0.44, {
     cause: 'hazard',
     damage,
-    sourcePosition: [0, 0, 0],
+    sourcePosition: hazard.position,
     impactPosition,
   })
 
@@ -1433,13 +1513,31 @@ function resolveHazard(
   }
 }
 
+function emitHazardTrigger(
+  events: ReplayEvent[],
+  tick: number,
+  hazard: ArenaHazardDescriptor,
+  bot: BotRuntime,
+  damage: number,
+  position: Vector3,
+): void {
+  events.push({
+    t: tick + 0.35,
+    type: 'hazard',
+    hazard: hazard.label,
+    bot: bot.role,
+    damage,
+    position,
+  })
+}
+
 function applyCombatTick(
   state: CombatRuntimeState,
   tick: number,
   redCommand: TurnCommand,
   blueCommand: TurnCommand,
 ): CombatTickResult {
-  const { arena, events, red, blue } = state
+  const { arena, events, hazards, red, blue } = state
 
   state.elapsedTicks = tick
   advanceRuntimeEffects(red, tick)
@@ -1496,8 +1594,8 @@ function applyCombatTick(
     }
   }
 
-  resolveHazard(events, tick, arena, red)
-  resolveHazard(events, tick, arena, blue)
+  resolveHazards(events, tick, arena, hazards, red)
+  resolveHazards(events, tick, arena, hazards, blue)
 
   if (red.health + blue.health < healthBeforeTick) {
     state.lastDamageTick = tick

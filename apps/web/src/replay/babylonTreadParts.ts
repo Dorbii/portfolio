@@ -102,6 +102,7 @@ export function createTreadPart(args: MobilityPartRenderArgs): void {
   for (let side = -1; side <= 1; side += 2) {
     createTreadSideDetails(args, visual, side)
   }
+  createExposedTreadWheels(args, visual)
 
   for (let index = 0; index < visual.padCount; index += 1) {
     const offset = index - (visual.padCount - 1) / 2
@@ -135,6 +136,72 @@ export function createTreadPart(args: MobilityPartRenderArgs): void {
     rollerMesh.position.z = offset * Math.max(depth * 0.5, 0.24)
     rollerMesh.metadata = { kind: 'roll', speed: visual.rollSpeed }
     attachMesh(rollerMesh, parent, materials.rubber)
+  }
+}
+
+function createExposedTreadWheels(
+  {
+    scene,
+    parent,
+    role,
+    blockId,
+    width,
+    height,
+    depth,
+    materials,
+  }: MobilityPartRenderArgs,
+  visual: TreadVisual,
+): void {
+  const sideZ = Math.max(depth * visual.baseDepthScale * 0.54, 0.32)
+  const lowerY = Math.max(height * 0.08, 0.08)
+  const wheelY = Math.max(height * 0.25, 0.14)
+  const wheelX = Math.max(width * visual.baseWidthScale * 0.4, 0.34)
+  const wheelDiameter = Math.max(width * visual.rollerScale, 0.22)
+
+  for (const z of [-sideZ, sideZ]) {
+    for (const x of [-wheelX, 0, wheelX]) {
+      const wheel = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-exposed-road-wheel-${x.toFixed(2)}-${z > 0 ? 'front' : 'rear'}`,
+        {
+          height: Math.max(depth * 0.08, 0.045),
+          diameter: wheelDiameter,
+          tessellation: 16,
+        },
+        scene,
+      )
+      const hub = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-exposed-road-wheel-hub-${x.toFixed(2)}-${z > 0 ? 'front' : 'rear'}`,
+        {
+          height: Math.max(depth * 0.09, 0.05),
+          diameter: wheelDiameter * 0.38,
+          tessellation: 10,
+        },
+        scene,
+      )
+
+      wheel.rotation.x = Math.PI / 2
+      hub.rotation.x = Math.PI / 2
+      wheel.position.set(x, wheelY, z)
+      hub.position.copyFrom(wheel.position)
+      attachMesh(wheel, parent, materials.steel)
+      attachMesh(hub, parent, materials.trim)
+    }
+
+    for (const x of [-wheelX * 1.22, wheelX * 1.22]) {
+      const sprocket = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-exposed-sprocket-${x > 0 ? 'front' : 'rear'}-${z > 0 ? 'outer' : 'inner'}`,
+        {
+          height: Math.max(depth * 0.08, 0.045),
+          diameter: Math.max(wheelDiameter * 1.18, 0.28),
+          tessellation: 14,
+        },
+        scene,
+      )
+
+      sprocket.rotation.x = Math.PI / 2
+      sprocket.position.set(x, lowerY + wheelDiameter * 0.35, z)
+      attachMesh(sprocket, parent, materials.steel)
+    }
   }
 }
 
@@ -258,29 +325,48 @@ function createTankTrackPart({
     attachMesh(ramp, parent, materials.rubber)
   }
 
-  const sideArmor = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tank-side-armor`,
-    {
-      width: Math.max(length * 0.74, 0.92),
-      height: Math.max(height * 0.28, 0.14),
-      depth: Math.max(beltDepth * 0.54, 0.24),
-    },
-    scene,
-  )
-  const serviceHatch = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tank-service-hatch`,
-    {
-      width: Math.max(length * 0.38, 0.46),
-      height: Math.max(height * 0.08, 0.05),
-      depth: Math.max(beltDepth * 0.42, 0.18),
-    },
-    scene,
-  )
+  const railDepth = Math.max(beltDepth * 0.09, 0.045)
+  const upperRailY = bottomY + trackHeight * 0.73
+  const lowerRailY = bottomY + trackHeight * 0.2
 
-  sideArmor.position.set(0, bottomY + trackHeight * 0.74, -beltDepth * 0.08)
-  serviceHatch.position.set(0, sideArmor.position.y + Math.max(height * 0.2, 0.12), -beltDepth * 0.08)
-  attachMesh(sideArmor, parent, material)
-  attachMesh(serviceHatch, parent, materials.utility)
+  for (const z of [-wheelFaceZ, wheelFaceZ]) {
+    createTrackFrameRail(scene, parent, material, `${role}-${blockId}-tank-upper-side-rail-${z > 0 ? 'front' : 'rear'}`, {
+      depth: railDepth,
+      height: Math.max(height * 0.16, 0.09),
+      width: Math.max(length * 0.76, 0.96),
+      x: 0,
+      y: upperRailY,
+      z,
+    })
+    createTrackFrameRail(scene, parent, materials.trim, `${role}-${blockId}-tank-lower-side-rail-${z > 0 ? 'front' : 'rear'}`, {
+      depth: railDepth,
+      height: Math.max(height * 0.1, 0.06),
+      width: Math.max(length * 0.66, 0.82),
+      x: 0,
+      y: lowerRailY,
+      z,
+    })
+
+    for (const x of [-length * 0.5, length * 0.5]) {
+      createTrackFrameRail(scene, parent, material, `${role}-${blockId}-tank-end-plate-${x > 0 ? 'front' : 'rear'}-${z > 0 ? 'outer' : 'inner'}`, {
+        depth: railDepth,
+        height: Math.max(trackHeight * 0.62, 0.32),
+        width: Math.max(length * 0.08, 0.1),
+        x,
+        y: bottomY + trackHeight * 0.45,
+        z,
+      })
+    }
+  }
+
+  createTrackFrameRail(scene, parent, materials.utility, `${role}-${blockId}-tank-service-hatch`, {
+    depth: Math.max(beltDepth * 0.42, 0.18),
+    height: Math.max(height * 0.07, 0.045),
+    width: Math.max(length * 0.38, 0.46),
+    x: 0,
+    y: topY + Math.max(height * 0.16, 0.1),
+    z: 0,
+  })
 
   const roadWheelCount = 5
   for (let index = 0; index < roadWheelCount; index += 1) {
@@ -321,19 +407,21 @@ function createTankTrackPart({
   }
 
   for (let index = 0; index < 3; index += 1) {
-    const roller = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-tank-return-roller-${index}`,
-      {
-        height: Math.max(beltDepth * 0.18, 0.08),
-        diameter: Math.max(trackHeight * 0.16, 0.09),
-        tessellation: 12,
-      },
-      scene,
-    )
+    for (const z of [-wheelFaceZ, wheelFaceZ]) {
+      const roller = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-tank-return-roller-${index}-${z > 0 ? 'front' : 'rear'}`,
+        {
+          height: Math.max(beltDepth * 0.18, 0.08),
+          diameter: Math.max(trackHeight * 0.16, 0.09),
+          tessellation: 12,
+        },
+        scene,
+      )
 
-    roller.rotation.x = Math.PI / 2
-    roller.position.set(-length * 0.24 + index * length * 0.24, topY - trackHeight * 0.18, wheelFaceZ)
-    attachMesh(roller, parent, materials.trim)
+      roller.rotation.x = Math.PI / 2
+      roller.position.set(-length * 0.24 + index * length * 0.24, topY - trackHeight * 0.18, z)
+      attachMesh(roller, parent, materials.trim)
+    }
   }
 
   const shoeCount = 9
@@ -353,6 +441,53 @@ function createTankTrackPart({
       y: topY + beltThickness * 0.72,
     })
   }
+
+  for (let side = -1; side <= 1; side += 2) {
+    for (let index = 0; index < 4; index += 1) {
+      const t = (index + 1) / 5
+      const rampShoe = MeshBuilder.CreateBox(
+        `${role}-${blockId}-tank-ramp-shoe-${side}-${index}`,
+        {
+          width: 0.1,
+          height: 0.045,
+          depth: beltDepth,
+        },
+        scene,
+      )
+
+      rampShoe.position.set(
+        side * length * (0.34 + t * 0.13),
+        bottomY + trackHeight * (0.12 + t * 0.72),
+        0,
+      )
+      rampShoe.rotation.z = side * -0.54
+      attachMesh(rampShoe, parent, materials.rubber)
+    }
+  }
+}
+
+function createTrackFrameRail(
+  scene: MobilityPartRenderArgs['scene'],
+  parent: MobilityPartRenderArgs['parent'],
+  material: MobilityPartRenderArgs['material'],
+  name: string,
+  options: {
+    depth: number
+    height: number
+    width: number
+    x: number
+    y: number
+    z: number
+  },
+): void {
+  const rail = MeshBuilder.CreateBox(
+    name,
+    { width: options.width, height: options.height, depth: options.depth },
+    scene,
+  )
+
+  rail.position.set(options.x, options.y, options.z)
+  attachMesh(rail, parent, material)
 }
 
 function createTrackBelt(
@@ -419,6 +554,29 @@ function createTrackWheel(
   wheel.metadata = { kind: 'roll', speed: 0.05 }
   attachMesh(wheel, parent, options.material)
   attachMesh(hub, parent, options.hubMaterial)
+
+  const faceOffset = options.z >= 0 ? 0.055 : -0.055
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6
+    const bolt = MeshBuilder.CreateCylinder(
+      `${name}-bolt-${index}`,
+      {
+        height: 0.025,
+        diameter: Math.max(options.diameter * 0.07, 0.018),
+        tessellation: 8,
+      },
+      scene,
+    )
+
+    bolt.rotation.x = Math.PI / 2
+    bolt.position.set(
+      options.x + Math.cos(angle) * options.diameter * 0.27,
+      options.y + Math.sin(angle) * options.diameter * 0.27,
+      options.z + faceOffset,
+    )
+    attachMesh(bolt, parent, options.hubMaterial)
+  }
 }
 
 function createTrackShoe(

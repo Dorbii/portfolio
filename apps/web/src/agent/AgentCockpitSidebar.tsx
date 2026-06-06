@@ -1,4 +1,3 @@
-import { PART_CATALOG } from '../../../../packages/catalog/src/index.js'
 import type { AgentChatMessageKind } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
@@ -15,7 +14,6 @@ import {
   ErrorPanel,
   Fact,
   InventoryTable,
-  PartTable,
   SectionTitle,
 } from './AgentCockpitPanels'
 import {
@@ -37,7 +35,9 @@ export function AgentCockpitSidebar({
   return (
     <aside className="cockpit-secondary-stack" aria-label="Secondary cockpit data">
       <AgentStatePanel controller={controller} invite={invite} />
-      <AgentReferencePanel controller={controller} invite={invite} />
+      {controller.canMutateRole ? (
+        <AgentReferencePanel controller={controller} invite={invite} />
+      ) : null}
       <AgentCommsPanel controller={controller} />
       <AgentActivityPanel controller={controller} />
     </aside>
@@ -52,6 +52,7 @@ function AgentStatePanel({
 }) {
   const {
     connectionGuidance,
+    canMutateRole,
     hasPlayerKey,
     isBusy,
     publicState,
@@ -80,14 +81,19 @@ function AgentStatePanel({
           <Fact label="Role" value={capitalize(invite.role)} />
           <Fact label="API" value={invite.apiBase} />
           <Fact label="Claim token" value={invite.claimToken ? 'Present' : 'Not in fragment'} />
+          <Fact label="Observer token" value={invite.observerToken ? 'Present' : 'Not in fragment'} />
           <Fact
-            label="Player key"
+            label="Bearer"
             value={
               roleToken
-                ? 'Stored in this tab'
+                ? canMutateRole
+                  ? 'Agent key stored'
+                  : 'Observer key stored'
                 : invite.claimToken
                   ? 'Available from invite'
-                  : 'Missing'
+                  : invite.observerToken
+                    ? 'Observer only'
+                    : 'Missing'
             }
           />
           <Fact label="Status" value={formatLabel(status)} />
@@ -111,7 +117,9 @@ function AgentStatePanel({
             {isBusy
               ? 'Loading role state from the API.'
               : hasPlayerKey
-                ? 'Player key loaded. Use Refresh state if the previous load failed.'
+                ? canMutateRole
+                  ? 'Agent key loaded. Use Refresh state if the previous load failed.'
+                  : 'Observer key loaded. Use Refresh state if the previous load failed.'
                 : 'Connect this role or reuse a stored player key to load private state.'}
           </p>
         )}
@@ -167,7 +175,7 @@ function AgentReferencePanel({
     <Panel className="agent-live-panel cockpit-secondary-panel" aria-labelledby="reference-heading">
       <div className="secondary-panel-header">
         <SectionTitle id="reference-heading" title="Reference" />
-        <span>Brief / shop / inventory</span>
+        <span>Brief / inventory</span>
       </div>
 
       <section className="agent-handoff-panel" aria-labelledby="handoff-heading">
@@ -197,12 +205,6 @@ function AgentReferencePanel({
         </div>
       </section>
 
-      <section aria-labelledby="shop-heading">
-        <SectionTitle id="shop-heading" title="Shop offers" />
-        <div className="cockpit-secondary-scroll">
-          <PartTable parts={PART_CATALOG.slice(0, 20)} />
-        </div>
-      </section>
     </Panel>
   )
 }
@@ -211,6 +213,7 @@ function AgentCommsPanel({ controller }: { controller: AgentCockpitController })
   const {
     canPostChat,
     canPostPrivateChat,
+    canMutateRole,
     chatKind,
     chatLog,
     chatMessage,
@@ -237,53 +240,103 @@ function AgentCommsPanel({ controller }: { controller: AgentCockpitController })
         <span>{chatLog.length + privateChatLog.length} messages</span>
       </div>
 
-      <AgentChatSection
-        canPost={canPostPrivateChat}
-        countLabel={`${privateChatLog.length} role-only`}
-        emptyText="No journal entries loaded."
-        formClassName="agent-chat-form private-chat-form"
-        hasMessages={roleHasPrivateChatLog}
-        id="private-chat"
-        kind={privateChatKind}
-        kindOptions={['strategy', 'reflection', 'observation', 'taunt']}
-        message={privateChatMessage}
-        messageLabel="Entry"
-        messages={privateChatLog}
-        onKindChange={setPrivateChatKind}
-        onMessageChange={setPrivateChatMessage}
-        onSubmit={submitPrivateChatMessage}
-        placeholder="Private strategy summary: plan rationale, opponent read, post-round reflection, or next adjustment. No hidden chain-of-thought."
-        sectionClassName="private-chat-panel"
-        status={privateChatStatus}
-        submitLabel="Save entry"
-        submittingLabel="Saving..."
-        title="Agent Journal"
-        disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
-      />
+      {canMutateRole ? (
+        <>
+          <AgentChatSection
+            canPost={canPostPrivateChat}
+            countLabel={`${privateChatLog.length} role-only`}
+            emptyText="No journal entries loaded."
+            formClassName="agent-chat-form private-chat-form"
+            hasMessages={roleHasPrivateChatLog}
+            id="private-chat"
+            kind={privateChatKind}
+            kindOptions={['strategy', 'reflection', 'observation', 'taunt']}
+            message={privateChatMessage}
+            messageLabel="Entry"
+            messages={privateChatLog}
+            onKindChange={setPrivateChatKind}
+            onMessageChange={setPrivateChatMessage}
+            onSubmit={submitPrivateChatMessage}
+            placeholder="Private strategy summary: plan rationale, opponent read, post-round reflection, or next adjustment. No hidden chain-of-thought."
+            sectionClassName="private-chat-panel"
+            status={privateChatStatus}
+            submitLabel="Save entry"
+            submittingLabel="Saving..."
+            title="Agent Journal"
+            disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
+          />
 
-      <AgentChatSection
-        canPost={canPostChat}
-        countLabel={`${chatLog.length} public`}
-        emptyText="No Table Talk loaded."
-        formClassName="agent-chat-form"
-        hasMessages={roleHasChatLog}
-        id="chat"
-        kind={chatKind}
-        kindOptions={['reflection', 'strategy', 'observation', 'taunt']}
-        message={chatMessage}
-        messageLabel="Public message"
-        messages={chatLog}
-        onKindChange={setChatKind}
-        onMessageChange={setChatMessage}
-        onSubmit={submitChatMessage}
-        placeholder="Opponent-visible Table Talk. Bluff, taunt, summarize strategy, or reflect without secrets."
-        status={chatStatus}
-        submitLabel="Post Table Talk"
-        submittingLabel="Posting..."
-        title="Table Talk"
-        disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
-      />
+          <AgentChatSection
+            canPost={canPostChat}
+            countLabel={`${chatLog.length} public`}
+            emptyText="No Table Talk loaded."
+            formClassName="agent-chat-form"
+            hasMessages={roleHasChatLog}
+            id="chat"
+            kind={chatKind}
+            kindOptions={['reflection', 'strategy', 'observation', 'taunt']}
+            message={chatMessage}
+            messageLabel="Public message"
+            messages={chatLog}
+            onKindChange={setChatKind}
+            onMessageChange={setChatMessage}
+            onSubmit={submitChatMessage}
+            placeholder="Opponent-visible Table Talk. Bluff, taunt, summarize strategy, or reflect without secrets."
+            status={chatStatus}
+            submitLabel="Post Table Talk"
+            submittingLabel="Posting..."
+            title="Table Talk"
+            disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
+          />
+        </>
+      ) : (
+        <>
+          <ReadOnlyChatSection
+            countLabel={`${privateChatLog.length} role-only`}
+            emptyText="No journal entries loaded."
+            hasMessages={roleHasPrivateChatLog}
+            id="private-chat"
+            messages={privateChatLog}
+            title="Agent Journal"
+          />
+          <ReadOnlyChatSection
+            countLabel={`${chatLog.length} public`}
+            emptyText="No Table Talk loaded."
+            hasMessages={roleHasChatLog}
+            id="chat"
+            messages={chatLog}
+            title="Table Talk"
+          />
+        </>
+      )}
     </Panel>
+  )
+}
+
+function ReadOnlyChatSection({
+  countLabel,
+  emptyText,
+  hasMessages,
+  id,
+  messages,
+  title,
+}: {
+  countLabel: string
+  emptyText: string
+  hasMessages: boolean
+  id: string
+  messages: AgentCockpitController['chatLog']
+  title: string
+}) {
+  return (
+    <section aria-labelledby={`${id}-heading`}>
+      <div className="plan-section-header">
+        <SectionTitle id={`${id}-heading`} title={title} />
+        <span className="chat-count">{countLabel}</span>
+      </div>
+      <AgentChatLog messages={messages} />
+      {!hasMessages ? <p className="agent-empty">{emptyText}</p> : null}
+    </section>
   )
 }
 

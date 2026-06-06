@@ -34,7 +34,6 @@ export type CockpitBriefArtifacts = {
 type CockpitDerivedStateInput = {
   chatMessage: string
   chatStatus: 'idle' | 'posting'
-  hasLocalDraftEdits: boolean
   invite: AgentInvite
   lastError: UiError | null
   privateChatMessage: string
@@ -53,7 +52,7 @@ export type AgentConnectionGuidance = {
   tone: 'blocked' | 'idle' | 'ready' | 'working'
 }
 
-export type AgentCockpitTaskKey = 'connect' | 'build' | 'submit' | 'turn' | 'review'
+export type AgentCockpitTaskKey = 'connect' | 'build' | 'turn' | 'review'
 
 export type AgentCockpitTaskStep = {
   key: AgentCockpitTaskKey
@@ -73,9 +72,9 @@ export type AgentCockpitWorkflow = {
 
 export type CockpitDerivedState = {
   canClaimRole: boolean
+  canMutateRole: boolean
   canPostChat: boolean
   canPostPrivateChat: boolean
-  canSubmitPlan: boolean
   chatLog: SessionChatMessage[]
   claimButtonLabel: string
   connectionGuidance: AgentConnectionGuidance
@@ -119,6 +118,7 @@ export function createCockpitBriefArtifacts({
         role: invite.role,
         apiBase: invite.apiBase,
         claimTokenPresent: Boolean(invite.claimToken),
+        observerTokenPresent: Boolean(invite.observerToken),
       },
       contractUrl: `${invite.apiBase}/agent-spec.json`,
       state: roleState,
@@ -148,7 +148,6 @@ function getBriefPublicState(publicState: PublicSessionState | null): PublicSess
 export function createCockpitDerivedState({
   chatMessage,
   chatStatus,
-  hasLocalDraftEdits,
   invite,
   lastError,
   privateChatMessage,
@@ -159,29 +158,26 @@ export function createCockpitDerivedState({
   status,
 }: CockpitDerivedStateInput): CockpitDerivedState {
   const isBusy = status === 'claiming' || status === 'loading'
-  const hasPlayerKey = Boolean(roleToken || invite.claimToken)
+  const isObserverCockpit = Boolean(invite.observerToken && !invite.claimToken)
+  const hasAccessKey = Boolean(roleToken || invite.claimToken || invite.observerToken)
+  const canMutateRole = Boolean(!isObserverCockpit && (roleToken || invite.claimToken))
   const matchLog = roleState?.eventLog ?? publicState?.eventLog ?? []
   const chatLog = roleState?.chatLog ?? publicState?.chatLog ?? []
   const privateChatLog = roleState?.privateChatLog ?? []
-  const canSubmitPlan = Boolean(
-    hasPlayerKey &&
-      roleState &&
-      !isBusy &&
-      roleState.phase === 'submission_phase' &&
-      !roleState.submitted,
-  )
   const connectionGuidance = createAgentConnectionGuidance({
     invite,
     lastError,
     roleState,
     roleToken,
     status,
+    isObserverCockpit,
   })
 
   return {
-    canClaimRole: !isBusy && Boolean(invite.claimToken) && !roleState,
+    canClaimRole: !isBusy && canMutateRole && Boolean(invite.claimToken) && !roleState,
+    canMutateRole,
     canPostChat: Boolean(
-      hasPlayerKey &&
+      canMutateRole &&
         roleState &&
         !isBusy &&
         chatStatus !== 'posting' &&
@@ -189,18 +185,17 @@ export function createCockpitDerivedState({
         chatMessage.trim().length > 0,
     ),
     canPostPrivateChat: Boolean(
-      hasPlayerKey &&
+      canMutateRole &&
         roleState &&
         !isBusy &&
         privateChatStatus !== 'posting' &&
         !isTerminalPhase(roleState.phase) &&
         privateChatMessage.trim().length > 0,
     ),
-    canSubmitPlan,
     chatLog,
-    claimButtonLabel: createClaimButtonLabel(status, roleState, hasPlayerKey, isBusy),
+    claimButtonLabel: createClaimButtonLabel(status, roleState, hasAccessKey, isBusy, isObserverCockpit),
     connectionGuidance,
-    hasPlayerKey,
+    hasPlayerKey: hasAccessKey,
     isBusy,
     matchLog,
     privateChatLog,
@@ -210,8 +205,8 @@ export function createCockpitDerivedState({
     roleHasPrivateChatLog: privateChatLog.length > 0,
     workflow: createAgentCockpitWorkflow({
       connectionGuidance,
-      hasLocalDraftEdits,
-      hasPlayerKey,
+      hasPlayerKey: hasAccessKey,
+      isObserverCockpit,
       roleState,
       status,
     }),
@@ -220,30 +215,29 @@ export function createCockpitDerivedState({
 
 function createAgentCockpitWorkflow({
   connectionGuidance,
-  hasLocalDraftEdits,
   hasPlayerKey,
+  isObserverCockpit,
   roleState,
   status,
 }: {
   connectionGuidance: AgentConnectionGuidance
-  hasLocalDraftEdits: boolean
   hasPlayerKey: boolean
+  isObserverCockpit: boolean
   roleState: RolePrivateState | null
   status: LoadStatus
 }): AgentCockpitWorkflow {
-  const activeTask = getActiveCockpitTask(roleState, hasLocalDraftEdits)
-  const stateLabel = getCockpitStateLabel(roleState, hasLocalDraftEdits, status)
+  const activeTask = getActiveCockpitTask(roleState)
+  const stateLabel = getCockpitStateLabel(roleState, status, isObserverCockpit)
 
   return {
     activeTask,
     detail: connectionGuidance.nextAction,
-    headline: getCockpitWorkflowHeadline(activeTask, roleState, hasPlayerKey),
+    headline: getCockpitWorkflowHeadline(activeTask, roleState, hasPlayerKey, isObserverCockpit),
     helperCall: connectionGuidance.helperCall,
     stateLabel,
     steps: [
       createConnectStep(roleState, hasPlayerKey, status, activeTask),
-      createBuildStep(roleState, hasLocalDraftEdits, activeTask),
-      createSubmitStep(roleState, activeTask),
+      createPlanStep(roleState, activeTask, isObserverCockpit),
       createTurnStep(roleState, activeTask),
       createReviewStep(roleState, activeTask),
     ],
@@ -252,11 +246,15 @@ function createAgentCockpitWorkflow({
 
 function getCockpitStateLabel(
   roleState: RolePrivateState | null,
-  hasLocalDraftEdits: boolean,
   status: LoadStatus,
+  isObserverCockpit: boolean,
 ): string {
   if (!roleState) {
-    return status === 'claiming' || status === 'loading' ? 'Connecting' : 'Unclaimed'
+    if (status === 'claiming' || status === 'loading') {
+      return 'Connecting'
+    }
+
+    return isObserverCockpit ? 'Observer' : 'Unclaimed'
   }
 
   if (roleState.phase === 'expired') {
@@ -276,24 +274,17 @@ function getCockpitStateLabel(
   }
 
   if (roleState.submitted) {
-    return roleState.opponent.submitted ? 'Submitted' : 'Waiting'
+    return roleState.opponent.submitted ? 'Plan observed' : 'Waiting'
   }
 
   if (roleState.phase === 'waiting_for_agents') {
     return 'Waiting'
   }
 
-  if (hasLocalDraftEdits) {
-    return 'Draft'
-  }
-
   return 'Claimed'
 }
 
-function getActiveCockpitTask(
-  roleState: RolePrivateState | null,
-  hasLocalDraftEdits: boolean,
-): AgentCockpitTaskKey {
+function getActiveCockpitTask(roleState: RolePrivateState | null): AgentCockpitTaskKey {
   if (!roleState || roleState.phase === 'waiting_for_agents') {
     return 'connect'
   }
@@ -303,7 +294,7 @@ function getActiveCockpitTask(
   }
 
   if (roleState.phase === 'submission_phase' && !roleState.submitted) {
-    return hasLocalDraftEdits ? 'submit' : 'build'
+    return 'build'
   }
 
   if (roleState.phase === 'combat_turn') {
@@ -317,25 +308,26 @@ function getCockpitWorkflowHeadline(
   activeTask: AgentCockpitTaskKey,
   roleState: RolePrivateState | null,
   hasPlayerKey: boolean,
+  isObserverCockpit: boolean,
 ): string {
   if (activeTask === 'connect') {
     if (roleState?.phase === 'waiting_for_agents') {
       return 'Wait for opponent claim'
     }
 
+    if (isObserverCockpit) {
+      return 'Observe agent state'
+    }
+
     return hasPlayerKey ? 'Connect role' : 'Claim role'
   }
 
   if (activeTask === 'build') {
-    return 'Build round plan'
-  }
-
-  if (activeTask === 'submit') {
-    return 'Submit round plan'
+    return roleState?.submitted ? 'Inspect submitted plan' : 'Waiting for agent plan'
   }
 
   if (activeTask === 'turn') {
-    return roleState?.combat?.submitted[roleState.role] ? 'Wait for opponent turn' : 'Submit combat turn'
+    return roleState?.combat?.submitted[roleState.role] ? 'Inspect submitted turn' : 'Inspect combat decision'
   }
 
   if (roleState?.phase === 'round_review' || roleState?.phase === 'replay_phase') {
@@ -370,15 +362,15 @@ function createConnectStep(
   }
 }
 
-function createBuildStep(
+function createPlanStep(
   roleState: RolePrivateState | null,
-  hasLocalDraftEdits: boolean,
   activeTask: AgentCockpitTaskKey,
+  isObserverCockpit: boolean,
 ): AgentCockpitTaskStep {
   if (!roleState) {
     return {
       key: 'build',
-      label: 'Build',
+      label: 'Plan',
       status: 'Locked',
       tone: 'idle',
     }
@@ -387,7 +379,7 @@ function createBuildStep(
   if (roleState.submitted) {
     return {
       key: 'build',
-      label: 'Build',
+      label: 'Plan',
       status: 'Submitted bot',
       tone: 'complete',
     }
@@ -396,7 +388,7 @@ function createBuildStep(
   if (roleState.phase !== 'submission_phase') {
     return {
       key: 'build',
-      label: 'Build',
+      label: 'Plan',
       status: 'Waiting',
       tone: 'waiting',
     }
@@ -404,48 +396,9 @@ function createBuildStep(
 
   return {
     key: 'build',
-    label: 'Build',
-    status: hasLocalDraftEdits ? 'Draft' : 'Ready',
+    label: 'Plan',
+    status: isObserverCockpit ? 'Agent pending' : 'Ready',
     tone: activeTask === 'build' ? 'current' : 'complete',
-  }
-}
-
-function createSubmitStep(
-  roleState: RolePrivateState | null,
-  activeTask: AgentCockpitTaskKey,
-): AgentCockpitTaskStep {
-  if (!roleState) {
-    return {
-      key: 'submit',
-      label: 'Submit',
-      status: 'Locked',
-      tone: 'idle',
-    }
-  }
-
-  if (roleState.submitted) {
-    return {
-      key: 'submit',
-      label: 'Submit',
-      status: 'Submitted',
-      tone: 'complete',
-    }
-  }
-
-  if (roleState.phase !== 'submission_phase') {
-    return {
-      key: 'submit',
-      label: 'Submit',
-      status: 'Waiting',
-      tone: 'waiting',
-    }
-  }
-
-  return {
-    key: 'submit',
-    label: 'Submit',
-    status: 'Ready',
-    tone: activeTask === 'submit' ? 'current' : 'idle',
   }
 }
 
@@ -588,12 +541,14 @@ export function isTerminalPhase(phase: RolePrivateState['phase'] | undefined): b
 
 export function createAgentConnectionGuidance({
   invite,
+  isObserverCockpit,
   lastError,
   roleState,
   roleToken,
   status,
 }: {
   invite: AgentInvite
+  isObserverCockpit: boolean
   lastError: UiError | null
   roleState: RolePrivateState | null
   roleToken: string
@@ -604,18 +559,24 @@ export function createAgentConnectionGuidance({
   if (roleState) {
     return {
       detail: `Private state loaded for round ${roleState.round}; phase ${formatLabel(roleState.phase)}.`,
-      helperCall: helperCallForRoleState(roleState),
-      nextAction: nextActionForRoleState(roleState),
-      status: `Connected as ${capitalize(roleState.role)}`,
+      helperCall: helperCallForRoleState(roleState, isObserverCockpit),
+      nextAction: nextActionForRoleState(roleState, isObserverCockpit),
+      status: isObserverCockpit
+        ? `${capitalize(roleState.role)} observer connected`
+        : `Connected as ${capitalize(roleState.role)}`,
       tone: isTerminalPhase(roleState.phase) ? 'blocked' : 'ready',
     }
   }
 
   if (status === 'claiming' || status === 'loading') {
     return {
-      detail: 'The page is claiming or resuming the role and loading private state.',
-      helperCall: bootstrapCall,
-      nextAction: 'Wait for the role state to finish loading before submitting.',
+      detail: isObserverCockpit
+        ? 'The page is loading read-only role state with an observer cockpit token.'
+        : 'The page is claiming or resuming the role and loading private state.',
+      helperCall: isObserverCockpit ? 'await window.AgentArenaRole.getState()' : bootstrapCall,
+      nextAction: isObserverCockpit
+        ? 'Wait for the cockpit state to finish loading before inspecting the agent plan.'
+        : 'Wait for the role state to finish loading before submitting.',
       status: 'Connecting',
       tone: 'working',
     }
@@ -624,10 +585,22 @@ export function createAgentConnectionGuidance({
   if (lastError) {
     return {
       detail: `${lastError.title}: ${lastError.message}`,
-      helperCall: bootstrapCall,
-      nextAction: 'Run bootstrap once. If the same capability or network error repeats, report that blocker instead of retrying raw HTTP.',
+      helperCall: isObserverCockpit ? 'await window.AgentArenaRole.getState()' : bootstrapCall,
+      nextAction: isObserverCockpit
+        ? 'Refresh state. If the same observer-token or network error repeats, report that blocker.'
+        : 'Run bootstrap once. If the same capability or network error repeats, report that blocker instead of retrying raw HTTP.',
       status: 'Connection needs attention',
       tone: 'blocked',
+    }
+  }
+
+  if (isObserverCockpit && invite.observerToken) {
+    return {
+      detail: 'Observer token is present; the cockpit can read role state but cannot submit plans, turns, or chat.',
+      helperCall: 'await window.AgentArenaRole.getState()',
+      nextAction: 'Refresh state and inspect what the agent has submitted or what decision context it is seeing.',
+      status: 'Observer key available',
+      tone: 'idle',
     }
   }
 
@@ -652,27 +625,42 @@ export function createAgentConnectionGuidance({
   }
 }
 
-function nextActionForRoleState(state: RolePrivateState): string {
+function nextActionForRoleState(
+  state: RolePrivateState,
+  isObserverCockpit: boolean,
+): string {
   if (isTerminalPhase(state.phase)) {
     return `Stop. The session is ${formatLabel(state.phase)}.`
   }
 
   if (state.phase === 'waiting_for_agents') {
-    return 'Wait for the opponent to claim; keep polling with the bounded continuation helper.'
+    return isObserverCockpit
+      ? 'Watch for both agents to connect before a plan window opens.'
+      : 'Wait for the opponent to claim; keep polling with the bounded continuation helper.'
   }
 
   if (state.phase === 'submission_phase') {
-    return state.submitted
-      ? 'Do not resubmit this round. Keep this role thread alive until the next action is ready or the wait times out.'
+    if (state.submitted) {
+      return isObserverCockpit
+        ? 'Inspect the submitted bot, tactics, opening script, and rationale while waiting for the opponent.'
+        : 'Do not resubmit this round. Keep this role thread alive until the next action is ready or the wait times out.'
+    }
+
+    return isObserverCockpit
+      ? 'No accepted plan yet. The agent still needs to submit a legal round plan.'
       : 'Submit exactly one legal round plan for this round.'
   }
 
   if (state.phase === 'combat_turn') {
     if (state.combat?.submitted[state.role]) {
-      return 'Wait for the opponent turn command or the turn deadline, then continue from the next state.'
+      return isObserverCockpit
+        ? 'This agent submitted a turn. Compare the pending turn status with the opponent and wait for resolution.'
+        : 'Wait for the opponent turn command or the turn deadline, then continue from the next state.'
     }
 
-    return `Submit one legal combat turn for tick ${state.combat?.tick ?? '?'} before the deadline. Movement and weapon or utility actions can be included together.`
+    return isObserverCockpit
+      ? `Inspect combat.decision for tick ${state.combat?.tick ?? '?'}: range, legal commands, movement options, and tactical cues explain what the agent should do next.`
+      : `Submit one legal combat turn for tick ${state.combat?.tick ?? '?'} before the deadline. Use combat.decision for range, legal commands, movement options, and tactical cues.`
   }
 
   if (state.phase === 'round_review') {
@@ -682,7 +670,14 @@ function nextActionForRoleState(state: RolePrivateState): string {
   return 'Wait for the next submission window with the bounded continuation helper.'
 }
 
-function helperCallForRoleState(state: RolePrivateState): string {
+function helperCallForRoleState(
+  state: RolePrivateState,
+  isObserverCockpit: boolean,
+): string {
+  if (isObserverCockpit) {
+    return 'await window.AgentArenaRole.getState()'
+  }
+
   if (isTerminalPhase(state.phase)) {
     return 'await window.AgentArenaRole.getState()'
   }
@@ -696,7 +691,11 @@ function helperCallForRoleState(state: RolePrivateState): string {
       return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
     }
 
-    return `await window.AgentArenaRole.submitTurnCommand({ action: 'submit_turn_command', tick: ${state.combat?.tick ?? 1}, move: 'brake', weaponA: 'hold' })`
+    return [
+      'const state = await window.AgentArenaRole.getState()',
+      'const decision = state.combat.decision',
+      `await window.AgentArenaRole.submitTurnCommand({ action: 'submit_turn_command', tick: ${state.combat?.tick ?? 1}, move: decision.movementOptions.recommended[0] ?? 'brake', weaponA: decision.actionReadiness.weaponA.canFire ? 'fire' : 'hold' })`,
+    ].join('\n')
   }
 
   if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'round_review') {
@@ -711,9 +710,14 @@ function createClaimButtonLabel(
   roleState: RolePrivateState | null,
   hasPlayerKey: boolean,
   isBusy: boolean,
+  isObserverCockpit: boolean,
 ): string {
   if (isBusy) {
     return status === 'claiming' ? 'Connecting...' : 'Loading...'
+  }
+
+  if (isObserverCockpit) {
+    return 'Observer view'
   }
 
   if (roleState) {

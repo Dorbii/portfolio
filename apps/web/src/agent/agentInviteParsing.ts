@@ -58,6 +58,7 @@ export function parseAgentInviteFragment(
   const apiValue = firstPresent(params.get('api'))
   const apiBase = apiValue ? normalizeApiBase(apiValue) : undefined
   const claimToken = firstPresent(params.get('claimToken'), params.get('invite'))
+  const observerToken = firstPresent(params.get('observerToken'), params.get('observer'))
 
   if (!sessionId) {
     errors.push('Missing session in the invite fragment.')
@@ -83,10 +84,11 @@ export function parseAgentInviteFragment(
     ok: true,
     value: {
       sessionId: sessionId as string,
-      role: role as TeamRole,
-      apiBase: apiBase as string,
-      ...(claimToken ? { claimToken } : {}),
-    },
+        role: role as TeamRole,
+        apiBase: apiBase as string,
+        ...(claimToken ? { claimToken } : {}),
+        ...(observerToken ? { observerToken } : {}),
+      },
   }
 }
 

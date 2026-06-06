@@ -3,16 +3,23 @@ import type {
   AgentChatMessageRequest,
   BotBlueprint,
   CombatBotSnapshot,
+  ArenaGridCell,
+  ArenaHazardThreat,
   CombatTurnSnapshot,
   GeneratedControls,
   InventoryItem,
+  MovementCommand,
+  PreferredRange,
   RoundPlanSubmission,
   SessionPhase,
   SessionChatMessage,
   TeamEconomySummary,
   TeamRole,
   TurnCommandSubmission,
+  TurnCommand,
+  UtilityCommand,
   ValidationIssue,
+  WeaponCommand,
 } from './types.js'
 
 export type CreateSessionRequest = {
@@ -26,6 +33,7 @@ export type CreateSessionRequest = {
 export type RoleInvite = {
   role: TeamRole
   claimToken: string
+  observerToken: string
   claimPath: string
 }
 
@@ -79,6 +87,87 @@ export type CombatTurnPublicState = {
   submitted: Record<TeamRole, boolean>
 }
 
+export type CombatRangeBand = 'contact' | 'close' | 'mid' | 'long'
+
+export type CombatTurnLegalCommands = {
+  movement: MovementCommand[]
+  weaponA?: WeaponCommand[]
+  weaponB?: WeaponCommand[]
+  utility?: UtilityCommand[]
+}
+
+export type CombatTurnDecisionContext = {
+  tick: number
+  deadlineAt: string
+  turnSeconds: number
+  legalCommands: CombatTurnLegalCommands
+  range: {
+    distance: number
+    band: CombatRangeBand
+    preferred: PreferredRange
+    selfWeaponReach: number
+    opponentWeaponReach: number
+    insideSelfWeaponReach: boolean
+    insideOpponentWeaponReach: boolean
+  }
+  positioning: {
+    selfCell: ArenaGridCell
+    opponentCell: ArenaGridCell
+    distanceCells: number
+    bearingToOpponent: 'north' | 'south' | 'east' | 'west' | 'same_cell'
+    lineOfSight: boolean
+  }
+  hazards: {
+    active: string[]
+    selfThreats: ArenaHazardThreat[]
+    opponentThreats: ArenaHazardThreat[]
+    threatenedLegalMoves: {
+      command: MovementCommand
+      targetCell: ArenaGridCell
+      hazards: ArenaHazardThreat[]
+    }[]
+  }
+  health: {
+    selfPct: number
+    opponentPct: number
+    deltaPct: number
+    retreatAtHealthPct: number
+  }
+  arenaPressure: {
+    selfDistanceToNearestWall: number
+    opponentDistanceToNearestWall: number
+    selfNearWall: boolean
+    opponentNearWall: boolean
+    selfNearCenterHazard: boolean
+    opponentNearCenterHazard: boolean
+    activeHazards: string[]
+  }
+  actionReadiness: {
+    weaponA: {
+      canFire: boolean
+      reason: string
+    }
+    weaponB?: {
+      canFire: boolean
+      reason: string
+    }
+    utility?: {
+      canActivate: boolean
+      reason: string
+    }
+  }
+  movementOptions: {
+    recommended: MovementCommand[]
+    avoid: MovementCommand[]
+    reasons: string[]
+  }
+  previousResolvedTurn?: {
+    self?: TurnCommand
+    opponent?: TurnCommand
+  }
+  tacticalCues: string[]
+}
+
 export type RoundPlanWindowState = {
   openedAt: string
   deadlineAt: string
@@ -89,6 +178,7 @@ export type CombatTurnPrivateState = CombatTurnPublicState & {
   snapshot: CombatTurnSnapshot
   self: CombatBotSnapshot
   opponent: CombatBotSnapshot
+  decision: CombatTurnDecisionContext
 }
 
 export type RolePublicState = Partial<TeamEconomySummary> & {
@@ -220,6 +310,7 @@ export type AdvanceRoundResponse = {
 
 export type RelayErrorCode =
   | 'BAD_JSON'
+  | 'FORBIDDEN'
   | 'INVALID_ACTION'
   | 'INVALID_REQUEST'
   | 'INVALID_ROLE'

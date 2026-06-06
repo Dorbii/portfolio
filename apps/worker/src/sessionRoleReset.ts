@@ -15,7 +15,7 @@ export async function resetStoredRoleClaim(
   roleName: TeamRole,
   tokenFactory: TokenFactory,
   tokenHasher: TokenHasher,
-): Promise<SessionResult<{ claimToken: string }>> {
+): Promise<SessionResult<{ claimToken: string; observerToken: string }>> {
   const role = state.roles[roleName]
 
   if (role.submittedAt) {
@@ -31,8 +31,10 @@ export async function resetStoredRoleClaim(
   }
 
   const claimToken = tokenFactory(roleName, 'claim')
+  const observerToken = tokenFactory(roleName, 'observer')
 
   role.claimTokenHash = await tokenHasher(claimToken)
+  role.observerTokenHash = await tokenHasher(observerToken)
   role.roleTokenHash = undefined
   role.agentName = undefined
   role.claimedAt = undefined
@@ -45,6 +47,6 @@ export async function resetStoredRoleClaim(
 
   return {
     ok: true,
-    value: { claimToken },
+    value: { claimToken, observerToken },
   }
 }

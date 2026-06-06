@@ -229,9 +229,11 @@ export function useRefereeConsoleController() {
 
   const {
     blueAgentBrief,
+    blueCockpitUrl,
     blueInviteUrl,
     hasAnyInvite,
     redAgentBrief,
+    redCockpitUrl,
     redInviteUrl,
   } = useMemo(
     () =>
@@ -271,6 +273,7 @@ export function useRefereeConsoleController() {
     advanceRoundLabel,
     apiBase,
     blueAgentBrief,
+    blueCockpitUrl,
     blueInviteUrl,
     canAdvanceRound,
     copyAgentBrief,
@@ -284,6 +287,7 @@ export function useRefereeConsoleController() {
     phase,
     publicSession,
     redAgentBrief,
+    redCockpitUrl,
     redInviteUrl,
     refreshStoredSession,
     replayError,

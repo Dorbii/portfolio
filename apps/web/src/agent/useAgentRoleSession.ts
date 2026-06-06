@@ -30,13 +30,16 @@ import { capitalize, formatLabel } from '../shared/format'
 const autoBootstrapAttempts = new Set<string>()
 
 export function useAgentRoleSession(invite: AgentInvite) {
-  const [roleToken, setRoleToken] = useState(() => readStoredRoleToken(window.sessionStorage, invite) ?? '')
+  const [roleToken, setRoleToken] = useState(() =>
+    invite.claimToken
+      ? readStoredRoleToken(window.sessionStorage, invite) ?? ''
+      : invite.observerToken ?? readStoredRoleToken(window.sessionStorage, invite) ?? '',
+  )
   const roleTokenRef = useRef(roleToken || undefined)
   const roleStateRef = useRef<RolePrivateState | null>(null)
   const [roleState, setRoleState] = useState<RolePrivateState | null>(null)
   const [publicState, setPublicState] = useState<PublicSessionState | null>(null)
   const [status, setStatus] = useState<LoadStatus>('idle')
-  const [agentName, setAgentName] = useState('')
   const [lastError, setLastError] = useState<UiError | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
@@ -59,10 +62,10 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
   const loadState = useCallback(
     async (options: { quiet?: boolean } = {}) => {
-      if (!roleTokenRef.current && !invite.claimToken) {
+      if (!roleTokenRef.current && !invite.claimToken && !invite.observerToken) {
         setLastError({
           title: 'No player key',
-          message: 'Connect this role with an invite claimToken or reuse a stored player key before loading state.',
+          message: 'Open an agent handoff or cockpit observer URL before loading state.',
         })
         return
       }
@@ -88,7 +91,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
         setStatus('ready')
       }
     },
-    [client, invite.claimToken],
+    [client, invite.claimToken, invite.observerToken],
   )
 
   useEffect(() => {
@@ -137,14 +140,10 @@ export function useAgentRoleSession(invite: AgentInvite) {
     setNotice(null)
 
     try {
-      const submittedAgentName = input.agentName?.trim() ?? agentName
+      const submittedAgentName = input.agentName?.trim() ?? ''
       const bootstrap = await client.bootstrapRole({
         agentName: submittedAgentName,
       })
-
-      if (submittedAgentName) {
-        setAgentName(submittedAgentName)
-      }
 
       if (invite.claimToken) {
         writeStoredRoleToken(window.sessionStorage, invite, invite.claimToken)
@@ -175,7 +174,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
     } finally {
       setStatus('ready')
     }
-  }, [agentName, client, invite])
+  }, [client, invite])
 
   const waitForNextAction = useCallback(async (
     options?: AgentWaitOptions,
@@ -297,15 +296,11 @@ export function useAgentRoleSession(invite: AgentInvite) {
     setNotice(null)
 
     try {
-      const submittedAgentName = input.agentName?.trim() ?? agentName
+      const submittedAgentName = input.agentName?.trim() ?? ''
       const claim = await client.claimRole({
         claimToken: invite.claimToken,
         agentName: submittedAgentName,
       })
-
-      if (submittedAgentName) {
-        setAgentName(submittedAgentName)
-      }
 
       writeStoredRoleToken(window.sessionStorage, invite, claim.roleToken)
       roleTokenRef.current = claim.roleToken
@@ -331,7 +326,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
     } finally {
       setStatus('ready')
     }
-  }, [agentName, client, invite])
+  }, [client, invite])
 
   useEffect(() => {
     return installAgentArenaRoleApi({
@@ -413,16 +408,19 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
   const clearRoleToken = useCallback(() => {
     clearStoredRoleToken(window.sessionStorage, invite)
-    roleTokenRef.current = undefined
-    setRoleToken('')
+    roleTokenRef.current = invite.observerToken
+    setRoleToken(invite.observerToken ?? '')
     setRoleState(null)
     setPublicState(null)
     setLastError(null)
-    setNotice('Stored player key removed. Use Connect role to continue.')
+    setNotice(
+      invite.observerToken
+        ? 'Stored player key removed. Observer access remains loaded from this URL.'
+        : 'Stored player key removed.',
+    )
   }, [invite])
 
   return {
-    agentName,
     claimRole,
     connectRole,
     clearRoleToken,
@@ -433,7 +431,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
     publicState,
     roleState,
     roleToken,
-    setAgentName,
     setLastError,
     setNotice,
     setPublicState,

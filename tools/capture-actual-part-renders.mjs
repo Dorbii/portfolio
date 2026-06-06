@@ -19,7 +19,6 @@ const imageDir = path.join(packageDir, 'part-renders')
 const markdownPath = path.join(packageDir, 'Agent Arena Actual Part Renders.md')
 const zipPath = path.join(exportRoot, `${packageName}.zip`)
 const chromePath = await findChrome()
-const chromeDebugPort = 9223
 
 const categoryOrder = ['body', 'mobility', 'weapon', 'defense', 'utility', 'style']
 const categoryLabels = {
@@ -72,7 +71,7 @@ try {
     '--enable-webgl',
     '--ignore-gpu-blocklist',
     '--use-angle=swiftshader',
-    `--remote-debugging-port=${chromeDebugPort}`,
+    '--remote-debugging-port=0',
     `--user-data-dir=${userDataDir}`,
     'about:blank',
   ], {
@@ -80,13 +79,9 @@ try {
     windowsHide: true,
   })
 
-  chrome.stderr.setEncoding('utf8')
-  chrome.stderr.on('data', (chunk) => {
-    if (String(chunk).includes('DevTools listening')) return
-    process.stderr.write(chunk)
-  })
+  const devToolsEndpoint = waitForSpawnedChromeDevTools(chrome)
 
-  const cdp = await openPageCdp(`${baseUrl}part-render-capture.html`)
+  const cdp = await openPageCdp(await devToolsEndpoint, `${baseUrl}part-render-capture.html`)
   await cdp.send('Page.enable')
   await cdp.send('Runtime.enable')
   await cdp.send('Emulation.setDeviceMetricsOverride', {
@@ -95,6 +90,9 @@ try {
     deviceScaleFactor: 1,
     mobile: false,
   })
+
+  await cdp.send('Page.navigate', { url: `${baseUrl}part-render-capture.html?partId=Body_Wedge&warmup=1` })
+  await waitForPartRender(cdp, 'Body_Wedge')
 
   for (const part of parts) {
     const targetUrl = `${baseUrl}part-render-capture.html?partId=${encodeURIComponent(part.id)}`
@@ -328,28 +326,49 @@ function measureMeshes(meshes: AbstractMesh[]): { min: Vector3; max: Vector3 } {
   await fs.writeFile(captureSourcePath, source, 'utf8')
 }
 
-async function openPageCdp(initialUrl) {
-  await waitForChrome()
-  const target = await fetchJson(`http://127.0.0.1:${chromeDebugPort}/json/new?${encodeURIComponent(initialUrl)}`, {
+async function openPageCdp(devToolsBaseUrl, initialUrl) {
+  const target = await fetchJson(`${devToolsBaseUrl}/json/new?${encodeURIComponent(initialUrl)}`, {
     method: 'PUT',
   })
 
   return createCdpClient(target.webSocketDebuggerUrl)
 }
 
-async function waitForChrome() {
-  const deadline = Date.now() + 15_000
+async function waitForSpawnedChromeDevTools(chromeProcess) {
+  chromeProcess.stderr.setEncoding('utf8')
 
-  while (Date.now() < deadline) {
-    try {
-      await fetchJson(`http://127.0.0.1:${chromeDebugPort}/json/version`)
-      return
-    } catch {
-      await delay(150)
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      cleanup()
+      reject(new Error('Timed out waiting for spawned Chrome DevTools endpoint.'))
+    }, 15_000)
+
+    const cleanup = () => {
+      clearTimeout(timeout)
+      chromeProcess.stderr.off('data', onData)
+      chromeProcess.off('exit', onExit)
     }
-  }
+    const onData = (chunk) => {
+      const text = String(chunk)
+      const match = text.match(/DevTools listening on (ws:\/\/\S+)/)
 
-  throw new Error('Timed out waiting for headless Chrome DevTools endpoint.')
+      if (match) {
+        cleanup()
+        const browserUrl = new URL(match[1])
+        resolve(`http://${browserUrl.host}`)
+        return
+      }
+
+      process.stderr.write(text)
+    }
+    const onExit = (code, signal) => {
+      cleanup()
+      reject(new Error(`Chrome exited before DevTools endpoint opened: code ${code ?? 'unknown'}, signal ${signal ?? 'none'}.`))
+    }
+
+    chromeProcess.stderr.on('data', onData)
+    chromeProcess.once('exit', onExit)
+  })
 }
 
 async function waitForPartRender(cdp, partId) {

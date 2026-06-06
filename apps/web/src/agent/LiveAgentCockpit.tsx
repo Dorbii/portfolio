@@ -11,7 +11,7 @@ import {
   AgentTaskPanel,
 } from './AgentCockpitShell'
 import { AgentCockpitSidebar } from './AgentCockpitSidebar'
-import { RoundPlanWorkbench } from './RoundPlanWorkbench'
+import { AgentInsightWorkbench } from './AgentInsightWorkbench'
 import { useLiveAgentCockpitController } from './useLiveAgentCockpitController'
 
 export function LiveAgentCockpit() {
@@ -42,26 +42,14 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const cockpit = useLiveAgentCockpitController(invite)
 
   return (
-    <main className="agent-live-app">
+    <main className={`agent-live-app role-${invite.role}`}>
       <AgentCockpitHeader controller={cockpit} invite={invite} />
 
       <AgentTaskPanel notice={cockpit.notice} workflow={cockpit.workflow} />
 
       <div className="agent-cockpit-layout">
         <div className="cockpit-primary-column">
-          <RoundPlanWorkbench
-            canSubmitPlan={cockpit.canSubmitPlan}
-            onSubmitRoundPlan={cockpit.submitRoundPlan}
-            onSubmissionModeChange={cockpit.toggleSubmissionMode}
-            role={invite.role}
-            roleState={cockpit.roleState}
-            hasLocalDraftEdits={cockpit.hasLocalDraftEdits}
-            setSubmissionDraft={cockpit.setSubmissionDraft}
-            setSubmissionText={cockpit.setSubmissionText}
-            submissionDraft={cockpit.submissionDraft}
-            submissionMode={cockpit.submissionMode}
-            submissionText={cockpit.submissionText}
-          />
+          <AgentInsightWorkbench role={invite.role} roleState={cockpit.roleState} />
         </div>
 
         <AgentCockpitSidebar controller={cockpit} invite={invite} />

@@ -1,11 +1,12 @@
-import type {
-  ArenaConfig,
-  MovementCommand,
-  NormalizedBotTactics,
-  OpeningScript,
-  TeamRole,
-  TurnCommand,
-  Vector3,
+import {
+  hasCenterArenaHazard,
+  type ArenaConfig,
+  type MovementCommand,
+  type NormalizedBotTactics,
+  type OpeningScript,
+  type TeamRole,
+  type TurnCommand,
+  type Vector3,
 } from '../../schemas/src/index.js'
 import type { BotStats } from './deriveStats.js'
 import {
@@ -424,7 +425,7 @@ function weaponReach(bot: PolicyBotState): number {
 }
 
 function centerHazardActive(arena: ArenaConfig): boolean {
-  return arena.activeHazards.some((hazard) => hazard.toLowerCase().includes('saw'))
+  return hasCenterArenaHazard(arena.activeHazards)
 }
 
 function pressureScore(bot: PolicyBotState, opponent: PolicyBotState): number {

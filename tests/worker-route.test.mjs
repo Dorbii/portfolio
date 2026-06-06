@@ -294,6 +294,69 @@ function assertLegalDesignPatterns(contract) {
   }
 }
 
+function assertCatalogGuidance(contract) {
+  const partCatalog = new Map(contract.partCatalog.map((part) => [part.id, part]))
+  const featureGates = new Map(
+    contract.catalogGuidance.featureGates.map((gate) => [gate.id, gate]),
+  )
+
+  assert.ok(contract.catalogGuidance.purpose.includes('Advisory catalog routing'))
+  assert.ok(contract.catalogGuidance.trustOrder[0].includes('session rules'))
+  assert.equal(featureGates.get('agent.plan_context')?.state, 'enabled')
+  assert.equal(featureGates.get('combat.hazard_routing')?.state, 'experimental')
+
+  for (const capability of contract.catalogGuidance.capabilities) {
+    assert.equal(typeof capability.id, 'string')
+    assert.ok(capability.routingHints.length > 0)
+    assert.ok(capability.preferWhen.length > 0)
+    assert.ok(capability.neverUseWhen.length > 0)
+    assert.ok(capability.semanticCapabilities.length > 0)
+    assert.ok(capability.candidateParts.length > 0)
+    assert.ok(capability.executionRules.length > 0)
+    assert.ok(capability.commonErrors.length > 0)
+
+    for (const gateId of capability.requiredFeatureGateIds) {
+      assert.ok(featureGates.has(gateId), `${capability.id} requires unknown gate ${gateId}`)
+    }
+
+    for (const candidate of capability.candidateParts) {
+      assert.ok(
+        partCatalog.has(candidate.partId),
+        `${capability.id} recommends unknown part ${candidate.partId}`,
+      )
+      assert.ok(candidate.reasons.length > 0)
+      assert.ok(candidate.companionNeeds.length > 0)
+
+      for (const gateId of candidate.featureGateIds) {
+        const gate = featureGates.get(gateId)
+
+        assert.ok(gate, `${candidate.partId} references unknown gate ${gateId}`)
+        assert.notEqual(gate.state, 'disabled')
+        assert.notEqual(gate.state, 'deprecated')
+      }
+    }
+
+    for (const exclusion of capability.excludedCandidates) {
+      assert.ok(
+        partCatalog.has(exclusion.partId),
+        `${capability.id} excludes unknown part ${exclusion.partId}`,
+      )
+      assert.ok(exclusion.reasons.length > 0)
+    }
+  }
+
+  assert.ok(
+    contract.catalogGuidance.capabilities
+      .find((capability) => capability.id === 'movement_escape')
+      ?.candidateParts.some((candidate) => candidate.partId === 'Wheel_Omni'),
+  )
+  assert.ok(
+    contract.catalogGuidance.capabilities
+      .find((capability) => capability.id === 'survive_contact')
+      ?.candidateParts.some((candidate) => candidate.partId === 'Armor_Reactive'),
+  )
+}
+
 test('GET /agent-spec.json returns the agent contract', async () => {
   const { response, json } = await route({}, '/agent-spec.json', {
     headers: {
@@ -323,6 +386,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('designPatterns')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mandatory fixed classes')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('catalogGuidance.capabilities')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Prefer a varied legal custom plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Table Talk')))
@@ -339,16 +403,26 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.continuationProtocol.watchField, 'stateVersion')
   assert.ok(json.continuationProtocol.browserHelpers.includes('waitForNextAction({ timeoutMs })'))
   assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
+  assert.ok(json.submissionChecklist.some((item) => item.includes('Feature gates describe system support')))
   assert.equal(json.rules.submissionSchemas.preferred.schemaVersion, 2)
   assert.ok(json.rules.submissionSchemas.preferred.tactics.movementPolicy.includes('hold_ground'))
   assert.equal(json.rules.combatTurnSeconds, 120)
   assert.equal(json.rules.turnCommandSchema.action, 'submit_turn_command')
   assert.ok(json.rules.turnCommandSchema.note.includes('movement plus weapon and utility'))
+  assert.equal(json.rules.turnDecisionContext.location, 'private state.combat.decision')
+  assert.ok(json.rules.turnDecisionContext.fields.movementOptions.includes('suggestions'))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('state.combat.decision')))
   assert.ok(json.turnStrategyGuidance.some((strategy) => strategy.id === 'kite_and_punish'))
+  assert.ok(
+    json.turnStrategyGuidance.some((strategy) =>
+      strategy.turnAdvice.some((advice) => advice.includes('state.combat.decision')),
+    ),
+  )
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
   assertLegalDesignPatterns(json)
+  assertCatalogGuidance(json)
   assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
   assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
   assert.equal(json.examples.roundPlanSubmission.openingScript.commands.length, 5)
@@ -588,6 +662,49 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
 })
 
+test('observer cockpit bearer can read private state but cannot mutate role state', async () => {
+  const env = createEnv()
+  const sessionId = 's_observer_route'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const observerState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.observerToken,
+  })
+
+  assert.equal(observerState.response.status, 200)
+  assert.equal(observerState.json.role, 'red')
+
+  const observerBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.observerToken,
+    body: { agentName: 'Observer Red' },
+  })
+
+  assert.equal(observerBootstrap.response.status, 401)
+  assert.equal(observerBootstrap.json.error.code, 'INVALID_TOKEN')
+
+  const observerSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+    method: 'POST',
+    token: redInvite.observerToken,
+    body: validSpinnerSubmission,
+  })
+
+  assert.equal(observerSubmission.response.status, 403)
+  assert.equal(observerSubmission.json.error.code, 'FORBIDDEN')
+
+  const observerChat = await route(env, `/sessions/${sessionId}/chat`, {
+    method: 'POST',
+    token: redInvite.observerToken,
+    body: { kind: 'observation', message: 'observer should not post' },
+  })
+
+  assert.equal(observerChat.response.status, 403)
+  assert.equal(observerChat.json.error.code, 'FORBIDDEN')
+})
+
 test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () => {
   const env = createEnv()
   const sessionId = 's_v2_route'
@@ -649,6 +766,17 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   assert.equal(blueSubmission.json.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.json.publicState.replayAvailable, false)
   assert.equal(blueSubmission.json.state.combat.tick, 1)
+  assert.equal('decision' in blueSubmission.json.publicState.combat, false)
+  assert.equal(blueSubmission.json.state.combat.decision.tick, 1)
+  assert.equal(blueSubmission.json.state.combat.decision.legalCommands.movement.includes('forward'), true)
+  assert.equal(blueSubmission.json.state.combat.decision.range.distance, 12)
+  assert.equal(blueSubmission.json.state.combat.decision.range.band, 'long')
+  assert.equal(blueSubmission.json.state.combat.decision.movementOptions.recommended.includes('dash_forward'), true)
+  assert.ok(
+    blueSubmission.json.state.combat.decision.tacticalCues.some((cue) =>
+      cue.includes('movement can be combined'),
+    ),
+  )
 
   const redTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
     method: 'POST',
@@ -666,6 +794,9 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   assert.equal(blueTurn.response.status, 200)
   assert.equal(blueTurn.json.publicState.phase, 'combat_turn')
   assert.equal(blueTurn.json.publicState.combat.tick, 2)
+  assert.equal(blueTurn.json.state.combat.decision.tick, 2)
+  assert.equal(blueTurn.json.state.combat.decision.previousResolvedTurn.self.move, 'forward')
+  assert.equal(blueTurn.json.state.combat.decision.previousResolvedTurn.opponent.move, 'forward')
 })
 
 test('POST /sessions/:id/chat stores public role-authored chat', async () => {

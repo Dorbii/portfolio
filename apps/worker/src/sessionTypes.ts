@@ -15,7 +15,7 @@ import type {
   TurnCommand,
 } from '../../../packages/schemas/src/index.js'
 
-export type TokenKind = 'claim' | 'role' | 'referee'
+export type TokenKind = 'claim' | 'observer' | 'role' | 'referee'
 export type TokenOwner = TeamRole | 'referee'
 export type TokenFactory = (owner: TokenOwner, kind: TokenKind) => string
 export type Clock = () => string
@@ -39,6 +39,7 @@ export type RateLimitRule = {
 export type StoredRoleState = {
   role: TeamRole
   claimTokenHash: string
+  observerTokenHash?: string
   roleTokenHash?: string
   agentName?: string
   claimedAt?: string
@@ -107,6 +108,9 @@ export type SessionResult<T> =
     }
   | RelayErrorResponse
 
+export type RoleBearerScope = 'agent' | 'observer'
+
 export type RoleBearerAuth = {
   role: StoredRoleState
+  scope: RoleBearerScope
 }

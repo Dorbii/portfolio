@@ -7,6 +7,7 @@ export type AgentInvite = {
   role: TeamRole
   apiBase: string
   claimToken?: string
+  observerToken?: string
 }
 
 export function createAgentInviteUrl(
@@ -20,6 +21,9 @@ export function createAgentInviteUrl(
   params.set('role', invite.role)
   if (invite.claimToken) {
     params.set('claimToken', invite.claimToken)
+  }
+  if (invite.observerToken) {
+    params.set('observerToken', invite.observerToken)
   }
   params.set('api', invite.apiBase)
 

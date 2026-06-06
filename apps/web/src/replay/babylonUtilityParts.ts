@@ -52,7 +52,24 @@ export function createUtilityPart(
   attachMesh(topBackplane, parent, materials.trim)
   attachMesh(sideCable, parent, materials.trim)
 
+  if (isElectronicsPart(partId)) {
+    createWireHarness(scene, parent, materials, role, blockId, width, height, depth)
+  }
+
   if (partId.includes('Booster')) {
+    const thrustFrame = MeshBuilder.CreateBox(
+      `${role}-${blockId}-booster-thrust-frame`,
+      {
+        width: Math.max(width * 0.74, 0.42),
+        height: Math.max(height * 0.26, 0.14),
+        depth: Math.max(depth * 0.22, 0.14),
+      },
+      scene,
+    )
+
+    thrustFrame.position.set(0, Math.max(height * 0.18, 0.12), -Math.max(depth * 0.28, 0.18))
+    attachMesh(thrustFrame, parent, materials.steel)
+
     for (let index = -1; index <= 1; index += 2) {
       const core = MeshBuilder.CreateCylinder(
         `${role}-${blockId}-booster-core-${index}`,
@@ -116,6 +133,122 @@ export function createUtilityPart(
     attachMesh(gyroCore, parent, materials.trim)
   }
 
+  if (partId.includes('EnergyCore')) {
+    const chamber = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-chamber`,
+      {
+        height: Math.max(height * 0.82, 0.42),
+        diameter: Math.max(width * 0.44, 0.26),
+        tessellation: 18,
+      },
+      scene,
+    )
+    const topCap = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-top-cap`,
+      {
+        height: Math.max(height * 0.12, 0.06),
+        diameter: Math.max(width * 0.52, 0.3),
+        tessellation: 18,
+      },
+      scene,
+    )
+    const bottomCap = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-bottom-cap`,
+      {
+        height: Math.max(height * 0.12, 0.06),
+        diameter: Math.max(width * 0.52, 0.3),
+        tessellation: 18,
+      },
+      scene,
+    )
+
+    chamber.position.y = Math.max(height * 0.46, 0.28)
+    chamber.metadata = { kind: 'pulse', speed: 0.035 }
+    topCap.position.y = chamber.position.y + Math.max(height * 0.44, 0.23)
+    bottomCap.position.y = chamber.position.y - Math.max(height * 0.44, 0.23)
+    attachMesh(chamber, parent, materials.light)
+    attachMesh(topCap, parent, materials.steel)
+    attachMesh(bottomCap, parent, materials.steel)
+    createVacuumTubePair(scene, parent, materials, role, blockId, width, height, depth)
+  }
+
+  if (partId.includes('Battery')) {
+    for (let index = -1; index <= 1; index += 1) {
+      const cell = MeshBuilder.CreateBox(
+        `${role}-${blockId}-battery-cell-${index + 1}`,
+        {
+          width: Math.max(width * 0.22, 0.12),
+          height: Math.max(height * 0.62, 0.32),
+          depth: Math.max(depth * 0.54, 0.26),
+        },
+        scene,
+      )
+
+      cell.position.set(index * Math.max(width * 0.22, 0.12), Math.max(height * 0.42, 0.24), 0)
+      attachMesh(cell, parent, materials.steel)
+    }
+
+    for (let side = -1; side <= 1; side += 2) {
+      const terminal = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-battery-terminal-${side}`,
+        {
+          height: Math.max(height * 0.14, 0.07),
+          diameter: Math.max(width * 0.12, 0.07),
+          tessellation: 10,
+        },
+        scene,
+      )
+
+      terminal.position.set(side * Math.max(width * 0.28, 0.16), Math.max(height * 0.86, 0.46), Math.max(depth * 0.24, 0.14))
+      attachMesh(terminal, parent, side > 0 ? materials.warning : materials.light)
+    }
+
+    createBatteryBusBars(scene, parent, materials, role, blockId, width, height, depth)
+  }
+
+  if (partId.includes('AIModule')) {
+    const board = MeshBuilder.CreateBox(
+      `${role}-${blockId}-ai-module-board`,
+      {
+        width: Math.max(width * 0.78, 0.42),
+        height: Math.max(height * 0.12, 0.07),
+        depth: Math.max(depth * 0.78, 0.42),
+      },
+      scene,
+    )
+    const chip = MeshBuilder.CreateBox(
+      `${role}-${blockId}-ai-module-chip`,
+      {
+        width: Math.max(width * 0.38, 0.22),
+        height: Math.max(height * 0.18, 0.1),
+        depth: Math.max(depth * 0.38, 0.22),
+      },
+      scene,
+    )
+
+    board.position.y = Math.max(height * 0.58, 0.32)
+    chip.position.y = board.position.y + Math.max(height * 0.12, 0.07)
+    attachMesh(board, parent, materials.trim)
+    attachMesh(chip, parent, materials.light)
+
+    for (let index = -2; index <= 2; index += 1) {
+      const trace = MeshBuilder.CreateBox(
+        `${role}-${blockId}-ai-module-trace-${index + 2}`,
+        {
+          width: Math.max(width * 0.08, 0.04),
+          height: Math.max(height * 0.04, 0.025),
+          depth: Math.max(depth * 0.62, 0.32),
+        },
+        scene,
+      )
+
+      trace.position.set(index * Math.max(width * 0.12, 0.07), chip.position.y + Math.max(height * 0.08, 0.04), 0)
+      attachMesh(trace, parent, materials.warning)
+    }
+
+    createPcbConnectorDetails(scene, parent, materials, role, blockId, width, height, depth, chip.position.y)
+  }
+
   if (partId.includes('Magnet')) {
     const ring = MeshBuilder.CreateTorus(
       `${role}-${blockId}-magnet-ring`,
@@ -145,6 +278,20 @@ export function createUtilityPart(
     attachMesh(leftPole, parent, materials.warning)
     attachMesh(rightPole, parent, materials.warning)
 
+    const hazardBand = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-magnet-hazard-band`,
+      {
+        diameter: Math.max(Math.max(width, depth) * 1.08, 0.62),
+        thickness: Math.max(width * 0.045, 0.025),
+        tessellation: 22,
+      },
+      scene,
+    )
+
+    hazardBand.rotation.x = Math.PI / 2
+    hazardBand.position.y = -Math.max(height * 0.22, 0.12)
+    attachMesh(hazardBand, parent, materials.warning)
+
     for (let index = 0; index < 2; index += 1) {
       const field = MeshBuilder.CreateTorus(
         `${role}-${blockId}-magnet-field-${index}`,
@@ -164,6 +311,20 @@ export function createUtilityPart(
   }
 
   if (partId.includes('Anchor')) {
+    const ballast = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-anchor-ballast`,
+      {
+        height: Math.max(height * 0.26, 0.16),
+        diameter: Math.max(Math.max(width, depth) * 0.62, 0.36),
+        tessellation: 14,
+      },
+      scene,
+    )
+
+    ballast.rotation.x = Math.PI / 2
+    ballast.position.y = -Math.max(height * 0.18, 0.12)
+    attachMesh(ballast, parent, materials.steel)
+
     for (let side = -1; side <= 1; side += 2) {
       const claw = MeshBuilder.CreateCylinder(
         `${role}-${blockId}-anchor-claw-${side}`,
@@ -224,9 +385,40 @@ export function createUtilityPart(
       attachMesh(droneBay, parent, materials.utility)
       attachMesh(rotor, parent, materials.warning)
     }
+
+    createPcbConnectorDetails(scene, parent, materials, role, blockId, width, height, depth, Math.max(height * 0.62, 0.34))
   }
 
   if (partId.includes('Smoke')) {
+    const nozzleRack = MeshBuilder.CreateBox(
+      `${role}-${blockId}-smoke-nozzle-rack`,
+      {
+        width: Math.max(width * 0.68, 0.34),
+        height: Math.max(height * 0.16, 0.09),
+        depth: Math.max(depth * 0.18, 0.1),
+      },
+      scene,
+    )
+
+    nozzleRack.position.set(0, Math.max(height * 0.52, 0.3), Math.max(depth * 0.46, 0.28))
+    attachMesh(nozzleRack, parent, materials.steel)
+
+    for (let index = -1; index <= 1; index += 1) {
+      const nozzle = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-smoke-nozzle-${index + 1}`,
+        {
+          height: Math.max(depth * 0.2, 0.12),
+          diameter: Math.max(width * 0.095, 0.055),
+          tessellation: 10,
+        },
+        scene,
+      )
+
+      nozzle.rotation.x = Math.PI / 2
+      nozzle.position.set(index * Math.max(width * 0.18, 0.1), nozzleRack.position.y, Math.max(depth * 0.58, 0.36))
+      attachMesh(nozzle, parent, materials.trim)
+    }
+
     for (let index = 0; index < 3; index += 1) {
       const puff = MeshBuilder.CreateSphere(
         `${role}-${blockId}-smoke-puff-${index}`,
@@ -281,9 +473,36 @@ export function createUtilityPart(
     attachMesh(mast, parent, materials.trim)
     attachMesh(sensorHead, parent, material)
     attachMesh(optic, parent, materials.light)
+    createVacuumTubePair(scene, parent, materials, role, blockId, width, height, depth)
   }
 
   if (partId.includes('RepairKit')) {
+    for (let side = -1; side <= 1; side += 2) {
+      const terminal = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-repair-terminal-${side}`,
+        {
+          height: Math.max(height * 0.16, 0.08),
+          diameter: Math.max(width * 0.12, 0.07),
+          tessellation: 10,
+        },
+        scene,
+      )
+      const latch = MeshBuilder.CreateBox(
+        `${role}-${blockId}-repair-case-latch-${side}`,
+        {
+          width: Math.max(width * 0.12, 0.07),
+          height: Math.max(height * 0.08, 0.045),
+          depth: Math.max(depth * 0.16, 0.08),
+        },
+        scene,
+      )
+
+      terminal.position.set(side * Math.max(width * 0.22, 0.12), Math.max(height * 0.72, 0.38), -Math.max(depth * 0.28, 0.16))
+      latch.position.set(side * Math.max(width * 0.32, 0.18), Math.max(height * 0.42, 0.24), Math.max(depth * 0.44, 0.26))
+      attachMesh(terminal, parent, materials.light)
+      attachMesh(latch, parent, materials.steel)
+    }
+
     const serviceArm = MeshBuilder.CreateBox(
       `${role}-${blockId}-repair-service-arm`,
       {
@@ -311,4 +530,184 @@ export function createUtilityPart(
   }
 
   attachMesh(box, parent, material)
+}
+
+function isElectronicsPart(partId: string): boolean {
+  return [
+    'AIModule',
+    'Battery',
+    'Drone',
+    'EnergyCore',
+    'Gyro',
+    'Magnet',
+    'RepairKit',
+    'Sensor',
+    'Smoke',
+  ].some((token) => partId.includes(token))
+}
+
+function createWireHarness(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  for (let index = -1; index <= 1; index += 2) {
+    const cable = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-utility-wire-harness-${index}`,
+      {
+        height: Math.max(depth * 0.56, 0.28),
+        diameter: 0.024,
+        tessellation: 8,
+      },
+      scene,
+    )
+    const plug = MeshBuilder.CreateBox(
+      `${role}-${blockId}-utility-wire-plug-${index}`,
+      {
+        width: Math.max(width * 0.12, 0.07),
+        height: 0.055,
+        depth: Math.max(depth * 0.08, 0.045),
+      },
+      scene,
+    )
+
+    cable.rotation.x = Math.PI / 2
+    cable.position.set(index * Math.max(width * 0.22, 0.12), Math.max(height * 0.72, 0.36), Math.max(depth * 0.05, 0.03))
+    plug.position.set(index * Math.max(width * 0.22, 0.12), cable.position.y, Math.max(depth * 0.36, 0.18))
+    attachMesh(cable, parent, index > 0 ? materials.warning : materials.trim)
+    attachMesh(plug, parent, materials.steel)
+  }
+
+  const loop = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-utility-service-loop`,
+    {
+      diameter: Math.max(Math.min(width, depth) * 0.42, 0.22),
+      thickness: 0.018,
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  loop.rotation.x = Math.PI / 2
+  loop.position.set(-Math.max(width * 0.32, 0.18), Math.max(height * 0.7, 0.34), Math.max(depth * 0.2, 0.1))
+  attachMesh(loop, parent, materials.trim)
+}
+
+function createBatteryBusBars(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  for (let index = -1; index <= 1; index += 1) {
+    const busBar = MeshBuilder.CreateBox(
+      `${role}-${blockId}-battery-bus-bar-${index + 1}`,
+      {
+        width: Math.max(width * 0.18, 0.1),
+        height: 0.045,
+        depth: Math.max(depth * 0.64, 0.32),
+      },
+      scene,
+    )
+
+    busBar.position.set(index * Math.max(width * 0.22, 0.12), Math.max(height * 0.76, 0.4), 0)
+    attachMesh(busBar, parent, materials.warning)
+  }
+}
+
+function createPcbConnectorDetails(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  boardY: number,
+): void {
+  for (let index = 0; index < 6; index += 1) {
+    const pin = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-pcb-header-pin-${index}`,
+      {
+        height: 0.055,
+        diameter: 0.024,
+        tessellation: 6,
+      },
+      scene,
+    )
+
+    pin.position.set(
+      -Math.max(width * 0.3, 0.16) + index * Math.max(width * 0.12, 0.055),
+      boardY + Math.max(height * 0.1, 0.045),
+      -Math.max(depth * 0.32, 0.16),
+    )
+    attachMesh(pin, parent, materials.steel)
+  }
+
+  for (let index = -1; index <= 1; index += 1) {
+    const capacitor = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-pcb-capacitor-${index + 1}`,
+      {
+        height: Math.max(height * 0.16, 0.08),
+        diameter: Math.max(width * 0.07, 0.04),
+        tessellation: 10,
+      },
+      scene,
+    )
+
+    capacitor.position.set(
+      index * Math.max(width * 0.16, 0.08),
+      boardY + Math.max(height * 0.14, 0.07),
+      Math.max(depth * 0.28, 0.14),
+    )
+    attachMesh(capacitor, parent, index === 0 ? materials.light : materials.steel)
+  }
+}
+
+function createVacuumTubePair(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  for (let index = -1; index <= 1; index += 2) {
+    const glass = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-vacuum-tube-glow-${index}`,
+      {
+        height: Math.max(height * 0.34, 0.16),
+        diameter: Math.max(width * 0.13, 0.075),
+        tessellation: 12,
+      },
+      scene,
+    )
+    const cap = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-vacuum-tube-cap-${index}`,
+      {
+        height: 0.045,
+        diameter: Math.max(width * 0.15, 0.085),
+        tessellation: 12,
+      },
+      scene,
+    )
+
+    glass.position.set(index * Math.max(width * 0.28, 0.15), Math.max(height * 0.82, 0.42), -Math.max(depth * 0.24, 0.12))
+    glass.metadata = { kind: 'pulse', speed: 0.026 }
+    cap.position.set(glass.position.x, glass.position.y + Math.max(height * 0.2, 0.09), glass.position.z)
+    attachMesh(glass, parent, materials.light)
+    attachMesh(cap, parent, materials.steel)
+  }
 }

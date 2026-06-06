@@ -50,7 +50,7 @@ import {
 import { ensureStoredSessionDefaults } from './sessionDefaults.js'
 import {
   findRoleBearer,
-  findRoleByToken,
+  findRoleAuthByToken,
   hasRefereeCapabilityToken,
 } from './sessionAuth.js'
 import { takeSessionRateLimit } from './sessionRateLimits.js'
@@ -82,6 +82,7 @@ import type {
   Clock,
   RateLimitAction,
   RateLimitRule,
+  RoleBearerAuth,
   SessionResult,
   StoredCombatState,
   StoredRoleState,
@@ -112,6 +113,8 @@ export class SessionCoordinator {
 
   private readonly pendingClaimTokens?: Record<TeamRole, string>
 
+  private readonly pendingObserverTokens?: Record<TeamRole, string>
+
   private readonly pendingRefereeToken?: string
 
   private constructor(
@@ -122,6 +125,7 @@ export class SessionCoordinator {
       tokenHasher?: TokenHasher
       rateLimits?: Partial<Record<RateLimitAction, RateLimitRule>>
       pendingClaimTokens?: Record<TeamRole, string>
+      pendingObserverTokens?: Record<TeamRole, string>
       pendingRefereeToken?: string
     } = {},
   ) {
@@ -132,6 +136,7 @@ export class SessionCoordinator {
     this.tokenHasher = options.tokenHasher ?? defaultTokenHasher
     this.rateLimits = mergeRateLimits(options.rateLimits)
     this.pendingClaimTokens = options.pendingClaimTokens
+    this.pendingObserverTokens = options.pendingObserverTokens
     this.pendingRefereeToken = options.pendingRefereeToken
   }
 
@@ -152,6 +157,7 @@ export class SessionCoordinator {
       tokenHasher: created.tokenHasher,
       rateLimits: options.rateLimits,
       pendingClaimTokens: created.claimTokens,
+      pendingObserverTokens: created.observerTokens,
       pendingRefereeToken: created.refereeToken,
     })
   }
@@ -173,11 +179,12 @@ export class SessionCoordinator {
   }
 
   createResponse(): CreateSessionResponse {
-    if (!this.pendingClaimTokens || !this.pendingRefereeToken) {
+    if (!this.pendingClaimTokens || !this.pendingObserverTokens || !this.pendingRefereeToken) {
       throw new Error('Capability tokens are only available immediately after session creation.')
     }
 
     const claimTokens = this.pendingClaimTokens
+    const observerTokens = this.pendingObserverTokens
 
     return {
       sessionId: this.state.id,
@@ -185,6 +192,7 @@ export class SessionCoordinator {
       invites: TEAM_ROLES.map((role) => ({
         role,
         claimToken: claimTokens[role],
+        observerToken: observerTokens[role],
         claimPath: `/sessions/${this.state.id}/claim`,
       })),
       refereeToken: this.pendingRefereeToken,
@@ -291,7 +299,7 @@ export class SessionCoordinator {
       this.tokenHasher,
       roleName,
       playerKey,
-      { allowUnclaimedClaimKey: true },
+      { allowObserver: false, allowUnclaimedClaimKey: true },
     )
 
     if (!auth) {
@@ -344,7 +352,7 @@ export class SessionCoordinator {
 
     return {
       ok: true,
-      value: buildRolePrivateState(this.state, auth.value),
+      value: buildRolePrivateState(this.state, auth.value.role),
     }
   }
 
@@ -359,7 +367,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    const role = auth.value
+    const role = auth.value.role
 
     if (role.submittedAt) {
       return relayError('ALREADY_SUBMITTED', `${role.role} already submitted this round.`)
@@ -418,7 +426,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    const role = auth.value
+    const role = auth.value.role
 
     this.resolveExpiredCombatTurn(now)
 
@@ -480,7 +488,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    const role = auth.value
+    const role = auth.value.role
     const validation = validateAgentChatMessageRequestShape(request)
 
     if (!validation.ok) {
@@ -516,7 +524,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    const role = auth.value
+    const role = auth.value.role
     const validation = validateAgentChatMessageRequestShape(request)
 
     if (!validation.ok) {
@@ -605,7 +613,7 @@ export class SessionCoordinator {
       return reset
     }
 
-    const { claimToken } = reset.value
+    const { claimToken, observerToken } = reset.value
 
     this.touch(now)
     this.appendEvent('role_reset', `${roleName} role reset by referee.`, now)
@@ -621,6 +629,7 @@ export class SessionCoordinator {
         invite: {
           role: roleName,
           claimToken,
+          observerToken,
           claimPath: `/sessions/${this.state.id}/claim`,
         },
         publicState: this.getPublicState(),
@@ -649,25 +658,32 @@ export class SessionCoordinator {
     roleToken: string,
     action: RateLimitAction,
     now: string,
-  ): Promise<SessionResult<StoredRoleState>> {
+  ): Promise<SessionResult<RoleBearerAuth>> {
     const activeError = this.requireActive(now)
 
     if (activeError) {
       return activeError
     }
 
-    const role = await findRoleByToken(this.state, this.tokenHasher, roleToken)
-    const rateLimitError = this.takeRateLimit(action, role?.role ?? 'invalid', now)
+    const auth = await findRoleAuthByToken(this.state, this.tokenHasher, roleToken)
+    const rateLimitError = this.takeRateLimit(action, auth?.role.role ?? 'invalid', now)
 
     if (rateLimitError) {
       return rateLimitError
     }
 
-    if (!role) {
+    if (!auth) {
       return relayError('INVALID_TOKEN', 'Role bearer token is missing or invalid.')
     }
 
-    return { ok: true, value: role }
+    if (auth.scope === 'observer' && action !== 'state') {
+      return relayError(
+        'FORBIDDEN',
+        'Observer cockpit tokens are read-only; use an agent player key for role mutations.',
+      )
+    }
+
+    return { ok: true, value: auth }
   }
 
   private async authorizeRefereeAction(

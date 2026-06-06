@@ -17,10 +17,12 @@ type LegacyStoredSessionState = Omit<StoredSessionState, 'phase'> & {
 export function createInitialRoleState(
   role: TeamRole,
   claimTokenHash: string,
+  observerTokenHash?: string,
 ): StoredRoleState {
   return {
     role,
     claimTokenHash,
+    observerTokenHash,
     gold: DEFAULT_STARTING_GOLD,
     wins: 0,
     losses: 0,
