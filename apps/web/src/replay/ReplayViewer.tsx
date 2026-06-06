@@ -3,6 +3,7 @@ import type { ReplayEvent, ReplayTimeline } from '../../../../packages/replay/sr
 import type {
   ArenaConfig,
   BotBlueprint,
+  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { BabylonReplayScene } from './BabylonReplayScene'
@@ -29,6 +30,7 @@ type ReplayViewerProps = {
   initialTime?: number
   proofMode?: boolean
   showDamageSchematic?: boolean
+  teamIdentities: Record<TeamRole, TeamIdentity>
   timeline: ReplayTimeline
 }
 
@@ -41,6 +43,7 @@ export function ReplayViewer({
   initialTime = 0,
   proofMode = false,
   showDamageSchematic = true,
+  teamIdentities,
   timeline,
 }: ReplayViewerProps) {
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
@@ -135,6 +138,7 @@ export function ReplayViewer({
         botBlueprints={botBlueprints}
         cameraPreset={cameraPreset}
         immediateCamera={proofMode}
+        teamIdentities={teamIdentities}
         timeline={timeline}
         time={time}
       />

@@ -161,7 +161,7 @@ test('referee loadPublicSession GETs /public without authorization', async () =>
   }
 })
 
-test('referee loadReplayPayload normalizes top-level replay payloads with bot blueprints', async () => {
+test('referee loadReplayPayload normalizes top-level replay payloads with render contracts', async () => {
   const sessionId = 's_demo'
   const { calls, restore } = withFetchStub(() =>
     jsonResponse({
@@ -169,6 +169,10 @@ test('referee loadReplayPayload normalizes top-level replay payloads with bot bl
       duration: 6,
       summary: 'Red wins.',
       events: [{ t: 0, type: 'spawn', bot: 'red', position: [0, 0, 0], rotation: [0, 90, 0] }],
+      teamIdentities: {
+        red: { name: 'Red Team', primaryColor: '#ff4c5d', logo: { mark: 'shield', initials: 'R' } },
+        blue: { name: 'Blue Team', primaryColor: '#5b9dff', logo: { mark: 'shield', initials: 'B' } },
+      },
       botBlueprints: {
         red: { name: 'Red', blocks: [] },
         blue: { name: 'Blue', blocks: [] },
@@ -185,8 +189,35 @@ test('referee loadReplayPayload normalizes top-level replay payloads with bot bl
     assert.equal(calls[0].headers.get('authorization'), null)
     assert.equal(replay.timeline.round, 1)
     assert.equal(replay.timeline.events.length, 1)
+    assert.equal(replay.teamIdentities.red.primaryColor, '#ff4c5d')
+    assert.equal(replay.teamIdentities.blue.primaryColor, '#5b9dff')
     assert.equal(replay.botBlueprints.red.name, 'Red')
     assert.equal(replay.botBlueprints.blue.name, 'Blue')
+  } finally {
+    restore()
+  }
+})
+
+test('referee loadReplayPayload rejects replay payloads without team identities', async () => {
+  const sessionId = 's_demo'
+  const { restore } = withFetchStub(() =>
+    jsonResponse({
+      round: 1,
+      duration: 6,
+      summary: 'Red wins.',
+      events: [{ t: 0, type: 'spawn', bot: 'red', position: [0, 0, 0], rotation: [0, 90, 0] }],
+      botBlueprints: {
+        red: { name: 'Red', blocks: [] },
+        blue: { name: 'Blue', blocks: [] },
+      },
+    }),
+  )
+
+  try {
+    await assert.rejects(
+      () => loadReplayPayload(DEFAULT_ARENA_API_BASE, sessionId),
+      /Replay payload is missing post-combat bot blueprints or team identities/,
+    )
   } finally {
     restore()
   }

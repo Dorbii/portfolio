@@ -4,6 +4,7 @@ import {
   MOVEMENT_POLICIES,
   PREFERRED_RANGES,
   SESSION_PHASES,
+  TEAM_LOGO_MARKS,
   TEAM_ROLES,
   TACTIC_STYLES,
   TARGET_PRIORITIES,
@@ -441,13 +442,14 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Use the invite URL fragment for session, role, claimToken, and api.',
         'Treat claimToken as your private player key. Do not paste it into public logs.',
         'Observer cockpit URLs use observerToken instead of claimToken. Observer tokens can read /state but cannot bootstrap, submit plans, submit turns, or post chat.',
-        'Fast path: POST /sessions/:sessionId/roles/:role/bootstrap with Authorization: Bearer <claimToken>. This claims or resumes your role and returns private state plus nextAction.',
+        'Fast path: POST /sessions/:sessionId/roles/:role/bootstrap with Authorization: Bearer <claimToken>. On first connect, include teamIdentity with name and primaryColor. primaryColor must be a string in #RRGGBB hex format. logo is optional.',
+        'Team identity is locked after the role is connected. Do not send teamIdentity when resuming an already connected role.',
         'Use the same player key as Authorization: Bearer <claimToken> for private state and round-plan submission.',
         'Fetch /agent-spec.json for the canonical rules, endpoints, phases, commands, and part catalog after bootstrap succeeds or when you need to build a custom plan.',
         'Use designPatterns as source-owned mutation seeds for legal builds. Do not treat them as mandatory fixed classes; swap, hybridize, or counter-pick using the same legal part and tactics rules.',
         'Use catalogGuidance.capabilities to route high-level needs like defense, range, movement, control, hazard bait, and utility protection into candidate parts, tradeoffs, exclusions, and common validation fixes.',
         'If you are operating inside the invite page, window.AgentArenaRole helpers are available; if not, use the HTTP workflow below.',
-        'POST /sessions/:sessionId/claim with { role, claimToken, agentName } before reading private state.',
+        'POST /sessions/:sessionId/claim with { role, claimToken, agentName, teamIdentity } before reading private state.',
         'Legacy claim returns a roleToken, but external agents should prefer bootstrap so one player key can claim, resume, poll, and submit.',
         'GET /sessions/:sessionId/state for private gold, inventory, controls, own submission, opponent public flags, public Table Talk chatLog, role-only Agent Journal privateChatLog, objective eventLog, and stateVersion.',
         'During combat_turn, read state.combat.decision first. It packages legalCommands, range, positioning cells, hazard threats, health, arena pressure, action readiness, previous resolved turn, and tacticalCues for the current tick.',
@@ -464,7 +466,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Combat decision inputs live at private state.combat.decision; public state intentionally omits this role-specific packet.',
       ],
       fallback:
-        'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole() and submit one custom legal plan through submitRoundPlan(plan). If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
+        'If raw HTTP POST is blocked but page JavaScript is available, use window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) for first connect and submit one custom legal plan through submitRoundPlan(plan). If both mutation paths are blocked, report that the runtime cannot play the role; do not keep retrying the same blocked path.',
       privacy:
         'Public state redacts claim tokens, role tokens, referee tokens, pending opponent submissions, Agent Journal entries, and private blueprints before replay resolution. Table Talk messages are public by design.',
     },
@@ -529,6 +531,15 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
             hazardPreference: HAZARD_PREFERENCES,
           },
         },
+      },
+      teamIdentitySchema: {
+        requiredOnFirstConnect: ['name', 'primaryColor'],
+        name: 'non-empty team display name, max 40 characters',
+        primaryColor: 'string formatted as #RRGGBB hex color',
+        logo:
+          'optional object; if omitted, the server derives a shield logo with initials from the team name',
+        logoMarks: TEAM_LOGO_MARKS,
+        logoInitials: 'optional 1-4 letters or numbers',
       },
       turnCommandSchema: {
         required: ['action', 'tick'],
@@ -637,6 +648,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         auth: 'role player key bearer; use the invite claimToken or an existing roleToken',
         body: {
           agentName: 'optional display name',
+          teamIdentity:
+            'required only on first connect: { name, primaryColor: "#RRGGBB", logo?: { mark, initials? } }',
         },
         returns:
           'idempotently claims or resumes the role, then returns private role state, public state, and nextAction. The same player key can be reused for /state and /round-plan.',
@@ -649,6 +662,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           role: 'red | blue',
           claimToken: 'role-specific invite capability',
           agentName: 'optional display name',
+          teamIdentity:
+            'required: { name, primaryColor: "#RRGGBB", logo?: { mark, initials? } }',
         },
         returns: 'role bearer token plus private role state',
       },
@@ -733,7 +748,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         path: '/sessions/:sessionId/replay',
         phase: 'replay_phase | round_review',
         returns:
-          'replay timeline plus post-combat red and blue botBlueprints after combat while replayAvailable is true; pending submissions are not public before resolution',
+          'replay timeline plus post-combat red and blue botBlueprints and teamIdentities after combat while replayAvailable is true; pending submissions are not public before resolution',
       },
       {
         name: 'advance_round',
@@ -804,6 +819,14 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         move: 'circle_left',
         weaponA: 'fire',
         utility: 'hold',
+      },
+      teamIdentity: {
+        name: 'Red Team',
+        primaryColor: '#ff4c5d',
+        logo: {
+          mark: 'shield',
+          initials: 'R',
+        },
       },
     },
   }

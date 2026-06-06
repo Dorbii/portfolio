@@ -106,6 +106,7 @@ export function RefereeConsole() {
                   arena={visibleArena}
                   botBlueprints={replayPayload.botBlueprints}
                   showDamageSchematic={false}
+                  teamIdentities={replayPayload.teamIdentities}
                   timeline={replayPayload.timeline}
                 />
               </Suspense>

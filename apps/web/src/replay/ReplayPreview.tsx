@@ -3,6 +3,7 @@ import {
   abilityProofReplay,
   mockBotBlueprints,
   mockReplay,
+  mockTeamIdentities,
 } from '../mockSession'
 import { ReplayViewer } from './ReplayViewer'
 import type { CameraPreset } from './replayMapping'
@@ -28,6 +29,7 @@ export function ReplayPreview() {
           initialCameraPreset={previewOptions.cameraPreset}
           initialTime={previewOptions.time}
           proofMode={previewOptions.proofMode}
+          teamIdentities={mockTeamIdentities}
           timeline={timeline}
         />
       </section>

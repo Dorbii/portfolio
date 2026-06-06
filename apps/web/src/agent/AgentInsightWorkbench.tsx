@@ -6,6 +6,7 @@ import type {
 import { MetricGrid } from '../shared/ui'
 import { formatLabel } from '../shared/format'
 import { BotAssemblyScene } from './BotAssemblyScene'
+import { resolveTeamIdentity } from '../shared/teamVisuals'
 import {
   Fact,
   PlanMetric,
@@ -26,14 +27,14 @@ export function AgentInsightWorkbench({
   const decision = roleState?.combat?.decision
   const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
-  const teamIdentity = roleState?.identity ?? null
+  const teamIdentity = roleState ? resolveTeamIdentity(role, roleState.identity) : null
 
   return (
     <section className="agent-live-panel cockpit-workbench agent-insight-workbench" aria-labelledby="agent-insight-heading">
       <div className="workbench-header">
         <div>
           <SectionTitle id="agent-insight-heading" title="Agent insight" />
-          <strong>{createInsightSubtitle(roleState, submission)}</strong>
+          <strong>{createInsightSubtitle(roleState, submission, teamIdentity)}</strong>
         </div>
         <span className={`assembly-state${roleState?.submitted ? '' : ' is-draft'}`}>
           {submissionLabel}
@@ -163,16 +164,17 @@ function ReadoutCard({
 function createInsightSubtitle(
   roleState: RolePrivateState | null,
   submission: RoundPlanSubmission | null,
+  identity: ReturnType<typeof resolveTeamIdentity> | null,
 ): string {
   if (!roleState) {
     return 'Load role state to inspect the agent.'
   }
 
   if (submission) {
-    return `${roleState.identity?.name ?? 'This role'} submitted ${submission.blueprint.name}.`
+    return `${identity?.name ?? 'This role'} submitted ${submission.blueprint.name}.`
   }
 
-  return `${roleState.identity?.name ?? 'This role'} has not submitted a round plan.`
+  return `${identity?.name ?? 'This role'} has not submitted a round plan.`
 }
 
 function NoRoleStatePanel() {

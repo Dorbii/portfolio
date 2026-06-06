@@ -5,6 +5,7 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
   ArenaConfig,
+  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
@@ -83,6 +84,7 @@ type BabylonReplaySceneProps = {
   botBlueprints: ReplayBotBlueprints
   cameraPreset: CameraPreset
   immediateCamera?: boolean
+  teamIdentities: Record<TeamRole, TeamIdentity>
   timeline: ReplayTimeline
   time: number
 }
@@ -98,6 +100,7 @@ export function BabylonReplayScene({
   botBlueprints,
   cameraPreset,
   immediateCamera = false,
+  teamIdentities,
   timeline,
   time,
 }: BabylonReplaySceneProps) {
@@ -148,7 +151,7 @@ export function BabylonReplayScene({
       camera.attachControl(canvas, true)
       createReplayLightingPreset(scene, arena.width)
 
-      const teamMaterials = createTeamMaterials(scene)
+      const teamMaterials = createTeamMaterials(scene, { identities: teamIdentities })
       const hazards = createArena(scene, arena)
       const bots = {
         red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red),
@@ -257,7 +260,7 @@ export function BabylonReplayScene({
 
       return undefined
     }
-  }, [arena, botBlueprints])
+  }, [arena, botBlueprints, teamIdentities])
 
   useEffect(() => {
     const resources = resourcesRef.current

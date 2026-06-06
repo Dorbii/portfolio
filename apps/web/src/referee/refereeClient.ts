@@ -7,6 +7,7 @@ import type {
   RelayErrorResponse,
   RoleInvite,
   RoleResetResponse,
+  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
@@ -35,6 +36,7 @@ export type StoredSessionSecrets = {
 
 export type ReplayPayload = {
   timeline: ReplayTimeline
+  teamIdentities: Record<TeamRole, TeamIdentity>
   botBlueprints: Record<TeamRole, BotBlueprint>
 }
 
@@ -128,7 +130,7 @@ export async function loadReplayPayload(
   if (!replayPayload) {
     throw new RefereeArenaApiError({
       status: 502,
-      message: 'Replay payload is missing post-combat bot blueprints.',
+      message: 'Replay payload is missing post-combat bot blueprints or team identities.',
       code: 'INVALID_REQUEST',
     })
   }
@@ -327,6 +329,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
 
   const payload = value as Record<string, unknown>
   const botBlueprints = payload.botBlueprints as Record<string, unknown> | undefined
+  const teamIdentities = payload.teamIdentities as Record<string, unknown> | undefined
   const hasBlueprints =
     typeof botBlueprints === 'object' &&
     botBlueprints !== null &&
@@ -334,8 +337,13 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
     botBlueprints.red !== null &&
     typeof botBlueprints.blue === 'object' &&
     botBlueprints.blue !== null
+  const hasTeamIdentities =
+    typeof teamIdentities === 'object' &&
+    teamIdentities !== null &&
+    hasTeamIdentityShape(teamIdentities.red) &&
+    hasTeamIdentityShape(teamIdentities.blue)
 
-  if (!hasBlueprints) {
+  if (!hasBlueprints || !hasTeamIdentities) {
     return undefined
   }
 
@@ -346,6 +354,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
   ) {
     return {
       timeline: payload.timeline as ReplayTimeline,
+      teamIdentities: teamIdentities as Record<TeamRole, TeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
     }
   }
@@ -358,11 +367,27 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
         events: payload.events,
         summary: payload.summary,
       } as ReplayTimeline,
+      teamIdentities: teamIdentities as Record<TeamRole, TeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
     }
   }
 
   return undefined
+}
+
+function hasTeamIdentityShape(value: unknown): value is TeamIdentity {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const identity = value as Record<string, unknown>
+
+  return (
+    typeof identity.name === 'string' &&
+    identity.name.trim().length > 0 &&
+    typeof identity.primaryColor === 'string' &&
+    /^#[0-9a-f]{6}$/i.test(identity.primaryColor.trim())
+  )
 }
 
 function hasReplayTimelineShape(value: unknown): value is ReplayTimeline {

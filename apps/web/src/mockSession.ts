@@ -9,6 +9,7 @@ export {
   mockBotBlueprints,
   mockPublicSession,
   mockRoleStates,
+  mockTeamIdentities,
   mockTeamEconomy,
   type TeamEconomySnapshot,
 } from './mockSessionState.js'

@@ -116,6 +116,35 @@ const validSpinnerSubmission = {
   },
 }
 
+const testTeamIdentities = {
+  red: {
+    name: 'Red Team',
+    primaryColor: '#ff4c5d',
+    logo: { mark: 'shield', initials: 'R' },
+  },
+  blue: {
+    name: 'Blue Team',
+    primaryColor: '#5b9dff',
+    logo: { mark: 'shield', initials: 'B' },
+  },
+}
+
+function testTeamIdentity(role, suffix = '') {
+  return {
+    ...testTeamIdentities[role],
+    name: `${testTeamIdentities[role].name}${suffix}`,
+    logo: { ...testTeamIdentities[role].logo },
+  }
+}
+
+function claimRequest(role, claimToken = `claim_${role}`, suffix = '') {
+  return {
+    role,
+    claimToken,
+    teamIdentity: testTeamIdentity(role, suffix),
+  }
+}
+
 function createTestSession(sessionId = 's_test', options = {}) {
   return SessionCoordinator.create(
     { sessionId, seed: 'test-seed' },
@@ -167,8 +196,8 @@ function repeatedCommands(ticks, commandForTick) {
 }
 
 async function claimBothRoles(session) {
-  const red = await session.claimRole({ role: 'red', claimToken: 'claim_red' })
-  const blue = await session.claimRole({ role: 'blue', claimToken: 'claim_blue' })
+  const red = await session.claimRole(claimRequest('red'))
+  const blue = await session.claimRole(claimRequest('blue'))
 
   assert.equal(red.ok, true)
   assert.equal(blue.ok, true)
@@ -2029,7 +2058,7 @@ test('observer cockpit tokens can read role state but cannot mutate agent state'
 
 test('sessions require both roles before opening plan submission', async () => {
   const session = await createTestSession()
-  const red = await session.claimRole({ role: 'red', claimToken: 'claim_red' })
+  const red = await session.claimRole(claimRequest('red'))
 
   assert.equal(red.ok, true)
   assert.equal(red.value.state.phase, 'waiting_for_agents')
@@ -2042,7 +2071,7 @@ test('sessions require both roles before opening plan submission', async () => {
   assert.equal(earlySubmission.ok, false)
   assert.equal(earlySubmission.error.code, 'PHASE_CLOSED')
 
-  const blue = await session.claimRole({ role: 'blue', claimToken: 'claim_blue' })
+  const blue = await session.claimRole(claimRequest('blue'))
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
@@ -2060,8 +2089,16 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(badBootstrap.ok, false)
   assert.equal(badBootstrap.error.code, 'INVALID_TOKEN')
 
+  const missingIdentity = await session.bootstrapRole('red', 'claim_red', {
+    agentName: 'external-red',
+  })
+
+  assert.equal(missingIdentity.ok, false)
+  assert.equal(missingIdentity.error.code, 'INVALID_REQUEST')
+
   const bootstrap = await session.bootstrapRole('red', 'claim_red', {
     agentName: 'external-red',
+    teamIdentity: testTeamIdentity('red'),
   })
 
   assert.equal(bootstrap.ok, true)
@@ -2087,7 +2124,9 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(privateState.ok, true)
   assert.equal(privateState.value.role, 'red')
 
-  const blue = await session.bootstrapRole('blue', 'claim_blue', {})
+  const blue = await session.bootstrapRole('blue', 'claim_blue', {
+    teamIdentity: testTeamIdentity('blue'),
+  })
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
@@ -2272,6 +2311,8 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(replay.ok, true)
   assert.equal(replay.value.botBlueprints.red.name, 'Spinner')
   assert.equal(replay.value.botBlueprints.blue.name, 'Spinner')
+  assert.deepEqual(replay.value.teamIdentities.red, testTeamIdentity('red'))
+  assert.deepEqual(replay.value.teamIdentities.blue, testTeamIdentity('blue'))
   assert.equal(validateReplayTimeline(replay.value), true)
 
   const publicJson = JSON.stringify(resolved.value.publicState)
@@ -2382,11 +2423,13 @@ test('referee can reset a claimed role and refresh claim capability before comba
     role: 'red',
     claimToken: redInvite.claimToken,
     agentName: 'stuck-red',
+    teamIdentity: testTeamIdentity('red', ' Stuck'),
   })
   const blueClaim = await session.claimRole({
     role: 'blue',
     claimToken: blueInvite.claimToken,
     agentName: 'blue',
+    teamIdentity: testTeamIdentity('blue'),
   })
 
   assert.equal(redClaim.ok, true)
@@ -2428,6 +2471,7 @@ test('referee can reset a claimed role and refresh claim capability before comba
     role: 'red',
     claimToken: reset.value.invite.claimToken,
     agentName: 'replacement-red',
+    teamIdentity: testTeamIdentity('red', ' Replacement'),
   })
 
   assert.equal(replacementClaim.ok, true)

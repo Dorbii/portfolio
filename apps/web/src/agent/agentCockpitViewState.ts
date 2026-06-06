@@ -514,7 +514,16 @@ export function createAgentConnectionGuidance({
   roleToken: string
   status: LoadStatus
 }): AgentConnectionGuidance {
-  const bootstrapCall = `await window.AgentArenaRole.bootstrapRole({ agentName: '${invite.role}-agent' })`
+  const bootstrapCall = [
+    'await window.AgentArenaRole.bootstrapRole({',
+    `  agentName: '${invite.role}-agent',`,
+    '  teamIdentity: {',
+    `    name: '${capitalize(invite.role)} Team',`,
+    `    primaryColor: '${invite.role === 'red' ? '#ff4c5d' : '#5b9dff'}',`,
+    "    logo: { mark: 'shield' },",
+    '  },',
+    '})',
+  ].join('\n')
 
   if (roleState) {
     return {

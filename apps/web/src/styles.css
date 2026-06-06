@@ -1773,7 +1773,7 @@ textarea:focus-visible {
   top: 0;
   z-index: 4;
   display: grid;
-  grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+  grid-template-columns: minmax(180px, 260px) minmax(360px, 1fr) minmax(420px, 0.92fr);
   align-items: center;
 }
 
@@ -1791,6 +1791,74 @@ textarea:focus-visible {
   background: var(--cockpit-team-strong);
   box-shadow: 0 0 14px rgba(var(--cockpit-team), 0.34);
   content: "";
+}
+
+.agent-identity-editor,
+.agent-identity-lock {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  align-items: end;
+}
+
+.agent-identity-editor {
+  grid-template-columns:
+    minmax(112px, 0.8fr)
+    minmax(136px, 1fr)
+    72px
+    minmax(104px, 0.72fr)
+    72px;
+}
+
+.agent-identity-editor label,
+.agent-identity-lock {
+  min-width: 0;
+  color: #8fa3a3;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.agent-identity-editor label {
+  display: grid;
+  gap: 5px;
+}
+
+.agent-identity-editor input,
+.agent-identity-editor select {
+  min-width: 0;
+  min-height: 34px;
+  margin: 0;
+}
+
+.agent-identity-editor input[type="color"] {
+  height: 34px;
+  padding: 4px;
+}
+
+.agent-identity-lock {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 9px 10px;
+  border: 1px solid rgba(var(--cockpit-team), 0.34);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-team), 0.12), rgba(var(--cockpit-team), 0.03)),
+    rgba(6, 10, 13, 0.74);
+}
+
+.agent-identity-lock strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #eef2f3;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-identity-lock small {
+  color: var(--cockpit-team-strong);
+  font-size: 0.7rem;
+  font-weight: 950;
 }
 
 .agent-command-actions {
@@ -2673,6 +2741,14 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .agent-identity-editor {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .agent-identity-editor label:nth-child(-n + 2) {
+    grid-column: span 3;
+  }
+
   .cockpit-secondary-stack {
     position: static;
     max-height: none;
@@ -2777,6 +2853,8 @@ textarea:focus-visible {
   .inventory-row,
     .agent-facts div,
     .replay-controls,
+    .agent-identity-editor,
+    .agent-identity-lock,
     .agent-command-actions,
     .agent-task-list,
     .plan-metric-strip,

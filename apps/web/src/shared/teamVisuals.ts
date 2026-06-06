@@ -18,18 +18,25 @@ type Rgb = {
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
 
-const ROLE_PRESENTATION_ACCENTS: Record<TeamRole, string> = {
-  red: '#ff4c5d',
-  blue: '#5b9dff',
+export const DEFAULT_TEAM_IDENTITIES: Record<TeamRole, TeamIdentity> = {
+  red: { name: 'Red Team', primaryColor: '#ff4c5d', logo: { mark: 'shield', initials: 'R' } },
+  blue: { name: 'Blue Team', primaryColor: '#5b9dff', logo: { mark: 'shield', initials: 'B' } },
+}
+
+export function resolveTeamIdentity(
+  role: TeamRole,
+  identity: TeamIdentity | null | undefined,
+): TeamIdentity {
+  return identity ?? DEFAULT_TEAM_IDENTITIES[role]
 }
 
 export function resolveTeamAccentHex(
   role: TeamRole,
   identity: TeamIdentity | null | undefined,
 ): string {
-  const color = identity?.primaryColor.trim() ?? ''
+  const color = resolveTeamIdentity(role, identity).primaryColor.trim()
 
-  return HEX_COLOR_PATTERN.test(color) ? color.toLowerCase() : ROLE_PRESENTATION_ACCENTS[role]
+  return HEX_COLOR_PATTERN.test(color) ? color.toLowerCase() : DEFAULT_TEAM_IDENTITIES[role].primaryColor
 }
 
 export function createTeamAccentCssVars(

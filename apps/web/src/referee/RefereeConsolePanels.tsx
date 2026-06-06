@@ -401,20 +401,21 @@ function getTeamDashboardData(
   const damageTaken = publicSession?.lastResult?.damage[role] ?? 0
   const remainingHealth = publicSession?.lastResult?.remainingHealth[role]
   const maxHealth = remainingHealth === undefined ? 100 : Math.max(remainingHealth + damageTaken, 1)
-  const identity = resolveTeamIdentity(role, roleState?.identity)
+  const identity = roleState?.identity ?? replayPayload?.teamIdentities[role]
+  const displayIdentity = resolveTeamIdentity(role, identity)
   const healthPercent = remainingHealth === undefined
     ? (roleState?.submitted ? 100 : 0)
     : Math.round((remainingHealth / maxHealth) * 100)
 
   return {
-    accentRgb: teamAccentRgb(role, roleState?.identity),
+    accentRgb: teamAccentRgb(role, identity),
     claimed: roleState?.claimed ?? false,
     damageTaken,
     healthLabel: remainingHealth === undefined ? 'Pending' : `${Math.max(remainingHealth, 0)}`,
     healthPercent,
     hitCount: countImpactEvents(replayPayload?.timeline.events ?? [], role),
     losses: roleState?.losses ?? 0,
-    name: roleState?.identity?.name.trim() || blueprint?.name?.trim() || identity.name,
+    name: identity?.name.trim() || blueprint?.name?.trim() || displayIdentity.name,
     role,
     submitted: roleState?.submitted ?? false,
     wins: roleState?.wins ?? 0,

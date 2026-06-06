@@ -974,8 +974,16 @@ export class SessionCoordinator {
       throw new Error('Both round submissions are required to complete combat.')
     }
 
+    if (!red.teamIdentity || !blue.teamIdentity) {
+      throw new Error('Both team identities are required to complete combat.')
+    }
+
     this.state.replay = {
       ...result.replay,
+      teamIdentities: {
+        red: cloneJson(red.teamIdentity),
+        blue: cloneJson(blue.teamIdentity),
+      },
       botBlueprints: {
         red: cloneJson(red.submission.blueprint),
         blue: cloneJson(blue.submission.blueprint),

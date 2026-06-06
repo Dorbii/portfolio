@@ -15,6 +15,7 @@ import type {
   SessionChatMessage,
   SessionLogEvent,
   SessionPhase,
+  TeamIdentity,
   TurnCommandPostRequest,
   TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
@@ -193,7 +194,7 @@ export class AgentArenaClient {
   async claimRole(input: {
     claimToken: string
     agentName?: string
-    teamIdentity?: RoleClaimResponse['state']['identity']
+    teamIdentity?: TeamIdentity
   }): Promise<RoleClaimResponse> {
     return this.requestJson<RoleClaimResponse>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/claim`,
@@ -211,7 +212,7 @@ export class AgentArenaClient {
 
   async claimInviteRole(input: {
     agentName?: string
-    teamIdentity?: RoleClaimResponse['state']['identity']
+    teamIdentity?: TeamIdentity
   } = {}): Promise<RoleClaimResponse> {
     if (!this.invite.claimToken) {
       throw new AgentArenaApiError({
@@ -231,7 +232,7 @@ export class AgentArenaClient {
   async bootstrapRole(input: {
     agentName?: string
     playerKey?: string
-    teamIdentity?: AgentBootstrapResponse['state']['identity']
+    teamIdentity?: TeamIdentity
   } = {}): Promise<AgentBootstrapResponse> {
     const playerKey = input.playerKey ?? this.invite.claimToken ?? this.getRoleToken?.()
 

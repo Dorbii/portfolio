@@ -44,6 +44,34 @@ const validSpinnerSubmission = {
     weaponCadence: 'opportunistic',
   },
 }
+
+const testTeamIdentities = {
+  red: {
+    name: 'Red Team',
+    primaryColor: '#ff4c5d',
+    logo: { mark: 'shield', initials: 'R' },
+  },
+  blue: {
+    name: 'Blue Team',
+    primaryColor: '#5b9dff',
+    logo: { mark: 'shield', initials: 'B' },
+  },
+}
+
+function testTeamIdentity(role, suffix = '') {
+  return {
+    ...testTeamIdentities[role],
+    name: `${testTeamIdentities[role].name}${suffix}`,
+    logo: { ...testTeamIdentities[role].logo },
+  }
+}
+
+function bootstrapBody(role, agentName) {
+  return {
+    ...(agentName ? { agentName } : {}),
+    teamIdentity: testTeamIdentity(role),
+  }
+}
 function cloneJson(value) {
   return JSON.parse(JSON.stringify(value))
 }
@@ -609,12 +637,13 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   const redBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
     token: redInvite.claimToken,
-    body: { agentName: 'External Red' },
+    body: bootstrapBody('red', 'External Red'),
   })
 
   assert.equal(redBootstrap.response.status, 201)
   assert.equal(redBootstrap.json.claimedNow, true)
   assert.equal(redBootstrap.json.state.role, 'red')
+  assert.deepEqual(redBootstrap.json.state.identity, testTeamIdentity('red'))
   assert.equal(redBootstrap.json.state.phase, 'waiting_for_agents')
   assert.equal(redBootstrap.json.publicState.roles.red.claimed, true)
   assert.equal(redBootstrap.json.nextAction, 'wait_for_opponent_claim')
@@ -648,11 +677,12 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',
     token: blueInvite.claimToken,
-    body: {},
+    body: bootstrapBody('blue'),
   })
 
   assert.equal(blueBootstrap.response.status, 201)
   assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
+  assert.deepEqual(blueBootstrap.json.state.identity, testTeamIdentity('blue'))
   assertRoundPlanWindow(blueBootstrap.json.state.roundPlan)
   assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
 })
@@ -1206,6 +1236,8 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(replay.json.botBlueprints?.blue?.blocks?.length > 0, true)
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].id, 'core')
   assert.equal(replay.json.botBlueprints?.red?.blocks[0].partId, 'Body_Square_Medium')
+  assert.deepEqual(replay.json.teamIdentities?.red, testTeamIdentity('red'))
+  assert.deepEqual(replay.json.teamIdentities?.blue, testTeamIdentity('blue'))
 
   const invalidAdvanceToken = await route(env, `/sessions/${sessionId}/advance-round`, {
     method: 'POST',

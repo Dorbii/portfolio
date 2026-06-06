@@ -28,8 +28,6 @@ import {
 } from './agentRolePolling'
 import { capitalize, formatLabel } from '../shared/format'
 
-const autoBootstrapAttempts = new Set<string>()
-
 export function useAgentRoleSession(invite: AgentInvite) {
   const [roleToken, setRoleToken] = useState(() =>
     invite.claimToken
@@ -389,25 +387,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
     waitForPhase,
     waitForStateChange,
   ])
-
-  useEffect(() => {
-    if (roleState || !invite.claimToken) {
-      return
-    }
-
-    if (roleToken && lastError?.code !== 'INVALID_TOKEN') {
-      return
-    }
-
-    const attemptKey = `${invite.apiBase}:${invite.sessionId}:${invite.role}:${invite.claimToken}`
-
-    if (autoBootstrapAttempts.has(attemptKey)) {
-      return
-    }
-
-    autoBootstrapAttempts.add(attemptKey)
-    void connectRole()
-  }, [connectRole, invite, lastError?.code, roleState, roleToken])
 
   const clearRoleToken = useCallback(() => {
     clearStoredRoleToken(window.sessionStorage, invite)

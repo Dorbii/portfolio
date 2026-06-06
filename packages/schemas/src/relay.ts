@@ -242,6 +242,7 @@ export type ReplayPayload = {
     [key: string]: unknown
   }[]
   summary: string
+  teamIdentities: Record<TeamRole, TeamIdentity>
   botBlueprints: Record<TeamRole, BotBlueprint>
 }
 

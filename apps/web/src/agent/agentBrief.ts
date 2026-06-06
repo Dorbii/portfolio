@@ -110,7 +110,9 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
     },
     workflow: [
       'Treat claimToken as your private player key. Do not paste it into public logs.',
-      'Default path: open the invite URL, use window.AgentArenaRole.bootstrapRole(), then wait for nextAction.',
+      'Default path: open the invite URL, choose teamIdentity, use window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }), then wait for nextAction.',
+      'On first bootstrap or claim, teamIdentity.name is the team display name and teamIdentity.primaryColor is a string in #RRGGBB hex format. logo is optional; if omitted, the server derives a shield logo with initials from the team name.',
+      'Team identity is locked after the role is connected. Do not send teamIdentity again when resuming an already connected role.',
       'If nextAction=submit_round_plan, submit exactly one legal v2 round plan. Prefer a custom plan when you can build one quickly.',
       'If nextAction=submit_turn_command, inspect state.combat.snapshot and submit exactly one command for state.combat.tick before the 120 second deadline.',
       'During combat_turn, prefer state.combat.decision for legalCommands, range, health, arenaPressure, actionReadiness, movementOptions, previousResolvedTurn, and tacticalCues.',
@@ -165,7 +167,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Do this first',
     'Default path: use the invite page helpers. Only use raw HTTP if the browser helper path is unavailable.',
     '```js',
-    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
+    ...teamIdentitySnippetLines(input.invite),
+    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent', teamIdentity })`,
     'const next = ["submit_round_plan", "submit_turn_command"].includes(boot.nextAction)',
     '  ? boot',
     `  : await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
@@ -222,7 +225,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Browser page API',
     'Use this path first when you are controlling the invite page:',
     '```js',
-    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent' })`,
+    ...teamIdentitySnippetLines(input.invite),
+    `const boot = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent', teamIdentity })`,
     'const next = ["submit_round_plan", "submit_turn_command"].includes(boot.nextAction)',
     '  ? boot',
     `  : await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
@@ -346,7 +350,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Validation checklist',
     ...brief.validationChecklist.map((item) => `- ${item}`),
     '',
-    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole(), getState(), waitForNextAction({ timeoutMs: 600000 }), then submitRoundPlan(plan) or submitTurnCommand(command) based on nextAction.',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) for first connect, getState(), waitForNextAction({ timeoutMs: 600000 }), then submitRoundPlan(plan) or submitTurnCommand(command) based on nextAction.',
   ].join('\n')
 }
 
@@ -355,11 +359,36 @@ function claimBodyForBrief(invite: AgentInvite): string {
     role: invite.role,
     claimToken: invite.claimToken ?? '<claimToken from invite URL>',
     agentName: `${invite.role}-agent`,
+    teamIdentity: teamIdentityForBrief(invite),
   })
 }
 
 function bootstrapBodyForBrief(invite: AgentInvite): string {
   return JSON.stringify({
     agentName: `${invite.role}-agent`,
+    teamIdentity: teamIdentityForBrief(invite),
   })
+}
+
+function teamIdentityForBrief(invite: AgentInvite) {
+  return {
+    name: invite.role === 'red' ? 'Red Team' : 'Blue Team',
+    primaryColor: invite.role === 'red' ? '#ff4c5d' : '#5b9dff',
+    logo: {
+      mark: 'shield',
+      initials: invite.role === 'red' ? 'R' : 'B',
+    },
+  }
+}
+
+function teamIdentitySnippetLines(invite: AgentInvite): string[] {
+  const identity = teamIdentityForBrief(invite)
+
+  return [
+    'const teamIdentity = {',
+    `  name: '${identity.name}',`,
+    `  primaryColor: '${identity.primaryColor}', // string, #RRGGBB hex color`,
+    `  logo: { mark: '${identity.logo.mark}', initials: '${identity.logo.initials}' }, // optional`,
+    '}',
+  ]
 }

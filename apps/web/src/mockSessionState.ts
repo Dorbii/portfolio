@@ -3,6 +3,7 @@ import type {
   BotBlueprint,
   PublicSessionState,
   RolePrivateState,
+  TeamIdentity,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
 
@@ -41,6 +42,19 @@ export const mockTeamEconomy: Record<TeamRole, TeamEconomySnapshot> = {
     damage: 31,
     baseIncome: 50,
     interestPreview: 9,
+  },
+}
+
+export const mockTeamIdentities: Record<TeamRole, TeamIdentity> = {
+  red: {
+    name: 'Crimson Circuit',
+    primaryColor: '#ff5b66',
+    logo: { mark: 'bolt', initials: 'CC' },
+  },
+  blue: {
+    name: 'Ion Net',
+    primaryColor: '#5b9dff',
+    logo: { mark: 'crosshair', initials: 'IN' },
   },
 }
 
@@ -118,11 +132,13 @@ export const mockPublicSession: PublicSessionState = {
   roles: {
     red: {
       role: 'red',
+      identity: mockTeamIdentities.red,
       claimed: true,
       submitted: true,
     },
     blue: {
       role: 'blue',
+      identity: mockTeamIdentities.blue,
       claimed: true,
       submitted: true,
     },
@@ -149,6 +165,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     sessionId: mockPublicSession.sessionId,
     stateVersion: mockPublicSession.stateVersion,
     role: 'red',
+    identity: mockTeamIdentities.red,
     phase: mockPublicSession.phase,
     round: mockPublicSession.round,
     expiresAt: mockPublicSession.expiresAt,
@@ -250,6 +267,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     sessionId: mockPublicSession.sessionId,
     stateVersion: mockPublicSession.stateVersion,
     role: 'blue',
+    identity: mockTeamIdentities.blue,
     phase: mockPublicSession.phase,
     round: mockPublicSession.round,
     expiresAt: mockPublicSession.expiresAt,

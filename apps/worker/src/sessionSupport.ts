@@ -195,17 +195,33 @@ export function normalizeTeamIdentity(identity: TeamIdentity): TeamIdentity {
   return {
     name: identity.name.trim(),
     primaryColor: identity.primaryColor.trim().toLowerCase(),
-    ...(identity.logo
-      ? {
-          logo: {
-            mark: identity.logo.mark,
-            ...(identity.logo.initials?.trim()
-              ? { initials: identity.logo.initials.trim().toUpperCase() }
-              : {}),
-          },
-        }
-      : {}),
+    logo: normalizeTeamLogo(identity),
   }
+}
+
+function normalizeTeamLogo(identity: TeamIdentity): NonNullable<TeamIdentity['logo']> {
+  return {
+    mark: identity.logo?.mark ?? 'shield',
+    initials: (identity.logo?.initials?.trim() || initialsFromTeamName(identity.name)).toUpperCase(),
+  }
+}
+
+function initialsFromTeamName(name: string): string {
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/gi, ''))
+    .filter(Boolean)
+
+  if (words.length === 0) {
+    return 'A'
+  }
+
+  if (words.length === 1) {
+    return words[0].slice(0, 4)
+  }
+
+  return words.map((word) => word[0]).join('').slice(0, 4)
 }
 
 export function combatSummary(result: CombatResult): CombatSummary {
