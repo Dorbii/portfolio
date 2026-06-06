@@ -4,7 +4,6 @@ import type {
   RolePrivateState,
   SessionPhase,
 } from '../../../../packages/schemas/src/index.js'
-import { createBaselineRoundPlan } from './baselineRoundPlan.js'
 import type {
   AgentArenaRoleApi,
   AgentArenaValidAction,
@@ -21,7 +20,6 @@ export type AgentArenaRoleClient = {
   getPrivateChatLog: AgentArenaRoleApi['getPrivateChatLog']
   getState: AgentArenaRoleApi['getState']
   submitChatMessage: AgentArenaRoleApi['submitChatMessage']
-  submitFallbackRoundPlan: AgentArenaRoleApi['submitFallbackRoundPlan']
   submitPrivateChatMessage: AgentArenaRoleApi['submitPrivateChatMessage']
   submitRoundPlan: AgentArenaRoleApi['submitRoundPlan']
   submitTurnCommand: AgentArenaRoleApi['submitTurnCommand']
@@ -98,21 +96,6 @@ export function getValidAgentActions(
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'get_fallback_round_plan',
-      available: true,
-    },
-    {
-      name: 'submit_fallback_round_plan',
-      available: Boolean(state && state.phase === 'submission_phase' && !state.submitted && state.gold >= 72),
-      ...(state?.phase !== 'submission_phase'
-        ? { reason: `Round plans are not open during ${state?.phase ?? 'unclaimed'}.` }
-        : state.submitted
-          ? { reason: 'This role has already submitted a round plan.' }
-          : state.gold < 72
-            ? { reason: 'Baseline Spinner requires 72 gold.' }
-            : {}),
-    },
-    {
       name: 'submit_round_plan',
       available: Boolean(state && state.phase === 'submission_phase' && !state.submitted),
       ...(state?.phase !== 'submission_phase'
@@ -174,8 +157,6 @@ export function createAgentArenaRoleApi(
     claimRole: (input) => options.claimRole?.(input) ?? client.claimInviteRole(input),
     getState: () => client.getState(),
     getValidActions: async () => getValidAgentActions(getCurrentState()),
-    getFallbackRoundPlan: () => createBaselineRoundPlan(),
-    submitFallbackRoundPlan: () => client.submitFallbackRoundPlan(),
     submitRoundPlan: (plan) => client.submitRoundPlan(plan),
     submitTurnCommand: (command) => client.submitTurnCommand(command),
     submitChatMessage: (input) => client.submitChatMessage(input),

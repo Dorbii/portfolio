@@ -141,8 +141,6 @@ export function createInstalledAgentArenaRoleApi({
 
       return state.privateChatLog
     },
-    submitFallbackRoundPlan: async () =>
-      updateFromRoundResponse(await client.submitFallbackRoundPlan()),
     submitRoundPlan: async (plan) =>
       updateFromRoundResponse(await client.submitRoundPlan(plan)),
     submitTurnCommand: async (command) =>

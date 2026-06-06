@@ -75,8 +75,8 @@ const chatLog = [
     phase: 'round_review' as const,
     role: 'blue' as const,
     agentName: 'blue-agent',
-    kind: 'reflection' as const,
-    message: 'Net control worked; next round should keep distance and add armor.',
+    kind: 'strategy' as const,
+    message: 'Net control worked that round; expect distance again unless you force contact.',
   },
 ]
 

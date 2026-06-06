@@ -1,12 +1,12 @@
 import type { RoundPlanSubmissionV2 } from './types.js'
 
-const BASELINE_SPINNER_PURCHASES = [
+const EXAMPLE_SPINNER_PURCHASES = [
   { partId: 'Body_Square_Medium', quantity: 1 },
   { partId: 'Wheel_Large', quantity: 2 },
   { partId: 'Weapon_Spinner_Small', quantity: 1 },
 ] as const
 
-const BASELINE_SPINNER_BLOCKS = [
+const EXAMPLE_SPINNER_BLOCKS = [
   {
     id: 'core',
     partId: 'Body_Square_Medium',
@@ -33,17 +33,17 @@ const BASELINE_SPINNER_BLOCKS = [
   },
 ] as const
 
-const BASELINE_SPINNER_RATIONALE =
-  'A compact legal plan that buys a body, mobility, and one weapon inside the first-round budget.'
+const EXAMPLE_SPINNER_RATIONALE =
+  'A compact legal example that buys a body, mobility, and one weapon inside the first-round budget.'
 
-export function createBaselineRoundPlan(): RoundPlanSubmissionV2 {
+export function createExampleRoundPlan(): RoundPlanSubmissionV2 {
   return {
     action: 'submit_round_plan',
     schemaVersion: 2,
-    purchases: BASELINE_SPINNER_PURCHASES.map((purchase) => ({ ...purchase })),
+    purchases: EXAMPLE_SPINNER_PURCHASES.map((purchase) => ({ ...purchase })),
     blueprint: {
-      name: 'Baseline Spinner',
-      blocks: BASELINE_SPINNER_BLOCKS.map((block) => ({
+      name: 'Example Spinner',
+      blocks: EXAMPLE_SPINNER_BLOCKS.map((block) => ({
         ...block,
         position: [...block.position],
         rotation: [...block.rotation],
@@ -59,13 +59,13 @@ export function createBaselineRoundPlan(): RoundPlanSubmissionV2 {
       weaponCadence: 'opportunistic',
       hazardPreference: 'avoid',
     },
-    rationale: BASELINE_SPINNER_RATIONALE,
+    rationale: EXAMPLE_SPINNER_RATIONALE,
   }
 }
 
-export function createBaselineRoundPlanV2Example(): RoundPlanSubmissionV2 {
+export function createExampleRoundPlanV2(): RoundPlanSubmissionV2 {
   return {
-    ...createBaselineRoundPlan(),
+    ...createExampleRoundPlan(),
     chat: [
       {
         kind: 'strategy',

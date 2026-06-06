@@ -48,8 +48,6 @@ export type AgentArenaValidAction = {
     | 'wait_for_state_change'
     | 'wait_for_next_submission_window'
     | 'wait_for_next_action'
-    | 'get_fallback_round_plan'
-    | 'submit_fallback_round_plan'
     | 'submit_round_plan'
     | 'submit_turn_command'
     | 'submit_chat_message'
@@ -69,8 +67,6 @@ export type AgentArenaRoleApi = {
   claimRole(input?: { agentName?: string }): Promise<RoleClaimResponse>
   getState(): Promise<RolePrivateState>
   getValidActions(): Promise<AgentArenaValidAction[]>
-  getFallbackRoundPlan(): RoundPlanSubmission
-  submitFallbackRoundPlan(): Promise<RoundSubmissionResponse>
   submitRoundPlan(
     plan: RoundPlanSubmission,
   ): Promise<RoundSubmissionResponse>

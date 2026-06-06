@@ -42,7 +42,6 @@ import {
   type ResolveCombatInput,
 } from '../../../packages/sim/src/index.js'
 import {
-  appendCombatChatterMessages,
   appendPrivateRoleChatMessages,
   appendRoleChatMessages,
   appendSessionEvent,
@@ -489,7 +488,7 @@ export class SessionCoordinator {
     }
 
     const role = auth.value.role
-    const validation = validateAgentChatMessageRequestShape(request)
+    const validation = validateAgentChatMessageRequestShape(request, 'public')
 
     if (!validation.ok) {
       return relayError('INVALID_REQUEST', 'Chat message failed validation.', validation.issues)
@@ -525,7 +524,7 @@ export class SessionCoordinator {
     }
 
     const role = auth.value.role
-    const validation = validateAgentChatMessageRequestShape(request)
+    const validation = validateAgentChatMessageRequestShape(request, 'private')
 
     if (!validation.ok) {
       return relayError('INVALID_REQUEST', 'Private chat message failed validation.', validation.issues)
@@ -955,7 +954,6 @@ export class SessionCoordinator {
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
     this.changePhase('replay_phase', 'Replay timeline is available.', now)
     this.changePhase('round_review', 'Round review is ready for referee advance.', now)
-    this.appendCombatChatter(result, now)
   }
 
   private changePhase(phase: SessionPhase, message: string, at: string): void {
@@ -978,12 +976,6 @@ export class SessionCoordinator {
     at: string,
   ): SessionChatMessage[] {
     return appendRoleChatMessages(this.state, role, requests, at)
-  }
-
-  private appendCombatChatter(result: CombatResult, at: string): void {
-    if (appendCombatChatterMessages(this.state, result, at)) {
-      this.touch(at)
-    }
   }
 
   private appendPrivateChatMessages(

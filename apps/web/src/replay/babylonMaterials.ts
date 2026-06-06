@@ -40,6 +40,7 @@ export type TeamMaterialSet = {
   weapon: BotPbrMaterial
   utility: BotPbrMaterial
   style: BotPbrMaterial
+  circuit: BotPbrMaterial
   damage: DamageMaterialSet
   trim: BotPbrMaterial
   rubber: BotPbrMaterial
@@ -141,6 +142,12 @@ export function createBotMaterialSet(
       metallic: 0.56,
       pattern: 'style',
       roughness: 0.48,
+    }),
+    circuit: createPlainCombatMaterial(scene, `${materialPrefix}-circuit`, {
+      baseColor: '#1f5c43',
+      emissive: '#1b4a39',
+      metallic: 0.28,
+      roughness: 0.52,
     }),
     damage: createDamageMaterialSet(scene, materialPrefix, palette),
     trim: createCombatMaterial(scene, `${materialPrefix}-trim`, {
@@ -279,6 +286,22 @@ function createCombatMaterial(
   if (recipe.pattern === 'light') {
     material.roughness = 0.22
   }
+
+  return material
+}
+
+function createPlainCombatMaterial(
+  scene: Scene,
+  name: string,
+  recipe: Omit<MaterialRecipe, 'pattern'>,
+): BotPbrMaterial {
+  const material = new PBRMetallicRoughnessMaterial(name, scene)
+
+  material.baseColor = Color3.FromHexString(recipe.baseColor)
+  material.emissiveColor = Color3.FromHexString(recipe.emissive ?? '#000000')
+  material.metallic = recipe.metallic
+  material.roughness = recipe.roughness
+  material.maxSimultaneousLights = 6
 
   return material
 }

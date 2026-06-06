@@ -2119,20 +2119,29 @@ test('session marks expired state and rejects private access after ttl', async (
   assert.equal(privateState.error.code, 'SESSION_EXPIRED')
 })
 
-test('agents can publish public chat and reflection messages', async () => {
+test('agents can publish public table talk while private reflections stay role scoped', async () => {
   const session = await createTestSession('s_chat')
   const { redToken } = await claimBothRoles(session)
   const chat = await session.submitChatMessage(redToken, {
-    kind: 'reflection',
-    message: '  Last round favored armor; next build should preserve control.  ',
+    kind: 'strategy',
+    message: '  Your last armor trade looked slow; I am testing control pressure next.  ',
   })
 
   assert.equal(chat.ok, true)
   assert.equal(chat.value.message.role, 'red')
-  assert.equal(chat.value.message.kind, 'reflection')
-  assert.equal(chat.value.message.message, 'Last round favored armor; next build should preserve control.')
+  assert.equal(chat.value.message.kind, 'strategy')
+  assert.equal(chat.value.message.message, 'Your last armor trade looked slow; I am testing control pressure next.')
   assert.equal(chat.value.publicState.chatLog.length, 1)
   assert.deepEqual(chat.value.state.chatLog, chat.value.publicState.chatLog)
+
+  const publicReflection = await session.submitChatMessage(redToken, {
+    kind: 'reflection',
+    message: 'This belongs in private role memory.',
+  })
+
+  assert.equal(publicReflection.ok, false)
+  assert.equal(publicReflection.error.code, 'INVALID_REQUEST')
+  assert.equal(publicReflection.error.issues[0].code, 'INVALID_CHAT_KIND')
 
   const invalid = await session.submitChatMessage(redToken, {
     kind: 'private_monologue',
@@ -2150,13 +2159,13 @@ test('private chat is scoped to the bearer role and hidden from public state', a
   const beforeVersion = session.getPublicState().stateVersion
   const noteText = 'Prefer flanks next round; the front armor plan trades poorly.'
   const note = await session.submitPrivateChatMessage(redToken, {
-    kind: 'strategy',
+    kind: 'reflection',
     message: `  ${noteText}  `,
   })
 
   assert.equal(note.ok, true)
   assert.equal(note.value.message.role, 'red')
-  assert.equal(note.value.message.kind, 'strategy')
+  assert.equal(note.value.message.kind, 'reflection')
   assert.equal(note.value.message.message, noteText)
   assert.equal(note.value.state.privateChatLog.length, 1)
   assert.equal(note.value.state.privateChatLog[0].message, noteText)
@@ -2255,8 +2264,8 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(resolved.value.publicState.phase, 'round_review')
   assert.equal(resolved.value.publicState.replayAvailable, true)
   assert.ok(resolved.value.publicState.lastResult)
-  assert.ok(resolved.value.publicState.chatLog.length >= 3)
-  assert.ok(resolved.value.publicState.chatLog.some((message) => message.kind === 'taunt'))
+  assert.equal(resolved.value.publicState.chatLog.length, 1)
+  assert.equal(resolved.value.publicState.chatLog[0].message, 'Opening with direct pressure; next round should adapt from replay damage.')
 
   const replay = session.getReplay()
 

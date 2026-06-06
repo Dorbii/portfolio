@@ -870,8 +870,8 @@ test('browser role API posts and reads public chat through authenticated endpoin
             round: 1,
             phase: 'submission_phase',
             role: 'red',
-            kind: 'reflection',
-            message: 'Armor held; add drive next.',
+            kind: 'strategy',
+            message: 'Your armor held, but your drive looked slow.',
           },
           state: {
             ...roleState,
@@ -883,8 +883,8 @@ test('browser role API posts and reads public chat through authenticated endpoin
                 round: 1,
                 phase: 'submission_phase',
                 role: 'red',
-                kind: 'reflection',
-                message: 'Armor held; add drive next.',
+                kind: 'strategy',
+                message: 'Your armor held, but your drive looked slow.',
               },
             ],
           },
@@ -917,12 +917,12 @@ test('browser role API posts and reads public chat through authenticated endpoin
   })
   const roleApi = createAgentArenaRoleApi(client, () => roleState)
   const posted = await roleApi.submitChatMessage({
-    kind: 'reflection',
-    message: 'Armor held; add drive next.',
+    kind: 'strategy',
+    message: 'Your armor held, but your drive looked slow.',
   })
   const chatLog = await roleApi.getChatLog()
 
-  assert.equal(posted.message.kind, 'reflection')
+  assert.equal(posted.message.kind, 'strategy')
   assert.deepEqual(chatLog, roleState.chatLog)
   assert.deepEqual(
     calls.map((call) => [call.method, call.url.replace(invite.apiBase, ''), call.authorization]),
@@ -932,8 +932,8 @@ test('browser role API posts and reads public chat through authenticated endpoin
     ],
   )
   assert.deepEqual(calls[0].body, {
-    kind: 'reflection',
-    message: 'Armor held; add drive next.',
+    kind: 'strategy',
+    message: 'Your armor held, but your drive looked slow.',
   })
 })
 

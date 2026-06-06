@@ -1,5 +1,6 @@
 import {
   AGENT_CHAT_MESSAGE_KINDS,
+  PUBLIC_AGENT_CHAT_MESSAGE_KINDS,
   type ValidationIssue,
   type ValidationResult,
 } from '../types.js'
@@ -10,16 +11,20 @@ import {
   result,
 } from './common.js'
 
+type ChatVisibility = 'public' | 'private'
+
 export function validateAgentChatMessageRequestShape(
   value: unknown,
+  visibility: ChatVisibility = 'public',
 ): ValidationResult {
-  return result(validateAgentChatMessageShape(value, 'chat'))
+  return result(validateAgentChatMessageShape(value, 'chat', allowedKindsForVisibility(visibility)))
 }
 
 export function validateAgentChatMessageBatchShape(
   value: unknown,
   path: string,
   maxMessages: number,
+  visibility: ChatVisibility = 'public',
 ): ValidationResult {
   const issues: ValidationIssue[] = []
 
@@ -41,7 +46,11 @@ export function validateAgentChatMessageBatchShape(
   }
 
   value.forEach((message, index) => {
-    issues.push(...validateAgentChatMessageShape(message, `${path}.${index}`))
+    issues.push(...validateAgentChatMessageShape(
+      message,
+      `${path}.${index}`,
+      allowedKindsForVisibility(visibility),
+    ))
   })
 
   return result(issues)
@@ -50,6 +59,7 @@ export function validateAgentChatMessageBatchShape(
 function validateAgentChatMessageShape(
   value: unknown,
   path: string,
+  allowedKinds: readonly string[],
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = []
 
@@ -71,16 +81,22 @@ function validateAgentChatMessageShape(
 
   if (
     'kind' in value &&
-    !AGENT_CHAT_MESSAGE_KINDS.includes(value.kind as never)
+    !allowedKinds.includes(value.kind as never)
   ) {
     issues.push(
       issue(
         'INVALID_CHAT_KIND',
         `${path}.kind`,
-        `Chat kind must be one of ${AGENT_CHAT_MESSAGE_KINDS.join(', ')}.`,
+        `Chat kind must be one of ${allowedKinds.join(', ')}.`,
       ),
     )
   }
 
   return issues
+}
+
+function allowedKindsForVisibility(visibility: ChatVisibility): readonly string[] {
+  return visibility === 'private'
+    ? AGENT_CHAT_MESSAGE_KINDS
+    : PUBLIC_AGENT_CHAT_MESSAGE_KINDS
 }

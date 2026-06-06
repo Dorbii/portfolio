@@ -23,7 +23,6 @@ import {
   createSafeAgentHash,
   type AgentInvite,
 } from '../shared/agentInvite.js'
-import { createBaselineRoundPlan } from './baselineRoundPlan.js'
 import type {
   AgentContract,
   AgentWaitOptions,
@@ -39,7 +38,6 @@ export {
   type ExternalAgentBrief,
   type ExternalAgentBriefInput,
 } from './agentBrief.js'
-export { createBaselineRoundPlan } from './baselineRoundPlan.js'
 export type {
   AgentArenaRoleApi,
   AgentArenaValidAction,
@@ -278,10 +276,6 @@ export class AgentArenaClient {
         body: JSON.stringify(plan),
       },
     )
-  }
-
-  async submitFallbackRoundPlan(): Promise<RoundSubmissionResponse> {
-    return this.submitRoundPlan(createBaselineRoundPlan())
   }
 
   async submitTurnCommand(

@@ -4,8 +4,6 @@ import type {
   SessionChatMessage,
   SessionLogEvent,
 } from '../../../packages/schemas/src/index.js'
-import type { CombatResult } from '../../../packages/sim/src/index.js'
-import { createCombatChatter } from './combatChatter.js'
 import {
   cloneJson,
   safeText,
@@ -74,18 +72,4 @@ export function appendPrivateRoleChatMessages(
   role.privateChatLog.push(...messages)
 
   return cloneJson(messages)
-}
-
-export function appendCombatChatterMessages(
-  state: StoredSessionState,
-  result: CombatResult,
-  at: string,
-): boolean {
-  const chatter = createCombatChatter(result)
-
-  for (const message of chatter) {
-    appendRoleChatMessages(state, state.roles[message.role], [message], at)
-  }
-
-  return chatter.length > 0
 }

@@ -67,6 +67,7 @@ export function createPartAccents(
       Math.max(height * 0.7, 0.22),
       Math.max(depth * 0.42, 0.14),
     )
+    createElectricalSurfaceDetails(scene, parent, materials, `${role}-${blockId}`, category, width, height, depth)
   }
 
   if (category === 'body') {
@@ -104,6 +105,150 @@ export function createPartAccents(
       z: 0,
     })
   }
+
+  if (category === 'weapon') {
+    createWeaponPowerLead(scene, parent, materials, `${role}-${blockId}`, width, height, depth)
+  }
+}
+
+function createElectricalSurfaceDetails(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  name: string,
+  category: PartCategory,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  if (Math.max(width, depth) < 0.42) {
+    return
+  }
+
+  const boardWidth = Math.max(width * 0.34, 0.2)
+  const boardDepth = Math.max(depth * 0.28, 0.16)
+  const boardY = category === 'utility'
+    ? Math.max(height * 0.88, 0.32)
+    : Math.max(height * 0.96, 0.36)
+  const boardX = -Math.max(width * 0.14, 0.05)
+  const boardZ = -Math.max(depth * 0.12, 0.04)
+
+  createBoxDetail(
+    scene,
+    parent,
+    materials.circuit,
+    `${name}-visible-pcb`,
+    boardWidth,
+    0.035,
+    boardDepth,
+    boardX,
+    boardY,
+    boardZ,
+  )
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(
+      scene,
+      parent,
+      index === 0 ? materials.light : materials.warning,
+      `${name}-visible-pcb-trace-${index + 1}`,
+      Math.max(boardWidth * 0.11, 0.035),
+      0.018,
+      boardDepth * 0.72,
+      boardX + index * boardWidth * 0.24,
+      boardY + 0.035,
+      boardZ,
+    )
+  }
+
+  createBoxDetail(
+    scene,
+    parent,
+    materials.trim,
+    `${name}-visible-controller-chip`,
+    boardWidth * 0.34,
+    0.07,
+    boardDepth * 0.32,
+    boardX - boardWidth * 0.08,
+    boardY + 0.075,
+    boardZ - boardDepth * 0.04,
+  )
+
+  for (let side = -1; side <= 1; side += 2) {
+    const terminal = MeshBuilder.CreateCylinder(
+      `${name}-visible-terminal-${side}`,
+      { height: 0.055, diameter: 0.055, tessellation: 8 },
+      scene,
+    )
+
+    terminal.position.set(boardX + side * boardWidth * 0.34, boardY + 0.07, boardZ + boardDepth * 0.34)
+    attachMesh(terminal, parent, materials.warning)
+  }
+
+  const tube = MeshBuilder.CreateCylinder(
+    `${name}-visible-status-tube`,
+    { height: 0.18, diameter: 0.065, tessellation: 10 },
+    scene,
+  )
+  const tubeCap = MeshBuilder.CreateCylinder(
+    `${name}-visible-status-tube-cap`,
+    { height: 0.045, diameter: 0.08, tessellation: 10 },
+    scene,
+  )
+  const cableLoop = MeshBuilder.CreateTorus(
+    `${name}-visible-service-wire`,
+    {
+      diameter: Math.max(Math.min(width, depth) * 0.28, 0.17),
+      thickness: 0.018,
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  tube.position.set(boardX + boardWidth * 0.32, boardY + 0.13, boardZ - boardDepth * 0.26)
+  tubeCap.position.set(tube.position.x, boardY + 0.045, tube.position.z)
+  cableLoop.rotation.x = Math.PI / 2
+  cableLoop.position.set(boardX + boardWidth * 0.2, boardY + 0.08, boardZ + boardDepth * 0.52)
+  attachMesh(tube, parent, materials.light)
+  attachMesh(tubeCap, parent, materials.trim)
+  attachMesh(cableLoop, parent, materials.trim)
+}
+
+function createWeaponPowerLead(
+  scene: Scene,
+  parent: TransformNode,
+  materials: TeamMaterialSet,
+  name: string,
+  width: number,
+  height: number,
+  depth: number,
+): void {
+  const lead = MeshBuilder.CreateCylinder(
+    `${name}-weapon-power-lead`,
+    {
+      height: Math.max(width * 0.52, 0.22),
+      diameter: 0.026,
+      tessellation: 8,
+    },
+    scene,
+  )
+
+  lead.rotation.z = Math.PI / 2
+  lead.position.set(0, Math.max(height * 0.68, 0.25), -Math.max(depth * 0.34, 0.1))
+  attachMesh(lead, parent, materials.trim)
+
+  createBoxDetail(
+    scene,
+    parent,
+    materials.circuit,
+    `${name}-weapon-service-junction`,
+    Math.max(width * 0.2, 0.12),
+    0.06,
+    Math.max(depth * 0.16, 0.08),
+    -Math.max(width * 0.18, 0.06),
+    lead.position.y + 0.04,
+    lead.position.z,
+  )
 }
 
 function createBodyPaintPanels(

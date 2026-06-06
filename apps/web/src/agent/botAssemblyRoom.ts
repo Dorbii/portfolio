@@ -1,4 +1,5 @@
 import { PointLight } from '@babylonjs/core/Lights/pointLight'
+import type { Material } from '@babylonjs/core/Materials/material'
 import { PBRMetallicRoughnessMaterial } from '@babylonjs/core/Materials/PBR/pbrMetallicRoughnessMaterial'
 import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
@@ -117,6 +118,7 @@ function createAssemblyMaterials(scene: Scene, role: TeamRole) {
     spark: createAssemblyMaterial(scene, 'assembly-spark-mat', '#ffe8a3', '#ffba32', 0.92, 0.02, 0.12),
     glass: createAssemblyMaterial(scene, 'assembly-glass-mat', '#9ac5d6', '#153243', 0.42, 0.02, 0.16),
     copper: createAssemblyMaterial(scene, 'assembly-copper-mat', '#b46a33', '#3a1204', 1, 0.8, 0.36),
+    pcb: createAssemblyMaterial(scene, 'assembly-pcb-mat', '#245b43', '#63ffad', 1, 0.22, 0.54),
   }
 }
 
@@ -553,6 +555,53 @@ function createGarageClutter(scene: Scene, materials: AssemblyMaterials): void {
   createCableCoil(scene, 'assembly-floor-cable-b', 4.28, 0.12, 1.25, materials)
   createBatteryBox(scene, 'assembly-floor-battery', -3.72, 0.25, 1.0, materials)
   createCircuitBoard(scene, 'assembly-floor-diagnostic-pcb', 3.62, 0.26, 1.34, materials)
+  createElectronicsServiceTray(scene, 'assembly-left-electronics-tray', -2.82, 0.24, 1.94, -0.18, materials)
+  createElectronicsServiceTray(scene, 'assembly-right-electronics-tray', 2.78, 0.24, 1.86, 0.16, materials)
+}
+
+function createElectronicsServiceTray(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  rotationY: number,
+  materials: AssemblyMaterials,
+): void {
+  const tray = MeshBuilder.CreateBox(`${name}-tray`, { width: 1.08, height: 0.08, depth: 0.58 }, scene)
+  const frontRail = MeshBuilder.CreateBox(`${name}-front-rail`, { width: 1.12, height: 0.08, depth: 0.06 }, scene)
+  const rearRail = MeshBuilder.CreateBox(`${name}-rear-rail`, { width: 1.12, height: 0.08, depth: 0.06 }, scene)
+
+  tray.position.set(x, y, z)
+  frontRail.position.set(x, y + 0.07, z + 0.32)
+  rearRail.position.set(x, y + 0.07, z - 0.32)
+  tray.rotation.y = rotationY
+  frontRail.rotation.y = rotationY
+  rearRail.rotation.y = rotationY
+  tray.material = materials.trim
+  frontRail.material = materials.rail
+  rearRail.material = materials.rail
+
+  createCircuitBoard(scene, `${name}-large-pcb`, x - 0.22, y + 0.09, z - 0.04, materials, {
+    depth: 0.46,
+    rotationY,
+    width: 0.72,
+  })
+
+  for (let index = 0; index < 3; index += 1) {
+    createVacuumTube(scene, `${name}-tube-${index}`, x + 0.24 + index * 0.16, y + 0.12, z + 0.12, materials, {
+      diameter: 0.11,
+      height: 0.34,
+      rotationY,
+    })
+  }
+
+  createCableCoil(scene, `${name}-coiled-lead`, x + 0.33, y + 0.08, z - 0.22, materials, {
+    diameter: 0.28,
+    rotationY,
+  })
+  createWireRun(scene, `${name}-red-wire`, x - 0.36, y + 0.16, z + 0.19, rotationY, materials.warning)
+  createWireRun(scene, `${name}-signal-wire`, x - 0.1, y + 0.17, z + 0.19, rotationY, materials.teamSignal)
 }
 
 function createWeldingSparks(scene: Scene, materials: AssemblyMaterials): AssemblyResources['rig']['sparks'] {
@@ -644,41 +693,116 @@ function createBatteryBox(scene: Scene, name: string, x: number, y: number, z: n
   warning.material = materials.warning
 }
 
-function createCircuitBoard(scene: Scene, name: string, x: number, y: number, z: number, materials: AssemblyMaterials): void {
-  const board = MeshBuilder.CreateBox(`${name}-board`, { width: 0.5, height: 0.035, depth: 0.36 }, scene)
+function createCircuitBoard(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  materials: AssemblyMaterials,
+  options: { depth?: number; rotationY?: number; width?: number } = {},
+): void {
+  const boardWidth = options.width ?? 0.5
+  const boardDepth = options.depth ?? 0.36
+  const rotationY = options.rotationY ?? 0
+  const board = MeshBuilder.CreateBox(`${name}-board`, { width: boardWidth, height: 0.035, depth: boardDepth }, scene)
 
   board.position.set(x, y, z)
-  board.material = materials.teamSignal
+  board.rotation.y = rotationY
+  board.material = materials.pcb
 
-  for (let index = 0; index < 5; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     const chip = MeshBuilder.CreateBox(`${name}-chip-${index}`, { width: 0.08, height: 0.045, depth: 0.08 }, scene)
 
-    chip.position.set(x - 0.18 + index * 0.09, y + 0.05, z + (index % 2 === 0 ? -0.08 : 0.08))
+    chip.position.set(x - boardWidth * 0.36 + index * boardWidth * 0.14, y + 0.05, z + (index % 2 === 0 ? -boardDepth * 0.22 : boardDepth * 0.22))
+    chip.rotation.y = rotationY
     chip.material = materials.trim
+  }
+
+  for (let index = -1; index <= 1; index += 1) {
+    const trace = MeshBuilder.CreateBox(`${name}-trace-${index + 1}`, { width: 0.035, height: 0.02, depth: boardDepth * 0.76 }, scene)
+
+    trace.position.set(x + index * boardWidth * 0.22, y + 0.045, z)
+    trace.rotation.y = rotationY
+    trace.material = index === 0 ? materials.teamSignal : materials.copper
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const pin = MeshBuilder.CreateCylinder(`${name}-edge-pin-${index}`, { height: 0.055, diameter: 0.035, tessellation: 8 }, scene)
+
+    pin.position.set(x - boardWidth * 0.32 + index * boardWidth * 0.21, y + 0.07, z + boardDepth * 0.44)
+    pin.rotation.y = rotationY
+    pin.material = materials.copper
   }
 }
 
-function createVacuumTube(scene: Scene, name: string, x: number, y: number, z: number, materials: AssemblyMaterials): void {
-  const glass = MeshBuilder.CreateCylinder(`${name}-glass`, { height: 0.36, diameter: 0.12, tessellation: 14 }, scene)
-  const cap = MeshBuilder.CreateCylinder(`${name}-cap`, { height: 0.06, diameter: 0.14, tessellation: 12 }, scene)
-  const filament = MeshBuilder.CreateCylinder(`${name}-filament`, { height: 0.26, diameter: 0.026, tessellation: 8 }, scene)
+function createVacuumTube(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  materials: AssemblyMaterials,
+  options: { diameter?: number; height?: number; rotationY?: number } = {},
+): void {
+  const height = options.height ?? 0.36
+  const diameter = options.diameter ?? 0.12
+  const rotationY = options.rotationY ?? 0
+  const glass = MeshBuilder.CreateCylinder(`${name}-glass`, { height, diameter, tessellation: 14 }, scene)
+  const cap = MeshBuilder.CreateCylinder(`${name}-cap`, { height: 0.06, diameter: diameter * 1.14, tessellation: 12 }, scene)
+  const filament = MeshBuilder.CreateCylinder(`${name}-filament`, { height: height * 0.72, diameter: diameter * 0.22, tessellation: 8 }, scene)
 
-  glass.position.set(x, y + 0.18, z)
+  glass.position.set(x, y + height * 0.5, z)
   cap.position.set(x, y + 0.02, z)
-  filament.position.set(x, y + 0.18, z)
+  filament.position.set(x, y + height * 0.5, z)
+  glass.rotation.y = rotationY
+  cap.rotation.y = rotationY
+  filament.rotation.y = rotationY
   glass.material = materials.glass
   cap.material = materials.trim
   filament.material = materials.copper
 }
 
-function createCableCoil(scene: Scene, name: string, x: number, y: number, z: number, materials: AssemblyMaterials): void {
+function createCableCoil(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  materials: AssemblyMaterials,
+  options: { diameter?: number; rotationY?: number } = {},
+): void {
+  const diameter = options.diameter ?? 0.36
+  const rotationY = options.rotationY ?? 0
+
   for (let index = 0; index < 3; index += 1) {
-    const loop = MeshBuilder.CreateTorus(`${name}-loop-${index}`, { diameter: 0.36 + index * 0.08, thickness: 0.026, tessellation: 18 }, scene)
+    const loop = MeshBuilder.CreateTorus(`${name}-loop-${index}`, { diameter: diameter + index * 0.08, thickness: 0.026, tessellation: 18 }, scene)
 
     loop.position.set(x, y + index * 0.018, z)
     loop.rotation.x = Math.PI / 2
+    loop.rotation.y = rotationY
     loop.material = materials.rubber
   }
+}
+
+function createWireRun(
+  scene: Scene,
+  name: string,
+  x: number,
+  y: number,
+  z: number,
+  rotationY: number,
+  material: Material,
+): void {
+  const run = MeshBuilder.CreateBox(`${name}-run`, { width: 0.52, height: 0.03, depth: 0.035 }, scene)
+  const plug = MeshBuilder.CreateBox(`${name}-plug`, { width: 0.12, height: 0.06, depth: 0.08 }, scene)
+
+  run.position.set(x, y, z)
+  plug.position.set(x + 0.3, y + 0.015, z)
+  run.rotation.y = rotationY
+  plug.rotation.y = rotationY
+  run.material = material
+  plug.material = material
 }
 
 export function createTeamBayLights(scene: Scene, role: TeamRole): PointLight[] {
