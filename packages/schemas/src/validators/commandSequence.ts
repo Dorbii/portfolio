@@ -2,10 +2,10 @@ import {
   MOVEMENT_COMMANDS,
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
+  type CommandSequence,
   type GeneratedControls,
   type TurnCommand,
   type TurnCommandSubmission,
-  type TurnPlan,
   type ValidationIssue,
   type ValidationResult,
 } from '../types.js'
@@ -13,33 +13,33 @@ import { isRecord, issue, result } from './common.js'
 
 const MAX_COMBAT_TURN_TICKS = 600
 
-type TurnPlanShapeOptions = {
+type CommandSequenceShapeOptions = {
   exactCommandCount?: boolean
   path?: string
 }
 
-export function validateTurnPlanShape(value: unknown, maxTicks = 5): ValidationResult {
-  return validateTurnPlanShapeWithOptions(value, maxTicks)
+export function validateCommandSequenceShape(value: unknown, maxTicks = 5): ValidationResult {
+  return validateCommandSequenceShapeWithOptions(value, maxTicks)
 }
 
 export function validateOpeningScriptShape(
   value: unknown,
   path = 'submission.openingScript',
 ): ValidationResult {
-  return validateTurnPlanShapeWithOptions(value, 5, {
+  return validateCommandSequenceShapeWithOptions(value, 5, {
     exactCommandCount: false,
     path,
   })
 }
 
-export function validateTurnPlanAgainstControls(
-  plan: TurnPlan,
+export function validateCommandSequenceAgainstControls(
+  sequence: CommandSequence,
   controls: GeneratedControls,
-  path = 'turnPlan',
+  path = 'commandSequence',
 ): ValidationResult {
   const issues: ValidationIssue[] = []
 
-  plan.commands.forEach((command, index) => {
+  sequence.commands.forEach((command, index) => {
     const commandPath = `${path}.commands.${index}`
 
     if (command.move !== undefined && !controls.movement.includes(command.move)) {
@@ -119,7 +119,7 @@ export function validateTurnCommandAgainstControls(
   controls: GeneratedControls,
   path = 'turnCommand',
 ): ValidationResult {
-  return validateTurnPlanAgainstControls({ commands: [command] }, controls, path)
+  return validateCommandSequenceAgainstControls({ commands: [command] }, controls, path)
 }
 
 export function asTurnCommandSubmission(
@@ -131,19 +131,19 @@ export function asTurnCommandSubmission(
     : null
 }
 
-function validateTurnPlanShapeWithOptions(
+function validateCommandSequenceShapeWithOptions(
   value: unknown,
   maxTicks = 5,
-  options: TurnPlanShapeOptions = {},
+  options: CommandSequenceShapeOptions = {},
 ): ValidationResult {
   const issues: ValidationIssue[] = []
-  const path = options.path ?? 'turnPlan'
+  const path = options.path ?? 'commandSequence'
   const exactCommandCount = options.exactCommandCount ?? true
 
   if (!isRecord(value)) {
     return {
       ok: false,
-      issues: [issue('INVALID_TURN_PLAN', path, 'Expected turn plan object.')],
+      issues: [issue('INVALID_COMMAND_SEQUENCE', path, 'Expected command sequence object.')],
     }
   }
 
@@ -161,7 +161,7 @@ function validateTurnPlanShapeWithOptions(
       issue(
         'INVALID_TICK_COUNT',
         `${path}.commands`,
-        `Turn plan must include exactly ${maxTicks} command ticks.`,
+        `Command sequence must include exactly ${maxTicks} command ticks.`,
       ),
     )
   } else if (!exactCommandCount && value.commands.length > maxTicks) {

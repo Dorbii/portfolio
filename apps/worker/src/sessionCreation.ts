@@ -3,6 +3,7 @@ import { createInitialRoleState } from './sessionDefaults.js'
 import {
   DEFAULT_ARENA,
   addMilliseconds,
+  cloneJson,
   createSessionId,
   defaultClock,
   defaultTokenFactory,
@@ -42,7 +43,7 @@ export async function createInitialSessionState(
   const now = clock()
   const sessionId = safeText(request.sessionId) ?? createSessionId()
   const seed = safeText(request.seed) ?? sessionId
-  const arena = isArenaConfig(request.arena) ? request.arena : DEFAULT_ARENA
+  const arena = cloneJson(isArenaConfig(request.arena) ? request.arena : DEFAULT_ARENA)
   const claimTokens: Record<TeamRole, string> = {
     red: tokenFactory('red', 'claim'),
     blue: tokenFactory('blue', 'claim'),

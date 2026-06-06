@@ -52,6 +52,17 @@ export function parseSessionIdFromLocation(): string {
   return normalizeSessionId(params.get('session') ?? params.get('sessionId') ?? '')
 }
 
+export function parseApiBaseFromLocation(): string {
+  if (typeof window === 'undefined') {
+    return DEFAULT_ARENA_API_BASE
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  const apiBase = normalizeApiBase(params.get('api') ?? '')
+
+  return apiBase ?? DEFAULT_ARENA_API_BASE
+}
+
 export function setSessionIdInUrl(sessionId: string) {
   const params = new URLSearchParams(window.location.search)
 
@@ -241,6 +252,35 @@ export function isValidSessionId(value: string): boolean {
 
 function storageKey(apiBase: string, sessionId: string): string {
   return `${SESSION_STORAGE_KEY_PREFIX}:${apiBase}:${sessionId}`
+}
+
+function normalizeApiBase(value: string): string | undefined {
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return undefined
+  }
+
+  try {
+    const url = new URL(trimmed)
+
+    if (url.protocol === 'https:' || (url.protocol === 'http:' && isLocalHost(url.hostname))) {
+      return url.toString().replace(/\/$/, '')
+    }
+  } catch {
+    return undefined
+  }
+
+  return undefined
+}
+
+function isLocalHost(hostname: string): boolean {
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]' ||
+    hostname === '::1'
+  )
 }
 
 function normalizeStoredInvites(value: unknown): RoleInvite[] {

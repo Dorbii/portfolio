@@ -10,7 +10,7 @@ import type {
 import {
   validateRoundPlanSubmissionShape,
   validateTurnCommandAgainstControls,
-  validateTurnPlanAgainstControls,
+  validateCommandSequenceAgainstControls,
 } from '../../schemas/src/index.js'
 import { validateBlueprintAssembly } from './blueprint.js'
 import { deriveControls } from './controls.js'
@@ -62,7 +62,7 @@ export function validateRoundSubmission(input: {
 
   const controls = deriveControls(input.submission.blueprint)
   const normalizedSubmission = normalizeRoundSubmission(input.submission)
-  const openingScriptResult = validateTurnPlanAgainstControls(
+  const openingScriptResult = validateCommandSequenceAgainstControls(
     normalizedSubmission.openingScript,
     controls,
     getOpeningScriptPath(),

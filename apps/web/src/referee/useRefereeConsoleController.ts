@@ -7,12 +7,12 @@ import type {
 import {
   clearStoredSession,
   createSession,
-  DEFAULT_ARENA_API_BASE,
   POLL_INTERVAL_MS,
   isTerminalPhase,
   isValidSessionId,
   loadPublicSession,
   normalizeSessionId,
+  parseApiBaseFromLocation,
   parseSessionIdFromLocation,
   readStoredSession,
   setSessionIdInUrl,
@@ -39,7 +39,7 @@ export function useRefereeConsoleController() {
   const [error, setError] = useState('')
   const sessionIdRef = useRef(activeSessionId)
   const skipNextActiveLoadRef = useRef(false)
-  const apiBase = DEFAULT_ARENA_API_BASE
+  const apiBase = useMemo(() => parseApiBaseFromLocation(), [])
   const {
     clearReplayState,
     replayError,

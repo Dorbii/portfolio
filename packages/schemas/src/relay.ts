@@ -79,6 +79,12 @@ export type CombatTurnPublicState = {
   submitted: Record<TeamRole, boolean>
 }
 
+export type RoundPlanWindowState = {
+  openedAt: string
+  deadlineAt: string
+  planSeconds: number
+}
+
 export type CombatTurnPrivateState = CombatTurnPublicState & {
   snapshot: CombatTurnSnapshot
   self: CombatBotSnapshot
@@ -100,6 +106,7 @@ export type PublicSessionState = {
   expiresAt: string
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
+  roundPlan?: RoundPlanWindowState
   combat?: CombatTurnPublicState
   replayAvailable: boolean
   lastResult?: CombatSummary
@@ -119,6 +126,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   controls?: GeneratedControls
   submitted: boolean
   ownSubmission?: RoundPlanSubmission
+  roundPlan?: RoundPlanWindowState
   combat?: CombatTurnPrivateState
   opponent: RolePublicState
   replayAvailable: boolean

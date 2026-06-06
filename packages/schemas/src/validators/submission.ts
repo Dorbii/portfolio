@@ -8,7 +8,7 @@ import { MAX_AGENT_CHAT_MESSAGES_PER_SUBMISSION, isRecord, issue, result } from 
 import { validateBlueprintShape, validatePurchaseShape } from './blueprint.js'
 import { validateAgentChatMessageBatchShape } from './chat.js'
 import { validateBotTacticsShape } from './tactics.js'
-import { validateOpeningScriptShape } from './turnPlan.js'
+import { validateOpeningScriptShape } from './commandSequence.js'
 
 export function validateRoundPlanSubmissionShape(
   value: unknown,

@@ -1,4 +1,5 @@
 import {
+  DEFAULT_ARENA_CONFIG,
   TEAM_ROLES,
   type AgentNextAction,
   type ArenaConfig,
@@ -16,12 +17,7 @@ import type {
   TokenOwner,
 } from './sessionTypes.js'
 
-export const DEFAULT_ARENA: ArenaConfig = {
-  name: 'Compact Box',
-  width: 24,
-  height: 16,
-  activeHazards: ['floor_saw'],
-}
+export const DEFAULT_ARENA: ArenaConfig = DEFAULT_ARENA_CONFIG
 
 export const DEFAULT_MAX_ROUNDS = 7
 export const DEFAULT_STARTING_GOLD = 100

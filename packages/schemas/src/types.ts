@@ -197,11 +197,11 @@ export type TurnCommandSubmission = {
   utility?: UtilityCommand
 }
 
-export type TurnPlan = {
+export type CommandSequence = {
   commands: TurnCommand[]
 }
 
-export type OpeningScript = TurnPlan
+export type OpeningScript = CommandSequence
 
 export const TACTIC_STYLES = [
   'balanced',
@@ -308,6 +308,13 @@ export type ArenaConfig = {
   width: number
   height: number
   activeHazards: string[]
+}
+
+export const DEFAULT_ARENA_CONFIG: ArenaConfig = {
+  name: 'Compact Box',
+  width: 24,
+  height: 16,
+  activeHazards: ['floor_saw'],
 }
 
 export type BotCombatStats = {

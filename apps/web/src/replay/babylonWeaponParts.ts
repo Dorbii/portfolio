@@ -18,7 +18,10 @@ import {
   createSpearWeaponPart,
 } from './babylonMeleeWeaponParts'
 import { createNetWeaponPart } from './babylonNetWeaponPart'
-import { createSpinnerWeaponPart } from './babylonSpinnerWeaponPart'
+import {
+  createSawWeaponPart,
+  createSpinnerWeaponPart,
+} from './babylonSpinnerWeaponPart'
 import { createTurretWeaponPart } from './babylonTurretWeaponPart'
 import type {
   WeaponPartRenderArgs,
@@ -31,7 +34,7 @@ const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRe
   ['hammer', createHammerWeaponPart],
   ['net', createNetWeaponPart],
   ['ram', createRamWeaponPart],
-  ['saw', createSpinnerWeaponPart],
+  ['saw', createSawWeaponPart],
   ['spear', createSpearWeaponPart],
   ['spinner', createSpinnerWeaponPart],
   ['turret', createTurretWeaponPart],

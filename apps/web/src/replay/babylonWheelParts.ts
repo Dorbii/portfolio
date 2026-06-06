@@ -20,6 +20,12 @@ export function createWheelPart(args: MobilityPartRenderArgs): void {
   const visual = wheelVisualFor(partId)
   const diameter = Math.max(width * visual.diameterScale, 0.46)
   const wheelWidth = Math.max(depth * visual.widthScale, 0.2)
+
+  if (partId === 'Wheel_Omni') {
+    createOmniWheelPart(args, diameter, wheelWidth)
+    return
+  }
+
   const wheel = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel`,
     {
@@ -132,10 +138,6 @@ export function createWheelPart(args: MobilityPartRenderArgs): void {
     createLargeWheelDetails(args, wheel, diameter, wheelWidth)
   }
 
-  if (partId === 'Wheel_Omni') {
-    createOmniWheelRollers(args, wheel, diameter, wheelWidth)
-  }
-
   if (partId === 'Wheel_Spiked') {
     createSpikedWheelRim(args, wheel, diameter)
   }
@@ -179,78 +181,107 @@ function createLargeWheelDetails(
   }
 }
 
-function createOmniWheelRollers(
-  { scene, materials, role, blockId }: MobilityPartRenderArgs,
-  wheel: Mesh,
+function createOmniWheelPart(
+  { scene, parent, materials, role, blockId }: MobilityPartRenderArgs,
   diameter: number,
   wheelWidth: number,
 ): void {
+  const core = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-omni-core`,
+    {
+      height: Math.max(wheelWidth * 0.44, 0.16),
+      diameter: Math.max(diameter * 0.44, 0.28),
+      tessellation: 18,
+    },
+    scene,
+  )
+  const outerRing = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-omni-outer-ring`,
+    {
+      diameter: Math.max(diameter * 0.94, 0.52),
+      thickness: Math.max(diameter * 0.05, 0.04),
+      tessellation: 26,
+    },
+    scene,
+  )
+  const hub = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-omni-hub`,
+    {
+      height: Math.max(wheelWidth * 0.68, 0.2),
+      diameter: Math.max(diameter * 0.2, 0.14),
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  core.rotation.z = Math.PI / 2
+  outerRing.rotation.z = Math.PI / 2
+  hub.rotation.z = Math.PI / 2
+  core.metadata = { kind: 'roll', speed: 0.3 }
+  attachMesh(core, parent, materials.steel)
+  attachMesh(outerRing, parent, materials.steel)
+  attachMesh(hub, parent, materials.steel)
+
   const rollerCount = 10
+  const rollerRadius = diameter * 0.46
 
   for (let index = 0; index < rollerCount; index += 1) {
     const angle = (Math.PI * 2 * index) / rollerCount
     const roller = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-omni-roller-${index}`,
       {
-        height: Math.max(wheelWidth * 0.84, 0.18),
+        height: Math.max(wheelWidth * 0.62, 0.16),
         diameter: Math.max(diameter * 0.13, 0.08),
         tessellation: 12,
       },
       scene,
     )
-    const capA = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-omni-roller-cap-a-${index}`,
+    const mount = MeshBuilder.CreateBox(
+      `${role}-${blockId}-omni-roller-mount-${index}`,
       {
-        height: 0.035,
-        diameter: Math.max(diameter * 0.15, 0.09),
-        tessellation: 10,
+        width: Math.max(wheelWidth * 0.1, 0.045),
+        height: Math.max(diameter * 0.08, 0.05),
+        depth: Math.max(diameter * 0.18, 0.1),
       },
       scene,
     )
-    const capB = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-omni-roller-cap-b-${index}`,
-      {
-        height: 0.035,
-        diameter: Math.max(diameter * 0.15, 0.09),
-        tessellation: 10,
-      },
-      scene,
-    )
-    const radius = diameter * 0.5
-    const rollerAxisTilt = index % 2 === 0 ? Math.PI / 4 : -Math.PI / 4
 
-    roller.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius)
-    roller.rotation.x = Math.PI / 2
-    roller.rotation.y = angle + rollerAxisTilt
+    roller.position.set(0, Math.sin(angle) * rollerRadius, Math.cos(angle) * rollerRadius)
+    roller.rotation.x = -angle
+    roller.rotation.y = index % 2 === 0 ? 0.72 : -0.72
     roller.metadata = { kind: 'roll', speed: 0.1 }
-    roller.parent = wheel
-    roller.material = materials.rubber
-
-    for (const [cap, offset] of [[capA, -1], [capB, 1]] as const) {
-      cap.position.copyFrom(roller.position)
-      cap.position.x += Math.cos(angle + Math.PI / 2) * offset * wheelWidth * 0.34
-      cap.position.z += Math.sin(angle + Math.PI / 2) * offset * wheelWidth * 0.34
-      cap.rotation.copyFrom(roller.rotation)
-      cap.parent = wheel
-      cap.material = materials.trim
-    }
+    mount.position.copyFrom(roller.position)
+    mount.rotation.x = -angle
+    attachMesh(roller, parent, materials.rubber)
+    attachMesh(mount, parent, materials.steel)
   }
 
+  createOmniSpokes(scene, parent, materials.steel, role, blockId, diameter, wheelWidth)
+}
+
+function createOmniSpokes(
+  scene: MobilityPartRenderArgs['scene'],
+  parent: MobilityPartRenderArgs['parent'],
+  material: MobilityPartRenderArgs['materials']['trim'],
+  role: MobilityPartRenderArgs['role'],
+  blockId: string,
+  diameter: number,
+  wheelWidth: number,
+): void {
   for (let index = 0; index < 6; index += 1) {
     const angle = (Math.PI * index) / 3
     const spoke = MeshBuilder.CreateBox(
       `${role}-${blockId}-omni-spoke-${index}`,
       {
-        width: Math.max(diameter * 0.08, 0.05),
-        height: Math.max(wheelWidth * 0.08, 0.045),
-        depth: Math.max(diameter * 0.58, 0.28),
+        width: Math.max(wheelWidth * 0.08, 0.045),
+        height: Math.max(diameter * 0.06, 0.04),
+        depth: Math.max(diameter * 0.56, 0.28),
       },
       scene,
     )
 
-    spoke.rotation.y = angle
-    spoke.parent = wheel
-    spoke.material = materials.trim
+    spoke.rotation.x = angle
+    attachMesh(spoke, parent, material)
   }
 }
 

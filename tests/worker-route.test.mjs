@@ -198,6 +198,11 @@ function assertRedactedPublicState(publicState, hiddenValues) {
   }
 }
 
+function assertRoundPlanWindow(roundPlan) {
+  assert.equal(roundPlan.planSeconds, 120)
+  assert.equal(Date.parse(roundPlan.deadlineAt) - Date.parse(roundPlan.openedAt), 120_000)
+}
+
 const requiredDesignPatternIds = [
   'stationary_spinner',
   'black_hole_control',
@@ -509,6 +514,7 @@ test('POST /sessions is public while direct Durable Object create action is not 
 
   assert.equal(created.response.status, 201)
   assert.equal(created.json.sessionId, 's_public_create')
+  assert.equal(created.json.publicState.roundPlan, undefined)
   assert.equal(directCreate.response.status, 404)
   assert.equal(directCreate.json.error.code, 'INVALID_ACTION')
 })
@@ -578,6 +584,7 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
 
   assert.equal(blueBootstrap.response.status, 201)
   assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
+  assertRoundPlanWindow(blueBootstrap.json.state.roundPlan)
   assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
 })
 
@@ -633,10 +640,13 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   })
 
   assert.equal(redSubmission.response.status, 200)
+  assert.equal(redSubmission.json.publicState.phase, 'submission_phase')
+  assertRoundPlanWindow(redSubmission.json.publicState.roundPlan)
   assert.equal(redSubmission.json.state.ownSubmission.schemaVersion, 2)
   assert.equal('turnPlan' in redSubmission.json.state.ownSubmission, false)
   assert.equal(blueSubmission.response.status, 200)
   assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.json.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.json.publicState.replayAvailable, false)
   assert.equal(blueSubmission.json.state.combat.tick, 1)
 
@@ -986,6 +996,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(redSubmission.json.publicState.roles.red.submitted, true)
   assert.equal(redSubmission.json.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.json.publicState.replayAvailable, false)
+  assertRoundPlanWindow(redSubmission.json.publicState.roundPlan)
 
   const earlyReplay = await route(env, `/sessions/${sessionId}/replay`)
 
@@ -996,6 +1007,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   assert.equal(preResolveState.response.status, 200)
   assert.equal(preResolveState.json.role, 'red')
+  assertRoundPlanWindow(preResolveState.json.roundPlan)
   assert.deepEqual(preResolveState.json.opponent, {
     role: 'blue',
     claimed: true,
@@ -1021,6 +1033,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(blueSubmission.json.publicState.roles.red.submitted, true)
   assert.equal(blueSubmission.json.publicState.roles.blue.submitted, true)
   assert.equal(blueSubmission.json.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.json.publicState.roundPlan, undefined)
   assert.equal('awardOptions' in blueSubmission.json.publicState, false)
 
   const resolved = await resolveLiveRouteCombat(
@@ -1065,6 +1078,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(advance.json.publicState.round, 2)
   assert.equal(advance.json.publicState.roles.red.submitted, false)
   assert.equal(advance.json.publicState.roles.blue.submitted, false)
+  assertRoundPlanWindow(advance.json.publicState.roundPlan)
 
   const redAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: redToken })
   const blueAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: blueToken })
@@ -1080,6 +1094,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(publicState.json.phase, 'submission_phase')
   assert.equal(typeof publicState.json.stateVersion, 'string')
   assert.equal(publicState.json.replayAvailable, false)
+  assertRoundPlanWindow(publicState.json.roundPlan)
   assertRedactedPublicState(publicState.json, [
     redInvite.claimToken,
     resetRed.json.invite.claimToken,

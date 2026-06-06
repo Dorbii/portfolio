@@ -11,12 +11,12 @@ export {
 } from './validators/blueprint.js'
 export {
   asTurnCommandSubmission,
+  validateCommandSequenceAgainstControls,
+  validateCommandSequenceShape,
   validateOpeningScriptShape,
   validateTurnCommandAgainstControls,
   validateTurnCommandSubmissionShape,
-  validateTurnPlanAgainstControls,
-  validateTurnPlanShape,
-} from './validators/turnPlan.js'
+} from './validators/commandSequence.js'
 export { validateBotTacticsShape } from './validators/tactics.js'
 export { validateAgentChatMessageRequestShape } from './validators/chat.js'
 export {

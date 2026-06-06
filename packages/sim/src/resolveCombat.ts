@@ -7,19 +7,20 @@ import {
   type ReplayEvent,
   type ReplayTimeline,
 } from '../../replay/src/index.js'
-import type {
-  ArenaConfig,
-  BotBlueprint,
-  CombatBotSnapshot,
-  CombatTurnSnapshot,
-  MovementCommand,
-  NormalizedBotTactics,
-  OpeningScript,
-  PartCategory,
-  PartBehaviorSlot,
-  TeamRole,
-  TurnCommand,
-  Vector3,
+import {
+  DEFAULT_ARENA_CONFIG,
+  type ArenaConfig,
+  type BotBlueprint,
+  type CombatBotSnapshot,
+  type CombatTurnSnapshot,
+  type MovementCommand,
+  type NormalizedBotTactics,
+  type OpeningScript,
+  type PartCategory,
+  type PartBehaviorSlot,
+  type TeamRole,
+  type TurnCommand,
+  type Vector3,
 } from '../../schemas/src/index.js'
 import { DEFAULT_BOT_TACTICS, getPart } from '../../catalog/src/index.js'
 import { deriveBotStats, type BotStats } from './deriveStats.js'
@@ -187,12 +188,7 @@ const STATUS_DURATIONS: Record<RuntimeStatusEffectId, number> = {
   repairing: 2,
 }
 
-const DEFAULT_ARENA: ArenaConfig = {
-  name: 'Compact Box',
-  width: 24,
-  height: 16,
-  activeHazards: ['floor_saw'],
-}
+const DEFAULT_ARENA: ArenaConfig = DEFAULT_ARENA_CONFIG
 
 function round(value: number): number {
   return Math.round(value * 100) / 100

@@ -223,7 +223,7 @@ function createTankTrackPart({
   const trackHeight = Math.max(height * 0.88, 0.56)
   const bottomY = -Math.max(height * 0.12, 0.08)
   const topY = bottomY + trackHeight
-  const wheelFaceZ = Math.max(beltDepth * 0.52, 0.24)
+  const wheelFaceZ = Math.max(beltDepth * 0.62, 0.28)
 
   createTrackBelt(scene, parent, materials.rubber, `${role}-${blockId}-tank-belt-bottom`, {
     depth: beltDepth,
@@ -285,35 +285,40 @@ function createTankTrackPart({
   const roadWheelCount = 5
   for (let index = 0; index < roadWheelCount; index += 1) {
     const x = -length * 0.32 + index * ((length * 0.64) / (roadWheelCount - 1))
-    createTrackWheel(scene, parent, `${role}-${blockId}-tank-road-wheel-${index}`, {
-      diameter: Math.max(trackHeight * 0.34, 0.18),
-      material: materials.trim,
-      hubMaterial: materials.warning,
-      tessellation: 18,
-      x,
-      y: bottomY + trackHeight * 0.28,
-      z: wheelFaceZ,
-    })
+
+    for (const z of [-wheelFaceZ, wheelFaceZ]) {
+      createTrackWheel(scene, parent, `${role}-${blockId}-tank-road-wheel-${index}-${z > 0 ? 'front' : 'rear'}`, {
+        diameter: Math.max(trackHeight * 0.34, 0.18),
+        material: materials.steel,
+        hubMaterial: materials.trim,
+        tessellation: 18,
+        x,
+        y: bottomY + trackHeight * 0.28,
+        z,
+      })
+    }
   }
 
-  createTrackWheel(scene, parent, `${role}-${blockId}-tank-front-idler`, {
-    diameter: Math.max(trackHeight * 0.44, 0.24),
-    material: materials.trim,
-    hubMaterial: materials.warning,
-    tessellation: 20,
-    x: length * 0.48,
-    y: bottomY + trackHeight * 0.4,
-    z: wheelFaceZ,
-  })
-  createTrackWheel(scene, parent, `${role}-${blockId}-tank-rear-sprocket`, {
-    diameter: Math.max(trackHeight * 0.5, 0.28),
-    material: materials.trim,
-    hubMaterial: materials.warning,
-    tessellation: 20,
-    x: -length * 0.48,
-    y: bottomY + trackHeight * 0.4,
-    z: wheelFaceZ,
-  })
+  for (const z of [-wheelFaceZ, wheelFaceZ]) {
+    createTrackWheel(scene, parent, `${role}-${blockId}-tank-front-idler-${z > 0 ? 'front' : 'rear'}`, {
+      diameter: Math.max(trackHeight * 0.44, 0.24),
+      material: materials.steel,
+      hubMaterial: materials.trim,
+      tessellation: 20,
+      x: length * 0.48,
+      y: bottomY + trackHeight * 0.4,
+      z,
+    })
+    createTrackWheel(scene, parent, `${role}-${blockId}-tank-rear-sprocket-${z > 0 ? 'front' : 'rear'}`, {
+      diameter: Math.max(trackHeight * 0.5, 0.28),
+      material: materials.steel,
+      hubMaterial: materials.trim,
+      tessellation: 20,
+      x: -length * 0.48,
+      y: bottomY + trackHeight * 0.4,
+      z,
+    })
+  }
 
   for (let index = 0; index < 3; index += 1) {
     const roller = MeshBuilder.CreateCylinder(
@@ -380,8 +385,8 @@ function createTrackWheel(
   name: string,
   options: {
     diameter: number
-    hubMaterial: MobilityPartRenderArgs['materials']['warning']
-    material: MobilityPartRenderArgs['materials']['trim']
+    hubMaterial: MobilityPartRenderArgs['materials']['trim']
+    material: MobilityPartRenderArgs['materials']['steel']
     tessellation: number
     x: number
     y: number

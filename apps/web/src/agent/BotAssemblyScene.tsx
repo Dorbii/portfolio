@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   BotBlueprint,
   TeamRole,
@@ -36,14 +36,30 @@ export function BotAssemblyScene({
 }: BotAssemblySceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const resourcesRef = useRef<AssemblyResources | null>(null)
+  const blueprintRef = useRef(blueprint)
+  const lastAttachedBlueprintRef = useRef<BotBlueprint | null>(null)
   const submittedRef = useRef(submitted)
   const [status, setStatus] = useState<AssemblyStatus>('booting')
   const [message, setMessage] = useState('')
   const [sceneStats, setSceneStats] = useState<BabylonRendererStats | null>(null)
+  const [attachedMeshCount, setAttachedMeshCount] = useState(0)
 
   useEffect(() => {
     submittedRef.current = submitted
   }, [submitted])
+
+  useEffect(() => {
+    blueprintRef.current = blueprint
+  }, [blueprint])
+
+  const attachBlueprint = useCallback(
+    (resources: AssemblyResources, nextBlueprint: BotBlueprint) => {
+      attachAssemblyBot(resources, nextBlueprint, role)
+      lastAttachedBlueprintRef.current = nextBlueprint
+      setAttachedMeshCount(resources.botMeshes.length)
+    },
+    [role],
+  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -68,6 +84,7 @@ export function BotAssemblyScene({
       const activeResources = resources
 
       resourcesRef.current = resources
+      attachBlueprint(activeResources, blueprintRef.current)
       setStatus('ready')
       setSceneStats(createRendererStats(activeResources.scene, activeResources.engine))
 
@@ -128,6 +145,7 @@ export function BotAssemblyScene({
         canvas.removeEventListener('webglcontextrestored', handleContextRestored)
         window.cancelAnimationFrame(statsFrame)
         resourcesRef.current = null
+        lastAttachedBlueprintRef.current = null
         activeResources.scene.dispose()
         activeResources.engine.dispose()
       }
@@ -135,13 +153,15 @@ export function BotAssemblyScene({
       setStatus('unavailable')
       setMessage(error instanceof Error ? error.message : 'Assembly renderer failed to start.')
       setSceneStats(null)
+      setAttachedMeshCount(0)
       resourcesRef.current = null
+      lastAttachedBlueprintRef.current = null
       resources?.scene.dispose()
       resources?.engine.dispose()
 
       return undefined
     }
-  }, [role])
+  }, [attachBlueprint, role])
 
   useEffect(() => {
     const resources = resourcesRef.current
@@ -150,8 +170,12 @@ export function BotAssemblyScene({
       return
     }
 
-    attachAssemblyBot(resources, blueprint, role)
-  }, [blueprint, role])
+    if (lastAttachedBlueprintRef.current === blueprint) {
+      return
+    }
+
+    attachBlueprint(resources, blueprint)
+  }, [attachBlueprint, blueprint])
 
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.assembly)
@@ -174,6 +198,9 @@ export function BotAssemblyScene({
       data-renderer-state={status}
       data-renderer-textures={sceneStats?.textures}
       data-renderer-total-vertices={sceneStats?.totalVertices}
+      data-assembly-blueprint-blocks={blueprint.blocks.length}
+      data-assembly-bot-attached={attachedMeshCount > 0 ? 'true' : 'false'}
+      data-assembly-bot-meshes={attachedMeshCount}
     >
       <canvas
         ref={canvasRef}

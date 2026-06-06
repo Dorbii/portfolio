@@ -6,14 +6,14 @@ import type {
 } from '../../../../packages/schemas/src/index.js'
 import type { RoundPlanEditorSectionProps } from './roundPlanEditorTypes'
 
-export function RoundPlanTurnPlanSection({
+export function RoundPlanOpeningScriptSection({
   setSubmissionDraft,
   submissionDraft,
 }: RoundPlanEditorSectionProps) {
   return (
-    <section className="plan-section turn-plan-editor" aria-labelledby="turn-plan-heading">
+    <section className="plan-section opening-script-editor" aria-labelledby="opening-script-heading">
       <div className="plan-section-header">
-        <h3 id="turn-plan-heading">Turn plan commands</h3>
+        <h3 id="opening-script-heading">Opening script commands</h3>
         <button
           type="button"
           onClick={() =>

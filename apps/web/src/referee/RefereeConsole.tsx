@@ -1,4 +1,5 @@
 import { Suspense, lazy } from 'react'
+import { DEFAULT_ARENA_CONFIG } from '../../../../packages/schemas/src/index.js'
 import {
   KeyStatsDashboard,
   MatchScoreboard,
@@ -17,9 +18,51 @@ import { useRefereeConsoleController } from './useRefereeConsoleController'
 const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
 )
+const ArenaPreviewScene = lazy(() =>
+  import('../replay/ArenaPreviewScene').then((module) => ({ default: module.ArenaPreviewScene })),
+)
 
 function ReplayFrameFallback() {
   return <p className="referee-empty replay-placeholder">Loading replay.</p>
+}
+
+function ReplayStatusOverlay({
+  error,
+  loadState,
+}: {
+  error: string
+  loadState: 'busy' | 'idle'
+}) {
+  const status = error
+    ? {
+        detail: error,
+        label: 'Replay unavailable',
+        role: 'alert' as const,
+        tone: 'error',
+      }
+    : loadState === 'busy'
+      ? {
+          detail: 'Fetching resolved combat timeline.',
+          label: 'Loading replay',
+          role: 'status' as const,
+          tone: 'busy',
+        }
+      : {
+          detail: 'Replay is flagged available; waiting for payload.',
+          label: 'Replay pending',
+          role: 'status' as const,
+          tone: 'busy',
+        }
+
+  return (
+    <div
+      className={`replay-status-overlay is-${status.tone}`}
+      role={status.role}
+    >
+      <strong>{status.label}</strong>
+      <span>{status.detail}</span>
+    </div>
+  )
 }
 
 export function RefereeConsole() {
@@ -56,10 +99,35 @@ export function RefereeConsole() {
       ? 'Cockpit tokens unavailable'
       : 'No cockpit handoffs yet'
   const dockChat = sessionChat.slice(-2)
+  const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
+  const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
+  const shouldShowReplayStatus = Boolean(publicSession?.replayAvailable && !replayPayload)
 
   return (
     <main className="arena-app match-console">
       <div className="match-dashboard-shell">
+        <section className="match-stage-card" id="dashboard" aria-label="Arena dashboard">
+          <div className="match-stage-frame">
+            {shouldShowReplay && replayPayload ? (
+              <Suspense fallback={<ReplayFrameFallback />}>
+                <ReplayViewer
+                  arena={visibleArena}
+                  botBlueprints={replayPayload.botBlueprints}
+                  showDamageSchematic={false}
+                  timeline={replayPayload.timeline}
+                />
+              </Suspense>
+            ) : (
+              <Suspense fallback={<ReplayFrameFallback />}>
+                <ArenaPreviewScene arena={visibleArena} />
+              </Suspense>
+            )}
+            {shouldShowReplayStatus ? (
+              <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
+            ) : null}
+          </div>
+        </section>
+
         <MatchScoreboard
           phase={phase}
           publicSession={publicSession}
@@ -94,28 +162,6 @@ export function RefereeConsole() {
           }}
         />
 
-        <section className="match-stage-card" id="dashboard" aria-label="Arena replay dashboard">
-          <div className="match-stage-frame">
-            {publicSession?.replayAvailable && replayPayload ? (
-              <Suspense fallback={<ReplayFrameFallback />}>
-                <ReplayViewer
-                  arena={publicSession.arena}
-                  botBlueprints={replayPayload.botBlueprints}
-                  initialTime={replayPayload.timeline.duration * 0.45}
-                  proofMode
-                  timeline={replayPayload.timeline}
-                />
-              </Suspense>
-            ) : publicSession?.replayAvailable ? (
-              <p className={replayError ? 'referee-error replay-inline-error' : 'referee-empty'}>
-                {replayError || (replayLoadState === 'busy' ? 'Loading replay data.' : 'Replay data is not loaded yet.')}
-              </p>
-            ) : (
-              <p className="referee-empty replay-placeholder">Replay appears here after both role plans resolve.</p>
-            )}
-          </div>
-        </section>
-
         <section className="match-dashboard-panels" aria-label="Match dashboard">
           <Panel className="panel dashboard-panel team-status-panel">
             <SectionHeader kicker="Team status" title="Team Status" />
@@ -136,8 +182,8 @@ export function RefereeConsole() {
         <section className="match-ops-dock" aria-label="Referee operations">
           <div className="ops-cell arena-info">
             <span>Arena</span>
-            <strong>{publicSession?.arena.name ?? 'No arena'}</strong>
-            <small>{publicSession?.arena.activeHazards.join(', ') || 'Hazards unavailable'}</small>
+            <strong>{visibleArena.name}</strong>
+            <small>{visibleArena.activeHazards.join(', ') || 'Hazards unavailable'}</small>
           </div>
           <div className="ops-cell">
             <span>Match info</span>

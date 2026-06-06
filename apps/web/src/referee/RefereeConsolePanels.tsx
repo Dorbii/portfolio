@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import type {
   PublicSessionState,
   TeamRole,
@@ -73,6 +74,7 @@ export function MatchScoreboard({
             ? `${formatReplayClock(replayPayload)} / ${decision}`
             : sessionControl.activeSessionId || 'Create session'}
         </small>
+        <ScoreboardPlanTimer publicSession={publicSession} />
         <ActionGroup className="scoreboard-session-actions">
           <Button
             type="button"
@@ -115,6 +117,49 @@ export function MatchScoreboard({
         winsRequired={winsRequired}
       />
     </header>
+  )
+}
+
+function ScoreboardPlanTimer({ publicSession }: { publicSession: PublicSessionState | null }) {
+  const roundPlan = publicSession?.phase === 'submission_phase'
+    ? publicSession.roundPlan
+    : undefined
+  const deadlineAt = roundPlan?.deadlineAt
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const deadlineMs = useMemo(
+    () => Date.parse(deadlineAt ?? ''),
+    [deadlineAt],
+  )
+  const remainingMs = Number.isFinite(deadlineMs)
+    ? Math.max(0, deadlineMs - nowMs)
+    : 0
+  const isExpired = Boolean(roundPlan && remainingMs <= 0)
+
+  useEffect(() => {
+    if (!deadlineAt) {
+      return undefined
+    }
+
+    setNowMs(Date.now())
+    const id = window.setInterval(() => setNowMs(Date.now()), 500)
+
+    return () => window.clearInterval(id)
+  }, [deadlineAt])
+
+  if (!roundPlan) {
+    return null
+  }
+
+  return (
+    <div
+      className={`scoreboard-plan-timer${isExpired ? ' is-expired' : ''}`}
+      aria-label="Round plan timer"
+      data-plan-timer-state={isExpired ? 'expired' : 'active'}
+      data-plan-deadline-at={deadlineAt}
+    >
+      <span>Plan Timer</span>
+      <strong>{formatCountdown(remainingMs)}</strong>
+    </div>
   )
 }
 
@@ -460,6 +505,14 @@ function formatDecision(publicSession: PublicSessionState | null): string {
 
 function formatReplayClock(replayPayload: ReplayPayload | null): string {
   return replayPayload ? formatDurationSeconds(replayPayload.timeline.duration) : '--'
+}
+
+function formatCountdown(remainingMs: number): string {
+  const totalSeconds = Math.ceil(remainingMs / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
 function getWinsRequired(maxRounds: number | undefined): number {

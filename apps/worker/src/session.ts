@@ -97,6 +97,7 @@ export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
 const COMBAT_TURN_SECONDS = 120
+const ROUND_PLAN_SECONDS = 120
 
 export class SessionCoordinator {
   private state: StoredSessionState
@@ -610,6 +611,7 @@ export class SessionCoordinator {
     this.appendEvent('role_reset', `${roleName} role reset by referee.`, now)
 
     if (this.state.phase === 'submission_phase') {
+      this.state.roundPlan = undefined
       this.changePhase('waiting_for_agents', `${roleName} role needs a fresh claim.`, now)
     }
 
@@ -721,6 +723,7 @@ export class SessionCoordinator {
   private advanceToNextRound(now: string): void {
     applyNextRoundEconomy(this.state)
     this.appendEvent('economy_applied', `Round ${this.state.round} economy applied.`, now)
+    this.openRoundPlanWindow(now)
     this.changePhase('submission_phase', `Round ${this.state.round} plans are open.`, now)
   }
 
@@ -760,6 +763,7 @@ export class SessionCoordinator {
     const bothClaimed = TEAM_ROLES.every((role) => this.state.roles[role].claimedAt)
 
     if (bothClaimed && this.state.phase === 'waiting_for_agents') {
+      this.openRoundPlanWindow(now)
       this.changePhase('submission_phase', 'Both roles claimed; round plans are open.', now)
     }
   }
@@ -781,6 +785,8 @@ export class SessionCoordinator {
       red: [],
       blue: [],
     })
+
+    this.state.roundPlan = undefined
 
     if (resolution.status === 'complete') {
       this.completeCombat(resolution.result, now)
@@ -874,6 +880,14 @@ export class SessionCoordinator {
       commands: input.commands,
       pending: {},
       snapshot: input.snapshot,
+    }
+  }
+
+  private openRoundPlanWindow(now: string): void {
+    this.state.roundPlan = {
+      openedAt: now,
+      deadlineAt: addMilliseconds(now, ROUND_PLAN_SECONDS * 1000),
+      planSeconds: ROUND_PLAN_SECONDS,
     }
   }
 

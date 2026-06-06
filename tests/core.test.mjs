@@ -88,7 +88,7 @@ const dualWeaponBlueprint = {
   ],
 }
 
-const sparseTurnPlan = { commands: [{ tick: 3, move: 'turn_left' }] }
+const sparseOpeningScript = { commands: [{ tick: 3, move: 'turn_left' }] }
 
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
@@ -1845,7 +1845,7 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
     seed: 'sparse-plan',
     red: {
       blueprint: bareBodyBlueprint,
-      openingScript: sparseTurnPlan,
+      openingScript: sparseOpeningScript,
     },
     blue: {
       blueprint: bareBodyBlueprint,
@@ -1959,6 +1959,7 @@ test('session creation returns role invites without leaking tokens publicly', as
   assert.equal(storedJson.includes('referee_referee'), false)
   assert.equal(response.publicState.roles.red.claimed, false)
   assert.equal(response.publicState.roles.blue.submitted, false)
+  assert.equal(response.publicState.roundPlan, undefined)
 })
 
 test('sessions require both roles before opening plan submission', async () => {
@@ -1980,6 +1981,11 @@ test('sessions require both roles before opening plan submission', async () => {
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
+  assert.deepEqual(blue.value.state.roundPlan, {
+    openedAt: '2026-06-03T00:00:00.000Z',
+    deadlineAt: '2026-06-03T00:02:00.000Z',
+    planSeconds: 120,
+  })
 })
 
 test('agent bootstrap uses the invite claim token as a reusable player key', async () => {
@@ -2020,6 +2026,7 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
+  assert.equal(blue.value.state.roundPlan.planSeconds, 120)
   assert.equal(blue.value.nextAction, 'submit_round_plan')
 })
 
@@ -2146,6 +2153,8 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
   assert.equal(redSubmission.value.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.value.publicState.replayAvailable, false)
+  assert.equal(redSubmission.value.publicState.roundPlan.planSeconds, 120)
+  assert.equal(redSubmission.value.publicState.roundPlan.deadlineAt, '2026-06-03T00:02:00.000Z')
   assert.equal(redSubmission.value.publicState.chatLog[0].kind, 'strategy')
 
   const preReplay = session.getReplay()
@@ -2158,6 +2167,7 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(blueSubmission.ok, true)
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.value.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
   assert.equal(blueSubmission.value.state.combat.turnSeconds, 120)
   assert.equal(blueSubmission.value.state.combat.self.role, 'blue')
@@ -2400,6 +2410,11 @@ test('referee advances round review and applies automatic economy to the next ro
   assert.equal(advance.value.publicState.roles.red.wins, 1)
   assert.equal(advance.value.publicState.roles.red.winStreak, 1)
   assert.equal(advance.value.publicState.roles.blue.losses, 1)
+  assert.deepEqual(advance.value.publicState.roundPlan, {
+    openedAt: '2026-06-03T00:02:00.000Z',
+    deadlineAt: '2026-06-03T00:04:00.000Z',
+    planSeconds: 120,
+  })
   assert.equal('awardOptions' in advance.value.publicState, false)
 
   const exported = loaded.exportState()
@@ -2408,6 +2423,7 @@ test('referee advances round review and applies automatic economy to the next ro
   assert.equal(exported.roles.blue.gold, 260 + 50 + calculateInterest(260))
   assert.equal(exported.roles.red.submittedAt, undefined)
   assert.equal(exported.roles.blue.submittedAt, undefined)
+  assert.equal(exported.roundPlan.deadlineAt, '2026-06-03T00:04:00.000Z')
 })
 
 test('draw advance applies no winner bonus', async () => {

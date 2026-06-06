@@ -2,9 +2,9 @@ import { MOVEMENT_COMMANDS } from '../../../../packages/schemas/src/index.js'
 import type {
   BotTactics,
   MovementCommand,
+  OpeningScript,
   RoundPlanSubmission,
   TurnCommand,
-  TurnPlan,
   UtilityCommand,
   WeaponCommand,
 } from '../../../../packages/schemas/src/index.js'
@@ -30,7 +30,7 @@ export function normalizeSubmissionForDraft(submission: RoundPlanSubmission): Ro
     rationale?: unknown
   }
   const blueprint = normalizeBlueprint(value.blueprint)
-  const openingScript = normalizeTurnPlan(value.openingScript)
+  const openingScript = normalizeOpeningScript(value.openingScript)
 
   return {
     action: 'submit_round_plan',
@@ -163,7 +163,7 @@ function asVector3(value: unknown[]): [number, number, number] {
   ]
 }
 
-function normalizeTurnPlan(value: unknown): TurnPlan {
+function normalizeOpeningScript(value: unknown): OpeningScript {
   if (!value || typeof value !== 'object') {
     return { commands: [] }
   }

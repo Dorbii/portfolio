@@ -68,6 +68,12 @@ export type StoredCombatState = {
   snapshot: CombatTurnSnapshot
 }
 
+export type StoredRoundPlanState = {
+  openedAt: string
+  deadlineAt: string
+  planSeconds: number
+}
+
 export type StoredSessionState = {
   id: string
   phase: SessionPhase
@@ -80,6 +86,7 @@ export type StoredSessionState = {
   updatedAt: string
   roles: Record<TeamRole, StoredRoleState>
   refereeTokenHash?: string
+  roundPlan?: StoredRoundPlanState
   combat?: StoredCombatState
   replay?: ReplayPayload
   lastResult?: CombatSummary

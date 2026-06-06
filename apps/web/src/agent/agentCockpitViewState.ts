@@ -53,7 +53,7 @@ export type AgentConnectionGuidance = {
   tone: 'blocked' | 'idle' | 'ready' | 'working'
 }
 
-export type AgentCockpitTaskKey = 'connect' | 'build' | 'submit' | 'review'
+export type AgentCockpitTaskKey = 'connect' | 'build' | 'submit' | 'turn' | 'review'
 
 export type AgentCockpitTaskStep = {
   key: AgentCockpitTaskKey
@@ -244,6 +244,7 @@ function createAgentCockpitWorkflow({
       createConnectStep(roleState, hasPlayerKey, status, activeTask),
       createBuildStep(roleState, hasLocalDraftEdits, activeTask),
       createSubmitStep(roleState, activeTask),
+      createTurnStep(roleState, activeTask),
       createReviewStep(roleState, activeTask),
     ],
   }
@@ -268,6 +269,10 @@ function getCockpitStateLabel(
 
   if (roleState.phase === 'round_review' || roleState.phase === 'replay_phase') {
     return 'Review'
+  }
+
+  if (roleState.phase === 'combat_turn') {
+    return roleState.combat?.submitted[roleState.role] ? 'Turn submitted' : 'Turn ready'
   }
 
   if (roleState.submitted) {
@@ -301,6 +306,10 @@ function getActiveCockpitTask(
     return hasLocalDraftEdits ? 'submit' : 'build'
   }
 
+  if (roleState.phase === 'combat_turn') {
+    return 'turn'
+  }
+
   return 'review'
 }
 
@@ -323,6 +332,10 @@ function getCockpitWorkflowHeadline(
 
   if (activeTask === 'submit') {
     return 'Submit round plan'
+  }
+
+  if (activeTask === 'turn') {
+    return roleState?.combat?.submitted[roleState.role] ? 'Wait for opponent turn' : 'Submit combat turn'
   }
 
   if (roleState?.phase === 'round_review' || roleState?.phase === 'replay_phase') {
@@ -433,6 +446,54 @@ function createSubmitStep(
     label: 'Submit',
     status: 'Ready',
     tone: activeTask === 'submit' ? 'current' : 'idle',
+  }
+}
+
+function createTurnStep(
+  roleState: RolePrivateState | null,
+  activeTask: AgentCockpitTaskKey,
+): AgentCockpitTaskStep {
+  if (!roleState) {
+    return {
+      key: 'turn',
+      label: 'Turn',
+      status: 'Locked',
+      tone: 'idle',
+    }
+  }
+
+  if (roleState.phase === 'round_review' || roleState.phase === 'replay_phase') {
+    return {
+      key: 'turn',
+      label: 'Turn',
+      status: 'Resolved',
+      tone: 'complete',
+    }
+  }
+
+  if (roleState.phase !== 'combat_turn') {
+    return {
+      key: 'turn',
+      label: 'Turn',
+      status: 'Waiting',
+      tone: 'waiting',
+    }
+  }
+
+  if (roleState.combat?.submitted[roleState.role]) {
+    return {
+      key: 'turn',
+      label: 'Turn',
+      status: 'Submitted',
+      tone: activeTask === 'turn' ? 'current' : 'complete',
+    }
+  }
+
+  return {
+    key: 'turn',
+    label: 'Turn',
+    status: 'Ready',
+    tone: activeTask === 'turn' ? 'current' : 'idle',
   }
 }
 
@@ -606,6 +667,14 @@ function nextActionForRoleState(state: RolePrivateState): string {
       : 'Submit exactly one legal round plan for this round.'
   }
 
+  if (state.phase === 'combat_turn') {
+    if (state.combat?.submitted[state.role]) {
+      return 'Wait for the opponent turn command or the turn deadline, then continue from the next state.'
+    }
+
+    return `Submit one legal combat turn for tick ${state.combat?.tick ?? '?'} before the deadline. Movement and weapon or utility actions can be included together.`
+  }
+
   if (state.phase === 'round_review') {
     return 'Wait for the referee to advance the round; keep polling with the bounded continuation helper.'
   }
@@ -620,6 +689,14 @@ function helperCallForRoleState(state: RolePrivateState): string {
 
   if (state.phase === 'submission_phase' && !state.submitted) {
     return 'await window.AgentArenaRole.submitRoundPlan(plan)'
+  }
+
+  if (state.phase === 'combat_turn') {
+    if (state.combat?.submitted[state.role]) {
+      return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+    }
+
+    return `await window.AgentArenaRole.submitTurnCommand({ action: 'submit_turn_command', tick: ${state.combat?.tick ?? 1}, move: 'brake', weaponA: 'hold' })`
   }
 
   if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'round_review') {

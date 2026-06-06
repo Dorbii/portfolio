@@ -28,6 +28,7 @@ type ReplayViewerProps = {
   initialCameraPreset?: CameraPreset
   initialTime?: number
   proofMode?: boolean
+  showDamageSchematic?: boolean
   timeline: ReplayTimeline
 }
 
@@ -39,6 +40,7 @@ export function ReplayViewer({
   initialCameraPreset = 'broadcast',
   initialTime = 0,
   proofMode = false,
+  showDamageSchematic = true,
   timeline,
 }: ReplayViewerProps) {
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
@@ -48,6 +50,10 @@ export function ReplayViewer({
     normalizeCameraPreset(initialCameraPreset),
   )
   const compiledTimeline = useMemo(() => compileReplayTimeline(timeline), [timeline])
+  const firstActionTime = useMemo(
+    () => findFirstReplayActionTime(compiledTimeline.events),
+    [compiledTimeline.events],
+  )
   const frame = useMemo(() => buildReplayFrame(compiledTimeline, time), [compiledTimeline, time])
   const activeEvent = useMemo(
     () => findActiveEvent(compiledTimeline.events, time, frame.effects),
@@ -96,10 +102,33 @@ export function ReplayViewer({
     setTime(0)
   }
 
+  const togglePlayback = () => {
+    if (playing) {
+      setPlaying(false)
+      return
+    }
+
+    setTime((current) => {
+      if (current >= compiledTimeline.duration) {
+        return firstActionTime
+      }
+
+      if (current <= 0.05 && firstActionTime > 0.05) {
+        return Math.max(0, firstActionTime - 0.12)
+      }
+
+      return current
+    })
+    setPlaying(true)
+  }
+
   return (
     <section
       className={`replay-shell${proofMode ? ' replay-shell-proof' : ''}`}
       aria-label="Babylon replay viewer"
+      data-replay-camera={cameraPreset}
+      data-replay-playing={playing ? 'true' : 'false'}
+      data-replay-time={time.toFixed(2)}
     >
       <BabylonReplayScene
         arena={arena}
@@ -115,7 +144,7 @@ export function ReplayViewer({
             <Button
               type="button"
               variant={playing ? 'secondary' : 'primary'}
-              onClick={() => setPlaying((current) => !current)}
+              onClick={togglePlayback}
             >
               {playing ? 'Pause' : 'Play'}
             </Button>
@@ -174,18 +203,20 @@ export function ReplayViewer({
               <span>{frame.effects.length} active effects</span>
             )}
           </div>
-          <div className="replay-damage-schematic" aria-label="Current bot part state">
-            <BotPartMap
-              blueprint={botBlueprints.red}
-              partStates={frame.parts.red}
-              role="red"
-            />
-            <BotPartMap
-              blueprint={botBlueprints.blue}
-              partStates={frame.parts.blue}
-              role="blue"
-            />
-          </div>
+          {showDamageSchematic ? (
+            <div className="replay-damage-schematic" aria-label="Current bot part state">
+              <BotPartMap
+                blueprint={botBlueprints.red}
+                partStates={frame.parts.red}
+                role="red"
+              />
+              <BotPartMap
+                blueprint={botBlueprints.blue}
+                partStates={frame.parts.blue}
+                role="blue"
+              />
+            </div>
+          ) : null}
         </>
       )}
     </section>
@@ -212,6 +243,24 @@ function findActiveEvent(
   }
 
   return current
+}
+
+function findFirstReplayActionTime(events: ReplayEvent[]): number {
+  for (const event of events) {
+    if (isNonTrivialMove(event)) {
+      return event.t
+    }
+  }
+
+  return events.find((event) => event.type !== 'spawn')?.t ?? 0
+}
+
+function isNonTrivialMove(event: ReplayEvent): boolean {
+  if (event.type !== 'move') {
+    return false
+  }
+
+  return Math.hypot(event.to[0] - event.from[0], event.to[2] - event.from[2]) > 0.05
 }
 
 function hasVisiblePartDetach(

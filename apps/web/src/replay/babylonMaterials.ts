@@ -43,6 +43,7 @@ export type TeamMaterialSet = {
   damage: DamageMaterialSet
   trim: BotPbrMaterial
   rubber: BotPbrMaterial
+  steel: BotPbrMaterial
   light: BotPbrMaterial
   warning: BotPbrMaterial
 }
@@ -153,6 +154,12 @@ export function createBotMaterialSet(
       metallic: 0,
       pattern: 'rubber',
       roughness: 0.9,
+    }),
+    steel: createCombatMaterial(scene, `${materialPrefix}-steel`, {
+      baseColor: '#b7c0bc',
+      metallic: 0.78,
+      pattern: 'weapon',
+      roughness: 0.36,
     }),
     light: createCombatMaterial(scene, `${materialPrefix}-light`, {
       baseColor: palette.glow,

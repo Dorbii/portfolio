@@ -1,8 +1,8 @@
 import type { RoundPlanEditorSectionProps } from './roundPlanEditorTypes'
 import { RoundPlanBlueprintSection } from './RoundPlanBlueprintSection'
+import { RoundPlanOpeningScriptSection } from './RoundPlanOpeningScriptSection'
 import { RoundPlanPurchaseSection } from './RoundPlanPurchaseSection'
 import { RoundPlanRationaleSection } from './RoundPlanRationaleSection'
-import { RoundPlanTurnPlanSection } from './RoundPlanTurnPlanSection'
 
 export function RoundPlanStructuredEditor({
   setSubmissionDraft,
@@ -18,7 +18,7 @@ export function RoundPlanStructuredEditor({
         setSubmissionDraft={setSubmissionDraft}
         submissionDraft={submissionDraft}
       />
-      <RoundPlanTurnPlanSection
+      <RoundPlanOpeningScriptSection
         setSubmissionDraft={setSubmissionDraft}
         submissionDraft={submissionDraft}
       />

@@ -23,52 +23,69 @@ export function createDefensePart(
   materials: TeamMaterialSet,
 ): void {
   if (partId.includes('Cage')) {
+    const cageWidth = Math.max(width * 0.94, 0.58)
+    const cageDepth = Math.max(depth * 0.94, 0.58)
+    const cageHeight = Math.max(height * 0.74, 0.42)
+    const postDiameter = Math.max(Math.min(width, depth) * 0.055, 0.045)
+    const railThickness = Math.max(postDiameter * 0.9, 0.04)
+    const baseY = Math.max(height * 0.06, 0.05)
+    const topY = baseY + cageHeight
     const belly = MeshBuilder.CreateBox(
       `${role}-${blockId}-cage-belly-armor`,
-      { width, height: Math.max(height * 0.28, 0.18), depth },
-      scene,
-    )
-    const leftTruss = MeshBuilder.CreateBox(
-      `${role}-${blockId}-cage-left-truss`,
-      { width: Math.max(width * 0.16, 0.09), height: Math.max(height * 0.46, 0.24), depth: Math.max(depth * 1.08, 0.62) },
-      scene,
-    )
-    const rightTruss = MeshBuilder.CreateBox(
-      `${role}-${blockId}-cage-right-truss`,
-      { width: Math.max(width * 0.16, 0.09), height: Math.max(height * 0.46, 0.24), depth: Math.max(depth * 1.08, 0.62) },
-      scene,
-    )
-    const topShroud = MeshBuilder.CreateBox(
-      `${role}-${blockId}-cage-top-shroud`,
-      { width: Math.max(width * 0.86, 0.6), height: Math.max(height * 0.16, 0.1), depth: Math.max(depth * 0.72, 0.46) },
-      scene,
-    )
-    const leftBrace = MeshBuilder.CreateBox(
-      `${role}-${blockId}-cage-left-brace`,
-      { width: Math.max(width * 0.14, 0.08), height: Math.max(height * 0.18, 0.1), depth: Math.max(depth * 1.12, 0.66) },
-      scene,
-    )
-    const rightBrace = MeshBuilder.CreateBox(
-      `${role}-${blockId}-cage-right-brace`,
-      { width: Math.max(width * 0.14, 0.08), height: Math.max(height * 0.18, 0.1), depth: Math.max(depth * 1.12, 0.66) },
+      { width: cageWidth, height: Math.max(height * 0.16, 0.1), depth: cageDepth },
       scene,
     )
 
-    belly.position.y = Math.max(height * 0.08, 0.08)
-    leftTruss.position.set(-width * 0.5, Math.max(height * 0.34, 0.2), 0)
-    rightTruss.position.set(width * 0.5, Math.max(height * 0.34, 0.2), 0)
-    topShroud.position.y = Math.max(height * 0.58, 0.32)
-    leftBrace.position.set(-width * 0.23, Math.max(height * 0.44, 0.26), 0)
-    rightBrace.position.set(width * 0.23, Math.max(height * 0.44, 0.26), 0)
-    leftBrace.rotation.z = 0.34
-    rightBrace.rotation.z = -0.34
-
+    belly.position.y = baseY
     attachMesh(belly, parent, material)
-    attachMesh(leftTruss, parent, materials.trim)
-    attachMesh(rightTruss, parent, materials.trim)
-    attachMesh(topShroud, parent, material)
-    attachMesh(leftBrace, parent, materials.warning)
-    attachMesh(rightBrace, parent, materials.warning)
+
+    for (const x of [-cageWidth * 0.46, cageWidth * 0.46]) {
+      for (const z of [-cageDepth * 0.46, cageDepth * 0.46]) {
+        const post = MeshBuilder.CreateCylinder(
+          `${role}-${blockId}-cage-post-${x > 0 ? 'r' : 'l'}-${z > 0 ? 'f' : 'b'}`,
+          { height: cageHeight, diameter: postDiameter, tessellation: 10 },
+          scene,
+        )
+
+        post.position.set(x, baseY + cageHeight * 0.5, z)
+        attachMesh(post, parent, materials.steel)
+      }
+    }
+
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-cage-front-rail`, cageWidth, railThickness, railThickness, 0, topY, cageDepth * 0.46)
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-cage-rear-rail`, cageWidth, railThickness, railThickness, 0, topY, -cageDepth * 0.46)
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-cage-left-rail`, railThickness, railThickness, cageDepth, -cageWidth * 0.46, topY, 0)
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-cage-right-rail`, railThickness, railThickness, cageDepth, cageWidth * 0.46, topY, 0)
+
+    for (let index = -1; index <= 1; index += 1) {
+      createBoxDetail(
+        scene,
+        parent,
+        materials.steel,
+        `${role}-${blockId}-cage-roof-slat-${index + 1}`,
+        cageWidth * 0.82,
+        railThickness * 0.78,
+        railThickness,
+        0,
+        topY + railThickness * 0.55,
+        index * cageDepth * 0.24,
+      )
+    }
+
+    for (const z of [-cageDepth * 0.24, cageDepth * 0.24]) {
+      createBoxDetail(
+        scene,
+        parent,
+        materials.warning,
+        `${role}-${blockId}-cage-service-tab-${z > 0 ? 'front' : 'rear'}`,
+        cageWidth * 0.24,
+        railThickness * 0.86,
+        railThickness,
+        0,
+        baseY + cageHeight * 0.48,
+        z,
+      )
+    }
 
     return
   }

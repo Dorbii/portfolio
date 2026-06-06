@@ -8,13 +8,15 @@ import type {
   BotBlueprint,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import { createBotNode, createTeamMaterials } from '../replay/babylonPartRenderer'
+import { createBotNode } from '../replay/babylonPartRenderer'
+import type { TeamMaterialSet } from '../replay/babylonMaterials'
 
 export type AssemblyResources = {
   bot?: TransformNode
   botMeshes: AbstractMesh[]
   camera: ArcRotateCamera
   engine: Engine
+  materials: TeamMaterialSet
   scene: Scene
   scanBar: AbstractMesh
   rig: {
@@ -58,8 +60,7 @@ export function attachAssemblyBot(
 ): void {
   resources.bot?.dispose(false, false)
 
-  const materials = createTeamMaterials(resources.scene)
-  const bot = createBotNode(resources.scene, blueprint, role, materials[role])
+  const bot = createBotNode(resources.scene, blueprint, role, resources.materials)
 
   bot.position.set(0, 0.16, 0)
   bot.rotation.y = role === 'red' ? -0.28 : 0.28

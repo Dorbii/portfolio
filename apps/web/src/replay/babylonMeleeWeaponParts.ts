@@ -17,22 +17,71 @@ export function createHammerWeaponPart({
   depth,
   materials,
 }: WeaponPartRenderArgs): void {
-  const shaft = MeshBuilder.CreateCylinder(
-    `${role}-${blockId}-hammer-shaft`,
-    { height: Math.max(height * 1.05, 0.8), diameter: Math.max(width * 0.18, 0.1), tessellation: 12 },
+  const armLength = Math.max(depth * 1.28, 0.82)
+  const arm = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-hammer-arm`,
+    {
+      height: armLength,
+      diameter: Math.max(width * 0.13, 0.075),
+      tessellation: 12,
+    },
     scene,
   )
-  const head = MeshBuilder.CreateBox(
-    `${role}-${blockId}-hammer-head`,
-    { width: Math.max(width * 1.1, 0.6), height: Math.max(height * 0.24, 0.18), depth: Math.max(depth * 1.7, 0.56) },
+  const head = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-hammer-impact-head`,
+    {
+      height: Math.max(width * 0.62, 0.34),
+      diameter: Math.max(height * 0.54, 0.24),
+      tessellation: 12,
+    },
+    scene,
+  )
+  const pivot = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-hammer-pivot`,
+    {
+      height: Math.max(width * 0.46, 0.26),
+      diameter: Math.max(height * 0.42, 0.2),
+      tessellation: 14,
+    },
     scene,
   )
 
-  shaft.rotation.z = Math.PI / 2
-  shaft.position.y = Math.max(height * 0.1, 0.15)
-  head.position.set(0, Math.max(height * 0.72, 0.46), 0)
-  attachMesh(shaft, parent, materials.trim)
-  attachMesh(head, parent, material)
+  arm.rotation.x = Math.PI / 2
+  arm.position.set(0, Math.max(height * 0.34, 0.2), Math.max(depth * 0.18, 0.12))
+  head.rotation.z = Math.PI / 2
+  head.position.set(0, Math.max(height * 0.52, 0.32), Math.max(depth * 0.82, 0.48))
+  pivot.rotation.z = Math.PI / 2
+  pivot.position.set(0, Math.max(height * 0.28, 0.18), -Math.max(depth * 0.42, 0.24))
+  attachMesh(arm, parent, materials.steel)
+  attachMesh(head, parent, materials.steel)
+  attachMesh(pivot, parent, materials.trim)
+
+  for (let side = -1; side <= 1; side += 2) {
+    createBoxDetail(
+      scene,
+      parent,
+      material,
+      `${role}-${blockId}-hammer-strike-face-${side}`,
+      Math.max(width * 0.18, 0.1),
+      Math.max(height * 0.42, 0.18),
+      Math.max(depth * 0.18, 0.1),
+      side * Math.max(width * 0.36, 0.2),
+      head.position.y,
+      head.position.z,
+    )
+    createBoxDetail(
+      scene,
+      parent,
+      materials.trim,
+      `${role}-${blockId}-hammer-side-bracket-${side}`,
+      Math.max(width * 0.12, 0.07),
+      Math.max(height * 0.5, 0.2),
+      Math.max(depth * 0.18, 0.12),
+      side * Math.max(width * 0.3, 0.18),
+      Math.max(height * 0.32, 0.2),
+      pivot.position.z,
+    )
+  }
 }
 
 export function createSpearWeaponPart({

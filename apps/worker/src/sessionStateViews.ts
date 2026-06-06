@@ -32,6 +32,7 @@ export function buildRolePrivateState(
     ...(role.controls ? { controls: role.controls } : {}),
     submitted: Boolean(role.submittedAt),
     ...(role.submission ? { ownSubmission: role.submission } : {}),
+    ...(state.roundPlan ? { roundPlan: state.roundPlan } : {}),
     ...(state.combat
       ? {
           combat: {
@@ -71,6 +72,7 @@ export function buildPublicSessionState(state: StoredSessionState): PublicSessio
       red: rolePublicState(state.roles.red),
       blue: rolePublicState(state.roles.blue),
     },
+    ...(state.roundPlan ? { roundPlan: state.roundPlan } : {}),
     ...(state.combat
       ? {
           combat: {
@@ -99,6 +101,7 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.round,
     state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
     state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
+    state.roundPlan ? `round-plan-${state.roundPlan.deadlineAt}` : 'round-plan-none',
     state.combat ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}` : 'combat-none',
     state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
     state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',

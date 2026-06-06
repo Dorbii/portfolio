@@ -79,8 +79,8 @@ const partSelectSource = readFileSync(
   new URL('../apps/web/src/agent/PartSelect.tsx', import.meta.url),
   'utf8',
 )
-const roundPlanTurnPlanSectionSource = readFileSync(
-  new URL('../apps/web/src/agent/RoundPlanTurnPlanSection.tsx', import.meta.url),
+const roundPlanOpeningScriptSectionSource = readFileSync(
+  new URL('../apps/web/src/agent/RoundPlanOpeningScriptSection.tsx', import.meta.url),
   'utf8',
 )
 const roundPlanRationaleSectionSource = readFileSync(
@@ -93,6 +93,10 @@ const replayViewerSource = readFileSync(
 )
 const replayPreviewSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayPreview.tsx', import.meta.url),
+  'utf8',
+)
+const arenaPreviewSceneSource = readFileSync(
+  new URL('../apps/web/src/replay/ArenaPreviewScene.tsx', import.meta.url),
   'utf8',
 )
 const replayCameraPresetsSource = readFileSync(
@@ -165,6 +169,10 @@ const babylonWeaponPartsSource = readFileSync(
 )
 const botAssemblyRendererSource = readFileSync(
   new URL('../apps/web/src/agent/botAssemblyRenderer.ts', import.meta.url),
+  'utf8',
+)
+const botAssemblyAnimationSource = readFileSync(
+  new URL('../apps/web/src/agent/botAssemblyAnimation.ts', import.meta.url),
   'utf8',
 )
 const botAssemblySceneSource = readFileSync(
@@ -289,6 +297,12 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitRuntimeSource.includes('Table Talk'))
   assert.ok(roundPlanWorkbenchSource.includes('Assembly bay'))
   assert.ok(roundPlanWorkbenchSource.includes('BotAssemblyScene'))
+  assert.ok(botAssemblySceneSource.includes('const blueprintRef = useRef(blueprint)'))
+  assert.ok(botAssemblySceneSource.includes('attachBlueprint(activeResources, blueprintRef.current)'))
+  assert.ok(botAssemblySceneSource.includes('data-assembly-bot-attached'))
+  assert.ok(botAssemblyRendererSource.includes('createBotMaterialSet'))
+  assert.ok(botAssemblyAnimationSource.includes('resources.materials'))
+  assert.equal(botAssemblyAnimationSource.includes('createTeamMaterials'), false)
   assert.ok(cockpitRuntimeSource.includes('Agent Journal'))
   assert.ok(cockpitRuntimeSource.includes('No hidden chain-of-thought'))
   assert.ok(agentChatFormsSource.includes('Table Talk posted.'))
@@ -312,7 +326,7 @@ test('agent cockpit includes structured plan editor section labels and advanced 
     roundPlanStructuredEditorSource,
     roundPlanPurchaseSectionSource,
     roundPlanBlueprintSectionSource,
-    roundPlanTurnPlanSectionSource,
+    roundPlanOpeningScriptSectionSource,
     roundPlanRationaleSectionSource,
     partSelectSource,
   ].join('\n')
@@ -323,8 +337,8 @@ test('agent cockpit includes structured plan editor section labels and advanced 
   assert.ok(roundPlanEditorSource.includes('Purchases'))
   assert.ok(roundPlanEditorSource.includes('blueprint-heading'))
   assert.ok(roundPlanEditorSource.includes('Blueprint'))
-  assert.ok(roundPlanEditorSource.includes('turn-plan-heading'))
-  assert.ok(roundPlanEditorSource.includes('Turn plan commands'))
+  assert.ok(roundPlanEditorSource.includes('opening-script-heading'))
+  assert.ok(roundPlanEditorSource.includes('Opening script commands'))
   assert.ok(roundPlanEditorSource.includes('Rationale'))
   assert.ok(roundPlanWorkbenchSource.includes('Advanced JSON mode'))
   assert.ok(roundPlanEditorSource.includes('function PartSelect'))
@@ -334,7 +348,7 @@ test('agent cockpit includes structured plan editor section labels and advanced 
 
 test('agent cockpit prioritizes active task workflow over secondary panels', () => {
   assert.ok(cockpitViewStateSource.includes('createAgentCockpitWorkflow'))
-  assert.ok(cockpitViewStateSource.includes("'connect' | 'build' | 'submit' | 'review'"))
+  assert.ok(cockpitViewStateSource.includes("'connect' | 'build' | 'submit' | 'turn' | 'review'"))
   assert.ok(cockpitViewStateSource.includes('Unclaimed'))
   assert.ok(cockpitViewStateSource.includes('Claimed'))
   assert.ok(cockpitViewStateSource.includes('Draft'))
@@ -382,11 +396,30 @@ test('Agent Arena operational surfaces use shared UI primitives', () => {
   assert.ok(replayViewerSource.includes("from '../shared/ui'"))
   assert.ok(refereeConsoleSource.includes('<Panel className="panel'))
   assert.ok(refereePanelsSource.includes('<ActionGroup className="scoreboard-session-actions"'))
+  assert.ok(refereePanelsSource.includes('function ScoreboardPlanTimer'))
+  assert.ok(refereePanelsSource.includes("publicSession?.phase === 'submission_phase'"))
+  assert.ok(refereePanelsSource.includes('data-plan-timer-state'))
+  assert.ok(refereePanelsSource.includes('formatCountdown'))
   assert.ok(refereePanelsSource.includes('<SectionHeading'))
   assert.ok(cockpitSurfaceSource.includes('<Panel className="agent-live-panel cockpit-secondary-panel'))
   assert.ok(cockpitSurfaceSource.includes('<MetricGrid className="agent-facts">'))
   assert.ok(replayViewerSource.includes('<ActionGroup className="replay-controls"'))
   assert.ok(replayViewerSource.includes('<FormField label="Camera">'))
+  assert.ok(refereeConsoleSource.includes("import('../replay/ArenaPreviewScene')"))
+  assert.ok(refereeConsoleSource.includes('const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG'))
+  assert.ok(refereeConsoleSource.includes('ReplayStatusOverlay'))
+  assert.ok(refereeConsoleSource.includes('replayError'))
+  assert.ok(refereeConsoleSource.includes('replayLoadState'))
+  assert.ok(refereeConsoleSource.indexOf('<section className="match-stage-card"') < refereeConsoleSource.indexOf('<MatchScoreboard'))
+  assert.ok(arenaPreviewSceneSource.includes('createArena(scene, sceneArena)'))
+  assert.ok(arenaPreviewSceneSource.includes('createCenterSpinner(scene)'))
+  assert.ok(arenaPreviewSceneSource.includes('data-arena-preview-state'))
+  assert.ok(refereeConsoleSource.includes('showDamageSchematic={false}'))
+  assert.equal(refereeConsoleSource.includes('replayControls'), false)
+  assert.equal(refereeConsoleSource.includes('proofMode={!'), false)
+  assert.ok(replayViewerSource.includes('data-replay-playing'))
+  assert.ok(replayViewerSource.includes('const togglePlayback = () =>'))
+  assert.ok(replayViewerSource.includes('findFirstReplayActionTime'))
 })
 
 test('agent cockpit separates submitted truth from editable round plan draft', () => {
@@ -495,6 +528,10 @@ test('Babylon renderer exposes source-owned resource and chunk budgets', () => {
   assert.ok(botAssemblySceneSource.includes('data-renderer-budget-state'))
   assert.ok(botAssemblySceneSource.includes('data-renderer-budget-total-vertices'))
   assert.ok(rendererBudgetToolSource.includes('chunkGzipBudgetBytes = 380 * 1024'))
+  assert.ok(rendererBudgetToolSource.includes('aggregateGzipBudgetBytes = 420 * 1024'))
+  assert.ok(rendererBudgetToolSource.includes('totalGzipBytes'))
+  assert.ok(rendererBudgetToolSource.includes('withinAggregateBudget'))
+  assert.ok(rendererBudgetToolSource.includes("chunk.fileName.startsWith('babylonRendererKit-')"))
   assert.ok(rendererBudgetToolSource.includes('npm.cmd run build'))
   assert.ok(packageSource.includes('"check:renderer-budget"'))
 })

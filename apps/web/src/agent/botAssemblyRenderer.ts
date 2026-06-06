@@ -14,6 +14,10 @@ import {
   createRendererGlow,
   isBabylonRendererSupported,
 } from '../replay/babylonRendererKit'
+import {
+  createBotMaterialSet,
+  DEFAULT_TEAM_PALETTES,
+} from '../replay/babylonMaterials'
 
 export function isAssemblyRendererSupported(): boolean {
   return isBabylonRendererSupported()
@@ -40,6 +44,7 @@ export function createAssemblyResources(
 
   camera.attachControl(canvas, true)
   createAssemblyLightingPreset(scene, role, submitted)
+  const materials = createBotMaterialSet(scene, role, DEFAULT_TEAM_PALETTES[role])
 
   const scanBarMaterial = createAssemblyMaterial(scene, 'assembly-scan-mat', '#dff5ff', '#8bdfff', 0.72)
   const scanBar = createRendererBox(
@@ -62,6 +67,7 @@ export function createAssemblyResources(
   return {
     camera,
     engine,
+    materials,
     scene,
     rig,
     scanBar,
