@@ -1,8 +1,8 @@
 import { getPart } from '../../../../packages/catalog/src/index.js'
 import type {
+  BotTactics,
   PartDefinition,
   RoundPlanSubmission,
-  RoundPlanSubmissionV1,
   TurnCommand,
 } from '../../../../packages/schemas/src/index.js'
 import { createBaselineRoundPlan } from '../../../../packages/schemas/src/index.js'
@@ -22,15 +22,28 @@ export type {
   TurnCommandDraft,
 } from './roundPlanDraftTypes'
 
+const DEFAULT_DRAFT_TACTICS: BotTactics = {
+  style: 'balanced',
+  targetPriority: 'closest',
+  preferredRange: 'close',
+  movementPolicy: 'close',
+  aggression: 0.65,
+  retreatAtHealthPct: 0.2,
+  weaponCadence: 'opportunistic',
+  hazardPreference: 'avoid',
+}
+
 export function createEmptySubmission(): RoundPlanSubmission {
   return {
     action: 'submit_round_plan',
+    schemaVersion: 2,
     purchases: [],
     blueprint: {
       name: '',
       blocks: [],
     },
-    turnPlan: {
+    tactics: { ...DEFAULT_DRAFT_TACTICS },
+    openingScript: {
       commands: [],
     },
   }
@@ -41,9 +54,7 @@ export function createSampleSubmission(): RoundPlanSubmission {
 }
 
 export function createDraftFromSubmission(submission: RoundPlanSubmission): RoundPlanDraft {
-  const turnPlan = 'turnPlan' in submission
-    ? submission.turnPlan
-    : submission.openingScript ?? { commands: [] }
+  const openingScript = submission.openingScript ?? { commands: [] }
 
   return {
     purchases: submission.purchases.map((purchase) => ({
@@ -62,7 +73,7 @@ export function createDraftFromSubmission(submission: RoundPlanSubmission): Roun
       rotationZ: String(block.rotation[2]),
       label: block.label ?? '',
     })),
-    turnCommands: turnPlan.commands.map((command) => ({
+    turnCommands: openingScript.commands.map((command) => ({
       tick: String(command.tick),
       move: command.move ?? '',
       weaponA: command.weaponA ?? '',
@@ -83,9 +94,10 @@ export function parseSubmissionText(input: string): RoundPlanSubmission {
   return value as RoundPlanSubmission
 }
 
-export function buildSubmissionFromDraft(draft: RoundPlanDraft): RoundPlanSubmissionV1 {
+export function buildSubmissionFromDraft(draft: RoundPlanDraft): RoundPlanSubmission {
   return {
     action: 'submit_round_plan',
+    schemaVersion: 2,
     purchases: draft.purchases
       .map((purchase) => ({
         partId: purchase.partId.trim(),
@@ -112,7 +124,8 @@ export function buildSubmissionFromDraft(draft: RoundPlanDraft): RoundPlanSubmis
           ...(block.label.trim() ? { label: block.label.trim() } : {}),
         })),
     },
-    turnPlan: {
+    tactics: { ...DEFAULT_DRAFT_TACTICS },
+    openingScript: {
       commands: draft.turnCommands
         .map((command, index) => {
           const next: TurnCommand = {

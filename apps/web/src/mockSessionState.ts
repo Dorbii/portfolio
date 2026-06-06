@@ -180,6 +180,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     submitted: true,
     ownSubmission: {
       action: 'submit_round_plan',
+      schemaVersion: 2,
       purchases: [
         { partId: 'Armor_Front_Plate', quantity: 1 },
         { partId: 'Style_Neon', quantity: 1 },
@@ -226,7 +227,17 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
         ],
         rationale: 'Protect the spinner long enough to trade once.',
       },
-      turnPlan: {
+      tactics: {
+        style: 'aggressive',
+        targetPriority: 'closest',
+        preferredRange: 'close',
+        movementPolicy: 'close',
+        aggression: 0.8,
+        retreatAtHealthPct: 0.18,
+        weaponCadence: 'opportunistic',
+        hazardPreference: 'avoid',
+      },
+      openingScript: {
         commands: [
           { tick: 1, move: 'dash_forward', weaponA: 'hold' },
           { tick: 2, move: 'circle_right', weaponA: 'fire' },
@@ -280,6 +291,7 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
     submitted: true,
     ownSubmission: {
       action: 'submit_round_plan',
+      schemaVersion: 2,
       purchases: [
         { partId: 'Weapon_Net', quantity: 1 },
         { partId: 'Utility_Magnet', quantity: 1 },
@@ -333,7 +345,17 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
         ],
         rationale: 'Keep distance, fire net, then push disabled drive.',
       },
-      turnPlan: {
+      tactics: {
+        style: 'control',
+        targetPriority: 'mobility',
+        preferredRange: 'mid',
+        movementPolicy: 'kite',
+        aggression: 0.58,
+        retreatAtHealthPct: 0.25,
+        weaponCadence: 'opportunistic',
+        hazardPreference: 'force',
+      },
+      openingScript: {
         commands: [
           { tick: 1, move: 'dash_forward', weaponA: 'hold' },
           { tick: 2, move: 'circle_left', weaponA: 'hold' },

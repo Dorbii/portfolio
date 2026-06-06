@@ -1,4 +1,5 @@
 import type {
+  CSSProperties,
   HTMLAttributes,
   LabelHTMLAttributes,
   ReactNode,
@@ -104,6 +105,46 @@ export function FormField({
 }
 
 export type StatusTone = 'neutral' | 'ok' | 'warning' | 'danger' | 'red' | 'blue'
+
+export type ProgressMeterTone = Extract<StatusTone, 'neutral' | 'ok' | 'warning' | 'danger' | 'red' | 'blue'>
+
+export function ProgressMeter({
+  className,
+  label,
+  max = 100,
+  tone = 'neutral',
+  value,
+  valueLabel,
+}: ClassNameProps & {
+  label: ReactNode
+  max?: number
+  tone?: ProgressMeterTone
+  value: number
+  valueLabel?: ReactNode
+}) {
+  const safeMax = Number.isFinite(max) && max > 0 ? max : 100
+  const safeValue = Number.isFinite(value) ? value : 0
+  const clampedValue = Math.min(Math.max(safeValue, 0), safeMax)
+  const percent = (clampedValue / safeMax) * 100
+
+  return (
+    <div className={joinClasses('ui-progress-meter', `tone-${tone}`, className)}>
+      <div className="ui-progress-meter-label">
+        <span>{label}</span>
+        <strong>{valueLabel ?? `${Math.round(percent)}%`}</strong>
+      </div>
+      <div
+        aria-label={typeof label === 'string' ? label : undefined}
+        aria-valuemax={safeMax}
+        aria-valuemin={0}
+        aria-valuenow={clampedValue}
+        className="ui-progress-track"
+        role="meter"
+        style={{ '--ui-progress-value': `${percent}%` } as CSSProperties}
+      />
+    </div>
+  )
+}
 
 export function StatusBadge({
   children,

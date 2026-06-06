@@ -2,6 +2,8 @@ import type {
   ArenaConfig,
   AgentChatMessageRequest,
   BotBlueprint,
+  CombatBotSnapshot,
+  CombatTurnSnapshot,
   GeneratedControls,
   InventoryItem,
   RoundPlanSubmission,
@@ -9,6 +11,7 @@ import type {
   SessionChatMessage,
   TeamEconomySummary,
   TeamRole,
+  TurnCommandSubmission,
   ValidationIssue,
 } from './types.js'
 
@@ -59,11 +62,27 @@ export type SessionLogEvent = {
     | 'role_reset'
     | 'phase_changed'
     | 'round_plan_submitted'
+    | 'turn_command_submitted'
+    | 'turn_command_timed_out'
     | 'combat_resolved'
     | 'round_advanced'
     | 'economy_applied'
     | 'session_completed'
   message: string
+}
+
+export type CombatTurnPublicState = {
+  tick: number
+  openedAt: string
+  deadlineAt: string
+  turnSeconds: number
+  submitted: Record<TeamRole, boolean>
+}
+
+export type CombatTurnPrivateState = CombatTurnPublicState & {
+  snapshot: CombatTurnSnapshot
+  self: CombatBotSnapshot
+  opponent: CombatBotSnapshot
 }
 
 export type RolePublicState = Partial<TeamEconomySummary> & {
@@ -81,6 +100,7 @@ export type PublicSessionState = {
   expiresAt: string
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
+  combat?: CombatTurnPublicState
   replayAvailable: boolean
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]
@@ -99,6 +119,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   controls?: GeneratedControls
   submitted: boolean
   ownSubmission?: RoundPlanSubmission
+  combat?: CombatTurnPrivateState
   opponent: RolePublicState
   replayAvailable: boolean
   lastResult?: CombatSummary
@@ -137,7 +158,9 @@ export type RoleClaimResponse = {
 export type AgentNextAction =
   | 'wait_for_opponent_claim'
   | 'submit_round_plan'
+  | 'submit_turn_command'
   | 'wait_for_opponent_submission'
+  | 'wait_for_opponent_turn'
   | 'wait_for_referee'
   | 'wait_for_next_round'
   | 'stop'
@@ -160,6 +183,13 @@ export type RoundSubmissionResponse = {
   state: RolePrivateState
   publicState: PublicSessionState
 }
+
+export type TurnCommandResponse = {
+  state: RolePrivateState
+  publicState: PublicSessionState
+}
+
+export type TurnCommandPostRequest = TurnCommandSubmission
 
 export type AgentChatMessageResponse = {
   message: SessionChatMessage

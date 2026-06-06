@@ -185,24 +185,72 @@ function createOmniWheelRollers(
   diameter: number,
   wheelWidth: number,
 ): void {
-  for (let index = 0; index < 8; index += 1) {
-    const angle = (Math.PI * 2 * index) / 8
+  const rollerCount = 10
+
+  for (let index = 0; index < rollerCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / rollerCount
     const roller = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-omni-roller-${index}`,
       {
-        height: Math.max(wheelWidth * 0.62, 0.13),
-        diameter: Math.max(diameter * 0.11, 0.07),
-        tessellation: 8,
+        height: Math.max(wheelWidth * 0.84, 0.18),
+        diameter: Math.max(diameter * 0.13, 0.08),
+        tessellation: 12,
+      },
+      scene,
+    )
+    const capA = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-omni-roller-cap-a-${index}`,
+      {
+        height: 0.035,
+        diameter: Math.max(diameter * 0.15, 0.09),
+        tessellation: 10,
+      },
+      scene,
+    )
+    const capB = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-omni-roller-cap-b-${index}`,
+      {
+        height: 0.035,
+        diameter: Math.max(diameter * 0.15, 0.09),
+        tessellation: 10,
+      },
+      scene,
+    )
+    const radius = diameter * 0.5
+    const rollerAxisTilt = index % 2 === 0 ? Math.PI / 4 : -Math.PI / 4
+
+    roller.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius)
+    roller.rotation.x = Math.PI / 2
+    roller.rotation.y = angle + rollerAxisTilt
+    roller.metadata = { kind: 'roll', speed: 0.1 }
+    roller.parent = wheel
+    roller.material = materials.rubber
+
+    for (const [cap, offset] of [[capA, -1], [capB, 1]] as const) {
+      cap.position.copyFrom(roller.position)
+      cap.position.x += Math.cos(angle + Math.PI / 2) * offset * wheelWidth * 0.34
+      cap.position.z += Math.sin(angle + Math.PI / 2) * offset * wheelWidth * 0.34
+      cap.rotation.copyFrom(roller.rotation)
+      cap.parent = wheel
+      cap.material = materials.trim
+    }
+  }
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * index) / 3
+    const spoke = MeshBuilder.CreateBox(
+      `${role}-${blockId}-omni-spoke-${index}`,
+      {
+        width: Math.max(diameter * 0.08, 0.05),
+        height: Math.max(wheelWidth * 0.08, 0.045),
+        depth: Math.max(diameter * 0.58, 0.28),
       },
       scene,
     )
 
-    roller.position.set(Math.cos(angle) * diameter * 0.48, 0, Math.sin(angle) * diameter * 0.48)
-    roller.rotation.x = Math.PI / 2
-    roller.rotation.y = angle + Math.PI / 4
-    roller.metadata = { kind: 'roll', speed: 0.1 }
-    roller.parent = wheel
-    roller.material = materials.warning
+    spoke.rotation.y = angle
+    spoke.parent = wheel
+    spoke.material = materials.trim
   }
 }
 

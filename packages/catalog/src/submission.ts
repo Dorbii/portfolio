@@ -4,10 +4,12 @@ import type {
   MovementPolicy,
   NormalizedRoundPlanSubmission,
   RoundPlanSubmission,
+  TurnCommand,
   ValidationIssue,
 } from '../../schemas/src/index.js'
 import {
   validateRoundPlanSubmissionShape,
+  validateTurnCommandAgainstControls,
   validateTurnPlanAgainstControls,
 } from '../../schemas/src/index.js'
 import { validateBlueprintAssembly } from './blueprint.js'
@@ -60,14 +62,14 @@ export function validateRoundSubmission(input: {
 
   const controls = deriveControls(input.submission.blueprint)
   const normalizedSubmission = normalizeRoundSubmission(input.submission)
-  const turnPlanResult = validateTurnPlanAgainstControls(
+  const openingScriptResult = validateTurnPlanAgainstControls(
     normalizedSubmission.openingScript,
     controls,
-    getOpeningScriptPath(input.submission),
+    getOpeningScriptPath(),
   )
 
-  if (!turnPlanResult.ok) {
-    return { ok: false, issues: turnPlanResult.issues }
+  if (!openingScriptResult.ok) {
+    return { ok: false, issues: openingScriptResult.issues }
   }
 
   const movementPolicyResult = validateMovementPolicyAgainstControls(
@@ -88,8 +90,21 @@ export function validateRoundSubmission(input: {
   }
 }
 
-function getOpeningScriptPath(submission: RoundPlanSubmission): string {
-  return submission.schemaVersion === 2 ? 'submission.openingScript' : 'turnPlan'
+export function validateSubmittedTurnCommand(input: {
+  controls: GeneratedControls
+  command: TurnCommand
+}): { ok: true } | { ok: false; issues: ValidationIssue[] } {
+  const validation = validateTurnCommandAgainstControls(
+    input.command,
+    input.controls,
+    'turnCommand',
+  )
+
+  return validation.ok ? { ok: true } : { ok: false, issues: validation.issues }
+}
+
+function getOpeningScriptPath(): string {
+  return 'submission.openingScript'
 }
 
 function validateMovementPolicyAgainstControls(

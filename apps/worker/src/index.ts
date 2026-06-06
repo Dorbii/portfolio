@@ -7,6 +7,7 @@ import {
   type CreateSessionRequest,
   type RoleClaimRequest,
   type TeamRole,
+  type TurnCommandPostRequest,
 } from '../../../packages/schemas/src/index.js'
 import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import {
@@ -120,6 +121,10 @@ export class AgentArenaSession {
     'round-plan': {
       method: 'POST',
       handle: (request, coordinator) => this.submitRoundPlan(request, coordinator),
+    },
+    'turn-command': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitTurnCommand(request, coordinator),
     },
     chat: {
       method: 'POST',
@@ -337,6 +342,27 @@ export class AgentArenaSession {
     return this.sessionResultResponse(
       coordinator,
       await coordinator.submitRoundPlan(bearerToken(request) ?? '', readResult.body),
+    )
+  }
+
+  private async submitTurnCommand(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Turn command body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitTurnCommand(
+        bearerToken(request) ?? '',
+        readResult.body as TurnCommandPostRequest,
+      ),
     )
   }
 

@@ -10,7 +10,10 @@ export {
   validatePurchaseShape,
 } from './validators/blueprint.js'
 export {
+  asTurnCommandSubmission,
   validateOpeningScriptShape,
+  validateTurnCommandAgainstControls,
+  validateTurnCommandSubmissionShape,
   validateTurnPlanAgainstControls,
   validateTurnPlanShape,
 } from './validators/turnPlan.js'

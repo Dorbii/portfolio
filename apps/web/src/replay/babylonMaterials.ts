@@ -1,77 +1,180 @@
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
-import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture'
+import type { Material } from '@babylonjs/core/Materials/material'
+import { PBRMetallicRoughnessMaterial } from '@babylonjs/core/Materials/PBR/pbrMetallicRoughnessMaterial'
 import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Scene } from '@babylonjs/core/scene'
 import type {
   PartCategory,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import {
+  createPbrSurfaceTextures,
+  type SurfacePattern,
+} from './babylonSurfaceTextures'
 
-export type TeamMaterialSet = {
-  chassis: StandardMaterial
-  armor: StandardMaterial
-  mobility: StandardMaterial
-  weapon: StandardMaterial
-  utility: StandardMaterial
-  style: StandardMaterial
-  damaged: StandardMaterial
-  trim: StandardMaterial
-  rubber: StandardMaterial
-  light: StandardMaterial
-  warning: StandardMaterial
+export type BotPbrMaterial = PBRMetallicRoughnessMaterial
+
+export type CombatTeamPalette = {
+  accent: string
+  armor: string
+  chassis: string
+  glow: string
+  rubber: string
+  trim: string
+  utility: string
+  warning: string
+  weapon: string
 }
 
-type SurfacePattern =
-  | 'panel'
-  | 'armor'
-  | 'mobility'
-  | 'weapon'
-  | 'utility'
-  | 'style'
-  | 'damaged'
-  | 'trim'
-  | 'rubber'
-  | 'light'
-  | 'warning'
-type TextureDrawingContext = ReturnType<DynamicTexture['getContext']>
+export type DamageMaterialSet = {
+  critical: BotPbrMaterial
+  light: BotPbrMaterial
+  medium: BotPbrMaterial
+}
+
+export type DamageMaterialTier = keyof DamageMaterialSet
+
+export type TeamMaterialSet = {
+  chassis: BotPbrMaterial
+  armor: BotPbrMaterial
+  mobility: BotPbrMaterial
+  weapon: BotPbrMaterial
+  utility: BotPbrMaterial
+  style: BotPbrMaterial
+  damage: DamageMaterialSet
+  trim: BotPbrMaterial
+  rubber: BotPbrMaterial
+  light: BotPbrMaterial
+  warning: BotPbrMaterial
+}
+
+type MaterialRecipe = {
+  baseColor: string
+  emissive?: string
+  metallic: number
+  pattern: SurfacePattern
+  roughness: number
+}
+
+const DAMAGE_MEDIUM_THRESHOLD = 0.34
+const DAMAGE_CRITICAL_THRESHOLD = 0.67
+
+export const DEFAULT_TEAM_PALETTES: Record<TeamRole, CombatTeamPalette> = {
+  red: {
+    accent: '#9f2b27',
+    armor: '#7a2926',
+    chassis: '#2c3335',
+    glow: '#ff4a31',
+    rubber: '#171819',
+    trim: '#272e30',
+    utility: '#b4552c',
+    warning: '#b7822f',
+    weapon: '#b49a62',
+  },
+  blue: {
+    accent: '#235f9f',
+    armor: '#254d78',
+    chassis: '#2c3335',
+    glow: '#4aa3ff',
+    rubber: '#171819',
+    trim: '#272e30',
+    utility: '#267b91',
+    warning: '#b7822f',
+    weapon: '#b49a62',
+  },
+}
 
 export function createTeamMaterials(
   scene: Scene,
+  paletteOverrides: Partial<Record<TeamRole, Partial<CombatTeamPalette>>> = {},
 ): Record<TeamRole, TeamMaterialSet> {
   return {
-    red: {
-      chassis: createMaterial(scene, 'red-chassis', '#b72e3b', '#23070a', 0.34, 'panel'),
-      armor: createMaterial(scene, 'red-armor', '#e84c5a', '#2b080c', 0.3, 'armor'),
-      mobility: createMaterial(scene, 'red-mobility', '#474b4e', '#070808', 0.32, 'mobility'),
-      weapon: createMaterial(scene, 'red-weapon', '#f6bd4f', '#4d2a05', 0.36, 'weapon'),
-      utility: createMaterial(scene, 'red-utility', '#f47b54', '#321005', 0.34, 'utility'),
-      style: createMaterial(scene, 'red-style', '#ff92a8', '#3c1019', 0.4, 'style'),
-      damaged: createMaterial(scene, 'red-damaged', '#4a3232', '#32110c', 0.22, 'damaged'),
-      trim: createMaterial(scene, 'red-trim', '#17191b', '#050505', 0.26, 'trim'),
-      rubber: createMaterial(scene, 'red-rubber', '#0d0e10', '#020202', 0.18, 'rubber'),
-      light: createMaterial(scene, 'red-light', '#ff5b68', '#ff1f35', 0.72, 'light'),
-      warning: createMaterial(scene, 'red-warning', '#f4c95b', '#5b3605', 0.3, 'warning'),
-    },
-    blue: {
-      chassis: createMaterial(scene, 'blue-chassis', '#1f6fc2', '#051323', 0.34, 'panel'),
-      armor: createMaterial(scene, 'blue-armor', '#55a9ff', '#06182d', 0.3, 'armor'),
-      mobility: createMaterial(scene, 'blue-mobility', '#3f4c55', '#070b0d', 0.32, 'mobility'),
-      weapon: createMaterial(scene, 'blue-weapon', '#f6bd4f', '#3a2503', 0.36, 'weapon'),
-      utility: createMaterial(scene, 'blue-utility', '#33c4ca', '#082629', 0.34, 'utility'),
-      style: createMaterial(scene, 'blue-style', '#98e5ff', '#09283b', 0.4, 'style'),
-      damaged: createMaterial(scene, 'blue-damaged', '#2f3b46', '#061f2a', 0.22, 'damaged'),
-      trim: createMaterial(scene, 'blue-trim', '#171b20', '#050608', 0.26, 'trim'),
-      rubber: createMaterial(scene, 'blue-rubber', '#0d0f12', '#020203', 0.18, 'rubber'),
-      light: createMaterial(scene, 'blue-light', '#58a9ff', '#167cff', 0.78, 'light'),
-      warning: createMaterial(scene, 'blue-warning', '#f4c95b', '#4b3205', 0.3, 'warning'),
-    },
+    red: createBotMaterialSet(scene, 'red', {
+      ...DEFAULT_TEAM_PALETTES.red,
+      ...paletteOverrides.red,
+    }),
+    blue: createBotMaterialSet(scene, 'blue', {
+      ...DEFAULT_TEAM_PALETTES.blue,
+      ...paletteOverrides.blue,
+    }),
+  }
+}
+
+export function createBotMaterialSet(
+  scene: Scene,
+  materialPrefix: string,
+  palette: CombatTeamPalette,
+): TeamMaterialSet {
+  return {
+    chassis: createCombatMaterial(scene, `${materialPrefix}-chassis`, {
+      baseColor: palette.chassis,
+      metallic: 0.42,
+      pattern: 'panel',
+      roughness: 0.66,
+    }),
+    armor: createCombatMaterial(scene, `${materialPrefix}-armor`, {
+      baseColor: palette.armor,
+      metallic: 0.48,
+      pattern: 'armor',
+      roughness: 0.62,
+    }),
+    mobility: createCombatMaterial(scene, `${materialPrefix}-mobility`, {
+      baseColor: mixHex(palette.chassis, '#3a4144', 0.45),
+      metallic: 0.55,
+      pattern: 'mobility',
+      roughness: 0.68,
+    }),
+    weapon: createCombatMaterial(scene, `${materialPrefix}-weapon`, {
+      baseColor: palette.weapon,
+      metallic: 0.66,
+      pattern: 'weapon',
+      roughness: 0.54,
+    }),
+    utility: createCombatMaterial(scene, `${materialPrefix}-utility`, {
+      baseColor: palette.utility,
+      metallic: 0.64,
+      pattern: 'utility',
+      roughness: 0.54,
+    }),
+    style: createCombatMaterial(scene, `${materialPrefix}-style`, {
+      baseColor: palette.accent,
+      metallic: 0.56,
+      pattern: 'style',
+      roughness: 0.48,
+    }),
+    damage: createDamageMaterialSet(scene, materialPrefix, palette),
+    trim: createCombatMaterial(scene, `${materialPrefix}-trim`, {
+      baseColor: palette.trim,
+      metallic: 0.46,
+      pattern: 'trim',
+      roughness: 0.68,
+    }),
+    rubber: createCombatMaterial(scene, `${materialPrefix}-rubber`, {
+      baseColor: palette.rubber,
+      metallic: 0,
+      pattern: 'rubber',
+      roughness: 0.9,
+    }),
+    light: createCombatMaterial(scene, `${materialPrefix}-light`, {
+      baseColor: palette.glow,
+      emissive: palette.glow,
+      metallic: 0.2,
+      pattern: 'light',
+      roughness: 0.28,
+    }),
+    warning: createCombatMaterial(scene, `${materialPrefix}-warning`, {
+      baseColor: palette.warning,
+      emissive: '#1d1003',
+      metallic: 0.72,
+      pattern: 'warning',
+      roughness: 0.47,
+    }),
   }
 }
 
 export function materialForCategory(
   materials: TeamMaterialSet,
   category: PartCategory,
-): StandardMaterial {
+): Material {
   if (category === 'defense') {
     return materials.armor
   }
@@ -95,228 +198,110 @@ export function materialForCategory(
   return materials.chassis
 }
 
-function createMaterial(
+export function damageMaterialForSeverity(
+  materials: DamageMaterialSet,
+  severity: number,
+): BotPbrMaterial | null {
+  if (severity <= 0) {
+    return null
+  }
+
+  return materials[damageTierForSeverity(severity)]
+}
+
+export function damageTierForSeverity(severity: number): DamageMaterialTier {
+  if (severity >= DAMAGE_CRITICAL_THRESHOLD) {
+    return 'critical'
+  }
+
+  if (severity >= DAMAGE_MEDIUM_THRESHOLD) {
+    return 'medium'
+  }
+
+  return 'light'
+}
+
+function createDamageMaterialSet(
+  scene: Scene,
+  materialPrefix: string,
+  palette: CombatTeamPalette,
+): DamageMaterialSet {
+  return {
+    light: createCombatMaterial(scene, `${materialPrefix}-damage-light`, {
+      baseColor: mixHex(palette.armor, '#5b4a3f', 0.36),
+      metallic: 0.5,
+      pattern: 'damage_light',
+      roughness: 0.62,
+    }),
+    medium: createCombatMaterial(scene, `${materialPrefix}-damage-medium`, {
+      baseColor: mixHex(palette.armor, '#40332d', 0.58),
+      emissive: '#120604',
+      metallic: 0.52,
+      pattern: 'damage_medium',
+      roughness: 0.72,
+    }),
+    critical: createCombatMaterial(scene, `${materialPrefix}-damage-critical`, {
+      baseColor: mixHex(palette.armor, '#211d1b', 0.76),
+      emissive: '#351007',
+      metallic: 0.54,
+      pattern: 'damage_critical',
+      roughness: 0.84,
+    }),
+  }
+}
+
+function createCombatMaterial(
   scene: Scene,
   name: string,
-  diffuse: string,
-  emissive: string,
-  specular = 0.34,
-  pattern: SurfacePattern = 'panel',
-): StandardMaterial {
-  const material = new StandardMaterial(name, scene)
+  recipe: MaterialRecipe,
+): BotPbrMaterial {
+  const material = new PBRMetallicRoughnessMaterial(name, scene)
+  const textures = createPbrSurfaceTextures(scene, name, recipe)
 
-  material.diffuseColor = Color3.FromHexString(diffuse)
-  material.specularColor = new Color3(specular, specular, Math.max(0.18, specular * 0.86))
-  material.emissiveColor = Color3.FromHexString(emissive)
-  material.diffuseTexture = createSurfaceTexture(scene, name, diffuse, pattern)
+  material.baseColor = Color3.FromHexString(recipe.baseColor)
+  material.baseTexture = textures.baseTexture
+  material.metallic = recipe.metallic
+  material.roughness = recipe.roughness
+  material.metallicRoughnessTexture = textures.metallicRoughnessTexture
+  material.occlusionTexture = textures.occlusionTexture
+  material.occlusionStrength = recipe.pattern === 'rubber' ? 0.42 : 0.68
+  material.normalTexture = textures.normalTexture
+  material.emissiveColor = Color3.FromHexString(recipe.emissive ?? '#000000')
+  material.maxSimultaneousLights = 6
+
+  if (recipe.pattern === 'light') {
+    material.roughness = 0.22
+  }
 
   return material
 }
 
-function createSurfaceTexture(
-  scene: Scene,
-  name: string,
-  baseColor: string,
-  pattern: SurfacePattern,
-): DynamicTexture {
-  const texture = new DynamicTexture(`${name}-surface`, { width: 256, height: 256 }, scene, true)
-  const context = texture.getContext()
-  const dark = rgbaFromHex('#050607', 0.52)
-  const light = rgbaFromHex('#f6f0d0', pattern === 'light' ? 0.34 : 0.16)
+function mixHex(hex: string, targetHex: string, targetWeight: number): string {
+  const source = rgbFromHex(hex)
+  const target = rgbFromHex(targetHex)
+  const sourceWeight = 1 - targetWeight
 
-  context.fillStyle = baseColor
-  context.fillRect(0, 0, 256, 256)
-
-  if (pattern === 'rubber' || pattern === 'mobility') {
-    drawTreadTexture(context, dark, light)
-  } else if (pattern === 'warning' || pattern === 'weapon') {
-    drawWarningTexture(context, dark, light)
-  } else if (pattern === 'utility') {
-    drawUtilityTexture(context, dark, light)
-  } else if (pattern === 'damaged') {
-    drawDamageTexture(context)
-  } else if (pattern === 'light') {
-    drawLightTexture(context, light)
-  } else {
-    drawPanelTexture(context, dark, light, pattern === 'armor' ? 58 : 64)
-  }
-
-  drawScuffs(context)
-  texture.uScale = pattern === 'rubber' || pattern === 'mobility' ? 3 : 2
-  texture.vScale = pattern === 'rubber' || pattern === 'mobility' ? 2.6 : 2
-  if (pattern === 'damaged') {
-    texture.uScale = 2.7
-    texture.vScale = 2.25
-  }
-  texture.update(false)
-
-  return texture
+  return rgbToHex({
+    blue: Math.round(source.blue * sourceWeight + target.blue * targetWeight),
+    green: Math.round(source.green * sourceWeight + target.green * targetWeight),
+    red: Math.round(source.red * sourceWeight + target.red * targetWeight),
+  })
 }
 
-function drawPanelTexture(
-  context: TextureDrawingContext,
-  dark: string,
-  light: string,
-  step: number,
-): void {
-  context.strokeStyle = dark
-  context.lineWidth = 3
-
-  for (let offset = step; offset < 256; offset += step) {
-    drawLine(context, offset, 0, offset, 256)
-    drawLine(context, 0, offset, 256, offset)
-  }
-
-  context.strokeStyle = light
-  context.lineWidth = 2
-
-  for (let x = 28; x < 256; x += 68) {
-    for (let y = 28; y < 256; y += 68) {
-      drawLine(context, x - 8, y, x + 8, y)
-      drawLine(context, x, y - 8, x, y + 8)
-    }
-  }
-}
-
-function drawTreadTexture(
-  context: TextureDrawingContext,
-  dark: string,
-  light: string,
-): void {
-  context.fillStyle = rgbaFromHex('#030303', 0.34)
-
-  for (let y = 8; y < 256; y += 24) {
-    context.fillRect(0, y, 256, 10)
-  }
-
-  context.strokeStyle = dark
-  context.lineWidth = 6
-
-  for (let x = -32; x < 256; x += 34) {
-    drawLine(context, x, 256, x + 72, 0)
-  }
-
-  context.strokeStyle = light
-  context.lineWidth = 2
-
-  for (let x = 20; x < 256; x += 52) {
-    drawLine(context, x, 12, x, 244)
-  }
-}
-
-function drawWarningTexture(
-  context: TextureDrawingContext,
-  dark: string,
-  light: string,
-): void {
-  context.strokeStyle = rgbaFromHex('#101010', 0.54)
-  context.lineWidth = 18
-
-  for (let x = -220; x < 256; x += 52) {
-    drawLine(context, x, 256, x + 256, 0)
-  }
-
-  context.strokeStyle = dark
-  context.lineWidth = 3
-  drawLine(context, 0, 42, 256, 42)
-  drawLine(context, 0, 214, 256, 214)
-  context.strokeStyle = light
-  context.lineWidth = 2
-  drawLine(context, 20, 128, 236, 128)
-}
-
-function drawUtilityTexture(
-  context: TextureDrawingContext,
-  dark: string,
-  light: string,
-): void {
-  drawPanelTexture(context, dark, light, 72)
-  context.strokeStyle = rgbaFromHex('#0a1012', 0.62)
-  context.lineWidth = 5
-
-  for (let y = 30; y < 256; y += 56) {
-    drawLine(context, 28, y, 228, y)
-  }
-
-  context.fillStyle = light
-
-  for (let x = 40; x < 256; x += 72) {
-    context.fillRect(x, 112, 18, 18)
-  }
-}
-
-function drawLightTexture(context: TextureDrawingContext, light: string): void {
-  context.strokeStyle = light
-  context.lineWidth = 12
-
-  for (let y = 24; y < 256; y += 42) {
-    drawLine(context, 0, y, 256, y)
-  }
-}
-
-function drawDamageTexture(context: TextureDrawingContext): void {
-  context.fillStyle = rgbaFromHex('#050607', 0.44)
-  context.fillRect(0, 0, 256, 256)
-  context.strokeStyle = rgbaFromHex('#000000', 0.82)
-  context.lineWidth = 9
-
-  for (let index = 0; index < 7; index += 1) {
-    const x = (index * 43 + 18) % 256
-    const y = (index * 61 + 34) % 256
-
-    drawLine(context, x, y, x + 72, y + 18)
-    drawLine(context, x + 26, y + 6, x + 42, y + 48)
-  }
-
-  context.strokeStyle = rgbaFromHex('#ffb25c', 0.5)
-  context.lineWidth = 4
-
-  for (let index = 0; index < 6; index += 1) {
-    const x = (index * 53 + 24) % 256
-    const y = (index * 37 + 42) % 256
-
-    drawLine(context, x, y, x + 28, y + 7)
-  }
-
-  context.fillStyle = rgbaFromHex('#ff6b2e', 0.34)
-
-  for (let index = 0; index < 5; index += 1) {
-    const x = (index * 67 + 39) % 238
-    const y = (index * 29 + 57) % 238
-
-    context.fillRect(x, y, 18, 8)
-  }
-}
-
-function drawScuffs(context: TextureDrawingContext): void {
-  context.strokeStyle = rgbaFromHex('#ffffff', 0.13)
-  context.lineWidth = 2
-
-  for (let index = 0; index < 18; index += 1) {
-    const x = (index * 47 + 19) % 256
-    const y = (index * 71 + 31) % 256
-    drawLine(context, x, y, x + 18, y + 5)
-  }
-}
-
-function drawLine(
-  context: TextureDrawingContext,
-  fromX: number,
-  fromY: number,
-  toX: number,
-  toY: number,
-): void {
-  context.beginPath()
-  context.moveTo(fromX, fromY)
-  context.lineTo(toX, toY)
-  context.stroke()
-}
-
-function rgbaFromHex(hex: string, alpha: number): string {
+function rgbFromHex(hex: string): { blue: number; green: number; red: number } {
   const normalized = hex.replace('#', '')
-  const red = Number.parseInt(normalized.slice(0, 2), 16)
-  const green = Number.parseInt(normalized.slice(2, 4), 16)
-  const blue = Number.parseInt(normalized.slice(4, 6), 16)
 
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`
+  return {
+    blue: Number.parseInt(normalized.slice(4, 6), 16),
+    green: Number.parseInt(normalized.slice(2, 4), 16),
+    red: Number.parseInt(normalized.slice(0, 2), 16),
+  }
+}
+
+function rgbToHex({ blue, green, red }: { blue: number; green: number; red: number }): string {
+  return `#${hexByte(red)}${hexByte(green)}${hexByte(blue)}`
+}
+
+function hexByte(value: number): string {
+  return Math.min(255, Math.max(0, value)).toString(16).padStart(2, '0')
 }

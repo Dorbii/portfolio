@@ -31,21 +31,21 @@ export { createCenterSpinner } from './babylonArenaStructures'
 export type { BabylonHazardVisual }
 
 export function createArena(scene: Scene, arena: ArenaConfig): BabylonHazardVisual[] {
-  const floorMaterial = createPbrSceneMaterial(scene, 'floor-pbr-mat', '#151a1a', '#020303', 0.62, 0.48)
-  const seamMaterial = createSceneMaterial(scene, 'panel-mat', '#334043', '#060808', 1, 0.28)
-  const wallMaterial = createSceneMaterial(scene, 'wall-mat', '#2b3134', '#050607', 1, 0.22)
-  const apronMaterial = createPbrSceneMaterial(scene, 'arena-apron-pbr-mat', '#080b0d', '#010202', 0.72, 0.42)
+  const floorMaterial = createPbrSceneMaterial(scene, 'floor-pbr-mat', '#141718', '#010202', 0.72, 0.82, 'arena_floor')
+  const seamMaterial = createSceneMaterial(scene, 'panel-mat', '#171d1f', '#020303', 1, 0.12)
+  const wallMaterial = createSceneMaterial(scene, 'wall-mat', '#202629', '#040506', 1, 0.16)
+  const apronMaterial = createPbrSceneMaterial(scene, 'arena-apron-pbr-mat', '#0b0e0f', '#010202', 0.7, 0.86, 'arena_apron')
   const glassMaterial = createSceneMaterial(scene, 'glass-mat', '#8bdfff', '#061824', 0.24, 0.5)
-  const trimMaterial = createSceneMaterial(scene, 'arena-trim-mat', '#101315', '#030404')
-  const warningMaterial = createSceneMaterial(scene, 'arena-warning-mat', '#d8ae33', '#4c3105', 1, 0.18)
-  const redPadMaterial = createSceneMaterial(scene, 'red-pad-mat', '#8f2632', '#37080e', 0.9, 0.28)
-  const bluePadMaterial = createSceneMaterial(scene, 'blue-pad-mat', '#1f5c97', '#061d34', 0.9, 0.28)
+  const trimMaterial = createSceneMaterial(scene, 'arena-trim-mat', '#080b0c', '#010202')
+  const warningMaterial = createSceneMaterial(scene, 'arena-warning-mat', '#b68d25', '#352104', 1, 0.16)
+  const redPadMaterial = createSceneMaterial(scene, 'red-pad-mat', '#6c1b24', '#240508', 0.78, 0.22)
+  const bluePadMaterial = createSceneMaterial(scene, 'blue-pad-mat', '#164572', '#041526', 0.78, 0.22)
   const redLightMaterial = createSceneMaterial(scene, 'red-led-mat', '#ff5968', '#ff2438', 1, 0.1)
   const blueLightMaterial = createSceneMaterial(scene, 'blue-led-mat', '#57adff', '#167fff', 1, 0.1)
   const whiteLightMaterial = createSceneMaterial(scene, 'white-led-mat', '#dfefff', '#9bd7ff', 1, 0.1)
   const hazardMaterial = createSceneMaterial(scene, 'hazard-mat', '#f0bd3c', '#654006', 1, 0.18)
   const hatchMaterial = createSceneMaterial(scene, 'hatch-mat', '#101416', '#020303')
-  const centerMaterial = createSceneMaterial(scene, 'center-mark-mat', '#5b676c', '#10161b', 0.78)
+  const centerMaterial = createSceneMaterial(scene, 'center-mark-mat', '#30383b', '#070b0e', 0.66)
 
   const apron = MeshBuilder.CreateBox(
     'arena-apron',

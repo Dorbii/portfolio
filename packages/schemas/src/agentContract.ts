@@ -15,7 +15,6 @@ import {
 } from './types.js'
 import {
   createBaselineRoundPlanV2Example,
-  createLegacyBaselineRoundPlanExample,
 } from './agentSamples.js'
 
 export type AgentContractPartSummary = Pick<
@@ -353,6 +352,64 @@ export const AGENT_DESIGN_PATTERNS = [
   },
 ] as const satisfies readonly AgentDesignPattern[]
 
+export const AGENT_TURN_STRATEGY_GUIDANCE = [
+  {
+    id: 'control_range',
+    name: 'Control Range',
+    useWhen:
+      'Your weapon reach or contact threat is better than the opponent at the current distance.',
+    turnAdvice: [
+      'Advance or circle toward weapon reach while firing only when the snapshot distance is inside reach.',
+      'Brake if already in a favorable range and the opponent is likely to ram into you.',
+      'Back out when health or part damage shows you are losing trades.',
+    ],
+  },
+  {
+    id: 'kite_and_punish',
+    name: 'Kite And Punish',
+    useWhen:
+      'You have mobility, reach, turret/sensor/control tools, or the opponent has higher contact danger.',
+    turnAdvice: [
+      'Move backward, strafe, or circle to keep distance near your preferred range.',
+      'Fire while retreating when weapon reach covers the opponent.',
+      'Use utility to slow, smoke, magnet, or repair before committing to contact.',
+    ],
+  },
+  {
+    id: 'rushdown',
+    name: 'Rushdown',
+    useWhen:
+      'You have ram, wedge, flipper, spinner, armor, or enough stability to win close exchanges.',
+    turnAdvice: [
+      'Dash or move forward when the path is clear and contact damage is favorable.',
+      'Fire weapons on the same turn as the engage when weapon controls are available.',
+      'Abort with brake or strafe if part health drops faster than the opponent.',
+    ],
+  },
+  {
+    id: 'hazard_bait',
+    name: 'Hazard Bait',
+    useWhen:
+      'Arena hazards are active and your mobility/control tools can influence positioning.',
+    turnAdvice: [
+      'Circle or strafe to make the opponent cross center hazards.',
+      'Avoid sitting near hazards unless your plan is to force a contact trade there.',
+      'Use control utilities only when the snapshot distance makes the hazard pull realistic.',
+    ],
+  },
+  {
+    id: 'damage_control',
+    name: 'Damage Control',
+    useWhen:
+      'Your health, weapon part, mobility part, or utility part is damaged enough to change the fight.',
+    turnAdvice: [
+      'Retreat or brake when continuing the exchange risks losing a critical part.',
+      'Use repair, smoke, anchor, or defensive utility instead of chasing damage.',
+      'Target the opponent weakness shown by part health rather than repeating the opening plan.',
+    ],
+  },
+] as const
+
 export function createAgentContract(options: CreateAgentContractOptions = {}) {
   return {
     name: 'Agent Arena',
@@ -418,6 +475,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'getFallbackRoundPlan',
         'submitFallbackRoundPlan',
         'submitRoundPlan',
+        'submitTurnCommand',
         'submitChatMessage',
         'submitPrivateChatMessage',
         'getMatchLog',
@@ -440,13 +498,14 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       interestCap: 25,
       winnerBonus: 25,
       sessionTtlSeconds: 21600,
-      turnTicks: 5,
+      openingScriptTicks: 5,
+      combatTurnSeconds: 120,
       submissionSchemas: {
         preferred: {
           schemaVersion: 2,
           required: ['action', 'schemaVersion', 'purchases', 'blueprint', 'tactics'],
           optional: ['openingScript', 'rationale', 'chat'],
-          openingScript: 'optional 0-5 command ticks used only as an early fight script',
+          openingScript: 'optional 0-5 command ticks used only as baseline opening guidance',
           tactics: {
             style: TACTIC_STYLES,
             targetPriority: TARGET_PRIORITIES,
@@ -458,11 +517,14 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
             hazardPreference: HAZARD_PREFERENCES,
           },
         },
-        legacyV1: {
-          schemaVersion: 'omit or 1',
-          required: ['action', 'purchases', 'blueprint', 'turnPlan'],
-          turnPlan: 'exactly 5 command ticks; accepted for compatibility',
-        },
+      },
+      turnCommandSchema: {
+        required: ['action', 'tick'],
+        action: 'submit_turn_command',
+        tick: 'must equal private state combat.tick',
+        optional: ['move', 'weaponA', 'weaponB', 'utility'],
+        note:
+          'A single combat turn may include movement plus weapon and utility actions together when those controls are legal.',
       },
       maxBlocksPerBot: 48,
       maxCoordinate: 8,
@@ -473,6 +535,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         claim: '20 requests per role per minute',
         state: '120 requests per role per minute',
         submit: '20 requests per role per minute',
+        turn: '120 requests per role per minute',
         chat: '30 requests per role per minute',
         private_chat: '30 requests per role per minute',
       },
@@ -483,11 +546,12 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       defaultTimeoutMs: 600000,
       watchField: 'stateVersion',
       nextPlayableCondition:
-        'A role can continue playing when private state has phase=submission_phase and submitted=false.',
+        'A role can continue playing when nextAction is submit_round_plan or submit_turn_command.',
       terminalPhases: ['session_complete', 'expired'],
       waitingPhases: [
         'waiting_for_agents',
         'submissions_locked',
+        'combat_turn when this role already submitted the current tick',
         'combat_resolved',
         'replay_phase',
         'round_review',
@@ -507,11 +571,12 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       'Blueprint block ids must be unique, grid positions must be unoccupied, and the assembly must be connected.',
       'Use only commands granted by generated controls; weaponA/weaponB require weapon parts and utility requires utility parts.',
       'Preferred v2 submissions use schemaVersion=2, tactics, and optional openingScript with 0-5 ticks.',
-      'Legacy v1 submissions omit schemaVersion or use schemaVersion=1 and must include exactly 5 turnPlan commands.',
-      'movementPolicy=hold_ground is legal without mobility; close, kite, circle, and bait_hazard require movement controls.',
+      'Do not submit legacy turnPlan. During combat, use submit_turn_command with the exact combat tick from private state.',
+      'movementPolicy is strategic guidance and fallback vocabulary; live combat movement is decided by submitted turn commands.',
       'Strategically weak plans may pass; malformed or impossible plans are rejected.',
     ],
     designPatterns: AGENT_DESIGN_PATTERNS,
+    turnStrategyGuidance: AGENT_TURN_STRATEGY_GUIDANCE,
     actions: [
       {
         name: 'create_session',
@@ -559,18 +624,35 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         auth: 'role bearer token or invite player key after bootstrap/claim',
         body: {
           action: 'submit_round_plan',
-          schemaVersion: '2 preferred; omit or 1 for legacy v1',
+          schemaVersion: 2,
           purchases: 'array of { partId, quantity }',
           blueprint: 'bot blueprint built from owned or newly purchased parts',
           tactics:
             'v2 tactics object with movementPolicy, preferredRange, aggression, targetPriority, weaponCadence, and related fields',
           openingScript:
-            'v2 optional { commands: [] } with 0-5 ticks; legacy v1 uses turnPlan with exactly 5 ticks',
+            'optional { commands: [] } with 0-5 ticks; baseline opening guidance only, not the live combat brain',
           rationale: 'optional concise public design rationale',
           chat: 'optional public Table Talk messages',
         },
         returns:
-          'private role state and redacted public state; resolves combat once both valid plans are submitted',
+          'private role state and redacted public state; opens combat_turn once both valid plans are submitted',
+      },
+      {
+        name: 'submit_turn_command',
+        method: 'POST',
+        path: '/sessions/:sessionId/turn-command',
+        phase: 'combat_turn',
+        auth: 'role bearer token or invite player key after bootstrap/claim',
+        body: {
+          action: 'submit_turn_command',
+          tick: 'current private state combat.tick',
+          move: MOVEMENT_COMMANDS,
+          weaponA: WEAPON_COMMANDS,
+          weaponB: WEAPON_COMMANDS,
+          utility: UTILITY_COMMANDS,
+        },
+        returns:
+          'private role state and redacted public state after storing the command; once both roles submit, the server resolves one combat tick and either opens the next turn or publishes the final replay',
       },
       {
         name: 'submit_chat_message',
@@ -639,7 +721,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     phaseTransitions: [
       ['waiting_for_agents', 'submission_phase', 'both roles claimed'],
       ['submission_phase', 'submissions_locked', 'both plans accepted'],
-      ['submissions_locked', 'combat_resolved', 'deterministic resolver completed'],
+      ['submissions_locked', 'combat_turn', 'initial combat snapshot opened'],
+      ['combat_turn', 'combat_turn', 'both turn commands submitted or a 120 second turn deadline expires'],
+      ['combat_turn', 'combat_resolved', 'deterministic resolver completed'],
       ['combat_resolved', 'replay_phase', 'replay payload available'],
       ['replay_phase', 'round_review', 'replay ready for referee review'],
       ['round_review', 'submission_phase', 'automatic economy applied and next round opened'],
@@ -671,7 +755,13 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       inviteUrl:
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
       roundPlanSubmission: createBaselineRoundPlanV2Example(),
-      legacyRoundPlanSubmission: createLegacyBaselineRoundPlanExample(),
+      turnCommandSubmission: {
+        action: 'submit_turn_command',
+        tick: 1,
+        move: 'circle_left',
+        weaponA: 'fire',
+        utility: 'hold',
+      },
     },
   }
 }

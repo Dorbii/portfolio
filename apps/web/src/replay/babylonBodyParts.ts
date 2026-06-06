@@ -1,11 +1,11 @@
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
-import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import type { Material } from '@babylonjs/core/Materials/material'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import {
   attachMesh,
   createBoxDetail,
+  createRampBlock,
   createSolidBlock,
 } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
@@ -18,7 +18,7 @@ import {
 export function createBodyPart(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   partId: string,
   width: number,
   height: number,
@@ -72,6 +72,59 @@ export function createBodyPart(
     return
   }
 
+  if (partId === 'Body_Light_Frame') {
+    const railWidth = Math.max(width * 0.14, 0.08)
+    const railHeight = Math.max(height * 0.34, 0.18)
+    const railDepth = Math.max(depth * 0.96, 0.6)
+    const crossDepth = Math.max(depth * 0.14, 0.08)
+
+    for (let side = -1; side <= 1; side += 2) {
+      createBoxDetail(
+        scene,
+        parent,
+        material,
+        `${parent.name}-light-frame-side-rail-${side}`,
+        railWidth,
+        railHeight,
+        railDepth,
+        side * Math.max(width * 0.42, 0.28),
+        Math.max(height * 0.22, 0.16),
+        0,
+      )
+    }
+
+    for (let side = -1; side <= 1; side += 2) {
+      createBoxDetail(
+        scene,
+        parent,
+        materials.trim,
+        `${parent.name}-light-frame-crossmember-${side}`,
+        Math.max(width * 0.82, 0.56),
+        Math.max(height * 0.16, 0.08),
+        crossDepth,
+        0,
+        Math.max(height * 0.34, 0.18),
+        side * Math.max(depth * 0.4, 0.24),
+      )
+    }
+
+    createBoxDetail(
+      scene,
+      parent,
+      materials.utility,
+      `${parent.name}-light-frame-battery-tray`,
+      Math.max(width * 0.38, 0.24),
+      Math.max(height * 0.24, 0.14),
+      Math.max(depth * 0.32, 0.18),
+      -Math.max(width * 0.08, 0.04),
+      Math.max(height * 0.54, 0.26),
+      -Math.max(depth * 0.04, 0.02),
+    )
+    createRaisedTechCluster(scene, parent, materials, width, height, depth)
+
+    return
+  }
+
   if (partId.includes('Cylinder')) {
     const cylinder = MeshBuilder.CreateCylinder(
       `${parent.name}-chassis-cyl`,
@@ -87,13 +140,15 @@ export function createBodyPart(
   }
 
   if (partId.includes('Wedge')) {
-    const wedge = MeshBuilder.CreateBox(
-      `${parent.name}-wedge`,
-      { width, height: Math.max(height, 0.35), depth },
+    const wedge = createRampBlock(
       scene,
+      `${parent.name}-wedge`,
+      width * 1.28,
+      Math.max(height * 0.9, 0.34),
+      depth * 1.04,
+      Math.max(height * 0.16, 0.06),
     )
-    wedge.scaling = new Vector3(1.25, 0.9, 1)
-    wedge.position.set(0, -height * 0.18, depth * 0.16)
+    wedge.position.set(0, -height * 0.04, depth * 0.08)
     attachMesh(wedge, parent, material)
     createBoxDetail(
       scene,

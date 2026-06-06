@@ -1,5 +1,6 @@
 import { MOVEMENT_COMMANDS } from '../../../../packages/schemas/src/index.js'
 import type {
+  BotTactics,
   MovementCommand,
   RoundPlanSubmission,
   TurnCommand,
@@ -9,26 +10,50 @@ import type {
 } from '../../../../packages/schemas/src/index.js'
 import { safeNumber } from './roundPlanDraftNumbers'
 
+const DEFAULT_NORMALIZED_TACTICS: BotTactics = {
+  style: 'balanced',
+  targetPriority: 'closest',
+  preferredRange: 'close',
+  movementPolicy: 'close',
+  aggression: 0.65,
+  retreatAtHealthPct: 0.2,
+  weaponCadence: 'opportunistic',
+  hazardPreference: 'avoid',
+}
+
 export function normalizeSubmissionForDraft(submission: RoundPlanSubmission): RoundPlanSubmission {
   const value = submission as {
     purchases?: unknown
     blueprint?: unknown
-    turnPlan?: unknown
     openingScript?: unknown
+    tactics?: unknown
     rationale?: unknown
   }
   const blueprint = normalizeBlueprint(value.blueprint)
-  const turnPlan = normalizeTurnPlan(value.turnPlan ?? value.openingScript)
+  const openingScript = normalizeTurnPlan(value.openingScript)
 
   return {
     action: 'submit_round_plan',
+    schemaVersion: 2,
     purchases: normalizePurchases(value.purchases),
     blueprint,
-    turnPlan,
+    tactics: normalizeTactics(value.tactics),
+    openingScript,
     rationale:
       typeof value.rationale === 'string' && value.rationale.trim().length > 0
         ? value.rationale.trim()
         : undefined,
+  }
+}
+
+function normalizeTactics(value: unknown): BotTactics {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ...DEFAULT_NORMALIZED_TACTICS }
+  }
+
+  return {
+    ...DEFAULT_NORMALIZED_TACTICS,
+    ...(value as BotTactics),
   }
 }
 

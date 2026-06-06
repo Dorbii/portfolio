@@ -24,6 +24,7 @@ export type AgentArenaRoleClient = {
   submitFallbackRoundPlan: AgentArenaRoleApi['submitFallbackRoundPlan']
   submitPrivateChatMessage: AgentArenaRoleApi['submitPrivateChatMessage']
   submitRoundPlan: AgentArenaRoleApi['submitRoundPlan']
+  submitTurnCommand: AgentArenaRoleApi['submitTurnCommand']
   waitForNextAction: AgentArenaRoleApi['waitForNextAction']
   waitForNextSubmissionWindow: AgentArenaRoleApi['waitForNextSubmissionWindow']
   waitForPhase: AgentArenaRoleApi['waitForPhase']
@@ -121,6 +122,15 @@ export function getValidAgentActions(
           : {}),
     },
     {
+      name: 'submit_turn_command',
+      available: Boolean(state && state.phase === 'combat_turn' && !state.combat?.submitted[state.role]),
+      ...(state?.phase !== 'combat_turn'
+        ? { reason: `Combat turns are not open during ${state?.phase ?? 'unclaimed'}.` }
+        : state.combat?.submitted[state.role]
+          ? { reason: 'This role has already submitted the current combat turn.' }
+          : {}),
+    },
+    {
       name: 'submit_chat_message',
       available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
       ...(state
@@ -167,6 +177,7 @@ export function createAgentArenaRoleApi(
     getFallbackRoundPlan: () => createBaselineRoundPlan(),
     submitFallbackRoundPlan: () => client.submitFallbackRoundPlan(),
     submitRoundPlan: (plan) => client.submitRoundPlan(plan),
+    submitTurnCommand: (command) => client.submitTurnCommand(command),
     submitChatMessage: (input) => client.submitChatMessage(input),
     submitPrivateChatMessage: (input) => client.submitPrivateChatMessage(input),
     getMatchLog: () => client.getMatchLog(),

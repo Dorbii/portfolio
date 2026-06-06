@@ -59,8 +59,8 @@ export function createSpinnerWeaponPart({
   hub.metadata = { kind: 'spin', speed: 0.15 }
   disc.parent = parent
   hub.parent = parent
-  disc.material = materials.trim
-  hub.material = material
+  disc.material = material
+  hub.material = materials.trim
   attachMesh(gearbox, parent, material)
   attachMesh(upperCowl, parent, materials.trim)
 

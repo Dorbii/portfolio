@@ -58,7 +58,7 @@ export function RoundPlanWorkbench({
   const submittedSubmission = roleState?.ownSubmission ?? null
   const previewSubmission = submittedSubmission ?? draftSubmission
   const previewBlueprint = previewSubmission.blueprint
-  const previewCommandCount = getSubmissionCommandCount(previewSubmission)
+  const previewCommandCount = getOpeningScriptCommandCount(previewSubmission)
   const previewStateLabel = submittedSubmission
     ? 'Submitted bot'
     : roleState
@@ -119,7 +119,7 @@ export function RoundPlanWorkbench({
         <PlanMetric label="Blocks" value={String(draftSummary.blockCount)} />
         <PlanMetric label="Mobility" value={String(draftSummary.mobilityParts)} />
         <PlanMetric label="Weapons" value={String(draftSummary.weaponParts)} />
-        <PlanMetric label="Commands" value={`${draftSummary.commandCount} / 5`} />
+        <PlanMetric label="Opening" value={`${draftSummary.commandCount} / 5`} />
       </div>
 
       <div className="submit-dock">
@@ -132,7 +132,7 @@ export function RoundPlanWorkbench({
           />
           <Fact
             label={submittedSubmission ? 'Submitted plan' : 'Draft plan'}
-            value={`${previewCommandCount} commands`}
+            value={`${previewCommandCount} opening commands`}
           />
         </dl>
         <Button
@@ -207,10 +207,6 @@ function getSubmitActionLabel(
   return 'Waiting'
 }
 
-function getSubmissionCommandCount(submission: RoundPlanSubmission): number {
-  if ('turnPlan' in submission) {
-    return submission.turnPlan.commands.length
-  }
-
+function getOpeningScriptCommandCount(submission: RoundPlanSubmission): number {
   return submission.openingScript?.commands.length ?? 0
 }

@@ -1,4 +1,4 @@
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import type { Material } from '@babylonjs/core/Materials/material'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
@@ -12,7 +12,7 @@ import type { TeamMaterialSet } from './babylonMaterials'
 export function createStylePart(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   role: TeamRole,
   blockId: string,
   partId: string,
@@ -47,6 +47,19 @@ export function createStylePart(
     attachMesh(left, parent, materials.light)
     attachMesh(right, parent, materials.light)
 
+    for (let side = -1; side <= 1; side += 2) {
+      const spar = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-wing-spar-${side}`,
+        { height: 0.78, diameter: 0.045, tessellation: 8 },
+        scene,
+      )
+
+      spar.rotation.x = Math.PI / 2
+      spar.rotation.z = side * 0.42
+      spar.position.set(side * 0.34, 0.34, 0)
+      attachMesh(spar, parent, materials.trim)
+    }
+
     return
   }
 
@@ -61,6 +74,11 @@ export function createStylePart(
       { height: 0.16, diameter: 0.42, tessellation: 12 },
       scene,
     )
+    const snout = MeshBuilder.CreateBox(
+      `${role}-${blockId}-dragon-snout`,
+      { width: 0.32, height: 0.16, depth: 0.28 },
+      scene,
+    )
     const hornL = MeshBuilder.CreateCylinder(
       `${role}-${blockId}-dragon-horn-l`,
       { height: 0.36, diameterTop: 0, diameterBottom: 0.09, tessellation: 12 },
@@ -73,12 +91,25 @@ export function createStylePart(
     )
     jaw.rotation.z = Math.PI / 2
     jaw.position.set(0, -0.1, 0.16)
+    snout.position.set(0, 0.02, 0.32)
     hornL.position.set(-0.18, 0.26, 0.01)
     hornR.position.set(0.18, 0.26, 0.01)
     attachMesh(skull, parent, material)
+    attachMesh(snout, parent, material)
     attachMesh(jaw, parent, materials.trim)
     attachMesh(hornL, parent, materials.warning)
     attachMesh(hornR, parent, materials.warning)
+
+    for (let side = -1; side <= 1; side += 2) {
+      const eye = MeshBuilder.CreateSphere(
+        `${role}-${blockId}-dragon-eye-${side}`,
+        { diameter: 0.075, segments: 8 },
+        scene,
+      )
+
+      eye.position.set(side * 0.16, 0.08, 0.48)
+      attachMesh(eye, parent, materials.light)
+    }
 
     return
   }
@@ -190,7 +221,7 @@ export function createStylePart(
 function createFlagPart(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   role: TeamRole,
   blockId: string,
 ): void {

@@ -104,13 +104,13 @@ export function createReplayLightingPreset(scene: Scene, arenaWidth: number): vo
   const redSide = new PointLight('red-side', new Vector3(-arenaWidth * 0.42, 2.1, 0), scene)
   const blueSide = new PointLight('blue-side', new Vector3(arenaWidth * 0.42, 2.1, 0), scene)
 
-  hemi.intensity = 0.48
-  key.intensity = 1.05
-  fill.intensity = 0.38
-  accent.intensity = 0.58
-  rim.intensity = 0.34
-  redSide.intensity = 0.65
-  blueSide.intensity = 0.65
+  hemi.intensity = 0.22
+  key.intensity = 0.92
+  fill.intensity = 0.16
+  accent.intensity = 0.5
+  rim.intensity = 0.44
+  redSide.intensity = 0.72
+  blueSide.intensity = 0.72
   redSide.diffuse = Color3.FromHexString('#ff4356')
   blueSide.diffuse = Color3.FromHexString('#4ca9ff')
   accent.diffuse = Color3.FromHexString('#ffd36a')

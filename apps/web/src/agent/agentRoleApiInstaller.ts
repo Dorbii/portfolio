@@ -3,6 +3,7 @@ import type {
   RoleClaimResponse,
   RolePrivateState,
   RoundSubmissionResponse,
+  TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import type {
@@ -59,6 +60,11 @@ export function createInstalledAgentArenaRoleApi({
     return response
   }
   const updateFromRoundResponse = (response: RoundSubmissionResponse) => {
+    setCurrentState(response.state)
+
+    return response
+  }
+  const updateFromTurnResponse = (response: TurnCommandResponse) => {
     setCurrentState(response.state)
 
     return response
@@ -139,6 +145,8 @@ export function createInstalledAgentArenaRoleApi({
       updateFromRoundResponse(await client.submitFallbackRoundPlan()),
     submitRoundPlan: async (plan) =>
       updateFromRoundResponse(await client.submitRoundPlan(plan)),
+    submitTurnCommand: async (command) =>
+      updateFromTurnResponse(await client.submitTurnCommand(command)),
     submitChatMessage: async (input) => {
       const response = await client.submitChatMessage(input)
 

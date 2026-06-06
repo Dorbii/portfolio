@@ -17,6 +17,7 @@ import {
 
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
+  schemaVersion: 2,
   purchases: [
     { partId: 'Body_Square_Medium', quantity: 1 },
     { partId: 'Wheel_Large', quantity: 2 },
@@ -36,7 +37,13 @@ const validSpinnerSubmission = {
       },
     ],
   },
-  turnPlan: {
+  tactics: {
+    movementPolicy: 'close',
+    preferredRange: 'close',
+    aggression: 0.75,
+    weaponCadence: 'opportunistic',
+  },
+  openingScript: {
     commands: [
       { tick: 1, move: 'forward', weaponA: 'hold' },
       { tick: 2, move: 'forward', weaponA: 'fire' },
@@ -137,6 +144,42 @@ async function route(env, path, options = {}) {
   const json = await response.json()
 
   return { response, json }
+}
+
+async function resolveLiveRouteCombat(env, sessionId, redToken, blueToken, firstState) {
+  let state = firstState
+
+  for (let index = 0; index < 90; index += 1) {
+    const tick = state.combat.tick
+    const command = {
+      action: 'submit_turn_command',
+      tick,
+      move: 'dash_forward',
+      weaponA: 'fire',
+    }
+
+    const redTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
+      method: 'POST',
+      token: redToken,
+      body: command,
+    })
+    const blueTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
+      method: 'POST',
+      token: blueToken,
+      body: command,
+    })
+
+    assert.equal(redTurn.response.status, 200)
+    assert.equal(blueTurn.response.status, 200)
+
+    if (blueTurn.json.publicState.phase === 'round_review') {
+      return blueTurn
+    }
+
+    state = blueTurn.json.state
+  }
+
+  throw new Error('Route combat did not resolve within expected turn budget.')
 }
 
 function inviteFor(invites, role) {
@@ -293,7 +336,10 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
   assert.equal(json.rules.submissionSchemas.preferred.schemaVersion, 2)
   assert.ok(json.rules.submissionSchemas.preferred.tactics.movementPolicy.includes('hold_ground'))
-  assert.ok(json.rules.submissionSchemas.legacyV1.turnPlan.includes('exactly 5'))
+  assert.equal(json.rules.combatTurnSeconds, 120)
+  assert.equal(json.rules.turnCommandSchema.action, 'submit_turn_command')
+  assert.ok(json.rules.turnCommandSchema.note.includes('movement plus weapon and utility'))
+  assert.ok(json.turnStrategyGuidance.some((strategy) => strategy.id === 'kite_and_punish'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
@@ -301,7 +347,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Baseline Spinner')
   assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
   assert.equal(json.examples.roundPlanSubmission.openingScript.commands.length, 5)
-  assert.equal(json.examples.legacyRoundPlanSubmission.turnPlan.commands.length, 5)
+  assert.equal(json.examples.turnCommandSubmission.action, 'submit_turn_command')
   assert.ok(
     json.examples.roundPlanSubmission.purchases.some(
       (purchase) => purchase.partId === 'Body_Square_Medium',
@@ -323,6 +369,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.method === 'POST' &&
         action.path === '/sessions' &&
         action.auth === 'none; protected by Cloudflare rate limiting/WAF',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'submit_turn_command' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/turn-command' &&
+        action.phase === 'combat_turn',
     ),
   )
   assert.ok(
@@ -581,8 +636,26 @@ test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () =>
   assert.equal(redSubmission.json.state.ownSubmission.schemaVersion, 2)
   assert.equal('turnPlan' in redSubmission.json.state.ownSubmission, false)
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'round_review')
-  assert.equal(blueSubmission.json.publicState.replayAvailable, true)
+  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.json.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.json.state.combat.tick, 1)
+
+  const redTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: { action: 'submit_turn_command', tick: 1, move: 'forward', weaponA: 'hold' },
+  })
+  const blueTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: { action: 'submit_turn_command', tick: 1, move: 'forward', weaponA: 'hold' },
+  })
+
+  assert.equal(redTurn.response.status, 200)
+  assert.equal(redTurn.json.publicState.combat.submitted.red, true)
+  assert.equal(blueTurn.response.status, 200)
+  assert.equal(blueTurn.json.publicState.phase, 'combat_turn')
+  assert.equal(blueTurn.json.publicState.combat.tick, 2)
 })
 
 test('POST /sessions/:id/chat stores public role-authored chat', async () => {
@@ -944,11 +1017,22 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   })
 
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'round_review')
+  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.json.publicState.roles.red.submitted, true)
   assert.equal(blueSubmission.json.publicState.roles.blue.submitted, true)
-  assert.equal(blueSubmission.json.publicState.replayAvailable, true)
+  assert.equal(blueSubmission.json.publicState.replayAvailable, false)
   assert.equal('awardOptions' in blueSubmission.json.publicState, false)
+
+  const resolved = await resolveLiveRouteCombat(
+    env,
+    sessionId,
+    redToken,
+    blueToken,
+    blueSubmission.json.state,
+  )
+
+  assert.equal(resolved.json.publicState.phase, 'round_review')
+  assert.equal(resolved.json.publicState.replayAvailable, true)
 
   const replay = await route(env, `/sessions/${sessionId}/replay`)
 
@@ -987,7 +1071,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
 
   assert.equal(redAfterAdvance.response.status, 200)
   assert.equal(blueAfterAdvance.response.status, 200)
-  assert.equal(redAfterAdvance.json.gold, 78)
+  assert.equal(redAfterAdvance.json.gold, 103)
   assert.equal(blueAfterAdvance.json.gold, 78)
 
   const publicState = await route(env, `/sessions/${sessionId}/public`)

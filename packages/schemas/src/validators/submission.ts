@@ -8,7 +8,7 @@ import { MAX_AGENT_CHAT_MESSAGES_PER_SUBMISSION, isRecord, issue, result } from 
 import { validateBlueprintShape, validatePurchaseShape } from './blueprint.js'
 import { validateAgentChatMessageBatchShape } from './chat.js'
 import { validateBotTacticsShape } from './tactics.js'
-import { validateOpeningScriptShape, validateTurnPlanShape } from './turnPlan.js'
+import { validateOpeningScriptShape } from './turnPlan.js'
 
 export function validateRoundPlanSubmissionShape(
   value: unknown,
@@ -36,15 +36,14 @@ export function validateRoundPlanSubmissionShape(
 
   const purchaseResult = validatePurchaseShape(value.purchases)
   const blueprintResult = validateBlueprintShape(value.blueprint)
-  const schemaVersion = value.schemaVersion ?? 1
-  const isKnownSchemaVersion = schemaVersion === 1 || schemaVersion === 2
+  const schemaVersion = value.schemaVersion
 
-  if (!isKnownSchemaVersion) {
+  if (schemaVersion !== 2) {
     issues.push(
       issue(
         'INVALID_SCHEMA_VERSION',
         'submission.schemaVersion',
-        'schemaVersion must be 1 or 2.',
+        'schemaVersion must be 2.',
       ),
     )
   }
@@ -57,35 +56,27 @@ export function validateRoundPlanSubmissionShape(
     issues.push(...blueprintResult.issues)
   }
 
-  if (schemaVersion === 1) {
-    const turnPlanResult = validateTurnPlanShape(value.turnPlan)
+  if ('turnPlan' in value) {
+    issues.push(
+      issue(
+        'LEGACY_TURN_PLAN_REMOVED',
+        'submission.turnPlan',
+        'Round submissions use openingScript only; submit live turns with submit_turn_command.',
+      ),
+    )
+  }
 
-    if (!turnPlanResult.ok) {
-      issues.push(...turnPlanResult.issues)
-    }
-  } else if (schemaVersion === 2) {
-    if ('turnPlan' in value) {
-      issues.push(
-        issue(
-          'LEGACY_TURN_PLAN_IN_V2',
-          'submission.turnPlan',
-          'schemaVersion 2 uses openingScript instead of turnPlan.',
-        ),
-      )
-    }
+  const tacticsResult = validateBotTacticsShape(value.tactics)
 
-    const tacticsResult = validateBotTacticsShape(value.tactics)
+  if (!tacticsResult.ok) {
+    issues.push(...tacticsResult.issues)
+  }
 
-    if (!tacticsResult.ok) {
-      issues.push(...tacticsResult.issues)
-    }
+  if ('openingScript' in value) {
+    const openingScriptResult = validateOpeningScriptShape(value.openingScript)
 
-    if ('openingScript' in value) {
-      const openingScriptResult = validateOpeningScriptShape(value.openingScript)
-
-      if (!openingScriptResult.ok) {
-        issues.push(...openingScriptResult.issues)
-      }
+    if (!openingScriptResult.ok) {
+      issues.push(...openingScriptResult.issues)
     }
   }
 

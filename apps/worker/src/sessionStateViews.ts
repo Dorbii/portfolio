@@ -32,6 +32,23 @@ export function buildRolePrivateState(
     ...(role.controls ? { controls: role.controls } : {}),
     submitted: Boolean(role.submittedAt),
     ...(role.submission ? { ownSubmission: role.submission } : {}),
+    ...(state.combat
+      ? {
+          combat: {
+            tick: state.combat.nextTick,
+            openedAt: state.combat.openedAt,
+            deadlineAt: state.combat.deadlineAt,
+            turnSeconds: state.combat.turnSeconds,
+            submitted: {
+              red: Boolean(state.combat.pending.red),
+              blue: Boolean(state.combat.pending.blue),
+            },
+            snapshot: state.combat.snapshot,
+            self: role.role === 'red' ? state.combat.snapshot.red : state.combat.snapshot.blue,
+            opponent: role.role === 'red' ? state.combat.snapshot.blue : state.combat.snapshot.red,
+          },
+        }
+      : {}),
     opponent: rolePublicState(opponent),
     replayAvailable: Boolean(state.replay),
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
@@ -54,6 +71,20 @@ export function buildPublicSessionState(state: StoredSessionState): PublicSessio
       red: rolePublicState(state.roles.red),
       blue: rolePublicState(state.roles.blue),
     },
+    ...(state.combat
+      ? {
+          combat: {
+            tick: state.combat.nextTick,
+            openedAt: state.combat.openedAt,
+            deadlineAt: state.combat.deadlineAt,
+            turnSeconds: state.combat.turnSeconds,
+            submitted: {
+              red: Boolean(state.combat.pending.red),
+              blue: Boolean(state.combat.pending.blue),
+            },
+          },
+        }
+      : {}),
     replayAvailable: Boolean(state.replay),
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
     chatLog: state.chatLog,
@@ -68,6 +99,9 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.round,
     state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
     state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
+    state.combat ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}` : 'combat-none',
+    state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
+    state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',
     state.eventLog.length,
     state.chatLog.length,
   ].join('|')

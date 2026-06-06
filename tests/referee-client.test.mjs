@@ -14,7 +14,6 @@ import {
   readStoredSession,
   clearStoredSession,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
-import { getInvitePanelMode } from '../.test-build/apps/web/src/referee/refereeInvitePanelState.js'
 
 function jsonResponse(value, init = {}) {
   return new Response(JSON.stringify(value), {
@@ -207,30 +206,6 @@ test('referee resetRoleClaim posts /reset-role with bearer token', async () => {
   } finally {
     restore()
   }
-})
-
-test('referee invite panel mode separates unclaimed handoff from claimed reset', () => {
-  assert.equal(
-    getInvitePanelMode({
-      hasInvite: true,
-      roleState: { claimed: false },
-    }),
-    'unclaimed',
-  )
-  assert.equal(
-    getInvitePanelMode({
-      hasInvite: true,
-      roleState: { claimed: true },
-    }),
-    'claimed',
-  )
-  assert.equal(
-    getInvitePanelMode({
-      hasInvite: false,
-      roleState: { claimed: false },
-    }),
-    'unavailable',
-  )
 })
 
 test('referee session storage persists referee token and role handoff tokens until session expiry', () => {

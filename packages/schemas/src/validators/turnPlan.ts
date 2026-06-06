@@ -3,11 +3,15 @@ import {
   UTILITY_COMMANDS,
   WEAPON_COMMANDS,
   type GeneratedControls,
+  type TurnCommand,
+  type TurnCommandSubmission,
   type TurnPlan,
   type ValidationIssue,
   type ValidationResult,
 } from '../types.js'
 import { isRecord, issue, result } from './common.js'
+
+const MAX_COMBAT_TURN_TICKS = 600
 
 type TurnPlanShapeOptions = {
   exactCommandCount?: boolean
@@ -78,6 +82,55 @@ export function validateTurnPlanAgainstControls(
   return result(issues)
 }
 
+export function validateTurnCommandSubmissionShape(
+  value: unknown,
+  expectedTick?: number,
+): ValidationResult {
+  const issues: ValidationIssue[] = []
+  const path = 'turnCommand'
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      issues: [issue('INVALID_TURN_COMMAND', path, 'Expected turn command object.')],
+    }
+  }
+
+  if (value.action !== 'submit_turn_command') {
+    issues.push(
+      issue(
+        'INVALID_ACTION',
+        `${path}.action`,
+        'Action must be submit_turn_command.',
+      ),
+    )
+  }
+
+  validateTurnCommandFields(value, path, issues, {
+    expectedTick,
+    maxTick: MAX_COMBAT_TURN_TICKS,
+  })
+
+  return result(issues)
+}
+
+export function validateTurnCommandAgainstControls(
+  command: TurnCommand,
+  controls: GeneratedControls,
+  path = 'turnCommand',
+): ValidationResult {
+  return validateTurnPlanAgainstControls({ commands: [command] }, controls, path)
+}
+
+export function asTurnCommandSubmission(
+  value: unknown,
+  expectedTick?: number,
+): TurnCommandSubmission | null {
+  return validateTurnCommandSubmissionShape(value, expectedTick).ok
+    ? (value as TurnCommandSubmission)
+    : null
+}
+
 function validateTurnPlanShapeWithOptions(
   value: unknown,
   maxTicks = 5,
@@ -131,58 +184,84 @@ function validateTurnPlanShapeWithOptions(
       return
     }
 
-    const tick = command.tick
+    const tick = validateTurnCommandFields(command, commandPath, issues, {
+      maxTick: maxTicks,
+    })
 
-    if (typeof tick !== 'number' || !Number.isInteger(tick) || tick < 1 || tick > maxTicks) {
-      issues.push(
-        issue(
-          'INVALID_TICK',
-          `${commandPath}.tick`,
-          `Tick must be an integer from 1 through ${maxTicks}.`,
-        ),
-      )
-    } else if (ticks.has(tick)) {
+    if (tick !== undefined && ticks.has(tick)) {
       issues.push(
         issue('DUPLICATE_TICK', `${commandPath}.tick`, `Duplicate tick ${tick}.`),
       )
-    } else {
+    } else if (tick !== undefined) {
       ticks.add(tick)
-    }
-
-    if (
-      command.move !== undefined &&
-      !MOVEMENT_COMMANDS.includes(command.move as never)
-    ) {
-      issues.push(issue('INVALID_MOVE', `${commandPath}.move`, 'Unknown move command.'))
-    }
-
-    if (
-      command.weaponA !== undefined &&
-      !WEAPON_COMMANDS.includes(command.weaponA as never)
-    ) {
-      issues.push(
-        issue('INVALID_WEAPON_A', `${commandPath}.weaponA`, 'Unknown weaponA command.'),
-      )
-    }
-
-    if (
-      command.weaponB !== undefined &&
-      !WEAPON_COMMANDS.includes(command.weaponB as never)
-    ) {
-      issues.push(
-        issue('INVALID_WEAPON_B', `${commandPath}.weaponB`, 'Unknown weaponB command.'),
-      )
-    }
-
-    if (
-      command.utility !== undefined &&
-      !UTILITY_COMMANDS.includes(command.utility as never)
-    ) {
-      issues.push(
-        issue('INVALID_UTILITY', `${commandPath}.utility`, 'Unknown utility command.'),
-      )
     }
   })
 
   return result(issues)
+}
+
+function validateTurnCommandFields(
+  command: Record<string, unknown>,
+  path: string,
+  issues: ValidationIssue[],
+  options: {
+    expectedTick?: number
+    maxTick: number
+  },
+): number | undefined {
+  const tick = command.tick
+
+  if (typeof tick !== 'number' || !Number.isInteger(tick) || tick < 1 || tick > options.maxTick) {
+    issues.push(
+      issue(
+        'INVALID_TICK',
+        `${path}.tick`,
+        `Tick must be an integer from 1 through ${options.maxTick}.`,
+      ),
+    )
+  } else if (options.expectedTick !== undefined && tick !== options.expectedTick) {
+    issues.push(
+      issue(
+        'OUT_OF_SEQUENCE_TICK',
+        `${path}.tick`,
+        `Expected combat tick ${options.expectedTick}.`,
+      ),
+    )
+  }
+
+  if (
+    command.move !== undefined &&
+    !MOVEMENT_COMMANDS.includes(command.move as never)
+  ) {
+    issues.push(issue('INVALID_MOVE', `${path}.move`, 'Unknown move command.'))
+  }
+
+  if (
+    command.weaponA !== undefined &&
+    !WEAPON_COMMANDS.includes(command.weaponA as never)
+  ) {
+    issues.push(
+      issue('INVALID_WEAPON_A', `${path}.weaponA`, 'Unknown weaponA command.'),
+    )
+  }
+
+  if (
+    command.weaponB !== undefined &&
+    !WEAPON_COMMANDS.includes(command.weaponB as never)
+  ) {
+    issues.push(
+      issue('INVALID_WEAPON_B', `${path}.weaponB`, 'Unknown weaponB command.'),
+    )
+  }
+
+  if (
+    command.utility !== undefined &&
+    !UTILITY_COMMANDS.includes(command.utility as never)
+  ) {
+    issues.push(
+      issue('INVALID_UTILITY', `${path}.utility`, 'Unknown utility command.'),
+    )
+  }
+
+  return typeof tick === 'number' && Number.isInteger(tick) ? tick : undefined
 }

@@ -1,6 +1,7 @@
 import type {
   ArenaConfig,
   CombatSummary,
+  CombatTurnSnapshot,
   GeneratedControls,
   InventoryItem,
   NormalizedRoundPlanSubmission,
@@ -11,6 +12,7 @@ import type {
   SessionLogEvent,
   SessionPhase,
   TeamRole,
+  TurnCommand,
 } from '../../../packages/schemas/src/index.js'
 
 export type TokenKind = 'claim' | 'role' | 'referee'
@@ -23,6 +25,7 @@ export type RateLimitAction =
   | 'claim'
   | 'state'
   | 'submit'
+  | 'turn'
   | 'chat'
   | 'private_chat'
   | 'advance_round'
@@ -55,6 +58,16 @@ export type StoredRoleState = {
   privateChatLog: SessionChatMessage[]
 }
 
+export type StoredCombatState = {
+  nextTick: number
+  openedAt: string
+  deadlineAt: string
+  turnSeconds: number
+  commands: Record<TeamRole, TurnCommand[]>
+  pending: Partial<Record<TeamRole, TurnCommand>>
+  snapshot: CombatTurnSnapshot
+}
+
 export type StoredSessionState = {
   id: string
   phase: SessionPhase
@@ -67,6 +80,7 @@ export type StoredSessionState = {
   updatedAt: string
   roles: Record<TeamRole, StoredRoleState>
   refereeTokenHash?: string
+  combat?: StoredCombatState
   replay?: ReplayPayload
   lastResult?: CombatSummary
   chatLog: SessionChatMessage[]

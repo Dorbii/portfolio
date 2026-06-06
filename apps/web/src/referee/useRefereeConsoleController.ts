@@ -14,7 +14,6 @@ import {
   loadPublicSession,
   normalizeSessionId,
   parseSessionIdFromLocation,
-  resetRoleClaim,
   readStoredSession,
   setSessionIdInUrl,
   toUserMessage,
@@ -24,7 +23,6 @@ import { capitalize } from '../shared/format'
 import {
   createRefereeAgentBriefs,
   hasInviteForRole as inviteListHasRole,
-  replaceInvite,
 } from './refereeAgentBriefs'
 import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
@@ -32,12 +30,10 @@ import { useRefereeReplayPayload } from './useRefereeReplayPayload'
 type SessionLoadState = 'idle' | 'busy'
 
 export function useRefereeConsoleController() {
-  const [sessionInput, setSessionInput] = useState(() => parseSessionIdFromLocation())
   const [activeSessionId, setActiveSessionId] = useState(() => parseSessionIdFromLocation())
   const [publicSession, setPublicSession] = useState<PublicSessionState | null>(null)
   const [invites, setInvites] = useState<RoleInvite[]>([])
   const [storedRefereeToken, setStoredRefereeToken] = useState('')
-  const [manualRefereeToken, setManualRefereeToken] = useState('')
   const [loadState, setLoadState] = useState<SessionLoadState>('idle')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -56,18 +52,11 @@ export function useRefereeConsoleController() {
     round: publicSession?.round,
   })
 
-  const activeRefereeToken = manualRefereeToken.trim() || storedRefereeToken
+  const activeRefereeToken = storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
-  const isActiveSession = activeSessionId.length > 0
-  const canResetAgentClaim =
-    isActiveSession &&
-    hasRefereeToken &&
-    loadState !== 'busy' &&
-    (publicSession?.phase === 'waiting_for_agents' || publicSession?.phase === 'submission_phase')
   const {
     advanceRoundHint,
     advanceRoundLabel,
-    advanceState,
     canAdvanceRound,
     submitRoundAdvance,
   } = useRefereeRoundAdvance({
@@ -153,44 +142,6 @@ export function useRefereeConsoleController() {
     [apiBase],
   )
 
-  const setActiveSession = useCallback(
-    (sessionId: string) => {
-      const normalizedSessionId = normalizeSessionId(sessionId)
-
-      if (!normalizedSessionId) {
-        clearSessionState()
-        setActiveSessionId('')
-        setSessionInput('')
-        return
-      }
-
-      if (!isValidSessionId(normalizedSessionId)) {
-        setError('Invalid session id. It should look like s_xxxx.')
-        return
-      }
-
-      setError('')
-      setMessage('')
-      setSessionInput(normalizedSessionId)
-      setSessionIdInUrl(normalizedSessionId)
-      setManualRefereeToken('')
-
-      if (normalizedSessionId === activeSessionId) {
-        hydrateStoredSession(normalizedSessionId)
-        void loadPublicState(normalizedSessionId)
-        return
-      }
-
-      setActiveSessionId(normalizedSessionId)
-    },
-    [
-      activeSessionId,
-      clearSessionState,
-      hydrateStoredSession,
-      loadPublicState,
-    ],
-  )
-
   useEffect(() => {
     sessionIdRef.current = activeSessionId
   }, [activeSessionId])
@@ -240,12 +191,10 @@ export function useRefereeConsoleController() {
 
       skipNextActiveLoadRef.current = true
       setActiveSessionId(response.sessionId)
-      setSessionInput(response.sessionId)
       setSessionIdInUrl(response.sessionId)
       setPublicSession(response.publicState)
       setInvites(response.invites)
       setStoredRefereeToken(response.refereeToken)
-      setManualRefereeToken('')
       clearReplayState()
       setMessage('Session created. Keep this tab open to retain the referee capability token.')
       writeStoredSession(window.sessionStorage, apiBase, response.sessionId, {
@@ -270,65 +219,6 @@ export function useRefereeConsoleController() {
         setError('Clipboard copy blocked. Select and copy manually.')
       })
   }, [])
-
-  const resetAgentClaim = useCallback(
-    async (role: TeamRole) => {
-      if (!activeSessionId) {
-        setError('Load a session before resetting an agent claim.')
-        return
-      }
-
-      if (!hasRefereeToken) {
-        setError('Referee token is required to reset agent claims.')
-        return
-      }
-
-      if (publicSession?.phase !== 'waiting_for_agents' && publicSession?.phase !== 'submission_phase') {
-        setError(
-          `Agent claims can be reset only before combat resolves. Current phase: ${publicSession?.phase ?? 'unknown'}.`,
-        )
-        return
-      }
-
-      setLoadState('busy')
-      setError('')
-      setMessage('')
-
-      try {
-        const response = await resetRoleClaim(
-          apiBase,
-          activeSessionId,
-          activeRefereeToken,
-          role,
-        )
-        const nextInvites = replaceInvite(invites, response.invite)
-
-        setInvites(nextInvites)
-        setPublicSession(response.publicState)
-        setStoredRefereeToken(activeRefereeToken)
-        writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
-          refereeToken: activeRefereeToken,
-          invites: nextInvites,
-          expiresAt: response.publicState.expiresAt,
-        })
-        clearReplayState()
-        setMessage(`${capitalize(role)} agent claim reset. Share the new handoff.`)
-      } catch (resetError) {
-        setError(toUserMessage(resetError))
-      } finally {
-        setLoadState('idle')
-      }
-    },
-    [
-      activeRefereeToken,
-      activeSessionId,
-      apiBase,
-      hasRefereeToken,
-      invites,
-      clearReplayState,
-      publicSession?.phase,
-    ],
-  )
 
   const hasInviteForRole = useCallback(
     (role: TeamRole) => {
@@ -355,81 +245,51 @@ export function useRefereeConsoleController() {
   )
 
   const phase = publicSession?.phase ?? 'not_started'
-  const sessionEvents = publicSession?.eventLog ?? ([] as PublicSessionState['eventLog'])
   const sessionChat = publicSession?.chatLog ?? ([] as PublicSessionState['chatLog'])
 
-  const saveManualRefereeToken = useCallback(() => {
+  const refreshStoredSession = useCallback(() => {
     if (!activeSessionId) {
-      setError('Load a session before saving token.')
       return
     }
 
-    if (!manualRefereeToken.trim()) {
-      setError('Referee token cannot be blank.')
-      return
+    try {
+      clearStoredSession(window.localStorage, apiBase, activeSessionId)
+    } catch {
+      // Session storage is the active store; localStorage cleanup is best-effort.
     }
-
-    if (!publicSession) {
-      setError('Load public session state before saving token.')
-      return
-    }
-
-    setStoredRefereeToken(manualRefereeToken.trim())
-    writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
-      refereeToken: manualRefereeToken.trim(),
-      expiresAt: publicSession.expiresAt,
-    })
-    setError('')
-    setMessage('Token saved for this session in this tab.')
-  }, [activeSessionId, apiBase, manualRefereeToken, publicSession])
-
-  const clearStoredRefereeToken = useCallback(() => {
-    if (!activeSessionId) {
-      setError('Load a session before clearing token.')
-      return
-    }
-
     clearStoredSession(window.sessionStorage, apiBase, activeSessionId)
     setStoredRefereeToken('')
     setInvites([])
-    setMessage('Stored referee token cleared for this tab.')
-  }, [activeSessionId, apiBase])
+    setError('')
+    setMessage('Stored session token cleared. Public session refreshed.')
+    void loadPublicState(activeSessionId, { silent: true })
+  }, [activeSessionId, apiBase, loadPublicState])
+
   return {
     activeSessionId,
     advanceRoundHint,
     advanceRoundLabel,
-    advanceState,
     apiBase,
     blueAgentBrief,
     blueInviteUrl,
-    canResetAgentClaim,
     canAdvanceRound,
-    clearStoredRefereeToken,
     copyAgentBrief,
     createNewSession,
     error,
     hasAnyInvite,
     hasInviteForRole,
     hasRefereeToken,
-    isActiveSession,
     loadState,
-    manualRefereeToken,
     message,
     phase,
     publicSession,
     redAgentBrief,
     redInviteUrl,
-    resetAgentClaim,
+    refreshStoredSession,
     replayError,
     replayLoadState,
     replayPayload,
-    saveManualRefereeToken,
     sessionChat,
-    sessionEvents,
-    sessionInput,
-    setActiveSession,
-    setManualRefereeToken,
-    setSessionInput,
     storedRefereeToken,
     submitRoundAdvance,
   }

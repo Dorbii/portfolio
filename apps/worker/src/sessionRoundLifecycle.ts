@@ -87,5 +87,6 @@ export function applyNextRoundEconomy(state: StoredSessionState): void {
   }
 
   state.round += 1
+  state.combat = undefined
   state.replay = undefined
 }

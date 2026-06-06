@@ -37,6 +37,7 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   claim: { windowMs: 60 * 1000, max: 20 },
   state: { windowMs: 60 * 1000, max: 120 },
   submit: { windowMs: 60 * 1000, max: 20 },
+  turn: { windowMs: 60 * 1000, max: 120 },
   chat: { windowMs: 60 * 1000, max: 30 },
   private_chat: { windowMs: 60 * 1000, max: 30 },
   advance_round: { windowMs: 60 * 1000, max: 20 },
@@ -173,6 +174,7 @@ export function mergeRateLimits(
     claim: overrides?.claim ?? DEFAULT_RATE_LIMITS.claim,
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
     submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
+    turn: overrides?.turn ?? DEFAULT_RATE_LIMITS.turn,
     chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
     private_chat: overrides?.private_chat ?? DEFAULT_RATE_LIMITS.private_chat,
     advance_round: overrides?.advance_round ?? DEFAULT_RATE_LIMITS.advance_round,
@@ -211,6 +213,10 @@ export function nextActionForRole(state: RolePrivateState): AgentNextAction {
 
   if (state.phase === 'submission_phase') {
     return state.submitted ? 'wait_for_opponent_submission' : 'submit_round_plan'
+  }
+
+  if (state.phase === 'combat_turn') {
+    return state.combat?.submitted[state.role] ? 'wait_for_opponent_turn' : 'submit_turn_command'
   }
 
   if (state.phase === 'round_review') {

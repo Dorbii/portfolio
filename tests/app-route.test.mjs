@@ -139,6 +139,14 @@ const babylonArenaSource = readFileSync(
   new URL('../apps/web/src/replay/babylonArena.ts', import.meta.url),
   'utf8',
 )
+const babylonMaterialsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonMaterials.ts', import.meta.url),
+  'utf8',
+)
+const babylonSurfaceTexturesSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonSurfaceTextures.ts', import.meta.url),
+  'utf8',
+)
 const babylonPartDetailsSource = readFileSync(
   new URL('../apps/web/src/replay/babylonPartDetails.ts', import.meta.url),
   'utf8',
@@ -217,23 +225,30 @@ test('root console is wired to live referee session helpers', () => {
   assert.ok(refereeRuntimeSource.includes('loadReplayPayload'))
   assert.ok(refereeConsoleSource.includes('ReplayViewer'))
   assert.ok(refereeConsoleSource.includes("import('../replay/ReplayViewer')"))
-  assert.ok(refereeConsoleSource.includes('ReplayOutcome'))
   assert.ok(refereeConsoleSource.includes('PublicChatLog'))
   assert.ok(refereeConsoleSource.includes('Fight comms'))
   assert.ok(refereeRuntimeSource.includes('advanceRound'))
-  assert.ok(refereeRuntimeSource.includes('resetRoleClaim'))
   assert.equal(refereeRuntimeSource.includes('Create capability token'), false)
-  assert.ok(refereeConsoleSource.includes('Referee capability token'))
+  assert.equal(refereeConsoleSource.includes('Referee capability token'), false)
   assert.ok(refereeRuntimeSource.includes('createExternalAgentBriefMarkdown'))
-  assert.ok(refereePanelsSource.includes('getInvitePanelMode'))
-  assert.ok(refereePanelsSource.includes("panelMode === 'claimed'"))
+  assert.ok(refereeConsoleSource.includes('roleHandoffs'))
+  assert.ok(refereeConsoleSource.includes('sessionControl'))
+  assert.ok(refereePanelsSource.includes('scoreboard-session-actions'))
+  assert.ok(refereePanelsSource.includes('Refresh Session'))
+  assert.ok(refereePanelsSource.includes('scoreboard-handoff-actions'))
+  assert.ok(refereePanelsSource.includes('team-status-facts'))
+  assert.ok(refereePanelsSource.includes('StatusFact'))
+  assert.ok(refereePanelsSource.includes('View cockpit'))
   assert.ok(refereePanelsSource.includes('Copy handoff'))
-  assert.ok(refereePanelsSource.includes('Reset agent claim'))
   assert.ok(refereeRuntimeSource.includes('handoff copied'))
-  assert.ok(refereeRuntimeSource.includes('resetAgentClaim'))
+  assert.ok(refereeConsoleControllerSource.includes('writeStoredSession(window.sessionStorage'))
+  assert.ok(refereeConsoleControllerSource.includes('refreshStoredSession'))
+  assert.equal(refereeConsoleSource.includes('FormField'), false)
+  assert.equal(refereeConsoleSource.includes('Session ID'), false)
+  assert.equal(refereePanelsSource.includes('label="Claim"'), false)
+  assert.equal(refereePanelsSource.includes('label="Submission"'), false)
   assert.equal(refereeRuntimeSource.includes(['wake', 'brief', 'copied'].join(' ')), false)
   assert.equal(refereeRuntimeSource.includes(['Refresh', 'claim'].join(' ')), false)
-  assert.ok(refereeRuntimeSource.includes('replaceInvite'))
 })
 
 test('agent cockpit renders reliability and debug hooks', () => {
@@ -366,7 +381,7 @@ test('Agent Arena operational surfaces use shared UI primitives', () => {
   assert.ok(cockpitSurfaceSource.includes("from '../shared/ui'"))
   assert.ok(replayViewerSource.includes("from '../shared/ui'"))
   assert.ok(refereeConsoleSource.includes('<Panel className="panel'))
-  assert.ok(refereeConsoleSource.includes('<MetricGrid className="session-metrics">'))
+  assert.ok(refereePanelsSource.includes('<ActionGroup className="scoreboard-session-actions"'))
   assert.ok(refereePanelsSource.includes('<SectionHeading'))
   assert.ok(cockpitSurfaceSource.includes('<Panel className="agent-live-panel cockpit-secondary-panel'))
   assert.ok(cockpitSurfaceSource.includes('<MetricGrid className="agent-facts">'))
@@ -499,7 +514,21 @@ test('tooling consolidates catalog AST extraction and dead-export audit paths', 
 test('Babylon material and part-language surfaces use PBR tokens and catalog-backed dispatch', () => {
   assert.ok(babylonSceneUtilsSource.includes('PBRMetallicRoughnessMaterial'))
   assert.ok(babylonSceneUtilsSource.includes('function createPbrSceneMaterial'))
+  assert.ok(babylonMaterialsSource.includes('PBRMetallicRoughnessMaterial'))
+  assert.ok(babylonMaterialsSource.includes('type CombatTeamPalette'))
+  assert.ok(babylonMaterialsSource.includes('DEFAULT_TEAM_PALETTES'))
+  assert.ok(babylonMaterialsSource.includes('paletteOverrides'))
+  assert.ok(babylonMaterialsSource.includes('function createBotMaterialSet'))
+  assert.ok(babylonMaterialsSource.includes('type DamageMaterialSet'))
+  assert.ok(babylonMaterialsSource.includes('function damageTierForSeverity'))
+  assert.ok(babylonMaterialsSource.includes('DAMAGE_MEDIUM_THRESHOLD'))
+  assert.ok(babylonMaterialsSource.includes('DAMAGE_CRITICAL_THRESHOLD'))
+  assert.ok(babylonMaterialsSource.includes('createPbrSurfaceTextures'))
+  assert.ok(babylonSurfaceTexturesSource.includes('type SurfacePattern'))
+  assert.ok(babylonSurfaceTexturesSource.includes(" | 'arena_floor'"))
+  assert.ok(babylonSurfaceTexturesSource.includes(" | 'damage_critical'"))
   assert.ok(babylonArenaSource.includes('createPbrSceneMaterial'))
+  assert.ok(babylonArenaSource.includes("'arena_floor'"))
   assert.ok(babylonRendererKitSource.includes('function applyRendererEnvironment'))
   assert.ok(babylonRendererKitSource.includes('createDefaultEnvironment'))
   assert.ok(babylonWeaponPartsSource.includes('WEAPON_RENDERERS_BY_VISUAL_FAMILY'))

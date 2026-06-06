@@ -37,20 +37,11 @@ export function normalizeRoundSubmission(
       : {}),
   }
 
-  if (submission.schemaVersion === 2) {
-    return {
-      ...common,
-      schemaVersion: 2,
-      tactics: normalizeTacticsForBlueprint(submission.tactics, submission.blueprint),
-      openingScript: cloneOpeningScript(submission.openingScript ?? EMPTY_OPENING_SCRIPT),
-    }
-  }
-
   return {
     ...common,
     schemaVersion: 2,
-    tactics: defaultTacticsForBlueprint(submission.blueprint),
-    openingScript: cloneOpeningScript(submission.turnPlan),
+    tactics: normalizeTacticsForBlueprint(submission.tactics, submission.blueprint),
+    openingScript: cloneOpeningScript(submission.openingScript ?? EMPTY_OPENING_SCRIPT),
   }
 }
 

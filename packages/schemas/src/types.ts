@@ -14,6 +14,7 @@ export const SESSION_PHASES = [
   'round_setup',
   'submission_phase',
   'submissions_locked',
+  'combat_turn',
   'combat_resolved',
   'replay_phase',
   'round_review',
@@ -187,6 +188,15 @@ export type TurnCommand = {
   utility?: UtilityCommand
 }
 
+export type TurnCommandSubmission = {
+  action: 'submit_turn_command'
+  tick: number
+  move?: MovementCommand
+  weaponA?: WeaponCommand
+  weaponB?: WeaponCommand
+  utility?: UtilityCommand
+}
+
 export type TurnPlan = {
   commands: TurnCommand[]
 }
@@ -269,16 +279,6 @@ export type AgentChatMessageRequest = {
   kind?: AgentChatMessageKind
 }
 
-export type RoundPlanSubmissionV1 = {
-  action: 'submit_round_plan'
-  schemaVersion?: 1
-  purchases: Purchase[]
-  blueprint: BotBlueprint
-  turnPlan: TurnPlan
-  rationale?: string
-  chat?: AgentChatMessageRequest[]
-}
-
 export type RoundPlanSubmissionV2 = {
   action: 'submit_round_plan'
   schemaVersion: 2
@@ -290,7 +290,7 @@ export type RoundPlanSubmissionV2 = {
   chat?: AgentChatMessageRequest[]
 }
 
-export type RoundPlanSubmission = RoundPlanSubmissionV1 | RoundPlanSubmissionV2
+export type RoundPlanSubmission = RoundPlanSubmissionV2
 
 export type NormalizedRoundPlanSubmission = {
   action: 'submit_round_plan'
@@ -308,6 +308,46 @@ export type ArenaConfig = {
   width: number
   height: number
   activeHazards: string[]
+}
+
+export type BotCombatStats = {
+  armor: number
+  chaos: number
+  control: number
+  durability: number
+  footprint: number
+  mass: number
+  mobility: number
+  stability: number
+  style: number
+  traction: number
+  weaponThreat: number
+}
+
+export type CombatBotSnapshot = {
+  role: TeamRole
+  position: Vector3
+  health: number
+  maxHealth: number
+  partHealth: Record<string, number>
+  stats: BotCombatStats
+  hasUtilityControl: boolean
+  hasWeaponControl: boolean
+  weaponSlotCount: number
+  weaponReach: number
+  statuses: string[]
+  cooldowns: Record<string, number>
+  charges: Record<string, number>
+}
+
+export type CombatTurnSnapshot = {
+  tick: number
+  arena: ArenaConfig
+  distance: number
+  hardMaxTicks: number
+  recentEvents: string[]
+  red: CombatBotSnapshot
+  blue: CombatBotSnapshot
 }
 
 export type SessionChatMessage = {

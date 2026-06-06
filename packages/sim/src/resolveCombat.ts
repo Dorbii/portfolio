@@ -10,6 +10,8 @@ import {
 import type {
   ArenaConfig,
   BotBlueprint,
+  CombatBotSnapshot,
+  CombatTurnSnapshot,
   MovementCommand,
   NormalizedBotTactics,
   OpeningScript,
@@ -75,6 +77,23 @@ export type ResolveCombatInput = {
   arena?: ArenaConfig
 }
 
+export type SubmittedCombatCommands = Record<TeamRole, readonly TurnCommand[]>
+
+export type SubmittedCombatResolution =
+  | {
+      status: 'active'
+      nextTick: number
+      snapshot: CombatTurnSnapshot
+      replay: ReplayTimeline
+      log: string[]
+    }
+  | {
+      status: 'complete'
+      nextTick: number
+      snapshot: CombatTurnSnapshot
+      result: CombatResult
+    }
+
 type BotRuntime = {
   role: TeamRole
   stats: BotStats
@@ -105,6 +124,23 @@ type RuntimePart = {
   position: Vector3
   health: number
   maxHealth: number
+}
+
+type CombatRuntimeState = {
+  round: number
+  arena: ArenaConfig
+  rng: () => number
+  red: BotRuntime
+  blue: BotRuntime
+  events: ReplayEvent[]
+  log: string[]
+  elapsedTicks: number
+  lastDamageTick: number
+  stoppedByNoDamage: boolean
+}
+
+type CombatTickResult = {
+  completed: boolean
 }
 
 type PartDamageHit = {
@@ -425,6 +461,125 @@ function controlDangerScore(bot: BotRuntime): number {
   }
 
   return score
+}
+
+function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
+  const arena = input.arena ?? DEFAULT_ARENA
+  const redStats = deriveBotStats(input.red.blueprint)
+  const blueStats = deriveBotStats(input.blue.blueprint)
+  const red = createBotRuntime('red', input.red.blueprint, redStats, [-6, 0, 0])
+  const blue = createBotRuntime('blue', input.blue.blueprint, blueStats, [6, 0, 0])
+
+  return {
+    round: input.round,
+    arena,
+    rng: createSeededRng(`${input.seed}:${input.round}`),
+    red,
+    blue,
+    events: [
+      { t: 0, type: 'spawn', bot: 'red', position: red.position, rotation: [0, 90, 0] },
+      { t: 0, type: 'spawn', bot: 'blue', position: blue.position, rotation: [0, -90, 0] },
+    ],
+    log: [],
+    elapsedTicks: 0,
+    lastDamageTick: 0,
+    stoppedByNoDamage: false,
+  }
+}
+
+function createBotRuntime(
+  role: TeamRole,
+  blueprint: BotBlueprint,
+  stats: BotStats,
+  position: Vector3,
+): BotRuntime {
+  const parts = createRuntimeParts(blueprint, stats)
+  const index = createBotRuntimeIndex(parts)
+  const weaponSlotCount = countAliveWeaponSlots(index)
+  const health = sumPartHealth(parts)
+
+  return {
+    role,
+    stats,
+    parts,
+    index,
+    health,
+    maxHealth: health,
+    hasUtilityControl: index.utilityControlParts.length > 0,
+    hasWeaponControl: weaponSlotCount > 0,
+    weaponSlotCount,
+    position,
+    statuses: [],
+    cooldowns: {},
+    charges: createInitialCharges(parts),
+    lastDamagedTick: -Infinity,
+    lastDealtDamageTick: -Infinity,
+  }
+}
+
+function createCombatSnapshot(
+  tick: number,
+  arena: ArenaConfig,
+  red: BotRuntime,
+  blue: BotRuntime,
+  events: readonly ReplayEvent[],
+): CombatTurnSnapshot {
+  return {
+    tick,
+    arena,
+    distance: round(distance(red.position, blue.position)),
+    hardMaxTicks: HARD_MAX_COMBAT_TICKS,
+    recentEvents: recentEventSummaries(events),
+    red: createBotSnapshot(red),
+    blue: createBotSnapshot(blue),
+  }
+}
+
+function createBotSnapshot(bot: BotRuntime): CombatBotSnapshot {
+  return {
+    role: bot.role,
+    position: [...bot.position],
+    health: round(bot.health),
+    maxHealth: round(bot.maxHealth),
+    partHealth: partHealthByBlock(bot.parts),
+    stats: { ...bot.stats },
+    hasUtilityControl: bot.hasUtilityControl,
+    hasWeaponControl: bot.hasWeaponControl,
+    weaponSlotCount: bot.weaponSlotCount,
+    weaponReach: round(weaponReach(bot)),
+    statuses: bot.statuses.map((status) => status.id).sort(),
+    cooldowns: { ...bot.cooldowns },
+    charges: { ...bot.charges },
+  }
+}
+
+function recentEventSummaries(events: readonly ReplayEvent[]): string[] {
+  return events
+    .slice(-8)
+    .map((event) => describeReplayEvent(event))
+}
+
+function describeReplayEvent(event: ReplayEvent): string {
+  switch (event.type) {
+    case 'spawn':
+      return `${event.bot} spawned`
+    case 'move':
+      return `${event.bot} moved ${event.command ?? event.intent}`
+    case 'weapon_fire':
+      return `${event.bot} fired ${event.weaponSlot ?? 'weapon'}`
+    case 'impact':
+      return `${event.attacker} hit ${event.defender}`
+    case 'damage':
+      return `${event.bot} took ${event.amount} damage`
+    case 'hazard':
+      return `${event.bot} took ${event.damage} hazard damage`
+    case 'part_detach':
+      return `${event.bot} lost ${event.partId}`
+    case 'knockout':
+      return `${event.bot} was knocked out`
+    default:
+      return event.type
+  }
 }
 
 function sumPartHealth(parts: RuntimePart[]): number {
@@ -1282,60 +1437,90 @@ function resolveHazard(
   }
 }
 
-export function resolveCombat(input: ResolveCombatInput): CombatResult {
-  const arena = input.arena ?? DEFAULT_ARENA
-  const rng = createSeededRng(`${input.seed}:${input.round}`)
-  const redStats = deriveBotStats(input.red.blueprint)
-  const blueStats = deriveBotStats(input.blue.blueprint)
-  const redParts = createRuntimeParts(input.red.blueprint, redStats)
-  const blueParts = createRuntimeParts(input.blue.blueprint, blueStats)
-  const redIndex = createBotRuntimeIndex(redParts)
-  const blueIndex = createBotRuntimeIndex(blueParts)
-  const redWeaponSlotCount = countAliveWeaponSlots(redIndex)
-  const blueWeaponSlotCount = countAliveWeaponSlots(blueIndex)
-  const red: BotRuntime = {
-    role: 'red',
-    stats: redStats,
-    parts: redParts,
-    index: redIndex,
-    health: sumPartHealth(redParts),
-    maxHealth: sumPartHealth(redParts),
-    hasUtilityControl: redIndex.utilityControlParts.length > 0,
-    hasWeaponControl: redWeaponSlotCount > 0,
-    weaponSlotCount: redWeaponSlotCount,
-    position: [-6, 0, 0],
-    statuses: [],
-    cooldowns: {},
-    charges: createInitialCharges(redParts),
-    lastDamagedTick: -Infinity,
-    lastDealtDamageTick: -Infinity,
+function applyCombatTick(
+  state: CombatRuntimeState,
+  tick: number,
+  redCommand: TurnCommand,
+  blueCommand: TurnCommand,
+): CombatTickResult {
+  const { arena, events, red, blue } = state
+
+  state.elapsedTicks = tick
+  advanceRuntimeEffects(red, tick)
+  advanceRuntimeEffects(blue, tick)
+
+  const redFrom = red.position
+  const blueFrom = blue.position
+  const healthBeforeTick = red.health + blue.health
+  const redMovementUtility = activateMovementUtility(red, redCommand)
+  const blueMovementUtility = activateMovementUtility(blue, blueCommand)
+
+  red.lastMove = redCommand.move
+  blue.lastMove = blueCommand.move
+
+  red.position = moveBot(red, redCommand, arena, redMovementUtility.multiplier)
+  blue.position = moveBot(blue, blueCommand, arena, blueMovementUtility.multiplier)
+
+  if (!positionsEqual(redFrom, red.position)) {
+    events.push(createMoveEvent(tick, red, redFrom, red.position, redCommand.move))
   }
-  const blue: BotRuntime = {
-    role: 'blue',
-    stats: blueStats,
-    parts: blueParts,
-    index: blueIndex,
-    health: sumPartHealth(blueParts),
-    maxHealth: sumPartHealth(blueParts),
-    hasUtilityControl: blueIndex.utilityControlParts.length > 0,
-    hasWeaponControl: blueWeaponSlotCount > 0,
-    weaponSlotCount: blueWeaponSlotCount,
-    position: [6, 0, 0],
-    statuses: [],
-    cooldowns: {},
-    charges: createInitialCharges(blueParts),
-    lastDamagedTick: -Infinity,
-    lastDealtDamageTick: -Infinity,
+  if (!positionsEqual(blueFrom, blue.position)) {
+    events.push(createMoveEvent(tick, blue, blueFrom, blue.position, blueCommand.move))
   }
 
-  const events: ReplayEvent[] = [
-    { t: 0, type: 'spawn', bot: 'red', position: red.position, rotation: [0, 90, 0] },
-    { t: 0, type: 'spawn', bot: 'blue', position: blue.position, rotation: [0, -90, 0] },
-  ]
-  const log: string[] = []
-  let elapsedTicks = 0
-  let lastDamageTick = 0
-  let stoppedByNoDamage = false
+  resolveWeapons(events, tick, arena, red, blue, redCommand, state.rng)
+  resolveWeapons(events, tick, arena, blue, red, blueCommand, state.rng)
+  resolveUtilities(events, tick, arena, red, blue, redCommand, redMovementUtility.consumed)
+  resolveUtilities(events, tick, arena, blue, red, blueCommand, blueMovementUtility.consumed)
+
+  if (
+    !isBotDestroyed(red) &&
+    !isBotDestroyed(blue) &&
+    distance(red.position, blue.position) < CONTACT_DISTANCE &&
+    (isContactMove(redCommand) || isContactMove(blueCommand))
+  ) {
+    const redRamDamage = contactAttackDamage(red, redCommand)
+    const blueRamDamage = contactAttackDamage(blue, blueCommand)
+    const redRetaliationDamage = contactRetaliationDamage(red, blueCommand)
+    const blueRetaliationDamage = contactRetaliationDamage(blue, redCommand)
+
+    if (redRamDamage > 0) {
+      applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+      applyContactDisruption(red, blue, redCommand, tick)
+    }
+    if (blueRamDamage > 0) {
+      applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+      applyContactDisruption(blue, red, blueCommand, tick)
+    }
+    if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
+      applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
+    }
+    if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
+      applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
+    }
+  }
+
+  resolveHazard(events, tick, arena, red)
+  resolveHazard(events, tick, arena, blue)
+
+  if (red.health + blue.health < healthBeforeTick) {
+    state.lastDamageTick = tick
+  }
+
+  if (isBotDestroyed(red) || isBotDestroyed(blue)) {
+    return { completed: true }
+  }
+
+  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TICKS) {
+    state.stoppedByNoDamage = true
+    return { completed: true }
+  }
+
+  return { completed: tick >= HARD_MAX_COMBAT_TICKS }
+}
+
+export function resolveCombat(input: ResolveCombatInput): CombatResult {
+  const state = createCombatRuntime(input)
   const redPolicy = compileCommandPolicy({
     tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS,
     openingScript: input.red.openingScript,
@@ -1346,88 +1531,74 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   })
 
   for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
-    elapsedTicks = tick
-    advanceRuntimeEffects(red, tick)
-    advanceRuntimeEffects(blue, tick)
-
     const redCommand = chooseCommand(
       redPolicy,
       tick,
-      { bot: policyStateFor(red), opponent: policyStateFor(blue), arena },
+      { bot: policyStateFor(state.red), opponent: policyStateFor(state.blue), arena: state.arena },
     )
     const blueCommand = chooseCommand(
       bluePolicy,
       tick,
-      { bot: policyStateFor(blue), opponent: policyStateFor(red), arena },
+      { bot: policyStateFor(state.blue), opponent: policyStateFor(state.red), arena: state.arena },
     )
-    const redFrom = red.position
-    const blueFrom = blue.position
-    const healthBeforeTick = red.health + blue.health
-    const redMovementUtility = activateMovementUtility(red, redCommand)
-    const blueMovementUtility = activateMovementUtility(blue, blueCommand)
 
-    red.lastMove = redCommand.move
-    blue.lastMove = blueCommand.move
-
-    red.position = moveBot(red, redCommand, arena, redMovementUtility.multiplier)
-    blue.position = moveBot(blue, blueCommand, arena, blueMovementUtility.multiplier)
-
-    if (!positionsEqual(redFrom, red.position)) {
-      events.push(createMoveEvent(tick, red, redFrom, red.position, redCommand.move))
-    }
-    if (!positionsEqual(blueFrom, blue.position)) {
-      events.push(createMoveEvent(tick, blue, blueFrom, blue.position, blueCommand.move))
-    }
-
-    resolveWeapons(events, tick, arena, red, blue, redCommand, rng)
-    resolveWeapons(events, tick, arena, blue, red, blueCommand, rng)
-    resolveUtilities(events, tick, arena, red, blue, redCommand, redMovementUtility.consumed)
-    resolveUtilities(events, tick, arena, blue, red, blueCommand, blueMovementUtility.consumed)
-
-    if (
-      !isBotDestroyed(red) &&
-      !isBotDestroyed(blue) &&
-      distance(red.position, blue.position) < CONTACT_DISTANCE &&
-      (isContactMove(redCommand) || isContactMove(blueCommand))
-    ) {
-      const redRamDamage = contactAttackDamage(red, redCommand)
-      const blueRamDamage = contactAttackDamage(blue, blueCommand)
-      const redRetaliationDamage = contactRetaliationDamage(red, blueCommand)
-      const blueRetaliationDamage = contactRetaliationDamage(blue, redCommand)
-
-      if (redRamDamage > 0) {
-        applyDamage(events, tick, red, blue, redRamDamage, 'ram')
-        applyContactDisruption(red, blue, redCommand, tick)
-      }
-      if (blueRamDamage > 0) {
-        applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
-        applyContactDisruption(blue, red, blueCommand, tick)
-      }
-      if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
-        applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
-      }
-      if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
-        applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
-      }
-    }
-
-    resolveHazard(events, tick, arena, red)
-    resolveHazard(events, tick, arena, blue)
-
-    if (red.health + blue.health < healthBeforeTick) {
-      lastDamageTick = tick
-    }
-
-    if (isBotDestroyed(red) || isBotDestroyed(blue)) {
-      break
-    }
-
-    if (tick - lastDamageTick >= NO_DAMAGE_STALEMATE_TICKS) {
-      stoppedByNoDamage = true
+    if (applyCombatTick(state, tick, redCommand, blueCommand).completed) {
       break
     }
   }
 
+  return finalizeCombatResult(input, state)
+}
+
+export function resolveSubmittedCombat(
+  input: ResolveCombatInput,
+  commands: SubmittedCombatCommands,
+): SubmittedCombatResolution {
+  const state = createCombatRuntime(input)
+  const submittedTicks = Math.min(
+    commands.red.length,
+    commands.blue.length,
+    HARD_MAX_COMBAT_TICKS,
+  )
+
+  for (let index = 0; index < submittedTicks; index += 1) {
+    const tick = index + 1
+    const redCommand = { ...commands.red[index], tick }
+    const blueCommand = { ...commands.blue[index], tick }
+
+    if (applyCombatTick(state, tick, redCommand, blueCommand).completed) {
+      return {
+        status: 'complete',
+        nextTick: tick,
+        snapshot: createCombatSnapshot(tick, state.arena, state.red, state.blue, state.events),
+        result: finalizeCombatResult(input, state),
+      }
+    }
+  }
+
+  const nextTick = submittedTicks + 1
+  const snapshot = createCombatSnapshot(nextTick, state.arena, state.red, state.blue, state.events)
+  const replay = createReplayTimeline({
+    round: input.round,
+    duration: partialReplayDuration(state.events, state.elapsedTicks),
+    events: state.events,
+    summary: `Combat turn ${nextTick} is waiting for agent commands.`,
+  })
+
+  return {
+    status: 'active',
+    nextTick,
+    snapshot,
+    replay,
+    log: state.log,
+  }
+}
+
+function finalizeCombatResult(
+  input: ResolveCombatInput,
+  state: CombatRuntimeState,
+): CombatResult {
+  const { red, blue, events, log } = state
   const remainingHealth = {
     red: round(red.health),
     blue: round(blue.health),
@@ -1438,10 +1609,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   }
   const redDestroyed = isBotDestroyed(red)
   const blueDestroyed = isBotDestroyed(blue)
-  const hardCapped = !redDestroyed && !blueDestroyed && elapsedTicks >= HARD_MAX_COMBAT_TICKS
+  const hardCapped = !redDestroyed && !blueDestroyed && state.elapsedTicks >= HARD_MAX_COMBAT_TICKS
   const noDamageStalemate = damage.red === 0 && damage.blue === 0
   let winner: TeamRole | 'draw' = 'draw'
-  let reason = stoppedByNoDamage
+  let reason = state.stoppedByNoDamage
     ? 'No bot took damage for a full minute; the round ended as a draw.'
     : hardCapped
       ? 'Both bots survived the hard combat safety cap with equivalent combat score.'
@@ -1460,12 +1631,12 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     reason = 'Red was knocked out.'
   } else if (noDamageStalemate) {
     winner = 'draw'
-    reason = stoppedByNoDamage
+    reason = state.stoppedByNoDamage
       ? 'No bot took damage for a full minute; the round ended as a draw.'
       : 'Neither bot dealt damage.'
   } else if (remainingHealth.red !== remainingHealth.blue) {
     winner = remainingHealth.red > remainingHealth.blue ? 'red' : 'blue'
-    reason = stoppedByNoDamage
+    reason = state.stoppedByNoDamage
       ? 'No bot took damage for a full minute; remaining health decided the result.'
       : hardCapped
         ? 'Both bots survived the hard combat safety cap; remaining health decided the result.'
@@ -1476,8 +1647,11 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   log.push(`Red damage taken: ${damage.red}. Blue damage taken: ${damage.blue}.`)
 
   const lastEventTime = events.reduce((latest, event) => Math.max(latest, event.t), 0)
-  const replayDuration = stoppedByNoDamage || hardCapped
-    ? elapsedTicks
+  const replayDuration = state.stoppedByNoDamage || hardCapped
+    ? Math.min(
+        HARD_MAX_COMBAT_TICKS + REPLAY_TRAILING_SECONDS,
+        Math.max(state.elapsedTicks, round(lastEventTime + REPLAY_TRAILING_SECONDS)),
+      )
     : Math.max(MIN_REPLAY_DURATION, round(lastEventTime + REPLAY_TRAILING_SECONDS))
 
   return {
@@ -1501,4 +1675,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     }),
     log,
   }
+}
+
+function partialReplayDuration(events: ReplayEvent[], elapsedTicks: number): number {
+  const lastEventTime = events.reduce((latest, event) => Math.max(latest, event.t), 0)
+
+  return Math.max(MIN_REPLAY_DURATION, elapsedTicks, round(lastEventTime + REPLAY_TRAILING_SECONDS))
 }

@@ -92,6 +92,7 @@ const sparseTurnPlan = { commands: [{ tick: 3, move: 'turn_left' }] }
 
 const validSpinnerSubmission = {
   action: 'submit_round_plan',
+  schemaVersion: 2,
   purchases: [
     { partId: 'Body_Square_Medium', quantity: 1 },
     { partId: 'Wheel_Large', quantity: 2 },
@@ -111,7 +112,13 @@ const validSpinnerSubmission = {
       },
     ],
   },
-  turnPlan: {
+  tactics: {
+    movementPolicy: 'close',
+    preferredRange: 'close',
+    aggression: 0.75,
+    weaponCadence: 'opportunistic',
+  },
+  openingScript: {
     commands: [
       { tick: 1, move: 'forward', weaponA: 'hold' },
       { tick: 2, move: 'forward', weaponA: 'fire' },
@@ -185,6 +192,34 @@ async function claimBothRoles(session) {
     redToken: red.value.roleToken,
     blueToken: blue.value.roleToken,
   }
+}
+
+async function resolveLiveCombat(session, redToken, blueToken, firstState) {
+  let state = firstState
+
+  for (let index = 0; index < 90; index += 1) {
+    const tick = state.combat.tick
+    const command = {
+      action: 'submit_turn_command',
+      tick,
+      move: 'dash_forward',
+      weaponA: 'fire',
+    }
+    const redTurn = await session.submitTurnCommand(redToken, command)
+    const blueTurn = await session.submitTurnCommand(blueToken, command)
+
+    assert.equal(redTurn.ok, true)
+    assert.equal(blueTurn.ok, true)
+
+    if (blueTurn.value.publicState.phase === 'round_review') {
+      return blueTurn
+    }
+
+    assert.equal(blueTurn.value.publicState.phase, 'combat_turn')
+    state = blueTurn.value.state
+  }
+
+  throw new Error('Combat did not resolve within expected live turn budget.')
 }
 
 test('catalog exposes unique MVP part ids', () => {
@@ -333,7 +368,9 @@ test('bad but processable weaponless body is accepted', () => {
         { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
       ],
     },
-    turnPlan: brakePlan,
+    schemaVersion: 2,
+    tactics: { movementPolicy: 'hold_ground' },
+    openingScript: brakePlan,
   }
   const result = validateRoundSubmission({ gold: 100, inventory: [], submission })
 
@@ -400,7 +437,9 @@ test('round submission rejects commands for absent modules', () => {
         { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
       ],
     },
-    turnPlan: {
+    schemaVersion: 2,
+    tactics: { movementPolicy: 'hold_ground' },
+    openingScript: {
       commands: [
         { tick: 1, move: 'brake', weaponA: 'fire' },
         { tick: 2, move: 'brake' },
@@ -416,7 +455,7 @@ test('round submission rejects commands for absent modules', () => {
   assert.ok(result.issues.some((entry) => entry.code === 'WEAPON_A_NOT_AVAILABLE'))
 })
 
-test('legacy round submissions still require exactly five turn plan commands', () => {
+test('legacy turnPlan round submissions are rejected', () => {
   const result = validateRoundSubmission({
     gold: 100,
     inventory: [],
@@ -429,10 +468,10 @@ test('legacy round submissions still require exactly five turn plan commands', (
   })
 
   assert.equal(result.ok, false)
-  assert.ok(result.issues.some((entry) => entry.code === 'INVALID_TICK_COUNT'))
+  assert.ok(result.issues.some((entry) => entry.code === 'LEGACY_TURN_PLAN_REMOVED'))
 })
 
-test('legacy round submissions normalize into v2 combat input', () => {
+test('v2 round submissions normalize into combat input', () => {
   const result = validateRoundSubmission({
     gold: 100,
     inventory: [],
@@ -445,15 +484,17 @@ test('legacy round submissions normalize into v2 combat input', () => {
   assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'close')
 })
 
-test('legacy default tactics stay legal for immobile submissions', () => {
+test('v2 hold-ground tactics stay legal for immobile submissions', () => {
   const result = validateRoundSubmission({
     gold: 100,
     inventory: [],
     submission: {
       action: 'submit_round_plan',
+      schemaVersion: 2,
       purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
       blueprint: bareBodyBlueprint,
-      turnPlan: brakePlan,
+      tactics: { movementPolicy: 'hold_ground' },
+      openingScript: brakePlan,
     },
   })
 
@@ -927,7 +968,7 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: validSpinnerSubmission.turnPlan,
+      openingScript: validSpinnerSubmission.openingScript,
     },
     blue: {
       blueprint: validSpinnerSubmission.blueprint,
@@ -937,7 +978,7 @@ test('resolver is deterministic and emits a valid replay timeline', () => {
         aggression: 0.9,
         weaponCadence: 'sustained',
       }),
-      openingScript: validSpinnerSubmission.turnPlan,
+      openingScript: validSpinnerSubmission.openingScript,
     },
   }
   const first = resolveCombat(input)
@@ -2115,12 +2156,21 @@ test('session resolves after both valid plans while keeping public state redacte
   const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
 
   assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'round_review')
-  assert.equal(blueSubmission.value.publicState.replayAvailable, true)
-  assert.equal(blueSubmission.value.publicState.lastResult.winner, 'draw')
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.value.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.value.publicState.combat.tick, 1)
+  assert.equal(blueSubmission.value.state.combat.turnSeconds, 120)
+  assert.equal(blueSubmission.value.state.combat.self.role, 'blue')
+  assert.equal(blueSubmission.value.state.combat.opponent.role, 'red')
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
-  assert.ok(blueSubmission.value.publicState.chatLog.length >= 3)
-  assert.ok(blueSubmission.value.publicState.chatLog.some((message) => message.kind === 'taunt'))
+
+  const resolved = await resolveLiveCombat(session, redToken, blueToken, blueSubmission.value.state)
+
+  assert.equal(resolved.value.publicState.phase, 'round_review')
+  assert.equal(resolved.value.publicState.replayAvailable, true)
+  assert.ok(resolved.value.publicState.lastResult)
+  assert.ok(resolved.value.publicState.chatLog.length >= 3)
+  assert.ok(resolved.value.publicState.chatLog.some((message) => message.kind === 'taunt'))
 
   const replay = session.getReplay()
 
@@ -2129,7 +2179,7 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(replay.value.botBlueprints.blue.name, 'Spinner')
   assert.equal(validateReplayTimeline(replay.value), true)
 
-  const publicJson = JSON.stringify(blueSubmission.value.publicState)
+  const publicJson = JSON.stringify(resolved.value.publicState)
   assert.equal(publicJson.includes('claim_red'), false)
   assert.equal(publicJson.includes('role_blue'), false)
   assert.equal(publicJson.includes('Spinner'), false)
@@ -2178,9 +2228,42 @@ test('session accepts v2 tactics without a legacy turnPlan', async () => {
   const blueSubmission = await session.submitRoundPlan(blueToken, v2Submission)
 
   assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'round_review')
-  assert.equal(blueSubmission.value.publicState.replayAvailable, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.value.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.value.state.combat.snapshot.recentEvents.includes('red spawned'), true)
+
+  const resolved = await resolveLiveCombat(session, redToken, blueToken, blueSubmission.value.state)
+
+  assert.equal(resolved.value.publicState.phase, 'round_review')
   assert.equal(validateReplayTimeline(session.getReplay().value), true)
+})
+
+test('session applies no-op turn commands when combat turn deadline expires', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_turn_timeout', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await session.submitRoundPlan(redToken, validSpinnerSubmission)
+  const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.value.publicState.combat.tick, 1)
+
+  now = '2026-06-03T00:02:01.000Z'
+
+  const redState = await session.getRoleStateForToken(redToken)
+
+  assert.equal(redState.ok, true)
+  assert.equal(redState.value.phase, 'combat_turn')
+  assert.equal(redState.value.combat.tick, 2)
+  assert.equal(redState.value.combat.submitted.red, false)
+  assert.equal(
+    redState.value.eventLog.some((event) => event.type === 'turn_command_timed_out'),
+    true,
+  )
 })
 
 test('referee can reset a claimed role and refresh claim capability before combat resolves', async () => {
@@ -2372,7 +2455,18 @@ test('session completes on max rounds and win streak target', async () => {
   const maxRoundTokens = await claimBothRoles(maxRoundSession)
 
   await maxRoundSession.submitRoundPlan(maxRoundTokens.redToken, validSpinnerSubmission)
-  await maxRoundSession.submitRoundPlan(maxRoundTokens.blueToken, validSpinnerSubmission)
+  const maxRoundBlueSubmission = await maxRoundSession.submitRoundPlan(
+    maxRoundTokens.blueToken,
+    validSpinnerSubmission,
+  )
+  const maxRoundResolved = await resolveLiveCombat(
+    maxRoundSession,
+    maxRoundTokens.redToken,
+    maxRoundTokens.blueToken,
+    maxRoundBlueSubmission.value.state,
+  )
+
+  assert.equal(maxRoundResolved.value.publicState.phase, 'round_review')
 
   const maxRoundAdvance = await maxRoundSession.advanceRound(maxRoundRefereeToken)
 

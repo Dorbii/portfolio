@@ -11,6 +11,8 @@ import type {
   SessionChatMessage,
   SessionLogEvent,
   SessionPhase,
+  TurnCommandPostRequest,
+  TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
 import type { createAgentContract } from '../../../../packages/schemas/src/agentContract.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
@@ -49,6 +51,7 @@ export type AgentArenaValidAction = {
     | 'get_fallback_round_plan'
     | 'submit_fallback_round_plan'
     | 'submit_round_plan'
+    | 'submit_turn_command'
     | 'submit_chat_message'
     | 'submit_private_chat_message'
   available: boolean
@@ -71,6 +74,9 @@ export type AgentArenaRoleApi = {
   submitRoundPlan(
     plan: RoundPlanSubmission,
   ): Promise<RoundSubmissionResponse>
+  submitTurnCommand(
+    command: TurnCommandPostRequest,
+  ): Promise<TurnCommandResponse>
   submitChatMessage(
     input: AgentChatMessagePostRequest | string,
   ): Promise<AgentChatMessageResponse>

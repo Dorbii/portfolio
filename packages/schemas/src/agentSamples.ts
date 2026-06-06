@@ -1,5 +1,4 @@
 import type {
-  RoundPlanSubmissionV1,
   RoundPlanSubmissionV2,
   TurnCommand,
 } from './types.js'
@@ -48,9 +47,10 @@ const BASELINE_SPINNER_COMMANDS = [
 const BASELINE_SPINNER_RATIONALE =
   'A compact legal opener that buys a body, mobility, and one weapon inside the first-round budget.'
 
-export function createBaselineRoundPlan(): RoundPlanSubmissionV1 {
+export function createBaselineRoundPlan(): RoundPlanSubmissionV2 {
   return {
     action: 'submit_round_plan',
+    schemaVersion: 2,
     purchases: BASELINE_SPINNER_PURCHASES.map((purchase) => ({ ...purchase })),
     blueprint: {
       name: 'Baseline Spinner',
@@ -60,21 +60,6 @@ export function createBaselineRoundPlan(): RoundPlanSubmissionV1 {
         rotation: [...block.rotation],
       })),
     },
-    turnPlan: {
-      commands: BASELINE_SPINNER_COMMANDS.map((command) => ({ ...command })),
-    },
-    rationale: BASELINE_SPINNER_RATIONALE,
-  }
-}
-
-export function createBaselineRoundPlanV2Example(): RoundPlanSubmissionV2 {
-  const baseline = createBaselineRoundPlan()
-
-  return {
-    action: 'submit_round_plan',
-    schemaVersion: 2,
-    purchases: baseline.purchases,
-    blueprint: baseline.blueprint,
     tactics: {
       style: 'aggressive',
       targetPriority: 'closest',
@@ -85,7 +70,16 @@ export function createBaselineRoundPlanV2Example(): RoundPlanSubmissionV2 {
       weaponCadence: 'opportunistic',
       hazardPreference: 'avoid',
     },
-    openingScript: baseline.turnPlan,
+    openingScript: {
+      commands: BASELINE_SPINNER_COMMANDS.map((command) => ({ ...command })),
+    },
+    rationale: BASELINE_SPINNER_RATIONALE,
+  }
+}
+
+export function createBaselineRoundPlanV2Example(): RoundPlanSubmissionV2 {
+  return {
+    ...createBaselineRoundPlan(),
     chat: [
       {
         kind: 'strategy',
@@ -93,19 +87,5 @@ export function createBaselineRoundPlanV2Example(): RoundPlanSubmissionV2 {
           'Opening with a compact spinner; if it loses trades, next round should add armor or control.',
       },
     ],
-    rationale: baseline.rationale,
-  }
-}
-
-export function createLegacyBaselineRoundPlanExample(): RoundPlanSubmissionV1 {
-  const baseline = createBaselineRoundPlan()
-
-  return {
-    ...baseline,
-    blueprint: {
-      ...baseline.blueprint,
-      name: 'Legacy Baseline Spinner',
-    },
-    rationale: 'Legacy v1 shape remains valid for existing agents.',
   }
 }

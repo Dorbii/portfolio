@@ -45,16 +45,6 @@ export function hasInviteForRole(invites: RoleInvite[], role: TeamRole): boolean
   return invites.some((invite) => invite.role === role && invite.claimToken.length > 0)
 }
 
-export function replaceInvite(invites: RoleInvite[], invite: RoleInvite): RoleInvite[] {
-  const nextByRole = new Map(invites.map((entry) => [entry.role, entry]))
-
-  nextByRole.set(invite.role, invite)
-
-  return (['red', 'blue'] as TeamRole[])
-    .map((role) => nextByRole.get(role))
-    .filter((entry): entry is RoleInvite => entry !== undefined)
-}
-
 function inviteForRole(invites: RoleInvite[], role: TeamRole): RoleInvite | undefined {
   return invites.find((invite) => invite.role === role)
 }

@@ -1,4 +1,4 @@
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import type { Material } from '@babylonjs/core/Materials/material'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
@@ -105,7 +105,7 @@ export function createPartAccents(
 function createFastenerRow(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   name: string,
   options: {
     count: number
@@ -131,7 +131,7 @@ function createFastenerRow(
 function createVentSlats(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   name: string,
   options: {
     count: number
@@ -159,7 +159,7 @@ function createVentSlats(
 function createPanelSeam(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   name: string,
   options: {
     width: number
@@ -184,8 +184,8 @@ function createPanelSeam(
 export function createArmorPanel(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
-  trim: StandardMaterial,
+  material: Material,
+  trim: Material,
   width: number,
   height: number,
   depth: number,
@@ -219,7 +219,7 @@ export function createArmorPanel(
 export function createCornerCaps(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   width: number,
   height: number,
   depth: number,
@@ -243,7 +243,7 @@ export function createCornerCaps(
 export function createTopLamp(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   radius: number,
   y: number,
 ): void {

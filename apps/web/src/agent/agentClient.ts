@@ -15,6 +15,8 @@ import type {
   SessionChatMessage,
   SessionLogEvent,
   SessionPhase,
+  TurnCommandPostRequest,
+  TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
 import {
   createAgentInviteUrl,
@@ -67,7 +69,11 @@ export {
 const DEFAULT_WAIT_POLL_MS = 4_000
 const DEFAULT_WAIT_TIMEOUT_MS = 10 * 60_000
 const MIN_WAIT_POLL_MS = 1_000
-const PLAYABLE_NEXT_ACTIONS = new Set<AgentNextAction>(['submit_round_plan', 'stop'])
+const PLAYABLE_NEXT_ACTIONS = new Set<AgentNextAction>([
+  'submit_round_plan',
+  'submit_turn_command',
+  'stop',
+])
 
 function isRelayErrorResponse(value: unknown): value is RelayErrorResponse {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -276,6 +282,19 @@ export class AgentArenaClient {
 
   async submitFallbackRoundPlan(): Promise<RoundSubmissionResponse> {
     return this.submitRoundPlan(createBaselineRoundPlan())
+  }
+
+  async submitTurnCommand(
+    command: TurnCommandPostRequest,
+  ): Promise<TurnCommandResponse> {
+    return this.requestJson<TurnCommandResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/turn-command`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(),
+        body: JSON.stringify(command),
+      },
+    )
   }
 
   async submitChatMessage(

@@ -10,6 +10,7 @@ import {
   deterministicAngle,
   toBabylonVector,
 } from './babylonSceneUtils'
+import { damageMaterialForSeverity } from './babylonMaterials'
 import type {
   PartFrameState,
   ReplayVisualFrame,
@@ -143,7 +144,7 @@ function applyPartMaterialState(
   metadata: BotPartNodeMetadata,
   damageSeverity: number,
 ): void {
-  const isDamaged = damageSeverity > 0
+  const damageMaterial = damageMaterialForSeverity(metadata.damageMaterials, damageSeverity)
 
   node.getChildMeshes().forEach((mesh) => {
     const baseMaterial = getBasePartMaterial(mesh)
@@ -152,7 +153,7 @@ function applyPartMaterialState(
       return
     }
 
-    mesh.material = isDamaged ? metadata.damagedMaterial : baseMaterial
+    mesh.material = damageMaterial ?? baseMaterial
   })
 }
 

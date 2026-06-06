@@ -1,5 +1,4 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import { getPart } from '../../../../packages/catalog/src/index.js'
@@ -23,7 +22,10 @@ import {
 } from './babylonMeshHelpers'
 import { createMobilityPart } from './babylonMobilityParts'
 import { materialForCategory } from './babylonMaterials'
-import type { TeamMaterialSet } from './babylonMaterials'
+import type {
+  DamageMaterialSet,
+  TeamMaterialSet,
+} from './babylonMaterials'
 import { createPartAccents } from './babylonPartDetails'
 import { createStylePart } from './babylonStyleParts'
 import { createUtilityPart } from './babylonUtilityParts'
@@ -38,7 +40,7 @@ export type BotPartNodeMetadata = {
   blockId: string
   partId: string
   primaryMaterialName: string
-  damagedMaterial: StandardMaterial
+  damageMaterials: DamageMaterialSet
   basePosition: [number, number, number]
   baseRotation: [number, number, number]
 }
@@ -95,7 +97,7 @@ function createPartNode(
     blockId: block.id,
     partId: block.partId,
     primaryMaterialName: material.name,
-    damagedMaterial: materials.damaged,
+    damageMaterials: materials.damage,
     basePosition: [partNode.position.x, partNode.position.y, partNode.position.z],
     baseRotation: [partNode.rotation.x, partNode.rotation.y, partNode.rotation.z],
   } satisfies BotPartNodeMetadata

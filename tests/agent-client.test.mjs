@@ -69,8 +69,48 @@ const roleState = {
   ],
 }
 
+function combatSnapshot() {
+  const baseBot = {
+    position: [-6, 0, 0],
+    health: 100,
+    maxHealth: 100,
+    partHealth: { core: 100 },
+    stats: {
+      armor: 0,
+      chaos: 0,
+      control: 0,
+      durability: 100,
+      footprint: 1,
+      mass: 10,
+      mobility: 10,
+      stability: 10,
+      style: 0,
+      traction: 10,
+      weaponThreat: 8,
+    },
+    hasUtilityControl: false,
+    hasWeaponControl: true,
+    weaponSlotCount: 1,
+    weaponReach: 2,
+    statuses: [],
+    cooldowns: {},
+    charges: {},
+  }
+
+  return {
+    tick: 1,
+    arena: { name: 'Compact Box', width: 24, height: 16, activeHazards: ['floor_saw'] },
+    distance: 12,
+    hardMaxTicks: 600,
+    recentEvents: ['red spawned', 'blue spawned'],
+    red: { ...baseBot, role: 'red' },
+    blue: { ...baseBot, role: 'blue', position: [6, 0, 0] },
+  }
+}
+
 const roundPlan = {
   action: 'submit_round_plan',
+  schemaVersion: 2,
   purchases: [],
   blueprint: {
     name: 'Test',
@@ -83,7 +123,10 @@ const roundPlan = {
       },
     ],
   },
-  turnPlan: {
+  tactics: {
+    movementPolicy: 'hold_ground',
+  },
+  openingScript: {
     commands: [
       { tick: 1, move: 'brake' },
       { tick: 2, move: 'brake' },
@@ -244,18 +287,23 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/claim'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/private-chat'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/turn-command'))
   assert.ok(brief.includes('window.AgentArenaRole.submitPrivateChatMessage'))
+  assert.ok(brief.includes('window.AgentArenaRole.submitTurnCommand'))
   assert.ok(brief.includes('Do not submit hidden chain-of-thought'))
   assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
   assert.ok(brief.includes('window.AgentArenaRole.waitForNextAction({ timeoutMs: 600000 })'))
   assert.ok(brief.includes('window.AgentArenaRole.submitFallbackRoundPlan()'))
-  assert.ok(brief.includes('If a submit response has state.submitted=true, stop submitting for this round and keep waiting'))
+  assert.ok(brief.includes('If a submit succeeds, stop submitting that same build or turn'))
   assert.ok(brief.includes('Do not keep retrying'))
   assert.ok(brief.includes('## Only if browser helpers fail'))
   assert.ok(brief.includes('## Browser page API'))
   assert.ok(brief.includes('Prefer a custom legal plan'))
   assert.ok(brief.includes('contract.designPatterns'))
   assert.ok(brief.includes('not fixed classes'))
+  assert.ok(brief.includes('## Strategy guidance'))
+  assert.ok(brief.includes('Kite And Punish'))
+  assert.ok(brief.includes('120 second deadline'))
   assert.ok(brief.includes('## Fallback round plan'))
   assert.ok(brief.includes('not the preferred strategy'))
   assert.ok(brief.includes('Phase: submission_phase'))
@@ -385,7 +433,8 @@ test('baseline round plan is a concrete first-round opener', () => {
     { partId: 'Weapon_Spinner_Small', quantity: 1 },
   ])
   assert.equal(plan.blueprint.blocks.length, 4)
-  assert.equal(plan.turnPlan.commands.length, 5)
+  assert.equal(plan.schemaVersion, 2)
+  assert.equal(plan.openingScript.commands.length, 5)
 })
 
 test('agent state script serialization escapes html-sensitive text', () => {
@@ -456,6 +505,52 @@ test('agent client claims, reads state, and submits with bearer auth', async () 
         })
       }
 
+      if (call.url.endsWith('/turn-command')) {
+        return jsonResponse({
+          state: {
+            ...roleState,
+            phase: 'combat_turn',
+            combat: {
+              tick: 2,
+              openedAt: '2026-06-03T12:02:00.000Z',
+              deadlineAt: '2026-06-03T12:04:00.000Z',
+              turnSeconds: 120,
+              submitted: { red: false, blue: false },
+              snapshot: combatSnapshot(),
+              self: combatSnapshot().red,
+              opponent: combatSnapshot().blue,
+            },
+          },
+          publicState: {
+            sessionId: invite.sessionId,
+            stateVersion: 'v3',
+            phase: 'combat_turn',
+            round: 1,
+            maxRounds: 7,
+            expiresAt: roleState.expiresAt,
+            arena: {
+              name: 'Compact Box',
+              width: 24,
+              height: 16,
+              activeHazards: ['floor_saw'],
+            },
+            roles: {
+              red: { role: 'red', claimed: true, submitted: true },
+              blue: { role: 'blue', claimed: true, submitted: true },
+            },
+            combat: {
+              tick: 2,
+              openedAt: '2026-06-03T12:02:00.000Z',
+              deadlineAt: '2026-06-03T12:04:00.000Z',
+              turnSeconds: 120,
+              submitted: { red: false, blue: false },
+            },
+            replayAvailable: false,
+            eventLog: roleState.eventLog,
+          },
+        })
+      }
+
       throw new Error(`Unexpected URL ${call.url}`)
     },
   })
@@ -464,22 +559,36 @@ test('agent client claims, reads state, and submits with bearer auth', async () 
   roleToken = claim.roleToken
   const state = await client.getState()
   const submission = await client.submitRoundPlan(roundPlan)
+  const turn = await client.submitTurnCommand({
+    action: 'submit_turn_command',
+    tick: 1,
+    move: 'brake',
+    weaponA: 'hold',
+  })
 
   assert.equal(claim.roleToken, 'role_red')
   assert.equal(state.role, 'red')
   assert.equal(submission.state.submitted, true)
+  assert.equal(turn.state.combat.tick, 2)
   assert.deepEqual(
     calls.map((call) => [call.method, call.url.replace(invite.apiBase, ''), call.authorization]),
     [
       ['POST', '/sessions/s_demo/claim', null],
       ['GET', '/sessions/s_demo/state', 'Bearer role_red'],
       ['POST', '/sessions/s_demo/round-plan', 'Bearer role_red'],
+      ['POST', '/sessions/s_demo/turn-command', 'Bearer role_red'],
     ],
   )
   assert.deepEqual(calls[0].body, {
     role: 'red',
     claimToken: 'cap_red',
     agentName: 'Red',
+  })
+  assert.deepEqual(calls[3].body, {
+    action: 'submit_turn_command',
+    tick: 1,
+    move: 'brake',
+    weaponA: 'hold',
   })
 })
 
@@ -545,9 +654,29 @@ test('browser role API exposes valid actions from current role state', async () 
       ['get_fallback_round_plan', true],
       ['submit_fallback_round_plan', true],
       ['submit_round_plan', true],
+      ['submit_turn_command', false],
       ['submit_chat_message', true],
       ['submit_private_chat_message', true],
     ],
+  )
+
+  const combatActions = getValidAgentActions({
+    ...roleState,
+    phase: 'combat_turn',
+    combat: {
+      tick: 1,
+      openedAt: '2026-06-03T12:02:00.000Z',
+      deadlineAt: '2026-06-03T12:04:00.000Z',
+      turnSeconds: 120,
+      submitted: { red: false, blue: true },
+      snapshot: combatSnapshot(),
+      self: combatSnapshot().red,
+      opponent: combatSnapshot().blue,
+    },
+  })
+  assert.equal(
+    combatActions.find((action) => action.name === 'submit_turn_command')?.available,
+    true,
   )
 })
 
@@ -571,7 +700,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, true, true, false, false, false, false, false, false, false, true, false, false, false, false],
+    [true, true, true, false, false, false, false, false, false, false, true, false, false, false, false, false],
   )
 })
 

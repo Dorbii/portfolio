@@ -1,4 +1,4 @@
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import type { Material } from '@babylonjs/core/Materials/material'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
@@ -11,8 +11,10 @@ import { attachMesh } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
 import { createDefaultWeaponPart } from './babylonDefaultWeaponPart'
 import {
+  createFlipperWeaponPart,
   createGrabberWeaponPart,
   createHammerWeaponPart,
+  createRamWeaponPart,
   createSpearWeaponPart,
 } from './babylonMeleeWeaponParts'
 import { createNetWeaponPart } from './babylonNetWeaponPart'
@@ -24,11 +26,11 @@ import type {
 } from './babylonWeaponPartTypes'
 
 const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRenderer>([
-  ['flipper', createGrabberWeaponPart],
+  ['flipper', createFlipperWeaponPart],
   ['grabber', createGrabberWeaponPart],
   ['hammer', createHammerWeaponPart],
   ['net', createNetWeaponPart],
-  ['ram', createGrabberWeaponPart],
+  ['ram', createRamWeaponPart],
   ['saw', createSpinnerWeaponPart],
   ['spear', createSpearWeaponPart],
   ['spinner', createSpinnerWeaponPart],
@@ -38,7 +40,7 @@ const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRe
 export function createWeaponPart(
   scene: Scene,
   parent: TransformNode,
-  material: StandardMaterial,
+  material: Material,
   role: TeamRole,
   blockId: string,
   partId: string,

@@ -3,6 +3,7 @@ import {
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
   validateRoleResetRequestShape,
+  validateTurnCommandSubmissionShape,
   type AdvanceRoundResponse,
   type AgentChatMessagePostRequest,
   type AgentChatMessageResponse,
@@ -26,14 +27,19 @@ import {
   type SessionLogEvent,
   type SessionPhase,
   type TeamRole,
+  type TurnCommand,
+  type TurnCommandResponse,
+  type TurnCommandSubmission,
 } from '../../../packages/schemas/src/index.js'
 import {
   normalizeRoundSubmission,
   validateRoundSubmission,
+  validateSubmittedTurnCommand,
 } from '../../../packages/catalog/src/index.js'
 import {
-  resolveCombat,
+  resolveSubmittedCombat,
   type CombatResult,
+  type ResolveCombatInput,
 } from '../../../packages/sim/src/index.js'
 import {
   appendCombatChatterMessages,
@@ -58,6 +64,7 @@ import { resetStoredRoleClaim } from './sessionRoleReset.js'
 import {
   cloneJson,
   combatSummary,
+  addMilliseconds,
   defaultClock,
   defaultTokenFactory,
   defaultTokenHasher,
@@ -76,6 +83,7 @@ import type {
   RateLimitAction,
   RateLimitRule,
   SessionResult,
+  StoredCombatState,
   StoredRoleState,
   StoredSessionState,
   TokenFactory,
@@ -87,6 +95,8 @@ export {
 } from './roundEconomy.js'
 export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
+
+const COMBAT_TURN_SECONDS = 120
 
 export class SessionCoordinator {
   private state: StoredSessionState
@@ -182,7 +192,10 @@ export class SessionCoordinator {
   }
 
   getPublicState(): PublicSessionState {
-    this.expireIfNeeded()
+    const now = this.clock()
+
+    this.expireIfNeeded(now)
+    this.resolveExpiredCombatTurn(now)
 
     return buildPublicSessionState(this.state)
   }
@@ -301,6 +314,8 @@ export class SessionCoordinator {
       this.advanceClaimPhase(now)
     }
 
+    this.resolveExpiredCombatTurn(now)
+
     const state = buildRolePrivateState(this.state, auth.role)
 
     return {
@@ -323,6 +338,8 @@ export class SessionCoordinator {
     if (!auth.ok) {
       return auth
     }
+
+    this.resolveExpiredCombatTurn(now)
 
     return {
       ok: true,
@@ -379,6 +396,68 @@ export class SessionCoordinator {
     this.appendChatMessages(role, (submission as RoundPlanSubmission).chat ?? [], now)
     this.appendEvent('round_plan_submitted', `${role.role} submitted a round plan.`, now)
     this.resolveIfReady(now)
+
+    return {
+      ok: true,
+      value: {
+        state: buildRolePrivateState(this.state, role),
+        publicState: this.getPublicState(),
+      },
+    }
+  }
+
+  async submitTurnCommand(
+    roleToken: string,
+    request: unknown,
+  ): Promise<SessionResult<TurnCommandResponse>> {
+    const now = this.clock()
+    const auth = await this.authorizeRoleAction(roleToken, 'turn', now)
+
+    if (!auth.ok) {
+      return auth
+    }
+
+    const role = auth.value
+
+    this.resolveExpiredCombatTurn(now)
+
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat) {
+      return relayError(
+        'PHASE_CLOSED',
+        `Turn commands are only accepted during combat_turn; current phase is ${this.state.phase}.`,
+      )
+    }
+
+    if (combat.pending[role.role]) {
+      return relayError('ALREADY_SUBMITTED', `${role.role} already submitted combat turn ${combat.nextTick}.`)
+    }
+
+    const shape = validateTurnCommandSubmissionShape(request, combat.nextTick)
+
+    if (!shape.ok) {
+      return relayError('SUBMISSION_INVALID', 'Turn command failed validation.', shape.issues)
+    }
+
+    const submitted = request as TurnCommandSubmission
+    const command = turnCommandFromSubmission(submitted)
+    const controls = role.controls
+
+    if (!controls) {
+      return relayError('INVALID_REQUEST', `${role.role} has no controls for the current round.`)
+    }
+
+    const controlValidation = validateSubmittedTurnCommand({ controls, command })
+
+    if (!controlValidation.ok) {
+      return relayError('SUBMISSION_INVALID', 'Turn command uses unavailable controls.', controlValidation.issues)
+    }
+
+    combat.pending[role.role] = command
+    this.touch(now)
+    this.appendEvent('turn_command_submitted', `${role.role} submitted combat turn ${combat.nextTick}.`, now)
+    this.resolveCombatTurnIfReady(now)
 
     return {
       ok: true,
@@ -694,11 +773,123 @@ export class SessionCoordinator {
     }
 
     this.changePhase('submissions_locked', 'Both round plans accepted.', now)
+    this.openCombatTurn(now)
+  }
 
-    const redSubmission = red.normalizedSubmission ?? normalizeRoundSubmission(red.submission)
-    const blueSubmission = blue.normalizedSubmission ?? normalizeRoundSubmission(blue.submission)
+  private openCombatTurn(now: string): void {
+    const resolution = resolveSubmittedCombat(this.buildCombatInput(), {
+      red: [],
+      blue: [],
+    })
 
-    const result = resolveCombat({
+    if (resolution.status === 'complete') {
+      this.completeCombat(resolution.result, now)
+      return
+    }
+
+    this.state.combat = this.createCombatState({
+      nextTick: resolution.nextTick,
+      snapshot: resolution.snapshot,
+      now,
+      commands: { red: [], blue: [] },
+    })
+    this.changePhase('combat_turn', `Combat turn ${resolution.nextTick} is open.`, now)
+  }
+
+  private resolveExpiredCombatTurn(now: string): void {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat) {
+      return
+    }
+
+    if (Date.parse(now) < Date.parse(combat.deadlineAt)) {
+      return
+    }
+
+    for (const roleName of TEAM_ROLES) {
+      if (combat.pending[roleName]) {
+        continue
+      }
+
+      const role = this.state.roles[roleName]
+      combat.pending[roleName] = createTimeoutTurnCommand(
+        combat.nextTick,
+        role.controls,
+      )
+      this.appendEvent(
+        'turn_command_timed_out',
+        `${roleName} timed out on combat turn ${combat.nextTick}; no-op command applied.`,
+        now,
+      )
+    }
+
+    this.resolveCombatTurnIfReady(now)
+  }
+
+  private resolveCombatTurnIfReady(now: string): void {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat) {
+      return
+    }
+
+    const redCommand = combat.pending.red
+    const blueCommand = combat.pending.blue
+
+    if (!redCommand || !blueCommand) {
+      return
+    }
+
+    combat.commands.red.push(redCommand)
+    combat.commands.blue.push(blueCommand)
+
+    const resolution = resolveSubmittedCombat(this.buildCombatInput(), combat.commands)
+
+    if (resolution.status === 'complete') {
+      this.completeCombat(resolution.result, now)
+      return
+    }
+
+    this.state.combat = this.createCombatState({
+      nextTick: resolution.nextTick,
+      snapshot: resolution.snapshot,
+      now,
+      commands: combat.commands,
+    })
+    this.touch(now)
+  }
+
+  private createCombatState(input: {
+    nextTick: number
+    snapshot: StoredCombatState['snapshot']
+    now: string
+    commands: StoredCombatState['commands']
+  }): StoredCombatState {
+    return {
+      nextTick: input.nextTick,
+      openedAt: input.now,
+      deadlineAt: addMilliseconds(input.now, COMBAT_TURN_SECONDS * 1000),
+      turnSeconds: COMBAT_TURN_SECONDS,
+      commands: input.commands,
+      pending: {},
+      snapshot: input.snapshot,
+    }
+  }
+
+  private buildCombatInput(): ResolveCombatInput {
+    const red = this.state.roles.red
+    const blue = this.state.roles.blue
+    const redSubmission = red.normalizedSubmission
+      ?? (red.submission ? normalizeRoundSubmission(red.submission) : undefined)
+    const blueSubmission = blue.normalizedSubmission
+      ?? (blue.submission ? normalizeRoundSubmission(blue.submission) : undefined)
+
+    if (!redSubmission || !blueSubmission) {
+      throw new Error('Both normalized round submissions are required to resolve combat.')
+    }
+
+    return {
       round: this.state.round,
       seed: `${this.state.id}:${this.state.seed}`,
       arena: this.state.arena,
@@ -712,7 +903,16 @@ export class SessionCoordinator {
         tactics: blueSubmission.tactics,
         openingScript: blueSubmission.openingScript,
       },
-    })
+    }
+  }
+
+  private completeCombat(result: CombatResult, now: string): void {
+    const red = this.state.roles.red
+    const blue = this.state.roles.blue
+
+    if (!red.submission || !blue.submission) {
+      throw new Error('Both round submissions are required to complete combat.')
+    }
 
     this.state.replay = {
       ...result.replay,
@@ -721,6 +921,7 @@ export class SessionCoordinator {
         blue: cloneJson(blue.submission.blueprint),
       },
     }
+    this.state.combat = undefined
     this.state.lastResult = combatSummary(result)
     this.appendEvent('combat_resolved', result.reason, now)
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
@@ -769,4 +970,39 @@ export class SessionCoordinator {
     this.state.updatedAt = at
   }
 
+}
+
+function turnCommandFromSubmission(submission: TurnCommandSubmission): TurnCommand {
+  return {
+    tick: submission.tick,
+    ...(submission.move ? { move: submission.move } : {}),
+    ...(submission.weaponA ? { weaponA: submission.weaponA } : {}),
+    ...(submission.weaponB ? { weaponB: submission.weaponB } : {}),
+    ...(submission.utility ? { utility: submission.utility } : {}),
+  }
+}
+
+function createTimeoutTurnCommand(
+  tick: number,
+  controls: StoredRoleState['controls'],
+): TurnCommand {
+  const command: TurnCommand = { tick }
+  const move = controls?.movement.includes('brake')
+    ? 'brake'
+    : controls?.movement[0]
+
+  if (move) {
+    command.move = move
+  }
+  if (controls?.weaponA?.includes('hold')) {
+    command.weaponA = 'hold'
+  }
+  if (controls?.weaponB?.includes('hold')) {
+    command.weaponB = 'hold'
+  }
+  if (controls?.utility?.includes('hold')) {
+    command.utility = 'hold'
+  }
+
+  return command
 }

@@ -141,6 +141,7 @@ export function BabylonReplayScene({
           wheelPrecision: 28,
         },
         clearColor: new Color4(0.03, 0.04, 0.04, 1),
+        environmentIntensity: 0.18,
       })
       const { camera, engine, scene } = core
 

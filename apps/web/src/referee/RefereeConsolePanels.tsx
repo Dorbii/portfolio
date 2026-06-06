@@ -1,7 +1,5 @@
-import { useMemo } from 'react'
 import type {
   PublicSessionState,
-  RolePublicState,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
@@ -14,267 +12,337 @@ import {
 import {
   ActionGroup,
   Button,
-  MetricGrid,
-  MetricRow,
-  RoleBadge,
+  ProgressMeter,
   SectionHeading,
   StatusBadge,
 } from '../shared/ui'
 import type { ReplayPayload } from './refereeClient'
-import { getInvitePanelMode } from './refereeInvitePanelState'
 
-export function TeamScoreCard({
-  role,
-  roleState,
-  winner,
+type TeamBannerHandoff = {
+  agentBrief: string
+  hasInvite: boolean
+  inviteUrl: string
+  onCopyBrief: () => Promise<void> | void
+  onOpen: () => void
+}
+
+type ScoreboardSessionControl = {
+  activeSessionId: string
+  advanceHint?: string
+  advanceLabel: string
+  canAdvance: boolean
+  canRefresh: boolean
+  isBusy: boolean
+  onAdvance: () => void
+  onCreate: () => void
+  onRefresh: () => void
+  tokenStored: boolean
+}
+
+export function MatchScoreboard({
+  phase,
+  publicSession,
+  replayPayload,
+  roleHandoffs,
+  sessionControl,
 }: {
-  role: TeamRole
-  roleState?: RolePublicState
-  winner?: TeamRole | 'draw'
+  phase: string
+  publicSession: PublicSessionState | null
+  replayPayload: ReplayPayload | null
+  roleHandoffs: Record<TeamRole, TeamBannerHandoff>
+  sessionControl: ScoreboardSessionControl
 }) {
-  const isWinner = winner === role
+  const winsRequired = getWinsRequired(publicSession?.maxRounds)
+  const decision = formatDecision(publicSession)
 
   return (
-    <div className={`score-team ${role} ${isWinner ? 'winner' : ''}`}>
-      <span>{teamName(role)}</span>
-      <strong>{roleState?.wins ?? 0}</strong>
-      <small>{roleStatus(roleState)}</small>
-    </div>
+    <header className="match-scoreboard" aria-label="Match scoreboard">
+      <ScoreboardTeam
+        phase={phase}
+        publicSession={publicSession}
+        replayPayload={replayPayload}
+        role="red"
+        handoff={roleHandoffs.red}
+        winsRequired={winsRequired}
+      />
+      <div className="scoreboard-core">
+        <span>Session Control</span>
+        <strong>{publicSession ? `R${publicSession.round}` : '--'}</strong>
+        <small title={sessionControl.activeSessionId || undefined}>
+          {publicSession
+            ? `${formatReplayClock(replayPayload)} / ${decision}`
+            : sessionControl.activeSessionId || 'Create session'}
+        </small>
+        <ActionGroup className="scoreboard-session-actions">
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!sessionControl.canAdvance}
+            title={sessionControl.advanceHint}
+            onClick={sessionControl.onAdvance}
+          >
+            {sessionControl.advanceLabel}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={!sessionControl.canRefresh}
+            onClick={sessionControl.onRefresh}
+            title={
+              sessionControl.tokenStored
+                ? 'Clear the stored referee and handoff tokens for this browser tab.'
+                : 'Reload the public session state.'
+            }
+          >
+            Refresh Session
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={sessionControl.onCreate}
+            disabled={sessionControl.isBusy}
+          >
+            {sessionControl.isBusy ? 'Creating...' : 'New Session'}
+          </Button>
+        </ActionGroup>
+      </div>
+      <ScoreboardTeam
+        phase={phase}
+        publicSession={publicSession}
+        replayPayload={replayPayload}
+        role="blue"
+        handoff={roleHandoffs.blue}
+        winsRequired={winsRequired}
+      />
+    </header>
   )
 }
 
-export function TeamRecordCard({
+function ScoreboardTeam({
+  handoff,
+  phase,
+  publicSession,
+  replayPayload,
   role,
-  roleState,
+  winsRequired,
 }: {
+  handoff: TeamBannerHandoff
+  phase: string
+  publicSession: PublicSessionState | null
+  replayPayload: ReplayPayload | null
   role: TeamRole
-  roleState: RolePublicState
+  winsRequired: number
 }) {
+  const team = getTeamDashboardData(role, publicSession, replayPayload)
+  const opponentRole = role === 'red' ? 'blue' : 'red'
+  const opponent = getTeamDashboardData(opponentRole, publicSession, replayPayload)
+  const isWinner = publicSession?.lastResult?.winner === role
+
   return (
-    <article className={`team-record-card ${role}`}>
-      <h3>{teamName(role)}</h3>
-      <dl>
-        <div>
-          <dt>Wins</dt>
-          <dd>{roleState.wins ?? 0}</dd>
-        </div>
-        <div>
-          <dt>Losses</dt>
-          <dd>{roleState.losses ?? 0}</dd>
-        </div>
-        <div>
-          <dt>Streak</dt>
-          <dd>{roleState.winStreak ?? 0}</dd>
-        </div>
-        <div>
-          <dt>State</dt>
-          <dd>{roleStatus(roleState)}</dd>
-        </div>
-      </dl>
-    </article>
+    <section className={`scoreboard-team-block ${role} ${isWinner ? 'winner' : ''}`}>
+      <div className="scoreboard-team-mark" aria-hidden="true" />
+      <div className="scoreboard-team-copy">
+        <strong>{team.name}</strong>
+        <span>
+          Win {team.wins} - {opponent.wins}
+        </span>
+      </div>
+      <div className="scoreboard-score">{team.wins}</div>
+      <div className="scoreboard-pips" aria-label={`${capitalize(role)} round wins`}>
+        {Array.from({ length: winsRequired }, (_, index) => (
+          <span
+            className={index < team.wins ? 'is-filled' : ''}
+            key={`${role}-pip-${index}`}
+          />
+        ))}
+      </div>
+      <div className="scoreboard-team-status">
+        <StatusBadge tone={team.claimed ? 'ok' : 'warning'}>
+          {team.claimed ? 'Connected' : 'Not connected'}
+        </StatusBadge>
+        <StatusBadge tone={team.submitted ? 'ok' : 'neutral'}>
+          {team.submitted ? 'Plan locked' : 'Plan pending'}
+        </StatusBadge>
+      </div>
+      <div className="scoreboard-handoff">
+        {handoff.hasInvite ? (
+          <ActionGroup className="scoreboard-handoff-actions">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handoff.onOpen}
+              disabled={!handoff.inviteUrl}
+            >
+              View cockpit
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handoff.onCopyBrief}
+              disabled={!handoff.agentBrief}
+            >
+              Copy handoff
+            </Button>
+          </ActionGroup>
+        ) : (
+          <span>{team.claimed ? formatLabel(phase) : 'Create session for handoff'}</span>
+        )}
+      </div>
+    </section>
   )
 }
 
-export function ReplayOutcome({
+export function TeamStatusDashboard({
   publicSession,
   replayPayload,
 }: {
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
 }) {
-  const result = publicSession?.lastResult
-  const keyEvents = useMemo(
-    () => getOutcomeEvents(replayPayload?.timeline.events ?? []),
-    [replayPayload],
-  )
+  const red = getTeamDashboardData('red', publicSession, replayPayload)
+  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
+  const maxDamage = Math.max(red.damageTaken, blue.damageTaken, 1)
+  const maxHits = Math.max(red.hitCount, blue.hitCount, 1)
 
   return (
-    <aside className="replay-outcome">
-      <SectionHeader kicker="Combat outcome" title="Result" />
-      {result ? (
-        <>
-          <MetricGrid className="status-list">
-            <MetricRow label="Winner" value={formatWinner(result.winner)} />
-            <MetricRow label="Reason" value={result.reason} />
-            <MetricRow label="Damage" value={`Red ${result.damage.red} / Blue ${result.damage.blue}`} />
-            <MetricRow label="Health" value={`Red ${result.remainingHealth.red} / Blue ${result.remainingHealth.blue}`} />
-          </MetricGrid>
-          <h3>Key events</h3>
-          {keyEvents.length > 0 ? (
-            <ol className="key-event-list">
-              {keyEvents.map((event, index) => (
-                <li key={`${event.t}-${event.type}-${index}`}>
-                  <span>{formatDurationSeconds(event.t)}</span>
-                  <p>{formatReplayEvent(event)}</p>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="referee-empty">Replay events load with the replay payload.</p>
-          )}
-        </>
-      ) : (
-        <p className="referee-empty">No combat result yet.</p>
-      )}
-    </aside>
-  )
-}
-
-export function PublicRoleStatus({ roles }: { roles: PublicSessionState['roles'] }) {
-  const roleEntries = useMemo(
-    () => Object.entries(roles) as [TeamRole, RolePublicState][],
-    [roles],
-  )
-
-  return (
-    <div className="role-status-list">
-      {roleEntries.map(([role, roleState]) => (
-        <MetricGrid className="status-list" key={role}>
-          <MetricRow
-            label={<RoleBadge role={role}>{capitalize(role)}</RoleBadge>}
-            value={<StatusBadge tone={roleState.claimed ? 'ok' : 'warning'}>{roleState.claimed ? 'Claimed' : 'Open'}</StatusBadge>}
+    <div className="team-status-dashboard">
+      {[red, blue].map((team) => (
+        <section className={`team-status-column ${team.role}`} key={team.role}>
+          <h3>{team.name}</h3>
+          <div className="team-status-facts">
+            <StatusFact
+              label="Connection"
+              tone={team.claimed ? 'ok' : 'warning'}
+              value={team.claimed ? 'Connected' : 'Open'}
+            />
+            <StatusFact
+              label="Plan"
+              tone={team.submitted ? 'ok' : 'neutral'}
+              value={team.submitted ? 'Locked' : 'Pending'}
+            />
+          </div>
+          <ProgressMeter
+            label="Health Left"
+            tone={team.role}
+            value={team.healthPercent}
+            valueLabel={team.healthLabel}
           />
-          <MetricRow
-            label="Submitted"
-            value={<StatusBadge tone={roleState.submitted ? 'ok' : 'neutral'}>{roleState.submitted ? 'Yes' : 'No'}</StatusBadge>}
+          <ProgressMeter
+            label="Damage Taken"
+            max={maxDamage}
+            tone={team.role}
+            value={team.damageTaken}
+            valueLabel={`${team.damageTaken}`}
           />
-        </MetricGrid>
+          <ProgressMeter
+            label="Weapon Hits"
+            max={maxHits}
+            tone={team.role}
+            value={team.hitCount}
+            valueLabel={`${team.hitCount}`}
+          />
+        </section>
       ))}
     </div>
   )
 }
 
-export function InvitePanel({
-  role,
-  hasInvite,
-  inviteUrl,
-  roleState,
-  agentBrief,
-  onCopyBrief,
-  onOpen,
-  onResetClaim,
-  canResetClaim,
+function StatusFact({
+  label,
+  tone,
+  value,
 }: {
-  role: TeamRole
-  hasInvite: boolean
-  inviteUrl: string
-  roleState?: RolePublicState
-  agentBrief: string
-  onCopyBrief: () => Promise<void> | void
-  onOpen: () => void
-  onResetClaim: () => Promise<void> | void
-  canResetClaim: boolean
+  label: string
+  tone: 'neutral' | 'ok' | 'warning'
+  value: string
 }) {
-  const panelMode = getInvitePanelMode({ hasInvite, roleState })
-
-  if (panelMode === 'claimed') {
-    return (
-      <div className="invite-panel invite-panel-claimed">
-        <p>
-          <strong>{capitalize(role)} agent claimed.</strong>
-          <span>
-            {hasInvite
-              ? 'Cockpit access remains available for this browser session.'
-              : 'Cockpit claim token is not stored in this browser session.'}
-          </span>
-        </p>
-        <InviteActions
-          agentBrief={agentBrief}
-          inviteUrl={inviteUrl}
-          onCopyBrief={onCopyBrief}
-          onOpen={onOpen}
-        />
-        <div className="invite-reset-actions">
-          <Button
-            type="button"
-            variant="danger"
-            onClick={onResetClaim}
-            disabled={!canResetClaim}
-            title="Available only before combat resolves."
-          >
-            Reset agent claim
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  if (panelMode === 'unavailable') {
-    return (
-      <div className="invite-panel">
-        <p className="referee-empty">
-          {capitalize(role)} cockpit unavailable because this tab does not have that role claim token.
-          Use the original handoff, create a new session here, or reset the role claim before combat resolves.
-        </p>
-        <div className="invite-reset-actions">
-          <Button
-            type="button"
-            variant="danger"
-            onClick={onResetClaim}
-            disabled={!canResetClaim}
-            title="Available only before combat resolves."
-          >
-            Reset agent claim
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="invite-panel">
-      <p>{capitalize(role)} agent handoff</p>
-      <InviteActions
-        agentBrief={agentBrief}
-        inviteUrl={inviteUrl}
-        onCopyBrief={onCopyBrief}
-        onOpen={onOpen}
-      />
-      <div className="invite-reset-actions">
-        <Button
-          type="button"
-          variant="danger"
-          onClick={onResetClaim}
-          disabled={!canResetClaim}
-          title="Available only before combat resolves."
-        >
-          Reset agent claim
-        </Button>
-      </div>
+    <div className="team-status-fact">
+      <span>{label}</span>
+      <StatusBadge tone={tone}>{value}</StatusBadge>
     </div>
   )
 }
 
-function InviteActions({
-  agentBrief,
-  inviteUrl,
-  onCopyBrief,
-  onOpen,
+export function KeyStatsDashboard({
+  publicSession,
+  replayPayload,
 }: {
-  agentBrief: string
-  inviteUrl: string
-  onCopyBrief: () => Promise<void> | void
-  onOpen: () => void
+  publicSession: PublicSessionState | null
+  replayPayload: ReplayPayload | null
+}) {
+  const red = getTeamDashboardData('red', publicSession, replayPayload)
+  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
+  const replayEvents = replayPayload?.timeline.events.length ?? 0
+
+  return (
+    <div className="key-stats-dashboard" role="table" aria-label="Key match stats">
+      <div className="key-stats-row key-stats-head" role="row">
+        <span role="columnheader">Metric</span>
+        <strong className="red" role="columnheader">{red.name}</strong>
+        <strong className="blue" role="columnheader">{blue.name}</strong>
+      </div>
+      <DashboardStatRow label="Damage Taken" red={`${red.damageTaken}`} blue={`${blue.damageTaken}`} />
+      <DashboardStatRow label="Weapon Hits" red={`${red.hitCount}`} blue={`${blue.hitCount}`} />
+      <DashboardStatRow label="Health Left" red={red.healthLabel} blue={blue.healthLabel} />
+      <DashboardStatRow label="Record" red={`${red.wins}-${red.losses}`} blue={`${blue.wins}-${blue.losses}`} />
+      <DashboardStatRow label="Replay Events" red={`${replayEvents}`} blue={`${replayEvents}`} />
+    </div>
+  )
+}
+
+function DashboardStatRow({
+  blue,
+  label,
+  red,
+}: {
+  blue: string
+  label: string
+  red: string
 }) {
   return (
-    <ActionGroup className="invite-links">
-      <Button
-        type="button"
-        variant="primary"
-        onClick={onOpen}
-        disabled={!inviteUrl}
-      >
-        Open cockpit
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={onCopyBrief}
-        disabled={!agentBrief}
-      >
-        Copy handoff
-      </Button>
-    </ActionGroup>
+    <div className="key-stats-row" role="row">
+      <span role="rowheader">{label}</span>
+      <strong className="red" role="cell">{red}</strong>
+      <strong className="blue" role="cell">{blue}</strong>
+    </div>
+  )
+}
+
+export function RoundSummaryDashboard({
+  publicSession,
+  replayPayload,
+}: {
+  publicSession: PublicSessionState | null
+  replayPayload: ReplayPayload | null
+}) {
+  const red = getTeamDashboardData('red', publicSession, replayPayload)
+  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
+  const result = publicSession?.lastResult
+
+  return (
+    <div className="round-summary-dashboard">
+      <div className="dashboard-panel-tabs" aria-label="Round summary view">
+        <span className="is-active">Round Summary</span>
+        <span>Event Log</span>
+      </div>
+      <div className="round-summary-table">
+        <DashboardStatRow label="Damage Taken" red={`${red.damageTaken}`} blue={`${blue.damageTaken}`} />
+        <DashboardStatRow label="Effective Hits" red={`${red.hitCount}`} blue={`${blue.hitCount}`} />
+        <DashboardStatRow label="Health Left" red={red.healthLabel} blue={blue.healthLabel} />
+        <DashboardStatRow
+          label="Submitted"
+          red={red.submitted ? 'Yes' : 'No'}
+          blue={blue.submitted ? 'Yes' : 'No'}
+        />
+        <DashboardStatRow
+          label="Round Winner"
+          red={result?.winner === 'red' ? 'Winner' : '-'}
+          blue={result?.winner === 'blue' ? 'Winner' : '-'}
+        />
+      </div>
+      <p>{result?.reason ?? 'Round outcome appears after combat resolves.'}</p>
+    </div>
   )
 }
 
@@ -328,67 +396,80 @@ export function PublicChatLog({
   )
 }
 
-export function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <MetricRow className="metric" label={label} value={value} />
-  )
+type TeamDashboardData = {
+  claimed: boolean
+  damageTaken: number
+  healthLabel: string
+  healthPercent: number
+  hitCount: number
+  losses: number
+  name: string
+  role: TeamRole
+  submitted: boolean
+  wins: number
+}
+
+function getTeamDashboardData(
+  role: TeamRole,
+  publicSession: PublicSessionState | null,
+  replayPayload: ReplayPayload | null,
+): TeamDashboardData {
+  const roleState = publicSession?.roles[role]
+  const damageTaken = publicSession?.lastResult?.damage[role] ?? 0
+  const remainingHealth = publicSession?.lastResult?.remainingHealth[role]
+  const maxHealth = remainingHealth === undefined ? 100 : Math.max(remainingHealth + damageTaken, 1)
+  const healthPercent = remainingHealth === undefined
+    ? (roleState?.submitted ? 100 : 0)
+    : Math.round((remainingHealth / maxHealth) * 100)
+
+  return {
+    claimed: roleState?.claimed ?? false,
+    damageTaken,
+    healthLabel: remainingHealth === undefined ? 'Pending' : `${Math.max(remainingHealth, 0)}`,
+    healthPercent,
+    hitCount: countImpactEvents(replayPayload?.timeline.events ?? [], role),
+    losses: roleState?.losses ?? 0,
+    name: replayPayload?.botBlueprints[role]?.name?.trim() || teamName(role),
+    role,
+    submitted: roleState?.submitted ?? false,
+    wins: roleState?.wins ?? 0,
+  }
 }
 
 function teamName(role: TeamRole): string {
   return `${capitalize(role)} Team`
 }
 
-function roleStatus(roleState: RolePublicState | undefined): string {
-  if (!roleState) {
-    return 'Waiting'
+function formatDecision(publicSession: PublicSessionState | null): string {
+  const result = publicSession?.lastResult
+
+  if (!publicSession) {
+    return 'Create or load a session'
   }
 
-  if (roleState.submitted) {
-    return 'Submitted'
+  if (!result) {
+    return formatLabel(publicSession.phase)
   }
 
-  if (roleState.claimed) {
-    return 'Claimed'
+  if (result.winner === 'draw') {
+    return 'Draw'
   }
 
-  return 'Open'
+  return `${capitalize(result.winner)} wins`
 }
 
-function getOutcomeEvents(events: ReplayEvent[]): ReplayEvent[] {
-  return events
-    .filter((event) =>
-      event.type === 'impact' ||
-      event.type === 'damage' ||
-      event.type === 'hazard' ||
-      event.type === 'knockout',
-    )
-    .slice(0, 8)
+function formatReplayClock(replayPayload: ReplayPayload | null): string {
+  return replayPayload ? formatDurationSeconds(replayPayload.timeline.duration) : '--'
 }
 
-function formatWinner(winner: TeamRole | 'draw'): string {
-  return winner === 'draw' ? 'Draw' : `${capitalize(winner)} wins`
+function getWinsRequired(maxRounds: number | undefined): number {
+  if (!maxRounds || maxRounds < 1) {
+    return 3
+  }
+
+  return Math.max(1, Math.floor(maxRounds / 2) + 1)
 }
 
-function formatReplayEvent(event: ReplayEvent): string {
-  if (event.type === 'weapon_fire') {
-    return `${capitalize(event.bot)} fired ${event.weaponSlot}.`
-  }
-
-  if (event.type === 'impact') {
-    return `${capitalize(event.attacker)} hit ${capitalize(event.defender)} for ${event.damage}.`
-  }
-
-  if (event.type === 'damage') {
-    return `${capitalize(event.bot)} took ${event.amount}; ${event.remainingHealth} health remains.`
-  }
-
-  if (event.type === 'hazard') {
-    return `${capitalize(event.bot)} took ${event.damage} from ${event.hazard}.`
-  }
-
-  if (event.type === 'knockout') {
-    return `${capitalize(event.bot)} knocked out by ${event.cause}.`
-  }
-
-  return formatLabel(event.type)
+function countImpactEvents(events: ReplayEvent[], role: TeamRole): number {
+  return events.filter((event) => event.type === 'impact' && event.attacker === role).length
 }

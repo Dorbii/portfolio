@@ -4,6 +4,10 @@ import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Scene } from '@babylonjs/core/scene'
 import type { Vector3 as ReplayVector3 } from '../../../../packages/schemas/src/index.js'
+import {
+  createPbrSurfaceTextures,
+  type SurfacePattern,
+} from './babylonSurfaceTextures'
 
 export function createSceneMaterial(
   scene: Scene,
@@ -31,6 +35,7 @@ export function createPbrSceneMaterial(
   emissive: string,
   metallic: number,
   roughness: number,
+  pattern?: SurfacePattern,
 ): PBRMetallicRoughnessMaterial {
   const material = new PBRMetallicRoughnessMaterial(name, scene)
 
@@ -38,6 +43,22 @@ export function createPbrSceneMaterial(
   material.emissiveColor = Color3.FromHexString(emissive)
   material.metallic = metallic
   material.roughness = roughness
+  material.maxSimultaneousLights = 6
+
+  if (pattern) {
+    const textures = createPbrSurfaceTextures(scene, name, {
+      baseColor,
+      metallic,
+      pattern,
+      roughness,
+    })
+
+    material.baseTexture = textures.baseTexture
+    material.metallicRoughnessTexture = textures.metallicRoughnessTexture
+    material.occlusionTexture = textures.occlusionTexture
+    material.occlusionStrength = pattern === 'arena_floor' ? 0.78 : 0.58
+    material.normalTexture = textures.normalTexture
+  }
 
   return material
 }
