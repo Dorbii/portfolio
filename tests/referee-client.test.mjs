@@ -233,12 +233,13 @@ test('referee invite panel mode separates unclaimed handoff from claimed reset',
   )
 })
 
-test('referee session storage persists only referee token until session expiry', () => {
+test('referee session storage persists referee token and role handoff tokens until session expiry', () => {
   const storage = new Map()
   const sessionId = 's_demo'
   const apiBase = DEFAULT_ARENA_API_BASE
   const data = {
     refereeToken: 'r_ref',
+    invites: [{ role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' }],
     expiresAt: '9999-01-01T00:00:00.000Z',
   }
   const invite = { role: 'red', claimToken: 'cap_red' }
@@ -270,13 +271,48 @@ test('referee session storage persists only referee token until session expiry',
   assert.equal(loaded?.sessionId, sessionId)
   assert.equal(loaded?.apiBase, apiBase)
   assert.equal(loaded?.refereeToken, data.refereeToken)
+  assert.deepEqual(loaded?.invites, data.invites)
   assert.equal(loaded?.expiresAt, data.expiresAt)
-  assert.equal(JSON.stringify(storage.get(`agent-arena:referee-console:${apiBase}:${sessionId}`)).includes('cap_red'), false)
+  assert.equal(JSON.stringify(storage.get(`agent-arena:referee-console:${apiBase}:${sessionId}`)).includes('cap_red'), true)
   assert.equal(calls.some(([op, key]) => op === 'set' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
   assert.equal(inviteLink.includes('invite='), false)
   assert.equal(inviteLink.includes('refereeToken'), false)
   clearStoredSession(mockStorage, apiBase, sessionId)
   assert.equal(calls.some(([op, key]) => op === 'remove' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
+})
+
+test('referee session storage preserves existing role handoff tokens when saving token-only updates', () => {
+  const storage = new Map()
+  const sessionId = 's_demo'
+  const apiBase = DEFAULT_ARENA_API_BASE
+  const mockStorage = {
+    getItem: (storedKey) => storage.get(storedKey) ?? null,
+    setItem: (storedKey, value) => {
+      storage.set(storedKey, value)
+    },
+    removeItem: (storedKey) => {
+      storage.delete(storedKey)
+    },
+  }
+  const invites = [
+    { role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' },
+    { role: 'blue', claimToken: 'cap_blue', claimPath: '/sessions/s_demo/claim' },
+  ]
+
+  writeStoredSession(mockStorage, apiBase, sessionId, {
+    refereeToken: 'r_ref',
+    invites,
+    expiresAt: '9999-01-01T00:00:00.000Z',
+  })
+  writeStoredSession(mockStorage, apiBase, sessionId, {
+    refereeToken: 'r_ref_next',
+    expiresAt: '9999-01-01T00:00:00.000Z',
+  })
+
+  const loaded = readStoredSession(mockStorage, apiBase, sessionId)
+
+  assert.equal(loaded?.refereeToken, 'r_ref_next')
+  assert.deepEqual(loaded?.invites, invites)
 })
 
 test('referee session storage drops expired or malformed records', () => {

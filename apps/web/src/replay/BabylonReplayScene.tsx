@@ -302,7 +302,7 @@ export function BabylonReplayScene({
 
     const frame = buildReplayFrame(timeline, time)
     updateBots(resources.bots, frame)
-    updateEffects(resources.effectPool, frame.effects, resources.botProfiles)
+    updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
     updateHazards(resources.hazards, frame)
     for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
       updateCamera(resources.camera, cameraPreset, frame, arena)

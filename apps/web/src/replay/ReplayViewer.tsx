@@ -12,8 +12,14 @@ import {
   type CameraPreset,
   type ReplayEffectState,
 } from './replayMapping'
+import { CAMERA_PRESET_OPTIONS, normalizeCameraPreset } from './replayCameraPresets'
 import { BotPartMap } from './ReplayPartMap'
 import { capitalize, formatDurationSeconds, formatLabel } from '../shared/format'
+import {
+  ActionGroup,
+  Button,
+  FormField,
+} from '../shared/ui'
 
 type ReplayViewerProps = {
   arena: ArenaConfig
@@ -23,15 +29,6 @@ type ReplayViewerProps = {
   proofMode?: boolean
   timeline: ReplayTimeline
 }
-
-const cameraOptions: { label: string; value: CameraPreset }[] = [
-  { label: 'Broadcast', value: 'broadcast' },
-  { label: 'Wide', value: 'wide' },
-  { label: 'Red follow', value: 'red_follow' },
-  { label: 'Blue follow', value: 'blue_follow' },
-  { label: 'Impact', value: 'impact' },
-  { label: 'Cinematic', value: 'cinematic' },
-]
 
 const speedOptions = [0.5, 1, 1.5, 2]
 
@@ -46,7 +43,9 @@ export function ReplayViewer({
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [cameraPreset, setCameraPreset] = useState<CameraPreset>(initialCameraPreset)
+  const [cameraPreset, setCameraPreset] = useState<CameraPreset>(() =>
+    normalizeCameraPreset(initialCameraPreset),
+  )
   const frame = useMemo(() => buildReplayFrame(timeline, time), [timeline, time])
   const sortedEvents = useMemo(
     () => sortTimelineEvents(timeline.events),
@@ -62,7 +61,7 @@ export function ReplayViewer({
   }, [initialTime, timeline])
 
   useEffect(() => {
-    setCameraPreset(initialCameraPreset)
+    setCameraPreset(normalizeCameraPreset(initialCameraPreset))
   }, [initialCameraPreset])
 
   useEffect(() => {
@@ -114,15 +113,18 @@ export function ReplayViewer({
       />
       {proofMode ? null : (
         <>
-          <div className="replay-controls" aria-label="Replay controls">
-            <button type="button" onClick={() => setPlaying((current) => !current)}>
+          <ActionGroup className="replay-controls" aria-label="Replay controls">
+            <Button
+              type="button"
+              variant={playing ? 'secondary' : 'primary'}
+              onClick={() => setPlaying((current) => !current)}
+            >
               {playing ? 'Pause' : 'Play'}
-            </button>
-            <button type="button" onClick={reset}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={reset}>
               Reset
-            </button>
-            <label>
-              <span>Speed</span>
+            </Button>
+            <FormField label="Speed">
               <select
                 value={speed}
                 onChange={(event) => setSpeed(Number(event.target.value))}
@@ -133,22 +135,20 @@ export function ReplayViewer({
                   </option>
                 ))}
               </select>
-            </label>
-            <label>
-              <span>Camera</span>
+            </FormField>
+            <FormField label="Camera">
               <select
                 value={cameraPreset}
-                onChange={(event) => setCameraPreset(event.target.value as CameraPreset)}
+                onChange={(event) => setCameraPreset(normalizeCameraPreset(event.target.value))}
               >
-                {cameraOptions.map((option) => (
+                {CAMERA_PRESET_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="replay-scrubber">
-              <span>{formatDurationSeconds(time)}</span>
+            </FormField>
+            <FormField className="replay-scrubber" label={formatDurationSeconds(time)}>
               <input
                 aria-label="Replay time"
                 max={timeline.duration}
@@ -161,8 +161,8 @@ export function ReplayViewer({
                   setTime(Number(event.target.value))
                 }}
               />
-            </label>
-          </div>
+            </FormField>
+          </ActionGroup>
           <div className="replay-status-strip">
             <span>Round {timeline.round}</span>
             <strong>{activeEvent ? formatLabel(activeEvent.type) : 'Ready'}</strong>

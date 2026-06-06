@@ -6,10 +6,16 @@ import {
   clampReplayTime,
 } from '../.test-build/apps/web/src/replay/replayMapping.js'
 import {
+  calculateTeamFollowFrame,
   calculateBroadcastFrameForBothBotsAndActiveEffect,
   capBroadcastShakeForNoExcessiveShake,
   NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT,
 } from '../.test-build/apps/web/src/replay/replayCameraFraming.js'
+import {
+  CAMERA_PRESET_OPTIONS,
+  CANONICAL_CAMERA_PRESETS,
+  normalizeCameraPreset,
+} from '../.test-build/apps/web/src/replay/replayCameraPresets.js'
 import { mockReplay } from '../.test-build/apps/web/src/mockSession.js'
 import {
   createReplayTimeline,
@@ -129,6 +135,54 @@ const movingWeaponTimeline = createReplayTimeline({
   ],
 })
 
+function createWeaponMetadataTimeline({
+  controlCue,
+  phase = 'release',
+  style = 'turret',
+  t = 1.5,
+} = {}) {
+  return createReplayTimeline({
+    round: 1,
+    duration: 3,
+    summary: 'Weapon metadata replay contract.',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 90, 0],
+      },
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'blue',
+        position: [5, 0, 0],
+        rotation: [0, -90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [4, 0, 0],
+      },
+      {
+        t,
+        type: 'weapon_fire',
+        bot: 'red',
+        weaponSlot: 'weaponA',
+        controlCue,
+        targetPosition: [4.4, 0, 0.2],
+        sourceBlockId: 'front-spinner',
+        sourcePartId: 'Weapon_Spinner_Small',
+        phase,
+        style,
+      },
+    ],
+  })
+}
+
 const abilityTimeline = createReplayTimeline({
   round: 3,
   duration: 4,
@@ -205,6 +259,67 @@ const droneSwarmTimeline = createReplayTimeline({
   ],
 })
 
+const detachMetadataTimeline = createReplayTimeline({
+  round: 5,
+  duration: 7,
+  summary: 'Red sheds armor with deterministic detach metadata.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [-2, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1,
+      type: 'damage',
+      bot: 'red',
+      amount: 12,
+      remainingHealth: 36,
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      partRemainingHealth: 0,
+      partMaxHealth: 12,
+    },
+    {
+      t: 2,
+      type: 'part_detach',
+      bot: 'red',
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      position: [0, 0.4, 0],
+      sourcePosition: [-2, 0, 0],
+      impactPosition: [0, 0, 0],
+      impulse: [1.2, 1, 0.4],
+      angularImpulse: [0.5, 1.25, -0.75],
+      fractureSeverity: 0.8,
+      damageCause: 'weapon',
+    },
+    {
+      t: 5,
+      type: 'part_detach',
+      bot: 'red',
+      blockId: 'rear-panel',
+      partId: 'Armor_Rear_Panel',
+      position: [-0.5, 0.3, 0.4],
+      sourcePosition: [-2, 0, 0],
+      impactPosition: [-0.5, 0, 0.4],
+      impulse: [0.6, 0.7, 1.1],
+      angularImpulse: [0.2, 0.9, -0.3],
+      fractureSeverity: 0.45,
+      damageCause: 'drone',
+    },
+  ],
+})
+
 test('replay mapping is deterministic for the same timeline and time', () => {
   const first = buildReplayFrame(timeline, 3.2)
   const second = buildReplayFrame(timeline, 3.2)
@@ -223,6 +338,148 @@ test('replay mapping clamps time and interpolates active moves', () => {
   assert.equal(frame.bots.red.status, 'active')
 })
 
+test('replay mapping uses move metadata duration and easing for deterministic progress', () => {
+  const metadataTimeline = createReplayTimeline({
+    round: 1,
+    duration: 3,
+    summary: 'Move metadata interpolation',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [4, 0, 0],
+        duration: 0.5,
+        easing: 'ease_out',
+        intent: 'advance',
+        facing: [1, 0, 0],
+        contactIntent: true,
+      },
+    ],
+  })
+  const frame = buildReplayFrame(metadataTimeline, 1.25)
+
+  assert.deepEqual(frame.bots.red.position, [3, 0, 0])
+  assert.equal(frame.bots.red.motion.progress, 0.5)
+  assert.equal(frame.bots.red.motion.easedProgress, 0.75)
+  assert.ok(frame.bots.red.motion.contactIntensity > 0)
+  assert.ok(frame.bots.red.motion.lean > 0)
+})
+
+test('replay mapping keeps old minimal move events on the default interpolation window', () => {
+  const minimalMoveTimeline = createReplayTimeline({
+    round: 1,
+    duration: 3,
+    summary: 'Legacy move interpolation',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'blue',
+        position: [4, 0, 0],
+        rotation: [0, -90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'blue',
+        from: [4, 0, 0],
+        to: [0, 0, 0],
+      },
+    ],
+  })
+  const frame = buildReplayFrame(minimalMoveTimeline, 1.5)
+
+  assert.deepEqual(frame.bots.blue.position, [2, 0, 0])
+  assert.equal(frame.bots.blue.motion.progress, 0.5)
+  assert.equal(frame.bots.blue.motion.easedProgress, 0.5)
+})
+
+test('replay mapping smooths facing changes for a strafe move instead of snapping rotation', () => {
+  const strafeTimeline = createReplayTimeline({
+    round: 1,
+    duration: 3,
+    summary: 'Strafe facing interpolation',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [0, 0, 2],
+        duration: 1,
+        easing: 'linear',
+        intent: 'strafe',
+        facing: [1, 0, 0],
+      },
+    ],
+  })
+  const midTurn = buildReplayFrame(strafeTimeline, 1.5)
+  const completedTurn = buildReplayFrame(strafeTimeline, 2.05)
+
+  assert.ok(midTurn.bots.red.rotationY > 0)
+  assert.ok(midTurn.bots.red.rotationY < Math.PI / 2)
+  assert.ok(midTurn.bots.red.motion.turn > 0)
+  assert.ok(midTurn.bots.red.motion.drift < 0)
+  assert.equal(completedTurn.bots.red.rotationY, Math.PI / 2)
+})
+
+test('replay mapping does not reveal future move position or facing before its time', () => {
+  const futureMoveTimeline = createReplayTimeline({
+    round: 1,
+    duration: 4,
+    summary: 'Future move suppression',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [4, 0, 0],
+        duration: 0.5,
+        easing: 'linear',
+        facing: [1, 0, 0],
+      },
+      {
+        t: 2,
+        type: 'move',
+        bot: 'red',
+        from: [4, 0, 0],
+        to: [4, 0, 4],
+        duration: 1,
+        easing: 'linear',
+        facing: [0, 0, 1],
+      },
+    ],
+  })
+  const beforeFuture = buildReplayFrame(futureMoveTimeline, 1.99)
+
+  assert.deepEqual(beforeFuture.bots.red.position, [4, 0, 0])
+  assert.equal(beforeFuture.bots.red.rotationY, Math.PI / 2)
+})
+
 test('replay mapping exposes weapon fire effects with team and slot context', () => {
   const frame = buildReplayFrame(timeline, 2.25)
   const weaponFire = frame.effects.find((effect) => effect.kind === 'weapon_fire')
@@ -232,6 +489,70 @@ test('replay mapping exposes weapon fire effects with team and slot context', ()
   assert.equal(weaponFire.label, 'weaponA')
   assert.ok(weaponFire.intensity > 0)
   assert.ok(weaponFire.intensity < 1)
+})
+
+test('replay mapping preserves weapon source identity and action metadata', () => {
+  const frame = buildReplayFrame(createWeaponMetadataTimeline({
+    phase: 'wind_up',
+    style: 'spinner',
+  }), 1.75)
+  const weaponFire = frame.effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(weaponFire)
+  assert.equal(weaponFire.sourceBlockId, 'front-spinner')
+  assert.equal(weaponFire.sourcePartId, 'Weapon_Spinner_Small')
+  assert.equal(weaponFire.weaponPhase, 'wind_up')
+  assert.equal(weaponFire.weaponStyle, 'spinner')
+  assert.equal(weaponFire.label, 'weaponA-spinner-wind_up')
+  assert.deepEqual(weaponFire.endPosition, [4.4, 0, 0.2])
+})
+
+test('replay mapping changes weapon effect labels deterministically by style and phase', () => {
+  const turretRelease = buildReplayFrame(createWeaponMetadataTimeline({
+    phase: 'release',
+    style: 'turret',
+  }), 1.75).effects.find((effect) => effect.kind === 'weapon_fire')
+  const flipperRecoil = buildReplayFrame(createWeaponMetadataTimeline({
+    phase: 'recoil',
+    style: 'flipper',
+  }), 1.75).effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(turretRelease)
+  assert.ok(flipperRecoil)
+  assert.equal(turretRelease.label, 'weaponA-turret-release')
+  assert.equal(flipperRecoil.label, 'weaponA-flipper-recoil')
+  assert.notEqual(turretRelease.label, flipperRecoil.label)
+})
+
+test('replay mapping preserves source metadata on control-net deploy effects', () => {
+  const frame = buildReplayFrame(createWeaponMetadataTimeline({
+    controlCue: 'deploy',
+    phase: 'deploy',
+    style: 'net',
+  }), 1.75)
+  const deploy = frame.effects.find((effect) => effect.kind === 'weapon_fire')
+  const controlNet = frame.effects.find((effect) => effect.kind === 'control_net')
+
+  assert.ok(deploy)
+  assert.ok(controlNet)
+  assert.equal(deploy.label, 'weaponA-net-deploy')
+  assert.equal(controlNet.label, 'control_net-net')
+  assert.equal(controlNet.sourceBlockId, 'front-spinner')
+  assert.equal(controlNet.sourcePartId, 'Weapon_Spinner_Small')
+  assert.equal(controlNet.weaponPhase, 'deploy')
+  assert.equal(controlNet.weaponStyle, 'net')
+})
+
+test('replay mapping keeps old minimal weapon fire events safe', () => {
+  const frame = buildReplayFrame(timeline, 2.25)
+  const weaponFire = frame.effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(weaponFire)
+  assert.equal(weaponFire.label, 'weaponA')
+  assert.equal(weaponFire.sourceBlockId, undefined)
+  assert.equal(weaponFire.sourcePartId, undefined)
+  assert.equal(weaponFire.weaponStyle, undefined)
+  assert.equal(weaponFire.weaponPhase, 'release')
 })
 
 test('replay mapping anchors weapon fire effects to the firing state', () => {
@@ -275,6 +596,46 @@ test('mock replay stays inside the MVP segment duration cap', () => {
   assert.ok(mockReplay.duration >= 15)
   assert.ok(mockReplay.duration <= 30)
   assert.ok(mockReplay.events.every((event) => event.t <= mockReplay.duration))
+})
+
+test('replay timeline validation accepts old minimal semantic event shapes', () => {
+  const oldMinimalTimeline = createReplayTimeline({
+    round: 1,
+    duration: 4,
+    summary: 'Old minimal replay contract',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [1, 0, 0],
+      },
+      {
+        t: 2,
+        type: 'weapon_fire',
+        bot: 'red',
+        weaponSlot: 'weaponA',
+      },
+      {
+        t: 3,
+        type: 'part_detach',
+        bot: 'blue',
+        blockId: 'left-wheel',
+        partId: 'Wheel_Large',
+        position: [1, 0.2, 0],
+      },
+    ],
+  })
+
+  assert.equal(validateReplayTimeline(oldMinimalTimeline), true)
 })
 
 test('replay timeline validation rejects empty-duration and out-of-range events', () => {
@@ -393,6 +754,93 @@ test('replay mapping exposes part detach only after the detach event time', () =
   assert.equal(afterVisualWindow.effects.some((effect) => effect.kind === 'debris' && effect.label === 'left-wheel'), false)
 })
 
+test('replay mapping preserves detach metadata into part frame state', () => {
+  const frame = buildReplayFrame(detachMetadataTimeline, 2.25)
+  const part = frame.parts.red['front-plate']
+
+  assert.equal(part.status, 'detached')
+  assert.equal(part.blockId, 'front-plate')
+  assert.equal(part.partId, 'Armor_Front_Plate')
+  assert.deepEqual(part.detachPosition, [0, 0.4, 0])
+  assert.deepEqual(part.sourcePosition, [-2, 0, 0])
+  assert.deepEqual(part.impactPosition, [0, 0, 0])
+  assert.deepEqual(part.impulse, [1.2, 1, 0.4])
+  assert.deepEqual(part.angularImpulse, [0.5, 1.25, -0.75])
+  assert.equal(part.fractureSeverity, 0.8)
+  assert.equal(part.damageCause, 'weapon')
+  assert.deepEqual(part.detachMotion.originPosition, [0, 0.4, 0])
+  assert.deepEqual(part.detachMotion.impulse, [1.2, 1, 0.4])
+  assert.deepEqual(part.detachMotion.angularImpulse, [0.5, 1.25, -0.75])
+})
+
+test('replay mapping computes deterministic detach arc, spin, settle, and fade', () => {
+  const airborne = buildReplayFrame(detachMetadataTimeline, 2.25).parts.red['front-plate'].detachMotion
+  const settled = buildReplayFrame(detachMetadataTimeline, 4).parts.red['front-plate'].detachMotion
+  const fading = buildReplayFrame(detachMetadataTimeline, 6.7).parts.red['front-plate'].detachMotion
+  const repeat = buildReplayFrame(detachMetadataTimeline, 2.25).parts.red['front-plate'].detachMotion
+
+  assert.deepEqual(airborne, repeat)
+  assert.equal(airborne.age, 0.25)
+  assert.equal(airborne.settled, false)
+  assert.deepEqual(airborne.position, [0.287, 0.531, 0.096])
+  assert.deepEqual(airborne.rotation, [0.125, 0.313, -0.187])
+  assert.equal(airborne.fade, 1)
+  assert.equal(settled.settled, true)
+  assert.deepEqual(settled.position, [0.779, 0.08, 0.26])
+  assert.deepEqual(settled.rotation, [0.083, 0.206, -0.124])
+  assert.equal(fading.settled, true)
+  assert.equal(fading.fade, 0.643)
+})
+
+test('replay mapping keeps legacy minimal detach safe with deterministic fallback motion', () => {
+  const legacyTimeline = createReplayTimeline({
+    round: 1,
+    duration: 5,
+    summary: 'Legacy detach without optional metadata.',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'blue',
+        position: [0, 0, 0],
+        rotation: [0, -90, 0],
+      },
+      {
+        t: 2,
+        type: 'part_detach',
+        bot: 'blue',
+        blockId: 'left-wheel',
+        partId: 'Wheel_Large',
+        position: [1, 0.2, 0],
+      },
+    ],
+  })
+  const frame = buildReplayFrame(legacyTimeline, 2.5)
+  const part = frame.parts.blue['left-wheel']
+
+  assert.equal(part.status, 'detached')
+  assert.equal(part.sourcePosition, undefined)
+  assert.equal(part.impactPosition, undefined)
+  assert.equal(part.fractureSeverity, 0.55)
+  assert.deepEqual(part.detachMotion.originPosition, [1, 0.2, 0])
+  assert.equal(part.detachMotion.impulse.every(Number.isFinite), true)
+  assert.notDeepEqual(part.detachMotion.position, part.detachMotion.originPosition)
+})
+
+test('replay mapping does not leak future detach metadata or motion early', () => {
+  const beforeFuture = buildReplayFrame(detachMetadataTimeline, 4.99)
+  const afterFuture = buildReplayFrame(detachMetadataTimeline, 5.1)
+
+  assert.equal(beforeFuture.parts.red['rear-panel'], undefined)
+  assert.equal(
+    beforeFuture.effects.some((effect) => effect.kind === 'part_detach' && effect.label === 'rear-panel'),
+    false,
+  )
+  assert.equal(afterFuture.parts.red['rear-panel'].status, 'detached')
+  assert.equal(afterFuture.parts.red['rear-panel'].damageCause, 'drone')
+  assert.ok(afterFuture.parts.red['rear-panel'].detachMotion)
+})
+
 test('replay mapping exposes laser_lance ability effects with deterministic placement', () => {
   const frame = buildReplayFrame(abilityTimeline, 2.1)
   const laserCore = frame.effects.find(
@@ -428,6 +876,27 @@ const cameraTestArena = {
   activeHazards: [],
 }
 
+test('canonical replay camera presets are limited to broadcast, red, and blue', () => {
+  assert.deepEqual(CANONICAL_CAMERA_PRESETS, ['broadcast', 'red', 'blue'])
+  assert.deepEqual(
+    CAMERA_PRESET_OPTIONS.map((option) => option.value),
+    ['broadcast', 'red', 'blue'],
+  )
+})
+
+test('legacy camera aliases normalize to approved canonical replay presets', () => {
+  assert.equal(normalizeCameraPreset('broadcast'), 'broadcast')
+  assert.equal(normalizeCameraPreset('red'), 'red')
+  assert.equal(normalizeCameraPreset('blue'), 'blue')
+  assert.equal(normalizeCameraPreset('red_follow'), 'red')
+  assert.equal(normalizeCameraPreset('blue_follow'), 'blue')
+  assert.equal(normalizeCameraPreset('wide'), 'broadcast')
+  assert.equal(normalizeCameraPreset('impact'), 'broadcast')
+  assert.equal(normalizeCameraPreset('cinematic'), 'broadcast')
+  assert.equal(normalizeCameraPreset('broad'), 'broadcast')
+  assert.equal(normalizeCameraPreset(null), 'broadcast')
+})
+
 function createCameraFrame({
   blue = [1, 0, 0],
   effects = [],
@@ -460,6 +929,7 @@ function createCameraFrame({
 
 test('replay mapping does not reveal future control, ability, impact, damage, hazard, or detach cues', () => {
   const beforeControl = buildReplayFrame(movingWeaponTimeline, 1.49)
+  const beforeWeaponMetadata = buildReplayFrame(createWeaponMetadataTimeline(), 1.49)
   const beforeDroneSwarm = buildReplayFrame(droneSwarmTimeline, 1.59)
   const beforeImpact = buildReplayFrame(timeline, 2.99)
   const beforeDamage = buildReplayFrame(timeline, 3.09)
@@ -470,6 +940,8 @@ test('replay mapping does not reveal future control, ability, impact, damage, ha
     beforeControl.effects.some((effect) => effect.label === 'weaponA-deploy' || effect.kind === 'control_net'),
     false,
   )
+  assert.equal(beforeWeaponMetadata.effects.some((effect) => effect.sourceBlockId === 'front-spinner'), false)
+  assert.equal(beforeWeaponMetadata.effects.some((effect) => effect.endPosition?.[0] === 4.4), false)
   assert.equal(beforeDroneSwarm.effects.some((effect) => effect.kind === 'drone_swarm'), false)
   assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'impact'), false)
   assert.equal(beforeImpact.effects.some((effect) => effect.kind === 'debris'), false)
@@ -623,4 +1095,32 @@ test('broadcast camera framing caps shake for no excessive shake invariant', () 
     NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT,
   )
   assert.equal(capBroadcastShakeForNoExcessiveShake(-1), 0)
+})
+
+test('red and blue follow cameras deterministically target the selected bot only', () => {
+  const frame = createCameraFrame({
+    red: [-7, 0.2, 2],
+    blue: [4, 0.1, -3],
+    effects: [
+      {
+        id: 'impact',
+        kind: 'impact',
+        position: [12, 0, 12],
+        age: 0.1,
+        intensity: 1,
+      },
+    ],
+  })
+  const redFollow = calculateTeamFollowFrame(frame, cameraTestArena, 'red')
+  const blueFollow = calculateTeamFollowFrame(frame, cameraTestArena, 'blue')
+  const redRepeat = calculateTeamFollowFrame(frame, cameraTestArena, 'red')
+
+  assert.deepEqual(redFollow, redRepeat)
+  assert.equal(redFollow.team, 'red')
+  assert.equal(blueFollow.team, 'blue')
+  assert.deepEqual(redFollow.target, [-7, 0.55, 2])
+  assert.deepEqual(blueFollow.target, [4, 0.45, -3])
+  assert.equal(redFollow.alpha, blueFollow.alpha)
+  assert.equal(redFollow.beta, blueFollow.beta)
+  assert.equal(redFollow.radius, blueFollow.radius)
 })

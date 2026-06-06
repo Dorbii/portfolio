@@ -6,6 +6,7 @@ import {
 } from '../mockSession'
 import { ReplayViewer } from './ReplayViewer'
 import type { CameraPreset } from './replayMapping'
+import { normalizeCameraPreset } from './replayCameraPresets'
 
 export function ReplayPreview() {
   const previewOptions = resolveReplayPreviewOptions(window.location.search)
@@ -43,23 +44,8 @@ function resolveReplayPreviewOptions(search: string): {
   const parsedTime = Number(params.get('time'))
 
   return {
-    cameraPreset: resolveCameraPreset(params.get('camera')),
+    cameraPreset: normalizeCameraPreset(params.get('camera')),
     proofMode: params.get('proof') === 'ability',
     time: Number.isFinite(parsedTime) ? parsedTime : 0,
   }
-}
-
-function resolveCameraPreset(value: string | null): CameraPreset {
-  if (
-    value === 'wide' ||
-    value === 'broadcast' ||
-    value === 'red_follow' ||
-    value === 'blue_follow' ||
-    value === 'impact' ||
-    value === 'cinematic'
-  ) {
-    return value
-  }
-
-  return 'broadcast'
 }

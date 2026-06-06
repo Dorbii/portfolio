@@ -33,3 +33,12 @@ dist-ssr
 # other
 pkg
 smoke-artifacts*
+
+# Codex-generated catalog/render reference artifacts
+/docs/agent-arena-parts-catalog.md
+/docs/part-catalog-reference/
+/exports/agent-arena-parts-catalog-obsidian-*
+/exports/agent-arena-parts-catalog-obsidian-png-*
+/exports/agent-arena-actual-part-renders-obsidian-*
+/tools/generate-parts-catalog-doc.mjs
+/tools/capture-actual-part-renders.mjs

@@ -1,5 +1,9 @@
 import {
   createReplayTimeline,
+  type MoveEasing,
+  type MoveEvent,
+  type MoveIntent,
+  type PartDetachEvent,
   type ReplayEvent,
   type ReplayTimeline,
 } from '../../replay/src/index.js'
@@ -93,6 +97,7 @@ type RuntimePart = {
 type PartDamageHit = {
   blockId: string
   partId: string
+  damageApplied: number
   remainingHealth: number
   maxHealth: number
   broke: boolean
@@ -100,6 +105,12 @@ type PartDamageHit = {
 }
 
 type WeaponSlot = 'weaponA' | 'weaponB'
+type DetachMetadataContext = {
+  cause: string
+  damage: number
+  sourcePosition: Vector3
+  impactPosition: Vector3
+}
 
 const WEAPON_SLOTS: readonly WeaponSlot[] = ['weaponA', 'weaponB']
 const NO_DAMAGE_STALEMATE_TICKS = 60
@@ -140,6 +151,18 @@ function round(value: number): number {
 
 function distance(left: Vector3, right: Vector3): number {
   return Math.hypot(left[0] - right[0], left[2] - right[2])
+}
+
+function normalizedFlatVector(from: Vector3, to: Vector3, fallback: Vector3 = [1, 0, 0]): Vector3 {
+  const dx = to[0] - from[0]
+  const dz = to[2] - from[2]
+  const length = Math.hypot(dx, dz)
+
+  if (length <= 0) {
+    return fallback
+  }
+
+  return [round(dx / length), 0, round(dz / length)]
 }
 
 function weaponReach(bot: BotRuntime): number {
@@ -512,6 +535,7 @@ function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: s
     hits.push({
       blockId: part.blockId,
       partId: part.partId,
+      damageApplied: round(applied),
       remainingHealth: part.health,
       maxHealth: part.maxHealth,
       broke: before > 0 && part.health <= 0,
@@ -524,12 +548,146 @@ function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: s
   return hits
 }
 
+function moveIntentFor(command: MovementCommand | undefined, forced = false): MoveIntent {
+  if (forced) {
+    return 'forced'
+  }
+
+  switch (command) {
+    case 'forward':
+    case 'dash_forward':
+      return 'advance'
+    case 'backward':
+    case 'dash_backward':
+      return 'retreat'
+    case 'strafe_left':
+    case 'strafe_right':
+      return 'strafe'
+    case 'circle_left':
+    case 'circle_right':
+      return 'circle'
+    case 'turn_left':
+    case 'turn_right':
+      return 'turn'
+    case 'brake':
+    case undefined:
+      return 'forced'
+  }
+}
+
+function moveEasingFor(command: MovementCommand | undefined, forced = false): MoveEasing {
+  if (forced) {
+    return 'ease_out'
+  }
+
+  switch (command) {
+    case 'dash_forward':
+    case 'dash_backward':
+      return 'ease_out'
+    case 'turn_left':
+    case 'turn_right':
+    case 'circle_left':
+    case 'circle_right':
+      return 'ease_in_out'
+    case 'brake':
+    case undefined:
+      return 'brake'
+    case 'forward':
+    case 'backward':
+    case 'strafe_left':
+    case 'strafe_right':
+      return 'linear'
+  }
+}
+
+function moveDurationFor(command: MovementCommand | undefined, forced = false): number {
+  if (forced) {
+    return 0.35
+  }
+
+  switch (command) {
+    case 'dash_forward':
+    case 'dash_backward':
+      return 0.48
+    case 'turn_left':
+    case 'turn_right':
+    case 'circle_left':
+    case 'circle_right':
+      return 0.72
+    case 'brake':
+    case undefined:
+      return 0.25
+    case 'forward':
+    case 'backward':
+    case 'strafe_left':
+    case 'strafe_right':
+      return 0.68
+  }
+}
+
+function createMoveEvent(
+  t: number,
+  bot: BotRuntime,
+  from: Vector3,
+  to: Vector3,
+  command?: MovementCommand,
+  forced = false,
+): MoveEvent {
+  return {
+    t,
+    type: 'move',
+    bot: bot.role,
+    from,
+    to,
+    duration: moveDurationFor(command, forced),
+    easing: moveEasingFor(command, forced),
+    command,
+    intent: moveIntentFor(command, forced),
+    facing: normalizedFlatVector(from, to, bot.role === 'red' ? [1, 0, 0] : [-1, 0, 0]),
+    contactIntent: !forced && command !== undefined && isContactMove({ tick: Math.trunc(t), move: command }),
+  }
+}
+
+function createDetachMetadata(
+  bot: BotRuntime,
+  hit: PartDamageHit,
+  index: number,
+  context: DetachMetadataContext,
+): Pick<
+  PartDetachEvent,
+  'sourcePosition' | 'impactPosition' | 'impulse' | 'angularImpulse' | 'fractureSeverity' | 'damageCause'
+> {
+  const direction = normalizedFlatVector(context.sourcePosition, hit.position, [bot.role === 'red' ? 1 : -1, 0, 0])
+  const severity = round(Math.min(1, hit.damageApplied / Math.max(1, hit.maxHealth)))
+  const impulseScale = round(0.35 + severity * 1.65 + Math.min(1.2, context.damage / 18))
+  const offsetX = hit.position[0] - bot.position[0]
+  const offsetZ = hit.position[2] - bot.position[2]
+
+  return {
+    sourcePosition: context.sourcePosition,
+    impactPosition: context.impactPosition,
+    impulse: [
+      round(direction[0] * impulseScale),
+      round(0.28 + severity * 0.72),
+      round(direction[2] * impulseScale),
+    ],
+    angularImpulse: [
+      round(offsetZ * impulseScale * 0.3),
+      round((index + 1) * (0.18 + severity * 0.42)),
+      round(-offsetX * impulseScale * 0.3),
+    ],
+    fractureSeverity: severity,
+    damageCause: context.cause,
+  }
+}
+
 function emitPartDetachEvents(
   events: ReplayEvent[],
   tick: number,
   bot: BotRuntime,
   hits: PartDamageHit[],
   startTime = tick + 0.36,
+  context?: DetachMetadataContext,
 ): void {
   hits.forEach((hit, index) => {
     if (!hit.broke) {
@@ -543,6 +701,7 @@ function emitPartDetachEvents(
       blockId: hit.blockId,
       partId: hit.partId,
       position: hit.position,
+      ...(context ? createDetachMetadata(bot, hit, index, context) : {}),
     })
   })
 }
@@ -764,7 +923,7 @@ function forceMoveToward(
   }
 
   bot.position = to
-  events.push({ t: tick + 0.22, type: 'move', bot: bot.role, from, to })
+  events.push(createMoveEvent(tick + 0.22, bot, from, to, undefined, true))
 }
 
 function applyDamage(
@@ -786,6 +945,11 @@ function applyDamage(
 
   defender.lastDamagedTick = tick
   attacker.lastDealtDamageTick = tick
+  const impactPosition: Vector3 = [
+    round((attacker.position[0] + defender.position[0]) / 2),
+    0,
+    round((attacker.position[2] + defender.position[2]) / 2),
+  ]
 
   events.push({
     t: tick + 0.25,
@@ -793,11 +957,7 @@ function applyDamage(
     attacker: attacker.role,
     defender: defender.role,
     damage: mitigated,
-    position: [
-      round((attacker.position[0] + defender.position[0]) / 2),
-      0,
-      round((attacker.position[2] + defender.position[2]) / 2),
-    ],
+    position: impactPosition,
   })
   events.push({
     t: tick + 0.3,
@@ -810,7 +970,12 @@ function applyDamage(
     partRemainingHealth: primaryHit?.remainingHealth,
     partMaxHealth: primaryHit?.maxHealth,
   })
-  emitPartDetachEvents(events, tick, defender, hits)
+  emitPartDetachEvents(events, tick, defender, hits, tick + 0.36, {
+    cause,
+    damage: mitigated,
+    sourcePosition: attacker.position,
+    impactPosition,
+  })
 
   if (wasAlive && isBotDestroyed(defender)) {
     events.push({
@@ -858,6 +1023,10 @@ function resolveWeapons(
       weaponSlot: slot,
       controlCue: isNet ? 'deploy' : undefined,
       targetPosition: isNet ? defender.position : undefined,
+      sourceBlockId: part.blockId,
+      sourcePartId: part.partId,
+      phase: isNet ? 'deploy' : 'release',
+      style: part.behaviorId ?? part.category,
     })
 
     if (!inRange) {
@@ -1093,6 +1262,7 @@ function resolveHazard(
   }
 
   const damage = Math.max(1, Math.round(6 - bot.stats.stability * 0.12))
+  const impactPosition: Vector3 = bot.position
   const wasAlive = !isBotDestroyed(bot)
   const hits = applyPartDamage(bot, damage, tick, 'hazard')
   const primaryHit = hits[0]
@@ -1104,7 +1274,7 @@ function resolveHazard(
     hazard: 'floor_saw',
     bot: bot.role,
     damage,
-    position: bot.position,
+    position: impactPosition,
   })
   events.push({
     t: tick + 0.38,
@@ -1117,7 +1287,12 @@ function resolveHazard(
     partRemainingHealth: primaryHit?.remainingHealth,
     partMaxHealth: primaryHit?.maxHealth,
   })
-  emitPartDetachEvents(events, tick, bot, hits, tick + 0.44)
+  emitPartDetachEvents(events, tick, bot, hits, tick + 0.44, {
+    cause: 'hazard',
+    damage,
+    sourcePosition: [0, 0, 0],
+    impactPosition,
+  })
 
   if (wasAlive && isBotDestroyed(bot)) {
     events.push({
@@ -1214,10 +1389,10 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
     blue.position = moveBot(blue, blueCommand, arena, blueMovementUtility.multiplier)
 
     if (!positionsEqual(redFrom, red.position)) {
-      events.push({ t: tick, type: 'move', bot: 'red', from: redFrom, to: red.position })
+      events.push(createMoveEvent(tick, red, redFrom, red.position, redCommand.move))
     }
     if (!positionsEqual(blueFrom, blue.position)) {
-      events.push({ t: tick, type: 'move', bot: 'blue', from: blueFrom, to: blue.position })
+      events.push(createMoveEvent(tick, blue, blueFrom, blue.position, blueCommand.move))
     }
 
     resolveWeapons(events, tick, arena, red, blue, redCommand, rng)

@@ -43,6 +43,10 @@ const roundPlanWorkbenchSource = readFileSync(
   new URL('../apps/web/src/agent/RoundPlanWorkbench.tsx', import.meta.url),
   'utf8',
 )
+const sharedUiSource = readFileSync(
+  new URL('../apps/web/src/shared/ui.tsx', import.meta.url),
+  'utf8',
+)
 const roundPlanStructuredEditorSource = readFileSync(
   new URL('../apps/web/src/agent/RoundPlanStructuredEditor.tsx', import.meta.url),
   'utf8',
@@ -69,6 +73,10 @@ const replayViewerSource = readFileSync(
 )
 const replayPreviewSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayPreview.tsx', import.meta.url),
+  'utf8',
+)
+const replayCameraPresetsSource = readFileSync(
+  new URL('../apps/web/src/replay/replayCameraPresets.ts', import.meta.url),
   'utf8',
 )
 const refereePanelsSource = readFileSync(
@@ -246,6 +254,34 @@ test('agent cockpit prioritizes active task workflow over secondary panels', () 
   assert.ok(roundPlanWorkbenchSource.indexOf('submit-dock') < roundPlanWorkbenchSource.indexOf('assembly-bay-panel'))
 })
 
+test('Agent Arena operational surfaces use shared UI primitives', () => {
+  const requiredPrimitiveExports = [
+    'Panel',
+    'SectionHeading',
+    'MetricGrid',
+    'MetricRow',
+    'ActionGroup',
+    'FormField',
+    'StatusBadge',
+    'RoleBadge',
+  ]
+
+  for (const primitive of requiredPrimitiveExports) {
+    assert.ok(sharedUiSource.includes(`function ${primitive}`), primitive)
+  }
+
+  assert.ok(refereeConsoleSource.includes("from '../shared/ui'"))
+  assert.ok(cockpitSource.includes("from '../shared/ui'"))
+  assert.ok(replayViewerSource.includes("from '../shared/ui'"))
+  assert.ok(refereeConsoleSource.includes('<Panel className="panel'))
+  assert.ok(refereeConsoleSource.includes('<MetricGrid className="session-metrics">'))
+  assert.ok(refereePanelsSource.includes('<SectionHeading'))
+  assert.ok(cockpitSource.includes('<Panel className="agent-live-panel cockpit-secondary-panel'))
+  assert.ok(cockpitSource.includes('<MetricGrid className="agent-facts">'))
+  assert.ok(replayViewerSource.includes('<ActionGroup className="replay-controls"'))
+  assert.ok(replayViewerSource.includes('<FormField label="Camera">'))
+})
+
 test('agent cockpit separates submitted truth from editable round plan draft', () => {
   assert.ok(roundPlanSubmissionSource.includes('roleState?.ownSubmission'))
   assert.ok(roundPlanSubmissionSource.includes('createEmptySubmission()'))
@@ -281,6 +317,19 @@ test('ability proof preview can render a clean canvas without replay overlays', 
   assert.ok(replayViewerSource.includes('replay-damage-schematic'))
 })
 
+test('replay camera controls expose only approved presets and normalize legacy aliases', () => {
+  assert.ok(replayCameraPresetsSource.includes("['broadcast', 'red', 'blue'] as const"))
+  assert.ok(replayViewerSource.includes('CAMERA_PRESET_OPTIONS.map'))
+  assert.ok(replayPreviewSource.includes('normalizeCameraPreset(params.get'))
+  assert.ok(replayCameraPresetsSource.includes("normalized === 'red_follow'"))
+  assert.ok(replayCameraPresetsSource.includes("normalized === 'blue_follow'"))
+  assert.equal(replayViewerSource.includes("value: 'wide'"), false)
+  assert.equal(replayViewerSource.includes("value: 'red_follow'"), false)
+  assert.equal(replayViewerSource.includes("value: 'blue_follow'"), false)
+  assert.equal(replayViewerSource.includes("value: 'impact'"), false)
+  assert.equal(replayViewerSource.includes("value: 'cinematic'"), false)
+})
+
 test('Babylon replay scene has render definitions for accepted replay cue kinds', () => {
   const requiredEffectKinds = [
     'weapon_fire',
@@ -297,8 +346,8 @@ test('Babylon replay scene has render definitions for accepted replay cue kinds'
   }
 
   assert.ok(babylonReplaySceneSource.includes('createEffectPool(scene)'))
-  assert.ok(babylonReplaySceneSource.includes('updateEffects(resources.effectPool, frame.effects, resources.botProfiles)'))
+  assert.ok(babylonReplaySceneSource.includes('updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)'))
   assert.ok(babylonReplayEffectsSource.includes('Object.entries(EFFECT_POOL_DEFINITIONS)'))
   assert.ok(babylonReplayEffectsSource.includes('EFFECT_POOL_DEFINITIONS[effect.kind]'))
-  assert.ok(babylonReplayEffectsSource.includes('definition.update({ effect, mesh, profiles })'))
+  assert.ok(babylonReplayEffectsSource.includes('definition.update({ bots, effect, mesh, profiles })'))
 })

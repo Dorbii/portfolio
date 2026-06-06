@@ -11,7 +11,15 @@ import {
   formatDurationSeconds,
   formatLabel,
 } from '../shared/format'
-import { Button } from '../shared/Button'
+import {
+  ActionGroup,
+  Button,
+  MetricGrid,
+  MetricRow,
+  RoleBadge,
+  SectionHeading,
+  StatusBadge,
+} from '../shared/ui'
 import type { ReplayPayload } from './refereeClient'
 import { getInvitePanelMode } from './refereeInvitePanelState'
 
@@ -85,24 +93,12 @@ export function ReplayOutcome({
       <SectionHeader kicker="Combat outcome" title="Result" />
       {result ? (
         <>
-          <dl className="status-list">
-            <div>
-              <dt>Winner</dt>
-              <dd>{formatWinner(result.winner)}</dd>
-            </div>
-            <div>
-              <dt>Reason</dt>
-              <dd>{result.reason}</dd>
-            </div>
-            <div>
-              <dt>Damage</dt>
-              <dd>{`Red ${result.damage.red} / Blue ${result.damage.blue}`}</dd>
-            </div>
-            <div>
-              <dt>Health</dt>
-              <dd>{`Red ${result.remainingHealth.red} / Blue ${result.remainingHealth.blue}`}</dd>
-            </div>
-          </dl>
+          <MetricGrid className="status-list">
+            <MetricRow label="Winner" value={formatWinner(result.winner)} />
+            <MetricRow label="Reason" value={result.reason} />
+            <MetricRow label="Damage" value={`Red ${result.damage.red} / Blue ${result.damage.blue}`} />
+            <MetricRow label="Health" value={`Red ${result.remainingHealth.red} / Blue ${result.remainingHealth.blue}`} />
+          </MetricGrid>
           <h3>Key events</h3>
           {keyEvents.length > 0 ? (
             <ol className="key-event-list">
@@ -133,16 +129,16 @@ export function PublicRoleStatus({ roles }: { roles: PublicSessionState['roles']
   return (
     <div className="role-status-list">
       {roleEntries.map(([role, roleState]) => (
-        <dl className="status-list" key={role}>
-          <div>
-            <dt>{capitalize(role)} claimed</dt>
-            <dd>{roleState.claimed ? 'Yes' : 'No'}</dd>
-          </div>
-          <div>
-            <dt>{capitalize(role)} submitted</dt>
-            <dd>{roleState.submitted ? 'Yes' : 'No'}</dd>
-          </div>
-        </dl>
+        <MetricGrid className="status-list" key={role}>
+          <MetricRow
+            label={<RoleBadge role={role}>{capitalize(role)}</RoleBadge>}
+            value={<StatusBadge tone={roleState.claimed ? 'ok' : 'warning'}>{roleState.claimed ? 'Claimed' : 'Open'}</StatusBadge>}
+          />
+          <MetricRow
+            label="Submitted"
+            value={<StatusBadge tone={roleState.submitted ? 'ok' : 'neutral'}>{roleState.submitted ? 'Yes' : 'No'}</StatusBadge>}
+          />
+        </MetricGrid>
       ))}
     </div>
   )
@@ -176,8 +172,18 @@ export function InvitePanel({
       <div className="invite-panel invite-panel-claimed">
         <p>
           <strong>{capitalize(role)} agent claimed.</strong>
-          <span>Normal handoff actions hidden.</span>
+          <span>
+            {hasInvite
+              ? 'Cockpit access remains available for this browser session.'
+              : 'Cockpit claim token is not stored in this browser session.'}
+          </span>
         </p>
+        <InviteActions
+          agentBrief={agentBrief}
+          inviteUrl={inviteUrl}
+          onCopyBrief={onCopyBrief}
+          onOpen={onOpen}
+        />
         <div className="invite-reset-actions">
           <Button
             type="button"
@@ -196,7 +202,10 @@ export function InvitePanel({
   if (panelMode === 'unavailable') {
     return (
       <div className="invite-panel">
-        <p className="referee-empty">{capitalize(role)} invite unavailable.</p>
+        <p className="referee-empty">
+          {capitalize(role)} cockpit unavailable because this tab does not have that role claim token.
+          Use the original handoff, create a new session here, or reset the role claim before combat resolves.
+        </p>
         <div className="invite-reset-actions">
           <Button
             type="button"
@@ -215,24 +224,12 @@ export function InvitePanel({
   return (
     <div className="invite-panel">
       <p>{capitalize(role)} agent handoff</p>
-      <div className="invite-links">
-        <Button
-          type="button"
-          variant="primary"
-          onClick={onOpen}
-          disabled={!inviteUrl}
-        >
-          Open cockpit
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCopyBrief}
-          disabled={!agentBrief}
-        >
-          Copy handoff
-        </Button>
-      </div>
+      <InviteActions
+        agentBrief={agentBrief}
+        inviteUrl={inviteUrl}
+        onCopyBrief={onCopyBrief}
+        onOpen={onOpen}
+      />
       <div className="invite-reset-actions">
         <Button
           type="button"
@@ -248,6 +245,39 @@ export function InvitePanel({
   )
 }
 
+function InviteActions({
+  agentBrief,
+  inviteUrl,
+  onCopyBrief,
+  onOpen,
+}: {
+  agentBrief: string
+  inviteUrl: string
+  onCopyBrief: () => Promise<void> | void
+  onOpen: () => void
+}) {
+  return (
+    <ActionGroup className="invite-links">
+      <Button
+        type="button"
+        variant="primary"
+        onClick={onOpen}
+        disabled={!inviteUrl}
+      >
+        Open cockpit
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={onCopyBrief}
+        disabled={!agentBrief}
+      >
+        Copy handoff
+      </Button>
+    </ActionGroup>
+  )
+}
+
 export function SectionHeader({
   kicker,
   title,
@@ -258,13 +288,12 @@ export function SectionHeader({
   aside?: string
 }) {
   return (
-    <div className="section-header">
-      <div>
-        <span>{kicker}</span>
-        <h2>{title}</h2>
-      </div>
-      {aside ? <p>{aside}</p> : null}
-    </div>
+    <SectionHeading
+      aside={aside}
+      className="section-header"
+      kicker={kicker}
+      title={title}
+    />
   )
 }
 
@@ -301,10 +330,7 @@ export function PublicChatLog({
 
 export function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="metric">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
+    <MetricRow className="metric" label={label} value={value} />
   )
 }
 

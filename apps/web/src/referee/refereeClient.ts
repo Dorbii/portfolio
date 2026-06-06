@@ -5,6 +5,7 @@ import type {
   PublicSessionState,
   RelayErrorCode,
   RelayErrorResponse,
+  RoleInvite,
   RoleResetResponse,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
@@ -28,6 +29,7 @@ export type StoredSessionSecrets = {
   sessionId: string
   apiBase: string
   refereeToken: string
+  invites: RoleInvite[]
   expiresAt: string
 }
 
@@ -198,6 +200,7 @@ export function readStoredSession(
         sessionId: parsed.sessionId,
         apiBase: parsed.apiBase,
         refereeToken: parsed.refereeToken,
+        invites: normalizeStoredInvites(parsed.invites),
         expiresAt: parsed.expiresAt,
       }
     }
@@ -214,12 +217,14 @@ export function writeStoredSession(
   storage: TokenStorage,
   apiBase: string,
   sessionId: string,
-  data: { refereeToken: string; expiresAt: string },
+  data: { refereeToken: string; expiresAt: string; invites?: RoleInvite[] },
 ) {
+  const existingSession = data.invites ? null : readStoredSession(storage, apiBase, sessionId)
   const payload: StoredSessionSecrets = {
     sessionId,
     apiBase,
     refereeToken: data.refereeToken,
+    invites: data.invites ? normalizeStoredInvites(data.invites) : existingSession?.invites ?? [],
     expiresAt: data.expiresAt,
   }
 
@@ -236,6 +241,37 @@ export function isValidSessionId(value: string): boolean {
 
 function storageKey(apiBase: string, sessionId: string): string {
   return `${SESSION_STORAGE_KEY_PREFIX}:${apiBase}:${sessionId}`
+}
+
+function normalizeStoredInvites(value: unknown): RoleInvite[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const byRole = new Map<TeamRole, RoleInvite>()
+
+  for (const entry of value) {
+    if (
+      typeof entry === 'object' &&
+      entry !== null &&
+      (entry as { role?: unknown }).role !== undefined &&
+      ((entry as { role?: unknown }).role === 'red' || (entry as { role?: unknown }).role === 'blue') &&
+      typeof (entry as { claimToken?: unknown }).claimToken === 'string' &&
+      (entry as { claimToken: string }).claimToken.length > 0
+    ) {
+      const invite = entry as RoleInvite
+
+      byRole.set(invite.role, {
+        role: invite.role,
+        claimToken: invite.claimToken,
+        claimPath: typeof invite.claimPath === 'string' ? invite.claimPath : '',
+      })
+    }
+  }
+
+  return (['red', 'blue'] as TeamRole[])
+    .map((role) => byRole.get(role))
+    .filter((invite): invite is RoleInvite => invite !== undefined)
 }
 
 function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {

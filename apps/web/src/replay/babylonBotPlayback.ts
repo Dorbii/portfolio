@@ -34,13 +34,15 @@ export function updateBots(
     )
     const bounce = Math.sin(frame.time * 18) * 0.02
     const flinch = damagePulse ? damagePulse.intensity : 0
+    const motion = state.motion
 
     bot.position = toBabylonVector(state.position)
-    bot.position.y = hit ? 0.08 + bounce : 0.16
+    bot.position.y = hit ? 0.08 + bounce : 0.16 + motion.contactIntensity * 0.03
     bot.rotation.y = state.rotationY
+    bot.rotation.x = hit ? 0 : -motion.lean
     bot.rotation.z = hit
       ? (role === 'red' ? -0.2 : 0.2)
-      : Math.sin(frame.time * 42) * flinch * 0.14
+      : Math.sin(frame.time * 42) * flinch * 0.14 + motion.drift * 0.08 + motion.turn * 0.1
     bot.scaling.setAll(hit ? 0.96 : 1 + flinch * 0.035)
     updateBotPartNodes(bot, role, frame.parts[role], frame.time)
 
@@ -104,31 +106,24 @@ function updateBotPartNodes(
     const baseRotation = metadata.baseRotation
     const damageSeverity = partDamageSeverity(state)
 
+    node.setEnabled(true)
     applyPartMaterialState(node, metadata, damageSeverity)
 
-    if (state?.status === 'detached' && state.detachTime !== undefined) {
-      const age = Math.max(0, time - state.detachTime)
-      const angle = deterministicAngle(`${role}-${metadata.blockId}`) + (role === 'red' ? 0.25 : -0.25)
-      const distance = Math.min(3.4, 0.45 + age * 1.85)
-      const origin = state.detachPosition
-        ? toBabylonVector(state.detachPosition)
-        : Vector3.TransformCoordinates(new Vector3(basePosition[0], basePosition[1], basePosition[2]), botWorldMatrix)
-      const hop = Math.max(0, 0.5 + age * 1.24 - age * age * 0.38)
-      const worldPosition = new Vector3(
-        origin.x + Math.cos(angle) * distance,
-        Math.max(0.08, origin.y + hop),
-        origin.z + Math.sin(angle) * distance,
-      )
+    if (state?.status === 'detached' && state.detachMotion) {
+      const motion = state.detachMotion
+      const worldPosition = toBabylonVector(motion.position)
       const localPosition = Vector3.TransformCoordinates(worldPosition, inverseBotWorld)
-      const freshBreak = Math.max(0, 1 - age / 0.7)
+      const freshBreak = Math.max(0, 1 - motion.age / 0.7) * (0.45 + motion.fractureSeverity)
+      const settleSquash = motion.settled ? 0.94 : 1
 
       node.position.copyFrom(localPosition)
       node.rotation.set(
-        baseRotation[0] + age * (1.9 + Math.abs(Math.sin(angle))),
-        baseRotation[1] + age * 2.5,
-        baseRotation[2] + age * (1.4 + Math.abs(Math.cos(angle))),
+        baseRotation[0] + motion.rotation[0],
+        baseRotation[1] + motion.rotation[1],
+        baseRotation[2] + motion.rotation[2],
       )
-      node.scaling.setAll(1.04 + freshBreak * 0.16)
+      node.scaling.setAll(Math.max(0.02, motion.fade) * settleSquash * (1.02 + freshBreak * 0.16))
+      node.setEnabled(motion.fade > 0.025)
 
       return
     }

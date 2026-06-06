@@ -1,7 +1,10 @@
-import type { TeamRole, Vector3 } from '../../schemas/src/index.js'
+import type { MovementCommand, TeamRole, Vector3 } from '../../schemas/src/index.js'
 
 export type AbilityName = 'laser_lance' | 'drone_swarm'
 export type WeaponFireCue = 'deploy' | 'release'
+export type MoveEasing = 'linear' | 'ease_in' | 'ease_out' | 'ease_in_out' | 'brake'
+export type MoveIntent = 'advance' | 'retreat' | 'strafe' | 'circle' | 'turn' | 'forced'
+export type WeaponFirePhase = 'wind_up' | 'deploy' | 'release' | 'recoil'
 
 export type SpawnEvent = {
   t: number
@@ -17,6 +20,12 @@ export type MoveEvent = {
   bot: TeamRole
   from: Vector3
   to: Vector3
+  duration?: number
+  easing?: MoveEasing
+  command?: MovementCommand
+  intent?: MoveIntent
+  facing?: Vector3
+  contactIntent?: boolean
 }
 
 export type WeaponFireEvent = {
@@ -26,6 +35,10 @@ export type WeaponFireEvent = {
   weaponSlot: 'weaponA' | 'weaponB'
   controlCue?: WeaponFireCue
   targetPosition?: Vector3
+  sourceBlockId?: string
+  sourcePartId?: string
+  phase?: WeaponFirePhase
+  style?: string
 }
 
 export type AbilityEvent = {
@@ -75,6 +88,12 @@ export type PartDetachEvent = {
   blockId: string
   partId?: string
   position: Vector3
+  sourcePosition?: Vector3
+  impactPosition?: Vector3
+  impulse?: Vector3
+  angularImpulse?: Vector3
+  fractureSeverity?: number
+  damageCause?: string
 }
 
 export type KnockoutEvent = {

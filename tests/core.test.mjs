@@ -708,6 +708,34 @@ test('resolver applies movement tactics to replay movement for the same blueprin
   assert.equal(redMoveEvents(holdResult).length, 0)
 })
 
+test('resolver emits semantic movement metadata for actual move events', () => {
+  const result = resolveCombat({
+    round: 1,
+    seed: 'move-metadata-check',
+    red: {
+      blueprint: fastMobileBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+      openingScript: repeatedScript(3, { move: 'dash_forward' }),
+    },
+    blue: {
+      blueprint: bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+      openingScript: { commands: [] },
+    },
+    arena: { name: 'Move Metadata Test', width: 24, height: 16, activeHazards: [] },
+  })
+  const firstMove = redMoveEvents(result)[0]
+
+  assert.ok(firstMove)
+  assert.equal(firstMove.command, 'dash_forward')
+  assert.equal(firstMove.intent, 'advance')
+  assert.equal(firstMove.easing, 'ease_out')
+  assert.equal(firstMove.contactIntent, true)
+  assert.ok(firstMove.duration > 0)
+  assert.ok(firstMove.duration <= 1)
+  assert.deepEqual(firstMove.facing, [1, 0, 0])
+})
+
 test('resolver is deterministic and emits a valid replay timeline', () => {
   const input = {
     round: 1,
@@ -783,6 +811,24 @@ test('resolver emits independent weaponA and weaponB fire from two weapon slots'
   }
 
   assert.ok(redWeaponFire.some((event) => event.weaponSlot === 'weaponB'))
+  assert.ok(
+    redWeaponFire.some(
+      (event) =>
+        event.weaponSlot === 'weaponA' &&
+        event.sourceBlockId === 'spinner' &&
+        event.sourcePartId === 'Weapon_Spinner_Small',
+    ),
+  )
+  assert.ok(
+    redWeaponFire.some(
+      (event) =>
+        event.weaponSlot === 'weaponB' &&
+        event.sourceBlockId === 'saw' &&
+        event.sourcePartId === 'Weapon_Saw',
+    ),
+  )
+  assert.ok(redWeaponFire.every((event) => event.phase === 'release'))
+  assert.ok(redWeaponFire.every((event) => typeof event.style === 'string' && event.style.length > 0))
   assert.ok(
     [...slotsByTick.values()].some(
       (slots) => slots.has('weaponA') && slots.has('weaponB'),
@@ -1522,6 +1568,15 @@ test('resolver emits a block-tied detach event when a part reaches zero HP', () 
   assert.ok(detach)
   assert.equal(detach.partId, 'Style_Flag')
   assert.equal(result.partHealth.blue[detach.blockId], 0)
+  assert.equal(typeof detach.damageCause, 'string')
+  assert.ok(Array.isArray(detach.sourcePosition))
+  assert.ok(Array.isArray(detach.impactPosition))
+  assert.ok(Array.isArray(detach.impulse))
+  assert.ok(Array.isArray(detach.angularImpulse))
+  assert.ok(detach.sourcePosition[0] < detach.position[0])
+  assert.ok(detach.impulse.some((value) => Math.abs(value) > 0))
+  assert.ok(detach.fractureSeverity > 0)
+  assert.ok(detach.fractureSeverity <= 1)
 
   const breakDamage = result.replay.events.find(
     (event) =>

@@ -1,12 +1,15 @@
 import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import type {
   ReplayEffectKind,
   ReplayEffectState,
 } from './replayMapping'
+import type { BotPartNodeMetadata } from './babylonPartRenderer'
 import type { BotVisualProfile } from './replayVisualProfile'
 import {
   createSceneMaterial,
@@ -134,6 +137,7 @@ export function updateEffects(
   pool: EffectPool,
   effects: ReplayEffectState[],
   profiles: Record<TeamRole, BotVisualProfile>,
+  bots?: Record<TeamRole, TransformNode>,
 ): void {
   const used = Object.fromEntries(
     (Object.keys(EFFECT_POOL_DEFINITIONS) as ReplayEffectKind[]).map((kind) => [kind, 0]),
@@ -152,7 +156,7 @@ export function updateEffects(
     used[effect.kind] += 1
     mesh.setEnabled(true)
     mesh.position = toBabylonVector(effect.position)
-    definition.update({ effect, mesh, profiles })
+    definition.update({ bots, effect, mesh, profiles })
   })
 }
 
@@ -251,13 +255,18 @@ function createPooledWeaponEffect(
   return mesh
 }
 
-function updateWeaponFireEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateInput): void {
   const profile = effect.team ? profiles[effect.team] : undefined
-  const weaponStyle = profile?.primaryWeapon ?? 'generic'
+  const weaponStyle = resolveWeaponStyle(effect.weaponStyle, profile)
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
   const heading = effect.rotationY ?? (effect.team === 'blue' ? -Math.PI / 2 : Math.PI / 2)
+  const phase = effect.weaponPhase ?? 'release'
+  const sourceAnchor = resolveSourceAnchor(effect, bots)
 
   mesh.visibility = 1
+  if (sourceAnchor) {
+    mesh.position.copyFrom(sourceAnchor)
+  }
   mesh.position.y += 0.25
   mesh.rotation.x = 0
   mesh.rotation.y = heading
@@ -278,27 +287,93 @@ function updateWeaponFireEffect({ effect, mesh, profiles }: EffectUpdateInput): 
     return
   }
 
+  if (weaponStyle === 'ram') {
+    const lunge = phase === 'wind_up' ? 0.18 : 0.45 + easeOutCubic(progress) * 0.85
+
+    mesh.position.x += Math.sin(heading) * lunge
+    mesh.position.z += Math.cos(heading) * lunge
+    mesh.position.y += 0.04
+    mesh.scaling.set(0.66 + effect.intensity * 0.28, 0.3 + effect.intensity * 0.12, 1.12 + effect.intensity * 1.4)
+
+    return
+  }
+
+  if (weaponStyle === 'flipper') {
+    const lift = Math.sin(Math.min(1, progress * 1.15) * Math.PI) * 0.48
+
+    mesh.position.x += Math.sin(heading) * (0.34 + progress * 0.74)
+    mesh.position.z += Math.cos(heading) * (0.34 + progress * 0.74)
+    mesh.position.y += lift
+    mesh.rotation.x = -0.65 - lift * 0.55
+    mesh.scaling.set(0.82, 0.24 + effect.intensity * 0.24, 1.22 + effect.intensity * 0.92)
+
+    return
+  }
+
   if (weaponStyle === 'turret') {
-    mesh.scaling.set(0.52, 0.52, 1.04 + effect.intensity * 2.1)
+    const tracerReach = effect.endPosition
+      ? Math.min(5.2, Vector3.Distance(mesh.position, toBabylonVector(effect.endPosition)))
+      : 2.6
+
+    mesh.scaling.set(0.42, 0.42, 1.04 + effect.intensity * 1.35 + tracerReach * 0.16)
     mesh.position.y += 0.12
     mesh.rotation.y = heading + (effect.team === 'blue' ? -1 : 1) * effect.intensity * 0.18
 
     return
   }
 
-  if (weaponStyle === 'spinner') {
-    mesh.scaling.set(0.42 + effect.intensity * 0.94, 0.42 + effect.intensity * 0.94, 0.72)
-    mesh.rotation.z = effect.age * 14
+  if (weaponStyle === 'spinner' || weaponStyle === 'saw') {
+    const bladeScale = weaponStyle === 'saw' ? 1.15 : 0.94
+
+    mesh.scaling.set(0.38 + effect.intensity * bladeScale, 0.38 + effect.intensity * bladeScale, 0.42)
+    mesh.rotation.x = weaponStyle === 'saw' ? Math.PI / 2 : 0
+    mesh.rotation.z = effect.age * (weaponStyle === 'saw' ? 24 : 16)
 
     return
   }
 
+  mesh.position.x += Math.sin(heading) * (0.2 + progress * 0.32)
+  mesh.position.z += Math.cos(heading) * (0.2 + progress * 0.32)
   mesh.scaling.setAll(0.34 + effect.intensity * 1.32)
 }
 
-function setWeaponEffectMode(mesh: Mesh, mode: BotVisualProfile['primaryWeapon'], progress: number): void {
+function resolveWeaponStyle(
+  effectStyle: string | undefined,
+  profile: BotVisualProfile | undefined,
+): string {
+  if (effectStyle) {
+    return effectStyle
+  }
+
+  return profile?.primaryWeapon ?? 'generic'
+}
+
+function resolveSourceAnchor(
+  effect: ReplayEffectState,
+  bots: Record<TeamRole, TransformNode> | undefined,
+): Vector3 | undefined {
+  if (!effect.team || !effect.sourceBlockId) {
+    return undefined
+  }
+
+  const bot = bots?.[effect.team]
+
+  if (!bot) {
+    return undefined
+  }
+
+  const node = bot.getChildren((candidate) => {
+    const metadata = candidate.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.kind === 'bot_part' && metadata.blockId === effect.sourceBlockId
+  }, true)[0] as TransformNode | undefined
+
+  return node?.getAbsolutePosition().clone()
+}
+
+function setWeaponEffectMode(mesh: Mesh, mode: string, progress: number): void {
   const showNet = mode === 'net'
-  const showMuzzle = mode === 'turret' || mode === 'spinner' || mode === 'generic'
+  const showMuzzle = !showNet
   const spread = 0.78 + easeOutCubic(progress) * 0.72
   const bow = Math.sin(progress * Math.PI) * 0.14
 

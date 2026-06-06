@@ -13,10 +13,12 @@
     "apps/web/src/agent/**/*.ts",
     "apps/web/src/referee/**/*.ts",
     "apps/web/src/shared/**/*.ts",
+    "apps/web/src/shared/**/*.tsx",
     "apps/web/src/mockSession.ts",
     "apps/web/src/mockReplayTimelines.ts",
     "apps/web/src/mockSessionState.ts",
     "apps/web/src/replay/replayCameraFraming.ts",
+    "apps/web/src/replay/replayCameraPresets.ts",
     "apps/web/src/replay/replayMapping.ts",
     "packages/**/*.ts"
   ]

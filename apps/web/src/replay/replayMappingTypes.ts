@@ -1,11 +1,21 @@
+import type { WeaponFirePhase } from '../../../../packages/replay/src/index.js'
 import type { TeamRole, Vector3 } from '../../../../packages/schemas/src/index.js'
 
-export type CameraPreset = 'wide' | 'broadcast' | 'red_follow' | 'blue_follow' | 'impact' | 'cinematic'
+export type { CameraPreset } from './replayCameraPresets.js'
 
 export type BotFrameState = {
   role: TeamRole
   position: Vector3
   rotationY: number
+  motion: {
+    contactIntensity: number
+    drift: number
+    easedProgress: number
+    lean: number
+    progress: number
+    speed: number
+    turn: number
+  }
   health?: number
   status: 'active' | 'knocked_out'
 }
@@ -18,6 +28,25 @@ export type PartFrameState = {
   status: 'attached' | 'detached'
   detachTime?: number
   detachPosition?: Vector3
+  sourcePosition?: Vector3
+  impactPosition?: Vector3
+  impulse?: Vector3
+  angularImpulse?: Vector3
+  fractureSeverity?: number
+  damageCause?: string
+  detachMotion?: PartDetachMotionFrameState
+}
+
+export type PartDetachMotionFrameState = {
+  age: number
+  originPosition: Vector3
+  position: Vector3
+  rotation: Vector3
+  impulse: Vector3
+  angularImpulse: Vector3
+  fractureSeverity: number
+  settled: boolean
+  fade: number
 }
 
 export type ReplayEffectKind =
@@ -44,6 +73,10 @@ export type ReplayEffectState = {
   damage?: number
   endPosition?: Vector3
   label?: string
+  sourceBlockId?: string
+  sourcePartId?: string
+  weaponPhase?: WeaponFirePhase
+  weaponStyle?: string
 }
 
 export type ReplayEndState = {

@@ -109,6 +109,7 @@ export function useRefereeConsoleController() {
 
       if (stored) {
         setStoredRefereeToken(stored.refereeToken)
+        setInvites(stored.invites)
         return
       }
 
@@ -249,6 +250,7 @@ export function useRefereeConsoleController() {
       setMessage('Session created. Keep this tab open to retain the referee capability token.')
       writeStoredSession(window.sessionStorage, apiBase, response.sessionId, {
         refereeToken: response.refereeToken,
+        invites: response.invites,
         expiresAt: response.publicState.expiresAt,
       })
     } catch (createError) {
@@ -306,6 +308,7 @@ export function useRefereeConsoleController() {
         setStoredRefereeToken(activeRefereeToken)
         writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
           refereeToken: activeRefereeToken,
+          invites: nextInvites,
           expiresAt: response.publicState.expiresAt,
         })
         clearReplayState()

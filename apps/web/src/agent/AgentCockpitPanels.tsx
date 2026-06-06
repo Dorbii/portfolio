@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { getPart } from '../../../../packages/catalog/src/index.js'
 import type {
   PartDefinition,
@@ -6,6 +7,7 @@ import type {
   ValidationIssue,
 } from '../../../../packages/schemas/src/index.js'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
+import { MetricRow, SubsectionTitle } from '../shared/ui'
 import { serializeJsonForScript } from './agentClient'
 
 export type UiError = {
@@ -46,16 +48,11 @@ export function InvalidInvite({ errors }: { errors: string[] }) {
 }
 
 export function SectionTitle({ id, title }: { id: string; title: string }) {
-  return <h2 id={id}>{title}</h2>
+  return <SubsectionTitle id={id} title={title} />
 }
 
-export function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  )
+export function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return <MetricRow label={label} value={value} />
 }
 
 export function ConnectionGuide({

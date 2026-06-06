@@ -2,6 +2,7 @@ import type { StandardMaterial } from '@babylonjs/core/Materials/standardMateria
 import type { Mesh } from '@babylonjs/core/Meshes/mesh'
 import type { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import type { createBotNode } from './babylonPartRenderer'
 import type { ReplayEffectState } from './replayMapping'
 import type { BotVisualProfile } from './replayVisualProfile'
 
@@ -27,6 +28,7 @@ export type EffectCreateInput = {
 }
 
 export type EffectUpdateInput = {
+  bots?: Record<TeamRole, ReturnType<typeof createBotNode>>
   effect: ReplayEffectState
   mesh: Mesh
   profiles: Record<TeamRole, BotVisualProfile>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { PART_CATALOG } from '../../../../packages/catalog/src/index.js'
 import type { AgentChatMessageKind } from '../../../../packages/schemas/src/index.js'
 import {
@@ -17,7 +17,13 @@ import {
   SectionTitle,
 } from './AgentCockpitPanels'
 import { RoundPlanWorkbench } from './RoundPlanWorkbench'
-import { Button } from '../shared/Button'
+import {
+  ActionGroup,
+  Button,
+  FormField,
+  MetricGrid,
+  Panel,
+} from '../shared/ui'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
 import type { AgentCockpitWorkflow } from './agentCockpitViewState'
 import {
@@ -28,15 +34,27 @@ import {
 } from './useLiveAgentCockpitController'
 
 export function LiveAgentCockpit() {
-  const parseResult = useMemo<AgentInviteParseResult>(() => {
-    return parseAgentInviteFragment(window.location.hash, window.location.origin)
+  const [parseResult, setParseResult] = useState<AgentInviteParseResult>(() =>
+    parseAgentInviteFragment(window.location.hash, window.location.origin),
+  )
+
+  useEffect(() => {
+    const updateInviteFromHash = () => {
+      setParseResult(parseAgentInviteFragment(window.location.hash, window.location.origin))
+    }
+
+    window.addEventListener('hashchange', updateInviteFromHash)
+
+    return () => {
+      window.removeEventListener('hashchange', updateInviteFromHash)
+    }
   }, [])
 
   if (!parseResult.ok) {
     return <InvalidInvite errors={parseResult.errors} />
   }
 
-  return <ClaimedAgentCockpit invite={parseResult.value} />
+  return <ClaimedAgentCockpit invite={parseResult.value} key={`${parseResult.value.sessionId}:${parseResult.value.role}`} />
 }
 
 function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
@@ -101,14 +119,13 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
           <h1>{capitalize(invite.role)} Agent Cockpit</h1>
         </div>
         <div className="agent-command-actions">
-          <label>
-            <span>Agent name</span>
+          <FormField label="Agent name">
             <input
               value={agentName}
               onChange={(event) => setAgentName(event.target.value)}
               maxLength={80}
             />
-          </label>
+          </FormField>
           <Button
             type="button"
             variant="primary"
@@ -157,7 +174,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
         </div>
 
         <aside className="cockpit-secondary-stack" aria-label="Secondary cockpit data">
-          <section className="agent-live-panel cockpit-secondary-panel" aria-labelledby="secondary-state-heading">
+          <Panel className="agent-live-panel cockpit-secondary-panel" aria-labelledby="secondary-state-heading">
             <div className="secondary-panel-header">
               <SectionTitle id="secondary-state-heading" title="State" />
               <span>{workflow.stateLabel}</span>
@@ -170,7 +187,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
 
             <section aria-labelledby="role-summary-heading">
               <SectionTitle id="role-summary-heading" title="Role summary" />
-              <dl className="agent-facts">
+              <MetricGrid className="agent-facts">
                 <Fact label="Session" value={invite.sessionId} />
                 <Fact label="Role" value={capitalize(invite.role)} />
                 <Fact label="API" value={invite.apiBase} />
@@ -186,13 +203,13 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                   }
                 />
                 <Fact label="Status" value={formatLabel(status)} />
-              </dl>
+              </MetricGrid>
             </section>
 
             <section aria-labelledby="phase-heading">
               <SectionTitle id="phase-heading" title="Current phase" />
               {roleState ? (
-                <dl className="agent-facts">
+                <MetricGrid className="agent-facts">
                   <Fact label="Phase" value={formatLabel(roleState.phase)} />
                   <Fact label="Round" value={String(roleState.round)} />
                   <Fact label="Gold" value={String(roleState.gold)} />
@@ -200,7 +217,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                   <Fact label="State version" value={roleState.stateVersion} />
                   <Fact label="Opponent" value={opponentLabel(roleState)} />
                   <Fact label="Expires" value={formatDateTime(roleState.expiresAt)} />
-                </dl>
+                </MetricGrid>
               ) : (
                 <p className="agent-empty">
                   {isBusy
@@ -218,12 +235,12 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
             <section aria-labelledby="opponent-heading">
               <SectionTitle id="opponent-heading" title="Opponent" />
               {roleState ? (
-                <dl className="agent-facts">
+                <MetricGrid className="agent-facts">
                   <Fact label="Role" value={capitalize(roleState.opponent.role)} />
                   <Fact label="Claimed" value={roleState.opponent.claimed ? 'Yes' : 'No'} />
                   <Fact label="Submitted" value={roleState.opponent.submitted ? 'Yes' : 'No'} />
                   <Fact label="Replay" value={roleState.replayAvailable ? 'Available' : 'Unavailable'} />
-                </dl>
+                </MetricGrid>
               ) : (
                 <p className="agent-empty">Opponent state is available after role state loads.</p>
               )}
@@ -232,19 +249,19 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
             <section aria-labelledby="arena-heading">
               <SectionTitle id="arena-heading" title="Arena" />
               {publicState ? (
-                <dl className="agent-facts">
+                <MetricGrid className="agent-facts">
                   <Fact label="Name" value={publicState.arena.name} />
                   <Fact label="Size" value={`${publicState.arena.width} x ${publicState.arena.height}`} />
                   <Fact label="Hazards" value={publicState.arena.activeHazards.join(', ')} />
                   <Fact label="Replay" value={publicState.replayAvailable ? 'Available' : 'Unavailable'} />
-                </dl>
+                </MetricGrid>
               ) : (
                 <p className="agent-empty">Public arena state has not loaded.</p>
               )}
             </section>
-          </section>
+          </Panel>
 
-          <section className="agent-live-panel cockpit-secondary-panel" aria-labelledby="reference-heading">
+          <Panel className="agent-live-panel cockpit-secondary-panel" aria-labelledby="reference-heading">
             <div className="secondary-panel-header">
               <SectionTitle id="reference-heading" title="Reference" />
               <span>Brief / shop / inventory</span>
@@ -283,9 +300,9 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
               <PartTable parts={PART_CATALOG.slice(0, 20)} />
             </div>
           </section>
-          </section>
+          </Panel>
 
-          <section className="agent-live-panel cockpit-secondary-panel chat-panel" aria-labelledby="comms-heading">
+          <Panel className="agent-live-panel cockpit-secondary-panel chat-panel" aria-labelledby="comms-heading">
             <div className="secondary-panel-header">
               <SectionTitle id="comms-heading" title="Comms" />
               <span>{chatLog.length + privateChatLog.length} messages</span>
@@ -326,12 +343,12 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                   disabled={!roleState || isTerminalPhase(roleState.phase) || privateChatStatus === 'posting'}
                 />
               </label>
-              <div className="agent-chat-actions">
+              <ActionGroup className="agent-chat-actions">
                 <span>{privateChatMessage.trim().length} / 420</span>
-                <button type="submit" disabled={!canPostPrivateChat}>
+                <Button type="submit" variant="primary" disabled={!canPostPrivateChat}>
                   {privateChatStatus === 'posting' ? 'Saving...' : 'Save entry'}
-                </button>
-              </div>
+                </Button>
+              </ActionGroup>
             </form>
             <AgentChatLog messages={privateChatLog} />
             {!roleHasPrivateChatLog ? <p className="agent-empty">No journal entries loaded.</p> : null}
@@ -372,19 +389,19 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
                   disabled={!roleState || isTerminalPhase(roleState.phase) || chatStatus === 'posting'}
                 />
               </label>
-              <div className="agent-chat-actions">
+              <ActionGroup className="agent-chat-actions">
                 <span>{chatMessage.trim().length} / 420</span>
-                <button type="submit" disabled={!canPostChat}>
+                <Button type="submit" variant="primary" disabled={!canPostChat}>
                   {chatStatus === 'posting' ? 'Posting...' : 'Post Table Talk'}
-                </button>
-              </div>
+                </Button>
+              </ActionGroup>
             </form>
             <AgentChatLog messages={chatLog} />
             {!roleHasChatLog ? <p className="agent-empty">No Table Talk loaded.</p> : null}
           </section>
-          </section>
+          </Panel>
 
-          <section className="agent-live-panel cockpit-secondary-panel match-log-panel" aria-labelledby="activity-heading">
+          <Panel className="agent-live-panel cockpit-secondary-panel match-log-panel" aria-labelledby="activity-heading">
             <div className="secondary-panel-header">
               <SectionTitle id="activity-heading" title="Activity" />
               <span>{matchLog.length} events</span>
@@ -408,7 +425,7 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
             </ol>
             {!roleHasMatchLog ? <p className="agent-empty">No match events loaded.</p> : null}
           </section>
-          </section>
+          </Panel>
         </aside>
       </div>
 
@@ -434,7 +451,7 @@ function AgentTaskPanel({
   workflow: AgentCockpitWorkflow
 }) {
   return (
-    <section className={`agent-live-panel agent-task-panel active-${workflow.activeTask}`} aria-labelledby="next-task-heading">
+    <Panel className={`agent-live-panel agent-task-panel active-${workflow.activeTask}`} aria-labelledby="next-task-heading">
       <div className="agent-next-task">
         <span className="agent-state-chip">{workflow.stateLabel}</span>
         <SectionTitle id="next-task-heading" title={workflow.headline} />
@@ -455,6 +472,6 @@ function AgentTaskPanel({
           </li>
         ))}
       </ol>
-    </section>
+    </Panel>
   )
 }

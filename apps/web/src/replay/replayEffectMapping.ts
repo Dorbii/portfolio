@@ -1,5 +1,6 @@
 import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
+import type { WeaponFirePhase } from '../../../../packages/replay/src/index.js'
 import type {
   BotFrameState,
   ReplayEffectState,
@@ -18,6 +19,16 @@ const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
 const LASER_LANCE_WINDOW = 0.95
 const DRONE_SWARM_WINDOW = 1.2
+const DEFAULT_WEAPON_PHASE: WeaponFirePhase = 'release'
+
+const WEAPON_STYLES = [
+  'spinner',
+  'saw',
+  'ram',
+  'flipper',
+  'turret',
+  'net',
+] as const
 
 export function buildReplayEffects(
   events: ReplayEvent[],
@@ -36,16 +47,29 @@ export function buildReplayEffects(
       if (age >= 0 && age <= duration) {
         const firingBot = resolveBotAtTime(event.bot, event.t)
         const intensity = Math.max(0, 1 - age / duration)
+        const weaponPhase = event.phase ?? (isControlDeploy ? 'deploy' : DEFAULT_WEAPON_PHASE)
+        const weaponStyle = normalizeWeaponStyle(event.style)
+        const endPosition =
+          event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.4)
+        const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+        const source = {
+          sourceBlockId: event.sourceBlockId,
+          sourcePartId: event.sourcePartId,
+          weaponPhase,
+          weaponStyle,
+        }
 
         effects.push({
           id: `${index}-weapon-${event.bot}`,
           kind: 'weapon_fire',
           position: firingBot.position,
-          rotationY: firingBot.rotationY,
+          rotationY,
           age,
           intensity,
           team: event.bot,
-          label: isControlDeploy ? `${event.weaponSlot}-deploy` : event.weaponSlot,
+          endPosition,
+          label: createWeaponEffectLabel(event.weaponSlot, weaponPhase, weaponStyle, isControlDeploy),
+          ...source,
         })
 
         if (isControlDeploy) {
@@ -53,13 +77,13 @@ export function buildReplayEffects(
             id: `${index}-weapon-control-${event.bot}`,
             kind: 'control_net',
             position: firingBot.position,
-            rotationY: firingBot.rotationY,
+            rotationY,
             age,
             intensity,
             team: event.bot,
-            endPosition:
-              event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.4),
-            label: 'control_net',
+            endPosition,
+            label: weaponStyle ? `control_net-${weaponStyle}` : 'control_net',
+            ...source,
           })
         }
       }
@@ -228,4 +252,31 @@ export function buildReplayEffects(
   })
 
   return effects
+}
+
+function normalizeWeaponStyle(style: string | undefined): string | undefined {
+  if (!style) {
+    return undefined
+  }
+
+  const normalized = style.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')
+
+  return WEAPON_STYLES.find((candidate) => normalized.includes(candidate)) ?? normalized
+}
+
+function createWeaponEffectLabel(
+  weaponSlot: string,
+  phase: WeaponFirePhase,
+  style: string | undefined,
+  isControlDeploy: boolean,
+): string {
+  if (!style && phase === DEFAULT_WEAPON_PHASE && !isControlDeploy) {
+    return weaponSlot
+  }
+
+  if (!style) {
+    return `${weaponSlot}-${phase}`
+  }
+
+  return `${weaponSlot}-${style}-${phase}`
 }

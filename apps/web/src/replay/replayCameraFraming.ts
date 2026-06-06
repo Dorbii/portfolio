@@ -1,5 +1,6 @@
 import type {
   ArenaConfig,
+  TeamRole,
   Vector3 as ReplayVector3,
 } from '../../../../packages/schemas/src/index.js'
 import type {
@@ -10,6 +11,8 @@ import type {
 export const BROADCAST_CAMERA_ALPHA = -Math.PI * 0.72
 export const BROADCAST_CAMERA_BETA = 0.9
 export const NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT = 0.32
+export const TEAM_FOLLOW_CAMERA_ALPHA = -Math.PI * 0.58
+export const TEAM_FOLLOW_CAMERA_BETA = 1.08
 
 const DEFAULT_VIEWPORT_ASPECT = 16 / 9
 const BROADCAST_VERTICAL_FOV = 0.8
@@ -19,6 +22,10 @@ const BROADCAST_NARROW_VIEWPORT_PADDING_MULTIPLIER = 2.5
 const BROADCAST_MIN_ARENA_RADIUS_MULTIPLIER = 0.48
 const BROADCAST_MAX_ARENA_RADIUS_MULTIPLIER = 1.66
 const BROADCAST_MIN_RADIUS = 10
+const TEAM_FOLLOW_TARGET_Y_OFFSET = 0.35
+const TEAM_FOLLOW_MIN_RADIUS = 6.8
+const TEAM_FOLLOW_MAX_RADIUS = 8.4
+const TEAM_FOLLOW_ARENA_RADIUS_MULTIPLIER = 0.46
 
 type ActiveEffectRule = {
   kind: ReplayEffectState['kind']
@@ -30,6 +37,14 @@ export type BroadcastCameraFrame = {
   focusPoints: ReplayVector3[]
   radius: number
   target: ReplayVector3
+}
+
+export type TeamFollowCameraFrame = {
+  alpha: number
+  beta: number
+  radius: number
+  target: ReplayVector3
+  team: TeamRole
 }
 
 const ACTIVE_EFFECT_RULES: ActiveEffectRule[] = [
@@ -71,6 +86,31 @@ export function capBroadcastShakeForNoExcessiveShake(shake: number): number {
   }
 
   return Math.min(shake, NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT)
+}
+
+export function calculateTeamFollowFrame(
+  frame: ReplayVisualFrame,
+  arena: ArenaConfig,
+  team: TeamRole,
+): TeamFollowCameraFrame {
+  const bot = frame.bots[team]
+  const arenaRadius = Math.max(arena.width, arena.height)
+
+  return {
+    alpha: TEAM_FOLLOW_CAMERA_ALPHA,
+    beta: TEAM_FOLLOW_CAMERA_BETA,
+    radius: clampNumber(
+      arenaRadius * TEAM_FOLLOW_ARENA_RADIUS_MULTIPLIER,
+      TEAM_FOLLOW_MIN_RADIUS,
+      TEAM_FOLLOW_MAX_RADIUS,
+    ),
+    target: [
+      roundCameraNumber(bot.position[0]),
+      roundCameraNumber(bot.position[1] + TEAM_FOLLOW_TARGET_Y_OFFSET),
+      roundCameraNumber(bot.position[2]),
+    ],
+    team,
+  }
 }
 
 function findBroadcastFocusEffect(effects: ReplayEffectState[]): ReplayEffectState | undefined {
@@ -213,4 +253,8 @@ function normalizeViewportAspect(aspect: number): number {
 
 function clampNumber(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
+}
+
+function roundCameraNumber(value: number): number {
+  return Math.round(value * 1000) / 1000
 }

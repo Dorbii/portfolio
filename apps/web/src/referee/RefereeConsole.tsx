@@ -10,7 +10,14 @@ import {
   TeamScoreCard,
 } from './RefereeConsolePanels'
 import { isTerminalPhase, POLL_INTERVAL_MS } from './refereeClient'
-import { Button } from '../shared/Button'
+import {
+  ActionGroup,
+  Button,
+  FormField,
+  MetricGrid,
+  MetricRow,
+  Panel,
+} from '../shared/ui'
 import { openExternalUrl } from '../shared/browser'
 import { formatLabel, formatMsInterval } from '../shared/format'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
@@ -62,27 +69,23 @@ export function RefereeConsole() {
     storedRefereeToken,
     submitRoundAdvance,
   } = useRefereeConsoleController()
+  const roleAccessSummary = hasAnyInvite
+    ? 'Cockpit handoffs stored'
+    : activeSessionId
+      ? 'Cockpit tokens unavailable'
+      : 'No cockpit handoffs yet'
+
   return (
     <main className="arena-app match-console">
-      <aside className="director-sidebar" aria-label="Referee status">
-        <div className="director-brand">
-          <span className="brand-mark" aria-hidden="true">A</span>
-          <div>
-            <span className="eyebrow">Agent Arena</span>
-            <h1>Referee Console</h1>
-          </div>
-        </div>
-        <div className="referee-identity">
-          <span className="referee-avatar" aria-hidden="true">R</span>
-          <div>
-            <strong>Referee</strong>
-            <span>{hasRefereeToken ? 'Capability token loaded' : 'Token not loaded'}</span>
-          </div>
-        </div>
-      </aside>
-
       <div className="director-workspace">
         <header className="score-header">
+          <div className="director-brand console-title-block">
+            <span className="brand-mark" aria-hidden="true">A</span>
+            <div>
+              <span className="eyebrow">Agent Arena</span>
+              <h1>Referee Console</h1>
+            </div>
+          </div>
           <div className="round-block">
             <strong>{publicSession ? `Round ${publicSession.round} / ${publicSession.maxRounds}` : 'No Session'}</strong>
             <span>{publicSession ? `Best of ${publicSession.maxRounds}` : 'Create or load a session'}</span>
@@ -104,6 +107,13 @@ export function RefereeConsole() {
             <span>Phase</span>
             <strong>{formatLabel(phase)}</strong>
           </div>
+          <div className="referee-identity header-referee-identity">
+            <span className="referee-avatar" aria-hidden="true">R</span>
+            <div>
+              <strong>{hasRefereeToken ? 'Referee token loaded' : 'No referee token'}</strong>
+              <span>{roleAccessSummary}</span>
+            </div>
+          </div>
           <Button
             type="button"
             variant="primary"
@@ -117,7 +127,7 @@ export function RefereeConsole() {
 
         <section className="director-content" id="overview">
           <section className="director-main-column">
-            <section className="panel arena-stage-card">
+            <Panel className="panel arena-stage-card">
               <SectionHeader
                 kicker="Arena replay"
                 title={publicSession?.arena.name ?? 'Combat replay'}
@@ -146,9 +156,9 @@ export function RefereeConsole() {
                   <p className="referee-empty replay-placeholder">Replay appears here after both role plans resolve.</p>
                 )}
               </div>
-            </section>
+            </Panel>
 
-            <section className="panel fight-comms-panel" id="chat">
+            <Panel className="panel fight-comms-panel" id="chat">
               <SectionHeader
                 kicker="Bot chat"
                 title="Fight comms"
@@ -158,9 +168,9 @@ export function RefereeConsole() {
                 messages={sessionChat}
                 emptyText="No bot chat yet. Combat resolution will add public trash talk, and agents can post taunts, observations, strategy notes, and reflections."
               />
-            </section>
+            </Panel>
 
-            <section className="panel round-review-dock" id="review">
+            <Panel className="panel round-review-dock" id="review">
               <SectionHeader
                 kicker="Round review"
                 title="Advance the match"
@@ -188,7 +198,7 @@ export function RefereeConsole() {
                   </Button>
                 </div>
               </div>
-            </section>
+            </Panel>
           </section>
 
           <aside className="director-right-rail">
@@ -197,7 +207,7 @@ export function RefereeConsole() {
               replayPayload={replayPayload}
             />
 
-            <section className="panel team-record-panel">
+            <Panel className="panel team-record-panel">
               <SectionHeader kicker="Team record" title="Public standings" />
               {publicSession ? (
                 <div className="team-record-grid">
@@ -207,32 +217,31 @@ export function RefereeConsole() {
               ) : (
                 <p className="referee-empty">Load session for public team state.</p>
               )}
-            </section>
+            </Panel>
 
-            <section className="panel" id="session">
+            <Panel className="panel" id="session">
               <SectionHeader
                 kicker="Session control"
                 title="Create or load"
                 aside={isActiveSession ? 'Public state by session id.' : 'No active session'}
               />
-              <div className="session-metrics">
+              <MetricGrid className="session-metrics">
                 <Metric label="Session" value={activeSessionId || 'Not loaded'} />
                 <Metric
                   label="Replay"
                   value={publicSession ? (publicSession.replayAvailable ? 'Ready' : 'Unavailable') : 'Unavailable'}
                 />
-              </div>
+              </MetricGrid>
               <div className="referee-form compact-form">
-                <label>
-                  Session ID
+                <FormField label="Session ID">
                   <input
                     value={sessionInput}
                     maxLength={64}
                     onChange={(event) => setSessionInput(event.target.value)}
                     disabled={loadState === 'busy'}
                   />
-                </label>
-                <div className="button-pair">
+                </FormField>
+                <ActionGroup className="button-pair">
                   <Button
                     type="button"
                     variant="secondary"
@@ -249,9 +258,8 @@ export function RefereeConsole() {
                   >
                     {loadState === 'busy' ? 'Creating...' : 'Create new'}
                   </Button>
-                </div>
-                <label>
-                  Referee capability token
+                </ActionGroup>
+                <FormField label="Referee capability token">
                   <input
                     type="password"
                     value={manualRefereeToken}
@@ -263,8 +271,8 @@ export function RefereeConsole() {
                     }
                     disabled={advanceState === 'submitting'}
                   />
-                </label>
-                <div className="button-pair">
+                </FormField>
+                <ActionGroup className="button-pair">
                   <Button
                     type="button"
                     variant="secondary"
@@ -281,11 +289,11 @@ export function RefereeConsole() {
                   >
                     Clear token
                   </Button>
-                </div>
+                </ActionGroup>
               </div>
-            </section>
+            </Panel>
 
-            <section className="panel" id="agents">
+            <Panel className="panel" id="agents">
               <SectionHeader
                 kicker="Agent handoff"
                 title="Agent handoffs"
@@ -319,9 +327,9 @@ export function RefereeConsole() {
                   Invite URLs are available only for sessions created in this console.
                 </p>
               ) : null}
-            </section>
+            </Panel>
 
-            <section className="panel" id="match-log">
+            <Panel className="panel" id="match-log">
               <SectionHeader kicker="Match log" title="Public events" />
               <ol className="event-log">
                 {sessionEvents.map((event) => (
@@ -331,29 +339,23 @@ export function RefereeConsole() {
                   </li>
                 ))}
               </ol>
-            </section>
+            </Panel>
 
-            <section className="panel">
+            <Panel className="panel">
               <SectionHeader kicker="Status" title="Diagnostics" />
-              <dl className="status-list">
-                <div>
-                  <dt>Token</dt>
-                  <dd>{hasRefereeToken ? 'Loaded' : 'Not loaded'}</dd>
-                </div>
-                <div>
-                  <dt>Polls</dt>
-                  <dd>
-                    {publicSession && !isTerminalPhase(publicSession.phase)
+              <MetricGrid className="status-list">
+                <MetricRow label="Token" value={hasRefereeToken ? 'Loaded' : 'Not loaded'} />
+                <MetricRow
+                  label="Polls"
+                  value={
+                    publicSession && !isTerminalPhase(publicSession.phase)
                       ? `Active (${formatMsInterval(POLL_INTERVAL_MS)})`
-                      : 'Stopped'}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Auth</dt>
-                  <dd>Bearer referee token</dd>
-                </div>
-              </dl>
-            </section>
+                      : 'Stopped'
+                  }
+                />
+                <MetricRow label="Auth" value="Bearer referee token" />
+              </MetricGrid>
+            </Panel>
           </aside>
         </section>
 
