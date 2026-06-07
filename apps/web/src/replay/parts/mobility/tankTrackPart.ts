@@ -1,7 +1,15 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { MobilityPartRenderArgs } from './types'
-import { createTrackBelt, createTrackFrameRail, createTrackShoe, createTrackWheel } from './trackGeometry'
+import {
+  createTrackBelt,
+  createTrackFrameRail,
+  createTrackReturnRoller,
+  createTrackShoe,
+  createTrackWheel,
+} from './trackGeometry'
+
+const TANK_TRACK_ROLL_SPEED = 0.052
 
 export function createTankTrackPart({
   scene,
@@ -107,6 +115,7 @@ export function createTankTrackPart({
         diameter: Math.max(trackHeight * 0.34, 0.18),
         material: materials.steel,
         hubMaterial: materials.trim,
+        rollSpeed: TANK_TRACK_ROLL_SPEED,
         tessellation: 18,
         x,
         y: bottomY + trackHeight * 0.28,
@@ -120,6 +129,7 @@ export function createTankTrackPart({
       diameter: Math.max(trackHeight * 0.44, 0.24),
       material: materials.steel,
       hubMaterial: materials.trim,
+      rollSpeed: TANK_TRACK_ROLL_SPEED,
       tessellation: 20,
       x: length * 0.48,
       y: bottomY + trackHeight * 0.4,
@@ -129,6 +139,7 @@ export function createTankTrackPart({
       diameter: Math.max(trackHeight * 0.5, 0.28),
       material: materials.steel,
       hubMaterial: materials.trim,
+      rollSpeed: TANK_TRACK_ROLL_SPEED,
       tessellation: 20,
       x: -length * 0.48,
       y: bottomY + trackHeight * 0.4,
@@ -138,19 +149,21 @@ export function createTankTrackPart({
 
   for (let index = 0; index < 3; index += 1) {
     for (const z of [-wheelFaceZ, wheelFaceZ]) {
-      const roller = MeshBuilder.CreateCylinder(
+      createTrackReturnRoller(
+        scene,
+        parent,
+        materials.trim,
         `${role}-${blockId}-tank-return-roller-${index}-${z > 0 ? 'front' : 'rear'}`,
         {
-          height: Math.max(beltDepth * 0.18, 0.08),
+          depth: Math.max(beltDepth * 0.18, 0.08),
           diameter: Math.max(trackHeight * 0.16, 0.09),
+          rollSpeed: TANK_TRACK_ROLL_SPEED * 1.2,
           tessellation: 12,
+          x: -length * 0.24 + index * length * 0.24,
+          y: topY - trackHeight * 0.18,
+          z,
         },
-        scene,
       )
-
-      roller.rotation.x = Math.PI / 2
-      roller.position.set(-length * 0.24 + index * length * 0.24, topY - trackHeight * 0.18, z)
-      attachMesh(roller, parent, materials.trim)
     }
   }
 

@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { MobilityPartRenderArgs } from './types'
 
@@ -58,12 +59,14 @@ export function createTrackWheel(
     diameter: number
     hubMaterial: MobilityPartRenderArgs['material']
     material: MobilityPartRenderArgs['material']
+    rollSpeed?: number
     tessellation: number
     x: number
     y: number
     z: number
   },
 ): void {
+  const wheelRoot = new TransformNode(`${name}-roll-root`, scene)
   const wheel = MeshBuilder.CreateCylinder(
     name,
     {
@@ -83,13 +86,13 @@ export function createTrackWheel(
     scene,
   )
 
+  wheelRoot.parent = parent
+  wheelRoot.position.set(options.x, options.y, options.z)
+  wheelRoot.metadata = { kind: 'roll', axis: 'z', speed: options.rollSpeed ?? 0.05 }
   wheel.rotation.x = Math.PI / 2
   hub.rotation.x = Math.PI / 2
-  wheel.position.set(options.x, options.y, options.z)
-  hub.position.copyFrom(wheel.position)
-  wheel.metadata = { kind: 'roll', axis: 'z', speed: 0.05 }
-  attachMesh(wheel, parent, options.material)
-  attachMesh(hub, parent, options.hubMaterial)
+  attachMesh(wheel, wheelRoot, options.material)
+  attachMesh(hub, wheelRoot, options.hubMaterial)
 
   const faceOffset = options.z >= 0 ? 0.055 : -0.055
 
@@ -107,12 +110,45 @@ export function createTrackWheel(
 
     bolt.rotation.x = Math.PI / 2
     bolt.position.set(
-      options.x + Math.cos(angle) * options.diameter * 0.27,
-      options.y + Math.sin(angle) * options.diameter * 0.27,
-      options.z + faceOffset,
+      Math.cos(angle) * options.diameter * 0.27,
+      Math.sin(angle) * options.diameter * 0.27,
+      faceOffset,
     )
-    attachMesh(bolt, parent, options.hubMaterial)
+    attachMesh(bolt, wheelRoot, options.hubMaterial)
   }
+}
+
+export function createTrackReturnRoller(
+  scene: MobilityPartRenderArgs['scene'],
+  parent: MobilityPartRenderArgs['parent'],
+  material: MobilityPartRenderArgs['material'],
+  name: string,
+  options: {
+    diameter: number
+    depth: number
+    rollSpeed?: number
+    tessellation: number
+    x: number
+    y: number
+    z: number
+  },
+): void {
+  const rollerRoot = new TransformNode(`${name}-roll-root`, scene)
+  const roller = MeshBuilder.CreateCylinder(
+    name,
+    {
+      height: options.depth,
+      diameter: options.diameter,
+      tessellation: options.tessellation,
+    },
+    scene,
+  )
+
+  rollerRoot.parent = parent
+  rollerRoot.position.set(options.x, options.y, options.z)
+  rollerRoot.metadata = { kind: 'roll', axis: 'z', speed: options.rollSpeed ?? 0.05 }
+  roller.rotation.x = Math.PI / 2
+  attachMesh(roller, rollerRoot, material)
 }
 
 export function createTrackShoe(
