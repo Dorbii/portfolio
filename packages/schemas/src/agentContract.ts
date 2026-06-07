@@ -54,8 +54,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Use the invite URL fragment for session, role, claimToken, and api.',
         'Treat claimToken as your private player key. Do not paste it into public logs.',
         'Preferred browser path: open /agent#session=<id>&role=<red|blue>&claimToken=<token>&api=<base>.',
-        'Call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) from the invite page.',
-        'Raw HTTP fallback: POST /sessions/:sessionId/roles/:role/bootstrap with Authorization: Bearer <claimToken>.',
+        'Call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) from the invite page once, then use waitForGameMasterPacket.',
+        'Raw HTTP fallback: POST /sessions/:sessionId/roles/:role/bootstrap once, then GET /sessions/:sessionId/state for gameMaster.',
+        'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap.',
         'After bootstrap, follow the returned GameMasterPacket.',
         'Choose exactly one id from legalActions and submit that actionId only.',
         'Do not send movement payloads, attack payloads, canonical payload maps, rationale, or hidden reasoning as combat truth.',
@@ -64,7 +65,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       ],
       currentStateSources: [
         'Browser agents can call waitForGameMasterPacket when the invite page helper is available.',
-        'HTTP agents can GET /sessions/:sessionId/state with bearer auth for the current GameMasterPacket.',
+        'HTTP agents can GET /sessions/:sessionId/state with bearer auth and read gameMaster for the current GameMasterPacket.',
         'Replay and public state are resolved truth sources, not instructions for authoring actions.',
       ],
       fallback:

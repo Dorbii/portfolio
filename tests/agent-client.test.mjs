@@ -283,9 +283,14 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
   assert.ok(brief.includes('Player key / claimToken: cap_red'))
   assert.ok(brief.includes('## Do This First'))
-  assert.ok(brief.includes('Use the invite page helpers when available:'))
+  assert.ok(brief.includes('Can you execute page JavaScript on the invite URL?'))
+  assert.ok(brief.includes('Does `window.AgentArenaRole` exist?'))
+  assert.ok(brief.includes('## Browser Helper Path'))
   assert.ok(brief.includes('window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: 600000 })'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
+  assert.ok(brief.includes('GET https://arena-api.test/sessions/s_demo/state'))
+  assert.ok(brief.includes('The packet is in `gameMaster`'))
+  assert.ok(brief.includes('After the first bootstrap, do not keep resending teamIdentity'))
   assert.ok(brief.includes('Authorization: Bearer <claimToken>'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/action'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
@@ -354,25 +359,32 @@ test('agent client bootstraps with invite claim token as bearer player key', asy
   ])
 })
 
-test('agent client waits for the next GameMasterPacket with a bounded timer', async () => {
-  let bootstrapCalls = 0
+test('agent client waits for the next GameMasterPacket through role state after bootstrap', async () => {
+  let stateCalls = 0
   const client = new AgentArenaClient({
     invite,
-    fetchImpl: async (url) => {
-      assert.equal(String(url), `${invite.apiBase}/sessions/s_demo/roles/red/bootstrap`)
-      bootstrapCalls += 1
+    fetchImpl: async (url, init = {}) => {
+      assert.equal(String(url), `${invite.apiBase}/sessions/s_demo/state`)
+      assert.equal(init.method ?? 'GET', 'GET')
+      stateCalls += 1
 
       return jsonResponse(
-        bootstrapCalls === 1
+        stateCalls === 1
           ? {
-              ...gameMasterPacket,
-              eventVersion: 1,
-              legalActions: [],
-              nextAction: 'wait_for_opponent_loadout',
+              ...roleState,
+              gameMaster: {
+                ...gameMasterPacket,
+                eventVersion: 1,
+                legalActions: [],
+                nextAction: 'wait_for_opponent_loadout',
+              },
             }
           : {
-              ...gameMasterPacket,
-              eventVersion: 2,
+              ...roleState,
+              gameMaster: {
+                ...gameMasterPacket,
+                eventVersion: 2,
+              },
             },
       )
     },
@@ -380,7 +392,7 @@ test('agent client waits for the next GameMasterPacket with a bounded timer', as
 
   const next = await client.waitForGameMasterPacket({ pollMs: 1, timeoutMs: 2_500 })
 
-  assert.equal(bootstrapCalls, 2)
+  assert.equal(stateCalls, 2)
   assert.equal(next.nextAction, 'build_bot')
   assert.equal(next.eventVersion, 2)
 })

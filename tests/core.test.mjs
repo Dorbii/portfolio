@@ -3853,6 +3853,25 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(resume.value.claimedNow, false)
   assert.equal(resume.value.state.role, 'red')
 
+  const sameIdentityResume = await session.bootstrapRole('red', 'claim_red', {
+    agentName: 'external-red',
+    teamIdentity: testTeamIdentity('red'),
+  })
+
+  assert.equal(sameIdentityResume.ok, true)
+  assert.equal(sameIdentityResume.value.claimedNow, false)
+
+  const mutatedIdentityResume = await session.bootstrapRole('red', 'claim_red', {
+    agentName: 'external-red',
+    teamIdentity: {
+      ...testTeamIdentity('red'),
+      name: 'Different Red Team',
+    },
+  })
+
+  assert.equal(mutatedIdentityResume.ok, false)
+  assert.equal(mutatedIdentityResume.error.code, 'INVALID_REQUEST')
+
   const duplicate = await session.bootstrapRole('red', 'claim_blue', {})
 
   assert.equal(duplicate.ok, false)

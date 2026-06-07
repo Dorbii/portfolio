@@ -513,10 +513,9 @@ export class AgentArenaClient {
 
   async waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket> {
     const config = waitConfig(options)
+    let packet = await this.fetchCurrentGameMasterPacket()
 
     for (;;) {
-      const packet = await this.bootstrapRole()
-
       if (hasNextPlayablePacket(packet, options)) {
         return packet
       }
@@ -527,6 +526,8 @@ export class AgentArenaClient {
         lastNextAction: packet.nextAction,
         lastStateVersion: `eventVersion ${packet.eventVersion}`,
       })
+
+      packet = await this.getRoleStateGameMasterPacket()
     }
   }
 
@@ -577,6 +578,28 @@ export class AgentArenaClient {
     }
 
     return payload as T
+  }
+
+  private async fetchCurrentGameMasterPacket(): Promise<GameMasterPacket> {
+    try {
+      return await this.getRoleStateGameMasterPacket()
+    } catch {
+      return this.bootstrapRole()
+    }
+  }
+
+  private async getRoleStateGameMasterPacket(): Promise<GameMasterPacket> {
+    const state = await this.getState()
+
+    if (!state.gameMaster) {
+      throw new AgentArenaApiError({
+        status: 409,
+        code: 'INVALID_REQUEST',
+        message: 'Role state did not include a GameMasterPacket.',
+      })
+    }
+
+    return state.gameMaster
   }
 }
 

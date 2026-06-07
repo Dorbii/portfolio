@@ -964,6 +964,30 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assertGameMasterPacket(resumedRed.json, 'red')
   assert.equal(resumedRed.json.phase, 'wait_for_opponent_claim')
 
+  const repeatedIdentityRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: bootstrapBody('red', 'External Red'),
+  })
+
+  assert.equal(repeatedIdentityRed.response.status, 200)
+  assertGameMasterPacket(repeatedIdentityRed.json, 'red')
+
+  const mutatedIdentityRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...bootstrapBody('red', 'External Red'),
+      teamIdentity: {
+        ...testTeamIdentity('red'),
+        name: 'Different Red Team',
+      },
+    },
+  })
+
+  assert.equal(mutatedIdentityRed.response.status, 400)
+  assert.equal(mutatedIdentityRed.json.error.code, 'INVALID_REQUEST')
+
   const stolenRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
     token: blueInvite.claimToken,

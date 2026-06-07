@@ -22,6 +22,7 @@ const DEFAULT_ACCENT_BY_ROLE: Record<TeamRole, string> = {
   red: '#ff5c66',
 }
 
+const REFEREE_ROUTE_PARAMS = ['session', 'sessionId', 'api']
 const DAMAGE_PREVIEWS: PartCatalogDamagePreview[] = ['none', 'light', 'medium', 'critical']
 const TEAM_ROLES: TeamRole[] = ['red', 'blue']
 
@@ -33,6 +34,7 @@ export function PartCatalogPage() {
   const [accentColor, setAccentColor] = useState(initialOptions.accentColor)
   const [damagePreview, setDamagePreview] = useState<PartCatalogDamagePreview>(initialOptions.damagePreview)
   const [animate, setAnimate] = useState(initialOptions.animate)
+  const refereeBackHref = useMemo(() => buildRefereeBackHref(window.location.search), [])
   const visibleParts = useMemo(
     () => filterCatalogParts(categoryFilter),
     [categoryFilter],
@@ -52,7 +54,7 @@ export function PartCatalogPage() {
   }, [selectedPartId, visibleParts])
 
   useEffect(() => {
-    const params = new URLSearchParams()
+    const params = refereeRouteParams(window.location.search)
 
     params.set('part', selectedPartId)
     params.set('category', categoryFilter)
@@ -72,7 +74,7 @@ export function PartCatalogPage() {
         </div>
         <div className="part-catalog-header-actions">
           <strong>{selectedPart.id}</strong>
-          <a className="ui-button ui-button-ghost part-catalog-back" href="/">
+          <a className="ui-button ui-button-ghost part-catalog-back" href={refereeBackHref}>
             Back
           </a>
         </div>
@@ -243,6 +245,28 @@ function uniqueCategories(): PartCategory[] {
 
 function normalizeAccentColor(value: string | null, fallback: string): string {
   return value && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback
+}
+
+function buildRefereeBackHref(search: string): string {
+  const params = refereeRouteParams(search)
+  const nextSearch = params.toString()
+
+  return `/${nextSearch ? `?${nextSearch}` : ''}`
+}
+
+function refereeRouteParams(search: string): URLSearchParams {
+  const source = new URLSearchParams(search)
+  const output = new URLSearchParams()
+
+  for (const key of REFEREE_ROUTE_PARAMS) {
+    const value = source.get(key)
+
+    if (value) {
+      output.set(key, value)
+    }
+  }
+
+  return output
 }
 
 function formatLabel(value: string): string {

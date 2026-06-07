@@ -95,6 +95,7 @@ import {
   buildRolePrivateState,
 } from './sessionStateViews.js'
 import { validateLegacyAgentBootstrapRequestShape } from './sessionBootstrapLegacy.js'
+import type { LegacyTeamIdentity } from './sessionLegacyContracts.js'
 import type {
   LegacyAdvanceRoundResponse,
   LegacyAgentBootstrapResponse,
@@ -371,10 +372,16 @@ export class SessionCoordinator {
     let claimedNow = false
 
     if (auth.role.claimedAt && request.teamIdentity) {
-      return relayError(
-        'INVALID_REQUEST',
-        'Team identity is locked after the role is claimed.',
-      )
+      const requestedIdentity = normalizeTeamIdentity(request.teamIdentity)
+
+      if (auth.role.teamIdentity && !sameLockedTeamIdentity(auth.role.teamIdentity, requestedIdentity)) {
+        return relayError(
+          'INVALID_REQUEST',
+          'Team identity is locked after the role is claimed.',
+        )
+      }
+
+      auth.role.teamIdentity = auth.role.teamIdentity ?? requestedIdentity
     }
 
     if (!auth.role.claimedAt) {
@@ -1581,6 +1588,18 @@ function hashGameMasterSubmission(submission: GameMasterActionSubmission): strin
     actionId: submission.actionId,
     publicMessage: submission.publicMessage ?? '',
   })
+}
+
+function sameLockedTeamIdentity(
+  existing: LegacyTeamIdentity,
+  requested: LegacyTeamIdentity,
+): boolean {
+  return (
+    existing.name === requested.name &&
+    existing.primaryColor === requested.primaryColor &&
+    existing.logo?.mark === requested.logo?.mark &&
+    existing.logo?.initials === requested.logo?.initials
+  )
 }
 
 function createGameMasterActionSet(
