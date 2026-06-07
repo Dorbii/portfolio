@@ -12,6 +12,14 @@ import { createCrownPart } from './crownPart'
 import { createDragonHeadPart } from './dragonHeadPart'
 import { createFlagPart } from './flagPart'
 import { createWingAssemblyPart } from './wingAssemblyPart'
+import {
+  createAntennaPart,
+  createBladeAntennaPart,
+  createCowboyHatPart,
+  createHornsPart,
+  createTailPart,
+  createTopHatPart,
+} from './accessoryParts'
 
 export function createStylePart(
   scene: Scene,
@@ -24,6 +32,36 @@ export function createStylePart(
 ): void {
   if (partId === 'Style_Flag') {
     createFlagPart(scene, parent, material, role, blockId)
+    return
+  }
+
+  if (partId.includes('BladeAntenna')) {
+    createBladeAntennaPart({ scene, parent, material, role, blockId, materials })
+    return
+  }
+
+  if (partId.includes('Antenna')) {
+    createAntennaPart({ scene, parent, material, role, blockId, materials })
+    return
+  }
+
+  if (partId.includes('Horns')) {
+    createHornsPart({ scene, parent, material, role, blockId, materials })
+    return
+  }
+
+  if (partId.includes('Tail')) {
+    createTailPart({ scene, parent, material, role, blockId, materials })
+    return
+  }
+
+  if (partId.includes('TopHat')) {
+    createTopHatPart({ scene, parent, material, role, blockId, materials })
+    return
+  }
+
+  if (partId.includes('CowboyHat')) {
+    createCowboyHatPart({ scene, parent, material, role, blockId, materials })
     return
   }
 

@@ -2,6 +2,11 @@ import type { UtilityPartRenderArgs } from './types'
 import { createBatteryUtilityPart } from './batteryPart'
 import { createBoosterUtilityPart } from './boosterPart'
 import { createDroneControllerUtilityPart } from './droneControllerPart'
+import {
+  createCoolantTankUtilityPart,
+  createFuelTankUtilityPart,
+  createRadarUtilityPart,
+} from './industrialUtilityParts'
 import { createPlainUtilityPart } from './plainUtilityPart'
 import { createRepairKitUtilityPart } from './repairKitPart'
 import { createSensorUtilityPart } from './sensorPart'
@@ -15,6 +20,21 @@ export function createGenericUtilityPart(args: UtilityPartRenderArgs, partId: st
 
   if (partId.includes('Battery')) {
     createBatteryUtilityPart(args)
+    return
+  }
+
+  if (partId.includes('CoolantTank')) {
+    createCoolantTankUtilityPart(args)
+    return
+  }
+
+  if (partId.includes('FuelTank')) {
+    createFuelTankUtilityPart(args)
+    return
+  }
+
+  if (partId.includes('Radar')) {
+    createRadarUtilityPart(args)
     return
   }
 

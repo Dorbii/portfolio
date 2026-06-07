@@ -121,6 +121,9 @@ export function MatchScoreboard({
           >
             {sessionControl.isBusy ? 'Creating...' : 'New Session'}
           </Button>
+          <a className="ui-button ui-button-ghost" href="/part-catalog">
+            Part Catalog
+          </a>
         </ActionGroup>
       </div>
       <ScoreboardTeam

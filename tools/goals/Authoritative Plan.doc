@@ -1342,7 +1342,7 @@ Chrome route matrix:
 - `/agent`
 - `/replay-preview`
 - `/replay-preview?proof=ability&camera=broadcast`
-- `/qa/part-catalog`
+- `/part-catalog`
 
 Viewport matrix:
 - desktop: 1366x900
@@ -1358,7 +1358,7 @@ Slice 2, worker action route:
 Verify bootstrap/state return GameMaster packets. Verify `/action` accepts only valid `actionId`, rejects invalid/stale/forged payloads, and old routes are removed or explicitly rejected. Red submitting first must not stale blue’s same-decision action set.
 
 Slice 3, loadout builder:
-Verify legal loadout actions come from existing catalog truth, not ad hoc JSON. Browser-check `/qa/part-catalog`. Confirm labels fit, choices are scannable, and packets are not combinatorial garbage.
+Verify legal loadout actions come from existing catalog truth, not ad hoc JSON. Browser-check `/part-catalog`. Confirm labels fit, choices are scannable, and packets are not combinatorial garbage.
 
 Slice 4, combat resolver bridge:
 Run simultaneous action scenarios: both hold, same-anchor conflict, path crossing, anchor path blocked, LOS blocked, target moves out of range, destroyed-before-fire. V1 visual clipping of oversized bot geometry is allowed; report only tactical anchor-cell/path legality failures.
@@ -1469,4 +1469,3 @@ Old round-plan/turn-command logic is gone.
 **5. Future Scope / Non-Goals**
 
 `Footprint-aware movement and swept-volume collision are explicit V2 work. Do not mix partial footprint rules into V1.`
-
