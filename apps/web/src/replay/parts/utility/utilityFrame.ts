@@ -134,14 +134,14 @@ export function createBatteryBusBars(
     const busBar = MeshBuilder.CreateBox(
       `${role}-${blockId}-battery-bus-bar-${index + 1}`,
       {
-        width: Math.max(width * 0.18, 0.1),
-        height: 0.045,
-        depth: Math.max(depth * 0.64, 0.32),
+        width: Math.max(width * 0.055, 0.034),
+        height: 0.032,
+        depth: Math.max(depth * 0.58, 0.28),
       },
       scene,
     )
 
-    busBar.position.set(index * Math.max(width * 0.22, 0.12), Math.max(height * 0.76, 0.4), 0)
+    busBar.position.set(index * Math.max(width * 0.2, 0.11), Math.max(height * 0.79, 0.42), 0)
     attachMesh(busBar, parent, materials.warning)
   }
 }

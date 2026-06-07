@@ -23,7 +23,7 @@ export function createPartAccents(
   depth: number,
   materials: TeamMaterialSet,
 ): void {
-  if (category === 'mobility') {
+  if (category === 'mobility' || category === 'utility') {
     return
   }
 
@@ -54,7 +54,7 @@ export function createPartAccents(
     0,
   )
 
-  if (category === 'body' || category === 'utility') {
+  if (category === 'body') {
     createBoxDetail(
       scene,
       parent,
@@ -67,7 +67,7 @@ export function createPartAccents(
       Math.max(height * 0.7, 0.22),
       Math.max(depth * 0.42, 0.14),
     )
-    createElectricalSurfaceDetails(scene, parent, materials, `${role}-${blockId}`, category, width, height, depth)
+    createElectricalSurfaceDetails(scene, parent, materials, `${role}-${blockId}`, width, height, depth)
   }
 
   if (category === 'body') {
@@ -89,15 +89,6 @@ export function createPartAccents(
     z: -depth * 0.34,
   })
 
-  if (category === 'utility') {
-    createVentSlats(scene, parent, materials.trim, `${role}-${blockId}-utility-vents`, {
-      count: 4,
-      width: Math.max(width * 0.38, 0.18),
-      y: Math.max(height * 0.54, 0.2),
-      z: -Math.max(depth * 0.36, 0.12),
-    })
-  }
-
   if (category === 'defense' || category === 'body') {
     createPanelSeam(scene, parent, materials.trim, `${role}-${blockId}-service-seam`, {
       width: Math.max(width * 0.58, 0.22),
@@ -116,7 +107,6 @@ function createElectricalSurfaceDetails(
   parent: TransformNode,
   materials: TeamMaterialSet,
   name: string,
-  category: PartCategory,
   width: number,
   height: number,
   depth: number,
@@ -127,9 +117,7 @@ function createElectricalSurfaceDetails(
 
   const boardWidth = Math.max(width * 0.34, 0.2)
   const boardDepth = Math.max(depth * 0.28, 0.16)
-  const boardY = category === 'utility'
-    ? Math.max(height * 0.88, 0.32)
-    : Math.max(height * 0.96, 0.36)
+  const boardY = Math.max(height * 0.96, 0.36)
   const boardX = -Math.max(width * 0.14, 0.05)
   const boardZ = -Math.max(depth * 0.12, 0.04)
 
@@ -325,34 +313,6 @@ function createFastenerRow(
     bolt.position.set(options.xStart + options.xStep * index, options.y, options.z)
     bolt.rotation.x = Math.PI / 2
     attachMesh(bolt, parent, material)
-  }
-}
-
-function createVentSlats(
-  scene: Scene,
-  parent: TransformNode,
-  material: Material,
-  name: string,
-  options: {
-    count: number
-    width: number
-    y: number
-    z: number
-  },
-): void {
-  for (let index = 0; index < options.count; index += 1) {
-    createBoxDetail(
-      scene,
-      parent,
-      material,
-      `${name}-${index}`,
-      options.width,
-      0.025,
-      0.035,
-      0,
-      options.y,
-      options.z + (index - (options.count - 1) / 2) * 0.09,
-    )
   }
 }
 

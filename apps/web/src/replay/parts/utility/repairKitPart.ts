@@ -6,110 +6,112 @@ import { createUtilityFrame } from './utilityFrame'
 export function createRepairKitUtilityPart(args: UtilityPartRenderArgs): void {
   const { scene, parent, material, role, blockId, width, height, depth, materials } = args
   const box = createUtilityFrame(args, 'RepairKit')
+  const lidY = Math.max(height * 0.66, 0.34)
+  const caseWidth = Math.max(width * 0.74, 0.42)
+  const caseDepth = Math.max(depth * 0.68, 0.36)
 
+  const lid = MeshBuilder.CreateBox(
+    `${role}-${blockId}-repair-case-lid`,
+    {
+      width: caseWidth,
+      height: Math.max(height * 0.1, 0.055),
+      depth: caseDepth,
+    },
+    scene,
+  )
+  const crossBarX = MeshBuilder.CreateBox(
+    `${role}-${blockId}-repair-cross-horizontal`,
+    {
+      width: Math.max(width * 0.34, 0.18),
+      height: Math.max(height * 0.03, 0.018),
+      depth: Math.max(depth * 0.1, 0.06),
+    },
+    scene,
+  )
+  const crossBarZ = MeshBuilder.CreateBox(
+    `${role}-${blockId}-repair-cross-vertical`,
+    {
+      width: Math.max(width * 0.1, 0.06),
+      height: Math.max(height * 0.032, 0.018),
+      depth: Math.max(depth * 0.34, 0.18),
+    },
+    scene,
+  )
+  const handle = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-repair-carry-handle`,
+    {
+      diameter: Math.max(width * 0.34, 0.2),
+      thickness: 0.028,
+      tessellation: 16,
+    },
+    scene,
+  )
 
-    const detail = MeshBuilder.CreateBox(
-      `${role}-${blockId}-utility-detail`,
+  lid.position.y = lidY
+  crossBarX.position.set(0, lidY + Math.max(height * 0.06, 0.035), Math.max(depth * 0.02, 0.012))
+  crossBarZ.position.set(0, crossBarX.position.y + 0.002, crossBarX.position.z)
+  handle.rotation.x = Math.PI / 2
+  handle.position.set(0, lidY + Math.max(height * 0.22, 0.13), -Math.max(depth * 0.2, 0.12))
+  attachMesh(lid, parent, materials.trim)
+  attachMesh(crossBarX, parent, material)
+  attachMesh(crossBarZ, parent, material)
+  attachMesh(handle, parent, materials.steel)
+
+  for (let side = -1; side <= 1; side += 2) {
+    const latch = MeshBuilder.CreateBox(
+      `${role}-${blockId}-repair-case-latch-${side}`,
       {
-        width: Math.max(width * 0.3, 0.12),
-        height: Math.max(height * 0.3, 0.12),
-        depth: Math.max(depth * 0.7, 0.28),
+        width: Math.max(width * 0.12, 0.07),
+        height: Math.max(height * 0.07, 0.04),
+        depth: Math.max(depth * 0.14, 0.08),
       },
       scene,
     )
-    detail.position.z = Math.max(depth * 0.28, 0.22)
-    attachMesh(detail, parent, materials.trim)
-
-
-    const terminalBase = MeshBuilder.CreateBox(
-      `${role}-${blockId}-repair-terminal-base`,
+    const sideSocket = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-repair-charge-socket-${side}`,
       {
-        width: Math.max(width * 0.58, 0.28),
-        height: Math.max(height * 0.08, 0.045),
-        depth: Math.max(depth * 0.22, 0.12),
-      },
-      scene,
-    )
-
-    terminalBase.position.set(0, Math.max(height * 0.68, 0.35), -Math.max(depth * 0.28, 0.16))
-    attachMesh(terminalBase, parent, materials.trim)
-
-    for (let side = -1; side <= 1; side += 2) {
-      const terminal = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-repair-terminal-${side}`,
-        {
-          height: Math.max(height * 0.08, 0.045),
-          diameter: Math.max(width * 0.11, 0.06),
-          tessellation: 12,
-        },
-        scene,
-      )
-      const socketGlow = MeshBuilder.CreateBox(
-        `${role}-${blockId}-repair-terminal-indicator-${side}`,
-        {
-          width: Math.max(width * 0.08, 0.045),
-          height: Math.max(height * 0.03, 0.018),
-          depth: Math.max(depth * 0.11, 0.055),
-        },
-        scene,
-      )
-      const latch = MeshBuilder.CreateBox(
-        `${role}-${blockId}-repair-case-latch-${side}`,
-        {
-          width: Math.max(width * 0.12, 0.07),
-          height: Math.max(height * 0.08, 0.045),
-          depth: Math.max(depth * 0.16, 0.08),
-        },
-        scene,
-      )
-
-      terminal.rotation.y = Math.PI / 2
-      terminal.position.set(side * Math.max(width * 0.2, 0.11), terminalBase.position.y + Math.max(height * 0.065, 0.04), terminalBase.position.z)
-      socketGlow.position.set(terminal.position.x, terminal.position.y + Math.max(height * 0.045, 0.025), terminal.position.z)
-      latch.position.set(side * Math.max(width * 0.32, 0.18), Math.max(height * 0.42, 0.24), Math.max(depth * 0.44, 0.26))
-      attachMesh(terminal, parent, materials.steel)
-      attachMesh(socketGlow, parent, materials.light)
-      attachMesh(latch, parent, materials.steel)
-    }
-
-    const bridgeCable = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-repair-terminal-bridge`,
-      {
-        height: Math.max(width * 0.38, 0.2),
-        diameter: Math.max(width * 0.045, 0.026),
-        tessellation: 8,
+        height: Math.max(width * 0.12, 0.075),
+        diameter: Math.max(width * 0.08, 0.05),
+        tessellation: 12,
       },
       scene,
     )
 
-    bridgeCable.rotation.z = Math.PI / 2
-    bridgeCable.position.set(0, terminalBase.position.y + Math.max(height * 0.09, 0.055), terminalBase.position.z - Math.max(depth * 0.1, 0.06))
-    attachMesh(bridgeCable, parent, materials.trim)
+    latch.position.set(side * Math.max(width * 0.32, 0.18), Math.max(height * 0.44, 0.24), Math.max(depth * 0.42, 0.24))
+    sideSocket.rotation.z = Math.PI / 2
+    sideSocket.position.set(side * Math.max(width * 0.42, 0.24), Math.max(height * 0.54, 0.29), -Math.max(depth * 0.12, 0.07))
+    attachMesh(latch, parent, materials.steel)
+    attachMesh(sideSocket, parent, materials.light)
+  }
 
-    const serviceArm = MeshBuilder.CreateBox(
-      `${role}-${blockId}-repair-service-arm`,
+  for (let toolIndex = 0; toolIndex < 3; toolIndex += 1) {
+    const toolRail = MeshBuilder.CreateBox(
+      `${role}-${blockId}-repair-tool-rail-${toolIndex}`,
       {
-        width: Math.max(width * 0.14, 0.08),
-        height: Math.max(height * 0.7, 0.34),
-        depth: Math.max(depth * 0.18, 0.1),
-      },
-      scene,
-    )
-    const toolNode = MeshBuilder.CreateBox(
-      `${role}-${blockId}-repair-tool-node`,
-      {
-        width: Math.max(width * 0.28, 0.16),
-        height: Math.max(height * 0.16, 0.1),
-        depth: Math.max(depth * 0.28, 0.16),
+        width: Math.max(width * 0.48, 0.26),
+        height: Math.max(height * 0.035, 0.024),
+        depth: Math.max(depth * 0.045, 0.028),
       },
       scene,
     )
 
-    serviceArm.position.set(Math.max(width * 0.28, 0.18), Math.max(height * 0.78, 0.4), Math.max(depth * 0.16, 0.1))
-    serviceArm.rotation.z = -0.28
-    toolNode.position.set(Math.max(width * 0.36, 0.22), Math.max(height * 1.06, 0.58), Math.max(depth * 0.24, 0.16))
-    attachMesh(serviceArm, parent, materials.warning)
-    attachMesh(toolNode, parent, materials.trim)
+    toolRail.position.set(0, Math.max(height * 0.36, 0.2), -Math.max(depth * 0.32, 0.18) + toolIndex * Math.max(depth * 0.12, 0.07))
+    attachMesh(toolRail, parent, toolIndex === 1 ? materials.steel : materials.trim)
+  }
 
-  attachMesh(box, parent, material)
+  const patchPlate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-repair-patch-plate-stack`,
+    {
+      width: Math.max(width * 0.24, 0.14),
+      height: Math.max(height * 0.08, 0.05),
+      depth: Math.max(depth * 0.26, 0.14),
+    },
+    scene,
+  )
+
+  patchPlate.position.set(Math.max(width * 0.24, 0.15), Math.max(height * 0.5, 0.27), -Math.max(depth * 0.28, 0.16))
+  patchPlate.rotation.y = -0.22
+  attachMesh(patchPlate, parent, materials.steel)
+
+  attachMesh(box, parent, materials.utility)
 }
