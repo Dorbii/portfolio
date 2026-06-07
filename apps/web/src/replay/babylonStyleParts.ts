@@ -1,10 +1,14 @@
 import type { Material } from '@babylonjs/core/Materials/material'
+import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import {
   attachMesh,
+  createBoxDetail,
+  createRampBlock,
   createSolidBlock,
 } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
@@ -24,107 +28,12 @@ export function createStylePart(
   }
 
   if (partId.includes('Wings')) {
-    const body = MeshBuilder.CreateBox(
-      `${role}-${blockId}-wings-body`,
-      { width: 0.26, height: 0.16, depth: 0.96 },
-      scene,
-    )
-    const left = MeshBuilder.CreateBox(
-      `${role}-${blockId}-wing-l`,
-      { width: 0.64, height: 0.14, depth: 0.56 },
-      scene,
-    )
-    const right = MeshBuilder.CreateBox(
-      `${role}-${blockId}-wing-r`,
-      { width: 0.64, height: 0.14, depth: 0.56 },
-      scene,
-    )
-    left.position.set(-0.45, 0.28, 0.01)
-    right.position.set(0.45, 0.28, 0.01)
-    left.rotation.z = 0.5
-    right.rotation.z = -0.5
-    attachMesh(body, parent, material)
-    attachMesh(left, parent, materials.light)
-    attachMesh(right, parent, materials.light)
-
-    for (let side = -1; side <= 1; side += 2) {
-      const spar = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-wing-spar-${side}`,
-        { height: 0.78, diameter: 0.045, tessellation: 8 },
-        scene,
-      )
-
-      spar.rotation.x = Math.PI / 2
-      spar.rotation.z = side * 0.42
-      spar.position.set(side * 0.34, 0.34, 0)
-      attachMesh(spar, parent, materials.trim)
-    }
-
+    createWingAssemblyPart(scene, parent, material, role, blockId, materials)
     return
   }
 
   if (partId.includes('DragonHead')) {
-    const skull = MeshBuilder.CreateBox(
-      `${role}-${blockId}-dragon-head`,
-      { width: 0.5, height: 0.32, depth: 0.52 },
-      scene,
-    )
-    const jaw = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-dragon-jaw`,
-      { height: 0.16, diameter: 0.42, tessellation: 12 },
-      scene,
-    )
-    const snout = MeshBuilder.CreateBox(
-      `${role}-${blockId}-dragon-snout`,
-      { width: 0.32, height: 0.16, depth: 0.28 },
-      scene,
-    )
-    const hornL = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-dragon-horn-l`,
-      { height: 0.36, diameterTop: 0, diameterBottom: 0.09, tessellation: 12 },
-      scene,
-    )
-    const hornR = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-dragon-horn-r`,
-      { height: 0.36, diameterTop: 0, diameterBottom: 0.09, tessellation: 12 },
-      scene,
-    )
-    jaw.rotation.z = Math.PI / 2
-    jaw.position.set(0, -0.1, 0.16)
-    snout.position.set(0, 0.02, 0.32)
-    hornL.position.set(-0.18, 0.26, 0.01)
-    hornR.position.set(0.18, 0.26, 0.01)
-    attachMesh(skull, parent, material)
-    attachMesh(snout, parent, material)
-    attachMesh(jaw, parent, materials.trim)
-    attachMesh(hornL, parent, materials.warning)
-    attachMesh(hornR, parent, materials.warning)
-
-    for (let side = -1; side <= 1; side += 2) {
-      const eye = MeshBuilder.CreateSphere(
-        `${role}-${blockId}-dragon-eye-${side}`,
-        { diameter: 0.075, segments: 8 },
-        scene,
-      )
-
-      eye.position.set(side * 0.16, 0.08, 0.48)
-      attachMesh(eye, parent, materials.light)
-    }
-
-    for (let side = -1; side <= 1; side += 2) {
-      for (let index = 0; index < 3; index += 1) {
-        const tooth = MeshBuilder.CreateCylinder(
-          `${role}-${blockId}-dragon-tooth-${side}-${index}`,
-          { height: 0.12, diameterTop: 0, diameterBottom: 0.035, tessellation: 8 },
-          scene,
-        )
-
-        tooth.rotation.x = Math.PI / 2
-        tooth.position.set(side * (0.08 + index * 0.055), -0.18, 0.39)
-        attachMesh(tooth, parent, materials.steel)
-      }
-    }
-
+    createDragonHeadPart(scene, parent, material, role, blockId, materials)
     return
   }
 
@@ -242,38 +151,7 @@ export function createStylePart(
   }
 
   if (partId.includes('Crown')) {
-    const band = MeshBuilder.CreateTorus(
-      `${role}-${blockId}-crown-band`,
-      { diameter: 0.52, thickness: 0.12, tessellation: 18 },
-      scene,
-    )
-    for (let index = 0; index < 7; index += 1) {
-      const angle = (Math.PI * 2 * index) / 7
-      const tooth = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-crown-tooth-${index}`,
-        {
-          height: index % 2 === 0 ? 0.28 : 0.2,
-          diameterTop: 0.035,
-          diameterBottom: 0.09,
-          tessellation: 8,
-        },
-        scene,
-      )
-      const jewel = MeshBuilder.CreateSphere(
-        `${role}-${blockId}-crown-jewel-${index}`,
-        { diameter: 0.055, segments: 8 },
-        scene,
-      )
-
-      tooth.position.set(Math.sin(angle) * 0.27, 0.22, Math.cos(angle) * 0.27)
-      tooth.rotation.z = -Math.sin(angle) * 0.22
-      jewel.position.set(Math.sin(angle) * 0.29, 0.38 + (index % 2 === 0 ? 0.08 : 0), Math.cos(angle) * 0.29)
-      attachMesh(tooth, parent, materials.warning)
-      attachMesh(jewel, parent, materials.light)
-    }
-    band.rotation.x = Math.PI / 2
-    attachMesh(band, parent, material)
-
+    createCrownPart(scene, parent, material, role, blockId, materials)
     return
   }
 
@@ -320,6 +198,422 @@ export function createStylePart(
   }
 
   createSolidBlock(scene, parent, material, `${role}-${blockId}-style`, 0.5, 0.3, 0.5)
+}
+
+function createDragonHeadPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  role: TeamRole,
+  blockId: string,
+  materials: TeamMaterialSet,
+): void {
+  const neckMount = createRampBlock(scene, `${role}-${blockId}-dragon-neck-armor-base`, 0.5, 0.18, 0.44, 0.06)
+  const skullTop = createExtrudedPlateFromOutline(
+    scene,
+    `${role}-${blockId}-dragon-armored-skull`,
+    [
+      [-0.22, -0.26],
+      [0.22, -0.22],
+      [0.28, 0.08],
+      [0.2, 0.42],
+      [0.08, 0.68],
+      [-0.08, 0.68],
+      [-0.2, 0.42],
+      [-0.28, 0.08],
+    ],
+    0.055,
+  )
+  const snoutTop = createExtrudedPlateFromOutline(
+    scene,
+    `${role}-${blockId}-dragon-tapered-snout`,
+    [
+      [-0.14, 0.3],
+      [0.14, 0.3],
+      [0.1, 0.76],
+      [0.02, 0.88],
+      [-0.02, 0.88],
+      [-0.1, 0.76],
+    ],
+    0.048,
+  )
+
+  neckMount.position.set(0, 0.12, -0.15)
+  skullTop.position.y = 0.48
+  snoutTop.position.y = 0.39
+  attachMesh(neckMount, parent, materials.trim)
+  attachMesh(skullTop, parent, materials.trim)
+  attachMesh(snoutTop, parent, material)
+
+  createBoxDetail(scene, parent, material, `${role}-${blockId}-dragon-team-scale-top`, 0.2, 0.035, 0.2, 0, 0.56, 0.08)
+  createBoxDetail(scene, parent, material, `${role}-${blockId}-dragon-team-scale-snout`, 0.16, 0.03, 0.2, 0, 0.45, 0.5)
+  createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-upper-jaw-rail`, 0.28, 0.045, 0.42, 0, 0.25, 0.6)
+  createBoxDetail(scene, parent, materials.trim, `${role}-${blockId}-dragon-lower-jaw-guard`, 0.24, 0.045, 0.44, 0, 0.12, 0.56)
+  createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-brow-armored`, 0.34, 0.045, 0.055, 0, 0.43, 0.43)
+  createBoxDetail(scene, parent, materials.trim, `${role}-${blockId}-dragon-top-service-plate`, 0.22, 0.032, 0.22, 0, 0.61, -0.05)
+
+  for (const side of [-1, 1]) {
+    const sidePlate = createExtrudedVerticalPlateFromOutline(
+      scene,
+      `${role}-${blockId}-dragon-cyber-side-profile-${side}`,
+      [
+        [-0.3, 0.12],
+        [-0.18, 0.38],
+        [0.02, 0.52],
+        [0.36, 0.5],
+        [0.78, 0.34],
+        [0.88, 0.23],
+        [0.58, 0.2],
+        [0.34, 0.08],
+        [0.02, 0.08],
+      ],
+      0.035,
+    )
+    const lowerJawPlate = createExtrudedVerticalPlateFromOutline(
+      scene,
+      `${role}-${blockId}-dragon-open-lower-jaw-plate-${side}`,
+      [
+        [0.24, 0.08],
+        [0.72, 0.11],
+        [0.86, 0.18],
+        [0.52, 0.03],
+        [0.18, 0.03],
+      ],
+      0.028,
+    )
+    const eye = MeshBuilder.CreateBox(
+      `${role}-${blockId}-dragon-glowing-eye-slit-${side}`,
+      { width: 0.028, height: 0.036, depth: 0.15 },
+      scene,
+    )
+    const horn = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-swept-horn-${side}`,
+      { height: 0.48, diameterTop: 0.012, diameterBottom: 0.078, tessellation: 10 },
+      scene,
+    )
+    const sideFin = createExtrudedVerticalPlateFromOutline(
+      scene,
+      `${role}-${blockId}-dragon-rear-swept-fin-${side}`,
+      [
+        [-0.22, 0.4],
+        [0.0, 0.72],
+        [0.2, 0.48],
+      ],
+      0.026,
+    )
+    const hornSocket = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-horn-socket-${side}`,
+      { height: 0.045, diameter: 0.1, tessellation: 12 },
+      scene,
+    )
+    const sideGear = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-dragon-side-gear-ring-${side}`,
+      { diameter: 0.16, thickness: 0.018, tessellation: 16 },
+      scene,
+    )
+    const nostril = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-nostril-port-${side}`,
+      { height: 0.085, diameter: 0.026, tessellation: 8 },
+      scene,
+    )
+
+    sidePlate.position.x = side * 0.2
+    lowerJawPlate.position.x = side * 0.17
+    eye.position.set(side * 0.22, 0.36, 0.42)
+    eye.rotation.y = side * 0.18
+    horn.position.set(side * 0.16, 0.67, -0.08)
+    horn.rotation.x = -0.72
+    horn.rotation.z = side * 0.2
+    sideFin.position.x = side * 0.27
+    sideFin.position.z = -0.14
+    hornSocket.position.set(side * 0.16, 0.51, -0.02)
+    sideGear.position.set(side * 0.25, 0.28, -0.08)
+    sideGear.rotation.y = Math.PI / 2
+    nostril.position.set(side * 0.09, 0.25, 0.78)
+    nostril.rotation.x = Math.PI / 2
+
+    attachMesh(sidePlate, parent, materials.trim)
+    attachMesh(lowerJawPlate, parent, materials.trim)
+    attachMesh(eye, parent, materials.light)
+    attachMesh(horn, parent, materials.steel)
+    attachMesh(sideFin, parent, material)
+    attachMesh(hornSocket, parent, material)
+    attachMesh(sideGear, parent, materials.steel)
+    attachMesh(nostril, parent, materials.steel)
+  }
+
+  for (let index = -3; index <= 3; index += 1) {
+    const tooth = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-jaw-tooth-${index + 3}`,
+      { height: 0.085, diameterTop: 0, diameterBottom: 0.026, tessellation: 7 },
+      scene,
+    )
+    const lowerTooth = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-lower-jaw-tooth-${index + 3}`,
+      { height: 0.07, diameterTop: 0, diameterBottom: 0.022, tessellation: 7 },
+      scene,
+    )
+
+    tooth.position.set(index * 0.035, 0.18, 0.72 - Math.abs(index) * 0.018)
+    tooth.rotation.x = Math.PI
+    lowerTooth.position.set(index * 0.032, 0.11, 0.58 - Math.abs(index) * 0.014)
+    attachMesh(tooth, parent, materials.steel)
+    attachMesh(lowerTooth, parent, materials.steel)
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const crest = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-spine-crest-${index}`,
+      { height: 0.14 - index * 0.02, diameterTop: 0, diameterBottom: 0.046, tessellation: 7 },
+      scene,
+    )
+
+    crest.position.set(0, 0.66 - index * 0.045, -0.24 + index * 0.12)
+    crest.rotation.x = -0.36
+    attachMesh(crest, parent, materials.steel)
+  }
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-neck-fastener-${index + 1}`, 0.045, 0.025, 0.045, index * 0.13, 0.23, -0.18)
+  }
+}
+
+function createWingAssemblyPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  role: TeamRole,
+  blockId: string,
+  materials: TeamMaterialSet,
+): void {
+  createBoxDetail(scene, parent, materials.trim, `${role}-${blockId}-wing-center-keel`, 0.34, 0.14, 0.76, 0, 0.18, 0)
+  createBoxDetail(scene, parent, material, `${role}-${blockId}-wing-service-cover`, 0.24, 0.055, 0.48, 0, 0.31, 0)
+
+  for (const side of [-1, 1]) {
+    const wingPlate = createExtrudedPlateFromOutline(
+      scene,
+      `${role}-${blockId}-swept-wing-panel-${side}`,
+      [
+        [side * 0.12, -0.24],
+        [side * 0.74, -0.38],
+        [side * 0.94, -0.07],
+        [side * 0.72, 0.28],
+        [side * 0.24, 0.36],
+        [side * 0.04, 0.12],
+      ],
+      0.045,
+    )
+    const hinge = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-wing-root-hinge-${side}`,
+      { height: 0.42, diameter: 0.06, tessellation: 12 },
+      scene,
+    )
+    const tipMarker = MeshBuilder.CreateSphere(
+      `${role}-${blockId}-wingtip-marker-light-${side}`,
+      { diameter: 0.055, segments: 10 },
+      scene,
+    )
+
+    wingPlate.position.y = 0.3
+    hinge.position.set(side * 0.18, 0.28, 0)
+    hinge.rotation.x = Math.PI / 2
+    tipMarker.position.set(side * 0.9, 0.34, -0.06)
+    tipMarker.metadata = { kind: 'pulse', speed: 0.012 }
+
+    attachMesh(wingPlate, parent, material)
+    attachMesh(hinge, parent, materials.steel)
+    attachMesh(tipMarker, parent, materials.light)
+
+    for (let index = 0; index < 3; index += 1) {
+      const rib = MeshBuilder.CreateBox(
+        `${role}-${blockId}-wing-rib-${side}-${index}`,
+        { width: 0.028, height: 0.035, depth: 0.48 - index * 0.07 },
+        scene,
+      )
+
+      rib.position.set(side * (0.32 + index * 0.17), 0.34, 0.02 - index * 0.04)
+      rib.rotation.y = side * -0.22
+      attachMesh(rib, parent, materials.steel)
+    }
+
+    for (const z of [-0.22, 0.22]) {
+      const spar = MeshBuilder.CreateBox(
+        `${role}-${blockId}-wing-long-spar-${side}-${z > 0 ? 'rear' : 'front'}`,
+        { width: 0.58, height: 0.035, depth: 0.028 },
+        scene,
+      )
+
+      spar.position.set(side * 0.48, 0.37, z)
+      spar.rotation.y = side * 0.16
+      attachMesh(spar, parent, materials.trim)
+    }
+  }
+
+  for (let index = -1; index <= 1; index += 1) {
+    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-wing-keel-fastener-${index + 1}`, 0.055, 0.025, 0.055, 0, 0.39, index * 0.18)
+  }
+}
+
+function createCrownPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  role: TeamRole,
+  blockId: string,
+  materials: TeamMaterialSet,
+): void {
+  const basePlate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-crown-bolted-base-plate`,
+    { width: 0.74, height: 0.08, depth: 0.58 },
+    scene,
+  )
+  const outerBand = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-crown-machined-band`,
+    { diameter: 0.58, thickness: 0.05, tessellation: 32 },
+    scene,
+  )
+  const innerRim = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-crown-inner-rim`,
+    { diameter: 0.44, thickness: 0.022, tessellation: 28 },
+    scene,
+  )
+
+  basePlate.position.y = 0.1
+  outerBand.position.y = 0.24
+  outerBand.rotation.x = Math.PI / 2
+  outerBand.scaling.z = 0.72
+  innerRim.position.y = 0.27
+  innerRim.rotation.x = Math.PI / 2
+  innerRim.scaling.z = 0.62
+  attachMesh(basePlate, parent, materials.trim)
+  attachMesh(outerBand, parent, materials.warning)
+  attachMesh(innerRim, parent, materials.steel)
+
+  for (let index = 0; index < 7; index += 1) {
+    const angle = (Math.PI * 2 * index) / 7
+    const radiusX = 0.29
+    const radiusZ = 0.2
+    const toothHeight = index % 2 === 0 ? 0.25 : 0.18
+    const tooth = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-crown-seated-tooth-${index}`,
+      {
+        height: toothHeight,
+        diameterTop: 0.03,
+        diameterBottom: 0.082,
+        tessellation: 6,
+      },
+      scene,
+    )
+    const socket = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-crown-tooth-socket-${index}`,
+      { height: 0.04, diameter: 0.1, tessellation: 10 },
+      scene,
+    )
+    const jewel = MeshBuilder.CreateSphere(
+      `${role}-${blockId}-crown-inset-jewel-${index}`,
+      { diameter: 0.036, segments: 8 },
+      scene,
+    )
+
+    tooth.position.set(Math.sin(angle) * radiusX, 0.36 + toothHeight * 0.18, Math.cos(angle) * radiusZ)
+    tooth.rotation.z = -Math.sin(angle) * 0.16
+    socket.position.set(Math.sin(angle) * radiusX, 0.27, Math.cos(angle) * radiusZ)
+    jewel.position.set(Math.sin(angle) * (radiusX + 0.018), 0.36, Math.cos(angle) * (radiusZ + 0.012))
+    attachMesh(tooth, parent, materials.warning)
+    attachMesh(socket, parent, materials.steel)
+    attachMesh(jewel, parent, materials.light)
+  }
+
+  for (const x of [-0.28, 0.28]) {
+    for (const z of [-0.2, 0.2]) {
+      const bolt = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-crown-base-bolt-${x}-${z}`,
+        { height: 0.025, diameter: 0.045, tessellation: 10 },
+        scene,
+      )
+
+      bolt.position.set(x, 0.155, z)
+      attachMesh(bolt, parent, materials.steel)
+    }
+  }
+
+  createBoxDetail(scene, parent, material, `${role}-${blockId}-crown-front-team-plate`, 0.22, 0.035, 0.04, 0, 0.18, 0.31)
+}
+
+function createExtrudedPlateFromOutline(
+  scene: Scene,
+  name: string,
+  outline: [number, number][],
+  thickness: number,
+): Mesh {
+  const mesh = new Mesh(name, scene)
+  const halfThickness = thickness / 2
+  const positions: number[] = []
+  const indices: number[] = []
+
+  outline.forEach(([x, z]) => positions.push(x, halfThickness, z))
+  outline.forEach(([x, z]) => positions.push(x, -halfThickness, z))
+
+  for (let index = 1; index < outline.length - 1; index += 1) {
+    indices.push(0, index, index + 1)
+    indices.push(outline.length, outline.length + index + 1, outline.length + index)
+  }
+
+  for (let index = 0; index < outline.length; index += 1) {
+    const next = (index + 1) % outline.length
+
+    indices.push(index, next, outline.length + next)
+    indices.push(index, outline.length + next, outline.length + index)
+  }
+
+  const normals: number[] = []
+  const vertexData = new VertexData()
+
+  VertexData.ComputeNormals(positions, indices, normals)
+  vertexData.positions = positions
+  vertexData.indices = indices
+  vertexData.normals = normals
+  vertexData.applyToMesh(mesh)
+
+  return mesh
+}
+
+function createExtrudedVerticalPlateFromOutline(
+  scene: Scene,
+  name: string,
+  outline: [number, number][],
+  thickness: number,
+): Mesh {
+  const mesh = new Mesh(name, scene)
+  const halfThickness = thickness / 2
+  const positions: number[] = []
+  const indices: number[] = []
+
+  outline.forEach(([z, y]) => positions.push(halfThickness, y, z))
+  outline.forEach(([z, y]) => positions.push(-halfThickness, y, z))
+
+  for (let index = 1; index < outline.length - 1; index += 1) {
+    indices.push(0, index, index + 1)
+    indices.push(outline.length, outline.length + index + 1, outline.length + index)
+  }
+
+  for (let index = 0; index < outline.length; index += 1) {
+    const next = (index + 1) % outline.length
+
+    indices.push(index, outline.length + next, next)
+    indices.push(index, outline.length + index, outline.length + next)
+  }
+
+  const normals: number[] = []
+  const vertexData = new VertexData()
+
+  VertexData.ComputeNormals(positions, indices, normals)
+  vertexData.positions = positions
+  vertexData.indices = indices
+  vertexData.normals = normals
+  vertexData.applyToMesh(mesh)
+
+  return mesh
 }
 
 function createFlagPart(

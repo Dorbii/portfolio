@@ -5,6 +5,10 @@ import { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import { attachMesh } from './babylonMeshHelpers'
 import type { TeamMaterialSet } from './babylonMaterials'
+import {
+  createPbrSceneMaterial,
+  createSceneMaterial,
+} from './babylonSceneUtils'
 
 export function createUtilityPart(
   scene: Scene,
@@ -20,6 +24,11 @@ export function createUtilityPart(
 ): void {
   if (partId.includes('Gyro')) {
     createGyroStabilizerPart(scene, parent, material, role, blockId, width, height, depth, materials)
+    return
+  }
+
+  if (partId.includes('EnergyCore')) {
+    createEnergyCorePart(scene, parent, material, role, blockId, width, height, depth, materials)
     return
   }
 
@@ -112,45 +121,6 @@ export function createUtilityPart(
       attachMesh(nozzleRing, parent, materials.warning)
       attachMesh(flame, parent, materials.light)
     }
-  }
-
-  if (partId.includes('EnergyCore')) {
-    const chamber = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-energy-core-chamber`,
-      {
-        height: Math.max(height * 0.82, 0.42),
-        diameter: Math.max(width * 0.44, 0.26),
-        tessellation: 18,
-      },
-      scene,
-    )
-    const topCap = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-energy-core-top-cap`,
-      {
-        height: Math.max(height * 0.12, 0.06),
-        diameter: Math.max(width * 0.52, 0.3),
-        tessellation: 18,
-      },
-      scene,
-    )
-    const bottomCap = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-energy-core-bottom-cap`,
-      {
-        height: Math.max(height * 0.12, 0.06),
-        diameter: Math.max(width * 0.52, 0.3),
-        tessellation: 18,
-      },
-      scene,
-    )
-
-    chamber.position.y = Math.max(height * 0.46, 0.28)
-    chamber.metadata = { kind: 'pulse', speed: 0.035 }
-    topCap.position.y = chamber.position.y + Math.max(height * 0.44, 0.23)
-    bottomCap.position.y = chamber.position.y - Math.max(height * 0.44, 0.23)
-    attachMesh(chamber, parent, materials.light)
-    attachMesh(topCap, parent, materials.steel)
-    attachMesh(bottomCap, parent, materials.steel)
-    createVacuumTubePair(scene, parent, materials, role, blockId, width, height, depth)
   }
 
   if (partId.includes('Battery')) {
@@ -552,6 +522,331 @@ export function createUtilityPart(
   attachMesh(box, parent, material)
 }
 
+function createEnergyCorePart(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const baseWidth = Math.max(width * 0.86, 0.48)
+  const baseDepth = Math.max(depth * 0.86, 0.48)
+  const baseHeight = Math.max(height * 0.16, 0.08)
+  const vesselSize = Math.max(Math.min(width, depth) * 0.48, 0.28)
+  const vesselY = Math.max(height * 0.48, 0.28)
+  const topRailY = vesselY + Math.max(height * 0.38, 0.21)
+  const bottomRailY = vesselY - Math.max(height * 0.34, 0.18)
+  const cornerX = Math.max(width * 0.36, 0.2)
+  const cornerZ = Math.max(depth * 0.36, 0.2)
+  const glassMaterial = createSceneMaterial(
+    scene,
+    `${role}-${blockId}-energy-core-containment-glass-mat`,
+    '#8ff4ff',
+    '#134f5a',
+    0.34,
+    0.52,
+  )
+  const brassMaterial = createPbrSceneMaterial(
+    scene,
+    `${role}-${blockId}-energy-core-machined-brass-mat`,
+    '#b7822f',
+    '#171006',
+    0.78,
+    0.34,
+  )
+  const copperMaterial = createPbrSceneMaterial(
+    scene,
+    `${role}-${blockId}-energy-core-wound-copper-mat`,
+    '#a8642e',
+    '#241006',
+    0.76,
+    0.38,
+  )
+  const darkInsulatorMaterial = createPbrSceneMaterial(
+    scene,
+    `${role}-${blockId}-energy-core-dark-insulator-mat`,
+    '#171819',
+    '#030303',
+    0.12,
+    0.82,
+  )
+  const amberMaterial = createSceneMaterial(
+    scene,
+    `${role}-${blockId}-energy-core-amber-charge-mat`,
+    '#f3b35c',
+    '#ff6a12',
+    0.66,
+    0.28,
+  )
+
+  const base = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-bolted-plinth`,
+    {
+      width: baseWidth,
+      height: baseHeight,
+      depth: baseDepth,
+    },
+    scene,
+  )
+  const lowerInsulator = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-rubber-isolation-pad`,
+    {
+      width: Math.max(baseWidth * 0.72, 0.36),
+      height: Math.max(height * 0.055, 0.032),
+      depth: Math.max(baseDepth * 0.72, 0.36),
+    },
+    scene,
+  )
+  const glassCube = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-containment-vessel`,
+    {
+      width: vesselSize,
+      height: Math.max(height * 0.62, 0.34),
+      depth: vesselSize,
+    },
+    scene,
+  )
+  const chargeColumn = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-energy-core-pulse-column`,
+    {
+      height: Math.max(height * 0.38, 0.22),
+      diameter: Math.max(width * 0.13, 0.075),
+      tessellation: 18,
+    },
+    scene,
+  )
+  const chargeSleeve = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-energy-core-amber-charge-sleeve`,
+    {
+      height: Math.max(height * 0.28, 0.16),
+      diameter: Math.max(width * 0.22, 0.125),
+      tessellation: 18,
+    },
+    scene,
+  )
+  const topLens = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-energy-core-top-energy-lens`,
+    {
+      height: Math.max(height * 0.055, 0.032),
+      diameter: Math.max(width * 0.13, 0.075),
+      tessellation: 20,
+    },
+    scene,
+  )
+  const topPlate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-bolted-top-plate`,
+    {
+      width: Math.max(vesselSize * 0.58, 0.18),
+      height: Math.max(height * 0.055, 0.032),
+      depth: Math.max(vesselSize * 0.58, 0.18),
+    },
+    scene,
+  )
+  const bottomPlate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-bolted-bottom-plate`,
+    {
+      width: Math.max(vesselSize * 1.18, 0.34),
+      height: Math.max(height * 0.07, 0.04),
+      depth: Math.max(vesselSize * 1.18, 0.34),
+    },
+    scene,
+  )
+
+  base.position.y = Math.max(height * 0.1, 0.06)
+  lowerInsulator.position.y = base.position.y + baseHeight * 0.68
+  glassCube.position.y = vesselY
+  chargeColumn.position.y = vesselY
+  chargeColumn.metadata = { kind: 'pulse', speed: 0.032 }
+  chargeSleeve.position.y = vesselY
+  chargeSleeve.metadata = { kind: 'pulse', speed: 0.024 }
+  topPlate.position.y = topRailY
+  bottomPlate.position.y = bottomRailY
+  topLens.position.y = topRailY + Math.max(height * 0.05, 0.03)
+  attachMesh(base, parent, darkInsulatorMaterial)
+  attachMesh(lowerInsulator, parent, darkInsulatorMaterial)
+  attachMesh(glassCube, parent, glassMaterial)
+  attachMesh(chargeColumn, parent, materials.light)
+  attachMesh(chargeSleeve, parent, amberMaterial)
+  attachMesh(topPlate, parent, brassMaterial)
+  attachMesh(bottomPlate, parent, brassMaterial)
+  attachMesh(topLens, parent, amberMaterial)
+
+  for (let index = 0; index < 3; index += 1) {
+    const coil = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-energy-core-induction-coil-ring-${index}`,
+      {
+        diameter: Math.max(vesselSize * (1.04 + index * 0.08), 0.3),
+        thickness: 0.018,
+        tessellation: 28,
+      },
+      scene,
+    )
+
+    coil.position.y = vesselY - Math.max(height * 0.2, 0.1) + index * Math.max(height * 0.2, 0.1)
+    attachMesh(coil, parent, index === 1 ? materials.steel : copperMaterial)
+  }
+
+  for (const x of [-cornerX, cornerX]) {
+    for (const z of [-cornerZ, cornerZ]) {
+      const pillar = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-energy-core-cage-corner-pillar-${x}-${z}`,
+        {
+          height: Math.max(height * 0.74, 0.42),
+          diameter: 0.032,
+          tessellation: 10,
+        },
+        scene,
+      )
+      const foot = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-energy-core-cage-foot-${x}-${z}`,
+        {
+          height: 0.035,
+          diameter: 0.07,
+          tessellation: 12,
+        },
+        scene,
+      )
+      const cap = MeshBuilder.CreateSphere(
+        `${role}-${blockId}-energy-core-cage-cap-node-${x}-${z}`,
+        { diameter: 0.07, segments: 10 },
+        scene,
+      )
+
+      pillar.position.set(x, vesselY, z)
+      foot.position.set(x, bottomRailY - Math.max(height * 0.06, 0.035), z)
+      cap.position.set(x, topRailY + Math.max(height * 0.06, 0.035), z)
+      attachMesh(pillar, parent, brassMaterial)
+      attachMesh(foot, parent, darkInsulatorMaterial)
+      attachMesh(cap, parent, brassMaterial)
+    }
+  }
+
+  for (const railY of [bottomRailY, topRailY]) {
+    for (const z of [-cornerZ, cornerZ]) {
+      const rail = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-energy-core-cage-x-rail-${railY}-${z}`,
+        {
+          height: cornerX * 2,
+          diameter: 0.026,
+          tessellation: 8,
+        },
+        scene,
+      )
+
+      rail.rotation.z = Math.PI / 2
+      rail.position.set(0, railY, z)
+      attachMesh(rail, parent, brassMaterial)
+    }
+
+    for (const x of [-cornerX, cornerX]) {
+      const rail = MeshBuilder.CreateCylinder(
+        `${role}-${blockId}-energy-core-cage-z-rail-${railY}-${x}`,
+        {
+          height: cornerZ * 2,
+          diameter: 0.026,
+          tessellation: 8,
+        },
+        scene,
+      )
+
+      rail.rotation.x = Math.PI / 2
+      rail.position.set(x, railY, 0)
+      attachMesh(rail, parent, brassMaterial)
+    }
+  }
+
+  for (const side of [-1, 1]) {
+    const conduit = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-service-conduit-${side}`,
+      {
+        height: Math.max(depth * 0.74, 0.4),
+        diameter: 0.026,
+        tessellation: 8,
+      },
+      scene,
+    )
+    const sideGear = MeshBuilder.CreateTorus(
+      `${role}-${blockId}-energy-core-side-gear-ring-${side}`,
+      {
+        diameter: Math.max(width * 0.22, 0.13),
+        thickness: 0.018,
+        tessellation: 18,
+      },
+      scene,
+    )
+    const sideHub = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-side-gear-hub-${side}`,
+      {
+        height: 0.035,
+        diameter: Math.max(width * 0.09, 0.055),
+        tessellation: 12,
+      },
+      scene,
+    )
+
+    conduit.rotation.x = Math.PI / 2
+    conduit.position.set(side * Math.max(width * 0.45, 0.25), Math.max(height * 0.22, 0.13), 0)
+    sideGear.rotation.y = Math.PI / 2
+    sideGear.position.set(side * Math.max(width * 0.48, 0.28), vesselY - Math.max(height * 0.03, 0.018), 0)
+    sideHub.rotation.z = Math.PI / 2
+    sideHub.position.copyFrom(sideGear.position)
+    attachMesh(conduit, parent, materials.steel)
+    attachMesh(sideGear, parent, brassMaterial)
+    attachMesh(sideHub, parent, materials.steel)
+
+    for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
+      const angle = (toothIndex / 8) * Math.PI * 2
+      const tooth = MeshBuilder.CreateBox(
+        `${role}-${blockId}-energy-core-side-gear-tooth-${side}-${toothIndex}`,
+        {
+          width: 0.026,
+          height: 0.04,
+          depth: 0.018,
+        },
+        scene,
+      )
+
+      tooth.position.set(
+        side * Math.max(width * 0.49, 0.29),
+        sideGear.position.y + Math.sin(angle) * Math.max(width * 0.12, 0.07),
+        Math.cos(angle) * Math.max(width * 0.12, 0.07),
+      )
+      tooth.rotation.x = angle
+      attachMesh(tooth, parent, brassMaterial)
+    }
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const bolt = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-energy-core-plinth-bolt-${index}`,
+      { height: 0.022, diameter: 0.04, tessellation: 10 },
+      scene,
+    )
+    const x = index % 2 === 0 ? -baseWidth * 0.34 : baseWidth * 0.34
+    const z = index < 2 ? -baseDepth * 0.34 : baseDepth * 0.34
+
+    bolt.position.set(x, base.position.y + baseHeight * 0.62, z)
+    attachMesh(bolt, parent, materials.steel)
+  }
+
+  const teamStatusStrip = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-team-status-strip`,
+    {
+      width: Math.max(width * 0.34, 0.18),
+      height: 0.02,
+      depth: Math.max(depth * 0.04, 0.026),
+    },
+    scene,
+  )
+
+  teamStatusStrip.position.set(0, base.position.y + baseHeight * 0.7, -baseDepth * 0.54)
+  attachMesh(teamStatusStrip, parent, material)
+}
+
 function createGyroStabilizerPart(
   scene: Scene,
   parent: TransformNode,
@@ -563,78 +858,74 @@ function createGyroStabilizerPart(
   depth: number,
   materials: TeamMaterialSet,
 ): void {
-  const baseWidth = Math.max(width * 0.86, 0.52)
-  const baseDepth = Math.max(depth * 0.72, 0.42)
-  const baseY = -Math.max(height * 0.22, 0.1)
-  const cageY = Math.max(height * 0.22, 0.18)
-  const ringDiameter = Math.max(Math.min(width, depth) * 0.68, 0.42)
-  const flywheelDiameter = Math.max(ringDiameter * 0.58, 0.26)
-  const axleLength = Math.max(width * 0.82, 0.5)
+  const baseWidth = Math.max(width * 0.72, 0.48)
+  const baseDepth = Math.max(depth * 0.56, 0.36)
+  const baseY = -Math.max(height * 0.14, 0.07)
+  const cageY = Math.max(height * 0.34, 0.28)
+  const ringDiameter = Math.max(Math.min(width, depth) * 0.7, 0.46)
+  const flywheelDiameter = Math.max(ringDiameter * 0.44, 0.24)
+  const axleLength = Math.max(width * 0.56, 0.36)
+  const pivotHeight = Math.max(ringDiameter * 1.12, 0.52)
 
-  const basePlate = MeshBuilder.CreateBox(
-    `${role}-${blockId}-gyro-machined-base`,
+  const basePlate = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-round-base`,
     {
-      width: baseWidth,
-      height: Math.max(height * 0.12, 0.07),
-      depth: baseDepth,
+      height: Math.max(height * 0.08, 0.045),
+      diameter: Math.max(baseWidth, baseDepth),
+      tessellation: 32,
     },
     scene,
   )
-  const frontRail = MeshBuilder.CreateBox(
-    `${role}-${blockId}-gyro-front-rail`,
-    { width: baseWidth, height: Math.max(height * 0.08, 0.045), depth: 0.045 },
+  const baseFoot = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-low-socket-foot`,
+    {
+      height: Math.max(height * 0.05, 0.03),
+      diameter: Math.max(baseWidth * 0.56, 0.28),
+      tessellation: 24,
+    },
     scene,
   )
-  const rearRail = MeshBuilder.CreateBox(
-    `${role}-${blockId}-gyro-rear-rail`,
-    { width: baseWidth, height: Math.max(height * 0.08, 0.045), depth: 0.045 },
+  const pedestal = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-pedestal-column`,
+    {
+      height: Math.max(height * 0.3, 0.18),
+      diameter: Math.max(width * 0.08, 0.05),
+      tessellation: 18,
+    },
+    scene,
+  )
+  const pivotAxis = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-vertical-pivot-axis`,
+    {
+      height: pivotHeight,
+      diameter: Math.max(width * 0.032, 0.02),
+      tessellation: 12,
+    },
+    scene,
+  )
+  const lowerPivot = MeshBuilder.CreateSphere(
+    `${role}-${blockId}-gyro-lower-pivot-ball`,
+    { diameter: Math.max(width * 0.08, 0.045), segments: 10 },
+    scene,
+  )
+  const upperPivot = MeshBuilder.CreateSphere(
+    `${role}-${blockId}-gyro-upper-pivot-ball`,
+    { diameter: Math.max(width * 0.07, 0.04), segments: 10 },
     scene,
   )
 
   basePlate.position.y = baseY
-  frontRail.position.set(0, baseY + Math.max(height * 0.09, 0.055), baseDepth * 0.42)
-  rearRail.position.set(0, frontRail.position.y, -baseDepth * 0.42)
-  attachMesh(basePlate, parent, materials.utility)
-  attachMesh(frontRail, parent, materials.trim)
-  attachMesh(rearRail, parent, materials.trim)
-
-  for (const side of [-1, 1]) {
-    const tower = MeshBuilder.CreateBox(
-      `${role}-${blockId}-gyro-bearing-tower-${side}`,
-      {
-        width: Math.max(width * 0.12, 0.07),
-        height: Math.max(height * 0.56, 0.34),
-        depth: Math.max(depth * 0.18, 0.1),
-      },
-      scene,
-    )
-    const bearing = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-gyro-bearing-cap-${side}`,
-      {
-        height: Math.max(width * 0.09, 0.055),
-        diameter: Math.max(width * 0.17, 0.09),
-        tessellation: 16,
-      },
-      scene,
-    )
-    const foot = MeshBuilder.CreateBox(
-      `${role}-${blockId}-gyro-bearing-foot-${side}`,
-      {
-        width: Math.max(width * 0.22, 0.12),
-        height: Math.max(height * 0.08, 0.045),
-        depth: Math.max(depth * 0.3, 0.16),
-      },
-      scene,
-    )
-
-    tower.position.set(side * axleLength * 0.5, cageY, 0)
-    bearing.position.set(side * axleLength * 0.5, cageY, 0)
-    bearing.rotation.z = Math.PI / 2
-    foot.position.set(side * axleLength * 0.5, baseY + Math.max(height * 0.13, 0.075), 0)
-    attachMesh(tower, parent, materials.trim)
-    attachMesh(bearing, parent, materials.steel)
-    attachMesh(foot, parent, materials.utility)
-  }
+  baseFoot.position.y = baseY + Math.max(height * 0.065, 0.038)
+  pedestal.position.y = baseY + Math.max(height * 0.21, 0.13)
+  pivotAxis.position.y = cageY
+  lowerPivot.position.y = cageY - pivotHeight * 0.5
+  upperPivot.position.y = cageY + pivotHeight * 0.5
+  attachMesh(basePlate, parent, materials.trim)
+  attachMesh(baseFoot, parent, materials.steel)
+  attachMesh(pedestal, parent, materials.steel)
+  attachMesh(pivotAxis, parent, materials.steel)
+  attachMesh(lowerPivot, parent, materials.steel)
+  attachMesh(upperPivot, parent, materials.steel)
 
   const outerGimbal = MeshBuilder.CreateTorus(
     `${role}-${blockId}-gyro-outer-gimbal-ring`,
@@ -645,11 +936,20 @@ function createGyroStabilizerPart(
     },
     scene,
   )
+  const equatorGimbal = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-gyro-equator-gimbal-ring`,
+    {
+      diameter: Math.max(ringDiameter * 0.92, 0.4),
+      thickness: Math.max(width * 0.034, 0.022),
+      tessellation: 32,
+    },
+    scene,
+  )
   const innerGimbal = MeshBuilder.CreateTorus(
     `${role}-${blockId}-gyro-inner-gimbal-ring`,
     {
-      diameter: Math.max(ringDiameter * 0.78, 0.32),
-      thickness: Math.max(width * 0.036, 0.022),
+      diameter: Math.max(ringDiameter * 0.68, 0.32),
+      thickness: Math.max(width * 0.024, 0.016),
       tessellation: 28,
     },
     scene,
@@ -657,10 +957,11 @@ function createGyroStabilizerPart(
 
   outerGimbal.position.y = cageY
   outerGimbal.rotation.x = Math.PI / 2
+  equatorGimbal.position.y = cageY
   innerGimbal.position.y = cageY
-  innerGimbal.rotation.x = Math.PI / 2
-  innerGimbal.rotation.y = Math.PI / 2
+  innerGimbal.rotation.z = Math.PI / 2
   attachMesh(outerGimbal, parent, materials.steel)
+  attachMesh(equatorGimbal, parent, materials.steel)
   attachMesh(innerGimbal, parent, materials.trim)
 
   const rotorRoot = new TransformNode(`${role}-${blockId}-gyro-flywheel-motion-root`, scene)
@@ -672,18 +973,18 @@ function createGyroStabilizerPart(
   const flywheel = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-gyro-flywheel-disc`,
     {
-      height: Math.max(width * 0.16, 0.09),
+      height: Math.max(width * 0.11, 0.07),
       diameter: flywheelDiameter,
-      tessellation: 36,
+      tessellation: 48,
     },
     scene,
   )
   const flywheelHub = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-gyro-flywheel-hub`,
     {
-      height: Math.max(width * 0.19, 0.1),
+      height: Math.max(width * 0.15, 0.09),
       diameter: Math.max(flywheelDiameter * 0.32, 0.11),
-      tessellation: 18,
+      tessellation: 24,
     },
     scene,
   )
@@ -691,7 +992,7 @@ function createGyroStabilizerPart(
     `${role}-${blockId}-gyro-horizontal-axle`,
     {
       height: axleLength,
-      diameter: Math.max(width * 0.055, 0.034),
+      diameter: Math.max(width * 0.04, 0.026),
       tessellation: 14,
     },
     scene,
@@ -701,7 +1002,7 @@ function createGyroStabilizerPart(
   flywheelHub.rotation.z = Math.PI / 2
   axle.rotation.z = Math.PI / 2
   attachMesh(flywheel, rotorRoot, materials.steel)
-  attachMesh(flywheelHub, rotorRoot, material)
+  attachMesh(flywheelHub, rotorRoot, materials.warning)
   attachMesh(axle, rotorRoot, materials.steel)
 
   for (let index = 0; index < 6; index += 1) {
@@ -709,9 +1010,9 @@ function createGyroStabilizerPart(
     const spoke = MeshBuilder.CreateBox(
       `${role}-${blockId}-gyro-flywheel-spoke-${index}`,
       {
-        width: Math.max(width * 0.035, 0.02),
-        height: Math.max(width * 0.035, 0.02),
-        depth: Math.max(flywheelDiameter * 0.48, 0.13),
+        width: Math.max(width * 0.026, 0.016),
+        height: Math.max(width * 0.026, 0.016),
+        depth: Math.max(flywheelDiameter * 0.44, 0.12),
       },
       scene,
     )
@@ -720,51 +1021,34 @@ function createGyroStabilizerPart(
     attachMesh(spoke, rotorRoot, materials.trim)
   }
 
-  const controlBoard = MeshBuilder.CreateBox(
-    `${role}-${blockId}-gyro-control-board`,
-    {
-      width: Math.max(width * 0.36, 0.2),
-      height: Math.max(height * 0.06, 0.035),
-      depth: Math.max(depth * 0.22, 0.12),
-    },
-    scene,
-  )
-
-  controlBoard.position.set(-baseWidth * 0.22, baseY + Math.max(height * 0.17, 0.1), baseDepth * 0.18)
-  attachMesh(controlBoard, parent, materials.circuit)
-
-  for (let index = 0; index < 3; index += 1) {
-    const chip = MeshBuilder.CreateBox(
-      `${role}-${blockId}-gyro-control-chip-${index}`,
+  for (const side of [-1, 1]) {
+    const pivotSaddle = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-gyro-pivot-saddle-${side}`,
       {
-        width: Math.max(width * 0.06, 0.035),
-        height: Math.max(height * 0.035, 0.022),
-        depth: Math.max(depth * 0.05, 0.03),
+        height: Math.max(width * 0.09, 0.052),
+        diameter: Math.max(width * 0.09, 0.052),
+        tessellation: 16,
       },
       scene,
     )
 
-    chip.position.set(
-      controlBoard.position.x + (index - 1) * Math.max(width * 0.09, 0.05),
-      controlBoard.position.y + Math.max(height * 0.045, 0.026),
-      controlBoard.position.z,
-    )
-    attachMesh(chip, parent, materials.trim)
+    pivotSaddle.position.set(side * axleLength * 0.5, cageY, 0)
+    pivotSaddle.rotation.z = Math.PI / 2
+    attachMesh(pivotSaddle, parent, materials.steel)
   }
 
-  const cableLoop = MeshBuilder.CreateTorus(
-    `${role}-${blockId}-gyro-control-cable-loop`,
+  const teamIndex = MeshBuilder.CreateBox(
+    `${role}-${blockId}-gyro-team-index-tab`,
     {
-      diameter: Math.max(width * 0.34, 0.19),
-      thickness: 0.015,
-      tessellation: 14,
+      width: Math.max(width * 0.16, 0.09),
+      height: Math.max(height * 0.025, 0.016),
+      depth: Math.max(depth * 0.18, 0.1),
     },
     scene,
   )
 
-  cableLoop.position.set(baseWidth * 0.28, cageY, baseDepth * 0.2)
-  cableLoop.rotation.x = Math.PI / 2
-  attachMesh(cableLoop, parent, materials.trim)
+  teamIndex.position.set(0, baseY + Math.max(height * 0.12, 0.07), baseDepth * 0.22)
+  attachMesh(teamIndex, parent, material)
 
   for (const side of [-1, 1]) {
     const bolt = MeshBuilder.CreateCylinder(
@@ -773,7 +1057,7 @@ function createGyroStabilizerPart(
       scene,
     )
 
-    bolt.position.set(side * baseWidth * 0.34, baseY + Math.max(height * 0.08, 0.05), -baseDepth * 0.3)
+    bolt.position.set(side * baseWidth * 0.28, baseY + Math.max(height * 0.08, 0.05), -baseDepth * 0.28)
     attachMesh(bolt, parent, materials.steel)
   }
 }

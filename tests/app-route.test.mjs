@@ -167,8 +167,20 @@ const babylonSpinnerWeaponPartSource = readFileSync(
   new URL('../apps/web/src/replay/babylonSpinnerWeaponPart.ts', import.meta.url),
   'utf8',
 )
+const babylonTurretWeaponPartSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonTurretWeaponPart.ts', import.meta.url),
+  'utf8',
+)
+const babylonNetWeaponPartSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonNetWeaponPart.ts', import.meta.url),
+  'utf8',
+)
 const babylonWheelPartsSource = readFileSync(
   new URL('../apps/web/src/replay/babylonWheelParts.ts', import.meta.url),
+  'utf8',
+)
+const babylonStylePartsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonStyleParts.ts', import.meta.url),
   'utf8',
 )
 const botAssemblyRendererSource = readFileSync(
@@ -636,6 +648,26 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonSpinnerWeaponPartSource.includes('spinner-motion-root'))
   assert.ok(babylonSpinnerWeaponPartSource.includes("spinnerRoot.metadata = { kind: 'spin', axis: 'x'"))
   assert.ok(babylonSpinnerWeaponPartSource.includes('attachMesh(bar, spinnerRoot, materials.steel)'))
+  assert.ok(babylonTurretWeaponPartSource.includes('turret-barrel-cluster-motion-root'))
+  assert.ok(babylonTurretWeaponPartSource.includes("barrelRoot.metadata = { kind: 'spin', axis: 'z'"))
+  assert.ok(babylonTurretWeaponPartSource.includes('turret-rotary-barrel'))
+  assert.ok(babylonTurretWeaponPartSource.includes('turret-muzzle-brake'))
+  assert.ok(babylonTurretWeaponPartSource.includes('turret-bolted-turntable'))
+  assert.ok(babylonTurretWeaponPartSource.includes('turret-traverse-gear-ring'))
+  assert.equal(babylonTurretWeaponPartSource.includes('turret-side-pod'), false)
+  assert.equal(babylonTurretWeaponPartSource.includes('turret-eye'), false)
+  assert.ok(babylonNetWeaponPartSource.includes('net-folded-cartridge'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-pressure-chamber'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-muzzle-bell'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-front-muzzle-ring'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-ribbed-cage-rail'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-ribbed-cage-band'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-side-pressure-bottle'))
+  assert.ok(babylonNetWeaponPartSource.includes('net-pressure-vial'))
+  assert.equal(babylonNetWeaponPartSource.includes('net-hoop'), false)
+  assert.equal(babylonNetWeaponPartSource.includes('net-vertical'), false)
+  assert.equal(babylonNetWeaponPartSource.includes('net-horizontal'), false)
+  assert.equal(babylonNetWeaponPartSource.includes('net-corner-node'), false)
   assert.ok(babylonMeleeWeaponPartsSource.includes('drill-bit-motion-root'))
   assert.ok(babylonMeleeWeaponPartsSource.includes("bitRoot.metadata = { kind: 'spin', axis: 'z'"))
   assert.ok(babylonMeleeWeaponPartsSource.includes('flail-chain-root'))
@@ -645,10 +677,32 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonWheelPartsSource.includes("wheelRoot.metadata = { kind: 'roll', axis: 'x'"))
   assert.ok(babylonTreadPartsSource.includes("wheel.metadata = { kind: 'roll', axis: 'z'"))
   assert.ok(babylonUtilityPartsSource.includes('createGyroStabilizerPart'))
+  assert.ok(babylonUtilityPartsSource.includes('createEnergyCorePart'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-containment-vessel'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-pulse-column'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-induction-coil-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-cage-corner-pillar'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-side-gear-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-service-conduit'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-machined-brass-mat'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-wound-copper-mat'))
+  assert.ok(babylonUtilityPartsSource.includes('energy-core-team-status-strip'))
+  assert.equal(babylonUtilityPartsSource.includes('energy-core-chamber'), false)
+  assert.equal(babylonUtilityPartsSource.includes('energy-core-top-cap'), false)
+  assert.equal(babylonUtilityPartsSource.includes('energy-core-bottom-cap'), false)
+  assert.equal(babylonUtilityPartsSource.includes('energy-core-team-accent-plate'), false)
   assert.ok(babylonUtilityPartsSource.includes('gyro-outer-gimbal-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-equator-gimbal-ring'))
   assert.ok(babylonUtilityPartsSource.includes('gyro-inner-gimbal-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-vertical-pivot-axis'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-upper-pivot-ball'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-lower-pivot-ball'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-pivot-saddle'))
   assert.ok(babylonUtilityPartsSource.includes('gyro-flywheel-motion-root'))
   assert.ok(babylonUtilityPartsSource.includes("rotorRoot.metadata = { kind: 'spin', axis: 'x'"))
+  assert.equal(babylonUtilityPartsSource.includes('gyro-bearing-tower'), false)
+  assert.equal(babylonUtilityPartsSource.includes('gyro-control-board'), false)
+  assert.equal(babylonUtilityPartsSource.includes('gyro-control-cable-loop'), false)
   assert.equal(babylonUtilityPartsSource.includes('gyroRing.metadata'), false)
   assert.ok(babylonUtilityPartsSource.includes("rotor.metadata = { kind: 'spin', axis: 'z'"))
   assert.equal(
@@ -656,6 +710,7 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
       [
         babylonMeleeWeaponPartsSource,
         babylonSpinnerWeaponPartSource,
+        babylonTurretWeaponPartSource,
         babylonTreadPartsSource,
         babylonUtilityPartsSource,
         babylonWheelPartsSource,
@@ -664,7 +719,10 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
     false,
   )
   assert.ok(babylonPartRendererSource.includes('function createCatalogPartNode'))
+  assert.ok(babylonPartRendererSource.includes("visualFamily !== 'energy_core'"))
   assert.ok(babylonPartRendererSource.includes("visualFamily !== 'gyro'"))
+  assert.ok(babylonPartRendererSource.includes("visualFamily !== 'turret'"))
+  assert.ok(babylonPartRendererSource.includes("visualFamily !== 'net'"))
   assert.equal(babylonWheelPartsSource.includes('large-wheel-outer-band'), false)
   assert.ok(babylonWheelPartsSource.includes('large-wheel-bead-plate'))
   assert.ok(babylonWheelPartsSource.includes('large-wheel-sidewall-lug'))
@@ -694,6 +752,26 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonTreadPartsSource.includes('standard-tread-front-idler'))
   assert.ok(babylonTreadPartsSource.includes('standard-tread-rear-sprocket'))
   assert.ok(babylonTreadPartsSource.includes('standard-tread-top-shoe'))
+  assert.ok(babylonStylePartsSource.includes('function createDragonHeadPart'))
+  assert.ok(babylonStylePartsSource.includes('dragon-armored-skull'))
+  assert.ok(babylonStylePartsSource.includes('dragon-tapered-snout'))
+  assert.ok(babylonStylePartsSource.includes('dragon-cyber-side-profile'))
+  assert.ok(babylonStylePartsSource.includes('dragon-open-lower-jaw-plate'))
+  assert.ok(babylonStylePartsSource.includes('dragon-glowing-eye-slit'))
+  assert.ok(babylonStylePartsSource.includes('dragon-swept-horn'))
+  assert.ok(babylonStylePartsSource.includes('dragon-side-gear-ring'))
+  assert.ok(babylonStylePartsSource.includes('function createWingAssemblyPart'))
+  assert.ok(babylonStylePartsSource.includes('swept-wing-panel'))
+  assert.ok(babylonStylePartsSource.includes('wing-root-hinge'))
+  assert.ok(babylonStylePartsSource.includes('wingtip-marker-light'))
+  assert.ok(babylonStylePartsSource.includes('function createCrownPart'))
+  assert.ok(babylonStylePartsSource.includes('crown-bolted-base-plate'))
+  assert.ok(babylonStylePartsSource.includes('crown-seated-tooth'))
+  assert.ok(babylonStylePartsSource.includes('crown-inset-jewel'))
+  assert.ok(babylonStylePartsSource.includes('function createExtrudedPlateFromOutline'))
+  assert.ok(babylonStylePartsSource.includes('function createExtrudedVerticalPlateFromOutline'))
+  assert.equal(babylonStylePartsSource.includes('wings-body'), false)
+  assert.equal(babylonStylePartsSource.includes('crown-jewel-${index}'), false)
   assert.ok(babylonPartDetailsSource.includes('function createFastenerRow'))
   assert.ok(babylonPartDetailsSource.includes('function createVentSlats'))
   assert.ok(babylonPartDetailsSource.includes('function createPanelSeam'))

@@ -743,7 +743,7 @@ test('catalog exposes visual descriptors for renderer dispatch and material lang
   assert.equal(visualFamilyFor('Weapon_Turret'), 'turret')
   assert.equal(visualFamilyFor('Wheel_Mecanum'), 'wheel')
   assert.equal(visualFamilyFor('Wheel_Omni'), 'wheel')
-  assert.equal(visualFamilyFor('Utility_EnergyCore'), 'battery')
+  assert.equal(visualFamilyFor('Utility_EnergyCore'), 'energy_core')
   assert.equal(visualFamilyFor('Utility_AIModule'), 'sensor')
   assert.equal(visualFamilyFor('Style_LightBar'), 'light_bar')
   assert.equal(visualFamilyFor('Tread_Heavy'), 'tread')

@@ -138,7 +138,13 @@ function createPartNode(
     createSolidBlock(scene, partNode, material, `${role}-${block.id}-box`, width, height, depth)
   }
 
-  if (category !== 'style' && visualFamily !== 'gyro') {
+  if (
+    category !== 'style' &&
+    visualFamily !== 'energy_core' &&
+    visualFamily !== 'gyro' &&
+    visualFamily !== 'turret' &&
+    visualFamily !== 'net'
+  ) {
     createPartAccents(scene, partNode, role, block.id, category, width, height, depth, materials)
   }
 

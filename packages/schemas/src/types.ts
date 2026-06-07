@@ -63,6 +63,7 @@ export type PartVisualFamily =
   | 'booster'
   | 'drone'
   | 'drill'
+  | 'energy_core'
   | 'flipper'
   | 'flail'
   | 'grabber'
