@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import test from 'node:test'
 
 const appSource = readFileSync(new URL('../apps/web/src/App.tsx', import.meta.url), 'utf8')
@@ -139,8 +139,16 @@ const partMotionSource = readFileSync(
   new URL('../apps/web/src/replay/parts/motion.ts', import.meta.url),
   'utf8',
 )
+const partVisualProfilesSource = readFileSync(
+  new URL('../apps/web/src/replay/parts/visualProfiles.ts', import.meta.url),
+  'utf8',
+)
 const partRendererSource = readFileSync(
   new URL('../apps/web/src/replay/parts/index.ts', import.meta.url),
+  'utf8',
+)
+const botPlaybackSource = readFileSync(
+  new URL('../apps/web/src/replay/bots/playback.ts', import.meta.url),
   'utf8',
 )
 
@@ -260,12 +268,40 @@ const deadExportScannerSource = readFileSync(
   'utf8',
 )
 const packageSource = readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+const schemaTypesSource = readFileSync(new URL('../packages/schemas/src/types.ts', import.meta.url), 'utf8')
+const catalogIndexSource = readFileSync(new URL('../packages/catalog/src/index.ts', import.meta.url), 'utf8')
+const catalogPartsSource = readFileSync(new URL('../packages/catalog/src/parts.ts', import.meta.url), 'utf8')
+const visualReferencesSource = readFileSync(
+  new URL('../packages/catalog/src/visualReferences.ts', import.meta.url),
+  'utf8',
+)
 
 function functionSource(source, functionName) {
   const start = source.indexOf(`function ${functionName}(`)
   const next = source.indexOf('\nfunction ', start + 1)
   assert.notEqual(start, -1)
   return next === -1 ? source.slice(start) : source.slice(start, next)
+}
+
+function sourceFilesUnder(relativeRoot) {
+  const root = new URL(`../${relativeRoot}/`, import.meta.url)
+  const files = []
+
+  function visit(directoryUrl) {
+    for (const entry of readdirSync(directoryUrl, { withFileTypes: true })) {
+      const childUrl = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directoryUrl)
+
+      if (entry.isDirectory()) {
+        visit(childUrl)
+      } else if (/\.(mjs|ts|tsx)$/.test(entry.name)) {
+        files.push(childUrl)
+      }
+    }
+  }
+
+  visit(root)
+
+  return files
 }
 
 test('app keeps a dedicated /agent route gate tolerant of nested paths', () => {
@@ -292,7 +328,49 @@ test('app exposes a first-class part catalog route from the main console', () =>
   assert.ok(partCatalogPageSource.includes('Part catalog'))
   assert.ok(catalogSceneSource.includes('createCatalogPartNode'))
   assert.ok(catalogSceneSource.includes('BABYLON_RENDERER_BUDGETS.partCatalog'))
-  assert.ok(catalogSceneSource.includes('damageMaterialForSeverity'))
+  assert.ok(catalogSceneSource.includes('damageMaterialForRoleAndSeverity'))
+  assert.ok(catalogSceneSource.includes('resolvePreviewMaterialRole'))
+})
+
+test('part catalog UI stays source-driven through shared display helpers', () => {
+  assert.ok(partCatalogPageSource.includes('PART_CATALOG'))
+  assert.ok(partCatalogPageSource.includes('getPart('))
+  assert.ok(partCatalogPageSource.includes('buildPartCatalogDisplay(selectedPart)'))
+  assert.ok(partCatalogPageSource.includes('selectedPartDisplay.summaryRows.map'))
+  assert.ok(partCatalogPageSource.includes('selectedPartDisplay.sections.map'))
+  assert.ok(partCatalogPageSource.includes('section.rows.map'))
+  assert.ok(partCatalogPageSource.includes('part-catalog-back'))
+  assert.equal(partCatalogPageSource.includes('JSON.stringify'), false)
+  assert.equal(partCatalogPageSource.includes('mechanicalParams'), false)
+  assert.equal(partCatalogPageSource.includes('catalogMetadata'), false)
+  assert.equal(partCatalogPageSource.includes('metadataTable'), false)
+  assert.ok(catalogSceneSource.includes('damageMaterialForRoleAndSeverity'))
+  assert.ok(catalogSceneSource.includes('DAMAGE_PREVIEW_SEVERITY'))
+  assert.ok(catalogSceneSource.includes('light: 0.35'))
+  assert.ok(catalogSceneSource.includes('medium: 0.68'))
+  assert.ok(catalogSceneSource.includes('critical: 1'))
+})
+
+test('runtime source does not import ignored local part references', () => {
+  const localDocsImportPattern = /\b(?:import[\s\S]{0,240}\bfrom\s*|import\s*\(|require\s*\()\s*['"][^'"]*local_docs/
+
+  for (const sourceFile of [
+    ...sourceFilesUnder('apps'),
+    ...sourceFilesUnder('packages'),
+  ]) {
+    const source = readFileSync(sourceFile, 'utf8')
+
+    assert.equal(
+      localDocsImportPattern.test(source),
+      false,
+      `${sourceFile.pathname} must not import local_docs`,
+    )
+  }
+
+  assert.ok(visualReferencesSource.includes('local_docs/part_references/'))
+  assert.equal(visualReferencesSource.includes('readFile'), false)
+  assert.equal(visualReferencesSource.includes('existsSync'), false)
+  assert.equal(visualReferencesSource.includes('readdirSync'), false)
 })
 
 test('root console is wired to live referee session helpers', () => {
@@ -730,6 +808,48 @@ test('Babylon part renderers are organized by part category', () => {
   }
 })
 
+test('shared part visual profile foundation is catalog-backed', () => {
+  for (const fieldName of [
+    'renderProfile',
+    'textureProfile',
+    'damageProfile',
+    'animationProfile',
+    'referenceIds',
+    'qualityStatus',
+  ]) {
+    assert.ok(schemaTypesSource.includes(fieldName), `schema visual descriptor should expose ${fieldName}`)
+    assert.ok(catalogPartsSource.includes(fieldName), `catalog inference should populate ${fieldName}`)
+  }
+
+  assert.ok(catalogIndexSource.includes("export * from './visualReferences.js'"))
+  assert.ok(catalogPartsSource.includes('function completeVisualDescriptor'))
+  assert.ok(catalogPartsSource.includes('PART_VISUAL_REFERENCE_IDS'))
+  assert.ok(visualReferencesSource.includes('export const PART_VISUAL_REFERENCES'))
+  assert.ok(visualReferencesSource.includes('approvedForRuntimeAsset: false'))
+
+  for (const profileId of [
+    'painted_chipped_armor',
+    'brushed_weapon_steel',
+    'scuffed_rubber',
+    'dirty_electrical_casing',
+    'emissive_led_glass',
+    'burnt_critical_metal',
+    'scraped_style_shell',
+  ]) {
+    assert.ok(partVisualProfilesSource.includes(profileId), `profile resolver missing ${profileId}`)
+    assert.ok(rendererMaterialsSource.includes(profileId), `materials missing ${profileId}`)
+    assert.ok(surfaceTexturesSource.includes(profileId), `surface textures missing ${profileId}`)
+  }
+
+  assert.ok(partVisualProfilesSource.includes('function resolvePartVisualProfile'))
+  assert.ok(partVisualProfilesSource.includes('function resolvePartTextureProfile'))
+  assert.ok(partVisualProfilesSource.includes('function resolvePartDamageProfile'))
+  assert.ok(partRendererSource.includes('resolvePartVisualProfile'))
+  assert.ok(partRendererSource.includes('materialForTextureProfile'))
+  assert.ok(partRendererSource.includes('visualProfile'))
+  assert.ok(partRendererSource.includes('roleMaterialNames'))
+})
+
 test('Babylon render scenes and helpers are organized by ownership folder', () => {
   for (const legacyRendererFile of [
     'ArenaPreviewScene.tsx',
@@ -794,6 +914,31 @@ test('tooling consolidates catalog AST extraction and dead-export audit paths', 
   assert.ok(packageSource.includes('"scan:dead-exports"'))
 })
 
+test('actual part render capture emits nested clean and damage-state images', () => {
+  assert.ok(actualPartCaptureToolSource.includes("const damageStates = ['clean', 'light', 'medium', 'critical']"))
+  assert.ok(actualPartCaptureToolSource.includes("type CaptureDamageState = 'clean' | 'critical' | 'light' | 'medium'"))
+  assert.ok(actualPartCaptureToolSource.includes("const DAMAGE_STATES: CaptureDamageState[] = ['clean', 'light', 'medium', 'critical']"))
+  assert.ok(actualPartCaptureToolSource.includes('const partImageDir = path.join(imageDir, part.id)'))
+  assert.ok(actualPartCaptureToolSource.includes('const outputPath = path.join(partImageDir, `${damageState}.png`)'))
+  assert.equal(actualPartCaptureToolSource.includes('path.join(imageDir, `${part.id}.png`)'), false)
+  assert.ok(actualPartCaptureToolSource.includes('part-renders/${part.id}/${state}.png'))
+  assert.ok(actualPartCaptureToolSource.includes('damage=${damageState}'))
+})
+
+test('actual part render capture harness uses role-aware damage materials', () => {
+  assert.ok(actualPartCaptureToolSource.includes('damageMaterialForRoleAndSeverity'))
+  assert.ok(actualPartCaptureToolSource.includes('isBotPartChildMaterialRole'))
+  assert.ok(actualPartCaptureToolSource.includes('applyCaptureDamagePreview(bot, damageState)'))
+  assert.ok(actualPartCaptureToolSource.includes("if (damageState === 'clean')"))
+  assert.ok(actualPartCaptureToolSource.includes('resolveCaptureMaterialRole(mesh, metadata)'))
+  assert.ok(actualPartCaptureToolSource.includes('metadata.damageMaterials'))
+  assert.ok(actualPartCaptureToolSource.includes('metadata.roleMaterialNames'))
+  assert.ok(actualPartCaptureToolSource.includes('metadata.visualProfile.damageProfile'))
+  assert.ok(actualPartCaptureToolSource.includes("if (damageProfile === 'scuffed_rubber') return 'rubber'"))
+  assert.ok(actualPartCaptureToolSource.includes("if (damageProfile === 'emissive_led_glass') return 'glass'"))
+  assert.equal(actualPartCaptureToolSource.includes('uniform dark'), false)
+})
+
 test('Babylon material and part-language surfaces use PBR tokens and catalog-backed dispatch', () => {
   assert.ok(sceneUtilsSource.includes('PBRMetallicRoughnessMaterial'))
   assert.ok(sceneUtilsSource.includes('function createPbrSceneMaterial'))
@@ -812,6 +957,11 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.equal(refereePanelsSource.includes('findBlueprintAccent'), false)
   assert.ok(rendererMaterialsSource.includes('function createBotMaterialSet'))
   assert.ok(rendererMaterialsSource.includes('type DamageMaterialSet'))
+  assert.ok(rendererMaterialsSource.includes('type DamageMaterialByRole'))
+  assert.ok(rendererMaterialsSource.includes('BOT_PART_CHILD_MATERIAL_ROLES'))
+  assert.ok(rendererMaterialsSource.includes('function materialForTextureProfile'))
+  assert.ok(rendererMaterialsSource.includes('function damageMaterialForRoleAndSeverity'))
+  assert.ok(rendererMaterialsSource.includes('function tagPartChildMaterialRole'))
   assert.ok(rendererMaterialsSource.includes('function damageTierForSeverity'))
   assert.ok(rendererMaterialsSource.includes('DAMAGE_MEDIUM_THRESHOLD'))
   assert.ok(rendererMaterialsSource.includes('DAMAGE_CRITICAL_THRESHOLD'))
@@ -831,10 +981,32 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(weaponPartsSource.includes('getPart(partId)?.visual.visualFamily'))
   assert.equal(weaponPartsSource.includes('partId.includes'), false)
   assert.ok(partMotionSource.includes("export type PartMotionAxis = 'x' | 'y' | 'z'"))
+  assert.ok(partMotionSource.includes('PART_ANIMATION_PROFILES'))
+  for (const animationProfile of [
+    'wheel_spin',
+    'tread_scroll',
+    'spinner_spin',
+    'hammer_swing',
+    'flipper_snap',
+    'grabber_clamp',
+    'turret_track',
+    'wing_buffet',
+    'dragon_breath_idle',
+    'neon_pulse',
+    'none',
+  ]) {
+    assert.ok(partMotionSource.includes(animationProfile), `part motion missing ${animationProfile}`)
+  }
+  assert.ok(partMotionSource.includes('function motionMetadataForAnimationProfile'))
   assert.ok(partMotionSource.includes('function applyRotaryMotion'))
   assert.equal(partMotionSource.includes('metadata.axis ??'), false)
   assert.ok(replaySceneSource.includes('updateBots(resources.bots, frame)'))
   assert.ok(catalogSceneSource.includes('applyPartMotion(node, elapsedSeconds'))
+  assert.ok(botPlaybackSource.includes('damageMaterialForRoleAndSeverity'))
+  assert.ok(botPlaybackSource.includes('resolveChildMaterialRole'))
+  assert.ok(botPlaybackSource.includes('primaryDamageRole'))
+  assert.ok(catalogSceneSource.includes('damageMaterialForRoleAndSeverity'))
+  assert.ok(catalogSceneSource.includes('resolvePreviewMaterialRole'))
   assert.ok(botAssemblyAnimationSource.includes('applyPartMotion(mesh, elapsed'))
   assert.equal(
     catalogSceneSource.includes("metadata?.kind === 'pulse' || metadata?.kind === 'roll' || metadata?.kind === 'spin'"),
@@ -846,7 +1018,7 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(spinnerWeaponPartSource.includes("bladeRoot.metadata = { kind: 'spin', axis: 'x'"))
   assert.ok(spinnerWeaponPartSource.includes('spinner-motion-root'))
   assert.ok(spinnerWeaponPartSource.includes("spinnerRoot.metadata = { kind: 'spin', axis: 'x'"))
-  assert.ok(spinnerWeaponPartSource.includes('attachMesh(bar, spinnerRoot, materials.steel)'))
+  assert.ok(spinnerWeaponPartSource.includes('attachWeaponEdgeMesh(bar, spinnerRoot, materials.steel)'))
   assert.ok(turretWeaponPartSource.includes('turret-barrel-cluster-motion-root'))
   assert.ok(turretWeaponPartSource.includes("barrelRoot.metadata = { kind: 'spin', axis: 'z'"))
   assert.ok(turretWeaponPartSource.includes('turret-rotary-barrel'))
@@ -885,8 +1057,8 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(meleeWeaponPartsSource.includes('flail-chain-root'))
   assert.ok(meleeWeaponPartsSource.includes("chainRoot.metadata = { kind: 'spin', axis: 'x'"))
   assert.equal(meleeWeaponPartsSource.includes('drum.metadata'), false)
-  assert.ok(wheelPartsSource.includes("wheel.metadata = { kind: 'roll', axis: 'x'"))
-  assert.ok(wheelPartsSource.includes("wheelRoot.metadata = { kind: 'roll', axis: 'x'"))
+  assert.ok(wheelPartsSource.includes("wheel.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x'"))
+  assert.ok(wheelPartsSource.includes("wheelRoot.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x'"))
   assert.ok(treadPartsSource.includes("wheelRoot.metadata = { kind: 'roll', axis: 'z'"))
   assert.equal(treadPartsSource.includes("wheel.metadata = { kind: 'roll', axis: 'z'"), false)
   assert.ok(treadPartsSource.includes('rollSpeed: visual.rollSpeed'))

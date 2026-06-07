@@ -28,7 +28,7 @@ export function createOmniWheelPart(
     scene,
   )
 
-  wheelRoot.metadata = { kind: 'roll', axis: 'x', speed: 0.3 }
+  wheelRoot.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', speed: 0.3 }
   wheelRoot.parent = parent
   core.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
@@ -110,12 +110,40 @@ export function createOmniWheelPart(
     )
     roller.rotation.x = -angle
     roller.rotation.y = rowSide * 0.7
+    roller.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', phase: angle, speed: 0.12 }
     attachMesh(roller, wheelRoot, materials.rubber)
+    createOmniRollerScuffBands(scene, roller, materials.profile.scuffed_rubber, role, blockId, index, rollerLength, rollerDiameter)
     createOmniRollerCaps(scene, wheelRoot, materials.steel, role, blockId, index, roller.position, angle, rowSide, rollerLength, rollerDiameter)
     createOmniRollerBracket(scene, wheelRoot, materials.steel, role, blockId, index, roller.position, angle, rowSide, diameter, wheelWidth)
   }
 
   createOmniSpokes(scene, wheelRoot, materials.steel, role, blockId, diameter, wheelWidth)
+}
+
+function createOmniRollerScuffBands(
+  scene: MobilityPartRenderArgs['scene'],
+  parent: MobilityPartRenderArgs['parent'],
+  material: MobilityPartRenderArgs['materials']['rubber'],
+  role: MobilityPartRenderArgs['role'],
+  blockId: string,
+  index: number,
+  rollerLength: number,
+  rollerDiameter: number,
+): void {
+  for (const bandSide of [-1, 1]) {
+    const band = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-omni-roller-scuff-band-${index}-${bandSide}`,
+      {
+        height: Math.max(rollerLength * 0.05, 0.016),
+        diameter: rollerDiameter * 1.04,
+        tessellation: 12,
+      },
+      scene,
+    )
+
+    band.position.y = bandSide * rollerLength * 0.18
+    attachMesh(band, parent, material)
+  }
 }
 
 function createOmniFaceCutouts(

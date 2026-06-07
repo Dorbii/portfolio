@@ -4,6 +4,10 @@ import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import type { Scene } from '@babylonjs/core/scene'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
+import {
+  attachRoleMesh,
+  tagRoleMesh,
+} from './weaponRenderHelpers'
 
 type NetMeshOptions = {
   material: Material
@@ -308,6 +312,7 @@ export function createNetWeaponPart({
       -Math.max(depth * 0.2, 0.12) + row * Math.max(depth * 0.28, 0.17),
     )
     attachMesh(vial, parent, materials.circuit)
+    tagRoleMesh(vial, 'glass')
 
     createCylinder(
       {
@@ -339,6 +344,43 @@ export function createNetWeaponPart({
       Math.max(width * 0.58, 0.34),
       0.014,
     )
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1
+    const row = Math.floor(index / 2)
+    const diagonal = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-net-folded-diagonal-lashing-${index}`,
+      {
+        height: Math.max(width * 0.44, 0.26),
+        diameter: 0.012,
+        tessellation: 8,
+      },
+      scene,
+    )
+    const anchorWeight = MeshBuilder.CreateSphere(
+      `${role}-${blockId}-net-payload-anchor-weight-${index}`,
+      {
+        diameter: Math.max(width * 0.07, 0.045),
+        segments: 8,
+      },
+      scene,
+    )
+
+    diagonal.rotation.z = Math.PI / 2
+    diagonal.rotation.y = side * 0.42
+    diagonal.position.set(
+      0,
+      bodyY - Math.max(height * (0.08 + row * 0.055), 0.045 + row * 0.03),
+      Math.max(depth * (0.04 + row * 0.15), 0.025 + row * 0.08),
+    )
+    anchorWeight.position.set(
+      side * Math.max(width * 0.24, 0.15),
+      bodyY - Math.max(height * (0.16 - row * 0.04), 0.09 - row * 0.02),
+      Math.max(depth * (0.18 + row * 0.12), 0.11 + row * 0.07),
+    )
+    attachRoleMesh(diagonal, parent, index % 2 === 0 ? materials.steel : materials.warning, 'trim')
+    attachRoleMesh(anchorWeight, parent, materials.steel, 'trim')
   }
 
   for (let index = 0; index < 8; index += 1) {

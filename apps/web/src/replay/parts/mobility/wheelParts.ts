@@ -62,7 +62,8 @@ export function createWheelPart(args: MobilityPartRenderArgs): void {
   rim.rotation.z = Math.PI / 2
   rim.position.y = 0
 
-  wheel.metadata = { kind: 'roll', axis: 'x', speed: visual.rollSpeed }
+  wheel.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', speed: visual.rollSpeed }
+  rim.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', speed: visual.rollSpeed }
   wheel.parent = parent
   wheel.material = materials.rubber
   rim.parent = parent
@@ -78,9 +79,12 @@ export function createWheelPart(args: MobilityPartRenderArgs): void {
     scene,
   )
   hub.rotation.z = Math.PI / 2
+  hub.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', speed: visual.rollSpeed }
   hub.parent = parent
   hub.material = materials.trim
   createWheelFaceHardware(args, diameter, wheelWidth, visual.hubScale)
+  createWheelRubberWear(args, wheel, diameter, wheelWidth, visual.treadCount)
+  createWheelValveStem(args, wheel, diameter, wheelWidth)
 
   const axle = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-wheel-axle`,
@@ -152,6 +156,67 @@ export function createWheelPart(args: MobilityPartRenderArgs): void {
     createLargeWheelDetails(args, wheel, diameter, wheelWidth)
   }
 
+}
+
+function createWheelRubberWear(
+  { scene, materials, role, blockId }: MobilityPartRenderArgs,
+  wheel: Mesh,
+  diameter: number,
+  wheelWidth: number,
+  treadCount: number,
+): void {
+  const scuffCount = Math.min(8, Math.max(4, Math.floor(treadCount * 0.65)))
+  const faceOffset = Math.max(wheelWidth * 0.53, 0.11)
+
+  for (let index = 0; index < scuffCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / scuffCount + (index % 2 === 0 ? 0.16 : -0.12)
+    const side = index % 2 === 0 ? -1 : 1
+    const scuff = MeshBuilder.CreateBox(
+      `${role}-${blockId}-wheel-rubber-scuff-${index}`,
+      {
+        width: Math.max(wheelWidth * 0.028, 0.014),
+        height: Math.max(diameter * 0.032, 0.018),
+        depth: Math.max(diameter * 0.18, 0.07),
+      },
+      scene,
+    )
+
+    scuff.position.set(
+      side * faceOffset,
+      Math.sin(angle) * diameter * 0.34,
+      Math.cos(angle) * diameter * 0.34,
+    )
+    scuff.rotation.x = angle + Math.PI * 0.5
+    scuff.rotation.z = Math.PI / 2
+    scuff.parent = wheel
+    scuff.material = materials.profile.scuffed_rubber
+  }
+}
+
+function createWheelValveStem(
+  { scene, materials, role, blockId }: MobilityPartRenderArgs,
+  wheel: Mesh,
+  diameter: number,
+  wheelWidth: number,
+): void {
+  const stem = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-wheel-valve-stem`,
+    {
+      height: Math.max(wheelWidth * 0.12, 0.04),
+      diameter: Math.max(diameter * 0.028, 0.018),
+      tessellation: 8,
+    },
+    scene,
+  )
+
+  stem.rotation.z = Math.PI / 2
+  stem.position.set(
+    Math.max(wheelWidth * 0.56, 0.12),
+    diameter * 0.22,
+    diameter * 0.23,
+  )
+  stem.parent = wheel
+  stem.material = materials.trim
 }
 
 function createLargeWheelDetails(

@@ -1,8 +1,8 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
-import { attachMesh } from '../../rendering/meshHelpers'
 import { createPbrSceneMaterial } from '../../rendering/sceneUtils'
 import type { UtilityPartRenderArgs } from './types'
+import { attachUtilityMesh } from './utilityFrame'
 
 export function createMagnetPart({
   scene,
@@ -131,12 +131,12 @@ export function createMagnetPart({
   upperFlange.position.y = upperY
   topTerminalCap.position.y = upperY + Math.max(height * 0.12, 0.07)
   topTerminalCap.scaling.y = 0.42
-  attachMesh(base, parent, darkInsulatorMaterial)
-  attachMesh(isolationPad, parent, darkInsulatorMaterial)
-  attachMesh(core, parent, ceramicMaterial)
-  attachMesh(lowerFlange, parent, brassMaterial)
-  attachMesh(upperFlange, parent, brassMaterial)
-  attachMesh(topTerminalCap, parent, materials.steel)
+  attachUtilityMesh(base, parent, darkInsulatorMaterial, 'rubber')
+  attachUtilityMesh(isolationPad, parent, darkInsulatorMaterial, 'rubber')
+  attachUtilityMesh(core, parent, ceramicMaterial, 'damageable')
+  attachUtilityMesh(lowerFlange, parent, brassMaterial, 'weapon_edge')
+  attachUtilityMesh(upperFlange, parent, brassMaterial, 'weapon_edge')
+  attachUtilityMesh(topTerminalCap, parent, materials.steel, 'weapon_edge')
 
   for (let index = 0; index < 10; index += 1) {
     const winding = MeshBuilder.CreateTorus(
@@ -150,7 +150,7 @@ export function createMagnetPart({
     )
 
     winding.position.y = lowerY + Math.max(height * 0.08, 0.045) + index * ((coilHeight - Math.max(height * 0.16, 0.09)) / 9)
-    attachMesh(winding, parent, copperMaterial)
+    attachUtilityMesh(winding, parent, copperMaterial, 'weapon_edge')
   }
 
   for (let index = 0; index < 4; index += 1) {
@@ -165,7 +165,7 @@ export function createMagnetPart({
     )
 
     separator.position.y = lowerY + Math.max(height * 0.15, 0.08) + index * Math.max(height * 0.14, 0.075)
-    attachMesh(separator, parent, materials.steel)
+    attachUtilityMesh(separator, parent, materials.steel, 'weapon_edge')
   }
 
   for (const side of [-1, 1]) {
@@ -201,9 +201,9 @@ export function createMagnetPart({
     poleShoe.position.set(side * yokeX, lowerY + Math.max(height * 0.12, 0.07), Math.max(depth * 0.28, 0.16))
     bridgeConductor.rotation.x = Math.PI / 2
     bridgeConductor.position.set(side * Math.max(width * 0.22, 0.14), upperY + Math.max(height * 0.08, 0.05), 0)
-    attachMesh(yoke, parent, steelYokeMaterial)
-    attachMesh(poleShoe, parent, steelYokeMaterial)
-    attachMesh(bridgeConductor, parent, copperMaterial)
+    attachUtilityMesh(yoke, parent, steelYokeMaterial, 'weapon_edge')
+    attachUtilityMesh(poleShoe, parent, steelYokeMaterial, 'weapon_edge')
+    attachUtilityMesh(bridgeConductor, parent, copperMaterial, 'weapon_edge')
   }
 
   for (const x of [-terminalX, terminalX]) {
@@ -229,9 +229,24 @@ export function createMagnetPart({
 
       post.position.set(x, upperY + Math.max(height * 0.08, 0.045), z)
       cap.position.set(x, post.position.y + Math.max(height * 0.15, 0.085), z)
-      attachMesh(post, parent, darkInsulatorMaterial)
-      attachMesh(cap, parent, brassMaterial)
+      attachUtilityMesh(post, parent, darkInsulatorMaterial, 'rubber')
+      attachUtilityMesh(cap, parent, brassMaterial, 'weapon_edge')
     }
+  }
+
+  for (const side of [-1, 1]) {
+    const polarityPlate = MeshBuilder.CreateBox(
+      `${role}-${blockId}-magnet-polarity-service-plate-${side}`,
+      {
+        width: Math.max(width * 0.18, 0.1),
+        height: Math.max(height * 0.02, 0.014),
+        depth: Math.max(depth * 0.08, 0.045),
+      },
+      scene,
+    )
+
+    polarityPlate.position.set(side * Math.max(width * 0.28, 0.16), base.position.y + baseHeight * 0.74, baseDepth * 0.46)
+    attachUtilityMesh(polarityPlate, parent, side > 0 ? material : materials.warning, side > 0 ? 'damageable' : 'trim')
   }
 
   for (let index = 0; index < 6; index += 1) {
@@ -251,7 +266,7 @@ export function createMagnetPart({
       base.position.y + baseHeight * 0.58,
       Math.sin(angle) * baseDepth * 0.32,
     )
-    attachMesh(bolt, parent, materials.steel)
+    attachUtilityMesh(bolt, parent, materials.steel, 'weapon_edge')
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -271,7 +286,7 @@ export function createMagnetPart({
       upperY + Math.max(height * 0.05, 0.03),
       Math.sin(angle) * flangeDiameter * 0.38,
     )
-    attachMesh(flangeBolt, parent, materials.steel)
+    attachUtilityMesh(flangeBolt, parent, materials.steel, 'weapon_edge')
   }
 
   const fieldRoot = new TransformNode(`${role}-${blockId}-magnet-field-pulse-root`, scene)
@@ -291,7 +306,7 @@ export function createMagnetPart({
     )
 
     fieldRing.position.y = coilY - Math.max(height * 0.18, 0.1) + index * Math.max(height * 0.18, 0.1)
-    attachMesh(fieldRing, fieldRoot, material)
+    attachUtilityMesh(fieldRing, fieldRoot, material, 'emissive')
   }
 
   const teamStatusStrip = MeshBuilder.CreateBox(
@@ -305,5 +320,5 @@ export function createMagnetPart({
   )
 
   teamStatusStrip.position.set(0, base.position.y + baseHeight * 0.72, -baseDepth * 0.54)
-  attachMesh(teamStatusStrip, parent, material)
+  attachUtilityMesh(teamStatusStrip, parent, material, 'damageable')
 }

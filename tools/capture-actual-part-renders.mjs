@@ -22,6 +22,7 @@ const imageDir = path.join(packageDir, 'part-renders')
 const markdownPath = path.join(packageDir, 'Agent Arena Actual Part Renders.md')
 const zipPath = path.join(exportRoot, `${packageName}.zip`)
 const chromePath = await findChrome()
+const damageStates = ['clean', 'light', 'medium', 'critical']
 
 const categoryOrder = ['body', 'mobility', 'weapon', 'defense', 'utility', 'style']
 const categoryLabels = {
@@ -94,28 +95,34 @@ try {
     mobile: false,
   })
 
-  await cdp.send('Page.navigate', { url: `${baseUrl}part-render-capture.html?partId=Body_Wedge&warmup=1` })
+  await cdp.send('Page.navigate', { url: `${baseUrl}part-render-capture.html?partId=Body_Wedge&damage=clean&warmup=1` })
   await waitForPartRender(cdp, 'Body_Wedge')
 
   for (const part of parts) {
-    const targetUrl = `${baseUrl}part-render-capture.html?partId=${encodeURIComponent(part.id)}`
-    const outputPath = path.join(imageDir, `${part.id}.png`)
+    const partImageDir = path.join(imageDir, part.id)
 
-    await cdp.send('Page.navigate', { url: targetUrl })
-    await waitForPartRender(cdp, part.id)
-    const result = await cdp.send('Runtime.evaluate', {
-      expression: 'window.AgentArenaPartCapture.toPngDataUrl()',
-      awaitPromise: true,
-      returnByValue: true,
-    })
-    const dataUrl = result.result?.value
+    await fs.mkdir(partImageDir, { recursive: true })
 
-    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) {
-      throw new Error(`Capture for ${part.id} did not return a PNG data URL.`)
+    for (const damageState of damageStates) {
+      const targetUrl = `${baseUrl}part-render-capture.html?partId=${encodeURIComponent(part.id)}&damage=${damageState}`
+      const outputPath = path.join(partImageDir, `${damageState}.png`)
+
+      await cdp.send('Page.navigate', { url: targetUrl })
+      await waitForPartRender(cdp, part.id)
+      const result = await cdp.send('Runtime.evaluate', {
+        expression: 'window.AgentArenaPartCapture.toPngDataUrl()',
+        awaitPromise: true,
+        returnByValue: true,
+      })
+      const dataUrl = result.result?.value
+
+      if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) {
+        throw new Error(`Capture for ${part.id} ${damageState} did not return a PNG data URL.`)
+      }
+
+      await fs.writeFile(outputPath, Buffer.from(dataUrl.split(',')[1], 'base64'))
+      process.stdout.write(`captured ${part.id} ${damageState}\n`)
     }
-
-    await fs.writeFile(outputPath, Buffer.from(dataUrl.split(',')[1], 'base64'))
-    process.stdout.write(`captured ${part.id}\n`)
   }
 
   await cdp.close()
@@ -170,10 +177,20 @@ async function writeCaptureHarness() {
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
+import type { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type { Node } from '@babylonjs/core/node'
 import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import type { BotBlueprint } from '../../../packages/schemas/src/index.js'
-import { createBotNode, createTeamMaterials } from './replay/parts'
+import {
+  createBotNode,
+  createTeamMaterials,
+  type BotPartNodeMetadata,
+} from './replay/parts'
+import {
+  damageMaterialForRoleAndSeverity,
+  isBotPartChildMaterialRole,
+  type BotPartChildMaterialRole,
+} from './replay/rendering/materials'
 import {
   createBabylonRendererCore,
   createCaptureLightingPreset,
@@ -185,6 +202,8 @@ type CaptureApi = {
   toPngDataUrl: () => string
 }
 
+type CaptureDamageState = 'clean' | 'critical' | 'light' | 'medium'
+
 declare global {
   interface Window {
     AgentArenaPartCapture: CaptureApi
@@ -195,6 +214,13 @@ declare global {
 }
 
 const canvas = document.querySelector<HTMLCanvasElement>('#capture')
+const DAMAGE_STATES: CaptureDamageState[] = ['clean', 'light', 'medium', 'critical']
+const DAMAGE_STATE_SEVERITY: Record<CaptureDamageState, number> = {
+  clean: 0,
+  critical: 1,
+  light: 0.35,
+  medium: 0.68,
+}
 
 if (!canvas) {
   throw new Error('Capture canvas is missing.')
@@ -210,6 +236,7 @@ void render()
 async function render(): Promise<void> {
   const params = new URLSearchParams(window.location.search)
   const partId = params.get('partId') ?? 'Body_Square_Small'
+  const damageState = resolveDamageState(params.get('damage'))
   const part = PART_CATALOG.find((candidate) => candidate.id === partId)
 
   window.__PART_RENDER_PART_ID = partId
@@ -262,6 +289,7 @@ async function render(): Promise<void> {
     const bot = createBotNode(scene, blueprint, 'red', materials)
 
     bot.rotation.y = -0.38
+    applyCaptureDamagePreview(bot, damageState)
     bot.getChildMeshes().forEach((mesh) => {
       mesh.setEnabled(isPartMesh(mesh))
     })
@@ -279,6 +307,88 @@ async function render(): Promise<void> {
   } catch (error) {
     window.__PART_RENDER_ERROR = error instanceof Error ? error.message : 'Part render failed.'
   }
+}
+
+function resolveDamageState(value: string | null): CaptureDamageState {
+  return DAMAGE_STATES.includes(value as CaptureDamageState) ? (value as CaptureDamageState) : 'clean'
+}
+
+function applyCaptureDamagePreview(bot: Node, damageState: CaptureDamageState): void {
+  if (damageState === 'clean') {
+    return
+  }
+
+  const severity = DAMAGE_STATE_SEVERITY[damageState]
+
+  bot.getChildren((node) => {
+    const metadata = node.metadata as BotPartNodeMetadata | undefined
+
+    if (metadata?.kind !== 'bot_part') {
+      return false
+    }
+
+    const partRoot = node as TransformNode
+
+    partRoot.getChildMeshes().forEach((mesh) => {
+      const materialRole = resolveCaptureMaterialRole(mesh, metadata)
+
+      if (materialRole) {
+        mesh.material = damageMaterialForRoleAndSeverity(
+          metadata.damageMaterials,
+          materialRole,
+          severity,
+        ) ?? mesh.material
+      }
+    })
+
+    return false
+  }, true)
+}
+
+function resolveCaptureMaterialRole(
+  mesh: AbstractMesh,
+  metadata: BotPartNodeMetadata,
+): BotPartChildMaterialRole | null {
+  const explicitRole = explicitPartMaterialRole(mesh)
+
+  if (explicitRole) {
+    return explicitRole
+  }
+
+  const materialName = mesh.material?.name
+
+  if (!materialName) {
+    return null
+  }
+
+  if (materialName === metadata.primaryMaterialName) {
+    return primaryDamageRole(metadata.visualProfile.damageProfile)
+  }
+
+  for (const role of Object.keys(metadata.roleMaterialNames) as BotPartChildMaterialRole[]) {
+    if (metadata.roleMaterialNames[role].includes(materialName)) {
+      return role
+    }
+  }
+
+  return null
+}
+
+function explicitPartMaterialRole(
+  mesh: AbstractMesh,
+): BotPartChildMaterialRole | null {
+  const metadata = mesh.metadata as { partMaterialRole?: unknown } | undefined
+
+  return isBotPartChildMaterialRole(metadata?.partMaterialRole) ? metadata.partMaterialRole : null
+}
+
+function primaryDamageRole(damageProfile: string): BotPartChildMaterialRole {
+  if (damageProfile === 'scuffed_rubber') return 'rubber'
+  if (damageProfile === 'emissive_led_glass') return 'glass'
+  if (damageProfile === 'brushed_weapon_steel') return 'weapon_edge'
+  if (damageProfile === 'scraped_style_shell') return 'trim'
+
+  return 'damageable'
 }
 
 function isPartMesh(mesh: AbstractMesh): boolean {
@@ -455,7 +565,7 @@ async function writeMarkdown() {
   const lines = [
     '# Agent Arena Actual Part Renders',
     '',
-    `Captured from the current Babylon renderer on 2026-06-06 using \`createBotNode()\`, \`createTeamMaterials()\`, and a ${teamColorHex} team identity. The capture uses brighter inspection lighting and tight framing, but the part meshes and procedural materials are the app renderer's own output. Includes ${parts.length} catalog parts (${counts}).`,
+    `Captured from the current Babylon renderer using \`createBotNode()\`, \`createTeamMaterials()\`, and a ${teamColorHex} team identity. The capture uses brighter inspection lighting and tight framing, but the part meshes, procedural materials, and role-aware damage materials are the app renderer's own output. Includes ${parts.length} catalog parts (${counts}) across clean, light, medium, and critical damage states.`,
     '',
     'These are actual WebGL render captures of each part in isolation. The surrounding bot foundation is hidden so the part geometry and procedural material are easier to inspect. They are not balance proof and they do not show blue-team palette variants.',
     '',
@@ -487,7 +597,9 @@ function partEntry(part) {
 
   return `### ${part.displayName}
 
-![${part.displayName}](part-renders/${part.id}.png)
+| State | Render |
+| --- | --- |
+${damageStates.map((state) => `| ${markdownText(state)} | ![${part.displayName} ${state}](part-renders/${part.id}/${state}.png) |`).join('\n')}
 
 | Field | Value |
 | --- | --- |

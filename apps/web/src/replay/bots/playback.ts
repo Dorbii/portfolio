@@ -15,7 +15,11 @@ import {
   isPartMotionNode,
   type PartMotionMetadata,
 } from '../parts/motion'
-import { damageMaterialForSeverity } from '../rendering/materials'
+import {
+  damageMaterialForRoleAndSeverity,
+  isBotPartChildMaterialRole,
+  type BotPartChildMaterialRole,
+} from '../rendering/materials'
 import type {
   PartFrameState,
   ReplayVisualFrame,
@@ -134,17 +138,65 @@ function applyPartMaterialState(
   metadata: BotPartNodeMetadata,
   damageSeverity: number,
 ): void {
-  const damageMaterial = damageMaterialForSeverity(metadata.damageMaterials, damageSeverity)
-
   node.getChildMeshes().forEach((mesh) => {
     const baseMaterial = getBasePartMaterial(mesh)
+    const materialRole = resolveChildMaterialRole(mesh, baseMaterial, metadata)
 
-    if (!baseMaterial || baseMaterial.name !== metadata.primaryMaterialName) {
+    if (!baseMaterial || !materialRole) {
       return
     }
 
+    const damageMaterial = damageMaterialForRoleAndSeverity(
+      metadata.damageMaterials,
+      materialRole,
+      damageSeverity,
+    )
+
     mesh.material = damageMaterial ?? baseMaterial
   })
+}
+
+function resolveChildMaterialRole(
+  mesh: AbstractMesh,
+  baseMaterial: AbstractMesh['material'],
+  metadata: BotPartNodeMetadata,
+): BotPartChildMaterialRole | null {
+  if (!baseMaterial) {
+    return null
+  }
+
+  const explicitRole = explicitPartMaterialRole(mesh)
+
+  if (explicitRole) {
+    return explicitRole
+  }
+
+  if (baseMaterial.name === metadata.primaryMaterialName) {
+    return primaryDamageRole(metadata.visualProfile.damageProfile)
+  }
+
+  for (const role of Object.keys(metadata.roleMaterialNames) as BotPartChildMaterialRole[]) {
+    if (metadata.roleMaterialNames[role].includes(baseMaterial.name)) {
+      return role
+    }
+  }
+
+  return null
+}
+
+function explicitPartMaterialRole(mesh: AbstractMesh): BotPartChildMaterialRole | null {
+  const metadata = mesh.metadata as { partMaterialRole?: unknown } | undefined
+
+  return isBotPartChildMaterialRole(metadata?.partMaterialRole) ? metadata.partMaterialRole : null
+}
+
+function primaryDamageRole(damageProfile: string): BotPartChildMaterialRole {
+  if (damageProfile === 'scuffed_rubber') return 'rubber'
+  if (damageProfile === 'emissive_led_glass') return 'glass'
+  if (damageProfile === 'brushed_weapon_steel') return 'weapon_edge'
+  if (damageProfile === 'scraped_style_shell') return 'trim'
+
+  return 'damageable'
 }
 
 function getBasePartMaterial(mesh: AbstractMesh): AbstractMesh['material'] {

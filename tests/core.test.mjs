@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   PART_CATALOG,
+  PART_VISUAL_REFERENCES,
   AGENT_FEATURE_GATES,
   applyPurchases,
   buildPartCatalogDisplay,
@@ -867,11 +868,31 @@ function assertCompleteSpec(catalogPart) {
 }
 
 function assertCompleteVisual(catalogPart) {
+  const supportedProfileIds = [
+    'painted_chipped_armor',
+    'brushed_weapon_steel',
+    'scuffed_rubber',
+    'dirty_electrical_casing',
+    'emissive_led_glass',
+    'burnt_critical_metal',
+    'scraped_style_shell',
+  ]
+
+  assert.equal(typeof catalogPart.visual.animationProfile, 'string')
+  assert.ok(catalogPart.visual.animationProfile.length > 0)
+  assert.equal(typeof catalogPart.visual.damageProfile, 'string')
+  assert.ok(supportedProfileIds.includes(catalogPart.visual.damageProfile))
   assert.ok(['low', 'medium', 'high'].includes(catalogPart.visual.detailBudget))
   assert.equal(typeof catalogPart.visual.materialRole, 'string')
   assert.ok(catalogPart.visual.materialRole.length > 0)
   assert.equal(typeof catalogPart.visual.mountRole, 'string')
   assert.ok(catalogPart.visual.mountRole.length > 0)
+  assert.ok(['blockout', 'upgraded', 'hero'].includes(catalogPart.visual.qualityStatus))
+  assert.ok(Array.isArray(catalogPart.visual.referenceIds))
+  assert.equal(typeof catalogPart.visual.renderProfile, 'string')
+  assert.ok(catalogPart.visual.renderProfile.length > 0)
+  assert.equal(typeof catalogPart.visual.textureProfile, 'string')
+  assert.ok(supportedProfileIds.includes(catalogPart.visual.textureProfile))
   assert.equal(typeof catalogPart.visual.visualFamily, 'string')
   assert.ok(catalogPart.visual.visualFamily.length > 0)
 }
@@ -1119,6 +1140,51 @@ test('catalog display model covers current and future part definition fields', (
   }
 })
 
+test('part visual reference manifest is repo-relative and catalog-linked', () => {
+  const manifestByPartId = new Map(PART_VISUAL_REFERENCES.map((entry) => [entry.partId, entry]))
+  const catalogIds = new Set(PART_CATALOG.map((part) => part.id))
+
+  assert.ok(PART_VISUAL_REFERENCES.length > 0)
+
+  for (const entry of PART_VISUAL_REFERENCES) {
+    assert.ok(catalogIds.has(entry.partId), `${entry.partId} manifest entry has no catalog part`)
+    assert.equal(entry.approvedForRuntimeAsset, false)
+    assert.ok(entry.notes.length > 0, `${entry.partId} manifest entry needs notes`)
+
+    for (const referencePath of entry.references) {
+      assert.equal(typeof referencePath, 'string')
+      assert.ok(referencePath.startsWith('local_docs/part_references/'), `${entry.partId} uses non-reference path ${referencePath}`)
+      assert.equal(referencePath.includes('..'), false, `${entry.partId} reference path may not escape repo root`)
+      assert.equal(referencePath.startsWith('/'), false, `${entry.partId} reference path must be repo-relative`)
+      assert.equal(/^[A-Za-z]:[\\/]/.test(referencePath), false, `${entry.partId} reference path must not be absolute`)
+    }
+
+    if (entry.references.length === 0) {
+      assert.equal(typeof entry.noReferenceReason, 'string', `${entry.partId} needs noReferenceReason without refs`)
+    }
+  }
+
+  for (const part of PART_CATALOG) {
+    for (const referenceId of part.visual.referenceIds) {
+      assert.ok(manifestByPartId.has(referenceId), `${part.id} references missing manifest id ${referenceId}`)
+    }
+
+    if (part.visual.qualityStatus !== 'blockout') {
+      const manifestEntry = manifestByPartId.get(part.id)
+
+      assert.ok(manifestEntry, `${part.id} upgraded visual needs manifest coverage`)
+      assert.ok(
+        manifestEntry.references.length > 0 || manifestEntry.noReferenceReason,
+        `${part.id} upgraded visual needs refs or noReferenceReason`,
+      )
+    }
+  }
+
+  assert.ok(PART_CATALOG.find((part) => part.id === 'Weapon_Hammer')?.visual.referenceIds.includes('Weapon_Hammer'))
+  assert.ok(PART_CATALOG.find((part) => part.id === 'Wheel_Omni')?.visual.referenceIds.includes('Wheel_Omni'))
+  assert.ok(PART_CATALOG.find((part) => part.id === 'Body_Square_Small')?.visual.referenceIds.includes('Body_Square_Small'))
+})
+
 test('catalog display model exposes mechanical specs, mounts, and unique effects', () => {
   const laser = PART_CATALOG.find((part) => part.id === 'Weapon_Laser')
   const omniWheel = PART_CATALOG.find((part) => part.id === 'Wheel_Omni')
@@ -1313,6 +1379,71 @@ test('expanded reference-backed catalog parts preserve behavior and economy cont
   assert.ok((lightBar?.stats.style ?? 0) >= 4)
 })
 
+test('lane 7 catalog expansion accepts only approved parts and keeps existing behavior semantics', () => {
+  const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const acceptedIds = [
+    'Frame_Angled_Strut',
+    'Mount_Weapon_Hardpoint',
+    'Mount_Axle_Bracket',
+    'Armor_Standoff',
+    'Armor_Sacrificial_Panel',
+    'Utility_ShockDamper',
+    'Weapon_Crusher',
+    'Weapon_ForkLifter',
+  ]
+  const deferredIds = [
+    'Weapon_Harpoon',
+    'Utility_HeatSink',
+  ]
+
+  for (const partId of acceptedIds) {
+    const part = parts.get(partId)
+
+    assert.notEqual(part, undefined)
+    assert.equal(part.rarity, 'normal')
+    assert.deepEqual(part.visual.referenceIds, [])
+    assert.equal(part.visual.qualityStatus, 'blockout')
+  }
+
+  for (const partId of deferredIds) {
+    assert.equal(parts.has(partId), false)
+  }
+
+  assert.equal(PART_BEHAVIOR_IDS.includes('harpoon'), false)
+  assert.equal(PART_BEHAVIOR_IDS.includes('crusher'), false)
+  assert.equal(PART_BEHAVIOR_IDS.includes('fork_lifter'), false)
+
+  const crusher = parts.get('Weapon_Crusher')
+  const forkLifter = parts.get('Weapon_ForkLifter')
+  const sacrificialPanel = parts.get('Armor_Sacrificial_Panel')
+
+  assert.deepEqual(crusher?.behavior, PART_BEHAVIORS.grabber)
+  assert.deepEqual(forkLifter?.behavior, PART_BEHAVIORS.flipper)
+  assert.equal(sacrificialPanel?.category, 'defense')
+  assert.equal(sacrificialPanel?.visual.visualFamily, 'armor')
+  assert.ok(sacrificialPanel?.tags.includes('armor'))
+  assert.equal(sacrificialPanel?.tags.includes('filler'), false)
+  assert.equal(sacrificialPanel?.tags.includes('structural'), false)
+  assert.equal(sacrificialPanel?.behavior, undefined)
+  assert.equal(sacrificialPanel?.controls, undefined)
+  assert.deepEqual(crusher?.spec, {
+    kind: 'weapon',
+    damage: 11,
+    range: 2,
+    cooldownTurns: 2,
+    fireMode: 'contact',
+    precision: 0.8,
+  })
+  assert.deepEqual(forkLifter?.spec, {
+    kind: 'weapon',
+    damage: 7,
+    range: 2,
+    cooldownTurns: 2,
+    fireMode: 'contact',
+    precision: 0.85,
+  })
+})
+
 test('purchase validation rejects unknown parts and overspend', () => {
   const unknown = applyPurchases(100, [], [{ partId: 'Weapon_NukeLaserDragon', quantity: 1 }])
   const overspend = applyPurchases(5, [], [{ partId: 'Weapon_Spinner_Large', quantity: 1 }])
@@ -1331,9 +1462,13 @@ test('structural filler parts are catalog-backed passive connective tissue', () 
   const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
   const requiredFillerIds = [
     'Frame_Strut',
+    'Frame_Angled_Strut',
     'Mount_Plate',
+    'Mount_Weapon_Hardpoint',
+    'Mount_Axle_Bracket',
     'Spacer_Block',
     'Armor_Tile',
+    'Armor_Standoff',
     'Counterweight',
   ]
 
@@ -2230,7 +2365,12 @@ test('catalog exposes visual descriptors for renderer dispatch and material lang
         part.visual?.visualFamily &&
         part.visual.materialRole &&
         part.visual.mountRole &&
-        part.visual.detailBudget,
+        part.visual.detailBudget &&
+        part.visual.renderProfile &&
+        part.visual.textureProfile &&
+        part.visual.damageProfile &&
+        part.visual.animationProfile &&
+        part.visual.qualityStatus,
       ),
     ),
     true,
@@ -2254,6 +2394,10 @@ test('catalog exposes visual descriptors for renderer dispatch and material lang
   assert.equal(visualFamilyFor('Utility_CoolantTank'), 'coolant_tank')
   assert.equal(visualFamilyFor('Utility_FuelTank'), 'fuel_tank')
   assert.equal(visualFamilyFor('Style_LightBar'), 'light_bar')
+  assert.equal(visualFamilyFor('Style_DragonHead'), 'dragon_head')
+  assert.equal(visualFamilyFor('Style_Crown'), 'crown')
+  assert.equal(visualFamilyFor('Style_Neon'), 'neon')
+  assert.equal(visualFamilyFor('Style_Wings'), 'wings')
   assert.equal(visualFamilyFor('Style_Antenna'), 'antenna')
   assert.equal(visualFamilyFor('Style_Horns'), 'horns')
   assert.equal(visualFamilyFor('Tread_Heavy'), 'tread')

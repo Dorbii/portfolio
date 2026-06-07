@@ -35,6 +35,7 @@ type WheelVisualPartId =
   | 'Wheel_Spiked'
 
 type TreadVisualPartId =
+  | 'Tread_Light'
   | 'Tread_Heavy'
   | 'Wheel_Tank'
 
@@ -136,6 +137,21 @@ const DEFAULT_TREAD_VISUAL: TreadVisual = {
 }
 
 const TREAD_VISUALS: Record<TreadVisualPartId, TreadVisual> = {
+  Tread_Light: {
+    baseWidthScale: 1.18,
+    baseHeightScale: 0.44,
+    baseDepthScale: 1.28,
+    topWidthScale: 1.04,
+    topHeightScale: 0.22,
+    topDepthScale: 1.08,
+    shroudHeightScale: 0.46,
+    shroudDepthScale: 1.34,
+    padCount: 6,
+    rollerCount: 3,
+    rollerScale: 0.36,
+    suspensionScale: 0.76,
+    rollSpeed: 0.068,
+  },
   Tread_Heavy: {
     baseWidthScale: 1.52,
     baseHeightScale: 0.72,

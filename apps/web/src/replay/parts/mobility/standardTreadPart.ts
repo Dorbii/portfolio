@@ -2,7 +2,7 @@ import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { MobilityPartRenderArgs } from './types'
 import { type TreadVisual } from './partVisuals'
-import { createTrackBelt, createTrackFrameRail, createTrackShoe, createTrackWheel } from './trackGeometry'
+import { createTrackBelt, createTrackFrameRail, createTrackReturnRoller, createTrackShoe, createTrackWheel } from './trackGeometry'
 
 export function createStandardTreadPart(
   {
@@ -137,6 +137,22 @@ export function createStandardTreadPart(
     })
   }
 
+  for (let index = 0; index < visual.rollerCount; index += 1) {
+    const x = -length * 0.27 + index * ((length * 0.54) / Math.max(visual.rollerCount - 1, 1))
+
+    for (const z of [-wheelFaceZ, wheelFaceZ]) {
+      createTrackReturnRoller(scene, parent, materials.trim, `${role}-${blockId}-standard-tread-return-roller-${index}-${z > 0 ? 'front' : 'rear'}`, {
+        depth: Math.max(beltDepth * 0.16, 0.07),
+        diameter: Math.max(trackHeight * 0.13 * visual.suspensionScale, 0.08),
+        rollSpeed: visual.rollSpeed * 1.18,
+        tessellation: isHeavy ? 12 : 10,
+        x,
+        y: bottomY + trackHeight * 0.72,
+        z,
+      })
+    }
+  }
+
   for (let index = 0; index < padCount; index += 1) {
     const x = -length * 0.42 + index * ((length * 0.84) / Math.max(padCount - 1, 1))
 
@@ -178,6 +194,49 @@ export function createStandardTreadPart(
       )
       rampShoe.rotation.z = side * -0.54
       attachMesh(rampShoe, parent, materials.rubber)
+    }
+  }
+
+  createTrackGuideBlocks({
+    scene,
+    parent,
+    materials,
+    role,
+    blockId,
+  }, length, beltDepth, beltThickness, bottomY, topY, isHeavy)
+}
+
+function createTrackGuideBlocks(
+  { scene, parent, materials, role, blockId }: Pick<MobilityPartRenderArgs, 'blockId' | 'materials' | 'parent' | 'role' | 'scene'>,
+  length: number,
+  beltDepth: number,
+  beltThickness: number,
+  bottomY: number,
+  topY: number,
+  isHeavy: boolean,
+): void {
+  const guideCount = isHeavy ? 5 : 4
+
+  for (let index = 0; index < guideCount; index += 1) {
+    const x = -length * 0.34 + index * ((length * 0.68) / Math.max(guideCount - 1, 1))
+
+    for (const surface of ['bottom', 'top'] as const) {
+      const guide = MeshBuilder.CreateBox(
+        `${role}-${blockId}-standard-tread-${surface}-center-guide-${index}`,
+        {
+          width: Math.max(length * 0.04, 0.052),
+          height: Math.max(beltThickness * 0.62, 0.026),
+          depth: Math.max(beltDepth * 0.18, 0.08),
+        },
+        scene,
+      )
+
+      guide.position.set(
+        x,
+        surface === 'bottom' ? bottomY + beltThickness * 0.72 : topY - beltThickness * 0.72,
+        0,
+      )
+      attachMesh(guide, parent, materials.profile.scuffed_rubber)
     }
   }
 }

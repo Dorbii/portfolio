@@ -1,7 +1,7 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
-import { attachMesh } from '../../rendering/meshHelpers'
 import { createPbrSceneMaterial, createSceneMaterial } from '../../rendering/sceneUtils'
 import type { UtilityPartRenderArgs } from './types'
+import { attachUtilityMesh } from './utilityFrame'
 
 export function createEnergyCorePart({
   scene,
@@ -137,6 +137,15 @@ export function createEnergyCorePart({
     },
     scene,
   )
+  const containmentCrack = MeshBuilder.CreateBox(
+    `${role}-${blockId}-energy-core-hairline-containment-crack`,
+    {
+      width: Math.max(width * 0.2, 0.12),
+      height: Math.max(height * 0.012, 0.008),
+      depth: Math.max(depth * 0.018, 0.012),
+    },
+    scene,
+  )
 
   base.position.y = Math.max(height * 0.1, 0.06)
   lowerInsulator.position.y = base.position.y + baseHeight * 0.68
@@ -148,14 +157,17 @@ export function createEnergyCorePart({
   topPlate.position.y = topRailY
   bottomPlate.position.y = bottomRailY
   topLens.position.y = topRailY + Math.max(height * 0.05, 0.03)
-  attachMesh(base, parent, darkInsulatorMaterial)
-  attachMesh(lowerInsulator, parent, darkInsulatorMaterial)
-  attachMesh(glassCube, parent, glassMaterial)
-  attachMesh(chargeColumn, parent, materials.light)
-  attachMesh(chargeSleeve, parent, amberMaterial)
-  attachMesh(topPlate, parent, brassMaterial)
-  attachMesh(bottomPlate, parent, brassMaterial)
-  attachMesh(topLens, parent, amberMaterial)
+  containmentCrack.position.set(Math.max(width * 0.06, 0.035), vesselY + Math.max(height * 0.08, 0.045), Math.max(vesselSize * 0.52, 0.16))
+  containmentCrack.rotation.z = -0.54
+  attachUtilityMesh(base, parent, darkInsulatorMaterial, 'rubber')
+  attachUtilityMesh(lowerInsulator, parent, darkInsulatorMaterial, 'rubber')
+  attachUtilityMesh(glassCube, parent, glassMaterial, 'glass')
+  attachUtilityMesh(chargeColumn, parent, materials.light, 'emissive')
+  attachUtilityMesh(chargeSleeve, parent, amberMaterial, 'emissive')
+  attachUtilityMesh(topPlate, parent, brassMaterial, 'weapon_edge')
+  attachUtilityMesh(bottomPlate, parent, brassMaterial, 'weapon_edge')
+  attachUtilityMesh(topLens, parent, amberMaterial, 'glass')
+  attachUtilityMesh(containmentCrack, parent, materials.trim, 'trim')
 
   for (let index = 0; index < 3; index += 1) {
     const coil = MeshBuilder.CreateTorus(
@@ -169,7 +181,7 @@ export function createEnergyCorePart({
     )
 
     coil.position.y = vesselY - Math.max(height * 0.2, 0.1) + index * Math.max(height * 0.2, 0.1)
-    attachMesh(coil, parent, index === 1 ? materials.steel : copperMaterial)
+    attachUtilityMesh(coil, parent, index === 1 ? materials.steel : copperMaterial, 'weapon_edge')
   }
 
   for (const x of [-cornerX, cornerX]) {
@@ -201,9 +213,9 @@ export function createEnergyCorePart({
       pillar.position.set(x, vesselY, z)
       foot.position.set(x, bottomRailY - Math.max(height * 0.06, 0.035), z)
       cap.position.set(x, topRailY + Math.max(height * 0.06, 0.035), z)
-      attachMesh(pillar, parent, brassMaterial)
-      attachMesh(foot, parent, darkInsulatorMaterial)
-      attachMesh(cap, parent, brassMaterial)
+      attachUtilityMesh(pillar, parent, brassMaterial, 'weapon_edge')
+      attachUtilityMesh(foot, parent, darkInsulatorMaterial, 'rubber')
+      attachUtilityMesh(cap, parent, brassMaterial, 'weapon_edge')
     }
   }
 
@@ -221,7 +233,7 @@ export function createEnergyCorePart({
 
       rail.rotation.z = Math.PI / 2
       rail.position.set(0, railY, z)
-      attachMesh(rail, parent, brassMaterial)
+      attachUtilityMesh(rail, parent, brassMaterial, 'weapon_edge')
     }
 
     for (const x of [-cornerX, cornerX]) {
@@ -237,7 +249,7 @@ export function createEnergyCorePart({
 
       rail.rotation.x = Math.PI / 2
       rail.position.set(x, railY, 0)
-      attachMesh(rail, parent, brassMaterial)
+      attachUtilityMesh(rail, parent, brassMaterial, 'weapon_edge')
     }
   }
 
@@ -276,9 +288,9 @@ export function createEnergyCorePart({
     sideGear.position.set(side * Math.max(width * 0.48, 0.28), vesselY - Math.max(height * 0.03, 0.018), 0)
     sideHub.rotation.z = Math.PI / 2
     sideHub.position.copyFrom(sideGear.position)
-    attachMesh(conduit, parent, materials.steel)
-    attachMesh(sideGear, parent, brassMaterial)
-    attachMesh(sideHub, parent, materials.steel)
+    attachUtilityMesh(conduit, parent, materials.steel, 'weapon_edge')
+    attachUtilityMesh(sideGear, parent, brassMaterial, 'weapon_edge')
+    attachUtilityMesh(sideHub, parent, materials.steel, 'weapon_edge')
 
     for (let toothIndex = 0; toothIndex < 8; toothIndex += 1) {
       const angle = (toothIndex / 8) * Math.PI * 2
@@ -298,7 +310,7 @@ export function createEnergyCorePart({
         Math.cos(angle) * Math.max(width * 0.12, 0.07),
       )
       tooth.rotation.x = angle
-      attachMesh(tooth, parent, brassMaterial)
+      attachUtilityMesh(tooth, parent, brassMaterial, 'weapon_edge')
     }
   }
 
@@ -312,7 +324,7 @@ export function createEnergyCorePart({
     const z = index < 2 ? -baseDepth * 0.34 : baseDepth * 0.34
 
     bolt.position.set(x, base.position.y + baseHeight * 0.62, z)
-    attachMesh(bolt, parent, materials.steel)
+    attachUtilityMesh(bolt, parent, materials.steel, 'weapon_edge')
   }
 
   const teamStatusStrip = MeshBuilder.CreateBox(
@@ -326,5 +338,5 @@ export function createEnergyCorePart({
   )
 
   teamStatusStrip.position.set(0, base.position.y + baseHeight * 0.7, -baseDepth * 0.54)
-  attachMesh(teamStatusStrip, parent, material)
+  attachUtilityMesh(teamStatusStrip, parent, material, 'damageable')
 }

@@ -1,6 +1,12 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
-import { attachMesh, createBoxDetail } from '../../rendering/meshHelpers'
+import { createBoxDetail } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
+import {
+  attachRoleMesh,
+  attachWeaponEdgeMesh,
+  tagRoleMesh,
+  tagWeaponEdgeMesh,
+} from './weaponRenderHelpers'
 
 export function createHammerWeaponPart({
   scene,
@@ -48,35 +54,66 @@ export function createHammerWeaponPart({
   head.position.set(0, Math.max(height * 0.52, 0.32), Math.max(depth * 0.82, 0.48))
   pivot.rotation.z = Math.PI / 2
   pivot.position.set(0, Math.max(height * 0.28, 0.18), -Math.max(depth * 0.42, 0.24))
-  attachMesh(arm, parent, materials.steel)
-  attachMesh(head, parent, materials.steel)
-  attachMesh(pivot, parent, materials.trim)
+  attachWeaponEdgeMesh(arm, parent, materials.steel)
+  attachWeaponEdgeMesh(head, parent, materials.steel)
+  attachRoleMesh(pivot, parent, materials.trim, 'trim')
 
   for (let side = -1; side <= 1; side += 2) {
-    createBoxDetail(
-      scene,
-      parent,
-      material,
-      `${role}-${blockId}-hammer-strike-face-${side}`,
-      Math.max(width * 0.18, 0.1),
-      Math.max(height * 0.42, 0.18),
-      Math.max(depth * 0.18, 0.1),
-      side * Math.max(width * 0.36, 0.2),
-      head.position.y,
-      head.position.z,
+    tagWeaponEdgeMesh(
+      createBoxDetail(
+        scene,
+        parent,
+        material,
+        `${role}-${blockId}-hammer-strike-face-${side}`,
+        Math.max(width * 0.18, 0.1),
+        Math.max(height * 0.42, 0.18),
+        Math.max(depth * 0.18, 0.1),
+        side * Math.max(width * 0.36, 0.2),
+        head.position.y,
+        head.position.z,
+      ),
     )
-    createBoxDetail(
-      scene,
-      parent,
-      materials.trim,
-      `${role}-${blockId}-hammer-side-bracket-${side}`,
-      Math.max(width * 0.12, 0.07),
-      Math.max(height * 0.5, 0.2),
-      Math.max(depth * 0.18, 0.12),
-      side * Math.max(width * 0.3, 0.18),
-      Math.max(height * 0.32, 0.2),
-      pivot.position.z,
+    tagRoleMesh(
+      createBoxDetail(
+        scene,
+        parent,
+        materials.trim,
+        `${role}-${blockId}-hammer-side-bracket-${side}`,
+        Math.max(width * 0.12, 0.07),
+        Math.max(height * 0.5, 0.2),
+        Math.max(depth * 0.18, 0.12),
+        side * Math.max(width * 0.3, 0.18),
+        Math.max(height * 0.32, 0.2),
+        pivot.position.z,
+      ),
+      'trim',
     )
+
+    const retainer = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-hammer-pivot-retainer-${side}`,
+      {
+        height: 0.04,
+        diameter: Math.max(height * 0.58, 0.25),
+        tessellation: 16,
+      },
+      scene,
+    )
+    const bentStop = MeshBuilder.CreateBox(
+      `${role}-${blockId}-hammer-bent-swing-stop-${side}`,
+      {
+        width: Math.max(width * 0.08, 0.052),
+        height: Math.max(height * 0.14, 0.07),
+        depth: Math.max(depth * 0.26, 0.14),
+      },
+      scene,
+    )
+
+    retainer.rotation.z = Math.PI / 2
+    retainer.position.set(side * Math.max(width * 0.26, 0.15), pivot.position.y, pivot.position.z)
+    bentStop.position.set(side * Math.max(width * 0.36, 0.22), Math.max(height * 0.52, 0.28), -Math.max(depth * 0.28, 0.16))
+    bentStop.rotation.z = side * 0.16
+    attachRoleMesh(retainer, parent, materials.steel, 'trim')
+    attachRoleMesh(bentStop, parent, materials.warning, 'trim')
   }
 
   for (let index = 0; index < 6; index += 1) {
@@ -97,6 +134,26 @@ export function createHammerWeaponPart({
       pivot.position.y + Math.sin(angle) * Math.max(height * 0.17, 0.08),
       pivot.position.z + Math.cos(angle) * Math.max(height * 0.17, 0.08),
     )
-    attachMesh(bolt, parent, materials.steel)
+    attachRoleMesh(bolt, parent, materials.steel, 'trim')
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1
+    const row = Math.floor(index / 2)
+    const chip = createBoxDetail(
+      scene,
+      parent,
+      materials.profile.burnt_critical_metal,
+      `${role}-${blockId}-hammer-impact-head-wear-chip-${index}`,
+      Math.max(width * 0.13, 0.07),
+      Math.max(height * 0.035, 0.02),
+      Math.max(depth * 0.12, 0.07),
+      side * Math.max(width * 0.31, 0.18),
+      head.position.y + Math.max(height * (0.08 - row * 0.16), -0.04),
+      head.position.z + Math.max(depth * 0.08, 0.045),
+    )
+
+    chip.rotation.z = side * 0.18
+    tagWeaponEdgeMesh(chip)
   }
 }

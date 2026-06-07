@@ -1,7 +1,7 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
-import { attachMesh } from '../../rendering/meshHelpers'
 import { createPbrSceneMaterial, createSceneMaterial } from '../../rendering/sceneUtils'
 import type { UtilityPartRenderArgs } from './types'
+import { attachUtilityMesh } from './utilityFrame'
 
 export function createAiModulePart({
   scene,
@@ -115,6 +115,15 @@ export function createAiModulePart({
     },
     scene,
   )
+  const crackedGlassChip = MeshBuilder.CreateBox(
+    `${role}-${blockId}-ai-module-cryo-glass-crack`,
+    {
+      width: Math.max(width * 0.16, 0.09),
+      height: Math.max(height * 0.012, 0.008),
+      depth: Math.max(depth * 0.018, 0.012),
+    },
+    scene,
+  )
 
   cardFrame.position.y = boardY
   insetBoard.position.y = boardY + boardHeight * 0.62
@@ -122,13 +131,16 @@ export function createAiModulePart({
   chipDie.position.y = chipY + Math.max(height * 0.07, 0.04)
   glassCap.position.y = chipDie.position.y + Math.max(height * 0.12, 0.07)
   centerColumn.position.y = glassCap.position.y
+  crackedGlassChip.position.set(Math.max(width * 0.05, 0.03), glassCap.position.y + Math.max(height * 0.02, 0.012), Math.max(depth * 0.13, 0.075))
+  crackedGlassChip.rotation.z = -0.48
   glassCap.metadata = { kind: 'pulse', speed: 0.012 }
-  attachMesh(cardFrame, parent, blackCeramicMaterial)
-  attachMesh(insetBoard, parent, boardMaterial)
-  attachMesh(chipPackage, parent, blackCeramicMaterial)
-  attachMesh(chipDie, parent, material)
-  attachMesh(glassCap, parent, glassMaterial)
-  attachMesh(centerColumn, parent, materials.steel)
+  attachUtilityMesh(cardFrame, parent, blackCeramicMaterial, 'damageable')
+  attachUtilityMesh(insetBoard, parent, boardMaterial, 'damageable')
+  attachUtilityMesh(chipPackage, parent, blackCeramicMaterial, 'damageable')
+  attachUtilityMesh(chipDie, parent, material, 'damageable')
+  attachUtilityMesh(glassCap, parent, glassMaterial, 'glass')
+  attachUtilityMesh(centerColumn, parent, materials.steel, 'weapon_edge')
+  attachUtilityMesh(crackedGlassChip, parent, materials.trim, 'trim')
 
   for (const z of [-cornerZ, cornerZ]) {
     const rail = MeshBuilder.CreateBox(
@@ -142,7 +154,7 @@ export function createAiModulePart({
     )
 
     rail.position.set(0, traceY, z)
-    attachMesh(rail, parent, goldTraceMaterial)
+    attachUtilityMesh(rail, parent, goldTraceMaterial, 'weapon_edge')
   }
 
   for (const x of [-cornerX, cornerX]) {
@@ -157,7 +169,7 @@ export function createAiModulePart({
     )
 
     rail.position.set(x, traceY, 0)
-    attachMesh(rail, parent, goldTraceMaterial)
+    attachUtilityMesh(rail, parent, goldTraceMaterial, 'weapon_edge')
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -175,7 +187,7 @@ export function createAiModulePart({
 
     trace.position.set(side * Math.max(width * 0.2, 0.11), traceY + 0.004, lane * Math.max(depth * 0.085, 0.045))
     trace.rotation.y = side * (0.18 + lane * 0.035)
-    attachMesh(trace, parent, goldTraceMaterial)
+    attachUtilityMesh(trace, parent, goldTraceMaterial, 'weapon_edge')
   }
 
   for (let index = 0; index < 6; index += 1) {
@@ -192,7 +204,7 @@ export function createAiModulePart({
     const lane = Math.floor(index / 2) - 1
 
     via.position.set(side * Math.max(width * 0.34, 0.2), traceY + 0.014, lane * Math.max(depth * 0.15, 0.08))
-    attachMesh(via, parent, materials.steel)
+    attachUtilityMesh(via, parent, materials.steel, 'weapon_edge')
   }
 
   for (const x of [-cornerX, cornerX]) {
@@ -218,8 +230,8 @@ export function createAiModulePart({
 
       standoff.position.set(x, chipY + Math.max(height * 0.08, 0.045), z)
       cap.position.set(x, standoff.position.y + Math.max(height * 0.13, 0.075), z)
-      attachMesh(standoff, parent, goldTraceMaterial)
-      attachMesh(cap, parent, materials.steel)
+      attachUtilityMesh(standoff, parent, goldTraceMaterial, 'weapon_edge')
+      attachUtilityMesh(cap, parent, materials.steel, 'weapon_edge')
     }
   }
 
@@ -236,7 +248,7 @@ export function createAiModulePart({
 
     serviceCable.rotation.x = Math.PI / 2
     serviceCable.position.set(side * Math.max(width * 0.3, 0.17), chipY + Math.max(height * 0.06, 0.035), 0)
-    attachMesh(serviceCable, parent, materials.trim)
+    attachUtilityMesh(serviceCable, parent, materials.trim, 'trim')
   }
 
   const teamStatusStrip = MeshBuilder.CreateBox(
@@ -250,5 +262,5 @@ export function createAiModulePart({
   )
 
   teamStatusStrip.position.set(0, boardY + boardHeight * 0.72, -boardDepth * 0.54)
-  attachMesh(teamStatusStrip, parent, material)
+  attachUtilityMesh(teamStatusStrip, parent, material, 'damageable')
 }

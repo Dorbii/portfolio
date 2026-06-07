@@ -4,7 +4,11 @@ import type { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../../../packages/schemas/src/index.js'
 import type { TeamMaterialSet } from '../../rendering/materials'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
-import { attachMesh, createBoxDetail } from '../../rendering/meshHelpers'
+import { createBoxDetail } from '../../rendering/meshHelpers'
+import {
+  attachStyleMesh,
+  tagStyleMesh,
+} from './styleMeshTags'
 
 export function createCrownPart(
   scene: Scene,
@@ -37,9 +41,9 @@ export function createCrownPart(
   innerRim.position.y = 0.27
   innerRim.rotation.x = Math.PI / 2
   innerRim.scaling.z = 0.62
-  attachMesh(basePlate, parent, materials.trim)
-  attachMesh(outerBand, parent, materials.warning)
-  attachMesh(innerRim, parent, materials.steel)
+  attachStyleMesh(basePlate, parent, materials.trim, 'trim')
+  attachStyleMesh(outerBand, parent, materials.warning, 'trim')
+  attachStyleMesh(innerRim, parent, materials.steel, 'weapon_edge')
 
   for (let index = 0; index < 7; index += 1) {
     const angle = (Math.PI * 2 * index) / 7
@@ -71,9 +75,10 @@ export function createCrownPart(
     tooth.rotation.z = -Math.sin(angle) * 0.16
     socket.position.set(Math.sin(angle) * radiusX, 0.27, Math.cos(angle) * radiusZ)
     jewel.position.set(Math.sin(angle) * (radiusX + 0.018), 0.36, Math.cos(angle) * (radiusZ + 0.012))
-    attachMesh(tooth, parent, materials.warning)
-    attachMesh(socket, parent, materials.steel)
-    attachMesh(jewel, parent, materials.light)
+    jewel.metadata = { kind: 'pulse', speed: 0.008 + index * 0.001 }
+    attachStyleMesh(tooth, parent, materials.warning, 'trim')
+    attachStyleMesh(socket, parent, materials.steel, 'weapon_edge')
+    attachStyleMesh(jewel, parent, materials.light, 'emissive')
   }
 
   for (const x of [-0.28, 0.28]) {
@@ -85,9 +90,33 @@ export function createCrownPart(
       )
 
       bolt.position.set(x, 0.155, z)
-      attachMesh(bolt, parent, materials.steel)
+      attachStyleMesh(bolt, parent, materials.steel, 'weapon_edge')
     }
   }
 
-  createBoxDetail(scene, parent, material, `${role}-${blockId}-crown-front-team-plate`, 0.22, 0.035, 0.04, 0, 0.18, 0.31)
+  tagStyleMesh(
+    createBoxDetail(scene, parent, material, `${role}-${blockId}-crown-front-team-plate`, 0.22, 0.035, 0.04, 0, 0.18, 0.31),
+    'trim',
+  )
+  tagStyleMesh(
+    createBoxDetail(scene, parent, materials.rubber, `${role}-${blockId}-crown-vibration-pad`, 0.48, 0.026, 0.34, 0, 0.145, 0),
+    'rubber',
+  )
+
+  const frontGem = MeshBuilder.CreateSphere(
+    `${role}-${blockId}-crown-large-command-jewel`,
+    { diameter: 0.09, segments: 12 },
+    scene,
+  )
+  const rearBrace = MeshBuilder.CreateBox(
+    `${role}-${blockId}-crown-rear-anti-shear-brace`,
+    { width: 0.34, height: 0.055, depth: 0.05 },
+    scene,
+  )
+
+  frontGem.position.set(0, 0.42, 0.31)
+  frontGem.metadata = { kind: 'pulse', speed: 0.012, phase: Math.PI * 0.5 }
+  rearBrace.position.set(0, 0.19, -0.32)
+  attachStyleMesh(frontGem, parent, materials.light, 'emissive')
+  attachStyleMesh(rearBrace, parent, materials.steel, 'weapon_edge')
 }

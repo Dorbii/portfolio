@@ -11,6 +11,9 @@ import type { TeamMaterialSet } from '../../rendering/materials'
 import { createCrownPart } from './crownPart'
 import { createDragonHeadPart } from './dragonHeadPart'
 import { createFlagPart } from './flagPart'
+import { createNeonPart } from './neonPart'
+import { createStyleSpikesPart } from './spikesPart'
+import { createTrashCanPart } from './trashCanPart'
 import { createWingAssemblyPart } from './wingAssemblyPart'
 import {
   createAntennaPart,
@@ -31,7 +34,7 @@ export function createStylePart(
   materials: TeamMaterialSet,
 ): void {
   if (partId === 'Style_Flag') {
-    createFlagPart(scene, parent, material, role, blockId)
+    createFlagPart(scene, parent, material, role, blockId, materials)
     return
   }
 
@@ -75,60 +78,13 @@ export function createStylePart(
     return
   }
 
-  if (partId.includes('Spikes')) {
-    const plate = MeshBuilder.CreateBox(
-      `${role}-${blockId}-spike-plate`,
-      { width: 0.62, height: 0.08, depth: 0.62 },
-      scene,
-    )
-    attachMesh(plate, parent, material)
-
-    for (let index = 0; index < 4; index += 1) {
-      const spike = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-spike-${index}`,
-        { height: 0.3, diameterTop: 0, diameterBottom: 0.08, tessellation: 8 },
-        scene,
-      )
-      spike.rotation.z = Math.PI / 2
-      spike.position.set(
-        (index % 2 === 0 ? -0.2 : 0.2) + (index > 1 ? 0 : 0),
-        0.2,
-        (index < 2 ? -0.2 : 0.2),
-      )
-      attachMesh(spike, parent, materials.warning)
-    }
+  if (partId === 'Style_Spikes') {
+    createStyleSpikesPart(scene, parent, material, role, blockId, materials)
     return
   }
 
-  if (partId.includes('Neon')) {
-    const strip = MeshBuilder.CreateBox(
-      `${role}-${blockId}-neon-strip`,
-      { width: 0.68, height: 0.1, depth: 0.12 },
-      scene,
-    )
-    const topRail = MeshBuilder.CreateBox(
-      `${role}-${blockId}-neon-top-rail`,
-      { width: 0.56, height: 0.07, depth: 0.1 },
-      scene,
-    )
-    const leftRail = MeshBuilder.CreateBox(
-      `${role}-${blockId}-neon-left-rail`,
-      { width: 0.07, height: 0.24, depth: 0.1 },
-      scene,
-    )
-    const rightRail = MeshBuilder.CreateBox(
-      `${role}-${blockId}-neon-right-rail`,
-      { width: 0.07, height: 0.24, depth: 0.1 },
-      scene,
-    )
-    topRail.position.set(0, 0.33, 0)
-    leftRail.position.set(-0.34, 0.22, 0)
-    rightRail.position.set(0.34, 0.22, 0)
-    attachMesh(strip, parent, material)
-    attachMesh(topRail, parent, materials.light)
-    attachMesh(leftRail, parent, materials.light)
-    attachMesh(rightRail, parent, materials.light)
-
+  if (partId === 'Style_Neon') {
+    createNeonPart(scene, parent, material, role, blockId, materials)
     return
   }
 
@@ -193,45 +149,8 @@ export function createStylePart(
     return
   }
 
-  if (partId.includes('TrashCan')) {
-    const shell = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-trash-shell`,
-      {
-        height: 0.52,
-        diameter: 0.36,
-        tessellation: 12,
-      },
-      scene,
-    )
-    const lid = MeshBuilder.CreateBox(
-      `${role}-${blockId}-trash-lid`,
-      { width: 0.24, height: 0.08, depth: 0.46 },
-      scene,
-    )
-    const handle = MeshBuilder.CreateTorus(
-      `${role}-${blockId}-trash-handle`,
-      { diameter: 0.18, thickness: 0.025, tessellation: 12 },
-      scene,
-    )
-    lid.position.set(0, 0.32, 0)
-    handle.position.set(0, 0.42, 0)
-    handle.rotation.x = Math.PI / 2
-    shell.rotation.z = Math.PI / 2
-    attachMesh(shell, parent, material)
-    attachMesh(lid, parent, materials.trim)
-    attachMesh(handle, parent, materials.steel)
-
-    for (let index = -2; index <= 2; index += 1) {
-      const rib = MeshBuilder.CreateBox(
-        `${role}-${blockId}-trash-rib-${index + 2}`,
-        { width: 0.025, height: 0.54, depth: 0.035 },
-        scene,
-      )
-
-      rib.position.set(index * 0.07, 0.02, 0.19)
-      attachMesh(rib, parent, materials.trim)
-    }
-
+  if (partId === 'Style_TrashCan') {
+    createTrashCanPart(scene, parent, material, role, blockId, materials)
     return
   }
 

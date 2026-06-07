@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
-import { damageMaterialForSeverity } from '../rendering/materials'
+import {
+  damageMaterialForRoleAndSeverity,
+  isBotPartChildMaterialRole,
+  type BotPartChildMaterialRole,
+} from '../rendering/materials'
 import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
 import {
   createCatalogPartNode,
@@ -263,17 +268,68 @@ function createQaTeamIdentity(role: TeamRole, primaryColor: string): LegacyTeamI
 function applyDamagePreview(partRoot: TransformNode, damagePreview: PartCatalogDamagePreview): void {
   const metadata = partRoot.metadata as BotPartNodeMetadata | undefined
   const severity = DAMAGE_PREVIEW_SEVERITY[damagePreview]
-  const material = metadata ? damageMaterialForSeverity(metadata.damageMaterials, severity) : null
 
-  if (!metadata || !material) {
+  if (!metadata) {
     return
   }
 
   partRoot.getChildMeshes().forEach((mesh) => {
-    if (mesh.material?.name === metadata.primaryMaterialName) {
-      mesh.material = material
+    const materialRole = resolvePreviewMaterialRole(mesh, metadata)
+
+    if (materialRole) {
+      mesh.material = damageMaterialForRoleAndSeverity(
+        metadata.damageMaterials,
+        materialRole,
+        severity,
+      ) ?? mesh.material
     }
   })
+}
+
+function resolvePreviewMaterialRole(
+  mesh: AbstractMesh,
+  metadata: BotPartNodeMetadata,
+): BotPartChildMaterialRole | null {
+  const explicitRole = explicitPartMaterialRole(mesh)
+
+  if (explicitRole) {
+    return explicitRole
+  }
+
+  const materialName = mesh.material?.name
+
+  if (!materialName) {
+    return null
+  }
+
+  if (materialName === metadata.primaryMaterialName) {
+    return primaryDamageRole(metadata.visualProfile.damageProfile)
+  }
+
+  for (const role of Object.keys(metadata.roleMaterialNames) as BotPartChildMaterialRole[]) {
+    if (metadata.roleMaterialNames[role].includes(materialName)) {
+      return role
+    }
+  }
+
+  return null
+}
+
+function explicitPartMaterialRole(
+  mesh: AbstractMesh,
+): BotPartChildMaterialRole | null {
+  const metadata = mesh.metadata as { partMaterialRole?: unknown } | undefined
+
+  return isBotPartChildMaterialRole(metadata?.partMaterialRole) ? metadata.partMaterialRole : null
+}
+
+function primaryDamageRole(damageProfile: string): BotPartChildMaterialRole {
+  if (damageProfile === 'scuffed_rubber') return 'rubber'
+  if (damageProfile === 'emissive_led_glass') return 'glass'
+  if (damageProfile === 'brushed_weapon_steel') return 'weapon_edge'
+  if (damageProfile === 'scraped_style_shell') return 'trim'
+
+  return 'damageable'
 }
 
 function liftPartAboveInspectionStage(partRoot: TransformNode): void {

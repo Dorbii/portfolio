@@ -33,12 +33,13 @@ export function createSpikedWheelPart(
   )
   const sideOffset = Math.max(wheelWidth * 0.43, 0.12)
 
-  wheelRoot.metadata = { kind: 'roll', axis: 'x', speed: 0.19 }
+  wheelRoot.metadata = { animationProfile: 'wheel_spin', kind: 'roll', axis: 'x', speed: 0.19 }
   wheelRoot.parent = parent
   tire.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
   attachMesh(tire, wheelRoot, materials.rubber)
   attachMesh(hub, wheelRoot, materials.trim)
+  createSpikedWheelRubberGouges(scene, wheelRoot, materials.profile.scuffed_rubber, role, blockId, tireRadius, wheelWidth)
 
   for (const side of [-1, 1]) {
     const sidePlate = MeshBuilder.CreateCylinder(
@@ -104,10 +105,43 @@ export function createSpikedWheelPart(
     saddle.position.copyFrom(radialAxis.scale(tireRadius + spikeLength * 0.02))
     spike.rotationQuaternion = rotationFromYAxis(radialAxis)
     saddle.rotationQuaternion = rotationFromYAxis(radialAxis)
-    spike.material = materials.warning
+    spike.material = materials.steel
     saddle.material = materials.steel
     spike.parent = wheelRoot
     saddle.parent = wheelRoot
+  }
+}
+
+function createSpikedWheelRubberGouges(
+  scene: MobilityPartRenderArgs['scene'],
+  parent: MobilityPartRenderArgs['parent'],
+  material: MobilityPartRenderArgs['materials']['rubber'],
+  role: MobilityPartRenderArgs['role'],
+  blockId: string,
+  tireRadius: number,
+  wheelWidth: number,
+): void {
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8 + 0.12
+    const side = index % 2 === 0 ? -1 : 1
+    const gouge = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spiked-wheel-rubber-gouge-${index}`,
+      {
+        width: Math.max(wheelWidth * 0.034, 0.016),
+        height: Math.max(tireRadius * 0.08, 0.028),
+        depth: Math.max(tireRadius * 0.22, 0.074),
+      },
+      scene,
+    )
+
+    gouge.position.set(
+      side * Math.max(wheelWidth * 0.42, 0.12),
+      Math.sin(angle) * tireRadius * 0.72,
+      Math.cos(angle) * tireRadius * 0.72,
+    )
+    gouge.rotation.x = angle + Math.PI * 0.5
+    gouge.rotation.z = Math.PI / 2
+    attachMesh(gouge, parent, material)
   }
 }
 

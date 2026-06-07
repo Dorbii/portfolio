@@ -70,12 +70,15 @@ export type PartVisualFamily =
   | 'chain_whip'
   | 'coolant_tank'
   | 'corner_guard'
+  | 'crown'
   | 'drone'
+  | 'dragon_head'
   | 'drill'
   | 'energy_core'
   | 'flex_panel'
   | 'flipper'
   | 'flail'
+  | 'flag'
   | 'fuel_tank'
   | 'grabber'
   | 'gyro'
@@ -86,6 +89,7 @@ export type PartVisualFamily =
   | 'leg'
   | 'light_bar'
   | 'magnet'
+  | 'neon'
   | 'net'
   | 'radar'
   | 'ram'
@@ -97,11 +101,14 @@ export type PartVisualFamily =
   | 'smoke'
   | 'spear'
   | 'spinner'
+  | 'spikes'
   | 'tail'
   | 'tread'
+  | 'trash_can'
   | 'turret'
   | 'wedge'
   | 'wheel'
+  | 'wings'
 
 export type PartMaterialRole =
   | 'painted_armor'
@@ -121,10 +128,18 @@ export type PartMountRole =
   | 'internal'
   | 'exposed'
 
+export type PartVisualQualityStatus = 'blockout' | 'upgraded' | 'hero'
+
 export type PartVisualDescriptor = {
+  animationProfile?: string
+  damageProfile?: string
   detailBudget: 'low' | 'medium' | 'high'
   materialRole: PartMaterialRole
   mountRole: PartMountRole
+  qualityStatus?: PartVisualQualityStatus
+  referenceIds?: string[]
+  renderProfile?: string
+  textureProfile?: string
   visualFamily: PartVisualFamily
 }
 

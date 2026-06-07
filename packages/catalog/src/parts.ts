@@ -20,6 +20,7 @@ import type {
   WeaponSpec,
 } from '../../schemas/src/index.js'
 import { PART_BEHAVIORS } from '../../sim/src/partBehaviors.js'
+import { PART_VISUAL_REFERENCE_IDS } from './visualReferences.js'
 
 type PartInput = {
   id: string
@@ -37,7 +38,7 @@ type PartInput = {
   spec?: PartSpec
   signatureEffect?: PartEffect
   mechanics?: PartEffect[]
-  visual?: PartVisualDescriptor
+  visual?: Partial<PartVisualDescriptor>
   behavior?: PartDefinition['behavior']
   controls?: PartDefinition['controls']
 }
@@ -45,6 +46,7 @@ type PartInput = {
 function part(input: PartInput): PartDefinition {
   const signatureEffect = input.signatureEffect ?? inferSignatureEffect(input)
   const mechanics = input.mechanics ?? inferMechanics(input)
+  const visual = completeVisualDescriptor(input)
 
   return {
     tags: [],
@@ -55,21 +57,47 @@ function part(input: PartInput): PartDefinition {
     spec: input.spec ?? inferSpec(input),
     ...(signatureEffect ? { signatureEffect } : {}),
     ...(mechanics.length > 0 ? { mechanics } : {}),
-    visual: input.visual ?? inferVisualDescriptor(input),
     ...input,
+    visual,
+  }
+}
+
+function completeVisualDescriptor(input: PartInput): PartVisualDescriptor {
+  const inferred = inferVisualDescriptor(input)
+  const visual = input.visual ?? {}
+
+  return {
+    ...inferred,
+    ...visual,
+    animationProfile: visual.animationProfile ?? inferred.animationProfile,
+    damageProfile: visual.damageProfile ?? inferred.damageProfile,
+    qualityStatus: visual.qualityStatus ?? inferred.qualityStatus,
+    referenceIds: visual.referenceIds ?? inferred.referenceIds,
+    renderProfile: visual.renderProfile ?? inferred.renderProfile,
+    textureProfile: visual.textureProfile ?? inferred.textureProfile,
   }
 }
 
 function inferVisualDescriptor(input: PartInput): PartVisualDescriptor {
+  const visualFamily = inferVisualFamily(input)
+  const materialRole = inferMaterialRole(input)
+
   return {
+    animationProfile: inferAnimationProfile(input, visualFamily),
+    damageProfile: inferDamageProfile(materialRole),
     detailBudget: inferDetailBudget(input),
-    materialRole: inferMaterialRole(input),
+    materialRole,
     mountRole: inferMountRole(input),
-    visualFamily: inferVisualFamily(input),
+    qualityStatus: 'blockout',
+    referenceIds: inferReferenceIds(input),
+    renderProfile: inferRenderProfile(input, visualFamily),
+    textureProfile: inferTextureProfile(materialRole),
+    visualFamily,
   }
 }
 
 function inferVisualFamily(input: PartInput): PartVisualFamily {
+  if (input.id.includes('DragonHead')) return 'dragon_head'
   if (input.id.includes('Laser')) return 'turret'
   if (input.id.includes('Shredder')) return 'shredder'
   if (input.id.includes('ChainWhip')) return 'chain_whip'
@@ -83,6 +111,8 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Spear')) return 'spear'
   if (input.id.includes('Flipper')) return 'flipper'
   if (input.id.includes('Grabber')) return 'grabber'
+  if (input.id.includes('Crusher')) return 'grabber'
+  if (input.id.includes('ForkLifter')) return 'flipper'
   if (input.id.includes('Ram')) return 'ram'
   if (input.id.includes('Rail')) return 'rail_armor'
   if (input.id.includes('CornerGuard')) return 'corner_guard'
@@ -108,6 +138,12 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('EnergyCore')) return 'energy_core'
   if (input.id.includes('Battery') || input.id.includes('RepairKit')) return 'battery'
   if (input.id.includes('Drone')) return 'drone'
+  if (input.id.includes('Crown')) return 'crown'
+  if (input.id.includes('Flag')) return 'flag'
+  if (input.id.includes('Neon')) return 'neon'
+  if (input.id.includes('TrashCan')) return 'trash_can'
+  if (input.id.includes('Wings')) return 'wings'
+  if (input.id.includes('Style_Spikes')) return 'spikes'
   if (input.id.includes('LightBar')) return 'light_bar'
   if (input.id.includes('BladeAntenna')) return 'blade_antenna'
   if (input.id.includes('Antenna')) return 'antenna'
@@ -116,6 +152,60 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('TopHat') || input.id.includes('CowboyHat')) return 'hat'
 
   return 'body'
+}
+
+function inferRenderProfile(input: PartInput, visualFamily: PartVisualFamily): string {
+  return `${input.category}_${visualFamily}_v1`
+}
+
+function inferTextureProfile(materialRole: PartMaterialRole): string {
+  if (materialRole === 'black_rubber') return 'scuffed_rubber'
+  if (materialRole === 'electrical_casing') return 'dirty_electrical_casing'
+  if (materialRole === 'glass_emissive') return 'emissive_led_glass'
+  if (materialRole === 'cosmetic_shell') return 'scraped_style_shell'
+  if (materialRole === 'weapon_steel') return 'brushed_weapon_steel'
+
+  return 'painted_chipped_armor'
+}
+
+function inferDamageProfile(materialRole: PartMaterialRole): string {
+  if (materialRole === 'black_rubber') return 'scuffed_rubber'
+  if (materialRole === 'electrical_casing') return 'dirty_electrical_casing'
+  if (materialRole === 'glass_emissive') return 'emissive_led_glass'
+  if (materialRole === 'cosmetic_shell') return 'scraped_style_shell'
+  if (materialRole === 'weapon_steel') return 'brushed_weapon_steel'
+  if (materialRole === 'raw_metal' || materialRole === 'hazard_marked') return 'burnt_critical_metal'
+
+  return 'painted_chipped_armor'
+}
+
+function inferAnimationProfile(input: PartInput, visualFamily: PartVisualFamily): string {
+  if (visualFamily === 'wheel') return 'wheel_spin'
+  if (visualFamily === 'tread') return 'tread_scroll'
+  if (
+    visualFamily === 'spinner' ||
+    visualFamily === 'saw' ||
+    visualFamily === 'shredder' ||
+    visualFamily === 'drill' ||
+    visualFamily === 'flail' ||
+    visualFamily === 'chain_whip'
+  ) {
+    return 'spinner_spin'
+  }
+  if (visualFamily === 'hammer') return 'hammer_swing'
+  if (visualFamily === 'flipper') return 'flipper_snap'
+  if (visualFamily === 'grabber') return 'grabber_clamp'
+  if (visualFamily === 'turret') return 'turret_track'
+  if (visualFamily === 'wings') return 'wing_buffet'
+  if (visualFamily === 'dragon_head') return 'dragon_breath_idle'
+  if (visualFamily === 'neon' || visualFamily === 'light_bar') return 'neon_pulse'
+  if (input.id.includes('Tread')) return 'tread_scroll'
+
+  return 'none'
+}
+
+function inferReferenceIds(input: PartInput): string[] {
+  return PART_VISUAL_REFERENCE_IDS.has(input.id) ? [input.id] : []
 }
 
 function inferMaterialRole(input: PartInput): PartMaterialRole {
@@ -740,6 +830,54 @@ export const PART_CATALOG: PartDefinition[] = [
     },
   }),
   part({
+    id: 'Frame_Angled_Strut',
+    category: 'body',
+    displayName: 'Angled Frame Strut',
+    cost: 5,
+    mass: 3,
+    durability: 12,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'connector'],
+    stats: { stability: 2 },
+  }),
+  part({
+    id: 'Mount_Weapon_Hardpoint',
+    category: 'body',
+    displayName: 'Weapon Hardpoint Mount',
+    cost: 8,
+    mass: 4,
+    durability: 16,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'mount'],
+    stats: { stability: 1, control: 1 },
+    mounts: [
+      topMount(['weapon']),
+      surfaceMount(['utility', 'style']),
+    ],
+    visual: {
+      mountRole: 'top_mount',
+    },
+  }),
+  part({
+    id: 'Mount_Axle_Bracket',
+    category: 'body',
+    displayName: 'Axle Bracket Mount',
+    cost: 6,
+    mass: 4,
+    durability: 15,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'mount'],
+    stats: { stability: 2, traction: 1 },
+    mounts: [
+      sideMount('axle_left', ['mobility'], 'left'),
+      sideMount('axle_right', ['mobility'], 'right'),
+      surfaceMount(['utility', 'style']),
+    ],
+    visual: {
+      mountRole: 'side_mount',
+    },
+  }),
+  part({
     id: 'Spacer_Block',
     category: 'body',
     displayName: 'Spacer Block',
@@ -1050,6 +1188,46 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.grabber,
   }),
   part({
+    id: 'Weapon_Crusher',
+    category: 'weapon',
+    displayName: 'Crusher Jaw',
+    cost: 34,
+    mass: 13,
+    durability: 24,
+    size: [1, 1, 1],
+    controls: { weapon: true },
+    stats: { weapon: 11, control: 7, stability: -1 },
+    behavior: PART_BEHAVIORS.grabber,
+    spec: {
+      kind: 'weapon',
+      damage: 11,
+      range: 2,
+      cooldownTurns: 2,
+      fireMode: 'contact',
+      precision: 0.8,
+    },
+  }),
+  part({
+    id: 'Weapon_ForkLifter',
+    category: 'weapon',
+    displayName: 'Fork Lifter',
+    cost: 28,
+    mass: 11,
+    durability: 22,
+    size: [2, 1, 1],
+    controls: { weapon: true },
+    stats: { weapon: 7, control: 9, stability: 2 },
+    behavior: PART_BEHAVIORS.flipper,
+    spec: {
+      kind: 'weapon',
+      damage: 7,
+      range: 2,
+      cooldownTurns: 2,
+      fireMode: 'contact',
+      precision: 0.85,
+    },
+  }),
+  part({
     id: 'Weapon_Ram',
     category: 'weapon',
     displayName: 'Ram Plate',
@@ -1139,6 +1317,28 @@ export const PART_CATALOG: PartDefinition[] = [
       mountRole: 'exposed',
       visualFamily: 'armor',
     },
+  }),
+  part({
+    id: 'Armor_Standoff',
+    category: 'defense',
+    displayName: 'Armor Standoff',
+    cost: 7,
+    mass: 4,
+    durability: 17,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'armor'],
+    stats: { armor: 3, stability: 1 },
+  }),
+  part({
+    id: 'Armor_Sacrificial_Panel',
+    category: 'defense',
+    displayName: 'Sacrificial Armor Panel',
+    cost: 9,
+    mass: 5,
+    durability: 20,
+    size: [2, 1, 1],
+    tags: ['armor'],
+    stats: { armor: 4, chaos: 1 },
   }),
   part({
     id: 'Armor_Reactive',
@@ -1351,6 +1551,17 @@ export const PART_CATALOG: PartDefinition[] = [
     controls: { utility: true },
     stats: { control: 6, chaos: 2 },
     behavior: PART_BEHAVIORS.drone_controller,
+  }),
+  part({
+    id: 'Utility_ShockDamper',
+    category: 'utility',
+    displayName: 'Shock Damper',
+    cost: 11,
+    mass: 5,
+    durability: 14,
+    size: [1, 1, 1],
+    tags: ['structural', 'passive', 'suspension'],
+    stats: { stability: 4, traction: 1 },
   }),
   part({
     id: 'Counterweight',

@@ -6,6 +6,12 @@ import {
 } from '../../rendering/bladeGeometry'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
+import {
+  attachRoleMesh,
+  attachWeaponEdgeMesh,
+  tagRoleMesh,
+  tagWeaponEdgeMesh,
+} from './weaponRenderHelpers'
 
 export function createSawWeaponPart({
   scene,
@@ -68,9 +74,12 @@ export function createSawWeaponPart({
   blade.material = materials.steel
   hub.parent = bladeRoot
   hub.material = materials.trim
+  tagWeaponEdgeMesh(blade)
+  tagRoleMesh(hub, 'trim')
   bladeRoot.parent = parent
-  attachMesh(guard, parent, materials.trim)
+  attachRoleMesh(guard, parent, materials.trim, 'trim')
   attachMesh(motor, parent, material)
+  tagRoleMesh(motor, 'damageable')
   createBladeFaceDetails({
     scene,
     parent: bladeRoot,
@@ -95,7 +104,28 @@ export function createSawWeaponPart({
     )
 
     spoke.rotation.x = angle
-    attachMesh(spoke, bladeRoot, materials.trim)
+    attachRoleMesh(spoke, bladeRoot, materials.trim, 'trim')
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const angle = (Math.PI * 2 * index) / 4 + 0.28
+    const toothWear = MeshBuilder.CreateBox(
+      `${role}-${blockId}-saw-heat-stained-tooth-${index}`,
+      {
+        width: Math.max(bladeThickness * 0.92, 0.06),
+        height: Math.max(bladeDiameter * 0.035, 0.028),
+        depth: Math.max(bladeDiameter * 0.12, 0.07),
+      },
+      scene,
+    )
+
+    toothWear.position.set(
+      0,
+      Math.sin(angle) * bladeDiameter * 0.48,
+      Math.cos(angle) * bladeDiameter * 0.48,
+    )
+    toothWear.rotation.x = angle
+    attachWeaponEdgeMesh(toothWear, bladeRoot, materials.profile.burnt_critical_metal)
   }
 }
 
@@ -105,11 +135,13 @@ export function createSpinnerWeaponPart({
   material,
   role,
   blockId,
+  partId,
   width,
   height,
   depth,
   materials,
 }: WeaponPartRenderArgs): void {
+  const isLargeSpinner = partId === 'Weapon_Spinner_Large'
   const spinnerDiameter = Math.max(Math.max(width, depth) * 1.18, 0.98)
   const spinnerCenterY = Math.max(height * 0.72, 0.42)
   const spinnerCenterZ = Math.max(depth * 0.2, 0.16)
@@ -125,6 +157,15 @@ export function createSpinnerWeaponPart({
   const hub = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-spinner-hub`,
     { height: Math.max(height * 0.3, 0.16), diameter: Math.max(spinnerDiameter * 0.38, 0.26) },
+    scene,
+  )
+  const cutterRing = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-spinner-hardened-cutter-ring`,
+    {
+      diameter: spinnerDiameter * 0.96,
+      thickness: Math.max(height * 0.055, 0.035),
+      tessellation: 28,
+    },
     scene,
   )
   const gearbox = MeshBuilder.CreateBox(
@@ -149,6 +190,7 @@ export function createSpinnerWeaponPart({
 
   disc.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
+  cutterRing.rotation.z = Math.PI / 2
   spinnerRoot.position.set(0, spinnerCenterY, spinnerCenterZ)
   spinnerRoot.metadata = { kind: 'spin', axis: 'x', speed: 0.15 }
   gearbox.position.set(0, Math.max(height * 0.52, 0.3), -Math.max(depth * 0.24, 0.18))
@@ -156,10 +198,12 @@ export function createSpinnerWeaponPart({
   disc.parent = spinnerRoot
   hub.parent = spinnerRoot
   spinnerRoot.parent = parent
-  disc.material = material
-  hub.material = materials.trim
+  attachWeaponEdgeMesh(disc, spinnerRoot, material)
+  attachRoleMesh(hub, spinnerRoot, materials.trim, 'trim')
+  attachWeaponEdgeMesh(cutterRing, spinnerRoot, materials.steel)
   attachMesh(gearbox, parent, material)
-  attachMesh(upperCowl, parent, materials.trim)
+  tagRoleMesh(gearbox, 'damageable')
+  attachRoleMesh(upperCowl, parent, materials.trim, 'trim')
   createBladeFaceDetails({
     scene,
     parent: spinnerRoot,
@@ -186,6 +230,8 @@ export function createSpinnerWeaponPart({
   forkRight.position.set(Math.max(width * 0.36, 0.24), Math.max(height * 0.18, 0.12), 0.08)
   attachMesh(forkLeft, parent, material)
   attachMesh(forkRight, parent, material)
+  tagRoleMesh(forkLeft, 'damageable')
+  tagRoleMesh(forkRight, 'damageable')
 
   for (let index = 0; index < 6; index += 1) {
     const angle = (Math.PI * 2 * index) / 6
@@ -196,7 +242,7 @@ export function createSpinnerWeaponPart({
     )
 
     bar.rotation.x = angle
-    attachMesh(bar, spinnerRoot, materials.steel)
+    attachWeaponEdgeMesh(bar, spinnerRoot, materials.steel)
   }
 
   for (let index = 0; index < 10; index += 1) {
@@ -213,7 +259,42 @@ export function createSpinnerWeaponPart({
 
     bite.position.set(0, Math.sin(angle) * spinnerDiameter * 0.5, Math.cos(angle) * spinnerDiameter * 0.5)
     bite.rotation.x = angle
-    attachMesh(bite, spinnerRoot, materials.steel)
+    attachWeaponEdgeMesh(bite, spinnerRoot, materials.steel)
+  }
+
+  const strikerCount = isLargeSpinner ? 4 : 3
+  for (let index = 0; index < strikerCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / strikerCount + (isLargeSpinner ? 0.18 : 0.34)
+    const striker = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spinner-asymmetric-striker-${index}`,
+      {
+        width: Math.max(height * 0.18, 0.08),
+        height: Math.max(spinnerDiameter * (isLargeSpinner ? 0.12 : 0.095), 0.075),
+        depth: Math.max(spinnerDiameter * (isLargeSpinner ? 0.2 : 0.16), 0.11),
+      },
+      scene,
+    )
+
+    striker.position.set(0, Math.sin(angle) * spinnerDiameter * 0.43, Math.cos(angle) * spinnerDiameter * 0.43)
+    striker.rotation.x = angle + 0.24
+    attachWeaponEdgeMesh(striker, spinnerRoot, materials.warning)
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const angle = (Math.PI * 2 * index) / 4 + 0.4
+    const heatStain = MeshBuilder.CreateBox(
+      `${role}-${blockId}-spinner-heat-stained-edge-${index}`,
+      {
+        width: Math.max(height * 0.06, 0.035),
+        height: Math.max(spinnerDiameter * 0.045, 0.035),
+        depth: Math.max(spinnerDiameter * 0.16, 0.09),
+      },
+      scene,
+    )
+
+    heatStain.position.set(0, Math.sin(angle) * spinnerDiameter * 0.5, Math.cos(angle) * spinnerDiameter * 0.5)
+    heatStain.rotation.x = angle
+    attachWeaponEdgeMesh(heatStain, spinnerRoot, materials.profile.burnt_critical_metal)
   }
 }
 

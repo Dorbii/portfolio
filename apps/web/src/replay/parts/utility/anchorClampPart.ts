@@ -1,7 +1,8 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
-import { attachMesh, createRampBlock, degreesToRadians } from '../../rendering/meshHelpers'
+import { createRampBlock, degreesToRadians } from '../../rendering/meshHelpers'
 import { createPbrSceneMaterial } from '../../rendering/sceneUtils'
 import type { UtilityPartRenderArgs } from './types'
+import { attachUtilityMesh } from './utilityFrame'
 
 export function createAnchorClampPart({
   scene,
@@ -82,9 +83,9 @@ export function createAnchorClampPart({
   ballastSlab.position.y = baseY
   armorCap.position.y = topPlateY
   rubberPad.position.y = skidY
-  attachMesh(ballastSlab, parent, ballastMaterial)
-  attachMesh(armorCap, parent, darkSteelMaterial)
-  attachMesh(rubberPad, parent, rubberMaterial)
+  attachUtilityMesh(ballastSlab, parent, ballastMaterial, 'damageable')
+  attachUtilityMesh(armorCap, parent, darkSteelMaterial, 'weapon_edge')
+  attachUtilityMesh(rubberPad, parent, rubberMaterial, 'rubber')
 
   const plungerHousing = MeshBuilder.CreateCylinder(
     `${role}-${blockId}-anchor-floor-lock-plunger-housing`,
@@ -109,8 +110,8 @@ export function createAnchorClampPart({
   plungerHousing.position.set(0, topPlateY + Math.max(height * 0.12, 0.07), Math.max(depth * 0.18, 0.1))
   dropSpike.rotation.x = Math.PI
   dropSpike.position.set(0, skidY - Math.max(height * 0.1, 0.06), Math.max(depth * 0.18, 0.1))
-  attachMesh(plungerHousing, parent, darkSteelMaterial)
-  attachMesh(dropSpike, parent, materials.steel)
+  attachUtilityMesh(plungerHousing, parent, darkSteelMaterial, 'weapon_edge')
+  attachUtilityMesh(dropSpike, parent, materials.steel, 'weapon_edge')
 
   for (const side of [-1, 1]) {
     const guideTower = MeshBuilder.CreateBox(
@@ -135,8 +136,8 @@ export function createAnchorClampPart({
     guideTower.position.set(side * Math.max(width * 0.16, 0.09), topPlateY + Math.max(height * 0.16, 0.09), Math.max(depth * 0.18, 0.1))
     towerPin.rotation.z = Math.PI / 2
     towerPin.position.set(guideTower.position.x, guideTower.position.y + Math.max(height * 0.05, 0.03), guideTower.position.z)
-    attachMesh(guideTower, parent, darkSteelMaterial)
-    attachMesh(towerPin, parent, materials.steel)
+    attachUtilityMesh(guideTower, parent, darkSteelMaterial, 'weapon_edge')
+    attachUtilityMesh(towerPin, parent, materials.steel, 'weapon_edge')
   }
 
   for (const side of [-1, 1]) {
@@ -161,8 +162,8 @@ export function createAnchorClampPart({
 
     weightPlate.position.set(side * baseWidth * 0.22, armorCap.position.y + Math.max(height * 0.07, 0.04), -baseDepth * 0.12)
     weightBoss.position.set(weightPlate.position.x, weightPlate.position.y + Math.max(height * 0.035, 0.02), weightPlate.position.z)
-    attachMesh(weightPlate, parent, materials.steel)
-    attachMesh(weightBoss, parent, ballastMaterial)
+    attachUtilityMesh(weightPlate, parent, materials.steel, 'weapon_edge')
+    attachUtilityMesh(weightBoss, parent, ballastMaterial, 'damageable')
   }
 
   for (let layer = 0; layer < 3; layer += 1) {
@@ -177,7 +178,7 @@ export function createAnchorClampPart({
     )
 
     weightLayer.position.set(0, topPlateY + Math.max(height * (0.12 + layer * 0.045), 0.07 + layer * 0.026), -baseDepth * 0.28)
-    attachMesh(weightLayer, parent, layer % 2 === 0 ? darkSteelMaterial : materials.steel)
+    attachUtilityMesh(weightLayer, parent, layer % 2 === 0 ? darkSteelMaterial : materials.steel, layer % 2 === 0 ? 'weapon_edge' : 'damageable')
   }
 
   for (const side of [-1, 1]) {
@@ -243,12 +244,12 @@ export function createAnchorClampPart({
     sideWeight.rotation.z = Math.PI / 2
     sideWeight.position.set(side * Math.max(width * 0.48, 0.28), baseY + Math.max(height * 0.04, 0.026), -Math.max(depth * 0.22, 0.13))
     hingeBlock.position.set(side * Math.max(width * 0.28, 0.17), topPlateY + Math.max(height * 0.03, 0.018), railZ)
-    attachMesh(skidRail, parent, darkSteelMaterial)
-    attachMesh(outriggerArm, parent, materials.steel)
-    attachMesh(lockingPin, parent, materials.steel)
-    attachMesh(floorFoot, parent, rubberMaterial)
-    attachMesh(sideWeight, parent, darkSteelMaterial)
-    attachMesh(hingeBlock, parent, darkSteelMaterial)
+    attachUtilityMesh(skidRail, parent, darkSteelMaterial, 'weapon_edge')
+    attachUtilityMesh(outriggerArm, parent, materials.steel, 'weapon_edge')
+    attachUtilityMesh(lockingPin, parent, materials.steel, 'weapon_edge')
+    attachUtilityMesh(floorFoot, parent, rubberMaterial, 'rubber')
+    attachUtilityMesh(sideWeight, parent, darkSteelMaterial, 'weapon_edge')
+    attachUtilityMesh(hingeBlock, parent, darkSteelMaterial, 'weapon_edge')
   }
 
   for (let index = 0; index < 6; index += 1) {
@@ -271,7 +272,7 @@ export function createAnchorClampPart({
       skidY - Math.max(height * 0.08, 0.045),
       row * Math.max(depth * 0.23, 0.13),
     )
-    attachMesh(tooth, parent, materials.warning)
+    attachUtilityMesh(tooth, parent, materials.warning, 'trim')
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -288,7 +289,7 @@ export function createAnchorClampPart({
 
     serration.rotation.y = side > 0 ? degreesToRadians(90) : degreesToRadians(-90)
     serration.position.set(side * Math.max(width * 0.4, 0.23), skidY - Math.max(height * 0.035, 0.02), lane * Math.max(depth * 0.16, 0.09))
-    attachMesh(serration, parent, darkSteelMaterial)
+    attachUtilityMesh(serration, parent, darkSteelMaterial, 'weapon_edge')
   }
 
   for (let index = 0; index < 4; index += 1) {
@@ -304,7 +305,7 @@ export function createAnchorClampPart({
 
     stripe.position.set((index - 1.5) * Math.max(width * 0.14, 0.08), armorCap.position.y + Math.max(height * 0.045, 0.024), -baseDepth * 0.36)
     stripe.rotation.y = -0.46
-    attachMesh(stripe, parent, materials.warning)
+    attachUtilityMesh(stripe, parent, materials.warning, 'trim')
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -321,7 +322,7 @@ export function createAnchorClampPart({
     const laneZ = Math.floor(index / 2) - 1.5
 
     bolt.position.set(sideX * baseWidth * 0.38, armorCap.position.y + Math.max(height * 0.05, 0.03), laneZ * baseDepth * 0.18)
-    attachMesh(bolt, parent, materials.steel)
+    attachUtilityMesh(bolt, parent, materials.steel, 'weapon_edge')
   }
 
   const loadIndicator = MeshBuilder.CreateBox(
@@ -335,5 +336,5 @@ export function createAnchorClampPart({
   )
 
   loadIndicator.position.set(0, armorCap.position.y + Math.max(height * 0.06, 0.035), baseDepth * 0.36)
-  attachMesh(loadIndicator, parent, material)
+  attachUtilityMesh(loadIndicator, parent, material, 'damageable')
 }

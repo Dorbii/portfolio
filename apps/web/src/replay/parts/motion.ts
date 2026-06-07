@@ -4,7 +4,24 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 export type PartMotionAxis = 'x' | 'y' | 'z'
 export type PartMotionKind = 'pulse' | 'roll' | 'smoke' | 'spin' | 'thrust'
 
+export const PART_ANIMATION_PROFILES = [
+  'wheel_spin',
+  'tread_scroll',
+  'spinner_spin',
+  'hammer_swing',
+  'flipper_snap',
+  'grabber_clamp',
+  'turret_track',
+  'wing_buffet',
+  'dragon_breath_idle',
+  'neon_pulse',
+  'none',
+] as const
+
+export type PartAnimationProfileId = (typeof PART_ANIMATION_PROFILES)[number]
+
 type PartMotionBaseMetadata = {
+  animationProfile?: PartAnimationProfileId
   motionBasePosition?: [number, number, number]
   motionBaseRotation?: [number, number, number]
   motionBaseScaling?: [number, number, number]
@@ -25,6 +42,45 @@ type ScalarPartMotionMetadata = PartMotionBaseMetadata & {
 export type PartMotionMetadata = RotaryPartMotionMetadata | ScalarPartMotionMetadata
 
 const MOTION_SPEED_SCALE = 28
+const PART_ANIMATION_PROFILE_SET = new Set<string>(PART_ANIMATION_PROFILES)
+
+export function isPartAnimationProfile(value: unknown): value is PartAnimationProfileId {
+  return typeof value === 'string' && PART_ANIMATION_PROFILE_SET.has(value)
+}
+
+export function motionMetadataForAnimationProfile(
+  animationProfile: string | undefined,
+): PartMotionMetadata | null {
+  if (!isPartAnimationProfile(animationProfile) || animationProfile === 'none') {
+    return null
+  }
+
+  if (animationProfile === 'wheel_spin') {
+    return { animationProfile, kind: 'roll', axis: 'x', speed: 0.08 }
+  }
+
+  if (animationProfile === 'tread_scroll') {
+    return { animationProfile, kind: 'roll', axis: 'z', speed: 0.055 }
+  }
+
+  if (animationProfile === 'spinner_spin') {
+    return { animationProfile, kind: 'spin', axis: 'z', speed: 0.14 }
+  }
+
+  if (animationProfile === 'turret_track') {
+    return { animationProfile, kind: 'spin', axis: 'y', speed: 0.025 }
+  }
+
+  if (animationProfile === 'neon_pulse') {
+    return { animationProfile, kind: 'pulse', speed: 0.035 }
+  }
+
+  if (animationProfile === 'dragon_breath_idle') {
+    return { animationProfile, kind: 'thrust', speed: 0.025 }
+  }
+
+  return { animationProfile, kind: 'pulse', speed: 0.02 }
+}
 
 export function isPartMotionNode(node: unknown): node is TransformNode {
   if (!(node instanceof TransformNode)) {

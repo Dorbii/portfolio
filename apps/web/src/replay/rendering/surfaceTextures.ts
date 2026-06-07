@@ -8,6 +8,13 @@ export type SurfacePattern =
   | 'weapon'
   | 'utility'
   | 'style'
+  | 'painted_chipped_armor'
+  | 'brushed_weapon_steel'
+  | 'scuffed_rubber'
+  | 'dirty_electrical_casing'
+  | 'emissive_led_glass'
+  | 'burnt_critical_metal'
+  | 'scraped_style_shell'
   | 'damage_light'
   | 'damage_medium'
   | 'damage_critical'
@@ -61,6 +68,31 @@ export function isDamageSurfacePattern(pattern: SurfacePattern): boolean {
   return pattern === 'damage_light'
     || pattern === 'damage_medium'
     || pattern === 'damage_critical'
+    || pattern === 'burnt_critical_metal'
+}
+
+function isRubberSurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'rubber' || pattern === 'scuffed_rubber'
+}
+
+function isMobilitySurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'mobility' || pattern === 'scuffed_rubber'
+}
+
+function isWeaponSurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'weapon' || pattern === 'brushed_weapon_steel'
+}
+
+function isUtilitySurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'utility' || pattern === 'dirty_electrical_casing'
+}
+
+function isLightSurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'light' || pattern === 'emissive_led_glass'
+}
+
+function isArmorSurfacePattern(pattern: SurfacePattern): boolean {
+  return pattern === 'armor' || pattern === 'painted_chipped_armor'
 }
 
 function createSurfaceTexture(
@@ -71,29 +103,29 @@ function createSurfaceTexture(
 ): DynamicTexture {
   const texture = new DynamicTexture(`${name}-albedo`, { width: TEXTURE_SIZE, height: TEXTURE_SIZE }, scene, true)
   const context = texture.getContext()
-  const dark = rgbaFromHex('#020304', pattern === 'rubber' ? 0.58 : 0.42)
+  const dark = rgbaFromHex('#020304', isRubberSurfacePattern(pattern) ? 0.58 : 0.42)
   const light = createSurfaceHighlight(pattern)
 
   context.fillStyle = baseColor
   context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
   drawGrimeGradient(context, pattern)
 
-  if (pattern === 'rubber' || pattern === 'mobility') {
+  if (isMobilitySurfacePattern(pattern)) {
     drawTreadTexture(context, dark, light)
-  } else if (pattern === 'weapon') {
+  } else if (isWeaponSurfacePattern(pattern)) {
     drawWeaponTexture(context, dark)
   } else if (pattern === 'warning') {
     drawWarningTexture(context, dark, light)
-  } else if (pattern === 'utility') {
+  } else if (isUtilitySurfacePattern(pattern)) {
     drawUtilityTexture(context, dark, light)
   } else if (isDamageSurfacePattern(pattern)) {
     drawDamageTexture(context, pattern)
-  } else if (pattern === 'light') {
+  } else if (isLightSurfacePattern(pattern)) {
     drawLightTexture(context, light)
   } else if (pattern === 'arena_floor' || pattern === 'arena_apron') {
     drawArenaTexture(context, pattern)
   } else {
-    drawPanelTexture(context, dark, light, pattern === 'armor' ? 84 : 92)
+    drawPanelTexture(context, dark, light, isArmorSurfacePattern(pattern) ? 84 : 92)
   }
 
   drawEdgeWear(context, pattern)
@@ -113,7 +145,7 @@ function createOrmTexture(
 ): DynamicTexture {
   const texture = new DynamicTexture(`${name}-orm`, { width: TEXTURE_SIZE, height: TEXTURE_SIZE }, scene, true)
   const context = texture.getContext()
-  const occlusionBase = pattern === 'rubber'
+  const occlusionBase = isRubberSurfacePattern(pattern)
     ? 150
     : pattern === 'arena_floor' || pattern === 'arena_apron'
       ? 132
@@ -122,7 +154,7 @@ function createOrmTexture(
   const metallicBase = Math.round(metallic * 255)
   const seamStep = isDamageSurfacePattern(pattern)
     ? 62
-    : pattern === 'mobility'
+    : isMobilitySurfacePattern(pattern)
       ? 34
       : pattern === 'arena_floor'
         ? 96
@@ -157,10 +189,10 @@ function createNormalTexture(
 
   context.fillStyle = 'rgb(128,128,255)'
   context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
-  context.strokeStyle = pattern === 'rubber' ? 'rgb(116,128,246)' : 'rgb(116,122,242)'
-  context.lineWidth = pattern === 'rubber' || pattern === 'mobility' ? 9 : 5
+  context.strokeStyle = isRubberSurfacePattern(pattern) ? 'rgb(116,128,246)' : 'rgb(116,122,242)'
+  context.lineWidth = isMobilitySurfacePattern(pattern) ? 9 : 5
 
-  if (pattern === 'rubber' || pattern === 'mobility') {
+  if (isMobilitySurfacePattern(pattern)) {
     for (let y = 16; y < TEXTURE_SIZE; y += 30) {
       drawLine(context, 0, y, TEXTURE_SIZE, y)
     }
@@ -169,7 +201,7 @@ function createNormalTexture(
       ? 68
       : pattern === 'arena_floor'
         ? 96
-        : pattern === 'armor'
+        : isArmorSurfacePattern(pattern)
           ? 84
           : 92
 
@@ -189,10 +221,10 @@ function createNormalTexture(
 }
 
 function applyTextureScale(texture: DynamicTexture, pattern: SurfacePattern): void {
-  texture.uScale = pattern === 'rubber' || pattern === 'mobility' ? 3.4 : 2.2
-  texture.vScale = pattern === 'rubber' || pattern === 'mobility' ? 2.8 : 2.2
+  texture.uScale = isMobilitySurfacePattern(pattern) ? 3.4 : 2.2
+  texture.vScale = isMobilitySurfacePattern(pattern) ? 2.8 : 2.2
 
-  if (pattern === 'weapon') {
+  if (isWeaponSurfacePattern(pattern)) {
     texture.uScale = 2.7
     texture.vScale = 1.7
   }
@@ -424,15 +456,15 @@ function drawDamageTexture(context: TextureDrawingContext, pattern: SurfacePatte
 function drawGrimeGradient(context: TextureDrawingContext, pattern: SurfacePattern): void {
   const gradient = context.createLinearGradient(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
 
-  gradient.addColorStop(0, rgbaFromHex('#ffffff', pattern === 'light' ? 0.08 : 0.04))
-  gradient.addColorStop(0.45, rgbaFromHex('#000000', pattern === 'rubber' ? 0.1 : 0.06))
+  gradient.addColorStop(0, rgbaFromHex('#ffffff', isLightSurfacePattern(pattern) ? 0.08 : 0.04))
+  gradient.addColorStop(0.45, rgbaFromHex('#000000', isRubberSurfacePattern(pattern) ? 0.1 : 0.06))
   gradient.addColorStop(1, rgbaFromHex('#000000', isDamageSurfacePattern(pattern) ? 0.28 : 0.18))
   context.fillStyle = gradient
   context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
 }
 
 function drawEdgeWear(context: TextureDrawingContext, pattern: SurfacePattern): void {
-  if (pattern === 'rubber' || pattern === 'light') {
+  if (isRubberSurfacePattern(pattern) || isLightSurfacePattern(pattern)) {
     return
   }
 
@@ -446,7 +478,7 @@ function drawEdgeWear(context: TextureDrawingContext, pattern: SurfacePattern): 
       ? 0.22
       : pattern === 'arena_floor'
         ? 0.11
-      : pattern === 'weapon' || pattern === 'warning'
+      : isWeaponSurfacePattern(pattern) || pattern === 'warning'
         ? 0.18
         : 0.1,
   )
@@ -460,7 +492,7 @@ function drawEdgeWear(context: TextureDrawingContext, pattern: SurfacePattern): 
 function createSurfaceHighlight(pattern: SurfacePattern): string {
   return rgbaFromHex(
     isCoolMetalPattern(pattern) ? '#dce7e2' : '#c8c0aa',
-    pattern === 'light' ? 0.32 : 0.16,
+    isLightSurfacePattern(pattern) ? 0.32 : 0.16,
   )
 }
 
@@ -471,12 +503,16 @@ function isCoolMetalPattern(pattern: SurfacePattern): boolean {
     || pattern === 'utility'
     || pattern === 'style'
     || pattern === 'trim'
+    || pattern === 'painted_chipped_armor'
+    || pattern === 'brushed_weapon_steel'
+    || pattern === 'dirty_electrical_casing'
+    || pattern === 'scraped_style_shell'
 }
 
 function drawScuffs(context: TextureDrawingContext, pattern: SurfacePattern): void {
-  context.strokeStyle = rgbaFromHex('#ffffff', isDamageSurfacePattern(pattern) ? 0.18 : pattern === 'weapon' ? 0.22 : 0.12)
-  context.lineWidth = pattern === 'weapon' ? 3 : 2
-  drawDeterministicScratches(context, pattern === 'rubber' ? 14 : pattern === 'arena_floor' ? 38 : 24, 19)
+  context.strokeStyle = rgbaFromHex('#ffffff', isDamageSurfacePattern(pattern) ? 0.18 : isWeaponSurfacePattern(pattern) ? 0.22 : 0.12)
+  context.lineWidth = isWeaponSurfacePattern(pattern) ? 3 : 2
+  drawDeterministicScratches(context, isRubberSurfacePattern(pattern) ? 14 : pattern === 'arena_floor' ? 38 : 24, 19)
 }
 
 function drawDeterministicScratches(

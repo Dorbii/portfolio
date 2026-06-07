@@ -6,6 +6,10 @@ import type { TeamMaterialSet } from '../../rendering/materials'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { attachMesh, createBoxDetail, createRampBlock } from '../../rendering/meshHelpers'
 import { createExtrudedPlateFromOutline, createExtrudedVerticalPlateFromOutline } from './plateGeometry'
+import {
+  attachStyleMesh,
+  tagStyleMesh,
+} from './styleMeshTags'
 
 export function createDragonHeadPart(
   scene: Scene,
@@ -58,6 +62,25 @@ export function createDragonHeadPart(
   createBoxDetail(scene, parent, materials.trim, `${role}-${blockId}-dragon-lower-jaw-guard`, 0.24, 0.045, 0.44, 0, 0.12, 0.56)
   createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-brow-armored`, 0.34, 0.045, 0.055, 0, 0.43, 0.43)
   createBoxDetail(scene, parent, materials.trim, `${role}-${blockId}-dragon-top-service-plate`, 0.22, 0.032, 0.22, 0, 0.61, -0.05)
+
+  const throatGlow = MeshBuilder.CreateSphere(
+    `${role}-${blockId}-dragon-idle-breath-throat-glow`,
+    { diameter: 0.12, segments: 12 },
+    scene,
+  )
+  const mouthHeatCore = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-dragon-idle-heat-core`,
+    { height: 0.18, diameterTop: 0.035, diameterBottom: 0.075, tessellation: 10 },
+    scene,
+  )
+
+  throatGlow.position.set(0, 0.25, 0.42)
+  throatGlow.metadata = { kind: 'pulse', speed: 0.014 }
+  mouthHeatCore.position.set(0, 0.19, 0.62)
+  mouthHeatCore.rotation.x = Math.PI / 2
+  mouthHeatCore.metadata = { kind: 'thrust', speed: 0.018 }
+  attachStyleMesh(throatGlow, parent, materials.light, 'emissive')
+  attachStyleMesh(mouthHeatCore, parent, materials.light, 'emissive')
 
   for (const side of [-1, 1]) {
     const sidePlate = createExtrudedVerticalPlateFromOutline(
@@ -123,6 +146,16 @@ export function createDragonHeadPart(
       { height: 0.085, diameter: 0.026, tessellation: 8 },
       scene,
     )
+    const nostrilGlow = MeshBuilder.CreateSphere(
+      `${role}-${blockId}-dragon-nostril-idle-glow-${side}`,
+      { diameter: 0.036, segments: 8 },
+      scene,
+    )
+    const cheekActuator = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-dragon-jaw-cheek-actuator-${side}`,
+      { height: 0.25, diameter: 0.024, tessellation: 8 },
+      scene,
+    )
 
     sidePlate.position.x = side * 0.2
     lowerJawPlate.position.x = side * 0.17
@@ -138,15 +171,22 @@ export function createDragonHeadPart(
     sideGear.rotation.y = Math.PI / 2
     nostril.position.set(side * 0.09, 0.25, 0.78)
     nostril.rotation.x = Math.PI / 2
+    nostrilGlow.position.set(side * 0.09, 0.25, 0.825)
+    nostrilGlow.metadata = { kind: 'pulse', speed: 0.01, phase: side > 0 ? Math.PI * 0.35 : Math.PI * 1.35 }
+    cheekActuator.position.set(side * 0.23, 0.22, 0.38)
+    cheekActuator.rotation.x = Math.PI / 2
+    cheekActuator.rotation.z = side * 0.18
 
     attachMesh(sidePlate, parent, materials.trim)
     attachMesh(lowerJawPlate, parent, materials.trim)
-    attachMesh(eye, parent, materials.light)
+    attachStyleMesh(eye, parent, materials.light, 'emissive')
     attachMesh(horn, parent, materials.steel)
     attachMesh(sideFin, parent, material)
     attachMesh(hornSocket, parent, material)
     attachMesh(sideGear, parent, materials.steel)
     attachMesh(nostril, parent, materials.steel)
+    attachStyleMesh(nostrilGlow, parent, materials.light, 'emissive')
+    attachStyleMesh(cheekActuator, parent, materials.steel, 'weapon_edge')
   }
 
   for (let index = -3; index <= 3; index += 1) {
@@ -181,6 +221,9 @@ export function createDragonHeadPart(
   }
 
   for (let index = -1; index <= 1; index += 1) {
-    createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-neck-fastener-${index + 1}`, 0.045, 0.025, 0.045, index * 0.13, 0.23, -0.18)
+    tagStyleMesh(
+      createBoxDetail(scene, parent, materials.steel, `${role}-${blockId}-dragon-neck-fastener-${index + 1}`, 0.045, 0.025, 0.045, index * 0.13, 0.23, -0.18),
+      'weapon_edge',
+    )
   }
 }

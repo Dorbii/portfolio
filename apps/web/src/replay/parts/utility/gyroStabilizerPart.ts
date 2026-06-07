@@ -2,6 +2,7 @@ import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { UtilityPartRenderArgs } from './types'
+import { attachUtilityMesh } from './utilityFrame'
 
 export function createGyroStabilizerPart({
   scene,
@@ -192,6 +193,49 @@ export function createGyroStabilizerPart({
     pivotSaddle.position.set(side * axleLength * 0.5, cageY, 0)
     pivotSaddle.rotation.z = Math.PI / 2
     attachMesh(pivotSaddle, parent, materials.steel)
+  }
+
+  for (const side of [-1, 1]) {
+    const damperStrut = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-gyro-oil-damper-strut-${side}`,
+      {
+        height: Math.max(height * 0.56, 0.32),
+        diameter: Math.max(width * 0.032, 0.022),
+        tessellation: 10,
+      },
+      scene,
+    )
+    const servoBlock = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-servo-trim-block-${side}`,
+      {
+        width: Math.max(width * 0.12, 0.07),
+        height: Math.max(height * 0.09, 0.052),
+        depth: Math.max(depth * 0.14, 0.08),
+      },
+      scene,
+    )
+
+    damperStrut.position.set(side * Math.max(width * 0.26, 0.15), cageY - Math.max(height * 0.08, 0.05), Math.max(depth * 0.24, 0.14))
+    damperStrut.rotation.z = side * 0.46
+    servoBlock.position.set(side * Math.max(width * 0.34, 0.2), baseY + Math.max(height * 0.18, 0.1), Math.max(depth * 0.26, 0.15))
+    attachUtilityMesh(damperStrut, parent, materials.steel, 'weapon_edge')
+    attachUtilityMesh(servoBlock, parent, materials.trim, 'trim')
+  }
+
+  for (let index = 0; index < 5; index += 1) {
+    const tick = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-calibration-tick-${index}`,
+      {
+        width: Math.max(width * 0.035, 0.022),
+        height: Math.max(height * 0.014, 0.01),
+        depth: Math.max(depth * 0.12, 0.07),
+      },
+      scene,
+    )
+    const offset = index - 2
+
+    tick.position.set(offset * Math.max(width * 0.08, 0.045), baseY + Math.max(height * 0.13, 0.075), baseDepth * 0.32)
+    attachUtilityMesh(tick, parent, index === 2 ? material : materials.warning, index === 2 ? 'damageable' : 'trim')
   }
 
   const teamIndex = MeshBuilder.CreateBox(

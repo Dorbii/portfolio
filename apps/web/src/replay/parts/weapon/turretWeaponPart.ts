@@ -2,6 +2,11 @@ import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
+import {
+  attachRoleMesh,
+  attachWeaponEdgeMesh,
+  tagRoleMesh,
+} from './weaponRenderHelpers'
 
 export function createTurretWeaponPart({
   scene,
@@ -67,10 +72,11 @@ export function createTurretWeaponPart({
   rearCounterweight.rotation.z = Math.PI / 2
   frontCollar.position.set(0, barrelRootY, barrelRootZ)
   frontCollar.rotation.x = Math.PI / 2
-  attachMesh(receiver, parent, materials.trim)
+  attachRoleMesh(receiver, parent, materials.trim, 'damageable')
   attachMesh(topArmor, parent, material)
-  attachMesh(rearCounterweight, parent, materials.steel)
-  attachMesh(frontCollar, parent, materials.steel)
+  tagRoleMesh(topArmor, 'damageable')
+  attachRoleMesh(rearCounterweight, parent, materials.steel, 'trim')
+  attachRoleMesh(frontCollar, parent, materials.steel, 'trim')
 
   createSideYokes({ scene, parent, role, blockId, width, height, depth, receiverY, receiverZ, materials })
   createCoolingAndServiceDetails({ scene, parent, role, blockId, width, height, depth, receiverY, receiverZ, materials })
@@ -135,9 +141,9 @@ function createTurntableBase({
   turntable.position.y = baseY
   pedestal.position.y = pedestalY
   gearRing.position.y = baseY + Math.max(height * 0.09, 0.05)
-  attachMesh(turntable, parent, materials.trim)
-  attachMesh(pedestal, parent, materials.steel)
-  attachMesh(gearRing, parent, materials.steel)
+  attachRoleMesh(turntable, parent, materials.trim, 'trim')
+  attachRoleMesh(pedestal, parent, materials.steel, 'damageable')
+  attachRoleMesh(gearRing, parent, materials.steel, 'trim')
 
   for (let index = 0; index < 10; index += 1) {
     const angle = (Math.PI * 2 * index) / 10
@@ -163,8 +169,25 @@ function createTurntableBase({
     foot.position.set(Math.sin(angle) * baseDiameter * 0.48, Math.max(height * 0.08, 0.05), Math.cos(angle) * baseDiameter * 0.48)
     foot.rotation.y = angle
     bolt.position.set(Math.sin(angle) * baseDiameter * 0.34, baseY + Math.max(height * 0.08, 0.045), Math.cos(angle) * baseDiameter * 0.34)
-    attachMesh(foot, parent, materials.steel)
-    attachMesh(bolt, parent, materials.steel)
+    attachRoleMesh(foot, parent, materials.steel, 'trim')
+    attachRoleMesh(bolt, parent, materials.steel, 'trim')
+  }
+
+  for (let index = 0; index < 12; index += 1) {
+    const angle = (Math.PI * 2 * index) / 12
+    const tooth = MeshBuilder.CreateBox(
+      `${role}-${blockId}-turret-traverse-index-tooth-${index}`,
+      {
+        width: Math.max(width * 0.055, 0.035),
+        height: Math.max(height * 0.045, 0.028),
+        depth: Math.max(depth * 0.09, 0.055),
+      },
+      scene,
+    )
+
+    tooth.position.set(Math.sin(angle) * baseDiameter * 0.42, baseY + Math.max(height * 0.13, 0.07), Math.cos(angle) * baseDiameter * 0.42)
+    tooth.rotation.y = angle
+    attachRoleMesh(tooth, parent, index % 3 === 0 ? materials.warning : materials.trim, 'trim')
   }
 }
 
@@ -219,9 +242,9 @@ function createSideYokes({
     pivotCap.rotation.z = Math.PI / 2
     brace.position.set(side * Math.max(width * 0.34, 0.22), Math.max(height * 0.32, 0.2), receiverZ - Math.max(depth * 0.2, 0.14))
     brace.rotation.x = side * 0.18
-    attachMesh(sidePlate, parent, materials.trim)
-    attachMesh(pivotCap, parent, materials.steel)
-    attachMesh(brace, parent, materials.steel)
+    attachRoleMesh(sidePlate, parent, materials.trim, 'trim')
+    attachRoleMesh(pivotCap, parent, materials.steel, 'trim')
+    attachRoleMesh(brace, parent, materials.steel, 'trim')
   }
 }
 
@@ -282,9 +305,9 @@ function createRotaryBarrelCluster({
   centerShaft.rotation.x = Math.PI / 2
   frontPlate.position.z = barrelLength * 0.78
   centerShaft.position.z = barrelLength * 0.42
-  attachMesh(rearPlate, barrelRoot, materials.steel)
-  attachMesh(frontPlate, barrelRoot, materials.steel)
-  attachMesh(centerShaft, barrelRoot, materials.trim)
+  attachRoleMesh(rearPlate, barrelRoot, materials.steel, 'trim')
+  attachRoleMesh(frontPlate, barrelRoot, materials.steel, 'trim')
+  attachRoleMesh(centerShaft, barrelRoot, materials.trim, 'trim')
 
   for (let index = 0; index < 6; index += 1) {
     const angle = (Math.PI * 2 * index) / 6
@@ -317,16 +340,28 @@ function createRotaryBarrelCluster({
       },
       scene,
     )
+    const bore = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-turret-dark-bore-${index}`,
+      {
+        height: Math.max(depth * 0.025, 0.02),
+        diameter: Math.max(width * 0.034, 0.023),
+        tessellation: 10,
+      },
+      scene,
+    )
 
     barrel.rotation.x = Math.PI / 2
     muzzle.rotation.x = Math.PI / 2
+    bore.rotation.x = Math.PI / 2
     barrel.position.set(x, y, barrelLength * 0.42)
     muzzle.position.set(x, y, barrelLength * 0.92)
+    bore.position.set(x, y, barrelLength * 0.975)
     heatSleeve.position.set(x * 0.96, y * 0.96, barrelLength * 0.36)
     heatSleeve.rotation.z = angle
-    attachMesh(barrel, barrelRoot, materials.steel)
-    attachMesh(muzzle, barrelRoot, materials.trim)
-    attachMesh(heatSleeve, barrelRoot, materials.warning)
+    attachWeaponEdgeMesh(barrel, barrelRoot, materials.steel)
+    attachWeaponEdgeMesh(muzzle, barrelRoot, materials.trim)
+    attachRoleMesh(bore, barrelRoot, materials.rubber, 'rubber')
+    attachRoleMesh(heatSleeve, barrelRoot, materials.warning, 'trim')
   }
 }
 
@@ -375,9 +410,9 @@ function createCoolingAndServiceDetails({
   sensorLens.position.set(0, receiverY + Math.max(height * 0.2, 0.12), receiverZ + Math.max(depth * 0.28, 0.22))
   statusLed.position.set(Math.max(width * 0.22, 0.13), receiverY + Math.max(height * 0.24, 0.15), receiverZ + Math.max(depth * 0.16, 0.1))
   sensorLens.rotation.x = Math.PI / 2
-  attachMesh(topSight, parent, materials.trim)
-  attachMesh(sensorLens, parent, materials.light)
-  attachMesh(statusLed, parent, materials.light)
+  attachRoleMesh(topSight, parent, materials.trim, 'trim')
+  attachRoleMesh(sensorLens, parent, materials.light, 'glass')
+  attachRoleMesh(statusLed, parent, materials.light, 'emissive')
 
   for (let index = 0; index < 5; index += 1) {
     const vent = MeshBuilder.CreateBox(
@@ -395,7 +430,7 @@ function createCoolingAndServiceDetails({
       receiverY + Math.max(height * 0.12, 0.075),
       receiverZ - Math.max(depth * 0.17, 0.12),
     )
-    attachMesh(vent, parent, materials.steel)
+    attachRoleMesh(vent, parent, materials.steel, 'trim')
   }
 
   for (let index = 0; index < 8; index += 1) {
@@ -417,6 +452,6 @@ function createCoolingAndServiceDetails({
       receiverZ + Math.max(depth * 0.22, 0.14),
     )
     bolt.rotation.x = Math.PI / 2
-    attachMesh(bolt, parent, materials.steel)
+    attachRoleMesh(bolt, parent, materials.steel, 'trim')
   }
 }

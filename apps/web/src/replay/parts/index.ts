@@ -21,26 +21,44 @@ import {
   degreesToRadians,
 } from '../rendering/meshHelpers'
 import { createMobilityPart } from './mobility'
-import { materialForCategory } from '../rendering/materials'
+import {
+  materialForTextureProfile,
+} from '../rendering/materials'
 import type {
-  DamageMaterialSet,
+  BotPartChildMaterialRole,
+  DamageMaterialByRole,
   TeamMaterialSet,
 } from '../rendering/materials'
 import { createPartAccents } from './details'
 import { createStylePart } from './style'
 import { createUtilityPart } from './utility'
 import { createWeaponPart } from './weapon'
+import {
+  resolvePartVisualProfile,
+  type ResolvedPartVisualProfile,
+} from './visualProfiles'
 
 export { createTeamMaterials, type TeamMaterialSet } from '../rendering/materials'
+export {
+  resolvePartAnimationProfile,
+  resolvePartDamageProfile,
+  resolvePartRenderProfile,
+  resolvePartTextureProfile,
+  resolvePartVisualProfile,
+} from './visualProfiles'
 
 const MAX_RENDERED_BLOCKS = 48
+
+type BotPartRoleMaterialNames = Record<BotPartChildMaterialRole, string[]>
 
 export type BotPartNodeMetadata = {
   kind: 'bot_part'
   blockId: string
   partId: string
   primaryMaterialName: string
-  damageMaterials: DamageMaterialSet
+  damageMaterials: DamageMaterialByRole
+  visualProfile: ResolvedPartVisualProfile
+  roleMaterialNames: BotPartRoleMaterialNames
   basePosition: [number, number, number]
   baseRotation: [number, number, number]
 }
@@ -95,6 +113,7 @@ function createPartNode(
   const category = part?.category ?? 'body'
   const size = part?.size ?? [1, 1, 1]
   const visualFamily = part?.visual.visualFamily
+  const visualProfile = resolvePartVisualProfile(part)
   const partNode = new TransformNode(`${role}-${block.id}`, scene)
   const width = Math.max(0.22, size[0] * BOT_CELL_SCALE)
   const height = heightForCategory(category, size[1])
@@ -110,14 +129,16 @@ function createPartNode(
     degreesToRadians(block.rotation[1]),
     degreesToRadians(block.rotation[2]),
   )
-  const material = materialForCategory(materials, category)
+  const material = materialForTextureProfile(materials, visualProfile.textureProfile, category)
 
   partNode.metadata = {
     kind: 'bot_part',
     blockId: block.id,
     partId: block.partId,
     primaryMaterialName: material.name,
-    damageMaterials: materials.damage,
+    damageMaterials: materials.damageByRole,
+    visualProfile,
+    roleMaterialNames: createRoleMaterialNames(material.name, materials),
     basePosition: [partNode.position.x, partNode.position.y, partNode.position.z],
     baseRotation: [partNode.rotation.x, partNode.rotation.y, partNode.rotation.z],
   } satisfies BotPartNodeMetadata
@@ -155,4 +176,42 @@ function createPartNode(
   }
 
   return partNode
+}
+
+function createRoleMaterialNames(
+  primaryMaterialName: string,
+  materials: TeamMaterialSet,
+): BotPartRoleMaterialNames {
+  return {
+    damageable: [
+      primaryMaterialName,
+      materials.chassis.name,
+      materials.armor.name,
+      materials.utility.name,
+      materials.profile.painted_chipped_armor.name,
+      materials.profile.dirty_electrical_casing.name,
+      materials.profile.burnt_critical_metal.name,
+    ],
+    rubber: [
+      materials.rubber.name,
+      materials.mobility.name,
+      materials.profile.scuffed_rubber.name,
+    ],
+    glass: [
+      materials.profile.emissive_led_glass.name,
+    ],
+    emissive: [
+      materials.light.name,
+    ],
+    trim: [
+      materials.trim.name,
+      materials.warning.name,
+      materials.profile.scraped_style_shell.name,
+    ],
+    weapon_edge: [
+      materials.steel.name,
+      materials.weapon.name,
+      materials.profile.brushed_weapon_steel.name,
+    ],
+  }
 }
