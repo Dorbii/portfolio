@@ -57,6 +57,7 @@ export type PartCategory = (typeof PART_CATEGORIES)[number]
 
 export type PartVisualFamily =
   | 'anchor'
+  | 'ai_module'
   | 'armor'
   | 'battery'
   | 'body'

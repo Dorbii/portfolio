@@ -43,3 +43,4 @@ exports*
 /exports/agent-arena-actual-part-renders-obsidian-*
 /tools/generate-parts-catalog-doc.mjs
 /tools/capture-actual-part-renders.mjs
+/tools/goals*
