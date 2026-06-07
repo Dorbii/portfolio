@@ -1,22 +1,20 @@
 import type {
-  AgentChatMessagePostRequest,
-  AgentChatMessageResponse,
   AgentBootstrapResponse,
-  AgentPrivateChatMessagePostRequest,
-  AgentPrivateChatMessageResponse,
-  RoleClaimResponse,
-  RolePrivateState,
-  RoundPlanSubmission,
-  RoundSubmissionResponse,
-  SessionChatMessage,
-  SessionLogEvent,
+  GameMasterActionPostRequest,
+  GameMasterActionResponse,
+  GameMasterPacket,
+  PostFightReflectionPostRequest,
+  PostFightReflectionResponse,
   SessionPhase,
   TeamIdentity,
-  TurnCommandPostRequest,
-  TurnCommandResponse,
 } from '../../../../packages/schemas/src/index.js'
 import type { createAgentContract } from '../../../../packages/schemas/src/agentContract.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
+import type {
+  AgentChatMessagePostRequest,
+  AgentChatMessageResponse,
+  RolePrivateState,
+} from './agentSessionTypes.js'
 
 export type AgentContract = ReturnType<typeof createAgentContract>
 
@@ -39,26 +37,20 @@ export type AgentInviteParseResult =
 
 export type AgentArenaValidAction = {
   name:
-    | 'get_contract'
     | 'bootstrap_role'
-    | 'claim_role'
     | 'get_role_state'
-    | 'get_match_log'
-    | 'get_chat_log'
-    | 'get_private_chat_log'
-    | 'wait_for_state_change'
-    | 'wait_for_next_submission_window'
-    | 'wait_for_next_action'
-    | 'submit_round_plan'
-    | 'submit_turn_command'
-    | 'submit_chat_message'
-    | 'submit_private_chat_message'
+    | 'wait_for_game_master_packet'
+    | 'submit_game_action'
+    | 'submit_post_fight_reflection'
+    | 'send_chat_message'
   available: boolean
   reason?: string
 }
 
 export type AgentWaitOptions = {
   pollMs?: number
+  previousEventVersion?: number
+  requireLegalActions?: boolean
   timeoutMs?: number
 }
 
@@ -68,31 +60,18 @@ export type AgentRoleConnectInput = {
 }
 
 export type AgentArenaRoleApi = {
-  getContract(): Promise<AgentContract>
   bootstrapRole(input?: AgentRoleConnectInput): Promise<AgentBootstrapResponse>
-  claimRole(input?: AgentRoleConnectInput): Promise<RoleClaimResponse>
   getState(): Promise<RolePrivateState>
-  getValidActions(): Promise<AgentArenaValidAction[]>
-  submitRoundPlan(
-    plan: RoundPlanSubmission,
-  ): Promise<RoundSubmissionResponse>
-  submitTurnCommand(
-    command: TurnCommandPostRequest,
-  ): Promise<TurnCommandResponse>
-  submitChatMessage(
+  waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket>
+  submitAction(
+    submission: GameMasterActionPostRequest,
+  ): Promise<GameMasterActionResponse>
+  submitPostFightReflection(
+    reflection: PostFightReflectionPostRequest,
+  ): Promise<PostFightReflectionResponse>
+  sendChatMessage(
     input: AgentChatMessagePostRequest | string,
   ): Promise<AgentChatMessageResponse>
-  submitPrivateChatMessage(
-    input: AgentPrivateChatMessagePostRequest | string,
-  ): Promise<AgentPrivateChatMessageResponse>
-  getMatchLog(): Promise<SessionLogEvent[]>
-  getChatLog(): Promise<SessionChatMessage[]>
-  getPrivateChatLog(): Promise<SessionChatMessage[]>
-  waitForStateChange(
-    previousStateVersion?: string,
-    options?: AgentWaitOptions,
-  ): Promise<RolePrivateState>
-  waitForPhase(phase: SessionPhase, options?: AgentWaitOptions): Promise<RolePrivateState>
-  waitForNextSubmissionWindow(options?: AgentWaitOptions): Promise<RolePrivateState>
-  waitForNextAction(options?: AgentWaitOptions): Promise<AgentBootstrapResponse>
 }
+
+export type { SessionPhase }

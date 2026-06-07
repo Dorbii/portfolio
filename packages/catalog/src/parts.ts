@@ -1,12 +1,23 @@
 import type {
+  ArmorSpec,
+  MobilitySpec,
   PartCategory,
   PartDefinition,
+  PartEffect,
+  PartFootprint,
+  PartMount,
   PartMaterialRole,
   PartMountRole,
+  PartRarity,
+  PartSpec,
   PartStats,
   PartVisualDescriptor,
   PartVisualFamily,
+  PowerSpec,
+  StructureSpec,
+  UtilitySpec,
   Vector3,
+  WeaponSpec,
 } from '../../schemas/src/index.js'
 import { PART_BEHAVIORS } from '../../sim/src/partBehaviors.js'
 
@@ -14,21 +25,36 @@ type PartInput = {
   id: string
   category: PartCategory
   displayName: string
+  rarity?: PartRarity
   cost: number
   mass: number
   durability: number
   size: Vector3
   tags?: string[]
   stats?: PartStats
+  footprint?: PartFootprint
+  mounts?: PartMount[]
+  spec?: PartSpec
+  signatureEffect?: PartEffect
+  mechanics?: PartEffect[]
   visual?: PartVisualDescriptor
   behavior?: PartDefinition['behavior']
   controls?: PartDefinition['controls']
 }
 
 function part(input: PartInput): PartDefinition {
+  const signatureEffect = input.signatureEffect ?? inferSignatureEffect(input)
+  const mechanics = input.mechanics ?? inferMechanics(input)
+
   return {
     tags: [],
     stats: {},
+    rarity: input.rarity ?? inferRarity(input),
+    footprint: input.footprint ?? inferFootprint(input),
+    mounts: input.mounts ?? inferMounts(input),
+    spec: input.spec ?? inferSpec(input),
+    ...(signatureEffect ? { signatureEffect } : {}),
+    ...(mechanics.length > 0 ? { mechanics } : {}),
     visual: input.visual ?? inferVisualDescriptor(input),
     ...input,
   }
@@ -44,6 +70,7 @@ function inferVisualDescriptor(input: PartInput): PartVisualDescriptor {
 }
 
 function inferVisualFamily(input: PartInput): PartVisualFamily {
+  if (input.id.includes('Laser')) return 'turret'
   if (input.id.includes('Drill')) return 'drill'
   if (input.id.includes('Flail')) return 'flail'
   if (input.id.includes('Spinner')) return 'spinner'
@@ -106,6 +133,379 @@ function inferDetailBudget(input: PartInput): PartVisualDescriptor['detailBudget
   }
 
   return 'medium'
+}
+
+function inferFootprint(input: PartInput): PartFootprint {
+  return {
+    size: input.size,
+    minY: 0,
+    groundContact: input.category === 'mobility' && (input.stats?.drive ?? 0) > 0
+      ? 'required'
+      : 'allowed',
+  }
+}
+
+function inferMounts(input: PartInput): PartMount[] {
+  if (input.category === 'body') {
+    return [
+      sideMount('side_front', ['body', 'mobility', 'weapon', 'defense', 'utility', 'style'], 'front'),
+      sideMount('side_rear', ['body', 'mobility', 'weapon', 'defense', 'utility', 'style'], 'rear'),
+      sideMount('side_left', ['body', 'mobility', 'weapon', 'defense', 'utility', 'style'], 'left'),
+      sideMount('side_right', ['body', 'mobility', 'weapon', 'defense', 'utility', 'style'], 'right'),
+      topMount(['weapon', 'defense', 'utility', 'style']),
+      surfaceMount(['defense', 'utility', 'style']),
+      internalMount(['utility']),
+    ]
+  }
+
+  if (input.category === 'mobility') {
+    return [
+      sideMount('side_outer', ['defense', 'utility', 'style'], 'outer'),
+      {
+        id: 'rim_outer',
+        kind: 'rim',
+        accepts: ['weapon', 'defense', 'utility', 'style'],
+        motion: 'inherits_parent_spin',
+        collisionPolicy: 'allow_clip_v1',
+        rotationOptions: [0, 90, 180, 270],
+        sectors: ['outer_rim'],
+      },
+    ]
+  }
+
+  if (input.category === 'defense') {
+    return [
+      surfaceMount(['weapon', 'utility', 'style']),
+      topMount(['utility', 'style']),
+    ]
+  }
+
+  if (input.category === 'weapon') {
+    return [surfaceMount(['utility', 'style'])]
+  }
+
+  if (input.category === 'utility') {
+    return [surfaceMount(['style'])]
+  }
+
+  return []
+}
+
+function sideMount(id: string, accepts: PartCategory[], sector: string): PartMount {
+  return {
+    id,
+    kind: 'side_socket',
+    accepts,
+    motion: 'static',
+    collisionPolicy: 'reject_overlap',
+    rotationOptions: [0, 90, 180, 270],
+    sectors: [sector],
+  }
+}
+
+function topMount(accepts: PartCategory[]): PartMount {
+  return {
+    id: 'top_socket',
+    kind: 'top_socket',
+    accepts,
+    motion: 'static',
+    collisionPolicy: 'allow_clip_v1',
+    rotationOptions: [0, 90, 180, 270],
+    sectors: ['top'],
+  }
+}
+
+function surfaceMount(accepts: PartCategory[]): PartMount {
+  return {
+    id: 'surface',
+    kind: 'surface',
+    accepts,
+    motion: 'static',
+    collisionPolicy: 'allow_clip_v1',
+    rotationOptions: [0, 90, 180, 270],
+    sectors: ['surface'],
+  }
+}
+
+function internalMount(accepts: PartCategory[]): PartMount {
+  return {
+    id: 'internal_slot',
+    kind: 'internal_slot',
+    accepts,
+    motion: 'static',
+    collisionPolicy: 'internal_only',
+    rotationOptions: [0],
+    sectors: ['internal'],
+  }
+}
+
+function inferSpec(input: PartInput): PartSpec {
+  switch (input.category) {
+    case 'weapon':
+      return inferWeaponSpec(input)
+    case 'mobility':
+      return inferMobilitySpec(input)
+    case 'defense':
+      return inferArmorSpec(input)
+    case 'body':
+      return inferStructureSpec(input)
+    case 'utility':
+      if (input.id.includes('Battery') || input.id.includes('EnergyCore')) {
+        return inferPowerSpec(input)
+      }
+
+      return inferUtilitySpec(input)
+    case 'style':
+      return inferUtilitySpec(input, 'cosmetic')
+  }
+}
+
+function inferRarity(input: PartInput): PartRarity {
+  return input.category === 'style' ? 'rare' : 'normal'
+}
+
+function inferSignatureEffect(input: PartInput): PartEffect | undefined {
+  if (input.category !== 'style') {
+    return undefined
+  }
+
+  if (input.id === 'Style_DragonHead') {
+    return {
+      id: 'fire_breath',
+      kind: 'signature',
+      trigger: 'activated',
+      cooldownTurns: 4,
+      charges: 2,
+      target: 'area',
+      params: {
+        damage: 10,
+        range: 4,
+        arcDegrees: 70,
+        fireMode: 'arc',
+      },
+      replayCue: 'fire_breath',
+      debriefSignals: ['fire_damage', 'signature_fire_breath', 'arc_occlusion'],
+    }
+  }
+
+  if (input.id === 'Style_Spikes') {
+    return {
+      id: 'spike_burst',
+      kind: 'signature',
+      trigger: 'on_hit',
+      cooldownTurns: 2,
+      target: 'opponent',
+      params: {
+        retaliationDamage: 4,
+        stabilityPenalty: 1,
+      },
+      replayCue: 'spark_burst',
+      debriefSignals: ['retaliation_damage', 'signature_spike_burst'],
+    }
+  }
+
+  if (input.id === 'Style_Wings') {
+    return {
+      id: 'wing_buffet',
+      kind: 'signature',
+      trigger: 'activated',
+      cooldownTurns: 3,
+      charges: 2,
+      target: 'movement',
+      params: {
+        lateralBoost: 1,
+        instabilityRisk: 0.2,
+      },
+      replayCue: 'wing_buffet',
+      debriefSignals: ['evasive_movement', 'stability_risk'],
+    }
+  }
+
+  if (input.id === 'Style_Neon' || input.id === 'Style_LightBar') {
+    return {
+      id: input.id === 'Style_Neon' ? 'neon_blind' : 'lightbar_flash',
+      kind: 'signature',
+      trigger: 'activated',
+      cooldownTurns: 3,
+      charges: 2,
+      target: 'opponent',
+      params: {
+        controlPenalty: 2,
+        durationTurns: 1,
+      },
+      replayCue: 'neon_blind',
+      debriefSignals: ['control_disruption', 'visual_signature'],
+    }
+  }
+
+  if (input.id === 'Style_Crown') {
+    return {
+      id: 'crown_command',
+      kind: 'signature',
+      trigger: 'passive',
+      cooldownTurns: 0,
+      target: 'self',
+      params: {
+        controlBonus: 1,
+        moraleSignal: 1,
+      },
+      replayCue: 'crown_command',
+      debriefSignals: ['control_bonus', 'signature_command'],
+    }
+  }
+
+  if (input.id === 'Style_TrashCan') {
+    return {
+      id: 'trash_shield',
+      kind: 'signature',
+      trigger: 'on_damage',
+      cooldownTurns: 3,
+      charges: 1,
+      target: 'self',
+      params: {
+        absorbDamage: 6,
+        detachChance: 0.35,
+      },
+      replayCue: 'trash_shield',
+      debriefSignals: ['absorbed_damage', 'detached_shell'],
+    }
+  }
+
+  return {
+    id: 'banner_presence',
+    kind: 'signature',
+    trigger: 'passive',
+    cooldownTurns: 0,
+    target: 'self',
+    params: {
+      styleSignal: Math.max(1, input.stats?.style ?? 1),
+    },
+    replayCue: 'crown_command',
+    debriefSignals: ['signature_presence'],
+  }
+}
+
+function inferMechanics(input: PartInput): PartEffect[] {
+  if (input.id === 'Utility_AIModule') {
+    return [
+      {
+        id: 'tactical_assist',
+        kind: 'utility',
+        trigger: 'passive',
+        cooldownTurns: 0,
+        target: 'movement',
+        params: {
+          recommendedMoveBias: 1,
+          externalAgentIntelligenceBonus: false,
+        },
+        replayCue: 'tactical_assist',
+        debriefSignals: ['tactical_assist_used', 'movement_recommendation_bias'],
+      },
+    ]
+  }
+
+  if (input.id === 'Utility_Gyro') {
+    return [
+      {
+        id: 'self_righting_stabilizer',
+        kind: 'utility',
+        trigger: 'on_flip',
+        cooldownTurns: 3,
+        charges: 1,
+        target: 'self',
+        params: {
+          selfRightChance: 0.75,
+          stabilityBonus: 3,
+        },
+        replayCue: 'self_right',
+        debriefSignals: ['gyro_self_righting', 'stability_failure_prevented'],
+      },
+    ]
+  }
+
+  return []
+}
+
+function inferWeaponSpec(input: PartInput): WeaponSpec {
+  const damage = Math.max(1, input.stats?.weapon ?? Math.round(input.durability / 4))
+
+  return {
+    kind: 'weapon',
+    damage,
+    range: inferWeaponRange(input),
+    cooldownTurns: inferWeaponCooldown(input),
+    ...(input.id.includes('Net') ? { ammo: 1 } : {}),
+    fireMode: inferWeaponFireMode(input),
+    precision: Math.max(0, Math.min(1, 0.45 + (input.stats?.control ?? 0) / 20)),
+  }
+}
+
+function inferWeaponRange(input: PartInput): number {
+  if (input.id.includes('Laser')) return 14
+  if (input.id.includes('Turret') || input.id.includes('Net')) return 8
+  if (input.id.includes('Spear') || input.id.includes('Drill')) return 3
+  if (input.id.includes('Ram') || input.id.includes('Flipper') || input.id.includes('Grabber')) return 2
+
+  return 4
+}
+
+function inferWeaponCooldown(input: PartInput): number {
+  if (input.id.includes('Net')) return 6
+  if (input.id.includes('Laser')) return 3
+  if (input.id.includes('Hammer') || input.id.includes('Flipper')) return 2
+
+  return 1
+}
+
+function inferWeaponFireMode(input: PartInput): WeaponSpec['fireMode'] {
+  if (input.id.includes('Laser')) return 'direct'
+  if (input.id.includes('Net') || input.id.includes('Hammer')) return 'arc'
+  if (input.id.includes('Spinner') || input.id.includes('Flail') || input.id.includes('Saw')) return 'sweep'
+  if (input.id.includes('Ram') || input.id.includes('Grabber') || input.id.includes('Drill')) return 'contact'
+
+  return 'direct'
+}
+
+function inferMobilitySpec(input: PartInput): MobilitySpec {
+  return {
+    kind: 'mobility',
+    moveBudget: Math.max(0, input.stats?.drive ?? 0),
+    traction: Math.max(0, input.stats?.traction ?? 0),
+    stability: Math.max(0, input.stats?.stability ?? 0),
+    turnRate: Math.max(1, Math.min(10, 4 + (input.stats?.control ?? 0) + (input.stats?.drive ?? 0) / 3)),
+  }
+}
+
+function inferArmorSpec(input: PartInput): ArmorSpec {
+  return {
+    kind: 'armor',
+    armor: Math.max(1, input.stats?.armor ?? Math.round(input.durability / 5)),
+    coverage: Math.max(1, Math.round(input.size[0] * input.size[2])),
+  }
+}
+
+function inferStructureSpec(input: PartInput): StructureSpec {
+  return {
+    kind: 'structure',
+    integrity: Math.max(1, input.durability),
+    connectorStrength: Math.max(1, Math.round((input.stats?.stability ?? 0) + input.mass / 4)),
+  }
+}
+
+function inferUtilitySpec(input: PartInput, effect = input.behavior?.id ?? 'passive'): UtilitySpec {
+  return {
+    kind: 'utility',
+    effect,
+    control: Math.max(0, input.stats?.control ?? 0),
+  }
+}
+
+function inferPowerSpec(input: PartInput): PowerSpec {
+  return {
+    kind: 'power',
+    output: Math.max(1, input.stats?.control ?? input.stats?.drive ?? 1),
+    capacity: Math.max(1, input.durability + input.mass),
+  }
 }
 
 export const PART_CATALOG: PartDefinition[] = [
@@ -199,6 +599,57 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 22,
     size: [2, 1, 2],
     stats: { drive: 2, stability: 2 },
+  }),
+  part({
+    id: 'Frame_Strut',
+    category: 'body',
+    displayName: 'Frame Strut',
+    cost: 4,
+    mass: 2,
+    durability: 10,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'connector'],
+    stats: { stability: 1 },
+    visual: {
+      detailBudget: 'medium',
+      materialRole: 'raw_metal',
+      mountRole: 'exposed',
+      visualFamily: 'body',
+    },
+  }),
+  part({
+    id: 'Mount_Plate',
+    category: 'body',
+    displayName: 'Mount Plate',
+    cost: 5,
+    mass: 3,
+    durability: 14,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'mount'],
+    stats: { stability: 1 },
+    visual: {
+      detailBudget: 'medium',
+      materialRole: 'raw_metal',
+      mountRole: 'top_mount',
+      visualFamily: 'shield',
+    },
+  }),
+  part({
+    id: 'Spacer_Block',
+    category: 'body',
+    displayName: 'Spacer Block',
+    cost: 3,
+    mass: 2,
+    durability: 8,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'spacer'],
+    stats: { stability: 1 },
+    visual: {
+      detailBudget: 'low',
+      materialRole: 'raw_metal',
+      mountRole: 'exposed',
+      visualFamily: 'body',
+    },
   }),
   part({
     id: 'Wheel_Small',
@@ -428,6 +879,25 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.turret,
   }),
   part({
+    id: 'Weapon_Laser',
+    category: 'weapon',
+    displayName: 'Laser Lance',
+    cost: 36,
+    mass: 8,
+    durability: 14,
+    size: [1, 1, 1],
+    controls: { weapon: true },
+    stats: { weapon: 9, control: 7 },
+    spec: {
+      kind: 'weapon',
+      damage: 13,
+      range: 14,
+      cooldownTurns: 3,
+      fireMode: 'direct',
+      precision: 0.82,
+    },
+  }),
+  part({
     id: 'Weapon_Spear',
     category: 'weapon',
     displayName: 'Spear',
@@ -523,6 +993,23 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 26,
     size: [2, 1, 1],
     stats: { armor: 7, control: 2 },
+  }),
+  part({
+    id: 'Armor_Tile',
+    category: 'defense',
+    displayName: 'Armor Tile',
+    cost: 6,
+    mass: 3,
+    durability: 16,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'armor'],
+    stats: { armor: 3 },
+    visual: {
+      detailBudget: 'medium',
+      materialRole: 'painted_armor',
+      mountRole: 'exposed',
+      visualFamily: 'armor',
+    },
   }),
   part({
     id: 'Armor_Reactive',
@@ -664,10 +1151,27 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.drone_controller,
   }),
   part({
+    id: 'Counterweight',
+    category: 'utility',
+    displayName: 'Counterweight',
+    cost: 5,
+    mass: 10,
+    durability: 18,
+    size: [1, 1, 1],
+    tags: ['structural', 'filler', 'ballast'],
+    stats: { stability: 3, drive: -1 },
+    visual: {
+      detailBudget: 'low',
+      materialRole: 'raw_metal',
+      mountRole: 'internal',
+      visualFamily: 'body',
+    },
+  }),
+  part({
     id: 'Style_Flag',
     category: 'style',
     displayName: 'Flag',
-    cost: 3,
+    cost: 12,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
@@ -677,7 +1181,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_DragonHead',
     category: 'style',
     displayName: 'Dragon Head',
-    cost: 9,
+    cost: 24,
     mass: 4,
     durability: 8,
     size: [1, 1, 1],
@@ -687,7 +1191,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Spikes',
     category: 'style',
     displayName: 'Style Spikes',
-    cost: 6,
+    cost: 16,
     mass: 2,
     durability: 8,
     size: [1, 1, 1],
@@ -697,7 +1201,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Wings',
     category: 'style',
     displayName: 'Wings',
-    cost: 8,
+    cost: 18,
     mass: 3,
     durability: 6,
     size: [2, 1, 1],
@@ -707,7 +1211,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Neon',
     category: 'style',
     displayName: 'Neon Kit',
-    cost: 7,
+    cost: 16,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
@@ -717,7 +1221,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_LightBar',
     category: 'style',
     displayName: 'Light Bar',
-    cost: 6,
+    cost: 15,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
@@ -727,7 +1231,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Crown',
     category: 'style',
     displayName: 'Crown',
-    cost: 10,
+    cost: 22,
     mass: 2,
     durability: 5,
     size: [1, 1, 1],
@@ -737,7 +1241,7 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_TrashCan',
     category: 'style',
     displayName: 'Trash Can Shell',
-    cost: 5,
+    cost: 14,
     mass: 5,
     durability: 10,
     size: [1, 1, 1],

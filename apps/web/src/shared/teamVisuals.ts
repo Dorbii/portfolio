@@ -1,7 +1,26 @@
 import type {
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+
+export const LEGACY_TEAM_LOGO_MARKS = [
+  'shield',
+  'bolt',
+  'gear',
+  'star',
+  'wedge',
+  'crosshair',
+] as const
+
+export type LegacyTeamLogoMark = (typeof LEGACY_TEAM_LOGO_MARKS)[number]
+
+export type LegacyTeamIdentity = {
+  name: string
+  primaryColor: string
+  logo?: {
+    mark: LegacyTeamLogoMark
+    initials?: string
+  }
+}
 
 export type TeamAccentCssVars = {
   '--cockpit-team': string
@@ -18,21 +37,21 @@ type Rgb = {
 
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
 
-export const DEFAULT_TEAM_IDENTITIES: Record<TeamRole, TeamIdentity> = {
+export const DEFAULT_TEAM_IDENTITIES: Record<TeamRole, LegacyTeamIdentity> = {
   red: { name: 'Red Team', primaryColor: '#ff4c5d', logo: { mark: 'shield', initials: 'R' } },
   blue: { name: 'Blue Team', primaryColor: '#5b9dff', logo: { mark: 'shield', initials: 'B' } },
 }
 
 export function resolveTeamIdentity(
   role: TeamRole,
-  identity: TeamIdentity | null | undefined,
-): TeamIdentity {
+  identity: LegacyTeamIdentity | null | undefined,
+): LegacyTeamIdentity {
   return identity ?? DEFAULT_TEAM_IDENTITIES[role]
 }
 
 export function resolveTeamAccentHex(
   role: TeamRole,
-  identity: TeamIdentity | null | undefined,
+  identity: LegacyTeamIdentity | null | undefined,
 ): string {
   const color = resolveTeamIdentity(role, identity).primaryColor.trim()
 
@@ -41,7 +60,7 @@ export function resolveTeamAccentHex(
 
 export function createTeamAccentCssVars(
   role: TeamRole,
-  identity: TeamIdentity | null | undefined,
+  identity: LegacyTeamIdentity | null | undefined,
 ): TeamAccentCssVars {
   const accentHex = resolveTeamAccentHex(role, identity)
   const accentRgb = hexToRgbString(accentHex)
@@ -56,7 +75,7 @@ export function createTeamAccentCssVars(
 
 export function teamAccentRgb(
   role: TeamRole,
-  identity: TeamIdentity | null | undefined,
+  identity: LegacyTeamIdentity | null | undefined,
 ): string {
   return hexToRgbString(resolveTeamAccentHex(role, identity))
 }

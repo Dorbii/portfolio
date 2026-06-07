@@ -1,11 +1,14 @@
 import type {
   ArenaConfig,
   BotBlueprint,
-  PublicSessionState,
-  RolePrivateState,
-  TeamIdentity,
+  GameMasterPacket,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
+import type { LegacyTeamIdentity } from './shared/teamVisuals'
+import type {
+  PublicSessionState,
+  RolePrivateState,
+} from './agent/agentSessionTypes.js'
 
 export type TeamEconomySnapshot = {
   role: TeamRole
@@ -45,7 +48,7 @@ export const mockTeamEconomy: Record<TeamRole, TeamEconomySnapshot> = {
   },
 }
 
-export const mockTeamIdentities: Record<TeamRole, TeamIdentity> = {
+export const mockTeamIdentities: Record<TeamRole, LegacyTeamIdentity> = {
   red: {
     name: 'Crimson Circuit',
     primaryColor: '#ff5b66',
@@ -71,8 +74,8 @@ const eventLog = [
   },
   {
     at: '14:14',
-    type: 'round_plan_submitted' as const,
-    message: 'Both round plans locked for round 3.',
+    type: 'game_action_submitted' as const,
+    message: 'Both loadouts locked for round 3.',
   },
   {
     at: '14:15',
@@ -121,6 +124,39 @@ const privateChatLogByRole = {
   ],
 }
 
+const mockGameMasterPackets: Record<TeamRole, GameMasterPacket> = {
+  red: {
+    sessionId: 's_mock_7f2',
+    role: 'red',
+    phase: 'round_review',
+    nextAction: 'view_replay',
+    round: 3,
+    fightId: 'fight_3',
+    decisionVersion: 7,
+    eventVersion: 4,
+    instruction: 'Review the resolved fight. Submit no gameplay action until the next packet asks for one.',
+    board: {
+      arena: arenaConfig,
+    },
+    legalActions: [],
+  },
+  blue: {
+    sessionId: 's_mock_7f2',
+    role: 'blue',
+    phase: 'round_review',
+    nextAction: 'view_replay',
+    round: 3,
+    fightId: 'fight_3',
+    decisionVersion: 7,
+    eventVersion: 4,
+    instruction: 'Review the resolved fight. Submit no gameplay action until the next packet asks for one.',
+    board: {
+      arena: arenaConfig,
+    },
+    legalActions: [],
+  },
+}
+
 export const mockPublicSession: PublicSessionState = {
   sessionId: 's_mock_7f2',
   stateVersion: 'mock|round_review|3|red-submitted|blue-submitted|4',
@@ -155,6 +191,9 @@ export const mockPublicSession: PublicSessionState = {
       red: 0,
       blue: 46,
     },
+  },
+  continuation: {
+    completedFightCount: 1,
   },
   chatLog,
   eventLog,
@@ -195,13 +234,8 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       utility: ['activate', 'hold'],
     },
     submitted: true,
-    ownSubmission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: [
-        { partId: 'Armor_Front_Plate', quantity: 1 },
-        { partId: 'Style_Neon', quantity: 1 },
-      ],
+    ownLoadout: {
+      confirmedAt: '14:14',
       blueprint: {
         name: 'Blackout Wedge',
         blocks: [
@@ -242,21 +276,10 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
             rotation: [0, 0, 0],
           },
         ],
-        rationale: 'Protect the spinner long enough to trade once.',
       },
-      tactics: {
-        style: 'aggressive',
-        targetPriority: 'closest',
-        preferredRange: 'close',
-        movementPolicy: 'close',
-        aggression: 0.8,
-        retreatAtHealthPct: 0.18,
-        weaponCadence: 'opportunistic',
-        hazardPreference: 'avoid',
-      },
-      rationale: 'Force a direct exchange before Blue can kite.',
     },
     opponent: mockPublicSession.roles.blue,
+    gameMaster: mockGameMasterPackets.red,
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
     chatLog,
@@ -298,14 +321,8 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
       utility: ['activate', 'hold'],
     },
     submitted: true,
-    ownSubmission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: [
-        { partId: 'Weapon_Net', quantity: 1 },
-        { partId: 'Utility_Magnet', quantity: 1 },
-        { partId: 'Utility_Sensor', quantity: 1 },
-      ],
+    ownLoadout: {
+      confirmedAt: '14:14',
       blueprint: {
         name: 'Snare Account',
         blocks: [
@@ -352,21 +369,10 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
             rotation: [0, 0, 0],
           },
         ],
-        rationale: 'Keep distance, fire net, then push disabled drive.',
       },
-      tactics: {
-        style: 'control',
-        targetPriority: 'mobility',
-        preferredRange: 'mid',
-        movementPolicy: 'kite',
-        aggression: 0.58,
-        retreatAtHealthPct: 0.25,
-        weaponCadence: 'opportunistic',
-        hazardPreference: 'force',
-      },
-      rationale: 'Run the lane, fire while sliding, and retreat before the spinner gets a clean trade.',
     },
     opponent: mockPublicSession.roles.red,
+    gameMaster: mockGameMasterPackets.blue,
     replayAvailable: mockPublicSession.replayAvailable,
     lastResult: mockPublicSession.lastResult,
     chatLog,
@@ -376,6 +382,6 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
 }
 
 export const mockBotBlueprints: Record<TeamRole, BotBlueprint> = {
-  red: mockRoleStates.red.ownSubmission!.blueprint,
-  blue: mockRoleStates.blue.ownSubmission!.blueprint,
+  red: mockRoleStates.red.ownLoadout!.blueprint,
+  blue: mockRoleStates.blue.ownLoadout!.blueprint,
 }

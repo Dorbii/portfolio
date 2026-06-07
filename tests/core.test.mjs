@@ -9,8 +9,6 @@ import {
   deriveControls,
   normalizeTactics,
   validateBlueprintAssembly,
-  validateRoundSubmission,
-  validateSubmittedTurnCommand,
 } from '../.test-build/packages/catalog/src/index.js'
 import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 import {
@@ -28,10 +26,23 @@ import {
   hasArenaLineOfSight,
   hasAliveBehaviorPart,
   hazardsAtPosition,
+  applyLoadoutAction,
+  buildCatalogStore,
+  buildLoadoutActionSet,
+  buildCombatActionSet,
+  buildFightDossier,
+  botDesignSnapshotToBlueprint,
+  combatActionCommand,
+  combatLegalActionForPacket,
+  buildSharedDebrief,
+  createInitialLoadoutBuildState,
+  loadoutLegalActionForPacket,
   pathHazards,
   resolveCombat,
   resolveSubmittedCombat,
+  resolveSubmittedGameActions,
   stablePartOrder,
+  validateMinimumViableLoadout,
   worldToArenaCell,
 } from '../.test-build/packages/sim/src/index.js'
 import {
@@ -87,7 +98,6 @@ const dualWeaponBlueprint = {
 }
 
 const validSpinnerSubmission = {
-  action: 'submit_round_plan',
   schemaVersion: 2,
   purchases: [
     { partId: 'Body_Square_Medium', quantity: 1 },
@@ -119,13 +129,13 @@ const validSpinnerSubmission = {
 const testTeamIdentities = {
   red: {
     name: 'Red Team',
-    primaryColor: '#ff4c5d',
-    logo: { mark: 'shield', initials: 'R' },
+    colorHex: '#ff4c5d',
+    logoPrompt: 'Red shield combat robotics logo with R monogram',
   },
   blue: {
     name: 'Blue Team',
-    primaryColor: '#5b9dff',
-    logo: { mark: 'shield', initials: 'B' },
+    colorHex: '#5b9dff',
+    logoPrompt: 'Blue shield combat robotics logo with B monogram',
   },
 }
 
@@ -133,8 +143,31 @@ function testTeamIdentity(role, suffix = '') {
   return {
     ...testTeamIdentities[role],
     name: `${testTeamIdentities[role].name}${suffix}`,
-    logo: { ...testTeamIdentities[role].logo },
   }
+}
+
+function expectedLegacyTeamIdentity(role, suffix = '') {
+  const identity = testTeamIdentity(role, suffix)
+
+  return {
+    name: identity.name,
+    primaryColor: identity.colorHex,
+    logo: {
+      mark: 'shield',
+      initials: expectedLegacyLogoInitials(identity.logoPrompt),
+    },
+  }
+}
+
+function expectedLegacyLogoInitials(value) {
+  return value
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/gi, ''))
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 4)
+    .toUpperCase()
 }
 
 function claimRequest(role, claimToken = `claim_${role}`, suffix = '') {
@@ -195,6 +228,391 @@ function repeatedCommands(ticks, commandForTick) {
   })
 }
 
+const tacticalOpenArena = {
+  name: 'Tactical Anchor Test',
+  width: 8,
+  height: 8,
+  activeHazards: [],
+  topology: {
+    grid: { cellSize: 1 },
+    spawnZones: [],
+    hazards: [],
+    terrain: [],
+    obstacles: [],
+  },
+}
+
+const tacticalBlockedArena = {
+  ...tacticalOpenArena,
+  name: 'Tactical Blocker Test',
+  topology: {
+    ...tacticalOpenArena.topology,
+    obstacles: [
+      {
+        id: 'center_blocker',
+        type: 'wall',
+        shape: { kind: 'rect', center: [0, 0], size: [1, 3] },
+        blocksMovement: true,
+      },
+    ],
+  },
+}
+
+const tacticalRuntimeArena = {
+  ...tacticalOpenArena,
+  name: 'Tactical Runtime Test',
+  width: 16,
+}
+
+const tacticalRuntimeBlockedArena = {
+  ...tacticalBlockedArena,
+  name: 'Tactical Runtime Blocker Test',
+  width: 16,
+}
+
+const tacticalCombatControls = {
+  movement: ['brake', 'forward', 'dash_forward', 'strafe_left', 'strafe_right'],
+  weaponA: ['fire', 'hold'],
+}
+
+function combatBotSnapshot(role, position, overrides = {}) {
+  const health = overrides.health ?? 30
+
+  return {
+    role,
+    position,
+    health,
+    maxHealth: overrides.maxHealth ?? health,
+    partHealth: overrides.partHealth ?? { core: health },
+    stats: overrides.stats ?? {
+      armor: 0,
+      chaos: 0,
+      control: 0,
+      durability: health,
+      footprint: 1,
+      mass: 8,
+      mobility: 12,
+      stability: 3,
+      style: 0,
+      traction: 4,
+      weaponThreat: 12,
+    },
+    hasUtilityControl: overrides.hasUtilityControl ?? false,
+    hasWeaponControl: overrides.hasWeaponControl ?? true,
+    weaponSlotCount: overrides.weaponSlotCount ?? 1,
+    weaponReach: overrides.weaponReach ?? 2,
+    statuses: overrides.statuses ?? [],
+    cooldowns: overrides.cooldowns ?? {},
+    charges: overrides.charges ?? {},
+  }
+}
+
+function combatSnapshot(arena, redPosition, bluePosition, overrides = {}) {
+  return {
+    tick: overrides.tick ?? 1,
+    arena,
+    distance: Math.hypot(redPosition[0] - bluePosition[0], redPosition[2] - bluePosition[2]),
+    hardMaxTicks: 600,
+    recentEvents: [],
+    red: combatBotSnapshot('red', redPosition, overrides.red),
+    blue: combatBotSnapshot('blue', bluePosition, overrides.blue),
+  }
+}
+
+function replayForCompletedFight() {
+  return {
+    round: 1,
+    duration: 12,
+    summary: 'Red disabled Blue with weapon pressure.',
+    events: [
+      { t: 0, type: 'spawn', bot: 'red', position: [-1, 0, 0], rotation: [0, 0, 0] },
+      { t: 0, type: 'spawn', bot: 'blue', position: [1, 0, 0], rotation: [0, 0, 0] },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [-1, 0, 0],
+        to: [0, 0, 0],
+        command: 'forward',
+      },
+      {
+        t: 2,
+        type: 'weapon_fire',
+        bot: 'red',
+        weaponSlot: 'weaponA',
+        sourceBlockId: 'spinner',
+        sourcePartId: 'Weapon_Spinner_Small',
+      },
+      {
+        t: 2.2,
+        type: 'impact',
+        attacker: 'red',
+        defender: 'blue',
+        damage: 40,
+        position: [0.4, 0, 0],
+      },
+      {
+        t: 2.3,
+        type: 'damage',
+        bot: 'blue',
+        amount: 40,
+        remainingHealth: 0,
+        blockId: 'core',
+        partId: 'Body_Square_Medium',
+        partRemainingHealth: 0,
+        partMaxHealth: 40,
+      },
+      {
+        t: 2.4,
+        type: 'part_detach',
+        bot: 'blue',
+        blockId: 'core',
+        partId: 'Body_Square_Medium',
+        position: [1, 0, 0],
+      },
+      { t: 2.5, type: 'knockout', bot: 'blue', cause: 'weapon' },
+    ],
+  }
+}
+
+function completedFightResult() {
+  return {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 0, blue: 40 },
+    remainingHealth: { red: 40, blue: 0 },
+    partHealth: {
+      red: { core: 40, left: 10, right: 10, spinner: 12 },
+      blue: { core: 0, left: 8, right: 8, spinner: 10 },
+    },
+    stats: {
+      red: { durability: 40 },
+      blue: { durability: 40 },
+    },
+    replay: replayForCompletedFight(),
+    log: ['Red disabled Blue.'],
+  }
+}
+
+function completedFightDossier(sessionId = 's_debrief') {
+  return buildFightDossier({
+    sessionId,
+    fightId: 'fight_1',
+    replay: replayForCompletedFight(),
+    result: completedFightResult(),
+    botBlueprints: {
+      red: validSpinnerSubmission.blueprint,
+      blue: validSpinnerSubmission.blueprint,
+    },
+  })
+}
+
+test('fight dossier attributes weapon damage from replay impact order', () => {
+  const result = completedFightResult()
+  result.partHealth.red.net = 10
+
+  const dossier = buildFightDossier({
+    sessionId: 's_weapon_source_dossier',
+    fightId: 'fight_1',
+    replay: {
+      round: 1,
+      duration: 4,
+      summary: 'Red spinner damage decided the fight after a low-impact net deploy.',
+      events: [
+        { t: 0, type: 'spawn', bot: 'red', position: [-1, 0, 0], rotation: [0, 0, 0] },
+        { t: 0, type: 'spawn', bot: 'blue', position: [1, 0, 0], rotation: [0, 0, 0] },
+        {
+          t: 1,
+          type: 'weapon_fire',
+          bot: 'red',
+          weaponSlot: 'weaponA',
+          sourceBlockId: 'net',
+          sourcePartId: 'Weapon_Net',
+          phase: 'deploy',
+        },
+        {
+          t: 2,
+          type: 'weapon_fire',
+          bot: 'red',
+          weaponSlot: 'weaponB',
+          sourceBlockId: 'spinner',
+          sourcePartId: 'Weapon_Spinner_Small',
+          phase: 'release',
+        },
+        {
+          t: 2.25,
+          type: 'impact',
+          attacker: 'red',
+          defender: 'blue',
+          damage: 40,
+          position: [0.4, 0, 0],
+        },
+        {
+          t: 2.3,
+          type: 'damage',
+          bot: 'blue',
+          amount: 40,
+          remainingHealth: 0,
+          blockId: 'core',
+          partId: 'Body_Square_Medium',
+          partRemainingHealth: 0,
+          partMaxHealth: 40,
+        },
+      ],
+    },
+    result,
+    botBlueprints: {
+      red: {
+        ...validSpinnerSubmission.blueprint,
+        blocks: [
+          ...validSpinnerSubmission.blueprint.blocks,
+          { id: 'net', partId: 'Weapon_Net', position: [1, 0, 0], rotation: [0, 0, 0] },
+        ],
+      },
+      blue: validSpinnerSubmission.blueprint,
+    },
+  })
+  const weapons = new Map(dossier.fights[0].stats.weaponUse.red.map((weapon) => [weapon.weaponId, weapon]))
+
+  assert.equal(weapons.get('Weapon_Net').damage, 0)
+  assert.equal(weapons.get('Weapon_Spinner_Small').damage, 40)
+})
+
+function postFightReflection(role, overrides = {}) {
+  const claims = {
+    ownWeaknesses: ['secret weak drive note'],
+    opponentThreats: ['secret opponent threat note'],
+    suggestedDesignChanges: ['secret design suggestion'],
+    suggestedTacticalChanges: ['secret tactical suggestion'],
+  }
+
+  if (role === 'blue') {
+    claims.perceivedWinReason = 'secret false blue win claim'
+    claims.perceivedLossReason = 'secret blue loss explanation'
+  }
+
+  return {
+    action: 'submit_post_fight_reflection',
+    fightId: 'fight_1',
+    role,
+    decisionVersion: 1500,
+    claims,
+    confidence: 'medium',
+    ...overrides,
+  }
+}
+
+test('shared debrief follows fight data over false private reflection claims', () => {
+  const dossier = completedFightDossier('s_debrief_data_authority')
+  const fight = dossier.fights[0]
+
+  fight.stats.weaponUse.red = [
+    { weaponId: 'Weapon_Net', activations: 1, hits: 0, damage: 0 },
+    { weaponId: 'Weapon_Spinner_Small', activations: 1, hits: 1, damage: 40 },
+  ]
+
+  const debrief = buildSharedDebrief({
+    sourceSessionId: 's_debrief_data_authority',
+    dossier,
+    reflections: [
+      {
+        status: 'private_pending',
+        submittedAt: '2026-06-03T00:01:00.000Z',
+        reflection: postFightReflection('red', {
+          claims: {
+            perceivedWinReason: 'SECRET_RAW_CLAIM: the net won the fight by itself',
+            ownWeaknesses: ['SECRET_RAW_WEAKNESS'],
+            opponentThreats: ['SECRET_RAW_THREAT'],
+            suggestedDesignChanges: ['SECRET_RAW_DESIGN'],
+            suggestedTacticalChanges: ['SECRET_RAW_TACTIC'],
+          },
+        }),
+      },
+    ],
+  })
+  const serialized = JSON.stringify(debrief)
+
+  assert.match(debrief.summary, /Weapon_Net/)
+  assert.match(debrief.summary, /Weapon_Spinner_Small/)
+  assert.equal(serialized.includes('SECRET_RAW_CLAIM'), false)
+  assert.equal(serialized.includes('SECRET_RAW_WEAKNESS'), false)
+  assert.equal(debrief.evidence.some((entry) => entry.type === 'reflection_conflict'), true)
+})
+
+function buildTacticalCombatActionSet({
+  role,
+  arena = tacticalOpenArena,
+  redPosition = [-1, 0, 0],
+  bluePosition = [1, 0, 0],
+  tick = 1,
+  controls = tacticalCombatControls,
+}) {
+  return buildCombatActionSet({
+    role,
+    round: 1,
+    tick,
+    decisionVersion: role === 'red' ? 11 : 12,
+    actionSetId: `${role}:r1:turn_${tick}:v${role === 'red' ? 11 : 12}`,
+    createdAt: '2026-06-07T00:00:00.000Z',
+    catalogVersion: 'part-catalog:v1',
+    arenaVersion: 'arena:v1:test',
+    snapshot: combatSnapshot(arena, redPosition, bluePosition, { tick }),
+    controls,
+  })
+}
+
+function findCombatAction(actionSet, predicate) {
+  const action = Object.values(actionSet.actions).find((candidate) => {
+    const command = combatActionCommand(candidate)
+
+    return command !== undefined && predicate(command, candidate)
+  })
+
+  assert.notEqual(action, undefined)
+
+  return action
+}
+
+function hasCombatAction(actionSet, predicate) {
+  return Object.values(actionSet.actions).some((candidate) => {
+    const command = combatActionCommand(candidate)
+
+    return command !== undefined && predicate(command, candidate)
+  })
+}
+
+function canonicalCombatAction(role, tick, command, suffix = '') {
+  const kind = command.move && command.move !== 'brake'
+    ? command.weaponA === 'fire' || command.weaponB === 'fire'
+      ? 'move_and_attack'
+      : 'move'
+    : command.weaponA === 'fire' || command.weaponB === 'fire'
+      ? 'attack'
+      : command.utility === 'activate'
+        ? 'use_utility'
+        : 'hold'
+
+  return {
+    id: `combat.${role}.test.t${tick}.${kind}${suffix ? `.${suffix}` : ''}`,
+    kind,
+    role,
+    payload: {
+      scope: 'combat_turn',
+      label: 'Test combat action',
+      summary: 'Test canonical combat action.',
+      command: { tick, ...command },
+    },
+  }
+}
+
+function canonicalCombatActions(role, commands) {
+  return commands.map((command, index) => canonicalCombatAction(role, index + 1, command))
+}
+
+function pathKeys(preview) {
+  return new Set(preview.path.map((cell) => `${cell.x},${cell.z}`))
+}
+
 async function claimBothRoles(session) {
   const red = await session.claimRole(claimRequest('red'))
   const blue = await session.claimRole(claimRequest('blue'))
@@ -208,29 +626,234 @@ async function claimBothRoles(session) {
   }
 }
 
-async function resolveLiveCombat(session, redToken, blueToken, firstState) {
-  let state = firstState
+function actionSubmissionFromPacket(packet, actionId = packet.legalActions[0]?.id) {
+  assert.equal(typeof packet.actionSetId, 'string')
+  assert.equal(typeof packet.decisionVersion, 'number')
+  assert.equal(typeof actionId, 'string')
 
+  return {
+    action: 'submit_game_action',
+    actionSetId: packet.actionSetId,
+    decisionVersion: packet.decisionVersion,
+    actionId,
+  }
+}
+
+function findLegalAction(packet, predicate) {
+  const action = packet.legalActions.find(predicate)
+
+  assert.notEqual(action, undefined)
+
+  return action
+}
+
+async function submitPacketAction(session, token, packet, action) {
+  const submitted = await session.submitGameMasterAction(
+    token,
+    actionSubmissionFromPacket(packet, action.id),
+  )
+
+  assert.equal(submitted.ok, true)
+
+  return submitted
+}
+
+async function placePartFromCatalog(session, token, packet, partId) {
+  let submitted = await submitPacketAction(
+    session,
+    token,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'choose_part' && action.catalogRefs?.includes(partId)),
+  )
+  submitted = await submitPacketAction(
+    session,
+    token,
+    submitted.value.packet,
+    findLegalAction(submitted.value.packet, (action) => action.kind === 'choose_attach_target'),
+  )
+  submitted = await submitPacketAction(
+    session,
+    token,
+    submitted.value.packet,
+    findLegalAction(submitted.value.packet, (action) => action.kind === 'choose_mount'),
+  )
+
+  return submitPacketAction(
+    session,
+    token,
+    submitted.value.packet,
+    findLegalAction(submitted.value.packet, (action) => action.kind === 'choose_rotation'),
+  )
+}
+
+function createBuilderHarness(gold = 200, catalog = PART_CATALOG) {
+  return {
+    buildState: createInitialLoadoutBuildState('red'),
+    catalog,
+    decisionVersion: 1,
+    gold,
+    inventory: [],
+  }
+}
+
+function builderActions(harness) {
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: harness.decisionVersion,
+    actionSetId: `red:r1:loadout:v${harness.decisionVersion}`,
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: harness.gold,
+    buildState: harness.buildState,
+    catalog: harness.catalog,
+  })
+
+  harness.decisionVersion += 1
+
+  return Object.values(actionSet.actions)
+}
+
+function chooseBuilderAction(harness, predicate) {
+  const action = builderActions(harness).find(predicate)
+
+  assert.notEqual(action, undefined)
+
+  return action
+}
+
+function applyBuilderAction(harness, action) {
+  const applied = applyLoadoutAction({
+    role: 'red',
+    gold: harness.gold,
+    inventory: harness.inventory,
+    buildState: harness.buildState,
+    action,
+    catalog: harness.catalog,
+  })
+
+  assert.equal(applied.ok, true, applied.ok ? '' : JSON.stringify(applied.issues))
+
+  harness.gold = applied.gold
+  harness.inventory = applied.inventory
+  harness.buildState = applied.buildState
+
+  return applied
+}
+
+function tryBuilderAction(harness, action) {
+  return applyLoadoutAction({
+    role: 'red',
+    gold: harness.gold,
+    inventory: harness.inventory,
+    buildState: harness.buildState,
+    action,
+    catalog: harness.catalog,
+  })
+}
+
+function placePartInHarness(harness, partId, options = {}) {
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_part' && action.payload.partId === partId,
+    ),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_attach_target' &&
+        (options.targetInstanceId === undefined || action.payload.targetInstanceId === options.targetInstanceId),
+    ),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_mount' &&
+        (options.mountPredicate ? options.mountPredicate(action) : true),
+    ),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_rotation' &&
+        (options.rotation === undefined || action.payload.rotation === options.rotation),
+    ),
+  )
+
+  return harness.buildState.currentDesign.parts.at(-1)
+}
+
+function builderPart(design, partId) {
+  const part = design.parts.find((entry) => entry.partId === partId)
+
+  assert.notEqual(part, undefined)
+
+  return part
+}
+
+async function buildMinimumViableLoadout(session, token, packet) {
+  let submitted = await placePartFromCatalog(session, token, packet, 'Body_Light_Frame')
+  submitted = await placePartFromCatalog(session, token, submitted.value.packet, 'Wheel_Small')
+  submitted = await placePartFromCatalog(session, token, submitted.value.packet, 'Weapon_Spear')
+
+  return {
+    packet: submitted.value.packet,
+    confirmAction: findLegalAction(submitted.value.packet, (action) => action.kind === 'confirm_loadout'),
+  }
+}
+
+async function confirmMinimumViableLoadout(session, token, packet) {
+  const built = await buildMinimumViableLoadout(session, token, packet)
+
+  return submitPacketAction(session, token, built.packet, built.confirmAction)
+}
+
+async function confirmBothMinimumLoadouts(session, redToken, blueToken) {
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+  const bluePacket = await session.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(redPacket.ok, true)
+  assert.equal(bluePacket.ok, true)
+
+  const redSubmission = await confirmMinimumViableLoadout(session, redToken, redPacket.value)
+  const blueSubmission = await confirmMinimumViableLoadout(session, blueToken, bluePacket.value)
+
+  return {
+    redSubmission,
+    blueSubmission,
+  }
+}
+
+function chooseCombatAction(packet) {
+  return (
+    packet.legalActions.find((action) => action.kind === 'move_and_attack') ??
+    packet.legalActions.find((action) => action.kind === 'attack') ??
+    packet.legalActions.find((action) => action.kind === 'move') ??
+    findLegalAction(packet, (action) => action.kind === 'hold')
+  )
+}
+
+async function resolveLiveCombat(session, redToken, blueToken) {
   for (let index = 0; index < 90; index += 1) {
-    const tick = state.combat.tick
-    const command = {
-      action: 'submit_turn_command',
-      tick,
-      move: 'dash_forward',
-      weaponA: 'fire',
-    }
-    const redTurn = await session.submitTurnCommand(redToken, command)
-    const blueTurn = await session.submitTurnCommand(blueToken, command)
+    const redPacket = await session.getGameMasterPacketForToken(redToken)
+    const bluePacket = await session.getGameMasterPacketForToken(blueToken)
 
-    assert.equal(redTurn.ok, true)
-    assert.equal(blueTurn.ok, true)
+    assert.equal(redPacket.ok, true)
+    assert.equal(bluePacket.ok, true)
+
+    const redTurn = await submitPacketAction(session, redToken, redPacket.value, chooseCombatAction(redPacket.value))
+    const blueTurn = await submitPacketAction(session, blueToken, bluePacket.value, chooseCombatAction(bluePacket.value))
 
     if (blueTurn.value.publicState.phase === 'round_review') {
       return blueTurn
     }
 
     assert.equal(blueTurn.value.publicState.phase, 'combat_turn')
-    state = blueTurn.value.state
   }
 
   throw new Error('Combat did not resolve within expected live turn budget.')
@@ -293,7 +916,7 @@ test('agent catalog guidance routes through feature gates instead of part flags'
 
 test('agent catalog guidance excludes disabled feature-gated candidates', () => {
   const featureGates = AGENT_FEATURE_GATES.map((gate) =>
-    gate.id === 'combat.movement_commands'
+    gate.id === 'combat.movement_actions'
       ? { ...gate, state: 'disabled' }
       : gate,
   )
@@ -438,6 +1061,795 @@ test('purchase validation rejects unknown parts and overspend', () => {
   assert.equal(overspend.issues[0].code, 'INSUFFICIENT_GOLD')
 })
 
+test('structural filler parts are catalog-backed passive connective tissue', () => {
+  const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const requiredFillerIds = [
+    'Frame_Strut',
+    'Mount_Plate',
+    'Spacer_Block',
+    'Armor_Tile',
+    'Counterweight',
+  ]
+
+  for (const partId of requiredFillerIds) {
+    const part = parts.get(partId)
+
+    assert.notEqual(part, undefined)
+    assert.equal(typeof part.cost, 'number')
+    assert.equal(typeof part.mass, 'number')
+    assert.equal(typeof part.durability, 'number')
+    assert.ok(part.tags.includes('filler'))
+    assert.equal(part.controls, undefined)
+    assert.equal(part.behavior, undefined)
+    assert.equal(typeof part.visual.visualFamily, 'string')
+  }
+})
+
+test('loadout actions use existing catalog specs and stay step-scoped', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 100,
+    actionSetId: 'red:r1:loadout:choose_part:v100',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 100,
+    buildState,
+  })
+  const legalActions = Object.values(actionSet.actions).map(loadoutLegalActionForPacket)
+  const lightFrame = PART_CATALOG.find((part) => part.id === 'Body_Light_Frame')
+  const lightFrameAction = legalActions.find((action) => action.catalogRefs?.includes('Body_Light_Frame'))
+
+  assert.notEqual(lightFrame, undefined)
+  assert.notEqual(lightFrameAction, undefined)
+  assert.equal(lightFrameAction.label, lightFrame.displayName)
+  assert.ok(lightFrameAction.summary.includes(`${lightFrame.cost} gold`))
+  assert.ok(lightFrameAction.summary.includes(`${lightFrame.mass} mass`))
+  assert.equal(legalActions.every((action) => action.kind === 'choose_part'), true)
+  assert.equal(legalActions.some((action) => action.kind === 'choose_mount'), false)
+  assert.equal(legalActions.some((action) => action.kind === 'choose_rotation'), false)
+})
+
+test('loadout action application mutates design through canonical payloads', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let gold = 100
+  let inventory = []
+  let actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 100,
+    actionSetId: 'red:r1:loadout:choose_part:v100',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold,
+    buildState,
+  })
+  const chooseBody = Object.values(actionSet.actions)
+    .find((action) => action.payload.partId === 'Body_Light_Frame')
+
+  assert.notEqual(chooseBody, undefined)
+
+  let applied = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory,
+    buildState,
+    action: chooseBody,
+  })
+
+  assert.equal(applied.ok, true)
+  buildState = applied.buildState
+  actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 101,
+    actionSetId: 'red:r1:loadout:choose_attach_target:v101',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold,
+    buildState,
+  })
+
+  applied = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory,
+    buildState,
+    action: Object.values(actionSet.actions)[0],
+  })
+
+  assert.equal(applied.ok, true)
+  buildState = applied.buildState
+  actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 102,
+    actionSetId: 'red:r1:loadout:choose_mount:v102',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold,
+    buildState,
+  })
+  applied = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory,
+    buildState,
+    action: Object.values(actionSet.actions)[0],
+  })
+
+  assert.equal(applied.ok, true)
+  buildState = applied.buildState
+  actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 103,
+    actionSetId: 'red:r1:loadout:choose_rotation:v103',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold,
+    buildState,
+  })
+  applied = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory,
+    buildState,
+    action: Object.values(actionSet.actions)[0],
+  })
+
+  assert.equal(applied.ok, true)
+  gold = applied.gold
+  inventory = applied.inventory
+  buildState = applied.buildState
+
+  assert.equal(gold, 84)
+  assert.deepEqual(inventory, [{ partId: 'Body_Light_Frame', quantity: 1 }])
+  assert.deepEqual(buildState.currentDesign.parts.map((part) => part.partId), ['Body_Light_Frame'])
+  assert.equal(validateMinimumViableLoadout(buildState.currentDesign).some((entry) => entry.code === 'MISSING_MOBILITY'), true)
+})
+
+test('catalog_non_style_parts_are_normal_rarity', () => {
+  for (const part of PART_CATALOG.filter((entry) => entry.category !== 'style')) {
+    assert.equal(part.rarity, 'normal', `${part.id} should default to normal rarity`)
+  }
+})
+
+test('catalog_style_parts_are_rare_signature_parts', () => {
+  const cheapestNonStyle = Math.min(
+    ...PART_CATALOG
+      .filter((part) => part.category !== 'style')
+      .map((part) => part.cost),
+  )
+
+  for (const part of PART_CATALOG.filter((entry) => entry.category === 'style')) {
+    assert.equal(part.rarity, 'rare', `${part.id} should default to rare rarity`)
+    assert.equal(part.signatureEffect?.kind, 'signature', `${part.id} should expose a typed signature effect`)
+    assert.equal(typeof part.signatureEffect?.id, 'string')
+    assert.ok(part.signatureEffect?.debriefSignals.length > 0)
+    assert.ok(part.cost > cheapestNonStyle, `${part.id} should be priced above normal filler`)
+  }
+})
+
+test('style_signature_requires_single_active_effect', () => {
+  const issues = validateMinimumViableLoadout({
+    name: 'double signature',
+    rootInstanceId: 'body',
+    activeSignaturePartInstanceId: 'flag',
+    parts: [
+      { instanceId: 'body', partId: 'Body_Light_Frame', cell: { x: 0, z: 0 } },
+      { instanceId: 'wheel', partId: 'Wheel_Omni', parentInstanceId: 'body', cell: { x: 1, z: 0 } },
+      { instanceId: 'weapon', partId: 'Weapon_Laser', parentInstanceId: 'body', cell: { x: 0, z: 0 } },
+      { instanceId: 'flag', partId: 'Style_Flag', parentInstanceId: 'body', cell: { x: 0, z: 0 }, signatureEffectActive: true },
+      { instanceId: 'dragon', partId: 'Style_DragonHead', parentInstanceId: 'body', cell: { x: 0, z: 0 }, signatureEffectActive: true },
+    ],
+  })
+
+  assert.ok(issues.some((issue) => issue.code === 'MULTIPLE_ACTIVE_SIGNATURE_EFFECTS'))
+})
+
+test('dragon_head_fire_breath_is_typed_not_flavor_text', () => {
+  const dragon = PART_CATALOG.find((part) => part.id === 'Style_DragonHead')
+
+  assert.equal(dragon?.signatureEffect?.id, 'fire_breath')
+  assert.equal(dragon?.signatureEffect?.trigger, 'activated')
+  assert.equal(dragon?.signatureEffect?.target, 'area')
+  assert.equal(dragon?.signatureEffect?.replayCue, 'fire_breath')
+  assert.equal(dragon?.signatureEffect?.params.fireMode, 'arc')
+  assert.equal(typeof dragon?.signatureEffect?.params.damage, 'number')
+  assert.ok(dragon?.signatureEffect?.debriefSignals.includes('fire_damage'))
+})
+
+test('top_socket_weapon_mount_generates_legal_action', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_part' && action.payload.partId === 'Weapon_Laser'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === 'part_1'),
+  )
+  const topSocket = chooseBuilderAction(
+    harness,
+    (action) => action.kind === 'choose_mount' && action.payload.mount === 'top_socket',
+  )
+
+  assert.equal(topSocket.payload.mountKind, 'top_socket')
+  assert.equal(topSocket.payload.collisionPolicy, 'allow_clip_v1')
+  assert.deepEqual(topSocket.payload.attachCell, { x: 0, z: 0 })
+})
+
+test('builder_generates_rim_mount_for_laser_on_wheel', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const wheel = placePartInHarness(harness, 'Wheel_Omni')
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_part' && action.payload.partId === 'Weapon_Laser'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === wheel.instanceId),
+  )
+  const rimMount = chooseBuilderAction(
+    harness,
+    (action) => action.kind === 'choose_mount' && action.payload.mount === 'rim_outer',
+  )
+
+  assert.equal(rimMount.payload.mountKind, 'rim')
+  assert.equal(rimMount.payload.mountMotion, 'inherits_parent_spin')
+  assert.equal(rimMount.payload.sector, 'outer_rim')
+  assert.ok(rimMount.payload.summary.includes('inherits parent spin'))
+})
+
+test('rim_mount_weapon_inherits_parent_spin', () => {
+  const wheel = PART_CATALOG.find((part) => part.id === 'Wheel_Omni')
+  const rim = wheel?.mounts.find((mount) => mount.id === 'rim_outer')
+
+  assert.equal(rim?.kind, 'rim')
+  assert.equal(rim?.motion, 'inherits_parent_spin')
+  assert.ok(rim?.accepts.includes('weapon'))
+})
+
+test('allow_clip_mount_can_share_anchor_cell', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const laser = placePartInHarness(harness, 'Weapon_Laser', {
+    targetInstanceId: 'part_1',
+    mountPredicate: (action) => action.payload.mount === 'top_socket',
+  })
+
+  assert.deepEqual(laser.cell, { x: 0, z: 0 })
+  assert.equal(laser.mountCollisionPolicy, 'allow_clip_v1')
+})
+
+test('reject_overlap_mount_rejects_occupied_cell', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  placePartInHarness(harness, 'Wheel_Omni', {
+    targetInstanceId: 'part_1',
+    mountPredicate: (action) => action.payload.mount === 'side_front',
+  })
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_part' && action.payload.partId === 'Wheel_Small'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === 'part_1'),
+  )
+
+  const rejected = tryBuilderAction(harness, {
+    id: 'forged.side_front',
+    kind: 'choose_mount',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'choose_mount',
+      label: 'Forged occupied side',
+      summary: 'Forged occupied side',
+      mount: 'side_front',
+      mountKind: 'side_socket',
+      mountMotion: 'static',
+      collisionPolicy: 'reject_overlap',
+      sector: 'front',
+      attachCell: { x: 0, z: 1 },
+    },
+  })
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues[0].code, 'OCCUPIED_ATTACH_CELL')
+})
+
+test('below_floor_part_rejected_or_occluded_by_floor_rule', () => {
+  const unsafeCatalog = PART_CATALOG.map((part) => part.id === 'Weapon_Laser'
+    ? { ...part, footprint: { ...part.footprint, minY: -1 } }
+    : part)
+  const issues = validateMinimumViableLoadout({
+    name: 'below floor weapon',
+    rootInstanceId: 'body',
+    parts: [
+      { instanceId: 'body', partId: 'Body_Light_Frame', cell: { x: 0, z: 0 } },
+      { instanceId: 'wheel', partId: 'Wheel_Omni', parentInstanceId: 'body', cell: { x: 1, z: 0 } },
+      { instanceId: 'laser', partId: 'Weapon_Laser', parentInstanceId: 'body', cell: { x: 0, z: 0 } },
+    ],
+  }, unsafeCatalog)
+
+  assert.ok(issues.some((issue) => issue.code === 'PART_BELOW_FLOOR'))
+})
+
+test('builder_remove_part_refunds_unconfirmed_draft', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const beforeGold = harness.gold
+  const wheel = placePartInHarness(harness, 'Wheel_Omni')
+  const afterWheelGold = harness.gold
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'remove_part' && action.payload.instanceId === wheel.instanceId),
+  )
+
+  assert.equal(harness.gold, beforeGold)
+  assert.equal(harness.gold > afterWheelGold, true)
+  assert.equal(harness.inventory.some((item) => item.partId === 'Wheel_Omni'), false)
+  assert.equal(harness.buildState.currentDesign.parts.some((part) => part.instanceId === wheel.instanceId), false)
+})
+
+test('builder_remove_parent_requires_remove_subtree', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
+
+  const removeRoot = tryBuilderAction(harness, {
+    id: 'forged.remove_root',
+    kind: 'remove_part',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'remove_part',
+      label: 'Remove root',
+      summary: 'Remove root',
+      instanceId: 'part_1',
+    },
+  })
+  const subtreeAction = chooseBuilderAction(
+    harness,
+    (action) => action.kind === 'remove_subtree' && action.payload.instanceId === 'part_1',
+  )
+
+  assert.equal(removeRoot.ok, false)
+  assert.equal(removeRoot.issues[0].code, 'PART_HAS_DEPENDENTS')
+  assert.notEqual(subtreeAction, undefined)
+})
+
+test('builder_remove_subtree_removes_children', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const wheel = placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
+  placePartInHarness(harness, 'Weapon_Laser', {
+    targetInstanceId: wheel.instanceId,
+    mountPredicate: (action) => action.payload.mount === 'rim_outer',
+  })
+  const beforeRemoveGold = harness.gold
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'remove_subtree' && action.payload.instanceId === wheel.instanceId),
+  )
+
+  assert.equal(harness.buildState.currentDesign.parts.map((part) => part.partId).join(','), 'Body_Light_Frame')
+  assert.ok(harness.gold > beforeRemoveGold)
+  assert.equal(harness.inventory.some((item) => item.partId === 'Weapon_Laser'), false)
+})
+
+test('builder_move_part_remounts_with_catalog_mounts', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const wheel = placePartInHarness(harness, 'Wheel_Omni', {
+    targetInstanceId: 'part_1',
+    mountPredicate: (action) => action.payload.mount === 'side_front',
+  })
+  const inventoryBeforeMove = JSON.stringify(harness.inventory)
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'move_part' && action.payload.instanceId === wheel.instanceId),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === 'part_1'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_mount' && action.payload.mount === 'side_rear'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_rotation' && action.payload.rotation === 0),
+  )
+
+  const moved = harness.buildState.currentDesign.parts.find((part) => part.instanceId === wheel.instanceId)
+
+  assert.deepEqual(moved?.cell, { x: 0, z: -1 })
+  assert.equal(moved?.mountId, 'side_rear')
+  assert.equal(JSON.stringify(harness.inventory), inventoryBeforeMove)
+})
+
+test('builder_rotate_part_uses_server_rotation_action', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) =>
+      action.kind === 'rotate_part' &&
+      action.payload.instanceId === 'part_1' &&
+      action.payload.rotation === 90,
+    ),
+  )
+
+  assert.equal(harness.buildState.currentDesign.parts[0].rotation, 90)
+})
+
+test('agent_cannot_submit_raw_mount_transform', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_part' && action.payload.partId === 'Wheel_Omni'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === 'part_1'),
+  )
+
+  const rejected = tryBuilderAction(harness, {
+    id: 'forged.raw_transform',
+    kind: 'choose_mount',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'choose_mount',
+      label: 'Raw transform',
+      summary: 'Raw transform',
+      mount: 'side_rear',
+      mountKind: 'side_socket',
+      mountMotion: 'static',
+      collisionPolicy: 'reject_overlap',
+      sector: 'rear',
+      attachCell: { x: 99, z: 99 },
+    },
+  })
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues[0].code, 'RAW_TRANSFORM_REJECTED')
+})
+
+test('builder_rejects_raw_transform_payload', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_part' && action.payload.partId === 'Wheel_Omni'),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(harness, (action) => action.kind === 'choose_attach_target' && action.payload.targetInstanceId === 'part_1'),
+  )
+
+  const rejected = tryBuilderAction(harness, {
+    id: 'forged.raw_place',
+    kind: 'choose_mount',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'choose_mount',
+      label: 'Raw place',
+      summary: 'Raw place',
+      mount: 'side_front',
+      mountKind: 'side_socket',
+      mountMotion: 'static',
+      collisionPolicy: 'reject_overlap',
+      sector: 'front',
+      attachCell: { x: 8, z: 8 },
+    },
+  })
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues[0].code, 'RAW_TRANSFORM_REJECTED')
+})
+
+test('catalog_weapon_specs_drive_resolver_damage', () => {
+  const laser = PART_CATALOG.find((part) => part.id === 'Weapon_Laser')
+  const customCatalog = PART_CATALOG.map((part) => part.id === 'Weapon_Laser'
+    ? { ...part, stats: { ...part.stats, weapon: 0 }, spec: { ...part.spec, damage: 31 } }
+    : part)
+  const stats = deriveBotStats({
+    name: 'spec weapon',
+    blocks: [
+      { id: 'body', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'wheel', partId: 'Wheel_Omni', position: [1, 0, 0], rotation: [0, 0, 0] },
+      { id: 'laser', partId: 'Weapon_Laser', position: [0, 0, 0], rotation: [0, 0, 0] },
+    ],
+  }, customCatalog)
+
+  assert.equal(laser?.spec.kind, 'weapon')
+  assert.ok(stats.weaponThreat >= 31)
+})
+
+test('catalog_mobility_specs_drive_move_budget', () => {
+  const customCatalog = PART_CATALOG.map((part) => part.id === 'Wheel_Omni'
+    ? { ...part, stats: { ...part.stats, drive: 0 }, spec: { ...part.spec, moveBudget: 18 } }
+    : part)
+  const stats = deriveBotStats({
+    name: 'spec mobility',
+    blocks: [
+      { id: 'body', partId: 'Body_Light_Frame', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'wheel', partId: 'Wheel_Omni', position: [1, 0, 0], rotation: [0, 0, 0] },
+      { id: 'laser', partId: 'Weapon_Laser', position: [0, 0, 0], rotation: [0, 0, 0] },
+    ],
+  }, customCatalog)
+
+  assert.ok(stats.mobility > 10)
+})
+
+test('rim_laser_inherits_spin_and_resolves_sweep', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const wheel = placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
+  placePartInHarness(harness, 'Weapon_Laser', {
+    targetInstanceId: wheel.instanceId,
+    mountPredicate: (action) => action.payload.mount === 'rim_outer',
+  })
+  const blueprint = botDesignSnapshotToBlueprint(harness.buildState.currentDesign)
+  const input = {
+    round: 1,
+    seed: 'rim-laser',
+    red: { blueprint, tactics: normalizeTactics({ aggression: 1, caution: 0.1 }) },
+    blue: {
+      blueprint: {
+        name: 'target',
+        blocks: [
+          { id: 'body', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+          { id: 'wheel', partId: 'Wheel_Small', position: [1, 0, 0], rotation: [0, 0, 0] },
+          { id: 'weapon', partId: 'Weapon_Spear', position: [0, 0, 1], rotation: [0, 0, 0] },
+        ],
+      },
+      tactics: normalizeTactics({ aggression: 0.1, caution: 1 }),
+    },
+  }
+  const active = resolveSubmittedGameActions(input, { red: [], blue: [] })
+
+  assert.equal(active.status, 'active')
+
+  const redActions = buildCombatActionSet({
+    role: 'red',
+    round: 1,
+    tick: active.nextTick,
+    decisionVersion: 1,
+    actionSetId: 'red:combat',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    catalogVersion: 'part-catalog:v1',
+    arenaVersion: 'arena:v1',
+    snapshot: active.snapshot,
+    controls: deriveControls(blueprint),
+  })
+  const blueActions = buildCombatActionSet({
+    role: 'blue',
+    round: 1,
+    tick: active.nextTick,
+    decisionVersion: 1,
+    actionSetId: 'blue:combat',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    catalogVersion: 'part-catalog:v1',
+    arenaVersion: 'arena:v1',
+    snapshot: active.snapshot,
+    controls: { movement: ['brake'] },
+  })
+  const redAttack = Object.values(redActions.actions).find((action) => action.kind === 'attack')
+  const blueHold = Object.values(blueActions.actions).find((action) => action.kind === 'hold')
+
+  assert.notEqual(redAttack, undefined)
+  assert.notEqual(blueHold, undefined)
+
+  const resolved = resolveSubmittedGameActions(input, { red: [redAttack], blue: [blueHold] })
+  const replay = resolved.status === 'complete' ? resolved.result.replay : resolved.replay
+  const laserFire = replay.events.find(
+    (event) => event.type === 'weapon_fire' && event.sourcePartId === 'Weapon_Laser',
+  )
+
+  assert.equal(laserFire?.fireMode, 'sweep')
+})
+
+test('spinning_laser_uses_sweep_envelope_not_direct_aim', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame')
+  const wheel = placePartInHarness(harness, 'Wheel_Omni')
+  const laser = placePartInHarness(harness, 'Weapon_Laser', {
+    targetInstanceId: wheel.instanceId,
+    mountPredicate: (action) => action.payload.mount === 'rim_outer',
+  })
+
+  assert.equal(PART_CATALOG.find((part) => part.id === 'Weapon_Laser')?.spec.fireMode, 'direct')
+  assert.equal(laser.mountMotion, 'inherits_parent_spin')
+})
+
+test('packet_uses_catalog_version_and_current_choice_digest', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 100,
+    actionSetId: 'red:r1:loadout:choose_part:v100',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 100,
+    buildState,
+  })
+  const legalActions = Object.values(actionSet.actions).map(loadoutLegalActionForPacket)
+
+  assert.equal(actionSet.catalogVersion, 'part-catalog:v1')
+  assert.equal(typeof actionSet.catalogDigest, 'string')
+  assert.equal(legalActions.every((action) => action.catalogDigest === actionSet.catalogDigest), true)
+})
+
+test('store_uses_asymmetric_role_specific_rolls', () => {
+  const seed = 'session/fight/round'
+  const redStore = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'red',
+    round: 1,
+    seed,
+    gold: 100,
+  })
+  const blueStore = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'blue',
+    round: 1,
+    seed,
+    gold: 100,
+  })
+  const repeatedRedStore = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'red',
+    round: 1,
+    seed,
+    gold: 100,
+  })
+
+  assert.deepEqual(redStore.slots.map((slot) => slot.kind), blueStore.slots.map((slot) => slot.kind))
+  assert.deepEqual(redStore.slots.map((slot) => slot.partId), repeatedRedStore.slots.map((slot) => slot.partId))
+  assert.notDeepEqual(redStore.slots.map((slot) => slot.partId), blueStore.slots.map((slot) => slot.partId))
+})
+
+test('store_has_no_dedicated_rare_signature_style_slot', () => {
+  const store = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'red',
+    round: 2,
+    seed: 'rare-style-store',
+    gold: 100,
+  })
+  const partsById = new Map(PART_CATALOG.map((part) => [part.id, part]))
+
+  assert.deepEqual(store.slots.map((slot) => slot.kind), [
+    'weapon',
+    'weapon',
+    'utility',
+    'utility',
+    'armor',
+    'armor',
+    'advanced_mobility',
+    'wildcard',
+    'wildcard',
+    'wildcard',
+  ])
+  assert.equal(store.slots.some((slot) => slot.kind.includes('style') || slot.kind.includes('rare')), false)
+
+  for (const slot of store.slots) {
+    const part = partsById.get(slot.partId)
+
+    if (part?.category === 'style' || (part?.rarity !== 'normal' && part?.signatureEffect)) {
+      assert.equal(slot.kind, 'wildcard')
+    }
+  }
+})
+
+test('store_foundation_parts_are_always_available', () => {
+  const redStore = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'red',
+    round: 3,
+    seed: 'foundation-store',
+    gold: 15,
+  })
+  const blueStore = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'blue',
+    round: 3,
+    seed: 'foundation-store',
+    gold: 15,
+  })
+  const requiredFoundation = [
+    'Body_Square_Small',
+    'Body_Light_Frame',
+    'Frame_Strut',
+    'Mount_Plate',
+    'Wheel_Small',
+    'Tread_Light',
+    'Weapon_Spear',
+  ]
+
+  for (const partId of requiredFoundation) {
+    assert.ok(redStore.foundationPartIds.includes(partId), `${partId} missing from red foundation`)
+    assert.ok(blueStore.foundationPartIds.includes(partId), `${partId} missing from blue foundation`)
+    assert.ok(redStore.offeredPartIds.includes(partId), `${partId} missing from red offers`)
+    assert.ok(blueStore.offeredPartIds.includes(partId), `${partId} missing from blue offers`)
+  }
+})
+
+test('store_rails_limit_rare_signature_and_keep_viability', () => {
+  const gold = 18
+  const store = buildCatalogStore({
+    catalog: PART_CATALOG,
+    role: 'blue',
+    round: 4,
+    seed: 'viability-store',
+    gold,
+  })
+  const partsById = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const offeredParts = store.offeredPartIds.map((partId) => partsById.get(partId)).filter(Boolean)
+  const rareSignatureSlots = store.slots.filter((slot) => {
+    const part = partsById.get(slot.partId)
+
+    return part?.rarity !== 'normal' && part?.signatureEffect
+  })
+  const totalRareSignatureCost = rareSignatureSlots.reduce(
+    (total, slot) => total + (partsById.get(slot.partId)?.cost ?? 0),
+    0,
+  )
+
+  assert.ok(offeredParts.some((part) => part.category === 'weapon' && part.cost <= gold))
+  assert.ok(offeredParts.some((part) =>
+    part.category === 'mobility' &&
+    part.cost <= gold &&
+    part.spec.kind === 'mobility' &&
+    part.spec.moveBudget > 0,
+  ))
+  assert.ok(rareSignatureSlots.length <= 1)
+  assert.ok(totalRareSignatureCost <= 24)
+})
+
+test('loadout_action_set_exposes_role_store_to_packet_contract', () => {
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 101,
+    actionSetId: 'red:r1:loadout:store:v101',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 100,
+    storeSeed: 'packet-store',
+  })
+
+  assert.equal(actionSet.catalogStore?.role, 'red')
+  assert.equal(actionSet.catalogStore?.slots.length, 10)
+  assert.ok(actionSet.catalogStore?.offeredPartIds.includes('Body_Square_Small'))
+})
+
 test('blueprint validation catches empty-processable edge cases', () => {
   const noBody = validateBlueprintAssembly(
     {
@@ -466,25 +1878,6 @@ test('blueprint validation catches empty-processable edge cases', () => {
   assert.ok(
     duplicatedCell.issues.some((entry) => entry.code === 'OCCUPIED_GRID_CELL'),
   )
-})
-
-test('bad but processable weaponless body is accepted', () => {
-  const submission = {
-    action: 'submit_round_plan',
-    purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
-    blueprint: {
-      name: 'Bad Idea',
-      blocks: [
-        { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
-      ],
-    },
-    schemaVersion: 2,
-    tactics: { movementPolicy: 'hold_ground' },
-  }
-  const result = validateRoundSubmission({ gold: 100, inventory: [], submission })
-
-  assert.equal(result.ok, true)
-  assert.deepEqual(result.controls, { movement: ['brake'] })
 })
 
 test('blueprint validation enforces inventory and connected grid', () => {
@@ -534,162 +1927,6 @@ test('controls are generated from installed modules', () => {
   assert.equal(controls.weaponB, undefined)
   assert.deepEqual(dualControls.weaponA, ['fire', 'hold'])
   assert.deepEqual(dualControls.weaponB, ['fire', 'hold'])
-})
-
-test('live turn command validation rejects commands for absent modules', () => {
-  const result = validateSubmittedTurnCommand({
-    controls: deriveControls(bareBodyBlueprint),
-    command: { tick: 1, move: 'brake', weaponA: 'fire' },
-  })
-
-  assert.equal(result.ok, false)
-  assert.ok(result.issues.some((entry) => entry.code === 'WEAPON_A_NOT_AVAILABLE'))
-})
-
-test('legacy turnPlan round submissions are rejected', () => {
-  const result = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      ...validSpinnerSubmission,
-      turnPlan: {
-        commands: [{ tick: 1, move: 'forward', weaponA: 'fire' }],
-      },
-    },
-  })
-
-  assert.equal(result.ok, false)
-  assert.ok(result.issues.some((entry) => entry.code === 'LEGACY_TURN_PLAN_REMOVED'))
-})
-
-test('v2 round submissions normalize into combat input', () => {
-  const result = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: validSpinnerSubmission,
-  })
-
-  assert.equal(result.ok, true)
-  assert.equal(result.normalizedSubmission.schemaVersion, 2)
-  assert.equal('openingScript' in result.normalizedSubmission, false)
-  assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'close')
-})
-
-test('v2 hold-ground tactics stay legal for immobile submissions', () => {
-  const result = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
-      blueprint: bareBodyBlueprint,
-      tactics: { movementPolicy: 'hold_ground' },
-    },
-  })
-
-  assert.equal(result.ok, true)
-  assert.equal(result.normalizedSubmission.tactics.movementPolicy, 'hold_ground')
-})
-
-test('v2 tactics submissions reject removed opening scripts', () => {
-  const result = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: validSpinnerSubmission.purchases,
-      blueprint: validSpinnerSubmission.blueprint,
-      tactics: {
-        style: 'aggressive',
-        targetPriority: 'closest',
-        preferredRange: 'close',
-        movementPolicy: 'close',
-        aggression: 0.8,
-        retreatAtHealthPct: 0.15,
-        weaponCadence: 'sustained',
-        hazardPreference: 'avoid',
-      },
-      openingScript: {
-        commands: [
-          { tick: 1, move: 'forward', weaponA: 'hold' },
-          { tick: 2, move: 'forward', weaponA: 'fire' },
-        ],
-      },
-    },
-  })
-
-  assert.equal(result.ok, false)
-  assert.ok(result.issues.some((entry) => entry.code === 'OPENING_SCRIPT_REMOVED'))
-})
-
-test('v2 tactics errors use path-specific issue locations', () => {
-  const result = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: validSpinnerSubmission.purchases,
-      blueprint: validSpinnerSubmission.blueprint,
-      tactics: {
-        movementPolicy: 'teleport',
-        aggression: 1.4,
-      },
-    },
-  })
-
-  assert.equal(result.ok, false)
-  assert.ok(
-    result.issues.some(
-      (entry) =>
-        entry.code === 'INVALID_MOVEMENT_POLICY' &&
-        entry.path === 'submission.tactics.movementPolicy',
-    ),
-  )
-  assert.ok(
-    result.issues.some(
-      (entry) =>
-        entry.code === 'INVALID_AGGRESSION' &&
-        entry.path === 'submission.tactics.aggression',
-    ),
-  )
-})
-
-test('v2 movement policy legality follows available mobility controls', () => {
-  const holdGround = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
-      blueprint: bareBodyBlueprint,
-      tactics: { movementPolicy: 'hold_ground' },
-    },
-  })
-  const closeWithoutMobility = validateRoundSubmission({
-    gold: 100,
-    inventory: [],
-    submission: {
-      action: 'submit_round_plan',
-      schemaVersion: 2,
-      purchases: [{ partId: 'Body_Square_Small', quantity: 1 }],
-      blueprint: bareBodyBlueprint,
-      tactics: { movementPolicy: 'close' },
-    },
-  })
-
-  assert.equal(holdGround.ok, true)
-  assert.equal(closeWithoutMobility.ok, false)
-  assert.ok(
-    closeWithoutMobility.issues.some(
-      (entry) =>
-        entry.code === 'MOVEMENT_POLICY_NOT_AVAILABLE' &&
-        entry.path === 'submission.tactics.movementPolicy',
-    ),
-  )
 })
 
 test('policy commands diverge for the same bot state with different movement tactics', () => {
@@ -969,6 +2206,227 @@ test('arena topology supports custom modular hazard placement and blockers', () 
   assert.equal(hazardsAtPosition(topology, [3, 0, 2])[0].id, 'crusher_lane')
   assert.equal(hasArenaLineOfSight(topology, [-1, 0, 0], [1, 0, 0]), false)
   assert.equal(hasArenaLineOfSight(topology, [-1, 0, 3], [1, 0, 3]), true)
+})
+
+test('combat action builder redacts canonical payloads and applies tactical-anchor legality', () => {
+  const redSet = buildTacticalCombatActionSet({ role: 'red' })
+  const blueSet = buildTacticalCombatActionSet({ role: 'blue' })
+  const redDash = findCombatAction(
+    redSet,
+    (command) => command.move === 'dash_forward' && command.weaponA !== 'fire',
+  )
+  const blueDash = findCombatAction(
+    blueSet,
+    (command) => command.move === 'dash_forward' && command.weaponA !== 'fire',
+  )
+  const redDashPacket = combatLegalActionForPacket(redDash)
+  const blueDashPacket = combatLegalActionForPacket(blueDash)
+  const redPath = pathKeys(redDashPacket.preview)
+  const bluePath = pathKeys(blueDashPacket.preview)
+
+  assert.equal(JSON.stringify(Object.values(redSet.actions).map(combatLegalActionForPacket)).includes('payload'), false)
+  assert.ok(redDashPacket.preview.riskTags.includes('occupied_anchor_conflict'))
+  assert.ok([...redPath].some((cell) => bluePath.has(cell)))
+
+  const blockedRedSet = buildTacticalCombatActionSet({
+    role: 'red',
+    arena: tacticalBlockedArena,
+  })
+  const farRedSet = buildTacticalCombatActionSet({
+    role: 'red',
+    redPosition: [-4, 0, 0],
+    bluePosition: [4, 0, 0],
+  })
+
+  assert.equal(hasCombatAction(blockedRedSet, (command) => command.move === 'dash_forward'), false)
+  assert.equal(hasCombatAction(blockedRedSet, (command) => command.weaponA === 'fire'), false)
+  assert.equal(hasCombatAction(farRedSet, (command) => command.weaponA === 'fire'), false)
+})
+
+test('resolveSubmittedGameActions keeps both-hold combat inert and replay-valid', () => {
+  const resolution = resolveSubmittedGameActions({
+    round: 1,
+    seed: 'canonical-both-hold',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    blue: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    arena: tacticalRuntimeArena,
+  }, {
+    red: [canonicalCombatAction('red', 1, { move: 'brake', weaponA: 'hold' })],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake', weaponA: 'hold' })],
+  })
+
+  assert.equal(resolution.status, 'active')
+  assert.equal(resolution.nextTick, 2)
+  assert.equal(resolution.snapshot.red.position[0], -6)
+  assert.equal(resolution.snapshot.blue.position[0], 6)
+  assert.equal(resolution.replay.events.some((event) => event.type === 'move'), false)
+  assert.equal(resolution.replay.events.some((event) => event.type === 'weapon_fire'), false)
+  assert.equal(validateReplayTimeline(resolution.replay), true)
+})
+
+test('resolveSubmittedGameActions deterministically blocks same-anchor and crossing-path conflicts', () => {
+  const conflictInput = {
+    round: 1,
+    seed: 'canonical-anchor-conflicts',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    blue: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    arena: tacticalRuntimeArena,
+  }
+  const sameAnchor = resolveSubmittedGameActions(conflictInput, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+    ]),
+  })
+  const crossingPath = resolveSubmittedGameActions(conflictInput, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { move: 'dash_forward' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { move: 'dash_forward' },
+    ]),
+  })
+
+  assert.equal(sameAnchor.status, 'active')
+  assert.equal(sameAnchor.snapshot.red.position[0], -2)
+  assert.equal(sameAnchor.snapshot.blue.position[0], 2)
+  assert.equal(sameAnchor.log.some((entry) => entry.includes('same final anchor')), true)
+  assert.equal(crossingPath.status, 'active')
+  assert.equal(crossingPath.snapshot.red.position[0], -1)
+  assert.equal(crossingPath.snapshot.blue.position[0], 1)
+  assert.equal(crossingPath.log.some((entry) => entry.includes('anchor paths crossed')), true)
+})
+
+test('resolveSubmittedGameActions fires only after final-pose range and line-of-sight checks', () => {
+  const rangeInput = {
+    round: 1,
+    seed: 'canonical-target-escapes-range',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close', weaponCadence: 'sustained' }),
+    },
+    blue: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    arena: tacticalRuntimeArena,
+  }
+  const rangeResolution = resolveSubmittedGameActions(rangeInput, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { move: 'dash_backward' },
+    ]),
+  })
+  const losResolution = resolveSubmittedGameActions({
+    ...rangeInput,
+    seed: 'canonical-final-los-blocked',
+    arena: tacticalRuntimeBlockedArena,
+  }, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'brake' },
+    ]),
+  })
+
+  assert.equal(
+    rangeResolution.replay.events.some(
+      (event) => event.type === 'weapon_fire' && event.bot === 'red' && Math.trunc(event.t) === 4,
+    ),
+    false,
+  )
+  assert.equal(
+    losResolution.replay.events.some((event) => event.type === 'weapon_fire' && event.bot === 'red'),
+    false,
+  )
+})
+
+test('resolveSubmittedGameActions suppresses same-tick fire from a bot destroyed earlier in weapon order', () => {
+  const heavyRedWeapon = {
+    name: 'Overloaded Spinner',
+    blocks: [
+      { id: 'spinnerA', partId: 'Weapon_Spinner_Large', position: [0, 0, 0], rotation: [0, 0, 0] },
+      { id: 'spinnerB', partId: 'Weapon_Spinner_Large', position: [1, 0, 0], rotation: [0, 0, 0] },
+      { id: 'spinnerC', partId: 'Weapon_Spinner_Large', position: [-1, 0, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const fragileBlueWeapon = {
+    name: 'Fragile Armed Target',
+    blocks: [
+      { id: 'spinner', partId: 'Weapon_Spinner_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const resolution = resolveSubmittedGameActions({
+    round: 1,
+    seed: 'canonical-destroyed-before-fire',
+    red: {
+      blueprint: heavyRedWeapon,
+      tactics: normalizeTactics({ movementPolicy: 'close', weaponCadence: 'sustained' }),
+    },
+    blue: {
+      blueprint: fragileBlueWeapon,
+      tactics: normalizeTactics({ movementPolicy: 'close', weaponCadence: 'sustained' }),
+    },
+    arena: tacticalRuntimeArena,
+  }, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'forward' },
+      { weaponA: 'fire' },
+    ]),
+  })
+
+  assert.equal(resolution.status, 'complete')
+  assert.equal(
+    resolution.result.replay.events.some((event) => event.type === 'knockout' && event.bot === 'blue'),
+    true,
+  )
+  assert.equal(
+    resolution.result.replay.events.some((event) => event.type === 'weapon_fire' && event.bot === 'blue'),
+    false,
+  )
 })
 
 test('resolver applies non-damaging arena trap effects instead of rendering them as inert props', () => {
@@ -2035,7 +3493,12 @@ test('observer cockpit tokens can read role state but cannot mutate agent state'
   assert.equal(observerBootstrap.ok, false)
   assert.equal(observerBootstrap.error.code, 'INVALID_TOKEN')
 
-  const observerSubmission = await session.submitRoundPlan('observer_red', validSpinnerSubmission)
+  const observerSubmission = await session.submitGameMasterAction('observer_red', {
+    action: 'submit_game_action',
+    actionSetId: 'observer-cannot-lock',
+    decisionVersion: 1,
+    actionId: 'observer-cannot-lock',
+  })
 
   assert.equal(observerSubmission.ok, false)
   assert.equal(observerSubmission.error.code, 'FORBIDDEN')
@@ -2057,17 +3520,19 @@ test('observer cockpit tokens can read role state but cannot mutate agent state'
   assert.equal(observerJournal.error.code, 'FORBIDDEN')
 })
 
-test('sessions require both roles before opening plan submission', async () => {
+test('sessions require both roles before opening loadout actions', async () => {
   const session = await createTestSession()
   const red = await session.claimRole(claimRequest('red'))
 
   assert.equal(red.ok, true)
   assert.equal(red.value.state.phase, 'waiting_for_agents')
 
-  const earlySubmission = await session.submitRoundPlan(
-    red.value.roleToken,
-    validSpinnerSubmission,
-  )
+  const earlySubmission = await session.submitGameMasterAction(red.value.roleToken, {
+    action: 'submit_game_action',
+    actionSetId: 'red:r1:loadout:not-open',
+    decisionVersion: 1,
+    actionId: 'loadout.red.r1.confirm',
+  })
 
   assert.equal(earlySubmission.ok, false)
   assert.equal(earlySubmission.error.code, 'PHASE_CLOSED')
@@ -2126,13 +3591,14 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(privateState.value.role, 'red')
 
   const blue = await session.bootstrapRole('blue', 'claim_blue', {
+    agentName: 'external-blue',
     teamIdentity: testTeamIdentity('blue'),
   })
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
   assert.equal(blue.value.state.roundPlan.planSeconds, 120)
-  assert.equal(blue.value.nextAction, 'submit_round_plan')
+  assert.equal(blue.value.nextAction, 'build_bot')
 })
 
 test('session rejects invalid role tokens for private state', async () => {
@@ -2157,6 +3623,111 @@ test('session marks expired state and rejects private access after ttl', async (
   assert.equal(publicState.phase, 'expired')
   assert.equal(privateState.ok, false)
   assert.equal(privateState.error.code, 'SESSION_EXPIRED')
+})
+
+test('post-fight reflections are accepted only after completed fights and consumed into shared debrief', async () => {
+  const session = await createTestSession('s_reflection_lifecycle')
+  const refereeToken = session.createResponse().refereeToken
+  const { redToken, blueToken } = await claimBothRoles(session)
+  const earlyPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(earlyPacket.ok, true)
+
+  const early = await session.submitPostFightReflection(
+    redToken,
+    postFightReflection('red', {
+      decisionVersion: earlyPacket.value.decisionVersion,
+    }),
+  )
+
+  assert.equal(early.ok, false)
+  assert.equal(early.error.code, 'PHASE_CLOSED')
+
+  const stored = session.exportState()
+  stored.phase = 'round_review'
+  stored.roundPlan = undefined
+  stored.combat = undefined
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+  stored.replay = {
+    ...replayForCompletedFight(),
+    teamIdentities: {
+      red: expectedLegacyTeamIdentity('red'),
+      blue: expectedLegacyTeamIdentity('blue'),
+    },
+    botBlueprints: {
+      red: validSpinnerSubmission.blueprint,
+      blue: validSpinnerSubmission.blueprint,
+    },
+  }
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 0, blue: 40 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
+  stored.fightDossier = completedFightDossier('s_reflection_lifecycle')
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:02:00.000Z',
+  })
+  const reviewPacket = await loaded.getGameMasterPacketForToken(redToken)
+
+  assert.equal(reviewPacket.ok, true)
+  assert.equal(reviewPacket.value.nextAction, 'submit_reflection')
+  assert.equal(reviewPacket.value.fightId, 'fight_1')
+
+  const secret = 'SECRET_RAW_REFLECTION_DO_NOT_LEAK'
+  const submitted = await loaded.submitPostFightReflection(
+    redToken,
+    postFightReflection('red', {
+      decisionVersion: reviewPacket.value.decisionVersion,
+      claims: {
+        perceivedWinReason: `${secret} net won the fight`,
+        ownWeaknesses: [`${secret} weak drive`],
+        opponentThreats: [`${secret} threat`],
+        suggestedDesignChanges: [`${secret} design`],
+        suggestedTacticalChanges: [`${secret} tactic`],
+      },
+    }),
+  )
+
+  assert.equal(submitted.ok, true)
+  assert.equal(submitted.value.packet.nextAction, 'wait_for_debrief')
+
+  const afterSubmit = loaded.exportState()
+  const [storedReflection] = afterSubmit.reflections
+
+  assert.equal(storedReflection.status, 'private_pending')
+  assert.equal(storedReflection.reflection.claims.ownWeaknesses[0].includes(secret), true)
+
+  const blueState = await loaded.getRoleStateForToken(blueToken)
+  const publicState = loaded.getPublicState()
+
+  assert.equal(blueState.ok, true)
+  assert.equal(JSON.stringify(blueState.value).includes(secret), false)
+  assert.equal(JSON.stringify(publicState).includes(secret), false)
+
+  const advanced = await loaded.advanceRound(refereeToken)
+
+  assert.equal(advanced.ok, true)
+  assert.equal(advanced.value.publicState.phase, 'submission_phase')
+
+  const afterAdvance = loaded.exportState()
+  const consumedReflection = afterAdvance.reflections[0]
+
+  assert.equal(consumedReflection.status, 'consumed_into_shared_debrief')
+  assert.equal(consumedReflection.debriefId, afterAdvance.sharedDebrief.debriefId)
+  assert.equal(afterAdvance.fightDossier.fights[0].stats.damageDealt.red, 40)
+  assert.equal(JSON.stringify(afterAdvance.sharedDebrief).includes(secret), false)
+
+  const redNext = await loaded.getGameMasterPacketForToken(redToken)
+  const blueNext = await loaded.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(redNext.ok, true)
+  assert.equal(blueNext.ok, true)
+  assert.deepEqual(redNext.value.sharedDebrief, blueNext.value.sharedDebrief)
+  assert.equal(JSON.stringify(redNext.value.sharedDebrief).includes(secret), false)
 })
 
 test('agents can publish public table talk while private reflections stay role scoped', async () => {
@@ -2230,6 +3801,112 @@ test('private chat is scoped to the bearer role and hidden from public state', a
   assert.equal(invalidToken.error.code, 'INVALID_TOKEN')
 })
 
+test('post-fight reflection lifecycle is private pending until debrief consumption', async () => {
+  const session = await createTestSession('s_reflection_lifecycle')
+  const { redToken, blueToken } = await claimBothRoles(session)
+  const earlyReflection = await session.submitPostFightReflection(
+    redToken,
+    postFightReflection('red'),
+  )
+
+  assert.equal(earlyReflection.ok, false)
+  assert.equal(earlyReflection.error.code, 'PHASE_CLOSED')
+
+  const stored = session.exportState()
+
+  stored.phase = 'round_review'
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 0, blue: 40 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
+  stored.replay = {
+    ...replayForCompletedFight(),
+    teamIdentities: {
+      red: expectedLegacyTeamIdentity('red'),
+      blue: expectedLegacyTeamIdentity('blue'),
+    },
+    botBlueprints: {
+      red: validSpinnerSubmission.blueprint,
+      blue: validSpinnerSubmission.blueprint,
+    },
+  }
+  stored.fightDossier = completedFightDossier('s_reflection_lifecycle')
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:02:00.000Z',
+  })
+  const redStateBeforeReflection = await loaded.getRoleStateForToken(redToken)
+  const reflection = await loaded.submitPostFightReflection(
+    redToken,
+    postFightReflection('red', {
+      decisionVersion: redStateBeforeReflection.value.gameMaster.decisionVersion,
+    }),
+  )
+
+  assert.equal(reflection.ok, true)
+  assert.equal(reflection.value.packet.nextAction, 'wait_for_debrief')
+  assert.equal(loaded.exportState().reflections[0].status, 'private_pending')
+
+  const blueState = await loaded.getRoleStateForToken(blueToken)
+  const publicState = loaded.getPublicState()
+
+  assert.equal(JSON.stringify(blueState.value).includes('secret weak drive note'), false)
+  assert.equal(JSON.stringify(publicState).includes('secret weak drive note'), false)
+
+  const debrief = loaded.buildContinuationDebrief()
+  const exported = loaded.exportState()
+  const debriefJson = JSON.stringify(debrief)
+
+  assert.equal(debrief.ok, true)
+  assert.equal(exported.reflections[0].status, 'consumed_into_shared_debrief')
+  assert.equal(exported.reflections[0].debriefId, debrief.value.sharedDebrief.debriefId)
+  assert.equal(debriefJson.includes('secret weak drive note'), false)
+  assert.equal(
+    debrief.value.sharedDebrief.evidence.some((entry) => entry.type === 'private_reflection_count'),
+    true,
+  )
+
+  const lateReflection = await loaded.submitPostFightReflection(
+    blueToken,
+    postFightReflection('blue', {
+      decisionVersion: blueState.value.gameMaster.decisionVersion,
+    }),
+  )
+  const afterLateReflection = loaded.exportState()
+
+  assert.equal(lateReflection.ok, false)
+  assert.equal(lateReflection.error.code, 'PHASE_CLOSED')
+  assert.equal(
+    afterLateReflection.reflections.some((entry) => entry.status === 'private_pending'),
+    false,
+  )
+
+  const completedStored = loaded.exportState()
+  completedStored.phase = 'session_complete'
+  const completed = SessionCoordinator.fromState(completedStored, {
+    clock: () => '2026-06-03T00:04:00.000Z',
+  })
+  const completedPacket = await completed.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(completedPacket.ok, true)
+
+  const lateCompletedReflection = await completed.submitPostFightReflection(
+    blueToken,
+    postFightReflection('blue', {
+      decisionVersion: completedPacket.value.decisionVersion,
+    }),
+  )
+
+  assert.equal(lateCompletedReflection.ok, false)
+  assert.equal(lateCompletedReflection.error.code, 'PHASE_CLOSED')
+  assert.equal(
+    completed.exportState().reflections.some((entry) => entry.status === 'private_pending'),
+    false,
+  )
+})
+
 test('session rate limits repeated private state attempts', async () => {
   const session = await createTestSession('s_rate_limit', {
     rateLimits: {
@@ -2249,18 +3926,16 @@ test('session rate limits repeated private state attempts', async () => {
   assert.equal(third.error.code, 'RATE_LIMITED')
 })
 
-test('session resolves after both valid plans while keeping public state redacted', async () => {
+test('session resolves after both confirmed loadouts while keeping public state redacted', async () => {
   const session = await createTestSession()
   const { redToken, blueToken } = await claimBothRoles(session)
-  const redSubmission = await session.submitRoundPlan(redToken, {
-    ...validSpinnerSubmission,
-    chat: [
-      {
-        kind: 'strategy',
-        message: 'Opening with direct pressure; next round should adapt from replay damage.',
-      },
-    ],
-  })
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+  const bluePacket = await session.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(redPacket.ok, true)
+  assert.equal(bluePacket.ok, true)
+
+  const redSubmission = await confirmMinimumViableLoadout(session, redToken, redPacket.value)
 
   assert.equal(redSubmission.ok, true)
   assert.equal(redSubmission.value.publicState.phase, 'submission_phase')
@@ -2269,104 +3944,62 @@ test('session resolves after both valid plans while keeping public state redacte
   assert.equal(redSubmission.value.publicState.replayAvailable, false)
   assert.equal(redSubmission.value.publicState.roundPlan.planSeconds, 120)
   assert.equal(redSubmission.value.publicState.roundPlan.deadlineAt, '2026-06-03T00:02:00.000Z')
-  assert.equal(redSubmission.value.publicState.chatLog[0].kind, 'strategy')
 
   const preReplay = session.getReplay()
 
   assert.equal(preReplay.ok, false)
   assert.equal(preReplay.error.code, 'REPLAY_NOT_AVAILABLE')
 
-  const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+  const blueSubmission = await confirmMinimumViableLoadout(session, blueToken, bluePacket.value)
+  const blueState = await session.getRoleStateForToken(blueToken)
 
   assert.equal(blueSubmission.ok, true)
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.value.publicState.replayAvailable, false)
   assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
-  assert.equal(blueSubmission.value.state.combat.turnSeconds, 120)
-  assert.equal(blueSubmission.value.state.combat.self.role, 'blue')
-  assert.equal(blueSubmission.value.state.combat.opponent.role, 'red')
-  assert.equal(blueSubmission.value.state.combat.decision.tick, 1)
-  assert.equal(blueSubmission.value.state.combat.decision.legalCommands.movement.includes('forward'), true)
-  assert.equal(blueSubmission.value.state.combat.decision.range.band, 'long')
-  assert.deepEqual(blueSubmission.value.state.combat.decision.positioning.selfCell, { x: 6, z: 0 })
-  assert.deepEqual(blueSubmission.value.state.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
-  assert.equal(blueSubmission.value.state.combat.decision.positioning.distanceCells, 12)
-  assert.equal(blueSubmission.value.state.combat.decision.positioning.bearingToOpponent, 'west')
-  assert.equal(blueSubmission.value.state.combat.decision.hazards.active.includes('floor_saw'), true)
-  assert.equal(blueSubmission.value.state.combat.decision.arenaPressure.selfNearHazard, false)
-  assert.ok(blueSubmission.value.state.combat.decision.movementOptions.recommended.length > 0)
+  assert.equal(blueState.ok, true)
+  assert.equal(blueState.value.combat.turnSeconds, 120)
+  assert.equal(blueState.value.combat.self.role, 'blue')
+  assert.equal(blueState.value.combat.opponent.role, 'red')
+  assert.equal(blueState.value.combat.decision.tick, 1)
+  assert.equal(blueState.value.combat.decision.availableCommands.movement.includes('forward'), true)
+  assert.equal(blueState.value.combat.decision.range.band, 'long')
+  assert.deepEqual(blueState.value.combat.decision.positioning.selfCell, { x: 6, z: 0 })
+  assert.deepEqual(blueState.value.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
+  assert.equal(blueState.value.combat.decision.positioning.distanceCells, 12)
+  assert.equal(blueState.value.combat.decision.positioning.bearingToOpponent, 'west')
+  assert.equal(blueState.value.combat.decision.hazards.active.includes('floor_saw'), true)
+  assert.equal(blueState.value.combat.decision.arenaPressure.selfNearHazard, false)
+  assert.ok(blueState.value.combat.decision.movementGuidance.approach.length > 0)
   assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
 
-  const resolved = await resolveLiveCombat(session, redToken, blueToken, blueSubmission.value.state)
+  const resolved = await resolveLiveCombat(session, redToken, blueToken)
 
   assert.equal(resolved.value.publicState.phase, 'round_review')
   assert.equal(resolved.value.publicState.replayAvailable, true)
   assert.ok(resolved.value.publicState.lastResult)
-  assert.equal(resolved.value.publicState.chatLog.length, 1)
-  assert.equal(resolved.value.publicState.chatLog[0].message, 'Opening with direct pressure; next round should adapt from replay damage.')
 
   const replay = session.getReplay()
 
   assert.equal(replay.ok, true)
-  assert.equal(replay.value.botBlueprints.red.name, 'Spinner')
-  assert.equal(replay.value.botBlueprints.blue.name, 'Spinner')
-  assert.deepEqual(replay.value.teamIdentities.red, testTeamIdentity('red'))
-  assert.deepEqual(replay.value.teamIdentities.blue, testTeamIdentity('blue'))
+  assert.equal(replay.value.botBlueprints.red.name, 'red loadout')
+  assert.equal(replay.value.botBlueprints.blue.name, 'blue loadout')
+  assert.deepEqual(replay.value.teamIdentities.red, expectedLegacyTeamIdentity('red'))
+  assert.deepEqual(replay.value.teamIdentities.blue, expectedLegacyTeamIdentity('blue'))
   assert.equal(validateReplayTimeline(replay.value), true)
 
   const publicJson = JSON.stringify(resolved.value.publicState)
   assert.equal(publicJson.includes('claim_red'), false)
   assert.equal(publicJson.includes('role_blue'), false)
-  assert.equal(publicJson.includes('Spinner'), false)
-  assert.equal(publicJson.includes('Body_Square_Medium'), false)
+  assert.equal(publicJson.includes('Body_Light_Frame'), false)
   assert.equal(publicJson.includes('commands'), false)
 
   const redState = await session.getRoleStateForToken(redToken)
   assert.equal(redState.ok, true)
-  assert.equal(redState.value.ownSubmission.blueprint.name, 'Spinner')
-  assert.equal(JSON.stringify(redState.value.opponent).includes('Spinner'), false)
-
-  const duplicate = await session.submitRoundPlan(redToken, validSpinnerSubmission)
-  assert.equal(duplicate.ok, false)
-  assert.equal(duplicate.error.code, 'ALREADY_SUBMITTED')
-})
-
-test('session accepts v2 tactics without a legacy turnPlan', async () => {
-  const session = await createTestSession('s_v2_submission')
-  const { redToken, blueToken } = await claimBothRoles(session)
-  const v2Submission = {
-    action: 'submit_round_plan',
-    schemaVersion: 2,
-    purchases: validSpinnerSubmission.purchases,
-    blueprint: validSpinnerSubmission.blueprint,
-    tactics: {
-      movementPolicy: 'close',
-      preferredRange: 'close',
-      aggression: 0.75,
-      weaponCadence: 'opportunistic',
-    },
-  }
-
-  const redSubmission = await session.submitRoundPlan(redToken, v2Submission)
-
-  assert.equal(redSubmission.ok, true)
-  assert.equal(redSubmission.value.state.ownSubmission.schemaVersion, 2)
-  assert.equal('turnPlan' in redSubmission.value.state.ownSubmission, false)
-  assert.equal('openingScript' in redSubmission.value.state.ownSubmission, false)
-
-  const blueSubmission = await session.submitRoundPlan(blueToken, v2Submission)
-
-  assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
-  assert.equal(blueSubmission.value.publicState.replayAvailable, false)
-  assert.equal(blueSubmission.value.state.combat.snapshot.recentEvents.includes('red spawned'), true)
-
-  const resolved = await resolveLiveCombat(session, redToken, blueToken, blueSubmission.value.state)
-
-  assert.equal(resolved.value.publicState.phase, 'round_review')
-  assert.equal(validateReplayTimeline(session.getReplay().value), true)
+  assert.equal(redState.value.ownLoadout.blueprint.name, 'red loadout')
+  assert.equal(JSON.stringify(redState.value.opponent).includes('red loadout'), false)
 })
 
 test('session applies no-op turn commands when combat turn deadline expires', async () => {
@@ -2376,8 +4009,7 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   })
   const { redToken, blueToken } = await claimBothRoles(session)
 
-  await session.submitRoundPlan(redToken, validSpinnerSubmission)
-  const blueSubmission = await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+  const { blueSubmission } = await confirmBothMinimumLoadouts(session, redToken, blueToken)
 
   assert.equal(blueSubmission.ok, true)
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
@@ -2441,11 +4073,14 @@ test('referee can reset a claimed role and refresh claim capability before comba
     kind: 'strategy',
     message: 'Keep this note tied to the first red claimant only.',
   })
-  const redSubmission = await session.submitRoundPlan(redToken, validSpinnerSubmission)
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+
+  const redSubmission = await placePartFromCatalog(session, redToken, redPacket.value, 'Body_Light_Frame')
 
   assert.equal(redSubmission.ok, true)
-  assert.equal(redSubmission.value.state.gold, 26)
-  assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
+  assert.equal(redSubmission.value.publicState.roles.red.submitted, false)
 
   const reset = await session.resetRole(refereeToken, { role: 'red' })
 
@@ -2487,8 +4122,7 @@ test('referee role reset cannot rewrite a resolved round', async () => {
   const refereeToken = session.createResponse().refereeToken
   const { redToken, blueToken } = await claimBothRoles(session)
 
-  await session.submitRoundPlan(redToken, validSpinnerSubmission)
-  await session.submitRoundPlan(blueToken, validSpinnerSubmission)
+  await confirmBothMinimumLoadouts(session, redToken, blueToken)
 
   const reset = await session.resetRole(refereeToken, { role: 'red' })
 
@@ -2510,8 +4144,8 @@ test('referee advances round review and applies automatic economy to the next ro
   stored.round = 1
   stored.roles.red.claimedAt = '2026-06-03T00:00:00.000Z'
   stored.roles.blue.claimedAt = '2026-06-03T00:00:00.000Z'
-  stored.roles.red.submittedAt = '2026-06-03T00:01:00.000Z'
-  stored.roles.blue.submittedAt = '2026-06-03T00:01:00.000Z'
+  stored.roles.red.loadoutConfirmedAt = '2026-06-03T00:01:00.000Z'
+  stored.roles.blue.loadoutConfirmedAt = '2026-06-03T00:01:00.000Z'
   stored.roles.red.gold = 68
   stored.roles.blue.gold = 260
   stored.lastResult = {
@@ -2545,8 +4179,8 @@ test('referee advances round review and applies automatic economy to the next ro
 
   assert.equal(exported.roles.red.gold, 68 + 50 + calculateInterest(68) + 25)
   assert.equal(exported.roles.blue.gold, 260 + 50 + calculateInterest(260))
-  assert.equal(exported.roles.red.submittedAt, undefined)
-  assert.equal(exported.roles.blue.submittedAt, undefined)
+  assert.equal(exported.roles.red.loadoutConfirmedAt, undefined)
+  assert.equal(exported.roles.blue.loadoutConfirmedAt, undefined)
   assert.equal(exported.roundPlan.deadlineAt, '2026-06-03T00:04:00.000Z')
 })
 
@@ -2594,16 +4228,15 @@ test('session completes on max rounds and win streak target', async () => {
   const maxRoundRefereeToken = maxRoundSession.createResponse().refereeToken
   const maxRoundTokens = await claimBothRoles(maxRoundSession)
 
-  await maxRoundSession.submitRoundPlan(maxRoundTokens.redToken, validSpinnerSubmission)
-  const maxRoundBlueSubmission = await maxRoundSession.submitRoundPlan(
+  await confirmBothMinimumLoadouts(
+    maxRoundSession,
+    maxRoundTokens.redToken,
     maxRoundTokens.blueToken,
-    validSpinnerSubmission,
   )
   const maxRoundResolved = await resolveLiveCombat(
     maxRoundSession,
     maxRoundTokens.redToken,
     maxRoundTokens.blueToken,
-    maxRoundBlueSubmission.value.state,
   )
 
   assert.equal(maxRoundResolved.value.publicState.phase, 'round_review')
@@ -2640,4 +4273,10 @@ test('session completes on max rounds and win streak target', async () => {
   assert.equal(streakAdvance.value.publicState.phase, 'session_complete')
   assert.equal(streakAdvance.value.publicState.roles.red.wins, 3)
   assert.equal(streakAdvance.value.publicState.roles.red.winStreak, 3)
+})
+
+test('session coordinator does not expose Slice 7 completion actions in Slice 6', () => {
+  assert.equal('saveCompletedSession' in SessionCoordinator.prototype, false)
+  assert.equal('continueChampionSession' in SessionCoordinator.prototype, false)
+  assert.equal('quitCompletedSession' in SessionCoordinator.prototype, false)
 })

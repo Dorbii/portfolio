@@ -1,7 +1,8 @@
 import type { MovementCommand, TeamRole, Vector3 } from '../../schemas/src/index.js'
 
-export type AbilityName = 'laser_lance' | 'drone_swarm'
+export type AbilityName = 'laser_lance' | 'drone_swarm' | 'fire_breath'
 export type WeaponFireCue = 'deploy' | 'release'
+export type WeaponFireMode = 'direct' | 'arc' | 'sweep' | 'contact'
 export type MoveEasing = 'linear' | 'ease_in' | 'ease_out' | 'ease_in_out' | 'brake'
 export type MoveIntent = 'advance' | 'retreat' | 'strafe' | 'circle' | 'turn' | 'forced'
 export type WeaponFirePhase = 'wind_up' | 'deploy' | 'release' | 'recoil'
@@ -38,6 +39,7 @@ export type WeaponFireEvent = {
   sourceBlockId?: string
   sourcePartId?: string
   phase?: WeaponFirePhase
+  fireMode?: WeaponFireMode
   style?: string
 }
 

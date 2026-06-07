@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import * as refereeClientModule from '../.test-build/apps/web/src/referee/refereeClient.js'
 import {
   DEFAULT_ARENA_API_BASE,
   DEFAULT_ARENA_SITE_BASE,
@@ -242,6 +243,13 @@ test('referee advanceRound posts /advance-round with bearer token', async () => 
   } finally {
     restore()
   }
+})
+
+test('referee client does not expose deferred Slice 7 session completion helpers', () => {
+  assert.equal('saveCompletedSession' in refereeClientModule, false)
+  assert.equal('continueChampionSession' in refereeClientModule, false)
+  assert.equal('quitCompletedSession' in refereeClientModule, false)
+  assert.equal('canSubmitSessionCompletionAction' in refereeClientModule, false)
 })
 
 test('referee resetRoleClaim posts /reset-role with bearer token', async () => {

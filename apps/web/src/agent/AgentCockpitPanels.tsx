@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react'
-import type {
-  SessionChatMessage,
-  ValidationIssue,
-} from '../../../../packages/schemas/src/index.js'
+import type { ValidationIssue } from '../../../../packages/schemas/src/index.js'
+import type { SessionChatMessage } from './agentSessionTypes.js'
 import { capitalize, formatDateTime, formatLabel } from '../shared/format'
 import { MetricRow, SubsectionTitle } from '../shared/ui'
 import { serializeJsonForScript } from './agentClient'

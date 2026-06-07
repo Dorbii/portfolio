@@ -1,11 +1,6 @@
-import type {
-  AgentBootstrapResponse,
-  RoleClaimResponse,
-  RolePrivateState,
-  RoundSubmissionResponse,
-  TurnCommandResponse,
-} from '../../../../packages/schemas/src/index.js'
+import type { GameMasterPacket } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
+import type { RolePrivateState } from './agentSessionTypes.js'
 import type {
   AgentArenaRoleApi,
   TokenStorage,
@@ -48,120 +43,95 @@ export function createInstalledAgentArenaRoleApi({
       storeRoleToken(invite.claimToken)
     }
   }
-  const updateFromBootstrapResponse = (response: AgentBootstrapResponse) => {
-    setCurrentState(response.state)
-
-    return response
-  }
-  const updateFromClaimResponse = (response: RoleClaimResponse) => {
-    storeRoleToken(response.roleToken)
-    setCurrentState(response.state)
-
-    return response
-  }
-  const updateFromRoundResponse = (response: RoundSubmissionResponse) => {
-    setCurrentState(response.state)
-
-    return response
-  }
-  const updateFromTurnResponse = (response: TurnCommandResponse) => {
-    setCurrentState(response.state)
-
-    return response
-  }
   const updateCurrentState = (state: RolePrivateState) => {
     setCurrentState(state)
 
     return state
   }
-  const baseApi = createAgentArenaRoleApi(client, getCurrentState, {
+  const updateFromGameMasterPacket = async <T extends GameMasterPacket>(
+    packet: T,
+  ): Promise<T> => {
+    try {
+      const state = await client.getState()
+
+      setCurrentState({
+        ...state,
+        gameMaster: state.gameMaster ?? packet,
+      })
+    } catch {
+      const state = getCurrentState()
+
+      if (state) {
+        setCurrentState({
+          ...state,
+          gameMaster: packet,
+        })
+      }
+    }
+
+    return packet
+  }
+  const api = createAgentArenaRoleApi(client, getCurrentState, {
     ...overrides,
     bootstrapRole: async (input) => {
-      const response = await (
+      const packet = await (
         overrides.bootstrapRole?.(input) ?? client.bootstrapRole(input)
       )
 
       storeInviteClaimToken()
 
-      return updateFromBootstrapResponse(response)
+      return updateFromGameMasterPacket(packet)
     },
-    claimRole: async (input) => {
-      const response = await (
-        overrides.claimRole?.(input) ?? client.claimInviteRole(input)
-      )
-
-      return updateFromClaimResponse(response)
-    },
-    waitForNextAction: async (options) => {
-      const response = await (
-        overrides.waitForNextAction?.(options) ?? client.waitForNextAction(options)
+    waitForGameMasterPacket: async (options) => {
+      const packet = await (
+        overrides.waitForGameMasterPacket?.(options) ??
+        client.waitForGameMasterPacket(options)
       )
 
       storeInviteClaimToken()
 
-      return updateFromBootstrapResponse(response)
+      return updateFromGameMasterPacket(packet)
     },
-    waitForNextSubmissionWindow: async (options) =>
-      updateCurrentState(
-        await (
-          overrides.waitForNextSubmissionWindow?.(options) ??
-          client.waitForNextSubmissionWindow(options)
-        ),
-      ),
-    waitForPhase: async (phase, options) =>
-      updateCurrentState(
-        await (
-          overrides.waitForPhase?.(phase, options) ??
-          client.waitForPhase(phase, options)
-        ),
-      ),
-    waitForStateChange: async (previousStateVersion, options) =>
-      updateCurrentState(
-        await (
-          overrides.waitForStateChange?.(previousStateVersion, options) ??
-          client.waitForStateChange(previousStateVersion, options)
-        ),
-      ),
+    submitAction: async (submission) => {
+      const response = await (
+        overrides.submitAction?.(submission) ?? client.submitAction(submission)
+      )
+
+      await updateFromGameMasterPacket(response.packet)
+
+      return response
+    },
+    submitPostFightReflection: async (reflection) => {
+      const response = await (
+        overrides.submitPostFightReflection?.(reflection) ??
+        client.submitPostFightReflection(reflection)
+      )
+
+      await updateFromGameMasterPacket(response.packet)
+
+      return response
+    },
+    sendChatMessage: async (input) => {
+      const response = await (
+        overrides.sendChatMessage?.(input) ??
+        client.sendChatMessage?.(input) ??
+        client.submitChatMessage?.(input)
+      )
+
+      if (!response) {
+        throw new Error('sendChatMessage is unavailable for this client.')
+      }
+
+      setCurrentState(response.state)
+
+      return response
+    },
   })
-  const api: AgentArenaRoleApi = {
-    ...baseApi,
+
+  return {
+    ...api,
     getState: async () => updateCurrentState(await client.getState()),
-    getMatchLog: async () => {
-      const state = await api.getState()
-
-      return state.eventLog
-    },
-    getChatLog: async () => {
-      const state = await api.getState()
-
-      return state.chatLog
-    },
-    getPrivateChatLog: async () => {
-      const state = await api.getState()
-
-      return state.privateChatLog
-    },
-    submitRoundPlan: async (plan) =>
-      updateFromRoundResponse(await client.submitRoundPlan(plan)),
-    submitTurnCommand: async (command) =>
-      updateFromTurnResponse(await client.submitTurnCommand(command)),
-    submitChatMessage: async (input) => {
-      const response = await client.submitChatMessage(input)
-
-      setCurrentState(response.state)
-
-      return response
-    },
-    submitPrivateChatMessage: async (input) => {
-      const response = await client.submitPrivateChatMessage(input)
-
-      setCurrentState(response.state)
-
-      return response
-    },
   }
-
-  return api
 }
 
 export function installAgentArenaRoleApi(

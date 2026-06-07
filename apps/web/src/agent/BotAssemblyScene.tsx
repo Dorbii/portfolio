@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   BotBlueprint,
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import {
   animateAssembly,
   attachAssemblyBot,
@@ -26,7 +26,7 @@ type AssemblyStatus = 'booting' | 'ready' | 'unavailable' | 'context_lost'
 
 type BotAssemblySceneProps = {
   blueprint: BotBlueprint
-  identity: TeamIdentity
+  identity: LegacyTeamIdentity
   role: TeamRole
   submitted: boolean
 }

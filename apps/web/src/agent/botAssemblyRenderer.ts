@@ -1,9 +1,9 @@
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type {
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import type { AssemblyResources } from './botAssemblyAnimation'
 import {
   createAssemblyMaterial,
@@ -29,7 +29,7 @@ export function isAssemblyRendererSupported(): boolean {
 export function createAssemblyResources(
   canvas: HTMLCanvasElement,
   role: TeamRole,
-  identity: TeamIdentity,
+  identity: LegacyTeamIdentity,
   submitted: boolean,
 ): AssemblyResources {
   const { camera, engine, scene } = createBabylonRendererCore(canvas, {

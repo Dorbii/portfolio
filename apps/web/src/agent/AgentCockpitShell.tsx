@@ -2,14 +2,14 @@ import {
   useMemo,
   useState,
 } from 'react'
-import {
-  TEAM_LOGO_MARKS,
-  type TeamIdentity,
-  type TeamLogoMark,
-} from '../../../../packages/schemas/src/index.js'
+import type { TeamIdentity } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import { capitalize } from '../shared/format'
-import { DEFAULT_TEAM_IDENTITIES } from '../shared/teamVisuals'
+import {
+  DEFAULT_TEAM_IDENTITIES,
+  LEGACY_TEAM_LOGO_MARKS,
+  type LegacyTeamLogoMark,
+} from '../shared/teamVisuals'
 import {
   Button,
   Panel,
@@ -34,7 +34,7 @@ export function AgentCockpitHeader({
   const [agentName, setAgentName] = useState(`${invite.role}-agent`)
   const [teamName, setTeamName] = useState<string>(identitySeed.name)
   const [primaryColor, setPrimaryColor] = useState<string>(identitySeed.primaryColor)
-  const [logoMark, setLogoMark] = useState<TeamLogoMark>('shield')
+  const [logoMark, setLogoMark] = useState<LegacyTeamLogoMark>('shield')
   const [logoInitials, setLogoInitials] = useState(capitalize(invite.role).slice(0, 1))
   const pendingTeamIdentity = useMemo(
     () => createPendingTeamIdentity({
@@ -92,9 +92,9 @@ export function AgentCockpitHeader({
               <span>Logo</span>
               <select
                 value={logoMark}
-                onChange={(event) => setLogoMark(event.target.value as TeamLogoMark)}
+                onChange={(event) => setLogoMark(event.target.value as LegacyTeamLogoMark)}
               >
-                {TEAM_LOGO_MARKS.map((mark) => (
+                {LEGACY_TEAM_LOGO_MARKS.map((mark) => (
                   <option key={mark} value={mark}>
                     {capitalize(mark)}
                   </option>
@@ -159,7 +159,7 @@ function createPendingTeamIdentity({
   teamName,
 }: {
   logoInitials: string
-  logoMark: TeamLogoMark
+  logoMark: LegacyTeamLogoMark
   primaryColor: string
   teamName: string
 }): TeamIdentity | null {
@@ -173,11 +173,8 @@ function createPendingTeamIdentity({
 
   return {
     name,
-    primaryColor: color,
-    logo: {
-      mark: logoMark,
-      ...(initials ? { initials } : {}),
-    },
+    colorHex: color,
+    logoPrompt: `${name} logo using a ${logoMark} motif${initials ? ` and ${initials} initials` : ''}`,
   }
 }
 export function AgentTaskPanel({

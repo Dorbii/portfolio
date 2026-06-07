@@ -2,7 +2,7 @@ import type {
   PublicSessionState,
   RolePrivateState,
   SessionChatMessage,
-} from '../../../../packages/schemas/src/index.js'
+} from './agentSessionTypes.js'
 import {
   AgentArenaApiError,
   createExternalAgentBrief,
@@ -234,7 +234,7 @@ function getCockpitStateLabel(
   }
 
   if (roleState.submitted) {
-    return roleState.opponent.submitted ? 'Plan observed' : 'Waiting'
+    return roleState.opponent.submitted ? 'Loadout observed' : 'Waiting'
   }
 
   if (roleState.phase === 'waiting_for_agents') {
@@ -283,7 +283,7 @@ function getCockpitWorkflowHeadline(
   }
 
   if (activeTask === 'build') {
-    return roleState?.submitted ? 'Inspect submitted plan' : 'Waiting for agent plan'
+    return roleState?.submitted ? 'Inspect confirmed loadout' : 'Waiting for loadout'
   }
 
   if (activeTask === 'turn') {
@@ -330,7 +330,7 @@ function createPlanStep(
   if (!roleState) {
     return {
       key: 'build',
-      label: 'Plan',
+      label: 'Loadout',
       status: 'Locked',
       tone: 'idle',
     }
@@ -339,8 +339,8 @@ function createPlanStep(
   if (roleState.submitted) {
     return {
       key: 'build',
-      label: 'Plan',
-      status: 'Submitted bot',
+      label: 'Loadout',
+      status: 'Loadout confirmed',
       tone: 'complete',
     }
   }
@@ -348,7 +348,7 @@ function createPlanStep(
   if (roleState.phase !== 'submission_phase') {
     return {
       key: 'build',
-      label: 'Plan',
+      label: 'Loadout',
       status: 'Waiting',
       tone: 'waiting',
     }
@@ -356,7 +356,7 @@ function createPlanStep(
 
   return {
     key: 'build',
-    label: 'Plan',
+    label: 'Loadout',
     status: isObserverCockpit ? 'Agent pending' : 'Ready',
     tone: activeTask === 'build' ? 'current' : 'complete',
   }
@@ -477,18 +477,18 @@ export function toUiError(error: unknown, title: string): UiError {
 
 export function submissionNotice(state: RolePrivateState): string {
   if (!state.submitted) {
-    return 'No round plan has been accepted for this role.'
+    return 'No loadout has been confirmed for this role.'
   }
 
   if (state.phase === 'submission_phase' && !state.opponent.submitted) {
-    return `Plan accepted. Waiting for ${capitalize(state.opponent.role)}.`
+    return `Loadout confirmed. Waiting for ${capitalize(state.opponent.role)}.`
   }
 
   if (state.phase === 'replay_phase') {
-    return 'Both plans resolved. Replay data is available.'
+    return 'Both loadouts resolved. Replay data is available.'
   }
 
-  return `Plan accepted. Current phase is ${formatLabel(state.phase)}.`
+  return `Loadout confirmed. Current phase is ${formatLabel(state.phase)}.`
 }
 
 export function opponentLabel(state: RolePrivateState): string {
@@ -519,8 +519,8 @@ export function createAgentConnectionGuidance({
     `  agentName: '${invite.role}-agent',`,
     '  teamIdentity: {',
     `    name: '${capitalize(invite.role)} Team',`,
-    `    primaryColor: '${invite.role === 'red' ? '#ff4c5d' : '#5b9dff'}',`,
-    "    logo: { mark: 'shield' },",
+    `    colorHex: '${invite.role === 'red' ? '#ff4c5d' : '#5b9dff'}',`,
+    `    logoPrompt: '${capitalize(invite.role)} shield logo for a combat robot team',`,
     '  },',
     '})',
   ].join('\n')
@@ -544,7 +544,7 @@ export function createAgentConnectionGuidance({
         : 'The page is claiming or resuming the role and loading private state.',
       helperCall: isObserverCockpit ? 'await window.AgentArenaRole.getState()' : bootstrapCall,
       nextAction: isObserverCockpit
-        ? 'Wait for the cockpit state to finish loading before inspecting the agent plan.'
+        ? 'Wait for the cockpit state to finish loading before inspecting the confirmed loadout.'
         : 'Wait for the role state to finish loading before submitting.',
       status: 'Connecting',
       tone: 'working',
@@ -565,7 +565,7 @@ export function createAgentConnectionGuidance({
 
   if (isObserverCockpit && invite.observerToken) {
     return {
-      detail: 'Observer token is present; the cockpit can read role state but cannot submit plans, turns, or chat.',
+      detail: 'Observer token is present; the cockpit can read role state but cannot lock actions or send chat.',
       helperCall: 'await window.AgentArenaRole.getState()',
       nextAction: 'Refresh state and inspect what the agent has submitted or what decision context it is seeing.',
       status: 'Observer key available',
@@ -579,7 +579,7 @@ export function createAgentConnectionGuidance({
         ? 'Invite player key is present; the page can claim or resume this role.'
         : 'Stored player key is present; the page can resume this role.',
       helperCall: bootstrapCall,
-      nextAction: 'Bootstrap the role, then follow the returned state and nextAction.',
+      nextAction: 'Bootstrap the role, then follow the returned GameMasterPacket.',
       status: 'Player key available',
       tone: 'idle',
     }
@@ -588,7 +588,7 @@ export function createAgentConnectionGuidance({
   return {
     detail: 'This page has no claimToken in the URL fragment and no stored player key for this session.',
     helperCall: 'Ask the referee for a refreshed invite URL.',
-    nextAction: 'Open a valid invite URL before trying to submit a plan.',
+    nextAction: 'Open a valid invite URL before trying to submit a GameMaster action.',
     status: 'Not connected',
     tone: 'blocked',
   }
@@ -604,7 +604,7 @@ function nextActionForRoleState(
 
   if (state.phase === 'waiting_for_agents') {
     return isObserverCockpit
-      ? 'Watch for both agents to connect before a plan window opens.'
+      ? 'Watch for both agents to connect before a GameMaster action packet opens.'
       : 'Wait for the opponent to claim; keep polling with the bounded continuation helper.'
   }
 
@@ -616,27 +616,27 @@ function nextActionForRoleState(
     }
 
     return isObserverCockpit
-      ? 'No accepted plan yet. The agent still needs to submit a legal round plan.'
-      : 'Submit exactly one legal round plan for this round.'
+      ? 'No accepted action yet. The agent still needs to choose one legal action from the current GameMasterPacket.'
+      : 'Choose exactly one id from gameMaster.legalActions and submit it with submitAction.'
   }
 
   if (state.phase === 'combat_turn') {
     if (state.combat?.submitted[state.role]) {
       return isObserverCockpit
-        ? 'This agent submitted a turn. Compare the pending turn status with the opponent and wait for resolution.'
-        : 'Wait for the opponent turn command or the turn deadline, then continue from the next state.'
+        ? 'This agent locked a combat action. Compare pending action status with the opponent and wait for resolution.'
+        : 'Wait for the opponent action or the turn deadline, then continue from the next packet.'
     }
 
     return isObserverCockpit
-      ? `Inspect combat.decision for tick ${state.combat?.tick ?? '?'}: range, legal commands, movement options, and tactical cues explain what the agent should do next.`
-      : `Submit one legal combat turn for tick ${state.combat?.tick ?? '?'} before the deadline. Use combat.decision for range, legal commands, movement options, and tactical cues.`
+      ? `Inspect gameMaster.legalActions for tick ${state.combat?.tick ?? '?'}; the server owns legal combat choices and canonical payloads.`
+      : `Choose one legal combat action from gameMaster.legalActions for tick ${state.combat?.tick ?? '?'} before the deadline.`
   }
 
   if (state.phase === 'round_review') {
-    return 'Wait for the referee to advance the round; keep polling with the bounded continuation helper.'
+    return 'Wait for the referee to advance the round; keep polling for the next GameMasterPacket.'
   }
 
-  return 'Wait for the next submission window with the bounded continuation helper.'
+  return 'Wait for the next GameMasterPacket with legalActions.'
 }
 
 function helperCallForRoleState(
@@ -652,26 +652,42 @@ function helperCallForRoleState(
   }
 
   if (state.phase === 'submission_phase' && !state.submitted) {
-    return 'await window.AgentArenaRole.submitRoundPlan(plan)'
+    return submitActionHelperForRoleState(state)
   }
 
   if (state.phase === 'combat_turn') {
     if (state.combat?.submitted[state.role]) {
-      return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+      return `await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
     }
 
-    return [
-      'const state = await window.AgentArenaRole.getState()',
-      'const decision = state.combat.decision',
-      `await window.AgentArenaRole.submitTurnCommand({ action: 'submit_turn_command', tick: ${state.combat?.tick ?? 1}, move: decision.movementOptions.recommended[0] ?? 'brake', weaponA: decision.actionReadiness.weaponA.canFire ? 'fire' : 'hold' })`,
-    ].join('\n')
+    return submitActionHelperForRoleState(state)
   }
 
   if (state.phase === 'waiting_for_agents' || state.submitted || state.phase === 'round_review') {
-    return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+    return `await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
   }
 
-  return `await window.AgentArenaRole.waitForNextAction({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+  return `await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+}
+
+function submitActionHelperForRoleState(state: RolePrivateState): string {
+  const packet = state.gameMaster
+
+  if (!packet?.actionSetId || packet.legalActions.length === 0) {
+    return `const packet = await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+  }
+
+  return [
+    'const state = await window.AgentArenaRole.getState()',
+    'const packet = state.gameMaster',
+    'const action = packet.legalActions[0]',
+    'await window.AgentArenaRole.submitAction({',
+    "  action: 'submit_game_action',",
+    '  actionSetId: packet.actionSetId,',
+    '  decisionVersion: packet.decisionVersion,',
+    '  actionId: action.id,',
+    '})',
+  ].join('\n')
 }
 
 function createClaimButtonLabel(

@@ -4,11 +4,11 @@ import { Color3 } from '@babylonjs/core/Maths/math.color'
 import { Scene } from '@babylonjs/core/scene'
 import type {
   PartCategory,
-  TeamIdentity,
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
 import {
   hexLuminance,
+  type LegacyTeamIdentity,
   mixHexColors,
   resolveTeamAccentHex,
 } from '../../shared/teamVisuals'
@@ -92,7 +92,7 @@ export const DEFAULT_TEAM_PALETTES: Record<TeamRole, CombatTeamPalette> = {
 }
 
 type TeamMaterialOptions = {
-  identities?: Partial<Record<TeamRole, TeamIdentity>>
+  identities?: Partial<Record<TeamRole, LegacyTeamIdentity>>
 }
 
 export function createTeamMaterials(
@@ -107,7 +107,7 @@ export function createTeamMaterials(
 
 export function createCombatTeamPalette(
   role: TeamRole,
-  identity: TeamIdentity | null | undefined,
+  identity: LegacyTeamIdentity | null | undefined,
 ): CombatTeamPalette {
   const base = DEFAULT_TEAM_PALETTES[role]
   const accent = resolveTeamAccentHex(role, identity)

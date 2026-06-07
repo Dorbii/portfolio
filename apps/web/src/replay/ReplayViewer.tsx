@@ -3,10 +3,10 @@ import type { ReplayEvent, ReplayTimeline } from '../../../../packages/replay/sr
 import type {
   ArenaConfig,
   BotBlueprint,
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { BabylonReplayScene } from './scene/BabylonReplayScene'
+import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import {
   buildReplayFrame,
   clampReplayTime,
@@ -30,7 +30,7 @@ type ReplayViewerProps = {
   initialTime?: number
   proofMode?: boolean
   showDamageSchematic?: boolean
-  teamIdentities: Record<TeamRole, TeamIdentity>
+  teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   timeline: ReplayTimeline
 }
 

@@ -10,13 +10,12 @@ export {
   validatePurchaseShape,
 } from './validators/blueprint.js'
 export {
-  asTurnCommandSubmission,
-  validateTurnCommandAgainstControls,
-  validateTurnCommandSubmissionShape,
-} from './validators/commandSequence.js'
+  asGameMasterActionSubmission,
+  validateGameMasterActionSubmissionShape,
+} from './validators/gameMasterAction.js'
 export { validateBotTacticsShape } from './validators/tactics.js'
 export { validateAgentChatMessageRequestShape } from './validators/chat.js'
 export {
-  asRoundPlanSubmission,
-  validateRoundPlanSubmissionShape,
-} from './validators/submission.js'
+  asPostFightAgentReflection,
+  validatePostFightAgentReflectionShape,
+} from './validators/reflection.js'

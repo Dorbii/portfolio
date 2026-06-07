@@ -5,18 +5,20 @@ import {
   AgentArenaSession,
   handleWorkerRequest,
 } from '../.test-build/apps/worker/src/index.js'
-import { validateReplayTimeline } from '../.test-build/packages/replay/src/index.js'
 import {
   HAZARD_PREFERENCES,
   MOVEMENT_POLICIES,
   PREFERRED_RANGES,
   TACTIC_STYLES,
   TARGET_PRIORITIES,
+  validateAgentBootstrapRequestShape,
   WEAPON_CADENCES,
 } from '../.test-build/packages/schemas/src/index.js'
+import {
+  buildSharedDebrief,
+} from '../.test-build/packages/sim/src/index.js'
 
 const validSpinnerSubmission = {
-  action: 'submit_round_plan',
   schemaVersion: 2,
   purchases: [
     { partId: 'Body_Square_Medium', quantity: 1 },
@@ -48,13 +50,13 @@ const validSpinnerSubmission = {
 const testTeamIdentities = {
   red: {
     name: 'Red Team',
-    primaryColor: '#ff4c5d',
-    logo: { mark: 'shield', initials: 'R' },
+    colorHex: '#ff4c5d',
+    logoPrompt: 'Red shield combat robotics logo with R monogram',
   },
   blue: {
     name: 'Blue Team',
-    primaryColor: '#5b9dff',
-    logo: { mark: 'shield', initials: 'B' },
+    colorHex: '#5b9dff',
+    logoPrompt: 'Blue shield combat robotics logo with B monogram',
   },
 }
 
@@ -62,13 +64,36 @@ function testTeamIdentity(role, suffix = '') {
   return {
     ...testTeamIdentities[role],
     name: `${testTeamIdentities[role].name}${suffix}`,
-    logo: { ...testTeamIdentities[role].logo },
   }
+}
+
+function expectedLegacyTeamIdentity(role, suffix = '') {
+  const identity = testTeamIdentity(role, suffix)
+
+  return {
+    name: identity.name,
+    primaryColor: identity.colorHex,
+    logo: {
+      mark: 'shield',
+      initials: expectedLegacyLogoInitials(identity.logoPrompt),
+    },
+  }
+}
+
+function expectedLegacyLogoInitials(value) {
+  return value
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/gi, ''))
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 4)
+    .toUpperCase()
 }
 
 function bootstrapBody(role, agentName) {
   return {
-    ...(agentName ? { agentName } : {}),
+    agentName: agentName ?? `${role}-agent`,
     teamIdentity: testTeamIdentity(role),
   }
 }
@@ -121,9 +146,14 @@ class FakeDurableObjectNamespace {
       return existing
     }
 
-    const durableObject = new AgentArenaSession({
-      storage: this.storageFor(key),
-    })
+    const durableObject = new AgentArenaSession(
+      {
+        storage: this.storageFor(key),
+      },
+      {
+        AGENT_ARENA_SESSION: this,
+      },
+    )
     const stub = {
       fetch: (request) => durableObject.fetch(request),
     }
@@ -165,42 +195,6 @@ async function route(env, path, options = {}) {
   return { response, json }
 }
 
-async function resolveLiveRouteCombat(env, sessionId, redToken, blueToken, firstState) {
-  let state = firstState
-
-  for (let index = 0; index < 90; index += 1) {
-    const tick = state.combat.tick
-    const command = {
-      action: 'submit_turn_command',
-      tick,
-      move: 'dash_forward',
-      weaponA: 'fire',
-    }
-
-    const redTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
-      method: 'POST',
-      token: redToken,
-      body: command,
-    })
-    const blueTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
-      method: 'POST',
-      token: blueToken,
-      body: command,
-    })
-
-    assert.equal(redTurn.response.status, 200)
-    assert.equal(blueTurn.response.status, 200)
-
-    if (blueTurn.json.publicState.phase === 'round_review') {
-      return blueTurn
-    }
-
-    state = blueTurn.json.state
-  }
-
-  throw new Error('Route combat did not resolve within expected turn budget.')
-}
-
 function inviteFor(invites, role) {
   const invite = invites.find((entry) => entry.role === role)
 
@@ -220,6 +214,289 @@ function assertRedactedPublicState(publicState, hiddenValues) {
 function assertRoundPlanWindow(roundPlan) {
   assert.equal(roundPlan.planSeconds, 120)
   assert.equal(Date.parse(roundPlan.deadlineAt) - Date.parse(roundPlan.openedAt), 120_000)
+}
+
+function assertGameMasterPacket(packet, role) {
+  assert.equal(packet.sessionId.startsWith('s_'), true)
+  assert.equal(packet.role, role)
+  assert.equal(typeof packet.decisionVersion, 'number')
+  assert.equal(typeof packet.eventVersion, 'number')
+  assert.ok(Array.isArray(packet.legalActions))
+  assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
+  assert.equal(packet.catalog.version, 'part-catalog:v1')
+  assert.equal(packet.catalog.parts.some((part) => part.id === 'Body_Square_Medium'), true)
+}
+
+function actionSubmissionFromPacket(packet, actionId = packet.legalActions[0]?.id) {
+  assert.equal(typeof packet.actionSetId, 'string')
+  assert.equal(typeof packet.decisionVersion, 'number')
+  assert.equal(typeof actionId, 'string')
+
+  return {
+    action: 'submit_game_action',
+    actionSetId: packet.actionSetId,
+    decisionVersion: packet.decisionVersion,
+    actionId,
+  }
+}
+
+function completedReplayPayload() {
+  return {
+    round: 1,
+    duration: 12,
+    summary: 'Red disabled Blue with weapon pressure.',
+    events: [
+      { t: 0, type: 'spawn', bot: 'red', position: [-1, 0, 0], rotation: [0, 0, 0] },
+      { t: 0, type: 'spawn', bot: 'blue', position: [1, 0, 0], rotation: [0, 0, 0] },
+      {
+        t: 1,
+        type: 'weapon_fire',
+        bot: 'red',
+        weaponSlot: 'weaponA',
+        sourceBlockId: 'spinner',
+        sourcePartId: 'Weapon_Spinner_Small',
+      },
+      {
+        t: 2,
+        type: 'damage',
+        bot: 'blue',
+        amount: 40,
+        remainingHealth: 0,
+        blockId: 'core',
+        partId: 'Body_Square_Medium',
+      },
+      { t: 2.5, type: 'knockout', bot: 'blue', cause: 'weapon' },
+    ],
+    teamIdentities: {
+      red: expectedLegacyTeamIdentity('red'),
+      blue: expectedLegacyTeamIdentity('blue'),
+    },
+    botBlueprints: {
+      red: validSpinnerSubmission.blueprint,
+      blue: validSpinnerSubmission.blueprint,
+    },
+  }
+}
+
+function completedFightDossier(sessionId) {
+  return {
+    sessionId,
+    fights: [
+      {
+        fightId: 'fight_1',
+        winner: 'red',
+        reason: 'Red disabled Blue.',
+        duration: 12,
+        replayTimelineId: `${sessionId}:fight_1:replay`,
+        bots: {
+          red: {
+            name: 'Spinner',
+            parts: [{ instanceId: 'core', partId: 'Body_Square_Medium', health: 40 }],
+            combat: { health: 40, maxHealth: 40, parts: [] },
+          },
+          blue: {
+            name: 'Spinner',
+            parts: [{ instanceId: 'core', partId: 'Body_Square_Medium', health: 0, detached: true }],
+            combat: { health: 0, maxHealth: 40, parts: [], statuses: ['knocked_out'] },
+          },
+        },
+        stats: {
+          damageDealt: { red: 40, blue: 0 },
+          damageTaken: { red: 0, blue: 40 },
+          damageByPart: { red: {}, blue: { core: 40 } },
+          weaponUse: {
+            red: [{ weaponId: 'Weapon_Spinner_Small', activations: 1, hits: 1, damage: 40 }],
+            blue: [],
+          },
+          hazardsTriggered: [],
+          movement: { red: { cellsMoved: 0, hazardsCrossed: 0 }, blue: { cellsMoved: 0, hazardsCrossed: 0 } },
+          disabledParts: { red: [], blue: ['core'] },
+        },
+        keyEvents: [
+          { at: 2, type: 'damage', summary: 'blue took 40 damage' },
+          { at: 2.5, type: 'knockout', summary: 'blue was knocked out by weapon' },
+        ],
+      },
+    ],
+  }
+}
+
+function routePostFightReflection(role, decisionVersion, overrides = {}) {
+  const claims = {
+    ownWeaknesses: ['secret weak drive note'],
+    opponentThreats: ['secret opponent pressure note'],
+    suggestedDesignChanges: ['secret armor change'],
+    suggestedTacticalChanges: ['secret tactical change'],
+  }
+
+  if (role === 'blue') {
+    claims.perceivedWinReason = 'secret false blue win claim'
+    claims.perceivedLossReason = 'secret blue loss explanation'
+  }
+
+  return {
+    action: 'submit_post_fight_reflection',
+    fightId: 'fight_1',
+    role,
+    decisionVersion,
+    claims,
+    confidence: 'medium',
+    ...overrides,
+  }
+}
+
+async function storeCompletedFight(env, sessionId) {
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+
+  stored.phase = 'round_review'
+  stored.round = 1
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 0, blue: 40 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
+  stored.replay = completedReplayPayload()
+  stored.fightDossier = completedFightDossier(sessionId)
+  await storage.put('agent-arena-session', stored)
+}
+
+async function storeCompletedSession(env, sessionId, options = {}) {
+  await storeCompletedFight(env, sessionId)
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+
+  stored.phase = 'session_complete'
+  stored.round = 3
+  stored.roles.red.wins = options.redWins ?? 3
+  stored.roles.red.winStreak = options.redWinStreak ?? 3
+  stored.roles.blue.losses = options.blueLosses ?? 3
+  stored.roles.red.currentDesign = options.redDesign ?? {
+    name: 'SECRET_CHAMPION_CARRY_DO_NOT_LEAK',
+    rootInstanceId: 'secret_champion_core',
+    parts: [
+      {
+        instanceId: 'secret_champion_core',
+        partId: 'Body_Square_Medium',
+        cell: { x: 0, z: 0 },
+        rotation: 0,
+      },
+      {
+        instanceId: 'secret_champion_spinner',
+        partId: 'Weapon_Spinner_Small',
+        cell: { x: 0, z: 1 },
+        rotation: 0,
+      },
+    ],
+  }
+  stored.sharedDebrief = undefined
+  await storage.put('agent-arena-session', stored)
+}
+
+function findLegalAction(packet, predicate) {
+  const action = packet.legalActions.find(predicate)
+
+  assert.notEqual(action, undefined)
+
+  return action
+}
+
+async function submitPacketAction(env, sessionId, token, packet, action) {
+  const submitted = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token,
+    body: actionSubmissionFromPacket(packet, action.id),
+  })
+
+  assert.equal(submitted.response.status, 200)
+  assertGameMasterPacket(submitted.json.packet, packet.role)
+
+  return submitted.json.packet
+}
+
+async function placePartFromCatalog(env, sessionId, token, packet, partId) {
+  packet = await submitPacketAction(
+    env,
+    sessionId,
+    token,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'choose_part' && action.catalogRefs?.includes(partId)),
+  )
+  packet = await submitPacketAction(
+    env,
+    sessionId,
+    token,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'choose_attach_target'),
+  )
+  packet = await submitPacketAction(
+    env,
+    sessionId,
+    token,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'choose_mount'),
+  )
+
+  return submitPacketAction(
+    env,
+    sessionId,
+    token,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'choose_rotation'),
+  )
+}
+
+async function buildMinimumViableLoadout(env, sessionId, token, packet) {
+  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Body_Light_Frame')
+  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Wheel_Small')
+  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Weapon_Spear')
+
+  return {
+    packet,
+    confirmAction: findLegalAction(packet, (action) => action.kind === 'confirm_loadout'),
+  }
+}
+
+async function confirmMinimumViableLoadout(env, sessionId, token, packet) {
+  const built = await buildMinimumViableLoadout(env, sessionId, token, packet)
+
+  return submitPacketAction(env, sessionId, token, built.packet, built.confirmAction)
+}
+
+async function bootstrapReadySession(env, sessionId) {
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const blueInvite = inviteFor(created.json.invites, 'blue')
+  const redBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: bootstrapBody('red', 'Red Action'),
+  })
+  const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: bootstrapBody('blue', 'Blue Action'),
+  })
+  const redReadyState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redBootstrap.response.status, 201)
+  assert.equal(blueBootstrap.response.status, 201)
+  assert.equal(redReadyState.response.status, 200)
+
+  return {
+    refereeToken: created.json.refereeToken,
+    redInvite,
+    blueInvite,
+    redPacket: redReadyState.json.gameMaster,
+    bluePacket: blueBootstrap.json,
+  }
 }
 
 const requiredDesignPatternIds = [
@@ -385,76 +662,71 @@ test('GET /agent-spec.json returns the agent contract', async () => {
 
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
-  assert.equal(json.name, 'Agent Arena')
-  assert.equal(json.version, '0.1.0')
+  assert.equal(json.name, 'Clash of Clankers')
+  assert.equal(json.version, '0.2.0-gamemaster')
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
   assert.ok(json.browserApi.methods.includes('bootstrapRole'))
-  assert.ok(json.browserApi.methods.includes('claimRole'))
-  assert.equal(json.browserApi.methods.includes('getFallbackRoundPlan'), false)
-  assert.equal(json.browserApi.methods.includes('submitFallbackRoundPlan'), false)
-  assert.ok(json.browserApi.methods.includes('submitChatMessage'))
-  assert.ok(json.browserApi.methods.includes('submitPrivateChatMessage'))
-  assert.ok(json.browserApi.methods.includes('getPrivateChatLog'))
-  assert.ok(json.browserApi.methods.includes('waitForStateChange'))
-  assert.ok(json.browserApi.methods.includes('waitForNextSubmissionWindow'))
-  assert.ok(json.browserApi.methods.includes('waitForNextAction'))
-  assert.ok(json.objective.includes('Build and submit'))
+  assert.ok(json.browserApi.methods.includes('getState'))
+  assert.ok(json.browserApi.methods.includes('waitForGameMasterPacket'))
+  assert.ok(json.browserApi.methods.includes('submitAction'))
+  assert.ok(json.browserApi.methods.includes('submitPostFightReflection'))
+  assert.ok(json.browserApi.methods.includes('sendChatMessage'))
+  assert.equal(json.browserApi.methods.includes('submitRoundPlan'), false)
+  assert.equal(json.browserApi.methods.includes('submitTurnCommand'), false)
+  assert.equal(json.browserApi.methods.includes('saveCompletedSession'), false)
+  assert.equal(json.browserApi.methods.includes('continueChampionSession'), false)
+  assert.equal(json.browserApi.methods.includes('quitCompletedSession'), false)
+  assert.equal(JSON.stringify(json).includes('/save'), false)
+  assert.equal(JSON.stringify(json).includes('/continue'), false)
+  assert.equal(JSON.stringify(json).includes('/quit'), false)
+  assert.ok(json.objective.includes('server-authored legal action menus'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/agent-spec.json')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('designPatterns')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mandatory fixed classes')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('catalogGuidance.capabilities')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole helpers')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Submit a varied legal custom plan')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('no built-in fallback bot plan')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Table Talk')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('state.chatLog')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted/deceptive input')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Agent Journal')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('stateVersion')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('waitForNextAction({ timeoutMs: 600000 })')))
-  assert.ok(json.externalAgentGuide.fallback.includes('window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })'))
-  assert.ok(json.externalAgentGuide.fallback.includes('submitRoundPlan(plan)'))
-  assert.equal(json.externalAgentGuide.fallback.includes('submitFallbackRoundPlan'), false)
-  assert.ok(json.externalAgentGuide.fallback.includes('do not keep retrying'))
-  assert.equal(json.continuationProtocol.transport, 'polling')
-  assert.equal(json.continuationProtocol.defaultTimeoutMs, 600000)
-  assert.equal(json.continuationProtocol.watchField, 'stateVersion')
-  assert.ok(json.continuationProtocol.browserHelpers.includes('waitForNextAction({ timeoutMs })'))
-  assert.ok(json.submissionChecklist.some((item) => item.includes('First round starts with 100 gold')))
-  assert.ok(json.submissionChecklist.some((item) => item.includes('Feature gates describe system support')))
-  assert.equal(json.rules.submissionSchemas.preferred.schemaVersion, 2)
-  assert.ok(json.rules.submissionSchemas.preferred.tactics.movementPolicy.includes('hold_ground'))
-  assert.equal(json.rules.combatTurnSeconds, 120)
-  assert.equal(json.rules.turnCommandSchema.action, 'submit_turn_command')
-  assert.ok(json.rules.turnCommandSchema.note.includes('movement plus weapon and utility'))
-  assert.equal(json.rules.turnDecisionContext.location, 'private state.combat.decision')
-  assert.ok(json.rules.turnDecisionContext.fields.positioning.includes('grid cells'))
-  assert.ok(json.rules.turnDecisionContext.fields.hazards.includes('hazard threats'))
-  assert.ok(json.rules.turnDecisionContext.fields.movementOptions.includes('suggestions'))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('state.combat.decision')))
-  assert.ok(json.turnStrategyGuidance.some((strategy) => strategy.id === 'kite_and_punish'))
-  assert.ok(
-    json.turnStrategyGuidance.some((strategy) =>
-      strategy.turnAdvice.some((advice) => advice.includes('state.combat.decision')),
-    ),
-  )
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('actionId only')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('bootstrapRole({ agentName, teamIdentity })')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('canonical payload maps')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted')))
+  assert.ok(json.externalAgentGuide.fallback.includes('runtime cannot play the role'))
+  assert.equal(json.externalAgentGuide.fallback.includes('submitRoundPlan'), false)
+  assert.equal(json.externalAgentGuide.fallback.includes('submitTurnCommand'), false)
+  assert.ok(json.rules.packetFields.required.includes('decisionVersion'))
+  assert.ok(json.rules.packetFields.required.includes('eventVersion'))
+  assert.ok(json.rules.packetFields.required.includes('legalActions'))
+  assert.deepEqual(json.rules.teamIdentitySchema.requiredOnFirstConnect, [
+    'name',
+    'colorHex',
+    'logoPrompt or logoAsset',
+  ])
+  assert.equal(json.rules.teamIdentitySchema.colorHex, 'string formatted as #RRGGBB hex color')
+  assert.ok(json.rules.teamIdentitySchema.logoPrompt.includes('text prompt'))
+  assert.ok(json.rules.teamIdentitySchema.logoAsset.includes('image_url'))
+  assert.equal(json.rules.packetFields.versionContract.decisionVersion, 'snapshot both agents choose from')
+  assert.equal(json.rules.packetFields.versionContract.actionSetId, 'exact role-specific legal menu')
+  assert.equal(json.rules.packetFields.versionContract.eventVersion, 'chat, replay, and public-state progression')
+  assert.equal(json.rules.submissionSchema.action, 'submit_game_action')
+  assert.deepEqual(json.rules.submissionSchema.required, [
+    'action',
+    'actionSetId',
+    'decisionVersion',
+    'actionId',
+  ])
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
-  assertLegalDesignPatterns(json)
   assertCatalogGuidance(json)
-  assert.equal(json.examples.roundPlanSubmission.blueprint.name, 'Example Spinner')
-  assert.equal(json.examples.roundPlanSubmission.schemaVersion, 2)
-  assert.equal('openingScript' in json.examples.roundPlanSubmission, false)
-  assert.equal(json.examples.turnCommandSubmission.action, 'submit_turn_command')
-  assert.ok(
-    json.examples.roundPlanSubmission.purchases.some(
-      (purchase) => purchase.partId === 'Body_Square_Medium',
-    ),
-  )
+  assert.equal(json.examples.gameMasterPacket.actionSetId, 'red:r1:fight_1:turn_3:v12')
+  assert.equal(json.examples.gameMasterPacket.decisionVersion, 12)
+  assert.equal(json.examples.gameMasterPacket.eventVersion, 21)
+  assert.ok(json.examples.gameMasterPacket.legalActions.some((action) => action.id === 'combat.red.r1.f1.t3.hold'))
+  assert.equal(json.examples.gameMasterPacket.submit.body.action, 'submit_game_action')
+  assert.equal(json.examples.gameMasterActionSubmission.action, 'submit_game_action')
+  assert.equal(json.examples.teamIdentity.colorHex, '#ff4c5d')
+  assert.equal(typeof json.examples.teamIdentity.logoPrompt, 'string')
+  assert.equal('primaryColor' in json.examples.teamIdentity, false)
+  assert.equal('logo' in json.examples.teamIdentity, false)
   assert.ok(
     json.actions.some(
       (action) =>
@@ -467,29 +739,18 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(
     json.actions.some(
       (action) =>
-        action.name === 'create_session' &&
+        action.name === 'submit_game_action' &&
         action.method === 'POST' &&
-        action.path === '/sessions' &&
-        action.auth === 'none; protected by Cloudflare rate limiting/WAF',
+        action.path === '/sessions/:sessionId/action' &&
+        action.body.action === 'submit_game_action',
     ),
   )
   assert.ok(
     json.actions.some(
       (action) =>
-        action.name === 'submit_turn_command' &&
+        action.name === 'submit_post_fight_reflection' &&
         action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/turn-command' &&
-        action.phase === 'combat_turn',
-    ),
-  )
-  assert.ok(
-    json.actions.some(
-      (action) =>
-        action.name === 'submit_private_chat_message' &&
-        action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/private-chat' &&
-        action.returns.includes('Agent Journal') &&
-        action.returns.includes('opponent private state do not include this entry'),
+        action.path === '/sessions/:sessionId/reflection',
     ),
   )
   assert.ok(
@@ -498,17 +759,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'get_replay' &&
         action.method === 'GET' &&
         action.path === '/sessions/:sessionId/replay' &&
-        action.phase === 'replay_phase | round_review' &&
-        action.returns.includes('botBlueprints') &&
-        action.returns.includes('pending submissions are not public before resolution'),
-    ),
-  )
-  assert.ok(
-    json.actions.some(
-      (action) =>
-        action.name === 'advance_round' &&
-        action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/advance-round',
+        action.returns.includes('resolved semantic replay truth'),
     ),
   )
   assert.ok(
@@ -517,23 +768,79 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'submit_chat_message' &&
         action.method === 'POST' &&
         action.path === '/sessions/:sessionId/chat' &&
-        action.returns.includes('opponent role context includes the same message in state.chatLog'),
+        action.returns.includes('display-only public chat'),
     ),
   )
+  const serializedContract = JSON.stringify(json)
+  for (const legacyPublicName of [
+    'submit_round_plan',
+    'submit_turn_command',
+    'submitRoundPlan',
+    'submitTurnCommand',
+    'RoundPlanSubmission',
+    'RoundPlanSubmissionV2',
+    'NormalizedRoundPlanSubmission',
+    'TurnCommandSubmission',
+    'TurnCommandPostRequest',
+    'CombatTurnDecisionContext',
+    'CombatTurnLegalCommands',
+    'movementOptions',
+    'legalCommands',
+    'primaryColor',
+    'logoMarks',
+    'logoInitials',
+    'save_completed_session',
+    'continue_champion_session',
+    'quit_completed_session',
+    '/sessions/:sessionId/save',
+    '/sessions/:sessionId/continue',
+    '/sessions/:sessionId/quit',
+  ]) {
+    assert.equal(serializedContract.includes(legacyPublicName), false, legacyPublicName)
+  }
+})
+
+test('public bootstrap validator requires agent name and team identity', () => {
+  const missingBoth = validateAgentBootstrapRequestShape({})
+
+  assert.equal(missingBoth.ok, false)
   assert.ok(
-    json.actions.some(
-      (action) =>
-        action.name === 'reset_role_claim' &&
-        action.method === 'POST' &&
-        action.path === '/sessions/:sessionId/reset-role' &&
-        action.auth === 'referee capability token',
-    ),
+    missingBoth.issues.some((issue) => issue.code === 'INVALID_AGENT_NAME' && issue.path === 'bootstrap.agentName'),
+  )
+  assert.ok(
+    missingBoth.issues.some((issue) => issue.code === 'MISSING_TEAM_IDENTITY' && issue.path === 'bootstrap.teamIdentity'),
+  )
+
+  const missingAgentName = validateAgentBootstrapRequestShape({
+    teamIdentity: testTeamIdentity('red'),
+  })
+
+  assert.equal(missingAgentName.ok, false)
+  assert.ok(
+    missingAgentName.issues.some((issue) => issue.code === 'INVALID_AGENT_NAME' && issue.path === 'bootstrap.agentName'),
+  )
+
+  const missingTeamIdentity = validateAgentBootstrapRequestShape({
+    agentName: 'red-agent',
+  })
+
+  assert.equal(missingTeamIdentity.ok, false)
+  assert.ok(
+    missingTeamIdentity.issues.some((issue) => issue.code === 'MISSING_TEAM_IDENTITY' && issue.path === 'bootstrap.teamIdentity'),
+  )
+
+  assert.equal(
+    validateAgentBootstrapRequestShape({
+      agentName: 'red-agent',
+      teamIdentity: testTeamIdentity('red'),
+    }).ok,
+    true,
   )
 })
 
 test('OPTIONS returns CORS preflight headers', async () => {
   const response = await handleWorkerRequest(
-    new Request('https://arena-api.test/sessions/s_demo/round-plan', {
+    new Request('https://arena-api.test/sessions/s_demo/action', {
       method: 'OPTIONS',
       headers: {
         origin: 'https://arena.dorbii.net',
@@ -641,12 +948,11 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   })
 
   assert.equal(redBootstrap.response.status, 201)
-  assert.equal(redBootstrap.json.claimedNow, true)
-  assert.equal(redBootstrap.json.state.role, 'red')
-  assert.deepEqual(redBootstrap.json.state.identity, testTeamIdentity('red'))
-  assert.equal(redBootstrap.json.state.phase, 'waiting_for_agents')
-  assert.equal(redBootstrap.json.publicState.roles.red.claimed, true)
+  assertGameMasterPacket(redBootstrap.json, 'red')
+  assert.equal(redBootstrap.json.phase, 'wait_for_opponent_claim')
   assert.equal(redBootstrap.json.nextAction, 'wait_for_opponent_claim')
+  assert.equal(redBootstrap.json.actionSetId, undefined)
+  assert.equal(redBootstrap.json.legalActions.length, 0)
 
   const resumedRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
@@ -655,8 +961,8 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   })
 
   assert.equal(resumedRed.response.status, 200)
-  assert.equal(resumedRed.json.claimedNow, false)
-  assert.equal(resumedRed.json.state.role, 'red')
+  assertGameMasterPacket(resumedRed.json, 'red')
+  assert.equal(resumedRed.json.phase, 'wait_for_opponent_claim')
 
   const stolenRed = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
     method: 'POST',
@@ -673,6 +979,7 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
 
   assert.equal(redState.response.status, 200)
   assert.equal(redState.json.role, 'red')
+  assertGameMasterPacket(redState.json.gameMaster, 'red')
 
   const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',
@@ -681,10 +988,14 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   })
 
   assert.equal(blueBootstrap.response.status, 201)
-  assert.equal(blueBootstrap.json.state.phase, 'submission_phase')
-  assert.deepEqual(blueBootstrap.json.state.identity, testTeamIdentity('blue'))
-  assertRoundPlanWindow(blueBootstrap.json.state.roundPlan)
-  assert.equal(blueBootstrap.json.nextAction, 'submit_round_plan')
+  assertGameMasterPacket(blueBootstrap.json, 'blue')
+  assert.equal(blueBootstrap.json.phase, 'choose_loadout')
+  assert.equal(blueBootstrap.json.nextAction, 'build_bot')
+  assert.equal(blueBootstrap.json.buildState.step, 'choose_part')
+  assert.equal(blueBootstrap.json.legalActions[0].kind, 'choose_part')
+  assert.equal(blueBootstrap.json.legalActions.every((action) => action.kind === 'choose_part'), true)
+  assert.equal(blueBootstrap.json.submit.body.actionSetId, blueBootstrap.json.actionSetId)
+  assert.equal(blueBootstrap.json.submit.body.decisionVersion, blueBootstrap.json.decisionVersion)
 })
 
 test('observer cockpit bearer can read private state but cannot mutate role state', async () => {
@@ -711,10 +1022,15 @@ test('observer cockpit bearer can read private state but cannot mutate role stat
   assert.equal(observerBootstrap.response.status, 401)
   assert.equal(observerBootstrap.json.error.code, 'INVALID_TOKEN')
 
-  const observerSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+  const observerSubmission = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token: redInvite.observerToken,
-    body: validSpinnerSubmission,
+    body: {
+      action: 'submit_game_action',
+      actionSetId: 'observer-cannot-lock',
+      decisionVersion: 1,
+      actionId: 'observer-cannot-lock',
+    },
   })
 
   assert.equal(observerSubmission.response.status, 403)
@@ -730,97 +1046,493 @@ test('observer cockpit bearer can read private state but cannot mutate role stat
   assert.equal(observerChat.json.error.code, 'FORBIDDEN')
 })
 
-test('POST /sessions/:id/round-plan accepts v2 tactics submissions', async () => {
+test('old round plan and turn command routes are removed from worker session actions', async () => {
   const env = createEnv()
-  const sessionId = 's_v2_route'
+  const sessionId = 's_old_routes_removed'
+  const { redInvite } = await bootstrapReadySession(env, sessionId)
+
+  const oldRoundPlan = await route(env, `/sessions/${sessionId}/round-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_round_plan',
+      ...validSpinnerSubmission,
+    },
+  })
+  const oldTurnCommand = await route(env, `/sessions/${sessionId}/turn-command`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_turn_command',
+      tick: 1,
+      move: 'forward',
+      weaponA: 'hold',
+    },
+  })
+
+  assert.equal(oldRoundPlan.response.status, 404)
+  assert.equal(oldRoundPlan.json.error.code, 'INVALID_ACTION')
+  assert.equal(oldTurnCommand.response.status, 404)
+  assert.equal(oldTurnCommand.json.error.code, 'INVALID_ACTION')
+})
+
+test('state and public routes embed GameMaster action-set versions for agents', async () => {
+  const env = createEnv()
+  const sessionId = 's_state_packet_route'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const publicState = await route(env, `/sessions/${sessionId}/public`)
+
+  assertGameMasterPacket(redPacket, 'red')
+  assertGameMasterPacket(bluePacket, 'blue')
+  assert.equal(redState.response.status, 200)
+  assertGameMasterPacket(redState.json.gameMaster, 'red')
+  assert.equal(redState.json.gameMaster.actionSetId, redPacket.actionSetId)
+  assert.equal(redState.json.gameMaster.decisionVersion, redPacket.decisionVersion)
+  assert.equal(publicState.response.status, 200)
+  assert.equal(publicState.json.gameMaster.red.actionSetId, redPacket.actionSetId)
+  assert.equal(publicState.json.gameMaster.blue.actionSetId, bluePacket.actionSetId)
+  assert.equal(publicState.json.gameMaster.red.decisionVersion, redPacket.decisionVersion)
+  assert.equal(publicState.json.gameMaster.blue.decisionVersion, bluePacket.decisionVersion)
+  assert.equal(publicState.json.gameMaster.red.eventVersion, publicState.json.gameMaster.blue.eventVersion)
+  assert.equal(blueInvite.claimToken.startsWith('cap_blue_'), true)
+})
+
+test('POST /sessions/:id/action accepts a valid server-authored action id', async () => {
+  const env = createEnv()
+  const sessionId = 's_action_accepts_valid'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const bodyAction = findLegalAction(
+    redPacket,
+    (action) => action.kind === 'choose_part' && action.catalogRefs?.includes('Body_Light_Frame'),
+  )
+  const submission = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: actionSubmissionFromPacket(redPacket, bodyAction.id),
+  })
+
+  assert.equal(submission.response.status, 200)
+  assertGameMasterPacket(submission.json.packet, 'red')
+  assert.equal(submission.json.packet.nextAction, 'build_bot')
+  assert.equal(submission.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(submission.json.packet.buildState.selectedPartId, 'Body_Light_Frame')
+  assert.equal(submission.json.packet.legalActions[0].kind, 'choose_attach_target')
+  assert.equal(submission.json.publicState.gameMaster.red.nextAction, 'build_bot')
+})
+
+test('loadout action spends gold and sets server-owned draft design', async () => {
+  const env = createEnv()
+  const sessionId = 's_loadout_builder_mutates_design'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+
+  assert.equal(redPacket.resources.remainingGold, 100)
+  assert.equal(redPacket.buildState.step, 'choose_part')
+  assert.equal(redPacket.legalActions.some((action) => action.kind === 'choose_mount'), false)
+  assert.equal(redPacket.legalActions.some((action) => action.kind === 'choose_rotation'), false)
+
+  let packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    'Body_Light_Frame',
+  )
+
+  assert.equal(packet.resources.remainingGold, 84)
+  assert.equal(packet.buildState.currentDesign.parts.length, 1)
+  assert.equal(packet.buildState.currentDesign.parts[0].partId, 'Body_Light_Frame')
+  assert.equal(packet.buildState.currentDesign.rootInstanceId, 'part_1')
+  assert.equal(packet.legalActions.some((action) => action.kind === 'confirm_loadout'), false)
+
+  packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    packet,
+    'Wheel_Small',
+  )
+  packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    packet,
+    'Weapon_Spear',
+  )
+
+  assert.equal(packet.resources.remainingGold, 58)
+  assert.deepEqual(
+    packet.buildState.currentDesign.parts.map((part) => part.partId),
+    ['Body_Light_Frame', 'Wheel_Small', 'Weapon_Spear'],
+  )
+  assert.notEqual(findLegalAction(packet, (action) => action.kind === 'confirm_loadout'), undefined)
+  assert.equal(JSON.stringify(packet).includes('"payload"'), false)
+  assert.equal(
+    packet.legalActions.some((action) => action.catalogRefs?.includes('Counterweight')),
+    true,
+  )
+})
+
+test('confirm loadout requires a minimum viable bot', async () => {
+  const env = createEnv()
+  const sessionId = 's_loadout_confirm_requires_viable'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const bodyOnlyPacket = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    'Body_Light_Frame',
+  )
+
+  assert.equal(bodyOnlyPacket.legalActions.some((action) => action.kind === 'confirm_loadout'), false)
+})
+
+test('POST /sessions/:id/action rejects invalid action ids and stale action-set versions', async () => {
+  const env = createEnv()
+  const sessionId = 's_action_rejects_invalid'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const invalidAction = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: actionSubmissionFromPacket(redPacket, 'loadout.red.r1.forged'),
+  })
+  const wrongActionSet = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(redPacket),
+      actionSetId: 'red:r1:loadout:v0',
+    },
+  })
+  const staleDecision = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(redPacket),
+      decisionVersion: redPacket.decisionVersion + 1,
+    },
+  })
+
+  assert.equal(invalidAction.response.status, 400)
+  assert.equal(invalidAction.json.error.code, 'SUBMISSION_INVALID')
+  assert.equal(wrongActionSet.response.status, 400)
+  assert.equal(wrongActionSet.json.error.code, 'SUBMISSION_INVALID')
+  assert.equal(staleDecision.response.status, 400)
+  assert.equal(staleDecision.json.error.code, 'SUBMISSION_INVALID')
+})
+
+test('POST /sessions/:id/action rejects forged gameplay payload fields', async () => {
+  const env = createEnv()
+  const sessionId = 's_action_rejects_forged_payload'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const forged = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(redPacket),
+      payload: {
+        purchases: validSpinnerSubmission.purchases,
+        blueprint: validSpinnerSubmission.blueprint,
+      },
+    },
+  })
+
+  assert.equal(forged.response.status, 400)
+  assert.equal(forged.json.error.code, 'SUBMISSION_INVALID')
+})
+
+test('POST /sessions/:id/action locks once and accepts duplicate same submission idempotently', async () => {
+  const env = createEnv()
+  const sessionId = 's_action_idempotent'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const { packet, confirmAction } = await buildMinimumViableLoadout(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+  )
+  const body = actionSubmissionFromPacket(packet, confirmAction.id)
+  const first = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body,
+  })
+  const duplicate = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body,
+  })
+  const changed = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...body,
+      actionId: findLegalAction(packet, (action) => action.kind === 'choose_part').id,
+    },
+  })
+
+  assert.equal(first.response.status, 200)
+  assert.equal(duplicate.response.status, 200)
+  assert.equal(duplicate.json.packet.nextAction, 'wait_for_opponent_loadout')
+  assert.equal(changed.response.status, 409)
+  assert.equal(changed.json.error.code, 'ALREADY_SUBMITTED')
+})
+
+test('red action submission does not stale blue action-set decision version', async () => {
+  const env = createEnv()
+  const sessionId = 's_action_red_first_blue_stable'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+  const redSubmission = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: actionSubmissionFromPacket(redPacket),
+  })
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const blueSubmission = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: actionSubmissionFromPacket(bluePacket),
+  })
+
+  assert.equal(redSubmission.response.status, 200)
+  assert.equal(blueState.response.status, 200)
+  assert.equal(blueState.json.gameMaster.actionSetId, bluePacket.actionSetId)
+  assert.equal(blueState.json.gameMaster.decisionVersion, bluePacket.decisionVersion)
+  assert.ok(blueState.json.gameMaster.eventVersion > bluePacket.eventVersion)
+  assert.equal(blueSubmission.response.status, 200)
+})
+
+test('combat /action uses generated canonical actions and preserves blue set after red locks first', async () => {
+  const env = createEnv()
+  const sessionId = 's_combat_generated_actions'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  const redAfterConfirm = await confirmMinimumViableLoadout(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+  )
+  const blueAfterConfirm = await confirmMinimumViableLoadout(
+    env,
+    sessionId,
+    blueInvite.claimToken,
+    bluePacket,
+  )
+  const redCombatState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueCombatState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const redCombatPacket = redCombatState.json.gameMaster
+  const blueCombatPacket = blueCombatState.json.gameMaster
+  const redHold = findLegalAction(redCombatPacket, (action) => action.kind === 'hold')
+  const blueHold = findLegalAction(blueCombatPacket, (action) => action.kind === 'hold')
+
+  assert.equal(redAfterConfirm.nextAction, 'wait_for_opponent_loadout')
+  assert.equal(blueAfterConfirm.phase, 'combat_turn')
+  assert.equal(redCombatState.response.status, 200)
+  assert.equal(blueCombatState.response.status, 200)
+  assertGameMasterPacket(redCombatPacket, 'red')
+  assertGameMasterPacket(blueCombatPacket, 'blue')
+  assert.equal(redCombatPacket.phase, 'combat_turn')
+  assert.equal(redCombatPacket.nextAction, 'choose_turn')
+  assert.equal(redCombatPacket.turnId, 'turn_1')
+  assert.equal(redCombatPacket.visibleState.turn, 1)
+  assert.equal(redCombatPacket.legalActions.some((action) => action.kind === 'ready'), false)
+  assert.equal(redCombatPacket.legalActions.every((action) => action.id.startsWith('combat.red.r1.t1.')), true)
+  assert.equal(JSON.stringify(redCombatPacket).includes('slice_2_minimal_action_bridge'), false)
+  assert.equal(JSON.stringify(redCombatPacket.legalActions).includes('command'), false)
+
+  const redSubmission = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: actionSubmissionFromPacket(redCombatPacket, redHold.id),
+  })
+  const blueAfterRed = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  assert.equal(redSubmission.response.status, 200)
+  assert.equal(redSubmission.json.packet.nextAction, 'wait_for_opponent_turn')
+  assert.equal(blueAfterRed.response.status, 200)
+  assert.equal(
+    redSubmission.json.publicState.eventLog.some((event) => event.message.includes(redHold.id)),
+    false,
+  )
+  assert.equal(
+    blueAfterRed.json.eventLog.some((event) => event.message.includes(redHold.id)),
+    false,
+  )
+  assert.equal(
+    blueAfterRed.json.eventLog.some((event) => event.message === 'red locked a GameMaster action.'),
+    true,
+  )
+  assert.equal(blueAfterRed.json.gameMaster.actionSetId, blueCombatPacket.actionSetId)
+  assert.equal(blueAfterRed.json.gameMaster.decisionVersion, blueCombatPacket.decisionVersion)
+  assert.deepEqual(
+    blueAfterRed.json.gameMaster.legalActions.map((action) => action.id),
+    blueCombatPacket.legalActions.map((action) => action.id),
+  )
+
+  const blueSubmission = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: actionSubmissionFromPacket(blueCombatPacket, blueHold.id),
+  })
+  const redNextTurn = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(blueSubmission.response.status, 200)
+  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
+  assert.equal(redNextTurn.response.status, 200)
+  assert.equal(redNextTurn.json.gameMaster.phase, 'combat_turn')
+  assert.equal(redNextTurn.json.gameMaster.nextAction, 'choose_turn')
+  assert.equal(redNextTurn.json.gameMaster.turnId, 'turn_2')
+  assert.notEqual(redNextTurn.json.gameMaster.actionSetId, redCombatPacket.actionSetId)
+  assert.equal(redNextTurn.json.gameMaster.legalActions.some((action) => action.kind === 'ready'), false)
+  assert.equal(
+    redNextTurn.json.gameMaster.legalActions.every((action) => action.id.startsWith('combat.red.r1.t2.')),
+    true,
+  )
+})
+
+test('POST /sessions/:id/reflection accepts only private post-fight reflections after completed fight', async () => {
+  const env = createEnv()
+  const sessionId = 's_reflection_route'
+  const { refereeToken, redInvite, blueInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const earlyReflection = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redPacket.decisionVersion),
+  })
+
+  assert.equal(earlyReflection.response.status, 409)
+  assert.equal(earlyReflection.json.error.code, 'PHASE_CLOSED')
+
+  await storeCompletedFight(env, sessionId)
+
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const mismatch = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('blue', redState.json.gameMaster.decisionVersion),
+  })
+  const submitted = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redState.json.gameMaster.decisionVersion),
+  })
+  const duplicate = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redState.json.gameMaster.decisionVersion),
+  })
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const publicState = await route(env, `/sessions/${sessionId}/public`)
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+  const advanced = await route(env, `/sessions/${sessionId}/advance-round`, {
+    method: 'POST',
+    token: refereeToken,
+    body: {},
+  })
+  const consumed = await storage.get('agent-arena-session')
+  const redNext = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueNext = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  assert.equal(redState.response.status, 200)
+  assert.equal(redState.json.gameMaster.fightId, 'fight_1')
+  assert.equal(redState.json.gameMaster.nextAction, 'submit_reflection')
+  assert.equal(mismatch.response.status, 403)
+  assert.equal(mismatch.json.error.code, 'FORBIDDEN')
+  assert.equal(submitted.response.status, 200)
+  assert.equal(submitted.json.packet.nextAction, 'wait_for_debrief')
+  assert.equal(duplicate.response.status, 409)
+  assert.equal(duplicate.json.error.code, 'ALREADY_SUBMITTED')
+  assert.equal(stored.reflections[0].status, 'private_pending')
+  assert.equal(JSON.stringify(blueState.json).includes('secret weak drive note'), false)
+  assert.equal(JSON.stringify(publicState.json).includes('secret weak drive note'), false)
+  assert.equal(advanced.response.status, 200)
+  assert.equal(consumed.reflections[0].status, 'consumed_into_shared_debrief')
+  assert.equal(consumed.reflections[0].debriefId, consumed.sharedDebrief.debriefId)
+  assert.equal(JSON.stringify(consumed.sharedDebrief).includes('secret weak drive note'), false)
+  assert.deepEqual(redNext.json.gameMaster.sharedDebrief, blueNext.json.gameMaster.sharedDebrief)
+  assert.equal(JSON.stringify(redNext.json.gameMaster.sharedDebrief).includes('secret weak drive note'), false)
+})
+
+test('POST /sessions/:id/reflection rejects late reflection after shared debrief exists', async () => {
+  const env = createEnv()
+  const sessionId = 's_reflection_route_after_debrief'
+  const { redInvite } = await bootstrapReadySession(env, sessionId)
+
+  await storeCompletedFight(env, sessionId)
+
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+  const sharedDebrief = buildSharedDebrief({
+    sourceSessionId: sessionId,
+    dossier: stored.fightDossier,
+    reflections: [],
+  })
+  stored.sharedDebrief = sharedDebrief
+  await storage.put('agent-arena-session', stored)
+
+  const lateReflection = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redState.json.gameMaster.decisionVersion),
+  })
+  const afterLateReflection = await storage.get('agent-arena-session')
+
+  assert.equal(redState.response.status, 200)
+  assert.equal(lateReflection.response.status, 409)
+  assert.equal(lateReflection.json.error.code, 'PHASE_CLOSED')
+  assert.equal(
+    (afterLateReflection.reflections ?? []).some((entry) => entry.status === 'private_pending'),
+    false,
+  )
+  assert.deepEqual(afterLateReflection.sharedDebrief, sharedDebrief)
+})
+
+test('POST /sessions/:id/save, /continue, and /quit are deferred outside Slice 6', async () => {
+  const env = createEnv()
+  const sessionId = 's_slice_7_deferred'
   const created = await route(env, '/sessions', {
     method: 'POST',
     body: { sessionId },
   })
-  const redInvite = inviteFor(created.json.invites, 'red')
-  const blueInvite = inviteFor(created.json.invites, 'blue')
 
-  await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
-    method: 'POST',
-    token: redInvite.claimToken,
-    body: bootstrapBody('red'),
-  })
-  await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
-    method: 'POST',
-    token: blueInvite.claimToken,
-    body: bootstrapBody('blue'),
-  })
+  assert.equal(created.response.status, 201)
 
-  const v2Submission = {
-    action: 'submit_round_plan',
-    schemaVersion: 2,
-    purchases: validSpinnerSubmission.purchases,
-    blueprint: validSpinnerSubmission.blueprint,
-    tactics: {
-      movementPolicy: 'close',
-      preferredRange: 'close',
-      aggression: 0.75,
-      weaponCadence: 'opportunistic',
-    },
+  for (const action of ['save', 'continue', 'quit']) {
+    const result = await route(env, `/sessions/${sessionId}/${action}`, {
+      method: 'POST',
+      token: created.json.refereeToken,
+      body: {},
+    })
+
+    assert.equal(result.response.status, 404)
+    assert.equal(result.json.error.code, 'INVALID_ACTION')
   }
-
-  const redSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
-    method: 'POST',
-    token: redInvite.claimToken,
-    body: v2Submission,
-  })
-  const blueSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
-    method: 'POST',
-    token: blueInvite.claimToken,
-    body: v2Submission,
-  })
-
-  assert.equal(redSubmission.response.status, 200)
-  assert.equal(redSubmission.json.publicState.phase, 'submission_phase')
-  assertRoundPlanWindow(redSubmission.json.publicState.roundPlan)
-  assert.equal(redSubmission.json.state.ownSubmission.schemaVersion, 2)
-  assert.equal('turnPlan' in redSubmission.json.state.ownSubmission, false)
-  assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
-  assert.equal(blueSubmission.json.publicState.roundPlan, undefined)
-  assert.equal(blueSubmission.json.publicState.replayAvailable, false)
-  assert.equal(blueSubmission.json.state.combat.tick, 1)
-  assert.equal('decision' in blueSubmission.json.publicState.combat, false)
-  assert.equal(blueSubmission.json.state.combat.decision.tick, 1)
-  assert.equal(blueSubmission.json.state.combat.decision.legalCommands.movement.includes('forward'), true)
-  assert.equal(blueSubmission.json.state.combat.decision.range.distance, 12)
-  assert.equal(blueSubmission.json.state.combat.decision.range.band, 'long')
-  assert.deepEqual(blueSubmission.json.state.combat.decision.positioning.selfCell, { x: 6, z: 0 })
-  assert.deepEqual(blueSubmission.json.state.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
-  assert.equal(blueSubmission.json.state.combat.decision.positioning.bearingToOpponent, 'west')
-  assert.equal(blueSubmission.json.state.combat.decision.hazards.active.includes('floor_saw'), true)
-  assert.equal(blueSubmission.json.state.combat.decision.arenaPressure.selfNearHazard, false)
-  assert.equal(blueSubmission.json.state.combat.decision.movementOptions.recommended.includes('dash_forward'), true)
-  assert.ok(
-    blueSubmission.json.state.combat.decision.tacticalCues.some((cue) =>
-      cue.includes('movement can be combined'),
-    ),
-  )
-
-  const redTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
-    method: 'POST',
-    token: redInvite.claimToken,
-    body: { action: 'submit_turn_command', tick: 1, move: 'forward', weaponA: 'hold' },
-  })
-  const blueTurn = await route(env, `/sessions/${sessionId}/turn-command`, {
-    method: 'POST',
-    token: blueInvite.claimToken,
-    body: { action: 'submit_turn_command', tick: 1, move: 'forward', weaponA: 'hold' },
-  })
-
-  assert.equal(redTurn.response.status, 200)
-  assert.equal(redTurn.json.publicState.combat.submitted.red, true)
-  assert.equal(blueTurn.response.status, 200)
-  assert.equal(blueTurn.json.publicState.phase, 'combat_turn')
-  assert.equal(blueTurn.json.publicState.combat.tick, 2)
-  assert.equal(blueTurn.json.state.combat.decision.tick, 2)
-  assert.equal(blueTurn.json.state.combat.decision.previousResolvedTurn.self.move, 'forward')
-  assert.equal(blueTurn.json.state.combat.decision.previousResolvedTurn.opponent.move, 'forward')
 })
 
 test('POST /sessions/:id/chat stores public role-authored chat', async () => {
@@ -1157,7 +1869,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(typeof redState.json.stateVersion, 'string')
   assert.equal(redState.json.opponent.role, 'blue')
   assert.equal(redState.json.opponent.claimed, true)
-  assert.equal(redState.json.ownSubmission, undefined)
+  assert.equal(redState.json.ownLoadout, undefined)
   assertRedactedPublicState(redState.json.opponent, [
     redInvite.claimToken,
     resetRed.json.invite.claimToken,
@@ -1167,15 +1879,19 @@ test('worker routes session traffic through the Durable Object relay boundary', 
     refereeToken,
   ])
 
-  const redSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+  assertGameMasterPacket(redState.json.gameMaster, 'red')
+  assert.equal(redState.json.gameMaster.phase, 'choose_loadout')
+
+  const redSubmission = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token: redToken,
-    body: validSpinnerSubmission,
+    body: actionSubmissionFromPacket(redState.json.gameMaster),
   })
 
   assert.equal(redSubmission.response.status, 200)
   assert.equal(redSubmission.json.publicState.phase, 'submission_phase')
-  assert.equal(redSubmission.json.publicState.roles.red.submitted, true)
+  assert.equal(redSubmission.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(redSubmission.json.publicState.gameMaster.red.nextAction, 'build_bot')
   assert.equal(redSubmission.json.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.json.publicState.replayAvailable, false)
   assertRoundPlanWindow(redSubmission.json.publicState.roundPlan)
@@ -1190,9 +1906,11 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(preResolveState.response.status, 200)
   assert.equal(preResolveState.json.role, 'red')
   assertRoundPlanWindow(preResolveState.json.roundPlan)
+  assert.equal(preResolveState.json.gameMaster.nextAction, 'build_bot')
+  assert.equal(preResolveState.json.gameMaster.buildState.step, 'choose_attach_target')
   assert.deepEqual(preResolveState.json.opponent, {
     role: 'blue',
-    identity: testTeamIdentity('blue'),
+    identity: expectedLegacyTeamIdentity('blue'),
     claimed: true,
     submitted: false,
     wins: 0,
@@ -1205,43 +1923,24 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(preResolveReplay.response.status, 404)
   assert.equal(preResolveReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
 
-  const blueSubmission = await route(env, `/sessions/${sessionId}/round-plan`, {
+  const blueState = await route(env, `/sessions/${sessionId}/state`, { token: blueToken })
+  const blueSubmission = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token: blueToken,
-    body: validSpinnerSubmission,
+    body: actionSubmissionFromPacket(blueState.json.gameMaster),
   })
 
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
-  assert.equal(blueSubmission.json.publicState.roles.red.submitted, true)
-  assert.equal(blueSubmission.json.publicState.roles.blue.submitted, true)
+  assert.equal(blueSubmission.json.publicState.phase, 'submission_phase')
+  assert.equal(blueSubmission.json.publicState.gameMaster.red.nextAction, 'build_bot')
+  assert.equal(blueSubmission.json.publicState.gameMaster.blue.nextAction, 'build_bot')
   assert.equal(blueSubmission.json.publicState.replayAvailable, false)
-  assert.equal(blueSubmission.json.publicState.roundPlan, undefined)
   assert.equal('awardOptions' in blueSubmission.json.publicState, false)
-
-  const resolved = await resolveLiveRouteCombat(
-    env,
-    sessionId,
-    redToken,
-    blueToken,
-    blueSubmission.json.state,
-  )
-
-  assert.equal(resolved.json.publicState.phase, 'round_review')
-  assert.equal(resolved.json.publicState.replayAvailable, true)
 
   const replay = await route(env, `/sessions/${sessionId}/replay`)
 
-  assert.equal(replay.response.status, 200)
-  assert.equal(validateReplayTimeline(replay.json), true)
-  assert.equal(replay.json.botBlueprints?.red?.name, 'Spinner')
-  assert.equal(replay.json.botBlueprints?.blue?.name, 'Spinner')
-  assert.equal(replay.json.botBlueprints?.red?.blocks?.length > 0, true)
-  assert.equal(replay.json.botBlueprints?.blue?.blocks?.length > 0, true)
-  assert.equal(replay.json.botBlueprints?.red?.blocks[0].id, 'core')
-  assert.equal(replay.json.botBlueprints?.red?.blocks[0].partId, 'Body_Square_Medium')
-  assert.deepEqual(replay.json.teamIdentities?.red, testTeamIdentity('red', ' Replacement'))
-  assert.deepEqual(replay.json.teamIdentities?.blue, testTeamIdentity('blue'))
+  assert.equal(replay.response.status, 404)
+  assert.equal(replay.json.error.code, 'REPLAY_NOT_AVAILABLE')
 
   const invalidAdvanceToken = await route(env, `/sessions/${sessionId}/advance-round`, {
     method: 'POST',
@@ -1258,20 +1957,16 @@ test('worker routes session traffic through the Durable Object relay boundary', 
     body: {},
   })
 
-  assert.equal(advance.response.status, 200)
-  assert.equal(advance.json.publicState.phase, 'submission_phase')
-  assert.equal(advance.json.publicState.round, 2)
-  assert.equal(advance.json.publicState.roles.red.submitted, false)
-  assert.equal(advance.json.publicState.roles.blue.submitted, false)
-  assertRoundPlanWindow(advance.json.publicState.roundPlan)
+  assert.equal(advance.response.status, 409)
+  assert.equal(advance.json.error.code, 'PHASE_CLOSED')
 
   const redAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: redToken })
   const blueAfterAdvance = await route(env, `/sessions/${sessionId}/state`, { token: blueToken })
 
   assert.equal(redAfterAdvance.response.status, 200)
   assert.equal(blueAfterAdvance.response.status, 200)
-  assert.equal(redAfterAdvance.json.gold, 103)
-  assert.equal(blueAfterAdvance.json.gold, 78)
+  assert.equal(redAfterAdvance.json.gameMaster.nextAction, 'build_bot')
+  assert.equal(blueAfterAdvance.json.gameMaster.nextAction, 'build_bot')
 
   const publicState = await route(env, `/sessions/${sessionId}/public`)
 
@@ -1280,6 +1975,8 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(typeof publicState.json.stateVersion, 'string')
   assert.equal(publicState.json.replayAvailable, false)
   assertRoundPlanWindow(publicState.json.roundPlan)
+  assert.equal(publicState.json.gameMaster.red.nextAction, 'build_bot')
+  assert.equal(publicState.json.gameMaster.blue.nextAction, 'build_bot')
   assertRedactedPublicState(publicState.json, [
     redInvite.claimToken,
     resetRed.json.invite.claimToken,
@@ -1297,8 +1994,8 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   })
 
   assert.equal(finalRedState.response.status, 200)
-  assert.equal(finalRedState.json.ownSubmission, undefined)
-  assert.equal(finalRedState.json.round, 2)
+  assert.equal(finalRedState.json.ownLoadout, undefined)
+  assert.equal(finalRedState.json.round, 1)
   assert.equal(JSON.stringify(finalRedState.json.opponent).includes('Spinner'), false)
 
   const staleReplay = await route(env, `/sessions/${sessionId}/replay`)

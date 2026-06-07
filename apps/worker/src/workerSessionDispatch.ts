@@ -85,6 +85,13 @@ export async function handlePublicCreateSessionRequest(
     typeof createRequest.sessionId === 'string' && createRequest.sessionId.trim().length > 0
       ? createRequest.sessionId.trim()
       : createSessionId()
+  const sanitizedCreateRequest: CreateSessionRequest = {
+    sessionId,
+    ...(typeof createRequest.seed === 'string' ? { seed: createRequest.seed } : {}),
+    ...(typeof createRequest.maxRounds === 'number' ? { maxRounds: createRequest.maxRounds } : {}),
+    ...(typeof createRequest.ttlSeconds === 'number' ? { ttlSeconds: createRequest.ttlSeconds } : {}),
+    ...(createRequest.arena ? { arena: createRequest.arena } : {}),
+  }
 
   if (!isSessionId(sessionId)) {
     return invalidSessionIdResponse(request, env)
@@ -94,7 +101,7 @@ export async function handlePublicCreateSessionRequest(
   internalUrl.pathname = `/sessions/${encodeURIComponent(sessionId)}/create`
 
   return forwardToSessionObject(
-    requestWithJson(request, internalUrl, { ...body, sessionId }),
+    requestWithJson(request, internalUrl, sanitizedCreateRequest),
     env,
     sessionId,
   )

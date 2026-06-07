@@ -2,24 +2,27 @@ export const TEAM_ROLES = ['red', 'blue'] as const
 
 export type TeamRole = (typeof TEAM_ROLES)[number]
 
-export const TEAM_LOGO_MARKS = [
-  'shield',
-  'bolt',
-  'gear',
-  'star',
-  'wedge',
-  'crosshair',
+export const TEAM_LOGO_ASSET_KINDS = [
+  'image_url',
+  'data_url',
+  'asset_id',
 ] as const
 
-export type TeamLogoMark = (typeof TEAM_LOGO_MARKS)[number]
+export type TeamLogoAssetKind = (typeof TEAM_LOGO_ASSET_KINDS)[number]
+
+export type TeamLogoAsset = {
+  kind: TeamLogoAssetKind
+  url?: string
+  dataUrl?: string
+  assetId?: string
+  altText?: string
+}
 
 export type TeamIdentity = {
   name: string
-  primaryColor: string
-  logo?: {
-    mark: TeamLogoMark
-    initials?: string
-  }
+  colorHex: string
+  logoPrompt?: string
+  logoAsset?: TeamLogoAsset
 }
 
 export type TeamEconomySummary = {
@@ -113,6 +116,12 @@ export type PartVisualDescriptor = {
 
 export type Vector3 = [number, number, number]
 
+export type PartFootprint = {
+  size: Vector3
+  minY: number
+  groundContact: 'required' | 'allowed' | 'none'
+}
+
 export type PartStats = {
   armor?: number
   chaos?: number
@@ -122,6 +131,104 @@ export type PartStats = {
   style?: number
   traction?: number
   weapon?: number
+}
+
+export type PartRarity = 'normal' | 'rare' | 'epic' | 'legendary'
+
+export type PartMountKind =
+  | 'side_socket'
+  | 'top_socket'
+  | 'surface'
+  | 'sphere'
+  | 'rim'
+  | 'internal_slot'
+
+export type PartMountMotion =
+  | 'static'
+  | 'inherits_parent_spin'
+  | 'inherits_parent_swing'
+
+export type PartCollisionPolicy =
+  | 'allow_clip_v1'
+  | 'reject_overlap'
+  | 'internal_only'
+
+export type PartMount = {
+  id: string
+  kind: PartMountKind
+  accepts: PartCategory[]
+  motion: PartMountMotion
+  collisionPolicy: PartCollisionPolicy
+  rotationOptions: number[]
+  sectors?: string[]
+}
+
+export type WeaponSpec = {
+  kind: 'weapon'
+  damage: number
+  range: number
+  cooldownTurns: number
+  ammo?: number
+  fireMode: 'direct' | 'arc' | 'sweep' | 'contact'
+  precision: number
+}
+
+export type MobilitySpec = {
+  kind: 'mobility'
+  moveBudget: number
+  traction: number
+  stability: number
+  turnRate: number
+}
+
+export type ArmorSpec = {
+  kind: 'armor'
+  armor: number
+  coverage: number
+}
+
+export type StructureSpec = {
+  kind: 'structure'
+  integrity: number
+  connectorStrength: number
+}
+
+export type UtilitySpec = {
+  kind: 'utility'
+  effect: string
+  control: number
+}
+
+export type PowerSpec = {
+  kind: 'power'
+  output: number
+  capacity: number
+}
+
+export type PartSpec =
+  | WeaponSpec
+  | MobilitySpec
+  | ArmorSpec
+  | StructureSpec
+  | UtilitySpec
+  | PowerSpec
+
+export type PartEffectTrigger = 'activated' | 'on_hit' | 'on_damage' | 'on_flip' | 'passive'
+
+export type PartEffectTarget = 'self' | 'opponent' | 'area' | 'movement' | 'weapon'
+
+export type PartReplayCue = 'fire_breath' | 'spark_burst' | 'wing_buffet' | 'neon_blind' | 'crown_command' | 'trash_shield' | 'self_right' | 'tactical_assist'
+
+export type PartEffect = {
+  id: string
+  kind: 'signature' | 'utility'
+  trigger: PartEffectTrigger
+  cooldownTurns: number
+  charges?: number
+  target: PartEffectTarget
+  params: Record<string, number | string | boolean>
+  replayCue?: PartReplayCue
+  debriefSignals: string[]
 }
 
 export type PartBehaviorSlot = Extract<PartCategory, 'body' | 'defense' | 'weapon' | 'utility'>
@@ -135,12 +242,18 @@ export type PartDefinition = {
   id: string
   category: PartCategory
   displayName: string
+  rarity: PartRarity
   cost: number
   mass: number
   durability: number
   size: Vector3
   tags: string[]
   stats: PartStats
+  footprint: PartFootprint
+  mounts: PartMount[]
+  spec: PartSpec
+  signatureEffect?: PartEffect
+  mechanics?: PartEffect[]
   visual: PartVisualDescriptor
   behavior?: PartBehavior
   controls?: {
@@ -166,6 +279,13 @@ export type BlueprintBlock = {
   position: Vector3
   rotation: Vector3
   label?: string
+  parentInstanceId?: string
+  mountId?: string
+  mountKind?: PartMountKind
+  mountMotion?: PartMountMotion
+  mountCollisionPolicy?: PartCollisionPolicy
+  mountSector?: string
+  signatureEffectActive?: boolean
 }
 
 export type BotBlueprint = {
@@ -213,13 +333,390 @@ export type TurnCommand = {
   utility?: UtilityCommand
 }
 
-export type TurnCommandSubmission = {
-  action: 'submit_turn_command'
-  tick: number
-  move?: MovementCommand
-  weaponA?: WeaponCommand
-  weaponB?: WeaponCommand
-  utility?: UtilityCommand
+export type GridCoord = {
+  x: number
+  z: number
+}
+
+export type BotPose = {
+  anchor: GridCoord
+  facing: 'north' | 'south' | 'east' | 'west'
+}
+
+export const GAME_MASTER_PHASES = [
+  'wait_for_opponent_claim',
+  'choose_loadout',
+  'wait_for_opponent_loadout',
+  'combat_turn',
+  'wait_for_opponent_turn',
+  'replay_phase',
+  'round_review',
+  'session_complete',
+  'expired',
+] as const
+
+export type GameMasterPhase = (typeof GAME_MASTER_PHASES)[number]
+
+export const GAME_MASTER_NEXT_ACTIONS = [
+  'claim_role',
+  'build_bot',
+  'choose_turn',
+  'submit_reflection',
+  'wait_for_opponent_claim',
+  'wait_for_opponent_loadout',
+  'wait_for_opponent_turn',
+  'wait_for_debrief',
+  'view_replay',
+  'session_complete',
+  'stop',
+] as const
+
+export type GameMasterNextAction = (typeof GAME_MASTER_NEXT_ACTIONS)[number]
+
+export const GAME_MASTER_ACTION_KINDS = [
+  'select_loadout',
+  'choose_part',
+  'choose_attach_target',
+  'choose_mount',
+  'choose_rotation',
+  'buy_part',
+  'place_part',
+  'remove_part',
+  'remove_subtree',
+  'move_part',
+  'rotate_part',
+  'confirm_loadout',
+  'move',
+  'attack',
+  'move_and_attack',
+  'use_utility',
+  'hold',
+  'ready',
+] as const
+
+export type GameMasterActionKind = (typeof GAME_MASTER_ACTION_KINDS)[number]
+
+export type AgentResourcesView = {
+  gold?: number
+  remainingGold?: number
+  partLimitRemaining?: number
+  [key: string]: unknown
+}
+
+export type CatalogSnapshotView = {
+  version: string
+  digest?: string
+  parts: PartDefinition[] | Record<string, unknown>
+  [key: string]: unknown
+}
+
+export type CatalogStoreSlotKind =
+  | 'weapon'
+  | 'utility'
+  | 'armor'
+  | 'advanced_mobility'
+  | 'wildcard'
+
+export type CatalogStoreSlot = {
+  id: string
+  kind: CatalogStoreSlotKind
+  partId: string
+}
+
+export type CatalogStoreView = {
+  id: string
+  seed: string
+  role: TeamRole
+  foundationPartIds: string[]
+  slots: CatalogStoreSlot[]
+  offeredPartIds: string[]
+}
+
+export type AgentBoardView = {
+  arena: ArenaConfig
+  self?: BotPose
+  opponent?: BotPose
+  blockedCells?: GridCoord[]
+  hazardCells?: GridCoord[]
+  [key: string]: unknown
+}
+
+export type AgentVisibleCombatState = {
+  self: BotCombatState
+  opponent: BotCombatState
+  turn?: number
+  [key: string]: unknown
+}
+
+export const LOADOUT_BUILD_STEPS = [
+  'choose_part',
+  'choose_attach_target',
+  'choose_mount',
+  'choose_rotation',
+  'ready_to_confirm',
+] as const
+
+export type LoadoutBuildStep = (typeof LOADOUT_BUILD_STEPS)[number]
+
+export type LoadoutBuildState = {
+  step: LoadoutBuildStep
+  catalogVersion: string
+  selectedPartId?: string
+  selectedMovingPartId?: string
+  selectedAttachTargetId?: string
+  selectedMount?: string
+  selectedMountKind?: PartMountKind
+  selectedMountMotion?: PartMountMotion
+  selectedMountCollisionPolicy?: PartCollisionPolicy
+  selectedMountSector?: string
+  selectedAttachCell?: GridCoord
+  selectedRotation?: number
+  currentDesign: BotDesignSnapshot
+}
+
+export type SubmitInstruction = {
+  method: 'POST'
+  path: string
+  body: {
+    action: 'submit_game_action'
+    actionSetId: string
+    decisionVersion: number
+    actionId: string
+    publicMessage?: string
+  }
+}
+
+export type GameMasterLegalAction = {
+  id: string
+  kind: GameMasterActionKind
+  label: string
+  summary: string
+  catalogDigest?: string
+  catalogRefs?: string[]
+  requirements?: string[]
+  preview?: {
+    basis: 'current_snapshot'
+    outcome: 'estimated' | 'guaranteed'
+    path?: GridCoord[]
+    finalPose?: BotPose
+    target?: GridCoord
+    currentLineOfSight?: boolean
+    expectedRangeIfOpponentHolds?: number
+    hazardExposure?: number
+    riskTags?: string[]
+  }
+}
+
+export type GameMasterPacket = {
+  sessionId: string
+  role: TeamRole
+  phase: GameMasterPhase
+  nextAction: GameMasterNextAction
+  round: number
+  fightId?: string
+  turnId?: string
+  decisionVersion: number
+  eventVersion: number
+  actionSetId?: string
+  catalogDigest?: string
+  instruction: string
+  resources?: AgentResourcesView
+  catalog?: CatalogSnapshotView
+  store?: CatalogStoreView
+  buildState?: LoadoutBuildState
+  board?: AgentBoardView
+  visibleState?: AgentVisibleCombatState
+  legalActions: GameMasterLegalAction[]
+  sharedDebrief?: SharedDebrief
+  submit?: SubmitInstruction
+}
+
+export type GameMasterActionSubmission = {
+  action: 'submit_game_action'
+  actionSetId: string
+  decisionVersion: number
+  actionId: string
+  publicMessage?: string
+}
+
+export type CanonicalGameAction = {
+  id: string
+  kind: GameMasterActionKind
+  role: TeamRole
+  payload: Record<string, unknown>
+}
+
+export type ActiveActionSet = {
+  actionSetId: string
+  role: TeamRole
+  phase: GameMasterPhase
+  round: number
+  fightId?: string
+  turnId?: string
+  decisionVersion: number
+  catalogVersion: string
+  catalogDigest?: string
+  arenaVersion: string
+  catalogStore?: CatalogStoreView
+  createdAt: string
+  expiresAt?: string
+  actions: Record<string, CanonicalGameAction>
+  locked?: {
+    actionId: string
+    submittedAt: string
+    requestHash: string
+  }
+}
+
+export type BotPartSnapshot = {
+  instanceId: string
+  partId: string
+  cell?: GridCoord
+  rotation?: number
+  parentInstanceId?: string
+  mountId?: string
+  mountKind?: PartMountKind
+  mountMotion?: PartMountMotion
+  mountCollisionPolicy?: PartCollisionPolicy
+  mountSector?: string
+  signatureEffectActive?: boolean
+  health?: number
+  detached?: boolean
+}
+
+export type BotDesignSnapshot = {
+  name: string
+  parts: BotPartSnapshot[]
+  rootInstanceId?: string
+  activeSignaturePartInstanceId?: string
+}
+
+export type BotCombatState = {
+  pose?: BotPose
+  health: number
+  maxHealth: number
+  parts?: BotPartSnapshot[]
+  statuses?: string[]
+}
+
+export type BotDetailedSnapshot = BotDesignSnapshot & {
+  combat: BotCombatState
+}
+
+export type PostFightAgentReflection = {
+  action: 'submit_post_fight_reflection'
+  fightId: string
+  role: TeamRole
+  decisionVersion: number
+  claims: {
+    perceivedWinReason?: string
+    perceivedLossReason?: string
+    ownWeaknesses: string[]
+    opponentThreats: string[]
+    suggestedDesignChanges: string[]
+    suggestedTacticalChanges: string[]
+  }
+  confidence: 'low' | 'medium' | 'high'
+}
+
+export type DebriefEvidence = {
+  type: string
+  summary: string
+  value?: number | string | boolean
+  source?: string
+}
+
+export type SharedDebrief = {
+  debriefId: string
+  sourceSessionId: string
+  fightIds: string[]
+  summary: string
+  championImprovementHints: string[]
+  challengerCounterplayHints: string[]
+  evidence: DebriefEvidence[]
+}
+
+export type WeaponUseStats = {
+  weaponId: string
+  activations: number
+  hits: number
+  damage: number
+}
+
+export type HazardExposureStats = {
+  role: TeamRole
+  hazardId: string
+  exposureCount: number
+  damage: number
+}
+
+export type MovementStats = {
+  cellsMoved: number
+  hazardsCrossed: number
+  finalPose?: BotPose
+}
+
+export type FightKeyEvent = {
+  at: number
+  type: string
+  summary: string
+}
+
+export type FightDossier = {
+  sessionId: string
+  fights: Array<{
+    fightId: string
+    winner: TeamRole | 'draw'
+    reason: string
+    duration: number
+    replayTimelineId?: string
+    bots: Record<TeamRole, BotDetailedSnapshot>
+    stats: {
+      damageDealt: Record<TeamRole, number>
+      damageTaken: Record<TeamRole, number>
+      damageByPart: Record<TeamRole, Record<string, number>>
+      weaponUse: Record<TeamRole, WeaponUseStats[]>
+      hazardsTriggered: HazardExposureStats[]
+      movement: Record<TeamRole, MovementStats>
+      disabledParts: Record<TeamRole, string[]>
+    }
+    keyEvents: FightKeyEvent[]
+  }>
+}
+
+export type ChampionRecord = {
+  wins: number
+  consecutiveWins: number
+  losses: number
+  sourceSessionIds: string[]
+}
+
+export type ChallengerBalanceGrant = {
+  role: TeamRole
+  bonusGold: number
+  reason: string
+}
+
+export type ChampionContinuationSave = {
+  saveId: string
+  sourceSessionId: string
+  championRole: TeamRole
+  championTeamIdentity: TeamIdentity
+  championDesign: BotDesignSnapshot
+  championFinalState: BotCombatState
+  championRecord: ChampionRecord
+  fightDossier: FightDossier
+  sharedDebrief: SharedDebrief
+  challengerBalance: ChallengerBalanceGrant
+  createdAt: string
+}
+
+export type ChampionContinuationSeed = {
+  sourceSave: ChampionContinuationSave
+  championRole: TeamRole
+  challengerRole: TeamRole
+  challengerBonusGold: number
+  sharedDebrief: SharedDebrief
 }
 
 export const TACTIC_STYLES = [
@@ -302,28 +799,6 @@ export type AgentChatMessageKind = (typeof AGENT_CHAT_MESSAGE_KINDS)[number]
 export type AgentChatMessageRequest = {
   message: string
   kind?: AgentChatMessageKind
-}
-
-export type RoundPlanSubmissionV2 = {
-  action: 'submit_round_plan'
-  schemaVersion: 2
-  purchases: Purchase[]
-  blueprint: BotBlueprint
-  tactics: BotTactics
-  rationale?: string
-  chat?: AgentChatMessageRequest[]
-}
-
-export type RoundPlanSubmission = RoundPlanSubmissionV2
-
-export type NormalizedRoundPlanSubmission = {
-  action: 'submit_round_plan'
-  schemaVersion: 2
-  purchases: Purchase[]
-  blueprint: BotBlueprint
-  tactics: NormalizedBotTactics
-  rationale?: string
-  chat?: AgentChatMessageRequest[]
 }
 
 export type ArenaConfig = {

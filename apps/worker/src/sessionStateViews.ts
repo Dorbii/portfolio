@@ -1,12 +1,17 @@
-import type {
-  PublicSessionState,
-  RolePrivateState,
-} from '../../../packages/schemas/src/index.js'
 import {
   cloneJson,
   rolePublicState,
 } from './sessionSupport.js'
-import { buildCombatTurnDecisionContext } from './sessionCombatDecision.js'
+import { buildCombatDecisionBrief } from './sessionCombatDecision.js'
+import { botDesignSnapshotToBlueprint } from '../../../packages/sim/src/index.js'
+import type {
+  GameMasterNextAction,
+  GameMasterPhase,
+} from '../../../packages/schemas/src/index.js'
+import type {
+  LegacyPublicSessionState,
+  LegacyRolePrivateState,
+} from './sessionLegacyContracts.js'
 import type {
   StoredRoleState,
   StoredSessionState,
@@ -15,7 +20,7 @@ import type {
 export function buildRolePrivateState(
   state: StoredSessionState,
   role: StoredRoleState,
-): RolePrivateState {
+): LegacyRolePrivateState {
   const opponent = role.role === 'red' ? state.roles.blue : state.roles.red
 
   return cloneJson({
@@ -32,8 +37,15 @@ export function buildRolePrivateState(
     winStreak: role.winStreak,
     inventory: role.inventory,
     ...(role.controls ? { controls: role.controls } : {}),
-    submitted: Boolean(role.submittedAt),
-    ...(role.submission ? { ownSubmission: role.submission } : {}),
+    submitted: Boolean(role.loadoutConfirmedAt),
+    ...(role.currentDesign && role.loadoutConfirmedAt
+      ? {
+          ownLoadout: {
+            blueprint: botDesignSnapshotToBlueprint(role.currentDesign),
+            confirmedAt: role.loadoutConfirmedAt,
+          },
+        }
+      : {}),
     ...(state.roundPlan ? { roundPlan: state.roundPlan } : {}),
     ...(state.combat
       ? {
@@ -49,7 +61,7 @@ export function buildRolePrivateState(
             snapshot: state.combat.snapshot,
             self: role.role === 'red' ? state.combat.snapshot.red : state.combat.snapshot.blue,
             opponent: role.role === 'red' ? state.combat.snapshot.blue : state.combat.snapshot.red,
-            decision: buildCombatTurnDecisionContext(state, role, state.combat),
+            decision: buildCombatDecisionBrief(state, role, state.combat),
           },
         }
       : {}),
@@ -62,7 +74,7 @@ export function buildRolePrivateState(
   })
 }
 
-export function buildPublicSessionState(state: StoredSessionState): PublicSessionState {
+export function buildPublicSessionState(state: StoredSessionState): LegacyPublicSessionState {
   return cloneJson({
     sessionId: state.id,
     stateVersion: sessionStateVersion(state),
@@ -90,8 +102,10 @@ export function buildPublicSessionState(state: StoredSessionState): PublicSessio
           },
         }
       : {}),
+    gameMaster: buildGameMasterPublicSummary(state),
     replayAvailable: Boolean(state.replay),
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
+    continuation: buildPublicContinuationState(state),
     chatLog: state.chatLog,
     eventLog: state.eventLog,
   })
@@ -102,13 +116,76 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.updatedAt,
     state.phase,
     state.round,
-    state.roles.red.submittedAt ? 'red-submitted' : 'red-open',
-    state.roles.blue.submittedAt ? 'blue-submitted' : 'blue-open',
-    state.roundPlan ? `round-plan-${state.roundPlan.deadlineAt}` : 'round-plan-none',
+    state.roles.red.loadoutConfirmedAt ? 'red-loadout-confirmed' : 'red-loadout-open',
+    state.roles.blue.loadoutConfirmedAt ? 'blue-loadout-confirmed' : 'blue-loadout-open',
+    state.roundPlan ? `loadout-window-${state.roundPlan.deadlineAt}` : 'loadout-window-none',
     state.combat ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}` : 'combat-none',
     state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
     state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',
     state.eventLog.length,
     state.chatLog.length,
+    state.reflections?.length ?? 0,
+    state.sharedDebrief?.debriefId ?? 'debrief-none',
+    state.championSave?.saveId ?? 'save-none',
+    state.sourceChampionSave?.saveId ?? 'source-save-none',
+    state.continuedSessionId ?? 'continued-none',
+    state.quitAt ?? 'quit-none',
   ].join('|')
+}
+
+function buildPublicContinuationState(
+  state: StoredSessionState,
+): NonNullable<LegacyPublicSessionState['continuation']> {
+  const save = state.championSave ?? state.sourceChampionSave
+  const challengerBonusGold = state.championSave?.challengerBalance.bonusGold
+    ?? state.continuationSeed?.challengerBonusGold
+
+  return {
+    completedFightCount: state.fightDossier?.fights.length ?? 0,
+    ...(state.sharedDebrief ? { sharedDebrief: state.sharedDebrief } : {}),
+    saved: Boolean(state.championSave),
+    quit: Boolean(state.quitAt),
+    ...(state.continuedSessionId ? { continuedSessionId: state.continuedSessionId } : {}),
+    ...(save
+      ? {
+          championRole: save.championRole,
+          championRecord: save.championRecord,
+        }
+      : {}),
+    ...(challengerBonusGold !== undefined ? { challengerBonusGold } : {}),
+  }
+}
+
+function buildGameMasterPublicSummary(
+  state: StoredSessionState,
+): LegacyPublicSessionState['gameMaster'] {
+  const summaries: NonNullable<LegacyPublicSessionState['gameMaster']> = {}
+
+  for (const roleName of ['red', 'blue'] as const) {
+    const activeSet = state.activeActionSets?.[roleName]
+
+    if (!activeSet) {
+      continue
+    }
+
+    summaries[roleName] = {
+      phase: activeSet.phase,
+      nextAction: state.lockedActions?.[roleName]
+        ? nextActionAfterLock(activeSet.phase)
+        : nextActionForPhase(activeSet.phase),
+      decisionVersion: activeSet.decisionVersion,
+      eventVersion: state.eventLog.length + state.chatLog.length,
+      actionSetId: activeSet.actionSetId,
+    }
+  }
+
+  return Object.keys(summaries).length > 0 ? summaries : undefined
+}
+
+function nextActionForPhase(phase: GameMasterPhase): GameMasterNextAction {
+  return phase === 'combat_turn' ? 'choose_turn' : 'build_bot'
+}
+
+function nextActionAfterLock(phase: GameMasterPhase): GameMasterNextAction {
+  return phase === 'combat_turn' ? 'wait_for_opponent_turn' : 'wait_for_opponent_loadout'
 }

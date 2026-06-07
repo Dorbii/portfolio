@@ -1,9 +1,16 @@
 import type {
   AgentBootstrapResponse,
-  RoleClaimResponse,
-  RolePrivateState,
-  SessionPhase,
+  GameMasterActionPostRequest,
+  GameMasterActionResponse,
+  GameMasterPacket,
+  PostFightReflectionPostRequest,
+  PostFightReflectionResponse,
 } from '../../../../packages/schemas/src/index.js'
+import type {
+  AgentChatMessagePostRequest,
+  AgentChatMessageResponse,
+  RolePrivateState,
+} from './agentSessionTypes.js'
 import type {
   AgentArenaRoleApi,
   AgentArenaValidAction,
@@ -14,20 +21,14 @@ import { TERMINAL_PHASES } from './agentPhases.js'
 
 export type AgentArenaRoleClient = {
   bootstrapRole: AgentArenaRoleApi['bootstrapRole']
-  claimInviteRole: AgentArenaRoleApi['claimRole']
-  getChatLog: AgentArenaRoleApi['getChatLog']
-  getContract: AgentArenaRoleApi['getContract']
-  getMatchLog: AgentArenaRoleApi['getMatchLog']
-  getPrivateChatLog: AgentArenaRoleApi['getPrivateChatLog']
   getState: AgentArenaRoleApi['getState']
-  submitChatMessage: AgentArenaRoleApi['submitChatMessage']
-  submitPrivateChatMessage: AgentArenaRoleApi['submitPrivateChatMessage']
-  submitRoundPlan: AgentArenaRoleApi['submitRoundPlan']
-  submitTurnCommand: AgentArenaRoleApi['submitTurnCommand']
-  waitForNextAction: AgentArenaRoleApi['waitForNextAction']
-  waitForNextSubmissionWindow: AgentArenaRoleApi['waitForNextSubmissionWindow']
-  waitForPhase: AgentArenaRoleApi['waitForPhase']
-  waitForStateChange: AgentArenaRoleApi['waitForStateChange']
+  sendChatMessage?: AgentArenaRoleApi['sendChatMessage']
+  submitAction: AgentArenaRoleApi['submitAction']
+  submitChatMessage?: (
+    input: AgentChatMessagePostRequest | string,
+  ) => Promise<AgentChatMessageResponse>
+  submitPostFightReflection: AgentArenaRoleApi['submitPostFightReflection']
+  waitForGameMasterPacket: AgentArenaRoleApi['waitForGameMasterPacket']
 }
 
 export function getValidAgentActions(
@@ -35,17 +36,8 @@ export function getValidAgentActions(
 ): AgentArenaValidAction[] {
   return [
     {
-      name: 'get_contract',
-      available: true,
-    },
-    {
       name: 'bootstrap_role',
       available: true,
-    },
-    {
-      name: 'claim_role',
-      available: !state,
-      ...(state ? { reason: 'Role is already claimed in this browser.' } : {}),
     },
     {
       name: 'get_role_state',
@@ -53,22 +45,7 @@ export function getValidAgentActions(
       ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'get_match_log',
-      available: Boolean(state),
-      ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
-    },
-    {
-      name: 'get_chat_log',
-      available: Boolean(state),
-      ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
-    },
-    {
-      name: 'get_private_chat_log',
-      available: Boolean(state),
-      ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
-    },
-    {
-      name: 'wait_for_state_change',
+      name: 'wait_for_game_master_packet',
       available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
       ...(state
         ? TERMINAL_PHASES.has(state.phase)
@@ -77,54 +54,25 @@ export function getValidAgentActions(
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'wait_for_next_submission_window',
-      available: Boolean(state && !TERMINAL_PHASES.has(state.phase) && !(state.phase === 'submission_phase' && !state.submitted)),
+      name: 'submit_game_action',
+      available: Boolean(state?.gameMaster?.legalActions.length),
       ...(state
-        ? TERMINAL_PHASES.has(state.phase)
-          ? { reason: `Session is terminal: ${state.phase}.` }
-          : state.phase === 'submission_phase' && !state.submitted
-            ? { reason: 'Submission window is already open.' }
-            : {}
+        ? state.gameMaster?.legalActions.length
+          ? {}
+          : { reason: 'The current GameMasterPacket has no legalActions to submit.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'wait_for_next_action',
-      available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
+      name: 'submit_post_fight_reflection',
+      available: Boolean(state?.gameMaster?.nextAction === 'submit_reflection'),
       ...(state
-        ? TERMINAL_PHASES.has(state.phase)
-          ? { reason: `Session is terminal: ${state.phase}.` }
-          : {}
+        ? state.gameMaster?.nextAction === 'submit_reflection'
+          ? {}
+          : { reason: 'Private reflection is only available when requested by the GameMasterPacket.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'submit_round_plan',
-      available: Boolean(state && state.phase === 'submission_phase' && !state.submitted),
-      ...(state?.phase !== 'submission_phase'
-        ? { reason: `Round plans are not open during ${state?.phase ?? 'unclaimed'}.` }
-        : state.submitted
-          ? { reason: 'This role has already submitted a round plan.' }
-          : {}),
-    },
-    {
-      name: 'submit_turn_command',
-      available: Boolean(state && state.phase === 'combat_turn' && !state.combat?.submitted[state.role]),
-      ...(state?.phase !== 'combat_turn'
-        ? { reason: `Combat turns are not open during ${state?.phase ?? 'unclaimed'}.` }
-        : state.combat?.submitted[state.role]
-          ? { reason: 'This role has already submitted the current combat turn.' }
-          : {}),
-    },
-    {
-      name: 'submit_chat_message',
-      available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
-      ...(state
-        ? TERMINAL_PHASES.has(state.phase)
-          ? { reason: `Session is terminal: ${state.phase}.` }
-          : {}
-        : { reason: 'Role has not been claimed in this browser.' }),
-    },
-    {
-      name: 'submit_private_chat_message',
+      name: 'send_chat_message',
       available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
       ...(state
         ? TERMINAL_PHASES.has(state.phase)
@@ -137,44 +85,39 @@ export function getValidAgentActions(
 
 export type AgentArenaRoleApiOptions = {
   bootstrapRole?: (input?: AgentRoleConnectInput) => Promise<AgentBootstrapResponse>
-  claimRole?: (input?: AgentRoleConnectInput) => Promise<RoleClaimResponse>
-  waitForNextAction?: (options?: AgentWaitOptions) => Promise<AgentBootstrapResponse>
-  waitForNextSubmissionWindow?: (options?: AgentWaitOptions) => Promise<RolePrivateState>
-  waitForPhase?: (phase: SessionPhase, options?: AgentWaitOptions) => Promise<RolePrivateState>
-  waitForStateChange?: (
-    previousStateVersion?: string,
-    options?: AgentWaitOptions,
-  ) => Promise<RolePrivateState>
+  sendChatMessage?: (
+    input: AgentChatMessagePostRequest | string,
+  ) => Promise<AgentChatMessageResponse>
+  submitAction?: (
+    submission: GameMasterActionPostRequest,
+  ) => Promise<GameMasterActionResponse>
+  submitPostFightReflection?: (
+    reflection: PostFightReflectionPostRequest,
+  ) => Promise<PostFightReflectionResponse>
+  waitForGameMasterPacket?: (options?: AgentWaitOptions) => Promise<GameMasterPacket>
 }
 
 export function createAgentArenaRoleApi(
   client: AgentArenaRoleClient,
-  getCurrentState: () => RolePrivateState | null,
+  _getCurrentState: () => RolePrivateState | null,
   options: AgentArenaRoleApiOptions = {},
 ): AgentArenaRoleApi {
   return {
-    getContract: () => client.getContract(),
     bootstrapRole: (input) => options.bootstrapRole?.(input) ?? client.bootstrapRole(input),
-    claimRole: (input) => options.claimRole?.(input) ?? client.claimInviteRole(input),
     getState: () => client.getState(),
-    getValidActions: async () => getValidAgentActions(getCurrentState()),
-    submitRoundPlan: (plan) => client.submitRoundPlan(plan),
-    submitTurnCommand: (command) => client.submitTurnCommand(command),
-    submitChatMessage: (input) => client.submitChatMessage(input),
-    submitPrivateChatMessage: (input) => client.submitPrivateChatMessage(input),
-    getMatchLog: () => client.getMatchLog(),
-    getChatLog: () => client.getChatLog(),
-    getPrivateChatLog: () => client.getPrivateChatLog(),
-    waitForStateChange: (previousStateVersion, waitOptions) =>
-      options.waitForStateChange?.(previousStateVersion, waitOptions) ??
-        client.waitForStateChange(previousStateVersion, waitOptions),
-    waitForPhase: (phase, waitOptions) =>
-      options.waitForPhase?.(phase, waitOptions) ?? client.waitForPhase(phase, waitOptions),
-    waitForNextSubmissionWindow: (waitOptions) =>
-      options.waitForNextSubmissionWindow?.(waitOptions) ??
-        client.waitForNextSubmissionWindow(waitOptions),
-    waitForNextAction: (waitOptions) =>
-      options.waitForNextAction?.(waitOptions) ?? client.waitForNextAction(waitOptions),
+    waitForGameMasterPacket: (waitOptions) =>
+      options.waitForGameMasterPacket?.(waitOptions) ??
+        client.waitForGameMasterPacket(waitOptions),
+    submitAction: (submission) =>
+      options.submitAction?.(submission) ?? client.submitAction(submission),
+    submitPostFightReflection: (reflection) =>
+      options.submitPostFightReflection?.(reflection) ??
+        client.submitPostFightReflection(reflection),
+    sendChatMessage: (input) =>
+      options.sendChatMessage?.(input) ??
+        client.sendChatMessage?.(input) ??
+        client.submitChatMessage?.(input) ??
+        Promise.reject(new Error('sendChatMessage is unavailable for this client.')),
   }
 }
 

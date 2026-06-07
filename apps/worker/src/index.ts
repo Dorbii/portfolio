@@ -1,13 +1,10 @@
 import {
   createAgentContract,
-  validateAgentBootstrapRequestShape,
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
-  type CreateSessionRequest,
   type RoleClaimRequest,
   type TeamRole,
-  type TurnCommandPostRequest,
 } from '../../../packages/schemas/src/index.js'
 import {
   PART_CATALOG,
@@ -17,6 +14,10 @@ import {
   SessionCoordinator,
   type StoredSessionState,
 } from './session.js'
+import type {
+  InternalCreateSessionRequest,
+} from './sessionCreation.js'
+import { validateLegacyAgentBootstrapRequestShape } from './sessionBootstrapLegacy.js'
 import {
   bodyTooLargeResponse,
   errorResponse,
@@ -116,6 +117,8 @@ export async function handleWorkerRequest(
 export class AgentArenaSession {
   private readonly state: DurableObjectState
 
+  private readonly env: WorkerEnv
+
   private readonly sessionRoutes: Record<string, SessionRouteSpec> = {
     claim: {
       method: 'POST',
@@ -129,13 +132,13 @@ export class AgentArenaSession {
       method: 'GET',
       handle: (request, coordinator) => this.roleState(request, coordinator),
     },
-    'round-plan': {
+    action: {
       method: 'POST',
-      handle: (request, coordinator) => this.submitRoundPlan(request, coordinator),
+      handle: (request, coordinator) => this.submitGameMasterAction(request, coordinator),
     },
-    'turn-command': {
+    reflection: {
       method: 'POST',
-      handle: (request, coordinator) => this.submitTurnCommand(request, coordinator),
+      handle: (request, coordinator) => this.submitPostFightReflection(request, coordinator),
     },
     chat: {
       method: 'POST',
@@ -166,8 +169,9 @@ export class AgentArenaSession {
     },
   }
 
-  constructor(state: DurableObjectState) {
+  constructor(state: DurableObjectState, env: WorkerEnv = {}) {
     this.state = state
+    this.env = env
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -262,10 +266,11 @@ export class AgentArenaSession {
       )
     }
 
-    const coordinator = await SessionCoordinator.create({
-      ...(body as CreateSessionRequest),
+    const createRequest: InternalCreateSessionRequest = {
+      ...(body as InternalCreateSessionRequest),
       sessionId,
-    })
+    }
+    const coordinator = await SessionCoordinator.create(createRequest)
     await this.saveSession(coordinator)
 
     return jsonResponse(coordinator.createResponse(), { status: 201 })
@@ -318,7 +323,7 @@ export class AgentArenaSession {
     }
 
     const body = readResult.body as Record<string, unknown>
-    const validation = validateAgentBootstrapRequestShape(body)
+    const validation = validateLegacyAgentBootstrapRequestShape(body)
 
     if (!validation.ok) {
       return errorResponse(
@@ -329,38 +334,25 @@ export class AgentArenaSession {
       )
     }
 
-    return this.sessionResultResponse(
-      coordinator,
-      await coordinator.bootstrapRole(
-        role,
-        bearerToken(request) ?? '',
-        body as AgentBootstrapRequest,
-      ),
-      (value) => ({ status: value.claimedNow ? 201 : 200 }),
+    const result = await coordinator.bootstrapRole(
+      role,
+      bearerToken(request) ?? '',
+      body as Partial<AgentBootstrapRequest>,
     )
-  }
+    await this.saveSession(coordinator)
 
-  private async submitRoundPlan(
-    request: Request,
-    coordinator: SessionCoordinator,
-  ): Promise<Response> {
-    const readResult = await this.readJsonRequest(request, 'Round plan body must be JSON.')
-
-    if (!readResult.ok) {
-      return readResult.response
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
     }
 
-    return this.sessionResultResponse(
-      coordinator,
-      await coordinator.submitRoundPlan(bearerToken(request) ?? '', readResult.body),
-    )
+    return jsonResponse(result.value.packet, { status: result.value.claimedNow ? 201 : 200 })
   }
 
-  private async submitTurnCommand(
+  private async submitGameMasterAction(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const readResult = await this.readJsonRequest(request, 'Turn command body must be JSON.', {
+    const readResult = await this.readJsonRequest(request, 'GameMaster action body must be JSON.', {
       requireRecord: true,
     })
 
@@ -370,10 +362,7 @@ export class AgentArenaSession {
 
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitTurnCommand(
-        bearerToken(request) ?? '',
-        readResult.body as TurnCommandPostRequest,
-      ),
+      await coordinator.submitGameMasterAction(bearerToken(request) ?? '', readResult.body),
     )
   }
 
@@ -395,6 +384,24 @@ export class AgentArenaSession {
 
   private async replay(coordinator: SessionCoordinator): Promise<Response> {
     return this.sessionResultResponse(coordinator, coordinator.getReplay())
+  }
+
+  private async submitPostFightReflection(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Post-fight reflection body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitPostFightReflection(bearerToken(request) ?? '', readResult.body),
+    )
   }
 
   private async submitChatMessage(
@@ -479,6 +486,25 @@ export class AgentArenaSession {
     }
 
     return { ok: true, body }
+  }
+
+  private async createContinuationSession(
+    request: Request,
+    createRequest: InternalCreateSessionRequest,
+  ): Promise<Response> {
+    const url = new URL(request.url)
+
+    url.pathname = `/sessions/${encodeURIComponent(createRequest.sessionId ?? '')}/create`
+
+    return forwardToSessionObject(
+      new Request(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(createRequest),
+      }),
+      this.env,
+      createRequest.sessionId ?? '',
+    )
   }
 
   private async sessionResultResponse<T>(

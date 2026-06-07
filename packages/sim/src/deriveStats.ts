@@ -19,6 +19,24 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
+export function partWeaponDamage(part: PartDefinition): number {
+  return part.spec.kind === 'weapon'
+    ? part.spec.damage
+    : part.stats.weapon ?? 0
+}
+
+export function partWeaponRange(part: PartDefinition): number {
+  return part.spec.kind === 'weapon'
+    ? part.spec.range
+    : 0
+}
+
+export function partMobilityMoveBudget(part: PartDefinition): number {
+  return part.spec.kind === 'mobility'
+    ? part.spec.moveBudget
+    : part.stats.drive ?? 0
+}
+
 export function deriveBotStats(
   blueprint: BotBlueprint,
   catalog: PartDefinition[] = PART_CATALOG,
@@ -49,14 +67,14 @@ export function deriveBotStats(
 
     totals.mass += part.mass
     totals.durability += part.durability
-    totals.armor += part.stats.armor ?? 0
+    totals.armor += part.spec.kind === 'armor' ? part.spec.armor : part.stats.armor ?? 0
     totals.chaos += part.stats.chaos ?? 0
     totals.control += part.stats.control ?? 0
-    totals.mobility += part.stats.drive ?? 0
-    totals.stability += part.stats.stability ?? 0
+    totals.mobility += partMobilityMoveBudget(part)
+    totals.stability += part.spec.kind === 'mobility' ? part.spec.stability : part.stats.stability ?? 0
     totals.style += part.stats.style ?? 0
-    totals.traction += part.stats.traction ?? 0
-    totals.weaponThreat += part.stats.weapon ?? 0
+    totals.traction += part.spec.kind === 'mobility' ? part.spec.traction : part.stats.traction ?? 0
+    totals.weaponThreat += partWeaponDamage(part)
     xs.add(block.position[0])
     zs.add(block.position[2])
   }

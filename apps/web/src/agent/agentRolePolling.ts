@@ -1,4 +1,4 @@
-import type { RolePrivateState } from '../../../../packages/schemas/src/index.js'
+import type { RolePrivateState } from './agentSessionTypes.js'
 import { TERMINAL_PHASES } from './agentPhases.js'
 
 export const ROLE_STATE_POLL_MS = 4_000

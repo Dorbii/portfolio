@@ -6,6 +6,7 @@ import {
   MatchScoreboard,
   PublicChatLog,
   SectionHeader,
+  SessionCompletionPanel,
 } from './RefereeConsolePanels'
 import {
   Panel,
@@ -70,6 +71,7 @@ export function RefereeConsole() {
     blueAgentBrief,
     blueCockpitUrl,
     canAdvanceRound,
+    completionControls,
     copyAgentBrief,
     createNewSession,
     error,
@@ -158,6 +160,14 @@ export function RefereeConsole() {
             <PublicChatLog
               messages={sessionChat}
               emptyText="No fight comms yet."
+            />
+          </Panel>
+
+          <Panel className="panel dashboard-panel session-completion-dashboard-panel">
+            <SectionHeader kicker="Post-fight" title="Shared Debrief" />
+            <SessionCompletionPanel
+              controls={completionControls}
+              publicSession={publicSession}
             />
           </Panel>
 

@@ -1,13 +1,15 @@
 import {
   type ArenaConfig,
+  type ArenaGridCell,
+  type ArenaHazardThreat,
   type CombatBotSnapshot,
-  type CombatRangeBand,
-  type CombatTurnDecisionContext,
   type GeneratedControls,
   type MovementCommand,
   type NormalizedBotTactics,
   type PreferredRange,
   type TeamRole,
+  type TurnCommand,
+  type UtilityCommand,
   type WeaponCommand,
 } from '../../../packages/schemas/src/index.js'
 import {
@@ -23,6 +25,7 @@ import {
   worldToArenaCell,
   type CompiledArenaTopology,
 } from '../../../packages/sim/src/arenaTopology.js'
+import { combatActionCommand } from '../../../packages/sim/src/combatActions.js'
 import type {
   StoredCombatState,
   StoredRoleState,
@@ -34,25 +37,107 @@ const HAZARD_AWARENESS_DISTANCE = 1.8
 const DEFAULT_PREFERRED_RANGE: PreferredRange = 'close'
 const DEFAULT_RETREAT_HEALTH_PCT = 0.2
 
-export function buildCombatTurnDecisionContext(
+type CombatRangeBand = 'contact' | 'close' | 'mid' | 'long'
+
+type WorkerCombatTurnAvailableCommands = {
+  movement: MovementCommand[]
+  weaponA?: WeaponCommand[]
+  weaponB?: WeaponCommand[]
+  utility?: UtilityCommand[]
+}
+
+type CombatDecisionBrief = {
+  tick: number
+  deadlineAt: string
+  turnSeconds: number
+  availableCommands: WorkerCombatTurnAvailableCommands
+  range: {
+    distance: number
+    band: CombatRangeBand
+    preferred: PreferredRange
+    selfWeaponReach: number
+    opponentWeaponReach: number
+    insideSelfWeaponReach: boolean
+    insideOpponentWeaponReach: boolean
+  }
+  positioning: {
+    selfCell: ArenaGridCell
+    opponentCell: ArenaGridCell
+    distanceCells: number
+    bearingToOpponent: 'north' | 'south' | 'east' | 'west' | 'same_cell'
+    lineOfSight: boolean
+  }
+  hazards: {
+    active: string[]
+    selfThreats: ArenaHazardThreat[]
+    opponentThreats: ArenaHazardThreat[]
+    threatenedLegalMoves: {
+      command: MovementCommand
+      targetCell: ArenaGridCell
+      hazards: ArenaHazardThreat[]
+    }[]
+  }
+  health: {
+    selfPct: number
+    opponentPct: number
+    deltaPct: number
+    retreatAtHealthPct: number
+  }
+  arenaPressure: {
+    selfDistanceToNearestWall: number
+    opponentDistanceToNearestWall: number
+    selfNearWall: boolean
+    opponentNearWall: boolean
+    selfNearHazard: boolean
+    opponentNearHazard: boolean
+    selfNearCenterHazard: boolean
+    opponentNearCenterHazard: boolean
+    activeHazards: string[]
+  }
+  actionReadiness: {
+    weaponA: {
+      canFire: boolean
+      reason: string
+    }
+    weaponB?: {
+      canFire: boolean
+      reason: string
+    }
+    utility?: {
+      canActivate: boolean
+      reason: string
+    }
+  }
+  movementGuidance: {
+    approach: MovementCommand[]
+    avoid: MovementCommand[]
+    reasons: string[]
+  }
+  previousResolvedTurn?: {
+    self?: TurnCommand
+    opponent?: TurnCommand
+  }
+  tacticalCues: string[]
+}
+
+export function buildCombatDecisionBrief(
   state: StoredSessionState,
   role: StoredRoleState,
   combat: StoredCombatState,
-): CombatTurnDecisionContext {
+): CombatDecisionBrief {
   const self = role.role === 'red' ? combat.snapshot.red : combat.snapshot.blue
   const opponent = role.role === 'red' ? combat.snapshot.blue : combat.snapshot.red
   const opponentRole = role.role === 'red' ? state.roles.blue : state.roles.red
   const controls = role.controls ?? { movement: ['brake'] }
-  const tactics = role.normalizedSubmission?.tactics
   const topology = compileArenaTopology(combat.snapshot.arena)
-  const range = buildRangeDecision(combat, self, opponent, tactics)
+  const range = buildRangeDecision(combat, self, opponent)
   const positioning = buildPositioning(topology, self, opponent)
   const hazards = buildHazards(topology, controls, role.role, self, opponent)
-  const health = buildHealthDecision(self, opponent, tactics)
+  const health = buildHealthDecision(self, opponent)
   const arenaPressure = buildArenaPressure(combat.snapshot.arena, topology, self, opponent)
   const actionReadiness = buildActionReadiness(controls, range)
   const resolvedTurn = previousResolvedTurn(role.role, combat)
-  const movementOptions = buildMovementOptions({
+  const movementGuidance = buildMovementGuidance({
     role: role.role,
     arena: combat.snapshot.arena,
     controls,
@@ -70,7 +155,7 @@ export function buildCombatTurnDecisionContext(
     tick: combat.nextTick,
     deadlineAt: combat.deadlineAt,
     turnSeconds: combat.turnSeconds,
-    legalCommands: {
+    availableCommands: {
       movement: controls.movement,
       ...(controls.weaponA ? { weaponA: controls.weaponA } : {}),
       ...(controls.weaponB ? { weaponB: controls.weaponB } : {}),
@@ -82,7 +167,7 @@ export function buildCombatTurnDecisionContext(
     health,
     arenaPressure,
     actionReadiness,
-    movementOptions,
+    movementGuidance,
     ...(resolvedTurn ? { previousResolvedTurn: resolvedTurn } : {}),
     tacticalCues: tacticalCues({
       role,
@@ -93,7 +178,7 @@ export function buildCombatTurnDecisionContext(
       health,
       arenaPressure,
       actionReadiness,
-      movementOptions,
+      movementGuidance,
       recentEvents: combat.snapshot.recentEvents,
     }),
   }
@@ -103,7 +188,7 @@ function buildPositioning(
   topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
-): CombatTurnDecisionContext['positioning'] {
+): CombatDecisionBrief['positioning'] {
   const selfCell = worldToArenaCell(topology, self.position)
   const opponentCell = worldToArenaCell(topology, opponent.position)
 
@@ -122,7 +207,7 @@ function buildHazards(
   role: TeamRole,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
-): CombatTurnDecisionContext['hazards'] {
+): CombatDecisionBrief['hazards'] {
   return {
     active: activeHazardTypes(topology),
     selfThreats: hazardsAtPosition(topology, self.position, HAZARD_AWARENESS_DISTANCE),
@@ -145,7 +230,7 @@ function buildRangeDecision(
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
   tactics?: NormalizedBotTactics,
-): CombatTurnDecisionContext['range'] {
+): CombatDecisionBrief['range'] {
   const distance = round(combat.snapshot.distance)
   const selfWeaponReach = round(self.weaponReach)
   const opponentWeaponReach = round(opponent.weaponReach)
@@ -165,7 +250,7 @@ function buildHealthDecision(
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
   tactics?: NormalizedBotTactics,
-): CombatTurnDecisionContext['health'] {
+): CombatDecisionBrief['health'] {
   const selfPct = healthPct(self)
   const opponentPct = healthPct(opponent)
 
@@ -182,7 +267,7 @@ function buildArenaPressure(
   topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
   opponent: CombatBotSnapshot,
-): CombatTurnDecisionContext['arenaPressure'] {
+): CombatDecisionBrief['arenaPressure'] {
   const selfWallDistance = distanceToNearestArenaWall(arena, self.position)
   const opponentWallDistance = distanceToNearestArenaWall(arena, opponent.position)
   const selfNearHazard = hazardsAtPosition(topology, self.position, HAZARD_AWARENESS_DISTANCE).length > 0
@@ -203,8 +288,8 @@ function buildArenaPressure(
 
 function buildActionReadiness(
   controls: GeneratedControls,
-  range: CombatTurnDecisionContext['range'],
-): CombatTurnDecisionContext['actionReadiness'] {
+  range: CombatDecisionBrief['range'],
+): CombatDecisionBrief['actionReadiness'] {
   return {
     weaponA: weaponReadiness(controls.weaponA, range.insideSelfWeaponReach),
     ...(controls.weaponB ? { weaponB: weaponReadiness(controls.weaponB, range.insideSelfWeaponReach) } : {}),
@@ -221,19 +306,19 @@ function buildActionReadiness(
   }
 }
 
-function buildMovementOptions(input: {
+function buildMovementGuidance(input: {
   role: TeamRole
   arena: ArenaConfig
   controls: GeneratedControls
   self: CombatBotSnapshot
   opponent: CombatBotSnapshot
-  range: CombatTurnDecisionContext['range']
-  health: CombatTurnDecisionContext['health']
-  arenaPressure: CombatTurnDecisionContext['arenaPressure']
+  range: CombatDecisionBrief['range']
+  health: CombatDecisionBrief['health']
+  arenaPressure: CombatDecisionBrief['arenaPressure']
   topology: CompiledArenaTopology
-  hazards: CombatTurnDecisionContext['hazards']
+  hazards: CombatDecisionBrief['hazards']
   previousSelfMove?: MovementCommand
-}): CombatTurnDecisionContext['movementOptions'] {
+}): CombatDecisionBrief['movementGuidance'] {
   const recommended: MovementCommand[] = []
   const reasons: string[] = []
   const nearestSelfHazard = input.hazards.selfThreats[0]
@@ -290,7 +375,7 @@ function buildMovementOptions(input: {
   )
 
   return {
-    recommended: availableRecommended.length > 0 ? uniqueCommands(availableRecommended) : ['brake'],
+    approach: availableRecommended.length > 0 ? uniqueCommands(availableRecommended) : ['brake'],
     avoid: uniqueCommands(avoid),
     reasons,
   }
@@ -299,13 +384,13 @@ function buildMovementOptions(input: {
 function tacticalCues(input: {
   role: StoredRoleState
   opponentRole: StoredRoleState
-  range: CombatTurnDecisionContext['range']
-  positioning: CombatTurnDecisionContext['positioning']
-  hazards: CombatTurnDecisionContext['hazards']
-  health: CombatTurnDecisionContext['health']
-  arenaPressure: CombatTurnDecisionContext['arenaPressure']
-  actionReadiness: CombatTurnDecisionContext['actionReadiness']
-  movementOptions: CombatTurnDecisionContext['movementOptions']
+  range: CombatDecisionBrief['range']
+  positioning: CombatDecisionBrief['positioning']
+  hazards: CombatDecisionBrief['hazards']
+  health: CombatDecisionBrief['health']
+  arenaPressure: CombatDecisionBrief['arenaPressure']
+  actionReadiness: CombatDecisionBrief['actionReadiness']
+  movementGuidance: CombatDecisionBrief['movementGuidance']
   recentEvents: string[]
 }): string[] {
   const cues: string[] = []
@@ -353,16 +438,16 @@ function tacticalCues(input: {
     cues.push('Opponent is near an active hazard; lateral or control pressure may keep them there.')
   }
 
-  if (input.movementOptions.avoid.length > 0) {
-    cues.push(`Avoid low-value movement here: ${input.movementOptions.avoid.join(', ')}.`)
+  if (input.movementGuidance.avoid.length > 0) {
+    cues.push(`Avoid low-value movement here: ${input.movementGuidance.avoid.join(', ')}.`)
   }
 
   if (input.recentEvents.length > 0) {
     cues.push(`Recent resolved events: ${input.recentEvents.slice(-3).join(' | ')}`)
   }
 
-  if (!input.role.normalizedSubmission && input.opponentRole.submittedAt) {
-    cues.push('You do not have a normalized plan for this round; submit a legal round plan before combat decisions matter.')
+  if (!input.role.loadoutConfirmedAt && input.opponentRole.loadoutConfirmedAt) {
+    cues.push('You do not have a confirmed loadout for this round; prefer conservative commands until the loadout state catches up.')
   }
 
   return cues
@@ -395,11 +480,15 @@ function weaponReadiness(
 function previousResolvedTurn(
   role: TeamRole,
   combat: StoredCombatState,
-): CombatTurnDecisionContext['previousResolvedTurn'] {
-  const selfCommands = combat.commands[role]
-  const opponentCommands = combat.commands[role === 'red' ? 'blue' : 'red']
-  const self = selfCommands[selfCommands.length - 1]
-  const opponent = opponentCommands[opponentCommands.length - 1]
+): CombatDecisionBrief['previousResolvedTurn'] {
+  const selfActions = combat.actions[role]
+  const opponentActions = combat.actions[role === 'red' ? 'blue' : 'red']
+  const self = selfActions[selfActions.length - 1]
+    ? combatActionCommand(selfActions[selfActions.length - 1])
+    : undefined
+  const opponent = opponentActions[opponentActions.length - 1]
+    ? combatActionCommand(opponentActions[opponentActions.length - 1])
+    : undefined
 
   if (!self && !opponent) {
     return undefined
@@ -431,7 +520,7 @@ function rangeBand(
   return 'long'
 }
 
-function shouldCloseDistance(range: CombatTurnDecisionContext['range']): boolean {
+function shouldCloseDistance(range: CombatDecisionBrief['range']): boolean {
   if (range.preferred === 'long') {
     return false
   }
@@ -448,8 +537,8 @@ function shouldAvoidMovement(
   arena: ArenaConfig,
   topology: CompiledArenaTopology,
   self: CombatBotSnapshot,
-  range: CombatTurnDecisionContext['range'],
-  arenaPressure: CombatTurnDecisionContext['arenaPressure'],
+  range: CombatDecisionBrief['range'],
+  arenaPressure: CombatDecisionBrief['arenaPressure'],
   command: MovementCommand,
 ): boolean {
   if (command === 'brake') {

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   AgentBootstrapResponse,
-  PublicSessionState,
-  RoleClaimResponse,
-  RolePrivateState,
   TeamIdentity,
 } from '../../../../packages/schemas/src/index.js'
+import type {
+  PublicSessionState,
+  RolePrivateState,
+} from './agentSessionTypes.js'
 import {
   AgentArenaApiError,
   AgentArenaClient,
@@ -186,10 +187,17 @@ export function useAgentRoleSession(invite: AgentInvite) {
         setRoleToken(invite.claimToken)
       }
 
-      const roleStateWithIdentity = rememberTeamIdentity(bootstrap.state, input.teamIdentity)
+      const [privateState, redactedState] = await Promise.all([
+        client.getState(),
+        client.getPublicState().catch(() => null),
+      ])
+      const roleStateWithIdentity = rememberTeamIdentity({
+        ...privateState,
+        gameMaster: privateState.gameMaster ?? bootstrap,
+      }, input.teamIdentity)
 
       setRoleState(roleStateWithIdentity)
-      setPublicState(bootstrap.publicState)
+      setPublicState(redactedState)
       setStatus('ready')
       setNotice(
         `${capitalize(invite.role)} role connected. Next action: ${formatLabel(bootstrap.nextAction)}.`,
@@ -199,10 +207,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
         '',
         `${window.location.pathname}${window.location.search}${createSafeAgentHash(invite)}`,
       )
-      return {
-        ...bootstrap,
-        state: roleStateWithIdentity,
-      }
+      return bootstrap
     } catch (error) {
       setLastError(toUiError(error, 'Role connection failed'))
 
@@ -216,14 +221,14 @@ export function useAgentRoleSession(invite: AgentInvite) {
     }
   }, [client, invite, rememberTeamIdentity])
 
-  const waitForNextAction = useCallback(async (
+  const waitForGameMasterPacket = useCallback(async (
     options?: AgentWaitOptions,
   ): Promise<AgentBootstrapResponse> => {
     setStatus('loading')
     setLastError(null)
 
     try {
-      const bootstrap = await client.waitForNextAction(options)
+      const packet = await client.waitForGameMasterPacket(options)
 
       if (invite.claimToken) {
         writeStoredRoleToken(window.sessionStorage, invite, invite.claimToken)
@@ -231,155 +236,23 @@ export function useAgentRoleSession(invite: AgentInvite) {
         setRoleToken(invite.claimToken)
       }
 
-      const roleStateWithIdentity = rememberTeamIdentity(bootstrap.state)
-
-      setRoleState(roleStateWithIdentity)
-      setPublicState(bootstrap.publicState)
-      setNotice(`Next action: ${formatLabel(bootstrap.nextAction)}.`)
-
-      return {
-        ...bootstrap,
-        state: roleStateWithIdentity,
-      }
-    } catch (error) {
-      setLastError(toUiError(error, 'Continuation wait failed'))
-      throw error
-    } finally {
-      setStatus('ready')
-    }
-  }, [client, invite, rememberTeamIdentity])
-
-  const waitForStateChange = useCallback(async (
-    previousStateVersion?: string,
-    options?: AgentWaitOptions,
-  ): Promise<RolePrivateState> => {
-    setStatus('loading')
-    setLastError(null)
-
-    try {
-      const state = await client.waitForStateChange(previousStateVersion, options)
-
-      const roleStateWithIdentity = rememberTeamIdentity(state)
-
-      setRoleState(roleStateWithIdentity)
-
-      return roleStateWithIdentity
-    } catch (error) {
-      setLastError(toUiError(error, 'Continuation wait failed'))
-      throw error
-    } finally {
-      setStatus('ready')
-    }
-  }, [client, rememberTeamIdentity])
-
-  const waitForPhase = useCallback(async (
-    phase: RolePrivateState['phase'],
-    options?: AgentWaitOptions,
-  ): Promise<RolePrivateState> => {
-    setStatus('loading')
-    setLastError(null)
-
-    try {
-      const state = await client.waitForPhase(phase, options)
-
-      const roleStateWithIdentity = rememberTeamIdentity(state)
-
-      setRoleState(roleStateWithIdentity)
-
-      return roleStateWithIdentity
-    } catch (error) {
-      setLastError(toUiError(error, 'Continuation wait failed'))
-      throw error
-    } finally {
-      setStatus('ready')
-    }
-  }, [client, rememberTeamIdentity])
-
-  const waitForNextSubmissionWindow = useCallback(async (
-    options?: AgentWaitOptions,
-  ): Promise<RolePrivateState> => {
-    setStatus('loading')
-    setLastError(null)
-
-    try {
-      const state = await client.waitForNextSubmissionWindow(options)
-
-      const roleStateWithIdentity = rememberTeamIdentity(state)
-
-      setRoleState(roleStateWithIdentity)
-      setNotice('Next submission window is open.')
-
-      return roleStateWithIdentity
-    } catch (error) {
-      setLastError(toUiError(error, 'Continuation wait failed'))
-      throw error
-    } finally {
-      setStatus('ready')
-    }
-  }, [client, rememberTeamIdentity])
-
-  const claimRole = useCallback(async (
-    input: { agentName?: string; teamIdentity?: TeamIdentity; throwOnError?: boolean } = {},
-  ): Promise<RoleClaimResponse | null> => {
-    if (!invite.claimToken) {
-      const error = new AgentArenaApiError({
-        status: 400,
-        code: 'INVALID_TOKEN',
-        message:
-          'This invite can load a stored role token, but it cannot claim a new role.',
+      const [privateState, redactedState] = await Promise.all([
+        client.getState(),
+        client.getPublicState().catch(() => null),
+      ])
+      const roleStateWithIdentity = rememberTeamIdentity({
+        ...privateState,
+        gameMaster: privateState.gameMaster ?? packet,
       })
 
-      setLastError({
-        title: 'Claim token missing',
-        message: error.message,
-        code: 'INVALID_INVITE',
-      })
-
-      if (input.throwOnError) {
-        throw error
-      }
-
-      return null
-    }
-
-    setStatus('claiming')
-    setLastError(null)
-    setNotice(null)
-
-    try {
-      const submittedAgentName = input.agentName?.trim() ?? ''
-      const claim = await client.claimRole({
-        claimToken: invite.claimToken,
-        agentName: submittedAgentName,
-        teamIdentity: input.teamIdentity,
-      })
-
-      writeStoredRoleToken(window.sessionStorage, invite, claim.roleToken)
-      roleTokenRef.current = claim.roleToken
-      setRoleToken(claim.roleToken)
-      const roleStateWithIdentity = rememberTeamIdentity(claim.state, input.teamIdentity)
-
       setRoleState(roleStateWithIdentity)
-      setPublicState(await client.getPublicState().catch(() => null))
-      setStatus('ready')
-      setNotice(`${capitalize(invite.role)} role claimed.`)
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}${window.location.search}${createSafeAgentHash(invite)}`,
-      )
-      return {
-        ...claim,
-        state: roleStateWithIdentity,
-      }
+      setPublicState(redactedState)
+      setNotice(`Next action: ${formatLabel(packet.nextAction)}.`)
+
+      return packet
     } catch (error) {
-      setLastError(toUiError(error, 'Claim failed'))
-
-      if (input.throwOnError) {
-        throw error
-      }
-
-      return null
+      setLastError(toUiError(error, 'Continuation wait failed'))
+      throw error
     } finally {
       setStatus('ready')
     }
@@ -406,25 +279,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
           return bootstrap
         },
-        waitForNextAction,
-        waitForNextSubmissionWindow,
-        waitForPhase,
-        waitForStateChange,
-        claimRole: async (input) => {
-          const claim = await claimRole({
-            ...input,
-            throwOnError: true,
-          })
-
-          if (!claim) {
-            throw new AgentArenaApiError({
-              status: 409,
-              message: 'Role claim did not complete.',
-            })
-          }
-
-          return claim
-        },
+        waitForGameMasterPacket,
       },
       setCurrentState: (state) => {
         setRoleState(rememberTeamIdentity(state))
@@ -436,15 +291,11 @@ export function useAgentRoleSession(invite: AgentInvite) {
       storage: window.sessionStorage,
     })
   }, [
-    claimRole,
     client,
     connectRole,
     invite,
     rememberTeamIdentity,
-    waitForNextAction,
-    waitForNextSubmissionWindow,
-    waitForPhase,
-    waitForStateChange,
+    waitForGameMasterPacket,
   ])
 
   const clearRoleToken = useCallback(() => {
@@ -463,7 +314,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [invite])
 
   return {
-    claimRole,
     connectRole,
     clearRoleToken,
     client,

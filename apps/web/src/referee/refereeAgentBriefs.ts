@@ -1,8 +1,8 @@
 import type {
-  PublicSessionState,
   RoleInvite,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import { createExternalAgentBriefMarkdown } from '../agent/agentClient.js'
 import { buildInviteUrl } from './refereeClient.js'
 

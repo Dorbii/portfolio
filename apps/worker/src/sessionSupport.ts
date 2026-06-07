@@ -1,15 +1,18 @@
 import {
   DEFAULT_ARENA_CONFIG,
   TEAM_ROLES,
-  type AgentNextAction,
   type ArenaConfig,
-  type CombatSummary,
+  type GameMasterNextAction,
   type RelayErrorResponse,
-  type RolePrivateState,
-  type RolePublicState,
   type TeamIdentity,
 } from '../../../packages/schemas/src/index.js'
 import type { CombatResult } from '../../../packages/sim/src/index.js'
+import type {
+  LegacyCombatSummary,
+  LegacyRolePrivateState,
+  LegacyRolePublicState,
+  LegacyTeamIdentity,
+} from './sessionLegacyContracts.js'
 import type {
   RateLimitAction,
   RateLimitRule,
@@ -32,13 +35,16 @@ const MAX_SESSION_TTL_MS = 24 * 60 * 60 * 1000
 
 const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   claim: { windowMs: 60 * 1000, max: 20 },
+  action: { windowMs: 60 * 1000, max: 60 },
   state: { windowMs: 60 * 1000, max: 120 },
-  submit: { windowMs: 60 * 1000, max: 20 },
-  turn: { windowMs: 60 * 1000, max: 120 },
   chat: { windowMs: 60 * 1000, max: 30 },
   private_chat: { windowMs: 60 * 1000, max: 30 },
+  reflection: { windowMs: 60 * 1000, max: 10 },
   advance_round: { windowMs: 60 * 1000, max: 20 },
   reset_role: { windowMs: 60 * 1000, max: 20 },
+  save_session: { windowMs: 60 * 1000, max: 10 },
+  continue_session: { windowMs: 60 * 1000, max: 10 },
+  quit_session: { windowMs: 60 * 1000, max: 10 },
 }
 
 export function cloneJson<T>(value: T): T {
@@ -169,40 +175,51 @@ export function mergeRateLimits(
 ): Record<RateLimitAction, RateLimitRule> {
   return {
     claim: overrides?.claim ?? DEFAULT_RATE_LIMITS.claim,
+    action: overrides?.action ?? DEFAULT_RATE_LIMITS.action,
     state: overrides?.state ?? DEFAULT_RATE_LIMITS.state,
-    submit: overrides?.submit ?? DEFAULT_RATE_LIMITS.submit,
-    turn: overrides?.turn ?? DEFAULT_RATE_LIMITS.turn,
     chat: overrides?.chat ?? DEFAULT_RATE_LIMITS.chat,
     private_chat: overrides?.private_chat ?? DEFAULT_RATE_LIMITS.private_chat,
+    reflection: overrides?.reflection ?? DEFAULT_RATE_LIMITS.reflection,
     advance_round: overrides?.advance_round ?? DEFAULT_RATE_LIMITS.advance_round,
     reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
+    save_session: overrides?.save_session ?? DEFAULT_RATE_LIMITS.save_session,
+    continue_session: overrides?.continue_session ?? DEFAULT_RATE_LIMITS.continue_session,
+    quit_session: overrides?.quit_session ?? DEFAULT_RATE_LIMITS.quit_session,
   }
 }
 
-export function rolePublicState(role: StoredRoleState): RolePublicState {
+export function rolePublicState(role: StoredRoleState): LegacyRolePublicState {
   return {
     role: role.role,
     ...(role.teamIdentity ? { identity: role.teamIdentity } : {}),
     claimed: Boolean(role.claimedAt),
-    submitted: Boolean(role.submittedAt),
+    submitted: Boolean(role.loadoutConfirmedAt),
     wins: role.wins,
     losses: role.losses,
     winStreak: role.winStreak,
   }
 }
 
-export function normalizeTeamIdentity(identity: TeamIdentity): TeamIdentity {
+export function normalizeTeamIdentity(identity: TeamIdentity): LegacyTeamIdentity {
+  const logoSeed = identity.logoPrompt?.trim() ||
+    identity.logoAsset?.altText?.trim() ||
+    identity.logoAsset?.assetId?.trim() ||
+    identity.name
+
   return {
     name: identity.name.trim(),
-    primaryColor: identity.primaryColor.trim().toLowerCase(),
-    logo: normalizeTeamLogo(identity),
+    primaryColor: identity.colorHex.trim().toLowerCase(),
+    logo: normalizeTeamLogo(identity.name, logoSeed),
   }
 }
 
-function normalizeTeamLogo(identity: TeamIdentity): NonNullable<TeamIdentity['logo']> {
+function normalizeTeamLogo(
+  teamName: string,
+  logoSeed: string,
+): NonNullable<LegacyTeamIdentity['logo']> {
   return {
-    mark: identity.logo?.mark ?? 'shield',
-    initials: (identity.logo?.initials?.trim() || initialsFromTeamName(identity.name)).toUpperCase(),
+    mark: 'shield',
+    initials: initialsFromTeamName(logoSeed || teamName).toUpperCase(),
   }
 }
 
@@ -224,7 +241,7 @@ function initialsFromTeamName(name: string): string {
   return words.map((word) => word[0]).join('').slice(0, 4)
 }
 
-export function combatSummary(result: CombatResult): CombatSummary {
+export function combatSummary(result: CombatResult): LegacyCombatSummary {
   return {
     winner: result.winner,
     reason: result.reason,
@@ -233,9 +250,13 @@ export function combatSummary(result: CombatResult): CombatSummary {
   }
 }
 
-export function nextActionForRole(state: RolePrivateState): AgentNextAction {
-  if (state.phase === 'expired' || state.phase === 'session_complete') {
+export function nextActionForRole(state: LegacyRolePrivateState): GameMasterNextAction {
+  if (state.phase === 'expired') {
     return 'stop'
+  }
+
+  if (state.phase === 'session_complete') {
+    return 'session_complete'
   }
 
   if (state.phase === 'waiting_for_agents') {
@@ -243,16 +264,20 @@ export function nextActionForRole(state: RolePrivateState): AgentNextAction {
   }
 
   if (state.phase === 'submission_phase') {
-    return state.submitted ? 'wait_for_opponent_submission' : 'submit_round_plan'
+    return state.submitted ? 'wait_for_opponent_loadout' : 'build_bot'
   }
 
   if (state.phase === 'combat_turn') {
-    return state.combat?.submitted[state.role] ? 'wait_for_opponent_turn' : 'submit_turn_command'
+    return state.combat?.submitted[state.role] ? 'wait_for_opponent_turn' : 'choose_turn'
+  }
+
+  if (state.phase === 'replay_phase') {
+    return 'view_replay'
   }
 
   if (state.phase === 'round_review') {
-    return 'wait_for_referee'
+    return 'wait_for_debrief'
   }
 
-  return 'wait_for_next_round'
+  return 'wait_for_debrief'
 }

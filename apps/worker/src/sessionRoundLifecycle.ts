@@ -80,10 +80,10 @@ export function applyNextRoundEconomy(state: StoredSessionState): void {
 
     team.gold += DEFAULT_BASE_INCOME + interest + winnerBonus
     team.controls = undefined
-    team.submission = undefined
-    team.normalizedSubmission = undefined
-    team.submittedAt = undefined
-    team.submissionBaseline = undefined
+    team.currentDesign = undefined
+    team.loadoutBuildState = undefined
+    team.loadoutVersion = undefined
+    team.loadoutConfirmedAt = undefined
   }
 
   state.round += 1

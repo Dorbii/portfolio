@@ -1,20 +1,29 @@
 import type {
   ArenaConfig,
-  CombatSummary,
+  ActiveActionSet,
+  BotDesignSnapshot,
+  CanonicalGameAction,
+  ChampionContinuationSave,
+  ChampionContinuationSeed,
   CombatTurnSnapshot,
+  GameMasterActionSubmission,
   GeneratedControls,
   InventoryItem,
-  NormalizedRoundPlanSubmission,
+  LoadoutBuildState,
+  FightDossier,
   RelayErrorResponse,
-  ReplayPayload,
-  RoundPlanSubmission,
-  SessionChatMessage,
-  SessionLogEvent,
   SessionPhase,
+  SharedDebrief,
+  PostFightAgentReflection,
   TeamRole,
-  TeamIdentity,
-  TurnCommand,
 } from '../../../packages/schemas/src/index.js'
+import type {
+  LegacyCombatSummary,
+  LegacyReplayPayload,
+  LegacySessionChatMessage,
+  LegacySessionLogEvent,
+  LegacyTeamIdentity,
+} from './sessionLegacyContracts.js'
 
 export type TokenKind = 'claim' | 'observer' | 'role' | 'referee'
 export type TokenOwner = TeamRole | 'referee'
@@ -24,13 +33,16 @@ export type TokenHasher = (token: string) => Promise<string>
 
 export type RateLimitAction =
   | 'claim'
+  | 'action'
   | 'state'
-  | 'submit'
-  | 'turn'
   | 'chat'
   | 'private_chat'
+  | 'reflection'
   | 'advance_round'
   | 'reset_role'
+  | 'save_session'
+  | 'continue_session'
+  | 'quit_session'
 
 export type RateLimitRule = {
   windowMs: number
@@ -43,22 +55,32 @@ export type StoredRoleState = {
   observerTokenHash?: string
   roleTokenHash?: string
   agentName?: string
-  teamIdentity?: TeamIdentity
+  teamIdentity?: LegacyTeamIdentity
   claimedAt?: string
-  submittedAt?: string
   gold: number
   wins: number
   losses: number
   winStreak: number
   inventory: InventoryItem[]
+  currentDesign?: BotDesignSnapshot
+  loadoutBuildState?: LoadoutBuildState
+  loadoutVersion?: number
+  loadoutConfirmedAt?: string
   controls?: GeneratedControls
-  submission?: RoundPlanSubmission
-  normalizedSubmission?: NormalizedRoundPlanSubmission
-  submissionBaseline?: {
-    gold: number
-    inventory: InventoryItem[]
-  }
-  privateChatLog: SessionChatMessage[]
+  privateChatLog: LegacySessionChatMessage[]
+}
+
+export type StoredPostFightReflectionStatus =
+  | 'private_pending'
+  | 'consumed_into_shared_debrief'
+
+export type StoredPostFightReflection = {
+  reflectionId: string
+  status: StoredPostFightReflectionStatus
+  submittedAt: string
+  consumedAt?: string
+  debriefId?: string
+  reflection: PostFightAgentReflection
 }
 
 export type StoredCombatState = {
@@ -66,8 +88,8 @@ export type StoredCombatState = {
   openedAt: string
   deadlineAt: string
   turnSeconds: number
-  commands: Record<TeamRole, TurnCommand[]>
-  pending: Partial<Record<TeamRole, TurnCommand>>
+  actions: Record<TeamRole, CanonicalGameAction[]>
+  pending: Partial<Record<TeamRole, CanonicalGameAction>>
   snapshot: CombatTurnSnapshot
 }
 
@@ -91,11 +113,30 @@ export type StoredSessionState = {
   refereeTokenHash?: string
   roundPlan?: StoredRoundPlanState
   combat?: StoredCombatState
-  replay?: ReplayPayload
-  lastResult?: CombatSummary
-  chatLog: SessionChatMessage[]
-  eventLog: SessionLogEvent[]
+  activeActionSets?: Partial<Record<TeamRole, ActiveActionSet>>
+  lockedActions?: Partial<Record<TeamRole, LockedGameAction>>
+  replay?: LegacyReplayPayload
+  lastResult?: LegacyCombatSummary
+  reflections?: StoredPostFightReflection[]
+  fightDossier?: FightDossier
+  sharedDebrief?: SharedDebrief
+  championSave?: ChampionContinuationSave
+  sourceChampionSave?: ChampionContinuationSave
+  continuationSeed?: ChampionContinuationSeed
+  continuedSessionId?: string
+  quitAt?: string
+  chatLog: LegacySessionChatMessage[]
+  eventLog: LegacySessionLogEvent[]
   rateLimits: Record<string, StoredRateLimit>
+}
+
+export type LockedGameAction = Pick<
+  GameMasterActionSubmission,
+  'actionSetId' | 'decisionVersion' | 'actionId'
+> & {
+  role: TeamRole
+  submittedAt: string
+  requestHash: string
 }
 
 export type StoredRateLimit = {

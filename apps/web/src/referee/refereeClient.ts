@@ -1,15 +1,17 @@
 import type {
-  AdvanceRoundResponse,
   BotBlueprint,
-  CreateSessionResponse,
-  PublicSessionState,
   RelayErrorCode,
   RelayErrorResponse,
-  RoleInvite,
-  RoleResetResponse,
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { LegacyTeamIdentity } from '../shared/teamVisuals'
+import type {
+  AdvanceRoundResponse,
+  CreateSessionResponse,
+  PublicSessionState,
+  RoleInvite,
+  RoleResetResponse,
+} from '../agent/agentSessionTypes.js'
 import type { ReplayTimeline } from '../../../../packages/replay/src/index.js'
 import {
   DEFAULT_AGENT_SITE_BASE,
@@ -36,7 +38,7 @@ export type StoredSessionSecrets = {
 
 export type ReplayPayload = {
   timeline: ReplayTimeline
-  teamIdentities: Record<TeamRole, TeamIdentity>
+  teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   botBlueprints: Record<TeamRole, BotBlueprint>
 }
 
@@ -354,7 +356,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
   ) {
     return {
       timeline: payload.timeline as ReplayTimeline,
-      teamIdentities: teamIdentities as Record<TeamRole, TeamIdentity>,
+      teamIdentities: teamIdentities as Record<TeamRole, LegacyTeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
     }
   }
@@ -367,7 +369,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
         events: payload.events,
         summary: payload.summary,
       } as ReplayTimeline,
-      teamIdentities: teamIdentities as Record<TeamRole, TeamIdentity>,
+      teamIdentities: teamIdentities as Record<TeamRole, LegacyTeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
     }
   }
@@ -375,7 +377,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
   return undefined
 }
 
-function hasTeamIdentityShape(value: unknown): value is TeamIdentity {
+function hasTeamIdentityShape(value: unknown): value is LegacyTeamIdentity {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return false
   }

@@ -1,10 +1,13 @@
 import {
-  TEAM_LOGO_MARKS,
   type TeamIdentity,
-  type TeamLogoMark,
   type TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
+import {
+  LEGACY_TEAM_LOGO_MARKS,
+  type LegacyTeamIdentity,
+  type LegacyTeamLogoMark,
+} from '../shared/teamVisuals.js'
 import type {
   AgentInviteParseResult,
   TokenStorage,
@@ -13,7 +16,7 @@ import type {
 const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 const TEAM_ROLE_VALUES = ['red', 'blue'] as const
 const TEAM_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
-const DEFAULT_TEAM_LOGO_MARK: TeamLogoMark = 'shield'
+const DEFAULT_TEAM_LOGO_MARK: LegacyTeamLogoMark = 'shield'
 
 function firstPresent(...values: Array<string | null>): string | undefined {
   return values
@@ -52,8 +55,8 @@ function isTeamRole(value: unknown): value is TeamRole {
   return TEAM_ROLE_VALUES.includes(value as TeamRole)
 }
 
-function isTeamLogoMark(value: unknown): value is TeamLogoMark {
-  return typeof value === 'string' && TEAM_LOGO_MARKS.includes(value as TeamLogoMark)
+function isTeamLogoMark(value: unknown): value is LegacyTeamLogoMark {
+  return typeof value === 'string' && LEGACY_TEAM_LOGO_MARKS.includes(value as LegacyTeamLogoMark)
 }
 
 export function parseAgentInviteFragment(
@@ -136,7 +139,7 @@ export function clearStoredRoleToken(
 export function readStoredTeamIdentity(
   storage: TokenStorage,
   invite: AgentInvite,
-): TeamIdentity | undefined {
+): LegacyTeamIdentity | undefined {
   const rawValue = firstPresent(storage.getItem(createAgentTeamIdentityStorageKey(invite)))
 
   if (!rawValue) {
@@ -153,8 +156,8 @@ export function readStoredTeamIdentity(
 export function writeStoredTeamIdentity(
   storage: TokenStorage,
   invite: AgentInvite,
-  identity: TeamIdentity,
-): TeamIdentity {
+  identity: TeamIdentity | LegacyTeamIdentity,
+): LegacyTeamIdentity {
   const normalizedIdentity = normalizeStoredTeamIdentity(identity)
 
   storage.setItem(
@@ -172,7 +175,7 @@ export function clearStoredTeamIdentity(
   storage.removeItem(createAgentTeamIdentityStorageKey(invite))
 }
 
-function normalizeStoredTeamIdentity(value: unknown): TeamIdentity {
+function normalizeStoredTeamIdentity(value: unknown): LegacyTeamIdentity {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new Error('Expected team identity object.')
   }
@@ -181,6 +184,8 @@ function normalizeStoredTeamIdentity(value: unknown): TeamIdentity {
   const name = typeof identity.name === 'string' ? identity.name.trim() : ''
   const primaryColor = typeof identity.primaryColor === 'string'
     ? identity.primaryColor.trim().toLowerCase()
+    : typeof identity.colorHex === 'string'
+      ? identity.colorHex.trim().toLowerCase()
     : ''
 
   if (!name || !TEAM_COLOR_PATTERN.test(primaryColor)) {
@@ -190,12 +195,15 @@ function normalizeStoredTeamIdentity(value: unknown): TeamIdentity {
   const logo = typeof identity.logo === 'object' && identity.logo !== null && !Array.isArray(identity.logo)
     ? identity.logo as Record<string, unknown>
     : null
+  const logoPrompt = typeof identity.logoPrompt === 'string' && identity.logoPrompt.trim()
+    ? identity.logoPrompt.trim()
+    : ''
   const logoMark = isTeamLogoMark(logo?.mark)
     ? logo.mark
     : DEFAULT_TEAM_LOGO_MARK
   const initials = typeof logo?.initials === 'string' && logo.initials.trim()
     ? logo.initials.trim().slice(0, 4).toUpperCase()
-    : undefined
+    : initialsFromLogoPrompt(logoPrompt)
 
   return {
     name,
@@ -205,4 +213,17 @@ function normalizeStoredTeamIdentity(value: unknown): TeamIdentity {
       ...(initials ? { initials } : {}),
     },
   }
+}
+
+function initialsFromLogoPrompt(value: string): string | undefined {
+  const letters = value
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/gi, ''))
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 4)
+    .toUpperCase()
+
+  return letters || undefined
 }

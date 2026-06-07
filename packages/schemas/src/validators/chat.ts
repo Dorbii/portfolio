@@ -40,7 +40,7 @@ export function validateAgentChatMessageBatchShape(
       issue(
         'TOO_MANY_CHAT_MESSAGES',
         path,
-        `Submit at most ${maxMessages} chat messages with a round plan.`,
+        `Send at most ${maxMessages} chat messages with a loadout action.`,
       ),
     )
   }

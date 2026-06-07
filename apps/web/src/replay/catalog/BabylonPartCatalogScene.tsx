@@ -4,10 +4,10 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
-  TeamIdentity,
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
 import { damageMaterialForSeverity } from '../rendering/materials'
+import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
 import {
   createCatalogPartNode,
   createTeamMaterials,
@@ -249,7 +249,7 @@ export function BabylonPartCatalogScene({
   )
 }
 
-function createQaTeamIdentity(role: TeamRole, primaryColor: string): TeamIdentity {
+function createQaTeamIdentity(role: TeamRole, primaryColor: string): LegacyTeamIdentity {
   return {
     name: `${role.toUpperCase()} QA`,
     primaryColor,

@@ -1,10 +1,10 @@
 import type {
   BotBlueprint,
-  TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import {
   hexLuminance,
+  type LegacyTeamIdentity,
   mixHexColors,
   resolveTeamAccentHex,
 } from '../shared/teamVisuals'
@@ -29,7 +29,7 @@ export type BotVisualProfile = {
 export type ReplayBotBlueprints = Record<TeamRole, BotBlueprint>
 
 type BotVisualProfileOptions = {
-  identities?: Partial<Record<TeamRole, TeamIdentity>>
+  identities?: Partial<Record<TeamRole, LegacyTeamIdentity>>
 }
 
 export const DEFAULT_BOT_EFFECT_PALETTES: Record<TeamRole, BotEffectPalette> = {
@@ -50,7 +50,7 @@ export function createBotVisualProfiles(
 export function createBotVisualProfile(
   blueprint: BotBlueprint,
   role: TeamRole = 'red',
-  identity?: TeamIdentity,
+  identity?: LegacyTeamIdentity,
 ): BotVisualProfile {
   const partIds = blueprint.blocks.map((block) => block.partId)
   const primaryWeapon = partIds.find((partId) => partId.startsWith('Weapon_'))
@@ -66,7 +66,7 @@ export function createBotVisualProfile(
 
 function createBotEffectPalette(
   role: TeamRole,
-  identity?: TeamIdentity,
+  identity?: LegacyTeamIdentity,
 ): BotEffectPalette {
   const accent = resolveTeamAccentHex(role, identity)
   const darkAccent = hexLuminance(accent) < 0.18

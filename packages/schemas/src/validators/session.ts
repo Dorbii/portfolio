@@ -1,5 +1,5 @@
 import {
-  TEAM_LOGO_MARKS,
+  TEAM_LOGO_ASSET_KINDS,
   TEAM_ROLES,
   type ArenaConfig,
   type ValidationIssue,
@@ -24,8 +24,9 @@ import {
 } from './common.js'
 
 const MAX_TEAM_IDENTITY_NAME_LENGTH = 40
+const MAX_LOGO_PROMPT_LENGTH = 280
+const MAX_LOGO_ASSET_VALUE_LENGTH = 2_048
 const TEAM_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
-const TEAM_LOGO_INITIALS_PATTERN = /^[A-Za-z0-9]{1,4}$/
 
 export function validateCreateSessionRequestShape(value: unknown): ValidationResult {
   const issues: ValidationIssue[] = []
@@ -168,10 +169,9 @@ export function validateAgentBootstrapRequestShape(value: unknown): ValidationRe
     }
   }
 
-  if ('agentName' in value && typeof value.agentName !== 'string') {
-    issues.push(issue('INVALID_AGENT_NAME', 'bootstrap.agentName', 'Agent name must be text.'))
+  if (typeof value.agentName !== 'string' || value.agentName.trim().length === 0) {
+    issues.push(issue('INVALID_AGENT_NAME', 'bootstrap.agentName', 'Agent name is required.'))
   } else if (
-    typeof value.agentName === 'string' &&
     value.agentName.length > MAX_ROLE_CLAIM_AGENT_NAME_LENGTH
   ) {
     issues.push(
@@ -183,7 +183,15 @@ export function validateAgentBootstrapRequestShape(value: unknown): ValidationRe
     )
   }
 
-  if ('teamIdentity' in value) {
+  if (!('teamIdentity' in value)) {
+    issues.push(
+      issue(
+        'MISSING_TEAM_IDENTITY',
+        'bootstrap.teamIdentity',
+        'Team identity is required.',
+      ),
+    )
+  } else {
     issues.push(...validateTeamIdentityShape(value.teamIdentity, 'bootstrap.teamIdentity'))
   }
 
@@ -209,45 +217,104 @@ function validateTeamIdentityShape(value: unknown, path: string): ValidationIssu
     )
   }
 
-  if (typeof value.primaryColor !== 'string' || !TEAM_COLOR_PATTERN.test(value.primaryColor.trim())) {
+  if (typeof value.colorHex !== 'string' || !TEAM_COLOR_PATTERN.test(value.colorHex.trim())) {
     issues.push(
       issue(
         'INVALID_TEAM_COLOR',
-        `${path}.primaryColor`,
-        'Team primaryColor must be a #RRGGBB hex color.',
+        `${path}.colorHex`,
+        'Team colorHex must be a #RRGGBB hex color.',
       ),
     )
   }
 
-  if ('logo' in value) {
-    if (!isRecord(value.logo)) {
-      issues.push(issue('INVALID_TEAM_LOGO', `${path}.logo`, 'Logo must be an object.'))
-    } else {
-      const logo = value.logo
+  const hasLogoPrompt = typeof value.logoPrompt === 'string' && value.logoPrompt.trim().length > 0
+  const hasLogoAsset = 'logoAsset' in value
 
-      if (!TEAM_LOGO_MARKS.includes(logo.mark as never)) {
+  if ('logoPrompt' in value) {
+    if (typeof value.logoPrompt !== 'string' || value.logoPrompt.trim().length === 0) {
+      issues.push(issue('INVALID_TEAM_LOGO_PROMPT', `${path}.logoPrompt`, 'Logo prompt must be non-empty text.'))
+    } else if (value.logoPrompt.length > MAX_LOGO_PROMPT_LENGTH) {
+      issues.push(
+        issue(
+          'TEAM_LOGO_PROMPT_TOO_LONG',
+          `${path}.logoPrompt`,
+          `Logo prompt max length is ${MAX_LOGO_PROMPT_LENGTH}.`,
+        ),
+      )
+    }
+  }
+
+  if (hasLogoAsset) {
+    issues.push(...validateLogoAssetShape(value.logoAsset, `${path}.logoAsset`))
+  }
+
+  if (!hasLogoPrompt && !hasLogoAsset) {
+    issues.push(
+      issue(
+        'MISSING_TEAM_LOGO',
+        path,
+        'Team identity must include logoPrompt or logoAsset.',
+      ),
+    )
+  }
+
+  return issues
+}
+
+function validateLogoAssetShape(value: unknown, path: string): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+
+  if (!isRecord(value)) {
+    return [issue('INVALID_TEAM_LOGO_ASSET', path, 'Logo asset must be an object.')]
+  }
+
+  if (!TEAM_LOGO_ASSET_KINDS.includes(value.kind as never)) {
+    issues.push(
+      issue(
+        'INVALID_TEAM_LOGO_ASSET_KIND',
+        `${path}.kind`,
+        `Logo asset kind must be one of ${TEAM_LOGO_ASSET_KINDS.join(', ')}.`,
+      ),
+    )
+  }
+
+  const valueFields = [
+    ['url', value.url],
+    ['dataUrl', value.dataUrl],
+    ['assetId', value.assetId],
+  ] as const
+  const providedValues = valueFields.filter(([, fieldValue]) =>
+    typeof fieldValue === 'string' && fieldValue.trim().length > 0
+  )
+
+  if (providedValues.length === 0) {
+    issues.push(
+      issue(
+        'MISSING_TEAM_LOGO_ASSET_VALUE',
+        path,
+        'Logo asset must include url, dataUrl, or assetId.',
+      ),
+    )
+  }
+
+  for (const [field, fieldValue] of valueFields) {
+    if (field in value) {
+      if (typeof fieldValue !== 'string' || fieldValue.trim().length === 0) {
+        issues.push(issue('INVALID_TEAM_LOGO_ASSET_VALUE', `${path}.${field}`, 'Logo asset value must be non-empty text.'))
+      } else if (fieldValue.length > MAX_LOGO_ASSET_VALUE_LENGTH) {
         issues.push(
           issue(
-            'INVALID_TEAM_LOGO_MARK',
-            `${path}.logo.mark`,
-            `Logo mark must be one of ${TEAM_LOGO_MARKS.join(', ')}.`,
-          ),
-        )
-      }
-
-      if (
-        'initials' in logo &&
-        (typeof logo.initials !== 'string' || !TEAM_LOGO_INITIALS_PATTERN.test(logo.initials.trim()))
-      ) {
-        issues.push(
-          issue(
-            'INVALID_TEAM_LOGO_INITIALS',
-            `${path}.logo.initials`,
-            'Logo initials must be 1-4 letters or numbers.',
+            'TEAM_LOGO_ASSET_VALUE_TOO_LONG',
+            `${path}.${field}`,
+            `Logo asset value max length is ${MAX_LOGO_ASSET_VALUE_LENGTH}.`,
           ),
         )
       }
     }
+  }
+
+  if ('altText' in value && typeof value.altText !== 'string') {
+    issues.push(issue('INVALID_TEAM_LOGO_ALT_TEXT', `${path}.altText`, 'Logo asset altText must be text.'))
   }
 
   return issues

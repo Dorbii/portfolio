@@ -5,9 +5,9 @@ import {
   type CSSProperties,
 } from 'react'
 import type {
-  PublicSessionState,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
 import {
   capitalize,
@@ -45,6 +45,17 @@ type ScoreboardSessionControl = {
   onCreate: () => void
   onRefresh: () => void
   tokenStored: boolean
+}
+
+export type SessionCompletionControl = {
+  canContinue: boolean
+  canQuit: boolean
+  canSave: boolean
+  completedFightCount: number
+  isBusy: boolean
+  onContinue: () => void
+  onQuit: () => void
+  onSave: () => void
 }
 
 export function MatchScoreboard({
@@ -123,6 +134,101 @@ export function MatchScoreboard({
   )
 }
 
+export function SessionCompletionPanel({
+  controls,
+  publicSession,
+}: {
+  controls: SessionCompletionControl
+  publicSession: PublicSessionState | null
+}) {
+  const continuation = publicSession?.continuation
+  const winner = publicSession?.lastResult?.winner
+  const winnerName =
+    winner === 'red' || winner === 'blue'
+      ? publicSession?.roles[winner]?.identity?.name
+      : undefined
+  const winnerLabel = winner === 'red' || winner === 'blue'
+    ? `${capitalize(winner)} / ${winnerName || 'Unclaimed team'}`
+    : publicSession?.lastResult?.winner === 'draw'
+      ? 'Draw'
+      : 'Pending'
+  const debriefSummary = continuation?.sharedDebrief?.summary.trim() || 'Shared debrief appears after a completed fight debrief is available.'
+  const debriefState = continuation?.sharedDebrief ? 'Ready' : 'Pending'
+  const championRecord = continuation?.championRecord
+    ? `${continuation.championRecord.wins}-${continuation.championRecord.losses} / Streak ${continuation.championRecord.consecutiveWins}`
+    : 'Pending'
+  const challengerBonus = continuation?.challengerBonusGold ?? 0
+  const saveStatus = continuation?.quit
+    ? 'Quit'
+    : continuation?.continuedSessionId
+      ? 'Continued'
+      : continuation?.saved
+        ? 'Saved'
+        : 'Not saved'
+
+  return (
+    <div
+      className="session-completion-panel"
+      data-can-continue={controls.canContinue ? 'true' : 'false'}
+      data-can-quit={controls.canQuit ? 'true' : 'false'}
+      data-can-save={controls.canSave ? 'true' : 'false'}
+      data-completed-fight-count={controls.completedFightCount}
+      data-has-shared-debrief={continuation?.sharedDebrief ? 'true' : 'false'}
+    >
+      <div className="session-completion-grid">
+        <CompletionFact label="Winner" value={winnerLabel} />
+        <CompletionFact label="Completed Fights" value={`${controls.completedFightCount}`} />
+        <CompletionFact label="Champion Record" value={championRecord} />
+        <CompletionFact label="Challenger Bonus" value={`${challengerBonus}`} />
+        <CompletionFact label="Save Status" value={saveStatus} />
+        <CompletionFact label="Shared Debrief" value={debriefState} />
+      </div>
+      <p className="session-completion-debrief">{debriefSummary}</p>
+      <ActionGroup className="session-completion-actions">
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={!controls.canSave}
+          onClick={controls.onSave}
+        >
+          {controls.isBusy ? 'Saving...' : 'Save'}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={!controls.canContinue}
+          onClick={controls.onContinue}
+        >
+          Continue
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={!controls.canQuit}
+          onClick={controls.onQuit}
+        >
+          Quit
+        </Button>
+      </ActionGroup>
+    </div>
+  )
+}
+
+function CompletionFact({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div className="session-completion-fact">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
 function ScoreboardPlanTimer({ publicSession }: { publicSession: PublicSessionState | null }) {
   const roundPlan = publicSession?.phase === 'submission_phase'
     ? publicSession.roundPlan
@@ -156,11 +262,11 @@ function ScoreboardPlanTimer({ publicSession }: { publicSession: PublicSessionSt
   return (
     <div
       className={`scoreboard-plan-timer${isExpired ? ' is-expired' : ''}`}
-      aria-label="Round plan timer"
+      aria-label="Loadout timer"
       data-plan-timer-state={isExpired ? 'expired' : 'active'}
       data-plan-deadline-at={deadlineAt}
     >
-      <span>Plan Timer</span>
+      <span>Loadout Timer</span>
       <strong>{formatCountdown(remainingMs)}</strong>
     </div>
   )
@@ -202,7 +308,7 @@ function ScoreboardTeam({
             {team.claimed ? 'Connected' : 'Not connected'}
           </StatusBadge>
           <StatusBadge tone={team.submitted ? 'ok' : 'neutral'}>
-            {team.submitted ? 'Plan locked' : 'Plan pending'}
+            {team.submitted ? 'Loadout locked' : 'Loadout pending'}
           </StatusBadge>
         </div>
         {handoff.hasInvite ? (

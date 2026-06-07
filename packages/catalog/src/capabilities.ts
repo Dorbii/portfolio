@@ -35,32 +35,32 @@ const MAX_EXCLUSIONS_PER_CAPABILITY = 6
 export const AGENT_FEATURE_GATES = [
   {
     id: 'agent.plan_context',
-    label: 'Agent plan context bundle',
+    label: 'Agent catalog context bundle',
     state: 'enabled',
     scope: 'agent_runtime',
     summary:
-      'Agents may use catalog capability guidance as advisory planning context before submitting a round plan.',
+      'Agents may use catalog capability guidance as advisory loadout context before choosing a server-authored action.',
     agentGuidance:
-      'Use this guidance to compare options and tradeoffs; it is not permission to ignore validation or choose an illegal plan.',
+      'Use this guidance to compare options and tradeoffs; it is not permission to ignore validation or choose an illegal loadout.',
   },
   {
-    id: 'combat.turn_commands',
-    label: 'Turn command combat loop',
+    id: 'combat.game_master_actions',
+    label: 'Game-master combat actions',
     state: 'enabled',
     scope: 'combat_resolution',
     summary:
-      'Combat resolves from per-turn agent commands, where movement and action commands can be submitted together.',
+      'Combat resolves from server-authored legal actions that encode movement, weapons, and utility timing.',
     agentGuidance:
-      'During combat_turn, read state.combat.decision and submit the exact current tick once.',
+      'During combat_turn, choose one actionId from the current GameMasterPacket legalActions list.',
   },
   {
-    id: 'combat.movement_commands',
-    label: 'Movement commands',
+    id: 'combat.movement_actions',
+    label: 'Movement actions',
     state: 'enabled',
     scope: 'combat_resolution',
-    summary: 'Blueprints with movement controls can issue movement commands during combat turns.',
+    summary: 'Blueprints with movement controls unlock server-authored movement action choices.',
     agentGuidance:
-      'Movement parts unlock movement commands, but your turn command still decides how to move.',
+      'Movement parts expand legalActions; choose the actionId that best fits the current packet.',
   },
   {
     id: 'combat.weapon_actions',
@@ -260,14 +260,14 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     preferWhen: [
       'The opponent has stronger contact damage.',
       'Your plan needs to maintain long or mid range.',
-      'You need legal movement commands for live combat turns.',
+      'You need legal movement actions for live combat turns.',
     ],
     neverUseWhen: [
       'The plan intentionally anchors and wins only through contact punishment.',
       'You cannot afford both a body and enough mobility to make the blueprint legal.',
     ],
     semanticCapabilities: ['improve_lateral_escape', 'counter_rushdown'],
-    requiredFeatureGateIds: ['combat.movement_commands'],
+    requiredFeatureGateIds: ['combat.movement_actions'],
     match: (part) =>
       part.category === 'mobility' &&
       part.controls?.movement === true &&
@@ -275,7 +275,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     nearMiss: (part) => part.category === 'mobility',
     executionRules: [
       'Buy at least one body and enough movement parts to make the blueprint connected.',
-      'Movement parts unlock commands; the agent still chooses each combat turn movement.',
+      'Movement parts unlock legal movement actionIds; the agent still chooses one current action.',
     ],
     commonErrors: [
       'Selecting a movementPolicy other than hold_ground without movement controls.',
@@ -297,7 +297,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
       'The opponent can punish slow direct approaches with range or hazards.',
     ],
     semanticCapabilities: ['win_shove_trades', 'counter_kiting'],
-    requiredFeatureGateIds: ['combat.movement_commands'],
+    requiredFeatureGateIds: ['combat.movement_actions'],
     match: (part) =>
       (part.category === 'mobility' && stat(part, 'traction') >= 6) ||
       part.behavior?.id === 'anchor' ||
@@ -337,7 +337,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     nearMiss: (part) => part.category === 'weapon' || part.behavior?.id === 'sensor',
     executionRules: [
       'Pair range pressure with movement or control so the opponent cannot freely close.',
-      'Fire only when state.combat.decision says the target is inside reach.',
+      'Fire only when the current GameMasterPacket makes a weapon action legal and useful.',
     ],
     commonErrors: [
       'Buying a ranged weapon but submitting close-only movement.',
@@ -432,7 +432,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
       part.category === 'body' ||
       part.category === 'mobility',
     executionRules: [
-      'Control parts need timing and range; use state.combat.decision before activating.',
+      'Control parts need timing and range; choose them only when the current packet exposes the right action.',
       'Pair control with damage, hazards, or part targeting so pins convert into progress.',
     ],
     commonErrors: [
@@ -455,7 +455,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
       'The opponent has range pressure that punishes evasive loops.',
     ],
     semanticCapabilities: ['force_hazard_pathing', 'improve_lateral_escape', 'counter_rushdown'],
-    requiredFeatureGateIds: ['combat.hazard_routing', 'combat.movement_commands'],
+    requiredFeatureGateIds: ['combat.hazard_routing', 'combat.movement_actions'],
     match: (part) =>
       (part.category === 'mobility' && (stat(part, 'drive') >= 8 || stat(part, 'control') >= 2)) ||
       ['booster', 'smoke', 'magnet', 'net', 'front_plate'].includes(part.behavior?.id ?? ''),
@@ -517,7 +517,7 @@ export function createAgentCatalogGuidance(
 
   return {
     purpose:
-      'Advisory catalog routing for round-plan design. Capabilities provide options, tradeoffs, exclusions, and recovery hints; agents still make the final legal submission.',
+      'Advisory catalog routing for loadout-action selection. Capabilities provide options, tradeoffs, exclusions, and recovery hints; agents still make the final legal loadout choice.',
     trustOrder: [
       'session rules and schemas',
       'current private role state',
@@ -642,7 +642,7 @@ function featureGateIdsForPart(
     }
   }
 
-  if (part.controls?.movement) gateIds.add('combat.movement_commands')
+  if (part.controls?.movement) gateIds.add('combat.movement_actions')
   if (part.controls?.weapon) gateIds.add('combat.weapon_actions')
   if (part.controls?.utility) gateIds.add('combat.utility_actions')
 
@@ -652,7 +652,7 @@ function featureGateIdsForPart(
 function candidateReasons(part: PartDefinition): readonly string[] {
   const reasons: string[] = []
 
-  if (part.controls?.movement) reasons.push('unlocks movement commands')
+  if (part.controls?.movement) reasons.push('unlocks movement actions')
   if (part.controls?.weapon) reasons.push('unlocks weapon actions')
   if (part.controls?.utility) reasons.push('unlocks utility actions')
   if (part.behavior) reasons.push(`uses ${part.behavior.id} combat behavior`)
@@ -695,7 +695,7 @@ function companionNeedsForPart(part: PartDefinition): readonly string[] {
   }
 
   if (part.category === 'utility') {
-    return ['turn timing from state.combat.decision', 'protection if the utility is fragile']
+    return ['timing from the current GameMasterPacket', 'protection if the utility is fragile']
   }
 
   if (part.category === 'body') {
@@ -715,8 +715,8 @@ function nearMissReasons(
 
   const reasons: string[] = []
 
-  if (definition.requiredFeatureGateIds.includes('combat.movement_commands') && !part.controls?.movement) {
-    reasons.push('does not unlock movement commands')
+  if (definition.requiredFeatureGateIds.includes('combat.movement_actions') && !part.controls?.movement) {
+    reasons.push('does not unlock movement actions')
   }
 
   if (definition.requiredFeatureGateIds.includes('combat.weapon_actions') && !part.controls?.weapon) {

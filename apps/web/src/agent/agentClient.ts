@@ -1,24 +1,26 @@
 import type {
+  AgentBootstrapResponse,
+  GameMasterActionPostRequest,
+  GameMasterActionResponse,
+  GameMasterPacket,
+  PostFightReflectionPostRequest,
+  PostFightReflectionResponse,
+  RelayErrorCode,
+  RelayErrorResponse,
+  SessionPhase,
+  TeamIdentity,
+} from '../../../../packages/schemas/src/index.js'
+import type {
   AgentChatMessagePostRequest,
   AgentChatMessageResponse,
-  AgentBootstrapResponse,
-  AgentNextAction,
   AgentPrivateChatMessagePostRequest,
   AgentPrivateChatMessageResponse,
   PublicSessionState,
-  RelayErrorCode,
-  RelayErrorResponse,
   RoleClaimResponse,
   RolePrivateState,
-  RoundPlanSubmission,
-  RoundSubmissionResponse,
   SessionChatMessage,
   SessionLogEvent,
-  SessionPhase,
-  TeamIdentity,
-  TurnCommandPostRequest,
-  TurnCommandResponse,
-} from '../../../../packages/schemas/src/index.js'
+} from './agentSessionTypes.js'
 import {
   createAgentInviteUrl,
   createSafeAgentHash,
@@ -72,10 +74,22 @@ export {
 const DEFAULT_WAIT_POLL_MS = 4_000
 const DEFAULT_WAIT_TIMEOUT_MS = 10 * 60_000
 const MIN_WAIT_POLL_MS = 1_000
-const PLAYABLE_NEXT_ACTIONS = new Set<AgentNextAction>([
-  'submit_round_plan',
-  'submit_turn_command',
+const TERMINAL_GAME_MASTER_PHASES = new Set<GameMasterPacket['phase']>([
+  'session_complete',
+  'expired',
+])
+const READY_WITHOUT_LEGAL_ACTIONS = new Set<GameMasterPacket['nextAction']>([
+  'submit_reflection',
+  'view_replay',
+  'session_complete',
   'stop',
+])
+const GAME_MASTER_ACTION_BODY_KEYS = new Set([
+  'action',
+  'actionSetId',
+  'decisionVersion',
+  'actionId',
+  'publicMessage',
 ])
 
 function isRelayErrorResponse(value: unknown): value is RelayErrorResponse {
@@ -128,7 +142,7 @@ async function waitBeforePollingAgain(
   input: {
     target: string
     lastPhase?: SessionPhase
-    lastNextAction?: AgentNextAction
+    lastNextAction?: GameMasterPacket['nextAction']
     lastStateVersion?: string
   },
 ): Promise<void> {
@@ -171,6 +185,64 @@ export class AgentArenaApiError extends Error {
     this.status = input.status
     this.code = input.code
     this.issues = input.issues
+  }
+}
+
+function hasNextPlayablePacket(
+  packet: GameMasterPacket,
+  options: AgentWaitOptions = {},
+): boolean {
+  if (TERMINAL_GAME_MASTER_PHASES.has(packet.phase)) {
+    return true
+  }
+
+  if (
+    typeof options.previousEventVersion === 'number' &&
+    packet.eventVersion !== options.previousEventVersion
+  ) {
+    return true
+  }
+
+  if (READY_WITHOUT_LEGAL_ACTIONS.has(packet.nextAction)) {
+    return true
+  }
+
+  return options.requireLegalActions === false || packet.legalActions.length > 0
+}
+
+function exactGameMasterActionBody(
+  input: GameMasterActionPostRequest,
+): GameMasterActionPostRequest {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message: 'submitAction expects a GameMaster action object.',
+    })
+  }
+
+  const extraKeys = Object.keys(input).filter((key) => !GAME_MASTER_ACTION_BODY_KEYS.has(key))
+
+  if (extraKeys.length > 0) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message:
+        'submitAction accepts only action, actionSetId, decisionVersion, actionId, and publicMessage.',
+      issues: extraKeys.map((key) => ({
+        code: 'UNSUPPORTED_FIELD',
+        path: key,
+        message: 'Remove this field and choose an actionId from legalActions instead.',
+      })),
+    })
+  }
+
+  return {
+    action: input.action,
+    actionSetId: input.actionSetId,
+    decisionVersion: input.decisionVersion,
+    actionId: input.actionId,
+    ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
   }
 }
 
@@ -276,28 +348,28 @@ export class AgentArenaClient {
     )
   }
 
-  async submitRoundPlan(
-    plan: RoundPlanSubmission,
-  ): Promise<RoundSubmissionResponse> {
-    return this.requestJson<RoundSubmissionResponse>(
-      `/sessions/${encodeURIComponent(this.invite.sessionId)}/round-plan`,
+  async submitAction(
+    submission: GameMasterActionPostRequest,
+  ): Promise<GameMasterActionResponse> {
+    return this.requestJson<GameMasterActionResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/action`,
       {
         method: 'POST',
         headers: this.authorizationHeaders(),
-        body: JSON.stringify(plan),
+        body: JSON.stringify(exactGameMasterActionBody(submission)),
       },
     )
   }
 
-  async submitTurnCommand(
-    command: TurnCommandPostRequest,
-  ): Promise<TurnCommandResponse> {
-    return this.requestJson<TurnCommandResponse>(
-      `/sessions/${encodeURIComponent(this.invite.sessionId)}/turn-command`,
+  async submitPostFightReflection(
+    reflection: PostFightReflectionPostRequest,
+  ): Promise<PostFightReflectionResponse> {
+    return this.requestJson<PostFightReflectionResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/reflection`,
       {
         method: 'POST',
         headers: this.authorizationHeaders(),
-        body: JSON.stringify(command),
+        body: JSON.stringify(reflection),
       },
     )
   }
@@ -313,6 +385,12 @@ export class AgentArenaClient {
         body: JSON.stringify(typeof input === 'string' ? { message: input } : input),
       },
     )
+  }
+
+  async sendChatMessage(
+    input: AgentChatMessagePostRequest | string,
+  ): Promise<AgentChatMessageResponse> {
+    return this.submitChatMessage(input)
   }
 
   async submitPrivateChatMessage(
@@ -433,21 +511,21 @@ export class AgentArenaClient {
     }
   }
 
-  async waitForNextAction(options?: AgentWaitOptions): Promise<AgentBootstrapResponse> {
+  async waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket> {
     const config = waitConfig(options)
 
     for (;;) {
-      const bootstrap = await this.bootstrapRole()
+      const packet = await this.bootstrapRole()
 
-      if (PLAYABLE_NEXT_ACTIONS.has(bootstrap.nextAction)) {
-        return bootstrap
+      if (hasNextPlayablePacket(packet, options)) {
+        return packet
       }
 
       await waitBeforePollingAgain(config, {
-        target: 'next playable action',
-        lastPhase: bootstrap.state.phase,
-        lastNextAction: bootstrap.nextAction,
-        lastStateVersion: bootstrap.state.stateVersion,
+        target: 'next GameMasterPacket with legalActions',
+        lastPhase: packet.phase as SessionPhase,
+        lastNextAction: packet.nextAction,
+        lastStateVersion: `eventVersion ${packet.eventVersion}`,
       })
     }
   }

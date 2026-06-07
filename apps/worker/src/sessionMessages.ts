@@ -1,13 +1,13 @@
-import type {
-  AgentChatMessagePostRequest,
-  AgentPrivateChatMessagePostRequest,
-  SessionChatMessage,
-  SessionLogEvent,
-} from '../../../packages/schemas/src/index.js'
 import {
   cloneJson,
   safeText,
 } from './sessionSupport.js'
+import type {
+  LegacyAgentChatMessagePostRequest,
+  LegacyAgentPrivateChatMessagePostRequest,
+  LegacySessionChatMessage,
+  LegacySessionLogEvent,
+} from './sessionLegacyContracts.js'
 import type {
   StoredRoleState,
   StoredSessionState,
@@ -15,7 +15,7 @@ import type {
 
 export function appendSessionEvent(
   state: StoredSessionState,
-  type: SessionLogEvent['type'],
+  type: LegacySessionLogEvent['type'],
   message: string,
   at: string,
 ): void {
@@ -25,9 +25,9 @@ export function appendSessionEvent(
 export function appendRoleChatMessages(
   state: StoredSessionState,
   role: StoredRoleState,
-  requests: AgentChatMessagePostRequest[],
+  requests: LegacyAgentChatMessagePostRequest[],
   at: string,
-): SessionChatMessage[] {
+): LegacySessionChatMessage[] {
   const messages = requests.map((request, index) => {
     const message = safeText(request.message)!
 
@@ -51,9 +51,9 @@ export function appendRoleChatMessages(
 export function appendPrivateRoleChatMessages(
   state: StoredSessionState,
   role: StoredRoleState,
-  requests: AgentPrivateChatMessagePostRequest[],
+  requests: LegacyAgentPrivateChatMessagePostRequest[],
   at: string,
-): SessionChatMessage[] {
+): LegacySessionChatMessage[] {
   const messages = requests.map((request, index) => {
     const message = safeText(request.message)!
 

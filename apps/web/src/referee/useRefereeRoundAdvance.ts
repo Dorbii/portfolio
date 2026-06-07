@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { PublicSessionState } from '../../../../packages/schemas/src/index.js'
+import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import {
   advanceRound,
   toUserMessage,

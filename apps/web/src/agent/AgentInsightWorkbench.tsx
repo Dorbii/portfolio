@@ -1,8 +1,10 @@
 import type {
-  RolePrivateState,
-  RoundPlanSubmission,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type {
+  ConfirmedLoadoutView,
+  RolePrivateState,
+} from './agentSessionTypes.js'
 import { MetricGrid } from '../shared/ui'
 import { formatLabel } from '../shared/format'
 import { BotAssemblyScene } from './BotAssemblyScene'
@@ -22,9 +24,10 @@ export function AgentInsightWorkbench({
   role,
   roleState,
 }: AgentInsightWorkbenchProps) {
-  const submission = roleState?.ownSubmission ?? null
-  const blueprint = submission?.blueprint ?? null
+  const loadout = roleState?.ownLoadout ?? null
+  const blueprint = loadout?.blueprint ?? null
   const decision = roleState?.combat?.decision
+  const legalActions = roleState?.gameMaster?.legalActions ?? []
   const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
   const teamIdentity = roleState ? resolveTeamIdentity(role, roleState.identity) : null
@@ -34,7 +37,7 @@ export function AgentInsightWorkbench({
       <div className="workbench-header">
         <div>
           <SectionTitle id="agent-insight-heading" title="Agent insight" />
-          <strong>{createInsightSubtitle(roleState, submission, teamIdentity)}</strong>
+          <strong>{createInsightSubtitle(roleState, loadout, teamIdentity)}</strong>
         </div>
         <span className={`assembly-state${roleState?.submitted ? '' : ' is-draft'}`}>
           {submissionLabel}
@@ -43,12 +46,12 @@ export function AgentInsightWorkbench({
 
       <div className="plan-metric-strip" aria-label="Agent state summary">
         <PlanMetric label="Phase" value={formatLabel(roleState?.phase ?? 'not_loaded')} />
-        <PlanMetric label="Plan" tone={roleState?.submitted ? 'ok' : undefined} value={submissionLabel} />
-        <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No plan'} />
+        <PlanMetric label="Loadout" tone={roleState?.submitted ? 'ok' : undefined} value={submissionLabel} />
+        <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No blueprint'} />
         <PlanMetric
-          label="Combat"
-          tone={decision ? 'ok' : undefined}
-          value={decision ? `${formatLabel(decision.range.band)} range` : 'No turn'}
+          label="Actions"
+          tone={legalActions.length > 0 ? 'ok' : undefined}
+          value={legalActions.length > 0 ? `${legalActions.length} legal` : 'No actions'}
         />
       </div>
 
@@ -61,9 +64,9 @@ export function AgentInsightWorkbench({
           <div className="plan-section-header">
             <SectionTitle id="assembly-bay-heading" title="Assembly bay" />
             <div className="assembly-preview-meta">
-              <span className="assembly-state">Submitted bot</span>
+              <span className="assembly-state">Confirmed bot</span>
               <strong>{blueprint.name}</strong>
-              <span>Read-only plan from role state</span>
+              <span>Read-only loadout from role state</span>
             </div>
           </div>
           <BotAssemblyScene blueprint={blueprint} identity={teamIdentity} role={role} submitted />
@@ -73,31 +76,35 @@ export function AgentInsightWorkbench({
       {roleState ? (
       <div className={`insight-grid${decision ? ' has-decision' : ''}`}>
         <section className="plan-section insight-panel" aria-labelledby="plan-read-heading">
-          <SectionTitle id="plan-read-heading" title="Plan read" />
-          {submission ? (
+          <SectionTitle id="plan-read-heading" title="Loadout read" />
+          {loadout ? (
             <>
               <div className="insight-readout-grid">
                 <ReadoutCard
                   label="Bot"
-                  value={submission.blueprint.name}
-                  detail={`${submission.blueprint.blocks.length} blocks / ${submission.purchases.length} bought`}
+                  value={loadout.blueprint.name}
+                  detail={`${loadout.blueprint.blocks.length} installed blocks`}
                 />
                 <ReadoutCard
                   label="Movement"
-                  value={formatOptionalLabel(submission.tactics.movementPolicy)}
-                  detail={`${formatOptionalLabel(submission.tactics.preferredRange)} range`}
+                  value={formatOptionalLabel(roleState.controls?.movement[0])}
+                  detail={`${roleState.controls?.movement.length ?? 0} movement action choices`}
                 />
                 <ReadoutCard
                   label="Weapons"
-                  value={formatOptionalLabel(submission.tactics.weaponCadence)}
-                  detail={`${formatAggression(submission.tactics.aggression)} aggression`}
+                  value={formatWeaponSummary(roleState)}
+                  detail={formatUtilitySummary(roleState)}
                 />
               </div>
-              <InsightText title="Rationale" text={submission.rationale} fallback="No rationale was submitted with this plan." />
+              <InsightText
+                title="Loadout status"
+                text={loadout.confirmedAt ? `Confirmed at ${loadout.confirmedAt}.` : undefined}
+                fallback="This loadout has not been confirmed yet."
+              />
             </>
           ) : (
             <p className="agent-empty">
-              No accepted plan is available yet. That means this agent has not committed a bot, tactics, or rationale for this round.
+              No confirmed loadout is available yet. That means this agent has not committed a bot for this round.
             </p>
           )}
         </section>
@@ -121,19 +128,19 @@ export function AgentInsightWorkbench({
                 title="Tactical cues"
               />
               <InsightList
-                emptyText="No movement recommendation returned."
-                items={decision.movementOptions.recommended.map(formatLabel)}
-                title="Recommended movement"
+                emptyText="No legal action packet is available for this turn."
+                items={legalActions.map(formatLegalAction)}
+                title="Legal actions"
               />
               <InsightList
                 emptyText="No movement avoid-list returned."
-                items={decision.movementOptions.avoid.map(formatLabel)}
+                items={decision.movementGuidance.avoid.map(formatLabel)}
                 title="Avoid"
               />
             </>
           ) : (
             <p className="agent-empty">
-              Combat decision context appears once both plans resolve and a turn is open.
+              Combat decision context appears once both loadouts resolve and a turn is open.
             </p>
           )}
         </section>
@@ -163,18 +170,18 @@ function ReadoutCard({
 
 function createInsightSubtitle(
   roleState: RolePrivateState | null,
-  submission: RoundPlanSubmission | null,
+  loadout: ConfirmedLoadoutView | null,
   identity: ReturnType<typeof resolveTeamIdentity> | null,
 ): string {
   if (!roleState) {
     return 'Load role state to inspect the agent.'
   }
 
-  if (submission) {
-    return `${identity?.name ?? 'This role'} submitted ${submission.blueprint.name}.`
+  if (loadout) {
+    return `${identity?.name ?? 'This role'} confirmed ${loadout.blueprint.name}.`
   }
 
-  return `${identity?.name ?? 'This role'} has not submitted a round plan.`
+  return `${identity?.name ?? 'This role'} has not confirmed a loadout.`
 }
 
 function NoRoleStatePanel() {
@@ -182,7 +189,7 @@ function NoRoleStatePanel() {
     <section className="insight-empty-state" aria-labelledby="empty-state-heading">
       <SectionTitle id="empty-state-heading" title="State not loaded" />
       <p>
-        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the agent plan, rationale, and combat decision context.
+        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the confirmed loadout, rationale, and combat decision context.
       </p>
     </section>
   )
@@ -284,10 +291,21 @@ function formatOptionalLabel(value: string | undefined): string {
   return value ? formatLabel(value) : 'Not set'
 }
 
-function formatAggression(value: number | undefined): string {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return 'Unknown'
-  }
+function formatWeaponSummary(state: RolePrivateState): string {
+  const slots = [
+    state.controls?.weaponA ? 'Weapon A' : '',
+    state.controls?.weaponB ? 'Weapon B' : '',
+  ].filter(Boolean)
 
-  return `${Math.round(value * 100)}%`
+  return slots.length > 0 ? slots.join(' / ') : 'No weapon command'
+}
+
+function formatUtilitySummary(state: RolePrivateState): string {
+  return state.controls?.utility ? 'Utility command available' : 'No utility command'
+}
+
+function formatLegalAction(
+  action: NonNullable<RolePrivateState['gameMaster']>['legalActions'][number],
+): string {
+  return `${action.label}: ${action.summary}`
 }

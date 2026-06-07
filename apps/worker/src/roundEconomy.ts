@@ -1,7 +1,5 @@
-import type {
-  CombatSummary,
-  TeamRole,
-} from '../../../packages/schemas/src/index.js'
+import type { TeamRole } from '../../../packages/schemas/src/index.js'
+import type { LegacyCombatSummary } from './sessionLegacyContracts.js'
 
 const DEFAULT_INTEREST_RATE = 0.1
 const DEFAULT_INTEREST_CAP = 25
@@ -16,7 +14,7 @@ export function calculateInterest(unspentGold: number): number {
 }
 
 export function calculateWinnerBonus(
-  result: CombatSummary | undefined,
+  result: LegacyCombatSummary | undefined,
   role: TeamRole,
 ): number {
   return result?.winner === role ? DEFAULT_WINNER_BONUS : 0

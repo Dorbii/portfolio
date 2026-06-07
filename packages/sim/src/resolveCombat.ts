@@ -11,16 +11,20 @@ import {
   DEFAULT_ARENA_CONFIG,
   type ArenaConfig,
   type BotBlueprint,
+  type CanonicalGameAction,
   type CombatBotSnapshot,
   type CombatTurnSnapshot,
   type MovementCommand,
   type NormalizedBotTactics,
   type PartCategory,
   type PartBehaviorSlot,
+  type PartEffect,
+  type PartMountMotion,
   type TeamRole,
   type TurnCommand,
   type Vector3,
   type ArenaHazardThreat,
+  type WeaponSpec,
 } from '../../schemas/src/index.js'
 import { DEFAULT_BOT_TACTICS, getPart } from '../../catalog/src/index.js'
 import { deriveBotStats, type BotStats } from './deriveStats.js'
@@ -51,12 +55,23 @@ import {
   type RuntimeStatusEffectId,
 } from './statusEffects.js'
 import {
+  arenaCellCenter,
   clampPositionToArena,
   compileArenaTopology,
   hazardEffectKind,
+  hasArenaLineOfSight,
   hazardsAtPosition,
+  pathHazards,
   type CompiledArenaTopology,
 } from './arenaTopology.js'
+import { combatActionCommand } from './combatActions.js'
+import {
+  evaluateCombatCommand,
+  type CombatLegalityContext,
+} from './combatLegality.js'
+import {
+  type TacticalMovementPlan,
+} from './gridMovement.js'
 
 export type CombatantInput = {
   role: TeamRole
@@ -84,6 +99,7 @@ export type ResolveCombatInput = {
 }
 
 export type SubmittedCombatCommands = Record<TeamRole, readonly TurnCommand[]>
+export type SubmittedGameActions = Record<TeamRole, readonly CanonicalGameAction[]>
 
 export type SubmittedCombatResolution =
   | {
@@ -99,6 +115,65 @@ export type SubmittedCombatResolution =
       snapshot: CombatTurnSnapshot
       result: CombatResult
     }
+
+export function resolveSubmittedGameActions(
+  input: ResolveCombatInput,
+  actions: SubmittedGameActions,
+): SubmittedCombatResolution {
+  const state = createCombatRuntime(input)
+  const submittedTicks = Math.min(
+    actions.red.length,
+    actions.blue.length,
+    HARD_MAX_COMBAT_TICKS,
+  )
+
+  for (let index = 0; index < submittedTicks; index += 1) {
+    const tick = index + 1
+
+    if (applyGameActionTick(state, tick, actions.red[index], actions.blue[index]).completed) {
+      return {
+        status: 'complete',
+        nextTick: tick,
+        snapshot: createCombatSnapshot(tick, state.arena, state.red, state.blue, state.events),
+        result: finalizeCombatResult(input, state),
+      }
+    }
+  }
+
+  const nextTick = submittedTicks + 1
+  const snapshot = createCombatSnapshot(nextTick, state.arena, state.red, state.blue, state.events)
+  const replay = createReplayTimeline({
+    round: input.round,
+    duration: partialReplayDuration(state.events, state.elapsedTicks),
+    events: state.events,
+    summary: `Combat turn ${nextTick} is waiting for GameMaster actions.`,
+  })
+
+  return {
+    status: 'active',
+    nextTick,
+    snapshot,
+    replay,
+    log: state.log,
+  }
+}
+
+function commandFromCanonicalAction(
+  action: CanonicalGameAction,
+  role: TeamRole,
+): TurnCommand {
+  if (action.role !== role) {
+    throw new Error(`${role} submitted GameMaster action owned by ${action.role}.`)
+  }
+
+  const command = combatActionCommand(action)
+
+  if (!command) {
+    throw new Error(`${role} submitted non-combat GameMaster action ${action.id}.`)
+  }
+
+  return command
+}
 
 type BotRuntime = {
   role: TeamRole
@@ -125,6 +200,9 @@ type RuntimePart = {
   category: PartCategory
   hasWeaponControl: boolean
   hasUtilityControl: boolean
+  weaponSpec?: WeaponSpec
+  mountMotion?: PartMountMotion
+  signatureEffect?: PartEffect
   behaviorId?: PartBehaviorId
   behaviorSlot?: PartBehaviorSlot
   position: Vector3
@@ -217,20 +295,42 @@ function normalizedFlatVector(from: Vector3, to: Vector3, fallback: Vector3 = [1
 }
 
 function weaponReach(bot: BotRuntime): number {
-  return 1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28 + weaponReachBonus(bot)
+  return Math.max(
+    1.6 + bot.stats.control / 16 + bot.stats.weaponThreat / 28 + weaponReachBonus(bot),
+    ...aliveWeaponControlParts(bot).map((part) => weaponSpecReach(part)),
+  )
+}
+
+function weaponSpecReach(part: RuntimePart): number {
+  if (!part.weaponSpec) {
+    return 0
+  }
+
+  if (part.mountMotion === 'inherits_parent_spin') {
+    return part.weaponSpec.range
+  }
+
+  return part.weaponSpec.fireMode === 'direct' || part.weaponSpec.fireMode === 'arc'
+    ? part.weaponSpec.range
+    : 0
 }
 
 function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePart[] {
   const rawParts = blueprint.blocks.map((block) => {
     const part = getPart(block.partId)
     const behaviorId = knownBehaviorId(part?.behavior?.id)
+    const weaponSpec = effectiveWeaponSpec(part?.spec, block.mountMotion)
+    const signatureEffect = block.signatureEffectActive ? part?.signatureEffect : undefined
 
     return {
       block,
       category: part?.category ?? 'body',
       durability: Math.max(1, part?.durability ?? 1),
-      hasUtilityControl: Boolean(part?.controls?.utility),
-      hasWeaponControl: Boolean(part?.controls?.weapon),
+      hasUtilityControl: Boolean(part?.controls?.utility || signatureEffect?.trigger === 'activated'),
+      hasWeaponControl: Boolean(part?.controls?.weapon || weaponSpec),
+      weaponSpec,
+      mountMotion: block.mountMotion,
+      signatureEffect,
       behaviorId,
       behaviorSlot: part?.behavior?.slot,
     }
@@ -244,6 +344,9 @@ function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePa
     durability,
     hasUtilityControl,
     hasWeaponControl,
+    weaponSpec,
+    mountMotion,
+    signatureEffect,
     behaviorId,
     behaviorSlot,
   }) => {
@@ -255,6 +358,9 @@ function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePa
       category,
       hasWeaponControl,
       hasUtilityControl,
+      weaponSpec,
+      mountMotion,
+      signatureEffect,
       behaviorId,
       behaviorSlot,
       position: [...block.position],
@@ -352,6 +458,16 @@ function behaviorKey(part: RuntimePart): string | undefined {
   return part.behaviorId ? `${part.blockId}:${part.behaviorId}` : undefined
 }
 
+function signatureKey(part: RuntimePart): string | undefined {
+  return part.signatureEffect ? `${part.blockId}:${part.signatureEffect.id}` : undefined
+}
+
+function isReadySignaturePart(bot: BotRuntime, part: RuntimePart): boolean {
+  const key = signatureKey(part)
+
+  return key !== undefined && (bot.cooldowns[key] ?? 0) <= 0 && (bot.charges[key] ?? 1) > 0
+}
+
 function startCooldown(bot: BotRuntime, key: string, ticks: number): void {
   bot.cooldowns[key] = ticks
 }
@@ -380,6 +496,16 @@ function createInitialCharges(parts: RuntimePart[]): Record<string, number> {
     if (part.behaviorId === 'drone_controller') {
       charges[key] = DRONE_CHARGES
     }
+  }
+
+  for (const part of parts) {
+    const key = signatureKey(part)
+
+    if (key === undefined || part.signatureEffect?.charges === undefined) {
+      continue
+    }
+
+    charges[key] = part.signatureEffect.charges
   }
 
   return charges
@@ -1145,6 +1271,10 @@ function resolveWeapons(
   command: TurnCommand,
   nextRandom: () => number,
 ): void {
+  if (isBotDestroyed(attacker) || isBotDestroyed(defender)) {
+    return
+  }
+
   const weaponParts = aliveWeaponControlParts(attacker)
   const firingSlots = WEAPON_SLOTS.flatMap((slot, index) => {
     const part = weaponParts[index]
@@ -1156,13 +1286,13 @@ function resolveWeapons(
     return
   }
 
-  const inRange = distance(attacker.position, defender.position) <= weaponReach(attacker)
-
-  if (!inRange) {
-    return
-  }
+  const topology = compileArenaTopology(arena)
 
   for (const { slot, part } of firingSlots) {
+    if (!weaponPartCanHit(topology, attacker, defender, part)) {
+      continue
+    }
+
     const isNet = part.behaviorId === 'net'
 
     events.push({
@@ -1175,12 +1305,34 @@ function resolveWeapons(
       sourceBlockId: part.blockId,
       sourcePartId: part.partId,
       phase: isNet ? 'deploy' : 'release',
+      fireMode: part.weaponSpec?.fireMode,
       style: part.behaviorId ?? part.category,
     })
 
     applyDamage(events, tick, attacker, defender, weaponSlotDamage(attacker, nextRandom()), 'weapon')
     applyWeaponBehavior(events, tick, arena, attacker, defender, part)
   }
+}
+
+function weaponPartCanHit(
+  topology: CompiledArenaTopology,
+  attacker: BotRuntime,
+  defender: BotRuntime,
+  part: RuntimePart,
+): boolean {
+  if (part.weaponSpec?.fireMode === 'sweep' && partWorldPosition(attacker, part)[1] < 0) {
+    return false
+  }
+
+  const reach = Math.max(weaponReach(attacker), weaponSpecReach(part))
+  const inRange = distance(attacker.position, defender.position) <= reach
+  const hasLineOfSight = (
+    part.mountMotion === 'inherits_parent_spin' &&
+    part.weaponSpec?.fireMode === 'sweep'
+  ) ||
+    hasArenaLineOfSight(topology, attacker.position, defender.position)
+
+  return inRange && hasLineOfSight
 }
 
 function applyWeaponBehavior(
@@ -1236,6 +1388,12 @@ function resolveUtilities(
     return
   }
 
+  const signaturePart = chooseReadySignaturePart(actor)
+
+  if (signaturePart && resolveSignatureUtility(events, actor, opponent, signaturePart, tick)) {
+    return
+  }
+
   const part = chooseReadyUtilityPart(actor, opponent)
   const key = part ? behaviorKey(part) : undefined
 
@@ -1282,6 +1440,59 @@ function resolveUtilities(
     case undefined:
       break
   }
+}
+
+function chooseReadySignaturePart(actor: BotRuntime): RuntimePart | undefined {
+  return actor.index.aliveParts.find((part) => (
+    part.signatureEffect?.trigger === 'activated' &&
+    isReadySignaturePart(actor, part)
+  ))
+}
+
+function resolveSignatureUtility(
+  events: ReplayEvent[],
+  actor: BotRuntime,
+  opponent: BotRuntime,
+  part: RuntimePart,
+  tick: number,
+): boolean {
+  const effect = part.signatureEffect
+  const key = signatureKey(part)
+
+  if (!effect || key === undefined) {
+    return false
+  }
+
+  if (effect.id === 'fire_breath') {
+    const range = numericEffectParam(effect, 'range', 4)
+    const damage = numericEffectParam(effect, 'damage', 8)
+
+    if (distance(actor.position, opponent.position) > range) {
+      return false
+    }
+
+    events.push({
+      t: round(tick + 0.18),
+      type: 'ability',
+      bot: actor.role,
+      ability: 'fire_breath',
+      target: opponent.role,
+      targetPosition: opponent.position,
+    })
+    applyDamage(events, tick, actor, opponent, damage, 'fire_breath')
+    startCooldown(actor, key, effect.cooldownTurns)
+    consumeCharge(actor, key)
+
+    return true
+  }
+
+  return false
+}
+
+function numericEffectParam(effect: PartEffect, key: string, fallback: number): number {
+  const value = effect.params[key]
+
+  return typeof value === 'number' ? value : fallback
 }
 
 function chooseReadyUtilityPart(
@@ -1521,6 +1732,355 @@ function emitHazardTrigger(
     damage,
     position,
   })
+}
+
+function effectiveWeaponSpec(
+  spec: { kind: string } | undefined,
+  mountMotion: PartMountMotion | undefined,
+): WeaponSpec | undefined {
+  if (spec?.kind !== 'weapon') {
+    return undefined
+  }
+
+  const weaponSpec = spec as WeaponSpec
+
+  if (mountMotion === 'inherits_parent_spin' && weaponSpec.fireMode === 'direct') {
+    return {
+      ...weaponSpec,
+      fireMode: 'sweep',
+    }
+  }
+
+  return weaponSpec
+}
+
+type GameActionTickIntent = {
+  command: TurnCommand
+  movement: TacticalMovementPlan
+  movementBlocked: boolean
+}
+
+type AnchorConflict = {
+  blockRed: boolean
+  blockBlue: boolean
+  contactRed: boolean
+  contactBlue: boolean
+  reason?: string
+}
+
+function applyGameActionTick(
+  state: CombatRuntimeState,
+  tick: number,
+  redAction: CanonicalGameAction,
+  blueAction: CanonicalGameAction,
+): CombatTickResult {
+  const { arena, events, topology, red, blue } = state
+
+  state.elapsedTicks = tick
+  advanceRuntimeEffects(red, tick)
+  advanceRuntimeEffects(blue, tick)
+
+  const healthBeforeTick = red.health + blue.health
+  const redCommand = { ...commandFromCanonicalAction(redAction, 'red'), tick }
+  const blueCommand = { ...commandFromCanonicalAction(blueAction, 'blue'), tick }
+  const redIntent = gameActionTickIntent(state, 'red', redCommand)
+  const blueIntent = gameActionTickIntent(state, 'blue', blueCommand)
+  const redMovementUtility = activateMovementUtility(red, redCommand)
+  const blueMovementUtility = activateMovementUtility(blue, blueCommand)
+  const conflict = anchorConflictForIntents(redIntent, blueIntent)
+  const redResolvedCommand = redIntent.movementBlocked || conflict.blockRed
+    ? { ...redCommand, move: 'brake' as const }
+    : redCommand
+  const blueResolvedCommand = blueIntent.movementBlocked || conflict.blockBlue
+    ? { ...blueCommand, move: 'brake' as const }
+    : blueCommand
+
+  red.lastMove = redResolvedCommand.move
+  blue.lastMove = blueResolvedCommand.move
+
+  if (redIntent.movementBlocked) {
+    state.log.push(`red combat action ${redAction.id} had a blocked or out-of-bounds anchor path.`)
+  }
+  if (blueIntent.movementBlocked) {
+    state.log.push(`blue combat action ${blueAction.id} had a blocked or out-of-bounds anchor path.`)
+  }
+  if (conflict.reason) {
+    state.log.push(`Combat anchor conflict on tick ${tick}: ${conflict.reason}.`)
+  }
+
+  const redMoved = applyAnchorMovement(events, tick, topology, red, redResolvedCommand, redIntent)
+  const blueMoved = applyAnchorMovement(events, tick, topology, blue, blueResolvedCommand, blueIntent)
+
+  applyAnchorConflictDamage(events, tick, red, blue, redCommand, blueCommand, conflict)
+
+  if (redMoved) {
+    applyAnchorPathHazards(events, tick, arena, topology, red, redIntent.movement)
+  } else {
+    resolveHazards(events, tick, arena, topology, red)
+  }
+  if (blueMoved) {
+    applyAnchorPathHazards(events, tick, arena, topology, blue, blueIntent.movement)
+  } else {
+    resolveHazards(events, tick, arena, topology, blue)
+  }
+
+  resolveWeapons(events, tick, arena, red, blue, redResolvedCommand, state.rng)
+  resolveWeapons(events, tick, arena, blue, red, blueResolvedCommand, state.rng)
+  resolveUtilities(events, tick, arena, red, blue, redResolvedCommand, redMovementUtility.consumed)
+  resolveUtilities(events, tick, arena, blue, red, blueResolvedCommand, blueMovementUtility.consumed)
+
+  if (
+    !isBotDestroyed(red) &&
+    !isBotDestroyed(blue) &&
+    distance(red.position, blue.position) < CONTACT_DISTANCE &&
+    (isContactMove(redResolvedCommand) || isContactMove(blueResolvedCommand))
+  ) {
+    const redRamDamage = contactAttackDamage(red, redResolvedCommand)
+    const blueRamDamage = contactAttackDamage(blue, blueResolvedCommand)
+    const redRetaliationDamage = contactRetaliationDamage(red, blueResolvedCommand)
+    const blueRetaliationDamage = contactRetaliationDamage(blue, redResolvedCommand)
+
+    if (redRamDamage > 0) {
+      applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+      applyContactDisruption(red, blue, redResolvedCommand, tick)
+    }
+    if (blueRamDamage > 0) {
+      applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+      applyContactDisruption(blue, red, blueResolvedCommand, tick)
+    }
+    if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
+      applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
+    }
+    if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
+      applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
+    }
+  }
+
+  if (red.health + blue.health < healthBeforeTick) {
+    state.lastDamageTick = tick
+  }
+
+  if (isBotDestroyed(red) || isBotDestroyed(blue)) {
+    return { completed: true }
+  }
+
+  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TICKS) {
+    state.stoppedByNoDamage = true
+    return { completed: true }
+  }
+
+  return { completed: tick >= HARD_MAX_COMBAT_TICKS }
+}
+
+function gameActionTickIntent(
+  state: CombatRuntimeState,
+  role: TeamRole,
+  command: TurnCommand,
+): GameActionTickIntent {
+  const legality = evaluateCombatCommand(combatLegalityContextForState(state, role), command)
+
+  return {
+    command,
+    movement: legality.movement,
+    movementBlocked: legality.movement.blocked || legality.movement.outOfBounds,
+  }
+}
+
+function combatLegalityContextForState(
+  state: CombatRuntimeState,
+  role: TeamRole,
+): CombatLegalityContext {
+  const self = role === 'red' ? state.red : state.blue
+  const opponent = role === 'red' ? state.blue : state.red
+
+  return {
+    arena: state.arena,
+    role,
+    self: createBotSnapshot(self),
+    opponent: createBotSnapshot(opponent),
+  }
+}
+
+function applyAnchorMovement(
+  events: ReplayEvent[],
+  tick: number,
+  topology: CompiledArenaTopology,
+  bot: BotRuntime,
+  command: TurnCommand,
+  intent: GameActionTickIntent,
+): boolean {
+  if (!movesAnchor(intent.movement) || intent.movementBlocked || command.move === 'brake') {
+    return false
+  }
+
+  const from = bot.position
+  const to = arenaCellCenter(topology, intent.movement.to)
+
+  if (positionsEqual(from, to)) {
+    return false
+  }
+
+  bot.position = to
+  events.push(createMoveEvent(tick, bot, from, to, command.move))
+
+  return true
+}
+
+function applyAnchorPathHazards(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
+  bot: BotRuntime,
+  movement: TacticalMovementPlan,
+): void {
+  const from = arenaCellCenter(topology, movement.from)
+  const to = arenaCellCenter(topology, movement.to)
+  const hazards = pathHazards(topology, from, to, 0.5)
+  const seen = new Set<string>()
+
+  for (const hazard of hazards) {
+    if (!seen.has(hazard.id)) {
+      seen.add(hazard.id)
+      applyArenaHazard(events, tick, arena, hazard, bot)
+    }
+  }
+}
+
+function anchorConflictForIntents(
+  red: GameActionTickIntent,
+  blue: GameActionTickIntent,
+): AnchorConflict {
+  const redMoving = movesAnchor(red.movement) && !red.movementBlocked
+  const blueMoving = movesAnchor(blue.movement) && !blue.movementBlocked
+
+  if (!redMoving && !blueMoving) {
+    return noAnchorConflict()
+  }
+
+  const redIntoBlueAnchor = redMoving && pathHasCell(red.movement.path, blue.movement.from)
+  const blueIntoRedAnchor = blueMoving && pathHasCell(blue.movement.path, red.movement.from)
+
+  if (
+    redMoving &&
+    blueMoving &&
+    sameAnchorCell(red.movement.to, blue.movement.to)
+  ) {
+    return {
+      blockRed: true,
+      blockBlue: true,
+      contactRed: true,
+      contactBlue: true,
+      reason: 'both bots selected the same final anchor',
+    }
+  }
+
+  if (
+    redMoving &&
+    blueMoving &&
+    red.movement.path.some((cell) => pathHasCell(blue.movement.path, cell))
+  ) {
+    return {
+      blockRed: true,
+      blockBlue: true,
+      contactRed: redIntoBlueAnchor,
+      contactBlue: blueIntoRedAnchor,
+      reason: 'anchor paths crossed',
+    }
+  }
+
+  if (redIntoBlueAnchor && !blueMoving) {
+    return {
+      blockRed: true,
+      blockBlue: false,
+      contactRed: true,
+      contactBlue: false,
+      reason: 'red rammed a held blue anchor',
+    }
+  }
+
+  if (blueIntoRedAnchor && !redMoving) {
+    return {
+      blockRed: false,
+      blockBlue: true,
+      contactRed: false,
+      contactBlue: true,
+      reason: 'blue rammed a held red anchor',
+    }
+  }
+
+  if (redIntoBlueAnchor && blueIntoRedAnchor) {
+    return {
+      blockRed: true,
+      blockBlue: true,
+      contactRed: true,
+      contactBlue: true,
+      reason: 'bots swapped anchor paths',
+    }
+  }
+
+  return noAnchorConflict()
+}
+
+function applyAnchorConflictDamage(
+  events: ReplayEvent[],
+  tick: number,
+  red: BotRuntime,
+  blue: BotRuntime,
+  redCommand: TurnCommand,
+  blueCommand: TurnCommand,
+  conflict: AnchorConflict,
+): void {
+  if (!conflict.contactRed && !conflict.contactBlue) {
+    return
+  }
+
+  const redRamDamage = conflict.contactRed ? contactAttackDamage(red, redCommand) : 0
+  const blueRamDamage = conflict.contactBlue ? contactAttackDamage(blue, blueCommand) : 0
+  const redRetaliationDamage = conflict.contactBlue ? contactRetaliationDamage(red, blueCommand) : 0
+  const blueRetaliationDamage = conflict.contactRed ? contactRetaliationDamage(blue, redCommand) : 0
+
+  if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRamDamage > 0) {
+    applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+    applyContactDisruption(red, blue, redCommand, tick)
+  }
+  if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRamDamage > 0) {
+    applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+    applyContactDisruption(blue, red, blueCommand, tick)
+  }
+  if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
+    applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
+  }
+  if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
+    applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
+  }
+}
+
+function movesAnchor(movement: TacticalMovementPlan): boolean {
+  return !sameAnchorCell(movement.from, movement.to)
+}
+
+function pathHasCell(
+  path: readonly TacticalMovementPlan['from'][],
+  cell: TacticalMovementPlan['from'],
+): boolean {
+  return path.some((entry) => sameAnchorCell(entry, cell))
+}
+
+function sameAnchorCell(
+  left: TacticalMovementPlan['from'],
+  right: TacticalMovementPlan['from'],
+): boolean {
+  return left.x === right.x && left.z === right.z
+}
+
+function noAnchorConflict(): AnchorConflict {
+  return {
+    blockRed: false,
+    blockBlue: false,
+    contactRed: false,
+    contactBlue: false,
+  }
 }
 
 function applyCombatTick(

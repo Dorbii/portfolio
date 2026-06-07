@@ -4,10 +4,10 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
   ArenaConfig,
-  TeamIdentity,
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../../packages/replay/src/index.js'
+import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
 import {
   createArena,
   updateHazards,
@@ -81,7 +81,7 @@ type BabylonReplaySceneProps = {
   botBlueprints: ReplayBotBlueprints
   cameraPreset: CameraPreset
   immediateCamera?: boolean
-  teamIdentities: Record<TeamRole, TeamIdentity>
+  teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   timeline: ReplayTimeline
   time: number
 }

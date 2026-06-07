@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
-  PublicSessionState,
   RoleInvite,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import {
   clearStoredSession,
   createSession,
@@ -52,6 +52,10 @@ export function useRefereeConsoleController() {
 
   const activeRefereeToken = storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
+  const completedFightCount = publicSession?.continuation.completedFightCount ?? 0
+  const canSave = false
+  const canContinue = false
+  const canQuit = false
   const {
     advanceRoundHint,
     advanceRoundLabel,
@@ -234,6 +238,7 @@ export function useRefereeConsoleController() {
 
   const phase = publicSession?.phase ?? 'not_started'
   const sessionChat = publicSession?.chatLog ?? ([] as PublicSessionState['chatLog'])
+  const deferredCompletionAction = useCallback(() => undefined, [])
 
   const refreshStoredSession = useCallback(() => {
     if (!activeSessionId) {
@@ -261,6 +266,16 @@ export function useRefereeConsoleController() {
     canAdvanceRound,
     copyAgentBrief,
     createNewSession,
+    completionControls: {
+      canContinue,
+      canQuit,
+      canSave,
+      completedFightCount,
+      isBusy: false,
+      onContinue: deferredCompletionAction,
+      onQuit: deferredCompletionAction,
+      onSave: deferredCompletionAction,
+    },
     error,
     hasInviteForRole,
     loadState,

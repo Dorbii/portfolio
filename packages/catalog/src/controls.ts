@@ -11,12 +11,15 @@ export function deriveControls(
 ): GeneratedControls {
   const parts = new Map(catalog.map((part) => [part.id, part]))
   const blockParts = blueprint.blocks
-    .map((block) => parts.get(block.partId))
-    .filter((part): part is PartDefinition => Boolean(part))
+    .map((block) => ({ block, part: parts.get(block.partId) }))
+    .filter((entry): entry is { block: BotBlueprint['blocks'][number], part: PartDefinition } => Boolean(entry.part))
 
-  const hasMovement = blockParts.some((part) => part.controls?.movement)
-  const weaponCount = blockParts.filter((part) => part.controls?.weapon).length
-  const hasUtility = blockParts.some((part) => part.controls?.utility)
+  const hasMovement = blockParts.some(({ part }) => part.controls?.movement)
+  const weaponCount = blockParts.filter(({ part }) => part.controls?.weapon).length
+  const hasUtility = blockParts.some(({ block, part }) => (
+    part.controls?.utility ||
+    (block.signatureEffectActive && part.signatureEffect?.trigger === 'activated')
+  ))
 
   return {
     movement: hasMovement

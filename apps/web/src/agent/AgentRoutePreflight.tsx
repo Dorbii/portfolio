@@ -1,7 +1,5 @@
 import { useEffect } from 'react'
-import type {
-  RolePrivateState,
-} from '../../../../packages/schemas/src/index.js'
+import type { RolePrivateState } from './agentSessionTypes.js'
 import {
   AgentArenaClient,
   parseAgentInviteFragment,

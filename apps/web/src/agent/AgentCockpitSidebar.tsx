@@ -45,11 +45,11 @@ function AgentStatePanel({
     workflow,
   } = controller
   const phaseLabel = roleState ? formatLabel(roleState.phase) : isBusy ? 'Loading' : 'Not loaded'
-  const planLabel = roleState?.submitted ? 'Submitted' : 'Pending'
-  const planDetail = roleState?.ownSubmission?.blueprint.name ?? (roleState ? 'No accepted plan' : 'Awaiting state')
+  const planLabel = roleState?.submitted ? 'Confirmed' : 'Pending'
+  const planDetail = roleState?.ownLoadout?.blueprint.name ?? (roleState ? 'No confirmed loadout' : 'Awaiting state')
   const opponentStatus = roleState
     ? roleState.opponent.submitted
-      ? 'Submitted'
+      ? 'Confirmed'
       : roleState.opponent.claimed
         ? 'Connected'
         : 'Open'
@@ -80,7 +80,7 @@ function AgentStatePanel({
           detail={roleState ? `Round ${roleState.round}` : formatLabel(status)}
         />
         <SignalCard
-          label="Plan"
+          label="Loadout"
           tone={roleState?.submitted ? 'ok' : 'warning'}
           value={planLabel}
           detail={planDetail}
@@ -142,7 +142,7 @@ function AgentCommsPanel({ controller }: { controller: AgentCockpitController })
           countLabel={`${privateChatLog.length} role-only`}
           id="private-chat"
           messages={privateChatLog}
-          title="Agent Journal"
+          title="Private Reflection"
         />
       ) : null}
       {roleHasChatLog ? (
@@ -150,7 +150,7 @@ function AgentCommsPanel({ controller }: { controller: AgentCockpitController })
           countLabel={`${chatLog.length} public`}
           id="chat"
           messages={chatLog}
-          title="Table Talk"
+          title="Public Chat"
         />
       ) : null}
     </Panel>

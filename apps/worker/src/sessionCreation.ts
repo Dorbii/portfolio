@@ -1,4 +1,9 @@
-import type { CreateSessionRequest, TeamRole } from '../../../packages/schemas/src/index.js'
+import type {
+  ChampionContinuationSeed,
+  CreateSessionRequest,
+  TeamRole,
+} from '../../../packages/schemas/src/index.js'
+import { createInitialLoadoutBuildState } from '../../../packages/sim/src/index.js'
 import { createInitialRoleState } from './sessionDefaults.js'
 import {
   DEFAULT_ARENA,
@@ -9,6 +14,7 @@ import {
   defaultTokenFactory,
   defaultTokenHasher,
   isArenaConfig,
+  isTeamRole,
   safeMaxRounds,
   safeText,
   safeTtlMs,
@@ -19,6 +25,10 @@ import type {
   TokenFactory,
   TokenHasher,
 } from './sessionTypes.js'
+
+export type InternalCreateSessionRequest = CreateSessionRequest & {
+  continuationSeed?: ChampionContinuationSeed
+}
 
 export type CreatedSessionState = {
   state: StoredSessionState
@@ -31,7 +41,7 @@ export type CreatedSessionState = {
 }
 
 export async function createInitialSessionState(
-  request: CreateSessionRequest = {},
+  request: InternalCreateSessionRequest = {},
   options: {
     clock?: Clock
     tokenFactory?: TokenFactory
@@ -62,6 +72,24 @@ export async function createInitialSessionState(
     blue: await tokenHasher(observerTokens.blue),
   }
   const refereeToken = tokenFactory('referee', 'referee')
+  const roles: StoredSessionState['roles'] = {
+    red: createInitialRoleState('red', claimTokenHashes.red, observerTokenHashes.red),
+    blue: createInitialRoleState('blue', claimTokenHashes.blue, observerTokenHashes.blue),
+  }
+  const continuationSeed = normalizeContinuationSeed(request.continuationSeed)
+
+  if (continuationSeed) {
+    const champion = roles[continuationSeed.championRole]
+    const challenger = roles[continuationSeed.challengerRole]
+
+    champion.currentDesign = cloneJson(continuationSeed.sourceSave.championDesign)
+    champion.loadoutBuildState = {
+      ...createInitialLoadoutBuildState(continuationSeed.championRole),
+      currentDesign: cloneJson(continuationSeed.sourceSave.championDesign),
+    }
+    champion.loadoutVersion = 1
+    challenger.gold += continuationSeed.challengerBonusGold
+  }
 
   return {
     clock,
@@ -80,11 +108,15 @@ export async function createInitialSessionState(
       createdAt: now,
       expiresAt: addMilliseconds(now, safeTtlMs(request.ttlSeconds)),
       updatedAt: now,
-      roles: {
-        red: createInitialRoleState('red', claimTokenHashes.red, observerTokenHashes.red),
-        blue: createInitialRoleState('blue', claimTokenHashes.blue, observerTokenHashes.blue),
-      },
+      roles,
       refereeTokenHash: await tokenHasher(refereeToken),
+      ...(continuationSeed
+        ? {
+            sourceChampionSave: cloneJson(continuationSeed.sourceSave),
+            continuationSeed: cloneJson(continuationSeed),
+            sharedDebrief: cloneJson(continuationSeed.sharedDebrief),
+          }
+        : {}),
       chatLog: [],
       rateLimits: {},
       eventLog: [
@@ -95,5 +127,48 @@ export async function createInitialSessionState(
         },
       ],
     },
+  }
+}
+
+function normalizeContinuationSeed(value: unknown): ChampionContinuationSeed | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined
+  }
+
+  const seed = value as Partial<ChampionContinuationSeed>
+
+  if (
+    !isTeamRole(seed.championRole) ||
+    !isTeamRole(seed.challengerRole) ||
+    seed.championRole === seed.challengerRole ||
+    typeof seed.challengerBonusGold !== 'number' ||
+    !Number.isFinite(seed.challengerBonusGold) ||
+    seed.challengerBonusGold < 0 ||
+    typeof seed.sourceSave !== 'object' ||
+    seed.sourceSave === null ||
+    typeof seed.sharedDebrief !== 'object' ||
+    seed.sharedDebrief === null
+  ) {
+    return undefined
+  }
+
+  const sourceSave = seed.sourceSave as ChampionContinuationSeed['sourceSave']
+
+  if (
+    typeof sourceSave.saveId !== 'string' ||
+    typeof sourceSave.sourceSessionId !== 'string' ||
+    sourceSave.championRole !== seed.championRole ||
+    typeof sourceSave.championDesign !== 'object' ||
+    sourceSave.championDesign === null
+  ) {
+    return undefined
+  }
+
+  return {
+    sourceSave: cloneJson(sourceSave),
+    championRole: seed.championRole,
+    challengerRole: seed.challengerRole,
+    challengerBonusGold: Math.floor(seed.challengerBonusGold),
+    sharedDebrief: cloneJson(seed.sharedDebrief as ChampionContinuationSeed['sharedDebrief']),
   }
 }
