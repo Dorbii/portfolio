@@ -67,10 +67,10 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Magnet')) return 'magnet'
   if (input.id.includes('Anchor')) return 'anchor'
   if (input.id.includes('Smoke')) return 'smoke'
+  if (input.id.includes('AIModule')) return 'ai_module'
   if (input.id.includes('Sensor')) return 'sensor'
   if (input.id.includes('EnergyCore')) return 'energy_core'
   if (input.id.includes('Battery') || input.id.includes('RepairKit')) return 'battery'
-  if (input.id.includes('AIModule')) return 'sensor'
   if (input.id.includes('Drone')) return 'drone'
   if (input.id.includes('LightBar')) return 'light_bar'
 

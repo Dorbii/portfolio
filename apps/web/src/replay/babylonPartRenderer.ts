@@ -140,8 +140,10 @@ function createPartNode(
 
   if (
     category !== 'style' &&
+    visualFamily !== 'ai_module' &&
     visualFamily !== 'energy_core' &&
     visualFamily !== 'gyro' &&
+    visualFamily !== 'magnet' &&
     visualFamily !== 'turret' &&
     visualFamily !== 'net'
   ) {
