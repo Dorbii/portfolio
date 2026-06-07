@@ -114,7 +114,7 @@ function createWeaponMount({
   mountRing.position.set(0, Math.max(height * 0.34, 0.18), 0)
   mountRing.rotation.x = Math.PI / 2
   attachMesh(mountPlate, parent, materials.trim)
-  attachMesh(mountRing, parent, materials.warning)
+  attachMesh(mountRing, parent, materials.steel)
 
   for (let side = -1; side <= 1; side += 2) {
     const bracket = MeshBuilder.CreateBox(

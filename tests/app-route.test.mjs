@@ -63,6 +63,14 @@ const replayPreviewSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayPreview.tsx', import.meta.url),
   'utf8',
 )
+const partCatalogPreviewSource = readFileSync(
+  new URL('../apps/web/src/replay/PartCatalogPreview.tsx', import.meta.url),
+  'utf8',
+)
+const babylonPartCatalogSceneSource = readFileSync(
+  new URL('../apps/web/src/replay/BabylonPartCatalogScene.tsx', import.meta.url),
+  'utf8',
+)
 const arenaPreviewSceneSource = readFileSync(
   new URL('../apps/web/src/replay/ArenaPreviewScene.tsx', import.meta.url),
   'utf8',
@@ -123,6 +131,26 @@ const babylonPartDetailsSource = readFileSync(
   new URL('../apps/web/src/replay/babylonPartDetails.ts', import.meta.url),
   'utf8',
 )
+const babylonPartMotionSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonPartMotion.ts', import.meta.url),
+  'utf8',
+)
+const babylonPartRendererSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonPartRenderer.ts', import.meta.url),
+  'utf8',
+)
+const babylonTreadPartsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonTreadParts.ts', import.meta.url),
+  'utf8',
+)
+const babylonUtilityPartsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonUtilityParts.ts', import.meta.url),
+  'utf8',
+)
+const babylonMeleeWeaponPartsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonMeleeWeaponParts.ts', import.meta.url),
+  'utf8',
+)
 const babylonReplayEffectsSource = readFileSync(
   new URL('../apps/web/src/replay/babylonReplayEffects.ts', import.meta.url),
   'utf8',
@@ -133,6 +161,14 @@ const babylonSceneUtilsSource = readFileSync(
 )
 const babylonWeaponPartsSource = readFileSync(
   new URL('../apps/web/src/replay/babylonWeaponParts.ts', import.meta.url),
+  'utf8',
+)
+const babylonSpinnerWeaponPartSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonSpinnerWeaponPart.ts', import.meta.url),
+  'utf8',
+)
+const babylonWheelPartsSource = readFileSync(
+  new URL('../apps/web/src/replay/babylonWheelParts.ts', import.meta.url),
   'utf8',
 )
 const botAssemblyRendererSource = readFileSync(
@@ -179,6 +215,19 @@ test('app keeps a dedicated /agent route gate tolerant of nested paths', () => {
   assert.match(appSource, /const normalized = pathname\.replace\(/)
   assert.match(appSource, /normalized === '\/agent'/)
   assert.match(appSource, /normalized\.endsWith\('\/agent'\)/)
+})
+
+test('app keeps a qa-only part catalog route for isolated renderer review', () => {
+  assert.ok(appSource.includes("import('./replay/PartCatalogPreview')"))
+  assert.match(appSource, /function isPartCatalogPreviewPathname\(/)
+  assert.match(appSource, /normalized === '\/qa\/part-catalog'/)
+  assert.match(appSource, /normalized\.endsWith\('\/qa\/part-catalog'\)/)
+  assert.ok(partCatalogPreviewSource.includes('PART_CATALOG'))
+  assert.ok(partCatalogPreviewSource.includes('BabylonPartCatalogScene'))
+  assert.ok(partCatalogPreviewSource.includes("'Wheel_Omni'"))
+  assert.ok(babylonPartCatalogSceneSource.includes('createCatalogPartNode'))
+  assert.ok(babylonPartCatalogSceneSource.includes('BABYLON_RENDERER_BUDGETS.partCatalog'))
+  assert.ok(babylonPartCatalogSceneSource.includes('damageMaterialForSeverity'))
 })
 
 test('root console is wired to live referee session helpers', () => {
@@ -480,6 +529,10 @@ test('Babylon renderer surfaces share lifecycle, lighting, and stats helpers', (
   assert.ok(babylonReplaySceneSource.includes('createReplayLightingPreset'))
   assert.ok(babylonReplaySceneSource.includes('createRendererStats'))
   assert.ok(babylonReplaySceneSource.includes('disposeBabylonRendererCore'))
+  assert.ok(babylonPartCatalogSceneSource.includes('createBabylonRendererCore'))
+  assert.ok(babylonPartCatalogSceneSource.includes('createCaptureLightingPreset'))
+  assert.ok(babylonPartCatalogSceneSource.includes('createRendererStats'))
+  assert.ok(babylonPartCatalogSceneSource.includes('disposeBabylonRendererCore'))
   assert.ok(botAssemblyRendererSource.includes('createBabylonRendererCore'))
   assert.ok(botAssemblyRendererSource.includes('createAssemblyLightingPreset'))
   assert.ok(botAssemblyRendererSource.includes('createRendererBox'))
@@ -487,6 +540,8 @@ test('Babylon renderer surfaces share lifecycle, lighting, and stats helpers', (
   assert.ok(actualPartCaptureToolSource.includes('createCaptureLightingPreset'))
   assert.equal(babylonReplaySceneSource.includes('new Engine('), false)
   assert.equal(babylonReplaySceneSource.includes('new Scene('), false)
+  assert.equal(babylonPartCatalogSceneSource.includes('new Engine('), false)
+  assert.equal(babylonPartCatalogSceneSource.includes('new Scene('), false)
   assert.equal(botAssemblyRendererSource.includes('new Engine('), false)
   assert.equal(botAssemblyRendererSource.includes('new Scene('), false)
   assert.equal(actualPartCaptureToolSource.includes('new Engine('), false)
@@ -499,9 +554,12 @@ test('Babylon renderer exposes source-owned resource and chunk budgets', () => {
   assert.ok(babylonRendererBudgetsSource.includes('BABYLON_RENDERER_BUDGETS'))
   assert.ok(babylonRendererBudgetsSource.includes('BABYLON_RENDERER_CHUNK_GZIP_BUDGET_BYTES'))
   assert.ok(babylonRendererBudgetsSource.includes('BABYLON_RENDERER_AGGREGATE_GZIP_BUDGET_BYTES'))
+  assert.ok(babylonRendererBudgetsSource.includes('partCatalog'))
   assert.ok(babylonRendererBudgetsSource.includes('function createBabylonRendererBudgetState'))
   assert.ok(babylonReplaySceneSource.includes('data-renderer-budget-state'))
   assert.ok(babylonReplaySceneSource.includes('data-renderer-budget-total-vertices'))
+  assert.ok(babylonPartCatalogSceneSource.includes('data-renderer-budget-state'))
+  assert.ok(babylonPartCatalogSceneSource.includes('data-renderer-budget-total-vertices'))
   assert.ok(botAssemblySceneSource.includes('data-renderer-budget-state'))
   assert.ok(botAssemblySceneSource.includes('data-renderer-budget-total-vertices'))
   assert.ok(rendererBudgetToolSource.includes('chunkGzipBudgetBytes = 560 * 1024'))
@@ -534,6 +592,10 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.equal(babylonMaterialsSource.includes('paletteOverrides'), false)
   assert.ok(babylonMaterialsSource.includes('function createCombatTeamPalette'))
   assert.ok(babylonMaterialsSource.includes('resolveTeamAccentHex'))
+  assert.equal(babylonMaterialsSource.includes("weapon: '#b49a62'"), false)
+  assert.equal(babylonMaterialsSource.includes("'#6f3a22'"), false)
+  assert.ok(babylonMaterialsSource.includes("weapon: mixHexColors(base.weapon, accent"))
+  assert.ok(babylonMaterialsSource.includes("utility: mixHexColors(base.utility, accent"))
   assert.ok(teamVisualsSource.includes('function createTeamAccentCssVars'))
   assert.ok(refereePanelsSource.includes('teamAccentRgb(role, identity)'))
   assert.equal(refereePanelsSource.includes('findBlueprintAccent'), false)
@@ -546,6 +608,10 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonSurfaceTexturesSource.includes('type SurfacePattern'))
   assert.ok(babylonSurfaceTexturesSource.includes(" | 'arena_floor'"))
   assert.ok(babylonSurfaceTexturesSource.includes(" | 'damage_critical'"))
+  assert.ok(babylonSurfaceTexturesSource.includes('function drawWeaponTexture'))
+  assert.ok(babylonSurfaceTexturesSource.includes('function isCoolMetalPattern'))
+  assert.equal(babylonSurfaceTexturesSource.includes("pattern === 'warning' || pattern === 'weapon'"), false)
+  assert.ok(babylonSurfaceTexturesSource.includes("pattern === 'weapon'"))
   assert.ok(babylonArenaSource.includes('createPbrSceneMaterial'))
   assert.ok(babylonArenaSource.includes("'arena_floor'"))
   assert.ok(babylonRendererKitSource.includes('function applyRendererEnvironment'))
@@ -553,6 +619,81 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(babylonWeaponPartsSource.includes('WEAPON_RENDERERS_BY_VISUAL_FAMILY'))
   assert.ok(babylonWeaponPartsSource.includes('getPart(partId)?.visual.visualFamily'))
   assert.equal(babylonWeaponPartsSource.includes('partId.includes'), false)
+  assert.ok(babylonPartMotionSource.includes("export type PartMotionAxis = 'x' | 'y' | 'z'"))
+  assert.ok(babylonPartMotionSource.includes('function applyRotaryMotion'))
+  assert.equal(babylonPartMotionSource.includes('metadata.axis ??'), false)
+  assert.ok(babylonReplaySceneSource.includes('updateBots(resources.bots, frame)'))
+  assert.ok(babylonPartCatalogSceneSource.includes('applyPartMotion(node, elapsedSeconds'))
+  assert.ok(botAssemblyAnimationSource.includes('applyPartMotion(mesh, elapsed'))
+  assert.equal(
+    babylonPartCatalogSceneSource.includes("metadata?.kind === 'pulse' || metadata?.kind === 'roll' || metadata?.kind === 'spin'"),
+    false,
+  )
+  assert.equal(botAssemblyAnimationSource.includes("mesh.rotation.y += (metadata.speed ?? 0.06)"), false)
+  assert.ok(babylonWeaponPartsSource.includes('attachMesh(mountRing, parent, materials.steel)'))
+  assert.ok(babylonSpinnerWeaponPartSource.includes('saw-blade-motion-root'))
+  assert.ok(babylonSpinnerWeaponPartSource.includes("bladeRoot.metadata = { kind: 'spin', axis: 'x'"))
+  assert.ok(babylonSpinnerWeaponPartSource.includes('spinner-motion-root'))
+  assert.ok(babylonSpinnerWeaponPartSource.includes("spinnerRoot.metadata = { kind: 'spin', axis: 'x'"))
+  assert.ok(babylonSpinnerWeaponPartSource.includes('attachMesh(bar, spinnerRoot, materials.steel)'))
+  assert.ok(babylonMeleeWeaponPartsSource.includes('drill-bit-motion-root'))
+  assert.ok(babylonMeleeWeaponPartsSource.includes("bitRoot.metadata = { kind: 'spin', axis: 'z'"))
+  assert.ok(babylonMeleeWeaponPartsSource.includes('flail-chain-root'))
+  assert.ok(babylonMeleeWeaponPartsSource.includes("chainRoot.metadata = { kind: 'spin', axis: 'x'"))
+  assert.equal(babylonMeleeWeaponPartsSource.includes('drum.metadata'), false)
+  assert.ok(babylonWheelPartsSource.includes("wheel.metadata = { kind: 'roll', axis: 'x'"))
+  assert.ok(babylonWheelPartsSource.includes("wheelRoot.metadata = { kind: 'roll', axis: 'x'"))
+  assert.ok(babylonTreadPartsSource.includes("wheel.metadata = { kind: 'roll', axis: 'z'"))
+  assert.ok(babylonUtilityPartsSource.includes('createGyroStabilizerPart'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-outer-gimbal-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-inner-gimbal-ring'))
+  assert.ok(babylonUtilityPartsSource.includes('gyro-flywheel-motion-root'))
+  assert.ok(babylonUtilityPartsSource.includes("rotorRoot.metadata = { kind: 'spin', axis: 'x'"))
+  assert.equal(babylonUtilityPartsSource.includes('gyroRing.metadata'), false)
+  assert.ok(babylonUtilityPartsSource.includes("rotor.metadata = { kind: 'spin', axis: 'z'"))
+  assert.equal(
+    /kind: '(?:roll|spin)', speed/.test(
+      [
+        babylonMeleeWeaponPartsSource,
+        babylonSpinnerWeaponPartSource,
+        babylonTreadPartsSource,
+        babylonUtilityPartsSource,
+        babylonWheelPartsSource,
+      ].join('\n'),
+    ),
+    false,
+  )
+  assert.ok(babylonPartRendererSource.includes('function createCatalogPartNode'))
+  assert.ok(babylonPartRendererSource.includes("visualFamily !== 'gyro'"))
+  assert.equal(babylonWheelPartsSource.includes('large-wheel-outer-band'), false)
+  assert.ok(babylonWheelPartsSource.includes('large-wheel-bead-plate'))
+  assert.ok(babylonWheelPartsSource.includes('large-wheel-sidewall-lug'))
+  assert.equal(babylonWheelPartsSource.includes('omni-outer-ring'), false)
+  assert.ok(babylonWheelPartsSource.includes('CreateCapsule'))
+  assert.ok(babylonWheelPartsSource.includes('omni-face-rim'))
+  assert.ok(babylonWheelPartsSource.includes('omni-face-window'))
+  assert.ok(babylonWheelPartsSource.includes('omni-roller-cheek'))
+  assert.equal(babylonWheelPartsSource.includes('mecanum-roller-cheek'), false)
+  assert.equal(babylonWheelPartsSource.includes('mecanum-side-bolt'), false)
+  assert.ok(babylonWheelPartsSource.includes('mecanum-side-plate'))
+  assert.ok(babylonWheelPartsSource.includes('mecanum-face-fastener'))
+  assert.ok(babylonWheelPartsSource.includes('mecanum-roller-cap'))
+  assert.ok(babylonWheelPartsSource.includes('mecanum-roller-bearing'))
+  assert.ok(babylonWheelPartsSource.includes('function createMecanumRollerAxis'))
+  assert.equal(babylonWheelPartsSource.includes('function createSpikedWheelRim'), false)
+  assert.ok(babylonWheelPartsSource.includes('function createSpikedWheelPart'))
+  assert.ok(babylonWheelPartsSource.includes('spiked-wheel-tooth'))
+  assert.ok(babylonWheelPartsSource.includes('spiked-wheel-bite-ring'))
+  assert.equal(babylonTreadPartsSource.includes('tread-top-stripe'), false)
+  assert.equal(babylonTreadPartsSource.includes('tread-drive-module'), false)
+  assert.equal(babylonTreadPartsSource.includes('exposed-road-wheel'), false)
+  assert.equal(babylonTreadPartsSource.includes('tread-shock-tower'), false)
+  assert.equal(babylonTreadPartsSource.includes('standard-tread-service-hatch'), false)
+  assert.ok(babylonTreadPartsSource.includes('function createStandardTreadPart'))
+  assert.ok(babylonTreadPartsSource.includes('standard-tread-belt-top'))
+  assert.ok(babylonTreadPartsSource.includes('standard-tread-front-idler'))
+  assert.ok(babylonTreadPartsSource.includes('standard-tread-rear-sprocket'))
+  assert.ok(babylonTreadPartsSource.includes('standard-tread-top-shoe'))
   assert.ok(babylonPartDetailsSource.includes('function createFastenerRow'))
   assert.ok(babylonPartDetailsSource.includes('function createVentSlats'))
   assert.ok(babylonPartDetailsSource.includes('function createPanelSeam'))

@@ -224,14 +224,14 @@ export const mockRoleStates: Record<TeamRole, RolePrivateState> = {
             rotation: [0, 0, 0],
           },
           {
-            id: 'left-tread',
-            partId: 'Tread_Heavy',
+            id: 'left-wheel',
+            partId: 'Wheel_Large',
             position: [-2, 0, 0],
             rotation: [0, 0, 0],
           },
           {
-            id: 'right-tread',
-            partId: 'Tread_Heavy',
+            id: 'right-wheel',
+            partId: 'Wheel_Large',
             position: [2, 0, 0],
             rotation: [0, 0, 0],
           },

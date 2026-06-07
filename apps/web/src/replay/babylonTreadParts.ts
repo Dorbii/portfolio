@@ -7,7 +7,19 @@ import {
 } from './babylonPartVisuals'
 
 export function createTreadPart(args: MobilityPartRenderArgs): void {
-  const {
+  const { partId } = args
+  const visual = treadVisualFor(partId)
+
+  if (partId === 'Wheel_Tank') {
+    createTankTrackPart(args)
+    return
+  }
+
+  createStandardTreadPart(args, visual)
+}
+
+function createStandardTreadPart(
+  {
     scene,
     parent,
     material,
@@ -18,259 +30,167 @@ export function createTreadPart(args: MobilityPartRenderArgs): void {
     height,
     depth,
     materials,
-  } = args
-  const visual = treadVisualFor(partId)
+  }: MobilityPartRenderArgs,
+  visual: TreadVisual,
+): void {
+  const isHeavy = partId === 'Tread_Heavy'
+  const length = Math.max(width * (isHeavy ? 1.3 : 1.18), isHeavy ? 1.56 : 1.3)
+  const beltDepth = Math.max(depth * (isHeavy ? 0.98 : 0.86), isHeavy ? 0.52 : 0.42)
+  const beltThickness = Math.max(height * (isHeavy ? 0.11 : 0.09), 0.058)
+  const trackHeight = Math.max(height * (isHeavy ? 0.76 : 0.68), isHeavy ? 0.56 : 0.46)
+  const bottomY = -Math.max(height * 0.12, 0.07)
+  const topY = bottomY + trackHeight
+  const wheelFaceZ = Math.max(beltDepth * 0.55, 0.24)
+  const padCount = isHeavy ? Math.max(visual.padCount + 9, 16) : Math.max(visual.padCount + 9, 14)
 
-  if (partId === 'Wheel_Tank') {
-    createTankTrackPart(args)
-    return
-  }
-
-  const base = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-base`,
-    {
-      width: Math.max(width * visual.baseWidthScale, 0.68),
-      height: Math.max(height * visual.baseHeightScale, 0.15),
-      depth: Math.max(depth * visual.baseDepthScale, 0.7),
-    },
-    scene,
-  )
-  const top = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-top`,
-    {
-      width: Math.max(width * visual.topWidthScale, 0.56),
-      height: Math.max(height * visual.topHeightScale, 0.08),
-      depth: Math.max(depth * visual.topDepthScale, 0.5),
-    },
-    scene,
-  )
-
-  top.position.y = Math.max(height * (0.26 + visual.topHeightScale), 0.11)
-  attachMesh(base, parent, materials.rubber)
-  attachMesh(top, parent, material)
-
-  const topStripe = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-top-stripe`,
-    {
-      width: Math.max(width * visual.topWidthScale * 0.58, 0.34),
-      height: Math.max(height * 0.06, 0.04),
-      depth: Math.max(depth * 0.16, 0.08),
-    },
-    scene,
-  )
-
-  topStripe.position.set(0, top.position.y + Math.max(height * 0.22, 0.1), Math.max(depth * 0.22, 0.12))
-  attachMesh(topStripe, parent, partId === 'Tread_Light' ? materials.utility : materials.warning)
-
-  const linkLeft = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-link-l`,
-    {
-      width: Math.max(width * 0.18, 0.1),
-      height: Math.max(height * 0.32, 0.08),
-      depth: Math.max(depth * visual.topDepthScale, 0.5),
-    },
-    scene,
-  )
-  const linkRight = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-link-r`,
-    {
-      width: Math.max(width * 0.18, 0.1),
-      height: Math.max(height * 0.32, 0.08),
-      depth: Math.max(depth * visual.topDepthScale, 0.5),
-    },
-    scene,
-  )
-
-  linkLeft.position.x = -Math.max(width * 0.54, 0.22)
-  linkRight.position.x = Math.max(width * 0.54, 0.22)
-  attachMesh(linkLeft, parent, materials.trim)
-  attachMesh(linkRight, parent, materials.trim)
-
-  const driveModule = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-drive-module`,
-    {
-      width: Math.max(width * 0.54 * visual.suspensionScale, 0.32),
-      height: Math.max(height * 0.48 * visual.suspensionScale, 0.22),
-      depth: Math.max(depth * 0.5 * visual.suspensionScale, 0.28),
-    },
-    scene,
-  )
-
-  driveModule.position.set(0, Math.max(height * 0.68, 0.3), -Math.max(depth * 0.18, 0.12))
-  attachMesh(driveModule, parent, partId === 'Tread_Heavy' ? materials.warning : materials.utility)
+  createTrackBelt(scene, parent, materials.rubber, `${role}-${blockId}-standard-tread-belt-bottom`, {
+    depth: beltDepth,
+    height: beltThickness,
+    width: length,
+    x: 0,
+    y: bottomY,
+    z: 0,
+  })
+  createTrackBelt(scene, parent, materials.rubber, `${role}-${blockId}-standard-tread-belt-top`, {
+    depth: beltDepth * 0.96,
+    height: beltThickness,
+    width: length * 0.88,
+    x: -length * 0.02,
+    y: topY,
+    z: 0,
+  })
 
   for (let side = -1; side <= 1; side += 2) {
-    createTreadSideDetails(args, visual, side)
-  }
-  createExposedTreadWheels(args, visual)
-
-  for (let index = 0; index < visual.padCount; index += 1) {
-    const offset = index - (visual.padCount - 1) / 2
-    const treadPad = MeshBuilder.CreateBox(
-      `${role}-${blockId}-tread-pad-${index}`,
+    const ramp = MeshBuilder.CreateBox(
+      `${role}-${blockId}-standard-tread-belt-ramp-${side}`,
       {
-        width: Math.max(width * visual.topWidthScale * 0.94, 0.48),
-        height: Math.max(height * 0.1, 0.05),
-        depth: Math.max(depth * 0.12, 0.065),
+        width: Math.max(length * 0.23, 0.28),
+        height: beltThickness,
+        depth: beltDepth,
       },
       scene,
     )
 
-    treadPad.position.set(0, Math.max(height * 0.02, 0.04), offset * Math.max(depth * 0.24, 0.13))
-    attachMesh(treadPad, parent, materials.rubber)
+    ramp.position.set(side * length * 0.45, bottomY + trackHeight * 0.5, 0)
+    ramp.rotation.z = side * -0.54
+    attachMesh(ramp, parent, materials.rubber)
   }
 
-  for (let index = 0; index < visual.rollerCount; index += 1) {
-    const offset = index - (visual.rollerCount - 1) / 2
-    const rollerMesh = MeshBuilder.CreateCylinder(
-      `${role}-${blockId}-roller-${index}`,
-      {
-        height: Math.max(depth * 0.42, 0.16),
-        diameter: Math.max(width * visual.rollerScale * (index === 1 ? 0.82 : 1), 0.2),
-        tessellation: 16,
-      },
-      scene,
-    )
+  const railDepth = Math.max(beltDepth * 0.085, 0.04)
+  const upperRailY = bottomY + trackHeight * 0.68
+  const lowerRailY = bottomY + trackHeight * 0.2
 
-    rollerMesh.rotation.x = Math.PI / 2
-    rollerMesh.position.z = offset * Math.max(depth * 0.5, 0.24)
-    rollerMesh.metadata = { kind: 'roll', speed: visual.rollSpeed }
-    attachMesh(rollerMesh, parent, materials.rubber)
-  }
-}
+  for (const z of [-wheelFaceZ, wheelFaceZ]) {
+    createTrackFrameRail(scene, parent, material, `${role}-${blockId}-standard-tread-upper-side-rail-${z > 0 ? 'front' : 'rear'}`, {
+      depth: railDepth,
+      height: Math.max(height * (isHeavy ? 0.16 : 0.12), 0.07),
+      width: Math.max(length * 0.74, 0.86),
+      x: 0,
+      y: upperRailY,
+      z,
+    })
+    createTrackFrameRail(scene, parent, materials.trim, `${role}-${blockId}-standard-tread-lower-side-rail-${z > 0 ? 'front' : 'rear'}`, {
+      depth: railDepth,
+      height: Math.max(height * 0.09, 0.052),
+      width: Math.max(length * 0.66, 0.78),
+      x: 0,
+      y: lowerRailY,
+      z,
+    })
 
-function createExposedTreadWheels(
-  {
-    scene,
-    parent,
-    role,
-    blockId,
-    width,
-    height,
-    depth,
-    materials,
-  }: MobilityPartRenderArgs,
-  visual: TreadVisual,
-): void {
-  const sideZ = Math.max(depth * visual.baseDepthScale * 0.54, 0.32)
-  const lowerY = Math.max(height * 0.08, 0.08)
-  const wheelY = Math.max(height * 0.25, 0.14)
-  const wheelX = Math.max(width * visual.baseWidthScale * 0.4, 0.34)
-  const wheelDiameter = Math.max(width * visual.rollerScale, 0.22)
-
-  for (const z of [-sideZ, sideZ]) {
-    for (const x of [-wheelX, 0, wheelX]) {
-      const wheel = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-exposed-road-wheel-${x.toFixed(2)}-${z > 0 ? 'front' : 'rear'}`,
-        {
-          height: Math.max(depth * 0.08, 0.045),
-          diameter: wheelDiameter,
-          tessellation: 16,
-        },
-        scene,
-      )
-      const hub = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-exposed-road-wheel-hub-${x.toFixed(2)}-${z > 0 ? 'front' : 'rear'}`,
-        {
-          height: Math.max(depth * 0.09, 0.05),
-          diameter: wheelDiameter * 0.38,
-          tessellation: 10,
-        },
-        scene,
-      )
-
-      wheel.rotation.x = Math.PI / 2
-      hub.rotation.x = Math.PI / 2
-      wheel.position.set(x, wheelY, z)
-      hub.position.copyFrom(wheel.position)
-      attachMesh(wheel, parent, materials.steel)
-      attachMesh(hub, parent, materials.trim)
-    }
-
-    for (const x of [-wheelX * 1.22, wheelX * 1.22]) {
-      const sprocket = MeshBuilder.CreateCylinder(
-        `${role}-${blockId}-exposed-sprocket-${x > 0 ? 'front' : 'rear'}-${z > 0 ? 'outer' : 'inner'}`,
-        {
-          height: Math.max(depth * 0.08, 0.045),
-          diameter: Math.max(wheelDiameter * 1.18, 0.28),
-          tessellation: 14,
-        },
-        scene,
-      )
-
-      sprocket.rotation.x = Math.PI / 2
-      sprocket.position.set(x, lowerY + wheelDiameter * 0.35, z)
-      attachMesh(sprocket, parent, materials.steel)
+    for (const x of [-length * 0.5, length * 0.5]) {
+      createTrackFrameRail(scene, parent, material, `${role}-${blockId}-standard-tread-end-plate-${x > 0 ? 'front' : 'rear'}-${z > 0 ? 'outer' : 'inner'}`, {
+        depth: railDepth,
+        height: Math.max(trackHeight * 0.52, 0.28),
+        width: Math.max(length * 0.06, 0.08),
+        x,
+        y: bottomY + trackHeight * 0.43,
+        z,
+      })
     }
   }
-}
 
-function createTreadSideDetails(
-  {
-    scene,
-    parent,
-    material,
-    role,
-    blockId,
-    width,
-    height,
-    depth,
-    materials,
-  }: MobilityPartRenderArgs,
-  visual: TreadVisual,
-  side: number,
-): void {
-  const treadArmorShroud = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-armor-shroud-${side}`,
-    {
-      width: Math.max(width * 0.16 * visual.suspensionScale, 0.1),
-      height: Math.max(height * visual.shroudHeightScale, 0.18),
-      depth: Math.max(depth * visual.shroudDepthScale, 0.72),
-    },
-    scene,
-  )
-  const cableRail = MeshBuilder.CreateCylinder(
-    `${role}-${blockId}-tread-cable-rail-${side}`,
-    { height: Math.max(depth * visual.shroudDepthScale * 0.7, 0.5), diameter: 0.032, tessellation: 8 },
-    scene,
-  )
-  const suspensionPod = MeshBuilder.CreateBox(
-    `${role}-${blockId}-tread-suspension-pod-${side}`,
-    {
-      width: Math.max(width * 0.2 * visual.suspensionScale, 0.14),
-      height: Math.max(height * 0.72 * visual.suspensionScale, 0.3),
-      depth: Math.max(depth * 0.36 * visual.suspensionScale, 0.22),
-    },
-    scene,
-  )
-  const shockTower = MeshBuilder.CreateCylinder(
-    `${role}-${blockId}-tread-shock-tower-${side}`,
-    {
-      height: Math.max(height * 0.72 * visual.suspensionScale, 0.34),
-      diameter: Math.max(width * 0.09, 0.07),
-      tessellation: 8,
-    },
-    scene,
-  )
+  const roadWheelCount = isHeavy ? 4 : 3
+  for (let index = 0; index < roadWheelCount; index += 1) {
+    const x = -length * 0.28 + index * ((length * 0.56) / Math.max(roadWheelCount - 1, 1))
 
-  treadArmorShroud.position.set(side * Math.max(width * 0.76, 0.34), Math.max(height * 0.22, 0.08), 0)
-  cableRail.rotation.x = Math.PI / 2
-  cableRail.position.set(side * Math.max(width * 0.4, 0.22), Math.max(height * 0.64, 0.22), 0)
-  suspensionPod.position.set(
-    side * Math.max(width * 0.46, 0.28),
-    Math.max(height * 0.68, 0.3),
-    -Math.max(depth * 0.34, 0.18),
-  )
-  shockTower.position.set(
-    side * Math.max(width * 0.3, 0.22),
-    Math.max(height * 0.74, 0.34),
-    Math.max(depth * 0.24, 0.14),
-  )
-  shockTower.rotation.z = side * 0.18
-  attachMesh(treadArmorShroud, parent, material)
-  attachMesh(cableRail, parent, materials.trim)
-  attachMesh(suspensionPod, parent, material)
-  attachMesh(shockTower, parent, materials.trim)
+    for (const z of [-wheelFaceZ, wheelFaceZ]) {
+      createTrackWheel(scene, parent, `${role}-${blockId}-standard-tread-road-wheel-${index}-${z > 0 ? 'front' : 'rear'}`, {
+        diameter: Math.max(trackHeight * (isHeavy ? 0.32 : 0.3), isHeavy ? 0.18 : 0.15),
+        material: materials.rubber,
+        hubMaterial: materials.steel,
+        tessellation: isHeavy ? 18 : 16,
+        x,
+        y: bottomY + trackHeight * 0.3,
+        z,
+      })
+    }
+  }
+
+  for (const z of [-wheelFaceZ, wheelFaceZ]) {
+    createTrackWheel(scene, parent, `${role}-${blockId}-standard-tread-front-idler-${z > 0 ? 'front' : 'rear'}`, {
+      diameter: Math.max(trackHeight * (isHeavy ? 0.4 : 0.36), 0.2),
+      material: materials.rubber,
+      hubMaterial: materials.steel,
+      tessellation: isHeavy ? 20 : 18,
+      x: length * 0.45,
+      y: bottomY + trackHeight * 0.4,
+      z,
+    })
+    createTrackWheel(scene, parent, `${role}-${blockId}-standard-tread-rear-sprocket-${z > 0 ? 'front' : 'rear'}`, {
+      diameter: Math.max(trackHeight * (isHeavy ? 0.44 : 0.38), 0.22),
+      material: materials.rubber,
+      hubMaterial: materials.steel,
+      tessellation: isHeavy ? 20 : 18,
+      x: -length * 0.45,
+      y: bottomY + trackHeight * 0.4,
+      z,
+    })
+  }
+
+  for (let index = 0; index < padCount; index += 1) {
+    const x = -length * 0.42 + index * ((length * 0.84) / Math.max(padCount - 1, 1))
+
+    createTrackShoe(scene, parent, `${role}-${blockId}-standard-tread-bottom-shoe-${index}`, {
+      depth: beltDepth * 1.06,
+      height: Math.max(beltThickness * 0.5, 0.026),
+      material: materials.rubber,
+      width: Math.max(length * 0.04, 0.05),
+      x,
+      y: bottomY - beltThickness * 0.74,
+    })
+    createTrackShoe(scene, parent, `${role}-${blockId}-standard-tread-top-shoe-${index}`, {
+      depth: beltDepth,
+      height: Math.max(beltThickness * 0.46, 0.024),
+      material: materials.rubber,
+      width: Math.max(length * 0.038, 0.048),
+      x,
+      y: topY + beltThickness * 0.74,
+    })
+  }
+
+  for (let side = -1; side <= 1; side += 2) {
+    for (let index = 0; index < 4; index += 1) {
+      const t = (index + 1) / 5
+      const rampShoe = MeshBuilder.CreateBox(
+        `${role}-${blockId}-standard-tread-ramp-shoe-${side}-${index}`,
+        {
+          width: Math.max(length * 0.038, 0.048),
+          height: Math.max(beltThickness * 0.46, 0.024),
+          depth: beltDepth,
+        },
+        scene,
+      )
+
+      rampShoe.position.set(
+        side * length * (0.34 + t * 0.13),
+        bottomY + trackHeight * (0.12 + t * 0.72),
+        0,
+      )
+      rampShoe.rotation.z = side * -0.54
+      attachMesh(rampShoe, parent, materials.rubber)
+    }
+  }
 }
 
 function createTankTrackPart({
@@ -520,8 +440,8 @@ function createTrackWheel(
   name: string,
   options: {
     diameter: number
-    hubMaterial: MobilityPartRenderArgs['materials']['trim']
-    material: MobilityPartRenderArgs['materials']['steel']
+    hubMaterial: MobilityPartRenderArgs['material']
+    material: MobilityPartRenderArgs['material']
     tessellation: number
     x: number
     y: number
@@ -551,7 +471,7 @@ function createTrackWheel(
   hub.rotation.x = Math.PI / 2
   wheel.position.set(options.x, options.y, options.z)
   hub.position.copyFrom(wheel.position)
-  wheel.metadata = { kind: 'roll', speed: 0.05 }
+  wheel.metadata = { kind: 'roll', axis: 'z', speed: 0.05 }
   attachMesh(wheel, parent, options.material)
   attachMesh(hub, parent, options.hubMaterial)
 
@@ -585,14 +505,16 @@ function createTrackShoe(
   name: string,
   options: {
     depth: number
+    height?: number
     material: MobilityPartRenderArgs['materials']['rubber']
+    width?: number
     x: number
     y: number
   },
 ): void {
   const shoe = MeshBuilder.CreateBox(
     name,
-    { width: 0.1, height: 0.045, depth: options.depth },
+    { width: options.width ?? 0.1, height: options.height ?? 0.045, depth: options.depth },
     scene,
   )
 

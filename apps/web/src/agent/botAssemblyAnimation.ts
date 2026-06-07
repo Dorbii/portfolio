@@ -10,6 +10,11 @@ import type {
 } from '../../../../packages/schemas/src/index.js'
 import { createBotNode } from '../replay/babylonPartRenderer'
 import type { TeamMaterialSet } from '../replay/babylonMaterials'
+import {
+  applyPartMotion,
+  isPartMotionNode,
+  type PartMotionMetadata,
+} from '../replay/babylonPartMotion'
 
 export type AssemblyResources = {
   bot?: TransformNode
@@ -50,9 +55,7 @@ type AssemblyMetadata = {
   assemblyIndex?: number
   basePosition?: Vector3
   baseScaling?: Vector3
-  kind?: string
-  speed?: number
-}
+} & PartMotionMetadata
 
 export function attachAssemblyBot(
   resources: AssemblyResources,
@@ -156,13 +159,8 @@ export function animateAssembly(resources: AssemblyResources, submitted: boolean
   })
 
   resources.botMeshes.forEach((mesh) => {
-    const metadata = mesh.metadata as AssemblyMetadata | undefined
-    if (metadata?.kind === 'spin') {
-      mesh.rotation.y += (metadata.speed ?? 0.06) * (submitted ? 0.8 : 1.3)
-    }
-
-    if (metadata?.kind === 'roll') {
-      mesh.rotation.x += (metadata.speed ?? 0.05) * (submitted ? 0.6 : 1)
+    if (isPartMotionNode(mesh)) {
+      applyPartMotion(mesh, elapsed, submitted ? 0.8 : 1.3)
     }
   })
 }

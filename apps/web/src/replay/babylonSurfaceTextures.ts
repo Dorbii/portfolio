@@ -72,7 +72,7 @@ function createSurfaceTexture(
   const texture = new DynamicTexture(`${name}-albedo`, { width: TEXTURE_SIZE, height: TEXTURE_SIZE }, scene, true)
   const context = texture.getContext()
   const dark = rgbaFromHex('#020304', pattern === 'rubber' ? 0.58 : 0.42)
-  const light = rgbaFromHex('#c8c0aa', pattern === 'light' ? 0.32 : 0.16)
+  const light = createSurfaceHighlight(pattern)
 
   context.fillStyle = baseColor
   context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
@@ -80,8 +80,10 @@ function createSurfaceTexture(
 
   if (pattern === 'rubber' || pattern === 'mobility') {
     drawTreadTexture(context, dark, light)
-  } else if (pattern === 'warning' || pattern === 'weapon') {
-    drawWarningTexture(context, dark, light, pattern)
+  } else if (pattern === 'weapon') {
+    drawWeaponTexture(context, dark)
+  } else if (pattern === 'warning') {
+    drawWarningTexture(context, dark, light)
   } else if (pattern === 'utility') {
     drawUtilityTexture(context, dark, light)
   } else if (isDamageSurfacePattern(pattern)) {
@@ -257,16 +259,57 @@ function drawTreadTexture(
   }
 }
 
+function drawWeaponTexture(
+  context: TextureDrawingContext,
+  dark: string,
+): void {
+  context.strokeStyle = rgbaFromHex('#e8efea', 0.13)
+  context.lineWidth = 2
+
+  for (let y = 18; y < TEXTURE_SIZE; y += 23) {
+    const start = (y * 7) % 41
+    drawLine(context, -start, y, TEXTURE_SIZE + 24, y + ((y % 3) - 1))
+  }
+
+  context.strokeStyle = rgbaFromHex('#030405', 0.28)
+  context.lineWidth = 7
+
+  for (let y = 66; y < TEXTURE_SIZE; y += 104) {
+    drawLine(context, 28, y, TEXTURE_SIZE - 28, y)
+  }
+
+  context.strokeStyle = rgbaFromHex('#d5ddd9', 0.2)
+  context.lineWidth = 3
+
+  for (let radius = 58; radius < TEXTURE_SIZE * 0.62; radius += 42) {
+    context.beginPath()
+    context.arc(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, radius, Math.PI * 0.08, Math.PI * 1.75)
+    context.stroke()
+  }
+
+  context.fillStyle = rgbaFromHex('#050607', 0.24)
+  for (let index = 0; index < 9; index += 1) {
+    const x = 42 + ((index * 79) % (TEXTURE_SIZE - 84))
+    const y = 42 + ((index * 47) % (TEXTURE_SIZE - 84))
+
+    context.fillRect(x, y, 13, 13)
+  }
+
+  context.strokeStyle = dark
+  context.lineWidth = 4
+  drawLine(context, 0, 64, TEXTURE_SIZE, 64)
+  drawLine(context, 0, TEXTURE_SIZE - 64, TEXTURE_SIZE, TEXTURE_SIZE - 64)
+}
+
 function drawWarningTexture(
   context: TextureDrawingContext,
   dark: string,
   light: string,
-  pattern: SurfacePattern,
 ): void {
-  context.strokeStyle = rgbaFromHex('#080808', pattern === 'weapon' ? 0.26 : 0.52)
-  context.lineWidth = pattern === 'weapon' ? 12 : 24
+  context.strokeStyle = rgbaFromHex('#080808', 0.52)
+  context.lineWidth = 24
 
-  for (let x = -320; x < TEXTURE_SIZE; x += pattern === 'weapon' ? 70 : 58) {
+  for (let x = -320; x < TEXTURE_SIZE; x += 58) {
     drawLine(context, x, TEXTURE_SIZE, x + TEXTURE_SIZE, 0)
   }
 
@@ -393,8 +436,12 @@ function drawEdgeWear(context: TextureDrawingContext, pattern: SurfacePattern): 
     return
   }
 
+  const wearColor = isCoolMetalPattern(pattern)
+    ? '#e4ece7'
+    : '#d8c8a0'
+
   context.strokeStyle = rgbaFromHex(
-    '#d8c8a0',
+    wearColor,
     isDamageSurfacePattern(pattern)
       ? 0.22
       : pattern === 'arena_floor'
@@ -408,6 +455,22 @@ function drawEdgeWear(context: TextureDrawingContext, pattern: SurfacePattern): 
   context.strokeStyle = rgbaFromHex('#050607', 0.36)
   context.lineWidth = 7
   context.strokeRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
+}
+
+function createSurfaceHighlight(pattern: SurfacePattern): string {
+  return rgbaFromHex(
+    isCoolMetalPattern(pattern) ? '#dce7e2' : '#c8c0aa',
+    pattern === 'light' ? 0.32 : 0.16,
+  )
+}
+
+function isCoolMetalPattern(pattern: SurfacePattern): boolean {
+  return pattern === 'panel'
+    || pattern === 'armor'
+    || pattern === 'weapon'
+    || pattern === 'utility'
+    || pattern === 'style'
+    || pattern === 'trim'
 }
 
 function drawScuffs(context: TextureDrawingContext, pattern: SurfacePattern): void {

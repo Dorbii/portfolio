@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import {
   attachMesh,
   createBoxDetail,
@@ -421,13 +422,18 @@ export function createDrillWeaponPart({
     },
     scene,
   )
+  const bitRoot = new TransformNode(`${role}-${blockId}-drill-bit-motion-root`, scene)
 
-  gearbox.position.set(0, Math.max(height * 0.34, 0.22), -Math.max(depth * 0.16, 0.14))
+  const shaftY = Math.max(height * 0.34, 0.22)
+
+  gearbox.position.set(0, shaftY, -Math.max(depth * 0.16, 0.14))
+  bitRoot.position.set(0, shaftY, 0)
+  bitRoot.metadata = { kind: 'spin', axis: 'z', speed: 0.16 }
   shaft.rotation.x = Math.PI / 2
-  shaft.position.set(0, Math.max(height * 0.34, 0.22), Math.max(depth * 0.24, 0.2))
-  shaft.metadata = { kind: 'spin', speed: 0.16 }
+  shaft.position.z = Math.max(depth * 0.24, 0.2)
   attachMesh(gearbox, parent, material)
-  attachMesh(shaft, parent, materials.steel)
+  bitRoot.parent = parent
+  attachMesh(shaft, bitRoot, materials.steel)
 
   const bitSegments = 5
   for (let index = 0; index < bitSegments; index += 1) {
@@ -452,13 +458,12 @@ export function createDrillWeaponPart({
     )
 
     bit.rotation.x = Math.PI / 2
-    bit.position.set(0, shaft.position.y, Math.max(depth * (0.48 + index * 0.13), 0.34 + index * 0.1))
-    bit.metadata = { kind: 'spin', speed: 0.16 }
+    bit.position.z = Math.max(depth * (0.48 + index * 0.13), 0.34 + index * 0.1)
     flute.position.copyFrom(bit.position)
     flute.rotation.z = index * 0.72
     flute.rotation.x = Math.PI / 2
-    attachMesh(bit, parent, materials.steel)
-    attachMesh(flute, parent, materials.warning)
+    attachMesh(bit, bitRoot, materials.steel)
+    attachMesh(flute, bitRoot, materials.warning)
   }
 }
 
@@ -486,11 +491,15 @@ export function createFlailWeaponPart({
 
   drum.rotation.z = Math.PI / 2
   drum.position.set(0, y, -Math.max(depth * 0.22, 0.16))
-  drum.metadata = { kind: 'spin', speed: 0.13 }
   attachMesh(drum, parent, material)
 
   for (let chain = -1; chain <= 1; chain += 2) {
     const chainX = chain * Math.max(width * 0.16, 0.1)
+    const chainRoot = new TransformNode(`${role}-${blockId}-flail-chain-root-${chain}`, scene)
+
+    chainRoot.position.set(chainX, y, drum.position.z)
+    chainRoot.metadata = { kind: 'spin', axis: 'x', speed: 0.13, phase: chain > 0 ? Math.PI : 0 }
+    chainRoot.parent = parent
 
     for (let index = 0; index < 4; index += 1) {
       const link = MeshBuilder.CreateTorus(
@@ -505,8 +514,8 @@ export function createFlailWeaponPart({
 
       link.rotation.x = Math.PI / 2
       link.rotation.z = index % 2 === 0 ? 0 : Math.PI / 2
-      link.position.set(chainX, y, Math.max(depth * (0.08 + index * 0.16), 0.12 + index * 0.1))
-      attachMesh(link, parent, materials.steel)
+      link.position.z = Math.max(depth * (0.18 + index * 0.16), 0.18 + index * 0.1)
+      attachMesh(link, chainRoot, materials.steel)
     }
 
     const ball = MeshBuilder.CreateSphere(
@@ -515,8 +524,8 @@ export function createFlailWeaponPart({
       scene,
     )
 
-    ball.position.set(chainX, y, Math.max(depth * 0.78, 0.52))
-    attachMesh(ball, parent, materials.steel)
+    ball.position.z = Math.max(depth * 0.9, 0.62)
+    attachMesh(ball, chainRoot, materials.steel)
 
     for (let spike = 0; spike < 4; spike += 1) {
       const angle = (Math.PI * 2 * spike) / 4
@@ -532,12 +541,12 @@ export function createFlailWeaponPart({
       )
 
       tooth.position.set(
-        chainX + Math.sin(angle) * Math.max(width * 0.16, 0.08),
-        y + Math.cos(angle) * Math.max(width * 0.16, 0.08),
+        Math.sin(angle) * Math.max(width * 0.16, 0.08),
+        Math.cos(angle) * Math.max(width * 0.16, 0.08),
         ball.position.z,
       )
       tooth.rotation.z = -angle
-      attachMesh(tooth, parent, materials.warning)
+      attachMesh(tooth, chainRoot, materials.warning)
     }
   }
 }

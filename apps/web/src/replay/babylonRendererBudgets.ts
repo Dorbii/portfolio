@@ -8,7 +8,7 @@ export type BabylonRendererBudget = {
   totalVertices: number
 }
 
-export type BabylonRendererBudgetName = 'assembly' | 'replayPreview'
+export type BabylonRendererBudgetName = 'assembly' | 'partCatalog' | 'replayPreview'
 
 export type BabylonRendererBudgetState = {
   breaches: string[]
@@ -25,6 +25,13 @@ export const BABYLON_RENDERER_BUDGETS: Record<
     meshes: 760,
     textures: 150,
     totalVertices: 180_000,
+  },
+  partCatalog: {
+    activeMeshes: 180,
+    materials: 90,
+    meshes: 260,
+    textures: 110,
+    totalVertices: 70_000,
   },
   replayPreview: {
     activeMeshes: 900,

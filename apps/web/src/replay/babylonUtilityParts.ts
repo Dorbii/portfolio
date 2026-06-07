@@ -18,6 +18,11 @@ export function createUtilityPart(
   depth: number,
   materials: TeamMaterialSet,
 ): void {
+  if (partId.includes('Gyro')) {
+    createGyroStabilizerPart(scene, parent, material, role, blockId, width, height, depth, materials)
+    return
+  }
+
   const box = MeshBuilder.CreateBox(
     `${role}-${blockId}-utility`,
     {
@@ -107,30 +112,6 @@ export function createUtilityPart(
       attachMesh(nozzleRing, parent, materials.warning)
       attachMesh(flame, parent, materials.light)
     }
-  }
-
-  if (partId.includes('Gyro')) {
-    const gyroRing = MeshBuilder.CreateTorus(
-      `${role}-${blockId}-gyro-ring`,
-      {
-        diameter: Math.max(Math.max(width, depth) * 0.9, 0.52),
-        thickness: Math.max(width * 0.12, 0.07),
-        tessellation: 22,
-      },
-      scene,
-    )
-    const gyroCore = MeshBuilder.CreateSphere(
-      `${role}-${blockId}-gyro-core`,
-      { diameter: Math.max(width * 0.34, 0.2), segments: 10 },
-      scene,
-    )
-
-    gyroRing.rotation.x = Math.PI / 2
-    gyroRing.position.y = Math.max(height * 0.18, 0.12)
-    gyroRing.metadata = { kind: 'spin', speed: 0.045 }
-    gyroCore.position.y = Math.max(height * 0.18, 0.12)
-    attachMesh(gyroRing, parent, materials.light)
-    attachMesh(gyroCore, parent, materials.trim)
   }
 
   if (partId.includes('EnergyCore')) {
@@ -381,7 +362,7 @@ export function createUtilityPart(
       droneBay.position.set(side * Math.max(width * 0.24, 0.15), Math.max(height * 0.56, 0.3), Math.max(depth * 0.3, 0.18))
       rotor.rotation.x = Math.PI / 2
       rotor.position.set(droneBay.position.x, Math.max(height * 0.72, 0.38), droneBay.position.z)
-      rotor.metadata = { kind: 'spin', speed: 0.06 }
+      rotor.metadata = { kind: 'spin', axis: 'z', speed: 0.06 }
       attachMesh(droneBay, parent, materials.utility)
       attachMesh(rotor, parent, materials.warning)
     }
@@ -571,13 +552,238 @@ export function createUtilityPart(
   attachMesh(box, parent, material)
 }
 
+function createGyroStabilizerPart(
+  scene: Scene,
+  parent: TransformNode,
+  material: Material,
+  role: TeamRole,
+  blockId: string,
+  width: number,
+  height: number,
+  depth: number,
+  materials: TeamMaterialSet,
+): void {
+  const baseWidth = Math.max(width * 0.86, 0.52)
+  const baseDepth = Math.max(depth * 0.72, 0.42)
+  const baseY = -Math.max(height * 0.22, 0.1)
+  const cageY = Math.max(height * 0.22, 0.18)
+  const ringDiameter = Math.max(Math.min(width, depth) * 0.68, 0.42)
+  const flywheelDiameter = Math.max(ringDiameter * 0.58, 0.26)
+  const axleLength = Math.max(width * 0.82, 0.5)
+
+  const basePlate = MeshBuilder.CreateBox(
+    `${role}-${blockId}-gyro-machined-base`,
+    {
+      width: baseWidth,
+      height: Math.max(height * 0.12, 0.07),
+      depth: baseDepth,
+    },
+    scene,
+  )
+  const frontRail = MeshBuilder.CreateBox(
+    `${role}-${blockId}-gyro-front-rail`,
+    { width: baseWidth, height: Math.max(height * 0.08, 0.045), depth: 0.045 },
+    scene,
+  )
+  const rearRail = MeshBuilder.CreateBox(
+    `${role}-${blockId}-gyro-rear-rail`,
+    { width: baseWidth, height: Math.max(height * 0.08, 0.045), depth: 0.045 },
+    scene,
+  )
+
+  basePlate.position.y = baseY
+  frontRail.position.set(0, baseY + Math.max(height * 0.09, 0.055), baseDepth * 0.42)
+  rearRail.position.set(0, frontRail.position.y, -baseDepth * 0.42)
+  attachMesh(basePlate, parent, materials.utility)
+  attachMesh(frontRail, parent, materials.trim)
+  attachMesh(rearRail, parent, materials.trim)
+
+  for (const side of [-1, 1]) {
+    const tower = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-bearing-tower-${side}`,
+      {
+        width: Math.max(width * 0.12, 0.07),
+        height: Math.max(height * 0.56, 0.34),
+        depth: Math.max(depth * 0.18, 0.1),
+      },
+      scene,
+    )
+    const bearing = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-gyro-bearing-cap-${side}`,
+      {
+        height: Math.max(width * 0.09, 0.055),
+        diameter: Math.max(width * 0.17, 0.09),
+        tessellation: 16,
+      },
+      scene,
+    )
+    const foot = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-bearing-foot-${side}`,
+      {
+        width: Math.max(width * 0.22, 0.12),
+        height: Math.max(height * 0.08, 0.045),
+        depth: Math.max(depth * 0.3, 0.16),
+      },
+      scene,
+    )
+
+    tower.position.set(side * axleLength * 0.5, cageY, 0)
+    bearing.position.set(side * axleLength * 0.5, cageY, 0)
+    bearing.rotation.z = Math.PI / 2
+    foot.position.set(side * axleLength * 0.5, baseY + Math.max(height * 0.13, 0.075), 0)
+    attachMesh(tower, parent, materials.trim)
+    attachMesh(bearing, parent, materials.steel)
+    attachMesh(foot, parent, materials.utility)
+  }
+
+  const outerGimbal = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-gyro-outer-gimbal-ring`,
+    {
+      diameter: ringDiameter,
+      thickness: Math.max(width * 0.045, 0.028),
+      tessellation: 32,
+    },
+    scene,
+  )
+  const innerGimbal = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-gyro-inner-gimbal-ring`,
+    {
+      diameter: Math.max(ringDiameter * 0.78, 0.32),
+      thickness: Math.max(width * 0.036, 0.022),
+      tessellation: 28,
+    },
+    scene,
+  )
+
+  outerGimbal.position.y = cageY
+  outerGimbal.rotation.x = Math.PI / 2
+  innerGimbal.position.y = cageY
+  innerGimbal.rotation.x = Math.PI / 2
+  innerGimbal.rotation.y = Math.PI / 2
+  attachMesh(outerGimbal, parent, materials.steel)
+  attachMesh(innerGimbal, parent, materials.trim)
+
+  const rotorRoot = new TransformNode(`${role}-${blockId}-gyro-flywheel-motion-root`, scene)
+
+  rotorRoot.position.set(0, cageY, 0)
+  rotorRoot.metadata = { kind: 'spin', axis: 'x', speed: 0.11 }
+  rotorRoot.parent = parent
+
+  const flywheel = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-flywheel-disc`,
+    {
+      height: Math.max(width * 0.16, 0.09),
+      diameter: flywheelDiameter,
+      tessellation: 36,
+    },
+    scene,
+  )
+  const flywheelHub = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-flywheel-hub`,
+    {
+      height: Math.max(width * 0.19, 0.1),
+      diameter: Math.max(flywheelDiameter * 0.32, 0.11),
+      tessellation: 18,
+    },
+    scene,
+  )
+  const axle = MeshBuilder.CreateCylinder(
+    `${role}-${blockId}-gyro-horizontal-axle`,
+    {
+      height: axleLength,
+      diameter: Math.max(width * 0.055, 0.034),
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  flywheel.rotation.z = Math.PI / 2
+  flywheelHub.rotation.z = Math.PI / 2
+  axle.rotation.z = Math.PI / 2
+  attachMesh(flywheel, rotorRoot, materials.steel)
+  attachMesh(flywheelHub, rotorRoot, material)
+  attachMesh(axle, rotorRoot, materials.steel)
+
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6
+    const spoke = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-flywheel-spoke-${index}`,
+      {
+        width: Math.max(width * 0.035, 0.02),
+        height: Math.max(width * 0.035, 0.02),
+        depth: Math.max(flywheelDiameter * 0.48, 0.13),
+      },
+      scene,
+    )
+
+    spoke.rotation.x = angle
+    attachMesh(spoke, rotorRoot, materials.trim)
+  }
+
+  const controlBoard = MeshBuilder.CreateBox(
+    `${role}-${blockId}-gyro-control-board`,
+    {
+      width: Math.max(width * 0.36, 0.2),
+      height: Math.max(height * 0.06, 0.035),
+      depth: Math.max(depth * 0.22, 0.12),
+    },
+    scene,
+  )
+
+  controlBoard.position.set(-baseWidth * 0.22, baseY + Math.max(height * 0.17, 0.1), baseDepth * 0.18)
+  attachMesh(controlBoard, parent, materials.circuit)
+
+  for (let index = 0; index < 3; index += 1) {
+    const chip = MeshBuilder.CreateBox(
+      `${role}-${blockId}-gyro-control-chip-${index}`,
+      {
+        width: Math.max(width * 0.06, 0.035),
+        height: Math.max(height * 0.035, 0.022),
+        depth: Math.max(depth * 0.05, 0.03),
+      },
+      scene,
+    )
+
+    chip.position.set(
+      controlBoard.position.x + (index - 1) * Math.max(width * 0.09, 0.05),
+      controlBoard.position.y + Math.max(height * 0.045, 0.026),
+      controlBoard.position.z,
+    )
+    attachMesh(chip, parent, materials.trim)
+  }
+
+  const cableLoop = MeshBuilder.CreateTorus(
+    `${role}-${blockId}-gyro-control-cable-loop`,
+    {
+      diameter: Math.max(width * 0.34, 0.19),
+      thickness: 0.015,
+      tessellation: 14,
+    },
+    scene,
+  )
+
+  cableLoop.position.set(baseWidth * 0.28, cageY, baseDepth * 0.2)
+  cableLoop.rotation.x = Math.PI / 2
+  attachMesh(cableLoop, parent, materials.trim)
+
+  for (const side of [-1, 1]) {
+    const bolt = MeshBuilder.CreateCylinder(
+      `${role}-${blockId}-gyro-base-bolt-${side}`,
+      { height: 0.025, diameter: Math.max(width * 0.055, 0.032), tessellation: 10 },
+      scene,
+    )
+
+    bolt.position.set(side * baseWidth * 0.34, baseY + Math.max(height * 0.08, 0.05), -baseDepth * 0.3)
+    attachMesh(bolt, parent, materials.steel)
+  }
+}
+
 function isElectronicsPart(partId: string): boolean {
   return [
     'AIModule',
     'Battery',
     'Drone',
     'EnergyCore',
-    'Gyro',
     'Magnet',
     'RepairKit',
     'Sensor',

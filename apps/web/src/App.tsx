@@ -8,10 +8,21 @@ const LiveAgentCockpit = lazy(() =>
 const ReplayPreview = lazy(() =>
   import('./replay/ReplayPreview').then((module) => ({ default: module.ReplayPreview })),
 )
+const PartCatalogPreview = lazy(() =>
+  import('./replay/PartCatalogPreview').then((module) => ({ default: module.PartCatalogPreview })),
+)
 
 export default function App() {
   const pathname = window.location.pathname
   const isAgentPath = isAgentPathname(pathname)
+
+  if (isPartCatalogPreviewPathname(pathname)) {
+    return (
+      <Suspense fallback={<RouteFallback label="Loading part catalog preview." />}>
+        <PartCatalogPreview />
+      </Suspense>
+    )
+  }
 
   if (isReplayPreviewPathname(pathname)) {
     return (
@@ -85,4 +96,10 @@ function isReplayPreviewPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
   return normalized === '/replay-preview' || normalized.endsWith('/replay-preview')
+}
+
+function isPartCatalogPreviewPathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/qa/part-catalog' || normalized.endsWith('/qa/part-catalog')
 }

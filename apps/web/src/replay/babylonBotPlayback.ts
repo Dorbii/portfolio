@@ -10,6 +10,11 @@ import {
   deterministicAngle,
   toBabylonVector,
 } from './babylonSceneUtils'
+import {
+  applyPartMotion,
+  isPartMotionNode,
+  type PartMotionMetadata,
+} from './babylonPartMotion'
 import { damageMaterialForSeverity } from './babylonMaterials'
 import type {
   PartFrameState,
@@ -48,47 +53,17 @@ export function updateBots(
     updateBotPartNodes(bot, role, frame.parts[role], frame.time)
 
     const animatedNodes = bot.getChildren((node) => {
-      const metadata = node.metadata as { kind?: string } | undefined
-
-      return (
-        metadata?.kind === 'spin' ||
-        metadata?.kind === 'roll' ||
-        metadata?.kind === 'smoke' ||
-        metadata?.kind === 'thrust' ||
-        metadata?.kind === 'pulse'
-      )
+      return isPartMotionNode(node)
     }, true) as TransformNode[]
 
     animatedNodes.forEach((node) => {
-      const metadata = node.metadata as { kind?: string; speed?: number } | undefined
+      const metadata = node.metadata as PartMotionMetadata | undefined
 
       if (!metadata) {
         return
       }
 
-      if (metadata.kind === 'spin') {
-        node.rotation.y += (metadata.speed ?? 0.06) * 1.6
-      }
-
-      if (metadata.kind === 'roll') {
-        node.rotation.x += (metadata.speed ?? 0.05)
-      }
-
-      if (metadata.kind === 'smoke') {
-        node.position.y = 0.18 + Math.sin(frame.time * 9 + (metadata.speed ?? 0.04) * 40) * 0.08
-      }
-
-      if (metadata.kind === 'thrust') {
-        const pulse = 0.82 + Math.sin(frame.time * 18) * 0.18
-
-        node.scaling.set(1, pulse, 1)
-      }
-
-      if (metadata.kind === 'pulse') {
-        const pulse = 1 + Math.sin(frame.time * 5) * (metadata.speed ?? 0.04)
-
-        node.scaling.setAll(pulse)
-      }
+      applyPartMotion(node, frame.time, 1)
     })
   })
 }

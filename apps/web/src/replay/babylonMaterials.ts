@@ -74,9 +74,9 @@ export const DEFAULT_TEAM_PALETTES: Record<TeamRole, CombatTeamPalette> = {
     glow: '#ff4a31',
     rubber: '#171819',
     trim: '#272e30',
-    utility: '#b4552c',
+    utility: '#596469',
     warning: '#b7822f',
-    weapon: '#b49a62',
+    weapon: '#87908c',
   },
   blue: {
     accent: '#235f9f',
@@ -85,9 +85,9 @@ export const DEFAULT_TEAM_PALETTES: Record<TeamRole, CombatTeamPalette> = {
     glow: '#4aa3ff',
     rubber: '#171819',
     trim: '#272e30',
-    utility: '#267b91',
+    utility: '#596469',
     warning: '#b7822f',
-    weapon: '#b49a62',
+    weapon: '#87908c',
   },
 }
 
@@ -118,8 +118,9 @@ export function createCombatTeamPalette(
     accent,
     armor: mixHexColors(accent, isDarkAccent ? '#77848b' : '#20262b', isDarkAccent ? 0.46 : 0.26),
     glow: mixHexColors(accent, '#ffffff', isDarkAccent ? 0.62 : 0.18),
-    trim: mixHexColors(base.trim, accent, 0.12),
-    utility: mixHexColors(accent, isDarkAccent ? '#b7822f' : '#6f3a22', isDarkAccent ? 0.4 : 0.28),
+    trim: mixHexColors(base.trim, accent, 0.05),
+    utility: mixHexColors(base.utility, accent, isDarkAccent ? 0.12 : 0.08),
+    weapon: mixHexColors(base.weapon, accent, isDarkAccent ? 0.08 : 0.05),
   }
 }
 

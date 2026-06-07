@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import {
   createAnnularSectorMesh,
   createToothedBladeMesh,
@@ -56,25 +57,27 @@ export function createSawWeaponPart({
     },
     scene,
   )
+  const bladeRoot = new TransformNode(`${role}-${blockId}-saw-blade-motion-root`, scene)
 
-  blade.position.set(0, bladeCenterY, bladeCenterZ)
+  bladeRoot.position.set(0, bladeCenterY, bladeCenterZ)
+  bladeRoot.metadata = { kind: 'spin', axis: 'x', speed: 0.18 }
   hub.rotation.z = Math.PI / 2
-  hub.position.copyFrom(blade.position)
-  guard.position.copyFrom(blade.position)
+  guard.position.set(0, bladeCenterY, bladeCenterZ)
   motor.position.set(0, Math.max(height * 0.42, 0.28), -Math.max(depth * 0.24, 0.18))
-  blade.metadata = { kind: 'spin', speed: 0.18 }
-  hub.metadata = { kind: 'spin', speed: 0.18 }
-  attachMesh(blade, parent, materials.steel)
-  attachMesh(hub, parent, materials.trim)
+  blade.parent = bladeRoot
+  blade.material = materials.steel
+  hub.parent = bladeRoot
+  hub.material = materials.trim
+  bladeRoot.parent = parent
   attachMesh(guard, parent, materials.trim)
   attachMesh(motor, parent, material)
   createBladeFaceDetails({
     scene,
-    parent,
+    parent: bladeRoot,
     material: materials.trim,
     namePrefix: `${role}-${blockId}-saw`,
-    centerY: bladeCenterY,
-    centerZ: bladeCenterZ,
+    centerY: 0,
+    centerZ: 0,
     radius: bladeDiameter * 0.36,
     thickness: bladeThickness,
   })
@@ -91,9 +94,8 @@ export function createSawWeaponPart({
       scene,
     )
 
-    spoke.position.copyFrom(blade.position)
     spoke.rotation.x = angle
-    attachMesh(spoke, parent, materials.trim)
+    attachMesh(spoke, bladeRoot, materials.trim)
   }
 }
 
@@ -143,28 +145,28 @@ export function createSpinnerWeaponPart({
     },
     scene,
   )
+  const spinnerRoot = new TransformNode(`${role}-${blockId}-spinner-motion-root`, scene)
 
   disc.rotation.z = Math.PI / 2
   hub.rotation.z = Math.PI / 2
-  disc.position.set(0, spinnerCenterY, spinnerCenterZ)
-  hub.position.set(0, spinnerCenterY, spinnerCenterZ)
+  spinnerRoot.position.set(0, spinnerCenterY, spinnerCenterZ)
+  spinnerRoot.metadata = { kind: 'spin', axis: 'x', speed: 0.15 }
   gearbox.position.set(0, Math.max(height * 0.52, 0.3), -Math.max(depth * 0.24, 0.18))
   upperCowl.position.set(0, Math.max(height * 1.04, 0.58), -Math.max(depth * 0.04, 0.04))
-  disc.metadata = { kind: 'spin', speed: 0.15 }
-  hub.metadata = { kind: 'spin', speed: 0.15 }
-  disc.parent = parent
-  hub.parent = parent
+  disc.parent = spinnerRoot
+  hub.parent = spinnerRoot
+  spinnerRoot.parent = parent
   disc.material = material
   hub.material = materials.trim
   attachMesh(gearbox, parent, material)
   attachMesh(upperCowl, parent, materials.trim)
   createBladeFaceDetails({
     scene,
-    parent,
+    parent: spinnerRoot,
     material: materials.steel,
     namePrefix: `${role}-${blockId}-spinner`,
-    centerY: spinnerCenterY,
-    centerZ: spinnerCenterZ,
+    centerY: 0,
+    centerZ: 0,
     radius: spinnerDiameter * 0.34,
     thickness: Math.max(height * 0.2, 0.12),
   })
@@ -193,9 +195,8 @@ export function createSpinnerWeaponPart({
       scene,
     )
 
-    bar.position.set(0, spinnerCenterY, spinnerCenterZ)
     bar.rotation.x = angle
-    attachMesh(bar, parent, materials.warning)
+    attachMesh(bar, spinnerRoot, materials.steel)
   }
 
   for (let index = 0; index < 10; index += 1) {
@@ -210,13 +211,9 @@ export function createSpinnerWeaponPart({
       scene,
     )
 
-    bite.position.set(
-      0,
-      spinnerCenterY + Math.sin(angle) * spinnerDiameter * 0.5,
-      spinnerCenterZ + Math.cos(angle) * spinnerDiameter * 0.5,
-    )
+    bite.position.set(0, Math.sin(angle) * spinnerDiameter * 0.5, Math.cos(angle) * spinnerDiameter * 0.5)
     bite.rotation.x = angle
-    attachMesh(bite, parent, materials.steel)
+    attachMesh(bite, spinnerRoot, materials.steel)
   }
 }
 

@@ -66,6 +66,25 @@ export function createBotNode(
   return root
 }
 
+export function createCatalogPartNode(
+  scene: Scene,
+  partId: string,
+  role: TeamRole,
+  materials: TeamMaterialSet,
+): TransformNode {
+  return createPartNode(
+    scene,
+    {
+      id: 'catalog-part',
+      partId,
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+    },
+    role,
+    materials,
+  )
+}
+
 function createPartNode(
   scene: Scene,
   block: BlueprintBlock,
@@ -75,6 +94,7 @@ function createPartNode(
   const part = getPart(block.partId)
   const category = part?.category ?? 'body'
   const size = part?.size ?? [1, 1, 1]
+  const visualFamily = part?.visual.visualFamily
   const partNode = new TransformNode(`${role}-${block.id}`, scene)
   const width = Math.max(0.22, size[0] * BOT_CELL_SCALE)
   const height = heightForCategory(category, size[1])
@@ -118,7 +138,7 @@ function createPartNode(
     createSolidBlock(scene, partNode, material, `${role}-${block.id}-box`, width, height, depth)
   }
 
-  if (category !== 'style') {
+  if (category !== 'style' && visualFamily !== 'gyro') {
     createPartAccents(scene, partNode, role, block.id, category, width, height, depth, materials)
   }
 
