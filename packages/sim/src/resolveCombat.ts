@@ -124,7 +124,7 @@ export function resolveSubmittedGameActions(
   const submittedTicks = Math.min(
     actions.red.length,
     actions.blue.length,
-    HARD_MAX_COMBAT_TICKS,
+    HARD_MAX_COMBAT_TURNS,
   )
 
   for (let index = 0; index < submittedTicks; index += 1) {
@@ -247,10 +247,16 @@ type DetachMetadataContext = {
 }
 
 const WEAPON_SLOTS: readonly WeaponSlot[] = ['weaponA', 'weaponB']
-const NO_DAMAGE_STALEMATE_TICKS = 60
-const HARD_MAX_COMBAT_TICKS = 600
+const NO_DAMAGE_STALEMATE_TURNS = 60
+const HARD_MAX_COMBAT_TURNS = 600
 const MIN_REPLAY_DURATION = 6
-const REPLAY_TRAILING_SECONDS = 1
+// CODEX_INTENT: decouple deterministic combat turns from replay wall-clock seconds for smoother interpolation.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+const REPLAY_TURN_START_SECONDS = 0.35
+const REPLAY_TURN_SECONDS = 0.72
+const REPLAY_TRAILING_SECONDS = 0.85
 const CONTACT_DISTANCE = 1.28
 const BOOSTER_COOLDOWN_TICKS = 4
 const BOOSTER_MOVEMENT_MULTIPLIER = 1.35
@@ -276,6 +282,20 @@ const DEFAULT_ARENA: ArenaConfig = DEFAULT_ARENA_CONFIG
 
 function round(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+function replayTimeForTurn(turn: number, offsetSeconds = 0): number {
+  const turnIndex = Math.max(1, turn)
+
+  return round(REPLAY_TURN_START_SECONDS + (turnIndex - 1) * REPLAY_TURN_SECONDS + offsetSeconds)
+}
+
+function replayDurationForElapsedTurns(elapsedTurns: number): number {
+  if (elapsedTurns <= 0) {
+    return MIN_REPLAY_DURATION
+  }
+
+  return replayTimeForTurn(elapsedTurns, REPLAY_TRAILING_SECONDS)
 }
 
 function distance(left: Vector3, right: Vector3): number {
@@ -661,7 +681,7 @@ function createCombatSnapshot(
     tick,
     arena,
     distance: round(distance(red.position, blue.position)),
-    hardMaxTicks: HARD_MAX_COMBAT_TICKS,
+    hardMaxTicks: HARD_MAX_COMBAT_TURNS,
     recentEvents: recentEventSummaries(events),
     red: createBotSnapshot(red),
     blue: createBotSnapshot(blue),
@@ -900,25 +920,26 @@ function moveDurationFor(command: MovementCommand | undefined, forced = false): 
   switch (command) {
     case 'dash_forward':
     case 'dash_backward':
-      return 0.48
+      return 0.62
     case 'turn_left':
     case 'turn_right':
     case 'circle_left':
     case 'circle_right':
-      return 0.72
+      return REPLAY_TURN_SECONDS
     case 'brake':
     case undefined:
-      return 0.25
+      return 0.18
     case 'forward':
     case 'backward':
     case 'strafe_left':
     case 'strafe_right':
-      return 0.68
+      return REPLAY_TURN_SECONDS
   }
 }
 
 function createMoveEvent(
   t: number,
+  turn: number,
   bot: BotRuntime,
   from: Vector3,
   to: Vector3,
@@ -927,6 +948,7 @@ function createMoveEvent(
 ): MoveEvent {
   return {
     t,
+    turn,
     type: 'move',
     bot: bot.role,
     from,
@@ -936,7 +958,7 @@ function createMoveEvent(
     command,
     intent: moveIntentFor(command, forced),
     facing: normalizedFlatVector(from, to, bot.role === 'red' ? [1, 0, 0] : [-1, 0, 0]),
-    contactIntent: !forced && command !== undefined && isContactMove({ tick: Math.trunc(t), move: command }),
+    contactIntent: !forced && command !== undefined && isContactMove({ tick: turn, move: command }),
   }
 }
 
@@ -978,7 +1000,7 @@ function emitPartDetachEvents(
   tick: number,
   bot: BotRuntime,
   hits: PartDamageHit[],
-  startTime = tick + 0.36,
+  startTime = replayTimeForTurn(tick, 0.36),
   context?: DetachMetadataContext,
 ): void {
   hits.forEach((hit, index) => {
@@ -988,6 +1010,7 @@ function emitPartDetachEvents(
 
     events.push({
       t: startTime + index * 0.03,
+      turn: tick,
       type: 'part_detach',
       bot: bot.role,
       blockId: hit.blockId,
@@ -1204,7 +1227,7 @@ function forceMoveToward(
   }
 
   bot.position = to
-  events.push(createMoveEvent(tick + 0.22, bot, from, to, undefined, true))
+  events.push(createMoveEvent(replayTimeForTurn(tick, 0.22), tick, bot, from, to, undefined, true))
 }
 
 function applyDamage(
@@ -1233,7 +1256,8 @@ function applyDamage(
   ]
 
   events.push({
-    t: tick + 0.25,
+    t: replayTimeForTurn(tick, 0.25),
+    turn: tick,
     type: 'impact',
     attacker: attacker.role,
     defender: defender.role,
@@ -1241,7 +1265,8 @@ function applyDamage(
     position: impactPosition,
   })
   events.push({
-    t: tick + 0.3,
+    t: replayTimeForTurn(tick, 0.3),
+    turn: tick,
     type: 'damage',
     bot: defender.role,
     amount: mitigated,
@@ -1251,7 +1276,7 @@ function applyDamage(
     partRemainingHealth: primaryHit?.remainingHealth,
     partMaxHealth: primaryHit?.maxHealth,
   })
-  emitPartDetachEvents(events, tick, defender, hits, tick + 0.36, {
+  emitPartDetachEvents(events, tick, defender, hits, replayTimeForTurn(tick, 0.36), {
     cause,
     damage: mitigated,
     sourcePosition: attacker.position,
@@ -1260,7 +1285,8 @@ function applyDamage(
 
   if (wasAlive && isBotDestroyed(defender)) {
     events.push({
-      t: tick + 0.45,
+      t: replayTimeForTurn(tick, 0.45),
+      turn: tick,
       type: 'knockout',
       bot: defender.role,
       cause,
@@ -1307,6 +1333,7 @@ function resolveWeapons(
 
     events.push({
       t: weaponFireTime(tick, slot),
+      turn: tick,
       type: 'weapon_fire',
       bot: attacker.role,
       weaponSlot: slot,
@@ -1482,7 +1509,8 @@ function resolveSignatureUtility(
     }
 
     events.push({
-      t: round(tick + 0.18),
+      t: replayTimeForTurn(tick, 0.18),
+      turn: tick,
       type: 'ability',
       bot: actor.role,
       ability: 'fire_breath',
@@ -1567,7 +1595,8 @@ function resolveDroneUtility(
   }
 
   events.push({
-    t: tick + 0.18,
+    t: replayTimeForTurn(tick, 0.18),
+    turn: tick,
     type: 'ability',
     bot: actor.role,
     ability: 'drone_swarm',
@@ -1599,7 +1628,7 @@ function mostDamagedAlivePart(bot: BotRuntime): RuntimePart | undefined {
 }
 
 function weaponFireTime(tick: number, slot: WeaponSlot): number {
-  return round(tick + 0.1 + WEAPON_SLOTS.indexOf(slot) * 0.02)
+  return replayTimeForTurn(tick, 0.1 + WEAPON_SLOTS.indexOf(slot) * 0.02)
 }
 
 function weaponSlotDamage(attacker: BotRuntime, random: number): number {
@@ -1699,7 +1728,8 @@ function applyDamagingHazard(
   bot.lastDamagedTick = tick
   emitHazardTrigger(events, tick, hazard, bot, damage, impactPosition)
   events.push({
-    t: tick + 0.38,
+    t: replayTimeForTurn(tick, 0.38),
+    turn: tick,
     type: 'damage',
     bot: bot.role,
     amount: damage,
@@ -1709,7 +1739,7 @@ function applyDamagingHazard(
     partRemainingHealth: primaryHit?.remainingHealth,
     partMaxHealth: primaryHit?.maxHealth,
   })
-  emitPartDetachEvents(events, tick, bot, hits, tick + 0.44, {
+  emitPartDetachEvents(events, tick, bot, hits, replayTimeForTurn(tick, 0.44), {
     cause: 'hazard',
     damage,
     sourcePosition: hazard.position,
@@ -1718,7 +1748,8 @@ function applyDamagingHazard(
 
   if (wasAlive && isBotDestroyed(bot)) {
     events.push({
-      t: tick + 0.52,
+      t: replayTimeForTurn(tick, 0.52),
+      turn: tick,
       type: 'knockout',
       bot: bot.role,
       cause: 'hazard',
@@ -1735,7 +1766,8 @@ function emitHazardTrigger(
   position: Vector3,
 ): void {
   events.push({
-    t: tick + 0.35,
+    t: replayTimeForTurn(tick, 0.35),
+    turn: tick,
     type: 'hazard',
     hazard: hazard.type,
     bot: bot.role,
@@ -1874,12 +1906,12 @@ function applyGameActionTick(
     return { completed: true }
   }
 
-  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TICKS) {
+  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TURNS) {
     state.stoppedByNoDamage = true
     return { completed: true }
   }
 
-  return { completed: tick >= HARD_MAX_COMBAT_TICKS }
+  return { completed: tick >= HARD_MAX_COMBAT_TURNS }
 }
 
 function gameActionTickIntent(
@@ -1931,7 +1963,7 @@ function applyAnchorMovement(
   }
 
   bot.position = to
-  events.push(createMoveEvent(tick, bot, from, to, command.move))
+  events.push(createMoveEvent(replayTimeForTurn(tick), tick, bot, from, to, command.move))
 
   return true
 }
@@ -2118,10 +2150,10 @@ function applyCombatTick(
   blue.position = moveBot(blue, blueCommand, arena, blueMovementUtility.multiplier)
 
   if (!positionsEqual(redFrom, red.position)) {
-    events.push(createMoveEvent(tick, red, redFrom, red.position, redCommand.move))
+    events.push(createMoveEvent(replayTimeForTurn(tick), tick, red, redFrom, red.position, redCommand.move))
   }
   if (!positionsEqual(blueFrom, blue.position)) {
-    events.push(createMoveEvent(tick, blue, blueFrom, blue.position, blueCommand.move))
+    events.push(createMoveEvent(replayTimeForTurn(tick), tick, blue, blueFrom, blue.position, blueCommand.move))
   }
 
   resolveWeapons(events, tick, arena, red, blue, redCommand, state.rng)
@@ -2167,12 +2199,12 @@ function applyCombatTick(
     return { completed: true }
   }
 
-  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TICKS) {
+  if (tick - state.lastDamageTick >= NO_DAMAGE_STALEMATE_TURNS) {
     state.stoppedByNoDamage = true
     return { completed: true }
   }
 
-  return { completed: tick >= HARD_MAX_COMBAT_TICKS }
+  return { completed: tick >= HARD_MAX_COMBAT_TURNS }
 }
 
 export function resolveCombat(input: ResolveCombatInput): CombatResult {
@@ -2180,7 +2212,7 @@ export function resolveCombat(input: ResolveCombatInput): CombatResult {
   const redPolicy = { tactics: input.red.tactics ?? DEFAULT_BOT_TACTICS }
   const bluePolicy = { tactics: input.blue.tactics ?? DEFAULT_BOT_TACTICS }
 
-  for (let tick = 1; tick <= HARD_MAX_COMBAT_TICKS; tick += 1) {
+  for (let tick = 1; tick <= HARD_MAX_COMBAT_TURNS; tick += 1) {
     const redCommand = chooseCommand(
       redPolicy,
       tick,
@@ -2208,7 +2240,7 @@ export function resolveSubmittedCombat(
   const submittedTicks = Math.min(
     commands.red.length,
     commands.blue.length,
-    HARD_MAX_COMBAT_TICKS,
+    HARD_MAX_COMBAT_TURNS,
   )
 
   for (let index = 0; index < submittedTicks; index += 1) {
@@ -2259,11 +2291,11 @@ function finalizeCombatResult(
   }
   const redDestroyed = isBotDestroyed(red)
   const blueDestroyed = isBotDestroyed(blue)
-  const hardCapped = !redDestroyed && !blueDestroyed && state.elapsedTicks >= HARD_MAX_COMBAT_TICKS
+  const hardCapped = !redDestroyed && !blueDestroyed && state.elapsedTicks >= HARD_MAX_COMBAT_TURNS
   const noDamageStalemate = damage.red === 0 && damage.blue === 0
   let winner: TeamRole | 'draw' = 'draw'
   let reason = state.stoppedByNoDamage
-    ? 'No bot took damage for a full minute; the round ended as a draw.'
+    ? `No bot took damage for ${NO_DAMAGE_STALEMATE_TURNS} combat turns; the round ended as a draw.`
     : hardCapped
       ? 'Both bots survived the hard combat safety cap with equivalent combat score.'
     : 'Both bots survived with equivalent combat score.'
@@ -2282,12 +2314,12 @@ function finalizeCombatResult(
   } else if (noDamageStalemate) {
     winner = 'draw'
     reason = state.stoppedByNoDamage
-      ? 'No bot took damage for a full minute; the round ended as a draw.'
+      ? `No bot took damage for ${NO_DAMAGE_STALEMATE_TURNS} combat turns; the round ended as a draw.`
       : 'Neither bot dealt damage.'
   } else if (remainingHealth.red !== remainingHealth.blue) {
     winner = remainingHealth.red > remainingHealth.blue ? 'red' : 'blue'
     reason = state.stoppedByNoDamage
-      ? 'No bot took damage for a full minute; remaining health decided the result.'
+      ? `No bot took damage for ${NO_DAMAGE_STALEMATE_TURNS} combat turns; remaining health decided the result.`
       : hardCapped
         ? 'Both bots survived the hard combat safety cap; remaining health decided the result.'
       : 'Both bots survived; remaining health decided the result.'
@@ -2299,8 +2331,8 @@ function finalizeCombatResult(
   const lastEventTime = events.reduce((latest, event) => Math.max(latest, event.t), 0)
   const replayDuration = state.stoppedByNoDamage || hardCapped
     ? Math.min(
-        HARD_MAX_COMBAT_TICKS + REPLAY_TRAILING_SECONDS,
-        Math.max(state.elapsedTicks, round(lastEventTime + REPLAY_TRAILING_SECONDS)),
+        replayDurationForElapsedTurns(HARD_MAX_COMBAT_TURNS),
+        Math.max(replayDurationForElapsedTurns(state.elapsedTicks), round(lastEventTime + REPLAY_TRAILING_SECONDS)),
       )
     : Math.max(MIN_REPLAY_DURATION, round(lastEventTime + REPLAY_TRAILING_SECONDS))
 
@@ -2330,5 +2362,5 @@ function finalizeCombatResult(
 function partialReplayDuration(events: ReplayEvent[], elapsedTicks: number): number {
   const lastEventTime = events.reduce((latest, event) => Math.max(latest, event.t), 0)
 
-  return Math.max(MIN_REPLAY_DURATION, elapsedTicks, round(lastEventTime + REPLAY_TRAILING_SECONDS))
+  return Math.max(MIN_REPLAY_DURATION, replayDurationForElapsedTurns(elapsedTicks), round(lastEventTime + REPLAY_TRAILING_SECONDS))
 }

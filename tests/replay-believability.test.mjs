@@ -64,8 +64,10 @@ function moveEvents(result, bot) {
   )
 }
 
-function integerMoveEvents(result, bot) {
-  return moveEvents(result, bot).filter((event) => Number.isInteger(event.t))
+function turnMoveEvents(result, bot) {
+  return moveEvents(result, bot).filter(
+    (event) => typeof event.turn === 'number' && event.intent !== 'forced',
+  )
 }
 
 function weaponFireEvents(result, bot) {
@@ -114,13 +116,13 @@ function movementProfile(result, bot) {
 }
 
 function assertNoContradictoryMovement(result, bot, scenarioId) {
-  const moves = integerMoveEvents(result, bot)
+  const moves = turnMoveEvents(result, bot)
 
   for (let index = 1; index < moves.length; index += 1) {
     const previous = moves[index - 1]
     const current = moves[index]
 
-    if (current.t !== previous.t + 1) {
+    if (current.turn !== previous.turn + 1) {
       continue
     }
 
@@ -132,7 +134,7 @@ function assertNoContradictoryMovement(result, bot, scenarioId) {
     assert.equal(
       areOpposedPrimaryXDeltas(previousDx, previousDz, currentDx, currentDz),
       false,
-      `${scenarioId}: ${bot} flips forward/backward between ticks ${previous.t} and ${current.t}`,
+      `${scenarioId}: ${bot} flips forward/backward between turns ${previous.turn} and ${current.turn}`,
     )
   }
 
@@ -141,13 +143,13 @@ function assertNoContradictoryMovement(result, bot, scenarioId) {
     const middle = moves[index - 1]
     const current = moves[index]
 
-    if (middle.t !== first.t + 1 || current.t !== middle.t + 1) {
+    if (middle.turn !== first.turn + 1 || current.turn !== middle.turn + 1) {
       continue
     }
 
     assert.ok(
       distance(first.to, current.to) > 0.05,
-      `${scenarioId}: ${bot} bounces back to the same position at tick ${current.t}`,
+      `${scenarioId}: ${bot} bounces back to the same position at turn ${current.turn}`,
     )
   }
 }
@@ -348,8 +350,8 @@ test('turret kiter vs brawler preserves range, fires while moving, and needs the
   const withoutTurret = runWithoutKeyPart(scenario)
   const kiterProfile = movementProfile(result, 'blue')
   const brawlerProfile = movementProfile(result, 'red')
-  const blueMoveTicks = new Set(
-    integerMoveEvents(result, 'blue').map((event) => event.t),
+  const blueMoveTurns = new Set(
+    turnMoveEvents(result, 'blue').map((event) => event.turn),
   )
 
   assert.ok(kiterProfile.count >= 10)
@@ -358,7 +360,7 @@ test('turret kiter vs brawler preserves range, fires while moving, and needs the
   assertFirstFiresHaveRangeContext(result, 'blue', scenario.input.blue.blueprint)
   assert.ok(
     weaponFireEvents(result, 'blue').some((event) =>
-      blueMoveTicks.has(Math.trunc(event.t)),
+      blueMoveTurns.has(event.turn),
     ),
   )
   assert.ok(
@@ -382,7 +384,7 @@ test('net control vs fast sprinter deploys only with target context and slows th
     (event) => event.controlCue === 'deploy',
   )
   const firstDeploy = deployFires[0]
-  const blueMoves = integerMoveEvents(result, 'blue')
+  const blueMoves = turnMoveEvents(result, 'blue')
   const firstNetDamage = result.replay.events.find(
     (event) => event.type === 'damage' && event.bot === 'blue' && event.t > firstDeploy.t,
   )
@@ -470,7 +472,7 @@ test('commander drone vs spinner shows mobile command movement and charged drone
   assert.ok(commanderProfile.count > 20)
   assert.ok(commanderProfile.zDistance > commanderProfile.xDistance * 1.2)
   assert.equal(movementProfile(result, 'blue').count, 0)
-  assert.deepEqual(droneAbilities.map((event) => Math.trunc(event.t)), [1, 5])
+  assert.deepEqual(droneAbilities.map((event) => event.turn), [1, 5])
 
   for (const ability of droneAbilities) {
     const commanderPosition = positionAt(result, 'red', ability.t)

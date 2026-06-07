@@ -2687,6 +2687,47 @@ test('resolveSubmittedGameActions keeps both-hold combat inert and replay-valid'
   assert.equal(validateReplayTimeline(resolution.replay), true)
 })
 
+test('resolveSubmittedGameActions emits continuous visual move timing with explicit combat turns', () => {
+  const resolution = resolveSubmittedGameActions({
+    round: 1,
+    seed: 'canonical-replay-smooth-timing',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    blue: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    arena: tacticalRuntimeArena,
+  }, {
+    red: canonicalCombatActions('red', [
+      { move: 'forward' },
+      { move: 'forward' },
+      { move: 'forward' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'brake' },
+      { move: 'brake' },
+      { move: 'brake' },
+    ]),
+  })
+  const redMoves = moveEvents(resolution, 'red').slice(0, 3)
+
+  assert.deepEqual(redMoves.map((event) => event.turn), [1, 2, 3])
+  assert.ok(redMoves[0].t < 1)
+  assert.equal(validateReplayTimeline(resolution.replay), true)
+
+  for (let index = 1; index < redMoves.length; index += 1) {
+    const previous = redMoves[index - 1]
+    const current = redMoves[index]
+    const spacing = current.t - previous.t
+
+    assert.ok(spacing > 0)
+    assert.ok(spacing <= (previous.duration ?? 0) + 0.001)
+  }
+})
+
 test('resolveSubmittedGameActions deterministically blocks same-anchor and crossing-path conflicts', () => {
   const conflictInput = {
     round: 1,
@@ -2783,7 +2824,7 @@ test('resolveSubmittedGameActions fires only after final-pose range and line-of-
 
   assert.equal(
     rangeResolution.replay.events.some(
-      (event) => event.type === 'weapon_fire' && event.bot === 'red' && Math.trunc(event.t) === 4,
+      (event) => event.type === 'weapon_fire' && event.bot === 'red' && event.turn === 4,
     ),
     false,
   )
@@ -2998,14 +3039,13 @@ test('resolver emits independent weaponA and weaponB fire from two weapon slots'
   const redWeaponFire = result.replay.events.filter(
     (event) => event.type === 'weapon_fire' && event.bot === 'red',
   )
-  const slotsByTick = new Map()
+  const slotsByTurn = new Map()
 
   for (const event of redWeaponFire) {
-    const tick = Math.trunc(event.t)
-    const slots = slotsByTick.get(tick) ?? new Set()
+    const slots = slotsByTurn.get(event.turn) ?? new Set()
 
     slots.add(event.weaponSlot)
-    slotsByTick.set(tick, slots)
+    slotsByTurn.set(event.turn, slots)
   }
 
   assert.ok(redWeaponFire.some((event) => event.weaponSlot === 'weaponB'))
@@ -3029,7 +3069,7 @@ test('resolver emits independent weaponA and weaponB fire from two weapon slots'
   assert.ok(redWeaponFire.every((event) => typeof event.style === 'string' && event.style.length > 0))
   assert.ok(redWeaponFire.every((event) => Array.isArray(event.targetPosition)))
   assert.ok(
-    [...slotsByTick.values()].some(
+    [...slotsByTurn.values()].some(
       (slots) => slots.has('weaponA') && slots.has('weaponB'),
     ),
   )
@@ -3102,10 +3142,10 @@ test('resolver applies net status to slow movement on later ticks', () => {
 
   assert.ok(firstNetHit)
 
-  const hitTick = Math.trunc(firstNetHit.t)
-  const blueMoves = new Map(moveEvents(result, 'blue').map((event) => [event.t, event]))
-  const beforeSlow = blueMoves.get(hitTick)
-  const afterSlow = blueMoves.get(hitTick + 1)
+  const hitTurn = firstNetHit.turn
+  const blueMoves = new Map(moveEvents(result, 'blue').map((event) => [event.turn, event]))
+  const beforeSlow = blueMoves.get(hitTurn)
+  const afterSlow = blueMoves.get(hitTurn + 1)
 
   assert.ok(beforeSlow)
   assert.ok(afterSlow)
@@ -3135,7 +3175,7 @@ test('resolver gates booster burst with a runtime-part cooldown', () => {
     },
     arena: { name: 'Cooldown Test', width: 24, height: 16, activeHazards: [] },
   })
-  const deltas = new Map(redMoveEvents(result).map((event) => [event.t, movementDelta(event)]))
+  const deltas = new Map(redMoveEvents(result).map((event) => [event.turn, movementDelta(event)]))
 
   assert.ok(deltas.get(1) > deltas.get(2) * 1.25)
   assert.ok(deltas.get(5) > deltas.get(4) * 1.25)
@@ -3202,11 +3242,11 @@ test('resolver limits drone controller with charges and cooldown', () => {
     },
     arena: { name: 'Drone Test', width: 24, height: 16, activeHazards: [] },
   })
-  const droneTicks = result.replay.events
+  const droneTurns = result.replay.events
     .filter((event) => event.type === 'ability' && event.bot === 'red')
-    .map((event) => Math.trunc(event.t))
+    .map((event) => event.turn)
 
-  assert.deepEqual(droneTicks, [1, 5])
+  assert.deepEqual(droneTurns, [1, 5])
 })
 
 test('resolver stops destroyed utility behavior before later utility resolution', () => {
@@ -3400,12 +3440,12 @@ test('resolver lets turret kiters fire while moving and lose that behavior witho
   })
   const turretResult = fight(turretKiterBlueprint)
   const withoutTurretResult = fight(withoutTurretBlueprint)
-  const blueMoveTicks = new Set(moveEvents(turretResult, 'blue').map((event) => Math.trunc(event.t)))
+  const blueMoveTurns = new Set(moveEvents(turretResult, 'blue').map((event) => event.turn))
   const blueFire = turretResult.replay.events.filter(
     (event) => event.type === 'weapon_fire' && event.bot === 'blue',
   )
 
-  assert.ok(blueFire.some((event) => blueMoveTicks.has(Math.trunc(event.t))))
+  assert.ok(blueFire.some((event) => blueMoveTurns.has(event.turn)))
   assert.equal(
     withoutTurretResult.replay.events.some(
       (event) => event.type === 'weapon_fire' && event.bot === 'blue',
@@ -3454,7 +3494,7 @@ test('resolver gives net control forced movement and slow effects from live cont
     },
     arena: { name: 'Jailer Test', width: 24, height: 16, activeHazards: [] },
   })
-  const forcedBlueMoves = moveEvents(result, 'blue').filter((event) => event.t % 1 !== 0)
+  const forcedBlueMoves = moveEvents(result, 'blue').filter((event) => event.intent === 'forced')
 
   assert.ok(
     result.replay.events.some(
@@ -3687,7 +3727,7 @@ test('resolver models commander drone as charged ability pressure, not mini-bot 
     (event) => event.type === 'ability' && event.ability === 'drone_swarm',
   )
 
-  assert.deepEqual(droneAbilities.map((event) => Math.trunc(event.t)), [1, 5])
+  assert.deepEqual(droneAbilities.map((event) => event.turn), [1, 5])
   assert.equal(
     withoutDroneResult.replay.events.some((event) => event.type === 'ability'),
     false,
@@ -3800,8 +3840,8 @@ test('resolver handles sparse plans deterministically and keeps replay timeline 
   assert.equal(first.winner, 'draw')
   assert.equal(first.damage.red, 0)
   assert.equal(first.damage.blue, 0)
-  assert.equal(first.replay.duration, 60)
-  assert.equal(first.reason, 'No bot took damage for a full minute; the round ended as a draw.')
+  assert.equal(first.replay.duration, 43.68)
+  assert.equal(first.reason, 'No bot took damage for 60 combat turns; the round ended as a draw.')
   assert.equal(first.log[0].startsWith('Round 3'), true)
 })
 

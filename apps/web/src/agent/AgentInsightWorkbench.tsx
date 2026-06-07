@@ -114,7 +114,7 @@ export function AgentInsightWorkbench({
           {decision && roleState?.combat ? (
             <>
               <MetricGrid className="agent-facts">
-                <Fact label="Tick" value={String(decision.tick)} />
+                <Fact label="Turn" value={String(decision.tick)} />
                 <Fact label="Range" value={`${formatLabel(decision.range.band)} / ${decision.range.distance.toFixed(2)}m`} />
                 <Fact label="Preferred" value={formatLabel(decision.range.preferred)} />
                 <Fact label="Self health" value={`${Math.round(decision.health.selfPct)}%`} />

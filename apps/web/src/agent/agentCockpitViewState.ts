@@ -628,8 +628,8 @@ function nextActionForRoleState(
     }
 
     return isObserverCockpit
-      ? `Inspect gameMaster.legalActions for tick ${state.combat?.tick ?? '?'}; the server owns legal combat choices and canonical payloads.`
-      : `Choose one legal combat action from gameMaster.legalActions for tick ${state.combat?.tick ?? '?'} before the deadline.`
+      ? `Inspect gameMaster.legalActions for turn ${state.combat?.tick ?? '?'}; the server owns legal combat choices and canonical payloads.`
+      : `Choose one legal combat action from gameMaster.legalActions for turn ${state.combat?.tick ?? '?'} before the deadline.`
   }
 
   if (state.phase === 'round_review') {

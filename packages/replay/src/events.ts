@@ -1,5 +1,13 @@
 import type { MovementCommand, TeamRole, Vector3 } from '../../schemas/src/index.js'
 
+// CODEX_INTENT: carry combat turn identity separately from replay render time.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export type CombatTurnEventMetadata = {
+  turn?: number
+}
+
 export type AbilityName = 'laser_lance' | 'drone_swarm' | 'fire_breath'
 export type BotStabilityEventType =
   | 'bot_destabilized'
@@ -21,7 +29,7 @@ export type SpawnEvent = {
   rotation: Vector3
 }
 
-export type MoveEvent = {
+export type MoveEvent = CombatTurnEventMetadata & {
   t: number
   type: 'move'
   bot: TeamRole
@@ -35,7 +43,7 @@ export type MoveEvent = {
   contactIntent?: boolean
 }
 
-export type WeaponFireEvent = {
+export type WeaponFireEvent = CombatTurnEventMetadata & {
   t: number
   type: 'weapon_fire'
   bot: TeamRole
@@ -49,7 +57,7 @@ export type WeaponFireEvent = {
   style?: string
 }
 
-export type AbilityEvent = {
+export type AbilityEvent = CombatTurnEventMetadata & {
   t: number
   type: 'ability'
   bot: TeamRole
@@ -59,7 +67,7 @@ export type AbilityEvent = {
   targetPosition?: Vector3
 }
 
-export type ImpactEvent = {
+export type ImpactEvent = CombatTurnEventMetadata & {
   t: number
   type: 'impact'
   attacker: TeamRole
@@ -68,7 +76,7 @@ export type ImpactEvent = {
   position: Vector3
 }
 
-export type DamageEvent = {
+export type DamageEvent = CombatTurnEventMetadata & {
   t: number
   type: 'damage'
   bot: TeamRole
@@ -80,7 +88,7 @@ export type DamageEvent = {
   partMaxHealth?: number
 }
 
-export type HazardEvent = {
+export type HazardEvent = CombatTurnEventMetadata & {
   t: number
   type: 'hazard'
   hazard: string
@@ -89,7 +97,7 @@ export type HazardEvent = {
   position: Vector3
 }
 
-export type BotStabilityEvent = {
+export type BotStabilityEvent = CombatTurnEventMetadata & {
   t: number
   type: BotStabilityEventType
   bot: TeamRole
@@ -99,7 +107,7 @@ export type BotStabilityEvent = {
   severity?: number
 }
 
-export type PartDetachEvent = {
+export type PartDetachEvent = CombatTurnEventMetadata & {
   t: number
   type: 'part_detach'
   bot: TeamRole
@@ -114,7 +122,7 @@ export type PartDetachEvent = {
   damageCause?: string
 }
 
-export type KnockoutEvent = {
+export type KnockoutEvent = CombatTurnEventMetadata & {
   t: number
   type: 'knockout'
   bot: TeamRole
