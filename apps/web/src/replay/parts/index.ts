@@ -142,11 +142,14 @@ function createPartNode(
     category !== 'style' &&
     visualFamily !== 'ai_module' &&
     visualFamily !== 'anchor' &&
+    visualFamily !== 'coolant_tank' &&
     visualFamily !== 'energy_core' &&
+    visualFamily !== 'fuel_tank' &&
     visualFamily !== 'gyro' &&
     visualFamily !== 'magnet' &&
     visualFamily !== 'turret' &&
-    visualFamily !== 'net'
+    visualFamily !== 'net' &&
+    visualFamily !== 'radar'
   ) {
     createPartAccents(scene, partNode, role, block.id, category, width, height, depth, materials)
   }

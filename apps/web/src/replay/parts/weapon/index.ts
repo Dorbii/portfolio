@@ -9,6 +9,7 @@ import type {
 } from '../../../../../../packages/schemas/src/index.js'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { TeamMaterialSet } from '../../rendering/materials'
+import { createChainWhipWeaponPart } from './chainWhipWeaponPart'
 import { createDefaultWeaponPart } from './defaultWeaponPart'
 import {
   createDrillWeaponPart,
@@ -24,6 +25,7 @@ import {
   createSawWeaponPart,
   createSpinnerWeaponPart,
 } from './spinnerWeaponPart'
+import { createShredderWeaponPart } from './shredderWeaponPart'
 import { createTurretWeaponPart } from './turretWeaponPart'
 import type {
   WeaponPartRenderArgs,
@@ -31,6 +33,7 @@ import type {
 } from './types'
 
 const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRenderer>([
+  ['chain_whip', createChainWhipWeaponPart],
   ['drill', createDrillWeaponPart],
   ['flail', createFlailWeaponPart],
   ['flipper', createFlipperWeaponPart],
@@ -39,6 +42,7 @@ const WEAPON_RENDERERS_BY_VISUAL_FAMILY = new Map<PartVisualFamily, WeaponPartRe
   ['net', createNetWeaponPart],
   ['ram', createRamWeaponPart],
   ['saw', createSawWeaponPart],
+  ['shredder', createShredderWeaponPart],
   ['spear', createSpearWeaponPart],
   ['spinner', createSpinnerWeaponPart],
   ['turret', createTurretWeaponPart],

@@ -23,7 +23,7 @@ const DEFAULT_ACCENT_BY_ROLE: Record<TeamRole, string> = {
 const DAMAGE_PREVIEWS: PartCatalogDamagePreview[] = ['none', 'light', 'medium', 'critical']
 const TEAM_ROLES: TeamRole[] = ['red', 'blue']
 
-export function PartCatalogPreview() {
+export function PartCatalogPage() {
   const initialOptions = useMemo(() => resolvePartCatalogOptions(window.location.search), [])
   const [selectedPartId, setSelectedPartId] = useState(initialOptions.partId)
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialOptions.category)
@@ -61,7 +61,7 @@ export function PartCatalogPreview() {
     <main className="part-catalog-page">
       <header className="replay-preview-header part-catalog-header">
         <div>
-          <span className="eyebrow">QA part catalog</span>
+          <span className="eyebrow">Part catalog</span>
           <h1>{selectedPart.displayName}</h1>
         </div>
         <strong>{selectedPart.id}</strong>

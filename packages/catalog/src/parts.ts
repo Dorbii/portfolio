@@ -44,6 +44,8 @@ function inferVisualDescriptor(input: PartInput): PartVisualDescriptor {
 }
 
 function inferVisualFamily(input: PartInput): PartVisualFamily {
+  if (input.id.includes('Shredder')) return 'shredder'
+  if (input.id.includes('ChainWhip')) return 'chain_whip'
   if (input.id.includes('Drill')) return 'drill'
   if (input.id.includes('Flail')) return 'flail'
   if (input.id.includes('Spinner')) return 'spinner'
@@ -55,6 +57,10 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Flipper')) return 'flipper'
   if (input.id.includes('Grabber')) return 'grabber'
   if (input.id.includes('Ram')) return 'ram'
+  if (input.id.includes('Rail')) return 'rail_armor'
+  if (input.id.includes('CornerGuard')) return 'corner_guard'
+  if (input.id.includes('FlexPanel')) return 'flex_panel'
+  if (input.id.includes('HeavyWedge')) return 'heavy_wedge'
   if (input.id.includes('Tread')) return 'tread'
   if (input.id.includes('Mecanum')) return 'wheel'
   if (input.id.includes('Wheel')) return 'wheel'
@@ -68,11 +74,19 @@ function inferVisualFamily(input: PartInput): PartVisualFamily {
   if (input.id.includes('Anchor')) return 'anchor'
   if (input.id.includes('Smoke')) return 'smoke'
   if (input.id.includes('AIModule')) return 'ai_module'
+  if (input.id.includes('Radar')) return 'radar'
+  if (input.id.includes('CoolantTank')) return 'coolant_tank'
+  if (input.id.includes('FuelTank')) return 'fuel_tank'
   if (input.id.includes('Sensor')) return 'sensor'
   if (input.id.includes('EnergyCore')) return 'energy_core'
   if (input.id.includes('Battery') || input.id.includes('RepairKit')) return 'battery'
   if (input.id.includes('Drone')) return 'drone'
   if (input.id.includes('LightBar')) return 'light_bar'
+  if (input.id.includes('BladeAntenna')) return 'blade_antenna'
+  if (input.id.includes('Antenna')) return 'antenna'
+  if (input.id.includes('Horns')) return 'horns'
+  if (input.id.includes('Tail')) return 'tail'
+  if (input.id.includes('TopHat') || input.id.includes('CowboyHat')) return 'hat'
 
   return 'body'
 }
@@ -404,6 +418,30 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.spinner,
   }),
   part({
+    id: 'Weapon_ChainWhip',
+    category: 'weapon',
+    displayName: 'Chain Whip',
+    cost: 24,
+    mass: 7,
+    durability: 12,
+    size: [1, 1, 2],
+    controls: { weapon: true },
+    stats: { weapon: 9, chaos: 5, control: -2 },
+    behavior: PART_BEHAVIORS.spinner,
+  }),
+  part({
+    id: 'Weapon_Shredder',
+    category: 'weapon',
+    displayName: 'Shredder Drum',
+    cost: 42,
+    mass: 16,
+    durability: 24,
+    size: [2, 1, 2],
+    controls: { weapon: true },
+    stats: { weapon: 16, chaos: 6, control: -1, stability: -1 },
+    behavior: PART_BEHAVIORS.spinner,
+  }),
+  part({
     id: 'Weapon_Net',
     category: 'weapon',
     displayName: 'Net Launcher',
@@ -536,6 +574,47 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.reactive_armor,
   }),
   part({
+    id: 'Armor_Rail',
+    category: 'defense',
+    displayName: 'Rail Armor',
+    cost: 12,
+    mass: 7,
+    durability: 24,
+    size: [2, 1, 1],
+    stats: { armor: 4, control: 2 },
+  }),
+  part({
+    id: 'Armor_CornerGuard',
+    category: 'defense',
+    displayName: 'Corner Guard',
+    cost: 9,
+    mass: 5,
+    durability: 20,
+    size: [1, 1, 1],
+    stats: { armor: 4, stability: 1 },
+  }),
+  part({
+    id: 'Armor_FlexPanel',
+    category: 'defense',
+    displayName: 'Flex Panel',
+    cost: 13,
+    mass: 6,
+    durability: 18,
+    size: [2, 1, 1],
+    stats: { armor: 4, chaos: 1 },
+  }),
+  part({
+    id: 'Armor_HeavyWedge',
+    category: 'defense',
+    displayName: 'Heavy Wedge Armor',
+    cost: 18,
+    mass: 11,
+    durability: 32,
+    size: [2, 1, 1],
+    stats: { armor: 7, control: 2, drive: -1 },
+    behavior: PART_BEHAVIORS.front_plate,
+  }),
+  part({
     id: 'Utility_Booster',
     category: 'utility',
     displayName: 'Booster',
@@ -578,6 +657,26 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 1],
     stats: { stability: 2, control: 1 },
+  }),
+  part({
+    id: 'Utility_CoolantTank',
+    category: 'utility',
+    displayName: 'Coolant Tank',
+    cost: 14,
+    mass: 5,
+    durability: 11,
+    size: [1, 1, 1],
+    stats: { stability: 2, weapon: 1 },
+  }),
+  part({
+    id: 'Utility_FuelTank',
+    category: 'utility',
+    displayName: 'Fuel Tank',
+    cost: 12,
+    mass: 6,
+    durability: 9,
+    size: [1, 1, 1],
+    stats: { drive: 2, chaos: 2 },
   }),
   part({
     id: 'Utility_AIModule',
@@ -652,6 +751,18 @@ export const PART_CATALOG: PartDefinition[] = [
     behavior: PART_BEHAVIORS.sensor,
   }),
   part({
+    id: 'Utility_Radar',
+    category: 'utility',
+    displayName: 'Radar Dish',
+    cost: 18,
+    mass: 4,
+    durability: 10,
+    size: [1, 1, 1],
+    controls: { utility: true },
+    stats: { control: 6 },
+    behavior: PART_BEHAVIORS.sensor,
+  }),
+  part({
     id: 'Utility_DroneController',
     category: 'utility',
     displayName: 'Drone Controller',
@@ -674,6 +785,26 @@ export const PART_CATALOG: PartDefinition[] = [
     stats: { style: 3 },
   }),
   part({
+    id: 'Style_Antenna',
+    category: 'style',
+    displayName: 'Antenna',
+    cost: 3,
+    mass: 1,
+    durability: 3,
+    size: [1, 1, 1],
+    stats: { style: 2, control: 1 },
+  }),
+  part({
+    id: 'Style_BladeAntenna',
+    category: 'style',
+    displayName: 'Blade Antenna',
+    cost: 4,
+    mass: 1,
+    durability: 4,
+    size: [1, 1, 1],
+    stats: { style: 3, control: 1 },
+  }),
+  part({
     id: 'Style_DragonHead',
     category: 'style',
     displayName: 'Dragon Head',
@@ -692,6 +823,26 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     stats: { style: 4, weapon: 1 },
+  }),
+  part({
+    id: 'Style_Horns',
+    category: 'style',
+    displayName: 'Horns',
+    cost: 6,
+    mass: 2,
+    durability: 6,
+    size: [1, 1, 1],
+    stats: { style: 4, chaos: 1 },
+  }),
+  part({
+    id: 'Style_Tail',
+    category: 'style',
+    displayName: 'Tail',
+    cost: 7,
+    mass: 3,
+    durability: 6,
+    size: [1, 1, 1],
+    stats: { style: 4, chaos: 1, stability: -1 },
   }),
   part({
     id: 'Style_Wings',
@@ -722,6 +873,26 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 4,
     size: [1, 1, 1],
     stats: { style: 4, control: 1 },
+  }),
+  part({
+    id: 'Style_TopHat',
+    category: 'style',
+    displayName: 'Top Hat',
+    cost: 5,
+    mass: 2,
+    durability: 4,
+    size: [1, 1, 1],
+    stats: { style: 5 },
+  }),
+  part({
+    id: 'Style_CowboyHat',
+    category: 'style',
+    displayName: 'Cowboy Hat',
+    cost: 5,
+    mass: 2,
+    durability: 4,
+    size: [1, 1, 1],
+    stats: { style: 5, chaos: 1 },
   }),
   part({
     id: 'Style_Crown',

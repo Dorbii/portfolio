@@ -10,6 +10,12 @@ import { createHeavyArmorPart } from './heavyArmorPart'
 import { createLightArmorPart } from './lightArmorPart'
 import { createReactiveArmorPart } from './reactiveArmorPart'
 import { createSpikedArmorPart } from './spikedArmorPart'
+import {
+  createCornerGuardArmorPart,
+  createFlexPanelArmorPart,
+  createHeavyWedgeArmorPart,
+  createRailArmorPart,
+} from './specialArmorParts'
 import type { DefensePartRenderArgs } from './types'
 
 export function createDefensePart(
@@ -33,6 +39,26 @@ export function createDefensePart(
 
   if (partId.includes('Front') || partId.includes('Shield')) {
     createFrontArmorPart(args)
+    return
+  }
+
+  if (partId.includes('Rail')) {
+    createRailArmorPart(args)
+    return
+  }
+
+  if (partId.includes('CornerGuard')) {
+    createCornerGuardArmorPart(args)
+    return
+  }
+
+  if (partId.includes('FlexPanel')) {
+    createFlexPanelArmorPart(args)
+    return
+  }
+
+  if (partId.includes('HeavyWedge')) {
+    createHeavyWedgeArmorPart(args)
     return
   }
 

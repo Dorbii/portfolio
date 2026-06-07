@@ -9,7 +9,7 @@ const rendererChunkFilePrefixes = [
   'ArenaPreviewScene-',
   'BabylonPartCatalogScene-',
   'BabylonReplayScene-',
-  'PartCatalogPreview-',
+  'PartCatalogPage-',
   'ReplayViewer-',
   'rendererKit-',
 ]

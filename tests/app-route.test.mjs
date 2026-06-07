@@ -63,8 +63,8 @@ const replayPreviewSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayPreview.tsx', import.meta.url),
   'utf8',
 )
-const partCatalogPreviewSource = readFileSync(
-  new URL('../apps/web/src/replay/catalog/PartCatalogPreview.tsx', import.meta.url),
+const partCatalogPageSource = readFileSync(
+  new URL('../apps/web/src/replay/catalog/PartCatalogPage.tsx', import.meta.url),
   'utf8',
 )
 const catalogSceneSource = readFileSync(
@@ -145,6 +145,10 @@ function readReplayPartSources(paths) {
     .map((path) => readFileSync(new URL(`../apps/web/src/replay/parts/${path}`, import.meta.url), 'utf8'))
     .join('\n')
 }
+const defensePartsSource = readReplayPartSources([
+  'defense/index.ts',
+  'defense/specialArmorParts.ts',
+])
 const treadPartsSource = readReplayPartSources([
   'mobility/treadParts.ts',
   'mobility/standardTreadPart.ts',
@@ -161,6 +165,7 @@ const utilityPartsSource = readReplayPartSources([
   'utility/droneControllerPart.ts',
   'utility/energyCorePart.ts',
   'utility/gyroStabilizerPart.ts',
+  'utility/industrialUtilityParts.ts',
   'utility/magnetPart.ts',
   'utility/repairKitPart.ts',
   'utility/sensorPart.ts',
@@ -168,6 +173,7 @@ const utilityPartsSource = readReplayPartSources([
   'utility/utilityFrame.ts',
 ])
 const meleeWeaponPartsSource = readReplayPartSources([
+  'weapon/chainWhipWeaponPart.ts',
   'weapon/meleeWeaponParts.ts',
   'weapon/drillWeaponPart.ts',
   'weapon/flailWeaponPart.ts',
@@ -193,6 +199,10 @@ const spinnerWeaponPartSource = readFileSync(
   new URL('../apps/web/src/replay/parts/weapon/spinnerWeaponPart.ts', import.meta.url),
   'utf8',
 )
+const shredderWeaponPartSource = readFileSync(
+  new URL('../apps/web/src/replay/parts/weapon/shredderWeaponPart.ts', import.meta.url),
+  'utf8',
+)
 const turretWeaponPartSource = readFileSync(
   new URL('../apps/web/src/replay/parts/weapon/turretWeaponPart.ts', import.meta.url),
   'utf8',
@@ -210,6 +220,7 @@ const wheelPartsSource = readReplayPartSources([
 ])
 const stylePartsSource = readReplayPartSources([
   'style/index.ts',
+  'style/accessoryParts.ts',
   'style/crownPart.ts',
   'style/dragonHeadPart.ts',
   'style/flagPart.ts',
@@ -260,14 +271,18 @@ test('app keeps a dedicated /agent route gate tolerant of nested paths', () => {
   assert.match(appSource, /normalized\.endsWith\('\/agent'\)/)
 })
 
-test('app keeps a qa-only part catalog route for isolated renderer review', () => {
-  assert.ok(appSource.includes("import('./replay/catalog/PartCatalogPreview')"))
-  assert.match(appSource, /function isPartCatalogPreviewPathname\(/)
-  assert.match(appSource, /normalized === '\/qa\/part-catalog'/)
-  assert.match(appSource, /normalized\.endsWith\('\/qa\/part-catalog'\)/)
-  assert.ok(partCatalogPreviewSource.includes('PART_CATALOG'))
-  assert.ok(partCatalogPreviewSource.includes('BabylonPartCatalogScene'))
-  assert.ok(partCatalogPreviewSource.includes("'Wheel_Omni'"))
+test('app exposes a first-class part catalog route from the main console', () => {
+  assert.ok(appSource.includes("import('./replay/catalog/PartCatalogPage')"))
+  assert.match(appSource, /function isPartCatalogPathname\(/)
+  assert.match(appSource, /normalized === '\/part-catalog'/)
+  assert.match(appSource, /normalized\.endsWith\('\/part-catalog'\)/)
+  assert.equal(appSource.includes('/qa/part-catalog'), false)
+  assert.ok(refereePanelsSource.includes('href="/part-catalog"'))
+  assert.ok(refereePanelsSource.includes('Part Catalog'))
+  assert.ok(partCatalogPageSource.includes('PART_CATALOG'))
+  assert.ok(partCatalogPageSource.includes('BabylonPartCatalogScene'))
+  assert.ok(partCatalogPageSource.includes("'Wheel_Omni'"))
+  assert.ok(partCatalogPageSource.includes('Part catalog'))
   assert.ok(catalogSceneSource.includes('createCatalogPartNode'))
   assert.ok(catalogSceneSource.includes('BABYLON_RENDERER_BUDGETS.partCatalog'))
   assert.ok(catalogSceneSource.includes('damageMaterialForSeverity'))
@@ -644,15 +659,19 @@ test('Babylon part renderers are organized by part category', () => {
     'body/techDetails.ts',
     'defense/cageArmorPart.ts',
     'defense/reactiveArmorPart.ts',
+    'defense/specialArmorParts.ts',
     'mobility/mecanumWheelPart.ts',
     'mobility/omniWheelPart.ts',
     'mobility/tankTrackPart.ts',
     'mobility/trackGeometry.ts',
     'style/dragonHeadPart.ts',
+    'style/accessoryParts.ts',
     'style/plateGeometry.ts',
     'utility/boosterPart.ts',
+    'utility/industrialUtilityParts.ts',
     'utility/repairKitPart.ts',
     'utility/utilityFrame.ts',
+    'weapon/chainWhipWeaponPart.ts',
     'weapon/drillWeaponPart.ts',
     'weapon/flailWeaponPart.ts',
     'weapon/hammerWeaponPart.ts',
@@ -802,6 +821,19 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.equal(netWeaponPartSource.includes('net-vertical'), false)
   assert.equal(netWeaponPartSource.includes('net-horizontal'), false)
   assert.equal(netWeaponPartSource.includes('net-corner-node'), false)
+  assert.ok(weaponPartsSource.includes("['chain_whip', createChainWhipWeaponPart]"))
+  assert.ok(weaponPartsSource.includes("['shredder', createShredderWeaponPart]"))
+  assert.ok(meleeWeaponPartsSource.includes('chain-whip-horizontal-sweep-root'))
+  assert.ok(meleeWeaponPartsSource.includes("chainRoot.metadata = { kind: 'spin', axis: 'y'"))
+  assert.ok(meleeWeaponPartsSource.includes('chain-whip-drive-cylinder'))
+  assert.ok(meleeWeaponPartsSource.includes('chain-whip-single-lash-link'))
+  assert.ok(meleeWeaponPartsSource.includes('chain-whip-hooked-impact-tip'))
+  assert.equal(meleeWeaponPartsSource.includes('chain-whip-armored-spool-housing'), false)
+  assert.equal(meleeWeaponPartsSource.includes('chain-whip-side-guard'), false)
+  assert.ok(shredderWeaponPartSource.includes('shredder-drum-motion-root'))
+  assert.ok(shredderWeaponPartSource.includes("drumRoot.metadata = { kind: 'spin', axis: 'z'"))
+  assert.ok(shredderWeaponPartSource.includes('shredder-toothed-disc'))
+  assert.ok(shredderWeaponPartSource.includes('shredder-armored-gearbox'))
   assert.ok(meleeWeaponPartsSource.includes('drill-bit-motion-root'))
   assert.ok(meleeWeaponPartsSource.includes("bitRoot.metadata = { kind: 'spin', axis: 'z'"))
   assert.ok(meleeWeaponPartsSource.includes('flail-chain-root'))
@@ -822,6 +854,15 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(utilityPartsSource.includes('battery-lipo-cell'))
   assert.ok(utilityPartsSource.includes('booster-pressure-tank'))
   assert.ok(utilityPartsSource.includes('repair-case-lid'))
+  assert.ok(utilityPartsSource.includes('radar-parabolic-dish'))
+  assert.ok(utilityPartsSource.includes('radar-dish-rim'))
+  assert.ok(utilityPartsSource.includes("blockLabel: 'coolant-tank'"))
+  assert.ok(utilityPartsSource.includes("blockLabel: 'fuel-tank'"))
+  assert.ok(utilityPartsSource.includes('${blockLabel}-pressure-cylinder'))
+  assert.ok(utilityPartsSource.includes('fuel-tank-hazard-stripe'))
+  assert.equal(utilityPartsSource.includes("createUtilityFrame(args, 'Radar')"), false)
+  assert.equal(utilityPartsSource.includes("createUtilityFrame(args, 'CoolantTank')"), false)
+  assert.equal(utilityPartsSource.includes("createUtilityFrame(args, 'FuelTank')"), false)
   assert.ok(utilityPartsSource.includes('sensor-pcb-board'))
   assert.ok(utilityPartsSource.includes('smoke-pressure-canister'))
   assert.ok(partDetailsSource.includes("category === 'mobility' || category === 'utility'"))
@@ -887,6 +928,16 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.equal(utilityPartsSource.includes('gyro-control-cable-loop'), false)
   assert.equal(utilityPartsSource.includes('gyroRing.metadata'), false)
   assert.ok(utilityPartsSource.includes("rotor.metadata = { kind: 'spin', axis: 'z'"))
+  assert.ok(defensePartsSource.includes('rail-armor-horizontal-tube'))
+  assert.ok(defensePartsSource.includes('corner-guard-octagonal-bumper'))
+  assert.ok(defensePartsSource.includes('flex-panel-rubberized-segment'))
+  assert.ok(defensePartsSource.includes('heavy-wedge-sloped-armor'))
+  assert.ok(stylePartsSource.includes('antenna-flexible-mast'))
+  assert.ok(stylePartsSource.includes('blade-antenna-fin-mast'))
+  assert.ok(stylePartsSource.includes('horns-swept-metal-horn'))
+  assert.ok(stylePartsSource.includes('tail-armored-segment'))
+  assert.ok(stylePartsSource.includes('top-hat-tall-crown'))
+  assert.ok(stylePartsSource.includes('cowboy-hat-pinched-crown'))
   assert.equal(
     /kind: '(?:roll|spin)', speed/.test(
       [
@@ -903,11 +954,14 @@ test('Babylon material and part-language surfaces use PBR tokens and catalog-bac
   assert.ok(partRendererSource.includes('function createCatalogPartNode'))
   assert.ok(partRendererSource.includes("visualFamily !== 'ai_module'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'anchor'"))
+  assert.ok(partRendererSource.includes("visualFamily !== 'coolant_tank'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'energy_core'"))
+  assert.ok(partRendererSource.includes("visualFamily !== 'fuel_tank'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'gyro'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'magnet'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'turret'"))
   assert.ok(partRendererSource.includes("visualFamily !== 'net'"))
+  assert.ok(partRendererSource.includes("visualFamily !== 'radar'"))
   assert.equal(wheelPartsSource.includes('large-wheel-outer-band'), false)
   assert.ok(wheelPartsSource.includes('large-wheel-bead-plate'))
   assert.ok(wheelPartsSource.includes('large-wheel-sidewall-lug'))
