@@ -5,6 +5,21 @@ import { gzipSync } from 'node:zlib'
 const distAssetsDir = resolve('dist/assets')
 const chunkGzipBudgetBytes = 560 * 1024
 const aggregateGzipBudgetBytes = 720 * 1024
+const rendererChunkFilePrefixes = [
+  'ArenaPreviewScene-',
+  'BabylonPartCatalogScene-',
+  'BabylonReplayScene-',
+  'PartCatalogPreview-',
+  'ReplayViewer-',
+  'rendererKit-',
+]
+const rendererChunkSourceMarkers = [
+  'arena-preview-stage',
+  'bot_part',
+  'data-renderer-budget-state',
+  'part-catalog-stage',
+  'replay-camera',
+]
 
 if (!existsSync(distAssetsDir)) {
   throw new Error('dist/assets is missing. Run npm.cmd run build before checking renderer budgets.')
@@ -24,13 +39,8 @@ const chunkCandidates = readdirSync(distAssetsDir)
     }
   })
   .filter((chunk) =>
-    chunk.fileName.startsWith('ArenaPreviewScene-')
-    || chunk.fileName.startsWith('ReplayViewer-')
-    || chunk.fileName.startsWith('babylonArena-')
-    || chunk.fileName.startsWith('babylonPartRenderer-')
-    || chunk.fileName.startsWith('babylonRendererKit-')
-    || chunk.source.includes('replay-camera')
-    || chunk.source.includes('bot_part'),
+    rendererChunkFilePrefixes.some((prefix) => chunk.fileName.startsWith(prefix))
+    || rendererChunkSourceMarkers.some((marker) => chunk.source.includes(marker)),
   )
   .sort((a, b) => b.gzipBytes - a.gzipBytes)
 

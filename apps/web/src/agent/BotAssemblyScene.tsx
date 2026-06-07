@@ -16,11 +16,11 @@ import {
 import {
   BABYLON_RENDERER_BUDGETS,
   createBabylonRendererBudgetState,
-} from '../replay/babylonRendererBudgets'
+} from '../replay/rendering/rendererBudgets'
 import {
   createRendererStats,
   type BabylonRendererStats,
-} from '../replay/babylonRendererKit'
+} from '../replay/rendering/rendererKit'
 
 type AssemblyStatus = 'booting' | 'ready' | 'unavailable' | 'context_lost'
 

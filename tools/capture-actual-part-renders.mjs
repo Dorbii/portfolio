@@ -173,13 +173,13 @@ import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
 import type { Node } from '@babylonjs/core/node'
 import { PART_CATALOG } from '../../../packages/catalog/src/index.js'
 import type { BotBlueprint } from '../../../packages/schemas/src/index.js'
-import { createBotNode, createTeamMaterials } from './replay/babylonPartRenderer'
+import { createBotNode, createTeamMaterials } from './replay/parts'
 import {
   createBabylonRendererCore,
   createCaptureLightingPreset,
   createRendererGlow,
   isBabylonRendererSupported,
-} from './replay/babylonRendererKit'
+} from './replay/rendering/rendererKit'
 
 type CaptureApi = {
   toPngDataUrl: () => string

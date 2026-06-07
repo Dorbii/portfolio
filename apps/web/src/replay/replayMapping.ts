@@ -12,7 +12,7 @@ import {
   replayEventsAtOrBefore,
   type CompiledReplayTimeline,
 } from './replayCompiledTimeline.js'
-import { buildReplayEffects } from './replayEffectMapping.js'
+import { buildReplayEffects } from './effects/effectMapping.js'
 import type {
   BotFrameState,
   IndexedReplayEvent,

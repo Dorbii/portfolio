@@ -1,7 +1,7 @@
 import type { ReplayEvent, ReplayTimeline } from '../../../../packages/replay/src/index.js'
 import { sortReplayEvents } from '../../../../packages/replay/src/index.js'
 import type { TeamRole } from '../../../../packages/schemas/src/index.js'
-import { getReplayEffectWindowSeconds } from './replayEffectMapping.js'
+import { getReplayEffectWindowSeconds } from './effects/effectMapping.js'
 import type { IndexedReplayEvent } from './replayMappingTypes.js'
 
 type EffectWindow = {

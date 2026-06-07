@@ -8,13 +8,13 @@ import type {
   BotBlueprint,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import { createBotNode } from '../replay/babylonPartRenderer'
-import type { TeamMaterialSet } from '../replay/babylonMaterials'
+import { createBotNode } from '../replay/parts'
+import type { TeamMaterialSet } from '../replay/rendering/materials'
 import {
   applyPartMotion,
   isPartMotionNode,
   type PartMotionMetadata,
-} from '../replay/babylonPartMotion'
+} from '../replay/parts/motion'
 
 export type AssemblyResources = {
   bot?: TransformNode

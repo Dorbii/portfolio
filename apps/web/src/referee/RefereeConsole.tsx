@@ -16,7 +16,7 @@ const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
 )
 const ArenaPreviewScene = lazy(() =>
-  import('../replay/ArenaPreviewScene').then((module) => ({ default: module.ArenaPreviewScene })),
+  import('../replay/arena/ArenaPreviewScene').then((module) => ({ default: module.ArenaPreviewScene })),
 )
 
 function ReplayFrameFallback() {

@@ -7,7 +7,7 @@ import {
 } from '../mockSession'
 import { ReplayViewer } from './ReplayViewer'
 import type { CameraPreset } from './replayMapping'
-import { normalizeCameraPreset } from './replayCameraPresets'
+import { normalizeCameraPreset } from './camera/presets'
 
 export function ReplayPreview() {
   const previewOptions = resolveReplayPreviewOptions(window.location.search)

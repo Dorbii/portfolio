@@ -6,7 +6,7 @@ import type {
   TeamIdentity,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import { BabylonReplayScene } from './BabylonReplayScene'
+import { BabylonReplayScene } from './scene/BabylonReplayScene'
 import {
   buildReplayFrame,
   clampReplayTime,
@@ -14,7 +14,7 @@ import {
   type CameraPreset,
   type ReplayEffectState,
 } from './replayMapping'
-import { CAMERA_PRESET_OPTIONS, normalizeCameraPreset } from './replayCameraPresets'
+import { CAMERA_PRESET_OPTIONS, normalizeCameraPreset } from './camera/presets'
 import { BotPartMap } from './ReplayPartMap'
 import { capitalize, formatDurationSeconds, formatLabel } from '../shared/format'
 import {

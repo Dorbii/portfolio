@@ -16,11 +16,11 @@ import {
   createRendererBox,
   createRendererGlow,
   isBabylonRendererSupported,
-} from '../replay/babylonRendererKit'
+} from '../replay/rendering/rendererKit'
 import {
   createBotMaterialSet,
   createCombatTeamPalette,
-} from '../replay/babylonMaterials'
+} from '../replay/rendering/materials'
 
 export function isAssemblyRendererSupported(): boolean {
   return isBabylonRendererSupported()

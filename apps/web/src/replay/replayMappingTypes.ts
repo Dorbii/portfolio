@@ -7,7 +7,7 @@ export type IndexedReplayEvent = {
   sequence: number
 }
 
-export type { CameraPreset } from './replayCameraPresets.js'
+export type { CameraPreset } from './camera/presets.js'
 
 export type BotFrameState = {
   role: TeamRole

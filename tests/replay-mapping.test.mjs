@@ -14,12 +14,12 @@ import {
   calculateBroadcastFrameForBothBotsAndActiveEffect,
   capBroadcastShakeForNoExcessiveShake,
   NO_EXCESSIVE_BROADCAST_SHAKE_LIMIT,
-} from '../.test-build/apps/web/src/replay/replayCameraFraming.js'
+} from '../.test-build/apps/web/src/replay/camera/framing.js'
 import {
   CAMERA_PRESET_OPTIONS,
   CANONICAL_CAMERA_PRESETS,
   normalizeCameraPreset,
-} from '../.test-build/apps/web/src/replay/replayCameraPresets.js'
+} from '../.test-build/apps/web/src/replay/camera/presets.js'
 import { mockReplay } from '../.test-build/apps/web/src/mockSession.js'
 import {
   createReplayTimeline,

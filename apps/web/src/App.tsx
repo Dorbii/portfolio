@@ -9,7 +9,7 @@ const ReplayPreview = lazy(() =>
   import('./replay/ReplayPreview').then((module) => ({ default: module.ReplayPreview })),
 )
 const PartCatalogPreview = lazy(() =>
-  import('./replay/PartCatalogPreview').then((module) => ({ default: module.PartCatalogPreview })),
+  import('./replay/catalog/PartCatalogPreview').then((module) => ({ default: module.PartCatalogPreview })),
 )
 
 export default function App() {

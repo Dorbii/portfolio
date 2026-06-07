@@ -11,7 +11,7 @@ import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import {
   createPbrSurfaceTextures,
   type SurfacePattern,
-} from '../replay/babylonSurfaceTextures'
+} from '../replay/rendering/surfaceTextures'
 import type { AssemblyResources } from './botAssemblyAnimation'
 
 const ROOM_WIDTH = 10.8
