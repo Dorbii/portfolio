@@ -1,0 +1,1472 @@
+Game Descriptor Concept:
+build a weird combat machine, let it fight, learn from the wreckage, mutate the design
+
+**Intent**
+
+The replacement is not “better prompts.” It is a different authority model.
+
+```text
+Old model:
+agent reads big manual
+agent writes round plan / turn command JSON
+server validates
+renderer tries to make it look alive
+
+New model:
+server acts as game master
+server gives legal choices
+agent chooses actionId
+server applies canonical payload
+resolver emits semantic replay
+renderer animates resolved truth
+```
+
+The agent’s job is strategy, not API composition, grid legality, schema compliance, or combat arbitration.
+
+The human post-session loop is:
+
+```text
+Quit:
+  end session, no save
+
+Save:
+  save champion design + fight dossier + shared debrief
+
+Continue:
+  save first, then start next session seeded with champion design
+  both agents receive same shared debrief
+  challenger gets bonus gold based on champion record
+```
+
+**Non-Negotiable Decisions**
+
+- No backwards compatibility in final merged state.
+- Remove `/round-plan` and `/turn-command`.
+- Remove `submitRoundPlan` and `submitTurnCommand`.
+- Remove public `submit_round_plan` and `submit_turn_command` action names.
+- Do not ask the agent capability questions like “can you execute JS?” in gameplay flow.
+- Keep combat simultaneous.
+- Do not send rationale/internal thought to the server as combat truth.
+- Public chat/trash talk is allowed but display-only.
+- Private post-fight reflections are allowed only after at least one completed fight.
+- Reflections stay private until consumed into the shared debrief.
+- Champion design is private/carryover.
+- Shared debrief is sent to both future agents.
+- Challenger does not receive champion design.
+- V1 is perfect-information tactics. Do not half-build fog-of-war.
+
+**New Agent Connection Prompt**
+
+Replace the current giant manual with a short static brief in [agentBrief.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentBrief.ts) and [agentContract.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/agentContract.ts).
+
+Example:
+
+```text
+You are about to play Clash of Clankers.
+
+Declare:
+- agentName
+- teamIdentity.name
+- teamIdentity.colorHex as valid hex
+- teamIdentity.logoPrompt or logo asset
+
+Preferred browser path:
+Open /agent#session=<id>&role=<red|blue>&claimToken=<token>&api=<base>
+Then call:
+await window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })
+
+Raw HTTP fallback:
+POST /sessions/:sessionId/roles/:role/bootstrap
+Authorization: Bearer <claimToken>
+
+After bootstrap, follow the returned GameMasterPacket.
+Choose from legalActions and submit actionId only.
+```
+
+No old examples that tell agents to build custom v2 plans or inspect `movementOptions.recommended`.
+
+**New Public Routes**
+
+Keep:
+
+```text
+POST /sessions/:sessionId/roles/:role/bootstrap
+GET  /sessions/:sessionId/state
+GET  /sessions/:sessionId/public
+GET  /sessions/:sessionId/replay
+POST /sessions/:sessionId/chat
+POST /sessions/:sessionId/private-chat
+```
+
+Add:
+
+```text
+POST /sessions/:sessionId/action
+POST /sessions/:sessionId/reflection
+POST /sessions/:sessionId/save
+POST /sessions/:sessionId/continue
+POST /sessions/:sessionId/quit
+```
+
+Remove:
+
+```text
+POST /sessions/:sessionId/round-plan
+POST /sessions/:sessionId/turn-command
+```
+
+`/advance-round` is not automatically legacy. If the game still supports multiple fights/rounds inside one session, keep it as human/referee round control. If the new model collapses each session to one completed fight, then remove it too. Do not decide that accidentally.
+
+**Core Contracts**
+
+Add/replace schema in [types.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts) and [relay.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/relay.ts).
+
+```ts
+type GameMasterPhase =
+  | 'wait_for_opponent_claim'
+  | 'choose_loadout'
+  | 'wait_for_opponent_loadout'
+  | 'combat_turn'
+  | 'wait_for_opponent_turn'
+  | 'replay_phase'
+  | 'round_review'
+  | 'session_complete'
+  | 'expired';
+
+type GameMasterPacket = {
+  sessionId: string;
+  role: TeamRole;
+  phase: GameMasterPhase;
+  nextAction: GameMasterNextAction;
+  round: number;
+  fightId?: string;
+  turnId?: string;
+
+  decisionVersion: number;
+  eventVersion: number;
+  actionSetId?: string;
+
+  instruction: string;
+  resources?: AgentResourcesView;
+  catalog?: CatalogSnapshotView;
+  board?: AgentBoardView;
+  visibleState?: AgentVisibleCombatState;
+  legalActions: GameMasterLegalAction[];
+
+  sharedDebrief?: SharedDebrief;
+  submit?: SubmitInstruction;
+};
+```
+
+Use separate versions:
+
+```ts
+type VersionContract = {
+  decisionVersion: number; // snapshot both agents choose from
+  actionSetId: string;     // exact role-specific legal menu
+  eventVersion: number;    // chat/replay/public-state progression
+};
+```
+
+`stateVersion` alone is not enough. If red submits first and increments state, blue’s simultaneous action must not become stale.
+
+**Legal Action Contract**
+
+```ts
+type GameMasterLegalAction = {
+  id: string;
+  kind:
+    | 'select_loadout'
+    | 'buy_part'
+    | 'place_part'
+    | 'confirm_loadout'
+    | 'move'
+    | 'attack'
+    | 'move_and_attack'
+    | 'use_utility'
+    | 'hold'
+    | 'ready';
+
+  label: string;
+  summary: string;
+
+  catalogRefs?: string[];
+  requirements?: string[];
+
+  preview?: {
+    basis: 'current_snapshot';
+    outcome: 'estimated' | 'guaranteed';
+    path?: GridCoord[];
+    finalPose?: BotPose;
+    target?: GridCoord;
+    currentLineOfSight?: boolean;
+    expectedRangeIfOpponentHolds?: number;
+    hazardExposure?: number;
+    riskTags?: string[];
+  };
+};
+```
+
+Do not expose canonical payloads to agents.
+
+Server stores:
+
+```ts
+type ActiveActionSet = {
+  actionSetId: string;
+  role: TeamRole;
+  phase: GameMasterPhase;
+  round: number;
+  fightId?: string;
+  turnId?: string;
+  decisionVersion: number;
+  catalogVersion: string;
+  arenaVersion: string;
+  createdAt: string;
+  expiresAt?: string;
+
+  actions: Record<string, CanonicalGameAction>;
+
+  locked?: {
+    actionId: string;
+    submittedAt: string;
+    requestHash: string;
+  };
+};
+```
+
+Submission:
+
+```ts
+type GameMasterActionSubmission = {
+  action: 'submit_game_action';
+  actionSetId: string;
+  decisionVersion: number;
+  actionId: string;
+  publicMessage?: string;
+};
+```
+
+Accepted example:
+
+```ts
+{
+  action: 'submit_game_action',
+  actionSetId: 'red:r1:f1:t3:v12',
+  decisionVersion: 12,
+  actionId: 'combat.red.r1.f1.t3.move_east_2.fire_weapon_a',
+  publicMessage: 'Your left side is looking soft.'
+}
+```
+
+Rejected forever:
+
+```ts
+{
+  actionId: 'combat.red.r1.f1.t3.move_east_2.fire_weapon_a',
+  move: { x: 2, z: 0 },
+  weaponA: { target: 'blue' },
+  rationale: 'I want to flank...'
+}
+```
+
+The server ignores/blocks client-authored gameplay payloads.
+
+**Loadout / Builder Phase**
+
+The catalog must come from the existing catalog package, not a new JSON schema.
+
+Relevant files:
+
+- [parts.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/parts.ts)
+- [capabilities.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/capabilities.ts)
+- [controls.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/controls.ts)
+- [blueprint.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/blueprint.ts)
+- [inventory.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/inventory.ts)
+
+The loadout phase is a permissive, server-guided freeform builder. Agents should be able to create unusual modular bots through legal builder actions: central wheels, weapons attached to odd targets, long strut arms, asymmetric armor, counterweights, and ugly-but-legal machines.
+
+The server remains authoritative. Agents do not submit raw blueprint JSON. They submit action IDs for each builder step. The server stores and applies the canonical placement payload.
+
+Part behavior comes from the catalog, not placement fantasy:
+- A laser mounted near/on a wheel is still a laser.
+- A wheel with a laser attached does not become a turret unless the catalog defines that behavior.
+- A frame strut extends structure but does not add mobility.
+- Armor absorbs damage but does not become a weapon.
+- Counterweight changes mass/handling only if that behavior exists; otherwise it is ballast/structure.
+
+Builder flow:
+
+1. choose part
+2. choose attach target
+3. choose mount side / attach cell
+4. choose rotation
+5. server places part
+6. repeat / remove / move / rotate
+7. confirm loadout
+
+Do not generate every possible part x cell x rotation combination in one packet. Each packet should expose only the legal choices for the current builder step.
+
+Example: 
+```js
+{
+  phase: 'choose_loadout',
+  nextAction: 'build_bot',
+  instruction: 'Choose a part to add to your bot.',
+  decisionVersion: 7,
+  actionSetId: 'red:r1:builder:choose_part:v7',
+  resources: {
+    gold: 100,
+    remainingGold: 74,
+    partLimitRemaining: 8
+  },
+  buildState: {
+    step: 'choose_part',
+    currentDesign: {
+      rootInstanceId: 'part_1',
+      parts: [
+        {
+          instanceId: 'part_1',
+          partId: 'Body_Light_Frame',
+          cell: { x: 0, z: 0 },
+          rotation: 0
+        }
+      ]
+    }
+  },
+  catalog: {
+    version: 'catalog-2026-06-07',
+    parts: '<existing PART_CATALOG entries or compact catalog view with real specs/metadata>'
+  },
+  legalActions: [
+    {
+      id: 'build.red.r1.choose_part.Frame_Strut',
+      kind: 'choose_part',
+      label: 'Frame strut',
+      summary: 'Cheap connector for extending the bot frame.',
+      catalogRefs: ['Frame_Strut']
+    },
+    {
+      id: 'build.red.r1.choose_part.Weapon_Laser',
+      kind: 'choose_part',
+      label: 'Laser',
+      summary: 'Ranged weapon. Keeps laser behavior regardless of mount target.',
+      catalogRefs: ['Weapon_Laser']
+    }
+  ],
+  submit: {
+    method: 'POST',
+    path: '/sessions/:sessionId/action',
+    body: {
+      action: 'submit_game_action',
+      actionSetId: 'red:r1:builder:choose_part:v7',
+      decisionVersion: 7,
+      actionId: '<legalActions.id>'
+    }
+  }
+}
+```
+
+placement example: 
+```js
+{
+  phase: 'choose_loadout',
+  nextAction: 'build_bot',
+  instruction: 'Choose where to attach Weapon_Laser.',
+  decisionVersion: 8,
+  actionSetId: 'red:r1:builder:attach_target:v8',
+  buildState: {
+    step: 'choose_attach_target',
+    selectedPartId: 'Weapon_Laser',
+    catalogVersion: 'catalog-2026-06-07',
+    currentDesign: {
+      parts: [
+        { instanceId: 'part_1', partId: 'Body_Light_Frame' },
+        { instanceId: 'part_2', partId: 'Wheel_Omni' }
+      ]
+    }
+  },
+  legalActions: [
+    {
+      id: 'build.red.r1.attach.Weapon_Laser.to.part_1.north',
+      kind: 'choose_attach_target',
+      label: 'Attach laser to body north mount',
+      summary: 'Mounts laser from the body frame.'
+    },
+    {
+      id: 'build.red.r1.attach.Weapon_Laser.to.part_2.top',
+      kind: 'choose_attach_target',
+      label: 'Attach laser to omni wheel top mount',
+      summary: 'Unusual placement. Laser remains a laser; wheel remains a wheel.'
+    }
+  ]
+}
+```
+
+Builder DSA: 
+```text
+input:
+  role state
+  gold
+  current draft design
+  selected builder step
+  selected part/target/rotation, if any
+  catalog snapshot
+  champion carryover design if continuing
+
+process:
+  read existing PART_CATALOG and part metadata
+  build legal next-step actions only
+  validate remove/move/rotate actions from active action set
+  preserve at least one connected root after removal
+  validate affordability
+  validate part count
+  validate graph connectivity
+  validate server-created part instance IDs
+  validate mount/attach target from active action set
+  validate rotation from active action set
+  validate minimum viable bot on confirm
+  store canonical payload per actionId
+
+output:
+  GameMasterPacket.buildState
+  GameMasterPacket.legalActions
+  ActiveActionSet.actions
+```
+
+```text
+Filler parts must have cost, mass, durability, category, attach affordances, render classification, and sim behavior. They must not add active weapon/mobility/utility behavior unless explicitly defined in the catalog.
+Structural filler parts are required so weird builds have enough connective tissue:
+- Frame_Strut
+- Mount_Plate
+- Spacer_Block
+- Armor_Tile
+- Counterweight
+```
+
+**Combat DSA**
+
+Add or extract:
+
+```text
+packages/sim/src/gameMasterActions.ts
+packages/sim/src/combatActions.ts
+packages/sim/src/loadoutActions.ts
+packages/sim/src/actionIds.ts
+packages/sim/src/gridMovement.ts
+packages/sim/src/combatLegality.ts
+```
+
+Core flow:
+
+```text
+session state
+  -> role private view
+  -> action builder
+  -> active action set
+  -> agent chooses actionId
+  -> SessionCoordinator locks selected canonical payload
+  -> when both roles locked, resolver consumes canonical payloads
+  -> ReplayTimeline.events
+```
+
+V1 movement legality is tactical-grid based:
+```text
+bot anchor cell
+movement budget
+arena bounds
+blocked center cells
+path cannot pass through blocker cells
+hazard cells crossed by anchor path
+occupied anchor-cell conflicts
+line of sight from final anchor cell
+weapon range from final anchor cell
+```
+V1 intentionally does not enforce bot footprint, swept volume, rotation volume, or visual part clipping. Oversized bot geometry may clip in replay. That is acceptable because tactical anchor cells are the combat truth.
+
+Conflict rules must be deterministic:
+
+```text
+both enter same cell
+paths cross
+both bots choose same anchor cell
+paths cross anchor cells
+one bot rams while one holds
+attack target moves out of range
+line of sight changes after movement
+hazard exposure from anchor path
+bot destroyed before firing
+one bot rams while one holds
+attack target moves out of range
+line of sight changes after movement
+hazard push/drag outcome
+bot destroyed before firing
+```
+
+Recommended resolution order:
+
+```text
+1. validate selected canonical intents
+2. resolve movement and collisions
+3. apply hazard exposure
+4. resolve weapon fire from final poses
+5. resolve utility/detach/end effects
+6. emit replay timeline
+```
+
+**Resolver Replacement**
+
+In [resolveCombat.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/resolveCombat.ts), replace command-driven input.
+
+Old:
+
+```ts
+TurnCommandSubmission
+TurnCommand
+SubmittedCombatCommands
+turnCommandFromSubmission(...)
+```
+
+New:
+
+```ts
+CanonicalCombatAction
+SubmittedGameActions
+resolveSubmittedGameActions(...)
+```
+
+The action builder and resolver must share low-level legality helpers. Otherwise you create two rule engines and bugs will be nasty.
+
+**Replay Contract**
+
+Keep replay downstream.
+
+Relevant files:
+
+- [events.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/replay/src/events.ts)
+- [timeline.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/replay/src/timeline.ts)
+- [replayMapping.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/replayMapping.ts)
+
+Replay events should be semantic resolved truth:
+
+```ts
+{
+  type: 'move',
+  bot: 'red',
+  from: { x: 3, z: 2 },
+  to: { x: 5, z: 2 },
+  path: [...]
+}
+
+{
+  type: 'weapon_fire',
+  bot: 'red',
+  weaponId: 'Weapon_Net',
+  origin: { x: 5, z: 2 },
+  targetPosition: { x: 5, z: 6 },
+  hit: true
+}
+```
+
+Renderer never parses:
+
+```text
+agent rationale
+public chat
+shared debrief
+play-by-play prose
+```
+
+**Post-Fight Reflection**
+
+Only available after at least one completed fight.
+
+Add schema:
+
+```ts
+type PostFightAgentReflection = {
+  action: 'submit_post_fight_reflection';
+  fightId: string;
+  role: TeamRole;
+  decisionVersion: number;
+  claims: {
+    perceivedWinReason?: string;
+    perceivedLossReason?: string;
+    ownWeaknesses: string[];
+    opponentThreats: string[];
+    suggestedDesignChanges: string[];
+    suggestedTacticalChanges: string[];
+  };
+  confidence: 'low' | 'medium' | 'high';
+};
+```
+
+Rules:
+
+```text
+no completed fight -> reject reflection
+reflection is private_pending
+reflection is not visible to opponent
+reflection is not sent to future agents directly
+on save/continue, debrief builder consumes reflections
+after debrief, reflection visibility becomes consumed_into_shared_debrief
+```
+
+This is not hidden chain-of-thought. It is structured post-fight analysis.
+
+**Debrief Builder**
+
+Add:
+
+```text
+packages/sim/src/fightDossier.ts
+packages/sim/src/debriefBuilder.ts
+apps/worker/src/sessionContinuation.ts
+```
+
+Input:
+
+```text
+ReplayTimeline.events
+final red bot state
+final blue bot state
+starting bot snapshots
+damage by source
+part health/detach state
+movement paths
+hazard exposure
+weapon uptime/ammo/cooldowns
+winner/loser
+private red reflection
+private blue reflection
+```
+
+Output:
+
+```ts
+type SharedDebrief = {
+  debriefId: string;
+  sourceSessionId: string;
+  fightIds: string[];
+  summary: string;
+  championImprovementHints: string[];
+  challengerCounterplayHints: string[];
+  evidence: DebriefEvidence[];
+};
+```
+
+Example:
+
+```text
+Champion won by controlling center distance with a front-pressure spinner. The spinner produced 72% of confirmed damage. The losing bot created two lateral openings but did not attack before the champion recovered facing.
+
+Champion improvement hints:
+- Side armor and turning stability are the main upgrade candidates.
+- Avoid crossing the center hazard when already ahead on damage.
+
+Challenger counterplay hints:
+- Do not trade directly on the champion centerline.
+- Force lateral movement and punish exposed side cells.
+```
+
+If agent reflection conflicts with data, debrief follows data.
+
+Example:
+
+```text
+Agent claim: "The net won the fight."
+Data: net caused 0 disables, spinner caused 61 damage.
+Debrief: "The net had low measurable impact; spinner damage decided the fight."
+```
+
+**Champion Save Model**
+
+Add schema:
+
+```ts
+type ChampionContinuationSave = {
+  saveId: string;
+  sourceSessionId: string;
+  championRole: TeamRole;
+  championTeamIdentity: TeamIdentity;
+  championDesign: BotDesignSnapshot;
+  championFinalState: BotCombatState;
+  championRecord: {
+    wins: number;
+    consecutiveWins: number;
+    losses: number;
+    sourceSessionIds: string[];
+  };
+  fightDossier: FightDossier;
+  sharedDebrief: SharedDebrief;
+  challengerBalance: ChallengerBalanceGrant;
+  createdAt: string;
+};
+```
+
+Detailed fight dossier:
+
+```ts
+type FightDossier = {
+  sessionId: string;
+  fights: Array<{
+    fightId: string;
+    winner: TeamRole | 'draw';
+    reason: string;
+    duration: number;
+    replayTimelineId?: string;
+    bots: {
+      red: BotDetailedSnapshot;
+      blue: BotDetailedSnapshot;
+    };
+    stats: {
+      damageDealt: Record<TeamRole, number>;
+      damageTaken: Record<TeamRole, number>;
+      damageByPart: Record<TeamRole, Record<string, number>>;
+      weaponUse: Record<TeamRole, WeaponUseStats[]>;
+      hazardsTriggered: HazardExposureStats[];
+      movement: Record<TeamRole, MovementStats>;
+      disabledParts: Record<TeamRole, string[]>;
+    };
+    keyEvents: FightKeyEvent[];
+  }>;
+};
+```
+
+The save must include both bots’ fight data in detail, but only the champion design carries forward.
+
+**Continue Flow**
+
+```text
+human clicks Continue
+server verifies session_complete and at least one completed fight
+server collects pending reflections or uses existing submitted reflections
+server builds fight dossier
+server builds shared debrief
+server saves champion record
+server computes challenger bonus gold
+server creates next session
+winner role receives champion design + shared debrief
+challenger receives shared debrief + bonus gold
+```
+
+Starting balance:
+
+```ts
+challengerBonusGold = Math.min(championConsecutiveWins * 25, 150);
+```
+
+Later, add dominance:
+
+```ts
+dominanceBonus =
+  hpRemainingBonus
+  + damageRatioBonus
+  + shortWinBonus
+  + mobilityRetainedBonus;
+```
+
+Do not add dominance until fight dossier metrics are stable.
+
+**Human UI**
+
+Modify:
+
+- [RefereeConsole.tsx](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/referee/RefereeConsole.tsx)
+- [RefereeConsolePanels.tsx](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/referee/RefereeConsolePanels.tsx)
+- [useRefereeConsoleController.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/referee/useRefereeConsoleController.ts)
+- [refereeClient.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/referee/refereeClient.ts)
+
+Add session-complete controls:
+
+```text
+Continue
+Save
+Quit
+```
+
+State rules:
+
+```text
+session_complete + completedFightCount >= 1:
+  Save enabled
+  Continue enabled
+  Quit enabled
+
+session_complete + completedFightCount == 0:
+  Save disabled
+  Continue disabled
+  Quit enabled
+```
+
+UI should show:
+
+```text
+winner
+champion record
+challenger bonus gold
+saved/not saved status
+shared debrief preview
+```
+
+Do not expose raw private reflections in UI unless it is an explicit debug/admin view.
+
+**Worker Files To Replace**
+
+[session.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+Remove/replace:
+
+```text
+submitRoundPlan
+submitTurnCommand
+turnCommandFromSubmission
+round-plan submission storage path
+turn-command pending command path
+```
+
+Add:
+
+```text
+buildGameMasterPacket
+submitGameMasterAction
+lockRoleAction
+resolveLockedActionsIfReady
+submitPostFightReflection
+saveCompletedSession
+continueChampionSession
+quitCompletedSession
+```
+
+[index.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/index.ts)
+
+Remove route entries:
+
+```text
+round-plan
+turn-command
+```
+
+Add route entries:
+
+```text
+action
+reflection
+save
+continue
+quit
+```
+
+[sessionTypes.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionTypes.ts)
+
+Replace:
+
+```text
+submission?: RoundPlanSubmission
+normalizedSubmission?: NormalizedRoundPlanSubmission
+```
+
+With:
+
+```text
+currentDesign?: BotDesignSnapshot
+activeActionSets?: Record<TeamRole, ActiveActionSet>
+lockedActions?: Record<TeamRole, LockedGameAction>
+postFightReflections?: PostFightAgentReflection[]
+championSave?: ChampionContinuationSave
+```
+
+[sessionSupport.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionSupport.ts)
+
+Replace old `nextActionForRole` outputs:
+
+```text
+submit_round_plan
+submit_turn_command
+wait_for_opponent_submission
+wait_for_opponent_turn
+```
+
+With:
+
+```text
+choose_loadout
+choose_turn
+wait_for_opponent_loadout
+wait_for_opponent_turn
+submit_reflection
+wait_for_debrief
+session_complete
+```
+
+[sessionStateViews.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionStateViews.ts)
+
+Remove external dependency on `combat.decision.legalCommands` and `movementOptions`. Return or embed `GameMasterPacket` instead.
+
+[sessionCombatDecision.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionCombatDecision.ts)
+
+This is legacy unless reused internally. Replace with `combatActions.ts` that creates actual legal action sets, not advisory suggestions.
+
+[sessionRoundLifecycle.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionRoundLifecycle.ts)
+
+Audit `winnerBonus`. It may remain for intra-session economy, but it must not be confused with champion continuation challenger bonus.
+
+**Schema/Catalog Cleanup**
+
+[types.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts)
+
+Remove public:
+
+```text
+TurnCommandSubmission
+RoundPlanSubmission
+RoundPlanSubmissionV2
+NormalizedRoundPlanSubmission
+```
+
+Add:
+
+```text
+GameMasterPacket
+GameMasterLegalAction
+GameMasterActionSubmission
+ActiveActionSet
+CanonicalGameAction
+PostFightAgentReflection
+SharedDebrief
+ChampionContinuationSave
+FightDossier
+```
+
+[relay.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/relay.ts)
+
+Remove/replace:
+
+```text
+CombatTurnDecisionContext
+CombatTurnLegalCommands
+movementOptions
+AgentNextAction submit_round_plan / submit_turn_command
+ownSubmission?: RoundPlanSubmission
+TurnCommandPostRequest
+```
+
+[validators.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/validators.ts)
+
+Stop exporting old submission/command validators.
+
+Delete or replace:
+
+- [commandSequence.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/validators/commandSequence.ts)
+- [submission.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/validators/submission.ts)
+
+Add:
+
+```text
+validators/gameMasterAction.ts
+validators/reflection.ts
+validators/continuation.ts
+```
+
+[agentSamples.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/agentSamples.ts)
+
+Remove old round-plan samples. Replace with packet/action examples.
+
+[catalog/submission.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/submission.ts) and [normalizeSubmission.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/normalizeSubmission.ts)
+
+These are legacy if only validating agent-authored round plans. Replace with internal loadout/build validation or move that logic into `loadoutActions`.
+
+[capabilities.ts](/C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/capabilities.ts)
+
+Remove language saying catalog capabilities are advisory for round-plan design. New language: catalog specs feed server-generated loadout actions.
+
+**Web Agent Cleanup**
+
+[agentClientTypes.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentClientTypes.ts)
+
+Remove:
+
+```text
+submitRoundPlan
+submitTurnCommand
+AgentArenaValidAction submit_round_plan / submit_turn_command
+```
+
+Add:
+
+```text
+submitAction
+submitPostFightReflection
+waitForGameMasterPacket
+```
+
+[agentClient.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentClient.ts)
+
+Remove POSTs to:
+
+```text
+/round-plan
+/turn-command
+```
+
+Add POSTs to:
+
+```text
+/action
+/reflection
+```
+
+[agentRoleApi.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentRoleApi.ts) and [agentRoleApiInstaller.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentRoleApiInstaller.ts)
+
+Window API becomes:
+
+```ts
+window.AgentArenaRole.bootstrapRole(...)
+window.AgentArenaRole.getState()
+window.AgentArenaRole.waitForGameMasterPacket(...)
+window.AgentArenaRole.submitAction(...)
+window.AgentArenaRole.submitPostFightReflection(...)
+window.AgentArenaRole.sendChatMessage(...)
+```
+
+[agentCockpitViewState.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentCockpitViewState.ts)
+
+Remove instruction strings that call `submitRoundPlan` or `submitTurnCommand`.
+
+[AgentInsightWorkbench.tsx](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/AgentInsightWorkbench.tsx)
+
+Replace `movementOptions.recommended` UI with legal action packet display.
+
+[AgentCockpitSidebar.tsx](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/AgentCockpitSidebar.tsx)
+
+Rename/reframe:
+
+```text
+Table Talk -> Public Chat / Table Talk, display-only
+Agent Journal -> Private Reflection, post-fight only if keeping this surface
+```
+
+Do not keep “Agent Journal” as a general strategy memory bag if the new model wants private reflections only after completed fights.
+
+[mockSessionState.ts](/C:/Users/Steve/Documents/Github/portfolio/apps/web/src/mockSessionState.ts)
+
+Remove mock `submit_round_plan` payloads and old `round_review` assumptions that depend on old submissions.
+
+**Tests To Rewrite**
+
+[worker-route.test.mjs](/C:/Users/Steve/Documents/Github/portfolio/tests/worker-route.test.mjs)
+
+Remove old route tests for:
+
+```text
+/round-plan
+/turn-command
+submit_round_plan
+submit_turn_command
+legalCommands
+movementOptions
+```
+
+Add:
+
+```text
+bootstrap_returns_game_master_packet
+state_returns_game_master_packet
+action_route_accepts_valid_action_id
+action_route_rejects_invalid_action_id
+action_route_rejects_stale_decision_version
+old_round_plan_route_removed
+old_turn_command_route_removed
+reflection_rejected_without_completed_fight
+save_requires_completed_fight
+continue_calls_save_and_creates_next_session
+```
+
+[core.test.mjs](/C:/Users/Steve/Documents/Github/portfolio/tests/core.test.mjs)
+
+Replace direct calls to:
+
+```text
+session.submitRoundPlan
+session.submitTurnCommand
+```
+
+With:
+
+```text
+session.submitGameMasterAction
+session.submitPostFightReflection
+session.saveCompletedSession
+session.continueChampionSession
+```
+
+[agent-client.test.mjs](/C:/Users/Steve/Documents/Github/portfolio/tests/agent-client.test.mjs)
+
+Replace helper expectations:
+
+```text
+submitRoundPlan -> removed
+submitTurnCommand -> removed
+submitAction -> present
+submitPostFightReflection -> present
+```
+
+[app-route.test.mjs](/C:/Users/Steve/Documents/Github/portfolio/tests/app-route.test.mjs)
+
+Replace source assertions:
+
+```text
+movementOptions.recommended -> legalActions
+Agent Journal unrestricted guidance -> private post-fight reflection
+Table Talk as strategy source -> display-only public chat
+```
+
+[referee-client.test.mjs](/C:/Users/Steve/Documents/Github/portfolio/tests/referee-client.test.mjs)
+
+Add save/continue/quit client route tests.
+
+**Acceptance Test Names**
+
+Minimum set:
+
+```text
+old_round_plan_route_removed
+old_turn_command_route_removed
+browser_helper_exposes_submitAction_only
+bootstrap_returns_game_master_packet_with_catalog
+state_packet_contains_actionSetId_and_decisionVersion
+loadout_action_uses_existing_catalog_specs
+loadout_action_spends_gold_and_sets_design
+invalid_action_id_is_rejected
+forged_payload_is_ignored
+duplicate_action_submit_is_idempotent
+different_action_after_lock_is_rejected
+red_submit_does_not_stale_blue_action_set
+both_actions_resolve_same_decision_version
+timeout_applies_hold_action
+anchor_path_cannot_pass_through_blocked_cell
+oversized_bot_visual_clipping_does_not_affect_legality
+path_crossing_collision_is_deterministic
+line_of_sight_blocks_weapon_action
+weapon_preview_is_not_treated_as_guaranteed_hit
+replay_uses_resolved_events_not_action_preview
+chat_is_display_only
+reflection_rejected_before_completed_fight
+private_reflection_not_visible_to_opponent
+debrief_consumes_private_reflections
+shared_debrief_sent_to_both_next_agents
+challenger_receives_bonus_gold
+challenger_does_not_receive_champion_design
+save_persists_champion_design_and_fight_dossier
+continue_calls_save_and_seeds_champion_design
+quit_does_not_persist_champion_save
+```
+
+**Implementation Slices**
+
+Slice 1: Contract replacement
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+schemas/types
+schemas/relay
+validators
+agent contract examples
+```
+
+Exit:
+
+```text
+new GameMaster types compile
+old public action names removed from schemas
+tests updated for contract shape
+```
+
+Slice 2: Worker action route
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+worker index/session/sessionTypes/sessionSupport
+```
+
+Exit:
+
+```text
+bootstrap/state return GameMasterPacket
+/action accepts valid actionId
+old routes removed
+```
+
+Slice 3: Loadout action builder
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+catalog + sim loadoutActions
+```
+
+Exit:
+
+```text
+server generates legal loadout actions from existing PART_CATALOG
+selected loadout creates valid design
+catalog specs appear in packet
+```
+
+Slice 4: Combat action builder and resolver bridge
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+sim combatActions/gridMovement/combatLegality/resolveCombat
+```
+
+Exit:
+
+```text
+legal combat actions generated
+selected canonical actions resolve simultaneously
+replay timeline still valid
+```
+
+Slice 5: Agent browser helper and prompt cleanup
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+web agent client/role API/brief/cockpit
+```
+
+Exit:
+
+```text
+window.AgentArenaRole has submitAction
+old submitRoundPlan/submitTurnCommand gone
+static connection brief only
+```
+
+Slice 6: Reflections and debrief
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+reflection route
+fightDossier
+debriefBuilder
+private reflection lifecycle
+```
+
+Exit:
+
+```text
+reflection only after completed fight
+debrief generated from replay + bot state + reflections
+shared debrief does not expose raw reflection
+```
+
+Slice 7: Save / Continue / Quit
+QA handoff: notify the QA lane when this slice claims readiness, with changed behavior, known risks, and skipped validation.
+Scope:
+
+```text
+worker continuation
+referee client/UI
+champion save data
+next session seed
+```
+
+Exit:
+
+```text
+save persists champion
+continue starts next session
+quit does not persist
+challenger bonus applied
+```
+
+## QA Lane: Independent GameMaster Migration QA
+
+Spawn a separate read-only QA thread at the start of Slice 1 and keep it active through Slice 8.
+
+Persistent QA prompt:
+
+You are the independent QA expert for the Agent Arena GameMaster migration in:
+C:\Users\Steve\Documents\Github\portfolio
+
+Mission:
+Run alongside the implementation plan until completion. Do not implement, edit source files, reformat, stage, commit, or quick-fix anything. Your job is to verify claims with static gates, route checks, Chrome/browser proof, visual inspection, legacy sentinels, privacy checks, and slice-by-slice GO / PARTIAL / NO-GO verdicts.
+
+You may write QA artifacts only under:
+smoke-artifacts/qa/gamemaster-migration/
+
+Do not modify source files, tests, package files, configs, committed fixtures, or implementation code.
+
+Standing setup:
+1. Record `git status --short`.
+2. Record `git rev-parse --short HEAD`.
+3. Start the QA server with `npm.cmd run dev`.
+4. Use the actual Vite URL/port from logs; do not assume 5173.
+5. Use Chrome/browser automation for runtime proof.
+6. Prefer `load` waits, not `networkidle`, unless this environment proves otherwise.
+7. Record server URL, commit SHA, tested slice, time, viewport sizes, and artifact paths.
+
+Static gates:
+Run when a slice claims readiness, and always at final QA:
+- `npm.cmd test`
+- `npm.cmd run typecheck`
+- `npm.cmd run lint`
+- `npm.cmd run build`
+- `npm.cmd run check:renderer-budget`
+- `git diff --check`
+- `git ls-files smoke-artifacts`
+
+Legacy sentinels:
+Search `apps/` and `packages/` after slices 1, 2, 5, and 8 for active old public API concepts:
+- `submit_round_plan`
+- `submit_turn_command`
+- `submitRoundPlan`
+- `submitTurnCommand`
+- `/round-plan`
+- `/turn-command`
+- `movementOptions.recommended`
+- external/public `legalCommands`
+
+These should be zero in active app/package code.
+
+Search `tests/` separately. Old strings are allowed only in explicit negative/removal tests, not active mocks, helper contracts, prompt expectations, or expected current behavior.
+
+Chrome route matrix:
+- `/`
+- `/agent`
+- `/replay-preview`
+- `/replay-preview?proof=ability&camera=broadcast`
+- `/qa/part-catalog`
+
+Viewport matrix:
+- desktop: 1366x900
+- narrow: 390x844
+- wide sanity: 1920x1080 when UI layout changed
+
+Per-slice QA:
+
+Slice 1, contract replacement:
+Verify old public action names disappear from schemas, prompts, helper docs, route guide text, and active tests. Confirm `GameMasterPacket` exposes `decisionVersion`, `eventVersion`, `actionSetId`, `legalActions`, and `submit`.
+
+Slice 2, worker action route:
+Verify bootstrap/state return GameMaster packets. Verify `/action` accepts only valid `actionId`, rejects invalid/stale/forged payloads, and old routes are removed or explicitly rejected. Red submitting first must not stale blue’s same-decision action set.
+
+Slice 3, loadout builder:
+Verify legal loadout actions come from existing catalog truth, not ad hoc JSON. Browser-check `/qa/part-catalog`. Confirm labels fit, choices are scannable, and packets are not combinatorial garbage.
+
+Slice 4, combat resolver bridge:
+Run simultaneous action scenarios: both hold, same-anchor conflict, path crossing, anchor path blocked, LOS blocked, target moves out of range, destroyed-before-fire. V1 visual clipping of oversized bot geometry is allowed; report only tactical anchor-cell/path legality failures.
+
+Slice 5, agent helper/prompt cleanup:
+In Chrome, inspect `window.AgentArenaRole`. It should expose `submitAction` and reflection/chat helpers, not `submitRoundPlan` or `submitTurnCommand`. Cockpit copy must not tell agents to build raw gameplay JSON.
+
+Slice 6, reflection/debrief:
+Verify reflection before completed fight is rejected. Verify private reflections do not appear to the opponent or future agents raw. Shared debrief must be evidence-based and override false agent claims when replay/fight data disagrees.
+
+Slice 7, save/continue/quit:
+Verify disabled/enabled UI states. `Save` requires completed fight. `Continue` saves first, starts next session, gives champion design only to champion, gives challenger shared debrief plus bonus gold, and does not leak champion private design, raw reflections, player keys, claim tokens, or canonical payload maps.
+
+Slice 8, legacy cleanup:
+Legacy searches must be zero in active app/package code. Browser copy must not mention old APIs. Active tests must no longer assert old behavior except explicit removal/negative tests.
+
+Visual professionalism checks:
+For every UI-changing slice, inspect desktop and narrow screenshots for text clipping, overlapping panels, unclear disabled states, generic card clutter, raw JSON leakage, weak hierarchy, horizontal overflow, and controls that obscure the game view.
+
+Replay fidelity checks:
+Use real playback, not only DOM mutation. Confirm one mounted canvas, nonblank render, readable bots from broadcast camera, coherent lighting/materials, no UI occlusion, stable `data-replay-*` / renderer stats, no future spoiler timeline, and screenshots for desktop+narrow.
+
+Report format after each pass:
+- Slice:
+- Commit:
+- Server URL:
+- Commands run:
+- Chrome routes/viewports:
+- Screenshots/artifacts:
+- Findings:
+  - P0: correctness/security/privacy blocker
+  - P1: gameplay or route-contract blocker
+  - P2: visible UX/fidelity/professionalism issue
+  - P3: cleanup/nit/test gap
+- Verdict: GO / PARTIAL / NO-GO
+- Proof gaps:
+
+Rules:
+Never issue GO from static tests alone. Browser proof is required for UI, replay, agent cockpit, visual fidelity, and save/continue flows.
+
+QA must verify from source, command output, and browser evidence. Do not accept implementation summaries without checking route behavior, helper API shape, packet fields, privacy boundaries, and legacy sentinels.
+
+QA verdict is advisory during implementation but blocking for final release readiness unless the owner explicitly accepts the risk.
+
+Slice 8: Legacy cleanup sweep
+
+Scope:
+
+```text
+old files, exports, tests, source assertions
+```
+
+Exit:
+
+```text
+rg finds no old public concepts:
+submit_round_plan
+submit_turn_command
+submitRoundPlan
+submitTurnCommand
+/round-plan
+/turn-command
+movementOptions.recommended
+legalCommands as external API
+```
+
+**Skill Routing**
+
+- `architecture-planning`: owns contract and slice ordering.
+- `refactor-cleaner`: owns deletion of old routes, schemas, validators, samples, tests.
+- `security-review`: auth, player keys, action IDs, chat/reflection injection, save visibility.
+- `codex-invariant-test-generator`: action-set, resolver, debrief, continuation invariants.
+- `coding-standards`: TypeScript implementation discipline.
+- `frontend-patterns`: browser helper and referee UI.
+- `game-ui-ux`: action packet display, session-complete controls, debrief UI.
+- `babylon-pbr-fidelity`: only if replay visuals change.
+- `release-readiness-gate`: final readiness verdict.
+
+**Validation**
+
+Run:
+
+```text
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+git diff --check
+git ls-files smoke-artifacts
+```
+
+For replay-affecting changes, also verify `/replay-preview` from real resolved timeline data.
+
+The cleaned final repo should read like this:
+
+```text
+Agents choose from legal action menus.
+Server owns legality and canonical payloads.
+Catalog owns part truth.
+Sim owns resolution.
+Replay owns animation truth.
+Private reflections feed shared debriefs only after completed fights.
+Champion design carries forward privately.
+Challenger gets shared debrief plus balance gold.
+Old round-plan/turn-command logic is gone.
+```
+
+**5. Future Scope / Non-Goals**
+
+`Footprint-aware movement and swept-volume collision are explicit V2 work. Do not mix partial footprint rules into V1.`
+
