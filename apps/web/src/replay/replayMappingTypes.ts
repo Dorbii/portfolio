@@ -9,10 +9,30 @@ export type IndexedReplayEvent = {
 
 export type { CameraPreset } from './camera/presets.js'
 
+export type BotStabilityPose =
+  | 'upright'
+  | 'destabilized'
+  | 'tipped'
+  | 'flipped'
+  | 'self_righting'
+  | 'immobilized'
+
+export type BotStabilityFrameState = {
+  age: number
+  cause?: string
+  heightOffset: number
+  pitch: number
+  pose: BotStabilityPose
+  progress: number
+  roll: number
+  severity: number
+}
+
 export type BotFrameState = {
   role: TeamRole
   position: Vector3
   rotationY: number
+  stability: BotStabilityFrameState
   motion: {
     contactIntensity: number
     drift: number
@@ -23,7 +43,7 @@ export type BotFrameState = {
     turn: number
   }
   health?: number
-  status: 'active' | 'knocked_out'
+  status: 'active' | 'immobilized' | 'knocked_out'
 }
 
 export type PartFrameState = {
@@ -59,7 +79,9 @@ export type ReplayEffectKind =
   | 'weapon_fire'
   | 'control_net'
   | 'laser_lance'
+  | 'fire_breath'
   | 'drone_swarm'
+  | 'stability'
   | 'part_detach'
   | 'impact'
   | 'debris'

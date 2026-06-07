@@ -19,7 +19,9 @@ const PART_DETACH_WINDOW = 1.9
 const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
 const LASER_LANCE_WINDOW = 0.95
+const FIRE_BREATH_WINDOW = 1.05
 const DRONE_SWARM_WINDOW = 1.2
+const STABILITY_WINDOW = 1.1
 const DEFAULT_WEAPON_PHASE: WeaponFirePhase = 'release'
 
 const WEAPON_STYLES = [
@@ -42,6 +44,10 @@ export function getReplayEffectWindowSeconds(event: ReplayEvent): number | undef
     return LASER_LANCE_WINDOW
   }
 
+  if (event.type === 'ability' && event.ability === 'fire_breath') {
+    return FIRE_BREATH_WINDOW
+  }
+
   if (event.type === 'ability' && event.ability === 'drone_swarm') {
     return DRONE_SWARM_WINDOW
   }
@@ -60,6 +66,12 @@ export function getReplayEffectWindowSeconds(event: ReplayEvent): number | undef
 
   if (event.type === 'part_detach') {
     return PART_DETACH_WINDOW
+  }
+
+  if (isBotStabilityEvent(event)) {
+    return event.type === 'bot_flipped' || event.type === 'bot_immobilized'
+      ? STABILITY_WINDOW * 1.25
+      : STABILITY_WINDOW
   }
 
   return undefined
@@ -147,6 +159,27 @@ export function buildReplayEffects(
       }
     }
 
+    if (event.type === 'ability' && event.ability === 'fire_breath') {
+      const age = time - event.t
+      const firingBot = resolveBotAtTime(event.bot, event.t)
+      const endPosition = event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.1)
+      const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+
+      if (age >= 0 && age <= FIRE_BREATH_WINDOW) {
+        effects.push({
+          id: `${sequence}-fire-breath-${event.bot}`,
+          kind: 'fire_breath',
+          position: firingBot.position,
+          rotationY,
+          age,
+          intensity: Math.max(0, 1 - age / FIRE_BREATH_WINDOW),
+          team: event.bot,
+          endPosition,
+          label: event.ability,
+        })
+      }
+    }
+
     if (event.type === 'ability' && event.ability === 'drone_swarm') {
       const age = time - event.t
       const firingBot = resolveBotAtTime(event.bot, event.t)
@@ -164,6 +197,25 @@ export function buildReplayEffects(
           team: event.bot,
           endPosition,
           label: event.ability,
+        })
+      }
+    }
+
+    if (isBotStabilityEvent(event)) {
+      const age = time - event.t
+      const duration = getReplayEffectWindowSeconds(event) ?? STABILITY_WINDOW
+
+      if (age >= 0 && age <= duration) {
+        const bot = resolveBotAtTime(event.bot, event.t)
+
+        effects.push({
+          id: `${sequence}-stability-${event.bot}`,
+          kind: 'stability',
+          position: bot.position,
+          age,
+          intensity: Math.max(0, 1 - age / duration),
+          team: event.bot,
+          label: event.cause ? `${event.type}:${event.cause}` : event.type,
         })
       }
     }
@@ -291,6 +343,25 @@ export function buildReplayEffects(
   })
 
   return effects
+}
+
+function isBotStabilityEvent(
+  event: ReplayEvent,
+): event is Extract<ReplayEvent, {
+  type:
+    | 'bot_destabilized'
+    | 'bot_tipped'
+    | 'bot_flipped'
+    | 'bot_self_righted'
+    | 'bot_immobilized'
+}> {
+  return (
+    event.type === 'bot_destabilized' ||
+    event.type === 'bot_tipped' ||
+    event.type === 'bot_flipped' ||
+    event.type === 'bot_self_righted' ||
+    event.type === 'bot_immobilized'
+  )
 }
 
 function replayEffectEventSource(

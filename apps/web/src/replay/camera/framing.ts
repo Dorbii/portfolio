@@ -52,7 +52,9 @@ export type TeamFollowCameraFrame = {
 const ACTIVE_EFFECT_RULES: ActiveEffectRule[] = [
   { kind: 'part_detach', maxAge: 1.35 },
   { kind: 'impact', maxAge: 1.2 },
+  { kind: 'stability', maxAge: 1.2 },
   { kind: 'hazard', maxAge: 0.9 },
+  { kind: 'fire_breath', maxAge: 1.1 },
   { kind: 'laser_lance', maxAge: 1.2 },
   { kind: 'control_net', maxAge: 1.2 },
   { kind: 'drone_swarm', maxAge: 1.2 },
@@ -133,6 +135,7 @@ function findBroadcastFocusEffect(effects: ReplayEffectState[]): ReplayEffectSta
 function getActiveEffectFocusPoints(effect: ReplayEffectState): ReplayVector3[] {
   if (
     effect.kind === 'laser_lance' ||
+    effect.kind === 'fire_breath' ||
     effect.kind === 'control_net' ||
     effect.kind === 'drone_swarm'
   ) {

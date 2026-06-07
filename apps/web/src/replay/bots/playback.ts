@@ -41,15 +41,20 @@ export function updateBots(
     const bounce = Math.sin(frame.time * 18) * 0.02
     const flinch = damagePulse ? damagePulse.intensity : 0
     const motion = state.motion
+    const stability = state.stability
+    const stabilityScale = stability.pose === 'flipped' ? 0.98 : 1
+    const verticalOffset = stability.heightOffset
 
     bot.position = toBabylonVector(state.position)
-    bot.position.y = hit ? 0.08 + bounce : 0.16 + motion.contactIntensity * 0.03
+    bot.position.y = hit
+      ? 0.08 + bounce
+      : Math.max(0.06, 0.16 + motion.contactIntensity * 0.03 + verticalOffset)
     bot.rotation.y = state.rotationY
-    bot.rotation.x = hit ? 0 : -motion.lean
+    bot.rotation.x = hit ? 0 : -motion.lean + stability.pitch
     bot.rotation.z = hit
       ? (role === 'red' ? -0.2 : 0.2)
-      : Math.sin(frame.time * 42) * flinch * 0.14 + motion.drift * 0.08 + motion.turn * 0.1
-    bot.scaling.setAll(hit ? 0.96 : 1 + flinch * 0.035)
+      : Math.sin(frame.time * 42) * flinch * 0.14 + motion.drift * 0.08 + motion.turn * 0.1 + stability.roll
+    bot.scaling.setAll(hit ? 0.96 : stabilityScale * (1 + flinch * 0.035))
     updateBotPartNodes(bot, role, frame.parts[role], frame.time)
 
     const animatedNodes = bot.getChildren((node) => {

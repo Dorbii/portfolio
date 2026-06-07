@@ -278,125 +278,216 @@ function inferRarity(input: PartInput): PartRarity {
   return input.category === 'style' ? 'rare' : 'normal'
 }
 
-function inferSignatureEffect(input: PartInput): PartEffect | undefined {
-  if (input.category !== 'style') {
-    return undefined
-  }
-
-  if (input.id === 'Style_DragonHead') {
-    return {
-      id: 'fire_breath',
-      kind: 'signature',
-      trigger: 'activated',
-      cooldownTurns: 4,
-      charges: 2,
-      target: 'area',
-      params: {
-        damage: 10,
-        range: 4,
-        arcDegrees: 70,
-        fireMode: 'arc',
-      },
-      replayCue: 'fire_breath',
-      debriefSignals: ['fire_damage', 'signature_fire_breath', 'arc_occlusion'],
-    }
-  }
-
-  if (input.id === 'Style_Spikes') {
-    return {
-      id: 'spike_burst',
-      kind: 'signature',
-      trigger: 'on_hit',
-      cooldownTurns: 2,
-      target: 'opponent',
-      params: {
-        retaliationDamage: 4,
-        stabilityPenalty: 1,
-      },
-      replayCue: 'spark_burst',
-      debriefSignals: ['retaliation_damage', 'signature_spike_burst'],
-    }
-  }
-
-  if (input.id === 'Style_Wings') {
-    return {
-      id: 'wing_buffet',
-      kind: 'signature',
-      trigger: 'activated',
-      cooldownTurns: 3,
-      charges: 2,
-      target: 'movement',
-      params: {
-        lateralBoost: 1,
-        instabilityRisk: 0.2,
-      },
-      replayCue: 'wing_buffet',
-      debriefSignals: ['evasive_movement', 'stability_risk'],
-    }
-  }
-
-  if (input.id === 'Style_Neon' || input.id === 'Style_LightBar') {
-    return {
-      id: input.id === 'Style_Neon' ? 'neon_blind' : 'lightbar_flash',
-      kind: 'signature',
-      trigger: 'activated',
-      cooldownTurns: 3,
-      charges: 2,
-      target: 'opponent',
-      params: {
-        controlPenalty: 2,
-        durationTurns: 1,
-      },
-      replayCue: 'neon_blind',
-      debriefSignals: ['control_disruption', 'visual_signature'],
-    }
-  }
-
-  if (input.id === 'Style_Crown') {
-    return {
-      id: 'crown_command',
-      kind: 'signature',
-      trigger: 'passive',
-      cooldownTurns: 0,
-      target: 'self',
-      params: {
-        controlBonus: 1,
-        moraleSignal: 1,
-      },
-      replayCue: 'crown_command',
-      debriefSignals: ['control_bonus', 'signature_command'],
-    }
-  }
-
-  if (input.id === 'Style_TrashCan') {
-    return {
-      id: 'trash_shield',
-      kind: 'signature',
-      trigger: 'on_damage',
-      cooldownTurns: 3,
-      charges: 1,
-      target: 'self',
-      params: {
-        absorbDamage: 6,
-        detachChance: 0.35,
-      },
-      replayCue: 'trash_shield',
-      debriefSignals: ['absorbed_damage', 'detached_shell'],
-    }
-  }
-
-  return {
-    id: 'banner_presence',
+const STYLE_SIGNATURE_EFFECTS: Record<string, PartEffect> = {
+  Style_Flag: {
+    id: 'rally_flag',
     kind: 'signature',
     trigger: 'passive',
     cooldownTurns: 0,
     target: 'self',
     params: {
-      styleSignal: Math.max(1, input.stats?.style ?? 1),
+      controlBonus: 1,
+      targetDiscipline: 1,
+      styleSignal: 3,
     },
     replayCue: 'crown_command',
-    debriefSignals: ['signature_presence'],
+    debriefSignals: ['rally_flag_presence', 'target_discipline', 'team_identity_signal'],
+  },
+  Style_Antenna: {
+    id: 'signal_ping',
+    kind: 'signature',
+    trigger: 'passive',
+    cooldownTurns: 0,
+    target: 'movement',
+    params: {
+      sensorReachBonus: 1,
+      pathingHintBonus: 1,
+      controlBonus: 1,
+    },
+    replayCue: 'tactical_assist',
+    debriefSignals: ['sensor_ping', 'movement_read_bonus', 'antenna_tracking'],
+  },
+  Style_BladeAntenna: {
+    id: 'blade_jammer',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'opponent',
+    params: {
+      controlPenalty: 1,
+      precisionPenalty: 0.12,
+      durationTurns: 1,
+    },
+    replayCue: 'neon_blind',
+    debriefSignals: ['blade_signal_jam', 'precision_disruption', 'control_disruption'],
+  },
+  Style_DragonHead: {
+    id: 'fire_breath',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 4,
+    charges: 2,
+    target: 'area',
+    params: {
+      damage: 10,
+      range: 4,
+      arcDegrees: 70,
+      fireMode: 'arc',
+    },
+    replayCue: 'fire_breath',
+    debriefSignals: ['fire_damage', 'signature_fire_breath', 'arc_occlusion'],
+  },
+  Style_Spikes: {
+    id: 'spike_burst',
+    kind: 'signature',
+    trigger: 'on_hit',
+    cooldownTurns: 2,
+    target: 'opponent',
+    params: {
+      retaliationDamage: 4,
+      stabilityPenalty: 1,
+    },
+    replayCue: 'spark_burst',
+    debriefSignals: ['retaliation_damage', 'signature_spike_burst'],
+  },
+  Style_Horns: {
+    id: 'horn_countercharge',
+    kind: 'signature',
+    trigger: 'on_hit',
+    cooldownTurns: 2,
+    target: 'opponent',
+    params: {
+      retaliationDamage: 3,
+      pushbackCells: 1,
+      instabilityPenalty: 1,
+    },
+    replayCue: 'spark_burst',
+    debriefSignals: ['horn_countercharge', 'contact_pushback', 'instability_pressure'],
+  },
+  Style_Tail: {
+    id: 'tail_slap',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'movement',
+    params: {
+      lateralPushCells: 1,
+      opponentStabilityPenalty: 1,
+      selfInstabilityRisk: 0.15,
+    },
+    replayCue: 'wing_buffet',
+    debriefSignals: ['tail_slap_space_control', 'lateral_displacement', 'stability_risk'],
+  },
+  Style_Wings: {
+    id: 'wing_buffet',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'movement',
+    params: {
+      lateralBoost: 1,
+      instabilityRisk: 0.2,
+    },
+    replayCue: 'wing_buffet',
+    debriefSignals: ['evasive_movement', 'stability_risk'],
+  },
+  Style_Neon: {
+    id: 'neon_blind',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'opponent',
+    params: {
+      controlPenalty: 2,
+      precisionPenalty: 0.1,
+      durationTurns: 1,
+    },
+    replayCue: 'neon_blind',
+    debriefSignals: ['control_disruption', 'visual_signature', 'neon_blind'],
+  },
+  Style_LightBar: {
+    id: 'lightbar_flash',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'opponent',
+    params: {
+      controlPenalty: 1,
+      initiativePing: 1,
+      durationTurns: 1,
+    },
+    replayCue: 'neon_blind',
+    debriefSignals: ['lightbar_flash', 'initiative_ping', 'control_disruption'],
+  },
+  Style_TopHat: {
+    id: 'top_hat_taunt',
+    kind: 'signature',
+    trigger: 'passive',
+    cooldownTurns: 0,
+    target: 'opponent',
+    params: {
+      baitAggression: 1,
+      styleSignal: 5,
+      composureBonus: 1,
+    },
+    replayCue: 'crown_command',
+    debriefSignals: ['top_hat_taunt', 'baited_approach', 'style_pressure'],
+  },
+  Style_CowboyHat: {
+    id: 'rodeo_bait',
+    kind: 'signature',
+    trigger: 'activated',
+    cooldownTurns: 3,
+    charges: 2,
+    target: 'opponent',
+    params: {
+      baitHazardBonus: 1,
+      closeRangeTaunt: 1,
+      chaosPressure: 1,
+    },
+    replayCue: 'crown_command',
+    debriefSignals: ['rodeo_bait', 'hazard_bait', 'close_range_taunt'],
+  },
+  Style_Crown: {
+    id: 'crown_command',
+    kind: 'signature',
+    trigger: 'passive',
+    cooldownTurns: 0,
+    target: 'self',
+    params: {
+      controlBonus: 1,
+      moraleSignal: 1,
+    },
+    replayCue: 'crown_command',
+    debriefSignals: ['control_bonus', 'signature_command'],
+  },
+  Style_TrashCan: {
+    id: 'trash_shield',
+    kind: 'signature',
+    trigger: 'on_damage',
+    cooldownTurns: 3,
+    charges: 1,
+    target: 'self',
+    params: {
+      absorbDamage: 6,
+      detachChance: 0.35,
+    },
+    replayCue: 'trash_shield',
+    debriefSignals: ['absorbed_damage', 'detached_shell'],
+  },
+}
+
+function inferSignatureEffect(input: PartInput): PartEffect | undefined {
+  if (input.category !== 'style') {
+    return undefined
   }
+
+  return STYLE_SIGNATURE_EFFECTS[input.id]
 }
 
 function inferMechanics(input: PartInput): PartEffect[] {
@@ -1282,77 +1373,77 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Flag',
     category: 'style',
     displayName: 'Flag',
-    cost: 12,
-    mass: 1,
-    durability: 4,
-    size: [1, 1, 1],
-    stats: { style: 3 },
-  }),
-  part({
-    id: 'Style_Antenna',
-    category: 'style',
-    displayName: 'Antenna',
-    cost: 14,
-    mass: 1,
-    durability: 3,
-    size: [1, 1, 1],
-    stats: { style: 2, control: 1 },
-  }),
-  part({
-    id: 'Style_BladeAntenna',
-    category: 'style',
-    displayName: 'Blade Antenna',
-    cost: 15,
+    cost: 18,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
     stats: { style: 3, control: 1 },
   }),
   part({
+    id: 'Style_Antenna',
+    category: 'style',
+    displayName: 'Antenna',
+    cost: 20,
+    mass: 1,
+    durability: 3,
+    size: [1, 1, 1],
+    stats: { style: 2, control: 2 },
+  }),
+  part({
+    id: 'Style_BladeAntenna',
+    category: 'style',
+    displayName: 'Blade Antenna',
+    cost: 22,
+    mass: 1,
+    durability: 4,
+    size: [1, 1, 1],
+    stats: { style: 3, control: 2, chaos: 1 },
+  }),
+  part({
     id: 'Style_DragonHead',
     category: 'style',
     displayName: 'Dragon Head',
-    cost: 24,
+    cost: 42,
     mass: 4,
     durability: 8,
     size: [1, 1, 1],
-    stats: { style: 7, chaos: 2 },
+    stats: { style: 7, chaos: 3 },
   }),
   part({
     id: 'Style_Spikes',
     category: 'style',
     displayName: 'Style Spikes',
-    cost: 16,
+    cost: 24,
     mass: 2,
     durability: 8,
     size: [1, 1, 1],
-    stats: { style: 4, weapon: 1 },
+    stats: { style: 4, weapon: 2, armor: 1 },
   }),
   part({
     id: 'Style_Horns',
     category: 'style',
     displayName: 'Horns',
-    cost: 15,
+    cost: 24,
     mass: 2,
     durability: 6,
     size: [1, 1, 1],
-    stats: { style: 4, chaos: 1 },
+    stats: { style: 4, weapon: 1, chaos: 2 },
   }),
   part({
     id: 'Style_Tail',
     category: 'style',
     displayName: 'Tail',
-    cost: 15,
+    cost: 24,
     mass: 3,
     durability: 6,
     size: [1, 1, 1],
-    stats: { style: 4, chaos: 1, stability: -1 },
+    stats: { style: 4, chaos: 2, stability: -1 },
   }),
   part({
     id: 'Style_Wings',
     category: 'style',
     displayName: 'Wings',
-    cost: 18,
+    cost: 30,
     mass: 3,
     durability: 6,
     size: [2, 1, 1],
@@ -1362,61 +1453,61 @@ export const PART_CATALOG: PartDefinition[] = [
     id: 'Style_Neon',
     category: 'style',
     displayName: 'Neon Kit',
-    cost: 16,
+    cost: 26,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
-    stats: { style: 5 },
+    stats: { style: 5, control: 1 },
   }),
   part({
     id: 'Style_LightBar',
     category: 'style',
     displayName: 'Light Bar',
-    cost: 15,
+    cost: 24,
     mass: 1,
     durability: 4,
     size: [1, 1, 1],
-    stats: { style: 4, control: 1 },
+    stats: { style: 4, control: 2 },
   }),
   part({
     id: 'Style_TopHat',
     category: 'style',
     displayName: 'Top Hat',
-    cost: 14,
+    cost: 20,
     mass: 2,
     durability: 4,
     size: [1, 1, 1],
-    stats: { style: 5 },
+    stats: { style: 5, control: 1 },
   }),
   part({
     id: 'Style_CowboyHat',
     category: 'style',
     displayName: 'Cowboy Hat',
-    cost: 14,
+    cost: 22,
     mass: 2,
     durability: 4,
     size: [1, 1, 1],
-    stats: { style: 5, chaos: 1 },
+    stats: { style: 5, chaos: 2 },
   }),
   part({
     id: 'Style_Crown',
     category: 'style',
     displayName: 'Crown',
-    cost: 22,
+    cost: 36,
     mass: 2,
     durability: 5,
     size: [1, 1, 1],
-    stats: { style: 8 },
+    stats: { style: 8, control: 2 },
   }),
   part({
     id: 'Style_TrashCan',
     category: 'style',
     displayName: 'Trash Can Shell',
-    cost: 14,
+    cost: 26,
     mass: 5,
     durability: 10,
     size: [1, 1, 1],
-    stats: { style: 4, armor: 1, chaos: 2 },
+    stats: { style: 4, armor: 2, chaos: 2, stability: -1 },
   }),
 ]
 

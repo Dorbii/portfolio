@@ -263,6 +263,92 @@ const droneSwarmTimeline = createReplayTimeline({
   ],
 })
 
+const stabilityTimeline = createReplayTimeline({
+  round: 6,
+  duration: 7,
+  summary: 'Red gets flipped and self-rights from resolved stability events.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [4, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1,
+      type: 'bot_destabilized',
+      bot: 'red',
+      cause: 'hard turn',
+      direction: [1, 0, 0.2],
+      duration: 0.8,
+      severity: 0.7,
+    },
+    {
+      t: 2,
+      type: 'bot_flipped',
+      bot: 'red',
+      cause: 'flipper',
+      direction: [1, 0, 0],
+      duration: 0.9,
+      severity: 0.95,
+    },
+    {
+      t: 3.5,
+      type: 'bot_self_righted',
+      bot: 'red',
+      cause: 'gyro',
+      duration: 1.2,
+      severity: 0.8,
+    },
+    {
+      t: 5,
+      type: 'bot_immobilized',
+      bot: 'blue',
+      cause: 'lost drive',
+      severity: 0.6,
+    },
+  ],
+})
+
+const fireBreathTimeline = createReplayTimeline({
+  round: 7,
+  duration: 3,
+  summary: 'Dragon Head breathes fire at close range.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [0, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [3, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 1.2,
+      type: 'ability',
+      bot: 'red',
+      ability: 'fire_breath',
+      weaponSlot: 'weaponB',
+      target: 'blue',
+      targetPosition: [2.2, 0, 0.4],
+    },
+  ],
+})
+
 const detachMetadataTimeline = createReplayTimeline({
   round: 5,
   duration: 7,
@@ -1061,6 +1147,42 @@ test('replay mapping exposes drone_swarm ability effects with separate lane sema
   assert.equal(frame.effects.every((effect) => effect.kind !== 'laser_lance'), true)
 })
 
+test('replay mapping exposes fire_breath ability effects with target endpoints', () => {
+  const before = buildReplayFrame(fireBreathTimeline, 1.19)
+  const frame = buildReplayFrame(fireBreathTimeline, 1.55)
+  const fireBreath = frame.effects.find((effect) => effect.kind === 'fire_breath')
+
+  assert.equal(before.effects.some((effect) => effect.kind === 'fire_breath'), false)
+  assert.ok(fireBreath)
+  assert.equal(fireBreath.team, 'red')
+  assert.equal(fireBreath.label, 'fire_breath')
+  assert.deepEqual(fireBreath.endPosition, [2.2, 0, 0.4])
+  assert.ok(fireBreath.intensity > 0)
+  assert.ok(fireBreath.intensity < 1)
+})
+
+test('replay mapping turns stability events into deterministic bot pose state', () => {
+  const before = buildReplayFrame(stabilityTimeline, 0.99)
+  const destabilized = buildReplayFrame(stabilityTimeline, 1.2)
+  const flipped = buildReplayFrame(stabilityTimeline, 3)
+  const selfRighting = buildReplayFrame(stabilityTimeline, 4)
+  const recovered = buildReplayFrame(stabilityTimeline, 4.8)
+  const immobilized = buildReplayFrame(stabilityTimeline, 5.2)
+
+  assert.equal(before.bots.red.stability.pose, 'upright')
+  assert.equal(before.effects.some((effect) => effect.kind === 'stability'), false)
+  assert.equal(destabilized.bots.red.stability.pose, 'destabilized')
+  assert.ok(Math.abs(destabilized.bots.red.stability.roll) > 0)
+  assert.ok(destabilized.effects.some((effect) => effect.kind === 'stability' && effect.team === 'red'))
+  assert.equal(flipped.bots.red.stability.pose, 'flipped')
+  assert.ok(Math.abs(flipped.bots.red.stability.roll) > 3)
+  assert.equal(selfRighting.bots.red.stability.pose, 'self_righting')
+  assert.ok(Math.abs(selfRighting.bots.red.stability.roll) < Math.abs(flipped.bots.red.stability.roll))
+  assert.equal(recovered.bots.red.stability.pose, 'upright')
+  assert.equal(immobilized.bots.blue.status, 'immobilized')
+  assert.equal(immobilized.bots.blue.stability.pose, 'immobilized')
+})
+
 test('replay mapping emits a larger deploy control cue for net/control-linked weapon fire', () => {
   const frame = buildReplayFrame(movingWeaponTimeline, 2)
   const deploy = frame.effects.find((effect) => effect.label === 'weaponA-deploy')
@@ -1130,6 +1252,11 @@ test('broadcast camera framing includes active effect endpoints in target and ra
   assert.ok(effectCamera.focusPoints.some((point) => point[0] === 10 && point[2] === -6))
   assert.ok(effectCamera.target[0] > baselineCamera.target[0])
   assert.ok(effectCamera.radius > baselineCamera.radius)
+})
+
+test('replay timeline validation accepts stability and fire-breath semantic events', () => {
+  assert.equal(validateReplayTimeline(stabilityTimeline), true)
+  assert.equal(validateReplayTimeline(fireBreathTimeline), true)
 })
 
 test('broadcast camera framing clamps tall effect focus to an above-floor target band', () => {

@@ -21,6 +21,7 @@ import type {
 
 export const LOADOUT_CATALOG_VERSION = 'part-catalog:v1'
 export const LOADOUT_PART_LIMIT = 12
+export const RARE_SIGNATURE_STORE_MAX_COST = 42
 
 const LOADOUT_ACTION_SCOPE = 'loadout_builder'
 const ROTATION_OPTIONS = [0, 90, 180, 270] as const
@@ -1514,7 +1515,7 @@ function chooseStoreSlots(
 
           return kind === 'wildcard' &&
             rareSignatureCount === 0 &&
-            rareSignatureCost + part.cost <= 24
+            rareSignatureCost + part.cost <= RARE_SIGNATURE_STORE_MAX_COST
         }),
       rng,
     )

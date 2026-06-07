@@ -96,6 +96,7 @@ export function RefereeConsole() {
   const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
   const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
   const shouldShowReplayStatus = Boolean(publicSession?.replayAvailable && !replayPayload)
+  const shouldShowSessionCompletion = publicSession?.phase === 'session_complete'
 
   return (
     <main className="arena-app match-console">
@@ -163,13 +164,15 @@ export function RefereeConsole() {
             />
           </Panel>
 
-          <Panel className="panel dashboard-panel session-completion-dashboard-panel">
-            <SectionHeader kicker="Post-fight" title="Shared Debrief" />
-            <SessionCompletionPanel
-              controls={completionControls}
-              publicSession={publicSession}
-            />
-          </Panel>
+          {shouldShowSessionCompletion ? (
+            <Panel className="panel dashboard-panel session-completion-dashboard-panel">
+              <SectionHeader kicker="Session end" title="Shared Debrief" />
+              <SessionCompletionPanel
+                controls={completionControls}
+                publicSession={publicSession}
+              />
+            </Panel>
+          ) : null}
 
           <Panel className="panel dashboard-panel key-stats-panel">
             <SectionHeader kicker="Key stats" title="Key Stats" />

@@ -5,6 +5,7 @@ import {
   PART_CATALOG,
   AGENT_FEATURE_GATES,
   applyPurchases,
+  buildPartCatalogDisplay,
   createAgentCatalogGuidance,
   deriveControls,
   normalizeTactics,
@@ -38,6 +39,7 @@ import {
   createInitialLoadoutBuildState,
   loadoutLegalActionForPacket,
   pathHazards,
+  RARE_SIGNATURE_STORE_MAX_COST,
   resolveCombat,
   resolveSubmittedCombat,
   resolveSubmittedGameActions,
@@ -49,6 +51,7 @@ import {
   SessionCoordinator,
   calculateInterest,
 } from '../.test-build/apps/worker/src/session.js'
+import { DEFAULT_STARTING_GOLD } from '../.test-build/apps/worker/src/sessionSupport.js'
 
 const bareBodyBlueprint = {
   name: 'Bare Core',
@@ -796,6 +799,122 @@ function builderPart(design, partId) {
   return part
 }
 
+function requirePart(partsById, partId) {
+  const catalogPart = partsById.get(partId)
+
+  assert.notEqual(catalogPart, undefined)
+
+  return catalogPart
+}
+
+function assertFiniteVector(vector, label) {
+  assert.equal(Array.isArray(vector), true, `${label} must be a vector`)
+  assert.equal(vector.length, 3, `${label} must have three components`)
+
+  for (const component of vector) {
+    assert.ok(Number.isFinite(component) && component > 0, `${label} has invalid component ${component}`)
+  }
+}
+
+function assertFiniteStats(stats, label) {
+  for (const [key, value] of Object.entries(stats)) {
+    assert.ok(Number.isFinite(value), `${label}.${key} must be finite`)
+  }
+}
+
+function assertCompleteSpec(catalogPart) {
+  const spec = catalogPart.spec
+
+  assert.equal(typeof spec.kind, 'string', `${catalogPart.id}.spec.kind is missing`)
+
+  switch (spec.kind) {
+    case 'weapon':
+      assert.ok(spec.damage > 0, `${catalogPart.id}.spec.damage must be positive`)
+      assert.ok(spec.range > 0, `${catalogPart.id}.spec.range must be positive`)
+      assert.ok(spec.cooldownTurns >= 1, `${catalogPart.id}.spec.cooldownTurns must be positive`)
+      assert.ok(spec.precision >= 0 && spec.precision <= 1, `${catalogPart.id}.spec.precision must be normalized`)
+      assert.ok(['direct', 'arc', 'sweep', 'contact'].includes(spec.fireMode))
+      break
+    case 'mobility':
+      assert.ok(spec.moveBudget >= 0, `${catalogPart.id}.spec.moveBudget must be non-negative`)
+      assert.ok(spec.traction >= 0, `${catalogPart.id}.spec.traction must be non-negative`)
+      assert.ok(spec.stability >= 0, `${catalogPart.id}.spec.stability must be non-negative`)
+      assert.ok(spec.turnRate > 0, `${catalogPart.id}.spec.turnRate must be positive`)
+      if (spec.moveBudget > 0) {
+        assert.equal(catalogPart.footprint.groundContact, 'required')
+      }
+      break
+    case 'armor':
+      assert.ok(spec.armor > 0, `${catalogPart.id}.spec.armor must be positive`)
+      assert.ok(spec.coverage > 0, `${catalogPart.id}.spec.coverage must be positive`)
+      break
+    case 'structure':
+      assert.ok(spec.integrity > 0, `${catalogPart.id}.spec.integrity must be positive`)
+      assert.ok(spec.connectorStrength > 0, `${catalogPart.id}.spec.connectorStrength must be positive`)
+      break
+    case 'utility':
+      assert.equal(typeof spec.effect, 'string')
+      assert.ok(spec.effect.length > 0, `${catalogPart.id}.spec.effect must be named`)
+      assert.ok(spec.control >= 0, `${catalogPart.id}.spec.control must be non-negative`)
+      break
+    case 'power':
+      assert.ok(spec.output > 0, `${catalogPart.id}.spec.output must be positive`)
+      assert.ok(spec.capacity > 0, `${catalogPart.id}.spec.capacity must be positive`)
+      break
+    default:
+      assert.fail(`${catalogPart.id} has unknown spec kind ${spec.kind}`)
+  }
+}
+
+function assertCompleteVisual(catalogPart) {
+  assert.ok(['low', 'medium', 'high'].includes(catalogPart.visual.detailBudget))
+  assert.equal(typeof catalogPart.visual.materialRole, 'string')
+  assert.ok(catalogPart.visual.materialRole.length > 0)
+  assert.equal(typeof catalogPart.visual.mountRole, 'string')
+  assert.ok(catalogPart.visual.mountRole.length > 0)
+  assert.equal(typeof catalogPart.visual.visualFamily, 'string')
+  assert.ok(catalogPart.visual.visualFamily.length > 0)
+}
+
+function assertCompleteMount(mount, label) {
+  assert.equal(typeof mount.id, 'string')
+  assert.ok(mount.id.length > 0, `${label}.id is missing`)
+  assert.equal(typeof mount.kind, 'string')
+  assert.ok(mount.accepts.length > 0, `${label}.accepts must not be empty`)
+  assert.equal(typeof mount.motion, 'string')
+  assert.equal(typeof mount.collisionPolicy, 'string')
+  assert.ok(mount.rotationOptions.length > 0, `${label}.rotationOptions must not be empty`)
+
+  for (const rotation of mount.rotationOptions) {
+    assert.ok(Number.isFinite(rotation), `${label}.rotationOptions contains invalid rotation`)
+  }
+}
+
+function assertCompleteEffect(effect, label) {
+  assert.notEqual(effect, undefined, `${label} is missing`)
+  assert.equal(typeof effect.id, 'string')
+  assert.ok(effect.id.length > 0, `${label}.id is missing`)
+  assert.ok(['signature', 'utility'].includes(effect.kind), `${label}.kind is invalid`)
+  assert.ok(['activated', 'on_hit', 'on_damage', 'on_flip', 'passive'].includes(effect.trigger), `${label}.trigger is invalid`)
+  assert.ok(effect.cooldownTurns >= 0, `${label}.cooldownTurns must be non-negative`)
+  assert.ok(['self', 'opponent', 'area', 'movement', 'weapon'].includes(effect.target), `${label}.target is invalid`)
+  assert.ok(Object.keys(effect.params).length > 0, `${label}.params must not be empty`)
+  assert.ok(effect.debriefSignals.length > 0, `${label}.debriefSignals must not be empty`)
+
+  if (effect.trigger === 'activated') {
+    assert.ok((effect.charges ?? 0) > 0, `${label}.charges must be positive for activated effects`)
+  }
+
+  for (const [key, value] of Object.entries(effect.params)) {
+    const validType = typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean'
+
+    assert.equal(validType, true, `${label}.params.${key} has invalid type`)
+    if (typeof value === 'number') {
+      assert.ok(Number.isFinite(value), `${label}.params.${key} must be finite`)
+    }
+  }
+}
+
 async function buildMinimumViableLoadout(session, token, packet) {
   let submitted = await placePartFromCatalog(session, token, packet, 'Body_Light_Frame')
   submitted = await placePartFromCatalog(session, token, submitted.value.packet, 'Wheel_Small')
@@ -980,6 +1099,134 @@ test('catalog exposes required source-owned part behavior metadata', () => {
     id: 'drone_controller',
     slot: 'utility',
   })
+})
+
+test('catalog display model covers current and future part definition fields', () => {
+  const intentionallyHiddenKeys = new Set(['displayName', 'id'])
+
+  for (const part of PART_CATALOG) {
+    const display = buildPartCatalogDisplay(part)
+    const coveredKeys = new Set(display.coveredKeys)
+    const displayedKeys = Object.keys(part).filter((key) => !intentionallyHiddenKeys.has(key))
+
+    assert.equal(display.partId, part.id)
+    assert.ok(display.summaryRows.some((row) => row.id === 'rarity'))
+    assert.ok(display.summaryRows.some((row) => row.id === 'size'))
+
+    for (const key of displayedKeys) {
+      assert.ok(coveredKeys.has(key), `${part.id} catalog display is missing ${key}`)
+    }
+  }
+})
+
+test('catalog display model exposes mechanical specs, mounts, and unique effects', () => {
+  const laser = PART_CATALOG.find((part) => part.id === 'Weapon_Laser')
+  const omniWheel = PART_CATALOG.find((part) => part.id === 'Wheel_Omni')
+  const dragonHead = PART_CATALOG.find((part) => part.id === 'Style_DragonHead')
+
+  assert.ok(laser)
+  assert.ok(omniWheel)
+  assert.ok(dragonHead)
+
+  const laserRows = buildPartCatalogDisplay(laser).sections.flatMap((section) => section.rows)
+  const wheelRows = buildPartCatalogDisplay(omniWheel).sections.flatMap((section) => section.rows)
+  const dragonRows = buildPartCatalogDisplay(dragonHead).sections.flatMap((section) => section.rows)
+
+  assert.ok(laserRows.some((row) => row.id === 'spec.damage' && row.value === '13'))
+  assert.ok(laserRows.some((row) => row.id === 'spec.range' && row.value === '14'))
+  assert.ok(wheelRows.some((row) => row.id === 'mounts.1.motion' && row.value === 'Inherits Parent Spin'))
+  assert.ok(wheelRows.some((row) => row.id === 'mounts.1.collisionPolicy' && row.value === 'Allow Clip V1'))
+  assert.ok(dragonRows.some((row) => row.id === 'signatureEffect.id' && row.value === 'Fire Breath'))
+  assert.ok(dragonRows.some((row) => row.id === 'signatureEffect.params.damage' && row.value === '10'))
+})
+
+test('part catalog definitions have complete mechanical parameters', () => {
+  for (const catalogPart of PART_CATALOG) {
+    assert.equal(typeof catalogPart.id, 'string')
+    assert.ok(catalogPart.id.length > 0)
+    assert.equal(typeof catalogPart.displayName, 'string')
+    assert.ok(catalogPart.displayName.length > 0)
+    assert.ok(Number.isFinite(catalogPart.cost) && catalogPart.cost > 0, `${catalogPart.id} has invalid cost`)
+    assert.ok(Number.isFinite(catalogPart.mass) && catalogPart.mass > 0, `${catalogPart.id} has invalid mass`)
+    assert.ok(Number.isFinite(catalogPart.durability) && catalogPart.durability > 0, `${catalogPart.id} has invalid durability`)
+    assertFiniteVector(catalogPart.size, `${catalogPart.id}.size`)
+    assert.deepEqual(catalogPart.footprint.size, catalogPart.size)
+    assert.ok(catalogPart.footprint.minY >= 0, `${catalogPart.id} footprint may not dip below the floor`)
+    assert.ok(Object.keys(catalogPart.stats).length > 0, `${catalogPart.id} must expose at least one stat`)
+    assertFiniteStats(catalogPart.stats, `${catalogPart.id}.stats`)
+    assertCompleteSpec(catalogPart)
+    assertCompleteVisual(catalogPart)
+
+    if (catalogPart.category !== 'style') {
+      assert.ok(catalogPart.mounts.length > 0, `${catalogPart.id} should expose mount affordances`)
+    }
+
+    for (const mount of catalogPart.mounts) {
+      assertCompleteMount(mount, `${catalogPart.id}.mounts.${mount.id}`)
+    }
+
+    for (const mechanic of catalogPart.mechanics ?? []) {
+      assertCompleteEffect(mechanic, `${catalogPart.id}.mechanics.${mechanic.id}`)
+    }
+
+    if (catalogPart.signatureEffect) {
+      assertCompleteEffect(catalogPart.signatureEffect, `${catalogPart.id}.signatureEffect`)
+    }
+  }
+})
+
+test('style signature parts have unique effects and viable rare prices', () => {
+  const expectedEffectByPart = new Map([
+    ['Style_Flag', 'rally_flag'],
+    ['Style_Antenna', 'signal_ping'],
+    ['Style_BladeAntenna', 'blade_jammer'],
+    ['Style_DragonHead', 'fire_breath'],
+    ['Style_Spikes', 'spike_burst'],
+    ['Style_Horns', 'horn_countercharge'],
+    ['Style_Tail', 'tail_slap'],
+    ['Style_Wings', 'wing_buffet'],
+    ['Style_Neon', 'neon_blind'],
+    ['Style_LightBar', 'lightbar_flash'],
+    ['Style_TopHat', 'top_hat_taunt'],
+    ['Style_CowboyHat', 'rodeo_bait'],
+    ['Style_Crown', 'crown_command'],
+    ['Style_TrashCan', 'trash_shield'],
+  ])
+  const styleParts = PART_CATALOG.filter((part) => part.category === 'style')
+  const signatureIds = new Set()
+
+  assert.equal(styleParts.length, expectedEffectByPart.size)
+
+  for (const stylePart of styleParts) {
+    const expectedEffectId = expectedEffectByPart.get(stylePart.id)
+
+    assert.equal(stylePart.rarity, 'rare')
+    assert.equal(stylePart.signatureEffect?.id, expectedEffectId, `${stylePart.id} needs a unique signature effect`)
+    assert.notEqual(stylePart.signatureEffect?.id, 'banner_presence')
+    assert.ok(stylePart.cost >= 18, `${stylePart.id} should be priced above filler/default parts`)
+    assert.ok(stylePart.cost <= RARE_SIGNATURE_STORE_MAX_COST, `${stylePart.id} cannot exceed wildcard rare store cap`)
+    assertCompleteEffect(stylePart.signatureEffect, `${stylePart.id}.signatureEffect`)
+    signatureIds.add(stylePart.signatureEffect?.id)
+  }
+
+  assert.equal(signatureIds.size, styleParts.length)
+})
+
+test('catalog economy keeps first-round core plus one rare signature viable', () => {
+  const partsById = new Map(PART_CATALOG.map((part) => [part.id, part]))
+  const starterCoreIds = ['Body_Light_Frame', 'Wheel_Small', 'Weapon_Spear']
+  const starterCoreCost = starterCoreIds.reduce((total, partId) => total + requirePart(partsById, partId).cost, 0)
+  const rareSignatureCosts = PART_CATALOG
+    .filter((part) => part.category === 'style' && part.signatureEffect)
+    .map((part) => part.cost)
+  const maxRareSignatureCost = Math.max(...rareSignatureCosts)
+
+  assert.ok(starterCoreCost <= DEFAULT_STARTING_GOLD / 2, `Starter core costs ${starterCoreCost}`)
+  assert.ok(
+    starterCoreCost + maxRareSignatureCost <= DEFAULT_STARTING_GOLD,
+    `Starter core plus most expensive signature costs ${starterCoreCost + maxRareSignatureCost}`,
+  )
+  assert.ok(maxRareSignatureCost <= RARE_SIGNATURE_STORE_MAX_COST)
 })
 
 test('mobility catalog differentiates wheel and tread archetypes mechanically', () => {
@@ -1849,7 +2096,7 @@ test('store_rails_limit_rare_signature_and_keep_viability', () => {
     part.spec.moveBudget > 0,
   ))
   assert.ok(rareSignatureSlots.length <= 1)
-  assert.ok(totalRareSignatureCost <= 24)
+  assert.ok(totalRareSignatureCost <= RARE_SIGNATURE_STORE_MAX_COST)
 })
 
 test('loadout_action_set_exposes_role_store_to_packet_contract', () => {

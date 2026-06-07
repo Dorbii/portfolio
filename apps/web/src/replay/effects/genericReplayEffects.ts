@@ -169,6 +169,18 @@ export function updateHazardEffect({ effect, mesh }: EffectUpdateInput): void {
   mesh.rotation.y = effect.age * 2.2
 }
 
+export function updateStabilityEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
+  const pulse = 0.84 + effect.intensity * 0.72
+
+  tintStandardMaterial(mesh.material, palette.soft, palette.glow, 0.28 + effect.intensity * 0.28)
+  mesh.position.y = 0.22 + Math.sin(effect.age * 12) * 0.035
+  mesh.scaling.set(pulse, pulse, 0.42 + effect.intensity * 0.34)
+  mesh.rotation.x = Math.PI / 2
+  mesh.rotation.y = effect.age * 4.8
+  mesh.visibility = 0.36 + effect.intensity * 0.42
+}
+
 export function updateKnockoutEffect({ effect, mesh }: EffectUpdateInput): void {
   const pulse = 1 + Math.min(effect.age, 3) * 0.15
 

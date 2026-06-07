@@ -10,6 +10,8 @@ export type EffectMaterials = {
   controlNet: StandardMaterial
   damage: StandardMaterial
   debris: StandardMaterial
+  fire: StandardMaterial
+  fireGlow: StandardMaterial
   hazard: StandardMaterial
   knockout: StandardMaterial
   laser: StandardMaterial
@@ -18,6 +20,7 @@ export type EffectMaterials = {
   partDetach: StandardMaterial
   smoke: StandardMaterial
   spark: StandardMaterial
+  stability: StandardMaterial
   weapon: StandardMaterial
 }
 

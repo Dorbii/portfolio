@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   PART_CATALOG,
+  buildPartCatalogDisplay,
+  formatCatalogLabel,
   getPart,
 } from '../../../../../packages/catalog/src/index.js'
 import type {
@@ -36,6 +38,10 @@ export function PartCatalogPage() {
     [categoryFilter],
   )
   const selectedPart = getPart(selectedPartId) ?? PART_CATALOG[0]
+  const selectedPartDisplay = useMemo(
+    () => buildPartCatalogDisplay(selectedPart),
+    [selectedPart],
+  )
 
   useEffect(() => {
     if (visibleParts.some((part) => part.id === selectedPartId)) {
@@ -64,7 +70,12 @@ export function PartCatalogPage() {
           <span className="eyebrow">Part catalog</span>
           <h1>{selectedPart.displayName}</h1>
         </div>
-        <strong>{selectedPart.id}</strong>
+        <div className="part-catalog-header-actions">
+          <strong>{selectedPart.id}</strong>
+          <a className="ui-button ui-button-ghost part-catalog-back" href="/">
+            Back
+          </a>
+        </div>
       </header>
       <section className="part-catalog-layout">
         <div className="part-catalog-render-panel">
@@ -153,32 +164,31 @@ export function PartCatalogPage() {
               <span>Animate</span>
             </label>
           </div>
-          <dl className="part-catalog-facts">
-            <div>
-              <dt>Category</dt>
-              <dd>{formatLabel(selectedPart.category)}</dd>
+          <div className="part-catalog-details">
+            <dl className="part-catalog-facts part-catalog-summary">
+              {selectedPartDisplay.summaryRows.map((row) => (
+                <div key={row.id}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="part-catalog-section-list">
+              {selectedPartDisplay.sections.map((section) => (
+                <section className="part-catalog-fact-section" key={section.id}>
+                  <h2>{section.label}</h2>
+                  <dl className="part-catalog-facts">
+                    {section.rows.map((row) => (
+                      <div key={row.id}>
+                        <dt>{row.label}</dt>
+                        <dd>{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))}
             </div>
-            <div>
-              <dt>Cost</dt>
-              <dd>{selectedPart.cost}</dd>
-            </div>
-            <div>
-              <dt>Mass</dt>
-              <dd>{selectedPart.mass}</dd>
-            </div>
-            <div>
-              <dt>Durability</dt>
-              <dd>{selectedPart.durability}</dd>
-            </div>
-            <div>
-              <dt>Size</dt>
-              <dd>{selectedPart.size.join(' x ')}</dd>
-            </div>
-            <div>
-              <dt>Visual</dt>
-              <dd>{formatLabel(selectedPart.visual.visualFamily)}</dd>
-            </div>
-          </dl>
+          </div>
         </aside>
       </section>
     </main>
@@ -236,8 +246,5 @@ function normalizeAccentColor(value: string | null, fallback: string): string {
 }
 
 function formatLabel(value: string): string {
-  return value
-    .split('_')
-    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
-    .join(' ')
+  return formatCatalogLabel(value)
 }

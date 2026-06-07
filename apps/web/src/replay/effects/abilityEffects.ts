@@ -142,6 +142,40 @@ export function createPooledLaserLanceEffect(
   return mesh
 }
 
+export function createPooledFireBreathEffect(
+  scene: Scene,
+  name: string,
+  material: StandardMaterial,
+  glowMaterial: StandardMaterial,
+): Mesh {
+  const mesh = MeshBuilder.CreateCylinder(
+    name,
+    { height: 1, diameterTop: 0.82, diameterBottom: 0.22, tessellation: 18 },
+    scene,
+  )
+  const core = MeshBuilder.CreateCylinder(
+    `${name}-core`,
+    { height: 1.05, diameterTop: 0.48, diameterBottom: 0.1, tessellation: 14 },
+    scene,
+  )
+  const emberA = MeshBuilder.CreateSphere(`${name}-ember-a`, { diameter: 0.16, segments: 8 }, scene)
+  const emberB = MeshBuilder.CreateSphere(`${name}-ember-b`, { diameter: 0.12, segments: 8 }, scene)
+  const coneMaterial = cloneStandardMaterial(material, `${name}-mat`, 0.62)
+  const coreMaterial = cloneStandardMaterial(glowMaterial, `${name}-core-mat`, 0.38)
+
+  mesh.material = coneMaterial
+  core.material = coreMaterial
+  core.parent = mesh
+  emberA.material = coreMaterial
+  emberB.material = coreMaterial
+  emberA.parent = mesh
+  emberB.parent = mesh
+  mesh.rotation.x = Math.PI / 2
+  mesh.setEnabled(false)
+
+  return mesh
+}
+
 export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
   const bodyMaterial = createSceneMaterial(scene, `${name}-body-mat`, '#263238', '#071113')
   const accentMaterial = createSceneMaterial(scene, `${name}-accent-mat`, '#dfff75', '#8cff2a', 1, 0.04)
@@ -278,6 +312,37 @@ export function updateLaserLanceEffect({ effect, mesh, profiles }: EffectUpdateI
   mesh.rotation.z = Math.sin(effect.age * 22) * 0.035
   mesh.scaling.set(pulse, 0.88 + effect.intensity * 0.34, length)
   mesh.visibility = 0.76 + effect.intensity * 0.24
+}
+
+export function updateFireBreathEffect({ effect, mesh, profiles }: EffectUpdateInput): void {
+  const palette = resolveReplayEffectPalette(effect.team, profiles)
+  const start = toBabylonVector(effect.position)
+  const end = effect.endPosition ? toBabylonVector(effect.endPosition) : start
+  const midpoint = Vector3.Center(start, end)
+  const length = Math.max(0.8, Vector3.Distance(start, end))
+  const dx = end.x - start.x
+  const dz = end.z - start.z
+  const heading = Math.abs(dx) + Math.abs(dz) < 0.001
+    ? effect.rotationY ?? 0
+    : Math.atan2(dx, dz)
+  const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
+  const flare = Math.sin(progress * Math.PI)
+
+  tintStandardMaterial(mesh.material, '#ff9a35', '#ff4d12', 0.52 + effect.intensity * 0.26)
+  mesh.getChildMeshes().forEach((child, index) => {
+    tintStandardMaterial(child.material, index === 0 ? '#fff0a8' : palette.hot, '#ff6b1a', 0.42)
+    child.visibility = 0.48 + effect.intensity * 0.42
+    child.position.x = Math.sin(effect.age * 9 + index * 1.7) * 0.09
+    child.position.y = -0.3 + progress * (0.45 + index * 0.28)
+    child.position.z = -0.08 + Math.cos(effect.age * 7 + index) * 0.05
+    child.scaling.setAll(0.74 + flare * 0.42 + index * 0.16)
+  })
+  mesh.position.set(midpoint.x, 0.58 + flare * 0.18, midpoint.z)
+  mesh.rotation.x = Math.PI / 2
+  mesh.rotation.y = heading
+  mesh.rotation.z = Math.sin(effect.age * 18) * 0.08
+  mesh.scaling.set(0.62 + flare * 0.28, length, 0.7 + effect.intensity * 0.24)
+  mesh.visibility = 0.62 + effect.intensity * 0.28
 }
 
 export function updateDroneSwarmEffect({ effect, mesh, profiles }: EffectUpdateInput): void {

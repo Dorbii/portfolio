@@ -1,6 +1,12 @@
 import type { MovementCommand, TeamRole, Vector3 } from '../../schemas/src/index.js'
 
 export type AbilityName = 'laser_lance' | 'drone_swarm' | 'fire_breath'
+export type BotStabilityEventType =
+  | 'bot_destabilized'
+  | 'bot_tipped'
+  | 'bot_flipped'
+  | 'bot_self_righted'
+  | 'bot_immobilized'
 export type WeaponFireCue = 'deploy' | 'release'
 export type WeaponFireMode = 'direct' | 'arc' | 'sweep' | 'contact'
 export type MoveEasing = 'linear' | 'ease_in' | 'ease_out' | 'ease_in_out' | 'brake'
@@ -83,6 +89,16 @@ export type HazardEvent = {
   position: Vector3
 }
 
+export type BotStabilityEvent = {
+  t: number
+  type: BotStabilityEventType
+  bot: TeamRole
+  cause?: string
+  direction?: Vector3
+  duration?: number
+  severity?: number
+}
+
 export type PartDetachEvent = {
   t: number
   type: 'part_detach'
@@ -113,6 +129,7 @@ export type ReplayEvent =
   | ImpactEvent
   | DamageEvent
   | HazardEvent
+  | BotStabilityEvent
   | PartDetachEvent
   | KnockoutEvent
 
@@ -124,6 +141,11 @@ const REPLAY_EVENT_TYPE_RANK: Record<ReplayEvent['type'], number> = {
   impact: 40,
   damage: 50,
   hazard: 60,
+  bot_destabilized: 62,
+  bot_tipped: 64,
+  bot_flipped: 66,
+  bot_self_righted: 68,
+  bot_immobilized: 69,
   part_detach: 70,
   knockout: 80,
 }

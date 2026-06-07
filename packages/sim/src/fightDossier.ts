@@ -315,7 +315,8 @@ function keyEvents(events: ReplayEvent[]): FightKeyEvent[] {
       event.type === 'damage' ||
       event.type === 'knockout' ||
       event.type === 'part_detach' ||
-      event.type === 'hazard')
+      event.type === 'hazard' ||
+      isBotStabilityEvent(event))
     .slice(0, 12)
     .map((event) => ({
       at: event.t,
@@ -337,8 +338,28 @@ function summarizeEvent(event: ReplayEvent): string {
   if (event.type === 'knockout') {
     return `${event.bot} was knocked out by ${event.cause}.`
   }
+  if (isBotStabilityEvent(event)) {
+    return `${event.bot} ${summarizeStabilityEventType(event.type)}${event.cause ? ` from ${event.cause}` : ''}.`
+  }
 
   return `${event.type} event.`
+}
+
+function summarizeStabilityEventType(eventType: ReplayEvent['type']): string {
+  switch (eventType) {
+    case 'bot_destabilized':
+      return 'destabilized'
+    case 'bot_tipped':
+      return 'tipped'
+    case 'bot_flipped':
+      return 'flipped'
+    case 'bot_self_righted':
+      return 'self-righted'
+    case 'bot_immobilized':
+      return 'was immobilized'
+    default:
+      return 'changed stability'
+  }
 }
 
 function distance2d(from: [number, number, number], to: [number, number, number]): number {
@@ -371,4 +392,21 @@ function isHazardEvent(event: ReplayEvent): event is HazardEvent {
 
 function isPartDetachEvent(event: ReplayEvent): event is PartDetachEvent {
   return event.type === 'part_detach'
+}
+
+function isBotStabilityEvent(event: ReplayEvent): event is Extract<ReplayEvent, {
+  type:
+    | 'bot_destabilized'
+    | 'bot_tipped'
+    | 'bot_flipped'
+    | 'bot_self_righted'
+    | 'bot_immobilized'
+}> {
+  return (
+    event.type === 'bot_destabilized' ||
+    event.type === 'bot_tipped' ||
+    event.type === 'bot_flipped' ||
+    event.type === 'bot_self_righted' ||
+    event.type === 'bot_immobilized'
+  )
 }

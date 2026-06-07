@@ -1,4 +1,5 @@
 import type {
+  BotStabilityEvent,
   MoveEasing,
   MoveEvent,
   ReplayEvent,
@@ -15,6 +16,7 @@ import {
 import { buildReplayEffects } from './effects/effectMapping.js'
 import type {
   BotFrameState,
+  BotStabilityFrameState,
   IndexedReplayEvent,
   PartDetachMotionFrameState,
   PartFrameState,
@@ -51,6 +53,8 @@ const DETACH_MAX_ANGULAR_IMPULSE = 3.8
 const DETACH_MAX_SETTLE_TIME = 1.55
 const DETACH_FADE_START = 4.2
 const DETACH_FADE_DURATION = 1.4
+const DEFAULT_STABILITY_DURATION = 0.9
+const SELF_RIGHT_DURATION = 1.25
 
 const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
   red: {
@@ -58,6 +62,7 @@ const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
     position: [-6, 0, 0],
     motion: createIdleMotion(),
     rotationY: Math.PI / 2,
+    stability: createUprightStability(),
     status: 'active',
   },
   blue: {
@@ -65,6 +70,7 @@ const DEFAULT_BOT_STATE: Record<TeamRole, BotFrameState> = {
     position: [6, 0, 0],
     motion: createIdleMotion(),
     rotationY: -Math.PI / 2,
+    stability: createUprightStability(),
     status: 'active',
   },
 }
@@ -137,6 +143,10 @@ function resolveBotState(
       }
     }
 
+    if (isBotStabilityEvent(event) && event.bot === role) {
+      state = resolveStabilityFrameState(state, event, time)
+    }
+
     if (event.type === 'knockout' && event.bot === role) {
       state = {
         ...state,
@@ -146,6 +156,157 @@ function resolveBotState(
   }
 
   return state
+}
+
+function resolveStabilityFrameState(
+  previousState: BotFrameState,
+  event: BotStabilityEvent,
+  time: number,
+): BotFrameState {
+  const age = round(Math.max(0, time - event.t))
+  const duration = resolveStabilityDuration(event)
+  const progress = clamp01(age / duration)
+  const severity = normalizeSeverity(event.severity)
+  const direction = normalizeFlatDirection(event.direction, event.bot)
+  const maxTilt = 0.28 + severity * 0.62
+  const easedProgress = easeInOut(progress)
+
+  if (event.type === 'bot_destabilized') {
+    if (progress >= 1) {
+      return previousState
+    }
+
+    const wobble = Math.sin(age * 20) * (1 - progress) * maxTilt * 0.72
+
+    return {
+      ...previousState,
+      stability: {
+        age,
+        cause: event.cause,
+        heightOffset: round(Math.sin(progress * Math.PI) * 0.08 * severity),
+        pitch: round(direction[2] * maxTilt * 0.35 * (1 - progress) + wobble * 0.35),
+        pose: 'destabilized',
+        progress,
+        roll: round(-direction[0] * maxTilt * 0.35 * (1 - progress) + wobble),
+        severity,
+      },
+    }
+  }
+
+  if (event.type === 'bot_tipped') {
+    return {
+      ...previousState,
+      stability: {
+        age,
+        cause: event.cause,
+        heightOffset: round(-0.03 * easedProgress),
+        pitch: round(direction[2] * maxTilt * easedProgress),
+        pose: 'tipped',
+        progress,
+        roll: round(-direction[0] * maxTilt * easedProgress),
+        severity,
+      },
+    }
+  }
+
+  if (event.type === 'bot_flipped') {
+    const flipDirection = direction[0] >= 0 ? 1 : -1
+
+    return {
+      ...previousState,
+      stability: {
+        age,
+        cause: event.cause,
+        heightOffset: round(-0.08 * easedProgress),
+        pitch: round(direction[2] * 0.2 * severity * easedProgress),
+        pose: 'flipped',
+        progress,
+        roll: round(flipDirection * Math.PI * easedProgress),
+        severity,
+      },
+    }
+  }
+
+  if (event.type === 'bot_self_righted') {
+    if (progress >= 1) {
+      return {
+        ...previousState,
+        stability: createUprightStability(),
+        status: previousState.status === 'immobilized' ? 'active' : previousState.status,
+      }
+    }
+
+    const previousRoll = Math.abs(previousState.stability.roll) > 0.1
+      ? previousState.stability.roll
+      : (event.bot === 'red' ? 1 : -1) * Math.PI
+    const previousPitch = previousState.stability.pitch
+
+    return {
+      ...previousState,
+      stability: {
+        age,
+        cause: event.cause,
+        heightOffset: round(Math.sin(progress * Math.PI) * (0.28 + severity * 0.18)),
+        pitch: round(previousPitch * (1 - easedProgress)),
+        pose: 'self_righting',
+        progress,
+        roll: round(previousRoll * (1 - easedProgress)),
+        severity,
+      },
+      status: previousState.status === 'immobilized' ? 'active' : previousState.status,
+    }
+  }
+
+  return {
+    ...previousState,
+    stability: {
+      age,
+      cause: event.cause,
+      heightOffset: round(-0.035 * severity),
+      pitch: round(previousState.stability.pitch * 0.65),
+      pose: 'immobilized',
+      progress: 1,
+      roll: round(previousState.stability.roll * 0.65),
+      severity,
+    },
+    status: previousState.status === 'knocked_out' ? 'knocked_out' : 'immobilized',
+  }
+}
+
+function resolveStabilityDuration(event: BotStabilityEvent): number {
+  if (typeof event.duration === 'number' && Number.isFinite(event.duration)) {
+    return clamp(event.duration, 0.12, 2.5)
+  }
+
+  return event.type === 'bot_self_righted' ? SELF_RIGHT_DURATION : DEFAULT_STABILITY_DURATION
+}
+
+function isBotStabilityEvent(event: ReplayEvent): event is BotStabilityEvent {
+  return (
+    event.type === 'bot_destabilized' ||
+    event.type === 'bot_tipped' ||
+    event.type === 'bot_flipped' ||
+    event.type === 'bot_self_righted' ||
+    event.type === 'bot_immobilized'
+  )
+}
+
+function normalizeFlatDirection(direction: Vector3 | undefined, role: TeamRole): Vector3 {
+  const sanitized = sanitizeVector(direction)
+
+  if (!sanitized) {
+    return role === 'red' ? [1, 0, 0] : [-1, 0, 0]
+  }
+
+  const x = sanitized[0]
+  const z = sanitized[2]
+  const length = Math.hypot(x, z)
+
+  if (length < 0.001) {
+    return role === 'red' ? [1, 0, 0] : [-1, 0, 0]
+  }
+
+  return [round(x / length), 0, round(z / length)]
 }
 
 function resolveMoveFrameState(
@@ -515,6 +676,7 @@ function cloneBotState(state: BotFrameState): BotFrameState {
     ...state,
     motion: { ...state.motion },
     position: [...state.position],
+    stability: { ...state.stability },
   }
 }
 
@@ -527,6 +689,18 @@ function createIdleMotion(): BotFrameState['motion'] {
     progress: 1,
     speed: 0,
     turn: 0,
+  }
+}
+
+function createUprightStability(): BotStabilityFrameState {
+  return {
+    age: 0,
+    heightOffset: 0,
+    pitch: 0,
+    pose: 'upright',
+    progress: 1,
+    roll: 0,
+    severity: 0,
   }
 }
 

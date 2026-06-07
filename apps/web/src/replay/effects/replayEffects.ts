@@ -24,9 +24,11 @@ import {
 import {
   createPooledControlNetEffect,
   createPooledDroneSwarmEffect,
+  createPooledFireBreathEffect,
   createPooledLaserLanceEffect,
   updateControlNetEffect,
   updateDroneSwarmEffect,
+  updateFireBreathEffect,
   updateLaserLanceEffect,
 } from './abilityEffects'
 import {
@@ -41,6 +43,7 @@ import {
   updateKnockoutEffect,
   updatePartDetachEffect,
   updateSmokeEffect,
+  updateStabilityEffect,
 } from './genericReplayEffects'
 import type {
   EffectCreateInput,
@@ -76,10 +79,22 @@ const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = 
       createPooledLaserLanceEffect(scene, `laser-lance-effect-${index}`, materials.laser, materials.laserGlow),
     update: updateLaserLanceEffect,
   },
+  fire_breath: {
+    capacity: 3,
+    create: ({ index, materials, scene }) =>
+      createPooledFireBreathEffect(scene, `fire-breath-effect-${index}`, materials.fire, materials.fireGlow),
+    update: updateFireBreathEffect,
+  },
   drone_swarm: {
     capacity: 3,
     create: ({ index, scene }) => createPooledDroneSwarmEffect(scene, `drone-swarm-effect-${index}`),
     update: updateDroneSwarmEffect,
+  },
+  stability: {
+    capacity: 6,
+    create: ({ index, materials, scene }) =>
+      createPooledTorus(scene, `stability-effect-${index}`, materials.stability, 1.32),
+    update: updateStabilityEffect,
   },
   part_detach: {
     capacity: 6,
@@ -170,6 +185,8 @@ function createEffectMaterials(scene: Scene): EffectMaterials {
     controlNet: createSceneMaterial(scene, 'control-net-mat', '#b8ffff', '#1cf4ff', 0.88, 0.08),
     damage: createSceneMaterial(scene, 'damage-marker-mat', '#ff8b5d', '#ff2e2e'),
     debris: createSceneMaterial(scene, 'debris-mat', '#d2d6d2', '#3a403d'),
+    fire: createSceneMaterial(scene, 'fire-breath-mat', '#ff9a35', '#ff4d12', 0.68, 0.04),
+    fireGlow: createSceneMaterial(scene, 'fire-breath-glow-mat', '#fff0a8', '#ff6b1a', 0.52, 0.03),
     hazard: createSceneMaterial(scene, 'hazard-flash-mat', '#ffcc4d', '#ff751f'),
     knockout: createSceneMaterial(scene, 'ko-mat', '#f4eef2', '#b83342'),
     laser: createSceneMaterial(scene, 'laser-lance-mat', '#fff8df', '#ff34d2', 1, 0.04),
@@ -178,6 +195,7 @@ function createEffectMaterials(scene: Scene): EffectMaterials {
     partDetach: createSceneMaterial(scene, 'part-detach-mat', '#fff0b8', '#ff7f2a', 0.82, 0.08),
     smoke: createSceneMaterial(scene, 'smoke-mat', '#aeb8b4', '#151918', 0.42),
     spark: createSceneMaterial(scene, 'spark-mat', '#ffd35f', '#ff8a24'),
+    stability: createSceneMaterial(scene, 'stability-mat', '#cce0ff', '#5ea8ff', 0.44, 0.08),
     weapon: createSceneMaterial(scene, 'weapon-flash-mat', '#f7f2b4', '#f7c24b'),
   }
 }

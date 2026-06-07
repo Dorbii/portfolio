@@ -708,6 +708,16 @@ function describeReplayEvent(event: ReplayEvent): string {
       return event.damage > 0
         ? `${event.bot} took ${event.damage} hazard damage`
         : `${event.bot} triggered ${event.hazard}`
+    case 'bot_destabilized':
+      return `${event.bot} destabilized`
+    case 'bot_tipped':
+      return `${event.bot} tipped`
+    case 'bot_flipped':
+      return `${event.bot} flipped`
+    case 'bot_self_righted':
+      return `${event.bot} self-righted`
+    case 'bot_immobilized':
+      return `${event.bot} immobilized`
     case 'part_detach':
       return `${event.bot} lost ${event.partId}`
     case 'knockout':
