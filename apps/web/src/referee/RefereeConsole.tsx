@@ -12,7 +12,6 @@ import {
   Panel,
 } from '../shared/ui'
 import {
-  RefereeArenaMonologueOverlay,
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
@@ -98,10 +97,19 @@ export function RefereeConsole() {
     storedRefereeToken,
     submitRoundAdvance,
   } = useRefereeConsoleController()
-  const chatSummary = sessionChat.length > 0
-    ? `${sessionChat.length} message${sessionChat.length === 1 ? '' : 's'}`
+  const fightComms = [
+    ...sessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
+    ...(['red', 'blue'] as const).flatMap((role) =>
+      (roleStates[role]?.privateChatLog ?? []).map((message) => ({
+        ...message,
+        visibility: 'role_only' as const,
+      })),
+    ),
+  ].sort((left, right) => Date.parse(left.at) - Date.parse(right.at) || left.id.localeCompare(right.id))
+  const chatSummary = fightComms.length > 0
+    ? `${fightComms.length} message${fightComms.length === 1 ? '' : 's'}`
     : activeSessionId
-      ? 'No agent chat yet'
+      ? 'No fight comms yet'
       : 'Create session first'
   const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
   const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
@@ -133,7 +141,12 @@ export function RefereeConsole() {
               <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
             ) : null}
             {!shouldShowReplay ? (
-              <RefereeArenaMonologueOverlay roleStates={roleStates} />
+              <RefereeCockpitStrip
+                loadState={roleLoadState}
+                placement="stage"
+                roleStates={roleStates}
+                stateError={roleStateError}
+              />
             ) : null}
           </div>
         </section>
@@ -173,17 +186,11 @@ export function RefereeConsole() {
           }}
         />
 
-        <RefereeCockpitStrip
-          loadState={roleLoadState}
-          roleStates={roleStates}
-          stateError={roleStateError}
-        />
-
         <section className="match-dashboard-panels" aria-label="Match dashboard">
           <Panel className="panel dashboard-panel fight-comms-panel">
-            <SectionHeader kicker="Agent chat" title="Fight Comms" aside={chatSummary} />
+            <SectionHeader kicker="Agent comms" title="Fight Comms" aside={chatSummary} />
             <PublicChatLog
-              messages={sessionChat}
+              messages={fightComms}
               emptyText="No fight comms yet."
             />
           </Panel>

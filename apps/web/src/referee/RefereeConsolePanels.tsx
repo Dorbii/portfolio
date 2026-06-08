@@ -46,6 +46,10 @@ type ScoreboardSessionControl = {
   tokenStored: boolean
 }
 
+type FightCommsMessage = PublicSessionState['chatLog'][number] & {
+  visibility?: 'public' | 'role_only'
+}
+
 export type SessionCompletionControl = {
   canContinue: boolean
   canQuit: boolean
@@ -463,7 +467,7 @@ export function PublicChatLog({
   messages,
   emptyText,
 }: {
-  messages: PublicSessionState['chatLog']
+  messages: FightCommsMessage[]
   emptyText: string
 }) {
   if (messages.length === 0) {
@@ -479,11 +483,11 @@ export function PublicChatLog({
   )
 }
 
-function ChatMessageItem({ message }: { message: PublicSessionState['chatLog'][number] }) {
+function ChatMessageItem({ message }: { message: FightCommsMessage }) {
   const body = message.message.trim()
 
   return (
-    <li className={`chat-message ${message.role}`}>
+    <li className={`chat-message ${message.role}${message.visibility === 'role_only' ? ' is-role-only' : ''}`}>
       <div className="chat-message-header">
         <span className={`role-chip ${message.role}`}>{capitalize(message.role)}</span>
         <strong>{formatLabel(message.kind)}</strong>
@@ -492,6 +496,7 @@ function ChatMessageItem({ message }: { message: PublicSessionState['chatLog'][n
       <p className={body ? undefined : 'is-empty'}>{body || 'No message body supplied.'}</p>
       <small>
         Round {message.round} / {formatLabel(message.phase)}
+        {message.visibility === 'role_only' ? ' / Role-only decision note' : ''}
         {message.agentName ? ` / ${message.agentName}` : ''}
       </small>
     </li>

@@ -626,8 +626,8 @@ function nextActionForRoleState(
     }
 
     return isObserverCockpit
-      ? `Inspect gameMaster.legalActions for turn ${state.combat?.tick ?? '?'}; the server owns legal combat choices, parameters, validation, and canonical payloads.`
-      : `Choose one legal combat action from gameMaster.legalActions for turn ${state.combat?.tick ?? '?'} before the deadline, including parameters only when parameterSchema asks for them.`
+      ? `Inspect board cells for turn ${state.combat?.tick ?? '?'}; reachable cells expose the current move, attack, and utility action refs.`
+      : `Choose a board cell action for turn ${state.combat?.tick ?? '?'} before the deadline; submit the referenced action id with parameters only when requested.`
   }
 
   if (state.phase === 'round_review') {

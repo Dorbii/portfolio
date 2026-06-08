@@ -938,7 +938,10 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
   assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
+  assert.deepEqual(json.components.schemas.GptActRequest.required, ['inviteUrl', 'actionId'])
   assert.ok(json.components.schemas.GptActRequest.required.includes('actionId'))
+  assert.equal('actionSetId' in json.components.schemas.GptActRequest.properties, false)
+  assert.equal('decisionVersion' in json.components.schemas.GptActRequest.properties, false)
   assert.ok(json.components.schemas.GptCatalogRequest.required.includes('partIds'))
 })
 

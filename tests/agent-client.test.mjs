@@ -323,6 +323,14 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('window.AgentArenaRole.submitAction'))
   assert.equal(brief.includes("colorHex: '<choose a #RRGGBB accent color>'"), false)
   assert.equal(brief.includes('You are the RED agent'), false)
+  const customGptSection = brief.slice(
+    brief.indexOf('## Custom GPT Actions Path'),
+    brief.indexOf('## Browser Helper Path'),
+  )
+  assert.ok(customGptSection.includes('"actionId":"<legalActions.id>"'))
+  assert.equal(customGptSection.includes('actionSetId'), false)
+  assert.equal(customGptSection.includes('decisionVersion'), false)
+  assert.ok(brief.includes('Custom GPT gptAct must not send actionSetId or decisionVersion'))
   assert.ok(brief.includes('"action":"submit_game_action"'))
   assert.ok(brief.includes('"actionSetId":"<packet.actionSetId>"'))
   assert.ok(brief.includes('"actionId":"<legalActions[0].id>"'))

@@ -77,6 +77,8 @@ import {
   type CombatLegalityContext,
 } from './combatLegality.js'
 import {
+  isBlockedAnchorCell,
+  isCellInsideArena,
   type TacticalMovementPlan,
 } from './gridMovement.js'
 import {
@@ -1856,6 +1858,50 @@ function applyDamagingHazard(
 ): void {
   const impactPosition: Vector3 = bot.position
   const wasAlive = !isBotDestroyed(bot)
+
+  if (bot.machine) {
+    const result = applyMachineDamage(bot.machine, damage)
+
+    if (!result) {
+      emitHazardTrigger(events, tick, hazard, bot, 0, impactPosition)
+      return
+    }
+
+    syncBotRuntimeFromMachine(bot)
+    bot.lastDamagedTick = tick
+    emitHazardTrigger(events, tick, hazard, bot, damage, impactPosition)
+    events.push({
+      t: replayTimeForTurn(tick, 0.38),
+      turn: tick,
+      type: 'damage',
+      bot: bot.role,
+      amount: result.target.damageApplied,
+      remainingHealth: round(bot.health),
+      blockId: result.target.instanceId,
+      partId: result.target.partId,
+      partRemainingHealth: result.target.remainingHealth,
+      partMaxHealth: result.target.maxHealth,
+    })
+    emitMachineWreckageEvents(events, tick, bot, result.wreckage, replayTimeForTurn(tick, 0.44), {
+      cause: 'hazard',
+      damage,
+      sourcePosition: hazard.position,
+      impactPosition,
+    })
+
+    if (wasAlive && isBotDestroyed(bot)) {
+      events.push({
+        t: replayTimeForTurn(tick, 0.52),
+        turn: tick,
+        type: 'knockout',
+        bot: bot.role,
+        cause: 'hazard',
+      })
+    }
+
+    return
+  }
+
   const hits = applyPartDamage(bot, damage, tick, 'hazard')
   const primaryHit = hits[0]
 
@@ -1942,7 +1988,13 @@ type AnchorConflict = {
   blockBlue: boolean
   contactRed: boolean
   contactBlue: boolean
+  redPushesBlue?: AnchorPush
+  bluePushesRed?: AnchorPush
   reason?: string
+}
+
+type AnchorPush = {
+  to: TacticalMovementPlan['from']
 }
 
 function applyGameActionTick(
@@ -1964,7 +2016,7 @@ function applyGameActionTick(
   const blueIntent = gameActionTickIntent(state, 'blue', blueCommand, combatActionMovementOverride(blueAction))
   const redMovementUtility = activateMovementUtility(red, redCommand)
   const blueMovementUtility = activateMovementUtility(blue, blueCommand)
-  const conflict = anchorConflictForIntents(redIntent, blueIntent)
+  const conflict = anchorConflictForIntents(arena, topology, redIntent, blueIntent)
   const redResolvedCommand = redIntent.movementBlocked || conflict.blockRed
     ? { ...redCommand, move: 'brake' as const }
     : redCommand
@@ -1982,22 +2034,24 @@ function applyGameActionTick(
     state.log.push(`blue combat action ${blueAction.id} had a blocked or out-of-bounds anchor path.`)
   }
   if (conflict.reason) {
-    state.log.push(`Combat anchor conflict on tick ${tick}: ${conflict.reason}.`)
+    state.log.push(`Combat anchor conflict on turn ${tick}: ${conflict.reason}.`)
   }
+
+  const pushed = applyAnchorConflictPushes(events, tick, arena, topology, red, blue, conflict)
 
   const redMoved = applyResolvedMovement(events, tick, topology, arena, red, redResolvedCommand, redIntent)
   const blueMoved = applyResolvedMovement(events, tick, topology, arena, blue, blueResolvedCommand, blueIntent)
 
   applyAnchorConflictDamage(events, tick, red, blue, redCommand, blueCommand, conflict)
 
-  if (redMoved && !red.machine) {
+  if (redMoved) {
     applyAnchorPathHazards(events, tick, arena, topology, red, redIntent.movement)
-  } else if (!red.machine) {
+  } else if (!pushed.red) {
     resolveHazards(events, tick, arena, topology, red)
   }
-  if (blueMoved && !blue.machine) {
+  if (blueMoved) {
     applyAnchorPathHazards(events, tick, arena, topology, blue, blueIntent.movement)
-  } else if (!blue.machine) {
+  } else if (!pushed.blue) {
     resolveHazards(events, tick, arena, topology, blue)
   }
 
@@ -2011,8 +2065,6 @@ function applyGameActionTick(
   }
 
   if (
-    !red.machine &&
-    !blue.machine &&
     !isBotDestroyed(red) &&
     !isBotDestroyed(blue) &&
     distance(red.position, blue.position) < CONTACT_DISTANCE &&
@@ -2024,18 +2076,18 @@ function applyGameActionTick(
     const blueRetaliationDamage = contactRetaliationDamage(blue, redResolvedCommand)
 
     if (redRamDamage > 0) {
-      applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+      applyContactDamage(events, tick, red, blue, redRamDamage, 'ram')
       applyContactDisruption(red, blue, redResolvedCommand, tick)
     }
     if (blueRamDamage > 0) {
-      applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+      applyContactDamage(events, tick, blue, red, blueRamDamage, 'ram')
       applyContactDisruption(blue, red, blueResolvedCommand, tick)
     }
     if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
-      applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
+      applyContactDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
     }
     if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
-      applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
+      applyContactDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
     }
   }
 
@@ -2152,6 +2204,18 @@ function applyMachineWeaponDamage(
   defender: BotRuntime,
   baseDamage: number,
 ): void {
+  applyMachineDamageWithEvents(events, tick, attacker, defender, baseDamage, 'weapon', 'machine_weapon')
+}
+
+function applyMachineDamageWithEvents(
+  events: ReplayEvent[],
+  tick: number,
+  attacker: BotRuntime,
+  defender: BotRuntime,
+  baseDamage: number,
+  cause: string,
+  wreckageCause: string,
+): void {
   if (!defender.machine) {
     return
   }
@@ -2198,7 +2262,7 @@ function applyMachineWeaponDamage(
     partMaxHealth: result.target.maxHealth,
   })
   emitMachineWreckageEvents(events, tick, defender, result.wreckage, replayTimeForTurn(tick, 0.36), {
-    cause: 'machine_weapon',
+    cause: wreckageCause,
     damage,
     sourcePosition: attacker.position,
     impactPosition,
@@ -2210,7 +2274,7 @@ function applyMachineWeaponDamage(
       turn: tick,
       type: 'knockout',
       bot: defender.role,
-      cause: 'weapon',
+      cause,
     })
   }
 }
@@ -2365,6 +2429,8 @@ function applyAnchorPathHazards(
 }
 
 function anchorConflictForIntents(
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
   red: GameActionTickIntent,
   blue: GameActionTickIntent,
 ): AnchorConflict {
@@ -2407,6 +2473,19 @@ function anchorConflictForIntents(
   }
 
   if (redIntoBlueAnchor && !blueMoving) {
+    const push = anchorPushFromMovement(arena, topology, red.movement, blue.movement.from)
+
+    if (push) {
+      return {
+        blockRed: false,
+        blockBlue: false,
+        contactRed: true,
+        contactBlue: false,
+        redPushesBlue: push,
+        reason: 'red pushed a held blue anchor',
+      }
+    }
+
     return {
       blockRed: true,
       blockBlue: false,
@@ -2417,6 +2496,19 @@ function anchorConflictForIntents(
   }
 
   if (blueIntoRedAnchor && !redMoving) {
+    const push = anchorPushFromMovement(arena, topology, blue.movement, red.movement.from)
+
+    if (push) {
+      return {
+        blockRed: false,
+        blockBlue: false,
+        contactRed: false,
+        contactBlue: true,
+        bluePushesRed: push,
+        reason: 'blue pushed a held red anchor',
+      }
+    }
+
     return {
       blockRed: false,
       blockBlue: true,
@@ -2439,6 +2531,118 @@ function anchorConflictForIntents(
   return noAnchorConflict()
 }
 
+function anchorPushFromMovement(
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
+  movement: TacticalMovementPlan,
+  pushedFrom: TacticalMovementPlan['from'],
+): AnchorPush | undefined {
+  const direction = movementEntryDirection(movement, pushedFrom)
+  const to = {
+    x: pushedFrom.x + direction.x,
+    z: pushedFrom.z + direction.z,
+  }
+
+  if (
+    (direction.x === 0 && direction.z === 0) ||
+    !isCellInsideArena(arena, to) ||
+    isBlockedAnchorCell(topology, to)
+  ) {
+    return undefined
+  }
+
+  return { to }
+}
+
+function movementEntryDirection(
+  movement: TacticalMovementPlan,
+  cell: TacticalMovementPlan['from'],
+): TacticalMovementPlan['from'] {
+  const index = movement.path.findIndex((entry) => sameAnchorCell(entry, cell))
+  const previous = index > 0
+    ? movement.path[index - 1]
+    : movement.from
+  const current = index >= 0 ? movement.path[index] : movement.to
+  const direction = {
+    x: Math.sign(current.x - previous.x),
+    z: Math.sign(current.z - previous.z),
+  }
+
+  if (direction.x !== 0 || direction.z !== 0) {
+    return direction
+  }
+
+  return {
+    x: Math.sign(movement.to.x - movement.from.x),
+    z: Math.sign(movement.to.z - movement.from.z),
+  }
+}
+
+function applyAnchorConflictPushes(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
+  red: BotRuntime,
+  blue: BotRuntime,
+  conflict: AnchorConflict,
+): Record<TeamRole, boolean> {
+  const pushed: Record<TeamRole, boolean> = { red: false, blue: false }
+
+  if (conflict.redPushesBlue) {
+    pushed.blue = applyForcedAnchorPush(events, tick, arena, topology, blue, conflict.redPushesBlue)
+  }
+
+  if (conflict.bluePushesRed) {
+    pushed.red = applyForcedAnchorPush(events, tick, arena, topology, red, conflict.bluePushesRed)
+  }
+
+  return pushed
+}
+
+function applyForcedAnchorPush(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
+  bot: BotRuntime,
+  push: AnchorPush,
+): boolean {
+  const from = bot.position
+  const to = arenaCellCenter(topology, push.to)
+
+  if (positionsEqual(from, to)) {
+    return false
+  }
+
+  bot.position = to
+  events.push(createMoveEvent(replayTimeForTurn(tick, 0.14), tick, bot, from, to, undefined, true))
+  applyForcedPushPathHazards(events, tick, arena, topology, bot, from, to)
+
+  return true
+}
+
+function applyForcedPushPathHazards(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  topology: CompiledArenaTopology,
+  bot: BotRuntime,
+  from: Vector3,
+  to: Vector3,
+): void {
+  const seen = new Set<string>()
+
+  for (const hazard of pathHazards(topology, from, to, 0.5)) {
+    if (seen.has(hazard.id)) {
+      continue
+    }
+
+    seen.add(hazard.id)
+    applyArenaHazard(events, tick, arena, hazard, bot)
+  }
+}
+
 function applyAnchorConflictDamage(
   events: ReplayEvent[],
   tick: number,
@@ -2448,10 +2652,6 @@ function applyAnchorConflictDamage(
   blueCommand: TurnCommand,
   conflict: AnchorConflict,
 ): void {
-  if (red.machine || blue.machine) {
-    return
-  }
-
   if (!conflict.contactRed && !conflict.contactBlue) {
     return
   }
@@ -2462,19 +2662,35 @@ function applyAnchorConflictDamage(
   const blueRetaliationDamage = conflict.contactRed ? contactRetaliationDamage(blue, redCommand) : 0
 
   if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRamDamage > 0) {
-    applyDamage(events, tick, red, blue, redRamDamage, 'ram')
+    applyContactDamage(events, tick, red, blue, redRamDamage, 'ram')
     applyContactDisruption(red, blue, redCommand, tick)
   }
   if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRamDamage > 0) {
-    applyDamage(events, tick, blue, red, blueRamDamage, 'ram')
+    applyContactDamage(events, tick, blue, red, blueRamDamage, 'ram')
     applyContactDisruption(blue, red, blueCommand, tick)
   }
   if (!isBotDestroyed(red) && !isBotDestroyed(blue) && redRetaliationDamage > 0) {
-    applyDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
+    applyContactDamage(events, tick, red, blue, redRetaliationDamage, 'weapon')
   }
   if (!isBotDestroyed(red) && !isBotDestroyed(blue) && blueRetaliationDamage > 0) {
-    applyDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
+    applyContactDamage(events, tick, blue, red, blueRetaliationDamage, 'weapon')
   }
+}
+
+function applyContactDamage(
+  events: ReplayEvent[],
+  tick: number,
+  attacker: BotRuntime,
+  defender: BotRuntime,
+  baseDamage: number,
+  cause: string,
+): void {
+  if (defender.machine) {
+    applyMachineDamageWithEvents(events, tick, attacker, defender, baseDamage, cause, cause)
+    return
+  }
+
+  applyDamage(events, tick, attacker, defender, baseDamage, cause)
 }
 
 function movesAnchor(movement: TacticalMovementPlan): boolean {

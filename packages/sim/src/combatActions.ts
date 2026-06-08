@@ -360,7 +360,6 @@ function reachableBoardMovementOverrides(
 
   const topology = compileArenaTopology(context.arena)
   const from = worldToArenaCell(topology, context.self.position)
-  const opponent = worldToArenaCell(topology, context.opponent.position)
   const queue: BoardMovementOverride[] = [{
     from: cloneCell(from),
     to: cloneCell(from),
@@ -394,8 +393,7 @@ function reachableBoardMovementOverrides(
       if (
         reachable.has(key) ||
         !isCellInsideArena(context.arena, next) ||
-        isBlockedAnchorCell(topology, next) ||
-        sameCell(next, opponent)
+        isBlockedAnchorCell(topology, next)
       ) {
         continue
       }
@@ -466,14 +464,10 @@ function evaluateBoardCombatCommand(
   weaponOptions: CombatWeaponLegalityOptions = {},
 ): CombatActionLegality {
   const movement = boardMovementPlanForCombatAction(context, command, movementOverride)
-  const opponent = opponentAnchor(context)
   const reasons: string[] = []
 
   if (!sameCell(movement.from, movementOverride.from)) {
     reasons.push('Movement action was authored for a different starting cell.')
-  }
-  if (sameCell(movement.to, opponent)) {
-    reasons.push('Destination cell is occupied by the opponent.')
   }
   if (movement.outOfBounds) {
     reasons.push('Movement path leaves arena bounds.')

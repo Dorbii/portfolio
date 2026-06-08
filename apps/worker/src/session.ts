@@ -145,7 +145,8 @@ export {
 export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
-const COMBAT_TURN_SECONDS = 30
+const COMBAT_TURN_SECONDS = 60
+const COMBAT_TURN_HANDOFF_DELAY_MS = 10_000
 const ROUND_PLAN_SECONDS = 240
 const GAME_MASTER_CATALOG_VERSION = 'part-catalog:v1'
 const GAME_MASTER_ARENA_VERSION = 'arena:v1'
@@ -1018,7 +1019,7 @@ export class SessionCoordinator {
       sessionId: this.state.id,
       role: roleName,
       phase: gameMasterPhaseForSession(this.state.phase),
-      nextAction: nextGameMasterActionForRole(this.state, roleName),
+      nextAction: nextGameMasterActionForRole(this.state, roleName, now),
       round: this.state.round,
       fightId: activeSet?.fightId ?? latestCompletedFightId(this.state),
       turnId: activeSet?.turnId,
@@ -1026,7 +1027,7 @@ export class SessionCoordinator {
       eventVersion: eventVersionForState(this.state),
       actionSetId: activeSet?.actionSetId,
       catalogDigest: activeSet?.catalogDigest,
-      instruction: gameMasterInstruction(this.state, roleName),
+      instruction: gameMasterInstruction(this.state, roleName, now),
       resources: {
         gold: role.gold,
         remainingGold: role.gold,
@@ -1068,6 +1069,12 @@ export class SessionCoordinator {
     const phase = gameMasterPhaseForSession(this.state.phase)
 
     if (phase !== 'choose_loadout' && phase !== 'combat_turn') {
+      this.state.activeActionSets = undefined
+      this.state.lockedActions = undefined
+      return
+    }
+
+    if (phase === 'combat_turn' && !isCombatTurnOpen(this.state, now)) {
       this.state.activeActionSets = undefined
       this.state.lockedActions = undefined
       return
@@ -1418,6 +1425,7 @@ export class SessionCoordinator {
       nextTick: resolution.nextTick,
       snapshot: resolution.snapshot,
       now,
+      opensAt: addMilliseconds(now, COMBAT_TURN_HANDOFF_DELAY_MS),
       actions: combat.actions,
       baselineMachineDesigns: combat.baselineMachineDesigns,
     })
@@ -1502,13 +1510,16 @@ export class SessionCoordinator {
     nextTick: number
     snapshot: StoredCombatState['snapshot']
     now: string
+    opensAt?: string
     actions: StoredCombatState['actions']
     baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns']
   }): StoredCombatState {
+    const openedAt = input.opensAt ?? input.now
+
     return {
       nextTick: input.nextTick,
-      openedAt: input.now,
-      deadlineAt: addMilliseconds(input.now, COMBAT_TURN_SECONDS * 1000),
+      openedAt,
+      deadlineAt: addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000),
       turnSeconds: COMBAT_TURN_SECONDS,
       ...(input.baselineMachineDesigns ? { baselineMachineDesigns: input.baselineMachineDesigns } : {}),
       actions: input.actions,
@@ -2224,6 +2235,7 @@ function gameMasterPhaseForSession(phase: SessionPhase): GameMasterPhase {
 function nextGameMasterActionForRole(
   state: StoredSessionState,
   roleName: TeamRole,
+  now: string,
 ): GameMasterNextAction {
   const phase = gameMasterPhaseForSession(state.phase)
 
@@ -2244,6 +2256,10 @@ function nextGameMasterActionForRole(
   }
 
   if (phase === 'combat_turn') {
+    if (!isCombatTurnOpen(state, now)) {
+      return 'wait_for_opponent_turn'
+    }
+
     return state.lockedActions?.[roleName] ? 'wait_for_opponent_turn' : 'choose_turn'
   }
 
@@ -2268,7 +2284,15 @@ function nextGameMasterActionForRole(
   return 'wait_for_debrief'
 }
 
-function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole): string {
+function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole, now: string): string {
+  if (
+    gameMasterPhaseForSession(state.phase) === 'combat_turn' &&
+    !isCombatTurnOpen(state, now) &&
+    state.combat
+  ) {
+    return `Next combat turn opens at ${state.combat.openedAt}. Keep polling for the server-authored action packet.`
+  }
+
   if (state.lockedActions?.[roleName]) {
     return 'Your action is locked. Wait for the other role or the next server-authored packet.'
   }
@@ -2289,4 +2313,12 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole): s
   }
 
   return 'Wait for the next server-authored GameMaster packet.'
+}
+
+function isCombatTurnOpen(state: StoredSessionState, now: string): boolean {
+  return (
+    state.phase === 'combat_turn' &&
+    Boolean(state.combat) &&
+    Date.parse(now) >= Date.parse(state.combat?.openedAt ?? now)
+  )
 }

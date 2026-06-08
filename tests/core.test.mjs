@@ -1688,7 +1688,7 @@ test('machine combat action generation exposes reachable grid cells from mobilit
   assert.ok(destinationCellIds.size > 20)
   assert.equal(destinationCellIds.has('cell:-1:4'), true)
   assert.equal(destinationCellIds.has('cell:-1:-4'), true)
-  assert.equal(destinationCellIds.has('cell:1:0'), false)
+  assert.equal(destinationCellIds.has('cell:1:0'), true)
 
   const snapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], { tick: 1 })
   const board = buildAgentBoardView({
@@ -5155,6 +5155,59 @@ test('resolveSubmittedGameActions deterministically blocks same-anchor and cross
   assert.equal(crossingPath.log.some((entry) => entry.includes('anchor paths crossed')), true)
 })
 
+test('resolveSubmittedGameActions pushes a held opponent anchor instead of coercing movement to brake', () => {
+  const conflictInput = {
+    round: 1,
+    seed: 'canonical-anchor-push',
+    red: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    blue: {
+      blueprint: validSpinnerSubmission.blueprint,
+      tactics: normalizeTactics({ movementPolicy: 'close' }),
+    },
+    arena: tacticalRuntimeArena,
+  }
+  const resolution = resolveSubmittedGameActions(conflictInput, {
+    red: canonicalCombatActions('red', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'dash_forward' },
+      { move: 'dash_forward' },
+      { move: 'brake' },
+      { move: 'brake' },
+    ]),
+  })
+
+  assert.equal(resolution.status, 'active')
+  assert.equal(resolution.snapshot.red.position[0], 2)
+  assert.equal(resolution.snapshot.blue.position[0], 3)
+  assert.equal(resolution.log.some((entry) => entry.includes('red pushed a held blue anchor')), true)
+  assert.equal(
+    resolution.replay.events.some((event) =>
+      event.type === 'move' &&
+      event.bot === 'blue' &&
+      event.intent === 'forced' &&
+      event.turn === 4
+    ),
+    true,
+  )
+  assert.equal(
+    resolution.replay.events.some((event) =>
+      event.type === 'move' &&
+      event.bot === 'red' &&
+      event.command === 'brake' &&
+      event.turn === 4
+    ),
+    false,
+  )
+})
+
 test('resolveSubmittedGameActions fires only after final-pose range and line-of-sight checks', () => {
   const rangeInput = {
     round: 1,
@@ -7029,8 +7082,9 @@ test('worker machine combat replays cumulative actions from baseline while packe
   stored.activeActionSets = undefined
   stored.lockedActions = undefined
 
+  let now = '2026-06-03T00:00:30.000Z'
   const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => '2026-06-03T00:01:00.000Z',
+    clock: () => now,
   })
 
   await submitCombatCommand(
@@ -7048,6 +7102,8 @@ test('worker machine combat replays cumulative actions from baseline while packe
 
   assertVectorClose(redRuntimeAfterFirstTurn.orientationByInstanceId.core.forward, [1, 0, 0], 'first persisted core forward')
   assert.equal(afterFirstTurn.combat.baselineMachineDesigns.red.runtime, undefined)
+
+  now = '2026-06-03T00:00:40.000Z'
 
   const redSecondPacket = await loaded.getGameMasterPacketForToken(redToken)
   const redSecondCommands = Object.values(loaded.exportState().activeActionSets.red.actions)
@@ -7105,7 +7161,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
   assert.equal(blueState.ok, true)
-  assert.equal(blueState.value.combat.turnSeconds, 30)
+  assert.equal(blueState.value.combat.turnSeconds, 60)
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')
   assert.equal(blueState.value.combat.decision.tick, 1)
@@ -7197,7 +7253,7 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
 
-  now = '2026-06-03T00:00:31.000Z'
+  now = '2026-06-03T00:01:01.000Z'
 
   const redState = await session.getRoleStateForToken(redToken)
 
@@ -7211,6 +7267,83 @@ test('session applies no-op turn commands when combat turn deadline expires', as
     redState.value.eventLog.some((event) => event.type === 'turn_command_timed_out'),
     true,
   )
+})
+
+test('session delays the next combat action packet after a resolved turn', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_combat_turn_handoff_delay', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const initialRed = createInitialMachineDesign('red')
+  const redMachine = {
+    ...initialRed,
+    parts: [
+      initialRed.parts[0],
+      machinePart('drive_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'drive_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const stored = session.exportState()
+
+  stored.roles.red.storedDesign = {
+    version: 'machine:v1',
+    machine: redMachine,
+  }
+  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(redMachine)
+  stored.combat.baselineMachineDesigns = {
+    red: structuredClone(redMachine),
+    blue: structuredClone(stored.roles.blue.storedDesign.machine),
+  }
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => now,
+  })
+  const opened = loaded.exportState().combat
+
+  assert.equal(opened.turnSeconds, 60)
+  assert.equal(opened.openedAt, '2026-06-03T00:00:00.000Z')
+  assert.equal(opened.deadlineAt, '2026-06-03T00:01:00.000Z')
+
+  await submitCombatCommand(loaded, redToken, 'red', (command) => command.move !== undefined && command.move !== 'brake')
+  const blueTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
+
+  assert.equal(blueTurn.value.publicState.phase, 'combat_turn')
+
+  const delayedState = loaded.exportState()
+
+  assert.equal(delayedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
+  assert.equal(delayedState.combat.deadlineAt, '2026-06-03T00:01:10.000Z')
+
+  const delayedPacket = await loaded.getGameMasterPacketForToken(redToken)
+
+  assert.equal(delayedPacket.ok, true)
+  assert.equal(delayedPacket.value.nextAction, 'wait_for_opponent_turn')
+  assert.equal(delayedPacket.value.legalActions.length, 0)
+  assert.equal(delayedPacket.value.submit, undefined)
+  assert.equal(
+    delayedPacket.value.instruction.includes('Next combat turn opens at 2026-06-03T00:00:10.000Z'),
+    true,
+  )
+
+  now = '2026-06-03T00:00:10.000Z'
+
+  const openPacket = await loaded.getGameMasterPacketForToken(redToken)
+
+  assert.equal(openPacket.ok, true)
+  assert.equal(openPacket.value.nextAction, 'choose_turn')
+  assert.equal(openPacket.value.legalActions.length > 0, true)
+  assert.notEqual(openPacket.value.submit, undefined)
 })
 
 test('session auto-confirms current loadouts when loadout window expires', async () => {
@@ -7236,7 +7369,7 @@ test('session auto-confirms current loadouts when loadout window expires', async
   assert.equal(publicState.phase, 'combat_turn')
   assert.equal(publicState.roles.red.submitted, true)
   assert.equal(publicState.roles.blue.submitted, true)
-  assert.equal(redState.value.combat.turnSeconds, 30)
+  assert.equal(redState.value.combat.turnSeconds, 60)
   assert.equal(
     publicState.eventLog.filter((event) => event.message.includes('loadout window expired')).length,
     2,

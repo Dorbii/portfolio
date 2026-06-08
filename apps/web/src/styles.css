@@ -359,6 +359,12 @@ button:disabled {
   line-height: 1.32;
 }
 
+.fight-comms-panel .chat-message.is-role-only p::before {
+  content: "[Role-only] ";
+  color: #f3d46f;
+  font-weight: 900;
+}
+
 .fight-comms-panel .chat-message small {
   display: none;
 }
@@ -2829,6 +2835,161 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.loadout-parts-block,
+.packet-action-summary {
+  min-width: 0;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(238, 242, 247, 0.08);
+}
+
+.loadout-part-list {
+  max-height: clamp(180px, 28vh, 320px);
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  overflow: auto;
+  list-style: none;
+}
+
+.loadout-part-card {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 10px;
+  border: 1px solid rgba(238, 242, 247, 0.1);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 247, 0.04), rgba(238, 242, 247, 0.012)),
+    rgba(5, 9, 12, 0.68);
+}
+
+.loadout-part-card.tone-ok {
+  border-color: rgba(93, 210, 146, 0.22);
+}
+
+.loadout-part-card.tone-warning {
+  border-color: rgba(247, 184, 75, 0.34);
+}
+
+.loadout-part-main,
+.loadout-part-side {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.loadout-part-main span,
+.loadout-part-side small,
+.loadout-part-stats {
+  color: #8fa3a3;
+  font-size: 0.64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.loadout-part-main strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #eef2f3;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.loadout-part-main small {
+  min-width: 0;
+  overflow: hidden;
+  color: #aeb7c1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.loadout-part-side {
+  justify-items: end;
+  text-align: right;
+}
+
+.loadout-part-side span {
+  width: fit-content;
+  max-width: 110px;
+  padding: 3px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--cockpit-team), 0.26);
+  border-radius: 999px;
+  color: #d8dedf;
+  background: rgba(var(--cockpit-team), 0.08);
+  font-size: 0.62rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.loadout-part-card p,
+.loadout-part-stats {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.loadout-part-card p {
+  color: #d8dedf;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.action-summary-grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.direct-action-list {
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  list-style: none;
+}
+
+.direct-action-list li {
+  min-width: 0;
+  padding: 7px 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(238, 242, 247, 0.09);
+  border-radius: 6px;
+  background: rgba(5, 9, 12, 0.62);
+}
+
+.direct-action-list strong,
+.direct-action-list span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.direct-action-list strong {
+  color: #d8dedf;
+  font-size: 0.8rem;
+}
+
+.direct-action-list span {
+  color: #8fa3a3;
+  font-size: 0.64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .combat-decision-panel {
   grid-row: span 2;
 }
@@ -2840,7 +3001,9 @@ textarea:focus-visible {
 }
 
 .insight-text strong,
-.insight-list-block > strong {
+.insight-list-block > strong,
+.loadout-parts-block > strong,
+.packet-action-summary > strong {
   color: #8fa3a3;
   font-size: 0.66rem;
   font-weight: 950;
@@ -3048,6 +3211,7 @@ textarea:focus-visible {
   .plan-metric-strip,
   .agent-task-list,
   .cockpit-signal-grid,
+  .action-summary-grid,
   .insight-readout-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -3986,6 +4150,21 @@ textarea:focus-visible {
     rgba(7, 10, 14, 0.8);
 }
 
+.match-stage-frame .referee-cockpit-strip.is-stage {
+  position: absolute;
+  inset: 12px;
+  z-index: 2;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: auto;
+  border-color: rgba(139, 223, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(13, 18, 23, 0.88), rgba(5, 8, 12, 0.86)),
+    linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 42%, rgba(92, 145, 255, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 22px 52px rgba(0, 0, 0, 0.38);
+}
+
 .referee-cockpit-strip-header {
   min-width: 0;
   display: flex;
@@ -4026,6 +4205,7 @@ textarea:focus-visible {
 
 .referee-cockpit-grid {
   min-width: 0;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -4033,6 +4213,7 @@ textarea:focus-visible {
 
 .referee-cockpit-card {
   min-width: 0;
+  min-height: 0;
   padding: 10px;
   display: grid;
   grid-template-rows: auto minmax(180px, 0.86fr) auto;
@@ -4042,6 +4223,10 @@ textarea:focus-visible {
   background:
     linear-gradient(90deg, rgba(var(--cockpit-team), 0.08), transparent 42%),
     linear-gradient(180deg, rgba(13, 18, 23, 0.88), rgba(5, 8, 12, 0.9));
+}
+
+.referee-cockpit-strip.is-stage .referee-cockpit-card {
+  grid-template-rows: auto minmax(150px, 1fr) auto;
 }
 
 .referee-cockpit-card-header {
@@ -4089,6 +4274,10 @@ textarea:focus-visible {
 .referee-garage-preview .bot-assembly-stage {
   height: clamp(190px, 20vw, 280px);
   margin-top: 0;
+}
+
+.referee-cockpit-strip.is-stage .referee-garage-preview .bot-assembly-stage {
+  height: clamp(160px, 19vw, 260px);
 }
 
 .referee-decision-preview {
@@ -4407,6 +4596,10 @@ textarea:focus-visible {
   }
 
   .arena-monologue-overlay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .referee-cockpit-strip.is-stage .referee-cockpit-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 

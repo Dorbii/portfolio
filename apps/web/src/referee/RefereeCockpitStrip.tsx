@@ -16,6 +16,7 @@ import {
 
 type RefereeCockpitStripProps = {
   loadState: 'busy' | 'idle'
+  placement?: 'page' | 'stage'
   roleStates: Partial<Record<TeamRole, RolePrivateState>>
   stateError: string
 }
@@ -26,6 +27,7 @@ type RefereeCockpitStripProps = {
 // CODEX_REVIEW: pending
 export function RefereeCockpitStrip({
   loadState,
+  placement = 'page',
   roleStates,
   stateError,
 }: RefereeCockpitStripProps) {
@@ -36,7 +38,10 @@ export function RefereeCockpitStrip({
   }
 
   return (
-    <section className="referee-cockpit-strip" aria-labelledby="referee-cockpit-strip-heading">
+    <section
+      className={`referee-cockpit-strip is-${placement}`}
+      aria-labelledby="referee-cockpit-strip-heading"
+    >
       <div className="referee-cockpit-strip-header">
         <div>
           <span>Agent Cockpits</span>
@@ -64,7 +69,7 @@ export function RefereeArenaMonologueOverlay({
   }
 
   return (
-    <aside className="arena-monologue-overlay" aria-label="Agent inner monologues">
+    <aside className="arena-monologue-overlay" aria-label="Agent role-only decision notes">
       <ArenaMonologueCard role="red" roleState={roleStates.red} />
       <ArenaMonologueCard role="blue" roleState={roleStates.blue} />
     </aside>

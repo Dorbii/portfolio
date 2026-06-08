@@ -412,7 +412,7 @@ function tacticalCues(input: {
   const cues: string[] = []
 
   cues.push(
-    'Submit exactly one command for the current combat tick; movement can be combined with weapon and utility actions.',
+    'Submit exactly one command for the current combat turn; movement can be combined with weapon and utility actions.',
   )
 
   if (input.actionReadiness.weaponA.canFire) {
