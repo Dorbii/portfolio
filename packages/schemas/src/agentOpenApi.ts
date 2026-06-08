@@ -9,7 +9,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
     openapi: '3.1.0',
     info: {
       title: 'Clash of Clankers GPT Actions API',
-      version: '0.2.0-gamemaster',
+      version: '0.2.1-gamemaster',
       description:
         'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript.',
     },
@@ -32,7 +32,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           operationId: 'gptNext',
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll this when the role is waiting. Continue only when status is playable, complete, or expired.',
+            'Poll this when the role is waiting. Follow the continuation hint to keep playing until complete or expired.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },
@@ -306,6 +306,35 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
           },
         },
+        GptContinuationHint: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['keepGoing', 'recommendedNextCall', 'instruction'],
+          properties: {
+            keepGoing: {
+              type: 'boolean',
+              description:
+                'True when the GPT should keep using actions for the same invite without asking the user for the next step.',
+            },
+            recommendedNextCall: {
+              type: 'string',
+              enum: ['gptNext', 'gptAct', 'gptReflection', 'stop'],
+              description:
+                'The next GPT action the model should prefer after reading this response.',
+            },
+            pollAfterMs: {
+              type: 'integer',
+              minimum: 0,
+              description:
+                'Suggested delay before polling gptNext again when the current role is waiting.',
+            },
+            instruction: {
+              type: 'string',
+              description:
+                'Short continuation instruction for the Custom GPT. This is a hint, not a guaranteed autonomous loop.',
+            },
+          },
+        },
         GptResponse: {
           type: 'object',
           additionalProperties: true,
@@ -318,7 +347,10 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
               description:
-                'Current GameMasterPacket. Choose action ids only from packet.legalActions, and inspect packet.board.cells[].legal during combat.',
+                'Current GameMasterPacket. Choose action ids only from packet.legalActions, and inspect packet.board.reachablePoses, attackableTargets, and compact cells during combat.',
+            },
+            continuation: {
+              $ref: '#/components/schemas/GptContinuationHint',
             },
           },
         },

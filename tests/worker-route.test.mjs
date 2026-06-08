@@ -946,6 +946,14 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
     json.components.schemas.GptActRequest.properties.parameters.$ref,
     '#/components/schemas/GptActionParameters',
   )
+  assert.equal(
+    json.components.schemas.GptResponse.properties.continuation.$ref,
+    '#/components/schemas/GptContinuationHint',
+  )
+  assert.deepEqual(
+    json.components.schemas.GptContinuationHint.properties.recommendedNextCall.enum,
+    ['gptNext', 'gptAct', 'gptReflection', 'stop'],
+  )
   const gptParameterProperties = json.components.schemas.GptActionParameters.properties
 
   assert.ok('childPartId' in gptParameterProperties)
@@ -1358,6 +1366,8 @@ test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
   assert.equal(claim.json.sessionId, sessionId)
   assert.equal(claim.json.role, 'red')
   assertGptCompactPacket(claim.json.packet, 'red')
+  assert.equal(claim.json.continuation.keepGoing, true)
+  assert.equal(claim.json.continuation.recommendedNextCall, 'gptNext')
   assert.equal('mode' in state.json.identity, false)
 })
 
@@ -1378,6 +1388,8 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.equal(next.json.role, 'red')
   assertGptCompactPacket(next.json.packet, 'red')
   assert.ok(next.json.packet.legalActions.length > 0)
+  assert.equal(next.json.continuation.keepGoing, true)
+  assert.equal(next.json.continuation.recommendedNextCall, 'gptAct')
 })
 
 test('POST /gpt/next returns a compact combat board for Custom GPT actions', async () => {
@@ -1413,10 +1425,14 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
 
   assert.equal(redStart.response.status, 200)
   assert.equal(redStart.json.status, 'waiting')
+  assert.equal(redStart.json.continuation.recommendedNextCall, 'gptNext')
+  assert.equal(typeof redStart.json.continuation.pollAfterMs, 'number')
   assert.equal(blueCombat.response.status, 200)
   assert.equal(blueCombat.json.status, 'playable')
+  assert.equal(blueCombat.json.continuation.recommendedNextCall, 'gptAct')
   assert.equal(redCombat.response.status, 200)
   assert.equal(redCombat.json.status, 'playable')
+  assert.equal(redCombat.json.continuation.recommendedNextCall, 'gptAct')
   assertGptCompactPacket(packet, 'red')
   assert.equal(packet.nextAction, 'choose_turn')
   assert.ok(packet.legalActions.length > 0)
@@ -1499,6 +1515,8 @@ test('POST /gpt/act fills GameMaster version fields from the latest packet', asy
   assert.equal(action.json.acceptedActionId, partAction.id)
   assertGptCompactPacket(action.json.packet, 'red')
   assert.equal(action.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(action.json.continuation.keepGoing, true)
+  assert.equal(action.json.continuation.recommendedNextCall, 'gptAct')
   assert.equal(stale.response.status, 409)
   assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')
 })

@@ -129,6 +129,8 @@ type GptCompactPacket = {
   [key: string]: unknown
 }
 
+type GptPacketStatus = 'claimed' | 'playable' | 'waiting' | 'complete' | 'expired'
+
 type GptMountSlotAlias = {
   id: string
   kind: 'propose_mount_pose'
@@ -556,6 +558,7 @@ export class AgentArenaSession {
         sessionId: result.value.sessionId,
         role: result.value.role,
         packet: compactGptPacket(result.value.packet),
+        continuation: gptContinuationForPacket(result.value.packet, 'claimed'),
       },
     )
   }
@@ -591,6 +594,7 @@ export class AgentArenaSession {
               sessionId: result.value.sessionId,
               role: result.value.role,
               packet: compactGptPacket(result.value),
+              continuation: gptContinuationForPacket(result.value),
             },
           }
         : result,
@@ -664,6 +668,7 @@ export class AgentArenaSession {
               acceptedActionId: body.actionId,
               ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
               packet: compactGptPacket(result.value.packet),
+              continuation: gptContinuationForPacket(result.value.packet),
               publicState: result.value.publicState,
             },
           }
@@ -723,6 +728,7 @@ export class AgentArenaSession {
             value: {
               status: gptPacketStatus(result.value.packet),
               packet: compactGptPacket(result.value.packet),
+              continuation: gptContinuationForPacket(result.value.packet),
             },
           }
         : result,
@@ -1430,7 +1436,7 @@ function normalizeGptTeamIdentity(input: GptTeamIdentityInput): TeamIdentity {
 
 function gptPacketStatus(
   packet: { legalActions: unknown[]; nextAction: string; phase?: string },
-): 'playable' | 'waiting' | 'complete' | 'expired' {
+): Exclude<GptPacketStatus, 'claimed'> {
   if (packet.phase === 'expired') {
     return 'expired'
   }
@@ -1442,6 +1448,44 @@ function gptPacketStatus(
   return packet.legalActions.length > 0 || packet.nextAction === 'submit_reflection' || packet.nextAction === 'view_replay'
     ? 'playable'
     : 'waiting'
+}
+
+function gptContinuationForPacket(
+  packet: { legalActions: unknown[]; nextAction: string; phase?: string },
+  statusOverride?: GptPacketStatus,
+): Record<string, unknown> {
+  const status = statusOverride ?? gptPacketStatus(packet)
+
+  if (status === 'complete' || status === 'expired') {
+    return {
+      keepGoing: false,
+      recommendedNextCall: 'stop',
+      instruction: 'Stop calling actions for this invite unless the user asks to inspect the final state.',
+    }
+  }
+
+  if (packet.nextAction === 'submit_reflection') {
+    return {
+      keepGoing: true,
+      recommendedNextCall: 'gptReflection',
+      instruction: 'Submit a concise private reflection with gptReflection, then continue from the returned packet.',
+    }
+  }
+
+  if (packet.legalActions.length > 0) {
+    return {
+      keepGoing: true,
+      recommendedNextCall: 'gptAct',
+      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now.',
+    }
+  }
+
+  return {
+    keepGoing: true,
+    recommendedNextCall: 'gptNext',
+    pollAfterMs: 1500,
+    instruction: 'Call gptNext again after a short wait. Continue polling until the returned status is playable, complete, or expired.',
+  }
 }
 
 export default {
