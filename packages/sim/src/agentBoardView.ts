@@ -1,5 +1,7 @@
 import type {
+  AgentBoardAttackAffordance,
   AgentBoardCellView,
+  AgentBoardLegalActionRef,
   AgentBoardPoseView,
   AgentBoardTargetView,
   AgentBoardView,
@@ -20,7 +22,9 @@ import {
   worldToArenaCell,
 } from './arenaTopology.js'
 import {
+  combatActionCommand,
   combatLegalActionForPacket,
+  combatActionMovementOverride,
   isCombatAction,
 } from './combatActions.js'
 import {
@@ -77,14 +81,24 @@ export function buildAgentBoardView(input: BuildAgentBoardViewInput): AgentBoard
 type ActionBoardContext = {
   reachableByCell: Map<string, string[]>
   targetableByCell: Map<string, string[]>
+  mobilityByCell: Map<string, AgentBoardCellMobility>
+  legalByCell: Map<string, NonNullable<AgentBoardCellView['legal']>>
   poses: Map<string, AgentBoardPoseView>
   targets: Map<string, AgentBoardTargetView>
+}
+
+type AgentBoardCellMobility = {
+  mobilityCost: number
+  mobilityRemaining?: number
+  path?: GridCoord[]
 }
 
 function buildActionBoardContext(actions: readonly CanonicalGameAction[]): ActionBoardContext {
   const context: ActionBoardContext = {
     reachableByCell: new Map(),
     targetableByCell: new Map(),
+    mobilityByCell: new Map(),
+    legalByCell: new Map(),
     poses: new Map(),
     targets: new Map(),
   }
@@ -102,7 +116,20 @@ function buildActionBoardContext(actions: readonly CanonicalGameAction[]): Actio
       continue
     }
 
-    addActionId(context.reachableByCell, cellIdFor(finalPose.anchor), action.id)
+    const sourceCellId = cellIdFor(finalPose.anchor)
+    const publicRef = legalActionRef(publicAction)
+    const command = combatActionCommand(action)
+    const movementOverride = combatActionMovementOverride(action)
+
+    addActionId(context.reachableByCell, sourceCellId, action.id)
+    addMobility(context.mobilityByCell, sourceCellId, {
+      mobilityCost: movementOverride?.mobilityCost ?? movementCostForKind(publicAction.kind, preview),
+      ...(movementOverride?.mobilityRemaining !== undefined
+        ? { mobilityRemaining: movementOverride.mobilityRemaining }
+        : {}),
+      ...(preview.path ? { path: preview.path.map(cloneCell) } : {}),
+    })
+    addLegalAction(context.legalByCell, sourceCellId, publicAction.kind, publicRef, command, preview)
     addReachablePose(context.poses, action, publicAction.kind, finalPose, preview)
 
     if (isAttackKind(publicAction.kind) && preview.target) {
@@ -131,6 +158,8 @@ function buildBoardCell(
   const blocksMovement = isBlockedAnchorCell(topology, cell)
   const reachableByActionIds = actionContext.reachableByCell.get(cellIdFor(cell)) ?? []
   const targetableByActionIds = actionContext.targetableByCell.get(cellIdFor(cell)) ?? []
+  const mobility = actionContext.mobilityByCell.get(cellIdFor(cell))
+  const legal = actionContext.legalByCell.get(cellIdFor(cell))
   const occupant = sameCell(cell, selfAnchor)
     ? 'self' as const
     : sameCell(cell, opponentAnchor)
@@ -159,6 +188,13 @@ function buildBoardCell(
       center,
       arenaCellCenter(topology, opponentAnchor),
     ),
+    reachable: reachableByActionIds.length > 0,
+    ...(mobility ? {
+      mobilityCost: mobility.mobilityCost,
+      ...(mobility.mobilityRemaining !== undefined ? { mobilityRemaining: mobility.mobilityRemaining } : {}),
+      ...(mobility.path ? { path: mobility.path.map(cloneCell) } : {}),
+    } : {}),
+    ...(legal ? { legal } : {}),
     ...(reachableByActionIds.length > 0 ? { reachableByActionIds } : {}),
     ...(targetableByActionIds.length > 0 ? { targetableByActionIds } : {}),
     ...(unavailableReasons.length > 0 ? { unavailableReasons } : {}),
@@ -224,6 +260,106 @@ function addAttackableTarget(
     ...(preview.expectedRangeIfOpponentHolds !== undefined ? { distance: preview.expectedRangeIfOpponentHolds } : {}),
     ...(preview.currentLineOfSight !== undefined ? { lineOfSight: preview.currentLineOfSight } : {}),
   })
+}
+
+function addMobility(
+  mobilityByCell: Map<string, AgentBoardCellMobility>,
+  cellId: string,
+  mobility: AgentBoardCellMobility,
+): void {
+  const existing = mobilityByCell.get(cellId)
+
+  if (
+    existing &&
+    (
+      existing.mobilityCost < mobility.mobilityCost ||
+      (
+        existing.mobilityCost === mobility.mobilityCost &&
+        (existing.mobilityRemaining ?? -1) >= (mobility.mobilityRemaining ?? -1)
+      )
+    )
+  ) {
+    return
+  }
+
+  mobilityByCell.set(cellId, {
+    mobilityCost: mobility.mobilityCost,
+    ...(mobility.mobilityRemaining !== undefined ? { mobilityRemaining: mobility.mobilityRemaining } : {}),
+    ...(mobility.path ? { path: mobility.path.map(cloneCell) } : {}),
+  })
+}
+
+function addLegalAction(
+  legalByCell: Map<string, NonNullable<AgentBoardCellView['legal']>>,
+  cellId: string,
+  kind: GameMasterActionKind,
+  action: AgentBoardLegalActionRef,
+  command: ReturnType<typeof combatActionCommand>,
+  preview: NonNullable<ReturnType<typeof combatLegalActionForPacket>['preview']>,
+): void {
+  const legal = legalByCell.get(cellId) ?? {}
+
+  if (kind === 'move') {
+    legal.moveHere = action
+  } else if (isAttackKind(kind) && preview.target) {
+    legal.attacksFromHere = [
+      ...(legal.attacksFromHere ?? []),
+      attackAffordance(action, command, preview.target),
+    ]
+  } else if (kind === 'use_utility') {
+    legal.useUtilityFromHere = action
+  }
+
+  if (legal.moveHere || legal.attacksFromHere?.length || legal.useUtilityFromHere) {
+    legalByCell.set(cellId, legal)
+  }
+}
+
+function legalActionRef(action: ReturnType<typeof combatLegalActionForPacket>): AgentBoardLegalActionRef {
+  return {
+    actionId: action.id,
+    kind: action.kind,
+    label: action.label,
+    summary: action.summary,
+    ...(action.parameterExamples?.[0] ? { parameters: action.parameterExamples[0] } : {}),
+  }
+}
+
+function attackAffordance(
+  action: AgentBoardLegalActionRef,
+  command: ReturnType<typeof combatActionCommand>,
+  target: GridCoord,
+): AgentBoardAttackAffordance {
+  const targetCellId = cellIdFor(target)
+
+  return {
+    ...action,
+    targetId: 'opponent',
+    targetCellId,
+    ...(weaponSlotFor(command) ? { weaponSlot: weaponSlotFor(command) } : {}),
+  }
+}
+
+function weaponSlotFor(command: ReturnType<typeof combatActionCommand>): 'weaponA' | 'weaponB' | undefined {
+  if (command?.weaponA === 'fire') {
+    return 'weaponA'
+  }
+  if (command?.weaponB === 'fire') {
+    return 'weaponB'
+  }
+
+  return undefined
+}
+
+function movementCostForKind(
+  kind: GameMasterActionKind,
+  preview: NonNullable<ReturnType<typeof combatLegalActionForPacket>['preview']>,
+): number {
+  if (kind === 'hold' || kind === 'attack' || kind === 'use_utility') {
+    return 0
+  }
+
+  return preview.path?.length ?? 0
 }
 
 function unavailableCellReasons(

@@ -1,4 +1,3 @@
-import { MOVEMENT_COMMANDS } from '../../schemas/src/index.js'
 import type {
   ActiveActionSet,
   CanonicalGameAction,
@@ -6,23 +5,38 @@ import type {
   GameMasterActionKind,
   GameMasterLegalAction,
   GeneratedControls,
+  GridCoord,
   MachineCapabilities,
-  MachineMovementCapability,
   MachineWeaponCapability,
   MovementCommand,
   TeamRole,
   TurnCommand,
+  Vector3,
   WeaponCommand,
 } from '../../schemas/src/index.js'
 import { combatActionId } from './actionIds.js'
 import {
+  arenaCellCenter,
+  compileArenaTopology,
+  hasArenaLineOfSight,
+  pathHazards,
+  worldToArenaCell,
+} from './arenaTopology.js'
+import {
+  combatPreview,
   commandHasOffense,
   evaluateCombatCommand,
   movementCommandLabel,
+  type CombatActionLegality,
   type CombatWeaponLegalityOptions,
   type CombatLegalityContext,
 } from './combatLegality.js'
-import { machineMovementCommandSupported } from './machineMovement.js'
+import {
+  gridDistance,
+  isBlockedAnchorCell,
+  isCellInsideArena,
+  type TacticalMovementPlan,
+} from './gridMovement.js'
 
 export const COMBAT_ACTION_SCOPE = 'combat_turn'
 
@@ -31,7 +45,16 @@ export type CanonicalCombatActionPayload = {
   label: string
   summary: string
   command: TurnCommand
-  legality: ReturnType<typeof evaluateCombatCommand>
+  legality: CombatActionLegality
+  movementOverride?: BoardMovementOverride
+}
+
+export type BoardMovementOverride = {
+  from: GridCoord
+  to: GridCoord
+  path: GridCoord[]
+  mobilityCost: number
+  mobilityRemaining: number
 }
 
 export type BuildCombatActionSetInput = {
@@ -52,6 +75,7 @@ export type BuildCombatActionSetInput = {
 type CombatActionCandidate = {
   command: TurnCommand
   weaponOptions?: CombatWeaponLegalityOptions
+  movementOverride?: BoardMovementOverride
 }
 
 export function buildCombatActionSet(input: BuildCombatActionSetInput): ActiveActionSet {
@@ -76,7 +100,7 @@ export function buildCombatActionSet(input: BuildCombatActionSetInput): ActiveAc
 export function buildCombatActions(input: BuildCombatActionSetInput): CanonicalGameAction[] {
   const context = combatContext(input)
   const candidates = input.machineCapabilities
-    ? machineCapabilityCandidates(input.tick, input.role, input.machineCapabilities)
+    ? machineCapabilityCandidates(input.tick, input.role, input.machineCapabilities, context)
     : generatedControlCandidates(input.tick, input.controls ?? { movement: ['brake'] })
   const actions = candidates
     .map((candidate) => combatActionFromCandidate(input, context, candidate))
@@ -120,13 +144,25 @@ export function combatActionCommand(action: CanonicalGameAction): TurnCommand | 
   return command ? { ...command } : undefined
 }
 
+export function combatActionMovementOverride(action: CanonicalGameAction): BoardMovementOverride | undefined {
+  if (!isCombatAction(action)) {
+    return undefined
+  }
+
+  const override = (action.payload as Partial<CanonicalCombatActionPayload>).movementOverride
+
+  return override ? cloneBoardMovementOverride(override) : undefined
+}
+
 function combatActionFromCandidate(
   input: BuildCombatActionSetInput,
   context: CombatLegalityContext,
   candidate: CombatActionCandidate,
 ): CanonicalGameAction | undefined {
   const command = candidate.command
-  const legality = evaluateCombatCommand(context, command, candidate.weaponOptions)
+  const legality = candidate.movementOverride
+    ? evaluateBoardCombatCommand(context, command, candidate.movementOverride, candidate.weaponOptions)
+    : evaluateCombatCommand(context, command, candidate.weaponOptions)
 
   if (!legality.ok) {
     return undefined
@@ -141,7 +177,7 @@ function combatActionFromCandidate(
       round: input.round,
       tick: input.tick,
       kind,
-      parts: actionIdPartsForCommand(command, legality.preview),
+      parts: actionIdPartsForCommand(kind, command, legality.preview),
     }),
     kind,
     role: input.role,
@@ -153,6 +189,7 @@ function combatActionFromCandidate(
       summary: descriptor.summary,
       command,
       legality,
+      ...(candidate.movementOverride ? { movementOverride: cloneBoardMovementOverride(candidate.movementOverride) } : {}),
     },
   }
 }
@@ -181,8 +218,10 @@ function machineCapabilityCandidates(
   tick: number,
   role: TeamRole,
   capabilities: MachineCapabilities,
+  context: CombatLegalityContext,
 ): CombatActionCandidate[] {
-  const movement = machineMovementCommands(role, capabilities.movement)
+  const reachable = reachableBoardMovementOverrides(context, capabilities)
+  const movement = reachable.filter((plan) => plan.mobilityCost > 0)
   const weaponSlots = capabilities.weapons.slice(0, 2).map((weapon, index) => ({
     slot: index === 0 ? 'weaponA' as const : 'weaponB' as const,
     weapon,
@@ -190,8 +229,16 @@ function machineCapabilityCandidates(
 
   return [
     commandCandidate(holdCommand(tick)),
-    ...movement.map((move) => commandCandidate({ tick, move })),
-    ...weaponSlots.flatMap(({ slot, weapon }) => machineWeaponCommands(tick, movement, slot, weapon)),
+    ...movement.map((movementOverride) => ({
+      command: {
+        tick,
+        move: movementCommandForBoardMove(role, movementOverride.from, movementOverride.to),
+      },
+      movementOverride,
+    })),
+    ...weaponSlots.flatMap(({ slot, weapon }) =>
+      machineWeaponCommands(tick, role, movement, slot, weapon),
+    ),
     ...machineUtilityCommands(tick, capabilities),
   ]
 }
@@ -244,23 +291,10 @@ function moveAndAttackCommands(tick: number, controls: GeneratedControls): TurnC
     .map((move) => ({ tick, move, [firstWeapon]: 'fire' }))
 }
 
-function machineMovementCommands(
-  role: TeamRole,
-  capabilities: readonly MachineMovementCapability[],
-): MovementCommand[] {
-  if (capabilities.length === 0) {
-    return []
-  }
-
-  return MOVEMENT_COMMANDS.filter((command) =>
-    command !== 'brake' &&
-    capabilities.some((capability) => machineMovementCommandSupported(role, capability, command)),
-  )
-}
-
 function machineWeaponCommands(
   tick: number,
-  movement: readonly MovementCommand[],
+  role: TeamRole,
+  movement: readonly BoardMovementOverride[],
   slot: 'weaponA' | 'weaponB',
   weapon: MachineWeaponCapability,
 ): CombatActionCandidate[] {
@@ -271,9 +305,14 @@ function machineWeaponCommands(
 
   return [
     { command: { tick, [slot]: 'fire' }, weaponOptions },
-    ...movement.map((move) => ({
-      command: { tick, move, [slot]: 'fire' },
+    ...movement.map((movementOverride) => ({
+      command: {
+        tick,
+        move: movementCommandForBoardMove(role, movementOverride.from, movementOverride.to),
+        [slot]: 'fire',
+      },
       weaponOptions,
+      movementOverride,
     })),
   ]
 }
@@ -285,6 +324,191 @@ function machineUtilityCommands(
   return capabilities.utility.length > 0
     ? [commandCandidate({ tick, utility: 'activate' })]
     : []
+}
+
+function reachableBoardMovementOverrides(
+  context: CombatLegalityContext,
+  capabilities: MachineCapabilities,
+): BoardMovementOverride[] {
+  const budget = machineMobilityBudget(capabilities)
+
+  if (budget <= 0) {
+    return []
+  }
+
+  const topology = compileArenaTopology(context.arena)
+  const from = worldToArenaCell(topology, context.self.position)
+  const opponent = worldToArenaCell(topology, context.opponent.position)
+  const queue: BoardMovementOverride[] = [{
+    from: cloneCell(from),
+    to: cloneCell(from),
+    path: [],
+    mobilityCost: 0,
+    mobilityRemaining: budget,
+  }]
+  const reachable = new Map<string, BoardMovementOverride>([[cellKey(from), queue[0]]])
+  const directions: readonly GridCoord[] = [
+    { x: 1, z: 0 },
+    { x: -1, z: 0 },
+    { x: 0, z: 1 },
+    { x: 0, z: -1 },
+  ]
+
+  for (let index = 0; index < queue.length; index += 1) {
+    const current = queue[index]
+
+    if (current.mobilityCost >= budget) {
+      continue
+    }
+
+    for (const direction of directions) {
+      const next = {
+        x: current.to.x + direction.x,
+        z: current.to.z + direction.z,
+      }
+      const key = cellKey(next)
+      const cost = current.mobilityCost + 1
+
+      if (
+        reachable.has(key) ||
+        !isCellInsideArena(context.arena, next) ||
+        isBlockedAnchorCell(topology, next) ||
+        sameCell(next, opponent)
+      ) {
+        continue
+      }
+
+      const plan = {
+        from: cloneCell(from),
+        to: cloneCell(next),
+        path: [...current.path.map(cloneCell), cloneCell(next)],
+        mobilityCost: cost,
+        mobilityRemaining: budget - cost,
+      }
+
+      reachable.set(key, plan)
+      queue.push(plan)
+    }
+  }
+
+  return [...reachable.values()].sort((left, right) =>
+    left.mobilityCost - right.mobilityCost ||
+    left.to.x - right.to.x ||
+    left.to.z - right.to.z
+  )
+}
+
+function machineMobilityBudget(capabilities: MachineCapabilities): number {
+  return Math.max(
+    0,
+    ...capabilities.movement.map((movement) => Math.max(0, Math.floor(movement.moveBudget))),
+  )
+}
+
+function movementCommandForBoardMove(
+  role: TeamRole,
+  from: GridCoord,
+  to: GridCoord,
+): MovementCommand {
+  const delta = {
+    x: to.x - from.x,
+    z: to.z - from.z,
+  }
+
+  if (delta.x === 0 && delta.z === 0) {
+    return 'brake'
+  }
+
+  const forward = role === 'red' ? 1 : -1
+  const forwardDelta = delta.x * forward
+
+  if (forwardDelta > 0 && delta.z !== 0) {
+    return delta.z < 0 ? 'circle_left' : 'circle_right'
+  }
+
+  if (Math.abs(delta.x) >= Math.abs(delta.z)) {
+    if (forwardDelta > 0) {
+      return Math.abs(delta.x) > 1 ? 'dash_forward' : 'forward'
+    }
+
+    return Math.abs(delta.x) > 1 ? 'dash_backward' : 'backward'
+  }
+
+  return delta.z < 0 ? 'strafe_left' : 'strafe_right'
+}
+
+function evaluateBoardCombatCommand(
+  context: CombatLegalityContext,
+  command: TurnCommand,
+  movementOverride: BoardMovementOverride,
+  weaponOptions: CombatWeaponLegalityOptions = {},
+): CombatActionLegality {
+  const movement = boardMovementPlanForCombatAction(context, command, movementOverride)
+  const opponent = opponentAnchor(context)
+  const reasons: string[] = []
+
+  if (!sameCell(movement.from, movementOverride.from)) {
+    reasons.push('Movement action was authored for a different starting cell.')
+  }
+  if (sameCell(movement.to, opponent)) {
+    reasons.push('Destination cell is occupied by the opponent.')
+  }
+  if (movement.outOfBounds) {
+    reasons.push('Movement path leaves arena bounds.')
+  }
+  if (movement.blocked) {
+    reasons.push('Movement path crosses a blocked anchor cell.')
+  }
+  if (firesWeapon(command) && !movement.lineOfSightToOpponent) {
+    reasons.push('Target is not in line of sight from final anchor cell.')
+  }
+  if (
+    firesWeapon(command) &&
+    weaponOptions.emitterAxis &&
+    !emitterAxisTargetsOpponent(context, movement.to, weaponOptions.emitterAxis)
+  ) {
+    reasons.push('Weapon emitter axis cannot bear on the opponent from final anchor cell.')
+  }
+  if (firesWeapon(command) && movement.rangeToOpponent > Math.ceil(weaponOptions.weaponRange ?? context.self.weaponReach)) {
+    reasons.push('Target is out of weapon range from final anchor cell.')
+  }
+
+  return {
+    ok: reasons.length === 0,
+    reasons,
+    movement,
+    preview: combatPreview(context, command, movement),
+  }
+}
+
+export function boardMovementPlanForCombatAction(
+  context: CombatLegalityContext,
+  command: TurnCommand,
+  movementOverride: BoardMovementOverride,
+): TacticalMovementPlan {
+  const topology = compileArenaTopology(context.arena)
+  const from = worldToArenaCell(topology, context.self.position)
+  const opponent = worldToArenaCell(topology, context.opponent.position)
+  const fromWorld = arenaCellCenter(topology, from)
+  const toWorld = arenaCellCenter(topology, movementOverride.to)
+  const opponentWorld = arenaCellCenter(topology, opponent)
+  const path = movementOverride.path.map(cloneCell)
+
+  return {
+    command: command.move,
+    from,
+    to: cloneCell(movementOverride.to),
+    path,
+    blocked: path.some((cell) => isBlockedAnchorCell(topology, cell)),
+    outOfBounds: !isCellInsideArena(context.arena, from) ||
+      !isCellInsideArena(context.arena, movementOverride.to) ||
+      path.some((cell) => !isCellInsideArena(context.arena, cell)),
+    hazardCells: uniqueCells(
+      pathHazards(topology, fromWorld, toWorld, 0.5).map((hazard) => hazard.cell),
+    ),
+    lineOfSightToOpponent: hasArenaLineOfSight(topology, toWorld, opponentWorld),
+    rangeToOpponent: gridDistance(movementOverride.to, opponent),
+  }
 }
 
 
@@ -453,29 +677,30 @@ function gridSummary(prefix: string, preview: NonNullable<GameMasterLegalAction[
 }
 
 function actionIdPartsForCommand(
+  kind: GameMasterActionKind,
   command: TurnCommand,
   preview: NonNullable<GameMasterLegalAction['preview']>,
 ): string[] {
   const finalAnchor = preview.finalPose?.anchor
   const target = preview.target
 
-  if (command.move && command.move !== 'brake' && commandHasOffense(command)) {
+  if (kind === 'move_and_attack') {
     return [
       finalAnchor ? `to_${cellActionPart(finalAnchor)}` : 'move',
       target ? `target_${cellActionPart(target)}` : 'target',
       weaponActionPart(command),
     ]
   }
-  if (command.move && command.move !== 'brake') {
+  if (kind === 'move') {
     return [finalAnchor ? `to_${cellActionPart(finalAnchor)}` : 'move']
   }
-  if (command.weaponA === 'fire' || command.weaponB === 'fire') {
+  if (kind === 'attack') {
     return [
       target ? `target_${cellActionPart(target)}` : 'target',
       weaponActionPart(command),
     ]
   }
-  if (command.utility === 'activate') {
+  if (kind === 'use_utility') {
     return [finalAnchor ? `source_${cellActionPart(finalAnchor)}` : 'source', 'utility']
   }
 
@@ -510,6 +735,92 @@ function cellActionPart(cell: { x: number; z: number }): string {
 
 function signedActionNumber(value: number): string {
   return value < 0 ? `n${Math.abs(value)}` : `p${value}`
+}
+
+function firesWeapon(command: TurnCommand): boolean {
+  return command.weaponA === 'fire' || command.weaponB === 'fire'
+}
+
+function emitterAxisTargetsOpponent(
+  context: CombatLegalityContext,
+  finalAnchor: GridCoord,
+  emitterAxis: Vector3,
+): boolean {
+  const opponent = opponentAnchor(context)
+  const target = normalizePlanarVector({
+    x: opponent.x - finalAnchor.x,
+    z: opponent.z - finalAnchor.z,
+  })
+
+  if (!target) {
+    return true
+  }
+
+  const emitter = normalizePlanarVector({
+    x: emitterAxis[0],
+    z: emitterAxis[2],
+  })
+
+  if (!emitter) {
+    return false
+  }
+
+  return emitter.x * target.x + emitter.z * target.z >= 0.65
+}
+
+function opponentAnchor(context: CombatLegalityContext): GridCoord {
+  return worldToArenaCell(compileArenaTopology(context.arena), context.opponent.position)
+}
+
+function normalizePlanarVector(vector: GridCoord): GridCoord | undefined {
+  const length = Math.hypot(vector.x, vector.z)
+
+  if (length === 0) {
+    return undefined
+  }
+
+  return {
+    x: vector.x / length,
+    z: vector.z / length,
+  }
+}
+
+function uniqueCells(cells: GridCoord[]): GridCoord[] {
+  const seen = new Set<string>()
+  const unique: GridCoord[] = []
+
+  for (const cell of cells) {
+    const key = cellKey(cell)
+
+    if (!seen.has(key)) {
+      seen.add(key)
+      unique.push(cloneCell(cell))
+    }
+  }
+
+  return unique
+}
+
+function cloneBoardMovementOverride(override: BoardMovementOverride): BoardMovementOverride {
+  return {
+    from: cloneCell(override.from),
+    to: cloneCell(override.to),
+    path: override.path.map(cloneCell),
+    mobilityCost: override.mobilityCost,
+    mobilityRemaining: override.mobilityRemaining,
+  }
+}
+
+function cloneCell<T extends GridCoord>(cell: T): T {
+  return { ...cell }
+}
+
+function sameCell(left: GridCoord, right: GridCoord): boolean {
+  return left.x === right.x && left.z === right.z
+}
+
+function cellKey(cell: GridCoord): string {
+  return `${cell.x},${cell.z}`
 }
 
 function dedupeActions(actions: CanonicalGameAction[]): CanonicalGameAction[] {

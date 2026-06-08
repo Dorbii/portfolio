@@ -1653,7 +1653,7 @@ test('machine combat action generation gives no-mobility machines hold only', ()
   assert.deepEqual(combatCommands(actionSet), [{ tick: 1, move: 'brake' }])
 })
 
-test('machine combat action generation limits normal-wheel movement to matching axes', () => {
+test('machine combat action generation exposes reachable grid cells from mobility budget', () => {
   const initial = createInitialMachineDesign('red')
   const machine = {
     ...initial,
@@ -1674,12 +1674,35 @@ test('machine combat action generation limits normal-wheel movement to matching 
     ],
   }
   const actionSet = buildMachineCapabilityCombatActionSet({ machine })
+  const moveActions = Object.values(actionSet.actions)
+    .filter((action) => action.kind === 'move')
+    .map(combatLegalActionForPacket)
+  const destinationCellIds = new Set(
+    moveActions
+      .map((action) => action.parameterExamples?.[0]?.destinationCellId)
+      .filter(Boolean),
+  )
 
-  assert.deepEqual(combatMoves(actionSet), ['brake', 'forward', 'backward', 'dash_forward', 'dash_backward'])
-  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_left'), false)
-  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_right'), false)
-  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'circle_left'), false)
-  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'turn_right'), false)
+  assert.equal(combatMoves(actionSet).includes('brake'), true)
+  assert.ok(destinationCellIds.size > 20)
+  assert.equal(destinationCellIds.has('cell:-1:4'), true)
+  assert.equal(destinationCellIds.has('cell:-1:-4'), true)
+  assert.equal(destinationCellIds.has('cell:1:0'), false)
+
+  const snapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], { tick: 1 })
+  const board = buildAgentBoardView({
+    arena: snapshot.arena,
+    role: 'red',
+    self: snapshot.red,
+    opponent: snapshot.blue,
+    actions: Object.values(actionSet.actions),
+  })
+  const northCell = board.cells.find((cell) => cell.cellId === 'cell:-1:4')
+
+  assert.equal(northCell.reachable, true)
+  assert.equal(northCell.mobilityCost, 4)
+  assert.equal(northCell.mobilityRemaining, 3)
+  assert.equal(northCell.legal.moveHere.parameters.destinationCellId, 'cell:-1:4')
 })
 
 test('machine combat action generation exposes lateral moves from omni movement capability', () => {
@@ -1822,7 +1845,12 @@ test('machine resolver moves generated machine commands through native wheel cap
       machineAttachment('core', 'lateral_wheel', { mountId: 'core_shell' }),
     ],
   }
-  const actionSet = buildMachineCapabilityCombatActionSet({ machine: lateralWheelMachine })
+  const actionSet = buildMachineCapabilityCombatActionSet({
+    machine: lateralWheelMachine,
+    arena: tacticalRuntimeArena,
+    redPosition: [-6, 0, 0],
+    bluePosition: [6, 0, 0],
+  })
   const generatedStrafe = findCombatAction(actionSet, (command) => command.move === 'strafe_right')
   const resolved = resolveSubmittedGameActions(machineCombatInput({
     redMachine: lateralWheelMachine,
@@ -4886,6 +4914,9 @@ test('agent board view exposes tactical cells, reachable poses, and attack targe
   const attackTarget = board.attackableTargets.find((target) => target.targetId === 'opponent')
 
   assert.equal(selfCell.occupant, 'self')
+  assert.equal(selfCell.reachable, true)
+  assert.equal(selfCell.mobilityCost, 0)
+  assert.equal(selfCell.legal.attacksFromHere[0].actionId, fire.id)
   assert.equal(opponentCell.occupant, 'opponent')
   assert.ok(opponentCell.targetableByActionIds.includes(fire.id))
   assert.ok(cornerCell.unavailableReasons.includes('No current legal action ends on this cell.'))

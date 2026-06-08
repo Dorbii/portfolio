@@ -706,6 +706,26 @@ export type AgentBoardView = {
   [key: string]: unknown
 }
 
+export type AgentBoardLegalActionRef = {
+  actionId: string
+  kind: GameMasterActionKind
+  label?: string
+  summary?: string
+  parameters?: GameMasterActionParameters
+}
+
+export type AgentBoardAttackAffordance = AgentBoardLegalActionRef & {
+  targetId: 'opponent'
+  targetCellId: string
+  weaponSlot?: 'weaponA' | 'weaponB'
+}
+
+export type AgentBoardCellLegalView = {
+  moveHere?: AgentBoardLegalActionRef
+  attacksFromHere?: AgentBoardAttackAffordance[]
+  useUtilityFromHere?: AgentBoardLegalActionRef
+}
+
 export type AgentBoardCellView = GridCoord & {
   cellId: string
   inBounds: boolean
@@ -720,6 +740,11 @@ export type AgentBoardCellView = GridCoord & {
   occupant?: 'self' | 'opponent'
   distanceToOpponent?: number
   lineOfSightToOpponent?: boolean
+  reachable?: boolean
+  mobilityCost?: number
+  mobilityRemaining?: number
+  path?: GridCoord[]
+  legal?: AgentBoardCellLegalView
   reachableByActionIds?: string[]
   targetableByActionIds?: string[]
   unavailableReasons?: string[]

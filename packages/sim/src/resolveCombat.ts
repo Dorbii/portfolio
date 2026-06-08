@@ -66,7 +66,12 @@ import {
   pathHazards,
   type CompiledArenaTopology,
 } from './arenaTopology.js'
-import { combatActionCommand } from './combatActions.js'
+import {
+  boardMovementPlanForCombatAction,
+  combatActionCommand,
+  combatActionMovementOverride,
+  type BoardMovementOverride,
+} from './combatActions.js'
 import {
   evaluateCombatCommand,
   type CombatLegalityContext,
@@ -1928,6 +1933,7 @@ function effectiveWeaponSpec(
 type GameActionTickIntent = {
   command: TurnCommand
   movement: TacticalMovementPlan
+  movementOverride?: BoardMovementOverride
   movementBlocked: boolean
 }
 
@@ -1954,8 +1960,8 @@ function applyGameActionTick(
   const healthBeforeTick = red.health + blue.health
   const redCommand = { ...commandFromCanonicalAction(redAction, 'red'), tick }
   const blueCommand = { ...commandFromCanonicalAction(blueAction, 'blue'), tick }
-  const redIntent = gameActionTickIntent(state, 'red', redCommand)
-  const blueIntent = gameActionTickIntent(state, 'blue', blueCommand)
+  const redIntent = gameActionTickIntent(state, 'red', redCommand, combatActionMovementOverride(redAction))
+  const blueIntent = gameActionTickIntent(state, 'blue', blueCommand, combatActionMovementOverride(blueAction))
   const redMovementUtility = activateMovementUtility(red, redCommand)
   const blueMovementUtility = activateMovementUtility(blue, blueCommand)
   const conflict = anchorConflictForIntents(redIntent, blueIntent)
@@ -2058,20 +2064,28 @@ function gameActionTickIntent(
   state: CombatRuntimeState,
   role: TeamRole,
   command: TurnCommand,
+  movementOverride?: BoardMovementOverride,
 ): GameActionTickIntent {
-  const legality = evaluateCombatCommand(combatLegalityContextForState(state, role), command)
+  const context = combatLegalityContextForState(state, role)
+  const movement = movementOverride
+    ? boardMovementPlanForCombatAction(context, command, movementOverride)
+    : evaluateCombatCommand(context, command).movement
   const self = role === 'red' ? state.red : state.blue
-  const machineMovementBlocked = self.machine !== undefined &&
+  const machineMovementBlocked = movementOverride === undefined &&
+    self.machine !== undefined &&
     command.move !== undefined &&
     command.move !== 'brake' &&
     !self.machine.capabilities.movement.some((capability) =>
       machineMovementCommandSupported(role, capability, command.move!),
     )
+  const staleMovementOverride = movementOverride !== undefined &&
+    !sameAnchorCell(movement.from, movementOverride.from)
 
   return {
     command,
-    movement: legality.movement,
-    movementBlocked: legality.movement.blocked || legality.movement.outOfBounds || machineMovementBlocked,
+    movement,
+    ...(movementOverride ? { movementOverride } : {}),
+    movementBlocked: movement.blocked || movement.outOfBounds || machineMovementBlocked || staleMovementOverride,
   }
 }
 
@@ -2278,6 +2292,26 @@ function applyResolvedMovement(
 
   if (intent.movementBlocked || command.move === 'brake') {
     return false
+  }
+
+  if (intent.movementOverride) {
+    const from = bot.position
+    const to = arenaCellCenter(topology, intent.movement.to)
+
+    if (command.move === 'turn_left' || command.move === 'circle_left') {
+      rotateMachineRootOrientation(bot.machine, 'left')
+    } else if (command.move === 'turn_right' || command.move === 'circle_right') {
+      rotateMachineRootOrientation(bot.machine, 'right')
+    }
+
+    if (positionsEqual(from, to)) {
+      return false
+    }
+
+    bot.position = to
+    events.push(createMoveEvent(replayTimeForTurn(tick), tick, bot, from, to, command.move))
+
+    return true
   }
 
   const resolved = resolveMachineMovement({
