@@ -55,6 +55,33 @@ export function createExampleGameMasterPacket(): GameMasterPacket {
           blocksLineOfSight: false,
           distanceToOpponent: 4,
           lineOfSightToOpponent: true,
+          reachable: true,
+          mobilityCost: 2,
+          mobilityRemaining: 4,
+          path: [
+            { x: 3, z: 2 },
+            { x: 4, z: 2 },
+            { x: 5, z: 2 },
+          ],
+          legal: {
+            attacksFromHere: [
+              {
+                actionId: 'combat.red.r1.t3.move_and_attack.to_xp5_zp2.target_xp5_zp6.weapon_a',
+                kind: 'move_and_attack',
+                label: 'Move to cell (5, 2) and attack opponent at cell (5, 6)',
+                summary:
+                  'Move to destination cell cell:5:2, then attack opponent on cell cell:5:6. 4 cells from target; line of sight clear; 0 hazard cells crossed.',
+                parameters: {
+                  destinationCellId: 'cell:5:2',
+                  targetId: 'opponent',
+                  targetCellId: 'cell:5:6',
+                },
+                targetId: 'opponent',
+                targetCellId: 'cell:5:6',
+                weaponSlot: 'weaponA',
+              },
+            ],
+          },
           reachableByActionIds: ['combat.red.r1.t3.move_and_attack.to_xp5_zp2.target_xp5_zp6.weapon_a'],
         },
         {
@@ -67,6 +94,7 @@ export function createExampleGameMasterPacket(): GameMasterPacket {
           occupant: 'opponent',
           distanceToOpponent: 0,
           lineOfSightToOpponent: true,
+          reachable: false,
           targetableByActionIds: ['combat.red.r1.t3.move_and_attack.to_xp5_zp2.target_xp5_zp6.weapon_a'],
           unavailableReasons: ['Opponent occupies this anchor cell.'],
         },

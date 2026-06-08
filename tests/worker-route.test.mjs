@@ -684,6 +684,14 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.name, 'Clash of Clankers')
   assert.equal(json.version, '0.2.0-gamemaster')
+  assert.equal(json.entrypoints.gptActionsOpenApi, 'https://arena-api.dorbii.net/openapi.json')
+  assert.equal(json.customGptActions.openApi, 'https://arena-api.dorbii.net/openapi.json')
+  assert.deepEqual(json.customGptActions.operations, [
+    'gptClaim',
+    'gptNext',
+    'gptAct',
+    'gptReflection',
+  ])
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
   assert.ok(json.browserApi.methods.includes('bootstrapRole'))
@@ -701,6 +709,9 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(JSON.stringify(json).includes('/continue'), false)
   assert.equal(JSON.stringify(json).includes('/quit'), false)
   assert.ok(json.objective.includes('server-authored legal action menus'))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Custom GPT path')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Browser automation path')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole.bootstrapRole')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generate your own TeamIdentity')))
@@ -749,6 +760,15 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.examples.gameMasterPacket.decisionVersion, 12)
   assert.equal(json.examples.gameMasterPacket.eventVersion, 21)
   assert.ok(json.examples.gameMasterPacket.legalActions.some((action) => action.id === 'combat.red.r1.t3.hold.cell_xp3_zp2.hold'))
+  assert.equal(json.examples.gameMasterPacket.board.cells[0].reachable, true)
+  assert.equal(json.examples.gameMasterPacket.board.cells[0].mobilityCost, 2)
+  assert.equal(json.examples.gameMasterPacket.board.cells[0].mobilityRemaining, 4)
+  assert.equal(
+    json.examples.gameMasterPacket.board.cells[0].legal.attacksFromHere[0].actionId,
+    'combat.red.r1.t3.move_and_attack.to_xp5_zp2.target_xp5_zp6.weapon_a',
+  )
+  assert.equal(json.examples.gameMasterPacket.board.cells[0].legal.attacksFromHere[0].targetCellId, 'cell:5:6')
+  assert.equal(json.examples.gameMasterPacket.board.cells[1].reachable, false)
   assert.ok(
     json.examples.gameMasterPacket.legalActions.some(
       (action) => action.parameterSchema?.properties?.destinationCellId?.enum?.includes('cell:5:2') &&
@@ -873,6 +893,33 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   ]) {
     assert.equal(serializedContract.includes(legacyPublicName), false, legacyPublicName)
   }
+})
+
+test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
+  const { response, json } = await route({}, '/openapi.json', {
+    headers: {
+      origin: 'https://arena.dorbii.net',
+    },
+  })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
+  assert.equal(json.openapi, '3.1.0')
+  assert.equal(json.servers[0].url, 'https://arena-api.test')
+  assert.deepEqual(Object.keys(json.paths).sort(), [
+    '/gpt/act',
+    '/gpt/claim',
+    '/gpt/next',
+    '/gpt/reflection',
+  ])
+  assert.equal(json.paths['/gpt/claim'].post.operationId, 'gptClaim')
+  assert.equal(json.paths['/gpt/next'].post.operationId, 'gptNext')
+  assert.equal(json.paths['/gpt/act'].post.operationId, 'gptAct')
+  assert.equal(json.paths['/gpt/reflection'].post.operationId, 'gptReflection')
+  assert.equal(JSON.stringify(json).includes('/sessions/'), false)
+  assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
+  assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
+  assert.ok(json.components.schemas.GptActRequest.required.includes('actionId'))
 })
 
 test('public bootstrap validator requires agent name and team identity', () => {

@@ -1,4 +1,5 @@
 export * from './agentContract.js'
+export * from './agentOpenApi.js'
 export * from './agentCapabilities.js'
 export * from './agentSamples.js'
 export * from './relay.js'

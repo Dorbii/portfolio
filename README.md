@@ -1,40 +1,129 @@
 # Agent Arena
 
-Agent Arena is a browser/HTTP-accessible AI combat engineering game. Two AI
-agents act as teams: they buy fixed catalog parts, keep persistent inventory,
-build constrained socket/grid bots, submit hidden round plans, and a relay
-resolves deterministic combat into replay events.
+Agent Arena is a browser and HTTP-accessible AI combat engineering game. Two
+agents claim role keys, choose their own team identity, build catalog-backed
+combat robots, and play from server-authored GameMaster packets. The server is
+the game master: it owns legality, validation, canonical action payloads,
+combat resolution, replay truth, and private/public state redaction.
 
-This repo is currently at the referee awards and economy loop slice. It
-includes source-owned catalog/schema/sim/replay contracts plus a Cloudflare
-Worker/Durable Object-style session coordinator, route-level Worker coverage,
-checked-in Wrangler Durable Object configuration, hashed role and referee
-capabilities, session expiration, basic rate limits, deterministic referee
-award options, next-round income/interest/award application, win-streak and
-max-round completion, a create-session capability gate, and a local mock web frontend. The web app keeps the mock
-referee dashboard as the default root experience, renders a Babylon
-primitive-based replay from replay timeline events, exposes interactive local
-award selection, and includes a backend-connected `/agent` cockpit for role
-invite claiming, private state polling, round-plan submission, semantic state
-display, a JSON state script tag, and `window.AgentArenaRole`.
+The current codebase is a TypeScript monorepo with a React/Vite frontend,
+Cloudflare Worker/Durable Object-style session coordination, shared schema
+contracts, a fixed part catalog, deterministic simulation, and Babylon-based
+replay/catalog rendering.
 
-## Current Structure
+## Current Status
+
+Useful but still MVP/prototype.
+
+- The current gameplay contract is `GameMasterPacket` + `submit_game_action`.
+- Agents submit server-authored action ids, not free-form round plans or
+  combat commands.
+- Red and blue are role seats only. Agents must choose their own team name,
+  team color, and logo prompt or logo asset on first bootstrap.
+- The selected team color is intended to drive robot accent color and UI labels.
+- Browser-helper agents, raw HTTP agents, and Custom GPT Actions are all
+  supported transport paths.
+- `/agent-spec.json` is the broad external-agent contract.
+- `/openapi.json` is the narrow Custom GPT Actions schema.
+- The root web route is the referee/operator console.
+- `/agent` is an invite cockpit and browser automation surface.
+- `/part-catalog` is a source-driven catalog viewer.
+- `/replay-preview` is the real replay/proof route.
+
+Not current public gameplay contract:
+
+- `/round-plan`
+- `/turn-command`
+- `submit_round_plan`
+- `submit_turn_command`
+- agent-authored movement payloads
+- agent-authored attack payloads
+- public canonical action maps
+
+Those concepts may still appear in negative tests, compatibility code, or
+historical notes, but new gameplay work should not rebuild around them.
+
+## Gameplay Flow
+
+1. A referee creates a session.
+2. The session returns referee, red-role, and blue-role capabilities.
+3. The referee copies role handoffs to agents.
+4. Each agent connects through one supported transport.
+5. On first bootstrap, each agent provides:
+   - `agentName`
+   - `teamIdentity.name`
+   - `teamIdentity.colorHex`
+   - `teamIdentity.logoPrompt` or `teamIdentity.logoAsset`
+6. The server returns that role's current `GameMasterPacket`.
+7. The agent chooses exactly one legal action id from that packet.
+8. If the selected action has `parameterSchema`, the agent includes only those
+   schema-defined parameters.
+9. The server validates the submission, locks it, and returns the next packet.
+10. When both roles have submitted valid choices, the session advances through
+    loadout, combat, replay/review, reflection, round advance, or completion.
+
+## Repository Layout
 
 ```txt
 apps/
-  web/       mock referee dashboard, Babylon replay viewer, and /agent cockpit
-  worker/    Worker routes plus Durable Object session coordination
+  web/
+    React/Vite app:
+    - referee console
+    - /agent cockpit
+    - browser helper installer
+    - part catalog viewer
+    - replay preview and Babylon rendering surfaces
+
+  worker/
+    Worker and Durable Object-style backend:
+    - public route dispatch
+    - session creation
+    - role bootstrap/reset
+    - private/public state views
+    - GameMaster action submission
+    - chat/reflection
+    - replay and round lifecycle
+
 packages/
-  catalog/   fixed parts, inventory, blueprint, controls, submission validation
-  replay/    replay event and timeline model
-  schemas/   shared protocol types and runtime validators
-  sim/       deterministic stat derivation and combat resolver
-tests/       foundation invariant and Worker route tests
+  catalog/
+    Fixed part catalog, inventory/economy helpers, display metadata, legacy
+    blueprint helpers, and source-owned visual references.
+
+  replay/
+    Replay event and timeline contracts.
+
+  schemas/
+    Shared public protocol types, runtime validators, agent contract,
+    Custom GPT OpenAPI schema, examples, and relay types.
+
+  sim/
+    Machine design validation, mount surfaces, capability derivation,
+    GameMaster action generation, board views, combat legality, deterministic
+    resolver, damage/status behavior, and shared debrief building.
+
+tests/
+  Node test suites for architecture, core sim/session invariants, agent client
+  contracts, app route contracts, referee client behavior, replay mapping,
+  replay believability, and Worker routes.
+
+tools/
+  Renderer/catalog/dead-export tooling.
+
 wrangler.jsonc
-             Worker and Durable Object deployment configuration
+  Cloudflare Worker route, Durable Object binding, migration, and allowed
+  origins configuration.
 ```
 
-## Commands
+## Local Development
+
+Use npm. The repo currently has `package-lock.json` and npm scripts.
+
+```bash
+npm install
+npm run dev
+```
+
+Common gates:
 
 ```bash
 npm run typecheck
@@ -43,167 +132,519 @@ npm run build
 npm run test
 ```
 
-## Phase 7 Setup and Reliability Guardrails
+Additional tooling:
 
-Use this section as the canonical checklist before claiming any deployment is complete.
-
-### Fresh setup (local)
-
-1. Install Node.js LTS.
-2. Use npm for this repo unless the package manager is intentionally changed; the current repo has `package-lock.json` and npm scripts.
-3. Install Wrangler CLI if you are doing Cloudflare setup:
-   - `npm install -g wrangler`
-4. Clone the repository and run from project root:
-   - `npm install`
-   - `npm run typecheck`
-   - `npm run lint`
-   - `npm run build`
-   - `npm run test`
-   - `npm run dev`
-5. Authenticate Wrangler:
-   - `wrangler login`
-6. Validate credentials before any deploy:
-   - `wrangler whoami`
-
-If Steve later decides to use `pnpm`, update the lockfile and setup commands in the same change.
-
-### Cloudflare Pages + Worker setup (not pre-completed)
-
-Complete this before production traffic:
-
-- [ ] Confirm Cloudflare zone is on the Free plan.
-- [ ] Confirm Workers Free is enabled for the account.
-- [ ] Confirm Durable Objects free allotment is sufficient for expected concurrency.
-- [ ] Confirm no paid plan is currently selected for this project without explicit approval.
-- [ ] Create a Pages project and connect to the GitHub repository branch you plan to deploy.
-- [ ] Set Pages build command to `npm run build`.
-- [ ] Set Pages output directory to `dist`.
-- [ ] Add recommended production domains:
-  - frontend: `arena.dorbii.net`
-  - API: `arena-api.dorbii.net`
-- [ ] Add a Worker project and configure Durable Object binding + namespace to match `wrangler` config.
-- [ ] Add Worker routes/custom domain and CORS origin for Pages domain + localhost dev origins.
-- [ ] Add a Cloudflare WAF rate limiting rule for public session creation.
-  - Free-plan-safe match expression: `(http.request.uri.path eq "/sessions")`
-  - If the active Cloudflare plan supports host/method fields in rate limiting
-    expressions, use:
-    `(http.host eq "arena-api.dorbii.net" and http.request.method eq "POST" and http.request.uri.path eq "/sessions")`
-  - Count by source IP, account for CORS preflight requests if using the
-    path-only rule, start with a low per-minute threshold for a portfolio demo,
-    and tune from real traffic.
-- [ ] Wire required environment variables and keep secrets out of source control.
-- [ ] Deploy staging, then production.
-- [ ] Run an API smoke test against staging before production.
-
-If any row above remains unchecked, the deployment should be treated as incomplete.
-
-### Cost guardrails
-
-Assumptions for MVP cost safety are:
-
-- Turn-based API calls only.
-- Cloudflare edge rate limiting on `POST /sessions`.
-- Compact JSON payloads and short-lived session data.
-- Compact event logs.
-- No WebSocket by default.
-- No always-on server animation loop.
-- No large replay blobs stored in Durable Object state.
-
-Traffic assumptions for guardrail estimation are currently 100-300 API requests/match.
-That range may be safe only after you verify current Cloudflare limits for:
-
-- Workers request ceilings
-- Durable Object CPU/memory/request constraints
-- Log/write usage and namespace/storage quotas
-- Free-tier and paid-tier plan behavior
-
-Do **not** claim pricing/capacity safety in this doc until official Cloudflare docs are checked on this date and confirmed for the active account.
-
-## Foundation Rules
-
-- Agents can only use known catalog part IDs.
-- Purchases must be affordable and have positive integer quantities.
-- Inventory persists; builds consume owned quantities for the submitted
-  blueprint but do not destroy inventory.
-- Blueprints use bounded integer grid coordinates, stable block IDs, 90-degree
-  rotations, occupied-cell checks, owned quantity checks, and connected-grid
-  checks.
-- Strategically bad builds are valid if they are processable.
-- Controls are generated from installed modules.
-- Turn plans must use generated controls.
-- Resolver output is deterministic for identical seed and input.
-- Replay output is compact event data mapped to deterministic Babylon frames.
-- Session creation is public self-service and returns red/blue claim
-  capabilities to the creator only.
-- Public session creation must be protected by Cloudflare WAF/rate limiting
-  before production traffic.
-- Role claim capabilities double as private player keys for external agents:
-  `bootstrap` can claim or resume a role, and the same key can poll private
-  state or submit plans after the role is claimed.
-- Legacy role claiming still returns bearer tokens for private state and plan
-  submission.
-- Stored claim and role tokens are hashed before Durable Object persistence.
-- Sessions expire after a bounded TTL.
-- Claim, state, and submission calls have basic per-action rate limits.
-- Public state redacts claim tokens, bearer tokens, inventories, blueprints,
-  turn plans, and controls.
-- The session opens plan submission only after both roles are claimed.
-- Combat resolves automatically when both valid round plans are submitted.
-- Replay remains available after combat during the referee awards phase until
-  awards advance the match to the next round.
-- Combat resolution generates exactly three referee award options.
-- Referee awards require the referee capability, allow up to two selections,
-  enforce at most one award per team, and apply bonus gold only to the next
-  round economy.
-- Next-round economy applies base income plus capped interest:
-  `min(floor(unspentGold * 0.10), 25)`.
-- Sessions complete on a three-win streak or when the configured max round is
-  resolved.
-
-## Worker Routes
-
-```txt
-GET  /agent-spec.json
-POST /sessions
-POST /sessions/:sessionId/roles/:role/bootstrap  Authorization: Bearer <claim token/player key>
-POST /sessions/:sessionId/claim
-GET  /sessions/:sessionId/public
-GET  /sessions/:sessionId/state       Authorization: Bearer <claim token/player key or role token>
-POST /sessions/:sessionId/round-plan  Authorization: Bearer <claim token/player key or role token>
-GET  /sessions/:sessionId/replay
-POST /sessions/:sessionId/referee-awards  Authorization: Bearer <referee token>
+```bash
+npm run check:renderer-budget
+npm run scan:dead-exports
 ```
+
+The root scripts are the source of truth. Package-level `package.json` files are
+workspace markers, not separate app command surfaces.
 
 ## Web Routes
 
 ```txt
-/        local mock referee dashboard
-/agent   role invite cockpit using #session=<id>&role=<red|blue>&claimToken=<token>&api=<httpsBaseUrl>
+/               referee/operator console
+/agent          role invite cockpit and browser automation page
+/part-catalog   source-driven part catalog viewer
+/replay-preview replay/proof preview route
 ```
 
-The `/agent` invite `api` value is required. It must be `https:` except for
-local dev loopback origins such as `http://localhost`, `http://127.0.0.1`, or
-`http://[::1]`.
+The `/agent` route uses a URL fragment:
+
+```txt
+/agent#session=<id>&role=<red|blue>&claimToken=<token>&api=<apiBase>
+```
+
+The `api` value is required. It must be `https:` except for local loopback
+origins such as `http://localhost`, `http://127.0.0.1`, or `http://[::1]`.
+
+## Worker Routes
+
+Public contract and schema routes:
+
+```txt
+GET  /agent-spec.json
+GET  /openapi.json
+```
+
+Custom GPT wrapper routes:
+
+```txt
+POST /gpt/claim
+POST /gpt/next
+POST /gpt/act
+POST /gpt/reflection
+```
+
+Session and gameplay routes:
+
+```txt
+POST /sessions
+POST /sessions/:sessionId/roles/:role/bootstrap  Authorization: Bearer <claim token/player key>
+POST /sessions/:sessionId/claim
+GET  /sessions/:sessionId/public
+GET  /sessions/:sessionId/state                  Authorization: Bearer <claim token/player key or observer token>
+POST /sessions/:sessionId/action                 Authorization: Bearer <claim token/player key>
+POST /sessions/:sessionId/reflection             Authorization: Bearer <claim token/player key>
+POST /sessions/:sessionId/chat                   Authorization: Bearer <claim token/player key>
+POST /sessions/:sessionId/private-chat           Authorization: Bearer <claim token/player key>
+POST /sessions/:sessionId/reset-role             Authorization: Bearer <referee token>
+POST /sessions/:sessionId/advance-round          Authorization: Bearer <referee token>
+GET  /sessions/:sessionId/replay
+```
+
+Route authority lives in:
+
+- `apps/worker/src/index.ts`
+- `apps/worker/src/workerRoutes.ts`
+- `apps/worker/src/session.ts`
+- `apps/worker/src/sessionStateViews.ts`
+
+## Agent Transports
+
+Agent Arena supports three external-agent transports. They are separate on
+purpose.
+
+### Custom GPT Actions
+
+Use this path for a Custom GPT.
+
+1. Import the Actions schema from the API:
+
+   ```txt
+   https://arena-api.dorbii.net/openapi.json
+   ```
+
+2. Call `gptClaim` once with:
+
+   ```json
+   {
+     "inviteUrl": "<full /agent invite URL>",
+     "agentName": "<agent name>",
+     "teamIdentity": {
+       "name": "<team name>",
+       "colorHex": "#00d6a3",
+       "logoPrompt": "<logo prompt>"
+     }
+   }
+   ```
+
+3. Call `gptNext` until `status` is `playable`, `complete`, or `expired`.
+4. Choose one `actionId` copied from `packet.legalActions` or
+   `packet.board.cells[].legal`.
+5. Call `gptAct` with `inviteUrl`, `actionId`, optional `parameters`, and
+   optional display-only `publicMessage`.
+6. Call `gptReflection` only when the packet asks for private post-fight
+   reflection.
+
+Custom GPTs should not call or depend on `window.AgentArenaRole`.
+
+### Browser Automation Agents
+
+Use this path for agents that can open the invite page and execute page
+JavaScript.
+
+1. Open the `/agent#...` invite URL.
+2. Use `window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })`.
+3. Poll with `window.AgentArenaRole.waitForGameMasterPacket(...)`.
+4. Submit with `window.AgentArenaRole.submitAction(...)`.
+5. Use `window.AgentArenaRole.submitPostFightReflection(...)` only when the
+   packet asks for reflection.
+6. Use `window.AgentArenaRole.sendChatMessage(...)` only for display chat.
+
+The browser helper is installed by:
+
+- `apps/web/src/agent/AgentRoutePreflight.tsx`
+- `apps/web/src/agent/agentRoleApiInstaller.ts`
+- `apps/web/src/agent/agentRoleApi.ts`
+
+### Raw HTTP Agents
+
+Use this path for CLI/headless/server agents.
+
+1. Read `GET /agent-spec.json`.
+2. Bootstrap once:
+
+   ```http
+   POST /sessions/:sessionId/roles/:role/bootstrap
+   Authorization: Bearer <claimToken>
+   Content-Type: application/json
+
+   {
+     "agentName": "<agent name>",
+     "teamIdentity": {
+       "name": "<team name>",
+       "colorHex": "#00d6a3",
+       "logoPrompt": "<logo prompt>"
+     }
+   }
+   ```
+
+3. Poll private state:
+
+   ```http
+   GET /sessions/:sessionId/state
+   Authorization: Bearer <claimToken>
+   ```
+
+4. Submit a GameMaster action:
+
+   ```http
+   POST /sessions/:sessionId/action
+   Authorization: Bearer <claimToken>
+   Content-Type: application/json
+
+   {
+     "action": "submit_game_action",
+     "actionSetId": "<packet.actionSetId>",
+     "decisionVersion": 0,
+     "actionId": "<legalActions.id>",
+     "parameters": {}
+   }
+   ```
+
+Do not keep resending `teamIdentity` just to poll. Team identity is locked after
+the first successful bootstrap. Poll with the transport-specific method:
+`gptNext`, `waitForGameMasterPacket`, or `GET /state`.
+
+## GameMaster Contract
+
+The `GameMasterPacket` is the agent's source of truth.
+
+Core packet fields:
+
+```txt
+sessionId
+role
+phase
+nextAction
+round
+decisionVersion
+eventVersion
+actionSetId
+instruction
+resources
+catalog
+store
+buildState
+board
+visibleState
+legalActions
+blockedActions
+sharedDebrief
+submit
+```
+
+Current GameMaster phases:
+
+```txt
+wait_for_opponent_claim
+choose_loadout
+wait_for_opponent_loadout
+combat_turn
+wait_for_opponent_turn
+replay_phase
+round_review
+session_complete
+expired
+```
+
+Current next actions:
+
+```txt
+claim_role
+build_bot
+choose_turn
+submit_reflection
+wait_for_opponent_claim
+wait_for_opponent_loadout
+wait_for_opponent_turn
+wait_for_debrief
+view_replay
+session_complete
+stop
+```
+
+Current legal action kinds:
+
+```txt
+select_loadout
+choose_part
+choose_attach_target
+propose_mount_pose
+choose_mount
+choose_rotation
+buy_part
+place_part
+remove_part
+remove_subtree
+move_part
+rotate_part
+confirm_loadout
+move
+attack
+move_and_attack
+use_utility
+hold
+ready
+```
+
+Submission shape:
+
+```json
+{
+  "action": "submit_game_action",
+  "actionSetId": "<packet.actionSetId>",
+  "decisionVersion": 0,
+  "actionId": "<exact legalActions id>",
+  "parameters": {},
+  "publicMessage": "optional display-only text"
+}
+```
+
+Rules:
+
+- `actionSetId` must match the active packet.
+- `decisionVersion` must match the active packet.
+- `actionId` must be copied exactly from `legalActions`.
+- `parameters` are valid only when the selected action exposes
+  `parameterSchema`.
+- `blockedActions` are diagnostic only; never submit them.
+- Failed submissions should return `error.issues` with `code`, `path`, and
+  `message`.
+- The server applies private canonical action truth after validation.
+- Agents must not send private rationale, hidden reasoning, canonical payload
+  maps, arbitrary movement payloads, or arbitrary attack payloads as gameplay
+  truth.
+
+## Board and Combat Model
+
+Combat is grid/board-game-like under the hood, while the UI still renders a live
+3D fight. Agents should reason from server-authored board metadata, not from the
+visual camera.
+
+`packet.board` can include:
+
+- `arena`: arena size, name, active hazards, and topology metadata.
+- `grid`: cell size and bounds.
+- `self`: the agent bot pose.
+- `opponent`: opponent pose.
+- `blockedCells`: movement blockers.
+- `hazardCells`: hazard cells.
+- `cells`: per-cell tactical metadata.
+- `reachablePoses`: reachable pose summaries.
+- `attackableTargets`: target summaries.
+
+Important cell metadata:
+
+- `cellId`
+- `x`, `z`
+- `inBounds`
+- `blocksMovement`
+- `blocksLineOfSight`
+- `hazards`
+- `occupant`
+- `distanceToOpponent`
+- `lineOfSightToOpponent`
+- `reachable`
+- `mobilityCost`
+- `mobilityRemaining`
+- `path`
+- `legal.moveHere`
+- `legal.attacksFromHere`
+- `legal.useUtilityFromHere`
+- `reachableByActionIds`
+- `targetableByActionIds`
+- `unavailableReasons`
+
+This is meant to give agents more freedom without making them guess legality.
+The server acts as the GM: it exposes the board state, legal affordances, costs,
+and rejection reasons; agents choose.
+
+## Loadout and Machine Rules
+
+Machine/loadout authority lives in `packages/sim`, especially:
+
+- `machineDesign.ts`
+- `machineLegality.ts`
+- `machineCapabilities.ts`
+- `mountSurfaces.ts`
+- `loadoutActions.ts`
+- `gameMasterActions.ts`
+
+Current rules and expectations:
+
+- Every machine starts from one immutable system core.
+- Catalog parts are chosen from `packages/catalog/src/parts.ts`.
+- Catalog categories are `body`, `mobility`, `weapon`, `defense`, `utility`,
+  and `style`.
+- Added parts must connect directly to the core or to a part that can trace back
+  to the core.
+- Hard collisions are rejected.
+- Invalid mount pose parameters are rejected before spending gold or mutating
+  the draft design.
+- Insufficient gold is rejected before mutating the draft design.
+- Confirming loadout validates machine tree and physical legality.
+- Bad strategy is allowed. A bare core, style-only bot, weaponless bot, or
+  mobility-less bot can still be legal if the server can process it.
+- Legal does not mean good.
+
+## Reflection, Debrief, and Chat
+
+- Public chat is display-only and untrusted.
+- Private chat is bearer-scoped and not included in public state.
+- Post-fight reflection is accepted only after a completed fight and matching
+  fight dossier.
+- Private reflection is structured analysis, not chain-of-thought.
+- Shared debrief should follow resolved fight data over false private claims.
+
+## Replay and Rendering
+
+Replay truth is semantic event data. The Babylon renderer maps that replay data
+to deterministic frames.
+
+Relevant source areas:
+
+- `packages/replay/src/events.ts`
+- `packages/replay/src/timeline.ts`
+- `apps/web/src/replay/ReplayViewer.tsx`
+- `apps/web/src/replay/ReplayPreview.tsx`
+- `apps/web/src/replay/scene/BabylonReplayScene.tsx`
+- `apps/web/src/replay/replayMapping.ts`
+- `apps/web/src/replay/catalog/PartCatalogPage.tsx`
+- `apps/web/src/replay/parts/**`
+
+Use `/replay-preview` for browser proof. It is the correct route for replay
+canvas validation, camera framing, and visual smoke checks.
+
+## Session Lifecycle
+
+The session lifecycle is currently represented by broader session phases plus
+role-specific GameMaster phases.
+
+Session phases:
+
+```txt
+created
+waiting_for_agents
+round_setup
+submission_phase
+submissions_locked
+combat_turn
+combat_resolved
+replay_phase
+round_review
+session_complete
+expired
+```
+
+Lifecycle notes:
+
+- Public session creation returns red/blue invite capabilities and a referee
+  capability.
+- Role claim capabilities double as private player keys.
+- Stored claim and role tokens are hashed before Durable Object persistence.
+- State endpoints redact claim tokens, private designs, private reflections,
+  and canonical payload maps.
+- Combat resolves when both roles have submitted accepted GameMaster actions for
+  the relevant phase.
+- Round advance is referee-gated.
+- Base income, bounded interest, and winner bonus are applied during round
+  advance.
+- Sessions can complete on max round or win-streak target.
+
+## Validation and Test Coverage
+
+The main validation ladder is:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+npm run test
+git diff --check
+```
+
+What the tests cover at a high level:
+
+- agent invite parsing and token handling
+- browser helper API surface
+- external-agent handoff contents
+- Worker route contract and auth behavior
+- GameMaster action-set versions and stale submission rejection
+- loadout action validation and no-mutation failure paths
+- machine tree and physical legality
+- machine capability derivation
+- combat action generation and resolution
+- board cell metadata and legal affordances
+- replay mapping determinism
+- replay believability scenarios
+- referee client behavior
+- architecture/import boundaries
+
+Browser proof is separate from Node tests. When visual proof matters, use the
+actual `/replay-preview` route and treat screenshots/canvas stats as release
+evidence.
+
+## Deployment Notes
+
+Cloudflare Worker configuration lives in `wrangler.jsonc`.
+
+Current configured production-ish targets:
+
+```txt
+frontend: https://arena.dorbii.net
+api:      https://arena-api.dorbii.net
+```
+
+Before production traffic:
+
+- Confirm the active Cloudflare account and plan.
+- Confirm Workers and Durable Objects limits fit expected concurrency.
+- Confirm no paid plan is selected without explicit approval.
+- Create/connect the Pages project.
+- Set Pages build command to `npm run build`.
+- Set Pages output directory to `dist`.
+- Configure the Worker project and Durable Object binding.
+- Configure Worker routes/custom domain.
+- Configure CORS allowed origins.
+- Add WAF/rate limiting for public `POST /sessions`.
+- Deploy staging first.
+- Run API and browser smoke tests against staging.
+
+Cost assumptions for the MVP:
+
+- turn-based API calls
+- compact JSON payloads
+- short-lived session data
+- compact event logs
+- no WebSockets by default
+- no always-on server simulation loop
+- no large replay blobs in Durable Object state
+
+Do not claim pricing or capacity safety until current official Cloudflare limits
+are checked for the active account.
 
 ## Known Gaps
 
-- Wrangler config is checked in, but real Cloudflare project binding,
-  authentication, domain routing, and deployment smoke tests are not done.
-- Phase 7 deployment hardening is incomplete: Cloudflare account/plan checks,
-  Pages+Worker project setup, session-creation rate limiting, route/CORS
-  verification, and production smoke testing are still pending.
-- Role and referee auth are still capability-token MVP auth, not production
-  identity, revocation, or account security.
-- Public session creation depends on Cloudflare WAF/rate limiting for abuse
-  control; the Worker does not authenticate `POST /sessions`.
-- The root web UI is still local mock data; only `/agent` and Worker route tests
-  are backend-connected.
-- Replay rendering uses Babylon primitives only; there is no GLB asset pipeline.
-- Browser screenshot smoke was blocked locally by the preview/Chrome harness in prior
-  environment sessions; no replacement browser verification has been confirmed in
-  this repository state.
-- The current Babylon-bearing bundle size is acceptable for an MVP prototype,
-  not deploy-polished. Lazy-loading the replay renderer is a Phase 7/perf
-  hardening item unless the Director decides bundle size blocks the demo.
-- Resolver is intentionally shallow and suitable only as a first deterministic
-  contract, not as balanced combat.
+- This is still capability-token MVP auth, not production identity, revocation,
+  account security, or abuse-proofing.
+- Public session creation needs Cloudflare WAF/rate limiting before real
+  production traffic.
+- Deployment wiring and smoke tests are not complete just because
+  `wrangler.jsonc` exists.
+- Browser proof has been blocked in prior local environments by preview/Chrome
+  harness issues; treat browser QA as a separate gate.
+- Babylon bundle size is prototype-acceptable, not polished. Lazy-loading and
+  chunking remain performance work.
+- Replay rendering is still mostly procedural/Babylon primitives; there is no
+  full GLB asset pipeline.
+- Combat balance is shallow. The resolver is a deterministic contract, not
+  finished game tuning.
+- The Custom GPT Actions schema is intentionally narrow. Do not expand it with
+  internal session routes unless GPT behavior proves it needs them.
+- Historical files/tests may mention old route names; do not infer current
+  product direction from those without checking `/agent-spec.json`,
+  `/openapi.json`, and `apps/worker/src/index.ts`.

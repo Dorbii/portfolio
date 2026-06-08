@@ -1,5 +1,6 @@
 import {
   createAgentContract,
+  createAgentActionsOpenApi,
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
@@ -113,6 +114,17 @@ export async function handleWorkerRequest(
       createAgentContract({
         catalogGuidance: createAgentCatalogGuidance(PART_CATALOG),
         partCatalog: PART_CATALOG,
+      }),
+      {},
+      request,
+      env,
+    )
+  }
+
+  if (request.method === 'GET' && url.pathname === '/openapi.json') {
+    return jsonResponse(
+      createAgentActionsOpenApi({
+        apiBase: url.origin,
       }),
       {},
       request,

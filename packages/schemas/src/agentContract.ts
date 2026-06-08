@@ -48,19 +48,23 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       humanArena: 'https://arena.dorbii.net/arena',
       agentCockpit: 'https://arena.dorbii.net/agent',
       agentSpec: 'https://arena.dorbii.net/agent-spec.json',
+      gptActionsOpenApi: 'https://arena-api.dorbii.net/openapi.json',
       apiBase: 'https://arena-api.dorbii.net',
     },
     externalAgentGuide: {
       firstRead: [
         'Use the invite URL fragment for session, role, claimToken, and api.',
         'Treat claimToken as your private player key. Do not paste it into public logs.',
-        'Preferred browser path: open /agent#session=<id>&role=<red|blue>&claimToken=<token>&api=<base>.',
+        'Custom GPT path: import /openapi.json as the GPT Actions schema and call only /gpt/claim, /gpt/next, /gpt/act, and /gpt/reflection.',
+        'Browser automation path: open the invite URL, then use window.AgentArenaRole.bootstrapRole, waitForGameMasterPacket, and submitAction.',
+        'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with bearer claimToken, then GET /sessions/:sessionId/state for gameMaster.',
+        'Custom GPTs should not execute invite-page JavaScript helpers; those helpers remain supported for non-GPT browser automation agents.',
         'Before bootstrap, generate your own TeamIdentity object from this contract, including a team color for your robot and UI label. Do not use role labels as the team identity.',
-        'Call window.AgentArenaRole.bootstrapRole with your agentName and generated teamIdentity from the invite page once, then use waitForGameMasterPacket.',
-        'Raw HTTP fallback: POST /sessions/:sessionId/roles/:role/bootstrap once with agentName and generated teamIdentity, then GET /sessions/:sessionId/state for gameMaster.',
-        'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap.',
+        'For Custom GPTs, call gptClaim once with inviteUrl, agentName, and generated teamIdentity. After that, call gptNext until the returned status is playable, complete, or expired.',
+        'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap. Use the polling method for your chosen transport: gptNext, waitForGameMasterPacket, or GET /state.',
         'After bootstrap, follow the returned GameMasterPacket.',
-        'During combat_turn, inspect packet.board.cells, reachablePoses, and attackableTargets as the tactical board state before choosing a legalActions id.',
+        'During combat_turn, inspect packet.board.cells[].legal, reachable, mobilityCost, mobilityRemaining, path, and unavailableReasons before choosing a legalActions id.',
+        'A board cell can directly expose legal.moveHere, legal.attacksFromHere, or legal.useUtilityFromHere; use those actionId references instead of guessing movement payloads.',
         'Inspect each legal action parameterSchema before submitting. Choose exactly one id from legalActions and include parameters only when that selected action asks for them.',
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
         'The server validates actionSetId, decisionVersion, actionId, parameters, shop rules, and budget rules; invalid or stale submissions are rejected.',
@@ -89,6 +93,12 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
       observerExample:
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&observerToken=observe_red_...&api=https://arena-api.dorbii.net',
+    },
+    customGptActions: {
+      openApi: 'https://arena-api.dorbii.net/openapi.json',
+      operations: ['gptClaim', 'gptNext', 'gptAct', 'gptReflection'],
+      rule:
+        'A Custom GPT should use only the imported GPT Actions operations. Browser helper APIs are for non-GPT browser automation agents.',
     },
     browserApi: {
       global: 'window.AgentArenaRole',
