@@ -3,7 +3,10 @@ import {
   rolePublicState,
 } from './sessionSupport.js'
 import { buildCombatDecisionBrief } from './sessionCombatDecision.js'
-import { botDesignSnapshotToBlueprint } from '../../../packages/sim/src/index.js'
+import {
+  botDesignSnapshotToLegacyBotBlueprintProjection,
+  machineDesignToLegacyBotBlueprintProjection,
+} from '../../../packages/sim/src/index.js'
 import type {
   GameMasterNextAction,
   GameMasterPhase,
@@ -22,6 +25,7 @@ export function buildRolePrivateState(
   role: StoredRoleState,
 ): LegacyRolePrivateState {
   const opponent = role.role === 'red' ? state.roles.blue : state.roles.red
+  const ownLoadout = legacyOwnLoadoutProjection(role)
 
   return cloneJson({
     sessionId: state.id,
@@ -38,14 +42,7 @@ export function buildRolePrivateState(
     inventory: role.inventory,
     ...(role.controls ? { controls: role.controls } : {}),
     submitted: Boolean(role.loadoutConfirmedAt),
-    ...(role.currentDesign && role.loadoutConfirmedAt
-      ? {
-          ownLoadout: {
-            blueprint: botDesignSnapshotToBlueprint(role.currentDesign),
-            confirmedAt: role.loadoutConfirmedAt,
-          },
-        }
-      : {}),
+    ...(ownLoadout ? { ownLoadout } : {}),
     ...(state.roundPlan ? { roundPlan: state.roundPlan } : {}),
     ...(state.combat
       ? {
@@ -72,6 +69,53 @@ export function buildRolePrivateState(
     privateChatLog: role.privateChatLog,
     eventLog: state.eventLog,
   })
+}
+
+function legacyOwnLoadoutProjection(
+  role: StoredRoleState,
+): LegacyRolePrivateState['ownLoadout'] {
+  // CODEX_INTENT: render ownLoadout from StoredDesign projections while keeping legacy display naming stable.
+  // CODEX_RISK: behavioral
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  if (!role.loadoutConfirmedAt) {
+    return undefined
+  }
+
+  if (role.storedDesign?.version === 'machine:v1') {
+    return {
+      blueprint: legacyNamedProjection(
+        machineDesignToLegacyBotBlueprintProjection(role.storedDesign.machine),
+        legacyProjectionNameForRole(role),
+      ),
+      confirmedAt: role.loadoutConfirmedAt,
+    }
+  }
+
+  const legacyDesign = role.storedDesign?.version === 'legacy-bot-design:v1'
+    ? role.storedDesign.design
+    : role.currentDesign
+
+  return legacyDesign
+    ? {
+        blueprint: legacyNamedProjection(
+          botDesignSnapshotToLegacyBotBlueprintProjection(legacyDesign),
+          legacyProjectionNameForRole(role),
+        ),
+        confirmedAt: role.loadoutConfirmedAt,
+      }
+    : undefined
+}
+
+function legacyProjectionNameForRole(role: StoredRoleState): string | undefined {
+  return role.loadoutBuildState?.legacyDraft?.name ?? role.currentDesign?.name
+}
+
+function legacyNamedProjection<T extends { name: string }>(
+  projection: T,
+  legacyName: string | undefined,
+): T {
+  return legacyName ? { ...projection, name: legacyName } : projection
 }
 
 export function buildPublicSessionState(state: StoredSessionState): LegacyPublicSessionState {

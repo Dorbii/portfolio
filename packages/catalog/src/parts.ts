@@ -1,6 +1,8 @@
 import type {
   ArmorSpec,
+  MachinePartCapabilityDefinition,
   MobilitySpec,
+  MountSurface,
   PartCategory,
   PartDefinition,
   PartEffect,
@@ -35,12 +37,14 @@ type PartInput = {
   stats?: PartStats
   footprint?: PartFootprint
   mounts?: PartMount[]
+  mountSurfaces?: MountSurface[]
   spec?: PartSpec
   signatureEffect?: PartEffect
   mechanics?: PartEffect[]
   visual?: Partial<PartVisualDescriptor>
   behavior?: PartDefinition['behavior']
   controls?: PartDefinition['controls']
+  machineCapabilities?: MachinePartCapabilityDefinition
 }
 
 function part(input: PartInput): PartDefinition {
@@ -54,6 +58,7 @@ function part(input: PartInput): PartDefinition {
     rarity: input.rarity ?? inferRarity(input),
     footprint: input.footprint ?? inferFootprint(input),
     mounts: input.mounts ?? inferMounts(input),
+    mountSurfaces: input.mountSurfaces ?? inferMountSurfaces(input),
     spec: input.spec ?? inferSpec(input),
     ...(signatureEffect ? { signatureEffect } : {}),
     ...(mechanics.length > 0 ? { mechanics } : {}),
@@ -295,6 +300,36 @@ function inferMounts(input: PartInput): PartMount[] {
   return []
 }
 
+function inferMountSurfaces(input: PartInput): MountSurface[] {
+  if (input.category === 'style') {
+    return []
+  }
+
+  const deckAccepts: PartCategory[] = input.category === 'mobility'
+    ? ['defense', 'utility', 'style']
+    : ['weapon', 'defense', 'utility', 'style']
+
+  const surfaces: MountSurface[] = [
+    panelSurface(
+      'deck_panel',
+      deckAccepts,
+      [0, input.size[1] / 2, 0],
+      [Math.max(0.5, input.size[0]), Math.max(0.5, input.size[2])],
+    ),
+  ]
+
+  if (input.category === 'body') {
+    surfaces.push(sphereSurface(
+      'hull_shell',
+      ['mobility', 'weapon', 'defense', 'utility', 'style'],
+      [0, 0, 0],
+      Math.max(input.size[0], input.size[1], input.size[2]) / 2,
+    ))
+  }
+
+  return surfaces
+}
+
 function sideMount(id: string, accepts: PartCategory[], sector: string): PartMount {
   return {
     id,
@@ -340,6 +375,39 @@ function internalMount(accepts: PartCategory[]): PartMount {
     collisionPolicy: 'internal_only',
     rotationOptions: [0],
     sectors: ['internal'],
+  }
+}
+
+function panelSurface(
+  id: string,
+  accepts: PartCategory[],
+  center: Vector3,
+  size: [number, number],
+): MountSurface {
+  return {
+    id,
+    kind: 'panel',
+    accepts,
+    center,
+    size,
+    normal: [0, 1, 0],
+    uAxis: [1, 0, 0],
+    vAxis: [0, 0, 1],
+  }
+}
+
+function sphereSurface(
+  id: string,
+  accepts: PartCategory[],
+  center: Vector3,
+  radius: number,
+): MountSurface {
+  return {
+    id,
+    kind: 'sphere',
+    accepts,
+    center,
+    radius,
   }
 }
 
@@ -703,6 +771,38 @@ function inferPowerSpec(input: PartInput): PowerSpec {
   }
 }
 
+function movementMachineCapabilities(
+  mode: NonNullable<MachinePartCapabilityDefinition['movement']>['mode'],
+  lateralAxis?: NonNullable<MachinePartCapabilityDefinition['movement']>['lateralAxis'],
+): MachinePartCapabilityDefinition {
+  return {
+    movement: {
+      mode,
+      driveAxis: 'forward',
+      ...(lateralAxis ? { lateralAxis } : {}),
+    },
+  }
+}
+
+function weaponMachineCapabilities(
+  mode: NonNullable<MachinePartCapabilityDefinition['weapon']>['mode'] = 'fixed_emitter',
+): MachinePartCapabilityDefinition {
+  return {
+    weapon: {
+      mode,
+      emitterAxis: 'forward',
+    },
+  }
+}
+
+function utilityMachineCapabilities(): MachinePartCapabilityDefinition {
+  return {
+    utility: {
+      mode: 'activated_utility',
+    },
+  }
+}
+
 export const PART_CATALOG: PartDefinition[] = [
   part({
     id: 'Body_Square_Small',
@@ -903,6 +1003,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('normal_wheel'),
     stats: { drive: 7, traction: 2 },
   }),
   part({
@@ -914,6 +1015,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 14,
     size: [1.5, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('normal_wheel'),
     stats: { drive: 6, traction: 4, stability: 1 },
   }),
   part({
@@ -925,6 +1027,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 20,
     size: [2, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('normal_wheel'),
     stats: { drive: 5, traction: 6, stability: 2 },
   }),
   part({
@@ -936,6 +1039,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [2, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('normal_wheel'),
     stats: { drive: 4, traction: 9, stability: 4 },
   }),
   part({
@@ -947,6 +1051,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 10,
     size: [1, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('omni_wheel', 'right'),
     stats: { drive: 9, traction: 3, control: 2, chaos: 1 },
   }),
   part({
@@ -958,6 +1063,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('mecanum_wheel', 'right'),
     stats: { drive: 8, traction: 3, control: 4, chaos: 2 },
   }),
   part({
@@ -969,6 +1075,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 16,
     size: [1, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('normal_wheel'),
     stats: { drive: 5, traction: 7, weapon: 2, chaos: 1 },
   }),
   part({
@@ -980,6 +1087,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 22,
     size: [2, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('tank_tread'),
     stats: { drive: 5, traction: 9, stability: 4 },
   }),
   part({
@@ -991,6 +1099,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 36,
     size: [2, 2, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('tank_tread'),
     stats: { drive: 3, traction: 13, stability: 7 },
   }),
   part({
@@ -1002,6 +1111,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 10,
     size: [1, 1, 1],
     controls: { movement: true },
+    machineCapabilities: movementMachineCapabilities('articulated_leg', 'right'),
     stats: { drive: 5, traction: 2, chaos: 3 },
   }),
   part({
@@ -1023,6 +1133,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 18,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 11, chaos: 3 },
     behavior: PART_BEHAVIORS.spinner,
   }),
@@ -1035,6 +1146,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 28,
     size: [2, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 18, chaos: 5, stability: -2 },
     behavior: PART_BEHAVIORS.spinner,
   }),
@@ -1047,6 +1159,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [1, 2, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 13, chaos: 2 },
   }),
   part({
@@ -1058,6 +1171,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 22,
     size: [2, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 8, control: 8, stability: 1 },
     behavior: PART_BEHAVIORS.flipper,
   }),
@@ -1070,6 +1184,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 16,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 10, control: 2 },
     behavior: PART_BEHAVIORS.saw,
   }),
@@ -1082,6 +1197,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 20,
     size: [1, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 12, control: 3, stability: -1 },
     behavior: PART_BEHAVIORS.saw,
   }),
@@ -1094,6 +1210,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 18,
     size: [1, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 14, chaos: 5, control: -1 },
     behavior: PART_BEHAVIORS.spinner,
   }),
@@ -1106,6 +1223,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 9, chaos: 5, control: -2 },
     behavior: PART_BEHAVIORS.spinner,
   }),
@@ -1118,6 +1236,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [2, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 16, chaos: 6, control: -1, stability: -1 },
     behavior: PART_BEHAVIORS.spinner,
   }),
@@ -1130,6 +1249,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 4, control: 12 },
     behavior: PART_BEHAVIORS.net,
   }),
@@ -1142,6 +1262,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 20,
     size: [1, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities('turret_emitter'),
     stats: { weapon: 12, control: 5 },
     behavior: PART_BEHAVIORS.turret,
   }),
@@ -1154,6 +1275,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 14,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 9, control: 7 },
     spec: {
       kind: 'weapon',
@@ -1173,6 +1295,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 14,
     size: [1, 1, 2],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 7, control: 3 },
   }),
   part({
@@ -1184,6 +1307,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 18,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 5, control: 9 },
     behavior: PART_BEHAVIORS.grabber,
   }),
@@ -1196,6 +1320,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [1, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 11, control: 7, stability: -1 },
     behavior: PART_BEHAVIORS.grabber,
     spec: {
@@ -1216,6 +1341,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 22,
     size: [2, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 7, control: 9, stability: 2 },
     behavior: PART_BEHAVIORS.flipper,
     spec: {
@@ -1236,6 +1362,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 24,
     size: [2, 1, 1],
     controls: { weapon: true },
+    machineCapabilities: weaponMachineCapabilities(),
     stats: { weapon: 6, armor: 2, stability: 2 },
     behavior: PART_BEHAVIORS.ram,
   }),
@@ -1401,6 +1528,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 10,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { drive: 5, chaos: 2 },
     behavior: PART_BEHAVIORS.booster,
   }),
@@ -1413,6 +1541,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { stability: 8 },
     behavior: PART_BEHAVIORS.gyro,
   }),
@@ -1465,6 +1594,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 7, chaos: 1 },
     behavior: PART_BEHAVIORS.sensor,
   }),
@@ -1477,6 +1607,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 14,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 7, chaos: 1 },
     behavior: PART_BEHAVIORS.magnet,
   }),
@@ -1489,6 +1620,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 16,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { traction: 8, stability: 4, drive: -2 },
     behavior: PART_BEHAVIORS.anchor,
   }),
@@ -1501,6 +1633,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { armor: 1 },
     behavior: PART_BEHAVIORS.repair_kit,
   }),
@@ -1513,6 +1646,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 3, chaos: 4 },
     behavior: PART_BEHAVIORS.smoke,
   }),
@@ -1525,6 +1659,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 8,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 4 },
     behavior: PART_BEHAVIORS.sensor,
   }),
@@ -1537,6 +1672,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 10,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 6 },
     behavior: PART_BEHAVIORS.sensor,
   }),
@@ -1549,6 +1685,7 @@ export const PART_CATALOG: PartDefinition[] = [
     durability: 12,
     size: [1, 1, 1],
     controls: { utility: true },
+    machineCapabilities: utilityMachineCapabilities(),
     stats: { control: 6, chaos: 2 },
     behavior: PART_BEHAVIORS.drone_controller,
   }),

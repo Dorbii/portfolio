@@ -115,6 +115,13 @@ const gameActionSubmission = {
   actionId: gameMasterPacket.legalActions[0].id,
 }
 
+const parameterizedGameActionSubmission = {
+  ...gameActionSubmission,
+  parameters: {
+    commitment: 2,
+  },
+}
+
 function jsonResponse(value, init = {}) {
   return new Response(JSON.stringify(value), {
     ...init,
@@ -303,6 +310,12 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('"actionSetId":"<packet.actionSetId>"'))
   assert.ok(brief.includes('"actionId":"<legalActions[0].id>"'))
   assert.ok(brief.includes('actionId must be copied from legalActions exactly.'))
+  assert.ok(brief.includes('Inspect each legal action parameterSchema before submitting'))
+  assert.ok(brief.includes("candidate.kind === 'propose_mount_pose'"))
+  assert.ok(brief.includes("actionId: action.id"))
+  assert.ok(brief.includes("parentInstanceId: 'core'"))
+  assert.ok(brief.includes('Machine legality is not strategy quality'))
+  assert.ok(brief.includes('shop and budget constraints still apply'))
   assert.ok(brief.includes('Reflection claims should be concise post-fight analysis, not hidden chain-of-thought.'))
   assert.ok(brief.includes('Phase: submission_phase'))
   assert.ok(brief.includes('State version: v1'))
@@ -492,6 +505,49 @@ test('agent client claims, reads state, and submits GameMaster action ids with b
     agentName: 'Red',
   })
   assert.deepEqual(calls[2].body, gameActionSubmission)
+})
+
+test('agent client submits schema-defined GameMaster action parameters', async () => {
+  const calls = []
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'role_red',
+    fetchImpl: async (url, init = {}) => {
+      calls.push({
+        url: String(url),
+        body: init.body ? JSON.parse(String(init.body)) : undefined,
+      })
+
+      return jsonResponse({
+        packet: gameMasterPacket,
+        publicState: {
+          sessionId: invite.sessionId,
+          stateVersion: 'v2',
+          phase: 'combat_turn',
+          round: 1,
+          maxRounds: 7,
+          expiresAt: roleState.expiresAt,
+          arena: {
+            name: 'Compact Box',
+            width: 24,
+            height: 16,
+            activeHazards: ['floor_saw'],
+          },
+          roles: {
+            red: { role: 'red', claimed: true, submitted: true },
+            blue: { role: 'blue', claimed: true, submitted: false },
+          },
+          replayAvailable: false,
+          eventLog: roleState.eventLog,
+        },
+      })
+    },
+  })
+
+  await client.submitAction(parameterizedGameActionSubmission)
+
+  assert.equal(calls[0].url.endsWith('/action'), true)
+  assert.deepEqual(calls[0].body, parameterizedGameActionSubmission)
 })
 
 test('agent client rejects submitAction gameplay payload fields before posting', async () => {

@@ -18,6 +18,7 @@
     "apps/web/src/mockReplayTimelines.ts",
     "apps/web/src/mockSessionState.ts",
     "apps/web/src/replay/camera/**/*.ts",
+    "apps/web/src/replay/bots/geometry.ts",
     "apps/web/src/replay/replayMapping.ts",
     "packages/**/*.ts"
   ]

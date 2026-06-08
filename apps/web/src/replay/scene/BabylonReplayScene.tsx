@@ -4,6 +4,7 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type {
   ArenaConfig,
+  MachineDesign,
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
 import type { ReplayTimeline } from '../../../../../packages/replay/src/index.js'
@@ -62,6 +63,16 @@ type RendererState = {
 
 type ReplaySceneStats = BabylonRendererStats
 
+type ReplayPartDebugState = {
+  role: TeamRole
+  blockId: string
+  partId: string
+  visualAuthority?: string
+  enabled: boolean
+  absolutePosition: [number, number, number]
+  rotationQuaternion?: [number, number, number, number]
+}
+
 type ReplayDebugFocusOptions = {
   alpha?: number
   beta?: number
@@ -73,6 +84,7 @@ type ReplayDebugFocusOptions = {
 
 type ReplaySceneDebugApi = {
   focusPart?: (options: ReplayDebugFocusOptions) => boolean
+  getPartDebugStates: () => ReplayPartDebugState[]
   getStats: () => ReplaySceneStats
 }
 
@@ -81,6 +93,7 @@ type BabylonReplaySceneProps = {
   botBlueprints: ReplayBotBlueprints
   cameraPreset: CameraPreset
   immediateCamera?: boolean
+  machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   timeline: ReplayTimeline
   time: number
@@ -97,6 +110,7 @@ export function BabylonReplayScene({
   botBlueprints,
   cameraPreset,
   immediateCamera = false,
+  machineDesigns,
   teamIdentities,
   timeline,
   time,
@@ -152,27 +166,21 @@ export function BabylonReplayScene({
       const teamMaterials = createTeamMaterials(scene, { identities: teamIdentities })
       const hazards = createArena(scene, arena)
       const bots = {
-        red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red),
-        blue: createBotNode(scene, botBlueprints.blue, 'blue', teamMaterials.blue),
+        red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red, machineDesigns?.red),
+        blue: createBotNode(scene, botBlueprints.blue, 'blue', teamMaterials.blue, machineDesigns?.blue),
       }
       const botProfiles = createBotVisualProfiles(botBlueprints, { identities: teamIdentities })
       const effectPool = createEffectPool(scene)
       createRendererGlow(scene, 'replay-glow', 0.32)
-      const replayDebugApi: ReplaySceneDebugApi = {
-        getStats: () => createRendererStats(scene, engine),
-      }
+      const getSceneStats = () => createRendererStats(scene, engine)
+      let cleanupReplayDebugApi: (() => void) | undefined
 
       if (import.meta.env.DEV) {
-        replayDebugApi.focusPart = (options) => {
-          if (!resources) {
-            return false
-          }
-
-          return focusReplayPart(resources, options)
-        }
+        cleanupReplayDebugApi = installReplayDebugApi(
+          () => resources,
+          getSceneStats,
+        )
       }
-
-      window.AgentArenaReplayDebug = replayDebugApi
 
       resources = {
         ...core,
@@ -183,7 +191,7 @@ export function BabylonReplayScene({
       }
       resourcesRef.current = resources
       setRendererState({ status: 'ready' })
-      setSceneStats(replayDebugApi.getStats())
+      setSceneStats(getSceneStats())
 
       engine.runRenderLoop(() => {
         if (!disposed) {
@@ -195,7 +203,7 @@ export function BabylonReplayScene({
       const refreshSceneStats = () => {
         if (!disposed) {
           if (pendingStatsFrames <= 0) {
-            setSceneStats(replayDebugApi.getStats())
+            setSceneStats(getSceneStats())
             return
           }
 
@@ -240,23 +248,23 @@ export function BabylonReplayScene({
         canvas.removeEventListener('webglcontextlost', handleContextLost)
         canvas.removeEventListener('webglcontextrestored', handleContextRestored)
         window.cancelAnimationFrame(statsFrame)
-        if (window.AgentArenaReplayDebug === replayDebugApi) {
-          delete window.AgentArenaReplayDebug
-        }
+        cleanupReplayDebugApi?.()
         resourcesRef.current = null
         disposeBabylonRendererCore(resources)
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Replay renderer failed to start.'
       setRendererState({ status: 'unavailable', message })
-      delete window.AgentArenaReplayDebug
+      if (import.meta.env.DEV) {
+        clearReplayDebugApi()
+      }
       setSceneStats(null)
       resourcesRef.current = null
       disposeBabylonRendererCore(resources)
 
       return undefined
     }
-  }, [arena, botBlueprints, teamIdentities])
+  }, [arena, botBlueprints, machineDesigns, teamIdentities])
 
   useEffect(() => {
     const resources = resourcesRef.current
@@ -318,6 +326,81 @@ export function BabylonReplayScene({
   )
 }
 
+function getReplayPartDebugStates(resources: SceneResources): ReplayPartDebugState[] {
+  const states: ReplayPartDebugState[] = []
+
+  ;(['red', 'blue'] as TeamRole[]).forEach((role) => {
+    const bot = resources.bots[role]
+    const nodes = bot.getChildren((candidate) => {
+      const metadata = candidate.metadata as BotPartNodeMetadata | undefined
+
+      return metadata?.kind === 'bot_part'
+    }, true) as TransformNode[]
+
+    nodes.forEach((node) => {
+      const metadata = node.metadata as BotPartNodeMetadata
+      const absolutePosition = node.getAbsolutePosition()
+      const rotationQuaternion = node.rotationQuaternion
+
+      states.push({
+        role,
+        blockId: metadata.blockId,
+        partId: metadata.partId,
+        visualAuthority: metadata.visualAuthority,
+        enabled: node.isEnabled(),
+        absolutePosition: [
+          roundDebugNumber(absolutePosition.x),
+          roundDebugNumber(absolutePosition.y),
+          roundDebugNumber(absolutePosition.z),
+        ],
+        ...(rotationQuaternion ? {
+          rotationQuaternion: [
+            roundDebugNumber(rotationQuaternion.x),
+            roundDebugNumber(rotationQuaternion.y),
+            roundDebugNumber(rotationQuaternion.z),
+            roundDebugNumber(rotationQuaternion.w),
+          ],
+        } : {}),
+      })
+    })
+  })
+
+  return states
+}
+
+function installReplayDebugApi(
+  getResources: () => SceneResources | null,
+  getStats: () => ReplaySceneStats,
+): () => void {
+  const replayDebugApi: ReplaySceneDebugApi = {
+    focusPart: (options) => {
+      const resources = getResources()
+
+      if (!resources) {
+        return false
+      }
+
+      return focusReplayPart(resources, options)
+    },
+    getPartDebugStates: () => {
+      const resources = getResources()
+
+      return resources ? getReplayPartDebugStates(resources) : []
+    },
+    getStats,
+  }
+
+  window.AgentArenaReplayDebug = replayDebugApi
+
+  return () => clearReplayDebugApi(replayDebugApi)
+}
+
+function clearReplayDebugApi(replayDebugApi?: ReplaySceneDebugApi): void {
+  if (!replayDebugApi || window.AgentArenaReplayDebug === replayDebugApi) {
+    delete window.AgentArenaReplayDebug
+  }
+}
+
 function focusReplayPart(resources: SceneResources, options: ReplayDebugFocusOptions): boolean {
   const bot = resources.bots[options.role]
   const node = bot.getChildren((candidate) => {
@@ -344,4 +427,8 @@ function configureReplayCameraControls(camera: BabylonRendererCore['camera']): v
   camera.lowerBetaLimit = 0.56
   camera.upperBetaLimit = 1.26
   camera.panningSensibility = 0
+}
+
+function roundDebugNumber(value: number): number {
+  return Math.round(value * 1000) / 1000
 }

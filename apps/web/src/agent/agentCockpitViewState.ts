@@ -616,8 +616,8 @@ function nextActionForRoleState(
     }
 
     return isObserverCockpit
-      ? 'No accepted action yet. The agent still needs to choose one legal action from the current GameMasterPacket.'
-      : 'Choose exactly one id from gameMaster.legalActions and submit it with submitAction.'
+      ? 'No accepted action yet. The agent still needs to inspect parameterSchema and choose one legal action from the current GameMasterPacket.'
+      : 'Inspect gameMaster.legalActions parameterSchema, then submit one action id with parameters only when that action asks for them.'
   }
 
   if (state.phase === 'combat_turn') {
@@ -628,8 +628,8 @@ function nextActionForRoleState(
     }
 
     return isObserverCockpit
-      ? `Inspect gameMaster.legalActions for turn ${state.combat?.tick ?? '?'}; the server owns legal combat choices and canonical payloads.`
-      : `Choose one legal combat action from gameMaster.legalActions for turn ${state.combat?.tick ?? '?'} before the deadline.`
+      ? `Inspect gameMaster.legalActions for turn ${state.combat?.tick ?? '?'}; the server owns legal combat choices, parameters, validation, and canonical payloads.`
+      : `Choose one legal combat action from gameMaster.legalActions for turn ${state.combat?.tick ?? '?'} before the deadline, including parameters only when parameterSchema asks for them.`
   }
 
   if (state.phase === 'round_review') {
@@ -686,6 +686,7 @@ function submitActionHelperForRoleState(state: RolePrivateState): string {
     '  actionSetId: packet.actionSetId,',
     '  decisionVersion: packet.decisionVersion,',
     '  actionId: action.id,',
+    '  ...(action.parameterSchema ? { parameters: action.parameterExamples?.[0] ?? {} } : {}),',
     '})',
   ].join('\n')
 }

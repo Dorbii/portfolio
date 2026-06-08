@@ -4,7 +4,11 @@ import type {
   Vector3,
 } from '../../schemas/src/index.js'
 
-export function botDesignSnapshotToBlueprint(
+// CODEX_INTENT: make the legacy BotDesignSnapshot to BotBlueprint projection explicit by name.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export function botDesignSnapshotToLegacyBotBlueprintProjection(
   design: BotDesignSnapshot,
 ): BotBlueprint {
   return {

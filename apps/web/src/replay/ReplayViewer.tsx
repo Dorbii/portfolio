@@ -3,6 +3,7 @@ import type { ReplayEvent, ReplayTimeline } from '../../../../packages/replay/sr
 import type {
   ArenaConfig,
   BotBlueprint,
+  MachineDesign,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { BabylonReplayScene } from './scene/BabylonReplayScene'
@@ -28,6 +29,7 @@ type ReplayViewerProps = {
   botBlueprints: Record<TeamRole, BotBlueprint>
   initialCameraPreset?: CameraPreset
   initialTime?: number
+  machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
   proofMode?: boolean
   showDamageSchematic?: boolean
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
@@ -41,6 +43,7 @@ export function ReplayViewer({
   botBlueprints,
   initialCameraPreset = 'broadcast',
   initialTime = 0,
+  machineDesigns,
   proofMode = false,
   showDamageSchematic = true,
   teamIdentities,
@@ -138,6 +141,7 @@ export function ReplayViewer({
         botBlueprints={botBlueprints}
         cameraPreset={cameraPreset}
         immediateCamera={proofMode}
+        machineDesigns={machineDesigns}
         teamIdentities={teamIdentities}
         timeline={timeline}
         time={time}

@@ -1,0 +1,3375 @@
+Director Control Artifact
+
+Source-of-truth decision:
+- This file is the active Director control artifact for the Machine Design Tree + Parameterized GameMaster Actions program.
+- The initiating prompt also named local_docs/plans/authoritative_plan.md. That file is a pointer only to avoid a stale blank plan; do not maintain two full copies.
+- Orchestrator and QA threads must use this file and the slice packet they receive, not the attachment or local_docs pointer.
+
+Director State
+- Current slice: Plan complete. Slice 14 final expert review is accepted with release-gate verdict GO WITH CAVEATS.
+- Accepted decisions:
+  - Bare-core legality direction is accepted for implementation unless a later human decision reverses it.
+  - tools/goals/Authoritative Plan.doc is the authoritative plan/control file.
+  - Slice 1 is accepted. Parameterized action contract/resolver/lock support is implemented; no machine placement behavior was added in Slice 1.
+  - publicMessage remains part of GameMaster request hashing as inherited behavior for now. This is a logged API risk, not a Slice 1 blocker; revisit before final API review.
+  - Slice 2 is accepted after follow-up. Active new-session loadout state now uses machine:v1 authority with core, while legacyDraft/currentDesign projection paths remain compatibility-only.
+  - Slice 3 is accepted after follow-up. MachineDesign legacy projections are compatibility/replay/private-state only; machine:v1 combat is temporarily brake/hold-only with neutral resolver fallback until native capabilities/combat land; machine:v1 confirm uses MachineDesign tree validation.
+  - Slice 3 temporary both-machine combat resolves as a no-damage draw after the first submitted hold pair to avoid inert 60-turn loops and rate-limit failure while native machine combat is absent.
+  - Slice 4 is accepted after follow-up. Mount surfaces are schema/catalog/sim data, not renderer-owned; PartMountKind no longer includes fake "sphere" vocabulary; core/catalog expose core_shell, core_deck, deck_panel, and hull_shell surfaces.
+  - Slice 4 ResolvedMountPose authority is position, surfaceNormal, orientation basis, and canonical params. It intentionally has no lossy transform/Euler output; legacy sector/cell mounts remain compatibility-only until Slice 5+ cleanup.
+  - Slice 5 is accepted. Machine loadout placement now uses propose_mount_pose after choose_attach_target; parameters are validated through the action template/schema resolver; validateMountPoseInput/resolveMountPose run before gold spend or design mutation; choose_mount/choose_rotation/cellForMount remain legacy compatibility only.
+  - Slice 5 residual risk: MachineDesign Transform3D.rotation still stores a legacy-compatible yaw/roll tuple derived from accepted pose params, not the full OrientationBasis. Slice 7/11 must not treat that tuple as full orientation authority; use or extend pose/orientation data before native capabilities/replay depend on local axes.
+  - Slice 6 is accepted. Machine:v1 confirm now uses validateMachineTree plus validateMachinePhysicalLegality; bare core, decorative-only, weaponless, mobility-less, backward-weapon, and sideways-wheel machines are legal; disconnected, unknown catalog part, hard sibling AABB collision, and insufficient gold are rejected.
+  - Slice 6 residual risk: hard collision validation is intentionally limited to current reliable data, using axis-aligned bounds for non-direct catalog-part overlaps. It is not oriented, mount-aware, parent/child-aware, or full physics collision.
+  - Slice 7 is accepted. MachineCapabilities are derived from MachineDesign parts, catalog machine capability metadata, explicit transform.orientation basis, and runtime.orientationByInstanceId. deriveControls and BotBlueprint/BotDesignSnapshot projections are not machine capability authority.
+  - Slice 7 residual risk: orientation basis validation is finite/shape-only and trusts upstream pose/runtime producers for unit/orthogonal basis correctness. Full orientation-basis corpus testing remains deferred.
+  - Slice 8 is accepted. Machine:v1 combat action generation now uses MachineCapabilities from deriveMachineCapabilities instead of temporary hold-only GeneratedControls or projection-derived controls. Resolver physics/runtime mutation remains deferred to Slice 9.
+  - Slice 8 residual risk: no wreckage entity exists before Slice 10, so LOS blocker proof is limited to current arena obstacles; machine weapon readiness in the AI combat brief still inherits current snapshot range semantics until native machine runtime reaches the resolver.
+  - Slice 9 is accepted. Machine:v1 combat now resolves movement and weapon fire through native MachineDesign, MachineRuntimeState, and MachineCapabilities authority. Machine movement uses shared capability axes rather than moveBot, deriveControls, or fallback blueprint authority.
+  - Slice 9 blocker fixes are accepted. Worker cumulative replay stores per-combat baseline machine designs to avoid double-applying prior submitted ticks after runtime persistence, while persisted runtime still feeds next-turn packet/action generation. Native machine weapon damage now writes flat healthByInstanceId through precise runtime sync without adding detach, wreckage, or breakage semantics.
+  - Slice 9 residual risk: mixed legacy-vs-machine combat is minimally supported but not deeply characterized. No browser/replay visual QA was run because Slice 9 did not change renderer/Babylon behavior; replay proof remains mandatory in Slice 11.
+  - Slice 10 is accepted after follow-up. Machine:v1 damage now applies through native MachineRuntimeState health, destroyed/detached capability suppression, child-subtree detach, and semantic part_detach wreckage events. Machine damage/detach/wreckage authority is native MachineDesign/MachineRuntimeState data, not legacy projections.
+  - Slice 10 blocker fix is accepted. Machine weapon resolution now reads refreshed attacker.machine.capabilities at fire time, so a machine weapon destroyed earlier in the same tick cannot fire from a stale pre-damage capability snapshot.
+  - Slice 10 residual risk: current weapon submissions still identify weaponA/weaponB slots rather than stable part instance ids, so live capability refresh can suppress a surviving second weapon if slot order shifts after same-tick damage. Detached descendants are runtime-health-zeroed immediately; Slice 11 may need richer visual metadata for detached-but-recognizable wreckage.
+  - Slice 11 is accepted after follow-up. Machine replay renders MachineDesign parts directly with machine:v1 visual authority; the legacy foundation-shell path is quarantined behind a named legacy adapter; the machine proof fixture supplies both red and blue MachineDesigns; public replay machine payload normalization now validates nested machine shape before renderer use.
+  - Slice 11 residual risk: replay machine payload validation is structural and finite-shape validation, not full semantic graph validation. Replay payloads still carry the stored machine design/runtime snapshot rather than a per-frame time-sliced runtime snapshot; this is accepted as non-blocking unless future replay requires frame-exact part runtime history.
+  - Slice 12 is accepted. Agent contract, samples, brief, cockpit, and workbench guidance now tell agents to inspect legal-action parameterSchema, submit parameters only when the selected action asks for them, expect server/shop/budget rejection of invalid or stale submissions, and understand that bad, weaponless, or mobility-less machine designs can still be legal.
+  - Slice 12 correction: the live propose_mount_pose schema uses yawDegrees and rollDegrees. The stale yawDeg/rollDeg examples in the packet/control artifact were corrected before Slice 13 was prepared.
+  - Slice 13 is accepted. Legacy authority-looking symbols were removed or quarantined: validateMinimumViableLoadout is now validateLegacyMinimumViableLoadout, cellForMount/isConnectedGrid helpers have legacy names, retained selectedAttachCell/selectedMountSector/selectedRotation fields have legacy removal notes, deriveControls is marked legacy projection, and forged machine:v1 choose_mount/choose_rotation legacy-grid apply paths now reject with LEGACY_GRID_ACTION_REJECTED.
+  - Slice 14 is accepted. Final expert panel reviewers passed architecture, Schema/API after blocker fixes, GameMaster/worker, sim, replay/Babylon, UI/agent, and cleanup lanes. Release gate verdict is GO WITH CAVEATS, not clean GO, because the worktree is heavily dirty/uncommitted by design and replay/browser proof was not rerun after final non-renderer schema/worker cleanup.
+- Deviations:
+  - local_docs/plans/authoritative_plan.md existed as a zero-byte file while the attached prompt named it as a target. It is intentionally non-authoritative and points here.
+  - Slice 1 narrowly edited packages/schemas/src/agentContract.ts, apps/web/src/agent/agentBrief.ts, and packages/schemas/src/validators.ts outside the nominal owned list to satisfy required agent-guidance cleanup and validator exports.
+  - Slice 2 follow-up is authorized to narrowly edit packages/sim/src/loadoutActions.ts and related tests because QA proved active loadout authority still starts from legacy BotDesignSnapshot.
+  - Slice 3 did not edit apps/worker/src/sessionLegacyContracts.ts because no compatibility-contract change was required there. It also added narrow CODEX review markers around projection boundary code.
+  - Slice 3 follow-up touched packages/sim/src/loadoutActions.ts, tests/worker-route.test.mjs, and stale combat action-set cleanup/no-op fallback in apps/worker/src/session.ts because QA proved projection authority and phase-state leaks.
+  - Slice 4 touched packages/sim/src/machineDesign.ts and packages/sim/src/index.ts outside the nominal owned list to attach core mount surfaces and export resolver helpers. This is accepted because the Slice 4 exit gate requires core surfaces and public sim access.
+  - Slice 5 touched packages/schemas/src/types.ts outside the nominal owned list to add propose_mount_pose, loadout build step, and public parameter metadata types. It did not touch packages/sim/src/actionIds.ts because no action id helper change was required.
+  - Slice 6 touched packages/sim/src/index.ts to export machine legality and tests/worker-route.test.mjs to remove stale starter-body assumptions from route helpers. It did not touch packages/catalog/src/capabilities.ts because no catalog capability helper was needed for physical legality.
+  - Slice 7 touched packages/schemas/src/types.ts, packages/sim/src/loadoutActions.ts, packages/sim/src/machineDesign.ts, packages/sim/src/machineLegality.ts, and packages/sim/src/index.ts to add explicit orientation/capability authority, persist pose orientation, validate basis shape, and export deriveMachineCapabilities. It did not add capabilitiesToLegacyControlsProjection because current machine combat remains the accepted temporary hold-only bridge until Slice 8.
+  - Slice 8 touched packages/sim/src/combatActions.ts, packages/sim/src/combatLegality.ts, apps/worker/src/session.ts, apps/worker/src/sessionCombatDecision.ts, and tests/core.test.mjs. It did not touch resolveCombat, resolveSubmittedCombat, damage, detach, replay, or runtime persistence.
+  - Slice 9 touched packages/sim/src/resolveCombat.ts, packages/sim/src/combatActions.ts, packages/sim/src/index.ts, apps/worker/src/session.ts, apps/worker/src/sessionTypes.ts, tests/core.test.mjs, and new packages/sim/src/machineMovement.ts, packages/sim/src/machineRuntime.ts, packages/sim/src/machineWeapons.ts. It added a minimal native no-capability machine draw for bare-core no-op fights without using a fallback blueprint. It did not implement Slice 10 detach, wreckage, or breakage, and did not change replay/Babylon visuals.
+  - Slice 10 touched packages/sim/src/resolveCombat.ts, packages/sim/src/index.ts, tests/core.test.mjs, and new packages/sim/src/machineDamage.ts. It emitted existing semantic part_detach events for machine wreckage data but did not implement renderer/Babylon replay visuals.
+  - Slice 11 touched additional files beyond the initial owned replay list to plumb replay machine data, local proof, client normalization, and tests: apps/web/src/replay/ReplayPreview.tsx, apps/web/src/replay/scene/BabylonReplayScene.tsx, apps/web/src/referee/refereeClient.ts, apps/web/src/referee/RefereeConsole.tsx, apps/worker/src/session.ts, apps/worker/src/sessionLegacyContracts.ts, apps/web/src/mockReplayTimelines.ts, apps/web/src/mockSession.ts, tests/referee-client.test.mjs, tests/app-route.test.mjs, tests/replay-mapping.test.mjs, and tsconfig.test.json.
+  - Slice 11 follow-up lane 019ea50b-4e4c-7ee1-83fb-52b1f8eabdf4 was stood down after only the blue proof fixture edit; fresh lane 019ea50d-beb6-7dc1-9255-45000b0bf215 completed the validator/test fix. Re-QA lane 019ea518-fe3c-7620-920b-84012b58c88e stalled after green gates and was stood down; fresh re-QA lane 019ea51b-8705-7fb1-98be-67d625f411c9 supplied the accepted verdict.
+  - Slice 12 Director corrected stale packet/control-artifact field names from yawDeg/rollDeg to yawDegrees/rollDegrees after verifying the live propose_mount_pose schema and tests.
+  - Slice 13 intentionally left public compatibility fields selectedAttachCell, selectedMountSector, and selectedRotation in place rather than performing a schema migration during cleanup. They are now explicitly documented as legacy-bot-design:v1 continuation state.
+  - Slice 14 final panel found and fixed Schema/API contract drift in shared GameMaster submission validation, mount-pose u/v parameter bounds, degree-parameter normalization before request hashing, and a dead Worker continuation helper/env field surfaced by strict noUnused validation. These fixes touched packages/schemas/src/types.ts, packages/schemas/src/validators/gameMasterAction.ts, packages/sim/src/loadoutActions.ts, apps/worker/src/index.ts, and tests/worker-route.test.mjs.
+- QA evidence links:
+  - Slice 1 Orchestrator thread: 019ea3e7-ddf6-7a42-86e5-b81436413eab. Handoff: npm.cmd test passed 244/244; required rg had no matches; git diff --check passed with CRLF warnings.
+  - Slice 1 QA thread: 019ea3f2-6e38-7782-bb45-05cfd635b160. Verdict: PASS; recommended accept with publicMessage hash risk logged for follow-up.
+  - Slice 2 Orchestrator thread: 019ea3f7-bc01-7c32-a741-acee1997dea8. Initial handoff: npm.cmd test passed 247/247, but QA rejected authority coverage.
+  - Slice 2 QA thread: 019ea401-655c-7210-9fa1-36456f053f7e. Verdict: FAIL. Blocker: role.storedDesign.machine existed, but active LoadoutBuildState/currentDesign still initialized as empty BotDesignSnapshot and first paid Body_* root.
+  - Slice 2 re-QA thread: 019ea413-f2c1-7941-952e-197089c8333f. Verdict: PASS. Evidence: npm.cmd test passed 248/248; active loadout state starts machine:v1 with core; first paid part attaches under core; no direct MachineDesign/BotBlueprint round-trip matches.
+  - Slice 3 Orchestrator thread: 019ea419-6ace-7123-bcaf-5bf382659d99. Initial handoff: npm.cmd test passed 250/250; git diff --check passed with CRLF warnings only; old botDesignSnapshotToBlueprint had no matches; no BotBlueprint -> MachineDesign authority matches.
+  - Slice 3 QA thread: 019ea426-8dae-7b72-a30c-eb24fdf4f7dd. Verdict: FAIL. Blocker: projection-derived BotBlueprints feed worker combat/action legality and combat resolution paths via storedDesignToLegacyBotBlueprintProjection; QA also flagged ad hoc StoredDesign -> BotDesignSnapshot loadout legality conversion as an authority risk.
+  - Slice 3 follow-up Orchestrator thread: 019ea419-6ace-7123-bcaf-5bf382659d99. Handoff: npm.cmd test passed 252/252; git diff --check exited clean with CRLF warnings only; machine:v1 controls use temporary brake-only fallback; resolver authority uses neutral fallback; machine confirm uses validateMachineTree.
+  - Slice 3 re-QA thread: 019ea441-e3d3-7080-9b10-e7935b55e4c2. Gate evidence: npm.cmd test passed 252/252; git diff --check exited clean with CRLF warnings only. Verdict supplied by independent QA subagent 019ea444-11bf-7fe3-912d-ad034609a9b6: PASS.
+  - Slice 4 Orchestrator thread: 019ea447-05a3-7233-9394-2de6193d1c32. Initial handoff: mount surfaces, pose resolution, exports, catalog/core surfaces, and tests added; npm.cmd test passed 256/256; git diff --check passed with CRLF warnings only.
+  - Slice 4 QA subagent: 019ea451-110f-7b70-9627-4ed2bcc220b0. Initial verdict: FAIL. The claimed loadout/session/combat scope issue was a false positive from accepted Slices 1-3; the real P2 issue was lossy transform.rotation/Euler output in ResolvedMountPose.
+  - Slice 4 follow-up Orchestrator thread: 019ea447-05a3-7233-9394-2de6193d1c32. Handoff: removed ResolvedMountPose.transform and basisToEulerDegrees; left loadout/session/combat/replay untouched; npm.cmd test passed 256/256; git diff --check passed with CRLF warnings only.
+  - Slice 4 Director local gate: npm.cmd test passed 256/256; git diff --check passed with LF-to-CRLF warnings only; rg found no basisToEulerDegrees and no mount-pose transform.rotation path. transform.rotation matches remain legacy machine/loadout/projection code, not mount pose resolver.
+  - Slice 5 Orchestrator thread: 019ea45b-c12f-7e03-814a-193f81c8982c. Handoff: propose_mount_pose machine flow, compact schema, resolver-before-mutation order, and focused route/unit tests added; npm.cmd test passed 261/261; git diff --check passed with CRLF warnings only.
+  - Slice 5 QA thread: 019ea46d-1acf-7a20-919b-90b17bfe09c8. Verdict: PASS. Evidence: npm.cmd test passed 261/261; git diff --check clean with CRLF warnings; remaining cell/mount/rotation grep matches are legacy compatibility code or explicit negative/schema tests.
+  - Slice 5 Director local gate: npm.cmd test passed 261/261; git diff --check passed with LF-to-CRLF warnings only; required rg remaining matches are schema legacy fields, legacy branch/stale-field clearing, and explicit negative/legacy tests.
+  - Slice 6 Orchestrator thread: 019ea470-d4a1-7082-8f48-7fcdb5751c70. Handoff: validateMachinePhysicalLegality added; machine confirm uses tree plus physical legality; store foundation/viability rails removed from machine flow; npm.cmd test passed 264/264; git diff --check passed with CRLF warnings only.
+  - Slice 6 QA thread: 019ea481-aa21-70f2-8554-f1b465826787. Verdict: PASS. Evidence: code review confirmed machine:v1 confirm does not use validateMinimumViableLoadout, remaining minimum-viable matches are legacy-only, and foundation/store rail symbols are absent except the empty schema/store field foundationPartIds.
+  - Slice 6 Director local gate: npm.cmd test passed 264/264; git diff --check passed with LF-to-CRLF warnings only; required rg remaining matches are legacy validator/tests and the legacy-only fallback call.
+  - Slice 7 Orchestrator thread: 019ea488-2c36-7460-81c7-1c7249f3d8a4. Handoff: deriveMachineCapabilities, machine capability catalog metadata, explicit Transform3D.orientation/runtime orientation support, loadout pose orientation persistence, basis shape validation, and focused tests added; npm.cmd test passed 267/267; git diff --check passed with CRLF warnings only.
+  - Slice 7 QA thread: 019ea499-2287-7c00-bbf4-0c3b306458ab. Verdict: PASS. Evidence: npm.cmd test passed 267/267; git diff --check passed with CRLF warnings only; capability derivation is MachineDesign/local-orientation based, capabilitiesToLegacyControlsProjection is absent, and no new Slice 8/9 behavior was found.
+  - Slice 7 Director local gate: npm.cmd test passed 267/267; git diff --check passed with LF-to-CRLF warnings only; required rg matches are legacy/projection compatibility, catalog annotations, new MachineCapabilities authority, and focused tests.
+  - Slice 8 Orchestrator thread: 019ea49c-36f4-7810-be5d-7e66c654d73e. Handoff: capability-driven combat action generation added; machine:v1 active action sets use deriveMachineCapabilities; public packets omit private command payloads; npm.cmd test passed 273/273; git diff --check passed with CRLF warnings only.
+  - Slice 8 QA thread: 019ea4af-ce19-7ec3-9ca7-9f371230dd82. No-blocker review: required validation gates green, resolver files untouched, remaining projection/control matches categorized as legacy/projection compatibility, and wreckage LOS called out as a pre-Slice 10 proof gap.
+  - Slice 8 Director local gate: npm.cmd test passed 273/273; git diff --check passed with LF-to-CRLF warnings only; required rg gate has no temporary machine-control source matches, and resolveCombat/resolveSubmittedCombat diff is empty.
+  - Slice 9 Orchestrator thread: 019ea4b5-68cd-7783-99a9-df84a490144a. Initial handoff passed tests but Director rejected two blockers: cumulative replay double-applied prior ticks from persisted runtime, and native weapon damage mutated flat parts without syncing machine runtime health. Follow-up fixed both with per-combat baseline machine designs and precise syncMachinePartDamage.
+  - Slice 9 QA thread: 019ea4d1-8341-7d12-8209-0c8927e5f753. Verdict: PASS/no-blocker. Evidence: npm.cmd test passed 278/278; git diff --check passed with CRLF warnings only; no fallback constants remain; remaining moveBot/deriveControls/projection matches are legacy/projection compatibility only.
+  - Slice 9 Director local gate: npm.cmd test passed 278/278; git diff --check passed with LF-to-CRLF warnings only; required rg found no fallback constants and only expected legacy/projection compatibility matches.
+  - Slice 10 Orchestrator thread: 019ea4d7-46d5-79c1-9ce8-93887bbd24df. Initial handoff passed tests but Director rejected one blocker: same-tick destroyed machine weapons could still fire from stale pre-damage machine capability snapshots. Follow-up removed stale capability arguments and added a machine same-tick destroyed-before-fire regression.
+  - Slice 10 QA thread: 019ea4e5-8bfa-7db2-8d02-26353b899f8d. Verdict: PASS/no-blocker. Evidence: npm.cmd test passed 284/284; git diff --check passed with CRLF warnings only; renderer/replay diff check empty; remaining projection/control matches classified as legacy/projection/test only.
+  - Slice 10 Director local gate: npm.cmd test passed 284/284; git diff --check passed with LF-to-CRLF warnings only; required rg found no fallback constants and only expected legacy/projection/test matches; renderer-path diff was empty.
+  - Slice 11 Orchestrator thread: 019ea4eb-b2bc-7443-979f-62352ba54711. Initial handoff implemented machine-native replay rendering, machine payload plumbing, dev-only debug proof, and browser screenshots, but later QA rejected two blocker gaps.
+  - Slice 11 debug-hook fix lane: 019ea501-2456-7f20-abc4-bb77121502be. Handoff gated the replay debug API behind import.meta.env.DEV and production bundle scans found no AgentArenaReplayDebug/getPartDebugStates matches.
+  - Slice 11 QA thread: 019ea507-1059-7ac3-b586-0a634c79b876. Verdict: FAIL. Blockers: machine proof fixture only proved red MachineDesign while blue could fall back to legacy, and public replay machine payload normalization was too shallow before casting to MachineDesign.
+  - Slice 11 blocker-fix lane: 019ea50d-beb6-7dc1-9255-45000b0bf215. Handoff: nested replay MachineDesign validation and focused tests added; npm.cmd test passed 289/289; typecheck/build passed; git diff --check passed with line-ending warnings only; dist debug scan had no matches. Browser proof was delegated back to Director because MCP browser profile was locked.
+  - Slice 11 Director local gate: npm.cmd test passed 289/289; npm.cmd run typecheck passed; npm.cmd run build passed with existing large-chunk warning; git diff --check passed with LF-to-CRLF warnings only; git ls-files smoke-artifacts had no output; dist debug scan had no matches; focused rg found foundation-shell only in a test title, projection matches only in projection/tests, and no Transform3D.rotation matches.
+  - Slice 11 Director browser proof refresh: /replay-preview?proof=machine&camera=broadcast&time=2.2 captured smoke-artifacts/slice11-machine-fix-desktop.png and smoke-artifacts/slice11-machine-fix-mobile.png. Isolated Playwright proof found nonblank samples 25/25 on desktop and mobile; dev debug showed 9 machine:v1 parts across red and blue, including red side-wheel quaternion [-0.5,-0.5,0.5,-0.5], red front-plate wreckage position evidence, and blue machine parts blue-core, blue-omni-left, blue-turret, blue-sensor-mast, and blue-rear-plate.
+  - Slice 11 re-QA thread: 019ea51b-8705-7fb1-98be-67d625f411c9. Verdict: PASS/no-blocker. Evidence: source review confirmed red/blue proof fixtures, ReplayPreview/ReplayViewer/BabylonReplayScene machineDesign plumbing, machine path selection before legacy fallback, nested client validation, and focused tests.
+  - Slice 12 Orchestrator thread: 019ea51f-95fd-7033-97ce-fc526a2067fe. Handoff: agent-facing contract, samples, brief, cockpit, workbench, and focused tests updated; npm.cmd test passed 289/289; npm.cmd run typecheck passed; npm.cmd run build passed with the existing large-chunk warning; git diff --check passed with line-ending warnings only.
+  - Slice 12 Director local gate: npm.cmd test passed 289/289; npm.cmd run typecheck passed; npm.cmd run build passed with the existing large-chunk warning; git diff --check passed with LF-to-CRLF warnings only; git ls-files smoke-artifacts returned no output; stale scans had no actionId-only, required mobility/weapon, yawDeg, or rollDeg matches in packages/apps/tests.
+  - Slice 12 QA thread: 019ea526-33c6-7122-b4eb-c541679fc532. Verdict: PASS/no-blocker. Evidence: QA verified parameterSchema guidance, conditional parameters guidance, server/shop/budget rejection wording, bad-design legality wording, yawDegrees/rollDegrees propose_mount_pose examples, and classified remaining starter/foundation matches as non-agent-facing.
+  - Slice 13 Orchestrator thread: 019ea52b-f57c-7732-ac32-45965e20af97. Handoff: conservative cleanup/quarantine batch updated loadoutActions, tests/core.test.mjs, catalog blueprint/controls, and schema compatibility comments; validation passed npm.cmd test, typecheck, lint, build, renderer-budget, and git diff --check.
+  - Slice 13 Director local gate: required cleanup rg rerun with only classified legacy/projection/test/real mount-surface matches; npm.cmd test passed 290/290 after adding the forged legacy-grid regression; npm.cmd run typecheck passed; npm.cmd run lint passed; npm.cmd run build passed with existing Vite large-chunk warning; npm.cmd run check:renderer-budget passed; git diff --check passed with LF-to-CRLF warnings only; git ls-files smoke-artifacts returned no output.
+  - Slice 13 initial QA thread: 019ea534-aa43-7551-be3d-bb182a1f99a8 stalled after independently passing tests, typecheck, lint, diff-check, and tracked smoke-artifact checks, so it was stood down. Fresh Slice 13 QA thread: 019ea539-093a-7783-a2d6-f318ded1948e. Verdict: PASS/no-blocker. Evidence: required grep classified, machine authority boundaries reviewed, forged legacy-grid regression confirmed, replay foundation-shell quarantine reviewed, and final expert panel cleared to start.
+  - Slice 14 Architecture review thread: 019ea541-2c8d-7c51-8c52-ac28846deb2e. Verdict: PASS/no-blocker. Evidence: MachineDesign authority, projection/compat boundaries, grid/foundation rail quarantine, and replay/source boundaries reviewed.
+  - Slice 14 Schema/API review thread: 019ea541-4865-7a90-931f-0e0d9ccf782a. Initial verdict: FAIL for shared validator unknown-field drift, missing mount-pose u/v schema bounds, and degree canonicalization before hash. Director fixed all three and reran npm.cmd test and typecheck; narrow re-review verdict: PASS/no-blocker.
+  - Slice 14 GameMaster/worker review thread: 019ea541-635b-7a31-9e37-b7a03fb664c8. Verdict: PASS/no-blocker. Evidence: role auth, active action-set authority, stale/duplicate lock behavior, normalized parameter hashing, and machine loadout/combat paths reviewed.
+  - Slice 14 Sim review thread: 019ea541-7e9d-7bb1-b206-691d36156076. Verdict: PASS/no-blocker. Evidence: capabilities/resolver fact parity, movement axes, weapon bearing/range/LOS, damage/detach, and same-tick suppression reviewed.
+  - Slice 14 Replay/Babylon review thread: 019ea541-9939-7aa0-9946-ddcc78049362. Verdict: PASS/no-blocker. Evidence: machine replay path, legacy foundation-shell quarantine, payload normalization, detach visuals, and Slice 11 screenshots reviewed.
+  - Slice 14 UI/agent review thread: 019ea541-b3dd-7393-993a-49362a5729f5. Verdict: PASS/no-blocker. Evidence: parameterSchema guidance, yawDegrees/rollDegrees examples, read-only cockpit/workbench posture, and stale actionId-only/control guidance reviewed.
+  - Slice 14 Cleanup review thread: 019ea541-cf37-7b92-8b5c-10f7519aacc4. Verdict: PASS/no-blocker. Evidence: banned-symbol cleanup gates, retained legacy field comments, deriveControls legacy projection status, and replay foundation-shell quarantine reviewed.
+  - Slice 14 Director final validation after fixes: npm.cmd test passed 290/290; npm.cmd run typecheck passed; npm.cmd run typecheck -- --noUnusedLocals --noUnusedParameters passed; npm.cmd run lint passed; npm.cmd run build passed with known Vite large-chunk warning; npm.cmd run check:renderer-budget passed with rendererKit-BWo2Buu5.js gzip 358,518 and total gzip 453,873 within budgets; git diff --check passed with LF-to-CRLF warnings only; git ls-files smoke-artifacts returned no output.
+  - Slice 14 release gate thread: 019ea54d-133c-79d1-8498-f98eb804ddf0. Verdict: GO WITH CAVEATS. Caveats: dirty/uncommitted worktree by design, no post-fix browser replay rerun after non-renderer schema/worker cleanup, known Vite large-chunk warning, and accepted residual risks around publicMessage hashing, legacyDraft projection drift, finite-only orientation proof, weaponA/weaponB slot identity, future parameterExamples fallback, and standard-quality visuals.
+- Cleanup status:
+  - Slice 13 accepted. Remaining cleanup matches are documented legacy/projection compatibility, test-only assertions, or real MountSurfaceKind sphere data rather than unauthorized machine authority.
+- Final review status:
+  - Slice 14 final expert review panel complete.
+  - Final release gate: GO WITH CAVEATS.
+
+Director Prompt Controls
+- Director must not implement code directly.
+- Director supervises through slice packets, checkpoint summaries, handoffs, validation evidence, QA reports, and final review.
+- Stop if an Orchestrator changes files outside slice scope without explanation.
+- Stop if a slice leaves required cleanup for later when the plan makes it an exit gate.
+- Stop if validation is missing or only partially run without Director acceptance.
+- Stop if MachineDesign truth round-trips through BotBlueprint.
+- Stop if deriveControls, cellForMount, foundation rails, or minimum viable loadout logic remain authoritative for machine sessions.
+- Stop if replay/browser proof is skipped for replay changes.
+- Stop if the final expert review panel is skipped.
+
+Prepared Slice 1 Orchestrator Packet
+
+Slice: 1 - Parameterized Action Submission End-to-End
+
+Goal:
+Add parameterized GameMaster action submissions end to end while preserving fixed-action compatibility.
+
+Context:
+- ActiveActionSet.actions remains private server authority.
+- Public packets may expose only redacted action templates and schemas.
+- Submissions may include parameters only when the matched action template defines a schema.
+- Request identity and idempotency must hash normalized parameters, not raw JSON.
+- Do not pass raw submission.parameters into loadout logic.
+- This slice does not implement machine placement behavior beyond a server-owned resolver surface for submitted actions.
+
+Owned files:
+- packages/schemas/src/types.ts
+- packages/schemas/src/validators/gameMasterAction.ts
+- packages/schemas/src/relay.ts
+- packages/schemas/src/agentSamples.ts
+- apps/worker/src/session.ts
+- apps/web/src/agent/agentClient.ts
+- apps/web/src/agent/agentClientTypes.ts
+- apps/web/src/agent/agentRoleApiInstaller.ts
+- focused tests in tests/ if needed for the required coverage
+
+Must add:
+- GameMasterActionSubmission.parameters?: Record<string, unknown>
+- GameMaster legal action parameterSchema and parameterExamples support
+- resolveSubmittedGameAction or equivalent server-owned resolver
+- normalized parameter hashing used by action locks/idempotency
+- template/schema validation for parameters
+
+Must delete or update:
+- Agent-facing "actionId only" guidance.
+- Client allowlists that reject parameters.
+- Any server path that treats parameterized submissions as raw JSON payload passthrough.
+
+Forbidden shortcuts:
+- Do not validate parameters only in the client.
+- Do not accept parameters when the selected action has no parameter schema.
+- Do not ignore unknown parameters.
+- Do not hash raw JSON or rely on insertion order.
+- Do not let same actionId with different normalized parameters reuse the same lock.
+
+Acceptance criteria:
+- Fixed legacy/fixed actions still work without parameters.
+- Unknown parameter rejects.
+- Missing required parameter rejects.
+- Out-of-range parameter rejects.
+- Normalized equivalent parameters hash the same.
+- Different normalized parameters for the same action conflict with an existing lock.
+- Web client accepts parameters.
+- Web client still rejects unsupported fields.
+- No unmodified agent-facing "actionId only" guidance remains.
+
+Required validation:
+- rg -n "actionId only|Submit the actionId only|accepts only action, actionSetId, decisionVersion, actionId" packages apps tests
+- npm.cmd test
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining legacy matches from the required rg command.
+- Any risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Prepared Slice 2 Orchestrator Packet
+
+Slice: 2 - System-Owned Machine Core and MachineDesign Storage
+
+Goal:
+Introduce a system-owned immutable Machine Core and make MachineDesign the stored authority for new sessions.
+
+Context:
+- MachineDesign is authoritative for new machine sessions.
+- BotBlueprint and BotDesignSnapshot are legacy projections only after this migration; do not round-trip MachineDesign through them to recover truth.
+- The core is system-owned, immutable, free, not inventory, not a shop/catalog body part, and starts as instance id "core".
+- Bad machines may be legal if physically valid; do not add strategic viability checks in this slice.
+- Slice 1 parameterized submission support is already present; do not rewrite it unless required for compile compatibility.
+
+Owned files:
+- packages/schemas/src/types.ts
+- packages/sim/src/machineDesign.ts
+- packages/sim/src/index.ts
+- apps/worker/src/sessionTypes.ts
+- apps/worker/src/sessionCreation.ts
+- apps/worker/src/sessionRoleReset.ts
+- focused tests in tests/ if needed for required coverage
+
+Must add:
+- MachineDesign
+- MachinePartInstance
+- MachineAttachment
+- Transform3D
+- MachineRuntimeState
+- MachineCoreDefinition
+- createInitialMachineDesign(role)
+- validateMachineTree
+- versioned stored design union:
+  type StoredDesign =
+    | { version: 'machine:v1'; machine: MachineDesign }
+    | { version: 'legacy-bot-design:v1'; design: BotDesignSnapshot }
+
+Must preserve:
+- Legacy continuation paths must be explicitly versioned.
+- Existing public/session behavior should remain compatible unless this slice explicitly changes new-session design storage.
+
+Must not do:
+- Do not use Body_* catalog parts as the immutable core.
+- Do not charge gold for the core.
+- Do not store new machine truth only in BotDesignSnapshot.
+- Do not make BotBlueprint authoritative.
+- Do not implement mount surfaces, pose resolution, loadout propose_mount_pose, capabilities, combat, or replay changes in this slice.
+
+Acceptance criteria:
+- New loadout state starts with exactly one core instance.
+- Core has no cost.
+- Core cannot be deleted.
+- Core cannot be moved.
+- Missing core invalid.
+- Duplicate core invalid.
+- C -> A -> B tree is valid.
+- Disconnected A invalid.
+- Cycle invalid.
+- MachineDesign is stored authority for new sessions.
+- Legacy continuation paths are explicitly versioned.
+
+Required validation:
+- npm.cmd test
+- focused rg checks showing MachineDesign is not round-tripped through BotBlueprint for truth
+- git diff --check
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Evidence for each tree/core invariant.
+- Any remaining legacy design storage paths and whether they are explicitly versioned.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Prepared Slice 3 Orchestrator Packet
+
+Slice: 3 - One-Way Legacy Projection Adapter
+
+Goal:
+Add explicit one-way legacy projections from MachineDesign to BotBlueprint/BotDesignSnapshot without making legacy shapes authoritative.
+
+Context:
+- MachineDesign is now stored authority for new-session loadout state.
+- Legacy BotDesignSnapshot/currentDesign paths remain compatibility projections only.
+- Do not implement mount surfaces, pose resolution, propose_mount_pose, capabilities, combat, or replay changes in this slice.
+- Projection can be lossy only if that loss is named and cannot be used to reconstruct MachineDesign truth.
+
+Owned files:
+- packages/sim/src/gameMasterActions.ts
+- packages/sim/src/machineProjection.ts
+- apps/worker/src/sessionStateViews.ts
+- apps/worker/src/sessionLegacyContracts.ts
+- focused tests in tests/ if needed for required coverage
+
+May touch if required for exports/compile/tests:
+- packages/sim/src/index.ts
+- apps/worker/src/session.ts
+- packages/schemas/src/types.ts
+
+Must add:
+- machineDesignToLegacyBotBlueprintProjection(machine): BotBlueprint
+- machineDesignToLegacyBotDesignSnapshotProjection(machine): BotDesignSnapshot
+
+Rules:
+- Projection only.
+- No BotBlueprint -> MachineDesign except a clearly named migration function for old saved fixtures, if truly needed.
+- Projection must preserve enough transform metadata for replay until native machine replay lands.
+- All projection function names must include legacy or Projection.
+- New machine validators must not import blueprint validators.
+
+Must not do:
+- Do not make BotBlueprint authoritative.
+- Do not use projection for legality.
+- Do not hide lossy conversion.
+- Do not overwrite MachineDesign state from a legacy projection.
+
+Acceptance criteria:
+- Machine with a spherical/parameter-like pose or transform metadata projects deterministically.
+- Projection does not mutate MachineDesign.
+- Projection output cannot be used to recover authoritative machine mount parameters.
+- Existing worker/session compatibility views consume named projection helpers instead of ad hoc implicit conversion.
+- No direct MachineDesign truth round-trip through BotBlueprint/BotDesignSnapshot.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg checks showing all projection functions include legacy or Projection in name
+- rg checks showing no BotBlueprint -> MachineDesign authority path
+- focused tests for deterministic projection, immutability, and lossy/non-authoritative projection
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Projection naming evidence.
+- Remaining legacy compatibility paths and why they are projection-only.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 4 Summary
+
+Implemented:
+- MountSurface, MountPoseInput, MountPoseParameters, OrientationBasis, and ResolvedMountPose schema types.
+- resolveMountPose and validateMountPoseInput with deterministic sphere/panel mapping, category acceptance, finite/bounds validation, and canonical params.
+- Deterministic vector/basis transform helpers.
+- Catalog/core mount surface data for representative parts and system core surfaces.
+- Removal of PartMountKind fake "sphere" vocabulary.
+
+Accepted constraints:
+- ResolvedMountPose must not expose lossy Euler/Transform3D output. Consumers use position, surfaceNormal, orientation, and canonical params.
+- Sphere u/v means azimuth/elevation on the declared surface, not a sector label.
+- Legacy sector/cell placement remains only as compatibility debt for Slice 5 cleanup.
+
+Validation:
+- npm.cmd test: passed 256/256.
+- git diff --check: passed with CRLF warnings only.
+- rg: no basisToEulerDegrees; no mount pose transform.rotation; no PartMountKind "sphere" authority.
+
+Prepared Slice 5 Orchestrator Packet
+
+Slice: 5 - Loadout Builder Uses propose_mount_pose
+
+Goal:
+Replace grid/sector/rotation placement in the new machine loadout flow with server-resolved propose_mount_pose parameters.
+
+Context:
+- MachineDesign is authoritative for new sessions.
+- Slice 4 added MountSurface, MountPoseInput, ResolvedMountPose, validateMountPoseInput, and resolveMountPose.
+- Public action packets may expose compact parameter schemas; do not enumerate every sphere placement.
+- Legacy BotDesignSnapshot/currentDesign and grid/cell placement paths may remain only if explicitly named legacy/projection and unused by the new machine flow.
+- Do not implement Slice 6 physical legality, Slice 7 capabilities, combat, replay, or agent manual changes in this slice.
+
+Owned files:
+- packages/sim/src/loadoutActions.ts
+- packages/sim/src/actionIds.ts
+- apps/worker/src/session.ts
+- tests/core.test.mjs
+- tests/worker-route.test.mjs
+
+May touch if required for compile/tests only:
+- packages/schemas/src/types.ts
+- packages/sim/src/index.ts
+- packages/schemas/src/validators/gameMasterAction.ts
+
+Must add:
+- propose_mount_pose legal action in the machine loadout flow after choose_part and choose_attach_target.
+- Parameter schema accepting parentInstanceId, childPartId, mountSurfaceId, u, v, yawDegrees, and rollDegrees.
+- Server-owned resolution through validateMountPoseInput/resolveMountPose before mutating MachineDesign.
+- Placement that attaches the purchased part to the selected parent using the accepted resolved pose.
+- Failure behavior that reports validation issues and does not spend gold or mutate design.
+
+Must delete or quarantine from the new machine flow:
+- choose_mount
+- choose_rotation
+- cellForMount
+- selectedAttachCell
+- selectedMountSector
+- selectedRotation
+
+Forbidden shortcuts:
+- Do not reintroduce enumerated sphere sectors under a different name.
+- Do not trust raw submission.parameters without the action template/schema resolver.
+- Do not let client-provided transforms override resolveMountPose.
+- Do not spend gold before pose validation succeeds.
+- Do not apply part limit to the immutable core.
+- Do not use legacy BotBlueprint/BotDesignSnapshot as machine truth.
+
+Acceptance criteria:
+- Can place a part on a core surface.
+- Can place a part on a child part surface.
+- Cannot place on detached or nonexistent parent.
+- Cannot place category on unsupported surface.
+- Invalid pose rejects with issues.
+- Valid pose spends gold once.
+- Failed pose does not spend gold.
+- Purchased part limit excludes the core.
+- Action packets expose compact schema, not enumerated sphere placements.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "cellForMount|selectedAttachCell|selectedMountSector|selectedRotation|choose_rotation" packages apps tests
+- focused test evidence for gold mutation/no-mutation and parent/surface rejection
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining legacy matches from the required rg command and why each is legacy-only.
+- Evidence that propose_mount_pose schema is compact.
+- Evidence that loadout placement resolves via resolveMountPose.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 5 Summary
+
+Implemented:
+- propose_mount_pose legal action for machine:v1 loadout placement after choose_part and choose_attach_target.
+- Compact parameter schema and examples for childPartId, parentInstanceId, mountSurfaceId, u, v, yawDegrees, and rollDegrees.
+- Server-side parameter validation through the canonical action template resolver before applyLoadoutAction receives normalized parameters.
+- Machine placement path that validates selected child/parent, detached parent state, mount surface support, pose bounds/category, and resolveMountPose before gold spend or MachineDesign mutation.
+- Focused unit and route tests covering core placement, child-surface placement, nonexistent/detached parent rejection, unsupported surface/category rejection, invalid pose rejection, no-mutation failure behavior, valid gold spend, and purchased-part-limit core exclusion.
+
+Accepted constraints:
+- choose_mount, choose_rotation, cellForMount, selectedAttachCell, selectedMountSector, and selectedRotation are not emitted for active machine:v1 placement flow. Remaining matches are legacy compatibility or explicit negative/schema tests.
+- Action packets expose schema/examples and not canonical payloads.
+- Core is not counted as a purchased part.
+
+Validation:
+- npm.cmd test: passed 261/261.
+- git diff --check: passed with CRLF warnings only.
+- rg gate: remaining matches accepted as legacy compatibility or explicit negative/schema tests.
+
+Residual risk:
+- MachineDesign still stores Transform3D.rotation as a legacy-compatible yaw/roll tuple. This is accepted for Slice 5 but must not become local-axis authority for Slice 7 capabilities or Slice 11 replay.
+
+Prepared Slice 6 Orchestrator Packet
+
+Slice: 6 - Permissive Physical Legality
+
+Goal:
+Replace starter/minimum-viable loadout legality with permissive MachineDesign physical legality.
+
+Context:
+- Slices 1-5 are accepted.
+- MachineDesign is authoritative for new sessions.
+- Director decision: bare core alone is legal for implementation. Bad machines may exist; do not require mobility, weapons, or foundation/starter rails.
+- Legacy BotDesignSnapshot/currentDesign compatibility may remain only for legacy flow. Machine:v1 confirm and legality must not depend on validateMinimumViableLoadout or starter rails.
+- Do not implement Slice 7 capabilities, combat action generation, combat resolver, replay, or agent manual changes.
+
+Owned files:
+- packages/sim/src/loadoutActions.ts
+- packages/sim/src/machineLegality.ts
+- packages/catalog/src/capabilities.ts
+- focused tests in tests/
+
+May touch if required for compile/tests only:
+- packages/sim/src/index.ts
+- packages/schemas/src/types.ts
+- apps/worker/src/session.ts
+
+Must add:
+- validateMachinePhysicalLegality or equivalent MachineDesign physical legality validator.
+- Machine:v1 confirm path that uses machine physical/tree legality instead of validateMinimumViableLoadout.
+- Tests proving permissive legality and invalid physical structures.
+
+Must delete or quarantine from machine:v1 flow:
+- validateMinimumViableLoadout
+- MISSING_MOBILITY
+- MISSING_WEAPON
+- MISSING_GROUND_SUPPORT
+- FOUNDATION_PART_IDS
+- BASIC_MOBILITY_PART_IDS
+- foundationPartIdsFor
+- applyStoreViabilityRails
+
+Forbidden shortcuts:
+- Do not require mobility, weapon, ground support, starter body, or foundation parts for machine:v1 confirmation.
+- Do not validate machine physical legality through BotDesignSnapshot/BotBlueprint projections.
+- Do not loosen disconnected/cycle/missing-core invariants from validateMachineTree.
+- Do not remove legacy compatibility by breaking old legacy-bot-design:v1 tests unless the slice explicitly migrates them.
+
+Acceptance criteria:
+- Bare core can confirm.
+- Core plus decorative/noncombat part can confirm.
+- Weaponless machine is legal.
+- Mobility-less machine is legal.
+- Backward weapon is legal.
+- Sideways wheel is legal.
+- Disconnected machine invalid.
+- Hard collision invalid, if collision data is available in current structures; otherwise document exactly why this remains deferred.
+- Unknown catalog part invalid.
+- Insufficient gold remains invalid at purchase/placement time.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "validateMinimumViableLoadout|MISSING_MOBILITY|MISSING_WEAPON|MISSING_GROUND_SUPPORT|FOUNDATION_PART_IDS|BASIC_MOBILITY_PART_IDS|foundationPartIdsFor|applyStoreViabilityRails" packages apps tests
+- focused evidence for bare-core confirm and no mobility/weapon/foundation rails in machine:v1 confirm
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining legacy matches from the required rg command and why each is legacy-only.
+- Evidence machine:v1 confirm no longer uses validateMinimumViableLoadout or starter rails.
+- Evidence disconnected/unknown/collision invalid cases are covered or explicitly deferred by missing current data.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 6 Summary
+
+Implemented:
+- validateMachinePhysicalLegality for MachineDesign physical legality, exported through packages/sim/src/index.ts.
+- Machine:v1 confirm path that runs validateMachineTree plus validateMachinePhysicalLegality and leaves validateMinimumViableLoadout as a legacy-only fallback.
+- Store generation without hidden foundation or viability rails; foundationPartIds remains as an empty compatibility field.
+- Focused unit and route tests covering bare-core confirm, decorative/noncombat confirm, weaponless and mobility-less legality, backward weapon and sideways wheel legality, disconnected tree rejection, unknown catalog part rejection, hard sibling AABB collision rejection, and insufficient-gold rejection before mutation.
+
+Accepted constraints:
+- Bad machines are legal if tree/physical structure is valid; no mobility, weapon, ground support, starter body, or foundation requirement is allowed for machine:v1 confirm.
+- validateMinimumViableLoadout and MISSING_* codes remain only in legacy validator/tests and the non-machine fallback.
+- Hard collision is scoped to currently reliable data: non-direct catalog-part AABB overlap. Parent/child, oriented, mount-aware, and full physics collision remain out of scope.
+
+Validation:
+- npm.cmd test: passed 264/264.
+- git diff --check: passed with CRLF warnings only.
+- rg gate: foundation/store rail symbols absent; remaining validateMinimumViableLoadout and MISSING_* matches accepted as legacy-only.
+
+Residual risk:
+- MachineDesign Transform3D.rotation still is not full orientation authority. Slice 7 must add or use explicit orientation/basis data before deriving local drive/emitter axes.
+
+Prepared Slice 7 Orchestrator Packet
+
+Slice: 7 - Machine Capabilities and Local Axis Authority
+
+Goal:
+Derive machine capabilities from MachineDesign parts, transforms, runtime state, and explicit local-axis metadata without using legacy deriveControls as machine authority.
+
+Context:
+- Slices 1-6 are accepted.
+- MachineDesign is authoritative for new sessions.
+- Bare core and bad-but-physically-valid machines are legal.
+- Machine:v1 combat is still temporarily hold/brake-only until native capability-driven action generation lands.
+- Slice 5/6 residual risk is active: MachineDesign Transform3D.rotation is a legacy-compatible yaw/roll tuple, not full OrientationBasis authority. Do not treat that tuple as a full local basis.
+- If current MachineDesign cannot safely represent local axis authority, add the minimal explicit orientation/basis/runtime representation needed for capabilities before deriving axes. Do not fake precision from the legacy tuple.
+- Do not implement Slice 8 combat action generation, Slice 9 resolver changes, Slice 10 damage/detach, Slice 11 replay, or agent manual changes.
+
+Owned files:
+- packages/catalog/src/controls.ts
+- packages/sim/src/machineCapabilities.ts
+- packages/catalog/src/parts.ts
+- apps/worker/src/session.ts
+- apps/worker/src/sessionCombatDecision.ts
+- focused tests in tests/
+
+May touch if required for orientation authority, exports, compile, or focused tests:
+- packages/schemas/src/types.ts
+- packages/sim/src/loadoutActions.ts
+- packages/sim/src/mountSurfaces.ts
+- packages/sim/src/index.ts
+- packages/sim/src/machineProjection.ts
+
+Must add:
+- deriveMachineCapabilities or equivalent.
+- Machine capability data for movement, weapons, utility, and inactive/detached parts.
+- Part-local drive axes and emitter axes using explicit basis/orientation authority, not BotBlueprint projection.
+- Temporary capabilitiesToLegacyControlsProjection only if needed to bridge existing worker/session controls until Slice 8.
+- Tests for local-axis-sensitive capability derivation.
+
+Catalog/model requirements:
+- Normal wheel: forward/back along its local drive axis; a sideways normal wheel must not unlock all movement.
+- Omni wheel: multi-axis/lateral capability.
+- Mecanum wheel: diagonal/lateral behavior if catalog parts currently support it; otherwise document exact catalog blocker.
+- Tank tread: forward/back with high traction if catalog parts currently support it; otherwise document exact catalog blocker.
+- Fixed weapon: fire along local emitter axis.
+- Turret/rotating part: capability direction uses explicit runtime rotation if current runtime state supports it; otherwise add minimal runtime orientation support or document exact blocker.
+
+Must delete or quarantine from machine:v1 authority:
+- deriveControls as the source of machine capabilities.
+- BotBlueprint/BotDesignSnapshot projection as the source of machine capabilities.
+- Any assumption that a wheel grants the full generic movement menu.
+- Any assumption that a weapon fires forward unless its local emitter axis says so.
+
+Forbidden shortcuts:
+- Do not use storedDesignToLegacyBotBlueprintProjection or botDesignSnapshotToLegacyBotBlueprintProjection to derive machine capabilities.
+- Do not use transform.rotation as a full basis unless this slice first makes that representation explicitly authoritative and tested.
+- Do not make combatActions.ts generate machine legal actions from capabilities yet; that is Slice 8.
+- Do not change combat resolver behavior; that is Slice 9.
+- Do not loosen Slice 6 physical/tree legality.
+- Do not reintroduce starter/foundation/minimum-viable strategy gates.
+
+Acceptance criteria:
+- deriveMachineCapabilities exists and is exported.
+- Machine capabilities ignore detached, disabled, or destroyed parts.
+- Bare core derives no movement and no weapon fire capability.
+- One sideways normal wheel does not unlock the generic full movement menu.
+- Omni wheel produces lateral capability.
+- Rear-facing laser exposes a rear firing direction.
+- Wheel-mounted laser follows explicit parent/runtime rotation if runtime rotation exists; otherwise handoff documents the exact missing runtime authority and focused tests cover the supported behavior.
+- capabilitiesToLegacyControlsProjection, if added, is named as a projection and not used as the source of truth for capability derivation.
+- deriveControls may remain only for legacy projection paths and old fixture compatibility, not machine authority.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "deriveControls\\(|storedDesignToLegacyBotBlueprintProjection|botDesignSnapshotToLegacyBotBlueprintProjection|MachineCapabilities|deriveMachineCapabilities|capabilitiesToLegacyControlsProjection" packages apps tests
+- focused evidence that machine capability derivation is not projection-derived
+- focused evidence for sideways wheel, omni wheel, rear weapon, and inactive/detached part behavior
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining rg matches and why each is legacy-only, projection-only, or accepted bridge code.
+- Evidence that MachineCapabilities are derived from MachineDesign/local-axis authority.
+- Evidence that Slice 5 orientation risk was addressed or exactly why part of it remains blocked.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 7 Summary
+
+Implemented:
+- deriveMachineCapabilities in packages/sim/src/machineCapabilities.ts, exported through packages/sim/src/index.ts.
+- Shared MachineCapabilities and machine capability catalog metadata types in packages/schemas/src/types.ts.
+- Catalog machine capability annotations for movement, weapon, utility, inactive/detached behavior support, including normal wheel, omni, mecanum, tank tread, articulated leg, fixed emitter, turret emitter, and activated utility modes.
+- Explicit Transform3D.orientation and MachineRuntimeState.orientationByInstanceId authority, with loadout placement persisting ResolvedMountPose.orientation.
+- Machine capability derivation that ignores detached, disabled, destroyed, missing-catalog, and missing-orientation parts.
+- Focused tests for bare core, sideways normal wheel, omni lateral axis, rear-facing laser, runtime parent orientation inheritance, inactive parts, and orientation persistence from mount pose.
+
+Accepted constraints:
+- deriveControls, storedDesignToLegacyBotBlueprintProjection, and botDesignSnapshotToLegacyBotBlueprintProjection remain legacy/projection compatibility only; they are not MachineCapabilities authority.
+- capabilitiesToLegacyControlsProjection was not added because no bridge was needed before Slice 8.
+- Combat action generation and resolver behavior intentionally remain unchanged from the accepted temporary hold/brake bridge until Slice 8/9.
+- Transform3D.rotation remains a legacy-compatible tuple and is not used as local-axis authority.
+
+Validation:
+- Orchestrator npm.cmd test: passed 267/267.
+- Director npm.cmd test: passed 267/267.
+- git diff --check: passed with LF-to-CRLF warnings only.
+- Required rg gate: remaining deriveControls/projection matches are legacy/projection compatibility, catalog annotations, new capability authority, or focused tests.
+- Independent QA PASS: 019ea499-2287-7c00-bbf4-0c3b306458ab.
+
+Residual risk:
+- Orientation basis validation currently checks finite vector shape only. It does not prove unit length or orthogonality; upstream pose resolution produces canonical bases, but runtime orientation producers must remain trusted until a later hardening slice.
+- Capability tests are representative, not a full orientation-basis corpus.
+
+Prepared Slice 8 Orchestrator Packet
+
+Slice: 8 - Combat Action Generation From Capabilities
+
+Goal:
+Generate machine:v1 combat legal actions from MachineCapabilities instead of temporary hold-only GeneratedControls or legacy projection controls.
+
+Context:
+- Slices 1-7 are accepted.
+- MachineDesign is authoritative for machine:v1 sessions.
+- deriveMachineCapabilities is the authority for machine movement, weapon, utility, and inactive part capability facts.
+- deriveControls and BotBlueprint/BotDesignSnapshot projection are legacy compatibility only and must not drive machine:v1 combat actions.
+- Current machine:v1 combat still uses the accepted temporary hold/brake bridge and no-damage draw fallback until this slice replaces action generation.
+- This slice changes action generation and worker wiring only. Resolver physics/runtime mutation remains Slice 9; damage/detach remains Slice 10; replay remains Slice 11.
+- Transform3D.rotation is not local-axis authority. Use MachineCapabilities axes from explicit orientation basis.
+
+Owned files:
+- packages/sim/src/combatActions.ts
+- packages/sim/src/combatLegality.ts
+- apps/worker/src/session.ts
+- apps/worker/src/sessionCombatDecision.ts
+- focused tests in tests/
+
+May touch if required for types, exports, capability conversion helpers, or focused tests:
+- packages/schemas/src/types.ts
+- packages/sim/src/machineCapabilities.ts
+- packages/sim/src/index.ts
+- packages/sim/src/gridMovement.ts
+
+Must add:
+- A machine-aware combat action generation path that consumes MachineCapabilities for machine:v1 stored designs.
+- Movement candidate generation from movement capability axes and current tactical grid commands, preserving hold/brake.
+- Weapon action generation from weapon emitter axes with target/range/line-of-sight gating.
+- Utility action generation from utility capabilities if current TurnCommand/action kinds can represent it.
+- Worker/session wiring so machine:v1 combat action sets are built from MachineCapabilities, not temporaryMachineCombatControls or projection controls.
+- Focused tests for capability-driven action menus and locked/idempotent action behavior remaining intact.
+
+Must delete or quarantine from machine:v1 authority:
+- TEMPORARY_MACHINE_COMBAT_CONTROLS and temporaryMachineCombatControls as the machine:v1 action-generation source.
+- temporaryMachineCombatAuthorityBlueprint as the machine:v1 action-generation source.
+- controlsForStoredDesignCombatAuthority returning projection-derived controls for machine:v1.
+- combatActions.ts generating machine:v1 movement candidates from raw GeneratedControls.
+
+Forbidden shortcuts:
+- Do not call deriveControls, storedDesignToLegacyBotBlueprintProjection, botDesignSnapshotToLegacyBotBlueprintProjection, or machineDesignToLegacyBotBlueprintProjection to generate machine:v1 combat actions.
+- Do not treat every mobility part as full MOVEMENT_COMMANDS.
+- Do not use transform.rotation as a local-axis basis.
+- Do not change resolveCombat, resolveSubmittedCombat, damage, detach, runtime persistence, replay, or agent manual behavior in this slice.
+- Do not loosen action id, action lock, stale decision, or idempotency semantics.
+- Do not remove legacy GeneratedControls support for legacy-bot-design:v1.
+
+Acceptance criteria:
+- No-mobility machine combat still has hold/brake but no movement actions.
+- A single axis-limited normal wheel yields only axis-matched limited movement actions, not the full generic movement menu.
+- Omni capability yields lateral movement candidates.
+- Weapon action is absent when emitter axis cannot target the opponent, and present when emitter/range/LOS can target.
+- Arena obstacle LOS blocks weapon fire.
+- Large wreckage or a current equivalent blocking obstacle blocks LOS; if no wreckage entity exists before Slice 10, document the exact blocker and prove the current obstacle path.
+- Existing destroyed-before-fire suppression still holds for available current data.
+- Active machine:v1 combat packets expose generated canonical actions and still omit private payload command data.
+- Duplicate/idempotent action submission and stale action-set behavior remain unchanged.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "TEMPORARY_MACHINE_COMBAT_CONTROLS|temporaryMachineCombatControls|temporaryMachineCombatAuthorityBlueprint|controlsForStoredDesignCombatAuthority|deriveControls\\(|storedDesignToLegacyBotBlueprintProjection|botDesignSnapshotToLegacyBotBlueprintProjection|machineDesignToLegacyBotBlueprintProjection|GeneratedControls" packages/sim apps/worker tests
+- focused evidence that machine:v1 combat action generation consumes deriveMachineCapabilities or MachineCapabilities
+- focused evidence that legacy-bot-design:v1 still uses legacy controls/projection compatibility
+- focused evidence that resolveCombat/resolveSubmittedCombat behavior was not changed
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining rg matches and why each is legacy-only, projection-only, or accepted compatibility.
+- Evidence for no-mobility hold-only, axis-limited wheel, omni lateral, weapon direction/LOS, obstacle/wreckage blocker handling, and idempotency/stale action behavior.
+- Evidence that Slice 9 resolver behavior was not implemented.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 8 Summary
+
+Implemented:
+- buildCombatActionSet now accepts MachineCapabilities and routes machine:v1 action generation through machine capability candidates instead of legacy GeneratedControls.
+- Machine movement candidates are filtered from movement capability axes against the existing tactical movement command set while preserving hold/brake.
+- Machine weapon candidates use MachineWeaponCapability range, emitter axis bearing, and arena LOS gating during action generation.
+- Machine utility capabilities emit use_utility actions where the current TurnCommand shape can represent utility activation.
+- Worker action-set creation derives MachineCapabilities from confirmed machine:v1 stored designs, deletes projection-derived role.controls for machine:v1, and keeps legacy controls for legacy-bot-design:v1 only.
+- Worker combat decision briefs derive available commands from active canonical action sets when present, so the agent-facing brief sees the generated machine action menu.
+- Focused tests cover no-mobility hold-only, axis-limited normal wheel movement, omni lateral moves, weapon bearing/range/LOS, obstacle LOS, utility activation, packet redaction, and existing stale/idempotent behavior through the full suite.
+
+Accepted constraints:
+- resolveCombat, resolveSubmittedCombat, damage, detach, runtime persistence, and replay were not changed in Slice 8.
+- GeneratedControls remains supported for legacy-bot-design:v1.
+- Projection helpers remain compatibility/replay/display paths only, not machine:v1 action generation authority.
+- No wreckage entity exists yet; current LOS proof uses ArenaObstacleDefinition blocking behavior, with wreckage deferred to Slice 10.
+
+Validation:
+- Orchestrator npm.cmd test: passed 273/273.
+- Director npm.cmd test: passed 273/273.
+- git diff --check: passed with LF-to-CRLF warnings only.
+- Required rg gate: no temporary machine-control source names remain; remaining GeneratedControls/deriveControls/projection matches are legacy/projection compatibility or focused tests.
+- resolveCombat/resolveSubmittedCombat diff: empty.
+- Independent QA no-blocker review: 019ea4af-ce19-7ec3-9ca7-9f371230dd82.
+
+Residual risk:
+- AI combat brief range/readiness still inherits current combat snapshot weaponReach semantics, so machine weapon readiness text can be conservative until Slice 9 gives the resolver native machine weapon reach.
+- Machine action generation currently exposes only the first two machine weapons through weaponA/weaponB because TurnCommand has only two weapon slots.
+- Wreckage LOS cannot be proved until Slice 10 adds wreckage entities.
+
+Prepared Slice 9 Orchestrator Packet
+
+Slice: 9 - Combat Resolver Uses Machine Runtime
+
+Goal:
+Make combat resolution use MachineDesign runtime/capability facts for machine:v1 sessions instead of the temporary no-damage draw fallback or legacy BotBlueprint movement.
+
+Context:
+- Slices 1-8 are accepted.
+- MachineDesign is authoritative for machine:v1 sessions.
+- deriveMachineCapabilities is the authority for machine movement, weapon, utility, and inactive part capability facts.
+- Slice 8 action generation now builds machine:v1 legal actions from MachineCapabilities.
+- Machine action generation and resolver must use the same capability facts.
+- Resolver behavior is currently still quarantined behind machineCombatDrawFallbackBlueprint / MACHINE_COMBAT_DRAW_FALLBACK_PART_ID and produces no native machine movement/damage.
+- Slice 9 owns resolver movement/weapon runtime parity, but not damage/detach/wreckage destruction semantics beyond the minimum state needed for deterministic native machine combat. Damage/detach/wreckage remains Slice 10; replay visuals remain Slice 11.
+- Transform3D.rotation is not local-axis authority. Use Transform3D.orientation and MachineRuntimeState.orientationByInstanceId through deriveMachineCapabilities.
+
+Owned files:
+- packages/sim/src/resolveCombat.ts
+- packages/sim/src/machineRuntime.ts
+- packages/sim/src/machineMovement.ts
+- packages/sim/src/machineWeapons.ts
+- focused tests in tests/
+
+May touch if required for types, exports, worker state wiring, or focused tests:
+- packages/schemas/src/types.ts
+- packages/sim/src/index.ts
+- apps/worker/src/session.ts
+- apps/worker/src/sessionTypes.ts
+- packages/sim/src/machineCapabilities.ts
+- packages/sim/src/combatActions.ts
+
+Must add:
+- Native machine:v1 resolver path that consumes MachineDesign and MachineRuntimeState/capability facts.
+- resolveMachineMovement or equivalent that maps submitted machine movement commands to deterministic movement using the same movement capability axes accepted by Slice 8 action generation.
+- machine weapon resolution that uses current emitter axes/range from MachineCapabilities instead of legacy BotBlueprint weaponReach.
+- Runtime persistence for machine combat facts that must affect the next turn, especially parent/runtime orientation changes used by child emitters.
+- Action-generation/resolution parity tests proving generated legal machine commands resolve as expected.
+- Determinism tests for identical machine runtime inputs.
+
+Must delete or quarantine from machine:v1 runtime authority:
+- machineCombatDrawFallbackBlueprint as the active resolver authority for confirmed machine:v1 combat.
+- MACHINE_COMBAT_DRAW_FALLBACK_PART_ID as the active resolver behavior for confirmed machine:v1 combat.
+- moveBot as the machine:v1 movement resolver.
+- deriveControls as any source of machine:v1 resolver movement/weapon authority.
+
+Forbidden shortcuts:
+- Do not route machine:v1 resolution through machineDesignToLegacyBotBlueprintProjection, storedDesignToLegacyBotBlueprintProjection, botDesignSnapshotToLegacyBotBlueprintProjection, or deriveControls.
+- Do not resolve every machine mobility capability as full generic movement.
+- Do not use Transform3D.rotation as local-axis authority.
+- Do not implement Slice 10 damage, attachment breakage, detach, or wreckage as broad systems in this slice.
+- Do not change replay/Babylon rendering behavior in this slice.
+- Do not loosen action id, action lock, stale decision, or idempotency semantics.
+- Do not break legacy-bot-design:v1 resolver compatibility.
+
+Acceptance criteria:
+- Machine action generation/resolution parity: a generated machine legal movement command resolves through native machine movement, not moveBot or fallback blueprint movement.
+- Same machine runtime input, action set, and seed produce deterministic resolver output.
+- A mounted wheel direction affects resolved movement direction.
+- A rotating parent/runtime orientation changes child weapon emitter direction on the next turn.
+- A weapon that Slice 8 legalizes by emitter/range/LOS can produce a native weapon-fire result in the resolver.
+- A weapon that cannot bear on the opponent does not fire successfully through the resolver.
+- Old generic all-movement behavior cannot occur for machine sessions.
+- Legacy-bot-design:v1 combat still resolves through the existing legacy path.
+- Existing destroyed-before-fire suppression remains true for current legacy data.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "moveBot\\(|deriveControls\\(|machineCombatDrawFallbackBlueprint|MACHINE_COMBAT_DRAW_FALLBACK_PART_ID|storedDesignToLegacyBotBlueprintProjection|botDesignSnapshotToLegacyBotBlueprintProjection|machineDesignToLegacyBotBlueprintProjection" packages/sim apps/worker packages/catalog tests
+- focused evidence that machine:v1 resolver consumes MachineDesign/MachineRuntimeState/MachineCapabilities
+- focused evidence that legacy-bot-design:v1 still uses legacy resolver compatibility
+- focused evidence that Slice 10 damage/detach/wreckage was not implemented
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining rg matches and why each is legacy-only, projection-only, accepted compatibility, or intentionally deferred cleanup.
+- Evidence for action-generation/resolution parity, deterministic same-input behavior, wheel-direction movement, runtime parent orientation changing child emitter direction, and no generic all-movement behavior.
+- Evidence that legacy combat remains compatible.
+- Evidence that Slice 10 damage/detach/wreckage and Slice 11 replay behavior were not implemented.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 9 Summary
+
+Implemented:
+- Native machine:v1 combat resolution now consumes MachineDesign, MachineRuntimeState, and MachineCapabilities for movement and weapon fire instead of machineCombatDrawFallbackBlueprint, MACHINE_COMBAT_DRAW_FALLBACK_PART_ID, moveBot, deriveControls, or projection-derived authority.
+- Machine movement uses shared capability-axis support from machineMovement.ts so generated commands and resolver behavior agree on supported directions.
+- Machine weapon fire uses current emitter axis, range, and LOS from machine capability/runtime facts.
+- Worker combat stores baseline machine designs at combat open for cumulative resolver replay, while persisted runtime still feeds next-turn packet/action generation.
+- Native machine weapon damage syncs flat part health back into MachineRuntimeState.healthByInstanceId without implementing detach, wreckage, or breakage semantics.
+- Focused tests cover resolver/action-generation parity, deterministic same-input behavior, runtime orientation affecting child emitters, no generic all-movement behavior, native weapon damage health sync, and worker two-turn replay without double-applying prior runtime ticks.
+
+Accepted constraints:
+- Slice 10 detach, wreckage, attachment breakage, destroyed capability removal, and full damage semantics remain deferred.
+- Slice 11 replay/Babylon visuals remain untouched.
+- Legacy-bot-design:v1 combat continues through the existing legacy resolver path.
+- Projection helpers remain compatibility/replay/display paths only, not machine:v1 resolver authority.
+
+Validation:
+- Orchestrator npm.cmd test: passed 278/278 after blocker fix.
+- Director npm.cmd test: passed 278/278.
+- git diff --check: passed with LF-to-CRLF warnings only.
+- Required rg gate: no fallback constants remain; remaining moveBot, deriveControls, and projection-helper matches are legacy/projection compatibility or focused tests.
+- Independent QA PASS/no-blocker review: 019ea4d1-8341-7d12-8209-0c8927e5f753.
+
+Residual risk:
+- Mixed legacy-vs-machine combat is minimally supported but not deeply characterized.
+- No browser/replay visual QA was run because Slice 9 did not change renderer/Babylon behavior.
+- Native machine damage currently has only flat health persistence; action suppression after destroyed/detached parts is owned by Slice 10.
+
+Prepared Slice 10 Orchestrator Packet
+
+Slice: 10 - Damage, Detach, and Wreckage Entities for machine:v1
+
+Goal:
+Add native machine:v1 damage, destroyed-part capability removal, detach semantics, and wreckage data/events on top of the accepted Slice 9 native machine resolver.
+
+Context:
+- Slices 1-9 are accepted.
+- Slice 9 replaced the temporary machine resolver fallback with native MachineDesign, MachineRuntimeState, and MachineCapabilities authority for movement and weapon fire.
+- The current Slice 9 native weapon damage signal is intentionally minimal: flat part health can drop and sync into MachineRuntimeState, but detached parts, wreckage entities, destroyed capability removal, and breakage semantics are not implemented yet.
+- MachineDesign and MachineRuntimeState remain authoritative for machine:v1 sessions.
+- Transform3D.orientation and MachineRuntimeState.orientationByInstanceId are local-axis authority. Transform3D.rotation and legacy projections are not authority.
+- Replay/Babylon visual rendering is Slice 11. Slice 10 may emit deterministic semantic wreckage/detach data needed by replay later, but must not implement renderer visuals.
+
+Owned files:
+- packages/sim/src/resolveCombat.ts
+- packages/sim/src/machineRuntime.ts
+- packages/sim/src/machineDamage.ts or equivalent if a new focused module is warranted
+- focused tests in tests/
+
+May touch if required for types, exports, worker persistence, or focused tests:
+- packages/schemas/src/types.ts
+- packages/sim/src/index.ts
+- apps/worker/src/session.ts
+- apps/worker/src/sessionTypes.ts
+- packages/sim/src/machineCapabilities.ts
+- packages/sim/src/combatActions.ts
+
+Must add:
+- Native machine damage target selection tied to machine part instance ids and runtime health.
+- Destroyed/disabled part capability removal so next action generation excludes movement, weapon, and utility capabilities from destroyed or detached parts.
+- Detach semantics for child subtrees when a parent part breaks, tracked in MachineRuntimeState.detachedInstanceIds or an equivalent native runtime structure.
+- Wreckage entity/data/event output for detached or destroyed parts, deterministic enough for Slice 11 replay rendering.
+- Deterministic tests proving repeated same input produces the same damage, detach, and wreckage output.
+- Tests proving a broken wheel removes movement actions on the next packet/action set.
+- Tests proving a broken weapon removes fire actions on the next packet/action set.
+- Tests proving parent break detaches the expected child subtree.
+- Tests proving wreckage data/event is emitted for detached or destroyed machine parts.
+- Tests proving machine damage/detach/wreckage do not route through legacy BotBlueprint, projection controls, or deriveControls authority.
+- Tests proving legacy-bot-design:v1 damage/destruction behavior remains compatible and destroyed-before-fire suppression remains true for legacy data.
+
+Must delete or quarantine from machine:v1 damage authority:
+- Any fallback blueprint, BotBlueprint projection, BotDesignSnapshot projection, deriveControls, or moveBot path used to decide machine damage, destroyed capability removal, detach, or wreckage.
+- Any use of Transform3D.rotation as local-axis authority for damage, detach, or wreckage.
+
+Forbidden shortcuts:
+- Do not change Babylon/replay renderer visuals in Slice 10.
+- Do not route machine:v1 damage or detach through machineDesignToLegacyBotBlueprintProjection, storedDesignToLegacyBotBlueprintProjection, botDesignSnapshotToLegacyBotBlueprintProjection, deriveControls, or GeneratedControls.
+- Do not treat all parts as destroyed-capability blockers if only decorative/non-capability parts are damaged.
+- Do not implement non-deterministic random damage spread without using the resolver seed/deterministic RNG pattern.
+- Do not loosen action id, action lock, stale decision, or idempotency semantics.
+- Do not break legacy-bot-design:v1 resolver compatibility.
+
+Acceptance criteria:
+- Destroying or disabling a movement-capable machine part removes the corresponding machine movement action from the next generated action set.
+- Destroying or disabling a weapon-capable machine part removes the corresponding fire action from the next generated action set.
+- Breaking a parent part detaches the intended child subtree in native machine runtime state.
+- Detached or destroyed machine parts produce deterministic wreckage data/events for later replay.
+- Damage, detach, and wreckage behavior is deterministic for identical machine runtime inputs and seeds.
+- Machine damage/detach/wreckage authority is native MachineDesign/MachineRuntimeState data, not legacy projection or fallback authority.
+- Legacy-bot-design:v1 combat damage/destruction remains compatible.
+- Existing destroyed-before-fire suppression remains true for legacy data.
+- Replay/Babylon renderer files are unchanged.
+
+Required validation:
+- npm.cmd test
+- git diff --check
+- rg -n "moveBot\\(|deriveControls\\(|machineCombatDrawFallbackBlueprint|MACHINE_COMBAT_DRAW_FALLBACK_PART_ID|storedDesignToLegacyBotBlueprintProjection|botDesignSnapshotToLegacyBotBlueprintProjection|machineDesignToLegacyBotBlueprintProjection" packages/sim apps/worker packages/catalog tests
+- rg -n "wreckage|detached|detachedInstanceIds|healthByInstanceId|disabled|destroyed" packages/sim apps/worker tests
+- focused evidence that disabled/destroyed movement, weapon, and utility parts are absent from next-turn machine action generation
+- focused evidence that replay/Babylon renderer files were not changed
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Remaining rg matches and why each is legacy-only, projection-only, accepted compatibility, or intentionally deferred cleanup.
+- Evidence for wheel capability removal, weapon capability removal, parent-subtree detach, wreckage data/event emission, deterministic damage/detach/wreckage behavior, and legacy compatibility.
+- Evidence that replay/Babylon visual behavior was not implemented.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 10 Summary
+
+Implemented:
+- Native machine:v1 damage now applies through MachineRuntimeState healthByInstanceId and refreshes MachineCapabilities after damage.
+- New machineDamage.ts provides deterministic target selection, destroyed part health updates, child-subtree detach, and wreckage records from MachineDesign attachments/runtime state.
+- Machine weapon damage emits existing semantic part_detach events for destroyed/detached machine parts, with enough data for Slice 11 replay rendering.
+- Destroyed/detached movement, weapon, and utility parts are excluded from next-turn machine action generation through deriveMachineCapabilities inactive-part handling.
+- Same-tick destroyed machine weapon suppression is fixed: resolveRoleWeapons reads refreshed attacker.machine.capabilities at fire time instead of stale pre-damage capability snapshots.
+- Focused tests cover wheel movement removal, weapon fire removal, utility removal, parent-subtree detach, deterministic wreckage output, native authority over legacy projection decoys, machine same-tick destroyed-before-fire suppression, and legacy destroyed-before-fire compatibility.
+
+Accepted constraints:
+- Replay/Babylon renderer visuals were not changed in Slice 10.
+- Legacy-bot-design:v1 damage/destruction remains on the legacy resolver path.
+- Machine damage/detach/wreckage authority is native MachineDesign/MachineRuntimeState data, not BotBlueprint, BotDesignSnapshot, deriveControls, moveBot, or projection helpers.
+
+Validation:
+- Orchestrator npm.cmd test after blocker fix: passed 284/284.
+- Director npm.cmd test after blocker fix: passed 284/284.
+- Independent QA npm.cmd test: passed 284/284.
+- git diff --check: passed with LF-to-CRLF warnings only.
+- Required projection/control rg gate: no fallback constants remain; remaining moveBot, deriveControls, and projection-helper matches are legacy/projection/test compatibility.
+- Required damage/detach/wreckage rg gate: expected native damage/runtime/capability/tests plus preexisting replay/loadout/fight-dossier matches.
+- Renderer-path diff check was empty for apps/web/src/replay, packages/replay, apps/web/src/babylon, apps/web/src/render, and packages/render.
+- Independent QA PASS/no-blocker review: 019ea4e5-8bfa-7db2-8d02-26353b899f8d.
+
+Residual risk:
+- Weapon submissions still identify weaponA/weaponB slots instead of stable part instance ids. Live refreshed capability lookup prevents destroyed weapons from firing, but can suppress a surviving second weapon if slot order shifts after same-tick damage.
+- Detached descendants are runtime-health-zeroed immediately. That is accepted for capability suppression; Slice 11 may need richer visual metadata if it wants detached-but-recognizable wreckage presentation.
+
+Prepared Slice 11 Orchestrator Packet
+
+Slice: 11 - Replay Projection and Visual Truth
+
+Goal:
+Render machine:v1 replay from MachineDesign/resolved machine state and semantic events so weird machine geometry, side-mounted parts, and detached wreckage are visible instead of hidden behind fake foundation shells.
+
+Context:
+- Slices 1-10 are accepted.
+- MachineDesign, Transform3D.orientation, MachineRuntimeState.orientationByInstanceId, MachineRuntimeState.healthByInstanceId, and MachineRuntimeState.detachedInstanceIds are machine truth.
+- Transform3D.rotation is a legacy-compatible tuple only. Do not use it as local-axis or replay orientation authority for machine:v1.
+- Slice 10 emits semantic part_detach events for machine wreckage using machine part instance ids, part ids, local position-derived world positions, damage metadata, and detach metadata.
+- Legacy replay projection may remain behind an explicit legacy adapter, but machine:v1 replay must not use fake foundation shell geometry to hide weird placement.
+- Browser/replay proof is mandatory for this slice.
+
+Owned files:
+- packages/replay/src/events.ts
+- apps/web/src/replay/parts/index.ts
+- apps/web/src/replay/bots/foundation.ts
+- apps/web/src/replay/bots/geometry.ts
+- apps/web/src/replay/ReplayViewer.tsx
+
+Current repo structure note:
+- Existing replay files include packages/replay/src/events.ts, packages/replay/src/timeline.ts, apps/web/src/replay/replayMapping.ts, apps/web/src/replay/replayMappingTypes.ts, apps/web/src/replay/ReplayViewer.tsx, apps/web/src/replay/ReplayPreview.tsx, apps/web/src/replay/scene/BabylonReplayScene.tsx, apps/web/src/replay/bots/foundation.ts, apps/web/src/replay/bots/geometry.ts, and apps/web/src/replay/parts/**. Touch adjacent replay files only when required by the existing architecture.
+
+May touch if required for replay data plumbing, tests, or local preview proof:
+- packages/replay/src/timeline.ts
+- apps/web/src/replay/replayMapping.ts
+- apps/web/src/replay/replayMappingTypes.ts
+- apps/web/src/replay/ReplayPreview.tsx
+- apps/web/src/replay/scene/BabylonReplayScene.tsx
+- focused replay tests in tests/
+- smoke-artifacts only for proof images if the repo already uses that convention; check git ls-files smoke-artifacts before and after.
+
+Must add:
+- Machine replay projection that renders machine parts from machine transforms/resolved snapshots instead of legacy fake foundation shells.
+- Detached/wreckage rendering for machine part_detach events from Slice 10.
+- A named legacy replay adapter or clearly quarantined legacy path for old fixture/legacy BotBlueprint rendering.
+- Replay/event validation or mapping updates if current event schemas reject the machine detach/wreckage metadata.
+- Focused tests proving machine replay path does not call fake foundation shell, preserves weird/asymmetric machine placement, preserves side-mounted wheel orientation, maps detach/wreckage semantics, and keeps legacy replay fixtures working.
+- Browser QA proof through /replay-preview on desktop and mobile.
+- Nonblank canvas proof and visible geometry proof for a weird asymmetric bot, side-mounted wheel alignment, and visible detach.
+
+Must delete or quarantine:
+- Any machine:v1 replay path that creates a fake visual foundation shell unless explicitly marked legacy-only.
+- Any renderer-authored physics, remounting, or transform reinterpretation that overrides MachineDesign/resolved machine state.
+- Any use of Transform3D.rotation as machine replay local-axis authority.
+
+Forbidden shortcuts:
+- Do not render machine:v1 through machineDesignToLegacyBotBlueprintProjection as the main visual truth path.
+- Do not hide weird or invalid-looking but legal machine placements behind a generic hull/foundation shell.
+- Do not make the browser proof with static screenshots of an unrelated route; use real /replay-preview playback.
+- Do not skip mobile proof.
+- Do not leave smoke-artifacts tracked unless already tracked intentionally.
+- Do not implement Slice 12 agent manual/cockpit/workbench changes or Slice 13 cleanup/final review changes.
+
+Acceptance criteria:
+- Machine replay renders parts from MachineDesign/resolved machine state.
+- No machine replay path calls fake foundation shell unless explicitly marked legacy-only.
+- Weird asymmetric bot is visibly weird in /replay-preview.
+- Side-mounted wheel is visibly aligned with its machine orientation/motion behavior.
+- Detached machine parts are visibly detached/wreckage in replay.
+- Legacy replay fixtures still render through named legacy compatibility.
+- Browser proof includes /replay-preview desktop screenshot, /replay-preview mobile screenshot, and nonblank canvas proof.
+- Replay tests and browser proof pass without overlapping UI/text/canvas problems.
+
+Required validation:
+- npm.cmd test
+- npm.cmd run typecheck
+- npm.cmd run build
+- git diff --check
+- rg -n "fake foundation|foundation shell|machineDesignToLegacyBotBlueprintProjection|Transform3D\\.rotation|rotation" packages/replay apps/web/src/replay packages/sim tests
+- git ls-files smoke-artifacts
+- Browser or Playwright proof for /replay-preview desktop and mobile, including nonblank canvas and visible detach evidence.
+
+Required handoff:
+- Changed files.
+- Tests run and validation output summary.
+- Browser proof artifacts/paths and what each proves.
+- Remaining rg matches and why each is legacy-only, compatibility-only, or accepted.
+- Evidence that machine replay avoids fake foundation shell and legacy projection authority.
+- Evidence for weird asymmetric bot, side-mounted wheel alignment, and detach visibility.
+- Evidence legacy replay remains compatible.
+- Risks/blockers.
+- Exact deviations from the slice packet, if any.
+
+Accepted Slice 11 Summary
+
+Implemented:
+- Machine replay rendering now uses MachineDesign parts and machine:v1 visual authority when machine designs are present.
+- Legacy replay rendering remains available only through the named legacy adapter path.
+- Detached machine parts from part_detach events render as recognizable wreckage in the real replay preview path.
+- Replay machine designs are plumbed from worker replay payloads through referee client/UI into ReplayViewer and BabylonReplayScene.
+- /replay-preview?proof=machine now supplies both red and blue MachineDesign fixtures.
+- Public replay machine payload normalization now rejects malformed nested machine shapes per team while preserving valid teams and legacy no-machine payloads.
+
+Validation:
+- npm.cmd test passed 289/289.
+- npm.cmd run typecheck passed.
+- npm.cmd run build passed with the existing large-chunk warning only.
+- git diff --check passed with line-ending warnings only.
+- git ls-files smoke-artifacts returned no tracked proof files.
+- dist debug-hook scan found no AgentArenaReplayDebug or getPartDebugStates.
+- Browser proof refreshed on desktop and mobile via /replay-preview?proof=machine&camera=broadcast&time=2.2.
+
+Accepted residual risk:
+- Public replay MachineDesign validation remains structural rather than full graph-semantic validation.
+- Replay payloads still represent the stored machine design/runtime snapshot instead of a time-sliced runtime history.
+
+Prepared Slice 12 Orchestrator Packet
+
+Slice: 12 - Agent Manual, Cockpit, Workbench
+
+Goal:
+Update agent-facing manual/cockpit/workbench guidance so agents understand parameterized legal actions and permissive machine design rules without stale starter/foundation/required-part advice.
+
+Context:
+- Slices 1-11 are accepted.
+- Public GameMaster packets expose legal actions with optional parameterSchema.
+- Agents submit parameters only when the selected legal action asks for them.
+- Server-owned validation rejects invalid parameters and stale/forged submissions.
+- Bad machine designs can be legal; bare core, weaponless, mobility-less, backward weapon, and sideways wheel designs are intentionally allowed by current legality.
+- Shop and budget constraints still apply.
+- Do not reintroduce starter builds, foundation rails, minimum mobility, or weapon-required guidance.
+
+Owned files:
+- packages/schemas/src/agentContract.ts
+- packages/schemas/src/agentSamples.ts
+- apps/web/src/agent/agentBrief.ts
+- apps/web/src/agent/agentCockpitViewState.ts
+- apps/web/src/agent/AgentInsightWorkbench.tsx
+
+May touch:
+- Focused tests covering agent manual/cockpit/workbench source contracts.
+
+Must add or update:
+- Agent-facing guidance that says to inspect parameterSchema before submitting a legal action.
+- Guidance that parameters are included only when that legal action requires/allows them.
+- Guidance that the server validates parameters and may reject submissions.
+- Guidance that poor or incomplete machine designs can still be legal.
+- Guidance that shop and budget constraints still apply.
+- A concrete propose_mount_pose example using the current GameMasterPacket/actionSetId/decisionVersion/actionId/parameters flow.
+
+Required example shape:
+```ts
+const packet = await window.AgentArenaRole.waitForGameMasterPacket()
+const action = packet.legalActions.find((candidate) => candidate.kind === 'propose_mount_pose')
+
+await window.AgentArenaRole.submitAction({
+  action: 'submit_game_action',
+  actionSetId: packet.actionSetId,
+  decisionVersion: packet.decisionVersion,
+  actionId: action.id,
+  parameters: {
+    parentInstanceId: 'core',
+    childPartId: 'Laser_A',
+    mountSurfaceId: 'core_shell',
+    u: 0.37,
+    v: 0.82,
+    yawDegrees: 120,
+    rollDegrees: 15,
+  },
+})
+```
+
+Must delete or quarantine stale guidance:
+- actionId only
+- Submit the actionId only
+- starter
+- foundation
+- mobility-required or weapon-required claims for machine:v1 legality
+
+Forbidden shortcuts:
+- Do not add starter build suggestions.
+- Do not say mobility or weapon is required for machine legality.
+- Do not imply every legal action has no parameters.
+- Do not leave UI text that implies fixed action-only controls.
+- Do not change server action validation behavior in this slice.
+- Do not implement Slice 13 cleanup or final review.
+
+Acceptance criteria:
+- Agent manual/sample/cockpit/workbench text describes parameterized GameMaster actions accurately.
+- Existing fixed-action compatibility is described without saying actionId is always enough.
+- UI/workbench state treats parameterized actions as first-class expected behavior.
+- Remaining starter/foundation/required-part matches are reviewed and are legacy-only, test-only, or unrelated false positives.
+
+Required validation:
+- rg -n "starter|foundation|actionId only|Submit the actionId only|mobility.*required|weapon.*required" packages apps tests
+- npm.cmd test
+- npm.cmd run typecheck
+- npm.cmd run build
+- git diff --check
+
+Required handoff:
+- Changed files.
+- Tests/validation output summary.
+- Remaining stale-guidance rg matches and classification.
+- Exact evidence that agent-facing docs/UI now show parameterSchema and parameters usage.
+- Risks/blockers.
+
+Accepted Slice 12 Summary
+
+Implemented:
+- Agent-facing contract, samples, brief, cockpit view state, and workbench text now describe parameterized GameMaster legal actions as normal behavior.
+- Guidance tells agents to inspect parameterSchema, submit parameters only when the selected legal action asks for them, and expect server validation/rejection for stale, invalid, shop, or budget failures.
+- Guidance explicitly allows bad, incomplete, weaponless, and mobility-less machine designs under current permissive machine legality.
+- propose_mount_pose examples use action: submit_game_action, actionSetId, decisionVersion, actionId, and parameters with yawDegrees/rollDegrees.
+
+Validation:
+- npm.cmd test passed 289/289.
+- npm.cmd run typecheck passed.
+- npm.cmd run build passed with the existing large-chunk warning only.
+- git diff --check passed with line-ending warnings only.
+- git ls-files smoke-artifacts returned no tracked proof files.
+- rg scans found no actionId-only guidance, required mobility/weapon claims, yawDeg, or rollDeg matches in packages/apps/tests.
+
+Accepted residual risk:
+- Generic examples still fall back to parameterExamples?.[0] ?? {}; this is acceptable for current examples but weak if future parameterized actions omit examples.
+
+Prepared Slice 13 Orchestrator Packet
+
+Slice: 13 - Dead Code and Legacy Cleanup
+
+Goal:
+Remove or quarantine leftover starter/foundation/grid/projection-era code so machine:v1 authority is not silently bypassed before the final expert review panel.
+
+Context:
+- Slices 1-12 are accepted.
+- This is cleanup, not feature work. Preserve accepted behavior and tests unless a legacy path is proven unauthorized by the current machine:v1 contract.
+- Use the refactor-cleaner workflow: conservative batches, evidence before deletion, focused tests after each risky removal, and explicit classification for anything that remains.
+- Do not remove intentionally retained compatibility/projection/replay legacy adapters unless they are not needed by tests and are not part of accepted backward compatibility.
+
+Required cleanup inventory:
+```txt
+validateMinimumViableLoadout
+FOUNDATION_PART_IDS
+BASIC_MOBILITY_PART_IDS
+foundationPartIdsFor
+applyStoreViabilityRails
+cellForMount
+isConnectedGrid as authority
+selectedAttachCell
+selectedMountSector
+selectedRotation
+choose_rotation for machine flow
+choose_mount for machine flow
+deriveControls as authority
+BotBlueprint as authority
+BotDesignSnapshot as authority
+PartMountKind fake sphere
+visual foundation shell in machine replay
+```
+
+Required validation:
+```powershell
+rg -n "validateMinimumViableLoadout|FOUNDATION_PART_IDS|BASIC_MOBILITY_PART_IDS|foundationPartIdsFor|applyStoreViabilityRails|cellForMount|selectedAttachCell|selectedMountSector|selectedRotation|deriveControls\\(|PartMountKind|kind: 'sphere'|actionId only|Submit the actionId only" packages apps tests
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+npm.cmd run check:renderer-budget
+git diff --check
+```
+
+Exit gate:
+- No unauthorized legacy matches remain.
+- Any remaining legacy code is explicitly named legacy or Projection and has a removal note or accepted compatibility reason.
+- No MachineDesign truth round-trips through BotBlueprint or BotDesignSnapshot.
+- Machine sessions do not use validateMinimumViableLoadout, foundation rails, cellForMount, choose_mount, choose_rotation, deriveControls, or fake sphere PartMountKind as authority.
+- Machine replay does not render through the visual foundation shell path except behind an explicit legacy adapter.
+
+Forbidden shortcuts:
+- Do not broaden scope into new mechanics, UI polish, schema redesign, or replay art changes.
+- Do not delete public backward-compatibility adapters just to make grep clean.
+- Do not leave ambiguous names like currentDesign or blueprint in machine-authority code without a Projection/legacy boundary.
+- Do not skip lint or renderer-budget just because earlier slices were green.
+
+Required handoff:
+- Changed files and why each was in cleanup scope.
+- For every remaining grep match, classify it as removed, legacy/projection compatibility, test-only, or blocker.
+- Validation command results.
+- Any behavior changes, even if intended to be no-op cleanup.
+- Risks/blockers and whether final panel can start.
+
+You are the Director Agent for Agent Arena.
+
+Model target: GPT-5.5 xhigh.
+
+Your goal is to execute the attached Authoritative Plan to completion through Orchestrator and QA threads. Do not implement code yourself.
+
+Repository:
+C:\Users\Steve\Documents\Github\portfolio
+
+Plan file target:
+C:\Users\Steve\Documents\Github\portfolio\local_docs\plans\authoritative_plan.md
+
+First:
+1. Check git status.
+2. Ensure the plan file exists. If it does not exist, create it from the plan text below.
+3. Treat that plan file as the source of truth.
+4. Do not start implementation until Slice 0 is complete.
+
+Your responsibilities:
+- Keep context small.
+- Go slice by slice in order.
+- Spawn one Orchestrator thread per implementation slice.
+- Give each Orchestrator only the relevant slice packet, not the full plan.
+- Spawn independent QA threads for QA lanes.
+- Do not read full implementation transcripts unless a design dispute requires it.
+- Supervise through slice packets, checkpoint summaries, handoffs, validation evidence, and QA reports.
+- Reject handoffs that skip tests, leave unauthorized legacy code, or drift from the design.
+- Maintain accepted decisions, deviations, QA status, and final review status in the plan file.
+- Do not invent features beyond the plan.
+- Do not override the plan without explicit decision logging.
+
+Stop conditions:
+- The Orchestrator changes files outside slice scope without explanation.
+- A slice leaves required cleanup for “later” when the plan says it is an exit gate.
+- Validation is missing or only partially run.
+- `MachineDesign` truth round-trips through `BotBlueprint`.
+- `deriveControls`, `cellForMount`, foundation rails, or minimum viable loadout logic remain authoritative for machine sessions.
+- Replay/browser proof is skipped for replay changes.
+- Final expert review panel is skipped.
+
+Completion condition:
+The goal is complete only when every slice in the Authoritative Plan is implemented in order, required legacy cleanup gates pass, independent QA signs off, and the final expert review panel returns a release verdict.
+
+Now read/create the plan file, complete Slice 0, then prepare the Slice 1 Orchestrator packet. Do not code.
+
+**Authoritative Plan: Machine Design Tree + Parameterized GameMaster Actions**
+
+  
+
+**Status**
+
+Draft for human approval. Do not implement until the Director accepts this document as the source of truth.
+
+  
+
+**Goal**
+
+Replace the current grid-cell loadout/control shortcut model with a server-authoritative machine model:
+
+  
+
+```txt
+
+system-owned core
+
+-> rooted machine tree
+
+-> parameterized mount surfaces
+
+-> resolved 3D transforms
+
+-> derived part affordances
+
+-> GameMaster legal actions
+
+-> combat resolution
+
+-> replay projection
+
+-> wreckage/mutation feedback
+
+```
+
+  
+
+**Non-Goals**
+
+- No full rigid-body physics in v1.
+
+- No continuous combat movement submissions from agents.
+
+- No multi-parent attachment graph in v1.
+
+- No autonomous detached parts in v1.
+
+- No starter builds, curated foundation rails, or “helpful” minimum viable loadout strategy gates.
+
+- No renderer-authored physics. Replay is projection only.
+
+  
+
+**Skill Routing**
+
+- Director and architecture control: `architecture-planning`, `subagent-orchestration`, `vertical-slice-issue-planner`
+
+- Contract and API review: `rules-core`, `coding-standards`, `codex-assumption-extraction`
+
+- Sim and failure analysis: `codex-failure-mode-enumerator`
+
+- Test strategy: `codex-invariant-test-generator`
+
+- Cleanup: `refactor-cleaner`
+
+- Replay/browser/UI: `frontend-patterns`, `game-ui-ux`, `babylon-pbr-fidelity`, `battlebots-babylon-art-direction`
+
+- Final review: `code-review`, `release-readiness-gate`
+
+  
+
+**Current Legacy System**
+
+Known legacy anchors:
+
+- [packages/schemas/src/types.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts): `PartMountKind`, `BotBlueprint`, `BotDesignSnapshot`, `GameMasterActionSubmission`, `GameMasterLegalAction`, `LoadoutBuildState`
+
+- [packages/schemas/src/validators/gameMasterAction.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/validators/gameMasterAction.ts): action submission shape only validates fixed `actionId`
+
+- [packages/sim/src/loadoutActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/loadoutActions.ts): foundation rails, minimum viable loadout, grid mount placement
+
+- [packages/catalog/src/parts.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/parts.ts): inferred socket/sector mounts
+
+- [packages/catalog/src/controls.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/controls.ts): generic `deriveControls`
+
+- [packages/sim/src/combatActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/combatActions.ts): combat actions from generic controls
+
+- [packages/sim/src/resolveCombat.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/resolveCombat.ts): `moveBot` ignores part orientation
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts): action locks, active action sets, current design storage, controls storage
+
+- [apps/web/src/agent/agentClient.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentClient.ts): client-side action body allowlist rejects parameters
+
+- [apps/web/src/replay/parts/index.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/parts/index.ts): creates fake visual foundation shell
+
+  
+
+**Locked Product Decisions**
+
+1. Bad machines are legal if physically valid.
+
+2. The server enforces rules, not strategy.
+
+3. Agents may choose dumb, stationary, weaponless, backward, sideways, or decorative machines.
+
+4. Core is system-owned, immutable, free, and not a shop/catalog body part.
+
+5. All live parts must connect to the core by parent links.
+
+6. V1 topology is a tree: every non-core live part has exactly one parent.
+
+7. Detached parts are inert wreckage in v1.
+
+8. Spherical freedom is parameterized, not enumerated.
+
+9. Combat authority is 3D transform based, with grid/cell projection only for tactical previews.
+
+10. Replay must match sim truth and must not invent coherent shapes that the machine does not have.
+
+  
+
+**Coordinate Contract**
+
+Use a sim-local 3D coordinate system:
+
+- `x`: right
+
+- `y`: up
+
+- `z`: forward
+
+- Units: meters-ish abstract game units.
+
+- Angles in degrees at API boundaries.
+
+- Resolved internal math may use radians/quaternions.
+
+- Store resolved rotations as quaternions where possible:
+
+```ts
+
+type QuaternionTuple = [number, number, number, number] // x, y, z, w
+
+type Vector3 = [number, number, number]
+
+```
+
+  
+
+Renderer-specific handedness is an adapter concern. Babylon must consume resolved transforms; it must not redefine simulation axes.
+
+  
+
+**Machine Core Contract**
+
+Add a system-owned machine core:
+
+```ts
+
+type MachineCoreDefinition = {
+
+  id: 'MachineCore_Standard'
+
+  displayName: 'Machine Core'
+
+  size: Vector3
+
+  durability: number
+
+  mass: number
+
+  mountSurfaces: MountSurface[]
+
+  collisionVolume: CollisionVolume
+
+}
+
+```
+
+  
+
+Rules:
+
+- Every draft starts with instance id `core`.
+
+- Core has no parent attachment.
+
+- Core has no cost.
+
+- Core is not inventory.
+
+- Core does not count against purchased part limit unless explicitly decided later.
+
+- Core defeat condition: destroyed core means machine defeat.
+
+- Core cannot be moved, deleted, replaced, detached, purchased, refunded, or rotated independently during build.
+
+  
+
+**Machine Data Contract**
+
+Add these contracts in schema/sim, preferably split out of the monolithic `types.ts` once stable:
+
+  
+
+```ts
+
+type MachineDesign = {
+
+  version: 'machine:v1'
+
+  name: string
+
+  coreInstanceId: 'core'
+
+  parts: MachinePartInstance[]
+
+  attachments: MachineAttachment[]
+
+  runtime?: MachineRuntimeState
+
+}
+
+  
+
+type MachinePartInstance = {
+
+  instanceId: string
+
+  kind: 'core' | 'catalog_part'
+
+  partId: string
+
+  health: number
+
+  maxHealth: number
+
+  detached?: boolean
+
+  destroyed?: boolean
+
+}
+
+  
+
+type MachineAttachment = {
+
+  attachmentId: string
+
+  parentInstanceId: string
+
+  childInstanceId: string
+
+  parentSurfaceId: string
+
+  poseInput: MountPoseInput
+
+  resolvedLocalTransform: Transform3D
+
+  collisionStatus: 'clear' | 'allowed_clip' | 'rejected'
+
+  createdAtActionId: string
+
+}
+
+  
+
+type Transform3D = {
+
+  position: Vector3
+
+  rotation: QuaternionTuple
+
+  scale?: Vector3
+
+}
+
+  
+
+type MachineRuntimeState = {
+
+  partMotion: Record<string, PartMotionState>
+
+  detachedWreckage: WreckageEntity[]
+
+}
+
+```
+
+  
+
+Invariant:
+
+```txt
+
+MachineDesign is authoritative.
+
+BotBlueprint and BotDesignSnapshot are legacy projections only.
+
+No code may round-trip MachineDesign through BotBlueprint to recover truth.
+
+```
+
+  
+
+**Mount Surface Contract**
+
+Replace sector mounts with surfaces:
+
+  
+
+```ts
+
+type MountSurfaceShape = 'sphere' | 'panel' | 'ring' | 'capsule'
+
+  
+
+type MountSurface = {
+
+  id: string
+
+  shape: MountSurfaceShape
+
+  accepts: PartCategory[]
+
+  parameterBounds: MountParameterBounds
+
+  orientationLimits: MountOrientationLimits
+
+  collisionPolicy: PartCollisionPolicy
+
+  motionInheritance: PartMountMotion
+
+  attachmentStrength: number
+
+  localTransform: Transform3D
+
+}
+
+  
+
+type MountPoseInput = {
+
+  surfaceId: string
+
+  u: number
+
+  v: number
+
+  yawDegrees: number
+
+  rollDegrees: number
+
+}
+
+```
+
+  
+
+Sphere semantics:
+
+- `u` in `[0, 1]`: longitude around local `y`
+
+- `u = 0`: local `+z`
+
+- `u = 0.25`: local `+x`
+
+- `u = 0.5`: local `-z`
+
+- `u = 0.75`: local `-x`
+
+- `v` in `[0, 1]`: latitude
+
+- `v = 0`: bottom `-y`
+
+- `v = 0.5`: equator
+
+- `v = 1`: top `+y`
+
+  
+
+Pose resolution:
+
+1. Resolve surface point and surface normal in parent-local space.
+
+2. Align child attach axis to parent surface normal.
+
+3. Apply `yawDegrees` around surface normal.
+
+4. Apply `rollDegrees` around child forward axis after yaw.
+
+5. Reject non-finite numbers.
+
+6. Reject out-of-bounds values.
+
+7. Normalize accepted values before storage/hash:
+
+```txt
+
+u/v precision: 4 decimal places
+
+yaw/roll precision: 1 decimal place
+
+```
+
+  
+
+Do not silently clamp invalid inputs. Reject them with structured issues.
+
+  
+
+**Parameterized GameMaster Action Contract**
+
+Extend public legal actions:
+
+  
+
+```ts
+
+type GameMasterLegalAction = {
+
+  id: string
+
+  kind: GameMasterActionKind
+
+  label: string
+
+  summary: string
+
+  parameterSchema?: GameMasterParameterSchema
+
+  parameterExamples?: Record<string, unknown>[]
+
+  catalogDigest?: string
+
+  catalogRefs?: string[]
+
+  requirements?: string[]
+
+  preview?: ...
+
+}
+
+```
+
+  
+
+Extend submissions:
+
+  
+
+```ts
+
+type GameMasterActionSubmission = {
+
+  action: 'submit_game_action'
+
+  actionSetId: string
+
+  decisionVersion: number
+
+  actionId: string
+
+  parameters?: Record<string, unknown>
+
+  publicMessage?: string
+
+}
+
+```
+
+  
+
+Add server resolver:
+
+  
+
+```ts
+
+type ResolvedSubmittedGameAction = {
+
+  action: CanonicalGameAction
+
+  normalizedParameters?: Record<string, unknown>
+
+  resolvedPayload: Record<string, unknown>
+
+  requestHash: string
+
+}
+
+  
+
+function resolveSubmittedGameAction(
+
+  activeSet: ActiveActionSet,
+
+  submission: GameMasterActionSubmission,
+
+): ResolveSubmittedGameActionResult
+
+```
+
+  
+
+Rules:
+
+- `ActiveActionSet.actions` remains private authority.
+
+- Public packet exposes only redacted template/schema.
+
+- Submission parameters are validated against the template.
+
+- Hash uses normalized parameters, not raw JSON.
+
+- Idempotency compares `actionSetId`, `decisionVersion`, `actionId`, and normalized `requestHash`.
+
+- Parameterized loadout placement must resolve to a server-owned `MachineAttachment`.
+
+- Unknown parameters reject.
+
+- Missing required parameters reject.
+
+- Different valid parameters for the same action are different submissions.
+
+  
+
+**Build Flow Contract**
+
+Initial loadout draft:
+
+```txt
+
+MachineDesign:
+
+  coreInstanceId = "core"
+
+  parts = [MachineCore instance]
+
+  attachments = []
+
+```
+
+  
+
+Build actions:
+
+1. `choose_part`: concrete fixed action from shop/catalog.
+
+2. `choose_attach_target`: concrete fixed action from live reachable parts.
+
+3. `propose_mount_pose`: parameterized action template.
+
+4. Accepted pose places the part and spends budget.
+
+5. `confirm_loadout`: allowed if physical legality passes.
+
+  
+
+Current `choose_mount` and `choose_rotation` become legacy or are removed after migration.
+
+  
+
+Physical legality checks:
+
+- core exists exactly once
+
+- core is immutable
+
+- all live non-core parts have exactly one parent attachment
+
+- all live parts reachable from core
+
+- no cycles
+
+- parent surface exists
+
+- parent surface accepts child category
+
+- known part ids
+
+- budget/shop ownership valid
+
+- no hard-invalid collision
+
+- no hard below-floor placement
+
+  
+
+Physical legality must not check:
+
+- mobility
+
+- weapon
+
+- ground support
+
+- strategic usefulness
+
+- symmetry
+
+- forward-facing weapons
+
+- stability
+
+  
+
+**Collision V1 Contract**
+
+Add simple collision profiles:
+
+```ts
+
+type CollisionVolume =
+
+  | { kind: 'sphere'; radius: number; offset?: Vector3 }
+
+  | { kind: 'box'; size: Vector3; offset?: Vector3 }
+
+  | { kind: 'capsule'; radius: number; height: number; axis: 'x' | 'y' | 'z'; offset?: Vector3 }
+
+```
+
+  
+
+Rules:
+
+- Use resolved transforms to test volumes.
+
+- Reject major overlap for `reject_overlap`.
+
+- Allow explicit cosmetic overlap only for `allow_clip_v1`.
+
+- Always reject core volume overlap unless parent-child mounting clearance explicitly allows contact.
+
+- Always reject below-floor hard invalids.
+
+- Do not use collision as hidden stability physics.
+
+  
+
+**Capability Contract**
+
+Replace generic controls with:
+
+  
+
+```ts
+
+type MachineCapabilities = {
+
+  movement: MovementCapability[]
+
+  weapons: WeaponCapability[]
+
+  utilities: UtilityCapability[]
+
+  sensors: SensorCapability[]
+
+  inactive: InactiveCapabilityReason[]
+
+}
+
+  
+
+type MovementCapability = {
+
+  instanceId: string
+
+  partId: string
+
+  localAxis: Vector3
+
+  worldAxis: Vector3
+
+  reverseWorldAxis?: Vector3
+
+  force: number
+
+  traction: number
+
+  movementKind: 'standard_wheel' | 'tank_tread' | 'omni' | 'mecanum' | 'booster' | 'other'
+
+}
+
+  
+
+type WeaponCapability = {
+
+  instanceId: string
+
+  partId: string
+
+  emitterWorldPosition: Vector3
+
+  fireWorldDirection: Vector3
+
+  range: number
+
+  damage: number
+
+  fireMode: 'direct' | 'arc' | 'sweep' | 'contact'
+
+  cooldownTurns: number
+
+}
+
+```
+
+  
+
+Temporary adapter allowed:
+
+```ts
+
+function capabilitiesToLegacyControls(capabilities: MachineCapabilities): GeneratedControls
+
+```
+
+  
+
+Adapter rules:
+
+- Name must include `legacy` or `Projection`.
+
+- It cannot be used by new combat legality once Slice 8 lands.
+
+- Final cleanup must remove it or quarantine it behind legacy UI only.
+
+  
+
+**Combat Contract**
+
+V1 combat legal actions are still finite server-authored choices, not free continuous agent commands.
+
+  
+
+Action generation:
+
+- derive current `MachineCapabilities`
+
+- generate tactical candidate moves from active mobility vectors
+
+- project candidates into board/cell previews for readability
+
+- generate weapon actions from current emitter transforms
+
+- suppress actions blocked by obstacles/opponent/large wreckage LOS
+
+- suppress actions from broken/detached parts
+
+- no hidden stability rejection
+
+  
+
+Tick order:
+
+```txt
+
+1. Load machine runtime state for both bots.
+
+2. Apply prior persistent part motion state.
+
+3. Resolve submitted movement actions.
+
+4. Update parent/child transforms affected by motion inheritance.
+
+5. Resolve weapon fire from instantaneous current transforms.
+
+6. Apply damage.
+
+7. Resolve attachment breakage and detach subtrees.
+
+8. Spawn inert wreckage.
+
+9. Derive next combat snapshot and legal actions.
+
+```
+
+  
+
+**Replay Contract**
+
+Replay consumes resolved machine state and semantic events:
+
+- spawn
+
+- move
+
+- weapon_fire
+
+- damage
+
+- part_detach
+
+- wreckage_spawn
+
+- knockout
+
+  
+
+Rules:
+
+- Renderer must not create a fake hull/foundation that hides weird placement.
+
+- Legacy fixture rendering may use a named legacy projection.
+
+- New machine replay renders part transforms from `MachineDesign`/resolved snapshots.
+
+- Browser QA must use `/replay-preview`.
+
+  
+
+**Slice 0: Director Control Plane**
+
+Type: Human/Mixed
+
+  
+
+Goal:
+
+Create the control artifact and enforce slice discipline.
+
+  
+
+Scope:
+
+- Create `tools/goals/Authoritative Plan.doc`.
+
+- Put this plan in it.
+
+- Add Director state section:
+
+  - current slice
+
+  - accepted decisions
+
+  - deviations
+
+  - QA evidence links
+
+  - cleanup status
+
+  - final review status
+
+  
+
+Director rules:
+
+- Do not code.
+
+- Do not read full implementation transcripts unless a dispute requires it.
+
+- Supervise through slice packets, handoffs, QA reports, and final review.
+
+- Do not skip slices.
+
+- Do not allow “cleanup later” if cleanup is listed as a slice exit gate.
+
+- Spawn independent QA after each high-risk slice.
+
+- Reject handoffs without exact changed files and validation output.
+
+  
+
+Exit gate:
+
+- Plan file exists.
+
+- Slice 1 packet is ready.
+
+- Director prompt includes stop conditions and no-code rule.
+
+  
+
+**Slice 1: Parameterized Action Submission End-to-End**
+
+Type: AFK with QA
+
+  
+
+Owned files:
+
+- [packages/schemas/src/types.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts)
+
+- [packages/schemas/src/validators/gameMasterAction.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/validators/gameMasterAction.ts)
+
+- [packages/schemas/src/relay.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/relay.ts)
+
+- [packages/schemas/src/agentSamples.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/agentSamples.ts)
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+- [apps/web/src/agent/agentClient.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentClient.ts)
+
+- [apps/web/src/agent/agentClientTypes.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentClientTypes.ts)
+
+- [apps/web/src/agent/agentRoleApiInstaller.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentRoleApiInstaller.ts)
+
+  
+
+Add:
+
+- `parameters?: Record<string, unknown>`
+
+- `parameterSchema`
+
+- `resolveSubmittedGameAction`
+
+- normalized parameter hash
+
+  
+
+Delete/update:
+
+- all user-facing “actionId only” language
+
+- allowlists that reject `parameters`
+
+  
+
+Forbidden shortcuts:
+
+- Do not pass raw `submission.parameters` into loadout logic.
+
+- Do not hash raw JSON.
+
+- Do not validate only in the client.
+
+- Do not let parameters exist without a template schema.
+
+  
+
+Required tests:
+
+- fixed old action still works
+
+- unknown parameter rejects
+
+- missing required parameter rejects
+
+- out-of-range parameter rejects
+
+- normalized equivalent params hash the same
+
+- different normalized params conflict with existing lock
+
+- web client accepts `parameters`
+
+- web client still rejects unsupported fields
+
+  
+
+Exit gate:
+
+- `rg -n "actionId only|Submit the actionId only|accepts only action, actionSetId, decisionVersion, actionId"` returns no unmodified agent-facing guidance.
+
+- `npm.cmd test` passes or slice-specific failures are documented as unrelated and accepted by Director.
+
+  
+
+**Slice 2: System-Owned Machine Core and MachineDesign Storage**
+
+Type: AFK
+
+  
+
+Owned files:
+
+- [packages/schemas/src/types.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts)
+
+- `packages/sim/src/machineDesign.ts`
+
+- [packages/sim/src/index.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/index.ts)
+
+- [apps/worker/src/sessionTypes.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionTypes.ts)
+
+- [apps/worker/src/sessionCreation.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionCreation.ts)
+
+- [apps/worker/src/sessionRoleReset.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionRoleReset.ts)
+
+  
+
+Add:
+
+- `MachineDesign`
+
+- `MachineCoreDefinition`
+
+- `createInitialMachineDesign(role)`
+
+- `validateMachineTree`
+
+- versioned stored design union:
+
+```ts
+
+type StoredDesign =
+
+  | { version: 'machine:v1'; machine: MachineDesign }
+
+  | { version: 'legacy-bot-design:v1'; design: BotDesignSnapshot }
+
+```
+
+  
+
+Forbidden shortcuts:
+
+- Do not use `Body_*` catalog parts as the immutable core.
+
+- Do not charge gold for core.
+
+- Do not store machine truth only in `BotDesignSnapshot`.
+
+  
+
+Required tests:
+
+- new loadout state starts with core
+
+- core has no cost
+
+- core cannot be deleted
+
+- core cannot be moved
+
+- missing core invalid
+
+- duplicate core invalid
+
+- `C -> A -> B` valid
+
+- disconnected `A` invalid
+
+- cycle invalid
+
+  
+
+Exit gate:
+
+- `MachineDesign` is the stored authority for new sessions.
+
+- Legacy continuation paths are explicitly versioned.
+
+  
+
+**Slice 3: One-Way Legacy Projection Adapter**
+
+Type: AFK
+
+  
+
+Owned files:
+
+- [packages/sim/src/gameMasterActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/gameMasterActions.ts)
+
+- `packages/sim/src/machineProjection.ts`
+
+- [apps/worker/src/sessionStateViews.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionStateViews.ts)
+
+- [apps/worker/src/sessionLegacyContracts.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionLegacyContracts.ts)
+
+  
+
+Add:
+
+```ts
+
+function machineDesignToLegacyBotBlueprintProjection(machine): BotBlueprint
+
+function machineDesignToLegacyBotDesignSnapshotProjection(machine): BotDesignSnapshot
+
+```
+
+  
+
+Rules:
+
+- Projection only.
+
+- No `BotBlueprint -> MachineDesign` except a named migration function for old saved fixtures.
+
+- Projection must preserve enough transform metadata for replay until native machine replay lands.
+
+  
+
+Forbidden shortcuts:
+
+- Do not make `BotBlueprint` authoritative.
+
+- Do not use projection for legality.
+
+- Do not hide lossy conversion.
+
+  
+
+Required tests:
+
+- machine with spherical pose projects deterministically
+
+- projection does not mutate machine
+
+- projection cannot be used to recover authoritative mount parameters
+
+  
+
+Exit gate:
+
+- All projection functions include `legacy` or `Projection` in name.
+
+- New machine validators do not import blueprint validators.
+
+  
+
+**Slice 4: Mount Surfaces and Pose Resolution**
+
+Type: AFK with math-focused QA
+
+  
+
+Owned files:
+
+- [packages/schemas/src/types.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/types.ts)
+
+- [packages/catalog/src/parts.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/parts.ts)
+
+- `packages/sim/src/mountSurfaces.ts`
+
+- `packages/sim/src/transforms.ts`
+
+  
+
+Add:
+
+- `MountSurface`
+
+- `MountPoseInput`
+
+- `ResolvedMountPose`
+
+- `resolveMountPose`
+
+- `validateMountPoseInput`
+
+- deterministic transform helpers
+
+  
+
+Delete/quarantine:
+
+- `PartMountKind: 'sphere'` fake vocabulary
+
+- sector-based sphere claims
+
+  
+
+Required tests:
+
+- sphere `u/v` maps to expected normals
+
+- panel `u/v` maps to expected local positions
+
+- yaw/roll affect orientation deterministically
+
+- NaN/infinity rejects
+
+- out-of-bounds rejects
+
+- accepted params normalize
+
+- surface category acceptance works
+
+  
+
+Exit gate:
+
+- Catalog exposes real mount surfaces for core and representative parts.
+
+- No code path treats `sphere` as a sector label.
+
+  
+
+**Slice 5: Loadout Builder Uses propose_mount_pose**
+
+Type: AFK with QA
+
+  
+
+Owned files:
+
+- [packages/sim/src/loadoutActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/loadoutActions.ts)
+
+- [packages/sim/src/actionIds.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/actionIds.ts)
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+- [tests/core.test.mjs](C:/Users/Steve/Documents/Github/portfolio/tests/core.test.mjs)
+
+- [tests/worker-route.test.mjs](C:/Users/Steve/Documents/Github/portfolio/tests/worker-route.test.mjs)
+
+  
+
+Replace flow:
+
+```txt
+
+choose_part
+
+-> choose_attach_target
+
+-> propose_mount_pose(parameters)
+
+-> place part on accepted resolved pose
+
+```
+
+  
+
+Remove or quarantine:
+
+- `choose_mount`
+
+- `choose_rotation`
+
+- `cellForMount`
+
+- `selectedAttachCell`
+
+- `selectedMountSector`
+
+- `selectedRotation`
+
+  
+
+Keep only if named legacy and unused by new machine flow.
+
+  
+
+Required tests:
+
+- can place part on core surface
+
+- can place part on child part surface
+
+- cannot place on detached/nonexistent parent
+
+- cannot place category on unsupported surface
+
+- invalid pose rejected with issues
+
+- valid pose spends gold
+
+- failed pose does not spend gold
+
+- part limit applies to purchased parts, not core
+
+- action packets expose compact schema, not enumerated sphere placements
+
+  
+
+Exit gate:
+
+```txt
+
+rg -n "cellForMount|selectedAttachCell|selectedMountSector|selectedRotation|choose_rotation" packages apps tests
+
+```
+
+Allowed only in named legacy adapter/tests.
+
+  
+
+**Slice 6: Permissive Physical Legality**
+
+Type: AFK
+
+  
+
+Owned files:
+
+- [packages/sim/src/loadoutActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/loadoutActions.ts)
+
+- `packages/sim/src/machineLegality.ts`
+
+- [packages/catalog/src/capabilities.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/capabilities.ts)
+
+- tests
+
+  
+
+Replace:
+
+```ts
+
+validateMinimumViableLoadout
+
+```
+
+  
+
+With:
+
+```ts
+
+validateMachinePhysicalLegality
+
+```
+
+  
+
+Delete:
+
+- `FOUNDATION_PART_IDS`
+
+- `BASIC_MOBILITY_PART_IDS`
+
+- `foundationPartIdsFor`
+
+- `applyStoreViabilityRails`
+
+  
+
+Required tests:
+
+- bare core can confirm if allowed by game phase decision, or core plus decorative part can confirm
+
+- weaponless legal
+
+- mobility-less legal
+
+- backward weapon legal
+
+- sideways wheel legal
+
+- disconnected invalid
+
+- hard collision invalid
+
+- unknown part invalid
+
+- insufficient gold invalid
+
+  
+
+Director decision required:
+
+- Is bare core alone legal? User direction implies yes: bad machines may exist. If accepted, test it.
+
+  
+
+Exit gate:
+
+```txt
+
+rg -n "validateMinimumViableLoadout|MISSING_MOBILITY|MISSING_WEAPON|MISSING_GROUND_SUPPORT|FOUNDATION_PART_IDS|BASIC_MOBILITY_PART_IDS|foundationPartIdsFor|applyStoreViabilityRails" packages apps tests
+
+```
+
+Allowed only in deleted-history comments? Prefer no matches.
+
+  
+
+**Slice 7: Machine Capabilities**
+
+Type: AFK
+
+  
+
+Owned files:
+
+- [packages/catalog/src/controls.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/controls.ts)
+
+- `packages/sim/src/machineCapabilities.ts`
+
+- [packages/catalog/src/parts.ts](C:/Users/Steve/Documents/Github/portfolio/packages/catalog/src/parts.ts)
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+- [apps/worker/src/sessionCombatDecision.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionCombatDecision.ts)
+
+  
+
+Add:
+
+- part-local drive axes
+
+- part-local emitter axes
+
+- `deriveMachineCapabilities`
+
+- temporary `capabilitiesToLegacyControlsProjection`
+
+  
+
+Part catalog must define:
+
+- normal wheel: forward/back along local drive axis
+
+- omni: multi-axis
+
+- mecanum: diagonal/lateral behavior
+
+- tank tread: forward/back with high traction
+
+- fixed weapon: fire along emitter axis
+
+- turret/rotating part: uses runtime rotation
+
+  
+
+Required tests:
+
+- one sideways normal wheel does not unlock all movement
+
+- omni wheel produces lateral capability
+
+- rear-facing laser fires rear direction
+
+- wheel-mounted laser follows parent runtime rotation
+
+- detached/broken parts inactive
+
+  
+
+Exit gate:
+
+- New combat action generation must be able to consume `MachineCapabilities`.
+
+- `deriveControls` may remain only as legacy projection, not authority.
+
+  
+
+**Slice 8: Combat Action Generation From Capabilities**
+
+Type: AFK with sim QA
+
+  
+
+Owned files:
+
+- [packages/sim/src/combatActions.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/combatActions.ts)
+
+- [packages/sim/src/combatLegality.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/combatLegality.ts)
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+- [apps/worker/src/sessionCombatDecision.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/sessionCombatDecision.ts)
+
+  
+
+Change:
+
+- build legal actions from `MachineCapabilities`
+
+- project movement candidates into tactical previews
+
+- preserve `hold`
+
+- preserve idempotency and locked action behavior
+
+  
+
+Required tests:
+
+- no mobility means hold only for movement
+
+- sideways-only capability yields sideways/limited tactical movement, not full movement menu
+
+- weapon action absent when weapon points away and cannot target
+
+- obstacle blocks LOS
+
+- large wreckage blocks LOS
+
+- old destroyed-before-fire suppression still holds
+
+  
+
+Exit gate:
+
+- `combatActions.ts` no longer generates movement candidates from raw `GeneratedControls` for machine sessions.
+
+- Existing combat tests updated to machine fixtures.
+
+  
+
+**Slice 9: Combat Resolver Uses Machine Runtime**
+
+Type: AFK with deterministic proof
+
+  
+
+Owned files:
+
+- [packages/sim/src/resolveCombat.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/resolveCombat.ts)
+
+- `packages/sim/src/machineRuntime.ts`
+
+- `packages/sim/src/machineMovement.ts`
+
+- `packages/sim/src/machineWeapons.ts`
+
+  
+
+Replace:
+
+- `moveBot` for machine sessions with `resolveMachineMovement`
+
+  
+
+Rules:
+
+- Resolver and action generation use same capability derivation.
+
+- Runtime part motion persists.
+
+- Weapon fire uses current transform.
+
+- Resolver returns updated machine runtime state in combat snapshot.
+
+  
+
+Required tests:
+
+- action generation/resolution parity
+
+- same input deterministic
+
+- rotating parent changes child weapon direction next turn
+
+- movement vector matches mounted wheel direction
+
+- old generic all-movement behavior cannot occur for machine sessions
+
+  
+
+Exit gate:
+
+```txt
+
+rg -n "moveBot\\(|deriveControls\\(" packages/sim apps/worker packages/catalog tests
+
+```
+
+Allowed only in legacy projection or old fixture migration.
+
+  
+
+**Slice 10: Damage, Attachment Breakage, Detach, Wreckage**
+
+Type: AFK
+
+  
+
+Owned files:
+
+- [packages/sim/src/resolveCombat.ts](C:/Users/Steve/Documents/Github/portfolio/packages/sim/src/resolveCombat.ts)
+
+- `packages/sim/src/machineDamage.ts`
+
+- [packages/replay/src/events.ts](C:/Users/Steve/Documents/Github/portfolio/packages/replay/src/events.ts)
+
+- [apps/worker/src/session.ts](C:/Users/Steve/Documents/Github/portfolio/apps/worker/src/session.ts)
+
+  
+
+Add:
+
+- attachment health
+
+- subtree detach
+
+- inert wreckage entities
+
+- part capability removal after break/detach
+
+  
+
+Required tests:
+
+- destroyed wheel removes movement
+
+- destroyed weapon removes attack
+
+- broken attachment detaches subtree
+
+- detached subtree does not contribute actions
+
+- core destroyed causes defeat
+
+- large wreckage blocks LOS if configured
+
+  
+
+Exit gate:
+
+- Combat snapshot persists damage/detach state between turns.
+
+  
+
+**Slice 11: Replay Projection and Visual Truth**
+
+Type: Mixed, independent browser QA required
+
+  
+
+Owned files:
+
+- [packages/replay/src/events.ts](C:/Users/Steve/Documents/Github/portfolio/packages/replay/src/events.ts)
+
+- [apps/web/src/replay/parts/index.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/parts/index.ts)
+
+- [apps/web/src/replay/bots/foundation.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/bots/foundation.ts)
+
+- [apps/web/src/replay/bots/geometry.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/bots/geometry.ts)
+
+- [apps/web/src/replay/ReplayViewer.tsx](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/replay/ReplayViewer.tsx)
+
+  
+
+Change:
+
+- render machine parts from resolved transforms
+
+- remove or quarantine fake foundation shell for machine sessions
+
+- render detached parts as wreckage
+
+- keep legacy replay fixtures behind named adapter
+
+  
+
+Required QA:
+
+- `/replay-preview` desktop screenshot
+
+- `/replay-preview` mobile screenshot
+
+- nonblank canvas proof
+
+- weird asymmetric bot visibly weird
+
+- side-mounted wheel visually aligned with motion behavior
+
+- detach visible
+
+  
+
+Exit gate:
+
+- No machine replay path calls fake foundation shell unless explicitly marked legacy.
+
+  
+
+**Slice 12: Agent Manual, Cockpit, Workbench**
+
+Type: Mixed
+
+  
+
+Owned files:
+
+- [packages/schemas/src/agentContract.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/agentContract.ts)
+
+- [packages/schemas/src/agentSamples.ts](C:/Users/Steve/Documents/Github/portfolio/packages/schemas/src/agentSamples.ts)
+
+- [apps/web/src/agent/agentBrief.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentBrief.ts)
+
+- [apps/web/src/agent/agentCockpitViewState.ts](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/agentCockpitViewState.ts)
+
+- [apps/web/src/agent/AgentInsightWorkbench.tsx](C:/Users/Steve/Documents/Github/portfolio/apps/web/src/agent/AgentInsightWorkbench.tsx)
+
+  
+
+Docs must say:
+
+- read `parameterSchema`
+
+- submit `parameters` only when the legal action asks for them
+
+- server validates and may reject
+
+- bad designs can be legal
+
+- no starter build suggestions
+
+- shop/budget still apply
+
+  
+
+Example:
+
+```ts
+
+const packet = await window.AgentArenaRole.waitForGameMasterPacket()
+
+const action = packet.legalActions.find((candidate) => candidate.kind === 'propose_mount_pose')
+
+  
+
+await window.AgentArenaRole.submitAction({
+
+  action: 'submit_game_action',
+
+  actionSetId: packet.actionSetId,
+
+  decisionVersion: packet.decisionVersion,
+
+  actionId: action.id,
+
+  parameters: {
+
+    parentInstanceId: 'core',
+
+    childPartId: 'Laser_A',
+
+    mountSurfaceId: 'core_shell',
+
+    u: 0.37,
+
+    v: 0.82,
+
+    yawDegrees: 120,
+
+    rollDegrees: 15,
+
+  },
+
+})
+
+```
+
+  
+
+Exit gate:
+
+```txt
+
+rg -n "starter|foundation|actionId only|Submit the actionId only|mobility.*required|weapon.*required" packages apps tests
+
+```
+
+Director reviews any remaining matches.
+
+  
+
+**Slice 13: Dead Code and Legacy Cleanup**
+
+Type: AFK with `refactor-cleaner`
+
+  
+
+Required cleanup inventory:
+
+```txt
+
+validateMinimumViableLoadout
+
+FOUNDATION_PART_IDS
+
+BASIC_MOBILITY_PART_IDS
+
+foundationPartIdsFor
+
+applyStoreViabilityRails
+
+cellForMount
+
+isConnectedGrid as authority
+
+selectedAttachCell
+
+selectedMountSector
+
+selectedRotation
+
+choose_rotation for machine flow
+
+choose_mount for machine flow
+
+deriveControls as authority
+
+BotBlueprint as authority
+
+BotDesignSnapshot as authority
+
+PartMountKind fake sphere
+
+visual foundation shell in machine replay
+
+```
+
+  
+
+Commands:
+
+```powershell
+
+rg -n "validateMinimumViableLoadout|FOUNDATION_PART_IDS|BASIC_MOBILITY_PART_IDS|foundationPartIdsFor|applyStoreViabilityRails|cellForMount|selectedAttachCell|selectedMountSector|selectedRotation|deriveControls\\(|PartMountKind|kind: 'sphere'|actionId only|Submit the actionId only" packages apps tests
+
+npm.cmd test
+
+npm.cmd run typecheck
+
+npm.cmd run lint
+
+npm.cmd run build
+
+npm.cmd run check:renderer-budget
+
+git diff --check
+
+```
+
+  
+
+Exit gate:
+
+- No unauthorized legacy matches.
+
+- All remaining legacy code has `legacy` or `Projection` naming and a removal note.
+
+- Director approves cleanup before final panel.
+
+  
+
+**Slice 14: Final Expert Review Panel**
+
+Type: Human/QA
+
+  
+
+Panel:
+
+1. Architecture reviewer
+
+   - Skills: `architecture-planning`, `pair-programmer-pushback`
+
+   - Checks: no source-of-truth drift, no hidden starter rails, no grid authority leak.
+
+  
+
+2. Schema/API reviewer
+
+   - Skills: `rules-core`, `coding-standards`
+
+   - Checks: exported types match validators, parameter schema enforced, backward compatibility understood.
+
+  
+
+3. GameMaster/worker reviewer
+
+   - Skills: `codex-assumption-extraction`, `codex-failure-mode-enumerator`
+
+   - Checks: idempotency, locked actions, stale decisions, normalized parameter hashing.
+
+  
+
+4. Sim reviewer
+
+   - Skills: `codex-failure-mode-enumerator`, `codex-invariant-test-generator`
+
+   - Checks: capabilities and resolver use same facts, transform math deterministic, damage detaches correctly.
+
+  
+
+5. Replay/Babylon reviewer
+
+   - Skills: `babylon-pbr-fidelity`, `battlebots-babylon-art-direction`
+
+   - Checks: visuals match sim, no fake foundation for machine sessions, proof screenshots exist.
+
+  
+
+6. UI/agent reviewer
+
+   - Skills: `frontend-patterns`, `game-ui-ux`
+
+   - Checks: agents can understand parameterized actions, UI does not imply old controls.
+
+  
+
+7. Cleanup reviewer
+
+   - Skill: `refactor-cleaner`
+
+   - Checks: dead code removed or quarantined, no stale tests asserting old behavior.
+
+  
+
+8. Release gate
+
+   - Skills: `code-review`, `release-readiness-gate`
+
+   - Verdict: `GO`, `GO WITH CAVEATS`, `NO-GO`, or `INSUFFICIENT PROOF`.
+
+  
+
+Final release is `NO-GO` unless every reviewer signs off or a human explicitly accepts a documented caveat.
+
+  
+
+**Director Handoff Template**
+
+Each Orchestrator gets only this:
+
+  
+
+```txt
+
+Slice: <number and title>
+
+  
+
+Goal:
+
+<one sentence>
+
+  
+
+Context:
+
+<only relevant architecture decisions>
+
+  
+
+Owned files:
+
+<exact list>
+
+  
+
+Must add:
+
+<types/functions/modules>
+
+  
+
+Must delete or quarantine:
+
+<legacy symbols>
+
+  
+
+Forbidden shortcuts:
+
+<explicit anti-patterns>
+
+  
+
+Acceptance criteria:
+
+<testable bullets>
+
+  
+
+Required validation:
+
+<commands>
+
+  
+
+Required handoff:
+
+- changed files
+
+- tests run
+
+- validation output summary
+
+- remaining legacy matches
+
+- risks/blockers
+
+```
+
+  
+
+**QA Lane Prompt Template**
+
+```txt
+
+Task: Independently QA Slice <N> against Authoritative Plan.
+
+  
+
+Do not implement. Do not rely on implementation transcript.
+
+Use the plan, current diff, and runtime proof only.
+
+  
+
+Check:
+
+- acceptance criteria
+
+- required tests
+
+- legacy cleanup gates
+
+- behavior proof
+
+- browser/replay proof if applicable
+
+  
+
+Return:
+
+- PASS/FAIL
+
+- evidence
+
+- exact files/lines for failures
+
+- missing proof
+
+- recommendation: accept, reject, or require follow-up
+
+```
+
+  
+
+**NO-GO Conditions**
+
+Any one of these blocks final approval:
+
+- `MachineDesign` truth round-trips through `BotBlueprint`.
+
+- Any new machine legality uses `validateMinimumViableLoadout`.
+
+- Any new machine flow uses `cellForMount`.
+
+- `deriveControls` remains authoritative for machine combat.
+
+- Agent docs still say `actionId only`.
+
+- Parameterized submissions are accepted without template validation.
+
+- Request hash ignores normalized parameters.
+
+- Core is purchased from shop or treated as a starter body part.
+
+- Replay machine path uses fake foundation shell as visual truth.
+
+- Dead-code grep gates are skipped.
+
+- Browser replay proof is missing after replay changes.
+
+- Final expert panel is skipped or consolidated into one generic review.
+
+  
+
+This is now much closer to something I would hand to a Director. It is still a draft, but it has the missing enforcement structure: locked contracts, slice ownership, forbidden shortcuts, exact cleanup gates, and reviewer prompts.

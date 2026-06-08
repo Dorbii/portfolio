@@ -1,10 +1,23 @@
 import { getPart } from '../../../../../packages/catalog/src/index.js'
 import type {
   BlueprintBlock,
+  MachineDesign,
+  MachinePartSource,
+  OrientationBasis,
   PartCategory,
+  Vector3,
 } from '../../../../../packages/schemas/src/index.js'
 
 export const BOT_CELL_SCALE = 0.58
+export const MACHINE_REPLAY_VISUAL_AUTHORITY = 'machine:v1'
+export const LEGACY_REPLAY_VISUAL_AUTHORITY = 'legacy-bot-blueprint'
+const CATALOG_DEFINITION_PREFIX = 'catalog:'
+const MACHINE_CORE_MAX_HEALTH = 20
+const IDENTITY_ORIENTATION: OrientationBasis = {
+  right: [1, 0, 0],
+  up: [0, 1, 0],
+  forward: [0, 0, 1],
+}
 
 export type BotBounds = {
   centerX: number
@@ -14,6 +27,17 @@ export type BotBounds = {
 }
 
 export type BotFoundationArchetype = 'compact_assault' | 'long_control' | 'modular_default'
+
+export type MachineReplayRenderPart = {
+  instanceId: string
+  partId: string
+  source: MachinePartSource
+  position: Vector3
+  orientation: OrientationBasis
+  health?: number
+  maxHealth: number
+  detached: boolean
+}
 
 export function measureBotBounds(blocks: BlueprintBlock[]): BotBounds {
   if (blocks.length === 0) {
@@ -53,6 +77,46 @@ export function measureBotBounds(blocks: BlueprintBlock[]): BotBounds {
     width,
     depth,
   }
+}
+
+export function measureMachineReplayBounds(parts: MachineReplayRenderPart[]): BotBounds {
+  if (parts.length === 0) {
+    return measureBotBounds([])
+  }
+
+  return measureBotBounds(
+    parts.map((part) => ({
+      id: part.instanceId,
+      partId: part.partId,
+      position: part.position,
+      rotation: [0, 0, 0],
+    })),
+  )
+}
+
+export function projectMachineDesignToReplayRenderParts(
+  machine: MachineDesign,
+): MachineReplayRenderPart[] {
+  const detachedInstanceIds = new Set(machine.runtime?.detachedInstanceIds ?? [])
+
+  return machine.parts.map((part) => {
+    const partId = replayCatalogPartId(part.definitionId)
+
+    return {
+      instanceId: part.instanceId,
+      partId,
+      source: part.source,
+      position: cloneVector(part.transform.position),
+      orientation: cloneOrientation(
+        machine.runtime?.orientationByInstanceId?.[part.instanceId] ??
+          part.transform.orientation ??
+          IDENTITY_ORIENTATION,
+      ),
+      health: machine.runtime?.healthByInstanceId[part.instanceId],
+      maxHealth: replayPartMaxHealth(partId),
+      detached: detachedInstanceIds.has(part.instanceId),
+    }
+  })
 }
 
 // CODEX_INTENT: infer visual foundations from real blueprint parts so replay bots do not share one generic hull.
@@ -112,4 +176,26 @@ export function heightForCategory(category: PartCategory, cellHeight: number): n
   }
 
   return Math.max(0.44, base * 0.94)
+}
+
+function replayCatalogPartId(definitionId: string): string {
+  return definitionId.startsWith(CATALOG_DEFINITION_PREFIX)
+    ? definitionId.slice(CATALOG_DEFINITION_PREFIX.length)
+    : definitionId
+}
+
+function replayPartMaxHealth(partId: string): number {
+  return Math.max(1, getPart(partId)?.durability ?? MACHINE_CORE_MAX_HEALTH)
+}
+
+function cloneVector(vector: Vector3): Vector3 {
+  return [vector[0], vector[1], vector[2]]
+}
+
+function cloneOrientation(orientation: OrientationBasis): OrientationBasis {
+  return {
+    right: cloneVector(orientation.right),
+    up: cloneVector(orientation.up),
+    forward: cloneVector(orientation.forward),
+  }
 }

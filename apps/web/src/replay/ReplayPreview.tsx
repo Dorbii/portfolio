@@ -1,6 +1,8 @@
 import {
   arenaConfig as previewArenaConfig,
   abilityProofReplay,
+  machineProofMachineDesigns,
+  machineProofReplay,
   mockBotBlueprints,
   mockReplay,
   mockTeamIdentities,
@@ -11,10 +13,17 @@ import { normalizeCameraPreset } from './camera/presets'
 
 export function ReplayPreview() {
   const previewOptions = resolveReplayPreviewOptions(window.location.search)
-  const timeline = previewOptions.proofMode ? abilityProofReplay : mockReplay
+  const timeline = previewOptions.proof === 'machine'
+    ? machineProofReplay
+    : previewOptions.proof === 'ability'
+      ? abilityProofReplay
+      : mockReplay
+  const machineDesigns = previewOptions.proof === 'machine'
+    ? machineProofMachineDesigns
+    : undefined
 
   return (
-    <main className={`replay-preview-page${previewOptions.proofMode ? ' replay-preview-proof' : ''}`}>
+    <main className={`replay-preview-page${previewOptions.proof ? ' replay-preview-proof' : ''}`}>
       <header className="replay-preview-header">
         <div>
           <span className="eyebrow">Art preview</span>
@@ -28,7 +37,8 @@ export function ReplayPreview() {
           botBlueprints={mockBotBlueprints}
           initialCameraPreset={previewOptions.cameraPreset}
           initialTime={previewOptions.time}
-          proofMode={previewOptions.proofMode}
+          machineDesigns={machineDesigns}
+          proofMode={Boolean(previewOptions.proof)}
           teamIdentities={mockTeamIdentities}
           timeline={timeline}
         />
@@ -39,15 +49,16 @@ export function ReplayPreview() {
 
 function resolveReplayPreviewOptions(search: string): {
   cameraPreset: CameraPreset
-  proofMode: boolean
+  proof: 'ability' | 'machine' | null
   time: number
 } {
   const params = new URLSearchParams(search)
   const parsedTime = Number(params.get('time'))
+  const proof = params.get('proof')
 
   return {
     cameraPreset: normalizeCameraPreset(params.get('camera')),
-    proofMode: params.get('proof') === 'ability',
+    proof: proof === 'ability' || proof === 'machine' ? proof : null,
     time: Number.isFinite(parsedTime) ? parsedTime : 0,
   }
 }

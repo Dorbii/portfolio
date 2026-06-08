@@ -55,6 +55,71 @@ function withFetchStub(callback) {
   }
 }
 
+function validMachineDesign(name, rootInstanceId = 'core') {
+  return {
+    name,
+    rootInstanceId,
+    parts: [
+      {
+        instanceId: rootInstanceId,
+        definitionId: 'system:machine-core:v1',
+        source: 'system_core',
+        transform: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: {
+            right: [1, 0, 0],
+            up: [0, 1, 0],
+            forward: [0, 0, 1],
+          },
+        },
+        immutable: true,
+      },
+      {
+        instanceId: `${rootInstanceId}-wheel`,
+        definitionId: 'catalog:Wheel_Omni',
+        source: 'catalog_part',
+        transform: {
+          position: [1, 0, 0],
+          rotation: [0, 90, 90],
+        },
+      },
+    ],
+    attachments: [
+      {
+        parentInstanceId: rootInstanceId,
+        childInstanceId: `${rootInstanceId}-wheel`,
+        mountId: 'core_shell',
+        transform: {
+          position: [1, 0, 0],
+          rotation: [0, 0, 0],
+          orientation: {
+            right: [1, 0, 0],
+            up: [0, 1, 0],
+            forward: [0, 0, 1],
+          },
+        },
+      },
+    ],
+    runtime: {
+      healthByInstanceId: {
+        [rootInstanceId]: 20,
+        [`${rootInstanceId}-wheel`]: 8,
+      },
+      detachedInstanceIds: [`${rootInstanceId}-wheel`],
+      disabledInstanceIds: [],
+      orientationByInstanceId: {
+        [`${rootInstanceId}-wheel`]: {
+          right: [0, 0, 1],
+          up: [1, 0, 0],
+          forward: [0, 1, 0],
+        },
+      },
+    },
+  }
+}
+
 test('referee invite URLs use production defaults and claimToken', () => {
   const inviteUrl = buildInviteUrl({
     role: 'red',
@@ -178,6 +243,10 @@ test('referee loadReplayPayload normalizes top-level replay payloads with render
         red: { name: 'Red', blocks: [] },
         blue: { name: 'Blue', blocks: [] },
       },
+      machineDesigns: {
+        red: validMachineDesign('Red machine', 'red-core'),
+        blue: validMachineDesign('Blue machine', 'blue-core'),
+      },
     }),
   )
 
@@ -194,6 +263,79 @@ test('referee loadReplayPayload normalizes top-level replay payloads with render
     assert.equal(replay.teamIdentities.blue.primaryColor, '#5b9dff')
     assert.equal(replay.botBlueprints.red.name, 'Red')
     assert.equal(replay.botBlueprints.blue.name, 'Blue')
+    assert.equal(replay.machineDesigns.red.name, 'Red machine')
+    assert.equal(replay.machineDesigns.red.runtime.healthByInstanceId['red-core'], 20)
+    assert.equal(replay.machineDesigns.blue.name, 'Blue machine')
+    assert.deepEqual(replay.machineDesigns.blue.runtime.detachedInstanceIds, ['blue-core-wheel'])
+  } finally {
+    restore()
+  }
+})
+
+test('referee loadReplayPayload omits machine designs with malformed nested transforms', async () => {
+  const sessionId = 's_demo'
+  const malformedRed = validMachineDesign('Malformed red machine', 'red-core')
+
+  malformedRed.parts[1].transform.rotation = [0, Number.POSITIVE_INFINITY, 0]
+
+  const { restore } = withFetchStub(() =>
+    jsonResponse({
+      round: 1,
+      duration: 6,
+      summary: 'Blue wins.',
+      events: [{ t: 0, type: 'spawn', bot: 'blue', position: [0, 0, 0], rotation: [0, -90, 0] }],
+      teamIdentities: {
+        red: { name: 'Red Team', primaryColor: '#ff4c5d' },
+        blue: { name: 'Blue Team', primaryColor: '#5b9dff' },
+      },
+      botBlueprints: {
+        red: { name: 'Red legacy', blocks: [] },
+        blue: { name: 'Blue legacy', blocks: [] },
+      },
+      machineDesigns: {
+        red: malformedRed,
+        blue: validMachineDesign('Blue machine', 'blue-core'),
+      },
+    }),
+  )
+
+  try {
+    const replay = await loadReplayPayload(DEFAULT_ARENA_API_BASE, sessionId)
+
+    assert.equal(replay.machineDesigns.red, undefined)
+    assert.equal(replay.machineDesigns.blue.name, 'Blue machine')
+  } finally {
+    restore()
+  }
+})
+
+test('referee loadReplayPayload preserves legacy replay payloads without machine designs', async () => {
+  const sessionId = 's_demo'
+  const { restore } = withFetchStub(() =>
+    jsonResponse({
+      timeline: {
+        round: 2,
+        duration: 5,
+        summary: 'Legacy replay.',
+        events: [{ t: 0, type: 'spawn', bot: 'red', position: [0, 0, 0], rotation: [0, 90, 0] }],
+      },
+      teamIdentities: {
+        red: { name: 'Red Team', primaryColor: '#ff4c5d' },
+        blue: { name: 'Blue Team', primaryColor: '#5b9dff' },
+      },
+      botBlueprints: {
+        red: { name: 'Red legacy', blocks: [] },
+        blue: { name: 'Blue legacy', blocks: [] },
+      },
+    }),
+  )
+
+  try {
+    const replay = await loadReplayPayload(DEFAULT_ARENA_API_BASE, sessionId)
+
+    assert.equal(replay.timeline.round, 2)
+    assert.equal(replay.botBlueprints.red.name, 'Red legacy')
+    assert.equal(replay.machineDesigns, undefined)
   } finally {
     restore()
   }

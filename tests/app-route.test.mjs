@@ -63,6 +63,10 @@ const replayPreviewSource = readFileSync(
   new URL('../apps/web/src/replay/ReplayPreview.tsx', import.meta.url),
   'utf8',
 )
+const mockReplayTimelinesSource = readFileSync(
+  new URL('../apps/web/src/mockReplayTimelines.ts', import.meta.url),
+  'utf8',
+)
 const partCatalogPageSource = readFileSync(
   new URL('../apps/web/src/replay/catalog/PartCatalogPage.tsx', import.meta.url),
   'utf8',
@@ -495,7 +499,8 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(cockpitViewStateSource.includes('await window.AgentArenaRole.bootstrapRole({'))
   assert.ok(cockpitViewStateSource.includes('teamIdentity: {'))
   assert.ok(cockpitViewStateSource.includes('waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })'))
-  assert.ok(cockpitViewStateSource.includes('Choose exactly one id from gameMaster.legalActions'))
+  assert.ok(cockpitViewStateSource.includes('Inspect gameMaster.legalActions parameterSchema'))
+  assert.ok(cockpitViewStateSource.includes('parameters only when that action asks for them'))
   assert.ok(cockpitViewStateSource.includes('submitAction({'))
   assert.ok(cockpitViewStateSource.includes('submit_game_action'))
   assert.ok(cockpitRuntimeSource.includes('Public Chat'))
@@ -536,6 +541,9 @@ test('agent cockpit is a read-only insight surface instead of a bot editor', () 
   assert.ok(agentInsightSource.includes('tacticalCues'))
   assert.ok(agentInsightSource.includes('Legal actions'))
   assert.ok(agentInsightSource.includes('gameMaster?.legalActions'))
+  assert.ok(agentInsightSource.includes('inspect parameterSchema and include parameters'))
+  assert.ok(agentInsightSource.includes('Machine legality'))
+  assert.ok(agentInsightSource.includes('validation, shop, and budget rules'))
   assert.equal(agentInsightSource.includes('Opening script'), false)
   assert.equal(agentInsightSource.includes('opening-read-heading'), false)
   assert.equal(cockpitRuntimeSource.includes('RoundPlanWorkbench'), false)
@@ -646,7 +654,10 @@ test('replay viewer does not render future event timeline markers', () => {
 
 test('ability proof preview can render a clean canvas without replay overlays', () => {
   assert.ok(appSource.includes("import('./replay/ReplayPreview')"))
-  assert.ok(replayPreviewSource.includes('proofMode={previewOptions.proofMode}'))
+  assert.ok(replayPreviewSource.includes("previewOptions.proof === 'ability'"))
+  assert.ok(replayPreviewSource.includes("previewOptions.proof === 'machine'"))
+  assert.ok(replayPreviewSource.includes('machineDesigns={machineDesigns}'))
+  assert.ok(replayPreviewSource.includes('proofMode={Boolean(previewOptions.proof)}'))
   assert.ok(replayViewerSource.includes('proofMode?: boolean'))
   assert.ok(replayViewerSource.includes("proofMode ? ' replay-shell-proof' : ''"))
   assert.ok(replayViewerSource.includes('immediateCamera={proofMode}'))
@@ -654,6 +665,25 @@ test('ability proof preview can render a clean canvas without replay overlays', 
   assert.ok(replayViewerSource.includes('replay-controls'))
   assert.ok(replayViewerSource.includes('replay-status-strip'))
   assert.ok(replayViewerSource.includes('replay-damage-schematic'))
+})
+
+test('machine proof preview requires red and blue machine-native fixtures', () => {
+  const fixtureStart = mockReplayTimelinesSource.indexOf(
+    'export const machineProofMachineDesigns: Record<TeamRole, MachineDesign>',
+  )
+  const fixtureEnd = mockReplayTimelinesSource.indexOf(
+    'export const machineProofReplay',
+    fixtureStart,
+  )
+  const fixtureSource = mockReplayTimelinesSource.slice(fixtureStart, fixtureEnd)
+
+  assert.ok(fixtureStart >= 0)
+  assert.ok(fixtureEnd > fixtureStart)
+  assert.ok(fixtureSource.includes('red: {'))
+  assert.ok(fixtureSource.includes('blue: {'))
+  assert.ok(fixtureSource.includes('blue-core'))
+  assert.ok(fixtureSource.includes('catalog:Weapon_Turret'))
+  assert.ok(replayPreviewSource.includes('machineDesigns={machineDesigns}'))
 })
 
 test('replay camera controls expose only approved presets and normalize legacy aliases', () => {

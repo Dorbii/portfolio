@@ -1,9 +1,13 @@
 import type {
   ChampionContinuationSeed,
   CreateSessionRequest,
+  StoredDesign,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
-import { createInitialLoadoutBuildState } from '../../../packages/sim/src/index.js'
+import {
+  createInitialLoadoutBuildState,
+  createInitialMachineDesign,
+} from '../../../packages/sim/src/index.js'
 import { createInitialRoleState } from './sessionDefaults.js'
 import {
   DEFAULT_ARENA,
@@ -76,17 +80,22 @@ export async function createInitialSessionState(
     red: createInitialRoleState('red', claimTokenHashes.red, observerTokenHashes.red),
     blue: createInitialRoleState('blue', claimTokenHashes.blue, observerTokenHashes.blue),
   }
+
+  roles.red.storedDesign = createStoredMachineDesign('red')
+  roles.blue.storedDesign = createStoredMachineDesign('blue')
+
   const continuationSeed = normalizeContinuationSeed(request.continuationSeed)
 
   if (continuationSeed) {
     const champion = roles[continuationSeed.championRole]
     const challenger = roles[continuationSeed.challengerRole]
 
+    champion.storedDesign = createStoredLegacyDesign(continuationSeed.sourceSave.championDesign)
     champion.currentDesign = cloneJson(continuationSeed.sourceSave.championDesign)
-    champion.loadoutBuildState = {
-      ...createInitialLoadoutBuildState(continuationSeed.championRole),
-      currentDesign: cloneJson(continuationSeed.sourceSave.championDesign),
-    }
+    champion.loadoutBuildState = createLegacyLoadoutBuildState(
+      continuationSeed.championRole,
+      continuationSeed.sourceSave.championDesign,
+    )
     champion.loadoutVersion = 1
     challenger.gold += continuationSeed.challengerBonusGold
   }
@@ -127,6 +136,38 @@ export async function createInitialSessionState(
         },
       ],
     },
+  }
+}
+
+function createStoredMachineDesign(role: TeamRole): StoredDesign {
+  return {
+    version: 'machine:v1',
+    machine: createInitialMachineDesign(role),
+  }
+}
+
+function createStoredLegacyDesign(
+  design: ChampionContinuationSeed['sourceSave']['championDesign'],
+): StoredDesign {
+  return {
+    version: 'legacy-bot-design:v1',
+    design: cloneJson(design),
+  }
+}
+
+function createLegacyLoadoutBuildState(
+  role: TeamRole,
+  design: ChampionContinuationSeed['sourceSave']['championDesign'],
+) {
+  const legacyDesign = cloneJson(design)
+
+  return {
+    ...createInitialLoadoutBuildState(role),
+    currentDesign: {
+      version: 'legacy-bot-design:v1' as const,
+      design: cloneJson(legacyDesign),
+    },
+    legacyDraft: legacyDesign,
   }
 }
 

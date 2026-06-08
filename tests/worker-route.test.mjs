@@ -12,6 +12,8 @@ import {
   TACTIC_STYLES,
   TARGET_PRIORITIES,
   validateAgentBootstrapRequestShape,
+  validateGameMasterActionParameters,
+  validateGameMasterActionSubmissionShape,
   WEAPON_CADENCES,
 } from '../.test-build/packages/schemas/src/index.js'
 import {
@@ -403,11 +405,23 @@ function findLegalAction(packet, predicate) {
   return action
 }
 
-async function submitPacketAction(env, sessionId, token, packet, action) {
+function catalogPartFromPacket(packet, partId) {
+  const parts = Array.isArray(packet.catalog?.parts) ? packet.catalog.parts : []
+  const part = parts.find((candidate) => candidate.id === partId)
+
+  assert.notEqual(part, undefined)
+
+  return part
+}
+
+async function submitPacketAction(env, sessionId, token, packet, action, parameters) {
   const submitted = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token,
-    body: actionSubmissionFromPacket(packet, action.id),
+    body: {
+      ...actionSubmissionFromPacket(packet, action.id),
+      ...(parameters ? { parameters } : {}),
+    },
   })
 
   assert.equal(submitted.response.status, 200)
@@ -436,31 +450,32 @@ async function placePartFromCatalog(env, sessionId, token, packet, partId) {
     sessionId,
     token,
     packet,
-    findLegalAction(packet, (action) => action.kind === 'choose_mount'),
+    findLegalAction(packet, (action) => action.kind === 'propose_mount_pose'),
+    defaultMountPoseParameters(findLegalAction(packet, (action) => action.kind === 'propose_mount_pose')),
   )
 
-  return submitPacketAction(
-    env,
-    sessionId,
-    token,
-    packet,
-    findLegalAction(packet, (action) => action.kind === 'choose_rotation'),
-  )
+  return packet
 }
 
-async function buildMinimumViableLoadout(env, sessionId, token, packet) {
-  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Body_Light_Frame')
-  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Wheel_Small')
-  packet = await placePartFromCatalog(env, sessionId, token, packet, 'Weapon_Spear')
+function defaultMountPoseParameters(action, overrides = {}) {
+  assert.equal(action.kind, 'propose_mount_pose')
+  assert.ok(action.parameterExamples?.length > 0)
 
+  return {
+    ...action.parameterExamples[0],
+    ...overrides,
+  }
+}
+
+async function buildConfirmableMachineLoadout(_env, _sessionId, _token, packet) {
   return {
     packet,
     confirmAction: findLegalAction(packet, (action) => action.kind === 'confirm_loadout'),
   }
 }
 
-async function confirmMinimumViableLoadout(env, sessionId, token, packet) {
-  const built = await buildMinimumViableLoadout(env, sessionId, token, packet)
+async function confirmMachineLoadout(env, sessionId, token, packet) {
+  const built = await buildConfirmableMachineLoadout(env, sessionId, token, packet)
 
   return submitPacketAction(env, sessionId, token, built.packet, built.confirmAction)
 }
@@ -685,7 +700,9 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('actionId only')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('parameterSchema')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('budget rules')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mobility-less machines can still be legal')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('bootstrapRole({ agentName, teamIdentity })')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('canonical payload maps')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted')))
@@ -713,6 +730,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
     'decisionVersion',
     'actionId',
   ])
+  assert.ok(json.rules.submissionSchema.optional.includes('parameters'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
@@ -721,12 +739,36 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.examples.gameMasterPacket.decisionVersion, 12)
   assert.equal(json.examples.gameMasterPacket.eventVersion, 21)
   assert.ok(json.examples.gameMasterPacket.legalActions.some((action) => action.id === 'combat.red.r1.f1.t3.hold'))
+  assert.ok(
+    json.examples.gameMasterPacket.legalActions.some(
+      (action) => action.parameterSchema?.properties?.commitment?.maximum === 3,
+    ),
+  )
   assert.equal(json.examples.gameMasterPacket.submit.body.action, 'submit_game_action')
   assert.equal(json.examples.gameMasterActionSubmission.action, 'submit_game_action')
+  assert.deepEqual(json.examples.gameMasterActionSubmission.parameters, { commitment: 2 })
+  assert.equal(json.examples.mountPoseActionSubmission.action, 'submit_game_action')
+  assert.equal(json.examples.mountPoseActionSubmission.actionId, 'loadout.red.r1.mount_pose.Laser_A.core')
+  assert.deepEqual(json.examples.mountPoseActionSubmission.parameters, {
+    parentInstanceId: 'core',
+    childPartId: 'Laser_A',
+    mountSurfaceId: 'core_shell',
+    u: 0.37,
+    v: 0.82,
+    yawDegrees: 120,
+    rollDegrees: 15,
+  })
   assert.equal(json.examples.teamIdentity.colorHex, '#ff4c5d')
   assert.equal(typeof json.examples.teamIdentity.logoPrompt, 'string')
   assert.equal('primaryColor' in json.examples.teamIdentity, false)
   assert.equal('logo' in json.examples.teamIdentity, false)
+  const exportedSubmissionValidation = validateGameMasterActionSubmissionShape({
+    ...json.examples.gameMasterActionSubmission,
+    forgedField: true,
+  })
+
+  assert.equal(exportedSubmissionValidation.ok, false)
+  assert.ok(exportedSubmissionValidation.issues.some((issue) => issue.code === 'UNKNOWN_FIELD'))
   assert.ok(
     json.actions.some(
       (action) =>
@@ -1017,7 +1059,13 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(blueBootstrap.json.nextAction, 'build_bot')
   assert.equal(blueBootstrap.json.buildState.step, 'choose_part')
   assert.equal(blueBootstrap.json.legalActions[0].kind, 'choose_part')
-  assert.equal(blueBootstrap.json.legalActions.every((action) => action.kind === 'choose_part'), true)
+  assert.equal(
+    blueBootstrap.json.legalActions
+      .filter((action) => action.kind !== 'confirm_loadout')
+      .every((action) => action.kind === 'choose_part'),
+    true,
+  )
+  assert.equal(blueBootstrap.json.legalActions.at(-1).kind, 'confirm_loadout')
   assert.equal(blueBootstrap.json.submit.body.actionSetId, blueBootstrap.json.actionSetId)
   assert.equal(blueBootstrap.json.submit.body.decisionVersion, blueBootstrap.json.decisionVersion)
 })
@@ -1128,21 +1176,25 @@ test('POST /sessions/:id/action accepts a valid server-authored action id', asyn
   const env = createEnv()
   const sessionId = 's_action_accepts_valid'
   const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
-  const bodyAction = findLegalAction(
+  const partAction = findLegalAction(
     redPacket,
-    (action) => action.kind === 'choose_part' && action.catalogRefs?.includes('Body_Light_Frame'),
+    (action) => action.kind === 'choose_part',
   )
+  const partId = partAction.catalogRefs?.[0]
+
+  assert.equal(typeof partId, 'string')
+
   const submission = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token: redInvite.claimToken,
-    body: actionSubmissionFromPacket(redPacket, bodyAction.id),
+    body: actionSubmissionFromPacket(redPacket, partAction.id),
   })
 
   assert.equal(submission.response.status, 200)
   assertGameMasterPacket(submission.json.packet, 'red')
   assert.equal(submission.json.packet.nextAction, 'build_bot')
   assert.equal(submission.json.packet.buildState.step, 'choose_attach_target')
-  assert.equal(submission.json.packet.buildState.selectedPartId, 'Body_Light_Frame')
+  assert.equal(submission.json.packet.buildState.selectedPartId, partId)
   assert.equal(submission.json.packet.legalActions[0].kind, 'choose_attach_target')
   assert.equal(submission.json.publicState.gameMaster.red.nextAction, 'build_bot')
 })
@@ -1154,6 +1206,19 @@ test('loadout action spends gold and sets server-owned draft design', async () =
 
   assert.equal(redPacket.resources.remainingGold, 100)
   assert.equal(redPacket.buildState.step, 'choose_part')
+  assert.equal(redPacket.buildState.currentDesign.version, 'machine:v1')
+  assert.equal(redPacket.buildState.currentDesign.machine.rootInstanceId, 'core')
+  assert.equal(redPacket.buildState.currentDesign.machine.parts.length, 1)
+  assert.equal(redPacket.buildState.currentDesign.machine.parts[0].instanceId, 'core')
+  assert.equal(redPacket.buildState.currentDesign.machine.parts[0].definitionId.startsWith('Body_'), false)
+  assert.equal(redPacket.buildState.currentDesign.machine.parts[0].source, 'system_core')
+  assert.equal(redPacket.buildState.currentDesign.machine.parts[0].immutable, true)
+  assert.equal(redPacket.buildState.legacyDraft.parts.length, 0)
+  const firstPartAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const firstPartId = firstPartAction.catalogRefs?.[0]
+  const firstPart = catalogPartFromPacket(redPacket, firstPartId)
+
+  assert.equal(typeof firstPartId, 'string')
   assert.equal(redPacket.legalActions.some((action) => action.kind === 'choose_mount'), false)
   assert.equal(redPacket.legalActions.some((action) => action.kind === 'choose_rotation'), false)
 
@@ -1162,56 +1227,155 @@ test('loadout action spends gold and sets server-owned draft design', async () =
     sessionId,
     redInvite.claimToken,
     redPacket,
-    'Body_Light_Frame',
+    firstPartId,
   )
 
-  assert.equal(packet.resources.remainingGold, 84)
-  assert.equal(packet.buildState.currentDesign.parts.length, 1)
-  assert.equal(packet.buildState.currentDesign.parts[0].partId, 'Body_Light_Frame')
-  assert.equal(packet.buildState.currentDesign.rootInstanceId, 'part_1')
-  assert.equal(packet.legalActions.some((action) => action.kind === 'confirm_loadout'), false)
-
-  packet = await placePartFromCatalog(
-    env,
-    sessionId,
-    redInvite.claimToken,
-    packet,
-    'Wheel_Small',
-  )
-  packet = await placePartFromCatalog(
-    env,
-    sessionId,
-    redInvite.claimToken,
-    packet,
-    'Weapon_Spear',
-  )
-
-  assert.equal(packet.resources.remainingGold, 58)
+  assert.equal(packet.resources.remainingGold, 100 - firstPart.cost)
+  assert.equal(packet.buildState.currentDesign.version, 'machine:v1')
+  assert.equal(packet.buildState.currentDesign.machine.rootInstanceId, 'core')
+  assert.equal(packet.buildState.currentDesign.machine.parts.length, 2)
+  assert.equal(packet.buildState.currentDesign.machine.parts[0].instanceId, 'core')
+  assert.equal(packet.buildState.currentDesign.machine.parts[1].definitionId, `catalog:${firstPartId}`)
   assert.deepEqual(
-    packet.buildState.currentDesign.parts.map((part) => part.partId),
-    ['Body_Light_Frame', 'Wheel_Small', 'Weapon_Spear'],
+    packet.buildState.currentDesign.machine.attachments.map((attachment) => [
+      attachment.parentInstanceId,
+      attachment.childInstanceId,
+    ]),
+    [['core', 'part_1']],
+  )
+  assert.equal(packet.buildState.legacyDraft.parts.length, 1)
+  assert.equal(packet.buildState.legacyDraft.parts[0].partId, firstPartId)
+  assert.equal(packet.buildState.legacyDraft.rootInstanceId, 'part_1')
+  assert.equal(packet.legalActions.some((action) => action.kind === 'confirm_loadout'), true)
+  assert.deepEqual(
+    packet.buildState.currentDesign.machine.parts.map((part) => part.definitionId),
+    [
+      'system:machine-core:v1',
+      `catalog:${firstPartId}`,
+    ],
   )
   assert.notEqual(findLegalAction(packet, (action) => action.kind === 'confirm_loadout'), undefined)
   assert.equal(JSON.stringify(packet).includes('"payload"'), false)
-  assert.equal(
-    packet.legalActions.some((action) => action.catalogRefs?.includes('Counterweight')),
-    true,
+})
+
+test('mount pose packet exposes compact schema and invalid pose does not mutate route state', async () => {
+  const env = createEnv()
+  const sessionId = 's_loadout_mount_pose_schema'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const bodyAction = findLegalAction(
+    redPacket,
+    (action) => action.kind === 'choose_part',
+  )
+  const selectedPartId = bodyAction.catalogRefs?.[0]
+  const selectedPart = catalogPartFromPacket(redPacket, selectedPartId)
+  let packet = await submitPacketAction(env, sessionId, redInvite.claimToken, redPacket, bodyAction)
+  const attachCore = findLegalAction(
+    packet,
+    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
+  )
+
+  packet = await submitPacketAction(env, sessionId, redInvite.claimToken, packet, attachCore)
+
+  const poseAction = findLegalAction(packet, (action) => action.kind === 'propose_mount_pose')
+  const schemaKeys = Object.keys(poseAction.parameterSchema.properties).sort()
+  const validParameters = defaultMountPoseParameters(poseAction, {
+    mountSurfaceId: 'core_shell',
+    u: 0.5,
+    v: 0.5,
+    yawDegrees: 0,
+    rollDegrees: 0,
+  })
+  const invalid = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(packet, poseAction.id),
+      parameters: {
+        ...validParameters,
+        u: -0.1,
+      },
+    },
+  })
+  const afterRejected = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.deepEqual(schemaKeys, [
+    'childPartId',
+    'mountSurfaceId',
+    'parentInstanceId',
+    'rollDegrees',
+    'u',
+    'v',
+    'yawDegrees',
+  ])
+  assert.deepEqual(poseAction.parameterSchema.required.sort(), schemaKeys)
+  assert.equal(poseAction.parameterSchema.properties.parentInstanceId.enum.length, 1)
+  assert.equal(poseAction.parameterSchema.properties.childPartId.enum.length, 1)
+  assert.equal(poseAction.parameterSchema.properties.mountSurfaceId.enum.includes('core_shell'), true)
+  assert.equal(poseAction.parameterSchema.properties.u.enum, undefined)
+  assert.equal(poseAction.parameterSchema.properties.v.enum, undefined)
+  assert.equal(poseAction.parameterSchema.properties.u.minimum, 0)
+  assert.equal(poseAction.parameterSchema.properties.u.maximum, 1)
+  assert.equal(poseAction.parameterSchema.properties.v.minimum, 0)
+  assert.equal(poseAction.parameterSchema.properties.v.maximum, 1)
+  assert.equal(poseAction.parameterSchema.properties.yawDegrees.normalization, 'degrees')
+  assert.equal(poseAction.parameterSchema.properties.rollDegrees.normalization, 'degrees')
+  const normalizedPose = validateGameMasterActionParameters({
+    ...validParameters,
+    yawDegrees: 450,
+    rollDegrees: -90,
+  }, poseAction.parameterSchema)
+
+  assert.equal(normalizedPose.ok, true)
+  assert.equal(normalizedPose.parameters.yawDegrees, 90)
+  assert.equal(normalizedPose.parameters.rollDegrees, 270)
+  assert.equal(JSON.stringify(poseAction.parameterSchema).includes('selectedAttachCell'), false)
+  assert.equal(JSON.stringify(poseAction.parameterSchema).includes('selectedMountSector'), false)
+  assert.equal(invalid.response.status, 400)
+  assert.equal(invalid.json.error.code, 'SUBMISSION_INVALID')
+  assert.ok(invalid.json.error.issues.some((issue) => issue.code === 'PARAMETER_OUT_OF_RANGE'))
+  assert.equal(afterRejected.json.gameMaster.resources.remainingGold, packet.resources.remainingGold)
+  assert.deepEqual(afterRejected.json.gameMaster.buildState.currentDesign, packet.buildState.currentDesign)
+  assert.equal(afterRejected.json.gameMaster.buildState.step, 'propose_mount_pose')
+
+  const valid = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(packet, poseAction.id),
+      parameters: validParameters,
+    },
+  })
+
+  assert.equal(valid.response.status, 200)
+  assert.equal(valid.json.packet.resources.remainingGold, 100 - selectedPart.cost)
+  assert.equal(valid.json.packet.buildState.currentDesign.machine.parts.length, 2)
+  assert.deepEqual(
+    valid.json.packet.buildState.currentDesign.machine.attachments.map((attachment) => [
+      attachment.parentInstanceId,
+      attachment.childInstanceId,
+      attachment.mountId,
+    ]),
+    [['core', 'part_1', 'core_shell']],
   )
 })
 
-test('confirm loadout requires a minimum viable bot', async () => {
+test('machine confirm loadout uses tree validity instead of legacy minimum viable rules', async () => {
   const env = createEnv()
-  const sessionId = 's_loadout_confirm_requires_viable'
+  const sessionId = 's_loadout_confirm_uses_machine_tree'
   const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
-  const bodyOnlyPacket = await placePartFromCatalog(
+  const confirmAction = findLegalAction(redPacket, (action) => action.kind === 'confirm_loadout')
+  const confirmed = await submitPacketAction(
     env,
     sessionId,
     redInvite.claimToken,
     redPacket,
-    'Body_Light_Frame',
+    confirmAction,
   )
 
-  assert.equal(bodyOnlyPacket.legalActions.some((action) => action.kind === 'confirm_loadout'), false)
+  assert.equal(confirmed.phase, 'choose_loadout')
+  assert.equal(confirmed.nextAction, 'wait_for_opponent_loadout')
 })
 
 test('POST /sessions/:id/action rejects invalid action ids and stale action-set versions', async () => {
@@ -1272,7 +1436,7 @@ test('POST /sessions/:id/action locks once and accepts duplicate same submission
   const env = createEnv()
   const sessionId = 's_action_idempotent'
   const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
-  const { packet, confirmAction } = await buildMinimumViableLoadout(
+  const { packet, confirmAction } = await buildConfirmableMachineLoadout(
     env,
     sessionId,
     redInvite.claimToken,
@@ -1336,13 +1500,13 @@ test('combat /action uses generated canonical actions and preserves blue set aft
   const sessionId = 's_combat_generated_actions'
   const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
 
-  const redAfterConfirm = await confirmMinimumViableLoadout(
+  const redAfterConfirm = await confirmMachineLoadout(
     env,
     sessionId,
     redInvite.claimToken,
     redPacket,
   )
-  const blueAfterConfirm = await confirmMinimumViableLoadout(
+  const blueAfterConfirm = await confirmMachineLoadout(
     env,
     sessionId,
     blueInvite.claimToken,
@@ -1415,17 +1579,15 @@ test('combat /action uses generated canonical actions and preserves blue set aft
   })
 
   assert.equal(blueSubmission.response.status, 200)
-  assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.json.publicState.phase, 'round_review')
+  assert.equal(blueSubmission.json.publicState.lastResult.damage.red, 0)
+  assert.equal(blueSubmission.json.publicState.lastResult.damage.blue, 0)
+  assert.equal(blueSubmission.json.publicState.combat, undefined)
   assert.equal(redNextTurn.response.status, 200)
-  assert.equal(redNextTurn.json.gameMaster.phase, 'combat_turn')
-  assert.equal(redNextTurn.json.gameMaster.nextAction, 'choose_turn')
-  assert.equal(redNextTurn.json.gameMaster.turnId, 'turn_2')
-  assert.notEqual(redNextTurn.json.gameMaster.actionSetId, redCombatPacket.actionSetId)
-  assert.equal(redNextTurn.json.gameMaster.legalActions.some((action) => action.kind === 'ready'), false)
-  assert.equal(
-    redNextTurn.json.gameMaster.legalActions.every((action) => action.id.startsWith('combat.red.r1.t2.')),
-    true,
-  )
+  assert.equal(redNextTurn.json.gameMaster.phase, 'round_review')
+  assert.equal(redNextTurn.json.gameMaster.nextAction, 'submit_reflection')
+  assert.equal(redNextTurn.json.gameMaster.actionSetId, undefined)
+  assert.deepEqual(redNextTurn.json.gameMaster.legalActions, [])
 })
 
 test('POST /sessions/:id/reflection accepts only private post-fight reflections after completed fight', async () => {

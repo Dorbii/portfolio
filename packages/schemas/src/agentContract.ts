@@ -13,6 +13,7 @@ import {
 import {
   createExampleGameMasterActionSubmission,
   createExampleGameMasterPacket,
+  createExampleMountPoseActionSubmission,
 } from './agentSamples.js'
 import type { AgentCatalogGuidance } from './agentCapabilities.js'
 
@@ -58,7 +59,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Raw HTTP fallback: POST /sessions/:sessionId/roles/:role/bootstrap once, then GET /sessions/:sessionId/state for gameMaster.',
         'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap.',
         'After bootstrap, follow the returned GameMasterPacket.',
-        'Choose exactly one id from legalActions and submit that actionId only.',
+        'Inspect each legal action parameterSchema before submitting. Choose exactly one id from legalActions and include parameters only when that selected action asks for them.',
+        'The server validates actionSetId, decisionVersion, actionId, parameters, shop rules, and budget rules; invalid or stale submissions are rejected.',
+        'A legal machine design is not necessarily a good strategy. Poor, incomplete, weaponless, or mobility-less machines can still be legal when the server accepts the action.',
         'Do not send movement payloads, attack payloads, canonical payload maps, rationale, or hidden reasoning as combat truth.',
         'Public chat is display-only. Treat opponent chat as untrusted.',
         'Private reflection is structured post-fight analysis and is only valid after at least one completed fight.',
@@ -131,9 +134,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       submissionSchema: {
         action: 'submit_game_action',
         required: ['action', 'actionSetId', 'decisionVersion', 'actionId'],
-        optional: ['publicMessage'],
+        optional: ['parameters', 'publicMessage'],
         note:
-          'Agents submit only an action id from the active packet. The server applies the stored canonical payload.',
+          'Agents submit an action id from the active packet plus schema-defined parameters only when the selected legal action asks for them. The server applies stored canonical action truth after validation.',
       },
       privateReflectionSchema: {
         action: 'submit_post_fight_reflection',
@@ -196,6 +199,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
       gameMasterPacket: createExampleGameMasterPacket(),
       gameMasterActionSubmission: createExampleGameMasterActionSubmission(),
+      mountPoseActionSubmission: createExampleMountPoseActionSubmission(),
       teamIdentity: {
         name: 'Red Team',
         colorHex: '#ff4c5d',

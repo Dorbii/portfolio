@@ -2,6 +2,7 @@ import {
   TEAM_ROLES,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
+  validateGameMasterActionParameters,
   validateGameMasterActionSubmissionShape,
   validatePostFightAgentReflectionShape,
   validateRoleClaimRequestShape,
@@ -10,20 +11,28 @@ import {
   type AgentBootstrapRequest,
   type CanonicalGameAction,
   type GameMasterActionKind,
+  type GameMasterActionParameters,
   type GameMasterActionSubmission,
   type GameMasterLegalAction,
   type GameMasterNextAction,
   type GameMasterPacket,
   type GameMasterPhase,
+  type MachineDesign,
+  type MachineRuntimeState,
+  type NormalizedGameMasterActionParameters,
   type RelayErrorResponse,
   type PostFightAgentReflection,
   type RoleClaimRequest,
   type RoleResetRequest,
   type SessionPhase,
   type SharedDebrief,
+  type StoredDesign,
   type TeamRole,
   type TurnCommand,
+  type ValidationIssue,
+  type BotDesignSnapshot,
   type BotBlueprint,
+  type GeneratedControls,
 } from '../../../packages/schemas/src/index.js'
 import {
   PART_CATALOG,
@@ -32,17 +41,20 @@ import {
 } from '../../../packages/catalog/src/index.js'
 import {
   applyLoadoutAction,
-  botDesignSnapshotToBlueprint,
+  botDesignSnapshotToLegacyBotBlueprintProjection,
   buildCombatActionSet,
   buildLoadoutActionSet,
   buildFightDossier,
   combatLegalActionForPacket,
   combatAnchorForPosition,
+  deriveMachineCapabilities,
   isCombatAction,
   ensureLoadoutBuildState,
   isLoadoutBuilderAction,
   LOADOUT_PART_LIMIT,
   loadoutLegalActionForPacket,
+  machineDesignToLegacyBotBlueprintProjection,
+  machineDesignToLegacyBotDesignSnapshotProjection,
   resolveSubmittedGameActions,
   mergeFightDossier,
   type CombatResult,
@@ -140,6 +152,7 @@ const GAME_MASTER_SUBMISSION_KEYS = new Set([
   'actionSetId',
   'decisionVersion',
   'actionId',
+  'parameters',
   'publicMessage',
 ])
 
@@ -483,7 +496,7 @@ export class SessionCoordinator {
     if (!isAllowedGameMasterSubmissionShape(request)) {
       return relayError(
         'SUBMISSION_INVALID',
-        'GameMaster action submission may include only action, actionSetId, decisionVersion, actionId, and publicMessage.',
+        'GameMaster action submission may include only action, actionSetId, decisionVersion, actionId, parameters, and publicMessage.',
       )
     }
 
@@ -515,13 +528,21 @@ export class SessionCoordinator {
       return relayError('SUBMISSION_INVALID', 'decisionVersion is stale or does not match the active action set.')
     }
 
-    const canonicalAction = activeSet.actions[submission.actionId]
+    const resolvedSubmission = resolveSubmittedGameAction(activeSet, submission)
 
-    if (!canonicalAction) {
-      return relayError('SUBMISSION_INVALID', 'actionId is not legal for the active action set.')
+    if (!resolvedSubmission.ok) {
+      return relayError(
+        'SUBMISSION_INVALID',
+        'GameMaster action submission failed validation.',
+        resolvedSubmission.issues,
+      )
     }
 
-    const requestHash = hashGameMasterSubmission(submission)
+    const canonicalAction = resolvedSubmission.action
+    const requestHash = hashGameMasterSubmission(
+      submission,
+      resolvedSubmission.normalizedParameters,
+    )
     const existingLock = this.state.lockedActions?.[role.role]
 
     if (existingLock) {
@@ -552,6 +573,7 @@ export class SessionCoordinator {
         activeSet,
         submission,
         canonicalAction,
+        requestHash,
         now,
       )
     }
@@ -575,13 +597,13 @@ export class SessionCoordinator {
     activeSet: ActiveActionSet,
     submission: GameMasterActionSubmission,
     canonicalAction: CanonicalGameAction,
+    requestHash: string,
     now: string,
   ): SessionResult<{
     packet: GameMasterPacket
     publicState: ReturnType<typeof buildPublicSessionState>
   }> {
     const role = this.state.roles[roleName]
-    const requestHash = hashGameMasterSubmission(submission)
     const existingLock = this.state.lockedActions?.[roleName]
 
     if (existingLock) {
@@ -619,11 +641,15 @@ export class SessionCoordinator {
     }
 
     if (result.confirmed) {
-      const blueprint = botDesignSnapshotToBlueprint(result.buildState.currentDesign)
+      const legacyDesign = storedDesignToLegacyBotDesignSnapshotProjection(
+        result.buildState.currentDesign,
+        result.buildState.legacyDraft?.name,
+      )
 
-      role.currentDesign = result.buildState.currentDesign
+      role.storedDesign = result.buildState.currentDesign
+      role.currentDesign = legacyDesign
       role.loadoutBuildState = result.buildState
-      role.controls = deriveControls(blueprint)
+      applyCombatCompatibilityControls(role, result.buildState.currentDesign)
       role.loadoutConfirmedAt = now
       this.lockRoleAction(roleName, activeSet, submission, requestHash, now)
       this.touch(now)
@@ -641,7 +667,11 @@ export class SessionCoordinator {
 
     role.gold = result.gold
     role.inventory = result.inventory
-    role.currentDesign = result.buildState.currentDesign
+    role.storedDesign = result.buildState.currentDesign
+    role.currentDesign = storedDesignToLegacyBotDesignSnapshotProjection(
+      result.buildState.currentDesign,
+      result.buildState.legacyDraft?.name,
+    )
     role.loadoutBuildState = result.buildState
     role.loadoutVersion = (role.loadoutVersion ?? 0) + 1
     this.touch(now)
@@ -974,7 +1004,7 @@ export class SessionCoordinator {
       resources: {
         gold: role.gold,
         remainingGold: role.gold,
-        partLimitRemaining: Math.max(0, LOADOUT_PART_LIMIT - (buildState?.currentDesign.parts.length ?? 0)),
+        partLimitRemaining: Math.max(0, LOADOUT_PART_LIMIT - (buildState?.legacyDraft?.parts.length ?? 0)),
       },
       catalog: {
         version: GAME_MASTER_CATALOG_VERSION,
@@ -1288,7 +1318,8 @@ export class SessionCoordinator {
   }
 
   private openCombatTurn(now: string): void {
-    const resolution = resolveSubmittedGameActions(this.buildCombatInput(), {
+    const baselineMachineDesigns = this.createCombatBaselineMachineDesigns()
+    const resolution = resolveSubmittedGameActions(this.buildCombatInput(baselineMachineDesigns), {
       red: [],
       blue: [],
     })
@@ -1305,6 +1336,7 @@ export class SessionCoordinator {
       snapshot: resolution.snapshot,
       now,
       actions: { red: [], blue: [] },
+      baselineMachineDesigns,
     })
     this.changePhase('combat_turn', `Combat turn ${resolution.nextTick} is open.`, now)
   }
@@ -1330,7 +1362,7 @@ export class SessionCoordinator {
         roleName,
         this.state.round,
         combat.nextTick,
-        role.controls,
+        controlsForRoleState(role),
       )
       this.appendEvent(
         'turn_command_timed_out',
@@ -1359,18 +1391,24 @@ export class SessionCoordinator {
     combat.actions.red.push(redAction)
     combat.actions.blue.push(blueAction)
 
-    const resolution = resolveSubmittedGameActions(this.buildCombatInput(), combat.actions)
+    const resolution = resolveSubmittedGameActions(
+      this.buildCombatInput(combat.baselineMachineDesigns),
+      combat.actions,
+    )
 
     if (resolution.status === 'complete') {
+      this.applyMachineRuntimeState(resolution.result.machineRuntime)
       this.completeCombat(resolution.result, now)
       return
     }
 
+    this.applyMachineRuntimeState(resolution.machineRuntime)
     this.state.combat = this.createCombatState({
       nextTick: resolution.nextTick,
       snapshot: resolution.snapshot,
       now,
       actions: combat.actions,
+      baselineMachineDesigns: combat.baselineMachineDesigns,
     })
     this.state.activeActionSets = undefined
     this.state.lockedActions = undefined
@@ -1382,12 +1420,14 @@ export class SessionCoordinator {
     snapshot: StoredCombatState['snapshot']
     now: string
     actions: StoredCombatState['actions']
+    baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns']
   }): StoredCombatState {
     return {
       nextTick: input.nextTick,
       openedAt: input.now,
       deadlineAt: addMilliseconds(input.now, COMBAT_TURN_SECONDS * 1000),
       turnSeconds: COMBAT_TURN_SECONDS,
+      ...(input.baselineMachineDesigns ? { baselineMachineDesigns: input.baselineMachineDesigns } : {}),
       actions: input.actions,
       pending: {},
       snapshot: input.snapshot,
@@ -1402,33 +1442,138 @@ export class SessionCoordinator {
     }
   }
 
-  private buildCombatInput(): ResolveCombatInput {
+  private createCombatBaselineMachineDesigns(): StoredCombatState['baselineMachineDesigns'] {
+    const baselineMachineDesigns: Partial<Record<TeamRole, MachineDesign>> = {}
+
+    for (const roleName of TEAM_ROLES) {
+      const role = this.state.roles[roleName]
+
+      if (role.storedDesign?.version === 'machine:v1' && role.loadoutConfirmedAt) {
+        baselineMachineDesigns[roleName] = cloneJson(role.storedDesign.machine)
+      }
+    }
+
+    return Object.keys(baselineMachineDesigns).length > 0 ? baselineMachineDesigns : undefined
+  }
+
+  // CODEX_INTENT: pass baseline machine designs into cumulative native resolver replay while retaining projected blueprints for replay compatibility.
+  // CODEX_RISK: data_semantics
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  private buildCombatInput(
+    baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns'],
+  ): ResolveCombatInput {
     const red = this.state.roles.red
     const blue = this.state.roles.blue
-    const redBlueprint = this.combatBlueprintForRole(red)
-    const blueBlueprint = this.combatBlueprintForRole(blue)
+    const redAuthority = this.combatAuthorityForRole(red, baselineMachineDesigns?.red)
+    const blueAuthority = this.combatAuthorityForRole(blue, baselineMachineDesigns?.blue)
 
     return {
       round: this.state.round,
       seed: `${this.state.id}:${this.state.seed}`,
       arena: this.state.arena,
       red: {
-        blueprint: redBlueprint,
-        tactics: defaultTacticsForBlueprint(redBlueprint),
+        blueprint: redAuthority.blueprint,
+        tactics: defaultTacticsForBlueprint(redAuthority.blueprint),
+        ...(redAuthority.machineDesign ? { machineDesign: redAuthority.machineDesign } : {}),
       },
       blue: {
-        blueprint: blueBlueprint,
-        tactics: defaultTacticsForBlueprint(blueBlueprint),
+        blueprint: blueAuthority.blueprint,
+        tactics: defaultTacticsForBlueprint(blueAuthority.blueprint),
+        ...(blueAuthority.machineDesign ? { machineDesign: blueAuthority.machineDesign } : {}),
       },
     }
   }
 
-  private combatBlueprintForRole(role: StoredRoleState): BotBlueprint {
+  private combatAuthorityForRole(
+    role: StoredRoleState,
+    baselineMachineDesign?: MachineDesign,
+  ): {
+    blueprint: BotBlueprint
+    machineDesign?: ResolveCombatInput['red']['machineDesign']
+  } {
+    if (role.storedDesign && role.loadoutConfirmedAt) {
+      if (role.storedDesign.version === 'machine:v1') {
+        const machineDesign = baselineMachineDesign ?? role.storedDesign.machine
+
+        return {
+          blueprint: storedDesignToLegacyBotBlueprintProjection(
+            { version: 'machine:v1', machine: machineDesign },
+            legacyProjectionNameForRole(role),
+          ),
+          machineDesign,
+        }
+      }
+
+      return {
+        blueprint: storedDesignToLegacyBotBlueprintProjection(
+          role.storedDesign,
+          legacyProjectionNameForRole(role),
+        ),
+      }
+    }
+
     if (role.currentDesign && role.loadoutConfirmedAt) {
-      return botDesignSnapshotToBlueprint(role.currentDesign)
+      return { blueprint: botDesignSnapshotToLegacyBotBlueprintProjection(role.currentDesign) }
     }
 
     throw new Error(`${role.role} requires a confirmed loadout to resolve combat.`)
+  }
+
+  // CODEX_INTENT: persist machine runtime facts that affect later turn capability derivation.
+  // CODEX_RISK: data_semantics
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  private applyMachineRuntimeState(runtime: Partial<Record<TeamRole, MachineRuntimeState>> | undefined): void {
+    if (!runtime) {
+      return
+    }
+
+    for (const roleName of TEAM_ROLES) {
+      const role = this.state.roles[roleName]
+      const roleRuntime = runtime[roleName]
+
+      if (!roleRuntime || role.storedDesign?.version !== 'machine:v1') {
+        continue
+      }
+
+      role.storedDesign = {
+        version: 'machine:v1',
+        machine: {
+          ...role.storedDesign.machine,
+          runtime: cloneJson(roleRuntime),
+        },
+      }
+    }
+  }
+
+  private replayCompatibilityBlueprintForRole(role: StoredRoleState): BotBlueprint {
+    if (role.storedDesign && role.loadoutConfirmedAt) {
+      return storedDesignToLegacyBotBlueprintProjection(
+        role.storedDesign,
+        legacyProjectionNameForRole(role),
+      )
+    }
+
+    if (role.currentDesign && role.loadoutConfirmedAt) {
+      return botDesignSnapshotToLegacyBotBlueprintProjection(role.currentDesign)
+    }
+
+    throw new Error(`${role.role} requires a confirmed loadout to project replay compatibility.`)
+  }
+
+  private replayMachineDesignsForRoles(): Partial<Record<TeamRole, MachineDesign>> | undefined {
+    const machineDesigns: Partial<Record<TeamRole, MachineDesign>> = {}
+
+    for (const roleName of TEAM_ROLES) {
+      const role = this.state.roles[roleName]
+
+      if (role.storedDesign?.version === 'machine:v1' && role.loadoutConfirmedAt) {
+        machineDesigns[roleName] = cloneJson(role.storedDesign.machine)
+      }
+    }
+
+    return machineDesigns.red || machineDesigns.blue ? machineDesigns : undefined
   }
 
   private completeCombat(result: CombatResult, now: string): void {
@@ -1440,9 +1585,10 @@ export class SessionCoordinator {
     }
 
     const botBlueprints = {
-      red: cloneJson(this.combatBlueprintForRole(red)),
-      blue: cloneJson(this.combatBlueprintForRole(blue)),
+      red: cloneJson(this.replayCompatibilityBlueprintForRole(red)),
+      blue: cloneJson(this.replayCompatibilityBlueprintForRole(blue)),
     }
+    const machineDesigns = this.replayMachineDesignsForRoles()
     const fightId = `fight_${this.state.round}`
 
     this.state.replay = {
@@ -1452,6 +1598,7 @@ export class SessionCoordinator {
         blue: cloneJson(blue.teamIdentity),
       },
       botBlueprints,
+      ...(machineDesigns ? { machineDesigns } : {}),
     }
     this.state.fightDossier = mergeFightDossier(
       this.state.fightDossier,
@@ -1464,6 +1611,8 @@ export class SessionCoordinator {
       }),
     )
     this.state.combat = undefined
+    this.state.activeActionSets = undefined
+    this.state.lockedActions = undefined
     this.state.lastResult = combatSummary(result)
     this.appendEvent('combat_resolved', result.reason, now)
     this.changePhase('combat_resolved', 'Combat result recorded.', now)
@@ -1561,15 +1710,79 @@ function createCanonicalCombatAction(
   }
 }
 
+function controlsForStoredLegacyDesign(design: StoredDesign): GeneratedControls | undefined {
+  if (design.version === 'machine:v1') {
+    return undefined
+  }
+
+  return deriveControls(storedDesignToLegacyBotBlueprintProjection(design))
+}
+
+function applyCombatCompatibilityControls(role: StoredRoleState, design: StoredDesign): void {
+  const controls = controlsForStoredLegacyDesign(design)
+
+  if (controls) {
+    role.controls = controls
+    return
+  }
+
+  delete role.controls
+}
+
 function controlsForRoleState(role: StoredRoleState): StoredRoleState['controls'] {
+  if (role.storedDesign?.version === 'machine:v1') {
+    return { movement: ['brake'] }
+  }
+
   if (role.controls) {
     return role.controls
   }
+  if (role.storedDesign) {
+    return controlsForStoredLegacyDesign(role.storedDesign)
+  }
   if (role.currentDesign) {
-    return deriveControls(botDesignSnapshotToBlueprint(role.currentDesign))
+    return deriveControls(botDesignSnapshotToLegacyBotBlueprintProjection(role.currentDesign))
   }
 
   return { movement: ['brake'] }
+}
+
+function machineCapabilitiesForRole(role: StoredRoleState) {
+  if (!role.loadoutConfirmedAt || role.storedDesign?.version !== 'machine:v1') {
+    return undefined
+  }
+
+  return deriveMachineCapabilities(role.storedDesign.machine)
+}
+
+function storedDesignToLegacyBotBlueprintProjection(
+  design: StoredDesign,
+  legacyName?: string,
+): BotBlueprint {
+  // CODEX_INTENT: keep replay/display blueprint compatibility as a projection from StoredDesign.
+  // CODEX_RISK: data_semantics
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  const blueprint = design.version === 'machine:v1'
+    ? machineDesignToLegacyBotBlueprintProjection(design.machine)
+    : botDesignSnapshotToLegacyBotBlueprintProjection(design.design)
+
+  return legacyName ? { ...blueprint, name: legacyName } : blueprint
+}
+
+function storedDesignToLegacyBotDesignSnapshotProjection(
+  design: StoredDesign,
+  legacyName?: string,
+): BotDesignSnapshot {
+  const snapshot = design.version === 'machine:v1'
+    ? machineDesignToLegacyBotDesignSnapshotProjection(design.machine)
+    : cloneJson(design.design)
+
+  return legacyName ? { ...snapshot, name: legacyName } : snapshot
+}
+
+function legacyProjectionNameForRole(role: StoredRoleState): string | undefined {
+  return role.loadoutBuildState?.legacyDraft?.name ?? role.currentDesign?.name
 }
 
 function isAllowedGameMasterSubmissionShape(value: unknown): boolean {
@@ -1580,14 +1793,103 @@ function isAllowedGameMasterSubmissionShape(value: unknown): boolean {
   return Object.keys(value).every((key) => GAME_MASTER_SUBMISSION_KEYS.has(key))
 }
 
-function hashGameMasterSubmission(submission: GameMasterActionSubmission): string {
-  return JSON.stringify({
+function hashGameMasterSubmission(
+  submission: GameMasterActionSubmission,
+  normalizedParameters?: NormalizedGameMasterActionParameters,
+): string {
+  return stableStringify({
     action: submission.action,
     actionSetId: submission.actionSetId,
     decisionVersion: submission.decisionVersion,
     actionId: submission.actionId,
+    parameters: normalizedParameters ?? {},
     publicMessage: submission.publicMessage ?? '',
   })
+}
+
+function resolveSubmittedGameAction(
+  activeSet: ActiveActionSet,
+  submission: GameMasterActionSubmission,
+): {
+  ok: true
+  action: CanonicalGameAction
+  normalizedParameters?: NormalizedGameMasterActionParameters
+} | {
+  ok: false
+  issues: ValidationIssue[]
+} {
+  const canonicalAction = activeSet.actions[submission.actionId]
+
+  if (!canonicalAction) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: 'INVALID_ACTION_ID',
+          path: 'actionSubmission.actionId',
+          message: 'actionId is not legal for the active action set.',
+        },
+      ],
+    }
+  }
+
+  if (!canonicalAction.parameterSchema) {
+    if (submission.parameters !== undefined) {
+      return {
+        ok: false,
+        issues: [
+          {
+            code: 'UNEXPECTED_PARAMETERS',
+            path: 'actionSubmission.parameters',
+            message: 'This action does not accept parameters.',
+          },
+        ],
+      }
+    }
+
+    return { ok: true, action: canonicalAction }
+  }
+
+  const parameters = submission.parameters ?? {}
+  const validation = validateGameMasterActionParameters(parameters, canonicalAction.parameterSchema)
+
+  if (!validation.ok) {
+    return validation
+  }
+
+  return {
+    ok: true,
+    action: {
+      ...canonicalAction,
+      payload: {
+        ...canonicalAction.payload,
+        parameters: validation.parameters,
+      },
+    },
+    normalizedParameters: validation.parameters,
+  }
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(stableJsonValue(value))
+}
+
+function stableJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(stableJsonValue)
+  }
+
+  if (typeof value !== 'object' || value === null) {
+    return value
+  }
+
+  const sorted: Record<string, unknown> = {}
+
+  for (const key of Object.keys(value).sort()) {
+    sorted[key] = stableJsonValue((value as Record<string, unknown>)[key])
+  }
+
+  return sorted
 }
 
 function sameLockedTeamIdentity(
@@ -1612,7 +1914,11 @@ function createGameMasterActionSet(
     const role = state.roles[roleName]
 
     role.loadoutBuildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
-    role.currentDesign = role.loadoutBuildState.currentDesign
+    role.storedDesign = role.loadoutBuildState.currentDesign
+    role.currentDesign = storedDesignToLegacyBotDesignSnapshotProjection(
+      role.loadoutBuildState.currentDesign,
+      role.loadoutBuildState.legacyDraft?.name,
+    )
 
     return buildLoadoutActionSet({
       role: roleName,
@@ -1632,6 +1938,9 @@ function createGameMasterActionSet(
     throw new Error('Combat action sets require an active combat state.')
   }
 
+  const role = state.roles[roleName]
+  const machineCapabilities = machineCapabilitiesForRole(role)
+
   return buildCombatActionSet({
     role: roleName,
     round: state.round,
@@ -1643,26 +1952,47 @@ function createGameMasterActionSet(
     arenaVersion: `${GAME_MASTER_ARENA_VERSION}:${state.arena.width}x${state.arena.height}`,
     expiresAt: state.combat.deadlineAt,
     snapshot: state.combat.snapshot,
-    controls: controlsForRoleState(state.roles[roleName]),
+    ...(machineCapabilities
+      ? { machineCapabilities }
+      : { controls: controlsForRoleState(role) }),
   })
 }
 
 function legalActionsForPacket(actionSet: ActiveActionSet): GameMasterLegalAction[] {
   return Object.values(actionSet.actions).map((action) => {
     if (isLoadoutBuilderAction(action)) {
-      return loadoutLegalActionForPacket(action)
+      return legalActionWithParameterMetadata(action, loadoutLegalActionForPacket(action))
     }
     if (isCombatAction(action)) {
-      return combatLegalActionForPacket(action)
+      return legalActionWithParameterMetadata(action, combatLegalActionForPacket(action))
     }
 
-    return {
+    return legalActionWithParameterMetadata(action, {
       id: action.id,
       kind: action.kind,
       label: legalActionLabel(action.kind),
       summary: legalActionSummary(action.kind),
-    }
+    })
   })
+}
+
+function legalActionWithParameterMetadata(
+  action: CanonicalGameAction,
+  legalAction: GameMasterLegalAction,
+): GameMasterLegalAction {
+  return {
+    ...legalAction,
+    ...(action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
+    ...(hasParameterExamples(action.parameterExamples)
+      ? { parameterExamples: action.parameterExamples }
+      : {}),
+  }
+}
+
+function hasParameterExamples(
+  examples: GameMasterActionParameters[] | undefined,
+): examples is GameMasterActionParameters[] {
+  return Array.isArray(examples) && examples.length > 0
 }
 
 function legalActionLabel(kind: GameMasterActionKind): string {
@@ -1812,7 +2142,7 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole): s
   }
 
   if (state.activeActionSets?.[roleName]) {
-    return 'Choose one legal action from this packet. Submit only the actionId with the packet actionSetId and decisionVersion.'
+    return 'Choose one legal action from this packet. Submit parameters only when that legal action exposes parameterSchema.'
   }
 
   return 'Wait for the next server-authored GameMaster packet.'

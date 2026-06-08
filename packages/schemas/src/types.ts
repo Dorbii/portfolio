@@ -168,7 +168,6 @@ export type PartMountKind =
   | 'side_socket'
   | 'top_socket'
   | 'surface'
-  | 'sphere'
   | 'rim'
   | 'internal_slot'
 
@@ -190,6 +189,89 @@ export type PartMount = {
   collisionPolicy: PartCollisionPolicy
   rotationOptions: number[]
   sectors?: string[]
+}
+
+export type MountSurfaceKind = 'panel' | 'sphere'
+
+export type PanelMountSurface = {
+  id: string
+  kind: 'panel'
+  accepts: PartCategory[]
+  center: Vector3
+  size: [number, number]
+  normal: Vector3
+  uAxis: Vector3
+  vAxis: Vector3
+}
+
+export type SphereMountSurface = {
+  id: string
+  kind: 'sphere'
+  accepts: PartCategory[]
+  center: Vector3
+  radius: number
+}
+
+export type MountSurface = PanelMountSurface | SphereMountSurface
+
+export type MountPoseInput = {
+  surface: MountSurface
+  partCategory: PartCategory
+  u: number
+  v: number
+  yawDegrees?: number
+  rollDegrees?: number
+}
+
+export type MountPoseParameters = {
+  u: number
+  v: number
+  yawDegrees: number
+  rollDegrees: number
+}
+
+export type OrientationBasis = {
+  right: Vector3
+  up: Vector3
+  forward: Vector3
+}
+
+export type MachineCapabilityLocalAxis = 'right' | 'up' | 'forward'
+
+export type MachineMovementCapabilityMode =
+  | 'normal_wheel'
+  | 'omni_wheel'
+  | 'mecanum_wheel'
+  | 'tank_tread'
+  | 'articulated_leg'
+
+export type MachineWeaponCapabilityMode = 'fixed_emitter' | 'turret_emitter'
+
+export type MachineUtilityCapabilityMode = 'activated_utility'
+
+export type MachinePartCapabilityDefinition = {
+  movement?: {
+    mode: MachineMovementCapabilityMode
+    driveAxis: MachineCapabilityLocalAxis
+    lateralAxis?: MachineCapabilityLocalAxis
+  }
+  weapon?: {
+    mode: MachineWeaponCapabilityMode
+    emitterAxis: MachineCapabilityLocalAxis
+  }
+  utility?: {
+    mode: MachineUtilityCapabilityMode
+  }
+}
+
+export type ResolvedMountPose = {
+  surfaceId: string
+  surfaceKind: MountSurfaceKind
+  partCategory: PartCategory
+  parameters: MountPoseParameters
+  position: Vector3
+  surfaceNormal: Vector3
+  orientation: OrientationBasis
 }
 
 export type WeaponSpec = {
@@ -280,6 +362,7 @@ export type PartDefinition = {
   stats: PartStats
   footprint: PartFootprint
   mounts: PartMount[]
+  mountSurfaces: MountSurface[]
   spec: PartSpec
   signatureEffect?: PartEffect
   mechanics?: PartEffect[]
@@ -290,6 +373,7 @@ export type PartDefinition = {
     utility?: boolean
     weapon?: boolean
   }
+  machineCapabilities?: MachinePartCapabilityDefinition
 }
 
 export type InventoryItem = {
@@ -321,6 +405,116 @@ export type BotBlueprint = {
   name: string
   blocks: BlueprintBlock[]
   rationale?: string
+}
+
+export type Transform3D = {
+  position: Vector3
+  rotation: Vector3
+  scale?: Vector3
+  orientation?: OrientationBasis
+}
+
+export type MachinePartSource = 'system_core' | 'catalog_part'
+
+export type MachineCoreDefinition = {
+  id: string
+  displayName: string
+  cost: 0
+  systemOwned: true
+  inventoryItem: false
+  catalogPart: false
+  immutable: true
+  mountSurfaces: MountSurface[]
+}
+
+export type MachinePartInstance = {
+  instanceId: string
+  definitionId: string
+  source: MachinePartSource
+  transform: Transform3D
+  immutable?: boolean
+}
+
+export type MachineAttachment = {
+  parentInstanceId: string
+  childInstanceId: string
+  mountId?: string
+  transform: Transform3D
+}
+
+export type MachineRuntimeState = {
+  healthByInstanceId: Record<string, number>
+  detachedInstanceIds?: string[]
+  disabledInstanceIds?: string[]
+  orientationByInstanceId?: Record<string, OrientationBasis>
+}
+
+export type MachineDesign = {
+  name: string
+  rootInstanceId: string
+  parts: MachinePartInstance[]
+  attachments: MachineAttachment[]
+  runtime?: MachineRuntimeState
+}
+
+export type MachineCapabilityOrientationSource =
+  | 'transform_orientation'
+  | 'runtime_orientation'
+  | 'inherited_runtime_orientation'
+
+export type MachineMovementCapability = {
+  kind: MachineMovementCapabilityMode
+  partInstanceId: string
+  partId: string
+  driveAxis: Vector3
+  lateralAxis?: Vector3
+  diagonalAxes?: Vector3[]
+  moveBudget: number
+  traction: number
+  stability: number
+  turnRate: number
+  orientationSource: MachineCapabilityOrientationSource
+}
+
+export type MachineWeaponCapability = {
+  kind: MachineWeaponCapabilityMode
+  partInstanceId: string
+  partId: string
+  emitterAxis: Vector3
+  damage: number
+  range: number
+  cooldownTurns: number
+  fireMode: WeaponSpec['fireMode']
+  precision: number
+  orientationSource: MachineCapabilityOrientationSource
+}
+
+export type MachineUtilityCapability = {
+  kind: MachineUtilityCapabilityMode
+  partInstanceId: string
+  partId: string
+  control: number
+}
+
+export type MachineInactivePartReason =
+  | 'detached'
+  | 'disabled'
+  | 'destroyed'
+  | 'missing_catalog_definition'
+  | 'missing_orientation_basis'
+
+export type MachineInactivePartCapability = {
+  partInstanceId: string
+  definitionId: string
+  partId?: string
+  reason: MachineInactivePartReason
+}
+
+export type MachineCapabilities = {
+  movement: MachineMovementCapability[]
+  weapons: MachineWeaponCapability[]
+  utility: MachineUtilityCapability[]
+  inactiveParts: MachineInactivePartCapability[]
 }
 
 export const MOVEMENT_COMMANDS = [
@@ -406,6 +600,7 @@ export const GAME_MASTER_ACTION_KINDS = [
   'select_loadout',
   'choose_part',
   'choose_attach_target',
+  'propose_mount_pose',
   'choose_mount',
   'choose_rotation',
   'buy_part',
@@ -424,6 +619,37 @@ export const GAME_MASTER_ACTION_KINDS = [
 ] as const
 
 export type GameMasterActionKind = (typeof GAME_MASTER_ACTION_KINDS)[number]
+
+export const GAME_MASTER_ACTION_PARAMETER_TYPES = [
+  'string',
+  'number',
+  'integer',
+  'boolean',
+] as const
+
+export type GameMasterActionParameterType = (typeof GAME_MASTER_ACTION_PARAMETER_TYPES)[number]
+
+export type GameMasterActionParameterValue = string | number | boolean
+
+export type GameMasterActionParameterDefinition = {
+  type: GameMasterActionParameterType
+  label?: string
+  summary?: string
+  enum?: GameMasterActionParameterValue[]
+  minimum?: number
+  maximum?: number
+  minLength?: number
+  maxLength?: number
+  normalization?: 'degrees'
+}
+
+export type GameMasterActionParameterSchema = {
+  type: 'object'
+  properties: Record<string, GameMasterActionParameterDefinition>
+  required?: string[]
+}
+
+export type GameMasterActionParameters = Record<string, unknown>
 
 export type AgentResourcesView = {
   gold?: number
@@ -480,6 +706,7 @@ export type AgentVisibleCombatState = {
 export const LOADOUT_BUILD_STEPS = [
   'choose_part',
   'choose_attach_target',
+  'propose_mount_pose',
   'choose_mount',
   'choose_rotation',
   'ready_to_confirm',
@@ -493,14 +720,19 @@ export type LoadoutBuildState = {
   selectedPartId?: string
   selectedMovingPartId?: string
   selectedAttachTargetId?: string
+  /** Legacy grid-mount continuation state for legacy-bot-design:v1 only. Remove with that compatibility path. */
   selectedMount?: string
   selectedMountKind?: PartMountKind
   selectedMountMotion?: PartMountMotion
   selectedMountCollisionPolicy?: PartCollisionPolicy
+  /** Legacy grid-mount continuation state for legacy-bot-design:v1 only. Remove with that compatibility path. */
   selectedMountSector?: string
+  /** Legacy grid-mount continuation state for legacy-bot-design:v1 only. Remove with that compatibility path. */
   selectedAttachCell?: GridCoord
+  /** Legacy grid-mount continuation state for legacy-bot-design:v1 only. Remove with that compatibility path. */
   selectedRotation?: number
-  currentDesign: BotDesignSnapshot
+  currentDesign: StoredDesign
+  legacyDraft?: BotDesignSnapshot
 }
 
 export type SubmitInstruction = {
@@ -511,6 +743,7 @@ export type SubmitInstruction = {
     actionSetId: string
     decisionVersion: number
     actionId: string
+    parameters?: GameMasterActionParameters
     publicMessage?: string
   }
 }
@@ -523,6 +756,8 @@ export type GameMasterLegalAction = {
   catalogDigest?: string
   catalogRefs?: string[]
   requirements?: string[]
+  parameterSchema?: GameMasterActionParameterSchema
+  parameterExamples?: GameMasterActionParameters[]
   preview?: {
     basis: 'current_snapshot'
     outcome: 'estimated' | 'guaranteed'
@@ -565,6 +800,7 @@ export type GameMasterActionSubmission = {
   actionSetId: string
   decisionVersion: number
   actionId: string
+  parameters?: GameMasterActionParameters
   publicMessage?: string
 }
 
@@ -572,6 +808,8 @@ export type CanonicalGameAction = {
   id: string
   kind: GameMasterActionKind
   role: TeamRole
+  parameterSchema?: GameMasterActionParameterSchema
+  parameterExamples?: GameMasterActionParameters[]
   payload: Record<string, unknown>
 }
 
@@ -619,6 +857,10 @@ export type BotDesignSnapshot = {
   rootInstanceId?: string
   activeSignaturePartInstanceId?: string
 }
+
+export type StoredDesign =
+  | { version: 'machine:v1'; machine: MachineDesign }
+  | { version: 'legacy-bot-design:v1'; design: BotDesignSnapshot }
 
 export type BotCombatState = {
   pose?: BotPose

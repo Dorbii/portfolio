@@ -101,6 +101,11 @@ export function AgentInsightWorkbench({
                 text={loadout.confirmedAt ? `Confirmed at ${loadout.confirmedAt}.` : undefined}
                 fallback="This loadout has not been confirmed yet."
               />
+              <InsightText
+                fallback="Server acceptance means the action passed validation, shop, and budget rules."
+                title="Machine legality"
+                text="Server acceptance means the action passed validation, shop, and budget rules. It does not mean the machine is strategically good."
+              />
             </>
           ) : (
             <p className="agent-empty">
@@ -307,5 +312,9 @@ function formatUtilitySummary(state: RolePrivateState): string {
 function formatLegalAction(
   action: NonNullable<RolePrivateState['gameMaster']>['legalActions'][number],
 ): string {
-  return `${action.label}: ${action.summary}`
+  const parameterHint = action.parameterSchema
+    ? 'inspect parameterSchema and include parameters'
+    : 'no parameters'
+
+  return `${action.label}: ${action.summary} (${parameterHint})`
 }

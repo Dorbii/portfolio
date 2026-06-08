@@ -1,5 +1,6 @@
 import type {
   BotBlueprint,
+  MachineDesign,
   RelayErrorCode,
   RelayErrorResponse,
   TeamRole,
@@ -40,6 +41,7 @@ export type ReplayPayload = {
   timeline: ReplayTimeline
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   botBlueprints: Record<TeamRole, BotBlueprint>
+  machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
 }
 
 export function isTerminalPhase(phase: PublicSessionState['phase'] | undefined): boolean {
@@ -331,6 +333,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
 
   const payload = value as Record<string, unknown>
   const botBlueprints = payload.botBlueprints as Record<string, unknown> | undefined
+  const machineDesigns = normalizeReplayMachineDesigns(payload.machineDesigns)
   const teamIdentities = payload.teamIdentities as Record<string, unknown> | undefined
   const hasBlueprints =
     typeof botBlueprints === 'object' &&
@@ -358,6 +361,7 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
       timeline: payload.timeline as ReplayTimeline,
       teamIdentities: teamIdentities as Record<TeamRole, LegacyTeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
+      ...(machineDesigns ? { machineDesigns } : {}),
     }
   }
 
@@ -371,10 +375,154 @@ function normalizeReplayPayload(value: unknown): ReplayPayload | undefined {
       } as ReplayTimeline,
       teamIdentities: teamIdentities as Record<TeamRole, LegacyTeamIdentity>,
       botBlueprints: botBlueprints as Record<TeamRole, BotBlueprint>,
+      ...(machineDesigns ? { machineDesigns } : {}),
     }
   }
 
   return undefined
+}
+
+function normalizeReplayMachineDesigns(
+  value: unknown,
+): Partial<Record<TeamRole, MachineDesign>> | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined
+  }
+
+  const designs = value as Record<string, unknown>
+  const machineDesigns: Partial<Record<TeamRole, MachineDesign>> = {}
+
+  if (hasMachineDesignShape(designs.red)) {
+    machineDesigns.red = designs.red
+  }
+  if (hasMachineDesignShape(designs.blue)) {
+    machineDesigns.blue = designs.blue
+  }
+
+  return machineDesigns.red || machineDesigns.blue ? machineDesigns : undefined
+}
+
+function hasMachineDesignShape(value: unknown): value is MachineDesign {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const design = value as Record<string, unknown>
+
+  return (
+    typeof design.name === 'string' &&
+    typeof design.rootInstanceId === 'string' &&
+    Array.isArray(design.parts) &&
+    design.parts.every(hasMachinePartShape) &&
+    Array.isArray(design.attachments) &&
+    design.attachments.every(hasMachineAttachmentShape) &&
+    (design.runtime === undefined || hasMachineRuntimeShape(design.runtime))
+  )
+}
+
+function hasMachinePartShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const part = value as Record<string, unknown>
+
+  return (
+    typeof part.instanceId === 'string' &&
+    typeof part.definitionId === 'string' &&
+    (part.source === 'system_core' || part.source === 'catalog_part') &&
+    hasTransformShape(part.transform)
+  )
+}
+
+function hasMachineAttachmentShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const attachment = value as Record<string, unknown>
+
+  return (
+    typeof attachment.parentInstanceId === 'string' &&
+    typeof attachment.childInstanceId === 'string' &&
+    (attachment.mountId === undefined || typeof attachment.mountId === 'string') &&
+    hasTransformShape(attachment.transform)
+  )
+}
+
+function hasMachineRuntimeShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const runtime = value as Record<string, unknown>
+
+  return (
+    hasFiniteNumberRecord(runtime.healthByInstanceId) &&
+    (runtime.detachedInstanceIds === undefined || hasStringArray(runtime.detachedInstanceIds)) &&
+    (runtime.disabledInstanceIds === undefined || hasStringArray(runtime.disabledInstanceIds)) &&
+    (
+      runtime.orientationByInstanceId === undefined ||
+      hasOrientationBasisRecord(runtime.orientationByInstanceId)
+    )
+  )
+}
+
+function hasTransformShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const transform = value as Record<string, unknown>
+
+  return (
+    hasFiniteVector3(transform.position) &&
+    hasFiniteVector3(transform.rotation) &&
+    (transform.scale === undefined || hasFiniteVector3(transform.scale)) &&
+    (transform.orientation === undefined || hasOrientationBasisShape(transform.orientation))
+  )
+}
+
+function hasOrientationBasisRecord(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  return Object.values(value).every(hasOrientationBasisShape)
+}
+
+function hasOrientationBasisShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  const basis = value as Record<string, unknown>
+
+  return (
+    hasFiniteVector3(basis.right) &&
+    hasFiniteVector3(basis.up) &&
+    hasFiniteVector3(basis.forward)
+  )
+}
+
+function hasFiniteNumberRecord(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  return Object.values(value).every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+}
+
+function hasStringArray(value: unknown): boolean {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+}
+
+function hasFiniteVector3(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.length === 3 &&
+    value.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+  )
 }
 
 function hasTeamIdentityShape(value: unknown): value is LegacyTeamIdentity {

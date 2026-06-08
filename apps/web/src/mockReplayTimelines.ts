@@ -1,4 +1,21 @@
 import { createReplayTimeline, type ReplayTimeline } from '../../../packages/replay/src/index.js'
+import type {
+  MachineDesign,
+  OrientationBasis,
+  TeamRole,
+} from '../../../packages/schemas/src/index.js'
+
+const IDENTITY_ORIENTATION: OrientationBasis = {
+  right: [1, 0, 0],
+  up: [0, 1, 0],
+  forward: [0, 0, 1],
+}
+
+const SIDE_MOUNTED_WHEEL_ORIENTATION: OrientationBasis = {
+  right: [0, 0, -1],
+  up: [1, 0, 0],
+  forward: [0, 1, 0],
+}
 
 export const mockReplay: ReplayTimeline = createReplayTimeline({
   round: 3,
@@ -296,6 +313,313 @@ export const abilityProofReplay: ReplayTimeline = createReplayTimeline({
       cause: 'gyro recovery',
       duration: 1.1,
       severity: 0.82,
+    },
+  ],
+})
+
+export const machineProofMachineDesigns: Record<TeamRole, MachineDesign> = {
+  red: {
+    name: 'Asymmetric machine proof',
+    rootInstanceId: 'core',
+    parts: [
+      {
+        instanceId: 'core',
+        definitionId: 'system:machine-core:v1',
+        source: 'system_core',
+        immutable: true,
+        transform: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        instanceId: 'side-wheel',
+        definitionId: 'catalog:Wheel_Large',
+        source: 'catalog_part',
+        transform: {
+          position: [-3.2, 0.1, 0.8],
+          rotation: [0, 270, 90],
+          scale: [1, 1, 1],
+          orientation: SIDE_MOUNTED_WHEEL_ORIENTATION,
+        },
+      },
+      {
+        instanceId: 'high-flag',
+        definitionId: 'catalog:Style_Flag',
+        source: 'catalog_part',
+        transform: {
+          position: [1.9, 1.35, -1.45],
+          rotation: [35, 180, 20],
+          scale: [1, 1, 1],
+          orientation: {
+            right: [0, 0, 1],
+            up: [0, 1, 0],
+            forward: [-1, 0, 0],
+          },
+        },
+      },
+      {
+        instanceId: 'front-plate',
+        definitionId: 'catalog:Armor_Front_Plate',
+        source: 'catalog_part',
+        transform: {
+          position: [0.4, 0.15, 2.7],
+          rotation: [0, 45, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+    ],
+    attachments: [
+      {
+        parentInstanceId: 'core',
+        childInstanceId: 'side-wheel',
+        mountId: 'core_shell',
+        transform: {
+          position: [-1, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        parentInstanceId: 'core',
+        childInstanceId: 'high-flag',
+        mountId: 'core_deck',
+        transform: {
+          position: [0, 1, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        parentInstanceId: 'core',
+        childInstanceId: 'front-plate',
+        mountId: 'core_shell',
+        transform: {
+          position: [0, 0, 1],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+    ],
+    runtime: {
+      healthByInstanceId: {
+        core: 20,
+        'side-wheel': 12,
+        'high-flag': 4,
+        'front-plate': 0,
+      },
+      orientationByInstanceId: {
+        'side-wheel': SIDE_MOUNTED_WHEEL_ORIENTATION,
+      },
+    },
+  },
+  blue: {
+    name: 'Blue machine proof turret sled',
+    rootInstanceId: 'blue-core',
+    parts: [
+      {
+        instanceId: 'blue-core',
+        definitionId: 'system:machine-core:v1',
+        source: 'system_core',
+        immutable: true,
+        transform: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        instanceId: 'blue-omni-left',
+        definitionId: 'catalog:Wheel_Omni',
+        source: 'catalog_part',
+        transform: {
+          position: [-2.35, 0.04, -0.95],
+          rotation: [0, 90, 90],
+          scale: [1, 1, 1],
+          orientation: {
+            right: [0, 0, 1],
+            up: [1, 0, 0],
+            forward: [0, 1, 0],
+          },
+        },
+      },
+      {
+        instanceId: 'blue-turret',
+        definitionId: 'catalog:Weapon_Turret',
+        source: 'catalog_part',
+        transform: {
+          position: [0.65, 1.05, 1.75],
+          rotation: [0, 18, 0],
+          scale: [1, 1, 1],
+          orientation: {
+            right: [1, 0, 0],
+            up: [0, 1, 0],
+            forward: [0, 0, 1],
+          },
+        },
+      },
+      {
+        instanceId: 'blue-sensor-mast',
+        definitionId: 'catalog:Utility_Sensor',
+        source: 'catalog_part',
+        transform: {
+          position: [1.8, 1.4, -1.25],
+          rotation: [0, 315, 8],
+          scale: [1, 1, 1],
+          orientation: {
+            right: [0.707, 0, 0.707],
+            up: [0, 1, 0],
+            forward: [-0.707, 0, 0.707],
+          },
+        },
+      },
+      {
+        instanceId: 'blue-rear-plate',
+        definitionId: 'catalog:Armor_Rear_Panel',
+        source: 'catalog_part',
+        transform: {
+          position: [-0.55, 0.18, -2.55],
+          rotation: [0, 210, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+    ],
+    attachments: [
+      {
+        parentInstanceId: 'blue-core',
+        childInstanceId: 'blue-omni-left',
+        mountId: 'core_shell',
+        transform: {
+          position: [-1, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        parentInstanceId: 'blue-core',
+        childInstanceId: 'blue-turret',
+        mountId: 'core_deck',
+        transform: {
+          position: [0, 1, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        parentInstanceId: 'blue-core',
+        childInstanceId: 'blue-sensor-mast',
+        mountId: 'core_deck',
+        transform: {
+          position: [1, 1, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+      {
+        parentInstanceId: 'blue-core',
+        childInstanceId: 'blue-rear-plate',
+        mountId: 'core_shell',
+        transform: {
+          position: [0, 0, -1],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+          orientation: IDENTITY_ORIENTATION,
+        },
+      },
+    ],
+    runtime: {
+      healthByInstanceId: {
+        'blue-core': 20,
+        'blue-omni-left': 10,
+        'blue-turret': 14,
+        'blue-sensor-mast': 6,
+        'blue-rear-plate': 0,
+      },
+      detachedInstanceIds: ['blue-rear-plate'],
+      orientationByInstanceId: {
+        'blue-turret': {
+          right: [0.966, 0, 0.259],
+          up: [0, 1, 0],
+          forward: [-0.259, 0, 0.966],
+        },
+      },
+    },
+  },
+}
+
+export const machineProofReplay: ReplayTimeline = createReplayTimeline({
+  round: 11,
+  duration: 5.4,
+  summary: 'Machine replay proof keeps asymmetric geometry and visible wreckage.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [-2.2, 0, -0.6],
+      rotation: [0, 74, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [3.6, 0, 1.2],
+      rotation: [0, -112, 0],
+    },
+    {
+      t: 0.8,
+      type: 'move',
+      bot: 'red',
+      from: [-2.2, 0, -0.6],
+      to: [-0.8, 0, -1.8],
+      duration: 1.1,
+      easing: 'ease_in_out',
+      intent: 'strafe',
+      facing: [1, 0, 0],
+    },
+    {
+      t: 1.4,
+      type: 'impact',
+      attacker: 'blue',
+      defender: 'red',
+      damage: 12,
+      position: [-0.6, 0, -1.5],
+    },
+    {
+      t: 1.55,
+      type: 'damage',
+      bot: 'red',
+      amount: 12,
+      remainingHealth: 24,
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      partRemainingHealth: 0,
+      partMaxHealth: 16,
+    },
+    {
+      t: 1.75,
+      type: 'part_detach',
+      bot: 'red',
+      blockId: 'front-plate',
+      partId: 'Armor_Front_Plate',
+      position: [-0.38, 0.42, -0.24],
+      sourcePosition: [3.6, 0, 1.2],
+      impactPosition: [-0.6, 0, -1.5],
+      impulse: [-1.25, 1.08, -0.72],
+      angularImpulse: [0.72, 1.3, -0.58],
+      fractureSeverity: 0.95,
+      damageCause: 'machine_weapon',
     },
   ],
 })

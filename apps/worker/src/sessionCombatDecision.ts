@@ -2,6 +2,7 @@ import {
   type ArenaConfig,
   type ArenaGridCell,
   type ArenaHazardThreat,
+  type ActiveActionSet,
   type CombatBotSnapshot,
   type GeneratedControls,
   type MovementCommand,
@@ -128,7 +129,7 @@ export function buildCombatDecisionBrief(
   const self = role.role === 'red' ? combat.snapshot.red : combat.snapshot.blue
   const opponent = role.role === 'red' ? combat.snapshot.blue : combat.snapshot.red
   const opponentRole = role.role === 'red' ? state.roles.blue : state.roles.red
-  const controls = role.controls ?? { movement: ['brake'] }
+  const controls = controlsForCombatDecision(state.activeActionSets?.[role.role], role.controls)
   const topology = compileArenaTopology(combat.snapshot.arena)
   const range = buildRangeDecision(combat, self, opponent)
   const positioning = buildPositioning(topology, self, opponent)
@@ -198,6 +199,30 @@ function buildPositioning(
     distanceCells: arenaCellDistance(selfCell, opponentCell),
     bearingToOpponent: bearingBetweenCells(selfCell, opponentCell),
     lineOfSight: hasArenaLineOfSight(topology, self.position, opponent.position),
+  }
+}
+
+function controlsForCombatDecision(
+  actionSet: ActiveActionSet | undefined,
+  fallback: GeneratedControls | undefined,
+): GeneratedControls {
+  if (!actionSet) {
+    return fallback ?? { movement: ['brake'] }
+  }
+
+  const commands = Object.values(actionSet.actions)
+    .map((action) => combatActionCommand(action))
+    .filter((command): command is TurnCommand => command !== undefined)
+  const movement = uniqueCommands(commands.flatMap((command) => command.move ? [command.move] : []))
+  const weaponA = uniqueCommands(commands.flatMap((command) => command.weaponA ? [command.weaponA] : []))
+  const weaponB = uniqueCommands(commands.flatMap((command) => command.weaponB ? [command.weaponB] : []))
+  const utility = uniqueCommands(commands.flatMap((command) => command.utility ? [command.utility] : []))
+
+  return {
+    movement: movement.length > 0 ? movement : ['brake'],
+    ...(weaponA.length > 0 ? { weaponA } : {}),
+    ...(weaponB.length > 0 ? { weaponB } : {}),
+    ...(utility.length > 0 ? { utility } : {}),
   }
 }
 
@@ -655,7 +680,7 @@ function addRecommended(commands: MovementCommand[], command: MovementCommand): 
   commands.push(command)
 }
 
-function uniqueCommands(commands: MovementCommand[]): MovementCommand[] {
+function uniqueCommands<T extends string>(commands: T[]): T[] {
   return [...new Set(commands)]
 }
 

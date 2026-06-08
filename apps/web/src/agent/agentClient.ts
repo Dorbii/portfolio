@@ -89,6 +89,7 @@ const GAME_MASTER_ACTION_BODY_KEYS = new Set([
   'actionSetId',
   'decisionVersion',
   'actionId',
+  'parameters',
   'publicMessage',
 ])
 
@@ -228,11 +229,11 @@ function exactGameMasterActionBody(
       status: 400,
       code: 'INVALID_REQUEST',
       message:
-        'submitAction accepts only action, actionSetId, decisionVersion, actionId, and publicMessage.',
+        'submitAction accepts the GameMaster action fields: action, actionSetId, decisionVersion, actionId, parameters, and publicMessage.',
       issues: extraKeys.map((key) => ({
         code: 'UNSUPPORTED_FIELD',
         path: key,
-        message: 'Remove this field and choose an actionId from legalActions instead.',
+        message: 'Remove this field and submit only fields supported by GameMaster action submissions.',
       })),
     })
   }
@@ -242,6 +243,7 @@ function exactGameMasterActionBody(
     actionSetId: input.actionSetId,
     decisionVersion: input.decisionVersion,
     actionId: input.actionId,
+    ...(input.parameters !== undefined ? { parameters: input.parameters } : {}),
     ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
   }
 }

@@ -11,9 +11,11 @@ import type {
   InventoryItem,
   LoadoutBuildState,
   FightDossier,
+  MachineDesign,
   RelayErrorResponse,
   SessionPhase,
   SharedDebrief,
+  StoredDesign,
   PostFightAgentReflection,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
@@ -62,6 +64,7 @@ export type StoredRoleState = {
   losses: number
   winStreak: number
   inventory: InventoryItem[]
+  storedDesign?: StoredDesign
   currentDesign?: BotDesignSnapshot
   loadoutBuildState?: LoadoutBuildState
   loadoutVersion?: number
@@ -88,6 +91,7 @@ export type StoredCombatState = {
   openedAt: string
   deadlineAt: string
   turnSeconds: number
+  baselineMachineDesigns?: Partial<Record<TeamRole, MachineDesign>>
   actions: Record<TeamRole, CanonicalGameAction[]>
   pending: Partial<Record<TeamRole, CanonicalGameAction>>
   snapshot: CombatTurnSnapshot

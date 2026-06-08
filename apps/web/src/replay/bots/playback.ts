@@ -1,4 +1,4 @@
-import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type { TeamRole } from '../../../../../packages/schemas/src/index.js'
@@ -99,6 +99,7 @@ function updateBotPartNodes(
     const state = partStates[metadata.blockId]
     const basePosition = metadata.basePosition
     const baseRotation = metadata.baseRotation
+    const baseRotationQuaternion = metadata.baseRotationQuaternion
     const damageSeverity = partDamageSeverity(state)
 
     node.setEnabled(true)
@@ -112,11 +113,7 @@ function updateBotPartNodes(
       const settleSquash = motion.settled ? 0.94 : 1
 
       node.position.copyFrom(localPosition)
-      node.rotation.set(
-        baseRotation[0] + motion.rotation[0],
-        baseRotation[1] + motion.rotation[1],
-        baseRotation[2] + motion.rotation[2],
-      )
+      applyNodeRotation(node, baseRotation, baseRotationQuaternion, motion.rotation)
       node.scaling.setAll(Math.max(0.02, motion.fade) * settleSquash * (1.02 + freshBreak * 0.16))
       node.setEnabled(motion.fade > 0.025)
 
@@ -128,9 +125,34 @@ function updateBotPartNodes(
       : 0
 
     node.position.set(basePosition[0], basePosition[1] + Math.abs(damageTremor) * 0.35, basePosition[2])
-    node.rotation.set(baseRotation[0], baseRotation[1], baseRotation[2] + damageTremor)
+    applyNodeRotation(node, baseRotation, baseRotationQuaternion, [0, 0, damageTremor])
     node.scaling.setAll(1 + damageSeverity * 0.055)
   })
+}
+
+function applyNodeRotation(
+  node: TransformNode,
+  baseRotation: [number, number, number],
+  baseRotationQuaternion: [number, number, number, number] | undefined,
+  rotationOffset: [number, number, number],
+): void {
+  if (baseRotationQuaternion) {
+    const base = Quaternion.FromArray(baseRotationQuaternion)
+    const offset = Quaternion.RotationYawPitchRoll(
+      rotationOffset[1],
+      rotationOffset[0],
+      rotationOffset[2],
+    )
+
+    node.rotationQuaternion = base.multiply(offset)
+    return
+  }
+
+  node.rotation.set(
+    baseRotation[0] + rotationOffset[0],
+    baseRotation[1] + rotationOffset[1],
+    baseRotation[2] + rotationOffset[2],
+  )
 }
 
 function applyPartMaterialState(

@@ -10,6 +10,7 @@ import type {
   GameMasterNextAction,
   GameMasterPacket,
   InventoryItem,
+  MachineDesign,
   PostFightAgentReflection,
   SessionPhase,
   SharedDebrief,
@@ -265,6 +266,7 @@ export type LegacyReplayPayload = {
   summary: string
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   botBlueprints: Record<TeamRole, BotBlueprint>
+  machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
 }
 
 export type LegacySubmittedCombatCommands = Record<TeamRole, TurnCommand[]>

@@ -1,3 +1,4 @@
+import { MOVEMENT_COMMANDS } from '../../schemas/src/index.js'
 import type {
   ActiveActionSet,
   CanonicalGameAction,
@@ -5,6 +6,9 @@ import type {
   GameMasterActionKind,
   GameMasterLegalAction,
   GeneratedControls,
+  MachineCapabilities,
+  MachineMovementCapability,
+  MachineWeaponCapability,
   MovementCommand,
   TeamRole,
   TurnCommand,
@@ -16,8 +20,10 @@ import {
   describeRange,
   evaluateCombatCommand,
   movementCommandLabel,
+  type CombatWeaponLegalityOptions,
   type CombatLegalityContext,
 } from './combatLegality.js'
+import { machineMovementCommandSupported } from './machineMovement.js'
 
 export const COMBAT_ACTION_SCOPE = 'combat_turn'
 
@@ -41,6 +47,12 @@ export type BuildCombatActionSetInput = {
   expiresAt?: string
   snapshot: CombatTurnSnapshot
   controls?: GeneratedControls
+  machineCapabilities?: MachineCapabilities
+}
+
+type CombatActionCandidate = {
+  command: TurnCommand
+  weaponOptions?: CombatWeaponLegalityOptions
 }
 
 export function buildCombatActionSet(input: BuildCombatActionSetInput): ActiveActionSet {
@@ -64,17 +76,11 @@ export function buildCombatActionSet(input: BuildCombatActionSetInput): ActiveAc
 
 export function buildCombatActions(input: BuildCombatActionSetInput): CanonicalGameAction[] {
   const context = combatContext(input)
-  const controls = input.controls ?? { movement: ['brake'] }
-  const candidates: TurnCommand[] = [
-    holdCommand(input.tick, controls),
-    ...movementCommands(input.tick, controls.movement),
-    ...weaponCommands(input.tick, controls.weaponA, 'weaponA'),
-    ...weaponCommands(input.tick, controls.weaponB, 'weaponB'),
-    ...utilityCommands(input.tick, controls),
-    ...moveAndAttackCommands(input.tick, controls),
-  ]
+  const candidates = input.machineCapabilities
+    ? machineCapabilityCandidates(input.tick, input.role, input.machineCapabilities)
+    : generatedControlCandidates(input.tick, input.controls ?? { movement: ['brake'] })
   const actions = candidates
-    .map((command) => combatActionFromCommand(input, context, command))
+    .map((candidate) => combatActionFromCandidate(input, context, candidate))
     .filter((action): action is CanonicalGameAction => action !== undefined)
 
   return dedupeActions(actions)
@@ -106,12 +112,13 @@ export function combatActionCommand(action: CanonicalGameAction): TurnCommand | 
   return command ? { ...command } : undefined
 }
 
-function combatActionFromCommand(
+function combatActionFromCandidate(
   input: BuildCombatActionSetInput,
   context: CombatLegalityContext,
-  command: TurnCommand,
+  candidate: CombatActionCandidate,
 ): CanonicalGameAction | undefined {
-  const legality = evaluateCombatCommand(context, command)
+  const command = candidate.command
+  const legality = evaluateCombatCommand(context, command, candidate.weaponOptions)
 
   if (!legality.ok) {
     return undefined
@@ -154,13 +161,47 @@ function combatContext(input: BuildCombatActionSetInput): CombatLegalityContext 
   }
 }
 
-function holdCommand(tick: number, controls: GeneratedControls): TurnCommand {
+function generatedControlCandidates(tick: number, controls: GeneratedControls): CombatActionCandidate[] {
+  return [
+    commandCandidate(holdCommand(tick, controls)),
+    ...movementCommands(tick, controls.movement).map(commandCandidate),
+    ...weaponCommands(tick, controls.weaponA, 'weaponA').map(commandCandidate),
+    ...weaponCommands(tick, controls.weaponB, 'weaponB').map(commandCandidate),
+    ...utilityCommands(tick, controls).map(commandCandidate),
+    ...moveAndAttackCommands(tick, controls).map(commandCandidate),
+  ]
+}
+
+function machineCapabilityCandidates(
+  tick: number,
+  role: TeamRole,
+  capabilities: MachineCapabilities,
+): CombatActionCandidate[] {
+  const movement = machineMovementCommands(role, capabilities.movement)
+  const weaponSlots = capabilities.weapons.slice(0, 2).map((weapon, index) => ({
+    slot: index === 0 ? 'weaponA' as const : 'weaponB' as const,
+    weapon,
+  }))
+
+  return [
+    commandCandidate(holdCommand(tick)),
+    ...movement.map((move) => commandCandidate({ tick, move })),
+    ...weaponSlots.flatMap(({ slot, weapon }) => machineWeaponCommands(tick, movement, slot, weapon)),
+    ...machineUtilityCommands(tick, capabilities),
+  ]
+}
+
+function commandCandidate(command: TurnCommand): CombatActionCandidate {
+  return { command }
+}
+
+function holdCommand(tick: number, controls?: GeneratedControls): TurnCommand {
   return {
     tick,
-    move: controls.movement.includes('brake') ? 'brake' : undefined,
-    ...(controls.weaponA?.includes('hold') ? { weaponA: 'hold' as const } : {}),
-    ...(controls.weaponB?.includes('hold') ? { weaponB: 'hold' as const } : {}),
-    ...(controls.utility?.includes('hold') ? { utility: 'hold' as const } : {}),
+    move: controls?.movement.includes('brake') === false ? undefined : 'brake',
+    ...(controls?.weaponA?.includes('hold') ? { weaponA: 'hold' as const } : {}),
+    ...(controls?.weaponB?.includes('hold') ? { weaponB: 'hold' as const } : {}),
+    ...(controls?.utility?.includes('hold') ? { utility: 'hold' as const } : {}),
   }
 }
 
@@ -197,6 +238,50 @@ function moveAndAttackCommands(tick: number, controls: GeneratedControls): TurnC
     .filter((move) => move !== 'brake')
     .map((move) => ({ tick, move, [firstWeapon]: 'fire' }))
 }
+
+function machineMovementCommands(
+  role: TeamRole,
+  capabilities: readonly MachineMovementCapability[],
+): MovementCommand[] {
+  if (capabilities.length === 0) {
+    return []
+  }
+
+  return MOVEMENT_COMMANDS.filter((command) =>
+    command !== 'brake' &&
+    capabilities.some((capability) => machineMovementCommandSupported(role, capability, command)),
+  )
+}
+
+function machineWeaponCommands(
+  tick: number,
+  movement: readonly MovementCommand[],
+  slot: 'weaponA' | 'weaponB',
+  weapon: MachineWeaponCapability,
+): CombatActionCandidate[] {
+  const weaponOptions = {
+    weaponRange: weapon.range,
+    emitterAxis: weapon.emitterAxis,
+  }
+
+  return [
+    { command: { tick, [slot]: 'fire' }, weaponOptions },
+    ...movement.map((move) => ({
+      command: { tick, move, [slot]: 'fire' },
+      weaponOptions,
+    })),
+  ]
+}
+
+function machineUtilityCommands(
+  tick: number,
+  capabilities: MachineCapabilities,
+): CombatActionCandidate[] {
+  return capabilities.utility.length > 0
+    ? [commandCandidate({ tick, utility: 'activate' })]
+    : []
+}
+
 
 function actionKindForCommand(command: TurnCommand): GameMasterActionKind {
   if (command.move && command.move !== 'brake' && commandHasOffense(command)) {

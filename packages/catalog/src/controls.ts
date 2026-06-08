@@ -5,6 +5,8 @@ import type {
 } from '../../schemas/src/index.js'
 import { PART_CATALOG } from './parts.js'
 
+// Legacy BotBlueprint controls projection retained for legacy combat/UI paths.
+// Machine:v1 combat must use deriveMachineCapabilities instead.
 export function deriveControls(
   blueprint: BotBlueprint,
   catalog: PartDefinition[] = PART_CATALOG,

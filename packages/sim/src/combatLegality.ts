@@ -6,6 +6,7 @@ import type {
   MovementCommand,
   TeamRole,
   TurnCommand,
+  Vector3,
 } from '../../schemas/src/index.js'
 import {
   gridDistance,
@@ -27,9 +28,15 @@ export type CombatActionLegality = {
   movement: TacticalMovementPlan
 }
 
+export type CombatWeaponLegalityOptions = {
+  weaponRange?: number
+  emitterAxis?: Vector3
+}
+
 export function evaluateCombatCommand(
   context: CombatLegalityContext,
   command: TurnCommand,
+  weaponOptions: CombatWeaponLegalityOptions = {},
 ): CombatActionLegality {
   const movement = tacticalMovementPlan({
     arena: context.arena,
@@ -49,7 +56,14 @@ export function evaluateCombatCommand(
   if (firesWeapon(command) && !movement.lineOfSightToOpponent) {
     reasons.push('Target is not in line of sight from final anchor cell.')
   }
-  if (firesWeapon(command) && movement.rangeToOpponent > Math.ceil(context.self.weaponReach)) {
+  if (
+    firesWeapon(command) &&
+    weaponOptions.emitterAxis &&
+    !emitterAxisTargetsOpponent(context, movement.to, weaponOptions.emitterAxis)
+  ) {
+    reasons.push('Weapon emitter axis cannot bear on the opponent from final anchor cell.')
+  }
+  if (firesWeapon(command) && movement.rangeToOpponent > Math.ceil(weaponOptions.weaponRange ?? context.self.weaponReach)) {
     reasons.push('Target is out of weapon range from final anchor cell.')
   }
 
@@ -156,6 +170,52 @@ export function describeRange(context: CombatLegalityContext, finalAnchor: GridC
 
 function firesWeapon(command: TurnCommand): boolean {
   return command.weaponA === 'fire' || command.weaponB === 'fire'
+}
+
+function emitterAxisTargetsOpponent(
+  context: CombatLegalityContext,
+  finalAnchor: GridCoord,
+  emitterAxis: Vector3,
+): boolean {
+  const opponent = tacticalMovementPlan({
+    arena: context.arena,
+    role: opponentRole(context.role),
+    from: context.opponent.position,
+    opponent: context.self.position,
+    command: 'brake',
+  }).from
+  const target = normalizePlanarVector({
+    x: opponent.x - finalAnchor.x,
+    z: opponent.z - finalAnchor.z,
+  })
+
+  if (!target) {
+    return true
+  }
+
+  const emitter = normalizePlanarVector({
+    x: emitterAxis[0],
+    z: emitterAxis[2],
+  })
+
+  if (!emitter) {
+    return false
+  }
+
+  return emitter.x * target.x + emitter.z * target.z >= 0.65
+}
+
+function normalizePlanarVector(vector: GridCoord): GridCoord | undefined {
+  const length = Math.hypot(vector.x, vector.z)
+
+  if (length === 0) {
+    return undefined
+  }
+
+  return {
+    x: vector.x / length,
+    z: vector.z / length,
+  }
 }
 
 function opponentRole(role: TeamRole): TeamRole {

@@ -26,7 +26,7 @@ function distance(left: Vector3, right: Vector3): number {
   )
 }
 
-function isConnectedGrid(blueprint: BotBlueprint): boolean {
+function isLegacyBlueprintGridConnected(blueprint: BotBlueprint): boolean {
   if (blueprint.blocks.length <= 1) {
     return true
   }
@@ -132,7 +132,7 @@ export function validateBlueprintAssembly(
     }
   }
 
-  if (!isConnectedGrid(blueprint)) {
+  if (!isLegacyBlueprintGridConnected(blueprint)) {
     issues.push(
       issue(
         'DISCONNECTED_BLUEPRINT',

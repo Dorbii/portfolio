@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import {
@@ -25,6 +26,10 @@ import {
   createReplayTimeline,
   validateReplayTimeline,
 } from '../.test-build/packages/replay/src/index.js'
+import {
+  MACHINE_REPLAY_VISUAL_AUTHORITY,
+  projectMachineDesignToReplayRenderParts,
+} from '../.test-build/apps/web/src/replay/bots/geometry.js'
 
 const timeline = createReplayTimeline({
   round: 2,
@@ -415,6 +420,105 @@ test('replay mapping is deterministic for the same timeline and time', () => {
   const second = buildReplayFrame(timeline, 3.2)
 
   assert.deepEqual(first, second)
+})
+
+test('machine replay projection preserves machine placement and orientation authority', () => {
+  const sideWheelOrientation = {
+    right: [0, 0, -1],
+    up: [1, 0, 0],
+    forward: [0, 1, 0],
+  }
+  const runtimeWheelOrientation = {
+    right: [0, 0, 1],
+    up: [-1, 0, 0],
+    forward: [0, 1, 0],
+  }
+  const machine = {
+    name: 'weird asymmetric replay machine',
+    rootInstanceId: 'core',
+    parts: [
+      {
+        instanceId: 'core',
+        definitionId: 'system:machine-core:v1',
+        source: 'system_core',
+        immutable: true,
+        transform: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          orientation: {
+            right: [1, 0, 0],
+            up: [0, 1, 0],
+            forward: [0, 0, 1],
+          },
+        },
+      },
+      {
+        instanceId: 'side-wheel',
+        definitionId: 'catalog:Wheel_Large',
+        source: 'catalog_part',
+        transform: {
+          position: [-3.25, 0.1, 1.75],
+          rotation: [0, 270, 90],
+          orientation: sideWheelOrientation,
+        },
+      },
+      {
+        instanceId: 'front-plate',
+        definitionId: 'catalog:Armor_Front_Plate',
+        source: 'catalog_part',
+        transform: {
+          position: [0.5, 0.2, 3.4],
+          rotation: [89, 181, 44],
+        },
+      },
+    ],
+    attachments: [],
+    runtime: {
+      healthByInstanceId: {
+        core: 20,
+        'side-wheel': 7,
+        'front-plate': 0,
+      },
+      detachedInstanceIds: ['front-plate'],
+      orientationByInstanceId: {
+        'side-wheel': runtimeWheelOrientation,
+      },
+    },
+  }
+
+  const parts = projectMachineDesignToReplayRenderParts(machine)
+  const core = parts.find((part) => part.instanceId === 'core')
+  const wheel = parts.find((part) => part.instanceId === 'side-wheel')
+  const plate = parts.find((part) => part.instanceId === 'front-plate')
+
+  assert.equal(MACHINE_REPLAY_VISUAL_AUTHORITY, 'machine:v1')
+  assert.ok(core)
+  assert.equal(core.partId, 'system:machine-core:v1')
+  assert.equal(core.source, 'system_core')
+  assert.ok(wheel)
+  assert.equal(wheel.partId, 'Wheel_Large')
+  assert.deepEqual(wheel.position, [-3.25, 0.1, 1.75])
+  assert.deepEqual(wheel.orientation, runtimeWheelOrientation)
+  assert.equal(wheel.health, 7)
+  assert.ok(plate)
+  assert.deepEqual(plate.orientation, {
+    right: [1, 0, 0],
+    up: [0, 1, 0],
+    forward: [0, 0, 1],
+  })
+  assert.equal(plate.detached, true)
+})
+
+test('machine replay node path is quarantined from legacy foundation shells', () => {
+  const source = readFileSync('apps/web/src/replay/parts/index.ts', 'utf8')
+  const machineStart = source.indexOf('export function createMachineReplayBotNode')
+  const machineEnd = source.indexOf('export function createCatalogPartNode')
+  const machineNodeSource = source.slice(machineStart, machineEnd)
+
+  assert.ok(machineStart >= 0)
+  assert.ok(machineEnd > machineStart)
+  assert.equal(machineNodeSource.includes('createBotFoundation'), false)
+  assert.equal(source.includes('createLegacyReplayBotBlueprintAdapterNode'), true)
 })
 
 test('compiled replay timeline preserves existing frame output', () => {

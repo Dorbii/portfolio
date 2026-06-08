@@ -117,8 +117,6 @@ export async function handleWorkerRequest(
 export class AgentArenaSession {
   private readonly state: DurableObjectState
 
-  private readonly env: WorkerEnv
-
   private readonly sessionRoutes: Record<string, SessionRouteSpec> = {
     claim: {
       method: 'POST',
@@ -169,9 +167,8 @@ export class AgentArenaSession {
     },
   }
 
-  constructor(state: DurableObjectState, env: WorkerEnv = {}) {
+  constructor(state: DurableObjectState) {
     this.state = state
-    this.env = env
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -486,25 +483,6 @@ export class AgentArenaSession {
     }
 
     return { ok: true, body }
-  }
-
-  private async createContinuationSession(
-    request: Request,
-    createRequest: InternalCreateSessionRequest,
-  ): Promise<Response> {
-    const url = new URL(request.url)
-
-    url.pathname = `/sessions/${encodeURIComponent(createRequest.sessionId ?? '')}/create`
-
-    return forwardToSessionObject(
-      new Request(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(createRequest),
-      }),
-      this.env,
-      createRequest.sessionId ?? '',
-    )
   }
 
   private async sessionResultResponse<T>(

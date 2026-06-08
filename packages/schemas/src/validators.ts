@@ -11,8 +11,10 @@ export {
 } from './validators/blueprint.js'
 export {
   asGameMasterActionSubmission,
+  validateGameMasterActionParameters,
   validateGameMasterActionSubmissionShape,
 } from './validators/gameMasterAction.js'
+export type { NormalizedGameMasterActionParameters } from './validators/gameMasterAction.js'
 export { validateBotTacticsShape } from './validators/tactics.js'
 export { validateAgentChatMessageRequestShape } from './validators/chat.js'
 export {

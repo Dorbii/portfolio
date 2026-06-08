@@ -22,6 +22,7 @@ import {
   compareDamageTargets,
   createBotRuntimeIndex,
   deriveBotStats,
+  deriveMachineCapabilities,
   damageCategoryPriorityFor,
   findFirstAliveBehaviorPart,
   getAliveBehaviorParts,
@@ -33,25 +34,37 @@ import {
   buildLoadoutActionSet,
   buildCombatActionSet,
   buildFightDossier,
-  botDesignSnapshotToBlueprint,
+  botDesignSnapshotToLegacyBotBlueprintProjection,
   combatActionCommand,
   combatLegalActionForPacket,
   buildSharedDebrief,
+  createInitialMachineDesign,
   createInitialLoadoutBuildState,
+  LOADOUT_PART_LIMIT,
+  loadoutBuildStateLegacyDesign,
   loadoutLegalActionForPacket,
+  machineDesignToLegacyBotBlueprintProjection,
+  machineDesignToLegacyBotDesignSnapshotProjection,
   pathHazards,
   RARE_SIGNATURE_STORE_MAX_COST,
   resolveCombat,
+  resolveMountPose,
   resolveSubmittedCombat,
   resolveSubmittedGameActions,
   stablePartOrder,
-  validateMinimumViableLoadout,
+  SYSTEM_MACHINE_CORE_DEFINITION,
+  validateLegacyMinimumViableLoadout,
+  validateMachinePhysicalLegality,
+  validateMachineTree,
+  validateMountPoseInput,
   worldToArenaCell,
 } from '../.test-build/packages/sim/src/index.js'
 import {
   SessionCoordinator,
   calculateInterest,
 } from '../.test-build/apps/worker/src/session.js'
+import { createInitialSessionState } from '../.test-build/apps/worker/src/sessionCreation.js'
+import { resetStoredRoleClaim } from '../.test-build/apps/worker/src/sessionRoleReset.js'
 import { DEFAULT_STARTING_GOLD } from '../.test-build/apps/worker/src/sessionSupport.js'
 
 const bareBodyBlueprint = {
@@ -585,6 +598,40 @@ function hasCombatAction(actionSet, predicate) {
   })
 }
 
+function buildMachineCapabilityCombatActionSet({
+  role = 'red',
+  machine,
+  arena = tacticalOpenArena,
+  redPosition = [-1, 0, 0],
+  bluePosition = [1, 0, 0],
+  tick = 1,
+}) {
+  return buildCombatActionSet({
+    role,
+    round: 1,
+    tick,
+    decisionVersion: role === 'red' ? 21 : 22,
+    actionSetId: `${role}:machine:r1:turn_${tick}`,
+    createdAt: '2026-06-07T00:00:00.000Z',
+    catalogVersion: 'part-catalog:v1',
+    arenaVersion: 'arena:v1:test',
+    snapshot: combatSnapshot(arena, redPosition, bluePosition, { tick }),
+    machineCapabilities: deriveMachineCapabilities(machine),
+  })
+}
+
+function combatCommands(actionSet) {
+  return Object.values(actionSet.actions)
+    .map((action) => combatActionCommand(action))
+    .filter(Boolean)
+}
+
+function combatMoves(actionSet) {
+  return combatCommands(actionSet)
+    .map((command) => command.move)
+    .filter(Boolean)
+}
+
 function canonicalCombatAction(role, tick, command, suffix = '') {
   const kind = command.move && command.move !== 'brake'
     ? command.weaponA === 'fire' || command.weaponB === 'fire'
@@ -651,13 +698,16 @@ function findLegalAction(packet, predicate) {
   return action
 }
 
-async function submitPacketAction(session, token, packet, action) {
+async function submitPacketAction(session, token, packet, action, parameters) {
   const submitted = await session.submitGameMasterAction(
     token,
-    actionSubmissionFromPacket(packet, action.id),
+    {
+      ...actionSubmissionFromPacket(packet, action.id),
+      ...(parameters ? { parameters } : {}),
+    },
   )
 
-  assert.equal(submitted.ok, true)
+  assert.equal(submitted.ok, true, submitted.ok ? undefined : JSON.stringify(submitted.error))
 
   return submitted
 }
@@ -679,20 +729,51 @@ async function placePartFromCatalog(session, token, packet, partId) {
     session,
     token,
     submitted.value.packet,
-    findLegalAction(submitted.value.packet, (action) => action.kind === 'choose_mount'),
+    findLegalAction(submitted.value.packet, (action) => action.kind === 'propose_mount_pose'),
+    defaultMountPoseParameters(
+      findLegalAction(submitted.value.packet, (action) => action.kind === 'propose_mount_pose'),
+    ),
   )
 
-  return submitPacketAction(
-    session,
-    token,
-    submitted.value.packet,
-    findLegalAction(submitted.value.packet, (action) => action.kind === 'choose_rotation'),
-  )
+  return submitted
+}
+
+function defaultMountPoseParameters(action, overrides = {}) {
+  assert.equal(action.kind, 'propose_mount_pose')
+  assert.ok(action.parameterExamples?.length > 0)
+
+  return {
+    ...action.parameterExamples[0],
+    ...overrides,
+  }
 }
 
 function createBuilderHarness(gold = 200, catalog = PART_CATALOG) {
   return {
     buildState: createInitialLoadoutBuildState('red'),
+    catalog,
+    decisionVersion: 1,
+    gold,
+    inventory: [],
+  }
+}
+
+function createLegacyBuilderHarness(gold = 200, catalog = PART_CATALOG) {
+  const legacyDraft = {
+    name: 'red legacy loadout',
+    parts: [],
+  }
+
+  return {
+    buildState: {
+      step: 'choose_part',
+      catalogVersion: 'part-catalog:v1',
+      currentDesign: {
+        version: 'legacy-bot-design:v1',
+        design: legacyDraft,
+      },
+      legacyDraft,
+    },
     catalog,
     decisionVersion: 1,
     gold,
@@ -717,6 +798,1510 @@ function builderActions(harness) {
 
   return Object.values(actionSet.actions)
 }
+
+function machineTransform(overrides = {}) {
+  return {
+    position: overrides.position ?? [0, 0, 0],
+    rotation: overrides.rotation ?? [0, 0, 0],
+    scale: overrides.scale ?? [1, 1, 1],
+    ...(overrides.orientation ? { orientation: overrides.orientation } : {}),
+  }
+}
+
+function machineBasis(overrides = {}) {
+  return {
+    right: overrides.right ?? [1, 0, 0],
+    up: overrides.up ?? [0, 1, 0],
+    forward: overrides.forward ?? [0, 0, 1],
+  }
+}
+
+function machinePart(instanceId, overrides = {}) {
+  return {
+    instanceId,
+    definitionId: overrides.definitionId ?? `catalog:${instanceId}`,
+    source: overrides.source ?? 'catalog_part',
+    transform: overrides.transform ?? machineTransform(),
+    ...(overrides.immutable !== undefined ? { immutable: overrides.immutable } : {}),
+  }
+}
+
+function machineAttachment(parentInstanceId, childInstanceId, overrides = {}) {
+  return {
+    parentInstanceId,
+    childInstanceId,
+    ...(overrides.mountId ? { mountId: overrides.mountId } : {}),
+    transform: overrides.transform ?? machineTransform(),
+  }
+}
+
+function machineWithLaser(role, instanceId, orientation) {
+  const initial = createInitialMachineDesign(role)
+
+  return {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart(instanceId, {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', instanceId, { mountId: 'core_shell' }),
+    ],
+  }
+}
+
+function machineWithCatalogPart(role, instanceId, definitionId, orientation = machineBasis()) {
+  const initial = createInitialMachineDesign(role)
+
+  return {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart(instanceId, {
+        definitionId,
+        transform: machineTransform({ orientation }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', instanceId, { mountId: 'core_shell' }),
+    ],
+  }
+}
+
+function machineWithRuntime(machine, runtime) {
+  return {
+    ...machine,
+    runtime,
+  }
+}
+
+function machineCombatInput({
+  redMachine,
+  blueMachine = createInitialMachineDesign('blue'),
+  seed,
+  arena = tacticalRuntimeArena,
+}) {
+  return {
+    round: 1,
+    seed,
+    arena,
+    red: {
+      blueprint: machineDesignToLegacyBotBlueprintProjection(redMachine),
+      machineDesign: redMachine,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    blue: {
+      blueprint: machineDesignToLegacyBotBlueprintProjection(blueMachine),
+      machineDesign: blueMachine,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+  }
+}
+
+function machineIssueCodes(design) {
+  return validateMachineTree(design).map((issue) => issue.code)
+}
+
+function machinePhysicalIssueCodes(design, catalog = PART_CATALOG) {
+  return validateMachinePhysicalLegality(design, catalog).map((issue) => issue.code)
+}
+
+function machineBuildState(machine) {
+  return {
+    ...createInitialLoadoutBuildState('red'),
+    currentDesign: {
+      version: 'machine:v1',
+      machine,
+    },
+  }
+}
+
+function forgedConfirmLoadoutAction() {
+  return {
+    id: 'forged.confirm_loadout',
+    kind: 'confirm_loadout',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'confirm_loadout',
+      label: 'Confirm loadout',
+      summary: 'Forged confirm loadout',
+    },
+  }
+}
+
+function assertMachineCanConfirm(machine, catalog = PART_CATALOG) {
+  const buildState = machineBuildState(machine)
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 501,
+    actionSetId: 'red:r1:loadout:machine-confirm:v501',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 1000,
+    buildState,
+    catalog,
+  })
+  const confirmAction = Object.values(actionSet.actions)
+    .find((action) => action.kind === 'confirm_loadout')
+
+  assert.notEqual(confirmAction, undefined)
+
+  const confirmed = applyLoadoutAction({
+    role: 'red',
+    gold: 1000,
+    inventory: [],
+    buildState,
+    action: confirmAction,
+    catalog,
+  })
+
+  assert.equal(confirmed.ok, true, confirmed.ok ? '' : JSON.stringify(confirmed.issues))
+  assert.equal(confirmed.confirmed, true)
+
+  return confirmed
+}
+
+test('initial machine design starts with exactly one free immutable system core', () => {
+  const design = createInitialMachineDesign('red')
+  const core = design.parts[0]
+
+  assert.equal(design.rootInstanceId, 'core')
+  assert.equal(design.parts.length, 1)
+  assert.equal(core.instanceId, 'core')
+  assert.equal(core.definitionId, SYSTEM_MACHINE_CORE_DEFINITION.id)
+  assert.equal(core.definitionId.startsWith('Body_'), false)
+  assert.equal(core.source, 'system_core')
+  assert.equal(core.immutable, true)
+  assert.equal(SYSTEM_MACHINE_CORE_DEFINITION.cost, 0)
+  assert.equal(SYSTEM_MACHINE_CORE_DEFINITION.systemOwned, true)
+  assert.equal(SYSTEM_MACHINE_CORE_DEFINITION.inventoryItem, false)
+  assert.equal(SYSTEM_MACHINE_CORE_DEFINITION.catalogPart, false)
+  assert.equal(validateMachineTree(design).length, 0)
+})
+
+test('mount surfaces are catalog and system-core data without sphere mount-kind vocabulary', () => {
+  const coreShell = SYSTEM_MACHINE_CORE_DEFINITION.mountSurfaces.find((surface) => surface.id === 'core_shell')
+  const coreDeck = SYSTEM_MACHINE_CORE_DEFINITION.mountSurfaces.find((surface) => surface.id === 'core_deck')
+  const lightFrame = PART_CATALOG.find((part) => part.id === 'Body_Light_Frame')
+  const cylinder = PART_CATALOG.find((part) => part.id === 'Body_Cylinder_Large')
+  const wheel = PART_CATALOG.find((part) => part.id === 'Wheel_Omni')
+
+  assertCompleteMountSurface(coreShell, 'system_core.core_shell')
+  assertCompleteMountSurface(coreDeck, 'system_core.core_deck')
+  assert.equal(coreShell.kind, 'sphere')
+  assert.equal(coreDeck.kind, 'panel')
+  assert.ok(coreShell.accepts.includes('weapon'))
+  assert.ok(coreDeck.accepts.includes('utility'))
+  assert.ok(lightFrame?.mountSurfaces.some((surface) => surface.kind === 'panel' && surface.accepts.includes('weapon')))
+  assert.ok(cylinder?.mountSurfaces.some((surface) => surface.kind === 'sphere' && surface.accepts.includes('mobility')))
+  assert.ok(wheel?.mountSurfaces.some((surface) => surface.kind === 'panel' && surface.accepts.includes('defense')))
+  assert.equal(PART_CATALOG.flatMap((part) => part.mounts).some((mount) => mount.kind === 'sphere'), false)
+})
+
+test('resolveMountPose maps sphere and panel uv coordinates deterministically', () => {
+  const sphereSurface = {
+    id: 'test_shell',
+    kind: 'sphere',
+    accepts: ['weapon', 'utility'],
+    center: [0, 0, 0],
+    radius: 2,
+  }
+  const panelSurface = {
+    id: 'test_panel',
+    kind: 'panel',
+    accepts: ['utility'],
+    center: [10, 2, 20],
+    size: [4, 6],
+    normal: [0, 1, 0],
+    uAxis: [1, 0, 0],
+    vAxis: [0, 0, 1],
+  }
+
+  assertVectorClose(
+    resolveMountPose({ surface: sphereSurface, partCategory: 'weapon', u: 0, v: 0.5 }).surfaceNormal,
+    [0, 0, 1],
+    'sphere forward normal',
+  )
+  assertVectorClose(
+    resolveMountPose({ surface: sphereSurface, partCategory: 'weapon', u: 0.25, v: 0.5 }).surfaceNormal,
+    [1, 0, 0],
+    'sphere right normal',
+  )
+  assertVectorClose(
+    resolveMountPose({ surface: sphereSurface, partCategory: 'weapon', u: 0.75, v: 1 }).surfaceNormal,
+    [0, 1, 0],
+    'sphere top normal',
+  )
+  assertVectorClose(
+    resolveMountPose({ surface: sphereSurface, partCategory: 'weapon', u: 0, v: 0.5 }).position,
+    [0, 0, 2],
+    'sphere position',
+  )
+  assertVectorClose(
+    resolveMountPose({ surface: panelSurface, partCategory: 'utility', u: 0, v: 1 }).position,
+    [8, 2, 23],
+    'panel corner position',
+  )
+})
+
+test('resolveMountPose canonicalizes accepted params and applies yaw and roll', () => {
+  const panelSurface = {
+    id: 'orientation_panel',
+    kind: 'panel',
+    accepts: ['weapon'],
+    center: [0, 0, 0],
+    size: [2, 2],
+    normal: [0, 1, 0],
+    uAxis: [1, 0, 0],
+    vAxis: [0, 0, 1],
+  }
+  const base = resolveMountPose({ surface: panelSurface, partCategory: 'weapon', u: 0.5, v: 0.5 })
+  const yawed = resolveMountPose({
+    surface: panelSurface,
+    partCategory: 'weapon',
+    u: 0.5,
+    v: 0.5,
+    yawDegrees: 90,
+  })
+  const rolled = resolveMountPose({
+    surface: panelSurface,
+    partCategory: 'weapon',
+    u: 0.5,
+    v: 0.5,
+    yawDegrees: 450,
+    rollDegrees: -90,
+  })
+  const rolledAgain = resolveMountPose({
+    surface: panelSurface,
+    partCategory: 'weapon',
+    u: 0.5,
+    v: 0.5,
+    yawDegrees: 450,
+    rollDegrees: -90,
+  })
+
+  assert.deepEqual(rolled, rolledAgain)
+  assert.deepEqual(rolled.parameters, {
+    u: 0.5,
+    v: 0.5,
+    yawDegrees: 90,
+    rollDegrees: 270,
+  })
+  assertVectorClose(base.orientation.right, [1, 0, 0], 'base right')
+  assertVectorClose(base.orientation.forward, [0, 0, 1], 'base forward')
+  assertVectorClose(yawed.orientation.right, [0, 0, -1], 'yawed right')
+  assertVectorClose(yawed.orientation.forward, [1, 0, 0], 'yawed forward')
+  assert.notDeepEqual(yawed.orientation.up, rolled.orientation.up)
+})
+
+test('validateMountPoseInput rejects invalid params, bounds, and category mismatch', () => {
+  const panelSurface = {
+    id: 'validation_panel',
+    kind: 'panel',
+    accepts: ['utility'],
+    center: [0, 0, 0],
+    size: [2, 2],
+    normal: [0, 1, 0],
+    uAxis: [1, 0, 0],
+    vAxis: [0, 0, 1],
+  }
+  const sphereSurface = {
+    id: 'wrapping_shell',
+    kind: 'sphere',
+    accepts: ['weapon'],
+    center: [0, 0, 0],
+    radius: 1,
+  }
+  const nanResult = validateMountPoseInput({ surface: panelSurface, partCategory: 'utility', u: Number.NaN, v: 0.5 })
+  const infinityResult = validateMountPoseInput({ surface: panelSurface, partCategory: 'utility', u: 0.5, v: Infinity })
+  const boundsResult = validateMountPoseInput({ surface: panelSurface, partCategory: 'utility', u: -0.1, v: 1.1 })
+  const categoryResult = validateMountPoseInput({ surface: panelSurface, partCategory: 'weapon', u: 0.5, v: 0.5 })
+  const wrapped = resolveMountPose({
+    surface: sphereSurface,
+    partCategory: 'weapon',
+    u: 1,
+    v: 0.5,
+    yawDegrees: 450,
+  })
+
+  assert.equal(nanResult.ok, false)
+  assert.equal(infinityResult.ok, false)
+  assert.equal(boundsResult.ok, false)
+  assert.equal(categoryResult.ok, false)
+  assert.ok(nanResult.issues.some((issue) => issue.code === 'INVALID_MOUNT_PARAMETER'))
+  assert.ok(infinityResult.issues.some((issue) => issue.code === 'INVALID_MOUNT_PARAMETER'))
+  assert.ok(boundsResult.issues.some((issue) => issue.code === 'MOUNT_PARAMETER_OUT_OF_BOUNDS'))
+  assert.ok(categoryResult.issues.some((issue) => issue.code === 'MOUNT_SURFACE_CATEGORY_REJECTED'))
+  assert.throws(
+    () => resolveMountPose({ surface: panelSurface, partCategory: 'utility', u: 0.5, v: Number.POSITIVE_INFINITY }),
+    /INVALID_MOUNT_PARAMETER/,
+  )
+  assert.deepEqual(wrapped.parameters, {
+    u: 0,
+    v: 0.5,
+    yawDegrees: 90,
+    rollDegrees: 0,
+  })
+})
+
+test('initial loadout build state uses MachineDesign authority with a free system core', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+
+  assert.equal(buildState.currentDesign.version, 'machine:v1')
+  assert.equal(buildState.currentDesign.machine.rootInstanceId, 'core')
+  assert.equal(buildState.currentDesign.machine.parts.length, 1)
+  assert.equal(buildState.currentDesign.machine.parts[0].instanceId, 'core')
+  assert.equal(buildState.currentDesign.machine.parts[0].definitionId.startsWith('Body_'), false)
+  assert.equal(buildState.currentDesign.machine.parts[0].source, 'system_core')
+  assert.equal(buildState.currentDesign.machine.parts[0].immutable, true)
+  assert.equal(buildState.legacyDraft.parts.length, 0)
+  assert.deepEqual(validateMachineTree(buildState.currentDesign.machine), [])
+})
+
+test('machine tree validator enforces core and attachment invariants', () => {
+  const initial = createInitialMachineDesign('red')
+  const core = initial.parts[0]
+  const validTree = {
+    ...initial,
+    parts: [core, machinePart('A'), machinePart('B')],
+    attachments: [
+      machineAttachment('core', 'A'),
+      machineAttachment('A', 'B'),
+    ],
+  }
+
+  assert.deepEqual(validateMachineTree(validTree), [])
+  assert.ok(machineIssueCodes({ ...validTree, parts: validTree.parts.slice(1), attachments: [] }).includes('MISSING_CORE'))
+  assert.ok(machineIssueCodes({
+    ...initial,
+    parts: [core, { ...core, transform: machineTransform() }],
+  }).includes('DUPLICATE_CORE'))
+  assert.ok(machineIssueCodes({
+    ...initial,
+    parts: [{ ...core, transform: { ...machineTransform(), position: [1, 0, 0] } }],
+  }).includes('CORE_MOVED'))
+  assert.ok(machineIssueCodes({
+    ...initial,
+    parts: [core, machinePart('A')],
+    attachments: [],
+  }).includes('DISCONNECTED_PART'))
+  assert.ok(machineIssueCodes({
+    ...initial,
+    parts: [core, machinePart('A'), machinePart('B')],
+    attachments: [
+      machineAttachment('A', 'B'),
+      machineAttachment('B', 'A'),
+    ],
+  }).includes('MACHINE_TREE_CYCLE'))
+})
+
+test('machine physical legality permits bare core, noncombat parts, and free orientation', () => {
+  const initial = createInitialMachineDesign('red')
+  const core = initial.parts[0]
+  const styleOnly = {
+    ...initial,
+    parts: [
+      core,
+      machinePart('flag', {
+        definitionId: 'catalog:Style_Flag',
+        transform: machineTransform({ position: [3, 0, 0] }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'flag', { mountId: 'core_deck' }),
+    ],
+  }
+  const orientedMachine = {
+    ...initial,
+    parts: [
+      core,
+      machinePart('backward_weapon', {
+        definitionId: 'catalog:Weapon_Spear',
+        transform: machineTransform({ position: [3, 0, 0], rotation: [0, 180, 0] }),
+      }),
+      machinePart('sideways_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({ position: [-3, 0, 0], rotation: [0, 90, 90] }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'backward_weapon', { mountId: 'core_shell' }),
+      machineAttachment('core', 'sideways_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+
+  assert.deepEqual(validateMachinePhysicalLegality(initial), [])
+  assert.deepEqual(validateMachinePhysicalLegality(styleOnly), [])
+  assert.deepEqual(validateMachinePhysicalLegality(orientedMachine), [])
+  assertMachineCanConfirm(initial)
+  assertMachineCanConfirm(styleOnly)
+  assertMachineCanConfirm(orientedMachine)
+})
+
+test('machine confirm rejects disconnected parts, unknown catalog parts, and hard collisions', () => {
+  const initial = createInitialMachineDesign('red')
+  const core = initial.parts[0]
+  const disconnected = {
+    ...initial,
+    parts: [
+      core,
+      machinePart('loose_armor', {
+        definitionId: 'catalog:Armor_Light',
+        transform: machineTransform({ position: [3, 0, 0] }),
+      }),
+    ],
+    attachments: [],
+  }
+  const unknownPart = {
+    ...initial,
+    parts: [
+      core,
+      machinePart('unknown_part', {
+        definitionId: 'catalog:Weapon_NukeLaserDragon',
+        transform: machineTransform({ position: [3, 0, 0] }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'unknown_part', { mountId: 'core_shell' }),
+    ],
+  }
+  const collidingParts = {
+    ...initial,
+    parts: [
+      core,
+      machinePart('left_plate', {
+        definitionId: 'catalog:Armor_Light',
+        transform: machineTransform({ position: [3, 0, 0] }),
+      }),
+      machinePart('right_plate', {
+        definitionId: 'catalog:Armor_Tile',
+        transform: machineTransform({ position: [3, 0, 0] }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'left_plate', { mountId: 'core_deck' }),
+      machineAttachment('core', 'right_plate', { mountId: 'core_deck' }),
+    ],
+  }
+  const disconnectedConfirm = applyLoadoutAction({
+    role: 'red',
+    gold: 1000,
+    inventory: [],
+    buildState: machineBuildState(disconnected),
+    action: forgedConfirmLoadoutAction(),
+  })
+  const unknownConfirm = applyLoadoutAction({
+    role: 'red',
+    gold: 1000,
+    inventory: [],
+    buildState: machineBuildState(unknownPart),
+    action: forgedConfirmLoadoutAction(),
+  })
+  const collisionConfirm = applyLoadoutAction({
+    role: 'red',
+    gold: 1000,
+    inventory: [],
+    buildState: machineBuildState(collidingParts),
+    action: forgedConfirmLoadoutAction(),
+  })
+
+  assert.ok(machineIssueCodes(disconnected).includes('DISCONNECTED_PART'))
+  assert.ok(machinePhysicalIssueCodes(unknownPart).includes('UNKNOWN_PART'))
+  assert.ok(machinePhysicalIssueCodes(collidingParts).includes('HARD_PART_COLLISION'))
+  assert.equal(disconnectedConfirm.ok, false)
+  assert.equal(unknownConfirm.ok, false)
+  assert.equal(collisionConfirm.ok, false)
+  assert.ok(disconnectedConfirm.issues.some((issue) => issue.code === 'DISCONNECTED_PART'))
+  assert.ok(unknownConfirm.issues.some((issue) => issue.code === 'UNKNOWN_PART'))
+  assert.ok(collisionConfirm.issues.some((issue) => issue.code === 'HARD_PART_COLLISION'))
+})
+
+test('machine legacy projection is deterministic and preserves replay transform metadata', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    name: 'projection machine',
+    parts: [
+      initial.parts[0],
+      {
+        instanceId: 'weapon',
+        definitionId: 'catalog:Weapon_Spear',
+        source: 'catalog_part',
+        transform: {
+          position: [1.5, 0.25, -2.5],
+          rotation: [10, 45, 5],
+          scale: [1.2, 0.8, 1.1],
+        },
+      },
+      {
+        instanceId: 'wheel',
+        definitionId: 'Wheel_Small',
+        source: 'catalog_part',
+        transform: {
+          position: [-1, 0, 0.5],
+          rotation: [0, 90, 0],
+        },
+      },
+    ],
+    attachments: [
+      {
+        parentInstanceId: 'core',
+        childInstanceId: 'weapon',
+        mountId: 'sphere_front',
+        transform: {
+          position: [88.125, 77.5, 66.25],
+          rotation: [12, 24, 36],
+          scale: [2, 2, 2],
+        },
+      },
+      {
+        parentInstanceId: 'weapon',
+        childInstanceId: 'wheel',
+        mountId: 'rim_left',
+        transform: machineTransform(),
+      },
+    ],
+    runtime: {
+      healthByInstanceId: { weapon: 17, wheel: 9 },
+      detachedInstanceIds: ['wheel'],
+      disabledInstanceIds: ['weapon'],
+    },
+  }
+
+  const blueprint = machineDesignToLegacyBotBlueprintProjection(machine)
+  const snapshot = machineDesignToLegacyBotDesignSnapshotProjection(machine)
+
+  assert.deepEqual(blueprint, machineDesignToLegacyBotBlueprintProjection(machine))
+  assert.deepEqual(snapshot, machineDesignToLegacyBotDesignSnapshotProjection(machine))
+  assert.deepEqual(blueprint.blocks, [
+    {
+      id: 'weapon',
+      partId: 'Weapon_Spear',
+      position: [1.5, 0.25, -2.5],
+      rotation: [10, 45, 5],
+      mountId: 'sphere_front',
+    },
+    {
+      id: 'wheel',
+      partId: 'Wheel_Small',
+      position: [-1, 0, 0.5],
+      rotation: [0, 90, 0],
+      parentInstanceId: 'weapon',
+      mountId: 'rim_left',
+    },
+  ])
+  assert.deepEqual(snapshot, {
+    name: 'projection machine',
+    rootInstanceId: 'weapon',
+    parts: [
+      {
+        instanceId: 'weapon',
+        partId: 'Weapon_Spear',
+        cell: { x: 1.5, z: -2.5 },
+        rotation: 45,
+        mountId: 'sphere_front',
+        health: 17,
+      },
+      {
+        instanceId: 'wheel',
+        partId: 'Wheel_Small',
+        cell: { x: -1, z: 0.5 },
+        rotation: 90,
+        parentInstanceId: 'weapon',
+        mountId: 'rim_left',
+        health: 9,
+        detached: true,
+      },
+    ],
+  })
+})
+
+test('machine legacy projection is immutable and lossy instead of authoritative round trip', () => {
+  const initial = createInitialMachineDesign('blue')
+  const machine = {
+    ...initial,
+    name: 'lossy projection machine',
+    parts: [
+      initial.parts[0],
+      {
+        instanceId: 'spinner',
+        definitionId: 'catalog:Weapon_Spinner_Small',
+        source: 'catalog_part',
+        transform: {
+          position: [2, 3, 4],
+          rotation: [15, 180, 30],
+          scale: [3, 3, 3],
+        },
+      },
+    ],
+    attachments: [
+      {
+        parentInstanceId: 'core',
+        childInstanceId: 'spinner',
+        mountId: 'parameterized_sphere',
+        transform: {
+          position: [98.75, 97.5, 96.25],
+          rotation: [22, 33, 44],
+          scale: [4, 4, 4],
+        },
+      },
+    ],
+    runtime: {
+      healthByInstanceId: { spinner: 11 },
+      disabledInstanceIds: ['spinner'],
+    },
+  }
+  const beforeProjection = JSON.stringify(machine)
+
+  const blueprint = machineDesignToLegacyBotBlueprintProjection(machine)
+  const snapshot = machineDesignToLegacyBotDesignSnapshotProjection(machine)
+
+  blueprint.blocks[0].position[0] = 999
+  snapshot.parts[0].cell.x = 999
+
+  assert.equal(JSON.stringify(machine), beforeProjection)
+  assert.equal(machine.parts[1].transform.position[0], 2)
+  assert.equal('scale' in blueprint.blocks[0], false)
+  assert.equal('transform' in snapshot.parts[0], false)
+  assert.equal(snapshot.parts[0].rotation, 180)
+  assert.equal(JSON.stringify({ blueprint, snapshot }).includes('98.75'), false)
+  assert.equal(JSON.stringify({ blueprint, snapshot }).includes('system_core'), false)
+  assert.equal(JSON.stringify({ blueprint, snapshot }).includes('immutable'), false)
+  assert.equal(JSON.stringify({ blueprint, snapshot }).includes('disabledInstanceIds'), false)
+})
+
+test('deriveMachineCapabilities uses MachineDesign local axes instead of legacy projection controls', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('sideways_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({
+          position: [2, 0, 0],
+          orientation: machineBasis({
+            right: [0, 0, -1],
+            forward: [1, 0, 0],
+          }),
+        }),
+      }),
+      machinePart('omni_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({
+          position: [-2, 0, 0],
+          orientation: machineBasis(),
+        }),
+      }),
+      machinePart('rear_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({
+          position: [0, 0, -2],
+          orientation: machineBasis({
+            right: [-1, 0, 0],
+            forward: [0, 0, -1],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'sideways_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'rear_laser', { mountId: 'core_shell' }),
+    ],
+  }
+  const bareCapabilities = deriveMachineCapabilities(initial)
+  const capabilities = deriveMachineCapabilities(machine)
+  const sidewaysWheel = capabilities.movement.find((entry) => entry.partInstanceId === 'sideways_wheel')
+  const omniWheel = capabilities.movement.find((entry) => entry.partInstanceId === 'omni_wheel')
+  const rearLaser = capabilities.weapons.find((entry) => entry.partInstanceId === 'rear_laser')
+  const projectedControls = deriveControls(machineDesignToLegacyBotBlueprintProjection(machine))
+
+  assert.deepEqual(bareCapabilities.movement, [])
+  assert.deepEqual(bareCapabilities.weapons, [])
+  assert.deepEqual(bareCapabilities.utility, [])
+  assert.equal(sidewaysWheel.kind, 'normal_wheel')
+  assertVectorClose(sidewaysWheel.driveAxis, [1, 0, 0], 'sideways wheel drive axis')
+  assert.equal(sidewaysWheel.lateralAxis, undefined)
+  assert.equal(omniWheel.kind, 'omni_wheel')
+  assertVectorClose(omniWheel.driveAxis, [0, 0, 1], 'omni wheel drive axis')
+  assertVectorClose(omniWheel.lateralAxis, [1, 0, 0], 'omni wheel lateral axis')
+  assert.equal(rearLaser.kind, 'fixed_emitter')
+  assertVectorClose(rearLaser.emitterAxis, [0, 0, -1], 'rear laser emitter axis')
+  assert.deepEqual(capabilities.inactiveParts, [])
+  assert.equal(projectedControls.movement.includes('strafe_left'), true)
+  assert.equal(projectedControls.weaponA?.includes('fire'), true)
+})
+
+test('deriveMachineCapabilities ignores detached disabled and destroyed parts', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('detached_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('disabled_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('destroyed_utility', {
+        definitionId: 'catalog:Utility_Smoke',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'detached_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'disabled_laser', { mountId: 'core_shell' }),
+      machineAttachment('core', 'destroyed_utility', { mountId: 'core_deck' }),
+    ],
+    runtime: {
+      healthByInstanceId: {
+        destroyed_utility: 0,
+      },
+      detachedInstanceIds: ['detached_wheel'],
+      disabledInstanceIds: ['disabled_laser'],
+    },
+  }
+  const capabilities = deriveMachineCapabilities(machine)
+  const inactiveReasonByPart = new Map(
+    capabilities.inactiveParts.map((part) => [part.partInstanceId, part.reason]),
+  )
+
+  assert.deepEqual(capabilities.movement, [])
+  assert.deepEqual(capabilities.weapons, [])
+  assert.deepEqual(capabilities.utility, [])
+  assert.equal(inactiveReasonByPart.get('detached_wheel'), 'detached')
+  assert.equal(inactiveReasonByPart.get('disabled_laser'), 'disabled')
+  assert.equal(inactiveReasonByPart.get('destroyed_utility'), 'destroyed')
+})
+
+test('deriveMachineCapabilities applies explicit parent runtime orientation to child emitters', () => {
+  const initial = createInitialMachineDesign('red')
+  const runtimeWheelBasis = machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  })
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('runtime_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('rim_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'runtime_wheel', { mountId: 'core_shell' }),
+      machineAttachment('runtime_wheel', 'rim_laser', { mountId: 'rim_outer' }),
+    ],
+    runtime: {
+      healthByInstanceId: {},
+      orientationByInstanceId: {
+        runtime_wheel: runtimeWheelBasis,
+      },
+    },
+  }
+  const capabilities = deriveMachineCapabilities(machine)
+  const wheel = capabilities.movement.find((entry) => entry.partInstanceId === 'runtime_wheel')
+  const laser = capabilities.weapons.find((entry) => entry.partInstanceId === 'rim_laser')
+
+  assert.equal(wheel.orientationSource, 'runtime_orientation')
+  assertVectorClose(wheel.driveAxis, [1, 0, 0], 'runtime wheel drive axis')
+  assert.equal(laser.orientationSource, 'inherited_runtime_orientation')
+  assertVectorClose(laser.emitterAxis, [1, 0, 0], 'runtime inherited laser emitter axis')
+})
+
+test('machine combat action generation gives no-mobility machines hold only', () => {
+  const actionSet = buildMachineCapabilityCombatActionSet({
+    machine: createInitialMachineDesign('red'),
+  })
+
+  assert.deepEqual(Object.values(actionSet.actions).map((action) => action.kind), ['hold'])
+  assert.deepEqual(combatCommands(actionSet), [{ tick: 1, move: 'brake' }])
+})
+
+test('machine combat action generation limits normal-wheel movement to matching axes', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('east_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [0, 0, -1],
+            forward: [1, 0, 0],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'east_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const actionSet = buildMachineCapabilityCombatActionSet({ machine })
+
+  assert.deepEqual(combatMoves(actionSet), ['brake', 'forward', 'backward', 'dash_forward', 'dash_backward'])
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_left'), false)
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_right'), false)
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'circle_left'), false)
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'turn_right'), false)
+})
+
+test('machine combat action generation exposes lateral moves from omni movement capability', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('omni_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const actionSet = buildMachineCapabilityCombatActionSet({ machine })
+
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_left'), true)
+  assert.equal(hasCombatAction(actionSet, (command) => command.move === 'strafe_right'), true)
+})
+
+test('machine combat weapon actions require emitter bearing range and arena line of sight', () => {
+  const initial = createInitialMachineDesign('red')
+  const awayLaser = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('rear_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [0, 0, 1],
+            forward: [-1, 0, 0],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'rear_laser', { mountId: 'core_shell' }),
+    ],
+  }
+  const forwardLaser = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('front_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [0, 0, -1],
+            forward: [1, 0, 0],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'front_laser', { mountId: 'core_shell' }),
+    ],
+  }
+  const farArena = {
+    ...tacticalOpenArena,
+    width: 40,
+    height: 8,
+  }
+
+  assert.equal(
+    hasCombatAction(
+      buildMachineCapabilityCombatActionSet({ machine: awayLaser }),
+      (command) => command.weaponA === 'fire',
+    ),
+    false,
+  )
+  assert.equal(
+    hasCombatAction(
+      buildMachineCapabilityCombatActionSet({ machine: forwardLaser }),
+      (command) => command.weaponA === 'fire' && command.move === undefined,
+    ),
+    true,
+  )
+  assert.equal(
+    hasCombatAction(
+      buildMachineCapabilityCombatActionSet({
+        machine: forwardLaser,
+        arena: farArena,
+        redPosition: [-10, 0, 0],
+        bluePosition: [10, 0, 0],
+      }),
+      (command) => command.weaponA === 'fire',
+    ),
+    false,
+  )
+  assert.equal(
+    hasCombatAction(
+      buildMachineCapabilityCombatActionSet({
+        machine: forwardLaser,
+        arena: tacticalBlockedArena,
+      }),
+      (command) => command.weaponA === 'fire',
+    ),
+    false,
+  )
+})
+
+test('machine combat action generation exposes utility activation when TurnCommand can represent it', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('booster', {
+        definitionId: 'catalog:Utility_Booster',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'booster', { mountId: 'core_deck' }),
+    ],
+  }
+  const actionSet = buildMachineCapabilityCombatActionSet({ machine })
+
+  assert.equal(hasCombatAction(actionSet, (command, action) =>
+    action.kind === 'use_utility' && command.utility === 'activate',
+  ), true)
+})
+
+test('machine resolver moves generated machine commands through native wheel capability axes', () => {
+  const initial = createInitialMachineDesign('red')
+  const lateralWheelMachine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('lateral_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'lateral_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const actionSet = buildMachineCapabilityCombatActionSet({ machine: lateralWheelMachine })
+  const generatedStrafe = findCombatAction(actionSet, (command) => command.move === 'strafe_right')
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine: lateralWheelMachine,
+    seed: 'machine-native-wheel-axis',
+  }), {
+    red: [generatedStrafe],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake' })],
+  })
+  const forgedGenericForward = resolveSubmittedGameActions(machineCombatInput({
+    redMachine: lateralWheelMachine,
+    seed: 'machine-native-no-generic-forward',
+  }), {
+    red: [canonicalCombatAction('red', 1, { move: 'forward' })],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake' })],
+  })
+  const strafeMove = moveEvents(resolved, 'red')[0]
+
+  assert.equal(resolved.status, 'active')
+  assert.ok(strafeMove)
+  assert.ok(strafeMove.to[2] > strafeMove.from[2])
+  assert.equal(moveEvents(forgedGenericForward, 'red').length, 0)
+  assert.equal(
+    forgedGenericForward.log.some((entry) => entry.includes('blocked or out-of-bounds anchor path')),
+    true,
+  )
+})
+
+test('machine resolver fires native weapons only when emitter range and bearing allow it', () => {
+  const forwardLaser = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const awayLaser = machineWithLaser('red', 'rear_laser', machineBasis({
+    right: [0, 0, 1],
+    forward: [-1, 0, 0],
+  }))
+  const fireAction = canonicalCombatAction('red', 1, { weaponA: 'fire' })
+  const blueHold = canonicalCombatAction('blue', 1, { move: 'brake' })
+  const forwardResolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine: forwardLaser,
+    seed: 'machine-native-weapon-fire',
+  }), {
+    red: [fireAction],
+    blue: [blueHold],
+  })
+  const awayResolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine: awayLaser,
+    seed: 'machine-native-weapon-bearing-blocked',
+  }), {
+    red: [fireAction],
+    blue: [blueHold],
+  })
+
+  assert.equal(
+    forwardResolved.replay.events.some(
+      (event) => event.type === 'weapon_fire' && event.bot === 'red' && event.sourcePartId === 'Weapon_Laser',
+    ),
+    true,
+  )
+  assert.equal(forwardResolved.snapshot.blue.health < forwardResolved.snapshot.blue.maxHealth, true)
+  assert.equal(forwardResolved.machineRuntime.blue.healthByInstanceId.core < 20, true)
+  assert.equal(
+    awayResolved.replay.events.some((event) => event.type === 'weapon_fire' && event.bot === 'red'),
+    false,
+  )
+  assert.equal(awayResolved.snapshot.blue.health, awayResolved.snapshot.blue.maxHealth)
+  assert.equal(awayResolved.machineRuntime.blue.healthByInstanceId.core, 20)
+})
+
+test('machine damage destroys wheel capability and removes movement from next action set', () => {
+  const redMachine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const blueMachine = machineWithCatalogPart('blue', 'drive_wheel', 'catalog:Wheel_Small')
+  const initialBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: blueMachine,
+  })
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine,
+    blueMachine,
+    seed: 'machine-damage-wheel-removes-movement',
+  }), {
+    red: [canonicalCombatAction('red', 1, { weaponA: 'fire' })],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake' })],
+  })
+  const nextBlueMachine = machineWithRuntime(blueMachine, resolved.machineRuntime.blue)
+  const nextBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: nextBlueMachine,
+    tick: 2,
+  })
+  const inactiveReasonByPart = new Map(
+    deriveMachineCapabilities(nextBlueMachine).inactiveParts.map((part) => [part.partInstanceId, part.reason]),
+  )
+  const projectedControls = deriveControls(machineDesignToLegacyBotBlueprintProjection(nextBlueMachine))
+
+  assert.equal(resolved.status, 'active')
+  assert.equal(hasCombatAction(initialBlueActions, (command) => command.move && command.move !== 'brake'), true)
+  assert.equal(resolved.machineRuntime.blue.healthByInstanceId.drive_wheel, 0)
+  assert.equal(inactiveReasonByPart.get('drive_wheel'), 'destroyed')
+  assert.equal(projectedControls.movement.includes('forward'), true)
+  assert.deepEqual(combatMoves(nextBlueActions), ['brake'])
+})
+
+test('machine damage destroys weapon capability and removes fire from next action set', () => {
+  const redMachine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const blueMachine = machineWithCatalogPart('blue', 'front_laser', 'catalog:Weapon_Laser', machineBasis({
+    right: [0, 0, 1],
+    forward: [-1, 0, 0],
+  }))
+  const initialBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: blueMachine,
+  })
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine,
+    blueMachine,
+    seed: 'machine-damage-weapon-removes-fire',
+  }), {
+    red: canonicalCombatActions('red', [
+      { weaponA: 'fire' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'brake' },
+      { move: 'brake' },
+    ]),
+  })
+  const nextBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: machineWithRuntime(blueMachine, resolved.machineRuntime.blue),
+    tick: 3,
+  })
+
+  assert.equal(resolved.status, 'active')
+  assert.equal(hasCombatAction(initialBlueActions, (command) => command.weaponA === 'fire'), true)
+  assert.equal(resolved.machineRuntime.blue.healthByInstanceId.front_laser, 0)
+  assert.equal(hasCombatAction(nextBlueActions, (command) =>
+    command.weaponA === 'fire' || command.weaponB === 'fire',
+  ), false)
+})
+
+test('machine resolver suppresses same-tick fire from a destroyed machine weapon', () => {
+  const initialRed = createInitialMachineDesign('red')
+  const redMachine = {
+    ...initialRed,
+    parts: [
+      initialRed.parts[0],
+      machinePart('front_laser_a', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [0, 0, -1],
+            forward: [1, 0, 0],
+          }),
+        }),
+      }),
+      machinePart('front_laser_b', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [0, 0, -1],
+            forward: [1, 0, 0],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'front_laser_a', { mountId: 'core_shell' }),
+      machineAttachment('core', 'front_laser_b', { mountId: 'core_shell' }),
+    ],
+  }
+  const blueMachine = machineWithCatalogPart('blue', 'front_laser', 'catalog:Weapon_Laser', machineBasis({
+    right: [0, 0, 1],
+    forward: [-1, 0, 0],
+  }))
+  const initialBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: blueMachine,
+  })
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine,
+    blueMachine,
+    seed: 'machine-destroyed-before-fire',
+  }), {
+    red: [canonicalCombatAction('red', 1, { weaponA: 'fire', weaponB: 'fire' })],
+    blue: [canonicalCombatAction('blue', 1, { weaponA: 'fire' })],
+  })
+
+  assert.equal(hasCombatAction(initialBlueActions, (command) => command.weaponA === 'fire'), true)
+  assert.equal(resolved.machineRuntime.blue.healthByInstanceId.front_laser, 0)
+  assert.equal(
+    resolved.replay.events.filter((event) => event.type === 'weapon_fire' && event.bot === 'red').length,
+    2,
+  )
+  assert.equal(
+    resolved.replay.events.some((event) => event.type === 'weapon_fire' && event.bot === 'blue'),
+    false,
+  )
+})
+
+test('machine damage destroys utility capability and removes utility activation from next action set', () => {
+  const redMachine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const blueMachine = machineWithCatalogPart('blue', 'booster', 'catalog:Utility_Booster')
+  const initialBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: blueMachine,
+  })
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine,
+    blueMachine,
+    seed: 'machine-damage-utility-removes-activation',
+  }), {
+    red: [canonicalCombatAction('red', 1, { weaponA: 'fire' })],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake' })],
+  })
+  const nextBlueActions = buildMachineCapabilityCombatActionSet({
+    role: 'blue',
+    machine: machineWithRuntime(blueMachine, resolved.machineRuntime.blue),
+    tick: 2,
+  })
+
+  assert.equal(resolved.status, 'active')
+  assert.equal(hasCombatAction(initialBlueActions, (command, action) =>
+    action.kind === 'use_utility' && command.utility === 'activate',
+  ), true)
+  assert.equal(resolved.machineRuntime.blue.healthByInstanceId.booster, 0)
+  assert.equal(hasCombatAction(nextBlueActions, (command, action) =>
+    action.kind === 'use_utility' || command.utility === 'activate',
+  ), false)
+})
+
+test('machine parent break detaches child subtree and emits deterministic wreckage events', () => {
+  const redMachine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const initialBlue = createInitialMachineDesign('blue')
+  const blueMachine = {
+    ...initialBlue,
+    parts: [
+      initialBlue.parts[0],
+      machinePart('drive_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('rim_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('rim_booster', {
+        definitionId: 'catalog:Utility_Booster',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'drive_wheel', { mountId: 'core_shell' }),
+      machineAttachment('drive_wheel', 'rim_laser', { mountId: 'rim_outer' }),
+      machineAttachment('rim_laser', 'rim_booster', { mountId: 'laser_mount' }),
+    ],
+  }
+  const input = machineCombatInput({
+    redMachine,
+    blueMachine,
+    seed: 'machine-parent-break-detaches-subtree',
+  })
+  const actions = {
+    red: [canonicalCombatAction('red', 1, { weaponA: 'fire' })],
+    blue: [canonicalCombatAction('blue', 1, { move: 'brake' })],
+  }
+  const first = resolveSubmittedGameActions(input, actions)
+  const second = resolveSubmittedGameActions(input, actions)
+  const wreckageIds = first.replay.events
+    .filter((event) => event.type === 'part_detach' && event.bot === 'blue')
+    .map((event) => event.blockId)
+
+  assert.deepEqual(first, second)
+  assert.deepEqual(first.machineRuntime.blue.detachedInstanceIds, ['rim_booster', 'rim_laser'])
+  assert.deepEqual(wreckageIds, ['drive_wheel', 'rim_laser', 'rim_booster'])
+  assert.equal(first.machineRuntime.blue.healthByInstanceId.drive_wheel, 0)
+  assert.equal(first.machineRuntime.blue.healthByInstanceId.rim_laser, 0)
+  assert.equal(first.machineRuntime.blue.healthByInstanceId.rim_booster, 0)
+})
+
+test('machine damage authority ignores legacy blueprint decoys and projection controls', () => {
+  const redMachine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const blueMachine = machineWithCatalogPart('blue', 'drive_wheel', 'catalog:Wheel_Small')
+  const legacyDecoyBlueprint = {
+    name: 'legacy decoy should not be authoritative',
+    blocks: [
+      { id: 'legacy_weapon', partId: 'Weapon_Laser', position: [0, 0, 0], rotation: [0, 0, 0] },
+    ],
+  }
+  const resolved = resolveSubmittedGameActions({
+    ...machineCombatInput({
+      redMachine,
+      blueMachine,
+      seed: 'machine-damage-native-not-legacy-projection',
+    }),
+    blue: {
+      blueprint: legacyDecoyBlueprint,
+      machineDesign: blueMachine,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+  }, {
+    red: [canonicalCombatAction('red', 1, { weaponA: 'fire' })],
+    blue: [canonicalCombatAction('blue', 1, { weaponA: 'fire' })],
+  })
+
+  assert.equal(resolved.machineRuntime.blue.healthByInstanceId.drive_wheel, 0)
+  assert.equal(resolved.snapshot.blue.partHealth.legacy_weapon, undefined)
+  assert.equal(resolved.snapshot.blue.partHealth.drive_wheel, 0)
+  assert.equal(
+    resolved.replay.events.some((event) => event.type === 'weapon_fire' && event.bot === 'blue'),
+    false,
+  )
+})
+
+test('machine resolver persists parent runtime orientation for child emitters on the next turn', () => {
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('omni_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('rim_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'rim_laser', { mountId: 'core_shell' }),
+    ],
+  }
+  const resolved = resolveSubmittedGameActions(machineCombatInput({
+    redMachine: machine,
+    seed: 'machine-runtime-orientation-emitter',
+  }), {
+    red: canonicalCombatActions('red', [
+      { move: 'turn_right' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'brake' },
+      { move: 'brake' },
+    ]),
+  })
+  const redRuntime = resolved.machineRuntime.red
+
+  assert.equal(
+    resolved.replay.events.some(
+      (event) => event.type === 'weapon_fire' && event.bot === 'red' && event.turn === 2,
+    ),
+    true,
+  )
+  assertVectorClose(redRuntime.orientationByInstanceId.core.forward, [1, 0, 0], 'runtime core forward')
+  assert.equal(deriveMachineCapabilities({
+    ...machine,
+    runtime: redRuntime,
+  }).weapons[0].orientationSource, 'inherited_runtime_orientation')
+  assertVectorClose(deriveMachineCapabilities({
+    ...machine,
+    runtime: redRuntime,
+  }).weapons[0].emitterAxis, [1, 0, 0], 'child emitter after parent runtime turn')
+})
+
+test('machine submitted combat resolution is deterministic for identical runtime inputs', () => {
+  const machine = machineWithLaser('red', 'front_laser', machineBasis({
+    right: [0, 0, -1],
+    forward: [1, 0, 0],
+  }))
+  const input = machineCombatInput({
+    redMachine: machine,
+    seed: 'machine-deterministic-runtime',
+  })
+  const actions = {
+    red: canonicalCombatActions('red', [
+      { weaponA: 'fire' },
+      { weaponA: 'fire' },
+    ]),
+    blue: canonicalCombatActions('blue', [
+      { move: 'brake' },
+      { move: 'brake' },
+    ]),
+  }
+  const first = resolveSubmittedGameActions(input, actions)
+  const second = resolveSubmittedGameActions(input, actions)
+
+  assert.deepEqual(first, second)
+})
+
+test('session creation stores machine authority and versions legacy continuation designs', async () => {
+  const tokenFactory = (owner, kind) => `${owner}.${kind}.token`
+  const tokenHasher = async (token) => `hash:${token}`
+  const created = await createInitialSessionState(
+    { sessionId: 's_machine_design_storage' },
+    { tokenFactory, tokenHasher },
+  )
+
+  assert.equal(created.state.roles.red.storedDesign.version, 'machine:v1')
+  assert.equal(created.state.roles.red.storedDesign.machine.parts.length, 1)
+  assert.equal(created.state.roles.red.storedDesign.machine.parts[0].instanceId, 'core')
+  assert.deepEqual(validateMachineTree(created.state.roles.red.storedDesign.machine), [])
+  assert.equal(created.state.roles.red.loadoutBuildState, undefined)
+  assert.equal(created.state.roles.blue.storedDesign.version, 'machine:v1')
+  assert.equal(created.state.roles.red.currentDesign, undefined)
+
+  const sharedDebrief = {
+    debriefId: 'debrief_legacy',
+    sourceSessionId: 's_legacy_source',
+    fightIds: [],
+    summary: 'Legacy continuation seed.',
+    championImprovementHints: [],
+    challengerCounterplayHints: [],
+    evidence: [],
+  }
+  const legacyChampionDesign = {
+    name: 'legacy champion',
+    rootInstanceId: 'legacy_core',
+    parts: [
+      {
+        instanceId: 'legacy_core',
+        partId: 'Body_Square_Medium',
+        cell: { x: 0, z: 0 },
+      },
+    ],
+  }
+  const continued = await createInitialSessionState(
+    {
+      sessionId: 's_machine_design_continuation',
+      continuationSeed: {
+        sourceSave: {
+          saveId: 'save_legacy',
+          sourceSessionId: 's_legacy_source',
+          championRole: 'red',
+          championTeamIdentity: { name: 'Legacy Red', colorHex: '#ff4c5d' },
+          championDesign: legacyChampionDesign,
+          championFinalState: { health: 10, maxHealth: 10 },
+          championRecord: {
+            wins: 1,
+            consecutiveWins: 1,
+            losses: 0,
+            sourceSessionIds: ['s_legacy_source'],
+          },
+          fightDossier: { sessionId: 's_legacy_source', fights: [] },
+          sharedDebrief,
+          challengerBalance: { role: 'blue', bonusGold: 5, reason: 'test' },
+          createdAt: '2026-06-07T00:00:00.000Z',
+        },
+        championRole: 'red',
+        challengerRole: 'blue',
+        challengerBonusGold: 5,
+        sharedDebrief,
+      },
+    },
+    { tokenFactory, tokenHasher },
+  )
+
+  assert.equal(continued.state.roles.red.storedDesign.version, 'legacy-bot-design:v1')
+  assert.deepEqual(continued.state.roles.red.storedDesign.design, legacyChampionDesign)
+  assert.equal(continued.state.roles.red.loadoutBuildState.currentDesign.version, 'legacy-bot-design:v1')
+  assert.deepEqual(continued.state.roles.red.loadoutBuildState.legacyDraft, legacyChampionDesign)
+  assert.equal(continued.state.roles.blue.storedDesign.version, 'machine:v1')
+
+  const redReset = await resetStoredRoleClaim(
+    continued.state,
+    'red',
+    tokenFactory,
+    tokenHasher,
+  )
+  const blueReset = await resetStoredRoleClaim(
+    continued.state,
+    'blue',
+    tokenFactory,
+    tokenHasher,
+  )
+
+  assert.equal(redReset.ok, true)
+  assert.equal(blueReset.ok, true)
+  assert.equal(continued.state.roles.red.storedDesign.version, 'legacy-bot-design:v1')
+  assert.deepEqual(continued.state.roles.red.storedDesign.design, legacyChampionDesign)
+  assert.equal(continued.state.roles.red.loadoutBuildState.currentDesign.version, 'legacy-bot-design:v1')
+  assert.deepEqual(continued.state.roles.red.loadoutBuildState.legacyDraft, legacyChampionDesign)
+  assert.equal(continued.state.roles.blue.storedDesign.version, 'machine:v1')
+})
 
 function chooseBuilderAction(harness, predicate) {
   const action = builderActions(harness).find(predicate)
@@ -756,6 +2341,62 @@ function tryBuilderAction(harness, action) {
   })
 }
 
+function builderActionWithMountPoseParameters(action, overrides = {}) {
+  return {
+    ...action,
+    payload: {
+      ...action.payload,
+      parameters: defaultMountPoseParameters(action, overrides),
+    },
+  }
+}
+
+function advanceBuilderToMountPose(harness, partId, targetInstanceId) {
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_part' && action.payload.partId === partId,
+    ),
+  )
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_attach_target' &&
+        (targetInstanceId === undefined || action.payload.targetInstanceId === targetInstanceId),
+    ),
+  )
+
+  return chooseBuilderAction(harness, (action) => action.kind === 'propose_mount_pose')
+}
+
+function forgedMountPoseAction(childPartId, parentInstanceId, mountSurfaceId, overrides = {}) {
+  return {
+    id: `forged.mount_pose.${childPartId}.${parentInstanceId}.${mountSurfaceId}`,
+    kind: 'propose_mount_pose',
+    role: 'red',
+    payload: {
+      scope: 'loadout_builder',
+      type: 'propose_mount_pose',
+      label: 'Forged mount pose',
+      summary: 'Forged mount pose',
+      childPartId,
+      parentInstanceId,
+      parameters: {
+        childPartId,
+        parentInstanceId,
+        mountSurfaceId,
+        u: 0.5,
+        v: 0.5,
+        yawDegrees: 0,
+        rollDegrees: 0,
+        ...overrides,
+      },
+    },
+  }
+}
+
 function placePartInHarness(harness, partId, options = {}) {
   applyBuilderAction(
     harness,
@@ -772,24 +2413,39 @@ function placePartInHarness(harness, partId, options = {}) {
         (options.targetInstanceId === undefined || action.payload.targetInstanceId === options.targetInstanceId),
     ),
   )
-  applyBuilderAction(
-    harness,
-    chooseBuilderAction(
-      harness,
-      (action) => action.kind === 'choose_mount' &&
-        (options.mountPredicate ? options.mountPredicate(action) : true),
-    ),
-  )
-  applyBuilderAction(
-    harness,
-    chooseBuilderAction(
-      harness,
-      (action) => action.kind === 'choose_rotation' &&
-        (options.rotation === undefined || action.payload.rotation === options.rotation),
-    ),
-  )
+  const poseAction = builderActions(harness).find((action) => action.kind === 'propose_mount_pose')
 
-  return harness.buildState.currentDesign.parts.at(-1)
+  if (poseAction) {
+    applyBuilderAction(
+      harness,
+      builderActionWithMountPoseParameters(poseAction, {
+        ...(options.mountSurfaceId ? { mountSurfaceId: options.mountSurfaceId } : {}),
+        ...(options.u !== undefined ? { u: options.u } : {}),
+        ...(options.v !== undefined ? { v: options.v } : {}),
+        ...(options.yawDegrees !== undefined ? { yawDegrees: options.yawDegrees } : {}),
+        ...(options.rollDegrees !== undefined ? { rollDegrees: options.rollDegrees } : {}),
+      }),
+    )
+  } else {
+    applyBuilderAction(
+      harness,
+      chooseBuilderAction(
+        harness,
+        (action) => action.kind === 'choose_mount' &&
+          (options.mountPredicate ? options.mountPredicate(action) : true),
+      ),
+    )
+    applyBuilderAction(
+      harness,
+      chooseBuilderAction(
+        harness,
+        (action) => action.kind === 'choose_rotation' &&
+          (options.rotation === undefined || action.payload.rotation === options.rotation),
+      ),
+    )
+  }
+
+  return loadoutBuildStateLegacyDesign(harness.buildState).parts.at(-1)
 }
 
 function builderPart(design, partId) {
@@ -814,6 +2470,27 @@ function assertFiniteVector(vector, label) {
 
   for (const component of vector) {
     assert.ok(Number.isFinite(component) && component > 0, `${label} has invalid component ${component}`)
+  }
+}
+
+function assertFiniteVectorComponents(vector, label) {
+  assert.equal(Array.isArray(vector), true, `${label} must be a vector`)
+  assert.equal(vector.length, 3, `${label} must have three components`)
+
+  for (const component of vector) {
+    assert.ok(Number.isFinite(component), `${label} has invalid component ${component}`)
+  }
+}
+
+function assertVectorClose(actual, expected, label, epsilon = 1e-9) {
+  assertFiniteVectorComponents(actual, label)
+  assert.equal(actual.length, expected.length, `${label} length mismatch`)
+
+  for (const [index, value] of actual.entries()) {
+    assert.ok(
+      Math.abs(value - expected[index]) <= epsilon,
+      `${label}.${index} expected ${expected[index]} but received ${value}`,
+    )
   }
 }
 
@@ -911,6 +2588,31 @@ function assertCompleteMount(mount, label) {
   }
 }
 
+function assertCompleteMountSurface(surface, label) {
+  assert.notEqual(surface, undefined, `${label} is missing`)
+  assert.equal(typeof surface.id, 'string')
+  assert.ok(surface.id.length > 0, `${label}.id is missing`)
+  assert.ok(['panel', 'sphere'].includes(surface.kind), `${label}.kind is invalid`)
+  assert.ok(surface.accepts.length > 0, `${label}.accepts must not be empty`)
+  assertFiniteVectorComponents(surface.center, `${label}.center`)
+
+  if (surface.kind === 'sphere') {
+    assert.ok(Number.isFinite(surface.radius) && surface.radius > 0, `${label}.radius must be positive`)
+    return
+  }
+
+  assert.equal(Array.isArray(surface.size), true, `${label}.size must be a tuple`)
+  assert.equal(surface.size.length, 2, `${label}.size must have two components`)
+
+  for (const component of surface.size) {
+    assert.ok(Number.isFinite(component) && component > 0, `${label}.size has invalid component ${component}`)
+  }
+
+  assertFiniteVectorComponents(surface.normal, `${label}.normal`)
+  assertFiniteVectorComponents(surface.uAxis, `${label}.uAxis`)
+  assertFiniteVectorComponents(surface.vAxis, `${label}.vAxis`)
+}
+
 function assertCompleteEffect(effect, label) {
   assert.notEqual(effect, undefined, `${label} is missing`)
   assert.equal(typeof effect.id, 'string')
@@ -936,32 +2638,28 @@ function assertCompleteEffect(effect, label) {
   }
 }
 
-async function buildMinimumViableLoadout(session, token, packet) {
-  let submitted = await placePartFromCatalog(session, token, packet, 'Body_Light_Frame')
-  submitted = await placePartFromCatalog(session, token, submitted.value.packet, 'Wheel_Small')
-  submitted = await placePartFromCatalog(session, token, submitted.value.packet, 'Weapon_Spear')
-
+async function buildConfirmableMachineLoadout(_session, _token, packet) {
   return {
-    packet: submitted.value.packet,
-    confirmAction: findLegalAction(submitted.value.packet, (action) => action.kind === 'confirm_loadout'),
+    packet,
+    confirmAction: findLegalAction(packet, (action) => action.kind === 'confirm_loadout'),
   }
 }
 
-async function confirmMinimumViableLoadout(session, token, packet) {
-  const built = await buildMinimumViableLoadout(session, token, packet)
+async function confirmMachineLoadout(session, token, packet) {
+  const built = await buildConfirmableMachineLoadout(session, token, packet)
 
   return submitPacketAction(session, token, built.packet, built.confirmAction)
 }
 
-async function confirmBothMinimumLoadouts(session, redToken, blueToken) {
+async function confirmBothMachineLoadouts(session, redToken, blueToken) {
   const redPacket = await session.getGameMasterPacketForToken(redToken)
   const bluePacket = await session.getGameMasterPacketForToken(blueToken)
 
   assert.equal(redPacket.ok, true)
   assert.equal(bluePacket.ok, true)
 
-  const redSubmission = await confirmMinimumViableLoadout(session, redToken, redPacket.value)
-  const blueSubmission = await confirmMinimumViableLoadout(session, blueToken, bluePacket.value)
+  const redSubmission = await confirmMachineLoadout(session, redToken, redPacket.value)
+  const blueSubmission = await confirmMachineLoadout(session, blueToken, bluePacket.value)
 
   return {
     redSubmission,
@@ -978,6 +2676,111 @@ function chooseCombatAction(packet) {
   )
 }
 
+async function submitCombatCommand(session, token, role, predicate) {
+  const packet = await session.getGameMasterPacketForToken(token)
+
+  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
+
+  const actionSet = session.exportState().activeActionSets?.[role]
+
+  assert.notEqual(actionSet, undefined)
+
+  const action = Object.values(actionSet.actions).find((candidate) => {
+    const command = combatActionCommand(candidate)
+
+    return command ? predicate(command, candidate) : false
+  })
+
+  assert.notEqual(action, undefined)
+
+  return submitPacketAction(
+    session,
+    token,
+    packet.value,
+    findLegalAction(packet.value, (legalAction) => legalAction.id === action.id),
+  )
+}
+
+async function createParameterizedCombatActionHarness() {
+  const session = await createTestSession('s_parameterized_actions')
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+
+  const stored = session.exportState()
+  const redActionSet = stored.activeActionSets?.red
+
+  assert.notEqual(redActionSet, undefined)
+  assert.notEqual(stored.combat, undefined)
+
+  const action = {
+    id: 'combat.red.parameterized.advance',
+    kind: 'move',
+    role: 'red',
+    parameterSchema: {
+      type: 'object',
+      required: ['targetCell', 'mode'],
+      properties: {
+        targetCell: {
+          type: 'integer',
+          label: 'Target cell',
+          summary: 'Forward cell count for this server-authored test action.',
+          minimum: 1,
+          maximum: 3,
+        },
+        mode: {
+          type: 'string',
+          label: 'Advance mode',
+          enum: ['probe', 'advance'],
+        },
+      },
+    },
+    parameterExamples: [
+      {
+        targetCell: 2,
+        mode: 'advance',
+      },
+    ],
+    payload: {
+      scope: 'combat_turn',
+      label: 'Parameterized advance',
+      summary: 'Server-owned parameterized action template for validation tests.',
+      command: {
+        tick: stored.combat.nextTick,
+        move: 'forward',
+      },
+    },
+  }
+
+  stored.activeActionSets = {
+    ...stored.activeActionSets,
+    red: {
+      ...redActionSet,
+      actions: {
+        [action.id]: action,
+      },
+    },
+  }
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:01:00.000Z',
+  })
+  const packet = await loaded.getGameMasterPacketForToken(redToken)
+
+  assert.equal(packet.ok, true)
+
+  return {
+    action,
+    packet: packet.value,
+    redToken,
+    session: loaded,
+  }
+}
+
 async function resolveLiveCombat(session, redToken, blueToken) {
   for (let index = 0; index < 90; index += 1) {
     const redPacket = await session.getGameMasterPacketForToken(redToken)
@@ -986,7 +2789,22 @@ async function resolveLiveCombat(session, redToken, blueToken) {
     assert.equal(redPacket.ok, true)
     assert.equal(bluePacket.ok, true)
 
+    if (redPacket.value.phase === 'round_review' || bluePacket.value.phase === 'round_review') {
+      return {
+        ok: true,
+        value: {
+          packet: redPacket.value,
+          publicState: session.getPublicState(),
+        },
+      }
+    }
+
     const redTurn = await submitPacketAction(session, redToken, redPacket.value, chooseCombatAction(redPacket.value))
+
+    if (redTurn.value.publicState.phase === 'round_review') {
+      return redTurn
+    }
+
     const blueTurn = await submitPacketAction(session, blueToken, bluePacket.value, chooseCombatAction(bluePacket.value))
 
     if (blueTurn.value.publicState.phase === 'round_review') {
@@ -1229,6 +3047,10 @@ test('part catalog definitions have complete mechanical parameters', () => {
 
     for (const mount of catalogPart.mounts) {
       assertCompleteMount(mount, `${catalogPart.id}.mounts.${mount.id}`)
+    }
+
+    for (const mountSurface of catalogPart.mountSurfaces) {
+      assertCompleteMountSurface(mountSurface, `${catalogPart.id}.mountSurfaces.${mountSurface.id}`)
     }
 
     for (const mechanic of catalogPart.mechanics ?? []) {
@@ -1507,9 +3329,103 @@ test('loadout actions use existing catalog specs and stay step-scoped', () => {
   assert.equal(lightFrameAction.label, lightFrame.displayName)
   assert.ok(lightFrameAction.summary.includes(`${lightFrame.cost} gold`))
   assert.ok(lightFrameAction.summary.includes(`${lightFrame.mass} mass`))
-  assert.equal(legalActions.every((action) => action.kind === 'choose_part'), true)
+  assert.equal(legalActions.filter((action) => action.kind === 'confirm_loadout').length, 1)
+  assert.equal(legalActions.at(-1).kind, 'confirm_loadout')
+  assert.equal(
+    legalActions
+      .filter((action) => action.kind !== 'confirm_loadout')
+      .every((action) => action.kind === 'choose_part'),
+    true,
+  )
   assert.equal(legalActions.some((action) => action.kind === 'choose_mount'), false)
   assert.equal(legalActions.some((action) => action.kind === 'choose_rotation'), false)
+})
+
+test('machine loadout rejects forged legacy grid placement actions', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+  const forgedChooseMount = applyLoadoutAction({
+    role: 'red',
+    gold: 100,
+    inventory: [],
+    buildState,
+    action: {
+      id: 'forged.legacy_mount',
+      kind: 'choose_mount',
+      role: 'red',
+      payload: {
+        scope: 'loadout_builder',
+        type: 'choose_mount',
+        label: 'Forged legacy mount',
+        summary: 'Forged legacy mount',
+        mount: 'side_front',
+        mountKind: 'side_socket',
+        mountMotion: 'static',
+        collisionPolicy: 'reject_overlap',
+        sector: 'front',
+        attachCell: { x: 0, z: 1 },
+      },
+    },
+  })
+  const forgedChooseRotation = applyLoadoutAction({
+    role: 'red',
+    gold: 100,
+    inventory: [],
+    buildState,
+    action: {
+      id: 'forged.legacy_rotation',
+      kind: 'choose_rotation',
+      role: 'red',
+      payload: {
+        scope: 'loadout_builder',
+        type: 'place_part',
+        label: 'Forged legacy rotation',
+        summary: 'Forged legacy rotation',
+        rotation: 0,
+        attachCell: { x: 0, z: 1 },
+      },
+    },
+  })
+
+  assert.equal(forgedChooseMount.ok, false)
+  assert.equal(forgedChooseMount.issues[0].code, 'LEGACY_GRID_ACTION_REJECTED')
+  assert.equal(forgedChooseRotation.ok, false)
+  assert.equal(forgedChooseRotation.issues[0].code, 'LEGACY_GRID_ACTION_REJECTED')
+})
+
+test('machine loadout confirm uses machine tree validity instead of legacy minimum viable rules', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+  const actionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 101,
+    actionSetId: 'red:r1:loadout:machine-confirm:v101',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 100,
+    buildState,
+  })
+  const confirmAction = Object.values(actionSet.actions)
+    .find((action) => action.kind === 'confirm_loadout')
+  const legacyIssues = validateLegacyMinimumViableLoadout(loadoutBuildStateLegacyDesign(buildState), PART_CATALOG)
+  const legacyCodes = new Set(legacyIssues.map((issue) => issue.code))
+
+  assert.notEqual(confirmAction, undefined)
+  assert.equal(validateMachineTree(buildState.currentDesign.machine).length, 0)
+  assert.equal(legacyCodes.has('MISSING_CORE'), true)
+  assert.equal(legacyCodes.has('MISSING_MOBILITY'), true)
+  assert.equal(legacyCodes.has('MISSING_WEAPON'), true)
+
+  const confirmed = applyLoadoutAction({
+    role: 'red',
+    gold: 100,
+    inventory: [],
+    buildState,
+    action: confirmAction,
+  })
+
+  assert.equal(confirmed.ok, true)
+  assert.equal(confirmed.confirmed, true)
+  assert.equal(confirmed.buildState.currentDesign.version, 'machine:v1')
 })
 
 test('loadout action application mutates design through canonical payloads', () => {
@@ -1566,49 +3482,294 @@ test('loadout action application mutates design through canonical payloads', () 
     role: 'red',
     round: 1,
     decisionVersion: 102,
-    actionSetId: 'red:r1:loadout:choose_mount:v102',
+    actionSetId: 'red:r1:loadout:propose_mount_pose:v102',
     createdAt: '2026-06-07T00:00:00.000Z',
     arenaVersion: 'arena:v1',
     gold,
     buildState,
   })
-  applied = applyLoadoutAction({
-    role: 'red',
-    gold,
-    inventory,
-    buildState,
-    action: Object.values(actionSet.actions)[0],
+  const poseAction = Object.values(actionSet.actions)
+    .find((action) => action.kind === 'propose_mount_pose')
+  const coreShell = SYSTEM_MACHINE_CORE_DEFINITION.mountSurfaces.find((surface) => surface.id === 'core_shell')
+
+  assert.notEqual(poseAction, undefined)
+  assert.notEqual(coreShell, undefined)
+
+  const poseParameters = defaultMountPoseParameters(poseAction, {
+    mountSurfaceId: 'core_shell',
+    u: 0.25,
+    v: 0.5,
+    yawDegrees: 90,
+    rollDegrees: 0,
   })
 
-  assert.equal(applied.ok, true)
-  buildState = applied.buildState
-  actionSet = buildLoadoutActionSet({
-    role: 'red',
-    round: 1,
-    decisionVersion: 103,
-    actionSetId: 'red:r1:loadout:choose_rotation:v103',
-    createdAt: '2026-06-07T00:00:00.000Z',
-    arenaVersion: 'arena:v1',
-    gold,
-    buildState,
-  })
+  assert.deepEqual(Object.keys(poseAction.parameterSchema.properties).sort(), [
+    'childPartId',
+    'mountSurfaceId',
+    'parentInstanceId',
+    'rollDegrees',
+    'u',
+    'v',
+    'yawDegrees',
+  ])
+  assert.equal(poseAction.parameterSchema.properties.u.enum, undefined)
+  assert.equal(poseAction.parameterSchema.properties.v.enum, undefined)
+
   applied = applyLoadoutAction({
     role: 'red',
     gold,
     inventory,
     buildState,
-    action: Object.values(actionSet.actions)[0],
+    action: {
+      ...poseAction,
+      payload: {
+        ...poseAction.payload,
+        parameters: poseParameters,
+      },
+    },
   })
 
   assert.equal(applied.ok, true)
   gold = applied.gold
   inventory = applied.inventory
   buildState = applied.buildState
+  const resolvedPose = resolveMountPose({
+    surface: coreShell,
+    partCategory: 'body',
+    u: poseParameters.u,
+    v: poseParameters.v,
+    yawDegrees: poseParameters.yawDegrees,
+    rollDegrees: poseParameters.rollDegrees,
+  })
+  const placedMachinePart = buildState.currentDesign.machine.parts.find((part) => part.instanceId === 'part_1')
+  const attachment = buildState.currentDesign.machine.attachments.find((entry) => entry.childInstanceId === 'part_1')
 
   assert.equal(gold, 84)
   assert.deepEqual(inventory, [{ partId: 'Body_Light_Frame', quantity: 1 }])
-  assert.deepEqual(buildState.currentDesign.parts.map((part) => part.partId), ['Body_Light_Frame'])
-  assert.equal(validateMinimumViableLoadout(buildState.currentDesign).some((entry) => entry.code === 'MISSING_MOBILITY'), true)
+  assert.deepEqual(loadoutBuildStateLegacyDesign(buildState).parts.map((part) => part.partId), ['Body_Light_Frame'])
+  assert.deepEqual(placedMachinePart.transform.position, resolvedPose.position)
+  assert.deepEqual(placedMachinePart.transform.rotation, [0, 90, 0])
+  assert.deepEqual(placedMachinePart.transform.orientation, resolvedPose.orientation)
+  assert.deepEqual(attachment.transform.orientation, resolvedPose.orientation)
+  assert.equal(attachment.parentInstanceId, 'core')
+  assert.equal(attachment.mountId, 'core_shell')
+  assert.equal(validateLegacyMinimumViableLoadout(loadoutBuildStateLegacyDesign(buildState)).some((entry) => entry.code === 'MISSING_MOBILITY'), true)
+})
+
+test('machine loadout pose can place on child part surfaces', () => {
+  const harness = createBuilderHarness()
+  const body = placePartInHarness(harness, 'Body_Light_Frame', { mountSurfaceId: 'core_shell' })
+
+  assert.equal(body.instanceId, 'part_1')
+
+  const poseAction = advanceBuilderToMountPose(harness, 'Weapon_Laser', body.instanceId)
+  const applied = applyBuilderAction(
+    harness,
+    builderActionWithMountPoseParameters(poseAction, {
+      mountSurfaceId: 'deck_panel',
+      u: 0.75,
+      v: 0.25,
+      yawDegrees: 45,
+      rollDegrees: 15,
+    }),
+  )
+  const laserPart = applied.buildState.currentDesign.machine.parts.find((part) => part.instanceId === 'part_2')
+  const laserAttachment = applied.buildState.currentDesign.machine.attachments.find(
+    (attachment) => attachment.childInstanceId === 'part_2',
+  )
+
+  assert.equal(applied.ok, true)
+  assert.equal(laserAttachment.parentInstanceId, body.instanceId)
+  assert.equal(laserAttachment.mountId, 'deck_panel')
+  assert.deepEqual(laserPart.transform.rotation, [0, 45, 15])
+  assert.notEqual(laserPart.transform.orientation, undefined)
+  assert.notDeepEqual(laserPart.transform.orientation.forward, [0, 0, 1])
+})
+
+test('machine pose rejects invalid parent and unsupported surface without mutating design', () => {
+  const harness = createBuilderHarness()
+  const body = placePartInHarness(harness, 'Body_Light_Frame', { mountSurfaceId: 'core_shell' })
+  const wheel = placePartInHarness(harness, 'Wheel_Small', {
+    targetInstanceId: body.instanceId,
+    mountSurfaceId: 'hull_shell',
+  })
+
+  applyBuilderAction(
+    harness,
+    chooseBuilderAction(
+      harness,
+      (action) => action.kind === 'choose_part' && action.payload.partId === 'Weapon_Laser',
+    ),
+  )
+
+  const baseState = harness.buildState
+  const baseGold = harness.gold
+  const baseDesign = JSON.stringify(baseState.currentDesign)
+  const missingParentState = {
+    ...baseState,
+    step: 'propose_mount_pose',
+    selectedAttachTargetId: 'ghost_parent',
+  }
+  const missingParent = applyLoadoutAction({
+    role: 'red',
+    gold: baseGold,
+    inventory: harness.inventory,
+    buildState: missingParentState,
+    action: forgedMountPoseAction('Weapon_Laser', 'ghost_parent', 'deck_panel'),
+    catalog: harness.catalog,
+  })
+  const detachedState = {
+    ...baseState,
+    step: 'propose_mount_pose',
+    selectedAttachTargetId: body.instanceId,
+    currentDesign: {
+      version: 'machine:v1',
+      machine: {
+        ...baseState.currentDesign.machine,
+        runtime: {
+          healthByInstanceId: {},
+          detachedInstanceIds: [body.instanceId],
+        },
+      },
+    },
+  }
+  const detachedParent = applyLoadoutAction({
+    role: 'red',
+    gold: baseGold,
+    inventory: harness.inventory,
+    buildState: detachedState,
+    action: forgedMountPoseAction('Weapon_Laser', body.instanceId, 'deck_panel'),
+    catalog: harness.catalog,
+  })
+  const unsupportedSurfaceState = {
+    ...baseState,
+    step: 'propose_mount_pose',
+    selectedAttachTargetId: wheel.instanceId,
+  }
+  const unsupportedSurface = applyLoadoutAction({
+    role: 'red',
+    gold: baseGold,
+    inventory: harness.inventory,
+    buildState: unsupportedSurfaceState,
+    action: forgedMountPoseAction('Weapon_Laser', wheel.instanceId, 'deck_panel'),
+    catalog: harness.catalog,
+  })
+
+  assert.equal(missingParent.ok, false)
+  assert.equal(missingParent.issues[0].code, 'INVALID_ATTACH_TARGET')
+  assert.equal(detachedParent.ok, false)
+  assert.equal(detachedParent.issues[0].code, 'DETACHED_ATTACH_TARGET')
+  assert.equal(unsupportedSurface.ok, false)
+  assert.equal(unsupportedSurface.issues.some((issue) => issue.code === 'MOUNT_SURFACE_CATEGORY_REJECTED'), true)
+  assert.equal(harness.gold, baseGold)
+  assert.equal(JSON.stringify(baseState.currentDesign), baseDesign)
+})
+
+test('machine pose rejects invalid uv before spending gold or mutating design', () => {
+  const harness = createBuilderHarness()
+  const poseAction = advanceBuilderToMountPose(harness, 'Body_Light_Frame', 'core')
+  const beforeGold = harness.gold
+  const beforeInventory = JSON.stringify(harness.inventory)
+  const beforeDesign = JSON.stringify(harness.buildState.currentDesign)
+  const rejected = tryBuilderAction(
+    harness,
+    builderActionWithMountPoseParameters(poseAction, {
+      mountSurfaceId: 'core_shell',
+      u: -0.1,
+      v: 0.5,
+    }),
+  )
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues.some((issue) => issue.code === 'MOUNT_PARAMETER_OUT_OF_BOUNDS'), true)
+  assert.equal(harness.gold, beforeGold)
+  assert.equal(JSON.stringify(harness.inventory), beforeInventory)
+  assert.equal(JSON.stringify(harness.buildState.currentDesign), beforeDesign)
+})
+
+test('machine pose rejects insufficient gold before spending or mutating design', () => {
+  const harness = createBuilderHarness(5)
+  harness.buildState = {
+    ...harness.buildState,
+    step: 'propose_mount_pose',
+    selectedPartId: 'Weapon_Laser',
+    selectedAttachTargetId: 'core',
+  }
+  const beforeGold = harness.gold
+  const beforeInventory = JSON.stringify(harness.inventory)
+  const beforeDesign = JSON.stringify(harness.buildState.currentDesign)
+  const rejected = tryBuilderAction(
+    harness,
+    forgedMountPoseAction('Weapon_Laser', 'core', 'core_shell', { u: 0, v: 0.5 }),
+  )
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues[0].code, 'INSUFFICIENT_GOLD')
+  assert.equal(harness.gold, beforeGold)
+  assert.equal(JSON.stringify(harness.inventory), beforeInventory)
+  assert.equal(JSON.stringify(harness.buildState.currentDesign), beforeDesign)
+})
+
+test('machine purchased part limit excludes immutable core', () => {
+  const harness = createBuilderHarness()
+  const baseState = createInitialLoadoutBuildState('red')
+  const almostFilledMachine = {
+    ...baseState.currentDesign.machine,
+    parts: [
+      ...baseState.currentDesign.machine.parts,
+      ...Array.from({ length: LOADOUT_PART_LIMIT - 1 }, (_, index) => ({
+        instanceId: `part_${index + 1}`,
+        definitionId: 'catalog:Armor_Tile',
+        source: 'catalog_part',
+        transform: {
+          position: [index + 1, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+        },
+      })),
+    ],
+  }
+  const allowedState = {
+    ...baseState,
+    step: 'propose_mount_pose',
+    selectedPartId: 'Armor_Tile',
+    selectedAttachTargetId: 'core',
+    currentDesign: {
+      version: 'machine:v1',
+      machine: almostFilledMachine,
+    },
+  }
+  const allowed = applyLoadoutAction({
+    role: 'red',
+    gold: 1000,
+    inventory: harness.inventory,
+    buildState: allowedState,
+    action: forgedMountPoseAction('Armor_Tile', 'core', 'core_deck'),
+    catalog: harness.catalog,
+  })
+
+  assert.equal(allowed.ok, true)
+
+  const fullState = {
+    ...allowed.buildState,
+    step: 'propose_mount_pose',
+    selectedPartId: 'Armor_Tile',
+    selectedAttachTargetId: 'core',
+  }
+  const rejected = applyLoadoutAction({
+    role: 'red',
+    gold: allowed.gold,
+    inventory: allowed.inventory,
+    buildState: fullState,
+    action: forgedMountPoseAction('Armor_Tile', 'core', 'core_deck'),
+    catalog: harness.catalog,
+  })
+
+  assert.equal(almostFilledMachine.parts.filter((part) => part.source === 'system_core').length, 1)
+  assert.equal(almostFilledMachine.parts.filter((part) => part.source === 'catalog_part').length, LOADOUT_PART_LIMIT - 1)
+  assert.equal(allowed.buildState.currentDesign.machine.parts.filter((part) => part.source === 'catalog_part').length, LOADOUT_PART_LIMIT)
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.issues[0].code, 'PART_LIMIT_REACHED')
 })
 
 test('catalog_non_style_parts_are_normal_rarity', () => {
@@ -1634,7 +3795,7 @@ test('catalog_style_parts_are_rare_signature_parts', () => {
 })
 
 test('style_signature_requires_single_active_effect', () => {
-  const issues = validateMinimumViableLoadout({
+  const issues = validateLegacyMinimumViableLoadout({
     name: 'double signature',
     rootInstanceId: 'body',
     activeSignaturePartInstanceId: 'flag',
@@ -1663,7 +3824,7 @@ test('dragon_head_fire_breath_is_typed_not_flavor_text', () => {
 })
 
 test('top_socket_weapon_mount_generates_legal_action', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   applyBuilderAction(
@@ -1685,7 +3846,7 @@ test('top_socket_weapon_mount_generates_legal_action', () => {
 })
 
 test('builder_generates_rim_mount_for_laser_on_wheel', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const wheel = placePartInHarness(harness, 'Wheel_Omni')
@@ -1718,7 +3879,7 @@ test('rim_mount_weapon_inherits_parent_spin', () => {
 })
 
 test('allow_clip_mount_can_share_anchor_cell', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const laser = placePartInHarness(harness, 'Weapon_Laser', {
@@ -1731,7 +3892,7 @@ test('allow_clip_mount_can_share_anchor_cell', () => {
 })
 
 test('reject_overlap_mount_rejects_occupied_cell', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   placePartInHarness(harness, 'Wheel_Omni', {
@@ -1773,7 +3934,7 @@ test('below_floor_part_rejected_or_occluded_by_floor_rule', () => {
   const unsafeCatalog = PART_CATALOG.map((part) => part.id === 'Weapon_Laser'
     ? { ...part, footprint: { ...part.footprint, minY: -1 } }
     : part)
-  const issues = validateMinimumViableLoadout({
+  const issues = validateLegacyMinimumViableLoadout({
     name: 'below floor weapon',
     rootInstanceId: 'body',
     parts: [
@@ -1787,7 +3948,7 @@ test('below_floor_part_rejected_or_occluded_by_floor_rule', () => {
 })
 
 test('builder_remove_part_refunds_unconfirmed_draft', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const beforeGold = harness.gold
@@ -1801,11 +3962,11 @@ test('builder_remove_part_refunds_unconfirmed_draft', () => {
   assert.equal(harness.gold, beforeGold)
   assert.equal(harness.gold > afterWheelGold, true)
   assert.equal(harness.inventory.some((item) => item.partId === 'Wheel_Omni'), false)
-  assert.equal(harness.buildState.currentDesign.parts.some((part) => part.instanceId === wheel.instanceId), false)
+  assert.equal(loadoutBuildStateLegacyDesign(harness.buildState).parts.some((part) => part.instanceId === wheel.instanceId), false)
 })
 
 test('builder_remove_parent_requires_remove_subtree', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
@@ -1833,7 +3994,7 @@ test('builder_remove_parent_requires_remove_subtree', () => {
 })
 
 test('builder_remove_subtree_removes_children', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const wheel = placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
@@ -1847,13 +4008,13 @@ test('builder_remove_subtree_removes_children', () => {
     chooseBuilderAction(harness, (action) => action.kind === 'remove_subtree' && action.payload.instanceId === wheel.instanceId),
   )
 
-  assert.equal(harness.buildState.currentDesign.parts.map((part) => part.partId).join(','), 'Body_Light_Frame')
+  assert.equal(loadoutBuildStateLegacyDesign(harness.buildState).parts.map((part) => part.partId).join(','), 'Body_Light_Frame')
   assert.ok(harness.gold > beforeRemoveGold)
   assert.equal(harness.inventory.some((item) => item.partId === 'Weapon_Laser'), false)
 })
 
 test('builder_move_part_remounts_with_catalog_mounts', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const wheel = placePartInHarness(harness, 'Wheel_Omni', {
@@ -1878,7 +4039,7 @@ test('builder_move_part_remounts_with_catalog_mounts', () => {
     chooseBuilderAction(harness, (action) => action.kind === 'choose_rotation' && action.payload.rotation === 0),
   )
 
-  const moved = harness.buildState.currentDesign.parts.find((part) => part.instanceId === wheel.instanceId)
+  const moved = loadoutBuildStateLegacyDesign(harness.buildState).parts.find((part) => part.instanceId === wheel.instanceId)
 
   assert.deepEqual(moved?.cell, { x: 0, z: -1 })
   assert.equal(moved?.mountId, 'side_rear')
@@ -1886,7 +4047,7 @@ test('builder_move_part_remounts_with_catalog_mounts', () => {
 })
 
 test('builder_rotate_part_uses_server_rotation_action', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   applyBuilderAction(
@@ -1898,11 +4059,11 @@ test('builder_rotate_part_uses_server_rotation_action', () => {
     ),
   )
 
-  assert.equal(harness.buildState.currentDesign.parts[0].rotation, 90)
+  assert.equal(loadoutBuildStateLegacyDesign(harness.buildState).parts[0].rotation, 90)
 })
 
 test('agent_cannot_submit_raw_mount_transform', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   applyBuilderAction(
@@ -1937,7 +4098,7 @@ test('agent_cannot_submit_raw_mount_transform', () => {
 })
 
 test('builder_rejects_raw_transform_payload', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   applyBuilderAction(
@@ -2006,7 +4167,7 @@ test('catalog_mobility_specs_drive_move_budget', () => {
 })
 
 test('rim_laser_inherits_spin_and_resolves_sweep', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const wheel = placePartInHarness(harness, 'Wheel_Omni', { targetInstanceId: 'part_1' })
@@ -2014,7 +4175,7 @@ test('rim_laser_inherits_spin_and_resolves_sweep', () => {
     targetInstanceId: wheel.instanceId,
     mountPredicate: (action) => action.payload.mount === 'rim_outer',
   })
-  const blueprint = botDesignSnapshotToBlueprint(harness.buildState.currentDesign)
+  const blueprint = botDesignSnapshotToLegacyBotBlueprintProjection(loadoutBuildStateLegacyDesign(harness.buildState))
   const input = {
     round: 1,
     seed: 'rim-laser',
@@ -2075,7 +4236,7 @@ test('rim_laser_inherits_spin_and_resolves_sweep', () => {
 })
 
 test('spinning_laser_uses_sweep_envelope_not_direct_aim', () => {
-  const harness = createBuilderHarness()
+  const harness = createLegacyBuilderHarness()
 
   placePartInHarness(harness, 'Body_Light_Frame')
   const wheel = placePartInHarness(harness, 'Wheel_Omni')
@@ -2169,7 +4330,7 @@ test('store_has_no_dedicated_rare_signature_style_slot', () => {
   }
 })
 
-test('store_foundation_parts_are_always_available', () => {
+test('store_has_no_hidden_foundation_offers', () => {
   const redStore = buildCatalogStore({
     catalog: PART_CATALOG,
     role: 'red',
@@ -2184,25 +4345,14 @@ test('store_foundation_parts_are_always_available', () => {
     seed: 'foundation-store',
     gold: 15,
   })
-  const requiredFoundation = [
-    'Body_Square_Small',
-    'Body_Light_Frame',
-    'Frame_Strut',
-    'Mount_Plate',
-    'Wheel_Small',
-    'Tread_Light',
-    'Weapon_Spear',
-  ]
 
-  for (const partId of requiredFoundation) {
-    assert.ok(redStore.foundationPartIds.includes(partId), `${partId} missing from red foundation`)
-    assert.ok(blueStore.foundationPartIds.includes(partId), `${partId} missing from blue foundation`)
-    assert.ok(redStore.offeredPartIds.includes(partId), `${partId} missing from red offers`)
-    assert.ok(blueStore.offeredPartIds.includes(partId), `${partId} missing from blue offers`)
-  }
+  assert.deepEqual(redStore.foundationPartIds, [])
+  assert.deepEqual(blueStore.foundationPartIds, [])
+  assert.deepEqual(redStore.offeredPartIds.sort(), redStore.slots.map((slot) => slot.partId).sort())
+  assert.deepEqual(blueStore.offeredPartIds.sort(), blueStore.slots.map((slot) => slot.partId).sort())
 })
 
-test('store_rails_limit_rare_signature_and_keep_viability', () => {
+test('store_limits_rare_signature_without_minimum_viability_rails', () => {
   const gold = 18
   const store = buildCatalogStore({
     catalog: PART_CATALOG,
@@ -2212,7 +4362,6 @@ test('store_rails_limit_rare_signature_and_keep_viability', () => {
     gold,
   })
   const partsById = new Map(PART_CATALOG.map((part) => [part.id, part]))
-  const offeredParts = store.offeredPartIds.map((partId) => partsById.get(partId)).filter(Boolean)
   const rareSignatureSlots = store.slots.filter((slot) => {
     const part = partsById.get(slot.partId)
 
@@ -2223,13 +4372,8 @@ test('store_rails_limit_rare_signature_and_keep_viability', () => {
     0,
   )
 
-  assert.ok(offeredParts.some((part) => part.category === 'weapon' && part.cost <= gold))
-  assert.ok(offeredParts.some((part) =>
-    part.category === 'mobility' &&
-    part.cost <= gold &&
-    part.spec.kind === 'mobility' &&
-    part.spec.moveBudget > 0,
-  ))
+  assert.deepEqual(store.foundationPartIds, [])
+  assert.deepEqual(store.offeredPartIds.sort(), store.slots.map((slot) => slot.partId).sort())
   assert.ok(rareSignatureSlots.length <= 1)
   assert.ok(totalRareSignatureCost <= RARE_SIGNATURE_STORE_MAX_COST)
 })
@@ -2248,7 +4392,11 @@ test('loadout_action_set_exposes_role_store_to_packet_contract', () => {
 
   assert.equal(actionSet.catalogStore?.role, 'red')
   assert.equal(actionSet.catalogStore?.slots.length, 10)
-  assert.ok(actionSet.catalogStore?.offeredPartIds.includes('Body_Square_Small'))
+  assert.deepEqual(actionSet.catalogStore?.foundationPartIds, [])
+  assert.deepEqual(
+    actionSet.catalogStore?.offeredPartIds.sort(),
+    actionSet.catalogStore?.slots.map((slot) => slot.partId).sort(),
+  )
 })
 
 test('blueprint validation catches empty-processable edge cases', () => {
@@ -4005,6 +6153,110 @@ test('sessions require both roles before opening loadout actions', async () => {
   })
 })
 
+test('GameMaster fixed actions reject parameters and still accept fixed submissions', async () => {
+  const session = await createTestSession('s_fixed_action_parameters')
+  const { redToken } = await claimBothRoles(session)
+  const packet = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(packet.ok, true)
+
+  const fixedAction = findLegalAction(packet.value, (action) => !action.parameterSchema)
+  const rejected = await session.submitGameMasterAction(redToken, {
+    ...actionSubmissionFromPacket(packet.value, fixedAction.id),
+    parameters: {},
+  })
+
+  assert.equal(rejected.ok, false)
+  assert.equal(rejected.error.code, 'SUBMISSION_INVALID')
+  assert.ok(rejected.error.issues.some((issue) => issue.code === 'UNEXPECTED_PARAMETERS'))
+
+  const accepted = await session.submitGameMasterAction(
+    redToken,
+    actionSubmissionFromPacket(packet.value, fixedAction.id),
+  )
+
+  assert.equal(accepted.ok, true)
+})
+
+test('GameMaster parameterized actions validate schemas and hash normalized parameters', async () => {
+  const {
+    action,
+    packet,
+    redToken,
+    session,
+  } = await createParameterizedCombatActionHarness()
+  const exposedAction = findLegalAction(packet, (candidate) => candidate.id === action.id)
+
+  assert.deepEqual(exposedAction.parameterSchema, action.parameterSchema)
+  assert.deepEqual(exposedAction.parameterExamples, action.parameterExamples)
+  assert.equal(JSON.stringify(packet.legalActions).includes('"payload"'), false)
+
+  const baseSubmission = actionSubmissionFromPacket(packet, action.id)
+  const missingRequired = await session.submitGameMasterAction(redToken, baseSubmission)
+
+  assert.equal(missingRequired.ok, false)
+  assert.equal(missingRequired.error.code, 'SUBMISSION_INVALID')
+  assert.ok(
+    missingRequired.error.issues.some(
+      (issue) => issue.code === 'MISSING_REQUIRED_PARAMETER' && issue.path.endsWith('.targetCell'),
+    ),
+  )
+
+  const unknownParameter = await session.submitGameMasterAction(redToken, {
+    ...baseSubmission,
+    parameters: {
+      targetCell: 2,
+      mode: 'advance',
+      extra: true,
+    },
+  })
+
+  assert.equal(unknownParameter.ok, false)
+  assert.ok(unknownParameter.error.issues.some((issue) => issue.code === 'UNKNOWN_PARAMETER'))
+
+  const outOfRange = await session.submitGameMasterAction(redToken, {
+    ...baseSubmission,
+    parameters: {
+      targetCell: 4,
+      mode: 'advance',
+    },
+  })
+
+  assert.equal(outOfRange.ok, false)
+  assert.ok(outOfRange.error.issues.some((issue) => issue.code === 'PARAMETER_OUT_OF_RANGE'))
+
+  const valid = await session.submitGameMasterAction(redToken, {
+    ...baseSubmission,
+    parameters: {
+      mode: 'advance',
+      targetCell: 2,
+    },
+  })
+
+  assert.equal(valid.ok, true)
+
+  const reorderedEquivalent = await session.submitGameMasterAction(redToken, {
+    ...baseSubmission,
+    parameters: {
+      targetCell: 2,
+      mode: 'advance',
+    },
+  })
+
+  assert.equal(reorderedEquivalent.ok, true)
+
+  const differentParameters = await session.submitGameMasterAction(redToken, {
+    ...baseSubmission,
+    parameters: {
+      mode: 'advance',
+      targetCell: 3,
+    },
+  })
+
+  assert.equal(differentParameters.ok, false)
+  assert.equal(differentParameters.error.code, 'ALREADY_SUBMITTED')
+})
+
 test('agent bootstrap uses the invite claim token as a reusable player key', async () => {
   const session = await createTestSession()
   const badBootstrap = await session.bootstrapRole('red', 'claim_not_real', {})
@@ -4402,6 +6654,183 @@ test('session rate limits repeated private state attempts', async () => {
   assert.equal(third.error.code, 'RATE_LIMITED')
 })
 
+test('no-mobility machine combat legal actions are hold-only and not projection-derived', async () => {
+  const session = await createTestSession('s_machine_combat_hold_only')
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  const { blueSubmission } = await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+  const stored = session.exportState()
+  const redActionSet = stored.activeActionSets.red
+  const redRole = stored.roles.red
+  const projectedMachine = createInitialMachineDesign('red')
+  const projectedControls = deriveControls(machineDesignToLegacyBotBlueprintProjection({
+    ...projectedMachine,
+    parts: [
+      projectedMachine.parts[0],
+      machinePart('projected_wheel', {
+        definitionId: 'catalog:Wheel_Small',
+        transform: machineTransform({ position: [-3, 0, 0], rotation: [0, 90, 90] }),
+      }),
+      machinePart('projected_weapon', {
+        definitionId: 'catalog:Weapon_Spear',
+        transform: machineTransform({ position: [3, 0, 0], rotation: [0, 180, 0] }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'projected_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'projected_weapon', { mountId: 'core_shell' }),
+    ],
+  }))
+  const commands = Object.values(redActionSet.actions)
+    .map((action) => combatActionCommand(action))
+    .filter(Boolean)
+
+  assert.equal(redPacket.ok, true)
+  assert.deepEqual(redPacket.value.legalActions.map((action) => action.kind), ['hold'])
+  assert.equal(redRole.controls, undefined)
+  assert.equal(projectedControls.movement.includes('forward'), true)
+  assert.equal(projectedControls.weaponA?.includes('fire'), true)
+  assert.deepEqual(commands, [{ tick: 1, move: 'brake' }])
+})
+
+test('active machine combat packets expose capability-generated canonical actions without command payloads', async () => {
+  const session = await createTestSession('s_machine_combat_capability_packet')
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const initial = createInitialMachineDesign('red')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('omni_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const stored = session.exportState()
+  stored.roles.red.storedDesign = {
+    version: 'machine:v1',
+    machine,
+  }
+  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(machine)
+  delete stored.roles.red.controls
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:01:00.000Z',
+  })
+  const packet = await loaded.getGameMasterPacketForToken(redToken)
+
+  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
+
+  const redActionSet = loaded.exportState().activeActionSets.red
+  const commands = Object.values(redActionSet.actions)
+    .map((action) => combatActionCommand(action))
+    .filter(Boolean)
+
+  assert.equal(packet.value.phase, 'combat_turn')
+  assert.equal(packet.value.legalActions.some((action) => action.kind === 'move'), true)
+  assert.equal(packet.value.legalActions.some((action) => action.kind === 'ready'), false)
+  assert.equal(JSON.stringify(packet.value.legalActions).includes('command'), false)
+  assert.equal(commands.some((command) => command.move === 'strafe_left'), true)
+  assert.equal(commands.some((command) => command.move === 'strafe_right'), true)
+})
+
+test('worker machine combat replays cumulative actions from baseline while packets use persisted runtime', async () => {
+  const session = await createTestSession('s_machine_combat_runtime_baseline')
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const initial = createInitialMachineDesign('red')
+  const redMachine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('omni_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('rim_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
+      machineAttachment('core', 'rim_laser', { mountId: 'core_shell' }),
+    ],
+  }
+  const blueMachine = createInitialMachineDesign('blue')
+  const stored = session.exportState()
+
+  stored.roles.red.storedDesign = {
+    version: 'machine:v1',
+    machine: redMachine,
+  }
+  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(redMachine)
+  stored.roles.blue.storedDesign = {
+    version: 'machine:v1',
+    machine: blueMachine,
+  }
+  stored.roles.blue.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(blueMachine)
+  stored.combat.baselineMachineDesigns = {
+    red: structuredClone(redMachine),
+    blue: structuredClone(blueMachine),
+  }
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => '2026-06-03T00:01:00.000Z',
+  })
+
+  await submitCombatCommand(loaded, redToken, 'red', (command) => command.move === 'turn_right')
+  const firstTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
+
+  assert.equal(firstTurn.value.publicState.phase, 'combat_turn')
+
+  const afterFirstTurn = loaded.exportState()
+  const redRuntimeAfterFirstTurn = afterFirstTurn.roles.red.storedDesign.machine.runtime
+
+  assertVectorClose(redRuntimeAfterFirstTurn.orientationByInstanceId.core.forward, [1, 0, 0], 'first persisted core forward')
+  assert.equal(afterFirstTurn.combat.baselineMachineDesigns.red.runtime, undefined)
+
+  const redSecondPacket = await loaded.getGameMasterPacketForToken(redToken)
+  const redSecondCommands = Object.values(loaded.exportState().activeActionSets.red.actions)
+    .map((action) => combatActionCommand(action))
+    .filter(Boolean)
+
+  assert.equal(redSecondPacket.ok, true, redSecondPacket.ok ? undefined : JSON.stringify(redSecondPacket.error))
+  assert.equal(redSecondCommands.some((command) => command.weaponA === 'fire'), true)
+
+  await submitCombatCommand(loaded, redToken, 'red', (command) => command.weaponA === 'fire')
+  const secondTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
+
+  assert.equal(secondTurn.value.publicState.phase, 'combat_turn')
+
+  const afterSecondTurn = loaded.exportState()
+  const redRuntimeAfterSecondTurn = afterSecondTurn.roles.red.storedDesign.machine.runtime
+  const blueRuntimeAfterSecondTurn = afterSecondTurn.roles.blue.storedDesign.machine.runtime
+
+  assertVectorClose(redRuntimeAfterSecondTurn.orientationByInstanceId.core.forward, [1, 0, 0], 'second persisted core forward')
+  assert.equal(afterSecondTurn.combat.snapshot.recentEvents.includes('red fired weaponA'), true)
+  assert.equal(blueRuntimeAfterSecondTurn.healthByInstanceId.core < 20, true)
+  assert.equal(afterSecondTurn.combat.baselineMachineDesigns.red.runtime, undefined)
+})
+
 test('session resolves after both confirmed loadouts while keeping public state redacted', async () => {
   const session = await createTestSession()
   const { redToken, blueToken } = await claimBothRoles(session)
@@ -4411,7 +6840,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(redPacket.ok, true)
   assert.equal(bluePacket.ok, true)
 
-  const redSubmission = await confirmMinimumViableLoadout(session, redToken, redPacket.value)
+  const redSubmission = await confirmMachineLoadout(session, redToken, redPacket.value)
 
   assert.equal(redSubmission.ok, true)
   assert.equal(redSubmission.value.publicState.phase, 'submission_phase')
@@ -4426,7 +6855,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(preReplay.ok, false)
   assert.equal(preReplay.error.code, 'REPLAY_NOT_AVAILABLE')
 
-  const blueSubmission = await confirmMinimumViableLoadout(session, blueToken, bluePacket.value)
+  const blueSubmission = await confirmMachineLoadout(session, blueToken, bluePacket.value)
   const blueState = await session.getRoleStateForToken(blueToken)
 
   assert.equal(blueSubmission.ok, true)
@@ -4439,7 +6868,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')
   assert.equal(blueState.value.combat.decision.tick, 1)
-  assert.equal(blueState.value.combat.decision.availableCommands.movement.includes('forward'), true)
+  assert.deepEqual(blueState.value.combat.decision.availableCommands, { movement: ['brake'] })
   assert.equal(blueState.value.combat.decision.range.band, 'long')
   assert.deepEqual(blueState.value.combat.decision.positioning.selfCell, { x: 6, z: 0 })
   assert.deepEqual(blueState.value.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
@@ -4447,7 +6876,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueState.value.combat.decision.positioning.bearingToOpponent, 'west')
   assert.equal(blueState.value.combat.decision.hazards.active.includes('floor_saw'), true)
   assert.equal(blueState.value.combat.decision.arenaPressure.selfNearHazard, false)
-  assert.ok(blueState.value.combat.decision.movementGuidance.approach.length > 0)
+  assert.deepEqual(blueState.value.combat.decision.movementGuidance.approach, ['brake'])
   assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
 
@@ -4462,6 +6891,9 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(replay.ok, true)
   assert.equal(replay.value.botBlueprints.red.name, 'red loadout')
   assert.equal(replay.value.botBlueprints.blue.name, 'blue loadout')
+  assert.equal(resolved.value.publicState.lastResult.damage.red, 0)
+  assert.equal(resolved.value.publicState.lastResult.damage.blue, 0)
+  assert.equal(replay.value.events.some((event) => event.type === 'weapon_fire'), false)
   assert.deepEqual(replay.value.teamIdentities.red, expectedLegacyTeamIdentity('red'))
   assert.deepEqual(replay.value.teamIdentities.blue, expectedLegacyTeamIdentity('blue'))
   assert.equal(validateReplayTimeline(replay.value), true)
@@ -4485,7 +6917,7 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   })
   const { redToken, blueToken } = await claimBothRoles(session)
 
-  const { blueSubmission } = await confirmBothMinimumLoadouts(session, redToken, blueToken)
+  const { blueSubmission } = await confirmBothMachineLoadouts(session, redToken, blueToken)
 
   assert.equal(blueSubmission.ok, true)
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
@@ -4496,9 +6928,11 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   const redState = await session.getRoleStateForToken(redToken)
 
   assert.equal(redState.ok, true)
-  assert.equal(redState.value.phase, 'combat_turn')
-  assert.equal(redState.value.combat.tick, 2)
-  assert.equal(redState.value.combat.submitted.red, false)
+  assert.equal(redState.value.phase, 'round_review')
+  assert.equal(redState.value.combat, undefined)
+  assert.equal(redState.value.replayAvailable, true)
+  assert.equal(redState.value.lastResult.damage.red, 0)
+  assert.equal(redState.value.lastResult.damage.blue, 0)
   assert.equal(
     redState.value.eventLog.some((event) => event.type === 'turn_command_timed_out'),
     true,
@@ -4598,7 +7032,7 @@ test('referee role reset cannot rewrite a resolved round', async () => {
   const refereeToken = session.createResponse().refereeToken
   const { redToken, blueToken } = await claimBothRoles(session)
 
-  await confirmBothMinimumLoadouts(session, redToken, blueToken)
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
 
   const reset = await session.resetRole(refereeToken, { role: 'red' })
 
@@ -4704,7 +7138,7 @@ test('session completes on max rounds and win streak target', async () => {
   const maxRoundRefereeToken = maxRoundSession.createResponse().refereeToken
   const maxRoundTokens = await claimBothRoles(maxRoundSession)
 
-  await confirmBothMinimumLoadouts(
+  await confirmBothMachineLoadouts(
     maxRoundSession,
     maxRoundTokens.redToken,
     maxRoundTokens.blueToken,

@@ -14,6 +14,8 @@ import {
   type CanonicalGameAction,
   type CombatBotSnapshot,
   type CombatTurnSnapshot,
+  type MachineDesign,
+  type MachineRuntimeState,
   type MovementCommand,
   type NormalizedBotTactics,
   type PartCategory,
@@ -72,11 +74,28 @@ import {
 import {
   type TacticalMovementPlan,
 } from './gridMovement.js'
+import {
+  machineMovementCommandSupported,
+  resolveMachineMovement,
+} from './machineMovement.js'
+import {
+  createMachineCombatRuntime,
+  exportMachineRuntimeState,
+  refreshMachineCombatRuntime,
+  rotateMachineRootOrientation,
+  type MachineCombatRuntime,
+} from './machineRuntime.js'
+import {
+  applyMachineDamage,
+  type MachineDamageWreckage,
+} from './machineDamage.js'
+import { resolveMachineWeaponFires } from './machineWeapons.js'
 
 export type CombatantInput = {
   role: TeamRole
   blueprint: BotBlueprint
   tactics: NormalizedBotTactics
+  machineDesign?: MachineDesign
 }
 
 export type CombatResult = {
@@ -88,6 +107,7 @@ export type CombatResult = {
   stats: Record<TeamRole, BotStats>
   replay: ReplayTimeline
   log: string[]
+  machineRuntime?: Partial<Record<TeamRole, MachineRuntimeState>>
 }
 
 export type ResolveCombatInput = {
@@ -108,6 +128,7 @@ export type SubmittedCombatResolution =
       snapshot: CombatTurnSnapshot
       replay: ReplayTimeline
       log: string[]
+      machineRuntime?: Partial<Record<TeamRole, MachineRuntimeState>>
     }
   | {
       status: 'complete'
@@ -155,6 +176,7 @@ export function resolveSubmittedGameActions(
     snapshot,
     replay,
     log: state.log,
+    ...(machineRuntimeForState(state) ? { machineRuntime: machineRuntimeForState(state) } : {}),
   }
 }
 
@@ -189,6 +211,7 @@ type BotRuntime = {
   statuses: RuntimeStatusEffect[]
   cooldowns: Record<string, number>
   charges: Record<string, number>
+  machine?: MachineCombatRuntime
   lastDamagedTick: number
   lastDealtDamageTick: number
   lastMove?: MovementCommand
@@ -222,6 +245,7 @@ type CombatRuntimeState = {
   elapsedTicks: number
   lastDamageTick: number
   stoppedByNoDamage: boolean
+  nativeNoCapabilityDraw: boolean
 }
 
 type CombatTickResult = {
@@ -410,6 +434,15 @@ function countAliveWeaponSlots(index: BotRuntimeIndex<RuntimePart>): number {
 }
 
 function updateRuntimeControlState(bot: BotRuntime): void {
+  if (bot.machine) {
+    refreshMachineCombatRuntime(bot.machine)
+    bot.stats = bot.machine.stats
+    bot.weaponSlotCount = Math.min(WEAPON_SLOTS.length, bot.machine.capabilities.weapons.length)
+    bot.hasWeaponControl = bot.weaponSlotCount > 0
+    bot.hasUtilityControl = bot.machine.capabilities.utility.length > 0
+    return
+  }
+
   bot.weaponSlotCount = countAliveWeaponSlots(bot.index)
   bot.hasWeaponControl = bot.weaponSlotCount > 0
   bot.hasUtilityControl = bot.index.utilityControlParts.length > 0
@@ -614,13 +647,23 @@ function controlDangerScore(bot: BotRuntime): number {
   return score
 }
 
+// CODEX_INTENT: choose native MachineDesign runtime authority when present while preserving legacy BotBlueprint combat.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
 function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
   const arena = input.arena ?? DEFAULT_ARENA
   const topology = compileArenaTopology(arena)
-  const redStats = deriveBotStats(input.red.blueprint)
-  const blueStats = deriveBotStats(input.blue.blueprint)
-  const red = createBotRuntime('red', input.red.blueprint, redStats, [-6, 0, 0])
-  const blue = createBotRuntime('blue', input.blue.blueprint, blueStats, [6, 0, 0])
+  const redMachine = input.red.machineDesign
+    ? createMachineCombatRuntime('red', input.red.machineDesign)
+    : undefined
+  const blueMachine = input.blue.machineDesign
+    ? createMachineCombatRuntime('blue', input.blue.machineDesign)
+    : undefined
+  const redStats = redMachine?.stats ?? deriveBotStats(input.red.blueprint)
+  const blueStats = blueMachine?.stats ?? deriveBotStats(input.blue.blueprint)
+  const red = createBotRuntime('red', input.red.blueprint, redStats, [-6, 0, 0], redMachine)
+  const blue = createBotRuntime('blue', input.blue.blueprint, blueStats, [6, 0, 0], blueMachine)
 
   return {
     round: input.round,
@@ -637,6 +680,7 @@ function createCombatRuntime(input: ResolveCombatInput): CombatRuntimeState {
     elapsedTicks: 0,
     lastDamageTick: 0,
     stoppedByNoDamage: false,
+    nativeNoCapabilityDraw: false,
   }
 }
 
@@ -645,10 +689,15 @@ function createBotRuntime(
   blueprint: BotBlueprint,
   stats: BotStats,
   position: Vector3,
+  machine?: MachineCombatRuntime,
 ): BotRuntime {
-  const parts = createRuntimeParts(blueprint, stats)
+  const parts = machine
+    ? createRuntimePartsFromMachine(machine)
+    : createRuntimeParts(blueprint, stats)
   const index = createBotRuntimeIndex(parts)
-  const weaponSlotCount = countAliveWeaponSlots(index)
+  const weaponSlotCount = machine
+    ? Math.min(WEAPON_SLOTS.length, machine.capabilities.weapons.length)
+    : countAliveWeaponSlots(index)
   const health = sumPartHealth(parts)
 
   return {
@@ -665,9 +714,23 @@ function createBotRuntime(
     statuses: [],
     cooldowns: {},
     charges: createInitialCharges(parts),
+    ...(machine ? { machine } : {}),
     lastDamagedTick: -Infinity,
     lastDealtDamageTick: -Infinity,
   }
+}
+
+function createRuntimePartsFromMachine(machine: MachineCombatRuntime): RuntimePart[] {
+  return machine.parts.map((part) => ({
+    blockId: part.instanceId,
+    partId: part.partId,
+    category: part.category,
+    hasWeaponControl: machine.capabilities.weapons.some((weapon) => weapon.partInstanceId === part.instanceId),
+    hasUtilityControl: machine.capabilities.utility.some((utility) => utility.partInstanceId === part.instanceId),
+    position: [...part.position],
+    health: part.health,
+    maxHealth: part.maxHealth,
+  }))
 }
 
 function createCombatSnapshot(
@@ -764,6 +827,14 @@ function partWorldPosition(bot: BotRuntime, part: RuntimePart): Vector3 {
     round(bot.position[0] + part.position[0] * 0.35),
     round(0.22 + part.position[1] * 0.18),
     round(bot.position[2] + part.position[2] * 0.35),
+  ]
+}
+
+function machineLocalPosition(bot: BotRuntime, localPosition: Vector3): Vector3 {
+  return [
+    round(bot.position[0] + localPosition[0] * 0.35),
+    round(0.22 + localPosition[1] * 0.18),
+    round(bot.position[2] + localPosition[2] * 0.35),
   ]
 }
 
@@ -1021,6 +1092,32 @@ function emitPartDetachEvents(
   })
 }
 
+function emitMachineWreckageEvents(
+  events: ReplayEvent[],
+  tick: number,
+  bot: BotRuntime,
+  wreckage: readonly MachineDamageWreckage[],
+  startTime = replayTimeForTurn(tick, 0.36),
+  context?: DetachMetadataContext,
+): void {
+  emitPartDetachEvents(
+    events,
+    tick,
+    bot,
+    wreckage.map((entry) => ({
+      blockId: entry.instanceId,
+      partId: entry.partId,
+      damageApplied: entry.damageApplied,
+      remainingHealth: entry.remainingHealth,
+      maxHealth: entry.maxHealth,
+      broke: true,
+      position: machineLocalPosition(bot, entry.localPosition),
+    })),
+    startTime,
+    context,
+  )
+}
+
 function movementImpactMultiplier(command: TurnCommand): number {
   switch (command.move) {
     case 'dash_forward':
@@ -1194,6 +1291,38 @@ function moveBot(
   }
 
   return clampPositionToArena(arena, [x, 0, z])
+}
+
+function moveBotForRuntime(
+  bot: BotRuntime,
+  command: TurnCommand,
+  arena: ArenaConfig,
+  utilityMultiplier: number,
+): Vector3 {
+  if (!bot.machine) {
+    return moveBot(bot, command, arena, utilityMultiplier)
+  }
+
+  const resolved = resolveMachineMovement({
+    role: bot.role,
+    position: bot.position,
+    command: command.move,
+    arena,
+    capabilities: bot.machine.capabilities.movement,
+    movementMultiplier: runtimeStatusMovementMultiplier(bot.statuses),
+  })
+
+  if (!resolved.supported) {
+    return bot.position
+  }
+
+  if (command.move === 'turn_left' || command.move === 'circle_left') {
+    rotateMachineRootOrientation(bot.machine, 'left')
+  } else if (command.move === 'turn_right' || command.move === 'circle_right') {
+    rotateMachineRootOrientation(bot.machine, 'right')
+  }
+
+  return resolved.to
 }
 
 function positionsEqual(left: Vector3, right: Vector3): boolean {
@@ -1850,28 +1979,34 @@ function applyGameActionTick(
     state.log.push(`Combat anchor conflict on tick ${tick}: ${conflict.reason}.`)
   }
 
-  const redMoved = applyAnchorMovement(events, tick, topology, red, redResolvedCommand, redIntent)
-  const blueMoved = applyAnchorMovement(events, tick, topology, blue, blueResolvedCommand, blueIntent)
+  const redMoved = applyResolvedMovement(events, tick, topology, arena, red, redResolvedCommand, redIntent)
+  const blueMoved = applyResolvedMovement(events, tick, topology, arena, blue, blueResolvedCommand, blueIntent)
 
   applyAnchorConflictDamage(events, tick, red, blue, redCommand, blueCommand, conflict)
 
-  if (redMoved) {
+  if (redMoved && !red.machine) {
     applyAnchorPathHazards(events, tick, arena, topology, red, redIntent.movement)
-  } else {
+  } else if (!red.machine) {
     resolveHazards(events, tick, arena, topology, red)
   }
-  if (blueMoved) {
+  if (blueMoved && !blue.machine) {
     applyAnchorPathHazards(events, tick, arena, topology, blue, blueIntent.movement)
-  } else {
+  } else if (!blue.machine) {
     resolveHazards(events, tick, arena, topology, blue)
   }
 
-  resolveWeapons(events, tick, arena, red, blue, redResolvedCommand, state.rng)
-  resolveWeapons(events, tick, arena, blue, red, blueResolvedCommand, state.rng)
-  resolveUtilities(events, tick, arena, red, blue, redResolvedCommand, redMovementUtility.consumed)
-  resolveUtilities(events, tick, arena, blue, red, blueResolvedCommand, blueMovementUtility.consumed)
+  resolveRoleWeapons(events, tick, arena, red, blue, redResolvedCommand, state.rng)
+  resolveRoleWeapons(events, tick, arena, blue, red, blueResolvedCommand, state.rng)
+  if (!red.machine) {
+    resolveUtilities(events, tick, arena, red, blue, redResolvedCommand, redMovementUtility.consumed)
+  }
+  if (!blue.machine) {
+    resolveUtilities(events, tick, arena, blue, red, blueResolvedCommand, blueMovementUtility.consumed)
+  }
 
   if (
+    !red.machine &&
+    !blue.machine &&
     !isBotDestroyed(red) &&
     !isBotDestroyed(blue) &&
     distance(red.position, blue.position) < CONTACT_DISTANCE &&
@@ -1902,6 +2037,11 @@ function applyGameActionTick(
     state.lastDamageTick = tick
   }
 
+  if (nativeMachineNoCapabilityDraw(state, redResolvedCommand, blueResolvedCommand)) {
+    state.nativeNoCapabilityDraw = true
+    return { completed: true }
+  }
+
   if (isBotDestroyed(red) || isBotDestroyed(blue)) {
     return { completed: true }
   }
@@ -1920,12 +2060,163 @@ function gameActionTickIntent(
   command: TurnCommand,
 ): GameActionTickIntent {
   const legality = evaluateCombatCommand(combatLegalityContextForState(state, role), command)
+  const self = role === 'red' ? state.red : state.blue
+  const machineMovementBlocked = self.machine !== undefined &&
+    command.move !== undefined &&
+    command.move !== 'brake' &&
+    !self.machine.capabilities.movement.some((capability) =>
+      machineMovementCommandSupported(role, capability, command.move!),
+    )
 
   return {
     command,
     movement: legality.movement,
-    movementBlocked: legality.movement.blocked || legality.movement.outOfBounds,
+    movementBlocked: legality.movement.blocked || legality.movement.outOfBounds || machineMovementBlocked,
   }
+}
+
+// CODEX_INTENT: resolve machine weapon fire from MachineCapabilities emitter facts instead of legacy weapon reach.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function resolveRoleWeapons(
+  events: ReplayEvent[],
+  tick: number,
+  arena: ArenaConfig,
+  attacker: BotRuntime,
+  defender: BotRuntime,
+  command: TurnCommand,
+  nextRandom: () => number,
+): void {
+  if (!attacker.machine) {
+    resolveWeapons(events, tick, arena, attacker, defender, command, nextRandom)
+    return
+  }
+
+  const machineCapabilities = attacker.machine.capabilities
+
+  if (isBotDestroyed(attacker) || isBotDestroyed(defender)) {
+    return
+  }
+
+  const fires = resolveMachineWeaponFires({
+    arena,
+    attackerRole: attacker.role,
+    attackerPosition: attacker.position,
+    defenderPosition: defender.position,
+    command,
+    weapons: machineCapabilities.weapons,
+  })
+
+  for (const { slot, weapon } of fires) {
+    events.push({
+      t: weaponFireTime(tick, slot),
+      turn: tick,
+      type: 'weapon_fire',
+      bot: attacker.role,
+      weaponSlot: slot,
+      targetPosition: defender.position,
+      sourceBlockId: weapon.partInstanceId,
+      sourcePartId: weapon.partId,
+      phase: 'release',
+      fireMode: weapon.fireMode,
+      style: weapon.kind,
+    })
+
+    applyMachineWeaponDamage(events, tick, attacker, defender, weapon.damage)
+  }
+}
+
+// CODEX_INTENT: apply native machine weapon damage through MachineRuntimeState breakage and wreckage semantics.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function applyMachineWeaponDamage(
+  events: ReplayEvent[],
+  tick: number,
+  attacker: BotRuntime,
+  defender: BotRuntime,
+  baseDamage: number,
+): void {
+  if (!defender.machine) {
+    return
+  }
+
+  const damage = Math.max(1, Math.round(baseDamage - defender.stats.armor * 0.25))
+  const result = applyMachineDamage(defender.machine, damage)
+
+  if (!result) {
+    return
+  }
+
+  const wasAlive = !isBotDestroyed(defender)
+  const applied = result.target.damageApplied
+
+  syncBotRuntimeFromMachine(defender)
+  defender.lastDamagedTick = tick
+  attacker.lastDealtDamageTick = tick
+
+  const impactPosition: Vector3 = [
+    round((attacker.position[0] + defender.position[0]) / 2),
+    0,
+    round((attacker.position[2] + defender.position[2]) / 2),
+  ]
+
+  events.push({
+    t: replayTimeForTurn(tick, 0.25),
+    turn: tick,
+    type: 'impact',
+    attacker: attacker.role,
+    defender: defender.role,
+    damage: applied,
+    position: impactPosition,
+  })
+  events.push({
+    t: replayTimeForTurn(tick, 0.3),
+    turn: tick,
+    type: 'damage',
+    bot: defender.role,
+    amount: applied,
+    remainingHealth: round(defender.health),
+    blockId: result.target.instanceId,
+    partId: result.target.partId,
+    partRemainingHealth: result.target.remainingHealth,
+    partMaxHealth: result.target.maxHealth,
+  })
+  emitMachineWreckageEvents(events, tick, defender, result.wreckage, replayTimeForTurn(tick, 0.36), {
+    cause: 'machine_weapon',
+    damage,
+    sourcePosition: attacker.position,
+    impactPosition,
+  })
+
+  if (wasAlive && isBotDestroyed(defender)) {
+    events.push({
+      t: replayTimeForTurn(tick, 0.45),
+      turn: tick,
+      type: 'knockout',
+      bot: defender.role,
+      cause: 'weapon',
+    })
+  }
+}
+
+function syncBotRuntimeFromMachine(bot: BotRuntime): void {
+  if (!bot.machine) {
+    return
+  }
+
+  const machineHealth = new Map(
+    bot.machine.parts.map((part) => [part.instanceId, part.health]),
+  )
+
+  for (const part of bot.parts) {
+    part.health = machineHealth.get(part.blockId) ?? part.health
+  }
+
+  bot.health = round(sumPartHealth(bot.parts))
+  refreshRuntimeIndex(bot)
+  updateRuntimeControlState(bot)
 }
 
 function combatLegalityContextForState(
@@ -1964,6 +2255,56 @@ function applyAnchorMovement(
 
   bot.position = to
   events.push(createMoveEvent(replayTimeForTurn(tick), tick, bot, from, to, command.move))
+
+  return true
+}
+
+// CODEX_INTENT: resolve machine movement through capability-supported axes instead of generic legacy movement.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function applyResolvedMovement(
+  events: ReplayEvent[],
+  tick: number,
+  topology: CompiledArenaTopology,
+  arena: ArenaConfig,
+  bot: BotRuntime,
+  command: TurnCommand,
+  intent: GameActionTickIntent,
+): boolean {
+  if (!bot.machine) {
+    return applyAnchorMovement(events, tick, topology, bot, command, intent)
+  }
+
+  if (intent.movementBlocked || command.move === 'brake') {
+    return false
+  }
+
+  const resolved = resolveMachineMovement({
+    role: bot.role,
+    position: bot.position,
+    command: command.move,
+    arena,
+    capabilities: bot.machine.capabilities.movement,
+    movementMultiplier: runtimeStatusMovementMultiplier(bot.statuses),
+  })
+
+  if (!resolved.supported) {
+    return false
+  }
+
+  if (command.move === 'turn_left' || command.move === 'circle_left') {
+    rotateMachineRootOrientation(bot.machine, 'left')
+  } else if (command.move === 'turn_right' || command.move === 'circle_right') {
+    rotateMachineRootOrientation(bot.machine, 'right')
+  }
+
+  if (positionsEqual(bot.position, resolved.to)) {
+    return false
+  }
+
+  bot.position = resolved.to
+  events.push(createMoveEvent(replayTimeForTurn(tick), tick, bot, resolved.from, resolved.to, command.move))
 
   return true
 }
@@ -2073,6 +2414,10 @@ function applyAnchorConflictDamage(
   blueCommand: TurnCommand,
   conflict: AnchorConflict,
 ): void {
+  if (red.machine || blue.machine) {
+    return
+  }
+
   if (!conflict.contactRed && !conflict.contactBlue) {
     return
   }
@@ -2125,6 +2470,43 @@ function noAnchorConflict(): AnchorConflict {
   }
 }
 
+// CODEX_INTENT: let bare-core machine combat finish through native no-capability semantics, not fallback blueprints.
+// CODEX_RISK: behavioral
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+function nativeMachineNoCapabilityDraw(
+  state: CombatRuntimeState,
+  redCommand: TurnCommand,
+  blueCommand: TurnCommand,
+): boolean {
+  return state.red.machine !== undefined &&
+    state.blue.machine !== undefined &&
+    !machineHasCombatCapability(state.red) &&
+    !machineHasCombatCapability(state.blue) &&
+    isHoldOnlyCommand(redCommand) &&
+    isHoldOnlyCommand(blueCommand)
+}
+
+function machineHasCombatCapability(bot: BotRuntime): boolean {
+  const capabilities = bot.machine?.capabilities
+
+  return Boolean(
+    capabilities &&
+    (
+      capabilities.movement.length > 0 ||
+      capabilities.weapons.length > 0 ||
+      capabilities.utility.length > 0
+    ),
+  )
+}
+
+function isHoldOnlyCommand(command: TurnCommand): boolean {
+  return (command.move === undefined || command.move === 'brake') &&
+    command.weaponA !== 'fire' &&
+    command.weaponB !== 'fire' &&
+    command.utility !== 'activate'
+}
+
 function applyCombatTick(
   state: CombatRuntimeState,
   tick: number,
@@ -2146,8 +2528,8 @@ function applyCombatTick(
   red.lastMove = redCommand.move
   blue.lastMove = blueCommand.move
 
-  red.position = moveBot(red, redCommand, arena, redMovementUtility.multiplier)
-  blue.position = moveBot(blue, blueCommand, arena, blueMovementUtility.multiplier)
+  red.position = moveBotForRuntime(red, redCommand, arena, redMovementUtility.multiplier)
+  blue.position = moveBotForRuntime(blue, blueCommand, arena, blueMovementUtility.multiplier)
 
   if (!positionsEqual(redFrom, red.position)) {
     events.push(createMoveEvent(replayTimeForTurn(tick), tick, red, redFrom, red.position, redCommand.move))
@@ -2156,12 +2538,18 @@ function applyCombatTick(
     events.push(createMoveEvent(replayTimeForTurn(tick), tick, blue, blueFrom, blue.position, blueCommand.move))
   }
 
-  resolveWeapons(events, tick, arena, red, blue, redCommand, state.rng)
-  resolveWeapons(events, tick, arena, blue, red, blueCommand, state.rng)
-  resolveUtilities(events, tick, arena, red, blue, redCommand, redMovementUtility.consumed)
-  resolveUtilities(events, tick, arena, blue, red, blueCommand, blueMovementUtility.consumed)
+  resolveRoleWeapons(events, tick, arena, red, blue, redCommand, state.rng)
+  resolveRoleWeapons(events, tick, arena, blue, red, blueCommand, state.rng)
+  if (!red.machine) {
+    resolveUtilities(events, tick, arena, red, blue, redCommand, redMovementUtility.consumed)
+  }
+  if (!blue.machine) {
+    resolveUtilities(events, tick, arena, blue, red, blueCommand, blueMovementUtility.consumed)
+  }
 
   if (
+    !red.machine &&
+    !blue.machine &&
     !isBotDestroyed(red) &&
     !isBotDestroyed(blue) &&
     distance(red.position, blue.position) < CONTACT_DISTANCE &&
@@ -2188,8 +2576,12 @@ function applyCombatTick(
     }
   }
 
-  resolveHazards(events, tick, arena, topology, red)
-  resolveHazards(events, tick, arena, topology, blue)
+  if (!red.machine) {
+    resolveHazards(events, tick, arena, topology, red)
+  }
+  if (!blue.machine) {
+    resolveHazards(events, tick, arena, topology, blue)
+  }
 
   if (red.health + blue.health < healthBeforeTick) {
     state.lastDamageTick = tick
@@ -2273,6 +2665,7 @@ export function resolveSubmittedCombat(
     snapshot,
     replay,
     log: state.log,
+    ...(machineRuntimeForState(state) ? { machineRuntime: machineRuntimeForState(state) } : {}),
   }
 }
 
@@ -2294,7 +2687,9 @@ function finalizeCombatResult(
   const hardCapped = !redDestroyed && !blueDestroyed && state.elapsedTicks >= HARD_MAX_COMBAT_TURNS
   const noDamageStalemate = damage.red === 0 && damage.blue === 0
   let winner: TeamRole | 'draw' = 'draw'
-  let reason = state.stoppedByNoDamage
+  let reason = state.nativeNoCapabilityDraw
+    ? 'Both machine combatants lacked native movement, weapon, or utility capabilities; the round ended as a draw.'
+    : state.stoppedByNoDamage
     ? `No bot took damage for ${NO_DAMAGE_STALEMATE_TURNS} combat turns; the round ended as a draw.`
     : hardCapped
       ? 'Both bots survived the hard combat safety cap with equivalent combat score.'
@@ -2313,7 +2708,9 @@ function finalizeCombatResult(
     reason = 'Red was knocked out.'
   } else if (noDamageStalemate) {
     winner = 'draw'
-    reason = state.stoppedByNoDamage
+    reason = state.nativeNoCapabilityDraw
+      ? 'Both machine combatants lacked native movement, weapon, or utility capabilities; the round ended as a draw.'
+      : state.stoppedByNoDamage
       ? `No bot took damage for ${NO_DAMAGE_STALEMATE_TURNS} combat turns; the round ended as a draw.`
       : 'Neither bot dealt damage.'
   } else if (remainingHealth.red !== remainingHealth.blue) {
@@ -2356,6 +2753,7 @@ function finalizeCombatResult(
       summary: reason,
     }),
     log,
+    ...(machineRuntimeForState(state) ? { machineRuntime: machineRuntimeForState(state) } : {}),
   }
 }
 
@@ -2363,4 +2761,19 @@ function partialReplayDuration(events: ReplayEvent[], elapsedTicks: number): num
   const lastEventTime = events.reduce((latest, event) => Math.max(latest, event.t), 0)
 
   return Math.max(MIN_REPLAY_DURATION, replayDurationForElapsedTurns(elapsedTicks), round(lastEventTime + REPLAY_TRAILING_SECONDS))
+}
+
+function machineRuntimeForState(
+  state: CombatRuntimeState,
+): Partial<Record<TeamRole, MachineRuntimeState>> | undefined {
+  const runtime: Partial<Record<TeamRole, MachineRuntimeState>> = {}
+
+  if (state.red.machine) {
+    runtime.red = exportMachineRuntimeState(state.red.machine)
+  }
+  if (state.blue.machine) {
+    runtime.blue = exportMachineRuntimeState(state.blue.machine)
+  }
+
+  return runtime.red || runtime.blue ? runtime : undefined
 }
