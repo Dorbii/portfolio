@@ -523,6 +523,64 @@ button:disabled {
   overflow: auto;
 }
 
+.privacy-page {
+  min-width: 0;
+  min-height: 100vh;
+  padding: 14px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    #090d0e;
+  background-size: 44px 44px;
+}
+
+.privacy-policy {
+  width: min(920px, 100%);
+  padding: 16px;
+  border: 1px solid rgba(139, 223, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(9, 13, 15, 0.94);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 18px 58px rgba(0, 0, 0, 0.34);
+}
+
+.privacy-policy-header h1 {
+  margin: 0 0 8px;
+}
+
+.privacy-policy-header p {
+  margin: 0 0 18px;
+  color: #92adb0;
+}
+
+.privacy-policy h1,
+.privacy-policy h2 {
+  margin: 24px 0 8px;
+}
+
+.privacy-policy h1 {
+  font-size: 1.45rem;
+}
+
+.privacy-policy h2 {
+  font-size: 1.02rem;
+}
+
+.privacy-policy p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+
+.privacy-policy ul {
+  margin: 0 0 18px 18px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
 .part-catalog-controls {
   display: grid;
   gap: 10px;
@@ -3524,7 +3582,7 @@ textarea:focus-visible {
   min-height: 156px;
   padding: 16px 14px 14px;
   display: grid;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto;
   align-content: stretch;
   justify-items: center;
   gap: 5px;
@@ -3555,6 +3613,47 @@ textarea:focus-visible {
 .scoreboard-core-state {
   color: #dce5f0;
   font-size: 0.78rem;
+}
+
+.scoreboard-plan-timer {
+  width: min(100%, 160px);
+  min-height: 40px;
+  padding: 5px 9px;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  border: 1px solid rgba(92, 229, 184, 0.36);
+  background: rgba(8, 24, 23, 0.86);
+  box-shadow: inset 0 0 20px rgba(92, 229, 184, 0.12);
+}
+
+.scoreboard-plan-timer span {
+  color: #9fb7c9;
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.scoreboard-plan-timer strong {
+  color: #5ce5b8;
+  font-size: 1rem;
+  font-weight: 950;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.scoreboard-plan-timer.is-expired {
+  border-color: rgba(255, 196, 94, 0.48);
+  background: rgba(31, 23, 9, 0.9);
+}
+
+.scoreboard-plan-timer.is-expired strong {
+  color: #ffc45e;
+}
+
+.scoreboard-plan-timer.is-hidden {
+  visibility: hidden;
 }
 
 .scoreboard-session-actions {
@@ -3789,6 +3888,92 @@ textarea:focus-visible {
   line-height: 1.35;
 }
 
+.arena-monologue-overlay {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  pointer-events: none;
+}
+
+.arena-monologue-card {
+  min-width: 0;
+  max-height: min(210px, 42vh);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+  border: 1px solid rgba(var(--cockpit-team), 0.26);
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.12), transparent 58%),
+    rgba(5, 8, 12, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 34px rgba(0, 0, 0, 0.38);
+  pointer-events: auto;
+}
+
+.arena-monologue-card header {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.arena-monologue-card header span {
+  color: #91a7b8;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.arena-monologue-card header strong {
+  min-width: 0;
+  overflow: hidden;
+  color: rgb(var(--cockpit-team));
+  font-size: 0.86rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arena-monologue-card ol {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  list-style: none;
+}
+
+.arena-monologue-card li {
+  min-width: 0;
+  padding: 8px 9px;
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(var(--cockpit-team), 0.18);
+  border-radius: 6px;
+  background: rgba(238, 242, 247, 0.04);
+}
+
+.arena-monologue-card p {
+  margin: 0;
+  color: #eef4fb;
+  font-size: 0.78rem;
+  line-height: 1.38;
+}
+
+.arena-monologue-card small {
+  color: #91a7b8;
+  font-size: 0.64rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
 .referee-cockpit-strip {
   min-width: 0;
   padding: 12px;
@@ -3815,8 +4000,7 @@ textarea:focus-visible {
 
 .referee-cockpit-strip-header span,
 .referee-cockpit-card-header span,
-.referee-decision-preview h3,
-.referee-decision-list > strong {
+.referee-decision-preview h3 {
   color: #91a7b8;
   font-size: 0.68rem;
   font-weight: 950;
@@ -3992,36 +4176,11 @@ textarea:focus-visible {
   color: #f6d995;
 }
 
-.referee-decision-list {
-  min-width: 0;
-}
-
-.referee-decision-list ul {
-  margin: 6px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 5px;
-  list-style: none;
-}
-
-.referee-decision-list li,
-.referee-decision-list p,
 .referee-cockpit-empty {
   margin: 0;
   color: #dce5f0;
   font-size: 0.78rem;
   line-height: 1.35;
-}
-
-.referee-decision-list li {
-  min-width: 0;
-  padding: 6px 7px;
-  overflow: hidden;
-  border: 1px solid rgba(238, 242, 247, 0.075);
-  border-radius: 5px;
-  background: rgba(238, 242, 247, 0.026);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .referee-cockpit-empty {
@@ -4245,6 +4404,14 @@ textarea:focus-visible {
 
   .match-stage-frame {
     height: clamp(460px, 72vh, 620px);
+  }
+
+  .arena-monologue-overlay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arena-monologue-card {
+    max-height: 150px;
   }
 
   .referee-cockpit-strip-header {

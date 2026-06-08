@@ -27,6 +27,8 @@ import {
   commandHasOffense,
   evaluateCombatCommand,
   movementCommandLabel,
+  weaponFireModeRequiresEmitterBearing,
+  weaponFireModeRequiresLineOfSight,
   type CombatActionLegality,
   type CombatWeaponLegalityOptions,
   type CombatLegalityContext,
@@ -44,8 +46,8 @@ export type CanonicalCombatActionPayload = {
   scope: typeof COMBAT_ACTION_SCOPE
   label: string
   summary: string
-  command: TurnCommand
-  legality: CombatActionLegality
+  command?: TurnCommand
+  legality?: CombatActionLegality
   movementOverride?: BoardMovementOverride
 }
 
@@ -106,7 +108,7 @@ export function buildCombatActions(input: BuildCombatActionSetInput): CanonicalG
     .map((candidate) => combatActionFromCandidate(input, context, candidate))
     .filter((action): action is CanonicalGameAction => action !== undefined)
 
-  return dedupeActions(actions)
+  return dedupeActions([...actions, surrenderAction(input)])
 }
 
 export function isCombatAction(action: CanonicalGameAction): boolean {
@@ -190,6 +192,25 @@ function combatActionFromCandidate(
       command,
       legality,
       ...(candidate.movementOverride ? { movementOverride: cloneBoardMovementOverride(candidate.movementOverride) } : {}),
+    },
+  }
+}
+
+function surrenderAction(input: BuildCombatActionSetInput): CanonicalGameAction {
+  return {
+    id: combatActionId({
+      role: input.role,
+      round: input.round,
+      tick: input.tick,
+      kind: 'surrender',
+      parts: ['concede_round'],
+    }),
+    kind: 'surrender',
+    role: input.role,
+    payload: {
+      scope: COMBAT_ACTION_SCOPE,
+      label: 'Surrender round',
+      summary: 'Concede this round immediately; the opponent wins and combat ends.',
     },
   }
 }
@@ -301,6 +322,7 @@ function machineWeaponCommands(
   const weaponOptions = {
     weaponRange: weapon.range,
     emitterAxis: weapon.emitterAxis,
+    fireMode: weapon.fireMode,
   }
 
   return [
@@ -459,12 +481,17 @@ function evaluateBoardCombatCommand(
   if (movement.blocked) {
     reasons.push('Movement path crosses a blocked anchor cell.')
   }
-  if (firesWeapon(command) && !movement.lineOfSightToOpponent) {
+  if (
+    firesWeapon(command) &&
+    weaponFireModeRequiresLineOfSight(weaponOptions.fireMode) &&
+    !movement.lineOfSightToOpponent
+  ) {
     reasons.push('Target is not in line of sight from final anchor cell.')
   }
   if (
     firesWeapon(command) &&
     weaponOptions.emitterAxis &&
+    weaponFireModeRequiresEmitterBearing(weaponOptions.fireMode) &&
     !emitterAxisTargetsOpponent(context, movement.to, weaponOptions.emitterAxis)
   ) {
     reasons.push('Weapon emitter axis cannot bear on the opponent from final anchor cell.')

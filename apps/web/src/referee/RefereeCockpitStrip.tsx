@@ -5,6 +5,7 @@ import type {
 import type {
   CombatDecisionBrief,
   RolePrivateState,
+  SessionChatMessage,
 } from '../agent/agentSessionTypes.js'
 import { BotAssemblyScene } from '../agent/BotAssemblyScene'
 import { formatLabel } from '../shared/format'
@@ -51,6 +52,25 @@ export function RefereeCockpitStrip({
   )
 }
 
+export function RefereeArenaMonologueOverlay({
+  roleStates,
+}: {
+  roleStates: Partial<Record<TeamRole, RolePrivateState>>
+}) {
+  const hasMessages = Boolean(roleStates.red?.privateChatLog.length || roleStates.blue?.privateChatLog.length)
+
+  if (!hasMessages) {
+    return null
+  }
+
+  return (
+    <aside className="arena-monologue-overlay" aria-label="Agent inner monologues">
+      <ArenaMonologueCard role="red" roleState={roleStates.red} />
+      <ArenaMonologueCard role="blue" roleState={roleStates.blue} />
+    </aside>
+  )
+}
+
 function RefereeCockpitPanel({
   role,
   roleState,
@@ -89,7 +109,7 @@ function RefereeCockpitPanel({
       )}
       <section className="referee-decision-preview" aria-label={`${identity.name} combat decision`}>
         <h3>Combat Decision</h3>
-        {decision ? <DecisionSummary decision={decision} state={roleState} /> : (
+        {decision ? <DecisionSummary decision={decision} /> : (
           <p className="referee-cockpit-empty">No open combat-turn decision packet yet.</p>
         )}
       </section>
@@ -99,13 +119,9 @@ function RefereeCockpitPanel({
 
 function DecisionSummary({
   decision,
-  state,
 }: {
   decision: CombatDecisionBrief
-  state?: RolePrivateState
 }) {
-  const legalActions = state?.gameMaster?.legalActions ?? []
-
   return (
     <div className="referee-decision-stack">
       <div className="referee-decision-facts">
@@ -123,16 +139,6 @@ function DecisionSummary({
           <Readiness label="U" ready={decision.actionReadiness.utility.canActivate} reason={decision.actionReadiness.utility.reason} />
         ) : null}
       </div>
-      <DecisionList
-        emptyText="No tactical cues."
-        items={decision.tacticalCues}
-        title="Cues"
-      />
-      <DecisionList
-        emptyText="No legal actions in packet."
-        items={legalActions.map((action) => action.label)}
-        title="Legal"
-      />
     </div>
   )
 }
@@ -169,27 +175,44 @@ function Readiness({
   )
 }
 
-function DecisionList({
-  emptyText,
-  items,
-  title,
+function ArenaMonologueCard({
+  role,
+  roleState,
 }: {
-  emptyText: string
-  items: string[]
-  title: string
+  role: TeamRole
+  roleState?: RolePrivateState
 }) {
+  const identity = resolveTeamIdentity(role, roleState?.identity)
+  const messages = roleState?.privateChatLog ?? []
+  const visibleMessages = messages.slice(-4)
+
   return (
-    <div className="referee-decision-list">
-      <strong>{title}</strong>
-      {items.length > 0 ? (
-        <ul>
-          {items.slice(0, 3).map((item) => (
-            <li key={item}>{item}</li>
+    <section
+      className={`arena-monologue-card ${role}`}
+      style={createTeamAccentCssVars(role, identity) as CSSProperties}
+    >
+      <header>
+        <span>{role}</span>
+        <strong>{identity.name}</strong>
+      </header>
+      {visibleMessages.length > 0 ? (
+        <ol>
+          {visibleMessages.map((message) => (
+            <li key={message.id}>
+              <p>{message.message}</p>
+              <small>
+                {formatMessageMeta(message)}
+              </small>
+            </li>
           ))}
-        </ul>
+        </ol>
       ) : (
-        <p>{emptyText}</p>
+        <p>No private agent notes yet.</p>
       )}
-    </div>
+    </section>
   )
+}
+
+function formatMessageMeta(message: SessionChatMessage): string {
+  return `${formatLabel(message.kind)} / round ${message.round}`
 }

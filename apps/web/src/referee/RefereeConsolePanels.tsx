@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import type {
   TeamRole,
@@ -87,6 +88,7 @@ export function MatchScoreboard({
             ? `${formatReplayClock(replayPayload)} / ${decision}`
             : sessionControl.activeSessionId || 'Create session'}
         </small>
+        <ScoreboardPlanTimer publicSession={publicSession} />
         <ActionGroup className="scoreboard-session-actions">
           <Button
             type="button"
@@ -131,6 +133,46 @@ export function MatchScoreboard({
         winsRequired={winsRequired}
       />
     </header>
+  )
+}
+
+function ScoreboardPlanTimer({
+  publicSession,
+}: {
+  publicSession: PublicSessionState | null
+}) {
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const deadlineAt = publicSession?.phase === 'submission_phase'
+    ? publicSession.roundPlan?.deadlineAt
+    : undefined
+
+  useEffect(() => {
+    if (!deadlineAt) {
+      return undefined
+    }
+
+    const interval = window.setInterval(() => setNowMs(Date.now()), 1000)
+
+    return () => window.clearInterval(interval)
+  }, [deadlineAt])
+
+  if (!deadlineAt) {
+    return (
+      <div className="scoreboard-plan-timer is-hidden" data-plan-timer-state="hidden">
+        <span>Loadout window</span>
+        <strong>--:--</strong>
+      </div>
+    )
+  }
+
+  const remainingMs = Date.parse(deadlineAt) - nowMs
+  const timerState = remainingMs <= 0 ? 'expired' : 'open'
+
+  return (
+    <div className={`scoreboard-plan-timer is-${timerState}`} data-plan-timer-state={timerState}>
+      <span>Loadout window</span>
+      <strong>{formatCountdown(remainingMs)}</strong>
+    </div>
   )
 }
 
@@ -533,6 +575,14 @@ function formatDecision(publicSession: PublicSessionState | null): string {
 
 function formatReplayClock(replayPayload: ReplayPayload | null): string {
   return replayPayload ? formatDurationSeconds(replayPayload.timeline.duration) : '--'
+}
+
+function formatCountdown(remainingMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
 function getWinsRequired(maxRounds: number | undefined): number {

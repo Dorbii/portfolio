@@ -9,6 +9,10 @@ import {
   compileArenaTopology,
   hasArenaLineOfSight,
 } from './arenaTopology.js'
+import {
+  weaponFireModeRequiresEmitterBearing,
+  weaponFireModeRequiresLineOfSight,
+} from './combatLegality.js'
 import type { CompiledArenaTopology } from './arenaTopology.js'
 import { normalizeVector } from './transforms.js'
 
@@ -60,12 +64,14 @@ export function machineWeaponCanHit(input: {
   weapon: MachineWeaponCapability
 }): boolean {
   const inRange = flatDistance(input.attackerPosition, input.defenderPosition) <= input.weapon.range
-  const hasLineOfSight = input.weapon.fireMode === 'sweep' ||
+  const hasLineOfSight = !weaponFireModeRequiresLineOfSight(input.weapon.fireMode) ||
     hasArenaLineOfSight(input.topology, input.attackerPosition, input.defenderPosition)
+  const hasEmitterBearing = !weaponFireModeRequiresEmitterBearing(input.weapon.fireMode) ||
+    emitterAxisTargetsOpponent(input.attackerPosition, input.defenderPosition, input.weapon.emitterAxis)
 
   return inRange &&
     hasLineOfSight &&
-    emitterAxisTargetsOpponent(input.attackerPosition, input.defenderPosition, input.weapon.emitterAxis)
+    hasEmitterBearing
 }
 
 function emitterAxisTargetsOpponent(

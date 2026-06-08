@@ -218,8 +218,8 @@ function assertRedactedPublicState(publicState, hiddenValues) {
 }
 
 function assertRoundPlanWindow(roundPlan) {
-  assert.equal(roundPlan.planSeconds, 120)
-  assert.equal(Date.parse(roundPlan.deadlineAt) - Date.parse(roundPlan.openedAt), 120_000)
+  assert.equal(roundPlan.planSeconds, 240)
+  assert.equal(Date.parse(roundPlan.deadlineAt) - Date.parse(roundPlan.openedAt), 240_000)
 }
 
 function assertGameMasterPacket(packet, role) {
@@ -231,6 +231,23 @@ function assertGameMasterPacket(packet, role) {
   assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
   assert.equal(packet.catalog.version, 'part-catalog:v1')
   assert.equal(packet.catalog.parts.some((part) => part.id === 'Body_Square_Medium'), true)
+}
+
+function assertGptCompactPacket(packet, role) {
+  assert.equal(packet.sessionId.startsWith('s_'), true)
+  assert.equal(packet.role, role)
+  assert.equal(typeof packet.decisionVersion, 'number')
+  assert.equal(packet.eventVersion, undefined)
+  assert.equal(packet.actionSetId, undefined)
+  assert.equal(packet.catalog, undefined)
+  assert.ok(Array.isArray(packet.legalActions))
+  assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
+  assert.equal(packet.legalActions.some((action) => 'catalogRefs' in action), false)
+
+  if (packet.buildState) {
+    assert.equal(packet.buildState.currentDesign, undefined)
+    assert.equal(packet.buildState.legacyDraft, undefined)
+  }
 }
 
 function actionSubmissionFromPacket(packet, actionId = packet.legalActions[0]?.id) {
@@ -908,6 +925,7 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(json.servers[0].url, 'https://arena-api.test')
   assert.deepEqual(Object.keys(json.paths).sort(), [
     '/gpt/act',
+    '/gpt/catalog',
     '/gpt/claim',
     '/gpt/next',
     '/gpt/reflection',
@@ -916,10 +934,12 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(json.paths['/gpt/next'].post.operationId, 'gptNext')
   assert.equal(json.paths['/gpt/act'].post.operationId, 'gptAct')
   assert.equal(json.paths['/gpt/reflection'].post.operationId, 'gptReflection')
+  assert.equal(json.paths['/gpt/catalog'].post.operationId, 'gptCatalog')
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
   assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
   assert.ok(json.components.schemas.GptActRequest.required.includes('actionId'))
+  assert.ok(json.components.schemas.GptCatalogRequest.required.includes('partIds'))
 })
 
 test('public bootstrap validator requires agent name and team identity', () => {
@@ -1319,7 +1339,7 @@ test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
   assert.equal(claim.json.status, 'claimed')
   assert.equal(claim.json.sessionId, sessionId)
   assert.equal(claim.json.role, 'red')
-  assertGameMasterPacket(claim.json.packet, 'red')
+  assertGptCompactPacket(claim.json.packet, 'red')
   assert.equal('mode' in state.json.identity, false)
 })
 
@@ -1338,8 +1358,35 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.equal(next.json.status, 'playable')
   assert.equal(next.json.sessionId, sessionId)
   assert.equal(next.json.role, 'red')
-  assertGameMasterPacket(next.json.packet, 'red')
+  assertGptCompactPacket(next.json.packet, 'red')
   assert.ok(next.json.packet.legalActions.length > 0)
+})
+
+test('POST /gpt/catalog returns selected compact part summaries', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_catalog'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const partId = partAction.catalogRefs?.[0]
+  const catalog = await route(env, '/gpt/catalog', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      partIds: [partId, 'Missing_Part'],
+    },
+  })
+
+  assert.equal(catalog.response.status, 200)
+  assert.equal(catalog.json.parts.length, 1)
+  assert.equal(catalog.json.parts[0].id, partId)
+  assert.equal(typeof catalog.json.parts[0].displayName, 'string')
+  assert.equal(typeof catalog.json.parts[0].cost, 'number')
+  assert.equal(typeof catalog.json.parts[0].mass, 'number')
+  assert.equal(typeof catalog.json.parts[0].durability, 'number')
+  assert.ok(Array.isArray(catalog.json.parts[0].tags))
+  assert.equal('mounts' in catalog.json.parts[0], false)
+  assert.equal('visual' in catalog.json.parts[0], false)
+  assert.equal('spec' in catalog.json.parts[0], false)
 })
 
 test('POST /gpt/act fills GameMaster version fields from the latest packet', async () => {
@@ -1366,6 +1413,7 @@ test('POST /gpt/act fills GameMaster version fields from the latest packet', asy
   assert.equal(action.response.status, 200)
   assert.equal(action.json.status, 'playable')
   assert.equal(action.json.acceptedActionId, partAction.id)
+  assertGptCompactPacket(action.json.packet, 'red')
   assert.equal(action.json.packet.buildState.step, 'choose_attach_target')
   assert.equal(stale.response.status, 409)
   assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')

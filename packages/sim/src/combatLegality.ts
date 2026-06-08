@@ -3,6 +3,7 @@ import type {
   CombatBotSnapshot,
   GameMasterLegalAction,
   GridCoord,
+  MachineWeaponCapability,
   MovementCommand,
   TeamRole,
   TurnCommand,
@@ -31,6 +32,7 @@ export type CombatActionLegality = {
 export type CombatWeaponLegalityOptions = {
   weaponRange?: number
   emitterAxis?: Vector3
+  fireMode?: MachineWeaponCapability['fireMode']
 }
 
 export function evaluateCombatCommand(
@@ -53,12 +55,17 @@ export function evaluateCombatCommand(
   if (movement.blocked) {
     reasons.push('Movement path crosses a blocked anchor cell.')
   }
-  if (firesWeapon(command) && !movement.lineOfSightToOpponent) {
+  if (
+    firesWeapon(command) &&
+    weaponFireModeRequiresLineOfSight(weaponOptions.fireMode) &&
+    !movement.lineOfSightToOpponent
+  ) {
     reasons.push('Target is not in line of sight from final anchor cell.')
   }
   if (
     firesWeapon(command) &&
     weaponOptions.emitterAxis &&
+    weaponFireModeRequiresEmitterBearing(weaponOptions.fireMode) &&
     !emitterAxisTargetsOpponent(context, movement.to, weaponOptions.emitterAxis)
   ) {
     reasons.push('Weapon emitter axis cannot bear on the opponent from final anchor cell.')
@@ -126,6 +133,18 @@ export function combatPreview(
 
 export function commandHasOffense(command: TurnCommand): boolean {
   return firesWeapon(command) || command.utility === 'activate'
+}
+
+export function weaponFireModeRequiresLineOfSight(
+  fireMode: MachineWeaponCapability['fireMode'] | undefined,
+): boolean {
+  return fireMode !== 'sweep'
+}
+
+export function weaponFireModeRequiresEmitterBearing(
+  fireMode: MachineWeaponCapability['fireMode'] | undefined,
+): boolean {
+  return fireMode !== 'sweep'
 }
 
 export function movementCommandLabel(command?: MovementCommand): string {

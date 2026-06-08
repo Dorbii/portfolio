@@ -16,6 +16,7 @@ import {
   type GameMasterLegalAction,
   type GameMasterNextAction,
   type GameMasterPacket,
+  type InventoryItem,
   type GameMasterPhase,
   type MachineDesign,
   type MachineRuntimeState,
@@ -39,6 +40,7 @@ import {
   defaultTacticsForBlueprint,
   deriveControls,
 } from '../../../packages/catalog/src/index.js'
+import { createReplayTimeline } from '../../../packages/replay/src/index.js'
 import {
   applyLoadoutAction,
   botDesignSnapshotToLegacyBotBlueprintProjection,
@@ -143,8 +145,8 @@ export {
 export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
-const COMBAT_TURN_SECONDS = 120
-const ROUND_PLAN_SECONDS = 120
+const COMBAT_TURN_SECONDS = 30
+const ROUND_PLAN_SECONDS = 240
 const GAME_MASTER_CATALOG_VERSION = 'part-catalog:v1'
 const GAME_MASTER_ARENA_VERSION = 'arena:v1'
 const GAME_MASTER_SUBMISSION_KEYS = new Set([
@@ -258,8 +260,7 @@ export class SessionCoordinator {
   getPublicState(): ReturnType<typeof buildPublicSessionState> {
     const now = this.clock()
 
-    this.expireIfNeeded(now)
-    this.resolveExpiredCombatTurn(now)
+    this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
     return buildPublicSessionState(this.state)
@@ -420,7 +421,7 @@ export class SessionCoordinator {
       this.advanceClaimPhase(now)
     }
 
-    this.resolveExpiredCombatTurn(now)
+    this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
     const state = buildRolePrivateState(this.state, auth.role)
@@ -448,7 +449,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    this.resolveExpiredCombatTurn(now)
+    this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
     return {
@@ -468,7 +469,7 @@ export class SessionCoordinator {
       return auth
     }
 
-    this.resolveExpiredCombatTurn(now)
+    this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
     return {
@@ -493,6 +494,9 @@ export class SessionCoordinator {
       return auth
     }
 
+    this.resolveTimedTransitions(now)
+    this.ensureGameMasterActionSets(now)
+
     if (!isAllowedGameMasterSubmissionShape(request)) {
       return relayError(
         'SUBMISSION_INVALID',
@@ -505,9 +509,6 @@ export class SessionCoordinator {
     if (!validation.ok) {
       return relayError('SUBMISSION_INVALID', 'GameMaster action submission failed validation.', validation.issues)
     }
-
-    this.resolveExpiredCombatTurn(now)
-    this.ensureGameMasterActionSets(now)
 
     const role = auth.value.role
     const submission = request as GameMasterActionSubmission
@@ -581,6 +582,19 @@ export class SessionCoordinator {
     this.lockRoleAction(role.role, activeSet, submission, requestHash, now)
     this.touch(now)
     this.appendEvent('game_action_submitted', `${role.role} locked a GameMaster action.`, now)
+
+    if (this.state.phase === 'combat_turn' && canonicalAction.kind === 'surrender') {
+      this.completeSurrender(role.role, now)
+
+      return {
+        ok: true,
+        value: {
+          packet: this.buildGameMasterPacket(role.role, now),
+          publicState: this.getPublicState(),
+        },
+      }
+    }
+
     this.resolveLockedActionsIfReady(now)
 
     return {
@@ -947,6 +961,8 @@ export class SessionCoordinator {
     if (activeError) {
       return activeError
     }
+
+    this.resolveTimedTransitions()
 
     if (!this.state.replay) {
       return relayError('REPLAY_NOT_AVAILABLE', 'Replay is available after both loadouts resolve.')
@@ -1410,6 +1426,78 @@ export class SessionCoordinator {
     this.touch(now)
   }
 
+  private resolveTimedTransitions(now = this.clock()): void {
+    this.expireIfNeeded(now)
+
+    if (this.state.phase === 'expired') {
+      return
+    }
+
+    this.resolveExpiredLoadoutWindow(now)
+    this.resolveExpiredCombatTurn(now)
+  }
+
+  private resolveExpiredLoadoutWindow(now: string): void {
+    if (this.state.phase !== 'submission_phase' || !this.state.roundPlan) {
+      return
+    }
+
+    if (Date.parse(now) < Date.parse(this.state.roundPlan.deadlineAt)) {
+      return
+    }
+
+    for (const roleName of TEAM_ROLES) {
+      const role = this.state.roles[roleName]
+
+      if (role.loadoutConfirmedAt) {
+        continue
+      }
+
+      this.finalizeLoadoutForRole(roleName, now)
+    }
+
+    this.resolveLockedActionsIfReady(now)
+  }
+
+  private finalizeLoadoutForRole(roleName: TeamRole, now: string): void {
+    const role = this.state.roles[roleName]
+    const buildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+    const pendingMovedPartId = buildState.selectedMovingPartId ? buildState.selectedPartId : undefined
+    const finalizedBuildState = {
+      ...buildState,
+      step: 'choose_part' as const,
+      selectedPartId: undefined,
+      selectedMovingPartId: undefined,
+      selectedAttachTargetId: undefined,
+      selectedMount: undefined,
+      selectedMountKind: undefined,
+      selectedMountMotion: undefined,
+      selectedMountCollisionPolicy: undefined,
+      selectedMountSector: undefined,
+      selectedAttachCell: undefined,
+      selectedRotation: undefined,
+    }
+
+    if (pendingMovedPartId) {
+      const refundedGold = PART_CATALOG.find((part) => part.id === pendingMovedPartId)?.cost ?? 0
+
+      role.gold += refundedGold
+      role.inventory = decrementInventory(role.inventory, pendingMovedPartId)
+    }
+
+    role.loadoutBuildState = finalizedBuildState
+    role.storedDesign = finalizedBuildState.currentDesign
+    role.currentDesign = storedDesignToLegacyBotDesignSnapshotProjection(
+      finalizedBuildState.currentDesign,
+      finalizedBuildState.legacyDraft?.name,
+    )
+    applyCombatCompatibilityControls(role, finalizedBuildState.currentDesign)
+    role.loadoutVersion = (role.loadoutVersion ?? 0) + 1
+    role.loadoutConfirmedAt = now
+    this.appendEvent('game_action_submitted', `${roleName} loadout window expired; current server-built loadout auto-confirmed.`, now)
+    this.touch(now)
+  }
+
   private createCombatState(input: {
     nextTick: number
     snapshot: StoredCombatState['snapshot']
@@ -1615,6 +1703,52 @@ export class SessionCoordinator {
     this.changePhase('round_review', 'Round review is ready for referee advance.', now)
   }
 
+  private completeSurrender(surrenderingRole: TeamRole, now: string): void {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat) {
+      return
+    }
+
+    const winner = oppositeRole(surrenderingRole)
+    const reason = `${capitalizeRole(surrenderingRole)} surrendered; ${capitalizeRole(winner)} wins the round.`
+    const result: CombatResult = {
+      winner,
+      reason,
+      damage: {
+        red: Math.max(0, combat.snapshot.red.maxHealth - combat.snapshot.red.health),
+        blue: Math.max(0, combat.snapshot.blue.maxHealth - combat.snapshot.blue.health),
+      },
+      remainingHealth: {
+        red: combat.snapshot.red.health,
+        blue: combat.snapshot.blue.health,
+      },
+      partHealth: {
+        red: { ...combat.snapshot.red.partHealth },
+        blue: { ...combat.snapshot.blue.partHealth },
+      },
+      stats: {
+        red: { ...combat.snapshot.red.stats },
+        blue: { ...combat.snapshot.blue.stats },
+      },
+      replay: createReplayTimeline({
+        round: this.state.round,
+        duration: 1,
+        events: [
+          { t: 0, type: 'spawn', bot: 'red', position: combat.snapshot.red.position, rotation: [0, 90, 0] },
+          { t: 0, type: 'spawn', bot: 'blue', position: combat.snapshot.blue.position, rotation: [0, -90, 0] },
+        ],
+        summary: reason,
+      }),
+      log: [
+        `Round ${this.state.round}: ${reason}`,
+        `Red damage taken: ${Math.max(0, combat.snapshot.red.maxHealth - combat.snapshot.red.health)}. Blue damage taken: ${Math.max(0, combat.snapshot.blue.maxHealth - combat.snapshot.blue.health)}.`,
+      ],
+    }
+
+    this.completeCombat(result, now)
+  }
+
   private changePhase(phase: SessionPhase, message: string, at: string): void {
     this.state.phase = phase
     this.touch(at)
@@ -1722,6 +1856,20 @@ function applyCombatCompatibilityControls(role: StoredRoleState, design: StoredD
   }
 
   delete role.controls
+}
+
+function decrementInventory(inventory: InventoryItem[], partId: string): InventoryItem[] {
+  return inventory
+    .map((item) => item.partId === partId ? { ...item, quantity: item.quantity - 1 } : item)
+    .filter((item) => item.quantity > 0)
+}
+
+function oppositeRole(role: TeamRole): TeamRole {
+  return role === 'red' ? 'blue' : 'red'
+}
+
+function capitalizeRole(role: TeamRole): string {
+  return role === 'red' ? 'Red' : 'Blue'
 }
 
 function controlsForRoleState(role: StoredRoleState): StoredRoleState['controls'] {

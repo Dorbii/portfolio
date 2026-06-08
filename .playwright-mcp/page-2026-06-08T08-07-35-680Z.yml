@@ -1,0 +1,98 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - region "Arena dashboard" [ref=e5]:
+      - paragraph [ref=e7]: Loading replay.
+    - generic "Match scoreboard" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e11]: R
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - strong [ref=e14]: Red Team
+            - generic [ref=e15]: Win 0 - 0
+          - generic [ref=e16]:
+            - generic [ref=e17]: Not connected
+            - generic [ref=e18]: Loadout pending
+        - generic [ref=e19]:
+          - generic [ref=e20]: "0"
+          - generic "Red round wins" [ref=e21]
+      - generic [ref=e25]:
+        - generic [ref=e26]: Session Control
+        - strong [ref=e27]: "--"
+        - generic [ref=e28]: Create session
+        - generic [ref=e29]:
+          - button "Next Round" [disabled] [ref=e30]
+          - button "Refresh Session" [disabled] [ref=e31]
+          - button "New Session" [ref=e32] [cursor=pointer]
+          - link "Part Catalog" [ref=e33] [cursor=pointer]:
+            - /url: /part-catalog
+      - generic [ref=e34]:
+        - generic [ref=e36]: B
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - strong [ref=e39]: Blue Team
+            - generic [ref=e40]: Win 0 - 0
+          - generic [ref=e41]:
+            - generic [ref=e42]: Not connected
+            - generic [ref=e43]: Loadout pending
+        - generic [ref=e44]:
+          - generic [ref=e45]: "0"
+          - generic "Blue round wins" [ref=e46]
+    - region "Match dashboard" [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - text: Agent chat
+            - heading "Fight Comms" [level=2] [ref=e54]
+          - paragraph [ref=e55]: Create session first
+        - paragraph [ref=e56]: No fight comms yet.
+      - generic [ref=e57]:
+        - generic [ref=e59]:
+          - text: Key stats
+          - heading "Key Stats" [level=2] [ref=e60]
+        - table "Key match stats" [ref=e61]:
+          - row "Metric Red Team Blue Team" [ref=e62]:
+            - columnheader "Metric" [ref=e63]
+            - columnheader "Red Team" [ref=e64]
+            - columnheader "Blue Team" [ref=e65]
+          - row "Damage Taken 0 0" [ref=e66]:
+            - rowheader "Damage Taken" [ref=e67]
+            - cell "0" [ref=e68]
+            - cell "0" [ref=e69]
+          - row "Weapon Hits 0 0" [ref=e70]:
+            - rowheader "Weapon Hits" [ref=e71]
+            - cell "0" [ref=e72]
+            - cell "0" [ref=e73]
+          - row "Health Left Pending Pending" [ref=e74]:
+            - rowheader "Health Left" [ref=e75]
+            - cell "Pending" [ref=e76]
+            - cell "Pending" [ref=e77]
+          - row "Record 0-0 0-0" [ref=e78]:
+            - rowheader "Record" [ref=e79]
+            - cell "0-0" [ref=e80]
+            - cell "0-0" [ref=e81]
+          - row "Replay Events 0 0" [ref=e82]:
+            - rowheader "Replay Events" [ref=e83]
+            - cell "0" [ref=e84]
+            - cell "0" [ref=e85]
+      - generic [ref=e86]:
+        - generic [ref=e88]:
+          - text: Environment
+          - heading "Arena Impact" [level=2] [ref=e89]
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - row "Hazard Damage Taken 0 0" [ref=e92]:
+              - rowheader "Hazard Damage Taken" [ref=e93]
+              - cell "0" [ref=e94]
+              - cell "0" [ref=e95]
+            - row "Hazard Triggers 0 0" [ref=e96]:
+              - rowheader "Hazard Triggers" [ref=e97]
+              - cell "0" [ref=e98]
+              - cell "0" [ref=e99]
+            - row "Damaging Hits 0 0" [ref=e100]:
+              - rowheader "Damaging Hits" [ref=e101]
+              - cell "0" [ref=e102]
+              - cell "0" [ref=e103]
+          - generic [ref=e104]:
+            - generic [ref=e105]: Active hazards
+            - strong [ref=e106]: No hazards loaded
+            - paragraph [ref=e107]: Arena impact appears after combat replay data resolves.

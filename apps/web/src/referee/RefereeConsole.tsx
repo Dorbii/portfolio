@@ -11,7 +11,10 @@ import {
 import {
   Panel,
 } from '../shared/ui'
-import { RefereeCockpitStrip } from './RefereeCockpitStrip'
+import {
+  RefereeArenaMonologueOverlay,
+  RefereeCockpitStrip,
+} from './RefereeCockpitStrip'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 
 const ReplayViewer = lazy(() =>
@@ -128,6 +131,9 @@ export function RefereeConsole() {
             )}
             {shouldShowReplayStatus ? (
               <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
+            ) : null}
+            {!shouldShowReplay ? (
+              <RefereeArenaMonologueOverlay roleStates={roleStates} />
             ) : null}
           </div>
         </section>

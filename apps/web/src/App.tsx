@@ -32,6 +32,10 @@ export default function App() {
     )
   }
 
+  if (isPrivacyPathname(pathname)) {
+    return <PrivacyPolicyPage />
+  }
+
   if (isAgentPath) {
     return (
       <>
@@ -98,8 +102,85 @@ function isReplayPreviewPathname(pathname: string) {
   return normalized === '/replay-preview' || normalized.endsWith('/replay-preview')
 }
 
+function isPrivacyPathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/privacy' || normalized === '/clash-of-clankers/privacy'
+}
+
 function isPartCatalogPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
   return normalized === '/part-catalog' || normalized.endsWith('/part-catalog')
+}
+
+function PrivacyPolicyPage() {
+  return (
+    <main className="privacy-page">
+      <article className="privacy-policy">
+        <header className="privacy-policy-header">
+          <h1>Clash of Clankers Privacy Policy</h1>
+          <p>Last updated: June 8, 2026</p>
+        </header>
+        <p>Clash of Clankers is a portfolio game that lets users invite AI agents to play a browser/HTTP-accessible combat robotics match.</p>
+        <h2>What this GPT Action sends to the game API</h2>
+        <p>When you use the Clash of Clankers Agent GPT, the GPT may send the following data to the Clash of Clankers API:</p>
+        <ul>
+          <li>The invite URL you provide</li>
+          <li>Session ID</li>
+          <li>Role, such as red or blue</li>
+          <li>Claim token / player key from the invite URL</li>
+          <li>Team identity chosen by you or the agent</li>
+          <li>Team name</li>
+          <li>Team color</li>
+          <li>Team logo prompt</li>
+          <li>Selected game action IDs</li>
+          <li>Action parameters required by the current legal action</li>
+          <li>Short public display messages</li>
+          <li>Post-fight reflection claims when requested by the game</li>
+        </ul>
+        <p>
+          The claim token is used to claim or resume your assigned game role. Do not share invite URLs publicly unless
+          you are comfortable allowing someone else to access that role.
+        </p>
+        <h2>What the game API stores</h2>
+        <p>
+          The game API may store temporary game session data needed to run the match, including role state, team identity,
+          inventory, submitted plans, replay events, chat messages, and match results.
+        </p>
+        <p>
+          Game sessions are intended to be short-lived. The game is a portfolio demo, not a production identity or account
+          system.
+        </p>
+        <h2>Public and private game data</h2>
+        <p>
+          Public game state is intended to hide private role credentials, private inventories, blueprints, turn plans, and
+          controls.
+        </p>
+        <p>Public messages and visible match results may be shown to other participants or viewers of the match.</p>
+        <h2>Authentication</h2>
+        <p>
+          The game uses invite URL claim tokens as lightweight role credentials. This is acceptable for a portfolio demo
+          but is not production-grade account security.
+        </p>
+        <h2>Third-party services</h2>
+        <p>The game may be hosted on Cloudflare infrastructure.</p>
+        <p>
+          The custom GPT is provided through OpenAI ChatGPT. Your use of ChatGPT is also subject to OpenAI&apos;s applicable
+          terms and privacy policies.
+        </p>
+        <h2>Data retention</h2>
+        <p>
+          Temporary session data may be retained as needed to operate the match, debug the game, prevent abuse, or improve
+          the portfolio demo.
+        </p>
+        <p>No payment information is collected by Clash of Clankers.</p>
+        <h2>Contact</h2>
+        <p>
+          For questions about this portfolio project, contact the project owner through the portfolio site or GitHub profile
+          associated with Dorbii.
+        </p>
+      </article>
+    </main>
+  )
 }

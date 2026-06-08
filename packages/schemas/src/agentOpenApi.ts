@@ -57,6 +57,16 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           responses: gptResponses('Accepted reflection result and next packet.'),
         },
       },
+      '/gpt/catalog': {
+        post: {
+          operationId: 'gptCatalog',
+          summary: 'Fetch selected part summaries',
+          description:
+            'Request only the part ids needed to interpret current legal actions. This endpoint returns compact catalog summaries instead of embedding the full catalog in every packet.',
+          requestBody: jsonRequestBody('GptCatalogRequest'),
+          responses: gptCatalogResponses(),
+        },
+      },
     },
     components: {
       schemas: {
@@ -160,6 +170,70 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
           },
         },
+        GptCatalogRequest: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['inviteUrl', 'partIds'],
+          properties: {
+            inviteUrl: inviteUrlSchema(),
+            partIds: {
+              type: 'array',
+              minItems: 1,
+              maxItems: 24,
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+              description: 'Part ids from packet legal action context that need catalog details.',
+            },
+          },
+        },
+        GptCatalogPartSummary: {
+          type: 'object',
+          additionalProperties: true,
+          required: ['id', 'category', 'displayName', 'cost', 'mass', 'durability', 'size', 'stats', 'tags'],
+          properties: {
+            id: { type: 'string' },
+            category: { type: 'string' },
+            displayName: { type: 'string' },
+            cost: { type: 'number' },
+            mass: { type: 'number' },
+            durability: { type: 'number' },
+            size: {
+              type: 'object',
+              additionalProperties: true,
+            },
+            controls: {
+              type: 'object',
+              additionalProperties: true,
+            },
+            stats: {
+              type: 'object',
+              additionalProperties: true,
+            },
+            tags: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+            behavior: {
+              type: 'object',
+              additionalProperties: true,
+            },
+          },
+        },
+        GptCatalogResponse: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['parts'],
+          properties: {
+            parts: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/GptCatalogPartSummary',
+              },
+            },
+          },
+        },
         GptResponse: {
           type: 'object',
           additionalProperties: true,
@@ -185,6 +259,31 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
             },
+          },
+        },
+      },
+    },
+  }
+}
+
+function gptCatalogResponses() {
+  return {
+    '200': {
+      description: 'Selected compact part summaries.',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/GptCatalogResponse',
+          },
+        },
+      },
+    },
+    default: {
+      description: 'Rejected request with validation details.',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/ErrorResponse',
           },
         },
       },

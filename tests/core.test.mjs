@@ -44,6 +44,7 @@ import {
   LOADOUT_PART_LIMIT,
   loadoutBuildStateLegacyDesign,
   loadoutLegalActionForPacket,
+  machineWeaponCanHit,
   machineDesignToLegacyBotBlueprintProjection,
   machineDesignToLegacyBotDesignSnapshotProjection,
   pathHazards,
@@ -1644,12 +1645,12 @@ test('deriveMachineCapabilities applies explicit parent runtime orientation to c
   assertVectorClose(laser.emitterAxis, [1, 0, 0], 'runtime inherited laser emitter axis')
 })
 
-test('machine combat action generation gives no-mobility machines hold only', () => {
+test('machine combat action generation gives no-mobility machines hold plus surrender only', () => {
   const actionSet = buildMachineCapabilityCombatActionSet({
     machine: createInitialMachineDesign('red'),
   })
 
-  assert.deepEqual(Object.values(actionSet.actions).map((action) => action.kind), ['hold'])
+  assert.deepEqual(Object.values(actionSet.actions).map((action) => action.kind), ['hold', 'surrender'])
   assert.deepEqual(combatCommands(actionSet), [{ tick: 1, move: 'brake' }])
 })
 
@@ -1805,6 +1806,61 @@ test('machine combat weapon actions require emitter bearing range and arena line
       (command) => command.weaponA === 'fire',
     ),
     false,
+  )
+})
+
+test('machine combat sweep weapon actions expose adjacent attacks from any bearing', () => {
+  const initial = createInitialMachineDesign('red')
+  const sideBearingSpinner = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('large_spinner', {
+        definitionId: 'catalog:Weapon_Spinner_Large',
+        transform: machineTransform({
+          orientation: machineBasis({
+            right: [1, 0, 0],
+            forward: [0, 0, 1],
+          }),
+        }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'large_spinner', { mountId: 'core_shell' }),
+    ],
+  }
+  const snapshot = combatSnapshot(tacticalOpenArena, [2, 0, 2], [2, 0, 1], { tick: 1 })
+  const actionSet = buildMachineCapabilityCombatActionSet({
+    machine: sideBearingSpinner,
+    redPosition: snapshot.red.position,
+    bluePosition: snapshot.blue.position,
+  })
+  const attackAction = Object.values(actionSet.actions)
+    .find((action) => action.kind === 'attack')
+  const board = buildAgentBoardView({
+    arena: snapshot.arena,
+    role: 'red',
+    self: snapshot.red,
+    opponent: snapshot.blue,
+    actions: Object.values(actionSet.actions),
+  })
+  const selfCell = board.cells.find((cell) => cell.x === 2 && cell.z === 2)
+  const capabilities = deriveMachineCapabilities(sideBearingSpinner)
+
+  assert.notEqual(attackAction, undefined)
+  assert.equal(combatActionCommand(attackAction).weaponA, 'fire')
+  assert.equal(combatLegalActionForPacket(attackAction).preview.expectedRangeIfOpponentHolds, 1)
+  assert.equal(selfCell.legal.attacksFromHere[0].targetCellId, 'cell:2:1')
+  assert.equal(board.attackableTargets[0].cell.x, 2)
+  assert.equal(board.attackableTargets[0].cell.z, 1)
+  assert.equal(
+    machineWeaponCanHit({
+      topology: compileArenaTopology(tacticalOpenArena),
+      attackerPosition: snapshot.red.position,
+      defenderPosition: snapshot.blue.position,
+      weapon: capabilities.weapons[0],
+    }),
+    true,
   )
 })
 
@@ -2816,7 +2872,7 @@ async function createParameterizedCombatActionHarness() {
   }
 
   const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => '2026-06-03T00:01:00.000Z',
+    clock: () => '2026-06-03T00:00:10.000Z',
   })
   const packet = await loaded.getGameMasterPacketForToken(redToken)
 
@@ -6320,8 +6376,8 @@ test('sessions require both roles before opening loadout actions', async () => {
   assert.equal(blue.value.state.phase, 'submission_phase')
   assert.deepEqual(blue.value.state.roundPlan, {
     openedAt: '2026-06-03T00:00:00.000Z',
-    deadlineAt: '2026-06-03T00:02:00.000Z',
-    planSeconds: 120,
+    deadlineAt: '2026-06-03T00:04:00.000Z',
+    planSeconds: 240,
   })
 })
 
@@ -6505,7 +6561,7 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
 
   assert.equal(blue.ok, true)
   assert.equal(blue.value.state.phase, 'submission_phase')
-  assert.equal(blue.value.state.roundPlan.planSeconds, 120)
+  assert.equal(blue.value.state.roundPlan.planSeconds, 240)
   assert.equal(blue.value.nextAction, 'build_bot')
 })
 
@@ -6834,7 +6890,7 @@ test('session rate limits repeated private state attempts', async () => {
   assert.equal(third.error.code, 'RATE_LIMITED')
 })
 
-test('no-mobility machine combat legal actions are hold-only and not projection-derived', async () => {
+test('no-mobility machine combat legal actions are hold plus surrender and not projection-derived', async () => {
   const session = await createTestSession('s_machine_combat_hold_only')
   const { redToken, blueToken } = await claimBothRoles(session)
 
@@ -6871,7 +6927,7 @@ test('no-mobility machine combat legal actions are hold-only and not projection-
     .filter(Boolean)
 
   assert.equal(redPacket.ok, true)
-  assert.deepEqual(redPacket.value.legalActions.map((action) => action.kind), ['hold'])
+  assert.deepEqual(redPacket.value.legalActions.map((action) => action.kind), ['hold', 'surrender'])
   assert.equal(redRole.controls, undefined)
   assert.equal(projectedControls.movement.includes('forward'), true)
   assert.equal(projectedControls.weaponA?.includes('fire'), true)
@@ -6909,7 +6965,7 @@ test('active machine combat packets expose capability-generated canonical action
   stored.lockedActions = undefined
 
   const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => '2026-06-03T00:01:00.000Z',
+    clock: () => '2026-06-03T00:00:10.000Z',
   })
   const packet = await loaded.getGameMasterPacketForToken(redToken)
 
@@ -7032,8 +7088,8 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(redSubmission.value.publicState.roles.red.submitted, true)
   assert.equal(redSubmission.value.publicState.roles.blue.submitted, false)
   assert.equal(redSubmission.value.publicState.replayAvailable, false)
-  assert.equal(redSubmission.value.publicState.roundPlan.planSeconds, 120)
-  assert.equal(redSubmission.value.publicState.roundPlan.deadlineAt, '2026-06-03T00:02:00.000Z')
+  assert.equal(redSubmission.value.publicState.roundPlan.planSeconds, 240)
+  assert.equal(redSubmission.value.publicState.roundPlan.deadlineAt, '2026-06-03T00:04:00.000Z')
 
   const preReplay = session.getReplay()
 
@@ -7049,7 +7105,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
   assert.equal(blueState.ok, true)
-  assert.equal(blueState.value.combat.turnSeconds, 120)
+  assert.equal(blueState.value.combat.turnSeconds, 30)
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')
   assert.equal(blueState.value.combat.decision.tick, 1)
@@ -7099,6 +7155,35 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(JSON.stringify(redState.value.opponent).includes('red loadout'), false)
 })
 
+test('session lets a combat agent surrender to resolve a stalled round', async () => {
+  const session = await createTestSession('s_combat_surrender')
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+
+  const surrenderAction = findLegalAction(redPacket.value, (action) => action.kind === 'surrender')
+  const surrendered = await submitPacketAction(session, redToken, redPacket.value, surrenderAction)
+
+  assert.equal(surrendered.ok, true)
+  assert.equal(surrendered.value.publicState.phase, 'round_review')
+  assert.equal(surrendered.value.publicState.replayAvailable, true)
+  assert.equal(surrendered.value.publicState.lastResult.winner, 'blue')
+  assert.equal(surrendered.value.publicState.lastResult.reason, 'Red surrendered; Blue wins the round.')
+  assert.equal(surrendered.value.publicState.lastResult.damage.red, 0)
+  assert.equal(surrendered.value.publicState.lastResult.damage.blue, 0)
+  assert.equal(session.exportState().combat, undefined)
+
+  const replay = session.getReplay()
+
+  assert.equal(replay.ok, true)
+  assert.equal(validateReplayTimeline(replay.value), true)
+  assert.equal(replay.value.summary, 'Red surrendered; Blue wins the round.')
+})
+
 test('session applies no-op turn commands when combat turn deadline expires', async () => {
   let now = '2026-06-03T00:00:00.000Z'
   const session = await createTestSession('s_turn_timeout', {
@@ -7112,7 +7197,7 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
 
-  now = '2026-06-03T00:02:01.000Z'
+  now = '2026-06-03T00:00:31.000Z'
 
   const redState = await session.getRoleStateForToken(redToken)
 
@@ -7125,6 +7210,78 @@ test('session applies no-op turn commands when combat turn deadline expires', as
   assert.equal(
     redState.value.eventLog.some((event) => event.type === 'turn_command_timed_out'),
     true,
+  )
+})
+
+test('session auto-confirms current loadouts when loadout window expires', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_loadout_auto_confirm', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  now = '2026-06-03T00:04:01.000Z'
+
+  const redState = await session.getRoleStateForToken(redToken)
+  const publicState = session.getPublicState()
+  const blueState = await session.getRoleStateForToken(blueToken)
+
+  assert.equal(redState.ok, true)
+  assert.equal(blueState.ok, true)
+  assert.equal(redState.value.phase, 'combat_turn')
+  assert.equal(blueState.value.phase, 'combat_turn')
+  assert.equal(redState.value.submitted, true)
+  assert.equal(blueState.value.submitted, true)
+  assert.equal(publicState.roundPlan, undefined)
+  assert.equal(publicState.phase, 'combat_turn')
+  assert.equal(publicState.roles.red.submitted, true)
+  assert.equal(publicState.roles.blue.submitted, true)
+  assert.equal(redState.value.combat.turnSeconds, 30)
+  assert.equal(
+    publicState.eventLog.filter((event) => event.message.includes('loadout window expired')).length,
+    2,
+  )
+})
+
+test('session sells pending remount parts when loadout window expires', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_loadout_pending_remount_refund', {
+    clock: () => now,
+  })
+  const { redToken } = await claimBothRoles(session)
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+
+  const placed = await placePartFromCatalog(session, redToken, redPacket.value, 'Frame_Strut')
+
+  assert.equal(placed.ok, true)
+
+  const goldAfterPlace = session.exportState().roles.red.gold
+  const strutCost = PART_CATALOG.find((part) => part.id === 'Frame_Strut')?.cost
+  const movePartAction = findLegalAction(placed.value.packet, (action) => action.kind === 'move_part')
+  const moving = await submitPacketAction(session, redToken, placed.value.packet, movePartAction)
+
+  assert.equal(strutCost, 1)
+  assert.equal(moving.ok, true)
+  assert.equal(session.exportState().roles.red.gold, goldAfterPlace)
+  assert.equal(session.exportState().roles.red.loadoutBuildState.selectedMovingPartId, 'part_1')
+  assert.equal(session.exportState().roles.red.loadoutBuildState.selectedPartId, 'Frame_Strut')
+  assert.equal(session.exportState().roles.red.loadoutConfirmedAt, undefined)
+
+  now = '2026-06-03T00:04:01.000Z'
+
+  const redState = await session.getRoleStateForToken(redToken)
+  const exported = session.exportState()
+
+  assert.equal(redState.ok, true)
+  assert.equal(redState.value.phase, 'combat_turn')
+  assert.equal(exported.roles.red.gold, goldAfterPlace + strutCost)
+  assert.equal(exported.roles.red.inventory.some((item) => item.partId === 'Frame_Strut'), false)
+  assert.equal(exported.roles.red.loadoutBuildState.selectedMovingPartId, undefined)
+  assert.equal(
+    exported.roles.red.loadoutBuildState.currentDesign.machine.parts.some((part) => part.partId === 'Frame_Strut'),
+    false,
   )
 })
 
@@ -7269,8 +7426,8 @@ test('referee advances round review and applies automatic economy to the next ro
   assert.equal(advance.value.publicState.roles.blue.losses, 1)
   assert.deepEqual(advance.value.publicState.roundPlan, {
     openedAt: '2026-06-03T00:02:00.000Z',
-    deadlineAt: '2026-06-03T00:04:00.000Z',
-    planSeconds: 120,
+    deadlineAt: '2026-06-03T00:06:00.000Z',
+    planSeconds: 240,
   })
   assert.equal('awardOptions' in advance.value.publicState, false)
 
@@ -7280,7 +7437,7 @@ test('referee advances round review and applies automatic economy to the next ro
   assert.equal(exported.roles.blue.gold, 260 + 50 + calculateInterest(260))
   assert.equal(exported.roles.red.loadoutConfirmedAt, undefined)
   assert.equal(exported.roles.blue.loadoutConfirmedAt, undefined)
-  assert.equal(exported.roundPlan.deadlineAt, '2026-06-03T00:04:00.000Z')
+  assert.equal(exported.roundPlan.deadlineAt, '2026-06-03T00:06:00.000Z')
 })
 
 test('draw advance applies no winner bonus', async () => {

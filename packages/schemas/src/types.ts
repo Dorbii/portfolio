@@ -615,6 +615,7 @@ export const GAME_MASTER_ACTION_KINDS = [
   'move_and_attack',
   'use_utility',
   'hold',
+  'surrender',
   'ready',
 ] as const
 

@@ -5,6 +5,8 @@ import {
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
   type GameMasterActionParameters,
+  type GameMasterPacket,
+  type PartDefinition,
   type PostFightAgentReflection,
   type RoleClaimRequest,
   type TeamIdentity,
@@ -67,7 +69,7 @@ type JsonRequestReadResult =
       response: Response
     }
 
-type GptRouteAction = 'claim' | 'next' | 'act' | 'reflection'
+type GptRouteAction = 'claim' | 'next' | 'act' | 'reflection' | 'catalog'
 
 type GptInvite = {
   sessionId: string
@@ -97,6 +99,28 @@ type GptReflectBody = {
   inviteUrl: string
   claims: PostFightAgentReflection['claims']
   confidence?: PostFightAgentReflection['confidence']
+}
+
+type GptCatalogBody = {
+  inviteUrl: string
+  partIds?: unknown
+}
+
+type GptCatalogPartSummary = Pick<
+  PartDefinition,
+  'id' | 'category' | 'displayName' | 'cost' | 'mass' | 'durability' | 'size' | 'controls' | 'stats' | 'tags' | 'behavior'
+>
+
+type GptCompactPacket = {
+  sessionId: GameMasterPacket['sessionId']
+  role: GameMasterPacket['role']
+  phase: GameMasterPacket['phase']
+  nextAction: GameMasterPacket['nextAction']
+  round: GameMasterPacket['round']
+  decisionVersion: GameMasterPacket['decisionVersion']
+  instruction: GameMasterPacket['instruction']
+  legalActions: Array<Record<string, unknown>>
+  [key: string]: unknown
 }
 
 export async function handleWorkerRequest(
@@ -228,6 +252,10 @@ export class AgentArenaSession {
     'gpt-reflect': {
       method: 'POST',
       handle: (request, coordinator) => this.gptReflect(request, coordinator),
+    },
+    'gpt-catalog': {
+      method: 'POST',
+      handle: (request, coordinator) => this.gptCatalog(request, coordinator),
     },
   }
 
@@ -498,7 +526,7 @@ export class AgentArenaSession {
         status: 'claimed',
         sessionId: result.value.sessionId,
         role: result.value.role,
-        packet: result.value.packet,
+        packet: compactGptPacket(result.value.packet),
       },
     )
   }
@@ -533,7 +561,7 @@ export class AgentArenaSession {
               status: gptPacketStatus(result.value),
               sessionId: result.value.sessionId,
               role: result.value.role,
-              packet: result.value,
+              packet: compactGptPacket(result.value),
             },
           }
         : result,
@@ -597,7 +625,7 @@ export class AgentArenaSession {
             value: {
               status: gptPacketStatus(result.value.packet),
               acceptedActionId: action.id,
-              packet: result.value.packet,
+              packet: compactGptPacket(result.value.packet),
               publicState: result.value.publicState,
             },
           }
@@ -656,11 +684,53 @@ export class AgentArenaSession {
             ok: true,
             value: {
               status: gptPacketStatus(result.value.packet),
-              packet: result.value.packet,
+              packet: compactGptPacket(result.value.packet),
             },
           }
         : result,
     )
+  }
+
+  private async gptCatalog(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'GPT catalog body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    const body = readResult.body as GptCatalogBody
+    const invite = parseGptInvite(body.inviteUrl)
+
+    if (!invite.ok) {
+      return invite.response
+    }
+
+    const packetResult = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
+
+    if (!packetResult.ok) {
+      return this.sessionResultResponse(coordinator, packetResult)
+    }
+
+    if (!Array.isArray(body.partIds)) {
+      return errorResponse(400, 'INVALID_REQUEST', 'GPT catalog partIds must be an array.')
+    }
+
+    const partIds = body.partIds.filter((partId): partId is string =>
+      typeof partId === 'string' && partId.trim().length > 0,
+    )
+    const requested = new Set(partIds)
+    const parts = PART_CATALOG
+      .filter((part) => requested.has(part.id))
+      .map(gptCatalogPartSummary)
+
+    await this.saveSession(coordinator)
+
+    return jsonResponse({ parts })
   }
 
   private async submitPostFightReflection(
@@ -850,9 +920,99 @@ async function forwardGptRequest(
 }
 
 function gptRouteAction(pathname: string): GptRouteAction | undefined {
-  const match = /^\/gpt\/(claim|next|act|reflection)$/.exec(pathname)
+  const match = /^\/gpt\/(claim|next|act|reflection|catalog)$/.exec(pathname)
 
   return match?.[1] as GptRouteAction | undefined
+}
+
+function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
+  return {
+    sessionId: packet.sessionId,
+    role: packet.role,
+    phase: packet.phase,
+    nextAction: packet.nextAction,
+    round: packet.round,
+    ...(packet.fightId ? { fightId: packet.fightId } : {}),
+    decisionVersion: packet.decisionVersion,
+    instruction: packet.instruction,
+    ...(packet.resources ? { resources: packet.resources } : {}),
+    ...(packet.store
+      ? {
+          store: {
+            foundationPartIds: packet.store.foundationPartIds,
+            offeredPartIds: packet.store.offeredPartIds,
+            slots: packet.store.slots.map((slot) => ({
+              id: slot.id,
+              kind: slot.kind,
+              partId: slot.partId,
+            })),
+          },
+        }
+      : {}),
+    ...(packet.buildState
+      ? {
+          buildState: {
+            step: packet.buildState.step,
+            selectedPartId: packet.buildState.selectedPartId,
+            selectedAttachTargetId: packet.buildState.selectedAttachTargetId,
+          },
+        }
+      : {}),
+    ...(packet.board
+      ? {
+          board: {
+            self: packet.board.self,
+            opponent: packet.board.opponent,
+            hazardCells: packet.board.hazardCells?.slice(0, 24),
+            reachablePoses: packet.board.reachablePoses?.slice(0, 24),
+            attackableTargets: packet.board.attackableTargets?.slice(0, 24),
+            cells: packet.board.cells?.slice(0, 81),
+          },
+        }
+      : {}),
+    ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
+    legalActions: packet.legalActions.map((action) => ({
+      id: action.id,
+      kind: action.kind,
+      label: action.label,
+      summary: action.summary,
+      ...(action.requirements ? { requirements: action.requirements } : {}),
+      ...(action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
+      ...(action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
+      ...(action.preview ? { preview: action.preview } : {}),
+    })),
+    ...(packet.blockedActions
+      ? {
+          blockedActions: packet.blockedActions.slice(0, 12).map((action) => ({
+            kind: action.kind,
+            label: action.label,
+            summary: action.summary,
+            requirements: action.requirements,
+            issues: action.issues?.slice(0, 5).map((issue) => ({
+              code: issue.code,
+              path: issue.path,
+              message: issue.message,
+            })),
+          })),
+        }
+      : {}),
+  }
+}
+
+function gptCatalogPartSummary(part: PartDefinition): GptCatalogPartSummary {
+  return {
+    id: part.id,
+    category: part.category,
+    displayName: part.displayName,
+    cost: part.cost,
+    mass: part.mass,
+    durability: part.durability,
+    size: part.size,
+    stats: part.stats,
+    tags: part.tags,
+    ...(part.controls ? { controls: part.controls } : {}),
+    ...(part.behavior ? { behavior: part.behavior } : {}),
+  }
 }
 
 function parseGptInvite(value: unknown): { ok: true; value: GptInvite } | { ok: false; response: Response } {
