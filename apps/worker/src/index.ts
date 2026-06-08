@@ -3,7 +3,10 @@ import {
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
+  type GameMasterActionParameters,
+  type PostFightAgentReflection,
   type RoleClaimRequest,
+  type TeamIdentity,
   type TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import {
@@ -27,10 +30,12 @@ import {
   preflightResponse,
   readJsonBody,
   statusForRelayError,
+  withCors,
 } from './workerHttp.js'
 import {
   bearerToken,
   isSessionId,
+  requestWithJson,
   sessionRoleRoute,
   sessionRoute,
 } from './workerRoutes.js'
@@ -61,6 +66,38 @@ type JsonRequestReadResult =
       response: Response
     }
 
+type GptRouteAction = 'claim' | 'next' | 'act' | 'reflection'
+
+type GptInvite = {
+  sessionId: string
+  role: TeamRole
+  claimToken: string
+  apiBase?: string
+}
+
+type GptClaimBody = {
+  inviteUrl: string
+  agentName?: string
+  teamIdentity?: GptTeamIdentityInput
+}
+
+type GptTeamIdentityInput = TeamIdentity & {
+  mode?: 'provided' | 'agent_decides'
+}
+
+type GptActBody = {
+  inviteUrl: string
+  actionId: string
+  parameters?: GameMasterActionParameters
+  publicMessage?: string
+}
+
+type GptReflectBody = {
+  inviteUrl: string
+  claims: PostFightAgentReflection['claims']
+  confidence?: PostFightAgentReflection['confidence']
+}
+
 export async function handleWorkerRequest(
   request: Request,
   env: WorkerEnv,
@@ -85,6 +122,12 @@ export async function handleWorkerRequest(
 
   if (request.method === 'POST' && url.pathname === '/sessions') {
     return handlePublicCreateSessionRequest(request, env)
+  }
+
+  const gptRoute = gptRouteAction(url.pathname)
+
+  if (gptRoute) {
+    return forwardGptRequest(request, env, gptRoute)
   }
 
   const roleRoute = sessionRoleRoute(url.pathname)
@@ -157,6 +200,22 @@ export class AgentArenaSession {
     replay: {
       method: 'GET',
       handle: (_request, coordinator) => this.replay(coordinator),
+    },
+    'gpt-claim': {
+      method: 'POST',
+      handle: (request, coordinator) => this.gptClaim(request, coordinator),
+    },
+    'gpt-next': {
+      method: 'POST',
+      handle: (request, coordinator) => this.gptNext(request, coordinator),
+    },
+    'gpt-act': {
+      method: 'POST',
+      handle: (request, coordinator) => this.gptAct(request, coordinator),
+    },
+    'gpt-reflect': {
+      method: 'POST',
+      handle: (request, coordinator) => this.gptReflect(request, coordinator),
     },
   }
 
@@ -383,6 +442,215 @@ export class AgentArenaSession {
     return this.sessionResultResponse(coordinator, coordinator.getReplay())
   }
 
+  // CODEX_INTENT: provide GPT Actions a narrow wrapper that hides GameMaster version bookkeeping.
+  // CODEX_RISK: interface
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  private async gptClaim(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'GPT claim body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    const body = readResult.body as Partial<GptClaimBody>
+    const invite = parseGptInvite(body.inviteUrl)
+
+    if (!invite.ok) {
+      return invite.response
+    }
+
+    const result = await coordinator.bootstrapRole(
+      invite.value.role,
+      invite.value.claimToken,
+      {
+        ...(typeof body.agentName === 'string' && body.agentName.trim()
+          ? { agentName: body.agentName.trim() }
+          : {}),
+        ...(body.teamIdentity ? { teamIdentity: normalizeGptTeamIdentity(body.teamIdentity) } : {}),
+      },
+    )
+    await this.saveSession(coordinator)
+
+    if (!result.ok) {
+      return jsonResponse(result, { status: statusForRelayError(result.error) })
+    }
+
+    return jsonResponse(
+      {
+        status: 'claimed',
+        sessionId: result.value.sessionId,
+        role: result.value.role,
+        packet: result.value.packet,
+      },
+    )
+  }
+
+  private async gptNext(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'GPT next body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    const body = readResult.body as Partial<GptClaimBody>
+    const invite = parseGptInvite(body.inviteUrl)
+
+    if (!invite.ok) {
+      return invite.response
+    }
+
+    const result = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
+
+    return this.sessionResultResponse(
+      coordinator,
+      result.ok
+        ? {
+            ok: true,
+            value: {
+              status: gptPacketStatus(result.value),
+              sessionId: result.value.sessionId,
+              role: result.value.role,
+              packet: result.value,
+            },
+          }
+        : result,
+    )
+  }
+
+  private async gptAct(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'GPT action body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    const body = readResult.body as Partial<GptActBody>
+    const invite = parseGptInvite(body.inviteUrl)
+
+    if (!invite.ok) {
+      return invite.response
+    }
+
+    if (typeof body.actionId !== 'string' || body.actionId.trim().length === 0) {
+      return errorResponse(400, 'SUBMISSION_INVALID', 'GPT actionId is required.')
+    }
+
+    const packetResult = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
+
+    if (!packetResult.ok) {
+      return this.sessionResultResponse(coordinator, packetResult)
+    }
+
+    const packet = packetResult.value
+    const action = packet.legalActions.find((candidate) => candidate.id === body.actionId)
+
+    if (!action || !packet.actionSetId) {
+      return errorResponse(
+        409,
+        'SUBMISSION_INVALID',
+        'actionId is not legal in the latest GameMasterPacket for this role.',
+      )
+    }
+
+    const result = await coordinator.submitGameMasterAction(invite.value.claimToken, {
+      action: 'submit_game_action',
+      actionSetId: packet.actionSetId,
+      decisionVersion: packet.decisionVersion,
+      actionId: action.id,
+      ...(body.parameters !== undefined ? { parameters: body.parameters } : {}),
+      ...(typeof body.publicMessage === 'string' ? { publicMessage: body.publicMessage } : {}),
+    })
+
+    return this.sessionResultResponse(
+      coordinator,
+      result.ok
+        ? {
+            ok: true,
+            value: {
+              status: gptPacketStatus(result.value.packet),
+              acceptedActionId: action.id,
+              packet: result.value.packet,
+              publicState: result.value.publicState,
+            },
+          }
+        : result,
+    )
+  }
+
+  private async gptReflect(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'GPT reflection body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    const body = readResult.body as Partial<GptReflectBody>
+    const invite = parseGptInvite(body.inviteUrl)
+
+    if (!invite.ok) {
+      return invite.response
+    }
+
+    if (!isJsonRecord(body.claims)) {
+      return errorResponse(400, 'INVALID_REQUEST', 'GPT reflection claims are required.')
+    }
+
+    const packetResult = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
+
+    if (!packetResult.ok) {
+      return this.sessionResultResponse(coordinator, packetResult)
+    }
+
+    const packet = packetResult.value
+
+    if (!packet.fightId) {
+      return errorResponse(409, 'PHASE_CLOSED', 'No completed fight is available for reflection.')
+    }
+
+    const result = await coordinator.submitPostFightReflection(invite.value.claimToken, {
+      action: 'submit_post_fight_reflection',
+      fightId: packet.fightId,
+      role: invite.value.role,
+      decisionVersion: packet.decisionVersion,
+      claims: body.claims as PostFightAgentReflection['claims'],
+      confidence: body.confidence ?? 'medium',
+    })
+
+    return this.sessionResultResponse(
+      coordinator,
+      result.ok
+        ? {
+            ok: true,
+            value: {
+              status: gptPacketStatus(result.value.packet),
+              packet: result.value.packet,
+            },
+          }
+        : result,
+    )
+  }
+
   private async submitPostFightReflection(
     request: Request,
     coordinator: SessionCoordinator,
@@ -530,6 +798,131 @@ function invalidDurableObjectSessionIdResponse(): Response {
     'INVALID_REQUEST',
     'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
   )
+}
+
+async function forwardGptRequest(
+  request: Request,
+  env: WorkerEnv,
+  action: GptRouteAction,
+): Promise<Response> {
+  const body = await readJsonBody(request)
+
+  if (isBodyTooLarge(body)) {
+    return bodyTooLargeResponse(request, env)
+  }
+
+  if (body === undefined || !isJsonRecord(body)) {
+    return errorResponse(400, 'BAD_JSON', 'GPT wrapper body must be JSON.', undefined, request, env)
+  }
+
+  const invite = parseGptInvite(body.inviteUrl)
+
+  if (!invite.ok) {
+    return withCors(invite.response, request, env)
+  }
+
+  if (!isSessionId(invite.value.sessionId)) {
+    return invalidSessionIdResponse(request, env)
+  }
+
+  const internalUrl = new URL(request.url)
+  internalUrl.pathname = `/sessions/${encodeURIComponent(invite.value.sessionId)}/gpt-${
+    action === 'reflection' ? 'reflect' : action
+  }`
+
+  return forwardToSessionObject(
+    requestWithJson(request, internalUrl, body),
+    env,
+    invite.value.sessionId,
+  )
+}
+
+function gptRouteAction(pathname: string): GptRouteAction | undefined {
+  const match = /^\/gpt\/(claim|next|act|reflection)$/.exec(pathname)
+
+  return match?.[1] as GptRouteAction | undefined
+}
+
+function parseGptInvite(value: unknown): { ok: true; value: GptInvite } | { ok: false; response: Response } {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return {
+      ok: false,
+      response: errorResponse(400, 'INVALID_REQUEST', 'inviteUrl is required.'),
+    }
+  }
+
+  let url: URL
+
+  try {
+    url = new URL(value)
+  } catch {
+    return {
+      ok: false,
+      response: errorResponse(400, 'INVALID_REQUEST', 'inviteUrl must be a valid URL.'),
+    }
+  }
+
+  const params = new URLSearchParams(url.hash.startsWith('#') ? url.hash.slice(1) : url.hash)
+  const sessionId = params.get('session') ?? ''
+  const role = params.get('role') ?? ''
+  const claimToken = params.get('claimToken') ?? params.get('invite') ?? ''
+  const apiBase = params.get('api') ?? undefined
+
+  if (!isSessionId(sessionId)) {
+    return {
+      ok: false,
+      response: invalidDurableObjectSessionIdResponse(),
+    }
+  }
+
+  if (role !== 'red' && role !== 'blue') {
+    return {
+      ok: false,
+      response: errorResponse(400, 'INVALID_ROLE', 'inviteUrl role must be red or blue.'),
+    }
+  }
+
+  if (!claimToken.trim()) {
+    return {
+      ok: false,
+      response: errorResponse(401, 'INVALID_TOKEN', 'inviteUrl must include claimToken.'),
+    }
+  }
+
+  return {
+    ok: true,
+    value: {
+      sessionId,
+      role,
+      claimToken,
+      ...(apiBase ? { apiBase } : {}),
+    },
+  }
+}
+
+function normalizeGptTeamIdentity(input: GptTeamIdentityInput): TeamIdentity {
+  return {
+    name: input.name,
+    colorHex: input.colorHex,
+    ...(input.logoPrompt ? { logoPrompt: input.logoPrompt } : {}),
+    ...(input.logoAsset ? { logoAsset: input.logoAsset } : {}),
+  }
+}
+
+function gptPacketStatus(
+  packet: { legalActions: unknown[]; nextAction: string; phase?: string },
+): 'playable' | 'waiting' | 'complete' | 'expired' {
+  if (packet.phase === 'expired') {
+    return 'expired'
+  }
+
+  if (packet.nextAction === 'session_complete' || packet.nextAction === 'stop') {
+    return 'complete'
+  }
+
+  return packet.legalActions.length > 0 || packet.nextAction === 'submit_reflection' || packet.nextAction === 'view_replay'
+    ? 'playable'
+    : 'waiting'
 }
 
 export default {

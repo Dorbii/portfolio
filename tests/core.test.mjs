@@ -30,6 +30,7 @@ import {
   hasAliveBehaviorPart,
   hazardsAtPosition,
   applyLoadoutAction,
+  buildAgentBoardView,
   buildCatalogStore,
   buildLoadoutActionSet,
   buildCombatActionSet,
@@ -699,11 +700,12 @@ function findLegalAction(packet, predicate) {
 }
 
 async function submitPacketAction(session, token, packet, action, parameters) {
+  const actionParameters = parameters ?? action.parameterExamples?.[0]
   const submitted = await session.submitGameMasterAction(
     token,
     {
       ...actionSubmissionFromPacket(packet, action.id),
-      ...(parameters ? { parameters } : {}),
+      ...(actionParameters ? { parameters: actionParameters } : {}),
     },
   )
 
@@ -3605,6 +3607,37 @@ test('machine loadout pose can place on child part surfaces', () => {
   assert.notDeepEqual(laserPart.transform.orientation.forward, [0, 0, 1])
 })
 
+test('machine pose rejects hard collisions before mutating builder state', () => {
+  const harness = createBuilderHarness()
+
+  placePartInHarness(harness, 'Body_Light_Frame', {
+    mountSurfaceId: 'core_shell',
+    u: 0.5,
+    v: 0.5,
+  })
+
+  const poseAction = advanceBuilderToMountPose(harness, 'Body_Light_Frame', 'core')
+  const baseState = JSON.stringify(harness.buildState)
+  const baseGold = harness.gold
+  const baseInventory = JSON.stringify(harness.inventory)
+  const rejected = tryBuilderAction(
+    harness,
+    builderActionWithMountPoseParameters(poseAction, {
+      mountSurfaceId: 'core_shell',
+      u: 0.5,
+      v: 0.5,
+      yawDegrees: 0,
+      rollDegrees: 0,
+    }),
+  )
+
+  assert.equal(rejected.ok, false)
+  assert.ok(rejected.issues.some((issue) => issue.code === 'HARD_PART_COLLISION'))
+  assert.equal(JSON.stringify(harness.buildState), baseState)
+  assert.equal(harness.gold, baseGold)
+  assert.equal(JSON.stringify(harness.inventory), baseInventory)
+})
+
 test('machine pose rejects invalid parent and unsupported surface without mutating design', () => {
   const harness = createBuilderHarness()
   const body = placePartInHarness(harness, 'Body_Light_Frame', { mountSurfaceId: 'core_shell' })
@@ -4825,6 +4858,59 @@ test('combat action builder redacts canonical payloads and applies tactical-anch
   assert.equal(hasCombatAction(blockedRedSet, (command) => command.move === 'dash_forward'), false)
   assert.equal(hasCombatAction(blockedRedSet, (command) => command.weaponA === 'fire'), false)
   assert.equal(hasCombatAction(farRedSet, (command) => command.weaponA === 'fire'), false)
+})
+
+test('agent board view exposes tactical cells, reachable poses, and attack targets', () => {
+  const actionSet = buildTacticalCombatActionSet({ role: 'red' })
+  const snapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], { tick: 1 })
+  const fire = findCombatAction(actionSet, (command) => command.weaponA === 'fire' && command.move === undefined)
+  const dash = findCombatAction(actionSet, (command) => command.move === 'dash_forward' && command.weaponA !== 'fire')
+  const board = buildAgentBoardView({
+    arena: snapshot.arena,
+    role: 'red',
+    self: snapshot.red,
+    opponent: snapshot.blue,
+    actions: Object.values(actionSet.actions),
+  })
+
+  assert.deepEqual(board.grid, { cellSize: 1, xMin: -4, xMax: 4, zMin: -4, zMax: 4 })
+  assert.deepEqual(board.self.anchor, { x: -1, z: 0 })
+  assert.deepEqual(board.opponent.anchor, { x: 1, z: 0 })
+  assert.equal(board.cells.length, 81)
+  assert.equal(board.blockedCells.length, 0)
+
+  const selfCell = board.cells.find((cell) => cell.cellId === 'cell:-1:0')
+  const opponentCell = board.cells.find((cell) => cell.cellId === 'cell:1:0')
+  const cornerCell = board.cells.find((cell) => cell.cellId === 'cell:-4:-4')
+  const dashPose = board.reachablePoses.find((pose) => pose.actionIds.includes(dash.id))
+  const attackTarget = board.attackableTargets.find((target) => target.targetId === 'opponent')
+
+  assert.equal(selfCell.occupant, 'self')
+  assert.equal(opponentCell.occupant, 'opponent')
+  assert.ok(opponentCell.targetableByActionIds.includes(fire.id))
+  assert.ok(cornerCell.unavailableReasons.includes('No current legal action ends on this cell.'))
+  assert.deepEqual(dashPose.anchor, { x: 1, z: 0 })
+  assert.ok(dashPose.riskTags.includes('occupied_anchor_conflict'))
+  assert.ok(attackTarget.actionIds.includes(fire.id))
+
+  const blockedSet = buildTacticalCombatActionSet({
+    role: 'red',
+    arena: tacticalBlockedArena,
+  })
+  const blockedSnapshot = combatSnapshot(tacticalBlockedArena, [-1, 0, 0], [1, 0, 0], { tick: 1 })
+  const blockedBoard = buildAgentBoardView({
+    arena: tacticalBlockedArena,
+    role: 'red',
+    self: blockedSnapshot.red,
+    opponent: blockedSnapshot.blue,
+    actions: Object.values(blockedSet.actions),
+  })
+  const blockedCell = blockedBoard.cells.find((cell) => cell.cellId === 'cell:0:0')
+
+  assert.ok(blockedBoard.blockedCells.some((cell) => cell.x === 0 && cell.z === 0))
+  assert.equal(blockedCell.blocksMovement, true)
+  assert.equal(blockedCell.blocksLineOfSight, true)
+  assert.ok(blockedCell.unavailableReasons.includes('Cell blocks movement and line of sight.'))
 })
 
 test('resolveSubmittedGameActions keeps both-hold combat inert and replay-valid', () => {
@@ -6824,7 +6910,12 @@ test('worker machine combat replays cumulative actions from baseline while packe
     clock: () => '2026-06-03T00:01:00.000Z',
   })
 
-  await submitCombatCommand(loaded, redToken, 'red', (command) => command.move === 'turn_right')
+  await submitCombatCommand(
+    loaded,
+    redToken,
+    'red',
+    (command) => command.move === 'turn_right' || command.move === 'circle_right',
+  )
   const firstTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
 
   assert.equal(firstTurn.value.publicState.phase, 'combat_turn')
@@ -6895,7 +6986,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')
   assert.equal(blueState.value.combat.decision.tick, 1)
-  assert.deepEqual(blueState.value.combat.decision.availableCommands, { movement: ['brake'] })
+  assert.equal('availableCommands' in blueState.value.combat.decision, false)
   assert.equal(blueState.value.combat.decision.range.band, 'long')
   assert.deepEqual(blueState.value.combat.decision.positioning.selfCell, { x: 6, z: 0 })
   assert.deepEqual(blueState.value.combat.decision.positioning.opponentCell, { x: -6, z: 0 })
@@ -6903,7 +6994,9 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueState.value.combat.decision.positioning.bearingToOpponent, 'west')
   assert.equal(blueState.value.combat.decision.hazards.active.includes('floor_saw'), true)
   assert.equal(blueState.value.combat.decision.arenaPressure.selfNearHazard, false)
-  assert.deepEqual(blueState.value.combat.decision.movementGuidance.approach, ['brake'])
+  assert.equal('approach' in blueState.value.combat.decision.movementGuidance, false)
+  assert.equal('avoid' in blueState.value.combat.decision.movementGuidance, false)
+  assert.ok(blueState.value.combat.decision.movementGuidance.reasons.length > 0)
   assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
 
@@ -6934,6 +7027,8 @@ test('session resolves after both confirmed loadouts while keeping public state 
   const redState = await session.getRoleStateForToken(redToken)
   assert.equal(redState.ok, true)
   assert.equal(redState.value.ownLoadout.blueprint.name, 'red loadout')
+  assert.equal(redState.value.ownLoadout.machineDesign.rootInstanceId, 'core')
+  assert.equal(redState.value.ownLoadout.machineDesign.parts.some((part) => part.instanceId === 'core'), true)
   assert.equal(JSON.stringify(redState.value.opponent).includes('red loadout'), false)
 })
 

@@ -118,7 +118,9 @@ const gameActionSubmission = {
 const parameterizedGameActionSubmission = {
   ...gameActionSubmission,
   parameters: {
-    commitment: 2,
+    destinationCellId: 'cell:5:2',
+    targetId: 'opponent',
+    targetCellId: 'cell:5:6',
   },
 }
 

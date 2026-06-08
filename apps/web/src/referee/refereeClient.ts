@@ -10,6 +10,7 @@ import type {
   AdvanceRoundResponse,
   CreateSessionResponse,
   PublicSessionState,
+  RolePrivateState,
   RoleInvite,
   RoleResetResponse,
 } from '../agent/agentSessionTypes.js'
@@ -119,6 +120,25 @@ export async function loadPublicSession(
 ): Promise<PublicSessionState> {
   return requestJson<PublicSessionState>(
     `${apiBase}/sessions/${encodeURIComponent(sessionId)}/public`,
+  )
+}
+
+// CODEX_INTENT: let the referee dashboard render role-observer cockpit state without widening public session state.
+// CODEX_RISK: interface
+// CODEX_CONFIDENCE: medium
+// CODEX_REVIEW: pending
+export async function loadRoleState(
+  apiBase: string,
+  sessionId: string,
+  observerToken: string,
+): Promise<RolePrivateState> {
+  return requestJson<RolePrivateState>(
+    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/state`,
+    {
+      headers: {
+        authorization: `Bearer ${observerToken}`,
+      },
+    },
   )
 }
 

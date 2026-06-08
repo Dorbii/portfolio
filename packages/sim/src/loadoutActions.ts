@@ -695,7 +695,13 @@ function mountPoseActions(input: CreateLoadoutActionsInput): CanonicalGameAction
     return []
   }
 
-  const examples = mountPoseParameterExamples(childPart, parent.instanceId, acceptedSurfaces)
+  const examples = mountPoseParameterExamples(
+    childPart,
+    parent.instanceId,
+    acceptedSurfaces,
+    input.buildState,
+    partsById,
+  )
 
   return [
     {
@@ -1080,6 +1086,13 @@ function proposeMountPose(
     parentInstanceId: parent.instanceId,
     resolvedPose,
   })
+  const physicalIssues = nextStoredDesign.version === 'machine:v1'
+    ? validateMachinePhysicalLegality(nextStoredDesign.machine, Array.from(partsById.values()))
+    : []
+
+  if (physicalIssues.length > 0) {
+    return { ok: false, issues: physicalIssues }
+  }
 
   return {
     ok: true,
@@ -1488,20 +1501,128 @@ function mountPoseParameterExamples(
   childPart: PartDefinition,
   parentInstanceId: string,
   surfaces: MountSurface[],
+  buildState: LoadoutBuildState & { currentDesign: { version: 'machine:v1'; machine: MachineDesign } },
+  partsById: Map<string, PartDefinition>,
 ): GameMasterActionParameters[] {
-  const surface = surfaces.find((candidate) => candidate.accepts.includes(childPart.category)) ?? surfaces[0]
+  const examples: GameMasterActionParameters[] = []
+  const seen = new Set<string>()
 
-  return surface
-    ? [{
+  for (const surface of surfaces) {
+    for (const point of mountPoseSamplePoints(surface)) {
+      const poseInput = {
+        surface,
+        partCategory: childPart.category,
+        u: point.u,
+        v: point.v,
+        yawDegrees: 0,
+        rollDegrees: 0,
+      }
+      const validation = validateMountPoseInput(poseInput)
+
+      if (!validation.ok) {
+        continue
+      }
+
+      const resolvedPose = resolveMountPose(poseInput)
+      const candidateMachine = machineWithProposedPose(
+        buildState,
+        childPart,
+        parentInstanceId,
+        resolvedPose,
+      )
+      const physicalIssues = validateMachinePhysicalLegality(candidateMachine, Array.from(partsById.values()))
+
+      if (physicalIssues.length > 0) {
+        continue
+      }
+
+      const example = {
         childPartId: childPart.id,
         parentInstanceId,
         mountSurfaceId: surface.id,
-        u: 0.5,
-        v: 0.5,
+        u: point.u,
+        v: point.v,
         yawDegrees: 0,
         rollDegrees: 0,
-      }]
-    : []
+      }
+      const key = JSON.stringify(example)
+
+      if (!seen.has(key)) {
+        seen.add(key)
+        examples.push(example)
+      }
+
+      if (examples.length >= 4) {
+        return examples
+      }
+    }
+  }
+
+  return examples
+}
+
+type MountPoseSamplePoint = {
+  u: number
+  v: number
+}
+
+function mountPoseSamplePoints(surface: MountSurface): MountPoseSamplePoint[] {
+  return surface.kind === 'sphere'
+    ? [
+        { u: 0.5, v: 0.5 },
+        { u: 0, v: 0.5 },
+        { u: 0.25, v: 0.5 },
+        { u: 0.75, v: 0.5 },
+        { u: 0.125, v: 0.5 },
+        { u: 0.375, v: 0.5 },
+        { u: 0.625, v: 0.5 },
+        { u: 0.875, v: 0.5 },
+        { u: 0.5, v: 0.25 },
+        { u: 0.5, v: 0.75 },
+      ]
+    : [
+        { u: 0.5, v: 0.5 },
+        { u: 0.2, v: 0.2 },
+        { u: 0.8, v: 0.2 },
+        { u: 0.2, v: 0.8 },
+        { u: 0.8, v: 0.8 },
+        { u: 0.5, v: 0.2 },
+        { u: 0.5, v: 0.8 },
+        { u: 0.2, v: 0.5 },
+        { u: 0.8, v: 0.5 },
+      ]
+}
+
+function machineWithProposedPose(
+  buildState: LoadoutBuildState & { currentDesign: { version: 'machine:v1'; machine: MachineDesign } },
+  childPart: PartDefinition,
+  parentInstanceId: string,
+  resolvedPose: ResolvedMountPose,
+): MachineDesign {
+  const machine = cloneMachineDesign(buildState.currentDesign.machine)
+  const instanceId = buildState.selectedMovingPartId ?? nextMachineCatalogInstanceId(machine)
+  const transform = machineTransformFromResolvedPose(resolvedPose)
+
+  machine.parts = [
+    ...machine.parts.filter((part) => part.instanceId !== instanceId),
+    {
+      instanceId,
+      definitionId: `catalog:${childPart.id}`,
+      source: 'catalog_part',
+      transform,
+    },
+  ]
+  machine.attachments = [
+    ...machine.attachments.filter((attachment) => attachment.childInstanceId !== instanceId),
+    {
+      parentInstanceId,
+      childInstanceId: instanceId,
+      mountId: resolvedPose.surfaceId,
+      transform: cloneTransform(transform),
+    },
+  ]
+
+  return machine
 }
 
 function mountPoseRequirements(
@@ -1515,6 +1636,7 @@ function mountPoseRequirements(
     `mountSurfaceId must be one of: ${uniqueStrings(surfaces.map((surface) => surface.id)).join(', ')}.`,
     'u and v must be numbers from 0 through 1 on the selected surface.',
     'yawDegrees and rollDegrees are degree values; the server normalizes them before placement.',
+    'Proposed poses must not hard-collide with existing non-parent parts; rejected submissions return HARD_PART_COLLISION issues.',
   ]
 }
 

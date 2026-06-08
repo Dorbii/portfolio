@@ -25,6 +25,7 @@ import {
 } from './refereeAgentBriefs'
 import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
+import { useRefereeRoleStates } from './useRefereeRoleStates'
 
 type SessionLoadState = 'idle' | 'busy'
 
@@ -48,6 +49,16 @@ export function useRefereeConsoleController() {
     apiBase,
     replayAvailable: publicSession?.replayAvailable,
     round: publicSession?.round,
+  })
+  const {
+    roleLoadState,
+    roleStateError,
+    roleStates,
+  } = useRefereeRoleStates({
+    activeSessionId,
+    apiBase,
+    invites,
+    stateVersion: publicSession?.stateVersion,
   })
 
   const activeRefereeToken = storedRefereeToken
@@ -287,6 +298,9 @@ export function useRefereeConsoleController() {
     replayError,
     replayLoadState,
     replayPayload,
+    roleLoadState,
+    roleStateError,
+    roleStates,
     sessionChat,
     storedRefereeToken,
     submitRoundAdvance,

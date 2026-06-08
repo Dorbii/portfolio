@@ -43,10 +43,10 @@ import {
   applyLoadoutAction,
   botDesignSnapshotToLegacyBotBlueprintProjection,
   buildCombatActionSet,
+  buildAgentBoardView,
   buildLoadoutActionSet,
   buildFightDossier,
   combatLegalActionForPacket,
-  combatAnchorForPosition,
   deriveMachineCapabilities,
   isCombatAction,
   ensureLoadoutBuildState,
@@ -976,6 +976,15 @@ export class SessionCoordinator {
     const buildState = gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
       ? ensureLoadoutBuildState(roleName, role.loadoutBuildState)
       : undefined
+    const board = selfCombat && opponentCombat
+      ? buildAgentBoardView({
+          arena: this.state.arena,
+          role: roleName,
+          self: selfCombat,
+          opponent: opponentCombat,
+          actions: activeSet && !locked ? Object.values(activeSet.actions) : [],
+        })
+      : { arena: this.state.arena }
     const submit = activeSet && legalActions.length > 0
       ? {
           method: 'POST' as const,
@@ -1014,25 +1023,7 @@ export class SessionCoordinator {
       },
       ...(activeSet?.catalogStore ? { store: activeSet.catalogStore } : {}),
       ...(buildState ? { buildState } : {}),
-      board: {
-        arena: this.state.arena,
-        ...(selfCombat
-          ? {
-              self: {
-                anchor: combatAnchorForPosition(this.state.arena, selfCombat.position),
-                facing: roleName === 'red' ? 'east' as const : 'west' as const,
-              },
-            }
-          : {}),
-        ...(opponentCombat
-          ? {
-              opponent: {
-                anchor: combatAnchorForPosition(this.state.arena, opponentCombat.position),
-                facing: roleName === 'red' ? 'west' as const : 'east' as const,
-              },
-            }
-          : {}),
-      },
+      board,
       ...(selfCombat && opponentCombat
         ? {
       visibleState: {

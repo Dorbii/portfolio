@@ -89,6 +89,7 @@ function legacyOwnLoadoutProjection(
         legacyProjectionNameForRole(role),
       ),
       confirmedAt: role.loadoutConfirmedAt,
+      machineDesign: role.storedDesign.machine,
     }
   }
 

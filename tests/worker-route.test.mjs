@@ -205,6 +205,10 @@ function inviteFor(invites, role) {
   return invite
 }
 
+function gptInviteUrl(sessionId, invite) {
+  return `https://arena.dorbii.net/agent#session=${sessionId}&role=${invite.role}&claimToken=${invite.claimToken}&api=https%3A%2F%2Farena-api.test`
+}
+
 function assertRedactedPublicState(publicState, hiddenValues) {
   const publicJson = JSON.stringify(publicState)
 
@@ -415,12 +419,13 @@ function catalogPartFromPacket(packet, partId) {
 }
 
 async function submitPacketAction(env, sessionId, token, packet, action, parameters) {
+  const actionParameters = parameters ?? action.parameterExamples?.[0]
   const submitted = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',
     token,
     body: {
       ...actionSubmissionFromPacket(packet, action.id),
-      ...(parameters ? { parameters } : {}),
+      ...(actionParameters ? { parameters: actionParameters } : {}),
     },
   })
 
@@ -743,15 +748,20 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.examples.gameMasterPacket.actionSetId, 'red:r1:fight_1:turn_3:v12')
   assert.equal(json.examples.gameMasterPacket.decisionVersion, 12)
   assert.equal(json.examples.gameMasterPacket.eventVersion, 21)
-  assert.ok(json.examples.gameMasterPacket.legalActions.some((action) => action.id === 'combat.red.r1.f1.t3.hold'))
+  assert.ok(json.examples.gameMasterPacket.legalActions.some((action) => action.id === 'combat.red.r1.t3.hold.cell_xp3_zp2.hold'))
   assert.ok(
     json.examples.gameMasterPacket.legalActions.some(
-      (action) => action.parameterSchema?.properties?.commitment?.maximum === 3,
+      (action) => action.parameterSchema?.properties?.destinationCellId?.enum?.includes('cell:5:2') &&
+        action.parameterSchema?.properties?.targetCellId?.enum?.includes('cell:5:6'),
     ),
   )
   assert.equal(json.examples.gameMasterPacket.submit.body.action, 'submit_game_action')
   assert.equal(json.examples.gameMasterActionSubmission.action, 'submit_game_action')
-  assert.deepEqual(json.examples.gameMasterActionSubmission.parameters, { commitment: 2 })
+  assert.deepEqual(json.examples.gameMasterActionSubmission.parameters, {
+    destinationCellId: 'cell:5:2',
+    targetId: 'opponent',
+    targetCellId: 'cell:5:6',
+  })
   assert.equal(json.examples.mountPoseActionSubmission.action, 'submit_game_action')
   assert.equal(json.examples.mountPoseActionSubmission.actionId, 'loadout.red.r1.mount_pose.Laser_A.core')
   assert.deepEqual(json.examples.mountPoseActionSubmission.parameters, {
@@ -775,6 +785,23 @@ test('GET /agent-spec.json returns the agent contract', async () => {
 
   assert.equal(exportedSubmissionValidation.ok, false)
   assert.ok(exportedSubmissionValidation.issues.some((issue) => issue.code === 'UNKNOWN_FIELD'))
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'gpt_act' &&
+        action.method === 'POST' &&
+        action.path === '/gpt/act' &&
+        action.returns.includes('server fills actionSetId and decisionVersion'),
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'gpt_reflection' &&
+        action.method === 'POST' &&
+        action.path === '/gpt/reflection',
+    ),
+  )
   assert.ok(
     json.actions.some(
       (action) =>
@@ -1216,6 +1243,87 @@ test('POST /sessions/:id/action accepts a valid server-authored action id', asyn
   assert.equal(submission.json.publicState.gameMaster.red.nextAction, 'build_bot')
 })
 
+test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_claim'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const claim = await route(env, '/gpt/claim', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      agentName: 'ClankGPT',
+      teamIdentity: {
+        mode: 'provided',
+        name: 'Iron Clankers',
+        colorHex: '#f97316',
+        logoPrompt: 'Orange industrial combat robotics logo',
+      },
+    },
+  })
+  const state = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(claim.response.status, 200)
+  assert.equal(claim.json.status, 'claimed')
+  assert.equal(claim.json.sessionId, sessionId)
+  assert.equal(claim.json.role, 'red')
+  assertGameMasterPacket(claim.json.packet, 'red')
+  assert.equal('mode' in state.json.identity, false)
+})
+
+test('POST /gpt/next returns GPT-friendly waiting or playable status', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_next'
+  const { redInvite } = await bootstrapReadySession(env, sessionId)
+  const next = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+
+  assert.equal(next.response.status, 200)
+  assert.equal(next.json.status, 'playable')
+  assert.equal(next.json.sessionId, sessionId)
+  assert.equal(next.json.role, 'red')
+  assertGameMasterPacket(next.json.packet, 'red')
+  assert.ok(next.json.packet.legalActions.length > 0)
+})
+
+test('POST /gpt/act fills GameMaster version fields from the latest packet', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_act'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const action = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      actionId: partAction.id,
+      publicMessage: 'Building mobility first.',
+    },
+  })
+  const stale = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      actionId: partAction.id,
+    },
+  })
+
+  assert.equal(action.response.status, 200)
+  assert.equal(action.json.status, 'playable')
+  assert.equal(action.json.acceptedActionId, partAction.id)
+  assert.equal(action.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(stale.response.status, 409)
+  assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')
+})
+
 test('loadout action spends gold and sets server-owned draft design', async () => {
   const env = createEnv()
   const sessionId = 's_loadout_builder_mutates_design'
@@ -1379,6 +1487,46 @@ test('mount pose packet exposes compact schema and invalid pose does not mutate 
     ]),
     [['core', 'part_1', 'core_shell']],
   )
+
+  let collisionPacket = valid.json.packet
+  const secondPartAction = findLegalAction(
+    collisionPacket,
+    (action) => action.kind === 'choose_part' && action.catalogRefs?.includes(selectedPartId),
+  )
+
+  collisionPacket = await submitPacketAction(env, sessionId, redInvite.claimToken, collisionPacket, secondPartAction)
+  collisionPacket = await submitPacketAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    collisionPacket,
+    findLegalAction(collisionPacket, (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core')),
+  )
+
+  const collisionPoseAction = findLegalAction(collisionPacket, (action) => action.kind === 'propose_mount_pose')
+  const collision = await route(env, `/sessions/${sessionId}/action`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      ...actionSubmissionFromPacket(collisionPacket, collisionPoseAction.id),
+      parameters: defaultMountPoseParameters(collisionPoseAction, {
+        mountSurfaceId: 'core_shell',
+        u: 0.5,
+        v: 0.5,
+        yawDegrees: 0,
+        rollDegrees: 0,
+      }),
+    },
+  })
+  const afterCollision = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(collision.response.status, 400)
+  assert.equal(collision.json.error.code, 'SUBMISSION_INVALID')
+  assert.ok(collision.json.error.issues.some((issue) => issue.code === 'HARD_PART_COLLISION'))
+  assert.equal(afterCollision.json.gameMaster.resources.remainingGold, collisionPacket.resources.remainingGold)
+  assert.deepEqual(afterCollision.json.gameMaster.buildState.currentDesign, collisionPacket.buildState.currentDesign)
 })
 
 test('machine confirm loadout uses tree validity instead of legacy minimum viable rules', async () => {
@@ -1557,6 +1705,22 @@ test('combat /action uses generated canonical actions and preserves blue set aft
   assert.equal(redCombatPacket.legalActions.every((action) => action.id.startsWith('combat.red.r1.t1.')), true)
   assert.equal(JSON.stringify(redCombatPacket).includes('slice_2_minimal_action_bridge'), false)
   assert.equal(JSON.stringify(redCombatPacket.legalActions).includes('command'), false)
+  assert.equal(redCombatPacket.board.grid.cellSize, 1)
+  assert.ok(redCombatPacket.board.cells.length > 0)
+  assert.equal(JSON.stringify(redCombatPacket.board).includes('"payload"'), false)
+  assert.equal(JSON.stringify(redCombatPacket.board).includes('"command"'), false)
+
+  const redSelfCell = redCombatPacket.board.cells.find(
+    (cell) => cell.x === redCombatPacket.board.self.anchor.x && cell.z === redCombatPacket.board.self.anchor.z,
+  )
+  const redOpponentCell = redCombatPacket.board.cells.find(
+    (cell) => cell.x === redCombatPacket.board.opponent.anchor.x && cell.z === redCombatPacket.board.opponent.anchor.z,
+  )
+  const redHoldPose = redCombatPacket.board.reachablePoses.find((pose) => pose.actionIds.includes(redHold.id))
+
+  assert.equal(redSelfCell.occupant, 'self')
+  assert.equal(redOpponentCell.occupant, 'opponent')
+  assert.deepEqual(redHoldPose.anchor, redCombatPacket.board.self.anchor)
 
   const redSubmission = await route(env, `/sessions/${sessionId}/action`, {
     method: 'POST',

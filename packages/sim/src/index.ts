@@ -1,5 +1,6 @@
 export * from './arenaTopology.js'
 export * from './actionIds.js'
+export * from './agentBoardView.js'
 export * from './combatActions.js'
 export * from './combatLegality.js'
 export * from './damagePriority.js'

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   BotBlueprint,
+  MachineDesign,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type { LegacyTeamIdentity } from '../shared/teamVisuals'
@@ -27,6 +28,7 @@ type AssemblyStatus = 'booting' | 'ready' | 'unavailable' | 'context_lost'
 type BotAssemblySceneProps = {
   blueprint: BotBlueprint
   identity: LegacyTeamIdentity
+  machineDesign?: MachineDesign
   role: TeamRole
   submitted: boolean
 }
@@ -34,13 +36,15 @@ type BotAssemblySceneProps = {
 export function BotAssemblyScene({
   blueprint,
   identity,
+  machineDesign,
   role,
   submitted,
 }: BotAssemblySceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const resourcesRef = useRef<AssemblyResources | null>(null)
   const blueprintRef = useRef(blueprint)
-  const lastAttachedBlueprintRef = useRef<BotBlueprint | null>(null)
+  const machineDesignRef = useRef(machineDesign)
+  const lastAttachedVisualKeyRef = useRef('')
   const submittedRef = useRef(submitted)
   const [status, setStatus] = useState<AssemblyStatus>('booting')
   const [message, setMessage] = useState('')
@@ -55,10 +59,23 @@ export function BotAssemblyScene({
     blueprintRef.current = blueprint
   }, [blueprint])
 
+  useEffect(() => {
+    machineDesignRef.current = machineDesign
+  }, [machineDesign])
+
+  // CODEX_INTENT: prefer MachineDesign render authority for confirmed machine loadouts so cockpit previews match replay bots.
+  // CODEX_RISK: behavioral
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
   const attachBlueprint = useCallback(
-    (resources: AssemblyResources, nextBlueprint: BotBlueprint) => {
-      attachAssemblyBot(resources, nextBlueprint, role)
-      lastAttachedBlueprintRef.current = nextBlueprint
+    (
+      resources: AssemblyResources,
+      nextBlueprint: BotBlueprint,
+      nextMachineDesign: MachineDesign | undefined,
+      visualKey: string,
+    ) => {
+      attachAssemblyBot(resources, nextBlueprint, role, nextMachineDesign)
+      lastAttachedVisualKeyRef.current = visualKey
       setAttachedMeshCount(resources.botMeshes.length)
     },
     [role],
@@ -85,9 +102,15 @@ export function BotAssemblyScene({
 
       resources = createAssemblyResources(canvas, role, identity, submittedRef.current)
       const activeResources = resources
+      const initialMachineDesign = machineDesignRef.current
 
       resourcesRef.current = resources
-      attachBlueprint(activeResources, blueprintRef.current)
+      attachBlueprint(
+        activeResources,
+        blueprintRef.current,
+        initialMachineDesign,
+        visualAuthorityKey(blueprintRef.current, initialMachineDesign),
+      )
       setStatus('ready')
       setSceneStats(createRendererStats(activeResources.scene, activeResources.engine))
 
@@ -148,7 +171,7 @@ export function BotAssemblyScene({
         canvas.removeEventListener('webglcontextrestored', handleContextRestored)
         window.cancelAnimationFrame(statsFrame)
         resourcesRef.current = null
-        lastAttachedBlueprintRef.current = null
+        lastAttachedVisualKeyRef.current = ''
         activeResources.scene.dispose()
         activeResources.engine.dispose()
       }
@@ -158,7 +181,7 @@ export function BotAssemblyScene({
       setSceneStats(null)
       setAttachedMeshCount(0)
       resourcesRef.current = null
-      lastAttachedBlueprintRef.current = null
+      lastAttachedVisualKeyRef.current = ''
       resources?.scene.dispose()
       resources?.engine.dispose()
 
@@ -173,12 +196,14 @@ export function BotAssemblyScene({
       return
     }
 
-    if (lastAttachedBlueprintRef.current === blueprint) {
+    const visualKey = visualAuthorityKey(blueprint, machineDesign)
+
+    if (lastAttachedVisualKeyRef.current === visualKey) {
       return
     }
 
-    attachBlueprint(resources, blueprint)
-  }, [attachBlueprint, blueprint])
+    attachBlueprint(resources, blueprint, machineDesign, visualKey)
+  }, [attachBlueprint, blueprint, machineDesign])
 
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.assembly)
@@ -204,6 +229,7 @@ export function BotAssemblyScene({
       data-assembly-blueprint-blocks={blueprint.blocks.length}
       data-assembly-bot-attached={attachedMeshCount > 0 ? 'true' : 'false'}
       data-assembly-bot-meshes={attachedMeshCount}
+      data-assembly-visual-authority={machineDesign ? 'machine:v1' : 'legacy-bot-blueprint'}
       data-assembly-team-color={identity.primaryColor}
     >
       <canvas
@@ -225,4 +251,13 @@ export function BotAssemblyScene({
       ) : null}
     </div>
   )
+}
+
+function visualAuthorityKey(
+  blueprint: BotBlueprint,
+  machineDesign: MachineDesign | undefined,
+): string {
+  return machineDesign
+    ? `machine:${JSON.stringify(machineDesign)}`
+    : `blueprint:${JSON.stringify(blueprint)}`
 }

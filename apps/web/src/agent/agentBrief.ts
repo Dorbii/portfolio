@@ -75,6 +75,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with your agentName and generated teamIdentity, then GET /sessions/:sessionId/state for the current GameMasterPacket.',
       'After the first bootstrap, do not keep resending teamIdentity just to poll; use waitForGameMasterPacket or GET state.',
       'Follow the current GameMasterPacket until it returns a terminal nextAction.',
+      'During combat_turn, inspect packet.board.cells, reachablePoses, and attackableTargets as the tactical board state before choosing a legalActions id.',
       'Inspect each legal action parameterSchema before submitting; choose exactly one id from legalActions.',
       'Read packet.blockedActions when present; those entries explain why a choice cannot be submitted yet and are not action ids.',
       'Submit only action, actionSetId, decisionVersion, actionId, parameters when the selected action asks for them, and optional publicMessage.',

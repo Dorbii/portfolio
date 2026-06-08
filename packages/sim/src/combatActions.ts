@@ -17,7 +17,6 @@ import type {
 import { combatActionId } from './actionIds.js'
 import {
   commandHasOffense,
-  describeRange,
   evaluateCombatCommand,
   movementCommandLabel,
   type CombatWeaponLegalityOptions,
@@ -92,12 +91,21 @@ export function isCombatAction(action: CanonicalGameAction): boolean {
 
 export function combatLegalActionForPacket(action: CanonicalGameAction): GameMasterLegalAction {
   const payload = action.payload as Partial<CanonicalCombatActionPayload>
+  const gridDescriptor = payload.command && payload.legality?.preview
+    ? gridActionDescriptor(action.kind, payload.command, payload.legality.preview)
+    : undefined
 
   return {
     id: action.id,
     kind: action.kind,
-    label: payload.label ?? action.id,
-    summary: payload.summary ?? 'Server-authored combat action.',
+    label: gridDescriptor?.label ?? payload.label ?? action.id,
+    summary: gridDescriptor?.summary ?? payload.summary ?? 'Server-authored combat action.',
+    ...(gridDescriptor?.parameterSchema ?? action.parameterSchema
+      ? { parameterSchema: gridDescriptor?.parameterSchema ?? action.parameterSchema }
+      : {}),
+    ...(gridDescriptor?.parameterExamples ?? action.parameterExamples
+      ? { parameterExamples: gridDescriptor?.parameterExamples ?? action.parameterExamples }
+      : {}),
     ...(payload.legality?.preview ? { preview: payload.legality.preview } : {}),
   }
 }
@@ -125,12 +133,7 @@ function combatActionFromCandidate(
   }
 
   const kind = actionKindForCommand(command)
-  const label = labelForCommand(command)
-  const summary = summaryForCommand(
-    context,
-    command,
-    legality.preview.finalPose?.anchor ?? legality.movement.to,
-  )
+  const descriptor = gridActionDescriptor(kind, command, legality.preview)
 
   return {
     id: combatActionId({
@@ -138,14 +141,16 @@ function combatActionFromCandidate(
       round: input.round,
       tick: input.tick,
       kind,
-      parts: actionIdPartsForCommand(command),
+      parts: actionIdPartsForCommand(command, legality.preview),
     }),
     kind,
     role: input.role,
+    ...(descriptor.parameterSchema ? { parameterSchema: descriptor.parameterSchema } : {}),
+    ...(descriptor.parameterExamples ? { parameterExamples: descriptor.parameterExamples } : {}),
     payload: {
       scope: COMBAT_ACTION_SCOPE,
-      label,
-      summary,
+      label: descriptor.label,
+      summary: descriptor.summary,
       command,
       legality,
     },
@@ -300,46 +305,211 @@ function actionKindForCommand(command: TurnCommand): GameMasterActionKind {
   return 'hold'
 }
 
-function labelForCommand(command: TurnCommand): string {
-  const movement = movementCommandLabel(command.move)
+function gridActionDescriptor(
+  kind: GameMasterActionKind,
+  command: TurnCommand,
+  preview: NonNullable<GameMasterLegalAction['preview']>,
+): Pick<GameMasterLegalAction, 'label' | 'summary' | 'parameterSchema' | 'parameterExamples'> {
+  const finalAnchor = preview.finalPose?.anchor
+  const target = preview.target
 
+  if (kind === 'move' && finalAnchor) {
+    const destinationCellId = cellIdFor(finalAnchor)
+
+    return {
+      label: `Move to ${cellLabel(finalAnchor)}`,
+      summary: gridSummary(`Move to destination cell ${destinationCellId}.`, preview),
+      parameterSchema: {
+        type: 'object',
+        required: ['destinationCellId'],
+        properties: {
+          destinationCellId: {
+            type: 'string',
+            label: 'Destination cell',
+            summary: 'Grid cell where this movement action ends.',
+            enum: [destinationCellId],
+          },
+        },
+      },
+      parameterExamples: [{ destinationCellId }],
+    }
+  }
+
+  if (kind === 'attack' && target) {
+    const targetCellId = cellIdFor(target)
+
+    return {
+      label: `Attack opponent at ${cellLabel(target)}`,
+      summary: gridSummary(`Attack target opponent on cell ${targetCellId}.`, preview),
+      parameterSchema: {
+        type: 'object',
+        required: ['targetId', 'targetCellId'],
+        properties: {
+          targetId: {
+            type: 'string',
+            label: 'Target',
+            summary: 'Server-authored attack target.',
+            enum: ['opponent'],
+          },
+          targetCellId: {
+            type: 'string',
+            label: 'Target cell',
+            summary: 'Grid cell occupied by the selected target.',
+            enum: [targetCellId],
+          },
+        },
+      },
+      parameterExamples: [{ targetId: 'opponent', targetCellId }],
+    }
+  }
+
+  if (kind === 'move_and_attack' && finalAnchor && target) {
+    const destinationCellId = cellIdFor(finalAnchor)
+    const targetCellId = cellIdFor(target)
+
+    return {
+      label: `Move to ${cellLabel(finalAnchor)} and attack opponent at ${cellLabel(target)}`,
+      summary: gridSummary(
+        `Move to destination cell ${destinationCellId}, then attack opponent on cell ${targetCellId}.`,
+        preview,
+      ),
+      parameterSchema: {
+        type: 'object',
+        required: ['destinationCellId', 'targetId', 'targetCellId'],
+        properties: {
+          destinationCellId: {
+            type: 'string',
+            label: 'Destination cell',
+            summary: 'Grid cell where this movement action ends before attacking.',
+            enum: [destinationCellId],
+          },
+          targetId: {
+            type: 'string',
+            label: 'Target',
+            summary: 'Server-authored attack target.',
+            enum: ['opponent'],
+          },
+          targetCellId: {
+            type: 'string',
+            label: 'Target cell',
+            summary: 'Grid cell occupied by the selected target.',
+            enum: [targetCellId],
+          },
+        },
+      },
+      parameterExamples: [{ destinationCellId, targetId: 'opponent', targetCellId }],
+    }
+  }
+
+  if (kind === 'use_utility' && finalAnchor) {
+    const sourceCellId = cellIdFor(finalAnchor)
+
+    return {
+      label: `Use utility at ${cellLabel(finalAnchor)}`,
+      summary: gridSummary(`Use utility from source cell ${sourceCellId}.`, preview),
+      parameterSchema: {
+        type: 'object',
+        required: ['sourceCellId'],
+        properties: {
+          sourceCellId: {
+            type: 'string',
+            label: 'Source cell',
+            summary: 'Grid cell where the utility action is activated.',
+            enum: [sourceCellId],
+          },
+        },
+      },
+      parameterExamples: [{ sourceCellId }],
+    }
+  }
+
+  if (finalAnchor) {
+    return {
+      label: `Hold at ${cellLabel(finalAnchor)}`,
+      summary: gridSummary(`Hold position on cell ${cellIdFor(finalAnchor)}.`, preview),
+    }
+  }
+
+  return {
+    label: movementCommandLabel(command.move),
+    summary: 'Server-authored grid combat action.',
+  }
+}
+
+function gridSummary(prefix: string, preview: NonNullable<GameMasterLegalAction['preview']>): string {
+  const details = [
+    preview.expectedRangeIfOpponentHolds !== undefined
+      ? `${preview.expectedRangeIfOpponentHolds} cells from target`
+      : undefined,
+    preview.currentLineOfSight !== undefined
+      ? `line of sight ${preview.currentLineOfSight ? 'clear' : 'blocked'}`
+      : undefined,
+    preview.hazardExposure !== undefined
+      ? `${preview.hazardExposure} hazard cells crossed`
+      : undefined,
+  ].filter((detail): detail is string => detail !== undefined)
+
+  return details.length > 0 ? `${prefix} ${details.join('; ')}.` : prefix
+}
+
+function actionIdPartsForCommand(
+  command: TurnCommand,
+  preview: NonNullable<GameMasterLegalAction['preview']>,
+): string[] {
+  const finalAnchor = preview.finalPose?.anchor
+  const target = preview.target
+
+  if (command.move && command.move !== 'brake' && commandHasOffense(command)) {
+    return [
+      finalAnchor ? `to_${cellActionPart(finalAnchor)}` : 'move',
+      target ? `target_${cellActionPart(target)}` : 'target',
+      weaponActionPart(command),
+    ]
+  }
+  if (command.move && command.move !== 'brake') {
+    return [finalAnchor ? `to_${cellActionPart(finalAnchor)}` : 'move']
+  }
+  if (command.weaponA === 'fire' || command.weaponB === 'fire') {
+    return [
+      target ? `target_${cellActionPart(target)}` : 'target',
+      weaponActionPart(command),
+    ]
+  }
+  if (command.utility === 'activate') {
+    return [finalAnchor ? `source_${cellActionPart(finalAnchor)}` : 'source', 'utility']
+  }
+
+  return [
+    finalAnchor ? `cell_${cellActionPart(finalAnchor)}` : 'cell_current',
+    'hold',
+  ]
+}
+
+function weaponActionPart(command: TurnCommand): string {
   if (command.weaponA === 'fire') {
-    return command.move && command.move !== 'brake' ? `${movement} and fire weapon A` : 'Fire weapon A'
+    return 'weapon_a'
   }
   if (command.weaponB === 'fire') {
-    return command.move && command.move !== 'brake' ? `${movement} and fire weapon B` : 'Fire weapon B'
-  }
-  if (command.utility === 'activate') {
-    return 'Use utility'
+    return 'weapon_b'
   }
 
-  return movement
+  return 'attack'
 }
 
-function summaryForCommand(
-  context: CombatLegalityContext,
-  command: TurnCommand,
-  finalAnchor: { x: number; z: number },
-): string {
-  const range = describeRange(context, finalAnchor)
-
-  if (command.weaponA === 'fire' || command.weaponB === 'fire') {
-    return `${labelForCommand(command)} from final anchor; ${range}.`
-  }
-  if (command.utility === 'activate') {
-    return `Activates available utility behavior from the current anchor; ${range}.`
-  }
-
-  return `${labelForCommand(command)} to tactical anchor (${finalAnchor.x}, ${finalAnchor.z}); ${range}.`
+function cellLabel(cell: { x: number; z: number }): string {
+  return `cell (${cell.x}, ${cell.z})`
 }
 
-function actionIdPartsForCommand(command: TurnCommand): string[] {
-  return [
-    command.move ?? 'hold',
-    command.weaponA === 'fire' ? 'fire_weapon_a' : '',
-    command.weaponB === 'fire' ? 'fire_weapon_b' : '',
-    command.utility === 'activate' ? 'use_utility' : '',
-  ]
+function cellIdFor(cell: { x: number; z: number }): string {
+  return `cell:${cell.x}:${cell.z}`
+}
+
+function cellActionPart(cell: { x: number; z: number }): string {
+  return `x${signedActionNumber(cell.x)}_z${signedActionNumber(cell.z)}`
+}
+
+function signedActionNumber(value: number): string {
+  return value < 0 ? `n${Math.abs(value)}` : `p${value}`
 }
 
 function dedupeActions(actions: CanonicalGameAction[]): CanonicalGameAction[] {

@@ -689,11 +689,62 @@ export type CatalogStoreView = {
 
 export type AgentBoardView = {
   arena: ArenaConfig
+  grid?: {
+    cellSize: number
+    xMin: number
+    xMax: number
+    zMin: number
+    zMax: number
+  }
   self?: BotPose
   opponent?: BotPose
   blockedCells?: GridCoord[]
   hazardCells?: GridCoord[]
+  cells?: AgentBoardCellView[]
+  reachablePoses?: AgentBoardPoseView[]
+  attackableTargets?: AgentBoardTargetView[]
   [key: string]: unknown
+}
+
+export type AgentBoardCellView = GridCoord & {
+  cellId: string
+  inBounds: boolean
+  blocksMovement: boolean
+  blocksLineOfSight: boolean
+  hazardIds?: string[]
+  hazards?: Array<{
+    id: string
+    type: string
+    damage: number
+  }>
+  occupant?: 'self' | 'opponent'
+  distanceToOpponent?: number
+  lineOfSightToOpponent?: boolean
+  reachableByActionIds?: string[]
+  targetableByActionIds?: string[]
+  unavailableReasons?: string[]
+}
+
+export type AgentBoardPoseView = {
+  poseId: string
+  anchor: GridCoord
+  facing: BotPose['facing']
+  reachable: true
+  actionIds: string[]
+  path?: GridCoord[]
+  distanceToOpponent?: number
+  lineOfSightToOpponent?: boolean
+  hazardExposure?: number
+  riskTags?: string[]
+}
+
+export type AgentBoardTargetView = {
+  targetId: string
+  kind: 'opponent'
+  cell: GridCoord
+  actionIds: string[]
+  distance?: number
+  lineOfSight?: boolean
 }
 
 export type AgentVisibleCombatState = {

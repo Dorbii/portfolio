@@ -11,6 +11,7 @@ import {
 import {
   Panel,
 } from '../shared/ui'
+import { RefereeCockpitStrip } from './RefereeCockpitStrip'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 
 const ReplayViewer = lazy(() =>
@@ -84,6 +85,9 @@ export function RefereeConsole() {
     replayError,
     replayLoadState,
     replayPayload,
+    roleLoadState,
+    roleStateError,
+    roleStates,
     sessionChat,
     storedRefereeToken,
     submitRoundAdvance,
@@ -154,6 +158,12 @@ export function RefereeConsole() {
             onRefresh: refreshStoredSession,
             tokenStored: Boolean(storedRefereeToken),
           }}
+        />
+
+        <RefereeCockpitStrip
+          loadState={roleLoadState}
+          roleStates={roleStates}
+          stateError={roleStateError}
         />
 
         <section className="match-dashboard-panels" aria-label="Match dashboard">

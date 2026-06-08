@@ -6,6 +6,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import type { Scene } from '@babylonjs/core/scene'
 import type {
   BotBlueprint,
+  MachineDesign,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { createBotNode } from '../replay/parts'
@@ -61,10 +62,11 @@ export function attachAssemblyBot(
   resources: AssemblyResources,
   blueprint: BotBlueprint,
   role: TeamRole,
+  machineDesign?: MachineDesign,
 ): void {
   resources.bot?.dispose(false, false)
 
-  const bot = createBotNode(resources.scene, blueprint, role, resources.materials)
+  const bot = createBotNode(resources.scene, blueprint, role, resources.materials, machineDesign)
 
   bot.position.set(0, 0.22, -0.24)
   bot.rotation.y = role === 'red' ? -0.28 : 0.28

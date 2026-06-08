@@ -95,6 +95,14 @@ const refereeConsoleControllerSource = readFileSync(
   new URL('../apps/web/src/referee/useRefereeConsoleController.ts', import.meta.url),
   'utf8',
 )
+const refereeCockpitStripSource = readFileSync(
+  new URL('../apps/web/src/referee/RefereeCockpitStrip.tsx', import.meta.url),
+  'utf8',
+)
+const refereeRoleStatesSource = readFileSync(
+  new URL('../apps/web/src/referee/useRefereeRoleStates.ts', import.meta.url),
+  'utf8',
+)
 const refereeReplayPayloadSource = readFileSync(
   new URL('../apps/web/src/referee/useRefereeReplayPayload.ts', import.meta.url),
   'utf8',
@@ -509,7 +517,10 @@ test('agent cockpit renders reliability and debug hooks', () => {
   assert.ok(agentInsightSource.includes('Assembly bay'))
   assert.ok(agentInsightSource.includes('BotAssemblyScene'))
   assert.ok(botAssemblySceneSource.includes('const blueprintRef = useRef(blueprint)'))
-  assert.ok(botAssemblySceneSource.includes('attachBlueprint(activeResources, blueprintRef.current)'))
+  assert.ok(botAssemblySceneSource.includes('attachBlueprint('))
+  assert.ok(botAssemblySceneSource.includes('initialMachineDesign'))
+  assert.ok(botAssemblySceneSource.includes("data-assembly-visual-authority={machineDesign ? 'machine:v1' : 'legacy-bot-blueprint'}"))
+  assert.ok(botAssemblyAnimationSource.includes('createBotNode(resources.scene, blueprint, role, resources.materials, machineDesign)'))
   assert.ok(botAssemblySceneSource.includes('data-assembly-bot-attached'))
   assert.ok(botAssemblyRendererSource.includes('createBotMaterialSet'))
   assert.ok(botAssemblyAnimationSource.includes('resources.materials'))
@@ -634,7 +645,10 @@ test('agent cockpit exposes submitted truth without editable draft state', () =>
   ].join('\n')
 
   assert.ok(agentInsightSource.includes('const loadout = roleState?.ownLoadout ?? null'))
-  assert.ok(agentInsightSource.includes('BotAssemblyScene blueprint={blueprint} identity={teamIdentity}'))
+  assert.ok(agentInsightSource.includes('BotAssemblyScene'))
+  assert.ok(agentInsightSource.includes('blueprint={blueprint}'))
+  assert.ok(agentInsightSource.includes('identity={teamIdentity}'))
+  assert.ok(agentInsightSource.includes('machineDesign={loadout.machineDesign}'))
   assert.ok(cockpitSource.includes('createTeamAccentCssVars(invite.role, cockpit.roleState?.identity)'))
   assert.ok(botAssemblySceneSource.includes('data-assembly-team-color={identity.primaryColor}'))
   assert.ok(botAssemblyRendererSource.includes('createCombatTeamPalette(role, identity)'))
@@ -653,6 +667,19 @@ test('agent cockpit exposes submitted truth without editable draft state', () =>
   assert.equal(cockpitRuntimeSource.includes('movementOptions.recommended'), false)
   assert.equal(cockpitRuntimeSource.includes('/round-plan'), false)
   assert.equal(cockpitRuntimeSource.includes('/turn-command'), false)
+})
+
+test('referee dashboard embeds observer cockpits with machine-authority garage renders', () => {
+  assert.ok(refereeConsoleSource.includes('RefereeCockpitStrip'))
+  assert.ok(refereeConsoleControllerSource.includes('useRefereeRoleStates'))
+  assert.ok(refereeConsoleControllerSource.includes('roleStates'))
+  assert.ok(refereeRoleStatesSource.includes('invite.observerToken'))
+  assert.ok(refereeRoleStatesSource.includes('loadRoleState(apiBase, activeSessionId, invite.observerToken)'))
+  assert.ok(refereeCockpitStripSource.includes('Garage and Combat Decisions'))
+  assert.ok(refereeCockpitStripSource.includes('BotAssemblyScene'))
+  assert.ok(refereeCockpitStripSource.includes('machineDesign={loadout.machineDesign}'))
+  assert.ok(refereeCockpitStripSource.includes('roleState?.combat?.decision'))
+  assert.equal(refereeCockpitStripSource.includes('AgentTaskPanel'), false)
 })
 
 test('replay viewer does not render future event timeline markers', () => {

@@ -10,7 +10,6 @@ import {
   type PreferredRange,
   type TeamRole,
   type TurnCommand,
-  type UtilityCommand,
   type WeaponCommand,
 } from '../../../packages/schemas/src/index.js'
 import {
@@ -40,18 +39,10 @@ const DEFAULT_RETREAT_HEALTH_PCT = 0.2
 
 type CombatRangeBand = 'contact' | 'close' | 'mid' | 'long'
 
-type WorkerCombatTurnAvailableCommands = {
-  movement: MovementCommand[]
-  weaponA?: WeaponCommand[]
-  weaponB?: WeaponCommand[]
-  utility?: UtilityCommand[]
-}
-
 type CombatDecisionBrief = {
   tick: number
   deadlineAt: string
   turnSeconds: number
-  availableCommands: WorkerCombatTurnAvailableCommands
   range: {
     distance: number
     band: CombatRangeBand
@@ -110,8 +101,6 @@ type CombatDecisionBrief = {
     }
   }
   movementGuidance: {
-    approach: MovementCommand[]
-    avoid: MovementCommand[]
     reasons: string[]
   }
   previousResolvedTurn?: {
@@ -119,6 +108,12 @@ type CombatDecisionBrief = {
     opponent?: TurnCommand
   }
   tacticalCues: string[]
+}
+
+type InternalMovementGuidance = {
+  approach: MovementCommand[]
+  avoid: MovementCommand[]
+  reasons: string[]
 }
 
 export function buildCombatDecisionBrief(
@@ -156,19 +151,15 @@ export function buildCombatDecisionBrief(
     tick: combat.nextTick,
     deadlineAt: combat.deadlineAt,
     turnSeconds: combat.turnSeconds,
-    availableCommands: {
-      movement: controls.movement,
-      ...(controls.weaponA ? { weaponA: controls.weaponA } : {}),
-      ...(controls.weaponB ? { weaponB: controls.weaponB } : {}),
-      ...(controls.utility ? { utility: controls.utility } : {}),
-    },
     range,
     positioning,
     hazards,
     health,
     arenaPressure,
     actionReadiness,
-    movementGuidance,
+    movementGuidance: {
+      reasons: movementGuidance.reasons,
+    },
     ...(resolvedTurn ? { previousResolvedTurn: resolvedTurn } : {}),
     tacticalCues: tacticalCues({
       role,
@@ -343,7 +334,7 @@ function buildMovementGuidance(input: {
   topology: CompiledArenaTopology
   hazards: CombatDecisionBrief['hazards']
   previousSelfMove?: MovementCommand
-}): CombatDecisionBrief['movementGuidance'] {
+}): InternalMovementGuidance {
   const recommended: MovementCommand[] = []
   const reasons: string[] = []
   const nearestSelfHazard = input.hazards.selfThreats[0]
@@ -415,7 +406,7 @@ function tacticalCues(input: {
   health: CombatDecisionBrief['health']
   arenaPressure: CombatDecisionBrief['arenaPressure']
   actionReadiness: CombatDecisionBrief['actionReadiness']
-  movementGuidance: CombatDecisionBrief['movementGuidance']
+  movementGuidance: InternalMovementGuidance
   recentEvents: string[]
 }): string[] {
   const cues: string[] = []
@@ -443,7 +434,7 @@ function tacticalCues(input: {
   }
 
   if (input.arenaPressure.selfNearWall) {
-    cues.push('You are near a wall; avoid commands that reduce escape space.')
+    cues.push('You are near a wall; avoid destination cells that reduce escape space.')
   }
 
   if (input.hazards.selfThreats.some((threat) => threat.inside)) {
@@ -452,8 +443,8 @@ function tacticalCues(input: {
 
   if (input.hazards.threatenedLegalMoves.length > 0) {
     cues.push(
-      `Hazard-threatened legal moves: ${input.hazards.threatenedLegalMoves
-        .map((move) => move.command)
+      `Hazard-threatened destination cells: ${input.hazards.threatenedLegalMoves
+        .map((move) => cellLabel(move.targetCell))
         .slice(0, 4)
         .join(', ')}.`,
     )
@@ -464,7 +455,7 @@ function tacticalCues(input: {
   }
 
   if (input.movementGuidance.avoid.length > 0) {
-    cues.push(`Avoid low-value movement here: ${input.movementGuidance.avoid.join(', ')}.`)
+    cues.push('Some legal destinations are low value here; prefer actions whose preview improves range, line of sight, or hazard exposure.')
   }
 
   if (input.recentEvents.length > 0) {
@@ -682,6 +673,10 @@ function addRecommended(commands: MovementCommand[], command: MovementCommand): 
 
 function uniqueCommands<T extends string>(commands: T[]): T[] {
   return [...new Set(commands)]
+}
+
+function cellLabel(cell: ArenaGridCell): string {
+  return `cell (${cell.x}, ${cell.z})`
 }
 
 function healthPct(bot: CombatBotSnapshot): number {

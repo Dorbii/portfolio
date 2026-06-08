@@ -60,6 +60,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Raw HTTP fallback: POST /sessions/:sessionId/roles/:role/bootstrap once with agentName and generated teamIdentity, then GET /sessions/:sessionId/state for gameMaster.',
         'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap.',
         'After bootstrap, follow the returned GameMasterPacket.',
+        'During combat_turn, inspect packet.board.cells, reachablePoses, and attackableTargets as the tactical board state before choosing a legalActions id.',
         'Inspect each legal action parameterSchema before submitting. Choose exactly one id from legalActions and include parameters only when that selected action asks for them.',
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
         'The server validates actionSetId, decisionVersion, actionId, parameters, shop rules, and budget rules; invalid or stale submissions are rejected.',
@@ -151,6 +152,42 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       },
     },
     actions: [
+      {
+        name: 'gpt_claim',
+        method: 'POST',
+        path: '/gpt/claim',
+        auth: 'inviteUrl body field; wrapper extracts claimToken',
+        returns: 'GPT-friendly status plus current GameMasterPacket',
+      },
+      {
+        name: 'gpt_next',
+        method: 'POST',
+        path: '/gpt/next',
+        auth: 'inviteUrl body field; wrapper extracts claimToken',
+        returns: 'playable, waiting, complete, or expired status plus current GameMasterPacket',
+      },
+      {
+        name: 'gpt_act',
+        method: 'POST',
+        path: '/gpt/act',
+        auth: 'inviteUrl body field; wrapper extracts claimToken',
+        body: {
+          inviteUrl:
+            'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https%3A%2F%2Farena-api.dorbii.net',
+          actionId: '<legalActions.id>',
+          parameters: {},
+          publicMessage: 'Optional display-only message.',
+        },
+        returns:
+          'GPT-friendly status plus next GameMasterPacket; server fills actionSetId and decisionVersion from the latest packet',
+      },
+      {
+        name: 'gpt_reflection',
+        method: 'POST',
+        path: '/gpt/reflection',
+        auth: 'inviteUrl body field; wrapper extracts claimToken',
+        returns: 'GPT-friendly status plus next GameMasterPacket',
+      },
       {
         name: 'bootstrap_role',
         method: 'POST',

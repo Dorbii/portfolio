@@ -71,6 +71,11 @@ export type LegacyLoadoutWindowState = {
 export type LegacyConfirmedLoadoutView = {
   blueprint: BotBlueprint
   confirmedAt?: string
+  // CODEX_INTENT: expose machine-authority private loadout data so cockpit rendering does not rely on legacy projections.
+  // CODEX_RISK: interface
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  machineDesign?: MachineDesign
 }
 
 export type LegacyCombatTurnPublicState = {

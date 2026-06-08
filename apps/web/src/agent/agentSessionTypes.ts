@@ -11,15 +11,13 @@ import type {
   GameMasterActionSubmission,
   GameMasterPacket,
   InventoryItem,
-  MovementCommand,
+  MachineDesign,
   PostFightAgentReflection,
   PostFightReflectionResponse,
   SessionPhase,
   SharedDebrief,
   TeamEconomySummary,
   TeamRole,
-  UtilityCommand,
-  WeaponCommand,
 } from '../../../../packages/schemas/src/index.js'
 import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 
@@ -27,12 +25,6 @@ export type CombatDecisionBrief = {
   tick: number
   deadlineAt: string
   turnSeconds: number
-  availableCommands: {
-    movement: MovementCommand[]
-    weaponA?: WeaponCommand[]
-    weaponB?: WeaponCommand[]
-    utility?: UtilityCommand[]
-  }
   range: {
     distance: number
     band: 'contact' | 'close' | 'mid' | 'long'
@@ -61,8 +53,6 @@ export type CombatDecisionBrief = {
     }
   }
   movementGuidance: {
-    approach: MovementCommand[]
-    avoid: MovementCommand[]
     reasons: string[]
   }
   previousResolvedTurn?: unknown
@@ -111,6 +101,11 @@ export type RolePublicState = Partial<TeamEconomySummary> & {
 export type ConfirmedLoadoutView = {
   blueprint: BotBlueprint
   confirmedAt?: string
+  // CODEX_INTENT: carry machine-authority loadout data through private state for cockpit/replay visual parity.
+  // CODEX_RISK: interface
+  // CODEX_CONFIDENCE: medium
+  // CODEX_REVIEW: pending
+  machineDesign?: MachineDesign
 }
 
 export type PublicContinuationState = {

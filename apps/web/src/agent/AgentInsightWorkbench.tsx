@@ -59,17 +59,23 @@ export function AgentInsightWorkbench({
         <NoRoleStatePanel />
       ) : null}
 
-      {roleState && teamIdentity && hasBlueprint && blueprint ? (
+      {roleState && teamIdentity && loadout && hasBlueprint && blueprint ? (
         <section className="assembly-bay-panel" aria-labelledby="assembly-bay-heading">
           <div className="plan-section-header">
             <SectionTitle id="assembly-bay-heading" title="Assembly bay" />
             <div className="assembly-preview-meta">
               <span className="assembly-state">Confirmed bot</span>
               <strong>{blueprint.name}</strong>
-              <span>Read-only loadout from role state</span>
+              <span>{loadout.machineDesign ? 'Machine-authority loadout from role state' : 'Legacy loadout from role state'}</span>
             </div>
           </div>
-          <BotAssemblyScene blueprint={blueprint} identity={teamIdentity} role={role} submitted />
+          <BotAssemblyScene
+            blueprint={blueprint}
+            identity={teamIdentity}
+            machineDesign={loadout.machineDesign}
+            role={role}
+            submitted
+          />
         </section>
       ) : null}
 
@@ -138,9 +144,9 @@ export function AgentInsightWorkbench({
                 title="Legal actions"
               />
               <InsightList
-                emptyText="No movement avoid-list returned."
-                items={decision.movementGuidance.avoid.map(formatLabel)}
-                title="Avoid"
+                emptyText="No grid guidance returned."
+                items={decision.movementGuidance.reasons}
+                title="Grid guidance"
               />
             </>
           ) : (
