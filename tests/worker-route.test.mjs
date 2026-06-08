@@ -1380,6 +1380,72 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.ok(next.json.packet.legalActions.length > 0)
 })
 
+test('POST /gpt/next returns a compact combat board for Custom GPT actions', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_next_compact_combat'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+
+  const redStart = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const blueCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+    },
+  })
+  const redCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+
+  const packet = redCombat.json.packet
+  const board = packet.board
+  const boardJson = JSON.stringify(board)
+
+  assert.equal(redStart.response.status, 200)
+  assert.equal(redStart.json.status, 'waiting')
+  assert.equal(blueCombat.response.status, 200)
+  assert.equal(blueCombat.json.status, 'playable')
+  assert.equal(redCombat.response.status, 200)
+  assert.equal(redCombat.json.status, 'playable')
+  assertGptCompactPacket(packet, 'red')
+  assert.equal(packet.nextAction, 'choose_turn')
+  assert.ok(packet.legalActions.length > 0)
+  assert.ok(board.cells.length > 0)
+  assert.ok(board.cells.length <= 24)
+  assert.ok(board.reachablePoses.length <= 16)
+  assert.ok(board.attackableTargets.length <= 16)
+  assert.equal(boardJson.includes('"path"'), false)
+  assert.equal(boardJson.includes('"hazards"'), false)
+  assert.equal(boardJson.includes('"unavailableReasons"'), false)
+  assert.equal(boardJson.includes('"parameters"'), false)
+  assert.ok(boardJson.length < 20_000)
+  assert.equal(board.cells.some((cell) => cell.occupant === 'self'), true)
+  assert.equal(board.cells.some((cell) => cell.occupant === 'opponent'), true)
+  assert.equal(
+    board.reachablePoses.some((pose) => pose.actionIds.length > 0) ||
+      board.attackableTargets.some((target) => target.actionIds.length > 0) ||
+      board.cells.some((cell) =>
+        Boolean(
+          cell.reachableByActionIds?.length ||
+            cell.targetableByActionIds?.length ||
+            cell.legal?.moveHere ||
+            cell.legal?.useUtilityFromHere ||
+            cell.legal?.attacksFromHere?.length,
+        )),
+    true,
+  )
+})
+
 test('POST /gpt/catalog returns selected compact part summaries', async () => {
   const env = createEnv()
   const sessionId = 's_gpt_catalog'

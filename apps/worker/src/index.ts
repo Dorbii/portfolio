@@ -61,6 +61,9 @@ export type {
 const STORAGE_KEY = 'agent-arena-session'
 const GPT_MOUNT_SLOT_ALIAS_PREFIX = 'gpt.loadout.mount'
 const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
+const GPT_COMPACT_BOARD_CELL_LIMIT = 24
+const GPT_COMPACT_BOARD_LIST_LIMIT = 16
+const GPT_COMPACT_ACTION_REF_LIMIT = 6
 
 type JsonRequestReadResult =
   | {
@@ -136,6 +139,14 @@ type GptMountSlotAlias = {
   semanticTags: string[]
   parameters: GameMasterActionParameters
 }
+
+type GptBoardView = NonNullable<GameMasterPacket['board']>
+type GptBoardCell = NonNullable<GptBoardView['cells']>[number]
+type GptBoardLegalView = NonNullable<GptBoardCell['legal']>
+type GptBoardLegalActionRef = NonNullable<GptBoardLegalView['moveHere']>
+type GptBoardAttackRef = NonNullable<GptBoardLegalView['attacksFromHere']>[number]
+type GptBoardPose = NonNullable<GptBoardView['reachablePoses']>[number]
+type GptBoardTarget = NonNullable<GptBoardView['attackableTargets']>[number]
 
 function isEmptyRecord(value: unknown): boolean {
   return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0
@@ -996,14 +1007,7 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
       : {}),
     ...(packet.board
       ? {
-          board: {
-            self: packet.board.self,
-            opponent: packet.board.opponent,
-            hazardCells: packet.board.hazardCells?.slice(0, 24),
-            reachablePoses: packet.board.reachablePoses?.slice(0, 24),
-            attackableTargets: packet.board.attackableTargets?.slice(0, 24),
-            cells: packet.board.cells?.slice(0, 81),
-          },
+          board: compactGptBoard(packet.board),
         }
       : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
@@ -1024,6 +1028,138 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
         }
       : {}),
   }
+}
+
+function compactGptBoard(board: GptBoardView): Record<string, unknown> {
+  return {
+    ...(board.grid ? { grid: board.grid } : {}),
+    ...(board.self ? { self: board.self } : {}),
+    ...(board.opponent ? { opponent: board.opponent } : {}),
+    ...(board.hazardCells ? { hazardCells: board.hazardCells.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
+    ...(board.reachablePoses
+      ? { reachablePoses: board.reachablePoses.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT).map(compactGptBoardPose) }
+      : {}),
+    ...(board.attackableTargets
+      ? { attackableTargets: board.attackableTargets.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT).map(compactGptBoardTarget) }
+      : {}),
+    ...(board.cells ? { cells: compactGptBoardCells(board) } : {}),
+  }
+}
+
+function compactGptBoardCells(board: GptBoardView): Array<Record<string, unknown>> {
+  const cells = board.cells ?? []
+  const selected: GptBoardCell[] = []
+  const seen = new Set<string>()
+  const addCell = (cell: GptBoardCell): void => {
+    if (seen.has(cell.cellId) || selected.length >= GPT_COMPACT_BOARD_CELL_LIMIT) {
+      return
+    }
+
+    seen.add(cell.cellId)
+    selected.push(cell)
+  }
+  const addMatching = (predicate: (cell: GptBoardCell) => boolean): void => {
+    for (const cell of cells) {
+      if (selected.length >= GPT_COMPACT_BOARD_CELL_LIMIT) {
+        return
+      }
+
+      if (predicate(cell)) {
+        addCell(cell)
+      }
+    }
+  }
+
+  addMatching((cell) => cell.occupant === 'self' || cell.occupant === 'opponent')
+  addMatching((cell) => Boolean(cell.legal || cell.targetableByActionIds?.length))
+  addMatching((cell) => Boolean(cell.hazardIds?.length))
+  addMatching((cell) => cell.reachable === true || Boolean(cell.reachableByActionIds?.length))
+  addMatching(() => true)
+
+  return selected.map(compactGptBoardCell)
+}
+
+function compactGptBoardCell(cell: GptBoardCell): Record<string, unknown> {
+  const legal = cell.legal ? compactGptCellLegal(cell.legal) : undefined
+
+  return {
+    cellId: cell.cellId,
+    x: cell.x,
+    z: cell.z,
+    ...(cell.occupant ? { occupant: cell.occupant } : {}),
+    ...(cell.blocksMovement ? { blocksMovement: true } : {}),
+    ...(cell.hazardIds?.length ? { hazardIds: cell.hazardIds } : {}),
+    ...(typeof cell.distanceToOpponent === 'number' ? { distanceToOpponent: cell.distanceToOpponent } : {}),
+    ...(typeof cell.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: cell.lineOfSightToOpponent } : {}),
+    ...(cell.reachable === true ? { reachable: true } : {}),
+    ...(typeof cell.mobilityCost === 'number' ? { mobilityCost: cell.mobilityCost } : {}),
+    ...(typeof cell.mobilityRemaining === 'number' ? { mobilityRemaining: cell.mobilityRemaining } : {}),
+    ...(legal ? { legal } : {}),
+    ...(cell.reachableByActionIds?.length
+      ? { reachableByActionIds: cell.reachableByActionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) }
+      : {}),
+    ...(cell.targetableByActionIds?.length
+      ? { targetableByActionIds: cell.targetableByActionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) }
+      : {}),
+  }
+}
+
+function compactGptCellLegal(legal: GptBoardLegalView): Record<string, unknown> | undefined {
+  return stripUndefinedFields({
+    moveHere: legal.moveHere ? compactGptBoardActionRef(legal.moveHere) : undefined,
+    attacksFromHere: legal.attacksFromHere
+      ?.slice(0, GPT_COMPACT_ACTION_REF_LIMIT)
+      .map(compactGptBoardAttackRef),
+    useUtilityFromHere: legal.useUtilityFromHere ? compactGptBoardActionRef(legal.useUtilityFromHere) : undefined,
+  })
+}
+
+function compactGptBoardActionRef(ref: GptBoardLegalActionRef): Record<string, unknown> {
+  return {
+    actionId: ref.actionId,
+    kind: ref.kind,
+    ...(ref.label ? { label: ref.label } : {}),
+    ...(ref.summary ? { summary: ref.summary } : {}),
+  }
+}
+
+function compactGptBoardAttackRef(ref: GptBoardAttackRef): Record<string, unknown> {
+  return {
+    ...compactGptBoardActionRef(ref),
+    targetId: ref.targetId,
+    targetCellId: ref.targetCellId,
+    ...(ref.weaponSlot ? { weaponSlot: ref.weaponSlot } : {}),
+  }
+}
+
+function compactGptBoardPose(pose: GptBoardPose): Record<string, unknown> {
+  return {
+    poseId: pose.poseId,
+    anchor: pose.anchor,
+    facing: pose.facing,
+    actionIds: pose.actionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT),
+    ...(typeof pose.distanceToOpponent === 'number' ? { distanceToOpponent: pose.distanceToOpponent } : {}),
+    ...(typeof pose.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: pose.lineOfSightToOpponent } : {}),
+    ...(typeof pose.hazardExposure === 'number' ? { hazardExposure: pose.hazardExposure } : {}),
+    ...(pose.riskTags?.length ? { riskTags: pose.riskTags.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) } : {}),
+  }
+}
+
+function compactGptBoardTarget(target: GptBoardTarget): Record<string, unknown> {
+  return {
+    targetId: target.targetId,
+    kind: target.kind,
+    cell: target.cell,
+    actionIds: target.actionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT),
+    ...(typeof target.distance === 'number' ? { distance: target.distance } : {}),
+    ...(typeof target.lineOfSight === 'boolean' ? { lineOfSight: target.lineOfSight } : {}),
+  }
+}
+
+function stripUndefinedFields(record: Record<string, unknown>): Record<string, unknown> | undefined {
+  const entries = Object.entries(record).filter(([, value]) => value !== undefined)
+
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined
 }
 
 function compactGptLegalAction(
