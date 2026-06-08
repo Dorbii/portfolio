@@ -1191,7 +1191,9 @@ export class SessionCoordinator {
       return activeError
     }
 
-    const auth = await findRoleAuthByToken(this.state, this.tokenHasher, roleToken)
+    const auth = await findRoleAuthByToken(this.state, this.tokenHasher, roleToken, {
+      allowUnclaimedClaimKey: action === 'state',
+    })
     const rateLimitError = this.takeRateLimit(action, auth?.role.role ?? 'invalid', now)
 
     if (rateLimitError) {

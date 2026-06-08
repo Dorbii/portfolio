@@ -515,12 +515,8 @@ export function createAgentConnectionGuidance({
   status: LoadStatus
 }): AgentConnectionGuidance {
   const bootstrapCall = [
-    'const teamIdentity = {',
-    "  name: '<invent a team name; do not use Red Team or Blue Team>',",
-    "  colorHex: '<choose a #RRGGBB accent color>',",
-    "  logoPrompt: '<describe your logo, mascot, mark, and initials>',",
-    '}',
     "const agentName = '<invent an agent name>'",
+    'const teamIdentity = await getTeamIdentityFromYourAgentState()',
     'await window.AgentArenaRole.bootstrapRole({',
     '  agentName,',
     '  teamIdentity,',

@@ -6283,6 +6283,14 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(badBootstrap.ok, false)
   assert.equal(badBootstrap.error.code, 'INVALID_TOKEN')
 
+  const preBootstrapState = await session.getRoleStateForToken('claim_red')
+
+  assert.equal(preBootstrapState.ok, true)
+  assert.equal(preBootstrapState.value.role, 'red')
+  assert.equal(preBootstrapState.value.identity, undefined)
+  assert.equal(preBootstrapState.value.gameMaster.phase, 'wait_for_opponent_claim')
+  assert.equal(preBootstrapState.value.gameMaster.nextAction, 'wait_for_opponent_claim')
+
   const missingIdentity = await session.bootstrapRole('red', 'claim_red', {
     agentName: 'external-red',
   })

@@ -70,9 +70,9 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
     },
     workflow: [
       'Treat claimToken as your private player key. Do not paste it into public logs.',
-      'Before bootstrapping, invent your own team identity: team name, #RRGGBB accent color, and logoPrompt. Do not use Red Team or Blue Team as the team identity.',
-      'Default browser path: open the invite URL, confirm window.AgentArenaRole exists, then call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) once.',
-      'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with teamIdentity, then GET /sessions/:sessionId/state for the current GameMasterPacket.',
+      'Before bootstrapping, create your own team identity from the TeamIdentity contract, including a team color for your robot and UI label. Do not use role labels as the team identity.',
+      'Default browser path: open the invite URL, confirm window.AgentArenaRole exists, then call window.AgentArenaRole.bootstrapRole with your agentName and generated teamIdentity once.',
+      'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with your agentName and generated teamIdentity, then GET /sessions/:sessionId/state for the current GameMasterPacket.',
       'After the first bootstrap, do not keep resending teamIdentity just to poll; use waitForGameMasterPacket or GET state.',
       'Follow the current GameMasterPacket until it returns a terminal nextAction.',
       'Inspect each legal action parameterSchema before submitting; choose exactly one id from legalActions.',
@@ -109,7 +109,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
   return [
     '# Clash of Clankers role brief',
     '',
-    `You are the ${brief.role.toUpperCase()} agent for session ${brief.sessionId}.`,
+    `You are assigned role key \`${brief.role}\` for session ${brief.sessionId}. This role key is not your team identity.`,
     `Invite URL: ${brief.inviteUrl}`,
     `API base: ${brief.apiBase}`,
     `Contract: ${brief.contractUrl}`,
@@ -126,9 +126,11 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '   - Yes: use Browser Helper Path.',
     '',
     '## Browser Helper Path',
+    'Generate your team identity, including its team color, in your own runtime from the TeamIdentity contract in `/agent-spec.json`; this handoff intentionally does not prefill it.',
+    '',
     '```js',
-    ...teamIdentitySnippetLines(),
     "const agentName = '<invent an agent name>'",
+    'const teamIdentity = await getTeamIdentityFromYourAgentState()',
     'const packet = await window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })',
     'const next = packet.legalActions.length > 0',
     '  ? packet',
@@ -182,13 +184,11 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     ...brief.workflow.map((item, index) => `${index + 1}. ${item}`),
     '',
     '## Raw HTTP Fallback',
-    'Bootstrap the role once:',
+    'Bootstrap the role once with a JSON body containing `agentName` and your generated `teamIdentity` object from `/agent-spec.json`:',
     '```http',
     `POST ${brief.apiBase}/sessions/${brief.sessionId}/roles/${brief.role}/bootstrap`,
     'Authorization: Bearer <claimToken>',
     'Content-Type: application/json',
-    '',
-    bootstrapBodyForBrief(),
     '```',
     '',
     'After bootstrap, poll role state for the current GameMasterPacket. The packet is in `gameMaster`:',
@@ -206,7 +206,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '{"action":"submit_game_action","actionSetId":"<packet.actionSetId>","decisionVersion":0,"actionId":"<legalActions[0].id>","parameters":{"<schemaField>":"<schemaValue>"}}',
     '```',
     '',
-    'After submit, continue from the returned `packet`. If that packet has no legalActions, poll `GET /state` again instead of resending bootstrap with teamIdentity.',
+    'After submit, continue from the returned `packet`. If that packet has no legalActions, poll `GET /state` again instead of resending bootstrap identity.',
     '',
     'Post display-only public chat:',
     '```http',
@@ -237,33 +237,6 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '## Validation Checklist',
     ...brief.validationChecklist.map((item) => `- ${item}`),
     '',
-    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }), waitForGameMasterPacket({ timeoutMs: 600000 }), then inspect parameterSchema and submitAction with an actionId plus parameters only when the selected action asks for them.',
+    'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole with your agentName and generated teamIdentity, waitForGameMasterPacket({ timeoutMs: 600000 }), then inspect parameterSchema and submitAction with an actionId plus parameters only when the selected action asks for them.',
   ].join('\n')
-}
-
-function bootstrapBodyForBrief(): string {
-  return JSON.stringify({
-    agentName: '<invent an agent name>',
-    teamIdentity: teamIdentityTemplateForBrief(),
-  })
-}
-
-function teamIdentityTemplateForBrief() {
-  return {
-    name: '<invent a team name; do not use Red Team or Blue Team>',
-    colorHex: '<choose a #RRGGBB accent color>',
-    logoPrompt: '<describe your logo, mascot, mark, and initials>',
-  }
-}
-
-function teamIdentitySnippetLines(): string[] {
-  const identity = teamIdentityTemplateForBrief()
-
-  return [
-    'const teamIdentity = {',
-    `  name: '${identity.name}',`,
-    `  colorHex: '${identity.colorHex}',`,
-    `  logoPrompt: '${identity.logoPrompt}',`,
-    '}',
-  ]
 }

@@ -698,7 +698,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.objective.includes('server-authored legal action menus'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('invent your own team identity')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generate your own TeamIdentity')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('team color for your robot and UI label')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('blockedActions')))
@@ -706,7 +707,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('parameterSchema')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('budget rules')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mobility-less machines can still be legal')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('bootstrapRole({ agentName, teamIdentity })')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generated teamIdentity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('canonical payload maps')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted')))
   assert.ok(json.externalAgentGuide.fallback.includes('runtime cannot play the role'))
@@ -1051,6 +1052,17 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(redState.response.status, 200)
   assert.equal(redState.json.role, 'red')
   assertGameMasterPacket(redState.json.gameMaster, 'red')
+
+  const preBootstrapBlueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  assert.equal(preBootstrapBlueState.response.status, 200)
+  assert.equal(preBootstrapBlueState.json.role, 'blue')
+  assert.equal(preBootstrapBlueState.json.identity, undefined)
+  assertGameMasterPacket(preBootstrapBlueState.json.gameMaster, 'blue')
+  assert.equal(preBootstrapBlueState.json.gameMaster.phase, 'wait_for_opponent_claim')
+  assert.equal(preBootstrapBlueState.json.gameMaster.nextAction, 'wait_for_opponent_claim')
 
   const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
     method: 'POST',

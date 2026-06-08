@@ -13,9 +13,11 @@ export async function findRoleAuthByToken(
   state: StoredSessionState,
   tokenHasher: TokenHasher,
   roleToken: string,
+  options: { allowUnclaimedClaimKey?: boolean } = {},
 ): Promise<RoleBearerAuth | undefined> {
   return findAnyRoleBearer(state, tokenHasher, roleToken, {
     allowObserver: true,
+    allowUnclaimedClaimKey: options.allowUnclaimedClaimKey ?? false,
   })
 }
 
@@ -51,7 +53,7 @@ async function findAnyRoleBearer(
   state: StoredSessionState,
   tokenHasher: TokenHasher,
   roleToken: string,
-  options: { allowObserver: boolean },
+  options: { allowObserver: boolean; allowUnclaimedClaimKey?: boolean },
 ): Promise<RoleBearerAuth | undefined> {
   if (!roleToken.trim()) {
     return undefined
@@ -62,7 +64,7 @@ async function findAnyRoleBearer(
   for (const roleName of TEAM_ROLES) {
     const auth = matchRoleBearer(state.roles[roleName], roleTokenHash, {
       allowObserver: options.allowObserver,
-      allowUnclaimedClaimKey: false,
+      allowUnclaimedClaimKey: options.allowUnclaimedClaimKey ?? false,
     })
 
     if (auth) {
