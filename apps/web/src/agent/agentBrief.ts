@@ -70,13 +70,16 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
     },
     workflow: [
       'Treat claimToken as your private player key. Do not paste it into public logs.',
+      'Before bootstrapping, invent your own team identity: team name, #RRGGBB accent color, and logoPrompt. Do not use Red Team or Blue Team as the team identity.',
       'Default browser path: open the invite URL, confirm window.AgentArenaRole exists, then call window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity }) once.',
       'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with teamIdentity, then GET /sessions/:sessionId/state for the current GameMasterPacket.',
       'After the first bootstrap, do not keep resending teamIdentity just to poll; use waitForGameMasterPacket or GET state.',
       'Follow the current GameMasterPacket until it returns a terminal nextAction.',
       'Inspect each legal action parameterSchema before submitting; choose exactly one id from legalActions.',
+      'Read packet.blockedActions when present; those entries explain why a choice cannot be submitted yet and are not action ids.',
       'Submit only action, actionSetId, decisionVersion, actionId, parameters when the selected action asks for them, and optional publicMessage.',
       'The server validates parameters, stale packets, forged action ids, shop rules, and budget rules before accepting a submitted action.',
+      'If a submit fails, read error.issues. Each issue includes code, path, and message for the rejected field or placement.',
       'Machine legality is not strategy quality. Bad, incomplete, weaponless, or mobility-less designs can still be legal if the server accepts them.',
       'Do not submit custom movement payloads, attack payloads, canonical payload maps, private rationale, or hidden reasoning as combat truth.',
       'Use public chat only for display. It is not a gameplay command source.',
@@ -89,6 +92,8 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       'decisionVersion must match the packet you are choosing from.',
       'actionId must be copied from legalActions exactly.',
       'parameters are valid only when the selected legal action exposes parameterSchema; omit parameters for fixed actions.',
+      'blockedActions is diagnostic only; never submit a blocked action as actionId.',
+      'failed submissions include error.issues when the server can explain the rejection.',
       'shop and budget constraints still apply, and invalid or stale submissions may be rejected.',
       'publicMessage is optional and display-only.',
       'Do not send secrets, claimToken, bearer tokens, private prompt text, or hidden reasoning in public chat.',
@@ -122,8 +127,9 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '',
     '## Browser Helper Path',
     '```js',
-    ...teamIdentitySnippetLines(input.invite),
-    `const packet = await window.AgentArenaRole.bootstrapRole({ agentName: '${brief.role}-agent', teamIdentity })`,
+    ...teamIdentitySnippetLines(),
+    "const agentName = '<invent an agent name>'",
+    'const packet = await window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })',
     'const next = packet.legalActions.length > 0',
     '  ? packet',
     `  : await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${brief.continuationProtocol.timeoutMs} })`,
@@ -182,7 +188,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     'Authorization: Bearer <claimToken>',
     'Content-Type: application/json',
     '',
-    bootstrapBodyForBrief(input.invite),
+    bootstrapBodyForBrief(),
     '```',
     '',
     'After bootstrap, poll role state for the current GameMasterPacket. The packet is in `gameMaster`:',
@@ -235,25 +241,23 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
   ].join('\n')
 }
 
-function bootstrapBodyForBrief(invite: AgentInvite): string {
+function bootstrapBodyForBrief(): string {
   return JSON.stringify({
-    agentName: `${invite.role}-agent`,
-    teamIdentity: teamIdentityForBrief(invite),
+    agentName: '<invent an agent name>',
+    teamIdentity: teamIdentityTemplateForBrief(),
   })
 }
 
-function teamIdentityForBrief(invite: AgentInvite) {
-  const roleName = invite.role === 'red' ? 'Red' : 'Blue'
-
+function teamIdentityTemplateForBrief() {
   return {
-    name: `${roleName} Team`,
-    colorHex: invite.role === 'red' ? '#ff4c5d' : '#5b9dff',
-    logoPrompt: `${roleName} combat robotics logo with a compact ${roleName[0]} monogram`,
+    name: '<invent a team name; do not use Red Team or Blue Team>',
+    colorHex: '<choose a #RRGGBB accent color>',
+    logoPrompt: '<describe your logo, mascot, mark, and initials>',
   }
 }
 
-function teamIdentitySnippetLines(invite: AgentInvite): string[] {
-  const identity = teamIdentityForBrief(invite)
+function teamIdentitySnippetLines(): string[] {
+  const identity = teamIdentityTemplateForBrief()
 
   return [
     'const teamIdentity = {',

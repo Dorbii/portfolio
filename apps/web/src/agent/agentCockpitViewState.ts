@@ -515,13 +515,15 @@ export function createAgentConnectionGuidance({
   status: LoadStatus
 }): AgentConnectionGuidance {
   const bootstrapCall = [
+    'const teamIdentity = {',
+    "  name: '<invent a team name; do not use Red Team or Blue Team>',",
+    "  colorHex: '<choose a #RRGGBB accent color>',",
+    "  logoPrompt: '<describe your logo, mascot, mark, and initials>',",
+    '}',
+    "const agentName = '<invent an agent name>'",
     'await window.AgentArenaRole.bootstrapRole({',
-    `  agentName: '${invite.role}-agent',`,
-    '  teamIdentity: {',
-    `    name: '${capitalize(invite.role)} Team',`,
-    `    colorHex: '${invite.role === 'red' ? '#ff4c5d' : '#5b9dff'}',`,
-    `    logoPrompt: '${capitalize(invite.role)} shield logo for a combat robot team',`,
-    '  },',
+    '  agentName,',
+    '  teamIdentity,',
     '})',
   ].join('\n')
 
@@ -680,6 +682,7 @@ function submitActionHelperForRoleState(state: RolePrivateState): string {
   return [
     'const state = await window.AgentArenaRole.getState()',
     'const packet = state.gameMaster',
+    'console.table(packet.blockedActions?.flatMap((blocked) => blocked.issues) ?? [])',
     'const action = packet.legalActions[0]',
     'await window.AgentArenaRole.submitAction({',
     "  action: 'submit_game_action',",

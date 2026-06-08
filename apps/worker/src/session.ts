@@ -965,6 +965,7 @@ export class SessionCoordinator {
     const activeSet = this.state.activeActionSets?.[roleName]
     const locked = this.state.lockedActions?.[roleName]
     const legalActions = activeSet && !locked ? legalActionsForPacket(activeSet) : []
+    const blockedActions = activeSet && !locked ? activeSet.blockedActions ?? [] : []
     const combat = this.state.phase === 'combat_turn' ? this.state.combat : undefined
     const selfCombat = combat
       ? roleName === 'red' ? combat.snapshot.red : combat.snapshot.blue
@@ -1050,6 +1051,7 @@ export class SessionCoordinator {
           }
         : {}),
       legalActions,
+      ...(blockedActions.length > 0 ? { blockedActions } : {}),
       ...(this.state.sharedDebrief ? { sharedDebrief: cloneJson(this.state.sharedDebrief) } : {}),
       ...(submit ? { submit } : {}),
     })

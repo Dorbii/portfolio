@@ -771,6 +771,15 @@ export type GameMasterLegalAction = {
   }
 }
 
+export type GameMasterBlockedAction = {
+  kind: GameMasterActionKind
+  label: string
+  summary: string
+  issues: ValidationIssue[]
+  catalogRefs?: string[]
+  requirements?: string[]
+}
+
 export type GameMasterPacket = {
   sessionId: string
   role: TeamRole
@@ -791,6 +800,7 @@ export type GameMasterPacket = {
   board?: AgentBoardView
   visibleState?: AgentVisibleCombatState
   legalActions: GameMasterLegalAction[]
+  blockedActions?: GameMasterBlockedAction[]
   sharedDebrief?: SharedDebrief
   submit?: SubmitInstruction
 }
@@ -828,6 +838,7 @@ export type ActiveActionSet = {
   createdAt: string
   expiresAt?: string
   actions: Record<string, CanonicalGameAction>
+  blockedActions?: GameMasterBlockedAction[]
   locked?: {
     actionId: string
     submittedAt: string

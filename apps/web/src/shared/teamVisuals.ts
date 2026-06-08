@@ -49,6 +49,27 @@ export function resolveTeamIdentity(
   return identity ?? DEFAULT_TEAM_IDENTITIES[role]
 }
 
+export function teamLogoInitials(
+  role: TeamRole,
+  identity: LegacyTeamIdentity | null | undefined,
+): string {
+  const resolved = resolveTeamIdentity(role, identity)
+  const initials = resolved.logo?.initials?.trim()
+
+  if (initials) {
+    return initials.slice(0, 4).toUpperCase()
+  }
+
+  return resolved.name
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/gi, '')[0])
+    .filter(Boolean)
+    .join('')
+    .slice(0, 4)
+    .toUpperCase() || role[0].toUpperCase()
+}
+
 export function resolveTeamAccentHex(
   role: TeamRole,
   identity: LegacyTeamIdentity | null | undefined,

@@ -698,8 +698,11 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.objective.includes('server-authored legal action menus'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('invent your own team identity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('blockedActions')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('error.issues')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('parameterSchema')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('budget rules')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('mobility-less machines can still be legal')))
@@ -712,6 +715,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.rules.packetFields.required.includes('decisionVersion'))
   assert.ok(json.rules.packetFields.required.includes('eventVersion'))
   assert.ok(json.rules.packetFields.required.includes('legalActions'))
+  assert.ok(json.rules.packetFields.optional.includes('blockedActions'))
   assert.deepEqual(json.rules.teamIdentitySchema.requiredOnFirstConnect, [
     'name',
     'colorHex',
@@ -758,7 +762,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
     yawDegrees: 120,
     rollDegrees: 15,
   })
-  assert.equal(json.examples.teamIdentity.colorHex, '#ff4c5d')
+  assert.equal(json.examples.teamIdentity.name, 'Voltage Choir')
+  assert.equal(json.examples.teamIdentity.colorHex, '#00d6a3')
   assert.equal(typeof json.examples.teamIdentity.logoPrompt, 'string')
   assert.equal('primaryColor' in json.examples.teamIdentity, false)
   assert.equal('logo' in json.examples.teamIdentity, false)
@@ -1313,6 +1318,8 @@ test('mount pose packet exposes compact schema and invalid pose does not mutate 
   assert.equal(poseAction.parameterSchema.properties.parentInstanceId.enum.length, 1)
   assert.equal(poseAction.parameterSchema.properties.childPartId.enum.length, 1)
   assert.equal(poseAction.parameterSchema.properties.mountSurfaceId.enum.includes('core_shell'), true)
+  assert.ok(poseAction.requirements.some((requirement) => requirement.includes('mountSurfaceId must be one of')))
+  assert.ok(poseAction.requirements.some((requirement) => requirement.includes('u and v must be numbers from 0 through 1')))
   assert.equal(poseAction.parameterSchema.properties.u.enum, undefined)
   assert.equal(poseAction.parameterSchema.properties.v.enum, undefined)
   assert.equal(poseAction.parameterSchema.properties.u.minimum, 0)
@@ -1335,6 +1342,7 @@ test('mount pose packet exposes compact schema and invalid pose does not mutate 
   assert.equal(invalid.response.status, 400)
   assert.equal(invalid.json.error.code, 'SUBMISSION_INVALID')
   assert.ok(invalid.json.error.issues.some((issue) => issue.code === 'PARAMETER_OUT_OF_RANGE'))
+  assert.ok(invalid.json.error.issues.some((issue) => issue.message.includes('between 0 and 1')))
   assert.equal(afterRejected.json.gameMaster.resources.remainingGold, packet.resources.remainingGold)
   assert.deepEqual(afterRejected.json.gameMaster.buildState.currentDesign, packet.buildState.currentDesign)
   assert.equal(afterRejected.json.gameMaster.buildState.step, 'propose_mount_pose')

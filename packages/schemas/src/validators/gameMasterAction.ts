@@ -161,7 +161,7 @@ export function validateGameMasterActionParameters(
         issue(
           'PARAMETER_OUT_OF_RANGE',
           parameterPath,
-          `${key} is outside the allowed range.`,
+          `${key} ${numberRangeMessage(definition)}.`,
         ),
       )
     }
@@ -175,7 +175,7 @@ export function validateGameMasterActionParameters(
         issue(
           'PARAMETER_OUT_OF_RANGE',
           parameterPath,
-          `${key} length is outside the allowed range.`,
+          `${key} length ${lengthRangeMessage(definition)}.`,
         ),
       )
     }
@@ -185,7 +185,7 @@ export function validateGameMasterActionParameters(
         issue(
           'PARAMETER_NOT_ALLOWED',
           parameterPath,
-          `${key} is not one of the allowed values.`,
+          `${key} must be one of: ${definition.enum.map(String).join(', ')}.`,
         ),
       )
     }
@@ -196,6 +196,42 @@ export function validateGameMasterActionParameters(
   return issues.length === 0
     ? { ok: true, parameters: normalized }
     : { ok: false, issues }
+}
+
+function numberRangeMessage(
+  definition: GameMasterActionParameterSchema['properties'][string],
+): string {
+  if (typeof definition.minimum === 'number' && typeof definition.maximum === 'number') {
+    return `must be between ${definition.minimum} and ${definition.maximum}`
+  }
+
+  if (typeof definition.minimum === 'number') {
+    return `must be greater than or equal to ${definition.minimum}`
+  }
+
+  if (typeof definition.maximum === 'number') {
+    return `must be less than or equal to ${definition.maximum}`
+  }
+
+  return 'is outside the allowed range'
+}
+
+function lengthRangeMessage(
+  definition: GameMasterActionParameterSchema['properties'][string],
+): string {
+  if (typeof definition.minLength === 'number' && typeof definition.maxLength === 'number') {
+    return `must be between ${definition.minLength} and ${definition.maxLength}`
+  }
+
+  if (typeof definition.minLength === 'number') {
+    return `must be at least ${definition.minLength}`
+  }
+
+  if (typeof definition.maxLength === 'number') {
+    return `must be at most ${definition.maxLength}`
+  }
+
+  return 'is outside the allowed range'
 }
 
 function normalizeParameterValue(

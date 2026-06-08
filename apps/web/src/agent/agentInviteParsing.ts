@@ -200,7 +200,7 @@ function normalizeStoredTeamIdentity(value: unknown): LegacyTeamIdentity {
     : ''
   const logoMark = isTeamLogoMark(logo?.mark)
     ? logo.mark
-    : DEFAULT_TEAM_LOGO_MARK
+    : logoMarkFromPrompt(logoPrompt)
   const initials = typeof logo?.initials === 'string' && logo.initials.trim()
     ? logo.initials.trim().slice(0, 4).toUpperCase()
     : initialsFromLogoPrompt(logoPrompt)
@@ -226,4 +226,26 @@ function initialsFromLogoPrompt(value: string): string | undefined {
     .toUpperCase()
 
   return letters || undefined
+}
+
+function logoMarkFromPrompt(value: string): LegacyTeamLogoMark {
+  const normalized = value.toLowerCase()
+
+  if (normalized.includes('bolt') || normalized.includes('lightning') || normalized.includes('voltage')) {
+    return 'bolt'
+  }
+  if (normalized.includes('gear') || normalized.includes('cog')) {
+    return 'gear'
+  }
+  if (normalized.includes('star')) {
+    return 'star'
+  }
+  if (normalized.includes('wedge') || normalized.includes('triangle')) {
+    return 'wedge'
+  }
+  if (normalized.includes('crosshair') || normalized.includes('target')) {
+    return 'crosshair'
+  }
+
+  return DEFAULT_TEAM_LOGO_MARK
 }

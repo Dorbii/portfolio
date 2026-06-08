@@ -181,12 +181,30 @@ export class AgentArenaApiError extends Error {
     code?: RelayErrorCode
     issues?: RelayErrorResponse['error']['issues']
   }) {
-    super(input.message)
+    const issueSummary = formatRelayIssueSummary(input.issues)
+
+    super(issueSummary ? `${input.message} Details: ${issueSummary}` : input.message)
     this.name = 'AgentArenaApiError'
     this.status = input.status
     this.code = input.code
     this.issues = input.issues
   }
+}
+
+function formatRelayIssueSummary(issues: RelayErrorResponse['error']['issues'] | undefined): string | undefined {
+  if (!issues || issues.length === 0) {
+    return undefined
+  }
+
+  const visibleIssues = issues.slice(0, 3).map(
+    (entry) => `${entry.path} ${entry.code}: ${entry.message}`,
+  )
+  const remaining = issues.length - visibleIssues.length
+
+  return [
+    ...visibleIssues,
+    ...(remaining > 0 ? [`and ${remaining} more issue${remaining === 1 ? '' : 's'}`] : []),
+  ].join('; ')
 }
 
 function hasNextPlayablePacket(

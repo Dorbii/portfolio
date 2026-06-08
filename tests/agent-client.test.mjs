@@ -249,7 +249,7 @@ test('agent team identity storage preserves selected team accent without claim t
   assert.deepEqual(readStoredTeamIdentity(storage, invite), {
     name: 'Aqua Circuit QA',
     primaryColor: '#00d6a3',
-    logo: { mark: 'shield', initials: 'ACQG' },
+    logo: { mark: 'gear', initials: 'ACQG' },
   })
 
   clearStoredTeamIdentity(storage, invite)
@@ -290,6 +290,8 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
   assert.ok(brief.includes('Player key / claimToken: cap_red'))
   assert.ok(brief.includes('## Do This First'))
+  assert.ok(brief.includes('invent your own team identity'))
+  assert.ok(brief.includes('Do not use Red Team or Blue Team'))
   assert.ok(brief.includes('Can you execute page JavaScript on the invite URL?'))
   assert.ok(brief.includes('Does `window.AgentArenaRole` exist?'))
   assert.ok(brief.includes('## Browser Helper Path'))
@@ -303,9 +305,11 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/reflection'))
   assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
+  assert.ok(brief.includes('const agentName = \'<invent an agent name>\''))
+  assert.ok(brief.includes('const packet = await window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })'))
   assert.ok(brief.includes('window.AgentArenaRole.submitAction'))
-  assert.ok(brief.includes("colorHex: '#ff4c5d'"))
-  assert.ok(brief.includes("logoPrompt: 'Red combat robotics logo"))
+  assert.ok(brief.includes("colorHex: '<choose a #RRGGBB accent color>'"))
+  assert.ok(brief.includes("logoPrompt: '<describe your logo, mascot, mark, and initials>'"))
   assert.ok(brief.includes('"action":"submit_game_action"'))
   assert.ok(brief.includes('"actionSetId":"<packet.actionSetId>"'))
   assert.ok(brief.includes('"actionId":"<legalActions[0].id>"'))
@@ -611,6 +615,9 @@ test('agent client surfaces relay validation errors', async () => {
       assert.equal(error.status, 400)
       assert.equal(error.code, 'SUBMISSION_INVALID')
       assert.equal(error.issues[0].code, 'UNKNOWN_PART')
+      assert.match(error.message, /purchases\.0\.partId/)
+      assert.match(error.message, /UNKNOWN_PART/)
+      assert.match(error.message, /Unknown part/)
 
       return true
     },

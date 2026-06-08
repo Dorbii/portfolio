@@ -1319,6 +1319,25 @@ test('machine confirm rejects disconnected parts, unknown catalog parts, and har
   assert.ok(disconnectedConfirm.issues.some((issue) => issue.code === 'DISCONNECTED_PART'))
   assert.ok(unknownConfirm.issues.some((issue) => issue.code === 'UNKNOWN_PART'))
   assert.ok(collisionConfirm.issues.some((issue) => issue.code === 'HARD_PART_COLLISION'))
+
+  const disconnectedActionSet = buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 502,
+    actionSetId: 'red:r1:loadout:blocked-confirm:v502',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 1000,
+    buildState: machineBuildState(disconnected),
+  })
+  const blockedConfirm = disconnectedActionSet.blockedActions?.find(
+    (action) => action.kind === 'confirm_loadout',
+  )
+
+  assert.equal(Object.values(disconnectedActionSet.actions).some((action) => action.kind === 'confirm_loadout'), false)
+  assert.notEqual(blockedConfirm, undefined)
+  assert.ok(blockedConfirm.issues.some((issue) => issue.code === 'DISCONNECTED_PART'))
+  assert.ok(blockedConfirm.requirements.some((requirement) => requirement.includes('not connected')))
 })
 
 test('machine legacy projection is deterministic and preserves replay transform metadata', () => {

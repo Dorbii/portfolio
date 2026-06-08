@@ -8,6 +8,7 @@ import type {
   CatalogStoreView,
   GameMasterActionParameterSchema,
   GameMasterActionParameters,
+  GameMasterBlockedAction,
   GameMasterLegalAction,
   GridCoord,
   InventoryItem,
@@ -252,6 +253,15 @@ export function buildLoadoutActionSet(input: BuildLoadoutActionSetInput): Active
       catalogDigest,
     },
   }))
+  const blockedActions = createBlockedLoadoutActions({
+    role: input.role,
+    round: input.round,
+    decisionVersion: input.decisionVersion,
+    gold: input.gold,
+    buildState,
+    catalog,
+    store: catalogStore,
+  })
 
   return {
     actionSetId: input.actionSetId,
@@ -267,6 +277,7 @@ export function buildLoadoutActionSet(input: BuildLoadoutActionSetInput): Active
     createdAt: input.createdAt,
     ...(input.expiresAt ? { expiresAt: input.expiresAt } : {}),
     actions: Object.fromEntries(actionsWithDigest.map((action) => [action.id, action])),
+    ...(blockedActions.length > 0 ? { blockedActions } : {}),
   }
 }
 
@@ -426,6 +437,26 @@ function createLoadoutActions(input: CreateLoadoutActionsInput): CanonicalGameAc
     case 'choose_rotation':
       return isMachineDesignAuthority(input.buildState) ? mountPoseActions(input) : rotationActions(input)
   }
+}
+
+function createBlockedLoadoutActions(input: CreateLoadoutActionsInput): GameMasterBlockedAction[] {
+  if (input.buildState.step !== 'choose_part' && input.buildState.step !== 'ready_to_confirm') {
+    return []
+  }
+
+  const confirmIssues = confirmLoadoutIssuesForBuildState(input.buildState, input.catalog)
+
+  if (confirmIssues.length === 0) {
+    return []
+  }
+
+  return [{
+    kind: 'confirm_loadout',
+    label: 'Confirm loadout unavailable',
+    summary: 'The current machine cannot be submitted until these server validation issues are fixed.',
+    issues: confirmIssues,
+    requirements: confirmIssues.map((entry) => entry.message),
+  }]
 }
 
 function choosePartActions(input: CreateLoadoutActionsInput): CanonicalGameAction[] {
@@ -658,12 +689,13 @@ function mountPoseActions(input: CreateLoadoutActionsInput): CanonicalGameAction
   }
 
   const surfaces = machineParentMountSurfaces(parent, partsById)
+  const acceptedSurfaces = surfacesAcceptingPart(childPart, surfaces)
 
-  if (surfaces.length === 0) {
+  if (acceptedSurfaces.length === 0) {
     return []
   }
 
-  const examples = mountPoseParameterExamples(childPart, parent.instanceId, surfaces)
+  const examples = mountPoseParameterExamples(childPart, parent.instanceId, acceptedSurfaces)
 
   return [
     {
@@ -677,8 +709,9 @@ function mountPoseActions(input: CreateLoadoutActionsInput): CanonicalGameAction
         catalogRefs: parent.source === 'catalog_part'
           ? [childPart.id, catalogPartIdFromMachinePart(parent)]
           : [childPart.id],
+        requirements: mountPoseRequirements(childPart, parent.instanceId, acceptedSurfaces),
       }),
-      parameterSchema: mountPoseParameterSchema(childPart.id, parent.instanceId, surfaces),
+      parameterSchema: mountPoseParameterSchema(childPart.id, parent.instanceId, acceptedSurfaces),
       parameterExamples: examples.length > 0 ? examples : undefined,
     },
   ]
@@ -1471,6 +1504,20 @@ function mountPoseParameterExamples(
     : []
 }
 
+function mountPoseRequirements(
+  childPart: PartDefinition,
+  parentInstanceId: string,
+  surfaces: MountSurface[],
+): string[] {
+  return [
+    `parentInstanceId must be ${parentInstanceId}.`,
+    `childPartId must be ${childPart.id}.`,
+    `mountSurfaceId must be one of: ${uniqueStrings(surfaces.map((surface) => surface.id)).join(', ')}.`,
+    'u and v must be numbers from 0 through 1 on the selected surface.',
+    'yawDegrees and rollDegrees are degree values; the server normalizes them before placement.',
+  ]
+}
+
 function mountPoseParametersFromPayload(
   payload: Extract<LoadoutActionPayload, { type: 'propose_mount_pose' }>,
 ): { ok: true; value: MountPoseActionParameters } | { ok: false; issues: ValidationIssue[] } {
@@ -1590,6 +1637,13 @@ function machineParentMountSurfaces(
   }
 
   return machineCatalogDefinition(parent, partsById)?.mountSurfaces ?? []
+}
+
+function surfacesAcceptingPart(
+  childPart: PartDefinition,
+  surfaces: MountSurface[],
+): MountSurface[] {
+  return surfaces.filter((surface) => surface.accepts.includes(childPart.category))
 }
 
 function machineCatalogDefinition(

@@ -13,6 +13,7 @@ import {
 import {
   resolveTeamIdentity,
   teamAccentRgb,
+  teamLogoInitials,
 } from '../shared/teamVisuals'
 import {
   ActionGroup,
@@ -253,7 +254,9 @@ function ScoreboardTeam({
       className={`scoreboard-team-block ${role} ${isWinner ? 'winner' : ''}`}
       style={getScoreboardAccentStyle(team.accentRgb)}
     >
-      <div className="scoreboard-team-mark" aria-hidden="true" />
+      <div className={`scoreboard-team-mark mark-${team.logoMark}`} aria-hidden="true">
+        <span>{team.logoInitials}</span>
+      </div>
       <div className="scoreboard-team-main">
         <div className="scoreboard-team-copy">
           <strong>{team.name}</strong>
@@ -449,6 +452,8 @@ type TeamDashboardData = {
   healthPercent: number
   hitCount: number
   losses: number
+  logoInitials: string
+  logoMark: string
   name: string
   role: TeamRole
   submitted: boolean
@@ -479,6 +484,8 @@ function getTeamDashboardData(
     healthPercent,
     hitCount: countImpactEvents(replayPayload?.timeline.events ?? [], role),
     losses: roleState?.losses ?? 0,
+    logoInitials: teamLogoInitials(role, identity),
+    logoMark: displayIdentity.logo?.mark ?? 'shield',
     name: identity?.name.trim() || blueprint?.name?.trim() || displayIdentity.name,
     role,
     submitted: roleState?.submitted ?? false,

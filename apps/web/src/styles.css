@@ -1978,24 +1978,13 @@ textarea:focus-visible {
   content: "";
 }
 
-.agent-identity-editor,
 .agent-identity-lock {
   min-width: 0;
   display: grid;
   gap: 8px;
-  align-items: end;
+  align-items: center;
 }
 
-.agent-identity-editor {
-  grid-template-columns:
-    minmax(112px, 0.8fr)
-    minmax(136px, 1fr)
-    72px
-    minmax(104px, 0.72fr)
-    72px;
-}
-
-.agent-identity-editor label,
 .agent-identity-lock {
   min-width: 0;
   color: #8fa3a3;
@@ -2004,31 +1993,31 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
-.agent-identity-editor label {
-  display: grid;
-  gap: 5px;
-}
-
-.agent-identity-editor input,
-.agent-identity-editor select {
-  min-width: 0;
-  min-height: 34px;
-  margin: 0;
-}
-
-.agent-identity-editor input[type="color"] {
-  height: 34px;
-  padding: 4px;
-}
-
 .agent-identity-lock {
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 38px auto minmax(0, 1fr) auto;
   padding: 9px 10px;
   border: 1px solid rgba(var(--cockpit-team), 0.34);
   border-radius: 7px;
   background:
     linear-gradient(180deg, rgba(var(--cockpit-team), 0.12), rgba(var(--cockpit-team), 0.03)),
     rgba(6, 10, 13, 0.74);
+}
+
+.agent-identity-lock.is-pending {
+  border-style: dashed;
+}
+
+.agent-identity-logo {
+  width: 30px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  clip-path: polygon(50% 0, 86% 18%, 73% 76%, 50% 100%, 27% 76%, 14% 18%);
+  background: linear-gradient(135deg, var(--cockpit-team-strong), rgba(255, 255, 255, 0.3));
+  color: #061014;
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .agent-identity-lock strong {
@@ -2049,7 +2038,7 @@ textarea:focus-visible {
 .agent-command-actions {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(104px, 1fr));
+  grid-template-columns: repeat(3, minmax(104px, 1fr));
   gap: 8px;
   align-items: end;
 }
@@ -2926,14 +2915,6 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .agent-identity-editor {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .agent-identity-editor label:nth-child(-n + 2) {
-    grid-column: span 3;
-  }
-
   .cockpit-secondary-stack {
     position: static;
     max-height: none;
@@ -3038,7 +3019,6 @@ textarea:focus-visible {
   .inventory-row,
     .agent-facts div,
     .replay-controls,
-    .agent-identity-editor,
     .agent-identity-lock,
     .agent-command-actions,
     .agent-task-list,
@@ -3323,6 +3303,8 @@ textarea:focus-visible {
   grid-area: mark;
   width: 54px;
   height: 60px;
+  display: grid;
+  place-items: center;
   align-self: center;
   justify-self: center;
   clip-path: polygon(50% 0, 86% 18%, 73% 76%, 50% 100%, 27% 76%, 14% 18%);
@@ -3332,6 +3314,45 @@ textarea:focus-visible {
 
 .scoreboard-team-mark {
   color: rgb(var(--scoreboard-accent));
+}
+
+.scoreboard-team-mark.mark-bolt {
+  clip-path: polygon(48% 0, 78% 0, 61% 38%, 88% 38%, 35% 100%, 47% 57%, 18% 57%);
+}
+
+.scoreboard-team-mark.mark-gear {
+  clip-path: polygon(50% 0, 61% 14%, 78% 9%, 84% 27%, 100% 36%, 91% 52%, 96% 70%, 78% 78%, 69% 96%, 50% 89%, 31% 96%, 22% 78%, 4% 70%, 9% 52%, 0 36%, 16% 27%, 22% 9%, 39% 14%);
+}
+
+.scoreboard-team-mark.mark-star {
+  clip-path: polygon(50% 0, 62% 34%, 98% 35%, 69% 56%, 79% 91%, 50% 70%, 21% 91%, 31% 56%, 2% 35%, 38% 34%);
+}
+
+.scoreboard-team-mark.mark-wedge {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.scoreboard-team-mark.mark-crosshair {
+  border-radius: 50%;
+  clip-path: none;
+}
+
+.scoreboard-team-mark.mark-crosshair::after {
+  position: absolute;
+  inset: 11px;
+  border: 2px solid rgba(6, 16, 20, 0.7);
+  border-radius: 50%;
+  content: "";
+}
+
+.scoreboard-team-mark span {
+  position: relative;
+  z-index: 1;
+  color: #061014;
+  font-size: 1rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .scoreboard-team-copy {

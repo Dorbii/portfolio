@@ -1,15 +1,6 @@
-import {
-  useMemo,
-  useState,
-} from 'react'
-import type { TeamIdentity } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import { capitalize } from '../shared/format'
-import {
-  DEFAULT_TEAM_IDENTITIES,
-  LEGACY_TEAM_LOGO_MARKS,
-  type LegacyTeamLogoMark,
-} from '../shared/teamVisuals'
+import { teamLogoInitials } from '../shared/teamVisuals'
 import {
   Button,
   Panel,
@@ -20,8 +11,6 @@ import type { useLiveAgentCockpitController } from './useLiveAgentCockpitControl
 
 type AgentCockpitController = ReturnType<typeof useLiveAgentCockpitController>
 
-const TEAM_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
-
 export function AgentCockpitHeader({
   controller,
   invite,
@@ -30,23 +19,8 @@ export function AgentCockpitHeader({
   invite: AgentInvite
 }) {
   const isObserverCockpit = Boolean(invite.observerToken && !invite.claimToken)
-  const identitySeed = DEFAULT_TEAM_IDENTITIES[invite.role]
-  const [agentName, setAgentName] = useState(`${invite.role}-agent`)
-  const [teamName, setTeamName] = useState<string>(identitySeed.name)
-  const [primaryColor, setPrimaryColor] = useState<string>(identitySeed.primaryColor)
-  const [logoMark, setLogoMark] = useState<LegacyTeamLogoMark>('shield')
-  const [logoInitials, setLogoInitials] = useState(capitalize(invite.role).slice(0, 1))
-  const pendingTeamIdentity = useMemo(
-    () => createPendingTeamIdentity({
-      logoInitials,
-      logoMark,
-      primaryColor,
-      teamName,
-    }),
-    [logoInitials, logoMark, primaryColor, teamName],
-  )
   const connectedIdentity = controller.roleState?.identity ?? null
-  const canSubmitIdentity = Boolean(pendingTeamIdentity)
+  const connectedLogo = connectedIdentity ? teamLogoInitials(invite.role, connectedIdentity) : null
 
   return (
     <header className="agent-live-header agent-command-header">
@@ -57,79 +31,21 @@ export function AgentCockpitHeader({
       {!isObserverCockpit ? (
         connectedIdentity ? (
           <div className="agent-identity-lock" aria-label="Connected team identity">
+            <span className="agent-identity-logo" aria-hidden="true">{connectedLogo}</span>
             <span>Team identity</span>
             <strong>{connectedIdentity.name}</strong>
             <small>{connectedIdentity.primaryColor}</small>
           </div>
         ) : (
-          <div className="agent-identity-editor" aria-label="Team identity for first connect">
-            <label>
-              <span>Agent</span>
-              <input
-                value={agentName}
-                onChange={(event) => setAgentName(event.target.value)}
-                maxLength={80}
-              />
-            </label>
-            <label>
-              <span>Team</span>
-              <input
-                value={teamName}
-                onChange={(event) => setTeamName(event.target.value)}
-                maxLength={40}
-              />
-            </label>
-            <label className="color-field">
-              <span>Hex color</span>
-              <input
-                aria-label="Team color"
-                type="color"
-                value={TEAM_COLOR_PATTERN.test(primaryColor) ? primaryColor : identitySeed.primaryColor}
-                onChange={(event) => setPrimaryColor(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Logo</span>
-              <select
-                value={logoMark}
-                onChange={(event) => setLogoMark(event.target.value as LegacyTeamLogoMark)}
-              >
-                {LEGACY_TEAM_LOGO_MARKS.map((mark) => (
-                  <option key={mark} value={mark}>
-                    {capitalize(mark)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="initials-field">
-              <span>Initials</span>
-              <input
-                value={logoInitials}
-                onChange={(event) => setLogoInitials(event.target.value)}
-                maxLength={4}
-              />
-            </label>
+          <div className="agent-identity-lock is-pending" aria-label="Agent-authored team identity pending">
+            <span className="agent-identity-logo" aria-hidden="true">{capitalize(invite.role).slice(0, 1)}</span>
+            <span>Team identity</span>
+            <strong>Awaiting agent bootstrap</strong>
+            <small>Agent-authored</small>
           </div>
         )
       ) : null}
       <div className="agent-command-actions">
-        {!isObserverCockpit ? (
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => {
-              if (pendingTeamIdentity) {
-                void controller.connectRole({
-                  agentName,
-                  teamIdentity: pendingTeamIdentity,
-                })
-              }
-            }}
-            disabled={!controller.canClaimRole || !canSubmitIdentity}
-          >
-            {controller.claimButtonLabel}
-          </Button>
-        ) : null}
         <Button
           type="button"
           variant="secondary"
@@ -150,32 +66,6 @@ export function AgentCockpitHeader({
       </div>
     </header>
   )
-}
-
-function createPendingTeamIdentity({
-  logoInitials,
-  logoMark,
-  primaryColor,
-  teamName,
-}: {
-  logoInitials: string
-  logoMark: LegacyTeamLogoMark
-  primaryColor: string
-  teamName: string
-}): TeamIdentity | null {
-  const name = teamName.trim()
-  const color = primaryColor.trim()
-  const initials = logoInitials.trim().replace(/[^a-z0-9]/gi, '').slice(0, 4)
-
-  if (!name || !TEAM_COLOR_PATTERN.test(color)) {
-    return null
-  }
-
-  return {
-    name,
-    colorHex: color,
-    logoPrompt: `${name} logo using a ${logoMark} motif${initials ? ` and ${initials} initials` : ''}`,
-  }
 }
 export function AgentTaskPanel({
   notice,

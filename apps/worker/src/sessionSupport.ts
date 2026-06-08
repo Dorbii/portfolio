@@ -218,9 +218,31 @@ function normalizeTeamLogo(
   logoSeed: string,
 ): NonNullable<LegacyTeamIdentity['logo']> {
   return {
-    mark: 'shield',
+    mark: logoMarkFromSeed(logoSeed),
     initials: initialsFromTeamName(logoSeed || teamName).toUpperCase(),
   }
+}
+
+function logoMarkFromSeed(logoSeed: string): NonNullable<LegacyTeamIdentity['logo']>['mark'] {
+  const normalized = logoSeed.toLowerCase()
+
+  if (normalized.includes('bolt') || normalized.includes('lightning') || normalized.includes('voltage')) {
+    return 'bolt'
+  }
+  if (normalized.includes('gear') || normalized.includes('cog')) {
+    return 'gear'
+  }
+  if (normalized.includes('star')) {
+    return 'star'
+  }
+  if (normalized.includes('wedge') || normalized.includes('triangle')) {
+    return 'wedge'
+  }
+  if (normalized.includes('crosshair') || normalized.includes('target')) {
+    return 'crosshair'
+  }
+
+  return 'shield'
 }
 
 function initialsFromTeamName(name: string): string {
