@@ -147,6 +147,7 @@ export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
 const COMBAT_TURN_SECONDS = 60
 const COMBAT_TURN_HANDOFF_DELAY_MS = 10_000
+const COMBAT_TURN_START_GATE_GRACE_MS = 120_000
 const ROUND_PLAN_SECONDS = 240
 const GAME_MASTER_CATALOG_VERSION = 'part-catalog:v1'
 const GAME_MASTER_ARENA_VERSION = 'arena:v1'
@@ -451,6 +452,7 @@ export class SessionCoordinator {
     }
 
     this.resolveTimedTransitions(now)
+    this.markCombatTurnSeen(auth.value.role.role, now)
     this.ensureGameMasterActionSets(now)
 
     return {
@@ -471,6 +473,7 @@ export class SessionCoordinator {
     }
 
     this.resolveTimedTransitions(now)
+    this.markCombatTurnSeen(auth.value.role.role, now)
     this.ensureGameMasterActionSets(now)
 
     return {
@@ -1353,10 +1356,11 @@ export class SessionCoordinator {
       nextTick: resolution.nextTick,
       snapshot: resolution.snapshot,
       now,
+      startGate: true,
       actions: { red: [], blue: [] },
       baselineMachineDesigns,
     })
-    this.changePhase('combat_turn', `Combat turn ${resolution.nextTick} is open.`, now)
+    this.changePhase('combat_turn', `Combat turn ${resolution.nextTick} is staged; waiting for both agents to arrive.`, now)
   }
 
   private resolveExpiredCombatTurn(now: string): void {
@@ -1442,7 +1446,62 @@ export class SessionCoordinator {
     }
 
     this.resolveExpiredLoadoutWindow(now)
+    this.resolveCombatStartGate(now)
     this.resolveExpiredCombatTurn(now)
+  }
+
+  private markCombatTurnSeen(roleName: TeamRole, now: string): void {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat?.startGate) {
+      return
+    }
+
+    if (Date.parse(now) >= Date.parse(combat.startGate.graceDeadlineAt)) {
+      this.releaseCombatStartGate(combat.startGate.graceDeadlineAt)
+      return
+    }
+
+    combat.startGate.readyBy = {
+      ...combat.startGate.readyBy,
+      [roleName]: combat.startGate.readyBy[roleName] ?? now,
+    }
+
+    if (TEAM_ROLES.every((role) => combat.startGate?.readyBy[role])) {
+      this.releaseCombatStartGate(now)
+      return
+    }
+
+    this.touch(now)
+  }
+
+  private resolveCombatStartGate(now: string): void {
+    const combat = this.state.combat
+
+    if (
+      this.state.phase !== 'combat_turn' ||
+      !combat?.startGate ||
+      Date.parse(now) < Date.parse(combat.startGate.graceDeadlineAt)
+    ) {
+      return
+    }
+
+    this.releaseCombatStartGate(combat.startGate.graceDeadlineAt)
+  }
+
+  private releaseCombatStartGate(openedAt: string): void {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat?.startGate) {
+      return
+    }
+
+    combat.openedAt = openedAt
+    combat.deadlineAt = addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000)
+    combat.startGate = undefined
+    this.state.activeActionSets = undefined
+    this.state.lockedActions = undefined
+    this.touch(openedAt)
   }
 
   private resolveExpiredLoadoutWindow(now: string): void {
@@ -1511,16 +1570,27 @@ export class SessionCoordinator {
     snapshot: StoredCombatState['snapshot']
     now: string
     opensAt?: string
+    startGate?: boolean
     actions: StoredCombatState['actions']
     baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns']
   }): StoredCombatState {
-    const openedAt = input.opensAt ?? input.now
+    const openedAt = input.startGate
+      ? addMilliseconds(input.now, COMBAT_TURN_START_GATE_GRACE_MS)
+      : input.opensAt ?? input.now
 
     return {
       nextTick: input.nextTick,
       openedAt,
       deadlineAt: addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000),
       turnSeconds: COMBAT_TURN_SECONDS,
+      ...(input.startGate
+        ? {
+            startGate: {
+              readyBy: {},
+              graceDeadlineAt: openedAt,
+            },
+          }
+        : {}),
       ...(input.baselineMachineDesigns ? { baselineMachineDesigns: input.baselineMachineDesigns } : {}),
       actions: input.actions,
       pending: {},

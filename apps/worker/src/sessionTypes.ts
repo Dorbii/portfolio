@@ -91,6 +91,10 @@ export type StoredCombatState = {
   openedAt: string
   deadlineAt: string
   turnSeconds: number
+  startGate?: {
+    readyBy: Partial<Record<TeamRole, string>>
+    graceDeadlineAt: string
+  }
   baselineMachineDesigns?: Partial<Record<TeamRole, MachineDesign>>
   actions: Record<TeamRole, CanonicalGameAction[]>
   pending: Partial<Record<TeamRole, CanonicalGameAction>>

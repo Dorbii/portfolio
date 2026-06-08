@@ -1472,18 +1472,23 @@ test('POST /gpt/act submits parameterized mount pose payloads', async () => {
   assert.equal(attached.json.packet.buildState.step, 'propose_mount_pose')
 
   const poseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose')
+  const { selectedPartId, selectedAttachTargetId } = attached.json.packet.buildState
+  assert.equal(typeof selectedPartId, 'string')
+  assert.equal(typeof selectedAttachTargetId, 'string')
   const placed = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl,
       actionId: poseAction.id,
-      parameters: defaultMountPoseParameters(poseAction, {
+      parameters: {
+        childPartId: selectedPartId,
+        parentInstanceId: selectedAttachTargetId,
         mountSurfaceId: 'core_shell',
         u: 0.5,
         v: 0.5,
         yawDegrees: 0,
         rollDegrees: 0,
-      }),
+      },
     },
   })
 
@@ -1568,6 +1573,8 @@ test('POST /gpt/act accepts semantic GPT mount slot aliases without parameters',
   assert.ok(mountSlotAliases.every((action) => action.resolvesToActionId === canonicalPoseAction.id))
   assert.ok(mountSlotAliases.every((action) => Array.isArray(action.semanticTags)))
   assert.equal(JSON.stringify(mountSlotAliases).includes('"parameters"'), false)
+  assert.equal('parameterSchema' in canonicalPoseAction, false)
+  assert.equal('parameterExamples' in canonicalPoseAction, false)
 
   const placed = await route(env, '/gpt/act', {
     method: 'POST',
@@ -1976,12 +1983,16 @@ test('combat /action uses generated canonical actions and preserves blue set aft
     blueInvite.claimToken,
     bluePacket,
   )
-  const redCombatState = await route(env, `/sessions/${sessionId}/state`, {
+  const redFirstCombatState = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,
   })
   const blueCombatState = await route(env, `/sessions/${sessionId}/state`, {
     token: blueInvite.claimToken,
   })
+  const redCombatState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const redFirstCombatPacket = redFirstCombatState.json.gameMaster
   const redCombatPacket = redCombatState.json.gameMaster
   const blueCombatPacket = blueCombatState.json.gameMaster
   const redHold = findLegalAction(redCombatPacket, (action) => action.kind === 'hold')
@@ -1989,10 +2000,16 @@ test('combat /action uses generated canonical actions and preserves blue set aft
 
   assert.equal(redAfterConfirm.nextAction, 'wait_for_opponent_loadout')
   assert.equal(blueAfterConfirm.phase, 'combat_turn')
+  assert.equal(redFirstCombatState.response.status, 200)
   assert.equal(redCombatState.response.status, 200)
   assert.equal(blueCombatState.response.status, 200)
+  assertGameMasterPacket(redFirstCombatPacket, 'red')
   assertGameMasterPacket(redCombatPacket, 'red')
   assertGameMasterPacket(blueCombatPacket, 'blue')
+  assert.equal(redFirstCombatPacket.phase, 'combat_turn')
+  assert.equal(redFirstCombatPacket.nextAction, 'wait_for_opponent_turn')
+  assert.equal(redFirstCombatPacket.legalActions.length, 0)
+  assert.equal(redFirstCombatPacket.submit, undefined)
   assert.equal(redCombatPacket.phase, 'combat_turn')
   assert.equal(redCombatPacket.nextAction, 'choose_turn')
   assert.equal(redCombatPacket.turnId, 'turn_1')

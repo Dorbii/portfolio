@@ -953,9 +953,13 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
 }
 
 function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
+  const mountSlotAliases = gptMountSlotAliasesForPacket(packet)
   const legalActions = [
-    ...packet.legalActions.map(compactGptLegalAction),
-    ...gptMountSlotAliasesForPacket(packet).map(compactGptMountSlotAlias),
+    ...packet.legalActions.map((action) =>
+      compactGptLegalAction(action, {
+        omitParameterDetails: mountSlotAliases.length > 0 && action.kind === 'propose_mount_pose',
+      })),
+    ...mountSlotAliases.map(compactGptMountSlotAlias),
   ]
 
   return {
@@ -1022,15 +1026,18 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
   }
 }
 
-function compactGptLegalAction(action: GameMasterLegalAction): Record<string, unknown> {
+function compactGptLegalAction(
+  action: GameMasterLegalAction,
+  options: { omitParameterDetails?: boolean } = {},
+): Record<string, unknown> {
   return {
     id: action.id,
     kind: action.kind,
     label: action.label,
     summary: action.summary,
     ...(action.requirements ? { requirements: action.requirements } : {}),
-    ...(action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
-    ...(action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
+    ...(!options.omitParameterDetails && action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
+    ...(!options.omitParameterDetails && action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
     ...(action.preview ? { preview: action.preview } : {}),
   }
 }

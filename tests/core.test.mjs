@@ -2765,10 +2765,33 @@ async function confirmBothMachineLoadouts(session, redToken, blueToken) {
 
   const redSubmission = await confirmMachineLoadout(session, redToken, redPacket.value)
   const blueSubmission = await confirmMachineLoadout(session, blueToken, bluePacket.value)
+  await openFirstCombatTurnForBoth(session, redToken, blueToken)
 
   return {
     redSubmission,
     blueSubmission,
+  }
+}
+
+async function openFirstCombatTurnForBoth(session, redToken, blueToken) {
+  const redArrived = await session.getGameMasterPacketForToken(redToken)
+  assert.equal(redArrived.ok, true)
+
+  if (redArrived.value.nextAction === 'choose_turn') {
+    return {
+      redPacket: redArrived.value,
+      bluePacket: redArrived.value.role === 'blue' ? redArrived.value : undefined,
+    }
+  }
+
+  const blueArrived = await session.getGameMasterPacketForToken(blueToken)
+  assert.equal(blueArrived.ok, true)
+  const redOpen = await session.getGameMasterPacketForToken(redToken)
+  assert.equal(redOpen.ok, true)
+
+  return {
+    redPacket: redOpen.value,
+    bluePacket: blueArrived.value,
   }
 }
 
@@ -7161,6 +7184,8 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
   assert.equal(blueState.ok, true)
+  assert.equal(blueState.value.gameMaster.nextAction, 'wait_for_opponent_turn')
+  assert.equal(blueState.value.gameMaster.legalActions.length, 0)
   assert.equal(blueState.value.combat.turnSeconds, 60)
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')
@@ -7209,6 +7234,61 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(redState.value.ownLoadout.machineDesign.rootInstanceId, 'core')
   assert.equal(redState.value.ownLoadout.machineDesign.parts.some((part) => part.instanceId === 'core'), true)
   assert.equal(JSON.stringify(redState.value.opponent).includes('red loadout'), false)
+})
+
+test('first combat turn clock starts after both agents fetch the combat packet', async () => {
+  const now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_first_combat_start_gate', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+  const bluePacket = await session.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(redPacket.ok, true)
+  assert.equal(bluePacket.ok, true)
+
+  const redSubmission = await confirmMachineLoadout(session, redToken, redPacket.value)
+  const blueSubmission = await confirmMachineLoadout(session, blueToken, bluePacket.value)
+
+  assert.equal(redSubmission.ok, true)
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+
+  let stored = session.exportState()
+
+  assert.equal(stored.combat.nextTick, 1)
+  assert.deepEqual(stored.combat.startGate.readyBy, {})
+  assert.equal(stored.combat.openedAt, '2026-06-03T00:02:00.000Z')
+  assert.equal(stored.combat.deadlineAt, '2026-06-03T00:03:00.000Z')
+
+  const redArrived = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redArrived.ok, true)
+  assert.equal(redArrived.value.nextAction, 'wait_for_opponent_turn')
+  assert.equal(redArrived.value.legalActions.length, 0)
+
+  stored = session.exportState()
+
+  assert.deepEqual(Object.keys(stored.combat.startGate.readyBy), ['red'])
+
+  const blueArrived = await session.getGameMasterPacketForToken(blueToken)
+
+  assert.equal(blueArrived.ok, true)
+  assert.equal(blueArrived.value.nextAction, 'choose_turn')
+  assert.equal(blueArrived.value.legalActions.length > 0, true)
+
+  stored = session.exportState()
+
+  assert.equal(stored.combat.startGate, undefined)
+  assert.equal(stored.combat.openedAt, now)
+  assert.equal(stored.combat.deadlineAt, '2026-06-03T00:01:00.000Z')
+
+  const redOpen = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redOpen.ok, true)
+  assert.equal(redOpen.value.nextAction, 'choose_turn')
+  assert.equal(redOpen.value.legalActions.length > 0, true)
 })
 
 test('session lets a combat agent surrender to resolve a stalled round', async () => {
