@@ -3331,13 +3331,16 @@ test('purchase validation rejects unknown parts and overspend', () => {
 
 test('structural filler parts are catalog-backed passive connective tissue', () => {
   const parts = new Map(PART_CATALOG.map((part) => [part.id, part]))
-  const requiredFillerIds = [
+  const connectiveFillerIds = [
     'Frame_Strut',
     'Frame_Angled_Strut',
     'Mount_Plate',
     'Mount_Weapon_Hardpoint',
     'Mount_Axle_Bracket',
     'Spacer_Block',
+  ]
+  const requiredFillerIds = [
+    ...connectiveFillerIds,
     'Armor_Tile',
     'Armor_Standoff',
     'Counterweight',
@@ -3354,6 +3357,10 @@ test('structural filler parts are catalog-backed passive connective tissue', () 
     assert.equal(part.controls, undefined)
     assert.equal(part.behavior, undefined)
     assert.equal(typeof part.visual.visualFamily, 'string')
+  }
+
+  for (const partId of connectiveFillerIds) {
+    assert.equal(parts.get(partId)?.cost, 1)
   }
 })
 
@@ -4426,10 +4433,23 @@ test('store_has_no_hidden_foundation_offers', () => {
     gold: 15,
   })
 
-  assert.deepEqual(redStore.foundationPartIds, [])
-  assert.deepEqual(blueStore.foundationPartIds, [])
-  assert.deepEqual(redStore.offeredPartIds.sort(), redStore.slots.map((slot) => slot.partId).sort())
-  assert.deepEqual(blueStore.offeredPartIds.sort(), blueStore.slots.map((slot) => slot.partId).sort())
+  assert.deepEqual(redStore.foundationPartIds, [
+    'Frame_Strut',
+    'Frame_Angled_Strut',
+    'Mount_Plate',
+    'Mount_Weapon_Hardpoint',
+    'Mount_Axle_Bracket',
+    'Spacer_Block',
+  ])
+  assert.deepEqual(blueStore.foundationPartIds, redStore.foundationPartIds)
+  assert.deepEqual(
+    redStore.offeredPartIds.sort(),
+    [...new Set([...redStore.slots.map((slot) => slot.partId), ...redStore.foundationPartIds])].sort(),
+  )
+  assert.deepEqual(
+    blueStore.offeredPartIds.sort(),
+    [...new Set([...blueStore.slots.map((slot) => slot.partId), ...blueStore.foundationPartIds])].sort(),
+  )
 })
 
 test('store_limits_rare_signature_without_minimum_viability_rails', () => {
@@ -4452,8 +4472,12 @@ test('store_limits_rare_signature_without_minimum_viability_rails', () => {
     0,
   )
 
-  assert.deepEqual(store.foundationPartIds, [])
-  assert.deepEqual(store.offeredPartIds.sort(), store.slots.map((slot) => slot.partId).sort())
+  assert.ok(store.foundationPartIds.includes('Frame_Strut'))
+  assert.ok(store.foundationPartIds.includes('Spacer_Block'))
+  assert.deepEqual(
+    store.offeredPartIds.sort(),
+    [...new Set([...store.slots.map((slot) => slot.partId), ...store.foundationPartIds])].sort(),
+  )
   assert.ok(rareSignatureSlots.length <= 1)
   assert.ok(totalRareSignatureCost <= RARE_SIGNATURE_STORE_MAX_COST)
 })
@@ -4472,10 +4496,22 @@ test('loadout_action_set_exposes_role_store_to_packet_contract', () => {
 
   assert.equal(actionSet.catalogStore?.role, 'red')
   assert.equal(actionSet.catalogStore?.slots.length, 10)
-  assert.deepEqual(actionSet.catalogStore?.foundationPartIds, [])
+  assert.deepEqual(actionSet.catalogStore?.foundationPartIds, [
+    'Frame_Strut',
+    'Frame_Angled_Strut',
+    'Mount_Plate',
+    'Mount_Weapon_Hardpoint',
+    'Mount_Axle_Bracket',
+    'Spacer_Block',
+  ])
   assert.deepEqual(
     actionSet.catalogStore?.offeredPartIds.sort(),
-    actionSet.catalogStore?.slots.map((slot) => slot.partId).sort(),
+    [
+      ...new Set([
+        ...(actionSet.catalogStore?.slots.map((slot) => slot.partId) ?? []),
+        ...(actionSet.catalogStore?.foundationPartIds ?? []),
+      ]),
+    ].sort(),
   )
 })
 

@@ -38,7 +38,7 @@ const gameMasterPacket = {
   resources: {
     gold: 100,
     remainingGold: 100,
-    partLimitRemaining: 12,
+    partLimitRemaining: 64,
   },
   legalActions: [
     {
@@ -304,6 +304,9 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   assert.ok(brief.includes('Do not use `window.AgentArenaRole` from a Custom GPT.'))
   assert.ok(brief.includes('## Browser Helper Path'))
   assert.ok(brief.includes('## Raw HTTP Fallback'))
+  assert.ok(brief.includes('The sample color is a role-specific fallback'))
+  assert.ok(brief.includes('"colorHex":"#ff4c5d"'))
+  assert.equal(brief.includes('"colorHex":"#00d6a3"'), false)
   assert.ok(brief.includes('window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: 600000 })'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
   assert.ok(brief.includes('GET https://arena-api.test/sessions/s_demo/state'))
@@ -354,6 +357,27 @@ test('external agent brief is self-contained enough to claim and submit', () => 
   ]) {
     assert.equal(brief.includes(legacyPublicName), false, legacyPublicName)
   }
+})
+
+test('external agent brief copied team identity sample color is role-distinct', () => {
+  const redBrief = createExternalAgentBriefMarkdown({
+    invite,
+    inviteUrl: createAgentInviteUrl(invite, 'https://arena.test'),
+  })
+  const blueInvite = {
+    ...invite,
+    role: 'blue',
+    claimToken: 'cap_blue',
+  }
+  const blueBrief = createExternalAgentBriefMarkdown({
+    invite: blueInvite,
+    inviteUrl: createAgentInviteUrl(blueInvite, 'https://arena.test'),
+  })
+
+  assert.ok(redBrief.includes('"colorHex":"#ff4c5d"'))
+  assert.ok(blueBrief.includes('"colorHex":"#5b9dff"'))
+  assert.equal(redBrief.includes('"colorHex":"#5b9dff"'), false)
+  assert.equal(blueBrief.includes('"colorHex":"#ff4c5d"'), false)
 })
 
 test('agent client bootstraps with invite claim token as bearer player key', async () => {

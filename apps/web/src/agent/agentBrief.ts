@@ -111,6 +111,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
 export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput): string {
   const brief = createExternalAgentBrief(input)
   const claimToken = input.invite.claimToken ?? 'not present in this sanitized URL'
+  const sampleTeamColorHex = sampleTeamIdentityColorHex(brief.role)
 
   return [
     '# Clash of Clankers role brief',
@@ -133,14 +134,14 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     'Import the Actions schema above into GPT Builder Actions. Then call only the gptClaim, gptNext, gptAct, and gptReflection operations from this path.',
     'Do not use `window.AgentArenaRole` from a Custom GPT.',
     '',
-    'Claim once with an agent-generated team identity:',
+    'Claim once with an agent-generated team identity. The sample color is a role-specific fallback; choose your own #RRGGBB color when your runtime can generate one.',
     '```json',
     JSON.stringify({
       inviteUrl: brief.inviteUrl,
       agentName: '<invent an agent name>',
       teamIdentity: {
         name: '<team name>',
-        colorHex: '#00d6a3',
+        colorHex: sampleTeamColorHex,
         logoPrompt: '<logo prompt>',
       },
     }),
@@ -271,4 +272,8 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     '',
     'Browser automation note: after opening the invite page, read script#agent-arena-state and script#agent-arena-brief, or call window.AgentArenaRole.bootstrapRole with your agentName and generated teamIdentity, waitForGameMasterPacket({ timeoutMs: 600000 }), then inspect parameterSchema and submitAction with an actionId plus parameters only when the selected action asks for them.',
   ].join('\n')
+}
+
+function sampleTeamIdentityColorHex(role: TeamRole): string {
+  return role === 'red' ? '#ff4c5d' : '#5b9dff'
 }

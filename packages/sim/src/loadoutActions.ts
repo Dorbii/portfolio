@@ -39,8 +39,16 @@ import {
 } from './mountSurfaces.js'
 
 export const LOADOUT_CATALOG_VERSION = 'part-catalog:v1'
-export const LOADOUT_PART_LIMIT = 12
+export const LOADOUT_PART_LIMIT = 64
 export const RARE_SIGNATURE_STORE_MAX_COST = 42
+export const ALWAYS_AVAILABLE_FILLER_PART_IDS = [
+  'Frame_Strut',
+  'Frame_Angled_Strut',
+  'Mount_Plate',
+  'Mount_Weapon_Hardpoint',
+  'Mount_Axle_Bracket',
+  'Spacer_Block',
+] as const
 
 const LOADOUT_ACTION_SCOPE = 'loadout_builder'
 const ROTATION_OPTIONS = [0, 90, 180, 270] as const
@@ -212,13 +220,17 @@ export type BuildCatalogStoreInput = {
 export function buildCatalogStore(input: BuildCatalogStoreInput): CatalogStoreView {
   const catalog = input.catalog ?? PART_CATALOG
   const slots = chooseStoreSlots(catalog, input)
-  const offeredPartIds = [...new Set(slots.map((slot) => slot.partId))]
+  const foundationPartIds = alwaysAvailableFillerPartIds(catalog)
+  const offeredPartIds = [...new Set([
+    ...slots.map((slot) => slot.partId),
+    ...foundationPartIds,
+  ])]
 
   return {
     id: `store.${input.seed}.r${input.round}.${input.role}`,
     seed: `${input.seed}/round-${input.round}/${input.role}`,
     role: input.role,
-    foundationPartIds: [],
+    foundationPartIds,
     slots,
     offeredPartIds,
   }
@@ -2343,6 +2355,12 @@ function chooseStoreSlots(
   })
 
   return slots
+}
+
+function alwaysAvailableFillerPartIds(catalog: PartDefinition[]): string[] {
+  const availableIds = new Set(catalog.map((part) => part.id))
+
+  return ALWAYS_AVAILABLE_FILLER_PART_IDS.filter((partId) => availableIds.has(partId))
 }
 
 function rotatingCandidates(
