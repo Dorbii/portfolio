@@ -131,8 +131,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               description: 'Exact id copied from packet.legalActions.',
             },
             parameters: {
-              type: 'object',
-              additionalProperties: true,
+              $ref: '#/components/schemas/GptActionParameters',
               description:
                 'Parameters for the selected action only when that legal action exposes parameterSchema.',
             },
@@ -142,6 +141,79 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               description: 'Optional display-only message. Do not include secrets or hidden reasoning.',
             },
           },
+        },
+        GptActionParameters: {
+          type: 'object',
+          additionalProperties: true,
+          description:
+            'Optional parameters copied from the selected legal action parameterSchema. Include only fields required by that selected action.',
+          properties: {
+            childPartId: {
+              type: 'string',
+              description: 'propose_mount_pose only: catalog part id selected by the previous loadout step.',
+            },
+            parentInstanceId: {
+              type: 'string',
+              description: 'propose_mount_pose only: parent MachineDesign instance id selected by the previous loadout step.',
+            },
+            mountSurfaceId: {
+              type: 'string',
+              description: 'propose_mount_pose only: mount surface id exposed by the selected parent instance.',
+            },
+            u: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description: 'propose_mount_pose only: normalized horizontal coordinate on the mount surface.',
+            },
+            v: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description: 'propose_mount_pose only: normalized vertical coordinate on the mount surface.',
+            },
+            yawDegrees: {
+              type: 'number',
+              description: 'propose_mount_pose only: yaw in degrees; the server normalizes degrees.',
+            },
+            rollDegrees: {
+              type: 'number',
+              description: 'propose_mount_pose only: roll in degrees; the server normalizes degrees.',
+            },
+            destinationCellId: {
+              type: 'string',
+              description: 'combat move and move_and_attack only: exact destination cell id from the selected action.',
+            },
+            targetId: {
+              type: 'string',
+              enum: ['opponent'],
+              description: 'combat attack and move_and_attack only: server-authored target id.',
+            },
+            targetCellId: {
+              type: 'string',
+              description: 'combat attack and move_and_attack only: exact target cell id from the selected action.',
+            },
+            sourceCellId: {
+              type: 'string',
+              description: 'combat utility only: exact source cell id from the selected action.',
+            },
+          },
+          examples: [
+            {
+              childPartId: 'Laser_A',
+              parentInstanceId: 'core',
+              mountSurfaceId: 'core_shell',
+              u: 0.37,
+              v: 0.82,
+              yawDegrees: 120,
+              rollDegrees: 15,
+            },
+            {
+              destinationCellId: 'cell:5:2',
+              targetId: 'opponent',
+              targetCellId: 'cell:5:6',
+            },
+          ],
         },
         GptReflectionClaims: {
           type: 'object',

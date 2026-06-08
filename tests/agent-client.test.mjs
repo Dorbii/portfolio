@@ -328,6 +328,9 @@ test('external agent brief is self-contained enough to claim and submit', () => 
     brief.indexOf('## Browser Helper Path'),
   )
   assert.ok(customGptSection.includes('"actionId":"<legalActions.id>"'))
+  assert.ok(customGptSection.includes('"actionId":"<propose_mount_pose legalActions.id>"'))
+  assert.ok(customGptSection.includes('"mountSurfaceId":"core_shell"'))
+  assert.ok(customGptSection.includes('"yawDegrees":0'))
   assert.equal(customGptSection.includes('actionSetId'), false)
   assert.equal(customGptSection.includes('decisionVersion'), false)
   assert.ok(brief.includes('Custom GPT gptAct must not send actionSetId or decisionVersion'))

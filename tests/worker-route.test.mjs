@@ -942,6 +942,21 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.ok(json.components.schemas.GptActRequest.required.includes('actionId'))
   assert.equal('actionSetId' in json.components.schemas.GptActRequest.properties, false)
   assert.equal('decisionVersion' in json.components.schemas.GptActRequest.properties, false)
+  assert.equal(
+    json.components.schemas.GptActRequest.properties.parameters.$ref,
+    '#/components/schemas/GptActionParameters',
+  )
+  const gptParameterProperties = json.components.schemas.GptActionParameters.properties
+
+  assert.ok('childPartId' in gptParameterProperties)
+  assert.ok('parentInstanceId' in gptParameterProperties)
+  assert.ok('mountSurfaceId' in gptParameterProperties)
+  assert.equal(gptParameterProperties.u.minimum, 0)
+  assert.equal(gptParameterProperties.u.maximum, 1)
+  assert.equal(gptParameterProperties.v.minimum, 0)
+  assert.equal(gptParameterProperties.v.maximum, 1)
+  assert.equal(gptParameterProperties.targetId.enum[0], 'opponent')
+  assert.ok('destinationCellId' in gptParameterProperties)
   assert.ok(json.components.schemas.GptCatalogRequest.required.includes('partIds'))
 })
 
@@ -1420,6 +1435,62 @@ test('POST /gpt/act fills GameMaster version fields from the latest packet', asy
   assert.equal(action.json.packet.buildState.step, 'choose_attach_target')
   assert.equal(stale.response.status, 409)
   assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')
+})
+
+test('POST /gpt/act submits parameterized mount pose payloads', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_act_mount_pose'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const inviteUrl = gptInviteUrl(sessionId, redInvite)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const chosePart = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: partAction.id,
+    },
+  })
+
+  assert.equal(chosePart.response.status, 200)
+  assertGptCompactPacket(chosePart.json.packet, 'red')
+  assert.equal(chosePart.json.packet.buildState.step, 'choose_attach_target')
+
+  const attachCore = findLegalAction(
+    chosePart.json.packet,
+    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
+  )
+  const attached = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: attachCore.id,
+    },
+  })
+
+  assert.equal(attached.response.status, 200)
+  assertGptCompactPacket(attached.json.packet, 'red')
+  assert.equal(attached.json.packet.buildState.step, 'propose_mount_pose')
+
+  const poseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose')
+  const placed = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: poseAction.id,
+      parameters: defaultMountPoseParameters(poseAction, {
+        mountSurfaceId: 'core_shell',
+        u: 0.5,
+        v: 0.5,
+        yawDegrees: 0,
+        rollDegrees: 0,
+      }),
+    },
+  })
+
+  assert.equal(placed.response.status, 200)
+  assert.equal(placed.json.acceptedActionId, poseAction.id)
+  assertGptCompactPacket(placed.json.packet, 'red')
+  assert.equal(placed.json.packet.buildState.step, 'choose_part')
 })
 
 test('loadout action spends gold and sets server-owned draft design', async () => {
