@@ -5,6 +5,7 @@ import {
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
   type GameMasterActionParameters,
+  type GameMasterLegalAction,
   type GameMasterPacket,
   type PartDefinition,
   type PostFightAgentReflection,
@@ -58,6 +59,8 @@ export type {
 } from './workerTypes.js'
 
 const STORAGE_KEY = 'agent-arena-session'
+const GPT_MOUNT_SLOT_ALIAS_PREFIX = 'gpt.loadout.mount'
+const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
 
 type JsonRequestReadResult =
   | {
@@ -121,6 +124,21 @@ type GptCompactPacket = {
   instruction: GameMasterPacket['instruction']
   legalActions: Array<Record<string, unknown>>
   [key: string]: unknown
+}
+
+type GptMountSlotAlias = {
+  id: string
+  kind: 'propose_mount_pose'
+  label: string
+  summary: string
+  mountSlotId: string
+  resolvesToActionId: string
+  semanticTags: string[]
+  parameters: GameMasterActionParameters
+}
+
+function isEmptyRecord(value: unknown): boolean {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0
 }
 
 export async function handleWorkerRequest(
@@ -598,7 +616,9 @@ export class AgentArenaSession {
     }
 
     const packet = packetResult.value
-    const action = packet.legalActions.find((candidate) => candidate.id === body.actionId)
+    const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
+    const action = resolvedGptAlias?.canonicalAction ??
+      packet.legalActions.find((candidate) => candidate.id === body.actionId)
 
     if (!action || !packet.actionSetId) {
       return errorResponse(
@@ -608,12 +628,18 @@ export class AgentArenaSession {
       )
     }
 
+    const shouldUseParameterExample =
+      action.parameterSchema !== undefined &&
+      action.parameterExamples?.[0] !== undefined &&
+      (body.parameters === undefined || isEmptyRecord(body.parameters))
+    const parameters = resolvedGptAlias?.alias.parameters ??
+      (shouldUseParameterExample ? action.parameterExamples?.[0] : body.parameters)
     const result = await coordinator.submitGameMasterAction(invite.value.claimToken, {
       action: 'submit_game_action',
       actionSetId: packet.actionSetId,
       decisionVersion: packet.decisionVersion,
       actionId: action.id,
-      ...(body.parameters !== undefined ? { parameters: body.parameters } : {}),
+      ...(parameters !== undefined ? { parameters } : {}),
       ...(typeof body.publicMessage === 'string' ? { publicMessage: body.publicMessage } : {}),
     })
 
@@ -624,7 +650,8 @@ export class AgentArenaSession {
             ok: true,
             value: {
               status: gptPacketStatus(result.value.packet),
-              acceptedActionId: action.id,
+              acceptedActionId: body.actionId,
+              ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
               packet: compactGptPacket(result.value.packet),
               publicState: result.value.publicState,
             },
@@ -926,6 +953,11 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
 }
 
 function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
+  const legalActions = [
+    ...packet.legalActions.map(compactGptLegalAction),
+    ...gptMountSlotAliasesForPacket(packet).map(compactGptMountSlotAlias),
+  ]
+
   return {
     sessionId: packet.sessionId,
     role: packet.role,
@@ -971,16 +1003,7 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
         }
       : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
-    legalActions: packet.legalActions.map((action) => ({
-      id: action.id,
-      kind: action.kind,
-      label: action.label,
-      summary: action.summary,
-      ...(action.requirements ? { requirements: action.requirements } : {}),
-      ...(action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
-      ...(action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
-      ...(action.preview ? { preview: action.preview } : {}),
-    })),
+    legalActions,
     ...(packet.blockedActions
       ? {
           blockedActions: packet.blockedActions.slice(0, 12).map((action) => ({
@@ -997,6 +1020,187 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
         }
       : {}),
   }
+}
+
+function compactGptLegalAction(action: GameMasterLegalAction): Record<string, unknown> {
+  return {
+    id: action.id,
+    kind: action.kind,
+    label: action.label,
+    summary: action.summary,
+    ...(action.requirements ? { requirements: action.requirements } : {}),
+    ...(action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
+    ...(action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
+    ...(action.preview ? { preview: action.preview } : {}),
+  }
+}
+
+function compactGptMountSlotAlias(alias: GptMountSlotAlias): Record<string, unknown> {
+  return {
+    id: alias.id,
+    kind: alias.kind,
+    label: alias.label,
+    summary: alias.summary,
+    mountSlotId: alias.mountSlotId,
+    resolvesToActionId: alias.resolvesToActionId,
+    semanticTags: alias.semanticTags,
+  }
+}
+
+function resolveGptMountSlotAlias(
+  packet: GameMasterPacket,
+  actionId: string,
+): { alias: GptMountSlotAlias; canonicalAction: GameMasterLegalAction } | undefined {
+  if (!actionId.startsWith(`${GPT_MOUNT_SLOT_ALIAS_PREFIX}.`)) {
+    return undefined
+  }
+
+  for (const canonicalAction of packet.legalActions) {
+    const alias = gptMountSlotAliasesForAction(canonicalAction)
+      .find((candidate) => candidate.id === actionId)
+
+    if (alias) {
+      return { alias, canonicalAction }
+    }
+  }
+
+  return undefined
+}
+
+function gptMountSlotAliasesForPacket(packet: GameMasterPacket): GptMountSlotAlias[] {
+  if (packet.buildState?.step !== 'propose_mount_pose') {
+    return []
+  }
+
+  return packet.legalActions
+    .flatMap((action) => gptMountSlotAliasesForAction(action))
+    .slice(0, GPT_MOUNT_SLOT_ALIAS_LIMIT)
+}
+
+function gptMountSlotAliasesForAction(action: GameMasterLegalAction): GptMountSlotAlias[] {
+  if (action.kind !== 'propose_mount_pose' || !Array.isArray(action.parameterExamples)) {
+    return []
+  }
+
+  const aliases: GptMountSlotAlias[] = []
+  const seenParameters = new Set<string>()
+  const canonicalToken = gptAliasToken(action.id)
+
+  for (const example of action.parameterExamples) {
+    if (aliases.length >= GPT_MOUNT_SLOT_ALIAS_LIMIT) {
+      break
+    }
+
+    const parameters = mountPoseParametersFromExample(example)
+
+    if (!parameters) {
+      continue
+    }
+
+    const parameterKey = JSON.stringify(parameters)
+
+    if (seenParameters.has(parameterKey)) {
+      continue
+    }
+
+    seenParameters.add(parameterKey)
+    const descriptor = gptMountSlotDescriptor(parameters)
+    const slotToken = gptAliasToken(`${descriptor.mountSlotId}.${aliases.length + 1}`)
+
+    aliases.push({
+      id: `${GPT_MOUNT_SLOT_ALIAS_PREFIX}.${canonicalToken}.${slotToken}`,
+      kind: 'propose_mount_pose',
+      label: descriptor.label,
+      summary: descriptor.summary,
+      mountSlotId: descriptor.mountSlotId,
+      resolvesToActionId: action.id,
+      semanticTags: descriptor.semanticTags,
+      parameters,
+    })
+  }
+
+  return aliases
+}
+
+function mountPoseParametersFromExample(value: GameMasterActionParameters): GameMasterActionParameters | undefined {
+  if (
+    typeof value.childPartId !== 'string' ||
+    typeof value.parentInstanceId !== 'string' ||
+    typeof value.mountSurfaceId !== 'string' ||
+    typeof value.u !== 'number' ||
+    typeof value.v !== 'number' ||
+    typeof value.yawDegrees !== 'number' ||
+    typeof value.rollDegrees !== 'number'
+  ) {
+    return undefined
+  }
+
+  return {
+    childPartId: value.childPartId,
+    parentInstanceId: value.parentInstanceId,
+    mountSurfaceId: value.mountSurfaceId,
+    u: value.u,
+    v: value.v,
+    yawDegrees: value.yawDegrees,
+    rollDegrees: value.rollDegrees,
+  }
+}
+
+function gptMountSlotDescriptor(parameters: GameMasterActionParameters): {
+  mountSlotId: string
+  label: string
+  summary: string
+  semanticTags: string[]
+} {
+  const u = typeof parameters.u === 'number' ? parameters.u : 0.5
+  const v = typeof parameters.v === 'number' ? parameters.v : 0.5
+  const surface = typeof parameters.mountSurfaceId === 'string' ? parameters.mountSurfaceId : 'mount_surface'
+  const surfaceLabel = surfaceLabelForGpt(surface)
+  const horizontal = u < 0.34 ? 'left' : u > 0.66 ? 'right' : 'center'
+  const vertical = v < 0.34 ? 'low' : v > 0.66 ? 'high' : 'middle'
+  const isCenter = horizontal === 'center' && vertical === 'middle'
+  const slotName = isCenter
+    ? 'center'
+    : [vertical === 'middle' ? undefined : vertical, horizontal === 'center' ? undefined : horizontal]
+      .filter(Boolean)
+      .join('-')
+  const label = isCenter
+    ? `Center mount on ${surfaceLabel}`
+    : `${titleCase(slotName)} mount on ${surfaceLabel}`
+  const summary = isCenter
+    ? `Balanced matrix slot on ${surfaceLabel}; useful when the agent wants stable, centered placement.`
+    : `Offset matrix slot on ${surfaceLabel}; useful for asymmetric contact, protection, or hazard-bait positioning.`
+
+  return {
+    mountSlotId: `${surface}.${slotName}`,
+    label,
+    summary,
+    semanticTags: ['mount_matrix', surface, isCenter ? 'balanced' : 'offset', horizontal, vertical],
+  }
+}
+
+function surfaceLabelForGpt(surfaceId: string): string {
+  return surfaceId
+    .replace(/^core[_-]?/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase()) || 'Mount Surface'
+}
+
+function titleCase(value: string): string {
+  return value
+    .split('-')
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toUpperCase() ?? ''}${part.slice(1)}`)
+    .join(' ')
+}
+
+function gptAliasToken(value: string): string {
+  return value
+    .replace(/[^a-z0-9]+/gi, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 96)
+    .toLowerCase() || 'slot'
 }
 
 function gptCatalogPartSummary(part: PartDefinition): GptCatalogPartSummary {

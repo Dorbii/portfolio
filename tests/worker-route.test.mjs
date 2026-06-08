@@ -1493,6 +1493,133 @@ test('POST /gpt/act submits parameterized mount pose payloads', async () => {
   assert.equal(placed.json.packet.buildState.step, 'choose_part')
 })
 
+test('POST /gpt/act uses legal action parameter examples when GPT omits mount pose parameters', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_act_mount_pose_fallback'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const inviteUrl = gptInviteUrl(sessionId, redInvite)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const chosePart = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: partAction.id,
+    },
+  })
+  const attachCore = findLegalAction(
+    chosePart.json.packet,
+    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
+  )
+  const attached = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: attachCore.id,
+    },
+  })
+  const poseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose')
+  const placedWithNoParameters = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: poseAction.id,
+    },
+  })
+
+  assert.equal(placedWithNoParameters.response.status, 200)
+  assert.equal(placedWithNoParameters.json.acceptedActionId, poseAction.id)
+  assertGptCompactPacket(placedWithNoParameters.json.packet, 'red')
+  assert.equal(placedWithNoParameters.json.packet.buildState.step, 'choose_part')
+})
+
+test('POST /gpt/act accepts semantic GPT mount slot aliases without parameters', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_act_mount_slot_alias'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const inviteUrl = gptInviteUrl(sessionId, redInvite)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const chosePart = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: partAction.id,
+    },
+  })
+  const attachCore = findLegalAction(
+    chosePart.json.packet,
+    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
+  )
+  const attached = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: attachCore.id,
+    },
+  })
+  const mountSlotAliases = attached.json.packet.legalActions.filter((action) =>
+    action.id.startsWith('gpt.loadout.mount.'))
+  const canonicalPoseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose' && !action.id.startsWith('gpt.'))
+
+  assert.equal(attached.response.status, 200)
+  assert.equal(mountSlotAliases.length > 0, true)
+  assert.equal(mountSlotAliases.length <= 6, true)
+  assert.ok(mountSlotAliases.some((action) => action.label.includes('Center mount')))
+  assert.ok(mountSlotAliases.every((action) => action.summary.includes('matrix slot')))
+  assert.ok(mountSlotAliases.every((action) => action.resolvesToActionId === canonicalPoseAction.id))
+  assert.ok(mountSlotAliases.every((action) => Array.isArray(action.semanticTags)))
+  assert.equal(JSON.stringify(mountSlotAliases).includes('"parameters"'), false)
+
+  const placed = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: mountSlotAliases[0].id,
+    },
+  })
+
+  assert.equal(placed.response.status, 200)
+  assert.equal(placed.json.acceptedActionId, mountSlotAliases[0].id)
+  assert.equal(placed.json.resolvedActionId, canonicalPoseAction.id)
+  assertGptCompactPacket(placed.json.packet, 'red')
+  assert.equal(placed.json.packet.buildState.step, 'choose_part')
+})
+
+test('POST /gpt/act rejects unknown GPT mount slot aliases without guessing', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_act_mount_slot_alias_unknown'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const inviteUrl = gptInviteUrl(sessionId, redInvite)
+  const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const chosePart = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: partAction.id,
+    },
+  })
+  const attachCore = findLegalAction(
+    chosePart.json.packet,
+    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
+  )
+  await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: attachCore.id,
+    },
+  })
+  const rejected = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      actionId: 'gpt.loadout.mount.unknown.front_center',
+    },
+  })
+
+  assert.equal(rejected.response.status, 409)
+  assert.equal(rejected.json.error.code, 'SUBMISSION_INVALID')
+})
+
 test('loadout action spends gold and sets server-owned draft design', async () => {
   const env = createEnv()
   const sessionId = 's_loadout_builder_mutates_design'

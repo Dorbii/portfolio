@@ -42,7 +42,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           operationId: 'gptAct',
           summary: 'Submit one legal GameMaster action id',
           description:
-            'Submit exactly one actionId copied from the latest packet. The server fills actionSetId and decisionVersion from current role state.',
+            'Submit exactly one actionId copied from the latest packet. The server fills actionSetId and decisionVersion from current role state, and can use the selected legal action parameterExamples when parameters are omitted.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -133,7 +133,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             parameters: {
               $ref: '#/components/schemas/GptActionParameters',
               description:
-                'Parameters for the selected action only when that legal action exposes parameterSchema.',
+                'Parameters for the selected action only when that legal action exposes parameterSchema. If omitted, the GPT wrapper uses the selected legal action parameterExamples when available.',
             },
             publicMessage: {
               type: 'string',

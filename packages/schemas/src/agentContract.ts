@@ -67,7 +67,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'A board cell can directly expose legal.moveHere, legal.attacksFromHere, or legal.useUtilityFromHere; use those actionId references instead of guessing movement payloads.',
         'Inspect each legal action parameterSchema before submitting. Choose exactly one id from legalActions and include parameters only when that selected action asks for them.',
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
-        'For Custom GPT /gpt/act, submit only inviteUrl, actionId, optional parameters, and optional publicMessage; the wrapper fills actionSetId and decisionVersion from current role state.',
+        'For Custom GPT /gpt/act, submit only inviteUrl, actionId, optional parameters, and optional publicMessage; the wrapper fills actionSetId and decisionVersion from current role state and uses the selected legal action parameterExamples when parameters are omitted.',
         'For browser helper or raw HTTP /sessions/:sessionId/action submissions, include the packet actionSetId and decisionVersion with the selected actionId.',
         'The server validates parameters, stale packets, forged action ids, shop rules, and budget rules before accepting a submitted action.',
         'If a submit is rejected, read error.issues; each issue contains code, path, and message explaining why the server refused it.',
@@ -155,7 +155,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         required: ['action', 'actionSetId', 'decisionVersion', 'actionId'],
         optional: ['parameters', 'publicMessage'],
         note:
-          'Agents submit an action id from the active packet plus schema-defined parameters only when the selected legal action asks for them. The server applies stored canonical action truth after validation.',
+          'Agents submit an action id from the active packet plus schema-defined parameters only when the selected legal action asks for them. Custom GPT /gpt/act can use server-authored parameterExamples when parameters are omitted. The server applies stored canonical action truth after validation.',
       },
       privateReflectionSchema: {
         action: 'submit_post_fight_reflection',
@@ -187,11 +187,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           inviteUrl:
             'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https%3A%2F%2Farena-api.dorbii.net',
           actionId: '<legalActions.id>',
-          parameters: {},
           publicMessage: 'Optional display-only message.',
         },
         returns:
-          'GPT-friendly status plus next GameMasterPacket; server fills actionSetId and decisionVersion from the latest packet',
+          'GPT-friendly status plus next GameMasterPacket; server fills actionSetId and decisionVersion from the latest packet and uses parameterExamples when Custom GPT omits parameters',
       },
       {
         name: 'gpt_reflection',
