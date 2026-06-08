@@ -71,9 +71,11 @@ export function RefereeConsole() {
     advanceRoundLabel,
     blueAgentBrief,
     blueCockpitUrl,
+    blueInviteUrl,
     canAdvanceRound,
     completionControls,
     copyAgentBrief,
+    copyInviteUrl,
     createNewSession,
     error,
     hasInviteForRole,
@@ -81,6 +83,7 @@ export function RefereeConsole() {
     publicSession,
     redAgentBrief,
     redCockpitUrl,
+    redInviteUrl,
     refreshStoredSession,
     replayError,
     replayLoadState,
@@ -136,14 +139,18 @@ export function RefereeConsole() {
             red: {
               agentBrief: redAgentBrief,
               hasInvite: hasInviteForRole('red'),
+              inviteCopyUrl: redInviteUrl,
               inviteUrl: redCockpitUrl,
               onCopyBrief: () => void copyAgentBrief(redAgentBrief),
+              onCopyInvite: () => void copyInviteUrl(redInviteUrl),
             },
             blue: {
               agentBrief: blueAgentBrief,
               hasInvite: hasInviteForRole('blue'),
+              inviteCopyUrl: blueInviteUrl,
               inviteUrl: blueCockpitUrl,
               onCopyBrief: () => void copyAgentBrief(blueAgentBrief),
+              onCopyInvite: () => void copyInviteUrl(blueInviteUrl),
             },
           }}
           sessionControl={{

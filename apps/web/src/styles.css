@@ -3484,8 +3484,8 @@ textarea:focus-visible {
 }
 
 .scoreboard-handoff-actions {
-  max-width: 330px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 430px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -4292,6 +4292,11 @@ textarea:focus-visible {
   .scoreboard-pips span {
     width: 10px;
     height: 10px;
+  }
+
+  .scoreboard-handoff-actions {
+    max-width: none;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .match-dashboard-shell .dashboard-panel {

@@ -26,8 +26,10 @@ import type { ReplayPayload } from './refereeClient'
 type TeamBannerHandoff = {
   agentBrief: string
   hasInvite: boolean
+  inviteCopyUrl: string
   inviteUrl: string
   onCopyBrief: () => Promise<void> | void
+  onCopyInvite: () => Promise<void> | void
 }
 
 type ScoreboardSessionControl = {
@@ -292,8 +294,18 @@ function ScoreboardTeam({
               <Button
                 type="button"
                 variant="ghost"
+                onClick={handoff.onCopyInvite}
+                disabled={!handoff.inviteCopyUrl}
+                title="Copy the playable agent invite URL with claim token."
+              >
+                Copy invite
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={handoff.onCopyBrief}
                 disabled={!handoff.agentBrief}
+                title="Copy the full external-agent handoff brief."
               >
                 Copy handoff
               </Button>

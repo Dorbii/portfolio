@@ -223,6 +223,14 @@ export function useRefereeConsoleController() {
       })
   }, [])
 
+  const copyInviteUrl = useCallback((inviteUrl: string) => {
+    return navigator.clipboard
+      .writeText(inviteUrl)
+      .catch(() => {
+        setError('Clipboard copy blocked. Select and copy the invite URL manually.')
+      })
+  }, [])
+
   const hasInviteForRole = useCallback(
     (role: TeamRole) => {
       return inviteListHasRole(invites, role)
@@ -233,8 +241,10 @@ export function useRefereeConsoleController() {
   const {
     blueAgentBrief,
     blueCockpitUrl,
+    blueInviteUrl,
     redAgentBrief,
     redCockpitUrl,
+    redInviteUrl,
   } = useMemo(
     () =>
       createRefereeAgentBriefs({
@@ -274,8 +284,10 @@ export function useRefereeConsoleController() {
     advanceRoundLabel,
     blueAgentBrief,
     blueCockpitUrl,
+    blueInviteUrl,
     canAdvanceRound,
     copyAgentBrief,
+    copyInviteUrl,
     createNewSession,
     completionControls: {
       canContinue,
@@ -294,6 +306,7 @@ export function useRefereeConsoleController() {
     publicSession,
     redAgentBrief,
     redCockpitUrl,
+    redInviteUrl,
     refreshStoredSession,
     replayError,
     replayLoadState,
