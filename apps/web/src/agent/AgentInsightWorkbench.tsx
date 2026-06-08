@@ -1,7 +1,5 @@
 import type {
-  AgentBoardView,
   BlueprintBlock,
-  GameMasterLegalAction,
   MachineDesign,
   MachinePartInstance,
   PartDefinition,
@@ -12,12 +10,10 @@ import type {
   ConfirmedLoadoutView,
   RolePrivateState,
 } from './agentSessionTypes.js'
-import { MetricGrid } from '../shared/ui'
 import { formatLabel } from '../shared/format'
 import { BotAssemblyScene } from './BotAssemblyScene'
 import { resolveTeamIdentity } from '../shared/teamVisuals'
 import {
-  Fact,
   PlanMetric,
   SectionTitle,
 } from './AgentCockpitPanels'
@@ -33,11 +29,12 @@ export function AgentInsightWorkbench({
 }: AgentInsightWorkbenchProps) {
   const loadout = roleState?.ownLoadout ?? null
   const blueprint = loadout?.blueprint ?? null
-  const decision = roleState?.combat?.decision
   const legalActions = roleState?.gameMaster?.legalActions ?? []
-  const boardSummary = createBoardActionSummary(roleState?.gameMaster?.board)
   const catalogById = createCatalogLookup(roleState)
   const loadoutParts = createLoadoutPartReadouts(roleState, loadout, catalogById)
+  const storeOffers = createStoreOfferReadouts(roleState, catalogById)
+  const foundationOffers = createFoundationPartReadouts(roleState, catalogById)
+  const inventoryParts = createInventoryPartReadouts(roleState, catalogById)
   const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
   const teamIdentity = roleState ? resolveTeamIdentity(role, roleState.identity) : null
@@ -61,7 +58,7 @@ export function AgentInsightWorkbench({
         <PlanMetric
           label={roleState?.phase === 'combat_turn' ? 'Board actions' : 'Actions'}
           tone={legalActions.length > 0 ? 'ok' : undefined}
-          value={formatActionMetric(roleState, legalActions, boardSummary)}
+          value={formatActionMetric(legalActions.length)}
         />
       </div>
 
@@ -90,8 +87,8 @@ export function AgentInsightWorkbench({
       ) : null}
 
       {roleState ? (
-      <div className={`insight-grid${decision ? ' has-decision' : ''}`}>
-        <section className="plan-section insight-panel" aria-labelledby="plan-read-heading">
+      <div className="insight-grid">
+        <section className="plan-section insight-panel loadout-insight-panel" aria-labelledby="plan-read-heading">
           <SectionTitle id="plan-read-heading" title="Loadout read" />
           {loadout ? (
             <>
@@ -112,60 +109,30 @@ export function AgentInsightWorkbench({
                   detail={formatUtilitySummary(roleState)}
                 />
               </div>
-              <InsightText
-                title="Loadout status"
-                text={loadout.confirmedAt ? `Confirmed at ${loadout.confirmedAt}.` : undefined}
-                fallback="This loadout has not been confirmed yet."
-              />
-              <LoadoutPartList parts={loadoutParts} />
-              <InsightText
-                fallback="Server acceptance means the action passed validation, shop, and budget rules."
-                title="Machine legality"
-                text="Server acceptance means the action passed validation, shop, and budget rules. It does not mean the machine is strategically good."
-              />
+              <div className="loadout-workbench-grid">
+                <LoadoutPartList parts={loadoutParts} />
+                <LoadoutStorePanel
+                  confirmedAt={loadout.confirmedAt}
+                  foundationParts={foundationOffers}
+                  inventoryParts={inventoryParts}
+                  storeOffers={storeOffers}
+                />
+              </div>
             </>
           ) : (
             <>
               <p className="agent-empty">
                 No confirmed loadout is available yet. That means this agent has not committed a bot for this round.
               </p>
-              {loadoutParts.length > 0 ? <LoadoutPartList parts={loadoutParts} /> : null}
+              <div className="loadout-workbench-grid">
+                {loadoutParts.length > 0 ? <LoadoutPartList parts={loadoutParts} /> : null}
+                <LoadoutStorePanel
+                  foundationParts={foundationOffers}
+                  inventoryParts={inventoryParts}
+                  storeOffers={storeOffers}
+                />
+              </div>
             </>
-          )}
-        </section>
-
-        <section className="plan-section insight-panel combat-decision-panel" aria-labelledby="decision-heading">
-          <SectionTitle id="decision-heading" title="Combat decision" />
-          {decision && roleState?.combat ? (
-            <>
-              <MetricGrid className="agent-facts">
-                <Fact label="Turn" value={String(decision.tick)} />
-                <Fact label="Range" value={`${formatLabel(decision.range.band)} / ${decision.range.distance.toFixed(2)}m`} />
-                <Fact label="Preferred" value={formatLabel(decision.range.preferred)} />
-                <Fact label="Self health" value={`${Math.round(decision.health.selfPct)}%`} />
-                <Fact label="Opponent health" value={`${Math.round(decision.health.opponentPct)}%`} />
-                <Fact label="Submitted" value={roleState.combat.submitted[roleState.role] ? 'Yes' : 'No'} />
-              </MetricGrid>
-              <DecisionReadiness state={roleState} />
-              <InsightList
-                emptyText="No tactical cues returned for this turn."
-                items={decision.tacticalCues}
-                title="Tactical cues"
-              />
-              <PacketActionSummary
-                boardSummary={boardSummary}
-                legalActions={legalActions}
-              />
-              <InsightList
-                emptyText="No grid guidance returned."
-                items={decision.movementGuidance.reasons}
-                title="Grid guidance"
-              />
-            </>
-          ) : (
-            <p className="agent-empty">
-              Combat decision context appears once both loadouts resolve and a turn is open.
-            </p>
           )}
         </section>
       </div>
@@ -203,19 +170,19 @@ type LoadoutPartReadout = {
   tone: 'neutral' | 'ok' | 'warning'
 }
 
-type BoardActionSummary = {
-  attackActionCount: number
-  gridActionIds: Set<string>
-  moveActionCount: number
-  reachableCellCount: number
-  totalCellCount: number
-  utilityActionCount: number
+type CatalogPartReadout = {
+  category: string
+  detail: string
+  id: string
+  name: string
+  quantity?: number
+  status: string
 }
 
 function LoadoutPartList({ parts }: { parts: LoadoutPartReadout[] }) {
   return (
     <div className="loadout-parts-block">
-      <strong>Loadout parts</strong>
+      <strong>Equipped loadout</strong>
       {parts.length > 0 ? (
         <ul className="loadout-part-list">
           {parts.map((part) => (
@@ -241,46 +208,72 @@ function LoadoutPartList({ parts }: { parts: LoadoutPartReadout[] }) {
   )
 }
 
-function PacketActionSummary({
-  boardSummary,
-  legalActions,
+function LoadoutStorePanel({
+  confirmedAt,
+  foundationParts,
+  inventoryParts,
+  storeOffers,
 }: {
-  boardSummary: BoardActionSummary
-  legalActions: GameMasterLegalAction[]
+  confirmedAt?: string
+  foundationParts: CatalogPartReadout[]
+  inventoryParts: CatalogPartReadout[]
+  storeOffers: CatalogPartReadout[]
 }) {
-  const directActions = legalActions.filter((action) => !boardSummary.gridActionIds.has(action.id))
-
   return (
-    <div className="packet-action-summary">
-      <strong>Action packet</strong>
-      <div className="action-summary-grid">
-        <ReadoutCard
-          detail={`${boardSummary.reachableCellCount} reachable cells`}
-          label="Board"
-          value={`${boardSummary.gridActionIds.size} grid refs`}
-        />
-        <ReadoutCard
-          detail={`${boardSummary.totalCellCount} cells in packet`}
-          label="Movement"
-          value={`${boardSummary.moveActionCount} moves`}
-        />
-        <ReadoutCard
-          detail={`${boardSummary.utilityActionCount} utility refs`}
-          label="Threats"
-          value={`${boardSummary.attackActionCount} attacks`}
-        />
+    <div className="loadout-store-panel">
+      <div className="loadout-status-card">
+        <span>Loadout status</span>
+        <strong>{confirmedAt ? 'Confirmed' : 'Building'}</strong>
+        <small>{confirmedAt ?? 'No confirmation timestamp yet'}</small>
       </div>
-      {directActions.length > 0 ? (
-        <ul className="direct-action-list" aria-label="Direct non-grid actions">
-          {directActions.slice(0, 4).map((action) => (
-            <li key={action.id}>
-              <strong>{action.label}</strong>
-              <span>{formatLabel(action.kind)}</span>
+      <CatalogPartList
+        emptyText="No active store packet is loaded for this role state."
+        parts={storeOffers}
+        title="Store offers"
+      />
+      {foundationParts.length > 0 ? (
+        <CatalogPartList
+          emptyText="No always-available store parts are loaded."
+          parts={foundationParts}
+          title="Always available"
+        />
+      ) : null}
+      <CatalogPartList
+        emptyText="No owned catalog parts are in inventory."
+        parts={inventoryParts}
+        title="Owned parts"
+      />
+    </div>
+  )
+}
+
+function CatalogPartList({
+  emptyText,
+  parts,
+  title,
+}: {
+  emptyText: string
+  parts: CatalogPartReadout[]
+  title: string
+}) {
+  return (
+    <div className="catalog-part-block">
+      <strong>{title}</strong>
+      {parts.length > 0 ? (
+        <ul className="catalog-part-list">
+          {parts.map((part) => (
+            <li key={part.id}>
+              <div>
+                <span>{part.category}</span>
+                <strong>{part.name}</strong>
+                <small>{part.detail}</small>
+              </div>
+              <em>{part.quantity ? `x${part.quantity}` : part.status}</em>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="agent-empty">All current actions are represented by board cells.</p>
+        <p className="agent-empty">{emptyText}</p>
       )}
     </div>
   )
@@ -307,101 +300,9 @@ function NoRoleStatePanel() {
     <section className="insight-empty-state" aria-labelledby="empty-state-heading">
       <SectionTitle id="empty-state-heading" title="State not loaded" />
       <p>
-        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the confirmed loadout, rationale, and combat decision context.
+        The cockpit has no private role state yet. Refresh with a valid observer or agent key; once state loads, this panel shows the confirmed loadout, store, and owned parts.
       </p>
     </section>
-  )
-}
-
-function DecisionReadiness({ state }: { state: RolePrivateState }) {
-  const decision = state.combat?.decision
-
-  if (!decision) {
-    return null
-  }
-
-  return (
-    <div className="decision-readiness">
-      <ReadinessCard
-        label="Weapon A"
-        ready={decision.actionReadiness.weaponA.canFire}
-        reason={decision.actionReadiness.weaponA.reason}
-      />
-      {decision.actionReadiness.weaponB ? (
-        <ReadinessCard
-          label="Weapon B"
-          ready={decision.actionReadiness.weaponB.canFire}
-          reason={decision.actionReadiness.weaponB.reason}
-        />
-      ) : null}
-      {decision.actionReadiness.utility ? (
-        <ReadinessCard
-          label="Utility"
-          ready={decision.actionReadiness.utility.canActivate}
-          reason={decision.actionReadiness.utility.reason}
-        />
-      ) : null}
-    </div>
-  )
-}
-
-function ReadinessCard({
-  label,
-  ready,
-  reason,
-}: {
-  label: string
-  ready: boolean
-  reason: string
-}) {
-  return (
-    <div className={`readiness-card ${ready ? 'is-ready' : 'is-waiting'}`}>
-      <span>{label}</span>
-      <strong>{ready ? 'Ready' : 'Hold'}</strong>
-      <p>{reason}</p>
-    </div>
-  )
-}
-
-function InsightText({
-  fallback,
-  text,
-  title,
-}: {
-  fallback: string
-  text?: string
-  title: string
-}) {
-  return (
-    <div className="insight-text">
-      <strong>{title}</strong>
-      <p>{text?.trim() || fallback}</p>
-    </div>
-  )
-}
-
-function InsightList({
-  emptyText,
-  items,
-  title,
-}: {
-  emptyText: string
-  items: string[]
-  title: string
-}) {
-  return (
-    <div className="insight-list-block">
-      <strong>{title}</strong>
-      {items.length > 0 ? (
-        <ul className="insight-list">
-          {items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      ) : (
-        <p className="agent-empty">{emptyText}</p>
-      )}
-    </div>
   )
 }
 
@@ -422,16 +323,8 @@ function formatUtilitySummary(state: RolePrivateState): string {
   return state.controls?.utility ? 'Utility command available' : 'No utility command'
 }
 
-function formatActionMetric(
-  state: RolePrivateState | null,
-  legalActions: GameMasterLegalAction[],
-  boardSummary: BoardActionSummary,
-): string {
-  if (state?.phase === 'combat_turn' && boardSummary.gridActionIds.size > 0) {
-    return `${boardSummary.gridActionIds.size} grid refs`
-  }
-
-  return legalActions.length > 0 ? `${legalActions.length} legal` : 'No actions'
+function formatActionMetric(legalActionCount: number): string {
+  return legalActionCount > 0 ? `${legalActionCount} legal` : 'No actions'
 }
 
 function createCatalogLookup(state: RolePrivateState | null): Map<string, PartDefinition> {
@@ -460,6 +353,73 @@ function createLoadoutPartReadouts(
   }
 
   return (loadout?.blueprint.blocks ?? []).map((block) => blueprintBlockReadout(block, state, catalogById))
+}
+
+function createStoreOfferReadouts(
+  state: RolePrivateState | null,
+  catalogById: Map<string, PartDefinition>,
+): CatalogPartReadout[] {
+  return (state?.gameMaster?.store?.slots ?? []).map((slot) =>
+    catalogPartReadout({
+      catalogById,
+      id: slot.id,
+      partId: slot.partId,
+      status: formatCatalogLabel(slot.kind),
+    }))
+}
+
+function createFoundationPartReadouts(
+  state: RolePrivateState | null,
+  catalogById: Map<string, PartDefinition>,
+): CatalogPartReadout[] {
+  return (state?.gameMaster?.store?.foundationPartIds ?? []).map((partId) =>
+    catalogPartReadout({
+      catalogById,
+      id: `foundation.${partId}`,
+      partId,
+      status: 'Foundation',
+    }))
+}
+
+function createInventoryPartReadouts(
+  state: RolePrivateState | null,
+  catalogById: Map<string, PartDefinition>,
+): CatalogPartReadout[] {
+  return (state?.inventory ?? [])
+    .filter((item) => item.quantity > 0)
+    .map((item) =>
+      catalogPartReadout({
+        catalogById,
+        id: `inventory.${item.partId}`,
+        partId: item.partId,
+        quantity: item.quantity,
+        status: 'Owned',
+      }))
+}
+
+function catalogPartReadout({
+  catalogById,
+  id,
+  partId,
+  quantity,
+  status,
+}: {
+  catalogById: Map<string, PartDefinition>
+  id: string
+  partId: string
+  quantity?: number
+  status: string
+}): CatalogPartReadout {
+  const definition = catalogById.get(partId)
+
+  return {
+    category: definition ? formatCatalogLabel(definition.category) : formatCatalogLabel(status),
+    detail: formatPartDetail(definition, undefined),
+    id,
+    name: definition?.displayName ?? formatCatalogLabel(partId),
+    ...(quantity ? { quantity } : {}),
+    status,
+  }
 }
 
 function machinePartReadout(
@@ -506,40 +466,6 @@ function blueprintBlockReadout(
     status: status.label,
     tone: status.tone,
   }
-}
-
-function createBoardActionSummary(board: AgentBoardView | undefined): BoardActionSummary {
-  const summary: BoardActionSummary = {
-    attackActionCount: 0,
-    gridActionIds: new Set(),
-    moveActionCount: 0,
-    reachableCellCount: 0,
-    totalCellCount: board?.cells?.length ?? 0,
-    utilityActionCount: 0,
-  }
-
-  for (const cell of board?.cells ?? []) {
-    if (cell.reachable) {
-      summary.reachableCellCount += 1
-    }
-
-    if (cell.legal?.moveHere) {
-      summary.gridActionIds.add(cell.legal.moveHere.actionId)
-      summary.moveActionCount += 1
-    }
-
-    for (const attack of cell.legal?.attacksFromHere ?? []) {
-      summary.gridActionIds.add(attack.actionId)
-      summary.attackActionCount += 1
-    }
-
-    if (cell.legal?.useUtilityFromHere) {
-      summary.gridActionIds.add(cell.legal.useUtilityFromHere.actionId)
-      summary.utilityActionCount += 1
-    }
-  }
-
-  return summary
 }
 
 function formatPartDetail(definition: PartDefinition | undefined, health: number | undefined): string {

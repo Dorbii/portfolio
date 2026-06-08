@@ -2774,18 +2774,18 @@ textarea:focus-visible {
 .insight-grid {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: minmax(260px, 0.88fr) minmax(300px, 1.12fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
-}
-
-.insight-grid.has-decision {
-  grid-template-columns: minmax(250px, 0.74fr) minmax(320px, 1.26fr);
 }
 
 .insight-panel {
   min-width: 0;
   display: grid;
   gap: 5px;
+}
+
+.loadout-insight-panel {
+  min-height: 0;
 }
 
 .insight-readout-grid {
@@ -2835,22 +2835,36 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.loadout-workbench-grid {
+  min-width: 0;
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.25fr) minmax(280px, 0.75fr);
+  gap: 10px;
+  align-items: start;
+}
+
 .loadout-parts-block,
-.packet-action-summary {
+.loadout-store-panel {
   min-width: 0;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(238, 242, 247, 0.08);
 }
 
-.loadout-part-list {
-  max-height: clamp(180px, 28vh, 320px);
+.loadout-part-list,
+.catalog-part-list {
+  min-width: 0;
   margin: 8px 0 0;
   padding: 0;
   display: grid;
   gap: 7px;
-  overflow: auto;
   list-style: none;
+}
+
+.loadout-part-list {
+  max-height: clamp(260px, 44vh, 560px);
+  overflow: auto;
 }
 
 .loadout-part-card {
@@ -2943,93 +2957,54 @@ textarea:focus-visible {
   line-height: 1.35;
 }
 
-.action-summary-grid {
-  margin-top: 8px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.direct-action-list {
-  margin: 8px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-  list-style: none;
-}
-
-.direct-action-list li {
+.loadout-status-card {
   min-width: 0;
-  padding: 7px 8px;
+  padding: 9px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  border: 1px solid rgba(238, 242, 247, 0.09);
-  border-radius: 6px;
-  background: rgba(5, 9, 12, 0.62);
+  gap: 4px;
+  border: 1px solid rgba(var(--cockpit-team), 0.2);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-team), 0.07), rgba(var(--cockpit-team), 0.014)),
+    rgba(5, 9, 12, 0.64);
 }
 
-.direct-action-list strong,
-.direct-action-list span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.direct-action-list strong {
-  color: #d8dedf;
-  font-size: 0.8rem;
-}
-
-.direct-action-list span {
-  color: #8fa3a3;
-  font-size: 0.64rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.combat-decision-panel {
-  grid-row: span 2;
-}
-
-.insight-text {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(238, 242, 247, 0.08);
-}
-
-.insight-text strong,
-.insight-list-block > strong,
-.loadout-parts-block > strong,
-.packet-action-summary > strong {
+.loadout-status-card span,
+.catalog-part-block > strong,
+.loadout-parts-block > strong {
   color: #8fa3a3;
   font-size: 0.66rem;
   font-weight: 950;
   text-transform: uppercase;
 }
 
-.insight-text p {
-  margin: 5px 0 0;
-  color: #d8dedf;
-  font-size: 0.86rem;
-  line-height: 1.45;
+.loadout-status-card strong {
+  color: #eef2f3;
+  font-size: 0.9rem;
 }
 
-.insight-list {
-  margin: 10px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 7px;
-  list-style: none;
+.loadout-status-card small {
+  min-width: 0;
+  overflow: hidden;
+  color: #aeb7c1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.insight-list li {
+.catalog-part-block {
+  min-width: 0;
+  margin-top: 10px;
+}
+
+.catalog-part-list li {
   min-width: 0;
   padding: 8px;
   display: grid;
-  gap: 3px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
   border: 1px solid rgba(238, 242, 247, 0.09);
   border-radius: 6px;
   background:
@@ -3037,58 +3012,58 @@ textarea:focus-visible {
     rgba(5, 9, 12, 0.62);
 }
 
-.insight-list li {
-  color: #d8dedf;
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.decision-readiness {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.readiness-card {
+.catalog-part-list li div {
   min-width: 0;
-  min-height: 78px;
-  padding: 8px;
   display: grid;
-  gap: 4px;
-  align-content: start;
-  border: 1px solid rgba(238, 242, 247, 0.1);
-  border-radius: 6px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 247, 0.042), rgba(238, 242, 247, 0.012)),
-    rgba(5, 9, 12, 0.7);
+  gap: 3px;
 }
 
-.readiness-card.is-ready {
-  border-color: rgba(93, 210, 146, 0.32);
+.catalog-part-list span,
+.catalog-part-list small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.readiness-card.is-waiting {
-  border-color: rgba(247, 184, 75, 0.28);
-}
-
-.readiness-card span {
+.catalog-part-list span {
   color: #8fa3a3;
   font-size: 0.62rem;
   font-weight: 950;
   text-transform: uppercase;
 }
 
-.readiness-card strong {
+.catalog-part-list strong {
+  min-width: 0;
+  overflow: hidden;
   color: #eef2f3;
   font-size: 0.86rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.readiness-card p {
-  margin: 0;
-  color: #b6c1c3;
-  font-size: 0.72rem;
-  line-height: 1.35;
+.catalog-part-list small {
+  color: #aeb7c1;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.catalog-part-list em {
+  width: fit-content;
+  max-width: 96px;
+  padding: 3px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--cockpit-team), 0.24);
+  border-radius: 999px;
+  color: #d8dedf;
+  background: rgba(var(--cockpit-team), 0.07);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 @media (max-width: 1180px) {
@@ -3128,7 +3103,8 @@ textarea:focus-visible {
   .agent-command-header,
   .agent-task-panel,
   .agent-cockpit-layout,
-  .insight-grid {
+  .insight-grid,
+  .loadout-workbench-grid {
     grid-template-columns: 1fr;
   }
 
@@ -3203,15 +3179,13 @@ textarea:focus-visible {
     grid-column: 1 / -1;
   }
 
-  .workbench-header,
-  .decision-readiness {
+  .workbench-header {
     grid-template-columns: 1fr;
   }
 
   .plan-metric-strip,
   .agent-task-list,
   .cockpit-signal-grid,
-  .action-summary-grid,
   .insight-readout-grid {
     grid-template-columns: 1fr 1fr;
   }

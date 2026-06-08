@@ -149,6 +149,7 @@ type GptBoardLegalActionRef = NonNullable<GptBoardLegalView['moveHere']>
 type GptBoardAttackRef = NonNullable<GptBoardLegalView['attacksFromHere']>[number]
 type GptBoardPose = NonNullable<GptBoardView['reachablePoses']>[number]
 type GptBoardTarget = NonNullable<GptBoardView['attackableTargets']>[number]
+type GptActionPreview = NonNullable<GameMasterLegalAction['preview']>
 
 function isEmptyRecord(value: unknown): boolean {
   return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0
@@ -669,7 +670,6 @@ export class AgentArenaSession {
               ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
               packet: compactGptPacket(result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
-              publicState: result.value.publicState,
             },
           }
         : result,
@@ -978,6 +978,9 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
       })),
     ...mountSlotAliases.map(compactGptMountSlotAlias),
   ]
+  const compactBoard = packet.board && (packet.legalActions.length > 0 || packet.nextAction === 'choose_turn')
+    ? compactGptBoard(packet.board)
+    : undefined
 
   return {
     sessionId: packet.sessionId,
@@ -1011,11 +1014,7 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
           },
         }
       : {}),
-    ...(packet.board
-      ? {
-          board: compactGptBoard(packet.board),
-        }
-      : {}),
+    ...(compactBoard && Object.keys(compactBoard).length > 0 ? { board: compactBoard } : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
     legalActions,
     ...(packet.blockedActions
@@ -1180,7 +1179,22 @@ function compactGptLegalAction(
     ...(action.requirements ? { requirements: action.requirements } : {}),
     ...(!options.omitParameterDetails && action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
     ...(!options.omitParameterDetails && action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
-    ...(action.preview ? { preview: action.preview } : {}),
+    ...(action.preview ? { preview: compactGptActionPreview(action.preview) } : {}),
+  }
+}
+
+function compactGptActionPreview(preview: GptActionPreview): Record<string, unknown> {
+  return {
+    basis: preview.basis,
+    outcome: preview.outcome,
+    ...(preview.finalPose ? { finalPose: preview.finalPose } : {}),
+    ...(preview.target ? { target: preview.target } : {}),
+    ...(typeof preview.currentLineOfSight === 'boolean' ? { currentLineOfSight: preview.currentLineOfSight } : {}),
+    ...(typeof preview.expectedRangeIfOpponentHolds === 'number'
+      ? { expectedRangeIfOpponentHolds: preview.expectedRangeIfOpponentHolds }
+      : {}),
+    ...(typeof preview.hazardExposure === 'number' ? { hazardExposure: preview.hazardExposure } : {}),
+    ...(preview.riskTags?.length ? { riskTags: preview.riskTags.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) } : {}),
   }
 }
 
