@@ -7426,7 +7426,7 @@ test('session delays the next combat action packet after a resolved turn', async
   assert.notEqual(openPacket.value.submit, undefined)
 })
 
-test('session consumes queued GPT combat plan steps after the handoff delay opens', async () => {
+test('session maps GPT combat_plan into lockstep round plans and stages the next round after both submit', async () => {
   let now = '2026-06-03T00:00:00.000Z'
   const session = await createTestSession('s_gpt_combat_plan_queue', {
     clock: () => now,
@@ -7472,6 +7472,14 @@ test('session consumes queued GPT combat plan steps after the handoff delay open
       { actionId: 'hold' },
     ],
   })
+  const redWaitingState = loaded.exportState()
+
+  assert.equal(redPlan.ok, true)
+  assert.equal(redPlan.value.submittedPlan.steps.length, 1)
+  assert.deepEqual(redPlan.value.submittedPlan.steps[0], { kind: 'end_turn' })
+  assert.equal(redWaitingState.combat.submittedPlans.red.steps.length, 1)
+  assert.equal(redWaitingState.combat.submittedPlans.blue, undefined)
+
   const bluePlan = await loaded.submitGptCombatPlan(blueToken, {
     steps: [
       { actionId: 'hold' },
@@ -7479,23 +7487,78 @@ test('session consumes queued GPT combat plan steps after the handoff delay open
     ],
   })
 
-  assert.equal(redPlan.ok, true)
   assert.equal(bluePlan.ok, true)
+  assert.equal(bluePlan.value.submittedPlan.steps.length, 1)
 
   let queuedState = loaded.exportState()
 
+  assert.equal(queuedState.combat.mode, 'lockstep_round_plan')
   assert.equal(queuedState.combat.nextTick, 2)
   assert.equal(queuedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
-  assert.equal(queuedState.combat.plans.red.length, 1)
-  assert.equal(queuedState.combat.plans.blue.length, 1)
+  assert.equal(queuedState.combat.plans, undefined)
+  assert.equal(queuedState.combat.submittedPlans, undefined)
+  assert.equal(queuedState.combat.planConsumption.red.endedBy, 'end_turn')
+  assert.equal(queuedState.combat.planConsumption.blue.endedBy, 'end_turn')
 
   now = '2026-06-03T00:00:10.000Z'
-  loaded.getPublicState()
+  const openPacket = await loaded.getGameMasterPacketForToken(redToken)
   queuedState = loaded.exportState()
 
-  assert.equal(queuedState.combat.nextTick, 3)
-  assert.equal(queuedState.combat.plans, undefined)
-  assert.equal(queuedState.combat.openedAt, '2026-06-03T00:00:20.000Z')
+  assert.equal(openPacket.ok, true)
+  assert.equal(openPacket.value.nextAction, 'choose_turn')
+  assert.equal(openPacket.value.combat.submitted, false)
+  assert.equal(openPacket.value.submit.path.endsWith('/combat-plan'), true)
+  assert.equal(queuedState.combat.nextTick, 2)
+})
+
+
+test('session accepts direct CombatRoundPlan submissions without legacy canonical combat actions', async () => {
+  const now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_direct_combat_round_plan', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+  assert.equal(redPacket.value.phase, 'combat_turn')
+  assert.equal(redPacket.value.nextAction, 'choose_turn')
+  assert.equal(redPacket.value.submit.path.endsWith('/combat-plan'), true)
+  assert.equal(redPacket.value.combat.submitted, false)
+  assert.equal(typeof redPacket.value.board.ascii, 'string')
+  assert.ok(redPacket.value.board.reachableCells.length > 0)
+
+  const redPlan = await session.submitCombatRoundPlan(redToken, {
+    action: 'submit_combat_round_plan',
+    round: redPacket.value.combat.round,
+    decisionVersion: redPacket.value.combat.decisionVersion,
+    steps: [{ kind: 'end_turn' }],
+  })
+
+  assert.equal(redPlan.ok, true)
+  assert.equal(redPlan.value.submittedPlan.role, 'red')
+  assert.deepEqual(redPlan.value.submittedPlan.steps, [{ kind: 'end_turn' }])
+
+  const redWaiting = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redWaiting.ok, true)
+  assert.equal(redWaiting.value.nextAction, 'wait_for_opponent_turn')
+  assert.equal(redWaiting.value.legalActions.length, 0)
+  assert.equal(redWaiting.value.combat.submitted, true)
+  assert.equal(redWaiting.value.submit, undefined)
+
+  const bluePlan = await session.submitCombatRoundPlan(blueToken, {
+    action: 'submit_combat_round_plan',
+    round: redPacket.value.combat.round,
+    decisionVersion: redPacket.value.combat.decisionVersion,
+    steps: [{ kind: 'end_turn' }],
+  })
+
+  assert.equal(bluePlan.ok, true)
+  assert.equal(session.exportState().combat.nextTick, 2)
 })
 
 test('session auto-confirms current loadouts when loadout window expires', async () => {

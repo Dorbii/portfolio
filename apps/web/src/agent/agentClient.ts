@@ -1,7 +1,8 @@
 import type {
   AgentBootstrapResponse,
-  GameMasterActionPostRequest,
+  CombatRoundPlanSubmission,
   GameMasterActionResponse,
+  GameMasterActionSubmission,
   GameMasterPacket,
   PostFightReflectionPostRequest,
   PostFightReflectionResponse,
@@ -226,12 +227,16 @@ function hasNextPlayablePacket(
     return true
   }
 
+  if (packet.phase === 'combat_turn' && packet.combat && !packet.combat.submitted) {
+    return true
+  }
+
   return options.requireLegalActions === false || packet.legalActions.length > 0
 }
 
 function exactGameMasterActionBody(
-  input: GameMasterActionPostRequest,
-): GameMasterActionPostRequest {
+  input: GameMasterActionSubmission,
+): GameMasterActionSubmission {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     throw new AgentArenaApiError({
       status: 400,
@@ -262,6 +267,26 @@ function exactGameMasterActionBody(
     decisionVersion: input.decisionVersion,
     actionId: input.actionId,
     ...(input.parameters !== undefined ? { parameters: input.parameters } : {}),
+    ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
+  }
+}
+
+function exactCombatRoundPlanBody(
+  input: CombatRoundPlanSubmission,
+): CombatRoundPlanSubmission {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message: 'submitCombatPlan expects a CombatRoundPlanSubmission object.',
+    })
+  }
+
+  return {
+    action: 'submit_combat_round_plan',
+    decisionVersion: input.decisionVersion,
+    round: input.round,
+    steps: input.steps.map((step) => ({ ...step })),
     ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
   }
 }
@@ -369,7 +394,7 @@ export class AgentArenaClient {
   }
 
   async submitAction(
-    submission: GameMasterActionPostRequest,
+    submission: GameMasterActionSubmission,
   ): Promise<GameMasterActionResponse> {
     return this.requestJson<GameMasterActionResponse>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/action`,
@@ -377,6 +402,19 @@ export class AgentArenaClient {
         method: 'POST',
         headers: this.authorizationHeaders(),
         body: JSON.stringify(exactGameMasterActionBody(submission)),
+      },
+    )
+  }
+
+  async submitCombatPlan(
+    submission: CombatRoundPlanSubmission,
+  ): Promise<GameMasterActionResponse> {
+    return this.requestJson<GameMasterActionResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/combat-plan`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(),
+        body: JSON.stringify(exactCombatRoundPlanBody(submission)),
       },
     )
   }

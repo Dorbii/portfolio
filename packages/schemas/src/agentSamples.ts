@@ -1,4 +1,5 @@
 import type {
+  CombatRoundPlanSubmission,
   GameMasterActionSubmission,
   GameMasterPacket,
 } from './types.js'
@@ -236,5 +237,127 @@ export function createExampleMountPoseActionSubmission(): GameMasterActionSubmis
       yawDegrees: 120,
       rollDegrees: 15,
     },
+  }
+}
+
+export function createExampleCombatRoundPacket(): GameMasterPacket {
+  return {
+    sessionId: 's_example',
+    role: 'red',
+    phase: 'combat_turn',
+    nextAction: 'choose_turn',
+    round: 3,
+    fightId: 'fight_3',
+    turnId: 'turn_4',
+    decisionVersion: 3204,
+    eventVersion: 44,
+    instruction:
+      'Submit one combat round plan using packet.combat.budget, packet.board.ascii, reachableCells, attackableCells, and utilityOptions.',
+    resources: {
+      gold: 7,
+      remainingGold: 7,
+      partLimitRemaining: 0,
+    },
+    catalog: {
+      version: 'part-catalog:v1',
+      parts: [],
+    },
+    combat: {
+      round: 3,
+      decisionVersion: 3204,
+      deadlineAt: '2026-06-09T14:30:00.000Z',
+      submitted: false,
+      opponentSubmitted: false,
+      budget: {
+        movement: 9,
+        actionTime: 9,
+        weaponCooldowns: {
+          weaponA: 0,
+          weaponB: 1,
+        },
+      },
+      self: {
+        hp: 72,
+        maxHp: 100,
+        mass: 44,
+        drive: 9,
+        weaponReach: 4,
+        anchor: { x: 3, z: 0 },
+      },
+      opponent: {
+        hp: 25,
+        maxHp: 90,
+        mass: 37,
+        drive: 6,
+        weaponReach: 2,
+        anchor: { x: 5, z: 0 },
+      },
+    },
+    board: {
+      arena: {
+        name: 'Compact Box',
+        width: 12,
+        height: 8,
+        activeHazards: ['floor_saw'],
+      },
+      grid: {
+        cellSize: 1,
+        xMin: -6,
+        xMax: 6,
+        zMin: -4,
+        zMax: 4,
+      },
+      self: {
+        anchor: { x: 3, z: 0 },
+        facing: 'east',
+      },
+      opponent: {
+        anchor: { x: 5, z: 0 },
+        facing: 'west',
+      },
+      blockedCells: [],
+      hazardCells: [{ x: 4, z: 0 }],
+      ascii: '.............\n.............\n.............\n.........+...\n.........S!O.\n.........+...\n.............\n.............\n.............',
+      reachableCells: [
+        { cellId: 'cell:4:0', x: 4, z: 0, moveCost: 1, movementRemaining: 8, hazard: true, hazardIds: ['floor_saw'] },
+        { cellId: 'cell:3:1', x: 3, z: 1, moveCost: 1, movementRemaining: 8, hazard: false },
+      ],
+      attackableCells: [
+        { cellId: 'cell:5:0', x: 5, z: 0, weaponSlot: 'weaponA', range: 4, distance: 2, actionTimeCost: 1 },
+      ],
+      utilityOptions: [],
+      cells: [],
+      reachablePoses: [],
+      attackableTargets: [],
+    },
+    legalActions: [],
+    submit: {
+      method: 'POST',
+      path: '/sessions/:sessionId/combat-plan',
+      body: {
+        action: 'submit_combat_round_plan',
+        decisionVersion: 3204,
+        round: 3,
+        steps: [
+          { kind: 'move', cellId: 'cell:4:0' },
+          { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:5:0' },
+          { kind: 'end_turn' },
+        ],
+      },
+    },
+  }
+}
+
+export function createExampleCombatRoundPlanSubmission(): CombatRoundPlanSubmission {
+  return {
+    action: 'submit_combat_round_plan',
+    decisionVersion: 3204,
+    round: 3,
+    steps: [
+      { kind: 'move', cellId: 'cell:4:0' },
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:5:0' },
+      { kind: 'end_turn' },
+    ],
+    publicMessage: 'Taking the lane and forcing contact.',
   }
 }

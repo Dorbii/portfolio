@@ -51,10 +51,19 @@ export function buildRolePrivateState(
             openedAt: state.combat.openedAt,
             deadlineAt: state.combat.deadlineAt,
             turnSeconds: state.combat.turnSeconds,
+            roundSeconds: state.combat.roundSeconds,
+            decisionVersion: state.combat.decisionVersion,
             submitted: {
-              red: Boolean(state.combat.pending.red),
-              blue: Boolean(state.combat.pending.blue),
+              red: Boolean(state.combat.submittedPlans?.red ?? state.combat.pending.red),
+              blue: Boolean(state.combat.submittedPlans?.blue ?? state.combat.pending.blue),
             },
+            mode: state.combat.mode,
+            budgets: state.combat.budgets,
+            submittedPlans: state.combat.submittedPlans,
+            planConsumption: state.combat.planConsumption,
+            lockstepEvents: state.combat.lockstepEvents,
+            lockstepLog: state.combat.lockstepLog,
+            elapsedSubsteps: state.combat.elapsedSubsteps,
             snapshot: state.combat.snapshot,
             self: role.role === 'red' ? state.combat.snapshot.red : state.combat.snapshot.blue,
             opponent: role.role === 'red' ? state.combat.snapshot.blue : state.combat.snapshot.red,
@@ -140,10 +149,15 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
             openedAt: state.combat.openedAt,
             deadlineAt: state.combat.deadlineAt,
             turnSeconds: state.combat.turnSeconds,
+            roundSeconds: state.combat.roundSeconds,
+            decisionVersion: state.combat.decisionVersion,
             submitted: {
-              red: Boolean(state.combat.pending.red),
-              blue: Boolean(state.combat.pending.blue),
+              red: Boolean(state.combat.submittedPlans?.red ?? state.combat.pending.red),
+              blue: Boolean(state.combat.submittedPlans?.blue ?? state.combat.pending.blue),
             },
+            mode: state.combat.mode,
+            budgets: state.combat.budgets,
+            planConsumption: state.combat.planConsumption,
           },
         }
       : {}),
@@ -165,8 +179,8 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.roles.blue.loadoutConfirmedAt ? 'blue-loadout-confirmed' : 'blue-loadout-open',
     state.roundPlan ? `loadout-window-${state.roundPlan.deadlineAt}` : 'loadout-window-none',
     state.combat ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}` : 'combat-none',
-    state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
-    state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',
+    state.combat?.submittedPlans?.red || state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
+    state.combat?.submittedPlans?.blue || state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',
     state.eventLog.length,
     state.chatLog.length,
     state.reflections?.length ?? 0,
@@ -215,7 +229,7 @@ function buildGameMasterPublicSummary(
 
     summaries[roleName] = {
       phase: activeSet.phase,
-      nextAction: state.lockedActions?.[roleName]
+      nextAction: state.lockedActions?.[roleName] || state.combat?.submittedPlans?.[roleName]
         ? nextActionAfterLock(activeSet.phase)
         : nextActionForPhase(activeSet.phase),
       decisionVersion: activeSet.decisionVersion,

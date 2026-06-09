@@ -5,6 +5,9 @@ import type {
   CanonicalGameAction,
   ChampionContinuationSave,
   ChampionContinuationSeed,
+  CombatBudget,
+  CombatRoundPlan,
+  CombatPlanConsumptionSummary,
   CombatTurnSnapshot,
   GameMasterActionSubmission,
   GeneratedControls,
@@ -12,6 +15,7 @@ import type {
   LoadoutBuildState,
   FightDossier,
   MachineDesign,
+  MachineRuntimeState,
   RelayErrorResponse,
   SessionPhase,
   SharedDebrief,
@@ -26,6 +30,7 @@ import type {
   LegacySessionLogEvent,
   LegacyTeamIdentity,
 } from './sessionLegacyContracts.js'
+import type { ReplayEvent } from '../../../packages/replay/src/index.js'
 
 export type TokenKind = 'claim' | 'observer' | 'role' | 'referee'
 export type TokenOwner = TeamRole | 'referee'
@@ -87,18 +92,35 @@ export type StoredPostFightReflection = {
 }
 
 export type StoredCombatState = {
+  /**
+   * Legacy tick index retained for old packets/tests. In lockstep mode this is the
+   * current combat round-plan index.
+   */
   nextTick: number
+  mode?: 'legacy_tick_actions' | 'lockstep_round_plan'
   openedAt: string
   deadlineAt: string
   turnSeconds: number
+  roundSeconds?: number
+  decisionVersion?: number
   startGate?: {
     readyBy: Partial<Record<TeamRole, string>>
     graceDeadlineAt: string
   }
   baselineMachineDesigns?: Partial<Record<TeamRole, MachineDesign>>
+  /** Legacy one-canonical-action-per-tick history. Kept until the UI/tests are fully migrated. */
   actions: Record<TeamRole, CanonicalGameAction[]>
+  /** Legacy pending canonical actions. Not authoritative in lockstep mode. */
   pending: Partial<Record<TeamRole, CanonicalGameAction>>
+  /** Legacy GPT semantic queue. Superseded by submittedPlans. */
   plans?: Partial<Record<TeamRole, StoredCombatPlanStep[]>>
+  budgets?: Partial<Record<TeamRole, CombatBudget>>
+  submittedPlans?: Partial<Record<TeamRole, CombatRoundPlan>>
+  planConsumption?: Partial<Record<TeamRole, CombatPlanConsumptionSummary>>
+  lockstepEvents?: ReplayEvent[]
+  lockstepLog?: string[]
+  elapsedSubsteps?: number
+  machineRuntime?: Partial<Record<TeamRole, MachineRuntimeState>>
   snapshot: CombatTurnSnapshot
 }
 

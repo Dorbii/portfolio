@@ -1,7 +1,8 @@
 import type {
   AgentBootstrapResponse,
-  GameMasterActionPostRequest,
+  CombatRoundPlanSubmission,
   GameMasterActionResponse,
+  GameMasterActionSubmission,
   GameMasterPacket,
   PostFightReflectionPostRequest,
   PostFightReflectionResponse,
@@ -24,6 +25,7 @@ export type AgentArenaRoleClient = {
   getState: AgentArenaRoleApi['getState']
   sendChatMessage?: AgentArenaRoleApi['sendChatMessage']
   submitAction: AgentArenaRoleApi['submitAction']
+  submitCombatPlan?: AgentArenaRoleApi['submitCombatPlan']
   submitChatMessage?: (
     input: AgentChatMessagePostRequest | string,
   ) => Promise<AgentChatMessageResponse>
@@ -59,7 +61,18 @@ export function getValidAgentActions(
       ...(state
         ? state.gameMaster?.legalActions.length
           ? {}
-          : { reason: 'The current GameMasterPacket has no legalActions to submit.' }
+          : { reason: 'The current GameMasterPacket has no legacy legalActions to submit.' }
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
+      name: 'submit_combat_round_plan',
+      available: Boolean(state?.gameMaster?.combat && !state.gameMaster.combat.submitted),
+      ...(state
+        ? state.gameMaster?.combat
+          ? state.gameMaster.combat.submitted
+            ? { reason: 'A combat round plan is already submitted for this round.' }
+            : {}
+          : { reason: 'The current GameMasterPacket is not a lockstep combat planning packet.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
@@ -89,7 +102,10 @@ export type AgentArenaRoleApiOptions = {
     input: AgentChatMessagePostRequest | string,
   ) => Promise<AgentChatMessageResponse>
   submitAction?: (
-    submission: GameMasterActionPostRequest,
+    submission: GameMasterActionSubmission,
+  ) => Promise<GameMasterActionResponse>
+  submitCombatPlan?: (
+    submission: CombatRoundPlanSubmission,
   ) => Promise<GameMasterActionResponse>
   submitPostFightReflection?: (
     reflection: PostFightReflectionPostRequest,
@@ -110,6 +126,10 @@ export function createAgentArenaRoleApi(
         client.waitForGameMasterPacket(waitOptions),
     submitAction: (submission) =>
       options.submitAction?.(submission) ?? client.submitAction(submission),
+    submitCombatPlan: (submission) =>
+      options.submitCombatPlan?.(submission) ??
+        client.submitCombatPlan?.(submission) ??
+        Promise.reject(new Error('submitCombatPlan is unavailable for this client.')),
     submitPostFightReflection: (reflection) =>
       options.submitPostFightReflection?.(reflection) ??
         client.submitPostFightReflection(reflection),

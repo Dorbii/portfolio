@@ -566,6 +566,121 @@ export type BotPose = {
   facing: 'north' | 'south' | 'east' | 'west'
 }
 
+export const COMBAT_PLAN_STEP_KINDS = [
+  'move',
+  'attack',
+  'utility',
+  'end_turn',
+] as const
+
+export type CombatPlanStepKind = (typeof COMBAT_PLAN_STEP_KINDS)[number]
+
+export type CombatWeaponSlot = 'weaponA' | 'weaponB'
+
+export type CombatPlanStep =
+  | {
+      kind: 'move'
+      cellId: string
+    }
+  | {
+      kind: 'attack'
+      weaponSlot: CombatWeaponSlot
+      targetCellId?: string
+    }
+  | {
+      kind: 'utility'
+      utilityId?: string
+      cellId?: string
+    }
+  | {
+      kind: 'end_turn'
+    }
+
+export type CombatBudget = {
+  movement: number
+  actionTime: number
+  weaponCooldowns: Record<string, number>
+}
+
+export type CombatRoundPlan = {
+  role: TeamRole
+  round: number
+  decisionVersion: number
+  steps: CombatPlanStep[]
+  submittedAt: string
+}
+
+export type CombatRoundPlanSubmission = {
+  action: 'submit_combat_round_plan'
+  decisionVersion: number
+  round: number
+  steps: CombatPlanStep[]
+  publicMessage?: string
+}
+
+export type CombatPlanConsumptionSummary = {
+  submittedSteps: number
+  consumedSteps: number
+  movementSpent: number
+  actionTimeSpent: number
+  rejectedSteps: Array<{
+    index: number
+    reason: string
+  }>
+  endedBy: 'end_turn' | 'budget_exhausted' | 'plan_exhausted' | 'substep_cap'
+}
+
+export type CombatBoardReachableCell = GridCoord & {
+  cellId: string
+  moveCost: number
+  movementRemaining?: number
+  hazard: boolean
+  hazardIds?: string[]
+  path?: GridCoord[]
+}
+
+export type CombatBoardAttackableCell = GridCoord & {
+  cellId: string
+  weaponSlot: CombatWeaponSlot
+  range: number
+  distance: number
+  actionTimeCost?: number
+  lineOfSight?: boolean
+}
+
+export type CombatBoardUtilityOption = {
+  utilityId: string
+  label?: string
+  cellId?: string
+  actionTimeCost?: number
+}
+
+export type CombatRoundPacketView = {
+  round: number
+  decisionVersion: number
+  deadlineAt: string
+  submitted: boolean
+  opponentSubmitted: boolean
+  budget: CombatBudget
+  self: {
+    hp: number
+    maxHp: number
+    mass?: number
+    drive?: number
+    weaponReach?: number
+    anchor: GridCoord
+  }
+  opponent: {
+    hp: number
+    maxHp: number
+    mass?: number
+    drive?: number
+    weaponReach?: number
+    anchor: GridCoord
+  }
+  submittedPlan?: CombatRoundPlan
+}
+
 export const GAME_MASTER_PHASES = [
   'wait_for_opponent_claim',
   'choose_loadout',
@@ -697,11 +812,15 @@ export type AgentBoardView = {
     zMin: number
     zMax: number
   }
+  ascii?: string
   self?: BotPose
   opponent?: BotPose
   blockedCells?: GridCoord[]
   hazardCells?: GridCoord[]
   cells?: AgentBoardCellView[]
+  reachableCells?: CombatBoardReachableCell[]
+  attackableCells?: CombatBoardAttackableCell[]
+  utilityOptions?: CombatBoardUtilityOption[]
   reachablePoses?: AgentBoardPoseView[]
   attackableTargets?: AgentBoardTargetView[]
   [key: string]: unknown
@@ -815,14 +934,7 @@ export type LoadoutBuildState = {
 export type SubmitInstruction = {
   method: 'POST'
   path: string
-  body: {
-    action: 'submit_game_action'
-    actionSetId: string
-    decisionVersion: number
-    actionId: string
-    parameters?: GameMasterActionParameters
-    publicMessage?: string
-  }
+  body: GameMasterActionSubmission | CombatRoundPlanSubmission
 }
 
 export type GameMasterLegalAction = {
@@ -875,6 +987,7 @@ export type GameMasterPacket = {
   store?: CatalogStoreView
   buildState?: LoadoutBuildState
   board?: AgentBoardView
+  combat?: CombatRoundPacketView
   visibleState?: AgentVisibleCombatState
   legalActions: GameMasterLegalAction[]
   blockedActions?: GameMasterBlockedAction[]

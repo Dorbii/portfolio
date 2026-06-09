@@ -30,6 +30,8 @@ export function AgentInsightWorkbench({
   const loadout = roleState?.ownLoadout ?? null
   const blueprint = loadout?.blueprint ?? null
   const legalActions = roleState?.gameMaster?.legalActions ?? []
+  const combatPacket = roleState?.gameMaster?.combat
+  const combatBoard = roleState?.gameMaster?.board
   const catalogById = createCatalogLookup(roleState)
   const loadoutParts = createLoadoutPartReadouts(roleState, loadout, catalogById)
   const storeOffers = createStoreOfferReadouts(roleState, catalogById)
@@ -56,9 +58,9 @@ export function AgentInsightWorkbench({
         <PlanMetric label="Loadout" tone={roleState?.submitted ? 'ok' : undefined} value={submissionLabel} />
         <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No blueprint'} />
         <PlanMetric
-          label={roleState?.phase === 'combat_turn' ? 'Board actions' : 'Actions'}
-          tone={legalActions.length > 0 ? 'ok' : undefined}
-          value={formatActionMetric(legalActions.length)}
+          label={combatPacket ? 'Combat plan' : roleState?.phase === 'combat_turn' ? 'Board actions' : 'Actions'}
+          tone={combatPacket && !combatPacket.submitted ? 'ok' : legalActions.length > 0 ? 'ok' : undefined}
+          value={combatPacket ? formatCombatPlanMetric(combatPacket, combatBoard) : formatActionMetric(legalActions.length)}
         />
       </div>
 
@@ -325,6 +327,21 @@ function formatUtilitySummary(state: RolePrivateState): string {
 
 function formatActionMetric(legalActionCount: number): string {
   return legalActionCount > 0 ? `${legalActionCount} legal` : 'No actions'
+}
+
+function formatCombatPlanMetric(
+  combat: NonNullable<RolePrivateState['gameMaster']>['combat'],
+  board: NonNullable<RolePrivateState['gameMaster']>['board'] | undefined,
+): string {
+  if (!combat) {
+    return 'No combat packet'
+  }
+
+  if (combat.submitted) {
+    return 'Plan submitted'
+  }
+
+  return `${combat.budget.movement} move / ${combat.budget.actionTime} time / ${board?.reachableCells?.length ?? 0} cells`
 }
 
 function createCatalogLookup(state: RolePrivateState | null): Map<string, PartDefinition> {

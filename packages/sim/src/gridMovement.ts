@@ -168,3 +168,68 @@ function uniqueCells(cells: ArenaGridCell[]): ArenaGridCell[] {
 function cloneCell(cell: ArenaGridCell): ArenaGridCell {
   return { x: cell.x, z: cell.z }
 }
+
+export function cellIdFor(cell: ArenaGridCell): string {
+  return `cell:${cell.x}:${cell.z}`
+}
+
+export function parseCellId(cellId: string): ArenaGridCell | undefined {
+  const trimmed = cellId.trim()
+  const cellMatch = /^cell:(-?\d+):(-?\d+)$/.exec(trimmed)
+  const compactMatch = cellMatch ?? /^(-?\d+)[,:](-?\d+)$/.exec(trimmed)
+
+  if (!compactMatch) {
+    return undefined
+  }
+
+  return {
+    x: Number(compactMatch[1]),
+    z: Number(compactMatch[2]),
+  }
+}
+
+export function adjacentCells(cell: ArenaGridCell): ArenaGridCell[] {
+  return [
+    { x: cell.x + 1, z: cell.z },
+    { x: cell.x - 1, z: cell.z },
+    { x: cell.x, z: cell.z + 1 },
+    { x: cell.x, z: cell.z - 1 },
+  ]
+}
+
+export function sameGridCell(left: ArenaGridCell, right: ArenaGridCell): boolean {
+  return left.x === right.x && left.z === right.z
+}
+
+export function stepToward(from: ArenaGridCell, to: ArenaGridCell): ArenaGridCell | undefined {
+  const xDelta = to.x - from.x
+  const zDelta = to.z - from.z
+
+  if (xDelta === 0 && zDelta === 0) {
+    return undefined
+  }
+
+  if (Math.abs(xDelta) >= Math.abs(zDelta) && xDelta !== 0) {
+    return { x: from.x + Math.sign(xDelta), z: from.z }
+  }
+
+  return { x: from.x, z: from.z + Math.sign(zDelta) }
+}
+
+export function linePathBetweenCells(from: ArenaGridCell, to: ArenaGridCell): ArenaGridCell[] {
+  const path: ArenaGridCell[] = []
+  let current = cloneCell(from)
+
+  for (let guard = 0; guard < 256; guard += 1) {
+    const next = stepToward(current, to)
+
+    if (!next) {
+      break
+    }
+
+    path.push(next)
+    current = next
+  }
+
+  return path
+}

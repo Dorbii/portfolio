@@ -136,6 +136,34 @@ function resolveBotState(
       state = resolveMoveFrameState(state, event, time)
     }
 
+    if (event.type === 'push' && event.defender === role) {
+      state = resolveMoveFrameState(state, {
+        t: event.t,
+        type: 'move',
+        bot: role,
+        from: event.from,
+        to: event.to,
+        duration: 0.42,
+        easing: 'ease_out',
+        intent: 'forced',
+        contactIntent: true,
+      }, time)
+    }
+
+    if (event.type === 'bounce' && event.bot === role) {
+      state = resolveMoveFrameState(state, {
+        t: event.t,
+        type: 'move',
+        bot: role,
+        from: event.from,
+        to: event.to,
+        duration: 0.32,
+        easing: 'brake',
+        intent: 'forced',
+        contactIntent: true,
+      }, time)
+    }
+
     if (event.type === 'damage' && event.bot === role) {
       state = {
         ...state,

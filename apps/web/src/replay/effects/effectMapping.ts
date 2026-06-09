@@ -18,6 +18,7 @@ const DEBRIS_WINDOW = 1.9
 const PART_DETACH_WINDOW = 1.9
 const DAMAGE_MARKER_WINDOW = 1.4
 const HAZARD_WINDOW = 0.9
+const CONTACT_WINDOW = 0.85
 const LASER_LANCE_WINDOW = 0.95
 const FIRE_BREATH_WINDOW = 1.05
 const DRONE_SWARM_WINDOW = 1.2
@@ -52,15 +53,19 @@ export function getReplayEffectWindowSeconds(event: ReplayEvent): number | undef
     return DRONE_SWARM_WINDOW
   }
 
-  if (event.type === 'impact') {
+  if (event.type === 'impact' || event.type === 'ram') {
     return DEBRIS_WINDOW
+  }
+
+  if (event.type === 'push' || event.type === 'bounce') {
+    return CONTACT_WINDOW
   }
 
   if (event.type === 'damage') {
     return DAMAGE_MARKER_WINDOW
   }
 
-  if (event.type === 'hazard') {
+  if (event.type === 'hazard' || event.type === 'hazard_trigger') {
     return HAZARD_WINDOW
   }
 
@@ -220,6 +225,65 @@ export function buildReplayEffects(
       }
     }
 
+
+    if (event.type === 'push') {
+      const age = time - event.t
+
+      if (age >= 0 && age <= CONTACT_WINDOW) {
+        effects.push({
+          id: `${sequence}-push-${event.attacker}-${event.defender}`,
+          kind: 'impact',
+          position: event.to,
+          age,
+          intensity: Math.max(0, 1 - age / CONTACT_WINDOW),
+          team: event.attacker,
+          label: `push:${event.reason}`,
+        })
+      }
+    }
+
+    if (event.type === 'ram') {
+      const age = time - event.t
+
+      if (age >= 0 && age <= IMPACT_WINDOW) {
+        effects.push({
+          id: `${sequence}-ram-${event.attacker}-${event.defender}`,
+          kind: 'impact',
+          position: event.position,
+          age,
+          intensity: Math.max(0, 1 - age / IMPACT_WINDOW),
+          team: event.attacker,
+          damage: event.damage,
+          label: event.blockedBy ? `ram:${event.blockedBy}` : 'ram',
+        })
+        effects.push({
+          id: `${sequence}-ram-damage-${event.defender}`,
+          kind: 'damage_marker',
+          position: event.position,
+          age,
+          intensity: Math.max(0, 1 - age / IMPACT_WINDOW),
+          team: event.defender,
+          damage: event.damage,
+        })
+      }
+    }
+
+    if (event.type === 'bounce') {
+      const age = time - event.t
+
+      if (age >= 0 && age <= CONTACT_WINDOW) {
+        effects.push({
+          id: `${sequence}-bounce-${event.bot}`,
+          kind: 'smoke',
+          position: event.to,
+          age,
+          intensity: Math.max(0, 1 - age / CONTACT_WINDOW),
+          team: event.bot,
+          label: event.cause,
+        })
+      }
+    }
+
     if (event.type === 'impact') {
       const age = time - event.t
 
@@ -274,19 +338,19 @@ export function buildReplayEffects(
       }
     }
 
-    if (event.type === 'hazard') {
+    if (event.type === 'hazard' || event.type === 'hazard_trigger') {
       const age = time - event.t
 
       if (age >= 0 && age <= HAZARD_WINDOW) {
         effects.push({
-          id: `${sequence}-hazard-${event.hazard}`,
+          id: `${sequence}-hazard-${event.hazard}-${event.type === 'hazard_trigger' ? event.trigger : 'legacy'}`,
           kind: 'hazard',
           position: event.position,
           age,
           intensity: 1 - age / HAZARD_WINDOW,
           team: event.bot,
           damage: event.damage,
-          label: event.hazard,
+          label: event.type === 'hazard_trigger' ? `${event.hazard}:${event.trigger}` : event.hazard,
         })
         if (event.damage > 0) {
           effects.push({
@@ -297,7 +361,7 @@ export function buildReplayEffects(
             intensity: 1 - age / HAZARD_WINDOW,
             team: event.bot,
             damage: event.damage,
-            label: event.hazard,
+            label: event.type === 'hazard_trigger' ? `${event.hazard}:${event.trigger}` : event.hazard,
           })
         }
       }

@@ -6,6 +6,7 @@ import type { MovementCommand, TeamRole, Vector3 } from '../../schemas/src/index
 // CODEX_REVIEW: pending
 export type CombatTurnEventMetadata = {
   turn?: number
+  substep?: number
 }
 
 export type AbilityName = 'laser_lance' | 'drone_swarm' | 'fire_breath'
@@ -97,6 +98,58 @@ export type HazardEvent = CombatTurnEventMetadata & {
   position: Vector3
 }
 
+export type PushEvent = CombatTurnEventMetadata & {
+  t: number
+  type: 'push'
+  attacker: TeamRole
+  defender: TeamRole
+  from: Vector3
+  to: Vector3
+  reason: 'mass' | 'drive' | 'momentum' | 'tie_break'
+  substep?: number
+}
+
+export type RamEvent = CombatTurnEventMetadata & {
+  t: number
+  type: 'ram'
+  attacker: TeamRole
+  defender: TeamRole
+  damage: number
+  position: Vector3
+  blockedBy?: 'wall' | 'obstacle' | 'bot'
+  substep?: number
+}
+
+export type BounceEvent = CombatTurnEventMetadata & {
+  t: number
+  type: 'bounce'
+  bot: TeamRole
+  from: Vector3
+  to: Vector3
+  cause: 'blocked_push' | 'wall' | 'collision'
+  substep?: number
+}
+
+export type HazardTriggerEvent = CombatTurnEventMetadata & {
+  t: number
+  type: 'hazard_trigger'
+  hazard: string
+  bot: TeamRole
+  damage: number
+  position: Vector3
+  trigger: 'voluntary_move' | 'forced_push' | 'bounce'
+  substep?: number
+}
+
+export type PlanStepRejectedEvent = CombatTurnEventMetadata & {
+  t: number
+  type: 'plan_step_rejected'
+  bot: TeamRole
+  stepIndex: number
+  reason: string
+  substep?: number
+}
+
 export type BotStabilityEvent = CombatTurnEventMetadata & {
   t: number
   type: BotStabilityEventType
@@ -137,6 +190,11 @@ export type ReplayEvent =
   | ImpactEvent
   | DamageEvent
   | HazardEvent
+  | PushEvent
+  | RamEvent
+  | BounceEvent
+  | HazardTriggerEvent
+  | PlanStepRejectedEvent
   | BotStabilityEvent
   | PartDetachEvent
   | KnockoutEvent
@@ -147,13 +205,18 @@ const REPLAY_EVENT_TYPE_RANK: Record<ReplayEvent['type'], number> = {
   weapon_fire: 20,
   ability: 30,
   impact: 40,
+  ram: 42,
+  push: 44,
+  bounce: 46,
   damage: 50,
   hazard: 60,
-  bot_destabilized: 62,
-  bot_tipped: 64,
-  bot_flipped: 66,
-  bot_self_righted: 68,
-  bot_immobilized: 69,
+  hazard_trigger: 61,
+  plan_step_rejected: 63,
+  bot_destabilized: 64,
+  bot_tipped: 66,
+  bot_flipped: 68,
+  bot_self_righted: 70,
+  bot_immobilized: 72,
   part_detach: 70,
   knockout: 80,
 }
@@ -168,6 +231,12 @@ export function compareReplayEvents(left: ReplayEvent, right: ReplayEvent): numb
     return left.t - right.t
   }
 
+  const substepRank = replayEventSubstep(left) - replayEventSubstep(right)
+
+  if (substepRank !== 0) {
+    return substepRank
+  }
+
   const typeRank = REPLAY_EVENT_TYPE_RANK[left.type] - REPLAY_EVENT_TYPE_RANK[right.type]
 
   if (typeRank !== 0) {
@@ -179,6 +248,12 @@ export function compareReplayEvents(left: ReplayEvent, right: ReplayEvent): numb
 
 export function sortReplayEvents(events: ReplayEvent[]): ReplayEvent[] {
   return [...events].sort(compareReplayEvents)
+}
+
+function replayEventSubstep(event: ReplayEvent): number {
+  return 'substep' in event && typeof event.substep === 'number'
+    ? event.substep
+    : Number.MAX_SAFE_INTEGER
 }
 
 function replayEventBotRank(event: ReplayEvent): number {

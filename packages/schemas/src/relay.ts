@@ -4,6 +4,7 @@ import type {
   BotBlueprint,
   ChampionContinuationSave,
   ChampionRecord,
+  CombatRoundPlanSubmission,
   GameMasterActionSubmission,
   GameMasterPacket,
   PostFightAgentReflection,
@@ -177,7 +178,7 @@ export type RoleResetResponse = {
   publicState: PublicSessionState
 }
 
-export type GameMasterActionPostRequest = GameMasterActionSubmission
+export type GameMasterActionPostRequest = GameMasterActionSubmission | CombatRoundPlanSubmission
 
 export type GameMasterActionResponse = {
   packet: GameMasterPacket
