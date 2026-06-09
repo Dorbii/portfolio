@@ -143,12 +143,6 @@ type GptMountSlotAlias = {
   parameters: GameMasterActionParameters
 }
 
-type GptActionResolution = {
-  canonicalAction: GameMasterLegalAction
-  parameters?: GameMasterActionParameters
-  resolvedActionId?: string
-}
-
 type GptBoardView = NonNullable<GameMasterPacket['board']>
 type GptBoardCell = NonNullable<GptBoardView['cells']>[number]
 type GptBoardLegalView = NonNullable<GptBoardCell['legal']>
