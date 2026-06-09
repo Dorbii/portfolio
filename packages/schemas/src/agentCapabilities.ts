@@ -79,3 +79,11 @@ export type AgentCatalogGuidance = Readonly<{
   featureGates: readonly AgentFeatureGate[]
   capabilities: readonly AgentCatalogCapability[]
 }>
+
+export const AGENT_RUNTIME_CAPABILITIES = [
+  'combat_round_plans',
+  'lockstep_combat_resolution',
+  'explicit_contact_events',
+] as const
+
+export type AgentRuntimeCapability = (typeof AGENT_RUNTIME_CAPABILITIES)[number]

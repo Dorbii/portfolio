@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   AgentBootstrapResponse,
+  CombatRoundPlanSubmission,
+  GameMasterActionResponse,
   TeamIdentity,
 } from '../../../../packages/schemas/src/index.js'
 import type {
@@ -258,6 +260,35 @@ export function useAgentRoleSession(invite: AgentInvite) {
     }
   }, [client, invite, rememberTeamIdentity])
 
+  const submitCombatPlan = useCallback(async (
+    submission: CombatRoundPlanSubmission,
+  ): Promise<GameMasterActionResponse> => {
+    setStatus('loading')
+    setLastError(null)
+
+    try {
+      const response = await client.submitCombatPlan(submission)
+      const [privateState, redactedState] = await Promise.all([
+        client.getState(),
+        client.getPublicState().catch(() => null),
+      ])
+
+      setRoleState(rememberTeamIdentity({
+        ...privateState,
+        gameMaster: privateState.gameMaster ?? response.packet,
+      }))
+      setPublicState(redactedState)
+      setNotice(`Combat plan submitted. Next action: ${formatLabel(response.packet.nextAction)}.`)
+
+      return response
+    } catch (error) {
+      setLastError(toUiError(error, 'Combat plan submit failed'))
+      throw error
+    } finally {
+      setStatus('ready')
+    }
+  }, [client, rememberTeamIdentity])
+
   useEffect(() => {
     return installAgentArenaRoleApi({
       client,
@@ -295,6 +326,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
     connectRole,
     invite,
     rememberTeamIdentity,
+    submitCombatPlan,
     waitForGameMasterPacket,
   ])
 
@@ -322,6 +354,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
     notice,
     publicState,
     roleState,
+    submitCombatPlan,
     roleToken,
     setLastError,
     setNotice,

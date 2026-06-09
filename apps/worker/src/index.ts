@@ -64,8 +64,6 @@ const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
 const GPT_COMPACT_BOARD_CELL_LIMIT = 24
 const GPT_COMPACT_BOARD_LIST_LIMIT = 16
 const GPT_COMPACT_ACTION_REF_LIMIT = 6
-const GPT_SEMANTIC_MOVE_ACTION_ID = 'move'
-const GPT_SEMANTIC_ATTACK_ACTION_ID = 'attack'
 const GPT_COMBAT_PLAN_ACTION_ID = 'combat_plan'
 
 type JsonRequestReadResult =
@@ -253,6 +251,10 @@ export class AgentArenaSession {
     action: {
       method: 'POST',
       handle: (request, coordinator) => this.submitGameMasterAction(request, coordinator),
+    },
+    'combat-plan': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitCombatRoundPlan(request, coordinator),
     },
     reflection: {
       method: 'POST',
@@ -503,6 +505,24 @@ export class AgentArenaSession {
     )
   }
 
+  private async submitCombatRoundPlan(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Combat round plan body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitCombatRoundPlan(bearerToken(request) ?? '', readResult.body),
+    )
+  }
+
   private async publicState(coordinator: SessionCoordinator): Promise<Response> {
     const publicState = coordinator.getPublicState()
     await this.saveSession(coordinator)
@@ -643,30 +663,26 @@ export class AgentArenaSession {
     if (body.actionId === GPT_COMBAT_PLAN_ACTION_ID) {
       const result = await coordinator.submitGptCombatPlan(invite.value.claimToken, body.parameters)
 
-      return this.sessionResultResponse(
-        coordinator,
-        result.ok
-          ? {
-              ok: true,
-              value: {
-                status: gptPacketStatus(result.value.packet),
-                acceptedActionId: body.actionId,
-                queuedSteps: result.value.queuedSteps,
-                packet: compactGptPacket(result.value.packet),
-                continuation: gptContinuationForPacket(result.value.packet),
-              },
-            }
-          : result,
-      )
+      if (!result.ok) {
+        return this.sessionResultResponse(coordinator, result)
+      }
+
+      return this.sessionResultResponse(coordinator, {
+        ok: true,
+        value: {
+          status: gptPacketStatus(result.value.packet),
+          acceptedActionId: body.actionId,
+          submittedSteps: result.value.submittedSteps,
+          submittedPlan: result.value.submittedPlan,
+          packet: compactGptPacket(result.value.packet),
+          continuation: gptContinuationForPacket(result.value.packet),
+        },
+      })
     }
 
     const packet = packetResult.value
     const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
-    const resolvedSemanticAction = resolvedGptAlias
-      ? undefined
-      : resolveGptSemanticCombatAction(packet, body.actionId, body.parameters)
     const action = resolvedGptAlias?.canonicalAction ??
-      resolvedSemanticAction?.canonicalAction ??
       packet.legalActions.find((candidate) => candidate.id === body.actionId)
 
     if (!action || !packet.actionSetId) {
@@ -682,7 +698,6 @@ export class AgentArenaSession {
       action.parameterExamples?.[0] !== undefined &&
       (body.parameters === undefined || isEmptyRecord(body.parameters))
     const parameters = resolvedGptAlias?.alias.parameters ??
-      resolvedSemanticAction?.parameters ??
       (shouldUseParameterExample ? action.parameterExamples?.[0] : body.parameters)
     const result = await coordinator.submitGameMasterAction(invite.value.claimToken, {
       action: 'submit_game_action',
@@ -701,9 +716,7 @@ export class AgentArenaSession {
             value: {
               status: gptPacketStatus(result.value.packet),
               acceptedActionId: body.actionId,
-              ...(resolvedGptAlias || resolvedSemanticAction
-                ? { resolvedActionId: resolvedSemanticAction?.resolvedActionId ?? action.id }
-                : {}),
+              ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
               packet: compactGptPacket(result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
             },
@@ -1056,6 +1069,7 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
         }
       : {}),
     ...(compactBoard && Object.keys(compactBoard).length > 0 ? { board: compactBoard } : {}),
+    ...(packet.combat ? { combat: compactGptCombat(packet.combat) } : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
     ...(isCombatTurn ? { actionSummary: compactGptCombatActionSummary(packet) } : {}),
     legalActions,
@@ -1078,56 +1092,56 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
 }
 
 function isGptCombatTurnPacket(packet: GameMasterPacket): boolean {
-  return packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn'
+  return packet.phase === 'combat_turn'
 }
 
 function compactGptCombatLegalActions(packet: GameMasterPacket): Array<Record<string, unknown>> {
-  const board = packet.board
-  const hasMoveCells = Boolean(board?.cells?.some((cell) => cell.legal?.moveHere))
-  const hasAttackCells = Boolean(board?.cells?.some((cell) => cell.legal?.attacksFromHere?.length))
-  const directActions = packet.legalActions.filter((action) =>
-    action.kind === 'hold' ||
-    action.kind === 'surrender' ||
-    action.kind === 'use_utility')
+  if (packet.combat?.submitted) {
+    return []
+  }
+
+  const surrenderActions = packet.legalActions
+    .filter((action) => action.kind === 'surrender')
+    .map((action) => compactGptLegalAction(action, { omitParameterDetails: true }))
 
   return [
     {
       id: GPT_COMBAT_PLAN_ACTION_ID,
       kind: 'use_utility',
-      label: 'Queue combat plan',
-      summary: 'Submit up to 8 ordered semantic steps; the server resolves each step against the live legal packet as turns open.',
+      label: 'Submit combat round plan',
+      summary: 'Submit the current combat round plan. This is no longer a future-turn queue; both plans resolve in lockstep substeps this round.',
       parameterSchema: {
         type: 'object',
         required: ['steps'],
         properties: {
           steps: {
             type: 'array',
-            label: 'Combat plan steps',
-            summary: 'Ordered steps using actionId move, attack, utility, hold, or surrender.',
-            maxItems: 8,
+            label: 'Combat round plan steps',
+            summary: 'Ordered intent steps. Use board.reachableCells[].cellId for move, board.attackableCells[] for attack, and end_turn when finished.',
+            maxItems: 16,
             items: {
               type: 'object',
-              required: ['actionId'],
+              required: ['kind'],
               properties: {
-                actionId: {
+                kind: {
                   type: 'string',
-                  summary: 'Use move, attack, utility, hold, or surrender.',
+                  summary: 'move, attack, utility, or end_turn.',
                 },
                 cellId: {
                   type: 'string',
-                  summary: 'For move or utility: a cellId from packet.board.reachableCells.',
-                },
-                attackActionId: {
-                  type: 'string',
-                  summary: 'For attack: an action id from packet.board.reachableCells[].attackActionIds[].actionId.',
-                },
-                targetCellId: {
-                  type: 'string',
-                  summary: 'Optional attack target cell id from the board.',
+                  summary: 'For move or utility: target cellId such as cell:3:0.',
                 },
                 weaponSlot: {
                   type: 'string',
-                  summary: 'Optional weaponA or weaponB attack slot.',
+                  summary: 'For attack: weaponA or weaponB.',
+                },
+                targetCellId: {
+                  type: 'string',
+                  summary: 'For attack: usually a cellId from board.attackableCells[].cellId.',
+                },
+                utilityId: {
+                  type: 'string',
+                  summary: 'Optional utility identifier from board.utilityOptions[].utilityId.',
                 },
               },
             },
@@ -1135,56 +1149,7 @@ function compactGptCombatLegalActions(packet: GameMasterPacket): Array<Record<st
         },
       },
     },
-    ...(hasMoveCells
-      ? [{
-          id: GPT_SEMANTIC_MOVE_ACTION_ID,
-          kind: 'move',
-          label: 'Move to a reachable cell',
-          summary: 'Choose parameters.cellId from packet.board.reachableCells[].cellId. The server resolves it to the current canonical move action.',
-          parameterSchema: {
-            type: 'object',
-            required: ['cellId'],
-            properties: {
-              cellId: {
-                type: 'string',
-                label: 'Destination cell',
-                summary: 'Reachable board cell id from packet.board.reachableCells.',
-              },
-            },
-          },
-        }]
-      : []),
-    ...(hasAttackCells
-      ? [{
-          id: GPT_SEMANTIC_ATTACK_ACTION_ID,
-          kind: 'attack',
-          label: 'Use an available cell attack',
-          summary: 'Choose parameters.attackActionId from a packet.board.reachableCells[].attackActionIds[] entry.',
-          parameterSchema: {
-            type: 'object',
-            required: ['attackActionId'],
-            properties: {
-              attackActionId: {
-                type: 'string',
-                label: 'Attack action id',
-                summary: 'Canonical attack action id exposed on a reachable cell.',
-              },
-            },
-          },
-        }]
-      : []),
-    ...directActions.map((action) =>
-      action.kind === 'hold' || action.kind === 'surrender'
-        ? {
-            id: action.kind,
-            kind: action.kind,
-            label: action.label,
-            summary: action.summary,
-            resolvesToActionId: action.id,
-          }
-        : compactGptLegalAction(action, {
-            omitPreview: true,
-          })),
+    ...surrenderActions,
   ]
 }
 
@@ -1194,6 +1159,8 @@ function compactGptCombatActionSummary(packet: GameMasterPacket): Record<string,
     return accumulator
   }, {})
   const cells = packet.board?.cells ?? []
+  const reachableCellCount = packet.board?.reachableCells?.length ?? cells.filter((cell) => cell.reachable || cell.legal?.moveHere).length
+  const attackCellCount = packet.board?.attackableCells?.length ?? cells.filter((cell) => cell.legal?.attacksFromHere?.length).length
   const movementBudgets = cells
     .map((cell) =>
       typeof cell.mobilityCost === 'number'
@@ -1202,11 +1169,27 @@ function compactGptCombatActionSummary(packet: GameMasterPacket): Record<string,
     .filter((value): value is number => typeof value === 'number')
 
   return {
-    canonicalLegalActionCount: packet.legalActions.length,
-    canonicalKindCounts: counts,
-    reachableCellCount: cells.filter((cell) => cell.reachable || cell.legal?.moveHere).length,
-    attackCellCount: cells.filter((cell) => cell.legal?.attacksFromHere?.length).length,
+    mode: packet.combat ? 'lockstep_round_plan' : 'action_menu',
+    actionMenuCount: packet.legalActions.length,
+    actionKindCounts: counts,
+    reachableCellCount,
+    attackCellCount,
+    ...(packet.combat?.budget ? { budget: packet.combat.budget } : {}),
     ...(movementBudgets.length > 0 ? { movementBudgetEstimate: Math.max(...movementBudgets) } : {}),
+  }
+}
+
+function compactGptCombat(combat: NonNullable<GameMasterPacket['combat']>): Record<string, unknown> {
+  return {
+    round: combat.round,
+    decisionVersion: combat.decisionVersion,
+    deadlineAt: combat.deadlineAt,
+    submitted: combat.submitted,
+    opponentSubmitted: combat.opponentSubmitted,
+    budget: combat.budget,
+    self: combat.self,
+    opponent: combat.opponent,
+    ...(combat.submittedPlan ? { submittedPlan: combat.submittedPlan } : {}),
   }
 }
 
@@ -1217,7 +1200,7 @@ function compactGptCombatBoard(packet: GameMasterPacket): Record<string, unknown
     return {}
   }
 
-  const reachableCells = compactGptReachableCells(board)
+  const reachableCells = board.reachableCells?.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) ?? compactGptReachableCells(board)
 
   return {
     ...(board.grid ? { grid: board.grid } : {}),
@@ -1226,6 +1209,8 @@ function compactGptCombatBoard(packet: GameMasterPacket): Record<string, unknown
     ...(board.hazardCells ? { hazardCells: board.hazardCells } : {}),
     ascii: asciiGptBoard(board),
     reachableCells,
+    ...(board.attackableCells?.length ? { attackableCells: board.attackableCells.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
+    ...(board.utilityOptions?.length ? { utilityOptions: board.utilityOptions.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
   }
 }
 
@@ -1266,8 +1251,8 @@ function asciiGptBoard(board: GptBoardView): string {
   const self = board.self?.anchor
   const opponent = board.opponent?.anchor
   const hazards = new Set((board.hazardCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
-  const reachable = new Set<string>()
-  const attacks = new Set<string>()
+  const reachable = new Set((board.reachableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
+  const attacks = new Set((board.attackableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
 
   for (const cell of board.cells ?? []) {
     const key = coordKey(cell.x, cell.z)
@@ -1508,121 +1493,6 @@ function compactGptMountSlotAlias(alias: GptMountSlotAlias): Record<string, unkn
     resolvesToActionId: alias.resolvesToActionId,
     semanticTags: alias.semanticTags,
   }
-}
-
-function resolveGptSemanticCombatAction(
-  packet: GameMasterPacket,
-  actionId: string,
-  parameters: GameMasterActionParameters | undefined,
-): GptActionResolution | undefined {
-  if (!isGptCombatTurnPacket(packet)) {
-    return undefined
-  }
-
-  if (actionId === GPT_SEMANTIC_MOVE_ACTION_ID) {
-    const cellId = stringParameter(parameters, 'cellId') ?? stringParameter(parameters, 'destinationCellId')
-    const cell = findGptBoardCell(packet.board, cellId)
-    const ref = cell?.legal?.moveHere
-    const canonicalAction = ref ? packet.legalActions.find((candidate) => candidate.id === ref.actionId) : undefined
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          parameters: ref?.parameters,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  if (actionId === GPT_SEMANTIC_ATTACK_ACTION_ID) {
-    const attackActionId = stringParameter(parameters, 'attackActionId') ?? stringParameter(parameters, 'canonicalActionId')
-    const requestedCellId = stringParameter(parameters, 'cellId')
-    const requestedSlot = stringParameter(parameters, 'slot') ?? stringParameter(parameters, 'weaponSlot')
-    const attack = attackActionId
-      ? findGptAttackRefByActionId(packet.board, attackActionId)
-      : findGptAttackRefByCell(packet.board, requestedCellId, requestedSlot)
-    const canonicalAction = attack ? packet.legalActions.find((candidate) => candidate.id === attack.actionId) : undefined
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          parameters: attack?.parameters,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  if (actionId === 'hold' || actionId === 'surrender') {
-    const canonicalAction = packet.legalActions.find((candidate) => candidate.kind === actionId)
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  return undefined
-}
-
-function stringParameter(
-  parameters: GameMasterActionParameters | undefined,
-  key: string,
-): string | undefined {
-  const value = parameters?.[key]
-
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function findGptBoardCell(
-  board: GptBoardView | undefined,
-  requestedCellId: string | undefined,
-): GptBoardCell | undefined {
-  if (!requestedCellId) {
-    return undefined
-  }
-
-  return board?.cells?.find((cell) => cellIdMatches(cell, requestedCellId))
-}
-
-function findGptAttackRefByActionId(
-  board: GptBoardView | undefined,
-  actionId: string | undefined,
-): GptBoardAttackRef | undefined {
-  if (!actionId) {
-    return undefined
-  }
-
-  for (const cell of board?.cells ?? []) {
-    const attack = cell.legal?.attacksFromHere?.find((candidate) => candidate.actionId === actionId)
-
-    if (attack) {
-      return attack
-    }
-  }
-
-  return undefined
-}
-
-function findGptAttackRefByCell(
-  board: GptBoardView | undefined,
-  requestedCellId: string | undefined,
-  requestedSlot: string | undefined,
-): GptBoardAttackRef | undefined {
-  const cell = findGptBoardCell(board, requestedCellId)
-
-  return cell?.legal?.attacksFromHere?.find((attack) =>
-    !requestedSlot || attack.weaponSlot === requestedSlot)
-}
-
-function cellIdMatches(cell: GptBoardCell, requestedCellId: string): boolean {
-  const normalized = requestedCellId.trim()
-
-  return normalized === cell.cellId ||
-    normalized === `${cell.x},${cell.z}` ||
-    normalized === `${cell.x}:${cell.z}` ||
-    normalized === `cell:${cell.x}:${cell.z}`
 }
 
 function resolveGptMountSlotAlias(

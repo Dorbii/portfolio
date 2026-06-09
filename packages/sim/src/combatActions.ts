@@ -1,6 +1,10 @@
 import type {
   ActiveActionSet,
   CanonicalGameAction,
+  CombatBoardAttackableCell,
+  CombatBoardReachableCell,
+  CombatBoardUtilityOption,
+  CombatBudget,
   CombatTurnSnapshot,
   GameMasterActionKind,
   GameMasterLegalAction,
@@ -856,4 +860,208 @@ function dedupeActions(actions: CanonicalGameAction[]): CanonicalGameAction[] {
   }
 
   return deduped
+}
+
+export type BuildCombatPlanAffordancesInput = {
+  role: TeamRole
+  snapshot: CombatTurnSnapshot
+  budget: CombatBudget
+  machineCapabilities?: MachineCapabilities
+}
+
+export type CombatPlanAffordanceSet = {
+  budget: CombatBudget
+  reachableCells: CombatBoardReachableCell[]
+  attackableCells: CombatBoardAttackableCell[]
+  utilityOptions: CombatBoardUtilityOption[]
+}
+
+export function buildCombatPlanAffordances(input: BuildCombatPlanAffordancesInput): CombatPlanAffordanceSet {
+  const topology = compileArenaTopology(input.snapshot.arena)
+  const self = input.role === 'red' ? input.snapshot.red : input.snapshot.blue
+  const opponent = input.role === 'red' ? input.snapshot.blue : input.snapshot.red
+  const selfAnchor = worldToArenaCell(topology, self.position)
+  const opponentAnchorCell = worldToArenaCell(topology, opponent.position)
+  const reachableCells = reachableCombatPlanCells({
+    snapshot: input.snapshot,
+    role: input.role,
+    start: selfAnchor,
+    opponent: opponentAnchorCell,
+    budget: input.budget,
+  })
+  const attackableCells = attackableCombatPlanCells({
+    snapshot: input.snapshot,
+    role: input.role,
+    selfReachableCells: reachableCells,
+    opponent: opponentAnchorCell,
+    weaponSlotCount: Math.max(0, Math.min(2, self.weaponSlotCount)),
+    weaponReach: Math.max(1, Math.ceil(self.weaponReach)),
+    budget: input.budget,
+  })
+  const utilityOptions = self.hasUtilityControl && input.budget.actionTime > 0
+    ? [
+        {
+          utilityId: 'primary_utility',
+          cellId: cellIdFor(selfAnchor),
+          actionTimeCost: 1,
+          summary: 'Spend utility action time from the current anchor cell.',
+        },
+      ]
+    : []
+
+  return {
+    budget: cloneCombatBudget(input.budget),
+    reachableCells,
+    attackableCells,
+    utilityOptions,
+  }
+}
+
+function reachableCombatPlanCells(input: {
+  snapshot: CombatTurnSnapshot
+  role: TeamRole
+  start: GridCoord
+  opponent: GridCoord
+  budget: CombatBudget
+}): CombatBoardReachableCell[] {
+  const topology = compileArenaTopology(input.snapshot.arena)
+  const limit = Math.max(0, Math.floor(input.budget.movement))
+  const queue: Array<{ cell: GridCoord; cost: number }> = [{ cell: cloneCell(input.start), cost: 0 }]
+  const bestCost = new Map<string, number>([[cellKey(input.start), 0]])
+
+  for (let cursor = 0; cursor < queue.length; cursor += 1) {
+    const current = queue[cursor]
+
+    if (current.cost >= limit) {
+      continue
+    }
+
+    for (const next of adjacentPlanCells(current.cell)) {
+      if (!isCellInsideArena(input.snapshot.arena, next) || isBlockedAnchorCell(topology, next)) {
+        continue
+      }
+
+      if (sameCell(next, input.opponent)) {
+        // The plan can intentionally path into contact, but not occupy the opponent's anchor as a passive reachable cell.
+        continue
+      }
+
+      const nextCost = current.cost + 1
+      const key = cellKey(next)
+      const prior = bestCost.get(key)
+
+      if (prior !== undefined && prior <= nextCost) {
+        continue
+      }
+
+      bestCost.set(key, nextCost)
+      queue.push({ cell: next, cost: nextCost })
+    }
+  }
+
+  return [...bestCost.entries()]
+    .map(([key, moveCost]) => {
+      const [xRaw, zRaw] = key.split(',')
+      const cell = { x: Number(xRaw), z: Number(zRaw) }
+      const position = arenaCellCenter(topology, cell)
+      const hazards = pathHazards(topology, arenaCellCenter(topology, input.start), position, 0.5)
+
+      return {
+        cellId: cellIdFor(cell),
+        x: cell.x,
+        z: cell.z,
+        moveCost,
+        movementRemaining: Math.max(0, input.budget.movement - moveCost),
+        hazard: hazards.length > 0,
+        ...(hazards.length > 0 ? { hazardIds: hazards.map((hazard) => hazard.id) } : {}),
+      }
+    })
+    .sort((left, right) => left.moveCost - right.moveCost || left.x - right.x || left.z - right.z)
+}
+
+function attackableCombatPlanCells(input: {
+  snapshot: CombatTurnSnapshot
+  role: TeamRole
+  selfReachableCells: CombatBoardReachableCell[]
+  opponent: GridCoord
+  weaponSlotCount: number
+  weaponReach: number
+  budget: CombatBudget
+}): CombatBoardAttackableCell[] {
+  if (input.weaponSlotCount <= 0 || input.budget.actionTime <= 0) {
+    return []
+  }
+
+  const topology = compileArenaTopology(input.snapshot.arena)
+  const slots: Array<'weaponA' | 'weaponB'> = input.weaponSlotCount > 1 ? ['weaponA', 'weaponB'] : ['weaponA']
+  const cells: CombatBoardAttackableCell[] = []
+  const targetWorld = arenaCellCenter(topology, input.opponent)
+
+  for (const reachable of input.selfReachableCells) {
+    const anchor = { x: reachable.x, z: reachable.z }
+    const distance = gridDistance(anchor, input.opponent)
+
+    if (distance > input.weaponReach) {
+      continue
+    }
+
+    if (!hasArenaLineOfSight(topology, arenaCellCenter(topology, anchor), targetWorld)) {
+      continue
+    }
+
+    for (const slot of slots) {
+      const cooldown = input.budget.weaponCooldowns[slot] ?? 0
+
+      if (cooldown > 0) {
+        continue
+      }
+
+      cells.push({
+        cellId: cellIdFor(input.opponent),
+        x: input.opponent.x,
+        z: input.opponent.z,
+        weaponSlot: slot,
+        range: input.weaponReach,
+        distance,
+        actionTimeCost: 1,
+      })
+    }
+  }
+
+  return dedupeAttackableCells(cells)
+}
+
+function adjacentPlanCells(cell: GridCoord): GridCoord[] {
+  return [
+    { x: cell.x + 1, z: cell.z },
+    { x: cell.x - 1, z: cell.z },
+    { x: cell.x, z: cell.z + 1 },
+    { x: cell.x, z: cell.z - 1 },
+  ]
+}
+
+function dedupeAttackableCells(cells: CombatBoardAttackableCell[]): CombatBoardAttackableCell[] {
+  const seen = new Set<string>()
+  const deduped: CombatBoardAttackableCell[] = []
+
+  for (const cell of cells.sort((left, right) => left.distance - right.distance || left.weaponSlot.localeCompare(right.weaponSlot))) {
+    const key = `${cell.cellId}:${cell.weaponSlot}`
+
+    if (seen.has(key)) {
+      continue
+    }
+
+    seen.add(key)
+    deduped.push(cell)
+  }
+
+  return deduped
+}
+
+function cloneCombatBudget(budget: CombatBudget): CombatBudget {
+  return {
+    movement: budget.movement,
+    actionTime: budget.actionTime,
+    weaponCooldowns: { ...budget.weaponCooldowns },
+  }
 }

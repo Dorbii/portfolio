@@ -40,9 +40,9 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/act': {
         post: {
           operationId: 'gptAct',
-          summary: 'Submit one legal GameMaster action id',
+          summary: 'Submit one GPT action or combat round plan',
           description:
-            'Submit exactly one actionId copied from the latest packet. The server fills actionSetId and decisionVersion from current role state, and can use the selected legal action parameterExamples when parameters are omitted.',
+            'Submit exactly one actionId copied from the latest packet. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -199,33 +199,35 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             steps: {
               type: 'array',
-              maxItems: 8,
+              maxItems: 16,
               description:
-                'combat_plan only: ordered semantic combat steps. Each item uses actionId move, attack, utility, hold, or surrender plus cellId or attackActionId when needed.',
+                'combat_plan only: current-round CombatPlanStep array. Each item uses kind move, attack, utility, or end_turn. This is not a future-turn queue.',
               items: {
                 type: 'object',
-                additionalProperties: true,
+                additionalProperties: false,
+                required: ['kind'],
                 properties: {
-                  actionId: {
+                  kind: {
                     type: 'string',
-                    description: 'move, attack, utility, hold, or surrender.',
+                    enum: ['move', 'attack', 'utility', 'end_turn'],
+                    description: 'Intent step kind consumed by the lockstep round resolver.',
                   },
                   cellId: {
                     type: 'string',
-                    description: 'move/utility destination cell id from packet.board.reachableCells.',
-                  },
-                  attackActionId: {
-                    type: 'string',
-                    description:
-                      'attack action id from packet.board.reachableCells[].attackActionIds[].actionId.',
+                    description: 'move/utility destination cell id from packet.board.reachableCells or utilityOptions.',
                   },
                   targetCellId: {
                     type: 'string',
-                    description: 'optional attack target cell id.',
+                    description: 'attack target cell id from packet.board.attackableCells.',
                   },
                   weaponSlot: {
                     type: 'string',
-                    description: 'optional weaponA or weaponB.',
+                    enum: ['weaponA', 'weaponB'],
+                    description: 'attack weapon slot.',
+                  },
+                  utilityId: {
+                    type: 'string',
+                    description: 'optional utility id from packet.board.utilityOptions.',
                   },
                 },
               },

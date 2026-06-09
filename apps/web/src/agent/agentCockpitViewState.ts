@@ -619,9 +619,21 @@ function nextActionForRoleState(
   }
 
   if (state.phase === 'combat_turn') {
+    if (state.gameMaster?.combat) {
+      if (state.gameMaster.combat.submitted || state.combat?.submitted[state.role]) {
+        return isObserverCockpit
+          ? 'This agent has locked a combat round plan. Compare submitted plan status with the opponent and wait for resolution.'
+          : 'Wait for the opponent plan or the turn deadline, then continue from the next packet.'
+      }
+
+      return isObserverCockpit
+        ? `Inspect the lockstep combat packet for round ${state.gameMaster.combat.round}; review budget, board.ascii, reachableCells, and attackableCells.`
+        : `Submit a CombatRoundPlan for round ${state.gameMaster.combat.round} using packet.combat.budget, board.reachableCells, and board.attackableCells.`
+    }
+
     if (state.combat?.submitted[state.role]) {
       return isObserverCockpit
-        ? 'This agent locked a combat action. Compare pending action status with the opponent and wait for resolution.'
+        ? 'This agent locked a legacy combat action. Compare pending action status with the opponent and wait for resolution.'
         : 'Wait for the opponent action or the turn deadline, then continue from the next packet.'
     }
 
@@ -654,6 +666,14 @@ function helperCallForRoleState(
   }
 
   if (state.phase === 'combat_turn') {
+    if (state.gameMaster?.combat) {
+      if (state.gameMaster.combat.submitted || state.combat?.submitted[state.role]) {
+        return `await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
+      }
+
+      return submitCombatPlanHelperForRoleState(state)
+    }
+
     if (state.combat?.submitted[state.role]) {
       return `await window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: ${AGENT_CONTINUATION_TIMEOUT_MS} })`
     }
@@ -686,6 +706,28 @@ function submitActionHelperForRoleState(state: RolePrivateState): string {
     '  decisionVersion: packet.decisionVersion,',
     '  actionId: action.id,',
     '  ...(action.parameterSchema ? { parameters: action.parameterExamples?.[0] ?? {} } : {}),',
+    '})',
+  ].join('\n')
+}
+
+
+function submitCombatPlanHelperForRoleState(state: RolePrivateState): string {
+  const packet = state.gameMaster
+
+  if (!packet?.combat) {
+    return submitActionHelperForRoleState(state)
+  }
+
+  return [
+    'const state = await window.AgentArenaRole.getState()',
+    'const packet = state.gameMaster',
+    'console.log(packet.combat)',
+    'console.log(packet.board?.ascii)',
+    'await window.AgentArenaRole.submitCombatPlan({',
+    "  action: 'submit_combat_round_plan',",
+    '  round: packet.combat.round,',
+    '  decisionVersion: packet.combat.decisionVersion,',
+    "  steps: [{ kind: 'end_turn' }], // replace with move/attack/utility steps inside packet.combat.budget",
     '})',
   ].join('\n')
 }

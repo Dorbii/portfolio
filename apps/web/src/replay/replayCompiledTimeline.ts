@@ -177,5 +177,9 @@ function replayEventRole(event: ReplayEvent): TeamRole | undefined {
     return event.bot
   }
 
+  if (event.type === 'push') {
+    return event.defender
+  }
+
   return undefined
 }

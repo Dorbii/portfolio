@@ -9,8 +9,11 @@ import type {
   BotPose,
   CanonicalGameAction,
   CombatBotSnapshot,
+  CombatBudget,
+  CombatTurnSnapshot,
   GameMasterActionKind,
   GridCoord,
+  MachineCapabilities,
   TeamRole,
 } from '../../schemas/src/index.js'
 import {
@@ -22,6 +25,7 @@ import {
   worldToArenaCell,
 } from './arenaTopology.js'
 import {
+  buildCombatPlanAffordances,
   combatActionCommand,
   combatLegalActionForPacket,
   combatActionMovementOverride,
@@ -463,4 +467,75 @@ function cloneCell<T extends GridCoord>(cell: T): T {
 
 function cellCoord(cell: GridCoord): GridCoord {
   return { x: cell.x, z: cell.z }
+}
+
+export type BuildCombatPlanBoardViewInput = BuildAgentBoardViewInput & {
+  snapshot: CombatTurnSnapshot
+  budget: CombatBudget
+  machineCapabilities?: MachineCapabilities
+}
+
+export function buildCombatPlanBoardView(input: BuildCombatPlanBoardViewInput): AgentBoardView {
+  const base = buildAgentBoardView(input)
+  const affordances = buildCombatPlanAffordances({
+    role: input.role,
+    snapshot: input.snapshot,
+    budget: input.budget,
+    machineCapabilities: input.machineCapabilities,
+  })
+  const ascii = renderCombatPlanAscii(base, affordances.reachableCells.map((cell) => cell.cellId), affordances.attackableCells.map((cell) => cell.cellId))
+
+  return {
+    ...base,
+    ascii,
+    reachableCells: affordances.reachableCells,
+    attackableCells: affordances.attackableCells,
+    utilityOptions: affordances.utilityOptions,
+  }
+}
+
+function renderCombatPlanAscii(
+  board: AgentBoardView,
+  reachableCellIds: string[],
+  attackableCellIds: string[],
+): string {
+  const bounds = board.grid ?? arenaGridBounds(board.arena)
+  const byCellId = new Map((board.cells ?? []).map((cell) => [cell.cellId, cell]))
+  const reachable = new Set(reachableCellIds)
+  const attackable = new Set(attackableCellIds)
+  const lines: string[] = []
+
+  for (let z = bounds.zMin; z <= bounds.zMax; z += 1) {
+    let line = ''
+
+    for (let x = bounds.xMin; x <= bounds.xMax; x += 1) {
+      const cellId = cellIdFor({ x, z })
+      const cell = byCellId.get(cellId)
+
+      if (!cell?.inBounds) {
+        line += ' '
+        continue
+      }
+
+      if (cell.occupant === 'self') {
+        line += 'S'
+      } else if (cell.occupant === 'opponent') {
+        line += attackable.has(cellId) ? 'T' : 'O'
+      } else if (cell.blocksMovement) {
+        line += '#'
+      } else if (attackable.has(cellId)) {
+        line += '*'
+      } else if (reachable.has(cellId)) {
+        line += '+'
+      } else if (cell.hazardIds && cell.hazardIds.length > 0) {
+        line += '!'
+      } else {
+        line += '.'
+      }
+    }
+
+    lines.push(line)
+  }
+
+  return lines.join('\n')
 }

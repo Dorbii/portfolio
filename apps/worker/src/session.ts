@@ -10,6 +10,10 @@ import {
   type ActiveActionSet,
   type AgentBootstrapRequest,
   type CanonicalGameAction,
+  type CombatBudget,
+  type CombatPlanStep,
+  type CombatRoundPlan,
+  type CombatRoundPlanSubmission,
   type GameMasterActionKind,
   type GameMasterActionParameters,
   type GameMasterActionSubmission,
@@ -29,7 +33,6 @@ import {
   type SharedDebrief,
   type StoredDesign,
   type TeamRole,
-  type TurnCommand,
   type ValidationIssue,
   type BotDesignSnapshot,
   type BotBlueprint,
@@ -40,25 +43,27 @@ import {
   defaultTacticsForBlueprint,
   deriveControls,
 } from '../../../packages/catalog/src/index.js'
-import { createReplayTimeline } from '../../../packages/replay/src/index.js'
+import { createReplayTimeline, type ReplayTimeline } from '../../../packages/replay/src/index.js'
 import {
   applyLoadoutAction,
   botDesignSnapshotToLegacyBotBlueprintProjection,
-  buildCombatActionSet,
   buildAgentBoardView,
+  buildCombatPlanBoardView,
   buildLoadoutActionSet,
   buildFightDossier,
-  combatLegalActionForPacket,
   deriveMachineCapabilities,
-  isCombatAction,
+  deriveCombatBudget,
   ensureLoadoutBuildState,
   isLoadoutBuilderAction,
   LOADOUT_PART_LIMIT,
   loadoutLegalActionForPacket,
   machineDesignToLegacyBotBlueprintProjection,
   machineDesignToLegacyBotDesignSnapshotProjection,
+  normalizeCombatRoundPlanSubmission as normalizeCombatRoundPlanSubmissionForSim,
+  resolveLockstepCombatRound,
   resolveSubmittedGameActions,
   mergeFightDossier,
+  validateCombatRoundPlanAgainstBoard,
   type CombatResult,
   type ResolveCombatInput,
 } from '../../../packages/sim/src/index.js'
@@ -132,7 +137,6 @@ import type {
   RoleBearerAuth,
   SessionResult,
   StoredCombatState,
-  StoredCombatPlanStep,
   LockedGameAction,
   StoredRoleState,
   StoredSessionState,
@@ -265,7 +269,6 @@ export class SessionCoordinator {
 
     this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
-    this.applyQueuedCombatPlans(now)
 
     return buildPublicSessionState(this.state)
   }
@@ -456,7 +459,6 @@ export class SessionCoordinator {
     this.resolveTimedTransitions(now)
     this.markCombatTurnSeen(auth.value.role.role, now)
     this.ensureGameMasterActionSets(now)
-    this.applyQueuedCombatPlans(now)
 
     return {
       ok: true,
@@ -478,7 +480,6 @@ export class SessionCoordinator {
     this.resolveTimedTransitions(now)
     this.markCombatTurnSeen(auth.value.role.role, now)
     this.ensureGameMasterActionSets(now)
-    this.applyQueuedCombatPlans(now)
 
     return {
       ok: true,
@@ -548,6 +549,18 @@ export class SessionCoordinator {
     }
 
     const canonicalAction = resolvedSubmission.action
+
+    if (
+      this.state.phase === 'combat_turn' &&
+      this.state.combat?.mode === 'lockstep_round_plan' &&
+      canonicalAction.kind !== 'surrender'
+    ) {
+      return relayError(
+        'SUBMISSION_INVALID',
+        'Combat movement, attack, and utility now require submit_combat_round_plan. Only surrender is accepted through submit_game_action during combat.',
+      )
+    }
+
     const requestHash = hashGameMasterSubmission(
       submission,
       resolvedSubmission.normalizedParameters,
@@ -614,6 +627,140 @@ export class SessionCoordinator {
     }
   }
 
+  async submitCombatRoundPlan(
+    roleToken: string,
+    request: unknown,
+  ): Promise<
+    SessionResult<{
+      packet: GameMasterPacket
+      publicState: ReturnType<typeof buildPublicSessionState>
+      submittedPlan?: CombatRoundPlan
+    }>
+  > {
+    const now = this.clock()
+    const auth = await this.authorizeRoleAction(roleToken, 'action', now)
+
+    if (!auth.ok) {
+      return auth as SessionResult<{
+        packet: GameMasterPacket
+        publicState: ReturnType<typeof buildPublicSessionState>
+        submittedPlan?: CombatRoundPlan
+      }>
+    }
+
+    this.resolveTimedTransitions(now)
+    this.ensureGameMasterActionSets(now)
+
+    return this.submitCombatRoundPlanForRole(auth.value.role.role, request, now)
+  }
+
+  private submitCombatRoundPlanForRole(
+    roleName: TeamRole,
+    request: unknown,
+    now: string,
+  ): SessionResult<{
+    packet: GameMasterPacket
+    publicState: ReturnType<typeof buildPublicSessionState>
+    submittedPlan?: CombatRoundPlan
+  }> {
+    const combat = this.state.combat
+
+    if (this.state.phase !== 'combat_turn' || !combat) {
+      return relayError('PHASE_CLOSED', 'Combat round plans can only be submitted during combat.')
+    }
+
+    if (!isCombatTurnOpen(this.state, now)) {
+      return relayError('PHASE_CLOSED', `Combat round ${combat.nextTick} opens at ${combat.openedAt}.`)
+    }
+
+    const normalized = normalizeCombatRoundPlanSubmissionForSim(request)
+
+    if (!normalized.ok) {
+      return relayError('SUBMISSION_INVALID', 'Combat round plan failed validation.', (normalized as { ok: false; issues: ValidationIssue[] }).issues)
+    }
+
+    const submission = normalized.submission
+    const decisionVersion = decisionVersionForRole(this.state, roleName)
+
+    if (submission.round !== this.state.round) {
+      return relayError('SUBMISSION_INVALID', `Combat round plan round ${submission.round} does not match current round ${this.state.round}.`)
+    }
+
+    if (submission.decisionVersion !== decisionVersion) {
+      return relayError('SUBMISSION_INVALID', 'decisionVersion is stale or does not match the current combat round.')
+    }
+
+    const budget = this.ensureCombatBudgetForRole(roleName)
+    const selfCombat = roleName === 'red' ? combat.snapshot.red : combat.snapshot.blue
+    const opponentCombat = roleName === 'red' ? combat.snapshot.blue : combat.snapshot.red
+    const board = buildCombatPlanBoardView({
+      arena: this.state.arena,
+      role: roleName,
+      self: selfCombat,
+      opponent: opponentCombat,
+      actions: [],
+      snapshot: combat.snapshot,
+      budget,
+      machineCapabilities: machineCapabilitiesForRole(this.state.roles[roleName]),
+    })
+    const validation = validateCombatRoundPlanAgainstBoard({
+      submission,
+      budget,
+      board,
+    })
+
+    if (!validation.ok) {
+      return relayError('SUBMISSION_INVALID', 'Combat round plan failed board/budget validation.', (validation as { ok: false; issues: ValidationIssue[] }).issues)
+    }
+
+    const plan: CombatRoundPlan = {
+      role: roleName,
+      round: this.state.round,
+      decisionVersion,
+      steps: validation.normalizedSteps.length > 0
+        ? validation.normalizedSteps.map(cloneCombatPlanStep)
+        : [{ kind: 'end_turn' }],
+      submittedAt: now,
+    }
+    const existing = combat.submittedPlans?.[roleName]
+
+    if (existing) {
+      if (combatRoundPlansEquivalent(existing, plan)) {
+        return {
+          ok: true,
+          value: {
+            packet: this.buildGameMasterPacket(roleName, now),
+            publicState: this.getPublicState(),
+            submittedPlan: existing,
+          },
+        }
+      }
+
+      return relayError('ALREADY_SUBMITTED', `${roleName} already submitted a different combat round plan.`)
+    }
+
+    combat.submittedPlans = {
+      ...(combat.submittedPlans ?? {}),
+      [roleName]: plan,
+    }
+    this.touch(now)
+    this.appendEvent(
+      'game_action_submitted',
+      `${roleName} submitted ${plan.steps.length} combat round plan step${plan.steps.length === 1 ? '' : 's'}.`,
+      now,
+    )
+    this.resolveCombatTurnIfReady(now)
+
+    return {
+      ok: true,
+      value: {
+        packet: this.buildGameMasterPacket(roleName, now),
+        publicState: this.getPublicState(),
+        submittedPlan: plan,
+      },
+    }
+  }
+
   async submitGptCombatPlan(
     roleToken: string,
     request: unknown,
@@ -621,48 +768,57 @@ export class SessionCoordinator {
     SessionResult<{
       packet: GameMasterPacket
       publicState: ReturnType<typeof buildPublicSessionState>
-      queuedSteps: number
+      submittedSteps: number
+      submittedPlan?: CombatRoundPlan
     }>
   > {
     const now = this.clock()
     const auth = await this.authorizeRoleAction(roleToken, 'action', now)
 
     if (!auth.ok) {
-      return auth
+      return auth as SessionResult<{
+        packet: GameMasterPacket
+        publicState: ReturnType<typeof buildPublicSessionState>
+        submittedSteps: number
+        submittedPlan?: CombatRoundPlan
+      }>
     }
 
     this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
     if (this.state.phase !== 'combat_turn' || !this.state.combat) {
-      return relayError('PHASE_CLOSED', 'Combat plans can only be queued during combat.')
+      return relayError('PHASE_CLOSED', 'Combat plans can only be submitted during combat.')
     }
 
-    const steps = parseStoredCombatPlanSteps(request)
-
-    if (steps.length === 0) {
-      return relayError('SUBMISSION_INVALID', 'Combat plan requires at least one move, attack, utility, hold, or surrender step.')
-    }
-
-    const submittedStepCount = steps.length
-    this.state.combat.plans = {
-      ...(this.state.combat.plans ?? {}),
-      [auth.value.role.role]: steps,
-    }
-    this.touch(now)
-    this.appendEvent(
-      'game_action_submitted',
-      `${auth.value.role.role} queued ${steps.length} combat plan step${steps.length === 1 ? '' : 's'}.`,
-      now,
+    const roleName = auth.value.role.role
+    const submission = combatRoundPlanSubmissionFromGptRequest(
+      request,
+      this.state.round,
+      decisionVersionForRole(this.state, roleName),
     )
-    this.applyQueuedCombatPlans(now)
+
+    if (!submission) {
+      return relayError('SUBMISSION_INVALID', 'Combat plan requires at least one move, attack, utility, or end_turn step.')
+    }
+
+    const submittedStepCount = submission.steps.length
+    const result = this.submitCombatRoundPlanForRole(roleName, submission, now)
+
+    if (!result.ok) {
+      return result as SessionResult<{
+        packet: GameMasterPacket
+        publicState: ReturnType<typeof buildPublicSessionState>
+        submittedSteps: number
+        submittedPlan?: CombatRoundPlan
+      }>
+    }
 
     return {
       ok: true,
       value: {
-        packet: this.buildGameMasterPacket(auth.value.role.role, now),
-        publicState: this.getPublicState(),
-        queuedSteps: submittedStepCount,
+        ...result.value,
+        submittedSteps: submittedStepCount,
       },
     }
   }
@@ -1041,9 +1197,13 @@ export class SessionCoordinator {
     const role = this.state.roles[roleName]
     const activeSet = this.state.activeActionSets?.[roleName]
     const locked = this.state.lockedActions?.[roleName]
-    const legalActions = activeSet && !locked ? legalActionsForPacket(activeSet) : []
-    const blockedActions = activeSet && !locked ? activeSet.blockedActions ?? [] : []
     const combat = this.state.phase === 'combat_turn' ? this.state.combat : undefined
+    const planSubmitted = Boolean(combat?.submittedPlans?.[roleName])
+    const rawLegalActions = activeSet && !locked && !planSubmitted ? legalActionsForPacket(activeSet) : []
+    const legalActions = combat?.mode === 'lockstep_round_plan'
+      ? rawLegalActions.filter((action) => action.kind === 'surrender')
+      : rawLegalActions
+    const blockedActions = activeSet && !locked && !planSubmitted ? activeSet.blockedActions ?? [] : []
     const selfCombat = combat
       ? roleName === 'red' ? combat.snapshot.red : combat.snapshot.blue
       : undefined
@@ -1053,27 +1213,52 @@ export class SessionCoordinator {
     const buildState = gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
       ? ensureLoadoutBuildState(roleName, role.loadoutBuildState)
       : undefined
-    const board = selfCombat && opponentCombat
-      ? buildAgentBoardView({
+    const combatBudget = combat && selfCombat && opponentCombat
+      ? this.ensureCombatBudgetForRole(roleName)
+      : undefined
+    const board = selfCombat && opponentCombat && combatBudget
+      ? buildCombatPlanBoardView({
           arena: this.state.arena,
           role: roleName,
           self: selfCombat,
           opponent: opponentCombat,
-          actions: activeSet && !locked ? Object.values(activeSet.actions) : [],
+          actions: [],
+          snapshot: combat!.snapshot,
+          budget: combatBudget,
+          machineCapabilities: machineCapabilitiesForRole(role),
         })
-      : { arena: this.state.arena }
-    const submit = activeSet && legalActions.length > 0
+      : selfCombat && opponentCombat
+        ? buildAgentBoardView({
+            arena: this.state.arena,
+            role: roleName,
+            self: selfCombat,
+            opponent: opponentCombat,
+            actions: activeSet && !locked ? Object.values(activeSet.actions) : [],
+          })
+        : { arena: this.state.arena }
+    const submit = combat?.mode === 'lockstep_round_plan' && combatBudget && !planSubmitted && isCombatTurnOpen(this.state, now)
       ? {
           method: 'POST' as const,
-          path: `/sessions/${this.state.id}/action`,
+          path: `/sessions/${this.state.id}/combat-plan`,
           body: {
-            action: 'submit_game_action' as const,
-            actionSetId: activeSet.actionSetId,
-            decisionVersion: activeSet.decisionVersion,
-            actionId: '<legalActions.id>',
+            action: 'submit_combat_round_plan' as const,
+            decisionVersion: decisionVersionForRole(this.state, roleName),
+            round: this.state.round,
+            steps: [{ kind: 'end_turn' as const }],
           },
         }
-      : undefined
+      : activeSet && legalActions.length > 0
+        ? {
+            method: 'POST' as const,
+            path: `/sessions/${this.state.id}/action`,
+            body: {
+              action: 'submit_game_action' as const,
+              actionSetId: activeSet.actionSetId,
+              decisionVersion: activeSet.decisionVersion,
+              actionId: '<legalActions.id>',
+            },
+          }
+        : undefined
 
     return cloneJson({
       sessionId: this.state.id,
@@ -1101,6 +1286,37 @@ export class SessionCoordinator {
       ...(activeSet?.catalogStore ? { store: activeSet.catalogStore } : {}),
       ...(buildState ? { buildState } : {}),
       board,
+      ...(combat && selfCombat && opponentCombat && combatBudget
+        ? {
+            combat: {
+              round: this.state.round,
+              decisionVersion: decisionVersionForRole(this.state, roleName),
+              deadlineAt: combat.deadlineAt,
+              submitted: planSubmitted,
+              opponentSubmitted: Boolean(combat.submittedPlans?.[opponentRoleName(roleName)]),
+              budget: combatBudget,
+              self: {
+                hp: selfCombat.health,
+                maxHp: selfCombat.maxHealth,
+                mass: selfCombat.stats.mass,
+                drive: selfCombat.stats.mobility,
+                weaponReach: selfCombat.weaponReach,
+                anchor: boardAnchor(board, 'self'),
+              },
+              opponent: {
+                hp: opponentCombat.health,
+                maxHp: opponentCombat.maxHealth,
+                mass: opponentCombat.stats.mass,
+                drive: opponentCombat.stats.mobility,
+                weaponReach: opponentCombat.weaponReach,
+                anchor: boardAnchor(board, 'opponent'),
+              },
+              ...(combat.submittedPlans?.[roleName]
+                ? { submittedPlan: combat.submittedPlans[roleName] }
+                : {}),
+            },
+          }
+        : {}),
       ...(selfCombat && opponentCombat
         ? {
       visibleState: {
@@ -1212,122 +1428,15 @@ export class SessionCoordinator {
   }
 
   private resolveLockedActionsIfReady(now = this.clock()): void {
-    if (gameMasterPhaseForSession(this.state.phase) === 'choose_loadout') {
-      if (TEAM_ROLES.every((roleName) => this.state.roles[roleName].loadoutConfirmedAt)) {
-        this.state.activeActionSets = undefined
-        this.state.lockedActions = undefined
-        this.openCombatTurn(now)
-      }
-
+    if (gameMasterPhaseForSession(this.state.phase) !== 'choose_loadout') {
       return
     }
 
-    if (this.state.phase !== 'combat_turn' || !this.state.combat) {
-      return
+    if (TEAM_ROLES.every((roleName) => this.state.roles[roleName].loadoutConfirmedAt)) {
+      this.state.activeActionSets = undefined
+      this.state.lockedActions = undefined
+      this.openCombatTurn(now)
     }
-
-    const redAction = this.lockedCanonicalAction('red')
-    const blueAction = this.lockedCanonicalAction('blue')
-
-    if (!redAction || !blueAction) {
-      return
-    }
-    if (!isCombatAction(redAction) || !isCombatAction(blueAction)) {
-      return
-    }
-
-    this.state.combat.pending = {
-      red: redAction,
-      blue: blueAction,
-    }
-    this.resolveCombatTurnIfReady(now)
-  }
-
-  private applyQueuedCombatPlans(now: string): void {
-    const combat = this.state.combat
-
-    if (
-      this.state.phase !== 'combat_turn' ||
-      !combat?.plans ||
-      !isCombatTurnOpen(this.state, now)
-    ) {
-      return
-    }
-
-    let lockedAny = false
-
-    for (const roleName of TEAM_ROLES) {
-      const queue = combat.plans[roleName]
-      const activeSet = this.state.activeActionSets?.[roleName]
-
-      if (!queue?.length || !activeSet || this.state.lockedActions?.[roleName] || combat.pending[roleName]) {
-        continue
-      }
-
-      while (queue.length > 0) {
-        const step = queue.shift()!
-        const resolved = resolveQueuedCombatPlanStep({
-          role: roleName,
-          state: this.state,
-          activeSet,
-          step,
-        })
-
-        if (!resolved) {
-          continue
-        }
-
-        const submission: GameMasterActionSubmission = {
-          action: 'submit_game_action',
-          actionSetId: activeSet.actionSetId,
-          decisionVersion: activeSet.decisionVersion,
-          actionId: resolved.action.id,
-          ...(resolved.parameters !== undefined ? { parameters: resolved.parameters } : {}),
-        }
-        const resolvedSubmission = resolveSubmittedGameAction(activeSet, submission)
-
-        if (!resolvedSubmission.ok || !isCombatAction(resolvedSubmission.action)) {
-          continue
-        }
-
-        const requestHash = hashGameMasterSubmission(
-          submission,
-          resolvedSubmission.normalizedParameters,
-        )
-        this.lockRoleAction(roleName, activeSet, submission, requestHash, now)
-        this.appendEvent(
-          'game_action_submitted',
-          `${roleName} locked queued combat plan step ${resolvedSubmission.action.id}.`,
-          now,
-        )
-        lockedAny = true
-        break
-      }
-
-      if (queue.length === 0) {
-        delete combat.plans[roleName]
-      }
-    }
-
-    if (Object.keys(combat.plans).length === 0) {
-      combat.plans = undefined
-    }
-
-    if (lockedAny) {
-      this.touch(now)
-      this.resolveLockedActionsIfReady(now)
-    }
-  }
-
-  private lockedCanonicalAction(roleName: TeamRole): CanonicalGameAction | undefined {
-    const lock = this.state.lockedActions?.[roleName]
-    const activeSet = this.state.activeActionSets?.[roleName]
-
-    if (!lock || !activeSet || lock.actionSetId !== activeSet.actionSetId) {
-      return undefined
-    }
-
-    return activeSet.actions[lock.actionId]
   }
 
   private async authorizeRoleAction(
@@ -1508,20 +1617,26 @@ export class SessionCoordinator {
     }
 
     for (const roleName of TEAM_ROLES) {
-      if (combat.pending[roleName]) {
+      if (combat.submittedPlans?.[roleName]) {
         continue
       }
 
-      const role = this.state.roles[roleName]
-      combat.pending[roleName] = createTimeoutCombatAction(
-        roleName,
-        this.state.round,
-        combat.nextTick,
-        controlsForRoleState(role),
-      )
+      const decisionVersion = decisionVersionForRole(this.state, roleName)
+      const timeoutPlan: CombatRoundPlan = {
+        role: roleName,
+        round: this.state.round,
+        decisionVersion,
+        steps: [{ kind: 'end_turn' }],
+        submittedAt: now,
+      }
+
+      combat.submittedPlans = {
+        ...(combat.submittedPlans ?? {}),
+        [roleName]: timeoutPlan,
+      }
       this.appendEvent(
         'turn_command_timed_out',
-        `${roleName} timed out on combat turn ${combat.nextTick}; no-op command applied.`,
+        `${roleName} timed out on combat round ${combat.nextTick}; end_turn plan applied.`,
         now,
       )
     }
@@ -1536,20 +1651,27 @@ export class SessionCoordinator {
       return
     }
 
-    const redAction = combat.pending.red
-    const blueAction = combat.pending.blue
+    const redPlan = combat.submittedPlans?.red
+    const bluePlan = combat.submittedPlans?.blue
 
-    if (!redAction || !blueAction) {
+    if (!redPlan || !bluePlan) {
       return
     }
 
-    combat.actions.red.push(redAction)
-    combat.actions.blue.push(blueAction)
-
-    const resolution = resolveSubmittedGameActions(
-      this.buildCombatInput(combat.baselineMachineDesigns),
-      combat.actions,
-    )
+    const resolution = resolveLockstepCombatRound({
+      ...this.buildCombatInput(combat.baselineMachineDesigns),
+      roundIndex: combat.nextTick,
+      snapshot: combat.snapshot,
+      plans: {
+        red: redPlan,
+        blue: bluePlan,
+      },
+      budgets: combat.budgets,
+      priorEvents: combat.lockstepEvents,
+      priorLog: combat.lockstepLog,
+      elapsedSubsteps: combat.elapsedSubsteps,
+      machineRuntime: combat.machineRuntime,
+    })
 
     if (resolution.status === 'complete') {
       this.applyMachineRuntimeState(resolution.result.machineRuntime)
@@ -1558,14 +1680,19 @@ export class SessionCoordinator {
     }
 
     this.applyMachineRuntimeState(resolution.machineRuntime)
+    this.state.replay = this.replayPayloadFromTimeline(resolution.replay)
     this.state.combat = this.createCombatState({
-      nextTick: resolution.nextTick,
+      nextTick: resolution.nextRound,
       snapshot: resolution.snapshot,
       now,
       opensAt: addMilliseconds(now, COMBAT_TURN_HANDOFF_DELAY_MS),
       actions: combat.actions,
-      plans: combat.plans,
       baselineMachineDesigns: combat.baselineMachineDesigns,
+      lockstepEvents: resolution.events,
+      lockstepLog: resolution.log,
+      elapsedSubsteps: resolution.elapsedSubsteps,
+      machineRuntime: resolution.machineRuntime,
+      planConsumption: resolution.consumed,
     })
     this.state.activeActionSets = undefined
     this.state.lockedActions = undefined
@@ -1699,6 +1826,48 @@ export class SessionCoordinator {
     this.touch(now)
   }
 
+  private ensureCombatBudgetForRole(roleName: TeamRole): CombatBudget {
+    const combat = this.state.combat
+
+    if (!combat) {
+      return { movement: 0, actionTime: 0, weaponCooldowns: {} }
+    }
+
+    const existing = combat.budgets?.[roleName]
+
+    if (existing) {
+      return cloneCombatBudget(existing)
+    }
+
+    const budget = deriveCombatBudget({
+      role: roleName,
+      snapshot: combat.snapshot,
+      machineCapabilities: machineCapabilitiesForRole(this.state.roles[roleName]),
+    })
+
+    combat.budgets = {
+      ...(combat.budgets ?? {}),
+      [roleName]: budget,
+    }
+
+    return cloneCombatBudget(budget)
+  }
+
+  private createCombatBudgets(snapshot: StoredCombatState['snapshot']): Record<TeamRole, CombatBudget> {
+    return {
+      red: deriveCombatBudget({
+        role: 'red',
+        snapshot,
+        machineCapabilities: machineCapabilitiesForRole(this.state.roles.red),
+      }),
+      blue: deriveCombatBudget({
+        role: 'blue',
+        snapshot,
+        machineCapabilities: machineCapabilitiesForRole(this.state.roles.blue),
+      }),
+    }
+  }
+
   private createCombatState(input: {
     nextTick: number
     snapshot: StoredCombatState['snapshot']
@@ -1706,18 +1875,28 @@ export class SessionCoordinator {
     opensAt?: string
     startGate?: boolean
     actions: StoredCombatState['actions']
-    plans?: StoredCombatState['plans']
+    submittedPlans?: StoredCombatState['submittedPlans']
+    budgets?: StoredCombatState['budgets']
+    planConsumption?: StoredCombatState['planConsumption']
+    lockstepEvents?: StoredCombatState['lockstepEvents']
+    lockstepLog?: StoredCombatState['lockstepLog']
+    elapsedSubsteps?: number
+    machineRuntime?: StoredCombatState['machineRuntime']
     baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns']
   }): StoredCombatState {
     const openedAt = input.startGate
       ? addMilliseconds(input.now, COMBAT_TURN_START_GATE_GRACE_MS)
       : input.opensAt ?? input.now
+    const budgets = input.budgets ?? this.createCombatBudgets(input.snapshot)
 
     return {
       nextTick: input.nextTick,
+      mode: 'lockstep_round_plan',
       openedAt,
       deadlineAt: addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000),
       turnSeconds: COMBAT_TURN_SECONDS,
+      roundSeconds: COMBAT_TURN_SECONDS,
+      decisionVersion: this.state.round * 1000 + 200 + input.nextTick,
       ...(input.startGate
         ? {
             startGate: {
@@ -1728,7 +1907,13 @@ export class SessionCoordinator {
         : {}),
       ...(input.baselineMachineDesigns ? { baselineMachineDesigns: input.baselineMachineDesigns } : {}),
       actions: input.actions,
-      ...(input.plans ? { plans: input.plans } : {}),
+      budgets,
+      ...(input.submittedPlans ? { submittedPlans: input.submittedPlans } : {}),
+      ...(input.planConsumption ? { planConsumption: input.planConsumption } : {}),
+      ...(input.lockstepEvents ? { lockstepEvents: input.lockstepEvents } : {}),
+      ...(input.lockstepLog ? { lockstepLog: input.lockstepLog } : {}),
+      ...(input.elapsedSubsteps !== undefined ? { elapsedSubsteps: input.elapsedSubsteps } : {}),
+      ...(input.machineRuntime ? { machineRuntime: input.machineRuntime } : {}),
       pending: {},
       snapshot: input.snapshot,
     }
@@ -1876,30 +2061,40 @@ export class SessionCoordinator {
     return machineDesigns.red || machineDesigns.blue ? machineDesigns : undefined
   }
 
-  private completeCombat(result: CombatResult, now: string): void {
+  private replayPayloadFromTimeline(replay: ReplayTimeline): LegacyReplayPayload {
     const red = this.state.roles.red
     const blue = this.state.roles.blue
 
     if (!red.teamIdentity || !blue.teamIdentity) {
-      throw new Error('Both team identities are required to complete combat.')
+      throw new Error('Both team identities are required to create a replay payload.')
     }
 
-    const botBlueprints = {
-      red: cloneJson(this.replayCompatibilityBlueprintForRole(red)),
-      blue: cloneJson(this.replayCompatibilityBlueprintForRole(blue)),
-    }
     const machineDesigns = this.replayMachineDesignsForRoles()
-    const fightId = `fight_${this.state.round}`
 
-    this.state.replay = {
-      ...result.replay,
+    return {
+      ...cloneJson(replay),
       teamIdentities: {
         red: cloneJson(red.teamIdentity),
         blue: cloneJson(blue.teamIdentity),
       },
-      botBlueprints,
+      botBlueprints: {
+        red: cloneJson(this.replayCompatibilityBlueprintForRole(red)),
+        blue: cloneJson(this.replayCompatibilityBlueprintForRole(blue)),
+      },
       ...(machineDesigns ? { machineDesigns } : {}),
     }
+  }
+
+  private completeCombat(result: CombatResult, now: string): void {
+    const red = this.state.roles.red
+    const blue = this.state.roles.blue
+    const botBlueprints = {
+      red: cloneJson(this.replayCompatibilityBlueprintForRole(red)),
+      blue: cloneJson(this.replayCompatibilityBlueprintForRole(blue)),
+    }
+    const fightId = `fight_${this.state.round}`
+
+    this.state.replay = this.replayPayloadFromTimeline(result.replay)
     this.state.fightDossier = mergeFightDossier(
       this.state.fightDossier,
       buildFightDossier({
@@ -2002,60 +2197,6 @@ export class SessionCoordinator {
 
 }
 
-function createTimeoutCombatAction(
-  roleName: TeamRole,
-  round: number,
-  tick: number,
-  controls: StoredRoleState['controls'],
-): CanonicalGameAction {
-  const command: TurnCommand = { tick }
-  const move = controls?.movement.includes('brake')
-    ? 'brake'
-    : controls?.movement[0]
-
-  if (move) {
-    command.move = move
-  }
-  if (controls?.weaponA?.includes('hold')) {
-    command.weaponA = 'hold'
-  }
-  if (controls?.weaponB?.includes('hold')) {
-    command.weaponB = 'hold'
-  }
-  if (controls?.utility?.includes('hold')) {
-    command.utility = 'hold'
-  }
-
-  return createCanonicalCombatAction(roleName, round, tick, command, 'timeout')
-}
-
-function createCanonicalCombatAction(
-  roleName: TeamRole,
-  round: number,
-  tick: number,
-  command: TurnCommand,
-  source: string,
-): CanonicalGameAction {
-  return {
-    id: `combat.${roleName}.r${round}.t${tick}.${source}.${command.move ?? 'hold'}`,
-    kind: command.weaponA === 'fire' || command.weaponB === 'fire'
-      ? command.move && command.move !== 'brake' ? 'move_and_attack' : 'attack'
-      : command.utility === 'activate'
-        ? 'use_utility'
-        : command.move && command.move !== 'brake'
-          ? 'move'
-          : 'hold',
-    role: roleName,
-    payload: {
-      scope: 'combat_turn',
-      source,
-      command,
-      label: source === 'timeout' ? 'Timed-out hold' : 'Server-selected combat action',
-      summary: 'Server-wrapped canonical combat action.',
-    },
-  }
-}
-
 function controlsForStoredLegacyDesign(design: StoredDesign): GeneratedControls | undefined {
   if (design.version === 'machine:v1') {
     return undefined
@@ -2087,24 +2228,6 @@ function oppositeRole(role: TeamRole): TeamRole {
 
 function capitalizeRole(role: TeamRole): string {
   return role === 'red' ? 'Red' : 'Blue'
-}
-
-function controlsForRoleState(role: StoredRoleState): StoredRoleState['controls'] {
-  if (role.storedDesign?.version === 'machine:v1') {
-    return { movement: ['brake'] }
-  }
-
-  if (role.controls) {
-    return role.controls
-  }
-  if (role.storedDesign) {
-    return controlsForStoredLegacyDesign(role.storedDesign)
-  }
-  if (role.currentDesign) {
-    return deriveControls(botDesignSnapshotToLegacyBotBlueprintProjection(role.currentDesign))
-  }
-
-  return { movement: ['brake'] }
 }
 
 function machineCapabilitiesForRole(role: StoredRoleState) {
@@ -2298,24 +2421,50 @@ function createGameMasterActionSet(
     throw new Error('Combat action sets require an active combat state.')
   }
 
-  const role = state.roles[roleName]
-  const machineCapabilities = machineCapabilitiesForRole(role)
-
-  return buildCombatActionSet({
-    role: roleName,
-    round: state.round,
-    tick: state.combat.nextTick,
-    decisionVersion: decisionVersionForRole(state, roleName),
-    actionSetId: actionSetIdForState(state, roleName),
-    createdAt: now,
-    catalogVersion: GAME_MASTER_CATALOG_VERSION,
-    arenaVersion: `${GAME_MASTER_ARENA_VERSION}:${state.arena.width}x${state.arena.height}`,
-    expiresAt: state.combat.deadlineAt,
-    snapshot: state.combat.snapshot,
-    ...(machineCapabilities
-      ? { machineCapabilities }
-      : { controls: controlsForRoleState(role) }),
+  return buildCombatSurrenderActionSet({
+    state,
+    roleName,
+    now,
   })
+}
+
+function buildCombatSurrenderActionSet(input: {
+  state: StoredSessionState
+  roleName: TeamRole
+  now: string
+}): ActiveActionSet {
+  const combat = input.state.combat
+
+  if (!combat) {
+    throw new Error('Combat surrender action set requires an active combat state.')
+  }
+
+  const actionId = `combat.${input.roleName}.r${input.state.round}.t${combat.nextTick}.surrender`
+
+  return {
+    actionSetId: actionSetIdForState(input.state, input.roleName),
+    role: input.roleName,
+    phase: 'combat_turn',
+    round: input.state.round,
+    turnId: `turn_${combat.nextTick}`,
+    decisionVersion: decisionVersionForRole(input.state, input.roleName),
+    catalogVersion: GAME_MASTER_CATALOG_VERSION,
+    arenaVersion: `${GAME_MASTER_ARENA_VERSION}:${input.state.arena.width}x${input.state.arena.height}`,
+    createdAt: input.now,
+    expiresAt: combat.deadlineAt,
+    actions: {
+      [actionId]: {
+        id: actionId,
+        kind: 'surrender',
+        role: input.roleName,
+        payload: {
+          scope: 'combat_surrender',
+          label: 'Surrender round',
+          summary: 'Concede this round immediately; the opponent wins and combat ends.',
+        },
+      },
+    },
+  }
 }
 
 function legalActionsForPacket(actionSet: ActiveActionSet): GameMasterLegalAction[] {
@@ -2323,10 +2472,6 @@ function legalActionsForPacket(actionSet: ActiveActionSet): GameMasterLegalActio
     if (isLoadoutBuilderAction(action)) {
       return legalActionWithParameterMetadata(action, loadoutLegalActionForPacket(action))
     }
-    if (isCombatAction(action)) {
-      return legalActionWithParameterMetadata(action, combatLegalActionForPacket(action))
-    }
-
     return legalActionWithParameterMetadata(action, {
       id: action.id,
       kind: action.kind,
@@ -2334,182 +2479,6 @@ function legalActionsForPacket(actionSet: ActiveActionSet): GameMasterLegalActio
       summary: legalActionSummary(action.kind),
     })
   })
-}
-
-type QueuedCombatPlanResolution = {
-  action: CanonicalGameAction
-  parameters?: GameMasterActionParameters
-}
-
-function parseStoredCombatPlanSteps(request: unknown): StoredCombatPlanStep[] {
-  const source = isRecord(request) && isRecord(request.parameters)
-    ? request.parameters
-    : request
-  const rawSteps = isRecord(source)
-    ? source.steps ?? source.actions ?? source.plan
-    : undefined
-
-  if (!Array.isArray(rawSteps)) {
-    return []
-  }
-
-  return rawSteps
-    .slice(0, 8)
-    .map(parseStoredCombatPlanStep)
-    .filter((step): step is StoredCombatPlanStep => step !== undefined)
-}
-
-function parseStoredCombatPlanStep(input: unknown): StoredCombatPlanStep | undefined {
-  if (typeof input === 'string') {
-    return storedCombatPlanStepFromKind(input)
-  }
-  if (!isRecord(input)) {
-    return undefined
-  }
-
-  const rawKind = stringField(input, 'kind') ?? stringField(input, 'actionId') ?? stringField(input, 'action')
-  const normalizedKind = normalizeCombatPlanStepKind(rawKind)
-  const cellId = stringField(input, 'cellId') ?? stringField(input, 'destinationCellId')
-  const attackActionId = stringField(input, 'attackActionId') ?? stringField(input, 'canonicalActionId')
-  const targetCellId = stringField(input, 'targetCellId')
-  const weaponSlot = stringField(input, 'weaponSlot')
-  const actionId = stringField(input, 'actionId')
-  const kind = normalizedKind ??
-    (attackActionId || targetCellId ? 'attack' : undefined) ??
-    (cellId ? 'move' : undefined)
-
-  if (!kind) {
-    return undefined
-  }
-
-  return {
-    kind,
-    ...(actionId && actionId !== kind ? { actionId } : {}),
-    ...(cellId ? { cellId } : {}),
-    ...(attackActionId ? { attackActionId } : {}),
-    ...(targetCellId ? { targetCellId } : {}),
-    ...(weaponSlot === 'weaponA' || weaponSlot === 'weaponB' ? { weaponSlot } : {}),
-  }
-}
-
-function storedCombatPlanStepFromKind(input: string): StoredCombatPlanStep | undefined {
-  const kind = normalizeCombatPlanStepKind(input)
-  return kind ? { kind } : undefined
-}
-
-function normalizeCombatPlanStepKind(input: string | undefined): StoredCombatPlanStep['kind'] | undefined {
-  switch (input) {
-    case 'move':
-    case 'attack':
-    case 'utility':
-    case 'use_utility':
-    case 'hold':
-    case 'surrender':
-      return input === 'use_utility' ? 'utility' : input
-    default:
-      return undefined
-  }
-}
-
-function resolveQueuedCombatPlanStep(input: {
-  role: TeamRole
-  state: StoredSessionState
-  activeSet: ActiveActionSet
-  step: StoredCombatPlanStep
-}): QueuedCombatPlanResolution | undefined {
-  const exactAction = input.step.actionId ? input.activeSet.actions[input.step.actionId] : undefined
-
-  if (exactAction && isCombatAction(exactAction)) {
-    return { action: exactAction }
-  }
-
-  const combat = input.state.combat
-  const selfCombat = input.role === 'red' ? combat?.snapshot.red : combat?.snapshot.blue
-  const opponentCombat = input.role === 'red' ? combat?.snapshot.blue : combat?.snapshot.red
-  const legalActions = legalActionsForPacket(input.activeSet)
-
-  if (input.step.kind === 'hold' || input.step.kind === 'surrender') {
-    return actionByKind(input.activeSet, legalActions, input.step.kind)
-  }
-
-  if (!combat || !selfCombat || !opponentCombat) {
-    return undefined
-  }
-
-  const board = buildAgentBoardView({
-    arena: input.state.arena,
-    role: input.role,
-    self: selfCombat,
-    opponent: opponentCombat,
-    actions: Object.values(input.activeSet.actions),
-  })
-
-  if (input.step.kind === 'move') {
-    const cell = board.cells?.find((candidate) => input.step.cellId && cellIdMatches(candidate.cellId, input.step.cellId))
-    const actionId = cell?.legal?.moveHere?.actionId
-    const action = actionId ? input.activeSet.actions[actionId] : undefined
-    return action && isCombatAction(action)
-      ? { action, ...(cell?.legal?.moveHere?.parameters ? { parameters: cell.legal.moveHere.parameters } : {}) }
-      : undefined
-  }
-
-  if (input.step.kind === 'attack') {
-    const attack = board.cells
-      ?.flatMap((cell) => cell.legal?.attacksFromHere ?? [])
-      .find((candidate) =>
-        (input.step.attackActionId && candidate.actionId === input.step.attackActionId) ||
-        (
-          input.step.targetCellId &&
-          cellIdMatches(candidate.targetCellId, input.step.targetCellId) &&
-          (!input.step.weaponSlot || candidate.weaponSlot === input.step.weaponSlot)
-        ))
-    const action = attack ? input.activeSet.actions[attack.actionId] : undefined
-    return action && isCombatAction(action)
-      ? { action, ...(attack?.parameters ? { parameters: attack.parameters } : {}) }
-      : undefined
-  }
-
-  if (input.step.kind === 'utility') {
-    const cell = board.cells?.find((candidate) =>
-      candidate.legal?.useUtilityFromHere &&
-      (!input.step.cellId || cellIdMatches(candidate.cellId, input.step.cellId)))
-    const actionId = cell?.legal?.useUtilityFromHere?.actionId
-    const action = actionId ? input.activeSet.actions[actionId] : undefined
-    return action && isCombatAction(action)
-      ? { action, ...(cell?.legal?.useUtilityFromHere?.parameters ? { parameters: cell.legal.useUtilityFromHere.parameters } : {}) }
-      : undefined
-  }
-
-  return undefined
-}
-
-function actionByKind(
-  activeSet: ActiveActionSet,
-  legalActions: GameMasterLegalAction[],
-  kind: GameMasterActionKind,
-): QueuedCombatPlanResolution | undefined {
-  const actionId = legalActions.find((action) => action.kind === kind)?.id
-  const action = actionId ? activeSet.actions[actionId] : undefined
-  return action && isCombatAction(action) ? { action } : undefined
-}
-
-function cellIdMatches(candidate: string, requested: string): boolean {
-  if (candidate === requested) {
-    return true
-  }
-
-  const match = /^(-?\d+)[,:](-?\d+)$/.exec(requested) ?? /^cell:(-?\d+):(-?\d+)$/.exec(requested)
-
-  return match ? candidate === `cell:${match[1]}:${match[2]}` : false
-}
-
-function stringField(record: Record<string, unknown>, key: string): string | undefined {
-  const value = record[key]
-  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function legalActionWithParameterMetadata(
@@ -2532,10 +2501,18 @@ function hasParameterExamples(
 }
 
 function legalActionLabel(kind: GameMasterActionKind): string {
+  if (kind === 'surrender') {
+    return 'Surrender round'
+  }
+
   return kind === 'hold' ? 'Hold position' : 'Ready'
 }
 
 function legalActionSummary(kind: GameMasterActionKind): string {
+  if (kind === 'surrender') {
+    return 'Concede this round immediately; the opponent wins and combat ends.'
+  }
+
   return kind === 'hold'
     ? 'Keep the current combat posture.'
     : 'Lock the selected server-authored action.'
@@ -2642,7 +2619,9 @@ function nextGameMasterActionForRole(
       return 'wait_for_opponent_turn'
     }
 
-    return state.lockedActions?.[roleName] ? 'wait_for_opponent_turn' : 'choose_turn'
+    return state.combat?.submittedPlans?.[roleName] || state.lockedActions?.[roleName]
+      ? 'wait_for_opponent_turn'
+      : 'choose_turn'
   }
 
   if (phase === 'replay_phase') {
@@ -2672,7 +2651,11 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole, no
     !isCombatTurnOpen(state, now) &&
     state.combat
   ) {
-    return `Next combat turn opens at ${state.combat.openedAt}. Keep polling for the server-authored action packet.`
+    return `Next combat round opens at ${state.combat.openedAt}. Keep polling for the combat plan packet.`
+  }
+
+  if (state.combat?.submittedPlans?.[roleName]) {
+    return 'Your combat round plan is submitted. Wait for the opponent or the next round packet.'
   }
 
   if (state.lockedActions?.[roleName]) {
@@ -2690,6 +2673,10 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole, no
     return 'Submit a private post-fight reflection for the completed fight. Do not include hidden chain-of-thought.'
   }
 
+  if (state.phase === 'combat_turn' && state.combat?.mode === 'lockstep_round_plan') {
+    return 'Submit one combat round plan using packet.combat.budget, packet.board.ascii, reachableCells, attackableCells, and utilityOptions. Each move step names a destination cellId; the resolver advances one cell per substep.'
+  }
+
   if (state.activeActionSets?.[roleName]) {
     return 'Choose one legal action from this packet. Submit parameters only when that legal action exposes parameterSchema.'
   }
@@ -2703,4 +2690,161 @@ function isCombatTurnOpen(state: StoredSessionState, now: string): boolean {
     Boolean(state.combat) &&
     Date.parse(now) >= Date.parse(state.combat?.openedAt ?? now)
   )
+}
+
+function stringField(record: Record<string, unknown>, key: string): string | undefined {
+  const value = record[key]
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function combatRoundPlanSubmissionFromGptRequest(
+  request: unknown,
+  round: number,
+  decisionVersion: number,
+): CombatRoundPlanSubmission | undefined {
+  const steps = combatPlanStepsFromGptRequest(request)
+
+  if (steps.length === 0) {
+    return undefined
+  }
+
+  return {
+    action: 'submit_combat_round_plan',
+    round,
+    decisionVersion,
+    steps,
+    ...(isRecord(request) && typeof request.publicMessage === 'string'
+      ? { publicMessage: request.publicMessage }
+      : {}),
+  }
+}
+
+function combatPlanStepsFromGptRequest(request: unknown): CombatPlanStep[] {
+  const source = isRecord(request) && isRecord(request.parameters)
+    ? request.parameters
+    : request
+  const rawSteps = isRecord(source)
+    ? source.steps ?? source.actions ?? source.plan
+    : undefined
+
+  if (!Array.isArray(rawSteps)) {
+    return []
+  }
+
+  return rawSteps
+    .slice(0, 16)
+    .map(parseCombatPlanStepFromGpt)
+    .filter((step): step is CombatPlanStep => step !== undefined)
+}
+
+function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined {
+  if (typeof input === 'string') {
+    return combatPlanStepFromKind(input)
+  }
+  if (!isRecord(input)) {
+    return undefined
+  }
+
+  const rawKind = stringField(input, 'kind') ?? stringField(input, 'action') ?? stringField(input, 'actionId')
+  const kind = normalizeRoundPlanStepKind(rawKind) ?? (stringField(input, 'cellId') ? 'move' : undefined)
+
+  if (!kind) {
+    return undefined
+  }
+
+  if (kind === 'move') {
+    const cellId = stringField(input, 'cellId') ?? stringField(input, 'destinationCellId')
+
+    return cellId ? { kind: 'move', cellId } : undefined
+  }
+
+  if (kind === 'attack') {
+    const weaponSlot = stringField(input, 'weaponSlot') === 'weaponB' ? 'weaponB' : 'weaponA'
+    const targetCellId = stringField(input, 'targetCellId') ?? stringField(input, 'cellId')
+
+    return {
+      kind: 'attack',
+      weaponSlot,
+      ...(targetCellId ? { targetCellId } : {}),
+    }
+  }
+
+  if (kind === 'utility') {
+    const utilityId = stringField(input, 'utilityId') ?? stringField(input, 'actionId')
+    const cellId = stringField(input, 'cellId')
+
+    return {
+      kind: 'utility',
+      ...(utilityId ? { utilityId } : {}),
+      ...(cellId ? { cellId } : {}),
+    }
+  }
+
+  return { kind: 'end_turn' }
+}
+
+function combatPlanStepFromKind(input: string): CombatPlanStep | undefined {
+  const kind = normalizeRoundPlanStepKind(input)
+
+  if (kind === 'end_turn') {
+    return { kind: 'end_turn' }
+  }
+
+  return undefined
+}
+
+function normalizeRoundPlanStepKind(input: string | undefined): CombatPlanStep['kind'] | undefined {
+  switch (input) {
+    case 'move':
+    case 'attack':
+    case 'utility':
+      return input
+    case 'use_utility':
+      return 'utility'
+    case 'hold':
+    case 'wait':
+    case 'end':
+    case 'end_turn':
+    case 'surrender':
+      return 'end_turn'
+    default:
+      return undefined
+  }
+}
+
+function cloneCombatPlanStep(step: CombatPlanStep): CombatPlanStep {
+  return { ...step } as CombatPlanStep
+}
+
+function cloneCombatBudget(budget: CombatBudget): CombatBudget {
+  return {
+    movement: budget.movement,
+    actionTime: budget.actionTime,
+    weaponCooldowns: { ...budget.weaponCooldowns },
+  }
+}
+
+function combatRoundPlansEquivalent(left: CombatRoundPlan, right: CombatRoundPlan): boolean {
+  return left.role === right.role &&
+    left.round === right.round &&
+    left.decisionVersion === right.decisionVersion &&
+    JSON.stringify(left.steps) === JSON.stringify(right.steps)
+}
+
+function boardAnchor(board: unknown, key: 'self' | 'opponent'): { x: number; z: number } {
+  const anchor = isRecord(board) && isRecord(board[key]) && isRecord(board[key].anchor)
+    ? board[key].anchor
+    : undefined
+  const x = anchor && typeof anchor.x === 'number' ? anchor.x : 0
+  const z = anchor && typeof anchor.z === 'number' ? anchor.z : 0
+
+  return { x, z }
+}
+
+function opponentRoleName(roleName: TeamRole): TeamRole {
+  return roleName === 'red' ? 'blue' : 'red'
 }

@@ -259,7 +259,7 @@ test('agent team identity storage preserves selected team accent without claim t
   assert.equal(readStoredTeamIdentity(storage, invite), undefined)
 })
 
-test('external agent brief is self-contained enough to claim and submit', () => {
+test('external agent handoff stays thin and packet-authoritative', () => {
   const brief = createExternalAgentBriefMarkdown({
     invite,
     inviteUrl: createAgentInviteUrl(invite, 'https://arena.test'),
@@ -287,73 +287,42 @@ test('external agent brief is self-contained enough to claim and submit', () => 
     },
   })
 
+  assert.ok(brief.includes('# Clash of Clankers Agent Handoff'))
   assert.ok(brief.includes('You are assigned role key `red` for session s_demo.'))
   assert.ok(brief.includes('This role key is not your team identity.'))
   assert.ok(brief.includes('https://arena.test/agent#session=s_demo&role=red&claimToken=cap_red&api=https%3A%2F%2Farena-api.test'))
   assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
   assert.ok(brief.includes('Actions schema: https://arena-api.test/openapi.json'))
   assert.ok(brief.includes('Player key / claimToken: cap_red'))
-  assert.ok(brief.includes('## Do This First'))
-  assert.ok(brief.includes('Generate your team identity, including its team color'))
-  assert.ok(brief.includes('including its team color'))
-  assert.ok(brief.includes('team color for your robot and UI label'))
-  assert.ok(brief.includes('this handoff intentionally does not prefill it'))
-  assert.ok(brief.includes('Custom GPT: import the Actions schema'))
-  assert.ok(brief.includes('Browser automation agent with page JavaScript'))
-  assert.ok(brief.includes('## Custom GPT Actions Path'))
-  assert.ok(brief.includes('Do not use `window.AgentArenaRole` from a Custom GPT.'))
-  assert.ok(brief.includes('## Browser Helper Path'))
-  assert.ok(brief.includes('## Raw HTTP Fallback'))
-  assert.ok(brief.includes('The sample color is a role-specific fallback'))
-  assert.ok(brief.includes('"colorHex":"#ff4c5d"'))
-  assert.equal(brief.includes('"colorHex":"#00d6a3"'), false)
-  assert.ok(brief.includes('window.AgentArenaRole.waitForGameMasterPacket({ timeoutMs: 600000 })'))
+  assert.ok(brief.includes('The current GameMasterPacket is the gameplay contract.'))
+  assert.ok(brief.includes('This handoff only provides connection details.'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
   assert.ok(brief.includes('GET https://arena-api.test/sessions/s_demo/state'))
-  assert.ok(brief.includes('The packet is in `gameMaster`'))
-  assert.ok(brief.includes('After the first bootstrap, do not keep resending teamIdentity'))
-  assert.ok(brief.includes('Authorization: Bearer <claimToken>'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/action'))
+  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/combat-plan'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
   assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/reflection'))
-  assert.ok(brief.includes('window.AgentArenaRole.bootstrapRole'))
-  assert.ok(brief.includes('const agentName = \'<invent an agent name>\''))
-  assert.ok(brief.includes('getTeamIdentityFromYourAgentState'))
-  assert.ok(brief.includes('const packet = await window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })'))
-  assert.ok(brief.includes('window.AgentArenaRole.submitAction'))
-  assert.equal(brief.includes("colorHex: '<choose a #RRGGBB accent color>'"), false)
-  assert.equal(brief.includes('You are the RED agent'), false)
-  const customGptSection = brief.slice(
-    brief.indexOf('## Custom GPT Actions Path'),
-    brief.indexOf('## Browser Helper Path'),
-  )
-  assert.ok(customGptSection.includes('"actionId":"<legalActions.id>"'))
-  assert.ok(customGptSection.includes('"actionId":"<propose_mount_pose legalActions.id>"'))
-  assert.ok(customGptSection.includes('"mountSurfaceId":"core_shell"'))
-  assert.ok(customGptSection.includes('"yawDegrees":0'))
-  assert.equal(customGptSection.includes('actionSetId'), false)
-  assert.equal(customGptSection.includes('decisionVersion'), false)
-  assert.ok(brief.includes('Custom GPT gptAct must not send actionSetId or decisionVersion'))
-  assert.ok(brief.includes('"action":"submit_game_action"'))
-  assert.ok(brief.includes('"actionSetId":"<packet.actionSetId>"'))
-  assert.ok(brief.includes('"actionId":"<legalActions[0].id>"'))
-  assert.ok(brief.includes('actionId must be copied from legalActions exactly.'))
-  assert.ok(brief.includes('packet.board.cells[].legal'))
-  assert.ok(brief.includes('Inspect each legal action parameterSchema before submitting'))
-  assert.ok(brief.includes("candidate.kind === 'propose_mount_pose'"))
-  assert.ok(brief.includes("actionId: action.id"))
-  assert.ok(brief.includes("parentInstanceId: 'core'"))
-  assert.ok(brief.includes('Machine legality is not strategy quality'))
-  assert.ok(brief.includes('shop and budget constraints still apply'))
-  assert.ok(brief.includes('Reflection claims should be concise post-fight analysis, not hidden chain-of-thought.'))
+  assert.ok(brief.includes('"colorHex":"#ff4c5d"'))
+  assert.equal(brief.includes('"colorHex":"#00d6a3"'), false)
+  assert.ok(brief.includes('Combat round plans must use the current packet `combat`, `board`, `round`, and `decisionVersion` metadata.'))
   assert.ok(brief.includes('Phase: submission_phase'))
   assert.ok(brief.includes('State version: v1'))
-  assert.ok(brief.includes('## Continuation Loop'))
   assert.ok(brief.includes('Timeout: 600000ms'))
   assert.ok(brief.includes('Watch field: eventVersion'))
-  assert.ok(brief.includes('script#agent-arena-brief'))
 
-  for (const legacyPublicName of [
+  for (const staleBriefContent of [
+    '## Do This First',
+    '## Custom GPT Actions Path',
+    '## Browser Helper Path',
+    '## Raw HTTP Fallback',
+    'actionId must be copied from legalActions exactly.',
+    'packet.board.cells[].legal',
+    'Inspect each legal action parameterSchema before submitting',
+    'window.AgentArenaRole.submitAction',
+    "candidate.kind === 'propose_mount_pose'",
+    'Machine legality is not strategy quality',
+    'shop and budget constraints still apply',
+    'Reflection claims should be concise post-fight analysis',
     'submitRoundPlan',
     'submitTurnCommand',
     'submit_round_plan',
@@ -366,7 +335,7 @@ test('external agent brief is self-contained enough to claim and submit', () => 
     'logo: {',
     'Baseline Spinner',
   ]) {
-    assert.equal(brief.includes(legacyPublicName), false, legacyPublicName)
+    assert.equal(brief.includes(staleBriefContent), false, staleBriefContent)
   }
 })
 
@@ -685,6 +654,7 @@ test('browser role API exposes only the packet-based public helper surface', asy
       'getState',
       'sendChatMessage',
       'submitAction',
+      'submitCombatPlan',
       'submitPostFightReflection',
       'waitForGameMasterPacket',
     ],
@@ -701,6 +671,7 @@ test('browser role API exposes only the packet-based public helper surface', asy
       ['get_role_state', true],
       ['wait_for_game_master_packet', true],
       ['submit_game_action', true],
+      ['submit_combat_round_plan', false],
       ['submit_post_fight_reflection', false],
       ['send_chat_message', true],
     ],
@@ -730,7 +701,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, false, false, false, false, false],
+    [true, false, false, false, false, false, false],
   )
 })
 

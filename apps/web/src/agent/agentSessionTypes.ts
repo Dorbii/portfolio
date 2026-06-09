@@ -5,6 +5,9 @@ import type {
   ChampionContinuationSave,
   ChampionRecord,
   CombatBotSnapshot,
+  CombatBudget,
+  CombatPlanConsumptionSummary,
+  CombatRoundPlan,
   CombatTurnSnapshot,
   GeneratedControls,
   GameMasterActionResponse,
@@ -65,6 +68,11 @@ export type CombatTurnPublicState = {
   deadlineAt: string
   turnSeconds: number
   submitted: Record<TeamRole, boolean>
+  mode?: 'legacy_tick_actions' | 'lockstep_round_plan'
+  roundSeconds?: number
+  decisionVersion?: number
+  budgets?: Partial<Record<TeamRole, CombatBudget>>
+  planConsumption?: Partial<Record<TeamRole, CombatPlanConsumptionSummary>>
 }
 
 export type CombatTurnPrivateState = CombatTurnPublicState & {
@@ -72,6 +80,10 @@ export type CombatTurnPrivateState = CombatTurnPublicState & {
   self: CombatBotSnapshot
   opponent: CombatBotSnapshot
   decision: CombatDecisionBrief
+  submittedPlans?: Partial<Record<TeamRole, CombatRoundPlan>>
+  lockstepEvents?: unknown[]
+  lockstepLog?: string[]
+  elapsedSubsteps?: number
 }
 
 export type SessionChatMessage = {
