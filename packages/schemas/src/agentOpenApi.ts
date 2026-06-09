@@ -197,6 +197,39 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'string',
               description: 'combat utility only: exact source cell id from the selected action.',
             },
+            steps: {
+              type: 'array',
+              maxItems: 8,
+              description:
+                'combat_plan only: ordered semantic combat steps. Each item uses actionId move, attack, utility, hold, or surrender plus cellId or attackActionId when needed.',
+              items: {
+                type: 'object',
+                additionalProperties: true,
+                properties: {
+                  actionId: {
+                    type: 'string',
+                    description: 'move, attack, utility, hold, or surrender.',
+                  },
+                  cellId: {
+                    type: 'string',
+                    description: 'move/utility destination cell id from packet.board.reachableCells.',
+                  },
+                  attackActionId: {
+                    type: 'string',
+                    description:
+                      'attack action id from packet.board.reachableCells[].attackActionIds[].actionId.',
+                  },
+                  targetCellId: {
+                    type: 'string',
+                    description: 'optional attack target cell id.',
+                  },
+                  weaponSlot: {
+                    type: 'string',
+                    description: 'optional weaponA or weaponB.',
+                  },
+                },
+              },
+            },
           },
           examples: [
             {

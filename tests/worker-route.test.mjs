@@ -1441,7 +1441,10 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   assert.equal(typeof board.ascii, 'string')
   assert.equal(board.ascii.includes('Legend: B=self, R=opponent'), true)
   assert.ok(board.reachableCells.length > 0)
-  assert.equal(packet.actionSummary.canonicalLegalActionCount >= packet.legalActions.length, true)
+  assert.equal(
+    packet.actionSummary.canonicalLegalActionCount >= packet.legalActions.filter((action) => action.id !== 'combat_plan').length,
+    true,
+  )
   assert.equal(boardJson.includes('"path"'), false)
   assert.equal(boardJson.includes('"hazards"'), false)
   assert.equal(boardJson.includes('"unavailableReasons"'), false)
@@ -1449,20 +1452,25 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   assert.equal(JSON.stringify(packet.legalActions).includes('"path"'), false)
   assert.ok(boardJson.length < 20_000)
   assert.ok(JSON.stringify(redCombat.json).length < 50_000)
-  const hold = packet.legalActions.find((action) => action.id === 'hold' || action.kind === 'hold')
-  assert.ok(hold)
-  const held = await route(env, '/gpt/act', {
+  const combatPlan = packet.legalActions.find((action) => action.id === 'combat_plan')
+  assert.ok(combatPlan)
+  const queued = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl: gptInviteUrl(sessionId, blueInvite),
-      actionId: 'hold',
+      actionId: 'combat_plan',
+      parameters: {
+        steps: [
+          { actionId: 'hold' },
+        ],
+      },
     },
   })
 
-  assert.equal(held.response.status, 200)
-  assert.equal(held.json.acceptedActionId, 'hold')
-  assert.ok(held.json.resolvedActionId)
-  assert.ok(JSON.stringify(held.json).length < 30_000)
+  assert.equal(queued.response.status, 200)
+  assert.equal(queued.json.acceptedActionId, 'combat_plan')
+  assert.equal(queued.json.queuedSteps, 1)
+  assert.ok(JSON.stringify(queued.json).length < 30_000)
 })
 
 test('POST /gpt/catalog returns selected compact part summaries', async () => {

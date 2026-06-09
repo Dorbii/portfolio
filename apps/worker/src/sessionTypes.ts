@@ -98,7 +98,17 @@ export type StoredCombatState = {
   baselineMachineDesigns?: Partial<Record<TeamRole, MachineDesign>>
   actions: Record<TeamRole, CanonicalGameAction[]>
   pending: Partial<Record<TeamRole, CanonicalGameAction>>
+  plans?: Partial<Record<TeamRole, StoredCombatPlanStep[]>>
   snapshot: CombatTurnSnapshot
+}
+
+export type StoredCombatPlanStep = {
+  kind: 'move' | 'attack' | 'utility' | 'hold' | 'surrender'
+  actionId?: string
+  cellId?: string
+  attackActionId?: string
+  targetCellId?: string
+  weaponSlot?: 'weaponA' | 'weaponB'
 }
 
 export type StoredRoundPlanState = {

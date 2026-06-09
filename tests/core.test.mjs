@@ -7426,6 +7426,78 @@ test('session delays the next combat action packet after a resolved turn', async
   assert.notEqual(openPacket.value.submit, undefined)
 })
 
+test('session consumes queued GPT combat plan steps after the handoff delay opens', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_gpt_combat_plan_queue', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const initialRed = createInitialMachineDesign('red')
+  const redMachine = {
+    ...initialRed,
+    parts: [
+      initialRed.parts[0],
+      machinePart('drive_wheel', {
+        definitionId: 'catalog:Wheel_Omni',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'drive_wheel', { mountId: 'core_shell' }),
+    ],
+  }
+  const stored = session.exportState()
+
+  stored.roles.red.storedDesign = {
+    version: 'machine:v1',
+    machine: redMachine,
+  }
+  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(redMachine)
+  stored.combat.baselineMachineDesigns = {
+    red: structuredClone(redMachine),
+    blue: structuredClone(stored.roles.blue.storedDesign.machine),
+  }
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+
+  const loaded = SessionCoordinator.fromState(stored, {
+    clock: () => now,
+  })
+  const redPlan = await loaded.submitGptCombatPlan(redToken, {
+    steps: [
+      { actionId: 'hold' },
+      { actionId: 'hold' },
+    ],
+  })
+  const bluePlan = await loaded.submitGptCombatPlan(blueToken, {
+    steps: [
+      { actionId: 'hold' },
+      { actionId: 'hold' },
+    ],
+  })
+
+  assert.equal(redPlan.ok, true)
+  assert.equal(bluePlan.ok, true)
+
+  let queuedState = loaded.exportState()
+
+  assert.equal(queuedState.combat.nextTick, 2)
+  assert.equal(queuedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
+  assert.equal(queuedState.combat.plans.red.length, 1)
+  assert.equal(queuedState.combat.plans.blue.length, 1)
+
+  now = '2026-06-03T00:00:10.000Z'
+  loaded.getPublicState()
+  queuedState = loaded.exportState()
+
+  assert.equal(queuedState.combat.nextTick, 3)
+  assert.equal(queuedState.combat.plans, undefined)
+  assert.equal(queuedState.combat.openedAt, '2026-06-03T00:00:20.000Z')
+})
+
 test('session auto-confirms current loadouts when loadout window expires', async () => {
   let now = '2026-06-03T00:00:00.000Z'
   const session = await createTestSession('s_loadout_auto_confirm', {

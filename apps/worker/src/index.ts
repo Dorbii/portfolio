@@ -66,6 +66,7 @@ const GPT_COMPACT_BOARD_LIST_LIMIT = 16
 const GPT_COMPACT_ACTION_REF_LIMIT = 6
 const GPT_SEMANTIC_MOVE_ACTION_ID = 'move'
 const GPT_SEMANTIC_ATTACK_ACTION_ID = 'attack'
+const GPT_COMBAT_PLAN_ACTION_ID = 'combat_plan'
 
 type JsonRequestReadResult =
   | {
@@ -639,6 +640,26 @@ export class AgentArenaSession {
       return this.sessionResultResponse(coordinator, packetResult)
     }
 
+    if (body.actionId === GPT_COMBAT_PLAN_ACTION_ID) {
+      const result = await coordinator.submitGptCombatPlan(invite.value.claimToken, body.parameters)
+
+      return this.sessionResultResponse(
+        coordinator,
+        result.ok
+          ? {
+              ok: true,
+              value: {
+                status: gptPacketStatus(result.value.packet),
+                acceptedActionId: body.actionId,
+                queuedSteps: result.value.queuedSteps,
+                packet: compactGptPacket(result.value.packet),
+                continuation: gptContinuationForPacket(result.value.packet),
+              },
+            }
+          : result,
+      )
+    }
+
     const packet = packetResult.value
     const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
     const resolvedSemanticAction = resolvedGptAlias
@@ -1070,6 +1091,50 @@ function compactGptCombatLegalActions(packet: GameMasterPacket): Array<Record<st
     action.kind === 'use_utility')
 
   return [
+    {
+      id: GPT_COMBAT_PLAN_ACTION_ID,
+      kind: 'use_utility',
+      label: 'Queue combat plan',
+      summary: 'Submit up to 8 ordered semantic steps; the server resolves each step against the live legal packet as turns open.',
+      parameterSchema: {
+        type: 'object',
+        required: ['steps'],
+        properties: {
+          steps: {
+            type: 'array',
+            label: 'Combat plan steps',
+            summary: 'Ordered steps using actionId move, attack, utility, hold, or surrender.',
+            maxItems: 8,
+            items: {
+              type: 'object',
+              required: ['actionId'],
+              properties: {
+                actionId: {
+                  type: 'string',
+                  summary: 'Use move, attack, utility, hold, or surrender.',
+                },
+                cellId: {
+                  type: 'string',
+                  summary: 'For move or utility: a cellId from packet.board.reachableCells.',
+                },
+                attackActionId: {
+                  type: 'string',
+                  summary: 'For attack: an action id from packet.board.reachableCells[].attackActionIds[].actionId.',
+                },
+                targetCellId: {
+                  type: 'string',
+                  summary: 'Optional attack target cell id from the board.',
+                },
+                weaponSlot: {
+                  type: 'string',
+                  summary: 'Optional weaponA or weaponB attack slot.',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     ...(hasMoveCells
       ? [{
           id: GPT_SEMANTIC_MOVE_ACTION_ID,
