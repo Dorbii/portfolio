@@ -64,6 +64,8 @@ const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
 const GPT_COMPACT_BOARD_CELL_LIMIT = 24
 const GPT_COMPACT_BOARD_LIST_LIMIT = 16
 const GPT_COMPACT_ACTION_REF_LIMIT = 6
+const GPT_SEMANTIC_MOVE_ACTION_ID = 'move'
+const GPT_SEMANTIC_ATTACK_ACTION_ID = 'attack'
 
 type JsonRequestReadResult =
   | {
@@ -140,6 +142,12 @@ type GptMountSlotAlias = {
   resolvesToActionId: string
   semanticTags: string[]
   parameters: GameMasterActionParameters
+}
+
+type GptActionResolution = {
+  canonicalAction: GameMasterLegalAction
+  parameters?: GameMasterActionParameters
+  resolvedActionId?: string
 }
 
 type GptBoardView = NonNullable<GameMasterPacket['board']>
@@ -633,7 +641,11 @@ export class AgentArenaSession {
 
     const packet = packetResult.value
     const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
+    const resolvedSemanticAction = resolvedGptAlias
+      ? undefined
+      : resolveGptSemanticCombatAction(packet, body.actionId, body.parameters)
     const action = resolvedGptAlias?.canonicalAction ??
+      resolvedSemanticAction?.canonicalAction ??
       packet.legalActions.find((candidate) => candidate.id === body.actionId)
 
     if (!action || !packet.actionSetId) {
@@ -649,6 +661,7 @@ export class AgentArenaSession {
       action.parameterExamples?.[0] !== undefined &&
       (body.parameters === undefined || isEmptyRecord(body.parameters))
     const parameters = resolvedGptAlias?.alias.parameters ??
+      resolvedSemanticAction?.parameters ??
       (shouldUseParameterExample ? action.parameterExamples?.[0] : body.parameters)
     const result = await coordinator.submitGameMasterAction(invite.value.claimToken, {
       action: 'submit_game_action',
@@ -667,7 +680,9 @@ export class AgentArenaSession {
             value: {
               status: gptPacketStatus(result.value.packet),
               acceptedActionId: body.actionId,
-              ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
+              ...(resolvedGptAlias || resolvedSemanticAction
+                ? { resolvedActionId: resolvedSemanticAction?.resolvedActionId ?? action.id }
+                : {}),
               packet: compactGptPacket(result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
             },
@@ -971,15 +986,20 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
 
 function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
   const mountSlotAliases = gptMountSlotAliasesForPacket(packet)
-  const legalActions = [
-    ...packet.legalActions.map((action) =>
-      compactGptLegalAction(action, {
-        omitParameterDetails: mountSlotAliases.length > 0 && action.kind === 'propose_mount_pose',
-      })),
-    ...mountSlotAliases.map(compactGptMountSlotAlias),
-  ]
+  const isCombatTurn = isGptCombatTurnPacket(packet)
+  const legalActions = isCombatTurn
+    ? compactGptCombatLegalActions(packet)
+    : [
+        ...packet.legalActions.map((action) =>
+          compactGptLegalAction(action, {
+            omitParameterDetails: mountSlotAliases.length > 0 && action.kind === 'propose_mount_pose',
+          })),
+        ...mountSlotAliases.map(compactGptMountSlotAlias),
+      ]
   const compactBoard = packet.board && (packet.legalActions.length > 0 || packet.nextAction === 'choose_turn')
-    ? compactGptBoard(packet.board)
+    ? isCombatTurn
+      ? compactGptCombatBoard(packet)
+      : compactGptBoard(packet.board)
     : undefined
 
   return {
@@ -1016,6 +1036,7 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
       : {}),
     ...(compactBoard && Object.keys(compactBoard).length > 0 ? { board: compactBoard } : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
+    ...(isCombatTurn ? { actionSummary: compactGptCombatActionSummary(packet) } : {}),
     legalActions,
     ...(packet.blockedActions
       ? {
@@ -1033,6 +1054,220 @@ function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
         }
       : {}),
   }
+}
+
+function isGptCombatTurnPacket(packet: GameMasterPacket): boolean {
+  return packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn'
+}
+
+function compactGptCombatLegalActions(packet: GameMasterPacket): Array<Record<string, unknown>> {
+  const board = packet.board
+  const hasMoveCells = Boolean(board?.cells?.some((cell) => cell.legal?.moveHere))
+  const hasAttackCells = Boolean(board?.cells?.some((cell) => cell.legal?.attacksFromHere?.length))
+  const directActions = packet.legalActions.filter((action) =>
+    action.kind === 'hold' ||
+    action.kind === 'surrender' ||
+    action.kind === 'use_utility')
+
+  return [
+    ...(hasMoveCells
+      ? [{
+          id: GPT_SEMANTIC_MOVE_ACTION_ID,
+          kind: 'move',
+          label: 'Move to a reachable cell',
+          summary: 'Choose parameters.cellId from packet.board.reachableCells[].cellId. The server resolves it to the current canonical move action.',
+          parameterSchema: {
+            type: 'object',
+            required: ['cellId'],
+            properties: {
+              cellId: {
+                type: 'string',
+                label: 'Destination cell',
+                summary: 'Reachable board cell id from packet.board.reachableCells.',
+              },
+            },
+          },
+        }]
+      : []),
+    ...(hasAttackCells
+      ? [{
+          id: GPT_SEMANTIC_ATTACK_ACTION_ID,
+          kind: 'attack',
+          label: 'Use an available cell attack',
+          summary: 'Choose parameters.attackActionId from a packet.board.reachableCells[].attackActionIds[] entry.',
+          parameterSchema: {
+            type: 'object',
+            required: ['attackActionId'],
+            properties: {
+              attackActionId: {
+                type: 'string',
+                label: 'Attack action id',
+                summary: 'Canonical attack action id exposed on a reachable cell.',
+              },
+            },
+          },
+        }]
+      : []),
+    ...directActions.map((action) =>
+      action.kind === 'hold' || action.kind === 'surrender'
+        ? {
+            id: action.kind,
+            kind: action.kind,
+            label: action.label,
+            summary: action.summary,
+            resolvesToActionId: action.id,
+          }
+        : compactGptLegalAction(action, {
+            omitPreview: true,
+          })),
+  ]
+}
+
+function compactGptCombatActionSummary(packet: GameMasterPacket): Record<string, unknown> {
+  const counts = packet.legalActions.reduce<Record<string, number>>((accumulator, action) => {
+    accumulator[action.kind] = (accumulator[action.kind] ?? 0) + 1
+    return accumulator
+  }, {})
+  const cells = packet.board?.cells ?? []
+  const movementBudgets = cells
+    .map((cell) =>
+      typeof cell.mobilityCost === 'number'
+        ? cell.mobilityCost + (typeof cell.mobilityRemaining === 'number' ? cell.mobilityRemaining : 0)
+        : undefined)
+    .filter((value): value is number => typeof value === 'number')
+
+  return {
+    canonicalLegalActionCount: packet.legalActions.length,
+    canonicalKindCounts: counts,
+    reachableCellCount: cells.filter((cell) => cell.reachable || cell.legal?.moveHere).length,
+    attackCellCount: cells.filter((cell) => cell.legal?.attacksFromHere?.length).length,
+    ...(movementBudgets.length > 0 ? { movementBudgetEstimate: Math.max(...movementBudgets) } : {}),
+  }
+}
+
+function compactGptCombatBoard(packet: GameMasterPacket): Record<string, unknown> {
+  const board = packet.board
+
+  if (!board) {
+    return {}
+  }
+
+  const reachableCells = compactGptReachableCells(board)
+
+  return {
+    ...(board.grid ? { grid: board.grid } : {}),
+    ...(board.self ? { self: board.self } : {}),
+    ...(board.opponent ? { opponent: board.opponent } : {}),
+    ...(board.hazardCells ? { hazardCells: board.hazardCells } : {}),
+    ascii: asciiGptBoard(board),
+    reachableCells,
+  }
+}
+
+function compactGptReachableCells(board: GptBoardView): Array<Record<string, unknown>> {
+  return (board.cells ?? [])
+    .filter((cell) =>
+      cell.occupant ||
+      cell.reachable ||
+      cell.legal?.moveHere ||
+      cell.legal?.attacksFromHere?.length ||
+      cell.legal?.useUtilityFromHere)
+    .map((cell) => ({
+      cellId: cell.cellId,
+      x: cell.x,
+      z: cell.z,
+      ...(typeof cell.mobilityCost === 'number' ? { moveCost: cell.mobilityCost } : {}),
+      ...(typeof cell.mobilityRemaining === 'number' ? { remainingMove: cell.mobilityRemaining } : {}),
+      ...(cell.hazardIds?.length ? { hazard: true, hazardIds: cell.hazardIds } : { hazard: false }),
+      ...(typeof cell.distanceToOpponent === 'number' ? { distanceToOpponent: cell.distanceToOpponent } : {}),
+      ...(typeof cell.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: cell.lineOfSightToOpponent } : {}),
+      ...(cell.legal?.moveHere ? { moveActionId: cell.legal.moveHere.actionId } : {}),
+      ...(cell.legal?.attacksFromHere?.length
+        ? {
+            attackActionIds: cell.legal.attacksFromHere.map((attack) => ({
+              actionId: attack.actionId,
+              kind: attack.kind,
+              targetCellId: attack.targetCellId,
+              ...(attack.weaponSlot ? { weaponSlot: attack.weaponSlot } : {}),
+            })),
+          }
+        : {}),
+      ...(cell.legal?.useUtilityFromHere ? { utilityActionId: cell.legal.useUtilityFromHere.actionId } : {}),
+    }))
+}
+
+function asciiGptBoard(board: GptBoardView): string {
+  const grid = board.grid ?? boundsFromBoard(board)
+  const self = board.self?.anchor
+  const opponent = board.opponent?.anchor
+  const hazards = new Set((board.hazardCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
+  const reachable = new Set<string>()
+  const attacks = new Set<string>()
+
+  for (const cell of board.cells ?? []) {
+    const key = coordKey(cell.x, cell.z)
+    if (cell.reachable || cell.legal?.moveHere) {
+      reachable.add(key)
+    }
+    if (cell.legal?.attacksFromHere?.length) {
+      attacks.add(key)
+    }
+  }
+
+  const rows = [
+    'Legend: B=self, R=opponent, *=reachable attack cell, +=reachable, H=hazard, .=empty',
+    `x ${grid.xMin}..${grid.xMax}, z ${grid.zMin}..${grid.zMax}`,
+    `     ${range(grid.xMin, grid.xMax).map((x) => String(x).padStart(3, ' ')).join('')}`,
+  ]
+
+  for (let z = grid.zMax; z >= grid.zMin; z -= 1) {
+    const cells = range(grid.xMin, grid.xMax).map((x) => {
+      const key = coordKey(x, z)
+      const marker = self?.x === x && self.z === z
+        ? 'B'
+        : opponent?.x === x && opponent.z === z
+          ? 'R'
+          : attacks.has(key)
+            ? '*'
+            : hazards.has(key)
+              ? 'H'
+              : reachable.has(key)
+                ? '+'
+                : '.'
+
+      return marker.padStart(3, ' ')
+    }).join('')
+    rows.push(`z=${String(z).padStart(3, ' ')}${cells}`)
+  }
+
+  return rows.join('\n')
+}
+
+function boundsFromBoard(board: GptBoardView): NonNullable<GptBoardView['grid']> {
+  const coords = [
+    ...(board.cells ?? []),
+    ...(board.hazardCells ?? []),
+    ...(board.self ? [board.self.anchor] : []),
+    ...(board.opponent ? [board.opponent.anchor] : []),
+  ]
+  const xs = coords.map((coord) => coord.x)
+  const zs = coords.map((coord) => coord.z)
+
+  return {
+    cellSize: 1,
+    xMin: Math.min(...xs, -12),
+    xMax: Math.max(...xs, 12),
+    zMin: Math.min(...zs, -8),
+    zMax: Math.max(...zs, 8),
+  }
+}
+
+function range(min: number, max: number): number[] {
+  return Array.from({ length: max - min + 1 }, (_, index) => min + index)
+}
+
+function coordKey(x: number, z: number): string {
+  return `${x}:${z}`
 }
 
 function compactGptBoard(board: GptBoardView): Record<string, unknown> {
@@ -1169,7 +1404,7 @@ function stripUndefinedFields(record: Record<string, unknown>): Record<string, u
 
 function compactGptLegalAction(
   action: GameMasterLegalAction,
-  options: { omitParameterDetails?: boolean } = {},
+  options: { omitParameterDetails?: boolean; omitPreview?: boolean } = {},
 ): Record<string, unknown> {
   return {
     id: action.id,
@@ -1179,7 +1414,7 @@ function compactGptLegalAction(
     ...(action.requirements ? { requirements: action.requirements } : {}),
     ...(!options.omitParameterDetails && action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
     ...(!options.omitParameterDetails && action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
-    ...(action.preview ? { preview: compactGptActionPreview(action.preview) } : {}),
+    ...(!options.omitPreview && action.preview ? { preview: compactGptActionPreview(action.preview) } : {}),
   }
 }
 
@@ -1208,6 +1443,121 @@ function compactGptMountSlotAlias(alias: GptMountSlotAlias): Record<string, unkn
     resolvesToActionId: alias.resolvesToActionId,
     semanticTags: alias.semanticTags,
   }
+}
+
+function resolveGptSemanticCombatAction(
+  packet: GameMasterPacket,
+  actionId: string,
+  parameters: GameMasterActionParameters | undefined,
+): GptActionResolution | undefined {
+  if (!isGptCombatTurnPacket(packet)) {
+    return undefined
+  }
+
+  if (actionId === GPT_SEMANTIC_MOVE_ACTION_ID) {
+    const cellId = stringParameter(parameters, 'cellId') ?? stringParameter(parameters, 'destinationCellId')
+    const cell = findGptBoardCell(packet.board, cellId)
+    const ref = cell?.legal?.moveHere
+    const canonicalAction = ref ? packet.legalActions.find((candidate) => candidate.id === ref.actionId) : undefined
+
+    return canonicalAction
+      ? {
+          canonicalAction,
+          parameters: ref?.parameters,
+          resolvedActionId: canonicalAction.id,
+        }
+      : undefined
+  }
+
+  if (actionId === GPT_SEMANTIC_ATTACK_ACTION_ID) {
+    const attackActionId = stringParameter(parameters, 'attackActionId') ?? stringParameter(parameters, 'canonicalActionId')
+    const requestedCellId = stringParameter(parameters, 'cellId')
+    const requestedSlot = stringParameter(parameters, 'slot') ?? stringParameter(parameters, 'weaponSlot')
+    const attack = attackActionId
+      ? findGptAttackRefByActionId(packet.board, attackActionId)
+      : findGptAttackRefByCell(packet.board, requestedCellId, requestedSlot)
+    const canonicalAction = attack ? packet.legalActions.find((candidate) => candidate.id === attack.actionId) : undefined
+
+    return canonicalAction
+      ? {
+          canonicalAction,
+          parameters: attack?.parameters,
+          resolvedActionId: canonicalAction.id,
+        }
+      : undefined
+  }
+
+  if (actionId === 'hold' || actionId === 'surrender') {
+    const canonicalAction = packet.legalActions.find((candidate) => candidate.kind === actionId)
+
+    return canonicalAction
+      ? {
+          canonicalAction,
+          resolvedActionId: canonicalAction.id,
+        }
+      : undefined
+  }
+
+  return undefined
+}
+
+function stringParameter(
+  parameters: GameMasterActionParameters | undefined,
+  key: string,
+): string | undefined {
+  const value = parameters?.[key]
+
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+function findGptBoardCell(
+  board: GptBoardView | undefined,
+  requestedCellId: string | undefined,
+): GptBoardCell | undefined {
+  if (!requestedCellId) {
+    return undefined
+  }
+
+  return board?.cells?.find((cell) => cellIdMatches(cell, requestedCellId))
+}
+
+function findGptAttackRefByActionId(
+  board: GptBoardView | undefined,
+  actionId: string | undefined,
+): GptBoardAttackRef | undefined {
+  if (!actionId) {
+    return undefined
+  }
+
+  for (const cell of board?.cells ?? []) {
+    const attack = cell.legal?.attacksFromHere?.find((candidate) => candidate.actionId === actionId)
+
+    if (attack) {
+      return attack
+    }
+  }
+
+  return undefined
+}
+
+function findGptAttackRefByCell(
+  board: GptBoardView | undefined,
+  requestedCellId: string | undefined,
+  requestedSlot: string | undefined,
+): GptBoardAttackRef | undefined {
+  const cell = findGptBoardCell(board, requestedCellId)
+
+  return cell?.legal?.attacksFromHere?.find((attack) =>
+    !requestedSlot || attack.weaponSlot === requestedSlot)
+}
+
+function cellIdMatches(cell: GptBoardCell, requestedCellId: string): boolean {
+  const normalized = requestedCellId.trim()
+
+  return normalized === cell.cellId ||
+    normalized === `${cell.x},${cell.z}` ||
+    normalized === `${cell.x}:${cell.z}` ||
+    normalized === `cell:${cell.x}:${cell.z}`
 }
 
 function resolveGptMountSlotAlias(

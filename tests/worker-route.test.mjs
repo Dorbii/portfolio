@@ -1419,7 +1419,7 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
     },
   })
 
-  const packet = redCombat.json.packet
+  const packet = blueCombat.json.packet
   const board = packet.board
   const boardJson = JSON.stringify(board)
 
@@ -1435,35 +1435,34 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   assert.equal(redCombat.response.status, 200)
   assert.equal(redCombat.json.status, 'playable')
   assert.equal(redCombat.json.continuation.recommendedNextCall, 'gptAct')
-  assertGptCompactPacket(packet, 'red')
+  assertGptCompactPacket(packet, 'blue')
   assert.equal(packet.nextAction, 'choose_turn')
   assert.ok(packet.legalActions.length > 0)
-  assert.ok(board.cells.length > 0)
-  assert.ok(board.cells.length <= 24)
-  assert.ok(board.reachablePoses.length <= 16)
-  assert.ok(board.attackableTargets.length <= 16)
+  assert.equal(typeof board.ascii, 'string')
+  assert.equal(board.ascii.includes('Legend: B=self, R=opponent'), true)
+  assert.ok(board.reachableCells.length > 0)
+  assert.equal(packet.actionSummary.canonicalLegalActionCount >= packet.legalActions.length, true)
   assert.equal(boardJson.includes('"path"'), false)
   assert.equal(boardJson.includes('"hazards"'), false)
   assert.equal(boardJson.includes('"unavailableReasons"'), false)
-  assert.equal(boardJson.includes('"parameters"'), false)
+  assert.equal(boardJson.includes('"parameterSchema"'), false)
   assert.equal(JSON.stringify(packet.legalActions).includes('"path"'), false)
   assert.ok(boardJson.length < 20_000)
   assert.ok(JSON.stringify(redCombat.json).length < 50_000)
-  assert.equal(board.cells.some((cell) => cell.occupant === 'self'), true)
-  assert.equal(board.cells.some((cell) => cell.occupant === 'opponent'), true)
-  assert.equal(
-    board.reachablePoses.some((pose) => pose.actionIds.length > 0) ||
-      board.attackableTargets.some((target) => target.actionIds.length > 0) ||
-      board.cells.some((cell) =>
-        Boolean(
-          cell.reachableByActionIds?.length ||
-            cell.targetableByActionIds?.length ||
-            cell.legal?.moveHere ||
-            cell.legal?.useUtilityFromHere ||
-            cell.legal?.attacksFromHere?.length,
-        )),
-    true,
-  )
+  const hold = packet.legalActions.find((action) => action.id === 'hold' || action.kind === 'hold')
+  assert.ok(hold)
+  const held = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+      actionId: 'hold',
+    },
+  })
+
+  assert.equal(held.response.status, 200)
+  assert.equal(held.json.acceptedActionId, 'hold')
+  assert.ok(held.json.resolvedActionId)
+  assert.ok(JSON.stringify(held.json).length < 30_000)
 })
 
 test('POST /gpt/catalog returns selected compact part summaries', async () => {
