@@ -64,8 +64,6 @@ const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
 const GPT_COMPACT_BOARD_CELL_LIMIT = 24
 const GPT_COMPACT_BOARD_LIST_LIMIT = 16
 const GPT_COMPACT_ACTION_REF_LIMIT = 6
-const GPT_SEMANTIC_MOVE_ACTION_ID = 'move'
-const GPT_SEMANTIC_ATTACK_ACTION_ID = 'attack'
 const GPT_COMBAT_PLAN_ACTION_ID = 'combat_plan'
 
 type JsonRequestReadResult =
@@ -674,7 +672,7 @@ export class AgentArenaSession {
         value: {
           status: gptPacketStatus(result.value.packet),
           acceptedActionId: body.actionId,
-          queuedSteps: result.value.queuedSteps,
+          submittedSteps: result.value.submittedSteps,
           submittedPlan: result.value.submittedPlan,
           packet: compactGptPacket(result.value.packet),
           continuation: gptContinuationForPacket(result.value.packet),
@@ -684,11 +682,7 @@ export class AgentArenaSession {
 
     const packet = packetResult.value
     const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
-    const resolvedSemanticAction = resolvedGptAlias
-      ? undefined
-      : resolveGptSemanticCombatAction(packet, body.actionId, body.parameters)
     const action = resolvedGptAlias?.canonicalAction ??
-      resolvedSemanticAction?.canonicalAction ??
       packet.legalActions.find((candidate) => candidate.id === body.actionId)
 
     if (!action || !packet.actionSetId) {
@@ -704,7 +698,6 @@ export class AgentArenaSession {
       action.parameterExamples?.[0] !== undefined &&
       (body.parameters === undefined || isEmptyRecord(body.parameters))
     const parameters = resolvedGptAlias?.alias.parameters ??
-      resolvedSemanticAction?.parameters ??
       (shouldUseParameterExample ? action.parameterExamples?.[0] : body.parameters)
     const result = await coordinator.submitGameMasterAction(invite.value.claimToken, {
       action: 'submit_game_action',
@@ -723,9 +716,7 @@ export class AgentArenaSession {
             value: {
               status: gptPacketStatus(result.value.packet),
               acceptedActionId: body.actionId,
-              ...(resolvedGptAlias || resolvedSemanticAction
-                ? { resolvedActionId: resolvedSemanticAction?.resolvedActionId ?? action.id }
-                : {}),
+              ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
               packet: compactGptPacket(result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
             },
@@ -1178,9 +1169,9 @@ function compactGptCombatActionSummary(packet: GameMasterPacket): Record<string,
     .filter((value): value is number => typeof value === 'number')
 
   return {
-    mode: packet.combat ? 'lockstep_round_plan' : 'legacy_canonical_actions',
-    canonicalLegalActionCount: packet.legalActions.length,
-    canonicalKindCounts: counts,
+    mode: packet.combat ? 'lockstep_round_plan' : 'action_menu',
+    actionMenuCount: packet.legalActions.length,
+    actionKindCounts: counts,
     reachableCellCount,
     attackCellCount,
     ...(packet.combat?.budget ? { budget: packet.combat.budget } : {}),
@@ -1216,7 +1207,7 @@ function compactGptCombatBoard(packet: GameMasterPacket): Record<string, unknown
     ...(board.self ? { self: board.self } : {}),
     ...(board.opponent ? { opponent: board.opponent } : {}),
     ...(board.hazardCells ? { hazardCells: board.hazardCells } : {}),
-    ascii: board.ascii ?? asciiGptBoard(board),
+    ascii: asciiGptBoard(board),
     reachableCells,
     ...(board.attackableCells?.length ? { attackableCells: board.attackableCells.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
     ...(board.utilityOptions?.length ? { utilityOptions: board.utilityOptions.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
@@ -1260,8 +1251,8 @@ function asciiGptBoard(board: GptBoardView): string {
   const self = board.self?.anchor
   const opponent = board.opponent?.anchor
   const hazards = new Set((board.hazardCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
-  const reachable = new Set<string>()
-  const attacks = new Set<string>()
+  const reachable = new Set((board.reachableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
+  const attacks = new Set((board.attackableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
 
   for (const cell of board.cells ?? []) {
     const key = coordKey(cell.x, cell.z)
@@ -1502,121 +1493,6 @@ function compactGptMountSlotAlias(alias: GptMountSlotAlias): Record<string, unkn
     resolvesToActionId: alias.resolvesToActionId,
     semanticTags: alias.semanticTags,
   }
-}
-
-function resolveGptSemanticCombatAction(
-  packet: GameMasterPacket,
-  actionId: string,
-  parameters: GameMasterActionParameters | undefined,
-): GptActionResolution | undefined {
-  if (!isGptCombatTurnPacket(packet)) {
-    return undefined
-  }
-
-  if (actionId === GPT_SEMANTIC_MOVE_ACTION_ID) {
-    const cellId = stringParameter(parameters, 'cellId') ?? stringParameter(parameters, 'destinationCellId')
-    const cell = findGptBoardCell(packet.board, cellId)
-    const ref = cell?.legal?.moveHere
-    const canonicalAction = ref ? packet.legalActions.find((candidate) => candidate.id === ref.actionId) : undefined
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          parameters: ref?.parameters,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  if (actionId === GPT_SEMANTIC_ATTACK_ACTION_ID) {
-    const attackActionId = stringParameter(parameters, 'attackActionId') ?? stringParameter(parameters, 'canonicalActionId')
-    const requestedCellId = stringParameter(parameters, 'cellId')
-    const requestedSlot = stringParameter(parameters, 'slot') ?? stringParameter(parameters, 'weaponSlot')
-    const attack = attackActionId
-      ? findGptAttackRefByActionId(packet.board, attackActionId)
-      : findGptAttackRefByCell(packet.board, requestedCellId, requestedSlot)
-    const canonicalAction = attack ? packet.legalActions.find((candidate) => candidate.id === attack.actionId) : undefined
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          parameters: attack?.parameters,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  if (actionId === 'hold' || actionId === 'surrender') {
-    const canonicalAction = packet.legalActions.find((candidate) => candidate.kind === actionId)
-
-    return canonicalAction
-      ? {
-          canonicalAction,
-          resolvedActionId: canonicalAction.id,
-        }
-      : undefined
-  }
-
-  return undefined
-}
-
-function stringParameter(
-  parameters: GameMasterActionParameters | undefined,
-  key: string,
-): string | undefined {
-  const value = parameters?.[key]
-
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function findGptBoardCell(
-  board: GptBoardView | undefined,
-  requestedCellId: string | undefined,
-): GptBoardCell | undefined {
-  if (!requestedCellId) {
-    return undefined
-  }
-
-  return board?.cells?.find((cell) => cellIdMatches(cell, requestedCellId))
-}
-
-function findGptAttackRefByActionId(
-  board: GptBoardView | undefined,
-  actionId: string | undefined,
-): GptBoardAttackRef | undefined {
-  if (!actionId) {
-    return undefined
-  }
-
-  for (const cell of board?.cells ?? []) {
-    const attack = cell.legal?.attacksFromHere?.find((candidate) => candidate.actionId === actionId)
-
-    if (attack) {
-      return attack
-    }
-  }
-
-  return undefined
-}
-
-function findGptAttackRefByCell(
-  board: GptBoardView | undefined,
-  requestedCellId: string | undefined,
-  requestedSlot: string | undefined,
-): GptBoardAttackRef | undefined {
-  const cell = findGptBoardCell(board, requestedCellId)
-
-  return cell?.legal?.attacksFromHere?.find((attack) =>
-    !requestedSlot || attack.weaponSlot === requestedSlot)
-}
-
-function cellIdMatches(cell: GptBoardCell, requestedCellId: string): boolean {
-  const normalized = requestedCellId.trim()
-
-  return normalized === cell.cellId ||
-    normalized === `${cell.x},${cell.z}` ||
-    normalized === `${cell.x}:${cell.z}` ||
-    normalized === `cell:${cell.x}:${cell.z}`
 }
 
 function resolveGptMountSlotAlias(

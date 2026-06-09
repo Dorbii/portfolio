@@ -38,6 +38,9 @@ import {
   botDesignSnapshotToLegacyBotBlueprintProjection,
   combatActionCommand,
   combatLegalActionForPacket,
+  normalizeCombatRoundPlanSubmission,
+  resolveLockstepCombatRound,
+  validateCombatRoundPlanAgainstBoard,
   buildSharedDebrief,
   createInitialMachineDesign,
   createInitialLoadoutBuildState,
@@ -337,6 +340,77 @@ function combatSnapshot(arena, redPosition, bluePosition, overrides = {}) {
     blue: combatBotSnapshot('blue', bluePosition, overrides.blue),
   }
 }
+
+function lockstepStats(overrides = {}) {
+  return {
+    armor: 0,
+    chaos: 0,
+    control: 0,
+    durability: 30,
+    footprint: 1,
+    mass: 8,
+    mobility: 12,
+    stability: 3,
+    style: 0,
+    traction: 4,
+    weaponThreat: 12,
+    ...overrides,
+  }
+}
+
+function combatRoundPlan(role, steps, overrides = {}) {
+  return {
+    role,
+    round: overrides.round ?? 1,
+    decisionVersion: overrides.decisionVersion ?? 1,
+    steps,
+    submittedAt: overrides.submittedAt ?? '2026-06-03T00:00:00.000Z',
+  }
+}
+
+function lockstepBudget(overrides = {}) {
+  return {
+    movement: 6,
+    actionTime: 4,
+    weaponCooldowns: {},
+    ...overrides,
+  }
+}
+
+function lockstepCombatInput(snapshot, plans, overrides = {}) {
+  return {
+    round: overrides.round ?? 1,
+    roundIndex: overrides.roundIndex ?? snapshot.tick,
+    seed: overrides.seed ?? 'lockstep-test-seed',
+    arena: snapshot.arena,
+    red: {
+      blueprint: overrides.redBlueprint ?? bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    blue: {
+      blueprint: overrides.blueBlueprint ?? bareBodyBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+    snapshot,
+    plans,
+    budgets: overrides.budgets ?? {
+      red: lockstepBudget(),
+      blue: lockstepBudget(),
+    },
+  }
+}
+
+function expectActiveLockstepResolution(resolution) {
+  assert.equal(resolution.status, 'active')
+  return resolution
+}
+
+function replayEventsForResolution(resolution) {
+  return resolution.status === 'active'
+    ? resolution.events
+    : resolution.result.replay.events
+}
+
 
 function replayForCompletedFight() {
   return {
@@ -713,6 +787,49 @@ async function submitPacketAction(session, token, packet, action, parameters) {
   assert.equal(submitted.ok, true, submitted.ok ? undefined : JSON.stringify(submitted.error))
 
   return submitted
+}
+
+function combatPlanSubmissionFromPacket(packet, steps = [{ kind: 'end_turn' }]) {
+  assert.notEqual(packet.combat, undefined)
+
+  return {
+    action: 'submit_combat_round_plan',
+    round: packet.combat.round,
+    decisionVersion: packet.combat.decisionVersion,
+    steps,
+  }
+}
+
+async function submitCombatPlanFromPacket(session, token, packet, steps = [{ kind: 'end_turn' }]) {
+  const submitted = await session.submitCombatRoundPlan(
+    token,
+    combatPlanSubmissionFromPacket(packet, steps),
+  )
+
+  assert.equal(submitted.ok, true, submitted.ok ? undefined : JSON.stringify(submitted.error))
+
+  return submitted
+}
+
+async function submitLatestCombatPlan(session, token, steps = [{ kind: 'end_turn' }]) {
+  const packet = await session.getGameMasterPacketForToken(token)
+
+  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
+
+  return submitCombatPlanFromPacket(session, token, packet.value, steps)
+}
+
+async function submitSurrenderFromLatestPacket(session, token) {
+  const packet = await session.getGameMasterPacketForToken(token)
+
+  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
+
+  return submitPacketAction(
+    session,
+    token,
+    packet.value,
+    findLegalAction(packet.value, (action) => action.kind === 'surrender'),
+  )
 }
 
 async function placePartFromCatalog(session, token, packet, partId) {
@@ -2795,155 +2912,6 @@ async function openFirstCombatTurnForBoth(session, redToken, blueToken) {
   }
 }
 
-function chooseCombatAction(packet) {
-  return (
-    packet.legalActions.find((action) => action.kind === 'move_and_attack') ??
-    packet.legalActions.find((action) => action.kind === 'attack') ??
-    packet.legalActions.find((action) => action.kind === 'move') ??
-    findLegalAction(packet, (action) => action.kind === 'hold')
-  )
-}
-
-async function submitCombatCommand(session, token, role, predicate) {
-  const packet = await session.getGameMasterPacketForToken(token)
-
-  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
-
-  const actionSet = session.exportState().activeActionSets?.[role]
-
-  assert.notEqual(actionSet, undefined)
-
-  const action = Object.values(actionSet.actions).find((candidate) => {
-    const command = combatActionCommand(candidate)
-
-    return command ? predicate(command, candidate) : false
-  })
-
-  assert.notEqual(action, undefined)
-
-  return submitPacketAction(
-    session,
-    token,
-    packet.value,
-    findLegalAction(packet.value, (legalAction) => legalAction.id === action.id),
-  )
-}
-
-async function createParameterizedCombatActionHarness() {
-  const session = await createTestSession('s_parameterized_actions')
-  const { redToken, blueToken } = await claimBothRoles(session)
-
-  await confirmBothMachineLoadouts(session, redToken, blueToken)
-
-  const redPacket = await session.getGameMasterPacketForToken(redToken)
-
-  assert.equal(redPacket.ok, true)
-
-  const stored = session.exportState()
-  const redActionSet = stored.activeActionSets?.red
-
-  assert.notEqual(redActionSet, undefined)
-  assert.notEqual(stored.combat, undefined)
-
-  const action = {
-    id: 'combat.red.parameterized.advance',
-    kind: 'move',
-    role: 'red',
-    parameterSchema: {
-      type: 'object',
-      required: ['targetCell', 'mode'],
-      properties: {
-        targetCell: {
-          type: 'integer',
-          label: 'Target cell',
-          summary: 'Forward cell count for this server-authored test action.',
-          minimum: 1,
-          maximum: 3,
-        },
-        mode: {
-          type: 'string',
-          label: 'Advance mode',
-          enum: ['probe', 'advance'],
-        },
-      },
-    },
-    parameterExamples: [
-      {
-        targetCell: 2,
-        mode: 'advance',
-      },
-    ],
-    payload: {
-      scope: 'combat_turn',
-      label: 'Parameterized advance',
-      summary: 'Server-owned parameterized action template for validation tests.',
-      command: {
-        tick: stored.combat.nextTick,
-        move: 'forward',
-      },
-    },
-  }
-
-  stored.activeActionSets = {
-    ...stored.activeActionSets,
-    red: {
-      ...redActionSet,
-      actions: {
-        [action.id]: action,
-      },
-    },
-  }
-
-  const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => '2026-06-03T00:00:10.000Z',
-  })
-  const packet = await loaded.getGameMasterPacketForToken(redToken)
-
-  assert.equal(packet.ok, true)
-
-  return {
-    action,
-    packet: packet.value,
-    redToken,
-    session: loaded,
-  }
-}
-
-async function resolveLiveCombat(session, redToken, blueToken) {
-  for (let index = 0; index < 90; index += 1) {
-    const redPacket = await session.getGameMasterPacketForToken(redToken)
-    const bluePacket = await session.getGameMasterPacketForToken(blueToken)
-
-    assert.equal(redPacket.ok, true)
-    assert.equal(bluePacket.ok, true)
-
-    if (redPacket.value.phase === 'round_review' || bluePacket.value.phase === 'round_review') {
-      return {
-        ok: true,
-        value: {
-          packet: redPacket.value,
-          publicState: session.getPublicState(),
-        },
-      }
-    }
-
-    const redTurn = await submitPacketAction(session, redToken, redPacket.value, chooseCombatAction(redPacket.value))
-
-    if (redTurn.value.publicState.phase === 'round_review') {
-      return redTurn
-    }
-
-    const blueTurn = await submitPacketAction(session, blueToken, bluePacket.value, chooseCombatAction(bluePacket.value))
-
-    if (blueTurn.value.publicState.phase === 'round_review') {
-      return blueTurn
-    }
-
-    assert.equal(blueTurn.value.publicState.phase, 'combat_turn')
-  }
-
-  throw new Error('Combat did not resolve within expected live turn budget.')
-}
 
 test('catalog exposes unique MVP part ids', () => {
   const ids = PART_CATALOG.map((part) => part.id)
@@ -6482,85 +6450,6 @@ test('GameMaster fixed actions reject parameters and still accept fixed submissi
   assert.equal(accepted.ok, true)
 })
 
-test('GameMaster parameterized actions validate schemas and hash normalized parameters', async () => {
-  const {
-    action,
-    packet,
-    redToken,
-    session,
-  } = await createParameterizedCombatActionHarness()
-  const exposedAction = findLegalAction(packet, (candidate) => candidate.id === action.id)
-
-  assert.deepEqual(exposedAction.parameterSchema, action.parameterSchema)
-  assert.deepEqual(exposedAction.parameterExamples, action.parameterExamples)
-  assert.equal(JSON.stringify(packet.legalActions).includes('"payload"'), false)
-
-  const baseSubmission = actionSubmissionFromPacket(packet, action.id)
-  const missingRequired = await session.submitGameMasterAction(redToken, baseSubmission)
-
-  assert.equal(missingRequired.ok, false)
-  assert.equal(missingRequired.error.code, 'SUBMISSION_INVALID')
-  assert.ok(
-    missingRequired.error.issues.some(
-      (issue) => issue.code === 'MISSING_REQUIRED_PARAMETER' && issue.path.endsWith('.targetCell'),
-    ),
-  )
-
-  const unknownParameter = await session.submitGameMasterAction(redToken, {
-    ...baseSubmission,
-    parameters: {
-      targetCell: 2,
-      mode: 'advance',
-      extra: true,
-    },
-  })
-
-  assert.equal(unknownParameter.ok, false)
-  assert.ok(unknownParameter.error.issues.some((issue) => issue.code === 'UNKNOWN_PARAMETER'))
-
-  const outOfRange = await session.submitGameMasterAction(redToken, {
-    ...baseSubmission,
-    parameters: {
-      targetCell: 4,
-      mode: 'advance',
-    },
-  })
-
-  assert.equal(outOfRange.ok, false)
-  assert.ok(outOfRange.error.issues.some((issue) => issue.code === 'PARAMETER_OUT_OF_RANGE'))
-
-  const valid = await session.submitGameMasterAction(redToken, {
-    ...baseSubmission,
-    parameters: {
-      mode: 'advance',
-      targetCell: 2,
-    },
-  })
-
-  assert.equal(valid.ok, true)
-
-  const reorderedEquivalent = await session.submitGameMasterAction(redToken, {
-    ...baseSubmission,
-    parameters: {
-      targetCell: 2,
-      mode: 'advance',
-    },
-  })
-
-  assert.equal(reorderedEquivalent.ok, true)
-
-  const differentParameters = await session.submitGameMasterAction(redToken, {
-    ...baseSubmission,
-    parameters: {
-      mode: 'advance',
-      targetCell: 3,
-    },
-  })
-
-  assert.equal(differentParameters.ok, false)
-  assert.equal(differentParameters.error.code, 'ALREADY_SUBMITTED')
-})
-
 test('agent bootstrap uses the invite claim token as a reusable player key', async () => {
   const session = await createTestSession()
   const badBootstrap = await session.bootstrapRole('red', 'claim_not_real', {})
@@ -6966,189 +6855,36 @@ test('session rate limits repeated private state attempts', async () => {
   assert.equal(third.error.code, 'RATE_LIMITED')
 })
 
-test('no-mobility machine combat legal actions are hold plus surrender and not projection-derived', async () => {
-  const session = await createTestSession('s_machine_combat_hold_only')
-  const { redToken, blueToken } = await claimBothRoles(session)
-
-  const { blueSubmission } = await confirmBothMachineLoadouts(session, redToken, blueToken)
-
-  assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
-
-  const redPacket = await session.getGameMasterPacketForToken(redToken)
-  const stored = session.exportState()
-  const redActionSet = stored.activeActionSets.red
-  const redRole = stored.roles.red
-  const projectedMachine = createInitialMachineDesign('red')
-  const projectedControls = deriveControls(machineDesignToLegacyBotBlueprintProjection({
-    ...projectedMachine,
-    parts: [
-      projectedMachine.parts[0],
-      machinePart('projected_wheel', {
-        definitionId: 'catalog:Wheel_Small',
-        transform: machineTransform({ position: [-3, 0, 0], rotation: [0, 90, 90] }),
-      }),
-      machinePart('projected_weapon', {
-        definitionId: 'catalog:Weapon_Spear',
-        transform: machineTransform({ position: [3, 0, 0], rotation: [0, 180, 0] }),
-      }),
-    ],
-    attachments: [
-      machineAttachment('core', 'projected_wheel', { mountId: 'core_shell' }),
-      machineAttachment('core', 'projected_weapon', { mountId: 'core_shell' }),
-    ],
-  }))
-  const commands = Object.values(redActionSet.actions)
-    .map((action) => combatActionCommand(action))
-    .filter(Boolean)
-
-  assert.equal(redPacket.ok, true)
-  assert.deepEqual(redPacket.value.legalActions.map((action) => action.kind), ['hold', 'surrender'])
-  assert.equal(redRole.controls, undefined)
-  assert.equal(projectedControls.movement.includes('forward'), true)
-  assert.equal(projectedControls.weaponA?.includes('fire'), true)
-  assert.deepEqual(commands, [{ tick: 1, move: 'brake' }])
-})
-
-test('active machine combat packets expose capability-generated canonical actions without command payloads', async () => {
-  const session = await createTestSession('s_machine_combat_capability_packet')
+test('combat packets expose lockstep plan metadata instead of canonical movement menus', async () => {
+  const session = await createTestSession('s_lockstep_packet_contract')
   const { redToken, blueToken } = await claimBothRoles(session)
 
   await confirmBothMachineLoadouts(session, redToken, blueToken)
 
-  const initial = createInitialMachineDesign('red')
-  const machine = {
-    ...initial,
-    parts: [
-      initial.parts[0],
-      machinePart('omni_wheel', {
-        definitionId: 'catalog:Wheel_Omni',
-        transform: machineTransform({ orientation: machineBasis() }),
-      }),
-    ],
-    attachments: [
-      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
-    ],
+  const blueCombat = await session.getGameMasterPacketForToken(blueToken)
+  const redCombat = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(blueCombat.ok, true)
+  assert.equal(redCombat.ok, true)
+
+  for (const packet of [blueCombat.value, redCombat.value]) {
+    assert.equal(packet.phase, 'combat_turn')
+    assert.equal(packet.nextAction, 'choose_turn')
+    assert.notEqual(packet.combat, undefined)
+    assert.notEqual(packet.board, undefined)
+    assert.equal(packet.submit?.method, 'POST')
+    assert.equal(packet.submit?.path, `/sessions/${session.exportState().id}/combat-plan`)
+    assert.equal(packet.submit?.body.action, 'submit_combat_round_plan')
+    assert.equal(packet.submit?.body.round, packet.combat.round)
+    assert.equal(packet.submit?.body.decisionVersion, packet.combat.decisionVersion)
+    assert.equal(packet.legalActions.every((action) => action.kind === 'surrender'), true)
+    assert.equal(JSON.stringify(packet.legalActions).includes('command'), false)
+    assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
+    assert.equal(typeof packet.board.ascii, 'string')
+    assert.ok(packet.board.reachableCells.length > 0)
+    assert.equal(JSON.stringify(packet.board).includes('command'), false)
+    assert.equal(JSON.stringify(packet.board).includes('payload'), false)
   }
-  const stored = session.exportState()
-  stored.roles.red.storedDesign = {
-    version: 'machine:v1',
-    machine,
-  }
-  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(machine)
-  delete stored.roles.red.controls
-  stored.activeActionSets = undefined
-  stored.lockedActions = undefined
-
-  const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => '2026-06-03T00:00:10.000Z',
-  })
-  const packet = await loaded.getGameMasterPacketForToken(redToken)
-
-  assert.equal(packet.ok, true, packet.ok ? undefined : JSON.stringify(packet.error))
-
-  const redActionSet = loaded.exportState().activeActionSets.red
-  const commands = Object.values(redActionSet.actions)
-    .map((action) => combatActionCommand(action))
-    .filter(Boolean)
-
-  assert.equal(packet.value.phase, 'combat_turn')
-  assert.equal(packet.value.legalActions.some((action) => action.kind === 'move'), true)
-  assert.equal(packet.value.legalActions.some((action) => action.kind === 'ready'), false)
-  assert.equal(JSON.stringify(packet.value.legalActions).includes('command'), false)
-  assert.equal(commands.some((command) => command.move === 'strafe_left'), true)
-  assert.equal(commands.some((command) => command.move === 'strafe_right'), true)
-})
-
-test('worker machine combat replays cumulative actions from baseline while packets use persisted runtime', async () => {
-  const session = await createTestSession('s_machine_combat_runtime_baseline')
-  const { redToken, blueToken } = await claimBothRoles(session)
-
-  await confirmBothMachineLoadouts(session, redToken, blueToken)
-
-  const initial = createInitialMachineDesign('red')
-  const redMachine = {
-    ...initial,
-    parts: [
-      initial.parts[0],
-      machinePart('omni_wheel', {
-        definitionId: 'catalog:Wheel_Omni',
-        transform: machineTransform({ orientation: machineBasis() }),
-      }),
-      machinePart('rim_laser', {
-        definitionId: 'catalog:Weapon_Laser',
-        transform: machineTransform({ orientation: machineBasis() }),
-      }),
-    ],
-    attachments: [
-      machineAttachment('core', 'omni_wheel', { mountId: 'core_shell' }),
-      machineAttachment('core', 'rim_laser', { mountId: 'core_shell' }),
-    ],
-  }
-  const blueMachine = createInitialMachineDesign('blue')
-  const stored = session.exportState()
-
-  stored.roles.red.storedDesign = {
-    version: 'machine:v1',
-    machine: redMachine,
-  }
-  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(redMachine)
-  stored.roles.blue.storedDesign = {
-    version: 'machine:v1',
-    machine: blueMachine,
-  }
-  stored.roles.blue.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(blueMachine)
-  stored.combat.baselineMachineDesigns = {
-    red: structuredClone(redMachine),
-    blue: structuredClone(blueMachine),
-  }
-  stored.activeActionSets = undefined
-  stored.lockedActions = undefined
-
-  let now = '2026-06-03T00:00:30.000Z'
-  const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => now,
-  })
-
-  await submitCombatCommand(
-    loaded,
-    redToken,
-    'red',
-    (command) => command.move === 'turn_right' || command.move === 'circle_right',
-  )
-  const firstTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
-
-  assert.equal(firstTurn.value.publicState.phase, 'combat_turn')
-
-  const afterFirstTurn = loaded.exportState()
-  const redRuntimeAfterFirstTurn = afterFirstTurn.roles.red.storedDesign.machine.runtime
-
-  assertVectorClose(redRuntimeAfterFirstTurn.orientationByInstanceId.core.forward, [1, 0, 0], 'first persisted core forward')
-  assert.equal(afterFirstTurn.combat.baselineMachineDesigns.red.runtime, undefined)
-
-  now = '2026-06-03T00:00:40.000Z'
-
-  const redSecondPacket = await loaded.getGameMasterPacketForToken(redToken)
-  const redSecondCommands = Object.values(loaded.exportState().activeActionSets.red.actions)
-    .map((action) => combatActionCommand(action))
-    .filter(Boolean)
-
-  assert.equal(redSecondPacket.ok, true, redSecondPacket.ok ? undefined : JSON.stringify(redSecondPacket.error))
-  assert.equal(redSecondCommands.some((command) => command.weaponA === 'fire'), true)
-
-  await submitCombatCommand(loaded, redToken, 'red', (command) => command.weaponA === 'fire')
-  const secondTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
-
-  assert.equal(secondTurn.value.publicState.phase, 'combat_turn')
-
-  const afterSecondTurn = loaded.exportState()
-  const redRuntimeAfterSecondTurn = afterSecondTurn.roles.red.storedDesign.machine.runtime
-  const blueRuntimeAfterSecondTurn = afterSecondTurn.roles.blue.storedDesign.machine.runtime
-
-  assertVectorClose(redRuntimeAfterSecondTurn.orientationByInstanceId.core.forward, [1, 0, 0], 'second persisted core forward')
-  assert.equal(afterSecondTurn.combat.snapshot.recentEvents.includes('red fired weaponA'), true)
-  assert.equal(blueRuntimeAfterSecondTurn.healthByInstanceId.core < 20, true)
-  assert.equal(afterSecondTurn.combat.baselineMachineDesigns.red.runtime, undefined)
 })
 
 test('session resolves after both confirmed loadouts while keeping public state redacted', async () => {
@@ -7204,7 +6940,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal('decision' in blueSubmission.value.publicState.combat, false)
   assert.equal('awardOptions' in blueSubmission.value.publicState, false)
 
-  const resolved = await resolveLiveCombat(session, redToken, blueToken)
+  const resolved = await submitSurrenderFromLatestPacket(session, redToken)
 
   assert.equal(resolved.value.publicState.phase, 'round_review')
   assert.equal(resolved.value.publicState.replayAvailable, true)
@@ -7320,110 +7056,254 @@ test('session lets a combat agent surrender to resolve a stalled round', async (
   assert.equal(replay.value.summary, 'Red surrendered; Blue wins the round.')
 })
 
-test('session applies no-op turn commands when combat turn deadline expires', async () => {
+test('session delays the next combat plan packet after a resolved lockstep round', async () => {
   let now = '2026-06-03T00:00:00.000Z'
-  const session = await createTestSession('s_turn_timeout', {
-    clock: () => now,
-  })
-  const { redToken, blueToken } = await claimBothRoles(session)
-
-  const { blueSubmission } = await confirmBothMachineLoadouts(session, redToken, blueToken)
-
-  assert.equal(blueSubmission.ok, true)
-  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
-  assert.equal(blueSubmission.value.publicState.combat.tick, 1)
-
-  now = '2026-06-03T00:01:01.000Z'
-
-  const redState = await session.getRoleStateForToken(redToken)
-
-  assert.equal(redState.ok, true)
-  assert.equal(redState.value.phase, 'round_review')
-  assert.equal(redState.value.combat, undefined)
-  assert.equal(redState.value.replayAvailable, true)
-  assert.equal(redState.value.lastResult.damage.red, 0)
-  assert.equal(redState.value.lastResult.damage.blue, 0)
-  assert.equal(
-    redState.value.eventLog.some((event) => event.type === 'turn_command_timed_out'),
-    true,
-  )
-})
-
-test('session delays the next combat action packet after a resolved turn', async () => {
-  let now = '2026-06-03T00:00:00.000Z'
-  const session = await createTestSession('s_combat_turn_handoff_delay', {
+  const session = await createTestSession('s_combat_plan_handoff_delay', {
     clock: () => now,
   })
   const { redToken, blueToken } = await claimBothRoles(session)
 
   await confirmBothMachineLoadouts(session, redToken, blueToken)
 
-  const initialRed = createInitialMachineDesign('red')
-  const redMachine = {
-    ...initialRed,
-    parts: [
-      initialRed.parts[0],
-      machinePart('drive_wheel', {
-        definitionId: 'catalog:Wheel_Omni',
-        transform: machineTransform({ orientation: machineBasis() }),
-      }),
-    ],
-    attachments: [
-      machineAttachment('core', 'drive_wheel', { mountId: 'core_shell' }),
-    ],
-  }
-  const stored = session.exportState()
+  const bluePacket = await session.getGameMasterPacketForToken(blueToken)
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
 
-  stored.roles.red.storedDesign = {
-    version: 'machine:v1',
-    machine: redMachine,
-  }
-  stored.roles.red.currentDesign = machineDesignToLegacyBotDesignSnapshotProjection(redMachine)
-  stored.combat.baselineMachineDesigns = {
-    red: structuredClone(redMachine),
-    blue: structuredClone(stored.roles.blue.storedDesign.machine),
-  }
-  stored.activeActionSets = undefined
-  stored.lockedActions = undefined
+  assert.equal(bluePacket.ok, true)
+  assert.equal(redPacket.ok, true)
+  assert.equal(bluePacket.value.nextAction, 'choose_turn')
+  assert.equal(redPacket.value.nextAction, 'choose_turn')
 
-  const loaded = SessionCoordinator.fromState(stored, {
-    clock: () => now,
-  })
-  const opened = loaded.exportState().combat
+  const redSubmission = await submitCombatPlanFromPacket(session, redToken, redPacket.value, [{ kind: 'end_turn' }])
 
-  assert.equal(opened.turnSeconds, 60)
-  assert.equal(opened.openedAt, '2026-06-03T00:00:00.000Z')
-  assert.equal(opened.deadlineAt, '2026-06-03T00:01:00.000Z')
+  assert.equal(redSubmission.ok, true)
+  assert.equal(redSubmission.value.publicState.phase, 'combat_turn')
+  assert.equal(redSubmission.value.packet.nextAction, 'wait_for_opponent_turn')
 
-  await submitCombatCommand(loaded, redToken, 'red', (command) => command.move !== undefined && command.move !== 'brake')
-  const blueTurn = await submitCombatCommand(loaded, blueToken, 'blue', (command) => command.move === 'brake')
+  const blueSubmission = await submitCombatPlanFromPacket(session, blueToken, bluePacket.value, [{ kind: 'end_turn' }])
 
-  assert.equal(blueTurn.value.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.ok, true)
+  assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
 
-  const delayedState = loaded.exportState()
+  const delayedState = session.exportState()
 
   assert.equal(delayedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
   assert.equal(delayedState.combat.deadlineAt, '2026-06-03T00:01:10.000Z')
 
-  const delayedPacket = await loaded.getGameMasterPacketForToken(redToken)
+  const delayedPacket = await session.getGameMasterPacketForToken(redToken)
 
   assert.equal(delayedPacket.ok, true)
   assert.equal(delayedPacket.value.nextAction, 'wait_for_opponent_turn')
   assert.equal(delayedPacket.value.legalActions.length, 0)
   assert.equal(delayedPacket.value.submit, undefined)
   assert.equal(
-    delayedPacket.value.instruction.includes('Next combat turn opens at 2026-06-03T00:00:10.000Z'),
+    delayedPacket.value.instruction.includes('Next combat round opens at 2026-06-03T00:00:10.000Z'),
     true,
   )
 
   now = '2026-06-03T00:00:10.000Z'
 
-  const openPacket = await loaded.getGameMasterPacketForToken(redToken)
+  const openPacket = await session.getGameMasterPacketForToken(redToken)
 
   assert.equal(openPacket.ok, true)
   assert.equal(openPacket.value.nextAction, 'choose_turn')
-  assert.equal(openPacket.value.legalActions.length > 0, true)
-  assert.notEqual(openPacket.value.submit, undefined)
+  assert.notEqual(openPacket.value.combat, undefined)
+  assert.equal(openPacket.value.submit?.path, `/sessions/${session.exportState().id}/combat-plan`)
+})
+
+test('combat round plan validation rejects invalid steps and over-budget movement', () => {
+  const invalid = normalizeCombatRoundPlanSubmission({
+    action: 'submit_combat_round_plan',
+    round: 1,
+    decisionVersion: 1,
+    steps: [{ kind: 'teleport', cellId: 'cell:2:0' }],
+  })
+
+  assert.equal(invalid.ok, false)
+  assert.equal(
+    invalid.issues.some((issue) => issue.code === 'INVALID_STEP_KIND'),
+    true,
+  )
+
+  const overBudget = validateCombatRoundPlanAgainstBoard({
+    submission: {
+      action: 'submit_combat_round_plan',
+      round: 1,
+      decisionVersion: 1,
+      steps: [{ kind: 'move', cellId: 'cell:2:0' }],
+    },
+    budget: lockstepBudget({ movement: 1 }),
+    board: {
+      ascii: 'R..',
+      reachableCells: [{ cellId: 'cell:2:0', x: 2, z: 0, moveCost: 2, hazard: false }],
+      attackableCells: [],
+      utilityOptions: [],
+    },
+  })
+
+  assert.equal(overBudget.ok, false)
+  assert.equal(
+    overBudget.issues.some((issue) => issue.code === 'MOVEMENT_BUDGET_EXCEEDED'),
+    true,
+  )
+})
+
+test('lockstep resolver advances simultaneous movement one grid cell per substep', () => {
+  const snapshot = combatSnapshot(tacticalOpenArena, [-3, 0, 0], [3, 0, 0], {
+    red: { stats: lockstepStats({ mass: 10, mobility: 12 }) },
+    blue: { stats: lockstepStats({ mass: 10, mobility: 12 }) },
+  })
+  const resolution = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:-1:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'move', cellId: 'cell:1:0' }, { kind: 'end_turn' }]),
+  })))
+  const redMoves = resolution.events.filter((event) => event.type === 'move' && event.bot === 'red')
+  const blueMoves = resolution.events.filter((event) => event.type === 'move' && event.bot === 'blue')
+
+  assert.deepEqual(redMoves.map((event) => event.to[0]), [-2, -1])
+  assert.deepEqual(blueMoves.map((event) => event.to[0]), [2, 1])
+  assert.equal(resolution.snapshot.red.position[0], -1)
+  assert.equal(resolution.snapshot.blue.position[0], 1)
+  assert.equal(resolution.consumed.red.movementSpent, 2)
+  assert.equal(resolution.consumed.blue.movementSpent, 2)
+})
+
+test('lockstep resolver does not move past the server-side movement budget', () => {
+  const snapshot = combatSnapshot(tacticalOpenArena, [-3, 0, 0], [3, 0, 0])
+  const resolution = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:-1:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  }, {
+    budgets: {
+      red: lockstepBudget({ movement: 1 }),
+      blue: lockstepBudget(),
+    },
+  })))
+
+  assert.equal(resolution.snapshot.red.position[0], -2)
+  assert.equal(resolution.consumed.red.movementSpent, 1)
+  assert.equal(resolution.consumed.red.consumedSteps, 2)
+})
+
+test('lockstep resolver resolves same-cell contests with explicit heavier-bot push events', () => {
+  const snapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], {
+    red: { stats: lockstepStats({ mass: 24, mobility: 6, stability: 8 }) },
+    blue: { stats: lockstepStats({ mass: 6, mobility: 6, stability: 3 }) },
+  })
+  const resolution = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:0:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'move', cellId: 'cell:0:0' }, { kind: 'end_turn' }]),
+  })))
+  const push = resolution.events.find((event) => event.type === 'push')
+
+  assert.notEqual(push, undefined)
+  assert.equal(push.attacker, 'red')
+  assert.equal(push.defender, 'blue')
+  assert.equal(push.reason, 'mass')
+  assert.equal(resolution.snapshot.red.position[0], 0)
+  assert.equal(resolution.snapshot.blue.position[0], 2)
+})
+
+test('lockstep resolver emits ram and bounce when a push has no valid destination', () => {
+  const wallArena = {
+    ...tacticalOpenArena,
+    name: 'Lockstep Wall Bounce Test',
+    width: 2,
+    height: 0,
+  }
+  const snapshot = combatSnapshot(wallArena, [0, 0, 0], [1, 0, 0], {
+    red: { stats: lockstepStats({ mass: 24, mobility: 8, stability: 8 }) },
+    blue: { stats: lockstepStats({ mass: 6, mobility: 4, stability: 3 }) },
+  })
+  const resolution = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:1:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  })))
+  const ram = resolution.events.find((event) => event.type === 'ram')
+  const bounce = resolution.events.find((event) => event.type === 'bounce')
+
+  assert.notEqual(ram, undefined)
+  assert.equal(ram.attacker, 'red')
+  assert.equal(ram.defender, 'blue')
+  assert.equal(ram.blockedBy, 'wall')
+  assert.notEqual(bounce, undefined)
+  assert.equal(bounce.bot, 'red')
+  assert.equal(resolution.snapshot.red.position[0], 0)
+  assert.equal(resolution.snapshot.blue.position[0], 1)
+  assert.ok(resolution.snapshot.blue.health < snapshot.blue.health)
+})
+
+test('lockstep resolver triggers hazards on voluntary movement and forced push paths', () => {
+  const hazardArena = {
+    ...tacticalOpenArena,
+    name: 'Lockstep Hazard Test',
+    activeHazards: ['floor_saw'],
+    topology: {
+      ...tacticalOpenArena.topology,
+      hazards: [
+        {
+          id: 'center_saw_test',
+          type: 'floor_saw',
+          shape: { kind: 'circle', center: [0, 0], radius: 0.45 },
+          damage: 4,
+          tags: ['test'],
+        },
+      ],
+    },
+  }
+  const voluntarySnapshot = combatSnapshot(hazardArena, [-1, 0, 0], [4, 0, 0])
+  const voluntary = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(voluntarySnapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:1:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  })))
+  const voluntaryHazard = voluntary.events.find((event) => event.type === 'hazard_trigger' && event.bot === 'red')
+
+  assert.notEqual(voluntaryHazard, undefined)
+  assert.equal(voluntaryHazard.trigger, 'voluntary_move')
+  assert.ok(voluntary.snapshot.red.health < voluntarySnapshot.red.health)
+
+  const forcedSnapshot = combatSnapshot(hazardArena, [-1, 0, 0], [0, 0, 0], {
+    red: { stats: lockstepStats({ mass: 24, mobility: 8, stability: 8 }) },
+    blue: { stats: lockstepStats({ mass: 6, mobility: 4, stability: 3 }) },
+  })
+  const forced = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(forcedSnapshot, {
+    red: combatRoundPlan('red', [{ kind: 'move', cellId: 'cell:0:0' }, { kind: 'end_turn' }]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  })))
+  const forcedHazard = forced.events.find((event) => event.type === 'hazard_trigger' && event.bot === 'blue')
+
+  assert.notEqual(forcedHazard, undefined)
+  assert.equal(forcedHazard.trigger, 'forced_push')
+})
+
+test('lockstep resolver supports weapon attacks after movement in the same submitted plan', () => {
+  const snapshot = combatSnapshot(tacticalOpenArena, [-2, 0, 0], [1, 0, 0], {
+    red: {
+      weaponReach: 2,
+      stats: lockstepStats({ weaponThreat: 18, control: 8 }),
+    },
+    blue: { stats: lockstepStats({ mass: 8 }) },
+  })
+  const resolution = expectActiveLockstepResolution(resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [
+      { kind: 'move', cellId: 'cell:-1:0' },
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:1:0' },
+      { kind: 'end_turn' },
+    ]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  }, {
+    budgets: {
+      red: lockstepBudget({ movement: 2, actionTime: 2 }),
+      blue: lockstepBudget(),
+    },
+  })))
+  const weaponFire = resolution.events.find((event) => event.type === 'weapon_fire' && event.bot === 'red')
+  const impact = resolution.events.find((event) => event.type === 'impact' && event.attacker === 'red')
+
+  assert.notEqual(weaponFire, undefined)
+  assert.notEqual(impact, undefined)
+  assert.equal(resolution.snapshot.red.position[0], -1)
+  assert.ok(resolution.snapshot.blue.health < snapshot.blue.health)
+  assert.equal(resolution.consumed.red.actionTimeSpent, 1)
 })
 
 test('session maps GPT combat_plan into lockstep round plans and stages the next round after both submit', async () => {
@@ -7468,8 +7348,7 @@ test('session maps GPT combat_plan into lockstep round plans and stages the next
   })
   const redPlan = await loaded.submitGptCombatPlan(redToken, {
     steps: [
-      { actionId: 'hold' },
-      { actionId: 'hold' },
+      { kind: 'end_turn' },
     ],
   })
   const redWaitingState = loaded.exportState()
@@ -7482,33 +7361,31 @@ test('session maps GPT combat_plan into lockstep round plans and stages the next
 
   const bluePlan = await loaded.submitGptCombatPlan(blueToken, {
     steps: [
-      { actionId: 'hold' },
-      { actionId: 'hold' },
+      { kind: 'end_turn' },
     ],
   })
 
   assert.equal(bluePlan.ok, true)
   assert.equal(bluePlan.value.submittedPlan.steps.length, 1)
 
-  let queuedState = loaded.exportState()
+  let roundState = loaded.exportState()
 
-  assert.equal(queuedState.combat.mode, 'lockstep_round_plan')
-  assert.equal(queuedState.combat.nextTick, 2)
-  assert.equal(queuedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
-  assert.equal(queuedState.combat.plans, undefined)
-  assert.equal(queuedState.combat.submittedPlans, undefined)
-  assert.equal(queuedState.combat.planConsumption.red.endedBy, 'end_turn')
-  assert.equal(queuedState.combat.planConsumption.blue.endedBy, 'end_turn')
+  assert.equal(roundState.combat.mode, 'lockstep_round_plan')
+  assert.equal(roundState.combat.nextTick, 2)
+  assert.equal(roundState.combat.openedAt, '2026-06-03T00:00:10.000Z')
+  assert.equal(roundState.combat.submittedPlans, undefined)
+  assert.equal(roundState.combat.planConsumption.red.endedBy, 'end_turn')
+  assert.equal(roundState.combat.planConsumption.blue.endedBy, 'end_turn')
 
   now = '2026-06-03T00:00:10.000Z'
   const openPacket = await loaded.getGameMasterPacketForToken(redToken)
-  queuedState = loaded.exportState()
+  roundState = loaded.exportState()
 
   assert.equal(openPacket.ok, true)
   assert.equal(openPacket.value.nextAction, 'choose_turn')
   assert.equal(openPacket.value.combat.submitted, false)
   assert.equal(openPacket.value.submit.path.endsWith('/combat-plan'), true)
-  assert.equal(queuedState.combat.nextTick, 2)
+  assert.equal(roundState.combat.nextTick, 2)
 })
 
 
@@ -7559,6 +7436,63 @@ test('session accepts direct CombatRoundPlan submissions without legacy canonica
 
   assert.equal(bluePlan.ok, true)
   assert.equal(session.exportState().combat.nextTick, 2)
+})
+
+
+test('session resolves a partial combat round plan with timeout end_turn for the missing opponent', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_partial_combat_round_plan_timeout', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const redPacket = await session.getGameMasterPacketForToken(redToken)
+
+  assert.equal(redPacket.ok, true)
+  assert.equal(redPacket.value.nextAction, 'choose_turn')
+  assert.equal(redPacket.value.submit.path.endsWith('/combat-plan'), true)
+
+  const selfAnchor = redPacket.value.combat.self.anchor
+  const selfCellId = `cell:${selfAnchor.x}:${selfAnchor.z}`
+  const reachableMove = redPacket.value.board.reachableCells.find((cell) =>
+    cell.cellId !== selfCellId && cell.moveCost <= redPacket.value.combat.budget.movement,
+  )
+  const redSteps = reachableMove
+    ? [{ kind: 'move', cellId: reachableMove.cellId }, { kind: 'end_turn' }]
+    : [{ kind: 'end_turn' }]
+  const redPlan = await session.submitCombatRoundPlan(redToken, {
+    action: 'submit_combat_round_plan',
+    round: redPacket.value.combat.round,
+    decisionVersion: redPacket.value.combat.decisionVersion,
+    steps: redSteps,
+  })
+
+  assert.equal(redPlan.ok, true)
+
+  const waiting = session.exportState()
+
+  assert.equal(waiting.combat.submittedPlans.red.steps.length, redSteps.length)
+  assert.equal(waiting.combat.submittedPlans.blue, undefined)
+
+  now = new Date(Date.parse(waiting.combat.deadlineAt) + 1).toISOString()
+
+  const bluePacket = await session.getGameMasterPacketForToken(blueToken)
+  const resolved = session.exportState()
+
+  assert.equal(bluePacket.ok, true)
+  assert.equal(resolved.combat.nextTick, waiting.combat.nextTick + 1)
+  assert.equal(resolved.combat.submittedPlans, undefined)
+  assert.equal(resolved.combat.planConsumption.red.endedBy === 'end_turn' || resolved.combat.planConsumption.red.endedBy === 'plan_exhausted', true)
+  assert.equal(
+    resolved.combat.planConsumption.blue.endedBy === 'end_turn' || resolved.combat.planConsumption.blue.endedBy === 'plan_exhausted',
+    true,
+  )
+  assert.equal(
+    resolved.eventLog.some((event) => event.type === 'turn_command_timed_out' && event.message.includes('blue timed out')),
+    true,
+  )
 })
 
 test('session auto-confirms current loadouts when loadout window expires', async () => {
@@ -7837,10 +7771,9 @@ test('session completes on max rounds and win streak target', async () => {
     maxRoundTokens.redToken,
     maxRoundTokens.blueToken,
   )
-  const maxRoundResolved = await resolveLiveCombat(
+  const maxRoundResolved = await submitSurrenderFromLatestPacket(
     maxRoundSession,
     maxRoundTokens.redToken,
-    maxRoundTokens.blueToken,
   )
 
   assert.equal(maxRoundResolved.value.publicState.phase, 'round_review')
