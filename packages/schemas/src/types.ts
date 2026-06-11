@@ -575,7 +575,11 @@ export const COMBAT_PLAN_STEP_KINDS = [
 
 export type CombatPlanStepKind = (typeof COMBAT_PLAN_STEP_KINDS)[number]
 
-export type CombatWeaponSlot = 'weaponA' | 'weaponB'
+/** Temporary compatibility: first two mounted weapons map to weaponA/weaponB. */
+export type LegacyCombatWeaponSlot = 'weaponA' | 'weaponB'
+
+/** @deprecated weaponA/weaponB is migration compatibility; use mounted weapon IDs. */
+export type CombatWeaponSlot = LegacyCombatWeaponSlot
 
 export type CombatPlanStep =
   | {
@@ -584,7 +588,10 @@ export type CombatPlanStep =
     }
   | {
       kind: 'attack'
-      weaponSlot: CombatWeaponSlot
+      /** Mounted weapon instance ID; the canonical combat weapon identity. */
+      weaponId?: string
+      /** Temporary compatibility: resolves to the nth active weapon. */
+      weaponSlot?: LegacyCombatWeaponSlot
       targetCellId?: string
     }
   | {

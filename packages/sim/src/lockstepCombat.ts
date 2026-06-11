@@ -16,6 +16,7 @@ import {
   type CombatTurnSnapshot,
   type GridCoord,
   type MachineRuntimeState,
+  type MachineWeaponCapability,
   type TeamRole,
   type Vector3,
 } from '../../schemas/src/index.js'
@@ -29,6 +30,8 @@ import {
   worldToArenaCell,
 } from './arenaTopology.js'
 import { advanceCombatCooldowns, deriveCombatBudget } from './combatBudget.js'
+import { weaponFireModeRequiresLineOfSight } from './combatLegality.js'
+import { deriveMachineCapabilities } from './machineCapabilities.js'
 import {
   createBounceEvent,
   createHazardTriggerEvent,
@@ -99,6 +102,8 @@ type RoleRuntime = {
   hasWeaponControl: boolean
   weaponSlotCount: number
   weaponReach: number
+  /** Active mounted weapon capabilities; canonical combat weapon identity. */
+  weapons: readonly MachineWeaponCapability[]
   statuses: string[]
   cooldowns: Record<string, number>
   charges: Record<string, number>
@@ -130,8 +135,8 @@ export function resolveLockstepCombatRound(
     : spawnEventsFromSnapshot(snapshot)
   const events: ReplayEvent[] = initialEvents
   const log = [...(input.priorLog ?? [])]
-  const red = createRoleRuntime('red', snapshot, input.plans.red, input.budgets?.red)
-  const blue = createRoleRuntime('blue', snapshot, input.plans.blue, input.budgets?.blue)
+  const red = createRoleRuntime('red', snapshot, input.plans.red, input.budgets?.red, activeMachineWeapons(input, 'red'))
+  const blue = createRoleRuntime('blue', snapshot, input.plans.blue, input.budgets?.blue, activeMachineWeapons(input, 'blue'))
   let elapsedSubsteps = input.elapsedSubsteps ?? 0
 
   for (let localSubstep = 1; localSubstep <= HARD_MAX_LOCKSTEP_SUBSTEPS; localSubstep += 1) {
@@ -233,6 +238,7 @@ function createRoleRuntime(
   snapshot: CombatTurnSnapshot,
   plan: CombatRoundPlan,
   budget: CombatBudget | undefined,
+  weapons: readonly MachineWeaponCapability[] = [],
 ): RoleRuntime {
   const bot = role === 'red' ? snapshot.red : snapshot.blue
   const anchor = worldToArenaCell(compileArenaTopology(snapshot.arena), bot.position)
@@ -250,6 +256,7 @@ function createRoleRuntime(
     hasWeaponControl: bot.hasWeaponControl,
     weaponSlotCount: bot.weaponSlotCount,
     weaponReach: bot.weaponReach,
+    weapons,
     statuses: [...bot.statuses],
     cooldowns: { ...bot.cooldowns },
     charges: { ...bot.charges },
@@ -697,18 +704,39 @@ function triggerAttackOrUtility(
     return
   }
 
+  // Weapon identity: step.weaponId selects the mounted weapon; legacy
+  // weaponA/weaponB map to the first/second active weapon during migration.
+  const selected = selectAttackWeapon(attacker, step)
+
+  if (!selected.ok) {
+    rejectConsumedStep(attacker, attacker.stepIndex - 1, selected.reason)
+    return
+  }
+
+  const weapon = selected.weapon
+  const cooldownKey = weapon?.partInstanceId ?? step.weaponId ?? step.weaponSlot ?? 'weaponA'
+
+  if ((attacker.budget.weaponCooldowns[cooldownKey] ?? 0) > 0) {
+    rejectConsumedStep(attacker, attacker.stepIndex - 1, `${cooldownKey} is on cooldown`)
+    return
+  }
+
   const distance = arenaCellDistance(attacker.anchor, target)
-  const inRange = distance <= Math.max(1, Math.ceil(attacker.weaponReach))
-  const hasLos = hasArenaLineOfSight(topology, attacker.position, arenaCellCenter(topology, target))
+  const range = weapon ? Math.max(1, Math.ceil(weapon.range)) : Math.max(1, Math.ceil(attacker.weaponReach))
+  const inRange = distance <= range
+  const requiresLineOfSight = weapon ? weaponFireModeRequiresLineOfSight(weapon.fireMode) : true
+  const hasLos = !requiresLineOfSight ||
+    hasArenaLineOfSight(topology, attacker.position, arenaCellCenter(topology, target))
 
   events.push({
     t,
     type: 'weapon_fire',
     bot: attacker.role,
-    weaponSlot: step.weaponSlot,
+    ...(weapon ? { weaponId: weapon.partInstanceId } : {}),
+    ...(step.weaponSlot ? { weaponSlot: step.weaponSlot } : {}),
     targetPosition: arenaCellCenter(topology, target),
     phase: 'release',
-    fireMode: 'direct',
+    fireMode: weapon?.fireMode ?? 'direct',
     turn: substep,
     substep,
   })
@@ -724,7 +752,16 @@ function triggerAttackOrUtility(
     return
   }
 
-  const damage = Math.max(1, Math.round(attacker.stats.weaponThreat / 6 || 2))
+  if (weapon && weapon.cooldownTurns > 0) {
+    attacker.budget.weaponCooldowns[cooldownKey] = weapon.cooldownTurns
+  }
+
+  // Damage comes from the selected weapon (zero-damage effect weapons stay
+  // zero); the aggregate weaponThreat fallback only covers stats-only bots.
+  const damage = weapon
+    ? Math.max(0, Math.round(weapon.damage))
+    : Math.max(1, Math.round(attacker.stats.weaponThreat / 6 || 2))
+
   events.push({
     t,
     type: 'impact',
@@ -736,6 +773,50 @@ function triggerAttackOrUtility(
     substep,
   })
   applyDamage(defender, damage, substep, t, events)
+}
+
+type SelectedAttackWeapon =
+  | { ok: true; weapon?: MachineWeaponCapability }
+  | { ok: false; reason: string }
+
+function selectAttackWeapon(
+  attacker: RoleRuntime,
+  step: Extract<CombatPlanStep, { kind: 'attack' }>,
+): SelectedAttackWeapon {
+  if (step.weaponId) {
+    const weapon = attacker.weapons.find((candidate) => candidate.partInstanceId === step.weaponId)
+
+    return weapon
+      ? { ok: true, weapon }
+      : { ok: false, reason: `${step.weaponId} is not an active mounted weapon` }
+  }
+
+  if (attacker.weapons.length === 0) {
+    // Stats-only legacy bots keep the aggregate weaponReach behavior.
+    return { ok: true }
+  }
+
+  const index = step.weaponSlot === 'weaponB' ? 1 : 0
+  const weapon = attacker.weapons[index]
+
+  return weapon
+    ? { ok: true, weapon }
+    : { ok: false, reason: `${step.weaponSlot ?? 'weaponA'} has no active mounted weapon` }
+}
+
+function activeMachineWeapons(
+  input: ResolveLockstepCombatRoundInput,
+  role: TeamRole,
+): readonly MachineWeaponCapability[] {
+  const design = role === 'red' ? input.red.machineDesign : input.blue.machineDesign
+
+  if (!design) {
+    return []
+  }
+
+  const runtime = input.machineRuntime?.[role] ?? design.runtime
+
+  return deriveMachineCapabilities(runtime ? { ...design, runtime } : design).weapons
 }
 
 function triggerHazardsForPath(

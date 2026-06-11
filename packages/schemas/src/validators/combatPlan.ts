@@ -14,7 +14,7 @@ const COMBAT_ROUND_PLAN_SUBMISSION_KEYS = new Set([
   'publicMessage',
 ])
 const MOVE_STEP_KEYS = new Set(['kind', 'cellId'])
-const ATTACK_STEP_KEYS = new Set(['kind', 'weaponSlot', 'targetCellId'])
+const ATTACK_STEP_KEYS = new Set(['kind', 'weaponId', 'weaponSlot', 'targetCellId'])
 const UTILITY_STEP_KEYS = new Set(['kind', 'utilityId', 'cellId'])
 const END_TURN_STEP_KEYS = new Set(['kind'])
 const CELL_ID_PATTERN = /^cell:-?\d+:-?\d+$/
@@ -231,14 +231,18 @@ export function normalizeCompactCombatPlanSubmission(
               issues.push(issue('UNKNOWN_FIELD', `${stepPath}.${key}`, `${key} is not accepted on a compact attack step.`))
             }
           }
-          if ('weapon' in step && step.weapon !== undefined && typeof step.weapon !== 'string') {
+          const hasCompactWeaponId = typeof step.weapon === 'string' && step.weapon.trim().length > 0
+
+          if ('weapon' in step && step.weapon !== undefined && !hasCompactWeaponId) {
             issues.push(issue('INVALID_WEAPON', `${stepPath}.weapon`, 'attack weapon must be a mounted weapon id string.'))
           }
-          const weaponSlot = step.weaponSlot ?? (typeof step.weapon === 'string' ? undefined : 'weaponA')
+          if (hasCompactWeaponId && step.weaponSlot !== undefined) {
+            issues.push(issue('INVALID_WEAPON_SELECTION', stepPath, 'attack steps accept either weapon (mounted weapon id) or weaponSlot, not both.'))
+          }
           if (
-            weaponSlot !== undefined &&
-            weaponSlot !== 'weaponA' &&
-            weaponSlot !== 'weaponB'
+            step.weaponSlot !== undefined &&
+            step.weaponSlot !== 'weaponA' &&
+            step.weaponSlot !== 'weaponB'
           ) {
             issues.push(issue('INVALID_WEAPON_SLOT', `${stepPath}.weaponSlot`, 'attack weaponSlot must be weaponA or weaponB during compatibility.'))
           }
@@ -248,7 +252,9 @@ export function normalizeCompactCombatPlanSubmission(
           }
           steps.push({
             kind: 'attack',
-            weaponSlot: (weaponSlot === 'weaponB' ? 'weaponB' : 'weaponA'),
+            ...(hasCompactWeaponId
+              ? { weaponId: (step.weapon as string).trim() }
+              : { weaponSlot: (step.weaponSlot === 'weaponB' ? 'weaponB' : 'weaponA') as 'weaponA' | 'weaponB' }),
             targetCellId: cellIdFromTuple(step.target),
           })
           return
@@ -326,15 +332,26 @@ export function validateCombatPlanStepShape(
         issues.push(issue('INVALID_CELL_ID', `${path}.cellId`, 'move steps require cellId like cell:3:0.'))
       }
       return issues
-    case 'attack':
+    case 'attack': {
       validateKnownStepKeys(value, ATTACK_STEP_KEYS, path, issues)
-      if (value.weaponSlot !== 'weaponA' && value.weaponSlot !== 'weaponB') {
-        issues.push(issue('INVALID_WEAPON_SLOT', `${path}.weaponSlot`, 'attack steps require weaponSlot weaponA or weaponB.'))
+
+      const hasWeaponId = typeof value.weaponId === 'string' && value.weaponId.trim().length > 0
+      const hasWeaponSlot = value.weaponSlot !== undefined
+
+      if ('weaponId' in value && value.weaponId !== undefined && (typeof value.weaponId !== 'string' || value.weaponId.trim().length === 0)) {
+        issues.push(issue('INVALID_WEAPON_ID', `${path}.weaponId`, 'weaponId must be a non-empty mounted weapon instance id.'))
+      }
+      if (hasWeaponSlot && value.weaponSlot !== 'weaponA' && value.weaponSlot !== 'weaponB') {
+        issues.push(issue('INVALID_WEAPON_SLOT', `${path}.weaponSlot`, 'attack weaponSlot must be weaponA or weaponB during compatibility.'))
+      }
+      if (hasWeaponId === hasWeaponSlot) {
+        issues.push(issue('INVALID_WEAPON_SELECTION', path, 'attack steps require exactly one of weaponId (canonical) or weaponSlot (compatibility).'))
       }
       if ('targetCellId' in value && value.targetCellId !== undefined && !isValidCellId(value.targetCellId)) {
         issues.push(issue('INVALID_TARGET_CELL_ID', `${path}.targetCellId`, 'targetCellId must look like cell:3:0.'))
       }
       return issues
+    }
     case 'utility':
       validateKnownStepKeys(value, UTILITY_STEP_KEYS, path, issues)
       if ('utilityId' in value && value.utilityId !== undefined && typeof value.utilityId !== 'string') {
@@ -365,7 +382,9 @@ function normalizeCombatPlanStep(value: unknown): CombatPlanStep {
     case 'attack':
       return {
         kind: 'attack',
-        weaponSlot: record.weaponSlot as 'weaponA' | 'weaponB',
+        ...(typeof record.weaponId === 'string' && record.weaponId.trim().length > 0
+          ? { weaponId: record.weaponId.trim() }
+          : { weaponSlot: record.weaponSlot as 'weaponA' | 'weaponB' }),
         ...(typeof record.targetCellId === 'string' ? { targetCellId: normalizeCellId(record.targetCellId) } : {}),
       }
     case 'utility':

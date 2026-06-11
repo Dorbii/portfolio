@@ -114,8 +114,9 @@ function compactMovement(
   return movement
 }
 
-// weaponA/weaponB slots are compatibility only in this slice; mounted weapon
-// IDs become the canonical combat identity in the unlimited-weapon slice.
+// Mounted weapon IDs are the canonical combat identity. All active weapons
+// are exposed; the first two also carry legacy weaponA/weaponB slots during
+// migration so older agents keep working.
 function compactWeapons(
   capabilities: MachineCapabilities | undefined,
   snapshot: CombatBotSnapshot,
@@ -124,13 +125,16 @@ function compactWeapons(
   const slots: Array<'weaponA' | 'weaponB'> = ['weaponA', 'weaponB']
   const weapons = capabilities?.weapons ?? []
 
-  return weapons.slice(0, snapshot.weaponSlotCount || slots.length).slice(0, 2).map((weapon, index) => {
-    const slot = slots[index]
-    const cooldown = budget?.weaponCooldowns[slot] ?? snapshot.cooldowns[slot] ?? 0
+  return weapons.map((weapon, index) => {
+    const slot = index < slots.length ? slots[index] : undefined
+    const cooldown = budget?.weaponCooldowns[weapon.partInstanceId] ??
+      (slot ? budget?.weaponCooldowns[slot] ?? snapshot.cooldowns[slot] : undefined) ??
+      snapshot.cooldowns[weapon.partInstanceId] ??
+      0
 
     return {
       id: weapon.partInstanceId,
-      slot,
+      ...(slot ? { slot } : {}),
       part: weapon.partId,
       fireMode: weapon.fireMode,
       range: weapon.range,

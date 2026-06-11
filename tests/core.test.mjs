@@ -8647,3 +8647,189 @@ test('compact combat plan submissions normalize to legacy round plans', () => {
     steps: [{ kind: 'end_turn' }],
   }).ok, false)
 })
+
+function machineWithWeapons(role, weaponPartIds) {
+  const initial = createInitialMachineDesign(role)
+  const parts = [initial.parts[0]]
+  const attachments = []
+
+  weaponPartIds.forEach((partId, index) => {
+    const instanceId = `w${index + 1}`
+
+    parts.push(machinePart(instanceId, {
+      definitionId: `catalog:${partId}`,
+      transform: machineTransform({ orientation: machineBasis() }),
+    }))
+    attachments.push(machineAttachment('core', instanceId, { mountId: 'core_shell' }))
+  })
+
+  return { ...initial, parts, attachments }
+}
+
+function catalogWeaponPartIds(count) {
+  const weapons = PART_CATALOG.filter(
+    (part) => part.spec.kind === 'weapon' && part.spec.damage > 0 && part.spec.range >= 2,
+  )
+
+  assert.ok(weapons.length >= count, `catalog needs at least ${count} weapon parts`)
+
+  return weapons.slice(0, count).map((part) => part.id)
+}
+
+test('combat plan validator accepts weaponId attacks and rejects ambiguous weapon selection', () => {
+  const base = { action: 'submit_combat_round_plan', decisionVersion: 1, round: 1 }
+
+  const byId = normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponId: 'w3', targetCellId: 'cell:1:0' }],
+  })
+
+  assert.equal(byId.ok, true)
+  assert.deepEqual(byId.submission.steps[0], {
+    kind: 'attack',
+    weaponId: 'w3',
+    targetCellId: 'cell:1:0',
+  })
+
+  const bySlot = normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponSlot: 'weaponB', targetCellId: 'cell:1:0' }],
+  })
+
+  assert.equal(bySlot.ok, true)
+  assert.deepEqual(bySlot.submission.steps[0], {
+    kind: 'attack',
+    weaponSlot: 'weaponB',
+    targetCellId: 'cell:1:0',
+  })
+
+  assert.equal(normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponId: 'w3', weaponSlot: 'weaponA' }],
+  }).ok, false)
+  assert.equal(normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', targetCellId: 'cell:1:0' }],
+  }).ok, false)
+
+  const compactById = normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack', weapon: 'w3', target: [1, 0] }],
+  })
+
+  assert.equal(compactById.ok, true)
+  assert.deepEqual(compactById.submission.steps[0], {
+    kind: 'attack',
+    weaponId: 'w3',
+    targetCellId: 'cell:1:0',
+  })
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack', weapon: 'w3', weaponSlot: 'weaponA', target: [1, 0] }],
+  }).ok, false)
+})
+
+test('machines expose unlimited mounted weapons and fire them by weapon id', () => {
+  const weaponIds = catalogWeaponPartIds(3)
+  const redMachine = machineWithWeapons('red', weaponIds)
+  const capabilities = deriveMachineCapabilities(redMachine)
+
+  assert.ok(capabilities.weapons.length >= 3, JSON.stringify(capabilities.inactiveParts))
+  assert.deepEqual(
+    capabilities.weapons.slice(0, 3).map((weapon) => weapon.partInstanceId),
+    ['w1', 'w2', 'w3'],
+  )
+
+  const arena = tacticalOpenArena
+  const snapshot = combatSnapshot(arena, [-1, 0, 0], [1, 0, 0], {
+    red: { weaponSlotCount: 3 },
+  })
+  const budget = lockstepBudget({ actionTime: 8 })
+  const compact = buildCompactCombatView({
+    role: 'red',
+    round: 1,
+    decisionVersion: 9,
+    snapshot,
+    budget,
+    arena,
+    selfCapabilities: capabilities,
+  })
+
+  assert.equal(compact.combat.self.weapons.length, capabilities.weapons.length)
+  assert.equal(compact.combat.self.weapons[0].slot, 'weaponA')
+  assert.equal(compact.combat.self.weapons[1].slot, 'weaponB')
+  assert.equal(compact.combat.self.weapons[2].slot, undefined)
+  assert.equal(typeof compact.combat.self.weapons[2].id, 'string')
+
+  const thirdWeapon = capabilities.weapons[2]
+  const input = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponId: 'w3', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: budget, blue: lockstepBudget() } }),
+  }
+
+  input.red.machineDesign = redMachine
+
+  const resolution = resolveLockstepCombatRound(input)
+  const events = replayEventsForResolution(resolution)
+  const fire = events.find((event) => event.type === 'weapon_fire' && event.bot === 'red')
+
+  assert.notEqual(fire, undefined)
+  assert.equal(fire.weaponId, 'w3')
+  assert.equal(fire.fireMode, thirdWeapon.fireMode)
+
+  const impact = events.find((event) => event.type === 'impact' && event.attacker === 'red')
+
+  assert.notEqual(impact, undefined)
+  assert.equal(impact.damage, Math.max(0, Math.round(thirdWeapon.damage)))
+
+  const legacyInput = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: lockstepBudget({ actionTime: 8 }), blue: lockstepBudget() } }),
+  }
+
+  legacyInput.red.machineDesign = redMachine
+
+  const legacyResolution = resolveLockstepCombatRound(legacyInput)
+  const legacyFire = replayEventsForResolution(legacyResolution).find(
+    (event) => event.type === 'weapon_fire' && event.bot === 'red',
+  )
+
+  assert.notEqual(legacyFire, undefined)
+  assert.equal(legacyFire.weaponId, 'w1', 'legacy weaponA must map to the first active weapon')
+  assert.equal(legacyFire.weaponSlot, 'weaponA')
+
+  const unknownInput = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponId: 'w999', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: lockstepBudget({ actionTime: 8 }), blue: lockstepBudget() } }),
+  }
+
+  unknownInput.red.machineDesign = redMachine
+
+  const unknownResolution = resolveLockstepCombatRound(unknownInput)
+  const unknownEvents = replayEventsForResolution(unknownResolution)
+
+  assert.equal(
+    unknownEvents.some((event) => event.type === 'weapon_fire' && event.bot === 'red'),
+    false,
+    'unknown weapon ids must not fire',
+  )
+})
