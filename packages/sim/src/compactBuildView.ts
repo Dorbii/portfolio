@@ -66,7 +66,7 @@ export function buildCompactBuildView(input: BuildCompactBuildViewInput): Compac
     const store = input.store ?? input.actionSet?.catalogStore
 
     if (store) {
-      packet.store = compactStoreView(store, catalogById)
+      packet.store = compactStoreView(store, buildState, catalogById)
     }
 
     packet.edit = compactEditSurface(buildState, input.actionSet, catalogById)
@@ -361,16 +361,27 @@ function compactStorePartFor(
 
 function compactStoreView(
   store: CatalogStoreView,
+  buildState: LoadoutBuildState,
   catalogById: Map<string, PartDefinition>,
 ): { foundation: CompactStorePart[]; offers: CompactStorePart[] } {
   const foundationIds = new Set(store.foundationPartIds)
+  const consumedSlotIds = new Set(buildState.consumedOfferSlotIds ?? [])
   const foundation = store.foundationPartIds
     .map((partId) => compactStorePartFor(partId, catalogById))
     .filter((part): part is CompactStorePart => Boolean(part))
+  const seenOfferPartIds = new Set<string>()
   const offers = store.slots
-    .map((slot) => slot.partId)
-    .filter((partId) => !foundationIds.has(partId))
-    .map((partId) => compactStorePartFor(partId, catalogById))
+    .filter((slot) => !consumedSlotIds.has(slot.id) && !foundationIds.has(slot.partId))
+    .filter((slot) => {
+      if (seenOfferPartIds.has(slot.partId)) {
+        return false
+      }
+
+      seenOfferPartIds.add(slot.partId)
+
+      return true
+    })
+    .map((slot) => compactStorePartFor(slot.partId, catalogById))
     .filter((part): part is CompactStorePart => Boolean(part))
 
   return { foundation, offers }

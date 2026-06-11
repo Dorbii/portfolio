@@ -8319,3 +8319,235 @@ test('compact build actions resolve through the active action set only', () => {
   assert.equal(ambiguous.ok, false)
   assert.equal(ambiguous.issues[0].code, 'AMBIGUOUS_COMPACT_ACTION')
 })
+
+function applyCompactPurchase(buildState, chooseAction, gold = 500) {
+  const chosen = applyLoadoutAction({ role: 'red', gold, inventory: [], buildState, action: chooseAction })
+
+  assert.equal(chosen.ok, true, chosen.ok ? '' : JSON.stringify(chosen.issues))
+
+  let actionSet = compactViewActionSet(chosen.buildState, gold)
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+
+  assert.notEqual(targetAction, undefined)
+
+  const targeted = applyLoadoutAction({ role: 'red', gold, inventory: [], buildState: chosen.buildState, action: targetAction })
+
+  assert.equal(targeted.ok, true, targeted.ok ? '' : JSON.stringify(targeted.issues))
+  actionSet = compactViewActionSet(targeted.buildState, gold)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+
+  assert.notEqual(mountAction, undefined)
+  assert.ok(mountAction.parameterExamples?.length > 0)
+
+  const mounted = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory: [],
+    buildState: targeted.buildState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(mounted.ok, true, mounted.ok ? '' : JSON.stringify(mounted.issues))
+
+  return mounted.buildState
+}
+
+test('store foundation parts are reusable and offers are one-purchase per round', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState, 500)
+  const actions = Object.values(actionSet.actions)
+  const foundationAction = actions.find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'foundation',
+  )
+  const offerAction = actions.find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'offer',
+  )
+
+  assert.notEqual(foundationAction, undefined)
+  assert.notEqual(offerAction, undefined)
+  assert.equal(typeof offerAction.payload.offerSlotId, 'string')
+
+  buildState = applyCompactPurchase(buildState, foundationAction)
+
+  assert.equal(buildState.consumedOfferSlotIds, undefined)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const foundationAgain = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === foundationAction.payload.partId,
+  )
+
+  assert.notEqual(foundationAgain, undefined, 'foundation part must stay purchasable')
+
+  buildState = applyCompactPurchase(buildState, foundationAgain)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const offerStill = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === offerAction.payload.partId,
+  )
+
+  assert.notEqual(offerStill, undefined)
+
+  buildState = applyCompactPurchase(buildState, offerStill)
+
+  assert.deepEqual(buildState.consumedOfferSlotIds, [offerAction.payload.offerSlotId])
+  assert.equal(buildState.selectedPartSource, undefined)
+  assert.equal(buildState.selectedOfferSlotId, undefined)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const offerGone = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === offerAction.payload.partId,
+  )
+
+  assert.equal(offerGone, undefined, 'consumed offer must not be offered again')
+
+  const compactResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: offerAction.payload.partId },
+  })
+
+  assert.equal(compactResolved.ok, false)
+  assert.equal(compactResolved.issues[0].code, 'COMPACT_ACTION_NOT_AVAILABLE')
+
+  const forgedReplay = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState,
+    action: offerAction,
+  })
+
+  assert.equal(forgedReplay.ok, false)
+  assert.equal(forgedReplay.issues[0].code, 'OFFER_CONSUMED')
+
+  const packet = buildCompactBuildView({
+    role: 'red',
+    round: 1,
+    decisionVersion: actionSet.decisionVersion,
+    gold: 500,
+    buildState,
+    actionSet,
+    store: actionSet.catalogStore,
+  })
+  const offerAliasSuffix = `.${offerAction.payload.partId}`
+
+  assert.equal(
+    packet.store.offers.some((offer) => offer.part.endsWith(offerAliasSuffix)),
+    false,
+    'compact store must hide consumed offers',
+  )
+  assert.ok(packet.store.foundation.length > 0)
+})
+
+test('failed placement and moved parts do not consume store offers', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState, 500)
+  const offerAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'offer',
+  )
+
+  assert.notEqual(offerAction, undefined)
+
+  const chosen = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState, action: offerAction })
+
+  assert.equal(chosen.ok, true)
+  assert.equal(chosen.buildState.selectedPartSource, 'offer')
+
+  let midState = chosen.buildState
+
+  actionSet = compactViewActionSet(midState, 500)
+
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const targeted = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: midState, action: targetAction })
+
+  midState = targeted.buildState
+  actionSet = compactViewActionSet(midState, 500)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const badMount = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: midState,
+    action: {
+      ...mountAction,
+      payload: {
+        ...mountAction.payload,
+        parameters: {
+          childPartId: mountAction.payload.childPartId,
+          parentInstanceId: mountAction.payload.parentInstanceId,
+          mountSurfaceId: 'surface_does_not_exist',
+          u: 0.5,
+          v: 0.5,
+          yawDegrees: 0,
+          rollDegrees: 0,
+        },
+      },
+    },
+  })
+
+  assert.equal(badMount.ok, false)
+  assert.equal(midState.consumedOfferSlotIds, undefined)
+
+  const goodMount = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: midState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(goodMount.ok, true, goodMount.ok ? '' : JSON.stringify(goodMount.issues))
+  assert.deepEqual(goodMount.buildState.consumedOfferSlotIds, [offerAction.payload.offerSlotId])
+
+  let movedState = goodMount.buildState
+
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const placedInstanceId = movedState.currentDesign.machine.parts.find(
+    (part) => part.source === 'catalog_part',
+  )?.instanceId
+  const moveAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'move_part' && action.payload.instanceId === placedInstanceId,
+  )
+
+  assert.notEqual(moveAction, undefined)
+
+  const moving = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: movedState, action: moveAction })
+
+  assert.equal(moving.ok, true, moving.ok ? '' : JSON.stringify(moving.issues))
+  movedState = moving.buildState
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const remountTarget = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const retargeted = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: movedState, action: remountTarget })
+
+  movedState = retargeted.buildState
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const remountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const remounted = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: movedState,
+    action: {
+      ...remountAction,
+      payload: { ...remountAction.payload, parameters: remountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(remounted.ok, true, remounted.ok ? '' : JSON.stringify(remounted.issues))
+  assert.deepEqual(
+    remounted.buildState.consumedOfferSlotIds,
+    [offerAction.payload.offerSlotId],
+    'moving an existing part must not consume another offer slot',
+  )
+})

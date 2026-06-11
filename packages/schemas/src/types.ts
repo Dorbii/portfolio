@@ -929,6 +929,12 @@ export type LoadoutBuildState = {
   selectedRotation?: number
   currentDesign: StoredDesign
   legacyDraft?: BotDesignSnapshot
+  /** Store offer slots consumed by successful placements this round. */
+  consumedOfferSlotIds?: string[]
+  /** Internal slot id tracked while an offer part is selected mid-placement. */
+  selectedOfferSlotId?: string
+  /** Whether the selected part came from the reusable foundation or a one-purchase offer. */
+  selectedPartSource?: 'foundation' | 'offer'
 }
 
 export type SubmitInstruction = {

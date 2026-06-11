@@ -78,6 +78,8 @@ type LoadoutActionPayload =
   | (LoadoutActionPayloadBase & {
       type: 'choose_part'
       partId: string
+      storeSource?: 'foundation' | 'offer'
+      offerSlotId?: string
     })
   | (LoadoutActionPayloadBase & {
       type: 'choose_attach_target'
@@ -347,7 +349,7 @@ export function applyLoadoutAction(input: ApplyLoadoutActionInput): ApplyLoadout
 
   switch (payload.type) {
     case 'choose_part':
-      return choosePart(input, buildState, partsById, payload.partId)
+      return choosePart(input, buildState, partsById, payload)
     case 'choose_attach_target':
       return chooseAttachTarget(input, buildState, payload.targetInstanceId)
     case 'propose_mount_pose':
@@ -523,12 +525,7 @@ function choosePartActions(input: CreateLoadoutActionsInput): CanonicalGameActio
 
   actions.push(...editExistingPartActions(input))
 
-  const storePartIds = input.store ? new Set(input.store.offeredPartIds) : undefined
-  const choices = input.catalog.filter((part) => {
-    if (storePartIds && !storePartIds.has(part.id)) {
-      return false
-    }
-
+  const partRules = (part: PartDefinition): boolean => {
     if (part.cost > input.gold) {
       return false
     }
@@ -538,9 +535,12 @@ function choosePartActions(input: CreateLoadoutActionsInput): CanonicalGameActio
     }
 
     return true
-  })
-
-  for (const part of choices) {
+  }
+  const pushChoosePart = (
+    part: PartDefinition,
+    storeSource?: 'foundation' | 'offer',
+    offerSlotId?: string,
+  ) => {
     actions.push(loadoutAction(input, 'choose_part', `choose_part.${part.id}`, {
       scope: LOADOUT_ACTION_SCOPE,
       type: 'choose_part',
@@ -548,7 +548,45 @@ function choosePartActions(input: CreateLoadoutActionsInput): CanonicalGameActio
       summary: catalogSummary(part),
       partId: part.id,
       catalogRefs: [part.id],
+      ...(storeSource ? { storeSource } : {}),
+      ...(offerSlotId ? { offerSlotId } : {}),
     }))
+  }
+
+  if (input.store) {
+    // Source-aware store rules: foundation parts are reusable templates and
+    // offers are one-purchase rounds. Overlapping part IDs resolve to the
+    // foundation source so the offer slot is never consumed by mistake.
+    const foundationIds = new Set(input.store.foundationPartIds)
+    const consumedSlots = new Set(input.buildState.consumedOfferSlotIds ?? [])
+    const partsById = partMap(input.catalog)
+
+    for (const partId of input.store.foundationPartIds) {
+      const part = partsById.get(partId)
+
+      if (part && partRules(part)) {
+        pushChoosePart(part, 'foundation')
+      }
+    }
+
+    const offeredSlotPartIds = new Set<string>()
+
+    for (const slot of input.store.slots) {
+      if (consumedSlots.has(slot.id) || foundationIds.has(slot.partId) || offeredSlotPartIds.has(slot.partId)) {
+        continue
+      }
+
+      const part = partsById.get(slot.partId)
+
+      if (part && partRules(part)) {
+        offeredSlotPartIds.add(slot.partId)
+        pushChoosePart(part, 'offer', slot.id)
+      }
+    }
+  } else {
+    for (const part of input.catalog.filter(partRules)) {
+      pushChoosePart(part)
+    }
   }
 
   if (appendConfirmAfterChoices && confirmIssues.length === 0) {
@@ -897,8 +935,9 @@ function choosePart(
   input: ApplyLoadoutActionInput,
   buildState: LoadoutBuildState,
   partsById: Map<string, PartDefinition>,
-  partId: string,
+  payload: Extract<LoadoutActionPayload, { type: 'choose_part' }>,
 ): ApplyLoadoutActionResult {
+  const partId = payload.partId
   const part = partsById.get(partId)
 
   if (!part) {
@@ -909,10 +948,20 @@ function choosePart(
     return fail('INSUFFICIENT_GOLD', 'resources.remainingGold', `${part.displayName} costs ${part.cost}, but only ${input.gold} gold is available.`)
   }
 
+  if (
+    payload.storeSource === 'offer' &&
+    payload.offerSlotId &&
+    (buildState.consumedOfferSlotIds ?? []).includes(payload.offerSlotId)
+  ) {
+    return fail('OFFER_CONSUMED', 'actionId', `${part.displayName} was already purchased from this round's store offer.`)
+  }
+
   return ok(input, {
     ...buildState,
     step: 'choose_attach_target',
     selectedPartId: part.id,
+    selectedPartSource: payload.storeSource,
+    selectedOfferSlotId: payload.storeSource === 'offer' ? payload.offerSlotId : undefined,
     selectedMovingPartId: undefined,
     selectedAttachTargetId: undefined,
     selectedMount: undefined,
@@ -1164,10 +1213,27 @@ function proposeMountPose(
       selectedMountSector: undefined,
       selectedAttachCell: undefined,
       selectedRotation: undefined,
+      selectedPartSource: undefined,
+      selectedOfferSlotId: undefined,
+      consumedOfferSlotIds: consumeSelectedOfferSlot(buildState, movingPartId),
       currentDesign: nextStoredDesign,
       legacyDraft: nextDesign,
     },
   }
+}
+
+// Offer consumption rule: one-purchase offers are consumed only after a
+// successful placement of a newly chosen part. Foundation parts and moved
+// existing parts never consume an offer slot.
+function consumeSelectedOfferSlot(
+  buildState: LoadoutBuildState,
+  movingPartId: string | undefined,
+): string[] | undefined {
+  if (movingPartId || buildState.selectedPartSource !== 'offer' || !buildState.selectedOfferSlotId) {
+    return buildState.consumedOfferSlotIds
+  }
+
+  return [...new Set([...(buildState.consumedOfferSlotIds ?? []), buildState.selectedOfferSlotId])]
 }
 
 // Legacy grid builder apply path retained for legacy-bot-design:v1 continuation only.
@@ -1269,6 +1335,9 @@ function placePart(
       selectedMountSector: undefined,
       selectedAttachCell: undefined,
       selectedRotation: undefined,
+      selectedPartSource: undefined,
+      selectedOfferSlotId: undefined,
+      consumedOfferSlotIds: consumeSelectedOfferSlot(buildState, movingPartId),
       currentDesign: nextStoredDesign,
       legacyDraft: nextDesign,
     },
