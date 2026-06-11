@@ -1444,3 +1444,208 @@ export type ValidationResult =
       ok: false
       issues: ValidationIssue[]
     }
+
+// ---------------------------------------------------------------------------
+// Compact agent protocol (slice 1): compact state in, compact intent out.
+// External part IDs in compact payloads use category-prefixed aliases
+// (weapon.Weapon_Turret); canonical catalog IDs remain unchanged internally.
+// ---------------------------------------------------------------------------
+
+export type CompactPartStatus = 'ok' | 'disabled' | 'detached' | 'destroyed'
+
+export type CompactBuildStep =
+  | 'choose_part'
+  | 'choose_attach_target'
+  | 'mount_part'
+
+export type CompactBuildPartRow = [
+  id: string,
+  part: string,
+  parent: string | null,
+  hp: number,
+  maxHp: number,
+]
+
+export type CompactStorePart = {
+  part: string
+  cost: number
+  mass: number
+  hp: number
+  weapon?: {
+    fireMode: string
+    range: number
+    damage: number
+    cooldown?: number
+    effect?: string
+  }
+  mobility?: {
+    mode: string
+    moveBudget: number
+    traction?: number
+    stability?: number
+  }
+  armor?: number
+  utility?: { effect: string }
+  style?: number
+}
+
+export type CompactBotSummary = {
+  hp: number
+  maxHp: number
+  mass: number
+  armor: number
+  stability: number
+  movement: Partial<Record<'x' | 'z' | 'xz', number>>
+  weapons: Array<{
+    id: string
+    part: string
+    fireMode: string
+    range: number
+    damage: number
+    cooldown: number
+  }>
+  utility: Array<{
+    id: string
+    part: string
+    effect: string
+  }>
+}
+
+export type CompactBuildPacket = {
+  v: 1
+  phase: 'build'
+  round: number
+  decisionVersion: number
+  buildDigest?: string
+  step: CompactBuildStep
+  budget: {
+    gold: number
+    parts: number
+  }
+  bot: {
+    mode: 'new' | 'existing'
+    summary: CompactBotSummary
+    partSchema: ['id', 'part', 'parent', 'hp', 'maxHp']
+    parts: CompactBuildPartRow[]
+  }
+  store?: {
+    foundation: CompactStorePart[]
+    offers: CompactStorePart[]
+  }
+  edit?: {
+    confirm: boolean
+    remove: Array<{ id: string; refund: number }>
+    removeSubtree: Array<{ id: string; refund: number; parts: number }>
+    move: string[]
+    rotate: Array<{ id: string; rot: number[] }>
+  }
+  selected?:
+    | { mode: 'new_part'; part: string; canonicalPartId: string; target?: string }
+    | {
+        mode: 'moving_existing_part'
+        id: string
+        part: string
+        canonicalPartId: string
+        target?: string
+      }
+  targets?: string[]
+  mountSchema?: ['surface', 'u', 'v', 'yaw', 'roll']
+  mounts?: Array<[surface: string, u: number, v: number, yaw: number, roll: number]>
+  requirements?: {
+    confirm_loadout: {
+      ok: boolean
+      missing: string[]
+      issues: ValidationIssue[]
+    }
+  }
+  issues?: ValidationIssue[]
+}
+
+export type CompactCombatWeapon = {
+  id?: string
+  slot?: 'weaponA' | 'weaponB'
+  part?: string
+  fireMode: string
+  range: number
+  cooldown: number
+  actionTime: number
+  facing?: [x: number, z: number]
+  dynamicFacing?: boolean
+}
+
+export type CompactCombatBot = {
+  cell: [x: number, z: number]
+  hp: number
+  maxHp: number
+  mass: number
+  armor: number
+  stability: number
+  movement: Partial<Record<'x' | 'z' | 'xz', number>>
+  weapons: CompactCombatWeapon[]
+}
+
+export type CompactCombatPacket = {
+  v: 1
+  combat: {
+    round: number
+    decisionVersion: number
+    budget: {
+      actionTime: number
+    }
+    self: CompactCombatBot
+    opponent: CompactCombatBot
+  }
+  board: {
+    grid: [xMin: number, xMax: number, zMin: number, zMax: number]
+    terrain: {
+      hazard?: Array<[x: number, z: number]>
+      wall?: Array<[x: number, z: number]>
+      smoke?: Array<[x: number, z: number]>
+    }
+  }
+}
+
+export type CompactBuildAction =
+  | { kind: 'choose_part'; part: string }
+  | { kind: 'remove_part'; id: string }
+  | { kind: 'remove_subtree'; id: string }
+  | { kind: 'move_part'; id: string }
+  | { kind: 'rotate_part'; id: string; rot: number }
+  | { kind: 'confirm_loadout' }
+  | { kind: 'choose_attach_target'; target: string }
+  | {
+      kind: 'mount_part'
+      surface: string
+      u: number
+      v: number
+      yaw?: number
+      roll?: number
+    }
+
+export type CompactBuildActionSubmission = {
+  action: 'submit_build_action'
+  decisionVersion: number
+  buildDigest?: string
+  step?: CompactBuildStep
+  command: CompactBuildAction
+  publicMessage?: string
+}
+
+export type CompactCombatPlanStep =
+  | { kind: 'move'; to: [x: number, z: number] }
+  | {
+      kind: 'attack'
+      weapon?: string
+      weaponSlot?: 'weaponA' | 'weaponB'
+      target: [x: number, z: number]
+    }
+  | { kind: 'utility'; utility?: string; at?: [x: number, z: number] }
+  | { kind: 'end_turn' }
+
+export type CompactCombatPlanSubmission = {
+  action: 'submit_combat_plan'
+  decisionVersion: number
+  round: number
+  steps: CompactCombatPlanStep[]
+  publicMessage?: string
+}

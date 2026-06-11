@@ -2845,3 +2845,138 @@ test('worker returns expired and rate-limited statuses through the Durable Objec
   assert.equal(rateLimited.response.status, 429)
   assert.equal(rateLimited.json.error.code, 'RATE_LIMITED')
 })
+
+test('round 2 build rehydrates prior confirmed blueprint healed to full', async () => {
+  const env = createEnv()
+  const sessionId = 's_round2_rehydration'
+  const { refereeToken, redInvite, blueInvite, redPacket, bluePacket } =
+    await bootstrapReadySession(env, sessionId)
+  const firstPartAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const firstPartId = firstPartAction.catalogRefs?.[0]
+  let packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    firstPartId,
+  )
+
+  packet = await submitPacketAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  await submitPacketAction(
+    env,
+    sessionId,
+    blueInvite.claimToken,
+    blueState.json.gameMaster,
+    findLegalAction(blueState.json.gameMaster, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const confirmedStored = await storage.get('agent-arena-session')
+  const confirmedParts = confirmedStored.roles.red.storedDesign.machine.parts.map(
+    (part) => [part.instanceId, part.definitionId],
+  )
+
+  assert.equal(confirmedStored.roles.red.storedDesign.machine.parts.length, 2)
+
+  await storeCompletedFight(env, sessionId)
+
+  const damagedStored = await storage.get('agent-arena-session')
+
+  damagedStored.roles.red.storedDesign.machine.runtime = {
+    healthByInstanceId: { core: 1, part_1: 0 },
+    destroyedInstanceIds: ['part_1'],
+  }
+  await storage.put('agent-arena-session', damagedStored)
+
+  const advanced = await route(env, `/sessions/${sessionId}/advance-round`, {
+    method: 'POST',
+    token: refereeToken,
+    body: {},
+  })
+
+  assert.equal(advanced.response.status, 200)
+
+  const redNext = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redNext.response.status, 200)
+  assert.equal(redNext.json.gameMaster.round, 2)
+  assert.equal(redNext.json.gameMaster.phase, 'choose_loadout')
+
+  const rehydrated = redNext.json.gameMaster.buildState.currentDesign
+
+  assert.equal(rehydrated.version, 'machine:v1')
+  assert.deepEqual(
+    rehydrated.machine.parts.map((part) => [part.instanceId, part.definitionId]),
+    confirmedParts,
+  )
+  assert.equal(rehydrated.machine.runtime, undefined)
+
+  const storedAfter = await storage.get('agent-arena-session')
+
+  assert.equal(storedAfter.roles.red.storedDesign.machine.parts.length, 2)
+  assert.equal(storedAfter.roles.red.storedDesign.machine.runtime, undefined)
+
+  const confirmAgain = findLegalAction(
+    redNext.json.gameMaster,
+    (action) => action.kind === 'confirm_loadout',
+  )
+  const reconfirmed = await submitPacketAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redNext.json.gameMaster,
+    confirmAgain,
+  )
+
+  assert.equal(reconfirmed.nextAction, 'wait_for_opponent_loadout')
+})
+
+test('storedDesign is not overwritten by fresh initial state when build state is missing', async () => {
+  const env = createEnv()
+  const sessionId = 's_stored_design_not_overwritten'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const firstPartAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    firstPartAction.catalogRefs?.[0],
+  )
+
+  assert.equal(packet.buildState.currentDesign.machine.parts.length, 2)
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+
+  assert.equal(stored.roles.red.storedDesign.machine.parts.length, 2)
+  stored.roles.red.loadoutBuildState = undefined
+  await storage.put('agent-arena-session', stored)
+
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redState.response.status, 200)
+  assert.equal(
+    redState.json.gameMaster.buildState.currentDesign.machine.parts.length,
+    2,
+  )
+
+  const storedAfter = await storage.get('agent-arena-session')
+
+  assert.equal(storedAfter.roles.red.storedDesign.machine.parts.length, 2)
+})

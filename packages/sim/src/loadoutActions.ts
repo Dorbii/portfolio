@@ -201,6 +201,39 @@ export function ensureLoadoutBuildState(
   }
 }
 
+export function createLoadoutBuildStateFromStoredDesign(
+  role: TeamRole,
+  storedDesign: StoredDesign,
+  catalogVersion = LOADOUT_CATALOG_VERSION,
+): LoadoutBuildState {
+  const normalized = normalizeStoredDesign(role, storedDesign, undefined)
+  const healed = healStoredDesignForShop(normalized)
+
+  return {
+    step: 'choose_part',
+    catalogVersion,
+    currentDesign: healed,
+    legacyDraft: cloneDesign(legacyProjectionDraftFromStoredDesign(healed)),
+  }
+}
+
+// Shop healing rule: combat damage is fight-local. The next shop reopens the
+// same blueprint healed to full, so runtime damage state must not carry over.
+function healStoredDesignForShop(storedDesign: StoredDesign): StoredDesign {
+  if (storedDesign.version !== 'machine:v1') {
+    return cloneStoredDesign(storedDesign)
+  }
+
+  const machine = cloneMachineDesign(storedDesign.machine)
+
+  machine.runtime = undefined
+
+  return {
+    version: 'machine:v1',
+    machine,
+  }
+}
+
 export function loadoutBuildStateLegacyDesign(buildState: LoadoutBuildState): BotDesignSnapshot {
   return cloneDesign(buildState.legacyDraft ?? legacyProjectionDraftFromStoredDesign(buildState.currentDesign))
 }

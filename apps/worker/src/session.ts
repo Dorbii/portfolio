@@ -31,6 +31,7 @@ import {
   type RoleResetRequest,
   type SessionPhase,
   type SharedDebrief,
+  type LoadoutBuildState,
   type StoredDesign,
   type TeamRole,
   type ValidationIssue,
@@ -53,6 +54,8 @@ import {
   buildFightDossier,
   deriveMachineCapabilities,
   deriveCombatBudget,
+  createInitialLoadoutBuildState,
+  createLoadoutBuildStateFromStoredDesign,
   ensureLoadoutBuildState,
   isLoadoutBuilderAction,
   LOADOUT_PART_LIMIT,
@@ -1211,7 +1214,7 @@ export class SessionCoordinator {
       ? roleName === 'red' ? combat.snapshot.blue : combat.snapshot.red
       : undefined
     const buildState = gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
-      ? ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+      ? ensureRoleBuildStateFromStoredDesign(roleName, role)
       : undefined
     const combatBudget = combat && selfCombat && opponentCombat
       ? this.ensureCombatBudgetForRole(roleName)
@@ -1788,6 +1791,14 @@ export class SessionCoordinator {
   }
 
   private finalizeLoadoutForRole(roleName: TeamRole, now: string): void {
+    // TODO(product rule, do not implement public cancel_move yet): if
+    // selectedMovingPartId exists when auto-confirming on timeout and a prior
+    // confirmed storedDesign exists, the incomplete draft should be discarded
+    // and rehydrated from that previous confirmed design so the mid-move part
+    // is not silently lost. Implementing this requires tracking the last
+    // confirmed design separately from the live draft (storedDesign currently
+    // mirrors the in-progress draft), so the current behavior refunds the
+    // pending moved part instead.
     const role = this.state.roles[roleName]
     const buildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
     const pendingMovedPartId = buildState.selectedMovingPartId ? buildState.selectedPartId : undefined
@@ -2387,6 +2398,25 @@ function sameLockedTeamIdentity(
   )
 }
 
+// Round 2+ rule: if a confirmed blueprint exists from a prior round and the
+// editable draft was cleared by round advancement, rehydrate the draft from
+// the stored blueprint (healed to full) instead of starting a fresh core-only
+// build that would overwrite the carried-forward bot.
+function ensureRoleBuildStateFromStoredDesign(
+  roleName: TeamRole,
+  role: StoredRoleState,
+): LoadoutBuildState {
+  if (role.loadoutBuildState) {
+    return ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+  }
+
+  if (role.storedDesign) {
+    return createLoadoutBuildStateFromStoredDesign(roleName, role.storedDesign)
+  }
+
+  return createInitialLoadoutBuildState(roleName)
+}
+
 function createGameMasterActionSet(
   state: StoredSessionState,
   roleName: TeamRole,
@@ -2396,7 +2426,7 @@ function createGameMasterActionSet(
   if (phase === 'choose_loadout') {
     const role = state.roles[roleName]
 
-    role.loadoutBuildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+    role.loadoutBuildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
     role.storedDesign = role.loadoutBuildState.currentDesign
     role.currentDesign = storedDesignToLegacyBotDesignSnapshotProjection(
       role.loadoutBuildState.currentDesign,

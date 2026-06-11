@@ -31,6 +31,9 @@ import {
   hazardsAtPosition,
   applyLoadoutAction,
   buildAgentBoardView,
+  canonicalPartIdFromCompact,
+  compactPartAlias,
+  compactSystemCoreAlias,
   buildCatalogStore,
   buildLoadoutActionSet,
   buildCombatActionSet,
@@ -44,6 +47,7 @@ import {
   buildSharedDebrief,
   createInitialMachineDesign,
   createInitialLoadoutBuildState,
+  createLoadoutBuildStateFromStoredDesign,
   LOADOUT_PART_LIMIT,
   loadoutBuildStateLegacyDesign,
   loadoutLegalActionForPacket,
@@ -7816,4 +7820,60 @@ test('session coordinator does not expose Slice 7 completion actions in Slice 6'
   assert.equal('saveCompletedSession' in SessionCoordinator.prototype, false)
   assert.equal('continueChampionSession' in SessionCoordinator.prototype, false)
   assert.equal('quitCompletedSession' in SessionCoordinator.prototype, false)
+})
+
+test('compactPartAlias prefixes catalog part category', () => {
+  for (const part of PART_CATALOG) {
+    assert.equal(compactPartAlias(part), `${part.category}.${part.id}`)
+  }
+  const turret = PART_CATALOG.find((part) => part.id === 'Weapon_Turret')
+  if (turret) {
+    assert.equal(compactPartAlias(turret), 'weapon.Weapon_Turret')
+  }
+})
+
+test('compactSystemCoreAlias returns body.Machine_Core', () => {
+  assert.equal(compactSystemCoreAlias(), 'body.Machine_Core')
+})
+
+test('canonicalPartIdFromCompact strips known category prefix', () => {
+  assert.equal(canonicalPartIdFromCompact('weapon.Weapon_Turret'), 'Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('body.Frame_Strut'), 'Frame_Strut')
+  assert.equal(canonicalPartIdFromCompact('  mobility.Wheel_Set  '), 'Wheel_Set')
+})
+
+test('canonicalPartIdFromCompact preserves canonical IDs', () => {
+  assert.equal(canonicalPartIdFromCompact('Weapon_Turret'), 'Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('catalog:Weapon_Turret'), 'catalog:Weapon_Turret')
+})
+
+test('canonicalPartIdFromCompact preserves unknown-prefix values', () => {
+  assert.equal(canonicalPartIdFromCompact('exotic.Weapon_Turret'), 'exotic.Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('.Weapon_Turret'), '.Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('weapon.'), 'weapon.')
+})
+
+test('createLoadoutBuildStateFromStoredDesign rehydrates blueprint healed to full', () => {
+  const initial = createInitialLoadoutBuildState('red')
+  const damaged = {
+    version: 'machine:v1',
+    machine: {
+      ...initial.currentDesign.machine,
+      runtime: {
+        healthByInstanceId: { core: 2 },
+        disabledInstanceIds: ['core'],
+      },
+    },
+  }
+  const rehydrated = createLoadoutBuildStateFromStoredDesign('red', damaged)
+
+  assert.equal(rehydrated.step, 'choose_part')
+  assert.equal(rehydrated.currentDesign.version, 'machine:v1')
+  assert.equal(rehydrated.currentDesign.machine.runtime, undefined)
+  assert.deepEqual(
+    rehydrated.currentDesign.machine.parts.map((part) => part.instanceId),
+    initial.currentDesign.machine.parts.map((part) => part.instanceId),
+  )
+  assert.equal(rehydrated.selectedPartId, undefined)
+  assert.equal(rehydrated.selectedMovingPartId, undefined)
 })
