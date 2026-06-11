@@ -629,7 +629,10 @@ function compactMounts(
 }
 
 export function digestCompactBuildPacket(packet: CompactBuildPacket): string {
-  const { buildDigest: _ignored, ...rest } = packet
+  const rest: Record<string, unknown> = { ...packet }
+
+  delete rest.buildDigest
+
   const serialized = JSON.stringify(rest)
   let hash = 5381
 
