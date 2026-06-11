@@ -999,6 +999,8 @@ export type GameMasterPacket = {
   blockedActions?: GameMasterBlockedAction[]
   sharedDebrief?: SharedDebrief
   submit?: SubmitInstruction
+  /** Compact build protocol view; present during choose_loadout. */
+  build?: CompactBuildPacket
 }
 
 export type GameMasterActionSubmission = {

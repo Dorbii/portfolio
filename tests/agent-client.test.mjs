@@ -654,6 +654,7 @@ test('browser role API exposes only the packet-based public helper surface', asy
       'getState',
       'sendChatMessage',
       'submitAction',
+      'submitBuildAction',
       'submitCombatPlan',
       'submitPostFightReflection',
       'waitForGameMasterPacket',
@@ -671,6 +672,7 @@ test('browser role API exposes only the packet-based public helper surface', asy
       ['get_role_state', true],
       ['wait_for_game_master_packet', true],
       ['submit_game_action', true],
+      ['submit_build_action', false],
       ['submit_combat_round_plan', false],
       ['submit_post_fight_reflection', false],
       ['send_chat_message', true],
@@ -701,7 +703,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
 
   assert.deepEqual(
     actions.map((action) => action.available),
-    [true, false, false, false, false, false, false],
+    [true, false, false, false, false, false, false, false],
   )
 })
 
@@ -895,4 +897,117 @@ test('browser role API posts post-fight reflection through the helper path', asy
     },
     confidence: 'medium',
   })
+})
+
+const compactBuildPacketFixture = {
+  v: 1,
+  phase: 'build',
+  round: 1,
+  decisionVersion: 1,
+  step: 'choose_part',
+  budget: { gold: 100, parts: 64 },
+  bot: {
+    mode: 'new',
+    summary: { hp: 20, maxHp: 20, mass: 0, armor: 0, stability: 0, movement: {}, weapons: [], utility: [] },
+    partSchema: ['id', 'part', 'parent', 'hp', 'maxHp'],
+    parts: [['core', 'body.Machine_Core', null, 20, 20]],
+  },
+  store: { foundation: [{ part: 'body.Frame_Strut', cost: 1, mass: 2, hp: 10 }], offers: [] },
+  edit: { confirm: true, remove: [], removeSubtree: [], move: [], rotate: [] },
+  requirements: { confirm_loadout: { ok: true, missing: [], issues: [] } },
+  issues: [],
+}
+
+test('agent client treats compact build packets without legalActions as playable', async () => {
+  let stateCalls = 0
+  const client = new AgentArenaClient({
+    invite,
+    fetchImpl: async () => {
+      stateCalls += 1
+
+      return jsonResponse({
+        ...roleState,
+        gameMaster: {
+          ...gameMasterPacket,
+          legalActions: [],
+          build: compactBuildPacketFixture,
+        },
+      })
+    },
+  })
+
+  const next = await client.waitForGameMasterPacket({ pollMs: 1, timeoutMs: 2_500 })
+
+  assert.equal(stateCalls, 1)
+  assert.equal(next.phase, 'choose_loadout')
+  assert.equal(next.build.step, 'choose_part')
+  assert.deepEqual(next.legalActions, [])
+})
+
+test('agent client submits compact build actions to the build-action endpoint', async () => {
+  const requests = []
+  const client = new AgentArenaClient({
+    invite,
+    getRoleToken: () => 'cap_red',
+    fetchImpl: async (url, init = {}) => {
+      requests.push({ url: String(url), init })
+
+      return jsonResponse({
+        packet: {
+          ...gameMasterPacket,
+          legalActions: [],
+          build: compactBuildPacketFixture,
+        },
+        publicState: { phase: 'submission_phase' },
+      })
+    },
+  })
+
+  const response = await client.submitBuildAction({
+    action: 'submit_build_action',
+    decisionVersion: 7,
+    command: { kind: 'choose_part', part: 'body.Frame_Strut' },
+    publicMessage: 'compact path',
+  })
+
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].url, `${invite.apiBase}/sessions/s_demo/build-action`)
+  assert.equal(requests[0].init.method, 'POST')
+  assert.deepEqual(JSON.parse(requests[0].init.body), {
+    action: 'submit_build_action',
+    decisionVersion: 7,
+    command: { kind: 'choose_part', part: 'body.Frame_Strut' },
+    publicMessage: 'compact path',
+  })
+  assert.equal(response.packet.build.v, 1)
+
+  await assert.rejects(
+    () =>
+      client.submitBuildAction({
+        action: 'submit_build_action',
+        decisionVersion: 7,
+        command: { kind: 'confirm_loadout' },
+        actionSetId: 'forged',
+      }),
+    (error) => error.code === 'INVALID_REQUEST',
+  )
+  assert.equal(requests.length, 1)
+})
+
+test('browser role API surfaces submit_build_action for compact build packets', () => {
+  const compactState = {
+    ...roleState,
+    gameMaster: {
+      ...gameMasterPacket,
+      legalActions: [],
+      build: compactBuildPacketFixture,
+    },
+  }
+  const actions = getValidAgentActions(compactState)
+  const buildAction = actions.find((action) => action.name === 'submit_build_action')
+  const legacyAction = actions.find((action) => action.name === 'submit_game_action')
+
+  assert.equal(buildAction?.available, true)
+  assert.equal(legacyAction?.available, false)
+  assert.match(legacyAction?.reason ?? '', /submit_build_action/)
 })

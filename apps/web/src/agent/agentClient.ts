@@ -1,4 +1,5 @@
 import type {
+  CompactBuildActionSubmission,
   AgentBootstrapResponse,
   CombatRoundPlanSubmission,
   GameMasterActionResponse,
@@ -231,6 +232,11 @@ function hasNextPlayablePacket(
     return true
   }
 
+  // Compact build packets are playable without legal action menus.
+  if (packet.phase === 'choose_loadout' && packet.build) {
+    return true
+  }
+
   return options.requireLegalActions === false || packet.legalActions.length > 0
 }
 
@@ -267,6 +273,52 @@ function exactGameMasterActionBody(
     decisionVersion: input.decisionVersion,
     actionId: input.actionId,
     ...(input.parameters !== undefined ? { parameters: input.parameters } : {}),
+    ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
+  }
+}
+
+const COMPACT_BUILD_ACTION_BODY_KEYS = new Set([
+  'action',
+  'decisionVersion',
+  'buildDigest',
+  'step',
+  'command',
+  'publicMessage',
+])
+
+function exactCompactBuildActionBody(
+  input: CompactBuildActionSubmission,
+): CompactBuildActionSubmission {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message: 'submitBuildAction expects a compact build action submission object.',
+    })
+  }
+
+  const extraKeys = Object.keys(input).filter((key) => !COMPACT_BUILD_ACTION_BODY_KEYS.has(key))
+
+  if (extraKeys.length > 0) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message:
+        'submitBuildAction accepts the compact build action fields: action, decisionVersion, buildDigest, step, command, and publicMessage.',
+      issues: extraKeys.map((key) => ({
+        code: 'UNSUPPORTED_FIELD',
+        path: key,
+        message: 'Remove this field and submit only fields supported by compact build action submissions.',
+      })),
+    })
+  }
+
+  return {
+    action: 'submit_build_action',
+    decisionVersion: input.decisionVersion,
+    ...(input.buildDigest !== undefined ? { buildDigest: input.buildDigest } : {}),
+    ...(input.step !== undefined ? { step: input.step } : {}),
+    command: { ...input.command },
     ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
   }
 }
@@ -402,6 +454,19 @@ export class AgentArenaClient {
         method: 'POST',
         headers: this.authorizationHeaders(),
         body: JSON.stringify(exactGameMasterActionBody(submission)),
+      },
+    )
+  }
+
+  async submitBuildAction(
+    submission: CompactBuildActionSubmission,
+  ): Promise<GameMasterActionResponse> {
+    return this.requestJson<GameMasterActionResponse>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/build-action`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(),
+        body: JSON.stringify(exactCompactBuildActionBody(submission)),
       },
     )
   }

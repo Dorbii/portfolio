@@ -101,6 +101,17 @@ export function createInstalledAgentArenaRoleApi({
 
       return response
     },
+    submitBuildAction: async (submission) => {
+      const response = await (
+        overrides.submitBuildAction?.(submission) ??
+        client.submitBuildAction?.(submission) ??
+        Promise.reject(new Error('submitBuildAction is unavailable for this client.'))
+      )
+
+      await updateFromGameMasterPacket(response.packet)
+
+      return response
+    },
     submitCombatPlan: async (submission) => {
       const response = await (
         overrides.submitCombatPlan?.(submission) ?? client.submitCombatPlan?.(submission)

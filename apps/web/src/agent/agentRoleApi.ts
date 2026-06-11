@@ -1,6 +1,7 @@
 import type {
   AgentBootstrapResponse,
   CombatRoundPlanSubmission,
+  CompactBuildActionSubmission,
   GameMasterActionResponse,
   GameMasterActionSubmission,
   GameMasterPacket,
@@ -25,6 +26,7 @@ export type AgentArenaRoleClient = {
   getState: AgentArenaRoleApi['getState']
   sendChatMessage?: AgentArenaRoleApi['sendChatMessage']
   submitAction: AgentArenaRoleApi['submitAction']
+  submitBuildAction?: AgentArenaRoleApi['submitBuildAction']
   submitCombatPlan?: AgentArenaRoleApi['submitCombatPlan']
   submitChatMessage?: (
     input: AgentChatMessagePostRequest | string,
@@ -57,11 +59,24 @@ export function getValidAgentActions(
     },
     {
       name: 'submit_game_action',
-      available: Boolean(state?.gameMaster?.legalActions.length),
+      available: Boolean(state?.gameMaster?.legalActions?.length),
       ...(state
-        ? state.gameMaster?.legalActions.length
+        ? state.gameMaster?.legalActions?.length
           ? {}
-          : { reason: 'The current GameMasterPacket has no legacy legalActions to submit.' }
+          : {
+              reason: state.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build
+                ? 'The compact build packet has no legacy legalActions; use submit_build_action.'
+                : 'The current GameMasterPacket has no legacy legalActions to submit.',
+            }
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
+      name: 'submit_build_action',
+      available: Boolean(state?.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build),
+      ...(state
+        ? state.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build
+          ? {}
+          : { reason: 'Compact build actions are only available during the build phase with packet.build present.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
@@ -104,6 +119,9 @@ export type AgentArenaRoleApiOptions = {
   submitAction?: (
     submission: GameMasterActionSubmission,
   ) => Promise<GameMasterActionResponse>
+  submitBuildAction?: (
+    submission: CompactBuildActionSubmission,
+  ) => Promise<GameMasterActionResponse>
   submitCombatPlan?: (
     submission: CombatRoundPlanSubmission,
   ) => Promise<GameMasterActionResponse>
@@ -126,6 +144,10 @@ export function createAgentArenaRoleApi(
         client.waitForGameMasterPacket(waitOptions),
     submitAction: (submission) =>
       options.submitAction?.(submission) ?? client.submitAction(submission),
+    submitBuildAction: (submission) =>
+      options.submitBuildAction?.(submission) ??
+        client.submitBuildAction?.(submission) ??
+        Promise.reject(new Error('submitBuildAction is unavailable for this client.')),
     submitCombatPlan: (submission) =>
       options.submitCombatPlan?.(submission) ??
         client.submitCombatPlan?.(submission) ??

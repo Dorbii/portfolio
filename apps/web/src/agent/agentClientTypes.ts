@@ -1,6 +1,7 @@
 import type {
   AgentBootstrapResponse,
   CombatRoundPlanSubmission,
+  CompactBuildActionSubmission,
   GameMasterActionResponse,
   GameMasterActionSubmission,
   GameMasterPacket,
@@ -42,6 +43,7 @@ export type AgentArenaValidAction = {
     | 'get_role_state'
     | 'wait_for_game_master_packet'
     | 'submit_game_action'
+    | 'submit_build_action'
     | 'submit_combat_round_plan'
     | 'submit_post_fight_reflection'
     | 'send_chat_message'
@@ -67,6 +69,9 @@ export type AgentArenaRoleApi = {
   waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket>
   submitAction(
     submission: GameMasterActionSubmission,
+  ): Promise<GameMasterActionResponse>
+  submitBuildAction(
+    submission: CompactBuildActionSubmission,
   ): Promise<GameMasterActionResponse>
   submitCombatPlan(
     submission: CombatRoundPlanSubmission,

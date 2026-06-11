@@ -30,6 +30,7 @@ export type ExternalAgentBrief = {
     bootstrap: string
     state: string
     action: string
+    buildAction: string
     combatPlan: string
     chat: string
     reflection: string
@@ -67,6 +68,7 @@ export function createExternalAgentBrief(input: ExternalAgentBriefInput): Extern
       bootstrap: `${sessionPath}/roles/${input.invite.role}/bootstrap`,
       state: `${sessionPath}/state`,
       action: `${sessionPath}/action`,
+      buildAction: `${sessionPath}/build-action`,
       combatPlan: `${sessionPath}/combat-plan`,
       chat: `${sessionPath}/chat`,
       reflection: `${sessionPath}/reflection`,
@@ -104,7 +106,7 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `Player key / claimToken: ${claimToken}`,
     '',
     '## Authority',
-    'The current GameMasterPacket is the gameplay contract. Use its `nextAction`, `legalActions`, `submit`, `board`, `combat`, `blockedActions`, and validation errors as the source of truth.',
+    'The current GameMasterPacket is the gameplay contract. During build, read `packet.build` (compact bot, store, edit, requirements) and submit compact build actions; use `submitBuildAction` from the browser helper or POST the build-action endpoint. Legacy `legalActions` may exist for compatibility but are not the compact build protocol. During combat, use `submitCombatPlan` with `board` and `combat` metadata.',
     'This handoff only provides connection details. It is not a rulebook, strategy guide, combat planner, or substitute for packet metadata.',
     '',
     '## Minimal Loop',
@@ -137,12 +139,13 @@ export function createExternalAgentBriefMarkdown(input: ExternalAgentBriefInput)
     `POST ${brief.endpoints.bootstrap}`,
     `GET ${brief.endpoints.state}`,
     `POST ${brief.endpoints.action}`,
+    `POST ${brief.endpoints.buildAction}`,
     `POST ${brief.endpoints.combatPlan}`,
     `POST ${brief.endpoints.chat}`,
     `POST ${brief.endpoints.reflection}`,
     '```',
     '',
-    'Legacy action submissions must copy the current packet `actionSetId`, `decisionVersion`, selected `actionId`, and required parameters. Combat round plans must use the current packet `combat`, `board`, `round`, and `decisionVersion` metadata.',
+    'Compact build submissions POST the build-action endpoint with `action: submit_build_action`, the packet `decisionVersion`, and one `command` such as `{"kind":"choose_part","part":"weapon.Weapon_Turret"}`. Legacy action submissions must copy the current packet `actionSetId`, `decisionVersion`, selected `actionId`, and required parameters. Combat round plans must use the current packet `combat`, `board`, `round`, and `decisionVersion` metadata.',
     '',
     '## Current Known State',
     `Phase: ${brief.currentState.phase}`,

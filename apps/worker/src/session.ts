@@ -1472,6 +1472,21 @@ export class SessionCoordinator {
       ...(blockedActions.length > 0 ? { blockedActions } : {}),
       ...(this.state.sharedDebrief ? { sharedDebrief: cloneJson(this.state.sharedDebrief) } : {}),
       ...(submit ? { submit } : {}),
+      // Compact build protocol view: browser/raw agents can play the build
+      // phase from packet.build without depending on legalActions menus.
+      ...(buildState && gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
+        ? {
+            build: buildCompactBuildView({
+              role: roleName,
+              round: this.state.round,
+              decisionVersion: activeSet?.decisionVersion ?? decisionVersionForRole(this.state, roleName),
+              gold: role.gold,
+              buildState,
+              actionSet: activeSet,
+              store: activeSet?.catalogStore,
+            }),
+          }
+        : {}),
     })
   }
 

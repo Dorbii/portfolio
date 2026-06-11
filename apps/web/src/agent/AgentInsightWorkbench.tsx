@@ -1,10 +1,12 @@
 import type {
   BlueprintBlock,
+  CompactStorePart,
   MachineDesign,
   MachinePartInstance,
   PartDefinition,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import { canonicalPartIdFromCompact } from '../../../../packages/sim/src/compactPartAliases.js'
 import { formatCatalogLabel } from '../../../../packages/catalog/src/index.js'
 import type {
   ConfirmedLoadoutView,
@@ -376,6 +378,15 @@ function createStoreOfferReadouts(
   state: RolePrivateState | null,
   catalogById: Map<string, PartDefinition>,
 ): CatalogPartReadout[] {
+  // Compact build packet is the primary protocol surface; legacy store slots
+  // remain a migration fallback only.
+  const compactOffers = state?.gameMaster?.build?.store?.offers
+
+  if (compactOffers) {
+    return compactOffers.map((offer, index) =>
+      compactStorePartReadout(offer, `offer.${index}`, 'Offer', catalogById))
+  }
+
   return (state?.gameMaster?.store?.slots ?? []).map((slot) =>
     catalogPartReadout({
       catalogById,
@@ -385,10 +396,31 @@ function createStoreOfferReadouts(
     }))
 }
 
+function compactStorePartReadout(
+  storePart: CompactStorePart,
+  id: string,
+  status: string,
+  catalogById: Map<string, PartDefinition>,
+): CatalogPartReadout {
+  return catalogPartReadout({
+    catalogById,
+    id,
+    partId: canonicalPartIdFromCompact(storePart.part),
+    status,
+  })
+}
+
 function createFoundationPartReadouts(
   state: RolePrivateState | null,
   catalogById: Map<string, PartDefinition>,
 ): CatalogPartReadout[] {
+  const compactFoundation = state?.gameMaster?.build?.store?.foundation
+
+  if (compactFoundation) {
+    return compactFoundation.map((part, index) =>
+      compactStorePartReadout(part, `foundation.${index}`, 'Foundation', catalogById))
+  }
+
   return (state?.gameMaster?.store?.foundationPartIds ?? []).map((partId) =>
     catalogPartReadout({
       catalogById,
