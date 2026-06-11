@@ -48,7 +48,10 @@ export type WeaponFireEvent = CombatTurnEventMetadata & {
   t: number
   type: 'weapon_fire'
   bot: TeamRole
-  weaponSlot: 'weaponA' | 'weaponB'
+  /** Mounted weapon instance ID; canonical weapon identity. */
+  weaponId?: string
+  /** Legacy slot retained for replay/UI compatibility. */
+  weaponSlot?: 'weaponA' | 'weaponB'
   controlCue?: WeaponFireCue
   targetPosition?: Vector3
   sourceBlockId?: string

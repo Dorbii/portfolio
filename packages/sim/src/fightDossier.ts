@@ -174,7 +174,7 @@ function weaponUse(events: ReplayEvent[], role: TeamRole): WeaponUseStats[] {
 
   for (const event of [...events].sort((left, right) => left.t - right.t)) {
     if (isWeaponFireEvent(event)) {
-      const weaponId = event.sourcePartId ?? event.sourceBlockId ?? event.weaponSlot
+      const weaponId = event.sourcePartId ?? event.sourceBlockId ?? event.weaponId ?? event.weaponSlot ?? 'weapon'
       const current = byWeapon.get(weaponId) ?? {
         weaponId,
         activations: 0,

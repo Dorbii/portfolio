@@ -240,6 +240,19 @@ function assertGptCompactPacket(packet, role) {
   assert.equal(packet.eventVersion, undefined)
   assert.equal(packet.actionSetId, undefined)
   assert.equal(packet.catalog, undefined)
+
+  if (packet.phase === 'choose_loadout') {
+    assertGptCompactBuildPacket(packet)
+    return
+  }
+
+  if (packet.phase === 'combat_turn' && packet.combat?.v === 1) {
+    assert.equal(packet.legalActions, undefined)
+    assert.equal(packet.board, undefined)
+    assert.equal(packet.buildState, undefined)
+    return
+  }
+
   assert.ok(Array.isArray(packet.legalActions))
   assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
   assert.equal(packet.legalActions.some((action) => 'catalogRefs' in action), false)
@@ -248,6 +261,34 @@ function assertGptCompactPacket(packet, role) {
     assert.equal(packet.buildState.currentDesign, undefined)
     assert.equal(packet.buildState.legacyDraft, undefined)
   }
+}
+
+function assertGptCompactBuildPacket(packet) {
+  assert.equal(packet.build.v, 1)
+  assert.equal(packet.build.phase, 'build')
+  assert.equal(typeof packet.build.step, 'string')
+  assert.equal(packet.legalActions, undefined)
+  assert.equal(packet.blockedActions, undefined)
+  assert.equal(packet.buildState, undefined)
+  assert.equal(packet.store, undefined)
+  assert.equal(packet.catalog, undefined)
+
+  const serialized = JSON.stringify(packet)
+
+  assert.equal(serialized.includes('"foundationPartIds"'), false)
+  assert.equal(serialized.includes('"offeredPartIds"'), false)
+  assert.equal(serialized.includes('"slots"'), false)
+  assert.equal(serialized.includes('"legalActions"'), false)
+}
+
+async function gameMasterStateFor(env, sessionId, invite) {
+  const state = await route(env, `/sessions/${sessionId}/state`, {
+    token: invite.claimToken,
+  })
+
+  assert.equal(state.response.status, 200)
+
+  return state.json.gameMaster
 }
 
 function actionSubmissionFromPacket(packet, actionId = packet.legalActions[0]?.id) {
@@ -857,7 +898,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.name === 'gpt_act' &&
         action.method === 'POST' &&
         action.path === '/gpt/act' &&
-        action.returns.includes('server fills actionSetId and decisionVersion'),
+        action.returns.includes('compact action objects'),
     ),
   )
   assert.ok(
@@ -967,8 +1008,18 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
   assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
-  assert.deepEqual(json.components.schemas.GptActRequest.required, ['inviteUrl', 'actionId'])
-  assert.ok(json.components.schemas.GptActRequest.required.includes('actionId'))
+  assert.deepEqual(json.components.schemas.GptActRequest.required, ['inviteUrl'])
+  assert.deepEqual(json.components.schemas.GptActRequest.oneOf, [
+    { required: ['inviteUrl', 'action'] },
+    { required: ['inviteUrl', 'actionId'] },
+  ])
+  assert.equal(
+    json.components.schemas.GptActRequest.properties.action.$ref,
+    '#/components/schemas/CompactBuildAction',
+  )
+  assert.ok(json.components.schemas.CompactBuildAction.required.includes('kind'))
+  assert.ok(json.components.schemas.CompactBuildAction.properties.kind.enum.includes('choose_part'))
+  assert.ok(json.components.schemas.CompactBuildAction.properties.kind.enum.includes('mount_part'))
   assert.equal('actionSetId' in json.components.schemas.GptActRequest.properties, false)
   assert.equal('decisionVersion' in json.components.schemas.GptActRequest.properties, false)
   assert.equal(
@@ -1416,12 +1467,15 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.equal(next.json.sessionId, sessionId)
   assert.equal(next.json.role, 'red')
   assertGptCompactPacket(next.json.packet, 'red')
-  assert.ok(next.json.packet.legalActions.length > 0)
+  assert.equal(next.json.packet.build.step, 'choose_part')
+  assert.ok(next.json.packet.build.store.foundation.length > 0)
+  assert.ok(next.json.packet.build.store.offers.length > 0)
+  assert.deepEqual(next.json.packet.build.bot.parts[0], ['core', 'body.Machine_Core', null, 20, 20])
   assert.equal(next.json.continuation.keepGoing, true)
   assert.equal(next.json.continuation.recommendedNextCall, 'gptAct')
 })
 
-test('POST /gpt/next returns a compact combat board for Custom GPT actions', async () => {
+test('POST /gpt/next returns compact combat state for Custom GPT actions', async () => {
   const env = createEnv()
   const sessionId = 's_gpt_next_compact_combat'
   const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
@@ -1449,8 +1503,7 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   })
 
   const packet = blueCombat.json.packet
-  const board = packet.board
-  const boardJson = JSON.stringify(board)
+  const packetJson = JSON.stringify(packet)
 
   assert.equal(redStart.response.status, 200)
   assert.equal(redStart.json.status, 'waiting')
@@ -1466,25 +1519,26 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   assert.equal(redCombat.json.continuation.recommendedNextCall, 'gptAct')
   assertGptCompactPacket(packet, 'blue')
   assert.equal(packet.nextAction, 'choose_turn')
-  assert.ok(packet.legalActions.some((action) => action.id === 'combat_plan'))
-  assert.equal(packet.actionSummary.mode, 'lockstep_round_plan')
-  assert.equal(packet.actionSummary.actionMenuCount <= 1, true)
-  assert.equal(typeof board.ascii, 'string')
-  assert.equal(board.ascii.includes('Legend: B=self, R=opponent'), true)
-  assert.ok(board.reachableCells.length > 0)
-  assert.equal(
-    packet.legalActions.every((action) => action.id === 'combat_plan' || action.kind === 'surrender'),
-    true,
-  )
-  assert.equal(boardJson.includes('"path"'), false)
-  assert.equal(boardJson.includes('"hazards"'), false)
-  assert.equal(boardJson.includes('"unavailableReasons"'), false)
-  assert.equal(boardJson.includes('"parameterSchema"'), false)
-  assert.equal(JSON.stringify(packet.legalActions).includes('"path"'), false)
-  assert.ok(boardJson.length < 20_000)
+  assert.equal(packet.combat.v, 1)
+  assert.equal(typeof packet.combat.combat.budget.actionTime, 'number')
+  assert.equal(Array.isArray(packet.combat.combat.self.cell), true)
+  assert.equal(typeof packet.combat.combat.self.hp, 'number')
+  assert.equal(typeof packet.combat.combat.opponent.maxHp, 'number')
+  assert.equal(Array.isArray(packet.combat.board.grid), true)
+  assert.equal(packet.combat.board.grid.length, 4)
+  assert.equal(packet.legalActions, undefined)
+  assert.equal(packet.board, undefined)
+  assert.equal(packet.actionSummary, undefined)
+  assert.equal(packetJson.includes('"reachableCells"'), false)
+  assert.equal(packetJson.includes('"attackableCells"'), false)
+  assert.equal(packetJson.includes('"utilityOptions"'), false)
+  assert.equal(packetJson.includes('"reachablePoses"'), false)
+  assert.equal(packetJson.includes('"attackableTargets"'), false)
+  assert.equal(packetJson.includes('"ascii"'), false)
+  assert.equal(packetJson.includes('"cells"'), false)
+  assert.ok(packetJson.length < 20_000)
   assert.ok(JSON.stringify(redCombat.json).length < 50_000)
-  const combatPlan = packet.legalActions.find((action) => action.id === 'combat_plan')
-  assert.ok(combatPlan)
+
   const submittedPlanResponse = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
@@ -1556,7 +1610,7 @@ test('POST /gpt/act fills GameMaster version fields from the latest packet', asy
   assert.equal(action.json.status, 'playable')
   assert.equal(action.json.acceptedActionId, partAction.id)
   assertGptCompactPacket(action.json.packet, 'red')
-  assert.equal(action.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(action.json.packet.build.step, 'choose_attach_target')
   assert.equal(action.json.continuation.keepGoing, true)
   assert.equal(action.json.continuation.recommendedNextCall, 'gptAct')
   assert.equal(action.json.publicState, undefined)
@@ -1581,10 +1635,11 @@ test('POST /gpt/act submits parameterized mount pose payloads', async () => {
 
   assert.equal(chosePart.response.status, 200)
   assertGptCompactPacket(chosePart.json.packet, 'red')
-  assert.equal(chosePart.json.packet.buildState.step, 'choose_attach_target')
+  assert.equal(chosePart.json.packet.build.step, 'choose_attach_target')
 
+  const afterChoose = await gameMasterStateFor(env, sessionId, redInvite)
   const attachCore = findLegalAction(
-    chosePart.json.packet,
+    afterChoose,
     (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
   )
   const attached = await route(env, '/gpt/act', {
@@ -1597,12 +1652,15 @@ test('POST /gpt/act submits parameterized mount pose payloads', async () => {
 
   assert.equal(attached.response.status, 200)
   assertGptCompactPacket(attached.json.packet, 'red')
-  assert.equal(attached.json.packet.buildState.step, 'propose_mount_pose')
+  assert.equal(attached.json.packet.build.step, 'mount_part')
 
-  const poseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose')
-  const { selectedPartId, selectedAttachTargetId } = attached.json.packet.buildState
+  const afterAttach = await gameMasterStateFor(env, sessionId, redInvite)
+  const poseAction = findLegalAction(afterAttach, (action) => action.kind === 'propose_mount_pose')
+  const { selectedPartId, selectedAttachTargetId } = afterAttach.buildState
+
   assert.equal(typeof selectedPartId, 'string')
   assert.equal(typeof selectedAttachTargetId, 'string')
+
   const placed = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
@@ -1623,7 +1681,8 @@ test('POST /gpt/act submits parameterized mount pose payloads', async () => {
   assert.equal(placed.response.status, 200)
   assert.equal(placed.json.acceptedActionId, poseAction.id)
   assertGptCompactPacket(placed.json.packet, 'red')
-  assert.equal(placed.json.packet.buildState.step, 'choose_part')
+  assert.equal(placed.json.packet.build.step, 'choose_part')
+  assert.equal(placed.json.packet.build.bot.parts.length, 2)
 })
 
 test('POST /gpt/act uses legal action parameter examples when GPT omits mount pose parameters', async () => {
@@ -1639,18 +1698,21 @@ test('POST /gpt/act uses legal action parameter examples when GPT omits mount po
       actionId: partAction.id,
     },
   })
+  const afterChoose = await gameMasterStateFor(env, sessionId, redInvite)
   const attachCore = findLegalAction(
-    chosePart.json.packet,
+    afterChoose,
     (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
   )
-  const attached = await route(env, '/gpt/act', {
+  await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl,
       actionId: attachCore.id,
     },
   })
-  const poseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose')
+
+  const afterAttach = await gameMasterStateFor(env, sessionId, redInvite)
+  const poseAction = findLegalAction(afterAttach, (action) => action.kind === 'propose_mount_pose')
   const placedWithNoParameters = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
@@ -1662,61 +1724,86 @@ test('POST /gpt/act uses legal action parameter examples when GPT omits mount po
   assert.equal(placedWithNoParameters.response.status, 200)
   assert.equal(placedWithNoParameters.json.acceptedActionId, poseAction.id)
   assertGptCompactPacket(placedWithNoParameters.json.packet, 'red')
-  assert.equal(placedWithNoParameters.json.packet.buildState.step, 'choose_part')
+  assert.equal(placedWithNoParameters.json.packet.build.step, 'choose_part')
 })
 
-test('POST /gpt/act accepts semantic GPT mount slot aliases without parameters', async () => {
+test('POST /gpt/act drives a full compact build flow without action ids', async () => {
   const env = createEnv()
-  const sessionId = 's_gpt_act_mount_slot_alias'
+  const sessionId = 's_gpt_act_compact_build'
   const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
   const inviteUrl = gptInviteUrl(sessionId, redInvite)
   const partAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
-  const chosePart = await route(env, '/gpt/act', {
+  const partId = partAction.catalogRefs?.[0]
+  const part = catalogPartFromPacket(redPacket, partId)
+  const both = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl,
       actionId: partAction.id,
+      action: { kind: 'choose_part', part: `${part.category}.${part.id}` },
     },
   })
-  const attachCore = findLegalAction(
-    chosePart.json.packet,
-    (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
-  )
-  const attached = await route(env, '/gpt/act', {
+  const neither = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: { inviteUrl },
+  })
+
+  assert.equal(both.response.status, 400)
+  assert.equal(both.json.error.code, 'SUBMISSION_INVALID')
+  assert.equal(neither.response.status, 400)
+  assert.equal(neither.json.error.code, 'SUBMISSION_INVALID')
+
+  const chosen = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl,
-      actionId: attachCore.id,
+      action: { kind: 'choose_part', part: `${part.category}.${part.id}` },
+      publicMessage: 'Compact build choose.',
     },
   })
-  const mountSlotAliases = attached.json.packet.legalActions.filter((action) =>
-    action.id.startsWith('gpt.loadout.mount.'))
-  const canonicalPoseAction = findLegalAction(attached.json.packet, (action) => action.kind === 'propose_mount_pose' && !action.id.startsWith('gpt.'))
 
-  assert.equal(attached.response.status, 200)
-  assert.equal(mountSlotAliases.length > 0, true)
-  assert.equal(mountSlotAliases.length <= 6, true)
-  assert.ok(mountSlotAliases.some((action) => action.label.includes('Center mount')))
-  assert.ok(mountSlotAliases.every((action) => action.summary.includes('matrix slot')))
-  assert.ok(mountSlotAliases.every((action) => action.resolvesToActionId === canonicalPoseAction.id))
-  assert.ok(mountSlotAliases.every((action) => Array.isArray(action.semanticTags)))
-  assert.equal(JSON.stringify(mountSlotAliases).includes('"parameters"'), false)
-  assert.equal('parameterSchema' in canonicalPoseAction, false)
-  assert.equal('parameterExamples' in canonicalPoseAction, false)
+  assert.equal(chosen.response.status, 200)
+  assert.deepEqual(chosen.json.acceptedAction, { kind: 'choose_part', part: `${part.category}.${part.id}` })
+  assertGptCompactPacket(chosen.json.packet, 'red')
+  assert.equal(chosen.json.packet.build.step, 'choose_attach_target')
+  assert.equal(chosen.json.packet.build.selected.canonicalPartId, partId)
+  assert.ok(chosen.json.packet.build.targets.includes('core'))
 
+  const targeted = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      action: { kind: 'choose_attach_target', target: 'core' },
+    },
+  })
+
+  assert.equal(targeted.response.status, 200)
+  assert.equal(targeted.json.packet.build.step, 'mount_part')
+  assert.ok(targeted.json.packet.build.mounts.length > 0)
+
+  const [surface, u, v, yaw, roll] = targeted.json.packet.build.mounts[0]
   const placed = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
       inviteUrl,
-      actionId: mountSlotAliases[0].id,
+      action: { kind: 'mount_part', surface, u, v, yaw, roll },
     },
   })
 
   assert.equal(placed.response.status, 200)
-  assert.equal(placed.json.acceptedActionId, mountSlotAliases[0].id)
-  assert.equal(placed.json.resolvedActionId, canonicalPoseAction.id)
-  assertGptCompactPacket(placed.json.packet, 'red')
-  assert.equal(placed.json.packet.buildState.step, 'choose_part')
+  assert.equal(placed.json.packet.build.step, 'choose_part')
+  assert.equal(placed.json.packet.build.bot.parts.length, 2)
+
+  const confirmed = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl,
+      action: { kind: 'confirm_loadout' },
+    },
+  })
+
+  assert.equal(confirmed.response.status, 200)
+  assert.equal(confirmed.json.packet.nextAction, 'wait_for_opponent_loadout')
 })
 
 test('POST /gpt/act rejects unknown GPT mount slot aliases without guessing', async () => {
@@ -1732,8 +1819,11 @@ test('POST /gpt/act rejects unknown GPT mount slot aliases without guessing', as
       actionId: partAction.id,
     },
   })
+  assert.equal(chosePart.response.status, 200)
+
+  const afterChoose = await gameMasterStateFor(env, sessionId, redInvite)
   const attachCore = findLegalAction(
-    chosePart.json.packet,
+    afterChoose,
     (action) => action.kind === 'choose_attach_target' && action.id.includes('.to.core'),
   )
   await route(env, '/gpt/act', {
@@ -2844,4 +2934,313 @@ test('worker returns expired and rate-limited statuses through the Durable Objec
 
   assert.equal(rateLimited.response.status, 429)
   assert.equal(rateLimited.json.error.code, 'RATE_LIMITED')
+})
+
+test('round 2 build rehydrates prior confirmed blueprint healed to full', async () => {
+  const env = createEnv()
+  const sessionId = 's_round2_rehydration'
+  const { refereeToken, redInvite, blueInvite, redPacket, bluePacket } =
+    await bootstrapReadySession(env, sessionId)
+  const firstPartAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const firstPartId = firstPartAction.catalogRefs?.[0]
+  let packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    firstPartId,
+  )
+
+  packet = await submitPacketAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    packet,
+    findLegalAction(packet, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  await submitPacketAction(
+    env,
+    sessionId,
+    blueInvite.claimToken,
+    blueState.json.gameMaster,
+    findLegalAction(blueState.json.gameMaster, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const confirmedStored = await storage.get('agent-arena-session')
+  const confirmedParts = confirmedStored.roles.red.storedDesign.machine.parts.map(
+    (part) => [part.instanceId, part.definitionId],
+  )
+
+  assert.equal(confirmedStored.roles.red.storedDesign.machine.parts.length, 2)
+
+  await storeCompletedFight(env, sessionId)
+
+  const damagedStored = await storage.get('agent-arena-session')
+
+  damagedStored.roles.red.storedDesign.machine.runtime = {
+    healthByInstanceId: { core: 1, part_1: 0 },
+    destroyedInstanceIds: ['part_1'],
+  }
+  await storage.put('agent-arena-session', damagedStored)
+
+  const advanced = await route(env, `/sessions/${sessionId}/advance-round`, {
+    method: 'POST',
+    token: refereeToken,
+    body: {},
+  })
+
+  assert.equal(advanced.response.status, 200)
+
+  const redNext = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redNext.response.status, 200)
+  assert.equal(redNext.json.gameMaster.round, 2)
+  assert.equal(redNext.json.gameMaster.phase, 'choose_loadout')
+
+  const rehydrated = redNext.json.gameMaster.buildState.currentDesign
+
+  assert.equal(rehydrated.version, 'machine:v1')
+  assert.deepEqual(
+    rehydrated.machine.parts.map((part) => [part.instanceId, part.definitionId]),
+    confirmedParts,
+  )
+  assert.equal(rehydrated.machine.runtime, undefined)
+
+  const storedAfter = await storage.get('agent-arena-session')
+
+  assert.equal(storedAfter.roles.red.storedDesign.machine.parts.length, 2)
+  assert.equal(storedAfter.roles.red.storedDesign.machine.runtime, undefined)
+
+  const confirmAgain = findLegalAction(
+    redNext.json.gameMaster,
+    (action) => action.kind === 'confirm_loadout',
+  )
+  const reconfirmed = await submitPacketAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redNext.json.gameMaster,
+    confirmAgain,
+  )
+
+  assert.equal(reconfirmed.nextAction, 'wait_for_opponent_loadout')
+})
+
+test('storedDesign is not overwritten by fresh initial state when build state is missing', async () => {
+  const env = createEnv()
+  const sessionId = 's_stored_design_not_overwritten'
+  const { redInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const firstPartAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const packet = await placePartFromCatalog(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    redPacket,
+    firstPartAction.catalogRefs?.[0],
+  )
+
+  assert.equal(packet.buildState.currentDesign.machine.parts.length, 2)
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+
+  assert.equal(stored.roles.red.storedDesign.machine.parts.length, 2)
+  stored.roles.red.loadoutBuildState = undefined
+  await storage.put('agent-arena-session', stored)
+
+  const redState = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(redState.response.status, 200)
+  assert.equal(
+    redState.json.gameMaster.buildState.currentDesign.machine.parts.length,
+    2,
+  )
+
+  const storedAfter = await storage.get('agent-arena-session')
+
+  assert.equal(storedAfter.roles.red.storedDesign.machine.parts.length, 2)
+})
+
+async function submitBuildAction(env, sessionId, token, decisionVersion, command, expectStatus = 200) {
+  const submitted = await route(env, `/sessions/${sessionId}/build-action`, {
+    method: 'POST',
+    token,
+    body: {
+      action: 'submit_build_action',
+      decisionVersion,
+      command,
+    },
+  })
+
+  assert.equal(submitted.response.status, expectStatus, JSON.stringify(submitted.json))
+
+  return submitted
+}
+
+test('POST /sessions/:id/build-action drives a full compact build flow without action ids', async () => {
+  const env = createEnv()
+  const sessionId = 's_compact_build_flow'
+  const { redInvite, blueInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const chooseAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const partId = chooseAction.catalogRefs?.[0]
+  const part = catalogPartFromPacket(redPacket, partId)
+  const alias = `${part.category}.${part.id}`
+
+  const chosen = await submitBuildAction(env, sessionId, redInvite.claimToken, redPacket.decisionVersion, {
+    kind: 'choose_part',
+    part: alias,
+  })
+
+  assert.equal(chosen.json.compactBuild.step, 'choose_attach_target')
+  assert.equal(chosen.json.compactBuild.selected.canonicalPartId, partId)
+  assert.ok(chosen.json.compactBuild.targets.includes('core'))
+  assert.equal('legalActions' in chosen.json.compactBuild, false)
+
+  const targeted = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    chosen.json.compactBuild.decisionVersion,
+    { kind: 'choose_attach_target', target: 'core' },
+  )
+
+  assert.equal(targeted.json.compactBuild.step, 'mount_part')
+  assert.ok(targeted.json.compactBuild.mounts.length > 0)
+
+  const [surface, u, v, yaw, roll] = targeted.json.compactBuild.mounts[0]
+  const staleDecisionVersion = targeted.json.compactBuild.decisionVersion
+  const mounted = await submitBuildAction(env, sessionId, redInvite.claimToken, staleDecisionVersion, {
+    kind: 'mount_part',
+    surface,
+    u,
+    v,
+    yaw,
+    roll,
+  })
+
+  assert.equal(mounted.json.compactBuild.step, 'choose_part')
+  assert.equal(mounted.json.compactBuild.bot.parts.length, 2)
+  assert.equal(mounted.json.compactBuild.bot.parts[1][1], alias)
+
+  const stale = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    staleDecisionVersion,
+    { kind: 'confirm_loadout' },
+    400,
+  )
+
+  assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')
+
+  const confirmed = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    mounted.json.compactBuild.decisionVersion,
+    { kind: 'confirm_loadout' },
+  )
+
+  assert.equal(confirmed.json.packet.nextAction, 'wait_for_opponent_loadout')
+
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const blueConfirm = await submitPacketAction(
+    env,
+    sessionId,
+    blueInvite.claimToken,
+    blueState.json.gameMaster,
+    findLegalAction(blueState.json.gameMaster, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  assert.notEqual(blueConfirm, undefined)
+
+  const wrongPhase = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    0,
+    { kind: 'confirm_loadout' },
+    409,
+  )
+
+  assert.equal(wrongPhase.json.error.code, 'PHASE_CLOSED')
+})
+
+test('POST /sessions/:id/combat-plan accepts compact combat plans alongside legacy plans', async () => {
+  const env = createEnv()
+  const sessionId = 's_compact_combat_plan'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+
+  const blueState = await gameMasterStateFor(env, sessionId, blueInvite)
+  const redState = await gameMasterStateFor(env, sessionId, redInvite)
+
+  assert.equal(blueState.phase, 'combat_turn')
+  assert.equal(blueState.combatCompact.v, 1)
+  assert.equal(Array.isArray(blueState.combatCompact.board.grid), true)
+
+  const reachable = blueState.board?.reachableCells ?? []
+
+  assert.ok(reachable.length > 0)
+
+  const [, moveX, moveZ] = reachable[0].cellId.split(':')
+  const compactAccepted = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {
+      action: 'submit_combat_plan',
+      decisionVersion: blueState.decisionVersion,
+      round: blueState.round,
+      steps: [
+        { kind: 'move', to: [Number(moveX), Number(moveZ)] },
+        { kind: 'end_turn' },
+      ],
+    },
+  })
+
+  assert.equal(compactAccepted.response.status, 200, JSON.stringify(compactAccepted.json))
+
+  const compactIllegal = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_combat_plan',
+      decisionVersion: redState.decisionVersion,
+      round: redState.round,
+      steps: [
+        { kind: 'move', to: [999, 999] },
+        { kind: 'end_turn' },
+      ],
+    },
+  })
+
+  assert.equal(compactIllegal.response.status, 400, JSON.stringify(compactIllegal.json))
+  assert.equal(compactIllegal.json.error.code, 'SUBMISSION_INVALID')
+
+  const legacyAccepted = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_combat_round_plan',
+      decisionVersion: redState.decisionVersion,
+      round: redState.round,
+      steps: [{ kind: 'end_turn' }],
+    },
+  })
+
+  assert.equal(legacyAccepted.response.status, 200, JSON.stringify(legacyAccepted.json))
 })

@@ -1,5 +1,7 @@
 import {
   TEAM_ROLES,
+  normalizeCompactBuildActionSubmission,
+  normalizeCompactCombatPlanSubmission,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
   validateGameMasterActionParameters,
@@ -31,6 +33,9 @@ import {
   type RoleResetRequest,
   type SessionPhase,
   type SharedDebrief,
+  type CompactBuildPacket,
+  type LoadoutBuildState,
+  type MachineCapabilities,
   type StoredDesign,
   type TeamRole,
   type ValidationIssue,
@@ -53,7 +58,12 @@ import {
   buildFightDossier,
   deriveMachineCapabilities,
   deriveCombatBudget,
+  buildCompactBuildView,
+  buildCompactCombatView,
+  createInitialLoadoutBuildState,
+  createLoadoutBuildStateFromStoredDesign,
   ensureLoadoutBuildState,
+  resolveCompactBuildAction,
   isLoadoutBuilderAction,
   LOADOUT_PART_LIMIT,
   loadoutLegalActionForPacket,
@@ -627,6 +637,133 @@ export class SessionCoordinator {
     }
   }
 
+  async submitCompactBuildAction(
+    roleToken: string,
+    request: unknown,
+  ): Promise<
+    SessionResult<{
+      packet: GameMasterPacket
+      compactBuild?: CompactBuildPacket
+      publicState: ReturnType<typeof buildPublicSessionState>
+    }>
+  > {
+    const now = this.clock()
+    const auth = await this.authorizeRoleAction(roleToken, 'action', now)
+
+    if (!auth.ok) {
+      return auth
+    }
+
+    this.resolveTimedTransitions(now)
+    this.ensureGameMasterActionSets(now)
+
+    const normalized = normalizeCompactBuildActionSubmission(request)
+
+    if (!normalized.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', normalized.issues)
+    }
+
+    if (this.state.phase !== 'submission_phase' || gameMasterPhaseForSession(this.state.phase) !== 'choose_loadout') {
+      return relayError('PHASE_CLOSED', `Compact build actions can only be submitted during the build phase, not ${this.state.phase}.`)
+    }
+
+    const roleName = auth.value.role.role
+    const role = this.state.roles[roleName]
+    const activeSet = this.state.activeActionSets?.[roleName]
+
+    if (!activeSet) {
+      return relayError(
+        'PHASE_CLOSED',
+        `No active GameMaster action set is available for ${roleName} during ${this.state.phase}.`,
+      )
+    }
+
+    const submission = normalized.submission
+
+    if (submission.decisionVersion !== activeSet.decisionVersion) {
+      return relayError('SUBMISSION_INVALID', 'decisionVersion is stale or does not match the active action set.')
+    }
+
+    const buildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
+    const resolved = resolveCompactBuildAction({
+      actionSet: activeSet,
+      buildState,
+      command: submission.command,
+    })
+
+    if (!resolved.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', resolved.issues)
+    }
+
+    // Compact intent resolves into a canonical server-authored action and then
+    // reuses the exact legacy submission pipeline (parameter validation,
+    // idempotent locking, loadout application). No second legality system.
+    const canonicalSubmission: GameMasterActionSubmission = {
+      action: 'submit_game_action',
+      actionSetId: activeSet.actionSetId,
+      decisionVersion: submission.decisionVersion,
+      actionId: resolved.value.canonicalAction.id,
+      ...(resolved.value.parameters ? { parameters: resolved.value.parameters } : {}),
+      ...(submission.publicMessage ? { publicMessage: submission.publicMessage } : {}),
+    }
+    const resolvedSubmission = resolveSubmittedGameAction(activeSet, canonicalSubmission)
+
+    if (!resolvedSubmission.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', resolvedSubmission.issues)
+    }
+
+    const canonicalAction = resolvedSubmission.action
+
+    if (!isLoadoutBuilderAction(canonicalAction)) {
+      return relayError('SUBMISSION_INVALID', 'Compact build actions may only resolve to loadout builder actions.')
+    }
+
+    const requestHash = hashGameMasterSubmission(canonicalSubmission, resolvedSubmission.normalizedParameters)
+    const applied = this.applyLoadoutGameMasterAction(
+      roleName,
+      activeSet,
+      canonicalSubmission,
+      canonicalAction,
+      requestHash,
+      now,
+    )
+
+    if (!applied.ok) {
+      return applied
+    }
+
+    return {
+      ok: true,
+      value: {
+        packet: applied.value.packet,
+        compactBuild: this.buildCompactBuildPacketForRole(roleName, now),
+        publicState: applied.value.publicState,
+      },
+    }
+  }
+
+  buildCompactBuildPacketForRole(roleName: TeamRole, now = this.clock()): CompactBuildPacket | undefined {
+    if (gameMasterPhaseForSession(this.state.phase) !== 'choose_loadout') {
+      return undefined
+    }
+
+    this.ensureGameMasterActionSets(now)
+
+    const role = this.state.roles[roleName]
+    const activeSet = this.state.activeActionSets?.[roleName]
+    const buildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
+
+    return buildCompactBuildView({
+      role: roleName,
+      round: this.state.round,
+      decisionVersion: activeSet?.decisionVersion ?? decisionVersionForRole(this.state, roleName),
+      gold: role.gold,
+      buildState,
+      actionSet: activeSet,
+      store: activeSet?.catalogStore,
+    })
+  }
+
   async submitCombatRoundPlan(
     roleToken: string,
     request: unknown,
@@ -673,7 +810,9 @@ export class SessionCoordinator {
       return relayError('PHASE_CLOSED', `Combat round ${combat.nextTick} opens at ${combat.openedAt}.`)
     }
 
-    const normalized = normalizeCombatRoundPlanSubmissionForSim(request)
+    const normalized = isRecord(request) && request.action === 'submit_combat_plan'
+      ? normalizeCompactCombatPlanSubmission(request)
+      : normalizeCombatRoundPlanSubmissionForSim(request)
 
     if (!normalized.ok) {
       return relayError('SUBMISSION_INVALID', 'Combat round plan failed validation.', (normalized as { ok: false; issues: ValidationIssue[] }).issues)
@@ -1211,7 +1350,7 @@ export class SessionCoordinator {
       ? roleName === 'red' ? combat.snapshot.blue : combat.snapshot.red
       : undefined
     const buildState = gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
-      ? ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+      ? ensureRoleBuildStateFromStoredDesign(roleName, role)
       : undefined
     const combatBudget = combat && selfCombat && opponentCombat
       ? this.ensureCombatBudgetForRole(roleName)
@@ -1338,7 +1477,51 @@ export class SessionCoordinator {
       ...(blockedActions.length > 0 ? { blockedActions } : {}),
       ...(this.state.sharedDebrief ? { sharedDebrief: cloneJson(this.state.sharedDebrief) } : {}),
       ...(submit ? { submit } : {}),
+      // Compact combat protocol view: state in, intent out; no affordance menus.
+      ...(combat && selfCombat && opponentCombat && combatBudget
+        ? {
+            combatCompact: buildCompactCombatView({
+              role: roleName,
+              round: this.state.round,
+              decisionVersion: decisionVersionForRole(this.state, roleName),
+              snapshot: combat.snapshot,
+              budget: combatBudget,
+              arena: this.state.arena,
+              selfCapabilities: this.combatMachineCapabilitiesForRole(roleName),
+              opponentCapabilities: this.combatMachineCapabilitiesForRole(opponentRoleName(roleName)),
+            }),
+          }
+        : {}),
+      // Compact build protocol view: browser/raw agents can play the build
+      // phase from packet.build without depending on legalActions menus.
+      ...(buildState && gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
+        ? {
+            build: buildCompactBuildView({
+              role: roleName,
+              round: this.state.round,
+              decisionVersion: activeSet?.decisionVersion ?? decisionVersionForRole(this.state, roleName),
+              gold: role.gold,
+              buildState,
+              actionSet: activeSet,
+              store: activeSet?.catalogStore,
+            }),
+          }
+        : {}),
     })
+  }
+
+  private combatMachineCapabilitiesForRole(roleName: TeamRole): MachineCapabilities | undefined {
+    const stored = this.state.roles[roleName].storedDesign
+    const baseline = this.state.combat?.baselineMachineDesigns?.[roleName] ??
+      (stored?.version === 'machine:v1' ? stored.machine : undefined)
+
+    if (!baseline) {
+      return undefined
+    }
+
+    const runtime = this.state.combat?.machineRuntime?.[roleName]
+
+    return deriveMachineCapabilities(runtime ? { ...baseline, runtime } : baseline)
   }
 
   private ensureGameMasterActionSets(now: string): void {
@@ -1788,6 +1971,14 @@ export class SessionCoordinator {
   }
 
   private finalizeLoadoutForRole(roleName: TeamRole, now: string): void {
+    // TODO(product rule, do not implement public cancel_move yet): if
+    // selectedMovingPartId exists when auto-confirming on timeout and a prior
+    // confirmed storedDesign exists, the incomplete draft should be discarded
+    // and rehydrated from that previous confirmed design so the mid-move part
+    // is not silently lost. Implementing this requires tracking the last
+    // confirmed design separately from the live draft (storedDesign currently
+    // mirrors the in-progress draft), so the current behavior refunds the
+    // pending moved part instead.
     const role = this.state.roles[roleName]
     const buildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
     const pendingMovedPartId = buildState.selectedMovingPartId ? buildState.selectedPartId : undefined
@@ -2387,6 +2578,25 @@ function sameLockedTeamIdentity(
   )
 }
 
+// Round 2+ rule: if a confirmed blueprint exists from a prior round and the
+// editable draft was cleared by round advancement, rehydrate the draft from
+// the stored blueprint (healed to full) instead of starting a fresh core-only
+// build that would overwrite the carried-forward bot.
+function ensureRoleBuildStateFromStoredDesign(
+  roleName: TeamRole,
+  role: StoredRoleState,
+): LoadoutBuildState {
+  if (role.loadoutBuildState) {
+    return ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+  }
+
+  if (role.storedDesign) {
+    return createLoadoutBuildStateFromStoredDesign(roleName, role.storedDesign)
+  }
+
+  return createInitialLoadoutBuildState(roleName)
+}
+
 function createGameMasterActionSet(
   state: StoredSessionState,
   roleName: TeamRole,
@@ -2396,7 +2606,7 @@ function createGameMasterActionSet(
   if (phase === 'choose_loadout') {
     const role = state.roles[roleName]
 
-    role.loadoutBuildState = ensureLoadoutBuildState(roleName, role.loadoutBuildState)
+    role.loadoutBuildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
     role.storedDesign = role.loadoutBuildState.currentDesign
     role.currentDesign = storedDesignToLegacyBotDesignSnapshotProjection(
       role.loadoutBuildState.currentDesign,
@@ -2757,14 +2967,18 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   if (kind === 'move') {
-    const cellId = stringField(input, 'cellId') ?? stringField(input, 'destinationCellId')
+    const cellId = stringField(input, 'cellId') ??
+      stringField(input, 'destinationCellId') ??
+      cellIdFromTupleField(input, 'to')
 
     return cellId ? { kind: 'move', cellId } : undefined
   }
 
   if (kind === 'attack') {
     const weaponSlot = stringField(input, 'weaponSlot') === 'weaponB' ? 'weaponB' : 'weaponA'
-    const targetCellId = stringField(input, 'targetCellId') ?? stringField(input, 'cellId')
+    const targetCellId = stringField(input, 'targetCellId') ??
+      stringField(input, 'cellId') ??
+      cellIdFromTupleField(input, 'target')
 
     return {
       kind: 'attack',
@@ -2774,8 +2988,8 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   if (kind === 'utility') {
-    const utilityId = stringField(input, 'utilityId') ?? stringField(input, 'actionId')
-    const cellId = stringField(input, 'cellId')
+    const utilityId = stringField(input, 'utilityId') ?? stringField(input, 'utility') ?? stringField(input, 'actionId')
+    const cellId = stringField(input, 'cellId') ?? cellIdFromTupleField(input, 'at')
 
     return {
       kind: 'utility',
@@ -2785,6 +2999,20 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   return { kind: 'end_turn' }
+}
+
+function cellIdFromTupleField(input: Record<string, unknown>, field: string): string | undefined {
+  const value = input[field]
+
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((entry) => typeof entry === 'number' && Number.isInteger(entry))
+  ) {
+    return `cell:${value[0]}:${value[1]}`
+  }
+
+  return undefined
 }
 
 function combatPlanStepFromKind(input: string): CombatPlanStep | undefined {

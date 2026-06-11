@@ -4,6 +4,8 @@ import {
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
   type AgentBootstrapRequest,
+  type CompactBuildAction,
+  type CompactBuildPacket,
   type GameMasterActionParameters,
   type GameMasterLegalAction,
   type GameMasterPacket,
@@ -97,8 +99,11 @@ type GptTeamIdentityInput = TeamIdentity & {
 
 type GptActBody = {
   inviteUrl: string
-  actionId: string
+  /** Legacy compatibility: exact id copied from packet.legalActions. */
+  actionId?: string
   parameters?: GameMasterActionParameters
+  /** Compact build action; the wrapper hides GameMaster version bookkeeping. */
+  action?: CompactBuildAction
   publicMessage?: string
 }
 
@@ -126,7 +131,8 @@ type GptCompactPacket = {
   round: GameMasterPacket['round']
   decisionVersion: GameMasterPacket['decisionVersion']
   instruction: GameMasterPacket['instruction']
-  legalActions: Array<Record<string, unknown>>
+  build?: CompactBuildPacket
+  legalActions?: Array<Record<string, unknown>>
   [key: string]: unknown
 }
 
@@ -245,6 +251,10 @@ export class AgentArenaSession {
     action: {
       method: 'POST',
       handle: (request, coordinator) => this.submitGameMasterAction(request, coordinator),
+    },
+    'build-action': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitCompactBuildAction(request, coordinator),
     },
     'combat-plan': {
       method: 'POST',
@@ -499,6 +509,24 @@ export class AgentArenaSession {
     )
   }
 
+  private async submitCompactBuildAction(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Compact build action body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitCompactBuildAction(bearerToken(request) ?? '', readResult.body),
+    )
+  }
+
   private async submitCombatRoundPlan(
     request: Request,
     coordinator: SessionCoordinator,
@@ -581,10 +609,21 @@ export class AgentArenaSession {
         status: 'claimed',
         sessionId: result.value.sessionId,
         role: result.value.role,
-        packet: compactGptPacket(result.value.packet),
+        packet: this.compactGptPacketFor(coordinator, result.value.packet),
         continuation: gptContinuationForPacket(result.value.packet, 'claimed'),
       },
     )
+  }
+
+  private compactGptPacketFor(
+    coordinator: SessionCoordinator,
+    packet: GameMasterPacket,
+  ): GptCompactPacket {
+    const compactBuild = packet.phase === 'choose_loadout'
+      ? coordinator.buildCompactBuildPacketForRole(packet.role)
+      : undefined
+
+    return compactGptPacket(packet, compactBuild)
   }
 
   private async gptNext(
@@ -617,7 +656,7 @@ export class AgentArenaSession {
               status: gptPacketStatus(result.value),
               sessionId: result.value.sessionId,
               role: result.value.role,
-              packet: compactGptPacket(result.value),
+              packet: this.compactGptPacketFor(coordinator, result.value),
               continuation: gptContinuationForPacket(result.value),
             },
           }
@@ -644,14 +683,52 @@ export class AgentArenaSession {
       return invite.response
     }
 
-    if (typeof body.actionId !== 'string' || body.actionId.trim().length === 0) {
-      return errorResponse(400, 'SUBMISSION_INVALID', 'GPT actionId is required.')
+    const hasActionId = typeof body.actionId === 'string' && body.actionId.trim().length > 0
+    const hasCompactAction = body.action !== undefined
+
+    if (hasActionId === hasCompactAction) {
+      return errorResponse(
+        400,
+        'SUBMISSION_INVALID',
+        'Provide exactly one of actionId (legacy) or action (compact build action).',
+      )
     }
 
     const packetResult = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
 
     if (!packetResult.ok) {
       return this.sessionResultResponse(coordinator, packetResult)
+    }
+
+    if (hasCompactAction) {
+      if (packetResult.value.phase !== 'choose_loadout') {
+        return errorResponse(
+          409,
+          'PHASE_CLOSED',
+          'Compact build actions are only accepted during the build phase. Use actionId combat_plan during combat.',
+        )
+      }
+
+      const result = await coordinator.submitCompactBuildAction(invite.value.claimToken, {
+        action: 'submit_build_action',
+        decisionVersion: packetResult.value.decisionVersion,
+        command: body.action,
+        ...(typeof body.publicMessage === 'string' ? { publicMessage: body.publicMessage } : {}),
+      })
+
+      if (!result.ok) {
+        return this.sessionResultResponse(coordinator, result)
+      }
+
+      return this.sessionResultResponse(coordinator, {
+        ok: true,
+        value: {
+          status: gptPacketStatus(result.value.packet),
+          acceptedAction: body.action,
+          packet: compactGptPacket(result.value.packet, result.value.compactBuild),
+          continuation: gptContinuationForPacket(result.value.packet),
+        },
+      })
     }
 
     if (body.actionId === GPT_COMBAT_PLAN_ACTION_ID) {
@@ -668,16 +745,21 @@ export class AgentArenaSession {
           acceptedActionId: body.actionId,
           submittedSteps: result.value.submittedSteps,
           submittedPlan: result.value.submittedPlan,
-          packet: compactGptPacket(result.value.packet),
+          packet: this.compactGptPacketFor(coordinator, result.value.packet),
           continuation: gptContinuationForPacket(result.value.packet),
         },
       })
     }
 
+    if (typeof body.actionId !== 'string') {
+      return errorResponse(400, 'SUBMISSION_INVALID', 'GPT actionId is required for the legacy path.')
+    }
+
+    const legacyActionId = body.actionId
     const packet = packetResult.value
-    const resolvedGptAlias = resolveGptMountSlotAlias(packet, body.actionId)
+    const resolvedGptAlias = resolveGptMountSlotAlias(packet, legacyActionId)
     const action = resolvedGptAlias?.canonicalAction ??
-      packet.legalActions.find((candidate) => candidate.id === body.actionId)
+      packet.legalActions.find((candidate) => candidate.id === legacyActionId)
 
     if (!action || !packet.actionSetId) {
       return errorResponse(
@@ -711,7 +793,7 @@ export class AgentArenaSession {
               status: gptPacketStatus(result.value.packet),
               acceptedActionId: body.actionId,
               ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
-              packet: compactGptPacket(result.value.packet),
+              packet: this.compactGptPacketFor(coordinator, result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
             },
           }
@@ -770,7 +852,7 @@ export class AgentArenaSession {
             ok: true,
             value: {
               status: gptPacketStatus(result.value.packet),
-              packet: compactGptPacket(result.value.packet),
+              packet: this.compactGptPacketFor(coordinator, result.value.packet),
               continuation: gptContinuationForPacket(result.value.packet),
             },
           }
@@ -1012,7 +1094,56 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
   return match?.[1] as GptRouteAction | undefined
 }
 
-function compactGptPacket(packet: GameMasterPacket): GptCompactPacket {
+function compactBuildGptInstruction(packet: GameMasterPacket): string {
+  if (packet.nextAction === 'wait_for_opponent_loadout') {
+    return 'Loadout locked. Poll gptNext until the opponent confirms.'
+  }
+
+  return 'Build phase: read packet.build (bot, store, edit, requirements) and submit one compact action through gptAct.action, e.g. {"kind":"choose_part","part":"weapon.Weapon_Turret"}. No actionId is needed for build.'
+}
+
+function compactCombatGptInstruction(packet: GameMasterPacket): string {
+  if (packet.nextAction !== 'choose_turn') {
+    return packet.instruction
+  }
+
+  return 'Combat: read packet.combat.combat (self/opponent state, budget) and packet.combat.board (grid bounds + terrain). Submit one compact plan with gptAct actionId combat_plan and parameters.steps, e.g. [{"kind":"move","to":[4,0]},{"kind":"attack","weaponSlot":"weaponA","target":[-6,0]},{"kind":"end_turn"}]. The server validates movement, terrain, range, line of sight, cooldowns, and action time.'
+}
+
+function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildPacket): GptCompactPacket {
+  // Compact combat protocol: combat packets expose compact state only; the
+  // agent submits intent and the server resolves legality.
+  if (packet.phase === 'combat_turn' && packet.combatCompact) {
+    return {
+      sessionId: packet.sessionId,
+      role: packet.role,
+      phase: packet.phase,
+      nextAction: packet.nextAction,
+      round: packet.round,
+      ...(packet.fightId ? { fightId: packet.fightId } : {}),
+      decisionVersion: packet.decisionVersion,
+      instruction: compactCombatGptInstruction(packet),
+      combat: packet.combatCompact,
+    }
+  }
+
+  // Compact build protocol: during the build phase the GPT packet exposes
+  // compact state (packet.build) instead of legal action menus, store slots,
+  // buildState internals, or catalog dumps.
+  if (compactBuild && packet.phase === 'choose_loadout') {
+    return {
+      sessionId: packet.sessionId,
+      role: packet.role,
+      phase: packet.phase,
+      nextAction: packet.nextAction,
+      round: packet.round,
+      decisionVersion: packet.decisionVersion,
+      instruction: compactBuildGptInstruction(packet),
+      ...(packet.resources ? { resources: packet.resources } : {}),
+      build: compactBuild,
+    }
+  }
+
   const mountSlotAliases = gptMountSlotAliasesForPacket(packet)
   const isCombatTurn = isGptCombatTurnPacket(packet)
   const legalActions = isCombatTurn

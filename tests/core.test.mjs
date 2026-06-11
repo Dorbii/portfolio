@@ -31,6 +31,12 @@ import {
   hazardsAtPosition,
   applyLoadoutAction,
   buildAgentBoardView,
+  buildCompactBuildView,
+  buildCompactCombatView,
+  canonicalPartIdFromCompact,
+  resolveCompactBuildAction,
+  compactPartAlias,
+  compactSystemCoreAlias,
   buildCatalogStore,
   buildLoadoutActionSet,
   buildCombatActionSet,
@@ -44,6 +50,7 @@ import {
   buildSharedDebrief,
   createInitialMachineDesign,
   createInitialLoadoutBuildState,
+  createLoadoutBuildStateFromStoredDesign,
   LOADOUT_PART_LIMIT,
   loadoutBuildStateLegacyDesign,
   loadoutLegalActionForPacket,
@@ -68,6 +75,10 @@ import {
   SessionCoordinator,
   calculateInterest,
 } from '../.test-build/apps/worker/src/session.js'
+import {
+  normalizeCompactBuildActionSubmission,
+  normalizeCompactCombatPlanSubmission,
+} from '../.test-build/packages/schemas/src/index.js'
 import { createInitialSessionState } from '../.test-build/apps/worker/src/sessionCreation.js'
 import { resetStoredRoleClaim } from '../.test-build/apps/worker/src/sessionRoleReset.js'
 import { DEFAULT_STARTING_GOLD } from '../.test-build/apps/worker/src/sessionSupport.js'
@@ -7816,4 +7827,1009 @@ test('session coordinator does not expose Slice 7 completion actions in Slice 6'
   assert.equal('saveCompletedSession' in SessionCoordinator.prototype, false)
   assert.equal('continueChampionSession' in SessionCoordinator.prototype, false)
   assert.equal('quitCompletedSession' in SessionCoordinator.prototype, false)
+})
+
+test('compactPartAlias prefixes catalog part category', () => {
+  for (const part of PART_CATALOG) {
+    assert.equal(compactPartAlias(part), `${part.category}.${part.id}`)
+  }
+  const turret = PART_CATALOG.find((part) => part.id === 'Weapon_Turret')
+  if (turret) {
+    assert.equal(compactPartAlias(turret), 'weapon.Weapon_Turret')
+  }
+})
+
+test('compactSystemCoreAlias returns body.Machine_Core', () => {
+  assert.equal(compactSystemCoreAlias(), 'body.Machine_Core')
+})
+
+test('canonicalPartIdFromCompact strips known category prefix', () => {
+  assert.equal(canonicalPartIdFromCompact('weapon.Weapon_Turret'), 'Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('body.Frame_Strut'), 'Frame_Strut')
+  assert.equal(canonicalPartIdFromCompact('  mobility.Wheel_Set  '), 'Wheel_Set')
+})
+
+test('canonicalPartIdFromCompact preserves canonical IDs', () => {
+  assert.equal(canonicalPartIdFromCompact('Weapon_Turret'), 'Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('catalog:Weapon_Turret'), 'catalog:Weapon_Turret')
+})
+
+test('canonicalPartIdFromCompact preserves unknown-prefix values', () => {
+  assert.equal(canonicalPartIdFromCompact('exotic.Weapon_Turret'), 'exotic.Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('.Weapon_Turret'), '.Weapon_Turret')
+  assert.equal(canonicalPartIdFromCompact('weapon.'), 'weapon.')
+})
+
+test('createLoadoutBuildStateFromStoredDesign rehydrates blueprint healed to full', () => {
+  const initial = createInitialLoadoutBuildState('red')
+  const damaged = {
+    version: 'machine:v1',
+    machine: {
+      ...initial.currentDesign.machine,
+      runtime: {
+        healthByInstanceId: { core: 2 },
+        disabledInstanceIds: ['core'],
+      },
+    },
+  }
+  const rehydrated = createLoadoutBuildStateFromStoredDesign('red', damaged)
+
+  assert.equal(rehydrated.step, 'choose_part')
+  assert.equal(rehydrated.currentDesign.version, 'machine:v1')
+  assert.equal(rehydrated.currentDesign.machine.runtime, undefined)
+  assert.deepEqual(
+    rehydrated.currentDesign.machine.parts.map((part) => part.instanceId),
+    initial.currentDesign.machine.parts.map((part) => part.instanceId),
+  )
+  assert.equal(rehydrated.selectedPartId, undefined)
+  assert.equal(rehydrated.selectedMovingPartId, undefined)
+})
+
+function compactViewActionSet(buildState, gold = 200, storeSeed = 'compact-view-test') {
+  return buildLoadoutActionSet({
+    role: 'red',
+    round: 1,
+    decisionVersion: 11,
+    actionSetId: 'red:r1:loadout:compact-view:v11',
+    createdAt: '2026-06-07T00:00:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold,
+    buildState,
+    storeSeed,
+  })
+}
+
+function compactViewFor(buildState, actionSet, gold = 200) {
+  return buildCompactBuildView({
+    role: 'red',
+    round: 1,
+    decisionVersion: actionSet.decisionVersion,
+    gold,
+    buildState,
+    actionSet,
+    store: actionSet.catalogStore,
+  })
+}
+
+test('compact build view exposes compact bot, store, edit, and requirements for choose_part', () => {
+  const buildState = createInitialLoadoutBuildState('red')
+  const actionSet = compactViewActionSet(buildState)
+  const packet = compactViewFor(buildState, actionSet)
+
+  assert.equal(packet.v, 1)
+  assert.equal(packet.phase, 'build')
+  assert.equal(packet.step, 'choose_part')
+  assert.deepEqual(packet.bot.partSchema, ['id', 'part', 'parent', 'hp', 'maxHp'])
+  assert.deepEqual(packet.bot.parts[0], ['core', 'body.Machine_Core', null, 20, 20])
+  assert.equal(packet.bot.mode, 'new')
+  assert.equal(packet.budget.gold, 200)
+  assert.equal(packet.budget.parts, LOADOUT_PART_LIMIT)
+  assert.ok(packet.store)
+  assert.ok(packet.store.foundation.length > 0)
+  assert.ok(packet.store.offers.length > 0)
+
+  for (const item of [...packet.store.foundation, ...packet.store.offers]) {
+    assert.match(item.part, /^(body|mobility|weapon|defense|utility|style)\./)
+    assert.equal('slot' in item, false)
+    assert.equal('stock' in item, false)
+    assert.equal('kind' in item, false)
+
+    if (item.mobility) {
+      assert.equal('x' in item.mobility, false)
+      assert.equal('z' in item.mobility, false)
+      assert.equal('xz' in item.mobility, false)
+      assert.equal(typeof item.mobility.moveBudget, 'number')
+    }
+  }
+
+  assert.equal(packet.edit.confirm, true)
+  assert.deepEqual(packet.edit.remove, [])
+  assert.deepEqual(packet.edit.move, [])
+  assert.equal(packet.requirements.confirm_loadout.ok, true)
+  assert.deepEqual(packet.requirements.confirm_loadout.missing, [])
+
+  const serialized = JSON.stringify(packet)
+
+  assert.equal('catalog' in packet, false)
+  assert.equal('legalActions' in packet, false)
+  assert.equal('blockedActions' in packet, false)
+  assert.equal('slots' in packet.store, false)
+  assert.equal('foundationPartIds' in packet.store, false)
+  assert.equal('offeredPartIds' in packet.store, false)
+  assert.equal(serialized.includes('"legalActions"'), false)
+  assert.equal(serialized.includes('"blockedActions"'), false)
+  assert.equal(serialized.includes('"offeredPartIds"'), false)
+  assert.equal(typeof packet.buildDigest, 'string')
+  assert.equal(packet.buildDigest, compactViewFor(buildState, actionSet).buildDigest)
+})
+
+test('compact build view exposes selected/targets and mount poses through the build steps', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState)
+  const chooseAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === 'Weapon_Spinner_Small',
+  ) ?? Object.values(actionSet.actions).find((action) => action.kind === 'choose_part')
+
+  assert.notEqual(chooseAction, undefined)
+
+  const chosen = applyLoadoutAction({
+    role: 'red',
+    gold: 200,
+    inventory: [],
+    buildState,
+    action: chooseAction,
+  })
+
+  assert.equal(chosen.ok, true)
+  buildState = chosen.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const attachPacket = compactViewFor(buildState, actionSet)
+
+  assert.equal(attachPacket.step, 'choose_attach_target')
+  assert.equal(attachPacket.selected.mode, 'new_part')
+  assert.equal(attachPacket.selected.canonicalPartId, chooseAction.payload.partId)
+  assert.match(attachPacket.selected.part, /\./)
+  assert.ok(attachPacket.targets.includes('core'))
+  assert.equal('store' in attachPacket, false)
+
+  const targetAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_attach_target',
+  )
+
+  assert.notEqual(targetAction, undefined)
+
+  const targeted = applyLoadoutAction({
+    role: 'red',
+    gold: 200,
+    inventory: [],
+    buildState,
+    action: targetAction,
+  })
+
+  assert.equal(targeted.ok, true)
+  buildState = targeted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const mountPacket = compactViewFor(buildState, actionSet)
+  const mountAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'propose_mount_pose',
+  )
+
+  assert.equal(mountPacket.step, 'mount_part')
+  assert.deepEqual(mountPacket.mountSchema, ['surface', 'u', 'v', 'yaw', 'roll'])
+  assert.notEqual(mountAction, undefined)
+  assert.ok(mountAction.parameterExamples.length > 0)
+  assert.ok(mountPacket.mounts.length > 0)
+
+  const example = mountAction.parameterExamples[0]
+
+  assert.deepEqual(mountPacket.mounts[0], [
+    example.mountSurfaceId,
+    example.u,
+    example.v,
+    example.yawDegrees,
+    example.rollDegrees,
+  ])
+})
+
+test('compact build view edit surface derives from the action set for existing parts', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState)
+  const chooseAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part',
+  )
+  const chosen = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: chooseAction })
+
+  assert.equal(chosen.ok, true)
+  buildState = chosen.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const targeted = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: targetAction })
+
+  assert.equal(targeted.ok, true)
+  buildState = targeted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const mounted = applyLoadoutAction({
+    role: 'red',
+    gold: 200,
+    inventory: [],
+    buildState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(mounted.ok, true, mounted.ok ? '' : JSON.stringify(mounted.issues))
+  buildState = mounted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const packet = compactViewFor(buildState, actionSet)
+  const placedRow = packet.bot.parts.find((row) => row[0] !== 'core')
+
+  assert.notEqual(placedRow, undefined)
+  assert.equal(packet.step, 'choose_part')
+  assert.equal(packet.bot.mode, 'existing')
+
+  const removeEntry = packet.edit.remove.find((entry) => entry.id === placedRow[0])
+  const removeAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'remove_part' && action.payload.instanceId === placedRow[0],
+  )
+
+  assert.notEqual(removeAction, undefined)
+  assert.notEqual(removeEntry, undefined)
+  assert.ok(removeEntry.refund > 0)
+  assert.ok(packet.edit.move.includes(placedRow[0]))
+
+  for (const rotateEntry of packet.edit.rotate) {
+    assert.ok(rotateEntry.rot.length > 0)
+    assert.deepEqual([...rotateEntry.rot].sort((a, b) => a - b), rotateEntry.rot)
+  }
+})
+
+test('round 2 compact build view shows healed full HP from rehydrated blueprint', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState)
+  const chooseAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_part')
+  const chosen = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: chooseAction })
+
+  buildState = chosen.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const targeted = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: targetAction })
+
+  buildState = targeted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const mounted = applyLoadoutAction({
+    role: 'red',
+    gold: 200,
+    inventory: [],
+    buildState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(mounted.ok, true, mounted.ok ? '' : JSON.stringify(mounted.issues))
+  buildState = mounted.buildState
+
+  const damagedStored = {
+    version: 'machine:v1',
+    machine: {
+      ...buildState.currentDesign.machine,
+      runtime: {
+        healthByInstanceId: { core: 1, part_1: 0 },
+        destroyedInstanceIds: ['part_1'],
+      },
+    },
+  }
+  const rehydrated = createLoadoutBuildStateFromStoredDesign('red', damagedStored)
+  const round2Set = buildLoadoutActionSet({
+    role: 'red',
+    round: 2,
+    decisionVersion: 21,
+    actionSetId: 'red:r2:loadout:compact-view:v21',
+    createdAt: '2026-06-07T00:10:00.000Z',
+    arenaVersion: 'arena:v1',
+    gold: 150,
+    buildState: rehydrated,
+    storeSeed: 'compact-view-round2',
+  })
+  const packet = buildCompactBuildView({
+    role: 'red',
+    round: 2,
+    decisionVersion: round2Set.decisionVersion,
+    gold: 150,
+    buildState: rehydrated,
+    actionSet: round2Set,
+    store: round2Set.catalogStore,
+  })
+
+  assert.equal(packet.round, 2)
+  assert.equal(packet.bot.mode, 'existing')
+  assert.equal(packet.bot.parts.length, 2)
+
+  for (const [, , , hp, maxHp] of packet.bot.parts) {
+    assert.equal(hp, maxHp)
+    assert.ok(hp > 0)
+  }
+
+  assert.equal(packet.bot.summary.hp, packet.bot.summary.maxHp)
+})
+
+test('compact build action validator rejects malformed submissions and normalizes mount defaults', () => {
+  assert.equal(normalizeCompactBuildActionSubmission(null).ok, false)
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_game_action', decisionVersion: 1, command: { kind: 'confirm_loadout' } }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_build_action', command: { kind: 'confirm_loadout' } }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_build_action', decisionVersion: 1 }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'confirm_loadout' },
+      extra: true,
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'choose_part', part: '' },
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'mount_part', surface: 'core_deck', u: 1.5, v: 0.5 },
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'rotate_part', id: 'part_1', rot: Number.NaN },
+    }).ok,
+    false,
+  )
+
+  const normalized = normalizeCompactBuildActionSubmission({
+    action: 'submit_build_action',
+    decisionVersion: 7,
+    command: { kind: 'mount_part', surface: ' core_deck ', u: 0.5, v: 0.25 },
+  })
+
+  assert.equal(normalized.ok, true)
+  assert.deepEqual(normalized.submission.command, {
+    kind: 'mount_part',
+    surface: 'core_deck',
+    u: 0.5,
+    v: 0.25,
+    yaw: 0,
+    roll: 0,
+  })
+})
+
+test('compact build actions resolve through the active action set only', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState)
+  const chooseAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_part')
+  const partId = chooseAction.payload.partId
+  const alias = `${PART_CATALOG.find((part) => part.id === partId).category}.${partId}`
+  const resolvedAlias = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: alias },
+  })
+  const resolvedCanonical = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: partId },
+  })
+
+  assert.equal(resolvedAlias.ok, true)
+  assert.equal(resolvedAlias.value.canonicalAction.id, chooseAction.id)
+  assert.equal(resolvedCanonical.ok, true)
+  assert.equal(resolvedCanonical.value.canonicalAction.id, chooseAction.id)
+
+  const confirmResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'confirm_loadout' },
+  })
+
+  assert.equal(confirmResolved.ok, true)
+  assert.equal(confirmResolved.value.canonicalAction.kind, 'confirm_loadout')
+
+  const missing = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'remove_part', id: 'part_404' },
+  })
+
+  assert.equal(missing.ok, false)
+  assert.equal(missing.issues[0].code, 'COMPACT_ACTION_NOT_AVAILABLE')
+
+  const chosen = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: chooseAction })
+
+  buildState = chosen.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const targetResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_attach_target', target: 'core' },
+  })
+
+  assert.equal(targetResolved.ok, true)
+  assert.equal(targetResolved.value.canonicalAction.kind, 'choose_attach_target')
+
+  const targeted = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: targetResolved.value.canonicalAction })
+
+  buildState = targeted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const mountResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'mount_part', surface: 'core_deck', u: 0.5, v: 0.5 },
+  })
+
+  assert.equal(mountResolved.ok, true)
+  assert.equal(mountResolved.value.canonicalAction.kind, 'propose_mount_pose')
+  assert.equal(mountResolved.value.parameters.childPartId, partId)
+  assert.equal(mountResolved.value.parameters.parentInstanceId, 'core')
+  assert.equal(mountResolved.value.parameters.mountSurfaceId, 'core_deck')
+  assert.equal(mountResolved.value.parameters.yawDegrees, 0)
+
+  const duplicateSet = {
+    ...actionSet,
+    actions: {
+      ...actionSet.actions,
+      forged_duplicate: {
+        ...Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose'),
+        id: 'forged_duplicate',
+      },
+    },
+  }
+  const ambiguous = resolveCompactBuildAction({
+    actionSet: duplicateSet,
+    buildState,
+    command: { kind: 'mount_part', surface: 'core_deck', u: 0.5, v: 0.5 },
+  })
+
+  assert.equal(ambiguous.ok, false)
+  assert.equal(ambiguous.issues[0].code, 'AMBIGUOUS_COMPACT_ACTION')
+})
+
+function applyCompactPurchase(buildState, chooseAction, gold = 500) {
+  const chosen = applyLoadoutAction({ role: 'red', gold, inventory: [], buildState, action: chooseAction })
+
+  assert.equal(chosen.ok, true, chosen.ok ? '' : JSON.stringify(chosen.issues))
+
+  let actionSet = compactViewActionSet(chosen.buildState, gold)
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+
+  assert.notEqual(targetAction, undefined)
+
+  const targeted = applyLoadoutAction({ role: 'red', gold, inventory: [], buildState: chosen.buildState, action: targetAction })
+
+  assert.equal(targeted.ok, true, targeted.ok ? '' : JSON.stringify(targeted.issues))
+  actionSet = compactViewActionSet(targeted.buildState, gold)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+
+  assert.notEqual(mountAction, undefined)
+  assert.ok(mountAction.parameterExamples?.length > 0)
+
+  const mounted = applyLoadoutAction({
+    role: 'red',
+    gold,
+    inventory: [],
+    buildState: targeted.buildState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(mounted.ok, true, mounted.ok ? '' : JSON.stringify(mounted.issues))
+
+  return mounted.buildState
+}
+
+test('store foundation parts are reusable and offers are one-purchase per round', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState, 500)
+  const actions = Object.values(actionSet.actions)
+  const foundationAction = actions.find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'foundation',
+  )
+  const offerAction = actions.find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'offer',
+  )
+
+  assert.notEqual(foundationAction, undefined)
+  assert.notEqual(offerAction, undefined)
+  assert.equal(typeof offerAction.payload.offerSlotId, 'string')
+
+  buildState = applyCompactPurchase(buildState, foundationAction)
+
+  assert.equal(buildState.consumedOfferSlotIds, undefined)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const foundationAgain = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === foundationAction.payload.partId,
+  )
+
+  assert.notEqual(foundationAgain, undefined, 'foundation part must stay purchasable')
+
+  buildState = applyCompactPurchase(buildState, foundationAgain)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const offerStill = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === offerAction.payload.partId,
+  )
+
+  assert.notEqual(offerStill, undefined)
+
+  buildState = applyCompactPurchase(buildState, offerStill)
+
+  assert.deepEqual(buildState.consumedOfferSlotIds, [offerAction.payload.offerSlotId])
+  assert.equal(buildState.selectedPartSource, undefined)
+  assert.equal(buildState.selectedOfferSlotId, undefined)
+  actionSet = compactViewActionSet(buildState, 500)
+
+  const offerGone = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.partId === offerAction.payload.partId,
+  )
+
+  assert.equal(offerGone, undefined, 'consumed offer must not be offered again')
+
+  const compactResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: offerAction.payload.partId },
+  })
+
+  assert.equal(compactResolved.ok, false)
+  assert.equal(compactResolved.issues[0].code, 'COMPACT_ACTION_NOT_AVAILABLE')
+
+  const forgedReplay = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState,
+    action: offerAction,
+  })
+
+  assert.equal(forgedReplay.ok, false)
+  assert.equal(forgedReplay.issues[0].code, 'OFFER_CONSUMED')
+
+  const packet = buildCompactBuildView({
+    role: 'red',
+    round: 1,
+    decisionVersion: actionSet.decisionVersion,
+    gold: 500,
+    buildState,
+    actionSet,
+    store: actionSet.catalogStore,
+  })
+  const offerAliasSuffix = `.${offerAction.payload.partId}`
+
+  assert.equal(
+    packet.store.offers.some((offer) => offer.part.endsWith(offerAliasSuffix)),
+    false,
+    'compact store must hide consumed offers',
+  )
+  assert.ok(packet.store.foundation.length > 0)
+})
+
+test('failed placement and moved parts do not consume store offers', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState, 500)
+  const offerAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'choose_part' && action.payload.storeSource === 'offer',
+  )
+
+  assert.notEqual(offerAction, undefined)
+
+  const chosen = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState, action: offerAction })
+
+  assert.equal(chosen.ok, true)
+  assert.equal(chosen.buildState.selectedPartSource, 'offer')
+
+  let midState = chosen.buildState
+
+  actionSet = compactViewActionSet(midState, 500)
+
+  const targetAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const targeted = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: midState, action: targetAction })
+
+  midState = targeted.buildState
+  actionSet = compactViewActionSet(midState, 500)
+
+  const mountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const badMount = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: midState,
+    action: {
+      ...mountAction,
+      payload: {
+        ...mountAction.payload,
+        parameters: {
+          childPartId: mountAction.payload.childPartId,
+          parentInstanceId: mountAction.payload.parentInstanceId,
+          mountSurfaceId: 'surface_does_not_exist',
+          u: 0.5,
+          v: 0.5,
+          yawDegrees: 0,
+          rollDegrees: 0,
+        },
+      },
+    },
+  })
+
+  assert.equal(badMount.ok, false)
+  assert.equal(midState.consumedOfferSlotIds, undefined)
+
+  const goodMount = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: midState,
+    action: {
+      ...mountAction,
+      payload: { ...mountAction.payload, parameters: mountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(goodMount.ok, true, goodMount.ok ? '' : JSON.stringify(goodMount.issues))
+  assert.deepEqual(goodMount.buildState.consumedOfferSlotIds, [offerAction.payload.offerSlotId])
+
+  let movedState = goodMount.buildState
+
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const placedInstanceId = movedState.currentDesign.machine.parts.find(
+    (part) => part.source === 'catalog_part',
+  )?.instanceId
+  const moveAction = Object.values(actionSet.actions).find(
+    (action) => action.kind === 'move_part' && action.payload.instanceId === placedInstanceId,
+  )
+
+  assert.notEqual(moveAction, undefined)
+
+  const moving = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: movedState, action: moveAction })
+
+  assert.equal(moving.ok, true, moving.ok ? '' : JSON.stringify(moving.issues))
+  movedState = moving.buildState
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const remountTarget = Object.values(actionSet.actions).find((action) => action.kind === 'choose_attach_target')
+  const retargeted = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: movedState, action: remountTarget })
+
+  movedState = retargeted.buildState
+  actionSet = compactViewActionSet(movedState, 500)
+
+  const remountAction = Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose')
+  const remounted = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: movedState,
+    action: {
+      ...remountAction,
+      payload: { ...remountAction.payload, parameters: remountAction.parameterExamples[0] },
+    },
+  })
+
+  assert.equal(remounted.ok, true, remounted.ok ? '' : JSON.stringify(remounted.issues))
+  assert.deepEqual(
+    remounted.buildState.consumedOfferSlotIds,
+    [offerAction.payload.offerSlotId],
+    'moving an existing part must not consume another offer slot',
+  )
+})
+
+test('compact combat view exposes state without affordance menus', () => {
+  const arena = tacticalOpenArena
+  const snapshot = combatSnapshot(arena, [-4, 0, 0], [4, 0, 0])
+  const packet = buildCompactCombatView({
+    role: 'red',
+    round: 2,
+    decisionVersion: 1201,
+    snapshot,
+    budget: lockstepBudget({ actionTime: 9, weaponCooldowns: { weaponA: 1 } }),
+    arena,
+  })
+
+  assert.equal(packet.v, 1)
+  assert.equal(packet.combat.round, 2)
+  assert.equal(packet.combat.decisionVersion, 1201)
+  assert.equal(packet.combat.budget.actionTime, 9)
+  assert.deepEqual(packet.combat.self.cell, [-4, 0])
+  assert.deepEqual(packet.combat.opponent.cell, [4, 0])
+  assert.equal(packet.combat.self.hp, 30)
+  assert.equal(packet.combat.self.maxHp, 30)
+  assert.equal(typeof packet.combat.self.mass, 'number')
+  assert.equal(typeof packet.combat.self.movement, 'object')
+  assert.equal(Array.isArray(packet.combat.self.weapons), true)
+  assert.equal(packet.board.grid.length, 4)
+
+  const serialized = JSON.stringify(packet)
+
+  for (const forbidden of [
+    '"reachableCells"',
+    '"attackableCells"',
+    '"utilityOptions"',
+    '"cells"',
+    '"reachablePoses"',
+    '"attackableTargets"',
+    '"ascii"',
+    '"legalActions"',
+    '"actionSummary"',
+  ]) {
+    assert.equal(serialized.includes(forbidden), false, `compact combat packet must omit ${forbidden}`)
+  }
+})
+
+test('compact combat plan submissions normalize to legacy round plans', () => {
+  const normalized = normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1201,
+    round: 1,
+    steps: [
+      { kind: 'move', to: [4, 0] },
+      { kind: 'attack', weaponSlot: 'weaponA', target: [-6, 0] },
+      { kind: 'utility', utility: 'anchor', at: [4, 1] },
+      { kind: 'end_turn' },
+    ],
+  })
+
+  assert.equal(normalized.ok, true)
+  assert.deepEqual(normalized.submission, {
+    action: 'submit_combat_round_plan',
+    decisionVersion: 1201,
+    round: 1,
+    steps: [
+      { kind: 'move', cellId: 'cell:4:0' },
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:-6:0' },
+      { kind: 'utility', utilityId: 'anchor', cellId: 'cell:4:1' },
+      { kind: 'end_turn' },
+    ],
+  })
+
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'move', to: [0.5, 0] }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack' }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'move', to: [1, 0], extra: true }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_round_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'end_turn' }],
+  }).ok, false)
+})
+
+function machineWithWeapons(role, weaponPartIds) {
+  const initial = createInitialMachineDesign(role)
+  const parts = [initial.parts[0]]
+  const attachments = []
+
+  weaponPartIds.forEach((partId, index) => {
+    const instanceId = `w${index + 1}`
+
+    parts.push(machinePart(instanceId, {
+      definitionId: `catalog:${partId}`,
+      transform: machineTransform({ orientation: machineBasis() }),
+    }))
+    attachments.push(machineAttachment('core', instanceId, { mountId: 'core_shell' }))
+  })
+
+  return { ...initial, parts, attachments }
+}
+
+function catalogWeaponPartIds(count) {
+  const weapons = PART_CATALOG.filter(
+    (part) => part.spec.kind === 'weapon' && part.spec.damage > 0 && part.spec.range >= 2,
+  )
+
+  assert.ok(weapons.length >= count, `catalog needs at least ${count} weapon parts`)
+
+  return weapons.slice(0, count).map((part) => part.id)
+}
+
+test('combat plan validator accepts weaponId attacks and rejects ambiguous weapon selection', () => {
+  const base = { action: 'submit_combat_round_plan', decisionVersion: 1, round: 1 }
+
+  const byId = normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponId: 'w3', targetCellId: 'cell:1:0' }],
+  })
+
+  assert.equal(byId.ok, true)
+  assert.deepEqual(byId.submission.steps[0], {
+    kind: 'attack',
+    weaponId: 'w3',
+    targetCellId: 'cell:1:0',
+  })
+
+  const bySlot = normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponSlot: 'weaponB', targetCellId: 'cell:1:0' }],
+  })
+
+  assert.equal(bySlot.ok, true)
+  assert.deepEqual(bySlot.submission.steps[0], {
+    kind: 'attack',
+    weaponSlot: 'weaponB',
+    targetCellId: 'cell:1:0',
+  })
+
+  assert.equal(normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', weaponId: 'w3', weaponSlot: 'weaponA' }],
+  }).ok, false)
+  assert.equal(normalizeCombatRoundPlanSubmission({
+    ...base,
+    steps: [{ kind: 'attack', targetCellId: 'cell:1:0' }],
+  }).ok, false)
+
+  const compactById = normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack', weapon: 'w3', target: [1, 0] }],
+  })
+
+  assert.equal(compactById.ok, true)
+  assert.deepEqual(compactById.submission.steps[0], {
+    kind: 'attack',
+    weaponId: 'w3',
+    targetCellId: 'cell:1:0',
+  })
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack', weapon: 'w3', weaponSlot: 'weaponA', target: [1, 0] }],
+  }).ok, false)
+})
+
+test('machines expose unlimited mounted weapons and fire them by weapon id', () => {
+  const weaponIds = catalogWeaponPartIds(3)
+  const redMachine = machineWithWeapons('red', weaponIds)
+  const capabilities = deriveMachineCapabilities(redMachine)
+
+  assert.ok(capabilities.weapons.length >= 3, JSON.stringify(capabilities.inactiveParts))
+  assert.deepEqual(
+    capabilities.weapons.slice(0, 3).map((weapon) => weapon.partInstanceId),
+    ['w1', 'w2', 'w3'],
+  )
+
+  const arena = tacticalOpenArena
+  const snapshot = combatSnapshot(arena, [-1, 0, 0], [1, 0, 0], {
+    red: { weaponSlotCount: 3 },
+  })
+  const budget = lockstepBudget({ actionTime: 8 })
+  const compact = buildCompactCombatView({
+    role: 'red',
+    round: 1,
+    decisionVersion: 9,
+    snapshot,
+    budget,
+    arena,
+    selfCapabilities: capabilities,
+  })
+
+  assert.equal(compact.combat.self.weapons.length, capabilities.weapons.length)
+  assert.equal(compact.combat.self.weapons[0].slot, 'weaponA')
+  assert.equal(compact.combat.self.weapons[1].slot, 'weaponB')
+  assert.equal(compact.combat.self.weapons[2].slot, undefined)
+  assert.equal(typeof compact.combat.self.weapons[2].id, 'string')
+
+  const thirdWeapon = capabilities.weapons[2]
+  const input = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponId: 'w3', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: budget, blue: lockstepBudget() } }),
+  }
+
+  input.red.machineDesign = redMachine
+
+  const resolution = resolveLockstepCombatRound(input)
+  const events = replayEventsForResolution(resolution)
+  const fire = events.find((event) => event.type === 'weapon_fire' && event.bot === 'red')
+
+  assert.notEqual(fire, undefined)
+  assert.equal(fire.weaponId, 'w3')
+  assert.equal(fire.fireMode, thirdWeapon.fireMode)
+
+  const impact = events.find((event) => event.type === 'impact' && event.attacker === 'red')
+
+  assert.notEqual(impact, undefined)
+  assert.equal(impact.damage, Math.max(0, Math.round(thirdWeapon.damage)))
+
+  const legacyInput = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: lockstepBudget({ actionTime: 8 }), blue: lockstepBudget() } }),
+  }
+
+  legacyInput.red.machineDesign = redMachine
+
+  const legacyResolution = resolveLockstepCombatRound(legacyInput)
+  const legacyFire = replayEventsForResolution(legacyResolution).find(
+    (event) => event.type === 'weapon_fire' && event.bot === 'red',
+  )
+
+  assert.notEqual(legacyFire, undefined)
+  assert.equal(legacyFire.weaponId, 'w1', 'legacy weaponA must map to the first active weapon')
+  assert.equal(legacyFire.weaponSlot, 'weaponA')
+
+  const unknownInput = {
+    ...lockstepCombatInput(snapshot, {
+      red: combatRoundPlan('red', [
+        { kind: 'attack', weaponId: 'w999', targetCellId: 'cell:1:0' },
+        { kind: 'end_turn' },
+      ]),
+      blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+    }, { budgets: { red: lockstepBudget({ actionTime: 8 }), blue: lockstepBudget() } }),
+  }
+
+  unknownInput.red.machineDesign = redMachine
+
+  const unknownResolution = resolveLockstepCombatRound(unknownInput)
+  const unknownEvents = replayEventsForResolution(unknownResolution)
+
+  assert.equal(
+    unknownEvents.some((event) => event.type === 'weapon_fire' && event.bot === 'red'),
+    false,
+    'unknown weapon ids must not fire',
+  )
 })

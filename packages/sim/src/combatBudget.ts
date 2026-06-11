@@ -15,7 +15,10 @@ export type DeriveCombatBudgetInput = {
 export type CombatPlanStepCost = {
   movement: number
   actionTime: number
-  weaponSlot?: 'weaponA' | 'weaponB'
+  /** Mounted weapon instance ID; the canonical cooldown key. */
+  weaponId?: string
+  /** Temporary compatibility cooldown key for weaponA/weaponB submissions. */
+  legacyWeaponSlot?: 'weaponA' | 'weaponB'
 }
 
 export type BudgetConsumptionResult =
@@ -61,7 +64,12 @@ export function combatPlanStepCost(
     case 'move':
       return { movement: Math.max(1, movementCost), actionTime: 0 }
     case 'attack':
-      return { movement: 0, actionTime: 1, weaponSlot: step.weaponSlot }
+      return {
+        movement: 0,
+        actionTime: 1,
+        ...(step.weaponId ? { weaponId: step.weaponId } : {}),
+        ...(!step.weaponId && step.weaponSlot ? { legacyWeaponSlot: step.weaponSlot } : {}),
+      }
     case 'utility':
       return { movement: 0, actionTime: 1 }
     case 'end_turn':
@@ -82,8 +90,10 @@ export function consumeCombatBudget(input: {
   if (cost.actionTime > input.budget.actionTime) {
     return { ok: false, reason: 'action time budget exhausted', cost }
   }
-  if (cost.weaponSlot && (input.budget.weaponCooldowns[cost.weaponSlot] ?? 0) > 0) {
-    return { ok: false, reason: `${cost.weaponSlot} is on cooldown`, cost }
+  const cooldownKey = cost.weaponId ?? cost.legacyWeaponSlot
+
+  if (cooldownKey && (input.budget.weaponCooldowns[cooldownKey] ?? 0) > 0) {
+    return { ok: false, reason: `${cooldownKey} is on cooldown`, cost }
   }
 
   return {
@@ -91,8 +101,8 @@ export function consumeCombatBudget(input: {
     budget: {
       movement: input.budget.movement - cost.movement,
       actionTime: input.budget.actionTime - cost.actionTime,
-      weaponCooldowns: cost.weaponSlot
-        ? { ...input.budget.weaponCooldowns, [cost.weaponSlot]: 1 }
+      weaponCooldowns: cooldownKey
+        ? { ...input.budget.weaponCooldowns, [cooldownKey]: 1 }
         : { ...input.budget.weaponCooldowns },
     },
     cost,

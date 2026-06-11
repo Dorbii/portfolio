@@ -81,7 +81,16 @@ export function validateCombatRoundPlanAgainstBoard(input: {
     }
 
     if (step.kind === 'attack') {
-      if (attackable.size > 0 && step.targetCellId && !attackable.has(`${step.weaponSlot}:${step.targetCellId}`)) {
+      // Legacy slot submissions can be checked against the legacy attackable
+      // affordance view. weaponId submissions are validated by the resolver
+      // (range, line of sight, cooldown) instead of an affordance menu.
+      if (
+        step.weaponSlot &&
+        !step.weaponId &&
+        attackable.size > 0 &&
+        step.targetCellId &&
+        !attackable.has(`${step.weaponSlot}:${step.targetCellId}`)
+      ) {
         issues.push(issue('ATTACK_NOT_AVAILABLE', `steps.${index}.targetCellId`, `${step.weaponSlot} cannot currently attack ${step.targetCellId}.`))
       }
       actionTime -= combatPlanStepCost(step).actionTime

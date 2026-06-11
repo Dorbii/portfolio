@@ -42,7 +42,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           operationId: 'gptAct',
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'Submit exactly one actionId copied from the latest packet. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps.',
+            'During build, submit one compact action (no actionId needed), e.g. {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps. Legacy actionId submissions copied from packet.legalActions remain accepted during migration. Provide exactly one of action or actionId.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -122,13 +122,20 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
         GptActRequest: {
           type: 'object',
           additionalProperties: false,
-          required: ['inviteUrl', 'actionId'],
+          required: ['inviteUrl'],
+          oneOf: [
+            { required: ['inviteUrl', 'action'] },
+            { required: ['inviteUrl', 'actionId'] },
+          ],
           properties: {
             inviteUrl: inviteUrlSchema(),
+            action: {
+              $ref: '#/components/schemas/CompactBuildAction',
+            },
             actionId: {
               type: 'string',
               minLength: 1,
-              description: 'Exact id copied from packet.legalActions.',
+              description: 'Legacy compatibility: exact id copied from packet.legalActions, or combat_plan during combat.',
             },
             parameters: {
               $ref: '#/components/schemas/GptActionParameters',
@@ -139,6 +146,69 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'string',
               maxLength: 240,
               description: 'Optional display-only message. Do not include secrets or hidden reasoning.',
+            },
+          },
+        },
+        CompactBuildAction: {
+          type: 'object',
+          additionalProperties: true,
+          required: ['kind'],
+          description:
+            'Compact build action for the build phase. kind selects the shape: choose_part {part: alias like weapon.Weapon_Turret}, choose_attach_target {target: part instance id from packet.build.targets}, mount_part {surface, u, v, yaw?, roll?} copied from packet.build.mounts rows, remove_part/remove_subtree/move_part {id}, rotate_part {id, rot}, confirm_loadout {}.',
+          properties: {
+            kind: {
+              type: 'string',
+              enum: [
+                'choose_part',
+                'choose_attach_target',
+                'mount_part',
+                'remove_part',
+                'remove_subtree',
+                'move_part',
+                'rotate_part',
+                'confirm_loadout',
+              ],
+              description: 'Compact build action kind.',
+            },
+            part: {
+              type: 'string',
+              description: 'choose_part only: category-prefixed part alias from packet.build.store, e.g. weapon.Weapon_Turret.',
+            },
+            target: {
+              type: 'string',
+              description: 'choose_attach_target only: target instance id from packet.build.targets.',
+            },
+            id: {
+              type: 'string',
+              description: 'remove_part, remove_subtree, move_part, rotate_part: existing part instance id from packet.build.bot.parts.',
+            },
+            rot: {
+              type: 'number',
+              description: 'rotate_part only: rotation value from packet.build.edit.rotate[].rot.',
+            },
+            surface: {
+              type: 'string',
+              description: 'mount_part only: surface id from packet.build.mounts rows.',
+            },
+            u: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description: 'mount_part only: normalized horizontal mount coordinate.',
+            },
+            v: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description: 'mount_part only: normalized vertical mount coordinate.',
+            },
+            yaw: {
+              type: 'number',
+              description: 'mount_part only: optional yaw in degrees, default 0.',
+            },
+            roll: {
+              type: 'number',
+              description: 'mount_part only: optional roll in degrees, default 0.',
             },
           },
         },

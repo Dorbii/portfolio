@@ -122,7 +122,7 @@ export function buildReplayEffects(
           intensity,
           team: event.bot,
           endPosition,
-          label: createWeaponEffectLabel(event.weaponSlot, weaponPhase, weaponStyle, isControlDeploy),
+          label: createWeaponEffectLabel(event.weaponId ?? event.weaponSlot ?? 'weapon', weaponPhase, weaponStyle, isControlDeploy),
           ...source,
         })
 

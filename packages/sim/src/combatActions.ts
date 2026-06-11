@@ -247,6 +247,9 @@ function machineCapabilityCandidates(
 ): CombatActionCandidate[] {
   const reachable = reachableBoardMovementOverrides(context, capabilities)
   const movement = reachable.filter((plan) => plan.mobilityCost > 0)
+  // Legacy TurnCommand compatibility: the legacy tick-action menu can only
+  // express weaponA/weaponB. The compact protocol and lockstep resolver use
+  // mounted weapon IDs and support every active weapon.
   const weaponSlots = capabilities.weapons.slice(0, 2).map((weapon, index) => ({
     slot: index === 0 ? 'weaponA' as const : 'weaponB' as const,
     weapon,
