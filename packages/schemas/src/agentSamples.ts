@@ -1,4 +1,5 @@
 import type {
+  CompactBuildActionSubmission,
   CombatRoundPlanSubmission,
   GameMasterActionSubmission,
   GameMasterPacket,
@@ -204,6 +205,23 @@ export function createExampleGameMasterPacket(): GameMasterPacket {
         parameters: {},
       },
     },
+  }
+}
+
+export function createExampleCompactBuildActionSubmission(): CompactBuildActionSubmission {
+  return {
+    action: 'submit_build_action',
+    decisionVersion: 200,
+    command: { kind: 'choose_part', part: 'weapon.Weapon_Turret' },
+    publicMessage: 'Adding a turret.',
+  }
+}
+
+export function createExampleCompactBuildMountSubmission(): CompactBuildActionSubmission {
+  return {
+    action: 'submit_build_action',
+    decisionVersion: 202,
+    command: { kind: 'mount_part', surface: 'core_deck', u: 0.5, v: 0.5, yaw: 0, roll: 0 },
   }
 }
 

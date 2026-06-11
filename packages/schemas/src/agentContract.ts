@@ -68,7 +68,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'legalActions are for loadout and explicit surrender only. Normal combat movement, attack, and utility decisions must go through submit_combat_round_plan, not actionId combat menus.',
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
         'For Custom GPT /gpt/act during combat, use actionId combat_plan with parameters.steps. The wrapper fills round and decisionVersion and submits the actual current CombatRoundPlan.',
-        'For Custom GPT /gpt/act outside combat, submit only inviteUrl, actionId, optional parameters, and optional publicMessage; the wrapper fills actionSetId and decisionVersion from current role state and uses the selected legal action parameterExamples when parameters are omitted.',
+        'During build (choose_loadout), read packet.build: bot is your current machine, store.foundation are reusable parts, store.offers are one-purchase round offers, edit lists legal edits, and requirements shows confirm blockers.',
+        'For Custom GPT /gpt/act during build, submit a compact action object instead of an actionId: {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}. Compact kinds are choose_part, choose_attach_target, mount_part, remove_part, remove_subtree, move_part, rotate_part, and confirm_loadout. Do not rely on legalActions for compact build.',
+        'For raw HTTP compact build actions, POST /sessions/:sessionId/build-action with action submit_build_action, decisionVersion, and command.',
+        'For Custom GPT /gpt/act legacy submissions outside combat, inviteUrl plus actionId remains accepted during migration; the wrapper fills actionSetId and decisionVersion from current role state and uses the selected legal action parameterExamples when parameters are omitted.',
         'For browser helper or raw HTTP combat plan submissions, POST /sessions/:sessionId/combat-plan with action submit_combat_round_plan, round, decisionVersion, and steps.',
         'The server validates parameters, stale packets, forged action ids, shop rules, combat plan shape, and budget rules before accepting a submitted command.',
         'If a submit is rejected, read error.issues; each issue contains code, path, and message explaining why the server refused it.',
@@ -188,11 +191,11 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         body: {
           inviteUrl:
             'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https%3A%2F%2Farena-api.dorbii.net',
-          actionId: '<legalActions.id>',
+          action: { kind: 'choose_part', part: 'weapon.Weapon_Turret' },
           publicMessage: 'Optional display-only message.',
         },
         returns:
-          'GPT-friendly status plus next GameMasterPacket; server fills actionSetId and decisionVersion from the latest packet and uses parameterExamples when Custom GPT omits parameters',
+          'GPT-friendly status plus next GameMasterPacket; during build the wrapper accepts compact action objects (no actionId) and returns packet.build, while legacy actionId submissions remain accepted during migration',
       },
       {
         name: 'gpt_reflection',
