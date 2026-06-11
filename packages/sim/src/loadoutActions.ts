@@ -209,11 +209,17 @@ export function createLoadoutBuildStateFromStoredDesign(
   const normalized = normalizeStoredDesign(role, storedDesign, undefined)
   const healed = healStoredDesignForShop(normalized)
 
+  const legacyDraft = cloneDesign(legacyProjectionDraftFromStoredDesign(healed))
+
+  // Keep the established legacy projection naming (`red loadout`) used by
+  // replay blueprints and public views, instead of the machine design name.
+  legacyDraft.name = `${role} loadout`
+
   return {
     step: 'choose_part',
     catalogVersion,
     currentDesign: healed,
-    legacyDraft: cloneDesign(legacyProjectionDraftFromStoredDesign(healed)),
+    legacyDraft,
   }
 }
 
