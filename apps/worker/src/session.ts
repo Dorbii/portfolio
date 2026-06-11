@@ -1,6 +1,7 @@
 import {
   TEAM_ROLES,
   normalizeCompactBuildActionSubmission,
+  normalizeCompactCombatPlanSubmission,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
   validateGameMasterActionParameters,
@@ -34,6 +35,7 @@ import {
   type SharedDebrief,
   type CompactBuildPacket,
   type LoadoutBuildState,
+  type MachineCapabilities,
   type StoredDesign,
   type TeamRole,
   type ValidationIssue,
@@ -57,6 +59,7 @@ import {
   deriveMachineCapabilities,
   deriveCombatBudget,
   buildCompactBuildView,
+  buildCompactCombatView,
   createInitialLoadoutBuildState,
   createLoadoutBuildStateFromStoredDesign,
   ensureLoadoutBuildState,
@@ -807,7 +810,9 @@ export class SessionCoordinator {
       return relayError('PHASE_CLOSED', `Combat round ${combat.nextTick} opens at ${combat.openedAt}.`)
     }
 
-    const normalized = normalizeCombatRoundPlanSubmissionForSim(request)
+    const normalized = isRecord(request) && request.action === 'submit_combat_plan'
+      ? normalizeCompactCombatPlanSubmission(request)
+      : normalizeCombatRoundPlanSubmissionForSim(request)
 
     if (!normalized.ok) {
       return relayError('SUBMISSION_INVALID', 'Combat round plan failed validation.', (normalized as { ok: false; issues: ValidationIssue[] }).issues)
@@ -1472,6 +1477,21 @@ export class SessionCoordinator {
       ...(blockedActions.length > 0 ? { blockedActions } : {}),
       ...(this.state.sharedDebrief ? { sharedDebrief: cloneJson(this.state.sharedDebrief) } : {}),
       ...(submit ? { submit } : {}),
+      // Compact combat protocol view: state in, intent out; no affordance menus.
+      ...(combat && selfCombat && opponentCombat && combatBudget
+        ? {
+            combatCompact: buildCompactCombatView({
+              role: roleName,
+              round: this.state.round,
+              decisionVersion: decisionVersionForRole(this.state, roleName),
+              snapshot: combat.snapshot,
+              budget: combatBudget,
+              arena: this.state.arena,
+              selfCapabilities: this.combatMachineCapabilitiesForRole(roleName),
+              opponentCapabilities: this.combatMachineCapabilitiesForRole(opponentRoleName(roleName)),
+            }),
+          }
+        : {}),
       // Compact build protocol view: browser/raw agents can play the build
       // phase from packet.build without depending on legalActions menus.
       ...(buildState && gameMasterPhaseForSession(this.state.phase) === 'choose_loadout'
@@ -1488,6 +1508,20 @@ export class SessionCoordinator {
           }
         : {}),
     })
+  }
+
+  private combatMachineCapabilitiesForRole(roleName: TeamRole): MachineCapabilities | undefined {
+    const stored = this.state.roles[roleName].storedDesign
+    const baseline = this.state.combat?.baselineMachineDesigns?.[roleName] ??
+      (stored?.version === 'machine:v1' ? stored.machine : undefined)
+
+    if (!baseline) {
+      return undefined
+    }
+
+    const runtime = this.state.combat?.machineRuntime?.[roleName]
+
+    return deriveMachineCapabilities(runtime ? { ...baseline, runtime } : baseline)
   }
 
   private ensureGameMasterActionSets(now: string): void {
@@ -2933,14 +2967,18 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   if (kind === 'move') {
-    const cellId = stringField(input, 'cellId') ?? stringField(input, 'destinationCellId')
+    const cellId = stringField(input, 'cellId') ??
+      stringField(input, 'destinationCellId') ??
+      cellIdFromTupleField(input, 'to')
 
     return cellId ? { kind: 'move', cellId } : undefined
   }
 
   if (kind === 'attack') {
     const weaponSlot = stringField(input, 'weaponSlot') === 'weaponB' ? 'weaponB' : 'weaponA'
-    const targetCellId = stringField(input, 'targetCellId') ?? stringField(input, 'cellId')
+    const targetCellId = stringField(input, 'targetCellId') ??
+      stringField(input, 'cellId') ??
+      cellIdFromTupleField(input, 'target')
 
     return {
       kind: 'attack',
@@ -2950,8 +2988,8 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   if (kind === 'utility') {
-    const utilityId = stringField(input, 'utilityId') ?? stringField(input, 'actionId')
-    const cellId = stringField(input, 'cellId')
+    const utilityId = stringField(input, 'utilityId') ?? stringField(input, 'utility') ?? stringField(input, 'actionId')
+    const cellId = stringField(input, 'cellId') ?? cellIdFromTupleField(input, 'at')
 
     return {
       kind: 'utility',
@@ -2961,6 +2999,20 @@ function parseCombatPlanStepFromGpt(input: unknown): CombatPlanStep | undefined 
   }
 
   return { kind: 'end_turn' }
+}
+
+function cellIdFromTupleField(input: Record<string, unknown>, field: string): string | undefined {
+  const value = input[field]
+
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((entry) => typeof entry === 'number' && Number.isInteger(entry))
+  ) {
+    return `cell:${value[0]}:${value[1]}`
+  }
+
+  return undefined
 }
 
 function combatPlanStepFromKind(input: string): CombatPlanStep | undefined {

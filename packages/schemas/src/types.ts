@@ -1001,6 +1001,8 @@ export type GameMasterPacket = {
   submit?: SubmitInstruction
   /** Compact build protocol view; present during choose_loadout. */
   build?: CompactBuildPacket
+  /** Compact combat protocol view; present during combat_turn. */
+  combatCompact?: CompactCombatPacket
 }
 
 export type GameMasterActionSubmission = {

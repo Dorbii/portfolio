@@ -1102,7 +1102,31 @@ function compactBuildGptInstruction(packet: GameMasterPacket): string {
   return 'Build phase: read packet.build (bot, store, edit, requirements) and submit one compact action through gptAct.action, e.g. {"kind":"choose_part","part":"weapon.Weapon_Turret"}. No actionId is needed for build.'
 }
 
+function compactCombatGptInstruction(packet: GameMasterPacket): string {
+  if (packet.nextAction !== 'choose_turn') {
+    return packet.instruction
+  }
+
+  return 'Combat: read packet.combat.combat (self/opponent state, budget) and packet.combat.board (grid bounds + terrain). Submit one compact plan with gptAct actionId combat_plan and parameters.steps, e.g. [{"kind":"move","to":[4,0]},{"kind":"attack","weaponSlot":"weaponA","target":[-6,0]},{"kind":"end_turn"}]. The server validates movement, terrain, range, line of sight, cooldowns, and action time.'
+}
+
 function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildPacket): GptCompactPacket {
+  // Compact combat protocol: combat packets expose compact state only; the
+  // agent submits intent and the server resolves legality.
+  if (packet.phase === 'combat_turn' && packet.combatCompact) {
+    return {
+      sessionId: packet.sessionId,
+      role: packet.role,
+      phase: packet.phase,
+      nextAction: packet.nextAction,
+      round: packet.round,
+      ...(packet.fightId ? { fightId: packet.fightId } : {}),
+      decisionVersion: packet.decisionVersion,
+      instruction: compactCombatGptInstruction(packet),
+      combat: packet.combatCompact,
+    }
+  }
+
   // Compact build protocol: during the build phase the GPT packet exposes
   // compact state (packet.build) instead of legal action menus, store slots,
   // buildState internals, or catalog dumps.

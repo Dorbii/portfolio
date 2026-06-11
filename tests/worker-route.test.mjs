@@ -246,6 +246,13 @@ function assertGptCompactPacket(packet, role) {
     return
   }
 
+  if (packet.phase === 'combat_turn' && packet.combat?.v === 1) {
+    assert.equal(packet.legalActions, undefined)
+    assert.equal(packet.board, undefined)
+    assert.equal(packet.buildState, undefined)
+    return
+  }
+
   assert.ok(Array.isArray(packet.legalActions))
   assert.equal(JSON.stringify(packet.legalActions).includes('payload'), false)
   assert.equal(packet.legalActions.some((action) => 'catalogRefs' in action), false)
@@ -1468,7 +1475,7 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.equal(next.json.continuation.recommendedNextCall, 'gptAct')
 })
 
-test('POST /gpt/next returns a compact combat board for Custom GPT actions', async () => {
+test('POST /gpt/next returns compact combat state for Custom GPT actions', async () => {
   const env = createEnv()
   const sessionId = 's_gpt_next_compact_combat'
   const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
@@ -1496,8 +1503,7 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   })
 
   const packet = blueCombat.json.packet
-  const board = packet.board
-  const boardJson = JSON.stringify(board)
+  const packetJson = JSON.stringify(packet)
 
   assert.equal(redStart.response.status, 200)
   assert.equal(redStart.json.status, 'waiting')
@@ -1513,25 +1519,26 @@ test('POST /gpt/next returns a compact combat board for Custom GPT actions', asy
   assert.equal(redCombat.json.continuation.recommendedNextCall, 'gptAct')
   assertGptCompactPacket(packet, 'blue')
   assert.equal(packet.nextAction, 'choose_turn')
-  assert.ok(packet.legalActions.some((action) => action.id === 'combat_plan'))
-  assert.equal(packet.actionSummary.mode, 'lockstep_round_plan')
-  assert.equal(packet.actionSummary.actionMenuCount <= 1, true)
-  assert.equal(typeof board.ascii, 'string')
-  assert.equal(board.ascii.includes('Legend: B=self, R=opponent'), true)
-  assert.ok(board.reachableCells.length > 0)
-  assert.equal(
-    packet.legalActions.every((action) => action.id === 'combat_plan' || action.kind === 'surrender'),
-    true,
-  )
-  assert.equal(boardJson.includes('"path"'), false)
-  assert.equal(boardJson.includes('"hazards"'), false)
-  assert.equal(boardJson.includes('"unavailableReasons"'), false)
-  assert.equal(boardJson.includes('"parameterSchema"'), false)
-  assert.equal(JSON.stringify(packet.legalActions).includes('"path"'), false)
-  assert.ok(boardJson.length < 20_000)
+  assert.equal(packet.combat.v, 1)
+  assert.equal(typeof packet.combat.combat.budget.actionTime, 'number')
+  assert.equal(Array.isArray(packet.combat.combat.self.cell), true)
+  assert.equal(typeof packet.combat.combat.self.hp, 'number')
+  assert.equal(typeof packet.combat.combat.opponent.maxHp, 'number')
+  assert.equal(Array.isArray(packet.combat.board.grid), true)
+  assert.equal(packet.combat.board.grid.length, 4)
+  assert.equal(packet.legalActions, undefined)
+  assert.equal(packet.board, undefined)
+  assert.equal(packet.actionSummary, undefined)
+  assert.equal(packetJson.includes('"reachableCells"'), false)
+  assert.equal(packetJson.includes('"attackableCells"'), false)
+  assert.equal(packetJson.includes('"utilityOptions"'), false)
+  assert.equal(packetJson.includes('"reachablePoses"'), false)
+  assert.equal(packetJson.includes('"attackableTargets"'), false)
+  assert.equal(packetJson.includes('"ascii"'), false)
+  assert.equal(packetJson.includes('"cells"'), false)
+  assert.ok(packetJson.length < 20_000)
   assert.ok(JSON.stringify(redCombat.json).length < 50_000)
-  const combatPlan = packet.legalActions.find((action) => action.id === 'combat_plan')
-  assert.ok(combatPlan)
+
   const submittedPlanResponse = await route(env, '/gpt/act', {
     method: 'POST',
     body: {
@@ -3169,4 +3176,71 @@ test('POST /sessions/:id/build-action drives a full compact build flow without a
   )
 
   assert.equal(wrongPhase.json.error.code, 'PHASE_CLOSED')
+})
+
+test('POST /sessions/:id/combat-plan accepts compact combat plans alongside legacy plans', async () => {
+  const env = createEnv()
+  const sessionId = 's_compact_combat_plan'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+
+  const blueState = await gameMasterStateFor(env, sessionId, blueInvite)
+  const redState = await gameMasterStateFor(env, sessionId, redInvite)
+
+  assert.equal(blueState.phase, 'combat_turn')
+  assert.equal(blueState.combatCompact.v, 1)
+  assert.equal(Array.isArray(blueState.combatCompact.board.grid), true)
+
+  const reachable = blueState.board?.reachableCells ?? []
+
+  assert.ok(reachable.length > 0)
+
+  const [, moveX, moveZ] = reachable[0].cellId.split(':')
+  const compactAccepted = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {
+      action: 'submit_combat_plan',
+      decisionVersion: blueState.decisionVersion,
+      round: blueState.round,
+      steps: [
+        { kind: 'move', to: [Number(moveX), Number(moveZ)] },
+        { kind: 'end_turn' },
+      ],
+    },
+  })
+
+  assert.equal(compactAccepted.response.status, 200, JSON.stringify(compactAccepted.json))
+
+  const compactIllegal = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_combat_plan',
+      decisionVersion: redState.decisionVersion,
+      round: redState.round,
+      steps: [
+        { kind: 'move', to: [999, 999] },
+        { kind: 'end_turn' },
+      ],
+    },
+  })
+
+  assert.equal(compactIllegal.response.status, 400, JSON.stringify(compactIllegal.json))
+  assert.equal(compactIllegal.json.error.code, 'SUBMISSION_INVALID')
+
+  const legacyAccepted = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_combat_round_plan',
+      decisionVersion: redState.decisionVersion,
+      round: redState.round,
+      steps: [{ kind: 'end_turn' }],
+    },
+  })
+
+  assert.equal(legacyAccepted.response.status, 200, JSON.stringify(legacyAccepted.json))
 })

@@ -32,6 +32,7 @@ import {
   applyLoadoutAction,
   buildAgentBoardView,
   buildCompactBuildView,
+  buildCompactCombatView,
   canonicalPartIdFromCompact,
   resolveCompactBuildAction,
   compactPartAlias,
@@ -76,6 +77,7 @@ import {
 } from '../.test-build/apps/worker/src/session.js'
 import {
   normalizeCompactBuildActionSubmission,
+  normalizeCompactCombatPlanSubmission,
 } from '../.test-build/packages/schemas/src/index.js'
 import { createInitialSessionState } from '../.test-build/apps/worker/src/sessionCreation.js'
 import { resetStoredRoleClaim } from '../.test-build/apps/worker/src/sessionRoleReset.js'
@@ -8550,4 +8552,98 @@ test('failed placement and moved parts do not consume store offers', () => {
     [offerAction.payload.offerSlotId],
     'moving an existing part must not consume another offer slot',
   )
+})
+
+test('compact combat view exposes state without affordance menus', () => {
+  const arena = tacticalOpenArena
+  const snapshot = combatSnapshot(arena, [-4, 0, 0], [4, 0, 0])
+  const packet = buildCompactCombatView({
+    role: 'red',
+    round: 2,
+    decisionVersion: 1201,
+    snapshot,
+    budget: lockstepBudget({ actionTime: 9, weaponCooldowns: { weaponA: 1 } }),
+    arena,
+  })
+
+  assert.equal(packet.v, 1)
+  assert.equal(packet.combat.round, 2)
+  assert.equal(packet.combat.decisionVersion, 1201)
+  assert.equal(packet.combat.budget.actionTime, 9)
+  assert.deepEqual(packet.combat.self.cell, [-4, 0])
+  assert.deepEqual(packet.combat.opponent.cell, [4, 0])
+  assert.equal(packet.combat.self.hp, 30)
+  assert.equal(packet.combat.self.maxHp, 30)
+  assert.equal(typeof packet.combat.self.mass, 'number')
+  assert.equal(typeof packet.combat.self.movement, 'object')
+  assert.equal(Array.isArray(packet.combat.self.weapons), true)
+  assert.equal(packet.board.grid.length, 4)
+
+  const serialized = JSON.stringify(packet)
+
+  for (const forbidden of [
+    '"reachableCells"',
+    '"attackableCells"',
+    '"utilityOptions"',
+    '"cells"',
+    '"reachablePoses"',
+    '"attackableTargets"',
+    '"ascii"',
+    '"legalActions"',
+    '"actionSummary"',
+  ]) {
+    assert.equal(serialized.includes(forbidden), false, `compact combat packet must omit ${forbidden}`)
+  }
+})
+
+test('compact combat plan submissions normalize to legacy round plans', () => {
+  const normalized = normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1201,
+    round: 1,
+    steps: [
+      { kind: 'move', to: [4, 0] },
+      { kind: 'attack', weaponSlot: 'weaponA', target: [-6, 0] },
+      { kind: 'utility', utility: 'anchor', at: [4, 1] },
+      { kind: 'end_turn' },
+    ],
+  })
+
+  assert.equal(normalized.ok, true)
+  assert.deepEqual(normalized.submission, {
+    action: 'submit_combat_round_plan',
+    decisionVersion: 1201,
+    round: 1,
+    steps: [
+      { kind: 'move', cellId: 'cell:4:0' },
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:-6:0' },
+      { kind: 'utility', utilityId: 'anchor', cellId: 'cell:4:1' },
+      { kind: 'end_turn' },
+    ],
+  })
+
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'move', to: [0.5, 0] }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'attack' }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'move', to: [1, 0], extra: true }],
+  }).ok, false)
+  assert.equal(normalizeCompactCombatPlanSubmission({
+    action: 'submit_combat_round_plan',
+    decisionVersion: 1,
+    round: 1,
+    steps: [{ kind: 'end_turn' }],
+  }).ok, false)
 })

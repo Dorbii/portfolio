@@ -22,6 +22,7 @@ export {
 export {
   MAX_COMBAT_PLAN_STEPS,
   normalizeCombatRoundPlanSubmission,
+  normalizeCompactCombatPlanSubmission,
   validateCombatPlanStepShape,
   validateCombatRoundPlanSubmissionShape,
 } from './validators/combatPlan.js'
