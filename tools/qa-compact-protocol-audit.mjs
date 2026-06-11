@@ -4,6 +4,7 @@
 // Run after `npm test` (needs .test-build): node tools/qa-compact-protocol-audit.mjs
 import assert from 'node:assert/strict'
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 import { AgentArenaSession, handleWorkerRequest } from '../.test-build/apps/worker/src/index.js'
 
@@ -381,13 +382,13 @@ record('Round 2 edit surface lists removable parts', round2Build.edit.remove.len
 // --- summary ---
 const failures = findings.filter((finding) => !finding.ok)
 
-mkdirSync(new URL('../../qa', import.meta.url).pathname, { recursive: true })
+mkdirSync(fileURLToPath(new URL('../../qa', import.meta.url)), { recursive: true })
 writeFileSync(
-  new URL('../../qa/qa-payload-samples.json', import.meta.url).pathname,
+  fileURLToPath(new URL('../../qa/qa-payload-samples.json', import.meta.url)),
   JSON.stringify({ sizes, samples }, null, 2),
 )
 writeFileSync(
-  new URL('../../qa/qa-findings.json', import.meta.url).pathname,
+  fileURLToPath(new URL('../../qa/qa-findings.json', import.meta.url)),
   JSON.stringify(findings, null, 2),
 )
 
