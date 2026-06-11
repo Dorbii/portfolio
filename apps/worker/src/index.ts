@@ -246,6 +246,10 @@ export class AgentArenaSession {
       method: 'POST',
       handle: (request, coordinator) => this.submitGameMasterAction(request, coordinator),
     },
+    'build-action': {
+      method: 'POST',
+      handle: (request, coordinator) => this.submitCompactBuildAction(request, coordinator),
+    },
     'combat-plan': {
       method: 'POST',
       handle: (request, coordinator) => this.submitCombatRoundPlan(request, coordinator),
@@ -496,6 +500,24 @@ export class AgentArenaSession {
     return this.sessionResultResponse(
       coordinator,
       await coordinator.submitGameMasterAction(bearerToken(request) ?? '', readResult.body),
+    )
+  }
+
+  private async submitCompactBuildAction(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const readResult = await this.readJsonRequest(request, 'Compact build action body must be JSON.', {
+      requireRecord: true,
+    })
+
+    if (!readResult.ok) {
+      return readResult.response
+    }
+
+    return this.sessionResultResponse(
+      coordinator,
+      await coordinator.submitCompactBuildAction(bearerToken(request) ?? '', readResult.body),
     )
   }
 

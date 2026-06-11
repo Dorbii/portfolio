@@ -33,6 +33,7 @@ import {
   buildAgentBoardView,
   buildCompactBuildView,
   canonicalPartIdFromCompact,
+  resolveCompactBuildAction,
   compactPartAlias,
   compactSystemCoreAlias,
   buildCatalogStore,
@@ -73,6 +74,9 @@ import {
   SessionCoordinator,
   calculateInterest,
 } from '../.test-build/apps/worker/src/session.js'
+import {
+  normalizeCompactBuildActionSubmission,
+} from '../.test-build/packages/schemas/src/index.js'
 import { createInitialSessionState } from '../.test-build/apps/worker/src/sessionCreation.js'
 import { resetStoredRoleClaim } from '../.test-build/apps/worker/src/sessionRoleReset.js'
 import { DEFAULT_STARTING_GOLD } from '../.test-build/apps/worker/src/sessionSupport.js'
@@ -8157,4 +8161,161 @@ test('round 2 compact build view shows healed full HP from rehydrated blueprint'
   }
 
   assert.equal(packet.bot.summary.hp, packet.bot.summary.maxHp)
+})
+
+test('compact build action validator rejects malformed submissions and normalizes mount defaults', () => {
+  assert.equal(normalizeCompactBuildActionSubmission(null).ok, false)
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_game_action', decisionVersion: 1, command: { kind: 'confirm_loadout' } }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_build_action', command: { kind: 'confirm_loadout' } }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({ action: 'submit_build_action', decisionVersion: 1 }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'confirm_loadout' },
+      extra: true,
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'choose_part', part: '' },
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'mount_part', surface: 'core_deck', u: 1.5, v: 0.5 },
+    }).ok,
+    false,
+  )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'rotate_part', id: 'part_1', rot: Number.NaN },
+    }).ok,
+    false,
+  )
+
+  const normalized = normalizeCompactBuildActionSubmission({
+    action: 'submit_build_action',
+    decisionVersion: 7,
+    command: { kind: 'mount_part', surface: ' core_deck ', u: 0.5, v: 0.25 },
+  })
+
+  assert.equal(normalized.ok, true)
+  assert.deepEqual(normalized.submission.command, {
+    kind: 'mount_part',
+    surface: 'core_deck',
+    u: 0.5,
+    v: 0.25,
+    yaw: 0,
+    roll: 0,
+  })
+})
+
+test('compact build actions resolve through the active action set only', () => {
+  let buildState = createInitialLoadoutBuildState('red')
+  let actionSet = compactViewActionSet(buildState)
+  const chooseAction = Object.values(actionSet.actions).find((action) => action.kind === 'choose_part')
+  const partId = chooseAction.payload.partId
+  const alias = `${PART_CATALOG.find((part) => part.id === partId).category}.${partId}`
+  const resolvedAlias = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: alias },
+  })
+  const resolvedCanonical = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_part', part: partId },
+  })
+
+  assert.equal(resolvedAlias.ok, true)
+  assert.equal(resolvedAlias.value.canonicalAction.id, chooseAction.id)
+  assert.equal(resolvedCanonical.ok, true)
+  assert.equal(resolvedCanonical.value.canonicalAction.id, chooseAction.id)
+
+  const confirmResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'confirm_loadout' },
+  })
+
+  assert.equal(confirmResolved.ok, true)
+  assert.equal(confirmResolved.value.canonicalAction.kind, 'confirm_loadout')
+
+  const missing = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'remove_part', id: 'part_404' },
+  })
+
+  assert.equal(missing.ok, false)
+  assert.equal(missing.issues[0].code, 'COMPACT_ACTION_NOT_AVAILABLE')
+
+  const chosen = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: chooseAction })
+
+  buildState = chosen.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const targetResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'choose_attach_target', target: 'core' },
+  })
+
+  assert.equal(targetResolved.ok, true)
+  assert.equal(targetResolved.value.canonicalAction.kind, 'choose_attach_target')
+
+  const targeted = applyLoadoutAction({ role: 'red', gold: 200, inventory: [], buildState, action: targetResolved.value.canonicalAction })
+
+  buildState = targeted.buildState
+  actionSet = compactViewActionSet(buildState)
+
+  const mountResolved = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'mount_part', surface: 'core_deck', u: 0.5, v: 0.5 },
+  })
+
+  assert.equal(mountResolved.ok, true)
+  assert.equal(mountResolved.value.canonicalAction.kind, 'propose_mount_pose')
+  assert.equal(mountResolved.value.parameters.childPartId, partId)
+  assert.equal(mountResolved.value.parameters.parentInstanceId, 'core')
+  assert.equal(mountResolved.value.parameters.mountSurfaceId, 'core_deck')
+  assert.equal(mountResolved.value.parameters.yawDegrees, 0)
+
+  const duplicateSet = {
+    ...actionSet,
+    actions: {
+      ...actionSet.actions,
+      forged_duplicate: {
+        ...Object.values(actionSet.actions).find((action) => action.kind === 'propose_mount_pose'),
+        id: 'forged_duplicate',
+      },
+    },
+  }
+  const ambiguous = resolveCompactBuildAction({
+    actionSet: duplicateSet,
+    buildState,
+    command: { kind: 'mount_part', surface: 'core_deck', u: 0.5, v: 0.5 },
+  })
+
+  assert.equal(ambiguous.ok, false)
+  assert.equal(ambiguous.issues[0].code, 'AMBIGUOUS_COMPACT_ACTION')
 })

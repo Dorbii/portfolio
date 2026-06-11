@@ -15,6 +15,11 @@ export {
   validateGameMasterActionSubmissionShape,
 } from './validators/gameMasterAction.js'
 export {
+  normalizeCompactBuildActionSubmission,
+  validateCompactBuildActionSubmissionShape,
+  validateCompactBuildCommandShape,
+} from './validators/buildAction.js'
+export {
   MAX_COMBAT_PLAN_STEPS,
   normalizeCombatRoundPlanSubmission,
   validateCombatPlanStepShape,

@@ -1,5 +1,6 @@
 import {
   TEAM_ROLES,
+  normalizeCompactBuildActionSubmission,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
   validateGameMasterActionParameters,
@@ -31,6 +32,7 @@ import {
   type RoleResetRequest,
   type SessionPhase,
   type SharedDebrief,
+  type CompactBuildPacket,
   type LoadoutBuildState,
   type StoredDesign,
   type TeamRole,
@@ -54,9 +56,11 @@ import {
   buildFightDossier,
   deriveMachineCapabilities,
   deriveCombatBudget,
+  buildCompactBuildView,
   createInitialLoadoutBuildState,
   createLoadoutBuildStateFromStoredDesign,
   ensureLoadoutBuildState,
+  resolveCompactBuildAction,
   isLoadoutBuilderAction,
   LOADOUT_PART_LIMIT,
   loadoutLegalActionForPacket,
@@ -628,6 +632,133 @@ export class SessionCoordinator {
         publicState: this.getPublicState(),
       },
     }
+  }
+
+  async submitCompactBuildAction(
+    roleToken: string,
+    request: unknown,
+  ): Promise<
+    SessionResult<{
+      packet: GameMasterPacket
+      compactBuild?: CompactBuildPacket
+      publicState: ReturnType<typeof buildPublicSessionState>
+    }>
+  > {
+    const now = this.clock()
+    const auth = await this.authorizeRoleAction(roleToken, 'action', now)
+
+    if (!auth.ok) {
+      return auth
+    }
+
+    this.resolveTimedTransitions(now)
+    this.ensureGameMasterActionSets(now)
+
+    const normalized = normalizeCompactBuildActionSubmission(request)
+
+    if (!normalized.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', normalized.issues)
+    }
+
+    if (this.state.phase !== 'submission_phase' || gameMasterPhaseForSession(this.state.phase) !== 'choose_loadout') {
+      return relayError('PHASE_CLOSED', `Compact build actions can only be submitted during the build phase, not ${this.state.phase}.`)
+    }
+
+    const roleName = auth.value.role.role
+    const role = this.state.roles[roleName]
+    const activeSet = this.state.activeActionSets?.[roleName]
+
+    if (!activeSet) {
+      return relayError(
+        'PHASE_CLOSED',
+        `No active GameMaster action set is available for ${roleName} during ${this.state.phase}.`,
+      )
+    }
+
+    const submission = normalized.submission
+
+    if (submission.decisionVersion !== activeSet.decisionVersion) {
+      return relayError('SUBMISSION_INVALID', 'decisionVersion is stale or does not match the active action set.')
+    }
+
+    const buildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
+    const resolved = resolveCompactBuildAction({
+      actionSet: activeSet,
+      buildState,
+      command: submission.command,
+    })
+
+    if (!resolved.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', resolved.issues)
+    }
+
+    // Compact intent resolves into a canonical server-authored action and then
+    // reuses the exact legacy submission pipeline (parameter validation,
+    // idempotent locking, loadout application). No second legality system.
+    const canonicalSubmission: GameMasterActionSubmission = {
+      action: 'submit_game_action',
+      actionSetId: activeSet.actionSetId,
+      decisionVersion: submission.decisionVersion,
+      actionId: resolved.value.canonicalAction.id,
+      ...(resolved.value.parameters ? { parameters: resolved.value.parameters } : {}),
+      ...(submission.publicMessage ? { publicMessage: submission.publicMessage } : {}),
+    }
+    const resolvedSubmission = resolveSubmittedGameAction(activeSet, canonicalSubmission)
+
+    if (!resolvedSubmission.ok) {
+      return relayError('SUBMISSION_INVALID', 'Compact build action failed validation.', resolvedSubmission.issues)
+    }
+
+    const canonicalAction = resolvedSubmission.action
+
+    if (!isLoadoutBuilderAction(canonicalAction)) {
+      return relayError('SUBMISSION_INVALID', 'Compact build actions may only resolve to loadout builder actions.')
+    }
+
+    const requestHash = hashGameMasterSubmission(canonicalSubmission, resolvedSubmission.normalizedParameters)
+    const applied = this.applyLoadoutGameMasterAction(
+      roleName,
+      activeSet,
+      canonicalSubmission,
+      canonicalAction,
+      requestHash,
+      now,
+    )
+
+    if (!applied.ok) {
+      return applied
+    }
+
+    return {
+      ok: true,
+      value: {
+        packet: applied.value.packet,
+        compactBuild: this.buildCompactBuildPacketForRole(roleName, now),
+        publicState: applied.value.publicState,
+      },
+    }
+  }
+
+  buildCompactBuildPacketForRole(roleName: TeamRole, now = this.clock()): CompactBuildPacket | undefined {
+    if (gameMasterPhaseForSession(this.state.phase) !== 'choose_loadout') {
+      return undefined
+    }
+
+    this.ensureGameMasterActionSets(now)
+
+    const role = this.state.roles[roleName]
+    const activeSet = this.state.activeActionSets?.[roleName]
+    const buildState = ensureRoleBuildStateFromStoredDesign(roleName, role)
+
+    return buildCompactBuildView({
+      role: roleName,
+      round: this.state.round,
+      decisionVersion: activeSet?.decisionVersion ?? decisionVersionForRole(this.state, roleName),
+      gold: role.gold,
+      buildState,
+      actionSet: activeSet,
+      store: activeSet?.catalogStore,
+    })
   }
 
   async submitCombatRoundPlan(

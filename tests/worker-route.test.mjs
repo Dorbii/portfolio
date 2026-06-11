@@ -2980,3 +2980,110 @@ test('storedDesign is not overwritten by fresh initial state when build state is
 
   assert.equal(storedAfter.roles.red.storedDesign.machine.parts.length, 2)
 })
+
+async function submitBuildAction(env, sessionId, token, decisionVersion, command, expectStatus = 200) {
+  const submitted = await route(env, `/sessions/${sessionId}/build-action`, {
+    method: 'POST',
+    token,
+    body: {
+      action: 'submit_build_action',
+      decisionVersion,
+      command,
+    },
+  })
+
+  assert.equal(submitted.response.status, expectStatus, JSON.stringify(submitted.json))
+
+  return submitted
+}
+
+test('POST /sessions/:id/build-action drives a full compact build flow without action ids', async () => {
+  const env = createEnv()
+  const sessionId = 's_compact_build_flow'
+  const { redInvite, blueInvite, redPacket } = await bootstrapReadySession(env, sessionId)
+  const chooseAction = findLegalAction(redPacket, (action) => action.kind === 'choose_part')
+  const partId = chooseAction.catalogRefs?.[0]
+  const part = catalogPartFromPacket(redPacket, partId)
+  const alias = `${part.category}.${part.id}`
+
+  const chosen = await submitBuildAction(env, sessionId, redInvite.claimToken, redPacket.decisionVersion, {
+    kind: 'choose_part',
+    part: alias,
+  })
+
+  assert.equal(chosen.json.compactBuild.step, 'choose_attach_target')
+  assert.equal(chosen.json.compactBuild.selected.canonicalPartId, partId)
+  assert.ok(chosen.json.compactBuild.targets.includes('core'))
+  assert.equal('legalActions' in chosen.json.compactBuild, false)
+
+  const targeted = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    chosen.json.compactBuild.decisionVersion,
+    { kind: 'choose_attach_target', target: 'core' },
+  )
+
+  assert.equal(targeted.json.compactBuild.step, 'mount_part')
+  assert.ok(targeted.json.compactBuild.mounts.length > 0)
+
+  const [surface, u, v, yaw, roll] = targeted.json.compactBuild.mounts[0]
+  const staleDecisionVersion = targeted.json.compactBuild.decisionVersion
+  const mounted = await submitBuildAction(env, sessionId, redInvite.claimToken, staleDecisionVersion, {
+    kind: 'mount_part',
+    surface,
+    u,
+    v,
+    yaw,
+    roll,
+  })
+
+  assert.equal(mounted.json.compactBuild.step, 'choose_part')
+  assert.equal(mounted.json.compactBuild.bot.parts.length, 2)
+  assert.equal(mounted.json.compactBuild.bot.parts[1][1], alias)
+
+  const stale = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    staleDecisionVersion,
+    { kind: 'confirm_loadout' },
+    400,
+  )
+
+  assert.equal(stale.json.error.code, 'SUBMISSION_INVALID')
+
+  const confirmed = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    mounted.json.compactBuild.decisionVersion,
+    { kind: 'confirm_loadout' },
+  )
+
+  assert.equal(confirmed.json.packet.nextAction, 'wait_for_opponent_loadout')
+
+  const blueState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const blueConfirm = await submitPacketAction(
+    env,
+    sessionId,
+    blueInvite.claimToken,
+    blueState.json.gameMaster,
+    findLegalAction(blueState.json.gameMaster, (action) => action.kind === 'confirm_loadout'),
+  )
+
+  assert.notEqual(blueConfirm, undefined)
+
+  const wrongPhase = await submitBuildAction(
+    env,
+    sessionId,
+    redInvite.claimToken,
+    0,
+    { kind: 'confirm_loadout' },
+    409,
+  )
+
+  assert.equal(wrongPhase.json.error.code, 'PHASE_CLOSED')
+})
