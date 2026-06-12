@@ -13,6 +13,7 @@ const liveArenaStageSource = readSource('apps/web/src/referee/liveArenaStage.ts'
 const refereeConsoleSource = readSource('apps/web/src/referee/RefereeConsole.tsx')
 const refereePanelsSource = readSource('apps/web/src/referee/RefereeConsolePanels.tsx')
 const refereeControllerSource = readSource('apps/web/src/referee/useRefereeConsoleController.ts')
+const babylonReplaySceneSource = readSource('apps/web/src/replay/scene/BabylonReplayScene.tsx')
 const replayPreviewSource = readSource('apps/web/src/replay/ReplayPreview.tsx')
 const replayViewerSource = readSource('apps/web/src/replay/ReplayViewer.tsx')
 const mockSessionSource = readSource('apps/web/src/mockSession.ts')
@@ -79,6 +80,16 @@ test('referee resolved replay starts playback when the replay payload arrives', 
   assert.ok(replayViewerSource.includes('setPlaying(autoPlay && nextTime < timeline.duration)'))
   assert.ok(replayViewerSource.includes('MAX_REPLAY_FRAME_DELTA_SECONDS'))
   assert.ok(replayPreviewSource.includes('autoPlay={Boolean(previewOptions.proof)}'))
+})
+
+test('referee resolved replay does not restart the renderer for unchanged arena poll snapshots', () => {
+  assert.ok(babylonReplaySceneSource.includes('const activeHazardsKey = arena.activeHazards.join'))
+  assert.ok(babylonReplaySceneSource.includes('const sceneArena = useMemo<ArenaConfig>'))
+  assert.ok(babylonReplaySceneSource.includes('[activeHazardsKey, arena.height, arena.name, arena.width]'))
+  assert.equal(
+    babylonReplaySceneSource.includes('}, [arena, botBlueprints, machineDesigns, teamIdentities])'),
+    false,
+  )
 })
 
 test('session completion UI omits dead save continue quit controls', () => {

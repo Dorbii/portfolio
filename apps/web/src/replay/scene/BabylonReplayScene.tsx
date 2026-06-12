@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
@@ -121,6 +121,13 @@ export function BabylonReplayScene({
     status: 'booting',
   })
   const [sceneStats, setSceneStats] = useState<ReplaySceneStats | null>(null)
+  const activeHazardsKey = arena.activeHazards.join('|')
+  const sceneArena = useMemo<ArenaConfig>(() => ({
+    name: arena.name,
+    width: arena.width,
+    height: arena.height,
+    activeHazards: activeHazardsKey ? activeHazardsKey.split('|') : [],
+  }), [activeHazardsKey, arena.height, arena.name, arena.width])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -149,9 +156,9 @@ export function BabylonReplayScene({
           beta: 1.05,
           lowerRadiusLimit: 4,
           name: 'replay-camera',
-          radius: Math.max(arena.width, arena.height) * 0.9,
+          radius: Math.max(sceneArena.width, sceneArena.height) * 0.9,
           target: Vector3.Zero(),
-          upperRadiusLimit: Math.max(arena.width, arena.height) * 1.7,
+          upperRadiusLimit: Math.max(sceneArena.width, sceneArena.height) * 1.7,
           wheelPrecision: 28,
         },
         clearColor: new Color4(0.03, 0.04, 0.04, 1),
@@ -161,10 +168,10 @@ export function BabylonReplayScene({
 
       configureReplayCameraControls(camera)
       camera.attachControl(canvas, true)
-      createReplayLightingPreset(scene, arena.width)
+      createReplayLightingPreset(scene, sceneArena.width)
 
       const teamMaterials = createTeamMaterials(scene, { identities: teamIdentities })
-      const hazards = createArena(scene, arena)
+      const hazards = createArena(scene, sceneArena)
       const bots = {
         red: createBotNode(scene, botBlueprints.red, 'red', teamMaterials.red, machineDesigns?.red),
         blue: createBotNode(scene, botBlueprints.blue, 'blue', teamMaterials.blue, machineDesigns?.blue),
@@ -264,7 +271,7 @@ export function BabylonReplayScene({
 
       return undefined
     }
-  }, [arena, botBlueprints, machineDesigns, teamIdentities])
+  }, [sceneArena, botBlueprints, machineDesigns, teamIdentities])
 
   useEffect(() => {
     const resources = resourcesRef.current
@@ -278,9 +285,9 @@ export function BabylonReplayScene({
     updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
     updateHazards(resources.hazards, frame)
     for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
-      updateCamera(resources.camera, cameraPreset, frame, arena)
+      updateCamera(resources.camera, cameraPreset, frame, sceneArena)
     }
-  }, [arena, cameraPreset, immediateCamera, timeline, time])
+  }, [cameraPreset, immediateCamera, sceneArena, timeline, time])
 
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.replayPreview)
