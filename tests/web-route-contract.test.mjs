@@ -62,9 +62,11 @@ test('referee console links to the current part catalog route', () => {
   assert.equal(refereePanelsSource.includes('/qa/part-catalog'), false)
 })
 
-test('referee console renders live combat bots before replay payloads are available', () => {
+test('referee console keeps live combat bots visible while partial replay payloads stream', () => {
   assert.ok(refereeConsoleSource.includes('createLiveArenaStageState(roleStates)'))
   assert.ok(refereeConsoleSource.includes('liveBots={liveArenaStage}'))
+  assert.ok(refereeConsoleSource.includes("const shouldStreamLiveCombat = publicSession?.phase === 'combat_turn'"))
+  assert.ok(refereeConsoleSource.includes('const shouldShowReplay = replayPayloadAvailable && !shouldStreamLiveCombat'))
   assert.ok(liveArenaStageSource.includes('combat?.snapshot'))
   assert.ok(liveArenaStageSource.includes('ownLoadout'))
   assert.ok(arenaPreviewSceneSource.includes('buildLiveArenaFrame(currentLiveBots, time)'))
@@ -77,8 +79,12 @@ test('referee resolved replay starts playback when the replay payload arrives', 
   assert.ok(refereeConsoleSource.includes('autoPlay'))
   assert.ok(replayViewerSource.includes('autoPlay = false'))
   assert.ok(replayViewerSource.includes('data-replay-autoplay'))
+  assert.ok(replayViewerSource.includes('data-replay-buffering'))
+  assert.ok(replayViewerSource.includes('const playbackActive = playing && rendererReady'))
   assert.ok(replayViewerSource.includes('setPlaying(autoPlay && nextTime < timeline.duration)'))
   assert.ok(replayViewerSource.includes('MAX_REPLAY_FRAME_DELTA_SECONDS'))
+  assert.ok(babylonReplaySceneSource.includes('onRendererReadyRef.current?.()'))
+  assert.ok(babylonReplaySceneSource.includes('pendingWarmupFrames = rendererWarmupFrames'))
   assert.ok(replayPreviewSource.includes('autoPlay={Boolean(previewOptions.proof)}'))
 })
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReplayEvent, ReplayTimeline } from '../../../../packages/replay/src/index.js'
 import type {
   ArenaConfig,
@@ -54,9 +54,14 @@ export function ReplayViewer({
 }: ReplayViewerProps) {
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
   const [playing, setPlaying] = useState(() => autoPlay && timeline.duration > 0)
+  const [rendererReady, setRendererReady] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>(() =>
     normalizeCameraPreset(initialCameraPreset),
+  )
+  const rendererKey = useMemo(
+    () => `${arena.name}|${arena.width}|${arena.height}|${arena.activeHazards.join('|')}`,
+    [arena.activeHazards, arena.height, arena.name, arena.width],
   )
   const compiledTimeline = useMemo(() => compileReplayTimeline(timeline), [timeline])
   const firstActionTime = useMemo(
@@ -68,6 +73,8 @@ export function ReplayViewer({
     () => findActiveEvent(compiledTimeline.events, time, frame.effects),
     [compiledTimeline.events, frame.effects, time],
   )
+  const playbackActive = playing && rendererReady
+  const replayBuffering = playing && !rendererReady
 
   useEffect(() => {
     const nextTime = clampReplayTime(timeline, initialTime)
@@ -77,11 +84,19 @@ export function ReplayViewer({
   }, [autoPlay, initialTime, timeline])
 
   useEffect(() => {
+    setRendererReady(false)
+  }, [botBlueprints, machineDesigns, rendererKey, teamIdentities])
+
+  useEffect(() => {
     setCameraPreset(normalizeCameraPreset(initialCameraPreset))
   }, [initialCameraPreset])
 
+  const handleRendererReady = useCallback(() => {
+    setRendererReady(true)
+  }, [])
+
   useEffect(() => {
-    if (!playing) {
+    if (!playbackActive) {
       return undefined
     }
 
@@ -111,7 +126,7 @@ export function ReplayViewer({
     animationFrame = window.requestAnimationFrame(tick)
 
     return () => window.cancelAnimationFrame(animationFrame)
-  }, [compiledTimeline, playing, speed])
+  }, [compiledTimeline, playbackActive, speed])
 
   const reset = () => {
     setPlaying(false)
@@ -144,7 +159,9 @@ export function ReplayViewer({
       aria-label="Babylon replay viewer"
       data-replay-camera={cameraPreset}
       data-replay-autoplay={autoPlay ? 'true' : 'false'}
+      data-replay-buffering={replayBuffering ? 'true' : 'false'}
       data-replay-playing={playing ? 'true' : 'false'}
+      data-replay-renderer-ready={rendererReady ? 'true' : 'false'}
       data-replay-time={time.toFixed(2)}
     >
       <BabylonReplayScene
@@ -153,6 +170,7 @@ export function ReplayViewer({
         cameraPreset={cameraPreset}
         immediateCamera={proofMode}
         machineDesigns={machineDesigns}
+        onRendererReady={handleRendererReady}
         teamIdentities={teamIdentities}
         timeline={timeline}
         time={time}
@@ -211,7 +229,9 @@ export function ReplayViewer({
           </ActionGroup>
           <div className="replay-status-strip">
             <span>Round {timeline.round}</span>
-            <strong>{activeEvent ? formatLabel(activeEvent.type) : 'Ready'}</strong>
+            <strong>
+              {replayBuffering ? 'Buffering' : activeEvent ? formatLabel(activeEvent.type) : 'Ready'}
+            </strong>
             <span>{formatDurationSeconds(time)} / {formatDurationSeconds(timeline.duration)}</span>
             {frame.endState ? (
               <span>

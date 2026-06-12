@@ -94,6 +94,7 @@ type BabylonReplaySceneProps = {
   cameraPreset: CameraPreset
   immediateCamera?: boolean
   machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
+  onRendererReady?: () => void
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
   timeline: ReplayTimeline
   time: number
@@ -111,11 +112,13 @@ export function BabylonReplayScene({
   cameraPreset,
   immediateCamera = false,
   machineDesigns,
+  onRendererReady,
   teamIdentities,
   timeline,
   time,
 }: BabylonReplaySceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const onRendererReadyRef = useRef(onRendererReady)
   const resourcesRef = useRef<SceneResources | null>(null)
   const [rendererState, setRendererState] = useState<RendererState>({
     status: 'booting',
@@ -130,6 +133,10 @@ export function BabylonReplayScene({
   }), [activeHazardsKey, arena.height, arena.name, arena.width])
 
   useEffect(() => {
+    onRendererReadyRef.current = onRendererReady
+  }, [onRendererReady])
+
+  useEffect(() => {
     const canvas = canvasRef.current
 
     if (!canvas) {
@@ -139,6 +146,20 @@ export function BabylonReplayScene({
     let resources: SceneResources | null = null
     let disposed = false
     let statsFrame = 0
+    const rendererWarmupFrames = immediateCamera ? 2 : 8
+    let pendingWarmupFrames = rendererWarmupFrames
+    let reportedReady = false
+    const reportRendererFrame = () => {
+      if (reportedReady) {
+        return
+      }
+
+      pendingWarmupFrames = Math.max(0, pendingWarmupFrames - 1)
+      if (pendingWarmupFrames <= 0) {
+        reportedReady = true
+        onRendererReadyRef.current?.()
+      }
+    }
 
     try {
       if (!isBabylonRendererSupported()) {
@@ -200,11 +221,14 @@ export function BabylonReplayScene({
       setRendererState({ status: 'ready' })
       setSceneStats(getSceneStats())
 
-      engine.runRenderLoop(() => {
+      const render = () => {
         if (!disposed) {
           scene.render()
+          reportRendererFrame()
         }
-      })
+      }
+
+      engine.runRenderLoop(render)
 
       let pendingStatsFrames = 10
       const refreshSceneStats = () => {
@@ -238,11 +262,9 @@ export function BabylonReplayScene({
 
         setRendererState({ status: 'ready' })
         engine.resize()
-        engine.runRenderLoop(() => {
-          if (!disposed) {
-            scene.render()
-          }
-        })
+        pendingWarmupFrames = rendererWarmupFrames
+        reportedReady = false
+        engine.runRenderLoop(render)
       }
 
       window.addEventListener('resize', resize)
@@ -271,7 +293,7 @@ export function BabylonReplayScene({
 
       return undefined
     }
-  }, [sceneArena, botBlueprints, machineDesigns, teamIdentities])
+  }, [immediateCamera, sceneArena, botBlueprints, machineDesigns, teamIdentities])
 
   useEffect(() => {
     const resources = resourcesRef.current

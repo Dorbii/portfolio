@@ -111,8 +111,14 @@ export function RefereeConsole() {
       : 'Create session first'
   const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
   const liveArenaStage = useMemo(() => createLiveArenaStageState(roleStates), [roleStates])
-  const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
-  const shouldShowReplayStatus = Boolean(publicSession?.replayAvailable && !replayPayload)
+  const replayPayloadAvailable = Boolean(publicSession?.replayAvailable && replayPayload)
+  const shouldStreamLiveCombat = publicSession?.phase === 'combat_turn'
+  const shouldShowReplay = replayPayloadAvailable && !shouldStreamLiveCombat
+  const shouldShowReplayStatus = Boolean(
+    publicSession?.replayAvailable &&
+      !replayPayload &&
+      !shouldStreamLiveCombat,
+  )
   const shouldShowSessionCompletion = publicSession?.phase === 'session_complete'
 
   return (
