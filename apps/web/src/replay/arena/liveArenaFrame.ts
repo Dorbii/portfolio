@@ -94,6 +94,7 @@ function createLiveIdleMotion(
   if (status === 'knocked_out') {
     return {
       contactIntensity: 0,
+      driveIntensity: 0,
       drift: 0,
       easedProgress: 0,
       lean: 0,
@@ -107,6 +108,7 @@ function createLiveIdleMotion(
 
   return {
     contactIntensity: status === 'immobilized' ? 0.02 : 0.08 + Math.sin(time * 2.4 + phase) * 0.025,
+    driveIntensity: status === 'immobilized' ? 0.03 : 0.1 + Math.sin(time * 2.2 + phase) * 0.025,
     drift: Math.sin(time * 0.9 + phase) * 0.08,
     easedProgress: 0,
     lean: Math.sin(time * 1.35 + phase) * 0.025,

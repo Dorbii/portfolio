@@ -13,6 +13,7 @@ const liveArenaStageSource = readSource('apps/web/src/referee/liveArenaStage.ts'
 const refereeConsoleSource = readSource('apps/web/src/referee/RefereeConsole.tsx')
 const refereePanelsSource = readSource('apps/web/src/referee/RefereeConsolePanels.tsx')
 const refereeControllerSource = readSource('apps/web/src/referee/useRefereeConsoleController.ts')
+const replayPreviewSource = readSource('apps/web/src/replay/ReplayPreview.tsx')
 const replayViewerSource = readSource('apps/web/src/replay/ReplayViewer.tsx')
 const mockSessionSource = readSource('apps/web/src/mockSession.ts')
 const mockSessionStateSource = readSource('apps/web/src/mockSessionState.ts')
@@ -76,6 +77,8 @@ test('referee resolved replay starts playback when the replay payload arrives', 
   assert.ok(replayViewerSource.includes('autoPlay = false'))
   assert.ok(replayViewerSource.includes('data-replay-autoplay'))
   assert.ok(replayViewerSource.includes('setPlaying(autoPlay && nextTime < timeline.duration)'))
+  assert.ok(replayViewerSource.includes('MAX_REPLAY_FRAME_DELTA_SECONDS'))
+  assert.ok(replayPreviewSource.includes('autoPlay={Boolean(previewOptions.proof)}'))
 })
 
 test('session completion UI omits dead save continue quit controls', () => {

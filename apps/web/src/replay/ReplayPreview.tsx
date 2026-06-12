@@ -33,6 +33,7 @@ export function ReplayPreview() {
       </header>
       <section className="replay-preview-frame">
         <ReplayViewer
+          autoPlay={Boolean(previewOptions.proof)}
           arena={previewArenaConfig}
           botBlueprints={mockBotBlueprints}
           initialCameraPreset={previewOptions.cameraPreset}

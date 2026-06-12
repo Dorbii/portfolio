@@ -365,6 +365,7 @@ function resolveMoveFrameState(
     ...previousState,
     motion: {
       contactIntensity: event.contactIntent ? easeInOut(rawProgress) : 0,
+      driveIntensity: resolveDriveIntensity(speed, rawProgress, event.contactIntent),
       drift: resolveMoveDrift(event, movementHeading, targetRotationY, rawProgress),
       easedProgress,
       lean: resolveMoveLean(event, speed, rawProgress),
@@ -443,6 +444,17 @@ function resolveMoveLean(event: MoveEvent, speed: number, progress: number): num
   const contactBoost = event.contactIntent ? 1.25 : 1
 
   return round(clamp(speed * 0.025 * direction * peak * contactBoost, -0.18, 0.18))
+}
+
+function resolveDriveIntensity(
+  speed: number,
+  progress: number,
+  contactIntent: boolean | undefined,
+): number {
+  const ramp = 0.3 + Math.sin(Math.PI * clamp01(progress)) * 0.7
+  const contactBoost = contactIntent ? 0.35 : 0
+
+  return round(clamp(speed * 0.32 * ramp + contactBoost, 0.08, 3.2))
 }
 
 function flatDistance(from: Vector3, to: Vector3): number {
@@ -711,6 +723,7 @@ function cloneBotState(state: BotFrameState): BotFrameState {
 function createIdleMotion(): BotFrameState['motion'] {
   return {
     contactIntensity: 0,
+    driveIntensity: 0,
     drift: 0,
     easedProgress: 1,
     lean: 0,

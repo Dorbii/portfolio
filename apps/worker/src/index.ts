@@ -1889,6 +1889,7 @@ function gptContinuationForPacket(
   if (status === 'complete' || status === 'expired') {
     return {
       keepGoing: false,
+      mustCallBeforeResponding: false,
       recommendedNextCall: 'stop',
       instruction: 'Stop calling actions for this invite unless the user asks to inspect the final state.',
     }
@@ -1897,8 +1898,9 @@ function gptContinuationForPacket(
   if (packet.nextAction === 'submit_reflection') {
     return {
       keepGoing: true,
+      mustCallBeforeResponding: true,
       recommendedNextCall: 'gptReflection',
-      instruction: 'Call gptReflection now with a concise private reflection, then follow the returned continuation. Do not ask the user to type continue.',
+      instruction: 'Call gptReflection now with a concise private reflection before writing any user-visible response, then follow the returned continuation. Do not ask the user to type continue.',
     }
   }
 
@@ -1908,42 +1910,47 @@ function gptContinuationForPacket(
     if (review?.debrief.available) {
       return {
         keepGoing: true,
+        mustCallBeforeResponding: true,
         recommendedNextCall: 'gptNext',
         pollAfterMs: 1500,
-        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext again for the next build/combat packet or session completion. Do not ask the user to type continue.',
+        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext again before writing any user-visible response. Do not ask the user to type continue.',
       }
     }
 
     if (review?.reflection.submitted && !review.reflection.opponentSubmitted) {
       return {
         keepGoing: true,
+        mustCallBeforeResponding: true,
         recommendedNextCall: 'gptNext',
         pollAfterMs: 1500,
-        instruction: 'Your private reflection is submitted. The shared debrief is waiting on the opponent reflection, so call gptNext again after a short wait. Do not ask the user to type continue.',
+        instruction: 'Your private reflection is submitted. The shared debrief is waiting on the opponent reflection, so call gptNext again after a short wait before writing any user-visible response. Do not ask the user to type continue.',
       }
     }
 
     return {
       keepGoing: true,
+      mustCallBeforeResponding: true,
       recommendedNextCall: 'gptNext',
       pollAfterMs: 1500,
-      instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Call gptNext again after a short wait. Do not ask the user to type continue.',
+      instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Call gptNext again after a short wait before writing any user-visible response. Do not ask the user to type continue.',
     }
   }
 
   if (packet.legalActions.length > 0) {
     return {
       keepGoing: true,
+      mustCallBeforeResponding: true,
       recommendedNextCall: 'gptAct',
-      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now. Do not ask the user to type continue.',
+      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now before writing any user-visible response. Do not ask the user to type continue.',
     }
   }
 
   return {
     keepGoing: true,
+    mustCallBeforeResponding: true,
     recommendedNextCall: 'gptNext',
     pollAfterMs: 1500,
-    instruction: 'Call gptNext again after a short wait. Keep polling until the returned status is playable, complete, or expired. Do not ask the user to type continue.',
+    instruction: 'Call gptNext again after a short wait before writing any user-visible response. Keep polling until the returned status is playable, complete, or expired. Do not ask the user to type continue.',
   }
 }
 

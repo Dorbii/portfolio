@@ -1102,9 +1102,11 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
     json.components.schemas.GptResponse.properties.continuation.$ref,
     '#/components/schemas/GptContinuationHint',
   )
+  assert.deepEqual(json.components.schemas.GptResponse.required, ['status', 'packet', 'continuation'])
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.build.edit.cancel'))
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.review'))
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('fightStartedAt'))
+  assert.ok(json.components.schemas.GptContinuationHint.required.includes('mustCallBeforeResponding'))
   assert.deepEqual(
     json.components.schemas.GptContinuationHint.properties.recommendedNextCall.enum,
     ['gptNext', 'gptAct', 'gptReflection', 'stop'],
@@ -1629,6 +1631,7 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.ok(next.json.packet.build.store.offers.length > 0)
   assert.deepEqual(next.json.packet.build.bot.parts[0], ['core', 'body.Machine_Core', null, 20, 20])
   assert.equal(next.json.continuation.keepGoing, true)
+  assert.equal(next.json.continuation.mustCallBeforeResponding, true)
   assert.equal(next.json.continuation.recommendedNextCall, 'gptAct')
   assert.ok(next.json.continuation.instruction.includes('Do not ask the user to type continue'))
 })

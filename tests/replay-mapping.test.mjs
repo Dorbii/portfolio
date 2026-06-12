@@ -631,6 +631,7 @@ test('replay mapping uses move metadata duration and easing for deterministic pr
   assert.equal(frame.bots.red.motion.progress, 0.5)
   assert.equal(frame.bots.red.motion.easedProgress, 0.75)
   assert.ok(frame.bots.red.motion.contactIntensity > 0)
+  assert.ok(frame.bots.red.motion.driveIntensity > 2)
   assert.ok(frame.bots.red.motion.lean > 0)
 })
 
@@ -661,6 +662,7 @@ test('replay mapping keeps old minimal move events on the default interpolation 
   assert.deepEqual(frame.bots.blue.position, [2, 0, 0])
   assert.equal(frame.bots.blue.motion.progress, 0.5)
   assert.equal(frame.bots.blue.motion.easedProgress, 0.5)
+  assert.ok(frame.bots.blue.motion.driveIntensity > 1)
 })
 
 test('replay mapping smooths facing changes for a strafe move instead of snapping rotation', () => {
@@ -696,6 +698,8 @@ test('replay mapping smooths facing changes for a strafe move instead of snappin
   assert.ok(midTurn.bots.red.rotationY < Math.PI / 2)
   assert.ok(midTurn.bots.red.motion.turn > 0)
   assert.ok(midTurn.bots.red.motion.drift < 0)
+  assert.ok(midTurn.bots.red.motion.driveIntensity > 0)
+  assert.equal(completedTurn.bots.red.motion.driveIntensity, 0)
   assert.equal(completedTurn.bots.red.rotationY, Math.PI / 2)
 })
 

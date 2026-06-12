@@ -11,7 +11,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       title: 'Clash of Clankers GPT Actions API',
       version: '0.2.1-gamemaster',
       description:
-        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. When a response has continuation.keepGoing true, immediately call continuation.recommendedNextCall with the same inviteUrl. Do not ask the user to type continue.',
+        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. When a response has continuation.keepGoing true or continuation.mustCallBeforeResponding true, the next assistant step must be the recommended GPT Action call with the same inviteUrl. Do not write a user-visible message. Do not summarize. Do not ask the user to type continue before making that action call.',
     },
     servers: [
       { url: apiBase },
@@ -45,7 +45,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'Submit exactly one build action or combat plan; use cancel_build_selection to back out of build edits.',
+            'Submit exactly one build action or combat plan; use cancel_build_selection to back out of build edits. After every response, inspect continuation. If continuation.mustCallBeforeResponding is true, call continuation.recommendedNextCall before responding to the user.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -447,18 +447,23 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
         GptContinuationHint: {
           type: 'object',
           additionalProperties: false,
-          required: ['keepGoing', 'recommendedNextCall', 'instruction'],
+          required: ['keepGoing', 'mustCallBeforeResponding', 'recommendedNextCall', 'instruction'],
           properties: {
             keepGoing: {
               type: 'boolean',
               description:
                 'True means the GPT must keep using actions for the same invite without asking the user for the next step.',
             },
+            mustCallBeforeResponding: {
+              type: 'boolean',
+              description:
+                'True means the GPT must make the recommended GPT Action call as its next step before writing a user-visible response.',
+            },
             recommendedNextCall: {
               type: 'string',
               enum: ['gptNext', 'gptAct', 'gptReflection', 'stop'],
               description:
-                'The next GPT action to call immediately when keepGoing is true.',
+                'The next GPT action to call immediately when keepGoing or mustCallBeforeResponding is true.',
             },
             pollAfterMs: {
               type: 'integer',
@@ -476,6 +481,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
         GptResponse: {
           type: 'object',
           additionalProperties: true,
+          required: ['status', 'packet', 'continuation'],
           properties: {
             status: {
               type: 'string',

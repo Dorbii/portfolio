@@ -38,6 +38,7 @@ type ReplayViewerProps = {
 }
 
 const speedOptions = [0.5, 1, 1.5, 2]
+const MAX_REPLAY_FRAME_DELTA_SECONDS = 0.1
 
 export function ReplayViewer({
   autoPlay = false,
@@ -88,7 +89,11 @@ export function ReplayViewer({
     let previous = performance.now()
 
     const tick = (now: number) => {
-      const elapsed = ((now - previous) / 1000) * speed
+      const elapsedSeconds = Math.min(
+        (now - previous) / 1000,
+        MAX_REPLAY_FRAME_DELTA_SECONDS,
+      )
+      const elapsed = elapsedSeconds * speed
       previous = now
 
       setTime((current) => {

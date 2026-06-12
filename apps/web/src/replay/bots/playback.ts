@@ -21,6 +21,7 @@ import {
   type BotPartChildMaterialRole,
 } from '../rendering/materials'
 import type {
+  BotFrameState,
   PartFrameState,
   ReplayVisualFrame,
 } from '../replayMapping'
@@ -48,11 +49,14 @@ export function updateBots(
     const stability = state.stability
     const stabilityScale = stability.pose === 'flipped' ? 0.98 : 1
     const verticalOffset = stability.heightOffset
+    const driveBounce = hit ? 0 : Math.sin(frame.time * 18 + (role === 'red' ? 0 : Math.PI)) *
+      0.014 *
+      Math.min(1, motion.driveIntensity)
 
     bot.position = toBabylonVector(state.position)
     bot.position.y = hit
       ? 0.08 + bounce
-      : Math.max(0.06, 0.16 + motion.contactIntensity * 0.03 + verticalOffset)
+      : Math.max(0.06, 0.16 + motion.contactIntensity * 0.03 + verticalOffset + driveBounce)
     bot.rotation.y = state.rotationY
     bot.rotation.x = hit ? 0 : -motion.lean + stability.pitch
     bot.rotation.z = hit
@@ -72,9 +76,99 @@ export function updateBots(
         return
       }
 
-      applyPartMotion(node, frame.time, 1)
+      const partMetadata = findBotPartMetadata(node)
+      const weaponIntensity = weaponMotionIntensity(frame, role, partMetadata)
+
+      applyPartMotion(
+        node,
+        frame.time,
+        partMotionSpeedScale(metadata, motion, weaponIntensity, partMetadata),
+      )
     })
   })
+}
+
+function partMotionSpeedScale(
+  metadata: PartMotionMetadata,
+  motion: BotFrameState['motion'],
+  weaponIntensity: number,
+  partMetadata: BotPartNodeMetadata | undefined,
+): number {
+  if (isDriveMotion(metadata)) {
+    return clamp(0.02 + motion.driveIntensity * 1.55, 0.02, 5)
+  }
+
+  if (isWeaponMotion(metadata, partMetadata)) {
+    const trackingScale = metadata.animationProfile === 'turret_track' ? 1.8 : 5.5
+    const baseScale = metadata.animationProfile === 'turret_track' ? 0.25 : 0.75
+
+    return clamp(baseScale + weaponIntensity * trackingScale + motion.contactIntensity * 1.15, 0.12, 8)
+  }
+
+  if (metadata.kind === 'thrust') {
+    return clamp(0.75 + weaponIntensity * 1.6, 0.5, 3.2)
+  }
+
+  return 1
+}
+
+function isDriveMotion(metadata: PartMotionMetadata): boolean {
+  return metadata.kind === 'roll' ||
+    metadata.animationProfile === 'wheel_spin' ||
+    metadata.animationProfile === 'tread_scroll'
+}
+
+function isWeaponMotion(
+  metadata: PartMotionMetadata,
+  partMetadata: BotPartNodeMetadata | undefined,
+): boolean {
+  const partId = partMetadata?.partId.toLowerCase() ?? ''
+
+  return metadata.animationProfile === 'spinner_spin' ||
+    metadata.animationProfile === 'turret_track' ||
+    (metadata.kind === 'spin' && (partId.startsWith('weapon_') || partId.startsWith('weapon.')))
+}
+
+function weaponMotionIntensity(
+  frame: ReplayVisualFrame,
+  role: TeamRole,
+  partMetadata: BotPartNodeMetadata | undefined,
+): number {
+  if (!partMetadata) {
+    return 0
+  }
+
+  return frame.effects.reduce((strongest, effect) => {
+    if (effect.team !== role || effect.kind !== 'weapon_fire') {
+      return strongest
+    }
+
+    const sourceMatches = effect.sourceBlockId === partMetadata.blockId ||
+      effect.sourcePartId === partMetadata.partId
+    const fallbackWeaponMatch = !effect.sourceBlockId &&
+      !effect.sourcePartId &&
+      partMetadata.partId.toLowerCase().startsWith('weapon_')
+
+    return sourceMatches || fallbackWeaponMatch
+      ? Math.max(strongest, effect.intensity)
+      : strongest
+  }, 0)
+}
+
+function findBotPartMetadata(node: TransformNode): BotPartNodeMetadata | undefined {
+  let current = node.parent
+
+  while (current instanceof TransformNode) {
+    const metadata = current.metadata as BotPartNodeMetadata | undefined
+
+    if (metadata?.kind === 'bot_part') {
+      return metadata
+    }
+
+    current = current.parent
+  }
+
+  return undefined
 }
 
 function updateBotPartNodes(
@@ -239,4 +333,8 @@ function partDamageSeverity(state: PartFrameState | undefined): number {
   }
 
   return state.health <= 0 ? 1 : 0
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
 }

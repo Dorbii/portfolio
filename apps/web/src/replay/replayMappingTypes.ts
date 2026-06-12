@@ -35,6 +35,7 @@ export type BotFrameState = {
   stability: BotStabilityFrameState
   motion: {
     contactIntensity: number
+    driveIntensity: number
     drift: number
     easedProgress: number
     lean: number
