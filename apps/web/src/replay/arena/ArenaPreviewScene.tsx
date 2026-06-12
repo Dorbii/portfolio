@@ -1,12 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import type { ArenaConfig } from '../../../../../packages/schemas/src/index.js'
+import type { ArenaConfig, TeamRole } from '../../../../../packages/schemas/src/index.js'
 import {
   createArena,
   updateHazardsAtTime,
   type BabylonHazardVisual,
 } from './index'
+import {
+  buildLiveArenaFrame,
+  liveArenaVisualKey,
+  type LiveArenaStageState,
+} from './liveArenaFrame'
+import {
+  updateBots,
+} from '../bots/playback'
+import {
+  createBotNode,
+  createTeamMaterials,
+} from '../parts'
 import {
   BABYLON_RENDERER_BUDGETS,
   createBabylonRendererBudgetState,
@@ -23,6 +35,7 @@ import {
 } from '../rendering/rendererKit'
 
 type ArenaPreviewResources = BabylonRendererCore & {
+  bots?: Record<TeamRole, ReturnType<typeof createBotNode>>
   hazards: BabylonHazardVisual[]
 }
 
@@ -33,13 +46,20 @@ type RendererState = {
 
 type ArenaPreviewSceneProps = {
   arena: ArenaConfig
+  liveBots?: LiveArenaStageState
 }
 
-export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
+export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const liveBotsRef = useRef<LiveArenaStageState | undefined>(liveBots)
   const [rendererState, setRendererState] = useState<RendererState>({ status: 'booting' })
   const [sceneStats, setSceneStats] = useState<BabylonRendererStats | null>(null)
   const activeHazardsKey = arena.activeHazards.join('|')
+  const liveBotsKey = liveArenaVisualKey(liveBots)
+
+  useEffect(() => {
+    liveBotsRef.current = liveBots
+  }, [liveBots])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -89,11 +109,39 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
       createReplayLightingPreset(scene, sceneArena.width)
 
       const hazards = createArena(scene, sceneArena)
+      const initialLiveBots = liveBotsRef.current
+      const teamMaterials = initialLiveBots
+        ? createTeamMaterials(scene, {
+            identities: {
+              blue: initialLiveBots.blue.identity,
+              red: initialLiveBots.red.identity,
+            },
+          })
+        : undefined
+      const bots = initialLiveBots && teamMaterials
+        ? {
+            blue: createBotNode(
+              scene,
+              initialLiveBots.blue.blueprint,
+              'blue',
+              teamMaterials.blue,
+              initialLiveBots.blue.machineDesign,
+            ),
+            red: createBotNode(
+              scene,
+              initialLiveBots.red.blueprint,
+              'red',
+              teamMaterials.red,
+              initialLiveBots.red.machineDesign,
+            ),
+          }
+        : undefined
 
       createRendererGlow(scene, 'arena-preview-glow', 0.28)
 
       resources = {
         ...core,
+        bots,
         hazards,
       }
       setRendererState({ status: 'ready' })
@@ -107,6 +155,14 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
         const time = (performance.now() - start) / 1000
 
         updateHazardsAtTime(resources.hazards, time)
+        const currentLiveBots = liveBotsRef.current
+
+        if (resources.bots && currentLiveBots) {
+          const frame = buildLiveArenaFrame(currentLiveBots, time)
+
+          updateBots(resources.bots, frame)
+        }
+
         resources.scene.render()
       }
 
@@ -168,7 +224,7 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
 
       return undefined
     }
-  }, [activeHazardsKey, arena.height, arena.name, arena.width])
+  }, [activeHazardsKey, arena.height, arena.name, arena.width, liveBotsKey])
 
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.replayPreview)
@@ -177,6 +233,7 @@ export function ArenaPreviewScene({ arena }: ArenaPreviewSceneProps) {
   return (
     <div
       className="babylon-stage arena-preview-stage"
+      data-arena-preview-live-bots={liveBots ? 'true' : 'false'}
       data-arena-preview-state={rendererState.status}
       data-arena-preview-hazards={activeHazardsKey}
       data-renderer-active-meshes={sceneStats?.activeMeshes}

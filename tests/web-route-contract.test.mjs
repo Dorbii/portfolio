@@ -7,8 +7,13 @@ function readSource(relativePath) {
 }
 
 const appSource = readSource('apps/web/src/App.tsx')
+const arenaPreviewSceneSource = readSource('apps/web/src/replay/arena/ArenaPreviewScene.tsx')
+const liveArenaFrameSource = readSource('apps/web/src/replay/arena/liveArenaFrame.ts')
+const liveArenaStageSource = readSource('apps/web/src/referee/liveArenaStage.ts')
+const refereeConsoleSource = readSource('apps/web/src/referee/RefereeConsole.tsx')
 const refereePanelsSource = readSource('apps/web/src/referee/RefereeConsolePanels.tsx')
 const refereeControllerSource = readSource('apps/web/src/referee/useRefereeConsoleController.ts')
+const replayViewerSource = readSource('apps/web/src/replay/ReplayViewer.tsx')
 const mockSessionSource = readSource('apps/web/src/mockSession.ts')
 const mockSessionStateSource = readSource('apps/web/src/mockSessionState.ts')
 const workerBootstrapSources = [
@@ -53,6 +58,24 @@ test('referee console links to the current part catalog route', () => {
   assert.ok(refereePanelsSource.includes('`/part-catalog${window.location.search}`'))
   assert.ok(refereePanelsSource.includes('Part Catalog'))
   assert.equal(refereePanelsSource.includes('/qa/part-catalog'), false)
+})
+
+test('referee console renders live combat bots before replay payloads are available', () => {
+  assert.ok(refereeConsoleSource.includes('createLiveArenaStageState(roleStates)'))
+  assert.ok(refereeConsoleSource.includes('liveBots={liveArenaStage}'))
+  assert.ok(liveArenaStageSource.includes('combat?.snapshot'))
+  assert.ok(liveArenaStageSource.includes('ownLoadout'))
+  assert.ok(arenaPreviewSceneSource.includes('buildLiveArenaFrame(currentLiveBots, time)'))
+  assert.ok(arenaPreviewSceneSource.includes('updateBots(resources.bots, frame)'))
+  assert.ok(liveArenaFrameSource.includes('function createLiveIdleMotion'))
+  assert.ok(liveArenaFrameSource.includes('ReplayVisualFrame'))
+})
+
+test('referee resolved replay starts playback when the replay payload arrives', () => {
+  assert.ok(refereeConsoleSource.includes('autoPlay'))
+  assert.ok(replayViewerSource.includes('autoPlay = false'))
+  assert.ok(replayViewerSource.includes('data-replay-autoplay'))
+  assert.ok(replayViewerSource.includes('setPlaying(autoPlay && nextTime < timeline.duration)'))
 })
 
 test('session completion UI omits dead save continue quit controls', () => {

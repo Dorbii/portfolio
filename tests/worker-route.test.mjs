@@ -1050,6 +1050,7 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.openapi, '3.1.0')
+  assert.ok(json.info.description.includes('Do not ask the user to type continue'))
   assert.equal(json.servers[0].url, 'https://arena-api.test')
   assert.deepEqual(Object.keys(json.paths).sort(), [
     '/gpt/act',
@@ -1102,6 +1103,12 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
     json.components.schemas.GptContinuationHint.properties.recommendedNextCall.enum,
     ['gptNext', 'gptAct', 'gptReflection', 'stop'],
   )
+  assert.ok(
+    json.components.schemas.GptContinuationHint.properties.instruction.description.includes(
+      'without asking the user',
+    ),
+  )
+  assert.equal(JSON.stringify(json).includes('not a guaranteed autonomous loop'), false)
   const gptParameterProperties = json.components.schemas.GptActionParameters.properties
 
   assert.ok('childPartId' in gptParameterProperties)
@@ -1617,6 +1624,7 @@ test('POST /gpt/next returns GPT-friendly waiting or playable status', async () 
   assert.deepEqual(next.json.packet.build.bot.parts[0], ['core', 'body.Machine_Core', null, 20, 20])
   assert.equal(next.json.continuation.keepGoing, true)
   assert.equal(next.json.continuation.recommendedNextCall, 'gptAct')
+  assert.ok(next.json.continuation.instruction.includes('Do not ask the user to type continue'))
 })
 
 test('POST /gpt/next returns compact combat state for Custom GPT actions', async () => {
@@ -1653,6 +1661,7 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assert.equal(redStart.json.status, 'waiting')
   assert.equal(redStart.json.continuation.recommendedNextCall, 'gptNext')
   assert.equal(typeof redStart.json.continuation.pollAfterMs, 'number')
+  assert.ok(redStart.json.continuation.instruction.includes('Do not ask the user to type continue'))
   assert.equal(redStart.json.packet.board, undefined)
   assert.ok(JSON.stringify(redStart.json).length < 8_000)
   assert.equal(blueCombat.response.status, 200)

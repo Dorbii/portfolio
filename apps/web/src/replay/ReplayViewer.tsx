@@ -25,6 +25,7 @@ import {
 } from '../shared/ui'
 
 type ReplayViewerProps = {
+  autoPlay?: boolean
   arena: ArenaConfig
   botBlueprints: Record<TeamRole, BotBlueprint>
   initialCameraPreset?: CameraPreset
@@ -39,6 +40,7 @@ type ReplayViewerProps = {
 const speedOptions = [0.5, 1, 1.5, 2]
 
 export function ReplayViewer({
+  autoPlay = false,
   arena,
   botBlueprints,
   initialCameraPreset = 'broadcast',
@@ -50,7 +52,7 @@ export function ReplayViewer({
   timeline,
 }: ReplayViewerProps) {
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(() => autoPlay && timeline.duration > 0)
   const [speed, setSpeed] = useState(1)
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>(() =>
     normalizeCameraPreset(initialCameraPreset),
@@ -67,8 +69,11 @@ export function ReplayViewer({
   )
 
   useEffect(() => {
-    setTime(clampReplayTime(timeline, initialTime))
-  }, [initialTime, timeline])
+    const nextTime = clampReplayTime(timeline, initialTime)
+
+    setTime(nextTime)
+    setPlaying(autoPlay && nextTime < timeline.duration)
+  }, [autoPlay, initialTime, timeline])
 
   useEffect(() => {
     setCameraPreset(normalizeCameraPreset(initialCameraPreset))
@@ -133,6 +138,7 @@ export function ReplayViewer({
       className={`replay-shell${proofMode ? ' replay-shell-proof' : ''}`}
       aria-label="Babylon replay viewer"
       data-replay-camera={cameraPreset}
+      data-replay-autoplay={autoPlay ? 'true' : 'false'}
       data-replay-playing={playing ? 'true' : 'false'}
       data-replay-time={time.toFixed(2)}
     >

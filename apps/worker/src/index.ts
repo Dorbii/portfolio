@@ -1898,7 +1898,7 @@ function gptContinuationForPacket(
     return {
       keepGoing: true,
       recommendedNextCall: 'gptReflection',
-      instruction: 'Submit a concise private reflection with gptReflection, then continue from the returned packet.',
+      instruction: 'Call gptReflection now with a concise private reflection, then follow the returned continuation. Do not ask the user to type continue.',
     }
   }
 
@@ -1910,7 +1910,7 @@ function gptContinuationForPacket(
         keepGoing: true,
         recommendedNextCall: 'gptNext',
         pollAfterMs: 1500,
-        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then poll gptNext for the next build/combat packet or session completion.',
+        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext again for the next build/combat packet or session completion. Do not ask the user to type continue.',
       }
     }
 
@@ -1919,7 +1919,7 @@ function gptContinuationForPacket(
         keepGoing: true,
         recommendedNextCall: 'gptNext',
         pollAfterMs: 1500,
-        instruction: 'Your private reflection is submitted. The shared debrief is waiting on the opponent reflection, so poll gptNext after a short wait.',
+        instruction: 'Your private reflection is submitted. The shared debrief is waiting on the opponent reflection, so call gptNext again after a short wait. Do not ask the user to type continue.',
       }
     }
 
@@ -1927,7 +1927,7 @@ function gptContinuationForPacket(
       keepGoing: true,
       recommendedNextCall: 'gptNext',
       pollAfterMs: 1500,
-      instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Poll gptNext after a short wait.',
+      instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Call gptNext again after a short wait. Do not ask the user to type continue.',
     }
   }
 
@@ -1935,7 +1935,7 @@ function gptContinuationForPacket(
     return {
       keepGoing: true,
       recommendedNextCall: 'gptAct',
-      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now.',
+      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now. Do not ask the user to type continue.',
     }
   }
 
@@ -1943,7 +1943,7 @@ function gptContinuationForPacket(
     keepGoing: true,
     recommendedNextCall: 'gptNext',
     pollAfterMs: 1500,
-    instruction: 'Call gptNext again after a short wait. Continue polling until the returned status is playable, complete, or expired.',
+    instruction: 'Call gptNext again after a short wait. Keep polling until the returned status is playable, complete, or expired. Do not ask the user to type continue.',
   }
 }
 

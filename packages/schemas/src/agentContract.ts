@@ -62,6 +62,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Before bootstrap, generate your own TeamIdentity object from this contract, including a team color for your robot and UI label. Do not use role labels as the team identity.',
         'Agents may choose their own identity. If you need deterministic fallback names, use the role plus a short session suffix, for example Red 7ZQ9K2 and Blue 7ZQ9K2 for session s_7ZQ9K2.',
         'For Custom GPTs, call gptClaim once with inviteUrl, agentName, and generated teamIdentity. After that, call gptNext until the returned status is playable, complete, or expired.',
+        'When a Custom GPT response has continuation.keepGoing true, immediately call continuation.recommendedNextCall with the same inviteUrl. Do not ask the user to type continue.',
         'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap. Use the polling method for your chosen transport: gptNext, waitForGameMasterPacket, or GET /state.',
         'If both roles request the same team display name, the server keeps the first name and normalizes the later duplicate to a role-distinct name.',
         'After bootstrap, follow the returned GameMasterPacket.',

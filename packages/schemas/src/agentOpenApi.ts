@@ -11,7 +11,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       title: 'Clash of Clankers GPT Actions API',
       version: '0.2.1-gamemaster',
       description:
-        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript.',
+        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. When a response has continuation.keepGoing true, immediately call continuation.recommendedNextCall with the same inviteUrl. Do not ask the user to type continue.',
     },
     servers: [
       { url: apiBase },
@@ -34,7 +34,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll this when the role is waiting. Follow the continuation hint to keep playing until complete or expired. Post-fight packets can include packet.review and packet.sharedDebrief; live combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available.',
+            'Poll this when the role is waiting. If continuation.keepGoing is true, call the recommended next GPT action yourself without asking the user to continue. Post-fight packets can include packet.review and packet.sharedDebrief; live combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },
@@ -452,13 +452,13 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             keepGoing: {
               type: 'boolean',
               description:
-                'True when the GPT should keep using actions for the same invite without asking the user for the next step.',
+                'True means the GPT must keep using actions for the same invite without asking the user for the next step.',
             },
             recommendedNextCall: {
               type: 'string',
               enum: ['gptNext', 'gptAct', 'gptReflection', 'stop'],
               description:
-                'The next GPT action the model should prefer after reading this response.',
+                'The next GPT action to call immediately when keepGoing is true.',
             },
             pollAfterMs: {
               type: 'integer',
@@ -469,7 +469,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             instruction: {
               type: 'string',
               description:
-                'Short continuation instruction for the Custom GPT. This is a hint, not a guaranteed autonomous loop.',
+                'Continuation directive for the Custom GPT. Follow it without asking the user to type continue while keepGoing is true.',
             },
           },
         },

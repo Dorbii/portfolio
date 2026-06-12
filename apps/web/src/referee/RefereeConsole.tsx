@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useMemo } from 'react'
 import { DEFAULT_ARENA_CONFIG } from '../../../../packages/schemas/src/index.js'
 import {
   ArenaImpactDashboard,
@@ -15,6 +15,7 @@ import {
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
+import { createLiveArenaStageState } from './liveArenaStage'
 
 const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
@@ -109,6 +110,7 @@ export function RefereeConsole() {
       ? 'No fight comms yet'
       : 'Create session first'
   const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
+  const liveArenaStage = useMemo(() => createLiveArenaStageState(roleStates), [roleStates])
   const shouldShowReplay = Boolean(publicSession?.replayAvailable && replayPayload)
   const shouldShowReplayStatus = Boolean(publicSession?.replayAvailable && !replayPayload)
   const shouldShowSessionCompletion = publicSession?.phase === 'session_complete'
@@ -121,6 +123,7 @@ export function RefereeConsole() {
             {shouldShowReplay && replayPayload ? (
               <Suspense fallback={<ReplayFrameFallback />}>
                 <ReplayViewer
+                  autoPlay
                   arena={visibleArena}
                   botBlueprints={replayPayload.botBlueprints}
                   machineDesigns={replayPayload.machineDesigns}
@@ -131,7 +134,7 @@ export function RefereeConsole() {
               </Suspense>
             ) : (
               <Suspense fallback={<ReplayFrameFallback />}>
-                <ArenaPreviewScene arena={visibleArena} />
+                <ArenaPreviewScene arena={visibleArena} liveBots={liveArenaStage} />
               </Suspense>
             )}
             {shouldShowReplayStatus ? (
