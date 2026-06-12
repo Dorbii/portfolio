@@ -56,33 +56,6 @@ export function Fact({ label, value }: { label: string; value: ReactNode }) {
   return <MetricRow label={label} value={value} />
 }
 
-export function ConnectionGuide({
-  compact = false,
-  guidance,
-}: {
-  compact?: boolean
-  guidance: {
-    detail: string
-    helperCall: string
-    nextAction: string
-    status: string
-    tone: 'blocked' | 'idle' | 'ready' | 'working'
-  }
-}) {
-  return (
-    <div className={`agent-connection tone-${guidance.tone}`} aria-live="polite">
-      <strong>{guidance.status}</strong>
-      <p>{guidance.nextAction}</p>
-      {compact ? null : (
-        <>
-          <code>{guidance.helperCall}</code>
-          <small>{guidance.detail}</small>
-        </>
-      )}
-    </div>
-  )
-}
-
 export function PlanMetric({
   label,
   tone,

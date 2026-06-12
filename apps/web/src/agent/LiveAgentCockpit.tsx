@@ -12,7 +12,6 @@ import { InvalidInvite } from './AgentCockpitPanels'
 import {
   AgentCockpitHeader,
   AgentCockpitScripts,
-  AgentTaskPanel,
 } from './AgentCockpitShell'
 import { AgentCockpitSidebar } from './AgentCockpitSidebar'
 import { AgentInsightWorkbench } from './AgentInsightWorkbench'
@@ -51,19 +50,18 @@ export function LiveAgentCockpit() {
 function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
   const cockpit = useLiveAgentCockpitController(invite)
   const teamStyle = createTeamAccentCssVars(invite.role, cockpit.roleState?.identity) as AgentLiveAppStyle
+  const showSecondarySidebar = cockpit.roleHasChatLog || cockpit.roleHasPrivateChatLog
 
   return (
     <main className="agent-live-app" style={teamStyle}>
       <AgentCockpitHeader controller={cockpit} invite={invite} />
 
-      <AgentTaskPanel notice={cockpit.notice} workflow={cockpit.workflow} />
-
-      <div className="agent-cockpit-layout">
+      <div className={`agent-cockpit-layout${showSecondarySidebar ? ' has-secondary' : ''}`}>
         <div className="cockpit-primary-column">
           <AgentInsightWorkbench role={invite.role} roleState={cockpit.roleState} />
         </div>
 
-        <AgentCockpitSidebar controller={cockpit} invite={invite} />
+        {showSecondarySidebar ? <AgentCockpitSidebar controller={cockpit} /> : null}
       </div>
 
       <AgentCockpitScripts
