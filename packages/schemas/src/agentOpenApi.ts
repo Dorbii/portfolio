@@ -20,6 +20,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/claim': {
         post: {
           operationId: 'gptClaim',
+          'x-openai-isConsequential': false,
           summary: 'Claim and bootstrap a role from an invite URL',
           description:
             'Claim the role once using the invite URL, agent name, and generated team identity. The invite claim token stays inside the request body and is not exposed in public state.',
@@ -30,6 +31,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/next': {
         post: {
           operationId: 'gptNext',
+          'x-openai-isConsequential': false,
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
             'Poll this when the role is waiting. Follow the continuation hint to keep playing until complete or expired. Post-fight packets can include packet.review and packet.sharedDebrief; live combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available.',
@@ -40,6 +42,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/act': {
         post: {
           operationId: 'gptAct',
+          'x-openai-isConsequential': false,
           summary: 'Submit one GPT action or combat round plan',
           description:
             'During build, submit one compact action (no actionId needed), e.g. {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}; use {"action":{"kind":"cancel_build_selection"}} to back out of the current build selection when packet.build.edit.cancel is true. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps. Legacy actionId submissions copied from packet.legalActions remain accepted during migration. Provide exactly one of action or actionId.',
@@ -50,6 +53,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/reflection': {
         post: {
           operationId: 'gptReflection',
+          'x-openai-isConsequential': false,
           summary: 'Submit a private post-fight reflection',
           description:
             'Submit concise private post-fight claims only when the packet requests a reflection.',
@@ -60,6 +64,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
       '/gpt/catalog': {
         post: {
           operationId: 'gptCatalog',
+          'x-openai-isConsequential': false,
           summary: 'Fetch selected part summaries',
           description:
             'Request only the part ids needed to interpret current legal actions. This endpoint returns compact catalog summaries instead of embedding the full catalog in every packet.',

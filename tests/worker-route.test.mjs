@@ -1063,6 +1063,9 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(json.paths['/gpt/act'].post.operationId, 'gptAct')
   assert.equal(json.paths['/gpt/reflection'].post.operationId, 'gptReflection')
   assert.equal(json.paths['/gpt/catalog'].post.operationId, 'gptCatalog')
+  for (const path of Object.keys(json.paths)) {
+    assert.equal(json.paths[path].post['x-openai-isConsequential'], false)
+  }
   assert.ok(json.paths['/gpt/next'].post.description.includes('packet.review'))
   assert.ok(json.paths['/gpt/next'].post.description.includes('fightDeadlineAt'))
   assert.ok(json.paths['/gpt/act'].post.description.includes('cancel_build_selection'))
