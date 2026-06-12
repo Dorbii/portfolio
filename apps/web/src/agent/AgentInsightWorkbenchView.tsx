@@ -49,8 +49,8 @@ export function AgentInsightWorkbenchView({ role, roleState }: Props) {
       <div className="plan-metric-strip insight-v6-status-strip" aria-label="Agent state summary">
         <PlanMetric label="Phase" value={formatLabel(roleState?.phase ?? 'not_loaded')} />
         <PlanMetric label="Loadout" tone={submitted ? 'ok' : undefined} value={submissionLabel} />
-        <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No blueprint'} />
-        <PlanMetric label="Parts" value={`${snapshot.purchased}/${snapshot.limit}`} />
+        <PlanMetric label="Build" value={`${snapshot.purchased}/${snapshot.limit} parts`} />
+        <PlanMetric label="Store" tone={snapshot.storeActive ? 'ok' : undefined} value={snapshot.storeActive ? `${snapshot.storeOffers} offers` : 'No store'} />
         <PlanMetric
           label={combatPacket ? 'Combat plan' : roleState?.phase === 'combat_turn' ? 'Board actions' : 'Actions'}
           tone={combatPacket && !combatPacket.submitted ? 'ok' : legalActions.length > 0 ? 'ok' : undefined}
@@ -88,26 +88,33 @@ export function AgentInsightWorkbenchView({ role, roleState }: Props) {
             <div className="insight-v6-drawer-header">
               <div>
                 <SectionTitle id="detail-drawer-heading" title="Part explorer" />
-                <p>Read-only drawer for installed parts and the current store packet.</p>
+                <p>Read-only drawer for installed parts, machine tree, and the current store packet.</p>
               </div>
               <PartExplorerTabs
                 activeTab={drawerTab}
+                partCount={loadoutParts.length}
+                rowCount={snapshot.rows}
                 setActiveTab={setDrawerTab}
-                storeCount={storeOffers.length + foundationParts.length}
+                storeCount={storeOffers.length + foundationParts.length + inventoryParts.length}
                 storeActive={snapshot.storeActive}
               />
             </div>
 
             {drawerTab === 'equipped' ? (
               <EquippedPartsDrawer parts={loadoutParts} snapshot={snapshot} />
-            ) : (
+            ) : null}
+            {drawerTab === 'store' ? (
               <StoreDrawer
                 foundationParts={foundationParts}
                 inventoryParts={inventoryParts}
+                loadoutParts={loadoutParts}
                 snapshot={snapshot}
                 storeOffers={storeOffers}
               />
-            )}
+            ) : null}
+            {drawerTab === 'tree' ? (
+              <TreeDrawer parts={loadoutParts} />
+            ) : null}
           </section>
         </>
       ) : null}
@@ -184,11 +191,12 @@ function PartMap({ snapshot }: { snapshot: BuildSnapshot }) {
   return <div className="insight-v6-part-map" aria-label="Installed part density map">{cells.map((part, index) => <span className={part ? `category-${normalizeCategory(part.category)}` : 'category-empty'} key={part?.instanceId ?? `empty.${index}`} title={part ? `${part.name} · ${part.instanceId}` : `Empty slot ${index + 1}`} />)}</div>
 }
 
-function PartExplorerTabs({ activeTab, setActiveTab, storeActive, storeCount }: { activeTab: DrawerTab; setActiveTab: (tab: DrawerTab) => void; storeActive: boolean; storeCount: number }) {
+function PartExplorerTabs({ activeTab, partCount, rowCount, setActiveTab, storeActive, storeCount }: { activeTab: DrawerTab; partCount: number; rowCount: number; setActiveTab: (tab: DrawerTab) => void; storeActive: boolean; storeCount: number }) {
   return (
     <div className="insight-v6-tabs" role="tablist" aria-label="Part explorer view">
-      <button className={activeTab === 'equipped' ? 'is-active' : ''} onClick={() => setActiveTab('equipped')} role="tab" type="button" aria-selected={activeTab === 'equipped'}>Equipped Parts</button>
+      <button className={activeTab === 'equipped' ? 'is-active' : ''} onClick={() => setActiveTab('equipped')} role="tab" type="button" aria-selected={activeTab === 'equipped'}>Equipped Parts<span>{partCount}</span></button>
       <button className={activeTab === 'store' ? 'is-active' : ''} onClick={() => setActiveTab('store')} role="tab" type="button" aria-selected={activeTab === 'store'}>Store{storeActive ? <span>{storeCount}</span> : null}</button>
+      <button className={activeTab === 'tree' ? 'is-active' : ''} onClick={() => setActiveTab('tree')} role="tab" type="button" aria-selected={activeTab === 'tree'}>Tree View<span>{rowCount}</span></button>
     </div>
   )
 }
@@ -204,18 +212,57 @@ function EquippedPartsDrawer({ parts, snapshot }: { parts: LoadoutPartReadout[];
   )
 }
 
-function StoreDrawer({ foundationParts, inventoryParts, snapshot, storeOffers }: { foundationParts: CatalogPartReadout[]; inventoryParts: CatalogPartReadout[]; snapshot: BuildSnapshot; storeOffers: CatalogPartReadout[] }) {
+function StoreDrawer({ foundationParts, inventoryParts, loadoutParts, snapshot, storeOffers }: { foundationParts: CatalogPartReadout[]; inventoryParts: CatalogPartReadout[]; loadoutParts: LoadoutPartReadout[]; snapshot: BuildSnapshot; storeOffers: CatalogPartReadout[] }) {
   return (
     <div className="insight-v6-drawer-body insight-v6-store-body" role="tabpanel">
       <div className="insight-v6-store-context"><strong>Current build context</strong><span>{snapshot.purchased}/{snapshot.limit} purchased</span><span>{snapshot.remaining === undefined ? 'cap unknown' : `${snapshot.remaining} cap remaining`}</span><span>{snapshot.storeOffers} round offers</span></div>
+      <div className="insight-v6-equipped-context" aria-label="Currently equipped context">
+        {loadoutParts.slice(0, 8).map((part) => <span className={`category-${normalizeCategory(part.category)}`} key={part.instanceId}>{part.name}</span>)}
+      </div>
       <div className="insight-v6-store-grid"><CatalogPartList emptyText="No round store offers are loaded for this role state." parts={storeOffers} title="Round offers" /><CatalogPartList emptyText="No foundation templates are loaded." parts={foundationParts} title="Foundation templates" /><CatalogPartList emptyText="No owned catalog parts are in inventory." parts={inventoryParts} title="Owned inventory" /></div>
       <p className="insight-v6-readonly-note">Store is visible for humans, but buying, mounting, moving, and confirming remain agent actions.</p>
     </div>
   )
 }
 
+function TreeDrawer({ parts }: { parts: LoadoutPartReadout[] }) {
+  const depthById = createDepthByPartId(parts)
+  return (
+    <div className="insight-v6-drawer-body" role="tabpanel">
+      {parts.length > 0
+        ? <ol className="insight-v6-tree-list">{parts.map((part) => <li className={`insight-v6-tree-row category-${normalizeCategory(part.category)}`} key={part.instanceId} style={{ paddingLeft: `${10 + (depthById.get(part.instanceId) ?? 0) * 16}px` }}><strong>{part.name}</strong><span>{part.instanceId}</span><small>parent: {part.parentId ?? 'root'}</small></li>)}</ol>
+        : <p className="agent-empty">No mounted part tree is available.</p>}
+    </div>
+  )
+}
+
 function CatalogPartList({ emptyText, parts, title }: { emptyText: string; parts: CatalogPartReadout[]; title: string }) {
   return <div className="catalog-part-block insight-v6-catalog-block"><strong>{title}</strong>{parts.length > 0 ? <ul className="catalog-part-list insight-v6-catalog-list">{parts.map((part) => <li key={part.id}><div><span>{part.category}</span><strong>{part.name}</strong><small>{part.detail}</small></div><em>{part.quantity ? `x${part.quantity}` : part.status}</em></li>)}</ul> : <p className="agent-empty">{emptyText}</p>}</div>
+}
+
+function createDepthByPartId(parts: LoadoutPartReadout[]): Map<string, number> {
+  const partsById = new Map(parts.map((part) => [part.instanceId, part]))
+  const depths = new Map<string, number>()
+  const depthFor = (part: LoadoutPartReadout, seen = new Set<string>()): number => {
+    const cached = depths.get(part.instanceId)
+    if (typeof cached === 'number') return cached
+    if (!part.parentId || seen.has(part.parentId)) {
+      depths.set(part.instanceId, 0)
+      return 0
+    }
+    const parent = partsById.get(part.parentId)
+    if (!parent) {
+      depths.set(part.instanceId, 1)
+      return 1
+    }
+    const nextSeen = new Set(seen)
+    nextSeen.add(part.instanceId)
+    const depth = depthFor(parent, nextSeen) + 1
+    depths.set(part.instanceId, depth)
+    return depth
+  }
+  for (const part of parts) depthFor(part)
+  return depths
 }
 
 function createInsightSubtitle(roleState: RolePrivateState | null, loadout: ConfirmedLoadoutView | null, identity: ReturnType<typeof resolveTeamIdentity> | null): string {
