@@ -122,6 +122,12 @@ class FakeDurableObjectNamespace {
 
   #storages = new Map()
 
+  #env
+
+  constructor(env) {
+    this.#env = env
+  }
+
   idFromName(name) {
     return name
   }
@@ -152,9 +158,7 @@ class FakeDurableObjectNamespace {
       {
         storage: this.storageFor(key),
       },
-      {
-        AGENT_ARENA_SESSION: this,
-      },
+      this.#env,
     )
     const stub = {
       fetch: (request) => durableObject.fetch(request),
@@ -166,10 +170,20 @@ class FakeDurableObjectNamespace {
   }
 }
 
-function createEnv() {
-  return {
-    AGENT_ARENA_SESSION: new FakeDurableObjectNamespace(),
+function createEnv(overrides = {}) {
+  const env = {
+    GPT_AUTO_POLL_ATTEMPTS: '0',
+    GPT_AUTO_POLL_DELAY_MS: '0',
+    ...overrides,
   }
+
+  env.AGENT_ARENA_SESSION = new FakeDurableObjectNamespace(env)
+
+  return env
+}
+
+function waitMs(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs))
 }
 
 function createRequest(path, options = {}) {
@@ -776,7 +790,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.name, 'Clash of Clankers')
-  assert.equal(json.version, '0.2.0-gamemaster')
+  assert.equal(json.version, '0.2.1-gamemaster')
   assert.equal(json.entrypoints.agentSpec, 'https://arena-api.dorbii.net/agent-spec.json')
   assert.equal(json.entrypoints.gptActionsOpenApi, 'https://arena-api.dorbii.net/openapi.json')
   assert.equal(json.customGptActions.openApi, 'https://arena-api.dorbii.net/openapi.json')
@@ -807,6 +821,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.objective.includes('combat round plans'))
   assert.ok(json.objective.includes('server owns legality'))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Custom GPT path only')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('routing layer')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('A waiting GPT response is not a turn result')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('gptCatalog')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Omit teamIdentity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.combat')))
@@ -1047,7 +1063,9 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.openapi, '3.1.0')
-  assert.ok(json.info.description.includes('Do not ask the user to type continue'))
+  assert.equal(json.info.version, '0.2.2-gamemaster')
+  assert.ok(json.info.description.includes('routing layer'))
+  assert.ok(json.info.description.includes('ask the user to type continue'))
   assert.equal(json.servers[0].url, 'https://arena-api.test')
   assert.deepEqual(Object.keys(json.paths).sort(), [
     '/gpt/act',
@@ -1105,7 +1123,16 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
     json.components.schemas.GptResponse.properties.continuation.$ref,
     '#/components/schemas/GptContinuationHint',
   )
-  assert.deepEqual(json.components.schemas.GptResponse.required, ['status', 'packet', 'continuation'])
+  assert.equal(
+    json.components.schemas.GptResponse.properties.nextStep.$ref,
+    '#/components/schemas/GptNextStepDirective',
+  )
+  assert.deepEqual(json.components.schemas.GptResponse.required, [
+    'status',
+    'packet',
+    'continuation',
+    'nextStep',
+  ])
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.build.edit.cancel'))
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.review'))
   assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('fightStartedAt'))
@@ -1702,6 +1729,9 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assert.equal(redStart.json.continuation.recommendedNextCall, 'gptNext')
   assert.equal(typeof redStart.json.continuation.pollAfterMs, 'number')
   assert.ok(redStart.json.continuation.instruction.includes('Do not ask the user to type continue'))
+  assert.equal(redStart.json.nextStep.userVisibleResponseAllowed, false)
+  assert.equal(redStart.json.nextStep.recommendedNextCall, 'gptNext')
+  assert.equal(redStart.json.packet.combat, undefined)
   assert.equal(redStart.json.packet.board, undefined)
   assert.ok(JSON.stringify(redStart.json).length < 8_000)
   assert.equal(blueCombat.response.status, 200)
@@ -1709,6 +1739,8 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assert.equal(blueCombat.json.continuation.keepGoing, true)
   assert.equal(blueCombat.json.continuation.mustCallBeforeResponding, true)
   assert.equal(blueCombat.json.continuation.recommendedNextCall, 'gptAct')
+  assert.equal(blueCombat.json.nextStep.userVisibleResponseAllowed, false)
+  assert.equal(blueCombat.json.nextStep.recommendedNextCall, 'gptAct')
   assert.ok(blueCombat.json.continuation.instruction.includes('actionId combat_plan'))
   assert.equal(blueCombat.json.continuation.instruction.includes('packet.legalActions[].id'), false)
   assert.equal(redCombat.response.status, 200)
@@ -1758,6 +1790,168 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assert.equal(submittedPlanResponse.json.acceptedActionId, 'combat_plan')
   assert.equal(submittedPlanResponse.json.submittedSteps, 1)
   assert.ok(JSON.stringify(submittedPlanResponse.json).length < 30_000)
+})
+
+test('POST /gpt/act strips exhausted waiting combat responses', async () => {
+  const env = createEnv({
+    GPT_AUTO_POLL_ATTEMPTS: '10',
+    GPT_AUTO_POLL_DELAY_MS: '20',
+  })
+  const sessionId = 's_gpt_act_auto_poll_combat'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+  await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const blueCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+    },
+  })
+  const redCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+
+  assert.equal(blueCombat.json.status, 'playable')
+  assert.equal(redCombat.json.status, 'playable')
+
+  const blueActionPromise = route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+      actionId: 'combat_plan',
+      parameters: {
+        steps: [
+          { kind: 'end_turn' },
+        ],
+      },
+    },
+  })
+
+  await waitMs(5)
+
+  const redAction = await route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      actionId: 'combat_plan',
+      parameters: {
+        steps: [
+          { kind: 'end_turn' },
+        ],
+      },
+    },
+  })
+  const blueAction = await blueActionPromise
+
+  assert.equal(redAction.response.status, 200)
+  assert.equal(blueAction.response.status, 200)
+  assert.equal(blueAction.json.acceptedActionId, 'combat_plan')
+  assert.equal(blueAction.json.autoPoll.resolved, false)
+  assert.equal(blueAction.json.autoPoll.exhausted, true)
+  assert.ok(blueAction.json.autoPoll.attempts > 0)
+  assert.equal(blueAction.json.status, 'waiting')
+  assert.equal(blueAction.json.packet.combat, undefined)
+  assert.equal(blueAction.json.packet.nextAction, 'wait_for_opponent_turn')
+  assert.equal(blueAction.json.continuation.recommendedNextCall, 'gptNext')
+  assert.equal(blueAction.json.continuation.mustCallBeforeResponding, true)
+  assert.equal(blueAction.json.nextStep.userVisibleResponseAllowed, false)
+  assert.equal(blueAction.json.nextStep.recommendedNextCall, 'gptNext')
+  assert.ok(blueAction.json.packet.instruction.includes('Do not summarize combat state'))
+})
+
+test('POST /gpt/act auto-polls through opponent submission to the next playable combat packet', async () => {
+  const env = createEnv({
+    GPT_AUTO_POLL_ATTEMPTS: '80',
+    GPT_AUTO_POLL_DELAY_MS: '25',
+  })
+  const sessionId = 's_gpt_act_auto_poll_resolved_combat'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+  await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const blueCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+    },
+  })
+  const redCombat = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+
+  assert.equal(blueCombat.json.status, 'playable')
+  assert.equal(redCombat.json.status, 'playable')
+
+  const blueActionPromise = route(env, '/gpt/act', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, blueInvite),
+      actionId: 'combat_plan',
+      parameters: {
+        steps: [
+          { kind: 'end_turn' },
+        ],
+      },
+    },
+  })
+
+  await waitMs(5)
+
+  const redAction = await route(env, `/sessions/${sessionId}/combat-plan`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      action: 'submit_combat_round_plan',
+      round: redCombat.json.packet.combat.combat.round,
+      decisionVersion: redCombat.json.packet.combat.combat.decisionVersion,
+      steps: [
+        { kind: 'end_turn' },
+      ],
+    },
+  })
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+  const openedAt = new Date(Date.now() - 1000).toISOString()
+
+  stored.combat.openedAt = openedAt
+  stored.combat.deadlineAt = new Date(Date.now() + 60_000).toISOString()
+  await storage.put('agent-arena-session', stored)
+
+  const blueAction = await blueActionPromise
+
+  assert.equal(redAction.response.status, 200)
+  assert.equal(blueAction.response.status, 200)
+  assert.equal(blueAction.json.acceptedActionId, 'combat_plan')
+  assert.equal(blueAction.json.autoPoll.resolved, true)
+  assert.equal(blueAction.json.autoPoll.exhausted, false)
+  assert.ok(blueAction.json.autoPoll.attempts > 0)
+  assert.equal(blueAction.json.status, 'playable')
+  assert.equal(blueAction.json.packet.nextAction, 'choose_turn')
+  assert.ok(blueAction.json.packet.decisionVersion > blueCombat.json.packet.decisionVersion)
+  assert.equal(blueAction.json.packet.combat.combat.decisionVersion, blueAction.json.packet.decisionVersion)
+  assert.equal(blueAction.json.continuation.recommendedNextCall, 'gptAct')
+  assert.equal(blueAction.json.continuation.mustCallBeforeResponding, true)
+  assert.equal(blueAction.json.nextStep.userVisibleResponseAllowed, false)
+  assert.equal(blueAction.json.nextStep.recommendedNextCall, 'gptAct')
 })
 
 test('POST /gpt/catalog returns selected compact part summaries', async () => {

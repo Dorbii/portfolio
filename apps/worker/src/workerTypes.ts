@@ -21,4 +21,6 @@ export type DurableObjectNamespace = {
 export type WorkerEnv = {
   AGENT_ARENA_SESSION?: DurableObjectNamespace
   AGENT_ARENA_ALLOWED_ORIGINS?: string
+  GPT_AUTO_POLL_ATTEMPTS?: string
+  GPT_AUTO_POLL_DELAY_MS?: string
 }

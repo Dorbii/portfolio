@@ -9,9 +9,9 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
     openapi: '3.1.0',
     info: {
       title: 'Clash of Clankers GPT Actions API',
-      version: '0.2.1-gamemaster',
+      version: '0.2.2-gamemaster',
       description:
-        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. When a response has continuation.keepGoing true or continuation.mustCallBeforeResponding true, the next assistant step must be the recommended GPT Action call with the same inviteUrl. Do not write a user-visible message. Do not summarize. Do not ask the user to type continue before making that action call.',
+        'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. Treat continuation/nextStep as the routing layer. When keepGoing, mustCallBeforeResponding, or nextStep.beforeUserResponse is true, the next assistant step must be the recommended GPT Action call with the same inviteUrl. Do not write a user-visible message, summarize, or ask the user to type continue before making that action call.',
     },
     servers: [
       { url: apiBase },
@@ -34,7 +34,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll while waiting. If continuation.keepGoing is true, call continuation.recommendedNextCall yourself; do not ask the user to continue. Post-fight packets may include packet.review/sharedDebrief; combat packets may include fightDeadlineAt/fightSeconds.',
+            'Poll status. Waiting is not final. If continuation.keepGoing or nextStep.beforeUserResponse is true, call the recommended operation with the same inviteUrl before chat. Do not ask user to continue. Post-fight may include packet.review/sharedDebrief; combat may include fightDeadlineAt/fightSeconds.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },
@@ -45,7 +45,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'Submit one build action or combat_plan. In combat use actionId combat_plan with parameters.steps. Follow continuation before responding.',
+            'Submit one build action or combat_plan. In combat use actionId combat_plan with parameters.steps. The server may long-poll after a submit; follow continuation/nextStep before responding.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -480,10 +480,34 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
           },
         },
+        GptNextStepDirective: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['beforeUserResponse', 'userVisibleResponseAllowed', 'recommendedNextCall', 'instruction'],
+          properties: {
+            beforeUserResponse: {
+              type: 'boolean',
+              description:
+                'True means the assistant must make the recommended GPT Action call before any user-visible response.',
+            },
+            userVisibleResponseAllowed: {
+              type: 'boolean',
+              description:
+                'False means do not write chat text to the user; call the recommended GPT Action instead.',
+            },
+            recommendedNextCall: {
+              type: 'string',
+              enum: ['gptNext', 'gptAct', 'gptReflection', 'stop'],
+            },
+            instruction: {
+              type: 'string',
+            },
+          },
+        },
         GptResponse: {
           type: 'object',
           additionalProperties: true,
-          required: ['status', 'packet', 'continuation'],
+          required: ['status', 'packet', 'continuation', 'nextStep'],
           properties: {
             status: {
               type: 'string',
@@ -493,10 +517,13 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
               description:
-                'Current GPT packet. During build, use packet.build, including packet.build.edit.cancel for cancel_build_selection. During combat, use packet.combat.combat and packet.combat.board; compact combat packets omit legalActions and raw board affordance arrays and include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available. Post-fight packets can include packet.review and packet.sharedDebrief. packet.legalActions appears only on compatibility surfaces.',
+                'Current GPT packet. During build, use packet.build, including packet.build.edit.cancel for cancel_build_selection. During playable combat, use packet.combat.combat and packet.combat.board; waiting combat packets may omit combat details and should only drive the nextStep action. Compact combat packets omit legalActions and raw board affordance arrays and include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available. Post-fight packets can include packet.review and packet.sharedDebrief. packet.legalActions appears only on compatibility surfaces.',
             },
             continuation: {
               $ref: '#/components/schemas/GptContinuationHint',
+            },
+            nextStep: {
+              $ref: '#/components/schemas/GptNextStepDirective',
             },
           },
         },

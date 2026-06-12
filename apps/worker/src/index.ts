@@ -67,6 +67,10 @@ const GPT_COMPACT_BOARD_CELL_LIMIT = 24
 const GPT_COMPACT_BOARD_LIST_LIMIT = 16
 const GPT_COMPACT_ACTION_REF_LIMIT = 6
 const GPT_COMBAT_PLAN_ACTION_ID = 'combat_plan'
+const DEFAULT_GPT_AUTO_POLL_ATTEMPTS = 24
+const DEFAULT_GPT_AUTO_POLL_DELAY_MS = 750
+const MAX_GPT_AUTO_POLL_ATTEMPTS = 40
+const MAX_GPT_AUTO_POLL_DELAY_MS = 1500
 
 type JsonRequestReadResult =
   | {
@@ -137,6 +141,19 @@ type GptCompactPacket = {
 }
 
 type GptPacketStatus = 'claimed' | 'playable' | 'waiting' | 'complete' | 'expired'
+
+type GptAutoPollConfig = {
+  attempts: number
+  delayMs: number
+}
+
+type GptAutoPollSummary = {
+  attempts: number
+  resolved: boolean
+  exhausted: boolean
+  delayMs: number
+  advancedRound?: boolean
+}
 
 type GptMountSlotAlias = {
   id: string
@@ -235,6 +252,8 @@ export async function handleWorkerRequest(
 export class AgentArenaSession {
   private readonly state: DurableObjectState
 
+  private readonly env: WorkerEnv
+
   private readonly sessionRoutes: Record<string, SessionRouteSpec> = {
     claim: {
       method: 'POST',
@@ -313,8 +332,9 @@ export class AgentArenaSession {
     },
   }
 
-  constructor(state: DurableObjectState) {
+  constructor(state: DurableObjectState, env: WorkerEnv = {}) {
     this.state = state
+    this.env = env
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -606,15 +626,9 @@ export class AgentArenaSession {
       return jsonResponse(result, { status: statusForRelayError(result.error) })
     }
 
-    return jsonResponse(
-      {
-        status: 'claimed',
-        sessionId: result.value.sessionId,
-        role: result.value.role,
-        packet: this.compactGptPacketFor(coordinator, result.value.packet),
-        continuation: gptContinuationForPacket(result.value.packet, 'claimed'),
-      },
-    )
+    return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value.packet, {}, {
+      statusOverride: 'claimed',
+    })
   }
 
   private compactGptPacketFor(
@@ -626,6 +640,110 @@ export class AgentArenaSession {
       : undefined
 
     return compactGptPacket(packet, compactBuild)
+  }
+
+  private async gptPacketResponse(
+    coordinator: SessionCoordinator,
+    roleToken: string,
+    packet: GameMasterPacket,
+    extras: Record<string, unknown> = {},
+    options: {
+      autoPoll?: boolean
+      statusOverride?: GptPacketStatus
+    } = {},
+  ): Promise<Response> {
+    const pollResult = options.autoPoll === true && options.statusOverride === undefined
+      ? await this.autoPollGptPacket(coordinator, roleToken, packet)
+      : {
+          coordinator,
+          packet,
+          autoPoll: undefined,
+        }
+    const status = options.statusOverride ?? gptPacketStatus(pollResult.packet)
+    const continuation = gptContinuationForPacket(pollResult.packet, options.statusOverride)
+
+    return this.sessionResultResponse(pollResult.coordinator, {
+      ok: true,
+      value: {
+        status,
+        sessionId: pollResult.packet.sessionId,
+        role: pollResult.packet.role,
+        ...extras,
+        ...(pollResult.autoPoll ? { autoPoll: pollResult.autoPoll } : {}),
+        packet: this.compactGptPacketFor(pollResult.coordinator, pollResult.packet),
+        continuation,
+        nextStep: gptNextStepDirective(continuation),
+      },
+    })
+  }
+
+  private async autoPollGptPacket(
+    coordinator: SessionCoordinator,
+    roleToken: string,
+    packet: GameMasterPacket,
+  ): Promise<{
+    coordinator: SessionCoordinator
+    packet: GameMasterPacket
+    autoPoll?: GptAutoPollSummary
+  }> {
+    const config = gptAutoPollConfig(this.env)
+
+    if (config.attempts <= 0 || gptPacketStatus(packet) !== 'waiting') {
+      return { coordinator, packet }
+    }
+
+    let activeCoordinator = coordinator
+    let activePacket = packet
+    let attempts = 0
+    let advancedRound = false
+
+    await this.saveSession(activeCoordinator)
+
+    while (attempts < config.attempts && gptPacketStatus(activePacket) === 'waiting') {
+      await wait(config.delayMs)
+
+      const latestCoordinator = await this.loadSession()
+
+      if (latestCoordinator) {
+        activeCoordinator = latestCoordinator
+      }
+
+      const packetResult = await activeCoordinator.getGameMasterPacketForToken(roleToken)
+
+      if (!packetResult.ok) {
+        break
+      }
+
+      attempts += 1
+      activePacket = packetResult.value
+
+      if (shouldGptNextAdvanceAfterDebrief(activePacket)) {
+        const advance = await activeCoordinator.advanceRoundAfterSharedDebrief(roleToken)
+
+        if (!advance.ok) {
+          break
+        }
+
+        activePacket = advance.value.packet
+        advancedRound = true
+      }
+
+      await this.saveSession(activeCoordinator)
+    }
+
+    const status = gptPacketStatus(activePacket)
+
+    return {
+      coordinator: activeCoordinator,
+      packet: activePacket,
+      autoPoll: {
+        attempts,
+        resolved: status !== 'waiting',
+        exhausted: status === 'waiting',
+        delayMs: config.delayMs,
+        ...(advancedRound ? { advancedRound: true } : {}),
+      },
+    }
   }
 
   private async gptNext(
@@ -658,31 +776,20 @@ export class AgentArenaSession {
 
       await this.saveSession(coordinator)
 
-      return jsonResponse({
-        status: gptPacketStatus(advance.value.packet),
-        sessionId: advance.value.packet.sessionId,
-        role: advance.value.packet.role,
+      return this.gptPacketResponse(coordinator, invite.value.claimToken, advance.value.packet, {
         advancedRound: true,
-        packet: this.compactGptPacketFor(coordinator, advance.value.packet),
-        continuation: gptContinuationForPacket(advance.value.packet),
+      }, {
+        autoPoll: true,
       })
     }
 
-    return this.sessionResultResponse(
-      coordinator,
-      result.ok
-        ? {
-            ok: true,
-            value: {
-              status: gptPacketStatus(result.value),
-              sessionId: result.value.sessionId,
-              role: result.value.role,
-              packet: this.compactGptPacketFor(coordinator, result.value),
-              continuation: gptContinuationForPacket(result.value),
-            },
-          }
-        : result,
-    )
+    if (!result.ok) {
+      return this.sessionResultResponse(coordinator, result)
+    }
+
+    return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value, {}, {
+      autoPoll: true,
+    })
   }
 
   private async gptAct(
@@ -741,14 +848,10 @@ export class AgentArenaSession {
         return this.sessionResultResponse(coordinator, result)
       }
 
-      return this.sessionResultResponse(coordinator, {
-        ok: true,
-        value: {
-          status: gptPacketStatus(result.value.packet),
-          acceptedAction: body.action,
-          packet: compactGptPacket(result.value.packet, result.value.compactBuild),
-          continuation: gptContinuationForPacket(result.value.packet),
-        },
+      return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value.packet, {
+        acceptedAction: body.action,
+      }, {
+        autoPoll: true,
       })
     }
 
@@ -759,16 +862,12 @@ export class AgentArenaSession {
         return this.sessionResultResponse(coordinator, result)
       }
 
-      return this.sessionResultResponse(coordinator, {
-        ok: true,
-        value: {
-          status: gptPacketStatus(result.value.packet),
-          acceptedActionId: body.actionId,
-          submittedSteps: result.value.submittedSteps,
-          submittedPlan: result.value.submittedPlan,
-          packet: this.compactGptPacketFor(coordinator, result.value.packet),
-          continuation: gptContinuationForPacket(result.value.packet),
-        },
+      return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value.packet, {
+        acceptedActionId: body.actionId,
+        submittedSteps: result.value.submittedSteps,
+        submittedPlan: result.value.submittedPlan,
+      }, {
+        autoPoll: true,
       })
     }
 
@@ -805,21 +904,16 @@ export class AgentArenaSession {
       ...(typeof body.publicMessage === 'string' ? { publicMessage: body.publicMessage } : {}),
     })
 
-    return this.sessionResultResponse(
-      coordinator,
-      result.ok
-        ? {
-            ok: true,
-            value: {
-              status: gptPacketStatus(result.value.packet),
-              acceptedActionId: body.actionId,
-              ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
-              packet: this.compactGptPacketFor(coordinator, result.value.packet),
-              continuation: gptContinuationForPacket(result.value.packet),
-            },
-          }
-        : result,
-    )
+    if (!result.ok) {
+      return this.sessionResultResponse(coordinator, result)
+    }
+
+    return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value.packet, {
+      acceptedActionId: body.actionId,
+      ...(resolvedGptAlias ? { resolvedActionId: action.id } : {}),
+    }, {
+      autoPoll: true,
+    })
   }
 
   private async gptReflect(
@@ -866,19 +960,13 @@ export class AgentArenaSession {
       confidence: body.confidence ?? 'medium',
     })
 
-    return this.sessionResultResponse(
-      coordinator,
-      result.ok
-        ? {
-            ok: true,
-            value: {
-              status: gptPacketStatus(result.value.packet),
-              packet: this.compactGptPacketFor(coordinator, result.value.packet),
-              continuation: gptContinuationForPacket(result.value.packet),
-            },
-          }
-        : result,
-    )
+    if (!result.ok) {
+      return this.sessionResultResponse(coordinator, result)
+    }
+
+    return this.gptPacketResponse(coordinator, invite.value.claimToken, result.value.packet, {}, {
+      autoPoll: true,
+    })
   }
 
   private async gptCatalog(
@@ -1135,7 +1223,7 @@ function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildP
   // Compact combat protocol: combat packets expose compact state only; the
   // agent submits intent and the server resolves legality.
   if (packet.phase === 'combat_turn' && packet.combatCompact) {
-    return {
+    const basePacket = {
       sessionId: packet.sessionId,
       role: packet.role,
       phase: packet.phase,
@@ -1143,6 +1231,17 @@ function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildP
       round: packet.round,
       ...(packet.fightId ? { fightId: packet.fightId } : {}),
       decisionVersion: packet.decisionVersion,
+    }
+
+    if (packet.nextAction !== 'choose_turn') {
+      return {
+        ...basePacket,
+        instruction: 'Waiting for the next combat decision packet. Do not summarize combat state or ask the user to continue; call gptNext again.',
+      }
+    }
+
+    return {
+      ...basePacket,
       instruction: compactCombatGptInstruction(packet),
       combat: packet.combatCompact,
       ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
@@ -1910,6 +2009,50 @@ function isGptCompactCombatDecision(
   return packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn'
 }
 
+function gptAutoPollConfig(env: WorkerEnv): GptAutoPollConfig {
+  return {
+    attempts: boundedInteger(
+      env.GPT_AUTO_POLL_ATTEMPTS,
+      DEFAULT_GPT_AUTO_POLL_ATTEMPTS,
+      0,
+      MAX_GPT_AUTO_POLL_ATTEMPTS,
+    ),
+    delayMs: boundedInteger(
+      env.GPT_AUTO_POLL_DELAY_MS,
+      DEFAULT_GPT_AUTO_POLL_DELAY_MS,
+      0,
+      MAX_GPT_AUTO_POLL_DELAY_MS,
+    ),
+  }
+}
+
+function boundedInteger(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  if (value === undefined || value.trim() === '') {
+    return fallback
+  }
+
+  const parsed = Number(value)
+
+  if (!Number.isFinite(parsed)) {
+    return fallback
+  }
+
+  return Math.min(Math.max(Math.trunc(parsed), min), max)
+}
+
+function wait(delayMs: number): Promise<void> {
+  if (delayMs <= 0) {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => setTimeout(resolve, delayMs))
+}
+
 function gptPacketStatus(
   packet: Pick<GameMasterPacket, 'legalActions' | 'nextAction' | 'phase'>,
 ): Exclude<GptPacketStatus, 'claimed'> {
@@ -2009,6 +2152,18 @@ function gptContinuationForPacket(
     recommendedNextCall: 'gptNext',
     pollAfterMs: 1500,
     instruction: 'Call gptNext again after a short wait before writing any user-visible response. Keep polling until the returned status is playable, complete, or expired. Do not ask the user to type continue.',
+  }
+}
+
+function gptNextStepDirective(continuation: Record<string, unknown>): Record<string, unknown> {
+  const requiresAction =
+    continuation.keepGoing === true || continuation.mustCallBeforeResponding === true
+
+  return {
+    beforeUserResponse: requiresAction,
+    userVisibleResponseAllowed: !requiresAction,
+    recommendedNextCall: continuation.recommendedNextCall,
+    instruction: continuation.instruction,
   }
 }
 

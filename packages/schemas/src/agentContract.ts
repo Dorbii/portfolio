@@ -44,7 +44,8 @@ const CUSTOM_GPT_AGENT_GUIDE = {
     'Custom GPT path only: import /openapi.json as the GPT Actions schema and call only gptClaim, gptNext, gptAct, gptReflection, and gptCatalog.',
     'Use the invite URL as the private player key source. Do not paste claimToken into public logs or public chat.',
     'Call gptClaim once with inviteUrl and agentName. Omit teamIdentity unless you are intentionally overriding the server-generated role/session identity.',
-    'After every GPT response, follow continuation. If keepGoing or mustCallBeforeResponding is true, the next assistant step is the recommended GPT Action call with the same inviteUrl before any user-visible message.',
+    'After every GPT response, follow continuation as the routing layer. If keepGoing, mustCallBeforeResponding, or response.nextStep.beforeUserResponse is true, the next assistant step is the recommended GPT Action call with the same inviteUrl before any user-visible message.',
+    'A waiting GPT response is not a turn result to summarize. Keep calling the recommended GPT Action until the response is playable, complete, or expired.',
     'During choose_loadout, read packet.build and submit one compact gptAct.action. Do not use actionId or legalActions for compact build.',
     'During combat_turn, read packet.combat.combat for self/opponent/budget and packet.combat.board for grid/terrain. Submit gptAct with actionId combat_plan and parameters.steps using compact to/target/at coordinate tuples.',
     'During round_review, call gptReflection when nextAction is submit_reflection. When sharedDebrief is available, follow continuation to advance or stop.',
@@ -97,7 +98,7 @@ const RAW_HTTP_AGENT_GUIDE = {
 export function createAgentContract(options: CreateAgentContractOptions = {}) {
   return {
     name: 'Clash of Clankers',
-    version: '0.2.0-gamemaster',
+    version: '0.2.1-gamemaster',
     objective:
       'Choose loadouts from server-authored legal action menus, then submit combat round plans that the server resolves in lockstep substeps. The server owns legality, budgets, contact, replay events, and combat resolution.',
     runtime: 'browser_and_http',
