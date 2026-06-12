@@ -1270,6 +1270,50 @@ export class SessionCoordinator {
     }
   }
 
+  async advanceRoundAfterSharedDebrief(
+    roleToken: string,
+  ): Promise<SessionResult<{
+    packet: GameMasterPacket
+    publicState: ReturnType<typeof buildPublicSessionState>
+  }>> {
+    const now = this.clock()
+    const auth = await this.authorizeRoleAction(roleToken, 'action', now)
+
+    if (!auth.ok) {
+      return auth
+    }
+
+    this.resolveTimedTransitions(now)
+
+    if (this.state.phase !== 'round_review') {
+      return relayError(
+        'PHASE_CLOSED',
+        `Role-driven round advance is available only during round_review; current phase is ${this.state.phase}.`,
+      )
+    }
+
+    if (!this.state.lastResult) {
+      return relayError('INVALID_REQUEST', 'Combat result is required before the round can advance.')
+    }
+
+    const fightId = latestCompletedFightId(this.state)
+
+    if (!fightId || !sharedDebriefCoversFight(this.state, fightId)) {
+      return relayError('PHASE_CLOSED', 'Shared debrief must be available before GPT role advance.')
+    }
+
+    this.applyReviewAndAdvance(now, 'Agent advanced round review after shared debrief.')
+    this.ensureGameMasterActionSets(now)
+
+    return {
+      ok: true,
+      value: {
+        packet: this.buildGameMasterPacket(auth.value.role.role, now),
+        publicState: this.getPublicState(),
+      },
+    }
+  }
+
   async resetRole(
     refereeToken: string,
     request: unknown,
@@ -1714,11 +1758,11 @@ export class SessionCoordinator {
       : relayError('INVALID_TOKEN', 'Referee capability token is missing or invalid.')
   }
 
-  private applyReviewAndAdvance(now: string): void {
+  private applyReviewAndAdvance(now: string, message = 'Referee advanced round review.'): void {
     this.consumeDebriefIfReady(now)
     this.appendEvent(
       'round_advanced',
-      'Referee advanced round review.',
+      message,
       now,
     )
     applyCombatResultToScore(this.state)

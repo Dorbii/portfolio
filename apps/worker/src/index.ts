@@ -647,6 +647,25 @@ export class AgentArenaSession {
 
     const result = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
 
+    if (result.ok && shouldGptNextAdvanceAfterDebrief(result.value)) {
+      const advance = await coordinator.advanceRoundAfterSharedDebrief(invite.value.claimToken)
+
+      if (!advance.ok) {
+        return this.sessionResultResponse(coordinator, advance)
+      }
+
+      await this.saveSession(coordinator)
+
+      return jsonResponse({
+        status: gptPacketStatus(advance.value.packet),
+        sessionId: advance.value.packet.sessionId,
+        role: advance.value.packet.role,
+        advancedRound: true,
+        packet: this.compactGptPacketFor(coordinator, advance.value.packet),
+        continuation: gptContinuationForPacket(advance.value.packet),
+      })
+    }
+
     return this.sessionResultResponse(
       coordinator,
       result.ok
@@ -1124,6 +1143,7 @@ function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildP
       decisionVersion: packet.decisionVersion,
       instruction: compactCombatGptInstruction(packet),
       combat: packet.combatCompact,
+      ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
     }
   }
 
@@ -1140,6 +1160,7 @@ function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildP
       decisionVersion: packet.decisionVersion,
       instruction: compactBuildGptInstruction(packet),
       ...(packet.resources ? { resources: packet.resources } : {}),
+      ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
       build: compactBuild,
     }
   }
@@ -1913,7 +1934,7 @@ function gptContinuationForPacket(
         mustCallBeforeResponding: true,
         recommendedNextCall: 'gptNext',
         pollAfterMs: 1500,
-        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext again before writing any user-visible response. Do not ask the user to type continue.',
+        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext to advance after debrief before writing any user-visible response. Do not ask the user to type continue.',
       }
     }
 
@@ -1952,6 +1973,14 @@ function gptContinuationForPacket(
     pollAfterMs: 1500,
     instruction: 'Call gptNext again after a short wait before writing any user-visible response. Keep polling until the returned status is playable, complete, or expired. Do not ask the user to type continue.',
   }
+}
+
+function shouldGptNextAdvanceAfterDebrief(
+  packet: Pick<GameMasterPacket, 'nextAction' | 'review' | 'sharedDebrief'>,
+): boolean {
+  return packet.nextAction === 'wait_for_debrief' &&
+    packet.review?.debrief.available === true &&
+    packet.sharedDebrief !== undefined
 }
 
 export default {
