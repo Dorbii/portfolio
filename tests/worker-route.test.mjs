@@ -1067,6 +1067,12 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   for (const path of Object.keys(json.paths)) {
     assert.equal(json.paths[path].post['x-openai-isConsequential'], false)
   }
+  for (const [path, methods] of Object.entries(json.paths)) {
+    assert.ok(
+      methods.post.description.length <= 300,
+      `${path} post description exceeds Custom GPT 300-character limit`,
+    )
+  }
   assert.ok(json.paths['/gpt/next'].post.description.includes('packet.review'))
   assert.ok(json.paths['/gpt/next'].post.description.includes('fightDeadlineAt'))
   assert.ok(json.paths['/gpt/act'].post.description.includes('cancel_build_selection'))

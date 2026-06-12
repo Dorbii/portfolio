@@ -34,7 +34,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll this when the role is waiting. If continuation.keepGoing is true, call the recommended next GPT action yourself without asking the user to continue. Post-fight packets can include packet.review and packet.sharedDebrief; live combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available.',
+            'Poll while waiting. If continuation.keepGoing is true, call continuation.recommendedNextCall yourself; do not ask the user to continue. Post-fight packets may include packet.review/sharedDebrief; combat packets may include fightDeadlineAt/fightSeconds.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },
