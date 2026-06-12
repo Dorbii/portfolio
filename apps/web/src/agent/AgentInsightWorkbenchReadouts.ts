@@ -9,7 +9,7 @@ import { canonicalPartIdFromCompact } from '../../../../packages/sim/src/compact
 import { formatCatalogLabel } from '../../../../packages/catalog/src/index.js'
 import type { ConfirmedLoadoutView, RolePrivateState } from './agentSessionTypes.js'
 
-export type DrawerTab = 'equipped' | 'store'
+export type DrawerTab = 'equipped' | 'store' | 'tree'
 export type CategoryKey = 'structure' | 'weapon' | 'defense' | 'mobility' | 'utility' | 'style' | 'other'
 export type PartReadoutTone = 'neutral' | 'ok' | 'warning'
 
@@ -18,6 +18,7 @@ export type LoadoutPartReadout = {
   detail: string
   instanceId: string
   name: string
+  parentId?: string
   source: string
   stats: string
   status: string
@@ -74,30 +75,36 @@ export function createBuildSnapshot(
   storeOffers: CatalogPartReadout[],
   foundationParts: CatalogPartReadout[],
 ): BuildSnapshot {
-  const compactSummary = state?.gameMaster?.build?.bot.summary
+  const compactBuild = state?.gameMaster?.build
+  const compactSummary = compactBuild?.bot.summary
   const remaining = readFiniteNumber(
-    state?.gameMaster?.build?.budget.parts ?? state?.gameMaster?.resources?.partLimitRemaining,
+    compactBuild?.budget.parts ?? state?.gameMaster?.resources?.partLimitRemaining,
   )
-  const purchased = parts.filter((part) => part.source !== 'System' && part.status !== 'Core').length
+  const rowPurchased = parts.filter((part) => part.source !== 'System' && part.status !== 'Core').length
+  const purchased = typeof remaining === 'number'
+    ? Math.max(0, LOADOUT_PART_LIMIT - remaining)
+    : rowPurchased
   const categories = createCategorySummary(parts)
   const dominant = categories
     .filter((category) => category.count > 0)
     .sort((left, right) => right.count - left.count)[0]
+  const roundOfferCount = compactBuild?.store?.offers.length ?? storeOffers.length
+  const foundationCount = compactBuild?.store?.foundation.length ?? foundationParts.length
 
   return {
     armor: compactSummary ? String(compactSummary.armor) : '—',
     categories,
     dominant,
-    foundationCount: foundationParts.length,
+    foundationCount,
     hp: compactSummary ? `${compactSummary.hp}/${compactSummary.maxHp}` : '—',
-    limit: Math.max(LOADOUT_PART_LIMIT, purchased + (remaining ?? 0), purchased),
+    limit: LOADOUT_PART_LIMIT,
     mapParts: parts.filter((part) => part.source !== 'System' && part.status !== 'Core'),
     mass: compactSummary ? formatPartMass(compactSummary.mass) : '—',
     purchased,
     remaining,
-    rows: parts.length,
-    storeActive: storeOffers.length > 0 || foundationParts.length > 0,
-    storeOffers: storeOffers.length,
+    rows: compactBuild?.bot.parts.length ?? parts.length,
+    storeActive: roundOfferCount > 0 || foundationCount > 0,
+    storeOffers: roundOfferCount,
     utility: compactSummary ? String(compactSummary.utility.length) : '—',
     weapons: compactSummary ? String(compactSummary.weapons.length) : '—',
   }
@@ -107,6 +114,10 @@ export function createCategorySummary(parts: LoadoutPartReadout[]): CategorySumm
   const counts = new Map<CategoryKey, number>(CATEGORY_ORDER.map((category) => [category.key, 0]))
 
   for (const part of parts) {
+    if (part.source === 'System' || part.status === 'Core') {
+      continue
+    }
+
     const key = normalizeCategory(part.category)
     counts.set(key, (counts.get(key) ?? 0) + 1)
   }
@@ -248,12 +259,14 @@ function machinePartReadout(
     Boolean(machine.runtime?.detachedInstanceIds?.includes(part.instanceId)),
     Boolean(machine.runtime?.disabledInstanceIds?.includes(part.instanceId)),
   )
+  const parentId = machine.attachments.find((attachment) => attachment.childInstanceId === part.instanceId)?.parentInstanceId
 
   return {
     category: definition ? formatCatalogLabel(definition.category) : part.source === 'system_core' ? 'Core' : 'Unknown',
     detail: formatPartDetail(definition, health),
     instanceId: part.instanceId,
     name: definition?.displayName ?? (part.source === 'system_core' ? 'Machine Core' : formatCatalogLabel(part.definitionId)),
+    ...(parentId ? { parentId } : {}),
     source: part.source === 'system_core' ? 'System' : 'Catalog',
     stats: formatPartStats(definition),
     status: status.label,
@@ -274,6 +287,7 @@ function blueprintBlockReadout(
     detail: formatPartDetail(definition, health),
     instanceId: block.id,
     name: definition?.displayName ?? formatCatalogLabel(block.partId),
+    ...(block.parentInstanceId ? { parentId: block.parentInstanceId } : {}),
     source: 'Blueprint',
     stats: formatPartStats(definition),
     status: status.label,
