@@ -45,7 +45,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'During build, submit one compact action (no actionId needed), e.g. {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}; use {"action":{"kind":"cancel_build_selection"}} to back out of the current build selection when packet.build.edit.cancel is true. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps. Legacy actionId submissions copied from packet.legalActions remain accepted during migration. Provide exactly one of action or actionId.',
+            'Submit exactly one build action or combat plan; use cancel_build_selection to back out of build edits.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
