@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionContinuationSave,
   ChampionRecord,
   CombatBotSnapshot,
   CombatBudget,
@@ -219,22 +218,6 @@ export type RoleResetResponse = {
 }
 
 export type AdvanceRoundResponse = {
-  publicState: PublicSessionState
-}
-
-export type SaveCompletedSessionResponse = {
-  save: ChampionContinuationSave
-  publicState: PublicSessionState
-}
-
-export type ContinueChampionSessionResponse = {
-  save: ChampionContinuationSave
-  nextSessionId: string
-  nextSession: CreateSessionResponse
-  publicState: PublicSessionState
-}
-
-export type QuitCompletedSessionResponse = {
   publicState: PublicSessionState
 }
 

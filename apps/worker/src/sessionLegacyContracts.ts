@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionContinuationSave,
   ChampionRecord,
   CombatBotSnapshot,
   CombatTurnSnapshot,
@@ -56,9 +55,6 @@ export type LegacySessionLogEvent = {
     | 'round_advanced'
     | 'economy_applied'
     | 'session_completed'
-    | 'session_saved'
-    | 'session_continued'
-    | 'session_quit'
   message: string
 }
 
@@ -241,22 +237,6 @@ export type LegacyPostFightReflectionResponse = {
 export type LegacyPostFightReflectionPostRequest = PostFightAgentReflection
 
 export type LegacyAdvanceRoundResponse = {
-  publicState: LegacyPublicSessionState
-}
-
-export type LegacySaveCompletedSessionResponse = {
-  save: ChampionContinuationSave
-  publicState: LegacyPublicSessionState
-}
-
-export type LegacyContinueChampionSessionResponse = {
-  save: ChampionContinuationSave
-  nextSessionId: string
-  nextSession: LegacyCreateSessionResponse
-  publicState: LegacyPublicSessionState
-}
-
-export type LegacyQuitCompletedSessionResponse = {
   publicState: LegacyPublicSessionState
 }
 

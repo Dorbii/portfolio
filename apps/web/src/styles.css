@@ -1822,78 +1822,6 @@ pre {
   opacity: 0.48;
 }
 
-.agent-connection {
-  position: relative;
-  margin-top: 12px;
-  padding: 11px 11px 11px 13px;
-  display: grid;
-  gap: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(238, 242, 247, 0.14);
-  border-radius: 6px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 247, 0.052), rgba(238, 242, 247, 0.014)),
-    rgba(8, 12, 15, 0.74);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
-}
-
-.agent-connection::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: rgba(238, 242, 247, 0.26);
-  content: "";
-}
-
-.agent-connection strong {
-  color: #eef2f3;
-  font-size: 0.88rem;
-}
-
-.agent-connection p,
-.agent-connection small {
-  margin: 0;
-  color: #c2cccc;
-  font-size: 0.78rem;
-  line-height: 1.45;
-}
-
-.agent-connection code {
-  min-width: 0;
-  padding: 7px 8px;
-  overflow-wrap: anywhere;
-  border-radius: 5px;
-  color: #f3d46f;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.01)),
-    rgba(3, 6, 8, 0.86);
-  font-size: 0.72rem;
-}
-
-.agent-connection.tone-ready {
-  border-color: rgba(96, 214, 148, 0.34);
-}
-
-.agent-connection.tone-ready::before {
-  background: #5dd292;
-}
-
-.agent-connection.tone-working {
-  border-color: rgba(143, 208, 255, 0.34);
-}
-
-.agent-connection.tone-working::before {
-  background: #8fd0ff;
-}
-
-.agent-connection.tone-blocked {
-  border-color: rgba(255, 115, 115, 0.34);
-}
-
-.agent-connection.tone-blocked::before {
-  background: #ff5c6c;
-}
-
 .agent-live-panel section + section {
   margin-top: 16px;
   padding-top: 12px;
@@ -1964,19 +1892,11 @@ textarea:focus-visible {
   border-color: rgba(183, 243, 204, 0.18);
 }
 
-.agent-notice,
-.agent-waiting,
 .agent-empty {
   margin: 12px 0 0;
   color: #c2cccc;
   font-size: 0.84rem;
   line-height: 1.4;
-}
-
-.agent-notice,
-.agent-waiting {
-  color: #b7f3cc;
-  font-weight: 800;
 }
 
 .agent-error {
@@ -2148,192 +2068,15 @@ textarea:focus-visible {
     0 8px 16px rgba(0, 0, 0, 0.16);
 }
 
-.agent-task-panel {
-  position: relative;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
-  gap: 14px;
-  align-items: stretch;
-  border-right: 0;
-  border-bottom: 1px solid var(--cockpit-border-strong);
-  overflow: hidden;
-  background:
-    linear-gradient(90deg, rgba(var(--cockpit-team), 0.105), rgba(143, 208, 255, 0.05)),
-    linear-gradient(180deg, rgba(12, 18, 22, 0.9), rgba(5, 9, 12, 0.9));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.028);
-}
-
-.agent-task-panel::before {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(var(--cockpit-team), 0.72), transparent 44%, rgba(143, 208, 255, 0.34));
-  content: "";
-}
-
-.agent-next-task {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.agent-next-task p,
-.agent-next-task small {
-  margin: 0;
-  color: #c2cccc;
-  font-size: 0.86rem;
-  line-height: 1.4;
-}
-
-.agent-next-task code {
-  min-width: 0;
-  width: fit-content;
-  max-width: 100%;
-  padding: 7px 8px;
-  overflow-wrap: anywhere;
-  border: 1px solid rgba(143, 208, 255, 0.22);
-  border-radius: 5px;
-  color: #e8f3ff;
-  background:
-    linear-gradient(180deg, rgba(143, 208, 255, 0.1), rgba(143, 208, 255, 0.026)),
-    rgba(3, 6, 8, 0.86);
-}
-
-.agent-state-chip {
-  width: fit-content;
-  min-height: 24px;
-  padding: 4px 9px;
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  border: 1px solid rgba(93, 210, 146, 0.42);
-  border-radius: 999px;
-  color: #b7f3cc;
-  background:
-    linear-gradient(180deg, rgba(93, 210, 146, 0.16), rgba(93, 210, 146, 0.035)),
-    rgba(3, 9, 7, 0.72);
-  font-size: 0.66rem;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.agent-state-chip::before {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: currentColor;
-  box-shadow: 0 0 8px currentColor;
-  content: "";
-}
-
-.agent-task-list {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  list-style: none;
-}
-
-.agent-task-step {
-  position: relative;
-  min-width: 0;
-  min-height: 74px;
-  padding: 10px;
-  display: grid;
-  align-content: space-between;
-  gap: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(238, 242, 247, 0.12);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 247, 0.06), rgba(238, 242, 247, 0.014)),
-    rgba(8, 12, 16, 0.76);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-.agent-task-step::before {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: rgba(238, 242, 247, 0.2);
-  content: "";
-}
-
-.agent-task-step span,
-.agent-task-step strong {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.agent-task-step span {
-  color: #8fa3a3;
-  font-size: 0.68rem;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.agent-task-step strong {
-  color: #eef2f3;
-  font-size: 0.9rem;
-}
-
-.agent-task-step.is-active {
-  border-color: rgba(var(--cockpit-team), 0.58);
-  box-shadow:
-    inset 3px 0 0 rgba(var(--cockpit-team), 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 0 20px rgba(var(--cockpit-team), 0.08);
-}
-
-.agent-task-step.tone-complete {
-  border-color: rgba(93, 210, 146, 0.3);
-}
-
-.agent-task-step.tone-complete::before {
-  background: #5dd292;
-}
-
-.agent-task-step.tone-current {
-  background:
-    linear-gradient(180deg, rgba(var(--cockpit-team), 0.15), rgba(var(--cockpit-team), 0.035)),
-    rgba(8, 12, 16, 0.82);
-}
-
-.agent-task-step.tone-current::before {
-  background: var(--cockpit-team-strong);
-}
-
-.agent-task-step.tone-waiting {
-  border-color: rgba(247, 184, 75, 0.3);
-}
-
-.agent-task-step.tone-waiting::before {
-  background: #f3d46f;
-}
-
-.agent-task-step.tone-blocked {
-  border-color: rgba(255, 92, 108, 0.36);
-}
-
-.agent-task-step.tone-blocked::before {
-  background: #ff5c6c;
-}
-
 .agent-cockpit-layout {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(620px, 1fr) minmax(300px, 360px);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
+}
+
+.agent-cockpit-layout.has-secondary {
+  grid-template-columns: minmax(620px, 1fr) minmax(300px, 360px);
 }
 
 .cockpit-primary-column,
@@ -2343,12 +2086,16 @@ textarea:focus-visible {
 }
 
 .cockpit-workbench {
-  min-height: calc(100vh - 184px);
+  min-height: calc(100vh - 76px);
   border-left: 0;
-  border-right: 1px solid var(--cockpit-border);
+  border-right: 0;
   background:
     linear-gradient(180deg, rgba(11, 16, 21, 0.88), rgba(4, 7, 11, 0.92)),
     var(--cockpit-panel-deep);
+}
+
+.agent-cockpit-layout.has-secondary .cockpit-workbench {
+  border-right: 1px solid var(--cockpit-border);
 }
 
 .cockpit-secondary-stack {
@@ -2402,53 +2149,6 @@ textarea:focus-visible {
 
 .cockpit-secondary-panel .agent-facts div:last-child {
   border-bottom: 0;
-}
-
-.cockpit-signal-grid {
-  margin: 10px 0 12px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.cockpit-signal-card {
-  min-width: 0;
-  min-height: 86px;
-  padding: 9px;
-  display: grid;
-  align-content: space-between;
-  gap: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(238, 242, 247, 0.1);
-  border-radius: 7px;
-  background:
-    linear-gradient(180deg, rgba(238, 242, 247, 0.05), rgba(238, 242, 247, 0.012)),
-    rgba(5, 9, 12, 0.64);
-}
-
-.cockpit-signal-card > span {
-  color: #8fa3a3;
-  font-size: 0.64rem;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.cockpit-signal-card > strong {
-  min-width: 0;
-  overflow: hidden;
-  color: #eef2f3;
-  font-size: 0.9rem;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cockpit-signal-card .ui-status-badge {
-  width: fit-content;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .workbench-header,
@@ -3373,8 +3073,8 @@ textarea:focus-visible {
   }
 
   .agent-command-header,
-  .agent-task-panel,
-  .agent-cockpit-layout {
+  .agent-cockpit-layout,
+  .agent-cockpit-layout.has-secondary {
     grid-template-columns: 1fr;
   }
 
@@ -3398,10 +3098,6 @@ textarea:focus-visible {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .agent-task-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   .agent-live-panel {
     border-right: 0;
   }
@@ -3415,7 +3111,6 @@ textarea:focus-visible {
   }
 
   .section-header,
-  .agent-task-panel,
   .team-row,
   .catalog-head,
   .catalog-row,
@@ -3454,8 +3149,6 @@ textarea:focus-visible {
   }
 
   .plan-metric-strip,
-  .agent-task-list,
-  .cockpit-signal-grid,
   .snapshot-stat-grid,
   .snapshot-category-legend,
   .drawer-header,
@@ -3490,9 +3183,7 @@ textarea:focus-visible {
     .replay-controls,
     .agent-identity-lock,
     .agent-command-actions,
-    .agent-task-list,
     .plan-metric-strip,
-    .cockpit-signal-grid,
     .snapshot-stat-grid,
     .snapshot-category-legend,
     .drawer-header,

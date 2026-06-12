@@ -10,11 +10,6 @@ import {
 import { useAgentRoleSession } from './useAgentRoleSession'
 
 export { ROLE_STATE_POLL_MS } from './agentRolePolling'
-export {
-  isTerminalPhase,
-  opponentLabel,
-  submissionNotice,
-} from './agentCockpitViewState'
 
 export function useLiveAgentCockpitController(invite: AgentInvite) {
   const {
@@ -22,7 +17,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     clearRoleToken,
     lastError,
     loadState,
-    notice,
     publicState,
     roleState,
     roleToken,
@@ -46,23 +40,18 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     [agentInviteUrl, invite, publicState, roleState],
   )
   const {
-    canClaimRole,
     canMutateRole,
     chatLog,
-    claimButtonLabel,
-    connectionGuidance,
     hasPlayerKey,
     isBusy,
     privateChatLog,
     refreshButtonLabel,
     roleHasChatLog,
     roleHasPrivateChatLog,
-    workflow,
   } = useMemo(
     () =>
       createCockpitDerivedState({
         invite,
-        lastError,
         publicState,
         roleState,
         roleToken,
@@ -70,7 +59,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
       }),
     [
       invite,
-      lastError,
       publicState,
       roleState,
       roleToken,
@@ -79,19 +67,15 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
   )
 
   return {
-    canClaimRole,
     canMutateRole,
     chatLog,
-    claimButtonLabel,
     connectRole,
     clearRoleToken,
-    connectionGuidance,
     externalAgentBriefScript,
     hasPlayerKey,
     isBusy,
     lastError,
     loadState,
-    notice,
     privateChatLog,
     publicState,
     refreshButtonLabel,
@@ -101,6 +85,5 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     roleToken,
     stateScript,
     status,
-    workflow,
   }
 }

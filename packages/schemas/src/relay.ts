@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionContinuationSave,
   ChampionRecord,
   CombatRoundPlanSubmission,
   GameMasterActionSubmission,
@@ -69,9 +68,6 @@ export type SessionLogEvent = {
     | 'economy_applied'
     | 'reflection_submitted'
     | 'session_completed'
-    | 'session_saved'
-    | 'session_continued'
-    | 'session_quit'
   message: string
 }
 
@@ -145,22 +141,6 @@ export type CreateSessionResponse = {
   phase: SessionPhase
   invites: RoleInvite[]
   refereeToken: string
-  publicState: PublicSessionState
-}
-
-export type SaveCompletedSessionResponse = {
-  save: ChampionContinuationSave
-  publicState: PublicSessionState
-}
-
-export type ContinueChampionSessionResponse = {
-  save: ChampionContinuationSave
-  nextSessionId: string
-  nextSession: CreateSessionResponse
-  publicState: PublicSessionState
-}
-
-export type QuitCompletedSessionResponse = {
   publicState: PublicSessionState
 }
 
