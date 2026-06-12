@@ -37,12 +37,6 @@ import { TERMINAL_PHASES } from './agentPhases.js'
 
 export { createAgentInviteUrl, createSafeAgentHash }
 export type { AgentInvite }
-export {
-  createExternalAgentBrief,
-  createExternalAgentBriefMarkdown,
-  type ExternalAgentBrief,
-  type ExternalAgentBriefInput,
-} from './agentBrief.js'
 export type {
   AgentArenaRoleApi,
   AgentArenaValidAction,

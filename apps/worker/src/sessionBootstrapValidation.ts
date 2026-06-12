@@ -5,9 +5,9 @@ import {
 } from '../../../packages/schemas/src/index.js'
 
 const MAX_AGENT_NAME_LENGTH = 80
-const LEGACY_BOOTSTRAP_AGENT_NAME = 'legacy-bootstrap'
+const BOOTSTRAP_IDENTITY_VALIDATION_AGENT_NAME = 'bootstrap-identity-validation'
 
-export function validateLegacyAgentBootstrapRequestShape(value: unknown): ValidationResult {
+export function validateAgentBootstrapPatchRequestShape(value: unknown): ValidationResult {
   const issues: ValidationIssue[] = []
 
   if (!isRecord(value)) {
@@ -41,7 +41,7 @@ export function validateLegacyAgentBootstrapRequestShape(value: unknown): Valida
 
   if ('teamIdentity' in value) {
     const identityValidation = validateAgentBootstrapRequestShape({
-      agentName: LEGACY_BOOTSTRAP_AGENT_NAME,
+      agentName: BOOTSTRAP_IDENTITY_VALIDATION_AGENT_NAME,
       teamIdentity: value.teamIdentity,
     })
 

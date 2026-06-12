@@ -24,12 +24,10 @@ import {
 } from '../shared/ui'
 import type { ReplayPayload } from './refereeClient'
 
-type TeamBannerHandoff = {
-  agentBrief: string
+type TeamBannerLinks = {
   hasInvite: boolean
   inviteCopyUrl: string
   inviteUrl: string
-  onCopyBrief: () => Promise<void> | void
   onCopyInvite: () => Promise<void> | void
 }
 
@@ -51,25 +49,18 @@ type FightCommsMessage = PublicSessionState['chatLog'][number] & {
 }
 
 export type SessionCompletionControl = {
-  canContinue: boolean
-  canQuit: boolean
-  canSave: boolean
   completedFightCount: number
-  isBusy: boolean
-  onContinue: () => void
-  onQuit: () => void
-  onSave: () => void
 }
 
 export function MatchScoreboard({
   publicSession,
   replayPayload,
-  roleHandoffs,
+  roleLinks,
   sessionControl,
 }: {
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
-  roleHandoffs: Record<TeamRole, TeamBannerHandoff>
+  roleLinks: Record<TeamRole, TeamBannerLinks>
   sessionControl: ScoreboardSessionControl
 }) {
   const winsRequired = getWinsRequired(publicSession?.maxRounds)
@@ -81,7 +72,7 @@ export function MatchScoreboard({
         publicSession={publicSession}
         replayPayload={replayPayload}
         role="red"
-        handoff={roleHandoffs.red}
+        links={roleLinks.red}
         winsRequired={winsRequired}
       />
       <div className="scoreboard-core">
@@ -110,7 +101,7 @@ export function MatchScoreboard({
             onClick={sessionControl.onRefresh}
             title={
               sessionControl.tokenStored
-                ? 'Clear the stored referee and handoff tokens for this browser tab.'
+                ? 'Clear the stored referee and agent invite tokens for this browser tab.'
                 : 'Reload the public session state.'
             }
           >
@@ -133,7 +124,7 @@ export function MatchScoreboard({
         publicSession={publicSession}
         replayPayload={replayPayload}
         role="blue"
-        handoff={roleHandoffs.blue}
+        links={roleLinks.blue}
         winsRequired={winsRequired}
       />
     </header>
@@ -200,62 +191,19 @@ export function SessionCompletionPanel({
       : 'Pending'
   const debriefSummary = continuation?.sharedDebrief?.summary.trim() || 'Shared debrief appears after a completed fight debrief is available.'
   const debriefState = continuation?.sharedDebrief ? 'Ready' : 'Pending'
-  const championRecord = continuation?.championRecord
-    ? `${continuation.championRecord.wins}-${continuation.championRecord.losses} / Streak ${continuation.championRecord.consecutiveWins}`
-    : 'Pending'
-  const challengerBonus = continuation?.challengerBonusGold ?? 0
-  const saveStatus = continuation?.quit
-    ? 'Quit'
-    : continuation?.continuedSessionId
-      ? 'Continued'
-      : continuation?.saved
-        ? 'Saved'
-        : 'Not saved'
 
   return (
     <div
       className="session-completion-panel"
-      data-can-continue={controls.canContinue ? 'true' : 'false'}
-      data-can-quit={controls.canQuit ? 'true' : 'false'}
-      data-can-save={controls.canSave ? 'true' : 'false'}
       data-completed-fight-count={controls.completedFightCount}
       data-has-shared-debrief={continuation?.sharedDebrief ? 'true' : 'false'}
     >
       <div className="session-completion-grid">
         <CompletionFact label="Winner" value={winnerLabel} />
         <CompletionFact label="Completed Fights" value={`${controls.completedFightCount}`} />
-        <CompletionFact label="Champion Record" value={championRecord} />
-        <CompletionFact label="Challenger Bonus" value={`${challengerBonus}`} />
-        <CompletionFact label="Save Status" value={saveStatus} />
         <CompletionFact label="Shared Debrief" value={debriefState} />
       </div>
       <p className="session-completion-debrief">{debriefSummary}</p>
-      <ActionGroup className="session-completion-actions">
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={!controls.canSave}
-          onClick={controls.onSave}
-        >
-          {controls.isBusy ? 'Saving...' : 'Save'}
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={!controls.canContinue}
-          onClick={controls.onContinue}
-        >
-          Continue
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!controls.canQuit}
-          onClick={controls.onQuit}
-        >
-          Quit
-        </Button>
-      </ActionGroup>
     </div>
   )
 }
@@ -280,13 +228,13 @@ function partCatalogHref(): string {
 }
 
 function ScoreboardTeam({
-  handoff,
+  links,
   publicSession,
   replayPayload,
   role,
   winsRequired,
 }: {
-  handoff: TeamBannerHandoff
+  links: TeamBannerLinks
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
   role: TeamRole
@@ -320,13 +268,13 @@ function ScoreboardTeam({
             {team.submitted ? 'Loadout locked' : 'Loadout pending'}
           </StatusBadge>
         </div>
-        {handoff.hasInvite ? (
-          <div className="scoreboard-handoff">
-            <ActionGroup className="scoreboard-handoff-actions">
-              {handoff.inviteUrl ? (
+        {links.hasInvite ? (
+          <div className="scoreboard-agent-links">
+            <ActionGroup className="scoreboard-agent-link-actions">
+              {links.inviteUrl ? (
                 <a
                   className="ui-button ui-button-ghost"
-                  href={handoff.inviteUrl}
+                  href={links.inviteUrl}
                   rel="noreferrer"
                   target="_blank"
                 >
@@ -340,20 +288,11 @@ function ScoreboardTeam({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={handoff.onCopyInvite}
-                disabled={!handoff.inviteCopyUrl}
+                onClick={links.onCopyInvite}
+                disabled={!links.inviteCopyUrl}
                 title="Copy the playable agent invite URL with claim token."
               >
                 Copy invite
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handoff.onCopyBrief}
-                disabled={!handoff.agentBrief}
-                title="Copy the full external-agent handoff brief."
-              >
-                Copy handoff
               </Button>
             </ActionGroup>
           </div>

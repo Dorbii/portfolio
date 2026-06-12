@@ -71,19 +71,16 @@ export function RefereeConsole() {
     activeSessionId,
     advanceRoundHint,
     advanceRoundLabel,
-    blueAgentBrief,
     blueCockpitUrl,
     blueInviteUrl,
     canAdvanceRound,
     completionControls,
-    copyAgentBrief,
     copyInviteUrl,
     createNewSession,
     error,
     hasInviteForRole,
     loadState,
     publicSession,
-    redAgentBrief,
     redCockpitUrl,
     redInviteUrl,
     refreshStoredSession,
@@ -154,21 +151,17 @@ export function RefereeConsole() {
         <MatchScoreboard
           publicSession={publicSession}
           replayPayload={replayPayload}
-          roleHandoffs={{
+          roleLinks={{
             red: {
-              agentBrief: redAgentBrief,
               hasInvite: hasInviteForRole('red'),
               inviteCopyUrl: redInviteUrl,
               inviteUrl: redCockpitUrl,
-              onCopyBrief: () => void copyAgentBrief(redAgentBrief),
               onCopyInvite: () => void copyInviteUrl(redInviteUrl),
             },
             blue: {
-              agentBrief: blueAgentBrief,
               hasInvite: hasInviteForRole('blue'),
               inviteCopyUrl: blueInviteUrl,
               inviteUrl: blueCockpitUrl,
-              onCopyBrief: () => void copyAgentBrief(blueAgentBrief),
               onCopyInvite: () => void copyInviteUrl(blueInviteUrl),
             },
           }}

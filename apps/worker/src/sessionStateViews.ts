@@ -185,33 +185,16 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.chatLog.length,
     state.reflections?.length ?? 0,
     state.sharedDebrief?.debriefId ?? 'debrief-none',
-    state.championSave?.saveId ?? 'save-none',
     state.sourceChampionSave?.saveId ?? 'source-save-none',
-    state.continuedSessionId ?? 'continued-none',
-    state.quitAt ?? 'quit-none',
   ].join('|')
 }
 
 function buildPublicContinuationState(
   state: StoredSessionState,
 ): NonNullable<LegacyPublicSessionState['continuation']> {
-  const save = state.championSave ?? state.sourceChampionSave
-  const challengerBonusGold = state.championSave?.challengerBalance.bonusGold
-    ?? state.continuationSeed?.challengerBonusGold
-
   return {
     completedFightCount: state.fightDossier?.fights.length ?? 0,
     ...(state.sharedDebrief ? { sharedDebrief: state.sharedDebrief } : {}),
-    saved: Boolean(state.championSave),
-    quit: Boolean(state.quitAt),
-    ...(state.continuedSessionId ? { continuedSessionId: state.continuedSessionId } : {}),
-    ...(save
-      ? {
-          championRole: save.championRole,
-          championRecord: save.championRecord,
-        }
-      : {}),
-    ...(challengerBonusGold !== undefined ? { challengerBonusGold } : {}),
   }
 }
 

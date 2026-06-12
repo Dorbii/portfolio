@@ -216,7 +216,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           type: 'object',
           additionalProperties: true,
           description:
-            'Optional parameters copied from the selected legal action parameterSchema. Include only fields required by that selected action.',
+            'Optional parameters for legacy selected legal actions or for actionId combat_plan. Include only fields required by the selected path.',
           properties: {
             childPartId: {
               type: 'string',
@@ -252,7 +252,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             destinationCellId: {
               type: 'string',
-              description: 'combat move and move_and_attack only: exact destination cell id from the selected action.',
+              description: 'legacy actionId compatibility only: exact destination cell id from the selected action.',
             },
             targetId: {
               type: 'string',
@@ -261,17 +261,17 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             targetCellId: {
               type: 'string',
-              description: 'combat attack and move_and_attack only: exact target cell id from the selected action.',
+              description: 'legacy actionId compatibility, or combat_plan attack alias: target cell id such as cell:5:6.',
             },
             sourceCellId: {
               type: 'string',
-              description: 'combat utility only: exact source cell id from the selected action.',
+              description: 'legacy actionId compatibility only: exact source cell id from the selected action.',
             },
             steps: {
               type: 'array',
               maxItems: 16,
               description:
-                'combat_plan only: current-round CombatPlanStep array. Each item uses kind move, attack, utility, or end_turn. This is not a future-turn queue.',
+                'combat_plan only: current-round compact steps. Read packet.combat.combat for budget/self/opponent and packet.combat.board for grid/terrain. Use move to:[x,z], attack target:[x,z], utility at:[x,z], or end_turn. This is not a future-turn queue.',
               items: {
                 type: 'object',
                 additionalProperties: false,
@@ -284,11 +284,25 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                   },
                   cellId: {
                     type: 'string',
-                    description: 'move/utility destination cell id from packet.board.reachableCells or utilityOptions.',
+                    description: 'compatibility alias for move or utility destination, such as cell:3:0.',
+                  },
+                  to: {
+                    type: 'array',
+                    minItems: 2,
+                    maxItems: 2,
+                    items: { type: 'integer' },
+                    description: 'move only: compact destination coordinate tuple [x,z].',
                   },
                   targetCellId: {
                     type: 'string',
-                    description: 'attack target cell id from packet.board.attackableCells.',
+                    description: 'compatibility alias for attack target cell id, such as cell:5:6.',
+                  },
+                  target: {
+                    type: 'array',
+                    minItems: 2,
+                    maxItems: 2,
+                    items: { type: 'integer' },
+                    description: 'attack only: compact target coordinate tuple [x,z].',
                   },
                   weaponSlot: {
                     type: 'string',
@@ -297,7 +311,18 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                   },
                   utilityId: {
                     type: 'string',
-                    description: 'optional utility id from packet.board.utilityOptions.',
+                    description: 'compatibility alias for utility identifier.',
+                  },
+                  utility: {
+                    type: 'string',
+                    description: 'utility only: compact utility identifier.',
+                  },
+                  at: {
+                    type: 'array',
+                    minItems: 2,
+                    maxItems: 2,
+                    items: { type: 'integer' },
+                    description: 'utility only: compact coordinate tuple [x,z].',
                   },
                 },
               },
@@ -314,9 +339,11 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               rollDegrees: 15,
             },
             {
-              destinationCellId: 'cell:5:2',
-              targetId: 'opponent',
-              targetCellId: 'cell:5:6',
+              steps: [
+                { kind: 'move', to: [1, 0] },
+                { kind: 'attack', weaponSlot: 'weaponA', target: [2, 0] },
+                { kind: 'end_turn' },
+              ],
             },
           ],
         },
@@ -452,7 +479,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
               description:
-                'Current GameMasterPacket. Choose action ids only from packet.legalActions, and inspect packet.board.reachablePoses, attackableTargets, and compact cells during combat.',
+                'Current GPT packet. During build, use packet.build. During combat, use packet.combat.combat and packet.combat.board; compact combat packets omit legalActions and raw board affordance arrays. packet.legalActions appears only on compatibility surfaces.',
             },
             continuation: {
               $ref: '#/components/schemas/GptContinuationHint',

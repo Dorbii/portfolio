@@ -66,16 +66,11 @@ export function AgentCockpitHeader({
   )
 }
 export function AgentCockpitScripts({
-  externalAgentBriefScript,
   stateScript,
 }: {
-  externalAgentBriefScript: string
   stateScript: string
 }) {
   return (
-    <>
-      <JsonScriptPanel id="agent-arena-state" json={stateScript} />
-      <JsonScriptPanel id="agent-arena-brief" json={externalAgentBriefScript} />
-    </>
+    <JsonScriptPanel id="agent-arena-state" json={stateScript} />
   )
 }

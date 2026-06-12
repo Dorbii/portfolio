@@ -2,35 +2,29 @@ import type {
   RoleInvite,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import type { PublicSessionState } from '../agent/agentSessionTypes.js'
-import { createExternalAgentBriefMarkdown } from '../agent/agentClient.js'
 import { buildInviteUrl } from './refereeClient.js'
 
-type RefereeAgentBriefInput = {
+type RefereeAgentLinksInput = {
   activeSessionId: string
   apiBase: string
   invites: RoleInvite[]
-  publicSession: PublicSessionState | null
   siteBase?: string
 }
 
-export type RefereeAgentBriefs = {
-  blueAgentBrief: string
+export type RefereeAgentLinks = {
   blueCockpitUrl: string
   blueInviteUrl: string
   hasAnyInvite: boolean
-  redAgentBrief: string
   redCockpitUrl: string
   redInviteUrl: string
 }
 
-export function createRefereeAgentBriefs({
+export function createRefereeAgentLinks({
   activeSessionId,
   apiBase,
   invites,
-  publicSession,
   siteBase,
-}: RefereeAgentBriefInput): RefereeAgentBriefs {
+}: RefereeAgentLinksInput): RefereeAgentLinks {
   const redInvite = inviteForRole(invites, 'red')
   const blueInvite = inviteForRole(invites, 'blue')
   const redInviteUrl = createRoleInviteUrl(redInvite, activeSessionId, apiBase, 'agent', siteBase)
@@ -39,11 +33,9 @@ export function createRefereeAgentBriefs({
   const blueCockpitUrl = createRoleInviteUrl(blueInvite, activeSessionId, apiBase, 'observer', siteBase)
 
   return {
-    blueAgentBrief: createRoleBrief(blueInvite, blueInviteUrl, activeSessionId, apiBase, publicSession),
     blueCockpitUrl,
     blueInviteUrl,
     hasAnyInvite: hasInviteForRole(invites, 'red') || hasInviteForRole(invites, 'blue'),
-    redAgentBrief: createRoleBrief(redInvite, redInviteUrl, activeSessionId, apiBase, publicSession),
     redCockpitUrl,
     redInviteUrl,
   }
@@ -88,35 +80,6 @@ function createRoleInviteUrl(
     sessionId: activeSessionId,
     apiBase,
     siteBase,
-  })
-}
-
-function createRoleBrief(
-  invite: RoleInvite | undefined,
-  inviteUrl: string,
-  activeSessionId: string,
-  apiBase: string,
-  publicSession: PublicSessionState | null,
-): string {
-  if (!invite || !inviteUrl || !activeSessionId) {
-    return ''
-  }
-
-  const claimToken = tokenValue(invite.claimToken)
-
-  if (!claimToken) {
-    return ''
-  }
-
-  return createExternalAgentBriefMarkdown({
-    invite: {
-      sessionId: activeSessionId,
-      role: invite.role,
-      apiBase,
-      claimToken,
-    },
-    inviteUrl,
-    publicState: publicSession,
   })
 }
 

@@ -42,9 +42,6 @@ const DEFAULT_RATE_LIMITS: Record<RateLimitAction, RateLimitRule> = {
   reflection: { windowMs: 60 * 1000, max: 10 },
   advance_round: { windowMs: 60 * 1000, max: 20 },
   reset_role: { windowMs: 60 * 1000, max: 20 },
-  save_session: { windowMs: 60 * 1000, max: 10 },
-  continue_session: { windowMs: 60 * 1000, max: 10 },
-  quit_session: { windowMs: 60 * 1000, max: 10 },
 }
 
 export function cloneJson<T>(value: T): T {
@@ -182,9 +179,6 @@ export function mergeRateLimits(
     reflection: overrides?.reflection ?? DEFAULT_RATE_LIMITS.reflection,
     advance_round: overrides?.advance_round ?? DEFAULT_RATE_LIMITS.advance_round,
     reset_role: overrides?.reset_role ?? DEFAULT_RATE_LIMITS.reset_role,
-    save_session: overrides?.save_session ?? DEFAULT_RATE_LIMITS.save_session,
-    continue_session: overrides?.continue_session ?? DEFAULT_RATE_LIMITS.continue_session,
-    quit_session: overrides?.quit_session ?? DEFAULT_RATE_LIMITS.quit_session,
   }
 }
 

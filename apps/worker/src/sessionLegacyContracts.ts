@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionRecord,
   CombatBotSnapshot,
   CombatTurnSnapshot,
   GeneratedControls,
@@ -15,7 +14,6 @@ import type {
   SharedDebrief,
   TeamEconomySummary,
   TeamRole,
-  TurnCommand,
 } from '../../../packages/schemas/src/index.js'
 
 export const LEGACY_TEAM_LOGO_MARKS = [
@@ -45,9 +43,7 @@ export type LegacySessionLogEvent = {
     | 'role_claimed'
     | 'role_reset'
     | 'phase_changed'
-    | 'round_plan_submitted'
-    | 'turn_command_submitted'
-    | 'turn_command_timed_out'
+    | 'combat_plan_timed_out'
     | 'game_action_submitted'
     | 'combat_resolved'
     | 'reflection_submitted'
@@ -113,12 +109,6 @@ export type LegacyPublicSessionState = {
   continuation: {
     completedFightCount: number
     sharedDebrief?: SharedDebrief
-    saved?: boolean
-    quit?: boolean
-    continuedSessionId?: string
-    championRole?: TeamRole
-    championRecord?: ChampionRecord
-    challengerBonusGold?: number
   }
   chatLog: LegacySessionChatMessage[]
   eventLog: LegacySessionLogEvent[]
@@ -253,5 +243,3 @@ export type LegacyReplayPayload = {
   botBlueprints: Record<TeamRole, BotBlueprint>
   machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
 }
-
-export type LegacySubmittedCombatCommands = Record<TeamRole, TurnCommand[]>

@@ -65,7 +65,6 @@ function ClaimedAgentCockpit({ invite }: { invite: AgentInvite }) {
       </div>
 
       <AgentCockpitScripts
-        externalAgentBriefScript={cockpit.externalAgentBriefScript}
         stateScript={cockpit.stateScript}
       />
     </main>

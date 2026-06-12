@@ -7501,7 +7501,7 @@ test('session resolves a partial combat round plan with timeout end_turn for the
     true,
   )
   assert.equal(
-    resolved.eventLog.some((event) => event.type === 'turn_command_timed_out' && event.message.includes('blue timed out')),
+    resolved.eventLog.some((event) => event.type === 'combat_plan_timed_out' && event.message.includes('blue timed out')),
     true,
   )
 })

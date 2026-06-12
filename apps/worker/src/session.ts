@@ -123,7 +123,7 @@ import {
   buildPublicSessionState,
   buildRolePrivateState,
 } from './sessionStateViews.js'
-import { validateLegacyAgentBootstrapRequestShape } from './sessionBootstrapLegacy.js'
+import { validateAgentBootstrapPatchRequestShape } from './sessionBootstrapValidation.js'
 import type { LegacyTeamIdentity } from './sessionLegacyContracts.js'
 import type {
   LegacyAdvanceRoundResponse,
@@ -361,7 +361,7 @@ export class SessionCoordinator {
     playerKey: string,
     request: Partial<AgentBootstrapRequest> = {},
   ): Promise<SessionResult<LegacyAgentBootstrapResponse>> {
-    const validation = validateLegacyAgentBootstrapRequestShape(request)
+    const validation = validateAgentBootstrapPatchRequestShape(request)
 
     if (!validation.ok) {
       return relayError(
@@ -1818,7 +1818,7 @@ export class SessionCoordinator {
         [roleName]: timeoutPlan,
       }
       this.appendEvent(
-        'turn_command_timed_out',
+        'combat_plan_timed_out',
         `${roleName} timed out on combat round ${combat.nextTick}; end_turn plan applied.`,
         now,
       )
@@ -2884,7 +2884,7 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole, no
   }
 
   if (state.phase === 'combat_turn' && state.combat?.mode === 'lockstep_round_plan') {
-    return 'Submit one combat round plan using packet.combat.budget, packet.board.ascii, reachableCells, attackableCells, and utilityOptions. Each move step names a destination cellId; the resolver advances one cell per substep.'
+    return 'Submit one combat round plan using packet.combat.budget and the current board affordances when present. Compact GPT packets expose packet.combat.combat and packet.combat.board grid/terrain instead of raw affordance arrays. Each move step names a destination cellId; the resolver advances one cell per substep.'
   }
 
   if (state.activeActionSets?.[roleName]) {

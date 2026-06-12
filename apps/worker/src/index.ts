@@ -26,7 +26,7 @@ import {
 import type {
   InternalCreateSessionRequest,
 } from './sessionCreation.js'
-import { validateLegacyAgentBootstrapRequestShape } from './sessionBootstrapLegacy.js'
+import { validateAgentBootstrapPatchRequestShape } from './sessionBootstrapValidation.js'
 import {
   bodyTooLargeResponse,
   errorResponse,
@@ -466,7 +466,7 @@ export class AgentArenaSession {
     }
 
     const body = readResult.body as Record<string, unknown>
-    const validation = validateLegacyAgentBootstrapRequestShape(body)
+    const validation = validateAgentBootstrapPatchRequestShape(body)
 
     if (!validation.ok) {
       return errorResponse(

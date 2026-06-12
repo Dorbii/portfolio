@@ -5,7 +5,6 @@ import type {
 } from './agentSessionTypes.js'
 import {
   AgentArenaApiError,
-  createExternalAgentBrief,
   getValidAgentActions,
   serializeJsonForScript,
   type AgentInvite,
@@ -14,16 +13,10 @@ import type { UiError } from './AgentCockpitPanels'
 
 export type LoadStatus = 'idle' | 'claiming' | 'loading' | 'ready'
 
-type CockpitBriefArtifactsInput = {
-  agentInviteUrl: string
+type CockpitStateScriptInput = {
   invite: AgentInvite
   publicState: PublicSessionState | null
   roleState: RolePrivateState | null
-}
-
-export type CockpitBriefArtifacts = {
-  externalAgentBriefScript: string
-  stateScript: string
 }
 
 type CockpitDerivedStateInput = {
@@ -45,54 +38,25 @@ export type CockpitDerivedState = {
   roleHasPrivateChatLog: boolean
 }
 
-export function createCockpitBriefArtifacts({
-  agentInviteUrl,
+export function createCockpitStateScript({
   invite,
   publicState,
   roleState,
-}: CockpitBriefArtifactsInput): CockpitBriefArtifacts {
-  const briefPublicState = getBriefPublicState(publicState)
-  const externalAgentBrief = createExternalAgentBrief({
-    invite,
-    inviteUrl: agentInviteUrl,
+}: CockpitStateScriptInput): string {
+  return serializeJsonForScript({
+    ok: Boolean(roleState),
+    invite: {
+      sessionId: invite.sessionId,
+      role: invite.role,
+      apiBase: invite.apiBase,
+      claimTokenPresent: Boolean(invite.claimToken),
+      observerTokenPresent: Boolean(invite.observerToken),
+    },
+    contractUrl: `${invite.apiBase}/agent-spec.json`,
     state: roleState,
-    publicState: briefPublicState,
+    publicState,
+    validActions: getValidAgentActions(roleState),
   })
-
-  return {
-    externalAgentBriefScript: serializeJsonForScript(externalAgentBrief),
-    stateScript: serializeJsonForScript({
-      ok: Boolean(roleState),
-      invite: {
-        sessionId: invite.sessionId,
-        role: invite.role,
-        apiBase: invite.apiBase,
-        claimTokenPresent: Boolean(invite.claimToken),
-        observerTokenPresent: Boolean(invite.observerToken),
-      },
-      contractUrl: `${invite.apiBase}/agent-spec.json`,
-      state: roleState,
-      publicState,
-      validActions: getValidAgentActions(roleState),
-    }),
-  }
-}
-
-function getBriefPublicState(publicState: PublicSessionState | null): PublicSessionState | null {
-  if (!publicState) {
-    return null
-  }
-
-  const roles = Object.values((publicState as { roles?: Record<string, unknown> }).roles ?? {})
-  const hasOnlyUsableRoles = roles.every((role) => {
-    return Boolean(
-      role &&
-        typeof role === 'object' &&
-        typeof (role as { role?: unknown }).role === 'string',
-    )
-  })
-
-  return roles.length > 0 && hasOnlyUsableRoles ? publicState : null
 }
 
 export function createCockpitDerivedState({

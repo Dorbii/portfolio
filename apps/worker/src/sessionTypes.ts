@@ -47,9 +47,6 @@ export type RateLimitAction =
   | 'reflection'
   | 'advance_round'
   | 'reset_role'
-  | 'save_session'
-  | 'continue_session'
-  | 'quit_session'
 
 export type RateLimitRule = {
   windowMs: number
@@ -160,11 +157,8 @@ export type StoredSessionState = {
   reflections?: StoredPostFightReflection[]
   fightDossier?: FightDossier
   sharedDebrief?: SharedDebrief
-  championSave?: ChampionContinuationSave
   sourceChampionSave?: ChampionContinuationSave
   continuationSeed?: ChampionContinuationSeed
-  continuedSessionId?: string
-  quitAt?: string
   chatLog: LegacySessionChatMessage[]
   eventLog: LegacySessionLogEvent[]
   rateLimits: Record<string, StoredRateLimit>

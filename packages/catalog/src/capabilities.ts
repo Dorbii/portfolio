@@ -49,18 +49,18 @@ export const AGENT_FEATURE_GATES = [
     state: 'enabled',
     scope: 'combat_resolution',
     summary:
-      'Combat resolves from server-authored legal actions that encode movement, weapons, and utility timing.',
+      'Combat resolves from compact combat plans that the server validates against budget, board, weapons, and utility rules.',
     agentGuidance:
-      'During combat_turn, choose one actionId from the current GameMasterPacket legalActions list.',
+      'During combat_turn, read the current combat packet and submit one compact combat plan; use actionId only for explicit surrender or compatibility paths.',
   },
   {
     id: 'combat.movement_actions',
     label: 'Movement actions',
     state: 'enabled',
     scope: 'combat_resolution',
-    summary: 'Blueprints with movement controls unlock server-authored movement action choices.',
+    summary: 'Blueprints with movement controls improve combat-plan movement options and budget use.',
     agentGuidance:
-      'Movement parts expand legalActions; choose the actionId that best fits the current packet.',
+      'Movement parts expand viable destinations and timing in the current combat plan.',
   },
   {
     id: 'combat.weapon_actions',
@@ -260,7 +260,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     preferWhen: [
       'The opponent has stronger contact damage.',
       'Your plan needs to maintain long or mid range.',
-      'You need legal movement actions for live combat turns.',
+      'You need enough movement budget and connected movement controls for live combat plans.',
     ],
     neverUseWhen: [
       'The plan intentionally anchors and wins only through contact punishment.',
@@ -275,7 +275,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     nearMiss: (part) => part.category === 'mobility',
     executionRules: [
       'Buy at least one body and enough movement parts to make the blueprint connected.',
-      'Movement parts unlock legal movement actionIds; the agent still chooses one current action.',
+      'Movement parts expand viable move steps; the server still validates the current combat plan.',
     ],
     commonErrors: [
       'Selecting a movementPolicy other than hold_ground without movement controls.',
@@ -652,9 +652,9 @@ function featureGateIdsForPart(
 function candidateReasons(part: PartDefinition): readonly string[] {
   const reasons: string[] = []
 
-  if (part.controls?.movement) reasons.push('unlocks movement actions')
-  if (part.controls?.weapon) reasons.push('unlocks weapon actions')
-  if (part.controls?.utility) reasons.push('unlocks utility actions')
+  if (part.controls?.movement) reasons.push('improves movement plan options')
+  if (part.controls?.weapon) reasons.push('adds weapon plan options')
+  if (part.controls?.utility) reasons.push('adds utility plan options')
   if (part.behavior) reasons.push(`uses ${part.behavior.id} combat behavior`)
 
   for (const [key, value] of sortedStats(part.stats)) {
@@ -716,15 +716,15 @@ function nearMissReasons(
   const reasons: string[] = []
 
   if (definition.requiredFeatureGateIds.includes('combat.movement_actions') && !part.controls?.movement) {
-    reasons.push('does not unlock movement actions')
+    reasons.push('does not improve movement plan options')
   }
 
   if (definition.requiredFeatureGateIds.includes('combat.weapon_actions') && !part.controls?.weapon) {
-    reasons.push('does not unlock weapon actions')
+    reasons.push('does not add weapon plan options')
   }
 
   if (definition.requiredFeatureGateIds.includes('combat.utility_actions') && !part.controls?.utility) {
-    reasons.push('does not unlock utility actions')
+    reasons.push('does not add utility plan options')
   }
 
   if (part.cost >= 30) reasons.push('cost is high for a supporting route')

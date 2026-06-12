@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionRecord,
   CombatBotSnapshot,
   CombatBudget,
   CombatPlanConsumptionSummary,
@@ -122,12 +121,6 @@ export type ConfirmedLoadoutView = {
 export type PublicContinuationState = {
   completedFightCount: number
   sharedDebrief?: SharedDebrief
-  saved?: boolean
-  quit?: boolean
-  continuedSessionId?: string
-  championRole?: TeamRole
-  championRecord?: ChampionRecord
-  challengerBonusGold?: number
 }
 
 export type RoleInvite = {

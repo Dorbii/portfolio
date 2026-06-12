@@ -8,7 +8,6 @@ import {
   clearStoredTeamIdentity,
   createAgentInviteUrl,
   createAgentTeamIdentityStorageKey,
-  createExternalAgentBriefMarkdown,
   createAgentRoleStorageKey,
   createSafeAgentHash,
   getValidAgentActions,
@@ -257,107 +256,6 @@ test('agent team identity storage preserves selected team accent without claim t
   clearStoredTeamIdentity(storage, invite)
 
   assert.equal(readStoredTeamIdentity(storage, invite), undefined)
-})
-
-test('external agent handoff stays thin and packet-authoritative', () => {
-  const brief = createExternalAgentBriefMarkdown({
-    invite,
-    inviteUrl: createAgentInviteUrl(invite, 'https://arena.test'),
-    state: roleState,
-    publicState: {
-      sessionId: invite.sessionId,
-      stateVersion: 'v1',
-      phase: 'submission_phase',
-      round: 1,
-      maxRounds: 7,
-      expiresAt: roleState.expiresAt,
-      arena: {
-        name: 'Compact Box',
-        width: 24,
-        height: 16,
-        activeHazards: ['floor_saw'],
-      },
-      roles: {
-        red: { role: 'red', claimed: true, submitted: false },
-        blue: { role: 'blue', claimed: true, submitted: false },
-      },
-      replayAvailable: false,
-      chatLog: roleState.chatLog,
-      eventLog: roleState.eventLog,
-    },
-  })
-
-  assert.ok(brief.includes('# Clash of Clankers Agent Handoff'))
-  assert.ok(brief.includes('You are assigned role key `red` for session s_demo.'))
-  assert.ok(brief.includes('This role key is not your team identity.'))
-  assert.ok(brief.includes('https://arena.test/agent#session=s_demo&role=red&claimToken=cap_red&api=https%3A%2F%2Farena-api.test'))
-  assert.ok(brief.includes('Contract: https://arena-api.test/agent-spec.json'))
-  assert.ok(brief.includes('Actions schema: https://arena-api.test/openapi.json'))
-  assert.ok(brief.includes('Player key / claimToken: cap_red'))
-  assert.ok(brief.includes('The current GameMasterPacket is the gameplay contract.'))
-  assert.ok(brief.includes('This handoff only provides connection details.'))
-  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/roles/red/bootstrap'))
-  assert.ok(brief.includes('GET https://arena-api.test/sessions/s_demo/state'))
-  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/action'))
-  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/combat-plan'))
-  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/chat'))
-  assert.ok(brief.includes('POST https://arena-api.test/sessions/s_demo/reflection'))
-  assert.ok(brief.includes('"colorHex":"#ff4c5d"'))
-  assert.equal(brief.includes('"colorHex":"#00d6a3"'), false)
-  assert.ok(brief.includes('Combat round plans must use the current packet `combat`, `board`, `round`, and `decisionVersion` metadata.'))
-  assert.ok(brief.includes('Phase: submission_phase'))
-  assert.ok(brief.includes('State version: v1'))
-  assert.ok(brief.includes('Timeout: 600000ms'))
-  assert.ok(brief.includes('Watch field: eventVersion'))
-
-  for (const staleBriefContent of [
-    '## Do This First',
-    '## Custom GPT Actions Path',
-    '## Browser Helper Path',
-    '## Raw HTTP Fallback',
-    'actionId must be copied from legalActions exactly.',
-    'packet.board.cells[].legal',
-    'Inspect each legal action parameterSchema before submitting',
-    'window.AgentArenaRole.submitAction',
-    "candidate.kind === 'propose_mount_pose'",
-    'Machine legality is not strategy quality',
-    'shop and budget constraints still apply',
-    'Reflection claims should be concise post-fight analysis',
-    'submitRoundPlan',
-    'submitTurnCommand',
-    'submit_round_plan',
-    'submit_turn_command',
-    'movementOptions',
-    'legalCommands',
-    '/round-plan',
-    '/turn-command',
-    'primaryColor',
-    'logo: {',
-    'Baseline Spinner',
-  ]) {
-    assert.equal(brief.includes(staleBriefContent), false, staleBriefContent)
-  }
-})
-
-test('external agent brief copied team identity sample color is role-distinct', () => {
-  const redBrief = createExternalAgentBriefMarkdown({
-    invite,
-    inviteUrl: createAgentInviteUrl(invite, 'https://arena.test'),
-  })
-  const blueInvite = {
-    ...invite,
-    role: 'blue',
-    claimToken: 'cap_blue',
-  }
-  const blueBrief = createExternalAgentBriefMarkdown({
-    invite: blueInvite,
-    inviteUrl: createAgentInviteUrl(blueInvite, 'https://arena.test'),
-  })
-
-  assert.ok(redBrief.includes('"colorHex":"#ff4c5d"'))
-  assert.ok(blueBrief.includes('"colorHex":"#5b9dff"'))
-  assert.equal(redBrief.includes('"colorHex":"#5b9dff"'), false)
-  assert.equal(blueBrief.includes('"colorHex":"#ff4c5d"'), false)
 })
 
 test('agent client bootstraps with invite claim token as bearer player key', async () => {

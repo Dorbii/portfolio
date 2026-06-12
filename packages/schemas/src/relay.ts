@@ -2,7 +2,6 @@ import type {
   AgentChatMessageRequest,
   ArenaConfig,
   BotBlueprint,
-  ChampionRecord,
   CombatRoundPlanSubmission,
   GameMasterActionSubmission,
   GameMasterPacket,
@@ -62,7 +61,7 @@ export type SessionLogEvent = {
     | 'role_reset'
     | 'phase_changed'
     | 'game_action_submitted'
-    | 'game_action_timed_out'
+    | 'combat_plan_timed_out'
     | 'combat_resolved'
     | 'round_advanced'
     | 'economy_applied'
@@ -81,12 +80,6 @@ export type RolePublicState = Partial<TeamEconomySummary> & {
 export type PublicContinuationState = {
   completedFightCount: number
   sharedDebrief?: SharedDebrief
-  saved?: boolean
-  quit?: boolean
-  continuedSessionId?: string
-  championRole?: TeamRole
-  championRecord?: ChampionRecord
-  challengerBonusGold?: number
 }
 
 export type PublicSessionState = {

@@ -100,7 +100,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
       if (!roleTokenRef.current && !invite.claimToken && !invite.observerToken) {
         setLastError({
           title: 'No player key',
-          message: 'Open an agent handoff or cockpit observer URL before loading state.',
+          message: 'Open an agent invite or cockpit observer URL before loading state.',
         })
         return
       }

@@ -20,9 +20,9 @@ import {
   writeStoredSession,
 } from './refereeClient'
 import {
-  createRefereeAgentBriefs,
+  createRefereeAgentLinks,
   hasInviteForRole as inviteListHasRole,
-} from './refereeAgentBriefs'
+} from './refereeAgentLinks'
 import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
 import { useRefereeRoleStates } from './useRefereeRoleStates'
@@ -64,9 +64,6 @@ export function useRefereeConsoleController() {
   const activeRefereeToken = storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
   const completedFightCount = publicSession?.continuation.completedFightCount ?? 0
-  const canSave = false
-  const canContinue = false
-  const canQuit = false
   const {
     advanceRoundHint,
     advanceRoundLabel,
@@ -215,14 +212,6 @@ export function useRefereeConsoleController() {
     }
   }, [apiBase, clearReplayState])
 
-  const copyAgentBrief = useCallback((brief: string) => {
-    return navigator.clipboard
-      .writeText(brief)
-      .catch(() => {
-        setError('Clipboard copy blocked. Select and copy manually.')
-      })
-  }, [])
-
   const copyInviteUrl = useCallback((inviteUrl: string) => {
     return navigator.clipboard
       .writeText(inviteUrl)
@@ -239,27 +228,23 @@ export function useRefereeConsoleController() {
   )
 
   const {
-    blueAgentBrief,
     blueCockpitUrl,
     blueInviteUrl,
-    redAgentBrief,
     redCockpitUrl,
     redInviteUrl,
   } = useMemo(
     () =>
-      createRefereeAgentBriefs({
+      createRefereeAgentLinks({
         activeSessionId,
         apiBase,
         invites,
-        publicSession,
         siteBase: window.location.origin,
       }),
-    [activeSessionId, apiBase, invites, publicSession],
+    [activeSessionId, apiBase, invites],
   )
 
   const phase = publicSession?.phase ?? 'not_started'
   const sessionChat = publicSession?.chatLog ?? ([] as PublicSessionState['chatLog'])
-  const deferredCompletionAction = useCallback(() => undefined, [])
 
   const refreshStoredSession = useCallback(() => {
     if (!activeSessionId) {
@@ -282,29 +267,19 @@ export function useRefereeConsoleController() {
     activeSessionId,
     advanceRoundHint,
     advanceRoundLabel,
-    blueAgentBrief,
     blueCockpitUrl,
     blueInviteUrl,
     canAdvanceRound,
-    copyAgentBrief,
     copyInviteUrl,
     createNewSession,
     completionControls: {
-      canContinue,
-      canQuit,
-      canSave,
       completedFightCount,
-      isBusy: false,
-      onContinue: deferredCompletionAction,
-      onQuit: deferredCompletionAction,
-      onSave: deferredCompletionAction,
     },
     error,
     hasInviteForRole,
     loadState,
     phase,
     publicSession,
-    redAgentBrief,
     redCockpitUrl,
     redInviteUrl,
     refreshStoredSession,

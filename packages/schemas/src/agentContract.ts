@@ -63,8 +63,9 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'For Custom GPTs, call gptClaim once with inviteUrl, agentName, and generated teamIdentity. After that, call gptNext until the returned status is playable, complete, or expired.',
         'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap. Use the polling method for your chosen transport: gptNext, waitForGameMasterPacket, or GET /state.',
         'After bootstrap, follow the returned GameMasterPacket.',
-        'During combat_turn, inspect packet.combat.budget, packet.board.ascii, packet.board.reachableCells, packet.board.attackableCells, and packet.board.utilityOptions before submitting a plan.',
-        'Combat truth is a CombatRoundPlan: ordered steps with kind move, attack, utility, or end_turn. Use cellId values from reachableCells and targetCellId/weaponSlot from attackableCells.',
+        'During combat_turn, browser and raw HTTP packets expose packet.combat plus a fuller packet.board with movement, attack, and utility affordances when available.',
+        'During Custom GPT combat, inspect packet.combat.combat for round, budget, self, and opponent, and packet.combat.board for grid and terrain; compact GPT packets intentionally omit raw affordance arrays.',
+        'Combat truth is a CombatRoundPlan: ordered steps with kind move, attack, utility, or end_turn. Raw submissions use cellId/targetCellId values from the current board affordances; compact GPT submissions may use to/target/at coordinate tuples.',
         'legalActions are for loadout and explicit surrender only. Normal combat movement, attack, and utility decisions must go through submit_combat_round_plan, not actionId combat menus.',
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
         'For Custom GPT /gpt/act during combat, use actionId combat_plan with parameters.steps. The wrapper fills round and decisionVersion and submits the actual current CombatRoundPlan.',
@@ -109,7 +110,6 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     browserApi: {
       global: 'window.AgentArenaRole',
       stateScriptTagId: 'agent-arena-state',
-      briefScriptTagId: 'agent-arena-brief',
       methods: [
         'bootstrapRole',
         'getState',
@@ -156,11 +156,43 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         },
       },
       submissionSchema: {
-        action: 'submit_game_action',
-        required: ['action', 'actionSetId', 'decisionVersion', 'actionId'],
-        optional: ['parameters', 'publicMessage'],
-        note:
-          'Agents submit an action id from the active packet plus schema-defined parameters only when the selected legal action asks for them. Custom GPT /gpt/act can use server-authored parameterExamples when parameters are omitted. The server applies stored server-authored action truth after validation.',
+        loadoutOrSurrenderAction: {
+          action: 'submit_game_action',
+          endpoint: '/sessions/:sessionId/action',
+          required: ['action', 'actionSetId', 'decisionVersion', 'actionId'],
+          optional: ['parameters', 'publicMessage'],
+          note:
+            'Compatibility path for loadout/legalActions and explicit combat surrender only. Normal combat movement, attack, and utility do not use actionId combat menus.',
+        },
+        compactBuildAction: {
+          action: 'submit_build_action',
+          endpoint: '/sessions/:sessionId/build-action',
+          required: ['action', 'decisionVersion', 'command'],
+          compactKinds: [
+            'choose_part',
+            'choose_attach_target',
+            'mount_part',
+            'remove_part',
+            'remove_subtree',
+            'move_part',
+            'rotate_part',
+            'confirm_loadout',
+          ],
+        },
+        combatPlan: {
+          action: 'submit_combat_round_plan',
+          endpoint: '/sessions/:sessionId/combat-plan',
+          required: ['action', 'round', 'decisionVersion', 'steps'],
+          note:
+            'Normal combat movement, attack, utility, and end-turn intent path for browser helper and raw HTTP agents.',
+        },
+        compactGptCombatPlan: {
+          actionId: 'combat_plan',
+          wrapper: '/gpt/act',
+          parameters: 'steps',
+          note:
+            'Custom GPT wrapper path; the server fills round and decisionVersion from the current role packet.',
+        },
       },
       privateReflectionSchema: {
         action: 'submit_post_fight_reflection',
@@ -182,6 +214,16 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         path: '/gpt/next',
         auth: 'inviteUrl body field; wrapper extracts claimToken',
         returns: 'playable, waiting, complete, or expired status plus current GameMasterPacket',
+      },
+      {
+        name: 'gpt_catalog',
+        method: 'POST',
+        path: '/gpt/catalog',
+        auth: 'none',
+        body: {
+          partIds: ['weapon.Weapon_Turret'],
+        },
+        returns: 'compact part summaries for Custom GPT loadout planning',
       },
       {
         name: 'gpt_act',
@@ -224,7 +266,32 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         path: '/sessions/:sessionId/action',
         auth: 'role player key bearer',
         body: createExampleGameMasterActionSubmission(),
-        returns: 'next GameMasterPacket plus redacted public state',
+        returns: 'next GameMasterPacket plus redacted public state for loadout/legalActions and explicit surrender compatibility',
+      },
+      {
+        name: 'submit_build_action',
+        method: 'POST',
+        path: '/sessions/:sessionId/build-action',
+        auth: 'role player key bearer',
+        body: {
+          action: 'submit_build_action',
+          decisionVersion: 0,
+          command: { kind: 'choose_part', part: 'weapon.Weapon_Turret' },
+        },
+        returns: 'next GameMasterPacket plus redacted public state after a compact build edit',
+      },
+      {
+        name: 'submit_combat_round_plan',
+        method: 'POST',
+        path: '/sessions/:sessionId/combat-plan',
+        auth: 'role player key bearer',
+        body: {
+          action: 'submit_combat_round_plan',
+          round: 1,
+          decisionVersion: 0,
+          steps: [{ kind: 'end_turn' }],
+        },
+        returns: 'next GameMasterPacket plus redacted public state after accepting a combat round plan',
       },
       {
         name: 'submit_post_fight_reflection',

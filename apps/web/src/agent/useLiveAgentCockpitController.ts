@@ -1,10 +1,7 @@
 import { useMemo } from 'react'
+import type { AgentInvite } from './agentClient'
 import {
-  createAgentInviteUrl,
-  type AgentInvite,
-} from './agentClient'
-import {
-  createCockpitBriefArtifacts,
+  createCockpitStateScript,
   createCockpitDerivedState,
 } from './agentCockpitViewState'
 import { useAgentRoleSession } from './useAgentRoleSession'
@@ -22,22 +19,14 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     roleToken,
     status,
   } = useAgentRoleSession(invite)
-  const agentInviteUrl = useMemo(
-    () => createAgentInviteUrl(invite, window.location.origin),
-    [invite],
-  )
-  const {
-    externalAgentBriefScript,
-    stateScript,
-  } = useMemo(
+  const stateScript = useMemo(
     () =>
-      createCockpitBriefArtifacts({
-        agentInviteUrl,
+      createCockpitStateScript({
         invite,
         publicState,
         roleState,
       }),
-    [agentInviteUrl, invite, publicState, roleState],
+    [invite, publicState, roleState],
   )
   const {
     canMutateRole,
@@ -71,7 +60,6 @@ export function useLiveAgentCockpitController(invite: AgentInvite) {
     chatLog,
     connectRole,
     clearRoleToken,
-    externalAgentBriefScript,
     hasPlayerKey,
     isBusy,
     lastError,

@@ -16,9 +16,9 @@ import {
   clearStoredSession,
 } from '../.test-build/apps/web/src/referee/refereeClient.js'
 import {
-  createRefereeAgentBriefs,
+  createRefereeAgentLinks,
   hasInviteForRole,
-} from '../.test-build/apps/web/src/referee/refereeAgentBriefs.js'
+} from '../.test-build/apps/web/src/referee/refereeAgentLinks.js'
 
 function jsonResponse(value, init = {}) {
   return new Response(JSON.stringify(value), {
@@ -162,22 +162,21 @@ test('referee invite URLs can use observer-only cockpit tokens', () => {
   assert.equal(inviteUrl.includes('claimToken'), false)
 })
 
-test('referee cockpit handoffs tolerate claim-only invite payloads', () => {
-  const briefs = createRefereeAgentBriefs({
+test('referee cockpit links tolerate claim-only invite payloads', () => {
+  const links = createRefereeAgentLinks({
     activeSessionId: 's_demo',
     apiBase: DEFAULT_ARENA_API_BASE,
     invites: [{ role: 'red', claimToken: 'cap_red', claimPath: '/sessions/s_demo/claim' }],
-    publicSession: null,
     siteBase: 'http://127.0.0.1:5175',
   })
 
   assert.equal(hasInviteForRole([{ role: 'red', claimToken: 'cap_red' }], 'red'), true)
-  assert.equal(briefs.hasAnyInvite, true)
-  assert.equal(briefs.redCockpitUrl.startsWith('http://127.0.0.1:5175/agent#'), true)
-  assert.equal(briefs.redCockpitUrl.includes('claimToken=cap_red'), true)
-  assert.equal(briefs.redCockpitUrl.includes('observerToken='), false)
-  assert.equal(briefs.redInviteUrl.includes('claimToken=cap_red'), true)
-  assert.equal(briefs.blueCockpitUrl, '')
+  assert.equal(links.hasAnyInvite, true)
+  assert.equal(links.redCockpitUrl.startsWith('http://127.0.0.1:5175/agent#'), true)
+  assert.equal(links.redCockpitUrl.includes('claimToken=cap_red'), true)
+  assert.equal(links.redCockpitUrl.includes('observerToken='), false)
+  assert.equal(links.redInviteUrl.includes('claimToken=cap_red'), true)
+  assert.equal(links.blueCockpitUrl, '')
 })
 
 test('referee createSession posts to /sessions', async () => {
@@ -432,7 +431,7 @@ test('referee resetRoleClaim posts /reset-role with bearer token', async () => {
   }
 })
 
-test('referee session storage persists referee token and role handoff tokens until session expiry', () => {
+test('referee session storage persists referee token and role invite tokens until session expiry', () => {
   const storage = new Map()
   const sessionId = 's_demo'
   const apiBase = DEFAULT_ARENA_API_BASE
@@ -482,7 +481,7 @@ test('referee session storage persists referee token and role handoff tokens unt
   assert.equal(calls.some(([op, key]) => op === 'remove' && key === `agent-arena:referee-console:${apiBase}:${sessionId}`), true)
 })
 
-test('referee session storage preserves existing role handoff tokens when saving token-only updates', () => {
+test('referee session storage preserves existing role invite tokens when saving token-only updates', () => {
   const storage = new Map()
   const sessionId = 's_demo'
   const apiBase = DEFAULT_ARENA_API_BASE

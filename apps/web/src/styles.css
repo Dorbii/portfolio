@@ -3618,24 +3618,24 @@ textarea:focus-visible {
   justify-content: flex-start;
 }
 
-.scoreboard-handoff {
+.scoreboard-agent-links {
   min-width: 0;
 }
 
-.scoreboard-handoff span {
+.scoreboard-agent-links span {
   color: #aeb7c1;
   font-size: 0.72rem;
   font-weight: 850;
   text-transform: uppercase;
 }
 
-.scoreboard-handoff-actions {
+.scoreboard-agent-link-actions {
   max-width: 430px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
-.scoreboard-handoff-actions .ui-button {
+.scoreboard-agent-link-actions .ui-button {
   min-height: 30px;
   padding: 5px 8px;
   border-color: rgba(var(--scoreboard-accent), 0.3);
@@ -3650,15 +3650,15 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
-.scoreboard-handoff-actions .ui-button:first-child {
+.scoreboard-agent-link-actions .ui-button:first-child {
   border-color: rgba(var(--scoreboard-accent), 0.48);
   background:
     linear-gradient(180deg, rgba(var(--scoreboard-accent), 0.18), rgba(var(--scoreboard-accent), 0.055)),
     rgba(238, 242, 247, 0.025);
 }
 
-.scoreboard-handoff-actions .ui-button:not(:disabled):hover,
-.scoreboard-handoff-actions .ui-button:not(:disabled):focus-visible {
+.scoreboard-agent-link-actions .ui-button:not(:disabled):hover,
+.scoreboard-agent-link-actions .ui-button:not(:disabled):focus-visible {
   border-color: rgba(var(--scoreboard-accent), 0.72);
   background:
     linear-gradient(180deg, rgba(var(--scoreboard-accent), 0.24), rgba(var(--scoreboard-accent), 0.08)),
@@ -3844,13 +3844,6 @@ textarea:focus-visible {
     rgba(6, 8, 12, 0.42);
   font-size: 0.82rem;
   line-height: 1.45;
-}
-
-.session-completion-actions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 .match-dashboard-shell .ui-status-badge {
@@ -4578,7 +4571,7 @@ textarea:focus-visible {
     height: 10px;
   }
 
-  .scoreboard-handoff-actions {
+  .scoreboard-agent-link-actions {
     max-width: none;
     grid-template-columns: minmax(0, 1fr);
   }

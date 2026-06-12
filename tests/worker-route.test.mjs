@@ -775,7 +775,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
     'gptReflection',
   ])
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
-  assert.equal(json.browserApi.briefScriptTagId, 'agent-arena-brief')
+  assert.equal('briefScriptTagId' in json.browserApi, false)
   assert.ok(json.browserApi.methods.includes('bootstrapRole'))
   assert.ok(json.browserApi.methods.includes('getState'))
   assert.ok(json.browserApi.methods.includes('waitForGameMasterPacket'))
@@ -802,7 +802,8 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generate your own TeamIdentity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('team color for your robot and UI label')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.budget')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.combat')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.board')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('submit_combat_round_plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions are for loadout and explicit surrender only')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('blockedActions')))
@@ -831,14 +832,23 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.rules.packetFields.versionContract.decisionVersion, 'snapshot both agents choose from')
   assert.equal(json.rules.packetFields.versionContract.actionSetId, 'exact role-specific legal menu')
   assert.equal(json.rules.packetFields.versionContract.eventVersion, 'chat, replay, and public-state progression')
-  assert.equal(json.rules.submissionSchema.action, 'submit_game_action')
-  assert.deepEqual(json.rules.submissionSchema.required, [
+  assert.equal(json.rules.submissionSchema.loadoutOrSurrenderAction.action, 'submit_game_action')
+  assert.equal(json.rules.submissionSchema.loadoutOrSurrenderAction.endpoint, '/sessions/:sessionId/action')
+  assert.deepEqual(json.rules.submissionSchema.loadoutOrSurrenderAction.required, [
     'action',
     'actionSetId',
     'decisionVersion',
     'actionId',
   ])
-  assert.ok(json.rules.submissionSchema.optional.includes('parameters'))
+  assert.ok(json.rules.submissionSchema.loadoutOrSurrenderAction.optional.includes('parameters'))
+  assert.equal(json.rules.submissionSchema.compactBuildAction.action, 'submit_build_action')
+  assert.equal(json.rules.submissionSchema.compactBuildAction.endpoint, '/sessions/:sessionId/build-action')
+  assert.ok(json.rules.submissionSchema.compactBuildAction.compactKinds.includes('mount_part'))
+  assert.equal(json.rules.submissionSchema.combatPlan.action, 'submit_combat_round_plan')
+  assert.equal(json.rules.submissionSchema.combatPlan.endpoint, '/sessions/:sessionId/combat-plan')
+  assert.ok(json.rules.submissionSchema.combatPlan.required.includes('steps'))
+  assert.equal(json.rules.submissionSchema.compactGptCombatPlan.actionId, 'combat_plan')
+  assert.equal(json.rules.submissionSchema.compactGptCombatPlan.wrapper, '/gpt/act')
   assert.ok(json.partCatalog.some((part) => part.id === 'Body_Square_Medium' && part.cost === 22))
   assert.ok(json.partCatalog.some((part) => part.id === 'Weapon_Spinner_Small'))
   assert.ok(json.partCatalog.some((part) => part.id === 'Utility_DroneController' && part.behavior?.id === 'drone_controller'))
@@ -904,6 +914,14 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(
     json.actions.some(
       (action) =>
+        action.name === 'gpt_catalog' &&
+        action.method === 'POST' &&
+        action.path === '/gpt/catalog',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
         action.name === 'gpt_reflection' &&
         action.method === 'POST' &&
         action.path === '/gpt/reflection',
@@ -925,6 +943,24 @@ test('GET /agent-spec.json returns the agent contract', async () => {
         action.method === 'POST' &&
         action.path === '/sessions/:sessionId/action' &&
         action.body.action === 'submit_game_action',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'submit_build_action' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/build-action' &&
+        action.body.action === 'submit_build_action',
+    ),
+  )
+  assert.ok(
+    json.actions.some(
+      (action) =>
+        action.name === 'submit_combat_round_plan' &&
+        action.method === 'POST' &&
+        action.path === '/sessions/:sessionId/combat-plan' &&
+        action.body.action === 'submit_combat_round_plan',
     ),
   )
   assert.ok(
@@ -1045,6 +1081,14 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(gptParameterProperties.v.maximum, 1)
   assert.equal(gptParameterProperties.targetId.enum[0], 'opponent')
   assert.ok('destinationCellId' in gptParameterProperties)
+  assert.ok('steps' in gptParameterProperties)
+  assert.ok('to' in gptParameterProperties.steps.items.properties)
+  assert.ok('target' in gptParameterProperties.steps.items.properties)
+  assert.ok('at' in gptParameterProperties.steps.items.properties)
+  assert.equal(
+    gptParameterProperties.steps.items.properties.cellId.description.includes('reachableCells'),
+    false,
+  )
   assert.ok(json.components.schemas.GptCatalogRequest.required.includes('partIds'))
 })
 
