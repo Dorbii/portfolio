@@ -2,6 +2,7 @@ import type { TeamRole } from '../../../../packages/schemas/src/index.js'
 import type { RolePrivateState } from './agentSessionTypes.js'
 import { AgentInsightWorkbenchView } from './AgentInsightWorkbenchView'
 import './AgentInsightWorkbench.css'
+import './AgentInsightWorkbenchDrawer.css'
 
 type AgentInsightWorkbenchProps = {
   role: TeamRole
