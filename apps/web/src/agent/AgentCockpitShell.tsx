@@ -3,10 +3,8 @@ import { capitalize } from '../shared/format'
 import { teamLogoInitials } from '../shared/teamVisuals'
 import {
   Button,
-  Panel,
 } from '../shared/ui'
-import { JsonScriptPanel, SectionTitle } from './AgentCockpitPanels'
-import type { AgentCockpitWorkflow } from './agentCockpitViewState'
+import { JsonScriptPanel } from './AgentCockpitPanels'
 import type { useLiveAgentCockpitController } from './useLiveAgentCockpitController'
 
 type AgentCockpitController = ReturnType<typeof useLiveAgentCockpitController>
@@ -67,39 +65,6 @@ export function AgentCockpitHeader({
     </header>
   )
 }
-export function AgentTaskPanel({
-  notice,
-  workflow,
-}: {
-  notice: string | null
-  workflow: AgentCockpitWorkflow
-}) {
-  return (
-    <Panel className={`agent-live-panel agent-task-panel active-${workflow.activeTask}`} aria-labelledby="next-task-heading">
-      <div className="agent-next-task">
-        <span className="agent-state-chip">{workflow.stateLabel}</span>
-        <SectionTitle id="next-task-heading" title={workflow.headline} />
-        <p>{workflow.detail}</p>
-        <code>{workflow.helperCall}</code>
-        {notice ? (
-          <small aria-live="polite">{notice}</small>
-        ) : null}
-      </div>
-      <ol className="agent-task-list" aria-label="Cockpit workflow">
-        {workflow.steps.map((step) => (
-          <li
-            className={`agent-task-step tone-${step.tone}${workflow.activeTask === step.key ? ' is-active' : ''}`}
-            key={step.key}
-          >
-            <span>{step.label}</span>
-            <strong>{step.status}</strong>
-          </li>
-        ))}
-      </ol>
-    </Panel>
-  )
-}
-
 export function AgentCockpitScripts({
   externalAgentBriefScript,
   stateScript,

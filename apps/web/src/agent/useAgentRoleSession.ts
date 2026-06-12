@@ -32,7 +32,6 @@ import {
   shouldPollAgentRoleState,
   startAgentRoleStatePolling,
 } from './agentRolePolling'
-import { capitalize, formatLabel } from '../shared/format'
 
 export function useAgentRoleSession(invite: AgentInvite) {
   const [roleToken, setRoleToken] = useState(() =>
@@ -46,7 +45,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
   const [publicState, setPublicState] = useState<PublicSessionState | null>(null)
   const [status, setStatus] = useState<LoadStatus>('idle')
   const [lastError, setLastError] = useState<UiError | null>(null)
-  const [notice, setNotice] = useState<string | null>(null)
 
   const client = useMemo(
     () =>
@@ -174,7 +172,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
     setStatus('claiming')
     setLastError(null)
-    setNotice(null)
 
     try {
       const submittedAgentName = input.agentName?.trim() ?? ''
@@ -201,9 +198,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
       setRoleState(roleStateWithIdentity)
       setPublicState(redactedState)
       setStatus('ready')
-      setNotice(
-        `${capitalize(invite.role)} role connected. Next action: ${formatLabel(bootstrap.nextAction)}.`,
-      )
       window.history.replaceState(
         null,
         '',
@@ -249,7 +243,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
       setRoleState(roleStateWithIdentity)
       setPublicState(redactedState)
-      setNotice(`Next action: ${formatLabel(packet.nextAction)}.`)
 
       return packet
     } catch (error) {
@@ -278,7 +271,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
         gameMaster: privateState.gameMaster ?? response.packet,
       }))
       setPublicState(redactedState)
-      setNotice(`Combat plan submitted. Next action: ${formatLabel(response.packet.nextAction)}.`)
 
       return response
     } catch (error) {
@@ -338,11 +330,6 @@ export function useAgentRoleSession(invite: AgentInvite) {
     setRoleState(null)
     setPublicState(null)
     setLastError(null)
-    setNotice(
-      invite.observerToken
-        ? 'Stored player key removed. Observer access remains loaded from this URL.'
-        : 'Stored player key removed.',
-    )
   }, [invite])
 
   return {
@@ -351,13 +338,11 @@ export function useAgentRoleSession(invite: AgentInvite) {
     client,
     lastError,
     loadState,
-    notice,
     publicState,
     roleState,
     submitCombatPlan,
     roleToken,
     setLastError,
-    setNotice,
     setPublicState,
     setRoleState,
     setStatus,
