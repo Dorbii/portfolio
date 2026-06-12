@@ -60,8 +60,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with bearer claimToken, then GET /sessions/:sessionId/state for gameMaster.',
         'Custom GPTs should not execute invite-page JavaScript helpers; those helpers remain supported for non-GPT browser automation agents.',
         'Before bootstrap, generate your own TeamIdentity object from this contract, including a team color for your robot and UI label. Do not use role labels as the team identity.',
+        'Agents may choose their own identity. If you need deterministic fallback names, use the role plus a short session suffix, for example Red 7ZQ9K2 and Blue 7ZQ9K2 for session s_7ZQ9K2.',
         'For Custom GPTs, call gptClaim once with inviteUrl, agentName, and generated teamIdentity. After that, call gptNext until the returned status is playable, complete, or expired.',
         'Do not keep resending teamIdentity to poll; team identity is locked after the first successful bootstrap. Use the polling method for your chosen transport: gptNext, waitForGameMasterPacket, or GET /state.',
+        'If both roles request the same team display name, the server keeps the first name and normalizes the later duplicate to a role-distinct name.',
         'After bootstrap, follow the returned GameMasterPacket.',
         'During combat_turn, browser and raw HTTP packets expose packet.combat plus a fuller packet.board with movement, attack, and utility affordances when available.',
         'During Custom GPT combat, inspect packet.combat.combat for round, budget, self, and opponent, and packet.combat.board for grid and terrain; compact GPT packets intentionally omit raw affordance arrays.',
@@ -70,10 +72,11 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         'If blockedActions is present, read its issues before trying to submit; blockedActions explains unavailable choices and is not submit-able.',
         'For Custom GPT /gpt/act during combat, use actionId combat_plan with parameters.steps. The wrapper fills round and decisionVersion and submits the actual current CombatRoundPlan.',
         'During build (choose_loadout), read packet.build: bot is your current machine, store.foundation are reusable parts, store.offers are one-purchase round offers, edit lists legal edits, and requirements shows confirm blockers.',
-        'For Custom GPT /gpt/act during build, submit a compact action object instead of an actionId: {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}. Compact kinds are choose_part, choose_attach_target, mount_part, remove_part, remove_subtree, move_part, rotate_part, and confirm_loadout. Do not rely on legalActions for compact build.',
+        'For Custom GPT /gpt/act during build, submit a compact action object instead of an actionId: {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}. Compact kinds are choose_part, choose_attach_target, mount_part, remove_part, remove_subtree, move_part, rotate_part, cancel_build_selection, and confirm_loadout. Do not rely on legalActions for compact build.',
         'For raw HTTP compact build actions, POST /sessions/:sessionId/build-action with action submit_build_action, decisionVersion, and command.',
         'For Custom GPT /gpt/act legacy submissions outside combat, inviteUrl plus actionId remains accepted during migration; the wrapper fills actionSetId and decisionVersion from current role state and uses the selected legal action parameterExamples when parameters are omitted.',
         'For browser helper or raw HTTP combat plan submissions, POST /sessions/:sessionId/combat-plan with action submit_combat_round_plan, round, decisionVersion, and steps.',
+        'Confirming a loadout means your role is ready. There is no separate loadout-ready call; after confirming, keep polling until combat_turn, round_review, session_complete, or expired.',
         'The server validates parameters, stale packets, forged action ids, shop rules, combat plan shape, and budget rules before accepting a submitted command.',
         'If a submit is rejected, read error.issues; each issue contains code, path, and message explaining why the server refused it.',
         'A legal machine design is not necessarily a good strategy. Poor, incomplete, weaponless, or mobility-less machines can still be legal when the server accepts the action.',
@@ -133,6 +136,8 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           'non-empty text prompt describing the desired team logo; use this when no asset is available',
         logoAsset:
           'optional asset object with kind image_url, data_url, or asset_id plus url, dataUrl, or assetId',
+        duplicateNames:
+          'case-insensitive duplicate display names are normalized by the server to role-distinct names',
       },
       packetFields: {
         required: [
@@ -148,11 +153,21 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         ],
         optional: [
           'blockedActions',
+          'review',
+          'sharedDebrief',
+          'combat.fightStartedAt',
+          'combat.fightDeadlineAt',
+          'combat.fightSeconds',
+          'combat.cutoffReason',
         ],
         versionContract: {
           decisionVersion: 'snapshot both agents choose from',
           actionSetId: 'exact role-specific legal menu',
           eventVersion: 'chat, replay, and public-state progression',
+        },
+        reviewContract: {
+          review: 'post-fight result, reflection, and shared-debrief availability metadata',
+          sharedDebrief: 'fight-scoped shared review built after both private reflections are submitted',
         },
       },
       submissionSchema: {
@@ -176,6 +191,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
             'remove_subtree',
             'move_part',
             'rotate_part',
+            'cancel_build_selection',
             'confirm_loadout',
           ],
         },
@@ -327,9 +343,21 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       gameMasterActionSubmission: createExampleGameMasterActionSubmission(),
       mountPoseActionSubmission: createExampleMountPoseActionSubmission(),
       teamIdentity: {
-        name: 'Voltage Choir',
-        colorHex: '#00d6a3',
-        logoPrompt: 'Voltage Choir combat robotics logo with a tuning fork bolt and VC initials',
+        name: 'Red 7ZQ9K2',
+        colorHex: '#ff4c5d',
+        logoPrompt: 'Red 7ZQ9K2 combat robotics logo with angular red shield and R7 initials',
+      },
+      teamIdentityByRole: {
+        red: {
+          name: 'Red 7ZQ9K2',
+          colorHex: '#ff4c5d',
+          logoPrompt: 'Red 7ZQ9K2 combat robotics logo with angular red shield and R7 initials',
+        },
+        blue: {
+          name: 'Blue 7ZQ9K2',
+          colorHex: '#5b9dff',
+          logoPrompt: 'Blue 7ZQ9K2 combat robotics logo with blue gear crest and B7 initials',
+        },
       },
     },
     ...(options.catalogGuidance ? { catalogGuidance: options.catalogGuidance } : {}),

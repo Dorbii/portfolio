@@ -2630,7 +2630,7 @@ function forgedMountPoseAction(childPartId, parentInstanceId, mountSurfaceId, ov
   }
 }
 
-function placePartInHarness(harness, partId, options = {}) {
+function selectPartInHarness(harness, partId) {
   applyBuilderAction(
     harness,
     chooseBuilderAction(
@@ -2638,6 +2638,10 @@ function placePartInHarness(harness, partId, options = {}) {
       (action) => action.kind === 'choose_part' && action.payload.partId === partId,
     ),
   )
+}
+
+function placePartInHarness(harness, partId, options = {}) {
+  selectPartInHarness(harness, partId)
   applyBuilderAction(
     harness,
     chooseBuilderAction(
@@ -3729,6 +3733,82 @@ test('machine pose rejects hard collisions before mutating builder state', () =>
   assert.equal(JSON.stringify(harness.buildState), baseState)
   assert.equal(harness.gold, baseGold)
   assert.equal(JSON.stringify(harness.inventory), baseInventory)
+})
+
+test('machine builder avoids observed no-mount deadlocks on crowded core targets', () => {
+  const scenarios = [
+    {
+      name: 'spear after shredder mecanum gyro',
+      seedParts: ['Weapon_Shredder', 'Wheel_Mecanum', 'Utility_Gyro'],
+      pendingPart: 'Weapon_Spear',
+    },
+    {
+      name: 'shield after shredder mecanum gyro',
+      seedParts: ['Weapon_Shredder', 'Wheel_Mecanum', 'Utility_Gyro'],
+      pendingPart: 'Armor_Shield',
+    },
+    {
+      name: 'small wheel after shredder mecanum gyro',
+      seedParts: ['Weapon_Shredder', 'Wheel_Mecanum', 'Utility_Gyro'],
+      pendingPart: 'Wheel_Small',
+    },
+    {
+      name: 'larger wheel-small stack stops before heavy armor trap',
+      seedParts: ['Wheel_Large', 'Weapon_Spear', 'Weapon_Flipper'],
+      pendingPart: 'Armor_Heavy',
+    },
+  ]
+
+  for (const scenario of scenarios) {
+    const harness = createBuilderHarness(1_000)
+
+    for (const partId of scenario.seedParts) {
+      placePartInHarness(harness, partId)
+    }
+
+    selectPartInHarness(harness, scenario.pendingPart)
+
+    const targetActions = builderActions(harness).filter((action) => action.kind === 'choose_attach_target')
+
+    assert.equal(
+      targetActions.some((action) => action.payload.targetInstanceId === 'core'),
+      false,
+      `${scenario.name} should not offer core when no feasible mount pose exists`,
+    )
+
+    const staleBuildState = {
+      ...harness.buildState,
+      step: 'propose_mount_pose',
+      selectedAttachTargetId: 'core',
+    }
+    const staleActionSet = buildLoadoutActionSet({
+      role: 'red',
+      round: 1,
+      decisionVersion: harness.decisionVersion,
+      actionSetId: `red:r1:loadout:stale-core:${scenario.pendingPart}:v${harness.decisionVersion}`,
+      createdAt: '2026-06-07T00:00:00.000Z',
+      arenaVersion: 'arena:v1',
+      gold: harness.gold,
+      buildState: staleBuildState,
+      catalog: harness.catalog,
+    })
+    const staleActions = Object.values(staleActionSet.actions)
+    const stalePacket = compactViewFor(staleBuildState, staleActionSet, harness.gold)
+
+    assert.equal(
+      staleActions.some((action) => action.kind === 'propose_mount_pose'),
+      false,
+      `${scenario.name} should suppress zero-example mount actions`,
+    )
+    assert.notEqual(
+      staleActions.find((action) => action.kind === 'cancel_build_selection'),
+      undefined,
+      `${scenario.name} should expose cancel in stale mount state`,
+    )
+    assert.equal(stalePacket.step, 'mount_part')
+    assert.deepEqual(stalePacket.mounts, [])
+    assert.equal(stalePacket.edit.cancel, true)
+  }
 })
 
 test('machine pose rejects invalid parent and unsupported surface without mutating design', () => {
@@ -6565,6 +6645,59 @@ test('session marks expired state and rejects private access after ttl', async (
   assert.equal(privateState.error.code, 'SESSION_EXPIRED')
 })
 
+test('public state replayVersion is absent without replay and changes with replay content and finalization', async () => {
+  const session = await createTestSession('s_replay_version')
+  const initialPublicState = session.getPublicState()
+
+  assert.equal(initialPublicState.replayAvailable, false)
+  assert.equal(initialPublicState.replayVersion, undefined)
+
+  const stored = session.exportState()
+
+  stored.phase = 'round_review'
+  stored.roundPlan = undefined
+  stored.combat = undefined
+  stored.activeActionSets = undefined
+  stored.lockedActions = undefined
+  stored.replay = {
+    ...replayForCompletedFight(),
+    teamIdentities: {
+      red: expectedLegacyTeamIdentity('red'),
+      blue: expectedLegacyTeamIdentity('blue'),
+    },
+    botBlueprints: {
+      red: validSpinnerSubmission.blueprint,
+      blue: validSpinnerSubmission.blueprint,
+    },
+  }
+
+  const replayPublicState = SessionCoordinator.fromState(stored).getPublicState()
+  const replayVersion = replayPublicState.replayVersion
+
+  assert.equal(replayPublicState.replayAvailable, true)
+  assert.equal(typeof replayVersion, 'string')
+
+  stored.replay.events = [
+    ...stored.replay.events,
+    { t: 9, type: 'hazard', hazard: 'floor_saw', position: [0, 0, 0] },
+  ]
+
+  const extraEventPublicState = SessionCoordinator.fromState(stored).getPublicState()
+
+  assert.notEqual(extraEventPublicState.replayVersion, replayVersion)
+
+  stored.lastResult = {
+    winner: 'red',
+    reason: 'Red disabled Blue.',
+    damage: { red: 0, blue: 40 },
+    remainingHealth: { red: 40, blue: 0 },
+  }
+
+  const finalizedPublicState = SessionCoordinator.fromState(stored).getPublicState()
+
+  assert.notEqual(finalizedPublicState.replayVersion, extraEventPublicState.replayVersion)
+})
+
 test('post-fight reflections are accepted only after completed fights and consumed into shared debrief', async () => {
   const session = await createTestSession('s_reflection_lifecycle')
   const refereeToken = session.createResponse().refereeToken
@@ -6616,6 +6749,14 @@ test('post-fight reflections are accepted only after completed fights and consum
   assert.equal(reviewPacket.ok, true)
   assert.equal(reviewPacket.value.nextAction, 'submit_reflection')
   assert.equal(reviewPacket.value.fightId, 'fight_1')
+  assert.equal(reviewPacket.value.review.fightId, 'fight_1')
+  assert.deepEqual(reviewPacket.value.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(reviewPacket.value.review.debrief, { available: false })
+  assert.equal(reviewPacket.value.review.result.winner, 'red')
 
   const secret = 'SECRET_RAW_REFLECTION_DO_NOT_LEAK'
   const submitted = await loaded.submitPostFightReflection(
@@ -6634,19 +6775,49 @@ test('post-fight reflections are accepted only after completed fights and consum
 
   assert.equal(submitted.ok, true)
   assert.equal(submitted.value.packet.nextAction, 'wait_for_debrief')
+  assert.deepEqual(submitted.value.packet.review.reflection, {
+    required: false,
+    submitted: true,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(submitted.value.packet.review.debrief, { available: false })
 
   const afterSubmit = loaded.exportState()
   const [storedReflection] = afterSubmit.reflections
 
   assert.equal(storedReflection.status, 'private_pending')
   assert.equal(storedReflection.reflection.claims.ownWeaknesses[0].includes(secret), true)
+  assert.equal(afterSubmit.sharedDebrief, undefined)
 
   const blueState = await loaded.getRoleStateForToken(blueToken)
   const publicState = loaded.getPublicState()
 
   assert.equal(blueState.ok, true)
+  assert.equal(blueState.value.gameMaster.nextAction, 'submit_reflection')
+  assert.deepEqual(blueState.value.gameMaster.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: true,
+  })
   assert.equal(JSON.stringify(blueState.value).includes(secret), false)
   assert.equal(JSON.stringify(publicState).includes(secret), false)
+
+  const blueSubmitted = await loaded.submitPostFightReflection(
+    blueToken,
+    postFightReflection('blue', {
+      decisionVersion: blueState.value.gameMaster.decisionVersion,
+    }),
+  )
+
+  assert.equal(blueSubmitted.ok, true)
+  assert.equal(blueSubmitted.value.packet.nextAction, 'wait_for_debrief')
+  assert.deepEqual(blueSubmitted.value.packet.review.reflection, {
+    required: false,
+    submitted: true,
+    opponentSubmitted: true,
+  })
+  assert.equal(blueSubmitted.value.packet.review.debrief.available, true)
+  assert.equal(loaded.exportState().reflections.every((entry) => entry.status === 'consumed_into_shared_debrief'), true)
 
   const advanced = await loaded.advanceRound(refereeToken)
 
@@ -7030,12 +7201,17 @@ test('first combat turn clock starts after both agents fetch the combat packet',
   assert.equal(stored.combat.startGate, undefined)
   assert.equal(stored.combat.openedAt, now)
   assert.equal(stored.combat.deadlineAt, '2026-06-03T00:01:00.000Z')
+  assert.equal(stored.combat.fightStartedAt, now)
+  assert.equal(stored.combat.fightDeadlineAt, '2026-06-03T00:05:00.000Z')
+  assert.equal(stored.combat.fightSeconds, 300)
 
   const redOpen = await session.getGameMasterPacketForToken(redToken)
 
   assert.equal(redOpen.ok, true)
   assert.equal(redOpen.value.nextAction, 'choose_turn')
   assert.equal(redOpen.value.legalActions.length > 0, true)
+  assert.equal(redOpen.value.combat.fightStartedAt, now)
+  assert.equal(redOpen.value.combat.fightDeadlineAt, '2026-06-03T00:05:00.000Z')
 })
 
 test('session lets a combat agent surrender to resolve a stalled round', async () => {
@@ -7065,6 +7241,63 @@ test('session lets a combat agent surrender to resolve a stalled round', async (
   assert.equal(replay.ok, true)
   assert.equal(validateReplayTimeline(replay.value), true)
   assert.equal(replay.value.summary, 'Red surrendered; Blue wins the round.')
+  assert.equal(replay.value.summary.includes('wall-clock expired'), false)
+})
+
+test('session resolves combat when the fight wall-clock expires', async () => {
+  let now = '2026-06-03T00:00:00.000Z'
+  const session = await createTestSession('s_fight_wall_clock_cutoff', {
+    clock: () => now,
+  })
+  const { redToken, blueToken } = await claimBothRoles(session)
+
+  await confirmBothMachineLoadouts(session, redToken, blueToken)
+
+  const open = session.exportState().combat
+
+  assert.equal(open.fightStartedAt, '2026-06-03T00:00:00.000Z')
+  assert.equal(open.fightDeadlineAt, '2026-06-03T00:05:00.000Z')
+
+  now = '2026-06-03T00:05:00.001Z'
+
+  const publicState = session.getPublicState()
+  const stored = session.exportState()
+  const replay = session.getReplay()
+
+  assert.equal(publicState.phase, 'round_review')
+  assert.equal(publicState.replayAvailable, true)
+  assert.equal(publicState.lastResult.reason, 'Fight wall-clock expired; round ends in a draw on equal remaining health.')
+  assert.equal(publicState.lastResult.winner, 'draw')
+  assert.equal(stored.combat, undefined)
+  assert.equal(stored.fightDossier.fights.at(-1).fightId, 'fight_1')
+  assert.equal(stored.fightDossier.fights.at(-1).reason, publicState.lastResult.reason)
+  assert.equal(replay.ok, true)
+  assert.equal(validateReplayTimeline(replay.value), true)
+})
+
+test('knockout before fight wall-clock cutoff resolves normally', () => {
+  const snapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], {
+    red: {
+      weaponReach: 2,
+      stats: lockstepStats({ weaponThreat: 40 }),
+    },
+    blue: {
+      health: 1,
+      maxHealth: 30,
+      partHealth: { core: 1 },
+    },
+  })
+  const resolution = resolveLockstepCombatRound(lockstepCombatInput(snapshot, {
+    red: combatRoundPlan('red', [
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:1:0' },
+      { kind: 'end_turn' },
+    ]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  }))
+
+  assert.equal(resolution.status, 'complete')
+  assert.equal(resolution.result.winner, 'red')
+  assert.equal(resolution.result.reason.includes('wall-clock expired'), false)
 })
 
 test('session delays the next combat plan packet after a resolved lockstep round', async () => {
@@ -7099,6 +7332,8 @@ test('session delays the next combat plan packet after a resolved lockstep round
 
   assert.equal(delayedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
   assert.equal(delayedState.combat.deadlineAt, '2026-06-03T00:01:10.000Z')
+  assert.equal(delayedState.combat.fightStartedAt, '2026-06-03T00:00:00.000Z')
+  assert.equal(delayedState.combat.fightDeadlineAt, '2026-06-03T00:05:00.000Z')
 
   const delayedPacket = await session.getGameMasterPacketForToken(redToken)
 
@@ -7494,6 +7729,9 @@ test('session resolves a partial combat round plan with timeout end_turn for the
 
   assert.equal(bluePacket.ok, true)
   assert.equal(resolved.combat.nextTick, waiting.combat.nextTick + 1)
+  assert.equal(resolved.combat.fightStartedAt, waiting.combat.fightStartedAt)
+  assert.equal(resolved.combat.fightDeadlineAt, waiting.combat.fightDeadlineAt)
+  assert.equal(resolved.lastResult, undefined)
   assert.equal(resolved.combat.submittedPlans, undefined)
   assert.equal(resolved.combat.planConsumption.red.endedBy === 'end_turn' || resolved.combat.planConsumption.red.endedBy === 'plan_exhausted', true)
   assert.equal(
@@ -7991,7 +8229,35 @@ test('compact build view exposes selected/targets and mount poses through the bu
   assert.equal(attachPacket.selected.canonicalPartId, chooseAction.payload.partId)
   assert.match(attachPacket.selected.part, /\./)
   assert.ok(attachPacket.targets.includes('core'))
+  assert.equal(attachPacket.edit.cancel, true)
   assert.equal('store' in attachPacket, false)
+
+  const cancelFromAttach = resolveCompactBuildAction({
+    actionSet,
+    buildState,
+    command: { kind: 'cancel_build_selection' },
+  })
+  const chosenDesignBeforeCancel = JSON.stringify(buildState.currentDesign)
+  const chosenLegacyBeforeCancel = JSON.stringify(buildState.legacyDraft)
+
+  assert.equal(cancelFromAttach.ok, true)
+  assert.equal(cancelFromAttach.value.canonicalAction.kind, 'cancel_build_selection')
+
+  const canceledSelectedPart = applyLoadoutAction({
+    role: 'red',
+    gold: 200,
+    inventory: [],
+    buildState,
+    action: cancelFromAttach.value.canonicalAction,
+  })
+
+  assert.equal(canceledSelectedPart.ok, true, canceledSelectedPart.ok ? '' : JSON.stringify(canceledSelectedPart.issues))
+  assert.equal(canceledSelectedPart.gold, 200)
+  assert.deepEqual(canceledSelectedPart.inventory, [])
+  assert.equal(canceledSelectedPart.buildState.step, 'choose_part')
+  assert.equal(canceledSelectedPart.buildState.selectedPartId, undefined)
+  assert.equal(JSON.stringify(canceledSelectedPart.buildState.currentDesign), chosenDesignBeforeCancel)
+  assert.equal(JSON.stringify(canceledSelectedPart.buildState.legacyDraft), chosenLegacyBeforeCancel)
 
   const targetAction = Object.values(actionSet.actions).find(
     (action) => action.kind === 'choose_attach_target',
@@ -8021,6 +8287,7 @@ test('compact build view exposes selected/targets and mount poses through the bu
   assert.notEqual(mountAction, undefined)
   assert.ok(mountAction.parameterExamples.length > 0)
   assert.ok(mountPacket.mounts.length > 0)
+  assert.equal(mountPacket.edit.cancel, true)
 
   const example = mountAction.parameterExamples[0]
 
@@ -8212,6 +8479,14 @@ test('compact build action validator rejects malformed submissions and normalize
     }).ok,
     false,
   )
+  assert.equal(
+    normalizeCompactBuildActionSubmission({
+      action: 'submit_build_action',
+      decisionVersion: 1,
+      command: { kind: 'cancel_build_selection', id: 'part_1' },
+    }).ok,
+    false,
+  )
 
   const normalized = normalizeCompactBuildActionSubmission({
     action: 'submit_build_action',
@@ -8228,6 +8503,15 @@ test('compact build action validator rejects malformed submissions and normalize
     yaw: 0,
     roll: 0,
   })
+
+  const cancelNormalized = normalizeCompactBuildActionSubmission({
+    action: 'submit_build_action',
+    decisionVersion: 8,
+    command: { kind: 'cancel_build_selection' },
+  })
+
+  assert.equal(cancelNormalized.ok, true)
+  assert.deepEqual(cancelNormalized.submission.command, { kind: 'cancel_build_selection' })
 })
 
 test('compact build actions resolve through the active action set only', () => {
@@ -8510,6 +8794,8 @@ test('failed placement and moved parts do not consume store offers', () => {
   assert.deepEqual(goodMount.buildState.consumedOfferSlotIds, [offerAction.payload.offerSlotId])
 
   let movedState = goodMount.buildState
+  const stableDesignBeforeMove = JSON.stringify(movedState.currentDesign)
+  const stableLegacyBeforeMove = JSON.stringify(movedState.legacyDraft)
 
   actionSet = compactViewActionSet(movedState, 500)
 
@@ -8525,6 +8811,31 @@ test('failed placement and moved parts do not consume store offers', () => {
   const moving = applyLoadoutAction({ role: 'red', gold: 500, inventory: [], buildState: movedState, action: moveAction })
 
   assert.equal(moving.ok, true, moving.ok ? '' : JSON.stringify(moving.issues))
+  assert.notEqual(moving.buildState.pendingMoveRestore, undefined)
+
+  const movingActionSet = compactViewActionSet(moving.buildState, 500)
+  const movingPacket = compactViewFor(moving.buildState, movingActionSet, 500)
+  const cancelMoveAction = Object.values(movingActionSet.actions).find(
+    (action) => action.kind === 'cancel_build_selection',
+  )
+
+  assert.equal(movingPacket.edit.cancel, true)
+  assert.notEqual(cancelMoveAction, undefined)
+
+  const canceledMove = applyLoadoutAction({
+    role: 'red',
+    gold: 500,
+    inventory: [],
+    buildState: moving.buildState,
+    action: cancelMoveAction,
+  })
+
+  assert.equal(canceledMove.ok, true, canceledMove.ok ? '' : JSON.stringify(canceledMove.issues))
+  assert.equal(canceledMove.buildState.step, 'choose_part')
+  assert.equal(canceledMove.buildState.pendingMoveRestore, undefined)
+  assert.equal(JSON.stringify(canceledMove.buildState.currentDesign), stableDesignBeforeMove)
+  assert.equal(JSON.stringify(canceledMove.buildState.legacyDraft), stableLegacyBeforeMove)
+
   movedState = moving.buildState
   actionSet = compactViewActionSet(movedState, 500)
 

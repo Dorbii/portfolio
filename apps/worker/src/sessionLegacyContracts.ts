@@ -43,6 +43,9 @@ export type LegacySessionLogEvent = {
     | 'role_claimed'
     | 'role_reset'
     | 'phase_changed'
+    | 'loadout_ready'
+    | 'combat_start_staged'
+    | 'combat_started'
     | 'combat_plan_timed_out'
     | 'game_action_submitted'
     | 'combat_resolved'
@@ -75,6 +78,10 @@ export type LegacyCombatTurnPublicState = {
   openedAt: string
   deadlineAt: string
   turnSeconds: number
+  fightStartedAt?: string
+  fightDeadlineAt?: string
+  fightSeconds?: number
+  cutoffReason?: 'fight_wall_clock_expired'
   submitted: Record<TeamRole, boolean>
 }
 
@@ -105,6 +112,7 @@ export type LegacyPublicSessionState = {
   combat?: LegacyCombatTurnPublicState
   gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
   replayAvailable: boolean
+  replayVersion?: string
   lastResult?: LegacyCombatSummary
   continuation: {
     completedFightCount: number

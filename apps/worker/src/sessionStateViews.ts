@@ -51,6 +51,10 @@ export function buildRolePrivateState(
             openedAt: state.combat.openedAt,
             deadlineAt: state.combat.deadlineAt,
             turnSeconds: state.combat.turnSeconds,
+            fightStartedAt: state.combat.fightStartedAt,
+            fightDeadlineAt: state.combat.fightDeadlineAt,
+            fightSeconds: state.combat.fightSeconds,
+            cutoffReason: state.combat.cutoffReason,
             roundSeconds: state.combat.roundSeconds,
             decisionVersion: state.combat.decisionVersion,
             submitted: {
@@ -149,6 +153,10 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
             openedAt: state.combat.openedAt,
             deadlineAt: state.combat.deadlineAt,
             turnSeconds: state.combat.turnSeconds,
+            fightStartedAt: state.combat.fightStartedAt,
+            fightDeadlineAt: state.combat.fightDeadlineAt,
+            fightSeconds: state.combat.fightSeconds,
+            cutoffReason: state.combat.cutoffReason,
             roundSeconds: state.combat.roundSeconds,
             decisionVersion: state.combat.decisionVersion,
             submitted: {
@@ -163,11 +171,35 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
       : {}),
     gameMaster: buildGameMasterPublicSummary(state),
     replayAvailable: Boolean(state.replay),
+    ...(state.replay ? { replayVersion: replayVersion(state) } : {}),
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
     continuation: buildPublicContinuationState(state),
     chatLog: state.chatLog,
     eventLog: state.eventLog,
   })
+}
+
+export function replayVersion(state: StoredSessionState): string | undefined {
+  const replay = state.replay
+
+  if (!replay) {
+    return undefined
+  }
+
+  const lastEvent = replay.events.at(-1)
+  const lastEventMarker = lastEvent ? `${lastEvent.t}:${lastEvent.type}` : 'none'
+  const resultMarker = state.lastResult
+    ? `${state.lastResult.winner}:${state.lastResult.reason}`
+    : 'result-open'
+
+  return [
+    'replay',
+    replay.round,
+    replay.duration,
+    replay.events.length,
+    lastEventMarker,
+    resultMarker,
+  ].join('|')
 }
 
 export function sessionStateVersion(state: StoredSessionState): string {
@@ -178,7 +210,9 @@ export function sessionStateVersion(state: StoredSessionState): string {
     state.roles.red.loadoutConfirmedAt ? 'red-loadout-confirmed' : 'red-loadout-open',
     state.roles.blue.loadoutConfirmedAt ? 'blue-loadout-confirmed' : 'blue-loadout-open',
     state.roundPlan ? `loadout-window-${state.roundPlan.deadlineAt}` : 'loadout-window-none',
-    state.combat ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}` : 'combat-none',
+    state.combat
+      ? `combat-${state.combat.nextTick}-${state.combat.deadlineAt}-${state.combat.fightDeadlineAt ?? 'fight-deadline-none'}`
+      : 'combat-none',
     state.combat?.submittedPlans?.red || state.combat?.pending.red ? 'red-turn-submitted' : 'red-turn-open',
     state.combat?.submittedPlans?.blue || state.combat?.pending.blue ? 'blue-turn-submitted' : 'blue-turn-open',
     state.eventLog.length,

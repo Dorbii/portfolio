@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   loadReplayPayload,
+  replayPayloadRequestKey,
   toUserMessage,
   type ReplayPayload,
 } from './refereeClient'
@@ -11,11 +12,13 @@ export function useRefereeReplayPayload({
   activeSessionId,
   apiBase,
   replayAvailable,
+  replayVersion,
   round,
 }: {
   activeSessionId: string
   apiBase: string
   replayAvailable: boolean | undefined
+  replayVersion: string | undefined
   round: number | undefined
 }) {
   const [replayLoadState, setReplayLoadState] = useState<SessionLoadState>('idle')
@@ -28,8 +31,15 @@ export function useRefereeReplayPayload({
     setReplayLoadState('idle')
   }, [])
 
+  const replayRequestKey = replayPayloadRequestKey({
+    activeSessionId,
+    replayAvailable,
+    replayVersion,
+    round,
+  })
+
   useEffect(() => {
-    if (!activeSessionId || !replayAvailable) {
+    if (!replayRequestKey) {
       clearReplayState()
       return
     }
@@ -61,7 +71,7 @@ export function useRefereeReplayPayload({
     return () => {
       canceled = true
     }
-  }, [activeSessionId, apiBase, clearReplayState, replayAvailable, round])
+  }, [activeSessionId, apiBase, clearReplayState, replayRequestKey])
 
   return {
     clearReplayState,

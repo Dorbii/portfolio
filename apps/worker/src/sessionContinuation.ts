@@ -2,6 +2,7 @@ import {
   buildSharedDebrief,
 } from '../../../packages/sim/src/index.js'
 import type {
+  GameMasterReviewMetadata,
   PostFightAgentReflection,
   SharedDebrief,
   TeamRole,
@@ -23,6 +24,13 @@ export function hasStoredReflection(
   return (state.reflections ?? []).some(
     (entry) => entry.reflection.role === role && entry.reflection.fightId === fightId,
   )
+}
+
+export function sharedDebriefCoversFight(
+  state: StoredSessionState,
+  fightId: string,
+): boolean {
+  return Boolean(state.sharedDebrief?.fightIds.includes(fightId))
 }
 
 export function storedReflectionForRole(
@@ -58,18 +66,20 @@ export function consumePendingReflectionsIntoDebrief(
   state: StoredSessionState,
   consumedAt: string,
 ): SharedDebrief | undefined {
-  if (!state.fightDossier) {
+  const fightId = latestCompletedFightId(state)
+
+  if (!state.fightDossier || !fightId) {
     return undefined
   }
 
   const debrief = buildSharedDebrief({
     sourceSessionId: state.id,
     dossier: state.fightDossier,
-    reflections: state.reflections ?? [],
+    reflections: (state.reflections ?? []).filter((entry) => entry.reflection.fightId === fightId),
   })
 
   state.reflections = (state.reflections ?? []).map((entry) =>
-    entry.status === 'private_pending'
+    entry.status === 'private_pending' && entry.reflection.fightId === fightId
       ? {
           ...entry,
           status: 'consumed_into_shared_debrief',
@@ -81,4 +91,37 @@ export function consumePendingReflectionsIntoDebrief(
   state.sharedDebrief = debrief
 
   return debrief
+}
+
+export function buildPacketReviewMetadata(
+  state: StoredSessionState,
+  role: TeamRole,
+): GameMasterReviewMetadata | undefined {
+  const fightId = latestCompletedFightId(state)
+
+  if (!fightId) {
+    return undefined
+  }
+
+  const ownReflection = storedReflectionForRole(state, role, fightId)
+  const opponentReflection = storedReflectionForRole(state, opponentRole(role), fightId)
+  const debriefAvailable = sharedDebriefCoversFight(state, fightId)
+
+  return {
+    fightId,
+    ...(state.lastResult ? { result: state.lastResult } : {}),
+    reflection: {
+      required: !debriefAvailable && !ownReflection,
+      submitted: Boolean(ownReflection),
+      opponentSubmitted: Boolean(opponentReflection),
+    },
+    debrief: {
+      available: debriefAvailable,
+      ...(debriefAvailable && state.sharedDebrief?.debriefId ? { debriefId: state.sharedDebrief.debriefId } : {}),
+    },
+  }
+}
+
+function opponentRole(role: TeamRole): TeamRole {
+  return role === 'red' ? 'blue' : 'red'
 }

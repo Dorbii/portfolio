@@ -1096,7 +1096,7 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
 
 function compactBuildGptInstruction(packet: GameMasterPacket): string {
   if (packet.nextAction === 'wait_for_opponent_loadout') {
-    return 'Loadout locked. Poll gptNext until the opponent confirms.'
+    return 'Loadout locked; your role is ready. Keep polling gptNext until combat_turn, round_review, session_complete, or expired.'
   }
 
   return 'Build phase: read packet.build (bot, store, edit, requirements) and submit one compact action through gptAct.action, e.g. {"kind":"choose_part","part":"weapon.Weapon_Turret"}. No actionId is needed for build.'
@@ -1195,6 +1195,8 @@ function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildP
       : {}),
     ...(compactBoard && Object.keys(compactBoard).length > 0 ? { board: compactBoard } : {}),
     ...(packet.combat ? { combat: compactGptCombat(packet.combat) } : {}),
+    ...(packet.review ? { review: packet.review } : {}),
+    ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
     ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
     ...(isCombatTurn ? { actionSummary: compactGptCombatActionSummary(packet) } : {}),
     legalActions,
@@ -1309,6 +1311,10 @@ function compactGptCombat(combat: NonNullable<GameMasterPacket['combat']>): Reco
     round: combat.round,
     decisionVersion: combat.decisionVersion,
     deadlineAt: combat.deadlineAt,
+    ...(combat.fightStartedAt ? { fightStartedAt: combat.fightStartedAt } : {}),
+    ...(combat.fightDeadlineAt ? { fightDeadlineAt: combat.fightDeadlineAt } : {}),
+    ...(combat.fightSeconds ? { fightSeconds: combat.fightSeconds } : {}),
+    ...(combat.cutoffReason ? { cutoffReason: combat.cutoffReason } : {}),
     submitted: combat.submitted,
     opponentSubmitted: combat.opponentSubmitted,
     budget: combat.budget,
@@ -1875,7 +1881,7 @@ function gptPacketStatus(
 }
 
 function gptContinuationForPacket(
-  packet: { legalActions: unknown[]; nextAction: string; phase?: string },
+  packet: Pick<GameMasterPacket, 'legalActions' | 'nextAction' | 'phase' | 'review' | 'sharedDebrief'>,
   statusOverride?: GptPacketStatus,
 ): Record<string, unknown> {
   const status = statusOverride ?? gptPacketStatus(packet)
@@ -1893,6 +1899,35 @@ function gptContinuationForPacket(
       keepGoing: true,
       recommendedNextCall: 'gptReflection',
       instruction: 'Submit a concise private reflection with gptReflection, then continue from the returned packet.',
+    }
+  }
+
+  if (packet.nextAction === 'wait_for_debrief') {
+    const review = packet.review
+
+    if (review?.debrief.available) {
+      return {
+        keepGoing: true,
+        recommendedNextCall: 'gptNext',
+        pollAfterMs: 1500,
+        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then poll gptNext for the next build/combat packet or session completion.',
+      }
+    }
+
+    if (review?.reflection.submitted && !review.reflection.opponentSubmitted) {
+      return {
+        keepGoing: true,
+        recommendedNextCall: 'gptNext',
+        pollAfterMs: 1500,
+        instruction: 'Your private reflection is submitted. The shared debrief is waiting on the opponent reflection, so poll gptNext after a short wait.',
+      }
+    }
+
+    return {
+      keepGoing: true,
+      recommendedNextCall: 'gptNext',
+      pollAfterMs: 1500,
+      instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Poll gptNext after a short wait.',
     }
   }
 

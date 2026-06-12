@@ -7,8 +7,7 @@ import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import {
   clearStoredSession,
   createSession,
-  POLL_INTERVAL_MS,
-  isTerminalPhase,
+  refereePollIntervalMs,
   isValidSessionId,
   loadPublicSession,
   normalizeSessionId,
@@ -48,6 +47,7 @@ export function useRefereeConsoleController() {
     activeSessionId,
     apiBase,
     replayAvailable: publicSession?.replayAvailable,
+    replayVersion: publicSession?.replayVersion,
     round: publicSession?.round,
   })
   const {
@@ -166,8 +166,10 @@ export function useRefereeConsoleController() {
     void loadPublicState(activeSessionId)
   }, [activeSessionId, clearSessionState, hydrateStoredSession, loadPublicState])
 
+  const pollIntervalMs = refereePollIntervalMs(publicSession)
+
   useEffect(() => {
-    if (!activeSessionId || isTerminalPhase(publicSession?.phase)) {
+    if (!activeSessionId || pollIntervalMs === undefined) {
       return
     }
 
@@ -179,12 +181,12 @@ export function useRefereeConsoleController() {
 
         void loadPublicState(activeSessionId, { silent: true })
       }
-    }, POLL_INTERVAL_MS)
+    }, pollIntervalMs)
 
     return () => {
       window.clearInterval(id)
     }
-  }, [activeSessionId, publicSession?.phase, loadPublicState])
+  }, [activeSessionId, pollIntervalMs, loadPublicState])
 
   const createNewSession = useCallback(async () => {
     setLoadState('busy')

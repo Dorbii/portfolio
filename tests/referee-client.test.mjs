@@ -3,13 +3,17 @@ import test from 'node:test'
 
 import * as refereeClientModule from '../.test-build/apps/web/src/referee/refereeClient.js'
 import {
+  ACTIVE_REFEREE_POLL_INTERVAL_MS,
   DEFAULT_ARENA_API_BASE,
   DEFAULT_ARENA_SITE_BASE,
+  IDLE_REFEREE_POLL_INTERVAL_MS,
   advanceRound,
   buildInviteUrl,
   createSession,
   loadReplayPayload,
   loadPublicSession,
+  refereePollIntervalMs,
+  replayPayloadRequestKey,
   resetRoleClaim,
   writeStoredSession,
   readStoredSession,
@@ -177,6 +181,85 @@ test('referee cockpit links tolerate claim-only invite payloads', () => {
   assert.equal(links.redCockpitUrl.includes('observerToken='), false)
   assert.equal(links.redInviteUrl.includes('claimToken=cap_red'), true)
   assert.equal(links.blueCockpitUrl, '')
+})
+
+test('referee replay request key changes on replayVersion before falling back to round', () => {
+  assert.equal(
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: false,
+      replayVersion: 'replay-v1',
+      round: 1,
+    }),
+    '',
+  )
+  assert.notEqual(
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: 'replay-v1',
+      round: 1,
+    }),
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: 'replay-v2',
+      round: 1,
+    }),
+  )
+  assert.equal(
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: 'replay-v1',
+      round: 1,
+    }),
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: 'replay-v1',
+      round: 2,
+    }),
+  )
+  assert.notEqual(
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: undefined,
+      round: 1,
+    }),
+    replayPayloadRequestKey({
+      activeSessionId: 's_demo',
+      replayAvailable: true,
+      replayVersion: undefined,
+      round: 2,
+    }),
+  )
+})
+
+test('referee polling uses active cadence only for combat and replay-active states', () => {
+  assert.equal(
+    refereePollIntervalMs({ phase: 'combat_turn', replayAvailable: false }),
+    ACTIVE_REFEREE_POLL_INTERVAL_MS,
+  )
+  assert.equal(
+    refereePollIntervalMs({ phase: 'replay_phase', replayAvailable: true }),
+    ACTIVE_REFEREE_POLL_INTERVAL_MS,
+  )
+  assert.equal(
+    refereePollIntervalMs({ phase: 'round_review', replayAvailable: true }),
+    ACTIVE_REFEREE_POLL_INTERVAL_MS,
+  )
+  assert.equal(
+    refereePollIntervalMs({ phase: 'round_review', replayAvailable: false }),
+    IDLE_REFEREE_POLL_INTERVAL_MS,
+  )
+  assert.equal(
+    refereePollIntervalMs({ phase: 'submission_phase', replayAvailable: false }),
+    IDLE_REFEREE_POLL_INTERVAL_MS,
+  )
+  assert.equal(refereePollIntervalMs({ phase: 'session_complete', replayAvailable: true }), undefined)
+  assert.equal(refereePollIntervalMs({ phase: 'expired', replayAvailable: true }), undefined)
 })
 
 test('referee createSession posts to /sessions', async () => {

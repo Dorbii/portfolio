@@ -32,7 +32,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           operationId: 'gptNext',
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll this when the role is waiting. Follow the continuation hint to keep playing until complete or expired.',
+            'Poll this when the role is waiting. Follow the continuation hint to keep playing until complete or expired. Post-fight packets can include packet.review and packet.sharedDebrief; live combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },
@@ -42,7 +42,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           operationId: 'gptAct',
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'During build, submit one compact action (no actionId needed), e.g. {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps. Legacy actionId submissions copied from packet.legalActions remain accepted during migration. Provide exactly one of action or actionId.',
+            'During build, submit one compact action (no actionId needed), e.g. {"action":{"kind":"choose_part","part":"weapon.Weapon_Turret"}}; use {"action":{"kind":"cancel_build_selection"}} to back out of the current build selection when packet.build.edit.cancel is true. During combat, use actionId combat_plan with parameters.steps; the server fills round and decisionVersion and resolves both submitted plans in lockstep substeps. Legacy actionId submissions copied from packet.legalActions remain accepted during migration. Provide exactly one of action or actionId.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -154,7 +154,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           additionalProperties: true,
           required: ['kind'],
           description:
-            'Compact build action for the build phase. kind selects the shape: choose_part {part: alias like weapon.Weapon_Turret}, choose_attach_target {target: part instance id from packet.build.targets}, mount_part {surface, u, v, yaw?, roll?} copied from packet.build.mounts rows, remove_part/remove_subtree/move_part {id}, rotate_part {id, rot}, confirm_loadout {}.',
+            'Compact build action for the build phase. kind selects the shape: choose_part {part: alias like weapon.Weapon_Turret}, choose_attach_target {target: part instance id from packet.build.targets}, mount_part {surface, u, v, yaw?, roll?} copied from packet.build.mounts rows, remove_part/remove_subtree/move_part {id}, rotate_part {id, rot}, cancel_build_selection {}, confirm_loadout {}.',
           properties: {
             kind: {
               type: 'string',
@@ -166,6 +166,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                 'remove_subtree',
                 'move_part',
                 'rotate_part',
+                'cancel_build_selection',
                 'confirm_loadout',
               ],
               description: 'Compact build action kind.',
@@ -479,7 +480,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
               description:
-                'Current GPT packet. During build, use packet.build. During combat, use packet.combat.combat and packet.combat.board; compact combat packets omit legalActions and raw board affordance arrays. packet.legalActions appears only on compatibility surfaces.',
+                'Current GPT packet. During build, use packet.build, including packet.build.edit.cancel for cancel_build_selection. During combat, use packet.combat.combat and packet.combat.board; compact combat packets omit legalActions and raw board affordance arrays and include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available. Post-fight packets can include packet.review and packet.sharedDebrief. packet.legalActions appears only on compatibility surfaces.',
             },
             continuation: {
               $ref: '#/components/schemas/GptContinuationHint',

@@ -113,9 +113,11 @@ import {
   type InternalCreateSessionRequest,
 } from './sessionCreation.js'
 import {
+  buildPacketReviewMetadata,
   consumePendingReflectionsIntoDebrief,
   hasStoredReflection,
   latestCompletedFightId,
+  sharedDebriefCoversFight,
   storePrivateReflection,
   storedReflectionForRole,
 } from './sessionContinuation.js'
@@ -161,6 +163,7 @@ export { createSessionId } from './sessionSupport.js'
 export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
 const COMBAT_TURN_SECONDS = 60
+const FIGHT_SECONDS = 300
 const COMBAT_TURN_HANDOFF_DELAY_MS = 10_000
 const COMBAT_TURN_START_GATE_GRACE_MS = 120_000
 const ROUND_PLAN_SECONDS = 240
@@ -331,7 +334,8 @@ export class SessionCoordinator {
     role.claimedAt = now
     const roleToken = this.tokenFactory(request.role, 'role')
     role.roleTokenHash = await this.tokenHasher(roleToken)
-    role.teamIdentity = role.teamIdentity ?? normalizeTeamIdentity(request.teamIdentity)
+    role.teamIdentity = role.teamIdentity ??
+      normalizeDistinctTeamIdentity(this.state, request.role, normalizeTeamIdentity(request.teamIdentity))
 
     if (request.agentName?.trim()) {
       role.agentName = request.agentName.trim().slice(0, 80)
@@ -403,7 +407,11 @@ export class SessionCoordinator {
     let claimedNow = false
 
     if (auth.role.claimedAt && request.teamIdentity) {
-      const requestedIdentity = normalizeTeamIdentity(request.teamIdentity)
+      const requestedIdentity = normalizeDistinctTeamIdentity(
+        this.state,
+        roleName,
+        normalizeTeamIdentity(request.teamIdentity),
+      )
 
       if (auth.role.teamIdentity && !sameLockedTeamIdentity(auth.role.teamIdentity, requestedIdentity)) {
         return relayError(
@@ -428,7 +436,11 @@ export class SessionCoordinator {
 
       auth.role.claimedAt = now
       auth.role.teamIdentity = auth.role.teamIdentity ??
-        normalizeTeamIdentity((request as AgentBootstrapRequest).teamIdentity)
+        normalizeDistinctTeamIdentity(
+          this.state,
+          roleName,
+          normalizeTeamIdentity((request as AgentBootstrapRequest).teamIdentity),
+        )
       claimedNow = true
 
       auth.role.agentName = (request as AgentBootstrapRequest).agentName.trim().slice(0, 80)
@@ -1024,6 +1036,7 @@ export class SessionCoordinator {
       this.lockRoleAction(roleName, activeSet, submission, requestHash, now)
       this.touch(now)
       this.appendEvent('game_action_submitted', `${roleName} confirmed a server-built loadout.`, now)
+      this.appendEvent('loadout_ready', `${roleName} loadout ready for combat.`, now)
       this.resolveLockedActionsIfReady(now)
 
       return {
@@ -1169,7 +1182,7 @@ export class SessionCoordinator {
       return relayError('INVALID_REQUEST', 'Reflection decisionVersion is stale or does not match the current packet.')
     }
 
-    if (this.state.sharedDebrief) {
+    if (sharedDebriefCoversFight(this.state, fightId)) {
       return relayError('PHASE_CLOSED', 'Post-fight reflection is closed after the shared debrief has been built.')
     }
 
@@ -1184,6 +1197,14 @@ export class SessionCoordinator {
     }
 
     storePrivateReflection(this.state, reflection, now)
+
+    if (
+      TEAM_ROLES.every((teamRole) => hasStoredReflection(this.state, teamRole, fightId)) &&
+      !sharedDebriefCoversFight(this.state, fightId)
+    ) {
+      consumePendingReflectionsIntoDebrief(this.state, now)
+    }
+
     this.touch(now)
     this.appendEvent('reflection_submitted', `${role.role} submitted private post-fight reflection.`, now)
 
@@ -1398,6 +1419,7 @@ export class SessionCoordinator {
             },
           }
         : undefined
+    const review = buildPacketReviewMetadata(this.state, roleName)
 
     return cloneJson({
       sessionId: this.state.id,
@@ -1431,6 +1453,10 @@ export class SessionCoordinator {
               round: this.state.round,
               decisionVersion: decisionVersionForRole(this.state, roleName),
               deadlineAt: combat.deadlineAt,
+              fightStartedAt: combat.fightStartedAt,
+              fightDeadlineAt: combat.fightDeadlineAt,
+              fightSeconds: combat.fightSeconds,
+              cutoffReason: combat.cutoffReason,
               submitted: planSubmitted,
               opponentSubmitted: Boolean(combat.submittedPlans?.[opponentRoleName(roleName)]),
               budget: combatBudget,
@@ -1475,6 +1501,7 @@ export class SessionCoordinator {
         : {}),
       legalActions,
       ...(blockedActions.length > 0 ? { blockedActions } : {}),
+      ...(review ? { review } : {}),
       ...(this.state.sharedDebrief ? { sharedDebrief: cloneJson(this.state.sharedDebrief) } : {}),
       ...(submit ? { submit } : {}),
       // Compact combat protocol view: state in, intent out; no affordance menus.
@@ -1484,6 +1511,10 @@ export class SessionCoordinator {
               role: roleName,
               round: this.state.round,
               decisionVersion: decisionVersionForRole(this.state, roleName),
+              fightStartedAt: combat.fightStartedAt,
+              fightDeadlineAt: combat.fightDeadlineAt,
+              fightSeconds: combat.fightSeconds,
+              cutoffReason: combat.cutoffReason,
               snapshot: combat.snapshot,
               budget: combatBudget,
               arena: this.state.arena,
@@ -1701,7 +1732,9 @@ export class SessionCoordinator {
   }
 
   private consumeDebriefIfReady(now: string): void {
-    if (!this.state.fightDossier || this.state.sharedDebrief) {
+    const fightId = latestCompletedFightId(this.state)
+
+    if (!this.state.fightDossier || !fightId || sharedDebriefCoversFight(this.state, fightId)) {
       return
     }
 
@@ -1785,6 +1818,11 @@ export class SessionCoordinator {
       actions: { red: [], blue: [] },
       baselineMachineDesigns,
     })
+    this.appendEvent(
+      'combat_start_staged',
+      `Round ${this.state.round} combat staged; waiting for both agents to fetch the combat packet.`,
+      now,
+    )
     this.changePhase('combat_turn', `Combat turn ${resolution.nextTick} is staged; waiting for both agents to arrive.`, now)
   }
 
@@ -1825,6 +1863,69 @@ export class SessionCoordinator {
     }
 
     this.resolveCombatTurnIfReady(now)
+  }
+
+  private resolveExpiredFightWindow(now: string): void {
+    const combat = this.state.combat
+
+    if (
+      this.state.phase !== 'combat_turn' ||
+      !combat ||
+      Boolean(combat.startGate) ||
+      !combat.fightDeadlineAt ||
+      Date.parse(now) < Date.parse(combat.fightDeadlineAt)
+    ) {
+      return
+    }
+
+    combat.cutoffReason = 'fight_wall_clock_expired'
+    this.completeCombat(this.fightCutoffResult(combat, now), now)
+  }
+
+  private fightCutoffResult(combat: StoredCombatState, now: string): CombatResult {
+    const redHealth = combat.snapshot.red.health
+    const blueHealth = combat.snapshot.blue.health
+    const winner = redHealth === blueHealth ? 'draw' : redHealth > blueHealth ? 'red' : 'blue'
+    const reason = winner === 'draw'
+      ? 'Fight wall-clock expired; round ends in a draw on equal remaining health.'
+      : `Fight wall-clock expired; ${capitalizeRole(winner)} wins on remaining health.`
+    const startedAt = combat.fightStartedAt ?? combat.openedAt
+    const duration = Math.max(1, Math.ceil((Date.parse(now) - Date.parse(startedAt)) / 1000))
+    const replayEvents = combat.lockstepEvents && combat.lockstepEvents.length > 0
+      ? combat.lockstepEvents
+      : [
+          { t: 0, type: 'spawn' as const, bot: 'red' as const, position: combat.snapshot.red.position, rotation: [0, 90, 0] as [number, number, number] },
+          { t: 0, type: 'spawn' as const, bot: 'blue' as const, position: combat.snapshot.blue.position, rotation: [0, -90, 0] as [number, number, number] },
+        ]
+
+    return {
+      winner,
+      reason,
+      damage: {
+        red: Math.max(0, combat.snapshot.red.maxHealth - redHealth),
+        blue: Math.max(0, combat.snapshot.blue.maxHealth - blueHealth),
+      },
+      remainingHealth: {
+        red: redHealth,
+        blue: blueHealth,
+      },
+      partHealth: {
+        red: { ...combat.snapshot.red.partHealth },
+        blue: { ...combat.snapshot.blue.partHealth },
+      },
+      stats: {
+        red: { ...combat.snapshot.red.stats },
+        blue: { ...combat.snapshot.blue.stats },
+      },
+      replay: createReplayTimeline({
+        round: this.state.round,
+        duration,
+        events: replayEvents,
+        summary: reason,
+      }),
+      log: [...(combat.lockstepLog ?? []), reason],
+      ...(combat.machineRuntime ? { machineRuntime: combat.machineRuntime } : {}),
+    }
   }
 
   private resolveCombatTurnIfReady(now: string): void {
@@ -1876,6 +1977,9 @@ export class SessionCoordinator {
       elapsedSubsteps: resolution.elapsedSubsteps,
       machineRuntime: resolution.machineRuntime,
       planConsumption: resolution.consumed,
+      fightStartedAt: combat.fightStartedAt,
+      fightDeadlineAt: combat.fightDeadlineAt,
+      fightSeconds: combat.fightSeconds,
     })
     this.state.activeActionSets = undefined
     this.state.lockedActions = undefined
@@ -1891,6 +1995,7 @@ export class SessionCoordinator {
 
     this.resolveExpiredLoadoutWindow(now)
     this.resolveCombatStartGate(now)
+    this.resolveExpiredFightWindow(now)
     this.resolveExpiredCombatTurn(now)
   }
 
@@ -1942,9 +2047,13 @@ export class SessionCoordinator {
 
     combat.openedAt = openedAt
     combat.deadlineAt = addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000)
+    combat.fightStartedAt = combat.fightStartedAt ?? openedAt
+    combat.fightSeconds = combat.fightSeconds ?? FIGHT_SECONDS
+    combat.fightDeadlineAt = combat.fightDeadlineAt ?? addMilliseconds(combat.fightStartedAt, combat.fightSeconds * 1000)
     combat.startGate = undefined
     this.state.activeActionSets = undefined
     this.state.lockedActions = undefined
+    this.appendEvent('combat_started', `Round ${this.state.round} combat clock started.`, openedAt)
     this.touch(openedAt)
   }
 
@@ -2014,6 +2123,7 @@ export class SessionCoordinator {
     role.loadoutVersion = (role.loadoutVersion ?? 0) + 1
     role.loadoutConfirmedAt = now
     this.appendEvent('game_action_submitted', `${roleName} loadout window expired; current server-built loadout auto-confirmed.`, now)
+    this.appendEvent('loadout_ready', `${roleName} loadout ready for combat.`, now)
     this.touch(now)
   }
 
@@ -2074,6 +2184,9 @@ export class SessionCoordinator {
     elapsedSubsteps?: number
     machineRuntime?: StoredCombatState['machineRuntime']
     baselineMachineDesigns?: StoredCombatState['baselineMachineDesigns']
+    fightStartedAt?: string
+    fightDeadlineAt?: string
+    fightSeconds?: number
   }): StoredCombatState {
     const openedAt = input.startGate
       ? addMilliseconds(input.now, COMBAT_TURN_START_GATE_GRACE_MS)
@@ -2087,6 +2200,9 @@ export class SessionCoordinator {
       deadlineAt: addMilliseconds(openedAt, COMBAT_TURN_SECONDS * 1000),
       turnSeconds: COMBAT_TURN_SECONDS,
       roundSeconds: COMBAT_TURN_SECONDS,
+      ...(input.fightStartedAt ? { fightStartedAt: input.fightStartedAt } : {}),
+      ...(input.fightDeadlineAt ? { fightDeadlineAt: input.fightDeadlineAt } : {}),
+      ...(input.fightSeconds ? { fightSeconds: input.fightSeconds } : {}),
       decisionVersion: this.state.round * 1000 + 200 + input.nextTick,
       ...(input.startGate
         ? {
@@ -2578,6 +2694,38 @@ function sameLockedTeamIdentity(
   )
 }
 
+const MAX_LOCKED_TEAM_NAME_LENGTH = 40
+
+function normalizeDistinctTeamIdentity(
+  state: StoredSessionState,
+  roleName: TeamRole,
+  identity: LegacyTeamIdentity,
+): LegacyTeamIdentity {
+  const opponentIdentity = state.roles[oppositeRole(roleName)].teamIdentity
+
+  if (!opponentIdentity || teamNameKey(opponentIdentity.name) !== teamNameKey(identity.name)) {
+    return identity
+  }
+
+  return {
+    ...identity,
+    name: roleDistinctTeamName(identity.name, roleName),
+  }
+}
+
+function teamNameKey(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function roleDistinctTeamName(name: string, roleName: TeamRole): string {
+  const suffix = ` ${capitalizeRole(roleName)}`
+  const compactName = name.trim().replace(/\s+/g, ' ')
+  const maxBaseLength = Math.max(1, MAX_LOCKED_TEAM_NAME_LENGTH - suffix.length)
+  const baseName = compactName.slice(0, maxBaseLength).trimEnd()
+
+  return `${baseName}${suffix}`
+}
+
 // Round 2+ rule: if a confirmed blueprint exists from a prior round and the
 // editable draft was cleared by round advancement, rehydrate the draft from
 // the stored blueprint (healed to full) instead of starting a fresh core-only
@@ -2843,7 +2991,7 @@ function nextGameMasterActionForRole(
 
     if (
       fightId &&
-      !state.sharedDebrief &&
+      !sharedDebriefCoversFight(state, fightId) &&
       !hasStoredReflection(state, roleName, fightId)
     ) {
       return 'submit_reflection'
@@ -2877,7 +3025,7 @@ function gameMasterInstruction(state: StoredSessionState, roleName: TeamRole, no
   if (
     gameMasterPhaseForSession(state.phase) === 'round_review' &&
     fightId &&
-    !state.sharedDebrief &&
+    !sharedDebriefCoversFight(state, fightId) &&
     !hasStoredReflection(state, roleName, fightId)
   ) {
     return 'Submit a private post-fight reflection for the completed fight. Do not include hidden chain-of-thought.'

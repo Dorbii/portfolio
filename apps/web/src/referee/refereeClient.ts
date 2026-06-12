@@ -22,7 +22,9 @@ import {
 
 export const DEFAULT_ARENA_API_BASE = 'https://arena-api.dorbii.net'
 export const DEFAULT_ARENA_SITE_BASE = DEFAULT_AGENT_SITE_BASE
-export const POLL_INTERVAL_MS = 10_000
+export const ACTIVE_REFEREE_POLL_INTERVAL_MS = 1_500
+export const IDLE_REFEREE_POLL_INTERVAL_MS = 10_000
+export const POLL_INTERVAL_MS = IDLE_REFEREE_POLL_INTERVAL_MS
 
 export const SESSION_ID_PATTERN = /^s_[A-Za-z0-9_-]{1,64}$/
 
@@ -47,6 +49,45 @@ export type ReplayPayload = {
 
 export function isTerminalPhase(phase: PublicSessionState['phase'] | undefined): boolean {
   return phase === 'session_complete' || phase === 'expired'
+}
+
+export function refereePollIntervalMs(
+  publicSession: Pick<PublicSessionState, 'phase' | 'replayAvailable'> | null | undefined,
+): number | undefined {
+  if (isTerminalPhase(publicSession?.phase)) {
+    return undefined
+  }
+
+  if (
+    publicSession?.phase === 'combat_turn' ||
+    publicSession?.phase === 'combat_resolved' ||
+    publicSession?.phase === 'replay_phase' ||
+    (publicSession?.phase === 'round_review' && publicSession.replayAvailable)
+  ) {
+    return ACTIVE_REFEREE_POLL_INTERVAL_MS
+  }
+
+  return IDLE_REFEREE_POLL_INTERVAL_MS
+}
+
+export function replayPayloadRequestKey({
+  activeSessionId,
+  replayAvailable,
+  replayVersion,
+  round,
+}: {
+  activeSessionId: string
+  replayAvailable: boolean | undefined
+  replayVersion: string | undefined
+  round: number | undefined
+}): string {
+  if (!activeSessionId || !replayAvailable) {
+    return ''
+  }
+
+  return replayVersion
+    ? `${activeSessionId}|${replayVersion}`
+    : `${activeSessionId}|round:${round ?? 'unknown'}`
 }
 
 export function normalizeSessionId(value: string): string {

@@ -5,6 +5,7 @@ import type {
 } from '../../../../packages/schemas/src/index.js'
 import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
+import type { StatusTone } from '../shared/ui'
 import {
   capitalize,
   formatClockTime,
@@ -137,9 +138,12 @@ function ScoreboardPlanTimer({
   publicSession: PublicSessionState | null
 }) {
   const [nowMs, setNowMs] = useState(() => Date.now())
-  const deadlineAt = publicSession?.phase === 'submission_phase'
-    ? publicSession.roundPlan?.deadlineAt
-    : undefined
+  const timer = publicSession?.phase === 'combat_turn' && publicSession.combat?.fightDeadlineAt
+    ? { deadlineAt: publicSession.combat.fightDeadlineAt, label: 'Fight clock' }
+    : publicSession?.phase === 'submission_phase' && publicSession.roundPlan?.deadlineAt
+      ? { deadlineAt: publicSession.roundPlan.deadlineAt, label: 'Loadout window' }
+      : undefined
+  const deadlineAt = timer?.deadlineAt
 
   useEffect(() => {
     if (!deadlineAt) {
@@ -154,7 +158,7 @@ function ScoreboardPlanTimer({
   if (!deadlineAt) {
     return (
       <div className="scoreboard-plan-timer is-hidden" data-plan-timer-state="hidden">
-        <span>Loadout window</span>
+        <span>Round clock</span>
         <strong>--:--</strong>
       </div>
     )
@@ -165,7 +169,7 @@ function ScoreboardPlanTimer({
 
   return (
     <div className={`scoreboard-plan-timer is-${timerState}`} data-plan-timer-state={timerState}>
-      <span>Loadout window</span>
+      <span>{timer.label}</span>
       <strong>{formatCountdown(remainingMs)}</strong>
     </div>
   )
@@ -244,6 +248,7 @@ function ScoreboardTeam({
   const opponentRole = role === 'red' ? 'blue' : 'red'
   const opponent = getTeamDashboardData(opponentRole, publicSession, replayPayload)
   const isWinner = publicSession?.lastResult?.winner === role
+  const lifecycle = teamLifecycleStatus(team, publicSession)
 
   return (
     <section
@@ -261,12 +266,7 @@ function ScoreboardTeam({
           </span>
         </div>
         <div className="scoreboard-team-status">
-          <StatusBadge tone={team.claimed ? 'ok' : 'warning'}>
-            {team.claimed ? 'Connected' : 'Not connected'}
-          </StatusBadge>
-          <StatusBadge tone={team.submitted ? 'ok' : 'neutral'}>
-            {team.submitted ? 'Loadout locked' : 'Loadout pending'}
-          </StatusBadge>
+          <StatusBadge tone={lifecycle.tone}>{lifecycle.label}</StatusBadge>
         </div>
         {links.hasInvite ? (
           <div className="scoreboard-agent-links">
@@ -456,6 +456,33 @@ type TeamDashboardData = {
   role: TeamRole
   submitted: boolean
   wins: number
+}
+
+function teamLifecycleStatus(
+  team: TeamDashboardData,
+  publicSession: PublicSessionState | null,
+): { label: string; tone: StatusTone } {
+  if (!team.claimed) {
+    return { label: 'Not claimed', tone: 'warning' }
+  }
+
+  if (
+    publicSession?.phase === 'session_complete' ||
+    publicSession?.phase === 'expired' ||
+    Boolean(publicSession?.lastResult)
+  ) {
+    return { label: 'Done', tone: 'neutral' }
+  }
+
+  if (publicSession?.phase === 'combat_turn' && publicSession.combat?.fightStartedAt) {
+    return { label: 'Combat live', tone: 'ok' }
+  }
+
+  if (team.submitted) {
+    return { label: 'Ready', tone: 'ok' }
+  }
+
+  return { label: 'Building', tone: 'neutral' }
 }
 
 function getTeamDashboardData(

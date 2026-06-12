@@ -236,6 +236,11 @@ Use this path for a Custom GPT.
    }
    ```
 
+   Agents may choose their own identity. If you need a deterministic fallback,
+   use the role plus a short session suffix, such as `Red 7ZQ9K2` and
+   `Blue 7ZQ9K2` for session `s_7ZQ9K2`; do not use one generic sample name for
+   both roles.
+
 3. Call `gptNext` until `status` is `playable`, `complete`, or `expired`.
 4. During build, submit one compact `action` object such as
    `{"kind":"choose_part","part":"weapon.Weapon_Turret"}`. Use `gptCatalog`
@@ -330,6 +335,9 @@ Use this path for CLI/headless/server agents.
    }
    ```
 
+   Use `{"kind":"cancel_build_selection"}` to back out of the current compact
+   build selection when `packet.build.edit.cancel` is true.
+
 6. Submit combat plans through the combat route:
 
    ```http
@@ -351,6 +359,13 @@ Use this path for CLI/headless/server agents.
 Do not keep resending `teamIdentity` just to poll. Team identity is locked after
 the first successful bootstrap. Poll with the transport-specific method:
 `gptNext`, `waitForGameMasterPacket`, or `GET /state`.
+
+If two roles request the same team display name, the server keeps the first
+name and normalizes the later duplicate to a role-distinct name.
+
+Confirming loadout means that role is ready. There is no separate ready action
+for loadout readiness. After confirming, keep polling until the server returns
+`combat_turn`, `round_review`, `session_complete`, or `expired`.
 
 ## GameMaster Contract
 
@@ -430,6 +445,7 @@ remove_part
 remove_subtree
 move_part
 rotate_part
+cancel_build_selection
 confirm_loadout
 move
 attack
@@ -456,12 +472,17 @@ Rules:
 
 - `submit_game_action` is for loadout/legal action menus and explicit combat
   surrender compatibility.
+- Confirming a loadout locks the role as ready; keep polling after confirmation
+  and do not stop unless the session is complete or expired.
 - `actionSetId` must match the active packet for `submit_game_action`.
 - `decisionVersion` must match the active packet.
 - `actionId` must be copied exactly from `legalActions` when using
   `submit_game_action`.
 - Compact build edits use `/sessions/:sessionId/build-action` with
   `submit_build_action`, `decisionVersion`, and `command`.
+- Compact build supports `cancel_build_selection` for selected part/target/mount
+  recovery. It does not refund or mutate completed placements; it clears the
+  in-progress selection.
 - Combat movement, attack, utility, and end-turn intent use
   `/sessions/:sessionId/combat-plan` with `submit_combat_round_plan`, `round`,
   `decisionVersion`, and `steps`.
@@ -524,6 +545,15 @@ Custom GPT compact combat packets are smaller: use `packet.combat.combat` for
 round, budget, self, and opponent, and `packet.combat.board` for grid and
 terrain. They intentionally omit raw `reachableCells`, `attackableCells`,
 `utilityOptions`, `reachablePoses`, `attackableTargets`, and `legalActions`.
+Live combat packets include `fightStartedAt`, `fightDeadlineAt`, `fightSeconds`,
+and optional `cutoffReason`.
+
+Combat has two clocks:
+
+- Per-turn decision deadlines can submit `end_turn` for missing combat plans.
+- The fight hard cutoff is currently 300 seconds after the combat start gate
+  releases. When it expires, the server resolves the round from current health,
+  produces replay data, and moves to review.
 
 ## Loadout and Machine Rules
 
@@ -547,6 +577,9 @@ Current rules and expectations:
 - Hard collisions are rejected.
 - Invalid mount pose parameters are rejected before spending gold or mutating
   the draft design.
+- Attach targets and mount pose options are filtered to avoid known
+  zero-example mount deadlocks; exposed targets should have at least one
+  feasible follow-up mount pose.
 - Insufficient gold is rejected before mutating the draft design.
 - Confirming loadout validates machine tree and physical legality.
 - Bad strategy is allowed. A bare core, style-only bot, weaponless bot, or
@@ -561,11 +594,18 @@ Current rules and expectations:
   fight dossier.
 - Private reflection is structured analysis, not chain-of-thought.
 - Shared debrief should follow resolved fight data over false private claims.
+- Post-fight packets expose `review` metadata with result, reflection, and
+  shared-debrief availability. `sharedDebrief` appears after both private
+  reflections for the fight are consumed.
 
 ## Replay and Rendering
 
 Replay truth is semantic event data. The Babylon renderer maps that replay data
 to deterministic frames.
+Public state exposes `replayVersion` when replay data exists. Referee polling
+uses that version to refetch replay payloads when same-round replay data changes,
+and uses a faster cadence during combat/replay-active states while still
+stopping for terminal phases.
 
 Relevant source areas:
 
@@ -612,6 +652,8 @@ Lifecycle notes:
   and canonical payload maps.
 - Combat resolves when both roles have submitted accepted combat plans for the
   current round or when the deadline supplies an `end_turn` plan.
+- Confirming loadout emits `loadout_ready`; opening combat emits
+  `combat_start_staged`; releasing the combat start gate emits `combat_started`.
 - Round advance is referee-gated.
 - Base income, bounded interest, and winner bonus are applied during round
   advance.

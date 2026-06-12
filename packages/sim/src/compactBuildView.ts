@@ -76,12 +76,14 @@ export function buildCompactBuildView(input: BuildCompactBuildViewInput): Compac
   if (compactStep === 'choose_attach_target') {
     packet.selected = compactSelected(buildState, catalogById)
     packet.targets = compactTargets(input.actionSet)
+    packet.edit = compactEditSurface(buildState, input.actionSet, catalogById)
   }
 
   if (compactStep === 'mount_part') {
     packet.selected = compactSelected(buildState, catalogById)
     packet.mountSchema = ['surface', 'u', 'v', 'yaw', 'roll']
     packet.mounts = compactMounts(input.actionSet)
+    packet.edit = compactEditSurface(buildState, input.actionSet, catalogById)
   }
 
   packet.buildDigest = digestCompactBuildPacket(packet)
@@ -511,6 +513,9 @@ function compactEditSurface(
           rotations.push(payload.rotation)
           rotateById.set(payload.instanceId, rotations)
         }
+        break
+      case 'cancel_build_selection':
+        edit.cancel = true
         break
       default:
         break

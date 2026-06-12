@@ -16,6 +16,10 @@ export type BuildCompactCombatViewInput = {
   role: TeamRole
   round: number
   decisionVersion: number
+  fightStartedAt?: string
+  fightDeadlineAt?: string
+  fightSeconds?: number
+  cutoffReason?: 'fight_wall_clock_expired'
   snapshot: CombatTurnSnapshot
   budget: CombatBudget
   arena: ArenaConfig
@@ -50,6 +54,10 @@ export function buildCompactCombatView(input: BuildCompactCombatViewInput): Comp
     combat: {
       round: input.round,
       decisionVersion: input.decisionVersion,
+      ...(input.fightStartedAt ? { fightStartedAt: input.fightStartedAt } : {}),
+      ...(input.fightDeadlineAt ? { fightDeadlineAt: input.fightDeadlineAt } : {}),
+      ...(input.fightSeconds ? { fightSeconds: input.fightSeconds } : {}),
+      ...(input.cutoffReason ? { cutoffReason: input.cutoffReason } : {}),
       budget: {
         actionTime: input.budget.actionTime,
       },

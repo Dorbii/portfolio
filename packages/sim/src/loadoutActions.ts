@@ -123,6 +123,9 @@ type LoadoutActionPayload =
       rotation: number
     })
   | (LoadoutActionPayloadBase & {
+      type: 'cancel_build_selection'
+    })
+  | (LoadoutActionPayloadBase & {
       type: 'confirm_loadout'
     })
 
@@ -366,6 +369,8 @@ export function applyLoadoutAction(input: ApplyLoadoutActionInput): ApplyLoadout
       return movePart(input, buildState, payload.instanceId)
     case 'rotate_part':
       return rotateExistingPart(input, buildState, partsById, payload.instanceId, payload.rotation)
+    case 'cancel_build_selection':
+      return cancelBuildSelection(input, buildState)
     case 'confirm_loadout':
       return confirmLoadout(input, buildState, partsById)
   }
@@ -482,13 +487,19 @@ function createLoadoutActions(input: CreateLoadoutActionsInput): CanonicalGameAc
     case 'ready_to_confirm':
       return choosePartActions(input)
     case 'choose_attach_target':
-      return attachTargetActions(input)
+      return withCancelBuildSelectionAction(input, attachTargetActions(input))
     case 'propose_mount_pose':
-      return mountPoseActions(input)
+      return withCancelBuildSelectionAction(input, mountPoseActions(input))
     case 'choose_mount':
-      return isMachineDesignAuthority(input.buildState) ? mountPoseActions(input) : mountActions(input)
+      return withCancelBuildSelectionAction(
+        input,
+        isMachineDesignAuthority(input.buildState) ? mountPoseActions(input) : mountActions(input),
+      )
     case 'choose_rotation':
-      return isMachineDesignAuthority(input.buildState) ? mountPoseActions(input) : rotationActions(input)
+      return withCancelBuildSelectionAction(
+        input,
+        isMachineDesignAuthority(input.buildState) ? mountPoseActions(input) : rotationActions(input),
+      )
   }
 }
 
@@ -603,6 +614,36 @@ function confirmLoadoutCanonicalAction(input: CreateLoadoutActionsInput): Canoni
     label: 'Confirm loadout',
     summary: 'Locks this server-built design for the fight.',
   })
+}
+
+function cancelBuildSelectionAction(input: CreateLoadoutActionsInput): CanonicalGameAction {
+  const isMove = Boolean(input.buildState.selectedMovingPartId)
+
+  return loadoutAction(input, 'cancel_build_selection', 'cancel_build_selection', {
+    scope: LOADOUT_ACTION_SCOPE,
+    type: 'cancel_build_selection',
+    label: isMove ? 'Cancel remount' : 'Cancel selected part',
+    summary: isMove
+      ? 'Restores the selected moved part to its last stable design and returns to part selection.'
+      : 'Clears the selected unmounted part and returns to part selection without spending gold.',
+  })
+}
+
+function withCancelBuildSelectionAction(
+  input: CreateLoadoutActionsInput,
+  actions: CanonicalGameAction[],
+): CanonicalGameAction[] {
+  return canCancelBuildSelection(input.buildState)
+    ? [...actions, cancelBuildSelectionAction(input)]
+    : actions
+}
+
+function canCancelBuildSelection(buildState: LoadoutBuildState): boolean {
+  if (!buildState.selectedPartId) {
+    return false
+  }
+
+  return !buildState.selectedMovingPartId || Boolean(buildState.pendingMoveRestore)
 }
 
 function editExistingPartActions(input: CreateLoadoutActionsInput): CanonicalGameAction[] {
@@ -720,20 +761,17 @@ function machineAttachTargetActions(
   childPart: PartDefinition,
   partsById: Map<string, PartDefinition>,
 ): CanonicalGameAction[] {
-  const machine = input.buildState.currentDesign.version === 'machine:v1'
-    ? input.buildState.currentDesign.machine
-    : undefined
-
-  if (!machine) {
+  if (!isMachineDesignAuthority(input.buildState)) {
     return []
   }
 
+  const buildState = input.buildState
+  const machine = buildState.currentDesign.machine
+
   return machineMountParentCandidates(machine)
-    .filter((parent) => parent.instanceId !== input.buildState.selectedMovingPartId)
+    .filter((parent) => parent.instanceId !== buildState.selectedMovingPartId)
     .filter((parent) => !isDetachedMachinePart(machine, parent.instanceId))
-    .filter((parent) => machineParentMountSurfaces(parent, partsById).some(
-      (surface) => surface.accepts.includes(childPart.category),
-    ))
+    .filter((parent) => feasibleMountPoseExamplesForParent(childPart, parent, buildState, partsById).length > 0)
     .map((parent) => {
       const isCore = parent.instanceId === MACHINE_CORE_INSTANCE_ID
       const targetDefinition = machineCatalogDefinition(parent, partsById)
@@ -792,6 +830,10 @@ function mountPoseActions(input: CreateLoadoutActionsInput): CanonicalGameAction
     partsById,
   )
 
+  if (examples.length === 0) {
+    return []
+  }
+
   return [
     {
       ...loadoutAction(input, 'propose_mount_pose', `mount_pose.${childPart.id}.${parent.instanceId}`, {
@@ -807,7 +849,7 @@ function mountPoseActions(input: CreateLoadoutActionsInput): CanonicalGameAction
         requirements: mountPoseRequirements(childPart, parent.instanceId, acceptedSurfaces),
       }),
       parameterSchema: mountPoseParameterSchema(childPart.id, parent.instanceId, acceptedSurfaces),
-      parameterExamples: examples.length > 0 ? examples : undefined,
+      parameterExamples: examples,
     },
   ]
 }
@@ -971,6 +1013,7 @@ function choosePart(
     selectedMountSector: undefined,
     selectedAttachCell: undefined,
     selectedRotation: undefined,
+    pendingMoveRestore: undefined,
   })
 }
 
@@ -1030,6 +1073,45 @@ function chooseAttachTarget(
     selectedMountSector: undefined,
     selectedAttachCell: undefined,
     selectedRotation: undefined,
+  })
+}
+
+function cancelBuildSelection(
+  input: ApplyLoadoutActionInput,
+  buildState: LoadoutBuildState,
+): ApplyLoadoutActionResult {
+  if (!buildState.selectedPartId) {
+    return fail('MISSING_SELECTED_PART', 'buildState.selectedPartId', 'Cancel requires a selected loadout part.')
+  }
+
+  if (buildState.selectedMovingPartId && !buildState.pendingMoveRestore) {
+    return fail('MISSING_MOVE_RESTORE', 'buildState.pendingMoveRestore', 'Canceling a moved part requires a saved restore snapshot.')
+  }
+
+  const restore = buildState.pendingMoveRestore
+
+  return ok(input, {
+    ...buildState,
+    step: 'choose_part',
+    selectedPartId: undefined,
+    selectedMovingPartId: undefined,
+    selectedAttachTargetId: undefined,
+    selectedMount: undefined,
+    selectedMountKind: undefined,
+    selectedMountMotion: undefined,
+    selectedMountCollisionPolicy: undefined,
+    selectedMountSector: undefined,
+    selectedAttachCell: undefined,
+    selectedRotation: undefined,
+    selectedPartSource: undefined,
+    selectedOfferSlotId: undefined,
+    pendingMoveRestore: undefined,
+    ...(restore
+      ? {
+          currentDesign: cloneStoredDesign(restore.storedDesign),
+          legacyDraft: cloneDesign(restore.legacyDraft),
+        }
+      : {}),
   })
 }
 
@@ -1215,6 +1297,7 @@ function proposeMountPose(
       selectedRotation: undefined,
       selectedPartSource: undefined,
       selectedOfferSlotId: undefined,
+      pendingMoveRestore: undefined,
       consumedOfferSlotIds: consumeSelectedOfferSlot(buildState, movingPartId),
       currentDesign: nextStoredDesign,
       legacyDraft: nextDesign,
@@ -1337,6 +1420,7 @@ function placePart(
       selectedRotation: undefined,
       selectedPartSource: undefined,
       selectedOfferSlotId: undefined,
+      pendingMoveRestore: undefined,
       consumedOfferSlotIds: consumeSelectedOfferSlot(buildState, movingPartId),
       currentDesign: nextStoredDesign,
       legacyDraft: nextDesign,
@@ -1412,6 +1496,10 @@ function movePart(
     selectedMountSector: undefined,
     selectedAttachCell: undefined,
     selectedRotation: undefined,
+    pendingMoveRestore: {
+      storedDesign: cloneStoredDesign(buildState.currentDesign),
+      legacyDraft: cloneDesign(legacyDraft),
+    },
     currentDesign: removeStoredDesignInstances(buildState.currentDesign, new Set([instanceId])),
     legacyDraft: {
       ...nextDesign,
@@ -1886,6 +1974,21 @@ function surfacesAcceptingPart(
   surfaces: MountSurface[],
 ): MountSurface[] {
   return surfaces.filter((surface) => surface.accepts.includes(childPart.category))
+}
+
+function feasibleMountPoseExamplesForParent(
+  childPart: PartDefinition,
+  parent: MachinePartInstance,
+  buildState: LoadoutBuildState & { currentDesign: { version: 'machine:v1'; machine: MachineDesign } },
+  partsById: Map<string, PartDefinition>,
+): GameMasterActionParameters[] {
+  return mountPoseParameterExamples(
+    childPart,
+    parent.instanceId,
+    surfacesAcceptingPart(childPart, machineParentMountSurfaces(parent, partsById)),
+    buildState,
+    partsById,
+  )
 }
 
 function machineCatalogDefinition(

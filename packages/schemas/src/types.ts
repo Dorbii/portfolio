@@ -666,6 +666,10 @@ export type CombatRoundPacketView = {
   round: number
   decisionVersion: number
   deadlineAt: string
+  fightStartedAt?: string
+  fightDeadlineAt?: string
+  fightSeconds?: number
+  cutoffReason?: 'fight_wall_clock_expired'
   submitted: boolean
   opponentSubmitted: boolean
   budget: CombatBudget
@@ -731,6 +735,7 @@ export const GAME_MASTER_ACTION_KINDS = [
   'remove_subtree',
   'move_part',
   'rotate_part',
+  'cancel_build_selection',
   'confirm_loadout',
   'move',
   'attack',
@@ -906,6 +911,13 @@ export type AgentVisibleCombatState = {
   [key: string]: unknown
 }
 
+export type GameMasterReviewResultSummary = {
+  winner: TeamRole | 'draw'
+  reason: string
+  damage: Record<TeamRole, number>
+  remainingHealth: Record<TeamRole, number>
+}
+
 export const LOADOUT_BUILD_STEPS = [
   'choose_part',
   'choose_attach_target',
@@ -936,6 +948,10 @@ export type LoadoutBuildState = {
   selectedRotation?: number
   currentDesign: StoredDesign
   legacyDraft?: BotDesignSnapshot
+  pendingMoveRestore?: {
+    storedDesign: StoredDesign
+    legacyDraft: BotDesignSnapshot
+  }
   /** Store offer slots consumed by successful placements this round. */
   consumedOfferSlotIds?: string[]
   /** Internal slot id tracked while an offer part is selected mid-placement. */
@@ -982,6 +998,20 @@ export type GameMasterBlockedAction = {
   requirements?: string[]
 }
 
+export type GameMasterReviewMetadata = {
+  fightId: string
+  result?: GameMasterReviewResultSummary
+  reflection: {
+    required: boolean
+    submitted: boolean
+    opponentSubmitted: boolean
+  }
+  debrief: {
+    available: boolean
+    debriefId?: string
+  }
+}
+
 export type GameMasterPacket = {
   sessionId: string
   role: TeamRole
@@ -1004,6 +1034,7 @@ export type GameMasterPacket = {
   visibleState?: AgentVisibleCombatState
   legalActions: GameMasterLegalAction[]
   blockedActions?: GameMasterBlockedAction[]
+  review?: GameMasterReviewMetadata
   sharedDebrief?: SharedDebrief
   submit?: SubmitInstruction
   /** Compact build protocol view; present during choose_loadout. */
@@ -1551,6 +1582,7 @@ export type CompactBuildPacket = {
   }
   edit?: {
     confirm: boolean
+    cancel?: boolean
     remove: Array<{ id: string; refund: number }>
     removeSubtree: Array<{ id: string; refund: number; parts: number }>
     move: string[]
@@ -1606,6 +1638,10 @@ export type CompactCombatPacket = {
   combat: {
     round: number
     decisionVersion: number
+    fightStartedAt?: string
+    fightDeadlineAt?: string
+    fightSeconds?: number
+    cutoffReason?: 'fight_wall_clock_expired'
     budget: {
       actionTime: number
     }
@@ -1628,6 +1664,7 @@ export type CompactBuildAction =
   | { kind: 'remove_subtree'; id: string }
   | { kind: 'move_part'; id: string }
   | { kind: 'rotate_part'; id: string; rot: number }
+  | { kind: 'cancel_build_selection' }
   | { kind: 'confirm_loadout' }
   | { kind: 'choose_attach_target'; target: string }
   | {

@@ -99,6 +99,10 @@ export type StoredCombatState = {
   deadlineAt: string
   turnSeconds: number
   roundSeconds?: number
+  fightStartedAt?: string
+  fightDeadlineAt?: string
+  fightSeconds?: number
+  cutoffReason?: 'fight_wall_clock_expired'
   decisionVersion?: number
   startGate?: {
     readyBy: Partial<Record<TeamRole, string>>

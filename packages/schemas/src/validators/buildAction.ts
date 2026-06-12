@@ -28,6 +28,7 @@ const COMMAND_KEYS: Record<string, Set<string>> = {
   remove_subtree: new Set(['kind', 'id']),
   move_part: new Set(['kind', 'id']),
   rotate_part: new Set(['kind', 'id', 'rot']),
+  cancel_build_selection: new Set(['kind']),
   confirm_loadout: new Set(['kind']),
   choose_attach_target: new Set(['kind', 'target']),
   mount_part: new Set(['kind', 'surface', 'u', 'v', 'yaw', 'roll']),
@@ -108,7 +109,7 @@ export function validateCompactBuildCommandShape(value: unknown, path = 'command
       issue(
         'INVALID_COMMAND_KIND',
         `${path}.kind`,
-        'kind must be one of choose_part, remove_part, remove_subtree, move_part, rotate_part, confirm_loadout, choose_attach_target, mount_part.',
+        'kind must be one of choose_part, remove_part, remove_subtree, move_part, rotate_part, cancel_build_selection, confirm_loadout, choose_attach_target, mount_part.',
       ),
     ]
   }
@@ -214,6 +215,8 @@ function normalizeCompactBuildCommand(record: Record<string, unknown>): CompactB
       return { kind: 'move_part', id: (record.id as string).trim() }
     case 'rotate_part':
       return { kind: 'rotate_part', id: (record.id as string).trim(), rot: record.rot as number }
+    case 'cancel_build_selection':
+      return { kind: 'cancel_build_selection' }
     case 'choose_attach_target':
       return { kind: 'choose_attach_target', target: (record.target as string).trim() }
     case 'mount_part':

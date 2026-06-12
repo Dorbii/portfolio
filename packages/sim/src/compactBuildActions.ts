@@ -123,6 +123,8 @@ function matchesCompactCommand(action: CanonicalGameAction, command: CompactBuil
         payload.instanceId === command.id &&
         payload.rotation === command.rot
       )
+    case 'cancel_build_selection':
+      return payload.type === 'cancel_build_selection'
     case 'confirm_loadout':
       return payload.type === 'confirm_loadout'
     case 'choose_attach_target':

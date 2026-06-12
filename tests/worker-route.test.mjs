@@ -409,6 +409,17 @@ function completedFightDossier(sessionId) {
   }
 }
 
+function completedFightEntry(sessionId, fightId, overrides = {}) {
+  const [entry] = completedFightDossier(sessionId).fights
+
+  return {
+    ...structuredClone(entry),
+    fightId,
+    replayTimelineId: `${sessionId}:${fightId}:replay`,
+    ...overrides,
+  }
+}
+
 function routePostFightReflection(role, decisionVersion, overrides = {}) {
   const claims = {
     ownWeaknesses: ['secret weak drive note'],
@@ -801,6 +812,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generate your own TeamIdentity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('team color for your robot and UI label')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Red 7ZQ9K2') && item.includes('Blue 7ZQ9K2')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.combat')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.board')))
@@ -810,6 +822,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('error.issues')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('budget rules')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generated teamIdentity')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('normalizes the later duplicate')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('action payload maps')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted')))
   assert.ok(json.externalAgentGuide.fallback.includes('runtime cannot play the role'))
@@ -821,6 +834,11 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.ok(json.rules.packetFields.required.includes('eventVersion'))
   assert.ok(json.rules.packetFields.required.includes('legalActions'))
   assert.ok(json.rules.packetFields.optional.includes('blockedActions'))
+  assert.ok(json.rules.packetFields.optional.includes('review'))
+  assert.ok(json.rules.packetFields.optional.includes('sharedDebrief'))
+  assert.ok(json.rules.packetFields.optional.includes('combat.fightDeadlineAt'))
+  assert.ok(json.rules.packetFields.reviewContract.review.includes('reflection'))
+  assert.ok(json.rules.packetFields.reviewContract.sharedDebrief.includes('fight-scoped'))
   assert.deepEqual(json.rules.teamIdentitySchema.requiredOnFirstConnect, [
     'name',
     'colorHex',
@@ -829,6 +847,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(json.rules.teamIdentitySchema.colorHex, 'string formatted as #RRGGBB hex color')
   assert.ok(json.rules.teamIdentitySchema.logoPrompt.includes('text prompt'))
   assert.ok(json.rules.teamIdentitySchema.logoAsset.includes('image_url'))
+  assert.ok(json.rules.teamIdentitySchema.duplicateNames.includes('role-distinct'))
   assert.equal(json.rules.packetFields.versionContract.decisionVersion, 'snapshot both agents choose from')
   assert.equal(json.rules.packetFields.versionContract.actionSetId, 'exact role-specific legal menu')
   assert.equal(json.rules.packetFields.versionContract.eventVersion, 'chat, replay, and public-state progression')
@@ -890,11 +909,14 @@ test('GET /agent-spec.json returns the agent contract', async () => {
     yawDegrees: 120,
     rollDegrees: 15,
   })
-  assert.equal(json.examples.teamIdentity.name, 'Voltage Choir')
-  assert.equal(json.examples.teamIdentity.colorHex, '#00d6a3')
+  assert.equal(json.examples.teamIdentity.name, 'Red 7ZQ9K2')
+  assert.equal(json.examples.teamIdentity.colorHex, '#ff4c5d')
   assert.equal(typeof json.examples.teamIdentity.logoPrompt, 'string')
   assert.equal('primaryColor' in json.examples.teamIdentity, false)
   assert.equal('logo' in json.examples.teamIdentity, false)
+  assert.equal(json.examples.teamIdentityByRole.red.name, 'Red 7ZQ9K2')
+  assert.equal(json.examples.teamIdentityByRole.blue.name, 'Blue 7ZQ9K2')
+  assert.notEqual(json.examples.teamIdentityByRole.red.name, json.examples.teamIdentityByRole.blue.name)
   const exportedSubmissionValidation = validateGameMasterActionSubmissionShape({
     ...json.examples.gameMasterActionSubmission,
     forgedField: true,
@@ -1041,6 +1063,9 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.equal(json.paths['/gpt/act'].post.operationId, 'gptAct')
   assert.equal(json.paths['/gpt/reflection'].post.operationId, 'gptReflection')
   assert.equal(json.paths['/gpt/catalog'].post.operationId, 'gptCatalog')
+  assert.ok(json.paths['/gpt/next'].post.description.includes('packet.review'))
+  assert.ok(json.paths['/gpt/next'].post.description.includes('fightDeadlineAt'))
+  assert.ok(json.paths['/gpt/act'].post.description.includes('cancel_build_selection'))
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
   assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
@@ -1056,6 +1081,7 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.ok(json.components.schemas.CompactBuildAction.required.includes('kind'))
   assert.ok(json.components.schemas.CompactBuildAction.properties.kind.enum.includes('choose_part'))
   assert.ok(json.components.schemas.CompactBuildAction.properties.kind.enum.includes('mount_part'))
+  assert.ok(json.components.schemas.CompactBuildAction.properties.kind.enum.includes('cancel_build_selection'))
   assert.equal('actionSetId' in json.components.schemas.GptActRequest.properties, false)
   assert.equal('decisionVersion' in json.components.schemas.GptActRequest.properties, false)
   assert.equal(
@@ -1066,6 +1092,9 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
     json.components.schemas.GptResponse.properties.continuation.$ref,
     '#/components/schemas/GptContinuationHint',
   )
+  assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.build.edit.cancel'))
+  assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('packet.review'))
+  assert.ok(json.components.schemas.GptResponse.properties.packet.description.includes('fightStartedAt'))
   assert.deepEqual(
     json.components.schemas.GptContinuationHint.properties.recommendedNextCall.enum,
     ['gptNext', 'gptAct', 'gptReflection', 'stop'],
@@ -1331,6 +1360,74 @@ test('worker exposes idempotent role bootstrap for external agents', async () =>
   assert.equal(blueBootstrap.json.submit.body.decisionVersion, blueBootstrap.json.decisionVersion)
 })
 
+test('role bootstrap normalizes duplicate team names and keeps identity locked', async () => {
+  const env = createEnv()
+  const sessionId = 's_duplicate_identity'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+  const blueInvite = inviteFor(created.json.invites, 'blue')
+  const duplicateName = 'Mirror Works'
+  const redIdentity = {
+    ...testTeamIdentity('red'),
+    name: duplicateName,
+  }
+  const blueIdentity = {
+    ...testTeamIdentity('blue'),
+    name: ` ${duplicateName} `,
+  }
+  const redBootstrap = await route(env, `/sessions/${sessionId}/roles/red/bootstrap`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: {
+      agentName: 'Red Mirror',
+      teamIdentity: redIdentity,
+    },
+  })
+  const blueBootstrap = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {
+      agentName: 'Blue Mirror',
+      teamIdentity: blueIdentity,
+    },
+  })
+  const publicState = await route(env, `/sessions/${sessionId}/public`)
+
+  assert.equal(redBootstrap.response.status, 201)
+  assert.equal(blueBootstrap.response.status, 201)
+  assert.equal(publicState.response.status, 200)
+  assert.equal(publicState.json.roles.red.identity.name, duplicateName)
+  assert.equal(publicState.json.roles.blue.identity.name, `${duplicateName} Blue`)
+  assert.notEqual(publicState.json.roles.red.identity.name, publicState.json.roles.blue.identity.name)
+
+  const sameOriginalBlue = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {
+      agentName: 'Blue Mirror',
+      teamIdentity: blueIdentity,
+    },
+  })
+  const mutatedBlue = await route(env, `/sessions/${sessionId}/roles/blue/bootstrap`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: {
+      agentName: 'Blue Mirror',
+      teamIdentity: {
+        ...blueIdentity,
+        name: 'Different Blue Team',
+      },
+    },
+  })
+
+  assert.equal(sameOriginalBlue.response.status, 200)
+  assert.equal(mutatedBlue.response.status, 400)
+  assert.equal(mutatedBlue.json.error.code, 'INVALID_REQUEST')
+})
+
 test('observer cockpit bearer can read private state but cannot mutate role state', async () => {
   const env = createEnv()
   const sessionId = 's_observer_route'
@@ -1564,6 +1661,9 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assertGptCompactPacket(packet, 'blue')
   assert.equal(packet.nextAction, 'choose_turn')
   assert.equal(packet.combat.v, 1)
+  assert.equal(typeof packet.combat.combat.fightStartedAt, 'string')
+  assert.equal(typeof packet.combat.combat.fightDeadlineAt, 'string')
+  assert.equal(packet.combat.combat.fightSeconds, 300)
   assert.equal(typeof packet.combat.combat.budget.actionTime, 'number')
   assert.equal(Array.isArray(packet.combat.combat.self.cell), true)
   assert.equal(typeof packet.combat.combat.self.hp, 'number')
@@ -2239,12 +2339,14 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
     redInvite.claimToken,
     redPacket,
   )
+  const redReadyPublic = await route(env, `/sessions/${sessionId}/public`)
   const blueAfterConfirm = await confirmMachineLoadout(
     env,
     sessionId,
     blueInvite.claimToken,
     bluePacket,
   )
+  const stagedPublic = await route(env, `/sessions/${sessionId}/public`)
   const redFirstCombatState = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,
   })
@@ -2259,7 +2361,25 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
   const blueCombatPacket = blueCombatState.json.gameMaster
 
   assert.equal(redAfterConfirm.nextAction, 'wait_for_opponent_loadout')
+  assert.equal(redReadyPublic.response.status, 200)
+  assert.deepEqual(
+    redReadyPublic.json.eventLog.filter((event) => event.type === 'loadout_ready').map((event) => event.message),
+    ['red loadout ready for combat.'],
+  )
   assert.equal(blueAfterConfirm.phase, 'combat_turn')
+  assert.equal(stagedPublic.response.status, 200)
+  assert.deepEqual(
+    stagedPublic.json.eventLog.filter((event) => event.type === 'loadout_ready').map((event) => event.message),
+    ['red loadout ready for combat.', 'blue loadout ready for combat.'],
+  )
+  assert.equal(
+    stagedPublic.json.eventLog.some((event) => event.type === 'combat_start_staged'),
+    true,
+  )
+  assert.equal(
+    stagedPublic.json.eventLog.some((event) => event.type === 'combat_started'),
+    false,
+  )
   assert.equal(redFirstCombatState.response.status, 200)
   assert.equal(redCombatState.response.status, 200)
   assert.equal(blueCombatState.response.status, 200)
@@ -2270,6 +2390,10 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
   assert.equal(redFirstCombatPacket.nextAction, 'wait_for_opponent_turn')
   assert.equal(redFirstCombatPacket.legalActions.length, 0)
   assert.equal(redFirstCombatPacket.submit, undefined)
+  assert.equal(
+    blueCombatState.json.eventLog.some((event) => event.type === 'combat_started'),
+    true,
+  )
 
   for (const packet of [redCombatPacket, blueCombatPacket]) {
     assert.equal(packet.phase, 'combat_turn')
@@ -2280,6 +2404,9 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
     assert.equal(packet.submit.body.action, 'submit_combat_round_plan')
     assert.equal(packet.submit.body.round, packet.combat.round)
     assert.equal(packet.submit.body.decisionVersion, packet.combat.decisionVersion)
+    assert.equal(typeof packet.combat.fightStartedAt, 'string')
+    assert.equal(typeof packet.combat.fightDeadlineAt, 'string')
+    assert.equal(packet.combat.fightSeconds, 300)
     assert.equal(packet.visibleState.turn, 1)
     assert.equal(packet.legalActions.every((action) => action.kind === 'surrender'), true)
     assert.equal(packet.legalActions.some((action) => action.kind === 'hold'), false)
@@ -2334,9 +2461,44 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
   assert.equal(blueSubmission.response.status, 200)
   assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.json.publicState.combat.tick, 2)
+  assert.equal(blueSubmission.json.publicState.combat.fightDeadlineAt, blueCombatPacket.combat.fightDeadlineAt)
   assert.equal(redNextTurn.response.status, 200)
   assert.equal(redNextTurn.json.gameMaster.phase, 'combat_turn')
   assert.equal(redNextTurn.json.gameMaster.nextAction, 'wait_for_opponent_turn')
+})
+
+test('public poll resolves combat when fight wall-clock deadline has passed', async () => {
+  const env = createEnv()
+  const sessionId = 's_fight_wall_clock_cutoff_route'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+  await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueCombatState = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+
+  stored.combat.fightStartedAt = '2026-06-03T00:00:00.000Z'
+  stored.combat.fightDeadlineAt = '2026-06-03T00:00:01.000Z'
+  stored.combat.fightSeconds = 300
+  await storage.put('agent-arena-session', stored)
+
+  const publicPoll = await route(env, `/sessions/${sessionId}/public`)
+  const resolved = await storage.get('agent-arena-session')
+
+  assert.equal(blueCombatState.response.status, 200)
+  assert.equal(typeof blueCombatState.json.combat.fightDeadlineAt, 'string')
+  assert.equal(publicPoll.response.status, 200)
+  assert.equal(publicPoll.json.phase, 'round_review')
+  assert.equal(publicPoll.json.replayAvailable, true)
+  assert.equal(publicPoll.json.lastResult.reason.includes('Fight wall-clock expired'), true)
+  assert.equal(resolved.combat, undefined)
+  assert.equal(resolved.fightDossier.fights.at(-1).fightId, 'fight_1')
 })
 
 test('POST /sessions/:id/reflection accepts only private post-fight reflections after completed fight', async () => {
@@ -2367,6 +2529,12 @@ test('POST /sessions/:id/reflection accepts only private post-fight reflections 
     token: redInvite.claimToken,
     body: routePostFightReflection('red', redState.json.gameMaster.decisionVersion),
   })
+  const redWaitingGpt = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
   const duplicate = await route(env, `/sessions/${sessionId}/reflection`, {
     method: 'POST',
     token: redInvite.claimToken,
@@ -2378,12 +2546,23 @@ test('POST /sessions/:id/reflection accepts only private post-fight reflections 
   const publicState = await route(env, `/sessions/${sessionId}/public`)
   const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
   const stored = await storage.get('agent-arena-session')
+  const blueSubmitted = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: routePostFightReflection('blue', blueState.json.gameMaster.decisionVersion),
+  })
+  const redDebriefGpt = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const consumed = await storage.get('agent-arena-session')
   const advanced = await route(env, `/sessions/${sessionId}/advance-round`, {
     method: 'POST',
     token: refereeToken,
     body: {},
   })
-  const consumed = await storage.get('agent-arena-session')
   const redNext = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,
   })
@@ -2394,21 +2573,179 @@ test('POST /sessions/:id/reflection accepts only private post-fight reflections 
   assert.equal(redState.response.status, 200)
   assert.equal(redState.json.gameMaster.fightId, 'fight_1')
   assert.equal(redState.json.gameMaster.nextAction, 'submit_reflection')
+  assert.deepEqual(redState.json.gameMaster.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(redState.json.gameMaster.review.debrief, { available: false })
   assert.equal(mismatch.response.status, 403)
   assert.equal(mismatch.json.error.code, 'FORBIDDEN')
   assert.equal(submitted.response.status, 200)
   assert.equal(submitted.json.packet.nextAction, 'wait_for_debrief')
+  assert.deepEqual(submitted.json.packet.review.reflection, {
+    required: false,
+    submitted: true,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(submitted.json.packet.review.debrief, { available: false })
+  assert.equal(redWaitingGpt.response.status, 200)
+  assert.equal(redWaitingGpt.json.packet.nextAction, 'wait_for_debrief')
+  assert.deepEqual(redWaitingGpt.json.packet.review.reflection, {
+    required: false,
+    submitted: true,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(redWaitingGpt.json.packet.review.debrief, { available: false })
+  assert.match(redWaitingGpt.json.continuation.instruction, /opponent reflection/)
   assert.equal(duplicate.response.status, 409)
   assert.equal(duplicate.json.error.code, 'ALREADY_SUBMITTED')
   assert.equal(stored.reflections[0].status, 'private_pending')
+  assert.equal(stored.sharedDebrief, undefined)
+  assert.deepEqual(blueState.json.gameMaster.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: true,
+  })
   assert.equal(JSON.stringify(blueState.json).includes('secret weak drive note'), false)
   assert.equal(JSON.stringify(publicState.json).includes('secret weak drive note'), false)
+  assert.equal(blueSubmitted.response.status, 200)
+  assert.equal(blueSubmitted.json.packet.review.debrief.available, true)
+  assert.equal(consumed.reflections.every((entry) => entry.status === 'consumed_into_shared_debrief'), true)
+  assert.equal(redDebriefGpt.response.status, 200)
+  assert.equal(redDebriefGpt.json.packet.review.debrief.available, true)
+  assert.deepEqual(redDebriefGpt.json.packet.sharedDebrief, consumed.sharedDebrief)
+  assert.match(redDebriefGpt.json.continuation.instruction, /Shared debrief is available/)
   assert.equal(advanced.response.status, 200)
   assert.equal(consumed.reflections[0].status, 'consumed_into_shared_debrief')
   assert.equal(consumed.reflections[0].debriefId, consumed.sharedDebrief.debriefId)
   assert.equal(JSON.stringify(consumed.sharedDebrief).includes('secret weak drive note'), false)
   assert.deepEqual(redNext.json.gameMaster.sharedDebrief, blueNext.json.gameMaster.sharedDebrief)
   assert.equal(JSON.stringify(redNext.json.gameMaster.sharedDebrief).includes('secret weak drive note'), false)
+})
+
+test('round 2 reflection and debrief are scoped to the latest fight', async () => {
+  const env = createEnv()
+  const sessionId = 's_reflection_route_round_2'
+  const { redInvite, blueInvite } = await bootstrapReadySession(env, sessionId)
+
+  await storeCompletedFight(env, sessionId)
+
+  const redFight1 = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueFight1 = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redFight1.json.gameMaster.decisionVersion),
+  })
+  await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: routePostFightReflection('blue', blueFight1.json.gameMaster.decisionVersion),
+  })
+
+  const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await storage.get('agent-arena-session')
+  const fight1DebriefId = stored.sharedDebrief.debriefId
+
+  stored.phase = 'round_review'
+  stored.round = 2
+  stored.lastResult = {
+    winner: 'blue',
+    reason: 'Blue disabled Red in fight 2.',
+    damage: { red: 40, blue: 0 },
+    remainingHealth: { red: 0, blue: 40 },
+  }
+  stored.replay = completedReplayPayload()
+  stored.fightDossier = {
+    ...stored.fightDossier,
+    fights: [
+      ...stored.fightDossier.fights,
+      completedFightEntry(sessionId, 'fight_2', {
+        winner: 'blue',
+        reason: 'Blue disabled Red in fight 2.',
+      }),
+    ],
+  }
+  await storage.put('agent-arena-session', stored)
+
+  const redFight2 = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+  const blueFight2 = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+
+  assert.equal(redFight2.response.status, 200)
+  assert.equal(blueFight2.response.status, 200)
+  assert.equal(redFight2.json.gameMaster.fightId, 'fight_2')
+  assert.equal(blueFight2.json.gameMaster.fightId, 'fight_2')
+  assert.equal(redFight2.json.gameMaster.nextAction, 'submit_reflection')
+  assert.equal(blueFight2.json.gameMaster.nextAction, 'submit_reflection')
+  assert.equal(redFight2.json.gameMaster.review.fightId, 'fight_2')
+  assert.deepEqual(redFight2.json.gameMaster.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: false,
+  })
+  assert.deepEqual(redFight2.json.gameMaster.review.debrief, { available: false })
+
+  const redRound2Reflection = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: redInvite.claimToken,
+    body: routePostFightReflection('red', redFight2.json.gameMaster.decisionVersion, {
+      fightId: 'fight_2',
+    }),
+  })
+  const redRound2Gpt = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const blueAfterRedRound2 = await route(env, `/sessions/${sessionId}/state`, {
+    token: blueInvite.claimToken,
+  })
+  const blueRound2Reflection = await route(env, `/sessions/${sessionId}/reflection`, {
+    method: 'POST',
+    token: blueInvite.claimToken,
+    body: routePostFightReflection('blue', blueAfterRedRound2.json.gameMaster.decisionVersion, {
+      fightId: 'fight_2',
+    }),
+  })
+  const redRound2DebriefGpt = await route(env, '/gpt/next', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+    },
+  })
+  const afterRound2 = await storage.get('agent-arena-session')
+
+  assert.equal(redRound2Reflection.response.status, 200)
+  assert.equal(redRound2Reflection.json.packet.nextAction, 'wait_for_debrief')
+  assert.match(redRound2Gpt.json.continuation.instruction, /opponent reflection/)
+  assert.deepEqual(blueAfterRedRound2.json.gameMaster.review.reflection, {
+    required: true,
+    submitted: false,
+    opponentSubmitted: true,
+  })
+  assert.equal(blueRound2Reflection.response.status, 200)
+  assert.equal(blueRound2Reflection.json.packet.review.fightId, 'fight_2')
+  assert.equal(blueRound2Reflection.json.packet.review.debrief.available, true)
+  assert.notEqual(afterRound2.sharedDebrief.debriefId, fight1DebriefId)
+  assert.equal(afterRound2.sharedDebrief.fightIds.includes('fight_2'), true)
+  assert.equal(
+    afterRound2.reflections
+      .filter((entry) => entry.reflection.fightId === 'fight_2')
+      .every((entry) => entry.status === 'consumed_into_shared_debrief'),
+    true,
+  )
+  assert.match(redRound2DebriefGpt.json.continuation.instruction, /Shared debrief is available/)
 })
 
 test('POST /sessions/:id/reflection rejects late reflection after shared debrief exists', async () => {
@@ -3235,6 +3572,13 @@ test('POST /sessions/:id/combat-plan accepts compact combat plans alongside lega
 
   assert.equal(blueState.phase, 'combat_turn')
   assert.equal(blueState.combatCompact.v, 1)
+  assert.equal(blueState.combatCompact.combat.fightStartedAt, undefined)
+  assert.equal(blueState.combatCompact.combat.fightDeadlineAt, undefined)
+  assert.equal(blueState.combatCompact.combat.fightSeconds, undefined)
+  assert.equal(redState.combatCompact.v, 1)
+  assert.equal(typeof redState.combatCompact.combat.fightStartedAt, 'string')
+  assert.equal(typeof redState.combatCompact.combat.fightDeadlineAt, 'string')
+  assert.equal(redState.combatCompact.combat.fightSeconds, 300)
   assert.equal(Array.isArray(blueState.combatCompact.board.grid), true)
 
   const reachable = blueState.board?.reachableCells ?? []

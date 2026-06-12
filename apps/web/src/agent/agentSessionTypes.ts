@@ -65,6 +65,10 @@ export type CombatTurnPublicState = {
   openedAt: string
   deadlineAt: string
   turnSeconds: number
+  fightStartedAt?: string
+  fightDeadlineAt?: string
+  fightSeconds?: number
+  cutoffReason?: 'fight_wall_clock_expired'
   submitted: Record<TeamRole, boolean>
   mode?: 'legacy_tick_actions' | 'lockstep_round_plan'
   roundSeconds?: number
@@ -147,6 +151,7 @@ export type PublicSessionState = {
   combat?: CombatTurnPublicState
   gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
   replayAvailable: boolean
+  replayVersion?: string
   lastResult?: CombatSummary
   continuation: PublicContinuationState
   chatLog: SessionChatMessage[]
