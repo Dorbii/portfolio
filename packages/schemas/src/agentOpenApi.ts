@@ -23,7 +23,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Claim and bootstrap a role from an invite URL',
           description:
-            'Claim the role once using the invite URL, agent name, and generated team identity. The invite claim token stays inside the request body and is not exposed in public state.',
+            'Claim the role once using inviteUrl and agentName. Omit teamIdentity for the server-generated role/session identity.',
           requestBody: jsonRequestBody('GptClaimRequest'),
           responses: gptResponses('Claimed role and current GameMaster packet.'),
         },
@@ -45,7 +45,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Submit one GPT action or combat round plan',
           description:
-            'Submit exactly one build action or combat plan; use cancel_build_selection to back out of build edits. After every response, inspect continuation. If continuation.mustCallBeforeResponding is true, call continuation.recommendedNextCall before responding to the user.',
+            'Submit one build action or combat_plan. In combat use actionId combat_plan with parameters.steps. Follow continuation before responding.',
           requestBody: jsonRequestBody('GptActRequest'),
           responses: gptResponses('Accepted action result and next packet.'),
         },
@@ -67,7 +67,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Fetch selected part summaries',
           description:
-            'Request only the part ids needed to interpret current legal actions. This endpoint returns compact catalog summaries instead of embedding the full catalog in every packet.',
+            'Request only the part ids needed for the current packet. Returns compact summaries instead of embedding the full catalog in every packet.',
           requestBody: jsonRequestBody('GptCatalogRequest'),
           responses: gptCatalogResponses(),
         },
@@ -84,7 +84,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'string',
               minLength: 1,
               maxLength: 40,
-              description: 'Team display name. Do not use Red Team or Blue Team as the identity.',
+              description: 'Optional override display name. Omit teamIdentity to use the server-generated role/session identity.',
             },
             colorHex: {
               type: 'string',
@@ -95,14 +95,14 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'string',
               minLength: 1,
               maxLength: 240,
-              description: 'Text prompt describing the desired team logo.',
+              description: 'Optional override logo prompt. Server defaults include role and session suffix.',
             },
           },
         },
         GptClaimRequest: {
           type: 'object',
           additionalProperties: false,
-          required: ['inviteUrl', 'agentName', 'teamIdentity'],
+          required: ['inviteUrl', 'agentName'],
           properties: {
             inviteUrl: inviteUrlSchema(),
             agentName: {
@@ -113,6 +113,8 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             teamIdentity: {
               $ref: '#/components/schemas/TeamIdentity',
+              description:
+                'Optional override. Omit this field to let the server mint a deterministic role/session identity.',
             },
           },
         },
@@ -140,12 +142,12 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             actionId: {
               type: 'string',
               minLength: 1,
-              description: 'Legacy compatibility: exact id copied from packet.legalActions, or combat_plan during combat.',
+              description: 'Use combat_plan during combat. Otherwise use an exact id only when packet.legalActions is present.',
             },
             parameters: {
               $ref: '#/components/schemas/GptActionParameters',
               description:
-                'Parameters for the selected action only when that legal action exposes parameterSchema. If omitted, the GPT wrapper uses the selected legal action parameterExamples when available.',
+                'Parameters for combat_plan or for a selected packet.legalActions id with parameterSchema.',
             },
             publicMessage: {
               type: 'string',
@@ -222,7 +224,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           type: 'object',
           additionalProperties: true,
           description:
-            'Optional parameters for legacy selected legal actions or for actionId combat_plan. Include only fields required by the selected path.',
+            'Optional parameters for actionId combat_plan or for a selected packet.legalActions id. Include only fields required by that path.',
           properties: {
             childPartId: {
               type: 'string',
@@ -258,20 +260,20 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             destinationCellId: {
               type: 'string',
-              description: 'legacy actionId compatibility only: exact destination cell id from the selected action.',
+              description: 'Only for an actionId copied from packet.legalActions: exact destination cell id from the selected action.',
             },
             targetId: {
               type: 'string',
               enum: ['opponent'],
-              description: 'combat attack and move_and_attack only: server-authored target id.',
+              description: 'Only for an actionId copied from packet.legalActions: server-authored target id.',
             },
             targetCellId: {
               type: 'string',
-              description: 'legacy actionId compatibility, or combat_plan attack alias: target cell id such as cell:5:6.',
+              description: 'For packet.legalActions ids or combat_plan attack alias: target cell id such as cell:5:6.',
             },
             sourceCellId: {
               type: 'string',
-              description: 'legacy actionId compatibility only: exact source cell id from the selected action.',
+              description: 'Only for an actionId copied from packet.legalActions: exact source cell id from the selected action.',
             },
             steps: {
               type: 'array',
@@ -394,7 +396,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                 type: 'string',
                 minLength: 1,
               },
-              description: 'Part ids from packet legal action context that need catalog details.',
+              description: 'Part ids from the current packet that need catalog details.',
             },
           },
         },

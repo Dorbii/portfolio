@@ -777,6 +777,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://arena.dorbii.net')
   assert.equal(json.name, 'Clash of Clankers')
   assert.equal(json.version, '0.2.0-gamemaster')
+  assert.equal(json.entrypoints.agentSpec, 'https://arena-api.dorbii.net/agent-spec.json')
   assert.equal(json.entrypoints.gptActionsOpenApi, 'https://arena-api.dorbii.net/openapi.json')
   assert.equal(json.customGptActions.openApi, 'https://arena-api.dorbii.net/openapi.json')
   assert.deepEqual(json.customGptActions.operations, [
@@ -784,6 +785,7 @@ test('GET /agent-spec.json returns the agent contract', async () => {
     'gptNext',
     'gptAct',
     'gptReflection',
+    'gptCatalog',
   ])
   assert.equal(json.browserApi.global, 'window.AgentArenaRole')
   assert.equal('briefScriptTagId' in json.browserApi, false)
@@ -804,36 +806,31 @@ test('GET /agent-spec.json returns the agent contract', async () => {
   assert.equal(JSON.stringify(json).includes('/quit'), false)
   assert.ok(json.objective.includes('combat round plans'))
   assert.ok(json.objective.includes('server owns legality'))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Custom GPT path')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Browser automation path')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('window.AgentArenaRole.bootstrapRole')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('submitCombatPlan')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('private player key')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generate your own TeamIdentity')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('team color for your robot and UI label')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Red 7ZQ9K2') && item.includes('Blue 7ZQ9K2')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('GameMasterPacket')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Custom GPT path only')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('gptCatalog')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('Omit teamIdentity')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.combat')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('packet.combat.board')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('submit_combat_round_plan')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('legalActions are for loadout and explicit surrender only')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('blockedActions')))
+  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('actionId combat_plan')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('error.issues')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('budget rules')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('generated teamIdentity')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('normalizes the later duplicate')))
-  assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('action payload maps')))
   assert.ok(json.externalAgentGuide.firstRead.some((item) => item.includes('untrusted')))
-  assert.ok(json.externalAgentGuide.fallback.includes('runtime cannot play the role'))
-  assert.equal(JSON.stringify(json.externalAgentGuide).includes('canonical payload maps'), false)
-  assert.equal(JSON.stringify(json.externalAgentGuide).includes('canonical combat action menus'), false)
-  assert.equal(json.externalAgentGuide.fallback.includes('submitRoundPlan'), false)
-  assert.equal(json.externalAgentGuide.fallback.includes('submitTurnCommand'), false)
+  assert.ok(json.externalAgentGuide.fallback.includes('GPT Actions are unavailable'))
+  assert.equal(JSON.stringify(json.externalAgentGuide).includes('window.AgentArenaRole'), false)
+  assert.equal(JSON.stringify(json.externalAgentGuide).includes('/sessions/:sessionId/roles'), false)
+  assert.equal(JSON.stringify(json.externalAgentGuide).includes('generate your own TeamIdentity'), false)
+  assert.equal(JSON.stringify(json.externalAgentGuide).includes('normalizes the later duplicate'), false)
+  assert.equal(JSON.stringify(json.externalAgentGuide).includes('legacy'), false)
+  assert.ok(json.runtimeGuides.browserAutomation.firstRead.some((item) => item.includes('window.AgentArenaRole')))
+  assert.ok(json.runtimeGuides.browserAutomation.firstRead.some((item) => item.includes('submitCombatPlan')))
+  assert.ok(json.runtimeGuides.rawHttp.firstRead.some((item) => item.includes('/roles/:role/bootstrap')))
+  assert.ok(json.runtimeGuides.rawHttp.firstRead.some((item) => item.includes('submit_combat_round_plan')))
   assert.ok(json.rules.packetFields.required.includes('decisionVersion'))
   assert.ok(json.rules.packetFields.required.includes('eventVersion'))
-  assert.ok(json.rules.packetFields.required.includes('legalActions'))
+  assert.equal(json.rules.packetFields.required.includes('legalActions'), false)
+  assert.ok(json.rules.packetFields.browserAndHttpRequired.includes('legalActions'))
   assert.ok(json.rules.packetFields.optional.includes('blockedActions'))
+  assert.ok(json.rules.packetFields.optional.includes('build'))
+  assert.ok(json.rules.packetFields.optional.includes('combat'))
   assert.ok(json.rules.packetFields.optional.includes('review'))
   assert.ok(json.rules.packetFields.optional.includes('sharedDebrief'))
   assert.ok(json.rules.packetFields.optional.includes('combat.fightDeadlineAt'))
@@ -1075,10 +1072,16 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   }
   assert.ok(json.paths['/gpt/next'].post.description.includes('packet.review'))
   assert.ok(json.paths['/gpt/next'].post.description.includes('fightDeadlineAt'))
-  assert.ok(json.paths['/gpt/act'].post.description.includes('cancel_build_selection'))
+  assert.ok(json.paths['/gpt/act'].post.description.includes('combat_plan'))
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
-  assert.ok(json.components.schemas.GptClaimRequest.required.includes('teamIdentity'))
+  assert.deepEqual(json.components.schemas.GptClaimRequest.required, ['inviteUrl', 'agentName'])
+  assert.ok('teamIdentity' in json.components.schemas.GptClaimRequest.properties)
+  assert.ok(
+    json.components.schemas.GptClaimRequest.properties.teamIdentity.description.includes(
+      'server mint',
+    ),
+  )
   assert.deepEqual(json.components.schemas.GptActRequest.required, ['inviteUrl'])
   assert.deepEqual(json.components.schemas.GptActRequest.oneOf, [
     { required: ['inviteUrl', 'action'] },
@@ -1575,7 +1578,7 @@ test('POST /sessions/:id/action accepts a valid server-authored action id', asyn
   assert.equal(submission.json.publicState.gameMaster.red.nextAction, 'build_bot')
 })
 
-test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
+test('POST /gpt/claim bootstraps a role with server-owned default identity', async () => {
   const env = createEnv()
   const sessionId = 's_gpt_claim'
   const created = await route(env, '/sessions', {
@@ -1583,6 +1586,38 @@ test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
     body: { sessionId },
   })
   const redInvite = inviteFor(created.json.invites, 'red')
+  const claim = await route(env, '/gpt/claim', {
+    method: 'POST',
+    body: {
+      inviteUrl: gptInviteUrl(sessionId, redInvite),
+      agentName: 'ClankGPT',
+    },
+  })
+  const state = await route(env, `/sessions/${sessionId}/state`, {
+    token: redInvite.claimToken,
+  })
+
+  assert.equal(claim.response.status, 200)
+  assert.equal(claim.json.status, 'claimed')
+  assert.equal(claim.json.sessionId, sessionId)
+  assert.equal(claim.json.role, 'red')
+  assertGptCompactPacket(claim.json.packet, 'red')
+  assert.equal(claim.json.continuation.keepGoing, true)
+  assert.equal(claim.json.continuation.recommendedNextCall, 'gptNext')
+  assert.equal(state.json.identity.name, 'Red GPTCLA')
+  assert.equal(state.json.identity.primaryColor, '#ff4c5d')
+  assert.equal(state.json.identity.logo.mark, 'shield')
+})
+
+test('POST /gpt/claim still accepts explicit team identity overrides', async () => {
+  const env = createEnv()
+  const sessionId = 's_gpt_claim_override'
+  const created = await route(env, '/sessions', {
+    method: 'POST',
+    body: { sessionId },
+  })
+  const redInvite = inviteFor(created.json.invites, 'red')
+
   const claim = await route(env, '/gpt/claim', {
     method: 'POST',
     body: {
@@ -1601,12 +1636,8 @@ test('POST /gpt/claim bootstraps a role from an invite URL', async () => {
   })
 
   assert.equal(claim.response.status, 200)
-  assert.equal(claim.json.status, 'claimed')
-  assert.equal(claim.json.sessionId, sessionId)
-  assert.equal(claim.json.role, 'red')
-  assertGptCompactPacket(claim.json.packet, 'red')
-  assert.equal(claim.json.continuation.keepGoing, true)
-  assert.equal(claim.json.continuation.recommendedNextCall, 'gptNext')
+  assert.equal(state.json.identity.name, 'Iron Clankers')
+  assert.equal(state.json.identity.primaryColor, '#f97316')
   assert.equal('mode' in state.json.identity, false)
 })
 
@@ -1675,9 +1706,15 @@ test('POST /gpt/next returns compact combat state for Custom GPT actions', async
   assert.ok(JSON.stringify(redStart.json).length < 8_000)
   assert.equal(blueCombat.response.status, 200)
   assert.equal(blueCombat.json.status, 'playable')
+  assert.equal(blueCombat.json.continuation.keepGoing, true)
+  assert.equal(blueCombat.json.continuation.mustCallBeforeResponding, true)
   assert.equal(blueCombat.json.continuation.recommendedNextCall, 'gptAct')
+  assert.ok(blueCombat.json.continuation.instruction.includes('actionId combat_plan'))
+  assert.equal(blueCombat.json.continuation.instruction.includes('packet.legalActions[].id'), false)
   assert.equal(redCombat.response.status, 200)
   assert.equal(redCombat.json.status, 'playable')
+  assert.equal(redCombat.json.continuation.keepGoing, true)
+  assert.equal(redCombat.json.continuation.mustCallBeforeResponding, true)
   assert.equal(redCombat.json.continuation.recommendedNextCall, 'gptAct')
   assertGptCompactPacket(packet, 'blue')
   assert.equal(packet.nextAction, 'choose_turn')

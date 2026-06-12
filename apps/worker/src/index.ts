@@ -99,7 +99,7 @@ type GptTeamIdentityInput = TeamIdentity & {
 
 type GptActBody = {
   inviteUrl: string
-  /** Legacy compatibility: exact id copied from packet.legalActions. */
+  /** Exact id copied from packet.legalActions when that compatibility surface is present. */
   actionId?: string
   parameters?: GameMasterActionParameters
   /** Compact build action; the wrapper hides GameMaster version bookkeeping. */
@@ -595,7 +595,9 @@ export class AgentArenaSession {
         ...(typeof body.agentName === 'string' && body.agentName.trim()
           ? { agentName: body.agentName.trim() }
           : {}),
-        ...(body.teamIdentity ? { teamIdentity: normalizeGptTeamIdentity(body.teamIdentity) } : {}),
+        teamIdentity: body.teamIdentity
+          ? normalizeGptTeamIdentity(body.teamIdentity)
+          : defaultGptTeamIdentity(invite.value),
       },
     )
     await this.saveSession(coordinator)
@@ -709,7 +711,7 @@ export class AgentArenaSession {
       return errorResponse(
         400,
         'SUBMISSION_INVALID',
-        'Provide exactly one of actionId (legacy) or action (compact build action).',
+        'Provide exactly one of actionId or action (compact build action).',
       )
     }
 
@@ -771,14 +773,14 @@ export class AgentArenaSession {
     }
 
     if (typeof body.actionId !== 'string') {
-      return errorResponse(400, 'SUBMISSION_INVALID', 'GPT actionId is required for the legacy path.')
+      return errorResponse(400, 'SUBMISSION_INVALID', 'GPT actionId is required when no compact action is provided.')
     }
 
-    const legacyActionId = body.actionId
+    const submittedActionId = body.actionId
     const packet = packetResult.value
-    const resolvedGptAlias = resolveGptMountSlotAlias(packet, legacyActionId)
+    const resolvedGptAlias = resolveGptMountSlotAlias(packet, submittedActionId)
     const action = resolvedGptAlias?.canonicalAction ??
-      packet.legalActions.find((candidate) => candidate.id === legacyActionId)
+      packet.legalActions.find((candidate) => candidate.id === submittedActionId)
 
     if (!action || !packet.actionSetId) {
       return errorResponse(
@@ -1885,8 +1887,31 @@ function normalizeGptTeamIdentity(input: GptTeamIdentityInput): TeamIdentity {
   }
 }
 
+function defaultGptTeamIdentity(invite: Pick<GptInvite, 'role' | 'sessionId'>): TeamIdentity {
+  const roleLabel = invite.role === 'red' ? 'Red' : 'Blue'
+  const suffix = gptIdentitySessionSuffix(invite.sessionId)
+
+  return {
+    name: `${roleLabel} ${suffix}`,
+    colorHex: invite.role === 'red' ? '#ff4c5d' : '#5b9dff',
+    logoPrompt: `${roleLabel} ${suffix} combat robotics logo with ${roleLabel.toLowerCase()} mechanical crest`,
+  }
+}
+
+function gptIdentitySessionSuffix(sessionId: string): string {
+  const suffix = sessionId.replace(/^s_/i, '').replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase()
+
+  return suffix || 'ARENA'
+}
+
+function isGptCompactCombatDecision(
+  packet: Pick<GameMasterPacket, 'nextAction' | 'phase'>,
+): boolean {
+  return packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn'
+}
+
 function gptPacketStatus(
-  packet: { legalActions: unknown[]; nextAction: string; phase?: string },
+  packet: Pick<GameMasterPacket, 'legalActions' | 'nextAction' | 'phase'>,
 ): Exclude<GptPacketStatus, 'claimed'> {
   if (packet.phase === 'expired') {
     return 'expired'
@@ -1896,7 +1921,10 @@ function gptPacketStatus(
     return 'complete'
   }
 
-  return packet.legalActions.length > 0 || packet.nextAction === 'submit_reflection' || packet.nextAction === 'view_replay'
+  return isGptCompactCombatDecision(packet) ||
+      packet.legalActions.length > 0 ||
+      packet.nextAction === 'submit_reflection' ||
+      packet.nextAction === 'view_replay'
     ? 'playable'
     : 'waiting'
 }
@@ -1954,6 +1982,15 @@ function gptContinuationForPacket(
       recommendedNextCall: 'gptNext',
       pollAfterMs: 1500,
       instruction: 'Waiting for a fight-scoped shared debrief or referee round advance. Call gptNext again after a short wait before writing any user-visible response. Do not ask the user to type continue.',
+    }
+  }
+
+  if (isGptCompactCombatDecision(packet)) {
+    return {
+      keepGoing: true,
+      mustCallBeforeResponding: true,
+      recommendedNextCall: 'gptAct',
+      instruction: 'Call gptAct now with actionId combat_plan and parameters.steps from packet.combat. Do not choose packet.legalActions during combat and do not ask the user to type continue.',
     }
   }
 
