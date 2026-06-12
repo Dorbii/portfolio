@@ -57,9 +57,8 @@ export function AgentInsightWorkbench({
   const storeOffers = createStoreOfferReadouts(roleState, catalogById)
   const foundationOffers = createFoundationPartReadouts(roleState, catalogById)
   const inventoryParts = createInventoryPartReadouts(roleState, catalogById)
-  const hasBlueprint = Boolean(blueprint && blueprint.blocks.length > 0)
   const submissionLabel = roleState?.submitted ? 'Accepted' : 'Pending'
-  const teamIdentity = roleState ? resolveTeamIdentity(role, roleState.identity) : null
+  const teamIdentity = resolveTeamIdentity(role, roleState?.identity)
   const buildSnapshot = createBuildSnapshot({
     foundationParts: foundationOffers,
     loadoutParts,
@@ -101,27 +100,15 @@ export function AgentInsightWorkbench({
 
       {roleState ? (
         <div className="observer-cockpit-grid">
-          {teamIdentity && loadout && hasBlueprint && blueprint ? (
-            <section className="assembly-bay-panel" aria-labelledby="assembly-bay-heading">
-              <div className="plan-section-header">
-                <SectionTitle id="assembly-bay-heading" title="Assembly bay" />
-                <div className="assembly-preview-meta">
-                  <span className="assembly-state">Confirmed bot</span>
-                  <strong>{blueprint.name}</strong>
-                  <span>{loadout.machineDesign ? 'Machine-authority loadout from role state' : 'Legacy loadout from role state'}</span>
-                </div>
-              </div>
-              <BotAssemblyScene
-                blueprint={blueprint}
-                identity={teamIdentity}
-                machineDesign={loadout.machineDesign}
-                role={role}
-                submitted
-              />
-            </section>
-          ) : (
-            <AssemblyBayPlaceholder />
-          )}
+          <section className="assembly-bay-panel" aria-label="Bot garage">
+            <BotAssemblyScene
+              blueprint={blueprint}
+              identity={teamIdentity}
+              machineDesign={loadout?.machineDesign}
+              role={role}
+              submitted={Boolean(roleState.submitted)}
+            />
+          </section>
           <BuildSnapshotPanel snapshot={buildSnapshot} />
         </div>
       ) : null}
@@ -190,20 +177,6 @@ type BuildSnapshotInput = {
   loadoutParts: LoadoutPartReadout[]
   roleState: RolePrivateState | null
   storeOffers: CatalogPartReadout[]
-}
-
-function AssemblyBayPlaceholder() {
-  return (
-    <section className="assembly-bay-panel assembly-bay-placeholder" aria-labelledby="assembly-placeholder-heading">
-      <div className="plan-section-header">
-        <SectionTitle id="assembly-placeholder-heading" title="Assembly bay" />
-        <span className="assembly-state is-draft">Waiting</span>
-      </div>
-      <p className="assembly-empty">
-        No confirmed loadout is available yet. Once the agent commits a bot, the assembly render stays here while the drawer carries equipped parts and store details.
-      </p>
-    </section>
-  )
 }
 
 function BuildSnapshotPanel({ snapshot }: { snapshot: BuildSnapshotReadout }) {

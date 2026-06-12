@@ -95,6 +95,14 @@ export function attachAssemblyBot(
   resources.startedAt = performance.now()
 }
 
+export function clearAssemblyBot(resources: AssemblyResources): void {
+  resources.bot?.dispose(false, false)
+  resources.bot = undefined
+  resources.botAssemblyNodes = []
+  resources.botMeshes = []
+  resources.startedAt = performance.now()
+}
+
 export function animateAssembly(resources: AssemblyResources, submitted: boolean): void {
   const now = performance.now()
   const elapsed = (now - resources.startedAt) / 1000

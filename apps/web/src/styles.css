@@ -2567,50 +2567,7 @@ textarea:focus-visible {
 
 .assembly-bay-panel {
   min-width: 0;
-  margin-top: 12px;
-  padding: 12px;
-  display: grid;
-  gap: 10px;
-  border: 1px solid rgba(var(--cockpit-team), 0.24);
-  border-radius: 10px;
-  background:
-    linear-gradient(90deg, rgba(var(--cockpit-team), 0.06), transparent 38%),
-    linear-gradient(180deg, rgba(18, 24, 30, 0.86), rgba(10, 14, 18, 0.82)),
-    rgba(8, 11, 14, 0.9);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-    0 14px 30px rgba(0, 0, 0, 0.22);
-}
-
-.assembly-bay-panel .plan-section-header {
-  align-items: center;
-  gap: 10px;
-}
-
-.assembly-preview-meta {
-  justify-self: end;
-  min-width: 0;
-  display: grid;
-  justify-items: end;
-  gap: 3px;
-  text-align: right;
-}
-
-.assembly-preview-meta strong {
-  max-width: 240px;
-  overflow: hidden;
-  color: #eef2f3;
-  font-size: 0.82rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.assembly-preview-meta > span:last-child {
-  max-width: 260px;
-  color: #8fa3a3;
-  font-size: 0.66rem;
-  font-weight: 800;
-  overflow-wrap: anywhere;
+  min-height: 100%;
 }
 
 .assembly-state {
@@ -2648,22 +2605,12 @@ textarea:focus-visible {
     rgba(247, 184, 75, 0.08);
 }
 
-.assembly-empty {
-  margin: 0;
-  min-height: 220px;
-  display: grid;
-  place-items: center;
-  border: 1px dashed rgba(143, 208, 255, 0.24);
-  border-radius: 8px;
-  text-align: center;
-}
-
 .bot-assembly-stage {
   position: relative;
   min-width: 0;
   height: clamp(300px, 38vh, 500px);
   min-height: 0;
-  margin-top: 10px;
+  margin-top: 0;
   overflow: hidden;
   border: 1px solid rgba(var(--cockpit-team), 0.2);
   border-radius: 8px;
@@ -2782,10 +2729,6 @@ textarea:focus-visible {
 
 .observer-cockpit-grid .assembly-bay-panel {
   margin-top: 0;
-}
-
-.assembly-bay-placeholder {
-  min-height: 100%;
 }
 
 .build-snapshot-panel {
@@ -3646,31 +3589,14 @@ textarea:focus-visible {
 }
 
 @media (max-width: 390px) {
-  .assembly-bay-panel {
-    padding: 10px;
-    margin-top: 10px;
-    gap: 8px;
-  }
-
-  .assembly-bay-panel .plan-section-header {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-
   .assembly-state {
     min-height: 24px;
     padding: 4px 8px;
     font-size: 0.62rem;
   }
 
-  .assembly-preview-meta strong,
-  .assembly-preview-meta > span:last-child {
-    max-width: 160px;
-  }
-
   .bot-assembly-stage {
     height: clamp(260px, 58vh, 340px);
-    margin-top: 6px;
     border-radius: 7px;
   }
 

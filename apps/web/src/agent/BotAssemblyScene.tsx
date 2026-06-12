@@ -8,6 +8,7 @@ import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import {
   animateAssembly,
   attachAssemblyBot,
+  clearAssemblyBot,
   type AssemblyResources,
 } from './botAssemblyAnimation'
 import {
@@ -26,7 +27,7 @@ import {
 type AssemblyStatus = 'booting' | 'ready' | 'unavailable' | 'context_lost'
 
 type BotAssemblySceneProps = {
-  blueprint: BotBlueprint
+  blueprint: BotBlueprint | null
   identity: LegacyTeamIdentity
   machineDesign?: MachineDesign
   role: TeamRole
@@ -70,11 +71,16 @@ export function BotAssemblyScene({
   const attachBlueprint = useCallback(
     (
       resources: AssemblyResources,
-      nextBlueprint: BotBlueprint,
+      nextBlueprint: BotBlueprint | null,
       nextMachineDesign: MachineDesign | undefined,
       visualKey: string,
     ) => {
-      attachAssemblyBot(resources, nextBlueprint, role, nextMachineDesign)
+      if (nextBlueprint) {
+        attachAssemblyBot(resources, nextBlueprint, role, nextMachineDesign)
+      } else {
+        clearAssemblyBot(resources)
+      }
+
       lastAttachedVisualKeyRef.current = visualKey
       setAttachedMeshCount(resources.botMeshes.length)
     },
@@ -208,6 +214,7 @@ export function BotAssemblyScene({
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.assembly)
     : null
+  const visualAuthority = getAssemblyVisualAuthority(blueprint, machineDesign)
 
   return (
     <div
@@ -226,15 +233,15 @@ export function BotAssemblyScene({
       data-renderer-state={status}
       data-renderer-textures={sceneStats?.textures}
       data-renderer-total-vertices={sceneStats?.totalVertices}
-      data-assembly-blueprint-blocks={blueprint.blocks.length}
+      data-assembly-blueprint-blocks={blueprint?.blocks.length ?? 0}
       data-assembly-bot-attached={attachedMeshCount > 0 ? 'true' : 'false'}
       data-assembly-bot-meshes={attachedMeshCount}
-      data-assembly-visual-authority={machineDesign ? 'machine:v1' : 'legacy-bot-blueprint'}
+      data-assembly-visual-authority={visualAuthority}
       data-assembly-team-color={identity.primaryColor}
     >
       <canvas
         ref={canvasRef}
-        aria-label={`${identity.name} bot assembly bay`}
+        aria-label={`${identity.name} garage bay`}
         aria-hidden={status === 'unavailable'}
         hidden={status === 'unavailable'}
       />
@@ -254,10 +261,25 @@ export function BotAssemblyScene({
 }
 
 function visualAuthorityKey(
-  blueprint: BotBlueprint,
+  blueprint: BotBlueprint | null,
   machineDesign: MachineDesign | undefined,
 ): string {
+  if (!blueprint) {
+    return 'empty-garage'
+  }
+
   return machineDesign
     ? `machine:${JSON.stringify(machineDesign)}`
     : `blueprint:${JSON.stringify(blueprint)}`
+}
+
+function getAssemblyVisualAuthority(
+  blueprint: BotBlueprint | null,
+  machineDesign: MachineDesign | undefined,
+): 'empty-garage' | 'legacy-bot-blueprint' | 'machine:v1' {
+  if (!blueprint) {
+    return 'empty-garage'
+  }
+
+  return machineDesign ? 'machine:v1' : 'legacy-bot-blueprint'
 }
