@@ -21,7 +21,11 @@ import {
   CANONICAL_CAMERA_PRESETS,
   normalizeCameraPreset,
 } from '../.test-build/apps/web/src/replay/camera/presets.js'
-import { mockReplay } from '../.test-build/apps/web/src/mockSession.js'
+import {
+  mockReplay,
+  stress64BotBlueprints,
+  stress64MachineDesigns,
+} from '../.test-build/apps/web/src/mockSession.js'
 import {
   createReplayTimeline,
   validateReplayTimeline,
@@ -150,8 +154,12 @@ const movingWeaponTimeline = createReplayTimeline({
 
 function createWeaponMetadataTimeline({
   controlCue,
+  omitStyle = false,
   phase = 'release',
+  sourceBlockId = 'front-spinner',
+  sourcePartId = 'Weapon_Spinner_Small',
   style = 'turret',
+  targetPosition = [4.4, 0, 0.2],
   t = 1.5,
 } = {}) {
   return createReplayTimeline({
@@ -186,11 +194,11 @@ function createWeaponMetadataTimeline({
         bot: 'red',
         weaponSlot: 'weaponA',
         controlCue,
-        targetPosition: [4.4, 0, 0.2],
-        sourceBlockId: 'front-spinner',
-        sourcePartId: 'Weapon_Spinner_Small',
+        sourceBlockId,
+        sourcePartId,
         phase,
-        style,
+        ...(targetPosition ? { targetPosition } : {}),
+        ...(omitStyle ? {} : { style }),
       },
     ],
   })
@@ -519,10 +527,22 @@ test('machine replay node path is quarantined from legacy foundation shells', ()
   const machineEnd = source.indexOf('export function createCatalogPartNode')
   const machineNodeSource = source.slice(machineStart, machineEnd)
 
+  assert.match(source, /const MAX_RENDERED_BLOCKS = 30/)
   assert.ok(machineStart >= 0)
   assert.ok(machineEnd > machineStart)
   assert.equal(machineNodeSource.includes('createBotFoundation'), false)
   assert.equal(source.includes('createLegacyReplayBotBlueprintAdapterNode'), true)
+})
+
+test('stress64 replay proof carries 64 source parts per side for the 30 part render cap', () => {
+  assert.equal(stress64MachineDesigns.red.parts.length, 64)
+  assert.equal(stress64MachineDesigns.blue.parts.length, 64)
+  assert.equal(stress64MachineDesigns.red.rootInstanceId, 'red-stress-00')
+  assert.equal(stress64MachineDesigns.blue.rootInstanceId, 'blue-stress-00')
+  assert.ok(stress64MachineDesigns.red.parts.some((part) => part.instanceId === 'red-stress-08' && part.definitionId === 'catalog:Weapon_Turret'))
+  assert.ok(stress64MachineDesigns.blue.parts.some((part) => part.instanceId === 'blue-stress-08' && part.definitionId === 'catalog:Weapon_Turret'))
+  assert.ok(stress64BotBlueprints.red.blocks.some((block) => block.id === 'red-stress-08' && block.partId === 'Weapon_Turret'))
+  assert.ok(stress64BotBlueprints.blue.blocks.some((block) => block.id === 'blue-stress-08' && block.partId === 'Weapon_Turret'))
 })
 
 test('compiled replay timeline preserves existing frame output', () => {
@@ -837,6 +857,32 @@ test('replay mapping changes weapon effect labels deterministically by style and
   assert.equal(turretRelease.label, 'weaponA-turret-release')
   assert.equal(flipperRecoil.label, 'weaponA-flipper-recoil')
   assert.notEqual(turretRelease.label, flipperRecoil.label)
+})
+
+test('replay mapping infers turret effect style from source part metadata', () => {
+  const turretRelease = buildReplayFrame(createWeaponMetadataTimeline({
+    omitStyle: true,
+    sourceBlockId: 'turret',
+    sourcePartId: 'Weapon_Turret',
+  }), 1.75).effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(turretRelease)
+  assert.equal(turretRelease.weaponStyle, 'turret')
+  assert.equal(turretRelease.label, 'weaponA-turret-release')
+})
+
+test('weapon fire with source metadata leaves untargeted direction to the muzzle anchor', () => {
+  const turretRelease = buildReplayFrame(createWeaponMetadataTimeline({
+    sourceBlockId: 'turret',
+    sourcePartId: 'Weapon_Turret',
+    style: 'turret',
+    targetPosition: null,
+  }), 1.75).effects.find((effect) => effect.kind === 'weapon_fire')
+
+  assert.ok(turretRelease)
+  assert.equal(turretRelease.rotationY, undefined)
+  assert.equal(turretRelease.endPosition, undefined)
+  assert.equal(turretRelease.weaponStyle, 'turret')
 })
 
 test('replay mapping preserves source metadata on control-net deploy effects', () => {

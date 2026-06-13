@@ -623,3 +623,111 @@ export const machineProofReplay: ReplayTimeline = createReplayTimeline({
     },
   ],
 })
+
+const STRESS_64_FILLER_PART_IDS = [
+  'Style_Flag',
+  'Style_Antenna',
+  'Style_TopHat',
+  'Style_CowboyHat',
+] as const
+
+export const stress64MachineDesigns: Record<TeamRole, MachineDesign> = {
+  red: createStress64MachineDesign('red', -0.16),
+  blue: createStress64MachineDesign('blue', 0.16),
+}
+
+export const stress64Replay: ReplayTimeline = createReplayTimeline({
+  round: 64,
+  duration: 3.4,
+  summary: 'Sixty-four visible parts per side stress the replay renderer cap.',
+  events: [
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'red',
+      position: [-3.8, 0, 0],
+      rotation: [0, 90, 0],
+    },
+    {
+      t: 0,
+      type: 'spawn',
+      bot: 'blue',
+      position: [3.8, 0, 0],
+      rotation: [0, -90, 0],
+    },
+    {
+      t: 0.9,
+      type: 'weapon_fire',
+      bot: 'blue',
+      weaponSlot: 'weaponA',
+      sourceBlockId: 'blue-stress-08',
+      sourcePartId: 'Weapon_Turret',
+      phase: 'release',
+      style: 'turret',
+      targetPosition: [-1.4, 0, -0.5],
+    },
+    {
+      t: 1.3,
+      type: 'weapon_fire',
+      bot: 'red',
+      weaponSlot: 'weaponA',
+      sourceBlockId: 'red-stress-08',
+      sourcePartId: 'Weapon_Turret',
+      phase: 'release',
+      style: 'turret',
+      targetPosition: [1.4, 0, 0.5],
+    },
+  ],
+})
+
+function createStress64MachineDesign(role: TeamRole, zBias: number): MachineDesign {
+  const parts = Array.from({ length: 64 }, (_, index): MachineDesign['parts'][number] => {
+    const column = index % 8
+    const row = Math.floor(index / 8)
+    const catalogPartId = index === 8
+      ? 'Weapon_Turret'
+      : STRESS_64_FILLER_PART_IDS[
+        (index + STRESS_64_FILLER_PART_IDS.length - 1) % STRESS_64_FILLER_PART_IDS.length
+      ]
+    const isCore = index === 0
+    const instanceId = `${role}-stress-${String(index).padStart(2, '0')}`
+
+    return {
+      instanceId,
+      definitionId: isCore ? 'system:machine-core:v1' : `catalog:${catalogPartId}`,
+      source: isCore ? 'system_core' : 'catalog_part',
+      ...(isCore ? { immutable: true } : {}),
+      transform: {
+        position: [
+          (column - 3.5) * 0.84,
+          row % 2 === 0 ? 0 : 0.08,
+          (row - 3.5) * 0.72 + zBias,
+        ],
+        rotation: [0, role === 'red' ? 0 : 180, 0],
+        scale: [1, 1, 1],
+        orientation: IDENTITY_ORIENTATION,
+      },
+    }
+  })
+
+  return {
+    name: `${role} 64 part visual stress machine`,
+    rootInstanceId: `${role}-stress-00`,
+    parts,
+    attachments: [],
+    runtime: {
+      healthByInstanceId: Object.fromEntries(
+        parts.map((part) => [part.instanceId, part.instanceId.endsWith('-00') ? 20 : 10]),
+      ),
+      orientationByInstanceId: {
+        [`${role}-stress-08`]: role === 'red'
+          ? IDENTITY_ORIENTATION
+          : {
+              right: [-1, 0, 0],
+              up: [0, 1, 0],
+              forward: [0, 0, -1],
+            },
+      },
+    },
+  }
+}

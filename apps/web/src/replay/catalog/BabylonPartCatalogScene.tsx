@@ -8,16 +8,17 @@ import type {
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
 import {
+  createBotMaterialSet,
+  createCombatTeamPalette,
   damageMaterialForRoleAndSeverity,
   isBotPartChildMaterialRole,
   type BotPartChildMaterialRole,
+  type TeamMaterialSet,
 } from '../rendering/materials'
 import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
 import {
   createCatalogPartNode,
-  createTeamMaterials,
   type BotPartNodeMetadata,
-  type TeamMaterialSet,
 } from '../parts'
 import {
   applyPartMotion,
@@ -114,8 +115,7 @@ export function BabylonPartCatalogScene({
 
       const { camera, engine, scene } = core
       const identity = createQaTeamIdentity(role, accentColor)
-      const teamMaterials = createTeamMaterials(scene, { identities: { [role]: identity } })
-      const materials = teamMaterials[role]
+      const materials = createBotMaterialSet(scene, role, createCombatTeamPalette(role, identity))
       const partRoot = createCatalogPartNode(scene, partId, role, materials)
 
       camera.attachControl(canvas, true)

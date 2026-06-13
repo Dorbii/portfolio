@@ -541,7 +541,10 @@ function createCombatMaterial(
   recipe: MaterialRecipe,
 ): BotPbrMaterial {
   const material = new PBRMetallicRoughnessMaterial(name, scene)
-  const textures = createPbrSurfaceTextures(scene, name, recipe)
+  const textures = createPbrSurfaceTextures(scene, name, {
+    ...recipe,
+    emissiveColor: recipe.emissive,
+  })
 
   material.baseColor = Color3.FromHexString(recipe.baseColor)
   material.baseTexture = textures.baseTexture
@@ -552,6 +555,9 @@ function createCombatMaterial(
   material.occlusionStrength = recipe.pattern === 'rubber' || recipe.pattern === 'scuffed_rubber' ? 0.42 : 0.68
   material.normalTexture = textures.normalTexture
   material.emissiveColor = Color3.FromHexString(recipe.emissive ?? '#000000')
+  if (textures.emissiveTexture) {
+    material.emissiveTexture = textures.emissiveTexture
+  }
   material.maxSimultaneousLights = 6
 
   if (recipe.pattern === 'light' || recipe.pattern === 'emissive_led_glass') {

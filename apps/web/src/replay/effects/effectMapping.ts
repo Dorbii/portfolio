@@ -102,10 +102,16 @@ export function buildReplayEffects(
         const firingBot = resolveBotAtTime(event.bot, event.t)
         const intensity = Math.max(0, 1 - age / duration)
         const weaponPhase = event.phase ?? (isControlDeploy ? 'deploy' : DEFAULT_WEAPON_PHASE)
-        const weaponStyle = normalizeWeaponStyle(event.style)
+        const weaponStyle = normalizeWeaponStyle(event.style) ?? inferWeaponStyleFromSourcePart(event.sourcePartId)
+        const shouldUseBotForwardFallback =
+          isControlDeploy || (!event.sourceBlockId && !event.sourcePartId)
         const endPosition =
-          event.targetPosition ?? forwardPoint(firingBot.position, firingBot.rotationY, 3.4)
-        const rotationY = headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+          event.targetPosition ?? (shouldUseBotForwardFallback
+            ? forwardPoint(firingBot.position, firingBot.rotationY, 3.4)
+            : undefined)
+        const rotationY = endPosition
+          ? headingForMove(firingBot.position, endPosition, firingBot.rotationY)
+          : undefined
         const source = {
           sourceBlockId: event.sourceBlockId,
           sourcePartId: event.sourcePartId,
@@ -117,13 +123,13 @@ export function buildReplayEffects(
           id: `${sequence}-weapon-${event.bot}`,
           kind: 'weapon_fire',
           position: firingBot.position,
-          rotationY,
           age,
           intensity,
           team: event.bot,
-          endPosition,
           label: createWeaponEffectLabel(event.weaponId ?? event.weaponSlot ?? 'weapon', weaponPhase, weaponStyle, isControlDeploy),
           ...source,
+          ...(rotationY !== undefined ? { rotationY } : {}),
+          ...(endPosition ? { endPosition } : {}),
         })
 
         if (isControlDeploy) {
@@ -450,6 +456,40 @@ function normalizeWeaponStyle(style: string | undefined): string | undefined {
   const normalized = style.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')
 
   return WEAPON_STYLES.find((candidate) => normalized.includes(candidate)) ?? normalized
+}
+
+function inferWeaponStyleFromSourcePart(sourcePartId: string | undefined): string | undefined {
+  if (!sourcePartId) {
+    return undefined
+  }
+
+  const style = sourcePartId.trim().toLowerCase()
+
+  if (style.includes('net')) {
+    return 'net'
+  }
+
+  if (style.includes('turret') || style.includes('laser')) {
+    return 'turret'
+  }
+
+  if (style.includes('saw')) {
+    return 'saw'
+  }
+
+  if (style.includes('spinner')) {
+    return 'spinner'
+  }
+
+  if (style.includes('flipper')) {
+    return 'flipper'
+  }
+
+  if (style.includes('ram') || style.includes('spear') || style.includes('grabber')) {
+    return 'ram'
+  }
+
+  return undefined
 }
 
 function createWeaponEffectLabel(

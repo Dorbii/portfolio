@@ -60,6 +60,52 @@ test('replay playback uses compiled timeline instead of per-frame sorting', () =
   assert.equal(extractFunction(replayMappingSource, 'buildReplayFrame').includes('.sort('), false)
 })
 
+test('replay art pass keeps texture profiles procedural and emission-capable', () => {
+  const surfaceTexturesSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/rendering/surfaceTextures.ts'),
+    'utf8',
+  )
+  const materialsSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/rendering/materials.ts'),
+    'utf8',
+  )
+
+  assert.match(surfaceTexturesSource, /const TEXTURE_SIZE = 512/)
+  assert.match(surfaceTexturesSource, /emissiveTexture\?: DynamicTexture/)
+  assert.match(surfaceTexturesSource, /function createEmissiveTexture/)
+  assert.match(surfaceTexturesSource, /drawBoltHalos/)
+  assert.match(surfaceTexturesSource, /drawServiceLabelsAndVents/)
+  assert.match(surfaceTexturesSource, /drawRubberSidewalls/)
+  assert.match(materialsSource, /material\.emissiveTexture = textures\.emissiveTexture/)
+})
+
+test('weapon fire effects can resolve visible muzzle anchors before falling back to part roots', () => {
+  const replayEffectsSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/effects/replayEffects.ts'),
+    'utf8',
+  )
+  const effectMappingSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/effects/effectMapping.ts'),
+    'utf8',
+  )
+  const turretSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/parts/weapon/turretWeaponPart.ts'),
+    'utf8',
+  )
+
+  assert.match(turretSource, /turret-muzzle-fire-anchor/)
+  assert.match(turretSource, /weaponFireAnchor: 'muzzle'/)
+  assert.match(turretSource, /weaponFireDirection: 'localZ'/)
+  assert.match(effectMappingSource, /inferWeaponStyleFromSourcePart\(event\.sourcePartId\)/)
+  assert.match(replayEffectsSource, /resolveWeaponStyle\(effect\.weaponStyle, effect\.sourcePartId, profile\)/)
+  assert.match(replayEffectsSource, /resolveSourceAnchor\(effect, bots, weaponStyle\)/)
+  assert.match(replayEffectsSource, /findWeaponFireAnchor/)
+  assert.match(replayEffectsSource, /headingForFireAnchor/)
+  assert.match(replayEffectsSource, /matchingSourcePartNodes\.length === 1/)
+  assert.match(replayEffectsSource, /sourceAnchor\?\.heading !== undefined/)
+  assert.match(replayEffectsSource, /Math\.sin\(heading\) \* tracerReach \* 0\.5/)
+})
+
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = join(directory, entry.name)

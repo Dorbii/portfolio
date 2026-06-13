@@ -128,6 +128,18 @@ test('referee root can render machine replay proof inside the match dashboard', 
   assert.equal(refereeReplayProofSource.includes('machineProofMachineDesigns'), false)
 })
 
+test('replay preview routes stress64 proof to the capped high-density machine replay', () => {
+  assert.ok(replayPreviewSource.includes("previewOptions.proof === 'stress64'"))
+  assert.ok(replayPreviewSource.includes('stress64Replay'))
+  assert.ok(replayPreviewSource.includes('stress64MachineDesigns'))
+  assert.ok(replayPreviewSource.includes('stress64BotBlueprints'))
+  assert.ok(replayPreviewSource.includes('const botBlueprints = previewOptions.proof === \'stress64\''))
+  assert.ok(replayPreviewSource.includes('botBlueprints={botBlueprints}'))
+  assert.ok(
+    replayPreviewSource.includes("proof: proof === 'ability' || proof === 'machine' || proof === 'stress64' ? proof : null"),
+  )
+})
+
 test('referee resolved replay does not restart the renderer for unchanged arena poll snapshots', () => {
   assert.ok(babylonReplaySceneSource.includes('const activeHazardsKey = arena.activeHazards.join'))
   assert.ok(babylonReplaySceneSource.includes('const sceneArena = useMemo<ArenaConfig>'))

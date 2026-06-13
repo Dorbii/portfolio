@@ -27,6 +27,7 @@ export type SurfacePattern =
 
 export type PbrSurfaceTextureSet = {
   baseTexture: DynamicTexture
+  emissiveTexture?: DynamicTexture
   metallicRoughnessTexture: DynamicTexture
   normalTexture: DynamicTexture
   occlusionTexture: DynamicTexture
@@ -34,6 +35,7 @@ export type PbrSurfaceTextureSet = {
 
 export type PbrSurfaceTextureRecipe = {
   baseColor: string
+  emissiveColor?: string
   metallic: number
   pattern: SurfacePattern
   roughness: number
@@ -41,7 +43,7 @@ export type PbrSurfaceTextureRecipe = {
 
 type TextureDrawingContext = ReturnType<DynamicTexture['getContext']>
 
-const TEXTURE_SIZE = 384
+const TEXTURE_SIZE = 512
 
 export function createPbrSurfaceTextures(
   scene: Scene,
@@ -58,6 +60,7 @@ export function createPbrSurfaceTextures(
 
   return {
     baseTexture: createSurfaceTexture(scene, name, recipe.baseColor, recipe.pattern),
+    emissiveTexture: createEmissiveTexture(scene, name, recipe.emissiveColor, recipe.pattern),
     metallicRoughnessTexture,
     normalTexture: createNormalTexture(scene, name, recipe.pattern),
     occlusionTexture: metallicRoughnessTexture,
@@ -128,6 +131,7 @@ function createSurfaceTexture(
     drawPanelTexture(context, dark, light, isArmorSurfacePattern(pattern) ? 84 : 92)
   }
 
+  drawProfileSurfaceDetails(context, pattern, dark, light)
   drawEdgeWear(context, pattern)
   drawScuffs(context, pattern)
   applyTextureScale(texture, pattern)
@@ -173,6 +177,7 @@ function createOrmTexture(
   context.strokeStyle = `rgb(${Math.min(255, occlusionBase + 40)},${Math.max(90, roughnessBase - 42)},${metallicBase})`
   context.lineWidth = 3
   drawDeterministicScratches(context, isDamageSurfacePattern(pattern) || pattern === 'arena_floor' ? 38 : pattern === 'weapon' ? 30 : 18, 42)
+  drawProfileOrmDetails(context, pattern, occlusionBase, roughnessBase, metallicBase)
   applyTextureScale(texture, pattern)
   texture.update(false)
 
@@ -214,6 +219,61 @@ function createNormalTexture(
   context.strokeStyle = 'rgb(142,136,255)'
   context.lineWidth = 2
   drawDeterministicScratches(context, isDamageSurfacePattern(pattern) || pattern === 'arena_floor' ? 32 : pattern === 'weapon' ? 26 : 14, 27)
+  drawProfileNormalDetails(context, pattern)
+  applyTextureScale(texture, pattern)
+  texture.update(false)
+
+  return texture
+}
+
+function createEmissiveTexture(
+  scene: Scene,
+  name: string,
+  emissiveColor: string | undefined,
+  pattern: SurfacePattern,
+): DynamicTexture | undefined {
+  const shouldDrawEmissiveTexture =
+    isLightSurfacePattern(pattern) ||
+    pattern === 'burnt_critical_metal' ||
+    pattern === 'damage_critical'
+
+  if (!shouldDrawEmissiveTexture) {
+    return undefined
+  }
+
+  const texture = new DynamicTexture(`${name}-emissive`, { width: TEXTURE_SIZE, height: TEXTURE_SIZE }, scene, true)
+  const context = texture.getContext()
+  const glowColor = emissiveColor ?? '#000000'
+  const centerGlow = isLightSurfacePattern(pattern)
+    ? 0.74
+    : pattern === 'burnt_critical_metal' || pattern === 'damage_critical'
+      ? 0.2
+      : 0.1
+
+  context.fillStyle = '#000000'
+  context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
+
+  if (isLightSurfacePattern(pattern)) {
+    drawEmissiveBands(context, glowColor)
+    drawEmissiveLensCells(context, glowColor)
+  } else if (pattern === 'burnt_critical_metal' || pattern === 'damage_critical') {
+    drawEmberFlecks(context, glowColor)
+  }
+
+  const radial = context.createRadialGradient(
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE / 2,
+    12,
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE * 0.48,
+  )
+
+  radial.addColorStop(0, rgbaFromHex(glowColor, centerGlow))
+  radial.addColorStop(0.42, rgbaFromHex(glowColor, centerGlow * 0.28))
+  radial.addColorStop(1, rgbaFromHex(glowColor, 0))
+  context.fillStyle = radial
+  context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
   applyTextureScale(texture, pattern)
   texture.update(false)
 
@@ -240,6 +300,144 @@ function applyTextureScale(texture: DynamicTexture, pattern: SurfacePattern): vo
   }
 }
 
+function drawProfileSurfaceDetails(
+  context: TextureDrawingContext,
+  pattern: SurfacePattern,
+  dark: string,
+  light: string,
+): void {
+  if (pattern === 'painted_chipped_armor' || pattern === 'armor') {
+    drawBoltHalos(context, dark, light, 4, 4)
+    drawPaintChips(context, '#2b3436', '#d8c8a0', 18)
+    drawPanelArrows(context, light)
+    return
+  }
+
+  if (pattern === 'brushed_weapon_steel' || pattern === 'weapon') {
+    drawDirectionalGrinding(context)
+    drawImpactGouges(context, '#f4f7f0', '#111516')
+    return
+  }
+
+  if (pattern === 'scuffed_rubber' || pattern === 'rubber' || pattern === 'mobility') {
+    drawRubberSidewalls(context, light)
+    drawRubberContactScuffs(context)
+    return
+  }
+
+  if (pattern === 'dirty_electrical_casing' || pattern === 'utility') {
+    drawServiceLabelsAndVents(context, dark, light)
+    drawBoltHalos(context, dark, light, 3, 3)
+    return
+  }
+
+  if (pattern === 'emissive_led_glass' || pattern === 'light') {
+    drawLensRings(context, light)
+    return
+  }
+
+  if (pattern === 'burnt_critical_metal' || isDamageSurfacePattern(pattern)) {
+    drawCrackedBurntPaint(context)
+    return
+  }
+
+  if (pattern === 'scraped_style_shell' || pattern === 'style') {
+    drawShowpieceScrapes(context, light)
+    drawBoltHalos(context, dark, light, 3, 2)
+  }
+}
+
+function drawProfileOrmDetails(
+  context: TextureDrawingContext,
+  pattern: SurfacePattern,
+  occlusionBase: number,
+  roughnessBase: number,
+  metallicBase: number,
+): void {
+  if (pattern === 'emissive_led_glass' || pattern === 'light') {
+    context.fillStyle = `rgb(${Math.max(30, occlusionBase - 70)},${Math.max(18, roughnessBase - 46)},${Math.max(0, metallicBase - 16)})`
+    for (let index = 0; index < 7; index += 1) {
+      const size = 20 + (index % 3) * 10
+      const x = 46 + ((index * 67) % (TEXTURE_SIZE - 92))
+      const y = 48 + ((index * 91) % (TEXTURE_SIZE - 96))
+
+      context.beginPath()
+      context.arc(x, y, size * 0.72, 0, Math.PI * 2)
+      context.fill()
+    }
+    return
+  }
+
+  if (pattern === 'scuffed_rubber' || pattern === 'rubber' || pattern === 'mobility') {
+    context.strokeStyle = `rgb(${Math.max(40, occlusionBase - 72)},${Math.min(255, roughnessBase + 18)},0)`
+    context.lineWidth = 11
+    for (let y = 26; y < TEXTURE_SIZE; y += 42) {
+      drawLine(context, 0, y, TEXTURE_SIZE, y)
+    }
+    return
+  }
+
+  if (pattern === 'brushed_weapon_steel' || pattern === 'weapon') {
+    context.strokeStyle = `rgb(${Math.max(88, occlusionBase - 46)},${Math.max(70, roughnessBase - 38)},${Math.min(255, metallicBase + 18)})`
+    context.lineWidth = 2
+    for (let y = 16; y < TEXTURE_SIZE; y += 12) {
+      drawLine(context, 0, y, TEXTURE_SIZE, y + ((y / 12) % 3 - 1))
+    }
+    return
+  }
+
+  if (pattern === 'painted_chipped_armor' || pattern === 'scraped_style_shell' || isDamageSurfacePattern(pattern)) {
+    context.fillStyle = `rgb(${Math.max(40, occlusionBase - 62)},${Math.min(255, roughnessBase + 22)},${Math.max(0, metallicBase - 16)})`
+    for (let index = 0; index < 16; index += 1) {
+      const x = 28 + ((index * 79) % (TEXTURE_SIZE - 56))
+      const y = 26 + ((index * 53) % (TEXTURE_SIZE - 52))
+
+      context.fillRect(x, y, 28 + (index % 4) * 7, 8 + (index % 3) * 5)
+    }
+  }
+}
+
+function drawProfileNormalDetails(context: TextureDrawingContext, pattern: SurfacePattern): void {
+  if (pattern === 'scuffed_rubber' || pattern === 'rubber' || pattern === 'mobility') {
+    context.strokeStyle = 'rgb(112,128,240)'
+    context.lineWidth = 6
+    for (let x = 22; x < TEXTURE_SIZE; x += 44) {
+      drawLine(context, x, 0, x + 18, TEXTURE_SIZE)
+    }
+    return
+  }
+
+  if (pattern === 'emissive_led_glass' || pattern === 'light') {
+    context.strokeStyle = 'rgb(151,143,255)'
+    context.lineWidth = 5
+    for (let radius = 34; radius <= 134; radius += 28) {
+      context.beginPath()
+      context.arc(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, radius, 0, Math.PI * 2)
+      context.stroke()
+    }
+    return
+  }
+
+  if (pattern === 'dirty_electrical_casing' || pattern === 'utility') {
+    context.strokeStyle = 'rgb(114,124,244)'
+    context.lineWidth = 4
+    for (let y = 48; y < TEXTURE_SIZE; y += 82) {
+      for (let x = 46; x < TEXTURE_SIZE - 72; x += 28) {
+        drawLine(context, x, y, x + 14, y)
+      }
+    }
+    return
+  }
+
+  if (pattern === 'brushed_weapon_steel' || pattern === 'weapon') {
+    context.strokeStyle = 'rgb(146,132,255)'
+    context.lineWidth = 2
+    for (let y = 18; y < TEXTURE_SIZE; y += 11) {
+      drawLine(context, 0, y, TEXTURE_SIZE, y + (y % 4) - 2)
+    }
+  }
+}
+
 function drawPanelTexture(
   context: TextureDrawingContext,
   dark: string,
@@ -262,6 +460,240 @@ function drawPanelTexture(
       drawLine(context, x - 11, y, x + 11, y)
       drawLine(context, x, y - 11, x, y + 11)
     }
+  }
+}
+
+function drawBoltHalos(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+  columns: number,
+  rows: number,
+): void {
+  const xStep = TEXTURE_SIZE / (columns + 1)
+  const yStep = TEXTURE_SIZE / (rows + 1)
+
+  for (let xIndex = 1; xIndex <= columns; xIndex += 1) {
+    for (let yIndex = 1; yIndex <= rows; yIndex += 1) {
+      const x = xIndex * xStep
+      const y = yIndex * yStep
+
+      context.fillStyle = dark
+      context.beginPath()
+      context.arc(x, y, 13, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = light
+      context.beginPath()
+      context.arc(x, y, 5, 0, Math.PI * 2)
+      context.fill()
+    }
+  }
+}
+
+function drawPaintChips(
+  context: TextureDrawingContext,
+  substrate: string,
+  exposedEdge: string,
+  count: number,
+): void {
+  for (let index = 0; index < count; index += 1) {
+    const x = 18 + ((index * 83) % (TEXTURE_SIZE - 58))
+    const y = 20 + ((index * 47) % (TEXTURE_SIZE - 62))
+    const width = 18 + ((index * 11) % 34)
+    const height = 7 + ((index * 5) % 16)
+
+    context.fillStyle = rgbaFromHex(substrate, 0.4)
+    context.fillRect(x, y, width, height)
+    context.strokeStyle = rgbaFromHex(exposedEdge, 0.25)
+    context.lineWidth = 2
+    drawLine(context, x, y, x + width, y + Math.max(1, height * 0.15))
+  }
+}
+
+function drawPanelArrows(context: TextureDrawingContext, light: string): void {
+  context.strokeStyle = light
+  context.lineWidth = 3
+
+  for (let index = 0; index < 5; index += 1) {
+    const x = 52 + index * 92
+    const y = 72 + ((index * 67) % (TEXTURE_SIZE - 144))
+
+    drawLine(context, x, y, x + 34, y)
+    drawLine(context, x + 34, y, x + 22, y - 10)
+    drawLine(context, x + 34, y, x + 22, y + 10)
+  }
+}
+
+function drawDirectionalGrinding(context: TextureDrawingContext): void {
+  context.strokeStyle = rgbaFromHex('#f6fff8', 0.16)
+  context.lineWidth = 2
+
+  for (let y = 12; y < TEXTURE_SIZE; y += 10) {
+    drawLine(context, 0, y, TEXTURE_SIZE, y + ((y / 10) % 5 - 2))
+  }
+}
+
+function drawImpactGouges(
+  context: TextureDrawingContext,
+  bright: string,
+  dark: string,
+): void {
+  for (let index = 0; index < 16; index += 1) {
+    const x = 24 + ((index * 61) % (TEXTURE_SIZE - 86))
+    const y = 32 + ((index * 97) % (TEXTURE_SIZE - 72))
+    const length = 24 + ((index * 17) % 66)
+
+    context.strokeStyle = rgbaFromHex(dark, 0.38)
+    context.lineWidth = 7
+    drawLine(context, x, y, x + length, y + ((index % 5) - 2) * 4)
+    context.strokeStyle = rgbaFromHex(bright, 0.22)
+    context.lineWidth = 2
+    drawLine(context, x + 3, y - 2, x + length - 4, y + ((index % 5) - 2) * 4 - 2)
+  }
+}
+
+function drawRubberSidewalls(context: TextureDrawingContext, light: string): void {
+  context.strokeStyle = rgbaFromHex('#050607', 0.48)
+  context.lineWidth = 12
+
+  for (let radius = 54; radius < TEXTURE_SIZE * 0.66; radius += 48) {
+    context.beginPath()
+    context.arc(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, radius, 0, Math.PI * 2)
+    context.stroke()
+  }
+
+  context.strokeStyle = light
+  context.lineWidth = 3
+
+  for (let radius = 76; radius < TEXTURE_SIZE * 0.58; radius += 64) {
+    context.beginPath()
+    context.arc(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, radius, Math.PI * 0.12, Math.PI * 1.88)
+    context.stroke()
+  }
+}
+
+function drawRubberContactScuffs(context: TextureDrawingContext): void {
+  context.strokeStyle = rgbaFromHex('#c7c9c0', 0.2)
+  context.lineWidth = 6
+
+  for (let index = 0; index < 18; index += 1) {
+    const x = 18 + ((index * 57) % (TEXTURE_SIZE - 36))
+    const y = 24 + ((index * 41) % (TEXTURE_SIZE - 48))
+
+    drawLine(context, x, y, x + 44, y + ((index % 3) - 1) * 8)
+  }
+}
+
+function drawServiceLabelsAndVents(
+  context: TextureDrawingContext,
+  dark: string,
+  light: string,
+): void {
+  context.fillStyle = rgbaFromHex('#d7ddd8', 0.18)
+
+  for (let index = 0; index < 7; index += 1) {
+    const x = 36 + ((index * 73) % (TEXTURE_SIZE - 114))
+    const y = 34 + ((index * 59) % (TEXTURE_SIZE - 92))
+
+    context.fillRect(x, y, 64, 18)
+    context.fillStyle = dark
+    context.fillRect(x + 8, y + 6, 44, 4)
+    context.fillStyle = rgbaFromHex('#d7ddd8', 0.18)
+  }
+
+  context.strokeStyle = light
+  context.lineWidth = 3
+
+  for (let y = 76; y < TEXTURE_SIZE; y += 88) {
+    for (let x = 44; x < TEXTURE_SIZE - 54; x += 26) {
+      drawLine(context, x, y, x + 14, y)
+    }
+  }
+}
+
+function drawLensRings(context: TextureDrawingContext, light: string): void {
+  const gradient = context.createRadialGradient(
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE / 2,
+    10,
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE / 2,
+    TEXTURE_SIZE * 0.5,
+  )
+
+  gradient.addColorStop(0, rgbaFromHex('#ffffff', 0.28))
+  gradient.addColorStop(0.45, light)
+  gradient.addColorStop(1, rgbaFromHex('#030406', 0.22))
+  context.fillStyle = gradient
+  context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE)
+  context.strokeStyle = rgbaFromHex('#ffffff', 0.24)
+  context.lineWidth = 4
+
+  for (let radius = 42; radius <= 162; radius += 38) {
+    context.beginPath()
+    context.arc(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, radius, 0, Math.PI * 2)
+    context.stroke()
+  }
+}
+
+function drawCrackedBurntPaint(context: TextureDrawingContext): void {
+  context.strokeStyle = rgbaFromHex('#050302', 0.62)
+  context.lineWidth = 7
+
+  for (let index = 0; index < 12; index += 1) {
+    const x = 22 + ((index * 89) % (TEXTURE_SIZE - 64))
+    const y = 30 + ((index * 73) % (TEXTURE_SIZE - 72))
+
+    drawLine(context, x, y, x + 52, y + 18)
+    drawLine(context, x + 22, y + 8, x + 34, y + 56)
+  }
+
+  context.strokeStyle = rgbaFromHex('#ff8a38', 0.22)
+  context.lineWidth = 3
+  drawDeterministicScratches(context, 22, 81)
+}
+
+function drawShowpieceScrapes(context: TextureDrawingContext, light: string): void {
+  context.strokeStyle = light
+  context.lineWidth = 5
+
+  for (let y = 48; y < TEXTURE_SIZE; y += 84) {
+    drawLine(context, 28, y, TEXTURE_SIZE - 42, y + 18)
+  }
+
+  drawPaintChips(context, '#202729', '#efe2bd', 14)
+}
+
+function drawEmissiveBands(context: TextureDrawingContext, glowColor: string): void {
+  context.strokeStyle = rgbaFromHex(glowColor, 0.72)
+  context.lineWidth = 18
+
+  for (let y = 46; y < TEXTURE_SIZE; y += 76) {
+    drawLine(context, 22, y, TEXTURE_SIZE - 22, y)
+  }
+}
+
+function drawEmissiveLensCells(context: TextureDrawingContext, glowColor: string): void {
+  context.fillStyle = rgbaFromHex(glowColor, 0.86)
+
+  for (let index = 0; index < 9; index += 1) {
+    const x = 58 + ((index * 73) % (TEXTURE_SIZE - 116))
+    const y = 62 + ((index * 47) % (TEXTURE_SIZE - 124))
+
+    context.beginPath()
+    context.arc(x, y, 18, 0, Math.PI * 2)
+    context.fill()
+  }
+}
+
+function drawEmberFlecks(context: TextureDrawingContext, glowColor: string): void {
+  context.fillStyle = rgbaFromHex(glowColor, 0.46)
+
+  for (let index = 0; index < 16; index += 1) {
+    const x = 24 + ((index * 83) % (TEXTURE_SIZE - 48))
+    const y = 28 + ((index * 61) % (TEXTURE_SIZE - 56))
+
+    context.fillRect(x, y, 10 + (index % 3) * 5, 3 + (index % 2) * 3)
   }
 }
 

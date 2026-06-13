@@ -119,3 +119,40 @@ export const mockBotBlueprints: Record<TeamRole, BotBlueprint> = {
   red: redBotBlueprint,
   blue: blueBotBlueprint,
 }
+
+export const stress64BotBlueprints: Record<TeamRole, BotBlueprint> = {
+  red: {
+    name: 'Crimson Stress Turret',
+    blocks: [
+      {
+        id: 'core',
+        partId: 'Body_Square_Medium',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      },
+      {
+        id: 'red-stress-08',
+        partId: 'Weapon_Turret',
+        position: [0, 1, 2],
+        rotation: [0, 0, 0],
+      },
+    ],
+  },
+  blue: {
+    name: 'Ion Stress Turret',
+    blocks: [
+      {
+        id: 'core',
+        partId: 'Body_Square_Medium',
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      },
+      {
+        id: 'blue-stress-08',
+        partId: 'Weapon_Turret',
+        position: [0, 1, 2],
+        rotation: [0, 0, 0],
+      },
+    ],
+  },
+}

@@ -296,10 +296,18 @@ function createRotaryBarrelCluster({
     },
     scene,
   )
+  const fireAnchor = new TransformNode(`${role}-${blockId}-turret-muzzle-fire-anchor`, scene)
 
   barrelRoot.position.set(0, barrelRootY, barrelRootZ)
   barrelRoot.metadata = { kind: 'spin', axis: 'z', speed: 0.16 }
   barrelRoot.parent = parent
+  fireAnchor.position.set(0, 0, barrelLength * 0.985)
+  fireAnchor.metadata = {
+    weaponFireAnchor: 'muzzle',
+    weaponFireDirection: 'localZ',
+    weaponFireStyle: 'turret',
+  }
+  fireAnchor.parent = barrelRoot
   rearPlate.rotation.x = Math.PI / 2
   frontPlate.rotation.x = Math.PI / 2
   centerShaft.rotation.x = Math.PI / 2

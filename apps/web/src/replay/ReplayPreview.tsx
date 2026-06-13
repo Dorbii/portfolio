@@ -6,6 +6,9 @@ import {
   mockBotBlueprints,
   mockReplay,
   mockTeamIdentities,
+  stress64BotBlueprints,
+  stress64MachineDesigns,
+  stress64Replay,
 } from '../mockSession'
 import { ReplayViewer } from './ReplayViewer'
 import type { CameraPreset } from './replayMapping'
@@ -17,10 +20,17 @@ export function ReplayPreview() {
     ? machineProofReplay
     : previewOptions.proof === 'ability'
       ? abilityProofReplay
-      : mockReplay
+      : previewOptions.proof === 'stress64'
+        ? stress64Replay
+        : mockReplay
   const machineDesigns = previewOptions.proof === 'machine'
     ? machineProofMachineDesigns
-    : undefined
+    : previewOptions.proof === 'stress64'
+      ? stress64MachineDesigns
+      : undefined
+  const botBlueprints = previewOptions.proof === 'stress64'
+    ? stress64BotBlueprints
+    : mockBotBlueprints
 
   return (
     <main className={`replay-preview-page${previewOptions.proof ? ' replay-preview-proof' : ''}`}>
@@ -35,7 +45,7 @@ export function ReplayPreview() {
         <ReplayViewer
           autoPlay={Boolean(previewOptions.proof)}
           arena={previewArenaConfig}
-          botBlueprints={mockBotBlueprints}
+          botBlueprints={botBlueprints}
           initialCameraPreset={previewOptions.cameraPreset}
           initialTime={previewOptions.time}
           machineDesigns={machineDesigns}
@@ -50,7 +60,7 @@ export function ReplayPreview() {
 
 function resolveReplayPreviewOptions(search: string): {
   cameraPreset: CameraPreset
-  proof: 'ability' | 'machine' | null
+  proof: 'ability' | 'machine' | 'stress64' | null
   time: number
 } {
   const params = new URLSearchParams(search)
@@ -59,7 +69,7 @@ function resolveReplayPreviewOptions(search: string): {
 
   return {
     cameraPreset: normalizeCameraPreset(params.get('camera')),
-    proof: proof === 'ability' || proof === 'machine' ? proof : null,
+    proof: proof === 'ability' || proof === 'machine' || proof === 'stress64' ? proof : null,
     time: Number.isFinite(parsedTime) ? parsedTime : 0,
   }
 }

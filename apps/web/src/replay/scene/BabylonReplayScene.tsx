@@ -467,6 +467,9 @@ export function BabylonReplayScene({
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.replayPreview)
     : null
+  const renderedPartCounts = resourcesRef.current
+    ? countReplayPartNodes(resourcesRef.current)
+    : null
 
   return (
     <div
@@ -489,6 +492,8 @@ export function BabylonReplayScene({
       data-replay-fps={sceneStats?.fps.toFixed(1)}
       data-replay-materials={sceneStats?.materials}
       data-replay-meshes={sceneStats?.meshes}
+      data-replay-rendered-blue-parts={renderedPartCounts?.blue}
+      data-replay-rendered-red-parts={renderedPartCounts?.red}
       data-replay-textures={sceneStats?.textures}
       data-replay-total-vertices={sceneStats?.totalVertices}
     >
@@ -506,6 +511,21 @@ export function BabylonReplayScene({
       ) : null}
     </div>
   )
+}
+
+function countReplayPartNodes(resources: SceneResources): Record<TeamRole, number> {
+  return {
+    blue: countBotPartNodes(resources.bots.blue),
+    red: countBotPartNodes(resources.bots.red),
+  }
+}
+
+function countBotPartNodes(bot: ReturnType<typeof createBotNode>): number {
+  return bot.getChildren((candidate) => {
+    const metadata = candidate.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.kind === 'bot_part'
+  }, true).length
 }
 
 function updateReplaySceneFrame(

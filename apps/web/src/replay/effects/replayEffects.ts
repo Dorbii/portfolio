@@ -60,6 +60,18 @@ type EffectPoolDefinition = {
   update: (input: EffectUpdateInput) => void
 }
 
+type WeaponFireAnchorMetadata = {
+  weaponFireAnchor?: unknown
+  weaponFireDirection?: unknown
+  weaponFireStyle?: unknown
+}
+
+type WeaponSourceAnchor = {
+  heading?: number
+  position: Vector3
+  precise: boolean
+}
+
 const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = {
   weapon_fire: {
     capacity: 6,
@@ -314,17 +326,26 @@ function createPooledWeaponEffect(
 function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateInput): void {
   const profile = effect.team ? profiles[effect.team] : undefined
   const palette = resolveReplayEffectPalette(effect.team, profiles)
-  const weaponStyle = resolveWeaponStyle(effect.weaponStyle, profile)
+  const weaponStyle = resolveWeaponStyle(effect.weaponStyle, effect.sourcePartId, profile)
   const progress = Math.min(Math.max(1 - effect.intensity, 0), 1)
-  const heading = effect.rotationY ?? (effect.team === 'blue' ? -Math.PI / 2 : Math.PI / 2)
+  let heading = effect.rotationY ?? (effect.team === 'blue' ? -Math.PI / 2 : Math.PI / 2)
   const phase = effect.weaponPhase ?? 'release'
-  const sourceAnchor = resolveSourceAnchor(effect, bots)
+  const sourceAnchor = resolveSourceAnchor(effect, bots, weaponStyle)
+
+  if (
+    sourceAnchor?.heading !== undefined &&
+    (weaponStyle === 'turret' || effect.rotationY === undefined || effect.endPosition === undefined)
+  ) {
+    heading = sourceAnchor.heading
+  }
 
   mesh.visibility = 1
   if (sourceAnchor) {
-    mesh.position.copyFrom(sourceAnchor)
+    mesh.position.copyFrom(sourceAnchor.position)
   }
-  mesh.position.y += 0.25
+  if (!sourceAnchor?.precise) {
+    mesh.position.y += 0.25
+  }
   mesh.rotation.x = 0
   mesh.rotation.y = heading
   mesh.rotation.z = 0
@@ -373,7 +394,14 @@ function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateIn
     const end = effect.endPosition ? toBabylonVector(effect.endPosition) : null
     const tracerReach = end ? Math.min(5.2, Vector3.Distance(start, end)) : 2.6
 
-    if (end) {
+    if (sourceAnchor?.heading !== undefined) {
+      mesh.position.set(
+        start.x + Math.sin(heading) * tracerReach * 0.5,
+        start.y + 0.08,
+        start.z + Math.cos(heading) * tracerReach * 0.5,
+      )
+      mesh.rotation.y = heading
+    } else if (end) {
       const midpoint = Vector3.Center(start, end)
 
       mesh.position.set(midpoint.x, start.y + 0.08, midpoint.z)
@@ -404,20 +432,62 @@ function updateWeaponFireEffect({ bots, effect, mesh, profiles }: EffectUpdateIn
 
 function resolveWeaponStyle(
   effectStyle: string | undefined,
+  sourcePartId: string | undefined,
   profile: BotVisualProfile | undefined,
 ): string {
   if (effectStyle) {
     return effectStyle
   }
 
+  const sourcePartStyle = inferWeaponStyleFromSourcePart(sourcePartId)
+
+  if (sourcePartStyle) {
+    return sourcePartStyle
+  }
+
   return profile?.primaryWeapon ?? 'generic'
+}
+
+function inferWeaponStyleFromSourcePart(sourcePartId: string | undefined): string | undefined {
+  if (!sourcePartId) {
+    return undefined
+  }
+
+  const style = sourcePartId.trim().toLowerCase()
+
+  if (style.includes('net')) {
+    return 'net'
+  }
+
+  if (style.includes('turret') || style.includes('laser')) {
+    return 'turret'
+  }
+
+  if (style.includes('saw')) {
+    return 'saw'
+  }
+
+  if (style.includes('spinner')) {
+    return 'spinner'
+  }
+
+  if (style.includes('flipper')) {
+    return 'flipper'
+  }
+
+  if (style.includes('ram') || style.includes('spear') || style.includes('grabber')) {
+    return 'ram'
+  }
+
+  return undefined
 }
 
 function resolveSourceAnchor(
   effect: ReplayEffectState,
   bots: Record<TeamRole, TransformNode> | undefined,
-): Vector3 | undefined {
-  if (!effect.team || !effect.sourceBlockId) {
+  weaponStyle: string,
+): WeaponSourceAnchor | undefined {
+  if (!effect.team || (!effect.sourceBlockId && !effect.sourcePartId)) {
     return undefined
   }
 
@@ -427,13 +497,92 @@ function resolveSourceAnchor(
     return undefined
   }
 
-  const node = bot.getChildren((candidate) => {
+  const node = findSourcePartNode(bot, effect)
+
+  if (!node) {
+    return undefined
+  }
+
+  const fireAnchor = findWeaponFireAnchor(node, weaponStyle)
+
+  if (fireAnchor) {
+    return {
+      heading: headingForFireAnchor(fireAnchor),
+      position: fireAnchor.getAbsolutePosition().clone(),
+      precise: true,
+    }
+  }
+
+  return {
+    position: node.getAbsolutePosition().clone(),
+    precise: false,
+  }
+}
+
+function findSourcePartNode(
+  bot: TransformNode,
+  effect: ReplayEffectState,
+): TransformNode | undefined {
+  const partNodes = bot.getChildren((candidate) => {
     const metadata = candidate.metadata as BotPartNodeMetadata | undefined
 
-    return metadata?.kind === 'bot_part' && metadata.blockId === effect.sourceBlockId
-  }, true)[0] as TransformNode | undefined
+    return metadata?.kind === 'bot_part'
+  }, true) as TransformNode[]
 
-  return node?.getAbsolutePosition().clone()
+  if (effect.sourceBlockId) {
+    return partNodes.find((node) => {
+      const metadata = node.metadata as BotPartNodeMetadata | undefined
+
+      return metadata?.blockId === effect.sourceBlockId
+    })
+  }
+
+  if (!effect.sourcePartId) {
+    return undefined
+  }
+
+  const matchingSourcePartNodes = partNodes.filter((node) => {
+    const metadata = node.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.partId === effect.sourcePartId
+  })
+
+  return matchingSourcePartNodes.length === 1 ? matchingSourcePartNodes[0] : undefined
+}
+
+function findWeaponFireAnchor(
+  node: TransformNode,
+  weaponStyle: string,
+): TransformNode | Mesh | undefined {
+  return node.getChildren((candidate) => {
+    const metadata = candidate.metadata as WeaponFireAnchorMetadata | undefined
+
+    return metadata?.weaponFireAnchor === 'muzzle' &&
+      (
+        typeof metadata.weaponFireStyle !== 'string' ||
+        metadata.weaponFireStyle === weaponStyle
+      )
+  }, true)[0] as TransformNode | Mesh | undefined
+}
+
+function headingForFireAnchor(node: TransformNode | Mesh): number | undefined {
+  const metadata = node.metadata as WeaponFireAnchorMetadata | undefined
+
+  if (metadata?.weaponFireDirection !== 'localZ') {
+    return undefined
+  }
+
+  const direction = Vector3.TransformNormal(
+    new Vector3(0, 0, 1),
+    node.computeWorldMatrix(true),
+  )
+  const length = Math.hypot(direction.x, direction.z)
+
+  if (length < 0.001) {
+    return undefined
+  }
+
+  return Math.atan2(direction.x / length, direction.z / length)
 }
 
 function applyWeaponEffectPalette(

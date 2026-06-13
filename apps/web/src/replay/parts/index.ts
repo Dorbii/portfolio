@@ -58,7 +58,7 @@ export {
   resolvePartVisualProfile,
 } from './visualProfiles'
 
-const MAX_RENDERED_BLOCKS = 48
+const MAX_RENDERED_BLOCKS = 30
 
 type BotPartRoleMaterialNames = Record<BotPartChildMaterialRole, string[]>
 

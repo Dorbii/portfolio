@@ -28,16 +28,16 @@ export const BABYLON_RENDERER_BUDGETS: Record<
   },
   partCatalog: {
     activeMeshes: 180,
-    materials: 90,
+    materials: 120,
     meshes: 260,
-    textures: 110,
+    textures: 150,
     totalVertices: 70_000,
   },
   replayPreview: {
-    activeMeshes: 900,
-    materials: 220,
-    meshes: 1_600,
-    textures: 220,
+    activeMeshes: 1_000,
+    materials: 240,
+    meshes: 1_800,
+    textures: 300,
     totalVertices: 300_000,
   },
 }
