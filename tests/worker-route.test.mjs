@@ -471,6 +471,10 @@ async function storeCompletedFight(env, sessionId) {
     remainingHealth: { red: 40, blue: 0 },
   }
   stored.replay = completedReplayPayload()
+  stored.fightReplays = {
+    ...(stored.fightReplays ?? {}),
+    fight_1: cloneJson(stored.replay),
+  }
   stored.fightDossier = completedFightDossier(sessionId)
   await storage.put('agent-arena-session', stored)
 }
@@ -3731,6 +3735,15 @@ test('round 2 build rehydrates prior confirmed blueprint healed to full', async 
   assert.equal(publicAfterAdvance.json.replayAvailable, false)
   assert.equal(publicAfterAdvance.json.replayStatus, 'none')
   assert.equal('lastResult' in publicAfterAdvance.json, false)
+  assert.equal(publicAfterAdvance.json.continuation.fightArchive.length, 1)
+  assert.equal(publicAfterAdvance.json.continuation.fightArchive[0].fightId, 'fight_1')
+  assert.equal(publicAfterAdvance.json.continuation.fightArchive[0].replayAvailable, true)
+
+  const archivedReplay = await route(env, `/sessions/${sessionId}/replay?fightId=fight_1`)
+
+  assert.equal(archivedReplay.response.status, 200)
+  assert.equal(archivedReplay.json.round, 1)
+  assert.equal(archivedReplay.json.summary, 'Red disabled Blue with weapon pressure.')
 
   const redNext = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,

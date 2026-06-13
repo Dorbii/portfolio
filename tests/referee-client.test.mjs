@@ -427,6 +427,41 @@ test('referee loadReplayPayload normalizes top-level replay payloads with render
   }
 })
 
+test('referee loadReplayPayload requests archived fight replay by fight id', async () => {
+  const sessionId = 's_demo'
+  const fightId = 'fight_2'
+  const { calls, restore } = withFetchStub(() =>
+    jsonResponse({
+      round: 2,
+      duration: 9,
+      summary: 'Blue wins.',
+      events: [{ t: 0, type: 'spawn', bot: 'blue', position: [0, 0, 0], rotation: [0, 0, 0] }],
+      teamIdentities: {
+        red: { name: 'Red Team', primaryColor: '#ff4c5d', logo: { mark: 'shield', initials: 'R' } },
+        blue: { name: 'Blue Team', primaryColor: '#5b9dff', logo: { mark: 'shield', initials: 'B' } },
+      },
+      botBlueprints: {
+        red: { name: 'Red', blocks: [] },
+        blue: { name: 'Blue', blocks: [] },
+      },
+    }),
+  )
+
+  try {
+    const replay = await loadReplayPayload(DEFAULT_ARENA_API_BASE, sessionId, fightId)
+
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].method, 'GET')
+    assert.equal(
+      calls[0].url,
+      `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/replay?fightId=${encodeURIComponent(fightId)}`,
+    )
+    assert.equal(replay.timeline.round, 2)
+  } finally {
+    restore()
+  }
+})
+
 test('referee loadReplayPayload omits machine designs with malformed nested transforms', async () => {
   const sessionId = 's_demo'
   const malformedRed = validMachineDesign('Malformed red machine', 'red-core')

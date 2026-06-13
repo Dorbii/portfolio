@@ -250,6 +250,20 @@ function buildPublicContinuationState(
   return {
     completedFightCount: state.fightDossier?.fights.length ?? 0,
     ...(state.sharedDebrief ? { sharedDebrief: state.sharedDebrief } : {}),
+    fightArchive: (state.fightDossier?.fights ?? []).map((fight) => ({
+      fightId: fight.fightId,
+      winner: fight.winner,
+      reason: fight.reason,
+      duration: fight.duration,
+      damageTaken: {
+        red: fight.stats.damageTaken.red,
+        blue: fight.stats.damageTaken.blue,
+      },
+      replayAvailable: Boolean(
+        state.fightReplays?.[fight.fightId] ??
+        (state.replay && state.fightDossier?.fights.at(-1)?.fightId === fight.fightId),
+      ),
+    })),
   }
 }
 

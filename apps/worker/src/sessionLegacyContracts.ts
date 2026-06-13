@@ -119,9 +119,19 @@ export type LegacyPublicSessionState = {
   continuation: {
     completedFightCount: number
     sharedDebrief?: SharedDebrief
+    fightArchive: LegacyFightArchiveEntry[]
   }
   chatLog: LegacySessionChatMessage[]
   eventLog: LegacySessionLogEvent[]
+}
+
+export type LegacyFightArchiveEntry = {
+  fightId: string
+  winner: TeamRole | 'draw'
+  reason: string
+  duration: number
+  damageTaken: Record<TeamRole, number>
+  replayAvailable: boolean
 }
 
 export type LegacyRolePrivateState = Partial<TeamEconomySummary> & {

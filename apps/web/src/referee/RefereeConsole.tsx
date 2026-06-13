@@ -1,8 +1,9 @@
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DEFAULT_ARENA_CONFIG, type TeamRole } from '../../../../packages/schemas/src/index.js'
 import type { PublicSessionState, RolePrivateState } from '../agent/agentSessionTypes.js'
 import {
   ArenaImpactDashboard,
+  FightArchiveDashboard,
   KeyStatsDashboard,
   MatchScoreboard,
   PublicChatLog,
@@ -16,6 +17,7 @@ import {
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
 import { buildRefereeObserverView } from './refereeObserverView'
+import type { ReplayPayload } from './refereeClient'
 import { createRefereeReplayProof, resolveRefereeReplayProofMode } from './refereeReplayProof'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 import { createLiveArenaStageState } from './liveArenaStage'
@@ -160,6 +162,7 @@ export function RefereeConsole() {
     error,
     hasInviteForRole,
     loadState,
+    loadFightReplay,
     publicSession,
     redCockpitUrl,
     redInviteUrl,
@@ -184,6 +187,11 @@ export function RefereeConsole() {
   const displayRoleStates = replayProof ? EMPTY_ROLE_STATES : roleStates
   const displaySessionChat = replayProof?.publicSession.chatLog ?? sessionChat
   const displayActiveSessionId = displayPublicSession?.sessionId ?? activeSessionId
+  const fightArchive = displayPublicSession?.continuation.fightArchive ?? []
+  const [archiveReplayPayload, setArchiveReplayPayload] = useState<ReplayPayload | null>(null)
+  const [archiveSelectedFightId, setArchiveSelectedFightId] = useState('')
+  const [archiveLoadState, setArchiveLoadState] = useState<'busy' | 'idle'>('idle')
+  const [archiveError, setArchiveError] = useState('')
   const fightComms = [
     ...displaySessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
     ...(['red', 'blue'] as const).flatMap((role) =>
@@ -205,25 +213,104 @@ export function RefereeConsole() {
     [displayPublicSession, displayReplayPayload],
   )
   const shouldDeferFightRender = useFightRenderWarmup(displayPublicSession)
-  const showRenderedReplay = observerView.showReplay && displayReplayPayload && !shouldDeferFightRender
-  const showFightCockpitStage = observerView.stage === 'live_combat' || shouldDeferFightRender
+  const reviewingArchivedReplay = archiveReplayPayload !== null
+  const stageReplayPayload = archiveReplayPayload ?? displayReplayPayload
+  const showRenderedReplay = Boolean(stageReplayPayload) &&
+    (reviewingArchivedReplay || (observerView.showReplay && !shouldDeferFightRender))
+  const renderedReplayPayload = showRenderedReplay ? stageReplayPayload : null
+  const showFightCockpitStage = !reviewingArchivedReplay &&
+    (observerView.stage === 'live_combat' || shouldDeferFightRender)
   const shouldShowSessionCompletion = displayPublicSession?.phase === 'session_complete'
+
+  useEffect(() => {
+    setArchiveReplayPayload(null)
+    setArchiveSelectedFightId('')
+    setArchiveError('')
+  }, [displayActiveSessionId])
+
+  const loadArchivedReplay = useCallback(
+    async (fightId: string) => {
+      if (replayProof?.replayPayload) {
+        const proofFightId = replayProof.publicSession.continuation.fightArchive[0]?.fightId
+
+        if (proofFightId === fightId) {
+          return replayProof.replayPayload
+        }
+      }
+
+      return loadFightReplay(fightId)
+    },
+    [loadFightReplay, replayProof],
+  )
+
+  const reviewArchivedFight = useCallback(
+    async (fightId: string) => {
+      setArchiveLoadState('busy')
+      setArchiveError('')
+
+      try {
+        const payload = await loadArchivedReplay(fightId)
+
+        setArchiveReplayPayload(payload)
+        setArchiveSelectedFightId(fightId)
+      } catch (errorValue) {
+        setArchiveError(errorValue instanceof Error ? errorValue.message : 'Could not load archived replay.')
+      } finally {
+        setArchiveLoadState('idle')
+      }
+    },
+    [loadArchivedReplay],
+  )
+
+  const downloadArchivedFight = useCallback(
+    async (fightId: string) => {
+      setArchiveLoadState('busy')
+      setArchiveError('')
+
+      try {
+        const payload = archiveSelectedFightId === fightId && archiveReplayPayload
+          ? archiveReplayPayload
+          : await loadArchivedReplay(fightId)
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        const safeSessionId = (displayActiveSessionId || 'session').replace(/[^a-z0-9_-]/gi, '_')
+        const safeFightId = fightId.replace(/[^a-z0-9_-]/gi, '_')
+
+        link.href = url
+        link.download = `${safeSessionId}-${safeFightId}-replay.json`
+        link.click()
+        URL.revokeObjectURL(url)
+      } catch (errorValue) {
+        setArchiveError(errorValue instanceof Error ? errorValue.message : 'Could not download archived replay.')
+      } finally {
+        setArchiveLoadState('idle')
+      }
+    },
+    [archiveReplayPayload, archiveSelectedFightId, displayActiveSessionId, loadArchivedReplay],
+  )
+
+  const clearArchivedFight = useCallback(() => {
+    setArchiveReplayPayload(null)
+    setArchiveSelectedFightId('')
+    setArchiveError('')
+  }, [])
 
   return (
     <main className="arena-app match-console">
       <div className="match-dashboard-shell">
         <section className="match-stage-card" id="dashboard" aria-label="Arena dashboard">
           <div className="match-stage-frame">
-            {showRenderedReplay ? (
+            {renderedReplayPayload ? (
               <Suspense fallback={<ReplayFrameFallback />}>
                 <ReplayViewer
                   autoPlay
                   arena={visibleArena}
-                  botBlueprints={displayReplayPayload.botBlueprints}
-                  machineDesigns={displayReplayPayload.machineDesigns}
+                  botBlueprints={renderedReplayPayload.botBlueprints}
+                  machineDesigns={renderedReplayPayload.machineDesigns}
                   showDamageSchematic={false}
-                  teamIdentities={displayReplayPayload.teamIdentities}
-                  timeline={displayReplayPayload.timeline}
+                  teamIdentities={renderedReplayPayload.teamIdentities}
+                  timeline={renderedReplayPayload.timeline}
                 />
               </Suspense>
             ) : showFightCockpitStage ? (
@@ -240,7 +327,7 @@ export function RefereeConsole() {
                 <ArenaPreviewScene arena={visibleArena} liveBots={liveArenaStage} />
               </Suspense>
             )}
-            {observerView.showReplayStatus ? (
+            {observerView.showReplayStatus && !reviewingArchivedReplay ? (
               <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
             ) : null}
             {observerView.showCockpitStrip && !showFightCockpitStage ? (
@@ -302,6 +389,25 @@ export function RefereeConsole() {
               <SessionCompletionPanel
                 controls={completionControls}
                 publicSession={displayPublicSession}
+              />
+            </Panel>
+          ) : null}
+
+          {fightArchive.length > 0 ? (
+            <Panel className="panel dashboard-panel fight-archive-panel">
+              <SectionHeader
+                kicker="Replay archive"
+                title="Fight Archive"
+                aside={archiveSelectedFightId || `${fightArchive.length} fight${fightArchive.length === 1 ? '' : 's'}`}
+              />
+              <FightArchiveDashboard
+                entries={fightArchive}
+                error={archiveError}
+                loadState={archiveLoadState}
+                onClear={clearArchivedFight}
+                onDownload={(fightId) => void downloadArchivedFight(fightId)}
+                onReview={(fightId) => void reviewArchivedFight(fightId)}
+                selectedFightId={archiveSelectedFightId}
               />
             </Panel>
           ) : null}

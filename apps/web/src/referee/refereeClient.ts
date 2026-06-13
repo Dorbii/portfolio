@@ -196,9 +196,11 @@ export async function loadRoleState(
 export async function loadReplayPayload(
   apiBase: string,
   sessionId: string,
+  fightId?: string,
 ): Promise<ReplayPayload> {
+  const search = fightId ? `?fightId=${encodeURIComponent(fightId)}` : ''
   const payload = await requestJson<unknown>(
-    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/replay`,
+    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/replay${search}`,
   )
   const replayPayload = normalizeReplayPayload(payload)
 

@@ -126,6 +126,16 @@ export type ConfirmedLoadoutView = {
 export type PublicContinuationState = {
   completedFightCount: number
   sharedDebrief?: SharedDebrief
+  fightArchive: PublicFightArchiveEntry[]
+}
+
+export type PublicFightArchiveEntry = {
+  fightId: string
+  winner: TeamRole | 'draw'
+  reason: string
+  duration: number
+  damageTaken: Record<TeamRole, number>
+  replayAvailable: boolean
 }
 
 export type RoleInvite = {

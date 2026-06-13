@@ -11,6 +11,7 @@ import {
   refereePollIntervalMs,
   isValidSessionId,
   loadPublicSession,
+  loadReplayPayload,
   normalizeSessionId,
   parseApiBaseFromLocation,
   parseSessionIdFromLocation,
@@ -259,6 +260,17 @@ export function useRefereeConsoleController() {
     [confirmedActiveSessionId, apiBase, invites],
   )
 
+  const loadFightReplay = useCallback(
+    async (fightId: string) => {
+      if (!activeSessionId) {
+        throw new Error('Create or load a session before opening archived replays.')
+      }
+
+      return loadReplayPayload(apiBase, activeSessionId, fightId)
+    },
+    [activeSessionId, apiBase],
+  )
+
   const phase = publicSession?.phase ?? 'not_started'
   const sessionChat = publicSession?.chatLog ?? ([] as PublicSessionState['chatLog'])
 
@@ -294,6 +306,7 @@ export function useRefereeConsoleController() {
     error,
     hasInviteForRole,
     loadState,
+    loadFightReplay,
     phase,
     publicSession,
     redCockpitUrl,

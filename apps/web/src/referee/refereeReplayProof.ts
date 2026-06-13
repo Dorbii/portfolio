@@ -86,6 +86,19 @@ export function createRefereeReplayProof(now = new Date()): {
       },
       continuation: {
         completedFightCount: 1,
+        fightArchive: [
+          {
+            fightId: 'fight_1',
+            winner: 'blue',
+            reason: 'Ion Net disables Crimson Circuit after trapping it against the west rail.',
+            duration: 12,
+            damageTaken: {
+              red: 30,
+              blue: 0,
+            },
+            replayAvailable: true,
+          },
+        ],
       },
       chatLog: [
         {

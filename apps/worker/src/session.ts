@@ -1387,7 +1387,7 @@ export class SessionCoordinator {
     }
   }
 
-  getReplay(): SessionResult<LegacyReplayPayload> {
+  getReplay(fightId?: string): SessionResult<LegacyReplayPayload> {
     const activeError = this.requireActive()
 
     if (activeError) {
@@ -1395,6 +1395,27 @@ export class SessionCoordinator {
     }
 
     this.resolveTimedTransitions()
+
+    if (fightId) {
+      const archivedReplay = this.state.fightReplays?.[fightId]
+      const latestFightId = latestCompletedFightId(this.state)
+
+      if (archivedReplay) {
+        return {
+          ok: true,
+          value: cloneJson(archivedReplay),
+        }
+      }
+
+      if (latestFightId === fightId && this.state.replay) {
+        return {
+          ok: true,
+          value: cloneJson(this.state.replay),
+        }
+      }
+
+      return relayError('REPLAY_NOT_AVAILABLE', `Replay is not archived for ${fightId}.`)
+    }
 
     const replay = this.state.replay
 
@@ -2457,7 +2478,13 @@ export class SessionCoordinator {
     }
     const fightId = `fight_${this.state.round}`
 
-    this.state.replay = this.replayPayloadFromTimeline(result.replay)
+    const replayPayload = this.replayPayloadFromTimeline(result.replay)
+
+    this.state.replay = replayPayload
+    this.state.fightReplays = {
+      ...(this.state.fightReplays ?? {}),
+      [fightId]: cloneJson(replayPayload),
+    }
     this.state.fightDossier = mergeFightDossier(
       this.state.fightDossier,
       buildFightDossier({

@@ -7648,6 +7648,61 @@ test('lockstep resolver supports weapon attacks after movement in the same submi
   assert.equal(resolution.consumed.red.actionTimeSpent, 1)
 })
 
+test('lockstep resolver mitigates direct attack damage with armor', () => {
+  const attackPlan = {
+    red: combatRoundPlan('red', [
+      { kind: 'attack', weaponSlot: 'weaponA', targetCellId: 'cell:1:0' },
+      { kind: 'end_turn' },
+    ]),
+    blue: combatRoundPlan('blue', [{ kind: 'end_turn' }]),
+  }
+  const budgets = {
+    red: lockstepBudget({ actionTime: 2 }),
+    blue: lockstepBudget(),
+  }
+  const unarmoredSnapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], {
+    red: {
+      weaponReach: 2,
+      stats: lockstepStats({ weaponThreat: 60 }),
+    },
+    blue: {
+      health: 40,
+      maxHealth: 40,
+      stats: lockstepStats({ armor: 0, mass: 8 }),
+    },
+  })
+  const armoredSnapshot = combatSnapshot(tacticalOpenArena, [-1, 0, 0], [1, 0, 0], {
+    red: {
+      weaponReach: 2,
+      stats: lockstepStats({ weaponThreat: 60 }),
+    },
+    blue: {
+      health: 40,
+      maxHealth: 40,
+      stats: lockstepStats({ armor: 18, mass: 8 }),
+    },
+  })
+  const unarmored = expectActiveLockstepResolution(resolveLockstepCombatRound(
+    lockstepCombatInput(unarmoredSnapshot, attackPlan, { budgets }),
+  ))
+  const armored = expectActiveLockstepResolution(resolveLockstepCombatRound(
+    lockstepCombatInput(armoredSnapshot, attackPlan, { budgets }),
+  ))
+  const unarmoredDamage = unarmored.events.find((event) => event.type === 'damage' && event.bot === 'blue')
+  const armoredDamage = armored.events.find((event) => event.type === 'damage' && event.bot === 'blue')
+  const unarmoredImpact = unarmored.events.find((event) => event.type === 'impact' && event.defender === 'blue')
+  const armoredImpact = armored.events.find((event) => event.type === 'impact' && event.defender === 'blue')
+
+  assert.notEqual(unarmoredDamage, undefined)
+  assert.notEqual(armoredDamage, undefined)
+  assert.notEqual(unarmoredImpact, undefined)
+  assert.notEqual(armoredImpact, undefined)
+  assert.ok(armoredDamage.amount < unarmoredDamage.amount)
+  assert.equal(armoredDamage.amount, armoredImpact.damage)
+  assert.equal(unarmoredDamage.amount, unarmoredImpact.damage)
+  assert.ok(armored.snapshot.blue.health > unarmored.snapshot.blue.health)
+})
+
 test('session maps GPT combat_plan into lockstep round plans and stages the next round after both submit', async () => {
   let now = '2026-06-03T00:00:00.000Z'
   const session = await createTestSession('s_gpt_combat_plan_queue', {

@@ -166,6 +166,7 @@ export type StoredSessionState = {
   chatLog: LegacySessionChatMessage[]
   eventLog: LegacySessionLogEvent[]
   rateLimits: Record<string, StoredRateLimit>
+  fightReplays?: Record<string, LegacyReplayPayload>
 }
 
 export type LockedGameAction = Pick<

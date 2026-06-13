@@ -300,7 +300,7 @@ export class AgentArenaSession {
     },
     replay: {
       method: 'GET',
-      handle: (_request, coordinator) => this.replay(coordinator),
+      handle: (request, coordinator) => this.replay(request, coordinator),
     },
     'gpt-claim': {
       method: 'POST',
@@ -580,8 +580,10 @@ export class AgentArenaSession {
     return this.sessionResultResponse(coordinator, result)
   }
 
-  private async replay(coordinator: SessionCoordinator): Promise<Response> {
-    return this.sessionResultResponse(coordinator, coordinator.getReplay())
+  private async replay(request: Request, coordinator: SessionCoordinator): Promise<Response> {
+    const fightId = new URL(request.url).searchParams.get('fightId')?.trim() || undefined
+
+    return this.sessionResultResponse(coordinator, coordinator.getReplay(fightId))
   }
 
   // CODEX_INTENT: provide GPT Actions a narrow wrapper that hides GameMaster version bookkeeping.

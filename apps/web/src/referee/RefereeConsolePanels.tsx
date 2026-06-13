@@ -47,6 +47,8 @@ type FightCommsMessage = PublicSessionState['chatLog'][number] & {
   visibility?: 'public' | 'role_only'
 }
 
+type FightArchiveEntry = PublicSessionState['continuation']['fightArchive'][number]
+
 export type SessionCompletionControl = {
   completedFightCount: number
 }
@@ -183,6 +185,90 @@ function CompletionFact({
       <strong>{value}</strong>
     </div>
   )
+}
+
+export function FightArchiveDashboard({
+  entries,
+  error,
+  loadState,
+  onClear,
+  onDownload,
+  onReview,
+  selectedFightId,
+}: {
+  entries: FightArchiveEntry[]
+  error: string
+  loadState: 'busy' | 'idle'
+  onClear: () => void
+  onDownload: (fightId: string) => void
+  onReview: (fightId: string) => void
+  selectedFightId: string
+}) {
+  const isBusy = loadState === 'busy'
+
+  if (entries.length === 0) {
+    return <p className="referee-empty">Completed fight replays will appear here.</p>
+  }
+
+  return (
+    <div className="fight-archive-dashboard" aria-busy={isBusy}>
+      {selectedFightId ? (
+        <div className="fight-archive-selected">
+          <span>Reviewing {selectedFightId}</span>
+          <Button type="button" variant="ghost" onClick={onClear} disabled={isBusy}>
+            Close Review
+          </Button>
+        </div>
+      ) : null}
+      <ol className="fight-archive-list">
+        {entries.map((entry) => {
+          const isSelected = entry.fightId === selectedFightId
+
+          return (
+            <li
+              className={`fight-archive-item${isSelected ? ' is-selected' : ''}`}
+              key={entry.fightId}
+            >
+              <div className="fight-archive-main">
+                <strong>{entry.fightId}</strong>
+                <span>{fightArchiveResultLabel(entry)}</span>
+                <small>{entry.reason}</small>
+              </div>
+              <div className="fight-archive-meta">
+                <span>{entry.duration}s</span>
+                <span>Damage R {entry.damageTaken.red} / B {entry.damageTaken.blue}</span>
+              </div>
+              <ActionGroup className="fight-archive-actions">
+                <Button
+                  type="button"
+                  variant={isSelected ? 'secondary' : 'ghost'}
+                  onClick={() => onReview(entry.fightId)}
+                  disabled={isBusy || !entry.replayAvailable || isSelected}
+                >
+                  {isSelected ? 'Viewing' : 'Review'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => onDownload(entry.fightId)}
+                  disabled={isBusy || !entry.replayAvailable}
+                >
+                  Download
+                </Button>
+              </ActionGroup>
+            </li>
+          )
+        })}
+      </ol>
+      {error ? <p className="fight-archive-error" role="alert">{error}</p> : null}
+    </div>
+  )
+}
+
+function fightArchiveResultLabel(entry: FightArchiveEntry): string {
+  return entry.winner === 'draw'
+    ? 'Draw'
+    : `${capitalize(entry.winner)} wins`
 }
 
 function partCatalogHref(): string {

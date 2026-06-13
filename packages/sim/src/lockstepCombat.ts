@@ -58,6 +58,7 @@ const LOCKSTEP_SUBSTEP_SECONDS = 0.35
 const LOCKSTEP_TRAILING_SECONDS = 0.85
 const HARD_MAX_LOCKSTEP_SUBSTEPS = 96
 const MIN_REPLAY_DURATION = 6
+const LOCKSTEP_ARMOR_MITIGATION_RATE = 6
 
 export type ResolveLockstepCombatRoundInput = ResolveCombatInput & {
   roundIndex?: number
@@ -758,9 +759,10 @@ function triggerAttackOrUtility(
 
   // Damage comes from the selected weapon (zero-damage effect weapons stay
   // zero); the aggregate weaponThreat fallback only covers stats-only bots.
-  const damage = weapon
+  const rawDamage = weapon
     ? Math.max(0, Math.round(weapon.damage))
     : Math.max(1, Math.round(attacker.stats.weaponThreat / 6 || 2))
+  const damage = armorMitigatedDamage(rawDamage, defender)
 
   events.push({
     t,
@@ -772,7 +774,7 @@ function triggerAttackOrUtility(
     turn: substep,
     substep,
   })
-  applyDamage(defender, damage, substep, t, events)
+  applyDamage(defender, rawDamage, substep, t, events)
 }
 
 type SelectedAttackWeapon =
@@ -853,7 +855,7 @@ function applyDamage(
   t: number,
   events: ReplayEvent[],
 ): void {
-  const damage = Math.max(0, Math.round(amount))
+  const damage = armorMitigatedDamage(amount, target)
 
   if (damage <= 0) {
     return
@@ -880,6 +882,19 @@ function applyDamage(
       substep,
     })
   }
+}
+
+function armorMitigatedDamage(amount: number, target: RoleRuntime): number {
+  const rawDamage = Math.max(0, Math.round(amount))
+
+  if (rawDamage <= 0) {
+    return 0
+  }
+
+  const armor = Math.max(0, target.stats.armor)
+  const mitigation = 100 / (100 + armor * LOCKSTEP_ARMOR_MITIGATION_RATE)
+
+  return Math.max(1, Math.round(rawDamage * mitigation))
 }
 
 function rejectCurrentStep(
