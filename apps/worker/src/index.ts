@@ -608,16 +608,18 @@ export class AgentArenaSession {
       return invite.response
     }
 
+    const teamIdentity = body.teamIdentity
+      ? normalizeGptTeamIdentity(body.teamIdentity)
+      : defaultGptTeamIdentity(invite.value)
+    const agentName = typeof body.agentName === 'string' && body.agentName.trim()
+      ? body.agentName.trim()
+      : defaultGptAgentName(invite.value)
     const result = await coordinator.bootstrapRole(
       invite.value.role,
       invite.value.claimToken,
       {
-        ...(typeof body.agentName === 'string' && body.agentName.trim()
-          ? { agentName: body.agentName.trim() }
-          : {}),
-        teamIdentity: body.teamIdentity
-          ? normalizeGptTeamIdentity(body.teamIdentity)
-          : defaultGptTeamIdentity(invite.value),
+        agentName,
+        teamIdentity,
       },
     )
     await this.saveSession(coordinator)
@@ -1995,6 +1997,13 @@ function defaultGptTeamIdentity(invite: Pick<GptInvite, 'role' | 'sessionId'>): 
     colorHex: invite.role === 'red' ? '#ff4c5d' : '#5b9dff',
     logoPrompt: `${roleLabel} ${suffix} combat robotics logo with ${roleLabel.toLowerCase()} mechanical crest`,
   }
+}
+
+function defaultGptAgentName(invite: Pick<GptInvite, 'role' | 'sessionId'>): string {
+  const roleLabel = invite.role === 'red' ? 'Red' : 'Blue'
+  const suffix = gptIdentitySessionSuffix(invite.sessionId)
+
+  return `${roleLabel} ${suffix} GPT`
 }
 
 function gptIdentitySessionSuffix(sessionId: string): string {

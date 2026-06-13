@@ -1093,7 +1093,12 @@ test('GET /openapi.json returns the Custom GPT Actions schema', async () => {
   assert.ok(json.paths['/gpt/act'].post.description.includes('combat_plan'))
   assert.equal(JSON.stringify(json).includes('/sessions/'), false)
   assert.equal(JSON.stringify(json).includes('window.AgentArenaRole'), false)
-  assert.deepEqual(json.components.schemas.GptClaimRequest.required, ['inviteUrl', 'agentName'])
+  assert.deepEqual(json.components.schemas.GptClaimRequest.required, ['inviteUrl'])
+  assert.ok(
+    json.components.schemas.GptClaimRequest.properties.agentName.description.includes(
+      'Optional',
+    ),
+  )
   assert.ok('teamIdentity' in json.components.schemas.GptClaimRequest.properties)
   assert.ok(
     json.components.schemas.GptClaimRequest.properties.teamIdentity.description.includes(
@@ -1636,7 +1641,6 @@ test('POST /gpt/claim bootstraps a role with server-owned default identity', asy
     method: 'POST',
     body: {
       inviteUrl: gptInviteUrl(sessionId, redInvite),
-      agentName: 'ClankGPT',
     },
   })
   const state = await route(env, `/sessions/${sessionId}/state`, {

@@ -23,7 +23,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Claim and bootstrap a role from an invite URL',
           description:
-            'Claim the role once using inviteUrl and agentName. Omit teamIdentity for the server-generated role/session identity.',
+            'Claim the role once using inviteUrl. Omit agentName/teamIdentity for server-generated role/session identity.',
           requestBody: jsonRequestBody('GptClaimRequest'),
           responses: gptResponses('Claimed role and current GameMaster packet.'),
         },
@@ -102,14 +102,14 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
         GptClaimRequest: {
           type: 'object',
           additionalProperties: false,
-          required: ['inviteUrl', 'agentName'],
+          required: ['inviteUrl'],
           properties: {
             inviteUrl: inviteUrlSchema(),
             agentName: {
               type: 'string',
               minLength: 1,
               maxLength: 80,
-              description: 'Agent/player name for the role claim.',
+              description: 'Optional agent/player name for the role claim. Server defaults include role and session suffix.',
             },
             teamIdentity: {
               $ref: '#/components/schemas/TeamIdentity',
