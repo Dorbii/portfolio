@@ -1,5 +1,8 @@
 import type {
   AgentChatMessageRequest,
+  AgentConnectionPacket,
+  AgentConnectionAction,
+  AgentConnectionResponse,
   ArenaConfig,
   BotBlueprint,
   CombatBotSnapshot,
@@ -8,9 +11,6 @@ import type {
   CombatRoundPlan,
   CombatTurnSnapshot,
   GeneratedControls,
-  GameMasterActionResponse,
-  GameMasterActionSubmission,
-  GameMasterPacket,
   ReplayLifecycleStatus,
   InventoryItem,
   MachineDesign,
@@ -160,7 +160,7 @@ export type PublicSessionState = {
     planSeconds: number
   }
   combat?: CombatTurnPublicState
-  gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  agent?: Partial<Record<TeamRole, Pick<AgentConnectionPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion'>>>
   replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
   replayVersion?: string
@@ -185,7 +185,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   ownLoadout?: ConfirmedLoadoutView
   roundPlan?: PublicSessionState['roundPlan']
   combat?: CombatTurnPrivateState
-  gameMaster?: GameMasterPacket
+  agentPacket?: AgentConnectionPacket
   opponent: RolePublicState
   replayAvailable: boolean
   lastResult?: CombatSummary
@@ -194,9 +194,9 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   eventLog: SessionLogEvent[]
 }
 
-export type AgentBootstrapResponse = GameMasterPacket
-export type GameMasterActionPostRequest = GameMasterActionSubmission
-export type GameMasterActionClientResponse = GameMasterActionResponse
+export type AgentBootstrapResponse = AgentConnectionPacket
+export type AgentConnectionActionPostRequest = AgentConnectionAction
+export type AgentConnectionActionClientResponse = AgentConnectionResponse<PublicSessionState>
 export type PostFightReflectionPostRequest = PostFightAgentReflection
 export type PostFightReflectionClientResponse = PostFightReflectionResponse
 

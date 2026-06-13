@@ -2,6 +2,7 @@ import {
   TEAM_ROLES,
   normalizeCompactBuildActionSubmission,
   normalizeCompactCombatPlanSubmission,
+  toAgentConnectionPacket,
   validateAgentBootstrapRequestShape,
   validateAgentChatMessageRequestShape,
   validateGameMasterActionParameters,
@@ -178,6 +179,11 @@ const GAME_MASTER_SUBMISSION_KEYS = new Set([
   'parameters',
   'publicMessage',
 ])
+const COMPACT_SURRENDER_SUBMISSION_KEYS = new Set([
+  'action',
+  'decisionVersion',
+  'publicMessage',
+])
 
 function sanitizeResolvedReplayState(state: StoredSessionState): void {
   if (state.combat && state.replay) {
@@ -297,6 +303,16 @@ export class SessionCoordinator {
     return buildPublicSessionState(this.state)
   }
 
+  private buildRolePrivateStateWithAgentPacket(
+    role: StoredRoleState,
+    now = this.clock(),
+  ): LegacyRolePrivateState {
+    return {
+      ...buildRolePrivateState(this.state, role),
+      agentPacket: toAgentConnectionPacket(this.buildGameMasterPacket(role.role, now)),
+    }
+  }
+
   async claimRole(request: RoleClaimRequest): Promise<SessionResult<LegacyRoleClaimResponse>> {
     const validation = validateRoleClaimRequestShape(request)
 
@@ -362,7 +378,7 @@ export class SessionCoordinator {
         sessionId: this.state.id,
         role: request.role,
         roleToken,
-        state: buildRolePrivateState(this.state, role),
+        state: this.buildRolePrivateStateWithAgentPacket(role, now),
       },
     }
   }
@@ -464,8 +480,12 @@ export class SessionCoordinator {
     this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
-    const state = buildRolePrivateState(this.state, auth.role)
     const packet = this.buildGameMasterPacket(roleName, now)
+    const agentPacket = toAgentConnectionPacket(packet)
+    const state = {
+      ...buildRolePrivateState(this.state, auth.role),
+      agentPacket,
+    }
 
     return {
       ok: true,
@@ -495,10 +515,7 @@ export class SessionCoordinator {
 
     return {
       ok: true,
-      value: {
-        ...buildRolePrivateState(this.state, auth.value.role),
-        gameMaster: this.buildGameMasterPacket(auth.value.role.role, now),
-      },
+      value: this.buildRolePrivateStateWithAgentPacket(auth.value.role, now),
     }
   }
 
@@ -539,21 +556,7 @@ export class SessionCoordinator {
     this.resolveTimedTransitions(now)
     this.ensureGameMasterActionSets(now)
 
-    if (!isAllowedGameMasterSubmissionShape(request)) {
-      return relayError(
-        'SUBMISSION_INVALID',
-        'GameMaster action submission may include only action, actionSetId, decisionVersion, actionId, parameters, and publicMessage.',
-      )
-    }
-
-    const validation = validateGameMasterActionSubmissionShape(request)
-
-    if (!validation.ok) {
-      return relayError('SUBMISSION_INVALID', 'GameMaster action submission failed validation.', validation.issues)
-    }
-
     const role = auth.value.role
-    const submission = request as GameMasterActionSubmission
     const activeSet = this.state.activeActionSets?.[role.role]
 
     if (!activeSet) {
@@ -563,8 +566,39 @@ export class SessionCoordinator {
       )
     }
 
+    let submissionRequest = request
+
+    if (isCompactSurrenderSubmissionShape(request)) {
+      const surrenderSubmission = compactSurrenderAsGameMasterSubmission(
+        request,
+        activeSet,
+        this.state.phase,
+      )
+
+      if (!surrenderSubmission.ok) {
+        return surrenderSubmission.error
+      }
+
+      submissionRequest = surrenderSubmission.submission
+    }
+
+    if (!isAllowedGameMasterSubmissionShape(submissionRequest)) {
+      return relayError(
+        'SUBMISSION_INVALID',
+        'Action submission may include only compact surrender fields.',
+      )
+    }
+
+    const validation = validateGameMasterActionSubmissionShape(submissionRequest)
+
+    if (!validation.ok) {
+      return relayError('SUBMISSION_INVALID', 'Action submission failed validation.', validation.issues)
+    }
+
+    const submission = submissionRequest as GameMasterActionSubmission
+
     if (submission.actionSetId !== activeSet.actionSetId) {
-      return relayError('SUBMISSION_INVALID', 'actionSetId does not match the active action set.')
+      return relayError('SUBMISSION_INVALID', 'Submitted action does not match the active internal action set.')
     }
 
     if (submission.decisionVersion !== activeSet.decisionVersion) {
@@ -576,7 +610,7 @@ export class SessionCoordinator {
     if (!resolvedSubmission.ok) {
       return relayError(
         'SUBMISSION_INVALID',
-        'GameMaster action submission failed validation.',
+        'Action submission failed validation.',
         resolvedSubmission.issues,
       )
     }
@@ -590,7 +624,7 @@ export class SessionCoordinator {
     ) {
       return relayError(
         'SUBMISSION_INVALID',
-        'Combat movement, attack, and utility now require submit_combat_round_plan. Only surrender is accepted through submit_game_action during combat.',
+        'Combat movement, attack, and utility require a compact combat plan. Only surrender is accepted through this route during combat.',
       )
     }
 
@@ -1110,7 +1144,7 @@ export class SessionCoordinator {
       ok: true,
       value: {
         message,
-        state: buildRolePrivateState(this.state, role),
+        state: this.buildRolePrivateStateWithAgentPacket(role, now),
         publicState: this.getPublicState(),
       },
     }
@@ -1144,7 +1178,7 @@ export class SessionCoordinator {
       ok: true,
       value: {
         message,
-        state: buildRolePrivateState(this.state, role),
+        state: this.buildRolePrivateStateWithAgentPacket(role, now),
       },
     }
   }
@@ -2664,6 +2698,86 @@ function isAllowedGameMasterSubmissionShape(value: unknown): boolean {
   }
 
   return Object.keys(value).every((key) => GAME_MASTER_SUBMISSION_KEYS.has(key))
+}
+
+function isCompactSurrenderSubmissionShape(value: unknown): value is Record<string, unknown> {
+  return isRecord(value) && value.action === 'surrender'
+}
+
+function compactSurrenderAsGameMasterSubmission(
+  value: Record<string, unknown>,
+  activeSet: ActiveActionSet,
+  phase: SessionPhase,
+): {
+  ok: true
+  submission: GameMasterActionSubmission
+} | {
+  ok: false
+  error: SessionResult<never>
+} {
+  const extraKeys = Object.keys(value).filter((key) => !COMPACT_SURRENDER_SUBMISSION_KEYS.has(key))
+
+  if (extraKeys.length > 0) {
+    return {
+      ok: false,
+      error: relayError(
+        'SUBMISSION_INVALID',
+        `Compact surrender does not accept: ${extraKeys.sort().join(', ')}.`,
+      ),
+    }
+  }
+
+  if (phase !== 'combat_turn') {
+    return {
+      ok: false,
+      error: relayError('PHASE_CLOSED', `Surrender is only available during combat, not ${phase}.`),
+    }
+  }
+
+  if (
+    typeof value.decisionVersion !== 'number' ||
+    !Number.isInteger(value.decisionVersion) ||
+    value.decisionVersion < 0
+  ) {
+    return {
+      ok: false,
+      error: relayError('SUBMISSION_INVALID', 'Compact surrender requires a non-negative integer decisionVersion.'),
+    }
+  }
+
+  if (value.decisionVersion !== activeSet.decisionVersion) {
+    return {
+      ok: false,
+      error: relayError('SUBMISSION_INVALID', 'decisionVersion is stale or does not match the active action set.'),
+    }
+  }
+
+  if ('publicMessage' in value && value.publicMessage !== undefined && typeof value.publicMessage !== 'string') {
+    return {
+      ok: false,
+      error: relayError('SUBMISSION_INVALID', 'publicMessage must be text.'),
+    }
+  }
+
+  const surrenderAction = Object.values(activeSet.actions).find((action) => action.kind === 'surrender')
+
+  if (!surrenderAction) {
+    return {
+      ok: false,
+      error: relayError('PHASE_CLOSED', 'No surrender action is available for the active combat packet.'),
+    }
+  }
+
+  return {
+    ok: true,
+    submission: {
+      action: 'submit_game_action',
+      actionSetId: activeSet.actionSetId,
+      decisionVersion: value.decisionVersion,
+      actionId: surrenderAction.id,
+      ...(typeof value.publicMessage === 'string' ? { publicMessage: value.publicMessage } : {}),
+    },
+  }
 }
 
 function hashGameMasterSubmission(

@@ -1,10 +1,10 @@
 import type {
   AgentBootstrapResponse,
-  CombatRoundPlanSubmission,
+  AgentConnectionPacket,
+  AgentConnectionResponse,
+  AgentConnectionSurrenderSubmission,
+  CompactCombatPlanSubmission,
   CompactBuildActionSubmission,
-  GameMasterActionResponse,
-  GameMasterActionSubmission,
-  GameMasterPacket,
   PostFightReflectionPostRequest,
   PostFightReflectionResponse,
   SessionPhase,
@@ -15,6 +15,7 @@ import type { AgentInvite } from '../shared/agentInvite.js'
 import type {
   AgentChatMessagePostRequest,
   AgentChatMessageResponse,
+  PublicSessionState,
   RolePrivateState,
 } from './agentSessionTypes.js'
 
@@ -41,10 +42,10 @@ export type AgentArenaValidAction = {
   name:
     | 'bootstrap_role'
     | 'get_role_state'
-    | 'wait_for_game_master_packet'
-    | 'submit_game_action'
+    | 'wait_for_agent_packet'
     | 'submit_build_action'
-    | 'submit_combat_round_plan'
+    | 'submit_combat_plan'
+    | 'surrender'
     | 'submit_post_fight_reflection'
     | 'send_chat_message'
   available: boolean
@@ -54,7 +55,6 @@ export type AgentArenaValidAction = {
 export type AgentWaitOptions = {
   pollMs?: number
   previousEventVersion?: number
-  requireLegalActions?: boolean
   timeoutMs?: number
 }
 
@@ -66,16 +66,16 @@ export type AgentRoleConnectInput = {
 export type AgentArenaRoleApi = {
   bootstrapRole(input?: AgentRoleConnectInput): Promise<AgentBootstrapResponse>
   getState(): Promise<RolePrivateState>
-  waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket>
-  submitAction(
-    submission: GameMasterActionSubmission,
-  ): Promise<GameMasterActionResponse>
+  waitForAgentPacket(options?: AgentWaitOptions): Promise<AgentConnectionPacket>
   submitBuildAction(
     submission: CompactBuildActionSubmission,
-  ): Promise<GameMasterActionResponse>
+  ): Promise<AgentConnectionResponse<PublicSessionState>>
   submitCombatPlan(
-    submission: CombatRoundPlanSubmission,
-  ): Promise<GameMasterActionResponse>
+    submission: CompactCombatPlanSubmission,
+  ): Promise<AgentConnectionResponse<PublicSessionState>>
+  surrender(
+    submission: AgentConnectionSurrenderSubmission,
+  ): Promise<AgentConnectionResponse<PublicSessionState>>
   submitPostFightReflection(
     reflection: PostFightReflectionPostRequest,
   ): Promise<PostFightReflectionResponse>

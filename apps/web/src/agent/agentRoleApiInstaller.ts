@@ -1,4 +1,4 @@
-import type { GameMasterPacket } from '../../../../packages/schemas/src/index.js'
+import type { AgentConnectionPacket } from '../../../../packages/schemas/src/index.js'
 import type { AgentInvite } from '../shared/agentInvite.js'
 import type { RolePrivateState } from './agentSessionTypes.js'
 import type {
@@ -48,7 +48,7 @@ export function createInstalledAgentArenaRoleApi({
 
     return state
   }
-  const updateFromGameMasterPacket = async <T extends GameMasterPacket>(
+  const updateFromAgentPacket = async <T extends AgentConnectionPacket>(
     packet: T,
   ): Promise<T> => {
     try {
@@ -56,7 +56,7 @@ export function createInstalledAgentArenaRoleApi({
 
       setCurrentState({
         ...state,
-        gameMaster: state.gameMaster ?? packet,
+        agentPacket: state.agentPacket ?? packet,
       })
     } catch {
       const state = getCurrentState()
@@ -64,7 +64,7 @@ export function createInstalledAgentArenaRoleApi({
       if (state) {
         setCurrentState({
           ...state,
-          gameMaster: packet,
+          agentPacket: packet,
         })
       }
     }
@@ -80,26 +80,17 @@ export function createInstalledAgentArenaRoleApi({
 
       storeInviteClaimToken()
 
-      return updateFromGameMasterPacket(packet)
+      return updateFromAgentPacket(packet)
     },
-    waitForGameMasterPacket: async (options) => {
+    waitForAgentPacket: async (options) => {
       const packet = await (
-        overrides.waitForGameMasterPacket?.(options) ??
-        client.waitForGameMasterPacket(options)
+        overrides.waitForAgentPacket?.(options) ??
+        client.waitForAgentPacket(options)
       )
 
       storeInviteClaimToken()
 
-      return updateFromGameMasterPacket(packet)
-    },
-    submitAction: async (submission) => {
-      const response = await (
-        overrides.submitAction?.(submission) ?? client.submitAction(submission)
-      )
-
-      await updateFromGameMasterPacket(response.packet)
-
-      return response
+      return updateFromAgentPacket(packet)
     },
     submitBuildAction: async (submission) => {
       const response = await (
@@ -108,7 +99,7 @@ export function createInstalledAgentArenaRoleApi({
         Promise.reject(new Error('submitBuildAction is unavailable for this client.'))
       )
 
-      await updateFromGameMasterPacket(response.packet)
+      await updateFromAgentPacket(response.packet)
 
       return response
     },
@@ -121,7 +112,20 @@ export function createInstalledAgentArenaRoleApi({
         throw new Error('submitCombatPlan is unavailable for this client.')
       }
 
-      await updateFromGameMasterPacket(response.packet)
+      await updateFromAgentPacket(response.packet)
+
+      return response
+    },
+    surrender: async (submission) => {
+      const response = await (
+        overrides.surrender?.(submission) ?? client.surrender?.(submission)
+      )
+
+      if (!response) {
+        throw new Error('surrender is unavailable for this client.')
+      }
+
+      await updateFromAgentPacket(response.packet)
 
       return response
     },
@@ -131,7 +135,7 @@ export function createInstalledAgentArenaRoleApi({
         client.submitPostFightReflection(reflection)
       )
 
-      await updateFromGameMasterPacket(response.packet)
+      await updateFromAgentPacket(response.packet)
 
       return response
     },

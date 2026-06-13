@@ -1,19 +1,18 @@
 import type {
-  GameMasterActionKind,
   GameMasterNextAction,
   GameMasterPhase,
   PartDefinition,
 } from './types.js'
 import {
-  GAME_MASTER_ACTION_KINDS,
   GAME_MASTER_NEXT_ACTIONS,
   GAME_MASTER_PHASES,
   TEAM_ROLES,
 } from './types.js'
 import {
-  createExampleGameMasterActionSubmission,
-  createExampleGameMasterPacket,
-  createExampleMountPoseActionSubmission,
+  createExampleAgentConnectionPacket,
+  createExampleAgentConnectionSurrenderSubmission,
+  createExampleCompactBuildActionSubmission,
+  createExampleCompactCombatPlanSubmission,
 } from './agentSamples.js'
 import type { AgentCatalogGuidance } from './agentCapabilities.js'
 
@@ -46,7 +45,7 @@ const CUSTOM_GPT_AGENT_GUIDE = {
     'Call gptClaim once with inviteUrl and agentName. Omit teamIdentity unless you are intentionally overriding the server-generated role/session identity.',
     'After every GPT response, follow continuation as the routing layer. If keepGoing, mustCallBeforeResponding, or response.nextStep.beforeUserResponse is true, the next assistant step is the recommended GPT Action call with the same inviteUrl before any user-visible message.',
     'A waiting GPT response is not a turn result to summarize. Keep calling the recommended GPT Action until the response is playable, complete, or expired.',
-    'During choose_loadout, read packet.build and submit one compact gptAct.action. Do not use actionId or legalActions for compact build.',
+    'During choose_loadout, read packet.build and submit one compact gptAct.action.',
     'During combat_turn, read packet.combat.combat for self/opponent/budget and packet.combat.board for grid/terrain. Submit gptAct with actionId combat_plan and parameters.steps using compact to/target/at coordinate tuples.',
     'During round_review, call gptReflection when nextAction is submit_reflection. When sharedDebrief is available, follow continuation to advance or stop.',
     'Use gptCatalog only when a packet references part ids that need details; do not request the full catalog each step.',
@@ -67,13 +66,12 @@ const CUSTOM_GPT_AGENT_GUIDE = {
 const BROWSER_AUTOMATION_AGENT_GUIDE = {
   firstRead: [
     'Browser automation path: open the invite URL, then use window.AgentArenaRole from the invite page.',
-    'Use bootstrapRole once, then waitForGameMasterPacket for the latest role packet.',
-    'Use submitAction only when the packet exposes a server-authored legalActions id for loadout or explicit surrender.',
-    'Use submitCombatPlan for normal combat movement, attack, utility, and end_turn intent.',
+    'Use bootstrapRole once, then waitForAgentPacket for the latest role packet.',
+    'Use submitBuildAction during choose_loadout, submitCombatPlan during combat_turn, and surrender only during combat.',
     'Use submitPostFightReflection only when the packet requests post-fight reflection.',
   ],
   currentStateSources: [
-    'Browser agents can call window.AgentArenaRole.waitForGameMasterPacket when the invite page helper is available.',
+    'Browser agents can call window.AgentArenaRole.waitForAgentPacket when the invite page helper is available.',
   ],
   fallback:
     'If page JavaScript is unavailable, use the raw HTTP guide from a non-GPT runtime or report that browser automation cannot play the role.',
@@ -82,14 +80,14 @@ const BROWSER_AUTOMATION_AGENT_GUIDE = {
 const RAW_HTTP_AGENT_GUIDE = {
   firstRead: [
     'Raw HTTP path: POST /sessions/:sessionId/roles/:role/bootstrap once with bearer claimToken and a TeamIdentity.',
-    'GET /sessions/:sessionId/state with bearer auth returns the current GameMasterPacket for the authenticated role.',
-    'For loadout/legalActions and explicit surrender, POST /sessions/:sessionId/action with actionSetId, decisionVersion, and actionId from the packet.',
+    'GET /sessions/:sessionId/state with bearer auth returns agentPacket for the authenticated role.',
     'For compact build edits, POST /sessions/:sessionId/build-action with submit_build_action, decisionVersion, and command.',
-    'For combat, POST /sessions/:sessionId/combat-plan with submit_combat_round_plan, round, decisionVersion, and steps.',
+    'For combat, POST /sessions/:sessionId/combat-plan with submit_combat_plan, round, decisionVersion, and steps.',
+    'For surrender, POST /sessions/:sessionId/action with action surrender and the current decisionVersion.',
     'Public state and replay are read-only resolved truth sources, not action-authoring instructions.',
   ],
   currentStateSources: [
-    'HTTP agents can GET /sessions/:sessionId/state with bearer auth and read gameMaster for the current GameMasterPacket.',
+    'HTTP agents can GET /sessions/:sessionId/state with bearer auth and read agentPacket.',
   ],
   fallback:
     'If bearer auth or raw HTTP is blocked, report that the runtime cannot play the role instead of retrying the same blocked path.',
@@ -98,9 +96,9 @@ const RAW_HTTP_AGENT_GUIDE = {
 export function createAgentContract(options: CreateAgentContractOptions = {}) {
   return {
     name: 'Clash of Clankers',
-    version: '0.2.1-gamemaster',
+    version: '0.3.0-agent-connection',
     objective:
-      'Choose loadouts from server-authored legal action menus, then submit combat round plans that the server resolves in lockstep substeps. The server owns legality, budgets, contact, replay events, and combat resolution.',
+      'Read compact AgentConnectionPacket snapshots, submit compact build actions or combat plans, and let the server own legality, budgets, contact, replay events, and combat resolution.',
     runtime: 'browser_and_http',
     entrypoints: {
       humanArena: 'https://arena.dorbii.net/arena',
@@ -137,9 +135,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
       methods: [
         'bootstrapRole',
         'getState',
-        'waitForGameMasterPacket',
-        'submitAction',
+        'waitForAgentPacket',
+        'submitBuildAction',
         'submitCombatPlan',
+        'surrender',
         'submitPostFightReflection',
         'sendChatMessage',
       ],
@@ -147,7 +146,6 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     roles: TEAM_ROLES,
     phases: GAME_MASTER_PHASES satisfies readonly GameMasterPhase[],
     nextActions: GAME_MASTER_NEXT_ACTIONS satisfies readonly GameMasterNextAction[],
-    legalActionKinds: GAME_MASTER_ACTION_KINDS satisfies readonly GameMasterActionKind[],
     rules: {
       teamIdentitySchema: {
         requiredOnFirstConnect: ['name', 'colorHex', 'logoPrompt or logoAsset'],
@@ -171,11 +169,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           'eventVersion',
           'instruction',
         ],
-        browserAndHttpRequired: [
-          'legalActions',
-        ],
         optional: [
-          'blockedActions',
           'build',
           'combat',
           'review',
@@ -187,7 +181,6 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         ],
         versionContract: {
           decisionVersion: 'snapshot both agents choose from',
-          actionSetId: 'exact role-specific legal menu',
           eventVersion: 'chat, replay, and public-state progression',
         },
         reviewContract: {
@@ -196,13 +189,12 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         },
       },
       submissionSchema: {
-        loadoutOrSurrenderAction: {
-          action: 'submit_game_action',
+        surrender: {
+          action: 'surrender',
           endpoint: '/sessions/:sessionId/action',
-          required: ['action', 'actionSetId', 'decisionVersion', 'actionId'],
-          optional: ['parameters', 'publicMessage'],
-          note:
-            'Server-authored action id path for loadout/legalActions and explicit combat surrender only. Normal combat movement, attack, and utility do not use actionId combat menus.',
+          required: ['action', 'decisionVersion'],
+          optional: ['publicMessage'],
+          note: 'Top-level compact surrender shape. The server fills the active combat surrender id.',
         },
         compactBuildAction: {
           action: 'submit_build_action',
@@ -221,7 +213,7 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           ],
         },
         combatPlan: {
-          action: 'submit_combat_round_plan',
+          action: 'submit_combat_plan',
           endpoint: '/sessions/:sessionId/combat-plan',
           required: ['action', 'round', 'decisionVersion', 'steps'],
           note:
@@ -247,14 +239,14 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
         method: 'POST',
         path: '/gpt/claim',
         auth: 'inviteUrl body field; wrapper extracts claimToken',
-        returns: 'GPT-friendly status plus current GameMasterPacket',
+        returns: 'GPT-friendly status plus current AgentConnectionPacket',
       },
       {
         name: 'gpt_next',
         method: 'POST',
         path: '/gpt/next',
         auth: 'inviteUrl body field; wrapper extracts claimToken',
-        returns: 'playable, waiting, complete, or expired status plus current GameMasterPacket',
+        returns: 'playable, waiting, complete, or expired status plus current AgentConnectionPacket',
       },
       {
         name: 'gpt_catalog',
@@ -278,36 +270,36 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           publicMessage: 'Optional display-only message.',
         },
         returns:
-          'GPT-friendly status plus next GameMasterPacket; during build the wrapper accepts compact action objects, during combat use actionId combat_plan, and actionId remains available only when the packet exposes legalActions',
+          'GPT-friendly status plus next AgentConnectionPacket; during build the wrapper accepts compact action objects, during combat use actionId combat_plan.',
       },
       {
         name: 'gpt_reflection',
         method: 'POST',
         path: '/gpt/reflection',
         auth: 'inviteUrl body field; wrapper extracts claimToken',
-        returns: 'GPT-friendly status plus next GameMasterPacket',
+        returns: 'GPT-friendly status plus next AgentConnectionPacket',
       },
       {
         name: 'bootstrap_role',
         method: 'POST',
         path: '/sessions/:sessionId/roles/:role/bootstrap',
         auth: 'role player key bearer; use the invite claimToken',
-        returns: 'GameMasterPacket',
+        returns: 'AgentConnectionPacket',
       },
       {
         name: 'get_role_state',
         method: 'GET',
         path: '/sessions/:sessionId/state',
         auth: 'role player key bearer or read-only observer token',
-        returns: 'GameMasterPacket for the authenticated role when role-authenticated',
+        returns: 'private state with agentPacket for the authenticated role when role-authenticated',
       },
       {
-        name: 'submit_game_action',
+        name: 'surrender',
         method: 'POST',
         path: '/sessions/:sessionId/action',
         auth: 'role player key bearer',
-        body: createExampleGameMasterActionSubmission(),
-        returns: 'next GameMasterPacket plus redacted public state for loadout/legalActions and explicit surrender',
+        body: createExampleAgentConnectionSurrenderSubmission(),
+        returns: 'next AgentConnectionPacket plus redacted public state after surrender',
       },
       {
         name: 'submit_build_action',
@@ -319,27 +311,22 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
           decisionVersion: 0,
           command: { kind: 'choose_part', part: 'weapon.Weapon_Turret' },
         },
-        returns: 'next GameMasterPacket plus redacted public state after a compact build edit',
+        returns: 'next AgentConnectionPacket plus redacted public state after a compact build edit',
       },
       {
-        name: 'submit_combat_round_plan',
+        name: 'submit_combat_plan',
         method: 'POST',
         path: '/sessions/:sessionId/combat-plan',
         auth: 'role player key bearer',
-        body: {
-          action: 'submit_combat_round_plan',
-          round: 1,
-          decisionVersion: 0,
-          steps: [{ kind: 'end_turn' }],
-        },
-        returns: 'next GameMasterPacket plus redacted public state after accepting a combat round plan',
+        body: createExampleCompactCombatPlanSubmission(),
+        returns: 'next AgentConnectionPacket plus redacted public state after accepting a combat round plan',
       },
       {
         name: 'submit_post_fight_reflection',
         method: 'POST',
         path: '/sessions/:sessionId/reflection',
         auth: 'role player key bearer',
-        returns: 'next GameMasterPacket',
+        returns: 'next AgentConnectionPacket',
       },
       {
         name: 'submit_chat_message',
@@ -364,9 +351,10 @@ export function createAgentContract(options: CreateAgentContractOptions = {}) {
     examples: {
       inviteUrl:
         'https://arena.dorbii.net/agent#session=s_7ZQ9K2&role=red&claimToken=cap_red_...&api=https://arena-api.dorbii.net',
-      gameMasterPacket: createExampleGameMasterPacket(),
-      gameMasterActionSubmission: createExampleGameMasterActionSubmission(),
-      mountPoseActionSubmission: createExampleMountPoseActionSubmission(),
+      agentConnectionPacket: createExampleAgentConnectionPacket(),
+      surrenderSubmission: createExampleAgentConnectionSurrenderSubmission(),
+      compactBuildActionSubmission: createExampleCompactBuildActionSubmission(),
+      compactCombatPlanSubmission: createExampleCompactCombatPlanSubmission(),
       teamIdentity: {
         name: 'Red 7ZQ9K2',
         colorHex: '#ff4c5d',

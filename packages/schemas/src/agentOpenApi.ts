@@ -9,7 +9,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
     openapi: '3.1.0',
     info: {
       title: 'Clash of Clankers GPT Actions API',
-      version: '0.2.2-gamemaster',
+      version: '0.3.0-agent-connection',
       description:
         'Import this schema into a Custom GPT Actions configuration. Use only these /gpt endpoints from a Custom GPT; do not execute browser helper JavaScript. Treat continuation/nextStep as the routing layer. When keepGoing, mustCallBeforeResponding, or nextStep.beforeUserResponse is true, the next assistant step must be the recommended GPT Action call with the same inviteUrl. Do not write a user-visible message, summarize, or ask the user to type continue before making that action call.',
     },
@@ -25,7 +25,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           description:
             'Claim the role once using inviteUrl. Omit agentName/teamIdentity for server-generated role/session identity.',
           requestBody: jsonRequestBody('GptClaimRequest'),
-          responses: gptResponses('Claimed role and current GameMaster packet.'),
+          responses: gptResponses('Claimed role and current AgentConnection packet.'),
         },
       },
       '/gpt/next': {
@@ -36,7 +36,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           description:
             'Poll status. Waiting is not final. Follow continuation/nextStep before chat; do not ask user to continue. Post-fight packet.review/sharedDebrief is a stop point: present it and wait for referee/user round advance. Combat may include fightDeadlineAt/fightSeconds.',
           requestBody: jsonRequestBody('GptNextRequest'),
-          responses: gptResponses('Latest role status and GameMaster packet.'),
+          responses: gptResponses('Latest role status and AgentConnection packet.'),
         },
       },
       '/gpt/act': {
@@ -141,13 +141,13 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
             actionId: {
               type: 'string',
+              enum: ['combat_plan'],
               minLength: 1,
-              description: 'Use combat_plan during combat. Otherwise use an exact id only when packet.legalActions is present.',
+              description: 'Use combat_plan during combat.',
             },
             parameters: {
               $ref: '#/components/schemas/GptActionParameters',
-              description:
-                'Parameters for combat_plan or for a selected packet.legalActions id with parameterSchema.',
+              description: 'Parameters for combat_plan.',
             },
             publicMessage: {
               type: 'string',
@@ -223,58 +223,8 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
         GptActionParameters: {
           type: 'object',
           additionalProperties: true,
-          description:
-            'Optional parameters for actionId combat_plan or for a selected packet.legalActions id. Include only fields required by that path.',
+          description: 'Optional parameters for actionId combat_plan.',
           properties: {
-            childPartId: {
-              type: 'string',
-              description: 'propose_mount_pose only: catalog part id selected by the previous loadout step.',
-            },
-            parentInstanceId: {
-              type: 'string',
-              description: 'propose_mount_pose only: parent MachineDesign instance id selected by the previous loadout step.',
-            },
-            mountSurfaceId: {
-              type: 'string',
-              description: 'propose_mount_pose only: mount surface id exposed by the selected parent instance.',
-            },
-            u: {
-              type: 'number',
-              minimum: 0,
-              maximum: 1,
-              description: 'propose_mount_pose only: normalized horizontal coordinate on the mount surface.',
-            },
-            v: {
-              type: 'number',
-              minimum: 0,
-              maximum: 1,
-              description: 'propose_mount_pose only: normalized vertical coordinate on the mount surface.',
-            },
-            yawDegrees: {
-              type: 'number',
-              description: 'propose_mount_pose only: yaw in degrees; the server normalizes degrees.',
-            },
-            rollDegrees: {
-              type: 'number',
-              description: 'propose_mount_pose only: roll in degrees; the server normalizes degrees.',
-            },
-            destinationCellId: {
-              type: 'string',
-              description: 'Only for an actionId copied from packet.legalActions: exact destination cell id from the selected action.',
-            },
-            targetId: {
-              type: 'string',
-              enum: ['opponent'],
-              description: 'Only for an actionId copied from packet.legalActions: server-authored target id.',
-            },
-            targetCellId: {
-              type: 'string',
-              description: 'For packet.legalActions ids or combat_plan attack alias: target cell id such as cell:5:6.',
-            },
-            sourceCellId: {
-              type: 'string',
-              description: 'Only for an actionId copied from packet.legalActions: exact source cell id from the selected action.',
-            },
             steps: {
               type: 'array',
               maxItems: 16,
@@ -290,20 +240,12 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                     enum: ['move', 'attack', 'utility', 'end_turn'],
                     description: 'Intent step kind consumed by the lockstep round resolver.',
                   },
-                  cellId: {
-                    type: 'string',
-                    description: 'compatibility alias for move or utility destination, such as cell:3:0.',
-                  },
                   to: {
                     type: 'array',
                     minItems: 2,
                     maxItems: 2,
                     items: { type: 'integer' },
                     description: 'move only: compact destination coordinate tuple [x,z].',
-                  },
-                  targetCellId: {
-                    type: 'string',
-                    description: 'compatibility alias for attack target cell id, such as cell:5:6.',
                   },
                   target: {
                     type: 'array',
@@ -316,10 +258,6 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
                     type: 'string',
                     enum: ['weaponA', 'weaponB'],
                     description: 'attack weapon slot.',
-                  },
-                  utilityId: {
-                    type: 'string',
-                    description: 'compatibility alias for utility identifier.',
                   },
                   utility: {
                     type: 'string',
@@ -337,15 +275,6 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
             },
           },
           examples: [
-            {
-              childPartId: 'Laser_A',
-              parentInstanceId: 'core',
-              mountSurfaceId: 'core_shell',
-              u: 0.37,
-              v: 0.82,
-              yawDegrees: 120,
-              rollDegrees: 15,
-            },
             {
               steps: [
                 { kind: 'move', to: [1, 0] },
@@ -517,7 +446,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
               type: 'object',
               additionalProperties: true,
               description:
-                'Current GPT packet. During build, use packet.build, including packet.build.edit.cancel for cancel_build_selection. During playable combat, use packet.combat.combat and packet.combat.board; waiting combat packets may omit combat details and should only drive the nextStep action. Compact combat packets omit legalActions and raw board affordance arrays and include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available. Post-fight packets can include packet.review and packet.sharedDebrief. packet.legalActions appears only on compatibility surfaces.',
+                'Current AgentConnection packet. During build, use packet.build, including packet.build.edit.cancel for cancel_build_selection. During playable combat, use packet.combat.combat and packet.combat.board; waiting combat packets may omit combat details and should only drive the nextStep action. Compact combat packets include fightStartedAt, fightDeadlineAt, fightSeconds, and cutoffReason when available. Post-fight packets can include packet.review and packet.sharedDebrief.',
             },
             continuation: {
               $ref: '#/components/schemas/GptContinuationHint',

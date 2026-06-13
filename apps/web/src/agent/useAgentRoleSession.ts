@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
+  AgentConnectionResponse,
   AgentBootstrapResponse,
-  CombatRoundPlanSubmission,
-  GameMasterActionResponse,
+  CompactCombatPlanSubmission,
   TeamIdentity,
 } from '../../../../packages/schemas/src/index.js'
 import type {
@@ -192,7 +192,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
       ])
       const roleStateWithIdentity = rememberTeamIdentity({
         ...privateState,
-        gameMaster: privateState.gameMaster ?? bootstrap,
+        agentPacket: privateState.agentPacket ?? bootstrap,
       }, input.teamIdentity)
 
       setRoleState(roleStateWithIdentity)
@@ -217,14 +217,14 @@ export function useAgentRoleSession(invite: AgentInvite) {
     }
   }, [client, invite, rememberTeamIdentity])
 
-  const waitForGameMasterPacket = useCallback(async (
+  const waitForAgentPacket = useCallback(async (
     options?: AgentWaitOptions,
   ): Promise<AgentBootstrapResponse> => {
     setStatus('loading')
     setLastError(null)
 
     try {
-      const packet = await client.waitForGameMasterPacket(options)
+      const packet = await client.waitForAgentPacket(options)
 
       if (invite.claimToken) {
         writeStoredRoleToken(window.sessionStorage, invite, invite.claimToken)
@@ -238,7 +238,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
       ])
       const roleStateWithIdentity = rememberTeamIdentity({
         ...privateState,
-        gameMaster: privateState.gameMaster ?? packet,
+        agentPacket: privateState.agentPacket ?? packet,
       })
 
       setRoleState(roleStateWithIdentity)
@@ -254,8 +254,8 @@ export function useAgentRoleSession(invite: AgentInvite) {
   }, [client, invite, rememberTeamIdentity])
 
   const submitCombatPlan = useCallback(async (
-    submission: CombatRoundPlanSubmission,
-  ): Promise<GameMasterActionResponse> => {
+    submission: CompactCombatPlanSubmission,
+  ): Promise<AgentConnectionResponse<PublicSessionState>> => {
     setStatus('loading')
     setLastError(null)
 
@@ -268,7 +268,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
       setRoleState(rememberTeamIdentity({
         ...privateState,
-        gameMaster: privateState.gameMaster ?? response.packet,
+        agentPacket: privateState.agentPacket ?? response.packet,
       }))
       setPublicState(redactedState)
 
@@ -302,7 +302,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
 
           return bootstrap
         },
-        waitForGameMasterPacket,
+        waitForAgentPacket,
       },
       setCurrentState: (state) => {
         setRoleState(rememberTeamIdentity(state))
@@ -319,7 +319,7 @@ export function useAgentRoleSession(invite: AgentInvite) {
     invite,
     rememberTeamIdentity,
     submitCombatPlan,
-    waitForGameMasterPacket,
+    waitForAgentPacket,
   ])
 
   const clearRoleToken = useCallback(() => {

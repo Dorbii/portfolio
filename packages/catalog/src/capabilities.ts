@@ -337,7 +337,7 @@ const CAPABILITY_DEFINITIONS: readonly CapabilityDefinition[] = [
     nearMiss: (part) => part.category === 'weapon' || part.behavior?.id === 'sensor',
     executionRules: [
       'Pair range pressure with movement or control so the opponent cannot freely close.',
-      'Fire only when the current GameMasterPacket makes a weapon action legal and useful.',
+      'Fire only when the current AgentConnectionPacket makes a weapon action legal and useful.',
     ],
     commonErrors: [
       'Buying a ranged weapon but submitting close-only movement.',
@@ -695,7 +695,7 @@ function companionNeedsForPart(part: PartDefinition): readonly string[] {
   }
 
   if (part.category === 'utility') {
-    return ['timing from the current GameMasterPacket', 'protection if the utility is fragile']
+    return ['timing from the current AgentConnectionPacket', 'protection if the utility is fragile']
   }
 
   if (part.category === 'body') {

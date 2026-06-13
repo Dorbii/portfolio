@@ -6643,8 +6643,8 @@ test('agent bootstrap uses the invite claim token as a reusable player key', asy
   assert.equal(preBootstrapState.ok, true)
   assert.equal(preBootstrapState.value.role, 'red')
   assert.equal(preBootstrapState.value.identity, undefined)
-  assert.equal(preBootstrapState.value.gameMaster.phase, 'wait_for_opponent_claim')
-  assert.equal(preBootstrapState.value.gameMaster.nextAction, 'wait_for_opponent_claim')
+  assert.equal(preBootstrapState.value.agentPacket.phase, 'wait_for_opponent_claim')
+  assert.equal(preBootstrapState.value.agentPacket.nextAction, 'wait_for_opponent_claim')
 
   const missingIdentity = await session.bootstrapRole('red', 'claim_red', {
     agentName: 'external-red',
@@ -6883,8 +6883,8 @@ test('post-fight reflections are accepted only after completed fights and consum
   const publicState = loaded.getPublicState()
 
   assert.equal(blueState.ok, true)
-  assert.equal(blueState.value.gameMaster.nextAction, 'submit_reflection')
-  assert.deepEqual(blueState.value.gameMaster.review.reflection, {
+  assert.equal(blueState.value.agentPacket.nextAction, 'submit_reflection')
+  assert.deepEqual(blueState.value.agentPacket.review.reflection, {
     required: true,
     submitted: false,
     opponentSubmitted: true,
@@ -6895,7 +6895,7 @@ test('post-fight reflections are accepted only after completed fights and consum
   const blueSubmitted = await loaded.submitPostFightReflection(
     blueToken,
     postFightReflection('blue', {
-      decisionVersion: blueState.value.gameMaster.decisionVersion,
+      decisionVersion: blueState.value.agentPacket.decisionVersion,
     }),
   )
 
@@ -7042,7 +7042,7 @@ test('post-fight reflection lifecycle is private pending until debrief consumpti
   const reflection = await loaded.submitPostFightReflection(
     redToken,
     postFightReflection('red', {
-      decisionVersion: redStateBeforeReflection.value.gameMaster.decisionVersion,
+      decisionVersion: redStateBeforeReflection.value.agentPacket.decisionVersion,
     }),
   )
 
@@ -7072,7 +7072,7 @@ test('post-fight reflection lifecycle is private pending until debrief consumpti
   const lateReflection = await loaded.submitPostFightReflection(
     blueToken,
     postFightReflection('blue', {
-      decisionVersion: blueState.value.gameMaster.decisionVersion,
+      decisionVersion: blueState.value.agentPacket.decisionVersion,
     }),
   )
   const afterLateReflection = loaded.exportState()
@@ -7192,8 +7192,8 @@ test('session resolves after both confirmed loadouts while keeping public state 
   assert.equal(blueSubmission.value.publicState.roundPlan, undefined)
   assert.equal(blueSubmission.value.publicState.combat.tick, 1)
   assert.equal(blueState.ok, true)
-  assert.equal(blueState.value.gameMaster.nextAction, 'wait_for_opponent_turn')
-  assert.equal(blueState.value.gameMaster.legalActions.length, 0)
+  assert.equal(blueState.value.agentPacket.nextAction, 'wait_for_opponent_turn')
+  assert.equal(blueState.value.agentPacket.legalActions, undefined)
   assert.equal(blueState.value.combat.turnSeconds, 60)
   assert.equal(blueState.value.combat.self.role, 'blue')
   assert.equal(blueState.value.combat.opponent.role, 'red')

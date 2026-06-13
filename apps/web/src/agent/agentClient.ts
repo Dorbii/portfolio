@@ -1,10 +1,10 @@
 import type {
+  AgentConnectionPacket,
+  AgentConnectionSurrenderSubmission,
+  AgentConnectionResponse,
   CompactBuildActionSubmission,
   AgentBootstrapResponse,
-  CombatRoundPlanSubmission,
-  GameMasterActionResponse,
-  GameMasterActionSubmission,
-  GameMasterPacket,
+  CompactCombatPlanSubmission,
   PostFightReflectionPostRequest,
   PostFightReflectionResponse,
   RelayErrorCode,
@@ -70,23 +70,15 @@ export {
 const DEFAULT_WAIT_POLL_MS = 4_000
 const DEFAULT_WAIT_TIMEOUT_MS = 10 * 60_000
 const MIN_WAIT_POLL_MS = 1_000
-const TERMINAL_GAME_MASTER_PHASES = new Set<GameMasterPacket['phase']>([
+const TERMINAL_AGENT_PHASES = new Set<AgentConnectionPacket['phase']>([
   'session_complete',
   'expired',
 ])
-const READY_WITHOUT_LEGAL_ACTIONS = new Set<GameMasterPacket['nextAction']>([
+const READY_WITHOUT_PACKET_ACTION = new Set<AgentConnectionPacket['nextAction']>([
   'submit_reflection',
   'view_replay',
   'session_complete',
   'stop',
-])
-const GAME_MASTER_ACTION_BODY_KEYS = new Set([
-  'action',
-  'actionSetId',
-  'decisionVersion',
-  'actionId',
-  'parameters',
-  'publicMessage',
 ])
 
 function isRelayErrorResponse(value: unknown): value is RelayErrorResponse {
@@ -139,7 +131,7 @@ async function waitBeforePollingAgain(
   input: {
     target: string
     lastPhase?: SessionPhase
-    lastNextAction?: GameMasterPacket['nextAction']
+    lastNextAction?: AgentConnectionPacket['nextAction']
     lastStateVersion?: string
   },
 ): Promise<void> {
@@ -204,10 +196,10 @@ function formatRelayIssueSummary(issues: RelayErrorResponse['error']['issues'] |
 }
 
 function hasNextPlayablePacket(
-  packet: GameMasterPacket,
+  packet: AgentConnectionPacket,
   options: AgentWaitOptions = {},
 ): boolean {
-  if (TERMINAL_GAME_MASTER_PHASES.has(packet.phase)) {
+  if (TERMINAL_AGENT_PHASES.has(packet.phase)) {
     return true
   }
 
@@ -218,57 +210,19 @@ function hasNextPlayablePacket(
     return true
   }
 
-  if (READY_WITHOUT_LEGAL_ACTIONS.has(packet.nextAction)) {
+  if (READY_WITHOUT_PACKET_ACTION.has(packet.nextAction)) {
     return true
   }
 
-  if (packet.phase === 'combat_turn' && packet.combat && !packet.combat.submitted) {
+  if (packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn' && packet.combat) {
     return true
   }
 
-  // Compact build packets are playable without legal action menus.
-  if (packet.phase === 'choose_loadout' && packet.build) {
+  if (packet.phase === 'choose_loadout' && packet.nextAction === 'build_bot' && packet.build) {
     return true
   }
 
-  return options.requireLegalActions === false || packet.legalActions.length > 0
-}
-
-function exactGameMasterActionBody(
-  input: GameMasterActionSubmission,
-): GameMasterActionSubmission {
-  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new AgentArenaApiError({
-      status: 400,
-      code: 'INVALID_REQUEST',
-      message: 'submitAction expects a GameMaster action object.',
-    })
-  }
-
-  const extraKeys = Object.keys(input).filter((key) => !GAME_MASTER_ACTION_BODY_KEYS.has(key))
-
-  if (extraKeys.length > 0) {
-    throw new AgentArenaApiError({
-      status: 400,
-      code: 'INVALID_REQUEST',
-      message:
-        'submitAction accepts the GameMaster action fields: action, actionSetId, decisionVersion, actionId, parameters, and publicMessage.',
-      issues: extraKeys.map((key) => ({
-        code: 'UNSUPPORTED_FIELD',
-        path: key,
-        message: 'Remove this field and submit only fields supported by GameMaster action submissions.',
-      })),
-    })
-  }
-
-  return {
-    action: input.action,
-    actionSetId: input.actionSetId,
-    decisionVersion: input.decisionVersion,
-    actionId: input.actionId,
-    ...(input.parameters !== undefined ? { parameters: input.parameters } : {}),
-    ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
-  }
+  return false
 }
 
 const COMPACT_BUILD_ACTION_BODY_KEYS = new Set([
@@ -277,6 +231,11 @@ const COMPACT_BUILD_ACTION_BODY_KEYS = new Set([
   'buildDigest',
   'step',
   'command',
+  'publicMessage',
+])
+const COMPACT_SURRENDER_BODY_KEYS = new Set([
+  'action',
+  'decisionVersion',
   'publicMessage',
 ])
 
@@ -318,21 +277,54 @@ function exactCompactBuildActionBody(
 }
 
 function exactCombatRoundPlanBody(
-  input: CombatRoundPlanSubmission,
-): CombatRoundPlanSubmission {
+  input: CompactCombatPlanSubmission,
+): CompactCombatPlanSubmission {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     throw new AgentArenaApiError({
       status: 400,
       code: 'INVALID_REQUEST',
-      message: 'submitCombatPlan expects a CombatRoundPlanSubmission object.',
+      message: 'submitCombatPlan expects a compact combat plan submission object.',
     })
   }
 
   return {
-    action: 'submit_combat_round_plan',
+    action: 'submit_combat_plan',
     decisionVersion: input.decisionVersion,
     round: input.round,
     steps: input.steps.map((step) => ({ ...step })),
+    ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
+  }
+}
+
+function exactSurrenderBody(
+  input: AgentConnectionSurrenderSubmission,
+): AgentConnectionSurrenderSubmission {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message: 'surrender expects a compact surrender submission object.',
+    })
+  }
+
+  const extraKeys = Object.keys(input).filter((key) => !COMPACT_SURRENDER_BODY_KEYS.has(key))
+
+  if (extraKeys.length > 0) {
+    throw new AgentArenaApiError({
+      status: 400,
+      code: 'INVALID_REQUEST',
+      message: 'surrender accepts only action, decisionVersion, and publicMessage.',
+      issues: extraKeys.map((key) => ({
+        code: 'UNSUPPORTED_FIELD',
+        path: key,
+        message: 'Remove this field and submit only compact surrender fields.',
+      })),
+    })
+  }
+
+  return {
+    action: 'surrender',
+    decisionVersion: input.decisionVersion,
     ...(input.publicMessage !== undefined ? { publicMessage: input.publicMessage } : {}),
   }
 }
@@ -439,23 +431,10 @@ export class AgentArenaClient {
     )
   }
 
-  async submitAction(
-    submission: GameMasterActionSubmission,
-  ): Promise<GameMasterActionResponse> {
-    return this.requestJson<GameMasterActionResponse>(
-      `/sessions/${encodeURIComponent(this.invite.sessionId)}/action`,
-      {
-        method: 'POST',
-        headers: this.authorizationHeaders(),
-        body: JSON.stringify(exactGameMasterActionBody(submission)),
-      },
-    )
-  }
-
   async submitBuildAction(
     submission: CompactBuildActionSubmission,
-  ): Promise<GameMasterActionResponse> {
-    return this.requestJson<GameMasterActionResponse>(
+  ): Promise<AgentConnectionResponse<PublicSessionState>> {
+    return this.requestJson<AgentConnectionResponse<PublicSessionState>>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/build-action`,
       {
         method: 'POST',
@@ -466,14 +445,27 @@ export class AgentArenaClient {
   }
 
   async submitCombatPlan(
-    submission: CombatRoundPlanSubmission,
-  ): Promise<GameMasterActionResponse> {
-    return this.requestJson<GameMasterActionResponse>(
+    submission: CompactCombatPlanSubmission,
+  ): Promise<AgentConnectionResponse<PublicSessionState>> {
+    return this.requestJson<AgentConnectionResponse<PublicSessionState>>(
       `/sessions/${encodeURIComponent(this.invite.sessionId)}/combat-plan`,
       {
         method: 'POST',
         headers: this.authorizationHeaders(),
         body: JSON.stringify(exactCombatRoundPlanBody(submission)),
+      },
+    )
+  }
+
+  async surrender(
+    submission: AgentConnectionSurrenderSubmission,
+  ): Promise<AgentConnectionResponse<PublicSessionState>> {
+    return this.requestJson<AgentConnectionResponse<PublicSessionState>>(
+      `/sessions/${encodeURIComponent(this.invite.sessionId)}/action`,
+      {
+        method: 'POST',
+        headers: this.authorizationHeaders(),
+        body: JSON.stringify(exactSurrenderBody(submission)),
       },
     )
   }
@@ -628,9 +620,9 @@ export class AgentArenaClient {
     }
   }
 
-  async waitForGameMasterPacket(options?: AgentWaitOptions): Promise<GameMasterPacket> {
+  async waitForAgentPacket(options?: AgentWaitOptions): Promise<AgentConnectionPacket> {
     const config = waitConfig(options)
-    let packet = await this.fetchCurrentGameMasterPacket()
+    let packet = await this.fetchCurrentAgentPacket()
 
     for (;;) {
       if (hasNextPlayablePacket(packet, options)) {
@@ -638,13 +630,13 @@ export class AgentArenaClient {
       }
 
       await waitBeforePollingAgain(config, {
-        target: 'next GameMasterPacket with legalActions',
+        target: 'next playable agent packet',
         lastPhase: packet.phase as SessionPhase,
         lastNextAction: packet.nextAction,
         lastStateVersion: `eventVersion ${packet.eventVersion}`,
       })
 
-      packet = await this.getRoleStateGameMasterPacket()
+      packet = await this.getRoleStateAgentPacket()
     }
   }
 
@@ -697,26 +689,26 @@ export class AgentArenaClient {
     return payload as T
   }
 
-  private async fetchCurrentGameMasterPacket(): Promise<GameMasterPacket> {
+  private async fetchCurrentAgentPacket(): Promise<AgentConnectionPacket> {
     try {
-      return await this.getRoleStateGameMasterPacket()
+      return await this.getRoleStateAgentPacket()
     } catch {
       return this.bootstrapRole()
     }
   }
 
-  private async getRoleStateGameMasterPacket(): Promise<GameMasterPacket> {
+  private async getRoleStateAgentPacket(): Promise<AgentConnectionPacket> {
     const state = await this.getState()
 
-    if (!state.gameMaster) {
+    if (!state.agentPacket) {
       throw new AgentArenaApiError({
         status: 409,
         code: 'INVALID_REQUEST',
-        message: 'Role state did not include a GameMasterPacket.',
+        message: 'Role state did not include an AgentConnectionPacket.',
       })
     }
 
-    return state.gameMaster
+    return state.agentPacket
   }
 }
 

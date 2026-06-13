@@ -1,16 +1,17 @@
 import type {
   AgentBootstrapResponse,
-  CombatRoundPlanSubmission,
+  AgentConnectionPacket,
+  AgentConnectionResponse,
+  AgentConnectionSurrenderSubmission,
   CompactBuildActionSubmission,
-  GameMasterActionResponse,
-  GameMasterActionSubmission,
-  GameMasterPacket,
+  CompactCombatPlanSubmission,
   PostFightReflectionPostRequest,
   PostFightReflectionResponse,
 } from '../../../../packages/schemas/src/index.js'
 import type {
   AgentChatMessagePostRequest,
   AgentChatMessageResponse,
+  PublicSessionState,
   RolePrivateState,
 } from './agentSessionTypes.js'
 import type {
@@ -25,14 +26,14 @@ export type AgentArenaRoleClient = {
   bootstrapRole: AgentArenaRoleApi['bootstrapRole']
   getState: AgentArenaRoleApi['getState']
   sendChatMessage?: AgentArenaRoleApi['sendChatMessage']
-  submitAction: AgentArenaRoleApi['submitAction']
   submitBuildAction?: AgentArenaRoleApi['submitBuildAction']
   submitCombatPlan?: AgentArenaRoleApi['submitCombatPlan']
+  surrender?: AgentArenaRoleApi['surrender']
   submitChatMessage?: (
     input: AgentChatMessagePostRequest | string,
   ) => Promise<AgentChatMessageResponse>
   submitPostFightReflection: AgentArenaRoleApi['submitPostFightReflection']
-  waitForGameMasterPacket: AgentArenaRoleApi['waitForGameMasterPacket']
+  waitForAgentPacket: AgentArenaRoleApi['waitForAgentPacket']
 }
 
 export function getValidAgentActions(
@@ -49,7 +50,7 @@ export function getValidAgentActions(
       ...(state ? {} : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'wait_for_game_master_packet',
+      name: 'wait_for_agent_packet',
       available: Boolean(state && !TERMINAL_PHASES.has(state.phase)),
       ...(state
         ? TERMINAL_PHASES.has(state.phase)
@@ -58,45 +59,39 @@ export function getValidAgentActions(
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'submit_game_action',
-      available: Boolean(state?.gameMaster?.legalActions?.length),
-      ...(state
-        ? state.gameMaster?.legalActions?.length
-          ? {}
-          : {
-              reason: state.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build
-                ? 'The compact build packet has no legacy legalActions; use submit_build_action.'
-                : 'The current GameMasterPacket has no legacy legalActions to submit.',
-            }
-        : { reason: 'Role has not been claimed in this browser.' }),
-    },
-    {
       name: 'submit_build_action',
-      available: Boolean(state?.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build),
+      available: Boolean(state?.agentPacket?.phase === 'choose_loadout' && state.agentPacket?.nextAction === 'build_bot' && state.agentPacket?.build),
       ...(state
-        ? state.gameMaster?.phase === 'choose_loadout' && state.gameMaster?.build
+        ? state.agentPacket?.phase === 'choose_loadout' && state.agentPacket?.nextAction === 'build_bot' && state.agentPacket?.build
           ? {}
           : { reason: 'Compact build actions are only available during the build phase with packet.build present.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
-      name: 'submit_combat_round_plan',
-      available: Boolean(state?.gameMaster?.combat && !state.gameMaster.combat.submitted),
+      name: 'submit_combat_plan',
+      available: Boolean(state?.agentPacket?.phase === 'combat_turn' && state.agentPacket.nextAction === 'choose_turn' && state.agentPacket.combat),
       ...(state
-        ? state.gameMaster?.combat
-          ? state.gameMaster.combat.submitted
-            ? { reason: 'A combat round plan is already submitted for this round.' }
-            : {}
-          : { reason: 'The current GameMasterPacket is not a lockstep combat planning packet.' }
+        ? state.agentPacket?.phase === 'combat_turn' && state.agentPacket.nextAction === 'choose_turn' && state.agentPacket.combat
+          ? {}
+          : { reason: 'The current agent packet is not a playable combat packet.' }
+        : { reason: 'Role has not been claimed in this browser.' }),
+    },
+    {
+      name: 'surrender',
+      available: Boolean(state?.agentPacket?.phase === 'combat_turn'),
+      ...(state
+        ? state.agentPacket?.phase === 'combat_turn'
+          ? {}
+          : { reason: 'Surrender is only available during combat.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
       name: 'submit_post_fight_reflection',
-      available: Boolean(state?.gameMaster?.nextAction === 'submit_reflection'),
+      available: Boolean(state?.agentPacket?.nextAction === 'submit_reflection'),
       ...(state
-        ? state.gameMaster?.nextAction === 'submit_reflection'
+        ? state.agentPacket?.nextAction === 'submit_reflection'
           ? {}
-          : { reason: 'Private reflection is only available when requested by the GameMasterPacket.' }
+          : { reason: 'Private reflection is only available when requested by the agent packet.' }
         : { reason: 'Role has not been claimed in this browser.' }),
     },
     {
@@ -116,19 +111,19 @@ export type AgentArenaRoleApiOptions = {
   sendChatMessage?: (
     input: AgentChatMessagePostRequest | string,
   ) => Promise<AgentChatMessageResponse>
-  submitAction?: (
-    submission: GameMasterActionSubmission,
-  ) => Promise<GameMasterActionResponse>
   submitBuildAction?: (
     submission: CompactBuildActionSubmission,
-  ) => Promise<GameMasterActionResponse>
+  ) => Promise<AgentConnectionResponse<PublicSessionState>>
   submitCombatPlan?: (
-    submission: CombatRoundPlanSubmission,
-  ) => Promise<GameMasterActionResponse>
+    submission: CompactCombatPlanSubmission,
+  ) => Promise<AgentConnectionResponse<PublicSessionState>>
+  surrender?: (
+    submission: AgentConnectionSurrenderSubmission,
+  ) => Promise<AgentConnectionResponse<PublicSessionState>>
   submitPostFightReflection?: (
     reflection: PostFightReflectionPostRequest,
   ) => Promise<PostFightReflectionResponse>
-  waitForGameMasterPacket?: (options?: AgentWaitOptions) => Promise<GameMasterPacket>
+  waitForAgentPacket?: (options?: AgentWaitOptions) => Promise<AgentConnectionPacket>
 }
 
 export function createAgentArenaRoleApi(
@@ -139,11 +134,9 @@ export function createAgentArenaRoleApi(
   return {
     bootstrapRole: (input) => options.bootstrapRole?.(input) ?? client.bootstrapRole(input),
     getState: () => client.getState(),
-    waitForGameMasterPacket: (waitOptions) =>
-      options.waitForGameMasterPacket?.(waitOptions) ??
-        client.waitForGameMasterPacket(waitOptions),
-    submitAction: (submission) =>
-      options.submitAction?.(submission) ?? client.submitAction(submission),
+    waitForAgentPacket: (waitOptions) =>
+      options.waitForAgentPacket?.(waitOptions) ??
+        client.waitForAgentPacket(waitOptions),
     submitBuildAction: (submission) =>
       options.submitBuildAction?.(submission) ??
         client.submitBuildAction?.(submission) ??
@@ -152,6 +145,10 @@ export function createAgentArenaRoleApi(
       options.submitCombatPlan?.(submission) ??
         client.submitCombatPlan?.(submission) ??
         Promise.reject(new Error('submitCombatPlan is unavailable for this client.')),
+    surrender: (submission) =>
+      options.surrender?.(submission) ??
+        client.surrender?.(submission) ??
+        Promise.reject(new Error('surrender is unavailable for this client.')),
     submitPostFightReflection: (reflection) =>
       options.submitPostFightReflection?.(reflection) ??
         client.submitPostFightReflection(reflection),

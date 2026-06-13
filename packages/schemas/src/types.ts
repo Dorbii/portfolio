@@ -1705,3 +1705,89 @@ export type CompactCombatPlanSubmission = {
   steps: CompactCombatPlanStep[]
   publicMessage?: string
 }
+
+export type AgentConnectionSurrenderSubmission = {
+  action: 'surrender'
+  decisionVersion: number
+  publicMessage?: string
+}
+
+export type AgentConnectionAction =
+  | CompactBuildActionSubmission
+  | CompactCombatPlanSubmission
+  | AgentConnectionSurrenderSubmission
+
+export type AgentConnectionPacket = {
+  sessionId: string
+  role: TeamRole
+  phase: GameMasterPhase
+  nextAction: GameMasterNextAction
+  round: number
+  fightId?: string
+  decisionVersion: number
+  eventVersion: number
+  instruction: string
+  resources?: AgentResourcesView
+  build?: CompactBuildPacket
+  combat?: CompactCombatPacket
+  review?: GameMasterReviewMetadata
+  sharedDebrief?: SharedDebrief
+}
+
+export type AgentConnectionResponse<TPublicState = unknown> = {
+  packet: AgentConnectionPacket
+  publicState?: TPublicState
+}
+
+export function toAgentConnectionPacket(packet: GameMasterPacket): AgentConnectionPacket {
+  return {
+    sessionId: packet.sessionId,
+    role: packet.role,
+    phase: packet.phase,
+    nextAction: packet.nextAction,
+    round: packet.round,
+    ...(packet.fightId ? { fightId: packet.fightId } : {}),
+    decisionVersion: packet.decisionVersion,
+    eventVersion: packet.eventVersion,
+    instruction: agentConnectionInstruction(packet),
+    ...(packet.resources ? { resources: packet.resources } : {}),
+    ...(packet.phase === 'choose_loadout' && packet.build ? { build: packet.build } : {}),
+    ...(packet.phase === 'combat_turn' && packet.nextAction === 'choose_turn' && packet.combatCompact
+      ? { combat: packet.combatCompact }
+      : {}),
+    ...(packet.review ? { review: packet.review } : {}),
+    ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
+  }
+}
+
+function agentConnectionInstruction(packet: GameMasterPacket): string {
+  if (packet.phase === 'choose_loadout') {
+    if (packet.nextAction === 'wait_for_opponent_loadout') {
+      return 'Loadout locked; keep polling until combat, review, completion, or expiry.'
+    }
+
+    return 'Build phase: read packet.build and submit one compact build action.'
+  }
+
+  if (packet.phase === 'combat_turn') {
+    if (packet.nextAction !== 'choose_turn') {
+      return 'Combat decision is not currently open for this role; keep polling for the next playable packet.'
+    }
+
+    return 'Combat: read packet.combat.combat and packet.combat.board, then submit one compact combat plan. The server validates movement, terrain, range, line of sight, cooldowns, and action time.'
+  }
+
+  if (packet.nextAction === 'submit_reflection') {
+    return 'Submit a private post-fight reflection for the completed fight. Do not include hidden chain-of-thought.'
+  }
+
+  if (packet.nextAction === 'view_replay') {
+    return 'Review is available; use the replay or debrief surfaces if needed, otherwise continue polling for the next round.'
+  }
+
+  if (packet.nextAction === 'session_complete' || packet.nextAction === 'stop') {
+    return 'Session is complete; no further agent action is required.'
+  }
+
+  return 'Wait for the next playable agent packet.'
+}

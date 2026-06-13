@@ -173,7 +173,7 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
           },
         }
       : {}),
-    gameMaster: buildGameMasterPublicSummary(state),
+    agent: buildAgentPublicSummary(state),
     replayStatus: replayStatus(state),
     replayAvailable,
     ...(replayAvailable ? { replayVersion: replayVersion(state) } : {}),
@@ -267,10 +267,10 @@ function buildPublicContinuationState(
   }
 }
 
-function buildGameMasterPublicSummary(
+function buildAgentPublicSummary(
   state: StoredSessionState,
-): LegacyPublicSessionState['gameMaster'] {
-  const summaries: NonNullable<LegacyPublicSessionState['gameMaster']> = {}
+): LegacyPublicSessionState['agent'] {
+  const summaries: NonNullable<LegacyPublicSessionState['agent']> = {}
 
   for (const roleName of ['red', 'blue'] as const) {
     const activeSet = state.activeActionSets?.[roleName]
@@ -286,7 +286,6 @@ function buildGameMasterPublicSummary(
         : nextActionForPhase(activeSet.phase),
       decisionVersion: activeSet.decisionVersion,
       eventVersion: state.eventLog.length + state.chatLog.length,
-      actionSetId: activeSet.actionSetId,
     }
   }
 

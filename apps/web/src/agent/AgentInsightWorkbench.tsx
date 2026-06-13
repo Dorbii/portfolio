@@ -10,7 +10,7 @@ import type {
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import { canonicalPartIdFromCompact } from '../../../../packages/sim/src/compactPartAliases.js'
-import { formatCatalogLabel } from '../../../../packages/catalog/src/index.js'
+import { PART_CATALOG, formatCatalogLabel } from '../../../../packages/catalog/src/index.js'
 import type {
   ConfirmedLoadoutView,
   RolePrivateState,
@@ -49,10 +49,9 @@ export function AgentInsightWorkbench({
   const [activeDetailTab, setActiveDetailTab] = useState<WorkbenchDetailTab>('equipped')
   const loadout = roleState?.ownLoadout ?? null
   const blueprint = loadout?.blueprint ?? null
-  const legalActions = roleState?.gameMaster?.legalActions ?? []
-  const combatPacket = roleState?.gameMaster?.combat
-  const combatBoard = roleState?.gameMaster?.board
-  const catalogById = createCatalogLookup(roleState)
+  const agentPacket = roleState?.agentPacket
+  const combatPacket = agentPacket?.combat
+  const catalogById = createCatalogLookup()
   const loadoutParts = createLoadoutPartReadouts(roleState, loadout, catalogById)
   const storeOffers = createStoreOfferReadouts(roleState, catalogById)
   const foundationOffers = createFoundationPartReadouts(roleState, catalogById)
@@ -84,8 +83,8 @@ export function AgentInsightWorkbench({
         <PlanMetric label="Blueprint" value={blueprint ? `${blueprint.blocks.length} blocks` : 'No blueprint'} />
         <PlanMetric
           label={combatPacket ? 'Combat plan' : roleState?.phase === 'combat_turn' ? 'Board actions' : 'Actions'}
-          tone={combatPacket && !combatPacket.submitted ? 'ok' : legalActions.length > 0 ? 'ok' : undefined}
-          value={combatPacket ? formatCombatPlanMetric(combatPacket, combatBoard) : formatActionMetric(legalActions.length)}
+          tone={combatPacket ? 'ok' : agentPacket?.nextAction === 'build_bot' ? 'ok' : undefined}
+          value={combatPacket ? formatCombatPlanMetric(combatPacket) : formatActionMetric(agentPacket?.nextAction)}
         />
         <PlanMetric
           label="Store"
@@ -560,33 +559,22 @@ function NoRoleStatePanel() {
   )
 }
 
-function formatActionMetric(legalActionCount: number): string {
-  return legalActionCount > 0 ? `${legalActionCount} legal` : 'No actions'
+function formatActionMetric(nextAction: string | undefined): string {
+  return nextAction ? formatLabel(nextAction) : 'No actions'
 }
 
 function formatCombatPlanMetric(
-  combat: NonNullable<RolePrivateState['gameMaster']>['combat'],
-  board: NonNullable<RolePrivateState['gameMaster']>['board'] | undefined,
+  combat: NonNullable<RolePrivateState['agentPacket']>['combat'],
 ): string {
   if (!combat) {
     return 'No combat packet'
   }
 
-  if (combat.submitted) {
-    return 'Plan submitted'
-  }
-
-  return `${combat.budget.movement} move / ${combat.budget.actionTime} time / ${board?.reachableCells?.length ?? 0} cells`
+  return `${combat.combat.budget.actionTime} time / ${combat.board.grid.join(',')} grid`
 }
 
-function createCatalogLookup(state: RolePrivateState | null): Map<string, PartDefinition> {
-  const parts = state?.gameMaster?.catalog?.parts
-
-  if (!Array.isArray(parts)) {
-    return new Map()
-  }
-
-  return new Map(parts.filter(isPartDefinition).map((part) => [part.id, part]))
+function createCatalogLookup(): Map<string, PartDefinition> {
+  return new Map(PART_CATALOG.filter(isPartDefinition).map((part) => [part.id, part]))
 }
 
 function createLoadoutPartReadouts(
@@ -594,11 +582,7 @@ function createLoadoutPartReadouts(
   loadout: ConfirmedLoadoutView | null,
   catalogById: Map<string, PartDefinition>,
 ): LoadoutPartReadout[] {
-  const buildState = state?.gameMaster?.buildState
-  const currentMachine = buildState?.currentDesign.version === 'machine:v1'
-    ? buildState.currentDesign.machine
-    : undefined
-  const machine = loadout?.machineDesign ?? currentMachine
+  const machine = loadout?.machineDesign
 
   if (machine) {
     return machine.parts.map((part) => machinePartReadout(part, machine, state, catalogById))
@@ -613,20 +597,14 @@ function createStoreOfferReadouts(
 ): CatalogPartReadout[] {
   // Compact build packet is the primary protocol surface; legacy store slots
   // remain a migration fallback only.
-  const compactOffers = state?.gameMaster?.build?.store?.offers
+  const compactOffers = state?.agentPacket?.build?.store?.offers
 
   if (compactOffers) {
     return compactOffers.map((offer, index) =>
       compactStorePartReadout(offer, `offer.${index}`, 'Offer', catalogById))
   }
 
-  return (state?.gameMaster?.store?.slots ?? []).map((slot) =>
-    catalogPartReadout({
-      catalogById,
-      id: slot.id,
-      partId: slot.partId,
-      status: formatCatalogLabel(slot.kind),
-    }))
+  return []
 }
 
 function compactStorePartReadout(
@@ -652,20 +630,14 @@ function createFoundationPartReadouts(
   state: RolePrivateState | null,
   catalogById: Map<string, PartDefinition>,
 ): CatalogPartReadout[] {
-  const compactFoundation = state?.gameMaster?.build?.store?.foundation
+  const compactFoundation = state?.agentPacket?.build?.store?.foundation
 
   if (compactFoundation) {
     return compactFoundation.map((part, index) =>
       compactStorePartReadout(part, `foundation.${index}`, 'Foundation', catalogById))
   }
 
-  return (state?.gameMaster?.store?.foundationPartIds ?? []).map((partId) =>
-    catalogPartReadout({
-      catalogById,
-      id: `foundation.${partId}`,
-      partId,
-      status: 'Foundation',
-    }))
+  return []
 }
 
 function createInventoryPartReadouts(
@@ -767,7 +739,7 @@ function createBuildSnapshot({
   roleState,
   storeOffers,
 }: BuildSnapshotInput): BuildSnapshotReadout {
-  const compactBuild = roleState?.gameMaster?.build
+  const compactBuild = roleState?.agentPacket?.build
   const remaining = typeof compactBuild?.budget.parts === 'number'
     ? Math.max(0, Math.floor(compactBuild.budget.parts))
     : null

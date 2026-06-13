@@ -5,6 +5,7 @@ import type {
   CombatBotSnapshot,
   CombatTurnSnapshot,
   GeneratedControls,
+  AgentConnectionPacket,
   GameMasterNextAction,
   GameMasterPacket,
   InventoryItem,
@@ -111,7 +112,7 @@ export type LegacyPublicSessionState = {
   roles: Record<TeamRole, LegacyRolePublicState>
   roundPlan?: LegacyLoadoutWindowState
   combat?: LegacyCombatTurnPublicState
-  gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  agent?: Partial<Record<TeamRole, Pick<AgentConnectionPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion'>>>
   replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
   replayVersion?: string
@@ -149,7 +150,7 @@ export type LegacyRolePrivateState = Partial<TeamEconomySummary> & {
   ownLoadout?: LegacyConfirmedLoadoutView
   roundPlan?: LegacyLoadoutWindowState
   combat?: LegacyCombatTurnPrivateState
-  gameMaster?: GameMasterPacket
+  agentPacket?: AgentConnectionPacket
   opponent: LegacyRolePublicState
   replayAvailable: boolean
   lastResult?: LegacyCombatSummary
@@ -241,7 +242,7 @@ export type LegacyPostFightReflectionReceipt = {
 
 export type LegacyPostFightReflectionResponse = {
   reflection: LegacyPostFightReflectionReceipt
-  packet: GameMasterPacket
+  packet: AgentConnectionPacket
 }
 
 export type LegacyPostFightReflectionPostRequest = PostFightAgentReflection

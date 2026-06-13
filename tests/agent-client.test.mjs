@@ -32,30 +32,11 @@ const gameMasterPacket = {
   round: 1,
   decisionVersion: 1,
   eventVersion: 1,
-  actionSetId: 'red:r1:loadout:v1',
-  instruction: 'Choose exactly one legal loadout action.',
+  instruction: 'Build phase: read packet.build and submit one compact build action.',
   resources: {
     gold: 100,
     remainingGold: 100,
     partLimitRemaining: 64,
-  },
-  legalActions: [
-    {
-      id: 'loadout.red.r1.confirm',
-      kind: 'confirm_loadout',
-      label: 'Confirm loadout',
-      summary: 'Lock the current bot design.',
-    },
-  ],
-  submit: {
-    method: 'POST',
-    path: '/sessions/s_demo/action',
-    body: {
-      action: 'submit_game_action',
-      actionSetId: 'red:r1:loadout:v1',
-      decisionVersion: 1,
-      actionId: '<legalActions.id>',
-    },
   },
 }
 
@@ -104,23 +85,20 @@ const roleState = {
       message: 'red role claimed.',
     },
   ],
-  gameMaster: gameMasterPacket,
+  agentPacket: gameMasterPacket,
 }
 
-const gameActionSubmission = {
-  action: 'submit_game_action',
-  actionSetId: gameMasterPacket.actionSetId,
+const surrenderSubmission = {
+  action: 'surrender',
   decisionVersion: gameMasterPacket.decisionVersion,
-  actionId: gameMasterPacket.legalActions[0].id,
+  publicMessage: 'compact surrender',
 }
 
-const parameterizedGameActionSubmission = {
-  ...gameActionSubmission,
-  parameters: {
-    destinationCellId: 'cell:5:2',
-    targetId: 'opponent',
-    targetCellId: 'cell:5:6',
-  },
+const compactCombatPlanSubmission = {
+  action: 'submit_combat_plan',
+  decisionVersion: gameMasterPacket.decisionVersion,
+  round: 1,
+  steps: [{ kind: 'end_turn' }],
 }
 
 function jsonResponse(value, init = {}) {
@@ -278,7 +256,8 @@ test('agent client bootstraps with invite claim token as bearer player key', asy
   const bootstrap = await client.bootstrapRole({ agentName: 'External Red' })
 
   assert.equal(bootstrap.nextAction, 'build_bot')
-  assert.equal(bootstrap.legalActions[0].id, 'loadout.red.r1.confirm')
+  assert.equal(bootstrap.actionSetId, undefined)
+  assert.equal(bootstrap.legalActions, undefined)
   assert.deepEqual(calls, [
     {
       url: 'https://arena-api.test/sessions/s_demo/roles/red/bootstrap',
@@ -289,7 +268,7 @@ test('agent client bootstraps with invite claim token as bearer player key', asy
   ])
 })
 
-test('agent client waits for the next GameMasterPacket through role state after bootstrap', async () => {
+test('agent client waits for the next AgentConnectionPacket through role state after bootstrap', async () => {
   let stateCalls = 0
   const client = new AgentArenaClient({
     invite,
@@ -302,25 +281,25 @@ test('agent client waits for the next GameMasterPacket through role state after 
         stateCalls === 1
           ? {
               ...roleState,
-              gameMaster: {
+              agentPacket: {
                 ...gameMasterPacket,
                 eventVersion: 1,
-                legalActions: [],
                 nextAction: 'wait_for_opponent_loadout',
               },
             }
           : {
               ...roleState,
-              gameMaster: {
+              agentPacket: {
                 ...gameMasterPacket,
                 eventVersion: 2,
+                build: compactBuildPacketFixture,
               },
             },
       )
     },
   })
 
-  const next = await client.waitForGameMasterPacket({ pollMs: 1, timeoutMs: 2_500 })
+  const next = await client.waitForAgentPacket({ pollMs: 1, timeoutMs: 2_500 })
 
   assert.equal(stateCalls, 2)
   assert.equal(next.nextAction, 'build_bot')
@@ -336,7 +315,7 @@ test('agent state script serialization escapes html-sensitive text', () => {
   assert.equal(serialized.includes('\\u003c/script>'), true)
 })
 
-test('agent client claims, reads state, and submits GameMaster action ids with bearer auth', async () => {
+test('agent client claims, reads state, and submits compact surrender with bearer auth', async () => {
   const calls = []
   let roleToken
   const client = new AgentArenaClient({
@@ -370,7 +349,6 @@ test('agent client claims, reads state, and submits GameMaster action ids with b
         return jsonResponse({
           packet: {
             ...gameMasterPacket,
-            legalActions: [],
             nextAction: 'wait_for_opponent_loadout',
           },
           publicState: {
@@ -403,7 +381,7 @@ test('agent client claims, reads state, and submits GameMaster action ids with b
   const claim = await client.claimRole({ claimToken: 'cap_red', agentName: 'Red' })
   roleToken = claim.roleToken
   const state = await client.getState()
-  const submission = await client.submitAction(gameActionSubmission)
+  const submission = await client.surrender(surrenderSubmission)
 
   assert.equal(claim.roleToken, 'role_red')
   assert.equal(state.role, 'red')
@@ -421,10 +399,10 @@ test('agent client claims, reads state, and submits GameMaster action ids with b
     claimToken: 'cap_red',
     agentName: 'Red',
   })
-  assert.deepEqual(calls[2].body, gameActionSubmission)
+  assert.deepEqual(calls[2].body, surrenderSubmission)
 })
 
-test('agent client submits schema-defined GameMaster action parameters', async () => {
+test('agent client submits compact combat plans', async () => {
   const calls = []
   const client = new AgentArenaClient({
     invite,
@@ -461,13 +439,13 @@ test('agent client submits schema-defined GameMaster action parameters', async (
     },
   })
 
-  await client.submitAction(parameterizedGameActionSubmission)
+  await client.submitCombatPlan(compactCombatPlanSubmission)
 
-  assert.equal(calls[0].url.endsWith('/action'), true)
-  assert.deepEqual(calls[0].body, parameterizedGameActionSubmission)
+  assert.equal(calls[0].url.endsWith('/combat-plan'), true)
+  assert.deepEqual(calls[0].body, compactCombatPlanSubmission)
 })
 
-test('agent client rejects submitAction gameplay payload fields before posting', async () => {
+test('agent client rejects unsupported surrender payload fields before posting', async () => {
   const calls = []
   const client = new AgentArenaClient({
     invite,
@@ -481,15 +459,15 @@ test('agent client rejects submitAction gameplay payload fields before posting',
 
   await assert.rejects(
     () =>
-      client.submitAction({
-        ...gameActionSubmission,
+      client.surrender({
+        ...surrenderSubmission,
         move: 'forward',
       }),
     (error) => {
       assert.equal(error instanceof AgentArenaApiError, true)
       assert.equal(error.status, 400)
       assert.equal(error.code, 'INVALID_REQUEST')
-      assert.match(error.message, /actionSetId/)
+      assert.match(error.message, /surrender/)
 
       return true
     },
@@ -522,7 +500,7 @@ test('agent client surfaces relay validation errors', async () => {
   })
 
   await assert.rejects(
-    () => client.submitAction(gameActionSubmission),
+    () => client.surrender(surrenderSubmission),
     (error) => {
       assert.equal(error instanceof AgentArenaApiError, true)
       assert.equal(error.status, 400)
@@ -551,11 +529,11 @@ test('browser role API exposes only the packet-based public helper surface', asy
       'bootstrapRole',
       'getState',
       'sendChatMessage',
-      'submitAction',
       'submitBuildAction',
       'submitCombatPlan',
       'submitPostFightReflection',
-      'waitForGameMasterPacket',
+      'surrender',
+      'waitForAgentPacket',
     ],
   )
   assert.equal('submitRoundPlan' in roleApi, false)
@@ -568,32 +546,34 @@ test('browser role API exposes only the packet-based public helper surface', asy
     [
       ['bootstrap_role', true],
       ['get_role_state', true],
-      ['wait_for_game_master_packet', true],
-      ['submit_game_action', true],
+      ['wait_for_agent_packet', true],
       ['submit_build_action', false],
-      ['submit_combat_round_plan', false],
+      ['submit_combat_plan', false],
+      ['surrender', false],
       ['submit_post_fight_reflection', false],
       ['send_chat_message', true],
     ],
   )
 })
 
-test('browser role API marks submit action unavailable when role is locked', async () => {
+test('browser role API marks compact actions unavailable when role is locked', async () => {
   const lockedState = {
     ...roleState,
     phase: 'round_review',
-    gameMaster: {
+    agentPacket: {
       ...gameMasterPacket,
-      legalActions: [],
       nextAction: 'view_replay',
       phase: 'round_review',
     },
   }
   const actions = getValidAgentActions(lockedState)
-  const submitAction = actions.find((action) => action.name === 'submit_game_action')
+  const buildAction = actions.find((action) => action.name === 'submit_build_action')
+  const combatAction = actions.find((action) => action.name === 'submit_combat_plan')
 
-  assert.equal(submitAction?.available, false)
-  assert.ok(Boolean(submitAction?.reason))
+  assert.equal(buildAction?.available, false)
+  assert.ok(Boolean(buildAction?.reason))
+  assert.equal(combatAction?.available, false)
+  assert.ok(Boolean(combatAction?.reason))
 })
 
 test('browser role API marks role-gated actions unavailable before claim', async () => {
@@ -605,7 +585,7 @@ test('browser role API marks role-gated actions unavailable before claim', async
   )
 })
 
-test('browser role API bootstrap override returns GameMasterPacket actions', async () => {
+test('browser role API bootstrap override returns agent packets', async () => {
   let agentName
   const client = new AgentArenaClient({
     invite,
@@ -624,7 +604,7 @@ test('browser role API bootstrap override returns GameMasterPacket actions', asy
 
   assert.equal(agentName, 'Browser Red')
   assert.equal(bootstrap.nextAction, 'build_bot')
-  assert.equal(bootstrap.legalActions[0].id, 'loadout.red.r1.confirm')
+  assert.equal(bootstrap.legalActions, undefined)
 })
 
 test('browser role API reads private state through the client state endpoint', async () => {
@@ -644,7 +624,7 @@ test('browser role API reads private state through the client state endpoint', a
   const state = await roleApi.getState()
 
   assert.equal(state.role, 'red')
-  assert.equal(state.gameMaster.legalActions[0].id, 'loadout.red.r1.confirm')
+  assert.equal(state.agentPacket.nextAction, 'build_bot')
 })
 
 test('browser role API posts and reads public chat through authenticated endpoints', async () => {
@@ -752,7 +732,6 @@ test('browser role API posts post-fight reflection through the helper path', asy
           packet: {
             ...gameMasterPacket,
             nextAction: 'wait_for_debrief',
-            legalActions: [],
           },
         })
       }
@@ -816,7 +795,7 @@ const compactBuildPacketFixture = {
   issues: [],
 }
 
-test('agent client treats compact build packets without legalActions as playable', async () => {
+test('agent client treats compact build packets as playable', async () => {
   let stateCalls = 0
   const client = new AgentArenaClient({
     invite,
@@ -825,21 +804,20 @@ test('agent client treats compact build packets without legalActions as playable
 
       return jsonResponse({
         ...roleState,
-        gameMaster: {
+        agentPacket: {
           ...gameMasterPacket,
-          legalActions: [],
           build: compactBuildPacketFixture,
         },
       })
     },
   })
 
-  const next = await client.waitForGameMasterPacket({ pollMs: 1, timeoutMs: 2_500 })
+  const next = await client.waitForAgentPacket({ pollMs: 1, timeoutMs: 2_500 })
 
   assert.equal(stateCalls, 1)
   assert.equal(next.phase, 'choose_loadout')
   assert.equal(next.build.step, 'choose_part')
-  assert.deepEqual(next.legalActions, [])
+  assert.equal(next.legalActions, undefined)
 })
 
 test('agent client submits compact build actions to the build-action endpoint', async () => {
@@ -853,7 +831,6 @@ test('agent client submits compact build actions to the build-action endpoint', 
       return jsonResponse({
         packet: {
           ...gameMasterPacket,
-          legalActions: [],
           build: compactBuildPacketFixture,
         },
         publicState: { phase: 'submission_phase' },
@@ -895,17 +872,15 @@ test('agent client submits compact build actions to the build-action endpoint', 
 test('browser role API surfaces submit_build_action for compact build packets', () => {
   const compactState = {
     ...roleState,
-    gameMaster: {
+    agentPacket: {
       ...gameMasterPacket,
-      legalActions: [],
       build: compactBuildPacketFixture,
     },
   }
   const actions = getValidAgentActions(compactState)
   const buildAction = actions.find((action) => action.name === 'submit_build_action')
-  const legacyAction = actions.find((action) => action.name === 'submit_game_action')
+  const combatAction = actions.find((action) => action.name === 'submit_combat_plan')
 
   assert.equal(buildAction?.available, true)
-  assert.equal(legacyAction?.available, false)
-  assert.match(legacyAction?.reason ?? '', /submit_build_action/)
+  assert.equal(combatAction?.available, false)
 })

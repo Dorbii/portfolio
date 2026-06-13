@@ -1,11 +1,11 @@
 import type {
   AgentChatMessageRequest,
+  AgentConnectionAction,
+  AgentConnectionPacket,
+  AgentConnectionResponse,
   ArenaConfig,
   BotBlueprint,
-  CombatRoundPlanSubmission,
   ReplayLifecycleStatus,
-  GameMasterActionSubmission,
-  GameMasterPacket,
   PostFightAgentReflection,
   SharedDebrief,
   SessionChatMessage,
@@ -105,7 +105,7 @@ export type PublicSessionState = {
   expiresAt: string
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
-  gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  agent?: Partial<Record<TeamRole, Pick<AgentConnectionPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion'>>>
   replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
   replayVersion?: string
@@ -123,7 +123,7 @@ export type RolePrivateState = Partial<TeamEconomySummary> & {
   phase: SessionPhase
   round: number
   expiresAt: string
-  gameMaster: GameMasterPacket
+  agentPacket: AgentConnectionPacket
   opponent: RolePublicState
   replayAvailable: boolean
   lastResult?: CombatSummary
@@ -157,32 +157,29 @@ export type RoleClaimResponse = {
   sessionId: string
   role: TeamRole
   roleToken: string
-  packet: GameMasterPacket
+  state: RolePrivateState
 }
 
-export type AgentBootstrapResponse = GameMasterPacket
+export type AgentBootstrapResponse = AgentConnectionPacket
 
 export type RoleResetResponse = {
   invite: RoleInvite
   publicState: PublicSessionState
 }
 
-export type GameMasterActionPostRequest = GameMasterActionSubmission | CombatRoundPlanSubmission
+export type AgentConnectionActionPostRequest = AgentConnectionAction
 
-export type GameMasterActionResponse = {
-  packet: GameMasterPacket
-  publicState: PublicSessionState
-}
+export type AgentConnectionActionResponse = AgentConnectionResponse<PublicSessionState>
 
 export type PostFightReflectionPostRequest = PostFightAgentReflection
 
 export type PostFightReflectionResponse = {
-  packet: GameMasterPacket
+  packet: AgentConnectionPacket
 }
 
 export type AgentChatMessageResponse = {
   message: SessionChatMessage
-  packet: GameMasterPacket
+  state: RolePrivateState
   publicState: PublicSessionState
 }
 
@@ -190,7 +187,7 @@ export type AgentChatMessagePostRequest = AgentChatMessageRequest
 
 export type AgentPrivateChatMessageResponse = {
   message: SessionChatMessage
-  packet: GameMasterPacket
+  state: RolePrivateState
 }
 
 export type AgentPrivateChatMessagePostRequest = AgentChatMessageRequest

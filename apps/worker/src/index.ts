@@ -1,11 +1,12 @@
 import {
   createAgentContract,
   createAgentActionsOpenApi,
+  toAgentConnectionPacket,
   validateCreateSessionRequestShape,
   validateRoleClaimRequestShape,
+  type AgentConnectionPacket,
   type AgentBootstrapRequest,
   type CompactBuildAction,
-  type CompactBuildPacket,
   type GameMasterActionParameters,
   type GameMasterLegalAction,
   type GameMasterPacket,
@@ -63,9 +64,6 @@ export type {
 const STORAGE_KEY = 'agent-arena-session'
 const GPT_MOUNT_SLOT_ALIAS_PREFIX = 'gpt.loadout.mount'
 const GPT_MOUNT_SLOT_ALIAS_LIMIT = 6
-const GPT_COMPACT_BOARD_CELL_LIMIT = 24
-const GPT_COMPACT_BOARD_LIST_LIMIT = 16
-const GPT_COMPACT_ACTION_REF_LIMIT = 6
 const GPT_COMBAT_PLAN_ACTION_ID = 'combat_plan'
 const DEFAULT_GPT_AUTO_POLL_ATTEMPTS = 24
 const DEFAULT_GPT_AUTO_POLL_DELAY_MS = 750
@@ -81,6 +79,27 @@ type JsonRequestReadResult =
       ok: false
       response: Response
     }
+
+type AgentConnectionPacketResult<T extends { packet: GameMasterPacket }> =
+  Omit<T, 'packet'> & { packet: AgentConnectionPacket }
+
+function toAgentConnectionPacketResult<T extends { packet: GameMasterPacket }>(
+  result: SessionResult<T>,
+): SessionResult<AgentConnectionPacketResult<T>> {
+  if (!result.ok) {
+    return result as SessionResult<AgentConnectionPacketResult<T>>
+  }
+
+  const { packet, ...rest } = result.value
+
+  return {
+    ok: true,
+    value: {
+      ...rest,
+      packet: toAgentConnectionPacket(packet),
+    } as AgentConnectionPacketResult<T>,
+  }
+}
 
 type GptRouteAction = 'claim' | 'next' | 'act' | 'reflection' | 'catalog'
 
@@ -103,7 +122,7 @@ type GptTeamIdentityInput = TeamIdentity & {
 
 type GptActBody = {
   inviteUrl: string
-  /** Exact id copied from packet.legalActions when that compatibility surface is present. */
+  /** Internal fallback action id for non-compact GPT calls. */
   actionId?: string
   parameters?: GameMasterActionParameters
   /** Compact build action; the wrapper hides GameMaster version bookkeeping. */
@@ -126,19 +145,6 @@ type GptCatalogPartSummary = Pick<
   PartDefinition,
   'id' | 'category' | 'displayName' | 'cost' | 'mass' | 'durability' | 'size' | 'controls' | 'stats' | 'tags' | 'behavior'
 >
-
-type GptCompactPacket = {
-  sessionId: GameMasterPacket['sessionId']
-  role: GameMasterPacket['role']
-  phase: GameMasterPacket['phase']
-  nextAction: GameMasterPacket['nextAction']
-  round: GameMasterPacket['round']
-  decisionVersion: GameMasterPacket['decisionVersion']
-  instruction: GameMasterPacket['instruction']
-  build?: CompactBuildPacket
-  legalActions?: Array<Record<string, unknown>>
-  [key: string]: unknown
-}
 
 type GptPacketStatus = 'claimed' | 'playable' | 'waiting' | 'complete' | 'expired'
 
@@ -164,15 +170,6 @@ type GptMountSlotAlias = {
   semanticTags: string[]
   parameters: GameMasterActionParameters
 }
-
-type GptBoardView = NonNullable<GameMasterPacket['board']>
-type GptBoardCell = NonNullable<GptBoardView['cells']>[number]
-type GptBoardLegalView = NonNullable<GptBoardCell['legal']>
-type GptBoardLegalActionRef = NonNullable<GptBoardLegalView['moveHere']>
-type GptBoardAttackRef = NonNullable<GptBoardLegalView['attacksFromHere']>[number]
-type GptBoardPose = NonNullable<GptBoardView['reachablePoses']>[number]
-type GptBoardTarget = NonNullable<GptBoardView['attackableTargets']>[number]
-type GptActionPreview = NonNullable<GameMasterLegalAction['preview']>
 
 function isEmptyRecord(value: unknown): boolean {
   return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0
@@ -507,14 +504,14 @@ export class AgentArenaSession {
       return jsonResponse(result, { status: statusForRelayError(result.error) })
     }
 
-    return jsonResponse(result.value.packet, { status: result.value.claimedNow ? 201 : 200 })
+    return jsonResponse(toAgentConnectionPacket(result.value.packet), { status: result.value.claimedNow ? 201 : 200 })
   }
 
   private async submitGameMasterAction(
     request: Request,
     coordinator: SessionCoordinator,
   ): Promise<Response> {
-    const readResult = await this.readJsonRequest(request, 'GameMaster action body must be JSON.', {
+    const readResult = await this.readJsonRequest(request, 'Agent action body must be JSON.', {
       requireRecord: true,
     })
 
@@ -522,9 +519,24 @@ export class AgentArenaSession {
       return readResult.response
     }
 
+    const actionName = (readResult.body as { action?: unknown }).action
+
+    if (actionName !== 'surrender') {
+      return errorResponse(
+        400,
+        'SUBMISSION_INVALID',
+        'Raw agent action submissions accept only compact surrender. Use /build-action or /combat-plan for gameplay decisions.',
+        undefined,
+        request,
+        this.env,
+      )
+    }
+
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitGameMasterAction(bearerToken(request) ?? '', readResult.body),
+      toAgentConnectionPacketResult(
+        await coordinator.submitGameMasterAction(bearerToken(request) ?? '', readResult.body),
+      ),
     )
   }
 
@@ -542,7 +554,9 @@ export class AgentArenaSession {
 
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitCompactBuildAction(bearerToken(request) ?? '', readResult.body),
+      toAgentConnectionPacketResult(
+        await coordinator.submitCompactBuildAction(bearerToken(request) ?? '', readResult.body),
+      ),
     )
   }
 
@@ -558,9 +572,24 @@ export class AgentArenaSession {
       return readResult.response
     }
 
+    const actionName = (readResult.body as { action?: unknown }).action
+
+    if (actionName !== 'submit_combat_plan') {
+      return errorResponse(
+        400,
+        'SUBMISSION_INVALID',
+        'Raw agent combat plans must use action submit_combat_plan.',
+        undefined,
+        request,
+        this.env,
+      )
+    }
+
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitCombatRoundPlan(bearerToken(request) ?? '', readResult.body),
+      toAgentConnectionPacketResult(
+        await coordinator.submitCombatRoundPlan(bearerToken(request) ?? '', readResult.body),
+      ),
     )
   }
 
@@ -635,14 +664,9 @@ export class AgentArenaSession {
   }
 
   private compactGptPacketFor(
-    coordinator: SessionCoordinator,
     packet: GameMasterPacket,
-  ): GptCompactPacket {
-    const compactBuild = packet.phase === 'choose_loadout'
-      ? coordinator.buildCompactBuildPacketForRole(packet.role)
-      : undefined
-
-    return compactGptPacket(packet, compactBuild)
+  ): AgentConnectionPacket {
+    return toAgentConnectionPacket(packet)
   }
 
   private async gptPacketResponse(
@@ -673,7 +697,7 @@ export class AgentArenaSession {
         role: pollResult.packet.role,
         ...extras,
         ...(pollResult.autoPoll ? { autoPoll: pollResult.autoPoll } : {}),
-        packet: this.compactGptPacketFor(pollResult.coordinator, pollResult.packet),
+        packet: this.compactGptPacketFor(pollResult.packet),
         continuation,
         nextStep: gptNextStepDirective(continuation),
       },
@@ -859,7 +883,7 @@ export class AgentArenaSession {
       return errorResponse(
         409,
         'SUBMISSION_INVALID',
-        'actionId is not legal in the latest GameMasterPacket for this role.',
+        'actionId is not valid for the current role state.',
       )
     }
 
@@ -999,7 +1023,9 @@ export class AgentArenaSession {
 
     return this.sessionResultResponse(
       coordinator,
-      await coordinator.submitPostFightReflection(bearerToken(request) ?? '', readResult.body),
+      toAgentConnectionPacketResult(
+        await coordinator.submitPostFightReflection(bearerToken(request) ?? '', readResult.body),
+      ),
     )
   }
 
@@ -1177,551 +1203,6 @@ function gptRouteAction(pathname: string): GptRouteAction | undefined {
   return match?.[1] as GptRouteAction | undefined
 }
 
-function compactBuildGptInstruction(packet: GameMasterPacket): string {
-  if (packet.nextAction === 'wait_for_opponent_loadout') {
-    return 'Loadout locked; your role is ready. Keep polling gptNext until combat_turn, round_review, session_complete, or expired.'
-  }
-
-  return 'Build phase: read packet.build (bot, store, edit, requirements) and submit one compact action through gptAct.action, e.g. {"kind":"choose_part","part":"weapon.Weapon_Turret"}. No actionId is needed for build.'
-}
-
-function compactCombatGptInstruction(packet: GameMasterPacket): string {
-  if (packet.nextAction !== 'choose_turn') {
-    return packet.instruction
-  }
-
-  return 'Combat: read packet.combat.combat (self/opponent state, budget) and packet.combat.board (grid bounds + terrain). Submit one compact plan with gptAct actionId combat_plan and parameters.steps, e.g. [{"kind":"move","to":[4,0]},{"kind":"attack","weaponSlot":"weaponA","target":[-6,0]},{"kind":"end_turn"}]. The server validates movement, terrain, range, line of sight, cooldowns, and action time.'
-}
-
-function compactGptPacket(packet: GameMasterPacket, compactBuild?: CompactBuildPacket): GptCompactPacket {
-  // Compact combat protocol: combat packets expose compact state only; the
-  // agent submits intent and the server resolves legality.
-  if (packet.phase === 'combat_turn' && packet.combatCompact) {
-    const basePacket = {
-      sessionId: packet.sessionId,
-      role: packet.role,
-      phase: packet.phase,
-      nextAction: packet.nextAction,
-      round: packet.round,
-      ...(packet.fightId ? { fightId: packet.fightId } : {}),
-      decisionVersion: packet.decisionVersion,
-    }
-
-    if (packet.nextAction !== 'choose_turn') {
-      return {
-        ...basePacket,
-        instruction: 'Waiting for the next combat decision packet. Do not summarize combat state or ask the user to continue; call gptNext again.',
-      }
-    }
-
-    return {
-      ...basePacket,
-      instruction: compactCombatGptInstruction(packet),
-      combat: packet.combatCompact,
-      ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
-    }
-  }
-
-  // Compact build protocol: during the build phase the GPT packet exposes
-  // compact state (packet.build) instead of legal action menus, store slots,
-  // buildState internals, or catalog dumps.
-  if (compactBuild && packet.phase === 'choose_loadout') {
-    return {
-      sessionId: packet.sessionId,
-      role: packet.role,
-      phase: packet.phase,
-      nextAction: packet.nextAction,
-      round: packet.round,
-      decisionVersion: packet.decisionVersion,
-      instruction: compactBuildGptInstruction(packet),
-      ...(packet.resources ? { resources: packet.resources } : {}),
-      ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
-      build: compactBuild,
-    }
-  }
-
-  const mountSlotAliases = gptMountSlotAliasesForPacket(packet)
-  const isCombatTurn = isGptCombatTurnPacket(packet)
-  const legalActions = isCombatTurn
-    ? compactGptCombatLegalActions(packet)
-    : [
-        ...packet.legalActions.map((action) =>
-          compactGptLegalAction(action, {
-            omitParameterDetails: mountSlotAliases.length > 0 && action.kind === 'propose_mount_pose',
-          })),
-        ...mountSlotAliases.map(compactGptMountSlotAlias),
-      ]
-  const compactBoard = packet.board && (packet.legalActions.length > 0 || packet.nextAction === 'choose_turn')
-    ? isCombatTurn
-      ? compactGptCombatBoard(packet)
-      : compactGptBoard(packet.board)
-    : undefined
-
-  return {
-    sessionId: packet.sessionId,
-    role: packet.role,
-    phase: packet.phase,
-    nextAction: packet.nextAction,
-    round: packet.round,
-    ...(packet.fightId ? { fightId: packet.fightId } : {}),
-    decisionVersion: packet.decisionVersion,
-    instruction: packet.instruction,
-    ...(packet.resources ? { resources: packet.resources } : {}),
-    ...(packet.store
-      ? {
-          store: {
-            foundationPartIds: packet.store.foundationPartIds,
-            offeredPartIds: packet.store.offeredPartIds,
-            slots: packet.store.slots.map((slot) => ({
-              id: slot.id,
-              kind: slot.kind,
-              partId: slot.partId,
-            })),
-          },
-        }
-      : {}),
-    ...(packet.buildState
-      ? {
-          buildState: {
-            step: packet.buildState.step,
-            selectedPartId: packet.buildState.selectedPartId,
-            selectedAttachTargetId: packet.buildState.selectedAttachTargetId,
-          },
-        }
-      : {}),
-    ...(compactBoard && Object.keys(compactBoard).length > 0 ? { board: compactBoard } : {}),
-    ...(packet.combat ? { combat: compactGptCombat(packet.combat) } : {}),
-    ...(packet.review ? { review: packet.review } : {}),
-    ...(packet.sharedDebrief ? { sharedDebrief: packet.sharedDebrief } : {}),
-    ...(packet.visibleState ? { visibleState: packet.visibleState } : {}),
-    ...(isCombatTurn ? { actionSummary: compactGptCombatActionSummary(packet) } : {}),
-    legalActions,
-    ...(packet.blockedActions
-      ? {
-          blockedActions: packet.blockedActions.slice(0, 12).map((action) => ({
-            kind: action.kind,
-            label: action.label,
-            summary: action.summary,
-            requirements: action.requirements,
-            issues: action.issues?.slice(0, 5).map((issue) => ({
-              code: issue.code,
-              path: issue.path,
-              message: issue.message,
-            })),
-          })),
-        }
-      : {}),
-  }
-}
-
-function isGptCombatTurnPacket(packet: GameMasterPacket): boolean {
-  return packet.phase === 'combat_turn'
-}
-
-function compactGptCombatLegalActions(packet: GameMasterPacket): Array<Record<string, unknown>> {
-  if (packet.combat?.submitted) {
-    return []
-  }
-
-  const surrenderActions = packet.legalActions
-    .filter((action) => action.kind === 'surrender')
-    .map((action) => compactGptLegalAction(action, { omitParameterDetails: true }))
-
-  return [
-    {
-      id: GPT_COMBAT_PLAN_ACTION_ID,
-      kind: 'use_utility',
-      label: 'Submit combat round plan',
-      summary: 'Submit the current combat round plan. This is no longer a future-turn queue; both plans resolve in lockstep substeps this round.',
-      parameterSchema: {
-        type: 'object',
-        required: ['steps'],
-        properties: {
-          steps: {
-            type: 'array',
-            label: 'Combat round plan steps',
-            summary: 'Ordered intent steps. Use board.reachableCells[].cellId for move, board.attackableCells[] for attack, and end_turn when finished.',
-            maxItems: 16,
-            items: {
-              type: 'object',
-              required: ['kind'],
-              properties: {
-                kind: {
-                  type: 'string',
-                  summary: 'move, attack, utility, or end_turn.',
-                },
-                cellId: {
-                  type: 'string',
-                  summary: 'For move or utility: target cellId such as cell:3:0.',
-                },
-                weaponSlot: {
-                  type: 'string',
-                  summary: 'For attack: weaponA or weaponB.',
-                },
-                targetCellId: {
-                  type: 'string',
-                  summary: 'For attack: usually a cellId from board.attackableCells[].cellId.',
-                },
-                utilityId: {
-                  type: 'string',
-                  summary: 'Optional utility identifier from board.utilityOptions[].utilityId.',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    ...surrenderActions,
-  ]
-}
-
-function compactGptCombatActionSummary(packet: GameMasterPacket): Record<string, unknown> {
-  const counts = packet.legalActions.reduce<Record<string, number>>((accumulator, action) => {
-    accumulator[action.kind] = (accumulator[action.kind] ?? 0) + 1
-    return accumulator
-  }, {})
-  const cells = packet.board?.cells ?? []
-  const reachableCellCount = packet.board?.reachableCells?.length ?? cells.filter((cell) => cell.reachable || cell.legal?.moveHere).length
-  const attackCellCount = packet.board?.attackableCells?.length ?? cells.filter((cell) => cell.legal?.attacksFromHere?.length).length
-  const movementBudgets = cells
-    .map((cell) =>
-      typeof cell.mobilityCost === 'number'
-        ? cell.mobilityCost + (typeof cell.mobilityRemaining === 'number' ? cell.mobilityRemaining : 0)
-        : undefined)
-    .filter((value): value is number => typeof value === 'number')
-
-  return {
-    mode: packet.combat ? 'lockstep_round_plan' : 'action_menu',
-    actionMenuCount: packet.legalActions.length,
-    actionKindCounts: counts,
-    reachableCellCount,
-    attackCellCount,
-    ...(packet.combat?.budget ? { budget: packet.combat.budget } : {}),
-    ...(movementBudgets.length > 0 ? { movementBudgetEstimate: Math.max(...movementBudgets) } : {}),
-  }
-}
-
-function compactGptCombat(combat: NonNullable<GameMasterPacket['combat']>): Record<string, unknown> {
-  return {
-    round: combat.round,
-    decisionVersion: combat.decisionVersion,
-    deadlineAt: combat.deadlineAt,
-    ...(combat.fightStartedAt ? { fightStartedAt: combat.fightStartedAt } : {}),
-    ...(combat.fightDeadlineAt ? { fightDeadlineAt: combat.fightDeadlineAt } : {}),
-    ...(combat.fightSeconds ? { fightSeconds: combat.fightSeconds } : {}),
-    ...(combat.cutoffReason ? { cutoffReason: combat.cutoffReason } : {}),
-    submitted: combat.submitted,
-    opponentSubmitted: combat.opponentSubmitted,
-    budget: combat.budget,
-    self: combat.self,
-    opponent: combat.opponent,
-    ...(combat.submittedPlan ? { submittedPlan: combat.submittedPlan } : {}),
-  }
-}
-
-function compactGptCombatBoard(packet: GameMasterPacket): Record<string, unknown> {
-  const board = packet.board
-
-  if (!board) {
-    return {}
-  }
-
-  const reachableCells = board.reachableCells?.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) ?? compactGptReachableCells(board)
-
-  return {
-    ...(board.grid ? { grid: board.grid } : {}),
-    ...(board.self ? { self: board.self } : {}),
-    ...(board.opponent ? { opponent: board.opponent } : {}),
-    ...(board.hazardCells ? { hazardCells: board.hazardCells } : {}),
-    ascii: asciiGptBoard(board),
-    reachableCells,
-    ...(board.attackableCells?.length ? { attackableCells: board.attackableCells.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
-    ...(board.utilityOptions?.length ? { utilityOptions: board.utilityOptions.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
-  }
-}
-
-function compactGptReachableCells(board: GptBoardView): Array<Record<string, unknown>> {
-  return (board.cells ?? [])
-    .filter((cell) =>
-      cell.occupant ||
-      cell.reachable ||
-      cell.legal?.moveHere ||
-      cell.legal?.attacksFromHere?.length ||
-      cell.legal?.useUtilityFromHere)
-    .map((cell) => ({
-      cellId: cell.cellId,
-      x: cell.x,
-      z: cell.z,
-      ...(typeof cell.mobilityCost === 'number' ? { moveCost: cell.mobilityCost } : {}),
-      ...(typeof cell.mobilityRemaining === 'number' ? { remainingMove: cell.mobilityRemaining } : {}),
-      ...(cell.hazardIds?.length ? { hazard: true, hazardIds: cell.hazardIds } : { hazard: false }),
-      ...(typeof cell.distanceToOpponent === 'number' ? { distanceToOpponent: cell.distanceToOpponent } : {}),
-      ...(typeof cell.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: cell.lineOfSightToOpponent } : {}),
-      ...(cell.legal?.moveHere ? { moveActionId: cell.legal.moveHere.actionId } : {}),
-      ...(cell.legal?.attacksFromHere?.length
-        ? {
-            attackActionIds: cell.legal.attacksFromHere.map((attack) => ({
-              actionId: attack.actionId,
-              kind: attack.kind,
-              targetCellId: attack.targetCellId,
-              ...(attack.weaponSlot ? { weaponSlot: attack.weaponSlot } : {}),
-            })),
-          }
-        : {}),
-      ...(cell.legal?.useUtilityFromHere ? { utilityActionId: cell.legal.useUtilityFromHere.actionId } : {}),
-    }))
-}
-
-function asciiGptBoard(board: GptBoardView): string {
-  const grid = board.grid ?? boundsFromBoard(board)
-  const self = board.self?.anchor
-  const opponent = board.opponent?.anchor
-  const hazards = new Set((board.hazardCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
-  const reachable = new Set((board.reachableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
-  const attacks = new Set((board.attackableCells ?? []).map((cell) => coordKey(cell.x, cell.z)))
-
-  for (const cell of board.cells ?? []) {
-    const key = coordKey(cell.x, cell.z)
-    if (cell.reachable || cell.legal?.moveHere) {
-      reachable.add(key)
-    }
-    if (cell.legal?.attacksFromHere?.length) {
-      attacks.add(key)
-    }
-  }
-
-  const rows = [
-    'Legend: B=self, R=opponent, *=reachable attack cell, +=reachable, H=hazard, .=empty',
-    `x ${grid.xMin}..${grid.xMax}, z ${grid.zMin}..${grid.zMax}`,
-    `     ${range(grid.xMin, grid.xMax).map((x) => String(x).padStart(3, ' ')).join('')}`,
-  ]
-
-  for (let z = grid.zMax; z >= grid.zMin; z -= 1) {
-    const cells = range(grid.xMin, grid.xMax).map((x) => {
-      const key = coordKey(x, z)
-      const marker = self?.x === x && self.z === z
-        ? 'B'
-        : opponent?.x === x && opponent.z === z
-          ? 'R'
-          : attacks.has(key)
-            ? '*'
-            : hazards.has(key)
-              ? 'H'
-              : reachable.has(key)
-                ? '+'
-                : '.'
-
-      return marker.padStart(3, ' ')
-    }).join('')
-    rows.push(`z=${String(z).padStart(3, ' ')}${cells}`)
-  }
-
-  return rows.join('\n')
-}
-
-function boundsFromBoard(board: GptBoardView): NonNullable<GptBoardView['grid']> {
-  const coords = [
-    ...(board.cells ?? []),
-    ...(board.hazardCells ?? []),
-    ...(board.self ? [board.self.anchor] : []),
-    ...(board.opponent ? [board.opponent.anchor] : []),
-  ]
-  const xs = coords.map((coord) => coord.x)
-  const zs = coords.map((coord) => coord.z)
-
-  return {
-    cellSize: 1,
-    xMin: Math.min(...xs, -12),
-    xMax: Math.max(...xs, 12),
-    zMin: Math.min(...zs, -8),
-    zMax: Math.max(...zs, 8),
-  }
-}
-
-function range(min: number, max: number): number[] {
-  return Array.from({ length: max - min + 1 }, (_, index) => min + index)
-}
-
-function coordKey(x: number, z: number): string {
-  return `${x}:${z}`
-}
-
-function compactGptBoard(board: GptBoardView): Record<string, unknown> {
-  return {
-    ...(board.grid ? { grid: board.grid } : {}),
-    ...(board.self ? { self: board.self } : {}),
-    ...(board.opponent ? { opponent: board.opponent } : {}),
-    ...(board.hazardCells ? { hazardCells: board.hazardCells.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT) } : {}),
-    ...(board.reachablePoses
-      ? { reachablePoses: board.reachablePoses.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT).map(compactGptBoardPose) }
-      : {}),
-    ...(board.attackableTargets
-      ? { attackableTargets: board.attackableTargets.slice(0, GPT_COMPACT_BOARD_LIST_LIMIT).map(compactGptBoardTarget) }
-      : {}),
-    ...(board.cells ? { cells: compactGptBoardCells(board) } : {}),
-  }
-}
-
-function compactGptBoardCells(board: GptBoardView): Array<Record<string, unknown>> {
-  const cells = board.cells ?? []
-  const selected: GptBoardCell[] = []
-  const seen = new Set<string>()
-  const addCell = (cell: GptBoardCell): void => {
-    if (seen.has(cell.cellId) || selected.length >= GPT_COMPACT_BOARD_CELL_LIMIT) {
-      return
-    }
-
-    seen.add(cell.cellId)
-    selected.push(cell)
-  }
-  const addMatching = (predicate: (cell: GptBoardCell) => boolean): void => {
-    for (const cell of cells) {
-      if (selected.length >= GPT_COMPACT_BOARD_CELL_LIMIT) {
-        return
-      }
-
-      if (predicate(cell)) {
-        addCell(cell)
-      }
-    }
-  }
-
-  addMatching((cell) => cell.occupant === 'self' || cell.occupant === 'opponent')
-  addMatching((cell) => Boolean(cell.legal || cell.targetableByActionIds?.length))
-  addMatching((cell) => Boolean(cell.hazardIds?.length))
-  addMatching((cell) => cell.reachable === true || Boolean(cell.reachableByActionIds?.length))
-  addMatching(() => true)
-
-  return selected.map(compactGptBoardCell)
-}
-
-function compactGptBoardCell(cell: GptBoardCell): Record<string, unknown> {
-  const legal = cell.legal ? compactGptCellLegal(cell.legal) : undefined
-
-  return {
-    cellId: cell.cellId,
-    x: cell.x,
-    z: cell.z,
-    ...(cell.occupant ? { occupant: cell.occupant } : {}),
-    ...(cell.blocksMovement ? { blocksMovement: true } : {}),
-    ...(cell.hazardIds?.length ? { hazardIds: cell.hazardIds } : {}),
-    ...(typeof cell.distanceToOpponent === 'number' ? { distanceToOpponent: cell.distanceToOpponent } : {}),
-    ...(typeof cell.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: cell.lineOfSightToOpponent } : {}),
-    ...(cell.reachable === true ? { reachable: true } : {}),
-    ...(typeof cell.mobilityCost === 'number' ? { mobilityCost: cell.mobilityCost } : {}),
-    ...(typeof cell.mobilityRemaining === 'number' ? { mobilityRemaining: cell.mobilityRemaining } : {}),
-    ...(legal ? { legal } : {}),
-    ...(cell.reachableByActionIds?.length
-      ? { reachableByActionIds: cell.reachableByActionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) }
-      : {}),
-    ...(cell.targetableByActionIds?.length
-      ? { targetableByActionIds: cell.targetableByActionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) }
-      : {}),
-  }
-}
-
-function compactGptCellLegal(legal: GptBoardLegalView): Record<string, unknown> | undefined {
-  return stripUndefinedFields({
-    moveHere: legal.moveHere ? compactGptBoardActionRef(legal.moveHere) : undefined,
-    attacksFromHere: legal.attacksFromHere
-      ?.slice(0, GPT_COMPACT_ACTION_REF_LIMIT)
-      .map(compactGptBoardAttackRef),
-    useUtilityFromHere: legal.useUtilityFromHere ? compactGptBoardActionRef(legal.useUtilityFromHere) : undefined,
-  })
-}
-
-function compactGptBoardActionRef(ref: GptBoardLegalActionRef): Record<string, unknown> {
-  return {
-    actionId: ref.actionId,
-    kind: ref.kind,
-    ...(ref.label ? { label: ref.label } : {}),
-    ...(ref.summary ? { summary: ref.summary } : {}),
-  }
-}
-
-function compactGptBoardAttackRef(ref: GptBoardAttackRef): Record<string, unknown> {
-  return {
-    ...compactGptBoardActionRef(ref),
-    targetId: ref.targetId,
-    targetCellId: ref.targetCellId,
-    ...(ref.weaponSlot ? { weaponSlot: ref.weaponSlot } : {}),
-  }
-}
-
-function compactGptBoardPose(pose: GptBoardPose): Record<string, unknown> {
-  return {
-    poseId: pose.poseId,
-    anchor: pose.anchor,
-    facing: pose.facing,
-    actionIds: pose.actionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT),
-    ...(typeof pose.distanceToOpponent === 'number' ? { distanceToOpponent: pose.distanceToOpponent } : {}),
-    ...(typeof pose.lineOfSightToOpponent === 'boolean' ? { lineOfSightToOpponent: pose.lineOfSightToOpponent } : {}),
-    ...(typeof pose.hazardExposure === 'number' ? { hazardExposure: pose.hazardExposure } : {}),
-    ...(pose.riskTags?.length ? { riskTags: pose.riskTags.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) } : {}),
-  }
-}
-
-function compactGptBoardTarget(target: GptBoardTarget): Record<string, unknown> {
-  return {
-    targetId: target.targetId,
-    kind: target.kind,
-    cell: target.cell,
-    actionIds: target.actionIds.slice(0, GPT_COMPACT_ACTION_REF_LIMIT),
-    ...(typeof target.distance === 'number' ? { distance: target.distance } : {}),
-    ...(typeof target.lineOfSight === 'boolean' ? { lineOfSight: target.lineOfSight } : {}),
-  }
-}
-
-function stripUndefinedFields(record: Record<string, unknown>): Record<string, unknown> | undefined {
-  const entries = Object.entries(record).filter(([, value]) => value !== undefined)
-
-  return entries.length > 0 ? Object.fromEntries(entries) : undefined
-}
-
-function compactGptLegalAction(
-  action: GameMasterLegalAction,
-  options: { omitParameterDetails?: boolean; omitPreview?: boolean } = {},
-): Record<string, unknown> {
-  return {
-    id: action.id,
-    kind: action.kind,
-    label: action.label,
-    summary: action.summary,
-    ...(action.requirements ? { requirements: action.requirements } : {}),
-    ...(!options.omitParameterDetails && action.parameterSchema ? { parameterSchema: action.parameterSchema } : {}),
-    ...(!options.omitParameterDetails && action.parameterExamples ? { parameterExamples: action.parameterExamples.slice(0, 3) } : {}),
-    ...(!options.omitPreview && action.preview ? { preview: compactGptActionPreview(action.preview) } : {}),
-  }
-}
-
-function compactGptActionPreview(preview: GptActionPreview): Record<string, unknown> {
-  return {
-    basis: preview.basis,
-    outcome: preview.outcome,
-    ...(preview.finalPose ? { finalPose: preview.finalPose } : {}),
-    ...(preview.target ? { target: preview.target } : {}),
-    ...(typeof preview.currentLineOfSight === 'boolean' ? { currentLineOfSight: preview.currentLineOfSight } : {}),
-    ...(typeof preview.expectedRangeIfOpponentHolds === 'number'
-      ? { expectedRangeIfOpponentHolds: preview.expectedRangeIfOpponentHolds }
-      : {}),
-    ...(typeof preview.hazardExposure === 'number' ? { hazardExposure: preview.hazardExposure } : {}),
-    ...(preview.riskTags?.length ? { riskTags: preview.riskTags.slice(0, GPT_COMPACT_ACTION_REF_LIMIT) } : {}),
-  }
-}
-
-function compactGptMountSlotAlias(alias: GptMountSlotAlias): Record<string, unknown> {
-  return {
-    id: alias.id,
-    kind: alias.kind,
-    label: alias.label,
-    summary: alias.summary,
-    mountSlotId: alias.mountSlotId,
-    resolvesToActionId: alias.resolvesToActionId,
-    semanticTags: alias.semanticTags,
-  }
-}
-
 function resolveGptMountSlotAlias(
   packet: GameMasterPacket,
   actionId: string,
@@ -1740,16 +1221,6 @@ function resolveGptMountSlotAlias(
   }
 
   return undefined
-}
-
-function gptMountSlotAliasesForPacket(packet: GameMasterPacket): GptMountSlotAlias[] {
-  if (packet.buildState?.step !== 'propose_mount_pose') {
-    return []
-  }
-
-  return packet.legalActions
-    .flatMap((action) => gptMountSlotAliasesForAction(action))
-    .slice(0, GPT_MOUNT_SLOT_ALIAS_LIMIT)
 }
 
 function gptMountSlotAliasesForAction(action: GameMasterLegalAction): GptMountSlotAlias[] {
@@ -2116,7 +1587,7 @@ function gptContinuationForPacket(
       keepGoing: true,
       mustCallBeforeResponding: true,
       recommendedNextCall: 'gptAct',
-      instruction: 'Call gptAct now with actionId combat_plan and parameters.steps from packet.combat. Do not choose packet.legalActions during combat and do not ask the user to type continue.',
+      instruction: 'Call gptAct now with actionId combat_plan and parameters.steps from packet.combat. Do not ask the user to type continue.',
     }
   }
 
@@ -2125,7 +1596,7 @@ function gptContinuationForPacket(
       keepGoing: true,
       mustCallBeforeResponding: true,
       recommendedNextCall: 'gptAct',
-      instruction: 'Choose exactly one current packet.legalActions[].id and call gptAct now before writing any user-visible response. Do not ask the user to type continue.',
+      instruction: 'Call gptAct now with the compact action requested by the current packet before writing any user-visible response. Do not ask the user to type continue.',
     }
   }
 

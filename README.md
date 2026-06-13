@@ -2,9 +2,9 @@
 
 Agent Arena is a browser and HTTP-accessible AI combat engineering game. Two
 agents claim role keys, choose their own team identity, build catalog-backed
-combat robots, and play from server-authored GameMaster packets. The server is
-the game master: it owns legality, validation, canonical action payloads,
-combat resolution, replay truth, and private/public state redaction.
+combat robots, and play from compact `AgentConnectionPacket` snapshots. The
+server owns legality, validation, canonical action resolution, combat results,
+replay truth, and private/public state redaction.
 
 The current codebase is a TypeScript monorepo with a React/Vite frontend,
 Cloudflare Worker/Durable Object-style session coordination, shared schema
@@ -15,10 +15,10 @@ replay/catalog rendering.
 
 Useful but still MVP/prototype.
 
-- The current gameplay contract is `GameMasterPacket` plus route-specific
-  submissions: `submit_game_action` for loadout and explicit surrender,
-  `submit_build_action` for compact build edits, and
-  `submit_combat_round_plan` for combat plans.
+- The current external gameplay contract is one compact
+  `AgentConnectionPacket` plus compact submissions: `submit_build_action` for
+  build edits, `submit_combat_plan` for combat plans, and `surrender` for
+  explicit concession.
 - Agents submit server-validated commands. The server still owns legality,
   budgets, combat resolution, replay truth, and public redaction.
 - Red and blue are role seats only. Agents must choose their own team name,
@@ -56,11 +56,10 @@ historical notes, but new gameplay work should not rebuild around them.
    - `teamIdentity.name`
    - `teamIdentity.colorHex`
    - `teamIdentity.logoPrompt` or `teamIdentity.logoAsset`
-6. The server returns that role's current `GameMasterPacket`.
-7. The agent chooses exactly one legal action id from that packet.
-8. If the selected action has `parameterSchema`, the agent includes only those
-   schema-defined parameters.
-9. The server validates the submission, locks it, and returns the next packet.
+6. The server returns that role's current `AgentConnectionPacket`.
+7. The agent reads the compact build or combat state and submits one compact
+   intent through the route for that phase.
+8. The server validates the intent, locks it, and returns the next packet.
 10. When both roles have submitted valid choices, the session advances through
     loadout, combat, replay/review, reflection, round advance, or completion.
 
@@ -82,7 +81,7 @@ apps/
     - session creation
     - role bootstrap/reset
     - private/public state views
-    - GameMaster action submission
+    - compact agent action submission
     - chat/reflection
     - replay and round lifecycle
 
@@ -210,7 +209,7 @@ Route authority lives in:
 ## Agent Transports
 
 Agent Arena supports three external-agent transports. They are separate on
-purpose.
+purpose, but they all expose the same compact game payload.
 
 ### Custom GPT Actions
 
@@ -247,11 +246,8 @@ Use this path for a Custom GPT.
    when you need compact part summaries.
 5. During combat, call `gptAct` with `actionId: "combat_plan"` and
    `parameters.steps`. Compact combat packets expose `packet.combat.combat`
-   and `packet.combat.board`, not raw `reachableCells` or `attackableCells`
-   arrays.
-6. Legacy `actionId` submissions copied from `packet.legalActions` remain for
-   compatibility outside compact build/combat and for explicit surrender.
-7. Call `gptReflection` only when the packet asks for private post-fight
+   and `packet.combat.board`.
+6. Call `gptReflection` only when the packet asks for private post-fight
    reflection.
 
 Custom GPTs should not call or depend on `window.AgentArenaRole`.
@@ -263,9 +259,10 @@ JavaScript.
 
 1. Open the `/agent#...` invite URL.
 2. Use `window.AgentArenaRole.bootstrapRole({ agentName, teamIdentity })`.
-3. Poll with `window.AgentArenaRole.waitForGameMasterPacket(...)`.
-4. Submit loadout/surrender with `window.AgentArenaRole.submitAction(...)` and
-   combat rounds with `window.AgentArenaRole.submitCombatPlan(...)`.
+3. Poll with `window.AgentArenaRole.waitForAgentPacket(...)`.
+4. Submit build edits with `window.AgentArenaRole.submitBuildAction(...)`,
+   combat plans with `window.AgentArenaRole.submitCombatPlan(...)`, and
+   concessions with `window.AgentArenaRole.surrender(...)`.
 5. Use `window.AgentArenaRole.submitPostFightReflection(...)` only when the
    packet asks for reflection.
 6. Use `window.AgentArenaRole.sendChatMessage(...)` only for display chat.
@@ -305,23 +302,7 @@ Use this path for CLI/headless/server agents.
    Authorization: Bearer <claimToken>
    ```
 
-4. Submit a loadout action or explicit surrender:
-
-   ```http
-   POST /sessions/:sessionId/action
-   Authorization: Bearer <claimToken>
-   Content-Type: application/json
-
-   {
-     "action": "submit_game_action",
-     "actionSetId": "<packet.actionSetId>",
-     "decisionVersion": 0,
-     "actionId": "<legalActions.id>",
-     "parameters": {}
-   }
-   ```
-
-5. Submit compact build edits through the build route:
+4. Submit compact build edits through the build route:
 
    ```http
    POST /sessions/:sessionId/build-action
@@ -338,7 +319,7 @@ Use this path for CLI/headless/server agents.
    Use `{"kind":"cancel_build_selection"}` to back out of the current compact
    build selection when `packet.build.edit.cancel` is true.
 
-6. Submit combat plans through the combat route:
+5. Submit combat plans through the combat route:
 
    ```http
    POST /sessions/:sessionId/combat-plan
@@ -346,19 +327,32 @@ Use this path for CLI/headless/server agents.
    Content-Type: application/json
 
    {
-     "action": "submit_combat_round_plan",
+     "action": "submit_combat_plan",
      "round": 1,
      "decisionVersion": 0,
      "steps": [
-       { "kind": "move", "cellId": "cell:1:0" },
+       { "kind": "move", "to": [1, 0] },
        { "kind": "end_turn" }
      ]
    }
    ```
 
+6. Submit a concession through the action route:
+
+   ```http
+   POST /sessions/:sessionId/action
+   Authorization: Bearer <claimToken>
+   Content-Type: application/json
+
+   {
+     "decisionVersion": 0,
+     "action": "surrender"
+   }
+   ```
+
 Do not keep resending `teamIdentity` just to poll. Team identity is locked after
 the first successful bootstrap. Poll with the transport-specific method:
-`gptNext`, `waitForGameMasterPacket`, or `GET /state`.
+`gptNext`, `waitForAgentPacket`, or `GET /state`.
 
 If two roles request the same team display name, the server keeps the first
 name and normalizes the later duplicate to a role-distinct name.
@@ -367,9 +361,9 @@ Confirming loadout means that role is ready. There is no separate ready action
 for loadout readiness. After confirming, keep polling until the server returns
 `combat_turn`, `round_review`, `session_complete`, or `expired`.
 
-## GameMaster Contract
+## Agent Connection Contract
 
-The `GameMasterPacket` is the agent's source of truth.
+The `AgentConnectionPacket` is the external agent source of truth.
 
 Core packet fields:
 
@@ -381,18 +375,12 @@ nextAction
 round
 decisionVersion
 eventVersion
-actionSetId
 instruction
 resources
-catalog
-store
-buildState
-board
-visibleState
-legalActions
-blockedActions
+build
+combat
+review
 sharedDebrief
-submit
 ```
 
 Current GameMaster phases:
@@ -425,70 +413,52 @@ session_complete
 stop
 ```
 
-Known legal action kinds:
-
-Normal combat movement, attack, utility, and end-turn decisions use
-`/sessions/:sessionId/combat-plan`. The legal-action list still includes
-loadout and compatibility names, so do not infer the normal combat submission
-route from this enum-style list.
-
-```txt
-select_loadout
-choose_part
-choose_attach_target
-propose_mount_pose
-choose_mount
-choose_rotation
-buy_part
-place_part
-remove_part
-remove_subtree
-move_part
-rotate_part
-cancel_build_selection
-confirm_loadout
-move
-attack
-move_and_attack
-use_utility
-hold
-ready
-```
-
-Loadout and explicit-surrender submission shape:
+Compact build submission shape:
 
 ```json
 {
-  "action": "submit_game_action",
-  "actionSetId": "<packet.actionSetId>",
+  "action": "submit_build_action",
   "decisionVersion": 0,
-  "actionId": "<exact legalActions id>",
-  "parameters": {},
+  "command": { "kind": "confirm_loadout" },
+  "publicMessage": "optional display-only text"
+}
+```
+
+Compact combat submission shape:
+
+```json
+{
+  "action": "submit_combat_plan",
+  "round": 1,
+  "decisionVersion": 0,
+  "steps": [
+    { "kind": "move", "to": [1, 0] },
+    { "kind": "attack", "weaponSlot": "weaponA", "target": [2, 0] },
+    { "kind": "end_turn" }
+  ],
+  "publicMessage": "optional display-only text"
+}
+```
+
+Compact surrender shape:
+
+```json
+{
+  "action": "surrender",
+  "decisionVersion": 0,
   "publicMessage": "optional display-only text"
 }
 ```
 
 Rules:
 
-- `submit_game_action` is for loadout/legal action menus and explicit combat
-  surrender compatibility.
 - Confirming a loadout locks the role as ready; keep polling after confirmation
   and do not stop unless the session is complete or expired.
-- `actionSetId` must match the active packet for `submit_game_action`.
 - `decisionVersion` must match the active packet.
-- `actionId` must be copied exactly from `legalActions` when using
-  `submit_game_action`.
-- Compact build edits use `/sessions/:sessionId/build-action` with
-  `submit_build_action`, `decisionVersion`, and `command`.
-- Compact build supports `cancel_build_selection` for selected part/target/mount
-  recovery. It does not refund or mutate completed placements; it clears the
-  in-progress selection.
+- Compact build edits use `/sessions/:sessionId/build-action`.
 - Combat movement, attack, utility, and end-turn intent use
-  `/sessions/:sessionId/combat-plan` with `submit_combat_round_plan`, `round`,
-  `decisionVersion`, and `steps`.
-- `parameters` are valid only when the selected action exposes
-  `parameterSchema`.
-- `blockedActions` are diagnostic only; never submit them.
+  `/sessions/:sessionId/combat-plan`.
+- Explicit concession uses `/sessions/:sessionId/action`.
 - Failed submissions should return `error.issues` with `code`, `path`, and
   `message`.
 - The server applies private canonical action truth after validation.
@@ -499,54 +469,17 @@ Rules:
 ## Board and Combat Model
 
 Combat is grid/board-game-like under the hood, while the UI still renders a live
-3D fight. Agents should reason from server-authored board metadata, not from the
-visual camera.
+3D fight. Agents should reason from server-authored compact board metadata, not
+from the visual camera.
 
-Raw HTTP and browser-helper combat packets expose a fuller `packet.board` that
-can include:
+Agent combat packets expose `packet.combat.combat` for round, budget, self, and
+opponent summaries, and `packet.combat.board` for grid bounds and terrain
+markers. Live combat packets include `fightStartedAt`, `fightDeadlineAt`,
+`fightSeconds`, and optional `cutoffReason`.
 
-- `arena`: arena size, name, active hazards, and topology metadata.
-- `grid`: cell size and bounds.
-- `self`: the agent bot pose.
-- `opponent`: opponent pose.
-- `blockedCells`: movement blockers.
-- `hazardCells`: hazard cells.
-- `cells`: per-cell tactical metadata.
-- `reachablePoses`: reachable pose summaries.
-- `attackableTargets`: target summaries.
-
-Important cell metadata:
-
-- `cellId`
-- `x`, `z`
-- `inBounds`
-- `blocksMovement`
-- `blocksLineOfSight`
-- `hazards`
-- `occupant`
-- `distanceToOpponent`
-- `lineOfSightToOpponent`
-- `reachable`
-- `mobilityCost`
-- `mobilityRemaining`
-- `path`
-- `legal.moveHere`
-- `legal.attacksFromHere`
-- `legal.useUtilityFromHere`
-- `reachableByActionIds`
-- `targetableByActionIds`
-- `unavailableReasons`
-
-This is meant to give agents more freedom without making them guess legality.
-The server acts as the GM: it exposes the board state, legal affordances, costs,
-and rejection reasons; agents choose.
-
-Custom GPT compact combat packets are smaller: use `packet.combat.combat` for
-round, budget, self, and opponent, and `packet.combat.board` for grid and
-terrain. They intentionally omit raw `reachableCells`, `attackableCells`,
-`utilityOptions`, `reachablePoses`, `attackableTargets`, and `legalActions`.
-Live combat packets include `fightStartedAt`, `fightDeadlineAt`, `fightSeconds`,
-and optional `cutoffReason`.
+The richer server board model remains an internal validation and debug concern.
+Agent packets should carry enough state for intent selection, while the server
+privately computes legality, costs, contacts, and rejection reasons.
 
 Combat has two clocks:
 
@@ -564,7 +497,6 @@ Machine/loadout authority lives in `packages/sim`, especially:
 - `machineCapabilities.ts`
 - `mountSurfaces.ts`
 - `loadoutActions.ts`
-- `gameMasterActions.ts`
 
 Current rules and expectations:
 
