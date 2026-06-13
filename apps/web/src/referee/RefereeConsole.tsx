@@ -1,5 +1,6 @@
-import { Suspense, lazy, useMemo } from 'react'
-import { DEFAULT_ARENA_CONFIG } from '../../../../packages/schemas/src/index.js'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import { DEFAULT_ARENA_CONFIG, type TeamRole } from '../../../../packages/schemas/src/index.js'
+import type { PublicSessionState, RolePrivateState } from '../agent/agentSessionTypes.js'
 import {
   ArenaImpactDashboard,
   KeyStatsDashboard,
@@ -14,6 +15,8 @@ import {
 import {
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
+import { buildRefereeObserverView } from './refereeObserverView'
+import { createRefereeReplayProof, resolveRefereeReplayProofMode } from './refereeReplayProof'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 import { createLiveArenaStageState } from './liveArenaStage'
 
@@ -23,6 +26,9 @@ const ReplayViewer = lazy(() =>
 const ArenaPreviewScene = lazy(() =>
   import('../replay/arena/ArenaPreviewScene').then((module) => ({ default: module.ArenaPreviewScene })),
 )
+
+const FIGHT_RENDER_WARMUP_MS = 30_000
+const EMPTY_ROLE_STATES: Partial<Record<TeamRole, RolePrivateState>> = {}
 
 function ReplayFrameFallback() {
   return <p className="referee-empty replay-placeholder">Loading replay.</p>
@@ -67,6 +73,79 @@ function ReplayStatusOverlay({
   )
 }
 
+function getCombatWarmupKey(publicSession: PublicSessionState | null): string | null {
+  if (!publicSession || !isFightRenderPhase(publicSession.phase)) {
+    return null
+  }
+
+  return `${publicSession.sessionId}:${publicSession.round}`
+}
+
+function isFightRenderPhase(phase: PublicSessionState['phase']): boolean {
+  return (
+    phase === 'combat_turn' ||
+    phase === 'combat_resolved' ||
+    phase === 'replay_phase' ||
+    phase === 'round_review'
+  )
+}
+
+function getFightStartedAtMs(publicSession: PublicSessionState | null): number | null {
+  const startedAt = publicSession && isFightRenderPhase(publicSession.phase)
+    ? publicSession?.combat?.fightStartedAt
+    : undefined
+
+  if (!startedAt) {
+    return null
+  }
+
+  const startedAtMs = Date.parse(startedAt)
+
+  if (!Number.isFinite(startedAtMs) || startedAtMs > Date.now()) {
+    return null
+  }
+
+  return startedAtMs
+}
+
+function useFightRenderWarmup(publicSession: PublicSessionState | null): boolean {
+  const [, setWarmupTick] = useState(0)
+  const localWarmupStartRef = useRef<{ key: string; startedAtMs: number } | null>(null)
+  const combatWarmupKey = getCombatWarmupKey(publicSession)
+
+  if (!combatWarmupKey) {
+    localWarmupStartRef.current = null
+  } else if (localWarmupStartRef.current?.key !== combatWarmupKey) {
+    localWarmupStartRef.current = {
+      key: combatWarmupKey,
+      startedAtMs: Date.now(),
+    }
+  }
+
+  const startedAtMs = getFightStartedAtMs(publicSession) ?? localWarmupStartRef.current?.startedAtMs
+  const readyAtMs = startedAtMs === undefined ? null : startedAtMs + FIGHT_RENDER_WARMUP_MS
+
+  useEffect(() => {
+    if (readyAtMs === null) {
+      return undefined
+    }
+
+    const remainingMs = readyAtMs - Date.now()
+
+    if (remainingMs <= 0) {
+      return undefined
+    }
+
+    const timeout = window.setTimeout(() => {
+      setWarmupTick((tick) => tick + 1)
+    }, remainingMs)
+
+    return () => window.clearTimeout(timeout)
+  }, [readyAtMs])
+
+  return readyAtMs !== null && Date.now() < readyAtMs
+}
+
 export function RefereeConsole() {
   const {
     activeSessionId,
@@ -95,10 +174,20 @@ export function RefereeConsole() {
     storedRefereeToken,
     submitRoundAdvance,
   } = useRefereeConsoleController()
+  const replayProofMode = useMemo(() => resolveRefereeReplayProofMode(window.location.search), [])
+  const replayProof = useMemo(
+    () => replayProofMode ? createRefereeReplayProof() : null,
+    [replayProofMode],
+  )
+  const displayPublicSession = replayProof?.publicSession ?? publicSession
+  const displayReplayPayload = replayProof?.replayPayload ?? replayPayload
+  const displayRoleStates = replayProof ? EMPTY_ROLE_STATES : roleStates
+  const displaySessionChat = replayProof?.publicSession.chatLog ?? sessionChat
+  const displayActiveSessionId = displayPublicSession?.sessionId ?? activeSessionId
   const fightComms = [
-    ...sessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
+    ...displaySessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
     ...(['red', 'blue'] as const).flatMap((role) =>
-      (roleStates[role]?.privateChatLog ?? []).map((message) => ({
+      (displayRoleStates[role]?.privateChatLog ?? []).map((message) => ({
         ...message,
         visibility: 'role_only' as const,
       })),
@@ -106,51 +195,60 @@ export function RefereeConsole() {
   ].sort((left, right) => Date.parse(left.at) - Date.parse(right.at) || left.id.localeCompare(right.id))
   const chatSummary = fightComms.length > 0
     ? `${fightComms.length} message${fightComms.length === 1 ? '' : 's'}`
-    : activeSessionId
+    : displayActiveSessionId
       ? 'No fight comms yet'
       : 'Create session first'
-  const visibleArena = publicSession?.arena ?? DEFAULT_ARENA_CONFIG
-  const liveArenaStage = useMemo(() => createLiveArenaStageState(roleStates), [roleStates])
-  const replayPayloadAvailable = Boolean(publicSession?.replayAvailable && replayPayload)
-  const shouldStreamLiveCombat = publicSession?.phase === 'combat_turn'
-  const shouldShowReplay = replayPayloadAvailable && !shouldStreamLiveCombat
-  const shouldShowReplayStatus = Boolean(
-    publicSession?.replayAvailable &&
-      !replayPayload &&
-      !shouldStreamLiveCombat,
+  const visibleArena = displayPublicSession?.arena ?? DEFAULT_ARENA_CONFIG
+  const liveArenaStage = useMemo(() => createLiveArenaStageState(displayRoleStates), [displayRoleStates])
+  const observerView = useMemo(
+    () => buildRefereeObserverView({ publicSession: displayPublicSession, replayPayload: displayReplayPayload }),
+    [displayPublicSession, displayReplayPayload],
   )
-  const shouldShowSessionCompletion = publicSession?.phase === 'session_complete'
+  const shouldDeferFightRender = useFightRenderWarmup(displayPublicSession)
+  const showRenderedReplay = observerView.showReplay && displayReplayPayload && !shouldDeferFightRender
+  const showFightCockpitStage = observerView.stage === 'live_combat' || shouldDeferFightRender
+  const shouldShowSessionCompletion = displayPublicSession?.phase === 'session_complete'
 
   return (
     <main className="arena-app match-console">
       <div className="match-dashboard-shell">
         <section className="match-stage-card" id="dashboard" aria-label="Arena dashboard">
           <div className="match-stage-frame">
-            {shouldShowReplay && replayPayload ? (
+            {showRenderedReplay ? (
               <Suspense fallback={<ReplayFrameFallback />}>
                 <ReplayViewer
                   autoPlay
                   arena={visibleArena}
-                  botBlueprints={replayPayload.botBlueprints}
-                  machineDesigns={replayPayload.machineDesigns}
+                  botBlueprints={displayReplayPayload.botBlueprints}
+                  machineDesigns={displayReplayPayload.machineDesigns}
                   showDamageSchematic={false}
-                  teamIdentities={replayPayload.teamIdentities}
-                  timeline={replayPayload.timeline}
+                  teamIdentities={displayReplayPayload.teamIdentities}
+                  timeline={displayReplayPayload.timeline}
                 />
               </Suspense>
+            ) : showFightCockpitStage ? (
+              <RefereeCockpitStrip
+                forceVisible
+                loadState={roleLoadState}
+                placement="stage"
+                observerView={observerView}
+                roleStates={displayRoleStates}
+                stateError={roleStateError}
+              />
             ) : (
               <Suspense fallback={<ReplayFrameFallback />}>
                 <ArenaPreviewScene arena={visibleArena} liveBots={liveArenaStage} />
               </Suspense>
             )}
-            {shouldShowReplayStatus ? (
+            {observerView.showReplayStatus ? (
               <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
             ) : null}
-            {!shouldShowReplay ? (
+            {observerView.showCockpitStrip && !showFightCockpitStage ? (
               <RefereeCockpitStrip
                 loadState={roleLoadState}
                 placement="stage"
-                roleStates={roleStates}
+                observerView={observerView}
+                roleStates={displayRoleStates}
                 stateError={roleStateError}
               />
             ) : null}
@@ -158,33 +256,34 @@ export function RefereeConsole() {
         </section>
 
         <MatchScoreboard
-          publicSession={publicSession}
-          replayPayload={replayPayload}
+          publicSession={displayPublicSession}
+          replayPayload={displayReplayPayload}
+          observerView={observerView}
           roleLinks={{
             red: {
-              hasInvite: hasInviteForRole('red'),
+              hasInvite: !replayProof && hasInviteForRole('red'),
               inviteCopyUrl: redInviteUrl,
               inviteUrl: redCockpitUrl,
               onCopyInvite: () => void copyInviteUrl(redInviteUrl),
             },
             blue: {
-              hasInvite: hasInviteForRole('blue'),
+              hasInvite: !replayProof && hasInviteForRole('blue'),
               inviteCopyUrl: blueInviteUrl,
               inviteUrl: blueCockpitUrl,
               onCopyInvite: () => void copyInviteUrl(blueInviteUrl),
             },
           }}
           sessionControl={{
-            activeSessionId,
+            activeSessionId: displayActiveSessionId,
             advanceHint: advanceRoundHint,
             advanceLabel: advanceRoundLabel,
-            canAdvance: canAdvanceRound,
-            canRefresh: Boolean(activeSessionId) && loadState !== 'busy',
+            canAdvance: !replayProof && canAdvanceRound,
+            canRefresh: !replayProof && Boolean(activeSessionId) && loadState !== 'busy',
             isBusy: loadState === 'busy',
             onAdvance: () => void submitRoundAdvance(),
             onCreate: () => void createNewSession(),
             onRefresh: refreshStoredSession,
-            tokenStored: Boolean(storedRefereeToken),
+            tokenStored: !replayProof && Boolean(storedRefereeToken),
           }}
         />
 
@@ -202,23 +301,30 @@ export function RefereeConsole() {
               <SectionHeader kicker="Session end" title="Shared Debrief" />
               <SessionCompletionPanel
                 controls={completionControls}
-                publicSession={publicSession}
+                publicSession={displayPublicSession}
               />
             </Panel>
           ) : null}
 
           <Panel className="panel dashboard-panel key-stats-panel">
             <SectionHeader kicker="Key stats" title="Key Stats" />
-            <KeyStatsDashboard publicSession={publicSession} replayPayload={replayPayload} />
+            <KeyStatsDashboard
+              replayPayload={displayReplayPayload}
+              observerView={observerView}
+            />
           </Panel>
 
           <Panel className="panel dashboard-panel arena-impact-panel" id="arena-impact">
             <SectionHeader kicker="Environment" title="Arena Impact" />
-            <ArenaImpactDashboard publicSession={publicSession} replayPayload={replayPayload} />
+            <ArenaImpactDashboard
+              publicSession={displayPublicSession}
+              replayPayload={displayReplayPayload}
+              observerView={observerView}
+            />
           </Panel>
         </section>
 
-        {error ? <p className="referee-error" role="alert">{error}</p> : null}
+        {error && !replayProof ? <p className="referee-error" role="alert">{error}</p> : null}
       </div>
     </main>
   )

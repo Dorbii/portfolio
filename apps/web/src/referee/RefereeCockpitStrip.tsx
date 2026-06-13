@@ -3,7 +3,6 @@ import type {
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
 import type {
-  CombatDecisionBrief,
   RolePrivateState,
   SessionChatMessage,
 } from '../agent/agentSessionTypes.js'
@@ -12,28 +11,40 @@ import { formatLabel } from '../shared/format'
 import {
   createTeamAccentCssVars,
   resolveTeamIdentity,
+  teamAccentRgb,
 } from '../shared/teamVisuals'
+import type { RefereeObserverLifecycle } from './refereeObserverView'
 
 type RefereeCockpitStripProps = {
+  forceVisible?: boolean
   loadState: 'busy' | 'idle'
   placement?: 'page' | 'stage'
+  observerView: Pick<RefereeObserverLifecycle, 'stage' | 'decisionText'>
   roleStates: Partial<Record<TeamRole, RolePrivateState>>
   stateError: string
 }
 
-// CODEX_INTENT: surface both agents' garage previews and combat decisions inside the referee fight view.
+type RefereeCockpitStripStyle = CSSProperties & {
+  '--cockpit-left-team': string
+  '--cockpit-right-team': string
+}
+
+// CODEX_INTENT: surface both agents' garage previews inside the referee fight view.
 // CODEX_RISK: behavioral
 // CODEX_CONFIDENCE: medium
 // CODEX_REVIEW: pending
 export function RefereeCockpitStrip({
+  forceVisible = false,
   loadState,
   placement = 'page',
+  observerView,
   roleStates,
   stateError,
 }: RefereeCockpitStripProps) {
   const hasAnyState = Boolean(roleStates.red || roleStates.blue)
+  const isLiveCombat = observerView.stage === 'live_combat'
 
-  if (!hasAnyState && loadState !== 'busy' && !stateError) {
+  if (!forceVisible && !hasAnyState && loadState !== 'busy' && !stateError && isLiveCombat) {
     return null
   }
 
@@ -41,20 +52,38 @@ export function RefereeCockpitStrip({
     <section
       className={`referee-cockpit-strip is-${placement}`}
       aria-labelledby="referee-cockpit-strip-heading"
+      style={createStripAccentCssVars(roleStates)}
     >
       <div className="referee-cockpit-strip-header">
         <div>
           <span>Agent Cockpits</span>
-          <h2 id="referee-cockpit-strip-heading">Garage and Combat Decisions</h2>
+          <h2 id="referee-cockpit-strip-heading">Garage</h2>
         </div>
-        {stateError ? <p role="alert">{stateError}</p> : <p>{loadState === 'busy' ? 'Loading observer state.' : 'Live observer state.'}</p>}
+        <p role={stateError ? 'alert' : undefined}>
+          {resolveStripStatusCopy(observerView, loadState, stateError)}
+        </p>
       </div>
       <div className="referee-cockpit-grid">
-        <RefereeCockpitPanel role="red" roleState={roleStates.red} />
-        <RefereeCockpitPanel role="blue" roleState={roleStates.blue} />
+        <RefereeCockpitPanel
+          role="red"
+          roleState={roleStates.red}
+        />
+        <RefereeCockpitPanel
+          role="blue"
+          roleState={roleStates.blue}
+        />
       </div>
     </section>
   )
+}
+
+function createStripAccentCssVars(
+  roleStates: Partial<Record<TeamRole, RolePrivateState>>,
+): RefereeCockpitStripStyle {
+  return {
+    '--cockpit-left-team': teamAccentRgb('red', roleStates.red?.identity),
+    '--cockpit-right-team': teamAccentRgb('blue', roleStates.blue?.identity),
+  }
 }
 
 export function RefereeArenaMonologueOverlay({
@@ -85,7 +114,6 @@ function RefereeCockpitPanel({
 }) {
   const identity = resolveTeamIdentity(role, roleState?.identity)
   const loadout = roleState?.ownLoadout
-  const decision = roleState?.combat?.decision
 
   return (
     <article
@@ -112,72 +140,40 @@ function RefereeCockpitPanel({
       ) : (
         <p className="referee-cockpit-empty">No confirmed loadout visible to the referee observer yet.</p>
       )}
-      <section className="referee-decision-preview" aria-label={`${identity.name} combat decision`}>
-        <h3>Combat Decision</h3>
-        {decision ? <DecisionSummary decision={decision} /> : (
-          <p className="referee-cockpit-empty">No open combat-turn decision packet yet.</p>
-        )}
-      </section>
     </article>
   )
 }
 
-function DecisionSummary({
-  decision,
-}: {
-  decision: CombatDecisionBrief
-}) {
-  return (
-    <div className="referee-decision-stack">
-      <div className="referee-decision-facts">
-        <Fact label="Turn" value={String(decision.tick)} />
-        <Fact label="Range" value={`${formatLabel(decision.range.band)} / ${decision.range.distance.toFixed(2)}m`} />
-        <Fact label="Self" value={`${Math.round(decision.health.selfPct ?? 0)}%`} />
-        <Fact label="Opponent" value={`${Math.round(decision.health.opponentPct ?? 0)}%`} />
-      </div>
-      <div className="referee-readiness-row">
-        <Readiness label="A" ready={decision.actionReadiness.weaponA.canFire} reason={decision.actionReadiness.weaponA.reason} />
-        {decision.actionReadiness.weaponB ? (
-          <Readiness label="B" ready={decision.actionReadiness.weaponB.canFire} reason={decision.actionReadiness.weaponB.reason} />
-        ) : null}
-        {decision.actionReadiness.utility ? (
-          <Readiness label="U" ready={decision.actionReadiness.utility.canActivate} reason={decision.actionReadiness.utility.reason} />
-        ) : null}
-      </div>
-    </div>
-  )
-}
+function resolveStripStatusCopy(
+  observerView: RefereeCockpitStripProps['observerView'],
+  loadState: 'busy' | 'idle',
+  stateError: string,
+): string {
+  if (stateError) {
+    return stateError
+  }
 
-function Fact({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  )
-}
+  if (loadState === 'busy') {
+    return 'Loading observer state.'
+  }
 
-function Readiness({
-  label,
-  ready,
-  reason,
-}: {
-  label: string
-  ready: boolean
-  reason: string
-}) {
-  return (
-    <div className={`referee-readiness ${ready ? 'is-ready' : 'is-hold'}`} title={reason}>
-      <span>{label}</span>
-      <strong>{ready ? 'Ready' : 'Hold'}</strong>
-    </div>
-  )
+  if (observerView.stage === 'resolved_replay') {
+    return `Replay complete: ${observerView.decisionText}`
+  }
+
+  if (observerView.stage === 'loadout_window') {
+    return 'Waiting for loadout submission.'
+  }
+
+  if (observerView.stage === 'round_review') {
+    return 'Round review phase.'
+  }
+
+  if (observerView.stage === 'session_complete') {
+    return 'Session complete.'
+  }
+
+  return 'Live observer state.'
 }
 
 function ArenaMonologueCard({

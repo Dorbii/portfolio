@@ -306,6 +306,42 @@ function runtimeInactiveReason(
   design: MachineDesign,
   instanceId: string,
 ): MachineInactivePartReason | undefined {
+  const directReason = directRuntimeInactiveReason(design, instanceId)
+
+  if (directReason) {
+    return directReason
+  }
+
+  const parentByChild = new Map(design.attachments.map((attachment) => [
+    attachment.childInstanceId,
+    attachment.parentInstanceId,
+  ]))
+  const visited = new Set<string>()
+  let parentInstanceId = parentByChild.get(instanceId)
+
+  while (parentInstanceId) {
+    if (visited.has(parentInstanceId)) {
+      return undefined
+    }
+
+    visited.add(parentInstanceId)
+
+    const parentReason = directRuntimeInactiveReason(design, parentInstanceId)
+
+    if (parentReason === 'detached' || parentReason === 'destroyed') {
+      return 'detached'
+    }
+
+    parentInstanceId = parentByChild.get(parentInstanceId)
+  }
+
+  return undefined
+}
+
+function directRuntimeInactiveReason(
+  design: MachineDesign,
+  instanceId: string,
+): MachineInactivePartReason | undefined {
   if (design.runtime?.detachedInstanceIds?.includes(instanceId)) {
     return 'detached'
   }

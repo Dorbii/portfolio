@@ -29,6 +29,33 @@ import type {
 export type { BotPartNodeMetadata } from '../parts'
 
 const basePartMaterials = new WeakMap<AbstractMesh, AbstractMesh['material']>()
+const botPlaybackCaches = new WeakMap<ReturnType<typeof createBotNode>, BotPlaybackCache>()
+const KNOCKOUT_COLLAPSE_DROP = 0.12
+const KNOCKOUT_COLLAPSE_DURATION_SECONDS = 2
+const KNOCKOUT_PART_SCATTER = 0.035
+
+type BotPlaybackAnimatedNode = {
+  metadata: PartMotionMetadata
+  node: TransformNode
+  partMetadata?: BotPartNodeMetadata
+}
+
+type BotPlaybackCache = {
+  animatedNodes: BotPlaybackAnimatedNode[]
+  partNodes: BotPlaybackPartNode[]
+}
+
+type BotPlaybackChildMaterial = {
+  baseMaterial: AbstractMesh['material']
+  materialRole: BotPartChildMaterialRole | null
+  mesh: AbstractMesh
+}
+
+type BotPlaybackPartNode = {
+  childMaterials: BotPlaybackChildMaterial[]
+  metadata: BotPartNodeMetadata
+  node: TransformNode
+}
 
 export function updateBots(
   bots: Record<TeamRole, ReturnType<typeof createBotNode>>,
@@ -38,45 +65,42 @@ export function updateBots(
 
   roles.forEach((role) => {
     const bot = bots[role]
+    const cache = getBotPlaybackCache(bot)
     const state = frame.bots[role]
-    const hit = frame.endState?.knockedOut === role
+    const knockoutProgress = knockoutProgressForRole(frame, role)
     const damagePulse = frame.effects.find(
       (effect) => effect.kind === 'damage_marker' && effect.team === role,
     )
-    const bounce = Math.sin(frame.time * 18) * 0.02
     const flinch = damagePulse ? damagePulse.intensity : 0
     const motion = state.motion
     const stability = state.stability
     const stabilityScale = stability.pose === 'flipped' ? 0.98 : 1
     const verticalOffset = stability.heightOffset
-    const driveBounce = hit ? 0 : Math.sin(frame.time * 18 + (role === 'red' ? 0 : Math.PI)) *
+    const driveBounce = Math.sin(frame.time * 18 + (role === 'red' ? 0 : Math.PI)) *
       0.014 *
-      Math.min(1, motion.driveIntensity)
+      Math.min(1, motion.driveIntensity) *
+      (1 - knockoutProgress)
+    const activePositionY = Math.max(
+      0.06,
+      0.16 + motion.contactIntensity * 0.03 + verticalOffset + driveBounce,
+    )
+    const activeRotationX = -motion.lean + stability.pitch
+    const activeRotationZ =
+      Math.sin(frame.time * 42) * flinch * 0.14 +
+      motion.drift * 0.08 +
+      motion.turn * 0.1 +
+      stability.roll
+    const activeScale = stabilityScale * (1 + flinch * 0.035)
 
     bot.position = toBabylonVector(state.position)
-    bot.position.y = hit
-      ? 0.08 + bounce
-      : Math.max(0.06, 0.16 + motion.contactIntensity * 0.03 + verticalOffset + driveBounce)
+    bot.position.y = lerp(activePositionY, 0.035, knockoutProgress)
     bot.rotation.y = state.rotationY
-    bot.rotation.x = hit ? 0 : -motion.lean + stability.pitch
-    bot.rotation.z = hit
-      ? (role === 'red' ? -0.2 : 0.2)
-      : Math.sin(frame.time * 42) * flinch * 0.14 + motion.drift * 0.08 + motion.turn * 0.1 + stability.roll
-    bot.scaling.setAll(hit ? 0.96 : stabilityScale * (1 + flinch * 0.035))
-    updateBotPartNodes(bot, role, frame.parts[role], frame.time)
+    bot.rotation.x = lerp(activeRotationX, -0.28, knockoutProgress)
+    bot.rotation.z = lerp(activeRotationZ, role === 'red' ? -0.58 : 0.58, knockoutProgress)
+    bot.scaling.setAll(lerp(activeScale, 0.94, knockoutProgress))
+    updateBotPartNodes(bot, role, cache.partNodes, frame.parts[role], frame.time, knockoutProgress)
 
-    const animatedNodes = bot.getChildren((node) => {
-      return isPartMotionNode(node)
-    }, true) as TransformNode[]
-
-    animatedNodes.forEach((node) => {
-      const metadata = node.metadata as PartMotionMetadata | undefined
-
-      if (!metadata) {
-        return
-      }
-
-      const partMetadata = findBotPartMetadata(node)
+    cache.animatedNodes.forEach(({ metadata, node, partMetadata }) => {
       const weaponIntensity = weaponMotionIntensity(frame, role, partMetadata)
 
       applyPartMotion(
@@ -86,6 +110,67 @@ export function updateBots(
       )
     })
   })
+}
+
+function knockoutProgressForRole(frame: ReplayVisualFrame, role: TeamRole): number {
+  if (frame.endState?.knockedOut !== role) {
+    return 0
+  }
+
+  const knockoutEffect = frame.effects.find(
+    (effect) => effect.kind === 'knockout' && effect.team === role,
+  )
+  const age = knockoutEffect?.age ?? 0
+
+  return smoothstep(clamp(age / KNOCKOUT_COLLAPSE_DURATION_SECONDS, 0, 1))
+}
+
+function getBotPlaybackCache(bot: ReturnType<typeof createBotNode>): BotPlaybackCache {
+  const existing = botPlaybackCaches.get(bot)
+
+  if (existing) {
+    return existing
+  }
+
+  const partNodes = (bot.getChildren((node) => {
+    const metadata = node.metadata as BotPartNodeMetadata | undefined
+
+    return metadata?.kind === 'bot_part'
+  }, true) as TransformNode[]).map((node): BotPlaybackPartNode => {
+    const metadata = node.metadata as BotPartNodeMetadata
+    const childMaterials = node.getChildMeshes().map((mesh): BotPlaybackChildMaterial => {
+      const baseMaterial = getBasePartMaterial(mesh)
+
+      return {
+        baseMaterial,
+        materialRole: resolveChildMaterialRole(mesh, baseMaterial, metadata),
+        mesh,
+      }
+    })
+
+    return {
+      childMaterials,
+      metadata,
+      node,
+    }
+  })
+
+  const animatedNodes = (bot.getChildren((node) => {
+    return isPartMotionNode(node)
+  }, true) as TransformNode[]).map((node): BotPlaybackAnimatedNode => ({
+    metadata: node.metadata as PartMotionMetadata,
+    node,
+    partMetadata: findBotPartMetadata(node),
+  }))
+
+  const cache = {
+    animatedNodes,
+    partNodes,
+  }
+
+  botPlaybackCaches.set(bot, cache)
+
+  return cache
 }
 
 function partMotionSpeedScale(
@@ -174,30 +259,26 @@ function findBotPartMetadata(node: TransformNode): BotPartNodeMetadata | undefin
 function updateBotPartNodes(
   bot: ReturnType<typeof createBotNode>,
   role: TeamRole,
+  partNodes: BotPlaybackPartNode[],
   partStates: Record<string, PartFrameState>,
   time: number,
+  knockoutProgress: number,
 ): void {
   const botWorldMatrix = bot.computeWorldMatrix(true).clone()
   const inverseBotWorld = botWorldMatrix.clone()
 
   inverseBotWorld.invert()
 
-  const nodes = bot.getChildren((node) => {
-    const metadata = node.metadata as BotPartNodeMetadata | undefined
-
-    return metadata?.kind === 'bot_part'
-  }, true) as TransformNode[]
-
-  nodes.forEach((node) => {
-    const metadata = node.metadata as BotPartNodeMetadata
+  partNodes.forEach((partNode) => {
+    const { metadata, node } = partNode
     const state = partStates[metadata.blockId]
     const basePosition = metadata.basePosition
     const baseRotation = metadata.baseRotation
     const baseRotationQuaternion = metadata.baseRotationQuaternion
-    const damageSeverity = partDamageSeverity(state)
+    const damageSeverity = Math.max(partDamageSeverity(state), knockoutProgress)
 
     node.setEnabled(true)
-    applyPartMaterialState(node, metadata, damageSeverity)
+    applyPartMaterialState(partNode, damageSeverity)
 
     if (state?.status === 'detached' && state.detachMotion) {
       const motion = state.detachMotion
@@ -215,13 +296,60 @@ function updateBotPartNodes(
     }
 
     const damageTremor = damageSeverity > 0
-      ? Math.sin(time * 28 + deterministicAngle(`${role}-${metadata.blockId}-damage`)) * 0.025 * damageSeverity
+      ? Math.sin(time * 28 + deterministicAngle(`${role}-${metadata.blockId}-damage`)) *
+        0.025 *
+        damageSeverity *
+        (1 - knockoutProgress)
       : 0
+    const activePositionY = basePosition[1] + Math.abs(damageTremor) * 0.35
+    const activeScale = 1 + damageSeverity * 0.055
 
-    node.position.set(basePosition[0], basePosition[1] + Math.abs(damageTremor) * 0.35, basePosition[2])
+    if (knockoutProgress > 0) {
+      const collapse = collapsedPartPose(role, metadata.blockId)
+
+      node.position.set(
+        lerp(basePosition[0], basePosition[0] + collapse.offsetX, knockoutProgress),
+        lerp(
+          activePositionY,
+          Math.max(0.015, basePosition[1] - KNOCKOUT_COLLAPSE_DROP + collapse.offsetY),
+          knockoutProgress,
+        ),
+        lerp(basePosition[2], basePosition[2] + collapse.offsetZ, knockoutProgress),
+      )
+      applyNodeRotation(node, baseRotation, baseRotationQuaternion, [
+        lerp(0, collapse.rotationX, knockoutProgress),
+        lerp(0, collapse.rotationY, knockoutProgress),
+        lerp(damageTremor, collapse.rotationZ, knockoutProgress),
+      ])
+      node.scaling.setAll(lerp(activeScale, 0.9, knockoutProgress))
+      return
+    }
+
+    node.position.set(basePosition[0], activePositionY, basePosition[2])
     applyNodeRotation(node, baseRotation, baseRotationQuaternion, [0, 0, damageTremor])
-    node.scaling.setAll(1 + damageSeverity * 0.055)
+    node.scaling.setAll(activeScale)
   })
+}
+
+function collapsedPartPose(role: TeamRole, blockId: string): {
+  offsetX: number
+  offsetY: number
+  offsetZ: number
+  rotationX: number
+  rotationY: number
+  rotationZ: number
+} {
+  const angle = deterministicAngle(`${role}-${blockId}-knockout-collapse`)
+  const side = role === 'red' ? -1 : 1
+
+  return {
+    offsetX: Math.cos(angle) * KNOCKOUT_PART_SCATTER,
+    offsetY: Math.sin(angle * 1.7) * 0.012,
+    offsetZ: Math.sin(angle) * KNOCKOUT_PART_SCATTER,
+    rotationX: -0.16 + Math.sin(angle * 1.3) * 0.08,
+    rotationY: Math.sin(angle * 0.7) * 0.05,
+    rotationZ: side * 0.2 + Math.cos(angle * 1.1) * 0.11,
+  }
 }
 
 function applyNodeRotation(
@@ -250,20 +378,17 @@ function applyNodeRotation(
 }
 
 function applyPartMaterialState(
-  node: TransformNode,
-  metadata: BotPartNodeMetadata,
+  partNode: BotPlaybackPartNode,
   damageSeverity: number,
 ): void {
-  node.getChildMeshes().forEach((mesh) => {
-    const baseMaterial = getBasePartMaterial(mesh)
-    const materialRole = resolveChildMaterialRole(mesh, baseMaterial, metadata)
+  partNode.childMaterials.forEach(({ baseMaterial, materialRole, mesh }) => {
 
     if (!baseMaterial || !materialRole) {
       return
     }
 
     const damageMaterial = damageMaterialForRoleAndSeverity(
-      metadata.damageMaterials,
+      partNode.metadata.damageMaterials,
       materialRole,
       damageSeverity,
     )
@@ -337,4 +462,14 @@ function partDamageSeverity(state: PartFrameState | undefined): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
+}
+
+function smoothstep(value: number): number {
+  const clamped = clamp(value, 0, 1)
+
+  return clamped * clamped * (3 - 2 * clamped)
+}
+
+function lerp(from: number, to: number, progress: number): number {
+  return from + (to - from) * clamp(progress, 0, 1)
 }

@@ -2713,10 +2713,51 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
   assert.equal(blueSubmission.response.status, 200)
   assert.equal(blueSubmission.json.publicState.phase, 'combat_turn')
   assert.equal(blueSubmission.json.publicState.combat.tick, 2)
+  assert.equal(blueSubmission.json.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.json.publicState.replayStatus, 'live_partial')
   assert.equal(blueSubmission.json.publicState.combat.fightDeadlineAt, blueCombatPacket.combat.fightDeadlineAt)
   assert.equal(redNextTurn.response.status, 200)
   assert.equal(redNextTurn.json.gameMaster.phase, 'combat_turn')
   assert.equal(redNextTurn.json.gameMaster.nextAction, 'wait_for_opponent_turn')
+
+  const liveReplay = await route(env, `/sessions/${sessionId}/replay`)
+  assert.equal(liveReplay.response.status, 404)
+  assert.equal(liveReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
+})
+
+test('legacy mixed combat and replay state is sanitized before route projection', async () => {
+  const sourceEnv = createEnv()
+  const sessionId = 's_legacy_mixed_replay_route'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(sourceEnv, sessionId)
+
+  await confirmMachineLoadout(sourceEnv, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(sourceEnv, sessionId, blueInvite.claimToken, bluePacket)
+
+  const sourceStorage = sourceEnv.AGENT_ARENA_SESSION.storageFor(sessionId)
+  const stored = await sourceStorage.get('agent-arena-session')
+
+  assert.notEqual(stored.combat, undefined)
+
+  stored.replay = completedReplayPayload()
+
+  const reloadedEnv = createEnv()
+  const reloadedStorage = reloadedEnv.AGENT_ARENA_SESSION.storageFor(sessionId)
+
+  await reloadedStorage.put('agent-arena-session', stored)
+
+  const publicPoll = await route(reloadedEnv, `/sessions/${sessionId}/public`)
+  const replay = await route(reloadedEnv, `/sessions/${sessionId}/replay`)
+  const sanitized = await reloadedStorage.get('agent-arena-session')
+
+  assert.equal(publicPoll.response.status, 200)
+  assert.equal(publicPoll.json.phase, 'combat_turn')
+  assert.equal(publicPoll.json.replayStatus, 'live_partial')
+  assert.equal(publicPoll.json.replayAvailable, false)
+  assert.equal(publicPoll.json.replayVersion, undefined)
+  assert.equal(replay.response.status, 404)
+  assert.equal(replay.json.error.code, 'REPLAY_NOT_AVAILABLE')
+  assert.equal(sanitized.replay, undefined)
+  assert.notEqual(sanitized.combat, undefined)
 })
 
 test('public poll resolves combat when fight wall-clock deadline has passed', async () => {
@@ -2732,6 +2773,7 @@ test('public poll resolves combat when fight wall-clock deadline has passed', as
   const blueCombatState = await route(env, `/sessions/${sessionId}/state`, {
     token: blueInvite.claimToken,
   })
+  const preExpiryReplay = await route(env, `/sessions/${sessionId}/replay`)
   const storage = env.AGENT_ARENA_SESSION.storageFor(sessionId)
   const stored = await storage.get('agent-arena-session')
 
@@ -2743,12 +2785,19 @@ test('public poll resolves combat when fight wall-clock deadline has passed', as
   const publicPoll = await route(env, `/sessions/${sessionId}/public`)
   const resolved = await storage.get('agent-arena-session')
 
+  const finalReplay = await route(env, `/sessions/${sessionId}/replay`)
+
   assert.equal(blueCombatState.response.status, 200)
+  assert.equal(preExpiryReplay.response.status, 404)
+  assert.equal(preExpiryReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
   assert.equal(typeof blueCombatState.json.combat.fightDeadlineAt, 'string')
   assert.equal(publicPoll.response.status, 200)
   assert.equal(publicPoll.json.phase, 'round_review')
   assert.equal(publicPoll.json.replayAvailable, true)
+  assert.equal(publicPoll.json.replayStatus, 'resolved')
   assert.equal(publicPoll.json.lastResult.reason.includes('Fight wall-clock expired'), true)
+  assert.equal(finalReplay.response.status, 200)
+  assert.equal(finalReplay.json.round, 1)
   assert.equal(resolved.combat, undefined)
   assert.equal(resolved.fightDossier.fights.at(-1).fightId, 'fight_1')
 })
@@ -3498,6 +3547,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(publicState.json.phase, 'submission_phase')
   assert.equal(typeof publicState.json.stateVersion, 'string')
   assert.equal(publicState.json.replayAvailable, false)
+  assert.equal('lastResult' in publicState.json, false)
   assertRoundPlanWindow(publicState.json.roundPlan)
   assert.equal(publicState.json.gameMaster.red.nextAction, 'build_bot')
   assert.equal(publicState.json.gameMaster.blue.nextAction, 'build_bot')
@@ -3521,6 +3571,7 @@ test('worker routes session traffic through the Durable Object relay boundary', 
   assert.equal(finalRedState.json.ownLoadout, undefined)
   assert.equal(finalRedState.json.round, 1)
   assert.equal(JSON.stringify(finalRedState.json.opponent).includes('Spinner'), false)
+  assert.equal('lastResult' in finalRedState.json, false)
 
   const staleReplay = await route(env, `/sessions/${sessionId}/replay`)
 
@@ -3629,12 +3680,31 @@ test('round 2 build rehydrates prior confirmed blueprint healed to full', async 
   })
 
   assert.equal(advanced.response.status, 200)
+  assert.equal(advanced.json.publicState.phase, 'submission_phase')
+  assert.equal(advanced.json.publicState.round, 2)
+  assert.equal(advanced.json.publicState.roles.red.wins, 1)
+  assert.equal(advanced.json.publicState.roles.blue.losses, 1)
+  assert.equal(advanced.json.publicState.replayAvailable, false)
+  assert.equal(advanced.json.publicState.replayStatus, 'none')
+  assert.equal('lastResult' in advanced.json.publicState, false)
+
+  const publicAfterAdvance = await route(env, `/sessions/${sessionId}/public`)
+
+  assert.equal(publicAfterAdvance.response.status, 200)
+  assert.equal(publicAfterAdvance.json.phase, 'submission_phase')
+  assert.equal(publicAfterAdvance.json.round, 2)
+  assert.equal(publicAfterAdvance.json.roles.red.wins, 1)
+  assert.equal(publicAfterAdvance.json.roles.blue.losses, 1)
+  assert.equal(publicAfterAdvance.json.replayAvailable, false)
+  assert.equal(publicAfterAdvance.json.replayStatus, 'none')
+  assert.equal('lastResult' in publicAfterAdvance.json, false)
 
   const redNext = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,
   })
 
   assert.equal(redNext.response.status, 200)
+  assert.equal('lastResult' in redNext.json, false)
   assert.equal(redNext.json.gameMaster.round, 2)
   assert.equal(redNext.json.gameMaster.phase, 'choose_loadout')
 

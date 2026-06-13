@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import type {
   TeamRole,
@@ -9,12 +8,10 @@ import type { StatusTone } from '../shared/ui'
 import {
   capitalize,
   formatClockTime,
-  formatDurationSeconds,
   formatLabel,
 } from '../shared/format'
 import {
   resolveTeamIdentity,
-  teamAccentRgb,
   teamLogoInitials,
 } from '../shared/teamVisuals'
 import {
@@ -24,6 +21,7 @@ import {
   StatusBadge,
 } from '../shared/ui'
 import type { ReplayPayload } from './refereeClient'
+import type { RefereeObserverLifecycle, RefereeObserverTeamView } from './refereeObserverView'
 
 type TeamBannerLinks = {
   hasInvite: boolean
@@ -56,23 +54,27 @@ export type SessionCompletionControl = {
 export function MatchScoreboard({
   publicSession,
   replayPayload,
+  observerView,
   roleLinks,
   sessionControl,
 }: {
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
+  observerView: RefereeObserverLifecycle
   roleLinks: Record<TeamRole, TeamBannerLinks>
   sessionControl: ScoreboardSessionControl
 }) {
   const winsRequired = getWinsRequired(publicSession?.maxRounds)
-  const decision = formatDecision(publicSession)
+  const decision = observerView.decisionText
+  const red = getTeamDashboardData('red', observerView, replayPayload)
+  const blue = getTeamDashboardData('blue', observerView, replayPayload)
 
   return (
     <header className="match-scoreboard" aria-label="Match scoreboard">
       <ScoreboardTeam
-        publicSession={publicSession}
-        replayPayload={replayPayload}
+        opponent={blue}
         role="red"
+        team={red}
         links={roleLinks.red}
         winsRequired={winsRequired}
       />
@@ -81,10 +83,9 @@ export function MatchScoreboard({
         <strong className="scoreboard-core-round">{publicSession ? `R${publicSession.round}` : '--'}</strong>
         <small className="scoreboard-core-state" title={sessionControl.activeSessionId || undefined}>
           {publicSession
-            ? `${formatReplayClock(replayPayload)} / ${decision}`
+            ? `${observerView.replayClockLabel} / ${decision}`
             : sessionControl.activeSessionId || 'Create session'}
         </small>
-        <ScoreboardPlanTimer publicSession={publicSession} />
         <ActionGroup className="scoreboard-session-actions">
           <Button
             type="button"
@@ -122,56 +123,13 @@ export function MatchScoreboard({
         </ActionGroup>
       </div>
       <ScoreboardTeam
-        publicSession={publicSession}
-        replayPayload={replayPayload}
+        opponent={red}
         role="blue"
+        team={blue}
         links={roleLinks.blue}
         winsRequired={winsRequired}
       />
     </header>
-  )
-}
-
-function ScoreboardPlanTimer({
-  publicSession,
-}: {
-  publicSession: PublicSessionState | null
-}) {
-  const [nowMs, setNowMs] = useState(() => Date.now())
-  const timer = publicSession?.phase === 'combat_turn' && publicSession.combat?.fightDeadlineAt
-    ? { deadlineAt: publicSession.combat.fightDeadlineAt, label: 'Fight clock' }
-    : publicSession?.phase === 'submission_phase' && publicSession.roundPlan?.deadlineAt
-      ? { deadlineAt: publicSession.roundPlan.deadlineAt, label: 'Loadout window' }
-      : undefined
-  const deadlineAt = timer?.deadlineAt
-
-  useEffect(() => {
-    if (!deadlineAt) {
-      return undefined
-    }
-
-    const interval = window.setInterval(() => setNowMs(Date.now()), 1000)
-
-    return () => window.clearInterval(interval)
-  }, [deadlineAt])
-
-  if (!deadlineAt) {
-    return (
-      <div className="scoreboard-plan-timer is-hidden" data-plan-timer-state="hidden">
-        <span>Round clock</span>
-        <strong>--:--</strong>
-      </div>
-    )
-  }
-
-  const remainingMs = Date.parse(deadlineAt) - nowMs
-  const timerState = remainingMs <= 0 ? 'expired' : 'open'
-
-  return (
-    <div className={`scoreboard-plan-timer is-${timerState}`} data-plan-timer-state={timerState}>
-      <span>{timer.label}</span>
-      <strong>{formatCountdown(remainingMs)}</strong>
-    </div>
   )
 }
 
@@ -233,22 +191,19 @@ function partCatalogHref(): string {
 
 function ScoreboardTeam({
   links,
-  publicSession,
-  replayPayload,
+  opponent,
   role,
+  team,
   winsRequired,
 }: {
   links: TeamBannerLinks
-  publicSession: PublicSessionState | null
-  replayPayload: ReplayPayload | null
+  opponent: TeamDashboardData
+  team: TeamDashboardData
   role: TeamRole
   winsRequired: number
 }) {
-  const team = getTeamDashboardData(role, publicSession, replayPayload)
-  const opponentRole = role === 'red' ? 'blue' : 'red'
-  const opponent = getTeamDashboardData(opponentRole, publicSession, replayPayload)
-  const isWinner = publicSession?.lastResult?.winner === role
-  const lifecycle = teamLifecycleStatus(team, publicSession)
+  const isWinner = team.isWinner
+  const lifecycle = teamLifecycleStatus(team)
 
   return (
     <section
@@ -314,15 +269,14 @@ function ScoreboardTeam({
 }
 
 export function KeyStatsDashboard({
-  publicSession,
   replayPayload,
+  observerView,
 }: {
-  publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
+  observerView: RefereeObserverLifecycle
 }) {
-  const red = getTeamDashboardData('red', publicSession, replayPayload)
-  const blue = getTeamDashboardData('blue', publicSession, replayPayload)
-  const replayEvents = replayPayload?.timeline.events.length ?? 0
+  const red = getTeamDashboardData('red', observerView, replayPayload)
+  const blue = getTeamDashboardData('blue', observerView, replayPayload)
 
   return (
     <div className="key-stats-dashboard" role="table" aria-label="Key match stats">
@@ -335,7 +289,11 @@ export function KeyStatsDashboard({
       <DashboardStatRow label="Weapon Hits" red={`${red.hitCount}`} blue={`${blue.hitCount}`} />
       <DashboardStatRow label="Health Left" red={red.healthLabel} blue={blue.healthLabel} />
       <DashboardStatRow label="Record" red={`${red.wins}-${red.losses}`} blue={`${blue.wins}-${blue.losses}`} />
-      <DashboardStatRow label="Replay Events" red={`${replayEvents}`} blue={`${replayEvents}`} />
+      <DashboardStatRow
+        label="Replay Events"
+        red={`${observerView.replayEventCount}`}
+        blue={`${observerView.replayEventCount}`}
+      />
     </div>
   )
 }
@@ -361,11 +319,13 @@ function DashboardStatRow({
 export function ArenaImpactDashboard({
   publicSession,
   replayPayload,
+  observerView,
 }: {
   publicSession: PublicSessionState | null
   replayPayload: ReplayPayload | null
+  observerView: RefereeObserverLifecycle
 }) {
-  const impact = summarizeArenaImpact(publicSession, replayPayload)
+  const impact = summarizeArenaImpact(publicSession, observerView, replayPayload)
 
   return (
     <div className="arena-impact-dashboard">
@@ -442,79 +402,35 @@ function ChatMessageItem({ message }: { message: FightCommsMessage }) {
   )
 }
 
-type TeamDashboardData = {
-  accentRgb: string
-  claimed: boolean
-  damageTaken: number
-  healthLabel: string
-  healthPercent: number
-  hitCount: number
-  losses: number
-  logoInitials: string
-  logoMark: string
-  name: string
+type TeamDashboardData = RefereeObserverTeamView & {
   role: TeamRole
-  submitted: boolean
-  wins: number
 }
 
 function teamLifecycleStatus(
   team: TeamDashboardData,
-  publicSession: PublicSessionState | null,
 ): { label: string; tone: StatusTone } {
-  if (!team.claimed) {
-    return { label: 'Not claimed', tone: 'warning' }
-  }
-
-  if (
-    publicSession?.phase === 'session_complete' ||
-    publicSession?.phase === 'expired' ||
-    Boolean(publicSession?.lastResult)
-  ) {
-    return { label: 'Done', tone: 'neutral' }
-  }
-
-  if (publicSession?.phase === 'combat_turn' && publicSession.combat?.fightStartedAt) {
-    return { label: 'Combat live', tone: 'ok' }
-  }
-
-  if (team.submitted) {
-    return { label: 'Ready', tone: 'ok' }
-  }
-
-  return { label: 'Building', tone: 'neutral' }
+  return team.lifecycle
 }
 
 function getTeamDashboardData(
   role: TeamRole,
-  publicSession: PublicSessionState | null,
+  observerView: RefereeObserverLifecycle,
   replayPayload: ReplayPayload | null,
 ): TeamDashboardData {
-  const roleState = publicSession?.roles[role]
+  const team = observerView.teams[role]
   const blueprint = replayPayload?.botBlueprints[role]
-  const damageTaken = publicSession?.lastResult?.damage[role] ?? 0
-  const remainingHealth = publicSession?.lastResult?.remainingHealth[role]
-  const maxHealth = remainingHealth === undefined ? 100 : Math.max(remainingHealth + damageTaken, 1)
-  const identity = roleState?.identity ?? replayPayload?.teamIdentities[role]
+  const identity = replayPayload?.teamIdentities?.[role]
   const displayIdentity = resolveTeamIdentity(role, identity)
-  const healthPercent = remainingHealth === undefined
-    ? (roleState?.submitted ? 100 : 0)
-    : Math.round((remainingHealth / maxHealth) * 100)
 
   return {
-    accentRgb: teamAccentRgb(role, identity),
-    claimed: roleState?.claimed ?? false,
-    damageTaken,
-    healthLabel: remainingHealth === undefined ? 'Pending' : `${Math.max(remainingHealth, 0)}`,
-    healthPercent,
-    hitCount: countImpactEvents(replayPayload?.timeline.events ?? [], role),
-    losses: roleState?.losses ?? 0,
+    ...team,
+    healthPercent: team.healthPercent,
     logoInitials: teamLogoInitials(role, identity),
     logoMark: displayIdentity.logo?.mark ?? 'shield',
-    name: identity?.name.trim() || blueprint?.name?.trim() || displayIdentity.name,
+    name: team.name || identity?.name?.trim() || blueprint?.name?.trim() || displayIdentity.name,
     role,
-    submitted: roleState?.submitted ?? false,
-    wins: roleState?.wins ?? 0,
+    submitted: team.submitted,
+    wins: team.wins,
   }
 }
 
@@ -526,36 +442,6 @@ function getScoreboardAccentStyle(accentRgb: string): ScoreboardAccentStyle {
   return { '--scoreboard-accent': accentRgb }
 }
 
-function formatDecision(publicSession: PublicSessionState | null): string {
-  const result = publicSession?.lastResult
-
-  if (!publicSession) {
-    return 'Create or load a session'
-  }
-
-  if (!result) {
-    return formatLabel(publicSession.phase)
-  }
-
-  if (result.winner === 'draw') {
-    return 'Draw'
-  }
-
-  return `${capitalize(result.winner)} wins`
-}
-
-function formatReplayClock(replayPayload: ReplayPayload | null): string {
-  return replayPayload ? formatDurationSeconds(replayPayload.timeline.duration) : '--'
-}
-
-function formatCountdown(remainingMs: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
-
 function getWinsRequired(maxRounds: number | undefined): number {
   if (!maxRounds || maxRounds < 1) {
     return 3
@@ -564,15 +450,14 @@ function getWinsRequired(maxRounds: number | undefined): number {
   return Math.max(1, Math.floor(maxRounds / 2) + 1)
 }
 
-function countImpactEvents(events: ReplayEvent[], role: TeamRole): number {
-  return events.filter((event) => event.type === 'impact' && event.attacker === role).length
-}
-
 function summarizeArenaImpact(
   publicSession: PublicSessionState | null,
+  observerView: RefereeObserverLifecycle,
   replayPayload: ReplayPayload | null,
 ) {
-  const hazardEvents = replayPayload?.timeline.events.filter((event) => event.type === 'hazard') ?? []
+  const hazardEvents = observerView.canUseReplayPayload
+    ? replayPayload?.timeline.events.filter((event) => event.type === 'hazard') ?? []
+    : []
   const damage = {
     red: sumHazardDamage(hazardEvents, 'red'),
     blue: sumHazardDamage(hazardEvents, 'blue'),
@@ -588,7 +473,7 @@ function summarizeArenaImpact(
   const totalDamage = damage.red + damage.blue
   const activeHazards = publicSession?.arena.activeHazards.join(', ') || 'No hazards loaded'
   const topHazard = mostDamagingHazard(hazardEvents)
-  const summary = !replayPayload
+  const summary = !observerView.canUseReplayPayload
     ? 'Arena impact appears after combat replay data resolves.'
     : totalDamage > 0 && topHazard
       ? `${formatLabel(topHazard.hazard)} dealt ${topHazard.damage} of ${totalDamage} total environment damage.`

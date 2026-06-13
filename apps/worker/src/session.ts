@@ -124,6 +124,7 @@ import {
 import {
   buildPublicSessionState,
   buildRolePrivateState,
+  hasResolvedReplay,
 } from './sessionStateViews.js'
 import { validateAgentBootstrapPatchRequestShape } from './sessionBootstrapValidation.js'
 import type { LegacyTeamIdentity } from './sessionLegacyContracts.js'
@@ -177,6 +178,12 @@ const GAME_MASTER_SUBMISSION_KEYS = new Set([
   'parameters',
   'publicMessage',
 ])
+
+function sanitizeResolvedReplayState(state: StoredSessionState): void {
+  if (state.combat && state.replay) {
+    state.replay = undefined
+  }
+}
 
 export class SessionCoordinator {
   private state: StoredSessionState
@@ -248,7 +255,11 @@ export class SessionCoordinator {
       rateLimits?: Partial<Record<RateLimitAction, RateLimitRule>>
     } = {},
   ): SessionCoordinator {
-    return new SessionCoordinator(cloneJson(state), options)
+    const loadedState = cloneJson(state)
+
+    sanitizeResolvedReplayState(loadedState)
+
+    return new SessionCoordinator(loadedState, options)
   }
 
   exportState(): StoredSessionState {
@@ -1385,13 +1396,15 @@ export class SessionCoordinator {
 
     this.resolveTimedTransitions()
 
-    if (!this.state.replay) {
+    const replay = this.state.replay
+
+    if (!replay || !hasResolvedReplay(this.state)) {
       return relayError('REPLAY_NOT_AVAILABLE', 'Replay is available after both loadouts resolve.')
     }
 
     return {
       ok: true,
-      value: cloneJson(this.state.replay),
+      value: cloneJson(replay),
     }
   }
 
@@ -2008,7 +2021,6 @@ export class SessionCoordinator {
     }
 
     this.applyMachineRuntimeState(resolution.machineRuntime)
-    this.state.replay = this.replayPayloadFromTimeline(resolution.replay)
     this.state.combat = this.createCombatState({
       nextTick: resolution.nextRound,
       snapshot: resolution.snapshot,

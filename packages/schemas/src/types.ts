@@ -47,6 +47,8 @@ export const SESSION_PHASES = [
 
 export type SessionPhase = (typeof SESSION_PHASES)[number]
 
+export type ReplayLifecycleStatus = 'none' | 'live_partial' | 'resolved'
+
 export const PART_CATEGORIES = [
   'body',
   'mobility',

@@ -2326,7 +2326,7 @@ textarea:focus-visible {
       rgba(255, 255, 255, 0.05) 0 1px,
       transparent 1px 40px
     ),
-    linear-gradient(90deg, rgba(var(--cockpit-team), 0.08), transparent 36%, transparent 64%, rgba(143, 208, 255, 0.06)),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.08), transparent 36%, transparent 64%, rgba(var(--cockpit-team), 0.04)),
     linear-gradient(180deg, rgba(25, 33, 40, 0.7), rgba(4, 6, 8, 0.96)),
     #050708;
   background-size: 34px 34px, 34px 34px, auto, auto, auto;
@@ -2338,12 +2338,12 @@ textarea:focus-visible {
 .bot-assembly-stage::before {
   position: absolute;
   inset: 8px;
-  border: 1px solid rgba(143, 208, 255, 0.16);
+  border: 1px solid rgba(var(--cockpit-team), 0.16);
   border-radius: 5px;
   pointer-events: none;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent 42%, transparent 58%, rgba(255, 255, 255, 0.08)),
-    radial-gradient(circle at 50% 50%, rgba(143, 208, 255, 0.15), transparent 58%);
+    radial-gradient(circle at 50% 50%, rgba(var(--cockpit-team), 0.15), transparent 58%);
   content: "";
   opacity: 0.7;
 }
@@ -2353,7 +2353,7 @@ textarea:focus-visible {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 28%, transparent 72%, rgba(92, 145, 255, 0.08)),
+    linear-gradient(90deg, rgba(var(--cockpit-team), 0.08), transparent 28%, transparent 72%, rgba(var(--cockpit-team), 0.04)),
     linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.24));
   content: "";
 }
@@ -3389,7 +3389,6 @@ textarea:focus-visible {
 
 .scoreboard-team-block,
 .scoreboard-core,
-.match-stage-card,
 .dashboard-panel {
   border: 1px solid rgba(238, 242, 247, 0.12);
   background:
@@ -3703,47 +3702,6 @@ textarea:focus-visible {
   font-size: 0.78rem;
 }
 
-.scoreboard-plan-timer {
-  width: min(100%, 160px);
-  min-height: 40px;
-  padding: 5px 9px;
-  display: grid;
-  align-content: center;
-  gap: 1px;
-  border: 1px solid rgba(92, 229, 184, 0.36);
-  background: rgba(8, 24, 23, 0.86);
-  box-shadow: inset 0 0 20px rgba(92, 229, 184, 0.12);
-}
-
-.scoreboard-plan-timer span {
-  color: #9fb7c9;
-  font-size: 0.62rem;
-  font-weight: 900;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.scoreboard-plan-timer strong {
-  color: #5ce5b8;
-  font-size: 1rem;
-  font-weight: 950;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.scoreboard-plan-timer.is-expired {
-  border-color: rgba(255, 196, 94, 0.48);
-  background: rgba(31, 23, 9, 0.9);
-}
-
-.scoreboard-plan-timer.is-expired strong {
-  color: #ffc45e;
-}
-
-.scoreboard-plan-timer.is-hidden {
-  visibility: hidden;
-}
-
 .scoreboard-session-actions {
   width: 100%;
   margin-top: 6px;
@@ -3891,8 +3849,9 @@ textarea:focus-visible {
 
 .match-stage-card {
   min-width: 0;
-  padding: 10px;
+  padding: 0;
   overflow: hidden;
+  background: #030506;
 }
 
 .match-stage-frame {
@@ -3900,9 +3859,10 @@ textarea:focus-visible {
   position: relative;
   height: clamp(420px, 34vw, 560px);
   overflow: hidden;
-  border: 1px solid rgba(238, 242, 247, 0.16);
-  border-radius: 6px;
-  background: #030506;
+  border: 1px solid rgba(238, 242, 247, 0.08);
+  background:
+    linear-gradient(180deg, rgba(13, 18, 23, 0.78), rgba(3, 5, 6, 0.96)),
+    #030506;
 }
 
 .match-stage-frame .replay-shell,
@@ -4069,17 +4029,16 @@ textarea:focus-visible {
 
 .match-stage-frame .referee-cockpit-strip.is-stage {
   position: absolute;
-  inset: 12px;
+  inset: 0;
   z-index: 2;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: auto;
-  border-color: rgba(139, 223, 255, 0.22);
+  border: 0;
+  border-radius: 0;
   background:
-    linear-gradient(180deg, rgba(13, 18, 23, 0.88), rgba(5, 8, 12, 0.86)),
-    linear-gradient(90deg, rgba(255, 92, 108, 0.08), transparent 42%, rgba(92, 145, 255, 0.08));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 22px 52px rgba(0, 0, 0, 0.38);
+    linear-gradient(90deg, rgba(var(--cockpit-left-team), 0.05), transparent 40%, transparent 60%, rgba(var(--cockpit-right-team), 0.05)),
+    rgba(5, 8, 12, 0.72);
+  box-shadow: none;
 }
 
 .referee-cockpit-strip-header {
@@ -4095,8 +4054,7 @@ textarea:focus-visible {
 }
 
 .referee-cockpit-strip-header span,
-.referee-cockpit-card-header span,
-.referee-decision-preview h3 {
+.referee-cockpit-card-header span {
   color: #91a7b8;
   font-size: 0.68rem;
   font-weight: 950;
@@ -4128,12 +4086,30 @@ textarea:focus-visible {
   gap: 10px;
 }
 
+.referee-cockpit-strip.is-stage .referee-cockpit-grid {
+  position: relative;
+  gap: 18px;
+}
+
+.referee-cockpit-strip.is-stage .referee-cockpit-grid::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(var(--cockpit-left-team), 0.72), rgba(var(--cockpit-left-team), 0.26) 44%, rgba(var(--cockpit-right-team), 0.26) 56%, rgba(var(--cockpit-right-team), 0.72));
+}
+
 .referee-cockpit-card {
   min-width: 0;
   min-height: 0;
   padding: 10px;
   display: grid;
-  grid-template-rows: auto minmax(180px, 0.86fr) auto;
+  grid-template-rows: auto minmax(180px, 1fr);
   gap: 10px;
   border: 1px solid rgba(var(--cockpit-team), 0.24);
   border-radius: 6px;
@@ -4143,7 +4119,17 @@ textarea:focus-visible {
 }
 
 .referee-cockpit-strip.is-stage .referee-cockpit-card {
-  grid-template-rows: auto minmax(150px, 1fr) auto;
+  grid-template-rows: auto minmax(150px, 1fr);
+  border: 0;
+  border-left: 3px solid rgba(var(--cockpit-team), 0.68);
+  border-radius: 0;
+  background: rgba(5, 8, 12, 0.38);
+  box-shadow: none;
+}
+
+.referee-cockpit-strip.is-stage .referee-cockpit-card.blue {
+  border-left: 0;
+  border-right: 3px solid rgba(var(--cockpit-team), 0.68);
 }
 
 .referee-cockpit-card-header {
@@ -4186,6 +4172,7 @@ textarea:focus-visible {
 .referee-garage-preview {
   min-width: 0;
   min-height: 0;
+  display: grid;
 }
 
 .referee-garage-preview .bot-assembly-stage {
@@ -4194,92 +4181,16 @@ textarea:focus-visible {
 }
 
 .referee-cockpit-strip.is-stage .referee-garage-preview .bot-assembly-stage {
-  height: clamp(160px, 19vw, 260px);
+  height: 100%;
+  min-height: 160px;
+  border-color: rgba(var(--cockpit-team), 0.14);
+  border-radius: 0;
+  box-shadow: none;
 }
 
-.referee-decision-preview {
-  min-width: 0;
-  padding: 10px;
-  display: grid;
-  gap: 8px;
-  border: 1px solid rgba(var(--cockpit-team), 0.16);
-  border-radius: 6px;
-  background:
-    linear-gradient(180deg, rgba(var(--cockpit-team), 0.055), rgba(var(--cockpit-team), 0.015)),
-    rgba(5, 8, 12, 0.68);
-}
-
-.referee-decision-preview h3 {
-  margin: 0;
-}
-
-.referee-decision-stack {
-  min-width: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.referee-decision-facts,
-.referee-readiness-row {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.referee-readiness-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.referee-decision-facts div,
-.referee-readiness {
-  min-width: 0;
-  min-height: 54px;
-  padding: 7px;
-  display: grid;
-  align-content: center;
-  gap: 3px;
-  border: 1px solid rgba(238, 242, 247, 0.09);
-  border-radius: 6px;
-  background: rgba(238, 242, 247, 0.032);
-}
-
-.referee-decision-facts span,
-.referee-readiness span {
-  min-width: 0;
-  overflow: hidden;
-  color: #91a7b8;
-  font-size: 0.62rem;
-  font-weight: 950;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.referee-decision-facts strong,
-.referee-readiness strong {
-  min-width: 0;
-  overflow: hidden;
-  color: #f4f6fb;
-  font-size: 0.82rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.referee-readiness.is-ready {
-  border-color: rgba(93, 210, 146, 0.3);
-}
-
-.referee-readiness.is-ready strong {
-  color: #b7f3cc;
-}
-
-.referee-readiness.is-hold {
-  border-color: rgba(247, 184, 75, 0.24);
-}
-
-.referee-readiness.is-hold strong {
-  color: #f6d995;
+.referee-cockpit-strip.is-stage .referee-garage-preview .bot-assembly-stage::before {
+  border-color: rgba(var(--cockpit-team), 0.08);
+  opacity: 0.38;
 }
 
 .referee-cockpit-empty {

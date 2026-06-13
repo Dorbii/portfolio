@@ -73,15 +73,25 @@ export function refereePollIntervalMs(
 export function replayPayloadRequestKey({
   activeSessionId,
   replayAvailable,
+  replayStatus,
   replayVersion,
   round,
 }: {
   activeSessionId: string
   replayAvailable: boolean | undefined
+  replayStatus?: PublicSessionState['replayStatus']
   replayVersion: string | undefined
   round: number | undefined
 }): string {
   if (!activeSessionId || !replayAvailable) {
+    return ''
+  }
+
+  if (replayStatus !== undefined && replayStatus !== 'resolved') {
+    return ''
+  }
+
+  if (!replayVersion && round === undefined) {
     return ''
   }
 

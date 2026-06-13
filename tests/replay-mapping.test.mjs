@@ -31,6 +31,10 @@ import {
   projectMachineDesignToReplayRenderParts,
 } from '../.test-build/apps/web/src/replay/bots/geometry.js'
 
+function round(value) {
+  return Math.round(value * 1000) / 1000
+}
+
 const timeline = createReplayTimeline({
   round: 2,
   duration: 8,
@@ -593,8 +597,8 @@ test('replay mapping clamps time and interpolates active moves', () => {
 
   const frame = buildReplayFrame(timeline, 1.41)
 
-  assert.ok(frame.bots.red.position[0] > 1.3)
-  assert.ok(frame.bots.red.position[0] < 1.6)
+  assert.ok(frame.bots.red.position[0] > 3)
+  assert.ok(frame.bots.red.position[0] < 3.25)
   assert.equal(frame.bots.red.status, 'active')
 })
 
@@ -627,11 +631,11 @@ test('replay mapping uses move metadata duration and easing for deterministic pr
   })
   const frame = buildReplayFrame(metadataTimeline, 1.25)
 
-  assert.deepEqual(frame.bots.red.position, [3, 0, 0])
-  assert.equal(frame.bots.red.motion.progress, 0.5)
-  assert.equal(frame.bots.red.motion.easedProgress, 0.75)
+  assert.deepEqual(frame.bots.red.position, [3.884, 0, 0])
+  assert.equal(round(frame.bots.red.motion.progress), 0.829)
+  assert.equal(frame.bots.red.motion.easedProgress, 0.971)
   assert.ok(frame.bots.red.motion.contactIntensity > 0)
-  assert.ok(frame.bots.red.motion.driveIntensity > 2)
+  assert.ok(frame.bots.red.motion.driveIntensity > 0.9)
   assert.ok(frame.bots.red.motion.lean > 0)
 })
 
@@ -659,10 +663,10 @@ test('replay mapping keeps old minimal move events on the default interpolation 
   })
   const frame = buildReplayFrame(minimalMoveTimeline, 1.5)
 
-  assert.deepEqual(frame.bots.blue.position, [2, 0, 0])
-  assert.equal(frame.bots.blue.motion.progress, 0.5)
-  assert.equal(frame.bots.blue.motion.easedProgress, 0.5)
-  assert.ok(frame.bots.blue.motion.driveIntensity > 1)
+  assert.deepEqual(frame.bots.blue.position, [0.648, 0, 0])
+  assert.equal(round(frame.bots.blue.motion.progress), 0.745)
+  assert.equal(round(frame.bots.blue.motion.easedProgress), 0.838)
+  assert.ok(frame.bots.blue.motion.driveIntensity > 0.5)
 })
 
 test('replay mapping smooths facing changes for a strafe move instead of snapping rotation', () => {
@@ -703,11 +707,11 @@ test('replay mapping smooths facing changes for a strafe move instead of snappin
   assert.equal(completedTurn.bots.red.rotationY, Math.PI / 2)
 })
 
-test('replay mapping does not reveal future move position or facing before its time', () => {
+test('replay mapping can lead into future move position for human-readable playback', () => {
   const futureMoveTimeline = createReplayTimeline({
     round: 1,
     duration: 4,
-    summary: 'Future move suppression',
+    summary: 'Future move visual lead-in',
     events: [
       {
         t: 0,
@@ -740,8 +744,55 @@ test('replay mapping does not reveal future move position or facing before its t
   })
   const beforeFuture = buildReplayFrame(futureMoveTimeline, 1.99)
 
-  assert.deepEqual(beforeFuture.bots.red.position, [4, 0, 0])
-  assert.equal(beforeFuture.bots.red.rotationY, Math.PI / 2)
+  assert.ok(beforeFuture.bots.red.position[2] > 0)
+  assert.ok(beforeFuture.bots.red.position[2] < 4)
+  assert.equal(beforeFuture.bots.red.position[0], 4)
+  assert.ok(beforeFuture.bots.red.rotationY < Math.PI / 2)
+})
+
+test('replay mapping bridges idle gaps aggressively before the next move', () => {
+  const bridgedMoveTimeline = createReplayTimeline({
+    round: 1,
+    duration: 7,
+    summary: 'Visual movement bridge',
+    events: [
+      {
+        t: 0,
+        type: 'spawn',
+        bot: 'red',
+        position: [0, 0, 0],
+        rotation: [0, 90, 0],
+      },
+      {
+        t: 1,
+        type: 'move',
+        bot: 'red',
+        from: [0, 0, 0],
+        to: [2, 0, 0],
+        duration: 0.4,
+        easing: 'linear',
+        facing: [1, 0, 0],
+      },
+      {
+        t: 4,
+        type: 'move',
+        bot: 'red',
+        from: [2, 0, 0],
+        to: [6, 0, 0],
+        duration: 1,
+        easing: 'linear',
+        facing: [1, 0, 0],
+      },
+    ],
+  })
+  const earlyBridge = buildReplayFrame(bridgedMoveTimeline, 1.6)
+  const duringBridge = buildReplayFrame(bridgedMoveTimeline, 3)
+
+  assert.ok(earlyBridge.bots.red.position[0] > 2)
+  assert.ok(earlyBridge.bots.red.position[0] < 2.5)
+  assert.ok(duringBridge.bots.red.position[0] > 2)
+  assert.ok(duringBridge.bots.red.position[0] > earlyBridge.bots.red.position[0])
+  assert.ok(duringBridge.bots.red.motion.driveIntensity > 0)
 })
 
 test('replay mapping exposes weapon fire effects with team and slot context', () => {
@@ -824,7 +875,7 @@ test('replay mapping anchors weapon fire effects to the firing state', () => {
   const weaponFire = frame.effects.find((effect) => effect.kind === 'weapon_fire')
 
   assert.ok(weaponFire)
-  assert.deepEqual(weaponFire.position, [2, 0, 0])
+  assert.deepEqual(weaponFire.position, [3.352, 0, 0])
   assert.equal(weaponFire.rotationY, Math.PI / 2)
   assert.ok(frame.bots.red.position[0] > weaponFire.position[0])
 })
@@ -1129,8 +1180,8 @@ test('replay mapping exposes laser_lance ability effects with deterministic plac
   )
 
   assert.ok(laserCore)
-  assert.ok(Math.abs(laserCore.position[0] - 2.7) < 0.1)
-  assert.ok(Math.abs(laserCore.position[2] + 1.3) < 0.1)
+  assert.ok(Math.abs(laserCore.position[0] - 2.216) < 0.1)
+  assert.ok(Math.abs(laserCore.position[2] + 1.784) < 0.1)
   assert.deepEqual(laserCore.endPosition, [0.8, 0, -0.4])
   assert.equal(laserCore.label, 'laser_lance')
   assert.ok(laserCore.intensity > 0)
@@ -1244,8 +1295,8 @@ test('replay mapping exposes drone_swarm ability effects with separate lane sema
   const droneSwarm = frame.effects.find((effect) => effect.kind === 'drone_swarm')
 
   assert.ok(droneSwarm)
-  assert.ok(Math.abs(droneSwarm.position[0] - 2.7) < 0.1)
-  assert.ok(Math.abs(droneSwarm.position[2] + 1.3) < 0.1)
+  assert.ok(Math.abs(droneSwarm.position[0] - 2.216) < 0.1)
+  assert.ok(Math.abs(droneSwarm.position[2] + 1.784) < 0.1)
   assert.deepEqual(droneSwarm.endPosition, [0.8, 0, -0.4])
   assert.equal(droneSwarm.team, 'blue')
   assert.equal(droneSwarm.label, 'drone_swarm')

@@ -11,6 +11,10 @@ import type { Material } from '@babylonjs/core/Materials/material'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import type { TeamRole } from '../../../../../packages/schemas/src/index.js'
+import {
+  resolveTeamAccentHex,
+  type LegacyTeamIdentity,
+} from '../../shared/teamVisuals'
 
 export type BabylonRendererCore = {
   camera: ArcRotateCamera
@@ -44,6 +48,10 @@ type BabylonRendererCoreOptions = {
   clearColor: Color4
   environmentIntensity?: number
   engineOptions?: EngineOptions
+}
+
+type ReplayLightingPresetOptions = {
+  identities?: Partial<Record<TeamRole, LegacyTeamIdentity>>
 }
 
 export function isBabylonRendererSupported(): boolean {
@@ -95,7 +103,11 @@ export function disposeBabylonRendererCore(resources: BabylonRendererCore | null
   resources?.engine.dispose()
 }
 
-export function createReplayLightingPreset(scene: Scene, arenaWidth: number): void {
+export function createReplayLightingPreset(
+  scene: Scene,
+  arenaWidth: number,
+  options: ReplayLightingPresetOptions = {},
+): void {
   const hemi = new HemisphericLight('hemi', new Vector3(0, 1, 0), scene)
   const key = new DirectionalLight('key', new Vector3(-0.45, -0.9, 0.4), scene)
   const fill = new DirectionalLight('fill', new Vector3(0.35, -0.75, -0.35), scene)
@@ -104,15 +116,20 @@ export function createReplayLightingPreset(scene: Scene, arenaWidth: number): vo
   const redSide = new PointLight('red-side', new Vector3(-arenaWidth * 0.42, 2.1, 0), scene)
   const blueSide = new PointLight('blue-side', new Vector3(arenaWidth * 0.42, 2.1, 0), scene)
 
-  hemi.intensity = 0.22
-  key.intensity = 0.92
-  fill.intensity = 0.16
-  accent.intensity = 0.5
-  rim.intensity = 0.44
-  redSide.intensity = 0.72
-  blueSide.intensity = 0.72
-  redSide.diffuse = Color3.FromHexString('#ff4356')
-  blueSide.diffuse = Color3.FromHexString('#4ca9ff')
+  scene.imageProcessingConfiguration.isEnabled = true
+  scene.imageProcessingConfiguration.contrast = 1.08
+  scene.imageProcessingConfiguration.exposure = 1.03
+  hemi.intensity = 0.24
+  key.intensity = 1.08
+  fill.intensity = 0.2
+  accent.intensity = 0.58
+  rim.intensity = 0.54
+  redSide.intensity = 0.56
+  blueSide.intensity = 0.56
+  key.position = new Vector3(-arenaWidth * 0.36, 6.5, arenaWidth * 0.22)
+  fill.position = new Vector3(arenaWidth * 0.32, 5.2, -arenaWidth * 0.28)
+  redSide.diffuse = Color3.FromHexString(resolveTeamAccentHex('red', options.identities?.red))
+  blueSide.diffuse = Color3.FromHexString(resolveTeamAccentHex('blue', options.identities?.blue))
   accent.diffuse = Color3.FromHexString('#ffd36a')
 
   accent.position = new Vector3(0, 5.8, 0)

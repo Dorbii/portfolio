@@ -1,4 +1,7 @@
 import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector'
+import { Color3 } from '@babylonjs/core/Maths/math.color'
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import { getPart } from '../../../../../packages/catalog/src/index.js'
@@ -101,6 +104,7 @@ export function createLegacyReplayBotBlueprintAdapterNode(
   const archetype = resolveFoundationArchetype(blocks)
 
   createBotFoundation(scene, root, role, materials, bounds, archetype)
+  createBotContactShadow(scene, root, role, bounds)
 
   blocks.forEach((block) => {
     const partNode = createPartNode(scene, block, role, materials)
@@ -135,6 +139,7 @@ export function createMachineReplayBotNode(
 
   boundsMarker.visibility = 0.28
   boundsMarker.isPickable = false
+  createBotContactShadow(scene, root, role, bounds)
 
   machineParts.forEach((part) => {
     const partNode = createMachinePartNode(scene, part, role, materials)
@@ -301,6 +306,35 @@ function createVisualPartNode(
   }
 
   return partNode
+}
+
+function createBotContactShadow(
+  scene: Scene,
+  root: TransformNode,
+  role: TeamRole,
+  bounds: { centerX: number; centerZ: number; width: number; depth: number },
+): void {
+  const material = new StandardMaterial(`${role}-bot-contact-shadow-mat`, scene)
+  const shadow = MeshBuilder.CreateDisc(
+    `${role}-bot-contact-shadow`,
+    {
+      radius: 0.5,
+      tessellation: 48,
+    },
+    scene,
+  )
+
+  material.diffuseColor = Color3.FromHexString('#020304')
+  material.emissiveColor = Color3.FromHexString('#020304')
+  material.specularColor = Color3.Black()
+  material.alpha = 0.34
+  material.backFaceCulling = false
+  shadow.parent = root
+  shadow.material = material
+  shadow.position.set(bounds.centerX, 0.014, bounds.centerZ)
+  shadow.rotation.x = Math.PI / 2
+  shadow.scaling.set(Math.max(1.2, bounds.width * 0.62), Math.max(1.1, bounds.depth * 0.56), 1)
+  shadow.isPickable = false
 }
 
 function quaternionForOrientation(orientation: OrientationBasis): Quaternion {

@@ -11,6 +11,7 @@ import type {
   GameMasterActionResponse,
   GameMasterActionSubmission,
   GameMasterPacket,
+  ReplayLifecycleStatus,
   InventoryItem,
   MachineDesign,
   PostFightAgentReflection,
@@ -150,6 +151,7 @@ export type PublicSessionState = {
   }
   combat?: CombatTurnPublicState
   gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
   replayVersion?: string
   lastResult?: CombatSummary

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
@@ -7,7 +7,6 @@ import type {
   MachineDesign,
   TeamRole,
 } from '../../../../../packages/schemas/src/index.js'
-import type { ReplayTimeline } from '../../../../../packages/replay/src/index.js'
 import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
 import {
   createArena,
@@ -41,7 +40,10 @@ import {
 } from '../rendering/rendererKit'
 import {
   buildReplayFrame,
+  clampReplayTime,
   type CameraPreset,
+  type CompiledReplayTimeline,
+  type ReplayVisualFrame,
 } from '../replayMapping'
 import {
   createBotVisualProfiles,
@@ -62,6 +64,21 @@ type RendererState = {
 }
 
 type ReplaySceneStats = BabylonRendererStats
+
+export type ReplayPlaybackStatus = {
+  frame: ReplayVisualFrame
+  playing: boolean
+  time: number
+}
+
+type ReplayPlaybackState = {
+  dirty: boolean
+  lastVisualUpdateNow?: number
+  playing: boolean
+  previousNow?: number
+  speed: number
+  time: number
+}
 
 type ReplayPartDebugState = {
   role: TeamRole
@@ -94,11 +111,20 @@ type BabylonReplaySceneProps = {
   cameraPreset: CameraPreset
   immediateCamera?: boolean
   machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
+  onPlaybackEnd?: () => void
+  onPlaybackFrame?: (status: ReplayPlaybackStatus) => void
   onRendererReady?: () => void
+  playing: boolean
+  seekTime: number
+  seekVersion: number
+  speed: number
   teamIdentities: Record<TeamRole, LegacyTeamIdentity>
-  timeline: ReplayTimeline
-  time: number
+  timeline: CompiledReplayTimeline
 }
+
+const MAX_REPLAY_FRAME_DELTA_SECONDS = 0.1
+const REPLAY_SCENE_FRAME_INTERVAL_MS = 1000 / 30
+const REPLAY_UI_FRAME_INTERVAL_MS = 125
 
 declare global {
   interface Window {
@@ -112,14 +138,32 @@ export function BabylonReplayScene({
   cameraPreset,
   immediateCamera = false,
   machineDesigns,
+  onPlaybackEnd,
+  onPlaybackFrame,
   onRendererReady,
+  playing,
+  seekTime,
+  seekVersion,
+  speed,
   teamIdentities,
   timeline,
-  time,
 }: BabylonReplaySceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const cameraPresetRef = useRef(cameraPreset)
+  const immediateCameraRef = useRef(immediateCamera)
+  const lastPlaybackFrameReportRef = useRef(0)
+  const onPlaybackEndRef = useRef(onPlaybackEnd)
+  const onPlaybackFrameRef = useRef(onPlaybackFrame)
   const onRendererReadyRef = useRef(onRendererReady)
+  const playbackRef = useRef<ReplayPlaybackState>({
+    dirty: true,
+    playing,
+    speed,
+    time: clampReplayTime(timeline, seekTime),
+  })
   const resourcesRef = useRef<SceneResources | null>(null)
+  const seekTimeRef = useRef(seekTime)
+  const timelineRef = useRef(timeline)
   const [rendererState, setRendererState] = useState<RendererState>({
     status: 'booting',
   })
@@ -131,10 +175,66 @@ export function BabylonReplayScene({
     height: arena.height,
     activeHazards: activeHazardsKey ? activeHazardsKey.split('|') : [],
   }), [activeHazardsKey, arena.height, arena.name, arena.width])
+  const sceneArenaRef = useRef(sceneArena)
+
+  useEffect(() => {
+    cameraPresetRef.current = cameraPreset
+    playbackRef.current.dirty = true
+  }, [cameraPreset])
+
+  useEffect(() => {
+    immediateCameraRef.current = immediateCamera
+    playbackRef.current.dirty = true
+  }, [immediateCamera])
+
+  useEffect(() => {
+    onPlaybackEndRef.current = onPlaybackEnd
+  }, [onPlaybackEnd])
+
+  useEffect(() => {
+    onPlaybackFrameRef.current = onPlaybackFrame
+  }, [onPlaybackFrame])
 
   useEffect(() => {
     onRendererReadyRef.current = onRendererReady
   }, [onRendererReady])
+
+  useEffect(() => {
+    playbackRef.current.playing = playing
+    playbackRef.current.dirty = true
+
+    if (!playing) {
+      playbackRef.current.previousNow = undefined
+    }
+  }, [playing])
+
+  useEffect(() => {
+    playbackRef.current.speed = speed
+    playbackRef.current.previousNow = undefined
+  }, [speed])
+
+  useEffect(() => {
+    sceneArenaRef.current = sceneArena
+    playbackRef.current.dirty = true
+  }, [sceneArena])
+
+  useEffect(() => {
+    timelineRef.current = timeline
+    playbackRef.current.time = clampReplayTime(timeline, playbackRef.current.time)
+    playbackRef.current.dirty = true
+  }, [timeline])
+
+  useEffect(() => {
+    seekTimeRef.current = seekTime
+  }, [seekTime])
+
+  useEffect(() => {
+    const playback = playbackRef.current
+
+    playback.time = clampReplayTime(timelineRef.current, seekTimeRef.current)
+    playback.previousNow = undefined
+    playback.dirty = true
+  }, [seekVersion])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -189,7 +289,7 @@ export function BabylonReplayScene({
 
       configureReplayCameraControls(camera)
       camera.attachControl(canvas, true)
-      createReplayLightingPreset(scene, sceneArena.width)
+      createReplayLightingPreset(scene, sceneArena.width, { identities: teamIdentities })
 
       const teamMaterials = createTeamMaterials(scene, { identities: teamIdentities })
       const hazards = createArena(scene, sceneArena)
@@ -217,15 +317,84 @@ export function BabylonReplayScene({
         effectPool,
         hazards,
       }
+      const sceneResources = resources
       resourcesRef.current = resources
       setRendererState({ status: 'ready' })
       setSceneStats(getSceneStats())
+      updateReplaySceneFrame(
+        sceneResources,
+        buildReplayFrame(timelineRef.current, playbackRef.current.time),
+        cameraPresetRef.current,
+        sceneArenaRef.current,
+        immediateCameraRef.current,
+      )
 
       const render = () => {
-        if (!disposed) {
-          scene.render()
-          reportRendererFrame()
+        if (disposed) {
+          return
         }
+
+        const playback = playbackRef.current
+        const now = performance.now()
+
+        let playbackEnded = false
+
+        if (playback.playing) {
+          const previousNow = playback.previousNow ?? now
+          const elapsedSeconds = Math.min(
+            (now - previousNow) / 1000,
+            MAX_REPLAY_FRAME_DELTA_SECONDS,
+          )
+          const nextTime = clampReplayTime(
+            timelineRef.current,
+            playback.time + elapsedSeconds * playback.speed,
+          )
+
+          playback.previousNow = now
+          playback.time = nextTime
+
+          if (nextTime >= timelineRef.current.duration) {
+            playback.playing = false
+            playbackEnded = true
+            onPlaybackEndRef.current?.()
+          }
+        } else {
+          playback.previousNow = undefined
+        }
+
+        const visualUpdateDue = playback.dirty || playbackEnded || (
+          playback.playing &&
+          (
+            playback.lastVisualUpdateNow === undefined ||
+            now - playback.lastVisualUpdateNow >= REPLAY_SCENE_FRAME_INTERVAL_MS
+          )
+        )
+
+        if (visualUpdateDue) {
+          const frame = buildReplayFrame(timelineRef.current, playback.time)
+          const forcePlaybackFrameReport = !playback.playing && playback.dirty
+
+          updateReplaySceneFrame(
+            sceneResources,
+            frame,
+            cameraPresetRef.current,
+            sceneArenaRef.current,
+            immediateCameraRef.current,
+          )
+          publishReplayPlaybackFrame(
+            frame,
+            playback.playing,
+            now,
+            forcePlaybackFrameReport,
+            lastPlaybackFrameReportRef,
+            onPlaybackFrameRef.current,
+          )
+          playback.dirty = false
+          playback.lastVisualUpdateNow = now
+        }
+
+        scene.render()
+        reportRendererFrame()
       }
 
       engine.runRenderLoop(render)
@@ -295,22 +464,6 @@ export function BabylonReplayScene({
     }
   }, [immediateCamera, sceneArena, botBlueprints, machineDesigns, teamIdentities])
 
-  useEffect(() => {
-    const resources = resourcesRef.current
-
-    if (!resources) {
-      return
-    }
-
-    const frame = buildReplayFrame(timeline, time)
-    updateBots(resources.bots, frame)
-    updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
-    updateHazards(resources.hazards, frame)
-    for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
-      updateCamera(resources.camera, cameraPreset, frame, sceneArena)
-    }
-  }, [cameraPreset, immediateCamera, sceneArena, timeline, time])
-
   const rendererBudgetState = sceneStats
     ? createBabylonRendererBudgetState(sceneStats, BABYLON_RENDERER_BUDGETS.replayPreview)
     : null
@@ -353,6 +506,46 @@ export function BabylonReplayScene({
       ) : null}
     </div>
   )
+}
+
+function updateReplaySceneFrame(
+  resources: SceneResources,
+  frame: ReplayVisualFrame,
+  cameraPreset: CameraPreset,
+  sceneArena: ArenaConfig,
+  immediateCamera: boolean,
+): void {
+  updateBots(resources.bots, frame)
+  updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
+  updateHazards(resources.hazards, frame)
+
+  for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
+    updateCamera(resources.camera, cameraPreset, frame, sceneArena)
+  }
+}
+
+function publishReplayPlaybackFrame(
+  frame: ReplayVisualFrame,
+  playing: boolean,
+  now: number,
+  force: boolean,
+  lastReportRef: MutableRefObject<number>,
+  onPlaybackFrame?: (status: ReplayPlaybackStatus) => void,
+): void {
+  if (!onPlaybackFrame) {
+    return
+  }
+
+  if (!force && playing && now - lastReportRef.current < REPLAY_UI_FRAME_INTERVAL_MS) {
+    return
+  }
+
+  lastReportRef.current = now
+  onPlaybackFrame({
+    frame,
+    playing,
+    time: frame.time,
+  })
 }
 
 function getReplayPartDebugStates(resources: SceneResources): ReplayPartDebugState[] {

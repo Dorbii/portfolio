@@ -11,6 +11,7 @@ import type {
   MachineDesign,
   PostFightAgentReflection,
   SessionPhase,
+  ReplayLifecycleStatus,
   SharedDebrief,
   TeamEconomySummary,
   TeamRole,
@@ -111,6 +112,7 @@ export type LegacyPublicSessionState = {
   roundPlan?: LegacyLoadoutWindowState
   combat?: LegacyCombatTurnPublicState
   gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
   replayVersion?: string
   lastResult?: LegacyCombatSummary
@@ -251,3 +253,5 @@ export type LegacyReplayPayload = {
   botBlueprints: Record<TeamRole, BotBlueprint>
   machineDesigns?: Partial<Record<TeamRole, MachineDesign>>
 }
+
+export type LegacyReplayStatus = LegacyPublicSessionState['replayStatus']

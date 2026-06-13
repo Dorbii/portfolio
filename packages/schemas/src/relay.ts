@@ -3,6 +3,7 @@ import type {
   ArenaConfig,
   BotBlueprint,
   CombatRoundPlanSubmission,
+  ReplayLifecycleStatus,
   GameMasterActionSubmission,
   GameMasterPacket,
   PostFightAgentReflection,
@@ -95,7 +96,9 @@ export type PublicSessionState = {
   arena: ArenaConfig
   roles: Record<TeamRole, RolePublicState>
   gameMaster?: Partial<Record<TeamRole, Pick<GameMasterPacket, 'phase' | 'nextAction' | 'decisionVersion' | 'eventVersion' | 'actionSetId'>>>
+  replayStatus: ReplayLifecycleStatus
   replayAvailable: boolean
+  replayVersion?: string
   lastResult?: CombatSummary
   continuation: PublicContinuationState
   chatLog: SessionChatMessage[]

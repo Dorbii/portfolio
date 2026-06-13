@@ -28,6 +28,14 @@ test('replay playback uses compiled timeline instead of per-frame sorting', () =
     join(repoRoot, 'apps/web/src/replay/ReplayViewer.tsx'),
     'utf8',
   )
+  const babylonReplaySceneSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/scene/BabylonReplayScene.tsx'),
+    'utf8',
+  )
+  const replayBotPlaybackSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/bots/playback.ts'),
+    'utf8',
+  )
   const replayMappingSource = readFileSync(
     join(repoRoot, 'apps/web/src/replay/replayMapping.ts'),
     'utf8',
@@ -35,6 +43,18 @@ test('replay playback uses compiled timeline instead of per-frame sorting', () =
 
   assert.match(replayViewerSource, /compileReplayTimeline\(timeline\)/)
   assert.match(replayViewerSource, /buildReplayFrame\(compiledTimeline, time\)/)
+  assert.match(replayViewerSource, /timeline=\{compiledTimeline\}/)
+  assert.equal(replayViewerSource.includes('window.requestAnimationFrame(tick)'), false)
+  assert.match(babylonReplaySceneSource, /MAX_REPLAY_FRAME_DELTA_SECONDS/)
+  assert.match(babylonReplaySceneSource, /REPLAY_SCENE_FRAME_INTERVAL_MS/)
+  assert.match(babylonReplaySceneSource, /engine.runRenderLoop\(render\)/)
+  assert.match(babylonReplaySceneSource, /buildReplayFrame\(timelineRef.current/)
+  assert.match(replayBotPlaybackSource, /botPlaybackCaches/)
+  assert.match(replayBotPlaybackSource, /getBotPlaybackCache\(bot\)/)
+  assert.match(replayBotPlaybackSource, /KNOCKOUT_COLLAPSE_DURATION_SECONDS/)
+  assert.match(replayBotPlaybackSource, /function knockoutProgressForRole\(frame: ReplayVisualFrame, role: TeamRole\)/)
+  assert.match(replayBotPlaybackSource, /const damageSeverity = Math\.max\(partDamageSeverity\(state\), knockoutProgress\)/)
+  assert.match(replayBotPlaybackSource, /collapsedPartPose\(role, metadata\.blockId\)/)
   assert.equal(replayViewerSource.includes('sortTimelineEvents'), false)
   assert.equal(replayViewerSource.includes('.sort('), false)
   assert.equal(extractFunction(replayMappingSource, 'buildReplayFrame').includes('.sort('), false)

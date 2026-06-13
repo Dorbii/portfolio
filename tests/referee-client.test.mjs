@@ -183,56 +183,108 @@ test('referee cockpit links tolerate claim-only invite payloads', () => {
   assert.equal(links.blueCockpitUrl, '')
 })
 
-test('referee replay request key changes on replayVersion before falling back to round', () => {
+test('referee replay request key uses resolved status as gate', () => {
   assert.equal(
     replayPayloadRequestKey({
       activeSessionId: 's_demo',
       replayAvailable: false,
+      replayStatus: 'resolved',
       replayVersion: 'replay-v1',
       round: 1,
     }),
     '',
   )
-  assert.notEqual(
+  assert.equal(
     replayPayloadRequestKey({
       activeSessionId: 's_demo',
       replayAvailable: true,
+      replayStatus: 'live_partial',
       replayVersion: 'replay-v1',
       round: 1,
     }),
-    replayPayloadRequestKey({
-      activeSessionId: 's_demo',
-      replayAvailable: true,
-      replayVersion: 'replay-v2',
-      round: 1,
-    }),
+    '',
   )
   assert.equal(
     replayPayloadRequestKey({
       activeSessionId: 's_demo',
       replayAvailable: true,
+      replayStatus: 'resolved',
       replayVersion: 'replay-v1',
       round: 1,
     }),
-    replayPayloadRequestKey({
-      activeSessionId: 's_demo',
-      replayAvailable: true,
-      replayVersion: 'replay-v1',
-      round: 2,
-    }),
+    's_demo|replay-v1',
   )
+})
+
+test('referee replay request key clears after resolved replay leaves current round', () => {
+  const resolvedKey = replayPayloadRequestKey({
+    activeSessionId: 's_demo',
+    replayAvailable: true,
+    replayStatus: 'resolved',
+    round: 1,
+    replayVersion: 'replay-v1',
+  })
+  const roundTwoLoadoutKey = replayPayloadRequestKey({
+    activeSessionId: 's_demo',
+    replayAvailable: false,
+    replayStatus: 'none',
+    round: 2,
+    replayVersion: undefined,
+  })
+  const staleResolvedIdentityKey = replayPayloadRequestKey({
+    activeSessionId: 's_demo',
+    replayAvailable: true,
+    replayStatus: 'none',
+    round: 2,
+    replayVersion: 'replay-v1',
+  })
+
+  assert.equal(resolvedKey, 's_demo|replay-v1')
+  assert.equal(roundTwoLoadoutKey, '')
+  assert.equal(staleResolvedIdentityKey, '')
+  assert.notEqual(roundTwoLoadoutKey, resolvedKey)
+  assert.notEqual(staleResolvedIdentityKey, resolvedKey)
+})
+
+test('referee replay request key includes round fallback and changes across rounds', () => {
+  const roundOneLegacy = replayPayloadRequestKey({
+    activeSessionId: 's_demo',
+    replayAvailable: true,
+    replayStatus: 'resolved',
+    replayVersion: undefined,
+    round: 1,
+  })
+  const roundTwoLegacy = replayPayloadRequestKey({
+    activeSessionId: 's_demo',
+    replayAvailable: true,
+    replayStatus: 'resolved',
+    replayVersion: undefined,
+    round: 2,
+  })
+
+  assert.equal(roundOneLegacy, 's_demo|round:1')
+  assert.equal(roundTwoLegacy, 's_demo|round:2')
+  assert.notEqual(
+    roundOneLegacy,
+    roundTwoLegacy,
+  )
+})
+
+test('referee replay request key uses replayVersion identity before round fallback', () => {
   assert.notEqual(
     replayPayloadRequestKey({
       activeSessionId: 's_demo',
       replayAvailable: true,
-      replayVersion: undefined,
+      replayStatus: 'resolved',
+      replayVersion: 'replay-v1',
       round: 1,
     }),
     replayPayloadRequestKey({
       activeSessionId: 's_demo',
       replayAvailable: true,
-      replayVersion: undefined,
-      round: 2,
+      replayStatus: 'resolved',
+      replayVersion: 'replay-v2',
+      round: 1,
     }),
   )
 })

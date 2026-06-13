@@ -45,6 +45,9 @@ export type { CompiledReplayTimeline }
 const DEFAULT_MOVE_DURATION = 1
 const MIN_MOVE_DURATION = 0.08
 const MAX_MOVE_DURATION = 1.2
+const VISUAL_MOVE_BRIDGE_MIN_GAP_SECONDS = 0.25
+const VISUAL_MOVE_BRIDGE_IDLE_PAD_SECONDS = 0.04
+const VISUAL_MOVE_BRIDGE_MAX_SECONDS = 3.4
 const DETACH_FLOOR_Y = 0.08
 const DETACH_GRAVITY = 3.8
 const DETACH_MAX_HORIZONTAL_IMPULSE = 3.2
@@ -118,7 +121,22 @@ function resolveBotState(
 ): BotFrameState {
   let state = cloneBotState(DEFAULT_BOT_STATE[role])
 
-  for (const { event } of replayEventsAtOrBefore(events, time)) {
+  for (let eventIndex = 0; eventIndex < events.length; eventIndex += 1) {
+    const { event } = events[eventIndex]
+    const moveWindow = event.type === 'move' && event.bot === role
+      ? resolveVisualMoveWindow(events, eventIndex, event)
+      : undefined
+
+    if (event.type === 'move' && event.bot === role && moveWindow && time >= moveWindow.start) {
+      state = resolveMoveFrameState(
+        state,
+        { ...event, t: moveWindow.start },
+        time,
+        moveWindow.duration,
+      )
+      continue
+    }
+
     if (event.t > time) {
       break
     }
@@ -130,10 +148,6 @@ function resolveBotState(
         position: event.position,
         rotationY: degreesToRadians(event.rotation[1]),
       }
-    }
-
-    if (event.type === 'move' && event.bot === role) {
-      state = resolveMoveFrameState(state, event, time)
     }
 
     if (event.type === 'push' && event.defender === role) {
@@ -341,8 +355,9 @@ function resolveMoveFrameState(
   previousState: BotFrameState,
   event: MoveEvent,
   time: number,
+  visualDuration?: number,
 ): BotFrameState {
-  const duration = resolveMoveDuration(event)
+  const duration = visualDuration ?? resolveMoveDuration(event)
   const targetRotationY = headingForMoveFacing(event, previousState.rotationY)
   const rawProgress = clamp01((time - event.t) / duration)
 
@@ -376,6 +391,47 @@ function resolveMoveFrameState(
     position: lerpVector(event.from, event.to, easedProgress),
     rotationY: lerpAngle(previousState.rotationY, targetRotationY, turnProgress),
   }
+}
+
+function resolveVisualMoveWindow(
+  events: IndexedReplayEvent[],
+  eventIndex: number,
+  event: MoveEvent,
+): { duration: number; start: number } {
+  const authoredDuration = resolveMoveDuration(event)
+  const authoredEnd = event.t + authoredDuration
+  const previousSettledAt = previousRoleEventSettledAt(events, eventIndex, event)
+  const idleGap = event.t - previousSettledAt
+  const bridgeLead = idleGap > VISUAL_MOVE_BRIDGE_MIN_GAP_SECONDS
+    ? Math.min(
+      VISUAL_MOVE_BRIDGE_MAX_SECONDS,
+      Math.max(0, idleGap - VISUAL_MOVE_BRIDGE_IDLE_PAD_SECONDS),
+    )
+    : 0
+  const start = Math.max(previousSettledAt, event.t - bridgeLead)
+
+  return {
+    duration: Math.max(MIN_MOVE_DURATION, authoredEnd - start),
+    start,
+  }
+}
+
+function previousRoleEventSettledAt(
+  events: IndexedReplayEvent[],
+  eventIndex: number,
+  event: MoveEvent,
+): number {
+  for (let index = eventIndex - 1; index >= 0; index -= 1) {
+    const previous = events[index].event
+
+    if (previous.type === 'move' && previous.bot === event.bot) {
+      return previous.t + resolveMoveDuration(previous)
+    }
+
+    return previous.t
+  }
+
+  return 0
 }
 
 function resolveMoveDuration(event: MoveEvent): number {

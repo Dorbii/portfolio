@@ -12,6 +12,7 @@ type RoundAdvanceInput = {
   apiBase: string
   hasRefereeToken: boolean
   publicSession: PublicSessionState | null
+  clearReplayState: () => void
   setError: (message: string) => void
   setPublicSession: (state: PublicSessionState) => void
   setStoredRefereeToken: (token: string) => void
@@ -45,6 +46,7 @@ export function useRefereeRoundAdvance({
   apiBase,
   hasRefereeToken,
   publicSession,
+  clearReplayState,
   setError,
   setPublicSession,
   setStoredRefereeToken,
@@ -100,6 +102,7 @@ export function useRefereeRoundAdvance({
         activeRefereeToken,
       )
 
+      clearReplayState()
       writeStoredSession(window.sessionStorage, apiBase, activeSessionId, {
         refereeToken: activeRefereeToken,
         expiresAt: response.publicState.expiresAt,
@@ -117,6 +120,7 @@ export function useRefereeRoundAdvance({
     apiBase,
     hasRefereeToken,
     publicSession?.phase,
+    clearReplayState,
     setError,
     setPublicSession,
     setStoredRefereeToken,

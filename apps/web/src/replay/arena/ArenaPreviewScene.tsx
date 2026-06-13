@@ -104,12 +104,19 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
         environmentIntensity: 0.2,
       })
       const { camera, engine, scene } = core
+      const initialLiveBots = liveBotsRef.current
 
       camera.attachControl(canvas, true)
-      createReplayLightingPreset(scene, sceneArena.width)
+      createReplayLightingPreset(scene, sceneArena.width, {
+        identities: initialLiveBots
+          ? {
+              blue: initialLiveBots.blue.identity,
+              red: initialLiveBots.red.identity,
+            }
+          : undefined,
+      })
 
       const hazards = createArena(scene, sceneArena)
-      const initialLiveBots = liveBotsRef.current
       const teamMaterials = initialLiveBots
         ? createTeamMaterials(scene, {
             identities: {

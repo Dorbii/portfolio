@@ -10,6 +10,7 @@ import {
 import type {
   GameMasterNextAction,
   GameMasterPhase,
+  ReplayLifecycleStatus,
 } from '../../../packages/schemas/src/index.js'
 import type {
   LegacyPublicSessionState,
@@ -26,6 +27,7 @@ export function buildRolePrivateState(
 ): LegacyRolePrivateState {
   const opponent = role.role === 'red' ? state.roles.blue : state.roles.red
   const ownLoadout = legacyOwnLoadoutProjection(role)
+  const replayAvailable = hasResolvedReplay(state)
 
   return cloneJson({
     sessionId: state.id,
@@ -76,7 +78,7 @@ export function buildRolePrivateState(
         }
       : {}),
     opponent: rolePublicState(opponent),
-    replayAvailable: Boolean(state.replay),
+    replayAvailable,
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
     chatLog: state.chatLog,
     privateChatLog: role.privateChatLog,
@@ -133,6 +135,8 @@ function legacyNamedProjection<T extends { name: string }>(
 }
 
 export function buildPublicSessionState(state: StoredSessionState): LegacyPublicSessionState {
+  const replayAvailable = hasResolvedReplay(state)
+
   return cloneJson({
     sessionId: state.id,
     stateVersion: sessionStateVersion(state),
@@ -170,8 +174,9 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
         }
       : {}),
     gameMaster: buildGameMasterPublicSummary(state),
-    replayAvailable: Boolean(state.replay),
-    ...(state.replay ? { replayVersion: replayVersion(state) } : {}),
+    replayStatus: replayStatus(state),
+    replayAvailable,
+    ...(replayAvailable ? { replayVersion: replayVersion(state) } : {}),
     ...(state.lastResult ? { lastResult: state.lastResult } : {}),
     continuation: buildPublicContinuationState(state),
     chatLog: state.chatLog,
@@ -182,7 +187,7 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
 export function replayVersion(state: StoredSessionState): string | undefined {
   const replay = state.replay
 
-  if (!replay) {
+  if (!replay || !hasResolvedReplay(state)) {
     return undefined
   }
 
@@ -200,6 +205,22 @@ export function replayVersion(state: StoredSessionState): string | undefined {
     lastEventMarker,
     resultMarker,
   ].join('|')
+}
+
+export function replayStatus(state: StoredSessionState): ReplayLifecycleStatus {
+  if (state.combat) {
+    return 'live_partial'
+  }
+
+  if (state.replay) {
+    return 'resolved'
+  }
+
+  return 'none'
+}
+
+export function hasResolvedReplay(state: StoredSessionState): boolean {
+  return Boolean(state.replay && !state.combat)
 }
 
 export function sessionStateVersion(state: StoredSessionState): string {

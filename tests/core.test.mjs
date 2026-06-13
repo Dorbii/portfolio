@@ -1733,6 +1733,42 @@ test('deriveMachineCapabilities ignores detached disabled and destroyed parts', 
   assert.equal(inactiveReasonByPart.get('destroyed_utility'), 'destroyed')
 })
 
+test('deriveMachineCapabilities disables descendants disconnected from the core by a destroyed parent', () => {
+  const initial = createInitialMachineDesign('blue')
+  const machine = {
+    ...initial,
+    parts: [
+      initial.parts[0],
+      machinePart('breakaway_panel', {
+        definitionId: 'catalog:Armor_Front_Plate',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+      machinePart('panel_laser', {
+        definitionId: 'catalog:Weapon_Laser',
+        transform: machineTransform({ orientation: machineBasis() }),
+      }),
+    ],
+    attachments: [
+      machineAttachment('core', 'breakaway_panel', { mountId: 'core_shell' }),
+      machineAttachment('breakaway_panel', 'panel_laser', { mountId: 'panel_mount' }),
+    ],
+    runtime: {
+      healthByInstanceId: {
+        breakaway_panel: 0,
+        panel_laser: 9,
+      },
+    },
+  }
+  const capabilities = deriveMachineCapabilities(machine)
+  const inactiveReasonByPart = new Map(
+    capabilities.inactiveParts.map((part) => [part.partInstanceId, part.reason]),
+  )
+
+  assert.deepEqual(capabilities.weapons, [])
+  assert.equal(inactiveReasonByPart.get('breakaway_panel'), 'destroyed')
+  assert.equal(inactiveReasonByPart.get('panel_laser'), 'detached')
+})
+
 test('deriveMachineCapabilities applies explicit parent runtime orientation to child emitters', () => {
   const initial = createInitialMachineDesign('red')
   const runtimeWheelBasis = machineBasis({
@@ -6294,6 +6330,60 @@ test('resolver emits a block-tied detach event when a part reaches zero HP', () 
   assert.ok(breakDamage.remainingHealth > 0)
 })
 
+test('resolver disconnects child parts when their parent reaches zero HP', () => {
+  const breakawayStackBlueprint = {
+    name: 'Breakaway Stack',
+    blocks: [
+      { id: 'core', partId: 'Body_Square_Small', position: [0, 0, 0], rotation: [0, 0, 0] },
+      {
+        id: 'panel',
+        partId: 'Armor_Front_Plate',
+        parentInstanceId: 'core',
+        position: [0, 0, 1],
+        rotation: [0, 0, 0],
+      },
+      {
+        id: 'flag',
+        partId: 'Style_Flag',
+        parentInstanceId: 'panel',
+        position: [0, 1, 1],
+        rotation: [0, 0, 0],
+      },
+    ],
+  }
+  const result = resolveCombat({
+    round: 1,
+    seed: 'parent-break-disconnects-children',
+    red: {
+      blueprint: partBreakAttackerBlueprint,
+      tactics: normalizeTactics({
+        movementPolicy: 'close',
+        preferredRange: 'contact',
+        aggression: 0.9,
+        weaponCadence: 'sustained',
+      }),
+    },
+    blue: {
+      blueprint: breakawayStackBlueprint,
+      tactics: normalizeTactics({ movementPolicy: 'hold_ground' }),
+    },
+  })
+  const detachEvents = result.replay.events.filter(
+    (event) => event.type === 'part_detach' && event.bot === 'blue',
+  )
+  const panelDetachIndex = detachEvents.findIndex((event) => event.blockId === 'panel')
+  const flagDetachIndex = detachEvents.findIndex((event) => event.blockId === 'flag')
+  const flagDamage = result.replay.events.find(
+    (event) => event.type === 'damage' && event.bot === 'blue' && event.blockId === 'flag',
+  )
+
+  assert.ok(panelDetachIndex >= 0)
+  assert.ok(flagDetachIndex > panelDetachIndex)
+  assert.equal(result.partHealth.blue.panel, 0)
+  assert.equal(result.partHealth.blue.flag, 0)
+  assert.equal(flagDamage, undefined)
+})
+
 test('resolver knockout occurs only after all parts on the losing bot are depleted', () => {
   const result = resolveCombat({
     round: 1,
@@ -7125,6 +7215,7 @@ test('session resolves after both confirmed loadouts while keeping public state 
   const resolved = await submitSurrenderFromLatestPacket(session, redToken)
 
   assert.equal(resolved.value.publicState.phase, 'round_review')
+  assert.equal(resolved.value.publicState.replayStatus, 'resolved')
   assert.equal(resolved.value.publicState.replayAvailable, true)
   assert.ok(resolved.value.publicState.lastResult)
 
@@ -7327,6 +7418,11 @@ test('session delays the next combat plan packet after a resolved lockstep round
 
   assert.equal(blueSubmission.ok, true)
   assert.equal(blueSubmission.value.publicState.phase, 'combat_turn')
+  assert.equal(blueSubmission.value.publicState.replayAvailable, false)
+  assert.equal(blueSubmission.value.publicState.replayStatus, 'live_partial')
+  const liveReplay = session.getReplay()
+  assert.equal(liveReplay.ok, false)
+  assert.equal(liveReplay.error.code, 'REPLAY_NOT_AVAILABLE')
 
   const delayedState = session.exportState()
 
@@ -7952,6 +8048,7 @@ test('referee advances round review and applies automatic economy to the next ro
   assert.equal(advance.value.publicState.round, 2)
   assert.equal(advance.value.publicState.roles.red.submitted, false)
   assert.equal(advance.value.publicState.roles.blue.submitted, false)
+  assert.equal('lastResult' in advance.value.publicState, false)
   assert.equal(advance.value.publicState.roles.red.wins, 1)
   assert.equal(advance.value.publicState.roles.red.winStreak, 1)
   assert.equal(advance.value.publicState.roles.blue.losses, 1)
@@ -7966,6 +8063,8 @@ test('referee advances round review and applies automatic economy to the next ro
 
   assert.equal(exported.roles.red.gold, 68 + 50 + calculateInterest(68) + 25)
   assert.equal(exported.roles.blue.gold, 260 + 50 + calculateInterest(260))
+  assert.equal(exported.lastResult, undefined)
+  assert.equal('lastResult' in exported, false)
   assert.equal(exported.roles.red.loadoutConfirmedAt, undefined)
   assert.equal(exported.roles.blue.loadoutConfirmedAt, undefined)
   assert.equal(exported.roundPlan.deadlineAt, '2026-06-03T00:06:00.000Z')

@@ -228,6 +228,7 @@ type RuntimePart = {
   blockId: string
   partId: string
   category: PartCategory
+  parentBlockId?: string
   hasWeaponControl: boolean
   hasUtilityControl: boolean
   weaponSpec?: WeaponSpec
@@ -407,6 +408,7 @@ function createRuntimeParts(blueprint: BotBlueprint, stats: BotStats): RuntimePa
       blockId: block.id,
       partId: block.partId,
       category,
+      ...(block.parentInstanceId ? { parentBlockId: block.parentInstanceId } : {}),
       hasWeaponControl,
       hasUtilityControl,
       weaponSpec,
@@ -728,16 +730,28 @@ function createBotRuntime(
 }
 
 function createRuntimePartsFromMachine(machine: MachineCombatRuntime): RuntimePart[] {
-  return machine.parts.map((part) => ({
-    blockId: part.instanceId,
-    partId: part.partId,
-    category: part.category,
-    hasWeaponControl: machine.capabilities.weapons.some((weapon) => weapon.partInstanceId === part.instanceId),
-    hasUtilityControl: machine.capabilities.utility.some((utility) => utility.partInstanceId === part.instanceId),
-    position: [...part.position],
-    health: part.health,
-    maxHealth: part.maxHealth,
-  }))
+  const parentByChild = new Map(
+    machine.design.attachments.map((attachment) => [
+      attachment.childInstanceId,
+      attachment.parentInstanceId,
+    ]),
+  )
+
+  return machine.parts.map((part) => {
+    const parentBlockId = parentByChild.get(part.instanceId)
+
+    return {
+      blockId: part.instanceId,
+      partId: part.partId,
+      category: part.category,
+      ...(parentBlockId ? { parentBlockId } : {}),
+      hasWeaponControl: machine.capabilities.weapons.some((weapon) => weapon.partInstanceId === part.instanceId),
+      hasUtilityControl: machine.capabilities.utility.some((utility) => utility.partInstanceId === part.instanceId),
+      position: [...part.position],
+      health: part.health,
+      maxHealth: part.maxHealth,
+    }
+  })
 }
 
 function createCombatSnapshot(
@@ -915,6 +929,9 @@ function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: s
     if (remainingDamage <= 0) {
       break
     }
+    if (part.health <= 0) {
+      continue
+    }
 
     const before = part.health
     const applied = Math.min(before, remainingDamage)
@@ -930,12 +947,71 @@ function applyPartDamage(bot: BotRuntime, amount: number, tick: number, cause: s
       broke: before > 0 && part.health <= 0,
       position: partWorldPosition(bot, part),
     })
+
+    if (before > 0 && part.health <= 0) {
+      hits.push(...detachDisconnectedChildSubtree(bot, part.blockId))
+    }
   }
 
   bot.health = round(sumPartHealth(bot.parts))
   refreshRuntimeIndex(bot)
 
   return hits
+}
+
+function detachDisconnectedChildSubtree(bot: BotRuntime, parentBlockId: string): PartDamageHit[] {
+  const childrenByParent = new Map<string, RuntimePart[]>()
+
+  for (const part of bot.parts) {
+    if (!part.parentBlockId) {
+      continue
+    }
+
+    const children = childrenByParent.get(part.parentBlockId)
+
+    if (children) {
+      children.push(part)
+    } else {
+      childrenByParent.set(part.parentBlockId, [part])
+    }
+  }
+
+  for (const children of childrenByParent.values()) {
+    children.sort((left, right) => left.blockId.localeCompare(right.blockId))
+  }
+
+  const detached: PartDamageHit[] = []
+  const visited = new Set<string>()
+  const visit = (blockId: string): void => {
+    if (visited.has(blockId)) {
+      return
+    }
+
+    visited.add(blockId)
+
+    for (const child of childrenByParent.get(blockId) ?? []) {
+      const before = child.health
+
+      if (before > 0) {
+        child.health = 0
+        detached.push({
+          blockId: child.blockId,
+          partId: child.partId,
+          damageApplied: 0,
+          remainingHealth: 0,
+          maxHealth: child.maxHealth,
+          broke: true,
+          position: partWorldPosition(bot, child),
+        })
+      }
+
+      visit(child.blockId)
+    }
+  }
+
+  visit(parentBlockId)
+
+  return detached
 }
 
 function moveIntentFor(command: MovementCommand | undefined, forced = false): MoveIntent {

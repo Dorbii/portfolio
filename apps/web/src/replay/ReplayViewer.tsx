@@ -6,7 +6,10 @@ import type {
   MachineDesign,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
-import { BabylonReplayScene } from './scene/BabylonReplayScene'
+import {
+  BabylonReplayScene,
+  type ReplayPlaybackStatus,
+} from './scene/BabylonReplayScene'
 import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import {
   buildReplayFrame,
@@ -38,7 +41,6 @@ type ReplayViewerProps = {
 }
 
 const speedOptions = [0.5, 1, 1.5, 2]
-const MAX_REPLAY_FRAME_DELTA_SECONDS = 0.1
 
 export function ReplayViewer({
   autoPlay = false,
@@ -55,6 +57,7 @@ export function ReplayViewer({
   const [time, setTime] = useState(() => clampReplayTime(timeline, initialTime))
   const [playing, setPlaying] = useState(() => autoPlay && timeline.duration > 0)
   const [rendererReady, setRendererReady] = useState(false)
+  const [seekVersion, setSeekVersion] = useState(0)
   const [speed, setSpeed] = useState(1)
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>(() =>
     normalizeCameraPreset(initialCameraPreset),
@@ -77,11 +80,12 @@ export function ReplayViewer({
   const replayBuffering = playing && !rendererReady
 
   useEffect(() => {
-    const nextTime = clampReplayTime(timeline, initialTime)
+    const nextTime = clampReplayTime(compiledTimeline, initialTime)
 
     setTime(nextTime)
-    setPlaying(autoPlay && nextTime < timeline.duration)
-  }, [autoPlay, initialTime, timeline])
+    setSeekVersion((version) => version + 1)
+    setPlaying(autoPlay && nextTime < compiledTimeline.duration)
+  }, [autoPlay, compiledTimeline, initialTime])
 
   useEffect(() => {
     setRendererReady(false)
@@ -95,42 +99,22 @@ export function ReplayViewer({
     setRendererReady(true)
   }, [])
 
-  useEffect(() => {
-    if (!playbackActive) {
-      return undefined
-    }
+  const handlePlaybackFrame = useCallback((status: ReplayPlaybackStatus) => {
+    setTime(status.time)
+  }, [])
 
-    let animationFrame = 0
-    let previous = performance.now()
+  const handlePlaybackEnd = useCallback(() => {
+    setPlaying(false)
+  }, [])
 
-    const tick = (now: number) => {
-      const elapsedSeconds = Math.min(
-        (now - previous) / 1000,
-        MAX_REPLAY_FRAME_DELTA_SECONDS,
-      )
-      const elapsed = elapsedSeconds * speed
-      previous = now
-
-      setTime((current) => {
-        const next = clampReplayTime(compiledTimeline, current + elapsed)
-
-        if (next >= compiledTimeline.duration) {
-          setPlaying(false)
-        }
-
-        return next
-      })
-      animationFrame = window.requestAnimationFrame(tick)
-    }
-
-    animationFrame = window.requestAnimationFrame(tick)
-
-    return () => window.cancelAnimationFrame(animationFrame)
-  }, [compiledTimeline, playbackActive, speed])
+  const seekTo = useCallback((nextTime: number) => {
+    setTime(clampReplayTime(compiledTimeline, nextTime))
+    setSeekVersion((version) => version + 1)
+  }, [compiledTimeline])
 
   const reset = () => {
     setPlaying(false)
-    setTime(0)
+    seekTo(0)
   }
 
   const togglePlayback = () => {
@@ -139,17 +123,15 @@ export function ReplayViewer({
       return
     }
 
-    setTime((current) => {
-      if (current >= compiledTimeline.duration) {
-        return firstActionTime
-      }
+    let nextTime = time
 
-      if (current <= 0.05 && firstActionTime > 0.05) {
-        return Math.max(0, firstActionTime - 0.12)
-      }
+    if (nextTime >= compiledTimeline.duration) {
+      nextTime = firstActionTime
+    } else if (nextTime <= 0.05 && firstActionTime > 0.05) {
+      nextTime = Math.max(0, firstActionTime - 0.12)
+    }
 
-      return current
-    })
+    seekTo(nextTime)
     setPlaying(true)
   }
 
@@ -171,9 +153,14 @@ export function ReplayViewer({
         immediateCamera={proofMode}
         machineDesigns={machineDesigns}
         onRendererReady={handleRendererReady}
+        onPlaybackEnd={handlePlaybackEnd}
+        onPlaybackFrame={handlePlaybackFrame}
+        playing={playbackActive}
+        seekTime={time}
+        seekVersion={seekVersion}
+        speed={speed}
         teamIdentities={teamIdentities}
-        timeline={timeline}
-        time={time}
+        timeline={compiledTimeline}
       />
       {proofMode ? null : (
         <>
@@ -222,7 +209,7 @@ export function ReplayViewer({
                 value={time}
                 onChange={(event) => {
                   setPlaying(false)
-                  setTime(Number(event.target.value))
+                  seekTo(Number(event.target.value))
                 }}
               />
             </FormField>

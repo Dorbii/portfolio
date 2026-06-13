@@ -47,6 +47,7 @@ export function useRefereeConsoleController() {
     activeSessionId,
     apiBase,
     replayAvailable: publicSession?.replayAvailable,
+    replayStatus: publicSession?.replayStatus,
     replayVersion: publicSession?.replayVersion,
     round: publicSession?.round,
   })
@@ -75,6 +76,7 @@ export function useRefereeConsoleController() {
     apiBase,
     hasRefereeToken,
     publicSession,
+    clearReplayState,
     setError,
     setPublicSession,
     setStoredRefereeToken,
