@@ -10,7 +10,7 @@
     }
   ],
   "vars": {
-    "AGENT_ARENA_ALLOWED_ORIGINS": "https://arena.dorbii.net,https://portfolio-agent-arena.pages.dev"
+    "AGENT_ARENA_ALLOWED_ORIGINS": "https://arena.dorbii.net,https://portfolio-agent-arena.pages.dev,https://chatgpt.com,https://chat.openai.com"
   },
   "durable_objects": {
     "bindings": [

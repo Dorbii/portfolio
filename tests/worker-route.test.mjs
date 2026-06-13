@@ -1226,6 +1226,25 @@ test('OPTIONS returns CORS preflight headers', async () => {
   assert.equal(response.headers.get('access-control-allow-headers'), 'authorization, content-type')
 })
 
+test('CORS allows ChatGPT action origins', async () => {
+  for (const origin of ['https://chatgpt.com', 'https://chat.openai.com']) {
+    const response = await handleWorkerRequest(
+      new Request('https://arena-api.test/gpt/claim', {
+        method: 'OPTIONS',
+        headers: {
+          origin,
+          'access-control-request-method': 'POST',
+          'access-control-request-headers': 'content-type',
+        },
+      }),
+      {},
+    )
+
+    assert.equal(response.status, 204)
+    assert.equal(response.headers.get('access-control-allow-origin'), origin)
+  }
+})
+
 test('CORS allows local dev and configured origins without wildcard fallback', async () => {
   const localResponse = await handleWorkerRequest(
     new Request('https://arena-api.test/agent-spec.json', {

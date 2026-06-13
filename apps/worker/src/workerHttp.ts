@@ -4,7 +4,11 @@ type WorkerHttpEnv = {
   AGENT_ARENA_ALLOWED_ORIGINS?: string
 }
 
-const DEFAULT_ALLOWED_CORS_ORIGINS = ['https://arena.dorbii.net']
+const DEFAULT_ALLOWED_CORS_ORIGINS = [
+  'https://arena.dorbii.net',
+  'https://chatgpt.com',
+  'https://chat.openai.com',
+]
 const LOCAL_DEV_CORS_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
 const MAX_JSON_BODY_BYTES = 64 * 1024
 const BODY_TOO_LARGE = Symbol('BODY_TOO_LARGE')
