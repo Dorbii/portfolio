@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
 import { Color4 } from '@babylonjs/core/Maths/math.color'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import type { ArenaConfig, TeamRole } from '../../../../../packages/schemas/src/index.js'
@@ -42,7 +42,12 @@ import {
   type BabylonRendererCore,
   type BabylonRendererStats,
 } from '../rendering/rendererKit'
-import type { LiveCombatTimeline } from './liveCombatTimeline'
+import {
+  advanceLivePlaybackBuffer,
+  createLivePlaybackBuffer,
+  type LiveCombatTimeline,
+  type LivePlaybackBufferSnapshot,
+} from './liveCombatTimeline'
 
 type ArenaPreviewResources = BabylonRendererCore & {
   botProfiles?: Record<TeamRole, BotVisualProfile>
@@ -60,17 +65,23 @@ type ArenaPreviewSceneProps = {
   arena: ArenaConfig
   liveBots?: LiveArenaStageState
   liveCombatTimeline?: LiveCombatTimeline | null
+  onLivePlaybackStatus?: (status: LivePlaybackBufferSnapshot | null) => void
 }
 
-export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: ArenaPreviewSceneProps) {
+export function ArenaPreviewScene({
+  arena,
+  liveBots,
+  liveCombatTimeline,
+  onLivePlaybackStatus,
+}: ArenaPreviewSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const liveBotsRef = useRef<LiveArenaStageState | undefined>(liveBots)
   const liveCombatTimelineRef = useRef<LiveCombatTimeline | null | undefined>(liveCombatTimeline)
-  const liveTimelinePlaybackRef = useRef({
-    key: '',
-    startedAt: 0,
-  })
+  const livePlaybackBufferRef = useRef(createLivePlaybackBuffer())
+  const onLivePlaybackStatusRef = useRef(onLivePlaybackStatus)
+  const lastLivePlaybackStatusKeyRef = useRef('')
   const [rendererState, setRendererState] = useState<RendererState>({ status: 'booting' })
+  const [livePlaybackStatus, setLivePlaybackStatus] = useState<LivePlaybackBufferSnapshot | null>(null)
   const [sceneStats, setSceneStats] = useState<BabylonRendererStats | null>(null)
   const activeHazardsKey = arena.activeHazards.join('|')
   const liveBotsKey = liveArenaVisualKey(liveBots)
@@ -82,6 +93,10 @@ export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: Arena
   useEffect(() => {
     liveCombatTimelineRef.current = liveCombatTimeline
   }, [liveCombatTimeline])
+
+  useEffect(() => {
+    onLivePlaybackStatusRef.current = onLivePlaybackStatus
+  }, [onLivePlaybackStatus])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -202,13 +217,23 @@ export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: Arena
 
         if (resources.bots && currentLiveBots) {
           const currentTimeline = liveCombatTimelineRef.current
-          const timelineTime = liveTimelineTime(currentTimeline, time, liveTimelinePlaybackRef.current)
-          const frame = buildLiveArenaFrame(currentLiveBots, time, currentTimeline, timelineTime)
+          const playbackStatus = advanceLivePlaybackBuffer(
+            livePlaybackBufferRef.current,
+            currentTimeline,
+            time,
+          )
+          const frame = buildLiveArenaFrame(currentLiveBots, time, currentTimeline, playbackStatus.playheadTime)
 
           updateBots(resources.bots, frame)
           if (resources.botProfiles) {
             updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
           }
+          publishLivePlaybackStatus(
+            playbackStatus,
+            lastLivePlaybackStatusKeyRef,
+            setLivePlaybackStatus,
+            onLivePlaybackStatusRef.current,
+          )
         }
 
         resources.scene.render()
@@ -284,6 +309,15 @@ export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: Arena
       data-arena-preview-live-bots={liveBots ? 'true' : 'false'}
       data-arena-preview-state={rendererState.status}
       data-arena-preview-hazards={activeHazardsKey}
+      data-live-playback-buffer-depth={livePlaybackStatus?.bufferDepthSeconds}
+      data-live-playback-buffer-health={livePlaybackStatus?.bufferHealth}
+      data-live-playback-last-seq={livePlaybackStatus?.lastSeq}
+      data-live-playback-max-committed={livePlaybackStatus?.maxCommittedEventTime}
+      data-live-playback-paused-reason={livePlaybackStatus?.pausedReason}
+      data-live-playback-playhead={livePlaybackStatus?.playheadTime}
+      data-live-playback-server-lag={livePlaybackStatus?.serverLagSeconds}
+      data-live-playback-status={livePlaybackStatus?.status}
+      data-live-playback-target-delay={livePlaybackStatus?.targetDelaySeconds}
       data-renderer-active-meshes={sceneStats?.activeMeshes}
       data-renderer-budget-active-meshes={BABYLON_RENDERER_BUDGETS.replayPreview.activeMeshes}
       data-renderer-budget-breaches={rendererBudgetState?.breaches.join('|')}
@@ -315,24 +349,35 @@ export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: Arena
   )
 }
 
-function liveTimelineTime(
-  liveCombatTimeline: LiveCombatTimeline | null | undefined,
-  sceneTime: number,
-  playback: { key: string; startedAt: number },
-): number {
-  if (!liveCombatTimeline) {
-    playback.key = ''
-    playback.startedAt = sceneTime
-    return sceneTime
+function publishLivePlaybackStatus(
+  status: LivePlaybackBufferSnapshot,
+  lastStatusKeyRef: MutableRefObject<string>,
+  setLivePlaybackStatus: Dispatch<SetStateAction<LivePlaybackBufferSnapshot | null>>,
+  onLivePlaybackStatus: ((status: LivePlaybackBufferSnapshot | null) => void) | undefined,
+): void {
+  const statusKey = livePlaybackStatusKey(status)
+
+  if (lastStatusKeyRef.current === statusKey) {
+    return
   }
 
-  if (playback.key !== liveCombatTimeline.key) {
-    playback.key = liveCombatTimeline.key
-    playback.startedAt = sceneTime
-  }
+  lastStatusKeyRef.current = statusKey
+  setLivePlaybackStatus(status)
+  onLivePlaybackStatus?.(status)
+}
 
-  return Math.min(
-    liveCombatTimeline.timeline.duration,
-    Math.max(0, sceneTime - playback.startedAt),
-  )
+function livePlaybackStatusKey(status: LivePlaybackBufferSnapshot): string {
+  return [
+    status.key,
+    status.status,
+    status.pausedReason ?? 'none',
+    status.lastSeq,
+    roundForStatusKey(status.playheadTime),
+    roundForStatusKey(status.bufferDepthSeconds),
+    roundForStatusKey(status.serverLagSeconds ?? 0),
+  ].join('|')
+}
+
+function roundForStatusKey(value: number): number {
+  return Math.round(value * 4) / 4
 }

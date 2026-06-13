@@ -3911,6 +3911,24 @@ textarea:focus-visible {
     rgba(13, 5, 8, 0.92);
 }
 
+.replay-status-overlay.is-live-buffer {
+  right: auto;
+  left: 16px;
+  max-width: min(460px, calc(100% - 32px));
+  border-color: rgba(116, 204, 255, 0.34);
+  background:
+    linear-gradient(180deg, rgba(116, 204, 255, 0.13), rgba(116, 204, 255, 0.04)),
+    rgba(5, 8, 12, 0.9);
+}
+
+.replay-status-overlay.is-live-buffer.is-drained,
+.replay-status-overlay.is-live-buffer.is-buffering {
+  border-color: rgba(247, 184, 75, 0.38);
+  background:
+    linear-gradient(180deg, rgba(247, 184, 75, 0.14), rgba(247, 184, 75, 0.045)),
+    rgba(5, 8, 12, 0.92);
+}
+
 .replay-status-overlay strong {
   color: #fff0bd;
   font-size: 0.76rem;
@@ -3921,6 +3939,10 @@ textarea:focus-visible {
 
 .replay-status-overlay.is-error strong {
   color: #ffbdc6;
+}
+
+.replay-status-overlay.is-live-buffer strong {
+  color: #d3f0ff;
 }
 
 .replay-status-overlay span {

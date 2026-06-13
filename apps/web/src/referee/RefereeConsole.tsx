@@ -13,6 +13,7 @@ import {
 import {
   Panel,
 } from '../shared/ui'
+import { formatLabel } from '../shared/format'
 import {
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
@@ -21,6 +22,8 @@ import type { ReplayPayload } from './refereeClient'
 import { createRefereeReplayProof, resolveRefereeReplayProofMode } from './refereeReplayProof'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 import { createLiveArenaStageState } from './liveArenaStage'
+import type { LivePlaybackBufferSnapshot } from '../replay/arena/liveCombatTimeline'
+import { formatLivePlaybackStatus, formatPlaybackSeconds } from './livePlaybackStatusCopy'
 
 const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
@@ -71,6 +74,26 @@ function ReplayStatusOverlay({
     >
       <strong>{status.label}</strong>
       <span>{status.detail}</span>
+    </div>
+  )
+}
+
+function LivePlaybackStatusOverlay({
+  status,
+}: {
+  status: LivePlaybackBufferSnapshot
+}) {
+  return (
+    <div
+      className={`replay-status-overlay is-live-buffer is-${status.status}`}
+      role="status"
+    >
+      <strong>{formatLabel(status.status)}</strong>
+      <span>
+        {formatLivePlaybackStatus(status)} Playhead {formatPlaybackSeconds(status.playheadTime)} /
+        committed {formatPlaybackSeconds(status.maxCommittedEventTime)} /
+        target delay {formatPlaybackSeconds(status.targetDelaySeconds)}.
+      </span>
     </div>
   )
 }
@@ -198,6 +221,7 @@ export function RefereeConsole() {
   const [archiveSelectedFightId, setArchiveSelectedFightId] = useState('')
   const [archiveLoadState, setArchiveLoadState] = useState<'busy' | 'idle'>('idle')
   const [archiveError, setArchiveError] = useState('')
+  const [livePlaybackStatus, setLivePlaybackStatus] = useState<LivePlaybackBufferSnapshot | null>(null)
   const fightComms = [
     ...displaySessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
     ...(['red', 'blue'] as const).flatMap((role) =>
@@ -230,6 +254,12 @@ export function RefereeConsole() {
   const renderedReplayPayload = showRenderedReplay ? stageReplayPayload : null
   const showFightCockpitStage = !reviewingArchivedReplay &&
     (shouldDeferFightRender || (observerView.stage === 'live_combat' && !liveArenaStage))
+  const showLivePlaybackStatus = observerView.stage === 'live_combat' &&
+    Boolean(liveArenaStage) &&
+    !showFightCockpitStage &&
+    !renderedReplayPayload &&
+    livePlaybackStatus !== null &&
+    livePlaybackStatus.status !== 'idle'
   const shouldShowSessionCompletion = displayPublicSession?.phase === 'session_complete'
 
   useEffect(() => {
@@ -338,16 +368,21 @@ export function RefereeConsole() {
                   arena={visibleArena}
                   liveBots={liveArenaStage}
                   liveCombatTimeline={displayLiveCombatTimeline}
+                  onLivePlaybackStatus={setLivePlaybackStatus}
                 />
               </Suspense>
             )}
             {observerView.showReplayStatus && !reviewingArchivedReplay ? (
               <ReplayStatusOverlay error={replayError} loadState={replayLoadState} />
             ) : null}
+            {showLivePlaybackStatus && livePlaybackStatus ? (
+              <LivePlaybackStatusOverlay status={livePlaybackStatus} />
+            ) : null}
             {observerView.showCockpitStrip && !showFightCockpitStage ? (
               <RefereeCockpitStrip
                 loadState={roleLoadState}
                 placement="stage"
+                livePlaybackStatus={livePlaybackStatus}
                 observerView={observerView}
                 roleStates={displayRoleStates}
                 stateError={liveArenaStateError}

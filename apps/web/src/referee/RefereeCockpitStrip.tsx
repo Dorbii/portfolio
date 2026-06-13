@@ -6,6 +6,7 @@ import type {
   RolePrivateState,
   SessionChatMessage,
 } from '../agent/agentSessionTypes.js'
+import type { LivePlaybackBufferSnapshot } from '../replay/arena/liveCombatTimeline'
 import { BotAssemblyScene } from '../agent/BotAssemblyScene'
 import { formatLabel } from '../shared/format'
 import {
@@ -14,9 +15,11 @@ import {
   teamAccentRgb,
 } from '../shared/teamVisuals'
 import type { RefereeObserverLifecycle } from './refereeObserverView'
+import { formatLivePlaybackStatus } from './livePlaybackStatusCopy'
 
 type RefereeCockpitStripProps = {
   forceVisible?: boolean
+  livePlaybackStatus?: LivePlaybackBufferSnapshot | null
   loadState: 'busy' | 'idle'
   placement?: 'page' | 'stage'
   observerView: Pick<RefereeObserverLifecycle, 'stage' | 'decisionText'>
@@ -35,6 +38,7 @@ type RefereeCockpitStripStyle = CSSProperties & {
 // CODEX_REVIEW: pending
 export function RefereeCockpitStrip({
   forceVisible = false,
+  livePlaybackStatus,
   loadState,
   placement = 'page',
   observerView,
@@ -60,7 +64,7 @@ export function RefereeCockpitStrip({
           <h2 id="referee-cockpit-strip-heading">Garage</h2>
         </div>
         <p role={stateError ? 'alert' : undefined}>
-          {resolveStripStatusCopy(observerView, loadState, stateError)}
+          {resolveStripStatusCopy(observerView, loadState, stateError, livePlaybackStatus)}
         </p>
       </div>
       <div className="referee-cockpit-grid">
@@ -148,6 +152,7 @@ function resolveStripStatusCopy(
   observerView: RefereeCockpitStripProps['observerView'],
   loadState: 'busy' | 'idle',
   stateError: string,
+  livePlaybackStatus: LivePlaybackBufferSnapshot | null | undefined,
 ): string {
   if (stateError) {
     return stateError
@@ -171,6 +176,10 @@ function resolveStripStatusCopy(
 
   if (observerView.stage === 'session_complete') {
     return 'Session complete.'
+  }
+
+  if (observerView.stage === 'live_combat' && livePlaybackStatus) {
+    return formatLivePlaybackStatus(livePlaybackStatus)
   }
 
   return 'Live observer state.'

@@ -5,6 +5,8 @@ import {
   buildLiveArenaFrame,
 } from '../.test-build/apps/web/src/replay/arena/liveArenaFrame.js'
 import {
+  advanceLivePlaybackBuffer,
+  createLivePlaybackBuffer,
   createLiveCombatTimelineBuffer,
   updateLiveCombatTimelineBuffer,
 } from '../.test-build/apps/web/src/replay/arena/liveCombatTimeline.js'
@@ -161,4 +163,118 @@ test('live combat timeline injects snapshot spawn anchors when the feed starts m
   assert.equal(frame.bots.red.position[0], -6)
   assert.equal(frame.bots.blue.position[0], 6)
   assert.equal(frame.effects.some((effect) => effect.kind === 'weapon_fire'), true)
+})
+
+test('live playback buffer pauses at the committed edge instead of running past available events', () => {
+  const timelineBuffer = createLiveCombatTimelineBuffer()
+  const playbackBuffer = createLivePlaybackBuffer()
+  const timeline = updateLiveCombatTimelineBuffer(timelineBuffer, feedWithEvents([
+    {
+      seq: 1,
+      event: { t: 0, type: 'spawn', bot: 'red', position: [-6, 0, 0], rotation: [0, 90, 0] },
+    },
+    {
+      seq: 2,
+      event: { t: 0, type: 'spawn', bot: 'blue', position: [6, 0, 0], rotation: [0, -90, 0] },
+    },
+    {
+      seq: 3,
+      event: {
+        t: 1,
+        type: 'weapon_fire',
+        bot: 'red',
+        targetPosition: [6, 0, 0],
+        weaponId: 'Weapon_Turret',
+      },
+    },
+  ], 3))
+
+  assert.ok(timeline)
+
+  const options = { maxFrameDeltaSeconds: 10, minPlayableBufferSeconds: 0.2 }
+
+  advanceLivePlaybackBuffer(playbackBuffer, timeline, 0, options)
+  const edge = advanceLivePlaybackBuffer(playbackBuffer, timeline, 2, options)
+  const drained = advanceLivePlaybackBuffer(playbackBuffer, timeline, 2.1, options)
+
+  assert.equal(edge.playheadTime, 0.8)
+  assert.equal(edge.bufferDepthSeconds, 0.2)
+  assert.equal(drained.status, 'drained')
+  assert.equal(drained.pausedReason, 'buffer_drained')
+  assert.equal(drained.playheadTime, 0.8)
+})
+
+test('live playback buffer catches up when committed events are far ahead of the playhead', () => {
+  const timelineBuffer = createLiveCombatTimelineBuffer()
+  const playbackBuffer = createLivePlaybackBuffer()
+  const timeline = updateLiveCombatTimelineBuffer(timelineBuffer, feedWithEvents([
+    {
+      seq: 1,
+      event: { t: 0, type: 'spawn', bot: 'red', position: [-6, 0, 0], rotation: [0, 90, 0] },
+    },
+    {
+      seq: 2,
+      event: { t: 9, type: 'damage', bot: 'blue', amount: 1, remainingHealth: 19 },
+    },
+  ], 2))
+
+  assert.ok(timeline)
+
+  const start = advanceLivePlaybackBuffer(playbackBuffer, timeline, 0, { maxFrameDeltaSeconds: 10 })
+  const catchingUp = advanceLivePlaybackBuffer(playbackBuffer, timeline, 1, { maxFrameDeltaSeconds: 10 })
+
+  assert.equal(start.status, 'catching_up')
+  assert.equal(catchingUp.status, 'catching_up')
+  assert.equal(catchingUp.playheadTime, 1.35)
+})
+
+test('live playback buffer replays late-arriving committed events instead of skipping them', () => {
+  const timelineBuffer = createLiveCombatTimelineBuffer()
+  const playbackBuffer = createLivePlaybackBuffer()
+  const firstTimeline = updateLiveCombatTimelineBuffer(timelineBuffer, feedWithEvents([
+    {
+      seq: 1,
+      event: { t: 0, type: 'spawn', bot: 'red', position: [-6, 0, 0], rotation: [0, 90, 0] },
+    },
+    {
+      seq: 2,
+      event: {
+        t: 3,
+        type: 'weapon_fire',
+        bot: 'red',
+        targetPosition: [6, 0, 0],
+        weaponId: 'Weapon_Turret',
+      },
+    },
+  ], 2))
+
+  assert.ok(firstTimeline)
+
+  const options = { maxFrameDeltaSeconds: 10 }
+
+  advanceLivePlaybackBuffer(playbackBuffer, firstTimeline, 0, options)
+  const advanced = advanceLivePlaybackBuffer(playbackBuffer, firstTimeline, 2, options)
+
+  assert.equal(advanced.playheadTime, 2)
+
+  const secondTimeline = updateLiveCombatTimelineBuffer(timelineBuffer, feedWithEvents([
+    {
+      seq: 3,
+      event: {
+        t: 0.7,
+        type: 'damage',
+        bot: 'blue',
+        amount: 5,
+        remainingHealth: 15,
+      },
+    },
+  ], 3))
+
+  assert.ok(secondTimeline)
+
+  const replayingLate = advanceLivePlaybackBuffer(playbackBuffer, secondTimeline, 2.1, options)
+
+  assert.equal(replayingLate.status, 'replaying_late_events')
+  assert.equal(replayingLate.playheadTime, 0.62)
+  assert.equal(replayingLate.lastSeq, 3)
 })
