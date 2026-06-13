@@ -34,8 +34,9 @@ import {
 import {
   createPooledBox,
   createPooledImpactBurstEffect,
+  createPooledSparkBurstEffect,
   createPooledSphere,
-  createPooledTorus,
+  createPooledStatusFlashEffect,
   updateDamageMarkerEffect,
   updateDebrisEffect,
   updateHazardEffect,
@@ -105,17 +106,17 @@ const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = 
   stability: {
     capacity: 6,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `stability-effect-${index}`, materials.stability, 1.32),
+      createPooledStatusFlashEffect(scene, `stability-effect-${index}`, materials.stability),
     update: updateStabilityEffect,
   },
   part_detach: {
     capacity: 6,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `part-detach-effect-${index}`, materials.partDetach, 1.12),
+      createPooledSparkBurstEffect(scene, `part-detach-effect-${index}`, materials.partDetach, 10),
     update: updatePartDetachEffect,
   },
   impact: {
-    capacity: 12,
+    capacity: 10,
     create: ({ index, materials, scene }) =>
       createPooledImpactBurstEffect(scene, `impact-effect-${index}`, materials.spark),
     update: updateImpactEffect,
@@ -127,9 +128,9 @@ const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = 
     update: updateDebrisEffect,
   },
   damage_marker: {
-    capacity: 16,
+    capacity: 10,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `damage-marker-effect-${index}`, materials.damage, 1.25),
+      createPooledSparkBurstEffect(scene, `damage-marker-effect-${index}`, materials.damage, 8),
     update: updateDamageMarkerEffect,
   },
   smoke: {
@@ -141,13 +142,13 @@ const EFFECT_POOL_DEFINITIONS: Record<ReplayEffectKind, EffectPoolDefinition> = 
   hazard: {
     capacity: 4,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `hazard-effect-${index}`, materials.hazard, 1.1),
+      createPooledStatusFlashEffect(scene, `hazard-effect-${index}`, materials.hazard),
     update: updateHazardEffect,
   },
   knockout: {
     capacity: 2,
     create: ({ index, materials, scene }) =>
-      createPooledTorus(scene, `knockout-effect-${index}`, materials.knockout, 1.8),
+      createPooledSparkBurstEffect(scene, `knockout-effect-${index}`, materials.knockout, 10),
     update: updateKnockoutEffect,
   },
 }
@@ -234,14 +235,9 @@ function createPooledWeaponEffect(
     { diameter: 0.18, segments: 10 },
     scene,
   )
-  const muzzle = MeshBuilder.CreateTorus(
+  const muzzle = MeshBuilder.CreateCylinder(
     `${name}-muzzle`,
-    { diameter: 0.44, thickness: 0.04, tessellation: 18 },
-    scene,
-  )
-  const netHoop = MeshBuilder.CreateTorus(
-    `${name}-net-hoop`,
-    { diameter: 1, thickness: 0.04, tessellation: 24 },
+    { height: 0.08, diameter: 0.38, tessellation: 12 },
     scene,
   )
 
@@ -270,11 +266,25 @@ function createPooledWeaponEffect(
   muzzle.position.z = -0.5
   muzzle.metadata = { weaponEffectPart: 'muzzle' }
 
-  netHoop.material = netEffectMaterial
-  netHoop.parent = mesh
-  netHoop.rotation.x = Math.PI / 2
-  netHoop.position.z = 0.34
-  netHoop.metadata = { weaponEffectPart: 'net-hoop', baseX: 0, baseY: 0 }
+  const netFrameSegments: Array<[string, [number, number], [number, number]]> = [
+    ['top', [0, 0.43], [0.9, 0.035]],
+    ['bottom', [0, -0.43], [0.9, 0.035]],
+    ['left', [-0.43, 0], [0.035, 0.9]],
+    ['right', [0.43, 0], [0.035, 0.9]],
+  ]
+
+  netFrameSegments.forEach(([slot, position, size]) => {
+    const segment = MeshBuilder.CreateBox(
+      `${name}-net-frame-${slot}`,
+      { width: size[0], height: size[1], depth: 0.025 },
+      scene,
+    )
+
+    segment.position.set(position[0], position[1], 0.34)
+    segment.parent = mesh
+    segment.material = netEffectMaterial
+    segment.metadata = { weaponEffectPart: 'net-strand', baseX: position[0], baseY: position[1] }
+  })
 
   for (let index = -2; index <= 2; index += 1) {
     const vertical = MeshBuilder.CreateBox(
@@ -656,9 +666,7 @@ function setWeaponEffectMode(mesh: Mesh, mode: string, progress: number, intensi
     child.position.y = (metadata.baseY ?? child.position.y) * spread
     child.position.z = 0.34 + bow
 
-    if (part === 'net-hoop') {
-      child.scaling.setAll(0.85 + progress * 0.28)
-    } else if (part === 'net-weight') {
+    if (part === 'net-weight') {
       child.scaling.setAll(1 + progress * 0.35)
     } else {
       child.scaling.setAll(0.92 + progress * 0.18)

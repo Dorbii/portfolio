@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
 import {
@@ -134,21 +135,48 @@ export function createGrabberWeaponPart({
       },
       scene,
     )
+    const pivotPosition = {
+      x: side * Math.max(width * 0.38, 0.26),
+      y: Math.max(height * 0.78, 0.36),
+      z: -Math.max(depth * 0.14, 0.08),
+    }
+    const jawRoot = new TransformNode(`${role}-${blockId}-grabber-jaw-clamp-root-${side}`, scene)
 
     pivot.rotation.z = Math.PI / 2
-    pivot.position.set(side * Math.max(width * 0.38, 0.26), Math.max(height * 0.78, 0.36), -Math.max(depth * 0.14, 0.08))
+    pivot.position.set(pivotPosition.x, pivotPosition.y, pivotPosition.z)
+    jawRoot.parent = parent
+    jawRoot.position.set(pivotPosition.x, pivotPosition.y, pivotPosition.z)
+    jawRoot.metadata = {
+      animationProfile: 'grabber_clamp',
+      kind: 'actuate',
+      axis: 'y',
+      amplitude: -side * 0.34,
+      speed: 0.05,
+    }
     clawTip.rotation.x = Math.PI / 2
     clawTip.rotation.z = side * 0.42
-    clawTip.position.set(side * Math.max(width * 0.42, 0.28), Math.max(height * 0.72, 0.34), Math.max(depth * 0.42, 0.28))
-    innerGripPad.position.set(side * Math.max(width * 0.24, 0.16), Math.max(height * 0.44, 0.24), Math.max(depth * 0.34, 0.2))
+    clawTip.position.set(
+      side * Math.max(width * 0.42, 0.28) - pivotPosition.x,
+      Math.max(height * 0.72, 0.34) - pivotPosition.y,
+      Math.max(depth * 0.42, 0.28) - pivotPosition.z,
+    )
+    innerGripPad.position.set(
+      side * Math.max(width * 0.24, 0.16) - pivotPosition.x,
+      Math.max(height * 0.44, 0.24) - pivotPosition.y,
+      Math.max(depth * 0.34, 0.2) - pivotPosition.z,
+    )
     innerGripPad.rotation.z = side * 0.18
-    jawBrace.position.set(side * Math.max(width * 0.34, 0.22), Math.max(height * 0.58, 0.3), Math.max(depth * 0.15, 0.1))
+    jawBrace.position.set(
+      side * Math.max(width * 0.34, 0.22) - pivotPosition.x,
+      Math.max(height * 0.58, 0.3) - pivotPosition.y,
+      Math.max(depth * 0.15, 0.1) - pivotPosition.z,
+    )
     jawBrace.rotation.z = side * 0.28
     jawBrace.rotation.x = -0.1
     attachRoleMesh(pivot, parent, materials.steel, 'trim')
-    attachWeaponEdgeMesh(clawTip, parent, materials.warning)
-    attachRoleMesh(innerGripPad, parent, materials.rubber, 'rubber')
-    attachRoleMesh(jawBrace, parent, materials.steel, 'trim')
+    attachWeaponEdgeMesh(clawTip, jawRoot, materials.warning)
+    attachRoleMesh(innerGripPad, jawRoot, materials.rubber, 'rubber')
+    attachRoleMesh(jawBrace, jawRoot, materials.steel, 'trim')
   }
 
   for (let index = 0; index < 4; index += 1) {

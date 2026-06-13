@@ -37,6 +37,11 @@ export type AssemblyResources = {
     leftClamp: AbstractMesh
     rightClamp: AbstractMesh
     clampRing: AbstractMesh
+    diagnosticBars: AbstractMesh[]
+    fanRotors: AbstractMesh[]
+    beaconLights: AbstractMesh[]
+    inspectionSweep: AbstractMesh
+    serviceCarriage: AbstractMesh
     sparks: Array<{
       mesh: AbstractMesh
       basePosition: Vector3
@@ -48,6 +53,7 @@ export type AssemblyResources = {
     rightClampBaseY: number
     leftArmBaseZ: number
     rightArmBaseZ: number
+    serviceCarriageBaseX: number
   }
   startedAt: number
 }
@@ -131,6 +137,26 @@ export function animateAssembly(resources: AssemblyResources, submitted: boolean
   resources.rig.rightToolHead.position.x = 0.18 + Math.cos(elapsed * 1.55) * 0.08
   resources.rig.leftToolHead.position.y = 1.18 + Math.cos(elapsed * 1.2) * 0.04
   resources.rig.rightToolHead.position.y = 1.18 + Math.sin(elapsed * 1.28) * 0.04
+  resources.rig.inspectionSweep.position.z = -1.48 + ((elapsed * 0.58) % 2.42)
+  resources.rig.inspectionSweep.scaling.x = 0.86 + Math.sin(elapsed * 2.4) * 0.08
+  resources.rig.serviceCarriage.position.x = resources.rig.serviceCarriageBaseX + Math.sin(elapsed * 0.68) * 1.45
+
+  resources.rig.fanRotors.forEach((fan, index) => {
+    fan.rotation.z += (index % 2 === 0 ? 1 : -1) * (submitted ? 0.055 : 0.1)
+  })
+
+  resources.rig.diagnosticBars.forEach((bar, index) => {
+    const pulse = 0.5 + Math.sin(elapsed * (2.1 + (index % 3) * 0.35) + index * 0.72) * 0.5
+
+    bar.scaling.x = 0.38 + pulse * 0.78
+    bar.scaling.y = 0.82 + Math.sin(elapsed * 3.4 + index) * 0.12
+  })
+
+  resources.rig.beaconLights.forEach((beacon, index) => {
+    const pulse = 0.5 + Math.sin(elapsed * 3.6 + index * 1.4) * 0.5
+
+    beacon.scaling.set(0.82 + pulse * 0.28, 0.82 + pulse * 0.36, 0.82 + pulse * 0.28)
+  })
 
   resources.rig.sparks.forEach((spark) => {
     const phase = (elapsed * 2.4 + spark.phase) % 1

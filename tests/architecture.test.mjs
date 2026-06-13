@@ -106,6 +106,58 @@ test('weapon fire effects can resolve visible muzzle anchors before falling back
   assert.match(replayEffectsSource, /Math\.sin\(heading\) \* tracerReach \* 0\.5/)
 })
 
+test('active replay effects use sparks and flashes instead of torus ring cues', () => {
+  const effectSourcePaths = [
+    'apps/web/src/replay/effects/abilityEffects.ts',
+    'apps/web/src/replay/effects/genericReplayEffects.ts',
+    'apps/web/src/replay/effects/replayEffects.ts',
+  ]
+  const effectSources = effectSourcePaths.map((path) => readFileSync(join(repoRoot, path), 'utf8')).join('\n')
+
+  assert.equal(effectSources.includes('CreateTorus'), false)
+  assert.equal(effectSources.includes('createPooledTorus'), false)
+  assert.match(effectSources, /createPooledSparkBurstEffect/)
+  assert.match(effectSources, /damage_marker:[\s\S]*createPooledSparkBurstEffect/)
+  assert.match(effectSources, /positionSparkChild/)
+})
+
+test('weapon mechanisms actuate and salvage runner reacts to detached parts', () => {
+  const motionSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/parts/motion.ts'),
+    'utf8',
+  )
+  const playbackSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/bots/playback.ts'),
+    'utf8',
+  )
+  const replaySceneSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/scene/BabylonReplayScene.tsx'),
+    'utf8',
+  )
+  const salvageRunnerSource = readFileSync(
+    join(repoRoot, 'apps/web/src/replay/arena/salvageRunner.ts'),
+    'utf8',
+  )
+  const weaponSource = [
+    'apps/web/src/replay/parts/weapon/flipperWeaponPart.ts',
+    'apps/web/src/replay/parts/weapon/grabberWeaponPart.ts',
+    'apps/web/src/replay/parts/weapon/hammerWeaponPart.ts',
+  ].map((path) => readFileSync(join(repoRoot, path), 'utf8')).join('\n')
+
+  assert.match(motionSource, /kind: 'actuate'/)
+  assert.match(motionSource, /animationProfile === 'flipper_snap'/)
+  assert.match(motionSource, /animationProfile === 'grabber_clamp'/)
+  assert.match(motionSource, /animationProfile === 'hammer_swing'/)
+  assert.match(playbackSource, /applyPartMotion\([\s\S]*weaponIntensity/)
+  assert.match(weaponSource, /flipper-paddle-snap-root/)
+  assert.match(weaponSource, /grabber-jaw-clamp-root/)
+  assert.match(weaponSource, /hammer-swing-root/)
+  assert.match(replaySceneSource, /createReplaySalvageRunner/)
+  assert.match(replaySceneSource, /updateReplaySalvageRunner\(resources\.salvageRunner, frame, sceneArena\)/)
+  assert.match(salvageRunnerSource, /effect\.kind === 'part_detach'/)
+  assert.match(salvageRunnerSource, /parts-crate/)
+})
+
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = join(directory, entry.name)

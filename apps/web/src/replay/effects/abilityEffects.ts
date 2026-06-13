@@ -24,15 +24,11 @@ export function createPooledControlNetEffect(
   name: string,
   material: StandardMaterial,
 ): Mesh {
-  const mesh = MeshBuilder.CreateTorus(
-    name,
-    { diameter: 1.8, thickness: 0.075, tessellation: 36 },
-    scene,
-  )
-
+  const mesh = MeshBuilder.CreateBox(name, { width: 0.04, height: 0.04, depth: 0.04 }, scene)
+  const carrierMaterial = cloneStandardMaterial(material, `${name}-carrier-mat`, 0)
   const netMaterial = cloneStandardMaterial(material, `${name}-mat`, 0.72)
 
-  mesh.material = netMaterial
+  mesh.material = carrierMaterial
   mesh.rotation.x = Math.PI / 2
 
   const centerKnot = MeshBuilder.CreateSphere(
@@ -43,6 +39,25 @@ export function createPooledControlNetEffect(
 
   centerKnot.parent = mesh
   centerKnot.material = netMaterial
+
+  const frameSegments: Array<[string, [number, number, number], [number, number, number]]> = [
+    ['top', [0, 0.84, 0], [1.72, 0.045, 0.035]],
+    ['bottom', [0, -0.84, 0], [1.72, 0.045, 0.035]],
+    ['left', [-0.84, 0, 0], [0.045, 1.72, 0.035]],
+    ['right', [0.84, 0, 0], [0.045, 1.72, 0.035]],
+  ]
+
+  frameSegments.forEach(([slot, position, size]) => {
+    const segment = MeshBuilder.CreateBox(
+      `${name}-frame-${slot}`,
+      { width: size[0], height: size[1], depth: size[2] },
+      scene,
+    )
+
+    segment.position.set(position[0], position[1], position[2])
+    segment.parent = mesh
+    segment.material = netMaterial
+  })
 
   for (let index = 0; index < 6; index += 1) {
     const angle = (Math.PI * 2 * index) / 6
@@ -195,9 +210,9 @@ export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
       { width: 0.54, height: 0.22, depth: 0.42 },
       scene,
     )
-    const rotor = MeshBuilder.CreateTorus(
+    const rotor = MeshBuilder.CreateBox(
       `${name}-rotor-${index}`,
-      { diameter: 0.5, thickness: 0.045, tessellation: 20 },
+      { width: 0.58, height: 0.035, depth: 0.035 },
       scene,
     )
     const sensor = MeshBuilder.CreateSphere(
@@ -218,7 +233,7 @@ export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
     pod.metadata = { droneEffectPart: 'pod', droneIndex: index }
 
     rotor.position.set(x, 0.18, z)
-    rotor.rotation.x = Math.PI / 2
+    rotor.rotation.y = tangent
     rotor.parent = mesh
     rotor.material = accentMaterial
     rotor.metadata = { droneEffectPart: 'rotor', droneIndex: index }
@@ -240,9 +255,14 @@ export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
     { height: 1.45, diameterTop: 0.18, diameterBottom: 1.15, tessellation: 18 },
     scene,
   )
-  const scanRing = MeshBuilder.CreateTorus(
-    `${name}-scan-ring`,
-    { diameter: 1.42, thickness: 0.055, tessellation: 30 },
+  const scanBarA = MeshBuilder.CreateBox(
+    `${name}-scan-bar-a`,
+    { width: 1.16, height: 0.05, depth: 0.055 },
+    scene,
+  )
+  const scanBarB = MeshBuilder.CreateBox(
+    `${name}-scan-bar-b`,
+    { width: 0.05, height: 0.05, depth: 1.16 },
     scene,
   )
 
@@ -250,11 +270,14 @@ export function createPooledDroneSwarmEffect(scene: Scene, name: string): Mesh {
   scanCone.parent = mesh
   scanCone.material = scanMaterial
   scanCone.metadata = { droneEffectPart: 'scan' }
-  scanRing.position.y = -1.25
-  scanRing.rotation.x = Math.PI / 2
-  scanRing.parent = mesh
-  scanRing.material = scanMaterial
-  scanRing.metadata = { droneEffectPart: 'scan' }
+  scanBarA.position.y = -1.25
+  scanBarB.position.y = -1.25
+  scanBarA.parent = mesh
+  scanBarB.parent = mesh
+  scanBarA.material = scanMaterial
+  scanBarB.material = scanMaterial
+  scanBarA.metadata = { droneEffectPart: 'scan' }
+  scanBarB.metadata = { droneEffectPart: 'scan' }
   mesh.setEnabled(false)
 
   return mesh

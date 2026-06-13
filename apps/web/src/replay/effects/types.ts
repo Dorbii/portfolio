@@ -38,13 +38,17 @@ export type EffectUpdateInput = {
 }
 
 export type WeaponEffectPartMetadata = {
-  weaponEffectPart?: 'muzzle' | 'net-hoop' | 'net-strand' | 'net-weight' | 'tracer-core' | 'tracer-glow' | 'tracer-tip'
+  weaponEffectPart?: 'muzzle' | 'net-strand' | 'net-weight' | 'tracer-core' | 'tracer-glow' | 'tracer-tip'
   baseX?: number
   baseY?: number
 }
 
 export type ImpactEffectPartMetadata = {
-  impactEffectPart?: 'core' | 'ring' | 'spark'
+  impactEffectPart?: 'core' | 'damage-core' | 'damage-spark' | 'spark' | 'status-bar'
+  baseAngle?: number
+  baseDistance?: number
+  baseLift?: number
+  spin?: number
 }
 
 export type DroneEffectPartMetadata = {

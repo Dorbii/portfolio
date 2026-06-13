@@ -34,9 +34,9 @@ export const BABYLON_RENDERER_BUDGETS: Record<
     totalVertices: 70_000,
   },
   replayPreview: {
-    activeMeshes: 1_000,
-    materials: 240,
-    meshes: 1_800,
+    activeMeshes: 1_300,
+    materials: 320,
+    meshes: 2_400,
     textures: 300,
     totalVertices: 300_000,
   },

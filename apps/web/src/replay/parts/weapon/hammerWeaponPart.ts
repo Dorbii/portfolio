@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { createBoxDetail } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
 import {
@@ -47,22 +48,31 @@ export function createHammerWeaponPart({
     },
     scene,
   )
+  const swingRoot = new TransformNode(`${role}-${blockId}-hammer-swing-root`, scene)
+  const pivotPosition = {
+    x: 0,
+    y: Math.max(height * 0.28, 0.18),
+    z: -Math.max(depth * 0.42, 0.24),
+  }
 
   arm.rotation.x = Math.PI / 2
-  arm.position.set(0, Math.max(height * 0.34, 0.2), Math.max(depth * 0.18, 0.12))
+  arm.position.set(0, Math.max(height * 0.34, 0.2) - pivotPosition.y, Math.max(depth * 0.18, 0.12) - pivotPosition.z)
   head.rotation.z = Math.PI / 2
-  head.position.set(0, Math.max(height * 0.52, 0.32), Math.max(depth * 0.82, 0.48))
+  head.position.set(0, Math.max(height * 0.52, 0.32) - pivotPosition.y, Math.max(depth * 0.82, 0.48) - pivotPosition.z)
   pivot.rotation.z = Math.PI / 2
-  pivot.position.set(0, Math.max(height * 0.28, 0.18), -Math.max(depth * 0.42, 0.24))
-  attachWeaponEdgeMesh(arm, parent, materials.steel)
-  attachWeaponEdgeMesh(head, parent, materials.steel)
+  pivot.position.set(pivotPosition.x, pivotPosition.y, pivotPosition.z)
+  swingRoot.parent = parent
+  swingRoot.position.set(pivotPosition.x, pivotPosition.y, pivotPosition.z)
+  swingRoot.metadata = { animationProfile: 'hammer_swing', kind: 'actuate', axis: 'x', amplitude: -0.95, speed: 0.06 }
+  attachWeaponEdgeMesh(arm, swingRoot, materials.steel)
+  attachWeaponEdgeMesh(head, swingRoot, materials.steel)
   attachRoleMesh(pivot, parent, materials.trim, 'trim')
 
   for (let side = -1; side <= 1; side += 2) {
     tagWeaponEdgeMesh(
       createBoxDetail(
         scene,
-        parent,
+        swingRoot,
         material,
         `${role}-${blockId}-hammer-strike-face-${side}`,
         Math.max(width * 0.18, 0.1),

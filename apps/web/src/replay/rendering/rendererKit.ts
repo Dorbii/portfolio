@@ -144,17 +144,31 @@ export function createAssemblyLightingPreset(
 ): void {
   const hemi = new HemisphericLight('assembly-hemi', new Vector3(0, 1, 0), scene)
   const key = new DirectionalLight('assembly-key', new Vector3(-0.45, -0.9, 0.35), scene)
+  const fill = new DirectionalLight('assembly-fill', new Vector3(0.42, -0.72, -0.24), scene)
   const rim = new PointLight('assembly-rim', new Vector3(0, 2.8, -2.8), scene)
+  const workLight = new PointLight('assembly-work-light', new Vector3(0, 2.25, 2.65), scene)
   const teamLight = new PointLight(
     'assembly-team-light',
     new Vector3(role === 'red' ? -2.4 : 2.4, 1.8, 1.4),
     scene,
   )
 
-  hemi.intensity = 0.45
-  key.intensity = 1.15
-  rim.intensity = 0.7
-  teamLight.intensity = submitted ? 0.95 : 0.84
+  scene.imageProcessingConfiguration.isEnabled = true
+  scene.imageProcessingConfiguration.contrast = 1.12
+  scene.imageProcessingConfiguration.exposure = 1.04
+  hemi.intensity = 0.34
+  key.intensity = 1.26
+  fill.intensity = 0.3
+  rim.intensity = 0.86
+  workLight.intensity = 0.52
+  teamLight.intensity = submitted ? 1.08 : 0.96
+  key.position = new Vector3(-3.4, 5.2, -1.8)
+  fill.position = new Vector3(3.1, 3.8, 2.2)
+  rim.diffuse = Color3.FromHexString('#7ddcff')
+  workLight.diffuse = Color3.FromHexString('#ffd28a')
+  rim.range = 5.2
+  workLight.range = 3.8
+  teamLight.range = 4.4
   teamLight.diffuse = Color3.FromHexString(teamAccent)
 }
 

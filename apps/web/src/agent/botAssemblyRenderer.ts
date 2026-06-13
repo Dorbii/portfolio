@@ -34,16 +34,17 @@ export function createAssemblyResources(
 ): AssemblyResources {
   const { camera, engine, scene } = createBabylonRendererCore(canvas, {
     camera: {
-      alpha: -Math.PI * 0.46,
-      beta: 0.98,
-      lowerRadiusLimit: 4.9,
+      alpha: -Math.PI * 0.43,
+      beta: 1.06,
+      lowerRadiusLimit: 5.0,
       name: 'assembly-camera',
-      radius: 6.3,
-      target: new Vector3(0, 0.58, -0.32),
+      radius: 6.05,
+      target: new Vector3(0, 0.76, -0.18),
       upperRadiusLimit: 7.6,
       wheelPrecision: 54,
     },
-    clearColor: new Color4(0.025, 0.03, 0.035, 1),
+    clearColor: new Color4(0.018, 0.022, 0.026, 1),
+    environmentIntensity: 0.58,
   })
 
   camera.lowerAlphaLimit = camera.alpha
@@ -68,7 +69,7 @@ export function createAssemblyResources(
   scanBar.position.set(0, 1.48, -0.28)
 
   const rig = createAssemblyRoom(scene, role)
-  createRendererGlow(scene, 'assembly-glow', 0.42)
+  createRendererGlow(scene, 'assembly-glow', 0.5)
 
   const bayLights = createTeamBayLights(scene, teamPalette.glow)
   bayLights.forEach((light) => {

@@ -1,4 +1,5 @@
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { attachMesh, createBoxDetail, createRampBlock } from '../../rendering/meshHelpers'
 import type { WeaponPartRenderArgs } from './types'
 import {
@@ -41,30 +42,39 @@ export function createFlipperWeaponPart({
     },
     scene,
   )
+  const hingePosition = {
+    x: 0,
+    y: Math.max(height * 0.26, 0.16),
+    z: -Math.max(depth * 0.44, 0.24),
+  }
+  const paddleRoot = new TransformNode(`${role}-${blockId}-flipper-paddle-snap-root`, scene)
 
-  paddle.position.set(0, Math.max(height * 0.18, 0.12), Math.max(depth * 0.22, 0.14))
+  paddle.position.set(0, Math.max(height * 0.18, 0.12) - hingePosition.y, Math.max(depth * 0.22, 0.14) - hingePosition.z)
   hinge.rotation.z = Math.PI / 2
-  hinge.position.set(0, Math.max(height * 0.26, 0.16), -Math.max(depth * 0.44, 0.24))
-  attachMesh(paddle, parent, material)
+  hinge.position.set(hingePosition.x, hingePosition.y, hingePosition.z)
+  paddleRoot.parent = parent
+  paddleRoot.position.set(hingePosition.x, hingePosition.y, hingePosition.z)
+  paddleRoot.metadata = { animationProfile: 'flipper_snap', kind: 'actuate', axis: 'x', amplitude: -0.78, speed: 0.05 }
+  attachMesh(paddle, paddleRoot, material)
   tagRoleMesh(paddle, 'damageable')
-  frontLip.position.set(0, Math.max(height * 0.32, 0.17), Math.max(depth * 0.86, 0.45))
+  frontLip.position.set(0, Math.max(height * 0.32, 0.17) - hingePosition.y, Math.max(depth * 0.86, 0.45) - hingePosition.z)
   frontLip.rotation.x = -0.08
   attachRoleMesh(hinge, parent, materials.trim, 'trim')
-  attachWeaponEdgeMesh(frontLip, parent, materials.steel)
+  attachWeaponEdgeMesh(frontLip, paddleRoot, materials.steel)
 
   for (let side = -1; side <= 1; side += 2) {
     tagRoleMesh(
       createBoxDetail(
         scene,
-        parent,
+        paddleRoot,
         materials.warning,
         `${role}-${blockId}-flipper-side-link-${side}`,
         Math.max(width * 0.12, 0.08),
         Math.max(height * 0.38, 0.18),
         Math.max(depth * 0.88, 0.42),
         side * Math.max(width * 0.48, 0.3),
-        Math.max(height * 0.28, 0.16),
-        0,
+        Math.max(height * 0.28, 0.16) - hingePosition.y,
+        -hingePosition.z,
       ),
       'trim',
     )
@@ -93,10 +103,10 @@ export function createFlipperWeaponPart({
 
     knuckle.rotation.z = Math.PI / 2
     knuckle.position.set(x, hinge.position.y, hinge.position.z)
-    paddleRib.position.set(x, Math.max(height * 0.34, 0.19), Math.max(depth * 0.32, 0.17))
+    paddleRib.position.set(x, Math.max(height * 0.34, 0.19) - hingePosition.y, Math.max(depth * 0.32, 0.17) - hingePosition.z)
     paddleRib.rotation.x = -0.08
     attachRoleMesh(knuckle, parent, index % 2 === 0 ? materials.steel : materials.trim, 'trim')
-    attachRoleMesh(paddleRib, parent, materials.trim, 'damageable')
+    attachRoleMesh(paddleRib, paddleRoot, materials.trim, 'damageable')
   }
 
   for (let side = -1; side <= 1; side += 2) {

@@ -2,7 +2,7 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 
 export type PartMotionAxis = 'x' | 'y' | 'z'
-export type PartMotionKind = 'pulse' | 'roll' | 'smoke' | 'spin' | 'thrust'
+export type PartMotionKind = 'actuate' | 'pulse' | 'roll' | 'smoke' | 'spin' | 'thrust'
 
 export const PART_ANIMATION_PROFILES = [
   'wheel_spin',
@@ -34,12 +34,18 @@ type RotaryPartMotionMetadata = PartMotionBaseMetadata & {
   kind: 'roll' | 'spin'
 }
 
-type ScalarPartMotionMetadata = PartMotionBaseMetadata & {
-  axis?: PartMotionAxis
-  kind?: Exclude<PartMotionKind, 'roll' | 'spin'>
+type ActuatedPartMotionMetadata = PartMotionBaseMetadata & {
+  amplitude?: number
+  axis: PartMotionAxis
+  kind: 'actuate'
 }
 
-export type PartMotionMetadata = RotaryPartMotionMetadata | ScalarPartMotionMetadata
+type ScalarPartMotionMetadata = PartMotionBaseMetadata & {
+  axis?: PartMotionAxis
+  kind?: Exclude<PartMotionKind, 'actuate' | 'roll' | 'spin'>
+}
+
+export type PartMotionMetadata = ActuatedPartMotionMetadata | RotaryPartMotionMetadata | ScalarPartMotionMetadata
 
 const MOTION_SPEED_SCALE = 28
 const PART_ANIMATION_PROFILE_SET = new Set<string>(PART_ANIMATION_PROFILES)
@@ -71,6 +77,18 @@ export function motionMetadataForAnimationProfile(
     return { animationProfile, kind: 'spin', axis: 'y', speed: 0.025 }
   }
 
+  if (animationProfile === 'hammer_swing') {
+    return { animationProfile, kind: 'actuate', axis: 'x', amplitude: -0.95, speed: 0.06 }
+  }
+
+  if (animationProfile === 'flipper_snap') {
+    return { animationProfile, kind: 'actuate', axis: 'x', amplitude: -0.78, speed: 0.05 }
+  }
+
+  if (animationProfile === 'grabber_clamp') {
+    return { animationProfile, kind: 'actuate', axis: 'y', amplitude: 0.34, speed: 0.05 }
+  }
+
   if (animationProfile === 'neon_pulse') {
     return { animationProfile, kind: 'pulse', speed: 0.035 }
   }
@@ -89,7 +107,8 @@ export function isPartMotionNode(node: unknown): node is TransformNode {
 
   const metadata = node.metadata as PartMotionMetadata | undefined
 
-  return metadata?.kind === 'pulse'
+  return metadata?.kind === 'actuate'
+    || metadata?.kind === 'pulse'
     || metadata?.kind === 'roll'
     || metadata?.kind === 'smoke'
     || metadata?.kind === 'spin'
@@ -100,6 +119,7 @@ export function applyPartMotion(
   node: TransformNode,
   elapsedSeconds: number,
   speedScale = 1,
+  actuation = 0,
 ): void {
   const metadata = node.metadata as PartMotionMetadata | undefined
 
@@ -111,6 +131,11 @@ export function applyPartMotion(
 
   if (isRotaryMotionMetadata(metadata)) {
     applyRotaryMotion(node, metadata, elapsedSeconds, speedScale)
+    return
+  }
+
+  if (metadata.kind === 'actuate') {
+    applyActuatedMotion(node, metadata, elapsedSeconds, actuation)
     return
   }
 
@@ -137,6 +162,29 @@ export function applyPartMotion(
     const baseScaling = vectorFromTuple(metadata.motionBaseScaling)
 
     node.scaling.set(baseScaling.x * pulse, baseScaling.y * pulse, baseScaling.z * pulse)
+  }
+}
+
+function applyActuatedMotion(
+  node: TransformNode,
+  metadata: ActuatedPartMotionMetadata,
+  elapsedSeconds: number,
+  actuation: number,
+): void {
+  const baseRotation = vectorFromTuple(metadata.motionBaseRotation)
+  const amount = (metadata.amplitude ?? 0.45) * smoothstep(clamp(actuation, 0, 1))
+  const rebound = Math.sin(elapsedSeconds * 18 + (metadata.phase ?? 0)) *
+    (metadata.speed ?? 0.04) *
+    clamp(actuation, 0, 1)
+
+  node.rotation.copyFrom(baseRotation)
+
+  if (metadata.axis === 'x') {
+    node.rotation.x += amount + rebound
+  } else if (metadata.axis === 'y') {
+    node.rotation.y += amount + rebound
+  } else {
+    node.rotation.z += amount + rebound
   }
 }
 
@@ -186,4 +234,14 @@ function vectorFromTuple(tuple: [number, number, number] | undefined): Vector3 {
   }
 
   return new Vector3(tuple[0], tuple[1], tuple[2])
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+function smoothstep(value: number): number {
+  const clamped = clamp(value, 0, 1)
+
+  return clamped * clamped * (3 - 2 * clamped)
 }

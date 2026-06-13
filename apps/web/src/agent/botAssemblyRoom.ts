@@ -20,6 +20,15 @@ const BACK_WALL_Z = 3.55
 const SIDE_WALL_X = 5.32
 
 type AssemblyMaterials = ReturnType<typeof createAssemblyMaterials>
+type AssemblyActivityRig = Pick<
+  Omit<AssemblyResources['rig'], 'sparks'>,
+  | 'diagnosticBars'
+  | 'fanRotors'
+  | 'beaconLights'
+  | 'inspectionSweep'
+  | 'serviceCarriage'
+  | 'serviceCarriageBaseX'
+>
 
 export function createAssemblyRoom(scene: Scene, role: TeamRole): AssemblyResources['rig'] {
   const materials = createAssemblyMaterials(scene)
@@ -56,6 +65,11 @@ function dynamicRigMeshes(rig: Omit<AssemblyResources['rig'], 'sparks'>): Abstra
     rig.leftClamp,
     rig.rightClamp,
     rig.clampRing,
+    ...rig.diagnosticBars,
+    ...rig.fanRotors,
+    ...rig.beaconLights,
+    rig.inspectionSweep,
+    rig.serviceCarriage,
   ]
 }
 
@@ -110,6 +124,11 @@ function createAssemblyMaterials(scene: Scene) {
     industrialArm: createAssemblyMaterial(scene, 'assembly-industrial-arm-mat', '#b77724', '#1e0d02', 1, 0.58, 0.44, 'warning'),
     rubber: createAssemblyMaterial(scene, 'assembly-rubber-mat', '#08090a', '#000000', 1, 0.04, 0.82, 'rubber'),
     diagnostic: createAssemblyMaterial(scene, 'assembly-diagnostic-mat', '#4dd48c', '#65ffb2', 0.88, 0.08, 0.32),
+    screen: createAssemblyMaterial(scene, 'assembly-screen-mat', '#071a22', '#31d7ff', 0.92, 0.02, 0.22),
+    statusRed: createAssemblyMaterial(scene, 'assembly-status-red-mat', '#ff384e', '#ff243d', 0.95, 0.04, 0.2),
+    statusAmber: createAssemblyMaterial(scene, 'assembly-status-amber-mat', '#ffc24b', '#ff9f2f', 0.94, 0.04, 0.24),
+    statusBlue: createAssemblyMaterial(scene, 'assembly-status-blue-mat', '#52b7ff', '#48cfff', 0.92, 0.04, 0.2),
+    inspectionBeam: createAssemblyMaterial(scene, 'assembly-inspection-beam-mat', '#bdeeff', '#63dcff', 0.38, 0.02, 0.12),
     primerPanel: createAssemblyMaterial(scene, 'assembly-primer-panel-mat', '#66717c', '#10161b', 1, 0.42, 0.58, 'panel'),
     workLight: createAssemblyMaterial(scene, 'assembly-work-light-mat', '#fff3c4', '#ffcf6d', 0.9, 0.02, 0.18),
     toolHead: createAssemblyMaterial(scene, 'assembly-tool-head-mat', '#b7c9d6', '#262f38', 1, 0.7, 0.28, 'weapon'),
@@ -168,6 +187,7 @@ function createGarageShell(scene: Scene, materials: AssemblyMaterials): void {
   }
 
   createAssemblyFloorGrates(scene, materials)
+  createFloorServiceDetails(scene, materials)
   createCeilingServiceStructure(scene, materials)
 }
 
@@ -192,6 +212,35 @@ function createAssemblyFloorGrates(scene: Scene, materials: AssemblyMaterials): 
       crossRail.position.set(0, 0.272, z - 0.28 + rail * 0.28)
       crossRail.material = materials.detail
     }
+  }
+}
+
+function createFloorServiceDetails(scene: Scene, materials: AssemblyMaterials): void {
+  for (const side of [-1, 1]) {
+    const serviceTrack = MeshBuilder.CreateBox(`assembly-floor-power-track-${side}`, { width: 0.2, height: 0.032, depth: 4.62 }, scene)
+
+    serviceTrack.position.set(side * 2.72, 0.13, -0.24)
+    serviceTrack.material = materials.rail
+
+    for (let index = 0; index < 6; index += 1) {
+      const accessPlate = MeshBuilder.CreateBox(`assembly-floor-access-plate-${side}-${index}`, { width: 0.42, height: 0.018, depth: 0.08 }, scene)
+      const hazardTab = MeshBuilder.CreateBox(`assembly-floor-hazard-tab-${side}-${index}`, { width: 0.24, height: 0.022, depth: 0.08 }, scene)
+
+      accessPlate.position.set(side * 2.72, 0.16, -2.02 + index * 0.72)
+      hazardTab.position.set(side * 2.48, 0.172, -2.02 + index * 0.72)
+      accessPlate.rotation.y = side * 0.08
+      hazardTab.rotation.y = side * -0.28
+      accessPlate.material = materials.detail
+      hazardTab.material = materials.warning
+    }
+  }
+
+  for (let index = 0; index < 8; index += 1) {
+    const scuff = MeshBuilder.CreateBox(`assembly-floor-scuff-${index}`, { width: 0.38 + (index % 3) * 0.18, height: 0.014, depth: 0.055 }, scene)
+
+    scuff.position.set(-2.72 + index * 0.78, 0.19, -1.86 + (index % 2) * 3.18)
+    scuff.rotation.y = -0.55 + index * 0.17
+    scuff.material = index % 2 === 0 ? materials.rubber : materials.trim
   }
 }
 
@@ -421,6 +470,7 @@ function createOverheadGantry(
   rightToolHead.material = materials.toolHead
   leftClamp.material = materials.toolHead
   rightClamp.material = materials.toolHead
+  const activityRig = createGarageActivityRig(scene, role, materials)
 
   return {
     trolley,
@@ -433,6 +483,7 @@ function createOverheadGantry(
     leftClamp,
     rightClamp,
     clampRing,
+    ...activityRig,
     trolleyBaseX: trolley.position.x,
     suspendedPanelBaseY: suspendedPanel.position.y,
     leftClampBaseY: leftClamp.position.y,
@@ -500,6 +551,137 @@ function createSideRobotArms(
 
   rig.leftClamp.position.x = -1.68
   rig.rightClamp.position.x = 1.68
+}
+
+function createGarageActivityRig(scene: Scene, role: TeamRole, materials: AssemblyMaterials): AssemblyActivityRig {
+  const diagnosticBars: AbstractMesh[] = []
+  const fanRotors: AbstractMesh[] = []
+  const beaconLights: AbstractMesh[] = []
+
+  createDiagnosticWall(scene, materials, diagnosticBars)
+  createVentilationFans(scene, materials, fanRotors)
+  createStatusBeaconPosts(scene, role, materials, beaconLights)
+
+  const inspectionRailLeft = MeshBuilder.CreateBox('assembly-inspection-rail-left', { width: 0.08, height: 0.045, depth: 2.36 }, scene)
+  const inspectionRailRight = MeshBuilder.CreateBox('assembly-inspection-rail-right', { width: 0.08, height: 0.045, depth: 2.36 }, scene)
+  const serviceRail = MeshBuilder.CreateBox('assembly-service-carriage-rail', { width: 3.4, height: 0.055, depth: 0.1 }, scene)
+  const inspectionSweep = MeshBuilder.CreateBox('assembly-inspection-sweep', { width: 2.95, height: 0.026, depth: 0.06 }, scene)
+  const serviceCarriage = MeshBuilder.CreateBox('assembly-service-carriage', { width: 0.56, height: 0.22, depth: 0.34 }, scene)
+
+  inspectionRailLeft.position.set(-1.94, 0.86, -0.28)
+  inspectionRailRight.position.set(1.94, 0.86, -0.28)
+  serviceRail.position.set(0, 2.82, -1.9)
+  inspectionSweep.position.set(0, 1.04, -1.48)
+  serviceCarriage.position.set(0, 2.68, -1.9)
+  inspectionRailLeft.material = materials.rail
+  inspectionRailRight.material = materials.rail
+  serviceRail.material = materials.trim
+  inspectionSweep.material = materials.inspectionBeam
+  serviceCarriage.material = materials.detail
+
+  return {
+    diagnosticBars,
+    fanRotors,
+    beaconLights,
+    inspectionSweep,
+    serviceCarriage,
+    serviceCarriageBaseX: serviceCarriage.position.x,
+  }
+}
+
+function createDiagnosticWall(scene: Scene, materials: AssemblyMaterials, diagnosticBars: AbstractMesh[]): void {
+  const consolePanel = MeshBuilder.CreateBox('assembly-diagnostic-wall-console', { width: 3.18, height: 1.08, depth: 0.08 }, scene)
+  const lowerBus = MeshBuilder.CreateBox('assembly-diagnostic-lower-bus', { width: 3.36, height: 0.11, depth: 0.12 }, scene)
+
+  consolePanel.position.set(0, 1.68, BACK_WALL_Z - 0.28)
+  lowerBus.position.set(0, 1.03, BACK_WALL_Z - 0.34)
+  consolePanel.material = materials.trim
+  lowerBus.material = materials.rail
+
+  for (let screenIndex = 0; screenIndex < 3; screenIndex += 1) {
+    const screenX = -1.04 + screenIndex * 1.04
+    const housing = MeshBuilder.CreateBox(`assembly-diagnostic-screen-housing-${screenIndex}`, { width: 0.84, height: 0.56, depth: 0.1 }, scene)
+    const screen = MeshBuilder.CreateBox(`assembly-diagnostic-screen-${screenIndex}`, { width: 0.66, height: 0.38, depth: 0.035 }, scene)
+
+    housing.position.set(screenX, 1.72, BACK_WALL_Z - 0.36)
+    screen.position.set(screenX, 1.72, BACK_WALL_Z - 0.41)
+    housing.material = materials.rail
+    screen.material = materials.screen
+
+    for (let barIndex = 0; barIndex < 4; barIndex += 1) {
+      const bar = MeshBuilder.CreateBox(`assembly-diagnostic-readout-${screenIndex}-${barIndex}`, { width: 0.28, height: 0.03, depth: 0.026 }, scene)
+
+      bar.position.set(screenX - 0.15 + barIndex * 0.1, 1.6 + barIndex * 0.07, BACK_WALL_Z - 0.445)
+      bar.material = barIndex % 2 === 0 ? materials.diagnostic : materials.statusBlue
+      diagnosticBars.push(bar)
+    }
+
+    for (let ledIndex = 0; ledIndex < 3; ledIndex += 1) {
+      const led = MeshBuilder.CreateSphere(`assembly-diagnostic-led-${screenIndex}-${ledIndex}`, { diameter: 0.065, segments: 8 }, scene)
+
+      led.position.set(screenX - 0.24 + ledIndex * 0.24, 1.39, BACK_WALL_Z - 0.43)
+      led.material = ledIndex === 1 ? materials.statusAmber : materials.statusRed
+    }
+  }
+
+  for (let jackIndex = 0; jackIndex < 8; jackIndex += 1) {
+    const jack = MeshBuilder.CreateCylinder(`assembly-diagnostic-patch-jack-${jackIndex}`, { height: 0.045, diameter: 0.07, tessellation: 8 }, scene)
+
+    jack.position.set(-1.48 + jackIndex * 0.42, 1.05, BACK_WALL_Z - 0.44)
+    jack.rotation.x = Math.PI / 2
+    jack.material = jackIndex % 3 === 0 ? materials.copper : materials.detail
+  }
+}
+
+function createVentilationFans(scene: Scene, materials: AssemblyMaterials, fanRotors: AbstractMesh[]): void {
+  for (let fanIndex = 0; fanIndex < 2; fanIndex += 1) {
+    const x = fanIndex === 0 ? -4.1 : 4.1
+    const frame = MeshBuilder.CreateBox(`assembly-vent-fan-frame-${fanIndex}`, { width: 1.02, height: 0.72, depth: 0.1 }, scene)
+    const shadowBox = MeshBuilder.CreateBox(`assembly-vent-fan-shadow-${fanIndex}`, { width: 0.8, height: 0.52, depth: 0.05 }, scene)
+    const rotor = MeshBuilder.CreateBox(`assembly-vent-fan-rotor-${fanIndex}`, { width: 0.58, height: 0.075, depth: 0.05 }, scene)
+    const hub = MeshBuilder.CreateCylinder(`assembly-vent-fan-hub-${fanIndex}`, { height: 0.055, diameter: 0.18, tessellation: 12 }, scene)
+
+    frame.position.set(x, 2.26, BACK_WALL_Z - 0.3)
+    shadowBox.position.set(x, 2.26, BACK_WALL_Z - 0.37)
+    rotor.position.set(x, 2.26, BACK_WALL_Z - 0.43)
+    hub.position.set(x, 2.26, BACK_WALL_Z - 0.46)
+    hub.rotation.x = Math.PI / 2
+    frame.material = materials.rail
+    shadowBox.material = materials.rubber
+    rotor.material = materials.detail
+    hub.material = materials.copper
+    fanRotors.push(rotor)
+
+    for (let barIndex = 0; barIndex < 4; barIndex += 1) {
+      const grille = MeshBuilder.CreateBox(`assembly-vent-fan-grille-${fanIndex}-${barIndex}`, { width: 0.72, height: 0.028, depth: 0.04 }, scene)
+
+      grille.position.set(x, 2.08 + barIndex * 0.12, BACK_WALL_Z - 0.48)
+      grille.material = materials.trim
+    }
+  }
+}
+
+function createStatusBeaconPosts(
+  scene: Scene,
+  role: TeamRole,
+  materials: AssemblyMaterials,
+  beaconLights: AbstractMesh[],
+): void {
+  const activeStatusMaterial = role === 'red' ? materials.statusRed : materials.statusBlue
+
+  for (const side of [-1, 1]) {
+    const post = MeshBuilder.CreateCylinder(`assembly-status-beacon-post-${side}`, { height: 0.72, diameter: 0.08, tessellation: 8 }, scene)
+    const cap = MeshBuilder.CreateCylinder(`assembly-status-beacon-cap-${side}`, { height: 0.08, diameter: 0.2, tessellation: 10 }, scene)
+    const beacon = MeshBuilder.CreateSphere(`assembly-status-beacon-light-${side}`, { diameter: 0.22, segments: 10 }, scene)
+
+    post.position.set(side * 3.08, 0.54, -1.88)
+    cap.position.set(side * 3.08, 0.92, -1.88)
+    beacon.position.set(side * 3.08, 1.04, -1.88)
+    post.material = materials.rail
+    cap.material = materials.trim
+    beacon.material = side === -1 ? materials.statusAmber : activeStatusMaterial
+    beaconLights.push(beacon)
+  }
 }
 
 function createPartsCarts(scene: Scene, materials: AssemblyMaterials): void {
@@ -894,9 +1076,12 @@ export function createTeamBayLights(scene: Scene, teamAccent: string): PointLigh
     scene,
   )
 
-  portLight.intensity = 0.55
-  starboardLight.intensity = 0.55
-  overheadLight.intensity = 0.45
+  portLight.intensity = 0.68
+  starboardLight.intensity = 0.68
+  overheadLight.intensity = 0.52
+  portLight.range = 4.4
+  starboardLight.range = 4.4
+  overheadLight.range = 5.2
 
   portLight.diffuse = Color3.FromHexString(teamAccent)
   starboardLight.diffuse = Color3.FromHexString(teamAccent)
@@ -923,7 +1108,7 @@ export function createAssemblyMaterial(
   material.roughness = roughness
   material.alpha = alpha
   material.backFaceCulling = alpha >= 1
-  material.maxSimultaneousLights = 6
+  material.maxSimultaneousLights = 8
 
   if (pattern) {
     const textures = createPbrSurfaceTextures(scene, name, {

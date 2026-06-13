@@ -14,6 +14,11 @@ import {
   type BabylonHazardVisual,
 } from '../arena'
 import {
+  createReplaySalvageRunner,
+  updateReplaySalvageRunner,
+  type ReplaySalvageRunner,
+} from '../arena/salvageRunner'
+import {
   updateBots,
   type BotPartNodeMetadata,
 } from '../bots/playback'
@@ -56,6 +61,7 @@ type SceneResources = BabylonRendererCore & {
   botProfiles: Record<TeamRole, BotVisualProfile>
   effectPool: EffectPool
   hazards: BabylonHazardVisual[]
+  salvageRunner: ReplaySalvageRunner
 }
 
 type RendererState = {
@@ -299,6 +305,7 @@ export function BabylonReplayScene({
       }
       const botProfiles = createBotVisualProfiles(botBlueprints, { identities: teamIdentities })
       const effectPool = createEffectPool(scene)
+      const salvageRunner = createReplaySalvageRunner(scene)
       createRendererGlow(scene, 'replay-glow', 0.32)
       const getSceneStats = () => createRendererStats(scene, engine)
       let cleanupReplayDebugApi: (() => void) | undefined
@@ -316,6 +323,7 @@ export function BabylonReplayScene({
         botProfiles,
         effectPool,
         hazards,
+        salvageRunner,
       }
       const sceneResources = resources
       resourcesRef.current = resources
@@ -538,6 +546,7 @@ function updateReplaySceneFrame(
   updateBots(resources.bots, frame)
   updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
   updateHazards(resources.hazards, frame)
+  updateReplaySalvageRunner(resources.salvageRunner, frame, sceneArena)
 
   for (let pass = 0; pass < (immediateCamera ? 10 : 1); pass += 1) {
     updateCamera(resources.camera, cameraPreset, frame, sceneArena)

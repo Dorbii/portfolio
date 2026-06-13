@@ -107,6 +107,7 @@ export function updateBots(
         node,
         frame.time,
         partMotionSpeedScale(metadata, motion, weaponIntensity, partMetadata),
+        weaponIntensity,
       )
     })
   })
@@ -210,7 +211,11 @@ function isWeaponMotion(
   const partId = partMetadata?.partId.toLowerCase() ?? ''
 
   return metadata.animationProfile === 'spinner_spin' ||
+    metadata.animationProfile === 'hammer_swing' ||
+    metadata.animationProfile === 'flipper_snap' ||
+    metadata.animationProfile === 'grabber_clamp' ||
     metadata.animationProfile === 'turret_track' ||
+    metadata.kind === 'actuate' ||
     (metadata.kind === 'spin' && (partId.startsWith('weapon_') || partId.startsWith('weapon.')))
 }
 
