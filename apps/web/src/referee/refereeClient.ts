@@ -260,6 +260,12 @@ export function toUserMessage(error: unknown): string {
   return 'Unknown error. Check console for details.'
 }
 
+export function isSessionNotFoundError(error: unknown): boolean {
+  return error instanceof RefereeArenaApiError &&
+    error.status === 404 &&
+    error.code === 'SESSION_NOT_FOUND'
+}
+
 export function readStoredSession(
   storage: TokenStorage,
   apiBase: string,

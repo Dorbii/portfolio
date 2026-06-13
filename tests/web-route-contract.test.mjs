@@ -74,6 +74,17 @@ test('referee console keeps live combat bots visible while partial replay payloa
   assert.ok(liveArenaFrameSource.includes('ReplayVisualFrame'))
 })
 
+test('referee invite links require confirmed public session state', () => {
+  assert.ok(
+    refereeControllerSource.includes(
+      "const confirmedActiveSessionId = publicSession?.sessionId === activeSessionId ? activeSessionId : ''",
+    ),
+  )
+  assert.ok(refereeControllerSource.includes('activeSessionId: confirmedActiveSessionId'))
+  assert.ok(refereeControllerSource.includes('isSessionNotFoundError(loadError)'))
+  assert.ok(refereeControllerSource.includes('setInvites([])'))
+})
+
 test('referee resolved replay starts playback when the replay payload arrives', () => {
   assert.ok(refereeConsoleSource.includes('autoPlay'))
   assert.ok(replayViewerSource.includes('autoPlay = false'))

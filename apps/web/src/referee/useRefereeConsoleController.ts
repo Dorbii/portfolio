@@ -7,6 +7,7 @@ import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import {
   clearStoredSession,
   createSession,
+  isSessionNotFoundError,
   refereePollIntervalMs,
   isValidSessionId,
   loadPublicSession,
@@ -139,6 +140,16 @@ export function useRefereeConsoleController() {
         setPublicSession(state)
       } catch (loadError) {
         setPublicSession(null)
+        if (isSessionNotFoundError(loadError)) {
+          clearStoredSession(window.sessionStorage, apiBase, normalizedSessionId)
+          try {
+            clearStoredSession(window.localStorage, apiBase, normalizedSessionId)
+          } catch {
+            // Browser privacy settings can disable localStorage; sessionStorage is the active store.
+          }
+          setStoredRefereeToken('')
+          setInvites([])
+        }
         setError(toUserMessage(loadError))
       } finally {
         if (!options.silent) {
@@ -231,6 +242,7 @@ export function useRefereeConsoleController() {
     [invites],
   )
 
+  const confirmedActiveSessionId = publicSession?.sessionId === activeSessionId ? activeSessionId : ''
   const {
     blueCockpitUrl,
     blueInviteUrl,
@@ -239,12 +251,12 @@ export function useRefereeConsoleController() {
   } = useMemo(
     () =>
       createRefereeAgentLinks({
-        activeSessionId,
+        activeSessionId: confirmedActiveSessionId,
         apiBase,
         invites,
         siteBase: window.location.origin,
       }),
-    [activeSessionId, apiBase, invites],
+    [confirmedActiveSessionId, apiBase, invites],
   )
 
   const phase = publicSession?.phase ?? 'not_started'

@@ -9,9 +9,11 @@ import {
   IDLE_REFEREE_POLL_INTERVAL_MS,
   advanceRound,
   buildInviteUrl,
+  isSessionNotFoundError,
   createSession,
   loadReplayPayload,
   loadPublicSession,
+  RefereeArenaApiError,
   refereePollIntervalMs,
   replayPayloadRequestKey,
   resetRoleClaim,
@@ -359,6 +361,25 @@ test('referee loadPublicSession GETs /public without authorization', async () =>
   } finally {
     restore()
   }
+})
+
+test('referee recognizes missing sessions as stale invite storage failures', () => {
+  assert.equal(
+    isSessionNotFoundError(new RefereeArenaApiError({
+      status: 404,
+      code: 'SESSION_NOT_FOUND',
+      message: 'Session has not been created.',
+    })),
+    true,
+  )
+  assert.equal(
+    isSessionNotFoundError(new RefereeArenaApiError({
+      status: 404,
+      code: 'INVALID_ACTION',
+      message: 'Unsupported session action.',
+    })),
+    false,
+  )
 })
 
 test('referee loadReplayPayload normalizes top-level replay payloads with render contracts', async () => {
