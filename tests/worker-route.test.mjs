@@ -2882,6 +2882,7 @@ test('POST /sessions/:id/reflection accepts only private post-fight reflections 
     },
   })
   const consumed = await storage.get('agent-arena-session')
+  const publicAfterDebriefGpt = await route(env, `/sessions/${sessionId}/public`)
   const redNext = await route(env, `/sessions/${sessionId}/state`, {
     token: redInvite.claimToken,
   })
@@ -2932,12 +2933,17 @@ test('POST /sessions/:id/reflection accepts only private post-fight reflections 
   assert.equal(blueSubmitted.json.packet.review.debrief.available, true)
   assert.equal(consumed.reflections.every((entry) => entry.status === 'consumed_into_shared_debrief'), true)
   assert.equal(redDebriefGpt.response.status, 200)
-  assert.equal(redDebriefGpt.json.advancedRound, true)
-  assert.equal(redDebriefGpt.json.packet.phase, 'choose_loadout')
-  assert.equal(redDebriefGpt.json.packet.nextAction, 'build_bot')
+  assert.equal(redDebriefGpt.json.advancedRound, undefined)
+  assert.equal(redDebriefGpt.json.status, 'playable')
+  assert.equal(redDebriefGpt.json.packet.phase, 'round_review')
+  assert.equal(redDebriefGpt.json.packet.nextAction, 'wait_for_debrief')
   assert.deepEqual(redDebriefGpt.json.packet.sharedDebrief, consumed.sharedDebrief)
-  assert.equal(redDebriefGpt.json.continuation.recommendedNextCall, 'gptAct')
-  assert.equal(consumed.phase, 'submission_phase')
+  assert.equal(redDebriefGpt.json.continuation.keepGoing, false)
+  assert.equal(redDebriefGpt.json.nextStep.userVisibleResponseAllowed, true)
+  assert.equal(consumed.phase, 'round_review')
+  assert.equal(publicAfterDebriefGpt.json.replayAvailable, true)
+  assert.equal(publicAfterDebriefGpt.json.replayStatus, 'resolved')
+  assert.ok(consumed.replay)
   assert.equal(consumed.reflections[0].status, 'consumed_into_shared_debrief')
   assert.equal(consumed.reflections[0].debriefId, consumed.sharedDebrief.debriefId)
   assert.equal(JSON.stringify(consumed.sharedDebrief).includes('secret weak drive note'), false)
@@ -3066,10 +3072,14 @@ test('round 2 reflection and debrief are scoped to the latest fight', async () =
       .every((entry) => entry.status === 'consumed_into_shared_debrief'),
     true,
   )
-  assert.equal(redRound2DebriefGpt.json.advancedRound, true)
-  assert.equal(redRound2DebriefGpt.json.packet.phase, 'choose_loadout')
+  assert.equal(redRound2DebriefGpt.json.advancedRound, undefined)
+  assert.equal(redRound2DebriefGpt.json.status, 'playable')
+  assert.equal(redRound2DebriefGpt.json.packet.phase, 'round_review')
+  assert.equal(redRound2DebriefGpt.json.packet.nextAction, 'wait_for_debrief')
   assert.deepEqual(redRound2DebriefGpt.json.packet.sharedDebrief, afterRound2.sharedDebrief)
-  assert.equal(redRound2DebriefGpt.json.continuation.recommendedNextCall, 'gptAct')
+  assert.equal(redRound2DebriefGpt.json.continuation.keepGoing, false)
+  assert.equal(redRound2DebriefGpt.json.nextStep.userVisibleResponseAllowed, true)
+  assert.ok(afterRound2.replay)
 })
 
 test('POST /sessions/:id/reflection rejects late reflection after shared debrief exists', async () => {

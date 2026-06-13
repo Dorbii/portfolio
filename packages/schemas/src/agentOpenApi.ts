@@ -34,7 +34,7 @@ export function createAgentActionsOpenApi(options: AgentActionsOpenApiOptions = 
           'x-openai-isConsequential': false,
           summary: 'Fetch the latest GPT-friendly packet status',
           description:
-            'Poll status. Waiting is not final. If continuation.keepGoing or nextStep.beforeUserResponse is true, call the recommended operation with the same inviteUrl before chat. Do not ask user to continue. Post-fight may include packet.review/sharedDebrief; combat may include fightDeadlineAt/fightSeconds.',
+            'Poll status. Waiting is not final. Follow continuation/nextStep before chat; do not ask user to continue. Post-fight packet.review/sharedDebrief is a stop point: present it and wait for referee/user round advance. Combat may include fightDeadlineAt/fightSeconds.',
           requestBody: jsonRequestBody('GptNextRequest'),
           responses: gptResponses('Latest role status and GameMaster packet.'),
         },

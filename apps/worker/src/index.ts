@@ -152,7 +152,6 @@ type GptAutoPollSummary = {
   resolved: boolean
   exhausted: boolean
   delayMs: number
-  advancedRound?: boolean
 }
 
 type GptMountSlotAlias = {
@@ -697,7 +696,6 @@ export class AgentArenaSession {
     let activeCoordinator = coordinator
     let activePacket = packet
     let attempts = 0
-    let advancedRound = false
 
     await this.saveSession(activeCoordinator)
 
@@ -719,17 +717,6 @@ export class AgentArenaSession {
       attempts += 1
       activePacket = packetResult.value
 
-      if (shouldGptNextAdvanceAfterDebrief(activePacket)) {
-        const advance = await activeCoordinator.advanceRoundAfterSharedDebrief(roleToken)
-
-        if (!advance.ok) {
-          break
-        }
-
-        activePacket = advance.value.packet
-        advancedRound = true
-      }
-
       await this.saveSession(activeCoordinator)
     }
 
@@ -743,7 +730,6 @@ export class AgentArenaSession {
         resolved: status !== 'waiting',
         exhausted: status === 'waiting',
         delayMs: config.delayMs,
-        ...(advancedRound ? { advancedRound: true } : {}),
       },
     }
   }
@@ -768,22 +754,6 @@ export class AgentArenaSession {
     }
 
     const result = await coordinator.getGameMasterPacketForToken(invite.value.claimToken)
-
-    if (result.ok && shouldGptNextAdvanceAfterDebrief(result.value)) {
-      const advance = await coordinator.advanceRoundAfterSharedDebrief(invite.value.claimToken)
-
-      if (!advance.ok) {
-        return this.sessionResultResponse(coordinator, advance)
-      }
-
-      await this.saveSession(coordinator)
-
-      return this.gptPacketResponse(coordinator, invite.value.claimToken, advance.value.packet, {
-        advancedRound: true,
-      }, {
-        autoPoll: true,
-      })
-    }
 
     if (!result.ok) {
       return this.sessionResultResponse(coordinator, result)
@@ -2063,7 +2033,7 @@ function wait(delayMs: number): Promise<void> {
 }
 
 function gptPacketStatus(
-  packet: Pick<GameMasterPacket, 'legalActions' | 'nextAction' | 'phase'>,
+  packet: Pick<GameMasterPacket, 'legalActions' | 'nextAction' | 'phase' | 'review' | 'sharedDebrief'>,
 ): Exclude<GptPacketStatus, 'claimed'> {
   if (packet.phase === 'expired') {
     return 'expired'
@@ -2076,6 +2046,9 @@ function gptPacketStatus(
   return isGptCompactCombatDecision(packet) ||
       packet.legalActions.length > 0 ||
       packet.nextAction === 'submit_reflection' ||
+      (packet.nextAction === 'wait_for_debrief' &&
+        packet.review?.debrief.available === true &&
+        packet.sharedDebrief !== undefined) ||
       packet.nextAction === 'view_replay'
     ? 'playable'
     : 'waiting'
@@ -2110,11 +2083,10 @@ function gptContinuationForPacket(
 
     if (review?.debrief.available) {
       return {
-        keepGoing: true,
-        mustCallBeforeResponding: true,
-        recommendedNextCall: 'gptNext',
-        pollAfterMs: 1500,
-        instruction: 'Shared debrief is available in packet.sharedDebrief. Read it, then call gptNext to advance after debrief before writing any user-visible response. Do not ask the user to type continue.',
+        keepGoing: false,
+        mustCallBeforeResponding: false,
+        recommendedNextCall: 'stop',
+        instruction: 'Shared debrief is available in packet.sharedDebrief and the resolved replay remains available to the referee. Present the fight result/debrief now; do not call gptNext again until the user or referee advances the round.',
       }
     }
 
@@ -2174,14 +2146,6 @@ function gptNextStepDirective(continuation: Record<string, unknown>): Record<str
     recommendedNextCall: continuation.recommendedNextCall,
     instruction: continuation.instruction,
   }
-}
-
-function shouldGptNextAdvanceAfterDebrief(
-  packet: Pick<GameMasterPacket, 'nextAction' | 'review' | 'sharedDebrief'>,
-): boolean {
-  return packet.nextAction === 'wait_for_debrief' &&
-    packet.review?.debrief.available === true &&
-    packet.sharedDebrief !== undefined
 }
 
 export default {
