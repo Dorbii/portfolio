@@ -16,9 +16,18 @@ import {
   updateBots,
 } from '../bots/playback'
 import {
+  createEffectPool,
+  updateEffects,
+  type EffectPool,
+} from '../effects/replayEffects'
+import {
   createBotNode,
   createTeamMaterials,
 } from '../parts'
+import {
+  createBotVisualProfiles,
+  type BotVisualProfile,
+} from '../replayVisualProfile'
 import {
   BABYLON_RENDERER_BUDGETS,
   createBabylonRendererBudgetState,
@@ -33,9 +42,12 @@ import {
   type BabylonRendererCore,
   type BabylonRendererStats,
 } from '../rendering/rendererKit'
+import type { LiveCombatTimeline } from './liveCombatTimeline'
 
 type ArenaPreviewResources = BabylonRendererCore & {
+  botProfiles?: Record<TeamRole, BotVisualProfile>
   bots?: Record<TeamRole, ReturnType<typeof createBotNode>>
+  effectPool: EffectPool
   hazards: BabylonHazardVisual[]
 }
 
@@ -47,11 +59,17 @@ type RendererState = {
 type ArenaPreviewSceneProps = {
   arena: ArenaConfig
   liveBots?: LiveArenaStageState
+  liveCombatTimeline?: LiveCombatTimeline | null
 }
 
-export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
+export function ArenaPreviewScene({ arena, liveBots, liveCombatTimeline }: ArenaPreviewSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const liveBotsRef = useRef<LiveArenaStageState | undefined>(liveBots)
+  const liveCombatTimelineRef = useRef<LiveCombatTimeline | null | undefined>(liveCombatTimeline)
+  const liveTimelinePlaybackRef = useRef({
+    key: '',
+    startedAt: 0,
+  })
   const [rendererState, setRendererState] = useState<RendererState>({ status: 'booting' })
   const [sceneStats, setSceneStats] = useState<BabylonRendererStats | null>(null)
   const activeHazardsKey = arena.activeHazards.join('|')
@@ -60,6 +78,10 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
   useEffect(() => {
     liveBotsRef.current = liveBots
   }, [liveBots])
+
+  useEffect(() => {
+    liveCombatTimelineRef.current = liveCombatTimeline
+  }, [liveCombatTimeline])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -125,6 +147,17 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
             },
           })
         : undefined
+      const botProfiles = initialLiveBots
+        ? createBotVisualProfiles({
+            blue: initialLiveBots.blue.blueprint,
+            red: initialLiveBots.red.blueprint,
+          }, {
+            identities: {
+              blue: initialLiveBots.blue.identity,
+              red: initialLiveBots.red.identity,
+            },
+          })
+        : undefined
       const bots = initialLiveBots && teamMaterials
         ? {
             blue: createBotNode(
@@ -143,12 +176,15 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
             ),
           }
         : undefined
+      const effectPool = createEffectPool(scene)
 
       createRendererGlow(scene, 'arena-preview-glow', 0.28)
 
       resources = {
         ...core,
+        botProfiles,
         bots,
+        effectPool,
         hazards,
       }
       setRendererState({ status: 'ready' })
@@ -165,9 +201,14 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
         const currentLiveBots = liveBotsRef.current
 
         if (resources.bots && currentLiveBots) {
-          const frame = buildLiveArenaFrame(currentLiveBots, time)
+          const currentTimeline = liveCombatTimelineRef.current
+          const timelineTime = liveTimelineTime(currentTimeline, time, liveTimelinePlaybackRef.current)
+          const frame = buildLiveArenaFrame(currentLiveBots, time, currentTimeline, timelineTime)
 
           updateBots(resources.bots, frame)
+          if (resources.botProfiles) {
+            updateEffects(resources.effectPool, frame.effects, resources.botProfiles, resources.bots)
+          }
         }
 
         resources.scene.render()
@@ -271,5 +312,27 @@ export function ArenaPreviewScene({ arena, liveBots }: ArenaPreviewSceneProps) {
         </div>
       ) : null}
     </div>
+  )
+}
+
+function liveTimelineTime(
+  liveCombatTimeline: LiveCombatTimeline | null | undefined,
+  sceneTime: number,
+  playback: { key: string; startedAt: number },
+): number {
+  if (!liveCombatTimeline) {
+    playback.key = ''
+    playback.startedAt = sceneTime
+    return sceneTime
+  }
+
+  if (playback.key !== liveCombatTimeline.key) {
+    playback.key = liveCombatTimeline.key
+    playback.startedAt = sceneTime
+  }
+
+  return Math.min(
+    liveCombatTimeline.timeline.duration,
+    Math.max(0, sceneTime - playback.startedAt),
   )
 }

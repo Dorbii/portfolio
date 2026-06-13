@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LiveCombatFeed } from '../agent/agentSessionTypes.js'
 import {
+  createLiveCombatTimelineBuffer,
+  resetLiveCombatTimelineBuffer,
+  updateLiveCombatTimelineBuffer,
+  type LiveCombatTimeline,
+} from '../replay/arena/liveCombatTimeline'
+import {
   LIVE_COMBAT_POLL_INTERVAL_MS,
   loadLiveCombatFeed,
   toUserMessage,
@@ -10,20 +16,25 @@ type UseRefereeLiveCombatFeedInput = {
   activeSessionId: string
   apiBase: string
   enabled: boolean
+  round?: number
 }
 
 export function useRefereeLiveCombatFeed({
   activeSessionId,
   apiBase,
   enabled,
+  round,
 }: UseRefereeLiveCombatFeedInput): {
   liveCombatError: string
   liveCombatFeed: LiveCombatFeed | null
+  liveCombatTimeline: LiveCombatTimeline | null
 } {
   const [liveCombatFeed, setLiveCombatFeed] = useState<LiveCombatFeed | null>(null)
   const [liveCombatError, setLiveCombatError] = useState('')
+  const [liveCombatTimeline, setLiveCombatTimeline] = useState<LiveCombatTimeline | null>(null)
   const nextSeqRef = useRef(0)
-  const requestKey = enabled && activeSessionId ? `${apiBase}|${activeSessionId}` : ''
+  const timelineBufferRef = useRef(createLiveCombatTimelineBuffer())
+  const requestKey = enabled && activeSessionId ? `${apiBase}|${activeSessionId}|${round ?? 'round-open'}` : ''
 
   const loadFeed = useCallback(async () => {
     if (!requestKey) {
@@ -39,6 +50,7 @@ export function useRefereeLiveCombatFeed({
 
       nextSeqRef.current = feed.combat?.nextSeq ?? 0
       setLiveCombatFeed(feed)
+      setLiveCombatTimeline(updateLiveCombatTimelineBuffer(timelineBufferRef.current, feed))
       setLiveCombatError('')
     } catch (error) {
       setLiveCombatError(toUserMessage(error))
@@ -47,7 +59,9 @@ export function useRefereeLiveCombatFeed({
 
   useEffect(() => {
     nextSeqRef.current = 0
+    resetLiveCombatTimelineBuffer(timelineBufferRef.current)
     setLiveCombatFeed(null)
+    setLiveCombatTimeline(null)
     setLiveCombatError('')
   }, [requestKey])
 
@@ -72,5 +86,6 @@ export function useRefereeLiveCombatFeed({
   return {
     liveCombatError,
     liveCombatFeed: requestKey ? liveCombatFeed : null,
+    liveCombatTimeline: requestKey ? liveCombatTimeline : null,
   }
 }

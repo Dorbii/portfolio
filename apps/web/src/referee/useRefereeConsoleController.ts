@@ -67,10 +67,12 @@ export function useRefereeConsoleController() {
   const {
     liveCombatError,
     liveCombatFeed,
+    liveCombatTimeline,
   } = useRefereeLiveCombatFeed({
     activeSessionId,
     apiBase,
     enabled: publicSession?.phase === 'combat_turn',
+    round: publicSession?.round,
   })
 
   const activeRefereeToken = storedRefereeToken
@@ -317,6 +319,7 @@ export function useRefereeConsoleController() {
     loadState,
     liveCombatError,
     liveCombatFeed,
+    liveCombatTimeline,
     loadFightReplay,
     phase,
     publicSession,

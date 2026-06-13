@@ -5,6 +5,9 @@ import type {
   Vector3,
 } from '../../../../../packages/schemas/src/index.js'
 import type { LegacyTeamIdentity } from '../../shared/teamVisuals'
+import {
+  buildReplayFrame,
+} from '../replayMapping.js'
 import type {
   BotFrameState,
   BotStabilityFrameState,
@@ -12,6 +15,7 @@ import type {
   ReplayEndState,
   ReplayVisualFrame,
 } from '../replayMappingTypes'
+import type { LiveCombatTimeline } from './liveCombatTimeline'
 
 export type LiveArenaBotState = {
   blueprint: BotBlueprint
@@ -40,9 +44,34 @@ export function liveArenaVisualKey(liveArena: LiveArenaStageState | undefined): 
 export function buildLiveArenaFrame(
   liveArena: LiveArenaStageState,
   time: number,
+  liveCombatTimeline?: LiveCombatTimeline | null,
+  timelineTime = time,
 ): ReplayVisualFrame {
   const redStatus = resolveBotStatus(liveArena.red)
   const blueStatus = resolveBotStatus(liveArena.blue)
+  const baseParts = {
+    blue: createPartFrameStates(liveArena.blue),
+    red: createPartFrameStates(liveArena.red),
+  }
+
+  if (liveCombatTimeline) {
+    const replayFrame = buildReplayFrame(liveCombatTimeline.timeline, timelineTime)
+
+    return {
+      ...replayFrame,
+      endState: replayFrame.endState ?? resolveEndState(redStatus, blueStatus),
+      parts: {
+        blue: {
+          ...baseParts.blue,
+          ...replayFrame.parts.blue,
+        },
+        red: {
+          ...baseParts.red,
+          ...replayFrame.parts.red,
+        },
+      },
+    }
+  }
 
   return {
     bots: {
@@ -51,10 +80,7 @@ export function buildLiveArenaFrame(
     },
     effects: [],
     endState: resolveEndState(redStatus, blueStatus),
-    parts: {
-      blue: createPartFrameStates(liveArena.blue),
-      red: createPartFrameStates(liveArena.red),
-    },
+    parts: baseParts,
     progress: 0,
     time,
   }

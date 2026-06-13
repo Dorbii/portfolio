@@ -164,6 +164,7 @@ export function RefereeConsole() {
     loadState,
     liveCombatError,
     liveCombatFeed,
+    liveCombatTimeline,
     loadFightReplay,
     publicSession,
     redCockpitUrl,
@@ -188,6 +189,7 @@ export function RefereeConsole() {
   const displayReplayPayload = replayProof?.replayPayload ?? replayPayload
   const displayRoleStates = replayProof ? EMPTY_ROLE_STATES : roleStates
   const displayLiveCombatFeed = replayProof ? null : liveCombatFeed
+  const displayLiveCombatTimeline = replayProof ? null : liveCombatTimeline
   const displayLiveCombatError = replayProof ? '' : liveCombatError
   const displaySessionChat = replayProof?.publicSession.chatLog ?? sessionChat
   const displayActiveSessionId = displayPublicSession?.sessionId ?? activeSessionId
@@ -332,7 +334,11 @@ export function RefereeConsole() {
               />
             ) : (
               <Suspense fallback={<ReplayFrameFallback />}>
-                <ArenaPreviewScene arena={visibleArena} liveBots={liveArenaStage} />
+                <ArenaPreviewScene
+                  arena={visibleArena}
+                  liveBots={liveArenaStage}
+                  liveCombatTimeline={displayLiveCombatTimeline}
+                />
               </Suspense>
             )}
             {observerView.showReplayStatus && !reviewingArchivedReplay ? (

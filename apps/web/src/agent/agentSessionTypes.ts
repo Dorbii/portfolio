@@ -21,6 +21,7 @@ import type {
   TeamEconomySummary,
   TeamRole,
 } from '../../../../packages/schemas/src/index.js'
+import type { ReplayEvent } from '../../../../packages/replay/src/index.js'
 import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 
 export type CombatDecisionBrief = {
@@ -127,7 +128,7 @@ export type LiveCombatFeed = {
     snapshot: PublicCombatSnapshot
     events: Array<{
       seq: number
-      event: unknown
+      event: ReplayEvent
     }>
     nextSeq: number
     submitted: Record<TeamRole, boolean>
