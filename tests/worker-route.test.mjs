@@ -2718,6 +2718,56 @@ test('combat uses /combat-plan and prunes legacy canonical /action combat', asyn
   assert.equal(liveReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
 })
 
+test('GET /sessions/:id/live-combat exposes public committed combat state without replay dependency', async () => {
+  const env = createEnv()
+  const sessionId = 's_live_combat_feed'
+  const { redInvite, blueInvite, redPacket, bluePacket } = await bootstrapReadySession(env, sessionId)
+
+  await confirmMachineLoadout(env, sessionId, redInvite.claimToken, redPacket)
+  await confirmMachineLoadout(env, sessionId, blueInvite.claimToken, bluePacket)
+
+  const initialFeed = await route(env, `/sessions/${sessionId}/live-combat`)
+
+  assert.equal(initialFeed.response.status, 200)
+  assert.equal(initialFeed.json.sessionId, sessionId)
+  assert.equal(initialFeed.json.phase, 'combat_turn')
+  assert.equal(initialFeed.json.combat.tick, 1)
+  assert.equal(initialFeed.json.combat.nextSeq, 0)
+  assert.deepEqual(initialFeed.json.combat.events, [])
+  assert.equal(initialFeed.json.combat.snapshot.red.role, 'red')
+  assert.equal(initialFeed.json.combat.snapshot.blue.role, 'blue')
+  assert.equal(typeof initialFeed.json.combat.snapshot.loadouts.red.blueprint.name, 'string')
+  assert.equal(typeof initialFeed.json.combat.snapshot.loadouts.blue.blueprint.name, 'string')
+  assert.equal(JSON.stringify(initialFeed.json).includes('submittedPlans'), false)
+  assert.equal(JSON.stringify(initialFeed.json).includes('privateChatLog'), false)
+  assert.equal(JSON.stringify(initialFeed.json).includes('decision'), false)
+  assert.equal(JSON.stringify(initialFeed.json).includes('cooldowns'), false)
+
+  const redCombatPacket = await internalGameMasterPacketFor(env, sessionId, redInvite.claimToken)
+  const blueCombatPacket = await internalGameMasterPacketFor(env, sessionId, blueInvite.claimToken)
+
+  await submitCombatPlanFromPacket(env, sessionId, redInvite.claimToken, redCombatPacket)
+  await submitCombatPlanFromPacket(env, sessionId, blueInvite.claimToken, blueCombatPacket)
+
+  const updatedFeed = await route(env, `/sessions/${sessionId}/live-combat`)
+  const eventSeq = updatedFeed.json.combat.nextSeq
+  const emptyDeltaFeed = await route(env, `/sessions/${sessionId}/live-combat?afterSeq=${eventSeq}`)
+  const liveReplay = await route(env, `/sessions/${sessionId}/replay`)
+
+  assert.equal(updatedFeed.response.status, 200)
+  assert.equal(updatedFeed.json.phase, 'combat_turn')
+  assert.equal(updatedFeed.json.combat.tick, 2)
+  assert.equal(typeof updatedFeed.json.combat.elapsedSubsteps, 'number')
+  assert.ok(eventSeq > 0)
+  assert.equal(updatedFeed.json.combat.events[0].seq, 1)
+  assert.equal(updatedFeed.json.combat.snapshot.red.health, updatedFeed.json.combat.snapshot.red.maxHealth)
+  assert.equal(emptyDeltaFeed.response.status, 200)
+  assert.equal(emptyDeltaFeed.json.combat.events.length, 0)
+  assert.equal(emptyDeltaFeed.json.combat.nextSeq, eventSeq)
+  assert.equal(liveReplay.response.status, 404)
+  assert.equal(liveReplay.json.error.code, 'REPLAY_NOT_AVAILABLE')
+})
+
 test('legacy mixed combat and replay state is sanitized before route projection', async () => {
   const sourceEnv = createEnv()
   const sessionId = 's_legacy_mixed_replay_route'

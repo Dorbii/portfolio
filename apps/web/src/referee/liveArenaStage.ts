@@ -3,7 +3,12 @@ import type {
   TeamRole,
   Vector3,
 } from '../../../../packages/schemas/src/index.js'
-import type { RolePrivateState } from '../agent/agentSessionTypes'
+import type {
+  LiveCombatFeed,
+  PublicCombatBotSnapshot,
+  PublicCombatLoadout,
+  RolePrivateState,
+} from '../agent/agentSessionTypes'
 import {
   resolveTeamIdentity,
 } from '../shared/teamVisuals'
@@ -21,7 +26,14 @@ const DEFAULT_LIVE_POSITIONS: Record<TeamRole, Vector3> = {
 
 export function createLiveArenaStageState(
   roleStates: RefereeRoleStates,
+  liveCombatFeed?: LiveCombatFeed | null,
 ): LiveArenaStageState | undefined {
+  const feedStageState = createLiveArenaStageStateFromFeed(liveCombatFeed)
+
+  if (feedStageState) {
+    return feedStageState
+  }
+
   const redLoadout = roleStates.red?.ownLoadout
   const blueLoadout = roleStates.blue?.ownLoadout
 
@@ -32,6 +44,40 @@ export function createLiveArenaStageState(
   return {
     blue: createLiveArenaBotState('blue', blueLoadout, roleStates),
     red: createLiveArenaBotState('red', redLoadout, roleStates),
+  }
+}
+
+function createLiveArenaStageStateFromFeed(
+  liveCombatFeed: LiveCombatFeed | null | undefined,
+): LiveArenaStageState | undefined {
+  const snapshot = liveCombatFeed?.combat?.snapshot
+  const redLoadout = snapshot?.loadouts.red
+  const blueLoadout = snapshot?.loadouts.blue
+
+  if (!snapshot || !redLoadout || !blueLoadout) {
+    return undefined
+  }
+
+  return {
+    blue: createLiveArenaBotStateFromFeed('blue', blueLoadout, snapshot.blue),
+    red: createLiveArenaBotStateFromFeed('red', redLoadout, snapshot.red),
+  }
+}
+
+function createLiveArenaBotStateFromFeed(
+  role: TeamRole,
+  loadout: PublicCombatLoadout,
+  combat: PublicCombatBotSnapshot,
+): LiveArenaBotState {
+  return {
+    blueprint: loadout.blueprint,
+    health: combat.health,
+    identity: resolveTeamIdentity(role, loadout.identity),
+    machineDesign: loadout.machineDesign,
+    maxHealth: combat.maxHealth,
+    partHealth: combat.partHealth,
+    position: combat.position,
+    statuses: combat.statuses,
   }
 }
 

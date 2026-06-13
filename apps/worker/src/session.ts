@@ -123,6 +123,7 @@ import {
   storedReflectionForRole,
 } from './sessionContinuation.js'
 import {
+  buildLiveCombatFeed,
   buildPublicSessionState,
   buildRolePrivateState,
   hasResolvedReplay,
@@ -301,6 +302,15 @@ export class SessionCoordinator {
     this.ensureGameMasterActionSets(now)
 
     return buildPublicSessionState(this.state)
+  }
+
+  getLiveCombatFeed(afterSeq = 0): ReturnType<typeof buildLiveCombatFeed> {
+    const now = this.clock()
+
+    this.resolveTimedTransitions(now)
+    this.ensureGameMasterActionSets(now)
+
+    return buildLiveCombatFeed(this.state, { afterSeq, serverTime: now })
   }
 
   private buildRolePrivateStateWithAgentPacket(

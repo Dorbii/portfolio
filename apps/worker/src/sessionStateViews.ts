@@ -8,12 +8,18 @@ import {
   machineDesignToLegacyBotBlueprintProjection,
 } from '../../../packages/sim/src/index.js'
 import type {
+  CombatBotSnapshot,
   GameMasterNextAction,
   GameMasterPhase,
   ReplayLifecycleStatus,
+  TeamRole,
 } from '../../../packages/schemas/src/index.js'
 import type {
   LegacyPublicSessionState,
+  LiveCombatFeed,
+  PublicCombatBotSnapshot,
+  PublicCombatLoadout,
+  PublicCombatSnapshot,
   LegacyRolePrivateState,
 } from './sessionLegacyContracts.js'
 import type {
@@ -182,6 +188,137 @@ export function buildPublicSessionState(state: StoredSessionState): LegacyPublic
     chatLog: state.chatLog,
     eventLog: state.eventLog,
   })
+}
+
+export function buildLiveCombatFeed(
+  state: StoredSessionState,
+  {
+    afterSeq = 0,
+    serverTime,
+  }: {
+    afterSeq?: number
+    serverTime: string
+  },
+): LiveCombatFeed {
+  const base = {
+    sessionId: state.id,
+    phase: state.phase,
+    round: state.round,
+    stateVersion: sessionStateVersion(state),
+    serverTime,
+  }
+  const combat = state.combat
+
+  if (!combat) {
+    return cloneJson(base)
+  }
+
+  const allEvents = combat.lockstepEvents ?? []
+  const firstEventIndex = clampEventSeq(afterSeq, allEvents.length)
+  const events = allEvents.slice(firstEventIndex).map((event, index) => ({
+    seq: firstEventIndex + index + 1,
+    event,
+  }))
+  const fightClock = liveFightClock(combat, serverTime)
+
+  return cloneJson({
+    ...base,
+    ...(fightClock ? { fightClock } : {}),
+    combat: {
+      tick: combat.nextTick,
+      ...(combat.elapsedSubsteps !== undefined ? { elapsedSubsteps: combat.elapsedSubsteps } : {}),
+      snapshot: publicCombatSnapshot(state),
+      events,
+      nextSeq: allEvents.length,
+      submitted: {
+        red: Boolean(combat.submittedPlans?.red ?? combat.pending.red),
+        blue: Boolean(combat.submittedPlans?.blue ?? combat.pending.blue),
+      },
+    },
+  })
+}
+
+function clampEventSeq(afterSeq: number, eventCount: number): number {
+  if (!Number.isFinite(afterSeq) || afterSeq <= 0) {
+    return 0
+  }
+
+  return Math.min(Math.floor(afterSeq), eventCount)
+}
+
+function liveFightClock(
+  combat: NonNullable<StoredSessionState['combat']>,
+  serverTime: string,
+): LiveCombatFeed['fightClock'] {
+  const clock: NonNullable<LiveCombatFeed['fightClock']> = {
+    ...(combat.fightStartedAt ? { startedAt: combat.fightStartedAt } : {}),
+    ...(combat.fightDeadlineAt ? { deadlineAt: combat.fightDeadlineAt } : {}),
+  }
+  const deadlineMs = combat.fightDeadlineAt ? Date.parse(combat.fightDeadlineAt) : Number.NaN
+  const serverMs = Date.parse(serverTime)
+
+  if (Number.isFinite(deadlineMs) && Number.isFinite(serverMs)) {
+    clock.remainingMs = Math.max(0, deadlineMs - serverMs)
+  }
+
+  return Object.keys(clock).length > 0 ? clock : undefined
+}
+
+function publicCombatSnapshot(state: StoredSessionState): PublicCombatSnapshot {
+  const combat = state.combat
+
+  if (!combat) {
+    throw new Error('Live combat snapshot requires active combat state.')
+  }
+
+  return {
+    arena: combat.snapshot.arena,
+    blue: publicCombatBotSnapshot(combat.snapshot.blue),
+    distance: combat.snapshot.distance,
+    hardMaxTicks: combat.snapshot.hardMaxTicks,
+    loadouts: publicCombatLoadouts(state),
+    recentEvents: combat.snapshot.recentEvents,
+    red: publicCombatBotSnapshot(combat.snapshot.red),
+    tick: combat.snapshot.tick,
+  }
+}
+
+function publicCombatBotSnapshot(snapshot: CombatBotSnapshot): PublicCombatBotSnapshot {
+  return {
+    health: snapshot.health,
+    maxHealth: snapshot.maxHealth,
+    partHealth: snapshot.partHealth,
+    position: snapshot.position,
+    role: snapshot.role,
+    statuses: snapshot.statuses,
+  }
+}
+
+function publicCombatLoadouts(state: StoredSessionState): PublicCombatSnapshot['loadouts'] {
+  return {
+    ...publicCombatLoadoutEntry('red', state.roles.red),
+    ...publicCombatLoadoutEntry('blue', state.roles.blue),
+  }
+}
+
+function publicCombatLoadoutEntry(
+  role: TeamRole,
+  storedRole: StoredRoleState,
+): Partial<Record<TeamRole, PublicCombatLoadout>> {
+  const loadout = legacyOwnLoadoutProjection(storedRole)
+
+  if (!loadout) {
+    return {}
+  }
+
+  return {
+    [role]: {
+      blueprint: loadout.blueprint,
+      ...(loadout.confirmedAt ? { confirmedAt: loadout.confirmedAt } : {}),
+      ...(storedRole.teamIdentity ? { identity: storedRole.teamIdentity } : {}),
+      ...(loadout.machineDesign ? { machineDesign: loadout.machineDesign } : {}),
+    },
+  }
 }
 
 export function replayVersion(state: StoredSessionState): string | undefined {

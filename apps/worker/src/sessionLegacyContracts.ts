@@ -17,6 +17,7 @@ import type {
   TeamEconomySummary,
   TeamRole,
 } from '../../../packages/schemas/src/index.js'
+import type { ReplayEvent } from '../../../packages/replay/src/index.js'
 
 export const LEGACY_TEAM_LOGO_MARKS = [
   'shield',
@@ -92,6 +93,53 @@ export type LegacyCombatTurnPrivateState = LegacyCombatTurnPublicState & {
   self: CombatBotSnapshot
   opponent: CombatBotSnapshot
   decision: unknown
+}
+
+export type PublicCombatBotSnapshot = Pick<
+  CombatBotSnapshot,
+  'role' | 'position' | 'health' | 'maxHealth' | 'partHealth' | 'statuses'
+>
+
+export type PublicCombatLoadout = {
+  blueprint: BotBlueprint
+  confirmedAt?: string
+  identity?: LegacyTeamIdentity
+  machineDesign?: MachineDesign
+}
+
+export type PublicCombatSnapshot = Pick<
+  CombatTurnSnapshot,
+  'tick' | 'arena' | 'distance' | 'hardMaxTicks' | 'recentEvents'
+> & {
+  blue: PublicCombatBotSnapshot
+  red: PublicCombatBotSnapshot
+  loadouts: Partial<Record<TeamRole, PublicCombatLoadout>>
+}
+
+export type PublicCombatEvent = {
+  seq: number
+  event: ReplayEvent
+}
+
+export type LiveCombatFeed = {
+  sessionId: string
+  phase: SessionPhase
+  round: number
+  stateVersion: string
+  serverTime: string
+  fightClock?: {
+    startedAt?: string
+    deadlineAt?: string
+    remainingMs?: number
+  }
+  combat?: {
+    tick: number
+    elapsedSubsteps?: number
+    snapshot: PublicCombatSnapshot
+    events: PublicCombatEvent[]
+    nextSeq: number
+    submitted: Record<TeamRole, boolean>
+  }
 }
 
 export type LegacyRolePublicState = Partial<TeamEconomySummary> & {

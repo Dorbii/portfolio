@@ -64,8 +64,10 @@ test('referee console links to the current part catalog route', () => {
 })
 
 test('referee console keeps live combat bots visible while partial replay payloads stream', () => {
-  assert.ok(refereeConsoleSource.includes('createLiveArenaStageState(displayRoleStates)'))
+  assert.ok(refereeConsoleSource.includes('createLiveArenaStageState(displayRoleStates, displayLiveCombatFeed)'))
   assert.ok(refereeConsoleSource.includes('liveBots={liveArenaStage}'))
+  assert.ok(refereeControllerSource.includes('useRefereeLiveCombatFeed'))
+  assert.ok(refereeControllerSource.includes("enabled: publicSession?.phase === 'combat_turn'"))
   assert.ok(liveArenaStageSource.includes('combat?.snapshot'))
   assert.ok(liveArenaStageSource.includes('ownLoadout'))
   assert.ok(arenaPreviewSceneSource.includes('buildLiveArenaFrame(currentLiveBots, time)'))

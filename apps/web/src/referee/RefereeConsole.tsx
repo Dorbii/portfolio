@@ -162,6 +162,8 @@ export function RefereeConsole() {
     error,
     hasInviteForRole,
     loadState,
+    liveCombatError,
+    liveCombatFeed,
     loadFightReplay,
     publicSession,
     redCockpitUrl,
@@ -185,6 +187,8 @@ export function RefereeConsole() {
   const displayPublicSession = replayProof?.publicSession ?? publicSession
   const displayReplayPayload = replayProof?.replayPayload ?? replayPayload
   const displayRoleStates = replayProof ? EMPTY_ROLE_STATES : roleStates
+  const displayLiveCombatFeed = replayProof ? null : liveCombatFeed
+  const displayLiveCombatError = replayProof ? '' : liveCombatError
   const displaySessionChat = replayProof?.publicSession.chatLog ?? sessionChat
   const displayActiveSessionId = displayPublicSession?.sessionId ?? activeSessionId
   const fightArchive = displayPublicSession?.continuation.fightArchive ?? []
@@ -207,7 +211,11 @@ export function RefereeConsole() {
       ? 'No fight comms yet'
       : 'Create session first'
   const visibleArena = displayPublicSession?.arena ?? DEFAULT_ARENA_CONFIG
-  const liveArenaStage = useMemo(() => createLiveArenaStageState(displayRoleStates), [displayRoleStates])
+  const liveArenaStage = useMemo(
+    () => createLiveArenaStageState(displayRoleStates, displayLiveCombatFeed),
+    [displayLiveCombatFeed, displayRoleStates],
+  )
+  const liveArenaStateError = displayLiveCombatError || roleStateError
   const observerView = useMemo(
     () => buildRefereeObserverView({ publicSession: displayPublicSession, replayPayload: displayReplayPayload }),
     [displayPublicSession, displayReplayPayload],
@@ -219,7 +227,7 @@ export function RefereeConsole() {
     (reviewingArchivedReplay || (observerView.showReplay && !shouldDeferFightRender))
   const renderedReplayPayload = showRenderedReplay ? stageReplayPayload : null
   const showFightCockpitStage = !reviewingArchivedReplay &&
-    (observerView.stage === 'live_combat' || shouldDeferFightRender)
+    (shouldDeferFightRender || (observerView.stage === 'live_combat' && !liveArenaStage))
   const shouldShowSessionCompletion = displayPublicSession?.phase === 'session_complete'
 
   useEffect(() => {
@@ -320,7 +328,7 @@ export function RefereeConsole() {
                 placement="stage"
                 observerView={observerView}
                 roleStates={displayRoleStates}
-                stateError={roleStateError}
+                stateError={liveArenaStateError}
               />
             ) : (
               <Suspense fallback={<ReplayFrameFallback />}>
@@ -336,7 +344,7 @@ export function RefereeConsole() {
                 placement="stage"
                 observerView={observerView}
                 roleStates={displayRoleStates}
-                stateError={roleStateError}
+                stateError={liveArenaStateError}
               />
             ) : null}
           </div>

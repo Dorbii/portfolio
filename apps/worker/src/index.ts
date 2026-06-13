@@ -259,6 +259,10 @@ export class AgentArenaSession {
       method: 'GET',
       handle: (_request, coordinator) => this.publicState(coordinator),
     },
+    'live-combat': {
+      method: 'GET',
+      handle: (request, coordinator) => this.liveCombat(request, coordinator),
+    },
     state: {
       method: 'GET',
       handle: (request, coordinator) => this.roleState(request, coordinator),
@@ -598,6 +602,18 @@ export class AgentArenaSession {
     await this.saveSession(coordinator)
 
     return jsonResponse(publicState)
+  }
+
+  private async liveCombat(
+    request: Request,
+    coordinator: SessionCoordinator,
+  ): Promise<Response> {
+    const afterSeq = parseLiveCombatAfterSeq(new URL(request.url).searchParams.get('afterSeq'))
+    const liveCombat = coordinator.getLiveCombatFeed(afterSeq)
+
+    await this.saveSession(coordinator)
+
+    return jsonResponse(liveCombat)
   }
 
   private async roleState(
@@ -1158,6 +1174,16 @@ function invalidDurableObjectSessionIdResponse(): Response {
     'INVALID_REQUEST',
     'Session id must start with s_ and contain only letters, numbers, underscores, or hyphens.',
   )
+}
+
+function parseLiveCombatAfterSeq(value: string | null): number {
+  if (!value) {
+    return 0
+  }
+
+  const parsed = Number(value)
+
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0
 }
 
 async function forwardGptRequest(

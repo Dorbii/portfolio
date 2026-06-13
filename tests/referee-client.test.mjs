@@ -7,10 +7,12 @@ import {
   DEFAULT_ARENA_API_BASE,
   DEFAULT_ARENA_SITE_BASE,
   IDLE_REFEREE_POLL_INTERVAL_MS,
+  LIVE_COMBAT_POLL_INTERVAL_MS,
   advanceRound,
   buildInviteUrl,
   isSessionNotFoundError,
   createSession,
+  loadLiveCombatFeed,
   loadReplayPayload,
   loadPublicSession,
   RefereeArenaApiError,
@@ -314,6 +316,7 @@ test('referee polling uses active cadence only for combat and replay-active stat
   )
   assert.equal(refereePollIntervalMs({ phase: 'session_complete', replayAvailable: true }), undefined)
   assert.equal(refereePollIntervalMs({ phase: 'expired', replayAvailable: true }), undefined)
+  assert.equal(LIVE_COMBAT_POLL_INTERVAL_MS <= ACTIVE_REFEREE_POLL_INTERVAL_MS, true)
 })
 
 test('referee createSession posts to /sessions', async () => {
@@ -357,6 +360,47 @@ test('referee loadPublicSession GETs /public without authorization', async () =>
     assert.equal(calls.length, 1)
     assert.equal(calls[0].method, 'GET')
     assert.equal(calls[0].url, `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/public`)
+    assert.equal(calls[0].headers.get('authorization'), null)
+  } finally {
+    restore()
+  }
+})
+
+test('referee loadLiveCombatFeed GETs observer-safe live combat deltas without authorization', async () => {
+  const sessionId = 's_demo'
+  const { calls, restore } = withFetchStub(() =>
+    jsonResponse({
+      sessionId,
+      phase: 'combat_turn',
+      round: 1,
+      stateVersion: 'v1',
+      serverTime: '2026-06-03T00:00:00.000Z',
+      combat: {
+        tick: 2,
+        snapshot: {
+          tick: 2,
+          arena: { width: 16, height: 16, name: 'Test Arena', activeHazards: [] },
+          distance: 12,
+          hardMaxTicks: 100,
+          recentEvents: [],
+          red: { role: 'red', position: [-6, 0, 0], health: 20, maxHealth: 20, partHealth: {}, statuses: [] },
+          blue: { role: 'blue', position: [6, 0, 0], health: 20, maxHealth: 20, partHealth: {}, statuses: [] },
+          loadouts: {},
+        },
+        events: [],
+        nextSeq: 3,
+        submitted: { red: false, blue: false },
+      },
+    }),
+  )
+
+  try {
+    const feed = await loadLiveCombatFeed(DEFAULT_ARENA_API_BASE, sessionId, 2)
+
+    assert.equal(feed.combat.nextSeq, 3)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].method, 'GET')
+    assert.equal(calls[0].url, `${DEFAULT_ARENA_API_BASE}/sessions/${encodeURIComponent(sessionId)}/live-combat?afterSeq=2`)
     assert.equal(calls[0].headers.get('authorization'), null)
   } finally {
     restore()

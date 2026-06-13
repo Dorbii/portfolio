@@ -9,6 +9,7 @@ import type { LegacyTeamIdentity } from '../shared/teamVisuals'
 import type {
   AdvanceRoundResponse,
   CreateSessionResponse,
+  LiveCombatFeed,
   PublicSessionState,
   RolePrivateState,
   RoleInvite,
@@ -23,6 +24,7 @@ import {
 export const DEFAULT_ARENA_API_BASE = 'https://arena-api.dorbii.net'
 export const DEFAULT_ARENA_SITE_BASE = DEFAULT_AGENT_SITE_BASE
 export const ACTIVE_REFEREE_POLL_INTERVAL_MS = 1_500
+export const LIVE_COMBAT_POLL_INTERVAL_MS = 750
 export const IDLE_REFEREE_POLL_INTERVAL_MS = 10_000
 export const POLL_INTERVAL_MS = IDLE_REFEREE_POLL_INTERVAL_MS
 
@@ -171,6 +173,18 @@ export async function loadPublicSession(
 ): Promise<PublicSessionState> {
   return requestJson<PublicSessionState>(
     `${apiBase}/sessions/${encodeURIComponent(sessionId)}/public`,
+  )
+}
+
+export async function loadLiveCombatFeed(
+  apiBase: string,
+  sessionId: string,
+  afterSeq = 0,
+): Promise<LiveCombatFeed> {
+  const search = afterSeq > 0 ? `?afterSeq=${encodeURIComponent(String(Math.floor(afterSeq)))}` : ''
+
+  return requestJson<LiveCombatFeed>(
+    `${apiBase}/sessions/${encodeURIComponent(sessionId)}/live-combat${search}`,
   )
 }
 

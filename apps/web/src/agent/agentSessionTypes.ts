@@ -89,6 +89,51 @@ export type CombatTurnPrivateState = CombatTurnPublicState & {
   elapsedSubsteps?: number
 }
 
+export type PublicCombatBotSnapshot = Pick<
+  CombatBotSnapshot,
+  'role' | 'position' | 'health' | 'maxHealth' | 'partHealth' | 'statuses'
+>
+
+export type PublicCombatLoadout = {
+  blueprint: BotBlueprint
+  confirmedAt?: string
+  identity?: LegacyTeamIdentity
+  machineDesign?: MachineDesign
+}
+
+export type PublicCombatSnapshot = Pick<
+  CombatTurnSnapshot,
+  'tick' | 'arena' | 'distance' | 'hardMaxTicks' | 'recentEvents'
+> & {
+  blue: PublicCombatBotSnapshot
+  red: PublicCombatBotSnapshot
+  loadouts: Partial<Record<TeamRole, PublicCombatLoadout>>
+}
+
+export type LiveCombatFeed = {
+  sessionId: string
+  phase: SessionPhase
+  round: number
+  stateVersion: string
+  serverTime: string
+  fightClock?: {
+    startedAt?: string
+    deadlineAt?: string
+    remainingMs?: number
+  }
+  combat?: {
+    tick: number
+    elapsedSubsteps?: number
+    snapshot: PublicCombatSnapshot
+    events: Array<{
+      seq: number
+      event: unknown
+    }>
+    nextSeq: number
+    submitted: Record<TeamRole, boolean>
+  }
+}
+
 export type SessionChatMessage = {
   id: string
   at: string

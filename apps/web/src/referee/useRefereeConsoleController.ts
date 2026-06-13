@@ -27,6 +27,7 @@ import {
 import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
 import { useRefereeRoleStates } from './useRefereeRoleStates'
+import { useRefereeLiveCombatFeed } from './useRefereeLiveCombatFeed'
 
 type SessionLoadState = 'idle' | 'busy'
 
@@ -62,6 +63,14 @@ export function useRefereeConsoleController() {
     apiBase,
     invites,
     stateVersion: publicSession?.stateVersion,
+  })
+  const {
+    liveCombatError,
+    liveCombatFeed,
+  } = useRefereeLiveCombatFeed({
+    activeSessionId,
+    apiBase,
+    enabled: publicSession?.phase === 'combat_turn',
   })
 
   const activeRefereeToken = storedRefereeToken
@@ -306,6 +315,8 @@ export function useRefereeConsoleController() {
     error,
     hasInviteForRole,
     loadState,
+    liveCombatError,
+    liveCombatFeed,
     loadFightReplay,
     phase,
     publicSession,
