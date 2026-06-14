@@ -7426,8 +7426,8 @@ test('session delays the next combat plan packet after a resolved lockstep round
 
   const delayedState = session.exportState()
 
-  assert.equal(delayedState.combat.openedAt, '2026-06-03T00:00:10.000Z')
-  assert.equal(delayedState.combat.deadlineAt, '2026-06-03T00:01:10.000Z')
+  assert.equal(delayedState.combat.openedAt, '2026-06-03T00:00:01.500Z')
+  assert.equal(delayedState.combat.deadlineAt, '2026-06-03T00:01:01.500Z')
   assert.equal(delayedState.combat.fightStartedAt, '2026-06-03T00:00:00.000Z')
   assert.equal(delayedState.combat.fightDeadlineAt, '2026-06-03T00:05:00.000Z')
 
@@ -7438,11 +7438,11 @@ test('session delays the next combat plan packet after a resolved lockstep round
   assert.equal(delayedPacket.value.legalActions.length, 0)
   assert.equal(delayedPacket.value.submit, undefined)
   assert.equal(
-    delayedPacket.value.instruction.includes('Next combat round opens at 2026-06-03T00:00:10.000Z'),
+    delayedPacket.value.instruction.includes('Next combat round opens at 2026-06-03T00:00:01.500Z'),
     true,
   )
 
-  now = '2026-06-03T00:00:10.000Z'
+  now = '2026-06-03T00:00:01.500Z'
 
   const openPacket = await session.getGameMasterPacketForToken(redToken)
 
@@ -7769,12 +7769,12 @@ test('session maps GPT combat_plan into lockstep round plans and stages the next
 
   assert.equal(roundState.combat.mode, 'lockstep_round_plan')
   assert.equal(roundState.combat.nextTick, 2)
-  assert.equal(roundState.combat.openedAt, '2026-06-03T00:00:10.000Z')
+  assert.equal(roundState.combat.openedAt, '2026-06-03T00:00:01.500Z')
   assert.equal(roundState.combat.submittedPlans, undefined)
   assert.equal(roundState.combat.planConsumption.red.endedBy, 'end_turn')
   assert.equal(roundState.combat.planConsumption.blue.endedBy, 'end_turn')
 
-  now = '2026-06-03T00:00:10.000Z'
+  now = '2026-06-03T00:00:01.500Z'
   const openPacket = await loaded.getGameMasterPacketForToken(redToken)
   roundState = loaded.exportState()
 

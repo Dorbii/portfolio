@@ -150,6 +150,7 @@ workspace markers, not separate app command surfaces.
 /agent          role invite cockpit and browser automation page
 /part-catalog   source-driven part catalog viewer
 /replay-preview replay/proof preview route
+/embed          frameable portfolio replay preview
 ```
 
 The `/agent` route uses a URL fragment:
@@ -635,7 +636,16 @@ Current configured production-ish targets:
 ```txt
 frontend: https://arena.dorbii.net
 api:      https://arena-api.dorbii.net
+portfolio embed parent origins:
+  https://dorbii.github.io
+  https://dorbii.net
+  https://www.dorbii.net
 ```
+
+The same frontend bundle keeps the referee console as the default root on
+`arena.dorbii.net` and local development hosts. On portfolio hosts, the root
+renders a portfolio shell that embeds `https://arena.dorbii.net/` in a desktop
+window. `/embed` remains available as a frameable replay-preview route.
 
 Before production traffic:
 

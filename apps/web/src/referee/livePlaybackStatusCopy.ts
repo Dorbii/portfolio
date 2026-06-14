@@ -1,27 +1,43 @@
 import type { LivePlaybackBufferSnapshot } from '../replay/arena/liveCombatTimeline'
 
-export function formatLivePlaybackStatus(status: LivePlaybackBufferSnapshot): string {
+export function formatLivePlaybackStatusLabel(status: LivePlaybackBufferSnapshot): string {
+  if (status.status === 'playing' || status.status === 'catching_up' || status.status === 'replaying_late_events') {
+    return 'Playing confirmed combat'
+  }
+
   if (status.status === 'drained') {
-    return 'Live buffer drained; waiting for committed combat events.'
+    return 'Caught up; next decision pending'
   }
 
   if (status.status === 'buffering') {
-    return 'Live buffer warming.'
+    return 'Waiting on agents'
+  }
+
+  return 'Waiting on agents'
+}
+
+export function formatLivePlaybackStatus(status: LivePlaybackBufferSnapshot): string {
+  if (status.status === 'drained') {
+    return 'Caught up; next decision pending.'
+  }
+
+  if (status.status === 'buffering') {
+    return 'Waiting on agents.'
   }
 
   if (status.status === 'catching_up') {
-    return `Live buffer catching up; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
+    return `Playing confirmed combat; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
   }
 
   if (status.status === 'replaying_late_events') {
-    return `Live buffer replaying late events; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
+    return `Playing confirmed combat; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
   }
 
   if (status.status === 'playing') {
-    return `Live buffer playing; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
+    return `Playing confirmed combat; ${formatPlaybackSeconds(status.bufferDepthSeconds)} buffered.`
   }
 
-  return 'Live observer state.'
+  return 'Waiting on agents.'
 }
 
 export function formatPlaybackSeconds(value: number): string {

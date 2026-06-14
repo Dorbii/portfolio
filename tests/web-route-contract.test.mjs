@@ -12,14 +12,19 @@ const liveArenaFrameSource = readSource('apps/web/src/replay/arena/liveArenaFram
 const liveArenaStageSource = readSource('apps/web/src/referee/liveArenaStage.ts')
 const refereeCockpitStripSource = readSource('apps/web/src/referee/RefereeCockpitStrip.tsx')
 const refereeConsoleSource = readSource('apps/web/src/referee/RefereeConsole.tsx')
+const refereePacingHudSource = readSource('apps/web/src/referee/RefereePacingHud.tsx')
+const refereePacingStateSource = readSource('apps/web/src/referee/refereePacingState.ts')
 const refereePanelsSource = readSource('apps/web/src/referee/RefereeConsolePanels.tsx')
 const refereeControllerSource = readSource('apps/web/src/referee/useRefereeConsoleController.ts')
+const refereeRoundAdvanceSource = readSource('apps/web/src/referee/useRefereeRoundAdvance.ts')
+const refereeRoleStatesSource = readSource('apps/web/src/referee/useRefereeRoleStates.ts')
 const refereeReplayProofSource = readSource('apps/web/src/referee/refereeReplayProof.ts')
 const babylonReplaySceneSource = readSource('apps/web/src/replay/scene/BabylonReplayScene.tsx')
 const replayPreviewSource = readSource('apps/web/src/replay/ReplayPreview.tsx')
 const replayViewerSource = readSource('apps/web/src/replay/ReplayViewer.tsx')
 const mockSessionSource = readSource('apps/web/src/mockSession.ts')
 const mockSessionStateSource = readSource('apps/web/src/mockSessionState.ts')
+const webHeadersSource = readSource('apps/web/public/_headers')
 const workerBootstrapSources = [
   'apps/worker/src/index.ts',
   'apps/worker/src/session.ts',
@@ -51,9 +56,46 @@ test('app route gates cover current web entry points', () => {
   assert.ok(appSource.includes("normalized === '/replay-preview'"))
   assert.ok(appSource.includes("normalized.endsWith('/replay-preview')"))
 
+  assert.ok(appSource.includes('function isArenaEmbedPathname(pathname: string)'))
+  assert.ok(appSource.includes("normalized === '/embed'"))
+  assert.ok(appSource.includes("normalized.endsWith('/embed')"))
+  assert.ok(appSource.includes('<ReplayPreview defaultProof="machine" />'))
+
   assert.ok(appSource.includes('function isPrivacyPathname(pathname: string)'))
   assert.ok(appSource.includes("normalized === '/privacy'"))
   assert.ok(appSource.includes("normalized === '/clash-of-clankers/privacy'"))
+})
+
+test('portfolio home launches the production arena app in a desktop window', () => {
+  assert.ok(appSource.includes('function shouldRenderPortfolioHome(pathname: string, hostname: string)'))
+  assert.ok(appSource.includes("host === 'dorbii.github.io'"))
+  assert.ok(appSource.includes("host === 'dorbii.net'"))
+  assert.ok(appSource.includes("host === 'www.dorbii.net'"))
+  assert.ok(appSource.includes("normalized === '/portfolio'"))
+  assert.ok(appSource.includes("normalized === '/clash-of-clankers'"))
+  assert.ok(appSource.includes("const ARENA_SITE_ORIGIN = 'https://arena.dorbii.net'"))
+  assert.ok(appSource.includes("const ARENA_APP_SRC = `${ARENA_SITE_ORIGIN}/`"))
+  assert.ok(appSource.includes('function resolveArenaAppSrc()'))
+  assert.ok(appSource.includes('return `${window.location.origin}/`'))
+  assert.ok(appSource.includes("return 'Dorbii Portfolio'"))
+  assert.ok(appSource.includes("return 'Clash of Clankers Embed'"))
+  assert.ok(appSource.includes('const [arenaWindowOpen, setArenaWindowOpen] = useState(false)'))
+  assert.ok(appSource.includes('className="portfolio-desktop-icon"'))
+  assert.ok(appSource.includes('setArenaWindowOpen(true)'))
+  assert.ok(appSource.includes('setArenaWindowOpen(false)'))
+  assert.ok(appSource.includes('className="portfolio-app-window"'))
+  assert.ok(appSource.includes('src={arenaAppSrc}'))
+  assert.ok(appSource.includes('title="Clash of Clankers arena"'))
+})
+
+test('arena frame routes detach global iframe deny headers before allowlisting portfolio origins', () => {
+  assert.match(webHeadersSource, /^\/\r?\n  ! Content-Security-Policy/m)
+  assert.ok(webHeadersSource.includes('/embed*'))
+  assert.ok(webHeadersSource.includes('! Content-Security-Policy'))
+  assert.ok(webHeadersSource.includes('! X-Frame-Options'))
+  assert.ok(webHeadersSource.includes("frame-ancestors 'self' https://dorbii.github.io"))
+  assert.ok(webHeadersSource.includes('https://dorbii.net'))
+  assert.ok(webHeadersSource.includes('https://www.dorbii.net'))
 })
 
 test('referee console links to the current part catalog route', () => {
@@ -73,6 +115,8 @@ test('referee console keeps live combat bots visible while partial replay payloa
   assert.ok(refereeControllerSource.includes('liveCombatTimeline'))
   assert.ok(refereeConsoleSource.includes('onLivePlaybackStatus={setLivePlaybackStatus}'))
   assert.ok(refereeCockpitStripSource.includes('formatLivePlaybackStatus'))
+  assert.ok(refereeCockpitStripSource.includes('pacingState.statusLine'))
+  assert.equal(refereeCockpitStripSource.includes('Live observer state.'), false)
   assert.ok(liveArenaStageSource.includes('combat?.snapshot'))
   assert.ok(liveArenaStageSource.includes('ownLoadout'))
   assert.ok(arenaPreviewSceneSource.includes('advanceLivePlaybackBuffer'))
@@ -84,6 +128,22 @@ test('referee console keeps live combat bots visible while partial replay payloa
   assert.ok(liveArenaFrameSource.includes('buildReplayFrame(liveCombatTimeline.timeline, timelineTime)'))
   assert.ok(liveArenaFrameSource.includes('function createLiveIdleMotion'))
   assert.ok(liveArenaFrameSource.includes('ReplayVisualFrame'))
+})
+
+test('referee console exposes pacing HUD and optional auto advance gate', () => {
+  assert.ok(refereeConsoleSource.includes('RefereePacingHud'))
+  assert.ok(refereeConsoleSource.includes('buildRefereePacingState'))
+  assert.ok(refereePacingHudSource.includes('data-active-blocker'))
+  assert.ok(refereePacingHudSource.includes('data-auto-advance-ready'))
+  assert.ok(refereePacingHudSource.includes('Auto advance rounds'))
+  assert.ok(refereePacingStateSource.includes('Waiting for referee round advance'))
+  assert.ok(refereePacingStateSource.includes('Waiting for shared debrief'))
+  assert.ok(refereeControllerSource.includes('resolveRefereeAutoAdvanceGate(publicSession, roleStates)'))
+  assert.ok(refereeControllerSource.includes('pollIntervalMs,'))
+  assert.ok(refereeRoundAdvanceSource.includes('autoAdvanceEnabled'))
+  assert.ok(refereeRoundAdvanceSource.includes('void submitRoundAdvance()'))
+  assert.ok(refereeRoleStatesSource.includes('pollIntervalMs = POLL_INTERVAL_MS'))
+  assert.ok(refereeRoleStatesSource.includes('window.setInterval'))
 })
 
 test('referee invite links require confirmed public session state', () => {
@@ -141,15 +201,17 @@ test('referee root can render machine replay proof inside the match dashboard', 
 })
 
 test('replay preview routes stress64 proof to the capped high-density machine replay', () => {
+  assert.ok(replayPreviewSource.includes('defaultProof = null'))
+  assert.ok(replayPreviewSource.includes("document.body.style.overflow = 'hidden'"))
+  assert.ok(replayPreviewSource.includes("document.documentElement.style.overflow = 'hidden'"))
   assert.ok(replayPreviewSource.includes("previewOptions.proof === 'stress64'"))
   assert.ok(replayPreviewSource.includes('stress64Replay'))
   assert.ok(replayPreviewSource.includes('stress64MachineDesigns'))
   assert.ok(replayPreviewSource.includes('stress64BotBlueprints'))
   assert.ok(replayPreviewSource.includes('const botBlueprints = previewOptions.proof === \'stress64\''))
   assert.ok(replayPreviewSource.includes('botBlueprints={botBlueprints}'))
-  assert.ok(
-    replayPreviewSource.includes("proof: proof === 'ability' || proof === 'machine' || proof === 'stress64' ? proof : null"),
-  )
+  assert.ok(replayPreviewSource.includes("const normalizedProof = proof === 'ability' || proof === 'machine' || proof === 'stress64'"))
+  assert.ok(replayPreviewSource.includes('proof: normalizedProof'))
 })
 
 test('referee resolved replay does not restart the renderer for unchanged arena poll snapshots', () => {

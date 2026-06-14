@@ -28,6 +28,7 @@ import { useRefereeRoundAdvance } from './useRefereeRoundAdvance'
 import { useRefereeReplayPayload } from './useRefereeReplayPayload'
 import { useRefereeRoleStates } from './useRefereeRoleStates'
 import { useRefereeLiveCombatFeed } from './useRefereeLiveCombatFeed'
+import { resolveRefereeAutoAdvanceGate } from './refereePacingState'
 
 type SessionLoadState = 'idle' | 'busy'
 
@@ -36,6 +37,7 @@ export function useRefereeConsoleController() {
   const [publicSession, setPublicSession] = useState<PublicSessionState | null>(null)
   const [invites, setInvites] = useState<RoleInvite[]>([])
   const [storedRefereeToken, setStoredRefereeToken] = useState('')
+  const [autoAdvanceRounds, setAutoAdvanceRounds] = useState(false)
   const [loadState, setLoadState] = useState<SessionLoadState>('idle')
   const [error, setError] = useState('')
   const sessionIdRef = useRef(activeSessionId)
@@ -54,6 +56,7 @@ export function useRefereeConsoleController() {
     replayVersion: publicSession?.replayVersion,
     round: publicSession?.round,
   })
+  const pollIntervalMs = refereePollIntervalMs(publicSession)
   const {
     roleLoadState,
     roleStateError,
@@ -62,6 +65,7 @@ export function useRefereeConsoleController() {
     activeSessionId,
     apiBase,
     invites,
+    pollIntervalMs,
     stateVersion: publicSession?.stateVersion,
   })
   const {
@@ -78,6 +82,10 @@ export function useRefereeConsoleController() {
   const activeRefereeToken = storedRefereeToken
   const hasRefereeToken = activeRefereeToken.length > 0
   const completedFightCount = publicSession?.continuation.completedFightCount ?? 0
+  const autoAdvanceGate = useMemo(
+    () => resolveRefereeAutoAdvanceGate(publicSession, roleStates),
+    [publicSession, roleStates],
+  )
   const {
     advanceRoundHint,
     advanceRoundLabel,
@@ -87,6 +95,8 @@ export function useRefereeConsoleController() {
     activeRefereeToken,
     activeSessionId,
     apiBase,
+    autoAdvanceEnabled: autoAdvanceRounds,
+    autoAdvanceReady: autoAdvanceGate.ready,
     hasRefereeToken,
     publicSession,
     clearReplayState,
@@ -190,8 +200,6 @@ export function useRefereeConsoleController() {
 
     void loadPublicState(activeSessionId)
   }, [activeSessionId, clearSessionState, hydrateStoredSession, loadPublicState])
-
-  const pollIntervalMs = refereePollIntervalMs(publicSession)
 
   useEffect(() => {
     if (!activeSessionId || pollIntervalMs === undefined) {
@@ -304,6 +312,8 @@ export function useRefereeConsoleController() {
 
   return {
     activeSessionId,
+    autoAdvanceGate,
+    autoAdvanceRounds,
     advanceRoundHint,
     advanceRoundLabel,
     blueCockpitUrl,
@@ -334,6 +344,7 @@ export function useRefereeConsoleController() {
     roleStates,
     sessionChat,
     storedRefereeToken,
+    setAutoAdvanceRounds,
     submitRoundAdvance,
   }
 }

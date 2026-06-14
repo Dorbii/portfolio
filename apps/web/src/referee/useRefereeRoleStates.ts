@@ -22,11 +22,13 @@ export function useRefereeRoleStates({
   activeSessionId,
   apiBase,
   invites,
+  pollIntervalMs = POLL_INTERVAL_MS,
   stateVersion,
 }: {
   activeSessionId: string
   apiBase: string
   invites: RoleInvite[]
+  pollIntervalMs?: number
   stateVersion: string | undefined
 }) {
   const [roleLoadState, setRoleLoadState] = useState<SessionLoadState>('idle')
@@ -70,7 +72,7 @@ export function useRefereeRoleStates({
   }, [loadStates, stateVersion])
 
   useEffect(() => {
-    if (!activeSessionId || invites.length === 0) {
+    if (!activeSessionId || invites.length === 0 || pollIntervalMs === undefined) {
       return undefined
     }
 
@@ -80,12 +82,12 @@ export function useRefereeRoleStates({
       }
 
       void loadStates({ silent: true })
-    }, POLL_INTERVAL_MS)
+    }, pollIntervalMs)
 
     return () => {
       window.clearInterval(id)
     }
-  }, [activeSessionId, invites.length, loadStates])
+  }, [activeSessionId, invites.length, loadStates, pollIntervalMs])
 
   return {
     roleLoadState,

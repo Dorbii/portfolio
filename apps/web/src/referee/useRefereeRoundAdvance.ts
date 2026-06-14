@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { PublicSessionState } from '../agent/agentSessionTypes.js'
 import {
   advanceRound,
@@ -10,6 +10,8 @@ type RoundAdvanceInput = {
   activeRefereeToken: string
   activeSessionId: string
   apiBase: string
+  autoAdvanceEnabled: boolean
+  autoAdvanceReady: boolean
   hasRefereeToken: boolean
   publicSession: PublicSessionState | null
   clearReplayState: () => void
@@ -44,6 +46,8 @@ export function useRefereeRoundAdvance({
   activeRefereeToken,
   activeSessionId,
   apiBase,
+  autoAdvanceEnabled,
+  autoAdvanceReady,
   hasRefereeToken,
   publicSession,
   clearReplayState,
@@ -125,6 +129,14 @@ export function useRefereeRoundAdvance({
     setPublicSession,
     setStoredRefereeToken,
   ])
+
+  useEffect(() => {
+    if (!autoAdvanceEnabled || !autoAdvanceReady || !canAdvanceRound) {
+      return
+    }
+
+    void submitRoundAdvance()
+  }, [autoAdvanceEnabled, autoAdvanceReady, canAdvanceRound, submitRoundAdvance])
 
   return {
     advanceRoundHint,

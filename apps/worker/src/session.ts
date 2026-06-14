@@ -167,7 +167,7 @@ export type { StoredRoleState, StoredSessionState } from './sessionTypes.js'
 
 const COMBAT_TURN_SECONDS = 60
 const FIGHT_SECONDS = 300
-const COMBAT_TURN_HANDOFF_DELAY_MS = 10_000
+const COMBAT_TURN_HANDOFF_DELAY_MS = 1_500
 const COMBAT_TURN_START_GATE_GRACE_MS = 120_000
 const ROUND_PLAN_SECONDS = 240
 const GAME_MASTER_CATALOG_VERSION = 'part-catalog:v1'

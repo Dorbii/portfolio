@@ -13,17 +13,22 @@ import {
 import {
   Panel,
 } from '../shared/ui'
-import { formatLabel } from '../shared/format'
 import {
   RefereeCockpitStrip,
 } from './RefereeCockpitStrip'
+import { RefereePacingHud } from './RefereePacingHud'
 import { buildRefereeObserverView } from './refereeObserverView'
 import type { ReplayPayload } from './refereeClient'
 import { createRefereeReplayProof, resolveRefereeReplayProofMode } from './refereeReplayProof'
 import { useRefereeConsoleController } from './useRefereeConsoleController'
 import { createLiveArenaStageState } from './liveArenaStage'
 import type { LivePlaybackBufferSnapshot } from '../replay/arena/liveCombatTimeline'
-import { formatLivePlaybackStatus, formatPlaybackSeconds } from './livePlaybackStatusCopy'
+import {
+  formatLivePlaybackStatus,
+  formatLivePlaybackStatusLabel,
+  formatPlaybackSeconds,
+} from './livePlaybackStatusCopy'
+import { buildRefereePacingState } from './refereePacingState'
 
 const ReplayViewer = lazy(() =>
   import('../replay/ReplayViewer').then((module) => ({ default: module.ReplayViewer })),
@@ -86,9 +91,18 @@ function LivePlaybackStatusOverlay({
   return (
     <div
       className={`replay-status-overlay is-live-buffer is-${status.status}`}
+      data-live-playback-buffer-depth={status.bufferDepthSeconds}
+      data-live-playback-buffer-health={status.bufferHealth}
+      data-live-playback-last-seq={status.lastSeq}
+      data-live-playback-max-committed={status.maxCommittedEventTime}
+      data-live-playback-paused-reason={status.pausedReason ?? 'none'}
+      data-live-playback-playhead={status.playheadTime}
+      data-live-playback-server-lag={status.serverLagSeconds}
+      data-live-playback-status={status.status}
+      data-live-playback-target-delay={status.targetDelaySeconds}
       role="status"
     >
-      <strong>{formatLabel(status.status)}</strong>
+      <strong>{formatLivePlaybackStatusLabel(status)}</strong>
       <span>
         {formatLivePlaybackStatus(status)} Playhead {formatPlaybackSeconds(status.playheadTime)} /
         committed {formatPlaybackSeconds(status.maxCommittedEventTime)} /
@@ -174,6 +188,8 @@ function useFightRenderWarmup(publicSession: PublicSessionState | null): boolean
 export function RefereeConsole() {
   const {
     activeSessionId,
+    autoAdvanceGate,
+    autoAdvanceRounds,
     advanceRoundHint,
     advanceRoundLabel,
     blueCockpitUrl,
@@ -201,6 +217,7 @@ export function RefereeConsole() {
     roleStates,
     sessionChat,
     storedRefereeToken,
+    setAutoAdvanceRounds,
     submitRoundAdvance,
   } = useRefereeConsoleController()
   const replayProofMode = useMemo(() => resolveRefereeReplayProofMode(window.location.search), [])
@@ -222,6 +239,7 @@ export function RefereeConsole() {
   const [archiveLoadState, setArchiveLoadState] = useState<'busy' | 'idle'>('idle')
   const [archiveError, setArchiveError] = useState('')
   const [livePlaybackStatus, setLivePlaybackStatus] = useState<LivePlaybackBufferSnapshot | null>(null)
+  const [clockNowMs, setClockNowMs] = useState(() => Date.now())
   const fightComms = [
     ...displaySessionChat.map((message) => ({ ...message, visibility: 'public' as const })),
     ...(['red', 'blue'] as const).flatMap((role) =>
@@ -246,6 +264,16 @@ export function RefereeConsole() {
     () => buildRefereeObserverView({ publicSession: displayPublicSession, replayPayload: displayReplayPayload }),
     [displayPublicSession, displayReplayPayload],
   )
+  const pacingState = useMemo(
+    () => buildRefereePacingState({
+      liveCombatFeed: displayLiveCombatFeed,
+      livePlaybackStatus,
+      nowMs: clockNowMs,
+      publicSession: displayPublicSession,
+      roleStates: displayRoleStates,
+    }),
+    [clockNowMs, displayLiveCombatFeed, displayPublicSession, displayRoleStates, livePlaybackStatus],
+  )
   const shouldDeferFightRender = useFightRenderWarmup(displayPublicSession)
   const reviewingArchivedReplay = archiveReplayPayload !== null
   const stageReplayPayload = archiveReplayPayload ?? displayReplayPayload
@@ -261,6 +289,16 @@ export function RefereeConsole() {
     livePlaybackStatus !== null &&
     livePlaybackStatus.status !== 'idle'
   const shouldShowSessionCompletion = displayPublicSession?.phase === 'session_complete'
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setClockNowMs(Date.now())
+    }, 1_000)
+
+    return () => {
+      window.clearInterval(id)
+    }
+  }, [])
 
   useEffect(() => {
     setArchiveReplayPayload(null)
@@ -357,6 +395,7 @@ export function RefereeConsole() {
               <RefereeCockpitStrip
                 forceVisible
                 loadState={roleLoadState}
+                pacingState={pacingState}
                 placement="stage"
                 observerView={observerView}
                 roleStates={displayRoleStates}
@@ -381,6 +420,7 @@ export function RefereeConsole() {
             {observerView.showCockpitStrip && !showFightCockpitStage ? (
               <RefereeCockpitStrip
                 loadState={roleLoadState}
+                pacingState={pacingState}
                 placement="stage"
                 livePlaybackStatus={livePlaybackStatus}
                 observerView={observerView}
@@ -421,6 +461,19 @@ export function RefereeConsole() {
             onRefresh: refreshStoredSession,
             tokenStored: !replayProof && Boolean(storedRefereeToken),
           }}
+        />
+
+        <RefereePacingHud
+          autoAdvance={{
+            enabled: !replayProof && autoAdvanceRounds,
+            onChange: setAutoAdvanceRounds,
+            ready: !replayProof && autoAdvanceGate.ready,
+            reason: !replayProof && !storedRefereeToken
+              ? 'Referee token is required for auto advance.'
+              : autoAdvanceGate.reason,
+            toggleDisabled: Boolean(replayProof) || !storedRefereeToken,
+          }}
+          pacingState={pacingState}
         />
 
         <section className="match-dashboard-panels" aria-label="Match dashboard">

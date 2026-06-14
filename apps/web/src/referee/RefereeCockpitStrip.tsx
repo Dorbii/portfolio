@@ -16,11 +16,13 @@ import {
 } from '../shared/teamVisuals'
 import type { RefereeObserverLifecycle } from './refereeObserverView'
 import { formatLivePlaybackStatus } from './livePlaybackStatusCopy'
+import type { RefereePacingState } from './refereePacingState'
 
 type RefereeCockpitStripProps = {
   forceVisible?: boolean
   livePlaybackStatus?: LivePlaybackBufferSnapshot | null
   loadState: 'busy' | 'idle'
+  pacingState?: RefereePacingState
   placement?: 'page' | 'stage'
   observerView: Pick<RefereeObserverLifecycle, 'stage' | 'decisionText'>
   roleStates: Partial<Record<TeamRole, RolePrivateState>>
@@ -40,6 +42,7 @@ export function RefereeCockpitStrip({
   forceVisible = false,
   livePlaybackStatus,
   loadState,
+  pacingState,
   placement = 'page',
   observerView,
   roleStates,
@@ -64,7 +67,7 @@ export function RefereeCockpitStrip({
           <h2 id="referee-cockpit-strip-heading">Garage</h2>
         </div>
         <p role={stateError ? 'alert' : undefined}>
-          {resolveStripStatusCopy(observerView, loadState, stateError, livePlaybackStatus)}
+          {resolveStripStatusCopy(observerView, loadState, stateError, livePlaybackStatus, pacingState)}
         </p>
       </div>
       <div className="referee-cockpit-grid">
@@ -153,6 +156,7 @@ function resolveStripStatusCopy(
   loadState: 'busy' | 'idle',
   stateError: string,
   livePlaybackStatus: LivePlaybackBufferSnapshot | null | undefined,
+  pacingState: RefereePacingState | undefined,
 ): string {
   if (stateError) {
     return stateError
@@ -164,6 +168,10 @@ function resolveStripStatusCopy(
 
   if (observerView.stage === 'resolved_replay') {
     return `Replay complete: ${observerView.decisionText}`
+  }
+
+  if (pacingState) {
+    return pacingState.statusLine
   }
 
   if (observerView.stage === 'loadout_window') {
@@ -182,7 +190,7 @@ function resolveStripStatusCopy(
     return formatLivePlaybackStatus(livePlaybackStatus)
   }
 
-  return 'Live observer state.'
+  return 'Waiting on agents.'
 }
 
 function ArenaMonologueCard({

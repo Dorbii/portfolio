@@ -1,4 +1,4 @@
-import { Component, Suspense, lazy, type ReactNode } from 'react'
+import { Component, Suspense, lazy, useEffect, useState, type ReactNode } from 'react'
 import { AgentRoutePreflight } from './agent/AgentRoutePreflight'
 import { RefereeConsole } from './referee/RefereeConsole'
 
@@ -12,14 +12,31 @@ const PartCatalogPage = lazy(() =>
   import('./replay/catalog/PartCatalogPage').then((module) => ({ default: module.PartCatalogPage })),
 )
 
+const ARENA_SITE_ORIGIN = 'https://arena.dorbii.net'
+const ARENA_APP_SRC = `${ARENA_SITE_ORIGIN}/`
+
 export default function App() {
   const pathname = window.location.pathname
+  const hostname = window.location.hostname
   const isAgentPath = isAgentPathname(pathname)
+  const documentTitle = resolveDocumentTitle(pathname, hostname)
+
+  useEffect(() => {
+    document.title = documentTitle
+  }, [documentTitle])
 
   if (isPartCatalogPathname(pathname)) {
     return (
       <Suspense fallback={<RouteFallback label="Loading part catalog." />}>
         <PartCatalogPage />
+      </Suspense>
+    )
+  }
+
+  if (isArenaEmbedPathname(pathname)) {
+    return (
+      <Suspense fallback={<RouteFallback label="Loading arena embed." />}>
+        <ReplayPreview defaultProof="machine" />
       </Suspense>
     )
   }
@@ -55,6 +72,10 @@ export default function App() {
         </RouteErrorBoundary>
       </>
     )
+  }
+
+  if (shouldRenderPortfolioHome(pathname, hostname)) {
+    return <PortfolioHomePage />
   }
 
   return <RefereeConsole />
@@ -102,6 +123,12 @@ function isReplayPreviewPathname(pathname: string) {
   return normalized === '/replay-preview' || normalized.endsWith('/replay-preview')
 }
 
+function isArenaEmbedPathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '')
+
+  return normalized === '/embed' || normalized.endsWith('/embed')
+}
+
 function isPrivacyPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
@@ -112,6 +139,139 @@ function isPartCatalogPathname(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '')
 
   return normalized === '/part-catalog' || normalized.endsWith('/part-catalog')
+}
+
+function shouldRenderPortfolioHome(pathname: string, hostname: string) {
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+  const host = hostname.toLowerCase()
+
+  return (
+    normalized === '/portfolio' ||
+    normalized === '/clash-of-clankers' ||
+    host === 'dorbii.github.io' ||
+    host === 'dorbii.net' ||
+    host === 'www.dorbii.net'
+  )
+}
+
+function resolveDocumentTitle(pathname: string, hostname: string) {
+  if (isPartCatalogPathname(pathname)) {
+    return 'Clash of Clankers Part Catalog'
+  }
+
+  if (isArenaEmbedPathname(pathname)) {
+    return 'Clash of Clankers Embed'
+  }
+
+  if (isReplayPreviewPathname(pathname)) {
+    return 'Clash of Clankers Replay Preview'
+  }
+
+  if (isPrivacyPathname(pathname)) {
+    return 'Clash of Clankers Privacy Policy'
+  }
+
+  if (isAgentPathname(pathname)) {
+    return 'Clash of Clankers Agent Cockpit'
+  }
+
+  if (shouldRenderPortfolioHome(pathname, hostname)) {
+    return 'Dorbii Portfolio'
+  }
+
+  return 'Clash of Clankers'
+}
+
+function PortfolioHomePage() {
+  const arenaAppSrc = resolveArenaAppSrc()
+  const [arenaWindowOpen, setArenaWindowOpen] = useState(false)
+
+  return (
+    <main className="portfolio-home">
+      <header className="portfolio-system-bar">
+        <strong>Dorbii</strong>
+        <span>Portfolio</span>
+      </header>
+
+      <section className="portfolio-desktop-workspace" aria-labelledby="portfolio-title">
+        <div className="portfolio-desktop-brand">
+          <span className="eyebrow">Portfolio</span>
+          <h1 id="portfolio-title">Dorbii</h1>
+          <p>AI combat engineering, browser automation surfaces, replay rendering, and Cloudflare infrastructure.</p>
+        </div>
+
+        <div className="portfolio-desktop-icons" aria-label="Desktop apps">
+          <button
+            className="portfolio-desktop-icon"
+            onClick={() => setArenaWindowOpen(true)}
+            type="button"
+          >
+            <span aria-hidden="true" className="portfolio-app-glyph portfolio-app-glyph-arena">
+              <span />
+            </span>
+            <span>Clash of Clankers</span>
+          </button>
+          <a
+            className="portfolio-desktop-icon"
+            href="https://github.com/Dorbii/portfolio"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span aria-hidden="true" className="portfolio-app-glyph portfolio-app-glyph-source">
+              <span />
+            </span>
+            <span>Source</span>
+          </a>
+        </div>
+
+        {arenaWindowOpen ? (
+          <section className="portfolio-app-window" aria-label="Clash of Clankers embedded app">
+            <div className="portfolio-window-bar">
+              <div className="portfolio-window-controls">
+                <button
+                  aria-label="Close Clash of Clankers"
+                  className="portfolio-window-control is-close"
+                  onClick={() => setArenaWindowOpen(false)}
+                  type="button"
+                >
+                  <span aria-hidden="true" />
+                </button>
+              </div>
+              <strong>Clash of Clankers</strong>
+              <a
+                aria-label="Open Clash of Clankers in a new tab"
+                href={ARENA_SITE_ORIGIN}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Open full arena
+              </a>
+            </div>
+            <iframe
+              allow="fullscreen"
+              className="portfolio-arena-frame"
+              loading="eager"
+              referrerPolicy="strict-origin-when-cross-origin"
+              src={arenaAppSrc}
+              title="Clash of Clankers arena"
+            />
+          </section>
+        ) : null}
+      </section>
+    </main>
+  )
+}
+
+function resolveArenaAppSrc() {
+  if (isLocalDevHost(window.location.hostname)) {
+    return `${window.location.origin}/`
+  }
+
+  return ARENA_APP_SRC
+}
+
+function isLocalDevHost(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]'
 }
 
 function PrivacyPolicyPage() {
