@@ -24,7 +24,7 @@ function permutations(items) {
   );
 }
 
-test("server-renders the evidence atlas and its three curated traces", async () => {
+test("server-renders the evidence atlas and its project launcher", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -32,11 +32,10 @@ test("server-renders the evidence atlas and its three curated traces", async () 
 
   assert.match(html, /Steven Doris/);
   assert.match(html, /Senior full-stack \/ platform engineer/i);
-  assert.match(html, /Open a case study/i);
+  assert.match(html, /Projects/i);
+  assert.match(html, /Choose a project/i);
   assert.doesNotMatch(html, /Filter the evidence map/i);
-  assert.match(html, /Agent tooling/i);
-  assert.match(html, /Context control/i);
-  assert.match(html, /VM platform/i);
+  assert.doesNotMatch(html, /Case studies/i);
   assert.match(html, /steven-doris-resume\.pdf/);
   assert.match(html, /steven-doris-resume\.docx/);
   assert.match(html, /og:image/);
@@ -46,6 +45,10 @@ test("server-renders the evidence atlas and its three curated traces", async () 
   assert.doesNotMatch(
     html,
     /Systems for controlled work|Three systems\. Clear evidence|world-class|supercharge/i,
+  );
+  assert.doesNotMatch(
+    html,
+    /\.py\b|internal repository|credential name|job identifier/i,
   );
 });
 
@@ -58,7 +61,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     graphLayout,
     particleField,
     inspector,
-    traceInspector,
+    projectInspector,
     queryInspector,
     data,
     query,
@@ -111,7 +114,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     ),
     readFile(
       new URL(
-        "../features/evidence-atlas/components/trace-inspector.tsx",
+        "../features/evidence-atlas/components/project-inspector.tsx",
         import.meta.url,
       ),
       "utf8",
@@ -147,13 +150,20 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     ),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
   ]);
+  const visualTokens = await readFile(
+    new URL(
+      "../features/evidence-atlas/rendering/visual-tokens.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  );
 
   assert.match(route, /import \{ EvidenceAtlas \}/);
   assert.doesNotMatch(route, /useState|useEffect|useCallback/);
   assert.match(atlas, /useEvidenceAtlasState/);
   assert.match(atlas, /<EvidenceGraph/);
   assert.match(atlas, /<EvidenceInspector/);
-  assert.match(atlas, /mode-trace/);
+  assert.match(atlas, /mode-project/);
   assert.match(atlas, /mode-explore/);
 
   assert.match(state, /window\.history\.replaceState/);
@@ -180,18 +190,37 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(particleField, /nodeFieldAlphaIdle/);
   assert.match(particleField, /function mixColor/);
   assert.match(particleField, /function drawAttentionBloom/);
-  assert.match(particleField, /const activeFlow/);
+  assert.doesNotMatch(particleField, /const activeFlow/);
   assert.match(particleField, /CanvasRenderingContext2D/);
+  assert.match(particleField, /function drawSemanticTokens/);
+  assert.match(particleField, /export function drawParticleFieldBase/);
+  assert.match(particleField, /export function drawParticleFieldMotion/);
+  assert.match(particleField, /export function particleTransit/);
+  assert.match(particleField, /export function visualTokenPromotion/);
+  assert.match(particleField, /export function visualTokenEchoCount/);
+  assert.match(particleField, /motionTimeScale: 0\.68/);
+  assert.match(particleField, /drawVisualTokenSprite/);
   assert.doesNotMatch(particleField, /activeTrace/);
+  assert.match(visualTokens, /const tokenSpriteCache/);
+  assert.match(visualTokens, /context\.drawImage\(sprite/);
+  assert.match(visualTokens, /const TOKEN_COLOR_STEP = 32/);
 
   assert.match(graph, /prefers-reduced-motion: reduce/);
+  assert.match(graph, /PARTICLE_FRAME_INTERVAL = 1000 \/ 30/);
+  assert.match(graph, /const baseCanvas = document\.createElement\("canvas"\)/);
   assert.match(graph, /selectedIds\.length > 0 \? selectedIds : previewId/);
+  assert.match(graph, /graph-viewport-controls/);
+  assert.match(graph, /onPointerDown=\{handlePointerDown\}/);
+  assert.match(graph, /addEventListener\("wheel", handleWheel, \{ passive: false \}\)/);
+  assert.match(graph, /inspectorOpen/);
+  assert.match(graph, /graphPointToScreen/);
+  assert.doesNotMatch(graph, /--graph-scale/);
   assert.doesNotMatch(graph, /relative field density|activeTrace/);
-  assert.match(inspector, /<TraceInspector/);
+  assert.match(inspector, /<ProjectInspector/);
   assert.match(inspector, /<QueryInspector/);
-  assert.match(traceInspector, /Trace playback controls/);
-  assert.match(traceInspector, /Evidence boundary/);
-  assert.match(traceInspector, /Replay/);
+  assert.match(projectInspector, /Project playback controls/);
+  assert.match(projectInspector, /Evidence boundary/);
+  assert.match(projectInspector, /Replay/);
   assert.match(queryInspector, /aria-labelledby="query-inspector-title"/);
   assert.match(queryInspector, /Each hop is backed by a shared evidence record/);
   assert.match(queryInspector, /Supporting records/);
@@ -203,16 +232,192 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(globalStyles, /features\/evidence-atlas\/styles/);
   assert.match(featureStyles, /\.graph-node:focus-visible/);
   assert.match(featureStyles, /\.graph-node\.is-preview/);
-  assert.match(featureStyles, /\.case-study-nav/);
+  assert.match(featureStyles, /\.project-nav/);
+  assert.match(featureStyles, /\.graph-viewport-controls/);
+  assert.doesNotMatch(featureStyles, /\.node-layer\s*\{[^}]*transform/);
   assert.doesNotMatch(featureStyles, /\.toolbar-group/);
   assert.match(featureStyles, /position: fixed/);
   assert.match(featureStyles, /width: min\(520px, calc\(100vw - 32px\)\)/);
-  assert.match(featureStyles, /\.trace-step/);
-  assert.match(featureStyles, /\.trace-player/);
+  assert.match(featureStyles, /\.project-step/);
+  assert.match(featureStyles, /\.project-player/);
   assert.match(featureStyles, /height: 100svh/);
   assert.match(featureStyles, /@media \(max-width: 940px\)/);
   assert.match(layout, /summary_large_image/);
   assert.match(layout, /favicon\.svg/);
+});
+
+test("keeps viewport transforms anchored and visual tokens evidence-scoped", async (t) => {
+  const vite = await createServer({
+    configFile: false,
+    server: { middlewareMode: true },
+    appType: "custom",
+    logLevel: "silent",
+  });
+  t.after(() => vite.close());
+  const [viewportModule, tokenModule, particleModule, dataModule] =
+    await Promise.all([
+      vite.ssrLoadModule(
+        "/features/evidence-atlas/rendering/graph-viewport.ts",
+      ),
+      vite.ssrLoadModule(
+        "/features/evidence-atlas/rendering/visual-tokens.ts",
+      ),
+      vite.ssrLoadModule(
+        "/features/evidence-atlas/rendering/particle-field.ts",
+      ),
+      vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
+    ]);
+
+  const size = { width: 1200, height: 800 };
+  const current = { scale: 1, x: 0, y: 0 };
+  const anchor = { x: 840, y: 260 };
+  const worldBefore = viewportModule.screenPointToGraph(anchor, current);
+  const zoomed = viewportModule.zoomGraphViewportAt(
+    current,
+    size,
+    anchor,
+    1.6,
+  );
+  const worldAfter = viewportModule.screenPointToGraph(anchor, zoomed);
+  assert.ok(Math.abs(worldBefore.x - worldAfter.x) < 0.001);
+  assert.ok(Math.abs(worldBefore.y - worldAfter.y) < 0.001);
+  assert.deepEqual(
+    viewportModule.graphPointToScreen(worldAfter, zoomed),
+    anchor,
+  );
+
+  const clamped = viewportModule.clampGraphViewport(
+    { scale: 99, x: -99999, y: 99999 },
+    size,
+  );
+  assert.equal(clamped.scale, viewportModule.MAX_GRAPH_SCALE);
+  assert.equal(viewportModule.MAX_GRAPH_SCALE, 4.5);
+  assert.ok(clamped.x > -99999);
+  assert.ok(clamped.y < 99999);
+
+  const drawerClamped = viewportModule.clampGraphViewport(
+    { scale: 1, x: -99999, y: 0 },
+    size,
+    { right: 520 },
+  );
+  assert.ok(
+    drawerClamped.x <= -520,
+    "an open drawer must allow the graph to pan fully clear of its overlay",
+  );
+
+  for (const node of dataModule.graphNodes) {
+    assert.ok(
+      tokenModule.visualTokenByNodeId[node.id],
+      `missing visual token for ${node.id}`,
+    );
+  }
+  for (const project of dataModule.evidenceTraces) {
+    assert.ok(
+      tokenModule.visualTokenByProjectId[project.id],
+      `missing project packet for ${project.id}`,
+    );
+  }
+  assert.equal(tokenModule.visualTokenByNodeId.docker.label, "Docker");
+  assert.equal(tokenModule.visualTokenByNodeId.databricks.label, "Databricks");
+  assert.deepEqual(tokenModule.visualTokenByNodeId.go, {
+    kind: "image-mask",
+    label: "Go gopher face",
+    src: tokenModule.visualTokenByNodeId.go.src,
+    crop: "face",
+  });
+  assert.deepEqual(
+    tokenModule.visualTokenVariantsByNodeId.go.map((token) => token.label),
+    ["Go gopher face", "Go wordmark"],
+  );
+  assert.equal(tokenModule.visualTokenForNode("go", 0).crop, "face");
+  assert.equal(tokenModule.visualTokenForNode("go", 1).label, "Go wordmark");
+  assert.equal(tokenModule.visualTokenForNode("go", 2).crop, "face");
+  assert.equal(tokenModule.visualTokenForNode("react", 99).label, "React");
+  assert.equal(
+    tokenModule.visualTokenForProject("governed-agent-tooling").label,
+    "Kaizen",
+  );
+  assert.equal(
+    tokenModule.visualTokenForProject("cross-provider-orchestration").label,
+    "Vendy",
+  );
+  assert.equal(particleModule.visualTokenEchoCount("capability", 1), 3);
+  assert.equal(particleModule.visualTokenEchoCount("technology", 1), 2);
+  assert.equal(particleModule.visualTokenEchoCount("capability", 0.39), 1);
+  assert.equal(particleModule.visualTokenEchoCount("capability", 0.27), 0);
+  assert.equal(particleModule.semanticZoomLevel(1), 0);
+  assert.equal(particleModule.semanticZoomLevel(4.5), 1);
+  assert.equal(particleModule.semanticTokenBridgeLimit(1), 0);
+  assert.equal(particleModule.semanticTokenBridgeLimit(1.45), 1);
+  assert.ok(
+    particleModule.semanticTokenBridgeLimit(2.5) >
+      particleModule.semanticTokenBridgeLimit(1.45),
+  );
+  assert.equal(particleModule.semanticTokenBridgeLimit(4.5), 6);
+
+  const transitA = particleModule.particleTransit(12_000, 17);
+  const transitB = particleModule.particleTransit(12_000, 18);
+  assert.notEqual(transitA.progress, transitB.progress);
+  assert.ok(transitA.alpha >= 0 && transitA.alpha <= 1);
+  assert.ok(transitB.alpha >= 0 && transitB.alpha <= 1);
+
+  const point = { x: 400, y: 300 };
+  const idlePromotion = particleModule.visualTokenPromotion(
+    "react",
+    point,
+    new Set(),
+    null,
+    {
+      viewport: current,
+      cursor: point,
+      motionEnabled: true,
+      occludedRight: 0,
+    },
+  );
+  assert.equal(idlePromotion, 0, "overview mode must remain particle-first");
+
+  const shallowZoomPromotion = particleModule.visualTokenPromotion(
+    "react",
+    point,
+    new Set(["react"]),
+    null,
+    {
+      viewport: { scale: 1.6, x: 0, y: 0 },
+      cursor: point,
+      motionEnabled: true,
+      occludedRight: 0,
+    },
+  );
+  assert.equal(shallowZoomPromotion, 0, "node icons must require deeper zoom");
+
+  const deepZoom = { ...zoomed, scale: 2 };
+  const selectedPromotion = particleModule.visualTokenPromotion(
+    "react",
+    point,
+    new Set(["react"]),
+    null,
+    {
+      viewport: deepZoom,
+      cursor: null,
+      motionEnabled: true,
+      occludedRight: 0,
+    },
+  );
+  assert.equal(selectedPromotion, 1);
+
+  const nearbyPromotion = particleModule.visualTokenPromotion(
+    "postgresql",
+    point,
+    new Set(),
+    null,
+    {
+      viewport: deepZoom,
+      cursor: { x: 410, y: 302 },
+      motionEnabled: true,
+      occludedRight: 0,
+    },
+  );
+  assert.ok(nearbyPromotion > 0.7);
 });
 
 test("resolves direct, shared-trace, bridged, and disconnected queries", async (t) => {
@@ -231,7 +436,10 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
   assert.equal(direct.mode, "direct");
   assert.ok(direct.directRecords.length > 0);
 
-  const sharedTrace = resolveEvidenceQuery(["kinforge", "skills-system"]);
+  const sharedTrace = resolveEvidenceQuery([
+    "deterministic-replay",
+    "context-budgeting",
+  ]);
   assert.equal(sharedTrace.mode, "shared-trace");
   assert.deepEqual(sharedTrace.relatedTraceIds, ["bounded-agent-context"]);
   assert.ok(sharedTrace.pathSegments.length > 0);
@@ -270,7 +478,7 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
   assert.equal(disconnected.pathSegments.length, 0);
 });
 
-test("keeps evidence records and traces referentially consistent", async (t) => {
+test("keeps projects, evidence records, and graph nodes separated", async (t) => {
   const vite = await createServer({
     configFile: false,
     server: { middlewareMode: true },
@@ -287,6 +495,12 @@ test("keeps evidence records and traces referentially consistent", async (t) => 
   assert.equal(nodeIds.size, graphNodes.length);
   assert.equal(recordIds.size, evidenceRecords.length);
   assert.equal(traceIds.size, evidenceTraces.length);
+  assert.equal(evidenceTraces.length, 10);
+  assert.ok(graphNodes.every((node) => node.kind !== "system"));
+  assert.ok(
+    evidenceTraces.every((project) => !nodeIds.has(project.id)),
+    "projects must not be graph nodes",
+  );
 
   for (const record of evidenceRecords) {
     assert.ok(traceIds.has(record.traceId), `unknown trace on ${record.id}`);
@@ -302,6 +516,11 @@ test("keeps evidence records and traces referentially consistent", async (t) => 
       .map((record) => record.id)
       .sort();
     assert.deepEqual([...trace.evidenceIds].sort(), traceRecordIds);
+    if (trace.replayStatus === "ready") {
+      assert.ok(traceRecordIds.length > 1, `replay-ready project ${trace.id} has no flow`);
+    } else {
+      assert.equal(traceRecordIds.length, 0, `overview project ${trace.id} has replay steps`);
+    }
     assert.deepEqual(
       evidenceRecords
         .filter((record) => record.traceId === trace.id)

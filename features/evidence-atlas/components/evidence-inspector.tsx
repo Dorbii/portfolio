@@ -1,8 +1,8 @@
 "use client";
 
 import { traceById } from "../model/evidence-data";
+import { ProjectInspector } from "./project-inspector";
 import { QueryInspector } from "./query-inspector";
-import { TraceInspector } from "./trace-inspector";
 
 type EvidenceInspectorProps = {
   activeTraceId: string | null;
@@ -31,13 +31,13 @@ export function EvidenceInspector({
 
   if (trace) {
     return (
-      <TraceInspector
-        trace={trace}
-        traceStep={traceStep}
-        isTracePlaying={isTracePlaying}
+      <ProjectInspector
+        project={trace}
+        projectStep={traceStep}
+        isProjectPlaying={isTracePlaying}
         onClose={onCloseTrace}
-        onTraceStepChange={onTraceStepChange}
-        onToggleTracePlayback={onToggleTracePlayback}
+        onProjectStepChange={onTraceStepChange}
+        onToggleProjectPlayback={onToggleTracePlayback}
       />
     );
   }

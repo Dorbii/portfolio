@@ -1,7 +1,8 @@
 # Visual Token Catalog
 
-Status: design catalog only. No token assets or runtime icon dependency have
-been added to the portfolio.
+Status: phase-one runtime prototype. The atlas now promotes a bounded set of
+particles into semantic masks during zoom, cursor proximity, selection, and
+active evidence paths.
 
 ## Purpose
 
@@ -28,7 +29,7 @@ technology token.
 
 | Node | Proposed reference | Mask direction | Tracked use | Ambient use | Priority | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Go | Custom compact Gopher derived from the Go visual language | Simplified head-and-ears silhouette | Follow records containing `go` from the selected Go node | 1–3 faint echoes only in Go-supported fields | P0 | The `SiGo` wordmark is less useful at particle scale than a recognizable Gopher mask |
+| Go | Supplied Go gopher artwork + official Go wordmark path | Tight face crop and `GO` mark | Follow records containing `go` from the selected Go node | Mix recognizable gopher faces and wordmark echoes in Go-supported fields | P0 | The full-body mascot does not survive particle scale; preserve the eyes, teeth, and outline instead |
 | TypeScript | Simple Icons / `SiTypescript` | Preserve the `TS` cutout in a square mask | Follow TypeScript-backed Kinforge records | Faint echoes around TypeScript-supported fields | P1 | Test legibility before accepting a sub-16px version |
 | React | Simple Icons / `SiReact` | Preserve the atom silhouette | Follow React-backed interface records | Sparse orbit-like echoes without adding literal orbit lines | P0 | Strong small-size silhouette |
 | AWS | Generic cloud silhouette or isolated AWS-style arrow | Prefer the cloud for ambient masks and test the arrow for tracked tokens | Follow AWS-backed Vendy records | Sparse cloud echoes in AWS-supported fields | P0 | Do not use the full `aws` wordmark at particle scale |
@@ -36,15 +37,7 @@ technology token.
 | Redis | Simple Icons / `SiRedis` | Preserve the stacked-database silhouette | Follow safe-write and coordination records | Sparse echoes in Redis-supported fields | P1 | Avoid making stack count look quantitative |
 | OpenAPI | Simple Icons / `SiOpenapiinitiative` | Preserve the aperture/ring silhouette | Follow generated-contract records | Sparse echoes near OpenAPI-supported fields | P1 | Must remain distinct from the generic evidence-packet glyphs |
 | MCP | Custom generic protocol connector | Two linked endpoints, a compact plug, or a small routing fork | Follow MCP-backed governed-agent records | Minimal connector echoes | P0 | Present it as the atlas's MCP glyph, not an official MCP logo |
-
-## Approved technology additions
-
-These technologies have user-approved, public-safe evidence summaries. They
-still require corresponding graph nodes and curated records before appearing in
-the atlas.
-
-| Candidate | Proposed reference | Mask direction | Tracked use | Ambient use | Priority | Public-safe evidence summary |
-| --- | --- | --- | --- | --- | --- | --- |
+| Python | Simple Icons / `SiPython` | Preserve the paired-snake silhouette | Follow repository-ingestion records | Sparse echoes in the metrics-pipeline field | P0 | Scheduled ingestion, API coordination, and validation |
 | Docker | Simple Icons / `SiDocker` | Preserve the whale-and-containers silhouette | Follow records for the Bitbucket ingestion workload | Sparse echoes around the ingestion pipeline field | P0 | Containerized execution for a Python Bitbucket ingestion pipeline |
 | Databricks | Simple Icons / `SiDatabricks` | Preserve the stacked open-box silhouette | Follow records for scheduled ingestion and validation | Sparse echoes around scheduled-job and data-quality fields | P0 | Scheduled Python ingestion job using three shards, a three-key authentication pool to reduce rate-limit failures, and data-quality checks |
 
@@ -95,8 +88,9 @@ semantics and are not necessarily the literal rendered shapes.
 
 ## Asset constraints
 
-- Use React Icons and Simple Icons as a reference catalog, not as a required
-  runtime dependency.
+- Import only the selected Simple Icons SVG sources as raw path data. Do not
+  import the package-wide JavaScript catalog; doing so materially slows the
+  production build.
 - Mechanically normalize established technology silhouettes; do not use an
   image model to approximate brand marks.
 - Build custom derivatives only for personal/project artwork such as Sensei,
@@ -133,7 +127,7 @@ without implying that visitors can inspect the underlying repository.
 The first implementation experiment should cover different silhouette risks:
 
 1. Kaizen K — simple custom mark.
-2. Go Gopher — custom recognizable character mask.
+2. Go — supplied gopher face crop plus official wordmark path.
 3. PostgreSQL — detailed established technology silhouette.
 4. React — thin established technology silhouette.
 5. AWS cloud/arrow — generic platform silhouette.
@@ -155,12 +149,34 @@ revise that token rather than weakening the common rules for every token.
 - NinjaOne brand assets: <https://www.ninjaone.com/brand/>
 - Tanium logo pack: <https://www.tanium.com/newsroom/media-kit/logo-pack/>
 
-## Decisions before implementation
+## Implemented prototype decisions
 
-- Confirm the P0 prototype set.
-- Decide the graph scale or interaction threshold at which tokens become
-  recognizable.
-- Decide whether a tracked token loops, travels once, or ping-pongs.
-- Choose a maximum ambient count per supported field.
-- Compare one compact atlas against direct `Path2D` masks using the same six
-  prototypes before choosing the runtime representation.
+- The overview remains particle-first. Tokens begin promoting at 116% zoom.
+- Selection and cursor proximity raise token visibility; deeper zoom reveals
+  faint ambient echoes without requiring two visible nodes.
+- Active evidence bridges reuse the existing particle flow and promote at most
+  two particles into semantic tokens. There is no separate tracked-packet
+  state machine.
+- Each promoted field renders one focal token plus low-opacity echoes mixed
+  into its particles: up to six for generic capabilities, four for
+  technologies, and two for systems. Counts depend on zoom and interaction,
+  never evidence strength. Echoes are smaller, flatter, and distributed across
+  the field rather than arranged as a second visual ring.
+- Tokens keep a bounded screen-space size and are culled before intersecting
+  the viewport edge or an open evidence drawer.
+- A shared 0.68 motion-time factor keeps field drift, bridge flow, blooms, and
+  semantic tokens synchronized at a calmer pace.
+- Reduced-motion mode places active bridge tokens at the midpoint.
+- Established technology masks use targeted Simple Icons path data. Personal,
+  system, and evidence-class glyphs use the local Canvas2D vocabulary.
+- Vector masks are rasterized once into small quantized-color sprites. Animated
+  frames reuse those sprites with `drawImage`; they do not rebuild detailed
+  paths and shadows for every echo on every frame.
+
+## Remaining prototype work
+
+- Validate the compact original gopher glyph at the actual zoom threshold.
+- Validate the Python, Docker, and Databricks masks against the new metrics
+  trace at the actual zoom threshold.
+- Add Sensei and employer identity marks only in experience-specific surfaces;
+  they should not become generic ambient particles.

@@ -30,7 +30,7 @@ export function useEvidenceAtlasState() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const params = new URLSearchParams(window.location.search);
-      const requestedTrace = params.get("trace");
+      const requestedTrace = params.get("project") ?? params.get("trace");
       const requestedFocus = params
         .get("focus")
         ?.split(",")
@@ -38,11 +38,16 @@ export function useEvidenceAtlasState() {
         .slice(0, MAX_MANUAL_SELECTIONS);
 
       if (requestedTrace && traceById.has(requestedTrace)) {
+        const trace = traceById.get(requestedTrace)!;
         const traceRecords = recordsForTrace(requestedTrace);
         setActiveTraceId(requestedTrace);
         setActiveTraceStep(0);
-        setSelectedIds(traceRecords[0]?.nodeIds ?? []);
-        setTracePlayback(supportsTraceMotion());
+        setSelectedIds(traceRecords[0]?.nodeIds ?? trace.nodeIds);
+        setTracePlayback(
+          trace.replayStatus === "ready" &&
+            traceRecords.length > 1 &&
+            supportsTraceMotion(),
+        );
       } else if (requestedFocus && requestedFocus.length > 0) {
         setSelectedIds(requestedFocus);
       }
@@ -55,7 +60,7 @@ export function useEvidenceAtlasState() {
   useEffect(() => {
     if (!urlReady) return;
     const params = new URLSearchParams();
-    if (activeTraceId) params.set("trace", activeTraceId);
+    if (activeTraceId) params.set("project", activeTraceId);
     else if (selectedIds.length > 0) params.set("focus", selectedIds.join(","));
     const query = params.toString();
     window.history.replaceState(
@@ -98,12 +103,17 @@ export function useEvidenceAtlasState() {
   );
 
   const openTrace = useCallback((traceId: string) => {
+    const trace = traceById.get(traceId);
     const traceRecords = recordsForTrace(traceId);
-    if (!traceById.has(traceId) || traceRecords.length === 0) return;
+    if (!trace) return;
     setActiveTraceId(traceId);
     setActiveTraceStep(0);
-    setSelectedIds(traceRecords[0].nodeIds);
-    setTracePlayback(supportsTraceMotion());
+    setSelectedIds(traceRecords[0]?.nodeIds ?? trace.nodeIds);
+    setTracePlayback(
+      trace.replayStatus === "ready" &&
+        traceRecords.length > 1 &&
+        supportsTraceMotion(),
+    );
     setPreviewId(null);
   }, []);
 

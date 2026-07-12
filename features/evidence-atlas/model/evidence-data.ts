@@ -1,5 +1,5 @@
 // Static portfolio evidence and the indexes derived from it.
-export type NodeKind = "capability" | "system" | "technology";
+export type NodeKind = "capability" | "technology";
 export type NodeTone = "cyan" | "lime" | "coral" | "violet";
 export type EvidenceClass =
   | "implementation"
@@ -47,6 +47,7 @@ export type EvidenceTrace = {
   evidenceClass: EvidenceClass;
   nodeIds: string[];
   evidenceIds: string[];
+  replayStatus: "ready" | "overview";
   outcomes: string[];
   limitations: string[];
   artifacts: TraceArtifact[];
@@ -60,38 +61,6 @@ export type GraphEdge = {
 };
 
 export const graphNodes: GraphNode[] = [
-  {
-    id: "kaizen-agent-tools",
-    label: "Kaizen agent tools",
-    kind: "system",
-    tone: "cyan",
-    description:
-      "A governed agent surface generated from service-owned contracts and API schemas.",
-  },
-  {
-    id: "kinforge",
-    label: "Kinforge",
-    kind: "system",
-    tone: "coral",
-    description:
-      "A simulation and protocol testbed for bounded agent control, replay, and evidence quality.",
-  },
-  {
-    id: "skills-system",
-    label: "Skills runtime",
-    kind: "system",
-    tone: "violet",
-    description:
-      "Routing, context-budget, run-ledger, and gate contracts for repeatable agent workflows.",
-  },
-  {
-    id: "vendy",
-    label: "Vendy VM platform",
-    kind: "system",
-    tone: "lime",
-    description:
-      "Self-service test-environment provisioning across AWS, VMware, and MacStadium.",
-  },
   {
     id: "capability-contracts",
     label: "Capability contracts",
@@ -244,6 +213,55 @@ export const graphNodes: GraphNode[] = [
     tone: "cyan",
     description: "Parameter schemas merged with capability metadata to generate callable tools.",
   },
+  {
+    id: "python",
+    label: "Python",
+    kind: "technology",
+    tone: "coral",
+    description: "Scheduled ingestion, API coordination, and data-quality validation.",
+  },
+  {
+    id: "docker",
+    label: "Docker",
+    kind: "technology",
+    tone: "cyan",
+    description: "Repeatable packaging for repository-ingestion workers.",
+  },
+  {
+    id: "databricks",
+    label: "Databricks",
+    kind: "technology",
+    tone: "lime",
+    description: "Scheduled, sharded execution and validation for engineering metrics.",
+  },
+  {
+    id: "csharp",
+    label: "C#",
+    kind: "technology",
+    tone: "violet",
+    description: "Desktop workflow automation and customer-specific operator tooling.",
+  },
+  {
+    id: "localdb",
+    label: "LocalDB",
+    kind: "technology",
+    tone: "violet",
+    description: "Local application state and result persistence for a standalone workflow.",
+  },
+  {
+    id: "electron",
+    label: "Electron",
+    kind: "technology",
+    tone: "coral",
+    description: "Desktop delivery for operator-facing migration workflows.",
+  },
+  {
+    id: "manifest-v3",
+    label: "Manifest V3",
+    kind: "technology",
+    tone: "cyan",
+    description: "Chrome extension packaging and browser integration.",
+  },
 ];
 
 export const evidenceRecords: EvidenceRecord[] = [
@@ -257,7 +275,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Capability metadata supplies intent, roles, risk, and guardrails while OpenAPI supplies parameter shape. Generated tools replace a manually maintained agent catalog.",
     nodeIds: [
-      "kaizen-agent-tools",
       "capability-contracts",
       "agent-boundaries",
       "mcp",
@@ -276,7 +293,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "JWT roles filter registration before tool discovery, so unavailable or unauthorized operations are absent rather than merely discouraged in prose.",
     nodeIds: [
-      "kaizen-agent-tools",
       "agent-boundaries",
       "trusted-evidence",
       "mcp",
@@ -294,7 +310,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Write tools can require idempotency keys, Redis-backed replay protection, correlation identifiers, sanitized errors, and audit events.",
     nodeIds: [
-      "kaizen-agent-tools",
       "safe-writes",
       "agent-boundaries",
       "redis",
@@ -313,7 +328,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Browser context remains a navigation and display hint. Only actor-authorized backend resolvers can add trusted metric evidence.",
     nodeIds: [
-      "kaizen-agent-tools",
       "trusted-evidence",
       "data-contracts",
       "agent-boundaries",
@@ -330,7 +344,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Six H160 profiles recorded zero priority mismatches across 480 paired comparisons and identical final tactical state.",
     nodeIds: [
-      "kinforge",
       "context-compression",
       "evaluation",
       "deterministic-replay",
@@ -348,7 +361,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Across three clean rotations on one seed, learned_compact averaged 76.0% less context than compact_tactical and 69.6% less than minimal.",
     nodeIds: [
-      "kinforge",
       "context-compression",
       "evaluation",
       "measured-impact",
@@ -366,7 +378,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "The run completed 705 accepted responses with zero decision rejections, gate rejections, or transport errors; the persistent learned lane completed all 300 windows.",
     nodeIds: [
-      "kinforge",
       "context-compression",
       "evaluation",
       "workflow-orchestration",
@@ -384,7 +395,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "A continuous thread decoded 12/12 held-out compounds while 12 fresh stateless controls correctly abstained. Replication across models, seeds, and domains remains open.",
     nodeIds: [
-      "kinforge",
       "context-compression",
       "evaluation",
       "trusted-evidence",
@@ -401,7 +411,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Coordinator carry, worker packets, loaded skills, reference files, tool output, and worker reports have explicit budgets instead of relying on conversational restraint.",
     nodeIds: [
-      "skills-system",
       "context-budgeting",
       "agent-boundaries",
       "data-contracts",
@@ -418,7 +427,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "A file-backed ledger records active lanes, accepted decisions, artifacts, blockers, and latest green gates so the transcript does not become hidden authority.",
     nodeIds: [
-      "skills-system",
       "context-budgeting",
       "workflow-orchestration",
       "evaluation",
@@ -436,7 +444,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Engineering and QA teams can provision test environments across AWS, VMware, and MacStadium through a shared lifecycle workflow.",
     nodeIds: [
-      "vendy",
       "workflow-orchestration",
       "operator-control",
       "go",
@@ -454,7 +461,7 @@ export const evidenceRecords: EvidenceRecord[] = [
     title: "Image contracts reduce provider-specific drift",
     detail:
       "Custom AMIs, launch templates, and cross-platform image specifications standardize environments while keeping provider behavior explicit.",
-    nodeIds: ["vendy", "data-contracts", "workflow-orchestration", "aws"],
+    nodeIds: ["data-contracts", "workflow-orchestration", "aws"],
     weight: 2,
   },
   {
@@ -467,7 +474,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Provisioning, retries, provider calls, and completion status remain coordinated through explicit backend state and operator-visible transitions.",
     nodeIds: [
-      "vendy",
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
@@ -486,7 +492,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "The integration extended the same operating model to macOS workflows while reducing reliance on one-off provisioning knowledge.",
     nodeIds: [
-      "vendy",
       "operator-control",
       "measured-impact",
       "workflow-orchestration",
@@ -502,8 +507,133 @@ export const evidenceRecords: EvidenceRecord[] = [
     title: "Unsupported VMware systems gained a migration path",
     detail:
       "An OVF-to-S3 workflow moved otherwise unsupported systems toward AWS with less manual intervention.",
-    nodeIds: ["vendy", "workflow-orchestration", "aws", "go"],
+    nodeIds: ["workflow-orchestration", "aws", "go"],
     weight: 2,
+  },
+  {
+    id: "metrics-auth-pool",
+    traceId: "engineering-metrics-pipeline",
+    sequence: 1,
+    source: "Owner-curated production summary",
+    evidenceClass: "production",
+    title: "Ingestion rotates a three-key authentication pool",
+    detail:
+      "Containerized Python ingestion workers rotate across three credentials to distribute Bitbucket API requests and reduce 429 pressure.",
+    nodeIds: [
+      "python",
+      "docker",
+      "workflow-orchestration",
+    ],
+    weight: 2,
+  },
+  {
+    id: "metrics-databricks-shards",
+    traceId: "engineering-metrics-pipeline",
+    sequence: 2,
+    source: "Owner-curated production summary",
+    evidenceClass: "production",
+    title: "A scheduled job partitions ingestion across three shards",
+    detail:
+      "Databricks schedules the Python workload across three bounded shards instead of treating repository ingestion as one opaque run.",
+    nodeIds: [
+      "python",
+      "databricks",
+      "workflow-orchestration",
+    ],
+    weight: 2,
+  },
+  {
+    id: "metrics-quality-gates",
+    traceId: "engineering-metrics-pipeline",
+    sequence: 3,
+    source: "Owner-curated production summary",
+    evidenceClass: "production",
+    title: "Data-quality checks gate downstream reporting",
+    detail:
+      "Validation runs before repository metrics are accepted downstream so failed ingestion does not silently become trusted reporting data.",
+    nodeIds: [
+      "databricks",
+      "data-contracts",
+      "trusted-evidence",
+    ],
+    weight: 2,
+  },
+  {
+    id: "uat-workflow-model",
+    traceId: "uat-automation",
+    sequence: 1,
+    source: "Owner-curated project summary",
+    evidenceClass: "implementation",
+    title: "The manual UAT process became explicit application state",
+    detail:
+      "A private bank workflow was reduced to bounded stages without exposing customer procedures or data.",
+    nodeIds: ["workflow-orchestration", "operator-control", "csharp"],
+    weight: 2,
+  },
+  {
+    id: "uat-local-application",
+    traceId: "uat-automation",
+    sequence: 2,
+    source: "Owner-curated project summary",
+    evidenceClass: "implementation",
+    title: "A standalone application owned the operator workflow",
+    detail:
+      "The custom C# UI used LocalDB for local state and results while keeping the application self-contained.",
+    nodeIds: ["csharp", "localdb", "operator-control"],
+    weight: 2,
+  },
+  {
+    id: "uat-tanium-execution",
+    traceId: "uat-automation",
+    sequence: 3,
+    source: "Resume outcome + owner clarification",
+    evidenceClass: "measured",
+    title: "The local workflow executed through the Tanium API",
+    detail:
+      "The resume reports a reduction from four FTEs to one and from one week to one hour; the exact measurement scope remains private and should be treated cautiously.",
+    nodeIds: [
+      "csharp",
+      "data-contracts",
+      "workflow-orchestration",
+      "measured-impact",
+    ],
+    weight: 2,
+  },
+  {
+    id: "xsearch-source-apis",
+    traceId: "xsearch-extension",
+    sequence: 1,
+    source: "Owner-curated project summary",
+    evidenceClass: "implementation",
+    title: "Existing service APIs became one search surface",
+    detail:
+      "The extension queried available APIs across internal knowledge sources instead of introducing a new search backend.",
+    nodeIds: ["data-contracts", "workflow-orchestration"],
+    weight: 1,
+  },
+  {
+    id: "xsearch-manifest-extension",
+    traceId: "xsearch-extension",
+    sequence: 2,
+    source: "Owner-curated project summary",
+    evidenceClass: "implementation",
+    title: "Manifest V3 placed search in the browser workflow",
+    detail:
+      "A Google Chrome extension provided the operator surface without requiring a separate destination.",
+    nodeIds: ["manifest-v3", "operator-control", "data-contracts"],
+    weight: 1,
+  },
+  {
+    id: "xsearch-result-aggregation",
+    traceId: "xsearch-extension",
+    sequence: 3,
+    source: "Internal tooling summary",
+    evidenceClass: "implementation",
+    title: "The extension aggregated and presented the responses",
+    detail:
+      "The solo prototype was built in five business days. Rollout was delayed, and the commercial product was still purchased, so no avoided-spend claim is made.",
+    nodeIds: ["data-contracts", "operator-control"],
+    weight: 1,
   },
 ];
 
@@ -511,8 +641,8 @@ export const evidenceTraces: EvidenceTrace[] = [
   {
     id: "governed-agent-tooling",
     index: "01",
-    title: "Governed agent tooling",
-    shortTitle: "Agent tooling",
+    title: "Kaizen Agent Platform",
+    shortTitle: "Kaizen Agent",
     period: "NinjaOne / current",
     statement:
       "Agent access should inherit the same contracts, permissions, and operational controls as the product it operates.",
@@ -520,8 +650,8 @@ export const evidenceTraces: EvidenceTrace[] = [
       "Kaizen turns service capability metadata and OpenAPI schemas into a discoverable MCP surface. The adapter stays thin; authorization and trusted evidence remain owned by backend services.",
     proofLabel: "Shipped system + contract evidence",
     evidenceClass: "production",
+    replayStatus: "ready",
     nodeIds: [
-      "kaizen-agent-tools",
       "capability-contracts",
       "agent-boundaries",
       "trusted-evidence",
@@ -563,8 +693,8 @@ export const evidenceTraces: EvidenceTrace[] = [
   {
     id: "bounded-agent-context",
     index: "02",
-    title: "Bounded agent context",
-    shortTitle: "Context control",
+    title: "ContextForge",
+    shortTitle: "ContextForge",
     period: "Kinforge + Skills / active research",
     statement:
       "Useful context is not the largest prompt. It is the smallest scoped packet that preserves the decision contract and can recover when continuity fails.",
@@ -572,9 +702,8 @@ export const evidenceTraces: EvidenceTrace[] = [
       "Kinforge tests a learned compact protocol against paired reference surfaces. The Skills runtime applies the same discipline operationally through context budgets, routing contracts, run ledgers, and explicit gates.",
     proofLabel: "Deterministic + bounded live evidence",
     evidenceClass: "bounded-live",
+    replayStatus: "ready",
     nodeIds: [
-      "kinforge",
-      "skills-system",
       "context-compression",
       "context-budgeting",
       "evaluation",
@@ -628,8 +757,8 @@ export const evidenceTraces: EvidenceTrace[] = [
   {
     id: "cross-provider-orchestration",
     index: "03",
-    title: "Cross-provider orchestration",
-    shortTitle: "VM platform",
+    title: "Kaizen Vendy",
+    shortTitle: "Vendy",
     period: "NinjaOne / current",
     statement:
       "Infrastructure differences should stay visible to the system without becoming manual work for every operator.",
@@ -637,8 +766,8 @@ export const evidenceTraces: EvidenceTrace[] = [
       "Vendy coordinates self-service test environments across AWS, VMware, and MacStadium with standardized image contracts, provider-specific execution, and an operator-visible lifecycle.",
     proofLabel: "Shipped platform + measured reach",
     evidenceClass: "production",
+    replayStatus: "ready",
     nodeIds: [
-      "vendy",
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
@@ -676,6 +805,240 @@ export const evidenceTraces: EvidenceTrace[] = [
         access: "portfolio-summary",
       },
     ],
+  },
+  {
+    id: "engineering-metrics-pipeline",
+    index: "04",
+    title: "Kaizen Metrics",
+    shortTitle: "Kaizen Metrics",
+    period: "NinjaOne / current",
+    statement:
+      "Operational reporting is only useful when ingestion survives API pressure and rejects bad data before it becomes a metric.",
+    summary:
+      "A containerized Python pipeline ingests Bitbucket data through a rotating three-key pool, runs as a three-shard Databricks job, and applies data-quality checks before downstream reporting.",
+    proofLabel: "Production pipeline + scheduled validation",
+    evidenceClass: "production",
+    replayStatus: "ready",
+    nodeIds: [
+      "python",
+      "docker",
+      "databricks",
+      "workflow-orchestration",
+      "data-contracts",
+      "trusted-evidence",
+    ],
+    evidenceIds: [
+      "metrics-auth-pool",
+      "metrics-databricks-shards",
+      "metrics-quality-gates",
+    ],
+    outcomes: [
+      "Repository ingestion is partitioned across three scheduled shards",
+      "A three-key pool reduces concentration on one Bitbucket credential",
+      "Validation gates downstream reporting data",
+    ],
+    limitations: [
+      "Private source, credentials, job configuration, and operational telemetry are not published.",
+      "Credential rotation mitigates rate-limit pressure; it does not remove upstream API limits.",
+    ],
+    artifacts: [
+      {
+        label: "Metrics pipeline summary",
+        detail: "Ingestion, scheduling, rate-limit handling, and validation boundaries",
+        access: "portfolio-summary",
+      },
+    ],
+  },
+  {
+    id: "tanium-risk-assessment",
+    index: "05",
+    title: "Tanium Risk Assessment",
+    shortTitle: "TRA",
+    period: "Tanium / 2020-2025",
+    statement:
+      "A useful risk assessment has to turn endpoint evidence into a repeatable operator decision, not just another report.",
+    summary:
+      "Steve joined an existing proof of concept, led two Python refactors, and later helped move the workflow into Go. The project remains an overview until the safe public sequence is curated.",
+    proofLabel: "Resume + owner-curated summary",
+    evidenceClass: "implementation",
+    replayStatus: "overview",
+    nodeIds: [
+      "python",
+      "go",
+      "workflow-orchestration",
+      "operator-control",
+      "data-contracts",
+      "measured-impact",
+    ],
+    evidenceIds: [],
+    outcomes: [
+      "Two Python refactors followed by a later Go implementation",
+      "The exact customer workflow and business metrics remain private",
+    ],
+    limitations: [
+      "This is a role and architecture summary, not a claim that Steve created the original product concept.",
+    ],
+    artifacts: [],
+  },
+  {
+    id: "uat-automation",
+    index: "06",
+    title: "UAT Automation",
+    shortTitle: "UAT",
+    period: "Tanium customer / 2020-2025",
+    statement:
+      "A private manual workflow became a standalone local application with a bounded API integration.",
+    summary:
+      "Steve built a custom C# UI backed by LocalDB for a bank customer. The only external integration was the Tanium API; customer procedures and data are intentionally omitted.",
+    proofLabel: "Resume outcome + owner-curated summary",
+    evidenceClass: "measured",
+    replayStatus: "ready",
+    nodeIds: [
+      "csharp",
+      "localdb",
+      "operator-control",
+      "workflow-orchestration",
+      "data-contracts",
+      "measured-impact",
+    ],
+    evidenceIds: [
+      "uat-workflow-model",
+      "uat-local-application",
+      "uat-tanium-execution",
+    ],
+    outcomes: [
+      "The resume reports a reduction from four FTEs to one",
+      "The resume reports a reduction from one week to one hour",
+    ],
+    limitations: [
+      "The bank identity, workflow stages, test data, and exact measurement scope are not public.",
+    ],
+    artifacts: [],
+  },
+  {
+    id: "cablecar",
+    index: "07",
+    title: "CableCar",
+    shortTitle: "CableCar",
+    period: "Tanium / approximately 3.5 active years",
+    statement:
+      "A proprietary migration suite moved Tanium content from on-premises environments into Tanium Cloud.",
+    summary:
+      "Steve inherited CableCar after its original developer left, became technical lead, and maintained and expanded the React/Electron migration product. The internal migration stages remain intentionally sparse for now.",
+    proofLabel: "Public workflow + private portfolio summary",
+    evidenceClass: "implementation",
+    replayStatus: "overview",
+    nodeIds: [
+      "react",
+      "electron",
+      "workflow-orchestration",
+      "operator-control",
+      "data-contracts",
+      "trusted-evidence",
+      "measured-impact",
+    ],
+    evidenceIds: [],
+    outcomes: [
+      "1,064 downloads reported by the internal tooling summary",
+      "Two weeks / 80 hours saved per download is the owner-confirmed estimate",
+    ],
+    limitations: [
+      "Customer content, transformation rules, internal architecture, and modeled financial savings are not published.",
+    ],
+    artifacts: [],
+  },
+  {
+    id: "xsearch-extension",
+    index: "08",
+    title: "xSearch",
+    shortTitle: "xSearch",
+    period: "Tanium / internal prototype",
+    statement:
+      "A small browser extension can be the right answer when the problem is aggregation rather than a new search platform.",
+    summary:
+      "Steve built a Manifest V3 Chrome extension in five business days to aggregate results from existing service APIs. Rollout was delayed, and the commercial product was still purchased.",
+    proofLabel: "Owner-curated implementation summary",
+    evidenceClass: "implementation",
+    replayStatus: "ready",
+    nodeIds: [
+      "manifest-v3",
+      "data-contracts",
+      "workflow-orchestration",
+      "operator-control",
+    ],
+    evidenceIds: [
+      "xsearch-source-apis",
+      "xsearch-manifest-extension",
+      "xsearch-result-aggregation",
+    ],
+    outcomes: [
+      "A solo five-business-day prototype",
+      "No avoided-spend or broad-adoption claim",
+    ],
+    limitations: [
+      "Internal endpoints, credentials, company search data, and undocumented source behavior are not published.",
+    ],
+    artifacts: [],
+  },
+  {
+    id: "tmatch-eolmatch",
+    index: "09",
+    title: "T-Match / EOLMatch",
+    shortTitle: "T-Match",
+    period: "Tanium use + public Go foundation",
+    statement:
+      "Inconsistent software inventory has to be normalized before lifecycle matching can be trusted.",
+    summary:
+      "The project applied fuzzy normalization and matching to end-of-life software detection. The public Go repository is evidence of the underlying approach, not proof that it is the exact private Tanium implementation.",
+    proofLabel: "Public implementation + private-use summary",
+    evidenceClass: "implementation",
+    replayStatus: "overview",
+    nodeIds: ["go", "evaluation", "data-contracts", "trusted-evidence"],
+    evidenceIds: [],
+    outcomes: [
+      "A reusable Go matching foundation for inconsistent product names and versions",
+    ],
+    limitations: [
+      "The public repository is not presented as the exact Tanium implementation.",
+    ],
+    artifacts: [
+      {
+        label: "EOLMatch",
+        detail: "Public Go implementation of the matching foundation",
+        access: "public",
+        href: "https://github.com/Dorbii/EOLMatch",
+      },
+    ],
+  },
+  {
+    id: "evidence-atlas",
+    index: "10",
+    title: "Evidence Atlas",
+    shortTitle: "Portfolio",
+    period: "Personal / current",
+    statement:
+      "A portfolio can make evidence relationships explorable without pretending proximity is proof.",
+    summary:
+      "This site uses an evidence-derived particle field, capability and technology nodes, project packets, deterministic layout, and explicit claim boundaries.",
+    proofLabel: "Public implementation",
+    evidenceClass: "implementation",
+    replayStatus: "overview",
+    nodeIds: [
+      "react",
+      "typescript",
+      "operator-control",
+      "data-contracts",
+      "evaluation",
+    ],
+    evidenceIds: [],
+    outcomes: [
+      "A static, interactive portfolio with no application backend",
+      "Project playback reuses the same evidence-selection model as manual graph exploration",
+    ],
+    limitations: [
+      "The visualization communicates curated evidence relationships; it is not a statistical embedding.",
+    ],
+    artifacts: [],
   },
 ];
 

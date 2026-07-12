@@ -20,7 +20,7 @@ export function SelectionTray({
   return (
     <div className="selection-tray" aria-label="Current evidence query">
       <span className="selection-label">
-        {activeTrace ? "Trace" : "Selected"}
+        {activeTrace ? "Project" : "Selected"}
       </span>
       <div className="selection-values">
         {activeTrace ? (

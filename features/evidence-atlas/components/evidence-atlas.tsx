@@ -1,9 +1,9 @@
 "use client";
 
 import { useEvidenceAtlasState } from "../hooks/use-evidence-atlas-state";
-import { CaseStudyNav } from "./case-study-nav";
 import { EvidenceGraph } from "./evidence-graph";
 import { EvidenceInspector } from "./evidence-inspector";
+import { ProjectNav } from "./project-nav";
 import { SelectionTray } from "./selection-tray";
 import { WorkspaceHeader } from "./workspace-header";
 
@@ -12,20 +12,22 @@ export function EvidenceAtlas() {
 
   return (
     <main
-      className={`evidence-workspace ${atlas.activeTraceId ? "mode-trace" : "mode-explore"}`}
+      className={`evidence-workspace ${atlas.activeTraceId ? "mode-project" : "mode-explore"}`}
     >
       <WorkspaceHeader />
 
       <div className="workspace-body">
         <section className="graph-panel" aria-label="Evidence relationship map">
-          <CaseStudyNav
-            activeTraceId={atlas.activeTraceId}
-            onOpenTrace={atlas.openTrace}
+          <ProjectNav
+            activeProjectId={atlas.activeTraceId}
+            onOpenProject={atlas.openTrace}
           />
 
           <EvidenceGraph
             selectedIds={atlas.selectedIds}
             previewId={atlas.previewId}
+            activeProjectId={atlas.activeTraceId}
+            inspectorOpen={atlas.inspectorOpen}
             onPreview={atlas.setPreviewId}
             onToggle={atlas.toggleNode}
           />

@@ -84,8 +84,8 @@ export function QueryInspector({
             <span>Documented path</span>
             <small>
               {resolution.mode === "shared-trace"
-                ? "Shared trace"
-                : "Cross-trace bridge"}
+                ? "Shared project"
+                : "Cross-project bridge"}
             </small>
           </div>
           {resolution.pathSegments.map((segment, index) => {
@@ -145,7 +145,7 @@ export function QueryInspector({
       {matchingTraceIds.length > 0 ? (
         <div className="matching-traces">
           <div className="section-heading">
-            <span>Related traces</span>
+            <span>Related projects</span>
           </div>
           {matchingTraceIds.map((traceId) => {
             const relatedTrace = traceById.get(traceId)!;
