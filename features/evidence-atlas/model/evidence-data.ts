@@ -1,6 +1,7 @@
 // Static portfolio evidence and the indexes derived from it.
+import type { NodeDomainId } from "./node-domains";
+
 export type NodeKind = "capability" | "technology";
-export type NodeTone = "cyan" | "lime" | "coral" | "violet";
 export type EvidenceClass =
   | "implementation"
   | "production"
@@ -12,7 +13,7 @@ export type GraphNode = {
   id: string;
   label: string;
   kind: NodeKind;
-  tone: NodeTone;
+  primaryDomain: NodeDomainId;
   description: string;
 };
 
@@ -35,12 +36,15 @@ export type TraceArtifact = {
   href?: string;
 };
 
+export type PortfolioGroup = "current" | "prior" | "personal";
+
 export type EvidenceTrace = {
   id: string;
   index: string;
   title: string;
   shortTitle: string;
   period: string;
+  portfolioGroup: PortfolioGroup;
   statement: string;
   summary: string;
   proofLabel: string;
@@ -65,7 +69,7 @@ export const graphNodes: GraphNode[] = [
     id: "capability-contracts",
     label: "Capability contracts",
     kind: "capability",
-    tone: "cyan",
+    primaryDomain: "architecture",
     description:
       "Intent, safety, role, availability, and recovery rules expressed as machine-readable contracts.",
   },
@@ -73,7 +77,7 @@ export const graphNodes: GraphNode[] = [
     id: "agent-boundaries",
     label: "Agent boundaries",
     kind: "capability",
-    tone: "cyan",
+    primaryDomain: "assurance",
     description:
       "Agents receive constrained tool surfaces while services retain business logic and authority.",
   },
@@ -81,7 +85,7 @@ export const graphNodes: GraphNode[] = [
     id: "trusted-evidence",
     label: "Trusted evidence",
     kind: "capability",
-    tone: "cyan",
+    primaryDomain: "assurance",
     description:
       "Browser-observed context stays separate from actor-authorized backend facts.",
   },
@@ -89,7 +93,7 @@ export const graphNodes: GraphNode[] = [
     id: "safe-writes",
     label: "Replay-safe writes",
     kind: "capability",
-    tone: "violet",
+    primaryDomain: "backend",
     description:
       "Idempotency, correlation, sanitized failure handling, and auditability around agent actions.",
   },
@@ -97,7 +101,7 @@ export const graphNodes: GraphNode[] = [
     id: "context-compression",
     label: "Context compression",
     kind: "capability",
-    tone: "coral",
+    primaryDomain: "architecture",
     description:
       "Bootstrap shared structure once, then transmit deltas, repairs, and bounded refreshes.",
   },
@@ -105,7 +109,7 @@ export const graphNodes: GraphNode[] = [
     id: "context-budgeting",
     label: "Context budgets",
     kind: "capability",
-    tone: "violet",
+    primaryDomain: "architecture",
     description:
       "Explicit limits for coordinator carry, worker packets, references, reports, and tool output.",
   },
@@ -113,7 +117,7 @@ export const graphNodes: GraphNode[] = [
     id: "evaluation",
     label: "Evaluation",
     kind: "capability",
-    tone: "coral",
+    primaryDomain: "assurance",
     description:
       "Paired comparisons, clean evidence classes, regression gates, and explicit non-claims.",
   },
@@ -121,7 +125,7 @@ export const graphNodes: GraphNode[] = [
     id: "deterministic-replay",
     label: "Deterministic replay",
     kind: "capability",
-    tone: "coral",
+    primaryDomain: "assurance",
     description:
       "Identical seeds and decisions reproduce exact outcomes while seeded variance remains measurable.",
   },
@@ -129,7 +133,7 @@ export const graphNodes: GraphNode[] = [
     id: "workflow-orchestration",
     label: "Workflow orchestration",
     kind: "capability",
-    tone: "lime",
+    primaryDomain: "architecture",
     description:
       "Long-running work with explicit state, retries, handoffs, and observable completion gates.",
   },
@@ -137,7 +141,7 @@ export const graphNodes: GraphNode[] = [
     id: "operator-control",
     label: "Operator control",
     kind: "capability",
-    tone: "lime",
+    primaryDomain: "frontend",
     description:
       "Interfaces that expose lifecycle state and recovery without leaking backend ownership into the UI.",
   },
@@ -145,7 +149,7 @@ export const graphNodes: GraphNode[] = [
     id: "data-contracts",
     label: "Data contracts",
     kind: "capability",
-    tone: "cyan",
+    primaryDomain: "data",
     description:
       "Schemas and source-of-truth rules prevent drift between producers, services, and interfaces.",
   },
@@ -153,7 +157,7 @@ export const graphNodes: GraphNode[] = [
     id: "measured-impact",
     label: "Measured impact",
     kind: "capability",
-    tone: "lime",
+    primaryDomain: "data",
     description:
       "Outcomes are shown with their scope and evidence boundary instead of decorative counters.",
   },
@@ -161,105 +165,98 @@ export const graphNodes: GraphNode[] = [
     id: "go",
     label: "Go",
     kind: "technology",
-    tone: "cyan",
+    primaryDomain: "backend",
     description: "Service, orchestration, code generation, and protocol infrastructure.",
   },
   {
     id: "typescript",
     label: "TypeScript",
     kind: "technology",
-    tone: "coral",
+    primaryDomain: "frontend",
     description: "Simulation, test harnesses, browser surfaces, and typed contracts.",
   },
   {
     id: "react",
     label: "React",
     kind: "technology",
-    tone: "lime",
+    primaryDomain: "frontend",
     description: "Operator-facing workflows and evidence-driven interfaces.",
   },
   {
     id: "aws",
     label: "AWS",
     kind: "technology",
-    tone: "lime",
+    primaryDomain: "infrastructure",
     description: "VM provisioning, image workflows, migration, and platform infrastructure.",
   },
   {
     id: "postgresql",
     label: "PostgreSQL",
     kind: "technology",
-    tone: "lime",
+    primaryDomain: "data",
     description: "Durable platform state, reporting, and backend coordination.",
   },
   {
     id: "redis",
     label: "Redis",
     kind: "technology",
-    tone: "violet",
+    primaryDomain: "data",
     description: "Replay protection and operational coordination for agent-facing writes.",
   },
   {
     id: "mcp",
     label: "MCP",
     kind: "technology",
-    tone: "cyan",
+    primaryDomain: "architecture",
     description: "A thin agent transport over service-owned capability and authorization contracts.",
   },
   {
     id: "openapi",
     label: "OpenAPI",
     kind: "technology",
-    tone: "cyan",
+    primaryDomain: "architecture",
     description: "Parameter schemas merged with capability metadata to generate callable tools.",
   },
   {
     id: "python",
     label: "Python",
     kind: "technology",
-    tone: "coral",
+    primaryDomain: "data",
     description: "Scheduled ingestion, API coordination, and data-quality validation.",
   },
   {
     id: "docker",
     label: "Docker",
     kind: "technology",
-    tone: "cyan",
+    primaryDomain: "infrastructure",
     description: "Repeatable packaging for repository-ingestion workers.",
   },
   {
     id: "databricks",
     label: "Databricks",
     kind: "technology",
-    tone: "lime",
+    primaryDomain: "data",
     description: "Scheduled, sharded execution and validation for engineering metrics.",
   },
   {
     id: "csharp",
     label: "C#",
     kind: "technology",
-    tone: "violet",
+    primaryDomain: "backend",
     description: "Desktop workflow automation and customer-specific operator tooling.",
   },
   {
     id: "localdb",
     label: "LocalDB",
     kind: "technology",
-    tone: "violet",
+    primaryDomain: "data",
     description: "Local application state and result persistence for a standalone workflow.",
-  },
-  {
-    id: "electron",
-    label: "Electron",
-    kind: "technology",
-    tone: "coral",
-    description: "Desktop delivery for operator-facing migration workflows.",
   },
   {
     id: "manifest-v3",
     label: "Manifest V3",
     kind: "technology",
-    tone: "cyan",
+    primaryDomain: "frontend",
     description: "Chrome extension packaging and browser integration.",
   },
 ];
@@ -644,6 +641,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "Kaizen Agent Platform",
     shortTitle: "Kaizen Agent",
     period: "NinjaOne / current",
+    portfolioGroup: "current",
     statement:
       "Agent access should inherit the same contracts, permissions, and operational controls as the product it operates.",
     summary:
@@ -696,6 +694,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "ContextForge",
     shortTitle: "ContextForge",
     period: "Kinforge + Skills / active research",
+    portfolioGroup: "personal",
     statement:
       "Useful context is not the largest prompt. It is the smallest scoped packet that preserves the decision contract and can recover when continuity fails.",
     summary:
@@ -760,6 +759,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "Kaizen Vendy",
     shortTitle: "Vendy",
     period: "NinjaOne / current",
+    portfolioGroup: "current",
     statement:
       "Infrastructure differences should stay visible to the system without becoming manual work for every operator.",
     summary:
@@ -812,6 +812,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "Kaizen Metrics",
     shortTitle: "Kaizen Metrics",
     period: "NinjaOne / current",
+    portfolioGroup: "current",
     statement:
       "Operational reporting is only useful when ingestion survives API pressure and rejects bad data before it becomes a metric.",
     summary:
@@ -855,6 +856,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "Tanium Risk Assessment",
     shortTitle: "TRA",
     period: "Tanium / 2020-2025",
+    portfolioGroup: "prior",
     statement:
       "A useful risk assessment has to turn endpoint evidence into a repeatable operator decision, not just another report.",
     summary:
@@ -886,6 +888,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "UAT Automation",
     shortTitle: "UAT",
     period: "Tanium customer / 2020-2025",
+    portfolioGroup: "prior",
     statement:
       "A private manual workflow became a standalone local application with a bounded API integration.",
     summary:
@@ -921,6 +924,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "CableCar",
     shortTitle: "CableCar",
     period: "Tanium / approximately 3.5 active years",
+    portfolioGroup: "prior",
     statement:
       "A proprietary migration suite moved Tanium content from on-premises environments into Tanium Cloud.",
     summary:
@@ -930,7 +934,6 @@ export const evidenceTraces: EvidenceTrace[] = [
     replayStatus: "overview",
     nodeIds: [
       "react",
-      "electron",
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
@@ -953,6 +956,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "xSearch",
     shortTitle: "xSearch",
     period: "Tanium / internal prototype",
+    portfolioGroup: "prior",
     statement:
       "A small browser extension can be the right answer when the problem is aggregation rather than a new search platform.",
     summary:
@@ -986,6 +990,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "T-Match / EOLMatch",
     shortTitle: "T-Match",
     period: "Tanium use + public Go foundation",
+    portfolioGroup: "prior",
     statement:
       "Inconsistent software inventory has to be normalized before lifecycle matching can be trusted.",
     summary:
@@ -1016,6 +1021,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     title: "Evidence Atlas",
     shortTitle: "Portfolio",
     period: "Personal / current",
+    portfolioGroup: "personal",
     statement:
       "A portfolio can make evidence relationships explorable without pretending proximity is proof.",
     summary:

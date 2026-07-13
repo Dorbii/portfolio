@@ -13,7 +13,7 @@ export function WorkspaceHeader() {
           Resume PDF
         </a>
         <a
-          className="resume-link"
+          className="ats-link"
           href="/steven-doris-resume.docx"
           download
         >

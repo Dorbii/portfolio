@@ -10,6 +10,10 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { graphNodes } from "../model/evidence-data";
+import {
+  nodeDomainById,
+  nodeDomainCssColor,
+} from "../model/node-domains";
 import { resolveEvidenceQuery } from "../model/evidence-query";
 import {
   computeLayout,
@@ -28,16 +32,26 @@ import {
 import {
   drawParticleFieldBase,
   drawParticleFieldMotion,
+  semanticNodeTokenReveal,
+  SELECTION_WAKE_DURATION_MS,
+  type SelectionWake,
 } from "../rendering/particle-field";
+import {
+  MOTION_ACTIVE_FRAME_INTERVAL,
+  POINTER_MOTION_ACTIVE_MS,
+  shouldPaintMotionFrame,
+} from "../rendering/render-schedule";
 
-const PARTICLE_PIXEL_RATIO_LIMIT = 1.5;
-const PARTICLE_FRAME_INTERVAL = 1000 / 30;
+const BASE_PIXEL_RATIO_LIMIT = 1.5;
+const MOTION_PIXEL_RATIO_LIMIT = 1;
+const SELECTION_WAKE_THROTTLE_MS = 520;
 
 type EvidenceGraphProps = {
   selectedIds: string[];
   previewId: string | null;
   activeProjectId: string | null;
   inspectorOpen: boolean;
+  selectionLimit: number;
   onPreview: (id: string | null) => void;
   onToggle: (id: string) => void;
 };
@@ -47,21 +61,28 @@ export function EvidenceGraph({
   previewId,
   activeProjectId,
   inspectorOpen,
+  selectionLimit,
   onPreview,
   onToggle,
 }: EvidenceGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const baseCanvasRef = useRef<HTMLCanvasElement>(null);
+  const motionCanvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef<Point | null>(null);
+  const lastPointerMotionAtRef = useRef(Number.NEGATIVE_INFINITY);
   const panRef = useRef<{
     pointerId: number;
     clientX: number;
     clientY: number;
     viewport: typeof DEFAULT_GRAPH_VIEWPORT;
   } | null>(null);
+  const lastWakeAtRef = useRef(Number.NEGATIVE_INFINITY);
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
   const [viewport, setViewport] = useState(DEFAULT_GRAPH_VIEWPORT);
   const [isPanning, setIsPanning] = useState(false);
+  const [selectionWake, setSelectionWake] = useState<SelectionWake | null>(
+    null,
+  );
   const viewportOcclusion = useMemo(
     () => ({
       right: inspectorOpen
@@ -70,14 +91,33 @@ export function EvidenceGraph({
     }),
     [inspectorOpen, size.width],
   );
+  const surfaceStyle = {
+    "--graph-controls-right": `${viewportOcclusion.right + 20}px`,
+    "--semantic-detail-opacity": semanticNodeTokenReveal(viewport.scale),
+  } as CSSProperties;
   const resolutionIds = useMemo(
     () => (selectedIds.length > 0 ? selectedIds : previewId ? [previewId] : []),
     [previewId, selectedIds],
   );
   const queryResolution = useMemo(
-    () => resolveEvidenceQuery(resolutionIds),
-    [resolutionIds],
+    () => resolveEvidenceQuery(resolutionIds, activeProjectId),
+    [activeProjectId, resolutionIds],
   );
+  const particleResolution = useMemo(
+    () => resolveEvidenceQuery(selectedIds, activeProjectId),
+    [activeProjectId, selectedIds],
+  );
+
+  useEffect(() => {
+    if (!selectionWake) return;
+    const wakeStartedAt = selectionWake.startedAt;
+    const timeout = window.setTimeout(() => {
+      setSelectionWake((current) =>
+        current?.startedAt === wakeStartedAt ? null : current,
+      );
+    }, SELECTION_WAKE_DURATION_MS);
+    return () => window.clearTimeout(timeout);
+  }, [selectionWake]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -96,25 +136,18 @@ export function EvidenceGraph({
   const positions = useMemo(() => computeLayout(size), [size]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = baseCanvasRef.current;
     if (!canvas || size.width <= 0 || size.height <= 0) return;
     const context = canvas.getContext("2d");
     if (!context) return;
 
     const pixelRatio = Math.min(
       window.devicePixelRatio || 1,
-      PARTICLE_PIXEL_RATIO_LIMIT,
+      BASE_PIXEL_RATIO_LIMIT,
     );
     canvas.width = Math.floor(size.width * pixelRatio);
     canvas.height = Math.floor(size.height * pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-    const baseCanvas = document.createElement("canvas");
-    baseCanvas.width = canvas.width;
-    baseCanvas.height = canvas.height;
-    const baseContext = baseCanvas.getContext("2d");
-    if (!baseContext) return;
-    baseContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -126,27 +159,62 @@ export function EvidenceGraph({
       occludedRight: viewportOcclusion.right,
     };
     drawParticleFieldBase(
-      baseContext,
+      context,
       size,
       positions,
-      queryResolution,
+      particleResolution,
       interaction,
     );
+  }, [
+    particleResolution,
+    positions,
+    size,
+    viewport,
+    viewportOcclusion.right,
+  ]);
+
+  useEffect(() => {
+    const canvas = motionCanvasRef.current;
+    if (!canvas || size.width <= 0 || size.height <= 0) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    const pixelRatio = Math.min(
+      window.devicePixelRatio || 1,
+      MOTION_PIXEL_RATIO_LIMIT,
+    );
+    canvas.width = Math.floor(size.width * pixelRatio);
+    canvas.height = Math.floor(size.height * pixelRatio);
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const interaction = {
+      viewport,
+      cursor: null,
+      motionEnabled: !reducedMotion,
+      occludedRight: viewportOcclusion.right,
+    };
+    const hasSemanticActivity =
+      resolutionIds.length > 0 ||
+      activeProjectId !== null ||
+      selectionWake !== null;
 
     let animationFrame = 0;
-    let previousFrame = -PARTICLE_FRAME_INTERVAL;
+    let previousFrame = -MOTION_ACTIVE_FRAME_INTERVAL;
     const paint = (time: number) => {
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       context.globalCompositeOperation = "source-over";
       context.clearRect(0, 0, size.width, size.height);
-      context.drawImage(baseCanvas, 0, 0, size.width, size.height);
       drawParticleFieldMotion(
         context,
         size,
         positions,
-        queryResolution,
+        particleResolution,
         previewId,
         activeProjectId,
+        selectionWake,
         time,
         {
           ...interaction,
@@ -156,23 +224,29 @@ export function EvidenceGraph({
     };
 
     const render = (time: number) => {
-      if (time - previousFrame >= PARTICLE_FRAME_INTERVAL) {
+      const pointerActive =
+        time - lastPointerMotionAtRef.current <= POINTER_MOTION_ACTIVE_MS;
+      const activeMotion = hasSemanticActivity || pointerActive || isPanning;
+      if (shouldPaintMotionFrame(time - previousFrame, activeMotion)) {
         paint(time);
         previousFrame = time;
       }
       animationFrame = window.requestAnimationFrame(render);
     };
 
-    paint(0);
+    paint(performance.now());
     if (!reducedMotion) {
       animationFrame = window.requestAnimationFrame(render);
     }
     return () => window.cancelAnimationFrame(animationFrame);
   }, [
     activeProjectId,
+    isPanning,
     positions,
     previewId,
-    queryResolution,
+    particleResolution,
+    resolutionIds.length,
+    selectionWake,
     size,
     viewport,
     viewportOcclusion.right,
@@ -207,6 +281,7 @@ export function EvidenceGraph({
       const anchor = localPoint(event.clientX, event.clientY);
       if (!anchor) return;
       event.preventDefault();
+      lastPointerMotionAtRef.current = performance.now();
       const zoomFactor = Math.exp(-event.deltaY * 0.0012);
       setViewport((current) =>
         zoomGraphViewportAt(
@@ -236,6 +311,7 @@ export function EvidenceGraph({
         clientY: event.clientY,
         viewport,
       };
+      lastPointerMotionAtRef.current = performance.now();
       event.currentTarget.setPointerCapture(event.pointerId);
       setIsPanning(true);
     },
@@ -245,7 +321,10 @@ export function EvidenceGraph({
   const handlePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       const local = localPoint(event.clientX, event.clientY);
-      if (local) cursorRef.current = screenPointToGraph(local, viewport);
+      if (local) {
+        cursorRef.current = screenPointToGraph(local, viewport);
+        lastPointerMotionAtRef.current = performance.now();
+      }
       const pan = panRef.current;
       if (!pan || pan.pointerId !== event.pointerId) return;
       setViewport(
@@ -280,9 +359,26 @@ export function EvidenceGraph({
     [queryResolution.pathNodeIds],
   );
 
+  const handleNodeToggle = useCallback(
+    (nodeId: string, selected: boolean) => {
+      const now = performance.now();
+      if (
+        !selected &&
+        selectedIds.length < selectionLimit &&
+        now - lastWakeAtRef.current >= SELECTION_WAKE_THROTTLE_MS
+      ) {
+        lastWakeAtRef.current = now;
+        setSelectionWake({ nodeId, startedAt: now });
+      }
+      onToggle(nodeId);
+    },
+    [onToggle, selectedIds.length, selectionLimit],
+  );
+
   return (
     <div
       className={`graph-surface ${isPanning ? "is-panning" : ""}`}
+      style={surfaceStyle}
       ref={containerRef}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -292,7 +388,16 @@ export function EvidenceGraph({
         if (!panRef.current) cursorRef.current = null;
       }}
     >
-      <canvas ref={canvasRef} aria-hidden="true" />
+      <canvas
+        ref={baseCanvasRef}
+        className="graph-field-base"
+        aria-hidden="true"
+      />
+      <canvas
+        ref={motionCanvasRef}
+        className="graph-field-motion"
+        aria-hidden="true"
+      />
       <div className="node-layer">
         {graphNodes.map((node) => {
           const point = positions[node.id];
@@ -303,23 +408,30 @@ export function EvidenceGraph({
           const style = {
             "--node-x": `${screenPoint.x}px`,
             "--node-y": `${screenPoint.y}px`,
+            "--node-color": nodeDomainCssColor(node.primaryDomain),
           } as CSSProperties;
+          const domain = nodeDomainById[node.primaryDomain];
 
           return (
             <button
               key={node.id}
               type="button"
-              className={`graph-node tone-${node.tone} ${selected ? "is-selected" : ""} ${previewId === node.id ? "is-preview" : ""} ${related ? "" : "is-muted"}`}
+              data-node-id={node.id}
+              className={`graph-node domain-${node.primaryDomain} ${selected ? "is-selected" : ""} ${previewId === node.id ? "is-preview" : ""} ${related ? "" : "is-muted"}`}
               style={style}
+              aria-label={`${node.label}, ${domain.label}`}
               aria-pressed={selected}
               onMouseEnter={() => onPreview(node.id)}
               onMouseLeave={() => onPreview(null)}
               onFocus={() => onPreview(node.id)}
               onBlur={() => onPreview(null)}
-              onClick={() => onToggle(node.id)}
+              onClick={() => handleNodeToggle(node.id, selected)}
             >
               <i aria-hidden="true" />
               <span>{node.label}</span>
+              <small className="graph-node-domain" aria-hidden="true">
+                {domain.label}
+              </small>
             </button>
           );
         })}

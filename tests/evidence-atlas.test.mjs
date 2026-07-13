@@ -157,25 +157,51 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     ),
     "utf8",
   );
+  const baseLayer = particleField.slice(
+    particleField.indexOf("export function drawParticleFieldBase"),
+    particleField.indexOf("export function drawParticleFieldMotion"),
+  );
+  const motionLayer = particleField.slice(
+    particleField.indexOf("export function drawParticleFieldMotion"),
+  );
+  const ambientDensityGuard = particleField.slice(
+    particleField.indexOf("const ambientOnly"),
+    particleField.indexOf(
+      "graphEdges.forEach",
+      particleField.indexOf("const ambientOnly"),
+    ),
+  );
 
   assert.match(route, /import \{ EvidenceAtlas \}/);
   assert.doesNotMatch(route, /useState|useEffect|useCallback/);
   assert.match(atlas, /useEvidenceAtlasState/);
   assert.match(atlas, /<EvidenceGraph/);
   assert.match(atlas, /<EvidenceInspector/);
+  assert.match(atlas, /<DomainLegend/);
   assert.match(atlas, /mode-project/);
   assert.match(atlas, /mode-explore/);
 
   assert.match(state, /window\.history\.replaceState/);
   assert.match(state, /const MAX_MANUAL_SELECTIONS = 3/);
+  assert.match(state, /current\.length >= MAX_MANUAL_SELECTIONS/);
+  assert.doesNotMatch(state, /slice\(-MAX_MANUAL_SELECTIONS\)/);
+  assert.match(state, /setTracePlayback\(false\)/);
   assert.match(state, /const applyTraceStep/);
   assert.match(state, /setSelectedIds\(record\.nodeIds\)/);
   assert.match(state, /prefers-reduced-motion: reduce/);
-  assert.match(state, /event\.key === "Escape"/);
+  assert.match(atlas, /event\.key !== "Escape"/);
+  assert.match(atlas, /event\.defaultPrevented/);
+  assert.match(atlas, /restoreNodeFocus/);
+  assert.match(atlas, /focusElement\("#project-inspector-title"\)/);
 
   assert.match(data, /function buildEdges\(records: EvidenceRecord\[\]\)/);
   assert.match(data, /export const graphEdges = buildEdges\(evidenceRecords\)/);
   assert.match(data, /export const evidenceStrengthByNode/);
+  assert.match(data, /export type PortfolioGroup = "current" \| "prior" \| "personal"/);
+  assert.equal(
+    [...data.matchAll(/portfolioGroup: "(?:current|prior|personal)"/g)].length,
+    10,
+  );
   assert.doesNotMatch(data, /GraphLens|graphLenses|recordsMatchingNodes/);
   assert.match(data, /Lower context does not prove better strategy/);
   assert.match(query, /function findShortestPath/);
@@ -187,6 +213,9 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(graphLayout, /export function computeLayout/);
   assert.match(graphLayout, /const verticalCoverage = 0\.84/);
   assert.match(particleField, /bridgeParticleActive/);
+  assert.match(particleField, /bridgeParticleAmbientScale: 0\.6/);
+  assert.match(particleField, /baseTextureDensity: 0\.92/);
+  assert.match(particleField, /baseTextureOpacity: 0\.9/);
   assert.match(particleField, /nodeFieldAlphaIdle/);
   assert.match(particleField, /function mixColor/);
   assert.match(particleField, /function drawAttentionBloom/);
@@ -198,32 +227,50 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(particleField, /export function particleTransit/);
   assert.match(particleField, /export function visualTokenPromotion/);
   assert.match(particleField, /export function visualTokenEchoCount/);
+  assert.match(particleField, /export function semanticTokenOrbit/);
+  assert.match(particleField, /export function dataBurstWindow/);
   assert.match(particleField, /motionTimeScale: 0\.68/);
   assert.match(particleField, /drawVisualTokenSprite/);
+  assert.match(baseLayer, /drawAtmosphereParticle/);
+  assert.doesNotMatch(baseLayer, /drawAmbientParticle/);
+  assert.match(motionLayer, /drawAmbientParticle/);
+  assert.doesNotMatch(ambientDensityGuard, /previewId/);
   assert.doesNotMatch(particleField, /activeTrace/);
   assert.match(visualTokens, /const tokenSpriteCache/);
   assert.match(visualTokens, /context\.drawImage\(sprite/);
   assert.match(visualTokens, /const TOKEN_COLOR_STEP = 32/);
 
   assert.match(graph, /prefers-reduced-motion: reduce/);
-  assert.match(graph, /PARTICLE_FRAME_INTERVAL = 1000 \/ 30/);
-  assert.match(graph, /const baseCanvas = document\.createElement\("canvas"\)/);
+  assert.match(graph, /baseCanvasRef/);
+  assert.match(graph, /motionCanvasRef/);
+  assert.match(graph, /MOTION_PIXEL_RATIO_LIMIT = 1/);
+  assert.match(graph, /shouldPaintMotionFrame/);
+  assert.doesNotMatch(graph, /context\.drawImage\(baseCanvas/);
   assert.match(graph, /selectedIds\.length > 0 \? selectedIds : previewId/);
+  assert.match(graph, /resolveEvidenceQuery\(resolutionIds, activeProjectId\)/);
+  assert.match(graph, /const particleResolution = useMemo/);
+  assert.match(graph, /resolveEvidenceQuery\(selectedIds, activeProjectId\)/);
+  assert.match(graph, /drawParticleFieldBase\([\s\S]*particleResolution/);
   assert.match(graph, /graph-viewport-controls/);
   assert.match(graph, /onPointerDown=\{handlePointerDown\}/);
   assert.match(graph, /addEventListener\("wheel", handleWheel, \{ passive: false \}\)/);
   assert.match(graph, /inspectorOpen/);
   assert.match(graph, /graphPointToScreen/);
+  assert.match(graph, /data-node-id=\{node\.id\}/);
+  assert.match(graph, /semanticNodeTokenReveal\(viewport\.scale\)/);
+  assert.match(graph, /className="graph-node-domain"/);
   assert.doesNotMatch(graph, /--graph-scale/);
   assert.doesNotMatch(graph, /relative field density|activeTrace/);
   assert.match(inspector, /<ProjectInspector/);
   assert.match(inspector, /<QueryInspector/);
   assert.match(projectInspector, /Project playback controls/);
+  assert.match(projectInspector, /aria-expanded=\{index === currentStep\}/);
+  assert.match(projectInspector, /tabIndex=\{-1\}/);
   assert.match(projectInspector, /Evidence boundary/);
   assert.match(projectInspector, /Replay/);
   assert.match(queryInspector, /aria-labelledby="query-inspector-title"/);
   assert.match(queryInspector, /Each hop is backed by a shared evidence record/);
-  assert.match(queryInspector, /Supporting records/);
+  assert.match(queryInspector, /Evidence records/);
   assert.match(
     queryInspector,
     /Show \{overflowRecords\.length\} more evidence record/,
@@ -232,8 +279,11 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(globalStyles, /features\/evidence-atlas\/styles/);
   assert.match(featureStyles, /\.graph-node:focus-visible/);
   assert.match(featureStyles, /\.graph-node\.is-preview/);
+  assert.match(featureStyles, /\.graph-node-domain/);
   assert.match(featureStyles, /\.project-nav/);
   assert.match(featureStyles, /\.graph-viewport-controls/);
+  assert.match(featureStyles, /\.graph-field-base/);
+  assert.match(featureStyles, /\.graph-field-motion/);
   assert.doesNotMatch(featureStyles, /\.node-layer\s*\{[^}]*transform/);
   assert.doesNotMatch(featureStyles, /\.toolbar-group/);
   assert.match(featureStyles, /position: fixed/);
@@ -254,19 +304,38 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     logLevel: "silent",
   });
   t.after(() => vite.close());
-  const [viewportModule, tokenModule, particleModule, dataModule] =
-    await Promise.all([
-      vite.ssrLoadModule(
-        "/features/evidence-atlas/rendering/graph-viewport.ts",
-      ),
-      vite.ssrLoadModule(
-        "/features/evidence-atlas/rendering/visual-tokens.ts",
-      ),
-      vite.ssrLoadModule(
-        "/features/evidence-atlas/rendering/particle-field.ts",
-      ),
-      vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
-    ]);
+  const [
+    viewportModule,
+    tokenModule,
+    particleModule,
+    renderScheduleModule,
+    dataModule,
+  ] = await Promise.all([
+    vite.ssrLoadModule(
+      "/features/evidence-atlas/rendering/graph-viewport.ts",
+    ),
+    vite.ssrLoadModule(
+      "/features/evidence-atlas/rendering/visual-tokens.ts",
+    ),
+    vite.ssrLoadModule(
+      "/features/evidence-atlas/rendering/particle-field.ts",
+    ),
+    vite.ssrLoadModule(
+      "/features/evidence-atlas/rendering/render-schedule.ts",
+    ),
+    vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
+  ]);
+
+  assert.equal(renderScheduleModule.motionFrameInterval(false), 1000 / 15);
+  assert.equal(renderScheduleModule.motionFrameInterval(true), 1000 / 30);
+  assert.equal(renderScheduleModule.shouldPaintMotionFrame(32, true), false);
+  assert.equal(renderScheduleModule.shouldPaintMotionFrame(33, true), true);
+  assert.equal(renderScheduleModule.shouldPaintMotionFrame(65, false), false);
+  assert.equal(renderScheduleModule.shouldPaintMotionFrame(66, false), true);
+  assert.ok(
+    renderScheduleModule.MOTION_IDLE_FRAME_INTERVAL >
+      renderScheduleModule.MOTION_ACTIVE_FRAME_INTERVAL,
+  );
 
   const size = { width: 1200, height: 800 };
   const current = { scale: 1, x: 0, y: 0 };
@@ -304,6 +373,40 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     drawerClamped.x <= -520,
     "an open drawer must allow the graph to pan fully clear of its overlay",
   );
+
+  const wake = { nodeId: "go", startedAt: 1_000 };
+  assert.equal(particleModule.selectionWakeFrame(null, 1_000).active, false);
+  assert.equal(
+    particleModule.selectionWakeFrame(wake, 1_000).progress,
+    0,
+  );
+  const wakeMidpoint = particleModule.selectionWakeFrame(wake, 1_525);
+  assert.equal(wakeMidpoint.active, true);
+  assert.ok(wakeMidpoint.progress > 0.45 && wakeMidpoint.progress < 0.55);
+  assert.ok(wakeMidpoint.envelope > 0.9);
+  assert.equal(
+    particleModule.selectionWakeFrame(wake, 2_100).active,
+    false,
+  );
+  assert.equal(
+    particleModule.selectionWakeFrame(wake, 1_000, false).staticEmphasis,
+    true,
+  );
+  const weakWake = particleModule.selectionWakeEdgeTuning(1);
+  const strongWake = particleModule.selectionWakeEdgeTuning(12);
+  assert.ok(strongWake.particleCount > weakWake.particleCount);
+  assert.ok(strongWake.speed > weakWake.speed);
+  const goWakeEdges = particleModule.selectionWakeEdges("go");
+  assert.ok(goWakeEdges.length > 0 && goWakeEdges.length <= 5);
+  assert.ok(
+    goWakeEdges.every((edge) => edge.source === "go" || edge.target === "go"),
+  );
+  assert.equal(dataModule.graphNodes.some((node) => node.id === "electron"), false);
+  const cableCar = dataModule.evidenceTraces.find(
+    (trace) => trace.id === "cablecar",
+  );
+  assert.match(cableCar.summary, /React\/Electron/);
+  assert.equal(cableCar.nodeIds.includes("electron"), false);
 
   for (const node of dataModule.graphNodes) {
     assert.ok(
@@ -347,13 +450,57 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
   assert.equal(particleModule.visualTokenEchoCount("capability", 0.27), 0);
   assert.equal(particleModule.semanticZoomLevel(1), 0);
   assert.equal(particleModule.semanticZoomLevel(4.5), 1);
+  assert.equal(particleModule.ambientGlyphDensity(1, "low"), 0.006);
+  assert.equal(particleModule.ambientGlyphDensity(1, "balanced"), 0.012);
+  assert.equal(particleModule.ambientGlyphDensity(4.5, "balanced"), 0.035);
+  assert.equal(particleModule.ambientGlyphDensity(4.5, "high"), 0.06);
+  const overviewGlyphCount = Array.from({ length: 10_000 }, (_, seed) =>
+    particleModule.ambientGlyphForSeed(
+      seed,
+      particleModule.ambientGlyphDensity(1, "balanced"),
+    ),
+  ).filter(Boolean).length;
+  const deepGlyphCount = Array.from({ length: 10_000 }, (_, seed) =>
+    particleModule.ambientGlyphForSeed(
+      seed,
+      particleModule.ambientGlyphDensity(4.5, "balanced"),
+    ),
+  ).filter(Boolean).length;
+  assert.ok(overviewGlyphCount > 80 && overviewGlyphCount < 160);
+  assert.ok(deepGlyphCount > overviewGlyphCount * 2);
   assert.equal(particleModule.semanticTokenBridgeLimit(1), 0);
-  assert.equal(particleModule.semanticTokenBridgeLimit(1.45), 1);
+  assert.equal(particleModule.semanticTokenBridgeLimit(1.65), 0);
+  assert.ok(particleModule.semanticTokenBridgeOpacity(1.75, 0) > 0);
+  assert.ok(particleModule.semanticTokenBridgeOpacity(1.75, 0) < 0.1);
   assert.ok(
     particleModule.semanticTokenBridgeLimit(2.5) >
-      particleModule.semanticTokenBridgeLimit(1.45),
+    particleModule.semanticTokenBridgeLimit(1.75),
   );
   assert.equal(particleModule.semanticTokenBridgeLimit(4.5), 6);
+
+  const orbitStart = particleModule.semanticTokenOrbit(0, 17, true);
+  const orbitLater = particleModule.semanticTokenOrbit(1_000, 17, true);
+  const orbitStill = particleModule.semanticTokenOrbit(1_000, 17, false);
+  assert.notEqual(orbitStart.angle, orbitLater.angle);
+  assert.equal(orbitStart.angle, orbitStill.angle);
+
+  const burstStates = Array.from({ length: 240 }, (_, index) =>
+    particleModule.dataBurstWindow(index * 50, true),
+  );
+  assert.ok(burstStates.some((state) => state.active));
+  assert.ok(
+    burstStates.some(
+      (state) => state.active && state.progress > 0 && state.progress < 1,
+    ),
+  );
+  const fullCadence = Array.from({ length: 1_441 }, (_, index) =>
+    particleModule.dataBurstWindow(index * 50, true),
+  );
+  const burstStarts = fullCadence.filter(
+    (state, index) => state.active && !fullCadence[index - 1]?.active,
+  );
+  assert.equal(burstStarts.length, 8);
+  assert.equal(particleModule.dataBurstWindow(1_000, false).active, false);
 
   const transitA = particleModule.particleTransit(12_000, 17);
   const transitB = particleModule.particleTransit(12_000, 18);
@@ -403,7 +550,7 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
       occludedRight: 0,
     },
   );
-  assert.equal(selectedPromotion, 1);
+  assert.ok(selectedPromotion > 0 && selectedPromotion < 1);
 
   const nearbyPromotion = particleModule.visualTokenPromotion(
     "postgresql",
@@ -417,7 +564,8 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
       occludedRight: 0,
     },
   );
-  assert.ok(nearbyPromotion > 0.7);
+  assert.ok(nearbyPromotion > 0);
+  assert.ok(nearbyPromotion < selectedPromotion);
 });
 
 test("resolves direct, shared-trace, bridged, and disconnected queries", async (t) => {
@@ -476,6 +624,17 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
   );
   assert.equal(disconnected.mode, "disconnected");
   assert.equal(disconnected.pathSegments.length, 0);
+
+  const projectScoped = resolveEvidenceQuery(
+    ["python", "databricks"],
+    "governed-agent-tooling",
+  );
+  assert.equal(projectScoped.mode, "disconnected");
+  assert.ok(
+    projectScoped.supportingRecords.every(
+      (record) => record.traceId === "governed-agent-tooling",
+    ),
+  );
 });
 
 test("keeps projects, evidence records, and graph nodes separated", async (t) => {
@@ -486,8 +645,11 @@ test("keeps projects, evidence records, and graph nodes separated", async (t) =>
     logLevel: "silent",
   });
   t.after(() => vite.close());
-  const { evidenceRecords, evidenceTraces, graphNodes } =
-    await vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts");
+  const [{ evidenceRecords, evidenceTraces, graphNodes }, { nodeDomains }] =
+    await Promise.all([
+      vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
+      vite.ssrLoadModule("/features/evidence-atlas/model/node-domains.ts"),
+    ]);
 
   const nodeIds = new Set(graphNodes.map((node) => node.id));
   const recordIds = new Set(evidenceRecords.map((record) => record.id));
@@ -497,6 +659,48 @@ test("keeps projects, evidence records, and graph nodes separated", async (t) =>
   assert.equal(traceIds.size, evidenceTraces.length);
   assert.equal(evidenceTraces.length, 10);
   assert.ok(graphNodes.every((node) => node.kind !== "system"));
+  assert.deepEqual(
+    nodeDomains.map((domain) => domain.id),
+    [
+      "backend",
+      "frontend",
+      "data",
+      "infrastructure",
+      "architecture",
+      "assurance",
+    ],
+  );
+  const representedDomains = new Set(
+    graphNodes.map((node) => node.primaryDomain),
+  );
+  assert.ok(
+    nodeDomains.every((domain) => representedDomains.has(domain.id)),
+    "every displayed domain must be represented by at least one graph node",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "go")?.primaryDomain,
+    "backend",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "react")?.primaryDomain,
+    "frontend",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "databricks")?.primaryDomain,
+    "data",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "aws")?.primaryDomain,
+    "infrastructure",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "mcp")?.primaryDomain,
+    "architecture",
+  );
+  assert.equal(
+    graphNodes.find((node) => node.id === "evaluation")?.primaryDomain,
+    "assurance",
+  );
   assert.ok(
     evidenceTraces.every((project) => !nodeIds.has(project.id)),
     "projects must not be graph nodes",

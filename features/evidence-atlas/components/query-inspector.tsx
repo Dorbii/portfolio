@@ -48,13 +48,17 @@ export function QueryInspector({
       aria-labelledby="query-inspector-title"
     >
       <div className="inspector-toolbar">
-        <strong>Evidence details</strong>
-        <button type="button" onClick={onClose}>
+        <span>Evidence dossier</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close evidence details"
+        >
           Close
         </button>
       </div>
       <header className="query-header">
-        <h2 id="query-inspector-title">
+        <h2 id="query-inspector-title" tabIndex={-1}>
           {selectedNodes.map((node) => node.label).join(" × ")}
         </h2>
         <p className="query-summary">
@@ -67,16 +71,40 @@ export function QueryInspector({
       </header>
 
       {selectedNodes.length === 1 ? (
-        <>
-          <p className="node-description">{selectedNodes[0].description}</p>
-          <div className="density-readout">
-            <span>Supporting records</span>
-            <b>{matchingRecords.length}</b>
-          </div>
-        </>
+        <p className="node-description">{selectedNodes[0].description}</p>
       ) : (
         <p className="node-description">{resolution.explanation}</p>
       )}
+
+      {matchingRecords.length > 0 ? (
+        <section className="query-records" aria-labelledby="query-records-title">
+          <div className="section-heading">
+            <h3 id="query-records-title">Evidence records</h3>
+            <span>{matchingRecords.length}</span>
+          </div>
+          {visibleRecords.map((record) => (
+            <QueryRecord key={record.id} record={record} />
+          ))}
+          {overflowRecords.length > 0 ? (
+            <details className="query-record-overflow">
+              <summary>
+                Show {overflowRecords.length} more evidence record
+                {overflowRecords.length === 1 ? "" : "s"}
+              </summary>
+              <div>
+                {overflowRecords.map((record) => (
+                  <QueryRecord key={record.id} record={record} />
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </section>
+      ) : resolution.mode === "disconnected" ? (
+        <div className="no-intersection">
+          <p>No documented relationship path.</p>
+          <span>{resolution.explanation}</span>
+        </div>
+      ) : null}
 
       {resolution.pathSegments.length > 0 ? (
         <section className="query-path" aria-label="Documented evidence path">
@@ -116,36 +144,11 @@ export function QueryInspector({
         </section>
       ) : null}
 
-      {matchingRecords.length > 0 ? (
-        <div className="query-records">
-          {visibleRecords.map((record) => (
-            <QueryRecord key={record.id} record={record} />
-          ))}
-          {overflowRecords.length > 0 ? (
-            <details className="query-record-overflow">
-              <summary>
-                Show {overflowRecords.length} more evidence record
-                {overflowRecords.length === 1 ? "" : "s"}
-              </summary>
-              <div>
-                {overflowRecords.map((record) => (
-                  <QueryRecord key={record.id} record={record} />
-                ))}
-              </div>
-            </details>
-          ) : null}
-        </div>
-      ) : resolution.mode === "disconnected" ? (
-        <div className="no-intersection">
-          <p>No documented relationship path.</p>
-          <span>{resolution.explanation}</span>
-        </div>
-      ) : null}
-
       {matchingTraceIds.length > 0 ? (
-        <div className="matching-traces">
+        <section className="matching-traces">
           <div className="section-heading">
-            <span>Related projects</span>
+            <h3>Projects using this evidence</h3>
+            <span>{matchingTraceIds.length}</span>
           </div>
           {matchingTraceIds.map((traceId) => {
             const relatedTrace = traceById.get(traceId)!;
@@ -160,7 +163,7 @@ export function QueryInspector({
               </button>
             );
           })}
-        </div>
+        </section>
       ) : null}
     </aside>
   );

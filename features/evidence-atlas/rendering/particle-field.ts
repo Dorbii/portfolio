@@ -3,8 +3,8 @@ import {
   graphEdges,
   graphNodes,
   type NodeKind,
-  type NodeTone,
 } from "../model/evidence-data";
+import { nodeDomainById } from "../model/node-domains";
 import type { EvidenceQueryResolution } from "../model/evidence-query";
 import { randomUnit, type Point, type Size } from "./graph-layout";
 import { graphPointToScreen, type GraphViewport } from "./graph-viewport";
@@ -15,7 +15,19 @@ import {
   visualTokenForProject,
 } from "./visual-tokens";
 
-type Rgb = [number, number, number];
+type Rgb = readonly [number, number, number];
+type AmbientGlyphProfile = "low" | "balanced" | "high";
+
+const ambientGlyphs = ["<>", "{}", "[]", "=>", "01", "//", ">_"] as const;
+const ambientGlyphProfiles: Record<
+  AmbientGlyphProfile,
+  { overview: number; deep: number }
+> = {
+  low: { overview: 0.006, deep: 0.018 },
+  balanced: { overview: 0.012, deep: 0.035 },
+  high: { overview: 0.02, deep: 0.06 },
+};
+const activeAmbientGlyphProfile: AmbientGlyphProfile = "balanced";
 
 export type ParticleFieldInteraction = {
   viewport: GraphViewport;
@@ -24,27 +36,28 @@ export type ParticleFieldInteraction = {
   occludedRight: number;
 };
 
+export type SelectionWake = {
+  nodeId: string;
+  startedAt: number;
+};
+
 type ActiveTokenBridge = {
   edgeIndex: number;
   sourceId: string;
   targetId: string;
 };
 
-const colors: Record<NodeTone, Rgb> = {
-  cyan: [86, 213, 238],
-  lime: [190, 226, 91],
-  coral: [255, 139, 111],
-  violet: [185, 151, 255],
-};
-
 const graphNodeById = new Map(graphNodes.map((node) => [node.id, node]));
 
 const fieldTuning = {
+  baseTextureDensity: 0.92,
+  baseTextureOpacity: 0.9,
   bridgeAlphaActive: 0.5,
-  bridgeAlphaIdle: 0.072,
+  bridgeAlphaIdle: 0.11,
   bridgeParticleBase: 14,
   bridgeParticlePerWeight: 11,
   bridgeParticleActive: 22,
+  bridgeParticleAmbientScale: 0.6,
   bridgeSpreadBase: 42,
   bridgeSpreadRatio: 0.19,
   nodeRadiusBase: 44,
@@ -57,12 +70,21 @@ const fieldTuning = {
   nodeParticleAlphaRange: 0.76,
   nodeParticleSatelliteOpacity: 0.62,
   satelliteScale: 1.62,
-  semanticTokenScale: 1.45,
-  semanticNodeTokenScale: 1.75,
+  semanticTokenScale: 1.65,
+  semanticTokenFullScale: 4.2,
+  semanticNodeTokenScale: 1.8,
+  semanticNodeTokenFullScale: 4,
   semanticTokenCursorRadius: 240,
   semanticTokenMaxBridges: 6,
+  dataBurstMaxConcurrent: 2,
+  dataBurstSlotDuration: 9_000,
+  dataBurstTrailLength: 8,
   motionTimeScale: 0.68,
+  selectionWakeDuration: 1_050,
+  selectionWakeMaxEdges: 5,
 };
+
+export const SELECTION_WAKE_DURATION_MS = fieldTuning.selectionWakeDuration;
 
 function rgba(color: Rgb, alpha: number) {
   return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
@@ -129,19 +151,137 @@ function clampUnit(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
+function smoothstep(start: number, end: number, value: number) {
+  const progress = clampUnit((value - start) / (end - start));
+  return progress * progress * (3 - 2 * progress);
+}
+
+export function selectionWakeFrame(
+  wake: SelectionWake | null,
+  time: number,
+  motionEnabled = true,
+) {
+  if (!wake) {
+    return { active: false, progress: 0, envelope: 0, staticEmphasis: false };
+  }
+  if (!motionEnabled) {
+    return { active: true, progress: 1, envelope: 0.72, staticEmphasis: true };
+  }
+
+  const elapsed = time - wake.startedAt;
+  if (elapsed < 0 || elapsed > fieldTuning.selectionWakeDuration) {
+    return { active: false, progress: 0, envelope: 0, staticEmphasis: false };
+  }
+  const progress = clampUnit(elapsed / fieldTuning.selectionWakeDuration);
+  return {
+    active: true,
+    progress,
+    envelope:
+      smoothstep(0, 0.1, progress) * (1 - smoothstep(0.82, 1, progress)),
+    staticEmphasis: false,
+  };
+}
+
+export function selectionWakeEdgeTuning(weight: number) {
+  const strength = clampUnit(weight / 12);
+  return {
+    particleCount: Math.round(10 + Math.min(weight, 12) * 3),
+    speed: 0.86 + strength * 0.38,
+    strength,
+  };
+}
+
+export function selectionWakeEdges(nodeId: string) {
+  return graphEdges
+    .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+    .sort((left, right) => right.weight - left.weight)
+    .slice(0, fieldTuning.selectionWakeMaxEdges);
+}
+
 export function semanticZoomLevel(scale: number) {
   return clampUnit((scale - 1.35) / 2.65);
 }
 
-export function semanticTokenBridgeLimit(scale: number) {
-  if (scale < fieldTuning.semanticTokenScale) return 0;
-  return Math.min(
-    fieldTuning.semanticTokenMaxBridges,
-    1 +
-      Math.floor(
-        semanticZoomLevel(scale) * (fieldTuning.semanticTokenMaxBridges - 1),
-      ),
+export function ambientGlyphDensity(
+  scale: number,
+  profile: AmbientGlyphProfile = activeAmbientGlyphProfile,
+) {
+  const density = ambientGlyphProfiles[profile];
+  const zoom = semanticZoomLevel(scale);
+  return density.overview + (density.deep - density.overview) * zoom;
+}
+
+export function ambientGlyphForSeed(seed: number, density: number) {
+  if (randomUnit(seed + 41) >= density) return null;
+  const glyphIndex = Math.floor(randomUnit(seed + 47) * ambientGlyphs.length);
+  return ambientGlyphs[glyphIndex] ?? ambientGlyphs[0];
+}
+
+function drawAmbientParticle(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  particleSize: number,
+  color: Rgb,
+  alpha: number,
+  seed: number,
+  glyphDensity: number,
+) {
+  const glyph = ambientGlyphForSeed(seed, glyphDensity);
+  context.fillStyle = rgba(color, glyph ? Math.min(1, alpha * 1.16) : alpha);
+  if (glyph) {
+    context.fillText(glyph, x, y);
+    return;
+  }
+  context.fillRect(x, y, particleSize, particleSize);
+}
+
+function drawAtmosphereParticle(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: Rgb,
+  alpha: number,
+  seed: number,
+  viewportScale: number,
+) {
+  const screenSize = randomUnit(seed + 53) > 0.95 ? 0.92 : 0.58;
+  const particleSize = screenSize / viewportScale;
+  context.fillStyle = rgba(color, alpha);
+  context.fillRect(
+    x - particleSize / 2,
+    y - particleSize / 2,
+    particleSize,
+    particleSize,
   );
+}
+
+export function semanticTokenReveal(scale: number) {
+  return smoothstep(
+    fieldTuning.semanticTokenScale,
+    fieldTuning.semanticTokenFullScale,
+    scale,
+  );
+}
+
+export function semanticNodeTokenReveal(scale: number) {
+  return smoothstep(
+    fieldTuning.semanticNodeTokenScale,
+    fieldTuning.semanticNodeTokenFullScale,
+    scale,
+  );
+}
+
+export function semanticTokenBridgePopulation(scale: number) {
+  return semanticTokenReveal(scale) * fieldTuning.semanticTokenMaxBridges;
+}
+
+export function semanticTokenBridgeLimit(scale: number) {
+  return Math.ceil(semanticTokenBridgePopulation(scale));
+}
+
+export function semanticTokenBridgeOpacity(scale: number, index: number) {
+  return clampUnit(semanticTokenBridgePopulation(scale) - index);
 }
 
 export function particleTransit(time: number, seed: number) {
@@ -205,6 +345,70 @@ function tokenFitsVisibleViewport(
   );
 }
 
+function tokenViewportVisibility(
+  point: Point,
+  size: Size,
+  interaction: ParticleFieldInteraction,
+) {
+  const screenPoint = graphPointToScreen(point, interaction.viewport);
+  const visibleRight = size.width - interaction.occludedRight;
+  const edgeDistance = Math.min(
+    screenPoint.x,
+    visibleRight - screenPoint.x,
+    screenPoint.y,
+    size.height - screenPoint.y,
+  );
+  return smoothstep(6, 44, edgeDistance);
+}
+
+export function semanticTokenOrbit(
+  time: number,
+  seed: number,
+  motionEnabled = true,
+) {
+  const direction = randomUnit(seed + 23) > 0.5 ? 1 : -1;
+  const speed = 0.000018 + randomUnit(seed + 29) * 0.000026;
+  return {
+    angle:
+      randomUnit(seed) * Math.PI * 2 +
+      (motionEnabled ? time * speed * direction : 0),
+    breathe: motionEnabled ? 1 + Math.sin(time * 0.00025 + seed) * 0.045 : 1,
+  };
+}
+
+export function dataBurstWindow(time: number, motionEnabled = true) {
+  if (!motionEnabled) {
+    return {
+      active: false,
+      progress: 0,
+      envelope: 0,
+      slot: 0,
+      streamCount: 0,
+      bridgeOffset: 0,
+    };
+  }
+
+  const slot = Math.floor(Math.max(0, time) / fieldTuning.dataBurstSlotDuration);
+  const phase = Math.max(0, time) - slot * fieldTuning.dataBurstSlotDuration;
+  const seed = slot * 307 + 97;
+  const start = 900 + randomUnit(seed + 3) * 5_600;
+  const duration = 300 + randomUnit(seed + 7) * 180;
+  const active = phase >= start && phase < start + duration;
+  const progress = active ? clampUnit((phase - start) / duration) : 0;
+  const envelope = active
+    ? smoothstep(0, 0.08, progress) * (1 - smoothstep(0.82, 1, progress))
+    : 0;
+
+  return {
+    active,
+    progress,
+    envelope,
+    slot,
+    streamCount: randomUnit(seed + 13) > 0.86 ? 2 : 1,
+    bridgeOffset: randomUnit(seed + 17),
+  };
+}
+
 export function visualTokenPromotion(
   nodeId: string,
   point: Point,
@@ -213,24 +417,23 @@ export function visualTokenPromotion(
   interaction: ParticleFieldInteraction,
 ) {
   const { viewport, cursor } = interaction;
-  if (
-    !visualTokenByNodeId[nodeId] ||
-    viewport.scale < fieldTuning.semanticNodeTokenScale
-  ) {
-    return 0;
-  }
-  if (selectedIds.has(nodeId)) return 1;
-  if (previewId === nodeId) return 0.88;
+  if (!visualTokenByNodeId[nodeId]) return 0;
+  const zoomReveal = semanticNodeTokenReveal(viewport.scale);
+  if (zoomReveal <= 0) return 0;
+  if (selectedIds.has(nodeId)) return zoomReveal;
+  if (previewId === nodeId) return zoomReveal * 0.88;
 
   if (cursor) {
     const dx = point.x - cursor.x;
     const dy = point.y - cursor.y;
     const radius = fieldTuning.semanticTokenCursorRadius / viewport.scale;
     const proximity = 1 - Math.sqrt(dx * dx + dy * dy) / radius;
-    if (proximity > 0) return 0.34 + clampUnit(proximity) * 0.5;
+    if (proximity > 0) {
+      return zoomReveal * (0.38 + clampUnit(proximity) * 0.46);
+    }
   }
 
-  return semanticZoomLevel(viewport.scale) * 0.58;
+  return zoomReveal * 0.46;
 }
 
 export function visualTokenEchoCount(kind: NodeKind, promotion: number) {
@@ -277,36 +480,53 @@ function drawSemanticTokens(
     const strength = evidenceStrengthByNode[node.id] ?? 1;
     const radius =
       fieldTuning.nodeRadiusBase + strength * fieldTuning.nodeRadiusPerStrength;
-    const color = colors[node.tone];
-    const echoCount = visualTokenEchoCount(node.kind, promotion);
-    for (let tokenIndex = 0; tokenIndex <= echoCount; tokenIndex += 1) {
+    const color = nodeDomainById[node.primaryDomain].color;
+    const maxEchoCount = visualTokenEchoCount(node.kind, 1);
+    for (let tokenIndex = 0; tokenIndex <= maxEchoCount; tokenIndex += 1) {
       const isEcho = tokenIndex > 0;
+      const revealStart = isEcho ? 0.22 + (tokenIndex - 1) * 0.2 : 0;
+      const layerReveal = smoothstep(
+        revealStart,
+        Math.min(1, revealStart + (isEcho ? 0.26 : 0.3)),
+        promotion,
+      );
+      if (layerReveal <= 0.01) continue;
       const seed = (nodeIndex + 1) * 173 + tokenIndex * 47;
       const variantSeed = node.id === "go" && !isEcho ? 0 : seed;
       const token = visualTokenForNode(node.id, variantSeed);
       if (!token) continue;
-      const angle = randomUnit(seed) * Math.PI * 2;
+      const orbitState = semanticTokenOrbit(
+        time,
+        seed,
+        interaction.motionEnabled,
+      );
       const orbit = radius *
         (isEcho
           ? 0.12 + randomUnit(seed + 7) * 1.08
           : 0.46 + randomUnit(seed + 7) * 0.48);
-      const drift = interaction.motionEnabled
-        ? Math.sin(time * 0.00032 + seed) *
-          (isEcho ? 3.8 : 2.2 + promotion * 2.8)
-        : 0;
-      const x = point.x + Math.cos(angle) * (orbit * 1.18 + drift);
-      const y = point.y + Math.sin(angle) * (orbit * 0.78 + drift * 0.45);
+      const x =
+        point.x +
+        Math.cos(orbitState.angle) * orbit * 1.18 * orbitState.breathe;
+      const y =
+        point.y +
+        Math.sin(orbitState.angle) * orbit * 0.78 * orbitState.breathe;
       const baseScreenSize = isEcho
-        ? 7 + promotion * 4.2 + semanticZoom * 3 + randomUnit(seed + 13) * 1.8
-        : 10 + promotion * 7 + semanticZoom * 9;
+        ? 4.1 + layerReveal * 1.4 + semanticZoom * 1.3 + randomUnit(seed + 13) * 0.7
+        : 6.2 + layerReveal * 2.2 + semanticZoom * 1.8;
       const screenSize = baseScreenSize *
-        (token.kind === "image-mask" ? (isEcho ? 1.15 : 1) : 1);
+        (token.kind === "image-mask" ? 1.05 : 1);
       if (!tokenFitsVisibleViewport({ x, y }, screenSize, size, interaction)) {
         continue;
       }
+      const viewportVisibility = tokenViewportVisibility(
+        { x, y },
+        size,
+        interaction,
+      );
       const alpha = isEcho
-        ? 0.12 + promotion * (0.16 + randomUnit(seed + 17) * 0.11)
-        : 0.2 + promotion * 0.64;
+        ? layerReveal * viewportVisibility *
+          (0.035 + promotion * (0.08 + randomUnit(seed + 17) * 0.05))
+        : layerReveal * viewportVisibility * (0.045 + promotion * 0.24);
       drawVisualTokenSprite(
         context,
         token,
@@ -315,8 +535,8 @@ function drawSemanticTokens(
         screenSize / interaction.viewport.scale,
         color,
         alpha,
-        (randomUnit(seed + 11) - 0.5) * (isEcho ? 0.8 : 0.18),
-        !isEcho,
+        (randomUnit(seed + 11) - 0.5) * (isEcho ? 0.42 : 0.12),
+        !isEcho && layerReveal > 0.45,
       );
     }
   });
@@ -356,13 +576,22 @@ function drawSemanticTokens(
     const progress = transit.progress;
     const x = source.x + (target.x - source.x) * progress;
     const y = source.y + (target.y - source.y) * progress;
-    const screenSize = 18 + semanticZoom * 10;
+    const screenSize = 7.2 + semanticZoom * 2.4;
     if (!tokenFitsVisibleViewport({ x, y }, screenSize, size, interaction)) {
       continue;
     }
+    const viewportVisibility = tokenViewportVisibility(
+      { x, y },
+      size,
+      interaction,
+    );
+    const bridgeOpacity = semanticTokenBridgeOpacity(
+      interaction.viewport.scale,
+      renderedBridges,
+    );
     const color = mixColor(
-      colors[sourceNode.tone],
-      colors[targetNode.tone],
+      nodeDomainById[sourceNode.primaryDomain].color,
+      nodeDomainById[targetNode.primaryDomain].color,
       progress,
     );
     const rotation = Math.atan2(target.y - source.y, target.x - source.x) * 0.08;
@@ -373,11 +602,273 @@ function drawSemanticTokens(
       y,
       screenSize / interaction.viewport.scale,
       color,
-      0.9 * transit.alpha,
+      0.52 * bridgeOpacity * viewportVisibility * transit.alpha,
       rotation,
+      bridgeOpacity > 0.55,
     );
     renderedBridges += 1;
   }
+}
+
+function drawDataBursts(
+  context: CanvasRenderingContext2D,
+  positions: Record<string, Point>,
+  activeBridges: ActiveTokenBridge[],
+  time: number,
+  interaction: ParticleFieldInteraction,
+) {
+  const burst = dataBurstWindow(time, interaction.motionEnabled);
+  if (!burst.active || burst.envelope <= 0.01 || activeBridges.length === 0) {
+    return;
+  }
+
+  const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
+  const fontSize = 6.4 + semanticZoom * 1.3;
+  const trailSpacing = 8 / interaction.viewport.scale;
+  const laneSpread = 14 / interaction.viewport.scale;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = `600 ${fontSize / interaction.viewport.scale}px "Cascadia Code", Consolas, monospace`;
+
+  const streamCount = Math.min(
+    burst.streamCount,
+    fieldTuning.dataBurstMaxConcurrent,
+    activeBridges.length,
+  );
+  const firstBridgeIndex = Math.floor(burst.bridgeOffset * activeBridges.length);
+  for (let streamIndex = 0; streamIndex < streamCount; streamIndex += 1) {
+    const bridge =
+      activeBridges[(firstBridgeIndex + streamIndex * 3) % activeBridges.length];
+    const reverse =
+      randomUnit(burst.slot * 191 + bridge.edgeIndex * 17 + streamIndex) > 0.5;
+
+    const firstId = reverse ? bridge.targetId : bridge.sourceId;
+    const secondId = reverse ? bridge.sourceId : bridge.targetId;
+    const source = positions[firstId];
+    const target = positions[secondId];
+    const sourceNode = graphNodeById.get(firstId);
+    const targetNode = graphNodeById.get(secondId);
+    if (!source || !target || !sourceNode || !targetNode) continue;
+
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    const perpendicularX = -dy / distance;
+    const perpendicularY = dx / distance;
+    const laneOffset =
+      (randomUnit(bridge.edgeIndex * 307 + 149) - 0.5) * laneSpread;
+    const trailProgress = trailSpacing / distance;
+
+    for (
+      let bitIndex = 0;
+      bitIndex < fieldTuning.dataBurstTrailLength;
+      bitIndex += 1
+    ) {
+      const progress = burst.progress - bitIndex * trailProgress;
+      if (progress < 0 || progress > 1) continue;
+      const x =
+        source.x + dx * progress + perpendicularX * laneOffset;
+      const y =
+        source.y + dy * progress + perpendicularY * laneOffset;
+      const color = mixColor(
+        nodeDomainById[sourceNode.primaryDomain].color,
+        nodeDomainById[targetNode.primaryDomain].color,
+        progress,
+      );
+      const trailStrength = 1 - bitIndex / fieldTuning.dataBurstTrailLength;
+      const alpha = burst.envelope * Math.pow(trailStrength, 1.45) * 0.78;
+      context.fillStyle = rgba(color, alpha);
+      context.shadowColor = rgba(color, alpha * 0.86);
+      context.shadowBlur = bitIndex === 0 ? 7 / interaction.viewport.scale : 0;
+      context.fillText(
+        randomUnit(bridge.edgeIndex * 131 + bitIndex * 29 + 5) > 0.5
+          ? "1"
+          : "0",
+        x,
+        y,
+      );
+    }
+  }
+
+  context.shadowBlur = 0;
+}
+
+function drawWakeBloom(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  color: Rgb,
+  radius: number,
+  strength: number,
+) {
+  const bloom = context.createRadialGradient(
+    point.x,
+    point.y,
+    0,
+    point.x,
+    point.y,
+    radius,
+  );
+  bloom.addColorStop(0, rgba(color, strength * 0.24));
+  bloom.addColorStop(0.28, rgba(color, strength * 0.08));
+  bloom.addColorStop(1, rgba(color, 0));
+  context.fillStyle = bloom;
+  context.beginPath();
+  context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+  context.fill();
+}
+
+function drawSelectionWake(
+  context: CanvasRenderingContext2D,
+  size: Size,
+  positions: Record<string, Point>,
+  wake: SelectionWake | null,
+  time: number,
+  interaction: ParticleFieldInteraction,
+) {
+  const frame = selectionWakeFrame(wake, time, interaction.motionEnabled);
+  if (!wake || !frame.active) return;
+  const source = positions[wake.nodeId];
+  const sourceNode = graphNodeById.get(wake.nodeId);
+  if (!source || !sourceNode) return;
+
+  const sourceColor = nodeDomainById[sourceNode.primaryDomain].color;
+  const sourceRadius =
+    fieldTuning.nodeRadiusBase +
+    (evidenceStrengthByNode[wake.nodeId] ?? 1) *
+      fieldTuning.nodeRadiusPerStrength;
+  drawWakeBloom(
+    context,
+    source,
+    sourceColor,
+    sourceRadius * 1.55,
+    frame.staticEmphasis ? 0.58 : frame.envelope * (1 - frame.progress) * 0.72,
+  );
+
+  const edges = selectionWakeEdges(wake.nodeId);
+  const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = `600 ${6.8 / interaction.viewport.scale}px "Cascadia Code", Consolas, monospace`;
+
+  edges.forEach((edge, edgeIndex) => {
+    const targetId = edge.source === wake.nodeId ? edge.target : edge.source;
+    const target = positions[targetId];
+    const targetNode = graphNodeById.get(targetId);
+    if (
+      !target ||
+      !targetNode ||
+      !edgeFitsVisibleViewport(source, target, size, interaction)
+    ) return;
+
+    const targetColor = nodeDomainById[targetNode.primaryDomain].color;
+    const tuning = selectionWakeEdgeTuning(edge.weight);
+    if (frame.staticEmphasis) {
+      const targetRadius =
+        fieldTuning.nodeRadiusBase +
+        (evidenceStrengthByNode[targetId] ?? 1) *
+          fieldTuning.nodeRadiusPerStrength;
+      drawWakeBloom(
+        context,
+        target,
+        targetColor,
+        targetRadius * 1.35,
+        0.28 + tuning.strength * 0.24,
+      );
+      return;
+    }
+
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    const direction = Math.atan2(dy, dx);
+    const perpendicularX = -dy / distance;
+    const perpendicularY = dx / distance;
+    const leadingProgress = clampUnit(frame.progress * tuning.speed);
+
+    for (
+      let particleIndex = 0;
+      particleIndex < tuning.particleCount;
+      particleIndex += 1
+    ) {
+      const seed = edgeIndex * 1_009 + particleIndex * 37 + 211;
+      const trail =
+        (particleIndex / tuning.particleCount) *
+        (0.24 - tuning.strength * 0.08);
+      const progress =
+        leadingProgress - trail + (randomUnit(seed + 3) - 0.5) * 0.035;
+      if (progress <= 0 || progress >= 1) continue;
+      const spread =
+        (randomUnit(seed + 7) - 0.5) *
+        (9 + distance * 0.024) *
+        (0.55 + frame.envelope * 0.45);
+      const x = source.x + dx * progress + perpendicularX * spread;
+      const y = source.y + dy * progress + perpendicularY * spread;
+      const color = mixColor(sourceColor, targetColor, progress);
+      const trailStrength = 1 - particleIndex / tuning.particleCount;
+      const alpha =
+        frame.envelope *
+        (0.28 + tuning.strength * 0.36) *
+        (0.5 + trailStrength * 0.5);
+
+      if (particleIndex > 0 && particleIndex % 7 === 0) {
+        context.save();
+        context.translate(x, y);
+        context.rotate(direction);
+        context.fillStyle = rgba(color, alpha * 0.92);
+        context.fillText(
+          ambientGlyphs[(edgeIndex + particleIndex) % ambientGlyphs.length],
+          0,
+          0,
+        );
+        context.restore();
+      } else {
+        const particleSize =
+          (randomUnit(seed + 13) > 0.84 ? 2.2 : 1.1) /
+          interaction.viewport.scale;
+        context.fillStyle = rgba(color, alpha);
+        context.fillRect(x, y, particleSize, particleSize);
+      }
+    }
+
+    const arrival =
+      smoothstep(0.72, 0.9, leadingProgress) *
+      (1 - smoothstep(0.9, 1, frame.progress));
+    if (arrival > 0.01) {
+      const targetRadius =
+        fieldTuning.nodeRadiusBase +
+        (evidenceStrengthByNode[targetId] ?? 1) *
+          fieldTuning.nodeRadiusPerStrength;
+      drawWakeBloom(
+        context,
+        target,
+        targetColor,
+        targetRadius * 1.45,
+        arrival * (0.34 + tuning.strength * 0.34),
+      );
+    }
+
+    if (edgeIndex < 2 && semanticZoom > 0.18) {
+      const token = visualTokenForNode(wake.nodeId, edgeIndex + 71);
+      if (token) {
+        const tokenProgress = clampUnit(leadingProgress - 0.09);
+        const x = source.x + dx * tokenProgress;
+        const y = source.y + dy * tokenProgress;
+        if (tokenFitsVisibleViewport({ x, y }, 7, size, interaction)) {
+          drawVisualTokenSprite(
+            context,
+            token,
+            x,
+            y,
+            (5.2 + semanticZoom * 1.8) / interaction.viewport.scale,
+            mixColor(sourceColor, targetColor, tokenProgress),
+            frame.envelope * (0.16 + tuning.strength * 0.18),
+            direction,
+            false,
+          );
+        }
+      }
+    }
+  });
 }
 
 function prepareFieldContext(
@@ -426,8 +917,10 @@ export function drawParticleFieldBase(
   const relatedNodeIds = new Set(resolution.pathNodeIds);
   const active = activeEvidenceSets(resolution);
   const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
-  const particleBudget = 1 - semanticZoom * 0.52;
-  const particleOpacity = 1 - semanticZoom * 0.48;
+  const particleBudget =
+    (1 - semanticZoom * 0.52) * fieldTuning.baseTextureDensity;
+  const particleOpacity =
+    (1 - semanticZoom * 0.48) * fieldTuning.baseTextureOpacity;
 
   graphEdges.forEach((edge, edgeIndex) => {
     const source = positions[edge.source];
@@ -473,16 +966,21 @@ export function drawParticleFieldBase(
         (dy / distance) * longitudinal +
         perpendicularY * spread;
       const color = mixColor(
-        colors[sourceNode.tone],
-        colors[targetNode.tone],
+        nodeDomainById[sourceNode.primaryDomain].color,
+        nodeDomainById[targetNode.primaryDomain].color,
         Math.max(0, Math.min(1, progress)),
       );
-      context.fillStyle = rgba(
+      const particleAlpha =
+        baseAlpha * (0.36 + randomUnit(seed + 8) * 0.68);
+      drawAtmosphereParticle(
+        context,
+        x,
+        y,
         color,
-        baseAlpha * (0.36 + randomUnit(seed + 8) * 0.68),
+        particleAlpha,
+        seed,
+        interaction.viewport.scale,
       );
-      const particleSize = randomUnit(seed + 11) > 0.92 ? 1.8 : 0.85;
-      context.fillRect(x, y, particleSize, particleSize);
     }
   });
 
@@ -509,7 +1007,7 @@ export function drawParticleFieldBase(
         interaction,
       )
     ) return;
-    const color = colors[node.tone];
+    const color = nodeDomainById[node.primaryDomain].color;
     const glow = context.createRadialGradient(
       point.x,
       point.y,
@@ -543,16 +1041,21 @@ export function drawParticleFieldBase(
       const y =
         point.y +
         Math.sin(angle) * distance * spreadScale * 0.78;
-      context.fillStyle = rgba(
-        color,
+      const particleAlpha =
         alpha *
-          particleOpacity *
-          (isSatellite ? fieldTuning.nodeParticleSatelliteOpacity : 1) *
-          (fieldTuning.nodeParticleAlphaFloor +
-            randomUnit(seed + 9) * fieldTuning.nodeParticleAlphaRange),
+        particleOpacity *
+        (isSatellite ? fieldTuning.nodeParticleSatelliteOpacity : 1) *
+        (fieldTuning.nodeParticleAlphaFloor +
+          randomUnit(seed + 9) * fieldTuning.nodeParticleAlphaRange);
+      drawAtmosphereParticle(
+        context,
+        x,
+        y,
+        color,
+        particleAlpha,
+        seed,
+        interaction.viewport.scale,
       );
-      const particleSize = randomUnit(seed + 15) > 0.91 ? 1.95 : 0.95;
-      context.fillRect(x, y, particleSize, particleSize);
     }
   });
 
@@ -566,6 +1069,7 @@ export function drawParticleFieldMotion(
   resolution: EvidenceQueryResolution,
   previewId: string | null,
   activeProjectId: string | null,
+  selectionWake: SelectionWake | null,
   time: number,
   interaction: ParticleFieldInteraction,
 ) {
@@ -577,6 +1081,18 @@ export function drawParticleFieldMotion(
   const activeTokenBridges: ActiveTokenBridge[] = [];
   const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
   const particleOpacity = 1 - semanticZoom * 0.68;
+  const glyphDensity = ambientGlyphDensity(interaction.viewport.scale);
+  const glyphFontSize = (5.2 + semanticZoom * 1.6) / interaction.viewport.scale;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = `600 ${glyphFontSize}px "Cascadia Code", Consolas, monospace`;
+  const ambientOnly =
+    focusSet.size === 0 &&
+    activeProjectId === null &&
+    selectionWake === null;
+  const bridgeParticleScale = ambientOnly
+    ? fieldTuning.bridgeParticleAmbientScale
+    : 1;
 
   graphEdges.forEach((edge, edgeIndex) => {
     if (!edgeIsActive(edge, active)) return;
@@ -600,8 +1116,13 @@ export function drawParticleFieldMotion(
     const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
     const perpendicularX = -dy / distance;
     const perpendicularY = dx / distance;
-    const count =
-      fieldTuning.bridgeParticleActive + Math.min(edge.weight, 12) * 3;
+    const count = Math.max(
+      1,
+      Math.round(
+        (fieldTuning.bridgeParticleActive + Math.min(edge.weight, 12) * 3) *
+          bridgeParticleScale,
+      ),
+    );
 
     for (let particleIndex = 0; particleIndex < count; particleIndex += 1) {
       const seed = edgeIndex * 101 + particleIndex * 19 + 1;
@@ -623,19 +1144,26 @@ export function drawParticleFieldMotion(
         (dy / distance) * longitudinal +
         perpendicularY * (spread + drift);
       const color = mixColor(
-        colors[sourceNode.tone],
-        colors[targetNode.tone],
+        nodeDomainById[sourceNode.primaryDomain].color,
+        nodeDomainById[targetNode.primaryDomain].color,
         clampUnit(transit.progress),
       );
-      context.fillStyle = rgba(
-        color,
+      const particleAlpha =
         fieldTuning.bridgeAlphaActive *
           particleOpacity *
           transit.alpha *
-          (0.38 + randomUnit(seed + 8) * 0.62),
-      );
+          (0.38 + randomUnit(seed + 8) * 0.62);
       const particleSize = randomUnit(seed + 11) > 0.88 ? 2.05 : 0.9;
-      context.fillRect(x, y, particleSize, particleSize);
+      drawAmbientParticle(
+        context,
+        x,
+        y,
+        particleSize,
+        color,
+        particleAlpha,
+        seed,
+        glyphDensity,
+      );
     }
   });
 
@@ -660,7 +1188,7 @@ export function drawParticleFieldMotion(
     drawAttentionBloom(
       context,
       point,
-      colors[node.tone],
+      nodeDomainById[node.primaryDomain].color,
       radius,
       attention,
       nodeIndex + 1,
@@ -668,7 +1196,23 @@ export function drawParticleFieldMotion(
     );
   });
 
+  drawSelectionWake(
+    context,
+    size,
+    positions,
+    selectionWake,
+    time,
+    interaction,
+  );
+
   context.globalCompositeOperation = "source-over";
+  drawDataBursts(
+    context,
+    positions,
+    activeTokenBridges,
+    time,
+    interaction,
+  );
   drawSemanticTokens(
     context,
     size,

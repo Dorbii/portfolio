@@ -24,6 +24,8 @@ export function useEvidenceAtlasState() {
   const [activeTraceId, setActiveTraceId] = useState<string | null>(null);
   const [activeTraceStep, setActiveTraceStep] = useState(0);
   const [tracePlayback, setTracePlayback] = useState(false);
+  const [queryInspectorOpen, setQueryInspectorOpen] = useState(false);
+  const [selectionLimitAttempts, setSelectionLimitAttempts] = useState(0);
   const [urlReady, setUrlReady] = useState(false);
   const [copyLabel, setCopyLabel] = useState("Copy link");
 
@@ -43,13 +45,12 @@ export function useEvidenceAtlasState() {
         setActiveTraceId(requestedTrace);
         setActiveTraceStep(0);
         setSelectedIds(traceRecords[0]?.nodeIds ?? trace.nodeIds);
-        setTracePlayback(
-          trace.replayStatus === "ready" &&
-            traceRecords.length > 1 &&
-            supportsTraceMotion(),
-        );
+        setTracePlayback(false);
       } else if (requestedFocus && requestedFocus.length > 0) {
         setSelectedIds(requestedFocus);
+        setQueryInspectorOpen(
+          !window.matchMedia("(max-width: 600px)").matches,
+        );
       }
       setUrlReady(true);
     }, 0);
@@ -70,36 +71,33 @@ export function useEvidenceAtlasState() {
     );
   }, [activeTraceId, selectedIds, urlReady]);
 
-  const clearAtlas = useCallback(() => {
-    setPreviewId(null);
-    setSelectedIds([]);
-    setActiveTraceId(null);
-    setActiveTraceStep(0);
-    setTracePlayback(false);
-  }, []);
-
-  useEffect(() => {
-    const handleKeyboard = (event: KeyboardEvent) => {
-      if (event.key === "Escape") clearAtlas();
-    };
-    window.addEventListener("keydown", handleKeyboard);
-    return () => window.removeEventListener("keydown", handleKeyboard);
-  }, [clearAtlas]);
-
   const toggleNode = useCallback(
     (nodeId: string) => {
       const wasTracing = activeTraceId !== null;
+      if (
+        !wasTracing &&
+        !selectedIds.includes(nodeId) &&
+        selectedIds.length >= MAX_MANUAL_SELECTIONS
+      ) {
+        setSelectionLimitAttempts((current) => current + 1);
+        return;
+      }
+      setSelectionLimitAttempts(0);
       setActiveTraceId(null);
       setTracePlayback(false);
+      setQueryInspectorOpen(
+        !window.matchMedia("(max-width: 600px)").matches,
+      );
       setSelectedIds((current) => {
         if (wasTracing) return [nodeId];
         if (current.includes(nodeId)) {
           return current.filter((id) => id !== nodeId);
         }
-        return [...current, nodeId].slice(-MAX_MANUAL_SELECTIONS);
+        if (current.length >= MAX_MANUAL_SELECTIONS) return current;
+        return [...current, nodeId];
       });
     },
-    [activeTraceId],
+    [activeTraceId, selectedIds],
   );
 
   const openTrace = useCallback((traceId: string) => {
@@ -109,11 +107,9 @@ export function useEvidenceAtlasState() {
     setActiveTraceId(traceId);
     setActiveTraceStep(0);
     setSelectedIds(traceRecords[0]?.nodeIds ?? trace.nodeIds);
-    setTracePlayback(
-      trace.replayStatus === "ready" &&
-        traceRecords.length > 1 &&
-        supportsTraceMotion(),
-    );
+    setTracePlayback(false);
+    setQueryInspectorOpen(false);
+    setSelectionLimitAttempts(0);
     setPreviewId(null);
   }, []);
 
@@ -191,11 +187,19 @@ export function useEvidenceAtlasState() {
     setActiveTraceId(null);
     setActiveTraceStep(0);
     setTracePlayback(false);
-  }, []);
-
-  const clearQuery = useCallback(() => {
+    setQueryInspectorOpen(false);
     setSelectedIds([]);
     setPreviewId(null);
+    setSelectionLimitAttempts(0);
+  }, []);
+
+  const openQuery = useCallback(() => {
+    if (selectedIds.length === 0) return;
+    setQueryInspectorOpen(true);
+  }, [selectedIds.length]);
+
+  const closeQuery = useCallback(() => {
+    setQueryInspectorOpen(false);
   }, []);
 
   const copyView = useCallback(async () => {
@@ -217,12 +221,18 @@ export function useEvidenceAtlasState() {
     activeTrace,
     activeTraceStep,
     tracePlayback,
-    inspectorOpen: Boolean(activeTraceId || selectedIds.length > 0),
+    selectionLimit: MAX_MANUAL_SELECTIONS,
+    selectionLimitAttempts,
+    queryInspectorOpen,
+    inspectorOpen: Boolean(
+      activeTraceId || (selectedIds.length > 0 && queryInspectorOpen),
+    ),
     copyLabel,
     toggleNode,
     openTrace,
     closeTrace,
-    clearQuery,
+    openQuery,
+    closeQuery,
     changeTraceStep,
     toggleTracePlayback,
     copyView,

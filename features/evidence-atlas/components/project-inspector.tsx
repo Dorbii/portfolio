@@ -28,6 +28,7 @@ export function ProjectInspector({
     ? Math.min(Math.max(projectStep, 0), records.length - 1)
     : 0;
   const currentRecord = records[currentStep];
+  const progress = hasReplay ? ((currentStep + 1) / records.length) * 100 : 100;
 
   return (
     <aside
@@ -35,42 +36,55 @@ export function ProjectInspector({
       aria-labelledby="project-inspector-title"
     >
       <div className="inspector-toolbar">
-        <strong>Project {project.index}</strong>
-        <button type="button" onClick={onClose}>
-          Return to map
+        <span>Project {project.index}</span>
+        <button type="button" onClick={onClose} aria-label="Close project details">
+          Close <i aria-hidden="true">×</i>
         </button>
       </div>
 
       <header className="project-header">
-        <p>{project.period}</p>
-        <h2 id="project-inspector-title">{project.title}</h2>
-        <span className={`proof-label proof-${project.evidenceClass}`}>
-          {project.proofLabel}
-        </span>
+        <div className="project-meta">
+          <p>{project.period}</p>
+          <span className={`proof-label proof-${project.evidenceClass}`}>
+            {project.proofLabel}
+          </span>
+        </div>
+        <h2 id="project-inspector-title" tabIndex={-1}>
+          {project.title}
+        </h2>
+        <p className="project-statement">{project.statement}</p>
+        <p className="project-summary">{project.summary}</p>
       </header>
 
-      <p className="project-statement">{project.statement}</p>
-      <p className="project-summary">{project.summary}</p>
-
       {hasReplay ? (
-        <>
-          <section className="project-player" aria-label="Project playback controls">
-            <div>
-              <span>Current step</span>
-              <strong>
-                {String(currentRecord.sequence).padStart(2, "0")} /{" "}
-                {String(records.length).padStart(2, "0")}
-              </strong>
+        <section className="project-flow" aria-label="Project steps">
+          <div className="section-heading">
+            <h3>Project flow</h3>
+            <span>{records.length} steps</span>
+          </div>
+
+          <div className="project-player" aria-label="Project playback controls">
+            <div className="project-player-status">
+              <span>Now tracing</span>
+              <strong>{currentRecord.title}</strong>
             </div>
-            <div>
+            <div className="project-progress" aria-hidden="true">
+              <span style={{ width: `${progress}%` }} />
+            </div>
+            <div className="project-player-controls">
+              <span className="project-step-count">
+                {String(currentRecord.sequence).padStart(2, "0")} / {String(records.length).padStart(2, "0")}
+              </span>
               <button
                 type="button"
+                aria-label="Previous project step"
                 disabled={currentStep === 0}
                 onClick={() => onProjectStepChange(currentStep - 1)}
               >
-                Previous
+                ←
               </button>
               <button
+                className="project-play-toggle"
                 type="button"
                 aria-pressed={isProjectPlaying}
                 onClick={onToggleProjectPlayback}
@@ -83,75 +97,71 @@ export function ProjectInspector({
               </button>
               <button
                 type="button"
+                aria-label="Next project step"
                 disabled={currentStep === records.length - 1}
                 onClick={() => onProjectStepChange(currentStep + 1)}
               >
-                Next
+                →
               </button>
             </div>
-          </section>
+          </div>
 
-          <section className="project-flow" aria-label="Project steps">
-            <div className="section-heading">
-              <span>Project steps</span>
-              <small>{records.length}</small>
-            </div>
+          <div className="project-step-list">
             {records.map((record, index) => (
               <button
                 className={`project-step ${index === currentStep ? "is-current" : ""}`}
                 key={record.id}
                 type="button"
-                aria-pressed={index === currentStep}
+                aria-current={index === currentStep ? "step" : undefined}
+                aria-expanded={index === currentStep}
                 onClick={() => onProjectStepChange(index)}
               >
-                <div className="step-marker">
+                <span className="step-marker">
                   {String(record.sequence).padStart(2, "0")}
-                </div>
-                <div>
-                  <p>
+                </span>
+                <span className="step-copy">
+                  <span className="step-meta">
                     <span>{record.source}</span>
                     <span>{evidenceClassLabels[record.evidenceClass]}</span>
-                  </p>
-                  <h3>{record.title}</h3>
-                  <div className="step-detail">{record.detail}</div>
-                  <div className="step-nodes" aria-label="Connected concepts">
-                    {record.nodeIds.slice(0, 5).map((nodeId) => (
-                      <span key={nodeId}>{nodeById.get(nodeId)?.label}</span>
-                    ))}
-                  </div>
-                </div>
+                  </span>
+                  <strong>{record.title}</strong>
+                  {index === currentStep ? (
+                    <>
+                      <span className="step-detail">{record.detail}</span>
+                      <span className="step-nodes" aria-label="Connected concepts">
+                        {record.nodeIds.slice(0, 5).map((nodeId) => (
+                          <span key={nodeId}>{nodeById.get(nodeId)?.label}</span>
+                        ))}
+                      </span>
+                    </>
+                  ) : null}
+                </span>
               </button>
             ))}
-          </section>
-        </>
+          </div>
+        </section>
       ) : null}
 
-      <section className="project-outcomes">
+      <section className="project-outcomes" aria-labelledby="project-outcomes-title">
         <div className="section-heading">
-          <span>Outcomes</span>
+          <h3 id="project-outcomes-title">Outcomes</h3>
+          <span>{project.outcomes.length}</span>
         </div>
-        <ul>
-          {project.outcomes.map((outcome) => (
-            <li key={outcome}>{outcome}</li>
+        <ol>
+          {project.outcomes.map((outcome, index) => (
+            <li key={outcome}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{outcome}</p>
+            </li>
           ))}
-        </ul>
-      </section>
-
-      <section className="project-limitations">
-        <div className="section-heading">
-          <span>Evidence boundary</span>
-        </div>
-        <ul>
-          {project.limitations.map((limitation) => (
-            <li key={limitation}>{limitation}</li>
-          ))}
-        </ul>
+        </ol>
       </section>
 
       {project.artifacts.length > 0 ? (
-        <section className="project-artifacts">
+        <section className="project-artifacts" aria-labelledby="project-artifacts-title">
           <div className="section-heading">
-            <span>Artifacts</span>
+            <h3 id="project-artifacts-title">Artifacts</h3>
+            <span>{project.artifacts.length}</span>
           </div>
           {project.artifacts.map((artifact) => {
             const content = (
@@ -161,7 +171,7 @@ export function ProjectInspector({
                 <small>
                   {artifact.access === "public"
                     ? "Open source"
-                    : "Private source / public summary"}
+                    : "Public summary"}
                 </small>
               </>
             );
@@ -181,6 +191,18 @@ export function ProjectInspector({
           })}
         </section>
       ) : null}
+
+      <details className="project-limitations">
+        <summary>
+          <span>Evidence boundary</span>
+          <small>{project.limitations.length} notes</small>
+        </summary>
+        <ul>
+          {project.limitations.map((limitation) => (
+            <li key={limitation}>{limitation}</li>
+          ))}
+        </ul>
+      </details>
     </aside>
   );
 }

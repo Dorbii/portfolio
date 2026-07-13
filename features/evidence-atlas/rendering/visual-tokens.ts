@@ -40,7 +40,7 @@ export type VisualToken =
       crop: "face";
     };
 
-type Rgb = [number, number, number];
+type Rgb = readonly [number, number, number];
 
 const goGopherUrl = "/go-gopher.png";
 
@@ -81,7 +81,6 @@ export const visualTokenByNodeId: Record<string, VisualToken> = {
   databricks: simpleIcon("Databricks", databricksSvg),
   csharp: { kind: "glyph", label: "C#", glyph: "braces" },
   localdb: { kind: "glyph", label: "LocalDB", glyph: "cube" },
-  electron: { kind: "glyph", label: "Electron", glyph: "flow" },
   "manifest-v3": { kind: "glyph", label: "Manifest V3", glyph: "connector" },
 };
 
@@ -125,6 +124,23 @@ const tokenSpriteCache = new Map<string, HTMLCanvasElement>();
 const TOKEN_SPRITE_SIZE = 48;
 const TOKEN_SPRITE_ICON_SIZE = 24;
 const TOKEN_COLOR_STEP = 32;
+
+export function preloadVisualTokenAssets() {
+  if (typeof Image === "undefined") return;
+  const imageTokens = Object.values(visualTokenByNodeId).filter(
+    (token): token is Extract<VisualToken, { kind: "image-mask" }> =>
+      token.kind === "image-mask",
+  );
+  for (const token of imageTokens) {
+    if (imageCache.has(token.src)) continue;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = token.src;
+    imageCache.set(token.src, image);
+  }
+}
+
+preloadVisualTokenAssets();
 
 function rgba(color: Rgb, alpha: number) {
   return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
@@ -400,9 +416,11 @@ export function drawVisualToken(
 }
 
 function quantizeColor(color: Rgb): Rgb {
-  return color.map((channel) =>
-    Math.min(255, Math.round(channel / TOKEN_COLOR_STEP) * TOKEN_COLOR_STEP),
-  ) as Rgb;
+  return [
+    Math.min(255, Math.round(color[0] / TOKEN_COLOR_STEP) * TOKEN_COLOR_STEP),
+    Math.min(255, Math.round(color[1] / TOKEN_COLOR_STEP) * TOKEN_COLOR_STEP),
+    Math.min(255, Math.round(color[2] / TOKEN_COLOR_STEP) * TOKEN_COLOR_STEP),
+  ];
 }
 
 function tokenSpriteKey(token: VisualToken, color: Rgb, glow: boolean) {
