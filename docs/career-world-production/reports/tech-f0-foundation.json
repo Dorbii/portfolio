@@ -1,0 +1,308 @@
+{
+  "schema_version": "career-world-tech-phase-report/v1",
+  "phase_id": "F0",
+  "packet_id": "TECH-F0-EARLY-DISPATCH-AMENDMENT",
+  "status": "IMPLEMENTED_REVIEW_PASS_AWAITING_DIRECTOR_ENVELOPE",
+  "implementation_verdict": "PASS",
+  "director_acceptance": "NOT_ASSERTED",
+  "downstream_acceptance": "NOT_GRANTED",
+  "summary": "Implemented only the art-independent Career World geometry foundation: exhaustive typed primitives, the frozen true-isometric projection, deterministic canonical tuple serialization, palette application outside geometry identity, and a pure compositional SVG renderer. Independent review initially found an invalid detail-tier test fixture plus two validator gaps; the fixture and validators were corrected and the same reviewer returned PASS. All F0-owned checks, repository-wide lint, the full build-backed test suite, and the standalone build pass. The Director repaired the unrelated lint gate with one configuration-only exclusion for frozen provenance scripts; that root-owned adjustment is recorded separately below and is not attributed to the F0 worker.",
+  "authority": {
+    "packet": {
+      "path": "docs/career-world-production/briefs/tech-f0-early-dispatch-amendment.json",
+      "bytes": 4441,
+      "sha256": "081f76617297ca11c191bf310c669329b6391700e78c306fa21b217a545dd4c4",
+      "verified": true
+    },
+    "c0_predecessor": {
+      "composition_brief": {
+        "path": "docs/career-world-production/briefs/tech-world-composition.md",
+        "bytes": 63858,
+        "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+        "verified": true
+      },
+      "composition_report": {
+        "path": "docs/career-world-production/reports/tech-world-composition.json",
+        "bytes": 38652,
+        "sha256": "53aec77216c1eaa10e8176958f8bcec3089ba769e7f88260def6df14653439b1",
+        "verified": true
+      },
+      "post_u0_contract": {
+        "path": "docs/career-world-production/briefs/tech-post-u0-preview-baseline-contract.md",
+        "bytes": 9427,
+        "sha256": "01653c0b833d472f2d8d37b864d96c5a221b121afbc0ab894a168c52e5527c44",
+        "verified": true
+      },
+      "historical_baseline": {
+        "path": "docs/career-world-production/reports/tech-implementation-baseline.json",
+        "bytes": 10162,
+        "sha256": "7facf4fbcbd51bb4257c9b02e728320cec675adb2308225ea3a6cde33b90e6f5",
+        "verified": true
+      },
+      "controlled_source": {
+        "file_count": 37,
+        "total_bytes": 1046172,
+        "aggregate_sha256": "f3445102bcb02b125eda9363347685a51abf4d3ac59e57cb43aa4f9ee8fd7ba7",
+        "historical_unchanged_paths_checked": 34,
+        "historical_unchanged_mismatches": 0,
+        "verified": true
+      }
+    }
+  },
+  "scope": {
+    "owned_paths": [
+      "features/career-world/geometry/types.ts",
+      "features/career-world/geometry/projection.ts",
+      "features/career-world/geometry/primitives.ts",
+      "features/career-world/geometry/canonical-payload.ts",
+      "features/career-world/geometry/palettes.ts",
+      "features/career-world/rendering/geometry-renderer.tsx",
+      "tests/career-world.test.mjs",
+      "docs/career-world-production/reports/tech-f0-foundation.json"
+    ],
+    "controlled_implementation_paths": [
+      "features/career-world/geometry/types.ts",
+      "features/career-world/geometry/projection.ts",
+      "features/career-world/geometry/primitives.ts",
+      "features/career-world/geometry/canonical-payload.ts",
+      "features/career-world/geometry/palettes.ts",
+      "features/career-world/rendering/geometry-renderer.tsx",
+      "tests/career-world.test.mjs"
+    ],
+    "administrative_report_path": "docs/career-world-production/reports/tech-f0-foundation.json",
+    "administrative_report_excluded_from_controlled_source_digest": true,
+    "unexpected_f0_paths_changed": 0,
+    "dependency_changes": 0
+  },
+  "before_after_receipts": [
+    {
+      "path": "features/career-world/geometry/types.ts",
+      "before": null,
+      "after": {
+        "bytes": 2617,
+        "sha256": "64b01ea13d048f075c4adf016f32ba0e5eba8676633b71ca53ad5b98d9cd2c93"
+      },
+      "change": "added"
+    },
+    {
+      "path": "features/career-world/geometry/projection.ts",
+      "before": null,
+      "after": {
+        "bytes": 1956,
+        "sha256": "597712a90fe63e913b6bd54d26a376323863b9c808187b796a34af0ea9ec58fb"
+      },
+      "change": "added"
+    },
+    {
+      "path": "features/career-world/geometry/primitives.ts",
+      "before": null,
+      "after": {
+        "bytes": 7301,
+        "sha256": "10e184109821be6cdad95e7956c2bd9c399dfb8bbc7c881177b27f4111814049"
+      },
+      "change": "added"
+    },
+    {
+      "path": "features/career-world/geometry/canonical-payload.ts",
+      "before": null,
+      "after": {
+        "bytes": 6503,
+        "sha256": "17778559c2b5c23125c62ea4421b155282489b8221fe7f6ce530349c6d0be152"
+      },
+      "change": "added"
+    },
+    {
+      "path": "features/career-world/geometry/palettes.ts",
+      "before": null,
+      "after": {
+        "bytes": 4416,
+        "sha256": "d8bbc03709fcc4e853828045030fccc0735b0d991802485e5c2e97fe936b8d13"
+      },
+      "change": "added"
+    },
+    {
+      "path": "features/career-world/rendering/geometry-renderer.tsx",
+      "before": null,
+      "after": {
+        "bytes": 3499,
+        "sha256": "4016943341adda28fb66bb0493344d22226929d4adcea2fa84fb601bb9ca384c"
+      },
+      "change": "added"
+    },
+    {
+      "path": "tests/career-world.test.mjs",
+      "before": {
+        "bytes": 26332,
+        "sha256": "6e0b8f8f55c8604a1a15d469715e4e31226a4bdfc2d39383fb25f18aa15b5344"
+      },
+      "after": {
+        "bytes": 36472,
+        "sha256": "659f5fca180fee443c54d2b82e3954013138d3547c2910c385d91edec0e26581"
+      },
+      "change": "modified"
+    }
+  ],
+  "director_gate_repair": {
+    "owner": "/root",
+    "reason": "Frozen one-off production utilities under docs/career-world-production/scripts are provenance artifacts rather than application source; excluding that directory removes four CommonJS-rule errors without changing the renderer, runtime, tests, dependencies, or art.",
+    "path": "eslint.config.mjs",
+    "before": {
+      "bytes": 483,
+      "sha256": "275a07c13fc7c83a652efcfa9fb6a207c451a2f5088e6793415ce44281285720"
+    },
+    "after": {
+      "bytes": 608,
+      "sha256": "2cf6acf0320c404678efde9eec0204f0cb69d40a4e9402c81f3ed0a69dd3a088"
+    },
+    "attributed_to_f0_worker": false,
+    "runtime_behavior_changed": false,
+    "dependency_changed": false
+  },
+  "controlled_source_successor": {
+    "predecessor_aggregate_sha256": "f3445102bcb02b125eda9363347685a51abf4d3ac59e57cb43aa4f9ee8fd7ba7",
+    "file_count": 43,
+    "total_bytes": 1082729,
+    "aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+    "non_owned_predecessor_paths_checked": 35,
+    "non_owned_predecessor_mismatches": 0,
+    "director_adjustment_paths_checked": 1,
+    "protected_path_mismatches": 0,
+    "report_excluded": true,
+    "path_sort": "ascending ordinal UTF-8 path bytes",
+    "record_format": "path + NUL + decimal byte count + NUL + lowercase SHA-256 + LF"
+  },
+  "director_control_repair": {
+    "owner": "/root",
+    "reason": "M0 and G1 independently reconstructed the exact 43-file controlled set and exposed a pre-existing aggregate transcription error in the first F0 envelope. Every per-file receipt, file count, byte total, non-owned equality check, protected-path check, and F0 implementation gate remained unchanged.",
+    "incorrect_aggregate_sha256": "f5d0bddc1d48cd53121e41f5ed10d9eaaa504fb5265f5a89e51183454ee6fa0f",
+    "corrected_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+    "reconstruction": "36 immutable baseline records with the three accepted C0 receipts, seven F0 owned receipts, and one Director eslint receipt applied by normalized path; 43 records sorted by ordinal UTF-8 path bytes and serialized with the declared record format",
+    "controlled_file_bytes_changed": false,
+    "implementation_or_dependency_changed": false,
+    "old_envelope_superseded": true
+  },
+  "test_harness_archaeology": {
+    "nearest_existing_tests_reviewed": [
+      "server-renders the bounded Career World tracer without retired media",
+      "keeps the full canonical registry, evidence holds, and frozen tracer coordinates stable",
+      "camera math preserves anchors and LOD does not mutate registry tuples"
+    ],
+    "helper_reviewed": "render",
+    "reused_harness_pieces": [
+      "node:test test cases",
+      "node:assert/strict assertions",
+      "Vite createServer with configFile false, middlewareMode true, appType custom, and silent logging",
+      "vite.ssrLoadModule for repository TypeScript and TSX modules",
+      "t.after(() => vite.close()) lifecycle cleanup",
+      "react-dom/server renderToStaticMarkup for SSR markup assertions"
+    ],
+    "new_runner_or_mock_layer": false
+  },
+  "implemented_invariants": [
+    "The geometry primitive discriminant is exactly surface, extrusion, or stroke; runtime validation rejects an unknown fourth kind.",
+    "Extrusions require a positive finite height, at least three unique finite plan points, and nonzero signed area before SVG projection.",
+    "The projection record exactly freezes azimuth 225, look direction 45, elevation 35.264, roll 0, authored rotation false, and the accepted screen formulas.",
+    "Generated projection coordinates use deterministic four-decimal formatting and reject nonfinite input or overflow.",
+    "The canonical payload is one explicit ordered JSON tuple and excludes palette values, employer ownership, placement, focus, LOD visibility, source-panel metadata, and labels.",
+    "All five employer palettes plus world-neutral and ambient-neutral fill the exact eight canonical slots.",
+    "The renderer is pure, has explicit data flow, contains no state, effects, image loading, network access, browser measurement, or asset-specific branches.",
+    "Every primitive remains in SSR markup with a stable key and tier annotation; detail visibility changes declaratively without changing primitive or primary-path identity.",
+    "Tier 0 retains the structural extrusion and primary path; test-only tier 1 and tier 2 fixtures are interior decoration.",
+    "Palette swaps change only resolved SVG colors and do not enter canonical geometry identity."
+  ],
+  "forbidden_scope_audit": {
+    "concept_png_runtime_references": 0,
+    "promoted_or_unpromoted_asset_shapes": 0,
+    "placement_coordinates": 0,
+    "placeholder_runtime_geometry": 0,
+    "camera_or_gesture_behavior": 0,
+    "drawer_or_overlay_behavior": 0,
+    "responsive_or_browser_proof_behavior": 0,
+    "three_dimensional_or_webgl_behavior": 0,
+    "new_dependencies": 0,
+    "note": "The two synthetic geometry objects exist only inside unit tests as deterministic serializer and renderer fixtures; they are not exported, registered, placed, or presented as canonical Career World assets."
+  },
+  "independent_review": {
+    "reviewer": "/root/tech_f0_foundation/f0_code_review",
+    "initial_verdict": "FAIL",
+    "initial_findings": [
+      "The renderer test incorrectly hid a structural extrusion at tier 0.",
+      "Zero-area extrusion plans passed validation.",
+      "The standalone primitive validator accepted an unknown discriminant."
+    ],
+    "corrections": [
+      "Moved the structural extrusion to tier 0, made higher tiers interior-only, and asserted identity continuity across tiers 0, 1, and 2.",
+      "Added duplicate-point and zero-area plan rejection and enforced validation inside projectExtrusion.",
+      "Added unknown primitive rejection and JavaScript regression coverage."
+    ],
+    "final_verdict": "PASS",
+    "final_remaining_blockers": 0,
+    "reviewer_files_changed": 0,
+    "reviewer_targeted_tests": "2/2 pass"
+  },
+  "verification": [
+    {
+      "command": "node --test --test-name-pattern \"freezes projection|server-renders every SVG primitive\" tests/career-world.test.mjs",
+      "scope": "targeted F0 tests after review corrections",
+      "status": "pass",
+      "result": "2 tests passed, 0 failed"
+    },
+    {
+      "command": "npm exec -- eslint <seven F0 source/test paths>",
+      "scope": "F0-owned source and test lint",
+      "status": "pass",
+      "result": "0 errors, 0 warnings"
+    },
+    {
+      "command": "npm exec -- tsc --noEmit --strict <six F0 source paths>",
+      "scope": "strict isolated F0 TypeScript check",
+      "status": "pass",
+      "result": "0 errors"
+    },
+    {
+      "command": "npm test",
+      "scope": "full build-backed repository test suite after review corrections",
+      "status": "pass",
+      "result": "15 tests passed, 0 failed; embedded production build passed"
+    },
+    {
+      "command": "npm run build",
+      "scope": "standalone production build after review corrections",
+      "status": "pass",
+      "result": "all five vinext build stages passed"
+    },
+    {
+      "command": "npm run lint",
+      "scope": "repository-wide lint",
+      "status": "pass",
+      "result": "0 errors and 0 warnings after the Director's configuration-only exclusion for frozen provenance scripts"
+    },
+    {
+      "command": "git diff --check",
+      "scope": "working tree before administrative report finalization",
+      "status": "pass",
+      "result": "no whitespace errors; unrelated line-ending warnings only"
+    },
+    {
+      "command": "owned and C0 non-owned SHA-256 audit",
+      "scope": "seven controlled F0 paths and 36 non-owned predecessor paths",
+      "status": "pass",
+      "result": "all owned receipts and the Director-owned eslint.config.mjs repair reproduced; ordinal serialization of the exact 43-file set produced corrected successor aggregate 233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121"
+    }
+  ],
+  "diagnostic_checks_not_used_as_acceptance_gates": [
+    {
+      "command": "repository-wide tsc --noEmit",
+      "status": "external_existing_errors",
+      "result": "No F0 error was reported. Existing errors remain in world-scene.tsx, world-registry.ts, evidence-atlas raw SVG module declarations, and worker Cloudflare global types."
+    }
+  ],
+  "limitations": [
+    "F0 does not contain any asset definition, selected-panel record, art binding, placement, registry integration, scene integration, interaction behavior, CSS, browser evidence, or 3D work.",
+    "Literal per-asset primaryPathHash and masterGeometryHash recomputation remains an I0 responsibility after promoted definitions exist; F0 supplies the deterministic payload serializer and exact path strings only.",
+    "This report does not accept F0, authorize M0 or G0-G6, promote art, or satisfy any downstream entry gate. The Director must verify this final report and issue the external handoff envelope."
+  ],
+  "files_outside_owned_scope_modified_by_f0": [],
+  "git_operations": [],
+  "deployment_operations": []
+}

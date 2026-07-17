@@ -1,0 +1,951 @@
+{
+  "schema_version": 1,
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-002",
+  "lane_id": "art-tracer-generation",
+  "role": "concept artist",
+  "thread_id": "/root/art_lead/tracer_generator",
+  "parent_thread_id": "/root/art_lead",
+  "status": "candidate_only",
+  "summary": "Generated exactly one initial built-in image candidate for each of the five promoted tracer assets, then used the single Director-authorized targeted retry to revise only world/career-world@v1. The rejected initial world candidate is preserved, every exact workspace path was visually inspected, and full-library generation was not started. All outputs remain candidate-only pending independent art QA.",
+  "authority": {
+    "promoted_inventory": "docs/career-world-production/asset-inventory.md",
+    "packet": "docs/career-world-production/briefs/art-tracer-generation.md",
+    "style_bible_and_rubric": "docs/career-world-production/reports/art-lead-recon.json",
+    "resolution": "The promoted asset inventory overrides earlier recon exclusions. This tracer contains only the five identities named by CW-002, so the changed Java, AI, and ACE/Column inventory decisions did not change the generated set."
+  },
+  "skills": {
+    "requested": [
+      "imagegen"
+    ],
+    "loaded": [
+      "imagegen"
+    ],
+    "used": [
+      {
+        "name": "imagegen",
+        "why": "Used the built-in image generator once per distinct tracer asset plus one targeted edit of the saved world candidate, labeled supplied references as non-edit inputs, preserved the rejected world initial, copied the selected revision into the workspace, and visually inspected the results."
+      }
+    ],
+    "fallback_used": false
+  },
+  "execution_contract": {
+    "generation_mode": "built_in_imagegen_only",
+    "distinct_assets": 5,
+    "initial_generation_calls": 5,
+    "targeted_retry_calls": 1,
+    "full_library_generation_started": false,
+    "reference_images_used_as_edit_targets": false,
+    "workspace_candidate_edit_targets": [
+      "design/career-world/concepts/tracer/world-career-world-v1.png"
+    ],
+    "promotion_claimed": false
+  },
+  "reference_inputs": [
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/03-kaizen-metrics-project-city.png",
+      "role": "style and Kaizen Metrics architecture-continuity reference",
+      "edit_target": false,
+      "view_image_inspected": true
+    },
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/01-career-world-overview.png",
+      "role": "world composition reference",
+      "edit_target": false,
+      "view_image_inspected": true
+    },
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/02-ninjaone-employer-territory.png",
+      "role": "city and capital composition reference",
+      "edit_target": false,
+      "view_image_inspected": true
+    }
+  ],
+  "files_changed": [
+    "design/career-world/concepts/tracer/skill-go-v1.png",
+    "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+    "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+    "design/career-world/concepts/tracer/world-career-world-v1.png",
+    "design/career-world/concepts/tracer/world-career-world-v1-rejected-initial.png",
+    "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+    "docs/career-world-production/reports/art-tracer-generation.json"
+  ],
+  "prompt_serialization": "Join exact_prompt_lines or revision_exact_prompt_lines with a single LF and no trailing LF. The result is the exact prompt submitted to built-in imagegen for that initial or revision call.",
+  "candidates": [
+    {
+      "asset_id": "skill/go@v1",
+      "generation_call_index": 1,
+      "output_path": "design/career-world/concepts/tracer/skill-go-v1.png",
+      "source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-1cc0edee-77e9-4781-9d02-be80f9e545a7.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "pixel_format": "24bpp RGB",
+        "bytes": 2053309
+      },
+      "sha256": "43227b1d852ac7b4f9e7aabfa75b172af7d95a44011e771d9a3c9c060592c3d6",
+      "exact_prompt_lines": [
+        "Use case: stylized-concept",
+        "Asset type: canonical game-environment concept sheet for deterministic SVG tracing",
+        "Primary request: Generate a brand-new concept sheet for the single canonical identity skill/go@v1. The supplied Career World images are style and composition references only, not edit targets; do not reproduce their UI, labels, or logos.",
+        "Scene/backdrop: one isolated asset on a near-black navy #080B10 technical drafting field with a very faint true-isometric grid and generous empty margin.",
+        "Subject: compact service engine house consisting of exactly one low rectangular workshop, one taller central engine bay, two narrow exhaust stacks, visible turbine housings, and one fixed blank sign-slot panel with no mark. It must read as a fast service/language workshop through architecture alone.",
+        "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; verticals remain vertical.",
+        "Style/medium: restrained technical-cartography line art; matte low-value navy/slate faces; thin parallel off-white and muted-cyan construction strokes; minimal emissive accent under 3 percent of visible face area; no cast shadow, no glass, chrome, PBR, or cinematic lighting.",
+        "Composition/framing: landscape concept sheet with four separated, unobscured views of this one identity only: three equally scaled, equally oriented LOD views and one smaller solid silhouette inset. Use spacing only, with no panel titles, captions, borders, arrows, legends, or UI.",
+        "LOD continuity: the three LOD views preserve the exact footprint, centroid, orientation, primary masses, roofline, facade rhythm, blank sign-slot anchor, two stacks, and turbine positions. Only secondary line density, doors, vents, seams, and small roof details may simplify between views. The silhouette must remain visually identical.",
+        "Text: none. Render no letters, words, digits, glyphs, icons, pseudo-text, signatures, or watermark anywhere, including on the sign slot.",
+        "Constraints: one isolated Go engine-house identity only; clean complete edges; traceable visible geometry; neutral reusable palette with no employer-specific baked mark; all views fit fully inside the canvas.",
+        "Avoid: technology or employer logos, Go lettering or gopher mascots, logo cubes, oversized symbols, extra buildings, extra stacks, roads, people, vehicles, trees, graph/dashboard nodes, data charts, private details, unsupported numbers, photorealism, fantasy, cyberpunk neon, perspective drift, melted joins, impossible stairs or windows, and geometry changes between LODs."
+      ],
+      "view_image_inspection": {
+        "subject": "pass: low workshop, taller engine bay, two stacks, turbine housings, and blank sign slot are visible",
+        "projection": "pass: orthographic isometric axes and verticals are consistent across the three views",
+        "style": "pass: restrained dark technical-cartography treatment with no PBR or photorealism",
+        "text_logo_leakage": "pass: no legible text, pseudo-text, technology mark, employer logo, mascot, or watermark",
+        "geometry_coherence": "pass: masses and turbine/stacks joins are coherent and traceable",
+        "lod_continuity": "risk: primary envelope is stable, but the left/high-detail view contains a small exterior service unit absent from later views"
+      },
+      "self_review": {
+        "status": "candidate_only",
+        "weighted_score_100": 92.25,
+        "automatic_blocker": false,
+        "critical_criterion_below_3": false,
+        "criteria": {
+          "identity_continuity": 3,
+          "projection_camera": 4,
+          "skill_reuse": 4,
+          "evidence_brand_safety": 4,
+          "geometry_coherence": 4,
+          "style_specificity": 4,
+          "lod_derivation": 3,
+          "palette_material": 3,
+          "density_legibility": 4,
+          "traceability": 4
+        }
+      },
+      "retry_count": 0,
+      "retry_decision": "No retry: the primary envelope, projection, identity, and safety constraints pass; the exterior unit is a bounded LOD-detail risk for independent QA rather than an automatic blocker or clear sub-80 failure.",
+      "rejected_retry_artifacts": [],
+      "deviations": [
+        "Small exterior service unit appears only in the left/high-detail LOD and may exceed secondary-detail simplification."
+      ],
+      "risks": [
+        "Independent QA should determine whether the exterior unit changes the effective footprint or silhouette enough to require a targeted retry."
+      ]
+    },
+    {
+      "asset_id": "project/kaizen-metrics@v1",
+      "generation_call_index": 2,
+      "output_path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+      "source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-f22c41c5-cd1a-41c1-9ce9-8c3526853b1d.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "pixel_format": "24bpp RGB",
+        "bytes": 2402555
+      },
+      "sha256": "df1d60f93e06a8fb0627dfb4218456865f9db258a88bcc9146ffb2f9f5d8966e",
+      "exact_prompt_lines": [
+        "Use case: stylized-concept",
+        "Asset type: canonical game-environment concept sheet for deterministic SVG tracing",
+        "Primary request: Generate a brand-new concept sheet for the single canonical identity project/kaizen-metrics@v1. The supplied Kaizen Metrics image is a style and architecture-continuity reference only, not an edit target; preserve its accepted domed observatory identity but do not reproduce its UI, labels, logos, or surrounding project city.",
+        "Scene/backdrop: one isolated asset on a near-black navy #080B10 technical drafting field with a very faint true-isometric grid and generous empty margin.",
+        "Subject: domed engineering observatory and reporting hall consisting of one circular ribbed dome on one square base, one lower rectangular annex, and one rooftop dish aligned directly behind the dome. The dome remains the dominant silhouette. In only the highest-detail LOD, include exactly three small shard beacons and one restrained archive/service detail as minor attachments that stay inside the established footprint and do not change the silhouette. No numbers or claims.",
+        "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; verticals remain vertical.",
+        "Style/medium: restrained technical-cartography line art; matte low-value navy/slate faces; thin parallel off-white and muted-cyan construction strokes; minimal emissive accent under 3 percent of visible face area; no cast shadow, no glass, chrome, PBR, or cinematic lighting.",
+        "Composition/framing: landscape concept sheet with four separated, unobscured views of this one identity only: three equally scaled, equally oriented LOD views and one smaller solid silhouette inset. Use spacing only, with no panel titles, captions, borders, arrows, legends, or UI.",
+        "LOD continuity: all three LOD views preserve the exact footprint, centroid, orientation, square base, circular ribbed dome, annex mass, dome roofline, facade rhythm, dish alignment, and fixed blank sign-slot anchor. Only secondary line density, doors, windows, ribs, seams, and the specifically permitted highest-detail attachments may simplify. The primary silhouette must remain visually identical.",
+        "Text: none. Render no letters, words, digits, glyphs, icons, pseudo-text, signatures, or watermark anywhere.",
+        "Constraints: one isolated Kaizen Metrics observatory identity only; clean complete edges; traceable visible geometry; all views fit fully inside the canvas; exactly three shard beacons only in the highest-detail view; no factual or metric implication.",
+        "Avoid: labels, technology or employer logos, dashboard screens, charts, graphs, data nodes, numbers, oversized symbols, surrounding skill buildings, roads, people, vehicles, trees, extra dishes, observatory campus scenes, private details, unsupported claims, photorealism, fantasy, cyberpunk neon, perspective drift, melted joins, impossible stairs or windows, silhouette-changing props, and changes to primary geometry between LODs."
+      ],
+      "view_image_inspection": {
+        "subject": "pass: ribbed dome, square platform/base, lower annex, rear-aligned dish, blank sign slot, and exactly three high-detail shard beacons are visible",
+        "projection": "pass: consistent orthographic isometric axes and verticals",
+        "style": "pass: technical-cartography line art with restrained cyan accents and no PBR",
+        "text_logo_leakage": "pass: no legible text, number, mark, dashboard, pseudo-text, or watermark",
+        "geometry_coherence": "pass: dome, annex, dish, platform, doors, and ribs join coherently",
+        "lod_continuity": "risk: primary dome/base/annex/dish massing is stable, but the three permitted high-detail obelisks occupy platform corners and may affect the outer silhouette"
+      },
+      "self_review": {
+        "status": "candidate_only",
+        "weighted_score_100": 92.25,
+        "automatic_blocker": false,
+        "critical_criterion_below_3": false,
+        "criteria": {
+          "identity_continuity": 3,
+          "projection_camera": 4,
+          "skill_reuse": 4,
+          "evidence_brand_safety": 4,
+          "geometry_coherence": 4,
+          "style_specificity": 4,
+          "lod_derivation": 3,
+          "palette_material": 3,
+          "density_legibility": 4,
+          "traceability": 4
+        }
+      },
+      "retry_count": 0,
+      "retry_decision": "No retry: the output follows the asset-specific permission for exactly three highest-detail shard beacons and preserves the primary observatory massing. Their corner placement remains an independent-QA risk, not a self-review blocker.",
+      "rejected_retry_artifacts": [],
+      "deviations": [
+        "The three permitted shard beacons sit at platform corners and may expand the high-detail silhouette even though the primary building silhouette is unchanged."
+      ],
+      "risks": [
+        "Independent QA should decide whether permitted LOD-2 attachments must remain entirely inside the alpha silhouette rather than only inside the platform footprint."
+      ]
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "generation_call_index": 3,
+      "output_path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+      "source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-35c40856-6084-42ad-a7e2-49902aaf2a4e.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "pixel_format": "24bpp RGB",
+        "bytes": 2183118
+      },
+      "sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+      "exact_prompt_lines": [
+        "Use case: stylized-concept",
+        "Asset type: canonical game-environment concept sheet for deterministic SVG tracing",
+        "Primary request: Generate a brand-new concept sheet for the single canonical identity city/ninjaone@v1. The supplied NinjaOne territory image is a style and broad capital-composition reference only, not an edit target; generate one unified employer capital landmark and do not reproduce the territory, surrounding projects, UI, labels, or logos.",
+        "Scene/backdrop: one isolated asset on a near-black navy #080B10 technical drafting field with a very faint true-isometric grid and generous empty margin.",
+        "Subject: one compact modern civic/platform capital cluster on a single unified foundation, consisting of exactly one tall central tower, two stepped side towers, low connected service wings, and one circular arrival court integrated at the front. It is one capital asset, not a whole project city. The central tower must dominate the silhouette while the two stepped side towers remain clearly paired.",
+        "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; verticals remain vertical.",
+        "Style/medium: restrained technical-cartography line art; matte faces using NinjaOne palette slots: structure base #18343B, muted darker structure shadow, primary line #7FC7CE, and emissive accent #56D5EE under 3 percent of visible face area; thin parallel construction strokes; no cast shadow, no glass, chrome, PBR, or cinematic lighting.",
+        "Composition/framing: landscape concept sheet with four separated, unobscured views of this one unified capital identity only: three equally scaled, equally oriented LOD views and one smaller solid silhouette inset. Use spacing only, with no panel titles, captions, borders, arrows, legends, or UI.",
+        "LOD continuity: all three LOD views preserve the exact unified footprint, centroid, orientation, central-tower mass and roofline, paired stepped-side-tower masses, low service wings, facade rhythm, circular arrival-court position, and fixed blank sign-slot anchor. Only secondary line density, doors, windows, seams, roof equipment, and court surface lines may simplify. The silhouette must remain visually identical.",
+        "Text: none. Render no letters, words, digits, glyphs, icons, pseudo-text, signatures, or watermark anywhere.",
+        "Constraints: one isolated capital landmark only; all tower masses stay physically connected to one foundation and one circular arrival court; clean complete edges; traceable visible geometry; all views fit fully inside the canvas; palette conveys the employer family only through mechanical color slots, never through a mark.",
+        "Avoid: employer logos, letter N, mascots, logo cubes, oversized symbols, labels, project buildings, skill buildings, roads leaving the asset, full territory maps, people, vehicles, trees, graph/dashboard nodes, charts, private details, real-campus implication, unsupported numbers, photorealism, fantasy, cyberpunk neon, perspective drift, melted joins, impossible stairs or windows, disconnected towers, silhouette-changing props, and changes to primary geometry between LODs."
+      ],
+      "view_image_inspection": {
+        "subject": "pass: one unified capital with one dominant central tower, two paired stepped towers, connected service wings, and one circular arrival court",
+        "projection": "pass: locked orthographic isometric axes and verticals across all LOD views",
+        "style": "pass: NinjaOne mechanical palette slots and restrained technical-cartography line art",
+        "text_logo_leakage": "pass: no N mark, employer logo, label, pseudo-text, or watermark",
+        "geometry_coherence": "pass: tower/wings/foundation/court connections are coherent and traceable",
+        "lod_continuity": "pass: primary footprint, tower hierarchy, wings, court, rooflines, and silhouette remain stable while facade detail simplifies"
+      },
+      "self_review": {
+        "status": "candidate_only",
+        "weighted_score_100": 98.75,
+        "automatic_blocker": false,
+        "critical_criterion_below_3": false,
+        "criteria": {
+          "identity_continuity": 4,
+          "projection_camera": 4,
+          "skill_reuse": 4,
+          "evidence_brand_safety": 4,
+          "geometry_coherence": 4,
+          "style_specificity": 4,
+          "lod_derivation": 4,
+          "palette_material": 3,
+          "density_legibility": 4,
+          "traceability": 4
+        }
+      },
+      "retry_count": 0,
+      "retry_decision": "No retry: visual inspection found no blocker or material prompt miss. The palette/material score remains conservative because a raster cannot prove every semantic palette-slot assignment.",
+      "rejected_retry_artifacts": [],
+      "deviations": [],
+      "risks": [
+        "Independent QA still needs projection-axis and alpha-overlay measurements before promotion."
+      ]
+    },
+    {
+      "asset_id": "world/career-world@v1",
+      "generation_call_index": 4,
+      "retry_call_index": 1,
+      "output_path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+      "initial_source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-f23936c0-f6ab-44bd-94d5-a9ca6cc6323b.png",
+      "source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-2cb7b81c-4276-4e1b-b416-aafcaeeecc05.png",
+      "dimensions": {
+        "width": 1672,
+        "height": 941,
+        "format": "PNG",
+        "pixel_format": "24bpp RGB",
+        "bytes": 2210155,
+        "aspect_ratio": 1.777896,
+        "target": "wide 16:9"
+      },
+      "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+      "exact_prompt_lines": [
+        "Use case: stylized-concept",
+        "Asset type: canonical authored world-geography concept reference for deterministic SVG tracing",
+        "Primary request: Generate a brand-new wide 16:9 concept reference for the single canonical identity world/career-world@v1. The supplied Career World overview is a composition reference only, not an edit target; preserve its broad one-mainland-above and two-islands-below arrangement but remove all UI, labels, logos, and authored employer architecture.",
+        "Scene/backdrop: calm near-black navy #080B10 ocean and technical drafting field with extremely faint contour and true-isometric guide lines; generous clean outer margin.",
+        "Subject: exactly one large neutral mainland spanning the upper two-thirds of the dominant map with exactly three fixed, unlabeled city anchor zones; exactly two separate smaller islands below, one lower-left and one lower-right, for the two remaining employer anchors; restrained mainland roads connecting the three mainland anchor zones; exactly two dotted sea routes, one from the mainland to each lower island; calm sparse neutral terrain with only low contours, small rock groupings, and occasional tiny conifer silhouettes.",
+        "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; verticals remain vertical.",
+        "Style/medium: restrained technical-cartography line art; matte low-value navy/slate land faces; thin parallel off-white and muted-cyan construction strokes; minimal emissive accent under 3 percent; no cast shadow, no PBR, no cinematic lighting.",
+        "Composition/framing: wide 16:9 reference, not an asset collage. One dominant authored world map occupies about 80 percent of the canvas. If space permits, a narrow unobtrusive unlabeled proof rail at the far right may show only two small simplified views plus one solid silhouette inset of this exact same geography; these are continuity proofs of the same world identity, never alternate maps or separate assets. Use spacing only, with no panel titles, captions, borders, arrows, legends, or UI.",
+        "LOD continuity: every representation preserves the exact mainland coastline, two-island count and relative positions, centroid, orientation, three mainland anchor-zone positions, road topology, and two sea-route endpoints. Only contour density, road surface detail, terrain marks, and small ambient marks may simplify. Geography and coastline silhouette must remain visually identical.",
+        "Text: none. Render no letters, words, digits, glyphs, icons, pseudo-text, signatures, or watermark anywhere.",
+        "Constraints: exactly one mainland, exactly two lower islands, exactly three empty mainland city anchor zones, exactly two dotted sea routes; no generated city labels, employer labels, technology labels, UI, or factual claims; all geography fits fully inside the wide frame; readable enough to trace.",
+        "Avoid: extra islands, archipelagos, extra route lines, labels, map legends, compass text, logos, mascots, large buildings, employer-specific architecture, city skylines, project buildings, graph/dashboard nodes, charts, data visualization, people, vehicles, ships, private details, unsupported numbers, photorealism, fantasy, cyberpunk neon, perspective drift, glowing borders, alternate coastlines, and geometry changes between LODs."
+      ],
+      "revision_exact_prompt_lines": [
+        "Use case: precise-object-edit",
+        "Asset type: targeted QA revision of the canonical authored world-geography concept reference",
+        "Input images: Image 1 is the edit target, the current world/career-world@v1 candidate. It is not merely a style reference.",
+        "Primary request: Revise only Image 1's coastline/anchor continuity defects. Treat one exact locked coastline-and-anchor mask as immutable source geometry, then derive the dominant map, both small proof views, and the solid silhouette inset from that single mask. Do not redesign the world.",
+        "Locked coordinate contract: the authored world frame is 1600 by 900 with top-left origin. Move the three empty circular mainland anchor pads into one shallow left/center/right band at the frozen world anchors: left pad (340,370), center pad (800,350), right pad (1240,380). These are approximately (21.25%,41.11%), (50%,38.89%), and (77.5%,42.22%) within the world frame. Preserve this exact left/center/right ordering and relative band placement in the dominant map and both proof views.",
+        "Locked geography mask: preserve exactly one large mainland outer contour and exactly two lower-island outer contours from a single master mask. Reuse those identical three land contours, without redrawing, stretching, rotating, mirroring, adding, deleting, or reshaping coast segments, in the dominant map, proof view 1, proof view 2, and solid silhouette inset. The silhouette must be the filled version of the identical contours. Preserve the same island scale, lower-left/lower-right positions, centroid, and orientation in every representation.",
+        "Targeted rock correction: render offshore rocks only as sparse angular sub-island-scale tick marks tight to the coast. Every rock must be visibly much smaller than either canonical lower island, faceted rather than rounded, and must never read as another island or archipelago.",
+        "Route contract: preserve exactly two dotted sea routes in each representation of the locked world: one mainland-to-lower-left-island route and one mainland-to-lower-right-island route. Preserve their endpoints from the single master geometry. No third route and no cross-island route.",
+        "Preserve unchanged: wide 16:9 composition; one dominant map with the same narrow unlabeled right-side proof rail; near-black navy #080B10 drafting field and calm ocean; orthographic true-isometric technical-cartography treatment; matte low-value navy/slate land faces; thin parallel off-white and muted-cyan lines; sparse contour, conifer, and angular-rock detail; restrained mainland roads connecting the three pads; no cast shadow, no PBR, no photorealism, no perspective convergence.",
+        "LOD continuity: proof views may simplify only interior contour density, road surface detail, and tiny ambient marks. They must use the identical locked outer land contours, three pad locations, road topology, and two sea-route endpoints. No alternate coastlines.",
+        "Text: none. Render no letters, words, digits, coordinates, glyphs, icons, pseudo-text, labels, captions, legends, compass text, signatures, logos, UI, or watermark anywhere.",
+        "Constraints: change only the anchor placement, contour reuse across proof/silhouette views, and offshore-rock readability described above; keep all unrelated accepted features unchanged; one mainland, two lower islands, three mainland pads in the frozen band, and two sea routes; complete traceable edges; all views fit the canvas.",
+        "Avoid: extra islands, island-like rounded rocks, archipelagos, alternate coastline shapes, pad drift, a low third mainland pad, extra anchor pads, extra routes, city buildings, employer architecture, labels, dashboards, charts, graph nodes, vehicles, ships, people, private details, unsupported claims, fantasy, cyberpunk neon, glowing borders, perspective drift, and any change to unrelated accepted features."
+      ],
+      "view_image_inspection": {
+        "subject": "pass: dominant upper mainland, three empty mainland pads in one frozen left/center/right band, exactly two lower islands, connected mainland roads, and exactly two dotted sea routes",
+        "projection": "pass: authored land treatment uses consistent orthographic/isometric depth without perspective convergence",
+        "style": "pass: sparse dark technical-cartography map treatment with no dashboard or asset-collage framing",
+        "text_logo_leakage": "pass: no labels, legends, logos, pseudo-text, numbers, UI, or watermark",
+        "geometry_coherence": "pass: coastline, cliffs, roads, frozen-band anchor pads, two canonical islands, angular offshore rock marks, and sea routes are readable and traceable",
+        "lod_continuity": "pass with measurement risk: both proof views and the filled silhouette use the same one-mainland/two-island contour topology and frozen pad band; exact pixel equality still requires an overlay"
+      },
+      "self_review": {
+        "status": "candidate_only",
+        "weighted_score_100": 94.25,
+        "automatic_blocker": false,
+        "critical_criterion_below_3": false,
+        "criteria": {
+          "identity_continuity": 3,
+          "projection_camera": 4,
+          "skill_reuse": 4,
+          "evidence_brand_safety": 4,
+          "geometry_coherence": 4,
+          "style_specificity": 4,
+          "lod_derivation": 4,
+          "palette_material": 3,
+          "density_legibility": 4,
+          "traceability": 4
+        }
+      },
+      "retry_count": 1,
+      "retry_decision": "Retry used: the Director authorized one world-only targeted edit to correct pad-band placement, single-mask contour reuse, and island-like offshore rocks. No other asset received a retry.",
+      "rejected_retry_artifacts": [
+        {
+          "path": "design/career-world/concepts/tracer/world-career-world-v1-rejected-initial.png",
+          "dimensions": {
+            "width": 1672,
+            "height": 941,
+            "format": "PNG",
+            "bytes": 2198697
+          },
+          "sha256": "0f9dfb03cb23e94318ce3b6a3ff2ec2e8bbe2fa0876bdb837e0c003ed51ae4aa",
+          "reason": "Rejected after independent QA because one mainland pad sat outside the frozen left/center/right anchor band, the proof/silhouette contours were not demonstrably derived from one locked mask, and rounded offshore marks could read as extra islands."
+        }
+      ],
+      "deviations": [
+        "The built-in edit visibly aligns all three pads and contour topology, but exact pixel-level equality across scaled proof/silhouette views remains unverified without an overlay."
+      ],
+      "risks": [
+        "The tiny proof views may still miss the rubric's strict silhouette-IoU threshold even though their topology, pad band, island count, and outer contours now match visually.",
+        "Deterministic tracing must use one code-native coastline/anchor mask; the raster revision is evidence, not layout truth."
+      ]
+    },
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "generation_call_index": 5,
+      "output_path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "source_generation_path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-03f3bf3d-12fd-457d-b230-7439656851ec.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "pixel_format": "24bpp RGB",
+        "bytes": 1800758
+      },
+      "sha256": "5f795188cd78ca2d0bfe9a791bcb76c7bac019638613ec53ab5f9173e8de9958",
+      "exact_prompt_lines": [
+        "Use case: stylized-concept",
+        "Asset type: canonical reusable ambient game-environment concept sheet for deterministic SVG tracing",
+        "Primary request: Generate a brand-new concept sheet for the single canonical identity ambient/evergreen-cluster@v1.",
+        "Scene/backdrop: one isolated reusable ambient asset on a near-black navy #080B10 technical drafting field with a very faint true-isometric grid and generous empty margin.",
+        "Subject: one compact evergreen cluster containing exactly four small conifer silhouettes rooted on one shared low neutral ground pad. Use a deliberate asymmetrical arrangement with one tallest conifer, two medium conifers, and one smaller conifer. It must read cleanly as one repeatable cluster at several map scales.",
+        "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; vertical trunks remain vertical.",
+        "Style/medium: restrained technical-cartography line art; matte low-value navy/slate faces; thin parallel off-white and muted-cyan contour strokes; minimal accent and no glow; no cast shadow, no PBR, no cinematic lighting.",
+        "Composition/framing: landscape concept sheet with four separated, unobscured views of this one evergreen-cluster identity only: three equally scaled, equally oriented LOD views and one smaller solid silhouette inset. Use spacing only, with no panel titles, captions, borders, arrows, legends, or UI.",
+        "LOD continuity: all three LOD views preserve the exact shared-pad footprint, centroid, orientation, four-tree count, tree positions, relative tree heights, primary conical masses, and outer silhouette. Only branch-tier count, needle-line density, trunk marks, pad contour lines, and tiny rock strokes may simplify. The silhouette must remain visually identical.",
+        "Text: none. Render no letters, words, digits, glyphs, icons, pseudo-text, signatures, or watermark anywhere.",
+        "Constraints: exactly four conifers on exactly one shared pad; all tree bases remain connected to that pad; compact traceable geometry; clean complete edges; generous separation between the four required views; all views fit fully inside the canvas.",
+        "Avoid: extra trees, missing trees, separate individual pads, forest scenes, roads, buildings, people, animals, signs, labels, logos, mascots, graph/dashboard nodes, oversized rocks, snow, cast shadows, ground-plane shadows, photorealism, painterly foliage, fantasy, cyberpunk neon, perspective drift, melted branches, disconnected trunks, silhouette-changing props, and changes to tree count, placement, height hierarchy, or pad footprint between LODs."
+      ],
+      "view_image_inspection": {
+        "subject": "pass: exactly four conifers with the required height hierarchy share one compact pad in each full LOD view",
+        "projection": "pass: pad axes are isometric and trunks stay vertical",
+        "style": "pass with risk: dark line-art treatment is traceable, though organic branch rendering is more illustrative than the building sheets",
+        "text_logo_leakage": "pass: no text, label, logo, pseudo-text, sign, or watermark",
+        "geometry_coherence": "pass: trunks connect to the shared pad and branch tiers are coherent",
+        "lod_continuity": "pass with risk: tree count, placement, height hierarchy, and pad footprint remain stable; the solid silhouette merges the front-center tree into the taller mass"
+      },
+      "self_review": {
+        "status": "candidate_only",
+        "weighted_score_100": 91.75,
+        "automatic_blocker": false,
+        "critical_criterion_below_3": false,
+        "criteria": {
+          "identity_continuity": 3,
+          "projection_camera": 4,
+          "skill_reuse": 4,
+          "evidence_brand_safety": 4,
+          "geometry_coherence": 4,
+          "style_specificity": 3,
+          "lod_derivation": 4,
+          "palette_material": 3,
+          "density_legibility": 4,
+          "traceability": 4
+        }
+      },
+      "retry_count": 0,
+      "retry_decision": "No retry: all three full LOD views preserve four trees, placement, height hierarchy, shared pad, projection, and safe styling; silhouette overlap and more illustrative foliage are QA risks but not blockers.",
+      "rejected_retry_artifacts": [],
+      "deviations": [
+        "The solid silhouette inset visually merges the front-center conifer into the tallest conifer's mass.",
+        "Branch treatment is somewhat more illustrative and organic than the architectural technical-cartography sheets."
+      ],
+      "risks": [
+        "Vector tracing should preserve four independently positioned trees even where the solid silhouette overlaps them.",
+        "Independent QA should compare style specificity against the three architectural sheets at target map scale."
+      ]
+    }
+  ],
+  "cw002b": {
+    "packet_id": "CW-002B",
+    "status": "candidate_only",
+    "summary": "Executed exactly three authorized built-in image-generation calls: one targeted Go edit, one targeted Kaizen Metrics edit, and one fresh Evergreen generation with no raster reference. All three prior candidates were preserved before overwrite and all three exact final paths were inspected. Go and Metrics visibly correct their scoped protrusion failures. Evergreen corrects the painterly/merged-crown failure but retains visible stepped outer-crown profile drift between LOD panels, so independent QA remains required.",
+    "history_rule": "This section preserves and supersedes the current-artifact fields for only skill/go@v1, project/kaizen-metrics@v1, and ambient/evergreen-cluster@v1. Earlier report sections remain historical evidence.",
+    "generation_contract": {
+      "tool_mode": "built_in_imagegen_only",
+      "call_count": 3,
+      "edit_calls": 2,
+      "fresh_generation_calls": 1,
+      "retry_count": 0,
+      "variant_count": 0,
+      "failed_call_count": 0,
+      "cli_or_api_fallback_used": false,
+      "full_fanout_started": false,
+      "fresh_generation_reference_contract": {
+        "asset_id": "ambient/evergreen-cluster@v1",
+        "referenced_image_paths_omitted": true,
+        "num_last_images_to_include_omitted": true,
+        "rejected_raster_mentioned_in_prompt": false
+      }
+    },
+    "prompt_serialization": "Join each call's exact_prompt_lines with a single LF and no trailing LF. The result is the exact prompt submitted to built-in imagegen.",
+    "calls": [
+      {
+        "call_index": 1,
+        "asset_id": "skill/go@v1",
+        "mode": "edit",
+        "result": "success",
+        "source_input": {
+          "path_at_call": "design/career-world/concepts/tracer/skill-go-v1.png",
+          "snapshot_path": "design/career-world/concepts/tracer/skill-go-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2053309,
+          "sha256": "43227b1d852ac7b4f9e7aabfa75b172af7d95a44011e771d9a3c9c060592c3d6"
+        },
+        "rejected_candidate": {
+          "path": "design/career-world/concepts/tracer/skill-go-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2053309,
+          "sha256": "43227b1d852ac7b4f9e7aabfa75b172af7d95a44011e771d9a3c9c060592c3d6",
+          "reason": "The leftmost highest-detail LOD contained a service box outside the building base, violating fixed footprint continuity."
+        },
+        "generated_source": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-d11ed017-6e4c-4cbd-a74e-d133505572d1.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2058080,
+          "sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a"
+        },
+        "final": {
+          "path": "design/career-world/concepts/tracer/skill-go-v1.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2058080,
+          "sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a"
+        },
+        "exact_prompt_lines": [
+          "Use case: precise-object-edit",
+          "Asset type: targeted CW-002B correction of the canonical skill/go@v1 technical-cartography concept sheet",
+          "Input images: Image 1 is the exact current skill/go@v1 PNG and is the edit target.",
+          "Primary request: Make the smallest possible correction to Image 1. Remove only the small exterior service box/attachment that sits outside the building base in the leftmost highest-detail LOD panel. Restore the unobstructed base edge and drafting-field background where that box was. Do not add a replacement object.",
+          "Preserve unchanged: the Go engine-house identity; exact 1536x1024 canvas and four-panel composition; all panel positions, scale, orientation, projection, and spacing; the low workshop, taller engine bay, two stacks, turbine housings, blank sign slot, doors, vents, roof details, materials, line weights, colors, lighting, background grid, every unaffected detail in all three LOD panels, and the existing solid silhouette inset.",
+          "LOD invariant: no attachment or object may exist outside the base in any LOD. The existing base footprint, primary mass, roofline, stacks, turbines, centroid, and solid silhouette must remain unchanged. Do not move, redraw, simplify, or restyle any unaffected geometry.",
+          "Style/medium: preserve the current restrained near-black navy technical-cartography line art, matte low-value faces, thin off-white and muted-cyan strokes, orthographic true-isometric camera, and absence of cast shadows or PBR.",
+          "Text: none. Add no letters, words, digits, glyphs, labels, pseudo-text, logos, mascots, signatures, or watermark.",
+          "Constraints: change only the exterior box removal and the pixels immediately behind it; preserve everything else exactly; keep all content fully inside the canvas.",
+          "Avoid: any attachment outside the base, replacement box, new object, changed footprint, changed silhouette, geometry drift between LODs, panel re-layout, camera drift, perspective, photorealism, PBR, glow increase, logo, text, UI, or edits to the other three panels."
+        ],
+        "inspection": {
+          "view_image_inspected": true,
+          "subject": "pass: low workshop, taller engine bay, two stacks, turbine housings, and blank sign slot remain",
+          "correction": "pass: no object or attachment remains outside the base in any LOD",
+          "projection_style": "pass: panel layout, orthographic isometric projection, dark technical-cartography materials, and solid silhouette remain",
+          "text_logo_leakage": "pass: no legible text, logo, mascot, pseudo-text, or watermark",
+          "visible_deviation": "Minor high-detail facade and vent linework regenerated beyond the removed box; primary mass and silhouette remain stable."
+        },
+        "self_review": {
+          "status": "candidate_only",
+          "weighted_score_100": 94.25,
+          "automatic_blocker": false,
+          "critical_criterion_below_3": false,
+          "criteria": {
+            "identity_continuity": 3,
+            "projection_camera": 4,
+            "skill_reuse": 4,
+            "evidence_brand_safety": 4,
+            "geometry_coherence": 4,
+            "style_specificity": 4,
+            "lod_derivation": 4,
+            "palette_material": 3,
+            "density_legibility": 4,
+            "traceability": 4
+          }
+        },
+        "deviations": [
+          "Minor non-primary facade and vent linework changed during the targeted raster edit."
+        ]
+      },
+      {
+        "call_index": 2,
+        "asset_id": "project/kaizen-metrics@v1",
+        "mode": "edit",
+        "result": "success",
+        "source_input": {
+          "path_at_call": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+          "snapshot_path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2402555,
+          "sha256": "df1d60f93e06a8fb0627dfb4218456865f9db258a88bcc9146ffb2f9f5d8966e"
+        },
+        "rejected_candidate": {
+          "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2402555,
+          "sha256": "df1d60f93e06a8fb0627dfb4218456865f9db258a88bcc9146ffb2f9f5d8966e",
+          "reason": "The lower-left highest-detail LOD had three corner beacons protruding beyond the outer alpha silhouette."
+        },
+        "generated_source": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-b245a466-e902-4644-9113-f4db4cb29003.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2322525,
+          "sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8"
+        },
+        "final": {
+          "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2322525,
+          "sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8"
+        },
+        "exact_prompt_lines": [
+          "Use case: precise-object-edit",
+          "Asset type: targeted CW-002B correction of the canonical project/kaizen-metrics@v1 technical-cartography concept sheet",
+          "Input images: Image 1 is the exact current project/kaizen-metrics@v1 PNG and is the edit target.",
+          "Primary request: Make the smallest possible correction to Image 1. In the lower-left highest-detail LOD panel only, remove exactly the three cyan corner obelisks/shard beacons that rise from the outer platform corners. Restore the original low platform corners and drafting-field background behind them. Do not add replacement objects.",
+          "Preserve unchanged: the observatory identity; exact 1536x1024 canvas and four-panel composition; every panel position, scale, orientation, projection, and spacing; the circular ribbed dome, square base/platform, lower annex, rear-aligned dish, facade rhythm, blank sign slot, doors, ribs, seams, archive/service detail, materials, line weights, colors, lighting, background grid, every unaffected detail in all three LOD panels, and the existing solid silhouette inset.",
+          "LOD invariant: no beacon, obelisk, shard, post, or attachment may extend beyond the existing parapet, platform footprint, or outer alpha silhouette in any panel. Keep the primary mass, dome, annex, dish, platform footprint, centroid, roofline, and solid silhouette unchanged. Do not move, redraw, simplify, or restyle unaffected geometry.",
+          "Style/medium: preserve the current restrained near-black navy technical-cartography line art, matte low-value faces, thin off-white and muted-cyan strokes, orthographic true-isometric camera, and absence of cast shadows or PBR.",
+          "Text: none. Add no letters, words, digits, glyphs, labels, pseudo-text, logos, signatures, dashboards, charts, or watermark.",
+          "Constraints: change only removal of the three corner beacons and the pixels immediately behind them; preserve everything else exactly; keep all content fully inside the canvas; introduce no new geometry.",
+          "Avoid: any remaining corner beacon, replacement object, new attachment, changed platform footprint, changed silhouette, geometry drift between LODs, panel re-layout, camera drift, perspective, photorealism, PBR, glow increase, logo, text, UI, or edits to the other three panels."
+        ],
+        "inspection": {
+          "view_image_inspected": true,
+          "subject": "pass: dome, square base/platform, annex, rear dish, facade rhythm, and silhouette remain",
+          "correction": "pass: all three protruding corner beacons are removed and only low platform-corner caps remain within the footprint",
+          "projection_style": "pass: panel composition, orthographic isometric projection, and technical-cartography material language remain",
+          "text_logo_leakage": "pass: no legible text, logo, number, pseudo-text, dashboard, or watermark",
+          "visible_deviation": "Minor non-primary facade and platform linework regenerated; primary dome/base/annex/dish mass and outer silhouette remain stable."
+        },
+        "self_review": {
+          "status": "candidate_only",
+          "weighted_score_100": 94.25,
+          "automatic_blocker": false,
+          "critical_criterion_below_3": false,
+          "criteria": {
+            "identity_continuity": 3,
+            "projection_camera": 4,
+            "skill_reuse": 4,
+            "evidence_brand_safety": 4,
+            "geometry_coherence": 4,
+            "style_specificity": 4,
+            "lod_derivation": 4,
+            "palette_material": 3,
+            "density_legibility": 4,
+            "traceability": 4
+          }
+        },
+        "deviations": [
+          "Minor non-primary facade and platform linework changed during the targeted raster edit."
+        ]
+      },
+      {
+        "call_index": 3,
+        "asset_id": "ambient/evergreen-cluster@v1",
+        "mode": "fresh_generation",
+        "result": "success",
+        "source_input": {
+          "path": null,
+          "raster_input_used": false,
+          "referenced_image_paths_omitted": true,
+          "num_last_images_to_include_omitted": true
+        },
+        "pre_correction_candidate_snapshot": {
+          "path_at_preservation": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+          "snapshot_path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 1800758,
+          "sha256": "5f795188cd78ca2d0bfe9a791bcb76c7bac019638613ec53ab5f9173e8de9958"
+        },
+        "rejected_candidate": {
+          "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002a.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 1800758,
+          "sha256": "5f795188cd78ca2d0bfe9a791bcb76c7bac019638613ec53ab5f9173e8de9958",
+          "reason": "The prior candidate used organic painterly/scalloped foliage and its silhouette merged one crown, failing the architectural technical-cartography and separation requirements."
+        },
+        "generated_source": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-79ca5e68-28da-405c-8331-f72d4207167c.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 1812255,
+          "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15"
+        },
+        "final": {
+          "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 1812255,
+          "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15"
+        },
+        "exact_prompt_lines": [
+          "Use case: stylized-concept",
+          "Asset type: fresh canonical ambient/evergreen-cluster@v1 architectural technical-cartography asset sheet for deterministic vector tracing",
+          "Primary request: Create one landscape concept sheet containing three LOD views and one separate solid silhouette inset of the same reusable evergreen cluster. This is architectural/technical-cartography asset design, not a painterly nature illustration.",
+          "Scene/backdrop: near-black navy #080B10 technical drafting field with a very faint orthographic true-isometric grid and generous empty margins.",
+          "Subject: exactly four distinct faceted conifers rooted on one fixed low diamond/irregular terrain footprint. Use the same fixed arrangement in every view: one tallest conifer, two medium conifers, and one shorter conifer. Space them widely enough that a clearly visible strip of background separates every crown from every other crown at every LOD. Every tree has one visibly separate straight trunk connecting to the shared terrain pad.",
+          "Geometry language: construct each crown from hard straight polygonal or stepped edges and a small number of planar faceted tiers, like compact architectural roof masses. Use rigid traceable silhouettes, angular corners, straight vertical trunks, and sparse internal facet seams. No curved, scalloped, fluffy, fuzzy, or needle-painted foliage.",
+          "Projection/camera: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0 degrees; no authored rotation, no perspective convergence; all trunks remain vertical.",
+          "Style/medium: restrained technical-cartography building-material language; matte low-value navy/slate planar faces; thin parallel off-white and muted-cyan construction strokes; minimal line density and minimal accent; no cast shadow, no contact shadow, no PBR, no cinematic light, no bloom.",
+          "Composition/framing: three equally scaled, equally oriented full LOD panels across the sheet plus one smaller separate solid silhouette inset below. Use spacing only; no panel frames, titles, captions, arrows, legends, or UI. All four required views fit fully on canvas.",
+          "Locked LOD continuity: LOD-0, LOD-1, and LOD-2 preserve the exact same terrain footprint, centroid, orientation, four-tree positions, four trunk positions, height hierarchy, outer crown profiles, crown-to-crown gaps, and complete cluster silhouette. Only internal facet seams and secondary line density may simplify. Tree count, profiles, positions, heights, gaps, trunks, and pad outline never change.",
+          "Silhouette inset: show the same fixed pad plus exactly four individually readable solid faceted crowns and exactly four solid straight trunks. Background gaps must remain visible between every crown and between every trunk; no crown or trunk may touch, overlap, merge, or disappear in the silhouette.",
+          "Text: none. Render no letters, words, digits, glyphs, labels, pseudo-text, logos, signatures, or watermark.",
+          "Constraints: exactly four trees in every full LOD and exactly four trees in the silhouette inset; one shared fixed terrain pad; hard straight/stepped traceable edges; planar facets; minimal internal lines; clean complete geometry; restrained dark technical-cartography palette.",
+          "Avoid: organic needle painting, scalloped foliage, soft foliage, fluffy or fuzzy edges, watercolor or painterly rendering, merged crowns, touching crowns, overlapping trees, merged trunks, hidden trunks, extra trees, missing trees, separate pads, footprint drift, profile drift, height drift, position drift, branch clutter, rocks, grass, bushes, snow, cast shadows, gradients that soften edges, photorealism, fantasy, cyberpunk neon, text, logo, labels, UI, and watermark."
+        ],
+        "inspection": {
+          "view_image_inspected": true,
+          "subject": "pass: exactly four faceted conifers, one tallest/two medium/one short, appear in each full LOD and the silhouette inset",
+          "separation": "pass: visible background gaps separate every crown and every trunk; no tree merges or disappears",
+          "terrain": "pass by visual inspection: one low angular pad retains the same placement and broad irregular footprint across all LOD panels",
+          "projection_style": "pass: hard planar architectural edges, sparse technical-cartography lines, isometric pad, vertical trunks, and no painterly foliage or cast shadow",
+          "text_logo_leakage": "pass: no text, labels, logos, pseudo-text, or watermark",
+          "visible_deviation": "The number and placement of stepped outer crown tiers change between the high-detail and simplified LOD panels, producing visible outer-profile drift despite stable positions, heights, gaps, trunks, and pad."
+        },
+        "self_review": {
+          "status": "candidate_only",
+          "weighted_score_100": 85.75,
+          "automatic_blocker": true,
+          "critical_criterion_below_3": true,
+          "criteria": {
+            "identity_continuity": 2,
+            "projection_camera": 4,
+            "skill_reuse": 4,
+            "evidence_brand_safety": 4,
+            "geometry_coherence": 4,
+            "style_specificity": 4,
+            "lod_derivation": 2,
+            "palette_material": 3,
+            "density_legibility": 4,
+            "traceability": 4
+          }
+        },
+        "deviations": [
+          "Outer stepped crown profiles simplify and change between LOD panels; this may violate the fixed-profile and silhouette-continuity gate."
+        ]
+      }
+    ],
+    "untouched_assets": [
+      {
+        "asset_id": "world/career-world@v1",
+        "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+        "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "verified_unchanged": true
+      },
+      {
+        "asset_id": "city/ninjaone@v1",
+        "path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+        "sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+        "verified_unchanged": true
+      }
+    ],
+    "allowed_writes": [
+      "design/career-world/concepts/tracer/skill-go-v1.png",
+      "design/career-world/concepts/tracer/skill-go-v1-rejected-cw002a.png",
+      "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+      "design/career-world/concepts/tracer/project-kaizen-metrics-v1-rejected-cw002a.png",
+      "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002a.png",
+      "docs/career-world-production/reports/art-tracer-generation.json"
+    ],
+    "next_gate": "Independent art QA must measure LOD overlays. No additional image-generation call is authorized by CW-002B."
+  },
+  "cw002c": {
+    "packet_id": "CW-002C",
+    "status": "candidate_only_failed_visual_contract",
+    "summary": "Executed exactly one authorized built-in image edit using the current CW-002B Evergreen final as the sole raster input. The call completed and its exact output was saved to the Evergreen final path. Inspection found that the edit did not satisfy the required pixel-equivalent outer-silhouette contract: the middle and right tall-tree crown tier counts still differ from the left canonical panel, and the bottom panel is detailed and outlined rather than a solid silhouette. No retry, variant, or fallback was attempted.",
+    "history_rule": "This top-level section appends CW-002C evidence without modifying or deleting earlier CW-002, CW-002B, batch-summary, or gate history.",
+    "generation_contract": {
+      "tool_mode": "built_in_imagegen_only",
+      "call_count": 1,
+      "edit_calls": 1,
+      "fresh_generation_calls": 0,
+      "retry_count": 0,
+      "variant_count": 0,
+      "failed_call_count": 0,
+      "cli_or_api_fallback_used": false,
+      "referenced_image_paths_count": 1,
+      "sole_referenced_image_path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "num_last_images_to_include_omitted": true,
+      "second_call_attempted": false
+    },
+    "prompt_serialization": "Join exact_prompt_lines with a single LF and no trailing LF. The result is the exact prompt submitted to built-in imagegen.",
+    "call": {
+      "call_index": 1,
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "mode": "edit",
+      "result": "technical_success_visual_contract_failure",
+      "source_input": {
+        "path_at_call": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+        "snapshot_path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002b.png",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "bytes": 1812255,
+        "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15"
+      },
+      "rejected_candidate": {
+        "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002b.png",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "bytes": 1812255,
+        "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15",
+        "reason": "CW-002B independent QA rejected visible stepped outer-crown profile and tier-count drift between LOD panels."
+      },
+      "generated_source": {
+        "path": "C:/Users/Steve/.codex/generated_images/019f6e7c-f42b-71a0-8674-0015dac9277d/exec-a1ebf14a-6bdb-4e5b-8e58-2e5b04611c47.png",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "bytes": 1796212,
+        "sha256": "b7009cb8a9782e4696840fd360aacab84c17d6ffc94b85d2be6fae4a058237b2"
+      },
+      "final": {
+        "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "bytes": 1796212,
+        "sha256": "b7009cb8a9782e4696840fd360aacab84c17d6ffc94b85d2be6fae4a058237b2"
+      },
+      "exact_prompt_lines": [
+        "Use case: precise-object-edit",
+        "Input images: Image 1 is the sole edit target: the existing four-panel evergreen-cluster LOD concept sheet.",
+        "Primary request: Correct only the geometry consistency between panels. The LEFT / HIGH-DETAIL panel is the immutable canonical geometry. Copy its exact terrain-pad outer contour and its exact four tree outer crown-and-trunk profiles into the MIDDLE panel, RIGHT panel, and bottom SOLID SILHOUETTE panel.",
+        "Canonical geometry requirements: Preserve the exact four tree positions, relative heights, crown widths, stepped crown tier count, every external crown corner and tier edge, trunk widths and lengths, crown-to-trunk gaps, tree-to-tree gaps, and the complete irregular terrain-pad perimeter from the LEFT panel. After a uniform scale and translation for panel placement, the primary outer silhouettes in all four panels must be pixel-equivalent to the LEFT panel.",
+        "LOD rule: The MIDDLE and RIGHT panels may remove or simplify ONLY interior face seams, facet lines, and surface linework. They must not change any external crown tier, external crown edge, trunk edge, gap, tree placement, or terrain-pad edge. The bottom SOLID SILHOUETTE must use the same canonical outer geometry with no interior linework.",
+        "Separation requirement: Keep four distinct, non-overlapping tree crowns and four distinct trunks, with the same visible gaps as the LEFT panel. Do not merge the trees into one mass.",
+        "Change only: the mismatched external geometry in the MIDDLE, RIGHT, and bottom SOLID SILHOUETTE panels.",
+        "Keep unchanged: every pixel of the LEFT / HIGH-DETAIL panel; the isometric projection; all panel locations and overall composition; the dark navy blueprint background and grid; slate-blue palette; pale technical outlines; angular faceted conifer style; terrain thickness; canvas dimensions and aspect ratio.",
+        "Avoid: any modification to the LEFT panel; any new or removed tree; altered scale relationships; altered terrain outline; altered crown tier count or outer crown contour; altered trunk or gap; soft or organic foliage; rounded shapes; shadows outside the existing style; glow; gradients that change the established rendering; text; labels; logos; arrows; watermark; extra objects.",
+        "Output intent: one corrected evergreen-cluster LOD concept sheet that preserves the existing art direction while making the four primary outer silhouettes geometrically identical after scale/alignment."
+      ],
+      "inspection": {
+        "view_image_inspected": true,
+        "left_panel_canonical_geometry": "visually retained at gross-geometry level; exact per-pixel preservation of the left panel is not established",
+        "four_tree_separation": "pass: all four panels visibly retain four separate crowns, four separate trunks, and background gaps",
+        "middle_vs_left_outer_profile": "fail: the tallest middle-panel crown has fewer stepped outer tiers than the left canonical tallest crown; other external crown profiles also differ",
+        "right_vs_left_outer_profile": "fail: the tallest right-panel crown has fewer stepped outer tiers than the left canonical tallest crown; external profile corners and tier boundaries differ",
+        "solid_silhouette_vs_left": "fail: the bottom panel is rendered with individual face seams and pale outlines instead of a solid silhouette, and its tree profiles do not match the left canonical profiles",
+        "terrain_pad_equivalence": "fail by visual requirement: the pads are broadly similar but exact pixel-equivalent outer contours after scale/alignment are not visibly demonstrated",
+        "projection_style": "pass: orthographic isometric layout, dark technical-cartography palette, grid, and angular faceted style remain",
+        "text_logo_leakage": "pass: no text, label, logo, arrow, pseudo-text, or watermark is visible",
+        "visibly_passes_pixel_equivalent_outer_silhouette_requirement": false,
+        "verification_limit": "Manual visual inspection is sufficient to reject because obvious tier-count and solid-silhouette mismatches remain; no raster overlay was required to establish failure."
+      },
+      "deviations": [
+        "The middle and right tall-tree crowns retain different external stepped tier counts and contours from the left canonical panel.",
+        "The bottom panel is no longer a solid silhouette and contains internal face seams and outlines.",
+        "Exact terrain-pad contour equivalence is not visibly established.",
+        "The built-in edit regenerated pixels outside the intended narrow correction; exact left-panel pixel preservation remains unverified."
+      ]
+    },
+    "artifact_integrity": {
+      "source_snapshot_equals_rejected_candidate": true,
+      "generated_source_equals_final": true,
+      "all_recorded_images_are_png": true,
+      "all_recorded_images_are_1536x1024": true
+    },
+    "unchanged_assets": [
+      {
+        "asset_id": "skill/go@v1",
+        "path": "design/career-world/concepts/tracer/skill-go-v1.png",
+        "expected_sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a",
+        "actual_sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a",
+        "verified_unchanged": true
+      },
+      {
+        "asset_id": "project/kaizen-metrics@v1",
+        "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+        "expected_sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8",
+        "actual_sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8",
+        "verified_unchanged": true
+      },
+      {
+        "asset_id": "city/ninjaone@v1",
+        "path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+        "expected_sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+        "actual_sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+        "verified_unchanged": true
+      },
+      {
+        "asset_id": "world/career-world@v1",
+        "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+        "expected_sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "actual_sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "verified_unchanged": true
+      }
+    ],
+    "allowed_writes": [
+      "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002b.png",
+      "docs/career-world-production/reports/art-tracer-generation.json"
+    ],
+    "next_gate": "CW-002C permits no additional image-generation call. Hand off the visibly failed candidate and preserved CW-002B snapshot for independent disposition."
+  },
+  "batch_summary": {
+    "candidate_count": 5,
+    "candidate_only_count": 5,
+    "retry_count": 1,
+    "rejected_retry_artifact_count": 1,
+    "automatic_blocker_count": 0,
+    "self_score_range": {
+      "minimum": 91.75,
+      "maximum": 98.75
+    },
+    "self_promotion": "not_permitted",
+    "next_gate": "independent CW-002 art QA plus measured projection/silhouette overlays"
+  },
+  "gates_run": [
+    {
+      "gate": "reference_readability",
+      "result": "pass",
+      "summary": "All three named references opened through view_image and were treated as style/composition references, not edit targets."
+    },
+    {
+      "gate": "built_in_generation_call_count",
+      "result": "pass",
+      "summary": "Five distinct assets received exactly five initial built-in imagegen calls; only world/career-world@v1 received the single Director-authorized targeted edit retry."
+    },
+    {
+      "gate": "required_output_inventory",
+      "result": "pass",
+      "summary": "All five exact PNG paths exist, open successfully, and have recorded dimensions, byte sizes, and SHA-256 hashes."
+    },
+    {
+      "gate": "saved_output_view_image_inspection",
+      "result": "pass",
+      "summary": "All five workspace copies were inspected through view_image for subject, projection, style, text/logo leakage, geometry coherence, and LOD continuity."
+    },
+    {
+      "gate": "report_json_parse",
+      "result": "pass",
+      "summary": "PowerShell ConvertFrom-Json validation completed after the report write."
+    }
+  ],
+  "deviations": [
+    "Go includes one high-detail-only exterior service unit.",
+    "Kaizen Metrics places the three explicitly permitted LOD-2 shard beacons at platform corners, creating a possible alpha-silhouette change.",
+    "The revised world candidate visibly reuses one-mainland/two-island topology and frozen-band pads across its proof rail, but exact scaled contour equality remains an overlay-verification item.",
+    "The evergreen silhouette inset merges one overlapping conifer and its foliage is somewhat more illustrative than the architectural sheets."
+  ],
+  "risks_blockers": [
+    {
+      "severity": "material_qa_risk",
+      "asset_id": "skill/go@v1",
+      "risk": "High-detail-only exterior service unit may violate strict footprint continuity.",
+      "blocker": false
+    },
+    {
+      "severity": "material_qa_risk",
+      "asset_id": "project/kaizen-metrics@v1",
+      "risk": "Permitted LOD-2 corner beacons may violate strict silhouette continuity despite preserving primary building massing.",
+      "blocker": false
+    },
+    {
+      "severity": "measurement_required",
+      "asset_id": "world/career-world@v1",
+      "risk": "The world-only retry corrected pad-band placement, outer-contour topology, route count, and rock readability; exact pixel equality across the scaled proof views still requires overlay measurement.",
+      "blocker": false
+    },
+    {
+      "severity": "style_and_overlap_review",
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "risk": "Silhouette overlap obscures one tree and the foliage treatment is more illustrative than the building sheets.",
+      "blocker": false
+    }
+  ],
+  "follow_ups": [
+    {
+      "owner": "independent art QA",
+      "action": "Measure the revised world's projection axes and LOD alpha/silhouette continuity. The authorized retry was consumed by world/career-world@v1; do not generate another asset without new direction."
+    },
+    {
+      "owner": "technical tracer",
+      "action": "Treat every PNG as tracing/reference evidence only; deterministic SVG geometry, coordinates, palette slots, and labels remain authoritative in code."
+    }
+  ],
+  "ledger_updates": [
+    {
+      "lane_id": "art-tracer-generation",
+      "status": "candidate_only",
+      "artifact_path": "docs/career-world-production/reports/art-tracer-generation.json",
+      "summary": "Five exact tracer PNG candidates generated and inspected; the single world-only targeted retry is saved at the exact final path, its rejected initial is preserved, and all assets remain candidate-only pending independent QA."
+    }
+  ]
+}

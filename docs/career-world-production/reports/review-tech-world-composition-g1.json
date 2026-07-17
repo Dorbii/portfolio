@@ -1,0 +1,671 @@
+{
+  "schema_version": "career-world-tech-fresh-context-review/v1",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005",
+  "phase_id": "G1",
+  "lane_id": "ambient-geometry",
+  "reviewer": "/root/review_geometry_g1",
+  "reviewed_at": "2026-07-17T10:01:54.3527088-05:00",
+  "review_mode": "fresh-context code and visual-contract review",
+  "terminal_verdict": "FAIL",
+  "handoff_verdict": "REJECT_G1_REOPEN_REQUIRED",
+  "summary": "The seven assigned IDs, live authority receipts, primitive union, palette/projection/orientation fields, and literal SHA-256 values are mechanically consistent, and all seven definitions load through the F0 validator. That is not sufficient for acceptance. The evergreen primary silhouette self-intersects; five other primary paths do not envelope the projected tier-0 geometry they are rendered over; six collision footprints underbound their centered projected ground envelopes; shore-pier tier 2 adds exterior rail-post height; and selected-panel topology drifts in the cargo-boat rail arrangement and shore-pier support arrangement. The G1 report therefore overclaims topology/LOD acceptance and handoff readiness. G1 must correct the geometry and footprints, recompute every affected literal hash, and issue a corrected lane report before an external handoff envelope or I0 integration.",
+  "authority": {
+    "composition_brief": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+      "verified_live": true
+    },
+    "corrected_f0_envelope": {
+      "path": "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json",
+      "bytes": 3101,
+      "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+      "envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "acceptance_status": "ACCEPTED",
+      "verified_live": true
+    },
+    "promoted_art_report": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "promoted_art_digest": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "verified_live": true
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14",
+      "verified_live": true
+    },
+    "implementation": {
+      "path": "features/career-world/definitions/ambient.ts",
+      "bytes": 26106,
+      "sha256": "61c1801696833305eee9db517484de596afebc34e77053653007912ba5e1568a",
+      "verified_live": true
+    },
+    "author_report": {
+      "path": "docs/career-world-production/reports/tech-world-composition-g1.json",
+      "reviewed_live": true,
+      "treated_as_claim_not_authority": true
+    }
+  },
+  "contract_checks": {
+    "assigned_id_closure": "PASS_7_OF_7",
+    "unique_geometry_keys": "PASS_7_OF_7",
+    "exact_palette_slot_order": "PASS_7_OF_7",
+    "projection_and_orientation": "PASS_7_OF_7",
+    "allowed_primitive_union_only": "PASS",
+    "definition_validator": "PASS_7_OF_7_BUT_SEMANTICALLY_INCOMPLETE",
+    "primary_hash_recomputation": "PASS_7_OF_7",
+    "master_hash_recomputation": "PASS_7_OF_7",
+    "extrusion_plan_positive_area": "PASS_32_OF_32",
+    "extrusion_plan_self_intersection": "PASS_32_OF_32",
+    "primary_path_simple_outer_envelope": "FAIL",
+    "tier_0_complete_exterior": "FAIL",
+    "higher_tiers_interior_only": "FAIL",
+    "conservative_centered_projected_footprint": "FAIL",
+    "selected_panel_topology": "FAIL",
+    "runtime_png_or_design_path_coupling": "PASS_ZERO_REFERENCES",
+    "employer_palette_or_position_coupling": "PASS_ZERO_REFERENCES",
+    "factual_or_evidence_coupling": "PASS_ZERO_REFERENCES",
+    "g1_test_file_ownership": "PASS_NO_TEST_EDITS_EXPECTED"
+  },
+  "findings": [
+    {
+      "id": "G1-REV-001",
+      "severity": "BLOCKER",
+      "title": "Five primary paths are authored in a different envelope from the projected tier-0 geometry",
+      "claim": "The service truck, cargo boat, marker buoy, shore pier, and roof-equipment kit primaryPath values are not the normalized outer silhouettes of the geometry that GeometryRenderer actually draws. A vertex-bounds comparison is a necessary, not sufficient, envelope test; each of these five fails it by material margins.",
+      "contract_evidence": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "204-206",
+          "detail": "primaryPath is the normalized outer silhouette and the footprint is a centered projected ground envelope."
+        },
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "220-225",
+          "detail": "Tier 0 must contain the complete exterior identity and the primary outline."
+        },
+        {
+          "path": "features/career-world/rendering/geometry-renderer.tsx",
+          "lines": "46-70",
+          "detail": "Extrusions are projected before rendering."
+        },
+        {
+          "path": "features/career-world/rendering/geometry-renderer.tsx",
+          "lines": "105-117",
+          "detail": "The unprojected authored primaryPath is then drawn directly over those projected primitives."
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "243-328",
+          "detail": "Service-truck primary path and projected extrusion plans."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "331-413",
+          "detail": "Cargo-boat primary path and projected hull/cabin plans."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "415-482",
+          "detail": "Marker-buoy primary path versus its octagonal body, mast, fins, and cage."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "484-578",
+          "detail": "Shore-pier primary path versus projected T decks, abutment, shelter, and piles."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "580-661",
+          "detail": "Roof-kit primary path versus projected base and equipment extrusions."
+        }
+      ],
+      "independent_measurement": [
+        {
+          "asset_id": "ambient/service-truck@v1",
+          "primary_bounds": [-79, 78, -68, 55],
+          "tier_0_rendered_vertex_bounds": [-88.3346, 86.6025, -100.5, 53]
+        },
+        {
+          "asset_id": "ambient/cargo-boat@v1",
+          "primary_bounds": [-98, 99, -58, 42],
+          "tier_0_rendered_vertex_bounds": [-102.191, 97.8609, -96, 64.5]
+        },
+        {
+          "asset_id": "ambient/marker-buoy@v1",
+          "primary_bounds": [-48, 50, -155, 68],
+          "tier_0_rendered_vertex_bounds": [-48, 50, -155, 22.2116],
+          "specific_failure": "The primary outline invents a lower weighted-body lobe down to y=68, but no tier-0 primitive supplies mass below y=22.2116."
+        },
+        {
+          "asset_id": "ambient/shore-pier@v1",
+          "primary_bounds": [-126, 126, -75, 76],
+          "tier_0_rendered_vertex_bounds": [-141.1621, 166.2769, -108, 81.5]
+        },
+        {
+          "asset_id": "ambient/roof-equipment-kit@v1",
+          "primary_bounds": [-61, 62, -58, 44],
+          "tier_0_rendered_vertex_bounds": [-75.3442, 76.2102, -66.4398, 48]
+        }
+      ],
+      "implication": "The permanent tier-0 outline is visibly detached from or cuts through the actual primitives, so the stored primaryPathHash does not identify the rendered exterior required by D-010. Literal hash equality only proves that the wrong path was hashed consistently.",
+      "smallest_correction": "Author each primaryPath from the complete projected tier-0 exterior in the renderer coordinate system after topology correction, keep it as one simple normalized outer envelope, then recompute both literal hashes. Do not paper over this by enlarging only the path or hiding projected faces."
+    },
+    {
+      "id": "G1-REV-002",
+      "severity": "BLOCKER",
+      "title": "The evergreen primary silhouette self-intersects twice",
+      "claim": "EVERGREEN_PRIMARY_PATH is not a simple normalized outer path. Independent segment intersection found two non-adjacent crossings.",
+      "contract_evidence": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "204-206",
+          "detail": "The primary path must be the normalized outer silhouette."
+        },
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "519-524",
+          "detail": "Per-batch acceptance requires a normalized primary path and complete tier-0 exterior."
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "58-67",
+          "detail": "The single path literal contains both crossings and is stored as the evergreen primary identity."
+        }
+      ],
+      "independent_measurement": {
+        "crossings": [
+          {
+            "segment_a": [[-28, -72], [-17, -49]],
+            "segment_b": [[-22, -48], [-8, -65]],
+            "intersection": [-18.534381, -52.208251]
+          },
+          {
+            "segment_a": [[12, -44], [29, -22]],
+            "segment_b": [[24, -20], [42, -31]],
+            "intersection": [28.445969, -22.716981]
+          }
+        ]
+      },
+      "implication": "The exterior outline folds across itself between overlapping crowns. Fill/winding behavior and silhouette identity are ambiguous, while the current validator and literal hash still report success.",
+      "smallest_correction": "Trace the true union boundary of the three selected crowns and shared plate without entering interior overlap edges, verify a simple closed path, and recompute evergreen primary/master hashes."
+    },
+    {
+      "id": "G1-REV-003",
+      "severity": "HIGH",
+      "title": "Six collision footprints underbound their centered projected ground envelopes",
+      "claim": "The definitions mostly store plan-space widths/depths while the accepted footprint is a centered projected envelope in the employer-local placement frame. Projecting all tier-0 extrusion base vertices and including ground-level exterior surfaces shows six underbounds; only evergreen is conservative.",
+      "contract_evidence": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "120-139",
+          "detail": "All definitions use the fixed true-isometric projection."
+        },
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "204-206",
+          "detail": "The footprint is conservative, centered, projected, and is collision authority."
+        },
+        {
+          "path": "features/career-world/geometry/projection.ts",
+          "lines": "8-21",
+          "detail": "screenX=(x-y)*0.8660254 and screenY=-(x+y)*0.5-z."
+        }
+      ],
+      "independent_measurement": [
+        {
+          "asset_id": "ambient/rock-cluster@v1",
+          "declared": [150, 115],
+          "minimum_centered_projected_envelope": [152, 98],
+          "result": "WIDTH_UNDERBOUND"
+        },
+        {
+          "asset_id": "ambient/service-truck@v1",
+          "declared": [150, 80],
+          "minimum_centered_projected_envelope": [176.6692, 110],
+          "result": "WIDTH_AND_DEPTH_UNDERBOUND"
+        },
+        {
+          "asset_id": "ambient/cargo-boat@v1",
+          "declared": [190, 82],
+          "minimum_centered_projected_envelope": [204.382, 129],
+          "result": "WIDTH_AND_DEPTH_UNDERBOUND"
+        },
+        {
+          "asset_id": "ambient/marker-buoy@v1",
+          "declared": [85, 70],
+          "minimum_centered_projected_envelope": [100, 46.4232],
+          "result": "WIDTH_UNDERBOUND"
+        },
+        {
+          "asset_id": "ambient/shore-pier@v1",
+          "declared": [250, 190],
+          "minimum_centered_projected_envelope": [332.5538, 196],
+          "result": "WIDTH_AND_DEPTH_UNDERBOUND"
+        },
+        {
+          "asset_id": "ambient/roof-equipment-kit@v1",
+          "declared": [115, 86],
+          "minimum_centered_projected_envelope": [152.4204, 100],
+          "result": "WIDTH_AND_DEPTH_UNDERBOUND"
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "155-173",
+          "detail": "Rock footprint and base."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "243-290",
+          "detail": "Truck footprint and plans."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "331-375",
+          "detail": "Boat footprint and plans."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "415-459",
+          "detail": "Buoy footprint, body, fins, and mast."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "484-555",
+          "detail": "Pier footprint and projected ground plans."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "580-638",
+          "detail": "Roof-kit footprint and projected ground plans."
+        }
+      ],
+      "implication": "P0 can report false non-collisions and place roads, labels, buildings, or other ambient props inside visible geometry. The shore-pier miss is especially large: a centered 250-unit width cannot contain the minimum centered projected width of 332.5538 units.",
+      "smallest_correction": "After correcting topology and primary paths, derive conservative centered footprint dimensions from the complete projected ground-contact envelope, round outward, then recompute master hashes. I0 must reject any definition whose projected ground vertices escape its centered footprint."
+    },
+    {
+      "id": "G1-REV-004",
+      "severity": "HIGH",
+      "title": "Shore-pier tier 2 mutates the exterior silhouette",
+      "claim": "shore-pier-rail-post-rhythm is classified as tier 2 even though it adds exterior rail-post height beyond the tier-0 rail envelope and primary path.",
+      "contract_evidence": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "220-225",
+          "detail": "Higher tiers may contain interior detail only and may not change the primary silhouette."
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "557-562",
+          "detail": "The tier-0 continuous rail envelope reaches y=-75."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "570-575",
+          "detail": "Tier-2 rail posts extend to y=-85 and several approach posts extend outward from the deck/rail outline."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "484-493",
+          "detail": "The primary path minimum is y=-75."
+        }
+      ],
+      "implication": "The pier gains visible exterior projections only at LOD 2, violating the immutable silhouette rule even if hashes remain stable across visibility changes.",
+      "smallest_correction": "Treat silhouette-defining rail posts as tier 0 and include them in the corrected primary envelope, or redesign tier 2 as interior deck/rail seams that remain strictly inside the tier-0 exterior."
+    },
+    {
+      "id": "G1-REV-005",
+      "severity": "MEDIUM",
+      "title": "Two selected-panel topology arrangements drift from the authored tier-0 geometry",
+      "claim": "The cargo boat places one rub rail on each opposing side instead of the promoted panel's two near-side lines, and the shore pier places all twelve piles only at y=+/-17 rather than carrying the selected support rhythm around the broad T cross-head.",
+      "external_visual_evidence": [
+        {
+          "path": "docs/career-world-production/reports/art-promoted-56.json",
+          "lines": "615-627",
+          "detail": "The selected cargo hero explicitly contains two near-side rub rails and both rail lines."
+        },
+        {
+          "path": "docs/career-world-production/reports/art-promoted-56.json",
+          "lines": "831-843",
+          "detail": "The selected pier hero is a complete pile-supported T and exposes every pile/support rhythm and cross-head."
+        },
+        {
+          "path": "docs/career-world-production/concept-briefs.json",
+          "lines": "1241-1251",
+          "detail": "Cargo topology requires two simple side rub rails."
+        },
+        {
+          "path": "docs/career-world-production/concept-briefs.json",
+          "lines": "1289-1299",
+          "detail": "Pier topology requires the pile-supported approach and broad cross-head."
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "384-397",
+          "detail": "The two boat paths are explicitly named port and starboard and occupy opposite envelope sides."
+        },
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "499-511",
+          "detail": "All twelve piles use six x columns and only y=-17/+17; none follows the broad cross-head ends."
+        }
+      ],
+      "implication": "Both assets remain recognizable, but their required arrangement reads as a generic barge/pier abstraction instead of the accepted selected-panel identity. The G1 report's exact topology claim is not supported.",
+      "smallest_correction": "Place two tier-0 rub rails in the selected near-side arrangement. Add a restrained tier-0 pier support pattern that visibly supports both the approach and broad cross-head; the manifest does not freeze an exact raster pile count, so preserve the accepted rhythm without pixel tracing."
+    },
+    {
+      "id": "G1-REV-006",
+      "severity": "MEDIUM",
+      "title": "The lane report overclaims semantic validation and handoff readiness",
+      "claim": "The report promotes schema/hash success into claims of complete exterior topology, zero panel conflicts, and readiness even though the F0 validator does not validate path syntax/simplicity, tier containment, projected primary-envelope agreement, or footprint containment.",
+      "repository_evidence": [
+        {
+          "path": "docs/career-world-production/reports/tech-world-composition-g1.json",
+          "lines": "9-14",
+          "detail": "The report declares PASS, ready for envelope, and complete tier-0 topology."
+        },
+        {
+          "path": "docs/career-world-production/reports/tech-world-composition-g1.json",
+          "lines": "388-403",
+          "detail": "Hash/schema checks are reported as if they prove topology and zero conflicts."
+        },
+        {
+          "path": "docs/career-world-production/reports/tech-world-composition-g1.json",
+          "lines": "443-453",
+          "detail": "The report says no active blocker and an empty blocker list."
+        },
+        {
+          "path": "features/career-world/geometry/canonical-payload.ts",
+          "lines": "127-168",
+          "detail": "The validator checks nonempty strings, positive dimensions, slots, primitive types/IDs, and tier presence but none of the failed semantic invariants."
+        }
+      ],
+      "implication": "An external G1 envelope would freeze known-invalid geometry and contaminate I0's reconstructed composite. Exact hashes make the defect durable rather than acceptable.",
+      "smallest_correction": "Reopen G1, record these blockers, correct ambient.ts, rerun scoped checks, and replace the author report's PASS/readiness claims. Only then may /root issue a final-report receipt and accepted G1 handoff envelope."
+    },
+    {
+      "id": "G1-REV-007",
+      "severity": "LOW",
+      "title": "The local regular-polygon helper puts unrounded transcendental values into master-hash payloads",
+      "claim": "offsetRegularPolygon duplicates the F0 regular-polygon behavior but stores raw Math.cos/Math.sin doubles. Those long values enter the canonical payload for the buoy, pier piles, and roof pipes, making literal master-hash reproduction unnecessarily dependent on the JavaScript math implementation.",
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/ambient.ts",
+          "lines": "33-49",
+          "detail": "Raw trigonometric results are frozen without four-decimal rounding."
+        },
+        {
+          "path": "features/career-world/geometry/primitives.ts",
+          "lines": "40-48",
+          "detail": "The F0 helper deliberately rounds plan points before freezing."
+        },
+        {
+          "path": "features/career-world/geometry/primitives.ts",
+          "lines": "65-87",
+          "detail": "The shared regularPolygonPlan already centralizes validation and rounded output."
+        },
+        {
+          "path": "features/career-world/geometry/canonical-payload.ts",
+          "lines": "100-113",
+          "detail": "Exact plan doubles are serialized into masterGeometryHash."
+        }
+      ],
+      "observed_examples": [
+        "31.411904105383748",
+        "-15.249999999999998",
+        "-75.03108891324554"
+      ],
+      "implication": "Same-engine recomputation passes today, but cross-version/platform reproducibility is more brittle than the foundation contract requires.",
+      "smallest_correction": "Build offset polygons from the rounded shared helper or explicitly round offset points before freezing. Recompute affected master hashes after the higher-severity geometry corrections."
+    }
+  ],
+  "asset_assessments": [
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Three unequal angular evergreens, three visible trunks, one shared faceted plate.",
+      "verified_present": true,
+      "blocking_issue": "Primary outer silhouette self-intersects twice.",
+      "footprint_result": "PASS_170x130_CONTAINS_MINIMUM_CENTERED_PROJECTED_156x98",
+      "higher_tier_result": "PASS_INTERIOR_SEAMS_ONLY"
+    },
+    {
+      "asset_id": "ambient/rock-cluster@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Five boulder identities: split slab as two halves, two medium wedges, two low chips, shared irregular base.",
+      "verified_present": true,
+      "primary_result": "PASS_SIMPLE_AND_VERTEX_BOUNDS_MATCH_TIER_0",
+      "blocking_issue": "Centered footprint width 150 underbounds the base at x=76; minimum centered width is 152.",
+      "higher_tier_result": "PASS_INTERIOR_SEAMS_ONLY"
+    },
+    {
+      "asset_id": "ambient/service-truck@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Cab-over mass, enclosed rear body, shallow rack, two wheel arches, clipped footprint.",
+      "verified_present": true,
+      "blocking_issues": [
+        "Primary path does not match projected tier-0 exterior.",
+        "Declared 150x80 footprint underbounds minimum centered projected 176.6692x110 envelope."
+      ],
+      "higher_tier_result": "PASS_INTERIOR_LINEWORK_ONLY"
+    },
+    {
+      "asset_id": "ambient/cargo-boat@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Low hull, blunt bow, empty well, raised stern cabin, two near-side rub rails.",
+      "verified_present_except_arrangement": true,
+      "blocking_issues": [
+        "Primary path does not match projected tier-0 exterior.",
+        "Declared 190x82 footprint underbounds minimum centered projected 204.382x129 envelope.",
+        "Rub rails are split port/starboard instead of two near-side lines."
+      ],
+      "higher_tier_result": "PASS_INTERIOR_LINEWORK_ONLY"
+    },
+    {
+      "asset_id": "ambient/marker-buoy@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Weighted faceted body, narrow mast, open cage, two opposing fins.",
+      "verified_present_except_body_mass": true,
+      "blocking_issues": [
+        "No tier-0 primitive supplies the selected lower weighted-body mass represented by primaryPath down to y=68.",
+        "Declared 85x70 footprint underbounds the fins; minimum centered projected width is 100."
+      ],
+      "higher_tier_result": "PASS_INTERIOR_LINEWORK_ONLY"
+    },
+    {
+      "asset_id": "ambient/shore-pier@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Pile-supported T approach/cross-head, blank shelter, rails, stepped shore landing.",
+      "verified_present_except_support_arrangement": true,
+      "blocking_issues": [
+        "Primary path does not match projected tier-0 exterior.",
+        "Declared 250x190 footprint underbounds minimum centered projected 332.5538x196 envelope.",
+        "Tier-2 rail posts extend beyond the tier-0 exterior.",
+        "Twelve piles remain on the narrow center strip rather than carrying support rhythm around the cross-head."
+      ]
+    },
+    {
+      "asset_id": "ambient/roof-equipment-kit@v1",
+      "verdict": "FAIL",
+      "selected_topology": "Shared base, low housing, angled hood, three pipes, narrow open curb.",
+      "verified_present": true,
+      "blocking_issues": [
+        "Primary path does not match projected tier-0 exterior.",
+        "Declared 115x86 footprint underbounds minimum centered projected 152.4204x100 envelope."
+      ],
+      "higher_tier_result": "NO_INDEPENDENT_EXTERIOR_INTENT_BUT_ONE_FASTENER_ENDPOINT_ESCAPES_THE_CURRENT_INVALID_PRIMARY"
+    }
+  ],
+  "hash_recomputation": {
+    "algorithm": "SHA-256 over UTF-8 exact primaryPath and F0 serializeCanonicalGeometryPayload output",
+    "definition_count": 7,
+    "validator_errors": 0,
+    "primary_matches": 7,
+    "master_matches": 7,
+    "result": "PASS_MECHANICALLY_NOT_SEMANTIC_ACCEPTANCE",
+    "per_asset": [
+      {
+        "asset_id": "ambient/evergreen-cluster@v1",
+        "primary": "sha256:6a38e12b954d68f64b3db0ebb893aa2c6fc3372e0e18c4135f12b5e16d0970c8",
+        "master": "sha256:60690a5eb4e77d84fbba4d4add266af8b5ac419bcd7ddbc1288533cc9c70a4aa"
+      },
+      {
+        "asset_id": "ambient/rock-cluster@v1",
+        "primary": "sha256:fe3054ded138aec1cc44f1482e3db6cc236cba9ba87a168e05155fe0f767f8e9",
+        "master": "sha256:882507e0939b3aea2bb7344ca6b2698e7f7dfe2a1a7c263c87424680ef08748f"
+      },
+      {
+        "asset_id": "ambient/service-truck@v1",
+        "primary": "sha256:a3fb187737c3db0426141e2428c2499644ed79ad98c29d833b2f94e7647485a8",
+        "master": "sha256:c1cf2371a12bbb319b6f22fb3065958f54eda018c9947f49e0b174a79e77369f"
+      },
+      {
+        "asset_id": "ambient/cargo-boat@v1",
+        "primary": "sha256:7506567f4f328ae6ff36b195df809cddee99f257bd828a7fe92e7f0682b18274",
+        "master": "sha256:8db33711d803916543f8548c6b66e25e070647ff3b9dff1fb2cf066dfd4b3155"
+      },
+      {
+        "asset_id": "ambient/marker-buoy@v1",
+        "primary": "sha256:11ea81b6741b1f8bd0348ffda04e2a07a9019f9bb7fd6f4449b796825e34b1cb",
+        "master": "sha256:b3f4b1a8e1af80d721a977612303b1db26e9dab523b178df3e6b67c866abeace"
+      },
+      {
+        "asset_id": "ambient/shore-pier@v1",
+        "primary": "sha256:1175f5094887b94cda8b83d55376c775b12959b0a144ab27e3bf2ff9232837c3",
+        "master": "sha256:a20b9891c23ddc1c12f80fb79dd5da1186440e5ff2868c4c090c547c33ec67b4"
+      },
+      {
+        "asset_id": "ambient/roof-equipment-kit@v1",
+        "primary": "sha256:11175c956e7321439f39c5c6bd3671c390a37c08cd972678c216af5abb8a8caa",
+        "master": "sha256:72b54b71ff6402bdd6e580aa2d9a07cab298b311925a92829a5e6d7558f8421c"
+      }
+    ]
+  },
+  "g1_test_deferral": {
+    "verdict": "CORRECTLY_DEFERRED_TO_I0",
+    "basis": [
+      {
+        "path": "docs/career-world-production/briefs/tech-world-composition.md",
+        "lines": "472-476",
+        "detail": "M/G lanes may not edit tests; I0 owns aggregate definition assertions."
+      },
+      {
+        "path": "docs/career-world-production/briefs/tech-world-composition.md",
+        "lines": "528-539",
+        "detail": "Aggregate gates wait for idle writers and I0 proves hashes, unique identities, palette/projection/orientation, tier invariants, and runtime isolation."
+      }
+    ],
+    "required_i0_gaps": [
+      "Recompute exact primary/master hashes for all 56 definitions and reject any mismatch.",
+      "Assert all primary paths are parseable, closed, nondegenerate, and simple with no non-adjacent self-intersection.",
+      "Project every tier-0 extrusion and assert its complete exterior is contained by and agrees with the primary outer envelope; include surfaces and strokes that define exterior identity.",
+      "Project every ground-contact plan/surface and assert the centered footprint conservatively contains it after outward rounding.",
+      "Assert tier-1/tier-2 geometry stays inside the tier-0 exterior and cannot change silhouette, roofline, or footprint.",
+      "Add asset-specific ambient topology fixtures for required component counts and arrangement, including three trees/trunks, five boulders, two truck arches, two near-side boat rails, two buoy fins, pier support rhythm, and three roof pipes.",
+      "Assert all non-skill ambient geometry keys, primary hashes, and master hashes are unique and no runtime PNG/design path, employer value, placement, or evidence fact enters definitions.",
+      "Freeze canonical polygon coordinates to rounded numeric values so hash fixtures do not depend on raw transcendental doubles.",
+      "Retain a separate visual review because automated bounds/count tests cannot prove selected-panel readability or detect every disconnected/occluded mass."
+    ]
+  },
+  "commands_and_checks": [
+    {
+      "command": "Get-FileHash -Algorithm SHA256 <composition brief, corrected F0 envelope, promoted-art report, manifest, ambient.ts, seven canonical PNGs>",
+      "result": "All live byte counts and SHA-256 values match the G1 authority/source receipts."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/tsx/dist/cli.mjs -",
+      "stdin_check": "Import AMBIENT_GEOMETRY_DEFINITIONS; call validateGeometryDefinition and serializeCanonicalGeometryPayload; compute SHA-256 with node:crypto for exact primaryPath and canonical payload.",
+      "result": "7/7 validator-clean, 7/7 primary hashes match, 7/7 master hashes match."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/tsx/dist/cli.mjs -",
+      "stdin_check": "Project every tier-0 extrusion through projectExtrusion; parse all tier-0 path vertices; compare rendered vertex bounds with primaryPath bounds.",
+      "result": "Five material primary/tier-0 envelope mismatches."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/tsx/dist/cli.mjs -",
+      "stdin_check": "Run pairwise non-adjacent segment intersection over all 32 extrusion plans and seven closed primary paths; compute signed areas.",
+      "result": "32/32 extrusion plans have positive area and no self-intersection; evergreen primaryPath has two self-intersections; the other six primary paths are simple by straight-segment test."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/tsx/dist/cli.mjs -",
+      "stdin_check": "Project tier-0 ground-contact vertices with projectPlanPoint, include ground-level exterior surfaces, and compare centered half-extents with each declared footprint.",
+      "result": "Evergreen passes; six footprints underbound at least one axis."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/eslint/bin/eslint.js features/career-world/definitions/ambient.ts",
+      "result": "PASS with zero output."
+    },
+    {
+      "command": "& 'C:\\Program Files\\nodejs\\node.exe' node_modules/typescript/bin/tsc features/career-world/definitions/ambient.ts --noEmit --target ES2022 --module esnext --moduleResolution bundler --strict --skipLibCheck",
+      "result": "PASS with zero output."
+    },
+    {
+      "command": "rg -n -i '\\.png|design/|#[0-9a-f]{3,8}|worldPosition|localPosition|employer|evidence|logo|text' features/career-world/definitions/ambient.ts",
+      "result": "No forbidden coupling matches."
+    },
+    {
+      "command": "git status --short -- features/career-world/definitions/ambient.ts docs/career-world-production/reports/tech-world-composition-g1.json docs/career-world-production/reports/review-tech-world-composition-g1.json",
+      "result": "Before this review report was written, only the expected untracked G1 implementation and author report appeared in this scoped status."
+    }
+  ],
+  "visual_evidence": {
+    "canonical_images_inspected_at_original_detail": [
+      "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+      "design/career-world/concepts/ambient/rock-cluster-v1.png",
+      "design/career-world/concepts/ambient/service-truck-v1.png",
+      "design/career-world/concepts/ambient/cargo-boat-v1.png",
+      "design/career-world/concepts/ambient/marker-buoy-v1.png",
+      "design/career-world/concepts/ambient/shore-pier-v1.png",
+      "design/career-world/concepts/ambient/roof-equipment-kit-v1.png"
+    ],
+    "selected_regions_used": "Only the promoted selected_trace_panel crop/role for each asset was treated as the visual identity/topology reference.",
+    "limits": [
+      "PNG pixels were not treated as coordinate, path, footprint, or hash authority.",
+      "No integrated runtime scene or browser raster was available or required at G1; projected source geometry and renderer behavior were inspected directly.",
+      "Vertex bounds are a lower-bound semantic check and do not include stroke width; the reported underbounds and primary mismatches therefore cannot be explained away by stroke thickness.",
+      "The manifest does not freeze an exact pier pile count, so the pier finding is about missing selected support arrangement/rhythm, not pixel-equal pile enumeration."
+    ]
+  },
+  "residual_risk": [
+    "Correcting primary paths, topology, rounding, or footprints changes master hashes and usually primary hashes; every affected receipt in the G1 report must be regenerated before handoff.",
+    "The current F0 validator remains too shallow to prevent recurrence; I0 tests must add semantic geometry guards rather than merely replaying validateGeometryDefinition.",
+    "A later rendered visual review is still required to assess occlusion, face ordering, read scale, and whether corrected silhouettes match the selected concept language.",
+    "P0 must not consume the current footprints because collision false negatives are demonstrated."
+  ],
+  "required_disposition": {
+    "g1_status": "REOPEN",
+    "external_handoff_envelope_allowed": false,
+    "i0_integration_allowed": false,
+    "required_next_owner": "/root/tech_geometry_g1",
+    "required_actions": [
+      "Correct the seven-asset G1 implementation within its existing file fence.",
+      "Recompute all affected literal primary/master hashes.",
+      "Replace the G1 author report's PASS/readiness and empty-blocker claims with evidence from corrected geometry.",
+      "Obtain a fresh independent review before /root freezes the final G1 report receipt."
+    ]
+  },
+  "review_artifact_receipt": {
+    "path": "docs/career-world-production/reports/review-tech-world-composition-g1.json",
+    "owner": "/root/review_geometry_g1",
+    "only_workspace_file_written_by_review": true,
+    "self_hash_excluded": true
+  },
+  "files_written": [
+    "docs/career-world-production/reports/review-tech-world-composition-g1.json"
+  ]
+}

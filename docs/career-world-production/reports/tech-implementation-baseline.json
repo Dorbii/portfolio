@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "snapshot_date": "2026-07-17",
+  "status": "baseline_frozen_dispatch_not_authorized",
+  "dispatch_authorized": false,
+  "art_promoted_by_this_report": false,
+  "repository_root": ".",
+  "git_context": {
+    "head": "964c5fbc7a8097a5d4a7e80fa67f41489626251a",
+    "worktree_clean": false,
+    "note": "This report binds the exact current bytes, including pre-existing untracked and modified work. No staging, commit, queue, ledger, or other git-state mutation was performed."
+  },
+  "scope": {
+    "career_world_runtime_files": 10,
+    "app_entry_files": 3,
+    "test_files": 2,
+    "package_config_and_dev_server_inputs": 9,
+    "protected_factual_dependencies": 2,
+    "approved_contract_and_packet_inputs": 10,
+    "file_count": 36,
+    "notes": [
+      "Every current file under features/career-world is included.",
+      "The app entry scope is app/page.tsx, app/layout.tsx, and app/globals.css.",
+      "The existing Evidence Atlas factual dependency and route/integration test are included because Career World imports and exercises them.",
+      "vite.config.ts, its two repo-local imports, package and lock files, and the applicable root configuration files are included so the localhost proof is bound to the configuration it executes.",
+      "Queue and ledger remain active Director coordination state and are not immutable worker inputs.",
+      "This report is excluded from its own aggregate to avoid self-reference."
+    ]
+  },
+  "hash_algorithm": {
+    "file_digest": "SHA-256 over exact raw file bytes; lowercase hexadecimal",
+    "path_normalization": "repository-relative paths with forward slashes",
+    "sort": "ascending ordinal byte order of normalized UTF-8 path bytes",
+    "record": "path + NUL + decimal byte count + NUL + lowercase file SHA-256 + LF",
+    "record_encoding": "UTF-8 without BOM",
+    "aggregate_digest": "SHA-256 over the concatenation of all sorted records, including the final LF"
+  },
+  "aggregate": {
+    "file_count": 36,
+    "total_bytes": 1019485,
+    "sha256": "a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97"
+  },
+  "browser_proof": {
+    "owner": "root",
+    "thread_id": "/root",
+    "start_command": "npm.cmd run dev",
+    "required_listener": "http://127.0.0.1:3000/",
+    "preview_url": "http://127.0.0.1:3000/?cw-preview=a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97",
+    "control_surface": "in-app Browser control",
+    "artifact_namespace": "docs/career-world-production/evidence/CW-007/browser/root/a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97/",
+    "scenario_path_rule": "docs/career-world-production/evidence/CW-007/browser/root/a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97/<qa-matrix-id>/",
+    "immutability_rule": "Root recomputes this aggregate immediately before server start and after evidence capture, stops on any mismatch or listener drift, and permits no source/configuration edit while the preview is active.",
+    "new_package_or_runner_dependency": false,
+    "shared_runner_configuration_edit": false
+  },
+  "deferred_prerequisites": {
+    "final_promoted_art_digest": {
+      "status": "pending_not_promoted",
+      "required_before_phase": "F0",
+      "owner": "Director",
+      "minimum_scope": [
+        "the final Director-promoted full-library art-QA report",
+        "the exact selected-panel mapping for all 56 asset IDs",
+        "the exact 56 selected canonical image byte counts and SHA-256 values"
+      ],
+      "rule": "Record a separate deterministic digest after all D-013 corrections pass independent QA. The current nonpromoted art report and concept PNG bytes are intentionally not represented as final art authority here."
+    }
+  },
+  "protected_text": {
+    "architecture_d013_line": 105,
+    "utf8_bytes_without_eol": 568,
+    "sha256_without_eol": "440c7dfbca7868f323cb7532532f39a94882ad406b704b74dea3590fd0b13f77"
+  },
+  "files": [
+    {
+      "path": ".openai/hosting.json",
+      "bytes": 93,
+      "sha256": "081e64063486e892035c5881ed31a32d9b6f86dae6b05f825ef8d7d48b63ed89"
+    },
+    {
+      "path": "app/globals.css",
+      "bytes": 83,
+      "sha256": "7073870a2897602d07e3a10a3a8369ef49adf97191edb5d1c3d068defb1c9a6a"
+    },
+    {
+      "path": "app/layout.tsx",
+      "bytes": 875,
+      "sha256": "dcb2198314fd0501bc42a08b21d1f4211b745af61194b2533c405ebeaeb192e2"
+    },
+    {
+      "path": "app/page.tsx",
+      "bytes": 117,
+      "sha256": "b768c208c5fc8e239181a3cb07179d926e4c18ceae467a39c77cd865eea82ff8"
+    },
+    {
+      "path": "build/sites-vite-plugin.ts",
+      "bytes": 1299,
+      "sha256": "abd6bc3a592961e978ab72fceb8ee7647824d9a2321ee5b5777b2a05d69526cc"
+    },
+    {
+      "path": "docs/career-world-asset-map.md",
+      "bytes": 12803,
+      "sha256": "7596eb116d34f9d621e4c9c249e093da30ef3840703f70c0851967473feb7246"
+    },
+    {
+      "path": "docs/career-world-production/architecture.md",
+      "bytes": 9767,
+      "sha256": "1c991510351736ade1057fcb5420178cc63ee13623964d037795465314cedffc"
+    },
+    {
+      "path": "docs/career-world-production/asset-inventory.md",
+      "bytes": 6914,
+      "sha256": "ad7a8925f9450369c6d7b54d2e72c6bb18c683a5d10000f2e6ad4d68a9fb7b15"
+    },
+    {
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "bytes": 15117,
+      "sha256": "f23cc8be600724c49623f5be144c7d9f5cde609d78af3b7e3445851e49fbeaed"
+    },
+    {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 56732,
+      "sha256": "dcab06c5f1f1485f26e2f8a137c4f67336472ea2e9bdabacc31ff5ccc8b416e4"
+    },
+    {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14"
+    },
+    {
+      "path": "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json",
+      "bytes": 2840,
+      "sha256": "0e58fb112afe49caa07e5d6d408208c07e7d5a375efed5365213ba74e8e94389"
+    },
+    {
+      "path": "docs/career-world-production/reports/qa-lead-contract.json",
+      "bytes": 68677,
+      "sha256": "4bbf03e51152ebb1b08dbc9722e3e14296603e01082a5e1cfe08c314bf60d4c5"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-capital-normalization.json",
+      "bytes": 9086,
+      "sha256": "5aaea793215b6fde29d0bfaa7f8228b44c34be86f03b5d83b05e173b877a7025"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-world-composition.json",
+      "bytes": 28518,
+      "sha256": "8b637343a9fd13c02f0fe8875a8a1899b22aaf91923b20b53f399e8941447454"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "bytes": 483,
+      "sha256": "275a07c13fc7c83a652efcfa9fb6a207c451a2f5088e6793415ce44281285720"
+    },
+    {
+      "path": "features/career-world/components/career-world.tsx",
+      "bytes": 4404,
+      "sha256": "f4f1d32e4a6223f91b8295e8c286ba9e31cd2cf2cef88861cbb5ace850da9996"
+    },
+    {
+      "path": "features/career-world/components/project-drawer.tsx",
+      "bytes": 3569,
+      "sha256": "8a58a7df8dadee7b2fee7bb8b2b7a0e045922c5b65c8dc9f567ec8e414b77595"
+    },
+    {
+      "path": "features/career-world/components/world-hit-targets.tsx",
+      "bytes": 2612,
+      "sha256": "9b298e205b3ce4d4d8518f4fe6d16489e6fdd2a3e4de62a05b4f2fbc3cfb8e6a"
+    },
+    {
+      "path": "features/career-world/components/world-scene.tsx",
+      "bytes": 3861,
+      "sha256": "86b57ef0abf2ca3e5adc8b080f72afbb9e032b623e201a1f484458337aa89ee2"
+    },
+    {
+      "path": "features/career-world/hooks/use-career-world-state.ts",
+      "bytes": 4990,
+      "sha256": "0d234d727f1a4ad9cb4451099c540ae7f310228beb6014be81dd13f1a47c2092"
+    },
+    {
+      "path": "features/career-world/index.ts",
+      "bytes": 57,
+      "sha256": "6bc4a9a32a5abadfcc028b96942a820623acb56e517d44801e38ff09f20c9805"
+    },
+    {
+      "path": "features/career-world/model/evidence-adapter.ts",
+      "bytes": 2013,
+      "sha256": "2076239ad6300e870bee31ba57e2cb165a277c41a28138fcbc612dc9dad4441f"
+    },
+    {
+      "path": "features/career-world/model/world-registry.ts",
+      "bytes": 22128,
+      "sha256": "a6dba017a3048914f62f606113f8bd020e15b03ab2adc8c6565c89902efa8182"
+    },
+    {
+      "path": "features/career-world/rendering/world-camera.ts",
+      "bytes": 2105,
+      "sha256": "72e9eb2ffe352d63c403766cf417343e6473f8df201543efbe5c7f3b436b9a6a"
+    },
+    {
+      "path": "features/career-world/styles/career-world.css",
+      "bytes": 6262,
+      "sha256": "c2d2130d1417619240773d54a3f5cec5a5690cb1eee853c7277fd510b9f85af2"
+    },
+    {
+      "path": "features/evidence-atlas/model/evidence-data.ts",
+      "bytes": 34429,
+      "sha256": "467c4c066208ef5cad5ac0590120ac8a69383140d63bde9bdd328ef1f1944111"
+    },
+    {
+      "path": "features/evidence-atlas/model/node-domains.ts",
+      "bytes": 875,
+      "sha256": "7af21bf05e14172e818ed5495e41cce8e75b0206c1065fed4ca6cd17e25df58f"
+    },
+    {
+      "path": "next.config.ts",
+      "bytes": 140,
+      "sha256": "a972c4f0ffa6dd714e7909b02d1ac19d2f2fe3d01f191efd2c5054bd6f142ec1"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 357078,
+      "sha256": "3f781e97ce44f2c0ae63a38379096f94204670116b748984377393fe5300de6d"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1086,
+      "sha256": "a0c512b31cca460be20758f892752443afa2caf4d2c6a2ac40f2ab69eaeafe8f"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "bytes": 101,
+      "sha256": "7b299d3d3b16699ddda397c0b2373b3af4f25f8fc9ccc9b3d9e64ef083bc1c21"
+    },
+    {
+      "path": "tests/career-world.test.mjs",
+      "bytes": 26332,
+      "sha256": "6e0b8f8f55c8604a1a15d469715e4e31226a4bdfc2d39383fb25f18aa15b5344"
+    },
+    {
+      "path": "tests/evidence-atlas.test.mjs",
+      "bytes": 43234,
+      "sha256": "20b5c990cc43fe4da7e256d53c37e938eaec402f8813067cd077d81861960899"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 700,
+      "sha256": "fbff01604d6cb54694be707f26e7a0eb21a6ef796b888c6a1dab1839fa7c6ccc"
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 1756,
+      "sha256": "5d68239b2f24f42354e8a05cf69b83fd8f3ce34727f2edf2b55283e4f732c77a"
+    }
+  ]
+}

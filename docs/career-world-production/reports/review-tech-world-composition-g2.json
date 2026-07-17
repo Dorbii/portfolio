@@ -1,0 +1,247 @@
+{
+  "schema_version": "career-world-tech-review/v1",
+  "review_id": "career-world-2026-07-17/CW-005/G2/corrected-r2-final-rereview",
+  "phase_id": "G2",
+  "review_state": "COMPLETE",
+  "completed_at": "2026-07-17T16:12:36.4416454Z",
+  "contract_readiness_verdict": "FAIL",
+  "receipt_ruling": "NO_GO_DO_NOT_ENVELOPE_OR_ADMIT_TO_I0",
+  "summary": "The second Tanium correction is real and passes the requested direct and renderer-equivalent checks: three Tier-0 sloped wedge cap volumes, a recessed zigzag floor with 14 retaining walls, a simple emitted-edge-derived primary path with zero Tier-0 or higher-tier escape, a centered 248 by 196 footprint, exact literal hashes, and clean lint. G2 still fails. Fresh renderer-equivalent containment found six unique T-Match Tier-0 exterior vertices outside its primaryPath by 0.866050 to 1.732000 projected units, and the required Tier-0 CableCar catenary exits its primaryPath for part of the quadratic curve by as much as 5.637489 units. Vendy's Tier-2 trolley and CableCar's Tier-2 pod also escape their accepted silhouettes. These results contradict the author report's zero-outside claim and leave the batch short of the primary-silhouette and higher-tier-interior contract.",
+  "review_scope": {
+    "implementation": "features/career-world/definitions/projects-a.ts",
+    "author_report": "docs/career-world-production/reports/tech-world-composition-g2.json",
+    "review_artifact": "docs/career-world-production/reports/review-tech-world-composition-g2.json",
+    "reviewer_writes": [
+      "docs/career-world-production/reports/review-tech-world-composition-g2.json"
+    ],
+    "source_edits_by_reviewer": 0,
+    "test_edits_by_reviewer": 0,
+    "author_report_edits_by_reviewer": 0,
+    "implementation_conversation_used_as_authority": false,
+    "author_report_treated_as_claims": true
+  },
+  "authority_order": [
+    "docs/career-world-production/briefs/tech-world-composition.md:204-206,220-226,500-526,530-539",
+    "docs/career-world-production/reports/tech-f0-foundation.json",
+    "docs/career-world-production/reports/art-promoted-56.json",
+    "docs/career-world-production/concept-briefs.json and the eight promoted canonical project PNGs",
+    "features/career-world/geometry/primitives.ts, canonical-payload.ts, projection.ts, and rendering/geometry-renderer.tsx",
+    "features/career-world/definitions/projects-a.ts",
+    "docs/career-world-production/reports/tech-world-composition-g2.json"
+  ],
+  "chronology": [
+    {
+      "event": "prior_independent_review",
+      "review_id": "career-world-2026-07-17/CW-005/G2/fresh-context",
+      "verdict": "FAIL",
+      "receipt": {
+        "implementation_bytes": 28365,
+        "implementation_sha256": "f85e1e888140ba2ab45c23f2837f2befc1e70a09ca8eb87a4b9856510df200b4",
+        "author_report_bytes": 17728,
+        "author_report_sha256": "bd44a62a8b53834fa2e3ce520fda3daca0bae8208d7c23ca517e9392dbe9667e"
+      },
+      "recorded_failures": [
+        "primaryPath padded halos",
+        "three under-sized collision footprints",
+        "flattened Kaizen Metrics, Vendy/Tanium, T-Match, CableCar, and XSearch topology"
+      ]
+    },
+    {
+      "event": "first_corrected_independent_rereview",
+      "review_id": "career-world-2026-07-17/CW-005/G2/corrected-fresh-rereview",
+      "verdict": "FAIL",
+      "receipt": {
+        "implementation_bytes": 37279,
+        "implementation_sha256": "d6e7621ab1a0b19126c86885b343a6d193690c53f315723536ba677f2b8eadd2",
+        "author_report_bytes": 5131,
+        "author_report_sha256": "68b3ad491d9bf724b18158bbad1a843d1ba71f7b151881fb89cdf54a2b03d76b"
+      },
+      "reason": "Tanium still lacked volumetric sloped caps and a recessed trench; slopedWedgeCap remained unused."
+    },
+    {
+      "event": "second_correction_submitted",
+      "status": "CORRECTED_AWAITING_INDEPENDENT_REVIEW",
+      "receipt": {
+        "implementation_bytes": 37484,
+        "implementation_sha256": "117fc2978c46eadc34e164dde0fc041bf52358ab83d04c0138c3bdf70d541cd7",
+        "author_report_bytes": 6012,
+        "author_report_sha256": "5dbcea5de2e04f239ab6463f43d5070d1341c9faf5bce0de4977489fef30c323"
+      }
+    },
+    {
+      "event": "current_final_independent_rereview",
+      "verdict": "FAIL",
+      "terminal": true,
+      "reason": "Tanium is corrected, but renderer-equivalent checks refute the author report's containment claim for T-Match and CableCar and find Tier-2 silhouette escapes in Vendy and CableCar."
+    }
+  ],
+  "severity_counts": {
+    "blocker": 1,
+    "material": 1,
+    "improvement": 0,
+    "nit": 0
+  },
+  "findings": [
+    {
+      "id": "G2-FINAL-BLOCKER-001",
+      "severity": "blocker",
+      "status": "open",
+      "claim": "T-Match and CableCar still do not have primaryPath values that contain their complete rendered Tier-0 exterior identity, so the author report's zero-outside result is false.",
+      "evidence": [
+        "The governing contract defines primaryPath as the normalized outer silhouette and requires Tier 0 to contain the complete primary silhouette, all exterior masses, and required connections: docs/career-world-production/briefs/tech-world-composition.md:204-206,220-225. Per-batch acceptance requires a normalized primary path whose Tier 0 matches manifest and selected-panel topology: lines 519-526.",
+        "Renderer-equivalent expansion used the actual projectExtrusion implementation for every extrusion face and the literal surface/stroke paths. A high-precision winding-number test found six unique T-Match Tier-0 exterior coordinates outside tmatchPrimaryPath: tmatch-left-lower-step at (-77.9423,-68), tmatch-right-lower-step at (-64.0859,-76), tmatch-left-middle-step at (-61.4878,-80.5), tmatch-right-middle-step at (-45.8993,-89.5), tmatch-left-upper-step at (-45.8993,-92.5), and tmatch-right-upper-step at (-28.5788,-102.5). The first two coordinates are also emitted by tmatch-deep-zigzag-seam-retaining-wall-8, -9, and/or -10. Their nearest silhouette distances are 0.866050 to 1.732000 projected units. Source: features/career-world/definitions/projects-a.ts:1033-1124.",
+        "CableCar's required Tier-0 catenary is the quadratic path M -58 -61 Q 0 -48 58 -61 at projects-a.ts:951-956. Sampling the exact quadratic at 4097 evenly spaced parameters found 622 outside samples; the maximum escape is 5.637489 projected units at approximately (14.584961,-54.911025). This is part of the manifest-required bridge identity, not optional decoration.",
+        "The author report says its Tier-0 projected-vertex containment check found zero outside vertices at docs/career-world-production/reports/tech-world-composition-g2.json:65-68. That statement is not reproducible. Endpoint-only checking also cannot prove containment of a quadratic stroke between its endpoints."
+      ],
+      "implication": "Two of eight definitions fail the exact outer-silhouette/Tier-0 contract. Literal hashes faithfully bind the defective geometry but do not make it acceptable. G2 cannot be enveloped or admitted to I0.",
+      "smallest_correction": "Adjust only tmatchPrimaryPath and cablecarPrimaryPath so they remain simple exterior traces and contain the actual renderer-expanded Tier-0 geometry, including the complete CableCar quadratic curve. Recompute only the affected primary/master hashes and report receipts. Do not change the accepted masses, topology, footprint, projection, or placement.",
+      "exact_i0_test_requirement": "For every definition, expand extrusion faces with projectExtrusion, flatten Q curves adaptively or at a declared subpixel error bound, and require every Tier-0 rendered segment/curve to be inside or on a simple primaryPath. Pin the six current T-Match misses and the CableCar catenary as regression fixtures. A vertex-only endpoint test is insufficient."
+    },
+    {
+      "id": "G2-FINAL-MATERIAL-002",
+      "severity": "material",
+      "status": "open",
+      "claim": "Optional higher-tier details escape the accepted primary silhouettes in Vendy and CableCar instead of remaining interior-only.",
+      "evidence": [
+        "The contract limits Tiers 1 and 2 to interior-only detail and requires easter eggs to fit inside the accepted silhouette/footprint contract: docs/career-world-production/briefs/tech-world-composition.md:222-226.",
+        "The Tier-2 Vendy trolley at projects-a.ts:564-574 has projected vertex (-10.3923,-84) outside vendyPrimaryPath by 1.141717 units.",
+        "All six unique vertices of the Tier-2 CableCar pod at projects-a.ts:963-975 are outside cablecarPrimaryPath; nearest-boundary distances range from 6.124349 to 22.609900 units.",
+        "No higher-tier non-stroke primitives exist, but primitive type is not the criterion: hidden strokes still must remain interior and cannot escape the accepted silhouette when made visible."
+      ],
+      "implication": "LOD visibility changes the visible extent outside the accepted primary path, contrary to the tier invariant. This independently prevents exact per-batch acceptance even after blocker 001 is fixed.",
+      "smallest_correction": "Keep the permitted trolley and pod semantics and move or redraw only those Tier-2 stroke paths inside their accepted silhouettes, or omit the optional details. Do not enlarge footprints or invent new masses to accommodate them.",
+      "exact_i0_test_requirement": "Run the same renderer-equivalent containment check for every Tier-1 and Tier-2 path, including curve interiors, and fail on any sample outside primaryPath. Pin the Vendy trolley and CableCar pod as regression fixtures."
+    }
+  ],
+  "tanium_final_disposition": {
+    "status": "PASS_CORRECTION_VERIFIED",
+    "source_evidence": [
+      "Three hall extrusions invoke slopedWedgeCap at features/career-world/definitions/projects-a.ts:740-757; the helper emits three fascia surfaces plus one sloped roof per hall, all Tier 0, at lines 303-350.",
+      "Recovered roof vertex heights from the actual emitted paths are lower [31,31,44,44], middle [42,42,56,56], and upper [54,54,69,69], proving nonconstant volumetric caps rather than flat-top prisms.",
+      "recessedCut is invoked for tanium-zigzag-inspection-trench at projects-a.ts:758. The emitted Tier-0 set contains one recessed floor and 14 retaining walls; helper construction is at lines 181-213.",
+      "taniumPrimaryPath at projects-a.ts:672-684 is exactly segment-simple. Renderer-expanded checks found zero Tier-0 points and zero all-tier points outside it. Its 30 vertices lie on actual Tier-0 emitted edges within at most 0.000065 projected units, the four-decimal projection rounding bound; primary and Tier-0 bounds are identical (-192.2576..174.9371 by -130.7846..47).",
+      "The centered footprint is 248 by 196 at projects-a.ts:1187-1195. All extrusion plan coordinates fit within +/-124 by +/-98; the forecourt itself reaches x=-124 and y=98, confirming the envelope is centered and not an offset recovery.",
+      "Tanium higher-tier details are strokes only and the renderer-equivalent all-tier check found zero silhouette escapes.",
+      "Repository ESLint completed with exit 0 and no output. The prior unused slopedWedgeCap warning is gone."
+    ]
+  },
+  "prior_findings_disposition": [
+    {
+      "prior_id": "G2-REREVIEW-BLOCKER-001",
+      "status": "resolved",
+      "evidence": "Tanium now has the three emitted sloped cap volumes and the recessed floor plus 14 walls described in tanium_final_disposition."
+    },
+    {
+      "prior_id": "G2-REREVIEW-IMPROVEMENT-002",
+      "status": "resolved",
+      "evidence": "slopedWedgeCap is invoked three times and root ESLint is warning-free."
+    },
+    {
+      "prior_id": "G2-REVIEW-BLOCKER-001",
+      "status": "partially_resolved_but_not_acceptance_complete",
+      "evidence": "All eight paths are no longer padded halos and Tanium's new path is an actual emitted-edge trace, but fresh renderer-equivalent containment exposes under-tracing in T-Match and CableCar as blocker 001."
+    },
+    {
+      "prior_id": "G2-REVIEW-BLOCKER-002",
+      "status": "resolved",
+      "evidence": "All extrusion plan coordinates fit their centered footprints; Tanium, CableCar, and XSearch retain corrected 248x196, 274.2359x94.2359, and 290x220 envelopes."
+    },
+    {
+      "prior_id": "G2-REVIEW-MATERIAL-003",
+      "status": "resolved",
+      "evidence": "Kaizen Metrics retains four Tier-0 pitched roof expansions and a Tier-0 faceted lightwell cap at projects-a.ts:620-636, matching the selected panel's sawtooth/refinery topology."
+    },
+    {
+      "prior_id": "G2-REVIEW-MATERIAL-004",
+      "status": "resolved",
+      "evidence": "Vendy retains a Tier-0 recessed dock at projects-a.ts:530 and Tanium now has the verified recessed trench and sloped halls. The separate Vendy Tier-2 escape is finding 002, not a recurrence of the dock defect."
+    },
+    {
+      "prior_id": "G2-REVIEW-MATERIAL-005",
+      "status": "topology_resolved_primary_containment_not_resolved",
+      "evidence": "T-Match retains alternating interlocking Tier-0 steps and a Tier-0 recessed zigzag seam at projects-a.ts:1055-1124, but its primaryPath misses six emitted exterior coordinates as finding 001 records."
+    },
+    {
+      "prior_id": "G2-REVIEW-IMPROVEMENT-006",
+      "status": "topology_resolved_primary_containment_not_resolved",
+      "evidence": "CableCar and XSearch retain the required Tier-0 tapered shells at projects-a.ts:935-949 and 1011-1017. CableCar's separate catenary/pod containment defects remain findings 001-002; XSearch passes the fresh renderer-equivalent checks."
+    },
+    {
+      "asset": "project/kaizen-agent-platform@v1",
+      "status": "pass_rechecked",
+      "evidence": "Three stepped bars, transfer bay, gate bridge, front gate, and rollback vault remain Tier 0; hashes, simplicity, footprint, and all-tier containment pass."
+    },
+    {
+      "asset": "project/uat-automation@v1",
+      "status": "pass_rechecked",
+      "evidence": "Five validation chambers, two dissimilar pavilions, raised mezzanine, and stairs remain present; hashes, simplicity, footprint, and all-tier containment pass."
+    }
+  ],
+  "independent_receipts": {
+    "composition_brief": { "bytes": 63858, "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af" },
+    "promoted_art_report": { "bytes": 124881, "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4" },
+    "concept_briefs": { "bytes": 288349, "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14" },
+    "f0_report": { "bytes": 14956, "sha256": "8abc109cef5a01b6414e2a55928342dddf342296d99496f68f95297302c80f3a" },
+    "primitives_source": { "bytes": 7301, "sha256": "10e184109821be6cdad95e7956c2bd9c399dfb8bbc7c881177b27f4111814049" },
+    "renderer_source": { "bytes": 3499, "sha256": "4016943341adda28fb66bb0493344d22226929d4adcea2fa84fb601bb9ca384c" },
+    "g2_implementation": { "bytes": 37484, "sha256": "117fc2978c46eadc34e164dde0fc041bf52358ab83d04c0138c3bdf70d541cd7" },
+    "g2_author_report": { "bytes": 6012, "sha256": "5dbcea5de2e04f239ab6463f43d5070d1341c9faf5bce0de4977489fef30c323" },
+    "predecessor_review_artifact": { "bytes": 13848, "sha256": "ac22c3e21bc9ad753540642391db683dd3f8d29128b976dac9eb046ad00b991f" }
+  },
+  "definition_hash_receipt": [
+    ["project/kaizen-agent-platform@v1", "sha256:a074bc19ba680a923ea6a14a5ea84d7747cd173be8318682c6046b3838c21c07", "sha256:8d44e5441ab4d1c0b46b219553e66e67ef4c42898f4a8eac74a6961f4feb84d2"],
+    ["project/vendy-vm-platform@v1", "sha256:c6042a192744482cd843885f2cbf3ab17bc66b44696f6c0188fc0092fa088a14", "sha256:d9f4de2910b2bf552928246c8997861a603c41fd67cb4340cf34f4a24b0728bb"],
+    ["project/kaizen-metrics@v1", "sha256:9ca4bd1436856de56e2947b31800c10395283865bfb8e1928e07fa72e05e80ec", "sha256:2e2381dc7a7b621fedd7b0e0e186c8e22fcd4d9c92b2418e01e9ad7ce8747947"],
+    ["project/tanium-risk-assessment@v1", "sha256:b1c786ba69f5b64b4c1b00e93459631ca83cde9a3019e7a2f14f9efed9bbc9c8", "sha256:107b90acb35e1fae118c7a2e87c958e8f428a7defab3f01745c193e11f9e2bc4"],
+    ["project/uat-automation@v1", "sha256:b63f5808cf836f71770c4d3c80aba64340fac915d3f731d489d25d42dc191470", "sha256:0d921daa912e4ad28d6f16d575407474e6c37a5ef0bdd5b26a41b1d2636c9d81"],
+    ["project/cablecar@v1", "sha256:f06d9271d027897c4e290135bca5e7f0a48f92bde0a170c998aa527871160e31", "sha256:2944aebebbe11f08e803e7a8ab977d9e740ae5ac0f51dccfd525da53c38bf2cf"],
+    ["project/xsearch@v1", "sha256:f9c24aabe596f0d78ab5461ff3abd0d562b20adcef37bc5e430080d94484fc7f", "sha256:20e78f0318e9939cec712b189acf4a27d34cc4f311f20c8781c9d4a48b7f2dcf"],
+    ["project/tmatch-eolmatch@v1", "sha256:5c5ff284e2bd81e7f89c957e385ce08394152f3f48274dc8e9eb8ae658b8e1dd", "sha256:9c5526fe6a62bb2a9cb7a1a5b7c23763354b1ba96612ee2f87287aeefa6fe4bf"]
+  ],
+  "renderer_equivalent_receipt": {
+    "definitions": 8,
+    "primitive_totals": { "all": 227, "tier_0": 196, "tier_1": 23, "tier_2": 8 },
+    "higher_tier_non_stroke_primitives": 0,
+    "f0_validation_errors": 0,
+    "primary_paths_exactly_simple": 8,
+    "centered_extrusion_plan_footprint_overruns": 0,
+    "primary_hash_matches": 8,
+    "master_hash_matches": 8,
+    "tanium_tier_0_outside_points": 0,
+    "tanium_all_tier_outside_points": 0,
+    "non_tanium_failures": {
+      "tmatch_unique_tier_0_vertices_outside": 6,
+      "cablecar_quadratic_samples": 4097,
+      "cablecar_quadratic_samples_outside": 622,
+      "vendy_unique_tier_2_vertices_outside": 1,
+      "cablecar_unique_tier_2_pod_vertices_outside": 6
+    }
+  },
+  "gate_evidence": {
+    "root_wide_build": "PASS via npm.cmd test / vinext build",
+    "root_wide_tests": "PASS, 15/15",
+    "root_wide_lint": "PASS with zero errors and zero warnings; unused slopedWedgeCap warning is gone",
+    "hash_recomputation": "PASS, all eight primaryPath SHA-256 values and all eight serializeCanonicalGeometryPayload SHA-256 values match stored literals",
+    "visual_review": "The eight promoted canonical PNGs were inspected as topology references. Tanium's corrected emitted topology now matches its three-wedge/trench identity. No claim of pixel equivalence is made."
+  },
+  "i0_required_tests": [
+    "Recompute primaryPathHash and masterGeometryHash for all 56 definitions from exact UTF-8 payloads.",
+    "Require each primaryPath to be an exactly segment-simple closed path without using a tolerance that turns near-adjacent segments into false crossings.",
+    "Expand every extrusion with projectExtrusion and require every Tier-0 surface, face, and adaptively flattened curve to lie inside or on primaryPath; pin T-Match's six misses and CableCar's catenary.",
+    "Run the same containment check for Tier 1 and Tier 2; pin the Vendy trolley and CableCar pod escapes.",
+    "Require every extrusion plan coordinate to fit the centered footprint and separately fixture authored ground-surface plan extrema where surfaces encode the footprint boundary.",
+    "Pin Tanium's three sloped roof height vectors, three sets of fascia IDs, one recessed floor, 14 retaining walls, Tier-0 placement, and zero all-tier escape.",
+    "Retain independent selected-panel visual sign-off for all eight assets; counts and hashes alone do not prove topology or composition."
+  ],
+  "limitations": [
+    "The current repository tests validate F0 contracts and deterministic rendering but do not test primary-silhouette containment, curve interiors, or higher-tier escape; their 15/15 pass does not cover the findings above.",
+    "The renderer-equivalent audit evaluates SVG centerlines. A later visual gate should also account for stroke width when checking pixels against an accepted silhouette tolerance.",
+    "This review does not accept G2, issue an external envelope, or authorize I0, P0, U0, placement, or integration."
+  ],
+  "final_input_receipt": {
+    "implementation": { "bytes": 37484, "sha256": "117fc2978c46eadc34e164dde0fc041bf52358ab83d04c0138c3bdf70d541cd7" },
+    "author_report": { "bytes": 6012, "sha256": "5dbcea5de2e04f239ab6463f43d5070d1341c9faf5bce0de4977489fef30c323" },
+    "verdict": "FAIL",
+    "terminal": true
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "envelope_id": "5850de27c81e9397c59adc0ab805a6fe91febd7690eae00c7663ae85b5849453",
+  "payload": {
+    "acceptance_status": "ACCEPTED",
+    "correction_history": {
+      "first_envelope_id": "8b762d7f2091d5a60e52a4871fce1d97a0c4d879496c150ae6573cffaa57ed01",
+      "invalidation_envelope_id": "18a3412164527b4e183434d779f9ba487a4b9a10f7ebf4098682d46c1a31b177",
+      "original_blocker": "The first module duplicated promoted art provenance and omitted the exact panelId/sourceSha256 client fields.",
+      "resolution": "The module now contains exactly assetId, stable panelId, and sourceSha256 for all 56 assets; independent re-review passes with zero current findings."
+    },
+    "art_prerequisite": {
+      "canonical_digest_sha256": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "report_bytes": 124881,
+      "report_path": "docs/career-world-production/reports/art-promoted-56.json",
+      "report_sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "verdict": "PROMOTED_56_GO"
+    },
+    "controlled_source": {
+      "aggregate_sha256": "e48730b6227bf37c785a88f0eb1ffa6e1f39a99e18c1136d304328254d9dba5a",
+      "file_count": 44,
+      "record_format": "path + NUL + decimal byte count + NUL + lowercase SHA-256 + LF",
+      "total_bytes": 1092909
+    },
+    "final_report": {
+      "bytes": 9181,
+      "path": "docs/career-world-production/reports/tech-world-composition-m0.json",
+      "sha256": "3bcd24c435de5d92dd29d1be7c325daf322150b6884952a8e7639af584cd7882"
+    },
+    "independent_review": {
+      "bytes": 19567,
+      "path": "docs/career-world-production/reports/review-tech-world-composition-m0.json",
+      "sha256": "e0d991eb30558cf14af3f305ebf51ef8c15389f4b3b995adc2fe8016bec8c8ff",
+      "verdict": "PASS"
+    },
+    "gate_result": "PASS",
+    "issuer": "/root",
+    "owned_after_paths": [
+      {
+        "bytes": 10180,
+        "path": "features/career-world/geometry/trace-panels.ts",
+        "sha256": "c6567c0d1c673dc7563a7521f0328a382b5da325f290d50f3f32514a3cdf64f4"
+      }
+    ],
+    "phase_id": "M0",
+    "predecessor_envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+    "protected_non_owned_verification": {
+      "live_predecessor_mismatches": 0,
+      "non_owned_predecessor_paths_checked": 43,
+      "result": "PASS"
+    }
+  }
+}

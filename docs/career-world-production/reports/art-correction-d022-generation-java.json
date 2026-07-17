@@ -1,0 +1,212 @@
+{
+  "schema_version": "career-world-d022-generation/v1",
+  "report_type": "art_correction_d022_generation_java",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "D-022",
+  "lane_id": "/root/gen_java",
+  "status": "SUCCESS_CANDIDATE_PERSISTED_AWAITING_INDEPENDENT_QA",
+  "exit_gate": "STOP_NO_QA_NO_PROMOTION",
+  "report_created_utc": "2026-07-17T13:38:22.0703868Z",
+  "authorization": {
+    "release_packet_path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+    "release_packet_id": "D-022-REMAINING-EIGHT-ROOT-RELEASE",
+    "execution_packet_path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+    "execution_packet_id": "CW-004-D021-REMAINING-EIGHT",
+    "authorized_asset_id": "skill/java@v1",
+    "authorized_d021_record_index": 5,
+    "authorized_imagegen_calls": 1,
+    "authorized_retries": 0,
+    "authorized_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+    "authorized_report_path": "docs/career-world-production/reports/art-correction-d022-generation-java.json",
+    "generator_acceptance_allowed": false,
+    "qa_authorized_in_this_lane": false,
+    "promotion_authorized": false,
+    "cli_or_api_fallback_authorized": false,
+    "runtime_or_git_mutation_authorized": false
+  },
+  "skill_use": {
+    "skill": "imagegen",
+    "top_level_mode": "built-in image_gen",
+    "intent": "fresh_generation_without_inputs",
+    "use_case": "stylized-concept",
+    "files_read_completely_before_execution": [
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/SKILL.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/prompting.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/sample-prompts.md"
+    ],
+    "skill_effect": "Used the built-in generation path once, preserved the built-in source, and copied it without overwrite or mutation to the project-bound candidate path."
+  },
+  "packet_receipts": [
+    {
+      "name": "d022_release_packet",
+      "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+      "expected_bytes": 6262,
+      "actual_bytes_preflight": 6262,
+      "actual_bytes_postflight": 6262,
+      "expected_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "actual_sha256_preflight": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "actual_sha256_postflight": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "match_preflight": true,
+      "match_postflight": true
+    },
+    {
+      "name": "d021_execution_packet",
+      "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+      "expected_bytes": 65201,
+      "actual_bytes_preflight": 65201,
+      "actual_bytes_postflight": 65201,
+      "expected_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "actual_sha256_preflight": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "actual_sha256_postflight": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "match_preflight": true,
+      "match_postflight": true
+    }
+  ],
+  "prompt_receipt": {
+    "source": "D-021 records[5].exact_prompt_lines",
+    "asset_id": "skill/java@v1",
+    "serialization": "UTF-8 without BOM; exact lines joined with one LF; no trailing LF",
+    "expected_line_count": 21,
+    "actual_line_count": 21,
+    "expected_bytes": 4522,
+    "actual_bytes": 4522,
+    "expected_sha256": "8153A36B04CEAEC8E8BE66E72CB47EC5CFFF8A94DD0486C62A8C051142A5ED1E",
+    "actual_sha256": "8153A36B04CEAEC8E8BE66E72CB47EC5CFFF8A94DD0486C62A8C051142A5ED1E",
+    "no_trailing_lf": true,
+    "match": true,
+    "prompt_file_written": false,
+    "prompt_augmentation_or_rewrite": false
+  },
+  "preflight": {
+    "fresh_generator": true,
+    "generator_lane": "/root/gen_java",
+    "d022_packet_receipt_match": true,
+    "d021_packet_receipt_match": true,
+    "record_index_and_asset_match": true,
+    "prompt_receipt_match": true,
+    "candidate_absent_before_call": true,
+    "generation_report_absent_before_call": true,
+    "candidate_parent_exists_before_call": true,
+    "candidate_parent_created_by_lane": false,
+    "argument_keys_match": true,
+    "immediate_prelaunch_recheck_passed": true
+  },
+  "imagegen_call_receipt": {
+    "tool": "built-in image_gen",
+    "tool_method": "image_gen.imagegen",
+    "intent": "fresh_generation_only",
+    "argument_keys": [
+      "prompt"
+    ],
+    "prompt_sha256": "8153A36B04CEAEC8E8BE66E72CB47EC5CFFF8A94DD0486C62A8C051142A5ED1E",
+    "referenced_image_paths": "OMITTED",
+    "num_last_images_to_include": "OMITTED",
+    "input_image_count": 0,
+    "other_arguments_or_images": [],
+    "call_count": 1,
+    "retry_count": 0,
+    "tool_result_status": "SUCCESS",
+    "tool_error": null,
+    "call_consumed": true,
+    "second_call_allowed": false,
+    "second_call_made": false,
+    "cli_or_api_fallback_used": false,
+    "observed_tool_wall_seconds": 53.797
+  },
+  "raw_tool_result_receipt": {
+    "source_path_parsed_from_output_hint": "C:/Users/Steve/.codex/generated_images/019f7048-ba7c-75c0-b048-3ac009e1008f/exec-51ffe9ee-816d-4210-afce-be5c595d276f.png",
+    "source_path_exists": true,
+    "source_created_utc": "2026-07-17T13:37:26.3018056Z",
+    "source_modified_utc": "2026-07-17T13:37:26.3018056Z",
+    "source_preserved_untouched": true,
+    "source_deleted_or_moved": false,
+    "bytes": 2214489,
+    "sha256": "BF91A1ED4EAF54F890B65636D9067EF6761D3456B577072F46BAC32B5CC53034"
+  },
+  "persistence_receipt": {
+    "required_destination": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+    "method": "System.IO.File.Copy(source, destination, false)",
+    "overwrite_allowed": false,
+    "persistence_attempt_count": 1,
+    "copy_api_invocation_count": 1,
+    "destination_absent_before_copy": true,
+    "destination_created": true,
+    "conversion_or_mutation_performed": false,
+    "source_bytes": 2214489,
+    "destination_bytes": 2214489,
+    "source_sha256": "BF91A1ED4EAF54F890B65636D9067EF6761D3456B577072F46BAC32B5CC53034",
+    "destination_sha256": "BF91A1ED4EAF54F890B65636D9067EF6761D3456B577072F46BAC32B5CC53034",
+    "byte_identical": true,
+    "retry_count": 0
+  },
+  "candidate_technical_receipt": {
+    "path": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+    "status": "PERSISTED",
+    "exists": true,
+    "created_utc": "2026-07-17T13:38:09.6936692Z",
+    "modified_utc": "2026-07-17T13:37:26.3018056Z",
+    "bytes": 2214489,
+    "sha256": "BF91A1ED4EAF54F890B65636D9067EF6761D3456B577072F46BAC32B5CC53034",
+    "png_signature_valid": true,
+    "iend_trailer_hex": "0000000049454E44AE426082",
+    "iend_trailer_valid": true,
+    "system_drawing_decode_succeeded": true,
+    "width": 1536,
+    "height": 1024,
+    "pixel_format": "Format24bppRgb",
+    "raw_format_guid": "b96b3caf-0728-11d3-9d7b-0000f81ef32e",
+    "technical_integrity_status": "PASS_SIGNATURE_IEND_AND_DECODE_ONLY",
+    "pixel_or_visual_acceptance_inspection_performed": false
+  },
+  "scope_validation": {
+    "built_in_imagegen_calls": 1,
+    "imagegen_retries": 0,
+    "second_imagegen_calls": 0,
+    "referenced_images_used": 0,
+    "conversation_images_included": 0,
+    "cli_or_api_generation_calls": 0,
+    "persistence_attempts": 1,
+    "candidate_files_created": 1,
+    "raw_output_mutations_or_deletions": 0,
+    "image_edits_composites_or_paintovers": 0,
+    "visual_acceptance_inspections": 0,
+    "qa_verdicts": 0,
+    "promotion_or_release_attempts": 0,
+    "runtime_product_test_queue_or_ledger_mutations": 0,
+    "git_stage_commit_push_or_pr_actions": 0,
+    "report_files_created": 1
+  },
+  "files_changed_by_lane": [
+    {
+      "path": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+      "role": "Untouched byte-for-byte copy of the single built-in output."
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-java.json",
+      "role": "Technical generation and persistence receipt written via apply_patch."
+    }
+  ],
+  "acceptance": {
+    "decision": null,
+    "verdict": "NOT_EVALUATED",
+    "qa_status": "NOT_RUN",
+    "original_resolution_visual_gate": "NOT_RUN",
+    "independent_pixel_gate": "NOT_RUN",
+    "nine_gate_review": "NOT_RUN",
+    "reviewer": null,
+    "candidate_promoted": false,
+    "no_qa_verdict_asserted": true,
+    "required_next_step": "Independent QA reviews the actual persisted candidate under the D-021 contract."
+  },
+  "terminal_assertions": {
+    "candidate_persisted": true,
+    "raw_output_preserved": true,
+    "source_and_candidate_byte_identical": true,
+    "one_call_limit_respected": true,
+    "no_retry": true,
+    "no_reference_input": true,
+    "no_edit_or_fallback": true,
+    "no_acceptance_or_promotion": true,
+    "no_qa_verdict": true
+  }
+}

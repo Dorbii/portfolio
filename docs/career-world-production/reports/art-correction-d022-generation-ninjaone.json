@@ -1,0 +1,477 @@
+{
+  "schema_version": "career-world-d022-generation/v1",
+  "report_type": "art_correction_d022_generation_ninjaone",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "D-022",
+  "lane_id": "gen_ninjaone",
+  "generator_lane": "/root/gen_ninjaone",
+  "asset_id": "city/ninjaone@v1",
+  "d021_record_index": 0,
+  "status": "GENERATED_ONCE_PERSISTED_AWAITING_INDEPENDENT_QA",
+  "exit_gate": "STOP_GENERATOR_COMPLETE_NO_QA_VERDICT",
+  "report_path": "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json",
+  "report_created_utc": "2026-07-17T13:39:04.2961188Z",
+  "authorization": {
+    "root_release_packet": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+    "execution_packet": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+    "authorized_asset_count_for_lane": 1,
+    "authorized_imagegen_calls": 1,
+    "authorized_retries": 0,
+    "authorized_candidate_path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+    "authorized_report_path": "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json",
+    "generator_acceptance_allowed": false,
+    "qa_authorized_in_this_lane": false,
+    "promotion_authorized": false,
+    "fallback_authorized": false,
+    "runtime_or_test_mutation_authorized": false,
+    "git_mutation_authorized": false
+  },
+  "skill_use": {
+    "skill": "imagegen",
+    "top_level_mode": "built-in image_gen",
+    "intent": "fresh_generation_without_inputs",
+    "use_case": "stylized-concept",
+    "files_read_completely_before_execution": [
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/SKILL.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/prompting.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/sample-prompts.md",
+      "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+      "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json"
+    ],
+    "prompt_augmentation_or_rewrite": false,
+    "reference_or_edit_mode_used": false,
+    "contract_override": "D-022 reserves visual acceptance for independent QA, so this lane records technical receipts only."
+  },
+  "authority_receipts": {
+    "preflight_checked_utc": "2026-07-17T13:32:40.5234008Z",
+    "all_preflight_receipts_match": true,
+    "preflight": [
+      {
+        "name": "d022_root_release",
+        "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+        "expected_bytes": 6262,
+        "actual_bytes": 6262,
+        "expected_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+        "actual_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+        "match": true
+      },
+      {
+        "name": "d021_execution_packet",
+        "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "expected_bytes": 65201,
+        "actual_bytes": 65201,
+        "expected_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+        "actual_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+        "match": true
+      },
+      {
+        "name": "d021_preflight_archive_report",
+        "path": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json",
+        "expected_bytes": 17199,
+        "actual_bytes": 17199,
+        "expected_sha256": "7FB0632BC78B6154301296D1B64383EB96BF2282B0C7643CC8FF8EA546D494FF",
+        "actual_sha256": "7FB0632BC78B6154301296D1B64383EB96BF2282B0C7643CC8FF8EA546D494FF",
+        "match": true
+      },
+      {
+        "name": "d020_disposition",
+        "path": "docs/career-world-production/reports/art-correction-d020-contextforge-director-disposition.json",
+        "expected_bytes": 5096,
+        "actual_bytes": 5096,
+        "expected_sha256": "9A4C4CAB5E5E3ED1FAA93256EDF4D860431E31A8861CEEC195B3979365C9DA0F",
+        "actual_sha256": "9A4C4CAB5E5E3ED1FAA93256EDF4D860431E31A8861CEEC195B3979365C9DA0F",
+        "match": true
+      },
+      {
+        "name": "d013_replan",
+        "path": "docs/career-world-production/reports/art-correction-replan.json",
+        "expected_bytes": 46188,
+        "actual_bytes": 46188,
+        "expected_sha256": "5FD24ABC03F9A0672C4FED32789A1894C22F6A9EC2A3CDC02E18B22B84403E50",
+        "actual_sha256": "5FD24ABC03F9A0672C4FED32789A1894C22F6A9EC2A3CDC02E18B22B84403E50",
+        "match": true
+      },
+      {
+        "name": "d013_calibration_packet",
+        "path": "docs/career-world-production/briefs/art-correction-calibration-packet.json",
+        "expected_bytes": 31516,
+        "actual_bytes": 31516,
+        "expected_sha256": "67A3F095F7317BAA3BC1CD69E584D71A87BE87CE51377B4FBFABFA038C622AAA",
+        "actual_sha256": "67A3F095F7317BAA3BC1CD69E584D71A87BE87CE51377B4FBFABFA038C622AAA",
+        "match": true
+      }
+    ],
+    "postflight_checked_utc": "2026-07-17T13:36:34.8955291Z",
+    "postflight_immutable_receipts": [
+      {
+        "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+        "bytes": 6262,
+        "sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "bytes": 65201,
+        "sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0"
+      },
+      {
+        "path": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json",
+        "bytes": 17199,
+        "sha256": "7FB0632BC78B6154301296D1B64383EB96BF2282B0C7643CC8FF8EA546D494FF"
+      }
+    ]
+  },
+  "packet_wide_preflight_receipts": {
+    "d022_d021_record_consistency": true,
+    "archive_scope_count": 8,
+    "all_eight_canonical_sources_match_frozen_receipts": true,
+    "all_eight_rejected_archives_match_frozen_receipts": true,
+    "all_eight_source_archive_pairs_byte_identical": true,
+    "protected_assets_count": 3,
+    "protected_assets_all_match": true,
+    "protected_assets": [
+      {
+        "asset_id": "skill/openapi@v1",
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+        "bytes": 1832426,
+        "sha256": "17383FECA2C6C5ACA13653B86919FA6351621B85FA5459C0BD758A8074B0B2C8"
+      },
+      {
+        "asset_id": "skill/workflow-orchestration@v1",
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/workflow-orchestration-r1.png",
+        "bytes": 2222826,
+        "sha256": "0BDF4DFE5FD160A3C798AFFED243C26523C52B81DCAF4E45579CF5074DA9E7A3"
+      },
+      {
+        "asset_id": "project/contextforge@v1",
+        "path": "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+        "bytes": 1484707,
+        "sha256": "2E310D456A3594BBA3B0041622A3235ABEE3F15F13019CF5A23B0F5B06B3E62A"
+      }
+    ],
+    "frozen45": {
+      "count": 45,
+      "all_current_hashes_match": true,
+      "expected_sha256": "2DC46F2CCEA1B4AD47480FE2254692D150AFE631840E3786F600B729C617573D",
+      "actual_sha256": "2DC46F2CCEA1B4AD47480FE2254692D150AFE631840E3786F600B729C617573D",
+      "match": true
+    },
+    "exact56": {
+      "count": 56,
+      "expected_sha256": "D785AE233EAB09BFF84DD71D62F2085E2AA00F0683AC3A5ADFE1436A5E0FB2F3",
+      "actual_sha256": "D785AE233EAB09BFF84DD71D62F2085E2AA00F0683AC3A5ADFE1436A5E0FB2F3",
+      "match": true
+    },
+    "lfs": {
+      "path_count": 24,
+      "assertion_count": 96,
+      "required": "filter=lfs; diff=lfs; merge=lfs; text=unset",
+      "all_match": true
+    }
+  },
+  "source_and_archive_receipts": {
+    "source_prompt": {
+      "path": "docs/career-world-production/briefs/art-batch-a.json",
+      "record_index_zero_based": 1,
+      "asset_id_match": true,
+      "expected_bytes": 2887,
+      "actual_bytes": 2887,
+      "expected_sha256": "73D84BC889D3423FA6AEFC6CE48AFFFF7F4F97C90B08B2CE6248084BE2E7419E",
+      "actual_sha256": "73D84BC889D3423FA6AEFC6CE48AFFFF7F4F97C90B08B2CE6248084BE2E7419E",
+      "match": true
+    },
+    "canonical_v0": {
+      "path": "design/career-world/concepts/cities/ninjaone-v1.png",
+      "bytes": 2172502,
+      "sha256": "21967FDFC64BEFA33801CFA86B820867C941461B2B960F7BA32F83EE87116BEC",
+      "width": 1536,
+      "height": 1024,
+      "png_signature_and_iend_valid": true
+    },
+    "rejected_archive_v0": {
+      "path": "design/career-world/rejected-candidates/cw004-v0/cities/ninjaone-v0-21967fdfc64b.png",
+      "bytes": 2172502,
+      "sha256": "21967FDFC64BEFA33801CFA86B820867C941461B2B960F7BA32F83EE87116BEC",
+      "width": 1536,
+      "height": 1024,
+      "png_signature_and_iend_valid": true,
+      "byte_identical_to_canonical_v0": true
+    }
+  },
+  "prompt_receipt": {
+    "source": "D-021 records[0].exact_prompt_lines",
+    "serialization": "UTF-8 without BOM; exact lines joined with one LF; no trailing LF",
+    "expected_line_count": 21,
+    "actual_line_count": 21,
+    "expected_bytes": 4522,
+    "actual_bytes": 4522,
+    "expected_sha256": "023893E4A88484BC01D4889B3F7D7E78064C871D5E65CD89B02C47EB6B24FD76",
+    "actual_sha256_preflight": "023893E4A88484BC01D4889B3F7D7E78064C871D5E65CD89B02C47EB6B24FD76",
+    "actual_sha256_immediate_prelaunch": "023893E4A88484BC01D4889B3F7D7E78064C871D5E65CD89B02C47EB6B24FD76",
+    "no_trailing_lf": true,
+    "ascii_only": true,
+    "prompt_file_written": false,
+    "prompt_augmentation_or_rewrite": false,
+    "match": true
+  },
+  "preflight": {
+    "fresh_generator": true,
+    "generator_lane": "/root/gen_ninjaone",
+    "authority_receipts_match": true,
+    "record_index_match": true,
+    "asset_id_match": true,
+    "source_prompt_receipt_match": true,
+    "prompt_receipt_match": true,
+    "candidate_parent_exists": true,
+    "candidate_absent_before_call": true,
+    "generation_report_absent_before_call": true,
+    "required_argument_keys": [
+      "prompt"
+    ],
+    "forbidden_argument_keys": [
+      "referenced_image_paths",
+      "num_last_images_to_include"
+    ],
+    "runtime_isolation_passed": true,
+    "immediate_prelaunch_recheck_passed": true,
+    "overall": "PASS"
+  },
+  "imagegen_call_receipt": {
+    "tool": "built-in image_gen",
+    "started_utc": "2026-07-17T13:34:10.125Z",
+    "finished_utc": "2026-07-17T13:35:17.622Z",
+    "elapsed_seconds": 67.497,
+    "argument_keys": [
+      "prompt"
+    ],
+    "prompt_sha256": "023893E4A88484BC01D4889B3F7D7E78064C871D5E65CD89B02C47EB6B24FD76",
+    "referenced_image_paths_omitted": true,
+    "num_last_images_to_include_omitted": true,
+    "other_arguments_or_images": [],
+    "call_count": 1,
+    "retry_count": 0,
+    "tool_result_status": "SUCCESS",
+    "tool_error": null,
+    "call_consumed": true,
+    "second_call_allowed": false,
+    "second_call_made": false,
+    "edit_composite_or_paintover_used": false,
+    "cli_or_api_fallback_used": false
+  },
+  "raw_tool_result_receipt": {
+    "result_keys": [
+      "image_url",
+      "output_hint"
+    ],
+    "image_url_transport": "data:image/png;base64",
+    "image_url_prefix": "data:image/png;base64,",
+    "image_url_total_characters": 2279450,
+    "image_url_payload_characters": 2279428,
+    "image_url_length_matches_base64_encoding_of_source_bytes": true,
+    "raw_data_url_embedded_verbatim_in_report": false,
+    "raw_data_url_omission_reason": "The 2,279,450-character transport string is not duplicated into this JSON; the untouched built-in output file is frozen below by exact bytes and SHA-256.",
+    "output_hint_verbatim": "Generated images are saved to C:\\Users\\Steve\\.codex\\generated_images\\019f7043-9af7-7da1-955a-4372517ff650 as C:\\Users\\Steve\\.codex\\generated_images\\019f7043-9af7-7da1-955a-4372517ff650\\exec-af7d3c64-7228-4263-a162-c121d1dd9ccd.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.",
+    "tool_output_id": "exec-af7d3c64-7228-4263-a162-c121d1dd9ccd",
+    "source_path_parsed_from_output_hint": "C:/Users/Steve/.codex/generated_images/019f7043-9af7-7da1-955a-4372517ff650/exec-af7d3c64-7228-4263-a162-c121d1dd9ccd.png"
+  },
+  "raw_output_png_receipt": {
+    "path": "C:/Users/Steve/.codex/generated_images/019f7043-9af7-7da1-955a-4372517ff650/exec-af7d3c64-7228-4263-a162-c121d1dd9ccd.png",
+    "exists": true,
+    "preserved_untouched": true,
+    "deleted_or_moved": false,
+    "bytes": 1709570,
+    "sha256": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+    "created_utc": "2026-07-17T13:35:17.5698829Z",
+    "modified_utc": "2026-07-17T13:35:17.5709504Z",
+    "png_signature_valid": true,
+    "ihdr": {
+      "width": 1254,
+      "height": 1254,
+      "bit_depth": 8,
+      "color_type": 2,
+      "compression_method": 0,
+      "filter_method": 0,
+      "interlace_method": 0
+    },
+    "chunk_summary": {
+      "chunk_count": 29,
+      "ihdr_count": 1,
+      "cabx_count": 1,
+      "cabx_total_bytes": 29083,
+      "idat_count": 26,
+      "idat_total_bytes": 1680118,
+      "iend_count": 1,
+      "iend_is_last": true,
+      "trailing_bytes": 0,
+      "bounded_chunk_parse_valid": true,
+      "chunk_crc_validation_performed": false
+    },
+    "technical_integrity_status": "PASS_SIGNATURE_IHDR_BOUNDED_CHUNK_PARSE_AND_IEND_ONLY",
+    "pixel_or_visual_acceptance_inspection_performed": false
+  },
+  "persistence_receipt": {
+    "source_path": "C:/Users/Steve/.codex/generated_images/019f7043-9af7-7da1-955a-4372517ff650/exec-af7d3c64-7228-4263-a162-c121d1dd9ccd.png",
+    "required_destination": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+    "destination_absolute_path": "C:/Users/Steve/Documents/Github/portfolio/design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+    "selected_method": "System.IO.File.Copy(source, destination, false)",
+    "selected_method_overwrite_allowed": false,
+    "persistence_attempt_count": 1,
+    "copy_api_invocation_count": 1,
+    "destination_absent_immediately_before_copy": true,
+    "destination_parent_preexisting": true,
+    "source_bytes_before": 1709570,
+    "source_sha256_before": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+    "source_bytes_after": 1709570,
+    "source_sha256_after": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+    "source_preserved": true,
+    "destination_bytes": 1709570,
+    "destination_sha256": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+    "source_destination_byte_equal": true,
+    "retry_count": 0,
+    "second_copy_attempted": false,
+    "conversion_or_mutation_performed": false,
+    "status": "PASS_WITH_POST_COPY_RECEIPT_SERIALIZATION_LIMITATION",
+    "receipt_capture_limitation": {
+      "initial_copy_command_exit_code": 1,
+      "failure_stage": "POST_COPY_RESULT_SERIALIZATION",
+      "failure_message": "false : The term 'false' is not recognized as the name of a cmdlet, function, script file, or operable program.",
+      "copy_completed_before_failure": true,
+      "exact_copy_start_and_finish_timestamps_available": false,
+      "destination_creation_time_utc": "2026-07-17T13:35:49.1617146Z",
+      "read_only_recovery_checked_utc": "2026-07-17T13:36:34.8955291Z",
+      "read_only_recovery_result": "The existing destination and untouched source were re-read without another copy; bytes, SHA-256, and bounded PNG structure match."
+    }
+  },
+  "final_candidate_receipt": {
+    "path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+    "status": "PERSISTED_AWAITING_INDEPENDENT_QA",
+    "exists": true,
+    "bytes": 1709570,
+    "sha256": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+    "created_utc": "2026-07-17T13:35:49.1617146Z",
+    "modified_utc": "2026-07-17T13:35:17.5709504Z",
+    "png_signature_valid": true,
+    "width": 1254,
+    "height": 1254,
+    "bit_depth": 8,
+    "color_type": 2,
+    "compression_method": 0,
+    "filter_method": 0,
+    "interlace_method": 0,
+    "chunk_count": 29,
+    "idat_count": 26,
+    "iend_is_last": true,
+    "trailing_bytes": 0,
+    "bounded_chunk_parse_valid": true,
+    "chunk_crc_validation_performed": false,
+    "exact_binary_match_to_raw_output": true,
+    "technical_integrity_assessment": "PASS_SIGNATURE_IHDR_BOUNDED_CHUNK_PARSE_IEND_AND_BYTE_IDENTITY_ONLY",
+    "pixel_or_visual_acceptance_inspection_performed": false
+  },
+  "lfs_receipt": {
+    "path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+    "git_check_attr": {
+      "filter": "lfs",
+      "diff": "lfs",
+      "merge": "lfs",
+      "text": "unset"
+    },
+    "match": true,
+    "gitattributes_mutated_by_lane": false,
+    "assessment": "PASS_LFS_ATTRIBUTES"
+  },
+  "runtime_isolation": {
+    "roots_scanned": [
+      "app",
+      "features",
+      "tests",
+      "public"
+    ],
+    "preflight": {
+      "checked_utc": "2026-07-17T13:32:40.5234008Z",
+      "files_scanned": 50,
+      "basename_text_hits": 0,
+      "exact_path_text_hits": 0,
+      "same_name_copies": 0,
+      "outcome": "PASS"
+    },
+    "postflight": {
+      "checked_utc": "2026-07-17T13:36:34.8955291Z",
+      "files_scanned": 50,
+      "basename_text_hits": 0,
+      "exact_forward_path_text_hits": 0,
+      "exact_backslash_path_text_hits": 0,
+      "sha256_text_hits": 0,
+      "same_name_copies": 0,
+      "same_size_files": 0,
+      "byte_identical_png_hits": 0,
+      "runtime_mutations": 0,
+      "outcome": "PASS"
+    }
+  },
+  "scope_validation": {
+    "built_in_imagegen_calls": 1,
+    "imagegen_retries": 0,
+    "second_imagegen_calls": 0,
+    "referenced_image_paths_used": 0,
+    "conversation_images_included": 0,
+    "cli_or_api_generation_calls": 0,
+    "persistence_attempts": 1,
+    "copy_api_invocations": 1,
+    "persistence_retries": 0,
+    "candidate_files_created": 1,
+    "raw_output_mutations_or_deletions": 0,
+    "image_edits_composites_or_paintovers": 0,
+    "cli_or_local_render_calls": 0,
+    "generator_acceptance_decisions": 0,
+    "qa_verdicts": 0,
+    "promotion_or_release_attempts": 0,
+    "runtime_product_test_queue_or_ledger_mutations": 0,
+    "read_only_git_check_attr_invocations": 25,
+    "git_mutation_operations": 0,
+    "git_stage_commit_push_or_pr_actions": 0,
+    "report_files_created": 1
+  },
+  "limitations": {
+    "png_scope": "The generator verified exact source-to-destination byte identity, PNG signature, IHDR fields, bounded chunk framing, final IEND, and zero trailing bytes. It did not recompute chunk CRCs or decode pixels for QA.",
+    "persistence_timestamp_scope": "The single copy completed, but its exact start and finish timestamps were lost when post-copy receipt serialization failed. The destination filesystem creation timestamp and a read-only recovery timestamp are reported instead.",
+    "visual_scope": "No generator acceptance decision, original-resolution QA gate, topology review, text review, style review, palette review, traceability review, or evidence-boundary review was performed.",
+    "qa_scope": "Independent QA remains mandatory under D-021 and is outside this generator lane."
+  },
+  "qa_and_acceptance": {
+    "acceptance_decision": null,
+    "qa_verdict": null,
+    "qa_status": "NOT_RUN",
+    "original_resolution_visual_gate": "NOT_RUN",
+    "nine_gate_review": "NOT_RUN",
+    "reviewer": null,
+    "generator_may_self_accept": false,
+    "candidate_promoted": false,
+    "no_qa_verdict_asserted": true,
+    "required_next_step": "DISTINCT_INDEPENDENT_QA_ONLY"
+  },
+  "files_changed_by_lane": [
+    {
+      "path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+      "role": "Untouched byte-for-byte copy of the single built-in image_gen output."
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json",
+      "role": "Technical generation, persistence, LFS, and runtime-isolation receipt; no QA verdict."
+    }
+  ],
+  "terminal_assertions": {
+    "one_call_limit_respected": true,
+    "no_retry": true,
+    "prompt_only_argument_shape_respected": true,
+    "no_raster_reference": true,
+    "raw_output_preserved": true,
+    "candidate_persisted_without_overwrite": true,
+    "source_candidate_byte_equal": true,
+    "no_edit_composite_cli_or_local_render": true,
+    "no_runtime_queue_ledger_or_test_mutation": true,
+    "no_git_mutation": true,
+    "no_acceptance_or_qa_verdict": true,
+    "no_promotion": true,
+    "awaiting_independent_qa": true
+  }
+}

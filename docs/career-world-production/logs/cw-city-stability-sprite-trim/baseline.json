@@ -1,0 +1,10 @@
+{
+  "run_id": "cw-city-stability-2026-07-17",
+  "lane": "ART-1 sprite crop normalization",
+  "transparent_asset_count": 55,
+  "transparent_pixels": 15466270,
+  "transparent_decoded_rgba_bytes": 61865080,
+  "transparent_encoded_bytes": 1919974,
+  "opaque_world_sha256": "5AD9CACE86DFD2909CA1142F77E39506EB4B194EFF282A31C1E774121A4576F3",
+  "note": "Captured immediately before the full 55-asset rebuild. One probe asset had already been rebuilt; the baseline therefore slightly understates the original decoded-pixel total and remains conservative."
+}

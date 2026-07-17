@@ -1,0 +1,194 @@
+{
+    "schema_version":  1,
+    "run_id":  "career-world-2026-07-16",
+    "slice_id":  "CW-004-prep",
+    "queue_item_id":  "CW-004-prep",
+    "lane_id":  "art-full-manifest",
+    "role":  "prompt architect",
+    "thread_id":  "/root/art_manifest_planner",
+    "parent_thread_id":  "/root",
+    "route_id":  "art/prompt-manifest",
+    "status":  "done",
+    "summary":  "Created and corrected the complete text-only generation manifest for the authoritative 56-asset inventory. Every asset has a unique stable PNG path, explicit evidence status, architecture-led brief, LOD and projection contract, full prompt with its easter-egg rule, avoidance list, and Director-governed reference policy. No images were generated. Final independent correction audit verdict: PROMOTE.",
+    "authority_resolution":  {
+                                 "inventory":  "docs/career-world-production/asset-inventory.md is authoritative.",
+                                 "superseded_art_report_decisions":  [
+                                                                         "Retained skill/java@v1 as user-required-unplaced.",
+                                                                         "Retained skill/ai@v1 as evidence-backed and Kaizen Metrics compatible.",
+                                                                         "Retained resume-supported VMware, MacStadium, Electron, Informatica, Atlassian, and CI/CD concepts with the inventory\u0027s placement statuses.",
+                                                                         "Created entertainment-only identity briefs for all six ACE Hardware and Column Technologies projects with explicit no-factual-architecture, no-real-campus, no-metrics, and no-skill-symbolism prohibitions."
+                                                                     ],
+                                 "remaining_conflicts":  [
+
+                                                         ]
+                             },
+    "skills":  {
+                   "requested":  [
+                                     "imagegen"
+                                 ],
+                   "loaded":  [
+                                  "imagegen"
+                              ],
+                   "used":  [
+                                {
+                                    "name":  "imagegen",
+                                    "why":  "Applied the complete shared prompting and sample-prompt guidance to structure generation-ready stylized-concept prompts while preserving invariants and negative constraints."
+                                }
+                            ],
+                   "generation_performed":  false
+               },
+    "files_changed":  [
+                          {
+                              "path":  "docs/career-world-production/concept-briefs.json",
+                              "change":  "added",
+                              "sha256":  "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+                          },
+                          {
+                              "path":  "docs/career-world-production/reports/art-full-manifest.json",
+                              "change":  "added"
+                          }
+                      ],
+    "inventory":  {
+                      "total":  56,
+                      "categories":  {
+                                         "world":  1,
+                                         "city":  5,
+                                         "project":  16,
+                                         "skill":  27,
+                                         "ambient":  7
+                                     },
+                      "evidence_statuses":  {
+                                                "ambient":  8,
+                                                "employer-supported-unlinked":  3,
+                                                "evidence-backed":  38,
+                                                "identity-only":  6,
+                                                "user-required-unplaced":  1
+                                            },
+                      "unique_ids":  56,
+                      "unique_output_paths":  56,
+                      "unique_full_prompts":  56,
+                      "unique_project_briefs":  16,
+                      "unique_skill_briefs":  27
+                  },
+    "prompt_contract":  {
+                            "use_case":  "stylized-concept",
+                            "input_images":  "None by default. Same-canonical tracer PNGs may be optional style/identity references; non-tracers require an art-lead-assigned passing same-category style reference.",
+                            "projection":  "orthographic true-isometric, azimuth 225 degrees, look direction 45 degrees, elevation 35.264 degrees, roll 0",
+                            "sheet_layout":  "LOD-0, LOD-1, LOD-2, and one solid silhouette inset",
+                            "source_of_truth":  "Generated concepts are tracing and review references only; deterministic SVG and registries remain authoritative.",
+                            "generated_text_or_brand_marks":  "prohibited",
+                            "reference_image_manifest":  "No raster image is currently assigned. The Director policy forbids every reference from becoming geometry or coordinate truth or transferring identity/topology.",
+                            "image_generation":  "not performed"
+                        },
+    "distinctness_corrections":  [
+                                     "Redesigned project/contextforge away from the nested-frame context-compression skill topology.",
+                                     "Redesigned project/tanium-risk-assessment away from the workflow-orchestration radial ring topology.",
+                                     "Redesigned project/xsearch away from the MCP four-arm exchange topology.",
+                                     "Redesigned project/tmatch-eolmatch away from the data-contracts paired-hall gateway topology.",
+                                     "Made the CableCar pod an optional LOD-2-only inset detail and redesigned the identity-only Atlassian resilience landmark away from the high-bridge topology.",
+                                     "Redesigned the identity-only Client DevOps landmark away from CI/CD fabrication and delivery circulation.",
+                                     "Separated Atlassian platform automation, Redis, VMware, and Atlassian skill silhouettes by replacing shared stacked-slab/core and high-bridge archetypes."
+                                 ],
+    "independent_prompt_audit":  {
+                                     "reviewer_thread":  "/root/art_manifest_planner/manifest_audit",
+                                     "scope":  "read-only 56-count, easter-rule propagation, AI topology, connected-mass, Director reference-policy, prompt-contradiction, and 16-project/27-skill solid-silhouette audit",
+                                     "result":  "PROMOTE",
+                                     "manifest_sha256":  "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+                                 },
+    "highest_risk_briefs":  [
+                                {
+                                    "id":  "world/career-world@v1",
+                                    "risk":  "The only multi-district sheet must preserve five exact anchor relationships while avoiding all code-native roads, routes, contours, fills, labels, and buildings; a model may collapse the four-panel LOD continuity or move anchors.",
+                                    "art_lead_check":  "Overlay the generated districts against the frozen 1600 x 900 anchors and reject any coastline, centroid, or anchor drift."
+                                },
+                                {
+                                    "id":  "project/sap-table-update-integration@v1",
+                                    "risk":  "The approved name strongly attracts SAP marks, UI tables, data-flow arrows, and invented integration facts even though the brief is identity-only.",
+                                    "art_lead_check":  "Accept only the abstract elevated grid-deck landmark with no logo, interface, factual system cue, metric, campus implication, or skill symbolism."
+                                },
+                                {
+                                    "id":  "project/atlassian-data-center-resilience@v1",
+                                    "risk":  "The approved name can trigger Atlassian branding, realistic data-center architecture, network diagrams, and availability implications.",
+                                    "art_lead_check":  "Verify that the low U-shaped fortified mass and both utility pods remain physically joined by solid ground-level service necks and contain no vendor mark, racks, topology, uptime claim, real-campus cue, or skill symbol."
+                                },
+                                {
+                                    "id":  "project/client-devops-delivery-implementations@v1",
+                                    "risk":  "The approved name can pull generation back toward generic DevOps pipelines, delivery flows, and invented implementation facts despite the deliberately non-pipeline cairn silhouette.",
+                                    "art_lead_check":  "Require the four-block vertical implementation cairn, central void, five-sided podium, and off-center cap without pipeline imagery, client identity, factual architecture, delivery symbolism, or outcome claims."
+                                },
+                                {
+                                    "id":  "skill/ai@v1",
+                                    "risk":  "AI generation commonly falls back to brains, robots, star/sparkle silhouettes, provider logos, decision centers, or autonomy claims; this asset is supported only through the Kaizen Metrics AWS Bedrock assistant claim.",
+                                    "art_lead_check":  "Require the linear asymmetric horizontal calibration-drum instrument pavilion, no star/radial plan, decision chamber, brain/humanoid/provider mark, autonomy cue, or employer color baked into geometry."
+                                }
+                            ],
+    "unresolved_prompt_risks":  [
+                                    {
+                                        "severity":  "material",
+                                        "risk":  "Mechanical text checks prove inventory and prompt distinctness, not that an image model will preserve identical primary geometry across three LOD panels.",
+                                        "mitigation":  "Use the art report\u0027s alpha-edge, projection-axis, silhouette, and deterministic traceability gates before promotion."
+                                    },
+                                    {
+                                        "severity":  "material",
+                                        "risk":  "The six identity-only project names contain brand or systems language that may pull generated output toward logos, dashboards, or invented factual architecture despite explicit negatives.",
+                                        "mitigation":  "Art lead must reject on any branding, real-campus cue, metric, skill symbolism, or factual implementation implication."
+                                    },
+                                    {
+                                        "severity":  "improvement",
+                                        "risk":  "No raster reference image is currently assigned. Director policy permits an optional same-canonical tracer reference or an art-lead-assigned passing same-category style reference for non-tracers.",
+                                        "mitigation":  "Treat every reference as style-only: never geometry or coordinate truth, and never transfer identity, topology, palette ownership, factual meaning, or evidence."
+                                    }
+                                ],
+    "gates_run":  [
+                      {
+                          "name":  "manifest inventory, schema, count, uniqueness, path, and prompt contract",
+                          "command":  "$ErrorActionPreference=\u0027Stop\u0027; $m=Get-Content -Raw -LiteralPath \u0027docs/career-world-production/concept-briefs.json\u0027 | ConvertFrom-Json; $inventory=Get-Content -Raw -LiteralPath \u0027docs/career-world-production/asset-inventory.md\u0027; $expected=[regex]::Matches($inventory,\u0027(?m)^(world|city|project|skill|ambient)/[a-z0-9-]+@v1(?=\\s*(?:#.*)?$)\u0027) | ForEach-Object Value | Sort-Object -Unique; $actual=@($m.assets.id); $top=@(\u0027schema_version\u0027,\u0027run_id\u0027,\u0027shared_prompt\u0027,\u0027projection\u0027,\u0027palette_slots\u0027,\u0027reference_images\u0027,\u0027reference_policy\u0027,\u0027assets\u0027); $required=@(\u0027id\u0027,\u0027category\u0027,\u0027status\u0027,\u0027evidence_status\u0027,\u0027output_path\u0027,\u0027reference_roles\u0027,\u0027asset_brief\u0027,\u0027easter_egg_rule\u0027,\u0027full_prompt\u0027,\u0027avoid\u0027); $allowed=@(\u0027evidence-backed\u0027,\u0027identity-only\u0027,\u0027employer-supported-unlinked\u0027,\u0027user-required-unplaced\u0027,\u0027ambient\u0027); $counts=@{world=1;city=5;project=16;skill=27;ambient=7}; foreach($f in $top){if(-not ($m.PSObject.Properties.Name -contains $f)){throw \"top:$f\"}}; if($m.schema_version -ne 1 -or $m.run_id -ne \u0027career-world-2026-07-16\u0027 -or @($m.palette_slots).Count -ne 8){throw \u0027top-level value\u0027}; if($expected.Count -ne 56 -or $actual.Count -ne 56 -or ($actual|Sort-Object -Unique).Count -ne 56){throw \u0027id count\u0027}; if(@(Compare-Object $expected $actual).Count){throw \u0027inventory mismatch\u0027}; if((@($m.assets.output_path)|Sort-Object -Unique).Count -ne 56 -or (@($m.assets.full_prompt)|Sort-Object -Unique).Count -ne 56){throw \u0027path/prompt uniqueness\u0027}; foreach($a in $m.assets){foreach($f in $required){if(-not ($a.PSObject.Properties.Name -contains $f)){throw \"$($a.id):$f\"}}; if($a.status -ne \u0027planned\u0027 -or $allowed -notcontains $a.evidence_status){throw \"$($a.id):status\"}; if([string]::IsNullOrWhiteSpace($a.asset_brief) -or [string]::IsNullOrWhiteSpace($a.full_prompt) -or [string]::IsNullOrWhiteSpace($a.easter_egg_rule)){throw \"$($a.id):blank\"}; if($a.full_prompt -notmatch \u0027LOD-0\u0027 -or $a.full_prompt -notmatch \u0027LOD-1\u0027 -or $a.full_prompt -notmatch \u0027LOD-2\u0027 -or $a.full_prompt -notmatch \u0027solid silhouette inset\u0027 -or $a.full_prompt -notmatch \u0027camera azimuth 225 degrees\u0027 -or $a.full_prompt -notmatch \u0027elevation 35.264 degrees\u0027 -or $a.full_prompt -notmatch \u0027Text \\(verbatim\\): none\u0027 -or $a.full_prompt -notmatch [regex]::Escape(\"Primary request: $($a.asset_brief)\")){throw \"$($a.id):prompt contract\"}; $folder=@{world=\u0027world\u0027;city=\u0027cities\u0027;project=\u0027projects\u0027;skill=\u0027skills\u0027;ambient=\u0027ambient\u0027}[$a.category]; if($a.output_path -notmatch \"^design/career-world/concepts/$folder/[a-z0-9-]+-v1\\.png$\"){throw \"$($a.id):path\"}}; foreach($c in $counts.Keys){if(@($m.assets|Where-Object category -eq $c).Count -ne $counts[$c]){throw \"$c count\"}}; $ev=$m.assets|Group-Object evidence_status|Sort-Object Name|ForEach-Object{\"$($_.Name)=$($_.Count)\"}; \"PASS total=56 ids=56 paths=56 prompts=56 categories=world:1,city:5,project:16,skill:27,ambient:7 evidence=$($ev -join \u0027,\u0027)\"",
+                          "result":  "pass",
+                          "output":  "PASS total=56 ids=56 paths=56 prompts=56 categories=world:1,city:5,project:16,skill:27,ambient:7 evidence=ambient=8,employer-supported-unlinked=3,evidence-backed=38,identity-only=6,user-required-unplaced=1"
+                      },
+                      {
+                          "name":  "geometry, authority overrides, easter-rule, AI, connection, and reference-policy contract",
+                          "command":  "$ErrorActionPreference=\u0027Stop\u0027\n$m=Get-Content -Raw -LiteralPath \u0027docs/career-world-production/concept-briefs.json\u0027 | ConvertFrom-Json\n$identityOnly=@(\u0027project/ticket-validation-automation@v1\u0027,\u0027project/sap-table-update-integration@v1\u0027,\u0027project/qc-alm-extractor@v1\u0027,\u0027project/atlassian-platform-automation@v1\u0027,\u0027project/atlassian-data-center-resilience@v1\u0027,\u0027project/client-devops-delivery-implementations@v1\u0027)\n$employerUnlinked=@(\u0027skill/informatica@v1\u0027,\u0027skill/atlassian@v1\u0027,\u0027skill/ci-cd@v1\u0027)\n$tracers=@(\u0027world/career-world@v1\u0027,\u0027city/ninjaone@v1\u0027,\u0027project/kaizen-metrics@v1\u0027,\u0027skill/go@v1\u0027,\u0027ambient/evergreen-cluster@v1\u0027)\nfunction Asset([string]$id){@($m.assets | Where-Object id -eq $id)[0]}\nif((@($m.assets | Where-Object category -eq \u0027project\u0027).asset_brief | Sort-Object -Unique).Count -ne 16){throw \u0027project briefs not unique\u0027}\nif((@($m.assets | Where-Object category -eq \u0027skill\u0027).asset_brief | Sort-Object -Unique).Count -ne 27){throw \u0027skill briefs not unique\u0027}\nforeach($a in $m.assets){\n  if(@($a.reference_roles).Count -ne 1 -or @($a.avoid).Count -lt 1){throw \"$($a.id) role/avoid\"}\n  if(-not $a.full_prompt.Contains($a.easter_egg_rule) -or ([regex]::Matches($a.full_prompt,\u0027(?m)^Easter egg rule:\u0027)).Count -ne 1){throw \"$($a.id) easter rule\"}\n  if($a.full_prompt -notmatch \u0027deterministic SVG\u0027){throw \"$($a.id) trace contract\"}\n  if($tracers -contains $a.id){\n    if($a.reference_roles[0] -notmatch \u0027same-canonical tracer PNG\u0027 -or $a.full_prompt -notmatch \u0027same canonical tracer PNG\u0027 -or $a.full_prompt -notmatch \u0027never as an edit target, geometry source, coordinate truth\u0027){throw \"$($a.id) tracer reference policy\"}\n  } else {\n    if($a.reference_roles[0] -notmatch \u0027art lead may assign a passing same-category image\u0027 -or $a.full_prompt -notmatch \u0027art lead explicitly assigns a passing same-category image\u0027 -or $a.full_prompt -notmatch \u0027never identity, topology, geometry, coordinates\u0027){throw \"$($a.id) non-tracer reference policy\"}\n  }\n}\nif((@($m.reference_policy.tracer_asset_ids|Sort-Object) -join \u0027|\u0027) -ne (@($tracers|Sort-Object) -join \u0027|\u0027)){throw \u0027tracer set\u0027}\nif(@($m.reference_policy.assigned_reference_images).Count -ne 0 -or $m.reference_policy.tracer_policy -notmatch \u0027same canonical asset\u0027 -or $m.reference_policy.tracer_policy -notmatch \u0027never edit targets, geometry sources, or coordinate truth\u0027 -or $m.reference_policy.non_tracer_policy -notmatch \u0027passing same-category image\u0027 -or $m.reference_policy.transfer_prohibition -notmatch \u0027never transfer canonical identity, topology, geometry, coordinates\u0027){throw \u0027top reference policy\u0027}\nforeach($id in $identityOnly){$a=Asset $id;if($a.evidence_status -ne \u0027identity-only\u0027 -or $a.full_prompt -notmatch \u0027Derived only from the approved project name\u0027 -or $a.full_prompt -notmatch \u0027Explicit prohibition: do not imply factual architecture, a real campus, systems, metrics, outcomes, or skill symbolism\u0027){throw \"$id hold contract\"}}\nforeach($id in $employerUnlinked){if((Asset $id).evidence_status -ne \u0027employer-supported-unlinked\u0027){throw \"$id status\"}}\nif((Asset \u0027skill/java@v1\u0027).evidence_status -ne \u0027user-required-unplaced\u0027 -or (Asset \u0027skill/java@v1\u0027).full_prompt -notmatch \u0027currently unplaced\u0027){throw \u0027Java contract\u0027}\n$ai=Asset \u0027skill/ai@v1\u0027\nif($ai.evidence_status -ne \u0027evidence-backed\u0027 -or $ai.full_prompt -notmatch \u0027Kaizen Metrics AWS Bedrock assistant\u0027 -or $ai.asset_brief -notmatch \u0027non-agentic analytical instrument pavilion\u0027 -or $ai.asset_brief -match \u0027star|decision chamber|inference wing\u0027 -or $ai.full_prompt -notmatch \u0027no decision center, autonomy, cognition, consciousness\u0027 -or $ai.full_prompt -notmatch \u0027star or sparkle silhouettes\u0027){throw \u0027AI contract\u0027}\n$resilience=Asset \u0027project/atlassian-data-center-resilience@v1\u0027\nif($resilience.asset_brief -notmatch \u0027physically joined.+solid ground-level service necks\u0027 -or $resilience.asset_brief -match \u0027detached utility pods\u0027){throw \u0027resilience connection\u0027}\nforeach($id in @(\u0027skill/vmware@v1\u0027,\u0027skill/macstadium@v1\u0027,\u0027skill/electron@v1\u0027)){if((Asset $id).evidence_status -ne \u0027evidence-backed\u0027){throw \"$id status\"}}\n$world=Asset \u0027world/career-world@v1\u0027\nforeach($anchor in @(\u0027NinjaOne \\(340,370\\)\u0027,\u0027Tanium \\(800,350\\)\u0027,\u0027Independent \\(1240,380\\)\u0027,\u0027ACE Hardware \\(380,700\\)\u0027,\u0027Column Technologies \\(1200,700\\)\u0027)){if($world.full_prompt -notmatch $anchor){throw \"world anchor $anchor\"}}\nif(@($m.assets | Where-Object category -eq \u0027ambient\u0027 | Where-Object {$_.full_prompt -notmatch \u0027Ambient assets have no sign slot\u0027}).Count){throw \u0027ambient sign-slot contract\u0027}\n\u0027PASS distinct_project_briefs=16 distinct_skill_briefs=27 easter_rules=56 tracer_policy=5 nontracer_policy=51 ai=non-agentic-instrument resilience=connected\u0027",
+                          "result":  "pass",
+                          "output":  "PASS distinct_project_briefs=16 distinct_skill_briefs=27 easter_rules=56 tracer_policy=5 nontracer_policy=51 ai=non-agentic-instrument resilience=connected"
+                      },
+                      {
+                          "name":  "evidence-backed project link enumeration",
+                          "command":  "$ErrorActionPreference=\u0027Stop\u0027\n$m=Get-Content -Raw -LiteralPath \u0027docs/career-world-production/concept-briefs.json\u0027 | ConvertFrom-Json\n$links=@{\n\u0027project/kaizen-agent-platform@v1\u0027=@(\u0027safe-writes\u0027,\u0027data-contract\u0027,\u0027Go\u0027,\u0027Redis\u0027,\u0027MCP\u0027,\u0027OpenAPI\u0027);\n\u0027project/vendy-vm-platform@v1\u0027=@(\u0027workflow-orchestration\u0027,\u0027operator-control\u0027,\u0027data-contracts\u0027,\u0027Go\u0027,\u0027React\u0027,\u0027AWS\u0027,\u0027PostgreSQL\u0027,\u0027VMware\u0027,\u0027MacStadium\u0027);\n\u0027project/kaizen-metrics@v1\u0027=@(\u0027Python\u0027,\u0027Databricks\u0027,\u0027workflow\u0027,\u0027data-contract\u0027,\u0027Go\u0027,\u0027PostgreSQL\u0027,\u0027Docker\u0027,\u0027AI\u0027,\u0027AWS\u0027);\n\u0027project/tanium-risk-assessment@v1\u0027=@(\u0027Python\u0027,\u0027Go\u0027,\u0027workflow\u0027,\u0027operator-control\u0027,\u0027data-contract\u0027);\n\u0027project/uat-automation@v1\u0027=@(\u0027C#\u0027,\u0027LocalDB\u0027,\u0027operator-control\u0027,\u0027workflow\u0027,\u0027data-contract\u0027);\n\u0027project/cablecar@v1\u0027=@(\u0027React\u0027,\u0027Electron\u0027,\u0027workflow\u0027,\u0027operator-control\u0027,\u0027data-contract\u0027);\n\u0027project/xsearch@v1\u0027=@(\u0027Manifest v3\u0027,\u0027data-contract\u0027,\u0027workflow\u0027,\u0027operator-control\u0027);\n\u0027project/tmatch-eolmatch@v1\u0027=@(\u0027Go\u0027,\u0027data-contract\u0027);\n\u0027project/contextforge@v1\u0027=@(\u0027context-compression\u0027,\u0027workflow\u0027,\u0027data-contract\u0027,\u0027TypeScript\u0027);\n\u0027project/career-world-portfolio@v1\u0027=@(\u0027React\u0027,\u0027TypeScript\u0027,\u0027operator-control\u0027,\u0027data-contract\u0027)\n}\nforeach($id in $links.Keys){$p=@($m.assets|Where-Object id -eq $id)[0].full_prompt;foreach($term in $links[$id]){if($p -notmatch [regex]::Escape($term)){throw \"$id missing $term\"}}}\n\u0027PASS evidence_backed_project_link_terms=all_10_projects\u0027",
+                          "result":  "pass",
+                          "output":  "PASS evidence_backed_project_link_terms=all_10_projects"
+                      },
+                      {
+                          "name":  "worker report parse, verdict, and checksum contract",
+                          "command":  "$ErrorActionPreference=\u0027Stop\u0027; $r=Get-Content -Raw -LiteralPath \u0027docs/career-world-production/reports/art-full-manifest.json\u0027 | ConvertFrom-Json; $hash=(Get-FileHash -Algorithm SHA256 -LiteralPath \u0027docs/career-world-production/concept-briefs.json\u0027).Hash; if($r.status -ne \u0027done\u0027 -or $r.promotion_verdict -ne \u0027PROMOTE\u0027 -or $r.inventory.total -ne 56 -or @($r.highest_risk_briefs).Count -ne 5 -or @($r.gates_run).Count -ne 4 -or $r.independent_prompt_audit.result -ne \u0027PROMOTE\u0027 -or $hash -ne $r.independent_prompt_audit.manifest_sha256 -or $hash -ne $r.files_changed[0].sha256){throw \u0027report contract\u0027}; \u0027PASS report_json status=done verdict=PROMOTE total=56 highest_risks=5 gates=4 independent_audit=PROMOTE checksum=match\u0027",
+                          "result":  "pass",
+                          "output":  "PASS report_json status=done verdict=PROMOTE total=56 highest_risks=5 gates=4 independent_audit=PROMOTE checksum=match"
+                      }
+                  ],
+    "stop_conditions":  {
+                            "inventory_conflict_remaining":  false,
+                            "factual_claim_invention_required":  false
+                        },
+    "deviations":  [
+
+                   ],
+    "handoff":  {
+                    "next_owner":  "art lead",
+                    "action":  "PROMOTE the corrected prompt manifest for art-lead generation planning. Individual generated concepts still require the art QA promotion gate; this lane generated no art."
+                },
+    "promotion_verdict":  "PROMOTE",
+    "director_reference_policy":  {
+                                      "tracer_asset_count":  5,
+                                      "non_tracer_asset_count":  51,
+                                      "assigned_reference_image_count":  0,
+                                      "tracer_rule":  "Optional tracer PNGs may guide style and identity only for the same canonical asset; they never define geometry or coordinates.",
+                                      "non_tracer_rule":  "No raster by default; only the art lead may assign a passing same-category style reference.",
+                                      "transfer_rule":  "References transfer style only, never identity, topology, geometry, coordinates, palette ownership, factual meaning, or evidence."
+                                  },
+    "qa_corrections":  {
+                           "easter_rules":  "All 56 full_prompt strings contain their record easter_egg_rule exactly once.",
+                           "ai":  "skill/ai@v1 is now a linear, asymmetric, non-agentic horizontal analytical-instrument pavilion with no star, decision-center, or autonomy topology.",
+                           "resilience":  "project/atlassian-data-center-resilience@v1 utility pods are physically joined to the U arms by solid ground-level service necks.",
+                           "references":  "Director policy is recorded top-level, per record, and in each generation prompt for five tracers and 51 non-tracers."
+                       }
+}

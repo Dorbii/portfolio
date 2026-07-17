@@ -35,8 +35,6 @@ entry point is `index.ts`; route files should import only `EvidenceAtlas`.
 - Wheel zoom may enter an authored project only after the viewport is centered
   near its neutral portal and crosses the project-entry threshold. This changes
   presentation state, never evidence selection or ontology.
-- Exiting project media or details restores the exact viewport captured before
-  entry.
 - An open evidence drawer changes viewport travel and token culling, not graph
   layout or evidence resolution.
 - Kaizen implementation details remain curated summaries. Public code must not

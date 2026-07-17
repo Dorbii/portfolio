@@ -1,0 +1,133 @@
+{
+  "schema_version": "career-world-guide-render-failure/v1",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "D014-GUIDE-FREEZE-20260717",
+  "lane_id": "d014-contextforge-guide-author",
+  "status": "STOPPED_AFTER_FAILED_SINGLE_RENDER",
+  "exit_gate": "STOPPED_AFTER_FAILED_SINGLE_RENDER",
+  "next_action": "MATERIALLY_NEW_RECOVERY_PACKET_REQUIRED",
+  "authority": {
+    "execution_packet_path": "docs/career-world-production/briefs/art-correction-d014-guide-execution-packet.json",
+    "execution_packet_bytes": 4995,
+    "execution_packet_sha256": "77A31B7FEE98DC9351514B0DCF2E1E56EE9A44AAD3EA175BED3CFAA3D30E89BC",
+    "packet_status_at_launch": "AUTHORIZED_NOT_EXECUTED",
+    "packet_render_invocation_limit": 1,
+    "packet_retry_limit": 0,
+    "escalated_process_authorized": true
+  },
+  "immutable_receipts": {
+    "approved_brief": {
+      "path": "docs/career-world-production/briefs/art-correction-d014-contextforge.md",
+      "bytes": 15013,
+      "sha256": "C002A11C812BDE0FF98B6996F5B3F836FBB3CC4F5C702B166D00AE97FF639439",
+      "unchanged_after_invocation": true
+    },
+    "approved_report": {
+      "path": "docs/career-world-production/reports/art-correction-d014-contextforge.json",
+      "bytes": 55759,
+      "sha256": "6AA53DA05E89252EAC5449C025E4D6F05ACD1146F0E2BD60463A766D6F7983FF",
+      "unchanged_after_invocation": true
+    },
+    "source_svg": {
+      "path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg",
+      "bytes": 16954,
+      "sha256": "B4B6583147C20804F7B47B613A3F97CDD62F7BD7D1AA21F61FD217FB0E8D9A1C",
+      "pre_render_checks_passed": 414,
+      "pre_render_failures": 0,
+      "unchanged_after_invocation": true
+    },
+    "rejected_r1_archive": {
+      "path": "design/career-world/rejected-candidates/cw004-r1/projects/contextforge-r1-1e004076e7bb.png",
+      "bytes": 2269325,
+      "sha256": "1E004076E7BB85A837FD71A6B70F713D4AC13E4076C51DCA56E9F19C5FD07639",
+      "unchanged_after_invocation": true
+    }
+  },
+  "single_render_attempt": {
+    "prior_prelaunch_approval_rejections": 1,
+    "prior_rejection_node_process_launched": false,
+    "prior_rejection_render_invocations_consumed": 0,
+    "launch_timestamp_utc": null,
+    "launch_timestamp_reason": "The invocation wrapper did not capture a timestamp; no unreliable retroactive timestamp is asserted.",
+    "renderer": {
+      "node_path": "C:/Program Files/nodejs/node.exe",
+      "node_version": "22.16.0",
+      "sharp_version": "0.34.5",
+      "libvips_version": "8.17.3"
+    },
+    "command_serialization": "UTF-8 with LF line endings and no trailing LF",
+    "command_bytes": 1293,
+    "command_sha256": "62D1CDF70856C2C6AD88FDC89CE37E2DAC93054DF5869B4F3717B6BDD1357DC8",
+    "command_verbatim": "$ErrorActionPreference='Stop'\n$node='C:\\Program Files\\nodejs\\node.exe'\n$src='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg'\n$dst='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.png'\nif(Test-Path -LiteralPath $dst){throw 'FINAL_PNG_ALREADY_EXISTS'}\n$script=@'\nconst fs=require(\"fs\");\nconst sharp=require(\"sharp\");\nconst src=process.argv[1];\nconst dst=process.argv[2];\nif(fs.existsSync(dst)){throw new Error(\"FINAL_PNG_ALREADY_EXISTS\");}\nsharp(src,{density:72,animated:false,failOn:\"error\",sequentialRead:true})\n  .flatten({background:\"#080B10\"})\n  .removeAlpha()\n  .toColourspace(\"srgb\")\n  .png({compressionLevel:9,adaptiveFiltering:false,palette:false,effort:10,force:true})\n  .toFile(dst)\n  .then(function(info){\n    if(info.format!==\"png\"||info.width!==1536||info.height!==1024||info.channels!==3){\n      console.error(JSON.stringify({status:\"NONCOMPLIANT_SINGLE_RENDER\",info:info}));\n      process.exitCode=2;\n      return;\n    }\n    console.log(JSON.stringify({status:\"SINGLE_RENDER_COMPLETED\",info:info}));\n  })\n  .catch(function(error){\n    console.error(JSON.stringify({status:\"SINGLE_RENDER_FAILED\",error:error.message}));\n    process.exitCode=1;\n  });\n'@\n& $node -e $script $src $dst\nif($LASTEXITCODE -ne 0){exit $LASTEXITCODE}",
+    "process_exit_code": 1,
+    "stderr_verbatim": "[eval]:7\n  .flatten({background:#080B10})\n                       ^\n\nSyntaxError: Invalid or unexpected token\n    at makeContextifyScript (node:internal/vm:185:14)\n    at compileScript (node:internal/process/execution:386:10)\n    at node:internal/process/execution:450:25\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:447:60)\n    at evalFunction (node:internal/process/execution:87:30)\n    at evalScript (node:internal/process/execution:99:3)\n    at node:internal/main/eval_string:74:3\n\nNode.js v22.16.0",
+    "node_process_launched": true,
+    "javascript_parse_succeeded": false,
+    "javascript_evaluation_started": false,
+    "sharp_required": false,
+    "sharp_pipeline_constructed": false,
+    "toFile_called": false,
+    "proof_basis": "Node emitted a SyntaxError from compileScript while parsing the complete -e source. Node performs this full-source parse before JavaScript evaluation; therefore neither require(\"sharp\") nor any later expression evaluated, no Sharp pipeline existed, and toFile was not called.",
+    "failure_class": "POWERSHELL_ARGUMENT_QUOTING_CAUSED_NODE_SOURCE_PARSE_ERROR",
+    "render_invocations": 1,
+    "retry_limit": 0,
+    "recovery_authorized": false,
+    "retry_attempted": false,
+    "substitute_renderer_attempted": false
+  },
+  "output_and_scope_verification": {
+    "rendered_png_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.png",
+    "rendered_png_exists": false,
+    "guide_generation_report_path": "docs/career-world-production/reports/art-correction-d014-guide-generation.json",
+    "guide_generation_report_exists": false,
+    "guided_candidate_path": "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+    "guided_candidate_exists": false,
+    "runtime_exact_path_or_basename_hits": 0,
+    "runtime_same_name_copies": 0,
+    "staged_files": 0,
+    "imagegen_calls": 0,
+    "canonical_promotion_attempts": 0,
+    "runtime_product_test_queue_ledger_architecture_mutations": 0
+  },
+  "files_changed": [
+    {
+      "path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg",
+      "role": "pre-frozen deterministic source",
+      "predated_failed_invocation": true,
+      "mutated_by_invocation": false
+    },
+    {
+      "path": "design/career-world/rejected-candidates/cw004-r1/projects/contextforge-r1-1e004076e7bb.png",
+      "role": "pre-existing rejected-r1 archive",
+      "predated_failed_invocation": true,
+      "mutated_by_invocation": false
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d014-guide-render-failure.json",
+      "role": "authorized terminal single-render failure evidence",
+      "predated_failed_invocation": false,
+      "mutated_by_invocation": false
+    }
+  ],
+  "temporary_evidence": {
+    "render_failure_log": {
+      "path": "C:/tmp/d014-guide-author-logs/single-render-failure.json",
+      "bytes": 3143,
+      "sha256": "42755D7E6AA401728A39131879D10099A86E8B1C5C7B8025AA592D50D0BB4E9F"
+    },
+    "worker_report_path": "C:/tmp/d014-guide-author-worker-report.json",
+    "worker_report_receipt_frozen_here": false,
+    "reason": "The worker report is updated after this repository evidence report and therefore is not self-frozen here."
+  },
+  "attempt_counts": {
+    "approval_rejected_prelaunch_attempts": 1,
+    "node_process_launches": 1,
+    "render_invocations": 1,
+    "sharp_toFile_calls": 0,
+    "renderer_retries": 0,
+    "substitute_renderer_calls": 0,
+    "imagegen_calls": 0
+  },
+  "no_recovery_attempt": true,
+  "recovery_authorized": false
+}

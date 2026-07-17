@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "report_type": "career-world-art-correction-d022-technical-generation",
+  "report_id": "CW-004-D022-GENERATION-OPERATOR-CONTROL",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "D-022",
+  "asset_id": "skill/operator-control@v1",
+  "status": "GENERATED_PENDING_INDEPENDENT_QA",
+  "verdict": "NO_GENERATOR_ACCEPTANCE_DECISION",
+  "authority": {
+    "release_packet_path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+    "release_packet_bytes": 6262,
+    "release_packet_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+    "execution_packet_path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+    "execution_packet_bytes": 65201,
+    "execution_packet_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+    "d021_record_index": 6
+  },
+  "prompt_receipt": {
+    "serialization": "Join the exact 21 D-021 prompt lines with LF; UTF-8 without BOM; no trailing LF",
+    "line_count": 21,
+    "utf8_bytes": 4479,
+    "sha256": "5E52A492009C512CA98EAC7A688C46739A9399A59563DE5D3EA4BE545EC2F1DC",
+    "receipt_verified_immediately_before_call": true,
+    "prompt_augmented_or_rewritten": false
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "intent": "brand-new generation",
+    "call_arguments": [
+      "prompt"
+    ],
+    "referenced_image_paths_omitted": true,
+    "num_last_images_to_include_omitted": true,
+    "call_count": 1,
+    "retry_count": 0,
+    "retry_authorized": false,
+    "call_outcome": "OUTPUT_RETURNED"
+  },
+  "persistence": {
+    "built_in_output_path": "C:/Users/Steve/.codex/generated_images/019f6e68-5fa2-7ff2-ba4e-05a2ac1cfb2d/exec-ac35972a-f40b-4eef-a2f7-a1569ee6902d.png",
+    "candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/operator-control-r1.png",
+    "candidate_absent_before_copy": true,
+    "operation": "COPY_BYTE_FOR_BYTE",
+    "copy_count": 1,
+    "conversion_or_mutation_performed": false,
+    "overwrite_performed": false,
+    "source_and_candidate_receipts_identical": true
+  },
+  "artifact": {
+    "path": "design/career-world/correction-candidates/cw004-r1/skills/operator-control-r1.png",
+    "bytes": 2037942,
+    "sha256": "041FFD0185F40D2E8E45D74D798FB3EA5229EB262E45A8ADC64A165A2E85F6A5",
+    "width": 1402,
+    "height": 1122,
+    "mode": "RGB",
+    "bit_depth": 8,
+    "png_signature": "89504E470D0A1A0A",
+    "iend_present": true,
+    "technical_png_receipt_valid": true
+  },
+  "qa_boundary": {
+    "generator_acceptance_allowed": false,
+    "visual_qa_performed": false,
+    "independent_qa_status": "PENDING",
+    "promotion_status": "NOT_AUTHORIZED"
+  },
+  "scope": {
+    "other_candidates_generated": 0,
+    "canonical_files_changed": [],
+    "manifest_runtime_or_test_files_changed": [],
+    "queue_or_ledger_files_changed": [],
+    "git_operations": []
+  },
+  "files_changed": [
+    "design/career-world/correction-candidates/cw004-r1/skills/operator-control-r1.png",
+    "docs/career-world-production/reports/art-correction-d022-generation-operator-control.json"
+  ]
+}

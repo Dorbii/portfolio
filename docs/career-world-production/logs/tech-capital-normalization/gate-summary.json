@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005C",
+  "lane_id": "tech-capital-normalization",
+  "result": "pass",
+  "baseline": {
+    "npm.cmd test": { "result": "pass", "tests": 13, "passed": 13, "failed": 0 },
+    "npm.cmd run lint": { "result": "pass" },
+    "npm.cmd run build": { "result": "pass" },
+    "git diff --check": { "result": "pass", "warnings": "pre-existing LF-to-CRLF notices only" }
+  },
+  "final": {
+    "npm.cmd test": { "result": "pass", "tests": 13, "passed": 13, "failed": 0 },
+    "npm.cmd run lint": { "result": "pass" },
+    "npm.cmd run build": { "result": "pass" },
+    "git diff --check": { "result": "pass", "warnings": "pre-existing LF-to-CRLF notices only" }
+  },
+  "scoped_registry": {
+    "command": "PowerShell inline Vite SSR assertion via C:\\Program Files\\nodejs\\node.exe --input-type=module -",
+    "result": "pass",
+    "assets": 56,
+    "employers": 5,
+    "projects": 16,
+    "skill_instances": 37,
+    "project_skill_links": 53,
+    "positioned_navigable_projects": 3,
+    "capital_instances": 5,
+    "city_kind_instances": 0,
+    "total_instances": 58,
+    "validation_issues": []
+  },
+  "protected_hashes": {
+    "result": "pass",
+    "algorithm": "SHA256",
+    "files": {
+      "features/career-world/rendering/world-camera.ts": "72E9EB2FFE352D63C403766CF417343E6473F8DF201543EFBE5C7F3B436B9A6A",
+      "features/career-world/model/evidence-adapter.ts": "2076239AD6300E870BEE31BA57E2CB165A277C41A28138FCBC612DC9DAD4441F",
+      "features/career-world/components/world-hit-targets.tsx": "9B298E205B3CE4D4D8518F4FE6D16489E6FDD2A3E4DE62A05B4F2FBC3CFB8E6A",
+      "docs/career-world-production/architecture.md": "6D93DBD720690A8317304270C22FD80E648C67D588D9B5105357488589FAC5EB",
+      "package.json": "A0C512B31CCA460BE20758F892752443AFA2CAF4D2C6A2AC40F2AB69EAEAFE8F"
+    }
+  },
+  "surface_and_fence": {
+    "result": "pass",
+    "worker_changed_paths": [
+      "features/career-world/model/world-registry.ts",
+      "features/career-world/components/world-scene.tsx",
+      "tests/career-world.test.mjs",
+      "docs/career-world-production/reports/tech-capital-normalization.json",
+      "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json"
+    ],
+    "prohibited_worker_changes": [],
+    "dependency_additions": 0,
+    "staged_paths": [],
+    "status_matches_pre_edit_baseline": true,
+    "note": "The worktree was already dirty and Career World was already untracked at dispatch; final status matched the captured pre-edit status, protected hashes remained exact, and worker mutations stayed within the five allowed paths."
+  },
+  "report_validation": {
+    "result": "pass",
+    "report_json": "parsed",
+    "gate_summary_json": "parsed",
+    "required_report_fields": "present",
+    "claim_paths_and_lines": "valid"
+  }
+}

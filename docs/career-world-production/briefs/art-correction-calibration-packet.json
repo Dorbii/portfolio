@@ -1,0 +1,371 @@
+{
+  "schema_version": "1.0",
+  "packet_type": "career-world-art-correction-r1-calibration-generation",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-004",
+  "decision": "D-013",
+  "packet_id": "cw004-r1-calibration-three",
+  "packet_path": "docs/career-world-production/briefs/art-correction-calibration-packet.json",
+  "status": "CANDIDATES_AWAITING_INDEPENDENT_QA",
+  "release": {
+    "calibration_release_authorized": true,
+    "image_generation_authorized": false,
+    "imagegen_call_release_consumed": true,
+    "imagegen_calls_completed": 3,
+    "imagegen_call_slots_remaining": 0,
+    "archive_copy_authorized": true,
+    "archive_copy_completed": true,
+    "archive_validation_complete": true,
+    "candidate_directory_creation_authorized": false,
+    "remaining_eight_release_authorized": false,
+    "required_next_action": "INDEPENDENT_QA_ONLY_OR_STOP"
+  },
+  "exact_scope": {
+    "calibration_asset_count": 3,
+    "calibration_asset_ids": [
+      "project/contextforge@v1",
+      "skill/openapi@v1",
+      "skill/workflow-orchestration@v1"
+    ],
+    "remaining_eight_count": 8,
+    "remaining_eight_asset_ids": [
+      "city/ninjaone@v1",
+      "project/tanium-risk-assessment@v1",
+      "project/vendy-vm-platform@v1",
+      "skill/atlassian@v1",
+      "skill/context-compression@v1",
+      "skill/java@v1",
+      "skill/operator-control@v1",
+      "skill/react@v1"
+    ],
+    "remaining_eight_status": "HOLD_UNRELEASED",
+    "frozen_nonblocked_asset_count": 45,
+    "canonical_closure_count": 56
+  },
+  "global_execution_rules": {
+    "built_in_imagegen_only": true,
+    "fresh_generation_only": true,
+    "distinct_calls_required": 3,
+    "one_call_per_asset": true,
+    "max_calls_per_asset": 1,
+    "required_call_shape": {
+      "prompt": "USE_EXACT_DERIVED_PROMPT_STRING_FOR_ONE_RECORD"
+    },
+    "forbidden_call_keys": [
+      "referenced_image_paths",
+      "num_last_images_to_include"
+    ],
+    "raster_inputs_forbidden": true,
+    "rejected_v0_as_input_forbidden": true,
+    "peer_or_tracer_art_as_input_forbidden": true,
+    "image_edit_or_composite_forbidden": true,
+    "cli_fallback_forbidden": true,
+    "technical_error_authorizes_retry": false,
+    "generator_may_assign_acceptance": false,
+    "no_r2": true,
+    "no_product_runtime_test_public_or_3d_mutation": true
+  },
+  "storage_gate": {
+    "storage_lane_lfs_result": "PASS",
+    "local_lfs_routing_observed": true,
+    "lfs_routing_is_not_archive_byte_validation": true,
+    "required_path_attributes": {
+      "filter": "lfs",
+      "diff": "lfs",
+      "merge": "lfs",
+      "text": "unset"
+    },
+    "gitattributes_path": ".gitattributes",
+    "gitattributes_sha256": "2540345F96A2D3BB28D024DEE472E69D64C48B52C34C74D3440C51DBE774C3BC",
+    "rejected_root_exists": true,
+    "candidate_root_exists": true,
+    "archive_copy_permitted_now": false,
+    "image_call_permitted_now": false,
+    "archive_validation_complete": true,
+    "archive_validation_report": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json",
+    "generation_report": "docs/career-world-production/reports/art-correction-calibration-generation.json",
+    "required_before_any_call": [
+      "Director explicitly releases exactly these three one-call imagegen calls",
+      "the archive-validation report and all three archive records are revalidated",
+      "each archived-v0 hash, byte count, PNG signature, and IHDR dimensions still matches canonical v0",
+      "the candidate root and all three candidate paths remain absent"
+    ]
+  },
+  "records": [
+    {
+      "asset_id": "project/contextforge@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "manifest_status": "planned",
+      "manifest_output_path": "design/career-world/concepts/projects/contextforge-v1.png",
+      "asset_brief": "An L-shaped heavy fabrication hall carries a bank of sawtooth roof vaults, a tall offset archive tower, and one diagonal overhead transfer bridge that lands on a compact cylindrical compression house.",
+      "source": {
+        "manifest_path": "docs/career-world-production/concept-briefs.json",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "generation_packet_index": 4,
+        "source_full_prompt_sha256": "BD3A46FD892479074087D55CD6A759B23600AB0C2200FCBBB095CF85BD97833D",
+        "source_full_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline"
+      },
+      "immutable_v0": {
+        "canonical_path": "design/career-world/concepts/projects/contextforge-v1.png",
+        "sha256": "A758DC9EEFF9847D91994EA9E071BA9D54200453465D2F1D6562847B2D7D76E2",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 1905694,
+        "generation_call_mode": "built_in_fresh_generation_no_raster",
+        "generation_no_raster_inputs": true
+      },
+      "independent_source_qa": {
+        "qa_batch": "art-qa-3",
+        "qa_report": "docs/career-world-production/reports/art-qa-batch-3.json",
+        "outcome": "REGENERATE",
+        "failure_class": "primary_topology",
+        "blocker_gates": [
+          "canonical_panel_and_primary_topology",
+          "primary_form_traceability"
+        ],
+        "visible_defect": "The fabrication hall is a long rectangular bar; no panel exposes the required L-shaped hall footprint.",
+        "required_invariant": "One fully visible, unmistakable L-shaped fabrication-hall footprint carries the sawtooth vault bank, with the offset tower at the elbow and the diagonal bridge landing on the cylinder.",
+        "smallest_correction": "Require an unmistakable fully visible L-shaped fabrication-hall footprint with the sawtooth bank, offset archive tower, overhead bridge, and cylindrical compression house preserved."
+      },
+      "preservation": {
+        "rejected_evidence_path": "design/career-world/rejected-candidates/cw004-v0/projects/contextforge-v0-a758dc9eeff9.png",
+        "required_sha256": "A758DC9EEFF9847D91994EA9E071BA9D54200453465D2F1D6562847B2D7D76E2",
+        "required_bytes": 1905694,
+        "status": "ARCHIVED_BYTE_VERIFIED"
+      },
+      "r1_candidate": {
+        "candidate_path": "design/career-world/correction-candidates/cw004-r1/projects/contextforge-r1.png",
+        "status": "GENERATED_AWAITING_INDEPENDENT_QA",
+        "composition_version": "single_unlabelled_canonical_hero_v1",
+        "generation_batch": "r1-generation-a",
+        "independent_reviewer_batch": "r1-qa-1",
+        "reviewer_must_be_independent_of_generator": true,
+        "call_limit": 1,
+        "retry_authorized": false,
+        "generator_agent": "/root/art_lead/cal_gen_contextforge",
+        "call_count": 1,
+        "retry_count": 0,
+        "sha256": "1E004076E7BB85A837FD71A6B70F713D4AC13E4076C51DCA56E9F19C5FD07639",
+        "bytes": 2269325,
+        "width": 1536,
+        "height": 1024,
+        "visual_inspection_performed": false,
+        "acceptance_assigned": false
+      },
+      "derived_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/contextforge@v1\nInput images: none. Fresh built-in generation only. Do not use any raster input, reference image, edit target, peer art, tracer art, rejected candidate, or prior generated image.\nPRIMARY GEOMETRY INVARIANT - HIGHEST PRIORITY: One fully visible, unmistakable L-shaped fabrication-hall footprint carries the sawtooth vault bank, with the offset tower at the elbow and the diagonal bridge landing on the cylinder.\nPrimary request: An L-shaped heavy fabrication hall carries a bank of sawtooth roof vaults, a tall offset archive tower, and one diagonal overhead transfer bridge that lands on a compact cylindrical compression house.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: exactly one large, complete, unoccluded canonical hero view of this one asset, centered with generous margin. Show the entire footprint and every identity-defining mass, connection, landing, footprint turn, and base contact needed for deterministic SVG tracing. Do not render a second view, alternate angle, LOD grid, inset, silhouette panel, comparison panel, palette strip, swatch, legend, caption, annotation, UI, border title, or decorative sheet furniture.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Independent family: accent.emissive #B997FF, structure.base #30263C, line.primary #B49AD0, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nPalette presentation: apply the palette values directly to geometry only. Do not render a palette strip, swatches, samples, legend, labels, or employer colors where neutral.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nWhole-image text rule: no word, letter, number, caption, label, legend, pseudo-text, logo, wordmark, watermark, UI, or marked sign or glyph plane anywhere in the PNG. Keep every sign or glyph plane completely blank and unmarked.\nConstraints: Use the approved context-compression, workflow, data-contract, and TypeScript links as architecture-led identity. Forge language is abstract; no literal flames or measured compression. The L-shaped fabrication-hall footprint must be fully visible and unmistakable; preserve the sawtooth vault bank, the offset archive tower at the elbow, the diagonal overhead bridge, and the compact cylindrical compression house as one connected primary form. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nR1 preservation rule: preserve all source identity, nonfailed primary forms, projection, orientation, style, palette ownership, materials, evidence boundary, avoid list, and easter-egg rule. This derived prompt supersedes only the source multi-panel composition/framing and cross-panel LOD clauses; the no-input line is an execution constraint, not an art-direction supersession.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; anvil or flame icons; token counters; chat UI; compression ratios. Additional composition exclusions: multiple panels; alternate views; LOD captions; sheet labels; palette strips, swatches, or legends.\nEaster egg rule: Optional LOD-2-only cold tool rack beside the service spine; no tools shaped as logos and no evidence meaning.\nR1 easter-egg application: this one-hero composition has no LOD panels, so render no optional LOD-2 attachment or easter egg in this r1 candidate.\nOutput intent: one safely traceable canonical master reference for D-010; not runtime art and not factual evidence.",
+      "derived_prompt_sha256": "0D9B871AB568BC1392BE62C66E0698D4F18A6B8B44A84500C0D0D0E0D121CFBF",
+      "derived_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline",
+      "prompt_derivation": {
+        "art_direction_supersession": [
+          "source multi-panel composition/framing clause",
+          "source cross-panel LOD consistency clauses",
+          "composition implication that palette slots appear as sheet swatches or a legend"
+        ],
+        "execution_normalization_not_art_direction_supersession": [
+          "optional-reference source line is narrowed to no raster inputs for D-013 execution"
+        ],
+        "additive_reinforcement_not_supersession": [
+          "independent-QA invariant is stated first",
+          "whole-image no-text rule is restated",
+          "asset-specific smallest correction is made explicit"
+        ],
+        "preserved": [
+          "asset identity and nonfailed primary forms",
+          "projection and authored orientation",
+          "technical-cartography style and backdrop",
+          "palette ownership or neutrality and emissive cap",
+          "lighting and material language",
+          "evidence boundary",
+          "source avoid list",
+          "source easter-egg rule"
+        ]
+      },
+      "easter_egg_rule": "Optional LOD-2-only cold tool rack beside the service spine; no tools shaped as logos and no evidence meaning."
+    },
+    {
+      "asset_id": "skill/openapi@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "manifest_status": "planned",
+      "manifest_output_path": "design/career-world/concepts/skills/openapi-v1.png",
+      "asset_brief": "Two tall open portal frames bracket a compact specification vault, with branching solid ramps and a long shallow rear canopy.",
+      "source": {
+        "manifest_path": "docs/career-world-production/concept-briefs.json",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "generation_packet_index": 12,
+        "source_full_prompt_sha256": "B08BFAC1AFA9D4F3F069EFB26ED944BDB27159BBC9AD93FA3667B82F323E8D75",
+        "source_full_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline"
+      },
+      "immutable_v0": {
+        "canonical_path": "design/career-world/concepts/skills/openapi-v1.png",
+        "sha256": "30737E30E3124A2F75A0B877EE2597E99A19DB002D41B5D94E16FFD603A32481",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 2126014,
+        "generation_call_mode": "built_in_fresh_generation_no_raster",
+        "generation_no_raster_inputs": true
+      },
+      "independent_source_qa": {
+        "qa_batch": "art-qa-2",
+        "qa_report": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "outcome": "REGENERATE",
+        "failure_class": "generated_text_or_branding",
+        "blocker_gates": [
+          "text_logo_watermark_absence"
+        ],
+        "visible_defect": "The sheet visibly prints LOD-0, LOD-1, and LOD-2 beneath the lower panels.",
+        "required_invariant": "The whole PNG contains no caption, word, letter, number, legend, pseudo-text, logo, watermark, or marked sign plane.",
+        "smallest_correction": "Remove all captions, words, numbers, and pseudo-text while preserving the two portals, central vault, solid ramps, rear canopy, neutral palette, and projection."
+      },
+      "preservation": {
+        "rejected_evidence_path": "design/career-world/rejected-candidates/cw004-v0/skills/openapi-v0-30737e30e312.png",
+        "required_sha256": "30737E30E3124A2F75A0B877EE2597E99A19DB002D41B5D94E16FFD603A32481",
+        "required_bytes": 2126014,
+        "status": "ARCHIVED_BYTE_VERIFIED"
+      },
+      "r1_candidate": {
+        "candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+        "status": "GENERATED_AWAITING_INDEPENDENT_QA",
+        "composition_version": "single_unlabelled_canonical_hero_v1",
+        "generation_batch": "r1-generation-b",
+        "independent_reviewer_batch": "r1-qa-2",
+        "reviewer_must_be_independent_of_generator": true,
+        "call_limit": 1,
+        "retry_authorized": false,
+        "generator_agent": "/root/art_lead/cal_gen_openapi",
+        "call_count": 1,
+        "retry_count": 0,
+        "sha256": "17383FECA2C6C5ACA13653B86919FA6351621B85FA5459C0BD758A8074B0B2C8",
+        "bytes": 1832426,
+        "width": 1216,
+        "height": 1294,
+        "visual_inspection_performed": false,
+        "acceptance_assigned": false
+      },
+      "derived_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/openapi@v1\nInput images: none. Fresh built-in generation only. Do not use any raster input, reference image, edit target, peer art, tracer art, rejected candidate, or prior generated image.\nPRIMARY GEOMETRY INVARIANT - HIGHEST PRIORITY: The whole PNG contains no caption, word, letter, number, legend, pseudo-text, logo, watermark, or marked sign plane.\nPrimary request: Two tall open portal frames bracket a compact specification vault, with branching solid ramps and a long shallow rear canopy.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: exactly one large, complete, unoccluded canonical hero view of this one asset, centered with generous margin. Show the entire footprint and every identity-defining mass, connection, landing, footprint turn, and base contact needed for deterministic SVG tracing. Do not render a second view, alternate angle, LOD grid, inset, silhouette panel, comparison panel, palette strip, swatch, legend, caption, annotation, UI, border title, or decorative sheet furniture.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nPalette presentation: apply the palette values directly to geometry only. Do not render a palette strip, swatches, samples, legend, labels, or employer colors where neutral.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nWhole-image text rule: no word, letter, number, caption, label, legend, pseudo-text, logo, wordmark, watermark, UI, or marked sign or glyph plane anywhere in the PNG. Keep every sign or glyph plane completely blank and unmarked.\nConstraints: Reusable neutral OpenAPI technology geometry. The open gateway silhouette must stand without wordmarks, documents, or endpoint diagrams. Preserve both tall open portal frames, the compact specification vault, the branching solid ramps, and the long shallow rear canopy. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nR1 preservation rule: preserve all source identity, nonfailed primary forms, projection, orientation, style, palette ownership, materials, evidence boundary, avoid list, and easter-egg rule. This derived prompt supersedes only the source multi-panel composition/framing and cross-panel LOD clauses; the no-input line is an execution constraint, not an art-direction supersession.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; OpenAPI logo; API text; Swagger imagery; endpoint lists; employer colors. Additional composition exclusions: multiple panels; alternate views; LOD captions; sheet labels; palette strips, swatches, or legends.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.\nR1 easter-egg application: this one-hero composition has no LOD panels, so render no optional LOD-2 attachment or easter egg in this r1 candidate.\nOutput intent: one safely traceable canonical master reference for D-010; not runtime art and not factual evidence.",
+      "derived_prompt_sha256": "7C8DB51B9AD60C1235061659BC59C8471C5DA594F1D499D0687E240C7196C01A",
+      "derived_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline",
+      "prompt_derivation": {
+        "art_direction_supersession": [
+          "source multi-panel composition/framing clause",
+          "source cross-panel LOD consistency clauses",
+          "composition implication that palette slots appear as sheet swatches or a legend"
+        ],
+        "execution_normalization_not_art_direction_supersession": [
+          "optional-reference source line is narrowed to no raster inputs for D-013 execution"
+        ],
+        "additive_reinforcement_not_supersession": [
+          "independent-QA invariant is stated first",
+          "whole-image no-text rule is restated",
+          "asset-specific smallest correction is made explicit"
+        ],
+        "preserved": [
+          "asset identity and nonfailed primary forms",
+          "projection and authored orientation",
+          "technical-cartography style and backdrop",
+          "palette ownership or neutrality and emissive cap",
+          "lighting and material language",
+          "evidence boundary",
+          "source avoid list",
+          "source easter-egg rule"
+        ]
+      },
+      "easter_egg_rule": "No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction."
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "manifest_status": "planned",
+      "manifest_output_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+      "asset_brief": "A circular conductor rotunda with a tall central drum, six staggered low service bays, and one interrupted ring ramp that creates a readable radial silhouette.",
+      "source": {
+        "manifest_path": "docs/career-world-production/concept-briefs.json",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "generation_packet_index": 7,
+        "source_full_prompt_sha256": "32B1C9776A03D802F85E8CE0381AD144F29699CA4AF6A4C1459E8613E69E3F93",
+        "source_full_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline"
+      },
+      "immutable_v0": {
+        "canonical_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+        "sha256": "912DCE71CA8E18845DAAC5007B83CB8C831F1713C89CD915956699D99BD3D586",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 2318262,
+        "generation_call_mode": "built_in_fresh_generation_no_raster",
+        "generation_no_raster_inputs": true
+      },
+      "independent_source_qa": {
+        "qa_batch": "art-qa-1",
+        "qa_report": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "outcome": "REGENERATE",
+        "failure_class": "primary_topology",
+        "blocker_gates": [
+          "canonical_panel_and_primary_topology",
+          "primary_form_traceability"
+        ],
+        "visible_defect": "Seven low service bays surround the ring; the brief requires exactly six.",
+        "required_invariant": "Exactly six distinct staggered low service bays surround the tall central drum with one interrupted ring ramp.",
+        "smallest_correction": "Require exactly six separately readable bays while preserving the central drum, interrupted ring, neutral palette, projection, and no-diagram/no-text constraints."
+      },
+      "preservation": {
+        "rejected_evidence_path": "design/career-world/rejected-candidates/cw004-v0/skills/workflow-orchestration-v0-912dce71ca8e.png",
+        "required_sha256": "912DCE71CA8E18845DAAC5007B83CB8C831F1713C89CD915956699D99BD3D586",
+        "required_bytes": 2318262,
+        "status": "ARCHIVED_BYTE_VERIFIED"
+      },
+      "r1_candidate": {
+        "candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/workflow-orchestration-r1.png",
+        "status": "GENERATED_AWAITING_INDEPENDENT_QA",
+        "composition_version": "single_unlabelled_canonical_hero_v1",
+        "generation_batch": "r1-generation-c",
+        "independent_reviewer_batch": "r1-qa-3",
+        "reviewer_must_be_independent_of_generator": true,
+        "call_limit": 1,
+        "retry_authorized": false,
+        "generator_agent": "/root/art_lead/cal_gen_workflow",
+        "call_count": 1,
+        "retry_count": 0,
+        "sha256": "0BDF4DFE5FD160A3C798AFFED243C26523C52B81DCAF4E45579CF5074DA9E7A3",
+        "bytes": 2222826,
+        "width": 1254,
+        "height": 1254,
+        "visual_inspection_performed": false,
+        "acceptance_assigned": false
+      },
+      "derived_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/workflow-orchestration@v1\nInput images: none. Fresh built-in generation only. Do not use any raster input, reference image, edit target, peer art, tracer art, rejected candidate, or prior generated image.\nPRIMARY GEOMETRY INVARIANT - HIGHEST PRIORITY: Exactly six distinct staggered low service bays surround the tall central drum with one interrupted ring ramp.\nPrimary request: A circular conductor rotunda with a tall central drum, six staggered low service bays, and one interrupted ring ramp that creates a readable radial silhouette.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: exactly one large, complete, unoccluded canonical hero view of this one asset, centered with generous margin. Show the entire footprint and every identity-defining mass, connection, landing, footprint turn, and base contact needed for deterministic SVG tracing. Do not render a second view, alternate angle, LOD grid, inset, silhouette panel, comparison panel, palette strip, swatch, legend, caption, annotation, UI, border title, or decorative sheet furniture.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nPalette presentation: apply the palette values directly to geometry only. Do not render a palette strip, swatches, samples, legend, labels, or employer colors where neutral.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nWhole-image text rule: no word, letter, number, caption, label, legend, pseudo-text, logo, wordmark, watermark, UI, or marked sign or glyph plane anywhere in the PNG. Keep every sign or glyph plane completely blank and unmarked.\nConstraints: Reusable neutral capability geometry. Bays express coordinated work abstractly; no arrows, nodes, or moving-flow claims. Show exactly six distinct, separately readable, staggered low service bays - never five, seven, implied, merged, or hidden - around the tall central drum with one interrupted ring ramp. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nR1 preservation rule: preserve all source identity, nonfailed primary forms, projection, orientation, style, palette ownership, materials, evidence boundary, avoid list, and easter-egg rule. This derived prompt supersedes only the source multi-panel composition/framing and cross-panel LOD clauses; the no-input line is an execution constraint, not an art-direction supersession.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; workflow diagrams; arrows; Kubernetes imagery; employer colors. Additional composition exclusions: multiple panels; alternate views; LOD captions; sheet labels; palette strips, swatches, or legends.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.\nR1 easter-egg application: this one-hero composition has no LOD panels, so render no optional LOD-2 attachment or easter egg in this r1 candidate.\nOutput intent: one safely traceable canonical master reference for D-010; not runtime art and not factual evidence.",
+      "derived_prompt_sha256": "915E571152B78A67CD499809BCC84C36BC2BDC9BED1113FC52377C6D2F30C126",
+      "derived_prompt_serialization": "UTF-8 bytes; LF line endings; no trailing newline",
+      "prompt_derivation": {
+        "art_direction_supersession": [
+          "source multi-panel composition/framing clause",
+          "source cross-panel LOD consistency clauses",
+          "composition implication that palette slots appear as sheet swatches or a legend"
+        ],
+        "execution_normalization_not_art_direction_supersession": [
+          "optional-reference source line is narrowed to no raster inputs for D-013 execution"
+        ],
+        "additive_reinforcement_not_supersession": [
+          "independent-QA invariant is stated first",
+          "whole-image no-text rule is restated",
+          "asset-specific smallest correction is made explicit"
+        ],
+        "preserved": [
+          "asset identity and nonfailed primary forms",
+          "projection and authored orientation",
+          "technical-cartography style and backdrop",
+          "palette ownership or neutrality and emissive cap",
+          "lighting and material language",
+          "evidence boundary",
+          "source avoid list",
+          "source easter-egg rule"
+        ]
+      },
+      "easter_egg_rule": "No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction."
+    }
+  ]
+}

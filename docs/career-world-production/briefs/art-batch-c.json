@@ -1,0 +1,478 @@
+{
+    "schema_version":  "1.0",
+    "packet_type":  "career-world-canonical-art-generation",
+    "run_id":  "career-world-2026-07-16",
+    "batch_id":  "art-batch-c",
+    "source_manifest":  {
+                            "path":  "docs/career-world-production/concept-briefs.json",
+                            "sha256":  "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+                        },
+    "asset_count":  18,
+    "execution_contract":  {
+                               "mode":  "built-in imagegen only",
+                               "calls":  "one distinct built-in imagegen call per asset record",
+                               "save":  "copy or move selected generated output to the record exact output_path; do not copy tracer PNGs into canonical paths",
+                               "inspect":  "view_image every saved canonical output and record prompt, SHA-256, pixel dimensions, and verdict",
+                               "forbidden":  [
+                                                 "CLI fallback",
+                                                 "batch CLI",
+                                                 "product code changes",
+                                                 "3D work",
+                                                 "cross-asset raster references",
+                                                 "using a tracer as edit or geometry truth"
+                                             ],
+                               "stop_condition":  "If built-in imagegen is unavailable or fails, stop and report; do not switch modes."
+                           },
+    "assets":  [
+                   {
+                       "id":  "city/independent@v1",
+                       "category":  "city",
+                       "output_path":  "design/career-world/concepts/cities/independent-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world city concept sheet for city/independent@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An asymmetric maker capital composed of a broad sawtooth workshop, a narrow archive tower, and a small pavilion grouped around an open triangular courtyard.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Independent family: accent.emissive #B997FF, structure.base #30263C, line.primary #B49AD0, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Illustrative independent-work capital. The three unlike masses and triangular void are the identity; do not normalize them into a symmetric campus. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; freelancer icons; initials; generic office campus.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/kaizen-metrics@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/kaizen-metrics-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/kaizen-metrics@v1\nInput images: none by default. If the same canonical tracer PNG is attached, use it only as a style and identity reference; never as an edit target, geometry source, coordinate truth, or permission to change topology.\nPrimary request: A terraced analytics refinery combines a low sawtooth ingestion hall, a raised linear compute spine, a cylindrical query reservoir, and one small faceted assistant lightwell.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: NinjaOne family: accent.emissive #56D5EE, structure.base #18343B, line.primary #7FC7CE, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Express the approved Python, Databricks, workflow, data-contract, Go, PostgreSQL, Docker, AI, and AWS links as abstract architecture only. The assistant element is non-humanoid and non-provider-specific. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; graphs or dashboards; brain imagery; robot faces; provider logos; metric values.\nEaster egg rule: Optional LOD-2-only static maintenance capsule beside the compute spine; it is decorative and must not imply throughput.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "Optional same-canonical tracer PNG only: use it as a style and identity reference, never as an edit target, geometry source, coordinate truth, or permission to change topology."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/tanium-risk-assessment@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/tanium-risk-assessment@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A diagonal escarpment of three interlocked wedge halls steps upward toward one cantilevered audit tower, cut by a deep zigzag inspection trench and anchored by a low triangular forecourt.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Tanium family: accent.emissive #FF8B6F, structure.base #3A2722, line.primary #D28A6E, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: High-level risk-assessment identity only, supported by Python, Go, workflow, operator-control, and data-contract links. No threat score, shield, target, or security claim. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; shield or crosshair symbols; risk gauges; security dashboards; Tanium branding.\nEaster egg rule: Optional LOD-2-only inspection lamp recessed at the trench terminus; static, unlabeled, and non-evidentiary.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/xsearch@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/xsearch-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/xsearch@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A long indexing-comb hall uses six parallel archive fins of staggered length beneath one transverse raised query bridge, with an off-center triangular reading tower at the closed end.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Tanium family: accent.emissive #FF8B6F, structure.base #3A2722, line.primary #D28A6E, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Use the approved Manifest v3, data-contract, workflow, and operator-control links abstractly. The indexing-comb plan is an architectural metaphor, not a letter, logo, interface, or factual search-system claim. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; letter X glyph; magnifying glass; search result UI; query counts.\nEaster egg rule: Optional LOD-2-only unlit survey mast on the reading tower; no symbols, labels, or data meaning.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/career-world-portfolio@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/career-world-portfolio@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A tiered cartographer pavilion forms an open folded-map roof around a central navigable courtyard, with three viewpoint decks and a narrow inset evidence gallery.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Independent family: accent.emissive #B997FF, structure.base #30263C, line.primary #B49AD0, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Use React, TypeScript, operator-control, and data-contract links only as high-level structure. The map metaphor is illustrative and the evidence gallery contains no generated content. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; portfolio screenshots; resume text; map labels; browser chrome; React or TypeScript marks.\nEaster egg rule: Optional LOD-2-only blank survey table in the courtyard; no map text, pins, or factual annotations.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/qc-alm-extractor@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/qc-alm-extractor@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An entertainment-only extractor landmark: two leaning clamp towers suspend one plain faceted block above a stepped quarry-like base with a short rear service ramp.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: ACE Hardware family: accent.emissive #E06B7A, structure.base #392329, line.primary #C77E89, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Derived only from the approved project name. The geometry must not imply a real QC/ALM tool, extraction process, system, result, metric, or skill. Explicit prohibition: do not imply factual architecture, a real campus, systems, metrics, outcomes, or skill symbolism. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; OpenText or ALM marks; software UI; data streams; ACE branding; extraction metrics.\nEaster egg rule: None. This identity-only landmark may not receive an easter egg until public-safe evidence is approved.",
+                       "evidence_status":  "identity-only",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "project/client-devops-delivery-implementations@v1",
+                       "category":  "project",
+                       "output_path":  "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/client-devops-delivery-implementations@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An entertainment-only implementation cairn: four irregular interlocked wedge blocks climb around a narrow vertical void on a five-sided podium, with one broad cantilevered cap that shifts the skyline off-center.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Column Technologies family: accent.emissive #78A7C2, structure.base #243341, line.primary #88AFC5, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Derived only from the approved project name. It must not imply a client, delivery process, DevOps architecture, implementation result, metric, or linked skill. Explicit prohibition: do not imply factual architecture, a real campus, systems, metrics, outcomes, or skill symbolism. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; client logos; CI pipeline diagrams; delivery metrics; shipping labels; Column branding.\nEaster egg rule: None. This identity-only landmark may not receive an easter egg until public-safe evidence is approved.",
+                       "evidence_status":  "identity-only",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/workflow-orchestration@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/workflow-orchestration@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A circular conductor rotunda with a tall central drum, six staggered low service bays, and one interrupted ring ramp that creates a readable radial silhouette.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral capability geometry. Bays express coordinated work abstractly; no arrows, nodes, or moving-flow claims. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; workflow diagrams; arrows; Kubernetes imagery; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/python@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/python-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/python@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Two offset curved-edge automation halls flank a straight diagonal service spine, with one square intake court and one raised rear utility loft.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Python technology geometry. The halls may interleave but must not resemble snakes or the Python mark. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; snake imagery; Python logo colors; code text; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/vmware@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/vmware-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/vmware@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Two stacked offset machine floors float visually above one heavy shared physical base, tied by an exposed side core and a recessed service court.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral VMware-supported geometry using only a high-level virtualization motif. No vendor product architecture or marks. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; VMware wordmark; interlocking-square logo; virtual machine screens; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/macstadium@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/macstadium-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/macstadium@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An elongated managed-compute hall sits on a deep plinth with a rhythm of narrow service bays, a detached parallel utility bridge, and one raised end tower.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral MacStadium-supported geometry using only a high-level managed compute motif. No Apple device silhouette, vendor campus, or rack claim. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Apple logo; Mac or phone silhouettes; MacStadium wordmark; real data-center detail; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/electron@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/electron-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/electron@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A lightweight outer frame cradles a smaller solid workspace volume, separated by a continuous air gap and anchored by one low desktop-like base slab without screen details.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Electron-supported geometry linked at a high level to CableCar. The nested shell, not an atom or desktop icon, carries identity. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; atom imagery; Electron logo; browser or desktop UI; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/informatica@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/informatica-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/informatica@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Three distinct intake halls converge through solid angled corridors into one raised transformation chamber, then leave through a single narrow exit dock.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Informatica-supported geometry associated with ACE Hardware employment but not linked to an approved project. Do not place it or imply a project use. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Informatica logo; data arrows; ACE branding; project symbols; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "employer-supported-unlinked",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/atlassian@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/atlassian-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/atlassian@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A single continuous chevron-plan civic hall forms two unequal wedge wings around a narrow open forecourt, with stepped roof terraces rising toward the joined apex and one low rear archive strip.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Atlassian-supported geometry associated with Column Technologies employment but not linked to an approved project. No product-specific identity. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Atlassian, Jira, or Confluence marks; board UI; Column branding; project symbols; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "employer-supported-unlinked",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/ci-cd@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/ci-cd-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/ci-cd@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An elongated fabrication hall is wrapped by a continuous elevated service track and terminates in two sequential release bays with different roof heights.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral CI/CD capability geometry associated with Column Technologies employment but not linked to an approved project. Continuous form is decorative, not a pipeline claim. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; pipeline diagrams; infinity symbols; status lights; Column branding; deployment metrics; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "employer-supported-unlinked",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "skill/manifest-v3@v1",
+                       "category":  "skill",
+                       "output_path":  "design/career-world/concepts/skills/manifest-v3-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/manifest-v3@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A three-tier logistics ledger tower steps upward from a broad sorting hall to a narrow cap, with one exterior verification ramp touching every tier.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Manifest v3 geometry. Three tiers are supported by the canonical identity; no literal manifest, version text, or numbered labels. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; v3 text; documents or checklists; shipping labels; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "evidence-backed",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "ambient/cargo-boat@v1",
+                       "category":  "ambient",
+                       "output_path":  "design/career-world/concepts/ambient/cargo-boat-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world ambient concept sheet for ambient/cargo-boat@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A low angular barge with a raised stern cabin, open central cargo well, blunt bow, and two simple side rub rails.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Ambient only. Neutral reusable vessel; the empty well carries no cargo, project, traffic, route, or throughput meaning. Keep footprint, centroid, orientation, component arrangement, primary forms, and outer silhouette unchanged across all LOD panels. Ambient assets have no sign slot. LOD changes only secondary seams, facets, and other non-silhouette surface detail; do not add or remove components. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; company flags; container labels; wake or motion; photoreal water; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "ambient",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   },
+                   {
+                       "id":  "ambient/roof-equipment-kit@v1",
+                       "category":  "ambient",
+                       "output_path":  "design/career-world/concepts/ambient/roof-equipment-kit-v1.png",
+                       "full_prompt":  "Use case: stylized-concept\nAsset type: canonical career-world ambient concept sheet for ambient/roof-equipment-kit@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: One canonical grouped roof kit containing a low rectangular housing, an angled vent hood, a three-pipe cluster, and a narrow access curb arranged on one shared base.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Ambient attachment kit only. The grouped footprint is one reusable identity; LOD may remove secondary seams but never rearrange components or imply a real mechanical system. Keep footprint, centroid, orientation, component arrangement, primary forms, and outer silhouette unchanged across all LOD panels. Ambient assets have no sign slot. LOD changes only secondary seams, facets, and other non-silhouette surface detail; do not add or remove components. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; brand labels; photoreal HVAC; steam or smoke; separate building mass; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+                       "evidence_status":  "ambient",
+                       "reference_roles":  [
+                                               "No raster reference by default. Only the art lead may assign a passing same-category image as a style reference; never transfer identity, topology, geometry, coordinates, palette ownership, or factual meaning."
+                                           ],
+                       "input_image_policy":  {
+                                                  "default":  "none",
+                                                  "art_lead_override":  "Only the art lead may attach the passing tracer PNG for this exact canonical asset, and only when eligible_same_canonical_tracer_path is non-null.",
+                                                  "eligible_same_canonical_tracer_path":  null,
+                                                  "permitted_role":  "style-and-identity reference only",
+                                                  "prohibited_roles":  [
+                                                                           "edit target",
+                                                                           "geometry source",
+                                                                           "coordinate truth",
+                                                                           "topology authority",
+                                                                           "palette ownership authority",
+                                                                           "evidence or factual authority"
+                                                                       ],
+                                                  "cross_asset_reference":  "forbidden"
+                                              }
+                   }
+               ]
+}

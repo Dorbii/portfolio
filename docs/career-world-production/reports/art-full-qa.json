@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "report_type": "independent-full-library-art-qa-consolidation",
+  "packet_id": "CW-004-QA",
+  "run_id": "career-world-2026-07-16",
+  "lane_id": "art-full-qa",
+  "role": "independent art QA lead",
+  "completed_at": "2026-07-17T03:23:42-05:00",
+  "sources": {
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+    },
+    "qa_brief": {
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "sha256": "F23CC8BE600724C49623F5BE144C7D9F5CDE609D78AF3B7E3445851E49FBEAED"
+    },
+    "qa_partition": {
+      "path": "docs/career-world-production/briefs/art-qa-batches.json",
+      "sha256": "9E5EA22E6A4123D06215D6D9323E966B84B1A69427F90C2A5BDAB1E2915CF407"
+    },
+    "architecture": {
+      "path": "docs/career-world-production/architecture.md",
+      "sha256": "6429E8056DD78B0D89363C821994ACC1612DFE42C50DECDC00DBC387F8D362DC"
+    },
+    "asset_map": {
+      "path": "docs/career-world-asset-map.md",
+      "sha256": "7596EB116D34F9D621E4C9C249E093DA30EF3840703F70C0851967473FEB7246"
+    },
+    "generation_reports": [
+      {
+        "batch": "art-batch-a",
+        "path": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "sha256": "0B4C608DDA30DC2D94D4FB04367E726BA0957F161F871D2DC526FBA66114E428"
+      },
+      {
+        "batch": "art-batch-b",
+        "path": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "sha256": "B60B9821CC446E80936B4E42797BBC268093760425075A487B56FE8F3F048899"
+      },
+      {
+        "batch": "art-batch-c",
+        "path": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "sha256": "80A2BB8FE00A23FE1375AA7D98AA48029D2E8717C9FA64F562FE54A443ECD120"
+      }
+    ],
+    "independent_qa_reports": [
+      {
+        "batch": "art-qa-1",
+        "path": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "sha256": "E4D662604D85C6E3E2B96C5151E4D4C9F44E94444A4502BA3F765C5825F1ECBC",
+        "review_count": 19
+      },
+      {
+        "batch": "art-qa-2",
+        "path": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "sha256": "88F3BD371CBE97A8DBB86B09A7A322CF236242EEAD31CC74C0D333C6B3851D06",
+        "review_count": 19
+      },
+      {
+        "batch": "art-qa-3",
+        "path": "docs/career-world-production/reports/art-qa-batch-3.json",
+        "sha256": "73E6A59A64D7EE9359F5EBE6FF20080D4BB63F46997CDD261DB033BF7A7BC2A6",
+        "review_count": 18
+      }
+    ]
+  },
+  "consolidation_validation": {
+    "all_reports_parse_as_strict_json": true,
+    "qa_batch_counts": [
+      19,
+      19,
+      18
+    ],
+    "review_count": 56,
+    "unique_asset_id_count": 56,
+    "unique_output_path_count": 56,
+    "unique_artifact_sha256_count": 56,
+    "pairwise_disjoint": true,
+    "union_equals_manifest_id_set": true,
+    "union_equals_manifest_path_set": true,
+    "all_asset_identity_metadata_matches_partition": true,
+    "all_artifact_hash_byte_dimension_and_png_fields_recomputed_and_match_disk": true,
+    "all_normalized_crop_bounds_valid": true,
+    "all_reviews_apply_exact_nine_gate_set": true,
+    "all_blocker_outcomes_consistent": true,
+    "aggregate_numeric_scores_used": false,
+    "total_artifact_bytes": 118407798,
+    "missing_outputs": 0,
+    "extra_outputs": 0,
+    "corrupt_outputs": 0,
+    "duplicate_artifact_hashes": 0,
+    "runtime_reference_hits": 0,
+    "runtime_identical_hash_copy_hits": 0,
+    "lead_visual_blocker_spot_check": {
+      "inspected_original_detail_count": 11,
+      "confirmed_reported_material_defect_count": 11,
+      "overturned_defect_count": 0,
+      "image_mutations": 0
+    }
+  },
+  "outcome_counts": {
+    "PASS": 30,
+    "PASS_WITH_NOTES": 15,
+    "REGENERATE": 11,
+    "REJECT": 0
+  },
+  "pass_asset_ids": [
+    "ambient/cargo-boat@v1",
+    "ambient/marker-buoy@v1",
+    "ambient/roof-equipment-kit@v1",
+    "ambient/shore-pier@v1",
+    "city/independent@v1",
+    "city/tanium@v1",
+    "project/atlassian-platform-automation@v1",
+    "project/cablecar@v1",
+    "project/career-world-portfolio@v1",
+    "project/client-devops-delivery-implementations@v1",
+    "project/kaizen-agent-platform@v1",
+    "project/kaizen-metrics@v1",
+    "project/qc-alm-extractor@v1",
+    "project/uat-automation@v1",
+    "skill/ai@v1",
+    "skill/ci-cd@v1",
+    "skill/databricks@v1",
+    "skill/data-contracts@v1",
+    "skill/electron@v1",
+    "skill/go@v1",
+    "skill/informatica@v1",
+    "skill/localdb@v1",
+    "skill/macstadium@v1",
+    "skill/mcp@v1",
+    "skill/postgresql@v1",
+    "skill/python@v1",
+    "skill/redis@v1",
+    "skill/safe-writes@v1",
+    "skill/vmware@v1",
+    "world/career-world@v1"
+  ],
+  "pass_with_notes": [
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "tracing_note": "Use the selected lower-left panel's exact three-form cluster and shared pad; do not import small rocks, grass-like ground detail, or branch-tier changes from secondary panels."
+    },
+    {
+      "asset_id": "ambient/rock-cluster@v1",
+      "tracing_note": "Use the selected lower-middle five-piece cluster; omit cyan fissure emphasis and do not drop the two low chips as secondary panels do."
+    },
+    {
+      "asset_id": "ambient/service-truck@v1",
+      "tracing_note": "Use the selected truck topology only; omit decorative progress-dot sequences outside the trace panel."
+    },
+    {
+      "asset_id": "city/ace-hardware@v1",
+      "tracing_note": "Use the selected complete capital panel; do not derive geometry from simplified panels that remove roof/facade detail or from the non-featureless silhouette inset."
+    },
+    {
+      "asset_id": "city/column-technologies@v1",
+      "tracing_note": "Use the selected upper five-fin capital; do not adopt the simplified panel's collapsed end blocks or bridge recess."
+    },
+    {
+      "asset_id": "project/atlassian-data-center-resilience@v1",
+      "tracing_note": "Use the selected clean topology; omit small roof housings and protruding pipes introduced only in the lower-left panel."
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "tracing_note": "Use the selected clean deck and required topology; omit roof blocks introduced only in the lower-row detail panel."
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "tracing_note": "Use the selected clean lower LOD-1 panel; do not trace the tangled canopy perforation visible in the large hero."
+    },
+    {
+      "asset_id": "project/tmatch-eolmatch@v1",
+      "tracing_note": "Use the selected upper-left topology; omit the four seam pins shown in the lower-left panel because the optional rule permits only a pair."
+    },
+    {
+      "asset_id": "project/xsearch@v1",
+      "tracing_note": "Use the selected large panel with all six archive fins; do not import merged or missing fins from lower-detail panels."
+    },
+    {
+      "asset_id": "skill/aws@v1",
+      "tracing_note": "Use the selected large panel with all three pavilions; ignore the simplified panel that reduces the campus."
+    },
+    {
+      "asset_id": "skill/csharp@v1",
+      "tracing_note": "Use the selected clean roofline; omit rooftop units and pipes that protrude only in the lower-left panel."
+    },
+    {
+      "asset_id": "skill/docker@v1",
+      "tracing_note": "Use the selected complete panel; do not treat the open-void silhouette inset or changing roof fixtures as master geometry."
+    },
+    {
+      "asset_id": "skill/manifest-v3@v1",
+      "tracing_note": "Use the selected large panel's complete supported route and tier relationship; do not infer supports from the simplified panel."
+    },
+    {
+      "asset_id": "skill/typescript@v1",
+      "tracing_note": "Use the selected three-shaft, diagonal-brace, square-hall panel; omit the abstract glyph strip outside the trace panel."
+    }
+  ],
+  "material_blockers": [
+    {
+      "asset_id": "skill/operator-control@v1",
+      "qa_report": "art-qa-1",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Only one exposed switchback access system is present; the brief requires two distinct exposed switchback ramps.",
+      "smallest_correction_recommendation": "Require two separately readable switchback ramp assemblies and landings while preserving the accepted cabin, stepped plinth, rear hall, neutral palette, projection, and no-text constraints.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "qa_report": "art-qa-1",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "The overhead gantry is one straight span with no readable fork; the brief requires a visibly branching connected gantry.",
+      "smallest_correction_recommendation": "Require an unmistakable connected gantry branch while preserving both unequal towers, sunken dock, kiosk, trapezoidal apron, palette, projection, and no-brand/no-text constraints.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "qa_report": "art-qa-1",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Seven low service bays surround the ring; the brief requires exactly six.",
+      "smallest_correction_recommendation": "Require exactly six separately readable bays while preserving the central drum, interrupted ring, neutral palette, projection, and no-diagram/no-text constraints.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/atlassian@v1",
+      "qa_report": "art-qa-1",
+      "failure_class": "generated_text_or_branding",
+      "blocker_gates": [
+        "text_logo_watermark_absence"
+      ],
+      "visible_defect": "The sheet visibly prints BACKGROUND, SURFACE, LIT FACE, SHADOW FACE, INK, FOCUS, ACCENT, and EMISSIVE.",
+      "smallest_correction_recommendation": "Remove every palette label and pseudo-label while preserving the two unequal wings, open forecourt, stepped terraces, rear strip, neutral palette, and projection.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "qa_report": "art-qa-2",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Only two independently readable low radial annexes are present; the brief requires three.",
+      "smallest_correction_recommendation": "Require three separately readable connected annexes in one unoccluded panel while preserving the octagonal hall, stepped beacon, clipped diamond footprint, teal palette, projection, and blank sign slot.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/java@v1",
+      "qa_report": "art-qa-2",
+      "failure_class": "generated_text_or_branding",
+      "blocker_gates": [
+        "text_logo_watermark_absence"
+      ],
+      "visible_defect": "A pseudo-text-like mark appears above the front entrance instead of a blank sign slot.",
+      "smallest_correction_recommendation": "Remove the entrance mark and leave the sign slot blank while preserving the broad hall, central tower, perimeter colonnade, two wings, neutral palette, and projection.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/openapi@v1",
+      "qa_report": "art-qa-2",
+      "failure_class": "generated_text_or_branding",
+      "blocker_gates": [
+        "text_logo_watermark_absence"
+      ],
+      "visible_defect": "The sheet visibly prints LOD-0, LOD-1, and LOD-2 beneath the lower panels.",
+      "smallest_correction_recommendation": "Remove all captions, words, numbers, and pseudo-text while preserving the two portals, central vault, solid ramps, rear canopy, neutral palette, and projection.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "qa_report": "art-qa-2",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Only two primary wedge halls are independently readable before the audit tower; the brief requires three.",
+      "smallest_correction_recommendation": "Require three distinct connected interlocked wedge halls stepping toward the audit tower while preserving the triangular forecourt, zigzag trench, orange palette, projection, and no-metric rule.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "qa_report": "art-qa-3",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Only two cascading terrace wings are visible around the stage; the brief requires exactly three.",
+      "smallest_correction_recommendation": "Require exactly three distinct cascading terrace wings plus the separate low rear service bar while preserving the neutral palette, projection, blank sign area, and no atom/orbit/text constraints.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "project/contextforge@v1",
+      "qa_report": "art-qa-3",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "The fabrication hall is a long rectangular bar; no panel exposes the required L-shaped hall footprint.",
+      "smallest_correction_recommendation": "Require an unmistakable fully visible L-shaped fabrication-hall footprint with the sawtooth bank, offset archive tower, overhead bridge, and cylindrical compression house preserved.",
+      "retry_authorized": false
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "qa_report": "art-qa-3",
+      "failure_class": "primary_topology",
+      "blocker_gates": [
+        "canonical_panel_and_primary_topology",
+        "primary_form_traceability"
+      ],
+      "visible_defect": "Three freestanding decreasing frames surround the core; the brief requires exactly four.",
+      "smallest_correction_recommendation": "Require exactly four distinct progressively smaller freestanding rectangular frames around one dense core, seated on the tapered trapezoidal base, with neutral palette, projection, and no text or provider symbols preserved.",
+      "retry_authorized": false
+    }
+  ],
+  "failure_distribution": {
+    "primary_topology": 8,
+    "generated_text_or_branding": 3,
+    "material_blocker_asset_count": 11,
+    "material_blocker_gate_result_count": 19
+  },
+  "frozen_regeneration_threshold": {
+    "maximum_assets_before_systemic_stop": 8,
+    "actual_assets_requiring_regeneration": 11,
+    "threshold_exceeded": true,
+    "individual_retry_limit_if_a_future_replan_reopens_corrections": 1,
+    "required_action": "STOP_CORRECTION_WAVE_AND_REPLAN",
+    "reason": "The 11 failures exceed the frozen eight-asset limit and cluster into repeated exact-count/topology misses plus generated-text leakage, indicating a batch/prompt-system issue rather than isolated cleanup.",
+    "regeneration_authorized_by_this_report": false
+  },
+  "promotion_verdict": {
+    "verdict": "STOP_DO_NOT_PROMOTE_FULL_LIBRARY",
+    "full_library_promoted": false,
+    "accepted_candidate_count": 45,
+    "blocked_candidate_count": 11,
+    "accepted_candidates_may_be_regenerated_in_the_correction_wave": false,
+    "next_gate": "Director and art lead must diagnose the systemic topology-count and generated-text failure modes and explicitly replan before any retry is authorized. The 11 failed assets then require narrow replacement calls and fresh independent re-QA under the one-retry limit.",
+    "three_d_or_product_code_authorized": false
+  },
+  "files_changed": [
+    "docs/career-world-production/reports/art-qa-batch-1.json",
+    "docs/career-world-production/reports/art-qa-batch-2.json",
+    "docs/career-world-production/reports/art-qa-batch-3.json",
+    "docs/career-world-production/reports/art-full-qa.json"
+  ]
+}

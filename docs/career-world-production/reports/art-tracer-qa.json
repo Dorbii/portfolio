@@ -1,0 +1,1392 @@
+{
+  "schema_version": 1,
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-002",
+  "lane_id": "art-tracer-qa",
+  "role": "art QA",
+  "thread_id": "/root/art_lead/tracer_qa",
+  "parent_thread_id": "/root/art_lead",
+  "route_id": "qa/art/tracer",
+  "queue_item_id": "CW-002",
+  "status": "done",
+  "summary": "CW-002C terminal QA independently reinspected all five current tracer PNGs. Go, Kaizen Metrics, NinjaOne, and Career World retain their approved hashes and PASS scores. Evergreen is rejected at 83.25: its canonical tall crown has seven stepped tiers versus four in the middle and five on the right, the bottom panel is outlined/full-detail rather than a solid silhouette, and pixel-equivalent terrain-pad geometry is not established. Final verdict: STOP; do not promote full fanout. A separate Director hold also blocks canonical fanout until concept outputs move from runtime public/ to design/career-world/concepts/ and refreshed manifest/batch SHA evidence is issued.",
+  "skills": {
+    "loaded": [
+      "task-packet-execution"
+    ],
+    "used": [
+      {
+        "name": "task-packet-execution",
+        "why": "Enforced the read-only evidence fence, single-report write fence, and structured worker handoff."
+      }
+    ]
+  },
+  "authority": {
+    "generator_self_scores_used": false,
+    "visual_review_method": "Each of the five saved tracer PNGs and each of the three named references was independently opened with view_image at original detail.",
+    "score_formula": "sum(weight * rating / 4)",
+    "pass_rule": "weighted score at least 90, no automatic blocker, and no critical criterion below 3",
+    "revise_rule": "weighted score 80 through 89.99 with no automatic blocker",
+    "reject_rule": "weighted score below 80 or any automatic blocker"
+  },
+  "references_inspected": [
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/03-kaizen-metrics-project-city.png",
+      "use": "Kaizen Metrics dome identity and technical-cartography style reference"
+    },
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/01-career-world-overview.png",
+      "use": "one-mainland/two-island topology and frozen left/center/right mainland anchor composition reference"
+    },
+    {
+      "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/02-ninjaone-employer-territory.png",
+      "use": "single NinjaOne capital identity and employer-family style reference"
+    }
+  ],
+  "rubric": {
+    "criteria": [
+      {
+        "id": "identity_continuity",
+        "weight": 18,
+        "critical": true
+      },
+      {
+        "id": "projection_camera",
+        "weight": 14,
+        "critical": true
+      },
+      {
+        "id": "skill_reuse",
+        "weight": 14,
+        "critical": true
+      },
+      {
+        "id": "evidence_brand_safety",
+        "weight": 12,
+        "critical": true
+      },
+      {
+        "id": "geometry_coherence",
+        "weight": 12,
+        "critical": true
+      },
+      {
+        "id": "style_specificity",
+        "weight": 10,
+        "critical": true
+      },
+      {
+        "id": "lod_derivation",
+        "weight": 8,
+        "critical": false
+      },
+      {
+        "id": "palette_material",
+        "weight": 5,
+        "critical": false
+      },
+      {
+        "id": "density_legibility",
+        "weight": 5,
+        "critical": false
+      },
+      {
+        "id": "traceability",
+        "weight": 2,
+        "critical": false
+      }
+    ]
+  },
+  "asset_reviews": [
+    {
+      "asset_id": "skill/go@v1",
+      "path": "design/career-world/concepts/tracer/skill-go-v1.png",
+      "sha256": "43227b1d852ac7b4f9e7aabfa75b172af7d95a44011e771d9a3c9c060592c3d6",
+      "verdict": "REVISE",
+      "weighted_score_100": 80.75,
+      "automatic_blocker": false,
+      "blockers": [],
+      "critical_criteria_below_3": [
+        "geometry_coherence"
+      ],
+      "scores": {
+        "identity_continuity": {
+          "rating": 3,
+          "weight": 18,
+          "contribution": 13.5,
+          "evidence": "The workshop, central engine bay, two stacks, turbine positions, roofline, and orientation remain stable, but the left high-detail view adds an exterior service unit that changes the occupied edge and visible silhouette."
+        },
+        "projection_camera": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "evidence": "All three views retain parallel isometric ground axes, vertical stacks, and no visible perspective convergence."
+        },
+        "skill_reuse": {
+          "rating": 3,
+          "weight": 14,
+          "contribution": 10.5,
+          "evidence": "The architecture is employer-neutral, contains no mark, and uses visually separable structure, line, and cyan accent colors suitable for a mechanical palette swap. A raster sheet cannot establish the required geometry hash or palette-reuse contact-sheet proof."
+        },
+        "evidence_brand_safety": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "No Go wordmark, gopher, employer logo, pseudo-text, unsupported number, private detail, or real-site claim is visible."
+        },
+        "geometry_coherence": {
+          "rating": 2,
+          "weight": 12,
+          "contribution": 6,
+          "evidence": "The primary building joins are coherent, but the high-detail-only exterior service unit is a silhouette-changing prop prohibited by this criterion."
+        },
+        "style_specificity": {
+          "rating": 4,
+          "weight": 10,
+          "contribution": 10,
+          "evidence": "Matte dark faces, thin parallel construction strokes, restrained cyan accents, and the isolated drafting-field layout match the technical-cartography contract."
+        },
+        "lod_derivation": {
+          "rating": 2,
+          "weight": 8,
+          "contribution": 4,
+          "evidence": "Secondary facade detail simplifies appropriately, but a whole exterior unit appears only in the highest-detail view rather than deriving from the same geometry."
+        },
+        "palette_material": {
+          "rating": 3,
+          "weight": 5,
+          "contribution": 3.75,
+          "evidence": "The visible treatment is matte and neutral with restrained emissive accents, but the raster cannot prove all eight semantic slots."
+        },
+        "density_legibility": {
+          "rating": 4,
+          "weight": 5,
+          "contribution": 5,
+          "evidence": "All four views are separated, fully visible, and readable against ample negative space."
+        },
+        "traceability": {
+          "rating": 4,
+          "weight": 2,
+          "contribution": 2,
+          "evidence": "The asset is isolated, complete, watermark-free, and its visible architectural edges can be rebuilt deterministically."
+        }
+      },
+      "explicit_checks": {
+        "employer_neutral": true,
+        "visually_mechanically_recolorable_without_geometry_change": true,
+        "mechanical_geometry_hash_proof_supplied": false,
+        "high_detail_only_exterior_service_unit_present": true,
+        "service_unit_changes_effective_footprint_or_silhouette": true
+      },
+      "visual_evidence": [
+        "Three main LOD views show the same engine-house massing and two-stack/two-turbine identity.",
+        "The small box-like service unit at the lower front-right edge exists only in the left high-detail view.",
+        "No technology or employer mark is visible; cyan is confined to separable trim and aperture accents."
+      ],
+      "targeted_revision_instruction": "Remove the high-detail-only exterior service unit and regenerate that LOD plus the silhouette from the unchanged lower-detail footprint, preserving every workshop, engine-bay, stack, turbine, roofline, sign-slot, orientation, and neutral palette feature.",
+      "targeted_revision_instruction_count": 1
+    },
+    {
+      "asset_id": "project/kaizen-metrics@v1",
+      "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+      "sha256": "df1d60f93e06a8fb0627dfb4218456865f9db258a88bcc9146ffb2f9f5d8966e",
+      "verdict": "REVISE",
+      "weighted_score_100": 84.25,
+      "automatic_blocker": false,
+      "blockers": [],
+      "critical_criteria_below_3": [
+        "geometry_coherence"
+      ],
+      "scores": {
+        "identity_continuity": {
+          "rating": 3,
+          "weight": 18,
+          "contribution": 13.5,
+          "evidence": "The dominant ribbed dome, square platform, rectangular annex, rear dish, centroid, and orientation remain stable, but three high-detail corner beacons extend beyond the otherwise stable building outline."
+        },
+        "projection_camera": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "evidence": "The platform axes, facade verticals, dome construction, and dish alignment use a consistent orthographic isometric camera in every view."
+        },
+        "skill_reuse": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "applicability": "No reusable employer-variant skill asset is present in this project sheet.",
+          "evidence": "The sheet contains only the single project identity and introduces no duplicate or recolored skill instance."
+        },
+        "evidence_brand_safety": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "The three shards are decorative corner beacons, not numbers, charts, graphs, gauges, trends, or any other metric claim; no logo, text, or private detail appears."
+        },
+        "geometry_coherence": {
+          "rating": 2,
+          "weight": 12,
+          "contribution": 6,
+          "evidence": "The observatory itself is coherent, but the three LOD-2 corner beacons rise outside the established building alpha silhouette and are absent from the other views and solid silhouette."
+        },
+        "style_specificity": {
+          "rating": 4,
+          "weight": 10,
+          "contribution": 10,
+          "evidence": "The dark matte observatory, fine rib and facade strokes, restrained cyan, and drafting field match the accepted technical-cartography reference."
+        },
+        "lod_derivation": {
+          "rating": 2,
+          "weight": 8,
+          "contribution": 4,
+          "evidence": "Facade and dome detail simplify correctly, but the three beacons create new outer edges in only the highest-detail view."
+        },
+        "palette_material": {
+          "rating": 3,
+          "weight": 5,
+          "contribution": 3.75,
+          "evidence": "The sheet is matte with restrained cyan and no PBR treatment; exact semantic palette-slot coverage cannot be proven from raster pixels."
+        },
+        "density_legibility": {
+          "rating": 4,
+          "weight": 5,
+          "contribution": 5,
+          "evidence": "The dome remains dominant and all views are separated, unobscured, and readable at sheet scale."
+        },
+        "traceability": {
+          "rating": 4,
+          "weight": 2,
+          "contribution": 2,
+          "evidence": "Dome ribs, base, annex, dish, platform, and attachments have complete visible edges and no watermark."
+        }
+      },
+      "explicit_checks": {
+        "accepted_domed_observatory_identity_retained": true,
+        "three_corner_beacons_present": true,
+        "corner_beacons_change_footprint": false,
+        "corner_beacons_change_alpha_silhouette": true,
+        "easter_egg_implies_metric": false
+      },
+      "visual_evidence": [
+        "The circular ribbed dome remains the dominant mass and visibly continues the supplied Kaizen Metrics landmark.",
+        "The square base, annex, and rear dish are stable in all three LOD views.",
+        "Exactly three cyan shard beacons appear only in the lower-left high-detail view and protrude beyond the building silhouette even though they remain on the same platform footprint."
+      ],
+      "targeted_revision_instruction": "Move the three permitted LOD-2 shard beacons onto positions fully inside the existing observatory alpha silhouette, then render the high-detail view and solid silhouette with the current dome, base, annex, dish, platform footprint, and all other geometry unchanged.",
+      "targeted_revision_instruction_count": 1
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+      "sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+      "verdict": "PASS",
+      "weighted_score_100": 98.75,
+      "automatic_blocker": false,
+      "blockers": [],
+      "critical_criteria_below_3": [],
+      "scores": {
+        "identity_continuity": {
+          "rating": 4,
+          "weight": 18,
+          "contribution": 18,
+          "evidence": "All views preserve one dominant central tower, two paired stepped side towers, connected low wings, one unified foundation, one front circular court, rooflines, centroid, and orientation."
+        },
+        "projection_camera": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "evidence": "Ground axes stay parallel, facade verticals remain vertical, and no tower shows perspective convergence or alternate rotation."
+        },
+        "skill_reuse": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "applicability": "No reusable employer-variant skill asset is present in this city-capital sheet.",
+          "evidence": "The sheet contains one employer-capital identity and no duplicate or independently recolored skill geometry."
+        },
+        "evidence_brand_safety": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "No NinjaOne logo, letter N, text, mascot, real-campus claim, unsupported number, or surrounding project identity appears."
+        },
+        "geometry_coherence": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "The towers, wings, foundation, steps, court, and corner fixtures are physically connected with coherent axes and no melted or impossible joins."
+        },
+        "style_specificity": {
+          "rating": 4,
+          "weight": 10,
+          "contribution": 10,
+          "evidence": "The sheet uses restrained dark technical-cartography massing, fine cyan linework, matte faces, and no generic neon/PBR/dashboard treatment."
+        },
+        "lod_derivation": {
+          "rating": 4,
+          "weight": 8,
+          "contribution": 8,
+          "evidence": "Only facade line density, doors, seams, court detail, and small roof treatment simplify; the unified capital silhouette remains stable."
+        },
+        "palette_material": {
+          "rating": 3,
+          "weight": 5,
+          "contribution": 3.75,
+          "evidence": "The prescribed dark teal/cyan employer family is restrained and matte with limited emissive area; the raster cannot prove all eight semantic slots."
+        },
+        "density_legibility": {
+          "rating": 4,
+          "weight": 5,
+          "contribution": 5,
+          "evidence": "The central tower hierarchy reads immediately and each view has clean separation and sufficient negative space."
+        },
+        "traceability": {
+          "rating": 4,
+          "weight": 2,
+          "contribution": 2,
+          "evidence": "All capital edges are complete, isolated, watermark-free, and rebuildable without guessing a hidden alternate layout."
+        }
+      },
+      "explicit_checks": {
+        "one_unified_capital_identity": true,
+        "alternate_city_layout": false,
+        "dominant_central_tower": true,
+        "paired_stepped_side_towers": true,
+        "connected_service_wings": true,
+        "single_circular_arrival_court": true
+      },
+      "visual_evidence": [
+        "Every LOD shows the same connected five-part hierarchy rather than a territory or collection of project buildings.",
+        "The central tower dominates while the two side towers remain visibly paired and subordinate.",
+        "The circular court stays attached to the same unified base and no road or territory geometry leaves the asset."
+      ],
+      "targeted_revision_instruction": null,
+      "targeted_revision_instruction_count": 0
+    },
+    {
+      "asset_id": "world/career-world@v1",
+      "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+      "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+      "verdict": "PASS",
+      "weighted_score_100": 92.25,
+      "automatic_blocker": false,
+      "blockers": [],
+      "critical_criteria_below_3": [],
+      "scores": {
+        "identity_continuity": {
+          "rating": 3,
+          "weight": 18,
+          "contribution": 13.5,
+          "evidence": "The dominant map and both proof views preserve one mainland, two lower islands, the same major coastline features, and three pads in one shallow left/center/right band. The filled silhouette has the same primary outer contours; strict scaled-pixel IoU was not mechanically measured, so this criterion remains conservative at 3."
+        },
+        "projection_camera": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "evidence": "Cliff edges, anchor ellipses, road surfaces, and terrain marks consistently use orthographic isometric axes without convergence."
+        },
+        "skill_reuse": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "applicability": "No reusable employer-variant skill asset is present in the world sheet.",
+          "evidence": "The map contains neutral geography only and no image-generated employer skill variants."
+        },
+        "evidence_brand_safety": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "No labels, UI, employer marks, city skylines, unsupported claims, private details, digits, or pseudo-text are visible."
+        },
+        "geometry_coherence": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "The left/center/right road topology and exactly two mainland-to-island dotted routes connect coherently; offshore marks are sparse, angular, tightly coastal, and visibly far smaller than either canonical island."
+        },
+        "style_specificity": {
+          "rating": 4,
+          "weight": 10,
+          "contribution": 10,
+          "evidence": "The dominant map uses restrained matte cartographic terrain, thin linework, sparse cyan route dots, and no dashboard or PBR treatment."
+        },
+        "lod_derivation": {
+          "rating": 3,
+          "weight": 8,
+          "contribution": 6,
+          "evidence": "Both proof maps and the filled silhouette visibly reuse the dominant map's primary coast, island positions, pad band, and route endpoints while simplifying only interior detail. Exact 1.5-percent edge-overlay compliance was not measured."
+        },
+        "palette_material": {
+          "rating": 3,
+          "weight": 5,
+          "contribution": 3.75,
+          "evidence": "The map is matte, neutral, and restrained; exact eight-slot semantics are not recoverable from the raster."
+        },
+        "density_legibility": {
+          "rating": 4,
+          "weight": 5,
+          "contribution": 5,
+          "evidence": "The 1+2 topology, three mainland pads, roads, two sea routes, and proof rail remain immediately legible with adequate negative space."
+        },
+        "traceability": {
+          "rating": 4,
+          "weight": 2,
+          "contribution": 2,
+          "evidence": "The candidate is isolated, complete, label-free, watermark-free, and exposes continuous coast, pad, road, route, and angular-rock edges suitable for one deterministic master trace."
+        }
+      },
+      "explicit_checks": {
+        "mainland_count": 1,
+        "lower_island_count": 2,
+        "dotted_sea_route_count": 2,
+        "label_and_ui_free": true,
+        "frozen_left_center_right_mainland_anchor_composition_preserved": true,
+        "observed_mainland_anchor_composition": "left, center, and right pads in one shallow horizontal band",
+        "proof_views_visibly_use_identical_primary_coastline": true,
+        "exact_scaled_pixel_equality_measured": false,
+        "rocks_unambiguously_read_as_rocks": true,
+        "rock_assessment": "Offshore marks are sparse faceted ticks tight to the coast and remain unambiguously smaller than both canonical lower islands."
+      },
+      "visual_evidence": [
+        "Compared with the rejected initial candidate, the former bottom-center mainland pad is now centered between the left and right pads in the accepted shallow band.",
+        "The dominant composition and both proof maps contain exactly one large mainland, two separate lower islands, and exactly two dotted mainland-to-island routes.",
+        "Distinctive major coastline lobes, bays, island contours, pad positions, and route endpoints recur in the dominant map, both proof maps, and the filled silhouette.",
+        "Every offshore mark is angular and sub-island-scale; none reads as a third lower island or archipelago.",
+        "No generated label, legend, logo, control, coordinate, or other UI element appears."
+      ],
+      "deterministic_resolution": {
+        "unresolved_issue": "Exact scaled-pixel coastline equality was not measured with an alpha overlay.",
+        "can_be_handled_deterministically": true,
+        "method": "Trace one code-native master coastline, island, anchor, and route mask, then derive dominant, proof, and silhouette representations from that single geometry.",
+        "requires_another_image_retry": false
+      },
+      "targeted_revision_instruction": null,
+      "targeted_revision_instruction_count": 0
+    },
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "sha256": "5f795188cd78ca2d0bfe9a791bcb76c7bac019638613ec53ab5f9173e8de9958",
+      "verdict": "REJECT",
+      "weighted_score_100": 70.25,
+      "automatic_blocker": false,
+      "blockers": [],
+      "critical_criteria_below_3": [
+        "identity_continuity",
+        "geometry_coherence",
+        "style_specificity"
+      ],
+      "scores": {
+        "identity_continuity": {
+          "rating": 2,
+          "weight": 18,
+          "contribution": 9,
+          "evidence": "All full LOD views contain four trees with the intended height hierarchy, but branch contours and pad edges drift and the solid silhouette merges the front-center medium tree into the tallest tree, leaving only three readable crowns."
+        },
+        "projection_camera": {
+          "rating": 3,
+          "weight": 14,
+          "contribution": 10.5,
+          "evidence": "Trunks remain vertical and the shared pad is consistently presented on the isometric field, although the organic pad provides limited measurable axis evidence."
+        },
+        "skill_reuse": {
+          "rating": 4,
+          "weight": 14,
+          "contribution": 14,
+          "applicability": "Assessed as canonical ambient reuse rather than employer-skill reuse.",
+          "evidence": "The cluster is neutral, contains no employer color or mark, and can be repeated as one ambient identity."
+        },
+        "evidence_brand_safety": {
+          "rating": 4,
+          "weight": 12,
+          "contribution": 12,
+          "evidence": "No text, logo, private detail, number, symbol, or factual implication is present."
+        },
+        "geometry_coherence": {
+          "rating": 2,
+          "weight": 12,
+          "contribution": 6,
+          "evidence": "Trunks connect to one pad, but the front-center crown tangentially merges with the tallest crown in the solid silhouette, defeating the required four-tree separation."
+        },
+        "style_specificity": {
+          "rating": 2,
+          "weight": 10,
+          "contribution": 5,
+          "evidence": "Broad filled scalloped foliage and soft illustrated shading read as generic game-environment concept art rather than the accepted thin parallel technical-cartography line language."
+        },
+        "lod_derivation": {
+          "rating": 2,
+          "weight": 8,
+          "contribution": 4,
+          "evidence": "Tree count and height hierarchy remain, but outer crown profiles, overlap relationships, and shared-pad contour change more than secondary-detail simplification."
+        },
+        "palette_material": {
+          "rating": 3,
+          "weight": 5,
+          "contribution": 3.75,
+          "evidence": "The palette is neutral and non-emissive, but the soft foliage shading is less matte and slot-like than the architectural sheets."
+        },
+        "density_legibility": {
+          "rating": 4,
+          "weight": 5,
+          "contribution": 5,
+          "evidence": "The three full views are well separated and the cluster remains readable against ample negative space."
+        },
+        "traceability": {
+          "rating": 2,
+          "weight": 2,
+          "contribution": 1,
+          "evidence": "The full views are isolated and watermark-free, but the solid silhouette does not expose four independently traceable tree masses and the painterly crown edges require interpretation."
+        }
+      },
+      "explicit_checks": {
+        "four_trees_present_in_each_full_lod": true,
+        "shared_pad_present": true,
+        "height_hierarchy_preserved": true,
+        "four_crowns_separate_in_solid_silhouette": false,
+        "front_center_tree_traceable_in_solid_silhouette": false,
+        "technical_cartography_style_match": false,
+        "employer_neutral_reusable_ambient_asset": true
+      },
+      "visual_evidence": [
+        "Each full LOD shows one tallest, two medium, and one smaller conifer on one pad.",
+        "The silhouette inset exposes only three distinct crowns because the front-center medium conifer is absorbed into the tallest mass.",
+        "Crown scallops, filled foliage layers, and soft shading are materially more illustrative than the thin technical line treatment of the accepted world and building references."
+      ],
+      "targeted_revision_instruction": "Regenerate the cluster with the front-center medium tree laterally separated enough to remain a fourth distinct crown in the solid silhouette, lock all four tree positions, heights, pad footprint, and outer conical masses across LODs, and replace the painterly foliage fills with the same matte thin-parallel-stroke technical-cartography treatment used by the accepted building sheets.",
+      "targeted_revision_instruction_count": 1
+    }
+  ],
+  "re_qa": {
+    "retry_round_count": 1,
+    "final_independent_rerun": true,
+    "scope": "world/career-world@v1 only; prior NinjaOne, Go, Kaizen Metrics, and evergreen scores and verdicts preserved",
+    "inputs": [
+      {
+        "path": "docs/career-world-production/reports/art-tracer-generation.json",
+        "role": "updated generation and retry record"
+      },
+      {
+        "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+        "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "role": "revised candidate inspected at original detail"
+      },
+      {
+        "path": "design/career-world/concepts/tracer/world-career-world-v1-rejected-initial.png",
+        "sha256": "0f9dfb03cb23e94318ce3b6a3ff2ec2e8bbe2fa0876bdb837e0c003ed51ae4aa",
+        "role": "rejected initial candidate inspected at original detail"
+      },
+      {
+        "path": "C:/Users/Steve/.codex/visualizations/2026/07/17/019f6de4-afa7-7ef1-9527-fb01bcab4419/career-world-mocks-v2/01-career-world-overview.png",
+        "role": "accepted topology and anchor-composition reference inspected at original detail"
+      }
+    ],
+    "previous_world_verdict": "REJECT",
+    "previous_world_score_100": 81,
+    "final_world_verdict": "PASS",
+    "final_world_score_100": 92.25,
+    "checks": {
+      "frozen_left_center_right_mainland_anchors": "pass",
+      "one_mainland_two_lower_islands": "pass",
+      "exactly_two_sea_routes": "pass",
+      "visibly_identical_primary_coastline_across_dominant_proof_and_silhouette": "pass",
+      "unambiguous_angular_rocks": "pass",
+      "label_and_ui_free": "pass"
+    },
+    "unresolved_world_issue": {
+      "description": "Exact scaled-pixel equality across differently sized representations was not established by an alpha overlay.",
+      "can_be_handled_deterministically": true,
+      "deterministic_method": "Use one code-native master coastline/anchor/route mask for every rendered representation.",
+      "requires_another_image_retry": false,
+      "blocks_world_pass": false
+    },
+    "further_revision_instructions_permitted": false
+  },
+  "cw002b_rerun": {
+    "packet_id": "CW-002B",
+    "audit_mode": "independent_current-pixel_review",
+    "generator_self_scores_used": false,
+    "all_five_view_image_inspected_at_original_detail": true,
+    "current_hashes_and_dimensions_recomputed_from_disk": true,
+    "score_formula": "sum(weight * rating / 4)",
+    "pass_rule": "total at least 90, no geometry or style blocker, and no critical criterion below 3",
+    "history_preserved": [
+      "asset_reviews",
+      "re_qa"
+    ],
+    "asset_reviews": [
+      {
+        "asset_id": "skill/go@v1",
+        "path": "design/career-world/concepts/tracer/skill-go-v1.png",
+        "dimensions": {
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2058080
+        },
+        "sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a",
+        "verdict": "PASS",
+        "weighted_score_100": 95.25,
+        "automatic_blocker": false,
+        "blockers": [],
+        "critical_criteria_below_3": [],
+        "scores": {
+          "identity_continuity": {
+            "rating": 4,
+            "weight": 18,
+            "contribution": 18,
+            "evidence": "The low workshop, taller engine bay, two stacks, two turbine housings, blank sign slot, centroid, roofline, common base, and solid silhouette remain stable across all three LOD panels."
+          },
+          "projection_camera": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "evidence": "All panels retain parallel true-isometric ground axes, vertical stacks, identical orientation, and no perspective convergence."
+          },
+          "skill_reuse": {
+            "rating": 3,
+            "weight": 14,
+            "contribution": 10.5,
+            "evidence": "The architecture is employer-neutral with no logo or baked employer mark, and its structure, line, and accent colors are visually separable for a mechanical palette swap. Raster inspection cannot prove a geometry hash or semantic palette-slot contact sheet."
+          },
+          "evidence_brand_safety": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "No Go wordmark, mascot, employer mark, pseudo-text, unsupported number, metric, private detail, or real-site claim appears."
+          },
+          "geometry_coherence": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "The former LOD-specific exterior service box is absent; every visible mass and pipe joins coherently inside the shared building base and common outer silhouette."
+          },
+          "style_specificity": {
+            "rating": 4,
+            "weight": 10,
+            "contribution": 10,
+            "evidence": "Matte navy faces, thin off-white/cyan construction strokes, sparse emissive detail, and the drafting grid retain the accepted technical-cartography language."
+          },
+          "lod_derivation": {
+            "rating": 4,
+            "weight": 8,
+            "contribution": 8,
+            "evidence": "Only vents, doors, facade seams, and other secondary lines simplify; no LOD-specific exterior object changes the shared footprint or primary outline."
+          },
+          "palette_material": {
+            "rating": 3,
+            "weight": 5,
+            "contribution": 3.75,
+            "evidence": "The treatment is matte, neutral, and restrained with limited cyan accent; exact eight-slot semantics cannot be proven from raster pixels."
+          },
+          "density_legibility": {
+            "rating": 4,
+            "weight": 5,
+            "contribution": 5,
+            "evidence": "All four views are separated, unobscured, and readable with ample negative space."
+          },
+          "traceability": {
+            "rating": 4,
+            "weight": 2,
+            "contribution": 2,
+            "evidence": "The complete isolated edges, stable base, solid silhouette, and absence of watermark support deterministic vector reconstruction."
+          }
+        },
+        "explicit_checks": {
+          "employer_neutral": true,
+          "visually_mechanically_recolorable_without_geometry_change": true,
+          "high_detail_only_attachment_outside_common_base": false,
+          "lod_specific_exterior_service_box_present": false,
+          "primary_engine_house_identity_stable": true,
+          "solid_silhouette_stable": true
+        },
+        "findings": [
+          "The former lower-front exterior box is fully removed and the base edge is restored.",
+          "No replacement attachment or new exterior protrusion appears in any LOD.",
+          "Minor facade-line differences remain secondary and do not alter the outer geometry."
+        ]
+      },
+      {
+        "asset_id": "project/kaizen-metrics@v1",
+        "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+        "dimensions": {
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2322525
+        },
+        "sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8",
+        "verdict": "PASS",
+        "weighted_score_100": 98.75,
+        "automatic_blocker": false,
+        "blockers": [],
+        "critical_criteria_below_3": [],
+        "scores": {
+          "identity_continuity": {
+            "rating": 4,
+            "weight": 18,
+            "contribution": 18,
+            "evidence": "The dominant ribbed dome, square base/platform, annex, rear dish, sign slot, centroid, orientation, and solid silhouette remain stable across the three LOD panels."
+          },
+          "projection_camera": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "evidence": "Platform axes, verticals, dome ribs, and dish alignment retain one orthographic true-isometric camera without convergence."
+          },
+          "skill_reuse": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "applicability": "No reusable employer-variant skill asset is present in this project sheet.",
+            "evidence": "The sheet contains only one canonical project identity and introduces no duplicate or independently recolored skill geometry."
+          },
+          "evidence_brand_safety": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "No beacon, number, chart, graph, gauge, result, trend, logo, text, or other metric/factual claim appears."
+          },
+          "geometry_coherence": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "The former three corner obelisks are absent; only low platform caps remain within the shared footprint, and all dome/base/annex/dish joins are coherent."
+          },
+          "style_specificity": {
+            "rating": 4,
+            "weight": 10,
+            "contribution": 10,
+            "evidence": "The matte observatory, fine architectural strokes, restrained cyan, and drafting field match the accepted technical-cartography style rather than PBR, dashboard, or generic concept art."
+          },
+          "lod_derivation": {
+            "rating": 4,
+            "weight": 8,
+            "contribution": 8,
+            "evidence": "Only ribs, doors, seams, facade lines, and the permitted recessed service detail vary; no LOD attachment changes the primary outline."
+          },
+          "palette_material": {
+            "rating": 3,
+            "weight": 5,
+            "contribution": 3.75,
+            "evidence": "The material language is matte and restrained with limited cyan accent; exact semantic palette-slot coverage is not provable from raster pixels."
+          },
+          "density_legibility": {
+            "rating": 4,
+            "weight": 5,
+            "contribution": 5,
+            "evidence": "The dome remains dominant and all panels remain separated, unobscured, and readable."
+          },
+          "traceability": {
+            "rating": 4,
+            "weight": 2,
+            "contribution": 2,
+            "evidence": "Dome ribs, base, annex, dish, platform, and low caps have complete visible edges with no watermark or ambiguous protrusion."
+          }
+        },
+        "explicit_checks": {
+          "corner_beacon_or_obelisk_extends_outer_alpha_silhouette": false,
+          "remaining_beacon_count": 0,
+          "remaining_beacon_rule": "pass because no beacon geometry remains",
+          "dome_base_annex_dish_platform_primary_mass_stable": true,
+          "metric_or_result_claim_present": false
+        },
+        "findings": [
+          "All three former cyan corner beacons are removed.",
+          "The remaining corner caps are low, repeated platform geometry and do not extend the outer alpha silhouette.",
+          "The domed landmark identity and non-metric evidence boundary are intact."
+        ]
+      },
+      {
+        "asset_id": "city/ninjaone@v1",
+        "path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+        "dimensions": {
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 2183118
+        },
+        "sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+        "hash_matches_prior_pass": true,
+        "verdict": "PASS",
+        "weighted_score_100": 98.75,
+        "automatic_blocker": false,
+        "blockers": [],
+        "critical_criteria_below_3": [],
+        "scores": {
+          "identity_continuity": {
+            "rating": 4,
+            "weight": 18,
+            "contribution": 18,
+            "evidence": "All panels preserve one unified capital with a dominant central tower, two paired stepped side towers, connected low wings, one foundation, and one front circular court."
+          },
+          "projection_camera": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "evidence": "Ground axes remain parallel, facade verticals remain vertical, and every tower retains the same isometric orientation without convergence."
+          },
+          "skill_reuse": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "applicability": "No reusable employer-variant skill asset is present in this city-capital sheet.",
+            "evidence": "The sheet contains one employer-capital identity and no duplicate or image-recolored skill geometry."
+          },
+          "evidence_brand_safety": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "No NinjaOne logo, letter N, text, mascot, project identity, unsupported number, or real-campus claim appears."
+          },
+          "geometry_coherence": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "Towers, wings, foundation, steps, court, and corner fixtures remain connected with coherent axes and no impossible joins or silhouette-changing props."
+          },
+          "style_specificity": {
+            "rating": 4,
+            "weight": 10,
+            "contribution": 10,
+            "evidence": "Dark matte masses, restrained cyan linework, and technical drafting presentation remain specific and non-PBR."
+          },
+          "lod_derivation": {
+            "rating": 4,
+            "weight": 8,
+            "contribution": 8,
+            "evidence": "Only facade, court, seam, and roof-detail density simplifies; the unified capital silhouette and footprint remain stable."
+          },
+          "palette_material": {
+            "rating": 3,
+            "weight": 5,
+            "contribution": 3.75,
+            "evidence": "The prescribed dark teal/cyan employer family remains matte and restrained; all eight semantic slots cannot be proven from raster pixels."
+          },
+          "density_legibility": {
+            "rating": 4,
+            "weight": 5,
+            "contribution": 5,
+            "evidence": "The tower hierarchy reads immediately and each view has clean separation and negative space."
+          },
+          "traceability": {
+            "rating": 4,
+            "weight": 2,
+            "contribution": 2,
+            "evidence": "Complete isolated capital edges and a matching solid silhouette support deterministic rebuilding without an alternate city-layout guess."
+          }
+        },
+        "explicit_checks": {
+          "hash_unchanged": true,
+          "one_unified_capital_identity": true,
+          "alternate_city_layout": false,
+          "primary_silhouette_stable": true
+        },
+        "findings": [
+          "Fresh inspection confirms the unchanged hash and prior one-capital conclusion.",
+          "No new text, logo, attachment, camera drift, or geometry drift is visible."
+        ]
+      },
+      {
+        "asset_id": "world/career-world@v1",
+        "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+        "dimensions": {
+          "width": 1672,
+          "height": 941,
+          "format": "PNG",
+          "bytes": 2210155
+        },
+        "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "required_hash_matches": true,
+        "verdict": "PASS",
+        "weighted_score_100": 92.25,
+        "automatic_blocker": false,
+        "blockers": [],
+        "critical_criteria_below_3": [],
+        "scores": {
+          "identity_continuity": {
+            "rating": 3,
+            "weight": 18,
+            "contribution": 13.5,
+            "evidence": "One mainland, two lower islands, three pads in a shallow left/center/right band, and the same major coastline features remain visible in dominant, proof, and silhouette representations; exact scaled-pixel IoU remains unmeasured."
+          },
+          "projection_camera": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "evidence": "Cliffs, anchor ellipses, roads, and terrain marks retain consistent orthographic isometric axes without convergence."
+          },
+          "skill_reuse": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "applicability": "No reusable employer-variant skill asset is present in the world sheet.",
+            "evidence": "The map remains neutral geography with no image-generated employer skill variants."
+          },
+          "evidence_brand_safety": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "No label, UI, logo, employer architecture, unsupported claim, coordinate, digit, or pseudo-text appears."
+          },
+          "geometry_coherence": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "The three-pad road topology and exactly two mainland-to-island routes remain coherent; offshore marks remain angular, tightly coastal, and much smaller than either island."
+          },
+          "style_specificity": {
+            "rating": 4,
+            "weight": 10,
+            "contribution": 10,
+            "evidence": "Matte cartographic terrain, thin linework, sparse cyan route dots, and the absence of dashboard/PBR treatment retain the accepted style."
+          },
+          "lod_derivation": {
+            "rating": 3,
+            "weight": 8,
+            "contribution": 6,
+            "evidence": "Proof maps and silhouette visibly retain primary coast, island positions, pad band, and route endpoints while simplifying interior detail; exact alpha-overlay compliance remains unmeasured."
+          },
+          "palette_material": {
+            "rating": 3,
+            "weight": 5,
+            "contribution": 3.75,
+            "evidence": "The map is matte, neutral, and restrained; exact eight-slot semantics are not recoverable from raster pixels."
+          },
+          "density_legibility": {
+            "rating": 4,
+            "weight": 5,
+            "contribution": 5,
+            "evidence": "Topology, anchors, roads, routes, islands, and the proof rail remain immediately legible with adequate negative space."
+          },
+          "traceability": {
+            "rating": 4,
+            "weight": 2,
+            "contribution": 2,
+            "evidence": "Continuous coast, pad, road, route, and angular-rock edges remain isolated, label-free, watermark-free, and suitable for a deterministic master trace."
+          }
+        },
+        "explicit_checks": {
+          "hash_equals_required_value": true,
+          "frozen_left_center_right_mainland_anchors": true,
+          "mainland_count": 1,
+          "lower_island_count": 2,
+          "sea_route_count": 2,
+          "visibly_shared_primary_coastline": true,
+          "angular_rocks_unambiguous": true
+        },
+        "findings": [
+          "Fresh inspection confirms the required hash and prior World PASS.",
+          "No topology, anchor, route, rock, label, UI, or style regression is visible."
+        ],
+        "deterministic_resolution": {
+          "unresolved_issue": "Exact scaled-pixel coastline equality remains unmeasured.",
+          "safe_code_native_handling": true,
+          "method": "Derive every World representation from one code-native coastline/anchor/route mask.",
+          "blocks_pass": false
+        }
+      },
+      {
+        "asset_id": "ambient/evergreen-cluster@v1",
+        "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+        "dimensions": {
+          "width": 1536,
+          "height": 1024,
+          "format": "PNG",
+          "bytes": 1812255
+        },
+        "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15",
+        "verdict": "REJECT",
+        "weighted_score_100": 85.75,
+        "automatic_blocker": true,
+        "blockers": [
+          "Primary stepped outer-crown profiles and tier shoulders change materially between LOD panels, altering every tree's silhouette rather than simplifying only internal facet seams and secondary line density."
+        ],
+        "critical_criteria_below_3": [
+          "identity_continuity"
+        ],
+        "scores": {
+          "identity_continuity": {
+            "rating": 2,
+            "weight": 18,
+            "contribution": 9,
+            "evidence": "Every panel has the same four-tree arrangement, heights, gaps, trunks, and pad, but high-detail crowns have more and differently placed stepped tiers than the simplified panels, producing materially different outer silhouettes."
+          },
+          "projection_camera": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "evidence": "The shared pad uses consistent isometric axes, all trunks remain vertical, and panel orientation/scale remain stable without perspective convergence."
+          },
+          "skill_reuse": {
+            "rating": 4,
+            "weight": 14,
+            "contribution": 14,
+            "applicability": "Assessed as canonical ambient reuse rather than employer-skill reuse.",
+            "evidence": "The cluster is neutral, isolated, repeatable, and contains no employer-specific color, mark, or placement claim."
+          },
+          "evidence_brand_safety": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "No text, logo, number, symbol, metric, private detail, cast shadow, or factual implication appears."
+          },
+          "geometry_coherence": {
+            "rating": 4,
+            "weight": 12,
+            "contribution": 12,
+            "evidence": "Each panel contains exactly four separated faceted crowns and four separated straight trunks connected coherently to one angular terrain pad, with no tangencies or merged masses."
+          },
+          "style_specificity": {
+            "rating": 4,
+            "weight": 10,
+            "contribution": 10,
+            "evidence": "Hard straight/stepped crown edges, planar matte faces, sparse facet seams, thin technical lines, and no painterly needles or soft scallops match the architectural technical-cartography language."
+          },
+          "lod_derivation": {
+            "rating": 2,
+            "weight": 8,
+            "contribution": 4,
+            "evidence": "The number, width, and vertical placement of outer stepped crown tiers change between LOD panels; this changes primary alpha edges instead of only internal facet detail."
+          },
+          "palette_material": {
+            "rating": 3,
+            "weight": 5,
+            "contribution": 3.75,
+            "evidence": "The cluster uses restrained matte navy/slate planar faces and thin pale lines without glow; exact eight-slot semantics are not proven by the raster."
+          },
+          "density_legibility": {
+            "rating": 4,
+            "weight": 5,
+            "contribution": 5,
+            "evidence": "Exactly four crowns and trunks remain readable in every LOD and the solid silhouette, with visible background gaps and minimal internal line density."
+          },
+          "traceability": {
+            "rating": 4,
+            "weight": 2,
+            "contribution": 2,
+            "evidence": "All hard edges, trunks, gaps, and the low irregular pad are complete, isolated, watermark-free, and individually traceable."
+          }
+        },
+        "explicit_checks": {
+          "lod_tree_counts": [
+            4,
+            4,
+            4
+          ],
+          "silhouette_tree_count": 4,
+          "four_separate_crowns_in_silhouette": true,
+          "four_separate_trunks_in_silhouette": true,
+          "visible_gap_between_every_crown": true,
+          "visible_gap_between_every_trunk": true,
+          "tree_positions_stable": true,
+          "tree_heights_stable": true,
+          "terrain_footprint_stable": true,
+          "hard_straight_stepped_edges": true,
+          "minimal_line_density": true,
+          "technical_cartography_material_language": true,
+          "painterly_or_scalloped_foliage": false,
+          "cast_shadow": false,
+          "outer_crown_profiles_stable": false
+        },
+        "findings": [
+          "The prior merged-crown, hidden-trunk, and painterly-style failures are corrected.",
+          "The high-detail panel uses additional and differently placed crown shoulders; the medium and low panels remove or reposition those outer steps on every tree.",
+          "Because the changing steps are alpha-boundary geometry, not internal seams, the current sheet fails the locked primary-silhouette contract."
+        ],
+        "deterministic_normalization_assessment": {
+          "one_master_silhouette_from_clearest_panel_is_safe": true,
+          "clearest_panel": "leftmost high-detail LOD",
+          "preserves_four_tree_identity": true,
+          "preserves_positions_heights_gaps_trunks_and_terrain_footprint": true,
+          "makes_current_png_pass": false,
+          "opens_full_fanout_gate": false,
+          "note": "This is a code-native normalization feasibility finding, not an image retry recommendation."
+        }
+      }
+    ],
+    "batch_gate": {
+      "required_all_five_pass": true,
+      "world_pass": true,
+      "ninjaone_pass": true,
+      "go_pass": true,
+      "kaizen_metrics_pass": true,
+      "evergreen_pass": false,
+      "full_fanout_gate_open": false,
+      "verdict": "STOP_DO_NOT_PROMOTE_FULL_FANOUT",
+      "exact_stop_defect": "Evergreen stepped outer crown profiles change between LOD panels, creating primary alpha-silhouette drift."
+    },
+    "retry_or_revision_recommendation": null
+  },
+  "cw002c_final_rerun": {
+    "packet_id": "CW-002C",
+    "terminal_allowed_tracer_audit": true,
+    "generator_self_scores_used": false,
+    "all_five_view_image_inspected_at_original_detail": true,
+    "hashes_and_dimensions_recomputed_from_disk": true,
+    "score_formula": "sum(weight * rating / 4)",
+    "pass_rule": "total at least 90, no geometry or style blocker, and no critical criterion below 3",
+    "history_preserved": [
+      "asset_reviews",
+      "re_qa",
+      "cw002b_rerun"
+    ],
+    "unchanged_approved_assets": [
+      {
+        "asset_id": "skill/go@v1",
+        "path": "design/career-world/concepts/tracer/skill-go-v1.png",
+        "dimensions": {"width": 1536, "height": 1024, "format": "PNG", "bytes": 2058080},
+        "sha256": "a6c762033bd10d293a722a5bedb335a1d1e50f69f9d2249bfdf16b68a92f428a",
+        "hash_matches_approved": true,
+        "verdict": "PASS",
+        "weighted_score_100": 95.25,
+        "criterion_count": 10,
+        "ratings": {"identity_continuity": 4, "projection_camera": 4, "skill_reuse": 3, "evidence_brand_safety": 4, "geometry_coherence": 4, "style_specificity": 4, "lod_derivation": 4, "palette_material": 3, "density_legibility": 4, "traceability": 4},
+        "fresh_visual_evidence": "No exterior service attachment has returned; common footprint, engine-house mass, stacks, turbines, projection, and solid silhouette remain unchanged."
+      },
+      {
+        "asset_id": "project/kaizen-metrics@v1",
+        "path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+        "dimensions": {"width": 1536, "height": 1024, "format": "PNG", "bytes": 2322525},
+        "sha256": "11b114ad615c0674b4fd407359ace07ef921e2d06d14c3d0f4b3b6ab0cc0c9b8",
+        "hash_matches_approved": true,
+        "verdict": "PASS",
+        "weighted_score_100": 98.75,
+        "criterion_count": 10,
+        "ratings": {"identity_continuity": 4, "projection_camera": 4, "skill_reuse": 4, "evidence_brand_safety": 4, "geometry_coherence": 4, "style_specificity": 4, "lod_derivation": 4, "palette_material": 3, "density_legibility": 4, "traceability": 4},
+        "fresh_visual_evidence": "No protruding beacon geometry has returned; dome, base, annex, dish, platform, projection, silhouette, and non-metric evidence boundary remain unchanged."
+      },
+      {
+        "asset_id": "city/ninjaone@v1",
+        "path": "design/career-world/concepts/tracer/city-ninjaone-v1.png",
+        "dimensions": {"width": 1536, "height": 1024, "format": "PNG", "bytes": 2183118},
+        "sha256": "1e361e2b4283280164ad673238294a5bdfcfb439f1432936e889ceb4f033b9e1",
+        "hash_matches_approved": true,
+        "verdict": "PASS",
+        "weighted_score_100": 98.75,
+        "criterion_count": 10,
+        "ratings": {"identity_continuity": 4, "projection_camera": 4, "skill_reuse": 4, "evidence_brand_safety": 4, "geometry_coherence": 4, "style_specificity": 4, "lod_derivation": 4, "palette_material": 3, "density_legibility": 4, "traceability": 4},
+        "fresh_visual_evidence": "The single connected capital, tower hierarchy, court, projection, palette, LOD geometry, and solid silhouette remain unchanged."
+      },
+      {
+        "asset_id": "world/career-world@v1",
+        "path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+        "dimensions": {"width": 1672, "height": 941, "format": "PNG", "bytes": 2210155},
+        "sha256": "06764b10197dd9eff76ef15bc77266980639e50c0e906080c905ce2b7cd71c9b",
+        "hash_matches_approved": true,
+        "verdict": "PASS",
+        "weighted_score_100": 92.25,
+        "criterion_count": 10,
+        "ratings": {"identity_continuity": 3, "projection_camera": 4, "skill_reuse": 4, "evidence_brand_safety": 4, "geometry_coherence": 4, "style_specificity": 4, "lod_derivation": 3, "palette_material": 3, "density_legibility": 4, "traceability": 4},
+        "fresh_visual_evidence": "The frozen left/center/right mainland band, one-mainland/two-island topology, two routes, primary coast, angular rocks, projection, and label-free treatment remain unchanged."
+      }
+    ],
+    "evergreen_review": {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1.png",
+      "dimensions": {"width": 1536, "height": 1024, "format": "PNG", "bytes": 1796212},
+      "sha256": "b7009cb8a9782e4696840fd360aacab84c17d6ffc94b85d2be6fae4a058237b2",
+      "expected_hash_matches": true,
+      "verdict": "REJECT",
+      "weighted_score_100": 83.25,
+      "automatic_blocker": true,
+      "blockers": [
+        "Primary outer crown geometry is not pixel-equivalent across LODs: the canonical left tall tree has seven stepped tiers, the middle has four, and the right has five, with visibly different tier edges and crown corners.",
+        "The bottom panel is an outlined, shaded, internally segmented fourth detail view rather than the required solid silhouette inset."
+      ],
+      "critical_criteria_below_3": ["identity_continuity"],
+      "scores": {
+        "identity_continuity": {"rating": 2, "weight": 18, "contribution": 9, "evidence": "Four-tree count, placement, heights, gaps, and trunks remain recognizable, but crown tier counts/profiles differ across panels and the bottom representation is not the canonical solid silhouette."},
+        "projection_camera": {"rating": 4, "weight": 14, "contribution": 14, "evidence": "All pads use consistent isometric axes, all trunks remain vertical, and panel orientation remains stable without convergence."},
+        "skill_reuse": {"rating": 4, "weight": 14, "contribution": 14, "evidence": "The neutral four-tree cluster remains a reusable ambient identity with no employer-specific mark or claim."},
+        "evidence_brand_safety": {"rating": 4, "weight": 12, "contribution": 12, "evidence": "No text, logo, number, metric, private detail, unsupported claim, or watermark appears."},
+        "geometry_coherence": {"rating": 4, "weight": 12, "contribution": 12, "evidence": "Within each panel, four separated faceted crowns and trunks join coherently to one pad with no merging, tangency, or impossible construction."},
+        "style_specificity": {"rating": 4, "weight": 10, "contribution": 10, "evidence": "Hard stepped edges, planar matte faces, sparse seams, and thin drafting lines remain architectural technical cartography rather than painterly foliage."},
+        "lod_derivation": {"rating": 1, "weight": 8, "contribution": 2, "evidence": "Middle and right alter external tier count and crown corners instead of only interior seams, while the bottom fails the required solid-silhouette representation entirely."},
+        "palette_material": {"rating": 3, "weight": 5, "contribution": 3.75, "evidence": "The restrained matte slate/navy material and pale lines remain compliant, but exact semantic slots cannot be proven from raster pixels."},
+        "density_legibility": {"rating": 4, "weight": 5, "contribution": 5, "evidence": "All four trees and trunks remain separated and readable with adequate negative space in every panel."},
+        "traceability": {"rating": 3, "weight": 2, "contribution": 1.5, "evidence": "Individual edges are traceable, but the missing solid silhouette and conflicting primary profiles force a canonical-geometry choice rather than providing one unambiguous tracing source."}
+      },
+      "exact_visual_checks": {
+        "left_tall_tree_stepped_tier_count": 7,
+        "middle_tall_tree_stepped_tier_count": 4,
+        "right_tall_tree_stepped_tier_count": 5,
+        "bottom_is_solid_silhouette": false,
+        "bottom_has_pale_outlines": true,
+        "bottom_has_internal_face_seams_and_shading": true,
+        "terrain_pad_pixel_equivalence_established": false,
+        "four_separate_crowns_and_trunks_retained": true,
+        "no_text_logo_or_watermark": true
+      },
+      "frozen_cw002b_source": {
+        "path": "design/career-world/concepts/tracer/ambient-evergreen-cluster-v1-rejected-cw002b.png",
+        "dimensions": {"width": 1536, "height": 1024, "format": "PNG", "bytes": 1812255},
+        "sha256": "14369081b1493f378d5a276b14522284970b74e2b762ef2fbbe97a5abed49c15",
+        "expected_hash_matches": true
+      }
+    },
+    "art_gate": {
+      "pass_count": 4,
+      "reject_count": 1,
+      "all_five_pass": false,
+      "full_fanout_gate_open": false,
+      "verdict": "STOP_DO_NOT_PROMOTE_FULL_FANOUT",
+      "exact_stop_defect": "Evergreen has non-equivalent seven/four/five tall-crown tier geometry across LODs and the bottom panel is not a solid silhouette."
+    },
+    "separate_director_hold": {
+      "active": true,
+      "applies_even_if_art_passed": true,
+      "reason": "Canonical fanout outputs are not authorized under runtime public/.",
+      "required_output_root": "design/career-world/concepts/",
+      "required_following_evidence": ["refreshed manifest", "refreshed batch SHA"]
+    },
+    "retry_budget_exhausted": true,
+    "retry_or_revision_recommendation": null
+  },
+  "batch_result": {
+    "qa_round": "CW-002C_FINAL",
+    "candidate_count": 5,
+    "reinspected_count": 5,
+    "pass_count": 4,
+    "revise_count": 0,
+    "reject_count": 1,
+    "automatic_blocker_count": 1,
+    "passed_assets": [
+      "skill/go@v1",
+      "project/kaizen-metrics@v1",
+      "city/ninjaone@v1",
+      "world/career-world@v1"
+    ],
+    "failed_assets": [
+      "ambient/evergreen-cluster@v1"
+    ],
+    "full_fanout_gate_open": false
+  },
+  "promotion_verdict": {
+    "verdict": "STOP_DO_NOT_PROMOTE_FULL_FANOUT",
+    "reason": "Four assets retain approved PASS hashes/scores, but Evergreen has automatic primary-geometry blockers: seven/four/five tall-crown tier counts across LODs and a bottom panel that is not a solid silhouette.",
+    "world_status": "PASS_UNCHANGED_REQUIRED_HASH",
+    "ninjaone_status": "PASS_UNCHANGED_HASH",
+    "full_library_generation_allowed": false,
+    "full_fanout_allowed": false,
+    "director_output_root_hold_active": true,
+    "next_gate": "Terminal CW-002C disposition only. Retry budget is exhausted; do not generate or fan out. Even a future art pass remains held until outputs move to design/career-world/concepts/ and refreshed manifest/batch SHA evidence is issued."
+  },
+  "gates_run": [
+    {
+      "gate": "required_context_fence",
+      "result": "pass",
+      "summary": "Read only the brief, promoted inventory, art-lead rubric/style contract, generation report, five tracer PNGs, and three named references."
+    },
+    {
+      "gate": "view_image_inspection",
+      "result": "pass",
+      "summary": "All five saved tracer PNGs and all three named references were opened at original detail."
+    },
+    {
+      "gate": "independent_scoring",
+      "result": "pass",
+      "summary": "All ten rubric criteria were scored 0-4 for every asset; generator self-scores were not used."
+    },
+    {
+      "gate": "revision_instruction_cardinality",
+      "result": "pass",
+      "summary": "Each of the three unchanged failed assets retains exactly one prior targeted revision instruction; both passing assets have none."
+    },
+    {
+      "gate": "world_retry_view_image_inspection",
+      "result": "pass",
+      "summary": "The revised World, rejected initial World, and accepted overview reference were each opened at original detail for the final rerun."
+    },
+    {
+      "gate": "world_retry_independent_scoring",
+      "result": "pass",
+      "summary": "All ten World criteria were independently rescored; the stored 92.25 total matches the weighted formula and no generator self-score was used."
+    },
+    {
+      "gate": "cw002b_all_five_view_image_inspection",
+      "result": "pass",
+      "summary": "All five exact current tracer PNGs were freshly opened at original detail for CW-002B."
+    },
+    {
+      "gate": "cw002b_hash_and_dimensions",
+      "result": "pass",
+      "summary": "SHA-256, width, height, format, and byte size were recomputed from disk for all five current PNGs; World matches the required hash and NinjaOne matches its prior PASS hash."
+    },
+    {
+      "gate": "cw002b_independent_weighted_scoring",
+      "result": "pass",
+      "summary": "All ten criteria were independently rescored for every current asset; stored totals match the weighted formula and generator self-scores were not used."
+    },
+    {
+      "gate": "cw002b_full_fanout",
+      "result": "stop",
+      "summary": "Evergreen fails the primary-silhouette continuity gate, so the all-five-pass prerequisite is false and full fanout remains closed."
+    },
+    {
+      "gate": "cw002c_all_five_view_image_inspection",
+      "result": "pass",
+      "summary": "All five exact current tracer PNGs were freshly opened at original detail for terminal CW-002C."
+    },
+    {
+      "gate": "cw002c_hash_dimensions_and_snapshot_integrity",
+      "result": "pass",
+      "summary": "All current hashes/dimensions match disk and the frozen CW-002B Evergreen source matches its expected byte-identical hash."
+    },
+    {
+      "gate": "cw002c_independent_score_arithmetic",
+      "result": "pass",
+      "summary": "Evergreen has ten scored criteria totaling 83.25; all four unchanged approved assets retain ten-criterion scores whose hashes and visual evidence remain unchanged."
+    },
+    {
+      "gate": "cw002c_terminal_full_fanout",
+      "result": "stop",
+      "summary": "Evergreen fails geometry/identity/LOD requirements, and the separate Director output-root hold is also active."
+    }
+  ],
+  "deviations": [],
+  "risks_blockers": [
+    {
+      "severity": "deterministic_trace_resolution",
+      "asset_id": "world/career-world@v1",
+      "risk": "Exact scaled-pixel coastline equality is not established by visual inspection; derive every representation from one code-native master mask. This does not block the World PASS and requires no further image retry."
+    },
+    {
+      "severity": "automatic_primary_geometry_blocker",
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "risk": "Canonical left/middle/right tall-crown tier counts are seven/four/five, the bottom is outlined/full-detail rather than solid, and terrain-pad pixel equivalence is not established."
+    },
+    {
+      "severity": "director_hold",
+      "asset_id": "canonical_fanout",
+      "risk": "Runtime public/ is not an authorized canonical output root; move to design/career-world/concepts/ and issue refreshed manifest/batch SHA before fanout can be authorized."
+    }
+  ],
+  "follow_ups": [
+    {
+      "owner": "art lead",
+      "action": "Record the terminal CW-002C Evergreen blockers and Director output-root hold. Retry budget is exhausted; no additional image generation or fanout is authorized."
+    }
+  ],
+  "files_changed": [
+    {
+      "path": "docs/career-world-production/reports/art-tracer-qa.json",
+      "sections": [
+        "asset_reviews",
+        "re_qa",
+        "cw002b_rerun",
+        "cw002c_final_rerun",
+        "batch_result",
+        "promotion_verdict"
+      ]
+    }
+  ],
+  "ledger_updates": [
+    {
+      "lane_id": "art-tracer-qa",
+      "status": "done",
+      "artifact_path": "docs/career-world-production/reports/art-tracer-qa.json",
+      "summary": "Terminal CW-002C retains four approved passes, rejects Evergreen at 83.25 for non-equivalent crown geometry and a non-solid bottom panel, records the output-root hold, and stops full fanout."
+    }
+  ]
+}

@@ -1,0 +1,2649 @@
+{
+  "schema_version": "career-world-promoted-canonical-inventory/v1",
+  "report_type": "final_resolved_art_promotion_record",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "CW-004-FINAL-PROMOTION-VERIFY",
+  "lane_id": "/root/art_lead",
+  "role": "independent final promotion verifier",
+  "completed_at": "2026-07-17T14:27:57.417Z",
+  "status": "COMPLETE",
+  "promotion_verdict": "PROMOTED_56_GO",
+  "summary": "Exactly 56 manifest-matched canonical concept PNGs are resolved: 45 unchanged originals and 11 promoted corrections. All promotion/archive, QA lineage, trace-panel, PNG, LFS, runtime-isolation, unstaged-state, category, verdict, and ordinal-digest checks pass.",
+  "files_changed": [
+    "docs/career-world-production/reports/art-promoted-56.json"
+  ],
+  "authority_receipts": [
+    {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14"
+    },
+    {
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "bytes": 15117,
+      "sha256": "f23cc8be600724c49623f5be144c7d9f5cde609d78af3b7e3445851e49fbeaed"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-1.json",
+      "bytes": 100881,
+      "sha256": "e4d662604d85c6e3e2b96c5151e4d4c9f44e94444a4502ba3f765c5825f1ecbc"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-2.json",
+      "bytes": 106008,
+      "sha256": "88f3bd371cbe97a8dbb86b09a7a322cf236242eead31cc74c0d333c6b3851d06"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-3.json",
+      "bytes": 108237,
+      "sha256": "73e6a59a64d7ee9359f5ebe6ff20080d4bb63f46997cdd261db033bf7a7bc2a6"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-full-qa.json",
+      "bytes": 16468,
+      "sha256": "9d257e7e1074777f504aea10b48d8ca2de7233ca2740c73aac53c4e1cad13bd9"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-generation-batch-a.json",
+      "bytes": 78505,
+      "sha256": "0b4c608dda30dc2d94d4fb04367e726ba0957f161f871d2dc526fba66114e428"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-generation-batch-b.json",
+      "bytes": 79126,
+      "sha256": "b60b9821cc446e80936b4e42797bbc268093760425075a487b56fe8f3f048899"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-generation-batch-c.json",
+      "bytes": 70981,
+      "sha256": "80a2bb8fe00a23fe1375aa7d98aa48029d2e8717c9fa64f562fe54a443ecd120"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-calibration-generation.json",
+      "bytes": 12164,
+      "sha256": "f6ec83ea1db7a3653d86e85193dc6a79e752d7c0b12a2f772a3d8b0a70244f84"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-calibration-qa.json",
+      "bytes": 25684,
+      "sha256": "6ff8323d2df762cb4cbe8a53a823719bf105e0bcb5427c758d1c65689b1f82f0"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json",
+      "bytes": 8530,
+      "sha256": "638fc57e10d4dce303c49c60132db8ab17ed54db2ae09b632ea006106a577108"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d018-contextforge-guided-generation.json",
+      "bytes": 19113,
+      "sha256": "86fda6d2ffa619d1b81e6d1decc6fcbb7b4377e245f936e4f6427975d831bfbc"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d019-contextforge-persistence-recovery.json",
+      "bytes": 2817,
+      "sha256": "2987409b5133886aea024cec5784909fb5166ec566ecbcdca63883d18facf9f5"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d020-contextforge-director-disposition.json",
+      "bytes": 5096,
+      "sha256": "9a4c4cab5e5e3ed1faa93256edf4d860431e31a8861ceec195b3979365c9da0f"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json",
+      "bytes": 17199,
+      "sha256": "7fb0632bc78b6154301296d1b64383eb96bf2282b0c7643cc8ff8ea546d494ff"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-atlassian.json",
+      "bytes": 9861,
+      "sha256": "0f89793d642f6eab05d27fef1bd69126155ae5f4d687e5173f425f46ffa14eab"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-context-compression.json",
+      "bytes": 11862,
+      "sha256": "6be4d80e8c90ed9ae78cb457a582f91b9876a4dc8da19e15e38c68558150f3ab"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-java.json",
+      "bytes": 9017,
+      "sha256": "d3ea26cc9a3359bab4f954d4aefff2620e762cdfb199d17cd417440c7e789508"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json",
+      "bytes": 20761,
+      "sha256": "06376ff617564fe419bd0d433edf2412f634f61e8159ab2d239002e9b306243a"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-operator-control.json",
+      "bytes": 3154,
+      "sha256": "391942cd08e9da71c231019ce91900ef797dced0664c0fbf36c979865a6679f9"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+      "bytes": 9981,
+      "sha256": "cdf9b307ffde0d20e63f8891d2577693b94d6322c26a47696bd7bfb8d8bc26af"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-tanium-risk-assessment.json",
+      "bytes": 9203,
+      "sha256": "8720f7b2979cf15a1997f9b402a88433cb4e6e63529d7fe7b293329231d1d1bc"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-vendy-vm-platform.json",
+      "bytes": 10935,
+      "sha256": "10e6146b8c5c3cc56b38009e2088a16e806ec9746e0ca2f09280cd41051a0831"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-r1-qa-batch-1.json",
+      "bytes": 28925,
+      "sha256": "7e7feedf552abc6b934c67cfd50cba0a8631803186093e331e1954c10b07610c"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json",
+      "bytes": 32722,
+      "sha256": "e5788e48f0464cdac48e0617d441178b1eecd4739cb2602615797cc8e9d485a5"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json",
+      "bytes": 25440,
+      "sha256": "82fe8e2674e3eb02ab8e4941890e24b7a8364037878a677e3213bff2b45386f4"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d023-local-edits-generation.json",
+      "bytes": 4680,
+      "sha256": "370085e547835f170b04c49fc9dd58abea0aef7428d2eb96f2f69c90243563d0"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json",
+      "bytes": 38773,
+      "sha256": "730eebb4a44c5569cdfb59784b3e1f4307b5dabd6b27a7f361842c5270182e17"
+    }
+  ],
+  "promotion_execution": {
+    "chronology_evidence_class": "root-reported control event plus independent live-state verification",
+    "first_command_copy_result": "All 11 copies completed before the final count expression.",
+    "terminal_diagnostic_failure": "The final count expression then failed because its tracer regex was malformed.",
+    "immediate_read_only_recovery": "Verified all 11 candidate/canonical pairs exact and canonical concept PNG count 56.",
+    "copy_retry_count": 0,
+    "additional_copy_after_recovery": false
+  },
+  "promotion_table": [
+    {
+      "asset_id": "city/ninjaone@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+        "bytes": 1709570,
+        "sha256": "581a2e77b1bfc7c1bf9c5bcb943d246abef0f8c3ef1fe0458f2276d3f923572c"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/cities/ninjaone-v1.png",
+        "bytes": 1709570,
+        "sha256": "581a2e77b1bfc7c1bf9c5bcb943d246abef0f8c3ef1fe0458f2276d3f923572c"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/cities/ninjaone-v0-21967fdfc64b.png",
+        "bytes": 2172502,
+        "sha256": "21967fdfc64befa33801cfa86b820867c941461b2b960f7ba32f83ee87116bec"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2172502,
+        "sha256": "21967fdfc64befa33801cfa86b820867c941461b2b960f7ba32f83ee87116bec"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "project/contextforge@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+        "bytes": 1484707,
+        "sha256": "2e310d456a3594bba3b0041622a3235abee3f15f13019cf5a23b0f5b06b3e62a"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/projects/contextforge-v1.png",
+        "bytes": 1484707,
+        "sha256": "2e310d456a3594bba3b0041622a3235abee3f15f13019cf5a23b0f5b06b3e62a"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/projects/contextforge-v0-a758dc9eeff9.png",
+        "bytes": 1905694,
+        "sha256": "a758dc9eeff9847d91994ea9e071ba9d54200453465d2f1d6562847b2d7d76e2"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 1905694,
+        "sha256": "a758dc9eeff9847d91994ea9e071ba9d54200453465d2f1d6562847b2d7d76e2"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+        "bytes": 1833463,
+        "sha256": "70195be33a6960fceafe71020707438a415a321168d6b432be8e026207853ce5"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+        "bytes": 1833463,
+        "sha256": "70195be33a6960fceafe71020707438a415a321168d6b432be8e026207853ce5"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/projects/tanium-risk-assessment-v0-e1f5f9c4c147.png",
+        "bytes": 2097928,
+        "sha256": "e1f5f9c4c1475064bcb9d4ccfd2089180e628feacd44b05f2b006a51f8e93e65"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2097928,
+        "sha256": "e1f5f9c4c1475064bcb9d4ccfd2089180e628feacd44b05f2b006a51f8e93e65"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/projects/vendy-vm-platform-r1.png",
+        "bytes": 2240121,
+        "sha256": "e788cc2fafbf83be9b8f164f3ae8be53bba089f1f4994b090554d99bdc3187de"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+        "bytes": 2240121,
+        "sha256": "e788cc2fafbf83be9b8f164f3ae8be53bba089f1f4994b090554d99bdc3187de"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/projects/vendy-vm-platform-v0-052fae0682df.png",
+        "bytes": 2106863,
+        "sha256": "052fae0682dfe99d19d8f4d4b3dea501c932ff06ba43e3e908de0fab426076c7"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2106863,
+        "sha256": "052fae0682dfe99d19d8f4d4b3dea501c932ff06ba43e3e908de0fab426076c7"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/atlassian@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/atlassian-r1.png",
+        "bytes": 1905435,
+        "sha256": "49929c22f68996c233d494573e77b3750b403f1e5889b44ab620a72f667732ad"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/atlassian-v1.png",
+        "bytes": 1905435,
+        "sha256": "49929c22f68996c233d494573e77b3750b403f1e5889b44ab620a72f667732ad"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/atlassian-v0-7cd5e3b177c9.png",
+        "bytes": 2006070,
+        "sha256": "7cd5e3b177c9dac02f2f5729d2a182fb7ee81d469127af4a59ce4c0210895c5c"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2006070,
+        "sha256": "7cd5e3b177c9dac02f2f5729d2a182fb7ee81d469127af4a59ce4c0210895c5c"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+        "bytes": 1630821,
+        "sha256": "082e69efcd95708e4ee22483003f57c004b10642ca960d5cfeae97b3a40a8d72"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/context-compression-v1.png",
+        "bytes": 1630821,
+        "sha256": "082e69efcd95708e4ee22483003f57c004b10642ca960d5cfeae97b3a40a8d72"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/context-compression-v0-fe0c908bee44.png",
+        "bytes": 2104280,
+        "sha256": "fe0c908bee4432bb0cf6d1b8991142b330dea5adecc529d733598e1c28b3717d"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2104280,
+        "sha256": "fe0c908bee4432bb0cf6d1b8991142b330dea5adecc529d733598e1c28b3717d"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/java@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+        "bytes": 2214489,
+        "sha256": "bf91a1ed4eaf54f890b65636d9067ef6761d3456b577072f46bac32b5cc53034"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/java-v1.png",
+        "bytes": 2214489,
+        "sha256": "bf91a1ed4eaf54f890b65636d9067ef6761d3456b577072f46bac32b5cc53034"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/java-v0-6358721e58b1.png",
+        "bytes": 2296479,
+        "sha256": "6358721e58b1ad30e31905d1a4b81339691c68b4b467e2e365d2a611611be909"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2296479,
+        "sha256": "6358721e58b1ad30e31905d1a4b81339691c68b4b467e2e365d2a611611be909"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/openapi@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+        "bytes": 1832426,
+        "sha256": "17383feca2c6c5aca13653b86919fa6351621b85fa5459c0bd758a8074b0b2c8"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/openapi-v1.png",
+        "bytes": 1832426,
+        "sha256": "17383feca2c6c5aca13653b86919fa6351621b85fa5459c0bd758a8074b0b2c8"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/openapi-v0-30737e30e312.png",
+        "bytes": 2126014,
+        "sha256": "30737e30e3124a2f75a0b877ee2597e99a19db002d41b5d94e16ffd603a32481"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2126014,
+        "sha256": "30737e30e3124a2f75a0b877ee2597e99a19db002d41b5d94e16ffd603a32481"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+    },
+    {
+      "asset_id": "skill/operator-control@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/operator-control-r1.png",
+        "bytes": 2037942,
+        "sha256": "041ffd0185f40d2e8e45d74d798fb3ea5229eb262e45a8adc64a165a2e85f6a5"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/operator-control-v1.png",
+        "bytes": 2037942,
+        "sha256": "041ffd0185f40d2e8e45d74d798fb3ea5229eb262e45a8adc64a165a2e85f6a5"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/operator-control-v0-8007b681ded1.png",
+        "bytes": 2258511,
+        "sha256": "8007b681ded1389c914f344736c9110de0ea9011285ef12e1c04e7b231e0235b"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2258511,
+        "sha256": "8007b681ded1389c914f344736c9110de0ea9011285ef12e1c04e7b231e0235b"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png",
+        "bytes": 2061551,
+        "sha256": "91f7071c9c9abb1572b7854161024082eee895e174e60c46a36c9eb0b5e67abe"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/react-v1.png",
+        "bytes": 2061551,
+        "sha256": "91f7071c9c9abb1572b7854161024082eee895e174e60c46a36c9eb0b5e67abe"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/react-v0-2390fcbca669.png",
+        "bytes": 2142440,
+        "sha256": "2390fcbca6690e6185a12bf9e6152acb12b6eb43154769c8c111ae79743720e0"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2142440,
+        "sha256": "2390fcbca6690e6185a12bf9e6152acb12b6eb43154769c8c111ae79743720e0"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "candidate": {
+        "path": "design/career-world/correction-candidates/cw004-r1/skills/workflow-orchestration-r1.png",
+        "bytes": 2222826,
+        "sha256": "0bdf4dfe5fd160a3c798affed243c26523c52b81dcaf4e45579cf5074da9e7a3"
+      },
+      "canonical": {
+        "path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+        "bytes": 2222826,
+        "sha256": "0bdf4dfe5fd160a3c798affed243c26523c52b81dcaf4e45579cf5074da9e7a3"
+      },
+      "candidate_canonical_byte_identical": true,
+      "rejected_v0_archive": {
+        "path": "design/career-world/rejected-candidates/cw004-v0/skills/workflow-orchestration-v0-912dce71ca8e.png",
+        "bytes": 2318262,
+        "sha256": "912dce71ca8e18845daac5007b83cb8c831f1713c89cd915956699d99bd3d586"
+      },
+      "frozen_pre_promotion_archive_receipt": {
+        "bytes": 2318262,
+        "sha256": "912dce71ca8e18845daac5007b83cb8c831f1713c89cd915956699d99bd3d586"
+      },
+      "archive_matches_frozen_pre_promotion_receipt": true,
+      "archive_authority": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+    }
+  ],
+  "aggregate": {
+    "record_order": "asset_id ordinal ascending",
+    "file_count": 56,
+    "total_bytes": 116046106,
+    "category_counts": {
+      "world": 1,
+      "city": 5,
+      "project": 16,
+      "skill": 27,
+      "ambient": 7
+    },
+    "verdict_counts": {
+      "PASS": 35,
+      "PASS_WITH_NOTES": 21
+    },
+    "lineage_counts": {
+      "original": 45,
+      "correction": 11
+    },
+    "digest_serialization": "UTF-8 lines: asset_id + NUL + canonical_path + NUL + decimal bytes + NUL + lowercase sha256 + LF.",
+    "digest_input_bytes": 8611,
+    "sha256": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708"
+  },
+  "checks": [
+    {
+      "check": "Manifest IDs and paths",
+      "result": "PASS",
+      "evidence": "56 unique IDs and paths; no missing or extra canonical record."
+    },
+    {
+      "check": "Resolved QA lineage",
+      "result": "PASS",
+      "evidence": "45 originals carry exact batch canonical_trace_panel objects; 11 one-hero corrections carry full_hero records and final correction authority."
+    },
+    {
+      "check": "ContextForge boundary",
+      "result": "PASS_WITH_NOTES",
+      "evidence": "D020 selects the guided art reference while preserving strict geometry deviations and assigning deterministic topology and clearance to code-native geometry."
+    },
+    {
+      "check": "Promotion and archive receipts",
+      "result": "PASS",
+      "evidence": "11/11 candidate-to-canonical exact; 11/11 v0 archives match frozen receipts."
+    },
+    {
+      "check": "PNG integrity",
+      "result": "PASS",
+      "evidence": "56/56 valid signature, single IHDR, terminal IEND, zero trailing bytes, forced decode, and matching dimensions."
+    },
+    {
+      "check": "LFS attributes",
+      "result": "PASS",
+      "evidence": "Read-only git check-attr: 56/56 filter=lfs, diff=lfs, merge=lfs, text=unset."
+    },
+    {
+      "check": "Runtime isolation",
+      "result": "PASS",
+      "evidence": "50 files and 2 runtime PNGs under app/features/tests/public: concept/correction/rejected refs 0, same basenames 0, identical copies 0."
+    },
+    {
+      "check": "Staged paths",
+      "result": "PASS",
+      "evidence": "Read-only git diff --cached --name-only returned 0 paths before report creation."
+    },
+    {
+      "check": "Ordinal digest",
+      "result": "PASS",
+      "evidence": "Bundled Node and independent ordinal computations agree: 56 files, 116046106 bytes, 8611 input bytes, 777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708."
+    }
+  ],
+  "claims": [
+    {
+      "claim": "The canonical library contains exactly the 56 manifest assets with category counts world 1, city 5, project 16, skill 27, ambient 7.",
+      "evidence_paths": [
+        "docs/career-world-production/concept-briefs.json",
+        "design/career-world/concepts"
+      ]
+    },
+    {
+      "claim": "The 45 originals preserve exact selected batch-QA trace panels.",
+      "evidence_paths": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ]
+    },
+    {
+      "claim": "The 11 corrections are promoted byte-for-byte and all v0 predecessors remain archived under frozen receipts.",
+      "evidence_paths": [
+        "docs/career-world-production/reports/art-correction-calibration-archive-validation.json",
+        "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json",
+        "design/career-world/correction-candidates",
+        "design/career-world/rejected-candidates/cw004-v0"
+      ]
+    },
+    {
+      "claim": "ContextForge is PASS_WITH_NOTES art direction, not coordinate truth or exact deterministic guide reconstruction.",
+      "evidence_paths": [
+        "docs/career-world-production/reports/art-correction-d020-contextforge-director-disposition.json",
+        "docs/career-world-production/reports/art-correction-calibration-qa.json"
+      ]
+    },
+    {
+      "claim": "No canonical concept is referenced or copied into runtime roots.",
+      "evidence_paths": [
+        "app",
+        "features",
+        "tests",
+        "public"
+      ]
+    }
+  ],
+  "deviations": [
+    {
+      "event": "The promotion command's final count expression failed after all 11 copies because its tracer regex was malformed.",
+      "resolution": "Immediate read-only recovery verified 11 exact pairs and count 56; no copy retry occurred."
+    },
+    {
+      "event": "A culture-sorted PowerShell digest diagnostic was non-ordinal.",
+      "resolution": "Discarded; this report binds the independently matching bundled-Node ordinal digest."
+    },
+    {
+      "event": "D020 supersedes exact generated-concept guide reconstruction and former clearance/envelope gates for ContextForge concept selection only.",
+      "resolution": "PASS_WITH_NOTES preserves the strict deviation evidence; code-native geometry remains authoritative."
+    },
+    {
+      "event": "Task-packet execution normally expects a commit.",
+      "resolution": "No commit or Git mutation: this lane authorizes only the fixed report."
+    }
+  ],
+  "risks_blockers": {
+    "blockers": [],
+    "risks": [
+      "ContextForge must not be used as coordinate truth, runtime evidence, or proof of exact protected-return reconstruction.",
+      "PASS_WITH_NOTES tracing restrictions remain binding for 21 records.",
+      "Local LFS attributes and unstaged state are verified; remote LFS availability was not tested."
+    ]
+  },
+  "artifacts": [
+    {
+      "type": "final_resolved_record",
+      "path": "docs/career-world-production/reports/art-promoted-56.json"
+    },
+    {
+      "type": "canonical_inventory",
+      "root": "design/career-world/concepts",
+      "count": 56,
+      "total_bytes": 116046106,
+      "aggregate_sha256": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708"
+    },
+    {
+      "type": "promoted_corrections",
+      "count": 11,
+      "candidate_canonical_exact": 11,
+      "rejected_v0_archive_exact": 11
+    }
+  ],
+  "ledger_updates": [],
+  "records": [
+    {
+      "asset_id": "ambient/cargo-boat@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/cargo-boat-v1.png",
+      "bytes": 2206972,
+      "sha256": "6cd8d2f526639058b7c4ab944bb2c6aadf5274fb9c7667704eecdf84f7cfc779",
+      "final_verdict": "PASS",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete low angular barge, raised stern cabin, empty central well, blunt bow, and two near-side rub rails",
+        "normalized_crop_bounds": {
+          "x_min": 0.12,
+          "y_min": 0.03,
+          "x_max": 0.84,
+          "y_max": 0.58
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full hull envelope, empty well, cabin, bow, and both rail lines at the clearest scale."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/cargo-boat-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+      "bytes": 1887418,
+      "sha256": "c4302d79aaa9812b6fb8f5f74ae4aed453826016c34d10db7fc9401bd921df8c",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "lod_0",
+        "region_descriptor": "lower-left panel containing the complete three-tree cluster with tall rear-center evergreen, medium left evergreen, short right evergreen, individually visible trunks, and one shared faceted ground plate",
+        "normalized_crop_bounds": {
+          "x_min": 0.025,
+          "y_min": 0.49,
+          "x_max": 0.49,
+          "y_max": 0.89
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This simplified panel preserves exactly three unequal angular trees, clear individual trunks, their overlapping arrangement, and the full shared plate with minimal distracting ground decoration."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected lower-left panel's exact three-form cluster and shared pad; do not import small rocks, grass-like ground detail, or branch-tier changes from secondary panels.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/marker-buoy@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/marker-buoy-v1.png",
+      "bytes": 1937073,
+      "sha256": "64f33c4be78d10eae17dc49766ec1ae2beafbef389b3dfd113678966fb688ae7",
+      "final_verdict": "PASS",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "far-left tall panel containing the complete faceted weighted buoy body, narrow mast, open top cage, and both opposing stabilizer fins",
+        "normalized_crop_bounds": {
+          "x_min": 0.01,
+          "y_min": 0.025,
+          "x_max": 0.26,
+          "y_max": 0.77
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The far-left panel exposes the full weighted body, mast, cage framing, two fins, and compact footprint at the highest detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/marker-buoy-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/rock-cluster@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/rock-cluster-v1.png",
+      "bytes": 1803688,
+      "sha256": "895bca1921f585fcf1c2869feff38463da42107e2c22b1f4e5fa59105fed14f6",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "lod_1",
+        "region_descriptor": "lower row second panel from the left containing the complete five-piece cluster with split central slab, two medium side wedges, two low front chips, and irregular shared base",
+        "normalized_crop_bounds": {
+          "x_min": 0.258,
+          "y_min": 0.54,
+          "x_max": 0.487,
+          "y_max": 0.866
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel clearly preserves the exact five-piece envelope and shared base while avoiding reliance on the brighter fissure accents in the more detailed panels."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/rock-cluster-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected lower-middle five-piece cluster; omit cyan fissure emphasis and do not drop the two low chips as secondary panels do.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/roof-equipment-kit@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/roof-equipment-kit-v1.png",
+      "bytes": 1871905,
+      "sha256": "e1a0d0f7bf41b7ffb62591b3c6fa2390322257439bffce81e3da919ee4830c1a",
+      "final_verdict": "PASS",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left detailed panel containing the complete shared base with low rectangular housing, angled vent hood, three-pipe cluster, and narrow open access curb",
+        "normalized_crop_bounds": {
+          "x_min": 0.01,
+          "y_min": 0.015,
+          "x_max": 0.49,
+          "y_max": 0.425
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The upper-left panel gives the most detailed complete view of all four required equipment components and their fixed arrangement on one base."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/roof-equipment-kit-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/service-truck@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+      "bytes": 2132090,
+      "sha256": "00eaecf434add54913e34c6006e3bad877b1c35d0854a9341f6e06d454550e45",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete cab-over utility truck, enclosed rear body, shallow roof rack, and both visible wheel arches",
+        "normalized_crop_bounds": {
+          "x_min": 0.25,
+          "y_min": 0.02,
+          "x_max": 0.72,
+          "y_max": 0.55
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full vehicle silhouette, compartment body, rack, cab, arches, and clipped footprint without the decorative progress-dot strips beneath the secondary panels."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": "Use the selected truck topology only; omit decorative progress-dot sequences outside the trace panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "ambient/shore-pier@v1",
+      "category": "ambient",
+      "canonical_path": "design/career-world/concepts/ambient/shore-pier-v1.png",
+      "bytes": 2130552,
+      "sha256": "d69fe4809f6c724d7dbbc95624ffc89a0df4d5d5e71b5ac6a9450e372a5a5b78",
+      "final_verdict": "PASS",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper-left large hero panel containing the complete T-shaped pile-supported pier, cross-head deck, blank shelter, and stepped shoreline abutment",
+        "normalized_crop_bounds": {
+          "x_min": 0.006,
+          "y_min": 0.01,
+          "x_max": 0.83,
+          "y_max": 0.583
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full approach, every pile/support rhythm, cross-head, shelter, rails, and shore landing in one complete view."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/ambient/shore-pier-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "city/ace-hardware@v1",
+      "category": "city",
+      "canonical_path": "design/career-world/concepts/cities/ace-hardware-v1.png",
+      "bytes": 2426368,
+      "sha256": "e7023f2bea7dd9244afa0b21f82a147812a841e7c67005e5b4961174998263f9",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left large panel containing the complete shed-roof civic hall, chamfered corner tower, covered porch perimeter, stairs, and heavy rectangular plinth",
+        "normalized_crop_bounds": {
+          "x_min": 0.028,
+          "y_min": 0.025,
+          "x_max": 0.505,
+          "y_max": 0.5
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This is the largest unobscured panel and exposes the hall, tower, porch supports, plinth, stairs, blank sign slot, and all outer edges without borrowing from another panel."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/cities/ace-hardware-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected complete capital panel; do not derive geometry from simplified panels that remove roof/facade detail or from the non-featureless silhouette inset.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "city/column-technologies@v1",
+      "category": "city",
+      "canonical_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+      "bytes": 2035436,
+      "sha256": "158815a35c804557c0d5c52f44d7e2bcf0518c4b22e69a4dd1f2127a5b54ad24",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper portrait panel containing the complete five-fin colonnaded capital, low transverse hall, recessed connecting roof bridge, flanking end blocks, and stepped forecourt",
+        "normalized_crop_bounds": {
+          "x_min": 0.1,
+          "y_min": 0.02,
+          "x_max": 0.92,
+          "y_max": 0.46
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes all five fins, their bases, the transverse hall, recessed bridge segments, side blocks, entrance, and forecourt at the highest useful detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected upper five-fin capital; do not adopt the simplified panel's collapsed end blocks or bridge recess.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "city/independent@v1",
+      "category": "city",
+      "canonical_path": "design/career-world/concepts/cities/independent-v1.png",
+      "bytes": 2156205,
+      "sha256": "298f8d3f207f579601b32b56573d681cb28518a9e342e06cc6632bc7ff114676",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left panel containing the complete asymmetric capital with broad sawtooth workshop, narrow archive tower, small pavilion, and open triangular courtyard on a continuous perimeter base",
+        "normalized_crop_bounds": {
+          "x_min": 0.06,
+          "y_min": 0.49,
+          "x_max": 0.49,
+          "y_max": 0.95
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel gives the clearest complete view of the three unlike masses, their asymmetric placement, the full triangular courtyard, connecting base, entrances, and roof profiles."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/cities/independent-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "category": "city",
+      "canonical_path": "design/career-world/concepts/cities/ninjaone-v1.png",
+      "bytes": 1709570,
+      "sha256": "581a2e77b1bfc7c1bf9c5bcb943d246abef0f8c3ef1fe0458f2276d3f923572c",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: octagonal hall, beacon, exactly three annexes, and complete base. Carry the nonblocking 1254 by 1254 canvas note."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "city/tanium@v1",
+      "category": "city",
+      "canonical_path": "design/career-world/concepts/cities/tanium-v1.png",
+      "bytes": 2336815,
+      "sha256": "270c48d91be28f9b359813c253aa5f8f7303cbbe8b1576147cda92865c59d888",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete long civic spine around the open rectangular forum, the tall left and shorter right observation towers, and the stepped corner buttresses",
+        "normalized_crop_bounds": {
+          "x_min": 0.01,
+          "y_min": 0.01,
+          "x_max": 0.99,
+          "y_max": 0.64
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The upper view exposes the entire open forum, both unequal towers, the enclosing spine, and all stepped corner supports at the largest scale."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/cities/tanium-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/atlassian-data-center-resilience@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+      "bytes": 2197002,
+      "sha256": "cf539279b3a2d6c284e8c9992b3a4c934f6e196188e3affe252571dd3303c608",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "lod_0",
+        "region_descriptor": "upper-left clean panel containing the complete low U-shaped fortified mass, deep open courtyard, alternating buttress bays, single roof datum, and both utility pods joined by ground-level necks",
+        "normalized_crop_bounds": {
+          "x_min": 0.007,
+          "y_min": 0.01,
+          "x_max": 0.495,
+          "y_max": 0.492
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The upper-left panel gives the cleanest complete exterior topology and preserves the single roof datum without borrowing later roof equipment."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": "Use the selected clean topology; omit small roof housings and protruding pipes introduced only in the lower-left panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/atlassian-platform-automation@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/atlassian-platform-automation-v1.png",
+      "bytes": 1752953,
+      "sha256": "2b1d1d3219523a47dc31cbb9f18c33141cd318ae1e42724ac0da91145830f1db",
+      "final_verdict": "PASS",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete inverted stepped-pyramid landmark, split roof notch, compact center base, and four connected stabilizer arms",
+        "normalized_crop_bounds": {
+          "x_min": 0.02,
+          "y_min": 0.03,
+          "x_max": 0.98,
+          "y_max": 0.635
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The upper panel gives the largest unobstructed view of all stepped tiers, the diagonal roof cleft, center support, and four arms."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/atlassian-platform-automation-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/cablecar@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/cablecar-v1.png",
+      "bytes": 2026497,
+      "sha256": "09b51763184fc8db50364138d9b0f2e7b08015c902edc4e5d57e4ace3849f4a1",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left panel containing both complete dissimilar terminal towers, the enclosed high bridge with shallow sagging lower chord, internal maintenance rail, and single static suspended pod",
+        "normalized_crop_bounds": {
+          "x_min": 0.007,
+          "y_min": 0.51,
+          "x_max": 0.495,
+          "y_max": 0.99
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The lower-left panel is the detailed complete view and exposes both towers, the full bridge envelope, its lower chord and rail, plus the permitted static pod."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/cablecar-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/career-world-portfolio@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+      "bytes": 2296385,
+      "sha256": "2a44096db6354b8ba0799fcca604c21f62ffc173fae7079c829d48934742e908",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_1",
+        "region_descriptor": "upper-right panel containing the complete folded-map pavilion, open center courtyard, left/right/rear viewpoint decks, and narrow right-front gallery",
+        "normalized_crop_bounds": {
+          "x_min": 0.5,
+          "y_min": 0.02,
+          "x_max": 0.97,
+          "y_max": 0.49
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel cleanly exposes the folded roof, navigable courtyard, exactly three decks, and inset gallery without the optional lower-panel survey table/roof props."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/client-devops-delivery-implementations@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+      "bytes": 2050283,
+      "sha256": "1d1f6ae65449a453b6f39a25a8fcd2991ad06da1795bec29e357d8467b2bcedb",
+      "final_verdict": "PASS",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper middle-right panel containing the complete four-block implementation cairn with central vertical void, five-sided podium, and broad off-center cantilevered cap",
+        "normalized_crop_bounds": {
+          "x_min": 0.495,
+          "y_min": 0.01,
+          "x_max": 0.744,
+          "y_max": 0.497
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel clearly separates all four irregular wedges, the narrow void, their interlocked climb, the five-sided base, and the deliberately shifted cap without relying on the oversized hero."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/contextforge@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/contextforge-v1.png",
+      "bytes": 1484707,
+      "sha256": "2e310d456a3594bba3b0041622a3235abee3f15f13019cf5a23b0f5b06b3e62a",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "D020 selects this full-canvas hero as an entertainment-only art-direction reference with a readable two-axis L identity. It does not prove exact protected-return reconstruction, former clearance or tower-envelope gates, or deterministic guide equivalence; code-native geometry owns those constraints.",
+        "consistency_scope": "D020 art-direction identity only; not coordinate truth or deterministic guide geometry"
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-d020-contextforge-director-disposition.json",
+        "docs/career-world-production/reports/art-correction-calibration-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d018-contextforge-guided-generation.json",
+          "docs/career-world-production/reports/art-correction-d019-contextforge-persistence-recovery.json"
+        ],
+        "prior_attempt_sources": [
+          "docs/career-world-production/reports/art-correction-calibration-qa.json"
+        ],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/kaizen-agent-platform@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png",
+      "bytes": 1946336,
+      "sha256": "73576f58bb8cecdee8dd81bbd2a4d43758384aed7a3aacb82f56104fddedfec0",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left framed panel containing the complete three-bar workshop cluster, central transfer bay, overhead gate bridge, front gate, and right-side rollback vault",
+        "normalized_crop_bounds": {
+          "x_min": 0.005,
+          "y_min": 0.51,
+          "x_max": 0.49,
+          "y_max": 0.98
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The lower-left panel exposes all three stepped bars and every defining bay, bridge, gate, and side-vault connection at the highest useful detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/kaizen-metrics@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/kaizen-metrics-v1.png",
+      "bytes": 2106110,
+      "sha256": "f557ed24948522730b6ed2320c8a7c8617964ab906ada6e8b9ce9dbabb0f81d4",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left panel containing the complete terraced refinery with sawtooth ingestion hall, raised compute spine, cylindrical reservoir, faceted lightwell, and static capsule",
+        "normalized_crop_bounds": {
+          "x_min": 0.02,
+          "y_min": 0.02,
+          "x_max": 0.49,
+          "y_max": 0.49
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This detailed panel exposes every requested primary mass and their shared terraced foundation, including the permitted static capsule."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/kaizen-metrics-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/qc-alm-extractor@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+      "bytes": 2140795,
+      "sha256": "4920864275daec6400d0c6ddd3cc3504de7e04f2ca828cec56eebbeeaef7c492",
+      "final_verdict": "PASS",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete stepped quarry-like base, both inward-leaning clamp towers, the plain suspended faceted block, and the short rear service ramp",
+        "normalized_crop_bounds": {
+          "x_min": 0.25,
+          "y_min": 0.02,
+          "x_max": 0.75,
+          "y_max": 0.56
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero panel exposes the complete base, both clamp towers and inward grip points, the suspended block, and rear ramp without overlap."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+      "bytes": 1981370,
+      "sha256": "726aeb8f0df5e78911f0d2b8113653814dfc596ed08376e72fba09c1a621e229",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete elevated grid deck, four corner piers, centered under-deck lift, and narrow front transfer bridge",
+        "normalized_crop_bounds": {
+          "x_min": 0.18,
+          "y_min": 0.01,
+          "x_max": 0.82,
+          "y_max": 0.65
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large hero shows the entire required table-landmark topology with a clean deck datum and all supports/connections visible."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": "Use the selected clean deck and required topology; omit roof blocks introduced only in the lower-row detail panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+      "bytes": 1833463,
+      "sha256": "70195be33a6960fceafe71020707438a415a321168d6b432be8e026207853ce5",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas r2 hero: exactly three halls, trench, tower, and unmarked forecourt. Carry the nonblocking 1254 by 1254 canvas note."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d023-local-edits-generation.json"
+        ],
+        "prior_attempt_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-tanium-risk-assessment.json",
+          "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+        ],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+      "bytes": 1842600,
+      "sha256": "461b36bcfb4a59a8a4865b854be93a11e73061e8644097a77889b1119712b25d",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "identity-only",
+      "selected_trace_panel": {
+        "panel_role": "lod_1",
+        "region_descriptor": "lower-row second framed panel from the left containing the complete perforated folded canopy, rib row, inspection arch, and wedge platform",
+        "normalized_crop_bounds": {
+          "x_min": 0.261,
+          "y_min": 0.618,
+          "x_max": 0.494,
+          "y_max": 0.94
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This bordered panel contains the full requested identity, readable perforation language, and clean hard edges without the localized malformed perforation patch present in the large hero rendering."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": "Use the selected clean lower LOD-1 panel; do not trace the tangled canopy perforation visible in the large hero.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/tmatch-eolmatch@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/tmatch-eolmatch-v1.png",
+      "bytes": 2034048,
+      "sha256": "095de73a13fce67160f7dbe48d07603333022ca6f1e65d5967d555c128f86bfe",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left panel containing the complete squat diamond tower with two interlocking stepped halves, deep zigzag roof seam, front entry, and single rear archive fin",
+        "normalized_crop_bounds": {
+          "x_min": 0.082,
+          "y_min": 0.025,
+          "x_max": 0.47,
+          "y_max": 0.495
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel is the most detailed complete view and exposes both stepped masses, the full zigzag seam, diamond base, and rear fin without occlusion."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/tmatch-eolmatch-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected upper-left topology; omit the four seam pins shown in the lower-left panel because the optional rule permits only a pair.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/uat-automation@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/uat-automation-v1.png",
+      "bytes": 2049287,
+      "sha256": "568a7594052aa777aaa5c6a46e73e14f5887bdab542d8487b8bcb1fdaa15a074",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete elongated validation hall, five enclosed chambers, two dissimilar endpoint pavilions, and the raised full-length control mezzanine",
+        "normalized_crop_bounds": {
+          "x_min": 0.095,
+          "y_min": 0.035,
+          "x_max": 0.925,
+          "y_max": 0.535
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large upper view exposes both endpoints, the chamber rhythm, the mezzanine, both stairs, and the entire footprint without overlap or clipping."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/uat-automation-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+      "bytes": 2240121,
+      "sha256": "e788cc2fafbf83be9b8f164f3ae8be53bba089f1f4994b090554d99bdc3187de",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: unequal towers, branching gantry, dock, kiosk, and apron; individual QA verdict PASS."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/projects/vendy-vm-platform-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-vendy-vm-platform.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "project/xsearch@v1",
+      "category": "project",
+      "canonical_path": "design/career-world/concepts/projects/xsearch-v1.png",
+      "bytes": 2109415,
+      "sha256": "611762c46693bf2632af7d21bd7aec107accc2266e27eb9b62d193f077969678",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper panel containing the complete long indexing-comb hall with six staggered parallel archive fins, one transverse raised bridge, and off-center triangular tower at the closed end",
+        "normalized_crop_bounds": {
+          "x_min": 0.18,
+          "y_min": 0.02,
+          "x_max": 0.78,
+          "y_max": 0.6
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes six separate fin roofs and end faces, their staggered lengths, the full transverse bridge, triangular tower, base, and all connections at useful tracing detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/projects/xsearch-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected large panel with all six archive fins; do not import merged or missing fins from lower-detail panels.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/ai@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/ai-v1.png",
+      "bytes": 1983357,
+      "sha256": "039fb712fc462282c60f5fed22e4fe103c4d8ccd1043bb424a0ce807bd4f450b",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left detailed panel containing the complete long faceted calibration drum, two unequal end cradles, transverse measurement gallery and support, and low rectangular service annex",
+        "normalized_crop_bounds": {
+          "x_min": 0.015,
+          "y_min": 0.52,
+          "x_max": 0.555,
+          "y_max": 0.98
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The lower-left panel gives the most detailed complete view of the drum, unequal cradles, crossing gallery, linear pad, and annex."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/ai-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/atlassian@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/atlassian-v1.png",
+      "bytes": 1905435,
+      "sha256": "49929c22f68996c233d494573e77b3750b403f1e5889b44ab620a72f667732ad",
+      "final_verdict": "PASS",
+      "evidence_status": "employer-supported-unlinked",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: chevron hall, unequal wings, open forecourt, roof terraces, and rear archive strip."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-1.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/atlassian-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-atlassian.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/aws@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/aws-v1.png",
+      "bytes": 2246238,
+      "sha256": "b78af482d54181315ae6d1752ef16d6aa65c686584686e8ca5b783848d9498c0",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper-left panel containing the complete clipped-base utility campus with one tall central hub, three smaller surrounding pavilions, and broad solid causeways",
+        "normalized_crop_bounds": {
+          "x_min": 0.007,
+          "y_min": 0.012,
+          "x_max": 0.642,
+          "y_max": 0.59
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel clearly exposes all three pavilions, the taller hub, every causeway, the clipped perimeter base, entrances, and blank sign areas."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/aws-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected large panel with all three pavilions; ignore the simplified panel that reduces the campus.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/ci-cd@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/ci-cd-v1.png",
+      "bytes": 2299821,
+      "sha256": "93b9267e251cd4ccfec7c0b8fd5f65f1ca7dbbfbec6789fe61d51c887652a89b",
+      "final_verdict": "PASS",
+      "evidence_status": "employer-supported-unlinked",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete elongated fabrication hall, continuous elevated looped service track, and two sequential front release bays with unequal roof heights",
+        "normalized_crop_bounds": {
+          "x_min": 0.14,
+          "y_min": 0.04,
+          "x_max": 0.82,
+          "y_max": 0.61
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero panel exposes the entire hall, the full elevated track loop and support rhythm, and both different-height release bays at the largest scale."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/ci-cd-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/context-compression-v1.png",
+      "bytes": 1630821,
+      "sha256": "082e69efcd95708e4ee22483003f57c004b10642ca960d5cfeae97b3a40a8d72",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas r2 hero: exactly four freestanding frames, closed core, and tapered base. Carry the nonblocking 1254 by 1254 canvas note."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d023-local-edits-generation.json"
+        ],
+        "prior_attempt_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-context-compression.json",
+          "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+        ],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/csharp@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/csharp-v1.png",
+      "bytes": 2010546,
+      "sha256": "3ec6e9d7b0f48b10e43e894652e30f531af83f7215793d7db5781ab110d42c0c",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering to the right of the swatch column containing the complete faceted six-sided toolhouse, sawtooth roof, side bay, and two plinth cuts",
+        "normalized_crop_bounds": {
+          "x_min": 0.25,
+          "y_min": 0.025,
+          "x_max": 0.8,
+          "y_max": 0.58
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large hero gives the clearest clean outer silhouette and exact side-bay/plinth-cut topology without the optional roof props shown in a secondary detail panel."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/csharp-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": "Use the selected clean roofline; omit rooftop units and pipes that protrude only in the lower-left panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/data-contracts@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+      "bytes": 2243413,
+      "sha256": "4031ee754c9dfa4b82a9b258c02f4526527b923768b239ef5ab4d5b929ce91a6",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing both complete archive halls, their unequal roof pitches, and the narrow sealed center gate",
+        "normalized_crop_bounds": {
+          "x_min": 0.09,
+          "y_min": 0.03,
+          "x_max": 0.91,
+          "y_max": 0.52
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes both hall envelopes and the exact narrow gate connection/central pinch at the largest clean scale."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/databricks@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/databricks-v1.png",
+      "bytes": 2431873,
+      "sha256": "6dec81683e324a04a5aaee3b355fc555a90134bc181d1206b423382fa25e8fc5",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "large upper-left panel containing the complete stepped processing quarry, four descending slab terraces, narrow central work court, and high rear retaining hall",
+        "normalized_crop_bounds": {
+          "x_min": 0.025,
+          "y_min": 0.012,
+          "x_max": 0.55,
+          "y_max": 0.63
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes the entire quarry envelope, all four terrace levels and stairs, the central court, and the continuous high rear retaining hall."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/databricks-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/docker@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/docker-v1.png",
+      "bytes": 1962290,
+      "sha256": "182aeedee3767d0dcf5f632c4ab2b79fe75adf307db533b10c683b191870ef73",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left panel containing the complete modular service-bay building, tall open gantry frame with hook, broad loading plinth, and left-side stair tower",
+        "normalized_crop_bounds": {
+          "x_min": 0.012,
+          "y_min": 0.017,
+          "x_max": 0.493,
+          "y_max": 0.454
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel fully exposes the stacked bays, gantry posts and beam, loading plinth, stair tower, blank sign slot, and all supporting connections."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/docker-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected complete panel; do not treat the open-void silhouette inset or changing roof fixtures as master geometry.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/electron@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/electron-v1.png",
+      "bytes": 2024163,
+      "sha256": "a761c2a3c9565f5f28c65ae0db89cafe204a728d090fbccb34e4ec395e83e653",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "large upper-left rendering containing the complete lightweight rounded outer frame, smaller solid faceted workspace volume within the visible air gap, and low desktop-like base slab",
+        "normalized_crop_bounds": {
+          "x_min": 0.07,
+          "y_min": 0.03,
+          "x_max": 0.5,
+          "y_max": 0.57
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large upper-left view most clearly separates the nested outer frame, inner solid volume, surrounding air space, small cradle linkage, and base slab."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/electron-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/go@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/go-v1.png",
+      "bytes": 2027887,
+      "sha256": "d7e55bdccbf3f72b1bad9c667446526fa5df2f154ce170ab01b7cfe09638706d",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing the complete long double-gable workshop around the open service spine, clipped front loading corner, and raised rear monitor shed",
+        "normalized_crop_bounds": {
+          "x_min": 0.15,
+          "y_min": 0.03,
+          "x_max": 0.9,
+          "y_max": 0.665
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero panel clearly exposes both parallel gable halls, the open center spine, the clipped loading bay, and the monitor shed in one view."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/go-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/informatica@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/informatica-v1.png",
+      "bytes": 1957013,
+      "sha256": "95cc361afef8b5366bb09b198fd804122ec44eb890c60b60b5c26020307dabee",
+      "final_verdict": "PASS",
+      "evidence_status": "employer-supported-unlinked",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper panel containing the complete three-intake convergence complex with upper-left, lower-left, and lower-center halls, solid angled corridors, raised central chamber, and single narrow right exit dock",
+        "normalized_crop_bounds": {
+          "x_min": 0.13,
+          "y_min": 0.02,
+          "x_max": 0.81,
+          "y_max": 0.6
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel clearly separates all three intake halls, every solid connector, the raised chamber, the sole narrow exit, their foundations, and all outer edges."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/informatica-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/java@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/java-v1.png",
+      "bytes": 2214489,
+      "sha256": "bf91a1ed4eaf54f890b65636d9067ef6761d3456b577072f46bac32b5cc53034",
+      "final_verdict": "PASS",
+      "evidence_status": "user-required-unplaced",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: long-span hall, tower, colonnade, and both side wings."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-1.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/java-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-java.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/localdb@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/localdb-v1.png",
+      "bytes": 2141987,
+      "sha256": "619a65cf85c56d95ce2b71441f2773e0105bf0fd9e7dc1a30c8804ee39307add",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left framed panel containing the complete thick square bunker base, offset intake pavilion, and two low ventilation ridges",
+        "normalized_crop_bounds": {
+          "x_min": 0.013,
+          "y_min": 0.02,
+          "x_max": 0.573,
+          "y_max": 0.65
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel gives the clearest complete view of the square base and the relative placement of the small intake and both ridges."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/localdb-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/macstadium@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/macstadium-v1.png",
+      "bytes": 2064498,
+      "sha256": "c823ec441dc09a9cef548bb4c498a43be6e9e9a280f2aa5556752f31ff8aaf0b",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_0",
+        "region_descriptor": "lower-row third framed panel from the left containing the complete elongated two-level hall, narrow service-bay rhythm, detached parallel utility bridge, and raised end tower",
+        "normalized_crop_bounds": {
+          "x_min": 0.507,
+          "y_min": 0.583,
+          "x_max": 0.76,
+          "y_max": 0.875
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This clean reduced-detail panel exposes the full primary hall/plinth/tower/bridge geometry without the dense non-authoritative roof-equipment field in the hero."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/macstadium-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/manifest-v3@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/manifest-v3-v1.png",
+      "bytes": 2432365,
+      "sha256": "d6db4f8b771518311744527b339db34e898317c9269f0588bcb504eaf4d9a794",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large left panel containing the complete broad sorting hall, three-tier stepped ledger tower, narrow cap, and single exterior verification ramp rising from the right ground terminal across every tier",
+        "normalized_crop_bounds": {
+          "x_min": 0.01,
+          "y_min": 0.02,
+          "x_max": 0.63,
+          "y_max": 0.82
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes the full sorting-hall footprint, all three tower tiers and cap, the complete supported ramp path, its tier contacts, terminal footing, stairs, and outer edges."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/manifest-v3-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": "Use the selected large panel's complete supported route and tier relationship; do not infer supports from the simplified panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/mcp@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/mcp-v1.png",
+      "bytes": 2118096,
+      "sha256": "f59c294b20dfef793f35076007b7c0d9d8956ceb75a6d70bae9b02db44b5d109",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper panel containing the complete square exchange tower, recessed roof court, diagonal internal stair, and four unequal exterior docking bays",
+        "normalized_crop_bounds": {
+          "x_min": 0.015,
+          "y_min": 0.015,
+          "x_max": 0.985,
+          "y_max": 0.6
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large upper panel exposes the square shell, open court, stair, and all four differently sized bays at original detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/mcp-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/openapi@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/openapi-v1.png",
+      "bytes": 1832426,
+      "sha256": "17383feca2c6c5aca13653b86919fa6351621b85fa5459c0bd758a8074b0b2c8",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: both portals, central vault, branching ramps, and rear canopy; individually accepted by calibration QA."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-calibration-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-calibration-generation.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/operator-control@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/operator-control-v1.png",
+      "bytes": 2037942,
+      "sha256": "041ffd0185f40d2e8e45d74d798fb3ea5229eb262e45a8adc64a165a2e85f6a5",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: cabin, plinth, two ramp assemblies, and rear hall. Carry the nonstandard-dimension and secondary-guardrail simplification notes."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-1.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/operator-control-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-operator-control.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/postgresql@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/postgresql-v1.png",
+      "bytes": 2363833,
+      "sha256": "26efa7c8a59bd5f24f7a772bc08e6b993446bc25839d05d65cd071ae888361c7",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-right group, left framed detail panel containing the complete cylindrical silo, partial helical ramp, radial buttresses, and octagonal base",
+        "normalized_crop_bounds": {
+          "x_min": 0.501,
+          "y_min": 0.025,
+          "x_max": 0.735,
+          "y_max": 0.484
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel isolates the complete ramped silo and exposes the buttress/base pattern with clean separable edges at useful detail."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/postgresql-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/python@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/python-v1.png",
+      "bytes": 2287010,
+      "sha256": "86ec77a2615136f6149aff04203348e8b54aad9eaebf13222e71d607ccb5b073",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper hero panel containing both complete offset curved-edge automation halls, the straight diagonal center service spine, square front intake court, and raised rear utility loft",
+        "normalized_crop_bounds": {
+          "x_min": 0.18,
+          "y_min": 0.03,
+          "x_max": 0.78,
+          "y_max": 0.54
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero panel shows both hall envelopes, the full diagonal spine, intake court, and raised rear loft at the largest scale."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/python-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/react-v1.png",
+      "bytes": 2061551,
+      "sha256": "91f7071c9c9abb1572b7854161024082eee895e174e60c46a36c9eb0b5e67abe",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas r2 hero: exactly three terrace wings, open stage, and one subordinate rear service bar. Carry the nonblocking 1254 by 1254 canvas note."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-d023-local-edits-generation.json"
+        ],
+        "prior_attempt_sources": [
+          "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+          "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json"
+        ],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-d021-remaining-eight-preflight-archive.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/redis@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/redis-v1.png",
+      "bytes": 1922446,
+      "sha256": "f14fe4ccd0e8a8446e72f1d970ffb5e86a1fc4e55c9c71af4fea47a8778b9471",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete five-cell low zigzag pavilion, diagonal bypass bridge, and right-end cylindrical service drum",
+        "normalized_crop_bounds": {
+          "x_min": 0.1,
+          "y_min": 0.06,
+          "x_max": 0.9,
+          "y_max": 0.43
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero shows the full five-cell zigzag count, bridge crossing, and terminal drum with the clearest plan outline."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/redis-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/safe-writes@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/safe-writes-v1.png",
+      "bytes": 2344867,
+      "sha256": "c67152f979c5a0abfc7f5f952290eca6de35c3d54d6d7d3a8b6334e91a41952f",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "full-width upper panel containing the complete low archive block, nested two-stage front airlock, recessed open central chamber, and structurally joined right rollback vault",
+        "normalized_crop_bounds": {
+          "x_min": 0.006,
+          "y_min": 0.01,
+          "x_max": 0.994,
+          "y_max": 0.557
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes the entire neutral capability structure, including the nested entry, courtyard chamber, connecting neck, side vault, and shared foundations."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/safe-writes-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/typescript@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/typescript-v1.png",
+      "bytes": 1896708,
+      "sha256": "1bfc5f4c32b895187dc2b040924547dd8f3ad80a22b832138025899c9c300e7b",
+      "final_verdict": "PASS_WITH_NOTES",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "far-left tall panel containing the complete square compiler hall, recessed right-side court, three unequal prismatic shafts, and the single diagonal binding brace",
+        "normalized_crop_bounds": {
+          "x_min": 0.01,
+          "y_min": 0.02,
+          "x_max": 0.26,
+          "y_max": 0.73
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The far-left detailed panel clearly exposes all three shaft heights, the brace, the square hall, and the recessed side court."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-2.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/typescript-v1.png",
+        "generation_batch": "art-batch-b",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-b.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-2.json"
+      },
+      "tracing_note": "Use the selected three-shaft, diagonal-brace, square-hall panel; omit the abstract glyph strip outside the trace panel.",
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/vmware@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/vmware-v1.png",
+      "bytes": 2392701,
+      "sha256": "646bc5a9169d4764e953602937c5be9df8e94a3a4e57ac8c81f771d430733d64",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "large upper panel containing the complete two-floor machine building with slightly offset stacked floors, heavy shared base, exposed left side core, and recessed open service court",
+        "normalized_crop_bounds": {
+          "x_min": 0.23,
+          "y_min": 0.025,
+          "x_max": 0.75,
+          "y_max": 0.625
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large panel exposes the staggered floor edges, their visual suspension above the base, the full side core, recessed service court, supports, stairs, and outer foundation."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-3.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/skills/vmware-v1.png",
+        "generation_batch": "art-batch-c",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-c.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-3.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "category": "skill",
+      "canonical_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+      "bytes": 2222826,
+      "sha256": "0bdf4dfe5fd160a3c798affed243c26523c52b81dcaf4e45579cf5074da9e7a3",
+      "final_verdict": "PASS",
+      "evidence_status": "evidence-backed",
+      "selected_trace_panel": {
+        "panel_role": "full_hero",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "source_note": "Full-canvas corrected hero: rotunda, exactly six bays, central drum, and interrupted annular ramp; individually accepted by calibration QA."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-correction-calibration-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "correction",
+        "original_failed_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json",
+        "selected_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/workflow-orchestration-r1.png",
+        "selected_generation_sources": [
+          "docs/career-world-production/reports/art-correction-calibration-generation.json"
+        ],
+        "prior_attempt_sources": [],
+        "archive_receipt_source": "docs/career-world-production/reports/art-correction-calibration-archive-validation.json"
+      },
+      "runtime_isolation": true
+    },
+    {
+      "asset_id": "world/career-world@v1",
+      "category": "world",
+      "canonical_path": "design/career-world/concepts/world/career-world-v1.png",
+      "bytes": 2264040,
+      "sha256": "9e914ffadb7e2505245f33c29de3a286b23be35d3b8358d14673013f4149dbe4",
+      "final_verdict": "PASS",
+      "evidence_status": "ambient",
+      "selected_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left framed panel containing the complete detailed coastal landmass and all five empty district pads",
+        "normalized_crop_bounds": {
+          "x_min": 0.006,
+          "y_min": 0.505,
+          "x_max": 0.497,
+          "y_max": 0.988
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel alone exposes the full coastline, offshore pieces, terrain corridors, and five separated empty anchors without authored city geometry."
+      },
+      "authoritative_qa_sources": [
+        "docs/career-world-production/reports/art-qa-batch-1.json",
+        "docs/career-world-production/reports/art-full-qa.json"
+      ],
+      "original_or_correction_lineage": {
+        "type": "original",
+        "selected_source_path": "design/career-world/concepts/world/career-world-v1.png",
+        "generation_batch": "art-batch-a",
+        "generation_report": "docs/career-world-production/reports/art-generation-batch-a.json",
+        "exact_batch_qa_source": "docs/career-world-production/reports/art-qa-batch-1.json"
+      },
+      "tracing_note": null,
+      "runtime_isolation": true
+    }
+  ],
+  "scope_validation": {
+    "report_absent_before_write": true,
+    "canonical_art_mutations_by_lane": 0,
+    "candidate_or_archive_mutations_by_lane": 0,
+    "source_runtime_or_test_mutations_by_lane": 0,
+    "queue_or_ledger_mutations_by_lane": 0,
+    "git_mutations_by_lane": 0,
+    "files_written": [
+      "docs/career-world-production/reports/art-promoted-56.json"
+    ]
+  }
+}

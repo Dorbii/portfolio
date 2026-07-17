@@ -18,7 +18,6 @@ type ProjectPortalsProps = {
     projectId: string | null,
     source: "pointer" | "keyboard",
   ) => void;
-  onPreloadProject: (projectId: string) => void;
   onOpenProject: (projectId: string) => void;
 };
 
@@ -29,7 +28,6 @@ export function ProjectPortals({
   activeProjectId,
   entryHintProjectId,
   onHoverProject,
-  onPreloadProject,
   onOpenProject,
 }: ProjectPortalsProps) {
   return (
@@ -61,15 +59,9 @@ export function ProjectPortals({
             aria-pressed={active}
             aria-label={`Enter ${project.title} project`}
             tabIndex={keyboardVisible ? 0 : -1}
-            onMouseEnter={() => {
-              onHoverProject(project.id, "pointer");
-              onPreloadProject(project.id);
-            }}
+            onMouseEnter={() => onHoverProject(project.id, "pointer")}
             onMouseLeave={() => onHoverProject(null, "pointer")}
-            onFocus={() => {
-              onHoverProject(project.id, "keyboard");
-              onPreloadProject(project.id);
-            }}
+            onFocus={() => onHoverProject(project.id, "keyboard")}
             onBlur={() => onHoverProject(null, "keyboard")}
             onClick={() => onOpenProject(project.id)}
           >

@@ -1,0 +1,105 @@
+{
+  "run_id": "cw-city-stability-2026-07-17",
+  "lane": "ART-1 sprite crop normalization",
+  "summary": {
+    "result": "PASS",
+    "detail": "Rebuilt all 55 transparent runtime sprites from their locked source crops using one Sharp encode per asset, exact alpha-bound trimming, and a two-pixel transparent guard. The opaque world asset was not rebuilt. Transparent decoded pixels fell 20.84 percent."
+  },
+  "files_changed": [
+    {
+      "path": "scripts/build-career-world-runtime-alpha.mjs",
+      "change": "Added idempotent category-limit sizing, raw-RGB mask generation, exact alpha bounds, guarded RGBA construction, single final WebP encode, and final manifest receipts."
+    },
+    {
+      "path": "scripts/build-career-world-runtime-art.ps1",
+      "change": "Restricted the isolated-process rebuild loop to the 55 transparent records and preserved the opaque world asset."
+    },
+    {
+      "path": "public/career-world/art/runtime-art-manifest.json",
+      "change": "Updated width, height, bytes, pre-trim, exact-bound, guard, opaque-pixel, and alpha-coverage receipts for 55 transparent records."
+    },
+    {
+      "path": "public/career-world/art/{ambient,city,project,skill}/*.webp",
+      "change": "Rebuilt 55 transparent runtime assets."
+    }
+  ],
+  "tests_run": [
+    {
+      "command": "& scripts\\build-career-world-runtime-art.ps1 -Node 'C:\\Users\\Steve\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe'",
+      "result": "PASS",
+      "counts": "55 assets rebuilt in 55 fresh Node processes; 0 FFmpeg invocations; 0 world rebuilds"
+    },
+    {
+      "command": "inline bundled-Node Sharp manifest/file receipt audit",
+      "result": "PASS",
+      "counts": "56/56 dimension receipts; 56/56 byte receipts; 55/55 meaningful alpha; 55/55 two-pixel guards; 55/55 exact tight bounds; 0 failures"
+    },
+    {
+      "command": "bundled Node scripts/build-career-world-runtime-alpha.mjs --asset=ambient/cargo-boat@v1 --from-source, repeated after the full rebuild",
+      "result": "PASS",
+      "counts": "SHA-256, byte count, and 490x257 dimensions identical before and after"
+    },
+    {
+      "command": "bundled Node --check scripts/build-career-world-runtime-alpha.mjs",
+      "result": "PASS",
+      "counts": "1 syntax gate"
+    },
+    {
+      "command": "bundled Node node_modules/.ignored/eslint/bin/eslint.js scripts/build-career-world-runtime-alpha.mjs",
+      "result": "BLOCKED_ENVIRONMENT",
+      "counts": "ESLint executable exists under node_modules/.ignored, but eslint.config.mjs cannot resolve package eslint from the current dependency layout"
+    }
+  ],
+  "claims": [
+    {
+      "claim": "Pre-trim dimensions are recomputed from immutable source crop dimensions and category limits, not record.output.",
+      "evidence": "scripts/build-career-world-runtime-alpha.mjs:30-56"
+    },
+    {
+      "claim": "The output is cropped to exact non-zero alpha bounds and surrounded by a two-pixel transparent RGBA guard.",
+      "evidence": "scripts/build-career-world-runtime-alpha.mjs:284-335"
+    },
+    {
+      "claim": "Source crop to resized raw RGB is followed by one final WebP encode; there is no intermediate source WebP.",
+      "evidence": "scripts/build-career-world-runtime-alpha.mjs:354-400"
+    },
+    {
+      "claim": "Final dimensions, bytes, and trim receipts are written after the output file is finalized.",
+      "evidence": "scripts/build-career-world-runtime-alpha.mjs:402-419; public/career-world/art/runtime-art-manifest.json:17-35"
+    },
+    {
+      "claim": "The wrapper uses one Node process per transparent asset and excludes world records.",
+      "evidence": "scripts/build-career-world-runtime-art.ps1:19-30"
+    },
+    {
+      "claim": "Transparent decoded pixels decreased by 3,222,917, or 20.84 percent, and the opaque world hash did not change.",
+      "evidence": "docs/career-world-production/logs/cw-city-stability-sprite-trim/audit.json"
+    }
+  ],
+  "deviations": [
+    "No separate pre-existing alpha audit script exists under scripts; the acceptance audit used Sharp directly against every manifest record.",
+    "The baseline was captured after one probe asset rebuild, so the measured 20.84 percent decoded-pixel reduction is conservative."
+  ],
+  "risks_blockers": [
+    {
+      "severity": "environment",
+      "detail": "The lane-specific ESLint gate could not run because another dependency operation had moved eslint and direct dependencies under node_modules/.ignored. Syntax validation passed. The root integration gate must rerun lint after dependency restoration."
+    }
+  ],
+  "artifacts": [
+    "docs/career-world-production/logs/cw-city-stability-sprite-trim/baseline.json",
+    "docs/career-world-production/logs/cw-city-stability-sprite-trim/build.json",
+    "docs/career-world-production/logs/cw-city-stability-sprite-trim/audit.json",
+    "docs/career-world-production/logs/cw-city-stability-sprite-trim/idempotence.json",
+    "public/career-world/art/runtime-art-manifest.json"
+  ],
+  "artifact_hashes": {
+    "scripts/build-career-world-runtime-alpha.mjs": "B08C7501BDEE2C83A79472A0EE57DBD4FADB9AA7A752143A284E65B5BB60ADD6",
+    "scripts/build-career-world-runtime-art.ps1": "1EC18DF57B30906899A7E7C82FD6340E5DC1A5E97C0F5A94E3ED5E5624D363C9",
+    "public/career-world/art/runtime-art-manifest.json": "5FCAA02BDC9A155718426B6C1DC4512321EF3B2E5022807CABAE844CBB77B765"
+  },
+  "ledger_updates": {
+    "shared_ledger_edited": false,
+    "requested_parent_update": "Record ART-1 as complete after root integration lint/build/browser gates."
+  }
+}

@@ -1,0 +1,409 @@
+{
+  "schema_version": "career-world-tech-parallel-lane-report/v1",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005",
+  "phase_id": "G4",
+  "lane_id": "skill-geometry-a",
+  "owner": "/root/tech_geometry_g4",
+  "completed_at": "2026-07-17T09:46:04.2800499-05:00",
+  "status": "IMPLEMENTED_VALIDATED_AWAITING_EXTERNAL_HANDOFF",
+  "implementation_verdict": "PASS",
+  "handoff_verdict": "PENDING_DIRECTOR_ENVELOPE",
+  "director_acceptance": "NOT_ASSERTED",
+  "integration_or_promotion_claimed": false,
+  "summary": "Authored the exact nine assigned employer-neutral skill identities as immutable deterministic 2.5D SVG geometry definitions. Each definition has one reusable master geometry, the frozen projection and orientation, the canonical eight palette slots, a complete tier-0 exterior identity, interior-only higher-tier linework, and literal primary/master SHA-256 values recomputed through the existing canonical serializer. The nine selected concepts were visually inspected as topology and art-direction references only. File-local lint, strict TypeScript, schema validation, exact assignment closure, forbidden-reference audit, and hash recomputation pass. No integration, placement, promotion, build, aggregate test, or external handoff is claimed.",
+  "authority_receipts": {
+    "composition_brief": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+      "verified": true
+    },
+    "composition_machine_report": {
+      "path": "docs/career-world-production/reports/tech-world-composition.json",
+      "bytes": 38652,
+      "sha256": "53aec77216c1eaa10e8176958f8bcec3089ba769e7f88260def6df14653439b1",
+      "verified": true
+    },
+    "f0_predecessor_envelope": {
+      "path": "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json",
+      "bytes": 3101,
+      "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+      "envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "supersedes_envelope_id": "01e5d95fbcf890434cae60b97fd108fc6310f73a28e7cc06cec2938048fd523b",
+      "controlled_source_file_count": 43,
+      "controlled_source_total_bytes": 1082729,
+      "controlled_source_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "acceptance_status": "ACCEPTED",
+      "payload_hash_recomputed": true,
+      "verified": true
+    },
+    "promoted_art_report": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "promoted_art_digest": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "record_count": 56,
+      "verified": true
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14",
+      "verified": true
+    },
+    "f0_geometry_inputs": [
+      {
+        "path": "features/career-world/geometry/types.ts",
+        "bytes": 2617,
+        "sha256": "64b01ea13d048f075c4adf016f32ba0e5eba8676633b71ca53ad5b98d9cd2c93"
+      },
+      {
+        "path": "features/career-world/geometry/primitives.ts",
+        "bytes": 7301,
+        "sha256": "10e184109821be6cdad95e7956c2bd9c399dfb8bbc7c881177b27f4111814049"
+      },
+      {
+        "path": "features/career-world/geometry/projection.ts",
+        "bytes": 1956,
+        "sha256": "597712a90fe63e913b6bd54d26a376323863b9c808187b796a34af0ea9ec58fb"
+      },
+      {
+        "path": "features/career-world/geometry/canonical-payload.ts",
+        "bytes": 6503,
+        "sha256": "17778559c2b5c23125c62ea4421b155282489b8221fe7f6ce530349c6d0be152"
+      },
+      {
+        "path": "features/career-world/geometry/palettes.ts",
+        "bytes": 4416,
+        "sha256": "d8bbc03709fcc4e853828045030fccc0735b0d991802485e5c2e97fe936b8d13"
+      }
+    ]
+  },
+  "scope": {
+    "assigned_asset_count": 9,
+    "assigned_asset_ids": [
+      "skill/safe-writes@v1",
+      "skill/context-compression@v1",
+      "skill/workflow-orchestration@v1",
+      "skill/operator-control@v1",
+      "skill/data-contracts@v1",
+      "skill/go@v1",
+      "skill/typescript@v1",
+      "skill/react@v1",
+      "skill/aws@v1"
+    ],
+    "owned_paths": [
+      "features/career-world/definitions/skills-a.ts",
+      "docs/career-world-production/reports/tech-world-composition-g4.json"
+    ],
+    "controlled_implementation_path": "features/career-world/definitions/skills-a.ts",
+    "administrative_report_path": "docs/career-world-production/reports/tech-world-composition-g4.json",
+    "administrative_report_excluded_from_controlled_source_digest": true,
+    "files_written_by_lane": [
+      "features/career-world/definitions/skills-a.ts",
+      "docs/career-world-production/reports/tech-world-composition-g4.json"
+    ],
+    "files_outside_owned_scope_modified_by_lane": [],
+    "dependency_changes": 0,
+    "git_operations": [],
+    "aggregate_build_or_test_runs": []
+  },
+  "owned_delta": {
+    "path": "features/career-world/definitions/skills-a.ts",
+    "change": "added",
+    "before": null,
+    "after": {
+      "bytes": 21689,
+      "sha256": "42a092b8b06169de8c7eb9310b95c463a0448cc6f5481deee2ecc59daee9dca8"
+    },
+    "export": "SKILL_GEOMETRY_DEFINITIONS_A",
+    "definition_count": 9
+  },
+  "assignment_closure": {
+    "expected_count": 9,
+    "actual_count": 9,
+    "missing_ids": [],
+    "extra_ids": [],
+    "duplicate_asset_ids": [],
+    "duplicate_geometry_keys": [],
+    "result": "PASS"
+  },
+  "shared_contract": {
+    "category": "skill",
+    "employer_neutral_master_definitions": 9,
+    "instance_reuse_model": "one canonical definition per skill; employer instances may supply only palette and placement",
+    "projection": "cw-iso-225-45-35.264-r0-v1",
+    "orientation": 0,
+    "palette_slots": [
+      "structure.base",
+      "structure.shadow",
+      "line.primary",
+      "line.secondary",
+      "accent.emissive",
+      "accent.focus",
+      "label.primary",
+      "terrain.claim"
+    ],
+    "allowed_primitive_types": [
+      "surface",
+      "extrusion",
+      "stroke"
+    ],
+    "tier_0_policy": "complete exterior silhouette, primary masses, required connections, footprint-defining faces, and roofline",
+    "higher_tier_policy": "interior linework only; no footprint, primary mass, connection, roofline, orientation, or primary-path changes",
+    "runtime_png_references": 0,
+    "employer_color_values": 0,
+    "palette_choices": 0,
+    "placement_coordinates": 0,
+    "text_or_logo_geometry": 0,
+    "factual_claims": 0,
+    "runtime_hash_computation": 0,
+    "dependencies_added": 0,
+    "tier_2_illustrative_attachments": 9,
+    "tier_2_attachment_rule": "one small line-only attachment per definition, wholly inside the accepted silhouette; viewport activation limits remain later scene-integration ownership"
+  },
+  "definitions": [
+    {
+      "asset_id": "skill/safe-writes@v1",
+      "geometry_key": "career-world/skill/safe-writes/master-v1",
+      "primary_path_hash": "sha256:de7d0ac9c6b5a86ec6a616a2d654f9e3429f06456abbf25e71d683ed95f05b5c",
+      "master_geometry_hash": "sha256:b1df2b0c81e8a1dda5df3f7158a12630f9d140b9849b5515e2f769736fd68069",
+      "footprint": { "width": 220, "depth": 180 },
+      "primitive_count": 13,
+      "primitive_type_counts": { "surface": 0, "extrusion": 9, "stroke": 4 },
+      "detail_tier_counts": { "0": 9, "1": 3, "2": 1 },
+      "tier_0_identity": "low three-sided archive mass, recessed central chamber, nested two-stage airlock, structural neck, and detached-reading rollback vault on one clipped foundation",
+      "interior_only_higher_tiers": "courtyard seam, airlock sequence seams, vault ribs, and one nested write-sequence attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/safe-writes-v1.png",
+        "bytes": 2344867,
+        "sha256": "c67152f979c5a0abfc7f5f952290eca6de35c3d54d6d7d3a8b6334e91a41952f",
+        "verdict": "PASS",
+        "selected_panel_role": "lod_2",
+        "selected_crop": [0.006, 0.01, 0.994, 0.557]
+      },
+      "trace_note_applied": "Preserved the complete archive/airlock/chamber/neck/vault topology; used no lock, checkmark, database, or employer mark."
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "geometry_key": "career-world/skill/context-compression/master-v1",
+      "primary_path_hash": "sha256:5be156474dcc31d6d53ee9f6bd97a2b0c001a64348e03a2371e316466904c26b",
+      "master_geometry_hash": "sha256:dfef20c964daa2a6990652cebd7c14de36ff0c75a9857282fc9a7659485efc3a",
+      "footprint": { "width": 180, "depth": 150 },
+      "primitive_count": 9,
+      "primitive_type_counts": { "surface": 4, "extrusion": 2, "stroke": 3 },
+      "detail_tier_counts": { "0": 6, "1": 2, "2": 1 },
+      "tier_0_identity": "exactly four freestanding rectangular frames decreasing in span and height toward one closed dense core on a tapered eight-point base",
+      "interior_only_higher_tiers": "base inset, core seams, and one nested compression attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/context-compression-v1.png",
+        "bytes": 1630821,
+        "sha256": "082e69efcd95708e4ee22483003f57c004b10642ca960d5cfeae97b3a40a8d72",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "full_hero",
+        "selected_crop": [0, 0, 1, 1]
+      },
+      "trace_note_applied": "Preserved the corrected r2 four-frame count, closed core, and tapered base; treated the 1254-square canvas note as non-geometric."
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "geometry_key": "career-world/skill/workflow-orchestration/master-v1",
+      "primary_path_hash": "sha256:3a8336d92bdb26206800f6bb015d022f2785e4def06a874c67ff7185aec9e3cf",
+      "master_geometry_hash": "sha256:9b01e46a631e4e0bc31fe8a3c4ba06da1393ac17819730db5d7b62c3cf7e89cc",
+      "footprint": { "width": 240, "depth": 220 },
+      "primitive_count": 13,
+      "primitive_type_counts": { "surface": 1, "extrusion": 9, "stroke": 3 },
+      "detail_tier_counts": { "0": 10, "1": 2, "2": 1 },
+      "tier_0_identity": "tall twelve-facet conductor drum, low rotunda plinth, exactly six staggered hexagonal service bays, and one interrupted annular ramp",
+      "interior_only_higher_tiers": "drum seams, ring deck seams, and one six-beat perimeter attachment without arrows or nodes",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+        "bytes": 2222826,
+        "sha256": "0bdf4dfe5fd160a3c798affed243c26523c52b81dcaf4e45579cf5074da9e7a3",
+        "verdict": "PASS",
+        "selected_panel_role": "full_hero",
+        "selected_crop": [0, 0, 1, 1]
+      },
+      "trace_note_applied": "Preserved the individually accepted correction's exact six-bay count, central drum, rotunda, and interrupted ramp; used no workflow diagram or Kubernetes imagery."
+    },
+    {
+      "asset_id": "skill/operator-control@v1",
+      "geometry_key": "career-world/skill/operator-control/master-v1",
+      "primary_path_hash": "sha256:7fc421db47884bedd29a359c7312e8f3e33d7b6c1ea1ef9b389e0ea49b6a2efa",
+      "master_geometry_hash": "sha256:b287a0ea46ee6cfd8eaeeb399ed8e9dd1740be2fc2aa824e5798a5315564ce82",
+      "footprint": { "width": 250, "depth": 210 },
+      "primitive_count": 12,
+      "primitive_type_counts": { "surface": 2, "extrusion": 6, "stroke": 4 },
+      "detail_tier_counts": { "0": 8, "1": 3, "2": 1 },
+      "tier_0_identity": "broad clipped stepped foundation and octagonal plinth, raised faceted cabin, rear counterweight hall, and exactly two exposed switchback ramp decks",
+      "interior_only_higher_tiers": "simplified paired ramp rails, cabin panels, and one paired-input line attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/operator-control-v1.png",
+        "bytes": 2037942,
+        "sha256": "041ffd0185f40d2e8e45d74d798fb3ea5229eb262e45a8adc64a165a2e85f6a5",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "full_hero",
+        "selected_crop": [0, 0, 1, 1]
+      },
+      "trace_note_applied": "Preserved cabin, plinth, two ramp assemblies, and rear hall; applied the accepted secondary-guardrail simplification and ignored nonstandard source dimensions."
+    },
+    {
+      "asset_id": "skill/data-contracts@v1",
+      "geometry_key": "career-world/skill/data-contracts/master-v1",
+      "primary_path_hash": "sha256:ba4d70f8851ad0bedd81b615be8f93735120af98da0792fd506cedd31e523674",
+      "master_geometry_hash": "sha256:5c0d00f488491ae34e64325a42dfdbffaa807837605f517e939af71167ec266a",
+      "footprint": { "width": 260, "depth": 170 },
+      "primitive_count": 11,
+      "primitive_type_counts": { "surface": 2, "extrusion": 5, "stroke": 4 },
+      "detail_tier_counts": { "0": 7, "1": 3, "2": 1 },
+      "tier_0_identity": "two separate archive halls with visibly unequal roof pitches connected only by one narrow sealed validation gate, retaining the pronounced central pinch",
+      "interior_only_higher_tiers": "hall bay seams, sealed-gate seams, and one neutral paired-line attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+        "bytes": 2243413,
+        "sha256": "4031ee754c9dfa4b82a9b258c02f4526527b923768b239ef5ab4d5b929ce91a6",
+        "verdict": "PASS",
+        "selected_panel_role": "unspecified_detail_panel",
+        "selected_crop": [0.09, 0.03, 0.91, 0.52]
+      },
+      "trace_note_applied": "Preserved both hall envelopes, unequal pitches, narrow gate, and central pinch; used no document, code-brace, or database imagery."
+    },
+    {
+      "asset_id": "skill/go@v1",
+      "geometry_key": "career-world/skill/go/master-v1",
+      "primary_path_hash": "sha256:99be4bad080b37d66ab151b32cf2e46e6ed1a3c1218dee0a1986655eb5f2ee7a",
+      "master_geometry_hash": "sha256:b9b1141f506d474ca24f811ec015124229bf325346f6621a70321e607fe528c0",
+      "footprint": { "width": 280, "depth": 150 },
+      "primitive_count": 10,
+      "primitive_type_counts": { "surface": 3, "extrusion": 4, "stroke": 3 },
+      "detail_tier_counts": { "0": 7, "1": 2, "2": 1 },
+      "tier_0_identity": "long paired gable workshop halls around a straight open service spine, one clipped loading corner, and a short raised rear monitor shed",
+      "interior_only_higher_tiers": "spine rails, workshop bay seams, and one small paired-channel attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/go-v1.png",
+        "bytes": 2027887,
+        "sha256": "d7e55bdccbf3f72b1bad9c667446526fa5df2f154ce170ab01b7cfe09638706d",
+        "verdict": "PASS",
+        "selected_panel_role": "unspecified_detail_panel",
+        "selected_crop": [0.15, 0.03, 0.9, 0.665]
+      },
+      "trace_note_applied": "Preserved both gable halls, the open center spine, clipped loading bay, and monitor shed; used no wordmark, mascot, or speed-line motif."
+    },
+    {
+      "asset_id": "skill/typescript@v1",
+      "geometry_key": "career-world/skill/typescript/master-v1",
+      "primary_path_hash": "sha256:4bf8c4e9b893a2fbd41231b51b0a86efb4fc9fa0a24b55e3dce2c069a0cd77c2",
+      "master_geometry_hash": "sha256:a1d5dca922fddc3e6eb2f536d307f4110f8ffdb9fdd52187f04ed04585478542",
+      "footprint": { "width": 170, "depth": 150 },
+      "primitive_count": 11,
+      "primitive_type_counts": { "surface": 2, "extrusion": 6, "stroke": 3 },
+      "detail_tier_counts": { "0": 8, "1": 2, "2": 1 },
+      "tier_0_identity": "square compiler hall with recessed side court, exactly three slim unequal shafts, and exactly one diagonal binding brace",
+      "interior_only_higher_tiers": "compiler band, shaft facets, and one neutral three-row lattice attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/typescript-v1.png",
+        "bytes": 1896708,
+        "sha256": "1bfc5f4c32b895187dc2b040924547dd8f3ad80a22b832138025899c9c300e7b",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "lod_2",
+        "selected_crop": [0.01, 0.02, 0.26, 0.73]
+      },
+      "trace_note_applied": "Used only the selected far-left complete panel and omitted the out-of-panel glyph strip, initials, logo blue, and code text."
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "geometry_key": "career-world/skill/react/master-v1",
+      "primary_path_hash": "sha256:e07ffee72bd1fa64e432ee33920bc093c6bab365431252a9d8ef8161160fca24",
+      "master_geometry_hash": "sha256:bd584a6a082a8c825fdc1544f823900982bfb6e76e34a6e5f795641aa76ae9e9",
+      "footprint": { "width": 240, "depth": 220 },
+      "primitive_count": 10,
+      "primitive_type_counts": { "surface": 0, "extrusion": 6, "stroke": 4 },
+      "detail_tier_counts": { "0": 6, "1": 3, "2": 1 },
+      "tier_0_identity": "exactly three unequal cascading terrace wings turning around an open octagonal stage, plus one subordinate low rear service bar",
+      "interior_only_higher_tiers": "one seam set per wing and one three-width responsive-layer attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/react-v1.png",
+        "bytes": 2061551,
+        "sha256": "91f7071c9c9abb1572b7854161024082eee895e174e60c46a36c9eb0b5e67abe",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "full_hero",
+        "selected_crop": [0, 0, 1, 1]
+      },
+      "trace_note_applied": "Preserved the corrected r2 exact three-wing count, open stage, and single rear service bar; used no orbital curve, atom, wordmark, or UI screen."
+    },
+    {
+      "asset_id": "skill/aws@v1",
+      "geometry_key": "career-world/skill/aws/master-v1",
+      "primary_path_hash": "sha256:401b20a28ff24c880a57e337906f819b0a72f9ed34b774d43cc7a0cd0a2e56ac",
+      "master_geometry_hash": "sha256:99d10a29de225f8fb7d568c2add2bc3ed4eb4b91542de10578843dc2157c4f92",
+      "footprint": { "width": 230, "depth": 200 },
+      "primitive_count": 11,
+      "primitive_type_counts": { "surface": 0, "extrusion": 8, "stroke": 3 },
+      "detail_tier_counts": { "0": 8, "1": 2, "2": 1 },
+      "tier_0_identity": "one clipped perimeter base with one tall central utility hub, exactly three smaller surrounding pavilions, and exactly three broad solid causeways",
+      "interior_only_higher_tiers": "hub bands, causeway insets, and one neutral three-dock attachment",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/skills/aws-v1.png",
+        "bytes": 2246238,
+        "sha256": "b78af482d54181315ae6d1752ef16d6aa65c686584686e8ca5b783848d9498c0",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "unspecified_detail_panel",
+        "selected_crop": [0.007, 0.012, 0.642, 0.59]
+      },
+      "trace_note_applied": "Used the selected complete large panel and retained all three pavilions; ignored the simplified reduced-campus panel and used no provider logo, smile, cloud, or service icon."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node node_modules/eslint/bin/eslint.js features/career-world/definitions/skills-a.ts",
+      "scope": "G4-owned implementation file only",
+      "status": "PASS",
+      "result": "0 errors, 0 warnings"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc features/career-world/definitions/skills-a.ts --noEmit --target ES2022 --module esnext --moduleResolution bundler --strict --skipLibCheck",
+      "scope": "strict isolated TypeScript check rooted at the G4-owned implementation file",
+      "status": "PASS",
+      "result": "0 errors"
+    },
+    {
+      "command": "node --input-type=module -e <Vite runnerImport definitions and canonical-payload; validateGeometryDefinition; Node crypto SHA-256 over primaryPath and serializeCanonicalGeometryPayload>",
+      "scope": "nine exported definitions",
+      "status": "PASS",
+      "result": "9/9 schema-valid; 9/9 primary hashes match; 9/9 master hashes match"
+    },
+    {
+      "command": "node --input-type=module -e <exact ordered nine-ID closure, duplicate-key, primitive-union, tier-2-count, and forbidden-source-pattern audit>",
+      "scope": "G4 export and source",
+      "status": "PASS",
+      "result": "9 expected, 9 actual, 0 missing, 0 extra, 0 duplicate asset IDs, 0 duplicate geometry keys, 0 forbidden patterns"
+    },
+    {
+      "command": "rg -n 'design/career-world|\\.png\\b|#[0-9A-Fa-f]{6}\\b|worldPosition|localPosition|employerId|paletteId|logo|wordmark' features/career-world/definitions/skills-a.ts",
+      "scope": "runtime PNG, palette, placement, employer, and logo isolation",
+      "status": "PASS",
+      "result": "0 matches"
+    },
+    {
+      "command": "git diff --check -- features/career-world/definitions/skills-a.ts",
+      "scope": "G4-owned implementation file only",
+      "status": "PASS",
+      "result": "no whitespace errors"
+    },
+    {
+      "command": "visual inspection with promoted selected-panel metadata",
+      "scope": "nine assigned canonical concept PNGs",
+      "status": "PASS",
+      "result": "9/9 complete primary forms inspected; 0 manifest-versus-panel topology conflicts"
+    }
+  ],
+  "deviations": [],
+  "limitations": [
+    "The promoted concept PNGs were used only as non-runtime identity, topology, and art-direction references; their pixels are not path, coordinate, footprint, collision, or hash authority.",
+    "The nine tier-2 line attachments are illustrative only. Later scene integration owns the accepted per-focus and per-viewport visibility cap; this lane adds no activation behavior.",
+    "G4 did not add placement, registry integration, scene integration, interactions, CSS, tests, dependencies, factual copy, or 3D work.",
+    "This report intentionally omits its own byte count and SHA-256. Root or the Director must freeze those values in an external handoff envelope after finalization."
+  ],
+  "blockers": []
+}

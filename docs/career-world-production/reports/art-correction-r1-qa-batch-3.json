@@ -1,0 +1,486 @@
+{
+  "schema_version": "career-world-r1-independent-qa/v1",
+  "report_type": "art_correction_r1_qa_batch_3",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "D-021-r1-qa-3",
+  "lane_id": "/root/gen_java",
+  "group_id": "r1-qa-3",
+  "status": "COMPLETE_NO_GO_ONE_ACTIVE_BLOCKER",
+  "decision": "NO_GO",
+  "review_completed_at_utc": "2026-07-17T13:45:58.9370405Z",
+  "reviewer": {
+    "agent": "/root/gen_java",
+    "independence_preserved": true,
+    "generated_asset_in_this_correction_wave": "skill/java@v1",
+    "generated_asset_is_in_review_group": false,
+    "reviewed_active_asset_generators": {
+      "project/vendy-vm-platform@v1": "/root/gen_vendy",
+      "skill/react@v1": "/root/gen_atlassian"
+    },
+    "protected_anchor_generator": "/root/art_lead/cal_gen_workflow",
+    "independence_basis": "The reviewer did not generate, edit, composite, or previously accept either active asset or the protected anchor."
+  },
+  "scope": {
+    "protected_anchor": "skill/workflow-orchestration@v1",
+    "active_asset_ids": [
+      "project/vendy-vm-platform@v1",
+      "skill/react@v1"
+    ],
+    "full_accepted_topology": [
+      "skill/workflow-orchestration@v1",
+      "project/vendy-vm-platform@v1",
+      "skill/react@v1"
+    ],
+    "report_path": "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json",
+    "outcome_enum_applied": [
+      "PASS",
+      "PASS_WITH_NOTES",
+      "FAIL"
+    ],
+    "protected_anchor_disposition_reopened": false,
+    "review_is_read_only_for_images": true
+  },
+  "governing_interpretation": {
+    "concept_role": "Entertainment-only canonical tracing reference.",
+    "runtime_geometry_authority": "Later code-native canonical geometry; the generated PNG is not runtime art or factual evidence.",
+    "single_complete_hero_required": true,
+    "pixel_equality_required": false,
+    "square_or_nonstandard_dimensions_alone_are_blocking": false,
+    "blocker_definition_applied": "A missing or extra identity-defining primary form, multiple layouts, material projection mismatch, text or logo leakage, disconnected or melted primary topology, or evidence-boundary violation blocks acceptance."
+  },
+  "authority_receipts": [
+    {
+      "name": "d021_execution_packet",
+      "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+      "bytes": 65201,
+      "sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "match": true,
+      "read_completely": true
+    },
+    {
+      "name": "d022_root_release",
+      "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+      "bytes": 6262,
+      "sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "match": true,
+      "read_completely": true
+    },
+    {
+      "name": "full_qa_contract",
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "bytes": 15117,
+      "sha256": "F23CC8BE600724C49623F5BE144C7D9F5CDE609D78AF3B7E3445851E49FBEAED",
+      "match": true,
+      "read_completely": true
+    },
+    {
+      "name": "qa_batch_partition",
+      "path": "docs/career-world-production/briefs/art-qa-batches.json",
+      "bytes": 25471,
+      "sha256": "9E5EA22E6A4123D06215D6D9323E966B84B1A69427F90C2A5BDAB1E2915CF407",
+      "match": true,
+      "read_completely": true
+    },
+    {
+      "name": "concept_manifest",
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+      "match": true,
+      "relevant_records_read": [
+        "skill/workflow-orchestration@v1",
+        "project/vendy-vm-platform@v1",
+        "skill/react@v1"
+      ]
+    }
+  ],
+  "inspection_method": {
+    "whole_candidate_original_detail_required": true,
+    "tool": "view_image",
+    "detail": "original",
+    "protected_anchor_inspected": true,
+    "active_candidates_inspected": 2,
+    "cropped_inspection_substituted_for_whole_image": false,
+    "pixel_equality_or_image_similarity_test_used": false
+  },
+  "protected_anchor_style_context": {
+    "asset_id": "skill/workflow-orchestration@v1",
+    "path": "design/career-world/correction-candidates/cw004-r1/skills/workflow-orchestration-r1.png",
+    "current_receipt": {
+      "bytes": 2222826,
+      "sha256": "0BDF4DFE5FD160A3C798AFFED243C26523C52B81DCAF4E45579CF5074DA9E7A3",
+      "format": "PNG",
+      "width": 1254,
+      "height": 1254,
+      "png_signature_valid": true,
+      "iend_valid": true,
+      "decodable": true,
+      "pixel_format": "Format24bppRgb"
+    },
+    "generation_report": {
+      "path": "docs/career-world-production/reports/art-correction-calibration-generation.json",
+      "bytes": 12164,
+      "sha256": "F6EC83EA1DB7A3653D86E85193DC6A79E752D7C0B12A2F772A3D8B0A70244F84",
+      "call_count": 1,
+      "retry_count": 0,
+      "prompt_sha256": "915E571152B78A67CD499809BCC84C36BC2BDC9BED1113FC52377C6D2F30C126"
+    },
+    "prior_independent_qa": {
+      "path": "docs/career-world-production/reports/art-correction-calibration-qa.json",
+      "bytes": 25684,
+      "sha256": "6FF8323D2DF762CB4CBE8A53A823719BF105E0BCB5427C758D1C65689B1F82F0",
+      "individual_outcome": "PASS",
+      "all_nine_gates_passed": true,
+      "candidate_unchanged": true,
+      "note": "The calibration report's aggregate NO_GO was caused by ContextForge; workflow-orchestration is an accepted protected candidate."
+    },
+    "visible_style_context": "One centered true-isometric hero on a near-black navy grid, matte low-value faces, hard ivory construction outlines, restrained cyan slit accents, minimal bloom, vertical verticals, and clearly connected primary masses.",
+    "use_in_this_review": "Family and drafting-language context only; no pixel equality or topology transfer was required.",
+    "new_disposition": null
+  },
+  "generation_receipt_checks": [
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "report_path": "docs/career-world-production/reports/art-correction-d022-generation-vendy-vm-platform.json",
+      "report_bytes": 10935,
+      "report_sha256": "10E6146B8C5C3CC56B38009E2088A16E806EC9746E0CA2F09280CD41051A0831",
+      "d021_record_index": 2,
+      "prompt_bytes": 4600,
+      "prompt_sha256": "AC43178E11F1046D95E9FF4D7B84A09C7D55497972C4C2A19BA100A19DAA3A6F",
+      "prompt_receipt_match": true,
+      "call_count": 1,
+      "retry_count": 0,
+      "reference_input_count": 0,
+      "edit_or_fallback_used": false,
+      "source_candidate_byte_identical": true,
+      "candidate_receipt_matches_disk": true,
+      "generator_qa_performed": false,
+      "receipt_verdict": "PASS",
+      "receipt_note": "The report records one corrected read-only System.Drawing probe after an unsupported overload; the supported decode succeeded before the sole persistence copy, with no generation or persistence retry."
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "report_path": "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+      "report_bytes": 9981,
+      "report_sha256": "CDF9B307FFDE0D20E63F8891D2577693B94D6322C26A47696BD7BFB8D8BC26AF",
+      "d021_record_index": 7,
+      "prompt_bytes": 4557,
+      "prompt_sha256": "CDE68A266E9E214821D349970F48B8AB5D7EAAE44593D7B435E161BE7555F45F",
+      "prompt_receipt_match": true,
+      "call_count": 1,
+      "retry_count": 0,
+      "referenced_image_paths_omitted": true,
+      "num_last_images_to_include_omitted": true,
+      "edit_or_fallback_used": false,
+      "source_candidate_byte_identical": true,
+      "candidate_receipt_matches_disk": true,
+      "generator_qa_performed": false,
+      "receipt_verdict": "PASS_WITH_NOTE",
+      "receipt_note": "The top-level lane label differs from the absolute preflight lane label, but asset, prompt, call, source, candidate, and persistence receipts are internally consistent."
+    }
+  ],
+  "runtime_isolation_check": {
+    "scanned_roots": [
+      "app",
+      "features",
+      "worker",
+      "tests",
+      "public"
+    ],
+    "candidate_path_basename_or_sha_text_hits": [],
+    "runtime_image_files_hashed": 2,
+    "byte_identical_runtime_image_hits": [],
+    "result": "PASS"
+  },
+  "reviews": [
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "source_output_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+      "candidate_path": "design/career-world/correction-candidates/cw004-r1/projects/vendy-vm-platform-r1.png",
+      "generator": "/root/gen_vendy",
+      "reviewer": "/root/gen_java",
+      "original_detail_inspected": true,
+      "artifact": {
+        "bytes": 2240121,
+        "sha256": "E788CC2FAFBF83BE9B8F164F3AE8BE53BBA089F1F4994B090554D99BDC3187DE",
+        "format": "PNG",
+        "width": 1536,
+        "height": 1024,
+        "pixel_format": "Format24bppRgb",
+        "png_signature_valid": true,
+        "iend_valid": true,
+        "decodable": true,
+        "generation_receipt_match": true
+      },
+      "canonical_trace_panel": {
+        "selection_status": "SAFE_CANONICAL_TRACE_PANEL",
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "The single centered landscape hero containing both unequal towers, the full Y-branch overhead gantry and central branch landing, the depressed dock, the front-left kiosk, and the complete broad foreground apron.",
+        "normalized_crop_bounds": {
+          "x_min": 0.06,
+          "y_min": 0.02,
+          "x_max": 0.93,
+          "y_max": 0.98
+        },
+        "complete_required_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent_with_required_topology": true,
+        "selection_reason": "All identity-defining masses, their base contacts, the gantry fork and landing, dock walls, kiosk, and apron perimeter are visible in one view without borrowing or inventing hidden structure."
+      },
+      "visible_topology_receipt": {
+        "unequal_service_tower_count": 2,
+        "sunken_orchestration_dock_visible": true,
+        "low_operator_kiosk_visible": true,
+        "broad_trapezoidal_equipment_apron_visible": true,
+        "one_connected_overhead_gantry_visible": true,
+        "gantry_fork_or_branch_unmistakable": true,
+        "branch_landing_between_towers_visible": true,
+        "additional_layout_or_panel_count": 0
+      },
+      "protected_anchor_style_comparison": {
+        "result": "compatible",
+        "visible_evidence": "Vendy retains the anchor's near-black isometric grid, matte low-value planes, narrow hard-edged construction strokes, sparse cyan slits, restrained bloom, and complete centered hero. Its stronger cyan line ownership is consistent with the authorized NinjaOne project palette rather than a family-style break.",
+        "pixel_equality_expected": false
+      },
+      "gates": [
+        {
+          "id": "artifact_integrity_and_identity",
+          "result": "pass",
+          "visible_evidence": "The exact decodable 1536x1024 PNG shows one Vendy platform identity and matches its D-022 candidate receipt.",
+          "manifest_evidence": "D-021 assigns this exact candidate path to project/vendy-vm-platform@v1."
+        },
+        {
+          "id": "canonical_panel_and_primary_topology",
+          "result": "pass",
+          "visible_evidence": "One complete hero visibly contains two unequal towers, a depressed central dock, a low front-left kiosk, a broad beveled trapezoidal apron, and a connected Y-branch gantry with a central landing.",
+          "manifest_evidence": "These are the frozen asset brief and the D-021 highest-priority geometry invariant."
+        },
+        {
+          "id": "projection_and_authored_orientation",
+          "result": "pass",
+          "visible_evidence": "Ground-plane axes remain parallel, verticals remain vertical, and the two towers and apron share a credible orthographic true-isometric projection without material convergence.",
+          "manifest_evidence": "D-021 requires the fixed true-isometric authored orientation and no camera rotation."
+        },
+        {
+          "id": "technical_cartography_style_and_palette_suitability",
+          "result": "pass",
+          "visible_evidence": "Near-black navy field, faint grid, matte dark faces, thin cyan construction lines, restrained light bars, minimal bloom, and hard separable edges match the shared drafting language.",
+          "manifest_evidence": "The project owns the NinjaOne family palette; no generated branding is required or used."
+        },
+        {
+          "id": "primary_form_traceability",
+          "result": "pass",
+          "visible_evidence": "Tower bases, dock perimeter, kiosk footprint, apron turns, gantry segments, fork, support, and landing can be described and traced without guessing a hidden primary edge.",
+          "manifest_evidence": "The D-021 output intent is one safely traceable canonical master reference."
+        },
+        {
+          "id": "text_logo_watermark_and_branding_safety",
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, caption, UI, logo, vendor mark, watermark, or marked sign plane is visible; small repeated marks read as seams and rail details.",
+          "manifest_evidence": "The source and correction prompts prohibit all text, VMware, AWS, Apple, MacStadium, and other marks."
+        },
+        {
+          "id": "connected_and_physically_readable_primary_structure",
+          "result": "pass",
+          "visible_evidence": "Both towers sit on the shared apron, the Y-gantry visibly joins the towers and central supported landing, dock walls seat on the base, and no required mass floats, melts, or ends in an impossible tangency.",
+          "manifest_evidence": "The gantry must be one connected branching structure and the platform must remain physically readable."
+        },
+        {
+          "id": "evidence_and_entertainment_boundary",
+          "result": "pass",
+          "visible_evidence": "The image contains generic architectural motifs only: no metrics, screens, vendor machinery, literal server imagery, private detail, real-data-center claim, outcome claim, or easter egg.",
+          "manifest_evidence": "The evidence-backed links authorize only high-level motifs; the concept remains entertainment-only tracing reference art."
+        },
+        {
+          "id": "runtime_isolation",
+          "result": "pass",
+          "visible_evidence": "No candidate path, basename, or hash reference and no byte-identical image was found under app, features, worker, tests, or public.",
+          "manifest_evidence": "The r1 PNG remains under design/career-world/correction-candidates and is not runtime authority."
+        }
+      ],
+      "cross_panel_observations": {
+        "classification": "not_applicable",
+        "summary": "The correction candidate contains one hero only.",
+        "d010_reason": "No secondary panel exists and no cross-panel equality is required."
+      },
+      "blockers": [],
+      "notes": [],
+      "verdict": "PASS",
+      "targeted_correction": null,
+      "promotion_authorized_by_this_verdict": false
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "source_output_path": "design/career-world/concepts/skills/react-v1.png",
+      "candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+      "generator": "/root/gen_atlassian",
+      "reviewer": "/root/gen_java",
+      "original_detail_inspected": true,
+      "artifact": {
+        "bytes": 2111331,
+        "sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "pixel_format": "Format24bppRgb",
+        "png_signature_valid": true,
+        "iend_valid": true,
+        "decodable": true,
+        "generation_receipt_match": true,
+        "dimension_note": "The square 1254x1254 result is technically valid and matches the protected anchor's dimensions; dimensions alone are not a blocker."
+      },
+      "canonical_trace_panel": {
+        "selection_status": "UNSAFE_REQUIRED_TOPOLOGY_MISMATCH",
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "The single centered square hero containing the open central stage, the upper-left, mid-right, lower-left, and lower-right terrace-wing masses, plus the separate low rectangular rear service bar.",
+        "normalized_crop_bounds": {
+          "x_min": 0.005,
+          "y_min": 0.09,
+          "x_max": 0.995,
+          "y_max": 0.9
+        },
+        "complete_generated_form_visible": true,
+        "complete_required_primary_form_visible": false,
+        "unoccluded": true,
+        "internally_consistent_with_required_topology": false,
+        "selection_reason": "The whole generated structure is visible, but it defines four independent terrace wings. Tracing it as the requested three-wing identity would require deleting a primary mass and guessing which three wings were intended."
+      },
+      "visible_topology_receipt": {
+        "open_central_stage_visible": true,
+        "separate_low_rear_service_bar_visible": true,
+        "distinct_cascading_terrace_wing_count": 4,
+        "required_distinct_cascading_terrace_wing_count": 3,
+        "wing_positions": [
+          "upper-left under the long triangular roof",
+          "mid-right under the broad angular roof",
+          "lower-left under the broad swept roof",
+          "lower-right under the separate triangular roof"
+        ],
+        "why_the_fourth_is_not_the_rear_bar": "A separate low rectangular rear bar with three rooftop boxes is independently visible behind the stage.",
+        "additional_layout_or_panel_count": 0
+      },
+      "protected_anchor_style_comparison": {
+        "result": "compatible",
+        "visible_evidence": "React matches the anchor's near-black isometric grid, dark matte faces, ivory construction outlines, restrained cyan slits, minimal bloom, vertical verticals, and centered single-hero treatment.",
+        "pixel_equality_expected": false,
+        "style_match_does_not_override_topology_failure": true
+      },
+      "gates": [
+        {
+          "id": "artifact_integrity_and_identity",
+          "result": "note",
+          "visible_evidence": "The exact decodable square PNG matches the D-022 receipt and contains one React-themed neutral building identity; the non-landscape dimensions are recorded only as a note.",
+          "manifest_evidence": "D-021 assigns this exact candidate path to skill/react@v1 and does not make 1536x1024 a hard acceptance requirement."
+        },
+        {
+          "id": "canonical_panel_and_primary_topology",
+          "result": "blocker",
+          "visible_evidence": "Four independent cascading terrace wings surround the stage: upper-left, mid-right, lower-left, and lower-right. The separate rear service bar is also visible, so none of the four wings can be reclassified as that bar.",
+          "manifest_evidence": "The frozen highest-priority invariant requires exactly three distinct cascading terrace wings, one separate rear bar, and a readable three-wing pinwheel footprint."
+        },
+        {
+          "id": "projection_and_authored_orientation",
+          "result": "pass",
+          "visible_evidence": "Ground axes and roof edges remain parallel, verticals remain vertical, and no material perspective convergence or conflicting authored rotation is visible.",
+          "manifest_evidence": "D-021 requires the fixed orthographic true-isometric view."
+        },
+        {
+          "id": "technical_cartography_style_and_palette_suitability",
+          "result": "pass",
+          "visible_evidence": "The image uses the neutral near-black field, matte low-value faces, ivory hard-edge outlines, restrained cyan accents, and no employer-owned color or branding.",
+          "manifest_evidence": "React must remain neutral reusable skill geometry with palette-only employer variants."
+        },
+        {
+          "id": "primary_form_traceability",
+          "result": "blocker",
+          "visible_evidence": "The generated four-wing form is sharply traceable, but no safe panel defines the requested three-wing master. A tracer would have to discard one identity-defining wing and invent the intended three-wing pinwheel.",
+          "manifest_evidence": "A safely traceable canonical master must expose the exact requested primary topology without guessing or redesign."
+        },
+        {
+          "id": "text_logo_watermark_and_branding_safety",
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, caption, UI, React wordmark, orbital or atom mark, employer mark, watermark, or marked sign plane is visible.",
+          "manifest_evidence": "The source and correction prompts prohibit text, UI screenshots, atom or orbital symbols, React branding, and employer colors."
+        },
+        {
+          "id": "connected_and_physically_readable_primary_structure",
+          "result": "pass",
+          "visible_evidence": "All visible wings and the rear bar sit on plausible multi-level bases with readable stairs and stage connections; no required mass visibly floats or melts.",
+          "manifest_evidence": "Connectivity is evaluated separately from the wrong wing count."
+        },
+        {
+          "id": "evidence_and_entertainment_boundary",
+          "result": "pass",
+          "visible_evidence": "The neutral architecture contains no employer or project association, metric, outcome, dashboard, UI, factual diagram, unsupported system claim, or easter egg.",
+          "manifest_evidence": "The evidence-backed skill record remains illustrative entertainment-only tracing reference art."
+        },
+        {
+          "id": "runtime_isolation",
+          "result": "pass",
+          "visible_evidence": "No candidate path, basename, or hash reference and no byte-identical image was found under app, features, worker, tests, or public.",
+          "manifest_evidence": "The r1 PNG remains under design/career-world/correction-candidates and is not runtime authority."
+        }
+      ],
+      "cross_panel_observations": {
+        "classification": "not_applicable",
+        "summary": "The correction candidate contains one hero only.",
+        "d010_reason": "The failure is inside the sole hero's primary topology, not a secondary-panel or pixel-equality issue."
+      },
+      "blockers": [
+        {
+          "id": "EXACT_THREE_WING_TOPOLOGY_NOT_MET",
+          "visible_defect": "Four distinct cascading terrace wings surround the central stage while a separate rear service bar is also present.",
+          "required_invariant": "Exactly three distinct cascading terrace wings around the open stage, one separate low rear service bar, offset roof planes, and a readable three-wing pinwheel without orbital curves.",
+          "implication": "The PNG cannot serve as the sole canonical master for the requested identity without deleting or redesigning a primary mass."
+        }
+      ],
+      "notes": [
+        "The 1254x1254 square dimensions are nonblocking.",
+        "Style, projection, neutrality, text safety, connectivity, and evidence boundary otherwise pass."
+      ],
+      "verdict": "FAIL",
+      "targeted_correction": {
+        "recommendation_only": true,
+        "instruction": "Produce one fresh single hero with exactly three separately readable cascading terrace wings around the open central stage and one unmistakably separate low rear service bar. Preserve the neutral drafting palette, true-isometric orientation, offset roof planes, readable three-wing pinwheel, blank sign planes, and no-text or no-orbital-symbol rules.",
+        "current_retry_authorized": false,
+        "authority_required": "A new Director or root release is required because D-021 and D-022 authorize no r2 call or retry."
+      },
+      "promotion_authorized_by_this_verdict": false
+    }
+  ],
+  "aggregate": {
+    "active_review_count": 2,
+    "protected_anchor_context_count": 1,
+    "outcome_counts": {
+      "PASS": 1,
+      "PASS_WITH_NOTES": 0,
+      "FAIL": 1
+    },
+    "passing_asset_ids": [
+      "project/vendy-vm-platform@v1"
+    ],
+    "blocking_asset_ids": [
+      "skill/react@v1"
+    ],
+    "protected_anchor_remains_accepted": true,
+    "group_recommendation": "NO_GO_DO_NOT_PROMOTE_R1_QA_3_AS_A_COMPLETE_TOPOLOGY",
+    "reason": "Vendy passes all nine gates, but React's sole hero has four terrace wings rather than the frozen exactly-three-wing identity. The full accepted topology therefore is not satisfied.",
+    "promotion_authorized": false,
+    "regeneration_authorized": false,
+    "next_action": "Preserve both candidates and this report. The Director decides whether to release one narrowly corrected React generation and assign a different independent reviewer."
+  },
+  "preservation": {
+    "candidate_images_modified": 0,
+    "candidate_images_generated": 0,
+    "image_edits_composites_or_paintovers": 0,
+    "promotion_or_canonical_overwrites": 0,
+    "runtime_test_queue_or_ledger_mutations": 0,
+    "git_stage_commit_push_or_pr_actions": 0,
+    "report_files_created": 1,
+    "only_workspace_path_written": "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json"
+  }
+}

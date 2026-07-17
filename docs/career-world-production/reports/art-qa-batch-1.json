@@ -1,0 +1,904 @@
+{
+  "schema_version": 1,
+  "report_type": "independent-full-library-art-qa-batch",
+  "packet_id": "CW-004-QA",
+  "run_id": "career-world-2026-07-16",
+  "qa_batch": "art-qa-1",
+  "report_path": "docs/career-world-production/reports/art-qa-batch-1.json",
+  "reviewer": {
+    "id": "/root/art_qa_lead/art_qa_1",
+    "role": "fresh-independent-CW-004-art-reviewer",
+    "independence_attestation": "I did not generate, edit, move, or self-score any asset assigned to art-qa-1. Generation report verdicts and defect flags were treated only as provenance and inspection leads."
+  },
+  "review_completed_at": "2026-07-17T03:04:10-05:00",
+  "sources": [
+    {
+      "role": "qa_contract",
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "sha256": "F23CC8BE600724C49623F5BE144C7D9F5CDE609D78AF3B7E3445851E49FBEAED",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "qa_partition",
+      "path": "docs/career-world-production/briefs/art-qa-batches.json",
+      "sha256": "9E5EA22E6A4123D06215D6D9323E966B84B1A69427F90C2A5BDAB1E2915CF407",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "frozen_source_manifest",
+      "path": "docs/career-world-production/concept-briefs.json",
+      "expected_sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+      "actual_sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+      "matches_frozen_sha": true
+    },
+    {
+      "role": "locked_product_contract_and_D-010",
+      "path": "docs/career-world-production/architecture.md",
+      "sha256": "6429E8056DD78B0D89363C821994ACC1612DFE42C50DECDC00DBC387F8D362DC",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "identity_reuse_projection_and_evidence_contract",
+      "path": "docs/career-world-asset-map.md",
+      "sha256": "7596EB116D34F9D621E4C9C249E093DA30EF3840703F70C0851967473FEB7246",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "generation_packet",
+      "path": "docs/career-world-production/briefs/art-batch-a.json",
+      "sha256": "4A88809B9B030152DBE18EC0B4F94AE1FEACAC29A7B614EF991DFD3DEE978345",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "generation_packet",
+      "path": "docs/career-world-production/briefs/art-batch-b.json",
+      "sha256": "BA49C760D0D73C06179E337436B88F08228506FDE7275AE6ECB7451BAB45229F",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "generation_packet",
+      "path": "docs/career-world-production/briefs/art-batch-c.json",
+      "sha256": "08473D098FC6ACCCFDC92A3981BC3AF49E1FE90D6E3C4A0CD457FBC3D9648358",
+      "hash_recomputed_from_disk": true
+    },
+    {
+      "role": "generation_provenance_and_leads_only",
+      "path": "docs/career-world-production/reports/art-generation-batch-a.json",
+      "expected_sha256": "0B4C608DDA30DC2D94D4FB04367E726BA0957F161F871D2DC526FBA66114E428",
+      "actual_sha256": "0B4C608DDA30DC2D94D4FB04367E726BA0957F161F871D2DC526FBA66114E428",
+      "matches_expected_sha": true
+    },
+    {
+      "role": "generation_provenance_and_leads_only",
+      "path": "docs/career-world-production/reports/art-generation-batch-b.json",
+      "expected_sha256": "B60B9821CC446E80936B4E42797BBC268093760425075A487B56FE8F3F048899",
+      "actual_sha256": "B60B9821CC446E80936B4E42797BBC268093760425075A487B56FE8F3F048899",
+      "matches_expected_sha": true
+    },
+    {
+      "role": "generation_provenance_and_leads_only",
+      "path": "docs/career-world-production/reports/art-generation-batch-c.json",
+      "expected_sha256": "80A2BB8FE00A23FE1375AA7D98AA48029D2E8717C9FA64F562FE54A443ECD120",
+      "actual_sha256": "80A2BB8FE00A23FE1375AA7D98AA48029D2E8717C9FA64F562FE54A443ECD120",
+      "matches_expected_sha": true
+    }
+  ],
+  "review_policy": {
+    "all_originals_inspected_with_view_image_detail_original": true,
+    "generated_cross_panel_pixel_equality_used_as_gate": false,
+    "single_selected_panel_used_for_D-010": true,
+    "secondary_panel_mismatch_alone_used_as_rejection": false,
+    "aggregate_numeric_score_used": false,
+    "nonstandard_dimension_policy": "The 1672x941 world raster is recorded as an observation and is not an automatic failure. No Column, OpenAPI, or MCP raster belongs to art-qa-1."
+  },
+  "partition_revalidation": {
+    "method": "qa_index = (generation_index + source_offset) mod 3; source offsets A=0, B=1, C=2",
+    "declared_asset_count": 19,
+    "actual_asset_count": 19,
+    "unique_asset_id_count": 19,
+    "unique_output_path_count": 19,
+    "formula_selected_asset_count": 19,
+    "formula_set_matches_art_qa_1": true,
+    "all_ids_exist_in_frozen_manifest": true,
+    "all_id_path_pairs_match_frozen_manifest": true,
+    "source_batch_counts": {
+      "art-batch-a": 7,
+      "art-batch-b": 6,
+      "art-batch-c": 6
+    },
+    "category_counts": {
+      "world": 1,
+      "city": 0,
+      "project": 6,
+      "skill": 9,
+      "ambient": 3
+    },
+    "all_qa_batches_union_count": 56,
+    "all_qa_batches_union_unique_ids": 56,
+    "all_qa_batches_union_unique_paths": 56,
+    "all_qa_batches_union_equals_manifest_ids": true,
+    "all_qa_batches_union_equals_manifest_paths": true,
+    "exact_asset_ids": [
+      "world/career-world@v1",
+      "project/kaizen-agent-platform@v1",
+      "project/ticket-validation-automation@v1",
+      "skill/operator-control@v1",
+      "skill/postgresql@v1",
+      "skill/csharp@v1",
+      "ambient/shore-pier@v1",
+      "project/vendy-vm-platform@v1",
+      "project/sap-table-update-integration@v1",
+      "skill/data-contracts@v1",
+      "skill/redis@v1",
+      "skill/localdb@v1",
+      "ambient/service-truck@v1",
+      "project/kaizen-metrics@v1",
+      "project/career-world-portfolio@v1",
+      "skill/workflow-orchestration@v1",
+      "skill/macstadium@v1",
+      "skill/atlassian@v1",
+      "ambient/cargo-boat@v1"
+    ]
+  },
+  "runtime_isolation_scan": {
+    "scan_roots": [
+      "app",
+      "features",
+      "tests",
+      "public"
+    ],
+    "exact_reference_scan": {
+      "command": "rg -n -F 'design/career-world/concepts/' app features tests public",
+      "hit_count": 0,
+      "hits": []
+    },
+    "public_copy_scan": {
+      "public_files_hashed": 5,
+      "same_assigned_basename_hit_count": 0,
+      "same_assigned_basename_hits": [],
+      "assigned_sha256_duplicate_hit_count": 0,
+      "assigned_sha256_duplicate_hits": [],
+      "public_concepts_directory_count": 0,
+      "public_concepts_directories": []
+    },
+    "all_assigned_paths_under_design_career_world_concepts": true,
+    "assigned_output_results": [
+      { "asset_id": "world/career-world@v1", "output_path": "design/career-world/concepts/world/career-world-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/kaizen-agent-platform@v1", "output_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/ticket-validation-automation@v1", "output_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/operator-control@v1", "output_path": "design/career-world/concepts/skills/operator-control-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/postgresql@v1", "output_path": "design/career-world/concepts/skills/postgresql-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/csharp@v1", "output_path": "design/career-world/concepts/skills/csharp-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "ambient/shore-pier@v1", "output_path": "design/career-world/concepts/ambient/shore-pier-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/vendy-vm-platform@v1", "output_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/sap-table-update-integration@v1", "output_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/data-contracts@v1", "output_path": "design/career-world/concepts/skills/data-contracts-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/redis@v1", "output_path": "design/career-world/concepts/skills/redis-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/localdb@v1", "output_path": "design/career-world/concepts/skills/localdb-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "ambient/service-truck@v1", "output_path": "design/career-world/concepts/ambient/service-truck-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/kaizen-metrics@v1", "output_path": "design/career-world/concepts/projects/kaizen-metrics-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "project/career-world-portfolio@v1", "output_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/workflow-orchestration@v1", "output_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/macstadium@v1", "output_path": "design/career-world/concepts/skills/macstadium-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "skill/atlassian@v1", "output_path": "design/career-world/concepts/skills/atlassian-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] },
+      { "asset_id": "ambient/cargo-boat@v1", "output_path": "design/career-world/concepts/ambient/cargo-boat-v1.png", "runtime_reference_hits": [], "public_same_basename_hits": [], "public_sha256_duplicate_hits": [] }
+    ],
+    "result": "pass"
+  },
+  "batch_summary": {
+    "batch_outcome": "REGENERATION_REQUIRED",
+    "review_count": 19,
+    "outcome_counts": {
+      "PASS": 11,
+      "PASS_WITH_NOTES": 4,
+      "REGENERATE": 4,
+      "REJECT": 0
+    },
+    "blocker_asset_count": 4,
+    "blockers": [
+      {
+        "asset_id": "skill/operator-control@v1",
+        "gate": "canonical_panel_and_primary_topology",
+        "reason": "Every rendered panel shows one exposed switchback access system; the brief requires two exposed switchback ramps."
+      },
+      {
+        "asset_id": "project/vendy-vm-platform@v1",
+        "gate": "canonical_panel_and_primary_topology",
+        "reason": "Every rendered panel shows a single straight overhead span between the two towers; the brief requires a visibly branching overhead gantry."
+      },
+      {
+        "asset_id": "skill/workflow-orchestration@v1",
+        "gate": "canonical_panel_and_primary_topology",
+        "reason": "Seven low perimeter service bays are visible in every usable panel; the brief requires six."
+      },
+      {
+        "asset_id": "skill/atlassian@v1",
+        "gate": "text_logo_watermark_absence",
+        "reason": "The sheet visibly prints BACKGROUND, SURFACE, LIT FACE, SHADOW FACE, INK, FOCUS, ACCENT, and EMISSIVE."
+      }
+    ],
+    "promotion_eligible": false,
+    "aggregate_numeric_score": null
+  },
+  "reviews": [
+    {
+      "asset_id": "world/career-world@v1",
+      "category": "world",
+      "evidence_status": "ambient",
+      "output_path": "design/career-world/concepts/world/career-world-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": {
+        "sha256": "9E914FFADB7E2505245F33C29DE3A286B23BE35D3B8358D14673013F4149DBE4",
+        "bytes": 2264040,
+        "format": "PNG",
+        "width": 1672,
+        "height": 941,
+        "decodable": true
+      },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left framed panel containing the complete detailed coastal landmass and all five empty district pads",
+        "normalized_crop_bounds": { "x_min": 0.006, "y_min": 0.505, "x_max": 0.497, "y_max": 0.988 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel alone exposes the full coastline, offshore pieces, terrain corridors, and five separated empty anchors without authored city geometry."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The recomputed file is a non-empty decodable 1672x941 PNG showing one coherent career-world geography. The nonstandard raster size is recorded but does not alter identity.", "manifest_evidence": "The manifest permits the world as the sole five-district geography exception at this exact path." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected panel has one main coastal system, navigable water/terrain negative space, and five clearly separated empty buildable pads in the required three-upper/two-lower relationship.", "manifest_evidence": "The brief requires one coherent coastal land system with five employer districts and no authored city geometry." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Parallel isometric grid axes and vertical cliff edges remain parallel with no visible perspective convergence or cinematic rotation.", "manifest_evidence": "The manifest locks orthographic true-isometric projection at the shared authored orientation." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Near-black navy field, matte low-value terrain, restrained contour linework, hard coast edges, and sparse anchor accents match the technical-cartography language.", "manifest_evidence": "The world prompt authorizes restrained hints from all five employer palette families only at district anchors." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The entire land envelope, cliff edge, offshore pieces, five pads, and terrain divisions are separable from the field without inventing a hidden outer boundary.", "manifest_evidence": "The world panel must support deterministic SVG reconstruction from one selected panel." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No words, initials, numbers, coordinate marks, logos, captions, pseudo-text, or watermark are visible.", "manifest_evidence": "Text is none; coordinate marks and generated branding are explicitly forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The mainland/coastal terrain reads as one connected land system; small offshore pieces are plainly separate geographic decoration rather than broken required masses.", "manifest_evidence": "The brief permits navigable water and coastal geography while requiring one coherent land system." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image contains no labels, roads, traffic, metrics, buildings, real-campus cues, or factual claims.", "manifest_evidence": "World geography is illustrative navigation art; routes, labels, and buildings remain code-native." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan across app, features, tests, and public returned 0 hits; public basename and SHA duplicate scans returned 0 hits." }
+      ],
+      "cross_panel_observations": {
+        "summary": "The other geography panels remove or add permitted terrain/coast detail; the selected coastline identity and five-pad relationship remain usable without blending.",
+        "classification": "none",
+        "d010_reason": "The selected LOD-2 panel independently defines the master geography; generated pixel parity was not evaluated."
+      },
+      "disposition": {
+        "outcome": "PASS",
+        "findings": [
+          "The 1672x941 raster is a scale-equivalent landscape observation, not a topology or traceability failure.",
+          "One safe detailed panel defines the requested five-anchor geography."
+        ],
+        "targeted_correction": null,
+        "reviewed_at": "2026-07-17T03:04:10-05:00"
+      }
+    },
+    {
+      "asset_id": "project/kaizen-agent-platform@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "73576F58BB8CECDEE8DD81BBD2A4D43758384AED7A3AACB82F56104FDDEDFEC0", "bytes": 1946336, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left framed panel containing the complete three-bar workshop cluster, central transfer bay, overhead gate bridge, front gate, and right-side rollback vault",
+        "normalized_crop_bounds": { "x_min": 0.005, "y_min": 0.51, "x_max": 0.49, "y_max": 0.98 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The lower-left panel exposes all three stepped bars and every defining bay, bridge, gate, and side-vault connection at the highest useful detail."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The recomputed decodable PNG contains one controlled workshop landmark identity at the exact path.", "manifest_evidence": "The ID and path resolve exactly to the evidence-backed Kaizen Agent Platform project brief." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "Three stepped bars surround an open central bay; the narrow elevated bridge, guarded front opening, and compact right rollback vault are all distinct.", "manifest_evidence": "Those five primary elements are the requested controlled, reversible silhouette." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Ground axes and roof edges remain parallel, verticals remain vertical, and the panel has no perspective convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Muted teal project accents, navy drafting field, matte faces, thin hard linework, and restrained bloom are legible and non-photoreal.", "manifest_evidence": "The project is authorized to use the NinjaOne palette family without branding." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Outer silhouettes, stepped tiers, open bay, bridge supports, gate posts, and vault footprint are all separable from the background.", "manifest_evidence": "The project must be reconstructable as deterministic SVG from one panel." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No words, pseudo-text, numbers, robots, chat symbols, database/API marks, logo, or watermark are visible.", "manifest_evidence": "The prompt forbids generated text, robot agents, chat bubbles, and stack branding." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "All bars and the side vault land on connected plinth/foundation geometry; the bridge lands on substantial posts and no major mass floats.", "manifest_evidence": "The three bars, gate bridge, and rollback vault are one controlled structural identity." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The architecture stays abstract and contains no transaction values, workflow diagram, implementation detail, or outcome claim.", "manifest_evidence": "Approved skill links may inform high-level massing only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Roof seams and small equipment vary only as permitted interior detail; all primary masses and connections match the selected panel.", "classification": "none", "d010_reason": "The selected panel alone defines the master geometry without averaging panels." },
+      "disposition": { "outcome": "PASS", "findings": ["The selected panel safely defines all required primary topology and connections."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "category": "project",
+      "evidence_status": "identity-only",
+      "output_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "461B36BCFB4A59A8A4865B854BE93A11E73061E8644097A77889B1119712B25D", "bytes": 1842600, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_1",
+        "region_descriptor": "lower-row second framed panel from the left containing the complete perforated folded canopy, rib row, inspection arch, and wedge platform",
+        "normalized_crop_bounds": { "x_min": 0.261, "y_min": 0.618, "x_max": 0.494, "y_max": 0.94 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This bordered panel contains the full requested identity, readable perforation language, and clean hard edges without the localized malformed perforation patch present in the large hero rendering."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one ticket-gate pavilion identity and no neighboring asset.", "manifest_evidence": "The ID/path and identity-only evidence status match the frozen manifest." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected panel clearly shows one folded canopy over a row of abstract ribs, one tall arch, and one wedge-shaped platform.", "manifest_evidence": "Those are the exact entertainment-only primary forms in the brief." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Platform edges remain parallel along the locked isometric axes, verticals stay vertical, and no perspective convergence is visible.", "manifest_evidence": "The shared orthographic true-isometric orientation is required." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Cool red project accents, matte dark faces, restrained perforation detail, and thin hard drafting lines remain traceable and non-photoreal.", "manifest_evidence": "ACE palette-family color is authorized for the project identity, without branding." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Canopy folds, supports, every rib envelope, arch opening, and the entire wedge footprint are exposed with no hidden required connection.", "manifest_evidence": "One panel must support deterministic reconstruction without borrowing from another panel." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No ticket text, barcode, QR code, number, ACE mark, caption, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "All such marks are explicitly forbidden for this identity-only project." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Canopy supports, ribs, and arch all land on the platform; no required mass floats or meets by accidental tangency.", "manifest_evidence": "The pavilion must be a physically readable entertainment landmark." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image makes no workflow, system, skill, metric, real-ticket, or real-campus claim and contains no easter egg.", "manifest_evidence": "Identity-only status permits only name-derived entertainment architecture." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": {
+        "summary": "The large upper hero has a localized tangled/malformed perforation patch on the canopy; the selected lower LOD-1 panel is clean and fully defines the required form.",
+        "classification": "nonblocking",
+        "d010_reason": "The defect is confined to a non-selected presentation panel and does not make the selected panel ambiguous or require blended geometry."
+      },
+      "disposition": { "outcome": "PASS_WITH_NOTES", "findings": ["Trace from the selected lower-row LOD-1 panel only; do not reproduce the malformed hero-panel perforation patch."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/operator-control@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/operator-control-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "8007B681DED1389C914F344736C9110DE0EA9011285EF12E1C04E7B231E0235B", "bytes": 2258511, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left framed panel containing the complete raised faceted cabin, stepped plinth, left-front switchback access system, and rear counterweight hall",
+        "normalized_crop_bounds": { "x_min": 0.013, "y_min": 0.02, "x_max": 0.463, "y_max": 0.524 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This is the clearest complete depiction of the generated candidate, but it cannot define an accepted master because it exposes only one switchback access system where the brief requires two ramps."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The recomputed decodable PNG is the requested neutral operator-control building candidate at the exact path.", "manifest_evidence": "ID, category, evidence status, and output path match the frozen manifest." },
+        { "id": "canonical_panel_and_primary_topology", "result": "blocker", "visible_evidence": "The cabin, stepped plinth, and rear hall are clear, but every usable panel shows one left-front switchback access system rather than two distinct exposed switchback ramps.", "manifest_evidence": "The asset brief explicitly requires the raised cabin to be reached by two exposed switchback ramps." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Parallel ground/roof axes and vertical supports are consistent with the locked orthographic isometric view.", "manifest_evidence": "The shared projection and authored orientation are locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "The structure uses a neutral dark palette, thin drafting lines, restrained cyan accents, and matte traceable faces with no employer ownership.", "manifest_evidence": "Skill concepts must remain employer-neutral and mechanically recolorable." },
+        { "id": "primary_form_traceability", "result": "blocker", "visible_evidence": "The depicted structure is traceable, but a tracer would have to invent the placement and connection of the missing second switchback ramp.", "manifest_evidence": "The sole master panel must expose every identity-defining primary connection without invented geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No words, controls, screens, person imagery, initials, numbers, logo, or watermark are visible.", "manifest_evidence": "The prompt forbids generated text, control-panel UI, joysticks, people, and branding." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The cabin is supported by a substantial core and frame, the shown ramp lands on platforms, and the rear hall connects by a solid neck/base.", "manifest_evidence": "Required masses must have plausible load paths and connected access." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image conveys manual access abstractly and contains no operational screen, metric, person, employer, project, or outcome claim.", "manifest_evidence": "The evidence-backed skill may remain an illustrative neutral capability identity only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "All rendered panels repeat the same single access system; no alternate panel supplies the second required switchback ramp.", "classification": "material", "d010_reason": "D-010 cannot cure a missing primary connection when no single panel contains the brief-required topology." },
+      "disposition": {
+        "outcome": "REGENERATE",
+        "findings": ["The missing second switchback ramp is a primary-topology omission, not a cross-panel parity issue."],
+        "targeted_correction": {
+          "visible_defect": "Only one exposed switchback access system is present.",
+          "required_invariant": "The raised faceted cabin must be reached by two distinct exposed switchback ramps while the broad stepped plinth and rear counterweight hall remain unchanged.",
+          "smallest_correction": "Regenerate only this asset with one narrow addendum requiring two separately readable switchback ramp assemblies and their explicit landings; preserve the accepted cabin, plinth, rear hall, neutral palette, projection, and no-text constraints."
+        },
+        "reviewed_at": "2026-07-17T03:04:10-05:00"
+      }
+    },
+    {
+      "asset_id": "skill/postgresql@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/postgresql-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "26EFA7C8A59BD5F24F7A772BC08E6B993446BC25839D05D65CD071AE888361C7", "bytes": 2363833, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-right group, left framed detail panel containing the complete cylindrical silo, partial helical ramp, radial buttresses, and octagonal base",
+        "normalized_crop_bounds": { "x_min": 0.501, "y_min": 0.025, "x_max": 0.735, "y_max": 0.484 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel isolates the complete ramped silo and exposes the buttress/base pattern with clean separable edges at useful detail."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one neutral silo-and-ramp skill identity.", "manifest_evidence": "ID, path, category, and evidence status match the PostgreSQL brief." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "A stout cylindrical archive silo, partial helical ramp, four-position radial buttress pattern, and compact octagonal base are readable as one identity.", "manifest_evidence": "Those elements define the requested skill topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Base axes remain parallel, verticals remain vertical, and circular faces use consistent isometric ellipses without perspective convergence.", "manifest_evidence": "The shared orthographic true-isometric view is mandatory." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "The neutral low-value structure, ivory linework, sparse cyan accents, and matte surfaces are mechanically recolorable and non-photoreal.", "manifest_evidence": "Skill geometry must remain employer-neutral across all palette slots." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The cylinder envelope, ramp curve, buttress faces, door recess, and octagonal base outline are separated from the field and mutually legible.", "manifest_evidence": "One selected panel must define deterministic master geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No elephant, database icon, SQL text, wordmark, number, logo, or watermark is visible.", "manifest_evidence": "The manifest explicitly forbids those marks and all generated text." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The ramp attaches to the silo, buttresses land on the octagonal base, and no required mass floats.", "manifest_evidence": "The silo, ramp, buttresses, and base are one physically readable skill building." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image makes no database capacity, durability, performance, employer, project, or real-facility claim.", "manifest_evidence": "PostgreSQL support may inform neutral architectural identity only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels reduce rails, seams, and roof equipment only; the silo, ramp, buttress pattern, and base remain the same identity.", "classification": "none", "d010_reason": "The selected LOD-2 panel fully defines the master without cross-panel blending." },
+      "disposition": { "outcome": "PASS", "findings": ["The cylindrical form reads as an architectural silo rather than a database icon treatment."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/csharp@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/csharp-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "3EC6E9D7B0F48B10E43E894652E30F531AF83F7215793D7DB5781AB110D42C0C", "bytes": 2010546, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering to the right of the swatch column containing the complete faceted six-sided toolhouse, sawtooth roof, side bay, and two plinth cuts",
+        "normalized_crop_bounds": { "x_min": 0.25, "y_min": 0.025, "x_max": 0.8, "y_max": 0.58 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large hero gives the clearest clean outer silhouette and exact side-bay/plinth-cut topology without the optional roof props shown in a secondary detail panel."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one neutral precision-toolhouse skill identity.", "manifest_evidence": "ID, path, category, and evidence status match the frozen C# record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected panel shows a faceted six-sided main mass, asymmetric sawtooth roof, low side bay, and two deep plinth notches.", "manifest_evidence": "These are the requested primary forms and footprint cuts." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Roof and footprint axes remain parallel and verticals remain vertical without material convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte faces, ivory hard edges, restrained cyan slots, and the navy field remain separable for employer recolor.", "manifest_evidence": "Skill geometry and palette ownership must remain employer-neutral." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "All roof planes, the side-bay connection, two plinth cuts, door/sign blanks, and outer footprint are exposed with no hidden required connection.", "manifest_evidence": "A single panel must support deterministic master reconstruction." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No C, hash, C# text, Microsoft/.NET mark, number, pseudo-text, logo, or watermark is visible; sign slots remain blank.", "manifest_evidence": "Those symbols and all generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Main hall and side bay share solid foundations and walls; roof planes and plinth cuts have plausible load paths.", "manifest_evidence": "The toolhouse and compilation bay form one connected building." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image presents abstract faceting only and makes no language, performance, employer, project, or vendor claim.", "manifest_evidence": "C# evidence supports a neutral reusable skill identity, not factual architecture." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": {
+        "summary": "The lower-left high-detail panel adds several rooftop units and pipes that protrude above the clean selected roofline; the selected hero remains complete and unambiguous.",
+        "classification": "nonblocking",
+        "d010_reason": "D-010 selects the clean hero as master; the secondary roof props are not borrowed and do not invalidate that panel."
+      },
+      "disposition": { "outcome": "PASS_WITH_NOTES", "findings": ["Trace the selected hero roofline and omit the non-authoritative secondary-panel rooftop props."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "ambient/shore-pier@v1",
+      "category": "ambient",
+      "evidence_status": "ambient",
+      "output_path": "design/career-world/concepts/ambient/shore-pier-v1.png",
+      "generation_batch": "art-batch-a",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "D69FE4809F6C724D7DBBC95624FFC89A0DF4D5D5E71B5AC6A9450E372A5A5B78", "bytes": 2130552, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper-left large hero panel containing the complete T-shaped pile-supported pier, cross-head deck, blank shelter, and stepped shoreline abutment",
+        "normalized_crop_bounds": { "x_min": 0.006, "y_min": 0.01, "x_max": 0.83, "y_max": 0.583 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full approach, every pile/support rhythm, cross-head, shelter, rails, and shore landing in one complete view."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one isolated shore-pier prop identity.", "manifest_evidence": "The ID/path and ambient status match the frozen manifest." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "A long narrow approach meets a broad T cross-head, with one tiny blank shelter and a stepped stone abutment.", "manifest_evidence": "Those four elements define the requested pier topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Deck edges and pile rows remain parallel on the locked axes with vertical supports and no convergence.", "manifest_evidence": "The ambient prop uses the shared orthographic true-isometric orientation." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Matte dark deck faces, thin ivory linework, restrained accent points, and the navy grid remain traceable and non-photoreal.", "manifest_evidence": "Ambient props use the neutral technical-cartography palette." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The approach footprint, T head, rails, shelter, abutment, and visible piles are fully separated from the field.", "manifest_evidence": "The complete reusable prop must be reconstructable without guessing its outer form." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "The shelter is blank and no sign, person, boat, word, number, logo, pseudo-text, or watermark is visible.", "manifest_evidence": "Signage, people, boats, text, and branding are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The approach joins the cross-head and shoreline steps; piles land below the deck and the shelter sits on it with no floating mass.", "manifest_evidence": "The T pier is one physically readable shoreline structure." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No route, cargo, ownership, traffic, real-location, or measured-scale meaning is asserted.", "manifest_evidence": "The pier is ambient illustrative navigation decoration only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels simplify rails, seams, and pile detail only; the selected T footprint and component arrangement remain stable.", "classification": "none", "d010_reason": "The selected hero independently defines the complete reusable pier." },
+      "disposition": { "outcome": "PASS", "findings": ["The retained voids between piles are structural openings, not a silhouette failure."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "052FAE0682DFE99D19D8F4D4B3DEA501C932FF06BA43E3E908DE0FAB426076C7", "bytes": 2106863, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "lower-left panel containing the complete unequal tower pair, sunken dock, straight overhead span with trolley, front kiosk, and trapezoidal apron",
+        "normalized_crop_bounds": { "x_min": 0.01, "y_min": 0.49, "x_max": 0.5, "y_max": 0.95 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel is the clearest complete generated candidate, but it cannot define an accepted master because the overhead gantry is a single straight span rather than the required branching form."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG is one Vendy VM Platform project landmark candidate.", "manifest_evidence": "ID, path, category, and evidence status match the frozen project record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "blocker", "visible_evidence": "Two unequal towers flank the dock and the kiosk/apron are present, but the overhead element is one straight tower-to-tower span in every panel; no plan branch or fork exists.", "manifest_evidence": "The brief explicitly requires a branching overhead gantry as a defining primary connection." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Apron, dock, and tower axes remain parallel with vertical towers and no material perspective convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Muted teal accents, matte low-value faces, navy field, and thin hard edges fit the project palette without vendor branding.", "manifest_evidence": "The project may use the NinjaOne family while remaining illustrative and unbranded." },
+        { "id": "primary_form_traceability", "result": "blocker", "visible_evidence": "The depicted towers, dock, kiosk, apron, and straight bridge are traceable, but a tracer would have to invent the missing branch and its landing.", "manifest_evidence": "The selected panel must expose the defining gantry connection pattern without invented geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No VMware, AWS, Apple, MacStadium, server, word, number, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "Vendor marks, literal server imagery, and all generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The shown bridge lands on both towers, the dock and kiosk sit on connected foundations, and no required mass floats.", "manifest_evidence": "All requested masses must read as a plausible connected project structure." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image contains no vendor machinery, metrics, data-center claim, flow direction, project result, or real-campus implication.", "manifest_evidence": "Approved skill links may influence only high-level motifs." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Every usable panel repeats the same straight tower-to-tower span; none provides the required branching gantry.", "classification": "material", "d010_reason": "D-010 cannot select around a primary connection-pattern omission shared by every panel." },
+      "disposition": {
+        "outcome": "REGENERATE",
+        "findings": ["The unbranched gantry is a primary-topology failure even though the other project masses are usable."],
+        "targeted_correction": {
+          "visible_defect": "The overhead gantry is a single straight span with no readable branch.",
+          "required_invariant": "One connected overhead gantry must have an unmistakable fork/branch while retaining the same two unequal towers, sunken dock, kiosk, and trapezoidal apron.",
+          "smallest_correction": "Regenerate only this asset with a narrow addendum requiring a visibly branching connected overhead gantry; preserve all other masses, the optional static trolley rule, palette, projection, and no-brand/no-text constraints."
+        },
+        "reviewed_at": "2026-07-17T03:04:10-05:00"
+      }
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "category": "project",
+      "evidence_status": "identity-only",
+      "output_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "726AEB8F0DF5E78911F0D2B8113653814DFC596ED08376E72FBA09C1A621E229", "bytes": 1981370, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete elevated grid deck, four corner piers, centered under-deck lift, and narrow front transfer bridge",
+        "normalized_crop_bounds": { "x_min": 0.18, "y_min": 0.01, "x_max": 0.82, "y_max": 0.65 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The large hero shows the entire required table-landmark topology with a clean deck datum and all supports/connections visible."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one elevated table-landmark identity at the correct path.", "manifest_evidence": "The frozen record is identity-only and derived solely from the approved project name." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected hero clearly shows one broad gridded deck, four heavy corner piers, one centered mechanical lift, and one narrow bridge.", "manifest_evidence": "These are the complete requested primary forms." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Deck grid and platform edges remain parallel on the locked axes, piers remain vertical, and no convergence is visible.", "manifest_evidence": "The shared orthographic true-isometric view is mandatory." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Cool red accents, matte dark faces, restrained linework, and hard traceable edges fit the ACE project palette without branding.", "manifest_evidence": "ACE palette-family ownership is authorized for this project identity only." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Deck perimeter/grid, all four piers, lift frame, and bridge landings are exposed and separable from the field.", "manifest_evidence": "The selected panel must support deterministic reconstruction without hidden required geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No SAP/ACE mark, interface, database table, arrow, data packet, word, number, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "All such marks and factual integration cues are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Four piers visibly support the deck, the lift sits beneath it, and the bridge lands at the lift/base with plausible structure.", "manifest_evidence": "The table landmark must be physically readable despite being entertainment-only." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No real SAP architecture, table data, integration flow, system, skill, metric, result, real campus, or easter egg is implied.", "manifest_evidence": "Identity-only status prohibits any factual architecture or association." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": {
+        "summary": "The lower-row third detail panel adds multiple blocks on top of the deck and changes that panel's roof silhouette; the selected hero has a complete clean deck and all required topology.",
+        "classification": "nonblocking",
+        "d010_reason": "The selected hero alone defines the master; secondary deck blocks are excluded rather than averaged or borrowed."
+      },
+      "disposition": { "outcome": "PASS_WITH_NOTES", "findings": ["Trace the clean selected hero deck and omit the non-authoritative blocks from the lower third panel."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/data-contracts@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "4031EE754C9DFA4B82A9B258C02F4526527B923768B239EF5AB4D5B929CE91A6", "bytes": 2243413, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing both complete archive halls, their unequal roof pitches, and the narrow sealed center gate",
+        "normalized_crop_bounds": { "x_min": 0.09, "y_min": 0.03, "x_max": 0.91, "y_max": 0.52 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes both hall envelopes and the exact narrow gate connection/central pinch at the largest clean scale."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one paired-hall validation-gate skill identity.", "manifest_evidence": "ID, path, category, and evidence status match the frozen record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "Two halls with visibly different roof pitches meet only through a narrow sealed gate, producing a pronounced central footprint pinch.", "manifest_evidence": "That paired-hall/gate pattern is the complete requested topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Hall axes and gate edges remain parallel and verticals stay vertical without perspective convergence.", "manifest_evidence": "The shared true-isometric orthographic orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte faces, ivory linework, sparse cyan gate accents, and blank swatches remain mechanically recolorable.", "manifest_evidence": "Skill geometry must not bake in employer color ownership." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Both roof volumes, wall footprints, central gate, short necks, and pinch are fully exposed and separable.", "manifest_evidence": "One selected panel must define the neutral master without invention." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No contract/document, brace/code text, database logo, word, number, pseudo-text, brand, or watermark is visible; the gate's diagonal structural brace is not a textual glyph.", "manifest_evidence": "Documents, code glyphs, database marks, and generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Both halls connect through solid short necks and the sealed gate; foundations and roof loads are coherent.", "manifest_evidence": "The gate is the sole required physical connection between the halls." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No schema, signature, data flow, employer, project, outcome, metric, or real-facility claim appears.", "manifest_evidence": "The skill is illustrative capability architecture only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels simplify facade and roof seams only; both halls, unequal roofs, gate, and footprint pinch remain stable.", "classification": "none", "d010_reason": "The selected hero independently defines the master geometry." },
+      "disposition": { "outcome": "PASS", "findings": ["The center gate and pinch are complete and safely traceable."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/redis@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/redis-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "F14FE4CCD0E8A8446E72F1D970FFB5E86A1FC4E55C9C71AF4FEA47A8778B9471", "bytes": 1922446, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete five-cell low zigzag pavilion, diagonal bypass bridge, and right-end cylindrical service drum",
+        "normalized_crop_bounds": { "x_min": 0.1, "y_min": 0.06, "x_max": 0.9, "y_max": 0.43 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero shows the full five-cell zigzag count, bridge crossing, and terminal drum with the clearest plan outline."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one low zigzag cache-pavilion identity.", "manifest_evidence": "ID, path, category, and evidence status match the Redis record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "Five interlocking low slab cells form a zigzag, one short diagonal bridge crosses them, and one cylindrical drum terminates the right end.", "manifest_evidence": "Those elements define the requested primary topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Slab edges and bridge axes remain parallel, verticals remain vertical, and the drum ellipse is consistent with the locked view.", "manifest_evidence": "The shared orthographic true-isometric orientation is required." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral dark slabs, ivory edges, sparse cyan details, and blank swatches remain employer-neutral; no baked red palette is present.", "manifest_evidence": "Skill geometry and palette ownership must be neutral and recolorable." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The five-cell envelope, bridge supports/landings, and drum/base perimeter are fully separable from the drafting field.", "manifest_evidence": "The master must be traceable without inventing hidden primary geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No Redis mark, text, number, latency value, literal data block, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "Branding, data blocks, metrics, and generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "All slab cells interlock at ground level, the bridge lands on supports, and the drum joins the terminal cell/base.", "manifest_evidence": "The pavilion must read as one connected low structure." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No latency, capacity, cache behavior, employer/project association, or factual system claim is implied.", "manifest_evidence": "Redis support may define only abstract reusable skill architecture." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels remove roof seams/equipment only; the five-cell zigzag, bypass bridge, and drum remain stable.", "classification": "none", "d010_reason": "The selected hero independently defines the master." },
+      "disposition": { "outcome": "PASS", "findings": ["Five cells and the terminal drum are independently readable in the selected panel."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/localdb@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/localdb-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "619A65CF85C56D95CE2B71441F2773E0105BF0FD9E7DC1A30C8804EE39307ADD", "bytes": 2141987, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left framed panel containing the complete thick square bunker base, offset intake pavilion, and two low ventilation ridges",
+        "normalized_crop_bounds": { "x_min": 0.013, "y_min": 0.02, "x_max": 0.573, "y_max": 0.65 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This panel gives the clearest complete view of the square base and the relative placement of the small intake and both ridges."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one compact bunker-like neutral skill identity.", "manifest_evidence": "ID, path, category, and evidence status match the LocalDB record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "A thick square base carries one small intake pavilion offset toward the near half and two separated low ventilation ridges.", "manifest_evidence": "Those are the requested visible primary forms of the sunken archive bunker." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Base/ridge axes remain parallel and verticals remain vertical with no material convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte dark faces, ivory hard edges, and sparse cyan points remain recolorable and non-photoreal.", "manifest_evidence": "Skill concepts must remain employer-neutral." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The full square perimeter, intake footprint/ramp, and both ridge outlines are exposed and separable.", "manifest_evidence": "The selected panel must define the master without hidden primary geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No Microsoft mark, database cylinder, server label, word, number, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "Vendor/database marks and generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "The pavilion and ridges seat directly on the heavy base and the intake ramp lands on its surface.", "manifest_evidence": "All visible bunker elements belong to one physically readable shared base." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No storage capacity, local-system behavior, employer/project association, or factual implementation claim appears.", "manifest_evidence": "LocalDB evidence supports only a neutral reusable capability identity." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels simplify seams and slightly center the intake presentation, but the selected panel clearly fixes an offset intake and the same two ridges on one square base.", "classification": "none", "d010_reason": "The selected LOD-2 panel alone fixes the authoritative placement." },
+      "disposition": { "outcome": "PASS", "findings": ["The intake is modestly but visibly offset in the selected panel."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "ambient/service-truck@v1",
+      "category": "ambient",
+      "evidence_status": "ambient",
+      "output_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+      "generation_batch": "art-batch-b",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "00EAECF434ADD54913E34C6006E3BAD877B1C35D0854A9341F6E06D454550E45", "bytes": 2132090, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete cab-over utility truck, enclosed rear body, shallow roof rack, and both visible wheel arches",
+        "normalized_crop_bounds": { "x_min": 0.25, "y_min": 0.02, "x_max": 0.72, "y_max": 0.55 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full vehicle silhouette, compartment body, rack, cab, arches, and clipped footprint without the decorative progress-dot strips beneath the secondary panels."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one isolated neutral service-truck identity.", "manifest_evidence": "ID, path, category, and ambient status match the frozen record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected hero shows a compact cab-over cab, enclosed rear service body, one shallow rack, exposed wheel arches, and clipped rectangular vehicle footprint.", "manifest_evidence": "Those are the complete requested primary forms." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Vehicle body axes remain parallel and verticals remain vertical with no material convergence.", "manifest_evidence": "The ambient prop uses the shared orthographic true-isometric orientation." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte dark panels, ivory hard edges, and restrained cyan lights remain traceable and employer-neutral.", "manifest_evidence": "Ambient props use the neutral technical-cartography palette." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Cab/body/rack seams, bumper, arches, wheels, and the entire outer vehicle envelope are exposed without hidden required components.", "manifest_evidence": "The complete reusable vehicle must be reconstructable from one panel." },
+        { "id": "text_logo_watermark_absence", "result": "note", "visible_evidence": "No words, license text, logo, emergency marking, number, employer mark, or watermark appears. Small unlabeled cyan/ivory dot sequences sit below secondary panels and read as decorative LOD progress indicators, not vehicle branding or factual content.", "manifest_evidence": "The manifest forbids text, labels, emergency markings, UI-like content, and branding; the selected panel itself is clean." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Cab and rear body share a chassis, wheels seat within arches, and the roof rack attaches to the body with no floating component.", "manifest_evidence": "The truck is one complete reusable vehicle prop." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No driver, cargo, route, direction, ownership, animated state, performance, or real-fleet claim is visible.", "manifest_evidence": "The service truck is ambient illustrative decoration only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": {
+        "summary": "The vehicle topology remains stable; only small decorative progress-dot sequences appear beneath the secondary rendered panels.",
+        "classification": "nonblocking",
+        "d010_reason": "The selected hero is clean and independently defines the vehicle; the dots are outside the trace crop and carry no identity or evidence meaning."
+      },
+      "disposition": { "outcome": "PASS_WITH_NOTES", "findings": ["Do not carry the secondary-panel progress dots into tracing or runtime geometry."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "project/kaizen-metrics@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/projects/kaizen-metrics-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "F557ED24948522730B6ED2320C8A7C8617964AB906ADA6E8B9CE9DBABB0F81D4", "bytes": 2106110, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_2",
+        "region_descriptor": "upper-left panel containing the complete terraced refinery with sawtooth ingestion hall, raised compute spine, cylindrical reservoir, faceted lightwell, and static capsule",
+        "normalized_crop_bounds": { "x_min": 0.02, "y_min": 0.02, "x_max": 0.49, "y_max": 0.49 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This detailed panel exposes every requested primary mass and their shared terraced foundation, including the permitted static capsule."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one analytics-refinery project identity.", "manifest_evidence": "ID, path, category, and evidence status match the frozen Kaizen Metrics record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected panel clearly separates the low sawtooth hall, raised linear spine, cylindrical reservoir, and small faceted lightwell on one terraced base.", "manifest_evidence": "Those four masses define the requested project landmark." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Base/roof axes remain parallel, verticals remain vertical, and the reservoir/lightwell use consistent isometric construction.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Muted teal accents, matte low-value faces, thin cyan/ivory lines, and low bloom fit the NinjaOne project family without photorealism.", "manifest_evidence": "The project may use the NinjaOne palette family without branding." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "All four primary masses, the terraced base, stair/entry, support spine, and capsule are exposed with clean separable outlines.", "manifest_evidence": "One selected panel must support deterministic reconstruction." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No graph, dashboard, metric value, brain, robot face, provider mark, word, number, pseudo-text, logo, or watermark is visible.", "manifest_evidence": "Those symbols and all generated text are explicitly forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Hall, spine, reservoir, and lightwell all seat on the shared base; the raised spine has visible supports and no major mass floats.", "manifest_evidence": "The refinery masses must form one plausible project landmark." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "Architecture stays abstract; the static capsule does not imply throughput, and no measured analytics, assistant autonomy, vendor detail, or outcome claim appears.", "manifest_evidence": "Approved skill links and Bedrock assistant evidence permit abstract architecture only; the capsule is decorative." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels remove roof equipment, rails, and seams only; all four primary masses and their placement remain stable.", "classification": "none", "d010_reason": "The selected LOD-2 panel independently defines the master." },
+      "disposition": { "outcome": "PASS", "findings": ["The assistant lightwell is non-humanoid and the capsule remains non-evidentiary."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "project/career-world-portfolio@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "2A44096DB6354B8BA0799FCCA604C21F62FFC173FAE7079C829D48934742E908", "bytes": 2296385, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_1",
+        "region_descriptor": "upper-right panel containing the complete folded-map pavilion, open center courtyard, left/right/rear viewpoint decks, and narrow right-front gallery",
+        "normalized_crop_bounds": { "x_min": 0.5, "y_min": 0.02, "x_max": 0.97, "y_max": 0.49 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The panel cleanly exposes the folded roof, navigable courtyard, exactly three decks, and inset gallery without the optional lower-panel survey table/roof props."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one cartographer-pavilion project identity.", "manifest_evidence": "ID, path, category, and evidence status match the frozen portfolio record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The folded-map roof encloses an open courtyard, with three discrete decks at left, right, and rear and a narrow inset gallery along the right-front wing.", "manifest_evidence": "Those elements define the requested landmark topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Courtyard/roof axes remain parallel and vertical posts remain vertical with no material convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Muted violet faces, restrained emissive points, thin hard edges, and navy field fit the Independent project family without photorealism.", "manifest_evidence": "The project may use the Independent palette family without branding." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Every roof fold, deck, courtyard edge, gallery wing, stair, and blank sign slot is exposed and separable.", "manifest_evidence": "One selected panel must support deterministic reconstruction." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No portfolio screenshot, resume text, map label, browser chrome, React/TypeScript mark, word, number, pseudo-text, logo, or watermark appears; sign/gallery areas are blank.", "manifest_evidence": "Those artifacts and all generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Roof wings, gallery, deck posts, stairs, and courtyard walls connect through continuous foundations and plausible supports.", "manifest_evidence": "The pavilion must read as one physically navigable landmark." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The map metaphor contains no generated content, pins, factual annotations, resume claims, metrics, or UI evidence.", "manifest_evidence": "React/TypeScript/operator/data links may inform high-level structure only; the gallery remains empty." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "The lower-left LOD-2 panel adds the permitted blank survey table and small roof props; the selected panel already defines the full primary pavilion.", "classification": "none", "d010_reason": "Those are permitted secondary details and are not needed to define the selected master." },
+      "disposition": { "outcome": "PASS", "findings": ["The selected panel safely fixes the three-deck folded-map identity and leaves evidence surfaces blank."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "912DCE71CA8E18845DAAC5007B83CB8C831F1713C89CD915956699D99BD3D586", "bytes": 2318262, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete central drum, interrupted ring ramp, and all seven visible perimeter service bays",
+        "normalized_crop_bounds": { "x_min": 0.18, "y_min": 0.04, "x_max": 0.82, "y_max": 0.61 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero clearly exposes the generated radial topology, but it cannot define an accepted master because it contains seven service bays rather than the required six."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one neutral radial conductor-rotunda skill candidate.", "manifest_evidence": "ID, path, category, and evidence status match the workflow-orchestration record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "blocker", "visible_evidence": "The central drum and interrupted ring are clear, but seven distinct low perimeter bays are visible: one rear-center, two rear-side, two mid-side, and two front-side bays.", "manifest_evidence": "The brief requires exactly six staggered low service bays." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "The ring uses a consistent isometric ellipse, base axes remain parallel, and verticals remain vertical without convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte dark faces, ivory hard edges, and restrained cyan accents remain employer-neutral and non-photoreal.", "manifest_evidence": "Skill geometry must remain mechanically recolorable and employer-neutral." },
+        { "id": "primary_form_traceability", "result": "blocker", "visible_evidence": "The generated seven-bay form is traceable, but producing the required six-bay master would require choosing and removing a primary bay without authority from any panel.", "manifest_evidence": "The selected panel must define the exact primary component count without invention." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No workflow diagram, arrow, node graph, Kubernetes image, word, number, pseudo-text, logo, or watermark appears.", "manifest_evidence": "Those symbols and all generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Every visible bay connects to the ring/base, the drum seats centrally, and the interrupted ramp has plausible landings.", "manifest_evidence": "The radial building must be one physically readable connected structure." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The image makes no moving-flow, workflow, throughput, project, employer, or outcome claim.", "manifest_evidence": "Bays may express coordination abstractly only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "All usable panels repeat seven perimeter bays; none supplies the required six-bay topology.", "classification": "material", "d010_reason": "D-010 cannot select around a wrong primary component count shared across every panel." },
+      "disposition": {
+        "outcome": "REGENERATE",
+        "findings": ["The seventh bay is a primary count error, not permitted LOD detail."],
+        "targeted_correction": {
+          "visible_defect": "Seven low service bays surround the ring.",
+          "required_invariant": "The rotunda must have exactly six staggered low service bays around the tall central drum and one interrupted ring ramp.",
+          "smallest_correction": "Regenerate only this asset with a narrow addendum requiring exactly six separately readable bays; preserve the drum, interrupted ring, neutral palette, projection, and no-diagram/no-text constraints."
+        },
+        "reviewed_at": "2026-07-17T03:04:10-05:00"
+      }
+    },
+    {
+      "asset_id": "skill/macstadium@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "output_path": "design/career-world/concepts/skills/macstadium-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "C823EC441DC09A9CEF548BB4C498A43BE6E9E9A280F2AA5556752F31FF8AAF0B", "bytes": 2064498, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_0",
+        "region_descriptor": "lower-row third framed panel from the left containing the complete elongated two-level hall, narrow service-bay rhythm, detached parallel utility bridge, and raised end tower",
+        "normalized_crop_bounds": { "x_min": 0.507, "y_min": 0.583, "x_max": 0.76, "y_max": 0.875 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "This clean reduced-detail panel exposes the full primary hall/plinth/tower/bridge geometry without the dense non-authoritative roof-equipment field in the hero."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one neutral elongated managed-compute hall identity.", "manifest_evidence": "ID, path, category, and evidence status match the MacStadium-supported skill record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "An elongated hall sits on a deep plinth with repeated narrow bays, one raised end tower, and one detached parallel supported utility bridge.", "manifest_evidence": "Those are the requested primary masses and arrangement." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Hall/bridge axes remain parallel, tower/supports remain vertical, and no material convergence is visible.", "manifest_evidence": "The shared orthographic true-isometric view is mandatory." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte faces, ivory linework, and sparse cyan accents remain employer-neutral and mechanically recolorable.", "manifest_evidence": "Skill geometry cannot bake in employer palette ownership." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "The hall/plinth perimeters, bay rhythm, end tower, bridge deck, and bridge supports are fully exposed and separable.", "manifest_evidence": "One selected panel must define the master without hidden primary geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No Apple logo, Mac/phone silhouette, MacStadium wordmark, rack label, word, number, pseudo-text, logo, or watermark appears.", "manifest_evidence": "Vendor/device marks, real data-center detail, and all generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Hall and tower share the plinth; the explicitly detached bridge is independently supported by solid piers and does not float.", "manifest_evidence": "The utility bridge is intentionally detached while all masses require plausible supports." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No vendor campus, rack claim, capacity, managed-compute metric, employer/project association, or real-facility implication appears.", "manifest_evidence": "MacStadium support permits only a high-level neutral managed-compute motif." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Higher-detail panels add many roof units and seams, while the selected LOD-0 panel retains the same hall, bay rhythm, tower, bridge, and supports.", "classification": "none", "d010_reason": "The selected panel fully defines primary geometry; higher-panel roof detail is intentionally excluded." },
+      "disposition": { "outcome": "PASS", "findings": ["The detached bridge is explicitly brief-authorized and visibly supported."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    },
+    {
+      "asset_id": "skill/atlassian@v1",
+      "category": "skill",
+      "evidence_status": "employer-supported-unlinked",
+      "output_path": "design/career-world/concepts/skills/atlassian-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "7CD5E3B177C9DAC02F2F5729D2A182FB7EE81D469127AF4A59CE4C0210895C5C", "bytes": 2006070, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "lod_0",
+        "region_descriptor": "upper-left panel containing the complete continuous chevron hall, unequal wedge wings, open forecourt, stepped apex terraces, and rear archive strip",
+        "normalized_crop_bounds": { "x_min": 0.02, "y_min": 0.04, "x_max": 0.49, "y_max": 0.43 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The upper-left panel cleanly defines the requested building topology, but the complete sheet cannot pass because generated palette words are visibly printed below all panels."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG is one Atlassian-supported neutral skill candidate at the correct path.", "manifest_evidence": "ID, path, category, and employer-supported-unlinked status match the frozen record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "One continuous chevron-plan hall forms unequal wedge wings around an open forecourt, with stepped apex terraces and a low rear strip.", "manifest_evidence": "Those elements are the complete requested topology." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Wing and forecourt axes remain parallel and verticals remain vertical without perspective convergence.", "manifest_evidence": "The shared orthographic true-isometric orientation is locked." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "The building itself uses neutral matte dark faces, ivory lines, and restrained cyan accents without baked Column color ownership.", "manifest_evidence": "Employer-supported-unlinked skill geometry must remain neutral and mechanically recolorable." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Both wedge footprints, the open forecourt, terrace steps, and rear strip are fully exposed and separable in the selected panel.", "manifest_evidence": "One selected panel must define the master geometry without invention." },
+        { "id": "text_logo_watermark_absence", "result": "blocker", "visible_evidence": "The bottom palette strip visibly prints the words BACKGROUND, SURFACE, LIT FACE, SHADOW FACE, INK, FOCUS, ACCENT, and EMISSIVE; cyan pseudo-label marks also appear on the detailed roof panel.", "manifest_evidence": "Text is none. Generated words, labels, pseudo-text, Atlassian/Jira/Confluence marks, Column branding, and UI are forbidden anywhere in the concept PNG." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Both wings meet continuously at the apex, the rear strip joins the hall, and walls/terraces have plausible foundations.", "manifest_evidence": "The chevron hall is one continuous connected civic building." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "No Atlassian product mark, board UI, Column brand, project symbol, skill association, metric, or outcome claim appears in the building imagery.", "manifest_evidence": "The skill is employer-supported but unlinked and cannot imply project use." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "The building topology remains coherent across panels; the failure is generated text on the sheet, not cross-panel geometry drift.", "classification": "none", "d010_reason": "D-010 supplies a usable topology panel but does not waive the independent no-generated-text gate." },
+      "disposition": {
+        "outcome": "REGENERATE",
+        "findings": ["Eight fully legible generated palette labels are an unconditional sheet-level blocker."],
+        "targeted_correction": {
+          "visible_defect": "Generated palette words and cyan pseudo-label marks are visible on the sheet.",
+          "required_invariant": "The complete PNG must contain no words, labels, pseudo-text, Atlassian/Jira/Confluence mark, Column branding, or other generated text while preserving the approved neutral chevron-hall topology.",
+          "smallest_correction": "Regenerate only this asset with a narrow addendum requiring all palette swatches and sign/glyph areas to remain completely unlabeled and blank; preserve the two unequal wings, open forecourt, stepped terraces, rear strip, neutral palette, and projection."
+        },
+        "reviewed_at": "2026-07-17T03:04:10-05:00"
+      }
+    },
+    {
+      "asset_id": "ambient/cargo-boat@v1",
+      "category": "ambient",
+      "evidence_status": "ambient",
+      "output_path": "design/career-world/concepts/ambient/cargo-boat-v1.png",
+      "generation_batch": "art-batch-c",
+      "qa_batch": "art-qa-1",
+      "reviewer": "/root/art_qa_lead/art_qa_1",
+      "artifact": { "sha256": "6CD8D2F526639058B7C4AB944BB2C6AADF5274FB9C7667704EECDF84F7CFC779", "bytes": 2206972, "format": "PNG", "width": 1536, "height": 1024, "decodable": true },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "upper large hero rendering containing the complete low angular barge, raised stern cabin, empty central well, blunt bow, and two near-side rub rails",
+        "normalized_crop_bounds": { "x_min": 0.12, "y_min": 0.03, "x_max": 0.84, "y_max": 0.58 },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The hero exposes the full hull envelope, empty well, cabin, bow, and both rail lines at the clearest scale."
+      },
+      "gates": [
+        { "id": "artifact_integrity_and_identity", "result": "pass", "visible_evidence": "The exact decodable PNG contains one isolated cargo-barge prop identity.", "manifest_evidence": "ID, path, category, and ambient status match the frozen record." },
+        { "id": "canonical_panel_and_primary_topology", "result": "pass", "visible_evidence": "The selected hero shows a low angular hull, raised stern cabin, open empty cargo well, blunt bow, and two simple longitudinal rub rails.", "manifest_evidence": "Those are the complete requested primary forms." },
+        { "id": "orthographic_projection_and_orientation", "result": "pass", "visible_evidence": "Hull/deck axes remain parallel, cabin verticals remain vertical, and no material perspective convergence is visible.", "manifest_evidence": "The ambient prop uses the shared orthographic true-isometric orientation." },
+        { "id": "technical_cartography_style_and_palette_suitability", "result": "pass", "visible_evidence": "Neutral matte dark faces, ivory hard edges, and sparse accent swatches remain technical-cartographic and employer-neutral.", "manifest_evidence": "Ambient props use the global neutral palette without employer ownership." },
+        { "id": "primary_form_traceability", "result": "pass", "visible_evidence": "Hull perimeter, bow, open well walls/floor, cabin, deck fittings, and both rub rails are fully exposed and separable.", "manifest_evidence": "One selected panel must define the complete reusable vessel without hidden primary geometry." },
+        { "id": "text_logo_watermark_absence", "result": "pass", "visible_evidence": "No company flag, container label, registration number, word, pseudo-text, logo, mascot, or watermark is visible.", "manifest_evidence": "Flags, labels, numbers, branding, and generated text are forbidden." },
+        { "id": "connected_physically_readable_primary_structure", "result": "pass", "visible_evidence": "Cabin, deck, hull, well walls, and rub rails attach continuously; no required vessel component floats.", "manifest_evidence": "The barge is one physically readable reusable prop." },
+        { "id": "evidence_entertainment_boundary", "result": "pass", "visible_evidence": "The well is empty and the image contains no cargo, project, traffic, route, throughput, ownership, wake, or motion claim.", "manifest_evidence": "The cargo boat is ambient illustrative decoration only." },
+        { "id": "runtime_isolation", "result": "pass", "concept_under_design_root": true, "runtime_reference_hits": [], "scan_evidence": "Exact concept-root reference scan returned 0 hits; no same-name or SHA-identical public copy exists." }
+      ],
+      "cross_panel_observations": { "summary": "Secondary panels remove small deck fittings and rail detail only; hull, well, cabin, bow, and rail placement remain stable.", "classification": "none", "d010_reason": "The selected hero independently defines the vessel master." },
+      "disposition": { "outcome": "PASS", "findings": ["The empty well and absence of wake preserve the non-evidentiary ambient boundary."], "targeted_correction": null, "reviewed_at": "2026-07-17T03:04:10-05:00" }
+    }
+  ]
+}

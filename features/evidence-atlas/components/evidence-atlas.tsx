@@ -2,19 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEvidenceAtlasState } from "../hooks/use-evidence-atlas-state";
-import { traceById } from "../model/evidence-data";
-import { projectMediaById } from "../model/project-media";
 import {
-  snapshotProjectViewport,
   type ProjectEntrySource,
-  type ProjectReturnRequest,
   type ProjectTransitionRequest,
-  type ProjectViewportSnapshot,
 } from "../model/project-transition";
-import { DEFAULT_GRAPH_VIEWPORT } from "../rendering/graph-viewport";
 import { EvidenceGraph } from "./evidence-graph";
 import { EvidenceInspector } from "./evidence-inspector";
-import { ProjectMediaStage } from "./project-media-stage";
 import { SelectionTray } from "./selection-tray";
 import { WorkspaceHeader } from "./workspace-header";
 
@@ -23,14 +16,6 @@ export function EvidenceAtlas() {
   const projectRequestId = useRef(0);
   const [projectTransition, setProjectTransition] =
     useState<ProjectTransitionRequest | null>(null);
-  const [projectMediaRequest, setProjectMediaRequest] =
-    useState<ProjectTransitionRequest | null>(null);
-  const [projectReturn, setProjectReturn] =
-    useState<ProjectReturnRequest | null>(null);
-  const [projectMediaOrigin, setProjectMediaOrigin] = useState({ x: 0, y: 0 });
-  const [projectEntryReady, setProjectEntryReady] = useState(false);
-  const [projectMediaExiting, setProjectMediaExiting] = useState(false);
-  const preloadedMediaRef = useRef(new Map<string, HTMLVideoElement>());
   const {
     activeTraceId,
     closeQuery,
@@ -71,23 +56,10 @@ export function EvidenceAtlas() {
     focusElement("#query-inspector-title");
   }, [focusElement, openQuery]);
 
-  const preloadProjectMedia = useCallback((projectId: string) => {
-    const media = projectMediaById[projectId];
-    if (!media || preloadedMediaRef.current.has(projectId)) return;
-    const video = document.createElement("video");
-    video.preload = "auto";
-    video.muted = true;
-    video.playsInline = true;
-    video.src = media.videoSrc;
-    video.load();
-    preloadedMediaRef.current.set(projectId, video);
-  }, []);
-
   const openProject = useCallback(
     (
       projectId: string,
       source: ProjectEntrySource = "activate",
-      returnViewport: ProjectViewportSnapshot = DEFAULT_GRAPH_VIEWPORT,
     ) => {
       if (activeTraceId) closeTrace();
       projectRequestId.current += 1;
@@ -95,31 +67,11 @@ export function EvidenceAtlas() {
         projectId,
         requestId: projectRequestId.current,
         source,
-        returnViewport: snapshotProjectViewport(returnViewport),
       } satisfies ProjectTransitionRequest;
 
-      if (projectMediaById[projectId]) {
-        preloadProjectMedia(projectId);
-        const portal = document.querySelector<HTMLElement>(
-          `[data-project-id="${projectId}"]`,
-        );
-        const bounds = portal?.getBoundingClientRect();
-        setProjectMediaOrigin(
-          bounds
-            ? {
-                x: bounds.left + bounds.width / 2,
-                y: bounds.top + bounds.height / 2,
-              }
-            : { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-        );
-        setProjectEntryReady(false);
-        setProjectMediaExiting(false);
-        setProjectReturn(null);
-        setProjectMediaRequest(request);
-      }
       setProjectTransition(request);
     },
-    [activeTraceId, closeTrace, preloadProjectMedia],
+    [activeTraceId, closeTrace],
   );
 
   const completeProjectTransition = useCallback(
@@ -127,10 +79,6 @@ export function EvidenceAtlas() {
       setProjectTransition((current) =>
         current?.requestId === request.requestId ? null : current,
       );
-      if (projectMediaById[request.projectId]) {
-        setProjectEntryReady(true);
-        return;
-      }
       openTrace(request.projectId);
       focusElement("#project-inspector-title");
     },
@@ -141,53 +89,10 @@ export function EvidenceAtlas() {
     setProjectTransition((current) =>
       current?.requestId === requestId ? null : current,
     );
-    setProjectMediaRequest((current) =>
-      current?.requestId === requestId ? null : current,
-    );
-    setProjectEntryReady(false);
-    setProjectMediaExiting(false);
-    setProjectReturn(null);
-    setProjectMediaOrigin({ x: 0, y: 0 });
   }, []);
 
-  const beginProjectExit = useCallback(() => {
-    const request = projectMediaRequest;
-    if (!request || projectMediaExiting) return;
-    setProjectTransition((current) =>
-      current?.requestId === request.requestId ? null : current,
-    );
-    projectRequestId.current += 1;
-    setProjectEntryReady(false);
-    setProjectMediaExiting(true);
-    setProjectReturn({
-      projectId: request.projectId,
-      requestId: projectRequestId.current,
-      viewport: snapshotProjectViewport(request.returnViewport),
-    });
-  }, [projectMediaExiting, projectMediaRequest]);
-
-  const completeProjectReturn = useCallback(
-    (request: ProjectReturnRequest) => {
-      setProjectReturn((current) =>
-        current?.requestId === request.requestId ? null : current,
-      );
-      setProjectMediaRequest(null);
-      setProjectEntryReady(false);
-      setProjectMediaExiting(false);
-      setProjectMediaOrigin({ x: 0, y: 0 });
-      closeTrace();
-      focusElement(`[data-project-id="${request.projectId}"]`);
-    },
-    [closeTrace, focusElement],
-  );
-
   const portalProjectId =
-    projectMediaRequest?.projectId ??
-    projectTransition?.projectId ??
-    atlas.activeTraceId;
-  const mediaProject = projectMediaRequest
-    ? traceById.get(projectMediaRequest.projectId)
-    : null;
+    projectTransition?.projectId ?? atlas.activeTraceId;
 
   const closeProject = useCallback(() => {
     const projectId = activeTraceId;
@@ -201,8 +106,7 @@ export function EvidenceAtlas() {
         event.defaultPrevented ||
         event.key !== "Escape" ||
         !inspectorOpen ||
-        projectTransition !== null ||
-        projectMediaRequest !== null
+        projectTransition !== null
       ) {
         return;
       }
@@ -224,7 +128,6 @@ export function EvidenceAtlas() {
     closeTrace,
     focusElement,
     inspectorOpen,
-    projectMediaRequest,
     projectTransition,
     restoreNodeFocus,
     selectedIds,
@@ -232,35 +135,21 @@ export function EvidenceAtlas() {
 
   return (
     <main
-      className={`evidence-workspace ${atlas.activeTraceId ? "mode-project" : "mode-explore"} ${projectMediaRequest ? "mode-media" : ""}`}
+      className={`evidence-workspace ${atlas.activeTraceId ? "mode-project" : "mode-explore"}`}
     >
-      <div
-        className="atlas-content"
-        inert={projectMediaRequest ? true : undefined}
-        aria-hidden={projectMediaRequest ? true : undefined}
-      >
-        <WorkspaceHeader />
+      <WorkspaceHeader />
 
-        <div className="workspace-body">
+      <div className="workspace-body">
         <section className="graph-panel" aria-label="Evidence relationship map">
           <EvidenceGraph
             selectedIds={atlas.selectedIds}
             activeProjectId={portalProjectId}
             inspectorOpen={atlas.inspectorOpen}
             projectTransition={projectTransition}
-            projectReturn={projectReturn}
-            projectStageActive={projectMediaRequest !== null}
-            motionSuspended={
-              projectMediaRequest !== null &&
-              projectTransition === null &&
-              projectReturn === null
-            }
             onToggle={toggleNode}
-            onPreloadProject={preloadProjectMedia}
             onOpenProject={openProject}
             onProjectTransitionComplete={completeProjectTransition}
             onProjectTransitionCancel={cancelProjectTransition}
-            onProjectReturnComplete={completeProjectReturn}
           />
 
           <SelectionTray
@@ -290,22 +179,7 @@ export function EvidenceAtlas() {
             onToggleTracePlayback={atlas.toggleTracePlayback}
           />
         ) : null}
-        </div>
       </div>
-
-      {projectMediaRequest &&
-      mediaProject &&
-      projectMediaById[projectMediaRequest.projectId] ? (
-        <ProjectMediaStage
-          media={projectMediaById[projectMediaRequest.projectId]!}
-          project={mediaProject}
-          origin={projectMediaOrigin}
-          entrySource={projectMediaRequest.source}
-          entryReady={projectEntryReady}
-          exiting={projectMediaExiting}
-          onExitStart={beginProjectExit}
-        />
-      ) : null}
     </main>
   );
 }

@@ -1,5 +1,5 @@
-import { EvidenceAtlas } from "@/features/evidence-atlas";
+import { CareerWorld } from "@/features/career-world";
 
 export default function Home() {
-  return <EvidenceAtlas />;
+  return <CareerWorld />;
 }

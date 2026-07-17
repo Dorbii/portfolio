@@ -1,0 +1,732 @@
+{
+  "schema_version": "career-world-d023-local-edits-independent-qa/v1",
+  "report_type": "art_correction_d023_local_edits_independent_qa",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "CW-004-D023",
+  "lane_id": "/root/art_lead",
+  "reviewer": "/root/art_lead",
+  "reviewed_at": "2026-07-17T14:06:39.5357634Z",
+  "status": "COMPLETE_GO",
+  "decision": "GO",
+  "summary": "Independent QA passes all three r2 local corrections for root aggregation. Context Compression now has exactly four freestanding frames; Tanium has an unmarked forecourt while preserving three halls, trench, and tower; React has exactly three terrace wings plus one subordinate rear bar. Each asset is PASS_WITH_NOTES only because its 1254 by 1254 canvas is nonstandard and explicitly nonblocking. This report performs no promotion.",
+  "scope": {
+    "active_asset_ids": [
+      "skill/context-compression@v1",
+      "project/tanium-risk-assessment@v1",
+      "skill/react@v1"
+    ],
+    "report_path": "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json",
+    "report_absent_before_review_write": true,
+    "art_mutation_authorized": false,
+    "promotion_authorized": false,
+    "source_mutation_authorized": false,
+    "runtime_or_test_mutation_authorized": false,
+    "queue_or_ledger_mutation_authorized": false,
+    "git_operations_authorized": false
+  },
+  "independence": {
+    "reviewer_generated_asset_in_active_group": false,
+    "reviewer_generated_asset_id": "skill/operator-control@v1",
+    "active_group_overlap": [],
+    "independent_visual_cross_checks": [
+      {
+        "reviewer": "/root/art_lead/d023_context_visual",
+        "asset_id": "skill/context-compression@v1",
+        "verdict": "PASS"
+      },
+      {
+        "reviewer": "/root/art_lead/d023_tanium_visual",
+        "asset_id": "project/tanium-risk-assessment@v1",
+        "verdict": "PASS"
+      },
+      {
+        "reviewer": "/root/art_lead/d023_react_visual",
+        "asset_id": "skill/react@v1",
+        "verdict": "PASS"
+      }
+    ],
+    "independence_preserved": true
+  },
+  "authority_receipts": {
+    "all_match": true,
+    "files": [
+      {
+        "path": "docs/career-world-production/reports/art-correction-d023-local-edits-generation.json",
+        "bytes": 4680,
+        "sha256": "370085E547835F170B04C49FC9DD58ABEA0AEF7428D2EB96F2F69C90243563D0"
+      },
+      {
+        "path": "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json",
+        "bytes": 32722,
+        "sha256": "E5788E48F0464CDAC48E0617D441178B1EECD4739CB2602615797CC8E9D485A5"
+      },
+      {
+        "path": "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json",
+        "bytes": 25440,
+        "sha256": "82FE8E2674E3EB02AB8E4941890E24B7A8364037878A677E3213BFF2B45386F4"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-full-qa.md",
+        "bytes": 15117,
+        "sha256": "F23CC8BE600724C49623F5BE144C7D9F5CDE609D78AF3B7E3445851E49FBEAED"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "bytes": 65201,
+        "sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0"
+      },
+      {
+        "path": "docs/career-world-production/concept-briefs.json",
+        "bytes": 288349,
+        "sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+      },
+      {
+        "path": "docs/career-world-production/reports/art-correction-replan.json",
+        "bytes": 46188,
+        "sha256": "5FD24ABC03F9A0672C4FED32789A1894C22F6A9EC2A3CDC02E18B22B84403E50"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-qa-batches.json",
+        "bytes": 25471,
+        "sha256": "9E5EA22E6A4123D06215D6D9323E966B84B1A69427F90C2A5BDAB1E2915CF407"
+      },
+      {
+        "path": ".gitattributes",
+        "bytes": 273,
+        "sha256": "2540345F96A2D3BB28D024DEE472E69D64C48B52C34C74D3440C51DBE774C3BC"
+      }
+    ]
+  },
+  "governing_interpretation": {
+    "concept_role": "Entertainment-only tracing reference. Manifest topology and later deterministic code-native geometry remain authoritative.",
+    "full_re_qa_rule": "Each r2 candidate was reviewed against all nine hard gates; repaired-gate-only review is forbidden.",
+    "single_hero_rule": "Each candidate is judged as one complete full-canvas hero; no secondary panel is required.",
+    "topology_count_rule": "Only primary forms that are visibly complete and traceable are counted; the reviewer neither deletes visible forms nor invents hidden forms.",
+    "square_or_nonstandard_dimensions_alone_are_blocker": false,
+    "square_or_nonstandard_dimensions_treatment": "note",
+    "topology_traceability_text_projection_style_palette_evidence_and_runtime_cannot_be_downgraded_to_notes": true,
+    "promotion_owner": "root after aggregate review"
+  },
+  "inspection": {
+    "method": "view_image",
+    "detail": "original",
+    "images_reviewed": [
+      "design/career-world/correction-candidates/cw004-r1/skills/context-compression-r1.png",
+      "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+      "design/career-world/correction-candidates/cw004-r1/projects/tanium-risk-assessment-r1.png",
+      "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+      "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+      "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png"
+    ],
+    "full_canvas_used_as_canonical_trace_panel": true,
+    "crops_used_as_substitute_for_full_image": false,
+    "shared_style_observation": "All three r2 candidates use one coherent isometric hero, a navy drafting grid, matte charcoal forms, hard pale outlines, restrained cyan illumination, and sparse amber accents. None contains a second layout, text, a logo, or pseudo-text."
+  },
+  "receipt_verification": {
+    "generation_report_matches_disk": true,
+    "raw_r2_outputs_byte_identical_to_r2_candidates": true,
+    "r1_archives_byte_identical_to_r1_inputs": true,
+    "v0_archives_byte_identical_to_v0_sources": true,
+    "png_structure_and_decode": "PASS",
+    "configured_lfs_path_coverage": {
+      "outcome": "PASS",
+      "evidence": ".gitattributes explicitly applies filter=lfs, diff=lfs, merge=lfs, and -text to design/career-world/concepts/**/*.png, design/career-world/rejected-candidates/**/*.png, and design/career-world/correction-candidates/**/*.png.",
+      "scoped_repo_artifact_paths_checked": 12,
+      "git_index_or_remote_lfs_storage_check": "NOT_RUN_GIT_FORBIDDEN"
+    }
+  },
+  "runtime_isolation": {
+    "roots_scanned": [
+      "app",
+      "features",
+      "worker",
+      "tests",
+      "public"
+    ],
+    "files_scanned": 51,
+    "runtime_image_files_hashed": 2,
+    "candidate_path_basename_or_hash_text_hits": 0,
+    "same_name_runtime_hits": 0,
+    "byte_identical_runtime_copy_hits": 0,
+    "outcome": "PASS"
+  },
+  "assets": [
+    {
+      "asset_id": "skill/context-compression@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/skills/context-compression-v1.png",
+      "r1_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/context-compression-r1.png",
+      "r2_candidate_path": "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+      "prior_r1_verdict": "FAIL",
+      "artifact": {
+        "bytes": 1630821,
+        "sha256": "082E69EFCD95708E4EE22483003F57C004B10642CA960D5CFEAE97B3A40A8D72",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 28,
+        "idat_chunk_count": 25,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "r1_artifact": {
+        "bytes": 1549553,
+        "sha256": "0B4EF3B90D0D162FA65B01AD329BEE065EB76305C5956DADF851E7020B45B72E",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 27,
+        "idat_chunk_count": 24,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "receipt_chain": {
+        "raw_r2_output": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6de4-afa7-7ef1-9527-fb01bcab4419/exec-6a028f75-c9cf-423e-b789-a5d780b5fe60.png",
+          "byte_identical_to_r2_candidate": true
+        },
+        "r1_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-r1/skills/context-compression-r1-0b4ef3b90d0d.png",
+          "bytes": 1549553,
+          "sha256": "0B4EF3B90D0D162FA65B01AD329BEE065EB76305C5956DADF851E7020B45B72E",
+          "byte_identical_to_r1_input": true
+        },
+        "v0_source": {
+          "path": "design/career-world/concepts/skills/context-compression-v1.png",
+          "bytes": 2104280,
+          "sha256": "FE0C908BEE4432BB0CF6D1B8991142B330DEA5ADECC529D733598E1C28B3717D"
+        },
+        "v0_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-v0/skills/context-compression-v0-fe0c908bee44.png",
+          "bytes": 2104280,
+          "sha256": "FE0C908BEE4432BB0CF6D1B8991142B330DEA5ADECC529D733598E1C28B3717D",
+          "byte_identical_to_v0_source": true
+        },
+        "configured_lfs_path_coverage": "PASS"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas centered hero containing four progressively smaller freestanding rectangular frames around one dense closed core on a tapered base",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The full canvas exposes every top beam, both legs, all eight frame feet, the base contacts, and the distinct closed core without a competing panel."
+      },
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The current file is a non-empty decodable 1254 by 1254 RGB8 PNG with valid signature, IHDR, IEND, no trailing bytes, and one complete unclipped context-compression hero. The square canvas is nonstandard but nonblocking.",
+          "contract_evidence": "The governing interpretation treats square dimensions alone as a note when the complete hero remains traceable."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "pass",
+          "visible_evidence": "Exactly four and only four solid freestanding rectangular frames are visible, ordered outermost, second, medium, and smallest inner. Each has one top beam, two legs, and two visible contacts with the base. The dense closed block assembly behind the smallest opening has no frame aperture and is not counted as a fifth frame.",
+          "contract_evidence": "The D-021 invariant requires exactly four progressively smaller freestanding frames around a dense core, with all four visibly contacting the base."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "The grid and frame axes remain parallel, verticals remain vertical, and the centered isometric view has no material perspective convergence or cinematic distortion.",
+          "contract_evidence": "The required presentation is a single orthographic true-isometric drafting hero."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Navy drafting field, matte charcoal faces, thin pale construction lines, restrained cyan edge illumination, and small amber accents remain coherent with the other repaired assets; no photorealism, PBR, dashboard furniture, or palette swatches appear.",
+          "contract_evidence": "The brief requires the shared technical-cartography family while keeping the asset illustrative and unbranded."
+        },
+        "primary_form_traceability": {
+          "result": "pass",
+          "visible_evidence": "All four top beams, eight legs, eight foot contacts, nested spacing, tapered platform, and the dense core silhouette can be traced directly from visible edges without inventing hidden primary geometry.",
+          "contract_evidence": "The concept is an entertainment-only master tracing reference; code-native geometry remains authoritative."
+        },
+        "text_logo_watermark_absence": {
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, logo, watermark, token counter, zip icon, chat bubble, employer mark, or marked sign plane is visible.",
+          "contract_evidence": "The whole-image rule prohibits text, logos, pseudo-text, watermarks, UI, and marked glyph planes."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "pass",
+          "visible_evidence": "Every frame terminates visibly on the shared tapered base; the core and layered base have plausible contacts with no floating, melted, or disconnected major mass.",
+          "contract_evidence": "The brief requires freestanding frames with explicit base contacts around one dense core."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "The image is an unlabeled fictional compression monument and makes no claim about a real system, metric, employer, project building, or factual implementation.",
+          "contract_evidence": "The asset is entertainment-only; manifest topology and deterministic code geometry remain authoritative."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "visible_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found under app, features, worker, tests, or public.",
+          "contract_evidence": "The concept must remain isolated from runtime and test surfaces until a separate promotion decision."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: one hero and no secondary panel.",
+        "classification": "none"
+      },
+      "blockers": [],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard; the full hero remains complete, centered, and traceable."
+      ],
+      "verdict": "PASS_WITH_NOTES",
+      "cycle_disposition": "ELIGIBLE_FOR_ROOT_AGGREGATION",
+      "findings": "The r1 three-frame defect is corrected. The r2 hero has exactly four progressively smaller freestanding rectangular frames, all required contacts are visible, and the dense core cannot reasonably be counted as another frame.",
+      "promotion_authorized_by_this_report": false,
+      "reviewed_at": "2026-07-17T14:06:39.5357634Z"
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+      "r1_candidate_path": "design/career-world/correction-candidates/cw004-r1/projects/tanium-risk-assessment-r1.png",
+      "r2_candidate_path": "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+      "prior_r1_verdict": "FAIL",
+      "artifact": {
+        "bytes": 1833463,
+        "sha256": "70195BE33A6960FCEAFE71020707438A415A321168D6B432BE8E026207853CE5",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 31,
+        "idat_chunk_count": 28,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "r1_artifact": {
+        "bytes": 1825232,
+        "sha256": "D24B3683E48D8D7932FBC38FEE2D9995EF5428EF6B55515E09DC7AEC5484A7C2",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 31,
+        "idat_chunk_count": 28,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "receipt_chain": {
+        "raw_r2_output": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6de4-afa7-7ef1-9527-fb01bcab4419/exec-f6c8138c-1a3d-434f-8e14-4351b95bcbb6.png",
+          "byte_identical_to_r2_candidate": true
+        },
+        "r1_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-r1/projects/tanium-risk-assessment-r1-d24b3683e48d.png",
+          "bytes": 1825232,
+          "sha256": "D24B3683E48D8D7932FBC38FEE2D9995EF5428EF6B55515E09DC7AEC5484A7C2",
+          "byte_identical_to_r1_input": true
+        },
+        "v0_source": {
+          "path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+          "bytes": 2097928,
+          "sha256": "E1F5F9C4C1475064BCB9D4CCFD2089180E628FEACD44B05F2B006A51F8E93E65"
+        },
+        "v0_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-v0/projects/tanium-risk-assessment-v0-e1f5f9c4c147.png",
+          "bytes": 2097928,
+          "sha256": "E1F5F9C4C1475064BCB9D4CCFD2089180E628FEACD44B05F2B006A51F8E93E65",
+          "byte_identical_to_v0_source": true
+        },
+        "configured_lfs_path_coverage": "PASS"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas centered hero containing three interlocked wedge halls, a continuous zigzag trench, a terminal cantilevered tower, and an unmarked triangular forecourt",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The full canvas exposes the three hall masses, trench run and bridges, tower support, forecourt, and all base contacts without another panel or hidden primary edge."
+      },
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The current file is a non-empty decodable 1254 by 1254 RGB8 PNG with valid signature, IHDR, IEND, no trailing bytes, and one complete unclipped risk-assessment complex. The square canvas is nonstandard but nonblocking.",
+          "contract_evidence": "The governing interpretation treats square dimensions alone as a note when the complete hero remains traceable."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "pass",
+          "visible_evidence": "Exactly three connected wedge-shaped hall masses are visible around one continuous zigzag trench/channel, with a cantilevered tower at the terminal end. The triangular forecourt remains, but the r1 raised diamond plaque and centered emblem-like mark are absent.",
+          "contract_evidence": "The D-021 invariant requires three interlocked wedge halls, the zigzag trench, the cantilevered tower, and a triangular forecourt with no plaque, emblem, or marked glyph plane."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "Parallel deck and roof axes, vertical tower edges, and the stable isometric camera show no material perspective convergence or cinematic distortion.",
+          "contract_evidence": "The required presentation is a single orthographic true-isometric drafting hero."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Navy grid, matte charcoal structures, pale technical outlines, restrained cyan edge illumination, and small amber accents match the shared repaired-asset drafting language; no PBR, photorealism, dashboard furniture, or palette swatches appear.",
+          "contract_evidence": "The brief requires the shared technical-cartography family while keeping the asset illustrative and unbranded."
+        },
+        "primary_form_traceability": {
+          "result": "pass",
+          "visible_evidence": "The three hall envelopes, connecting platforms, trench walls, bridges, tower support and cantilever, triangular forecourt, and base footprint can be followed from visible edges without guessing hidden primary geometry.",
+          "contract_evidence": "The concept is an entertainment-only master tracing reference; code-native geometry remains authoritative."
+        },
+        "text_logo_watermark_absence": {
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, logo, watermark, security badge, risk icon, plaque, emblem, or marked sign plane is visible. Large triangular line divisions read as continuous structural roof and deck seams, not isolated glyph-bearing plates.",
+          "contract_evidence": "The whole-image rule and asset avoid list prohibit text, branding, risk/security symbols, and marked sign or glyph planes."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "pass",
+          "visible_evidence": "The three halls share continuous deck and trench-side geometry; bridges span the channel; the tower is visibly supported; and no required mass floats or melts into another.",
+          "contract_evidence": "The brief requires an interlocked, physically readable three-hall complex with trench and tower."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "The image is an unlabeled fictional assessment complex and presents no real Tanium office, metric, private detail, security claim, or factual implementation diagram.",
+          "contract_evidence": "The project concept is entertainment-only; manifest topology and deterministic code geometry remain authoritative."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "visible_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found under app, features, worker, tests, or public.",
+          "contract_evidence": "The concept must remain isolated from runtime and test surfaces until a separate promotion decision."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: one hero and no secondary panel.",
+        "classification": "none"
+      },
+      "blockers": [],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard; the full hero remains complete, centered, and traceable."
+      ],
+      "verdict": "PASS_WITH_NOTES",
+      "cycle_disposition": "ELIGIBLE_FOR_ROOT_AGGREGATION",
+      "findings": "The r1 marked-plaque defect is corrected. The r2 forecourt is continuous and unmarked while exactly three halls, the trench, and the terminal cantilevered tower remain intact and directly traceable.",
+      "promotion_authorized_by_this_report": false,
+      "reviewed_at": "2026-07-17T14:06:39.5357634Z"
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/skills/react-v1.png",
+      "r1_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+      "r2_candidate_path": "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png",
+      "prior_r1_verdict": "FAIL",
+      "artifact": {
+        "bytes": 2061551,
+        "sha256": "91F7071C9C9ABB1572B7854161024082EEE895E174E60C46A36C9EB0B5E67ABE",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 35,
+        "idat_chunk_count": 32,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "r1_artifact": {
+        "bytes": 2111331,
+        "sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "mode": "RGB8",
+        "png_signature_valid": true,
+        "ihdr_valid": true,
+        "chunk_count": 35,
+        "idat_chunk_count": 32,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "receipt_chain": {
+        "raw_r2_output": {
+          "path": "C:/Users/Steve/.codex/generated_images/019f6de4-afa7-7ef1-9527-fb01bcab4419/exec-175b0591-2215-4892-a8f5-3537c1fec01b.png",
+          "byte_identical_to_r2_candidate": true
+        },
+        "r1_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-r1/skills/react-r1-2191cf9a7793.png",
+          "bytes": 2111331,
+          "sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+          "byte_identical_to_r1_input": true
+        },
+        "v0_source": {
+          "path": "design/career-world/concepts/skills/react-v1.png",
+          "bytes": 2142440,
+          "sha256": "2390FCBCA6690E6185A12BF9E6152ACB12B6EB43154769C8C111AE79743720E0"
+        },
+        "v0_archive": {
+          "path": "design/career-world/rejected-candidates/cw004-v0/skills/react-v0-2390fcbca669.png",
+          "bytes": 2142440,
+          "sha256": "2390FCBCA6690E6185A12BF9E6152ACB12B6EB43154769C8C111AE79743720E0",
+          "byte_identical_to_v0_source": true
+        },
+        "configured_lfs_path_coverage": "PASS"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas centered hero containing three cascading terrace wings around an open stage plus one low rear rectangular service bar",
+        "normalized_crop_bounds": {
+          "x_min": 0,
+          "y_min": 0,
+          "x_max": 1,
+          "y_max": 1
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The full canvas exposes all three wing footprints and terraces, their connections to the stage, the open lower-right sector, and the distinctly lower rear bar."
+      },
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The current file is a non-empty decodable 1254 by 1254 RGB8 PNG with valid signature, IHDR, IEND, no trailing bytes, and one complete unclipped terrace-stage hero. The square canvas is nonstandard but nonblocking.",
+          "contract_evidence": "The governing interpretation treats square dimensions alone as a note when the complete hero remains traceable."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "pass",
+          "visible_evidence": "Exactly three and only three terrace wings occupy the upper-left, right, and lower-left positions around the open stage. One low top-rear rectangular service bar with small roof boxes is subordinate in height and footprint. The former lower-right fourth wing is gone, leaving an open sector rather than a ghost mass.",
+          "contract_evidence": "The D-021 invariant requires exactly three cascading terrace wings plus one clearly subordinate low rear rectangular service bar, with no fourth wing."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "Parallel terrace, stage, and grid axes remain stable, verticals remain vertical, and the centered isometric view has no material perspective convergence or cinematic distortion.",
+          "contract_evidence": "The required presentation is a single orthographic true-isometric drafting hero."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Navy drafting field, matte charcoal terraces, pale technical outlines, restrained cyan lighting, and small amber accents match the other repaired assets; no photorealism, PBR, dashboard furniture, palette swatches, or brand palette treatment appears.",
+          "contract_evidence": "The brief requires the shared technical-cartography family without React branding."
+        },
+        "primary_form_traceability": {
+          "result": "pass",
+          "visible_evidence": "Each of the three wing footprints, stepped terrace levels, connector edges, open stage boundary, rear service bar, and base contact can be traced directly. The open lower-right sector makes the absence of a fourth wing unambiguous.",
+          "contract_evidence": "The concept is an entertainment-only master tracing reference; code-native geometry remains authoritative."
+        },
+        "text_logo_watermark_absence": {
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, logo, watermark, React wordmark, atom/orbit motif, UI, or marked sign plane is visible.",
+          "contract_evidence": "The whole-image rule and asset avoid list prohibit text, branding, UI, and React atom/orbit imagery."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "pass",
+          "visible_evidence": "All three wings meet the shared stage/platform system through visible deck geometry; the low rear bar sits on the same base; and no required mass floats, melts, or becomes structurally ambiguous.",
+          "contract_evidence": "The brief requires three connected terrace wings around the open stage plus a physically subordinate rear bar."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "The image is an unlabeled fictional terrace-stage monument and presents no claim about a real React implementation, employer, metric, skill level, or factual system diagram.",
+          "contract_evidence": "The skill concept is entertainment-only; manifest topology and deterministic code geometry remain authoritative."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "visible_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found under app, features, worker, tests, or public.",
+          "contract_evidence": "The concept must remain isolated from runtime and test surfaces until a separate promotion decision."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: one hero and no secondary panel.",
+        "classification": "none"
+      },
+      "blockers": [],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard; the full hero remains complete, centered, and traceable."
+      ],
+      "verdict": "PASS_WITH_NOTES",
+      "cycle_disposition": "ELIGIBLE_FOR_ROOT_AGGREGATION",
+      "findings": "The r1 four-wing defect is corrected. The r2 hero has exactly three terrace wings and one clearly subordinate low rear service bar; the lower-right sector is open and contains no ghost fourth wing.",
+      "promotion_authorized_by_this_report": false,
+      "reviewed_at": "2026-07-17T14:06:39.5357634Z"
+    }
+  ],
+  "aggregate": {
+    "active_asset_count": 3,
+    "pass_count": 0,
+    "pass_with_notes_count": 3,
+    "fail_count": 0,
+    "blocker_asset_count": 0,
+    "blocker_gate_count": 0,
+    "all_current_receipts_match": true,
+    "all_archive_receipts_match": true,
+    "all_png_integrity_checks_pass": true,
+    "all_configured_lfs_path_checks_pass": true,
+    "all_assets_have_one_complete_traceable_hero": true,
+    "all_nine_gates_recorded_per_asset": true,
+    "all_runtime_isolation_checks_pass": true,
+    "eligible_for_root_aggregation": [
+      "skill/context-compression@v1",
+      "project/tanium-risk-assessment@v1",
+      "skill/react@v1"
+    ],
+    "rejected_for_this_cycle": [],
+    "aggregate_recommendation": "GO",
+    "root_action": "May aggregate all three r2 candidates. Promotion remains a separate root-owned action and is not performed or authorized by this report.",
+    "tracing_notes_to_carry_forward": [
+      "All three candidates use nonstandard 1254 by 1254 canvases; use each sole full-canvas hero as its canonical tracing source."
+    ],
+    "promotion_executed": false,
+    "promotion_authorized_by_this_report": false
+  },
+  "files_changed": [
+    "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+  ],
+  "tests/checks": [
+    {
+      "check": "Original-detail visual comparison of all three r1/r2 pairs",
+      "result": "PASS",
+      "evidence": "Six images inspected at original detail; three independent visual cross-checks concurred."
+    },
+    {
+      "check": "Strict asset topology and prohibited-mark gates",
+      "result": "PASS",
+      "evidence": "Context exactly four frames; Tanium exactly three halls/trench/tower and no marked plaque; React exactly three wings plus one subordinate rear bar."
+    },
+    {
+      "check": "Current file receipts and PNG integrity",
+      "result": "PASS",
+      "evidence": "All r1/r2 sizes and SHA-256 values match disk; each PNG has valid signature, IHDR, IEND, zero trailing bytes, and decodes successfully."
+    },
+    {
+      "check": "Raw output and archive identity",
+      "result": "PASS",
+      "evidence": "All raw r2 outputs equal candidates; all r1 and v0 archive copies equal their recorded sources."
+    },
+    {
+      "check": "Configured LFS coverage",
+      "result": "PASS",
+      "evidence": "All 12 scoped concept, correction-candidate, and rejected-candidate receipt paths match explicit PNG LFS rules in .gitattributes."
+    },
+    {
+      "check": "Runtime isolation",
+      "result": "PASS",
+      "evidence": "No path, basename, hash, same-name, or byte-identical hit across app, features, worker, tests, or public."
+    },
+    {
+      "check": "Build, lint, typecheck, and runtime tests",
+      "result": "NOT_RUN",
+      "evidence": "The task is report-only and forbids source, runtime, test, and Git mutations; no code changed."
+    }
+  ],
+  "claims": [
+    {
+      "claim": "skill/context-compression@v1 is eligible for root aggregation with a nonblocking canvas note.",
+      "evidence_paths": [
+        "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+        "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+      ]
+    },
+    {
+      "claim": "project/tanium-risk-assessment@v1 is eligible for root aggregation with a nonblocking canvas note.",
+      "evidence_paths": [
+        "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+        "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+      ]
+    },
+    {
+      "claim": "skill/react@v1 is eligible for root aggregation with a nonblocking canvas note.",
+      "evidence_paths": [
+        "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png",
+        "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "docs/career-world-production/reports/art-correction-r1-qa-batch-3.json"
+      ]
+    },
+    {
+      "claim": "No scoped candidate is referenced or copied into runtime surfaces.",
+      "evidence_paths": [
+        "app",
+        "features",
+        "worker",
+        "tests",
+        "public"
+      ]
+    }
+  ],
+  "deviations": [
+    {
+      "constraint": "The task-packet-execution skill normally expects a commit for an implementation packet.",
+      "handling": "No commit or other Git operation was performed because this lane explicitly forbids Git and authorizes only the fixed QA report."
+    },
+    {
+      "constraint": "Git index and remote LFS storage state could provide additional LFS evidence.",
+      "handling": "No Git command was run. Configured LFS path coverage was verified directly against .gitattributes, which is the strongest in-scope check."
+    }
+  ],
+  "risks_blockers": {
+    "blockers": [],
+    "risks": [
+      "All three accepted candidates are 1254 by 1254 rather than a conventional production size; this is a tracing note, not an acceptance blocker.",
+      "This report verifies configured LFS path coverage, not Git index or remote LFS object availability, because Git operations are forbidden.",
+      "Promotion remains unverified and unexecuted; root must make any promotion decision separately."
+    ]
+  },
+  "artifacts": [
+    {
+      "asset_id": "skill/context-compression@v1",
+      "path": "design/career-world/correction-candidates/cw004-r2/skills/context-compression-r2.png",
+      "verdict": "PASS_WITH_NOTES",
+      "sha256": "082E69EFCD95708E4EE22483003F57C004B10642CA960D5CFEAE97B3A40A8D72"
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "path": "design/career-world/correction-candidates/cw004-r2/projects/tanium-risk-assessment-r2.png",
+      "verdict": "PASS_WITH_NOTES",
+      "sha256": "70195BE33A6960FCEAFE71020707438A415A321168D6B432BE8E026207853CE5"
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "path": "design/career-world/correction-candidates/cw004-r2/skills/react-r2.png",
+      "verdict": "PASS_WITH_NOTES",
+      "sha256": "91F7071C9C9ABB1572B7854161024082EEE895E174E60C46A36C9EB0B5E67ABE"
+    },
+    {
+      "type": "qa_report",
+      "path": "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+    }
+  ],
+  "ledger_updates": [],
+  "scope_validation": {
+    "images_viewed_at_original_detail": 6,
+    "active_candidates_reviewed": 3,
+    "prior_candidates_compared": 3,
+    "art_generated_or_edited": 0,
+    "canonical_art_promoted": 0,
+    "source_runtime_or_test_mutations": 0,
+    "queue_or_ledger_mutations": 0,
+    "git_operations": 0,
+    "files_written": [
+      "docs/career-world-production/reports/art-correction-d023-local-edits-qa.json"
+    ]
+  }
+}

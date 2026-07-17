@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Frozen one-off production utilities are provenance artifacts, not app code.
+    "docs/career-world-production/scripts/**",
   ]),
 ]);
 

@@ -1,0 +1,111 @@
+{
+  "schema_version": "career-world-director-execution-packet/v1",
+  "packet_id": "D-015-GUIDE-RENDER-RECOVERY",
+  "decision": "DIRECTOR_RELEASE_ONE_MATERIALLY_DIFFERENT_FILE_BASED_RENDER",
+  "status": "AUTHORIZED_NOT_EXECUTED",
+  "new_evidence": {
+    "failure_report_path": "docs/career-world-production/reports/art-correction-d014-guide-render-failure.json",
+    "failure_report_bytes": 7780,
+    "failure_report_sha256": "95BCAA9253CB67E03A8F50FAA4C3C7205C22A6ACDE3B811ADAFD34B061CBBEE4",
+    "failed_command_sha256": "62D1CDF70856C2C6AD88FDC89CE37E2DAC93054DF5869B4F3717B6BDD1357DC8",
+    "failed_process_exit_code": 1,
+    "failure_class": "POWERSHELL_ARGUMENT_QUOTING_CAUSED_NODE_SOURCE_PARSE_ERROR",
+    "javascript_evaluation_started": false,
+    "sharp_required": false,
+    "sharp_pipeline_constructed": false,
+    "sharp_to_file_calls": 0,
+    "rendered_png_created": false
+  },
+  "supersession": {
+    "supersedes_packet": "D-014-GUIDE-RASTER-ONLY",
+    "superseded_clause": "The inline Node process consumed its only invocation and allowed no retry or substitute renderer.",
+    "replacement": "Authorize one final process that executes a frozen CommonJS file. No JavaScript source is transported through PowerShell argument parsing. The renderer, source SVG, output settings, output path, and all art constraints remain unchanged.",
+    "reason": "The first process failed while Node parsed quote-stripped inline source, before JavaScript evaluation or Sharp loading. A file-based program removes the demonstrated transport failure rather than repeating the failed approach.",
+    "scope": "ContextForge deterministic guide rasterization only",
+    "does_not_erase_failure_evidence": true
+  },
+  "authority": {
+    "user_scope": "The current user request explicitly authorizes end-to-end concept-art generation and construction of the Career World site, including autonomous art and QA lanes.",
+    "director_decision": "Continue from the proven transport failure with one materially different, file-based renderer process and no further retry.",
+    "scope_expansion": false
+  },
+  "immutable_inputs": {
+    "approved_d014_brief_sha256": "C002A11C812BDE0FF98B6996F5B3F836FBB3CC4F5C702B166D00AE97FF639439",
+    "approved_d014_report_sha256": "6AA53DA05E89252EAC5449C025E4D6F05ACD1146F0E2BD60463A766D6F7983FF",
+    "geometry_sha256": "F131F8920920828B1776F1413CE0EFC9FA109927A0403B919AEC345E842A7965",
+    "prompt_sha256": "BA5E20499B8602473915E99423A494D0B339C130BFFCDDEA24CE5A2D595957AC",
+    "svg_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg",
+    "svg_bytes": 16954,
+    "svg_sha256": "B4B6583147C20804F7B47B613A3F97CDD62F7BD7D1AA21F61FD217FB0E8D9A1C",
+    "svg_pre_render_checks_passed": 414,
+    "rejected_r1_archive_sha256": "1E004076E7BB85A837FD71A6B70F713D4AC13E4076C51DCA56E9F19C5FD07639"
+  },
+  "frozen_renderer_program": {
+    "path": "docs/career-world-production/scripts/render-contextforge-guide.cjs",
+    "bytes": 1941,
+    "sha256": "FEF7319DB7DEC3632C7449A9398CD73B3C088A5B26B98BD021E10D90272A00D5",
+    "program_role": "Load the frozen SVG with Sharp, apply the already-approved deterministic settings, write the one final PNG path, validate PNG/1536x1024/three channels, and emit one JSON receipt.",
+    "inline_javascript": false,
+    "program_mutation_after_release_authorized": false
+  },
+  "single_authorized_recovery_process": {
+    "prior_node_process_launches": 1,
+    "prior_sharp_to_file_calls": 0,
+    "new_process_launch_limit": 1,
+    "new_sharp_to_file_call_limit": 1,
+    "retry_limit_after_this_process": 0,
+    "renderer": "Node.js 22.16.0 with repo-local Sharp 0.34.5 and libvips 8.17.3",
+    "escalated_process_authorized": true,
+    "escalation_reason": "The installed Node executable is outside the workspace sandbox and sandboxed execution returned Access is denied; all authorized writes remain inside the workspace.",
+    "source_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg",
+    "output_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.png",
+    "output_must_be_absent_before_process_launch": true,
+    "exact_powershell_command_serialization": "UTF-8 without BOM; LF line endings; no trailing LF",
+    "exact_powershell_command_bytes": 455,
+    "exact_powershell_command_sha256": "AB3380AC259FADACE37BA41D26721132221941E7E1D1BC4EDC5DA287E4F17A49",
+    "exact_powershell_command_lines": [
+      "$ErrorActionPreference='Stop'",
+      "$node='C:\\Program Files\\nodejs\\node.exe'",
+      "$renderer='docs/career-world-production/scripts/render-contextforge-guide.cjs'",
+      "$src='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg'",
+      "$dst='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.png'",
+      "if(Test-Path -LiteralPath $dst){throw 'FINAL_PNG_ALREADY_EXISTS'}",
+      "& $node $renderer $src $dst",
+      "if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
+    ],
+    "settings_unchanged_from_d014": true,
+    "error_or_noncompliant_output_consumes_final_recovery_process": true,
+    "third_process_or_substitute_renderer_authorized": false
+  },
+  "post_success_authorized_write": {
+    "path": "docs/career-world-production/reports/art-correction-d014-guide-generation.json",
+    "must_record": [
+      "Both the preserved failed inline attempt and the successful or failed file-based recovery process",
+      "Execution-packet and renderer-program receipts",
+      "SVG and PNG bytes, hashes, dimensions, channels, alpha, metadata, and renderer versions",
+      "Unchanged approved packet, archive, storage attributes, runtime isolation, and staged-file receipts"
+    ],
+    "may_mutate_failure_report_or_approved_d014_packet": false
+  },
+  "required_after_success": [
+    "Inspect the original-resolution PNG.",
+    "Dispatch a different non-author QA agent for geometry, topology, traceability, style, palette, text/logo/watermark, evidence-boundary, storage, and runtime-isolation gates.",
+    "Do not call imagegen until that independent guide QA passes."
+  ],
+  "explicitly_not_authorized": [
+    "Any third Node or renderer process",
+    "Any renderer-program or SVG edit after this release",
+    "Any built-in imagegen call",
+    "Any guided r2 candidate creation",
+    "Any canonical concept promotion",
+    "Any release of the remaining eight D-013 assets",
+    "Any runtime, product, test, queue, ledger, or architecture mutation",
+    "Any Git staging, commit, push, deployment, or external publication"
+  ],
+  "stop_conditions": [
+    "Any immutable input, failure evidence, execution packet, or renderer-program receipt drifts.",
+    "The output PNG exists before process launch.",
+    "The one file-based process returns an error or emits a noncompliant receipt.",
+    "Any requested action exceeds this recovery fence."
+  ]
+}

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const title = "Steven Doris | Engineering Evidence Atlas";
+const title = "Steven Doris | Career World";
 const description =
-  "Trace Steven Doris's platform, full-stack, and agent-system work through claims, implementation decisions, measured outcomes, and explicit evidence boundaries.";
+  "Navigate Steven Doris's engineering portfolio through an illustrative career world with factual project evidence kept separate.";
 
 export const metadata: Metadata = {
   title,
@@ -11,20 +11,11 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    images: [
-      {
-        url: "/og.png",
-        width: 1731,
-        height: 909,
-        alt: "Cyan, lime, coral, and violet evidence fields on a dark graph",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title,
     description,
-    images: ["/og.png"],
   },
   icons: {
     icon: "/favicon.svg",

@@ -1,0 +1,749 @@
+{
+  "schema_version": 1,
+  "packet_id": "CW-004-QA",
+  "packet_type": "independent-full-library-art-qa",
+  "run_id": "career-world-2026-07-16",
+  "frozen_before_terminal_asset_inspection": true,
+  "source_manifest": {
+    "path": "docs/career-world-production/concept-briefs.json",
+    "sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+    "asset_count": 56
+  },
+  "authority": [
+    "docs/career-world-production/concept-briefs.json at the exact source SHA",
+    "docs/career-world-production/architecture.md including D-010",
+    "docs/career-world-asset-map.md",
+    "the exact generation packet for each source asset",
+    "tracer reports as historical evidence only"
+  ],
+  "generation_packets": [
+    {
+      "id": "art-batch-a",
+      "path": "docs/career-world-production/briefs/art-batch-a.json",
+      "sha256": "4A88809B9B030152DBE18EC0B4F94AE1FEACAC29A7B614EF991DFD3DEE978345",
+      "asset_count": 19
+    },
+    {
+      "id": "art-batch-b",
+      "path": "docs/career-world-production/briefs/art-batch-b.json",
+      "sha256": "BA49C760D0D73C06179E337436B88F08228506FDE7275AE6ECB7451BAB45229F",
+      "asset_count": 19
+    },
+    {
+      "id": "art-batch-c",
+      "path": "docs/career-world-production/briefs/art-batch-c.json",
+      "sha256": "08473D098FC6ACCCFDC92A3981BC3AF49E1FE90D6E3C4A0CD457FBC3D9648358",
+      "asset_count": 18
+    }
+  ],
+  "terminal_review_preconditions": {
+    "all_generation_lanes_complete": true,
+    "all_exact_manifest_outputs_exist": true,
+    "expected_output_count": 56,
+    "review_incomplete_asset_for_terminal_verdict": false,
+    "reviewer_must_be_independent_of_every_assigned_asset": true,
+    "image_mutation_allowed": false
+  },
+  "d010_policy": {
+    "runtime_geometry_authority": "code-native master geometry traced from one selected canonical panel",
+    "generated_cross_panel_pixel_equality_is_gate": false,
+    "secondary_panel_inconsistency_alone_is_blocker": false,
+    "single_safe_panel_required": true,
+    "never_average_or_blend_conflicting_panels": true,
+    "material_failure": "No complete panel safely defines the requested primary topology, or the apparent identity, projection, style, connectivity, evidence boundary, or traceability fails."
+  },
+  "gate_result_enum": [
+    "pass",
+    "note",
+    "blocker",
+    "not_applicable"
+  ],
+  "outcome_enum": [
+    "PASS",
+    "PASS_WITH_NOTES",
+    "REGENERATE",
+    "REJECT"
+  ],
+  "review_record_schema": {
+    "required_identity_fields": [
+      "asset_id",
+      "category",
+      "evidence_status",
+      "output_path",
+      "generation_batch",
+      "qa_batch",
+      "reviewer"
+    ],
+    "artifact": {
+      "required_fields": [
+        "sha256",
+        "bytes",
+        "format",
+        "width",
+        "height",
+        "decodable"
+      ],
+      "format_must_equal": "PNG",
+      "hash_must_be_recomputed_from_disk": true,
+      "dimensions_must_be_recomputed_from_disk": true
+    },
+    "canonical_trace_panel": {
+      "required_fields": [
+        "panel_role",
+        "region_descriptor",
+        "normalized_crop_bounds",
+        "complete_primary_form_visible",
+        "unoccluded",
+        "internally_consistent",
+        "selection_reason"
+      ],
+      "panel_role_enum": [
+        "lod_0",
+        "lod_1",
+        "lod_2",
+        "unspecified_detail_panel"
+      ],
+      "normalized_crop_bounds": {
+        "required_fields": [
+          "x_min",
+          "y_min",
+          "x_max",
+          "y_max"
+        ],
+        "range": "0.0 through 1.0 inclusive",
+        "invariants": [
+          "x_min < x_max",
+          "y_min < y_max"
+        ]
+      },
+      "silhouette_only_panel_sufficient": false,
+      "descriptor_rule": "Name the sheet region and recognizable complete form so a second reviewer can locate it without guessing."
+    },
+    "gates": [
+      {
+        "id": "artifact_integrity_and_identity",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "canonical_panel_and_primary_topology",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "orthographic_projection_and_orientation",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "technical_cartography_style_and_palette_suitability",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "primary_form_traceability",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "text_logo_watermark_absence",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "connected_physically_readable_primary_structure",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "evidence_entertainment_boundary",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "visible_evidence",
+          "manifest_evidence"
+        ]
+      },
+      {
+        "id": "runtime_isolation",
+        "critical": true,
+        "required_fields": [
+          "result",
+          "concept_under_design_root",
+          "runtime_reference_hits",
+          "scan_evidence"
+        ]
+      }
+    ],
+    "cross_panel_observations": {
+      "required_fields": [
+        "summary",
+        "classification",
+        "d010_reason"
+      ],
+      "classification_enum": [
+        "none",
+        "nonblocking",
+        "material"
+      ]
+    },
+    "disposition": {
+      "required_fields": [
+        "outcome",
+        "findings",
+        "targeted_correction",
+        "reviewed_at"
+      ],
+      "aggregate_numeric_score_allowed": false,
+      "blocker_can_result_in_pass_or_pass_with_notes": false
+    }
+  },
+  "material_failure_examples": [
+    "wrong or missing primary topology",
+    "no complete usable canonical trace panel",
+    "material perspective or authored-view failure",
+    "technical-cartography or palette-suitability failure",
+    "generated text, logo, pseudo-text, number, mascot, provider mark, or watermark",
+    "disconnected or impossible required primary structure",
+    "unsupported factual architecture, metric, outcome, project-skill association, or evidence-hold violation",
+    "wrong artifact identity or untrusted provenance"
+  ],
+  "nonblocking_d010_examples": [
+    "secondary panel has different seam density",
+    "secondary panel omits or adds a small non-primary prop",
+    "secondary panel simplifies an edge while one selected panel remains complete",
+    "generated silhouette inset does not pixel-match the selected panel"
+  ],
+  "targeted_regeneration": {
+    "reviewer_may_recommend": true,
+    "reviewer_may_authorize_or_execute": false,
+    "authorizer": "Director after art-lead confirmation",
+    "scope": "one failed asset only",
+    "preserve_failed_candidate_and_hash": true,
+    "default_mode": "one fresh built-in imagegen call using the unchanged manifest prompt plus one narrow corrective addendum",
+    "per_asset_retry_limit_this_cycle": 1,
+    "correction_wave_stop_threshold_assets": 8,
+    "second_failure_outcome": "REJECT pending explicit brief or art-direction replan",
+    "forbidden": [
+      "batch-wide regeneration",
+      "CLI or batch CLI",
+      "cross-asset raster reference",
+      "prompt or identity redesign",
+      "product code or 3D change",
+      "self-review by the replacement generator"
+    ]
+  },
+  "promotion_contract": {
+    "allowed_terminal_asset_outcomes": [
+      "PASS",
+      "PASS_WITH_NOTES"
+    ],
+    "required_review_count": 56,
+    "blocker_count_must_equal": 0,
+    "every_asset_requires_hash_dimensions_panel_and_crop": true,
+    "pass_with_notes_must_flow_to_tracing_packet": true,
+    "runtime_isolation_must_pass": true,
+    "art_lead_recommends": true,
+    "director_promotes": true,
+    "promotion_meaning": "Concept references accepted for deterministic tracing; runtime geometry accuracy is not yet accepted."
+  },
+  "partition_method": {
+    "formula": "qa_index = (generation_index + source_offset) mod 3",
+    "source_offsets": {
+      "art-batch-a": 0,
+      "art-batch-b": 1,
+      "art-batch-c": 2
+    },
+    "reason": "Every QA batch mixes all three generation lanes and no generation packet is rubber-stamped as a unit."
+  },
+  "batches": [
+    {
+      "id": "art-qa-1",
+      "asset_count": 19,
+      "source_batch_counts": {
+        "art-batch-a": 7,
+        "art-batch-b": 6,
+        "art-batch-c": 6
+      },
+      "category_counts": {
+        "world": 1,
+        "city": 0,
+        "project": 6,
+        "skill": 9,
+        "ambient": 3
+      },
+      "assets": [
+        {
+          "id": "world/career-world@v1",
+          "category": "world",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/world/career-world-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/kaizen-agent-platform@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/ticket-validation-automation@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/operator-control@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/operator-control-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/postgresql@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/postgresql-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/csharp@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/csharp-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "ambient/shore-pier@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/shore-pier-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/vendy-vm-platform@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/sap-table-update-integration@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/data-contracts@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/redis@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/redis-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/localdb@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/localdb-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "ambient/service-truck@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/kaizen-metrics@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/kaizen-metrics-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "project/career-world-portfolio@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/workflow-orchestration@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/macstadium@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/macstadium-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/atlassian@v1",
+          "category": "skill",
+          "evidence_status": "employer-supported-unlinked",
+          "output_path": "design/career-world/concepts/skills/atlassian-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "ambient/cargo-boat@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/cargo-boat-v1.png",
+          "generation_batch": "art-batch-c"
+        }
+      ]
+    },
+    {
+      "id": "art-qa-2",
+      "asset_count": 19,
+      "source_batch_counts": {
+        "art-batch-a": 6,
+        "art-batch-b": 7,
+        "art-batch-c": 6
+      },
+      "category_counts": {
+        "world": 0,
+        "city": 2,
+        "project": 6,
+        "skill": 9,
+        "ambient": 2
+      },
+      "assets": [
+        {
+          "id": "city/ninjaone@v1",
+          "category": "city",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/cities/ninjaone-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/uat-automation@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/uat-automation-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/atlassian-platform-automation@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/atlassian-platform-automation-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/go@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/go-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/mcp@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/mcp-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/java@v1",
+          "category": "skill",
+          "evidence_status": "user-required-unplaced",
+          "output_path": "design/career-world/concepts/skills/java-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "city/tanium@v1",
+          "category": "city",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/cities/tanium-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/cablecar@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/cablecar-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/atlassian-data-center-resilience@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/typescript@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/typescript-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/openapi@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/openapi-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/ai@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/ai-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "ambient/marker-buoy@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/marker-buoy-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/tanium-risk-assessment@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "project/qc-alm-extractor@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/python@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/python-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/electron@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/electron-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/ci-cd@v1",
+          "category": "skill",
+          "evidence_status": "employer-supported-unlinked",
+          "output_path": "design/career-world/concepts/skills/ci-cd-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "ambient/roof-equipment-kit@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/roof-equipment-kit-v1.png",
+          "generation_batch": "art-batch-c"
+        }
+      ]
+    },
+    {
+      "id": "art-qa-3",
+      "asset_count": 18,
+      "source_batch_counts": {
+        "art-batch-a": 6,
+        "art-batch-b": 6,
+        "art-batch-c": 6
+      },
+      "category_counts": {
+        "world": 0,
+        "city": 3,
+        "project": 4,
+        "skill": 9,
+        "ambient": 2
+      },
+      "assets": [
+        {
+          "id": "city/ace-hardware@v1",
+          "category": "city",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/cities/ace-hardware-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "project/tmatch-eolmatch@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/tmatch-eolmatch-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/safe-writes@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/safe-writes-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/react@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/react-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "skill/docker@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/docker-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "ambient/rock-cluster@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/rock-cluster-v1.png",
+          "generation_batch": "art-batch-a"
+        },
+        {
+          "id": "city/column-technologies@v1",
+          "category": "city",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "project/contextforge@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/contextforge-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/context-compression@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/context-compression-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/aws@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/aws-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "skill/databricks@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/databricks-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "ambient/evergreen-cluster@v1",
+          "category": "ambient",
+          "evidence_status": "ambient",
+          "output_path": "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+          "generation_batch": "art-batch-b"
+        },
+        {
+          "id": "city/independent@v1",
+          "category": "city",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/cities/independent-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "project/xsearch@v1",
+          "category": "project",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/projects/xsearch-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "project/client-devops-delivery-implementations@v1",
+          "category": "project",
+          "evidence_status": "identity-only",
+          "output_path": "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/vmware@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/vmware-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/informatica@v1",
+          "category": "skill",
+          "evidence_status": "employer-supported-unlinked",
+          "output_path": "design/career-world/concepts/skills/informatica-v1.png",
+          "generation_batch": "art-batch-c"
+        },
+        {
+          "id": "skill/manifest-v3@v1",
+          "category": "skill",
+          "evidence_status": "evidence-backed",
+          "output_path": "design/career-world/concepts/skills/manifest-v3-v1.png",
+          "generation_batch": "art-batch-c"
+        }
+      ]
+    }
+  ],
+  "partition_validation": {
+    "batch_counts": [
+      19,
+      19,
+      18
+    ],
+    "union_count": 56,
+    "unique_id_count": 56,
+    "unique_output_path_count": 56,
+    "pairwise_disjoint": true,
+    "equals_source_manifest_id_set": true,
+    "equals_source_manifest_path_set": true,
+    "all_batches_mix_all_generation_lanes": true
+  }
+}

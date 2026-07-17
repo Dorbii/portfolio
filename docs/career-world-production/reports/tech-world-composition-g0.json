@@ -1,0 +1,462 @@
+{
+  "schema_version": "career-world-tech-parallel-lane-report/v1",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005",
+  "phase_id": "G0",
+  "lane_id": "world-city-geometry",
+  "owner": "/root/tech_geometry_g0",
+  "completed_at": "2026-07-17T09:51:35.4934983-05:00",
+  "status": "IMPLEMENTED_VALIDATED_AWAITING_DIRECTOR_ENVELOPE",
+  "implementation_verdict": "PASS",
+  "handoff_verdict": "READY_FOR_DIRECTOR_ENVELOPE",
+  "director_acceptance": "NOT_ASSERTED",
+  "integration_or_promotion_claimed": false,
+  "summary": "Authored exactly the assigned Career World geography and five illustrative employer capitals as six unique deterministic 2.5D SVG geometry definitions. Tier 0 retains the complete coastline/district or capital exterior identity; tiers 1 and 2 add only interior cartography, seams, windows, and rails. All definitions use the frozen projection, orientation zero, canonical palette slots, conservative footprints, and literal primary/master hashes independently recomputed from the F0 serializer. File-local lint, strict isolated TypeScript, schema/closure/hash/freeze checks, footprint containment, and twelve renderer SSR scenarios pass. G0 binds the Director-corrected F0 predecessor envelope and promoted 56-asset art report, but does not claim integration, placement, promotion, or Director acceptance.",
+  "authority_receipts": {
+    "composition_packet": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+      "verified": true
+    },
+    "f0_predecessor_envelope": {
+      "path": "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json",
+      "bytes": 3101,
+      "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+      "envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "supersedes_envelope_id": "01e5d95fbcf890434cae60b97fd108fc6310f73a28e7cc06cec2938048fd523b",
+      "controlled_source_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "acceptance_status": "ACCEPTED",
+      "verified": true
+    },
+    "promoted_art_report": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "promoted_art_digest": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "record_count": 56,
+      "verified": true
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14",
+      "verified": true
+    },
+    "f0_geometry_inputs": [
+      {
+        "path": "features/career-world/geometry/types.ts",
+        "bytes": 2617,
+        "sha256": "64b01ea13d048f075c4adf016f32ba0e5eba8676633b71ca53ad5b98d9cd2c93"
+      },
+      {
+        "path": "features/career-world/geometry/projection.ts",
+        "bytes": 1956,
+        "sha256": "597712a90fe63e913b6bd54d26a376323863b9c808187b796a34af0ea9ec58fb"
+      },
+      {
+        "path": "features/career-world/geometry/primitives.ts",
+        "bytes": 7301,
+        "sha256": "10e184109821be6cdad95e7956c2bd9c399dfb8bbc7c881177b27f4111814049"
+      },
+      {
+        "path": "features/career-world/geometry/canonical-payload.ts",
+        "bytes": 6503,
+        "sha256": "17778559c2b5c23125c62ea4421b155282489b8221fe7f6ce530349c6d0be152"
+      },
+      {
+        "path": "features/career-world/geometry/palettes.ts",
+        "bytes": 4416,
+        "sha256": "d8bbc03709fcc4e853828045030fccc0735b0d991802485e5c2e97fe936b8d13"
+      }
+    ]
+  },
+  "scope": {
+    "assigned_asset_count": 6,
+    "assigned_asset_ids": [
+      "world/career-world@v1",
+      "city/ninjaone@v1",
+      "city/tanium@v1",
+      "city/independent@v1",
+      "city/ace-hardware@v1",
+      "city/column-technologies@v1"
+    ],
+    "owned_paths": [
+      "features/career-world/definitions/world-cities.ts",
+      "docs/career-world-production/reports/tech-world-composition-g0.json"
+    ],
+    "controlled_implementation_path": "features/career-world/definitions/world-cities.ts",
+    "administrative_report_path": "docs/career-world-production/reports/tech-world-composition-g0.json",
+    "administrative_report_excluded_from_controlled_source_digest": true,
+    "files_written_by_lane": [
+      "features/career-world/definitions/world-cities.ts",
+      "docs/career-world-production/reports/tech-world-composition-g0.json"
+    ],
+    "files_outside_owned_scope_modified_by_lane": [],
+    "dependency_changes": 0,
+    "git_operations": [],
+    "aggregate_build_or_test_runs": []
+  },
+  "owned_delta": {
+    "path": "features/career-world/definitions/world-cities.ts",
+    "change": "added",
+    "before": null,
+    "after": {
+      "bytes": 26858,
+      "sha256": "7fa4fb6ccd4f2c2b15b4d2b5d4a8bd1a0867530959d53a1078fae70f76e29d4b"
+    },
+    "export": "WORLD_CITY_GEOMETRY_DEFINITIONS",
+    "definition_count": 6
+  },
+  "assignment_closure": {
+    "expected_count": 6,
+    "actual_count": 6,
+    "missing_ids": [],
+    "extra_ids": [],
+    "duplicate_asset_ids": [],
+    "duplicate_geometry_keys": [],
+    "result": "PASS"
+  },
+  "shared_contract": {
+    "categories": [
+      "world",
+      "city"
+    ],
+    "evidence_meaning": "Illustrative geography and employer capitals only; no architecture depicts a real office, store, headquarters, campus, metric, or product claim.",
+    "projection": "cw-iso-225-45-35.264-r0-v1",
+    "orientation": 0,
+    "palette_slots": [
+      "structure.base",
+      "structure.shadow",
+      "line.primary",
+      "line.secondary",
+      "accent.emissive",
+      "accent.focus",
+      "label.primary",
+      "terrain.claim"
+    ],
+    "allowed_primitive_types": [
+      "surface",
+      "extrusion",
+      "stroke"
+    ],
+    "runtime_png_references": 0,
+    "employer_color_values": 0,
+    "instance_or_placement_records": 0,
+    "text_or_logo_geometry": 0,
+    "factual_claims": 0,
+    "easter_eggs": 0,
+    "easter_egg_note": "The G0 manifest records explicitly forbid canonical-sheet easter eggs for the world and all five cities; no decorative exception was invented in this lane."
+  },
+  "definitions": [
+    {
+      "asset_id": "world/career-world@v1",
+      "geometry_key": "career-world/world/career-world/master-v1",
+      "primary_path_hash": "sha256:2289e817a69967b632ef230d87ace8b7206a81f4375634c3019bd32ef6618b0d",
+      "master_geometry_hash": "sha256:d19fb4433893727ac11812c221a64d452cff914cd506bb7003f0f22a8dab43d7",
+      "footprint": {
+        "width": 1600,
+        "depth": 900
+      },
+      "primitive_count": 10,
+      "primitive_type_counts": {
+        "surface": 6,
+        "extrusion": 0,
+        "stroke": 4
+      },
+      "detail_tier_counts": {
+        "0": 6,
+        "1": 2,
+        "2": 2
+      },
+      "tier_0_identity": "one irregular coastal landmass envelope with four offshore groups and exactly five separated empty district pads at the accepted district relationships",
+      "interior_only_higher_tiers": "two terrain spines, one central terrain corridor, and one split inner-coast contour",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/world/career-world-v1.png",
+        "bytes": 2264040,
+        "sha256": "9e914ffadb7e2505245f33c29de3a286b23be35d3b8358d14673013f4149dbe4",
+        "verdict": "PASS",
+        "selected_panel_role": "lod_2",
+        "selected_crop": [
+          0.006,
+          0.505,
+          0.497,
+          0.988
+        ]
+      },
+      "trace_note_applied": "Preserved the complete coastline, offshore pieces, negative-space corridors, and five empty buildable pads; added no city, project, skill, label, route claim, or coordinate mark."
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "geometry_key": "career-world/city/ninjaone/master-v1",
+      "primary_path_hash": "sha256:178bfb0e8450d08e3c3bd170543ab790ede8dd1c0a3d69cf416d5d562ae37237",
+      "master_geometry_hash": "sha256:cc6bc6eeb3b9d0df943b8bda392d7568e284e486c7f1305beb6b1d6d7266b5db",
+      "footprint": {
+        "width": 360,
+        "depth": 340
+      },
+      "primitive_count": 11,
+      "primitive_type_counts": {
+        "surface": 0,
+        "extrusion": 8,
+        "stroke": 3
+      },
+      "detail_tier_counts": {
+        "0": 8,
+        "1": 2,
+        "2": 1
+      },
+      "tier_0_identity": "clipped-diamond plinth, octagonal command hall, exactly three radial annexes, and a three-stage central beacon crown",
+      "interior_only_higher_tiers": "window band, empty sign-slot seam, and beacon service seams",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/cities/ninjaone-v1.png",
+        "bytes": 1709570,
+        "sha256": "581a2e77b1bfc7c1bf9c5bcb943d246abef0f8c3ef1fe0458f2276d3f923572c",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "full_hero",
+        "selected_crop": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      "trace_note_applied": "Used the corrected full-canvas hero and preserved the exact three-annex count and complete base; the nonblocking 1254 by 1254 concept-canvas note has no runtime effect."
+    },
+    {
+      "asset_id": "city/tanium@v1",
+      "geometry_key": "career-world/city/tanium/master-v1",
+      "primary_path_hash": "sha256:06e79625bcda014ebfc90c65b41b2fb54d8ef88bbb9b6f9e6feb25791e6b3dae",
+      "master_geometry_hash": "sha256:19ac9a133ccd97deccec702175a5f1449575f7a1b4e24d0ee7ad9421f8212fb8",
+      "footprint": {
+        "width": 440,
+        "depth": 280
+      },
+      "primitive_count": 13,
+      "primitive_type_counts": {
+        "surface": 1,
+        "extrusion": 10,
+        "stroke": 2
+      },
+      "detail_tier_counts": {
+        "0": 11,
+        "1": 1,
+        "2": 1
+      },
+      "tier_0_identity": "four low civic-spine bars enclosing an open rectangular forum, two unequal offset observation towers, and four deep corner buttresses",
+      "interior_only_higher_tiers": "facade rhythm and observation slit marks",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/cities/tanium-v1.png",
+        "bytes": 2336815,
+        "sha256": "270c48d91be28f9b359813c253aa5f8f7303cbbe8b1576147cda92865c59d888",
+        "verdict": "PASS",
+        "selected_panel_role": "unspecified_detail_panel",
+        "selected_crop": [
+          0.01,
+          0.01,
+          0.99,
+          0.64
+        ]
+      },
+      "trace_note_applied": "Preserved the full open forum, long enclosing spine, unequal tower heights, and stepped corner-support rhythm without shield or facility symbolism."
+    },
+    {
+      "asset_id": "city/independent@v1",
+      "geometry_key": "career-world/city/independent/master-v1",
+      "primary_path_hash": "sha256:f9bf4940e5bf6f1a71f1bb05e63d165324646be42cb23003431587ccfb114471",
+      "master_geometry_hash": "sha256:6efb10ea0cbfdef5e726ff22bc6a3243ca3feca94a513ac7d53c820b6fc80bb1",
+      "footprint": {
+        "width": 390,
+        "depth": 300
+      },
+      "primitive_count": 13,
+      "primitive_type_counts": {
+        "surface": 0,
+        "extrusion": 10,
+        "stroke": 3
+      },
+      "detail_tier_counts": {
+        "0": 11,
+        "1": 1,
+        "2": 1
+      },
+      "tier_0_identity": "five unequal workshop bays forming a sawtooth rhythm, one narrow archive tower, one small pavilion, three continuous base runs, and an open triangular courtyard",
+      "interior_only_higher_tiers": "workshop bay seams and archive-window stack",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/cities/independent-v1.png",
+        "bytes": 2156205,
+        "sha256": "298f8d3f207f579601b32b56573d681cb28518a9e342e06cc6632bc7ff114676",
+        "verdict": "PASS",
+        "selected_panel_role": "lod_2",
+        "selected_crop": [
+          0.06,
+          0.49,
+          0.49,
+          0.95
+        ]
+      },
+      "trace_note_applied": "Retained the asymmetric three-mass composition and explicit triangular void rather than normalizing it into a symmetric office campus."
+    },
+    {
+      "asset_id": "city/ace-hardware@v1",
+      "geometry_key": "career-world/city/ace-hardware/master-v1",
+      "primary_path_hash": "sha256:fb9df029d0d1dcc6db00fbf1d5110bc09a069f6476061c5da242ec6f59668f99",
+      "master_geometry_hash": "sha256:4aac885cfff2796dce8aea24e2794f22fcb8134a890699da4b69de0aa23a7289",
+      "footprint": {
+        "width": 410,
+        "depth": 310
+      },
+      "primitive_count": 11,
+      "primitive_type_counts": {
+        "surface": 1,
+        "extrusion": 7,
+        "stroke": 3
+      },
+      "detail_tier_counts": {
+        "0": 8,
+        "1": 2,
+        "2": 1
+      },
+      "tier_0_identity": "heavy rectangular plinth, broad civic hall, separate shed-roof plane, chamfered corner tower, and exactly four covered edge porches",
+      "interior_only_higher_tiers": "porch support rhythm, empty hall sign-slot seam, and shed-roof seams",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/cities/ace-hardware-v1.png",
+        "bytes": 2426368,
+        "sha256": "e7023f2bea7dd9244afa0b21f82a147812a841e7c67005e5b4961174998263f9",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "lod_2",
+        "selected_crop": [
+          0.028,
+          0.025,
+          0.505,
+          0.5
+        ]
+      },
+      "trace_note_applied": "Used the complete selected capital panel, preserving roof, facade, tower, porch, stair, and plinth relationships while omitting retail props, branding, and real-site implication."
+    },
+    {
+      "asset_id": "city/column-technologies@v1",
+      "geometry_key": "career-world/city/column-technologies/master-v1",
+      "primary_path_hash": "sha256:3debd55237c31c4a3537af39c50726f82f8308c1c265250f1676582e4dfec8ae",
+      "master_geometry_hash": "sha256:95897772dde90e5d0c54e3baa67aa973dc8f99206f5000e57c542dbce956a50c",
+      "footprint": {
+        "width": 440,
+        "depth": 240
+      },
+      "primitive_count": 15,
+      "primitive_type_counts": {
+        "surface": 0,
+        "extrusion": 13,
+        "stroke": 2
+      },
+      "detail_tier_counts": {
+        "0": 13,
+        "1": 1,
+        "2": 1
+      },
+      "tier_0_identity": "low transverse hall with two end blocks, one recessed roof bridge, exactly five ascending slender fins, and a three-step narrow forecourt",
+      "interior_only_higher_tiers": "hall colonnade seams and restrained fin-cap seams",
+      "source_receipt": {
+        "canonical_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+        "bytes": 2035436,
+        "sha256": "158815a35c804557c0d5c52f44d7e2bcf0518c4b22e69a4dd1f2127a5b54ad24",
+        "verdict": "PASS_WITH_NOTES",
+        "selected_panel_role": "unspecified_detail_panel",
+        "selected_crop": [
+          0.1,
+          0.02,
+          0.92,
+          0.46
+        ]
+      },
+      "trace_note_applied": "Used the selected complete five-fin capital and retained both end blocks plus the recessed bridge; did not adopt the simplified panel's collapsed topology."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node node_modules/eslint/bin/eslint.js features/career-world/definitions/world-cities.ts",
+      "scope": "G0-owned implementation file only",
+      "status": "PASS",
+      "result": "0 errors, 0 warnings"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --strict --skipLibCheck --module esnext --moduleResolution bundler --target es2022 features/career-world/definitions/world-cities.ts",
+      "scope": "strict isolated TypeScript check rooted at the G0-owned implementation file",
+      "status": "PASS",
+      "result": "0 errors"
+    },
+    {
+      "command": "Vite SSR load plus F0 validation and Node SHA-256 recomputation",
+      "scope": "six exported definitions",
+      "status": "PASS",
+      "result": "6/6 schema-valid; exact six-ID closure; six unique geometry keys; 6/6 primary hashes match; 6/6 master hashes match; exact palette order; all definitions, primitive arrays, and primitive records are frozen"
+    },
+    {
+      "command": "React SSR GeometryRenderer at detail tiers 0 and 2",
+      "scope": "six definitions across twelve renderer scenarios",
+      "status": "PASS",
+      "result": "12/12 rendered; every primitive group remained mounted; one primary path was present per scenario; no projection or extrusion error"
+    },
+    {
+      "command": "extrusion-plan footprint containment audit",
+      "scope": "all G0 extrusion plan points against each conservative centered footprint",
+      "status": "PASS",
+      "result": "All plan extents fall within the declared half-width and half-depth; world surface extents remain within the exact 1600 by 900 envelope"
+    },
+    {
+      "command": "manifest/promoted-art assignment and source-receipt audit",
+      "scope": "exact G0 six-ID assignment",
+      "status": "PASS",
+      "result": "6 expected, 6 implemented, 0 missing, 0 extra, 0 duplicates, six canonical PNG byte/hash receipts reproduced, 0 manifest-versus-selected-panel topology conflicts"
+    },
+    {
+      "command": "product-source forbidden-reference audit",
+      "scope": "features/career-world/definitions/world-cities.ts",
+      "status": "PASS",
+      "result": "0 runtime image or docs paths, 0 hex colors, 0 employer wrappers, 0 instance placements, 0 text/logos, 0 factual claims, 0 dependencies"
+    }
+  ],
+  "predecessor_digest_reconciliation": {
+    "original_envelope_declared_f0_controlled_source": {
+      "file_count": 43,
+      "total_bytes": 1082729,
+      "aggregate_sha256": "f5d0bddc1d48cd53121e41f5ed10d9eaaa504fb5265f5a89e51183454ee6fa0f"
+    },
+    "recomputed_from_exact_expected_per_file_receipts": {
+      "file_count": 43,
+      "total_bytes": 1082729,
+      "aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "path_sort": "ascending ordinal UTF-8 path bytes",
+      "record_format": "path + NUL + decimal byte count + NUL + lowercase SHA-256 + LF",
+      "per_file_receipts_checked": 43,
+      "per_file_receipt_mismatches": 0
+    },
+    "director_resolution": {
+      "superseding_envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "controlled_source_file_count": 43,
+      "controlled_source_total_bytes": 1082729,
+      "controlled_source_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "per_file_receipts_changed": 0,
+      "controlled_source_bytes_changed": false,
+      "result": "PASS"
+    },
+    "provisional_g0_branch_from_exact_receipts": {
+      "file_count": 44,
+      "total_bytes": 1109587,
+      "aggregate_sha256": "14062c90682ca278ba062c0fdd5dbe83c8a2a6fe67d0f190d9c201eaf7f47de7",
+      "accepted_successor_claimed": false
+    },
+    "result": "RESOLVED",
+    "impact": "No active G0 implementation or handoff blocker remains. The chronology is retained; G0 binds only the corrected reproducible predecessor."
+  },
+  "deviations": [],
+  "notes": [
+    "The generated concept PNGs were used only as non-runtime identity and topology references; their pixels were not treated as geometry, coordinates, footprint, or hash authority.",
+    "The world is the sole multi-district asset and contains five empty pads only. The city definitions contain no employer color value, logo, label, real-site feature, factual metric, or project/skill building.",
+    "G0 deliberately contains no easter egg because each assigned manifest record forbids one in the canonical world/city sheet. Later approved decoration remains outside this definition lane.",
+    "G0 did not add placement, registry integration, scene integration, interactions, CSS, tests, dependencies, or 3D work.",
+    "The 44-file G0 branch aggregate is reproducible and ready to be bound, but is not an accepted successor until the Director issues G0's external envelope.",
+    "This report intentionally omits its own byte count and SHA-256; an external Director handoff envelope must freeze those after finalization."
+  ],
+  "blockers": []
+}

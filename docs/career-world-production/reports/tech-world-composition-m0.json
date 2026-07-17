@@ -1,0 +1,193 @@
+{
+  "schema_version": "career-world-tech-phase-report/v1",
+  "phase_id": "M0",
+  "packet_id": "career-world-2026-07-16/CW-005/M0-CORRECTION",
+  "status": "CORRECTED_IMPLEMENTATION_VERIFIED",
+  "implementation_verdict": "PASS",
+  "independent_re_review": "PENDING",
+  "director_acceptance": "NOT_ASSERTED",
+  "downstream_acceptance": "READY_FOR_INDEPENDENT_REREVIEW",
+  "summary": "Corrected M0 to the exact minimal SelectedTracePanel client contract after independent review invalidated the first overbuilt implementation. The runtime module now imports only the CareerAssetId type and exports one ordinal 56-record collection with exactly assetId, stable panelId, and promoted canonical sourceSha256. Duplicate art provenance, paths, bytes, verdicts, panel metadata, QA metadata, lineage, notes, and runtime flags were removed. Exact ID/hash equality, manifest equality, stable panel IDs, strict TypeScript, lint, zero forbidden runtime path strings, corrected F0 predecessor receipts, and the new controlled-source successor all independently recompute.",
+  "authority": {
+    "accepted_brief": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "relevant_lines": "99-118",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+      "verified": true
+    },
+    "corrected_f0_predecessor": {
+      "path": "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json",
+      "bytes": 3101,
+      "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+      "envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "acceptance_status": "ACCEPTED",
+      "controlled_source": {
+        "file_count": 43,
+        "total_bytes": 1082729,
+        "aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121"
+      },
+      "live_receipt_mismatches": 0,
+      "verified": true
+    },
+    "promoted_art": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "promotion_verdict": "PROMOTED_56_GO",
+      "canonical_digest_sha256": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "verified": true
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14",
+      "asset_count": 56,
+      "verified": true
+    }
+  },
+  "independent_review_chronology": {
+    "initial_result": "FAIL",
+    "blocker": "The first trace-panels.ts duplicated art provenance forbidden by the exact client contract and omitted the required panelId/sourceSha256 shape.",
+    "invalidated_initial_source": {
+      "path": "features/career-world/geometry/trace-panels.ts",
+      "bytes": 79576,
+      "sha256": "b051ab2f88ca3b985f5aab38e63f554107f360da8f9146b663ccabaf7378d30c"
+    },
+    "invalidated_handoff_envelope_id": "8b762d7f2091d5a60e52a4871fce1d97a0c4d879496c150ae6573cffaa57ed01",
+    "invalidation_envelope": {
+      "path": "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json",
+      "bytes": 2062,
+      "sha256": "55066ebd40e9d5a3cf9b294f918cc72356871913f580c797e12411bb34987064",
+      "envelope_id": "18a3412164527b4e183434d779f9ba487a4b9a10f7ebf4098682d46c1a31b177",
+      "acceptance_status": "INVALIDATED_PENDING_CORRECTION",
+      "verified": true
+    },
+    "referenced_review_report": {
+      "path": "docs/career-world-production/reports/review-tech-world-composition-m0.json",
+      "present_during_correction": false,
+      "note": "The invalidation envelope records this review path, but the file was not present in the shared tree during correction; the envelope and Director correction packet provide the blocker authority."
+    },
+    "correction": "Replaced the overbuilt module with the exact three-field SelectedTracePanel shape, retained the established TRACE_PANEL_RECORDS export, copied only promoted asset IDs and canonical image hashes, and derived stable panel IDs mechanically.",
+    "duplicate_runtime_provenance_removed": [
+      "canonical and candidate paths",
+      "file byte counts",
+      "verdict and evidence status",
+      "panel role, crop, descriptor, and topology flags",
+      "QA sources and lineage",
+      "tracing and reviewer notes",
+      "runtime isolation flag"
+    ],
+    "corrected_result": "READY_FOR_INDEPENDENT_REREVIEW"
+  },
+  "scope": {
+    "owned_paths": [
+      "features/career-world/geometry/trace-panels.ts",
+      "docs/career-world-production/reports/tech-world-composition-m0.json"
+    ],
+    "controlled_implementation_paths": [
+      "features/career-world/geometry/trace-panels.ts"
+    ],
+    "administrative_report_path": "docs/career-world-production/reports/tech-world-composition-m0.json",
+    "administrative_report_excluded_from_controlled_source_digest": true,
+    "files_outside_owned_scope_modified_by_m0_correction": [],
+    "dependency_changes": 0,
+    "git_operations": []
+  },
+  "owned_before_after_receipts": [
+    {
+      "path": "features/career-world/geometry/trace-panels.ts",
+      "before": {
+        "bytes": 79576,
+        "sha256": "b051ab2f88ca3b985f5aab38e63f554107f360da8f9146b663ccabaf7378d30c"
+      },
+      "after": {
+        "bytes": 10180,
+        "sha256": "c6567c0d1c673dc7563a7521f0328a382b5da325f290d50f3f32514a3cdf64f4"
+      },
+      "change": "corrected"
+    }
+  ],
+  "corrected_contract": {
+    "type": "Readonly<{ assetId: CareerAssetId; panelId: `${CareerAssetId}#canonical-trace-v1`; sourceSha256: string; }>",
+    "export_name": "TRACE_PANEL_RECORDS",
+    "record_count": 56,
+    "unique_asset_ids": 56,
+    "ordinal_by_asset_id": true,
+    "keys_per_record": [
+      "assetId",
+      "panelId",
+      "sourceSha256"
+    ],
+    "exact_three_keys_per_record": true,
+    "exact_promoted_id_hash_equality": true,
+    "exact_manifest_id_equality": true,
+    "stable_panel_ids": true,
+    "panel_id_rule": "${assetId}#canonical-trace-v1",
+    "type_only_imports": [
+      "./types#CareerAssetId"
+    ],
+    "runtime_value_imports": 0
+  },
+  "runtime_boundary": {
+    "docs_path_strings": 0,
+    "design_path_strings": 0,
+    "png_path_strings": 0,
+    "base64_or_pixel_payloads": 0,
+    "duplicated_provenance_fields": 0,
+    "only_promoted_sha256_values_retained": true
+  },
+  "verification": [
+    {
+      "command": "node node_modules/eslint/bin/eslint.js features/career-world/geometry/trace-panels.ts",
+      "scope": "corrected M0 source lint",
+      "status": "pass",
+      "result": "0 errors, 0 warnings"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck features/career-world/geometry/trace-panels.ts features/career-world/geometry/types.ts",
+      "scope": "corrected isolated M0 strict TypeScript check",
+      "status": "pass",
+      "result": "0 errors"
+    },
+    {
+      "command": "read-only Node promoted-art/manifest/module equality and AST boundary audit",
+      "scope": "corrected three-field collection",
+      "status": "pass",
+      "result": "56 records; 56 unique ordinal IDs; exact three-key shape; exact promoted ID/SHA equality; exact manifest IDs; stable panel IDs; one type-only ./types import; zero forbidden provenance/path strings"
+    },
+    {
+      "command": "read-only Node predecessor/live-receipt/successor reconciliation",
+      "scope": "corrected M0 controlled source",
+      "status": "pass",
+      "result": "Corrected F0 envelope b9c7fe52 and aggregate 233887ca reproduce with zero live mismatches; corrected 44-file successor e48730b6 reproduces"
+    }
+  ],
+  "controlled_source_successor": {
+    "predecessor_envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+    "predecessor_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+    "file_count": 44,
+    "total_bytes": 1092909,
+    "aggregate_sha256": "e48730b6227bf37c785a88f0eb1ffa6e1f39a99e18c1136d304328254d9dba5a",
+    "non_owned_predecessor_paths_checked": 43,
+    "non_owned_predecessor_mismatches": 0,
+    "report_excluded": true,
+    "path_sort": "ascending ordinal UTF-8 path bytes",
+    "record_format": "path + NUL + decimal byte count + NUL + lowercase SHA-256 + LF"
+  },
+  "deviations": [
+    {
+      "kind": "invalidated_initial_implementation",
+      "note": "The first module was overbuilt and contradicted the accepted minimal runtime boundary. Its source receipt and handoff envelope are historical invalidated evidence only and must not enter I0."
+    },
+    {
+      "kind": "source_format",
+      "note": "Records use compact JSON-compatible object literals inside TypeScript; this is syntax-only formatting and does not add runtime data."
+    }
+  ],
+  "limitations": [
+    "This author report does not claim independent re-review, Director acceptance, M0 promotion, I0 integration, or downstream dispatch.",
+    "The report intentionally contains no self hash."
+  ]
+}
+

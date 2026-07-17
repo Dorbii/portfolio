@@ -1,0 +1,71 @@
+{
+  "schema_version": "career-world-tech-parallel-geometry-report/v1",
+  "run_id": "career-world-2026-07-17-g2-recovery-r2",
+  "slice_id": "CW-005",
+  "phase_id": "G2",
+  "lane_id": "/root/tech_geometry_g2",
+  "status": "CORRECTED_AWAITING_INDEPENDENT_REVIEW",
+  "implementation_verdict": "CORRECTION_COMPLETE_REVIEW_REQUIRED",
+  "director_acceptance": "NOT_ASSERTED",
+  "integration_or_promotion_claimed": false,
+  "completed_at": "2026-07-17T15:55:00Z",
+  "summary": "Second G2 correction after independent review rejected the first recovery's flat Tanium geometry. All eight primary paths use deterministic Tier-0 exterior traces rather than padded halos. Tanium now has three genuinely sloped wedge volumes, a recessed zigzag trench with floor and retaining walls, and an updated simple exterior path containing those volumes. Vendy retains its recessed dock; Kaizen Metrics retains pitched sawtooth roofs and a faceted lightwell; CableCar and XSearch retain tapered shells; T-Match retains alternating interlocking step plans and a recessed zigzag seam. This author report does not claim independent visual acceptance.",
+  "correction_history": [
+    {
+      "review_report": "docs/career-world-production/reports/review-tech-world-composition-g2.json",
+      "prior_verdict": "FAIL",
+      "resolved_in_this_round": [
+        "Replace three flat Tanium hall tops with sloped wedge cap geometry.",
+        "Replace the flat Tanium trench surface with a recessed floor and retaining walls.",
+        "Update the Tanium exterior trace to remain simple and contain the corrected Tier-0 volumes.",
+        "Eliminate the unused slopedWedgeCap lint warning by using the helper for its intended geometry."
+      ]
+    }
+  ],
+  "scope": {
+    "owned_implementation_path": "features/career-world/definitions/projects-a.ts",
+    "owned_administrative_report_path": "docs/career-world-production/reports/tech-world-composition-g2.json",
+    "non_owned_paths_written_by_lane": [],
+    "git_operations": [],
+    "dependency_changes": 0,
+    "product_integration_changes": 0
+  },
+  "owned_implementation_receipt": {
+    "path": "features/career-world/definitions/projects-a.ts",
+    "change": "recovered_and_corrected",
+    "after": {
+      "bytes": 37484,
+      "sha256": "117fc2978c46eadc34e164dde0fc041bf52358ab83d04c0138c3bdf70d541cd7"
+    }
+  },
+  "inventory": {
+    "expected_count": 8,
+    "actual_count": 8,
+    "asset_ids": [
+      "project/kaizen-agent-platform@v1", "project/vendy-vm-platform@v1", "project/kaizen-metrics@v1", "project/tanium-risk-assessment@v1", "project/uat-automation@v1", "project/cablecar@v1", "project/xsearch@v1", "project/tmatch-eolmatch@v1"
+    ],
+    "primitive_totals": { "all": 227, "tier_0": 196, "tier_1": 23, "tier_2": 8 },
+    "higher_tier_non_stroke_primitives": 0
+  },
+  "definition_hashes": [
+    { "asset_id": "project/kaizen-agent-platform@v1", "primary_path_sha256": "sha256:a074bc19ba680a923ea6a14a5ea84d7747cd173be8318682c6046b3838c21c07", "master_geometry_sha256": "sha256:8d44e5441ab4d1c0b46b219553e66e67ef4c42898f4a8eac74a6961f4feb84d2" },
+    { "asset_id": "project/vendy-vm-platform@v1", "primary_path_sha256": "sha256:c6042a192744482cd843885f2cbf3ab17bc66b44696f6c0188fc0092fa088a14", "master_geometry_sha256": "sha256:d9f4de2910b2bf552928246c8997861a603c41fd67cb4340cf34f4a24b0728bb" },
+    { "asset_id": "project/kaizen-metrics@v1", "primary_path_sha256": "sha256:9ca4bd1436856de56e2947b31800c10395283865bfb8e1928e07fa72e05e80ec", "master_geometry_sha256": "sha256:2e2381dc7a7b621fedd7b0e0e186c8e22fcd4d9c92b2418e01e9ad7ce8747947" },
+    { "asset_id": "project/tanium-risk-assessment@v1", "primary_path_sha256": "sha256:b1c786ba69f5b64b4c1b00e93459631ca83cde9a3019e7a2f14f9efed9bbc9c8", "master_geometry_sha256": "sha256:107b90acb35e1fae118c7a2e87c958e8f428a7defab3f01745c193e11f9e2bc4" },
+    { "asset_id": "project/uat-automation@v1", "primary_path_sha256": "sha256:b63f5808cf836f71770c4d3c80aba64340fac915d3f731d489d25d42dc191470", "master_geometry_sha256": "sha256:0d921daa912e4ad28d6f16d575407474e6c37a5ef0bdd5b26a41b1d2636c9d81" },
+    { "asset_id": "project/cablecar@v1", "primary_path_sha256": "sha256:f06d9271d027897c4e290135bca5e7f0a48f92bde0a170c998aa527871160e31", "master_geometry_sha256": "sha256:2944aebebbe11f08e803e7a8ab977d9e740ae5ac0f51dccfd525da53c38bf2cf" },
+    { "asset_id": "project/xsearch@v1", "primary_path_sha256": "sha256:f9c24aabe596f0d78ab5461ff3abd0d562b20adcef37bc5e430080d94484fc7f", "master_geometry_sha256": "sha256:20e78f0318e9939cec712b189acf4a27d34cc4f311f20c8781c9d4a48b7f2dcf" },
+    { "asset_id": "project/tmatch-eolmatch@v1", "primary_path_sha256": "sha256:5c5ff284e2bd81e7f89c957e385ce08394152f3f48274dc8e9eb8ae658b8e1dd", "master_geometry_sha256": "sha256:9c5526fe6a62bb2a9cb7a1a5b7c23763354b1ba96612ee2f87287aeefa6fe4bf" }
+  ],
+  "footprint_corrections": [
+    { "asset_id": "project/tanium-risk-assessment@v1", "footprint": { "width": 248, "depth": 196 } },
+    { "asset_id": "project/cablecar@v1", "footprint": { "width": 274.2359, "depth": 94.2359 } },
+    { "asset_id": "project/xsearch@v1", "footprint": { "width": 290, "depth": 220 } }
+  ],
+  "targeted_validation": {
+    "command": "Vite SSR import of PROJECT_GEOMETRY_DEFINITIONS_A; validateGeometryDefinition; per-extrusion centered-footprint validation; simple-primary-path segment audit; Tier-0 projected-vertex containment; SHA-256 of each primaryPath and serializeCanonicalGeometryPayload; repository ESLint",
+    "status": "pass",
+    "result": "8 definitions imported; zero F0 validation errors; zero Tier-0 extrusion-plan footprint overruns; all primary paths simple; zero Tier-0 projected vertices outside their primary path; all 16 stored hash literals recomputed exactly; ESLint completed with zero errors and zero warnings."
+  },
+  "next_gate": "Independent G2 re-review must rerun the Tier-0 exterior/footprint audit and original-detail visual inspection. No acceptance envelope, aggregate I0, placement, or integration claim is made here."
+}

@@ -1,0 +1,256 @@
+{
+  "schema_version": "career-world-tech-fresh-context-review/v1",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005",
+  "phase_id": "G6",
+  "lane_id": "skills-c-geometry",
+  "reviewer": "/root/rereview_g6_corrected",
+  "reviewed_at": "2026-07-17T10:45:54.3644802-05:00",
+  "review_mode": "fresh independent source, contract, receipt, geometry, and selected-panel review",
+  "terminal_verdict": "FAIL",
+  "handoff_verdict": "REJECT_G6_REOPEN_REQUIRED",
+  "summary": "The corrected G6 source receipt is exact, all nine definitions load through F0 with zero validator errors, all 18 literal geometry hashes recompute, every primary path component is closed/simple, all tier-0 rendered vertices fall within its primary silhouette, all nine centered projected ground envelopes fit their declared footprints, and the required Manifest v3, Java, and Informatica topology is now present. The correction is nevertheless not acceptable: three tier-1/2 stroke endpoints are outside both their asset primary silhouette and every rendered tier-0 face. That violates the binding interior-only detail rule. The previous review's four source failures are corrected; this is a new, narrower residual failure. No external handoff envelope or I0 integration is authorized.",
+  "historical_review_chronology": {
+    "prior_review_path": "docs/career-world-production/reports/review-tech-world-composition-g6.json",
+    "prior_reviewed_at": "2026-07-17T10:08:07.3183074-05:00",
+    "prior_terminal_verdict": "FAIL",
+    "prior_source_failure_ids": [
+      "G6-REV-001 primary-path/tier-0 containment",
+      "G6-REV-002 Manifest v3/Java/Informatica required topology",
+      "G6-REV-003 centered projected footprint containment",
+      "G6-REV-004 unsupported author-report readiness claim"
+    ],
+    "status_of_prior_source_failures": "CORRECTED_IN_CURRENT_SOURCE",
+    "current_residual_failure": "G6-REREVIEW-001 strict interior-only detail containment",
+    "chronology_note": "This report replaces the prior report at the same path while retaining its historical FAIL result and source-failure chronology; it does not reinterpret the prior source state."
+  },
+  "review_scope": {
+    "reviewed_source": "features/career-world/definitions/skills-c.ts",
+    "reviewed_author_report": "docs/career-world-production/reports/tech-world-composition-g6.json",
+    "review_output": "docs/career-world-production/reports/review-tech-world-composition-g6.json",
+    "source_edits": false,
+    "allowed_write": "review output only"
+  },
+  "authority": {
+    "composition_contract": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af",
+      "binding_rules": [
+        "primaryPath is the permanent normalized outer silhouette (line 206)",
+        "footprint is the conservative centered projected ground envelope and collision authority (line 204)",
+        "tier 0 owns exterior masses/connections; tiers 1 and 2 are interior-only (lines 220-226)",
+        "stored hashes are SHA-256 of exact UTF-8 canonical values (lines 228-234)"
+      ]
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14"
+    },
+    "promoted_art": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "canonical_56_file_digest": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708"
+    },
+    "f0_contracts_reviewed": [
+      "features/career-world/geometry/types.ts",
+      "features/career-world/geometry/projection.ts",
+      "features/career-world/geometry/primitives.ts",
+      "features/career-world/geometry/canonical-payload.ts",
+      "features/career-world/rendering/geometry-renderer.tsx",
+      "tests/career-world.test.mjs"
+    ]
+  },
+  "exact_input_receipts": {
+    "corrected_source": {
+      "path": "features/career-world/definitions/skills-c.ts",
+      "bytes": 23803,
+      "sha256": "21ea629c680690ff48667c71b82898f77b78b3e9ff2599a2ff2d4787edc87da5",
+      "expected_receipt_match": true
+    },
+    "author_report": {
+      "path": "docs/career-world-production/reports/tech-world-composition-g6.json",
+      "bytes": 12896,
+      "sha256": "b99f42822874cc7ef3c463caacd793ad60270ac58d710ab339d247fccb2904cc",
+      "expected_receipt_match": true
+    },
+    "review_report_self_receipt": "Intentionally excluded: this output cannot truthfully contain its own final byte count or SHA-256. Only a subsequent external envelope may record it."
+  },
+  "findings": [
+    {
+      "id": "G6-REREVIEW-001",
+      "severity": "BLOCKER",
+      "classification": "contract regression in corrected source",
+      "title": "Three higher-tier detail endpoints render outside their tier-0 identity",
+      "claim": "The corrected definitions retain tier-1/2 strokes outside both the declared primary silhouette and all rendered tier-0 faces. This is a direct violation of the required interior-only detail boundary, not a raster-parity preference.",
+      "contract_evidence": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "lines": "220-226",
+          "detail": "Tier 0 owns the complete exterior/primary outline; tiers 1 and 2 are interior-only and may not alter that identity."
+        },
+        {
+          "path": "features/career-world/rendering/geometry-renderer.tsx",
+          "lines": "20-85, 105-117",
+          "detail": "All declared strokes render at their own detail tier and primaryPath is independently rendered as the permanent tier-0 outline."
+        }
+      ],
+      "repository_evidence": [
+        {
+          "path": "features/career-world/definitions/skills-c.ts",
+          "lines": "711-713",
+          "detail": "Informatica tier-1 corridor-center-seams contains endpoints [-24, 12], [-8, 6], and [27, -3]. The first and last are outside primaryPath; all three are outside every tier-0 face in the renderer projection."
+        },
+        {
+          "path": "features/career-world/definitions/skills-c.ts",
+          "lines": "782-789",
+          "detail": "Atlassian tier-1 terrace-step-lines contains [-7, -16] and tier-2 forecourt-facade-rhythm contains [14, 3]; each is outside every tier-0 face, and [14, 3] is also outside primaryPath."
+        }
+      ],
+      "independent_measurement": {
+        "method": "Vite SSR-loaded current definitions; parse deterministic M/L SVG coordinates; test point-on-boundary or point-in-polygon against each closed primary component; then test against every exact tier-0 surface and projectExtrusion top/side face emitted by GeometryRenderer.",
+        "primary_silhouette_failures": [
+          {
+            "asset_id": "skill/informatica@v1",
+            "primitive_id": "corridor-center-seams",
+            "points": [[-24, 12], [27, -3]]
+          },
+          {
+            "asset_id": "skill/atlassian@v1",
+            "primitive_id": "forecourt-facade-rhythm",
+            "points": [[14, 3]]
+          }
+        ],
+        "tier_0_face_failures": [
+          {
+            "asset_id": "skill/informatica@v1",
+            "primitive_id": "corridor-center-seams",
+            "points": [[-24, 12], [-8, 6], [27, -3]]
+          },
+          {
+            "asset_id": "skill/atlassian@v1",
+            "primitive_id": "terrace-step-lines",
+            "points": [[-7, -16]]
+          },
+          {
+            "asset_id": "skill/atlassian@v1",
+            "primitive_id": "forecourt-facade-rhythm",
+            "points": [[14, 3]]
+          }
+        ]
+      },
+      "implication": "At LOD 1/2 the renderer can introduce floating or exterior linework that changes the visible identity without a tier-0 counterpart. The source does not meet the controlled detail-tier contract, so its hashes cannot be accepted as the G6 identity receipt.",
+      "smallest_credible_correction": "Move or shorten only the listed stroke segments so every point lies on/inside an existing tier-0 face and within primaryPath; do not expand the silhouette merely to accommodate detail. Recompute the affected Informatica and Atlassian masterGeometryHash values, rerun the containment diagnostic, and issue a revised author report."
+    }
+  ],
+  "severity_counts": {
+    "BLOCKER": 1,
+    "MATERIAL": 0,
+    "IMPROVEMENT": 0,
+    "NIT": 0
+  },
+  "corrected_contract_evidence": {
+    "definitions_and_hashes": {
+      "result": "PASS",
+      "evidence": "9 of 9 definitions load; validateGeometryDefinition reports zero errors; SHA-256 over each exact UTF-8 primaryPath and serializeCanonicalGeometryPayload(definition) matches all 18 stored literals."
+    },
+    "primary_paths": {
+      "result": "PASS",
+      "evidence": "All 10 primary components are closed and simple (one each except MacStadium's intentional two-component detached-bridge identity). All 664 measured tier-0 rendered vertices are on/inside their asset primary components; zero escape."
+    },
+    "centered_projected_ground_footprints": {
+      "result": "PASS",
+      "method": "For every tier-0 extrusion plan vertex projected at z=0 and tier-0 surface coordinate, calculate 2 * max(abs(screenX)) and 2 * max(abs(screenY)); compare with the declared centered footprint.",
+      "receipts": [
+        { "asset_id": "skill/manifest-v3@v1", "ground_envelope": [90, 54], "footprint": [94, 60] },
+        { "asset_id": "skill/java@v1", "ground_envelope": [86.6026, 50], "footprint": [92, 54] },
+        { "asset_id": "skill/ai@v1", "ground_envelope": [83.1384, 50], "footprint": [88, 54] },
+        { "asset_id": "skill/vmware@v1", "ground_envelope": [74.4782, 43], "footprint": [80, 48] },
+        { "asset_id": "skill/macstadium@v1", "ground_envelope": [89.2006, 51], "footprint": [94, 58] },
+        { "asset_id": "skill/electron@v1", "ground_envelope": [72.7462, 54], "footprint": [78, 60] },
+        { "asset_id": "skill/informatica@v1", "ground_envelope": [107.3872, 61.5], "footprint": [114, 68] },
+        { "asset_id": "skill/atlassian@v1", "ground_envelope": [100.459, 58], "footprint": [106, 64] },
+        { "asset_id": "skill/ci-cd@v1", "ground_envelope": [86.6026, 50], "footprint": [92, 54] }
+      ]
+    },
+    "required_topology": {
+      "result": "PASS",
+      "evidence": [
+        "Manifest v3 has one tier-0 verification-ramp, exactly three tier-0 support extrusions, one terminal footing, and one tier-0 ramp-ground-stairs connection (skills-c.ts:244-267).",
+        "Java has exactly thirteen named tier-0 exterior colonnade posts plus perimeter rhythm; it remains definition-only and unplaced (skills-c.ts:321-349; tests/career-world.test.mjs:159-164).",
+        "Informatica has exactly three named intake halls, three corridors, one exit-corridor, and one single-exit-dock. The corridor right plan edge and dock left plan edge both equal x=30, so the required dock connection has zero gap (skills-c.ts:702-709)."
+      ]
+    },
+    "palette_reuse_and_runtime_boundary": {
+      "result": "PASS",
+      "evidence": "The nine definitions contain palette-slot names rather than color literals, instance ownership, positions, employer palettes, factual claims, PNG imports, data URIs, or design/docs runtime imports. The source stays definition-only; Java retains no instance or project link."
+    },
+    "promoted_art_and_trace_receipts": {
+      "result": "PASS",
+      "evidence": "All nine canonical PNG byte counts and SHA-256 values independently match art-promoted-56.json and the selected trace-panel source hashes. Selected panels were visually inspected against the deliberately simple tier-0 abstractions; no manifest-versus-panel primary mass/count/connectivity conflict remains. This is agreement of identity/topology, not pixel-equality."
+    },
+    "aggregate_counts": {
+      "result": "PASS",
+      "definitions": 9,
+      "primitives": 99,
+      "primitive_types": { "surface": 10, "extrusion": 64, "stroke": 25 },
+      "detail_tiers": { "tier_0": 81, "tier_1": 9, "tier_2": 9 },
+      "higher_tier_non_stroke_primitives": 0,
+      "unique_geometry_keys": 9,
+      "unique_primary_path_hashes": 9,
+      "unique_master_geometry_hashes": 9
+    }
+  },
+  "visual_review_by_asset": [
+    { "asset_id": "skill/manifest-v3@v1", "result": "PASS", "evidence": "Simple tier-0 stack retains broad sorting hall, stepped tower/cap, supported exterior ramp, terminal, and stairs from the promoted complete panel." },
+    { "asset_id": "skill/java@v1", "result": "PASS", "evidence": "Long hall, central tower, low wings, and repeated perimeter colonnade remain legible; canonical definition remains unplaced." },
+    { "asset_id": "skill/ai@v1", "result": "PASS", "evidence": "Faceted drum, unequal cradles, transverse gallery, annex, and asymmetric pad remain a neutral instrument rather than an agent/brand claim." },
+    { "asset_id": "skill/vmware@v1", "result": "PASS", "evidence": "Heavy base, two offset machine floors, exposed side core, and recessed court survive as tier-0 primary masses." },
+    { "asset_id": "skill/macstadium@v1", "result": "PASS", "evidence": "Elongated hall/plinth, raised tower, supported detached parallel bridge, and service-bay rhythm remain present; two simple primary components are intentional." },
+    { "asset_id": "skill/electron@v1", "result": "PASS", "evidence": "Low slab, enclosing frame, inner workspace volume, and air-gap identity are retained without an Electron/desktop mark." },
+    { "asset_id": "skill/informatica@v1", "result": "FAIL_AT_DETAIL_TIER", "evidence": "The three-intake chamber/corridor/connected-dock topology is correct, but corridor centerline endpoints escape tier-0 faces." },
+    { "asset_id": "skill/atlassian@v1", "result": "FAIL_AT_DETAIL_TIER", "evidence": "Continuous chevron, forecourt, stepped terraces, and rear strip are retained, but one terrace and one façade detail endpoint escape tier-0 faces." },
+    { "asset_id": "skill/ci-cd@v1", "result": "PASS", "evidence": "Elongated hall, continuous track, supports, and two unequal release bays are retained without pipeline/status semantics." }
+  ],
+  "checks_run": [
+    { "check": "Expected source and author-report receipt recomputation", "status": "PASS", "result": "Both requested bytes/SHA-256 receipts match exactly." },
+    { "check": "Vite SSR import plus F0 validateGeometryDefinition", "status": "PASS", "result": "9 loaded definitions; zero validator errors." },
+    { "check": "Node crypto exact UTF-8 geometry hash recomputation", "status": "PASS", "result": "18 of 18 literal primary/master hashes match." },
+    { "check": "Closed/simple primary-component and exact renderer tier-0 containment diagnostic", "status": "PASS", "result": "10 of 10 components simple; 664 of 664 tier-0 measured vertices contained." },
+    { "check": "Centered projected ground-envelope diagnostic", "status": "PASS", "result": "9 of 9 declared footprints contain the recomputed conservative centered ground envelope." },
+    { "check": "Strict higher-tier containment diagnostic", "status": "FAIL", "result": "3 endpoints outside primary silhouettes and 5 endpoints outside every tier-0 face; see G6-REREVIEW-001." },
+    { "check": "Manifest v3/Java/Informatica exact topology review", "status": "PASS", "result": "3/1/1 Manifest supports/terminal/stair, 13 Java posts, and 3 connected Informatica intakes plus zero-gap dock confirmed." },
+    { "check": "Promoted PNG bytes/SHA and selected-panel visual comparison", "status": "PASS", "result": "9 of 9 exact PNG receipts match; primary identities reviewed as simple code-native abstractions." },
+    { "check": "npm.cmd test -- --test-name-pattern=freezes projection|definition", "status": "PASS", "result": "Build completed and 15 tests passed; this command did not contain the new G6 semantic fixture, so it does not clear G6-REREVIEW-001." }
+  ],
+  "i0_semantic_tests_required": [
+    { "priority": "BLOCKING", "obligation": "For all 56 definitions, parse primaryPath into closed simple components and assert every exact tier-0 renderer vertex is on/inside a primary component." },
+    { "priority": "BLOCKING", "obligation": "For all 56 definitions, project every tier-0 ground plan/surface under the frozen projection and assert the origin-centered envelope is within footprint width/depth." },
+    { "priority": "BLOCKING", "obligation": "For all tier-1/2 primitives, assert every rendered coordinate lies on/inside primaryPath and an existing tier-0 face; this fixture must fail the current Informatica and Atlassian endpoints until corrected." },
+    { "priority": "BLOCKING", "obligation": "Add exact fragile-topology fixtures: Manifest supported ramp/three supports/terminal/stairs/tier contacts; Java 13 exterior posts; Informatica three connected intakes and one zero-gap dock; MacStadium intentional detached bridge with supports; CI/CD continuous track and unequal bays." },
+    { "priority": "REQUIRED", "obligation": "Recompute every literal primary/master hash and assert the exact 56-ID closure plus trace-panel hash closure." },
+    { "priority": "REQUIRED", "obligation": "Assert 27 canonical skill definitions and 37 instances reuse identity with palette/position only; reject employer wrappers, alternate geometry, baked color, or position fields." },
+    { "priority": "REQUIRED", "obligation": "Assert Java has one definition/trace record but zero instance, ownership, position, palette-family assignment, or project link." },
+    { "priority": "REQUIRED", "obligation": "Audit runtime imports for docs/design/PNG/fetch/base64 and factual-evidence coupling, then defer browser/network evidence to the immutable-preview gate." }
+  ],
+  "limitations": [
+    "No source was edited and no external handoff, I0 aggregation, P0 placement, browser-preview, network, or accessibility acceptance was attempted.",
+    "Selected PNGs are identity/projection/topology references, not runtime masks or pixel-equality targets; visual review can establish only the contract-level agreement stated here.",
+    "The F0 validator checks schema/local primitive validity but does not establish semantic silhouette, strict detail containment, selected-panel topology, or centered-footprint correctness. Those were independently tested here.",
+    "The footprint test intentionally measures the contract's ground envelope, not elevated z-height as an additional collision dimension; P0 still owns actual inter-instance collision and route clearance review."
+  ],
+  "residual_risk_and_next_gate": [
+    "Do not create an external G6 acceptance envelope while G6-REREVIEW-001 remains open.",
+    "After the surgical stroke correction, recompute the two affected master hashes, independently rerun this review, and preserve this report as the rejected corrected-state chronology.",
+    "Only then may I0 aggregate all eight definition lanes and establish cross-library closure; P0 remains blocked until that accepted I0 predecessor exists."
+  ],
+  "files_written": [
+    "docs/career-world-production/reports/review-tech-world-composition-g6.json"
+  ],
+  "git_operations": {
+    "performed": false,
+    "note": "No staging, commit, reset, checkout, or other repository-state operation was performed. Existing unrelated working-tree changes were not touched."
+  }
+}

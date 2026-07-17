@@ -17,10 +17,7 @@ import {
 import { resolveEvidenceQuery } from "../model/evidence-query";
 import {
   PROJECT_ENTRY_DURATION_MS,
-  PROJECT_EXIT_DURATION_MS,
-  snapshotProjectViewport,
   type ProjectEntrySource,
-  type ProjectReturnRequest,
   type ProjectTransitionRequest,
 } from "../model/project-transition";
 import {
@@ -38,7 +35,6 @@ import {
   MIN_GRAPH_SCALE,
   screenPointToGraph,
   zoomGraphViewportAt,
-  type GraphViewport,
 } from "../rendering/graph-viewport";
 import {
   drawParticleFieldBase,
@@ -69,19 +65,13 @@ type EvidenceGraphProps = {
   activeProjectId: string | null;
   inspectorOpen: boolean;
   projectTransition: ProjectTransitionRequest | null;
-  projectReturn: ProjectReturnRequest | null;
-  projectStageActive: boolean;
-  motionSuspended: boolean;
   onToggle: (id: string) => void;
-  onPreloadProject: (projectId: string) => void;
   onOpenProject: (
     projectId: string,
     source: ProjectEntrySource,
-    returnViewport: GraphViewport,
   ) => void;
   onProjectTransitionComplete: (request: ProjectTransitionRequest) => void;
   onProjectTransitionCancel: (requestId: number) => void;
-  onProjectReturnComplete: (request: ProjectReturnRequest) => void;
 };
 
 export function EvidenceGraph({
@@ -89,15 +79,10 @@ export function EvidenceGraph({
   activeProjectId,
   inspectorOpen,
   projectTransition,
-  projectReturn,
-  projectStageActive,
-  motionSuspended,
   onToggle,
-  onPreloadProject,
   onOpenProject,
   onProjectTransitionComplete,
   onProjectTransitionCancel,
-  onProjectReturnComplete,
 }: EvidenceGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const baseCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -117,7 +102,6 @@ export function EvidenceGraph({
   } | null>(null);
   const projectAnimationRef = useRef<number | null>(null);
   const projectRequestRef = useRef<number | null>(null);
-  const projectReturnRequestRef = useRef<number | null>(null);
   const projectEntryLockRef = useRef<string | null>(null);
   const viewportRef = useRef(DEFAULT_GRAPH_VIEWPORT);
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
@@ -175,12 +159,12 @@ export function EvidenceGraph({
   );
 
   useEffect(() => {
-    if (!projectTransition && !activeProjectId && !projectStageActive) return;
+    if (!projectTransition && !activeProjectId) return;
     if (projectHoverWakeTimerRef.current !== null) {
       window.clearTimeout(projectHoverWakeTimerRef.current);
       projectHoverWakeTimerRef.current = null;
     }
-  }, [activeProjectId, projectStageActive, projectTransition]);
+  }, [activeProjectId, projectTransition]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -216,7 +200,6 @@ export function EvidenceGraph({
     "--project-warp-x": `${transitionScreenPoint.x}px`,
     "--project-warp-y": `${transitionScreenPoint.y}px`,
     "--project-entry-duration": `${PROJECT_ENTRY_DURATION_MS[projectTransition?.source ?? "activate"]}ms`,
-    "--project-exit-duration": `${PROJECT_EXIT_DURATION_MS}ms`,
   } as CSSProperties;
   useEffect(() => {
     if (!projectTransition && !activeProjectId) {
@@ -307,64 +290,13 @@ export function EvidenceGraph({
   ]);
 
   useEffect(() => {
-    if (!projectReturn || size.width <= 0 || size.height <= 0) return;
-
-    if (projectAnimationRef.current !== null) {
-      window.cancelAnimationFrame(projectAnimationRef.current);
-    }
-    projectReturnRequestRef.current = projectReturn.requestId;
-    const from = viewportRef.current;
-    const to = snapshotProjectViewport(projectReturn.viewport);
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    const finish = () => {
-      if (projectReturnRequestRef.current !== projectReturn.requestId) return;
-      projectAnimationRef.current = null;
-      projectReturnRequestRef.current = null;
-      viewportRef.current = to;
-      setViewport(to);
-      onProjectReturnComplete(projectReturn);
-    };
-
-    if (reducedMotion) {
-      finish();
-      return;
-    }
-
-    const startedAt = performance.now();
-    const animate = (now: number) => {
-      if (projectReturnRequestRef.current !== projectReturn.requestId) return;
-      const progress = Math.min(
-        1,
-        Math.max(0, (now - startedAt) / PROJECT_EXIT_DURATION_MS),
-      );
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const next = interpolateGraphViewport(from, to, eased);
-      viewportRef.current = next;
-      setViewport(next);
-      if (progress >= 1) finish();
-      else projectAnimationRef.current = window.requestAnimationFrame(animate);
-    };
-    projectAnimationRef.current = window.requestAnimationFrame(animate);
-
-    return () => {
-      if (projectAnimationRef.current !== null) {
-        window.cancelAnimationFrame(projectAnimationRef.current);
-        projectAnimationRef.current = null;
-      }
-    };
-  }, [onProjectReturnComplete, projectReturn, size.height, size.width]);
-
-  useEffect(() => {
-    if (!projectTransition || projectStageActive) return;
+    if (!projectTransition) return;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") cancelProjectTransition();
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [cancelProjectTransition, projectStageActive, projectTransition]);
+  }, [cancelProjectTransition, projectTransition]);
 
   useEffect(() => {
     const canvas = baseCanvasRef.current;
@@ -428,11 +360,6 @@ export function EvidenceGraph({
     }
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
-    if (motionSuspended) {
-      context.clearRect(0, 0, size.width, size.height);
-      return;
-    }
-
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -485,7 +412,6 @@ export function EvidenceGraph({
   }, [
     effectiveProjectId,
     isPanning,
-    motionSuspended,
     positions,
     projectPositions,
     particleResolution,
@@ -572,7 +498,7 @@ export function EvidenceGraph({
       ) {
         projectEntryLockRef.current = projectId;
         setHoveredProjectId(projectId);
-        onOpenProject(projectId, "zoom", next);
+        onOpenProject(projectId, "zoom");
       }
     };
     container.addEventListener("wheel", handleWheel, { passive: false });
@@ -672,8 +598,7 @@ export function EvidenceGraph({
       if (
         !projectId ||
         projectTransition ||
-        activeProjectId ||
-        projectStageActive
+        activeProjectId
       ) {
         return;
       }
@@ -689,7 +614,6 @@ export function EvidenceGraph({
     [
       activeProjectId,
       clearProjectHoverWakeTimer,
-      projectStageActive,
       projectTransition,
       triggerProjectWake,
     ],
@@ -701,14 +625,14 @@ export function EvidenceGraph({
       projectEntryLockRef.current = projectId;
       setHoveredProjectId(projectId);
       clearProjectHoverWakeTimer();
-      onOpenProject(projectId, "activate", viewportRef.current);
+      onOpenProject(projectId, "activate");
     },
     [clearProjectHoverWakeTimer, onOpenProject, projectTransition],
   );
 
   return (
     <div
-      className={`graph-surface ${isPanning ? "is-panning" : ""} ${projectTransition ? "is-project-transitioning" : ""} ${projectReturn ? "is-project-returning" : ""}`}
+      className={`graph-surface ${isPanning ? "is-panning" : ""} ${projectTransition ? "is-project-transitioning" : ""}`}
       style={surfaceStyle}
       ref={containerRef}
       onPointerDown={handlePointerDown}
@@ -738,7 +662,6 @@ export function EvidenceGraph({
           viewport.scale >= 1.45 ? hoveredProjectId : null
         }
         onHoverProject={handleProjectHover}
-        onPreloadProject={onPreloadProject}
         onOpenProject={handleProjectActivate}
       />
       <div className="node-layer">

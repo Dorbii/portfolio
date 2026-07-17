@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536.000000" height="1024.000000" viewBox="0.000000 0.000000 1536.000000 1024.000000" shape-rendering="geometricPrecision">
+  <g id="background">
+    <rect x="0.000000" y="0.000000" width="1536.000000" height="1024.000000" fill="#080B10" />
+  </g>
+  <g id="grid">
+    <path d="M 768.000000 856.960000 L 144.461709 496.960000 M 809.569219 832.960000 L 186.030929 472.960000 M 851.138439 808.960000 L 227.600148 448.960000 M 892.707658 784.960000 L 269.169367 424.960000 M 934.276878 760.960000 L 310.738587 400.960000 M 975.846097 736.960000 L 352.307806 376.960000 M 1017.415316 712.960000 L 393.877026 352.960000 M 1058.984536 688.960000 L 435.446245 328.960000 M 1100.553755 664.960000 L 477.015464 304.960000 M 1142.122974 640.960000 L 518.584684 280.960000 M 1183.692194 616.960000 L 560.153903 256.960000 M 1225.261413 592.960000 L 601.723122 232.960000 M 1266.830633 568.960000 L 643.292342 208.960000 M 1308.399852 544.960000 L 684.861561 184.960000 M 1349.969071 520.960000 L 726.430781 160.960000 M 1391.538291 496.960000 L 768.000000 136.960000 M 1433.107510 472.960000 L 809.569219 112.960000 M 1474.676729 448.960000 L 851.138439 88.960000 M 1516.245949 424.960000 L 892.707658 64.960000 M 768.000000 856.960000 L 1516.245949 424.960000 M 726.430781 832.960000 L 1474.676729 400.960000 M 684.861561 808.960000 L 1433.107510 376.960000 M 643.292342 784.960000 L 1391.538291 352.960000 M 601.723122 760.960000 L 1349.969071 328.960000 M 560.153903 736.960000 L 1308.399852 304.960000 M 518.584684 712.960000 L 1266.830633 280.960000 M 477.015464 688.960000 L 1225.261413 256.960000 M 435.446245 664.960000 L 1183.692194 232.960000 M 393.877026 640.960000 L 1142.122974 208.960000 M 352.307806 616.960000 L 1100.553755 184.960000 M 310.738587 592.960000 L 1058.984536 160.960000 M 269.169367 568.960000 L 1017.415316 136.960000 M 227.600148 544.960000 L 975.846097 112.960000 M 186.030929 520.960000 L 934.276878 88.960000 M 144.461709 496.960000 L 892.707658 64.960000" fill="none" stroke="#1B2B3D" stroke-width="1.000000" stroke-opacity="0.280000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="axis_witnesses">
+    <path d="M 792.941532 774.400000 L 1395.695213 426.400000 M 743.058468 774.400000 L 265.012445 498.400000" fill="none" stroke="#B49AD0" stroke-width="1.500000" stroke-opacity="0.400000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="plinth_top_fill">
+    <polygon points="768.000000,743.200000 1349.969071,407.200000 1183.692194,311.200000 809.569219,527.200000 518.584684,359.200000 310.738587,479.200000" fill="#30263C" />
+  </g>
+  <g id="plinth_top_boundary_physical_edges">
+    <polyline points="518.584684,359.200000 310.738587,479.200000 768.000000,743.200000 1349.969071,407.200000 1183.692194,311.200000" fill="none" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="plinth_visible_sides">
+    <polygon points="768.000000,760.000000 1349.969071,424.000000 1349.969071,407.200000 768.000000,743.200000" fill="#282033" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="310.738587,496.000000 768.000000,760.000000 768.000000,743.200000 310.738587,479.200000" fill="#1D1728" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="x_hall_visible_faces">
+    <polygon points="768.000000,656.800000 1320.870618,337.600000 1183.692194,258.400000 630.821576,577.600000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="768.000000,726.400000 768.000000,656.800000 630.821576,577.600000 630.821576,647.200000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="768.000000,726.400000 1320.870618,407.200000 1320.870618,337.600000 768.000000,656.800000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="y_hall_visible_faces">
+    <polygon points="630.821576,577.600000 809.569219,474.400000 518.584684,306.400000 339.837040,409.600000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="630.821576,647.200000 630.821576,577.600000 339.837040,409.600000 339.837040,479.200000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="630.821576,647.200000 809.569219,544.000000 809.569219,474.400000 630.821576,577.600000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="x_roof_bay_0">
+    <polygon points="768.000000,649.600000 824.118446,559.600000 720.195398,499.600000 664.076952,589.600000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="824.118446,559.600000 842.824595,606.400000 738.901546,546.400000 720.195398,499.600000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="768.000000,649.600000 824.118446,559.600000 842.824595,606.400000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="x_roof_bay_1">
+    <polygon points="842.824595,606.400000 898.943041,516.400000 795.019993,456.400000 738.901546,546.400000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="898.943041,516.400000 917.649190,563.200000 813.726141,503.200000 795.019993,456.400000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="842.824595,606.400000 898.943041,516.400000 917.649190,563.200000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="x_roof_bay_2">
+    <polygon points="917.649190,563.200000 973.767636,473.200000 869.844587,413.200000 813.726141,503.200000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="973.767636,473.200000 992.473785,520.000000 888.550736,460.000000 869.844587,413.200000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="917.649190,563.200000 973.767636,473.200000 992.473785,520.000000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="x_roof_bay_3">
+    <polygon points="992.473785,520.000000 1048.592231,430.000000 944.669182,370.000000 888.550736,460.000000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1048.592231,430.000000 1067.298380,476.800000 963.375331,416.800000 944.669182,370.000000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="992.473785,520.000000 1048.592231,430.000000 1067.298380,476.800000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="y_roof_bay_0">
+    <polygon points="610.036966,558.400000 547.683137,464.800000 713.960015,368.800000 776.313844,462.400000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="547.683137,464.800000 526.898528,510.400000 693.175405,414.400000 713.960015,368.800000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="610.036966,558.400000 547.683137,464.800000 526.898528,510.400000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="y_roof_bay_1">
+    <polygon points="526.898528,510.400000 464.544699,416.800000 630.821576,320.800000 693.175405,414.400000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="464.544699,416.800000 443.760089,462.400000 610.036966,366.400000 630.821576,320.800000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="526.898528,510.400000 464.544699,416.800000 443.760089,462.400000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="y_roof_bay_2">
+    <polygon points="443.760089,462.400000 381.406260,368.800000 547.683137,272.800000 610.036966,366.400000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="381.406260,368.800000 360.621650,414.400000 526.898528,318.400000 547.683137,272.800000" fill="#2B2237" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="443.760089,462.400000 381.406260,368.800000 360.621650,414.400000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="bridge_visible_faces">
+    <polygon points="1298.347999,210.603232 1057.246527,138.603232 1035.781013,150.196768 1276.882486,222.196768" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1276.882486,238.996768 1276.882486,222.196768 1035.781013,150.196768 1035.781013,166.996768" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1298.347999,227.403232 1298.347999,210.603232 1276.882486,222.196768 1276.882486,238.996768" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="tower_visible_faces">
+    <polygon points="1268.909094,185.200000 1335.419845,146.800000 1306.321391,130.000000 1239.810640,168.400000" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1268.909094,434.800000 1268.909094,185.200000 1239.810640,168.400000 1239.810640,418.000000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1268.909094,434.800000 1335.419845,396.400000 1335.419845,146.800000 1268.909094,185.200000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="cylinder_visible_side_faces">
+    <polygon points="987.725998,277.600000 989.729177,286.384600 989.729177,161.584600 987.725998,152.800000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="989.729177,286.384600 995.602076,294.570568 995.602076,169.770568 989.729177,161.584600" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="995.602076,294.570568 1004.944550,301.600000 1004.944550,176.800000 995.602076,169.770568" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1004.944550,301.600000 1017.119884,306.993880 1017.119884,182.193880 1004.944550,176.800000" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1017.119884,306.993880 1031.298396,310.384600 1031.298396,185.584600 1017.119884,182.193880" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1031.298396,310.384600 1046.513770,311.541136 1046.513770,186.741136 1031.298396,185.584600" fill="#30263C" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1046.513770,311.541136 1061.729143,310.384600 1061.729143,185.584600 1046.513770,186.741136" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1061.729143,310.384600 1075.907656,306.993880 1075.907656,182.193880 1061.729143,185.584600" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1075.907656,306.993880 1088.082989,301.600000 1088.082989,176.800000 1075.907656,182.193880" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1088.082989,301.600000 1097.425463,294.570568 1097.425463,169.770568 1088.082989,176.800000" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1097.425463,294.570568 1103.298363,286.384600 1103.298363,161.584600 1097.425463,169.770568" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+    <polygon points="1103.298363,286.384600 1105.301542,277.600000 1105.301542,152.800000 1103.298363,161.584600" fill="#241C30" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="cylinder_top_face">
+    <polygon points="1088.082989,128.800000 1075.907656,123.406120 1061.729143,120.015400 1046.513770,118.858864 1031.298396,120.015400 1017.119884,123.406120 1004.944550,128.800000 995.602076,135.829432 989.729177,144.015400 987.725998,152.800000 989.729177,161.584600 995.602076,169.770568 1004.944550,176.800000 1017.119884,182.193880 1031.298396,185.584600 1046.513770,186.741136 1061.729143,185.584600 1075.907656,182.193880 1088.082989,176.800000 1097.425463,169.770568 1103.298363,161.584600 1105.301542,152.800000 1103.298363,144.015400 1097.425463,135.829432" fill="#3A2E49" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="plinth_protected_return_trace">
+    <polyline points="1183.692194,311.200000 809.569219,527.200000 518.584684,359.200000" fill="none" stroke="#B49AD0" stroke-width="2.000000" stroke-opacity="0.950000" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="4.000000" />
+  </g>
+  <g id="primary_outlines">
+  </g>
+</svg>

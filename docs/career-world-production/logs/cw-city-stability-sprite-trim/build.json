@@ -1,0 +1,11 @@
+{
+  "run_id": "cw-city-stability-2026-07-17",
+  "command": "& scripts\\build-career-world-runtime-art.ps1 -Node 'C:\\Users\\Steve\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe'",
+  "exit_code": 0,
+  "wall_time_seconds": 33.6,
+  "transparent_assets_rebuilt": 55,
+  "fresh_node_processes": 55,
+  "opaque_world_assets_rebuilt": 0,
+  "ffmpeg_invocations": 0,
+  "result": "PASS"
+}

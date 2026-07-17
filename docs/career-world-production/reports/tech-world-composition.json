@@ -1,0 +1,597 @@
+{
+  "schema_version": 1,
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005B",
+  "lane_id": "tech-world-composition",
+  "role": "tech lead composition and extraction planner",
+  "thread_id": "/root/tech_lead",
+  "parent_thread_id": "/root",
+  "status": "planned_contract_corrected_dispatch_still_blocked",
+  "summary": "Prepared the CW-005B implementation contract for a code-native SVG Career World. The design records one promoted trace panel and one exact master geometry per each of 56 assets, limits rendering to three reusable SVG primitive types, reuses 27 skill definitions across 37 employer instances, incorporates D-011 and promoted CW-005C's five-capital registry model, defers final capital/project/skill coordinates until footprint collision review, preserves the accepted anchors and NinjaOne tuples, and splits work into disjoint geometry batches followed by sequential aggregation, placement, corrected scene/camera/interaction integration, and independent CW-007 review. C0 preserves the immutable 36-file initial dispatch receipt as historical evidence, replaces impossible repeated whole-baseline equality with self-excluding controlled-source deltas plus external final-report handoff envelopes, requires an exact reconstructed parallel merge, and requires a new post-U0 aggregate, preview URL, artifact namespace, and receipt before browser proof.",
+  "authority_resolution": {
+    "highest_authority": "docs/career-world-production/architecture.md including D-010 and D-011",
+    "qa_contract": "docs/career-world-production/reports/qa-lead-contract.json",
+    "manifest": "docs/career-world-production/concept-briefs.json",
+    "manifest_sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+    "ruling": "The selected panel is a non-runtime art and identity reference. Code-native master geometry, primary path, footprint, orientation, projection, and exact hashes are runtime authority; lower LODs hide interior details only.",
+    "capital_ruling": "D-011 is accepted and CW-005C is promoted: employer anchors are non-visible district/camera coordinates; the registry has exactly five capital instances backed by employer city assets and zero city-kind instances. P0 still owns collision-reviewed final positions for all five capitals, and U0 removes direct anchor-derived city/capital rendering.",
+    "art_status_precondition": "All 56 assets must have a Director-promoted PASS or PASS_WITH_NOTES record before any code lane starts."
+  },
+  "dispatch_safety": {
+    "baseline_report": "docs/career-world-production/reports/tech-implementation-baseline.json",
+    "dispatch_authorized": false,
+    "art_promoted_by_this_packet": false,
+    "global_entry_gates": [
+      "F0 has a Director-accepted C0 bootstrap receipt: the corrected composition brief/report and new post-U0 contract match accepted bytes while the other 34 initial-baseline paths still match the immutable historical receipt",
+      "the manifest SHA-256 still matches this packet",
+      "the Director has promoted one PASS or PASS_WITH_NOTES selected-panel record for all 56 assets",
+      "a separate digest for the final Director-promoted 56-asset art-QA result is recorded and bound to the implementation run"
+    ],
+    "serial_test_ownership": {
+      "path": "tests/career-world.test.mjs",
+      "order": [
+        "F0",
+        "I0",
+        "P0",
+        "U0"
+      ],
+      "forbidden_editors": [
+        "M0",
+        "G0",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6"
+      ],
+      "handoff_rule": "the prior serial owner is idle, its final phase report plus external handoff envelope are accepted, and the envelope's controlled-source successor is the next owner's exact predecessor before the next owner edits the file"
+    }
+  },
+  "baseline_transition_contract": {
+    "initial_receipt": {
+      "path": "docs/career-world-production/reports/tech-implementation-baseline.json",
+      "status": "immutable_historical_initial_dispatch_evidence",
+      "report_bytes": 10162,
+      "report_sha256": "7FACF4FBCBD51BB4257C9B02E728320CEC675ADB2308225EA3A6CDE33B90E6F5",
+      "file_count": 36,
+      "aggregate_sha256": "a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97",
+      "not_valid_for": [
+        "permanent whole-tree byte equality after implementation starts",
+        "implemented-site preview identity",
+        "U0 browser acceptance",
+        "R0 evidence URL or namespace"
+      ]
+    },
+    "c0_bootstrap": {
+      "superseded_initial_entries": [
+        {
+          "path": "docs/career-world-production/briefs/tech-world-composition.md",
+          "historical_bytes": 56732,
+          "historical_sha256": "DCAB06C5F1F1485F26E2F8A137C4F67336472EA2E9BDABACC31FF5CCC8B416E4"
+        },
+        {
+          "path": "docs/career-world-production/reports/tech-world-composition.json",
+          "historical_bytes": 28518,
+          "historical_sha256": "8B637343A9FD13C02F0FE8875A8A1899B22AAF91923B20B53F399E8941447454"
+        }
+      ],
+      "added_contract": "docs/career-world-production/briefs/tech-post-u0-preview-baseline-contract.md",
+      "unchanged_initial_paths_required": 34,
+      "acceptance_receipt_rule": "The Director handoff envelope records exact byte counts and SHA-256 values for the corrected brief, this machine report, and the added contract; this report does not embed its own final hash because that would be self-referential.",
+      "rule": "F0 binds the Director-accepted C0 bytes for the two corrected packet files and added contract, and proves the other 34 initial-baseline paths still match the immutable historical receipt."
+    },
+    "lane_delta_rule": {
+      "predecessor": "one exact accepted external handoff envelope naming a controlled-source digest; live unaccepted bytes are never a predecessor",
+      "owned_paths": "only the phase's explicit owned implementation source, test, and artifact paths may be added, modified, or deleted; its administrative phase report path is lane-owned but excluded from the controlled-source delta",
+      "non_owned_paths": "all non-owned controlled implementation paths must equal the accepted predecessor byte-for-byte",
+      "protected_paths": "all protected paths must equal the accepted predecessor byte-for-byte",
+      "required_receipt_fields": [
+        "predecessor external-envelope ID and controlled-source digest",
+        "exact owned implementation path set plus separately identified administrative report path",
+        "owned implementation additions, modifications, and deletions with before and after byte counts and SHA-256 values",
+        "zero-diff result for all non-owned controlled implementation paths",
+        "zero-diff result for all protected paths",
+        "successor controlled-source digest excluding the phase report and handoff envelope",
+        "exact validation commands and results"
+      ],
+      "phase_report_rule": "The phase report never hashes itself. After report finalization, root or the Director issues an external handoff envelope shaped as envelope_id plus payload; envelope_id hashes canonical payload only and is appended afterward. The payload contains the final report receipt, controlled-source aggregate, exact owned after-path receipts, verification result, issuer, and status. The direct successor persists the envelope verbatim and verifies the payload-only envelope_id."
+    },
+    "serial_chain": [
+      "F0",
+      "I0",
+      "P0",
+      "U0"
+    ],
+    "parallel_fanout": {
+      "common_predecessor": "accepted F0 external handoff envelope",
+      "lanes": [
+        "M0",
+        "G0",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6"
+      ],
+      "shared_workspace_rule": "Each lane report and external envelope freeze exact after-bytes and SHA-256 values for only that lane's reserved implementation paths; concurrent peer-reserved outputs cannot enter another lane's attributed delta or predecessor.",
+      "merge_rule": "After all eight owners are idle and accepted, root reconstructs the composite as exact F0 bytes plus every lane envelope's exact accepted after-bytes/hashes, verifies every live union member against its owning envelope and every path outside the union against F0, and freezes that reconstructed digest as I0's sole predecessor."
+    },
+    "post_u0_preview": {
+      "status": "required_not_created",
+      "contract_path": "docs/career-world-production/briefs/tech-post-u0-preview-baseline-contract.md",
+      "receipt_path": "docs/career-world-production/reports/tech-post-u0-preview-baseline.json",
+      "owner": "root",
+      "thread_id": "/root",
+      "required_before": [
+        "U0 runtime browser validation",
+        "U0 acceptance",
+        "R0 browser proof"
+      ]
+    }
+  },
+  "recommended_architecture": {
+    "definition_count": 56,
+    "categories": {
+      "world": 1,
+      "city": 5,
+      "project": 16,
+      "skill": 27,
+      "ambient": 7
+    },
+    "skill_instance_count": 37,
+    "primitive_types": [
+      "surface",
+      "extrusion",
+      "stroke"
+    ],
+    "projection_id": "cw-iso-225-45-35.264-r0-v1",
+    "placement": "Explicit 1024 x 1024 employer-local positions on the 5-unit grid for all five capitals, 16 projects, and 37 skill instances; world positions derive through the employer anchor and fixed 0.26 scale.",
+    "zoom": "One bounded camera model and one CSS matrix on a stable inner SVG group; all five capital, 16 project, and 37 skill-instance groups stay mounted while only role visibility, interior detail, focus, and relationship emphasis change.",
+    "runtime_image_imports": 0,
+    "dependency_additions": 0,
+    "three_dimensional_work": false
+  },
+  "recommended_worker_partition": [
+    {
+      "phase": "F0",
+      "mode": "sequential",
+      "dependencies": [],
+      "assignment": "shared types, projection, primitives, canonical payload, palettes, pure SVG renderer, and foundation/renderer assertions",
+      "asset_count": 0,
+      "test_path": "tests/career-world.test.mjs",
+      "report_path": "docs/career-world-production/reports/tech-world-composition-f0.json"
+    },
+    {
+      "phase": "M0",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "exact selected-panel metadata transcription and provenance validation",
+      "asset_count": 56,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-m0.json"
+    },
+    {
+      "phase": "G0",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "world and five city definitions",
+      "asset_count": 6,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g0.json"
+    },
+    {
+      "phase": "G1",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "seven ambient definitions",
+      "asset_count": 7,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g1.json"
+    },
+    {
+      "phase": "G2",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "projects A",
+      "asset_count": 8,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g2.json"
+    },
+    {
+      "phase": "G3",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "projects B",
+      "asset_count": 8,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g3.json"
+    },
+    {
+      "phase": "G4",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "skills A",
+      "asset_count": 9,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g4.json"
+    },
+    {
+      "phase": "G5",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "skills B",
+      "asset_count": 9,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g5.json"
+    },
+    {
+      "phase": "G6",
+      "mode": "parallel_after_F0",
+      "dependencies": [
+        "F0"
+      ],
+      "assignment": "skills C",
+      "asset_count": 9,
+      "test_edits_allowed": false,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-g6.json"
+    },
+    {
+      "phase": "I0",
+      "mode": "sequential_after_all_metadata_and_geometry_lanes",
+      "dependencies": [
+        "M0",
+        "G0",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6"
+      ],
+      "assignment": "aggregate index, registry join, hash recomputation, exact inventory fixtures, runtime-isolation checks, and aggregate assertions",
+      "asset_count": 56,
+      "test_path": "tests/career-world.test.mjs",
+      "report_path": "docs/career-world-production/reports/tech-world-composition-i0.json"
+    },
+    {
+      "phase": "P0",
+      "mode": "sequential_after_I0_and_accepted_footprints",
+      "dependencies": [
+        "I0"
+      ],
+      "assignment": "freeze collision-reviewed final positions for exactly 58 interactive instances, derive world coordinates, validate versioned reserved zones, and produce the required capital collision artifact",
+      "interactive_instance_count": 58,
+      "capital_instance_count": 5,
+      "project_instance_count": 16,
+      "skill_instance_count": 37,
+      "test_path": "tests/career-world.test.mjs",
+      "report_path": "docs/career-world-production/reports/tech-world-composition-p0.json"
+    },
+    {
+      "phase": "U0",
+      "mode": "sequential_after_P0_and_promoted_art_QA",
+      "dependencies": [
+        "P0"
+      ],
+      "assignment": "remove direct anchor-derived city/capital rendering; render all 58 collision-reviewed instances through GeometryRenderer; integrate the shell, stable scene, bounded camera CSS matrix, map gestures, explicit map focus and summary-open state, world-aligned semantic controls, and the drawer's narrow focus-order/trap path while preserving factual drawer eligibility/content; require root to freeze a self-excluding post-U0 receipt that records the accepted P0 envelope plus U0's exact source/test delta before runtime browser validation, then finalize the U0 report and bind its final hash in an external handoff envelope",
+      "interactive_instance_count": 58,
+      "capital_instance_count": 5,
+      "project_instance_count": 16,
+      "skill_instance_count": 37,
+      "test_path": "tests/career-world.test.mjs",
+      "report_path": "docs/career-world-production/reports/tech-world-composition-u0.json"
+    },
+    {
+      "phase": "R0",
+      "mode": "independent_review",
+      "dependencies": [
+        "U0"
+      ],
+      "ticket_exit_gate_dependencies": [
+        "CW-005",
+        "CW-006"
+      ],
+      "receipt_dependencies": [
+        "docs/career-world-production/reports/tech-post-u0-preview-baseline.json"
+      ],
+      "assignment": "CW-007 deterministic, browser, visual, accessibility, network, and performance evidence against one root-owned immutable preview",
+      "definition_count": 56,
+      "interactive_instance_count": 58,
+      "report_path": "docs/career-world-production/reports/tech-world-composition-r0.json"
+    }
+  ],
+  "p0_placement_contract": {
+    "owner": "P0",
+    "source_path": "features/career-world/model/world-placement.ts",
+    "validation_path": "features/career-world/model/placement-validation.ts",
+    "constant": "PLACEMENT_RESERVED_ZONES",
+    "versioned": true,
+    "instance_counts": {
+      "total": 58,
+      "capital": 5,
+      "project": 16,
+      "skill": 37
+    },
+    "required_zone_kinds": [
+      "route_corridor",
+      "label_envelope",
+      "interaction_clearance"
+    ],
+    "required_fields": [
+      "id",
+      "kind",
+      "coordinateSpace",
+      "version",
+      "source",
+      "geometry"
+    ],
+    "interaction_clearance": "all 58 instance centers reserve at least the world- or employer-local equivalent of a 44 by 44 CSS-pixel target at every required viewport/zoom proof point and record the conversion basis",
+    "validator_test_path": "tests/career-world.test.mjs",
+    "validator_failures": [
+      "missing or duplicate zone",
+      "missing source attribution",
+      "unsupported coordinate space",
+      "non-finite geometry",
+      "incomplete route or label coverage",
+      "interaction clearance below the recorded 44 CSS-pixel equivalent",
+      "unapproved overlap"
+    ]
+  },
+  "browser_proof_contract": {
+    "status": "blocked_until_post_u0_receipt",
+    "owner": "root",
+    "thread_id": "/root",
+    "start_command": "npm.cmd run dev",
+    "contract_path": "docs/career-world-production/briefs/tech-post-u0-preview-baseline-contract.md",
+    "receipt_path": "docs/career-world-production/reports/tech-post-u0-preview-baseline.json",
+    "preview_url_source": "docs/career-world-production/reports/tech-post-u0-preview-baseline.json#/browser_proof/preview_url",
+    "control_surface": "in-app Browser control",
+    "artifact_namespace_source": "docs/career-world-production/reports/tech-post-u0-preview-baseline.json#/browser_proof/artifact_namespace",
+    "historical_preview_forbidden": "http://127.0.0.1:3000/?cw-preview=a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97",
+    "new_package_or_runner_dependency": false,
+    "shared_runner_configuration_edits": false,
+    "immutability_checks": [
+      "the U0 external envelope's final report and post-U0 receipt byte counts and SHA-256 values recompute",
+      "every source/configuration file listed by the post-U0 receipt plus its aggregate recomputes immediately before server start",
+      "the emitted listener is the exact localhost origin recorded by the post-U0 receipt",
+      "the preview URL and artifact namespace are derived exactly from the post-U0 aggregate",
+      "the same post-U0 aggregate recomputes after evidence capture",
+      "all browser artifacts stay below the post-U0 receipt namespace"
+    ]
+  },
+  "u0_interaction_contract": {
+    "verdict": "corrected_plan_only; current interaction implementation remains NO-GO",
+    "entry_gates": [
+      "P0 accepted with all five capital, 16 project, and 37 skill-instance positions frozen and collision-reviewed",
+      "complete 56-asset art QA promoted by the Director",
+      "final promoted-art digest recorded separately and the accepted P0 external handoff envelope recomputes exactly",
+      "root records U0's exact owned source/test delta and every non-owned/protected equality check in the self-excluding post-U0 receipt",
+      "root thread /root freezes the post-U0 aggregate receipt and owns npm.cmd run dev, its digest-derived immutable localhost preview URL, in-app Browser control, and its digest-derived artifact namespace without any package or shared-runner configuration edit"
+    ],
+    "owned_files": [
+      "features/career-world/components/career-world.tsx",
+      "features/career-world/components/project-drawer.tsx",
+      "features/career-world/components/world-scene.tsx",
+      "features/career-world/components/world-hit-targets.tsx",
+      "features/career-world/rendering/world-camera.ts",
+      "features/career-world/hooks/use-career-world-state.ts",
+      "features/career-world/hooks/use-world-map-interactions.ts",
+      "features/career-world/styles/career-world.css",
+      "tests/career-world.test.mjs"
+    ],
+    "project_drawer_scope": "focus order and Tab/Shift+Tab trap mechanics only; factual content, evidence rendering, copy, layout, disclosure, and close/dismissal semantics are protected",
+    "protected_dependencies": [
+      "features/career-world/model/world-registry.ts",
+      "features/career-world/model/evidence-adapter.ts",
+      "features/career-world/geometry/**",
+      "features/career-world/rendering/geometry-renderer.tsx",
+      "package.json",
+      "shared browser-runner configuration",
+      "queue, ledger, and R0 evidence artifacts"
+    ],
+    "behavioral_acceptance": [
+      "All five capital, 16 project, and 37 skill-instance SVG groups retain the same registry ID, React key, and connected DOM node across LOD, focus, and drawer states; only visibility and interior detail may change.",
+      "Employer anchors produce no visible city/capital geometry; exactly five collision-reviewed capital instances render, and GeometryRenderer is the only asset-geometry path.",
+      "One pure camera CSS matrix is applied to one stable inner SVG group; normal motion has nonzero computed duration, a sampled intermediate matrix distinct from both endpoints, the exact expected final matrix, and no group-node replacement; reduced motion yields that same final camera with computed duration exactly zero.",
+      "Pure world-camera helpers own world/screen conversion, pointer-anchored zoom, screen-delta pan, fixed-world bounds clamping, and matrix derivation without DOM or React state.",
+      "Registry-derived semantic HTML overlay buttons remain keyed/mounted and centered on the matching world-projected capital, project, or skill instance with a minimum 44 by 44 CSS-pixel target; focus rings do not clip and open-drawer actions remain reachable above safe-area insets.",
+      "Map and index actions use native buttons/select; pointer, touch, Enter, and Space converge on the same focus and camera result.",
+      "CareerWorldFocus includes exact skill-instance focus; skill activation highlights accepted relationships and never opens a factual drawer.",
+      "Ordinary wheel zoom is pointer-anchored; Ctrl/Meta wheel is not canceled and does not change the map camera; mouse, pen, and one-finger touch drag use pointer capture and an explicit activation threshold while browser pinch/page zoom remains available.",
+      "Project focus and summary-open state are separate; opening or closing a summary never changes map focus, URL, pan override, camera values, or scene/target identity.",
+      "Before-open, open-drawer, and after-close snapshots are exactly equal for camera, map focus, every asset transform, selected project-skill relationships, and scene-root DOM identity; masked visual comparison is zero outside the drawer.",
+      "Background inert is declarative; the narrowly owned project-drawer focus order and Tab/Shift+Tab trap, modal heading focus, Escape/Close, obscured-target exclusion, and restoration to the exact captured invoker all pass.",
+      "Focus, selected, current, and relationship states use a non-color cue visible in forced-colors mode.",
+      "No geometry/hash/coordinate/evidence/dependency/primitive, drawer fact, or drawer layout change is included."
+    ],
+    "deterministic_tests": [
+      "pure pan, pointer-anchored zoom, bounds, world/screen round-trip, and CSS-matrix helper invariants",
+      "exact five-capital, 16-project, 37-skill visual and semantic cardinality with stable registry IDs",
+      "world, employer, project, and skill-instance focus transitions plus before/open/after summary snapshots that preserve camera, map focus, every asset transform, and selected relationships byte-for-byte",
+      "source/SSR contracts for declarative inert, native controls, narrow project-drawer focus-order/trap ownership, one stable camera group, no anchor-derived city geometry, and GeometryRenderer-only asset rendering"
+    ],
+    "runtime_browser_tests": [
+      {
+        "scenario": "identity_continuity",
+        "proof": "Retain handles for all 58 data-instance-id groups through world/employer/project/skill focus, LOD boundary crossings, and drawer open/close; each handle stays connected and node-identical with unchanged registry/geometry IDs."
+      },
+      {
+        "scenario": "overlay_alignment_native_semantics",
+        "proof": "At 1440x900, 900x900, 390x844, 600/601, 940/941, landscape phone, and 200/400 percent browser zoom, compare every visible HTML target center to its projected SVG instance within the declared tolerance and assert native element type, state, target size, no clipped target or focus ring, no input-trapping overflow, and open-drawer action reachability above safe-area insets."
+      },
+      {
+        "scenario": "wheel_pointer_touch",
+        "proof": "Exercise anchored ordinary wheel; uncanceled and camera-neutral Ctrl/Meta wheel; mouse/pen/touch pointer capture; below-threshold tap; above-threshold non-activating drag; bounded edge pan; cancel/lost-capture cleanup; browser pinch/page zoom; and document scroll outside the map."
+      },
+      {
+        "scenario": "normal_camera_motion",
+        "proof": "With normal motion enabled, assert nonzero computed transition duration, sample an intermediate CSS matrix distinct from the start and expected endpoint, assert the exact pure-helper final matrix, and retain the same camera-group and all 58 instance nodes throughout."
+      },
+      {
+        "scenario": "focus_drawer_separation",
+        "proof": "Focus a project without opening its summary, pan/zoom, open from a known invoker, and compare before/open/after camera, map focus, every asset transform, selected relationships, and scene-root node identity exactly; assert zero visual difference outside the drawer mask, declarative inert, heading focus, contained Tab order, Escape/Close, and return to the exact invoker; repeat skill focus and prove no drawer."
+      },
+      {
+        "scenario": "reduced_motion_forced_colors",
+        "proof": "Emulate reduced motion before load and toggle during a camera transition, asserting zero computed duration and identical final state; emulate forced colors and assert visible non-fill-only focus/selection/current cues."
+      }
+    ],
+    "qa_matrix_ids": [
+      "CW7-ZOOM-001",
+      "CW7-OVERLAY-001",
+      "CW7-INT-001",
+      "CW7-INT-002",
+      "CW7-FOCUS-001",
+      "CW7-MOTION-001",
+      "CW7-RESP-001",
+      "CW7-A11Y-002",
+      "CW7-A11Y-003"
+    ],
+    "evidence_boundary": "After root freezes the self-excluding post-U0 aggregate and receipt, U0 records gate summaries and the receipt reference, then finalizes its report for an external report-hash handoff envelope. R0 independently reruns the scenarios against that same immutable digest-bound preview and owns canonical CW-007 browser and accessibility artifacts; source regex or SSR output is not runtime proof."
+  },
+  "accepted_decisions": [
+    {
+      "id": "D-011",
+      "status": "accepted_and_promoted_by_CW-005C",
+      "evidence": "CW-005C normalized the registry to exactly five capital instances backed by employer city assets, zero city-kind instances, preserved instance/ninjaone/capital/01 at local (420, 500) and world (316.08, 366.88), and left the other four positions null pending collision review.",
+      "remaining_work": [
+        "P0 freezes and collision-reviews all five final capital positions and writes docs/career-world-production/evidence/CW-007/composition/capital-collision-review.json.",
+        "After P0 acceptance and promoted art QA, U0 removes direct anchor-derived city/capital rendering, renders only the five collision-reviewed capital instances, and applies the corrected shell/scene/camera/interaction/focus contract."
+      ]
+    }
+  ],
+  "risks_blockers": [
+    "Art QA must promote one usable panel and source hash for every asset before code work.",
+    "P0 placement before frozen footprints would create unsupported precision; all five capital positions, including NinjaOne's preserved tuple, still require recorded collision review.",
+    "Parallel lanes must not edit shared index, registry, scene, tests, CSS, queue, or ledger files.",
+    "Hash identity fails if workers serialize object keys or path numbers differently; one tuple serializer and four-decimal formatting are mandatory.",
+    "Identity-only landmarks and ambient art must remain illustrative and cannot create evidence, traces, links, or factual drawers.",
+    "The current scene still draws employer city geometry directly from anchors and conditionally remounts hidden landmarks; U0 must remove the anchor-derived rendering and use stable mounted instance groups.",
+    "The current shell couples project focus to summary eligibility, mutates inert imperatively, and lacks exact skill-instance focus and map gesture ownership; the root-owned post-U0 browser contract is specified but has not produced an aggregate, receipt, immutable preview, or evidence, so the corrected U0 contract remains mandatory before implementation can pass.",
+    "The immutable a66a8906 initial baseline is historical dispatch evidence only. Requiring it after an authorized lane edits a listed file deadlocks the plan; external handoff envelopes over self-excluding controlled-source deltas are mandatory at every handoff.",
+    "Endpoint-only camera and drawer assertions can hide missing normal interpolation, scene remounts, obscured transform/relationship drift, clipped focus rings, safe-area failures, and visual changes outside the drawer mask; U0 and R0 must execute the expanded runtime scenarios."
+  ],
+  "files_changed": [
+    {
+      "path": "docs/career-world-production/architecture.md",
+      "change": "updated",
+      "scope": "stale art-QA status sentence only; D-013 remains byte-identical"
+    },
+    {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "change": "updated",
+      "scope": "immutable historical dispatch receipt, self-excluding controlled-source deltas, external report-hash handoff envelopes, exact reconstructed parallel merge, phase dependencies/reports, serial test ownership, P0 reserved zones, post-U0 root browser proof, R0 queue gates, and existing implementation contract"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-world-composition.json",
+      "change": "updated",
+      "scope": "machine-readable initial-receipt transition, self-excluding predecessor/delta/envelope rules, exact reconstructed parallel merge, explicit dependency arrays/report paths, placement/post-U0 browser/R0 contracts, and existing acceptance"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-implementation-baseline.json",
+      "change": "added",
+      "scope": "preserved byte-for-byte by C0 as historical initial dispatch evidence: 36 files and aggregate a66a89065e752f9ec4d10ac3371e940217640a88270052a0f82704743022fd97"
+    },
+    {
+      "path": "docs/career-world-production/briefs/tech-post-u0-preview-baseline-contract.md",
+      "change": "added",
+      "scope": "self-excluding post-U0 source aggregate/receipt schema, digest-derived preview URL and namespace, freeze/reopen sequence, external final-report envelopes, exact reconstructed parallel merge, and R0 admission"
+    }
+  ],
+  "claims": [
+    {
+      "claim": "D-010 is resolved as one selected non-runtime panel plus one code-native master geometry whose exact identity fields remain stable across LOD.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 49,
+      "evidence": "The packet explicitly separates selected-panel reference authority from runtime geometry authority and permits only interior-detail hiding."
+    },
+    {
+      "claim": "The packet records accepted D-011 and promoted CW-005C as the canonical five-capital instance model while leaving final capital collision review and rendering to P0/U0.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 85,
+      "evidence": "The accepted-baseline section records five capital instances, zero city-kind instances, the preserved NinjaOne tuple, four pending positions, P0 collision evidence, and U0 anchor-render removal."
+    },
+    {
+      "claim": "The proposed geometry system uses one projection, three primitive types, literal SHA-256 identities, exact footprints, and no runtime pixels or geometry dependency.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 97,
+      "evidence": "The typed contract and hash sections define the exact fields, primitive union, canonical payload, and runtime boundary."
+    },
+    {
+      "claim": "All accepted anchors and five NinjaOne tuples are preserved while P0 owns final collision review for all five capitals and the remaining project/skill positions.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 271,
+      "evidence": "The placement contract generalizes the existing transform, repeats the accepted coordinates, requires five capital plus 16 project plus 37 skill records, and names the capital collision artifact."
+    },
+    {
+      "claim": "Seven disjoint geometry batches cover all 56 manifest assets exactly once and leave shared integration files to sequential owners.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 491,
+      "evidence": "The batch table assigns 6, 7, 8, 8, 9, 9, and 9 exact IDs, totaling 56, with explicit file fences."
+    },
+    {
+      "claim": "The immutable a66a8906 initial baseline remains historical dispatch evidence while each implementation lane is validated by an owned delta against one accepted predecessor.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 39,
+      "evidence": "The baseline-transition section preserves the 36-file receipt, defines the C0 bootstrap, self-excluding controlled-source digests, external final-report envelopes, exact reconstructed parallel merge, zero-diff non-owned/protected checks, and retirement of the pre-implementation preview from U0/R0 proof."
+    },
+    {
+      "claim": "Corrected U0 is one sequential shell/scene/state/camera/gesture/semantic/test owner with explicit P0 plus art-QA entry gates and audited deterministic and real-browser acceptance.",
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "line": 549,
+      "evidence": "The U0 section names the exact source fence including narrow project-drawer focus ownership, mandatory state and new gesture hooks, 58 stable groups, GeometryRenderer-only rendering, normal/reduced CSS camera matrix proof, semantic overlays, exact drawer-state continuity, and QA-matrix runtime scenarios."
+    }
+  ],
+  "gates_run": [
+    {
+      "command": "PowerShell JSON, immutable initial-baseline hash/byte/aggregate, C0 bootstrap, self-excluding predecessor/delta/external-envelope rules, exact reconstructed parallel merge, claim-line, explicit dependency/report uniqueness, serial test ownership, P0 reserved-zone/count, post-U0 root browser/R0 gate, manifest-hash, D-013 preservation, stale-language, and trailing-whitespace validation",
+      "result": "pass",
+      "summary": "The planning, initial-baseline, and post-U0 contract artifacts parse/read; the immutable initial receipt remains 36 files at aggregate a66a8906; C0 bootstraps only the two superseded packet paths plus the added contract; phase controlled-source digests exclude their own reports and external envelopes bind final report hashes; parallel M/G lanes share F0 and their composite is reconstructed from exact accepted lane after-hashes with all remaining paths equal F0; all 13 phases have explicit dependencies and reports; test ownership remains F0 to I0 to P0 to U0; P0 records 58 instances and versioned reserved zones; post-U0 root browser proof and R0 CW-005/CW-006 gates are explicit; the historical preview is forbidden; D-013 is unchanged; no trailing whitespace remains."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "summary": "No whitespace errors; only pre-existing line-ending warnings were emitted for unrelated tracked files."
+    }
+  ],
+  "deviations": [],
+  "stop_conditions": [
+    "F0 lacks a Director-accepted C0 bootstrap receipt, either corrected composition-packet file or the post-U0 contract differs from that receipt, or any of the other 34 initial-baseline paths differs from the immutable historical receipt.",
+    "Any lane-attributed implementation delta adds, changes, or deletes a path outside its exact owned set; any non-owned/protected implementation path attributable to that lane differs from the accepted predecessor; or its controlled-source successor digest does not recompute.",
+    "A phase report includes itself in its own successor digest, or its final byte count and SHA-256 are not frozen by an external handoff envelope after report finalization.",
+    "A parallel M0/G lane does not branch from the common accepted F0 envelope, or I0 lacks a reconstructed composite whose exact live union bytes match all eight accepted lane envelopes and whose remaining paths match F0.",
+    "The separate final Director-promoted 56-asset art-QA digest is missing or differs.",
+    "Manifest SHA or exact inventory changes.",
+    "Any asset lacks one promoted selected-panel record or its source hash differs.",
+    "Manifest topology and the selected panel conflict.",
+    "U0 starts before both P0 acceptance and Director-promoted full art QA, or without a nominated reproducible real-browser runner.",
+    "P0 reserved zones omit source attribution, route corridors, label envelopes, any of 58 interaction clearances, or the recorded 44 CSS-pixel-equivalent conversion basis.",
+    "U0 reaches browser validation without a valid self-excluding root-frozen post-U0 receipt containing the P0 envelope, exact U0 owned-source delta, aggregate, preview URL, and artifact namespace, or reaches handoff without its final report hash in an external envelope.",
+    "R0 starts before U0 acceptance plus accepted CW-005 and CW-006 exit gates, uses the historical a66a8906 preview, or uses a post-U0 receipt/aggregate/URL/namespace that is stale, non-recomputable, or not frozen and owned by root.",
+    "An accepted coordinate would need to move or accepted geometry would need to shrink, rotate, or be replaced.",
+    "A runtime PNG, new dependency, fourth primitive, canvas-only path, auto-layout engine, or 3D/WebGL surface appears necessary.",
+    "U0 requires a project-drawer edit beyond focus order/trap mechanics, or edits to registry/evidence/geometry, package, or shared runner configuration.",
+    "A live edit overlaps a lane-owned file or exact identity/semantic/verification evidence cannot be produced."
+  ],
+  "ledger_updates": [],
+  "git_operations": {
+    "staged": false,
+    "committed": false
+  }
+}

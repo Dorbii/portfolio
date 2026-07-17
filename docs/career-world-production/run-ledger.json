@@ -1,0 +1,721 @@
+{
+  "schema_version": 1,
+  "run_id": "career-world-2026-07-16",
+  "updated_at": "2026-07-17T13:53:38-05:00",
+  "source": {
+    "authoritative_plan_path": "docs/career-world-production/architecture.md",
+    "queue_path": "docs/career-world-production/queue.yaml",
+    "repo": "C:/Users/Steve/Documents/Github/portfolio"
+  },
+  "director": {
+    "thread_id": "/root",
+    "context_budget": "director synthesis only; full logs stay in artifacts",
+    "status": "active"
+  },
+  "current": {
+    "slice_id": "CW-007",
+    "queue_item_id": "CW-007",
+    "status": "desktop_city_stability_green_responsive_qa_pending",
+    "next_action": "Run the remaining responsive, keyboard, touch, and reduced-motion certification; desktop world, city, project, zoom-continuity, and bounded-memory checks are green",
+    "expected_exit_gate": "Build, lint, tests, fixed-coordinate continuity, browser world/city/project behavior, responsive, keyboard, touch, reduced-motion, and visual checks are green"
+  },
+  "lanes": [
+    {
+      "lane_id": "tech-lead-recon",
+      "thread_id": "/root/tech_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-001",
+      "role": "tech lead",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "",
+      "expected_exit_gate": "Repo-grounded renderer, data, test, and tracer recommendation",
+      "artifact_paths": ["docs/career-world-production/reports/tech-lead-recon.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "art-lead-recon",
+      "thread_id": "/root/art_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-001",
+      "role": "art lead",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "",
+      "expected_exit_gate": "Complete asset inventory, art bible, and generation batch proposal",
+      "artifact_paths": ["docs/career-world-production/reports/art-lead-recon.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "qa-lead-contract",
+      "thread_id": "/root/qa_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-001",
+      "role": "QA lead",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "",
+      "expected_exit_gate": "Testable acceptance matrix and independent lane plan",
+      "artifact_paths": ["docs/career-world-production/reports/qa-lead-contract.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-tracer-implementation",
+      "thread_id": "/root/tech_lead/cw003a_impl",
+      "parent_thread_id": "/root/tech_lead",
+      "slice_id": "CW-003",
+      "role": "frontend implementation worker",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Immutable registry, retained SVG scene, semantic controls, and factual modal tracer",
+      "artifact_paths": ["docs/career-world-production/reports/tech-tracer-implementation.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-tracer-responsive",
+      "thread_id": "/root/tech_lead/cw003b_impl",
+      "parent_thread_id": "/root/tech_lead",
+      "slice_id": "CW-003",
+      "role": "responsive implementation worker",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Reserved navigation, canvas, and status regions with matching DOM and visual order",
+      "artifact_paths": ["docs/career-world-production/reports/tech-tracer-responsive.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "art-manifest",
+      "thread_id": "/root/art_manifest_planner",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-002",
+      "role": "art manifest planner",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Exactly 56 distinct canonical prompts with evidence, reuse, easter-egg, and reference policy",
+      "artifact_paths": ["docs/career-world-production/concept-briefs.json", "docs/career-world-production/reports/art-manifest-qa.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "art-tracer",
+      "thread_id": "/root/art_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-002",
+      "role": "art lead",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Projection, identity, style, and at least one safe canonical trace panel are established for each tracer under D-010",
+      "artifact_paths": ["docs/career-world-production/reports/art-tracer-generation.json", "docs/career-world-production/reports/art-tracer-qa.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-full-registry",
+      "thread_id": "/root/tech_lead/cw005a_impl",
+      "parent_thread_id": "/root/tech_lead",
+      "slice_id": "CW-005A",
+      "role": "registry implementation worker",
+      "status": "done",
+      "started_at": "",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Exact 56/5/16/27/53/37 identity and relationship invariants with unreviewed positions held null",
+      "artifact_paths": ["docs/career-world-production/reports/tech-full-registry.json", "docs/career-world-production/logs/tech-full-registry/gate-summary.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "art-canonical-generation",
+      "thread_id": "/root/art_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-004",
+      "role": "art lead and three canonical generation lanes",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17T02:59:15-05:00",
+      "expected_exit_gate": "56 design-source PNGs generated with built-in imagegen, inspected, hashed, and ready for independent art QA",
+      "artifact_paths": ["docs/career-world-production/reports/art-generation-batch-a.json", "docs/career-world-production/reports/art-generation-batch-b.json", "docs/career-world-production/reports/art-generation-batch-c.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-evidence-drawers",
+      "thread_id": "/root/tech_lead/cw006a_impl",
+      "parent_thread_id": "/root/tech_lead",
+      "slice_id": "CW-006A",
+      "role": "factual evidence adapter worker",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Repository-backed drawer eligibility and provenance for ten evidence-backed projects; six identity-only projects remain ineligible",
+      "artifact_paths": ["docs/career-world-production/briefs/tech-evidence-drawers.md", "docs/career-world-production/reports/tech-evidence-drawers.json", "docs/career-world-production/logs/tech-evidence-drawers/gate-summary.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-world-composition",
+      "thread_id": "/root/tech_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005B",
+      "role": "2D composition planner",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Implementation-ready deterministic SVG composition packet with disjoint worker ownership, hash contracts, placement sequencing, and D-011 boundary",
+      "artifact_paths": ["docs/career-world-production/briefs/tech-world-composition.md", "docs/career-world-production/reports/tech-world-composition.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-capital-normalization",
+      "thread_id": "/root/tech_lead/cw005c_impl",
+      "parent_thread_id": "/root/tech_lead",
+      "slice_id": "CW-005C",
+      "role": "D-011 registry normalization worker",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17",
+      "expected_exit_gate": "Exactly five employer capitals, zero legacy city-kind anchor instances, preserved NinjaOne capital coordinates, and green repository gates",
+      "artifact_paths": ["docs/career-world-production/briefs/tech-capital-normalization.md", "docs/career-world-production/reports/tech-capital-normalization.json", "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "art-full-qa",
+      "thread_id": "/root/art_qa_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-004-QA",
+      "role": "independent art QA lead with three frozen-batch reviewers",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17T03:25:37-05:00",
+      "expected_exit_gate": "All 56 exact manifest outputs receive independent selected-panel metadata and PASS, PASS_WITH_NOTES, REGENERATE, or REJECT verdicts under D-010",
+      "artifact_paths": ["docs/career-world-production/briefs/art-full-qa.md", "docs/career-world-production/briefs/art-qa-batches.json", "docs/career-world-production/reports/art-qa-batch-1.json", "docs/career-world-production/reports/art-qa-batch-2.json", "docs/career-world-production/reports/art-qa-batch-3.json", "docs/career-world-production/reports/art-full-qa.json"],
+      "reviewer_threads": ["/root/art_qa_lead/art_qa_1", "/root/art_qa_lead/art_qa_2", "/root/art_qa_lead/art_qa_3"],
+      "partition_counts": [19, 19, 18],
+      "current_state": "Terminal QA complete: 30 PASS, 15 PASS_WITH_NOTES, 11 REGENERATE, and 0 REJECT; D-013 accepts a separate r1 correction program while this v0 library remains unpromoted",
+      "blocker": "Full-library promotion remains blocked; D-013 releases only the three calibration candidates after their exact packets and rejected-v0 archives validate"
+    },
+    {
+      "lane_id": "art-r1-correction",
+      "thread_id": "/root/art_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-004-R1",
+      "role": "D-013 one-hero correction program",
+      "status": "done",
+      "started_at": "2026-07-17",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Exactly 56 canonical concepts are resolved with selected trace references, final QA, byte receipts, LFS attributes, and runtime isolation",
+      "artifact_paths": ["docs/career-world-production/briefs/art-correction-replan.md", "docs/career-world-production/reports/art-correction-replan.json", "docs/career-world-production/reports/art-promoted-56.json"],
+      "calibration_asset_ids": ["project/contextforge@v1", "skill/openapi@v1", "skill/workflow-orchestration@v1"],
+      "held_remainder_count": 0,
+      "current_state": "PROMOTED_56_GO: 45 original assets plus 11 corrected one-hero assets are resolved; canonical ordinal digest 777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-world-composition-m0",
+      "thread_id": "/root/tech_geometry_m0",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-M0",
+      "role": "promoted trace-panel metadata worker",
+      "status": "done",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T05:02:00-05:00",
+      "expected_exit_gate": "Exactly 56 ordinal promoted trace-panel records with art/hash/path equality and no runtime PNG dependency",
+      "artifact_paths": ["features/career-world/geometry/trace-panels.ts", "docs/career-world-production/reports/tech-world-composition-m0.json", "docs/career-world-production/reports/review-tech-world-composition-m0.json", "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json"],
+      "blocker": ""
+    },
+    {
+      "lane_id": "tech-world-composition-g0",
+      "thread_id": "/root/tech_geometry_g0",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G0",
+      "role": "world and city geometry worker",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Six exact world/city definitions with literal canonical hashes and stable tier-zero identities",
+      "artifact_paths": ["features/career-world/definitions/world-cities.ts", "docs/career-world-production/reports/tech-world-composition-g0.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g1",
+      "thread_id": "/root/tech_geometry_g1",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G1",
+      "role": "ambient geometry worker",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Seven exact non-interactive ambient definitions with literal canonical hashes",
+      "artifact_paths": ["features/career-world/definitions/ambient.ts", "docs/career-world-production/reports/tech-world-composition-g1.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g2",
+      "thread_id": "/root/tech_geometry_g2",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G2",
+      "role": "project geometry worker A",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Eight exact unique project definitions with literal canonical hashes and entertainment-only detail",
+      "artifact_paths": ["features/career-world/definitions/projects-a.ts", "docs/career-world-production/reports/tech-world-composition-g2.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g3",
+      "thread_id": "/root/tech_geometry_g3",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G3",
+      "role": "project geometry worker B",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Eight exact unique project definitions including explicit ContextForge code-geometry boundary",
+      "artifact_paths": ["features/career-world/definitions/projects-b.ts", "docs/career-world-production/reports/tech-world-composition-g3.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g4",
+      "thread_id": "/root/tech_geometry_g4",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G4",
+      "role": "skill geometry worker A",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Nine exact employer-neutral reusable skill definitions with literal canonical hashes",
+      "artifact_paths": ["features/career-world/definitions/skills-a.ts", "docs/career-world-production/reports/tech-world-composition-g4.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g5",
+      "thread_id": "/root/art_lead/d017_setback_analysis",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G5",
+      "role": "skill geometry worker B",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Nine exact employer-neutral reusable skill definitions with literal canonical hashes",
+      "artifact_paths": ["features/career-world/definitions/skills-b.ts", "docs/career-world-production/reports/tech-world-composition-g5.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "tech-world-composition-g6",
+      "thread_id": "/root/tech_f0_foundation/f0_code_review/projection_test_audit",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-005-G6",
+      "role": "skill geometry worker C",
+      "status": "superseded_as_runtime_visual_path",
+      "started_at": "2026-07-17T04:36:00-05:00",
+      "last_update_at": "2026-07-17T04:36:00-05:00",
+      "expected_exit_gate": "Nine exact employer-neutral reusable skill definitions, including complete unplaced Java geometry, with literal canonical hashes",
+      "artifact_paths": ["features/career-world/definitions/skills-c.ts", "docs/career-world-production/reports/tech-world-composition-g6.json"],
+      "blocker": "D-016 preserves this work for traceability but removes it from the active visual-runtime dependency chain"
+    },
+    {
+      "lane_id": "art-kaizen-metrics-3d-assets",
+      "thread_id": "/root/kaizen_3d_asset_lead",
+      "parent_thread_id": "/root",
+      "slice_id": "CW-008A",
+      "role": "Blender and glTF asset lead",
+      "status": "deferred",
+      "started_at": "2026-07-17T04:50:00-05:00",
+      "last_update_at": "2026-07-17T11:30:17-05:00",
+      "expected_exit_gate": "One rebuildable source blend, ten canonical independent GLBs, measured budgets, and reviewed preview renders without runtime integration",
+      "artifact_paths": ["docs/career-world-production/briefs/kaizen-metrics-3d-asset-kit.md", "design/career-world/3d/kaizen-metrics/", "docs/career-world-production/reports/art-kaizen-metrics-3d-assets.json"],
+      "blocker": "D-015 explicitly pauses all 3D modeling, export, QA, scene assembly, and runtime integration; existing artifacts remain preserved"
+    }
+  ],
+  "accepted_decisions": [
+    {
+      "id": "D-001..D-004",
+      "summary": "Canonical employer/project/skill identity, semantic zoom continuity, retired video, and 2D-before-3D sequencing are locked",
+      "evidence": "docs/career-world-asset-map.md and latest user direction",
+      "decided_at": "2026-07-16"
+    },
+    {
+      "id": "D-005..D-009",
+      "summary": "Native SVG plus semantic controls, fixed world camera, 56-concept inventory with evidence holds, predeclared 2D budgets, and deferred 3D engine selection are promoted",
+      "evidence": "docs/career-world-production/asset-inventory.md and tech/art/QA recon reports",
+      "decided_at": "2026-07-16"
+    },
+    {
+      "id": "D-010",
+      "summary": "One selected concept panel is the trace reference; code-native master geometry is the runtime identity authority and LOD may hide interior detail only",
+      "evidence": "docs/career-world-production/architecture.md and bounded Evergreen correction evidence",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-011",
+      "summary": "Employer anchors are non-visible district/camera coordinates; each employer has exactly one visible capital instance using its canonical city asset",
+      "evidence": "docs/career-world-production/architecture.md, docs/career-world-production/reports/tech-capital-normalization.json, and its green gate summary",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-012",
+      "summary": "Source concept PNGs use scoped Git LFS while runtime imports remain forbidden; remote preservation requires an authorized push and clean-room selective pull",
+      "evidence": ".gitattributes, design/career-world/README.md, and docs/career-world-production/architecture.md",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-013",
+      "summary": "11 cross-lane blockers invalidate only their v0 multi-panel composition assumption; use derived one-hero r1 prompts, release 3 calibration assets before the remaining 8, freeze the other 45, and authorize no r2, product, or 3D work",
+      "evidence": "docs/career-world-production/architecture.md, docs/career-world-production/reports/art-full-qa.json, and docs/career-world-production/reports/art-correction-replan.json",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-014",
+      "summary": "After the 56-asset concept library is promoted, Blender source-model and glTF asset production for Kaizen Metrics may proceed in parallel; final 3D city layout, runtime loading, and public integration remain blocked until CW-007 zoom QA is green",
+      "evidence": "latest explicit user direction and docs/career-world-production/queue.yaml CW-008A",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-015",
+      "summary": "Supersede D-014's active 3D authority: pause and defer all 3D modeling, export, QA, scene assembly, and runtime integration while preserving generated files. Finish the animated 2.5D site, with progressively richer entertainment-only motion at world, city, and project zoom tiers",
+      "evidence": "latest explicit user direction and docs/career-world-production/queue.yaml CW-005, CW-007, CW-008A, CW-008, and CW-009",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-016",
+      "summary": "Supersede only D-010's code-native visual-authority clause and D-012's runtime-isolation clause: the approved concept art is now the active 2.5D visual source through 56 optimized runtime derivatives. The approved tracer world and tracer Kaizen Metrics observatory are narrow source overrides. Registry IDs, evidence boundaries, fixed placement, skill reuse, zoom continuity, and source-PNG preservation remain binding",
+      "evidence": "latest explicit user direction, docs/career-world-asset-map.md, and public/career-world/art/runtime-art-manifest.json",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-017",
+      "summary": "Supersede D-011's non-visible-anchor clause: each employer anchor is the authored overview pad and the single district origin reused by world, city, and project focus. Every capital, project, and skill keeps one asset, one world coordinate, and one fixed visual envelope across zoom. Project focus may change routes and emphasis only; it does not relocate, resize, remount, or recenter the district",
+      "evidence": "latest explicit user correction, features/career-world/model/world-registry.ts, features/career-world/model/scene-composition.ts, features/career-world/components/world-scene.tsx, and tests/career-world.test.mjs",
+      "decided_at": "2026-07-17"
+    }
+  ],
+  "latest_green_gates": [
+    {
+      "command": "npm.cmd test",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-16",
+      "summary": "Baseline after Blender/media removal: build passed and 7/7 tests passed"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-16",
+      "summary": "Baseline after Blender/media removal passed"
+    },
+    {
+      "command": "npm.cmd test",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-tracer-responsive/gates.md",
+      "completed_at": "2026-07-17",
+      "summary": "Root re-verification after CW-003B: build passed and 13/13 tests passed"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-tracer-responsive/gates.md",
+      "completed_at": "2026-07-17",
+      "summary": "Root re-verification after CW-003B passed with no diagnostics"
+    },
+    {
+      "command": "npm.cmd test",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-evidence-drawers/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "Root re-verification after CW-006A: build passed and 13/13 tests passed"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-evidence-drawers/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "Root re-verification after CW-006A passed with no diagnostics"
+    },
+    {
+      "command": "npm.cmd test",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "CW-005C final verification passed 13/13 tests with the D-011 capital invariants"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "CW-005C final lint passed with no diagnostics"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "CW-005C final production build completed successfully"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/tech-capital-normalization/gate-summary.json",
+      "completed_at": "2026-07-17",
+      "summary": "CW-005C final whitespace gate passed; unrelated CRLF warnings only"
+    },
+    {
+      "command": "node --test tests/career-world.test.mjs",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-17",
+      "summary": "D-016 asset-backed runtime contract passed 10/10 tests, including exact 56-file coverage, byte receipts, a 5 MiB payload ceiling, tracer source overrides, and procedural-renderer exclusions"
+    },
+    {
+      "command": "node --test tests/evidence-atlas.test.mjs tests/career-world.test.mjs",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-17",
+      "summary": "Final asset-backed integration regression passed 17/17 tests"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js features/career-world tests/career-world.test.mjs scripts/build-career-world-runtime-alpha.mjs",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-17",
+      "summary": "Career World runtime, contract test, and bounded Sharp asset builder linted without diagnostics"
+    },
+    {
+      "command": "node node_modules/vinext/dist/cli.js build",
+      "result": "pass",
+      "artifact_path": "",
+      "completed_at": "2026-07-17",
+      "summary": "Final asset-backed production build completed successfully"
+    },
+    {
+      "command": "in-app browser desktop world/city/project QA",
+      "result": "pass",
+      "artifact_path": "public/career-world/art/runtime-art-manifest.json",
+      "completed_at": "2026-07-17",
+      "summary": "World, NinjaOne city, and Kaizen Metrics project views loaded every expected image with zero missing assets and zero browser warnings or errors; the 55 alpha masks cover 20.5 to 69.3 percent of their canvases with no structural outliers"
+    },
+    {
+      "command": "npm.cmd test",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/reports/cw-city-stability-tests.json",
+      "completed_at": "2026-07-17",
+      "summary": "Integrated production build and full regression suite passed 19/19 after fixed-coordinate, semantic-LOD, camera-bound, and project-focus continuity changes"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/reports/cw-city-stability-css.json",
+      "completed_at": "2026-07-17",
+      "summary": "Final integrated lint passed with no diagnostics"
+    },
+    {
+      "command": "Sharp isolated-process rebuild and alpha audit",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/logs/cw-city-stability-sprite-trim/audit.json",
+      "completed_at": "2026-07-17",
+      "summary": "55 transparent assets passed exact alpha-bound, two-pixel guard, manifest receipt, and idempotence checks; transparent decoded pixels fell 20.84 percent"
+    },
+    {
+      "command": "in-app browser fixed-layout and performance QA",
+      "result": "pass",
+      "artifact_path": "docs/career-world-production/reports/cw-city-stability-camera.json",
+      "completed_at": "2026-07-17",
+      "summary": "NinjaOne retained all 21 district instances at 200 through 600 percent, project selection preserved the exact camera transform, bounded pan/zoom exposed no outside-stage gap, and the restarted capped dev server remained below 0.75 GiB private memory instead of the prior 33 GiB"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "cw004-art-library-promotion",
+      "status": "resolved",
+      "summary": "PROMOTED_56_GO closed the source-art library with 56 exact canonical receipts, 11 corrected promotions, selected trace references, and LFS attributes; its runtime-isolation clause is superseded for visuals by D-016",
+      "evidence": "docs/career-world-production/reports/art-promoted-56.json"
+    },
+    {
+      "id": "cw005-composition-entry",
+      "status": "resolved",
+      "summary": "CW-004 promotion is closed and D-016 authorizes direct optimized art derivatives; legacy M0 and G0-G6 geometry work is no longer an entry dependency for the active visual runtime",
+      "evidence": "docs/career-world-production/reports/art-promoted-56.json, docs/career-world-asset-map.md, and public/career-world/art/runtime-art-manifest.json"
+    },
+    {
+      "id": "cw008-cw009-entry",
+      "status": "deferred",
+      "summary": "D-015 supersedes the former CW-007 entry gate as an active concern: CW-008 and CW-009 are deferred regardless of 2.5D QA status until the user explicitly resumes 3D",
+      "evidence": "latest explicit user direction and docs/career-world-production/queue.yaml CW-008 and CW-009"
+    }
+  ],
+  "open_risks": [
+    {
+      "id": "held-project-evidence",
+      "status": "accepted_hold",
+      "summary": "ACE Hardware and Column Technologies remain identity-only because no approved public-safe project detail or project-skill evidence exists",
+      "mitigation": "Keep their landmarks illustrative-only with no factual drawer or project-skill links"
+    },
+    {
+      "id": "concept-panel-drift",
+      "status": "active",
+      "summary": "Generated concept art can drift in secondary panels",
+      "mitigation": "The runtime manifest freezes one approved source and crop per asset; tracer world and Kaizen Metrics overrides are explicit, while stable IDs and placements prevent zoom-level substitution"
+    },
+    {
+      "id": "lazy-3d-load",
+      "status": "deferred",
+      "summary": "A heavy 3D dependency could damage initial-load performance if not lazy-loaded",
+      "mitigation": "No active 3D dependency is authorized under D-015; preserve existing files and revisit loading strategy only if the user explicitly resumes 3D"
+    },
+    {
+      "id": "art-batch-drift",
+      "status": "mitigated",
+      "summary": "The completed 56-concept library still requires source-lineage protection when packaged for runtime",
+      "mitigation": "Freeze the promoted sources and enforce exact 56-record runtime-manifest coverage, file existence, source overrides, and byte receipts in tests"
+    },
+    {
+      "id": "design-source-repository-size",
+      "status": "locally_mitigated_remote_unverified",
+      "summary": "The 66 current canonical/tracer PNGs and both planned noncanonical candidate roots are locally routed through three scoped Git LFS rules",
+      "mitigation": "Maintain exact separate canonical, rejected-v0, and r1 inventories outside runtime imports; verify remote authentication and quota with an authorized push, then prove preservation with a clean-room selective LFS pull"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/career-world-asset-map.md",
+      "kind": "accepted identity contract",
+      "owner_lane_id": "director",
+      "created_at": "2026-07-16",
+      "summary": "Canonical hierarchy, reuse, projection, palette, and anti-drift rules"
+    },
+    {
+      "path": "docs/career-world-production/asset-inventory.md",
+      "kind": "accepted production inventory",
+      "owner_lane_id": "director",
+      "created_at": "2026-07-16",
+      "summary": "56 generated concept targets, supported links, evidence holds, coordinate frame, and art contract"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-lead-recon.json",
+      "kind": "recon report",
+      "owner_lane_id": "tech-lead-recon",
+      "created_at": "2026-07-16",
+      "summary": "SVG, registry, camera, tracer, and 3D deferral recommendation"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-lead-recon.json",
+      "kind": "recon report",
+      "owner_lane_id": "art-lead-recon",
+      "created_at": "2026-07-16",
+      "summary": "Art taxonomy, style bible, coordinates, batches, and QA rubric; Director overrode Java/AI and held-project exclusions"
+    },
+    {
+      "path": "docs/career-world-production/reports/qa-lead-contract.json",
+      "kind": "acceptance contract",
+      "owner_lane_id": "qa-lead-contract",
+      "created_at": "2026-07-16",
+      "summary": "D-010- and D-011-corrected CW-007 matrix and hard CW-008 entry gate"
+    },
+    {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "kind": "promoted 56-asset generation manifest",
+      "owner_lane_id": "art-manifest",
+      "created_at": "2026-07-17",
+      "summary": "Independently promoted prompt set at SHA-256 7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14 with non-runtime design output paths"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-tracer-responsive.json",
+      "kind": "implementation report",
+      "owner_lane_id": "tech-tracer-responsive",
+      "created_at": "2026-07-17",
+      "summary": "Reserved responsive regions validated in code and early Director browser checks"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-manifest-qa.json",
+      "kind": "independent manifest and relocation QA",
+      "owner_lane_id": "art-manifest",
+      "created_at": "2026-07-17",
+      "summary": "Promoted the non-runtime design-root manifest at SHA-256 7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14 and exact 19/19/18 generation packets"
+    },
+    {
+      "path": "docs/career-world-production/briefs/art-full-qa.md",
+      "kind": "independent full-library QA contract",
+      "owner_lane_id": "art-full-qa",
+      "created_at": "2026-07-17",
+      "summary": "Frozen D-010-aware art gate and 19/19/18 partition; terminal QA completed at 30 PASS, 15 PASS_WITH_NOTES, 11 REGENERATE, and 0 REJECT"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-1.json",
+      "kind": "independent art QA batch report",
+      "owner_lane_id": "art-full-qa",
+      "created_at": "2026-07-17",
+      "sha256": "E4D662604D85C6E3E2B96C5151E4D4C9F44E94444A4502BA3F765C5825F1ECBC",
+      "summary": "Independent mixed-source review of 19 assets: 11 PASS, 4 PASS_WITH_NOTES, 4 REGENERATE, 0 REJECT"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-2.json",
+      "kind": "independent art QA batch report",
+      "owner_lane_id": "art-full-qa",
+      "created_at": "2026-07-17",
+      "sha256": "88F3BD371CBE97A8DBB86B09A7A322CF236242EEAD31CC74C0D333C6B3851D06",
+      "summary": "Independent mixed-source review of 19 assets: 13 PASS, 2 PASS_WITH_NOTES, 4 REGENERATE, 0 REJECT"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-qa-batch-3.json",
+      "kind": "independent art QA batch report",
+      "owner_lane_id": "art-full-qa",
+      "created_at": "2026-07-17",
+      "sha256": "73E6A59A64D7EE9359F5EBE6FF20080D4BB63F46997CDD261DB033BF7A7BC2A6",
+      "summary": "Independent mixed-source review of 18 assets: 6 PASS, 9 PASS_WITH_NOTES, 3 REGENERATE, 0 REJECT"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-full-qa.json",
+      "kind": "independent full-library art QA consolidation",
+      "owner_lane_id": "art-full-qa",
+      "created_at": "2026-07-17",
+      "sha256": "9D257E7E1074777F504AEA10B48D8CA2DE7233CA2740C73AAC53C4E1CAD13BD9",
+      "summary": "Exact 56-asset consolidation stopped full-library promotion and enforced the 11 greater than 8 systemic-replan threshold without authorizing regeneration"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-replan.json",
+      "kind": "D-013 one-hero r1 correction plan",
+      "owner_lane_id": "art-r1-correction",
+      "created_at": "2026-07-17",
+      "sha256": "5FD24ABC03F9A0672C4FED32789A1894C22F6A9EC2A3CDC02E18B22B84403E50",
+      "summary": "Exact 11-asset correction plan with three calibration candidates, eight held remainder assets, 45 frozen v0 assets, separate LFS roots, and no r2, product, or 3D authority"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-generation-batch-c.json",
+      "kind": "canonical art generation report",
+      "owner_lane_id": "art-canonical-generation",
+      "created_at": "2026-07-17",
+      "sha256": "80A2BB8FE00A23FE1375AA7D98AA48029D2E8717C9FA64F562FE54A443ECD120",
+      "summary": "Validated Batch C generation record for 18 assets; generation complete pending independent QA"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-world-composition.json",
+      "kind": "2D composition implementation plan",
+      "owner_lane_id": "tech-world-composition",
+      "created_at": "2026-07-17",
+      "summary": "Deterministic SVG geometry, placement, integration, worker partition, and hash contracts"
+    },
+    {
+      "path": "docs/career-world-production/reports/tech-capital-normalization.json",
+      "kind": "D-011 implementation report",
+      "owner_lane_id": "tech-capital-normalization",
+      "created_at": "2026-07-17",
+      "summary": "Promoted five-capital registry normalization with zero legacy city-kind anchors and green gates"
+    },
+    {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "kind": "final 56-asset art promotion record",
+      "owner_lane_id": "art-r1-correction",
+      "created_at": "2026-07-17",
+      "sha256": "5865666A670E7D595061C487BC96C842C814A1BCA8C9077FFBC82132D2ADF3A4",
+      "summary": "PROMOTED_56_GO with 56 exact receipts, 11 corrected promotions, selected trace references, historical runtime isolation, and ordinal digest 777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708; D-016 supersedes only the visual-isolation clause"
+    },
+    {
+      "path": "public/career-world/art/runtime-art-manifest.json",
+      "kind": "asset-backed 2.5D runtime-art manifest",
+      "owner_lane_id": "tech-world-composition",
+      "created_at": "2026-07-17",
+      "summary": "Exactly 56 optimized WebP derivatives with crop, source, dimensions, byte receipts, one-mainland/two-island topology, and explicit tracer-world and Kaizen-observatory overrides"
+    }
+  ],
+  "notes": "No implementation lane may reinterpret accepted identity rules. Direct user authority overrides the art report's attempted exclusion of Java, AI, and six identity-only project concepts. art-tracer-qa.json is historical CW-002C evidence: D-010 supersedes its AI cross-panel-parity STOP, and art-manifest-qa.json supersedes its former runtime-public output-root hold. concept-briefs.json remains an immutable generation contract whose per-asset planned status must not be used as current operational state. D-016 is deliberately narrow: approved optimized art replaces procedural geometry as the active visual source, while IDs, evidence, reuse, placement, zoom continuity, and design-source preservation remain unchanged."
+}

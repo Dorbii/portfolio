@@ -1,0 +1,61 @@
+{
+  "schema_version": "career-world-art-recovery-report/v1",
+  "report_id": "D-019-CONTEXTFORGE-PERSISTENCE-RECOVERY",
+  "status": "RECOVERY_COMPLETE_AWAITING_INDEPENDENT_QA",
+  "authority": {
+    "packet_path": "docs/career-world-production/briefs/art-correction-d019-contextforge-persistence-recovery.json",
+    "packet_bytes": 3496,
+    "packet_sha256": "94E70E6372A67489C82D18C18F386909B5F12D0C6EB82359BF8FA67A6C1E0DDB",
+    "scope": "Create the exact missing candidate parent and copy the frozen built-in output once without mutation or overwrite."
+  },
+  "preflight": {
+    "d018_packet_match": true,
+    "d018_generation_report_match": true,
+    "raw_output_match": true,
+    "raw_output_path": "C:\\Users\\Steve\\.codex\\generated_images\\019f7018-3fb0-7b51-b5a5-cf0a93caefc0\\exec-54a3ea1e-cd75-40e0-a01f-0836c93ea83b.png",
+    "raw_output_bytes": 1484707,
+    "raw_output_sha256": "2E310D456A3594BBA3B0041622A3235ABEE3F15F13019CF5A23B0F5B06B3E62A",
+    "parent_existed": false,
+    "candidate_existed": false,
+    "report_existed": false
+  },
+  "execution": {
+    "directory_create_operations": 1,
+    "copy_api_calls": 1,
+    "overwrite_attempts": 0,
+    "imagegen_calls": 0,
+    "imagegen_retries": 0,
+    "render_calls": 0,
+    "image_mutations": 0,
+    "candidate_path": "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+    "persistence_method": "PowerShell New-Item for the exact absent parent, followed by one Copy-Item from the frozen built-in output to the exact absent candidate path."
+  },
+  "postflight": {
+    "candidate_bytes": 1484707,
+    "candidate_sha256": "2E310D456A3594BBA3B0041622A3235ABEE3F15F13019CF5A23B0F5B06B3E62A",
+    "exact_byte_copy": true,
+    "png_receipt_inherited_from_identical_source": "1536x1024 RGB8; IHDR/caBX/IDAT/IEND; all CRCs valid; zero trailing bytes; one C2PA caBX ancillary chunk; no text, EXIF, time, ICC, or pHYs chunk.",
+    "git_attributes": {
+      "filter": "lfs",
+      "diff": "lfs",
+      "merge": "lfs",
+      "text": "unset"
+    },
+    "runtime_basename_or_path_references": 0,
+    "staged_file_count": 0
+  },
+  "disposition": {
+    "technical_persistence": "PASS",
+    "visual_qa": "NOT_PERFORMED",
+    "promotion": "NOT_AUTHORIZED",
+    "remaining_eight_release": "NOT_AUTHORIZED"
+  },
+  "files_changed": [
+    "design/career-world/correction-candidates/cw004-r2/projects/contextforge-r2-guided.png",
+    "docs/career-world-production/reports/art-correction-d019-contextforge-persistence-recovery.json"
+  ],
+  "limitations": [
+    "The candidate inherits the raw output PNG structure receipt because the files are byte-identical; independent candidate QA must still inspect the workspace copy at original resolution.",
+    "This recovery makes no visual, topology, traceability, or promotion claim."
+  ]
+}

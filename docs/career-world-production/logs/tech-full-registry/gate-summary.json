@@ -1,0 +1,47 @@
+{
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005A",
+  "status": "passed",
+  "commands": [
+    {
+      "command": "npm.cmd test",
+      "status": "passed",
+      "summary": "13/13 tests passed; the expected baseline is 13. The command includes a production build before Node tests."
+    },
+    {
+      "command": "npm.cmd run lint",
+      "status": "passed",
+      "summary": "eslint completed with exit code 0."
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "passed",
+      "summary": "vinext build completed with exit code 0."
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "summary": "No whitespace errors; unrelated tracked-file CRLF warnings were emitted."
+    },
+    {
+      "command": "rg -n -i 'ProjectMediaStage|project-media|<video|autoplay|system-tour|WebGL|three|babylon' features/career-world package.json",
+      "status": "passed",
+      "summary": "No matches; rg exit 1 was handled as the expected clear result."
+    },
+    {
+      "command": "git diff --quiet -- features/career-world/rendering/world-camera.ts features/career-world/model/evidence-adapter.ts features/evidence-atlas/model/evidence-data.ts",
+      "status": "passed",
+      "summary": "All three protected paths are unchanged relative to the tracked baseline."
+    },
+    {
+      "command": "report schema, claim path:line, follow_up object, and report-file-fence PowerShell check",
+      "status": "passed",
+      "summary": "Required report fields, allowed status, claim locations, object-shaped follow-ups, and the worker's listed packet paths all validated."
+    }
+  ],
+  "protected_hashes": {
+    "features/career-world/rendering/world-camera.ts": "72E9EB2FFE352D63C403766CF417343E6473F8DF201543EFBE5C7F3B436B9A6A",
+    "features/career-world/model/evidence-adapter.ts": "DF58651AD942C6C96C29F1CFB13B03C000A021D46791E790DBD039BE84BB9CB6",
+    "features/evidence-atlas/model/evidence-data.ts": "467C4C066208EF5CAD5AC0590120AC8A69383140D63BDE9BDD328EF1F1944111"
+  }
+}

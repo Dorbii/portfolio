@@ -1,0 +1,345 @@
+{
+  "schema_version": "career-world-tech-lane-report/v1",
+  "report_type": "tech-world-composition-g3",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-005",
+  "lane_id": "G3",
+  "role": "geometry-definition-worker",
+  "completed_at": "2026-07-17T09:51:44.4852685-05:00",
+  "status": "PASS",
+  "outcome": "G3_SOURCE_COMPLETE_AWAITING_EXTERNAL_HANDOFF",
+  "summary": "Authored exactly eight unique Projects B geometry definitions as deterministic code-native 2.5D SVG configurations. Each definition preserves its selected primary topology, uses the frozen projection and palette slots, keeps the complete exterior in tier 0, stores recomputed literal identity hashes, and encodes no employer color, placement, factual claim, runtime bitmap, dependency, or product integration. This report does not claim integration, downstream acceptance, promotion, or art-guide coordinate equivalence.",
+  "authority_receipts": {
+    "f0_predecessor": {
+      "path": "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json",
+      "bytes": 3101,
+      "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+      "accepted_envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+      "controlled_file_count": 43,
+      "controlled_aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "note": "Superseding Director-accepted F0 envelope after repair of the aggregate transcription. Per-file receipts, controlled count, and controlled bytes are unchanged."
+    },
+    "composition_brief": {
+      "path": "docs/career-world-production/briefs/tech-world-composition.md",
+      "bytes": 63858,
+      "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af"
+    },
+    "manifest": {
+      "path": "docs/career-world-production/concept-briefs.json",
+      "bytes": 288349,
+      "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14"
+    },
+    "promoted_art_report": {
+      "path": "docs/career-world-production/reports/art-promoted-56.json",
+      "bytes": 124881,
+      "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4",
+      "canonical_56_file_digest": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708"
+    }
+  },
+  "scope": {
+    "owned_paths": [
+      "features/career-world/definitions/projects-b.ts",
+      "docs/career-world-production/reports/tech-world-composition-g3.json"
+    ],
+    "changed_paths": [
+      "features/career-world/definitions/projects-b.ts",
+      "docs/career-world-production/reports/tech-world-composition-g3.json"
+    ],
+    "out_of_fence_writes": [],
+    "report_self_receipt": "Excluded by contract. The external handoff envelope must record this finalized report's byte count and SHA-256."
+  },
+  "controlled_source_delta": {
+    "file_count": 1,
+    "files": [
+      {
+        "path": "features/career-world/definitions/projects-b.ts",
+        "bytes": 24082,
+        "lines": 726,
+        "sha256": "26f973287acd0b7b13fa00f7ffcbf4e9f02a576dd8a6886759b5de672f76ceb6"
+      }
+    ]
+  },
+  "assigned_id_closure": {
+    "expected_count": 8,
+    "actual_count": 8,
+    "missing_ids": [],
+    "extra_ids": [],
+    "duplicate_ids": [],
+    "ids": [
+      "project/contextforge@v1",
+      "project/career-world-portfolio@v1",
+      "project/ticket-validation-automation@v1",
+      "project/sap-table-update-integration@v1",
+      "project/qc-alm-extractor@v1",
+      "project/atlassian-platform-automation@v1",
+      "project/atlassian-data-center-resilience@v1",
+      "project/client-devops-delivery-implementations@v1"
+    ]
+  },
+  "definition_receipts": [
+    {
+      "asset_id": "project/contextforge@v1",
+      "evidence_status": "evidence-backed",
+      "geometry_key": "career-world/project/contextforge/master-v1",
+      "primary_path_hash": "sha256:7c4ec00cc9912ccd5740de3f303ffd418c577cefbdbde0b26ee8404ce129e5cc",
+      "master_geometry_hash": "sha256:b514e77499d8105737a3d9339229a7d57bedc0cfb529db18012d8985601cc6c1",
+      "footprint": { "width": 260, "depth": 250 },
+      "primitive_counts": { "total": 11, "surface": 4, "extrusion": 5, "stroke": 2, "tier_0": 9, "tier_1": 1, "tier_2": 1 },
+      "primary_topology": "A connected non-collinear L-shaped hall made from two intersecting fabrication wings, three tier-0 sawtooth roof vaults, one physically joined offset archive tower, and a diagonal transfer bridge that lands on the compact 12-sided compression house.",
+      "interior_detail": "Tier 1 holds only the bridge-truss seam. Tier 2 holds the approved cold tool rack inside the footprint, with no logo shape or evidence meaning."
+    },
+    {
+      "asset_id": "project/career-world-portfolio@v1",
+      "evidence_status": "evidence-backed",
+      "geometry_key": "career-world/project/career-world-portfolio/master-v1",
+      "primary_path_hash": "sha256:82742d1069dd48aaf0ad616778dea46e3be581f99c500c6461496f625a087413",
+      "master_geometry_hash": "sha256:e6637dbce85d773d7cf0195e285de5fefd8aa7f633ab080254101e7adee9b30a",
+      "footprint": { "width": 310, "depth": 280 },
+      "primitive_counts": { "total": 14, "surface": 5, "extrusion": 9, "stroke": 0, "tier_0": 13, "tier_1": 0, "tier_2": 1 },
+      "primary_topology": "Five connected pavilion masses and four folded roof planes leave the center navigable and open; exactly three physically joined viewpoint decks occupy the left, right, and rear, with one narrow inset gallery at the right-front wing.",
+      "interior_detail": "Tier 2 contains only the approved blank courtyard survey table; it has no map text, pins, annotations, or browser/resume content."
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/ticket-validation-automation/master-v1",
+      "primary_path_hash": "sha256:9a3f4df01905b2331abbfec46c94671b188e36e5dc1f76476d93ba881eedd0dc",
+      "master_geometry_hash": "sha256:4ef57b7660bc8de414a986831630c982e2daf67cfa42a812162168c7ceff9353",
+      "footprint": { "width": 280, "depth": 180 },
+      "primitive_counts": { "total": 21, "surface": 8, "extrusion": 12, "stroke": 1, "tier_0": 20, "tier_1": 1, "tier_2": 0 },
+      "primary_topology": "A five-sided wedge platform carries three joined folded-canopy planes, three supports, a row of six abstract ribs, and one complete tall inspection arch built from two posts plus a connected header.",
+      "interior_detail": "Tier 1 is one restrained clean perforation-line sequence derived from the accepted lower LOD-1 panel; the malformed hero perforation patch was not copied. No easter egg was added."
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/sap-table-update-integration/master-v1",
+      "primary_path_hash": "sha256:f80aed3911ec95fa6bc2cc20dac982e14d596f2ea6f4a7ee9502be4db39c649a",
+      "master_geometry_hash": "sha256:01f7aae8ac98e46f87c656f8330436ce2863352cabd0619c5636ce071381d8f7",
+      "footprint": { "width": 270, "depth": 270 },
+      "primitive_counts": { "total": 13, "surface": 5, "extrusion": 6, "stroke": 2, "tier_0": 11, "tier_1": 2, "tier_2": 0 },
+      "primary_topology": "One elevated broad deck is represented by a complete top and four side faces, rests into exactly four corner piers, meets a centered mechanical lift, and connects to one narrow front transfer bridge.",
+      "interior_detail": "Tier 1 contains deck grid seams only. Later-panel roof blocks were deliberately omitted, and no easter egg or factual integration cue was added."
+    },
+    {
+      "asset_id": "project/qc-alm-extractor@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/qc-alm-extractor/master-v1",
+      "primary_path_hash": "sha256:2d44a790a528d450d25448e91895b28bb056fd813832a480c85a392afcf8bc7e",
+      "master_geometry_hash": "sha256:18c6a8076be80eea213d13d5da2feb7f7b0180eedeec62d1f5778bcecdd41c92",
+      "footprint": { "width": 250, "depth": 280 },
+      "primitive_counts": { "total": 22, "surface": 15, "extrusion": 6, "stroke": 1, "tier_0": 21, "tier_1": 1, "tier_2": 0 },
+      "primary_topology": "Three nested quarry-base levels and a connected rear ramp carry two separately tapered inward-leaning clamp towers whose upper envelopes touch one plain suspended faceted block.",
+      "interior_detail": "Tier 1 contains only the paired clamp-face seam. No easter egg or application-lifecycle/data-flow symbolism was added."
+    },
+    {
+      "asset_id": "project/atlassian-platform-automation@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/atlassian-platform-automation/master-v1",
+      "primary_path_hash": "sha256:d70d632ec5ee9abe009c5ecf7de90ec3ef4e24b9be247f34a82eeaae14e239c7",
+      "master_geometry_hash": "sha256:6c72a6d7fbafed9c626333c902d24c6bebaaf15bef79e64fc4c523020de35c72",
+      "footprint": { "width": 300, "depth": 270 },
+      "primitive_counts": { "total": 22, "surface": 16, "extrusion": 5, "stroke": 1, "tier_0": 21, "tier_1": 1, "tier_2": 0 },
+      "primary_topology": "Three connected outward-growing frustum tiers form the inverted stepped volume above one compact base; four low cardinal buttress arms intersect the base, while two roof surfaces leave one deep diagonal cleft.",
+      "interior_detail": "Tier 1 contains only a tier seam. No easter egg, brand mark, platform fact, or automation cue was added."
+    },
+    {
+      "asset_id": "project/atlassian-data-center-resilience@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/atlassian-data-center-resilience/master-v1",
+      "primary_path_hash": "sha256:266396dfca987fe19dd64968595e57ed5ecc7819afafa1f3fa09447a0ea2e6e3",
+      "master_geometry_hash": "sha256:86974242eef5bc1c0f03e53c3c79af0ecbf2b558cc69c98705c5bb103444d5e7",
+      "footprint": { "width": 350, "depth": 230 },
+      "primitive_counts": { "total": 12, "surface": 0, "extrusion": 11, "stroke": 1, "tier_0": 11, "tier_1": 1, "tier_2": 0 },
+      "primary_topology": "One concave low U-shaped fortified mass leaves a deep open courtyard, six alternating solid buttress bays reinforce the exterior, and two utility pods physically meet the outer arms through ground-level service necks.",
+      "interior_detail": "Tier 1 contains only the single roof-datum outline. The unselected roof housings and pipes were omitted, and no easter egg or resilience claim was added."
+    },
+    {
+      "asset_id": "project/client-devops-delivery-implementations@v1",
+      "evidence_status": "identity-only",
+      "geometry_key": "career-world/project/client-devops-delivery-implementations/master-v1",
+      "primary_path_hash": "sha256:bb664721fa8bc59f0058f03bcf4149d294ad57c029fa46e1faa4eb53eacb48aa",
+      "master_geometry_hash": "sha256:e5173587fa37103df391b350bc97efcfa4c15a502e74d30e7ace1527d353273a",
+      "footprint": { "width": 230, "depth": 210 },
+      "primitive_counts": { "total": 11, "surface": 5, "extrusion": 5, "stroke": 1, "tier_0": 10, "tier_1": 1, "tier_2": 0 },
+      "primary_topology": "Exactly four unequal irregular wedge blocks climb around a narrow central void on one five-sided podium; the tallest wedge overlaps the bottom of one broad off-center cantilevered cap so the skyline remains physically connected.",
+      "interior_detail": "Tier 1 contains only the interlocked-wedge seam. No delivery process, client environment, tool mark, or easter egg was added."
+    }
+  ],
+  "source_panels": [
+    {
+      "asset_id": "project/contextforge@v1",
+      "final_verdict": "PASS_WITH_NOTES",
+      "canonical_path": "design/career-world/concepts/projects/contextforge-v1.png",
+      "canonical_sha256": "2e310d456a3594bba3b0041622a3235abee3f15f13019cf5a23b0f5b06b3e62a",
+      "selected_panel_role": "full_hero",
+      "normalized_crop_bounds": { "x_min": 0, "y_min": 0, "x_max": 1, "y_max": 1 },
+      "handling": "Used only as whole-image entertainment art direction. Geometry independently establishes an actual connected two-axis L, complete sawtooth bank, joined tower, sloped diagonal bridge, and compression-house landing. The image is not coordinate truth, protected-return proof, former-clearance proof, tower-envelope proof, or deterministic guide equivalence."
+    },
+    {
+      "asset_id": "project/career-world-portfolio@v1",
+      "final_verdict": "PASS",
+      "canonical_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+      "canonical_sha256": "2a44096db6354b8ba0799fcca604c21f62ffc173fae7079c829d48934742e908",
+      "selected_panel_role": "lod_1",
+      "normalized_crop_bounds": { "x_min": 0.5, "y_min": 0.02, "x_max": 0.97, "y_max": 0.49 }
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "final_verdict": "PASS_WITH_NOTES",
+      "canonical_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+      "canonical_sha256": "461b36bcfb4a59a8a4865b854be93a11e73061e8644097a77889b1119712b25d",
+      "selected_panel_role": "lod_1",
+      "normalized_crop_bounds": { "x_min": 0.261, "y_min": 0.618, "x_max": 0.494, "y_max": 0.94 },
+      "tracing_note_applied": "Used the clean lower LOD-1 topology and did not copy the tangled canopy perforation visible in the large hero."
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "final_verdict": "PASS_WITH_NOTES",
+      "canonical_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+      "canonical_sha256": "726aeb8f0df5e78911f0d2b8113653814dfc596ed08376e72fba09c1a621e229",
+      "selected_panel_role": "unspecified_detail_panel",
+      "normalized_crop_bounds": { "x_min": 0.18, "y_min": 0.01, "x_max": 0.82, "y_max": 0.65 },
+      "tracing_note_applied": "Used the selected clean elevated deck, exact four-pier/lift/bridge topology, and omitted roof blocks introduced only in a lower-row detail panel."
+    },
+    {
+      "asset_id": "project/qc-alm-extractor@v1",
+      "final_verdict": "PASS",
+      "canonical_path": "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+      "canonical_sha256": "4920864275daec6400d0c6ddd3cc3504de7e04f2ca828cec56eebbeeaef7c492",
+      "selected_panel_role": "unspecified_detail_panel",
+      "normalized_crop_bounds": { "x_min": 0.25, "y_min": 0.02, "x_max": 0.75, "y_max": 0.56 }
+    },
+    {
+      "asset_id": "project/atlassian-platform-automation@v1",
+      "final_verdict": "PASS",
+      "canonical_path": "design/career-world/concepts/projects/atlassian-platform-automation-v1.png",
+      "canonical_sha256": "2b1d1d3219523a47dc31cbb9f18c33141cd318ae1e42724ac0da91145830f1db",
+      "selected_panel_role": "unspecified_detail_panel",
+      "normalized_crop_bounds": { "x_min": 0.02, "y_min": 0.03, "x_max": 0.98, "y_max": 0.635 }
+    },
+    {
+      "asset_id": "project/atlassian-data-center-resilience@v1",
+      "final_verdict": "PASS_WITH_NOTES",
+      "canonical_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+      "canonical_sha256": "cf539279b3a2d6c284e8c9992b3a4c934f6e196188e3affe252571dd3303c608",
+      "selected_panel_role": "lod_0",
+      "normalized_crop_bounds": { "x_min": 0.007, "y_min": 0.01, "x_max": 0.495, "y_max": 0.492 },
+      "tracing_note_applied": "Used the selected clean U/pod topology and omitted small roof housings and protruding pipes introduced only in the lower-left panel."
+    },
+    {
+      "asset_id": "project/client-devops-delivery-implementations@v1",
+      "final_verdict": "PASS",
+      "canonical_path": "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+      "canonical_sha256": "1d1f6ae65449a453b6f39a25a8fcd2991ad06da1795bec29e357d8467b2bcedb",
+      "selected_panel_role": "lod_2",
+      "normalized_crop_bounds": { "x_min": 0.495, "y_min": 0.01, "x_max": 0.744, "y_max": 0.497 }
+    }
+  ],
+  "contextforge_art_direction_handling": {
+    "final_verdict_preserved": "PASS_WITH_NOTES",
+    "whole_image_reference_only": true,
+    "coordinate_truth_claimed": false,
+    "guide_reconstruction_claimed": false,
+    "former_clearance_or_tower_envelope_claimed": false,
+    "deterministic_code_authority": "features/career-world/definitions/projects-b.ts",
+    "code_owned_constraints": [
+      "connected readable non-collinear two-axis L",
+      "complete three-vault sawtooth bank",
+      "archive tower intersects the return hall",
+      "diagonal bridge touches the compression house and penetrates the archive-tower envelope",
+      "literal primary and master hashes",
+      "conservative centered footprint"
+    ]
+  },
+  "evidence_and_entertainment_boundary": {
+    "evidence_backed_assets": 2,
+    "identity_only_assets": 6,
+    "identity_only_easter_eggs_added": 0,
+    "approved_evidence_backed_lod2_details": [
+      "project/contextforge@v1 cold tool rack",
+      "project/career-world-portfolio@v1 blank survey table"
+    ],
+    "factual_copy_or_metrics_encoded": false,
+    "project_skill_links_encoded": false,
+    "logos_or_brand_geometry_encoded": false,
+    "note": "Geometry is illustrative entertainment. It does not create evidence, technical architecture, outcomes, metrics, or employer-campus claims."
+  },
+  "aggregate_geometry_counts": {
+    "definitions": 8,
+    "primitives": 126,
+    "primitive_types": { "surface": 58, "extrusion": 59, "stroke": 9 },
+    "detail_tiers": { "tier_0": 116, "tier_1": 8, "tier_2": 2 },
+    "higher_tier_exterior_masses_or_connections": 0,
+    "unique_geometry_keys": 8,
+    "unique_primary_path_hashes": 8,
+    "unique_master_geometry_hashes": 8
+  },
+  "checks": [
+    {
+      "name": "authority_hash_verification",
+      "result": "PASS",
+      "evidence": "The superseding F0 envelope, composition brief, manifest, promoted-art report, canonical 56 digest, and all eight canonical PNG SHA-256 values match their accepted receipts."
+    },
+    {
+      "name": "selected_panel_visual_review",
+      "result": "PASS",
+      "evidence": "Inspected all eight assigned canonical concept sheets. Each selected primary topology can be represented with the three accepted primitives; no manifest/panel stop-condition conflict or hidden-geometry invention was required. ContextForge was handled under its explicit whole-image PASS_WITH_NOTES caveat."
+    },
+    {
+      "name": "vite_ssr_module_and_definition_validation",
+      "result": "PASS",
+      "command": "Node plus Vite SSR load of projects-b.ts and canonical-payload.ts",
+      "evidence": "Eight definitions loaded; validateGeometryDefinition returned zero errors for every definition."
+    },
+    {
+      "name": "literal_sha256_recomputation",
+      "result": "PASS",
+      "command": "Node crypto SHA-256 over UTF-8 primaryPath and serializeCanonicalGeometryPayload(definition)",
+      "evidence": "All 16 stored literal hashes match independent recomputation."
+    },
+    {
+      "name": "closure_identity_projection_and_palette",
+      "result": "PASS",
+      "evidence": "Exact ordered eight-ID closure; eight unique geometry keys, primary hashes, and master hashes; category project; orientation 0; projection cw-iso-225-45-35.264-r0-v1; exact PALETTE_SLOTS on every definition."
+    },
+    {
+      "name": "tier_continuity",
+      "result": "PASS",
+      "evidence": "All 116 exterior masses, roof planes, supports, connections, complete frames, and footprint-defining elements are tier 0. The eight tier-1 and two tier-2 primitives are interior seams, restrained line detail, or the two approved non-silhouette props."
+    },
+    {
+      "name": "plan_footprint_and_connectivity_review",
+      "result": "PASS",
+      "evidence": "All 59 extrusion plans are finite, frozen, non-repeating, non-zero-area, non-self-intersecting, and contained by conservative centered footprints. Required bridges, necks, decks, supports, caps, tower landings, and clamps touch or overlap their intended exterior masses."
+    },
+    {
+      "name": "immutability_and_forbidden_reference_scan",
+      "result": "PASS",
+      "evidence": "Definitions, footprints, primitive arrays, primitives, plans, and plan points are frozen. Product source contains no runtime image/data URI, hex palette value, employer palette/owner, instance or position field, brand/logo text, 3D/WebGL surface, dependency, or product integration reference."
+    },
+    {
+      "name": "file_local_typescript",
+      "result": "PASS",
+      "command": "Node TypeScript tsc --noEmit --pretty false --skipLibCheck --strict --target ES2022 --module ESNext --moduleResolution Bundler features/career-world/definitions/projects-b.ts"
+    },
+    {
+      "name": "file_local_eslint",
+      "result": "PASS",
+      "command": "Node ESLint features/career-world/definitions/projects-b.ts"
+    },
+    {
+      "name": "file_local_diff_check",
+      "result": "PASS",
+      "command": "git diff --check -- features/career-world/definitions/projects-b.ts"
+    }
+  ],
+  "deviations": [],
+  "risks_blockers": [],
+  "handoff_boundary": {
+    "integration_claimed": false,
+    "promotion_claimed": false,
+    "external_envelope_required": true,
+    "next_owner_note": "External handoff must hash this finalized report, bind the one-file controlled source delta to superseding F0 envelope b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e, and verify the live source bytes before I0 reconstructs the eight-lane union."
+  }
+}

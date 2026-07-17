@@ -1,0 +1,1784 @@
+{
+  "schema_version": "career-world-runtime-art/v1",
+  "source_report": "docs/career-world-production/reports/art-promoted-56.json",
+  "world_topology": "one-mainland-two-lower-islands",
+  "records": [
+    {
+      "asset_id": "ambient/cargo-boat@v1",
+      "runtime_path": "/public/career-world/art/ambient/cargo-boat.webp",
+      "source_path": "design/career-world/concepts/ambient/cargo-boat-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 184,
+        "y": 30,
+        "width": 1104,
+        "height": 562
+      },
+      "output": {
+        "width": 490,
+        "height": 257,
+        "bytes": 19372,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.38,
+        "foreground_threshold": 25.38,
+        "pretrim": {
+          "width": 520,
+          "height": 264
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 486,
+          "content_height": 253,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 61982,
+          "alpha_coverage": 0.492194
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/evergreen-cluster@v1",
+      "runtime_path": "/public/career-world/art/ambient/evergreen-cluster.webp",
+      "source_path": "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 38,
+        "y": 500,
+        "width": 714,
+        "height": 408
+      },
+      "output": {
+        "width": 293,
+        "height": 288,
+        "bytes": 14326,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.03,
+        "foreground_threshold": 26.03,
+        "pretrim": {
+          "width": 520,
+          "height": 296
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 289,
+          "content_height": 284,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 47684,
+          "alpha_coverage": 0.565083
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/marker-buoy@v1",
+      "runtime_path": "/public/career-world/art/ambient/marker-buoy.webp",
+      "source_path": "design/career-world/concepts/ambient/marker-buoy-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 14,
+        "y": 24,
+        "width": 384,
+        "height": 762
+      },
+      "output": {
+        "width": 173,
+        "height": 325,
+        "bytes": 8564,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.74,
+        "foreground_threshold": 26.74,
+        "pretrim": {
+          "width": 190,
+          "height": 380
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 169,
+          "content_height": 321,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 20419,
+          "alpha_coverage": 0.363166
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/rock-cluster@v1",
+      "runtime_path": "/public/career-world/art/ambient/rock-cluster.webp",
+      "source_path": "design/career-world/concepts/ambient/rock-cluster-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 396,
+        "y": 552,
+        "width": 350,
+        "height": 332
+      },
+      "output": {
+        "width": 341,
+        "height": 300,
+        "bytes": 16094,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.03,
+        "foreground_threshold": 27.03,
+        "pretrim": {
+          "width": 350,
+          "height": 332
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 337,
+          "content_height": 296,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 61208,
+          "alpha_coverage": 0.598319
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/roof-equipment-kit@v1",
+      "runtime_path": "/public/career-world/art/ambient/roof-equipment-kit.webp",
+      "source_path": "design/career-world/concepts/ambient/roof-equipment-kit-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 14,
+        "y": 14,
+        "width": 736,
+        "height": 418
+      },
+      "output": {
+        "width": 490,
+        "height": 270,
+        "bytes": 23110,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.59,
+        "foreground_threshold": 27.59,
+        "pretrim": {
+          "width": 520,
+          "height": 294
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 486,
+          "content_height": 266,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 77970,
+          "alpha_coverage": 0.589342
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/service-truck@v1",
+      "runtime_path": "/public/career-world/art/ambient/service-truck.webp",
+      "source_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 384,
+        "y": 20,
+        "width": 720,
+        "height": 542
+      },
+      "output": {
+        "width": 477,
+        "height": 377,
+        "bytes": 38550,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.09,
+        "foreground_threshold": 30.09,
+        "pretrim": {
+          "width": 504,
+          "height": 380
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 473,
+          "content_height": 373,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 115968,
+          "alpha_coverage": 0.644879
+        }
+      }
+    },
+    {
+      "asset_id": "ambient/shore-pier@v1",
+      "runtime_path": "/public/career-world/art/ambient/shore-pier.webp",
+      "source_path": "design/career-world/concepts/ambient/shore-pier-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 8,
+        "y": 10,
+        "width": 1264,
+        "height": 586
+      },
+      "output": {
+        "width": 351,
+        "height": 228,
+        "bytes": 11750,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 10.46,
+        "foreground_threshold": 28.46,
+        "pretrim": {
+          "width": 520,
+          "height": 240
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 347,
+          "content_height": 224,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 25625,
+          "alpha_coverage": 0.3202
+        }
+      }
+    },
+    {
+      "asset_id": "city/ace-hardware@v1",
+      "runtime_path": "/public/career-world/art/city/ace-hardware.webp",
+      "source_path": "design/career-world/concepts/cities/ace-hardware-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 42,
+        "y": 24,
+        "width": 732,
+        "height": 486
+      },
+      "output": {
+        "width": 711,
+        "height": 459,
+        "bytes": 73284,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.31,
+        "foreground_threshold": 26.31,
+        "pretrim": {
+          "width": 732,
+          "height": 486
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 707,
+          "content_height": 455,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 200918,
+          "alpha_coverage": 0.615654
+        }
+      }
+    },
+    {
+      "asset_id": "city/column-technologies@v1",
+      "runtime_path": "/public/career-world/art/city/column-technologies.webp",
+      "source_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 102,
+        "y": 30,
+        "width": 838,
+        "height": 674
+      },
+      "output": {
+        "width": 716,
+        "height": 620,
+        "bytes": 45628,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 15.82,
+        "foreground_threshold": 33.82,
+        "pretrim": {
+          "width": 838,
+          "height": 674
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 712,
+          "content_height": 616,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 244073,
+          "alpha_coverage": 0.549813
+        }
+      }
+    },
+    {
+      "asset_id": "city/independent@v1",
+      "runtime_path": "/public/career-world/art/city/independent.webp",
+      "source_path": "design/career-world/concepts/cities/independent-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 92,
+        "y": 500,
+        "width": 660,
+        "height": 470
+      },
+      "output": {
+        "width": 580,
+        "height": 453,
+        "bytes": 39794,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 17.1,
+        "foreground_threshold": 35.1,
+        "pretrim": {
+          "width": 660,
+          "height": 470
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 576,
+          "content_height": 449,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 158998,
+          "alpha_coverage": 0.605153
+        }
+      }
+    },
+    {
+      "asset_id": "city/ninjaone@v1",
+      "runtime_path": "/public/career-world/art/city/ninjaone.webp",
+      "source_path": "design/career-world/concepts/cities/ninjaone-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "output": {
+        "width": 739,
+        "height": 631,
+        "bytes": 53112,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 10.68,
+        "foreground_threshold": 28.68,
+        "pretrim": {
+          "width": 760,
+          "height": 760
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 735,
+          "content_height": 627,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 227937,
+          "alpha_coverage": 0.488811
+        }
+      }
+    },
+    {
+      "asset_id": "city/tanium@v1",
+      "runtime_path": "/public/career-world/art/city/tanium.webp",
+      "source_path": "design/career-world/concepts/cities/tanium-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 14,
+        "y": 10,
+        "width": 1504,
+        "height": 644
+      },
+      "output": {
+        "width": 612,
+        "height": 357,
+        "bytes": 37704,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.53,
+        "foreground_threshold": 27.53,
+        "pretrim": {
+          "width": 900,
+          "height": 384
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 608,
+          "content_height": 353,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 101459,
+          "alpha_coverage": 0.464377
+        }
+      }
+    },
+    {
+      "asset_id": "project/atlassian-data-center-resilience@v1",
+      "runtime_path": "/public/career-world/art/project/atlassian-data-center-resilience.webp",
+      "source_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 10,
+        "y": 10,
+        "width": 748,
+        "height": 492
+      },
+      "output": {
+        "width": 705,
+        "height": 401,
+        "bytes": 30192,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 11.82,
+        "foreground_threshold": 29.82,
+        "pretrim": {
+          "width": 748,
+          "height": 492
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 701,
+          "content_height": 397,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 147011,
+          "alpha_coverage": 0.520016
+        }
+      }
+    },
+    {
+      "asset_id": "project/atlassian-platform-automation@v1",
+      "runtime_path": "/public/career-world/art/project/atlassian-platform-automation.webp",
+      "source_path": "design/career-world/concepts/projects/atlassian-platform-automation-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 30,
+        "y": 30,
+        "width": 1474,
+        "height": 618
+      },
+      "output": {
+        "width": 483,
+        "height": 322,
+        "bytes": 18450,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 14.82,
+        "foreground_threshold": 32.82,
+        "pretrim": {
+          "width": 860,
+          "height": 360
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 479,
+          "content_height": 318,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 93065,
+          "alpha_coverage": 0.598389
+        }
+      }
+    },
+    {
+      "asset_id": "project/cablecar@v1",
+      "runtime_path": "/public/career-world/art/project/cablecar.webp",
+      "source_path": "design/career-world/concepts/projects/cablecar-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 10,
+        "y": 522,
+        "width": 748,
+        "height": 490
+      },
+      "output": {
+        "width": 704,
+        "height": 397,
+        "bytes": 47478,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.74,
+        "foreground_threshold": 27.74,
+        "pretrim": {
+          "width": 748,
+          "height": 490
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 700,
+          "content_height": 393,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 142911,
+          "alpha_coverage": 0.511331
+        }
+      }
+    },
+    {
+      "asset_id": "project/career-world-portfolio@v1",
+      "runtime_path": "/public/career-world/art/project/career-world-portfolio.webp",
+      "source_path": "design/career-world/concepts/projects/career-world-portfolio-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 768,
+        "y": 20,
+        "width": 720,
+        "height": 480
+      },
+      "output": {
+        "width": 660,
+        "height": 474,
+        "bytes": 43678,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.1,
+        "foreground_threshold": 27.1,
+        "pretrim": {
+          "width": 720,
+          "height": 480
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 656,
+          "content_height": 470,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 205638,
+          "alpha_coverage": 0.657326
+        }
+      }
+    },
+    {
+      "asset_id": "project/client-devops-delivery-implementations@v1",
+      "runtime_path": "/public/career-world/art/project/client-devops-delivery-implementations.webp",
+      "source_path": "design/career-world/concepts/projects/client-devops-delivery-implementations-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 760,
+        "y": 10,
+        "width": 382,
+        "height": 498
+      },
+      "output": {
+        "width": 313,
+        "height": 433,
+        "bytes": 20896,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.68,
+        "foreground_threshold": 30.68,
+        "pretrim": {
+          "width": 382,
+          "height": 498
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 309,
+          "content_height": 429,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 94310,
+          "alpha_coverage": 0.695866
+        }
+      }
+    },
+    {
+      "asset_id": "project/contextforge@v1",
+      "runtime_path": "/public/career-world/art/project/contextforge.webp",
+      "source_path": "design/career-world/concepts/projects/contextforge-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      },
+      "output": {
+        "width": 655,
+        "height": 441,
+        "bytes": 32584,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 11.72,
+        "foreground_threshold": 29.72,
+        "pretrim": {
+          "width": 860,
+          "height": 572
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 651,
+          "content_height": 437,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 161340,
+          "alpha_coverage": 0.55855
+        }
+      }
+    },
+    {
+      "asset_id": "project/kaizen-agent-platform@v1",
+      "runtime_path": "/public/career-world/art/project/kaizen-agent-platform.webp",
+      "source_path": "design/career-world/concepts/projects/kaizen-agent-platform-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 6,
+        "y": 522,
+        "width": 744,
+        "height": 480
+      },
+      "output": {
+        "width": 617,
+        "height": 419,
+        "bytes": 40858,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.1,
+        "foreground_threshold": 26.1,
+        "pretrim": {
+          "width": 744,
+          "height": 480
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 613,
+          "content_height": 415,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 149453,
+          "alpha_coverage": 0.578103
+        }
+      }
+    },
+    {
+      "asset_id": "project/kaizen-metrics@v1",
+      "runtime_path": "/public/career-world/art/project/kaizen-metrics.webp",
+      "source_path": "design/career-world/concepts/tracer/project-kaizen-metrics-v1.png",
+      "source_role": "approved-kaizen-observatory-override",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 512
+      },
+      "output": {
+        "width": 602,
+        "height": 459,
+        "bytes": 54746,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.24,
+        "foreground_threshold": 26.24,
+        "pretrim": {
+          "width": 768,
+          "height": 512
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 598,
+          "content_height": 455,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 164055,
+          "alpha_coverage": 0.593718
+        }
+      }
+    },
+    {
+      "asset_id": "project/qc-alm-extractor@v1",
+      "runtime_path": "/public/career-world/art/project/qc-alm-extractor.webp",
+      "source_path": "design/career-world/concepts/projects/qc-alm-extractor-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 384,
+        "y": 20,
+        "width": 768,
+        "height": 552
+      },
+      "output": {
+        "width": 627,
+        "height": 524,
+        "bytes": 41580,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.96,
+        "foreground_threshold": 30.96,
+        "pretrim": {
+          "width": 768,
+          "height": 552
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 623,
+          "content_height": 520,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 171901,
+          "alpha_coverage": 0.523214
+        }
+      }
+    },
+    {
+      "asset_id": "project/sap-table-update-integration@v1",
+      "runtime_path": "/public/career-world/art/project/sap-table-update-integration.webp",
+      "source_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 276,
+        "y": 10,
+        "width": 982,
+        "height": 654
+      },
+      "output": {
+        "width": 730,
+        "height": 560,
+        "bytes": 58318,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 14.31,
+        "foreground_threshold": 32.31,
+        "pretrim": {
+          "width": 860,
+          "height": 572
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 726,
+          "content_height": 556,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 225853,
+          "alpha_coverage": 0.552478
+        }
+      }
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "runtime_path": "/public/career-world/art/project/tanium-risk-assessment.webp",
+      "source_path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "output": {
+        "width": 601,
+        "height": 618,
+        "bytes": 46784,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.89,
+        "foreground_threshold": 30.89,
+        "pretrim": {
+          "width": 680,
+          "height": 680
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 597,
+          "content_height": 614,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 176472,
+          "alpha_coverage": 0.47513
+        }
+      }
+    },
+    {
+      "asset_id": "project/ticket-validation-automation@v1",
+      "runtime_path": "/public/career-world/art/project/ticket-validation-automation.webp",
+      "source_path": "design/career-world/concepts/projects/ticket-validation-automation-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 400,
+        "y": 632,
+        "width": 356,
+        "height": 328
+      },
+      "output": {
+        "width": 349,
+        "height": 199,
+        "bytes": 13706,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.39,
+        "foreground_threshold": 30.39,
+        "pretrim": {
+          "width": 356,
+          "height": 328
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 345,
+          "content_height": 195,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 41922,
+          "alpha_coverage": 0.60362
+        }
+      }
+    },
+    {
+      "asset_id": "project/tmatch-eolmatch@v1",
+      "runtime_path": "/public/career-world/art/project/tmatch-eolmatch.webp",
+      "source_path": "design/career-world/concepts/projects/tmatch-eolmatch-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 124,
+        "y": 24,
+        "width": 594,
+        "height": 480
+      },
+      "output": {
+        "width": 547,
+        "height": 466,
+        "bytes": 50652,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 13.38,
+        "foreground_threshold": 31.38,
+        "pretrim": {
+          "width": 594,
+          "height": 480
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 543,
+          "content_height": 462,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 149376,
+          "alpha_coverage": 0.586013
+        }
+      }
+    },
+    {
+      "asset_id": "project/uat-automation@v1",
+      "runtime_path": "/public/career-world/art/project/uat-automation.webp",
+      "source_path": "design/career-world/concepts/projects/uat-automation-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 144,
+        "y": 34,
+        "width": 1274,
+        "height": 512
+      },
+      "output": {
+        "width": 837,
+        "height": 320,
+        "bytes": 39994,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.81,
+        "foreground_threshold": 25.81,
+        "pretrim": {
+          "width": 860,
+          "height": 344
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 833,
+          "content_height": 316,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 122750,
+          "alpha_coverage": 0.458296
+        }
+      }
+    },
+    {
+      "asset_id": "project/vendy-vm-platform@v1",
+      "runtime_path": "/public/career-world/art/project/vendy-vm-platform.webp",
+      "source_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      },
+      "output": {
+        "width": 708,
+        "height": 535,
+        "bytes": 59944,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.67,
+        "foreground_threshold": 27.67,
+        "pretrim": {
+          "width": 860,
+          "height": 572
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 704,
+          "content_height": 531,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 240415,
+          "alpha_coverage": 0.634709
+        }
+      }
+    },
+    {
+      "asset_id": "project/xsearch@v1",
+      "runtime_path": "/public/career-world/art/project/xsearch.webp",
+      "source_path": "design/career-world/concepts/projects/xsearch-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 276,
+        "y": 20,
+        "width": 920,
+        "height": 592
+      },
+      "output": {
+        "width": 819,
+        "height": 517,
+        "bytes": 58904,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 10.46,
+        "foreground_threshold": 28.46,
+        "pretrim": {
+          "width": 860,
+          "height": 552
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 815,
+          "content_height": 513,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 214895,
+          "alpha_coverage": 0.507518
+        }
+      }
+    },
+    {
+      "asset_id": "skill/ai@v1",
+      "runtime_path": "/public/career-world/art/skill/ai.webp",
+      "source_path": "design/career-world/concepts/skills/ai-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 22,
+        "y": 532,
+        "width": 828,
+        "height": 470
+      },
+      "output": {
+        "width": 519,
+        "height": 330,
+        "bytes": 28542,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 6.23,
+        "foreground_threshold": 25,
+        "pretrim": {
+          "width": 620,
+          "height": 350
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 515,
+          "content_height": 326,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 91593,
+          "alpha_coverage": 0.534787
+        }
+      }
+    },
+    {
+      "asset_id": "skill/atlassian@v1",
+      "runtime_path": "/public/career-world/art/skill/atlassian.webp",
+      "source_path": "design/career-world/concepts/skills/atlassian-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      },
+      "output": {
+        "width": 577,
+        "height": 316,
+        "bytes": 36994,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 15.24,
+        "foreground_threshold": 33.24,
+        "pretrim": {
+          "width": 620,
+          "height": 412
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 573,
+          "content_height": 312,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 112987,
+          "alpha_coverage": 0.619677
+        }
+      }
+    },
+    {
+      "asset_id": "skill/aws@v1",
+      "runtime_path": "/public/career-world/art/skill/aws.webp",
+      "source_path": "design/career-world/concepts/skills/aws-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 10,
+        "y": 12,
+        "width": 974,
+        "height": 590
+      },
+      "output": {
+        "width": 580,
+        "height": 353,
+        "bytes": 39222,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.81,
+        "foreground_threshold": 25.81,
+        "pretrim": {
+          "width": 620,
+          "height": 374
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 576,
+          "content_height": 349,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 117781,
+          "alpha_coverage": 0.575271
+        }
+      }
+    },
+    {
+      "asset_id": "skill/ci-cd@v1",
+      "runtime_path": "/public/career-world/art/skill/ci-cd.webp",
+      "source_path": "design/career-world/concepts/skills/ci-cd-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 214,
+        "y": 40,
+        "width": 1044,
+        "height": 582
+      },
+      "output": {
+        "width": 608,
+        "height": 313,
+        "bytes": 33134,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.31,
+        "foreground_threshold": 25.31,
+        "pretrim": {
+          "width": 620,
+          "height": 344
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 604,
+          "content_height": 309,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 99816,
+          "alpha_coverage": 0.524508
+        }
+      }
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "runtime_path": "/public/career-world/art/skill/context-compression.webp",
+      "source_path": "design/career-world/concepts/skills/context-compression-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "output": {
+        "width": 447,
+        "height": 507,
+        "bytes": 27810,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.1,
+        "foreground_threshold": 26.1,
+        "pretrim": {
+          "width": 560,
+          "height": 560
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 443,
+          "content_height": 503,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 132422,
+          "alpha_coverage": 0.584312
+        }
+      }
+    },
+    {
+      "asset_id": "skill/csharp@v1",
+      "runtime_path": "/public/career-world/art/skill/csharp.webp",
+      "source_path": "design/career-world/concepts/skills/csharp-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 384,
+        "y": 24,
+        "width": 844,
+        "height": 568
+      },
+      "output": {
+        "width": 551,
+        "height": 385,
+        "bytes": 38516,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.03,
+        "foreground_threshold": 26.03,
+        "pretrim": {
+          "width": 620,
+          "height": 416
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 547,
+          "content_height": 381,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 148146,
+          "alpha_coverage": 0.698357
+        }
+      }
+    },
+    {
+      "asset_id": "skill/data-contracts@v1",
+      "runtime_path": "/public/career-world/art/skill/data-contracts.webp",
+      "source_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 138,
+        "y": 30,
+        "width": 1258,
+        "height": 500
+      },
+      "output": {
+        "width": 599,
+        "height": 248,
+        "bytes": 30184,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.17,
+        "foreground_threshold": 25.17,
+        "pretrim": {
+          "width": 620,
+          "height": 246
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 595,
+          "content_height": 244,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 92621,
+          "alpha_coverage": 0.623492
+        }
+      }
+    },
+    {
+      "asset_id": "skill/databricks@v1",
+      "runtime_path": "/public/career-world/art/skill/databricks.webp",
+      "source_path": "design/career-world/concepts/skills/databricks-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 38,
+        "y": 12,
+        "width": 806,
+        "height": 632
+      },
+      "output": {
+        "width": 608,
+        "height": 480,
+        "bytes": 54324,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 4.94,
+        "foreground_threshold": 25,
+        "pretrim": {
+          "width": 620,
+          "height": 486
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 604,
+          "content_height": 476,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 176679,
+          "alpha_coverage": 0.605397
+        }
+      }
+    },
+    {
+      "asset_id": "skill/docker@v1",
+      "runtime_path": "/public/career-world/art/skill/docker.webp",
+      "source_path": "design/career-world/concepts/skills/docker-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 18,
+        "y": 16,
+        "width": 738,
+        "height": 446
+      },
+      "output": {
+        "width": 534,
+        "height": 372,
+        "bytes": 42206,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.95,
+        "foreground_threshold": 26.95,
+        "pretrim": {
+          "width": 620,
+          "height": 374
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 530,
+          "content_height": 368,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 126460,
+          "alpha_coverage": 0.636603
+        }
+      }
+    },
+    {
+      "asset_id": "skill/electron@v1",
+      "runtime_path": "/public/career-world/art/skill/electron.webp",
+      "source_path": "design/career-world/concepts/skills/electron-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 106,
+        "y": 30,
+        "width": 660,
+        "height": 552
+      },
+      "output": {
+        "width": 584,
+        "height": 499,
+        "bytes": 42852,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.81,
+        "foreground_threshold": 25.81,
+        "pretrim": {
+          "width": 620,
+          "height": 518
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 580,
+          "content_height": 495,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 170793,
+          "alpha_coverage": 0.58608
+        }
+      }
+    },
+    {
+      "asset_id": "skill/go@v1",
+      "runtime_path": "/public/career-world/art/skill/go.webp",
+      "source_path": "design/career-world/concepts/skills/go-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 230,
+        "y": 30,
+        "width": 1152,
+        "height": 650
+      },
+      "output": {
+        "width": 582,
+        "height": 340,
+        "bytes": 35364,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.67,
+        "foreground_threshold": 26.67,
+        "pretrim": {
+          "width": 620,
+          "height": 348
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 578,
+          "content_height": 336,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 109624,
+          "alpha_coverage": 0.553992
+        }
+      }
+    },
+    {
+      "asset_id": "skill/informatica@v1",
+      "runtime_path": "/public/career-world/art/skill/informatica.webp",
+      "source_path": "design/career-world/concepts/skills/informatica-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 198,
+        "y": 20,
+        "width": 1044,
+        "height": 592
+      },
+      "output": {
+        "width": 608,
+        "height": 334,
+        "bytes": 31612,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.02,
+        "foreground_threshold": 26.02,
+        "pretrim": {
+          "width": 620,
+          "height": 350
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 604,
+          "content_height": 330,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 95056,
+          "alpha_coverage": 0.46809
+        }
+      }
+    },
+    {
+      "asset_id": "skill/java@v1",
+      "runtime_path": "/public/career-world/art/skill/java.webp",
+      "source_path": "design/career-world/concepts/skills/java-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      },
+      "output": {
+        "width": 608,
+        "height": 330,
+        "bytes": 38558,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.82,
+        "foreground_threshold": 27.82,
+        "pretrim": {
+          "width": 620,
+          "height": 412
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 604,
+          "content_height": 326,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 93386,
+          "alpha_coverage": 0.465441
+        }
+      }
+    },
+    {
+      "asset_id": "skill/localdb@v1",
+      "runtime_path": "/public/career-world/art/skill/localdb.webp",
+      "source_path": "design/career-world/concepts/skills/localdb-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 18,
+        "y": 20,
+        "width": 860,
+        "height": 644
+      },
+      "output": {
+        "width": 548,
+        "height": 386,
+        "bytes": 37258,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 5.59,
+        "foreground_threshold": 25,
+        "pretrim": {
+          "width": 620,
+          "height": 464
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 544,
+          "content_height": 382,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 122009,
+          "alpha_coverage": 0.576798
+        }
+      }
+    },
+    {
+      "asset_id": "skill/macstadium@v1",
+      "runtime_path": "/public/career-world/art/skill/macstadium.webp",
+      "source_path": "design/career-world/concepts/skills/macstadium-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 778,
+        "y": 596,
+        "width": 388,
+        "height": 298
+      },
+      "output": {
+        "width": 382,
+        "height": 247,
+        "bytes": 15838,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.95,
+        "foreground_threshold": 25.95,
+        "pretrim": {
+          "width": 388,
+          "height": 298
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 378,
+          "content_height": 243,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 54799,
+          "alpha_coverage": 0.580781
+        }
+      }
+    },
+    {
+      "asset_id": "skill/manifest-v3@v1",
+      "runtime_path": "/public/career-world/art/skill/manifest-v3.webp",
+      "source_path": "design/career-world/concepts/skills/manifest-v3-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 14,
+        "y": 20,
+        "width": 952,
+        "height": 818
+      },
+      "output": {
+        "width": 595,
+        "height": 488,
+        "bytes": 59930,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.88,
+        "foreground_threshold": 25.88,
+        "pretrim": {
+          "width": 620,
+          "height": 532
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 591,
+          "content_height": 484,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 149957,
+          "alpha_coverage": 0.516452
+        }
+      }
+    },
+    {
+      "asset_id": "skill/mcp@v1",
+      "runtime_path": "/public/career-world/art/skill/mcp.webp",
+      "source_path": "design/career-world/concepts/skills/mcp-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 18,
+        "y": 18,
+        "width": 1216,
+        "height": 732
+      },
+      "output": {
+        "width": 407,
+        "height": 334,
+        "bytes": 26322,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.81,
+        "foreground_threshold": 25.81,
+        "pretrim": {
+          "width": 618,
+          "height": 372
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 403,
+          "content_height": 330,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 94000,
+          "alpha_coverage": 0.691492
+        }
+      }
+    },
+    {
+      "asset_id": "skill/openapi@v1",
+      "runtime_path": "/public/career-world/art/skill/openapi.webp",
+      "source_path": "design/career-world/concepts/skills/openapi-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1216,
+        "height": 1294
+      },
+      "output": {
+        "width": 454,
+        "height": 449,
+        "bytes": 42318,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.67,
+        "foreground_threshold": 30.67,
+        "pretrim": {
+          "width": 526,
+          "height": 560
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 450,
+          "content_height": 445,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 142124,
+          "alpha_coverage": 0.697213
+        }
+      }
+    },
+    {
+      "asset_id": "skill/operator-control@v1",
+      "runtime_path": "/public/career-world/art/skill/operator-control.webp",
+      "source_path": "design/career-world/concepts/skills/operator-control-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1402,
+        "height": 1122
+      },
+      "output": {
+        "width": 580,
+        "height": 416,
+        "bytes": 54354,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 11.53,
+        "foreground_threshold": 29.53,
+        "pretrim": {
+          "width": 620,
+          "height": 496
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 576,
+          "content_height": 412,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 152676,
+          "alpha_coverage": 0.632775
+        }
+      }
+    },
+    {
+      "asset_id": "skill/postgresql@v1",
+      "runtime_path": "/public/career-world/art/skill/postgresql.webp",
+      "source_path": "design/career-world/concepts/skills/postgresql-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 768,
+        "y": 24,
+        "width": 358,
+        "height": 470
+      },
+      "output": {
+        "width": 322,
+        "height": 418,
+        "bytes": 36632,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.81,
+        "foreground_threshold": 26.81,
+        "pretrim": {
+          "width": 358,
+          "height": 470
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 318,
+          "content_height": 414,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 98317,
+          "alpha_coverage": 0.73046
+        }
+      }
+    },
+    {
+      "asset_id": "skill/python@v1",
+      "runtime_path": "/public/career-world/art/skill/python.webp",
+      "source_path": "design/career-world/concepts/skills/python-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 276,
+        "y": 30,
+        "width": 920,
+        "height": 522
+      },
+      "output": {
+        "width": 562,
+        "height": 347,
+        "bytes": 52078,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 9.03,
+        "foreground_threshold": 27.03,
+        "pretrim": {
+          "width": 620,
+          "height": 350
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 558,
+          "content_height": 343,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 122364,
+          "alpha_coverage": 0.627463
+        }
+      }
+    },
+    {
+      "asset_id": "skill/react@v1",
+      "runtime_path": "/public/career-world/art/skill/react.webp",
+      "source_path": "design/career-world/concepts/skills/react-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "output": {
+        "width": 550,
+        "height": 409,
+        "bytes": 48012,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 11.24,
+        "foreground_threshold": 29.24,
+        "pretrim": {
+          "width": 560,
+          "height": 560
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 546,
+          "content_height": 405,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 142387,
+          "alpha_coverage": 0.632972
+        }
+      }
+    },
+    {
+      "asset_id": "skill/redis@v1",
+      "runtime_path": "/public/career-world/art/skill/redis.webp",
+      "source_path": "design/career-world/concepts/skills/redis-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 152,
+        "y": 60,
+        "width": 1228,
+        "height": 378
+      },
+      "output": {
+        "width": 589,
+        "height": 159,
+        "bytes": 21112,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.02,
+        "foreground_threshold": 25.02,
+        "pretrim": {
+          "width": 620,
+          "height": 190
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 585,
+          "content_height": 155,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 60257,
+          "alpha_coverage": 0.643421
+        }
+      }
+    },
+    {
+      "asset_id": "skill/safe-writes@v1",
+      "runtime_path": "/public/career-world/art/skill/safe-writes.webp",
+      "source_path": "design/career-world/concepts/skills/safe-writes-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 8,
+        "y": 10,
+        "width": 1516,
+        "height": 560
+      },
+      "output": {
+        "width": 425,
+        "height": 224,
+        "bytes": 17374,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.17,
+        "foreground_threshold": 30.17,
+        "pretrim": {
+          "width": 620,
+          "height": 228
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 421,
+          "content_height": 220,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 55645,
+          "alpha_coverage": 0.584506
+        }
+      }
+    },
+    {
+      "asset_id": "skill/typescript@v1",
+      "runtime_path": "/public/career-world/art/skill/typescript.webp",
+      "source_path": "design/career-world/concepts/skills/typescript-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 14,
+        "y": 20,
+        "width": 384,
+        "height": 726
+      },
+      "output": {
+        "width": 269,
+        "height": 466,
+        "bytes": 24290,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 8.88,
+        "foreground_threshold": 26.88,
+        "pretrim": {
+          "width": 296,
+          "height": 560
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 265,
+          "content_height": 462,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 70462,
+          "alpha_coverage": 0.562104
+        }
+      }
+    },
+    {
+      "asset_id": "skill/vmware@v1",
+      "runtime_path": "/public/career-world/art/skill/vmware.webp",
+      "source_path": "design/career-world/concepts/skills/vmware-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 352,
+        "y": 24,
+        "width": 798,
+        "height": 614
+      },
+      "output": {
+        "width": 604,
+        "height": 470,
+        "bytes": 64290,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 7.59,
+        "foreground_threshold": 25.59,
+        "pretrim": {
+          "width": 620,
+          "height": 476
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 600,
+          "content_height": 466,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 204634,
+          "alpha_coverage": 0.720847
+        }
+      }
+    },
+    {
+      "asset_id": "skill/workflow-orchestration@v1",
+      "runtime_path": "/public/career-world/art/skill/workflow-orchestration.webp",
+      "source_path": "design/career-world/concepts/skills/workflow-orchestration-v1.png",
+      "source_role": "promoted-canonical-panel",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1254,
+        "height": 1254
+      },
+      "output": {
+        "width": 550,
+        "height": 404,
+        "bytes": 48908,
+        "alpha": "connected-authored-silhouette",
+        "background_luminance": 12.74,
+        "foreground_threshold": 30.74,
+        "pretrim": {
+          "width": 560,
+          "height": 560
+        },
+        "trim": {
+          "method": "exact-alpha-bounds",
+          "content_width": 546,
+          "content_height": 400,
+          "transparent_guard_px": 2,
+          "opaque_pixels": 151031,
+          "alpha_coverage": 0.679707
+        }
+      }
+    },
+    {
+      "asset_id": "world/career-world@v1",
+      "runtime_path": "/public/career-world/art/world/career-world.webp",
+      "source_path": "design/career-world/concepts/tracer/world-career-world-v1.png",
+      "source_role": "approved-island-world-override",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1360,
+        "height": 940
+      },
+      "output": {
+        "width": 1360,
+        "height": 940,
+        "bytes": 160726
+      }
+    }
+  ]
+}

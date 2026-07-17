@@ -1,0 +1,555 @@
+{
+  "schema_version": "1.0",
+  "report_type": "career-world-canonical-art-generation-batch",
+  "run_id": "career-world-2026-07-16",
+  "slice_id": "CW-004",
+  "lane_id": "canonical-batch-b",
+  "batch_id": "art-batch-b",
+  "report_path": "docs/career-world-production/reports/art-generation-batch-b.json",
+  "acceptance_authority": "independent_qa_required",
+  "generation_verdict": "GENERATION_COMPLETE_PENDING_INDEPENDENT_QA",
+  "source_packet": {
+    "path": "docs/career-world-production/briefs/art-batch-b.json",
+    "sha256": "BA49C760D0D73C06179E337436B88F08228506FDE7275AE6ECB7451BAB45229F"
+  },
+  "source_manifest": {
+    "path": "docs/career-world-production/concept-briefs.json",
+    "required_sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14",
+    "actual_sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+  },
+  "execution": {
+    "call_mode": "built_in_fresh_generation_no_raster",
+    "declared_asset_count": 19,
+    "completed_asset_count": 19,
+    "calls": 19,
+    "retries": 0,
+    "technical_failures": 0,
+    "raster_inputs": 0,
+    "cross_asset_references": 0,
+    "cli_fallback": false
+  },
+  "summary": {
+    "candidate_ready": 15,
+    "candidate_flagged": 4,
+    "failures": 0,
+    "deviations_count": 11
+  },
+  "assets": [
+    {
+      "packet_index": 0,
+      "id": "city/tanium@v1",
+      "category": "city",
+      "output_path": "design/career-world/concepts/cities/tanium-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world city concept sheet for city/tanium@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A long low civic spine enclosing a rectangular forum, capped by two unequal offset observation towers and deep stepped corner buttresses.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Tanium family: accent.emissive #FF8B6F, structure.base #3A2722, line.primary #D28A6E, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Illustrative employer capital only, not a Tanium facility. Preserve the open forum void and asymmetrical twin-tower roofline across LODs. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Tanium marks; shield emblems; real campus implication.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "270C48D91BE28F9B359813C253AA5F8F7303CBBE8B1576147CDA92865C59D888",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2336815,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Open rectangular forum, unequal offset observation towers, long civic spine, and stepped corner buttresses are all visually legible.",
+        "Technical-cartography style, true-isometric presentation, LOD insets, and solid silhouette are present.",
+        "No visible generated label, logo, pseudo-text, or watermark."
+      ],
+      "defects": [
+        "The sheet includes a large hero rendering in addition to the four lower LOD/silhouette insets."
+      ]
+    },
+    {
+      "packet_index": 1,
+      "id": "city/column-technologies@v1",
+      "category": "city",
+      "output_path": "design/career-world/concepts/cities/column-technologies-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world city concept sheet for city/column-technologies@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A vertical colonnaded capital with five slender structural fins rising above a low transverse hall, joined by one recessed roof bridge and a narrow stepped forecourt.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Column Technologies family: accent.emissive #78A7C2, structure.base #243341, line.primary #88AFC5, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Employer identity is supported, but the landmark is illustrative only and must not imply a real Column Technologies campus. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Column Technologies marks; literal text columns; real-site resemblance.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "158815A35C804557C0D5C52F44D7E2BCF0518C4B22E69A4DD1F2127A5B54AD24",
+      "width": 1024,
+      "height": 1536,
+      "format": "PNG",
+      "bytes": 2035436,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Five slender structural fins rise above a low transverse hall with recessed bridges and a stepped forecourt.",
+        "The primary colonnaded silhouette is traceable across the rendered panels.",
+        "No visible generated label, logo, pseudo-text, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 2,
+      "id": "project/vendy-vm-platform@v1",
+      "category": "project",
+      "output_path": "design/career-world/concepts/projects/vendy-vm-platform-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/vendy-vm-platform@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Twin unequal service towers flank a sunken orchestration dock, with a branching overhead gantry, a low operator kiosk, and a broad trapezoidal equipment apron.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: NinjaOne family: accent.emissive #56D5EE, structure.base #18343B, line.primary #7FC7CE, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Use only the approved workflow-orchestration, operator-control, data-contracts, Go, React, AWS, PostgreSQL, VMware, and MacStadium links as high-level architectural motifs; imply no vendor-specific machinery or metrics. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; VMware, AWS, Apple, or MacStadium marks; literal server screenshots; real data-center design.\nEaster egg rule: Optional LOD-2-only empty service trolley on the gantry; no cargo, logo, direction, or metric meaning.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "052FAE0682DFE99D19D8F4D4B3DEA501C932FF06BA43E3E908DE0FAB426076C7",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2106863,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Unequal service towers, sunken dock, overhead gantry, operator kiosk, and trapezoidal apron are all visible.",
+        "The optional static gantry trolley appears only in the highest-detail panel.",
+        "No visible vendor mark, generated label, pseudo-text, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 3,
+      "id": "project/cablecar@v1",
+      "category": "project",
+      "output_path": "design/career-world/concepts/projects/cablecar-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/cablecar@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Two sharply different terminal towers stand across a narrow gap, joined by a high enclosed service bridge with a shallow catenary lower chord and a narrow maintenance rail tucked inside the bridge envelope.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Tanium family: accent.emissive #FF8B6F, structure.base #3A2722, line.primary #D28A6E, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: The name may drive the entertainment silhouette; React, Electron, workflow, operator-control, and data-contract links remain high-level and unbranded. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Electron or React logos; real transit system; passenger claims; animated direction implying runtime flow.\nEaster egg rule: The single suspended pod is the optional LOD-2 attachment; it must remain static and may be removed without changing the bridge silhouette.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "09B51763184FC8DB50364138D9B0F2E7B08015C902EDC4E5D57E4ACE3849F4A1",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2026497,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Two visibly different terminal towers are connected by a high enclosed bridge, and a static suspended pod appears only in the highest-detail panel.",
+        "The bridge-and-towers identity is coherent and traceable.",
+        "No visible generated label, logo, pseudo-text, or watermark."
+      ],
+      "defects": [
+        "The requested shallow catenary lower chord is present but visually subtle."
+      ]
+    },
+    {
+      "packet_index": 4,
+      "id": "project/contextforge@v1",
+      "category": "project",
+      "output_path": "design/career-world/concepts/projects/contextforge-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/contextforge@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An L-shaped heavy fabrication hall carries a bank of sawtooth roof vaults, a tall offset archive tower, and one diagonal overhead transfer bridge that lands on a compact cylindrical compression house.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Independent family: accent.emissive #B997FF, structure.base #30263C, line.primary #B49AD0, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Use the approved context-compression, workflow, data-contract, and TypeScript links as architecture-led identity. Forge language is abstract; no literal flames or measured compression. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; anvil or flame icons; token counters; chat UI; compression ratios.\nEaster egg rule: Optional LOD-2-only cold tool rack beside the service spine; no tools shaped as logos and no evidence meaning.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "A758DC9EEFF9847D91994EA9E071BA9D54200453465D2F1D6562847B2D7D76E2",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1905694,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Sawtooth roof vaults, offset archive tower, diagonal transfer bridge, and cylindrical compression house are all legible.",
+        "The primary structure is connected and traceable.",
+        "No visible generated label, logo, token counter, chat UI, pseudo-text, or watermark."
+      ],
+      "defects": [
+        "The L-shaped hall footprint is partly occluded and reads closer to a long rectangular hall in some panels."
+      ]
+    },
+    {
+      "packet_index": 5,
+      "id": "project/sap-table-update-integration@v1",
+      "category": "project",
+      "output_path": "design/career-world/concepts/projects/sap-table-update-integration-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/sap-table-update-integration@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An entertainment-only table landmark: a broad elevated grid deck rests on four heavy corner piers above a centered mechanical lift and a narrow transfer bridge.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: ACE Hardware family: accent.emissive #E06B7A, structure.base #392329, line.primary #C77E89, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Derived only from the approved project name. It is not SAP architecture and must not imply actual tables, integrations, data flow, results, or skills. Explicit prohibition: do not imply factual architecture, a real campus, systems, metrics, outcomes, or skill symbolism. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; SAP logo or interface; database tables; arrows or data packets; ACE branding; factual integration cues.\nEaster egg rule: None. This identity-only landmark may not receive an easter egg until public-safe evidence is approved.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "726AEB8F0DF5E78911F0D2B8113653814DFC596ED08376E72FBA09C1A621E229",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1981370,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_FLAGGED_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Broad elevated grid deck, four heavy corner piers, centered mechanical lift, and narrow transfer bridge are all visible.",
+        "The identity-only technical-cartography presentation contains no visible SAP or ACE mark, generated label, or watermark."
+      ],
+      "defects": [
+        "The highest-detail LOD panel adds multiple deck-top blocks that protrude beyond the simpler roofline and visibly change the outer silhouette."
+      ]
+    },
+    {
+      "packet_index": 6,
+      "id": "project/atlassian-data-center-resilience@v1",
+      "category": "project",
+      "output_path": "design/career-world/concepts/projects/atlassian-data-center-resilience-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world project concept sheet for project/atlassian-data-center-resilience@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: An entertainment-only resilience landmark: one low U-shaped fortified mass wraps a deep open courtyard, with alternating solid buttress bays, a single sloped roof datum, and two low utility pods physically joined to the inner U arms by solid ground-level service necks.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: Column Technologies family: accent.emissive #78A7C2, structure.base #243341, line.primary #88AFC5, with the global drafting field. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Derived only from the approved project name. Redundant-looking massing is symbolic entertainment, not a claim about a real data center, topology, availability, or implementation. Explicit prohibition: do not imply factual architecture, a real campus, systems, metrics, outcomes, or skill symbolism. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Atlassian marks; real data-center racks; uptime numbers; network diagrams; Column branding.\nEaster egg rule: None. This identity-only landmark may not receive an easter egg until public-safe evidence is approved.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "CF539279B3A2D6C284E8C9992B3A4C934F6E196188E3AFFE252571DD3303C608",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2197002,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_FLAGGED_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Low U-shaped fortified mass, deep open courtyard, alternating buttress bays, and two physically connected utility pods are legible.",
+        "No visible Atlassian or Column mark, generated label, pseudo-text, or watermark."
+      ],
+      "defects": [
+        "The highest-detail LOD panel adds roof equipment that visibly protrudes above the otherwise clean single roof datum."
+      ]
+    },
+    {
+      "packet_index": 7,
+      "id": "skill/context-compression@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/context-compression-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/context-compression@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Four freestanding rectangular frames decrease in span and height toward one dense central core, all seated on a tapered trapezoidal base.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral capability geometry. Nested massing, not text or token imagery, is the identity; employer variants are mechanical recolors only. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; zip icons; token counters; chat bubbles; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "FE0C908BEE4432BB0CF6D1B8991142B330DEA5ADECC529D733598E1C28B3717D",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2104280,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_FLAGGED_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Nested decreasing frames, dense central core, and tapered base communicate the compression motif in a traceable neutral style.",
+        "No visible zip icon, token counter, chat bubble, generated label, logo, or watermark."
+      ],
+      "defects": [
+        "The panels show three freestanding nested frames plus the core, not the specified four freestanding rectangular frames."
+      ]
+    },
+    {
+      "packet_index": 8,
+      "id": "skill/data-contracts@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/data-contracts-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/data-contracts@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Twin archive halls with different roof pitches connect only through a narrow sealed validation gate, creating a pronounced central pinch in the footprint.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral capability geometry. The paired halls and constrained gateway carry identity; no documents, signatures, or schema text. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; contract documents; braces or code glyphs; database logos; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "4031EE754C9DFA4B82A9B258C02F4526527B923768B239EF5AB4D5B929CE91A6",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2243413,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Twin halls have different roof pitches and connect through a narrow sealed central gate, producing the requested footprint pinch.",
+        "The paired-hall identity remains traceable at reduced detail.",
+        "No visible document, schema text, generated label, logo, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 9,
+      "id": "skill/typescript@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/typescript-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/typescript@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Three slim prismatic shafts of unequal height are bound by one diagonal brace above a square compiler hall with a recessed side court.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral TypeScript technology geometry. Typed modular structure is abstract; the plan must not form letters or a logo. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; TS initials; TypeScript logo blue; code text; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "1BFC5F4C32B895187DC2B040924547DD8F3AD80A22B832138025899C9C300E7B",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1896708,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Three unequal prismatic shafts, one diagonal brace, square compiler hall, and recessed side court are all legible.",
+        "The plan does not form TS initials or the TypeScript logo.",
+        "No visible code text, generated label, logo, or watermark."
+      ],
+      "defects": [
+        "The semantic palette strip includes small unlabeled graphic glyphs below the swatches; they do not read as text or a technology mark."
+      ]
+    },
+    {
+      "packet_index": 10,
+      "id": "skill/aws@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/aws-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/aws@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A distributed utility campus of three small service pavilions around one taller hub, joined at ground level by broad solid causeways and a clipped perimeter base.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral AWS-supported geometry using only a high-level distributed-service motif; no provider-specific building, cloud symbol, or product identity. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; AWS logo or orange smile; cloud icons; service icons; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "B78AF482D54181315AE6D1752EF16D6AA65C686584686E8CA5B783848D9498C0",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2246238,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Three small service pavilions surround one taller hub and are joined by broad ground-level causeways on a clipped base.",
+        "No cloud icon, AWS mark, service icon, generated label, or watermark is visible."
+      ],
+      "defects": [
+        "The sheet includes a large hero rendering plus three rendered detail variants before the silhouette, one more rendered variant than the requested three LOD panels."
+      ]
+    },
+    {
+      "packet_index": 11,
+      "id": "skill/redis@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/redis-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/redis@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A low zigzag cache pavilion is made from five interlocking ground-level slab cells, crossed by one short diagonal bypass bridge and terminated by a compact cylindrical service drum.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Redis technology geometry. The ground-level zigzag and diagonal bypass create identity without stacking; no latency claim or branded cache symbol. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Redis logo; red baked palette; literal data blocks; latency numbers; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "F14FE4CCD0E8A8446E72F1D970FFB5E86A1FC4E55C9C71AF4FEA47A8778B9471",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1922446,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Five interlocking low slab cells form a zigzag, crossed by one short diagonal bridge and terminated by a cylindrical drum.",
+        "The structure is low, connected, and traceable without a Redis mark or baked red palette.",
+        "No visible generated label, number, pseudo-text, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 12,
+      "id": "skill/openapi@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/openapi-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/openapi@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: Two tall open portal frames bracket a compact specification vault, with branching solid ramps and a long shallow rear canopy.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral OpenAPI technology geometry. The open gateway silhouette must stand without wordmarks, documents, or endpoint diagrams. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; OpenAPI logo; API text; Swagger imagery; endpoint lists; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "30737E30E3124A2F75A0B877EE2597E99A19DB002D41B5D94E16FFD603A32481",
+      "width": 1024,
+      "height": 1536,
+      "format": "PNG",
+      "bytes": 2126014,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_FLAGGED_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Two tall open portal frames, compact central vault, branching ramps, and shallow rear canopy are all clear and traceable.",
+        "No OpenAPI or Swagger logo is visible."
+      ],
+      "defects": [
+        "The image visibly renders the forbidden labels \"LOD-0\", \"LOD-1\", and \"LOD-2\" beneath the inset panels."
+      ]
+    },
+    {
+      "packet_index": 13,
+      "id": "skill/databricks@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/databricks-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/databricks@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A stepped processing quarry descends through four staggered slab terraces to a narrow central work court, bounded by a single high rear retaining hall.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral Databricks technology geometry. Layered processing is abstract; do not recreate the brick mark or a real facility. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Databricks logo; brick-stack emblem; lake imagery; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "6DEC81683E324A04A5AAEE3B355FC555A90134BC181D1206B423382FA25E8FC5",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2431873,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Four descending staggered terrace levels lead to a narrow work court bounded by a high rear retaining hall.",
+        "The quarry identity is traceable and does not reproduce the Databricks brick-stack emblem.",
+        "No visible generated label, logo, pseudo-text, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 14,
+      "id": "skill/localdb@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/localdb-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/localdb@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A compact sunken archive bunker leaves only a small offset intake pavilion and two low ventilation ridges above a thick square base.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral LocalDB technology geometry. Local, compact storage is conveyed by massing only; no vendor or database icon. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; Microsoft marks; database cylinders; server labels; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "619A65CF85C56D95CE2B71441F2773E0105BF0FD9E7DC1A30C8804EE39307ADD",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2141987,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Thick square base, compact intake pavilion, and two low ventilation ridges are all visible.",
+        "The massing is compact and neutral without database-cylinder or Microsoft imagery.",
+        "No visible generated label, logo, pseudo-text, or watermark."
+      ],
+      "defects": [
+        "The intake pavilion reads near-center rather than strongly offset from the base center."
+      ]
+    },
+    {
+      "packet_index": 15,
+      "id": "skill/ai@v1",
+      "category": "skill",
+      "output_path": "design/career-world/concepts/skills/ai-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world skill concept sheet for skill/ai@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A non-agentic analytical instrument pavilion centers on one long horizontal faceted calibration drum seated in two unequal structural cradles, crossed by a narrow transverse measurement gallery and balanced by a low rectangular service annex in a linear asymmetric footprint.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Reusable neutral AI geometry backed only through the Kaizen Metrics AWS Bedrock assistant claim. Treat AI as a non-agentic analytical instrument and service capability: no decision center, autonomy, cognition, consciousness, or provider-specific architecture. Keep footprint, centroid, orientation, primary masses, roofline, facade rhythm, and fixed empty sign-slot anchor unchanged across all LOD panels. LOD changes only secondary doors, windows, seams, roof equipment, and other non-silhouette detail. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; brains, faces, humanoids, robots; AWS or Bedrock marks; star or sparkle silhouettes; decision or agent control centers; autonomy or sentience claims; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "039FB712FC462282C60F5FED22E4FE103C4D8CCD1043BB424A0CE807BD4F450B",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1983357,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Long horizontal faceted drum, two unequal cradles, transverse measurement gallery, and low rectangular annex form a clear asymmetric analytical-instrument identity.",
+        "No brain, face, robot, sparkle, AWS/Bedrock mark, decision center, generated label, or watermark is visible."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 16,
+      "id": "ambient/evergreen-cluster@v1",
+      "category": "ambient",
+      "output_path": "design/career-world/concepts/ambient/evergreen-cluster-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world ambient concept sheet for ambient/evergreen-cluster@v1\nInput images: none by default. If the same canonical tracer PNG is attached, use it only as a style and identity reference; never as an edit target, geometry source, coordinate truth, or permission to change topology.\nPrimary request: One reusable clustered prop identity: three angular evergreen forms of unequal height overlap on a single low faceted ground plate while retaining clear individual trunks.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Ambient only. Preserve cluster footprint, tree spacing, centroid, and outer silhouette across LODs; no employer ownership or evidence meaning. Keep footprint, centroid, orientation, component arrangement, primary forms, and outer silhouette unchanged across all LOD panels. Ambient assets have no sign slot. LOD changes only secondary seams, facets, and other non-silhouette surface detail; do not add or remove components. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; photoreal foliage; snow; separate scene background; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "C4302D79AAA9812B6FB8F5F74AE4AED453826016C34D10DB7FC9401BD921DF8C",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1887418,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Exactly three angular evergreen forms of unequal height overlap on one faceted ground plate while retaining individually visible trunks.",
+        "Cluster footprint and component count remain readable across reduced-detail panels and silhouette.",
+        "No visible text, logo, photoreal foliage, snow, or watermark."
+      ],
+      "defects": []
+    },
+    {
+      "packet_index": 17,
+      "id": "ambient/service-truck@v1",
+      "category": "ambient",
+      "output_path": "design/career-world/concepts/ambient/service-truck-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world ambient concept sheet for ambient/service-truck@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A compact cab-over utility truck with an enclosed rear service body, one shallow roof rack, exposed wheel arches, and a clipped rectangular footprint.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Ambient only. Neutral reusable vehicle; no driver, cargo claim, employer ownership, route direction, or animated state. Keep footprint, centroid, orientation, component arrangement, primary forms, and outer silhouette unchanged across all LOD panels. Ambient assets have no sign slot. LOD changes only secondary seams, facets, and other non-silhouette surface detail; do not add or remove components. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; logos; license text; emergency markings; photoreal vehicle rendering; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "00EAECF434ADD54913E34C6006E3BAD877B1C35D0854A9341F6E06D454550E45",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 2132090,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Compact cab-over truck, enclosed service body, shallow roof rack, exposed wheel arches, and clipped rectangular vehicle footprint are legible.",
+        "No driver, cargo claim, license text, emergency marking, employer mark, or watermark is visible."
+      ],
+      "defects": [
+        "Small unlabeled dot indicators appear beneath the rendered inset panels; they do not read as text, ownership, or route direction."
+      ]
+    },
+    {
+      "packet_index": 18,
+      "id": "ambient/marker-buoy@v1",
+      "category": "ambient",
+      "output_path": "design/career-world/concepts/ambient/marker-buoy-v1.png",
+      "full_prompt": "Use case: stylized-concept\nAsset type: canonical career-world ambient concept sheet for ambient/marker-buoy@v1\nInput images: none by default. Use a raster reference only if the art lead explicitly assigns a passing same-category image; transfer style only, never identity, topology, geometry, coordinates, palette ownership, or factual meaning.\nPrimary request: A faceted weighted buoy body supports a narrow mast, a small open top cage, and two opposing stabilizer fins on a compact diamond footprint.\nScene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.\nStyle/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.\nComposition/framing: one isolated canonical identity only, centered with generous margin; show LOD-0, LOD-1, LOD-2, and one solid silhouette inset as separated unobscured panels.\nProjection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation.\nLighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.\nColor palette: global near-black navy field #080B10, surface #0D1219, ink #F0EEE7, focus #8CE8F8; keep all eight semantic palette slots explicit and do not bake in an employer color. Emissive detail may cover at most 3 percent of visible face area.\nMaterials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.\nText (verbatim): none.\nConstraints: Ambient only. Neutral reusable marker; no code, directional, warning, ownership, or data meaning. Keep footprint, centroid, orientation, component arrangement, primary forms, and outer silhouette unchanged across all LOD panels. Ambient assets have no sign slot. LOD changes only secondary seams, facets, and other non-silhouette surface detail; do not add or remove components. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.\nAvoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, or silhouette-changing LOD drift; numbers; letters; navigation symbols; flashing light effects; employer colors.\nEaster egg rule: No easter egg in the canonical sheet. Any later approved decoration must be a single optional LOD-2 attachment that does not alter footprint, silhouette, evidence, or interaction.",
+      "call_mode": "built_in_fresh_generation_no_raster",
+      "no_raster_inputs": true,
+      "sha256": "64F33C4BE78D10EAE17DC49766EC1AE2BEAFBEF389B3DFD113678966FB688AE7",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "bytes": 1937073,
+      "view_image_inspected": true,
+      "candidate_verdict": "CANDIDATE_READY_FOR_INDEPENDENT_QA",
+      "findings": [
+        "Faceted weighted buoy body, narrow mast, open top cage, two opposing fins, and compact diamond footprint are all clear.",
+        "No number, letter, navigation symbol, flashing-light effect, employer mark, or watermark is visible."
+      ],
+      "defects": []
+    }
+  ],
+  "failures": [],
+  "deviations": [
+    {
+      "id": "city/tanium@v1",
+      "severity": "minor_presentation",
+      "summary": "Large hero rendering appears in addition to four lower insets."
+    },
+    {
+      "id": "project/cablecar@v1",
+      "severity": "minor_identity_readability",
+      "summary": "Catenary lower chord is present but visually subtle."
+    },
+    {
+      "id": "project/contextforge@v1",
+      "severity": "minor_identity_readability",
+      "summary": "L-shaped hall footprint is partly occluded and can read as a long rectangle."
+    },
+    {
+      "id": "project/sap-table-update-integration@v1",
+      "severity": "material_qa_flag",
+      "summary": "LOD-2 deck-top blocks visibly protrude and change the roof silhouette."
+    },
+    {
+      "id": "project/atlassian-data-center-resilience@v1",
+      "severity": "material_qa_flag",
+      "summary": "LOD-2 roof equipment protrudes above the single roof datum."
+    },
+    {
+      "id": "skill/context-compression@v1",
+      "severity": "material_qa_flag",
+      "summary": "Three nested frames are shown instead of the specified four."
+    },
+    {
+      "id": "skill/typescript@v1",
+      "severity": "minor_presentation",
+      "summary": "Unlabeled graphic glyphs appear beneath semantic palette swatches."
+    },
+    {
+      "id": "skill/aws@v1",
+      "severity": "minor_presentation",
+      "summary": "One extra rendered detail variant appears before the silhouette."
+    },
+    {
+      "id": "skill/openapi@v1",
+      "severity": "material_qa_flag",
+      "summary": "Forbidden visible LOD-0, LOD-1, and LOD-2 labels are present."
+    },
+    {
+      "id": "skill/localdb@v1",
+      "severity": "minor_identity_readability",
+      "summary": "Intake pavilion reads near-center rather than strongly offset."
+    },
+    {
+      "id": "ambient/service-truck@v1",
+      "severity": "minor_presentation",
+      "summary": "Unlabeled dot indicators appear under rendered insets."
+    }
+  ],
+  "scope_validation": {
+    "allowed_write_paths_only": true,
+    "source_packet_unchanged": true,
+    "source_manifest_unchanged": true,
+    "planning_report_unchanged": true,
+    "runtime_public_unchanged": true,
+    "tracer_outputs_unchanged": true,
+    "other_generation_lanes_unchanged": true,
+    "product_code_tests_3d_git_unchanged": true,
+    "all_outputs_under_design_career_world_concepts": true,
+    "no_outputs_under_public": true
+  },
+  "validation": {
+    "json_parseable": true,
+    "canonical_filename": true,
+    "self_report_path_matches_filename": true,
+    "old_report_absent": true,
+    "asset_count_19": true,
+    "packet_order_ids_paths_prompts_exact": true,
+    "disk_hash_dimensions_bytes_exact": true,
+    "candidate_counts_sum_to_19": true,
+    "execution_counts_exact": true,
+    "all_outputs_under_design_career_world_concepts": true,
+    "no_outputs_under_public": true,
+    "no_final_art_acceptance": true
+  }
+}

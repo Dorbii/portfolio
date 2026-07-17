@@ -1,0 +1,241 @@
+{
+  "schema_version": "career-world-director-execution-packet/v1",
+  "packet_id": "D-017-CONTEXTFORGE-GUIDE-VISIBILITY-RECOVERY",
+  "decision": "DIRECTOR_RELEASE_ONE_VERSIONED_SPLIT_TOPOLOGY_OVERLAY_AND_RENDER",
+  "status": "RECONCILED_PREEXISTING_R3_SOURCE_RENDER_AUTHORIZED_NOT_EXECUTED",
+  "new_evidence": {
+    "invalidated_qa_report_path": "docs/career-world-production/reports/art-correction-d014-guide-qa.json",
+    "invalidated_qa_report_bytes": 6999,
+    "invalidated_qa_report_sha256": "52CE5F64B5306ABFAB90B28B8312B1A4E078DBD8EC8E40619545315A68C06039",
+    "revoked_d016_packet_path": "docs/career-world-production/briefs/art-correction-d016-contextforge-imagegen-execution.json",
+    "revoked_d016_packet_bytes": 5514,
+    "revoked_d016_packet_sha256": "32AC32DA7BA238BBD5DA28723394DFB93F1CB95EA58937A6BEC725A34A4E3A2A",
+    "pixel_failure": "Each complete return had 0/11 stroke hits within 5x5 neighborhoods; the tower-outline control had 11/11 hits.",
+    "root_cause": "The exactly-once boundary group was emitted before opaque hall and roof layers, which erased the return strokes in the rendered PNG.",
+    "imagegen_calls_before_recovery": 0,
+    "guided_output_exists": false
+  },
+  "authority": {
+    "user_scope": "The current user request authorizes completion of the concept-art library and its independent QA before site construction.",
+    "director_decision": "Preserve rejected r2 evidence and author one versioned r3 source that splits the six exactly-once boundary edges into early physical edges and a late protected-return topology overlay, then render it once for pixel-level QA.",
+    "scope_expansion": false
+  },
+  "provenance_reconciliation": {
+    "reason": "The r3 SVG was authored under the superseded 9705-byte D-017 authorization during a narrow packet-update race. Root stopped execution before any renderer or imagegen call, quarantined the source, and independently verified the exact bytes against the final split-edge contract before authorizing a render.",
+    "superseded_authorization_sha256": "716EFB8DEB1EECC298C9290502A44DE0842A364CE386A0910B830C2F97899C0C",
+    "pre_reconciliation_packet_bytes": 17762,
+    "pre_reconciliation_packet_sha256": "5AB648309304E7D131E38790EA95B561B68FF04571E8EC6BA3456B4E9A05619B",
+    "source_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.svg",
+    "source_bytes": 17212,
+    "source_sha256": "D50A323F24DA2D266F957DEB2BBD18468ACDDA30A67554171C74A4D3B63F085F",
+    "source_disposition": "ACCEPT_PREEXISTING_TECHNICALLY_CONFORMING_BYTES_WITHOUT_REATTRIBUTION",
+    "authored_under": "The superseded 716EFB8...899C0C packet, not the 5AB648...5619B packet and not this reconciled packet.",
+    "source_author": "/root/art_lead",
+    "source_created_utc": "2026-07-17T12:11:52.4090427Z",
+    "source_modified_utc": "2026-07-17T12:12:22.4498807Z",
+    "source_edit_history": "One successful apply_patch created the split source; a second apply_patch failed validation without mutation; one byte-normalization removed only a terminal LF. Current bytes are UTF-8 without BOM, LF-only, and have no trailing LF.",
+    "independent_root_checks": {
+      "r2_to_r3_exact_transform": "PASS",
+      "exact_21_layer_order": "PASS",
+      "six_boundary_edges_exactly_once": "PASS",
+      "late_ownership_exactly_T2_T3_and_T3_T4": "PASS",
+      "all_non_boundary_source_bytes_preserved": "PASS",
+      "prompt_22_lines_only_line_11_changed": "PASS",
+      "prompt_bytes": 6194,
+      "prompt_sha256": "ED8BF832F4037103820974D7569A79F7F8628E073BEF9E601A94E77C4B2EE189"
+    },
+    "call_counts_before_reconciliation": {
+      "renderer_process_launches": 0,
+      "sharp_renderer_commands": 0,
+      "sharp_to_file_calls": 0,
+      "imagegen_calls": 0
+    },
+    "png_absent_at_reconciliation": true,
+    "generation_report_absent_at_reconciliation": true
+  },
+  "preserved_r2_evidence": {
+    "svg_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.svg",
+    "svg_bytes": 16954,
+    "svg_sha256": "B4B6583147C20804F7B47B613A3F97CDD62F7BD7D1AA21F61FD217FB0E8D9A1C",
+    "png_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r2.png",
+    "png_bytes": 134853,
+    "png_sha256": "677C41B1D7DC18CE255B195BB2B219C48F1984FA50E645963DEAE9525F05EF46",
+    "disposition": "REJECTED_GUIDE_AND_FALLBACK_EVIDENCE",
+    "mutation_authorized": false
+  },
+  "r3_source_correction": {
+    "new_svg_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.svg",
+    "new_png_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.png",
+    "source_precreation_absence_was_verified_under_superseded_packet": true,
+    "source_already_exists_at_reconciliation": true,
+    "source_must_match_reconciled_receipt_before_render": true,
+    "png_must_be_absent_before_render": true,
+    "only_source_edit": "Replace the one early closed boundary polyline with two exactly-once open polylines using the same six projected edges and stroke style: an early T4-T5-T0-T1-T2 polyline for four nonprotected edges, plus a late T2-T3-T4 protected-return polyline after cylinder_top_face and before empty primary_outlines.",
+    "early_physical_boundary": {
+      "group_id": "plinth_top_boundary_physical_edges",
+      "layer_position": "Immediately after plinth_top_fill.",
+      "element": "One open polyline T4->T5->T0->T1->T2.",
+      "edges_drawn_exactly_once": [
+        "T0->T1",
+        "T1->T2",
+        "T4->T5",
+        "T5->T0"
+      ]
+    },
+    "late_topology_overlay": {
+      "group_id": "plinth_protected_return_trace",
+      "layer_position": "Immediately after cylinder_top_face and before primary_outlines.",
+      "element": "One polyline T2->T3->T4.",
+      "edges_drawn_exactly_once": [
+        "T2->T3",
+        "T3->T4"
+      ],
+      "role": "Topmost nonphysical technical-topology overlay that exposes only the complete protected L returns."
+    },
+    "unchanged": [
+      "Every projected coordinate and world-space geometry value",
+      "Every fill, stroke, opacity, width, join, cap, and miter value",
+      "All halls, roofs, tower, bridge, cylinder, grid, and axis geometry",
+      "All six boundary edge coordinates and their exactly-once ownership across the two replacement primitives",
+      "The empty primary_outlines group",
+      "Projection, palette, connectivity, complete-return coordinates, and 48-pixel clearances",
+      "Every D-014 imagegen prompt line except the single clarified guide-rendering line 11"
+    ],
+    "superseded_d014_semantics": [
+      "The one closed boundary polyline becomes one early open physical-edge polyline plus one late protected-return polyline.",
+      "Visible-faces-only and hidden-edges-omit do not apply only to the late T2-T3-T4 protected-return primitive.",
+      "Only the protected returns are explicitly a technical topology overlay; nonprotected edges retain their prior physical layer position and occlusion behavior."
+    ],
+    "new_exact_21_layer_order": [
+      "background",
+      "grid",
+      "axis_witnesses",
+      "plinth_top_fill",
+      "plinth_top_boundary_physical_edges",
+      "plinth_visible_sides",
+      "x_hall_visible_faces",
+      "y_hall_visible_faces",
+      "x_roof_bay_0",
+      "x_roof_bay_1",
+      "x_roof_bay_2",
+      "x_roof_bay_3",
+      "y_roof_bay_0",
+      "y_roof_bay_1",
+      "y_roof_bay_2",
+      "bridge_visible_faces",
+      "tower_visible_faces",
+      "cylinder_visible_side_faces",
+      "cylinder_top_face",
+      "plinth_protected_return_trace",
+      "primary_outlines"
+    ]
+  },
+  "guided_prompt_clarification": {
+    "reason": "The new late protected-return trace is nonphysical construction evidence. Naming it explicitly prevents a later guided imagegen call from literalizing the trace as rails, seams, walls, or added architecture.",
+    "authority_delta": "Supersede only D-014 exact prompt line 11. Preserve the other 21 prompt lines byte-for-byte and in the same order.",
+    "source_prompt_report_path": "docs/career-world-production/reports/art-correction-d014-contextforge.json",
+    "source_prompt_sha256": "BA5E20499B8602473915E99423A494D0B339C130BFFCDDEA24CE5A2D595957AC",
+    "source_line_11": "Guide rendering note: faint grid or axis witnesses in Image 1 are construction evidence only. Do not turn them into rails, arrows, signs, labels, a second panel, or additional architecture.",
+    "replacement_line_11": "Guide rendering note: faint grid, axis witnesses, and the late solid plinth-return topology trace in Image 1 are construction evidence only. Preserve the L/return geometry they prove, but do not turn those guide marks into rails, seams, walls, signs, labels, a second panel, or additional architecture.",
+    "exact_prompt_lines": [
+      "Use case: stylized-concept",
+      "Asset type: canonical career-world project concept for project/contextforge@v1",
+      "Input images: Image 1 is the sole pre-frozen deterministic geometry constraint guide. Use it as footprint, axis, primary-mass, and connection authority, not as an edit target. Generate one new candidate. Do not use any v0, r1, peer, prior generated, conversation, or other raster image, and do not use any other tracer art.",
+      "GUIDE AUTHORITY - HIGHEST PRIORITY: Preserve the complete primary geometry shown by Image 1. The two hall legs occupy different world-perpendicular true-isometric ground axes; never place both legs on one projected direction or reconnect the concave notch into a straight bar.",
+      "PRIMARY GEOMETRY INVARIANT - HIGHEST PRIORITY: Show one fully visible unmistakable concave L-shaped fabrication-hall footprint. Leave the complete rendered plinth-top returns R_X-E-R_Y and both full incident return edges visible. Place the same-size tall archive tower at the outer tip of the +X hall leg, seated and connected to the hall and at least 48 painted screen pixels clear of both complete returns; do not place it at the elbow or on the camera-far return edge. Put one sawtooth bank on each leg: the +X-leg bank repeats along +X with ridges parallel to Y, while the +Y-leg bank repeats along +Y with ridges parallel to X. Preserve one elevated visibly diagonal non-axis bridge from the tower to one compact cylindrical compression house entirely inside the open missing quadrant but outside the L footprint; every painted bridge and cylinder face or edge must also remain at least 48 screen pixels clear of both complete returns.",
+      "Primary request: An L-shaped heavy fabrication hall carries sawtooth roof vaults on both perpendicular legs, the same-size tall offset archive tower at the outer +X-leg tip, and one visibly diagonal non-axis overhead transfer bridge that lands on a compact cylindrical compression house inside the open missing quadrant but outside the L footprint.",
+      "Scene/backdrop: isolated asset on a near-black navy technical drafting field with a faint true-isometric grid and no surrounding scene.",
+      "Style/medium: restrained technical-cartography line art, matte low-value faces, thin parallel strokes, minimal bloom, traceable hard edges, no perspective convergence.",
+      "Composition/framing: exactly one large, complete, unoccluded canonical hero view of this one asset, centered with generous margin. Show the complete L footprint, concavity, both incident returns, both roof banks, tower base, bridge landings, cylinder base, and every identity-defining connection needed for deterministic SVG tracing. Do not render a second view, alternate angle, LOD grid, inset, silhouette panel, comparison panel, palette strip, swatch, legend, caption, annotation, UI, border title, or decorative sheet furniture.",
+      "Projection: orthographic true-isometric; camera azimuth 225 degrees from north, look direction 45 degrees, elevation 35.264 degrees, roll 0; +Y projects upper-left; no authored rotation. World-perpendicular ground axes appear as the two canonical isometric directions with a 120-degree included angle, not a 90-degree screen corner.",
+      "Guide rendering note: faint grid, axis witnesses, and the late solid plinth-return topology trace in Image 1 are construction evidence only. Preserve the L/return geometry they prove, but do not turn those guide marks into rails, seams, walls, signs, labels, a second panel, or additional architecture.",
+      "Lighting/mood: fixed graphic face values, quiet and legible, no cinematic lighting and no cast shadow.",
+      "Color palette: Independent family: accent.emissive #B997FF, structure.base #30263C, line.primary #B49AD0, with the global near-black navy drafting field. Emissive detail may cover at most 3 percent of visible face area.",
+      "Palette presentation: apply palette values directly to geometry only. Do not render a palette strip, swatches, samples, legend, labels, or employer colors.",
+      "Materials/textures: matte technical-cartography faces only; top, lit side, and shadow side use deterministic palette values.",
+      "Text (verbatim): none.",
+      "Whole-image text rule: no word, letter, number, caption, label, legend, pseudo-text, logo, wordmark, watermark, UI, or marked sign or glyph plane anywhere in the PNG. Keep every sign or glyph plane completely blank and unmarked.",
+      "Identity constraints: Use the approved context-compression, workflow, data-contract, and TypeScript links as architecture-led identity. Forge language is abstract; no literal flames or measured compression. Preserve the complete connected hall, tower, bridge, and cylinder as a physically readable primary form. Geometry must be reconstructable as deterministic SVG without guessing hidden edges.",
+      "Preservation rule: Preserve all source identity, nonfailed primary forms, projection, authored orientation, one-hero composition, technical-cartography style, palette ownership, materials, evidence boundary, avoid list, and easter-egg rule. The deterministic guide implements only the explicitly authorized ContextForge footprint-axis, complete-return visibility, and tower-placement corrections; it does not authorize any other art-direction change.",
+      "Avoid: generated text, labels, initials, numbers, pseudo-text, logos, wordmarks, mascots, or watermarks; perspective convergence, camera rotation, cast shadows, PBR, photorealism, glass, chrome, cyberpunk neon, or fantasy styling; graph or dashboard layouts, logo plinths, unsupported factual architecture, private details, metrics, or real-campus implication; melted joins, impossible stairs or windows, disconnected masses, inconsistent axes, hidden geometry, silhouette-changing LOD drift, a straight or collinear hall, a covered elbow concavity, a covered full return, an axis-aligned bridge, or sawtooth banks that repeat on the same axis; anvil or flame icons; token counters; chat UI; compression ratios; multiple panels; alternate views; LOD captions; palette strips, swatches, or legends.",
+      "Easter egg rule: render no optional LOD-2 attachment or easter egg in this one-hero correction candidate.",
+      "Output intent: one safely traceable canonical master reference for D-010; not runtime art and not factual evidence."
+    ],
+    "prompt_serialization": "Join exact_prompt_lines with one LF; no trailing LF; UTF-8 without BOM.",
+    "exact_prompt_line_count": 22,
+    "exact_prompt_bytes": 6194,
+    "exact_prompt_sha256": "ED8BF832F4037103820974D7569A79F7F8628E073BEF9E601A94E77C4B2EE189",
+    "imagegen_authorized_by_this_packet": false
+  },
+  "single_authorized_render": {
+    "source_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.svg",
+    "required_source_bytes": 17212,
+    "required_source_sha256": "D50A323F24DA2D266F957DEB2BBD18468ACDDA30A67554171C74A4D3B63F085F",
+    "output_path": "design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.png",
+    "renderer_program_path": "docs/career-world-production/scripts/render-contextforge-guide.cjs",
+    "renderer_program_bytes": 1941,
+    "renderer_program_sha256": "FEF7319DB7DEC3632C7449A9398CD73B3C088A5B26B98BD021E10D90272A00D5",
+    "renderer": "Node.js 22.16.0 with Sharp 0.34.5 and libvips 8.17.3",
+    "process_launch_limit": 1,
+    "sharp_to_file_call_limit": 1,
+    "retry_limit": 0,
+    "escalated_process_authorized": true,
+    "escalation_reason": "The installed Node executable is outside the workspace sandbox; all authorized writes are the versioned r3 PNG and its freeze report inside the workspace.",
+    "exact_powershell_command_serialization": "UTF-8 without BOM; LF line endings; no trailing LF",
+    "exact_powershell_command_bytes": 455,
+    "exact_powershell_command_sha256": "9FFD6313BEA81BE160D5B0E401C96D743E50025B01DF0CD7BB845C20356F9033",
+    "exact_powershell_command_lines": [
+      "$ErrorActionPreference='Stop'",
+      "$node='C:\\Program Files\\nodejs\\node.exe'",
+      "$renderer='docs/career-world-production/scripts/render-contextforge-guide.cjs'",
+      "$src='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.svg'",
+      "$dst='design/career-world/concepts/tracer/contextforge-footprint-axis-guide-r3.png'",
+      "if(Test-Path -LiteralPath $dst){throw 'FINAL_PNG_ALREADY_EXISTS'}",
+      "& $node $renderer $src $dst",
+      "if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
+    ],
+    "tool_error_or_noncompliant_output_consumes_call": true,
+    "second_r3_render_or_substitute_renderer_authorized": false
+  },
+  "freeze_report": {
+    "path": "docs/career-world-production/reports/art-correction-d017-guide-overlay-generation.json",
+    "must_record": "The full provenance reconciliation including superseded authorization and pre-reconciliation packet receipts; r2 preservation; reconciled r3 SVG receipt; r3 PNG receipt; exact source diff; renderer command/process/output; PNG structure; path attributes; runtime isolation; call counts; and no acceptance decision. It must not reattribute the existing SVG to the reconciled packet."
+  },
+  "independent_pixel_gate": {
+    "reviewer_must_differ_from_author": true,
+    "protected_segments": [
+      "T2->T3 / (14,4,0.35)->(5,4,0.35)",
+      "T3->T4 / (5,4,0.35)->(5,11,0.35)"
+    ],
+    "sampling": "At every 1-pixel arclength station on each protected segment, require its 5x5 pixel neighborhood to contain at least one boundary-colored pixel; endpoints and elbow must also hit.",
+    "stroke_color_mask": "Manhattan RGB distance at most 12 from rendered boundary color #AC93C8",
+    "required_coverage": 1.0,
+    "connectivity": "All matched pixels plus elbow and endpoints belong to one 8-connected component.",
+    "tower_outline_control_minimum_coverage": 1.0,
+    "source_edge_ownership": "The source edge multiset equals the six canonical boundary edges exactly once; the late group owns exactly T2-T3 and T3-T4 and is the final nonempty group.",
+    "changed_pixel_confinement": "Decompressed r3-versus-r2 changed pixels must lie inside a Chebyshev 3-pixel band of T2-T3-T4, with no changed pixels along the interiors of T1-T2 or T4-T5.",
+    "nonprotected_edge_preservation": "T0-T1, T1-T2, T4-T5, and T5-T0 remain early and retain r2 physical occlusion behavior; no late x-ray pixels are permitted on those four edges.",
+    "original_resolution_visual_gate": "Reject if the protected-return overlay flattens exterior depth or cuts through unrelated forms beyond its declared topology role.",
+    "rerun_all_nine_gates": true
+  },
+  "explicitly_not_authorized": [
+    "Any mutation or deletion of r2 evidence",
+    "Any mutation, deletion, recreation, or reattribution of the reconciled r3 SVG",
+    "Any geometry, coordinate, palette, stroke, or composition change beyond the exact six-edge split and two-group layer placement",
+    "Any prompt change beyond the exact one-line D-014 line-11 clarification frozen in guided_prompt_clarification",
+    "Any second r3 render",
+    "Any imagegen call",
+    "Any fallback or canonical promotion",
+    "Any release of the remaining eight D-013 assets",
+    "Any runtime, product, test, queue, ledger, or architecture mutation",
+    "Any Git staging, commit, push, deployment, or external publication"
+  ],
+  "stop_conditions": [
+    "Any preserved receipt drifts.",
+    "The reconciled r3 SVG receipt drifts from 17212 bytes and D50A323F24DA2D266F957DEB2BBD18468ACDDA30A67554171C74A4D3B63F085F.",
+    "The r3 PNG exists before its authorized render step.",
+    "The r2-to-r3 source diff contains anything other than replacing the one closed boundary group with the frozen early four-edge open polyline and late two-edge protected polyline.",
+    "The one renderer process fails or produces a noncompliant PNG.",
+    "The independent pixel gate or any nine-gate review fails."
+  ]
+}

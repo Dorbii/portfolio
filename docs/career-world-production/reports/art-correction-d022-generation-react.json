@@ -1,0 +1,229 @@
+{
+  "schema_version": "career-world-d022-generation/v1",
+  "report_type": "art_correction_d022_generation_react",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "D-022",
+  "lane_id": "gen_atlassian-react-followup",
+  "asset_id": "skill/react@v1",
+  "d021_record_index": 7,
+  "status": "GENERATED_ONCE_PERSISTED_PENDING_INDEPENDENT_QA",
+  "report_path": "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+  "report_created_after_postflight_utc": "2026-07-17T13:38:45.0953508Z",
+  "authorization": {
+    "root_release_packet": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+    "execution_packet": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+    "authorized_imagegen_calls": 1,
+    "authorized_retries": 0,
+    "authorized_candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+    "authorized_report_path": "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+    "generator_acceptance_allowed": false,
+    "qa_authorized_in_lane": false,
+    "promotion_authorized": false,
+    "fallback_authorized": false,
+    "runtime_test_manifest_or_git_mutation_authorized": false
+  },
+  "skill_use": {
+    "skill": "imagegen",
+    "top_level_mode": "built-in image_gen",
+    "intent": "brand_new_generation_without_inputs",
+    "use_case": "stylized-concept",
+    "files_read_completely_before_execution": [
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/SKILL.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/prompting.md",
+      "C:/Users/Steve/Documents/Github/skills/skills/.system/imagegen/references/sample-prompts.md",
+      "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+      "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json"
+    ],
+    "contract_override": "D-022 reserves visual validation for an independent reviewer, so the skill's normal output-inspection step was not performed."
+  },
+  "authority_receipts": {
+    "d022": {
+      "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+      "expected_bytes": 6262,
+      "preflight_bytes": 6262,
+      "postflight_bytes": 6262,
+      "expected_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "preflight_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "postflight_sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49",
+      "match": true
+    },
+    "d021": {
+      "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+      "expected_bytes": 65201,
+      "preflight_bytes": 65201,
+      "postflight_bytes": 65201,
+      "expected_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "preflight_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "postflight_sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0",
+      "match": true
+    }
+  },
+  "prompt_receipt": {
+    "source": "D-021 records[7].exact_prompt_lines",
+    "serialization": "UTF-8 without BOM; exact lines joined with one LF; no trailing LF",
+    "expected_line_count": 21,
+    "actual_line_count": 21,
+    "expected_bytes": 4557,
+    "actual_bytes": 4557,
+    "expected_sha256": "CDE68A266E9E214821D349970F48B8AB5D7EAAE44593D7B435E161BE7555F45F",
+    "actual_sha256_preflight": "CDE68A266E9E214821D349970F48B8AB5D7EAAE44593D7B435E161BE7555F45F",
+    "actual_sha256_immediate_prelaunch": "CDE68A266E9E214821D349970F48B8AB5D7EAAE44593D7B435E161BE7555F45F",
+    "actual_sha256_postflight": "CDE68A266E9E214821D349970F48B8AB5D7EAAE44593D7B435E161BE7555F45F",
+    "no_trailing_lf": true,
+    "ascii_only": true,
+    "prompt_file_written": false,
+    "prompt_augmentation_or_rewrite": false,
+    "match": true
+  },
+  "preflight": {
+    "generator_lane": "/root/gen_atlassian",
+    "brand_new_prompt_only_generation": true,
+    "d022_receipt_match": true,
+    "d021_receipt_match": true,
+    "record_index_match": true,
+    "asset_id_match": true,
+    "prompt_receipt_match": true,
+    "candidate_parent_exists": true,
+    "candidate_absent_before_call": true,
+    "generation_report_absent_before_call": true,
+    "required_argument_keys": [
+      "prompt"
+    ],
+    "forbidden_argument_keys": [
+      "referenced_image_paths",
+      "num_last_images_to_include"
+    ],
+    "immediate_prelaunch_recheck_passed": true,
+    "overall": "PASS"
+  },
+  "imagegen_call_receipt": {
+    "tool": "built-in image_gen",
+    "argument_keys": [
+      "prompt"
+    ],
+    "referenced_image_paths_omitted": true,
+    "num_last_images_to_include_omitted": true,
+    "other_arguments_or_images": [],
+    "call_count": 1,
+    "retry_count": 0,
+    "tool_result_status": "SUCCESS",
+    "tool_error": null,
+    "call_consumed": true,
+    "second_call_allowed": false,
+    "second_call_made": false,
+    "cli_or_api_fallback_used": false,
+    "output_hint_verbatim": "Generated images are saved to C:\\Users\\Steve\\.codex\\generated_images\\019f7044-8f33-7201-bbcd-4fb82974d0ca as C:\\Users\\Steve\\.codex\\generated_images\\019f7044-8f33-7201-bbcd-4fb82974d0ca\\exec-99739df6-a1c0-469e-9d20-a5503c0aec74.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.",
+    "source_path_parsed_from_output_hint": "C:/Users/Steve/.codex/generated_images/019f7044-8f33-7201-bbcd-4fb82974d0ca/exec-99739df6-a1c0-469e-9d20-a5503c0aec74.png"
+  },
+  "raw_output_png_receipt": {
+    "path": "C:/Users/Steve/.codex/generated_images/019f7044-8f33-7201-bbcd-4fb82974d0ca/exec-99739df6-a1c0-469e-9d20-a5503c0aec74.png",
+    "exists_postflight": true,
+    "preserved_untouched": true,
+    "deleted_or_moved": false,
+    "bytes": 2111331,
+    "sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+    "created_utc": "2026-07-17T13:38:12.9201131Z",
+    "modified_utc": "2026-07-17T13:38:12.9211722Z"
+  },
+  "persistence_receipt": {
+    "source_path": "C:/Users/Steve/.codex/generated_images/019f7044-8f33-7201-bbcd-4fb82974d0ca/exec-99739df6-a1c0-469e-9d20-a5503c0aec74.png",
+    "destination_path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+    "method": "System.IO.File.Copy(source, destination, false)",
+    "attempt_count": 1,
+    "overwrite_allowed": false,
+    "destination_absent_before_copy": true,
+    "destination_parent_preexisting": true,
+    "copied_utc": "2026-07-17T13:38:30.7182305Z",
+    "source_bytes": 2111331,
+    "destination_bytes": 2111331,
+    "source_sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+    "destination_sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+    "source_destination_byte_equal": true,
+    "conversion_or_mutation_performed": false,
+    "status": "PASS"
+  },
+  "candidate_technical_receipt": {
+    "path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+    "exists": true,
+    "bytes": 2111331,
+    "sha256": "2191CF9A7793DF6B0ABCC13500C2175287AB996AB60A7C9148F615DC7D17FA8A",
+    "created_utc": "2026-07-17T13:38:30.6077011Z",
+    "modified_utc": "2026-07-17T13:38:12.9211722Z",
+    "dimensions": {
+      "width": 1254,
+      "height": 1254
+    },
+    "mode": "RGB",
+    "mode_receipt": "PNG color type 2 truecolor, 8 bits per channel, 3 channels",
+    "png_signature_hex": "89504E470D0A1A0A",
+    "png_signature_valid": true,
+    "ihdr": {
+      "chunk_length": 13,
+      "chunk_type": "IHDR",
+      "bit_depth": 8,
+      "color_type": 2,
+      "compression_method": 0,
+      "filter_method": 0,
+      "interlace_method": 0,
+      "stored_crc_hex": "0A9E397D"
+    },
+    "iend": {
+      "chunk_length": 0,
+      "chunk_type": "IEND",
+      "stored_crc_hex": "AE426082",
+      "is_final_12_bytes": true,
+      "trailing_bytes": 0,
+      "valid": true
+    },
+    "technical_integrity_status": "PASS_SIGNATURE_IHDR_IEND_AND_BYTE_IDENTITY_ONLY"
+  },
+  "scope_validation": {
+    "built_in_imagegen_calls": 1,
+    "imagegen_retries": 0,
+    "second_imagegen_calls": 0,
+    "referenced_images_used": 0,
+    "cli_or_api_generation_calls": 0,
+    "persistence_attempts": 1,
+    "candidate_files_created": 1,
+    "raw_output_mutations_or_deletions": 0,
+    "image_edits_composites_paintovers_or_renders": 0,
+    "visual_qa_inspections": 0,
+    "qa_verdicts": 0,
+    "acceptance_decisions": 0,
+    "promotion_or_release_attempts": 0,
+    "manifest_runtime_test_queue_or_ledger_mutations": 0,
+    "git_operations": 0,
+    "report_files_created": 1
+  },
+  "qa_and_acceptance": {
+    "visual_inspection_performed_by_generator": false,
+    "acceptance_decision": null,
+    "qa_status": "PENDING_INDEPENDENT_QA",
+    "nine_gate_review": "NOT_RUN",
+    "candidate_promoted": false,
+    "no_qa_verdict_asserted": true,
+    "required_next_step": "Independent QA reviews the persisted candidate under D-021."
+  },
+  "files_changed_by_lane": [
+    {
+      "path": "design/career-world/correction-candidates/cw004-r1/skills/react-r1.png",
+      "role": "Exact byte-for-byte copy of the one built-in output."
+    },
+    {
+      "path": "docs/career-world-production/reports/art-correction-d022-generation-react.json",
+      "role": "Technical generation and persistence receipt; independent QA pending."
+    }
+  ],
+  "terminal_assertions": {
+    "candidate_persisted": true,
+    "source_candidate_byte_equal": true,
+    "one_call_limit_respected": true,
+    "no_retry": true,
+    "no_reference_input": true,
+    "no_edit_or_fallback": true,
+    "no_visual_qa_or_acceptance": true,
+    "no_promotion": true,
+    "no_manifest_runtime_test_or_git_operation": true,
+    "pending_independent_qa": true
+  }
+}

@@ -1,0 +1,348 @@
+{
+  "schema_version": "career-world-tech-review/v1",
+  "review_id": "career-world-2026-07-17/CW-005/M0/fresh-context-rereview",
+  "phase_id": "M0",
+  "review_state": "CORRECTED_STATE_REREVIEW_COMPLETE",
+  "review_scope": {
+    "implementation": "features/career-world/geometry/trace-panels.ts",
+    "author_report": "docs/career-world-production/reports/tech-world-composition-m0.json",
+    "invalidation_envelope": "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json",
+    "review_artifact": "docs/career-world-production/reports/review-tech-world-composition-m0.json",
+    "files_written_by_reviewer": [
+      "docs/career-world-production/reports/review-tech-world-composition-m0.json"
+    ],
+    "implementation_conversation_used_as_authority": false,
+    "implementation_report_treated_as_claims": true,
+    "implementation_or_test_edits_by_reviewer": 0,
+    "git_operations_by_reviewer": 0
+  },
+  "authority_order": [
+    "docs/career-world-production/briefs/tech-world-composition.md, especially lines 99-118, 414-428, 472-476, 491-493, 517-528, and 657-680",
+    "docs/career-world-production/reports/art-promoted-56.json",
+    "docs/career-world-production/concept-briefs.json",
+    "features/career-world/geometry/trace-panels.ts",
+    "docs/career-world-production/reports/tech-world-composition-m0.json",
+    "docs/career-world-production/reports/tech-world-composition-f0-handoff-envelope.json"
+  ],
+  "review_chronology": {
+    "initial_snapshot": {
+      "verdict": "FAIL",
+      "invalidated_source_receipt": {
+        "path": "features/career-world/geometry/trace-panels.ts",
+        "bytes": 79576,
+        "sha256": "b051ab2f88ca3b985f5aab38e63f554107f360da8f9146b663ccabaf7378d30c"
+      },
+      "invalidated_author_report_receipt": {
+        "path": "docs/career-world-production/reports/tech-world-composition-m0.json",
+        "bytes": 10036,
+        "sha256": "0888d3b3e88a3ef92af0c4c03c02ae68666a3c99dc7c406a94087c8793aead83"
+      },
+      "historical_findings": [
+        {
+          "id": "M0-REVIEW-BLOCKER-001",
+          "severity": "blocker",
+          "status": "resolved_in_corrected_source",
+          "claim": "The first product module implemented a full QA/provenance archive rather than the brief's exact three-field SelectedTracePanel API. It widened assetId to string, omitted panelId and top-level sourceSha256, and embedded 112 PNG path literals plus panel, verdict, lineage, crop, descriptor, QA-source, and tracing data.",
+          "original_evidence": [
+            "docs/career-world-production/briefs/tech-world-composition.md:99-118",
+            "invalidated features/career-world/geometry/trace-panels.ts@b051ab2f:28-50,53-110",
+            "docs/career-world-production/reports/tech-world-composition-m0.json:49-57,71-80"
+          ],
+          "resolution_evidence": [
+            "features/career-world/geometry/trace-panels.ts:1-7,9-66",
+            "docs/career-world-production/reports/tech-world-composition-m0.json:49-81,97-139"
+          ]
+        },
+        {
+          "id": "M0-REVIEW-BLOCKER-002",
+          "severity": "blocker",
+          "status": "invalidated_by_director_envelope",
+          "claim": "The first author report and external envelope overclaimed COMPLETE/PASS/ACCEPTED while the first source violated the M0 client contract.",
+          "invalidated_envelope_id": "8b762d7f2091d5a60e52a4871fce1d97a0c4d879496c150ae6573cffaa57ed01",
+          "resolution_evidence": [
+            "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json:2-8,17-28",
+            "docs/career-world-production/reports/tech-world-composition-m0.json:49-64,178-181"
+          ]
+        },
+        {
+          "id": "M0-REVIEW-MATERIAL-003",
+          "severity": "material",
+          "status": "resolved_by_exact_compact_projection",
+          "claim": "The first full-record transform inserted tracingNote: null for all 11 corrected promoted records even though tracing_note was absent, so its lossless/source-presence claim was false.",
+          "affected_asset_count": 11,
+          "resolution": "The corrected client contract contains only assetId, panelId, and sourceSha256. It no longer transforms or duplicates optional QA provenance, so absent-versus-null is preserved solely in the authoritative promoted report and is not collapsed in product metadata.",
+          "resolution_evidence": [
+            "features/career-world/geometry/trace-panels.ts:3-7,9-66",
+            "docs/career-world-production/reports/tech-world-composition-m0.json:71-80,111-139"
+          ]
+        }
+      ]
+    },
+    "invalidation": {
+      "path": "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json",
+      "bytes": 2062,
+      "sha256": "55066ebd40e9d5a3cf9b294f918cc72356871913f580c797e12411bb34987064",
+      "envelope_id": "18a3412164527b4e183434d779f9ba487a4b9a10f7ebf4098682d46c1a31b177",
+      "payload_id_recomputed": true,
+      "acceptance_status": "INVALIDATED_PENDING_CORRECTION",
+      "gate_result": "FAIL",
+      "invalidates_envelope_id": "8b762d7f2091d5a60e52a4871fce1d97a0c4d879496c150ae6573cffaa57ed01",
+      "evidence": "docs/career-world-production/reports/tech-world-composition-m0-handoff-envelope.json:2-8,17-28,30-42"
+    },
+    "corrected_snapshot": {
+      "source_receipt": {
+        "path": "features/career-world/geometry/trace-panels.ts",
+        "bytes": 10180,
+        "sha256": "c6567c0d1c673dc7563a7521f0328a382b5da325f290d50f3f32514a3cdf64f4"
+      },
+      "author_report_receipt": {
+        "path": "docs/career-world-production/reports/tech-world-composition-m0.json",
+        "bytes": 9181,
+        "sha256": "3bcd24c435de5d92dd29d1be7c325daf322150b6884952a8e7639af584cd7882"
+      },
+      "author_status": "CORRECTED_IMPLEMENTATION_VERIFIED",
+      "author_implementation_verdict": "PASS",
+      "author_independent_rereview_state": "PENDING",
+      "author_downstream_state": "READY_FOR_INDEPENDENT_REREVIEW",
+      "evidence": "docs/career-world-production/reports/tech-world-composition-m0.json:1-10,97-176,188-190"
+    }
+  },
+  "current_findings": [],
+  "current_findings_statement": "No blocker, material, improvement, or nit findings remain in the corrected M0 implementation or corrected author report.",
+  "current_severity_counts": {
+    "blocker": 0,
+    "material": 0,
+    "improvement": 0,
+    "nit": 0
+  },
+  "current_contract_review": {
+    "exact_client_api": {
+      "status": "pass",
+      "evidence": [
+        "docs/career-world-production/briefs/tech-world-composition.md:99-118",
+        "features/career-world/geometry/trace-panels.ts:1-7,9-66"
+      ],
+      "result": "The module imports CareerAssetId as a type, defines the exact readonly assetId/panelId/sourceSha256 shape, preserves the stable TRACE_PANEL_RECORDS named export, and exposes exactly 56 records with exactly those three keys."
+    },
+    "identity_hash_and_order": {
+      "status": "pass",
+      "source_records": 56,
+      "unique_asset_ids": 56,
+      "promoted_records": 56,
+      "manifest_assets": 56,
+      "source_promoted_id_order_equal": true,
+      "source_manifest_id_set_equal": true,
+      "ordinal_utf8_order": true,
+      "panel_id_rule_mismatches": 0,
+      "promoted_source_sha256_mismatches": 0,
+      "lowercase_64_hex_hash_mismatches": 0,
+      "evidence": [
+        "features/career-world/geometry/trace-panels.ts:9-66",
+        "docs/career-world-production/reports/tech-world-composition-m0.json:111-131"
+      ]
+    },
+    "promoted_and_manifest_integrity": {
+      "status": "pass",
+      "manifest_category_mismatches": 0,
+      "manifest_evidence_status_mismatches": 0,
+      "manifest_output_path_mismatches": 0,
+      "canonical_file_byte_or_sha256_mismatches": 0,
+      "observed_category_enum": [
+        "ambient",
+        "city",
+        "project",
+        "skill",
+        "world"
+      ],
+      "observed_evidence_status_enum": [
+        "ambient",
+        "employer-supported-unlinked",
+        "evidence-backed",
+        "identity-only",
+        "user-required-unplaced"
+      ],
+      "observed_verdict_enum": [
+        "PASS",
+        "PASS_WITH_NOTES"
+      ],
+      "ruling": "Path, category, evidence, verdict, panel, lineage, crop, descriptor, QA-source, and tracing fields remain authoritative in art-promoted-56.json and are intentionally excluded from the exact client projection by brief lines 116-118. Their exclusion is not data loss in the three-field runtime contract."
+    },
+    "correction_and_contextforge_handling": {
+      "status": "pass",
+      "correction_records": 11,
+      "full_hero_records": 11,
+      "correction_full_hero_intersection": 11,
+      "all_correction_ids_and_hashes_present_in_client_projection": true,
+      "contextforge": {
+        "asset_id": "project/contextforge@v1",
+        "client_source_sha256": "2e310d456a3594bba3b0041622a3235abee3f15f13019cf5a23b0f5b06b3e62a",
+        "promoted_source_sha256_equal": true,
+        "promoted_caveat_present": true,
+        "promoted_consistency_scope_present": true,
+        "client_duplicates_caveat_or_provenance": false,
+        "ruling": "The D020 not-coordinate-truth/code-native-constraint caveat remains in the promoted QA authority at art-promoted-56.json:1220-1258; the compact client correctly carries only ContextForge's identity and source hash at trace-panels.ts:27."
+      }
+    },
+    "lossless_projection_and_optionality": {
+      "status": "pass",
+      "result": "The corrected transformation is an exact projection of the three required fields. All 56 asset IDs and promoted hashes are copied exactly, panel IDs are mechanically exact, and no optional provenance field is transformed, invented, normalized, or collapsed."
+    },
+    "runtime_isolation": {
+      "status": "pass",
+      "type_only_imports": 1,
+      "runtime_value_imports": 0,
+      "export_from_declarations": 0,
+      "png_path_strings": 0,
+      "docs_or_design_path_strings": 0,
+      "fetch_calls": 0,
+      "require_calls": 0,
+      "dynamic_import_calls": 0,
+      "base64_or_pixel_payloads": 0,
+      "runtime_concept_request_patterns_in_app_features_tests": 0,
+      "evidence": [
+        "features/career-world/geometry/trace-panels.ts:1-7,9-66",
+        "docs/career-world-production/reports/tech-world-composition-m0.json:127-139"
+      ]
+    },
+    "error_handling_and_type_contract": {
+      "status": "pass",
+      "fallible_runtime_logic_present": false,
+      "missing_error_path": false,
+      "type_traps": [],
+      "result": "This is a static readonly metadata collection with no fallible runtime operation. CareerAssetId, the panelId template literal, exact three-key satisfaction, and strict TypeScript eliminate the type traps present in the invalidated version."
+    },
+    "lod_and_geometry_boundary": {
+      "status": "pass",
+      "result": "M0 authors no geometry, LOD behavior, placement, palette, renderer, scene, or product integration. Panel roles and correction/full_hero provenance remain outside the client, so the metadata module cannot become alternate LOD or coordinate authority."
+    },
+    "author_report_gate_accuracy": {
+      "status": "pass",
+      "result": "The corrected report preserves the initial FAIL/invalidation chronology, binds the corrected source receipt, reports independent rereview as pending rather than claiming it, does not assert Director acceptance or downstream dispatch, excludes itself from the successor digest, and omits its own hash.",
+      "evidence": [
+        "docs/career-world-production/reports/tech-world-composition-m0.json:5-10,49-81",
+        "docs/career-world-production/reports/tech-world-composition-m0.json:97-176,188-190"
+      ]
+    }
+  },
+  "independent_receipt_recomputation": {
+    "authority_receipts": {
+      "composition_brief": {
+        "bytes": 63858,
+        "sha256": "f53f5d516561b56d0dd20cabfabd41efa7ce54d355d47d1d456348b448d814af"
+      },
+      "promoted_art": {
+        "bytes": 124881,
+        "sha256": "5865666a670e7d595061c487bc96c842c814a1bca8c9077ffbc82132d2adf3a4"
+      },
+      "manifest": {
+        "bytes": 288349,
+        "sha256": "7fe7de3daa16bae5f2b091063f151621a2530acaf2b2ffd082fc2ab41e7a4d14"
+      },
+      "corrected_f0_envelope": {
+        "bytes": 3101,
+        "sha256": "47ff14b4fc5e373117108afab8aaa1a8160ce714200ef84aee1bade8bbf808e4",
+        "envelope_id": "b9c7fe52666eb09353c79f304a5a65634c19e45ca1e248b00e0d8abedbca0a9e",
+        "payload_id_recomputed": true
+      },
+      "corrected_f0_report": {
+        "bytes": 14956,
+        "sha256": "8abc109cef5a01b6414e2a55928342dddf342296d99496f68f95297302c80f3a"
+      }
+    },
+    "promoted_art_digest": {
+      "file_count": 56,
+      "total_canonical_bytes": 116046106,
+      "digest_input_bytes": 8611,
+      "sha256": "777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708",
+      "matches_promoted_report": true
+    },
+    "corrected_f0_predecessor": {
+      "file_count": 43,
+      "total_bytes": 1082729,
+      "aggregate_sha256": "233887ca9a5547fc5f0fe90d6e66f975ac7d48fcc8150e32e17a651493e36121",
+      "live_receipt_mismatches": 0,
+      "matches_corrected_f0_envelope": true
+    },
+    "corrected_m0_successor": {
+      "file_count": 44,
+      "total_bytes": 1092909,
+      "aggregate_sha256": "e48730b6227bf37c785a88f0eb1ffa6e1f39a99e18c1136d304328254d9dba5a",
+      "report_excluded": true,
+      "matches_corrected_author_report": true
+    }
+  },
+  "commands_and_checks": [
+    {
+      "command": "C:\\Program Files\\nodejs\\node.exe node_modules/eslint/bin/eslint.js features/career-world/geometry/trace-panels.ts",
+      "status": "pass",
+      "result": "0 errors, 0 warnings"
+    },
+    {
+      "command": "C:\\Program Files\\nodejs\\node.exe node_modules/typescript/bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck features/career-world/geometry/trace-panels.ts features/career-world/geometry/types.ts",
+      "status": "pass",
+      "result": "0 TypeScript errors"
+    },
+    {
+      "command": "read-only Node parse of TRACE_PANEL_RECORDS plus exact three-key, panel-ID, promoted-ID/hash, manifest-ID, ordinal-order, and hash-format audit",
+      "status": "pass",
+      "result": "56 records, 56 unique IDs, zero key/ID/hash/panel/order mismatches"
+    },
+    {
+      "command": "read-only Node promoted-record/manifest/canonical-file audit",
+      "status": "pass",
+      "result": "Zero category, evidence-status, output-path, canonical-byte, or canonical-SHA mismatches; 11 correction records equal the 11 full_hero records"
+    },
+    {
+      "command": "read-only TypeScript AST and repository runtime-pattern audit",
+      "status": "pass",
+      "result": "One type-only import; zero value imports, export-from declarations, PNG/docs/design strings, fetch/require/dynamic-import calls, base64/pixel payloads, or runtime concept-request patterns"
+    },
+    {
+      "command": "read-only promoted-art digest recomputation using asset_id + NUL + canonical_path + NUL + decimal bytes + NUL + lowercase sha256 + LF",
+      "status": "pass",
+      "result": "56 records, 8,611 digest-input bytes, SHA-256 777f7787064e0ad20fd641b077a3b97cbfcf9a15b586dc3af4a7af622050a708"
+    },
+    {
+      "command": "read-only controlled-source reconstruction from the 36-file immutable baseline, accepted C0 receipts, corrected F0 receipts, Director eslint receipt, and corrected M0 source receipt",
+      "status": "pass",
+      "result": "The 43-file predecessor and corrected 44-file successor counts, bytes, and aggregates reproduce; all 43 live predecessor receipts match"
+    },
+    {
+      "command": "read-only SHA-256 over JSON.stringify(invalidation envelope payload)",
+      "status": "pass",
+      "result": "Envelope ID 18a3412164527b4e183434d779f9ba487a4b9a10f7ebf4098682d46c1a31b177 reproduces, and its 2,062-byte file receipt matches the corrected author report"
+    },
+    {
+      "command": "git diff --check -- features/career-world/geometry/trace-panels.ts docs/career-world-production/reports/tech-world-composition-m0.json",
+      "status": "pass",
+      "result": "No whitespace errors"
+    }
+  ],
+  "m0_test_ruling": {
+    "new_m0_tests_required": false,
+    "finding_for_no_new_m0_tests": false,
+    "reason": "The brief assigns tests/career-world.test.mjs to F0, then I0, P0, and U0; M0 may not edit or reformat it. The corrected static metadata was independently audited without adding an M0 test."
+  },
+  "i0_required_coverage": [
+    "In the I0-owned Node test, read docs/career-world-production/reports/art-promoted-56.json and docs/career-world-production/concept-briefs.json as test inputs; do not import docs or design paths from product modules.",
+    "Assert the runtime metadata collection has exactly 56 unique CareerAssetId values and exact set equality with both manifest and promoted records.",
+    "Assert every panelId is exactly assetId plus #canonical-trace-v1 and every sourceSha256 exactly equals the promoted record's lowercase SHA-256 without reinterpretation.",
+    "Assert one-to-one ID equality between the 56 trace records and the 56 aggregate geometry definitions, with no missing, duplicate, or extra join member.",
+    "Recompute every literal primaryPathHash and masterGeometryHash and the aggregate geometry/hash invariants owned by I0.",
+    "Audit the runtime module graph for PNG/design/docs imports and for img, SVG image, CSS url, fetch, require, and dynamic-import requests; trace-panels.ts must remain free of concept/output path strings.",
+    "Cover the 11 corrected assets through the same exact ID/hash comparison. Do not duplicate correction/full_hero provenance or ContextForge caveat text into the client; those remain QA/geometry-review inputs.",
+    "Keep real network proof and browser no-request evidence for the later immutable-preview R0 gate; I0 supplies the deterministic source/module assertion."
+  ],
+  "evidence_limits": [
+    "Repository-wide test/build/lint gates were not rerun because the brief defers aggregate gates until all eight parallel M/G writers are idle; corrected file-local lint, strict TypeScript, direct data audits, and receipt reconstruction were run instead.",
+    "PNG pixels were not visually inspected. M0 is a metadata lane, and promoted PNGs are explicitly not coordinate or geometry authority; canonical bytes and hashes were verified.",
+    "No browser or network capture was run. M0 adds no runtime loading behavior; deterministic module-graph coverage belongs to I0 and immutable-preview network proof belongs to R0.",
+    "The shared worktree contains peer-lane outputs. This review reconstructed and checked every one of the 43 accepted predecessor paths but did not infer authorship of unrelated peer files or use implementation conversation as evidence."
+  ],
+  "residual_risk_and_next_gate": [
+    "The current external M0 envelope intentionally invalidates the first acceptance and must not enter I0. A new Director-owned handoff envelope must bind the corrected 10,180-byte source, corrected 9,181-byte author report, this independent PASS review, and corrected e48730b6 successor before M0 is accepted.",
+    "If I0 admitted the invalidated 969a0579 successor, its composite predecessor must be discarded and rebuilt from the corrected M0 envelope.",
+    "I0 still owns executable aggregate identity/hash/runtime-isolation coverage; this PASS does not claim I0 integration, browser network proof, Director acceptance, or CW-005 promotion."
+  ],
+  "contract_readiness_verdict": "PASS"
+}

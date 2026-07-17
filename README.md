@@ -5,6 +5,9 @@ The atlas relates systems, capabilities, technologies, and evidence. Visitors
 can query up to three concepts, open curated evidence traces, inspect proof
 boundaries, and share the current view through URL state.
 
+The approved replacement direction is defined in
+[`docs/career-world-asset-map.md`](docs/career-world-asset-map.md).
+
 This is deliberately a static site. The graph, traces, filtering, and URL state
 run in the browser; there is no database, authentication layer, or portfolio API.
 
@@ -23,14 +26,10 @@ run in the browser; there is no database, authentication layer, or portfolio API
   crosses that portal's authored entry threshold.
 - Project gravity wells focus the relevant evidence nodes using the existing graph
   viewport. Authored project entry converges the atlas into a local,
-  deterministic clip, then exposes an integrated project-details surface.
-  Returning reverses the transition and restores the exact prior graph view.
+  deterministic clip, then opens the existing project evidence inspector.
 
-Project media is declared in
-`features/evidence-atlas/model/project-media.ts`. The Kaizen Metrics clip is a
-static Blender render served from `public/projects/kaizen-metrics`; it has no
-runtime generation or API cost. Public descriptions of Kaizen work are curated
-summaries only and must not expose private source files or file-level evidence.
+Public descriptions of Kaizen work are curated summaries only and must not expose
+private source files or file-level evidence.
 
 ## Prerequisites
 

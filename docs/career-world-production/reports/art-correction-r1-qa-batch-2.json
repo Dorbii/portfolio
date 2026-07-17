@@ -1,0 +1,533 @@
+{
+  "schema_version": "career-world-r1-independent-qa/v1",
+  "report_type": "art_correction_r1_qa_batch_2",
+  "run_id": "career-world-2026-07-17",
+  "slice_id": "D-022-R1-QA-2",
+  "qa_batch": "r1-qa-2",
+  "reviewer": "/root/gen_vendy",
+  "reviewed_at": "2026-07-17T13:48:12.7925919Z",
+  "status": "COMPLETE_WITH_BLOCKERS",
+  "scope": {
+    "protected_anchor": "skill/openapi@v1",
+    "protected_anchor_path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+    "protected_anchor_role": "family and style context only; no topology transfer and no acceptance re-review",
+    "active_asset_ids": [
+      "city/ninjaone@v1",
+      "skill/context-compression@v1",
+      "project/tanium-risk-assessment@v1"
+    ],
+    "report_path": "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json",
+    "report_absent_before_review_write": true,
+    "art_mutation_authorized": false,
+    "promotion_authorized": false
+  },
+  "independence": {
+    "reviewer_generated_asset_in_active_group": false,
+    "reviewer_generated_asset_id": "project/vendy-vm-platform@v1",
+    "generated_asset_qa_group": "r1-qa-3",
+    "active_group_overlap": [],
+    "independence_preserved": true
+  },
+  "authority_receipts": {
+    "all_match": true,
+    "files": [
+      {
+        "path": "docs/career-world-production/concept-briefs.json",
+        "bytes": 288349,
+        "sha256": "7FE7DE3DAA16BAE5F2B091063F151621A2530ACAF2B2FFD082FC2AB41E7A4D14"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-correction-d021-remaining-eight-imagegen-execution.json",
+        "bytes": 65201,
+        "sha256": "26EC8A8D6BE5B93661932CB88A3CA22E32B01CBD765FC1A10A62A94ABD0FDBB0"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-correction-d022-remaining-eight-root-release.json",
+        "bytes": 6262,
+        "sha256": "E4FF33769D3C9AAE266497CF659E9A3909D2613CBF73DF4643538BB1AB0A3B49"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-full-qa.md",
+        "bytes": 15117,
+        "sha256": "F23CC8BE600724C49623F5BE144C7D9F5CDE609D78AF3B7E3445851E49FBEAED"
+      },
+      {
+        "path": "docs/career-world-production/briefs/art-qa-batches.json",
+        "bytes": 25471,
+        "sha256": "9E5EA22E6A4123D06215D6D9323E966B84B1A69427F90C2A5BDAB1E2915CF407"
+      }
+    ]
+  },
+  "governing_interpretation": {
+    "concept_role": "Entertainment-only tracing reference. Canonical code-native geometry remains authoritative.",
+    "single_hero_rule": "D-021 supersedes the original multi-panel framing and cross-panel LOD clauses. Each r1 candidate is judged as one complete hero; missing LOD panels are not defects.",
+    "pixel_equality_required": false,
+    "square_or_nonstandard_dimensions_alone_are_blocker": false,
+    "square_or_nonstandard_dimensions_treatment": "note",
+    "visible_blockers": [
+      "major missing identity form or wrong primary count",
+      "multiple layouts or panels",
+      "material projection mismatch",
+      "text, pseudo-text, logo, watermark, or marked glyph-plane leakage",
+      "disconnected or melted required topology",
+      "evidence-boundary violation"
+    ],
+    "correction_cycle_rule": "A blocker is FAIL and REJECT_FOR_THIS_CYCLE. D-021 and D-022 authorize no r2 call, retry, edit, reference, composite, fallback, or substitute generation."
+  },
+  "protected_anchor_style_context": {
+    "asset_id": "skill/openapi@v1",
+    "path": "design/career-world/correction-candidates/cw004-r1/skills/openapi-r1.png",
+    "bytes": 1832426,
+    "sha256": "17383FECA2C6C5ACA13653B86919FA6351621B85FA5459C0BD758A8074B0B2C8",
+    "post_review_sha256": "17383FECA2C6C5ACA13653B86919FA6351621B85FA5459C0BD758A8074B0B2C8",
+    "width": 1216,
+    "height": 1294,
+    "png_integrity": "PASS_CRC_IDAT_IEND_NO_TRAILING_BYTES",
+    "inspected_with_view_image_detail": "original",
+    "accepted_calibration_report": "docs/career-world-production/reports/art-correction-calibration-qa.json",
+    "accepted_calibration_disposition": "PASS",
+    "visible_style_evidence": "One centered orthographic isometric hero on a near-black navy grid, matte charcoal faces, pale hard construction outlines, sparse cyan emissive bars, minimal bloom, no labels, and fully exposed portal, ramp, vault, and canopy contacts.",
+    "comparison_to_active_candidates": "All three active candidates use the same near-black grid, parallel isometric axes, vertical uprights, matte low-value faces, hard traceable outlines, restrained emissive accents, and one-hero composition. NinjaOne applies its teal city family, Context Compression remains neutral ivory and cyan, and Tanium Risk Assessment applies its authorized orange family.",
+    "topology_identity_or_palette_transfer_used": false,
+    "anchor_acceptance_reopened": false
+  },
+  "generation_receipt_checks": [
+    {
+      "asset_id": "city/ninjaone@v1",
+      "report_path": "docs/career-world-production/reports/art-correction-d022-generation-ninjaone.json",
+      "report_bytes": 20761,
+      "report_sha256": "06376FF617564FE419BD0D433EDF2412F634F61E8159AB2D239002E9B306243A",
+      "d021_record_index": 0,
+      "prompt_bytes": 4522,
+      "prompt_sha256": "023893E4A88484BC01D4889B3F7D7E78064C871D5E65CD89B02C47EB6B24FD76",
+      "report_asset_and_path_match": true,
+      "report_prompt_match": true,
+      "report_candidate_bytes_match_disk": true,
+      "report_candidate_sha256_match_disk": true,
+      "call_count": 1,
+      "retry_count": 0,
+      "argument_keys": [
+        "prompt"
+      ],
+      "referenced_image_paths_omitted": true,
+      "num_last_images_to_include_omitted": true,
+      "qa_status_before_this_report": "NOT_RUN",
+      "overall": "PASS"
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "report_path": "docs/career-world-production/reports/art-correction-d022-generation-context-compression.json",
+      "report_bytes": 11862,
+      "report_sha256": "6BE4D80E8C90ED9AE78CB457A582F91B9876A4DC8DA19E15E38C68558150F3AB",
+      "d021_record_index": 4,
+      "prompt_bytes": 4495,
+      "prompt_sha256": "FECBB1CDEA465B12D997002F716F265374E5C884177341593DE6F5A57292596E",
+      "report_asset_and_path_match": true,
+      "report_prompt_match": true,
+      "report_candidate_bytes_match_disk": true,
+      "report_candidate_sha256_match_disk": true,
+      "call_count": 1,
+      "retry_count": 0,
+      "argument_keys": [
+        "prompt"
+      ],
+      "referenced_image_paths_omitted": true,
+      "num_last_images_to_include_omitted": true,
+      "qa_status_before_this_report": "NOT_RUN",
+      "overall": "PASS"
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "report_path": "docs/career-world-production/reports/art-correction-d022-generation-tanium-risk-assessment.json",
+      "report_bytes": 9203,
+      "report_sha256": "8720F7B2979CF15A1997F9B402A88433CB4E6E63529D7FE7B293329231D1D1BC",
+      "d021_record_index": 1,
+      "prompt_bytes": 4499,
+      "prompt_sha256": "D83E7199EED86741F1257FD4719E66DA4AF0014C7A941A38BCE60D90B0506D28",
+      "report_asset_and_path_match": true,
+      "report_prompt_match": true,
+      "report_candidate_bytes_match_disk": true,
+      "report_candidate_sha256_match_disk": true,
+      "call_count": 1,
+      "retry_count": 0,
+      "argument_keys": [
+        "prompt"
+      ],
+      "referenced_image_paths_omitted": true,
+      "num_last_images_to_include_omitted": true,
+      "qa_status_before_this_report": "NOT_RUN",
+      "overall": "PASS"
+    }
+  ],
+  "runtime_isolation": {
+    "roots_scanned": [
+      "app",
+      "features",
+      "tests",
+      "public"
+    ],
+    "files_scanned": 50,
+    "candidate_path_basename_or_hash_text_hits": 0,
+    "same_name_or_byte_identical_runtime_copy_hits": 0,
+    "outcome": "PASS"
+  },
+  "assets": [
+    {
+      "asset_id": "city/ninjaone@v1",
+      "category": "city",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/cities/ninjaone-v1.png",
+      "candidate_path": "design/career-world/correction-candidates/cw004-r1/cities/ninjaone-r1.png",
+      "generation_group": "r1-generation-a",
+      "qa_batch": "r1-qa-2",
+      "reviewer": "/root/gen_vendy",
+      "artifact": {
+        "sha256": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+        "post_review_sha256": "581A2E77B1BFC7C1BF9C5BCB943D246ABEF0F8C3EF1FE0458F2276D3F923572C",
+        "bytes": 1709570,
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "png_signature_valid": true,
+        "chunk_count": 29,
+        "all_chunk_crcs_valid": true,
+        "idat_zlib_stream_valid": true,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas centered hero showing the octagonal command hall, stepped beacon tower, three low radial annexes, and complete clipped-diamond base",
+        "normalized_crop_bounds": {
+          "x_min": 0.0,
+          "y_min": 0.0,
+          "x_max": 1.0,
+          "y_max": 1.0
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The sole hero exposes all three annexes, their connections, the central octagonal hall, beacon tiers, footprint turns, stairs, and base contacts without another panel or hidden primary edge."
+      },
+      "protected_anchor_style_comparison": "Matches the protected OpenAPI anchor's navy drafting field, matte dark faces, hard pale outlines, restrained cyan-family emissive bars, minimal bloom, and parallel isometric axes while retaining the authorized NinjaOne teal family rather than copying neutral skill topology.",
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The file is a non-empty decodable 1254 by 1254 PNG with valid CRCs and IDAT stream and visibly contains one NinjaOne city-capital identity. The square canvas is nonstandard, but the complete hero has margin and no clipping.",
+          "manifest_evidence": "D-021 record 0 maps city/ninjaone@v1 to this exact candidate path. The governing boundary makes square dimensions a note, not a blocker."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "pass",
+          "visible_evidence": "Exactly three separately readable low octagonal annexes occupy the left, right, and front radial positions around one larger octagonal command hall. The stepped beacon is centered above the hall and the complete clipped-diamond base is visible.",
+          "manifest_evidence": "The D-021 highest-priority invariant requires exactly three connected unoccluded radial annexes, the octagonal hall, stepped beacon, and clipped-diamond footprint."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "Grid and footprint axes remain parallel, verticals remain vertical, and the symmetric frontal isometric view shows no material perspective convergence or cinematic camera distortion.",
+          "manifest_evidence": "The required projection is orthographic true-isometric at the frozen authored orientation."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Near-black navy grid, matte teal-charcoal faces, thin cyan and pale outlines, restrained emissive bars, minimal bloom, and hard separable edges remain legible. No PBR, photorealism, palette furniture, or dashboard treatment is visible.",
+          "manifest_evidence": "The city may use the NinjaOne family values on geometry while remaining illustrative and unbranded."
+        },
+        "primary_form_traceability": {
+          "result": "pass",
+          "visible_evidence": "The central octagon, beacon tiers, all three annex roofs and walls, connector/platform relationships, stair runs, footprint corners, and base contacts have distinct outlines and require no invented hidden primary geometry.",
+          "manifest_evidence": "The D-021 output intent is one safely traceable master reference for deterministic code-native reconstruction."
+        },
+        "text_logo_watermark_absence": {
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, logo, watermark, ninja symbol, mascot, UI, or marked sign plane is visible. Recessed facade panels remain blank; short cyan bars read as the same material trim accepted on the protected anchor.",
+          "manifest_evidence": "The whole-image rule prohibits text and marked sign or glyph planes, and the city avoid list also prohibits NinjaOne logo shapes and ninja imagery."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "pass",
+          "visible_evidence": "All three annexes visibly meet the shared clipped-diamond platform through short necks, landings, or continuous base geometry; the hall, beacon, annexes, stairs, and base have plausible contacts with no floating or melted major mass.",
+          "manifest_evidence": "The brief requires three connected annexes around one compact civic hall."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "The image is an unlabeled fictional civic landmark. It contains no real-office resemblance, metric, private detail, factual campus claim, project building, skill building, or evidence diagram.",
+          "manifest_evidence": "The evidence-backed city record permits an illustrative employer capital only, not a NinjaOne office or real campus."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "concept_under_design_root": true,
+          "runtime_reference_hits": 0,
+          "scan_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found across app, features, tests, or public."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: the correction candidate contains exactly one hero and no secondary panels.",
+        "classification": "none",
+        "d010_reason": "The sole complete hero is the master reference; no cross-panel equality test or blending is required."
+      },
+      "blockers": [],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard but the full asset remains visible and unoccluded."
+      ],
+      "verdict": "PASS_WITH_NOTES",
+      "cycle_disposition": "ELIGIBLE_FOR_ROOT_AGGREGATION",
+      "findings": "The former two-annex topology defect is corrected: three separately visible connected annexes now surround the octagonal hall while the beacon, clipped-diamond footprint, blank panels, projection, palette, and entertainment boundary remain intact.",
+      "targeted_correction": null,
+      "reviewed_at": "2026-07-17T13:48:12.7925919Z"
+    },
+    {
+      "asset_id": "skill/context-compression@v1",
+      "category": "skill",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/skills/context-compression-v1.png",
+      "candidate_path": "design/career-world/correction-candidates/cw004-r1/skills/context-compression-r1.png",
+      "generation_group": "r1-generation-c",
+      "qa_batch": "r1-qa-2",
+      "reviewer": "/root/gen_vendy",
+      "artifact": {
+        "sha256": "0B4EF3B90D0D162FA65B01AD329BEE065EB76305C5956DADF851E7020B45B72E",
+        "post_review_sha256": "0B4EF3B90D0D162FA65B01AD329BEE065EB76305C5956DADF851E7020B45B72E",
+        "bytes": 1549553,
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "png_signature_valid": true,
+        "chunk_count": 27,
+        "all_chunk_crcs_valid": true,
+        "idat_zlib_stream_valid": true,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas centered hero showing the tapered trapezoidal base, three nested solid rectangular portal frames, and the dense central core",
+        "normalized_crop_bounds": {
+          "x_min": 0.0,
+          "y_min": 0.0,
+          "x_max": 1.0,
+          "y_max": 1.0
+        },
+        "complete_primary_form_visible": false,
+        "unoccluded": false,
+        "internally_consistent": false,
+        "selection_reason": "The sole hero is suitable for locating the failure, but it cannot serve as the accepted master: only three solid frames exist, and the smallest frame's left leg descends behind the core so its base contact is not visible."
+      },
+      "protected_anchor_style_comparison": "Matches the protected OpenAPI anchor's neutral navy, charcoal, ivory, and cyan technical-cartography language, orthographic axes, hard outlines, and low bloom. The failure is topology and visibility, not family style.",
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The file is a non-empty decodable 1254 by 1254 PNG with valid CRCs and IDAT stream and visibly contains the Context Compression nested-frame identity. The square canvas is nonstandard but not clipped.",
+          "manifest_evidence": "D-021 record 4 maps skill/context-compression@v1 to this exact candidate path. Square dimensions alone are a note."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "blocker",
+          "visible_evidence": "Only three distinct freestanding solid rectangular frames are visible from largest to smallest around the core. Cyan inset outlines and bevel edges belong to those same frames and are not a fourth solid frame.",
+          "manifest_evidence": "The highest-priority invariant requires exactly four distinct freestanding rectangular frames progressively decreasing toward one dense core. This candidate repeats the prior three-frame failure."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "Grid and structural axes remain parallel, posts remain vertical, and no material perspective convergence or conflicting camera is visible.",
+          "manifest_evidence": "The required projection is orthographic true-isometric at the frozen authored orientation."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Near-black grid, matte charcoal faces, ivory construction lines, sparse cyan accents, minimal bloom, and employer-neutral color ownership match the protected skill anchor. No palette strip, PBR, photorealism, dashboard, or employer color is visible.",
+          "manifest_evidence": "Context Compression must remain neutral reusable skill geometry with the frozen neutral palette family."
+        },
+        "primary_form_traceability": {
+          "result": "blocker",
+          "visible_evidence": "A tracer cannot reconstruct the required four-frame master from this image without inventing an absent fourth frame. The smallest visible frame's left leg is also hidden behind the dense core, so its base contact cannot be verified from the sole view.",
+          "manifest_evidence": "All four frames and all four base contacts must be visible and reconstructable without guessing hidden primary geometry."
+        },
+        "text_logo_watermark_absence": {
+          "result": "pass",
+          "visible_evidence": "No word, letter, number, pseudo-text, logo, watermark, zip icon, token counter, chat bubble, UI, employer mark, or marked sign plane is visible. Cyan lines read as structural trim.",
+          "manifest_evidence": "The whole-image rule and asset avoid list prohibit all text, provider symbols, token imagery, and employer branding."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "blocker",
+          "visible_evidence": "The two outer frames visibly seat both legs on the raised base deck. The smallest frame's right footing is visible, but its left leg runs behind the core and its contact is occluded; an absent fourth frame has no readable contacts at all.",
+          "manifest_evidence": "The D-021 invariant requires all four frames to visibly contact the tapered trapezoidal base."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "The image remains an unlabeled fictional nested-frame landmark with no token count, compression metric, employer association, factual system diagram, outcome claim, private detail, or campus implication.",
+          "manifest_evidence": "Evidence-backed neutral capability geometry is allowed, but text/token imagery and factual claims are forbidden."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "concept_under_design_root": true,
+          "runtime_reference_hits": 0,
+          "scan_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found across app, features, tests, or public."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: the correction candidate contains exactly one hero and no secondary panels.",
+        "classification": "none",
+        "d010_reason": "The sole view is judged directly; the failure is missing and occluded primary topology, not cross-panel mismatch."
+      },
+      "blockers": [
+        "Only three solid freestanding frames are present; exactly four are required.",
+        "The smallest visible frame's left base contact is occluded by the dense core, and the absent fourth frame has no visible base contacts."
+      ],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard but is not the failure."
+      ],
+      "verdict": "FAIL",
+      "cycle_disposition": "REJECT_FOR_THIS_CYCLE",
+      "findings": "The r1 candidate repeats the prior primary-topology failure. It remains a three-frame composition, and the sole view does not expose every required frame-to-base contact.",
+      "targeted_correction": "No further call is authorized in this cycle. If a later explicit replan permits new work, require four clearly separated solid frames with visible left and right footings for every frame while preserving the neutral palette, tapered base, dense core, projection, and no-text boundary.",
+      "reviewed_at": "2026-07-17T13:48:12.7925919Z"
+    },
+    {
+      "asset_id": "project/tanium-risk-assessment@v1",
+      "category": "project",
+      "evidence_status": "evidence-backed",
+      "manifest_output_path": "design/career-world/concepts/projects/tanium-risk-assessment-v1.png",
+      "candidate_path": "design/career-world/correction-candidates/cw004-r1/projects/tanium-risk-assessment-r1.png",
+      "generation_group": "r1-generation-b",
+      "qa_batch": "r1-qa-2",
+      "reviewer": "/root/gen_vendy",
+      "artifact": {
+        "sha256": "D24B3683E48D8D7932FBC38FEE2D9995EF5428EF6B55515E09DC7AEC5484A7C2",
+        "post_review_sha256": "D24B3683E48D8D7932FBC38FEE2D9995EF5428EF6B55515E09DC7AEC5484A7C2",
+        "bytes": 1825232,
+        "format": "PNG",
+        "width": 1254,
+        "height": 1254,
+        "png_signature_valid": true,
+        "chunk_count": 31,
+        "all_chunk_crcs_valid": true,
+        "idat_zlib_stream_valid": true,
+        "iend_valid": true,
+        "trailing_bytes": 0,
+        "system_drawing_decode_succeeded": true,
+        "view_image_detail": "original"
+      },
+      "canonical_trace_panel": {
+        "panel_role": "unspecified_detail_panel",
+        "region_descriptor": "the sole full-canvas diagonal hero showing the triangular forecourt, three stepped wedge halls, continuous zigzag trench, and cantilevered audit tower",
+        "normalized_crop_bounds": {
+          "x_min": 0.0,
+          "y_min": 0.0,
+          "x_max": 1.0,
+          "y_max": 1.0
+        },
+        "complete_primary_form_visible": true,
+        "unoccluded": true,
+        "internally_consistent": true,
+        "selection_reason": "The sole hero exposes all three wedge halls, their stepped/interlocked progression, the forecourt, trench, bridge interruptions, tower, retaining edges, and base contacts. The topology is traceable, but acceptance is blocked by a separate marked forecourt plaque."
+      },
+      "protected_anchor_style_comparison": "Matches the protected OpenAPI anchor's single-hero orthographic drafting language, matte dark faces, hard pale linework, restrained emissive use, and low bloom while correctly applying the authorized Tanium orange family rather than skill-neutral cyan.",
+      "gates": {
+        "artifact_integrity_and_identity": {
+          "result": "note",
+          "visible_evidence": "The file is a non-empty decodable 1254 by 1254 PNG with valid CRCs and IDAT stream and visibly contains one Tanium risk-assessment landmark identity. The square canvas is nonstandard but complete and unclipped.",
+          "manifest_evidence": "D-021 record 1 maps project/tanium-risk-assessment@v1 to this exact candidate path. Square dimensions alone are a note."
+        },
+        "canonical_panel_and_primary_topology": {
+          "result": "pass",
+          "visible_evidence": "Exactly three distinct wedge halls step diagonally from the low triangular forecourt toward one tall cantilevered audit tower. The deep dark zigzag trench remains continuously readable between the halls and right retaining wall despite two small bridge crossings.",
+          "manifest_evidence": "The highest-priority invariant requires exactly three connected interlocked wedge halls, the triangular forecourt, visible zigzag trench, and audit tower. The former two-hall defect is corrected."
+        },
+        "orthographic_projection_and_orientation": {
+          "result": "pass",
+          "visible_evidence": "Grid, hall, trench, and retaining-wall axes remain parallel, uprights remain vertical, and no material perspective convergence or cinematic camera distortion is visible.",
+          "manifest_evidence": "The required projection is orthographic true-isometric at the frozen authored orientation."
+        },
+        "technical_cartography_style_and_palette_suitability": {
+          "result": "pass",
+          "visible_evidence": "Near-black navy grid, matte brown-charcoal faces, thin orange and pale outlines, sparse emissive accents, low bloom, and hard separable edges match the family language. No PBR, photorealism, palette furniture, dashboard, or generic neon treatment is visible.",
+          "manifest_evidence": "This project may use its Tanium family geometry values without depending on branding."
+        },
+        "primary_form_traceability": {
+          "result": "pass",
+          "visible_evidence": "All three hall shells, stepped landings, trench turns, bridge crossings, forecourt outline, tower masses, and base contacts are exposed with distinct outlines. No hidden primary form must be invented.",
+          "manifest_evidence": "The D-021 output intent is one safely traceable master reference for deterministic code-native reconstruction."
+        },
+        "text_logo_watermark_absence": {
+          "result": "blocker",
+          "visible_evidence": "The triangular forecourt contains a distinct raised diamond plaque with an intentionally centered orange four-part emblem-like mark. It is not legible text, but it reads as a marked glyph or logo plane rather than incidental panel geometry. The two nearby orange-capped posts are plain unmarked architectural beacons and are not the failure.",
+          "manifest_evidence": "The whole-image D-021 rule prohibits any marked sign or glyph plane in addition to words, letters, numbers, pseudo-text, logos, and watermarks."
+        },
+        "connected_physically_readable_primary_structure": {
+          "result": "pass",
+          "visible_evidence": "The three halls seat on one stepped escarpment and meet the tower approach through continuous terraces, retaining structures, and small trench bridges. No hall or tower mass floats, melts, or loses a plausible load path.",
+          "manifest_evidence": "The three wedge halls must be visibly connected and interlocked while preserving the trench."
+        },
+        "evidence_entertainment_boundary": {
+          "result": "pass",
+          "visible_evidence": "No threat score, shield, crosshair, risk gauge, dashboard, Tanium wordmark, metric, outcome claim, private detail, or real-campus implication is visible. The image remains an illustrative unlabeled landmark.",
+          "manifest_evidence": "Only high-level risk-assessment identity is allowed; security claims, branding, metrics, and factual architecture are forbidden."
+        },
+        "runtime_isolation": {
+          "result": "pass",
+          "concept_under_design_root": true,
+          "runtime_reference_hits": 0,
+          "scan_evidence": "No candidate path, basename, hash, same-name file, or byte-identical copy was found across app, features, tests, or public."
+        }
+      },
+      "cross_panel_observations": {
+        "summary": "Not applicable: the correction candidate contains exactly one hero and no secondary panels.",
+        "classification": "none",
+        "d010_reason": "The sole complete hero defines the topology directly; the blocker is a prohibited mark within that hero."
+      },
+      "blockers": [
+        "A raised diamond forecourt plaque contains a centered orange emblem-like mark, violating the no-marked-sign-or-glyph-plane invariant."
+      ],
+      "notes": [
+        "The 1254 by 1254 canvas is nonstandard but is not the failure.",
+        "The former two-hall topology defect is corrected; exactly three wedge halls and the full trench are readable.",
+        "The two orange-capped posts are plain unmarked structural beacons and do not independently violate the text or branding gate."
+      ],
+      "verdict": "FAIL",
+      "cycle_disposition": "REJECT_FOR_THIS_CYCLE",
+      "findings": "Primary topology now passes, but the centered emblem-like mark on the raised forecourt plaque is a hard whole-image branding-safety violation under the literal marked-glyph-plane rule.",
+      "targeted_correction": "No further call is authorized in this cycle. If a later explicit replan permits new work, remove the forecourt plaque mark or leave that plane completely blank while preserving the three wedge halls, triangular forecourt, zigzag trench, audit tower, orange family, projection, and evidence boundary.",
+      "reviewed_at": "2026-07-17T13:48:12.7925919Z"
+    }
+  ],
+  "aggregate": {
+    "active_asset_count": 3,
+    "protected_anchor_count": 1,
+    "pass_count": 0,
+    "pass_with_notes_count": 1,
+    "fail_count": 2,
+    "blocker_asset_count": 2,
+    "blocker_gate_count": 4,
+    "all_artifacts_and_generation_receipts_match": true,
+    "all_candidates_contain_one_complete_sheet_layout": true,
+    "all_assets_have_an_acceptable_master_reference": false,
+    "all_nine_gates_recorded_per_asset": true,
+    "all_runtime_isolation_checks_pass": true,
+    "eligible_for_root_aggregation": [
+      "city/ninjaone@v1"
+    ],
+    "rejected_for_this_cycle": [
+      "skill/context-compression@v1",
+      "project/tanium-risk-assessment@v1"
+    ],
+    "aggregate_recommendation": "FAIL_R1_QA_2_ACCEPT_NINJAONE_WITH_NOTES_REJECT_CONTEXT_COMPRESSION_AND_TANIUM_RISK_ASSESSMENT_FOR_THIS_CYCLE",
+    "root_action": "Carry NinjaOne forward with its square-canvas note. Do not accept, trace, promote, retry, edit, reference, or substitute Context Compression or Tanium Risk Assessment under D-021/D-022. Any further work on either failed asset requires a new explicit Director replan.",
+    "tracing_notes_to_carry_forward": [
+      "NinjaOne uses a nonstandard 1254 by 1254 canvas; use the sole full-canvas hero as the canonical tracing source."
+    ],
+    "promotion_executed": false,
+    "promotion_decision_reserved_for": "Director after all independent QA batches are complete"
+  },
+  "scope_validation": {
+    "images_viewed_at_original_detail": 4,
+    "active_candidates_reviewed": 3,
+    "protected_anchor_re_reviewed_for_acceptance": false,
+    "art_generated_or_edited": 0,
+    "canonical_art_promoted": 0,
+    "runtime_or_test_mutations": 0,
+    "queue_or_ledger_mutations": 0,
+    "git_operations": 0,
+    "files_written": [
+      "docs/career-world-production/reports/art-correction-r1-qa-batch-2.json"
+    ]
+  }
+}

@@ -24,24 +24,30 @@ function permutations(items) {
   );
 }
 
-test("server-renders the evidence atlas and its project launcher", async () => {
+test("server-renders Career World as the default route", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
 
-  assert.match(html, /Steven Doris/);
-  assert.match(html, /Senior full-stack \/ platform engineer/i);
-  assert.match(html, /aria-label="Project portals"/i);
-  assert.doesNotMatch(html, /All layers|Spotlight UI \/ Client/i);
-  assert.doesNotMatch(html, /Filter the evidence map/i);
-  assert.doesNotMatch(html, /Case studies/i);
+  assert.match(html, /Career World/);
+  assert.match(html, /Illustrative world .* entertainment, not measured outcomes\./);
+  assert.match(html, /aria-label="Career World landmark navigation"/i);
+  for (const employer of [
+    "NinjaOne",
+    "Tanium",
+    "Independent",
+    "ACE Hardware",
+    "Column Technologies",
+  ]) {
+    assert.match(html, new RegExp(employer));
+  }
+  assert.match(html, /Choose an employer city to reveal its project and skill buildings\./);
   assert.match(html, /steven-doris-resume\.pdf/);
   assert.match(html, /steven-doris-resume\.docx/);
-  assert.match(html, /og:image/);
-  assert.match(html, /og\.png/);
+  assert.doesNotMatch(html, /og:image|og\.png/);
   assert.match(html, /favicon\.svg/);
-  assert.doesNotMatch(html, /Position comes from weighted shared evidence/i);
+  assert.doesNotMatch(html, /<video|autoplay|ProjectMediaStage/i);
   assert.doesNotMatch(
     html,
     /Systems for controlled work|Three systems\. Clear evidence|world-class|supercharge/i,
@@ -52,88 +58,45 @@ test("server-renders the evidence atlas and its project launcher", async () => {
   );
 });
 
-test("keeps project entry, authored media, and atlas return in one reversible flow", async () => {
-  const [
-    atlas,
-    graph,
-    portals,
-    mediaStage,
-    transitionModel,
-    mediaManifest,
-    videoAsset,
-    posterAsset,
-  ] =
-    await Promise.all([
-      readFile(
-        new URL(
-          "../features/evidence-atlas/components/evidence-atlas.tsx",
-          import.meta.url,
-        ),
-        "utf8",
+test("routes every project through one entry transition into the inspector", async () => {
+  const [atlas, graph, portals, transitionModel] = await Promise.all([
+    readFile(
+      new URL(
+        "../features/evidence-atlas/components/evidence-atlas.tsx",
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          "../features/evidence-atlas/components/evidence-graph.tsx",
-          import.meta.url,
-        ),
-        "utf8",
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../features/evidence-atlas/components/evidence-graph.tsx",
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          "../features/evidence-atlas/components/project-portals.tsx",
-          import.meta.url,
-        ),
-        "utf8",
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../features/evidence-atlas/components/project-portals.tsx",
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          "../features/evidence-atlas/components/project-media-stage.tsx",
-          import.meta.url,
-        ),
-        "utf8",
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../features/evidence-atlas/model/project-transition.ts",
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          "../features/evidence-atlas/model/project-transition.ts",
-          import.meta.url,
-        ),
-        "utf8",
-      ),
-      readFile(
-        new URL(
-          "../features/evidence-atlas/model/project-media.ts",
-          import.meta.url,
-        ),
-        "utf8",
-      ),
-      readFile(
-        new URL(
-          "../public/projects/kaizen-metrics/transition.mp4",
-          import.meta.url,
-        ),
-      ),
-      readFile(
-        new URL(
-          "../public/projects/kaizen-metrics/poster.png",
-          import.meta.url,
-        ),
-      ),
-    ]);
+      "utf8",
+    ),
+  ]);
 
-  assert.match(atlas, /projectMediaById\[request\.projectId\]/);
-  assert.match(atlas, /const preloadProjectMedia = useCallback/);
-  assert.match(atlas, /preloadedMediaRef\.current\.set\(projectId, video\)/);
-  assert.match(atlas, /returnViewport/);
-  assert.match(
+  assert.match(atlas, /setProjectTransition\(request\)/);
+  assert.match(atlas, /openTrace\(request\.projectId\)/);
+  assert.match(atlas, /focusElement\("#project-inspector-title"\)/);
+  assert.doesNotMatch(
     atlas,
-    /returnViewport: snapshotProjectViewport\(returnViewport\)/,
+    /ProjectMediaStage|projectMediaById|createElement\("video"\)|projectReturn/,
   );
-  assert.match(atlas, /focus\(\{\s*preventScroll: true/);
-  assert.match(atlas, /setProjectReturn\(/);
-  assert.match(atlas, /inert=\{projectMediaRequest \? true : undefined\}/);
-  assert.match(atlas, /motionSuspended=/);
-  assert.match(atlas, /onProjectReturnComplete=\{completeProjectReturn\}/);
-  assert.match(atlas, /<ProjectMediaStage/);
   assert.match(graph, /onProjectTransitionComplete/);
   assert.match(
     graph,
@@ -141,46 +104,23 @@ test("keeps project entry, authored media, and atlas return in one reversible fl
   );
   assert.match(graph, /cancelProjectTransition/);
   assert.match(graph, /interpolateGraphViewport/);
-  assert.match(graph, /projectReturn\.viewport/);
-  assert.match(graph, /onOpenProject\(projectId, "zoom", next\)/);
-  assert.match(graph, /onOpenProject\(projectId, "activate", viewportRef\.current\)/);
-  assert.match(portals, /onMouseEnter=\{\(\) => \{/);
-  assert.match(portals, /onFocus=\{\(\) => \{/);
-  assert.match(portals, /onPreloadProject\(project\.id\)/);
-  assert.doesNotMatch(mediaStage, /autoPlay/);
-  assert.match(mediaStage, /preload="auto"/);
-  assert.match(mediaStage, /muted/);
-  assert.match(mediaStage, /playsInline/);
-  assert.match(mediaStage, /onEnded=\{showDetails\}/);
-  assert.match(mediaStage, /prefers-reduced-motion: reduce/);
-  assert.match(mediaStage, /aria-label="Project animation controls"/);
-  assert.match(mediaStage, /const togglePlayback/);
-  assert.match(
-    mediaStage,
-    /phase === "loading" && entryReady && mediaReady && paused/,
+  assert.match(graph, /onOpenProject\(projectId, "zoom"\)/);
+  assert.match(graph, /onOpenProject\(projectId, "activate"\)/);
+  assert.doesNotMatch(
+    graph,
+    /projectReturn|projectStageActive|motionSuspended|onPreloadProject/,
   );
-  assert.match(mediaStage, /Play walkthrough/);
-  assert.match(mediaStage, /PROJECT_ENTRY_DURATION_MS\[entrySource\]/);
-  assert.match(mediaStage, /const requestAbort = useCallback/);
-  assert.match(mediaStage, /setAborting\(true\)/);
-  assert.match(mediaStage, /PROJECT_ABORT_DURATION_MS/);
+  assert.match(portals, /onMouseEnter=/);
+  assert.match(portals, /onFocus=/);
+  assert.doesNotMatch(portals, /onPreloadProject/);
   assert.match(
-    mediaStage,
-    /"--project-abort-duration": `\$\{PROJECT_ABORT_DURATION_MS\}ms`/,
+    transitionModel,
+    /export type ProjectEntrySource = "activate" \| "zoom"/,
   );
-  assert.match(
-    mediaStage,
-    /if \(reducedMotion \|\| phase === "details"\) \{\s*onExitStart\(\)/,
+  assert.doesNotMatch(
+    transitionModel,
+    /ProjectReturnRequest|ProjectViewportSnapshot|PROJECT_ABORT_DURATION_MS|PROJECT_EXIT_DURATION_MS/,
   );
-  assert.match(mediaStage, /className="project-terminal"/);
-  assert.match(mediaStage, /onClick=\{onExitStart\}/);
-  assert.match(mediaStage, /Skip to details/);
-  assert.match(transitionModel, /returnViewport: ProjectViewportSnapshot/);
-  assert.match(transitionModel, /export type ProjectReturnRequest/);
-  assert.match(mediaManifest, /engineering-metrics-pipeline/);
-  assert.match(mediaManifest, /\/projects\/kaizen-metrics\/transition\.mp4/);
-  assert.ok(videoAsset.length > 100_000);
-  assert.ok(posterAsset.length > 10_000);
 });
 
 test("keeps the evidence atlas feature boundaries explicit", async () => {
@@ -334,7 +274,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     ),
   );
 
-  assert.match(route, /import \{ EvidenceAtlas \}/);
+  assert.match(route, /import \{ CareerWorld \}/);
   assert.doesNotMatch(route, /useState|useEffect|useCallback/);
   assert.match(atlas, /useEvidenceAtlasState/);
   assert.match(atlas, /<EvidenceGraph/);
@@ -457,7 +397,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(graph, /projectEntryLockRef\.current === null/);
   assert.match(
     graph,
-    /projectEntryLockRef\.current = projectId;[\s\S]*onOpenProject\(projectId, "zoom", next\)/,
+    /projectEntryLockRef\.current = projectId;[\s\S]*onOpenProject\(projectId, "zoom"\)/,
   );
   assert.match(graph, /drawParticleFieldBase\([\s\S]*particleResolution/);
   assert.match(graph, /graph-viewport-controls/);
@@ -502,7 +442,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     /Show \{overflowRecords\.length\} more evidence record/,
   );
 
-  assert.match(globalStyles, /features\/evidence-atlas\/styles/);
+  assert.match(globalStyles, /features\/career-world\/styles/);
   assert.doesNotMatch(featureStyles, /\.graph-node:hover|\.graph-node\.is-preview/);
   assert.doesNotMatch(featureStyles, /\.graph-node\.is-muted/);
   assert.match(featureStyles, /\.graph-node-domain/);
@@ -525,12 +465,12 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(featureStyles, /width: min\(520px, calc\(100vw - 32px\)\)/);
   assert.match(featureStyles, /\.project-step/);
   assert.match(featureStyles, /\.project-player/);
-  assert.match(featureStyles, /\.project-media-stage\.is-aborting/);
-  assert.match(featureStyles, /@keyframes project-media-abort-tumble/);
+  assert.doesNotMatch(featureStyles, /\.project-media-stage|project-media-abort/);
   assert.match(featureStyles, /height: 100svh/);
   assert.match(featureStyles, /@media \(max-width: 940px\)/);
-  assert.match(layout, /summary_large_image/);
+  assert.match(layout, /card: "summary"/);
   assert.match(layout, /favicon\.svg/);
+  assert.doesNotMatch(layout, /summary_large_image|og\.png|Cyan, lime, coral, and violet evidence fields/);
 });
 
 test("keeps viewport transforms anchored and visual tokens evidence-scoped", async (t) => {
@@ -548,7 +488,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     renderScheduleModule,
     dataModule,
     relationshipModule,
-    transitionModule,
   ] = await Promise.all([
     vite.ssrLoadModule(
       "/features/evidence-atlas/rendering/graph-viewport.ts",
@@ -564,7 +503,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     ),
     vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
     vite.ssrLoadModule("/features/evidence-atlas/model/project-relations.ts"),
-    vite.ssrLoadModule("/features/evidence-atlas/model/project-transition.ts"),
   ]);
 
   assert.equal(renderScheduleModule.motionFrameInterval(false), 1000 / 15);
@@ -576,28 +514,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
   assert.ok(
     renderScheduleModule.MOTION_IDLE_FRAME_INTERVAL >
       renderScheduleModule.MOTION_ACTIVE_FRAME_INTERVAL,
-  );
-  assert.equal(transitionModule.PROJECT_ABORT_DURATION_MS, 240);
-  assert.ok(transitionModule.PROJECT_ABORT_DURATION_MS <= 300);
-
-  const initialViewport = { scale: 1, x: 37, y: 104 };
-  const capturedViewport = transitionModule.snapshotProjectViewport(
-    initialViewport,
-  );
-  assert.notEqual(capturedViewport, initialViewport);
-  const focusedViewport = viewportModule.focusGraphViewportAt(
-    { x: 800, y: 540 },
-    { width: 1200, height: 800 },
-    2.7,
-  );
-  assert.notDeepEqual(focusedViewport, initialViewport);
-  const restoredViewport = transitionModule.snapshotProjectViewport(
-    capturedViewport,
-  );
-  assert.deepEqual(
-    restoredViewport,
-    initialViewport,
-    "project entry and return must round-trip x, y, and scale exactly",
   );
   assert.equal(
     particleModule.supportsTrackedProjectBridge("direct-evidence"),
