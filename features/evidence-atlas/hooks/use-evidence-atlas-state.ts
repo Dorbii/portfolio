@@ -20,7 +20,6 @@ function supportsTraceMotion() {
 
 export function useEvidenceAtlasState() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [previewId, setPreviewId] = useState<string | null>(null);
   const [activeTraceId, setActiveTraceId] = useState<string | null>(null);
   const [activeTraceStep, setActiveTraceStep] = useState(0);
   const [tracePlayback, setTracePlayback] = useState(false);
@@ -110,7 +109,6 @@ export function useEvidenceAtlasState() {
     setTracePlayback(false);
     setQueryInspectorOpen(false);
     setSelectionLimitAttempts(0);
-    setPreviewId(null);
   }, []);
 
   const activeTrace = activeTraceId ? traceById.get(activeTraceId) : null;
@@ -189,7 +187,6 @@ export function useEvidenceAtlasState() {
     setTracePlayback(false);
     setQueryInspectorOpen(false);
     setSelectedIds([]);
-    setPreviewId(null);
     setSelectionLimitAttempts(0);
   }, []);
 
@@ -215,8 +212,6 @@ export function useEvidenceAtlasState() {
   return {
     selectedIds,
     selectedNodes,
-    previewId,
-    setPreviewId,
     activeTraceId,
     activeTrace,
     activeTraceStep,

@@ -8,6 +8,30 @@ boundaries, and share the current view through URL state.
 This is deliberately a static site. The graph, traces, filtering, and URL state
 run in the browser; there is no database, authentication layer, or portfolio API.
 
+## Interaction model
+
+- Projects are neutral gravity wells distributed through the atlas. They remain
+  outside the evidence-query ontology, but they anchor the visual layout and
+  its project-to-skill motion corridors.
+- Each capability or technology appears once. A project-specific skill orbits
+  its project; a shared skill is positioned near the weighted barycenter of the
+  projects whose records demonstrate it.
+- Particle bridges and selection wakes represent evidence-backed project-to-skill
+  relationships only. The visual field does not invent skill-to-skill links.
+- Semantic icons reveal progressively as the visitor zooms. Wheel zoom remains
+  graph navigation unless the viewport is centered near a project portal and
+  crosses that portal's authored entry threshold.
+- Project gravity wells focus the relevant evidence nodes using the existing graph
+  viewport. Authored project entry converges the atlas into a local,
+  deterministic clip, then exposes an integrated project-details surface.
+  Returning reverses the transition and restores the exact prior graph view.
+
+Project media is declared in
+`features/evidence-atlas/model/project-media.ts`. The Kaizen Metrics clip is a
+static Blender render served from `public/projects/kaizen-metrics`; it has no
+runtime generation or API cost. Public descriptions of Kaizen work are curated
+summaries only and must not expose private source files or file-level evidence.
+
 ## Prerequisites
 
 - Node.js `>=22.13.0`

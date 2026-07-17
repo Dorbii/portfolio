@@ -2,9 +2,7 @@ export type NodeDomainId =
   | "backend"
   | "frontend"
   | "data"
-  | "infrastructure"
-  | "architecture"
-  | "assurance";
+  | "infrastructure";
 
 export type NodeDomain = {
   id: NodeDomainId;
@@ -13,12 +11,14 @@ export type NodeDomain = {
 };
 
 export const nodeDomains: readonly NodeDomain[] = [
-  { id: "backend", label: "Backend", color: [86, 213, 238] },
-  { id: "frontend", label: "Frontend", color: [185, 151, 255] },
-  { id: "data", label: "Data", color: [246, 196, 83] },
-  { id: "infrastructure", label: "Infrastructure", color: [126, 211, 167] },
-  { id: "architecture", label: "Architecture", color: [110, 150, 255] },
-  { id: "assurance", label: "Assurance", color: [255, 139, 111] },
+  { id: "frontend", label: "UI / Client", color: [185, 151, 255] },
+  { id: "backend", label: "Services / APIs", color: [86, 213, 238] },
+  { id: "data", label: "Data / Processing", color: [246, 196, 83] },
+  {
+    id: "infrastructure",
+    label: "Platform / Infrastructure",
+    color: [126, 211, 167],
+  },
 ];
 
 export const nodeDomainById = Object.fromEntries(

@@ -1,18 +1,20 @@
 import {
   evidenceStrengthByNode,
-  graphEdges,
   graphNodes,
   type NodeKind,
 } from "../model/evidence-data";
 import { nodeDomainById } from "../model/node-domains";
 import type { EvidenceQueryResolution } from "../model/evidence-query";
+import {
+  projectSkillRelationships,
+  type ProjectRelationshipSupportKind,
+} from "../model/project-relations";
 import { randomUnit, type Point, type Size } from "./graph-layout";
 import { graphPointToScreen, type GraphViewport } from "./graph-viewport";
 import {
   drawVisualTokenSprite,
   visualTokenByNodeId,
   visualTokenForNode,
-  visualTokenForProject,
 } from "./visual-tokens";
 
 type Rgb = readonly [number, number, number];
@@ -37,39 +39,66 @@ export type ParticleFieldInteraction = {
 };
 
 export type SelectionWake = {
-  nodeId: string;
+  sourceId: string;
   startedAt: number;
 };
 
-type ActiveTokenBridge = {
+type ActiveProjectBridge = {
   edgeIndex: number;
-  sourceId: string;
-  targetId: string;
+  projectId: string;
+  nodeId: string;
+  weight: number;
 };
 
+const PROJECT_COLOR: Rgb = [205, 220, 234];
+
 const graphNodeById = new Map(graphNodes.map((node) => [node.id, node]));
+const projectFieldColorsById = new Map<string, Rgb[]>();
+
+projectSkillRelationships.forEach((relationship) => {
+  if (relationship.supportKind !== "direct-evidence") return;
+  const node = graphNodeById.get(relationship.nodeId);
+  if (!node) return;
+  const color = nodeDomainById[node.primaryDomain].color;
+  const colors = projectFieldColorsById.get(relationship.projectId) ?? [];
+  if (
+    !colors.some(
+      (existing) =>
+        existing[0] === color[0] &&
+        existing[1] === color[1] &&
+        existing[2] === color[2],
+    )
+  ) {
+    colors.push(color);
+    projectFieldColorsById.set(relationship.projectId, colors);
+  }
+});
+
+function projectFieldColors(projectId: string) {
+  return projectFieldColorsById.get(projectId) ?? [PROJECT_COLOR];
+}
 
 const fieldTuning = {
-  baseTextureDensity: 0.92,
-  baseTextureOpacity: 0.9,
+  baseTextureDensity: 1.08,
+  baseTextureOpacity: 0.98,
   bridgeAlphaActive: 0.5,
-  bridgeAlphaIdle: 0.11,
-  bridgeParticleBase: 14,
-  bridgeParticlePerWeight: 11,
+  bridgeAlphaIdle: 0.1,
+  bridgeParticleBase: 10,
+  bridgeParticlePerWeight: 7,
   bridgeParticleActive: 22,
-  bridgeParticleAmbientScale: 0.6,
-  bridgeSpreadBase: 42,
-  bridgeSpreadRatio: 0.19,
-  nodeRadiusBase: 44,
-  nodeRadiusPerStrength: 13,
-  nodeParticleBase: 60,
-  nodeParticlePerStrength: 48,
-  nodeFieldAlphaIdle: 0.46,
-  nodeFieldAlphaRelated: 0.76,
-  nodeParticleAlphaFloor: 0.24,
-  nodeParticleAlphaRange: 0.76,
-  nodeParticleSatelliteOpacity: 0.62,
-  satelliteScale: 1.62,
+  bridgeParticleAmbientScale: 0.5,
+  bridgeSpreadBase: 52,
+  bridgeSpreadRatio: 0.21,
+  nodeRadiusBase: 52,
+  nodeRadiusPerStrength: 12,
+  nodeParticleBase: 48,
+  nodeParticlePerStrength: 32,
+  nodeFieldAlphaIdle: 0.66,
+  nodeFieldAlphaRelated: 0.78,
+  nodeParticleAlphaFloor: 0.22,
+  nodeParticleAlphaRange: 0.68,
+  nodeParticleSatelliteOpacity: 0.38,
+  satelliteScale: 2.5,
   semanticTokenScale: 1.65,
   semanticTokenFullScale: 4.2,
   semanticNodeTokenScale: 1.8,
@@ -81,7 +110,7 @@ const fieldTuning = {
   dataBurstTrailLength: 8,
   motionTimeScale: 0.68,
   selectionWakeDuration: 1_050,
-  selectionWakeMaxEdges: 5,
+  selectionWakeParticleBudget: 120,
 };
 
 export const SELECTION_WAKE_DURATION_MS = fieldTuning.selectionWakeDuration;
@@ -186,16 +215,24 @@ export function selectionWakeEdgeTuning(weight: number) {
   const strength = clampUnit(weight / 12);
   return {
     particleCount: Math.round(10 + Math.min(weight, 12) * 3),
-    speed: 0.86 + strength * 0.38,
+    speed: 1.16 + strength * 0.06,
     strength,
   };
 }
 
-export function selectionWakeEdges(nodeId: string) {
-  return graphEdges
-    .filter((edge) => edge.source === nodeId || edge.target === nodeId)
-    .sort((left, right) => right.weight - left.weight)
-    .slice(0, fieldTuning.selectionWakeMaxEdges);
+export function supportsTrackedProjectBridge(
+  supportKind: ProjectRelationshipSupportKind,
+) {
+  return supportKind === "direct-evidence";
+}
+
+export function selectionWakeEdges(sourceId: string) {
+  return projectSkillRelationships
+    .filter(
+      (relationship) =>
+        relationship.nodeId === sourceId || relationship.projectId === sourceId,
+    )
+    .sort((left, right) => right.evidenceWeight - left.evidenceWeight);
 }
 
 export function semanticZoomLevel(scale: number) {
@@ -245,7 +282,7 @@ function drawAtmosphereParticle(
   seed: number,
   viewportScale: number,
 ) {
-  const screenSize = randomUnit(seed + 53) > 0.95 ? 0.92 : 0.58;
+  const screenSize = randomUnit(seed + 53) > 0.94 ? 1.08 : 0.74;
   const particleSize = screenSize / viewportScale;
   context.fillStyle = rgba(color, alpha);
   context.fillRect(
@@ -254,6 +291,145 @@ function drawAtmosphereParticle(
     particleSize,
     particleSize,
   );
+}
+
+function drawNodeAtmosphereHaze(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  color: Rgb,
+  radius: number,
+  alpha: number,
+) {
+  context.save();
+  context.translate(point.x, point.y);
+  context.scale(radius * 1.4, radius);
+  const gradient = context.createRadialGradient(0, 0, 0, 0, 0, 1);
+  gradient.addColorStop(0, rgba(color, alpha));
+  gradient.addColorStop(0.46, rgba(color, alpha * 0.38));
+  gradient.addColorStop(1, rgba(color, 0));
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.arc(0, 0, 1, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+function radicalInverse(index: number, base: number) {
+  let result = 0;
+  let fraction = 1 / base;
+  let value = index;
+  while (value > 0) {
+    result += fraction * (value % base);
+    value = Math.floor(value / base);
+    fraction /= base;
+  }
+  return result;
+}
+
+function drawAmbientDomainField(
+  context: CanvasRenderingContext2D,
+  size: Size,
+  positions: Record<string, Point>,
+  particleBudget: number,
+  particleOpacity: number,
+  viewportScale: number,
+) {
+  const colorPoints = graphNodes.flatMap((node) => {
+    const point = positions[node.id];
+    return point
+      ? [{ point, color: nodeDomainById[node.primaryDomain].color }]
+      : [];
+  });
+  if (colorPoints.length === 0) return;
+
+  const fieldWidth = size.width * 1.5;
+  const fieldHeight = size.height * 1.5;
+  const fieldLeft = -size.width * 0.25;
+  const fieldTop = -size.height * 0.25;
+  const distanceScale = Math.max(
+    180,
+    Math.min(size.width, size.height) * 0.38,
+  );
+  const particleCount = Math.round(
+    Math.min(
+      1_150,
+      Math.max(460, (size.width * size.height) / 1_100),
+    ) * particleBudget,
+  );
+
+  context.save();
+  context.globalCompositeOperation = "source-over";
+  for (let particleIndex = 1; particleIndex <= particleCount; particleIndex += 1) {
+    const seed = 131_000 + particleIndex * 43;
+    const jitterX = (randomUnit(seed + 3) - 0.5) * 18;
+    const jitterY = (randomUnit(seed + 7) - 0.5) * 18;
+    const x = fieldLeft + radicalInverse(particleIndex, 2) * fieldWidth + jitterX;
+    const y = fieldTop + radicalInverse(particleIndex, 3) * fieldHeight + jitterY;
+
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    let secondDistance = Number.POSITIVE_INFINITY;
+    let nearestColor = colorPoints[0].color;
+    let secondColor = nearestColor;
+    colorPoints.forEach(({ point, color }) => {
+      const distance = Math.hypot(point.x - x, point.y - y);
+      if (distance < nearestDistance) {
+        secondDistance = nearestDistance;
+        secondColor = nearestColor;
+        nearestDistance = distance;
+        nearestColor = color;
+      } else if (distance < secondDistance) {
+        secondDistance = distance;
+        secondColor = color;
+      }
+    });
+
+    const colorMix =
+      nearestDistance + secondDistance > 0
+        ? (nearestDistance / (nearestDistance + secondDistance)) * 0.5
+        : 0;
+    const influence = Math.exp(-nearestDistance / distanceScale);
+    const alpha =
+      particleOpacity *
+      (0.032 + influence * 0.12) *
+      (0.58 + randomUnit(seed + 11) * 0.42);
+    drawAtmosphereParticle(
+      context,
+      x,
+      y,
+      mixColor(nearestColor, secondColor, colorMix),
+      alpha,
+      seed,
+      viewportScale,
+    );
+  }
+  context.restore();
+}
+
+function drawRelationshipHaze(
+  context: CanvasRenderingContext2D,
+  source: Point,
+  target: Point,
+  color: Rgb,
+  alpha: number,
+  width: number,
+) {
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+
+  context.save();
+  context.translate(source.x + dx * 0.5, source.y + dy * 0.5);
+  context.rotate(Math.atan2(dy, dx));
+  context.scale(distance * 0.58, width);
+  const gradient = context.createRadialGradient(0, 0, 0, 0, 0, 1);
+  gradient.addColorStop(0, rgba(color, alpha));
+  gradient.addColorStop(0.5, rgba(color, alpha * 0.42));
+  gradient.addColorStop(1, rgba(color, 0));
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.arc(0, 0, 1, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
 }
 
 export function semanticTokenReveal(scale: number) {
@@ -336,12 +512,12 @@ function tokenFitsVisibleViewport(
   interaction: ParticleFieldInteraction,
 ) {
   const screenPoint = graphPointToScreen(point, interaction.viewport);
-  const padding = screenSize / 2 + 10;
+  const padding = screenSize / 2 + 72;
   return (
-    screenPoint.x >= padding &&
-    screenPoint.x <= size.width - interaction.occludedRight - padding &&
-    screenPoint.y >= padding &&
-    screenPoint.y <= size.height - padding
+    screenPoint.x >= -padding &&
+    screenPoint.x <= size.width - interaction.occludedRight + padding &&
+    screenPoint.y >= -padding &&
+    screenPoint.y <= size.height + padding
   );
 }
 
@@ -358,7 +534,7 @@ function tokenViewportVisibility(
     screenPoint.y,
     size.height - screenPoint.y,
   );
-  return smoothstep(6, 44, edgeDistance);
+  return smoothstep(-42, 52, edgeDistance);
 }
 
 export function semanticTokenOrbit(
@@ -413,7 +589,6 @@ export function visualTokenPromotion(
   nodeId: string,
   point: Point,
   selectedIds: ReadonlySet<string>,
-  previewId: string | null,
   interaction: ParticleFieldInteraction,
 ) {
   const { viewport, cursor } = interaction;
@@ -421,7 +596,6 @@ export function visualTokenPromotion(
   const zoomReveal = semanticNodeTokenReveal(viewport.scale);
   if (zoomReveal <= 0) return 0;
   if (selectedIds.has(nodeId)) return zoomReveal;
-  if (previewId === nodeId) return zoomReveal * 0.88;
 
   if (cursor) {
     const dx = point.x - cursor.x;
@@ -454,10 +628,10 @@ function drawSemanticTokens(
   size: Size,
   positions: Record<string, Point>,
   resolution: EvidenceQueryResolution,
-  previewId: string | null,
   activeProjectId: string | null,
   interaction: ParticleFieldInteraction,
-  activeBridges: ActiveTokenBridge[],
+  projectPositions: Record<string, Point>,
+  activeBridges: ActiveProjectBridge[],
   time: number,
 ) {
   const bridgeLimit = semanticTokenBridgeLimit(interaction.viewport.scale);
@@ -472,10 +646,9 @@ function drawSemanticTokens(
       node.id,
       point,
       selectedIds,
-      previewId,
       interaction,
     );
-    if (promotion <= 0.04) return;
+    if (promotion <= 0.001) return;
 
     const strength = evidenceStrengthByNode[node.id] ?? 1;
     const radius =
@@ -526,7 +699,9 @@ function drawSemanticTokens(
       const alpha = isEcho
         ? layerReveal * viewportVisibility *
           (0.035 + promotion * (0.08 + randomUnit(seed + 17) * 0.05))
-        : layerReveal * viewportVisibility * (0.045 + promotion * 0.24);
+        : layerReveal *
+          viewportVisibility *
+          (0.045 + promotion * 0.24);
       drawVisualTokenSprite(
         context,
         token,
@@ -542,33 +717,15 @@ function drawSemanticTokens(
   });
 
   let renderedBridges = 0;
-  const projectToken = visualTokenForProject(activeProjectId);
   for (const bridge of activeBridges) {
     if (renderedBridges >= bridgeLimit) break;
-    const selectedEndpoint = resolution.selectedIds.find(
-      (nodeId) =>
-        (nodeId === bridge.sourceId || nodeId === bridge.targetId) &&
-        (projectToken || visualTokenByNodeId[nodeId]),
-    );
-    const ambientEndpoint =
-      !projectToken && resolution.selectedIds.length === 0
-        ? (bridge.edgeIndex % 2 === 0
-            ? [bridge.sourceId, bridge.targetId]
-            : [bridge.targetId, bridge.sourceId]
-          ).find((nodeId) => visualTokenByNodeId[nodeId])
-        : undefined;
-    const tokenEndpoint = selectedEndpoint ?? ambientEndpoint;
-    if (!projectToken && !tokenEndpoint) continue;
-    const travelSourceId = tokenEndpoint ?? bridge.sourceId;
-    const otherEndpoint =
-      travelSourceId === bridge.sourceId ? bridge.targetId : bridge.sourceId;
-    const source = positions[travelSourceId];
-    const target = positions[otherEndpoint];
-    const sourceNode = graphNodes.find((node) => node.id === travelSourceId);
-    const targetNode = graphNodes.find((node) => node.id === otherEndpoint);
-    const token =
-      projectToken ?? visualTokenForNode(tokenEndpoint!, bridge.edgeIndex + 9);
-    if (!source || !target || !sourceNode || !targetNode || !token) continue;
+    const nodePoint = positions[bridge.nodeId];
+    const projectPoint = projectPositions[bridge.projectId];
+    const node = graphNodeById.get(bridge.nodeId);
+    const token = visualTokenForNode(bridge.nodeId, bridge.edgeIndex + 9);
+    if (!nodePoint || !projectPoint || !node || !token) continue;
+    const source = nodePoint;
+    const target = projectPoint;
 
     const transit = interaction.motionEnabled
       ? particleTransit(time, bridge.edgeIndex * 37 + 9)
@@ -590,8 +747,8 @@ function drawSemanticTokens(
       renderedBridges,
     );
     const color = mixColor(
-      nodeDomainById[sourceNode.primaryDomain].color,
-      nodeDomainById[targetNode.primaryDomain].color,
+      nodeDomainById[node.primaryDomain].color,
+      PROJECT_COLOR,
       progress,
     );
     const rotation = Math.atan2(target.y - source.y, target.x - source.x) * 0.08;
@@ -613,7 +770,8 @@ function drawSemanticTokens(
 function drawDataBursts(
   context: CanvasRenderingContext2D,
   positions: Record<string, Point>,
-  activeBridges: ActiveTokenBridge[],
+  projectPositions: Record<string, Point>,
+  activeBridges: ActiveProjectBridge[],
   time: number,
   interaction: ParticleFieldInteraction,
 ) {
@@ -639,16 +797,12 @@ function drawDataBursts(
   for (let streamIndex = 0; streamIndex < streamCount; streamIndex += 1) {
     const bridge =
       activeBridges[(firstBridgeIndex + streamIndex * 3) % activeBridges.length];
-    const reverse =
-      randomUnit(burst.slot * 191 + bridge.edgeIndex * 17 + streamIndex) > 0.5;
-
-    const firstId = reverse ? bridge.targetId : bridge.sourceId;
-    const secondId = reverse ? bridge.sourceId : bridge.targetId;
-    const source = positions[firstId];
-    const target = positions[secondId];
-    const sourceNode = graphNodeById.get(firstId);
-    const targetNode = graphNodeById.get(secondId);
-    if (!source || !target || !sourceNode || !targetNode) continue;
+    const nodePoint = positions[bridge.nodeId];
+    const projectPoint = projectPositions[bridge.projectId];
+    const node = graphNodeById.get(bridge.nodeId);
+    if (!nodePoint || !projectPoint || !node) continue;
+    const source = nodePoint;
+    const target = projectPoint;
 
     const dx = target.x - source.x;
     const dy = target.y - source.y;
@@ -671,8 +825,8 @@ function drawDataBursts(
       const y =
         source.y + dy * progress + perpendicularY * laneOffset;
       const color = mixColor(
-        nodeDomainById[sourceNode.primaryDomain].color,
-        nodeDomainById[targetNode.primaryDomain].color,
+        nodeDomainById[node.primaryDomain].color,
+        PROJECT_COLOR,
         progress,
       );
       const trailStrength = 1 - bitIndex / fieldTuning.dataBurstTrailLength;
@@ -721,58 +875,105 @@ function drawSelectionWake(
   context: CanvasRenderingContext2D,
   size: Size,
   positions: Record<string, Point>,
+  projectPositions: Record<string, Point>,
   wake: SelectionWake | null,
   time: number,
   interaction: ParticleFieldInteraction,
 ) {
   const frame = selectionWakeFrame(wake, time, interaction.motionEnabled);
   if (!wake || !frame.active) return;
-  const source = positions[wake.nodeId];
-  const sourceNode = graphNodeById.get(wake.nodeId);
-  if (!source || !sourceNode) return;
+  const wakePoint = positions[wake.sourceId] ?? projectPositions[wake.sourceId];
+  const wakeNode = graphNodeById.get(wake.sourceId);
+  if (!wakePoint) return;
 
-  const sourceColor = nodeDomainById[sourceNode.primaryDomain].color;
-  const sourceRadius =
-    fieldTuning.nodeRadiusBase +
-    (evidenceStrengthByNode[wake.nodeId] ?? 1) *
-      fieldTuning.nodeRadiusPerStrength;
-  drawWakeBloom(
-    context,
-    source,
-    sourceColor,
-    sourceRadius * 1.55,
-    frame.staticEmphasis ? 0.58 : frame.envelope * (1 - frame.progress) * 0.72,
+  const wakeColor = wakeNode
+    ? nodeDomainById[wakeNode.primaryDomain].color
+    : PROJECT_COLOR;
+  const projectWake = !wakeNode;
+  const wakeRadius = wakeNode
+    ? fieldTuning.nodeRadiusBase +
+      (evidenceStrengthByNode[wake.sourceId] ?? 1) *
+        fieldTuning.nodeRadiusPerStrength
+    : 54;
+  if (!projectWake) {
+    drawWakeBloom(
+      context,
+      wakePoint,
+      wakeColor,
+      wakeRadius * 1.2,
+      frame.staticEmphasis
+        ? 0.38
+        : frame.envelope * (1 - frame.progress) * 0.42,
+    );
+  }
+
+  const edges = selectionWakeEdges(wake.sourceId).filter((edge) =>
+    supportsTrackedProjectBridge(edge.supportKind),
   );
-
-  const edges = selectionWakeEdges(wake.nodeId);
+  const wakeParticleScale = Math.min(
+    1,
+    fieldTuning.selectionWakeParticleBudget /
+      Math.max(
+        1,
+        edges.reduce(
+          (total, edge) =>
+            total +
+              selectionWakeEdgeTuning(edge.evidenceWeight).particleCount,
+          0,
+        ),
+      ),
+  );
   const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.font = `600 ${6.8 / interaction.viewport.scale}px "Cascadia Code", Consolas, monospace`;
 
   edges.forEach((edge, edgeIndex) => {
-    const targetId = edge.source === wake.nodeId ? edge.target : edge.source;
-    const target = positions[targetId];
+    const sourceId = edge.nodeId;
+    const targetId = edge.projectId;
+    const source = positions[sourceId];
+    const target = projectPositions[targetId];
+    const sourceNode = graphNodeById.get(sourceId);
     const targetNode = graphNodeById.get(targetId);
     if (
+      !source ||
       !target ||
-      !targetNode ||
+      !sourceNode ||
       !edgeFitsVisibleViewport(source, target, size, interaction)
-    ) return;
+    ) {
+      return;
+    }
 
-    const targetColor = nodeDomainById[targetNode.primaryDomain].color;
-    const tuning = selectionWakeEdgeTuning(edge.weight);
+    const sourceColor = nodeDomainById[sourceNode.primaryDomain].color;
+    const targetColor = projectWake ? sourceColor : PROJECT_COLOR;
+    const tuning = selectionWakeEdgeTuning(edge.evidenceWeight);
+    const wakeParticleCount = Math.max(
+      4,
+      Math.round(tuning.particleCount * wakeParticleScale),
+    );
     if (frame.staticEmphasis) {
-      const targetRadius =
+      const sourceRadius =
         fieldTuning.nodeRadiusBase +
-        (evidenceStrengthByNode[targetId] ?? 1) *
+        (evidenceStrengthByNode[sourceId] ?? 1) *
           fieldTuning.nodeRadiusPerStrength;
+      const targetRadius = targetNode
+        ? fieldTuning.nodeRadiusBase +
+          (evidenceStrengthByNode[targetId] ?? 1) *
+            fieldTuning.nodeRadiusPerStrength
+        : 72;
+      drawWakeBloom(
+        context,
+        source,
+        sourceColor,
+        sourceRadius * 1.2,
+        0.2 + tuning.strength * 0.18,
+      );
       drawWakeBloom(
         context,
         target,
         targetColor,
-        targetRadius * 1.35,
-        0.28 + tuning.strength * 0.24,
+        targetRadius * 1.1,
+        (0.12 + tuning.strength * 0.08) / Math.max(1, edges.length),
       );
       return;
     }
@@ -787,12 +988,12 @@ function drawSelectionWake(
 
     for (
       let particleIndex = 0;
-      particleIndex < tuning.particleCount;
+      particleIndex < wakeParticleCount;
       particleIndex += 1
     ) {
       const seed = edgeIndex * 1_009 + particleIndex * 37 + 211;
       const trail =
-        (particleIndex / tuning.particleCount) *
+        (particleIndex / wakeParticleCount) *
         (0.24 - tuning.strength * 0.08);
       const progress =
         leadingProgress - trail + (randomUnit(seed + 3) - 0.5) * 0.035;
@@ -804,7 +1005,7 @@ function drawSelectionWake(
       const x = source.x + dx * progress + perpendicularX * spread;
       const y = source.y + dy * progress + perpendicularY * spread;
       const color = mixColor(sourceColor, targetColor, progress);
-      const trailStrength = 1 - particleIndex / tuning.particleCount;
+      const trailStrength = 1 - particleIndex / wakeParticleCount;
       const alpha =
         frame.envelope *
         (0.28 + tuning.strength * 0.36) *
@@ -834,21 +1035,23 @@ function drawSelectionWake(
       smoothstep(0.72, 0.9, leadingProgress) *
       (1 - smoothstep(0.9, 1, frame.progress));
     if (arrival > 0.01) {
-      const targetRadius =
-        fieldTuning.nodeRadiusBase +
-        (evidenceStrengthByNode[targetId] ?? 1) *
-          fieldTuning.nodeRadiusPerStrength;
+      const targetRadius = targetNode
+        ? fieldTuning.nodeRadiusBase +
+          (evidenceStrengthByNode[targetId] ?? 1) *
+            fieldTuning.nodeRadiusPerStrength
+        : 72;
       drawWakeBloom(
         context,
         target,
         targetColor,
-        targetRadius * 1.45,
-        arrival * (0.34 + tuning.strength * 0.34),
+        targetRadius * 1.12,
+        (arrival * (0.1 + tuning.strength * 0.1)) /
+          Math.max(1, edges.length),
       );
     }
 
     if (edgeIndex < 2 && semanticZoom > 0.18) {
-      const token = visualTokenForNode(wake.nodeId, edgeIndex + 71);
+      const token = visualTokenForNode(sourceId, edgeIndex + 71);
       if (token) {
         const tokenProgress = clampUnit(leadingProgress - 0.09);
         const x = source.x + dx * tokenProgress;
@@ -881,64 +1084,58 @@ function prepareFieldContext(
   context.globalCompositeOperation = "lighter";
 }
 
-function activeEvidenceSets(resolution: EvidenceQueryResolution) {
-  return {
-    recordIds: new Set(
-      resolution.supportingRecords.map((record) => record.id),
-    ),
-    segmentKeys: new Set(
-      resolution.pathSegments.map((segment) =>
-        [segment.fromId, segment.toId].sort().join("::"),
-      ),
-    ),
-  };
-}
-
-function edgeIsActive(
-  edge: (typeof graphEdges)[number],
-  active: ReturnType<typeof activeEvidenceSets>,
-) {
-  const edgeKey = [edge.source, edge.target].sort().join("::");
-  return active.segmentKeys.size > 0
-    ? active.segmentKeys.has(edgeKey)
-    : edge.recordIds.some((recordId) => active.recordIds.has(recordId));
-}
-
 export function drawParticleFieldBase(
   context: CanvasRenderingContext2D,
   size: Size,
   positions: Record<string, Point>,
   resolution: EvidenceQueryResolution,
   interaction: ParticleFieldInteraction,
+  projectPositions: Record<string, Point> = {},
 ) {
   context.clearRect(0, 0, size.width, size.height);
   prepareFieldContext(context, interaction);
   const focusSet = new Set(resolution.selectedIds);
   const relatedNodeIds = new Set(resolution.pathNodeIds);
-  const active = activeEvidenceSets(resolution);
+  const activeProjectIds = new Set(resolution.relatedTraceIds);
   const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
   const particleBudget =
     (1 - semanticZoom * 0.52) * fieldTuning.baseTextureDensity;
   const particleOpacity =
     (1 - semanticZoom * 0.48) * fieldTuning.baseTextureOpacity;
 
-  graphEdges.forEach((edge, edgeIndex) => {
-    const source = positions[edge.source];
-    const target = positions[edge.target];
+  drawAmbientDomainField(
+    context,
+    size,
+    positions,
+    particleBudget,
+    particleOpacity,
+    interaction.viewport.scale,
+  );
+
+  projectSkillRelationships.forEach((relationship, edgeIndex) => {
+    if (relationship.supportKind !== "direct-evidence") return;
+    const source = positions[relationship.nodeId];
+    const target = projectPositions[relationship.projectId];
     if (
       !source ||
       !target ||
       !edgeFitsVisibleViewport(source, target, size, interaction)
     ) return;
 
-    const sourceNode = graphNodeById.get(edge.source)!;
-    const targetNode = graphNodeById.get(edge.target)!;
-    const activeCorridor = edgeIsActive(edge, active);
+    const sourceNode = graphNodeById.get(relationship.nodeId)!;
+    const activeCorridor =
+      focusSet.has(relationship.nodeId) ||
+      (activeProjectIds.has(relationship.projectId) &&
+        relatedNodeIds.has(relationship.nodeId));
     const baseAlpha =
-      fieldTuning.bridgeAlphaIdle * (activeCorridor ? 1.55 : 1) * particleOpacity;
+      fieldTuning.bridgeAlphaIdle *
+      (activeCorridor ? 1.9 : 0.72) *
+      particleOpacity;
     const count = Math.round(
       (fieldTuning.bridgeParticleBase +
-        Math.min(edge.weight, 12) * fieldTuning.bridgeParticlePerWeight) *
+        Math.min(relationship.evidenceWeight, 12) *
+          fieldTuning.bridgeParticlePerWeight *
+          0.42) *
         particleBudget,
     );
     const dx = target.x - source.x;
@@ -946,6 +1143,17 @@ export function drawParticleFieldBase(
     const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
     const perpendicularX = -dy / distance;
     const perpendicularY = dx / distance;
+    const evidenceStrength = Math.min(relationship.evidenceWeight, 12) / 12;
+    drawRelationshipHaze(
+      context,
+      source,
+      target,
+      nodeDomainById[sourceNode.primaryDomain].color,
+      (0.008 + evidenceStrength * 0.011) *
+        (activeCorridor ? 1.8 : 1) *
+        particleOpacity,
+      58 + distance * 0.085,
+    );
 
     for (let particleIndex = 0; particleIndex < count; particleIndex += 1) {
       const seed = edgeIndex * 101 + particleIndex * 19 + 1;
@@ -967,8 +1175,8 @@ export function drawParticleFieldBase(
         perpendicularY * spread;
       const color = mixColor(
         nodeDomainById[sourceNode.primaryDomain].color,
-        nodeDomainById[targetNode.primaryDomain].color,
-        Math.max(0, Math.min(1, progress)),
+        PROJECT_COLOR,
+        Math.pow(Math.max(0, Math.min(1, progress)), 2.2) * 0.55,
       );
       const particleAlpha =
         baseAlpha * (0.36 + randomUnit(seed + 8) * 0.68);
@@ -1002,12 +1210,19 @@ export function drawParticleFieldBase(
     if (
       !pointFitsVisibleViewport(
         point,
-        radius * interaction.viewport.scale * 1.8,
+        radius * interaction.viewport.scale * 2.5,
         size,
         interaction,
       )
     ) return;
     const color = nodeDomainById[node.primaryDomain].color;
+    drawNodeAtmosphereHaze(
+      context,
+      point,
+      color,
+      radius * 2.35,
+      alpha * 0.014,
+    );
     const glow = context.createRadialGradient(
       point.x,
       point.y,
@@ -1016,8 +1231,9 @@ export function drawParticleFieldBase(
       point.y,
       radius,
     );
-    glow.addColorStop(0, rgba(color, alpha * 0.2));
-    glow.addColorStop(0.28, rgba(color, alpha * 0.075));
+    glow.addColorStop(0, rgba(color, alpha * 0.095));
+    glow.addColorStop(0.36, rgba(color, alpha * 0.025));
+    glow.addColorStop(0.72, rgba(color, alpha * 0.008));
     glow.addColorStop(1, rgba(color, 0));
     context.fillStyle = glow;
     context.beginPath();
@@ -1032,15 +1248,15 @@ export function drawParticleFieldBase(
     for (let particleIndex = 0; particleIndex < particleCount; particleIndex += 1) {
       const seed = nodeIndex * 1009 + particleIndex * 13 + 23;
       const angle = randomUnit(seed) * Math.PI * 2;
-      const distance = Math.pow(randomUnit(seed + 4), 0.69) * radius;
-      const isSatellite = randomUnit(seed + 18) > 0.7;
+      const distance = Math.pow(randomUnit(seed + 4), 0.58) * radius;
+      const isSatellite = randomUnit(seed + 18) > 0.52;
       const spreadScale = isSatellite ? fieldTuning.satelliteScale : 1;
       const x =
         point.x +
-        Math.cos(angle) * distance * spreadScale * 1.15;
+        Math.cos(angle) * distance * spreadScale * 1.28;
       const y =
         point.y +
-        Math.sin(angle) * distance * spreadScale * 0.78;
+        Math.sin(angle) * distance * spreadScale * 0.98;
       const particleAlpha =
         alpha *
         particleOpacity *
@@ -1059,6 +1275,61 @@ export function drawParticleFieldBase(
     }
   });
 
+  const portalPoints = Object.entries(projectPositions).sort(
+    ([, left], [, right]) => left.x - right.x || left.y - right.y,
+  );
+  if (portalPoints.length > 0) {
+    const portalColor = PROJECT_COLOR;
+    portalPoints.forEach(([projectId, point], portalIndex) => {
+      const radius = 120;
+      const glowRadius = 92;
+      const fieldColors = projectFieldColors(projectId);
+      if (
+        !pointFitsVisibleViewport(
+          point,
+          radius * interaction.viewport.scale * 1.7,
+          size,
+          interaction,
+        )
+      ) return;
+      const glow = context.createRadialGradient(
+        point.x,
+        point.y,
+        0,
+        point.x,
+        point.y,
+        glowRadius,
+      );
+      glow.addColorStop(0, rgba(portalColor, 0.055));
+      glow.addColorStop(0.28, rgba(portalColor, 0.018));
+      glow.addColorStop(1, rgba(portalColor, 0));
+      context.fillStyle = glow;
+      context.beginPath();
+      context.arc(point.x, point.y, glowRadius, 0, Math.PI * 2);
+      context.fill();
+
+      const particleCount = Math.round(144 * particleBudget);
+      for (let index = 0; index < particleCount; index += 1) {
+        const seed = 83_000 + portalIndex * 1009 + index * 17;
+        const angle = randomUnit(seed) * Math.PI * 2;
+        const distance = Math.pow(randomUnit(seed + 4), 0.7) * radius;
+        const particleColor =
+          fieldColors[
+            Math.floor(randomUnit(seed + 11) * fieldColors.length)
+          ];
+        drawAtmosphereParticle(
+          context,
+          point.x + Math.cos(angle) * distance * 1.24,
+          point.y + Math.sin(angle) * distance * 0.62,
+          particleColor,
+          particleOpacity * (0.17 + randomUnit(seed + 7) * 0.33),
+          seed,
+          interaction.viewport.scale,
+        );
+      }
+    });
+  }
+
   context.restore();
 }
 
@@ -1067,18 +1338,17 @@ export function drawParticleFieldMotion(
   size: Size,
   positions: Record<string, Point>,
   resolution: EvidenceQueryResolution,
-  previewId: string | null,
   activeProjectId: string | null,
   selectionWake: SelectionWake | null,
   time: number,
   interaction: ParticleFieldInteraction,
+  projectPositions: Record<string, Point> = {},
 ) {
   const motionTime = time * fieldTuning.motionTimeScale;
   prepareFieldContext(context, interaction);
 
   const focusSet = new Set(resolution.selectedIds);
-  const active = activeEvidenceSets(resolution);
-  const activeTokenBridges: ActiveTokenBridge[] = [];
+  const activeProjectBridges: ActiveProjectBridge[] = [];
   const semanticZoom = semanticZoomLevel(interaction.viewport.scale);
   const particleOpacity = 1 - semanticZoom * 0.68;
   const glyphDensity = ambientGlyphDensity(interaction.viewport.scale);
@@ -1086,31 +1356,34 @@ export function drawParticleFieldMotion(
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.font = `600 ${glyphFontSize}px "Cascadia Code", Consolas, monospace`;
-  const ambientOnly =
-    focusSet.size === 0 &&
-    activeProjectId === null &&
-    selectionWake === null;
+  const ambientOnly = activeProjectId === null && selectionWake === null;
   const bridgeParticleScale = ambientOnly
     ? fieldTuning.bridgeParticleAmbientScale
     : 1;
 
-  graphEdges.forEach((edge, edgeIndex) => {
-    if (!edgeIsActive(edge, active)) return;
-    const source = positions[edge.source];
-    const target = positions[edge.target];
+  projectSkillRelationships.forEach((relationship, edgeIndex) => {
+    if (relationship.supportKind !== "direct-evidence") return;
+    const relationshipActive = activeProjectId === relationship.projectId;
+    if (!ambientOnly && !relationshipActive) return;
+    const nodePoint = positions[relationship.nodeId];
+    const projectPoint = projectPositions[relationship.projectId];
+    const source = nodePoint;
+    const target = projectPoint;
     if (
       !source ||
       !target ||
       !edgeFitsVisibleViewport(source, target, size, interaction)
     ) return;
 
-    activeTokenBridges.push({
-      edgeIndex,
-      sourceId: edge.source,
-      targetId: edge.target,
-    });
-    const sourceNode = graphNodeById.get(edge.source)!;
-    const targetNode = graphNodeById.get(edge.target)!;
+    if (supportsTrackedProjectBridge(relationship.supportKind)) {
+      activeProjectBridges.push({
+        edgeIndex,
+        projectId: relationship.projectId,
+        nodeId: relationship.nodeId,
+        weight: relationship.evidenceWeight,
+      });
+    }
+    const node = graphNodeById.get(relationship.nodeId)!;
     const dx = target.x - source.x;
     const dy = target.y - source.y;
     const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
@@ -1119,7 +1392,8 @@ export function drawParticleFieldMotion(
     const count = Math.max(
       1,
       Math.round(
-        (fieldTuning.bridgeParticleActive + Math.min(edge.weight, 12) * 3) *
+        (fieldTuning.bridgeParticleActive +
+          Math.min(relationship.evidenceWeight, 12) * 3) *
           bridgeParticleScale,
       ),
     );
@@ -1144,15 +1418,16 @@ export function drawParticleFieldMotion(
         (dy / distance) * longitudinal +
         perpendicularY * (spread + drift);
       const color = mixColor(
-        nodeDomainById[sourceNode.primaryDomain].color,
-        nodeDomainById[targetNode.primaryDomain].color,
+        nodeDomainById[node.primaryDomain].color,
+        PROJECT_COLOR,
         clampUnit(transit.progress),
       );
       const particleAlpha =
         fieldTuning.bridgeAlphaActive *
           particleOpacity *
           transit.alpha *
-          (0.38 + randomUnit(seed + 8) * 0.62);
+          (0.38 + randomUnit(seed + 8) * 0.62) *
+          (relationshipActive ? 1 : 0.42);
       const particleSize = randomUnit(seed + 11) > 0.88 ? 2.05 : 0.9;
       drawAmbientParticle(
         context,
@@ -1171,7 +1446,7 @@ export function drawParticleFieldMotion(
     const point = positions[node.id];
     if (!point) return;
     const selected = focusSet.has(node.id);
-    const attention = selected ? 1 : previewId === node.id ? 0.78 : 0;
+    const attention = selected ? 1 : 0;
     if (attention <= 0) return;
     const strength = evidenceStrengthByNode[node.id] ?? 1;
     const radius =
@@ -1196,10 +1471,46 @@ export function drawParticleFieldMotion(
     );
   });
 
+  Object.entries(projectPositions).forEach(
+    ([projectId, point], portalIndex) => {
+      if (
+        !pointFitsVisibleViewport(
+          point,
+          120 * interaction.viewport.scale,
+          size,
+          interaction,
+        )
+      ) return;
+      const fieldColors = projectFieldColors(projectId);
+      for (let index = 0; index < 12; index += 1) {
+        const seed = 97_000 + portalIndex * 503 + index * 31;
+        const direction = randomUnit(seed + 11) > 0.5 ? 1 : -1;
+        const angle =
+          randomUnit(seed) * Math.PI * 2 +
+          motionTime * 0.000025 * direction * (0.7 + randomUnit(seed + 3));
+        const radius = 28 + randomUnit(seed + 5) * 46;
+        const particleColor =
+          fieldColors[
+            Math.floor(randomUnit(seed + 13) * fieldColors.length)
+          ];
+        drawAtmosphereParticle(
+          context,
+          point.x + Math.cos(angle) * radius * 1.28,
+          point.y + Math.sin(angle) * radius * 0.58,
+          particleColor,
+          0.1 + randomUnit(seed + 9) * 0.18,
+          seed,
+          interaction.viewport.scale,
+        );
+      }
+    },
+  );
+
   drawSelectionWake(
     context,
     size,
     positions,
+    projectPositions,
     selectionWake,
     time,
     interaction,
@@ -1209,7 +1520,8 @@ export function drawParticleFieldMotion(
   drawDataBursts(
     context,
     positions,
-    activeTokenBridges,
+    projectPositions,
+    activeProjectBridges,
     time,
     interaction,
   );
@@ -1218,10 +1530,10 @@ export function drawParticleFieldMotion(
     size,
     positions,
     resolution,
-    previewId,
     activeProjectId,
     interaction,
-    activeTokenBridges,
+    projectPositions,
+    activeProjectBridges,
     motionTime,
   );
   context.restore();

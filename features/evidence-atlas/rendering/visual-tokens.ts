@@ -51,18 +51,11 @@ function simpleIcon(label: string, svg: string): VisualToken {
 }
 
 export const visualTokenByNodeId: Record<string, VisualToken> = {
-  "capability-contracts": { kind: "glyph", label: "Capability contract", glyph: "contract" },
-  "agent-boundaries": { kind: "glyph", label: "Authority boundary", glyph: "boundary" },
-  "trusted-evidence": { kind: "glyph", label: "Trusted evidence", glyph: "boundary" },
   "safe-writes": { kind: "glyph", label: "Replay-safe write", glyph: "replay" },
   "context-compression": { kind: "glyph", label: "Context compression", glyph: "context" },
-  "context-budgeting": { kind: "glyph", label: "Context budget", glyph: "context" },
-  evaluation: { kind: "glyph", label: "Evaluation", glyph: "measure" },
-  "deterministic-replay": { kind: "glyph", label: "Deterministic replay", glyph: "replay" },
   "workflow-orchestration": { kind: "glyph", label: "Workflow", glyph: "flow" },
   "operator-control": { kind: "glyph", label: "Operator control", glyph: "flow" },
   "data-contracts": { kind: "glyph", label: "Data contract", glyph: "contract" },
-  "measured-impact": { kind: "glyph", label: "Measured impact", glyph: "measure" },
   go: {
     kind: "image-mask",
     label: "Go gopher face",

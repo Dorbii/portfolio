@@ -32,8 +32,8 @@ test("server-renders the evidence atlas and its project launcher", async () => {
 
   assert.match(html, /Steven Doris/);
   assert.match(html, /Senior full-stack \/ platform engineer/i);
-  assert.match(html, /Projects/i);
-  assert.match(html, /Choose a project/i);
+  assert.match(html, /aria-label="Project portals"/i);
+  assert.doesNotMatch(html, /All layers|Spotlight UI \/ Client/i);
   assert.doesNotMatch(html, /Filter the evidence map/i);
   assert.doesNotMatch(html, /Case studies/i);
   assert.match(html, /steven-doris-resume\.pdf/);
@@ -50,6 +50,137 @@ test("server-renders the evidence atlas and its project launcher", async () => {
     html,
     /\.py\b|internal repository|credential name|job identifier/i,
   );
+});
+
+test("keeps project entry, authored media, and atlas return in one reversible flow", async () => {
+  const [
+    atlas,
+    graph,
+    portals,
+    mediaStage,
+    transitionModel,
+    mediaManifest,
+    videoAsset,
+    posterAsset,
+  ] =
+    await Promise.all([
+      readFile(
+        new URL(
+          "../features/evidence-atlas/components/evidence-atlas.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/components/evidence-graph.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/components/project-portals.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/components/project-media-stage.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/model/project-transition.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/model/project-media.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../public/projects/kaizen-metrics/transition.mp4",
+          import.meta.url,
+        ),
+      ),
+      readFile(
+        new URL(
+          "../public/projects/kaizen-metrics/poster.png",
+          import.meta.url,
+        ),
+      ),
+    ]);
+
+  assert.match(atlas, /projectMediaById\[request\.projectId\]/);
+  assert.match(atlas, /const preloadProjectMedia = useCallback/);
+  assert.match(atlas, /preloadedMediaRef\.current\.set\(projectId, video\)/);
+  assert.match(atlas, /returnViewport/);
+  assert.match(
+    atlas,
+    /returnViewport: snapshotProjectViewport\(returnViewport\)/,
+  );
+  assert.match(atlas, /focus\(\{\s*preventScroll: true/);
+  assert.match(atlas, /setProjectReturn\(/);
+  assert.match(atlas, /inert=\{projectMediaRequest \? true : undefined\}/);
+  assert.match(atlas, /motionSuspended=/);
+  assert.match(atlas, /onProjectReturnComplete=\{completeProjectReturn\}/);
+  assert.match(atlas, /<ProjectMediaStage/);
+  assert.match(graph, /onProjectTransitionComplete/);
+  assert.match(
+    graph,
+    /PROJECT_ENTRY_DURATION_MS\[projectTransition\.source\]/,
+  );
+  assert.match(graph, /cancelProjectTransition/);
+  assert.match(graph, /interpolateGraphViewport/);
+  assert.match(graph, /projectReturn\.viewport/);
+  assert.match(graph, /onOpenProject\(projectId, "zoom", next\)/);
+  assert.match(graph, /onOpenProject\(projectId, "activate", viewportRef\.current\)/);
+  assert.match(portals, /onMouseEnter=\{\(\) => \{/);
+  assert.match(portals, /onFocus=\{\(\) => \{/);
+  assert.match(portals, /onPreloadProject\(project\.id\)/);
+  assert.doesNotMatch(mediaStage, /autoPlay/);
+  assert.match(mediaStage, /preload="auto"/);
+  assert.match(mediaStage, /muted/);
+  assert.match(mediaStage, /playsInline/);
+  assert.match(mediaStage, /onEnded=\{showDetails\}/);
+  assert.match(mediaStage, /prefers-reduced-motion: reduce/);
+  assert.match(mediaStage, /aria-label="Project animation controls"/);
+  assert.match(mediaStage, /const togglePlayback/);
+  assert.match(
+    mediaStage,
+    /phase === "loading" && entryReady && mediaReady && paused/,
+  );
+  assert.match(mediaStage, /Play walkthrough/);
+  assert.match(mediaStage, /PROJECT_ENTRY_DURATION_MS\[entrySource\]/);
+  assert.match(mediaStage, /const requestAbort = useCallback/);
+  assert.match(mediaStage, /setAborting\(true\)/);
+  assert.match(mediaStage, /PROJECT_ABORT_DURATION_MS/);
+  assert.match(
+    mediaStage,
+    /"--project-abort-duration": `\$\{PROJECT_ABORT_DURATION_MS\}ms`/,
+  );
+  assert.match(
+    mediaStage,
+    /if \(reducedMotion \|\| phase === "details"\) \{\s*onExitStart\(\)/,
+  );
+  assert.match(mediaStage, /className="project-terminal"/);
+  assert.match(mediaStage, /onClick=\{onExitStart\}/);
+  assert.match(mediaStage, /Skip to details/);
+  assert.match(transitionModel, /returnViewport: ProjectViewportSnapshot/);
+  assert.match(transitionModel, /export type ProjectReturnRequest/);
+  assert.match(mediaManifest, /engineering-metrics-pipeline/);
+  assert.match(mediaManifest, /\/projects\/kaizen-metrics\/transition\.mp4/);
+  assert.ok(videoAsset.length > 100_000);
+  assert.ok(posterAsset.length > 10_000);
 });
 
 test("keeps the evidence atlas feature boundaries explicit", async () => {
@@ -157,6 +288,37 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
     ),
     "utf8",
   );
+  const [projectPortals, projectTransition, projectLayout, projectRelations] =
+    await Promise.all([
+      readFile(
+        new URL(
+          "../features/evidence-atlas/components/project-portals.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/model/project-transition.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/rendering/project-layout.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../features/evidence-atlas/model/project-relations.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
   const baseLayer = particleField.slice(
     particleField.indexOf("export function drawParticleFieldBase"),
     particleField.indexOf("export function drawParticleFieldMotion"),
@@ -167,7 +329,7 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   const ambientDensityGuard = particleField.slice(
     particleField.indexOf("const ambientOnly"),
     particleField.indexOf(
-      "graphEdges.forEach",
+      "projectSkillRelationships.forEach",
       particleField.indexOf("const ambientOnly"),
     ),
   );
@@ -177,7 +339,8 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(atlas, /useEvidenceAtlasState/);
   assert.match(atlas, /<EvidenceGraph/);
   assert.match(atlas, /<EvidenceInspector/);
-  assert.match(atlas, /<DomainLegend/);
+  assert.doesNotMatch(atlas, /<ProjectPortals|graph-toolbar/);
+  assert.doesNotMatch(atlas, /<DomainLegend|<ProjectNav/);
   assert.match(atlas, /mode-project/);
   assert.match(atlas, /mode-explore/);
 
@@ -209,12 +372,16 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(query, /mode: "bridge"/);
   assert.match(query, /mode: "disconnected"/);
 
-  assert.match(graphLayout, /function normalizeLayoutBounds/);
   assert.match(graphLayout, /export function computeLayout/);
-  assert.match(graphLayout, /const verticalCoverage = 0\.84/);
+  assert.match(graphLayout, /weightedProjectAnchor/);
+  assert.match(graphLayout, /count === 1/);
+  assert.match(graphLayout, /projectSkillRelationshipsByNode/);
   assert.match(particleField, /bridgeParticleActive/);
-  assert.match(particleField, /bridgeParticleAmbientScale: 0\.6/);
-  assert.match(particleField, /baseTextureDensity: 0\.92/);
+  assert.match(particleField, /bridgeParticleAmbientScale: 0\.5/);
+  assert.match(particleField, /baseTextureDensity: 1\.08/);
+  assert.match(particleField, /function drawNodeAtmosphereHaze/);
+  assert.match(particleField, /function drawAmbientDomainField/);
+  assert.match(particleField, /function radicalInverse/);
   assert.match(particleField, /baseTextureOpacity: 0\.9/);
   assert.match(particleField, /nodeFieldAlphaIdle/);
   assert.match(particleField, /function mixColor/);
@@ -231,6 +398,23 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(particleField, /export function dataBurstWindow/);
   assert.match(particleField, /motionTimeScale: 0\.68/);
   assert.match(particleField, /drawVisualTokenSprite/);
+  assert.match(particleField, /projectSkillRelationships\.forEach/);
+  assert.match(particleField, /projectFieldColorsById/);
+  assert.doesNotMatch(particleField, /graphEdges\.forEach/);
+  assert.doesNotMatch(particleField, /fromProject/);
+  assert.match(
+    particleField,
+    /const source = nodePoint;\s*const target = projectPoint;/,
+  );
+  assert.match(
+    particleField,
+    /relationship\.supportKind !== "direct-evidence"/,
+  );
+  assert.match(particleField, /supportsTrackedProjectBridge/);
+  assert.match(
+    particleField,
+    /if \(supportsTrackedProjectBridge\(relationship\.supportKind\)\) \{\s*activeProjectBridges\.push/,
+  );
   assert.match(baseLayer, /drawAtmosphereParticle/);
   assert.doesNotMatch(baseLayer, /drawAmbientParticle/);
   assert.match(motionLayer, /drawAmbientParticle/);
@@ -246,21 +430,63 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(graph, /MOTION_PIXEL_RATIO_LIMIT = 1/);
   assert.match(graph, /shouldPaintMotionFrame/);
   assert.doesNotMatch(graph, /context\.drawImage\(baseCanvas/);
-  assert.match(graph, /selectedIds\.length > 0 \? selectedIds : previewId/);
-  assert.match(graph, /resolveEvidenceQuery\(resolutionIds, activeProjectId\)/);
+  assert.doesNotMatch(graph, /previewId|onPreview|is-muted|is-preview/);
   assert.match(graph, /const particleResolution = useMemo/);
-  assert.match(graph, /resolveEvidenceQuery\(selectedIds, activeProjectId\)/);
+  assert.match(graph, /resolveEvidenceQuery\(selectedIds, effectiveProjectId\)/);
+  assert.match(graph, /PROJECT_HOVER_WAKE_DELAY_MS = 120/);
+  assert.match(graph, /source === "keyboard"/);
+  assert.match(graph, /triggerProjectWake\(projectId\)/);
+  assert.doesNotMatch(graph, /setSelectionWake\(\{ sourceId: node\.id/);
+  assert.match(graph, /focusGraphViewportAt/);
+  assert.match(graph, /interpolateGraphViewport/);
+  assert.match(
+    graph,
+    /const projectPoint = projectPositions\[projectTransition\.projectId\]/,
+  );
+  assert.match(
+    graph,
+    /focusGraphViewportAt\(\s*projectPoint,\s*size,\s*targetScale/,
+  );
+  assert.match(graph, /<ProjectPortals/);
+  assert.match(graph, /positions=\{projectPositions\}/);
+  assert.match(graph, /closest<HTMLElement>\("\[data-project-id\]"\)/);
+  assert.match(graph, /projectPortalFootprint\(size\.width\)/);
+  assert.match(graph, /graphPointToScreen\(point, current\)/);
+  assert.doesNotMatch(graph, /nearestDistance > 108/);
+  assert.match(graph, /next\.scale >= PROJECT_PORTAL_ENTRY_SCALE/);
+  assert.match(graph, /projectEntryLockRef\.current === null/);
+  assert.match(
+    graph,
+    /projectEntryLockRef\.current = projectId;[\s\S]*onOpenProject\(projectId, "zoom", next\)/,
+  );
   assert.match(graph, /drawParticleFieldBase\([\s\S]*particleResolution/);
   assert.match(graph, /graph-viewport-controls/);
+  assert.doesNotMatch(graph, /<StackSpotlight|spotlightDomain|domainBandsForSize/);
   assert.match(graph, /onPointerDown=\{handlePointerDown\}/);
   assert.match(graph, /addEventListener\("wheel", handleWheel, \{ passive: false \}\)/);
   assert.match(graph, /inspectorOpen/);
   assert.match(graph, /graphPointToScreen/);
   assert.match(graph, /data-node-id=\{node\.id\}/);
+  assert.match(graph, /tabIndex=\{keyboardVisible \? 0 : -1\}/);
   assert.match(graph, /semanticNodeTokenReveal\(viewport\.scale\)/);
   assert.match(graph, /className="graph-node-domain"/);
   assert.doesNotMatch(graph, /--graph-scale/);
   assert.doesNotMatch(graph, /relative field density|activeTrace/);
+  assert.match(projectPortals, /data-project-id=\{project\.id\}/);
+  assert.match(projectPortals, /graphPointToScreen\(point, viewport\)/);
+  assert.match(projectPortals, /tabIndex=\{keyboardVisible \? 0 : -1\}/);
+  assert.match(
+    projectTransition,
+    /export type ProjectEntrySource = "activate" \| "zoom"/,
+  );
+  assert.match(projectTransition, /source: ProjectEntrySource/);
+  assert.match(projectLayout, /export function computeProjectPortalLayout/);
+  assert.match(projectLayout, /GOLDEN_ANGLE/);
+  assert.match(projectRelations, /export const projectSkillRelationships/);
+  assert.match(projectRelations, /projectSkillRelationshipsByNode/);
+  assert.match(projectRelations, /ProjectRelationshipSupportKind/);
+  assert.match(projectRelations, /evidenceWeight: number/);
+  assert.match(projectRelations, /layoutWeight: number/);
   assert.match(inspector, /<ProjectInspector/);
   assert.match(inspector, /<QueryInspector/);
   assert.match(projectInspector, /Project playback controls/);
@@ -277,10 +503,19 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   );
 
   assert.match(globalStyles, /features\/evidence-atlas\/styles/);
-  assert.match(featureStyles, /\.graph-node:focus-visible/);
-  assert.match(featureStyles, /\.graph-node\.is-preview/);
+  assert.doesNotMatch(featureStyles, /\.graph-node:hover|\.graph-node\.is-preview/);
+  assert.doesNotMatch(featureStyles, /\.graph-node\.is-muted/);
   assert.match(featureStyles, /\.graph-node-domain/);
-  assert.match(featureStyles, /\.project-nav/);
+  assert.match(
+    featureStyles,
+    /\.graph-node\s*\{[\s\S]*?background:\s*transparent;/,
+  );
+  assert.match(featureStyles, /\.project-portals/);
+  assert.match(
+    featureStyles,
+    /\.project-portal-node\s*\{[\s\S]*?background:\s*transparent;/,
+  );
+  assert.doesNotMatch(featureStyles, /\.stack-spotlight|is-layer-muted/);
   assert.match(featureStyles, /\.graph-viewport-controls/);
   assert.match(featureStyles, /\.graph-field-base/);
   assert.match(featureStyles, /\.graph-field-motion/);
@@ -290,6 +525,8 @@ test("keeps the evidence atlas feature boundaries explicit", async () => {
   assert.match(featureStyles, /width: min\(520px, calc\(100vw - 32px\)\)/);
   assert.match(featureStyles, /\.project-step/);
   assert.match(featureStyles, /\.project-player/);
+  assert.match(featureStyles, /\.project-media-stage\.is-aborting/);
+  assert.match(featureStyles, /@keyframes project-media-abort-tumble/);
   assert.match(featureStyles, /height: 100svh/);
   assert.match(featureStyles, /@media \(max-width: 940px\)/);
   assert.match(layout, /summary_large_image/);
@@ -310,6 +547,8 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     particleModule,
     renderScheduleModule,
     dataModule,
+    relationshipModule,
+    transitionModule,
   ] = await Promise.all([
     vite.ssrLoadModule(
       "/features/evidence-atlas/rendering/graph-viewport.ts",
@@ -324,6 +563,8 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
       "/features/evidence-atlas/rendering/render-schedule.ts",
     ),
     vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
+    vite.ssrLoadModule("/features/evidence-atlas/model/project-relations.ts"),
+    vite.ssrLoadModule("/features/evidence-atlas/model/project-transition.ts"),
   ]);
 
   assert.equal(renderScheduleModule.motionFrameInterval(false), 1000 / 15);
@@ -335,6 +576,36 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
   assert.ok(
     renderScheduleModule.MOTION_IDLE_FRAME_INTERVAL >
       renderScheduleModule.MOTION_ACTIVE_FRAME_INTERVAL,
+  );
+  assert.equal(transitionModule.PROJECT_ABORT_DURATION_MS, 240);
+  assert.ok(transitionModule.PROJECT_ABORT_DURATION_MS <= 300);
+
+  const initialViewport = { scale: 1, x: 37, y: 104 };
+  const capturedViewport = transitionModule.snapshotProjectViewport(
+    initialViewport,
+  );
+  assert.notEqual(capturedViewport, initialViewport);
+  const focusedViewport = viewportModule.focusGraphViewportAt(
+    { x: 800, y: 540 },
+    { width: 1200, height: 800 },
+    2.7,
+  );
+  assert.notDeepEqual(focusedViewport, initialViewport);
+  const restoredViewport = transitionModule.snapshotProjectViewport(
+    capturedViewport,
+  );
+  assert.deepEqual(
+    restoredViewport,
+    initialViewport,
+    "project entry and return must round-trip x, y, and scale exactly",
+  );
+  assert.equal(
+    particleModule.supportsTrackedProjectBridge("direct-evidence"),
+    true,
+  );
+  assert.equal(
+    particleModule.supportsTrackedProjectBridge("curated-summary"),
+    false,
   );
 
   const size = { width: 1200, height: 800 };
@@ -374,7 +645,26 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     "an open drawer must allow the graph to pan fully clear of its overlay",
   );
 
-  const wake = { nodeId: "go", startedAt: 1_000 };
+  const projectFocused = viewportModule.focusGraphViewportAt(
+    { x: 600, y: 400 },
+    size,
+    1.9,
+    { right: 520 },
+  );
+  assert.deepEqual(
+    viewportModule.graphPointToScreen({ x: 600, y: 400 }, projectFocused),
+    { x: 340, y: 416 },
+  );
+  assert.deepEqual(
+    viewportModule.interpolateGraphViewport(current, projectFocused, 0),
+    current,
+  );
+  assert.deepEqual(
+    viewportModule.interpolateGraphViewport(current, projectFocused, 1),
+    projectFocused,
+  );
+
+  const wake = { sourceId: "go", startedAt: 1_000 };
   assert.equal(particleModule.selectionWakeFrame(null, 1_000).active, false);
   assert.equal(
     particleModule.selectionWakeFrame(wake, 1_000).progress,
@@ -396,10 +686,35 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
   const strongWake = particleModule.selectionWakeEdgeTuning(12);
   assert.ok(strongWake.particleCount > weakWake.particleCount);
   assert.ok(strongWake.speed > weakWake.speed);
+  assert.ok(weakWake.speed >= 1.15);
   const goWakeEdges = particleModule.selectionWakeEdges("go");
-  assert.ok(goWakeEdges.length > 0 && goWakeEdges.length <= 5);
+  assert.equal(
+    goWakeEdges.length,
+    relationshipModule.projectSkillRelationships.filter(
+      (relationship) => relationship.nodeId === "go",
+    ).length,
+  );
   assert.ok(
-    goWakeEdges.every((edge) => edge.source === "go" || edge.target === "go"),
+    goWakeEdges.every(
+      (relationship) =>
+        relationship.nodeId === "go" || relationship.projectId === "go",
+    ),
+  );
+  const projectWakeEdges = particleModule.selectionWakeEdges(
+    "engineering-metrics-pipeline",
+  );
+  assert.equal(
+    projectWakeEdges.length,
+    relationshipModule.projectSkillRelationships.filter(
+      (relationship) =>
+        relationship.projectId === "engineering-metrics-pipeline",
+    ).length,
+  );
+  assert.ok(
+    projectWakeEdges.every(
+      (relationship) =>
+        relationship.projectId === "engineering-metrics-pipeline",
+    ),
   );
   assert.equal(dataModule.graphNodes.some((node) => node.id === "electron"), false);
   const cableCar = dataModule.evidenceTraces.find(
@@ -513,7 +828,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     "react",
     point,
     new Set(),
-    null,
     {
       viewport: current,
       cursor: point,
@@ -527,7 +841,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     "react",
     point,
     new Set(["react"]),
-    null,
     {
       viewport: { scale: 1.6, x: 0, y: 0 },
       cursor: point,
@@ -542,7 +855,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     "react",
     point,
     new Set(["react"]),
-    null,
     {
       viewport: deepZoom,
       cursor: null,
@@ -556,7 +868,6 @@ test("keeps viewport transforms anchored and visual tokens evidence-scoped", asy
     "postgresql",
     point,
     new Set(),
-    null,
     {
       viewport: deepZoom,
       cursor: { x: 410, y: 302 },
@@ -584,12 +895,9 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
   assert.equal(direct.mode, "direct");
   assert.ok(direct.directRecords.length > 0);
 
-  const sharedTrace = resolveEvidenceQuery([
-    "deterministic-replay",
-    "context-budgeting",
-  ]);
+  const sharedTrace = resolveEvidenceQuery(["safe-writes", "openapi"]);
   assert.equal(sharedTrace.mode, "shared-trace");
-  assert.deepEqual(sharedTrace.relatedTraceIds, ["bounded-agent-context"]);
+  assert.deepEqual(sharedTrace.relatedTraceIds, ["governed-agent-tooling"]);
   assert.ok(sharedTrace.pathSegments.length > 0);
 
   const bridge = resolveEvidenceQuery([
@@ -606,8 +914,8 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
 
   const permutationResults = permutations([
     "postgresql",
-    "trusted-evidence",
-    "context-budgeting",
+    "data-contracts",
+    "context-compression",
   ]).map((nodeIds) => resolveEvidenceQuery(nodeIds));
   assert.ok(permutationResults.every((result) => result.mode === "bridge"));
   assert.equal(
@@ -637,6 +945,188 @@ test("resolves direct, shared-trace, bridged, and disconnected queries", async (
   );
 });
 
+test("lays out deterministic project gravity wells and canonical skill satellites", async (t) => {
+  const vite = await createServer({
+    configFile: false,
+    server: { middlewareMode: true },
+    appType: "custom",
+    logLevel: "silent",
+  });
+  t.after(() => vite.close());
+  const [
+    projectLayout,
+    graphLayout,
+    { evidenceTraces, graphNodes },
+    { projectSkillRelationshipsByNode },
+  ] = await Promise.all([
+    vite.ssrLoadModule(
+      "/features/evidence-atlas/rendering/project-layout.ts",
+    ),
+    vite.ssrLoadModule("/features/evidence-atlas/rendering/graph-layout.ts"),
+    vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
+    vite.ssrLoadModule("/features/evidence-atlas/model/project-relations.ts"),
+  ]);
+
+  const wideSize = { width: 1440, height: 900 };
+  const compactSize = { width: 900, height: 900 };
+  const phoneSize = { width: 390, height: 700 };
+  const wide = projectLayout.computeProjectPortalLayout(wideSize);
+  const compact = projectLayout.computeProjectPortalLayout(compactSize);
+  const phone = projectLayout.computeProjectPortalLayout(phoneSize);
+
+  const boundsFor = (point, footprint) => ({
+    left: point.x - footprint.width / 2,
+    right: point.x + footprint.width / 2,
+    top: point.y - footprint.height / 2,
+    bottom: point.y + footprint.height / 2,
+  });
+  const boxesOverlap = (left, right, gap = 0) =>
+    left.left < right.right + gap &&
+    left.right + gap > right.left &&
+    left.top < right.bottom + gap &&
+    left.bottom + gap > right.top;
+
+  assert.deepEqual(
+    projectLayout.computeProjectPortalLayout(wideSize),
+    wide,
+    "project portal layout must be deterministic",
+  );
+  assert.deepEqual(Object.keys(wide).sort(), evidenceTraces.map((trace) => trace.id).sort());
+  const wideXValues = Object.values(wide).map((point) => point.x);
+  const wideYValues = Object.values(wide).map((point) => point.y);
+  assert.ok(
+    Math.max(...wideXValues) - Math.min(...wideXValues) > wideSize.width * 0.5,
+    "project hubs should use the atlas width rather than form a toolbar",
+  );
+  assert.ok(
+    Math.max(...wideYValues) - Math.min(...wideYValues) > wideSize.height * 0.45,
+    "project hubs should use the atlas height rather than form a horizontal layer",
+  );
+
+  for (const [size, portals] of [
+    [wideSize, wide],
+    [compactSize, compact],
+    [phoneSize, phone],
+  ]) {
+    const skills = graphLayout.computeLayout(size, portals);
+    const portalFootprint = projectLayout.projectPortalFootprint(size.width);
+    assert.deepEqual(
+      graphLayout.computeLayout(size, portals),
+      skills,
+      "skill satellite layout must be deterministic",
+    );
+    assert.deepEqual(
+      Object.keys(skills).sort(),
+      graphNodes.map((node) => node.id).sort(),
+      "every canonical skill should appear exactly once",
+    );
+    const portalEntries = Object.entries(portals);
+    const skillEntries = Object.entries(skills);
+    for (const [id, point] of portalEntries) {
+      const bounds = boundsFor(point, portalFootprint);
+      assert.ok(
+        bounds.left >= 0 &&
+          bounds.right <= size.width &&
+          bounds.top >= 0 &&
+          bounds.bottom <= size.height,
+        `${id} project footprint must remain inside ${size.width}x${size.height}`,
+      );
+    }
+    for (const [id, point] of skillEntries) {
+      const bounds = boundsFor(point, graphLayout.graphNodeFootprint(id));
+      assert.ok(
+        bounds.left >= 0 &&
+          bounds.right <= size.width &&
+          bounds.top >= 0 &&
+          bounds.bottom <= size.height,
+        `${id} skill footprint must remain inside ${size.width}x${size.height}`,
+      );
+    }
+    for (let leftIndex = 0; leftIndex < portalEntries.length; leftIndex += 1) {
+      for (
+        let rightIndex = leftIndex + 1;
+        rightIndex < portalEntries.length;
+        rightIndex += 1
+      ) {
+        assert.equal(
+          boxesOverlap(
+            boundsFor(portalEntries[leftIndex][1], portalFootprint),
+            boundsFor(portalEntries[rightIndex][1], portalFootprint),
+            2,
+          ),
+          false,
+          `project portals must not overlap at ${size.width}x${size.height}`,
+        );
+      }
+    }
+    for (let leftIndex = 0; leftIndex < skillEntries.length; leftIndex += 1) {
+      const [leftId, leftPoint] = skillEntries[leftIndex];
+      const leftFootprint = graphLayout.graphNodeFootprint(leftId);
+      for (
+        let rightIndex = leftIndex + 1;
+        rightIndex < skillEntries.length;
+        rightIndex += 1
+      ) {
+        const [rightId, rightPoint] = skillEntries[rightIndex];
+        assert.equal(
+          boxesOverlap(
+            boundsFor(leftPoint, leftFootprint),
+            boundsFor(rightPoint, graphLayout.graphNodeFootprint(rightId)),
+            2,
+          ),
+          false,
+          `${leftId} and ${rightId} must not overlap at ${size.width}x${size.height}`,
+        );
+      }
+      for (const [projectId, projectPoint] of portalEntries) {
+        assert.equal(
+          boxesOverlap(
+            boundsFor(leftPoint, leftFootprint),
+            boundsFor(projectPoint, portalFootprint),
+            2,
+          ),
+          false,
+          `${leftId} must not overlap ${projectId} at ${size.width}x${size.height}`,
+        );
+      }
+    }
+
+    const singleProjectNode = graphNodes.find(
+      (node) => projectSkillRelationshipsByNode.get(node.id)?.length === 1,
+    );
+    assert.ok(singleProjectNode, "fixture needs a project-specific skill");
+    const onlyRelationship = projectSkillRelationshipsByNode.get(
+      singleProjectNode.id,
+    )[0];
+    assert.ok(
+      Math.hypot(
+        skills[singleProjectNode.id].x - portals[onlyRelationship.projectId].x,
+        skills[singleProjectNode.id].y - portals[onlyRelationship.projectId].y,
+      ) < 280,
+      "a project-specific skill should orbit its project hub",
+    );
+
+    const sharedNode = graphNodes.find(
+      (node) => projectSkillRelationshipsByNode.get(node.id)?.length >= 2,
+    );
+    assert.ok(sharedNode, "fixture needs a shared skill");
+    const relatedProjects = projectSkillRelationshipsByNode
+      .get(sharedNode.id)
+      .map((relationship) => portals[relationship.projectId]);
+    assert.ok(
+      skills[sharedNode.id].x >=
+        Math.min(...relatedProjects.map((point) => point.x)) - 220 &&
+        skills[sharedNode.id].x <=
+          Math.max(...relatedProjects.map((point) => point.x)) + 220 &&
+        skills[sharedNode.id].y >=
+          Math.min(...relatedProjects.map((point) => point.y)) - 220 &&
+        skills[sharedNode.id].y <=
+          Math.max(...relatedProjects.map((point) => point.y)) + 220,
+      "a shared skill should remain near its related project barycenter",
+    );
+  }
+});
+
 test("keeps projects, evidence records, and graph nodes separated", async (t) => {
   const vite = await createServer({
     configFile: false,
@@ -645,10 +1135,15 @@ test("keeps projects, evidence records, and graph nodes separated", async (t) =>
     logLevel: "silent",
   });
   t.after(() => vite.close());
-  const [{ evidenceRecords, evidenceTraces, graphNodes }, { nodeDomains }] =
+  const [
+    { evidenceRecords, evidenceTraces, graphNodes },
+    { nodeDomains },
+    { projectSkillRelationships },
+  ] =
     await Promise.all([
       vite.ssrLoadModule("/features/evidence-atlas/model/evidence-data.ts"),
       vite.ssrLoadModule("/features/evidence-atlas/model/node-domains.ts"),
+      vite.ssrLoadModule("/features/evidence-atlas/model/project-relations.ts"),
     ]);
 
   const nodeIds = new Set(graphNodes.map((node) => node.id));
@@ -661,14 +1156,7 @@ test("keeps projects, evidence records, and graph nodes separated", async (t) =>
   assert.ok(graphNodes.every((node) => node.kind !== "system"));
   assert.deepEqual(
     nodeDomains.map((domain) => domain.id),
-    [
-      "backend",
-      "frontend",
-      "data",
-      "infrastructure",
-      "architecture",
-      "assurance",
-    ],
+    ["frontend", "backend", "data", "infrastructure"],
   );
   const representedDomains = new Set(
     graphNodes.map((node) => node.primaryDomain),
@@ -695,16 +1183,66 @@ test("keeps projects, evidence records, and graph nodes separated", async (t) =>
   );
   assert.equal(
     graphNodes.find((node) => node.id === "mcp")?.primaryDomain,
-    "architecture",
+    "backend",
   );
   assert.equal(
-    graphNodes.find((node) => node.id === "evaluation")?.primaryDomain,
-    "assurance",
+    graphNodes.find((node) => node.id === "operator-control")?.primaryDomain,
+    "frontend",
   );
   assert.ok(
     evidenceTraces.every((project) => !nodeIds.has(project.id)),
     "projects must not be graph nodes",
   );
+  assert.equal(
+    new Set(
+      projectSkillRelationships.map(
+        (relationship) => `${relationship.projectId}:${relationship.nodeId}`,
+      ),
+    ).size,
+    projectSkillRelationships.length,
+    "each project-to-skill relationship must be canonical",
+  );
+  assert.ok(
+    projectSkillRelationships.every(
+      (relationship) =>
+        traceIds.has(relationship.projectId) &&
+        nodeIds.has(relationship.nodeId) &&
+        relationship.evidenceIds.every((evidenceId) =>
+          recordIds.has(evidenceId),
+        ),
+    ),
+    "project-to-skill relationships must reference canonical model records",
+  );
+  assert.ok(
+    projectSkillRelationships.some(
+      (relationship) => relationship.supportKind === "curated-summary",
+    ),
+    "fixture needs a summary-only association to guard evidence semantics",
+  );
+  assert.ok(
+    projectSkillRelationships.every((relationship) =>
+      relationship.supportKind === "direct-evidence"
+        ? relationship.evidenceWeight > 0 &&
+          relationship.evidenceIds.length > 0 &&
+          relationship.layoutWeight === relationship.evidenceWeight
+        : relationship.evidenceWeight === 0 &&
+          relationship.evidenceIds.length === 0 &&
+          relationship.layoutWeight > 0,
+    ),
+    "summary-only support may affect layout but must not claim evidence density",
+  );
+
+  const metrics = evidenceTraces.find(
+    (trace) => trace.id === "engineering-metrics-pipeline",
+  );
+  assert.ok(metrics.nodeIds.includes("go"));
+  assert.ok(metrics.nodeIds.includes("postgresql"));
+  assert.ok(metrics.nodeIds.includes("docker"));
+  const metricsDocker = evidenceRecords.find(
+    (record) => record.id === "metrics-local-docker",
+  );
+  assert.match(metricsDocker.source, /local-development/i);
+  assert.doesNotMatch(metricsDocker.source, /production/i);
 
   for (const record of evidenceRecords) {
     assert.ok(traceIds.has(record.traceId), `unknown trace on ${record.id}`);

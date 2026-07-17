@@ -18,6 +18,8 @@ export const DEFAULT_GRAPH_VIEWPORT: GraphViewport = {
   y: 0,
 };
 
+export const PROJECT_FOCUS_SCALE = 1.9;
+
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
 }
@@ -66,6 +68,43 @@ export function zoomGraphViewportAt(
     size,
     occlusion,
   );
+}
+
+export function focusGraphViewportAt(
+  point: Point,
+  size: Size,
+  requestedScale = PROJECT_FOCUS_SCALE,
+  occlusion: GraphViewportOcclusion = { right: 0 },
+): GraphViewport {
+  const scale = clamp(requestedScale, MIN_GRAPH_SCALE, MAX_GRAPH_SCALE);
+  const visibleWidth = Math.max(1, size.width - Math.max(0, occlusion.right));
+  const anchor = {
+    x: visibleWidth / 2,
+    y: size.height * 0.52,
+  };
+
+  return clampGraphViewport(
+    {
+      scale,
+      x: anchor.x - point.x * scale,
+      y: anchor.y - point.y * scale,
+    },
+    size,
+    occlusion,
+  );
+}
+
+export function interpolateGraphViewport(
+  from: GraphViewport,
+  to: GraphViewport,
+  progress: number,
+): GraphViewport {
+  const amount = clamp(progress, 0, 1);
+  return {
+    scale: from.scale + (to.scale - from.scale) * amount,
+    x: from.x + (to.x - from.x) * amount,
+    y: from.y + (to.y - from.y) * amount,
+  };
 }
 
 export function graphPointToScreen(

@@ -1,4 +1,5 @@
-import { graphEdges, graphNodes } from "../model/evidence-data";
+import { graphNodes } from "../model/evidence-data";
+import { projectSkillRelationshipsByNode } from "../model/project-relations";
 
 export type Point = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -8,104 +9,264 @@ export function randomUnit(seed: number) {
   return value - Math.floor(value);
 }
 
-function normalizeLayoutBounds(
-  nodes: Array<{ id: string; x: number; y: number }>,
-  { width, height }: Size,
-): Record<string, Point> {
-  const layoutPaddingX = Math.min(150, Math.max(92, width * 0.075));
-  const layoutPaddingY = Math.min(120, Math.max(76, height * 0.08));
-  const minX = Math.min(...nodes.map((node) => node.x));
-  const maxX = Math.max(...nodes.map((node) => node.x));
-  const minY = Math.min(...nodes.map((node) => node.y));
-  const maxY = Math.max(...nodes.map((node) => node.y));
-  const xRange = Math.max(1, maxX - minX);
-  const yRange = Math.max(1, maxY - minY);
-  const usableWidth = Math.max(1, width - layoutPaddingX * 2);
-  const usableHeight = Math.max(1, height - layoutPaddingY * 2);
-  const verticalCoverage = 0.84;
-  const verticalOffset =
-    layoutPaddingY + (usableHeight * (1 - verticalCoverage)) / 2;
+export function stableHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
 
-  return Object.fromEntries(
-    nodes.map((node) => [
-      node.id,
-      {
-        x: layoutPaddingX + ((node.x - minX) / xRange) * usableWidth,
-        y:
-          verticalOffset +
-          ((node.y - minY) / yRange) * usableHeight * verticalCoverage,
-      },
-    ]),
+type LayoutNode = {
+  id: string;
+  anchor: Point;
+  footprint: Size;
+};
+
+export function graphNodeFootprint(nodeId: string): Size {
+  const label = graphNodes.find((node) => node.id === nodeId)?.label ?? nodeId;
+  return {
+    width: Math.max(44, Math.min(170, 29 + label.length * 7.1)),
+    height: 44,
+  };
+}
+
+function projectFootprint(viewportWidth: number): Size {
+  const width =
+    viewportWidth <= 620
+      ? Math.max(58, Math.min(104, viewportWidth * 0.2 - 8))
+      : Math.max(104, Math.min(136, viewportWidth * 0.084));
+  return { width, height: viewportWidth <= 620 ? 44 : 48 };
+}
+
+function clampNodePoint(
+  point: Point,
+  footprint: Size,
+  size: Size,
+  edgePadding: number,
+) {
+  return {
+    x: Math.min(
+      size.width - footprint.width / 2 - edgePadding,
+      Math.max(footprint.width / 2 + edgePadding, point.x),
+    ),
+    y: Math.min(
+      size.height - footprint.height / 2 - edgePadding,
+      Math.max(footprint.height / 2 + edgePadding, point.y),
+    ),
+  };
+}
+
+function overlaps(
+  leftPoint: Point,
+  leftFootprint: Size,
+  rightPoint: Point,
+  rightFootprint: Size,
+  gap: number,
+) {
+  return (
+    Math.abs(leftPoint.x - rightPoint.x) <
+      (leftFootprint.width + rightFootprint.width) / 2 + gap &&
+    Math.abs(leftPoint.y - rightPoint.y) <
+      (leftFootprint.height + rightFootprint.height) / 2 + gap
   );
 }
 
-export function computeLayout({ width, height }: Size): Record<string, Point> {
-  if (width <= 0 || height <= 0) return {};
+function placementIsClear(
+  point: Point,
+  footprint: Size,
+  placed: Array<{ point: Point; footprint: Size }>,
+  projectPositions: Record<string, Point>,
+  portalFootprint: Size,
+  gap: number,
+) {
+  return (
+    placed.every(
+      (item) => !overlaps(point, footprint, item.point, item.footprint, gap),
+    ) &&
+    Object.values(projectPositions).every(
+      (project) =>
+        !overlaps(point, footprint, project, portalFootprint, gap + 2),
+    )
+  );
+}
 
-  const paddingX = Math.min(118, width * 0.1);
-  const paddingY = Math.min(104, height * 0.11);
-  const nodes = graphNodes.map((node, index) => ({
-    id: node.id,
-    x: paddingX + randomUnit(index + 10) * (width - paddingX * 2),
-    y: paddingY + randomUnit(index + 90) * (height - paddingY * 2),
-    vx: 0,
-    vy: 0,
-  }));
-  const byId = new Map(nodes.map((node) => [node.id, node]));
+function placeNode(
+  node: LayoutNode,
+  placed: Array<{ point: Point; footprint: Size }>,
+  projectPositions: Record<string, Point>,
+  portalFootprint: Size,
+  size: Size,
+  edgePadding: number,
+  gap: number,
+) {
+  const seed = stableHash(node.id);
+  const initial = clampNodePoint(
+    node.anchor,
+    node.footprint,
+    size,
+    edgePadding,
+  );
+  if (
+    placementIsClear(
+      initial,
+      node.footprint,
+      placed,
+      projectPositions,
+      portalFootprint,
+      gap,
+    )
+  ) {
+    return initial;
+  }
 
-  for (let iteration = 0; iteration < 620; iteration += 1) {
-    const forces = new Map(nodes.map((node) => [node.id, { x: 0, y: 0 }]));
-
-    for (let leftIndex = 0; leftIndex < nodes.length; leftIndex += 1) {
-      for (
-        let rightIndex = leftIndex + 1;
-        rightIndex < nodes.length;
-        rightIndex += 1
-      ) {
-        const left = nodes[leftIndex];
-        const right = nodes[rightIndex];
-        const dx = right.x - left.x;
-        const dy = right.y - left.y;
-        const distanceSquared = dx * dx + dy * dy + 100;
-        const distance = Math.sqrt(distanceSquared);
-        const repulsion = Math.min(4.8, 18000 / distanceSquared);
-        const fx = (dx / distance) * repulsion;
-        const fy = (dy / distance) * repulsion;
-        forces.get(left.id)!.x -= fx;
-        forces.get(left.id)!.y -= fy;
-        forces.get(right.id)!.x += fx;
-        forces.get(right.id)!.y += fy;
-      }
-    }
-
-    for (const edge of graphEdges) {
-      const source = byId.get(edge.source)!;
-      const target = byId.get(edge.target)!;
-      const dx = target.x - source.x;
-      const dy = target.y - source.y;
-      const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      const boundedWeight = Math.min(edge.weight, 14);
-      const desired = Math.max(110, 220 - boundedWeight * 8);
-      const attraction =
-        (distance - desired) * 0.0011 * (1 + boundedWeight * 0.18);
-      const fx = (dx / distance) * attraction;
-      const fy = (dy / distance) * attraction;
-      forces.get(source.id)!.x += fx;
-      forces.get(source.id)!.y += fy;
-      forces.get(target.id)!.x -= fx;
-      forces.get(target.id)!.y -= fy;
-    }
-
-    for (const node of nodes) {
-      const force = forces.get(node.id)!;
-      force.x += (width / 2 - node.x) * 0.00034;
-      force.y += (height / 2 - node.y) * 0.00034;
-      node.vx = (node.vx + force.x) * 0.82;
-      node.vy = (node.vy + force.y) * 0.82;
-      node.x = Math.min(width - paddingX, Math.max(paddingX, node.x + node.vx));
-      node.y = Math.min(height - paddingY, Math.max(paddingY, node.y + node.vy));
+  const angleOffset = randomUnit(seed + 97) * Math.PI * 2;
+  for (let index = 1; index <= 1_800; index += 1) {
+    const radius = 8.5 * Math.sqrt(index);
+    const angle = angleOffset + index * Math.PI * (3 - Math.sqrt(5));
+    const candidate = clampNodePoint(
+      {
+        x: node.anchor.x + Math.cos(angle) * radius,
+        y: node.anchor.y + Math.sin(angle) * radius * 1.18,
+      },
+      node.footprint,
+      size,
+      edgePadding,
+    );
+    if (
+      placementIsClear(
+        candidate,
+        node.footprint,
+        placed,
+        projectPositions,
+        portalFootprint,
+        gap,
+      )
+    ) {
+      return candidate;
     }
   }
 
-  return normalizeLayoutBounds(nodes, { width, height });
+  let fallback: Point | null = null;
+  let fallbackDistance = Number.POSITIVE_INFINITY;
+  const minimumX = node.footprint.width / 2 + edgePadding;
+  const maximumX = size.width - node.footprint.width / 2 - edgePadding;
+  const minimumY = node.footprint.height / 2 + edgePadding;
+  const maximumY = size.height - node.footprint.height / 2 - edgePadding;
+  const scanStep = size.width <= 620 ? 3 : 5;
+  for (let y = minimumY; y <= maximumY; y += scanStep) {
+    for (let x = minimumX; x <= maximumX; x += scanStep) {
+      const candidate = { x, y };
+      if (
+        !placementIsClear(
+          candidate,
+          node.footprint,
+          placed,
+          projectPositions,
+          portalFootprint,
+          gap,
+        )
+      ) {
+        continue;
+      }
+      const distance = Math.hypot(x - node.anchor.x, y - node.anchor.y);
+      if (distance < fallbackDistance) {
+        fallback = candidate;
+        fallbackDistance = distance;
+      }
+    }
+  }
+  return fallback ?? initial;
+}
+
+function weightedProjectAnchor(
+  nodeId: string,
+  projectPositions: Record<string, Point>,
+  size: Size,
+) {
+  const relationships = projectSkillRelationshipsByNode.get(nodeId) ?? [];
+  const available = relationships.filter(
+    (relationship) => projectPositions[relationship.projectId],
+  );
+  if (available.length === 0) {
+    return { point: { x: size.width / 2, y: size.height / 2 }, count: 0 };
+  }
+
+  const totalWeight = available.reduce(
+    (total, relationship) => total + relationship.layoutWeight,
+    0,
+  );
+  const point = available.reduce(
+    (anchor, relationship) => {
+      const project = projectPositions[relationship.projectId];
+      anchor.x += (project.x * relationship.layoutWeight) / totalWeight;
+      anchor.y += (project.y * relationship.layoutWeight) / totalWeight;
+      return anchor;
+    },
+    { x: 0, y: 0 },
+  );
+  return { point, count: available.length };
+}
+
+export function computeLayout(
+  { width, height }: Size,
+  projectPositions: Record<string, Point> = {},
+): Record<string, Point> {
+  if (width <= 0 || height <= 0) return {};
+
+  const edgePadding = width <= 620 ? 6 : 14;
+  const nodes: LayoutNode[] = graphNodes.map((node) => {
+    const seed = stableHash(node.id);
+    const { point: barycenter, count } = weightedProjectAnchor(
+      node.id,
+      projectPositions,
+      { width, height },
+    );
+    const angle = randomUnit(seed) * Math.PI * 2;
+    const compact = width <= 620;
+    const orbit =
+      count === 1
+        ? 112 + randomUnit(seed + 19) * 62
+        : compact
+          ? 30 + randomUnit(seed + 19) * 54
+          : 64 + randomUnit(seed + 19) * 74;
+    const anchor = {
+      x: barycenter.x + Math.cos(angle) * orbit,
+      y:
+        barycenter.y +
+        Math.sin(angle) * orbit * (compact ? 0.78 : 0.88),
+    };
+    return {
+      id: node.id,
+      anchor,
+      footprint: graphNodeFootprint(node.id),
+    };
+  });
+
+  const portalFootprint = projectFootprint(width);
+  const gap = width <= 620 ? 3 : 14;
+  const relationshipCount = (nodeId: string) =>
+    projectSkillRelationshipsByNode.get(nodeId)?.length ?? 0;
+  const placementOrder = [...nodes].sort(
+    (left, right) =>
+      relationshipCount(left.id) - relationshipCount(right.id) ||
+      right.footprint.width - left.footprint.width ||
+      left.id.localeCompare(right.id),
+  );
+  const placed: Array<{ id: string; point: Point; footprint: Size }> = [];
+  for (const node of placementOrder) {
+    const point = placeNode(
+      node,
+      placed,
+      projectPositions,
+      portalFootprint,
+      { width, height },
+      edgePadding,
+      gap,
+    );
+    placed.push({ id: node.id, point, footprint: node.footprint });
+  }
+
+  return Object.fromEntries(placed.map((node) => [node.id, node.point]));
 }

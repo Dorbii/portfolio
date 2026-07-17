@@ -23,6 +23,7 @@ export type EvidenceRecord = {
   sequence: number;
   source: string;
   evidenceClass: EvidenceClass;
+  presentation?: "flow" | "supporting";
   title: string;
   detail: string;
   nodeIds: string[];
@@ -66,30 +67,6 @@ export type GraphEdge = {
 
 export const graphNodes: GraphNode[] = [
   {
-    id: "capability-contracts",
-    label: "Capability contracts",
-    kind: "capability",
-    primaryDomain: "architecture",
-    description:
-      "Intent, safety, role, availability, and recovery rules expressed as machine-readable contracts.",
-  },
-  {
-    id: "agent-boundaries",
-    label: "Agent boundaries",
-    kind: "capability",
-    primaryDomain: "assurance",
-    description:
-      "Agents receive constrained tool surfaces while services retain business logic and authority.",
-  },
-  {
-    id: "trusted-evidence",
-    label: "Trusted evidence",
-    kind: "capability",
-    primaryDomain: "assurance",
-    description:
-      "Browser-observed context stays separate from actor-authorized backend facts.",
-  },
-  {
     id: "safe-writes",
     label: "Replay-safe writes",
     kind: "capability",
@@ -101,39 +78,15 @@ export const graphNodes: GraphNode[] = [
     id: "context-compression",
     label: "Context compression",
     kind: "capability",
-    primaryDomain: "architecture",
+    primaryDomain: "backend",
     description:
       "Bootstrap shared structure once, then transmit deltas, repairs, and bounded refreshes.",
-  },
-  {
-    id: "context-budgeting",
-    label: "Context budgets",
-    kind: "capability",
-    primaryDomain: "architecture",
-    description:
-      "Explicit limits for coordinator carry, worker packets, references, reports, and tool output.",
-  },
-  {
-    id: "evaluation",
-    label: "Evaluation",
-    kind: "capability",
-    primaryDomain: "assurance",
-    description:
-      "Paired comparisons, clean evidence classes, regression gates, and explicit non-claims.",
-  },
-  {
-    id: "deterministic-replay",
-    label: "Deterministic replay",
-    kind: "capability",
-    primaryDomain: "assurance",
-    description:
-      "Identical seeds and decisions reproduce exact outcomes while seeded variance remains measurable.",
   },
   {
     id: "workflow-orchestration",
     label: "Workflow orchestration",
     kind: "capability",
-    primaryDomain: "architecture",
+    primaryDomain: "backend",
     description:
       "Long-running work with explicit state, retries, handoffs, and observable completion gates.",
   },
@@ -152,14 +105,6 @@ export const graphNodes: GraphNode[] = [
     primaryDomain: "data",
     description:
       "Schemas and source-of-truth rules prevent drift between producers, services, and interfaces.",
-  },
-  {
-    id: "measured-impact",
-    label: "Measured impact",
-    kind: "capability",
-    primaryDomain: "data",
-    description:
-      "Outcomes are shown with their scope and evidence boundary instead of decorative counters.",
   },
   {
     id: "go",
@@ -207,14 +152,14 @@ export const graphNodes: GraphNode[] = [
     id: "mcp",
     label: "MCP",
     kind: "technology",
-    primaryDomain: "architecture",
+    primaryDomain: "backend",
     description: "A thin agent transport over service-owned capability and authorization contracts.",
   },
   {
     id: "openapi",
     label: "OpenAPI",
     kind: "technology",
-    primaryDomain: "architecture",
+    primaryDomain: "backend",
     description: "Parameter schemas merged with capability metadata to generate callable tools.",
   },
   {
@@ -272,8 +217,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "Capability metadata supplies intent, roles, risk, and guardrails while OpenAPI supplies parameter shape. Generated tools replace a manually maintained agent catalog.",
     nodeIds: [
-      "capability-contracts",
-      "agent-boundaries",
       "mcp",
       "openapi",
       "go",
@@ -290,8 +233,6 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "JWT roles filter registration before tool discovery, so unavailable or unauthorized operations are absent rather than merely discouraged in prose.",
     nodeIds: [
-      "agent-boundaries",
-      "trusted-evidence",
       "mcp",
       "go",
     ],
@@ -308,7 +249,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "Write tools can require idempotency keys, Redis-backed replay protection, correlation identifiers, sanitized errors, and audit events.",
     nodeIds: [
       "safe-writes",
-      "agent-boundaries",
       "redis",
       "mcp",
       "go",
@@ -324,11 +264,7 @@ export const evidenceRecords: EvidenceRecord[] = [
     title: "Display context cannot mint trusted facts",
     detail:
       "Browser context remains a navigation and display hint. Only actor-authorized backend resolvers can add trusted metric evidence.",
-    nodeIds: [
-      "trusted-evidence",
-      "data-contracts",
-      "agent-boundaries",
-    ],
+    nodeIds: ["data-contracts"],
     weight: 3,
   },
   {
@@ -342,8 +278,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "Six H160 profiles recorded zero priority mismatches across 480 paired comparisons and identical final tactical state.",
     nodeIds: [
       "context-compression",
-      "evaluation",
-      "deterministic-replay",
       "typescript",
     ],
     weight: 3,
@@ -359,8 +293,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "Across three clean rotations on one seed, learned_compact averaged 76.0% less context than compact_tactical and 69.6% less than minimal.",
     nodeIds: [
       "context-compression",
-      "evaluation",
-      "measured-impact",
       "typescript",
     ],
     weight: 3,
@@ -376,7 +308,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "The run completed 705 accepted responses with zero decision rejections, gate rejections, or transport errors; the persistent learned lane completed all 300 windows.",
     nodeIds: [
       "context-compression",
-      "evaluation",
       "workflow-orchestration",
       "typescript",
     ],
@@ -391,11 +322,7 @@ export const evidenceRecords: EvidenceRecord[] = [
     title: "One session composed unseen symbol pairs",
     detail:
       "A continuous thread decoded 12/12 held-out compounds while 12 fresh stateless controls correctly abstained. Replication across models, seeds, and domains remains open.",
-    nodeIds: [
-      "context-compression",
-      "evaluation",
-      "trusted-evidence",
-    ],
+    nodeIds: ["context-compression"],
     weight: 2,
   },
   {
@@ -407,11 +334,7 @@ export const evidenceRecords: EvidenceRecord[] = [
     title: "Context limits are declared before execution",
     detail:
       "Coordinator carry, worker packets, loaded skills, reference files, tool output, and worker reports have explicit budgets instead of relying on conversational restraint.",
-    nodeIds: [
-      "context-budgeting",
-      "agent-boundaries",
-      "data-contracts",
-    ],
+    nodeIds: ["data-contracts"],
     weight: 3,
   },
   {
@@ -424,9 +347,7 @@ export const evidenceRecords: EvidenceRecord[] = [
     detail:
       "A file-backed ledger records active lanes, accepted decisions, artifacts, blockers, and latest green gates so the transcript does not become hidden authority.",
     nodeIds: [
-      "context-budgeting",
       "workflow-orchestration",
-      "evaluation",
       "data-contracts",
     ],
     weight: 3,
@@ -490,7 +411,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "The integration extended the same operating model to macOS workflows while reducing reliance on one-off provisioning knowledge.",
     nodeIds: [
       "operator-control",
-      "measured-impact",
       "workflow-orchestration",
     ],
     weight: 3,
@@ -515,12 +435,8 @@ export const evidenceRecords: EvidenceRecord[] = [
     evidenceClass: "production",
     title: "Ingestion rotates a three-key authentication pool",
     detail:
-      "Containerized Python ingestion workers rotate across three credentials to distribute Bitbucket API requests and reduce 429 pressure.",
-    nodeIds: [
-      "python",
-      "docker",
-      "workflow-orchestration",
-    ],
+      "Python ingestion workers rotate across three credentials to distribute Bitbucket API requests and reduce 429 pressure.",
+    nodeIds: ["python", "workflow-orchestration"],
     weight: 2,
   },
   {
@@ -551,9 +467,33 @@ export const evidenceRecords: EvidenceRecord[] = [
     nodeIds: [
       "databricks",
       "data-contracts",
-      "trusted-evidence",
     ],
     weight: 2,
+  },
+  {
+    id: "metrics-kaizen-persistence",
+    traceId: "engineering-metrics-pipeline",
+    sequence: 4,
+    source: "Owner-curated production summary",
+    evidenceClass: "production",
+    title: "Kaizen pulls validated tables into durable reporting state",
+    detail:
+      "After Databricks validation, a Go service reads the accepted tables and persists application-facing reporting data in PostgreSQL.",
+    nodeIds: ["databricks", "data-contracts", "go", "postgresql"],
+    weight: 2,
+  },
+  {
+    id: "metrics-local-docker",
+    traceId: "engineering-metrics-pipeline",
+    sequence: 5,
+    source: "Owner-curated local-development summary",
+    evidenceClass: "implementation",
+    presentation: "supporting",
+    title: "Docker keeps local ingestion development repeatable",
+    detail:
+      "Docker packages the Python ingestion environment for local development. It is supporting tooling, not part of the production Databricks execution path.",
+    nodeIds: ["docker", "python"],
+    weight: 1,
   },
   {
     id: "uat-workflow-model",
@@ -592,7 +532,6 @@ export const evidenceRecords: EvidenceRecord[] = [
       "csharp",
       "data-contracts",
       "workflow-orchestration",
-      "measured-impact",
     ],
     weight: 2,
   },
@@ -650,9 +589,6 @@ export const evidenceTraces: EvidenceTrace[] = [
     evidenceClass: "production",
     replayStatus: "ready",
     nodeIds: [
-      "capability-contracts",
-      "agent-boundaries",
-      "trusted-evidence",
       "safe-writes",
       "data-contracts",
       "go",
@@ -704,14 +640,8 @@ export const evidenceTraces: EvidenceTrace[] = [
     replayStatus: "ready",
     nodeIds: [
       "context-compression",
-      "context-budgeting",
-      "evaluation",
-      "deterministic-replay",
       "workflow-orchestration",
-      "agent-boundaries",
-      "trusted-evidence",
       "data-contracts",
-      "measured-impact",
       "typescript",
     ],
     evidenceIds: [
@@ -771,7 +701,6 @@ export const evidenceTraces: EvidenceTrace[] = [
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
-      "measured-impact",
       "go",
       "react",
       "aws",
@@ -816,22 +745,25 @@ export const evidenceTraces: EvidenceTrace[] = [
     statement:
       "Operational reporting is only useful when ingestion survives API pressure and rejects bad data before it becomes a metric.",
     summary:
-      "A containerized Python pipeline ingests Bitbucket data through a rotating three-key pool, runs as a three-shard Databricks job, and applies data-quality checks before downstream reporting.",
+      "A Python ingestion pipeline reads Bitbucket data through a rotating three-key pool, runs as a three-shard Databricks job, and applies data-quality checks before downstream reporting.",
     proofLabel: "Production pipeline + scheduled validation",
     evidenceClass: "production",
     replayStatus: "ready",
     nodeIds: [
       "python",
-      "docker",
       "databricks",
       "workflow-orchestration",
       "data-contracts",
-      "trusted-evidence",
+      "go",
+      "postgresql",
+      "docker",
     ],
     evidenceIds: [
       "metrics-auth-pool",
       "metrics-databricks-shards",
       "metrics-quality-gates",
+      "metrics-kaizen-persistence",
+      "metrics-local-docker",
     ],
     outcomes: [
       "Repository ingestion is partitioned across three scheduled shards",
@@ -870,7 +802,6 @@ export const evidenceTraces: EvidenceTrace[] = [
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
-      "measured-impact",
     ],
     evidenceIds: [],
     outcomes: [
@@ -902,7 +833,6 @@ export const evidenceTraces: EvidenceTrace[] = [
       "operator-control",
       "workflow-orchestration",
       "data-contracts",
-      "measured-impact",
     ],
     evidenceIds: [
       "uat-workflow-model",
@@ -937,8 +867,6 @@ export const evidenceTraces: EvidenceTrace[] = [
       "workflow-orchestration",
       "operator-control",
       "data-contracts",
-      "trusted-evidence",
-      "measured-impact",
     ],
     evidenceIds: [],
     outcomes: [
@@ -998,7 +926,7 @@ export const evidenceTraces: EvidenceTrace[] = [
     proofLabel: "Public implementation + private-use summary",
     evidenceClass: "implementation",
     replayStatus: "overview",
-    nodeIds: ["go", "evaluation", "data-contracts", "trusted-evidence"],
+    nodeIds: ["go", "data-contracts"],
     evidenceIds: [],
     outcomes: [
       "A reusable Go matching foundation for inconsistent product names and versions",
@@ -1034,7 +962,6 @@ export const evidenceTraces: EvidenceTrace[] = [
       "typescript",
       "operator-control",
       "data-contracts",
-      "evaluation",
     ],
     evidenceIds: [],
     outcomes: [
