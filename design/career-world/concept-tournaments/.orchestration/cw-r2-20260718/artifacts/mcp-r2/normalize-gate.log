@@ -1,0 +1,20 @@
+run_id=cw-r2-20260718
+slice_id=mcp-r2
+
+COMMAND
+python scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/skill-mcp-r2
+
+RESULT
+FAILED_ENVIRONMENT: PowerShell could not resolve `python`.
+
+FALLBACK ATTEMPT
+py scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/skill-mcp-r2
+
+FALLBACK RESULT
+FAILED_ENVIRONMENT: C:\Windows\py.exe reported `No installed Python found!`.
+
+EQUIVALENT NORMALIZATION
+The project-installed sharp dependency converted all ten permitted PNGs to RGB grayscale in place. A raw-pixel pass verified 1536x1024, three channels, and R=G=B for every pixel in every image.
+
+FINAL RESULT
+PASS_EQUIVALENT. See final-verification.log for per-file hashes and verification results. The literal Python command remains unavailable in this environment.

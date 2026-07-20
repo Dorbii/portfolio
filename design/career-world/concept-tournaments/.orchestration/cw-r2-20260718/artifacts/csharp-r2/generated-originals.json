@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "generated_store": "C:\\Users\\Steve\\.codex\\generated_images\\019f76c2-3b94-7753-8aa0-0fea03ad60f6",
+  "entries": [
+    {
+      "target": "skill-csharp-r2-01-sharp-grid-foundry.png",
+      "source": "exec-db4d0393-9916-4fa2-9535-447a76fa5c33.png",
+      "bytes": 2940740,
+      "sha256": "6a06387d702b77404ae714af522fe4a6aa9b364d38150dae2987bfb8cc69282b"
+    },
+    {
+      "target": "skill-csharp-r2-02-common-type-rotunda.png",
+      "source": "exec-a7f9aa37-6b26-4e6d-b53b-06843bc3366d.png",
+      "bytes": 3003451,
+      "sha256": "96e05c886ba2c46fd319db8713ad51f9211c776408bb3633018818dd17517599"
+    },
+    {
+      "target": "skill-csharp-r2-03-managed-runtime-vault.png",
+      "source": "exec-63a65d1a-6793-42c1-ab9d-3f3a0cd5ab25.png",
+      "bytes": 2857002,
+      "sha256": "462cbacd6e1dbcf9ac7cf75665e6cf88b2aaef5fc75b4b68ecd55bafbafb239a"
+    },
+    {
+      "target": "skill-csharp-r2-04-async-await-relay.png",
+      "source": "exec-7891da0a-a32b-4cc1-bb1b-af8e2c548b45.png",
+      "bytes": 2902117,
+      "sha256": "e7d2a9742d994ed65ec29ee3f7c8f7d6438d9b0b61df9edec5238413244f0d17"
+    },
+    {
+      "target": "skill-csharp-r2-05-multicast-delegate-hall.png",
+      "source": "exec-837a8a8d-7de8-49fe-9589-f5d0d02c369e.png",
+      "bytes": 2930609,
+      "sha256": "3159dd8be8410cf67ea59e4cf661f0a313d1d5ddbfed263578e10a5a326ef866"
+    },
+    {
+      "target": "skill-csharp-r2-06-linq-pipeline.png",
+      "source": "exec-56623e86-287b-4ee9-947c-06af8ecafa94.png",
+      "bytes": 3111938,
+      "sha256": "8b425b1b52e7da0b2f1bac57db23920c70039e5bc9a5b240bd75cd6ff6c43f16"
+    },
+    {
+      "target": "skill-csharp-r2-07-generic-constraint-forge.png",
+      "source": "exec-39d3a389-09df-44d0-acfa-84d515a91b50.png",
+      "bytes": 2944219,
+      "sha256": "11194d5f3dbc8476f37d90bb0f27c26db3c79f47d3c2cfaf4e8d450b12fe0f04"
+    },
+    {
+      "target": "skill-csharp-r2-08-event-mesh-pavilion.png",
+      "source": "exec-ae97e694-9b23-4be0-bf8f-c65efbb69c65.png",
+      "bytes": 2979821,
+      "sha256": "22ce6e764c30d2de5e10b2816f67e183c3ee235abf1576f8b0ab44228afc1727"
+    },
+    {
+      "target": "skill-csharp-r2-09-boxing-court.png",
+      "source": "exec-978e86ed-f4e4-4cc2-8067-7072d0b7d4d1.png",
+      "bytes": 2868544,
+      "sha256": "edb321c598904d873d1a279070f41571ea8cf85d74711bab5cf6f44a692e557c"
+    },
+    {
+      "target": "skill-csharp-r2-10-csharp-runtime-synthesis.png",
+      "source": "exec-31e41427-b133-4d11-b947-a8b36e1ba99a.png",
+      "bytes": 3006163,
+      "sha256": "6dc08ffa4ea60ba3e79eb96ab00ef37ea26dffff9b9de408f072ae3b0e7b31c0"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+schema_version: 1
+run_id: cw-r2-20260718
+id: tanium-r2
+title: Render and validate ten Tanium City R2 concepts
+status: done
+priority: 1
+route_id: career-world-r2-tanium
+spawn_mode: worker-lane
+context_budget: bounded-one-folder
+owner: { role: worker, thread_id: "/root/tanium_r2", parent_thread_id: "019f7276-e8bb-7050-831f-86b124cf308c", claimed_at: "2026-07-18T19:00:00Z", completed_at: "2026-07-18T19:55:00Z" }
+lane:
+  lane_id: tanium-r2-worker
+  worker_report_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/tanium-r2.json
+  ledger_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/run-ledger.json
+  log_artifact_dir: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/tanium-r2
+dependencies: []
+source:
+  authoritative_plan_path: scripts/build-career-world-r2-sets.mjs
+  plan_section: city/tanium@v1
+  created_from_prompt: User requested a more security-focused Tanium capital.
+scope:
+  allowed_files:
+    - design/career-world/concept-tournaments/city-tanium-r2/*.png
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/tanium-r2.json
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/tanium-r2/**
+  forbidden_files: [design/career-world/concept-tournament.html, scripts/**, design/career-world/concept-tournaments/**/tournament-set.*, design/career-world/concept-tournaments/**/prompt-set.json, design/career-world/concept-tournaments/**/concept-set.md]
+  required_context:
+    - design/career-world/concept-tournaments/city-tanium-r2/prompt-set.json
+    - design/career-world/concept-tournaments/city-tanium-r1/tanium-r1-05-risk-observatory.png
+skills: { full_skills: [imagegen, task-packet-execution] }
+acceptance_criteria:
+  - Exactly ten named PNGs, each 1536x1024 exact RGB grayscale.
+  - True peer-to-peer linear chains, security boundaries, questions/actions, or remediation are visible per prompt.
+  - No generic hub-and-spoke substitution and no weaponized security imagery.
+  - Contact sheet created and inspected.
+gate_commands:
+  - python scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/city-tanium-r2
+  - python scripts/build-concept-contact-sheets.py --output-dir design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/tanium-r2 design/career-world/concept-tournaments/city-tanium-r2
+stop_conditions: [Prompt or reference missing, Out-of-fence edit required, Same visual failure repeats after two targeted regenerations]
+max_failed_loops: 2
+tool_output_budget: { max_carried_command_output_chars: 12000, full_logs_as_artifacts: true, failure_tail_lines: 40 }
+expected_output: { worker_report_schema: templates/worker-report.template.json, expected_exit_gate: ten-normalized-pngs-plus-contact-sheet }
+communication: { mode: silent-unless-critical }

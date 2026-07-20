@@ -7,10 +7,17 @@ import {
   type CareerProjectId,
   type EmployerId,
 } from "../model/world-registry";
-import { projectScenePositionById } from "../model/scene-composition";
 import {
+  projectScenePositionById,
+  sceneNodes,
+  worldZones,
+} from "../model/scene-composition";
+import {
+  cameraForWorldRect,
   cameraForPoint,
   constrainWorldCamera,
+  sceneNodeBounds,
+  unionWorldRects,
   WORLD_CAMERA,
   type WorldCamera,
 } from "../rendering/world-camera";
@@ -33,7 +40,14 @@ export function resolveCareerWorldUrlState(search: string): CareerWorldFocus {
 
 export function cameraForFocus(focus: CareerWorldFocus): WorldCamera {
   if (focus.kind === "employer") {
-    return cameraForPoint(employerById.get(focus.employerId)!.anchor, 2);
+    const zone = worldZones.find((candidate) => candidate.id === focus.employerId)!;
+    const bounds = unionWorldRects([
+      zone.bounds,
+      ...sceneNodes
+        .filter((node) => node.employerId === focus.employerId)
+        .map(sceneNodeBounds),
+    ]);
+    return cameraForWorldRect(bounds, 2, 16);
   }
   if (focus.kind === "project") {
     const point = projectScenePositionById.get(focus.projectId);

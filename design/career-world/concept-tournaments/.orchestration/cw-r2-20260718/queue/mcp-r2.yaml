@@ -1,0 +1,43 @@
+schema_version: 1
+run_id: cw-r2-20260718
+id: mcp-r2
+title: Render and validate ten technically faithful MCP R2 concepts
+status: done
+priority: 1
+route_id: career-world-r2-mcp
+spawn_mode: worker-lane
+context_budget: bounded-one-folder
+owner: { role: worker, thread_id: "/root/mcp_r2", parent_thread_id: "019f7276-e8bb-7050-831f-86b124cf308c", claimed_at: "2026-07-18T19:00:00Z", completed_at: "2026-07-18T19:40:00Z" }
+lane:
+  lane_id: mcp-r2-worker
+  worker_report_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/mcp-r2.json
+  ledger_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/run-ledger.json
+  log_artifact_dir: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/mcp-r2
+dependencies: []
+source:
+  authoritative_plan_path: scripts/build-career-world-r2-sets.mjs
+  plan_section: skill/mcp@v1
+  created_from_prompt: User requested a more technical and interesting MCP building.
+scope:
+  allowed_files:
+    - design/career-world/concept-tournaments/skill-mcp-r2/*.png
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/mcp-r2.json
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/mcp-r2/**
+  forbidden_files: [design/career-world/concept-tournament.html, scripts/**, design/career-world/concept-tournaments/**/tournament-set.*, design/career-world/concept-tournaments/**/prompt-set.json, design/career-world/concept-tournaments/**/concept-set.md]
+  required_context:
+    - design/career-world/concept-tournaments/skill-mcp-r2/prompt-set.json
+    - design/career-world/concept-tournaments/skill-mcp-r1/skill-mcp-r1-08-scale-engine.png
+skills: { full_skills: [imagegen, task-packet-execution] }
+acceptance_criteria:
+  - Exactly ten named PNGs, each 1536x1024 exact RGB grayscale.
+  - Each image visibly expresses its MCP mechanism through connected architecture.
+  - No chat UI, AI brain, literal source code, plug icon, or detached network diagram.
+  - Contact sheet created and inspected.
+gate_commands:
+  - python scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/skill-mcp-r2
+  - python scripts/build-concept-contact-sheets.py --output-dir design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/mcp-r2 design/career-world/concept-tournaments/skill-mcp-r2
+stop_conditions: [Prompt or reference missing, Out-of-fence edit required, Same visual failure repeats after two targeted regenerations]
+max_failed_loops: 2
+tool_output_budget: { max_carried_command_output_chars: 12000, full_logs_as_artifacts: true, failure_tail_lines: 40 }
+expected_output: { worker_report_schema: templates/worker-report.template.json, expected_exit_gate: ten-normalized-pngs-plus-contact-sheet }
+communication: { mode: silent-unless-critical }

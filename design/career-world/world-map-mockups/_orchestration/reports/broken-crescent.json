@@ -1,0 +1,88 @@
+{
+  "run_id": "cw-world-map-concepts-20260719",
+  "lane_id": "broken-crescent",
+  "route_id": "imagegen-world-geography",
+  "status": "completed",
+  "summary": "Generated and visually inspected one monochrome orthographic 2.5D broken-crescent world-map concept containing one connected main continent, one rugged spire island, one predominantly low elongated terraced island, and one predominantly low horseshoe island, with no cities or built structures.",
+  "generation": {
+    "mode": "built-in imagegen",
+    "directed_calls": 1,
+    "prompt": "Use case: stylized-concept\nAsset type: game world-map terrain concept mockup\nPrimary request: Create a complete fantasy geography mockup with one broad broken-crescent main continent and exactly three detached islands, designed with generous open terrain for future sprawling cities but containing no cities yet.\nScene/backdrop: A dark charcoal ocean surrounding the full map, with a clear uninterrupted ocean margin on every side. No frame, parchment, compass, legend, clouds, or decorative border.\nSubject and landmass count: Show exactly FOUR connected land regions total: ONE single connected main continent plus exactly THREE single-piece detached islands. Do not create any other islands, offshore rocks, stacks, shoals, split sandbars, or separate fragments at any scale.\nMain continent: A wide, roomy broken-crescent continent wraps around a deep natural central gulf. The crescent remains one fully connected landmass with broad necks and substantial interior depth, not a thin ring. A rugged mountain chain follows much of the outer arc while leaving three very large, visibly separate lowland plains on the crescent's northern arm, central inner basin, and southern arm. Each plain must have ample continuous expansion room and gently rolling approaches suitable for a future capital region; do not mark these sites with pads or symbols. Include distinct lowland, foothill, upland, and alpine elevation bands.\nHydrology: Add several clearly connected, plausible mountain-fed river systems with visible headwaters. Some rivers flow inward across the broad plains into the central gulf and terminate in deltas or estuaries; others cross the outer slopes to the open ocean. Rivers must remain continuous, branch naturally, and visibly meet the coast.\nDetached island 1: One compact rugged spire island, a single continuous shoreline dominated by steep ridges and peaks, intentionally unsuitable for a city and unoccupied.\nDetached island 2: One long, organically asymmetric terraced island with a varied coastline, but at least 70 percent of its area is broad, low, gently stepped terrain suitable for a sprawling future capital. Keep any hills confined mostly to one short end.\nDetached island 3: One large low horseshoe-shaped island forming a sheltered open-water lagoon. It is one unbroken U-shaped landmass, not a ring and not a chain; at least 75 percent is broad low terrain suitable for a sprawling future capital. Keep the lagoon entrance clearly open to the sea.\nSpacing and composition: Landscape-format orthographic 2.5D isometric view, elevated three-quarter top-down camera with minimal perspective distortion. Keep the continent and all three islands well separated by generous channels of ocean so later zoomed-in buildings and details will not feel cramped. Entire coastline and all four land regions are fully visible and uncropped.\nStyle/medium: Monochrome technical-realism terrain relief, detailed sculpted grayscale land, fine contour-like erosion and relief striations, crisp river valleys, believable deltas, restrained atmospheric depth, and dark near-black textured water. Read as a polished terrain model rather than a flat illustrated map.\nColor palette: Charcoal-black ocean; stone gray and pale gray land; bright ridge highlights; no color accents.\nConstraints: exactly one connected main continent and exactly three detached islands; two islands visibly at least 65 percent broad low terrain; three widely separated capital-scale plains on the continent; varied coastline; no accidental land fragments.\nAvoid: cities, buildings, settlements, walls, roads, paths, bridges, pads, docks, ports, vehicles, people, labels, text, letters, numbers, UI, logo, watermark, grid, compass rose, border, map pins, banners, ruins, farms, cultivated fields, detached coastal rocks, extra islands."
+  },
+  "files_changed": [
+    "design/career-world/world-map-mockups/concepts/broken-crescent-terrain-r1.png",
+    "design/career-world/world-map-mockups/_orchestration/reports/broken-crescent.json"
+  ],
+  "tests_run": [
+    {
+      "test": "Project-bound image visual inspection",
+      "result": "pass",
+      "details": "Inspected the saved project PNG at original 1536 by 1024 resolution after copying it from the built-in imagegen output directory."
+    },
+    {
+      "test": "PNG metadata and dimensions",
+      "result": "pass",
+      "details": "System.Drawing opened the PNG successfully; 1536 by 1024 pixels; 24-bit RGB; 3504371 bytes."
+    },
+    {
+      "test": "Test-Path design/career-world/world-map-mockups/concepts/broken-crescent-terrain-r1.png",
+      "result": "pass",
+      "details": "The required project-bound artifact exists."
+    }
+  ],
+  "claims": [
+    {
+      "claim": "The map has one visually connected main continent and exactly three clearly detached islands.",
+      "evidence": "Original-resolution visual inspection shows four and only four separated land regions with open-ocean gaps: the large broken-crescent continent, a compact northeastern spire island, an elongated eastern terraced island, and a southeastern horseshoe island.",
+      "result": "pass"
+    },
+    {
+      "claim": "One island is rugged and intentionally unoccupied, while two islands provide broad low terrain suitable for future sprawling cities.",
+      "evidence": "The northeastern island is mountain-dominant and has no usable broad plain; the elongated eastern island is predominantly low terraced terrain with mountains confined to its far end; the horseshoe island is predominantly low, gently stepped terrain around a sheltered open lagoon. No structures are visible.",
+      "result": "pass"
+    },
+    {
+      "claim": "The main continent supports three widely separated future capital regions with expansion room.",
+      "evidence": "Large uninterrupted plains are visible on the upper arm, the middle inner-gulf reach, and the broad lower arm, separated by coastline, river systems, and substantial travel distance rather than packed into one compact basin.",
+      "result": "pass"
+    },
+    {
+      "claim": "The terrain includes connected mountain-fed rivers, deltas or estuaries, varied coastline, broad plains, and distinct elevation bands.",
+      "evidence": "Multiple dark continuous river channels descend from the outer-arc ranges, cross the major plains, branch into tributaries or distributaries, and meet both the central gulf and outer sea; rugged coasts, low terraces, foothills, uplands, and alpine ridges are visually distinct.",
+      "result": "pass"
+    },
+    {
+      "claim": "The full map uses monochrome orthographic 2.5D technical-realism terrain presentation with ocean margin.",
+      "evidence": "The saved image is a wide elevated relief view in charcoal, graphite, and pale stone with minimal perspective distortion; all coastlines are visible and surrounded by dark ocean margin.",
+      "result": "pass"
+    },
+    {
+      "claim": "No prohibited built, textual, decorative, or interface elements are present.",
+      "evidence": "Visual inspection found no cities, buildings, roads, pads, docks, vehicles, labels, text, UI, logo, grid, compass rose, border, or watermark.",
+      "result": "pass"
+    }
+  ],
+  "deviations": [],
+  "risks_blockers": [
+    "The 65 percent low-terrain threshold and exact shoreline connectivity are visual judgments from a raster concept rather than GIS measurements; both low islands visibly clear the intended planning threshold, and the four-region landmass count is unambiguous."
+  ],
+  "artifacts": [
+    {
+      "path": "design/career-world/world-map-mockups/concepts/broken-crescent-terrain-r1.png",
+      "type": "image/png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3504371,
+      "sha256": "fb33a3ab5ebe8aca73c3e5b2a5580eafdca3d9cd52a160fd7142e7c0f1aa6b27",
+      "inspected": true
+    }
+  ],
+  "ledger_updates": {
+    "lane_id": "broken-crescent",
+    "status": "completed",
+    "artifact": "design/career-world/world-map-mockups/concepts/broken-crescent-terrain-r1.png",
+    "worker_report": "design/career-world/world-map-mockups/_orchestration/reports/broken-crescent.json",
+    "directed_imagegen_calls": 1,
+    "acceptance_gate": "pass"
+  }
+}

@@ -1,0 +1,168 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "ace-hardware-city-2026-07-17",
+  "name": "ACE Hardware City",
+  "sourcePath": "design/career-world/concept-tournaments/ace-hardware-city",
+  "assets": [
+    {
+      "id": "ace-01-cooperative-crown",
+      "name": "The Cooperative Crown",
+      "src": "ace-city-01-cooperative-crown.png",
+      "tags": [
+        "cooperative",
+        "radial",
+        "centralized",
+        "exposed-truss",
+        "broad",
+        "ornate",
+        "civic"
+      ],
+      "thesis": "A central assembly rotunda and four equal wings turn shared ownership into the organizing geometry.",
+      "businessCue": "Retailer-owned cooperative supported by shared infrastructure."
+    },
+    {
+      "id": "ace-02-toolwright-capitol",
+      "name": "The Toolwright Capitol",
+      "src": "ace-city-02-toolwright-capitol.png",
+      "tags": [
+        "tools",
+        "rectilinear",
+        "u-shaped",
+        "industrial",
+        "gantry",
+        "robust",
+        "civic"
+      ],
+      "thesis": "A stepped hall, workshop wings, and open gantry monumentalize disciplined tool organization.",
+      "businessCue": "Professional tools and practical workshop expertise."
+    },
+    {
+      "id": "ace-03-neighborhood-exchange",
+      "name": "The Neighborhood Exchange",
+      "src": "ace-city-03-neighborhood-exchange.png",
+      "tags": [
+        "neighborhood",
+        "basilica",
+        "arcaded",
+        "welcoming",
+        "horizontal",
+        "market",
+        "civic"
+      ],
+      "thesis": "A covered civic exchange makes local service and community access the dominant idea.",
+      "businessCue": "Locally owned neighborhood stores and helpful service."
+    },
+    {
+      "id": "ace-04-repair-foundry",
+      "name": "The Repair Foundry",
+      "src": "ace-city-04-repair-foundry.png",
+      "tags": [
+        "repair",
+        "foundry",
+        "sawtooth",
+        "industrial",
+        "vertical",
+        "workshop",
+        "civic"
+      ],
+      "thesis": "A tall training tower and connected repair halls frame fixing things as a civic discipline.",
+      "businessCue": "Repair, maintenance, making, and practical expertise."
+    },
+    {
+      "id": "ace-05-timber-truss-hall",
+      "name": "The Timber Truss Hall",
+      "src": "ace-city-05-timber-truss-hall.png",
+      "tags": [
+        "materials",
+        "timber",
+        "peaked",
+        "exposed-truss",
+        "horizontal",
+        "structural",
+        "civic"
+      ],
+      "thesis": "A long stepped nave and explicit truss system celebrate construction knowledge and materials.",
+      "businessCue": "Building materials, lumber, and construction guidance."
+    },
+    {
+      "id": "ace-06-finish-lantern",
+      "name": "The Finish Lantern",
+      "src": "ace-city-06-finish-lantern.png",
+      "tags": [
+        "finish",
+        "vertical",
+        "refined",
+        "layered",
+        "faceted",
+        "lightweight",
+        "civic"
+      ],
+      "thesis": "Nested shells and precise surface layers reinterpret coatings and finish expertise without literal imagery.",
+      "businessCue": "Paint, coatings, material finish, and careful application."
+    },
+    {
+      "id": "ace-07-fastener-bastion",
+      "name": "The Fastener Bastion",
+      "src": "ace-city-07-fastener-bastion.png",
+      "tags": [
+        "fasteners",
+        "hexagonal",
+        "compact",
+        "massive",
+        "defensive",
+        "concentric",
+        "civic"
+      ],
+      "thesis": "Interlocked hexagonal terraces express connection, reliability, and structural permanence.",
+      "businessCue": "Fasteners, joints, dependable connection, and mechanical fit."
+    },
+    {
+      "id": "ace-08-garden-hearth-commons",
+      "name": "The Garden Hearth Commons",
+      "src": "ace-city-08-garden-hearth-commons.png",
+      "tags": [
+        "home-garden",
+        "conservatory",
+        "arched",
+        "open",
+        "welcoming",
+        "vertical",
+        "civic"
+      ],
+      "thesis": "A central hearth tower and open-lattice commons combine shelter, stewardship, and gathering.",
+      "businessCue": "Home care, outdoor living, garden stewardship, and neighborhood gathering."
+    },
+    {
+      "id": "ace-09-supply-nexus",
+      "name": "The Supply Nexus",
+      "src": "ace-city-09-supply-nexus.png",
+      "tags": [
+        "distribution",
+        "networked",
+        "campus",
+        "infrastructure",
+        "sprawling",
+        "connected",
+        "civic"
+      ],
+      "thesis": "A central dispatch hall and four connected supply wings make cooperative logistics visible.",
+      "businessCue": "Shared distribution supporting many independently owned stores."
+    },
+    {
+      "id": "ace-10-service-arch",
+      "name": "The Service Arch",
+      "src": "ace-city-10-service-arch.png",
+      "tags": [
+        "service",
+        "gateway",
+        "twin-tower",
+        "negative-space",
+        "open",
+        "welcoming",
+        "civic"
+      ],
+      "thesis": "An inhabitable arch and generous public passage turn helpful service into spatial openness.",
+      "businessCue": "Accessible expertise, practical help, and a protected meeting place."
+    }
+  ]
+};

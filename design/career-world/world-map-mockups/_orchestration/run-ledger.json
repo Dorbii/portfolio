@@ -1,0 +1,19 @@
+{
+  "run_id": "cw-world-map-concepts-20260719",
+  "parent_thread_id": "019f7b4a-a9ef-7171-8aef-9a670eba952c",
+  "objective": "Generate three materially different spacious Career World geography concepts, then place the five locked capital landmarks for comparative review.",
+  "status": "complete",
+  "accepted_decisions": [
+    "Each option has one main continent, one rugged unoccupied landmark island, and two broadly buildable city islands.",
+    "Three capital regions belong on the main continent; one belongs on each buildable island.",
+    "The options must solve future building sprawl rather than optimize for compact visual composition.",
+    "Terrain generation must not invent city art; locked capital sprites are added deterministically after terrain selection.",
+    "No option reuses the retired global land map."
+  ],
+  "queue": [
+    {"lane_id": "open-basin", "item": "queue/open-basin.yaml", "status": "done"},
+    {"lane_id": "broken-crescent", "item": "queue/broken-crescent.yaml", "status": "done"},
+    {"lane_id": "twin-deltas", "item": "queue/twin-deltas.yaml", "status": "done"}
+  ],
+  "integration": {"owner": "/root", "status": "done"}
+}

@@ -1,0 +1,202 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "ambient-delivery-van-r1-2026-07-18",
+  "name": "Delivery Van · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1",
+  "domainSummary": "A compact last-mile van defined by a tall enclosed cargo cube, a short forward cab, clear side and rear access zones, a stable commercial wheelbase, and unmarked slab panels.",
+  "evidenceBoundary": "Keep the van generic and unowned. Do not imply carrier, package type, route, delivery state, cargo contents, or a real production model.",
+  "researchSources": [
+    {
+      "title": "Career World ambient expansion inventory",
+      "path": "scripts/build-concept-tournament-index.mjs",
+      "use": "Accepted delivery-van role and canonical map-scale baseline."
+    },
+    {
+      "title": "Tournament production ledger",
+      "path": "design/career-world/concept-tournaments/tournament-production-ledger.json",
+      "use": "Canonical delivery-van geometry and identity boundary."
+    }
+  ],
+  "assets": [
+    {
+      "id": "ambient-delivery-van-r1-01-canonical-production",
+      "name": "Delivery Van · Canonical Production",
+      "src": "ambient-delivery-van-r1-01-canonical-production.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into its clearest production-ready map prop; emphasize tall enclosed cargo body",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "canonical-production",
+        "tall-enclosed-cargo-body",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "The accepted identity is tested in its most resolved reusable form. This version emphasizes tall enclosed cargo body.",
+      "businessCue": "tall enclosed cargo body"
+    },
+    {
+      "id": "ambient-delivery-van-r1-02-silhouette-contrast",
+      "name": "Delivery Van · Silhouette Contrast",
+      "src": "ambient-delivery-van-r1-02-silhouette-contrast.png",
+      "role": "broad-concept",
+      "controlledVariable": "push the outer contour and negative spaces for instant recognition at map scale; emphasize short forward cab",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "silhouette-contrast",
+        "short-forward-cab",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "A distinct silhouette tests recognition without labels or color. This version emphasizes short forward cab.",
+      "businessCue": "short forward cab"
+    },
+    {
+      "id": "ambient-delivery-van-r1-03-weighted-asymmetry",
+      "name": "Delivery Van · Weighted Asymmetry",
+      "src": "ambient-delivery-van-r1-03-weighted-asymmetry.png",
+      "role": "broad-concept",
+      "controlledVariable": "shift the dominant mass off-center while preserving the asset's practical balance; emphasize side and rear access zones",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "weighted-asymmetry",
+        "side-and-rear-access-zones",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "Controlled asymmetry creates identity without sacrificing function. This version emphasizes side and rear access zones.",
+      "businessCue": "side and rear access zones"
+    },
+    {
+      "id": "ambient-delivery-van-r1-04-functional-exposure",
+      "name": "Delivery Van · Functional Exposure",
+      "src": "ambient-delivery-van-r1-04-functional-exposure.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the asset's defining working parts structurally legible without diagrams; emphasize stable commercial wheelbase",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "functional-exposure",
+        "stable-commercial-wheelbase",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "Exposed function tests whether the object reads through construction rather than decoration. This version emphasizes stable commercial wheelbase.",
+      "businessCue": "stable commercial wheelbase"
+    },
+    {
+      "id": "ambient-delivery-van-r1-05-rugged-structure",
+      "name": "Delivery Van · Rugged Structure",
+      "src": "ambient-delivery-van-r1-05-rugged-structure.png",
+      "role": "broad-concept",
+      "controlledVariable": "strengthen load-bearing edges, joints, guards, and contact points; emphasize plain unmarked body panels",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "rugged-structure",
+        "plain-unmarked-body-panels",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "Rugged construction tests a durable working-world interpretation. This version emphasizes plain unmarked body panels.",
+      "businessCue": "plain unmarked body panels"
+    },
+    {
+      "id": "ambient-delivery-van-r1-06-modular-rhythm",
+      "name": "Delivery Van · Modular Rhythm",
+      "src": "ambient-delivery-van-r1-06-modular-rhythm.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize repeated functional elements into a clear unequal rhythm on one coherent object or shared base; emphasize tall enclosed cargo body",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "modular-rhythm",
+        "tall-enclosed-cargo-body",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "A modular cadence tests reuse and system belonging. This version emphasizes tall enclosed cargo body.",
+      "businessCue": "tall enclosed cargo body"
+    },
+    {
+      "id": "ambient-delivery-van-r1-07-low-profile",
+      "name": "Delivery Van · Low Profile",
+      "src": "ambient-delivery-van-r1-07-low-profile.png",
+      "role": "broad-concept",
+      "controlledVariable": "compress height and emphasize a long stable footprint while retaining every defining feature; emphasize short forward cab",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "low-profile",
+        "short-forward-cab",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "A low profile tests legibility in dense map placement. This version emphasizes short forward cab.",
+      "businessCue": "short forward cab"
+    },
+    {
+      "id": "ambient-delivery-van-r1-08-vertical-accent",
+      "name": "Delivery Van · Vertical Accent",
+      "src": "ambient-delivery-van-r1-08-vertical-accent.png",
+      "role": "broad-concept",
+      "controlledVariable": "give one legitimate functional element a taller focal role while keeping the overall prop subordinate to buildings; emphasize side and rear access zones",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "vertical-accent",
+        "side-and-rear-access-zones",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "A vertical accent tests landmark readability without turning the prop into architecture. This version emphasizes side and rear access zones.",
+      "businessCue": "side and rear access zones"
+    },
+    {
+      "id": "ambient-delivery-van-r1-09-compact-primitive",
+      "name": "Delivery Van · Compact Primitive",
+      "src": "ambient-delivery-van-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the asset to the smallest complete form that preserves its exact identity and component count; emphasize stable commercial wheelbase",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "compact-primitive",
+        "stable-commercial-wheelbase",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "The primitive reveals which cues are essential. This version emphasizes stable commercial wheelbase.",
+      "businessCue": "stable commercial wheelbase"
+    },
+    {
+      "id": "ambient-delivery-van-r1-10-ambient-synthesis",
+      "name": "Delivery Van · Ambient Synthesis",
+      "src": "ambient-delivery-van-r1-10-ambient-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "balance silhouette, function, construction, modular detail, and map-scale restraint in one production-ready prop; emphasize plain unmarked body panels",
+      "parentConcept": "Delivery Van research profile",
+      "tags": [
+        "ambient",
+        "ambient-synthesis",
+        "plain-unmarked-body-panels",
+        "ambient",
+        "vehicle",
+        "delivery"
+      ],
+      "thesis": "The synthesis tests the complete ambient identity for repeated world use. This version emphasizes plain unmarked body panels.",
+      "businessCue": "plain unmarked body panels"
+    }
+  ]
+};

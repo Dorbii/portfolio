@@ -1,7 +1,8 @@
-/* eslint-disable @next/next/no-img-element -- The promoted Career World art is already cropped and optimized WebP. */
+/* eslint-disable @next/next/no-img-element -- Career World art is prebuilt and optimized WebP. */
 
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -10,8 +11,8 @@ import {
 } from "react";
 
 import {
-  scenePlacementsByEmployer,
-  type ScenePlacement,
+  sceneNodes,
+  type SceneNode,
 } from "../model/scene-composition";
 import {
   careerWorldRegistry,
@@ -22,8 +23,10 @@ import {
   type WorldPoint,
 } from "../model/world-registry";
 import {
+  detailForZoom,
+  detailIncludes,
   panCameraByScreenDelta,
-  semanticLodForFocus,
+  visibleSceneNodes,
   zoomCameraAt,
   type WorldCamera,
 } from "../rendering/world-camera";
@@ -36,10 +39,12 @@ type WorldSceneProps = {
   reducedMotion: boolean;
   onCameraChange: (camera: WorldCamera) => void;
   onEmployer: (employerId: EmployerId) => void;
-  onProject: (projectId: CareerProjectId) => void;
+  onProject: (projectId: CareerProjectId, target?: HTMLElement) => void;
 };
 
 const SCENE_SIZE = Object.freeze({ width: 1600, height: 900 });
+const CULL_OVERSCAN_SCREEN_PIXELS = 180;
+const CULLING_REFRESH_SCREEN_PIXELS = 72;
 
 const assetLabelById = new Map(
   careerWorldRegistry.assets.map((asset) => [asset.id, asset.label]),
@@ -65,131 +70,149 @@ function frameMetrics(width: number, height: number): FrameMetrics {
   });
 }
 
-function nearestEmployer(point: WorldPoint): EmployerId {
-  return careerWorldRegistry.employers.reduce((nearest, candidate) => {
-    const nearestDistance =
-      (nearest.anchor.x - point.x) ** 2 + (nearest.anchor.y - point.y) ** 2;
-    const candidateDistance =
-      (candidate.anchor.x - point.x) ** 2 +
-      (candidate.anchor.y - point.y) ** 2;
-    return candidateDistance < nearestDistance ? candidate : nearest;
-  }).id;
-}
-
 function cameraTransform(camera: WorldCamera): string {
   return `translate(${SCENE_SIZE.width / 2 - camera.center.x * camera.zoom}px, ${
     SCENE_SIZE.height / 2 - camera.center.y * camera.zoom
   }px) scale(${camera.zoom})`;
 }
 
-function projectRoutePath(anchor: WorldPoint, placement: ScenePlacement): string {
-  const bendY = Math.min(anchor.y, placement.position.y) - 22;
-  return `M ${anchor.x} ${anchor.y} Q ${
-    (anchor.x + placement.position.x) / 2
-  } ${bendY} ${placement.position.x} ${placement.position.y}`;
+function nodeLabel(node: SceneNode): string | null {
+  if (node.kind === "ambient") return null;
+  if (node.kind === "capital") {
+    return employerById.get(node.employerId)?.label ?? null;
+  }
+  if (node.kind === "project" && node.projectId) {
+    return projectById.get(node.projectId)?.label ?? null;
+  }
+  return assetLabelById.get(node.assetId) ?? null;
 }
 
-function skillRoutePath(project: WorldPoint, skill: WorldPoint): string {
-  const dx = skill.x - project.x;
-  const dy = skill.y - project.y;
-  const bend = Math.min(28, Math.hypot(dx, dy) * 0.14);
-  return `M ${project.x} ${project.y} Q ${
-    (project.x + skill.x) / 2 - Math.sign(dy || 1) * bend
-  } ${(project.y + skill.y) / 2 + Math.sign(dx || 1) * bend} ${skill.x} ${
-    skill.y
-  }`;
-}
-
-const ART_ENVELOPES = Object.freeze({
-  capital: Object.freeze({ width: 132, height: 96 }),
-  project: Object.freeze({ width: 104, height: 90 }),
-  skill: Object.freeze({ width: 76, height: 68 }),
-});
-
-function artEnvelope(kind: ScenePlacement["kind"]) {
-  return ART_ENVELOPES[kind];
-}
-
-type ArtInstanceProps = Readonly<{
-  placement: ScenePlacement;
-  focused?: boolean;
-  linked?: boolean;
-  context?: boolean;
-  onProject: (projectId: CareerProjectId) => void;
+type SceneArtNodeProps = Readonly<{
+  node: SceneNode;
+  detail: ReturnType<typeof detailForZoom>;
+  focusEmployerId: EmployerId | null;
+  focusProjectId: CareerProjectId | null;
+  linkedSkillInstanceIds: ReadonlySet<string>;
+  onEmployer: (employerId: EmployerId) => void;
+  onProject: (projectId: CareerProjectId, target?: HTMLElement) => void;
   activate: (action: () => void) => void;
 }>;
 
-function ArtInstance({
-  placement,
-  focused = false,
-  linked = false,
-  context = false,
+function SceneArtNode({
+  node,
+  detail,
+  focusEmployerId,
+  focusProjectId,
+  linkedSkillInstanceIds,
+  onEmployer,
   onProject,
   activate,
-}: ArtInstanceProps) {
-  const isProject = placement.kind === "project";
-  const position = placement.position;
-  const envelope = artEnvelope(placement.kind);
-  const label = isProject
-    ? projectById.get(placement.projectId!)?.label
-    : assetLabelById.get(placement.assetId);
+}: SceneArtNodeProps) {
+  const label = nodeLabel(node);
+  const focused =
+    (node.kind === "capital" &&
+      focusEmployerId === node.employerId &&
+      focusProjectId === null) ||
+    (node.kind === "project" && node.projectId === focusProjectId);
+  const linked =
+    node.kind === "skill" && linkedSkillInstanceIds.has(node.instanceId);
+  const contextual =
+    detail !== "world" &&
+    (focusProjectId
+      ? !focused && !linked && node.employerId !== focusEmployerId
+      : focusEmployerId !== null && node.employerId !== focusEmployerId);
+  const labelInFocus =
+    detail === "world" ||
+    focusEmployerId === null ||
+    node.employerId === focusEmployerId;
+  const showLabel =
+    label !== null &&
+    labelInFocus &&
+    node.labelDetail !== null &&
+    detailIncludes(detail, node.labelDetail);
   const content = (
     <>
       <img
-        className="career-world-art-image"
-        data-art-asset={placement.assetId}
-        src={runtimeArtPath(placement.assetId)}
+        className="career-world-scene-node-art"
+        data-art-asset={node.assetId}
+        src={runtimeArtPath(node.assetId, node.employerId)}
         alt=""
-        loading="lazy"
+        loading={node.kind === "capital" ? "eager" : "lazy"}
         decoding="async"
         draggable={false}
       />
-      {label && <span className="career-world-art-label">{label}</span>}
+      {showLabel ? (
+        <span className="career-world-scene-node-label">{label}</span>
+      ) : null}
     </>
   );
+  const className = `career-world-scene-node is-${node.kind}${
+    focused ? " is-focused" : ""
+  }${linked ? " is-linked" : ""}${contextual ? " is-context" : ""}`;
+  const style = {
+    left: node.position.x,
+    top: node.position.y,
+    width: node.visualWidth,
+    transform: `translate(${-node.groundAnchor.x * 100}%, ${
+      -node.groundAnchor.y * 100
+    }%)`,
+    "--node-footprint-width": `${node.footprint.width}px`,
+    "--node-footprint-depth": `${node.footprint.depth}px`,
+  } as CSSProperties;
+  const data = {
+    "data-scene-layer": "scene-node",
+    "data-instance-id": node.instanceId,
+    "data-position-x": node.position.x,
+    "data-position-y": node.position.y,
+    "data-min-detail": node.minDetail,
+    "data-palette": node.paletteId,
+    "data-footprint": node.footprintClass,
+  };
+
+  if (node.kind === "capital") {
+    return (
+      <button
+        type="button"
+        className={className}
+        style={style}
+        aria-label={`Open ${label ?? node.employerId} city`}
+        data-map-select="employer"
+        {...data}
+        onClick={(event) => {
+          event.stopPropagation();
+          activate(() => onEmployer(node.employerId));
+        }}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  if (node.kind === "project" && node.projectId) {
+    return (
+      <button
+        type="button"
+        className={className}
+        style={style}
+        aria-label={`Open ${label ?? node.projectId} project`}
+        data-map-select="project"
+        data-project-control={node.projectId}
+        {...data}
+        onClick={(event) => {
+          event.stopPropagation();
+          const target = event.currentTarget;
+          activate(() => onProject(node.projectId!, target));
+        }}
+      >
+        {content}
+      </button>
+    );
+  }
 
   return (
-    <figure
-      className={`career-world-art-instance is-${placement.kind}${
-        focused ? " is-focused" : ""
-      }${linked ? " is-linked" : ""}${context ? " is-context" : ""}`}
-      data-scene-layer="instance-art"
-      data-instance-id={placement.instanceId}
-      data-position-x={position.x}
-      data-position-y={position.y}
-      style={
-        {
-          "--art-x": `${position.x}px`,
-          "--art-y": `${position.y}px`,
-          "--art-width": `${envelope.width}px`,
-          "--art-height": `${envelope.height}px`,
-          left: position.x,
-          top: position.y,
-          width: envelope.width,
-          height: envelope.height,
-          margin: 0,
-          position: "absolute",
-          transform: "translate(-50%, -50%)",
-        } as CSSProperties
-      }
-    >
-      {isProject ? (
-        <button
-          type="button"
-          className="career-world-art-button career-world-art-card"
-          data-map-select="project"
-          tabIndex={-1}
-          onClick={(event) => {
-            event.stopPropagation();
-            activate(() => onProject(placement.projectId!));
-          }}
-        >
-          {content}
-        </button>
-      ) : (
-        <div className="career-world-art-card">{content}</div>
-      )}
-    </figure>
+    <div className={className} style={style} aria-hidden="true" {...data}>
+      {content}
+    </div>
   );
 }
 
@@ -202,40 +225,11 @@ export function WorldScene({
   onEmployer,
   onProject,
 }: WorldSceneProps) {
-  const lod = semanticLodForFocus(
-    camera.zoom,
-    focusEmployerId !== null,
-    focusProjectId !== null,
-  );
-  const inferredEmployerId = nearestEmployer(camera.center);
-  const activeEmployerId =
-    focusEmployerId ?? (lod === "world" ? null : inferredEmployerId);
-  const activeEmployer = activeEmployerId
-    ? employerById.get(activeEmployerId) ?? null
-    : null;
-  const activePlacements = activeEmployerId
-    ? scenePlacementsByEmployer.get(activeEmployerId) ?? []
-    : [];
-  const focusedProjectPlacement = focusProjectId
-    ? activePlacements.find(
-        (placement) => placement.projectId === focusProjectId,
-      ) ?? null
-    : null;
-  const linkedSkillInstanceIds = new Set(
-    focusProjectId
-      ? careerWorldRegistry.projectSkillLinks
-          .filter((link) => link.projectId === focusProjectId)
-          .map((link) => link.skillInstanceId)
-      : [],
-  );
-  const linkedSkillPlacements = activePlacements.filter(
-    (placement) =>
-      placement.kind === "skill" &&
-      linkedSkillInstanceIds.has(placement.instanceId),
-  );
+  const detail = detailForZoom(camera.zoom);
   const sceneRef = useRef<HTMLDivElement>(null);
   const cameraLayerRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef(camera);
+  const lastCullingCameraRef = useRef(camera);
   const onCameraChangeRef = useRef(onCameraChange);
   const [viewportSize, setViewportSize] = useState<{
     width: number;
@@ -255,6 +249,7 @@ export function WorldScene({
 
   useEffect(() => {
     cameraRef.current = camera;
+    lastCullingCameraRef.current = camera;
     if (cameraLayerRef.current) {
       cameraLayerRef.current.style.transform = cameraTransform(camera);
     }
@@ -314,8 +309,26 @@ export function WorldScene({
     });
   };
 
+  const refreshCullingWindow = (nextCamera: WorldCamera, force = false) => {
+    const current = lastCullingCameraRef.current;
+    const screenDelta = Math.max(
+      Math.abs(nextCamera.center.x - current.center.x) * nextCamera.zoom,
+      Math.abs(nextCamera.center.y - current.center.y) * nextCamera.zoom,
+    );
+    if (
+      !force &&
+      screenDelta < CULLING_REFRESH_SCREEN_PIXELS &&
+      detailForZoom(current.zoom) === detailForZoom(nextCamera.zoom)
+    ) {
+      return;
+    }
+    lastCullingCameraRef.current = nextCamera;
+    onCameraChangeRef.current(nextCamera);
+  };
+
   const paintCamera = (nextCamera: WorldCamera) => {
     cameraRef.current = nextCamera;
+    refreshCullingWindow(nextCamera);
     if (cameraLayerRef.current) {
       cameraLayerRef.current.style.transform = cameraTransform(nextCamera);
     }
@@ -338,6 +351,12 @@ export function WorldScene({
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
+    if (
+      event.target instanceof Element &&
+      event.target.closest("[data-map-select]")
+    ) {
+      return;
+    }
     if (wheelCommitRef.current !== null) {
       window.clearTimeout(wheelCommitRef.current);
       wheelCommitRef.current = null;
@@ -383,7 +402,7 @@ export function WorldScene({
       frameRequestRef.current = null;
     }
     applyPendingPan();
-    if (drag.moved) onCameraChangeRef.current(cameraRef.current);
+    refreshCullingWindow(cameraRef.current, true);
     setInteracting(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
@@ -400,19 +419,20 @@ export function WorldScene({
       y: (event.clientY - rect.top - metrics.top) / metrics.scale,
     };
     const zoomFactor = event.deltaY < 0 ? 1.16 : 1 / 1.16;
-    const nextCamera = zoomCameraAt(
-      cameraRef.current,
-      anchor,
-      cameraRef.current.zoom * zoomFactor,
-      SCENE_SIZE,
+    paintCamera(
+      zoomCameraAt(
+        cameraRef.current,
+        anchor,
+        cameraRef.current.zoom * zoomFactor,
+        SCENE_SIZE,
+      ),
     );
-    paintCamera(nextCamera);
     if (wheelCommitRef.current !== null) {
       window.clearTimeout(wheelCommitRef.current);
     }
     wheelCommitRef.current = window.setTimeout(() => {
       wheelCommitRef.current = null;
-      onCameraChangeRef.current(cameraRef.current);
+      refreshCullingWindow(cameraRef.current, true);
       setInteracting(false);
     }, 90);
   };
@@ -425,21 +445,41 @@ export function WorldScene({
     action();
   };
 
-  const metrics = frameMetrics(viewportSize.width, viewportSize.height);
-  const cityPlacements = activePlacements.filter(
-    (placement) =>
-      placement.kind === "capital" ||
-      placement.kind === "project" ||
-      placement.kind === "skill",
+  const visibleNodes = useMemo(
+    () =>
+      [...visibleSceneNodes(
+        sceneNodes,
+        camera,
+        CULL_OVERSCAN_SCREEN_PIXELS,
+      )].sort((left, right) =>
+        left.position.y === right.position.y
+          ? left.position.x - right.position.x
+          : left.position.y - right.position.y,
+      ),
+    [camera],
   );
+  const renderedDetail = detail;
+  const linkedSkillInstanceIds = useMemo(
+    () =>
+      new Set(
+        focusProjectId
+          ? careerWorldRegistry.projectSkillLinks
+              .filter((link) => link.projectId === focusProjectId)
+              .map((link) => link.skillInstanceId)
+          : [],
+      ),
+    [focusProjectId],
+  );
+  const metrics = frameMetrics(viewportSize.width, viewportSize.height);
 
   return (
     <div
       ref={sceneRef}
       className="career-world-scene"
-      data-lod={lod}
+      data-lod={detail}
       data-reduced-motion={reducedMotion ? "true" : "false"}
-      aria-hidden="true"
+      role="region"
+      aria-label="Interactive Career World map"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={finishPointer}
@@ -469,7 +509,7 @@ export function WorldScene({
       >
         <div
           ref={cameraLayerRef}
-          className={`career-world-camera career-world-lod-${lod}`}
+          className={`career-world-camera career-world-detail-${detail}`}
           style={{
             position: "absolute",
             inset: 0,
@@ -492,113 +532,39 @@ export function WorldScene({
               decoding="async"
               fetchPriority="high"
               draggable={false}
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
+            {detail === "world" ? (
+              <div
+                className="career-world-coordinate-grid"
+                data-scene-layer="coordinate-grid"
+                data-grid-major-unit="100"
+                data-grid-half-unit="50"
+                data-grid-minor-unit="20"
+                aria-hidden="true"
+              />
+            ) : null}
           </div>
 
-          {lod === "world" && (
-            <div
-              className="career-world-world-cities"
-              data-scene-layer="world-cities"
-              style={{ position: "absolute", inset: 0 }}
-            >
-              {careerWorldRegistry.employers.map((employer) => {
-                const position = employer.anchor;
-                return (
-                  <button
-                    key={employer.id}
-                    type="button"
-                    className="career-world-city-pad"
-                    data-map-select="employer"
-                    tabIndex={-1}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      activate(() => onEmployer(employer.id));
-                    }}
-                    style={{
-                      position: "absolute",
-                      left: position.x,
-                      top: position.y,
-                      width: 132,
-                      height: 96,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  >
-                    <img
-                      className="career-world-city-pad-art"
-                      data-art-asset={employer.assetId}
-                      src={runtimeArtPath(employer.assetId)}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      draggable={false}
-                    />
-                    <span className="career-world-city-pad-label">
-                      {employer.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {lod !== "world" && activeEmployer && (
-            <div
-              className={`career-world-district-layer${
-                focusedProjectPlacement ? " career-world-project-layer" : ""
-              }`}
-              data-scene-layer={
-                focusedProjectPlacement ? "project-art" : "city-art"
-              }
-              style={{ position: "absolute", inset: 0 }}
-            >
-              <svg
-                className={`career-world-route-overlay${
-                  focusedProjectPlacement
-                    ? " career-world-project-route-overlay"
-                    : ""
-                }`}
-                data-scene-layer="routes"
-                viewBox="0 0 1600 900"
-                aria-hidden="true"
-                style={{ position: "absolute", inset: 0 }}
-              >
-                {focusedProjectPlacement
-                  ? linkedSkillPlacements.map((placement) => (
-                    <path
-                      key={placement.instanceId}
-                      d={skillRoutePath(
-                        focusedProjectPlacement.position,
-                        placement.position,
-                      )}
-                    />
-                  ))
-                  : cityPlacements
-                      .filter((placement) => placement.kind === "project")
-                      .map((placement) => (
-                        <path
-                          key={placement.instanceId}
-                          d={projectRoutePath(activeEmployer.anchor, placement)}
-                        />
-                      ))}
-              </svg>
-              {cityPlacements.map((placement) => {
-                const focused = placement.projectId === focusProjectId;
-                const linked = linkedSkillInstanceIds.has(placement.instanceId);
-                return (
-                  <ArtInstance
-                    key={placement.instanceId}
-                    placement={placement}
-                    focused={focused}
-                    linked={linked}
-                    context={Boolean(focusProjectId) && !focused && !linked}
-                    onProject={onProject}
-                    activate={activate}
-                  />
-                );
-              })}
-            </div>
-          )}
+          <div
+            className="career-world-scene-nodes"
+            data-scene-layer="scene-nodes"
+            data-visible-node-count={visibleNodes.length}
+            style={{ position: "absolute", inset: 0 }}
+          >
+            {visibleNodes.map((node) => (
+              <SceneArtNode
+                key={node.instanceId}
+                node={node}
+                detail={renderedDetail}
+                focusEmployerId={focusEmployerId}
+                focusProjectId={focusProjectId}
+                linkedSkillInstanceIds={linkedSkillInstanceIds}
+                onEmployer={onEmployer}
+                onProject={onProject}
+                activate={activate}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

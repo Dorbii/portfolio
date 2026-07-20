@@ -1,0 +1,2067 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T17:56:12.091Z",
+  "reviewExport": {
+    "fileName": "art-review-tournament-batch-2026-07-19.json",
+    "sha256": "7a909a1639b3c691b3055773bf3d93e373c6948969850a18db094f0928bfb0bb"
+  },
+  "authority": "docs/career-world-production/regional-territory-contract.md",
+  "status": "locked-for-regional-layouts",
+  "counts": {
+    "total": 46,
+    "city": 5,
+    "project": 16,
+    "skill": 25
+  },
+  "normalizationContract": {
+    "sourcePolicy": "preserve exact selected source pixels",
+    "projection": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+    "tone": "apply grayscale(1) then per-asset brightnessCompensation during final compositing",
+    "framing": "apply per-asset sourceFrameScale, then category mapRoleScale",
+    "hierarchy": {
+      "capital": 1,
+      "project": 0.44,
+      "skill": 0.28
+    },
+    "stopBoundary": "normalization metadata is locked; final stitched-map application is deferred"
+  },
+  "exclusions": [
+    "skill/safe-writes@v1",
+    "skill/manifest-v3@v1"
+  ],
+  "mixedTransportPool": [
+    "ambient/city-shuttle@v1",
+    "ambient/commuter-car@v1",
+    "ambient/delivery-van@v1",
+    "ambient/cargo-boat@v1",
+    "ambient/harbor-ferry@v1",
+    "ambient/service-truck@v1",
+    "ambient/work-skiff@v1"
+  ],
+  "assets": [
+    {
+      "assetId": "city/ace-hardware@v1",
+      "name": "ACE Hardware",
+      "category": "city",
+      "candidateId": "ace-r2-07-repair-exchange-crown",
+      "sourcePath": "design/career-world/concept-tournaments/ace-hardware-city-r2/ace-r2-07-repair-exchange-crown.png",
+      "sourceSha256": "bc11861ed813983578e135170e52b29a32bd8a6c7ae44df9b11401b9ac195e84",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 103.8,
+          "brightnessCompensation": 1.079,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 36,
+            "minY": 46,
+            "maxX": 1496,
+            "maxY": 978
+          },
+          "sampledLongAxisOccupancy": 0.951,
+          "targetLongAxisOccupancy": 0.82,
+          "sourceFrameScale": 0.862,
+          "mapRoleScale": 1,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "city/column-technologies@v1",
+      "name": "Column Technologies",
+      "category": "city",
+      "candidateId": "column-r1-03-toolchain-exchange",
+      "sourcePath": "design/career-world/concept-tournaments/city-column-technologies-r1/column-r1-03-toolchain-exchange.png",
+      "sourceSha256": "332abd6ad471fa01237394bc3d9722733d0302be879aa74e0d53e87bd7305d50",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 115.4,
+          "brightnessCompensation": 0.97,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 14,
+            "minY": 46,
+            "maxX": 1508,
+            "maxY": 982
+          },
+          "sampledLongAxisOccupancy": 0.973,
+          "targetLongAxisOccupancy": 0.82,
+          "sourceFrameScale": 0.842,
+          "mapRoleScale": 1,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "city/independent@v1",
+      "name": "Independent",
+      "category": "city",
+      "candidateId": "independent-r1-01-maker-triad-forum",
+      "sourcePath": "design/career-world/concept-tournaments/city-independent-r1/independent-r1-01-maker-triad-forum.png",
+      "sourceSha256": "229e12fc68eeacd87f781e19f35885436c00077f1ffcec3be997a34dc70082fb",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 119.9,
+          "brightnessCompensation": 0.934,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 38,
+            "minY": 52,
+            "maxX": 1500,
+            "maxY": 962
+          },
+          "sampledLongAxisOccupancy": 0.952,
+          "targetLongAxisOccupancy": 0.82,
+          "sourceFrameScale": 0.861,
+          "mapRoleScale": 1,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "city/ninjaone@v1",
+      "name": "NinjaOne",
+      "category": "city",
+      "candidateId": "city-ninjaone-r2-01-endpoint-hologram-crown",
+      "sourcePath": "design/career-world/concept-tournaments/city-ninjaone-r2/city-ninjaone-r2-01-endpoint-hologram-crown.png",
+      "sourceSha256": "04c9b33df6025b57557a740ff0b38b6d99f151f0e69f0a9b21ddd5aa74196db1",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 96.9,
+          "brightnessCompensation": 1.156,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 104,
+            "minY": 48,
+            "maxX": 1430,
+            "maxY": 992
+          },
+          "sampledLongAxisOccupancy": 0.923,
+          "targetLongAxisOccupancy": 0.82,
+          "sourceFrameScale": 0.889,
+          "mapRoleScale": 1,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "city/tanium@v1",
+      "name": "Tanium",
+      "category": "city",
+      "candidateId": "city-tanium-r3-01-central-t-chain",
+      "sourcePath": "design/career-world/targeted-regeneration/city-project-r3/city-tanium-r3-01-central-t-chain.png",
+      "sourceSha256": "f5ea11278d779856bfee379087d41d100dae72c79dda1e8145ce8c86a136605b",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Best capital hierarchy, readable central T plan, surrounding operational structures, and corrected lighter tone.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 15,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 113.9,
+          "brightnessCompensation": 0.983,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 126,
+            "minY": 64,
+            "maxX": 1410,
+            "maxY": 970
+          },
+          "sampledLongAxisOccupancy": 0.886,
+          "targetLongAxisOccupancy": 0.82,
+          "sourceFrameScale": 0.926,
+          "mapRoleScale": 1,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/atlassian-data-center-resilience@v1",
+      "name": "Atlassian Data Center Resilience",
+      "category": "project",
+      "candidateId": "project-atlassian-data-center-resilience-r1-10-domain-synthesis",
+      "sourcePath": "design/career-world/concept-tournaments/project-atlassian-data-center-resilience-r1/project-atlassian-data-center-resilience-r1-10-domain-synthesis.png",
+      "sourceSha256": "dfbf25ebf682785ff10375829cdb0ed161c139913f0326554a34ae78b64ff56f",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 115.1,
+          "brightnessCompensation": 0.973,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 20,
+            "minY": 112,
+            "maxX": 1486,
+            "maxY": 920
+          },
+          "sampledLongAxisOccupancy": 0.955,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/atlassian-platform-automation@v1",
+      "name": "Atlassian Platform Automation",
+      "category": "project",
+      "candidateId": "project-atlassian-platform-automation-r1-07-guarded-recovery",
+      "sourcePath": "design/career-world/concept-tournaments/project-atlassian-platform-automation-r1/project-atlassian-platform-automation-r1-07-guarded-recovery.png",
+      "sourceSha256": "ad825bc703ab77e2d38f72961e7b4802068788abd6b23995db7d546249c3c055",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 128.2,
+          "brightnessCompensation": 0.874,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 126,
+            "minY": 44,
+            "maxX": 1386,
+            "maxY": 970
+          },
+          "sampledLongAxisOccupancy": 0.905,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.795,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/cablecar@v1",
+      "name": "CableCar",
+      "category": "project",
+      "candidateId": "project-cablecar-r3-01-wide-span-cabin",
+      "sourcePath": "design/career-world/targeted-regeneration/city-project-r3/project-cablecar-r3-01-wide-span-cabin.png",
+      "sourceSha256": "42d88d56713e60cd5cdefd1594baa735a1a25a7238d80cdf7bcc823e9d1386be",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Clearly separated terminals and an unmistakable suspended cabin; no bridge substitution.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 17,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 98.7,
+          "brightnessCompensation": 1.135,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 72,
+            "minY": 136,
+            "maxX": 1444,
+            "maxY": 930
+          },
+          "sampledLongAxisOccupancy": 0.894,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.805,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/career-world-portfolio@v1",
+      "name": "Career World Portfolio",
+      "category": "project",
+      "candidateId": "project-career-world-portfolio-r1-01-canonical-amplification",
+      "sourcePath": "design/career-world/concept-tournaments/project-career-world-portfolio-r1/project-career-world-portfolio-r1-01-canonical-amplification.png",
+      "sourceSha256": "1ce9cec99261f9876fdbbe6c4fefe26c6830d5e28897d0768bd9480b210ca9e0",
+      "lockType": "director-completed-review-lock",
+      "selectionReason": "Completed review had no negative note; calibration leader is the strongest available completed result.",
+      "sourceReviewStatus": "reviewed",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 117.3,
+          "brightnessCompensation": 0.954,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 80,
+            "minY": 32,
+            "maxX": 1480,
+            "maxY": 946
+          },
+          "sampledLongAxisOccupancy": 0.912,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.789,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/client-devops-delivery-implementations@v1",
+      "name": "Client DevOps Delivery Implementations",
+      "category": "project",
+      "candidateId": "project-client-devops-delivery-implementations-r1-10-domain-synthesis",
+      "sourcePath": "design/career-world/concept-tournaments/project-client-devops-delivery-implementations-r1/project-client-devops-delivery-implementations-r1-10-domain-synthesis.png",
+      "sourceSha256": "9fa3d6c82c62ca99f68f54dc39d6b4cf7993d5c980e53e507975c314b9b8e269",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 110.9,
+          "brightnessCompensation": 1.01,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 382,
+            "minY": 46,
+            "maxX": 1170,
+            "maxY": 926
+          },
+          "sampledLongAxisOccupancy": 0.86,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.837,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/contextforge@v1",
+      "name": "ContextForge",
+      "category": "project",
+      "candidateId": "project-contextforge-r1-07-guarded-recovery",
+      "sourcePath": "design/career-world/concept-tournaments/project-contextforge-r1/project-contextforge-r1-07-guarded-recovery.png",
+      "sourceSha256": "968167d8d118267ca31777b992b38506fddeda3b6e05170710751425d110f601",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 108.9,
+          "brightnessCompensation": 1.028,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 62,
+            "minY": 36,
+            "maxX": 1474,
+            "maxY": 948
+          },
+          "sampledLongAxisOccupancy": 0.92,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.783,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/kaizen-agent-platform@v1",
+      "name": "Kaizen Agent Platform",
+      "category": "project",
+      "candidateId": "project-kaizen-agent-platform-r1-02-process-spine",
+      "sourcePath": "design/career-world/concept-tournaments/project-kaizen-agent-platform-r1/project-kaizen-agent-platform-r1-02-process-spine.png",
+      "sourceSha256": "bf1609a5d0d2d6a78cabc3ea0bcdd5d4858f8ae92f273e46a36ec7f9f57bcf70",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 117.9,
+          "brightnessCompensation": 0.95,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 138,
+            "minY": 86,
+            "maxX": 1428,
+            "maxY": 982
+          },
+          "sampledLongAxisOccupancy": 0.876,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.822,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/kaizen-metrics@v1",
+      "name": "Kaizen Metrics",
+      "category": "project",
+      "candidateId": "project-kaizen-metrics-r1-02-process-spine",
+      "sourcePath": "design/career-world/concept-tournaments/project-kaizen-metrics-r1/project-kaizen-metrics-r1-02-process-spine.png",
+      "sourceSha256": "b250c67d3a7b48215841dd35d4a7623eafc0dd84210b810974b286eafb16110d",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 105.2,
+          "brightnessCompensation": 1.064,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 30,
+            "minY": 74,
+            "maxX": 1506,
+            "maxY": 914
+          },
+          "sampledLongAxisOccupancy": 0.962,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/qc-alm-extractor@v1",
+      "name": "QC ALM Extractor",
+      "category": "project",
+      "candidateId": "project-qc-alm-extractor-r1-01-canonical-amplification",
+      "sourcePath": "design/career-world/concept-tournaments/project-qc-alm-extractor-r1/project-qc-alm-extractor-r1-01-canonical-amplification.png",
+      "sourceSha256": "34957c0f45915335fcb865203523462e57bb3965464cd39cd307efeeb137f2a7",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 106.6,
+          "brightnessCompensation": 1.051,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 292,
+            "minY": 62,
+            "maxX": 1246,
+            "maxY": 980
+          },
+          "sampledLongAxisOccupancy": 0.897,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.802,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/sap-table-update-integration@v1",
+      "name": "SAP Table Update Integration",
+      "category": "project",
+      "candidateId": "project-sap-table-update-integration-r1-06-modular-batch",
+      "sourcePath": "design/career-world/concept-tournaments/project-sap-table-update-integration-r1/project-sap-table-update-integration-r1-06-modular-batch.png",
+      "sourceSha256": "eace9488dc3a66cdfc72e7cc0d042e16657b2d773a44ca8d9e0891fb6eb3638e",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 114.9,
+          "brightnessCompensation": 0.975,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 208,
+            "minY": 36,
+            "maxX": 1288,
+            "maxY": 968
+          },
+          "sampledLongAxisOccupancy": 0.911,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.79,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/tanium-risk-assessment@v1",
+      "name": "Tanium Risk Assessment",
+      "category": "project",
+      "candidateId": "project-tanium-risk-assessment-r1-10-domain-synthesis",
+      "sourcePath": "design/career-world/concept-tournaments/project-tanium-risk-assessment-r1/project-tanium-risk-assessment-r1-10-domain-synthesis.png",
+      "sourceSha256": "16492c12ed865304481a577a0a36784a8e9e4b1edbb70981fed8317f8f0cf2db",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 113.1,
+          "brightnessCompensation": 0.99,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 98,
+            "minY": 40,
+            "maxX": 1426,
+            "maxY": 1002
+          },
+          "sampledLongAxisOccupancy": 0.94,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/ticket-validation-automation@v1",
+      "name": "Ticket Validation Automation",
+      "category": "project",
+      "candidateId": "project-ticket-validation-automation-r1-06-modular-batch",
+      "sourcePath": "design/career-world/concept-tournaments/project-ticket-validation-automation-r1/project-ticket-validation-automation-r1-06-modular-batch.png",
+      "sourceSha256": "33c93b5a4a0d87a375e06d154d61b65ab1680eac0ec702a5498a452b6252319c",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 135.2,
+          "brightnessCompensation": 0.84,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 106,
+            "minY": 76,
+            "maxX": 1418,
+            "maxY": 938
+          },
+          "sampledLongAxisOccupancy": 0.855,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.842,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/tmatch-eolmatch@v1",
+      "name": "T-Match / EOLMatch",
+      "category": "project",
+      "candidateId": "project-tmatch-eolmatch-r1-03-exchange-bridge",
+      "sourcePath": "design/career-world/concept-tournaments/project-tmatch-eolmatch-r1/project-tmatch-eolmatch-r1-03-exchange-bridge.png",
+      "sourceSha256": "1939e97d16dfe5c978901dcd2f09e46f1c1d924aa4e2766cb266ac99b21a74a5",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 122.2,
+          "brightnessCompensation": 0.916,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 58,
+            "minY": 2,
+            "maxX": 1442,
+            "maxY": 980
+          },
+          "sampledLongAxisOccupancy": 0.956,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/uat-automation@v1",
+      "name": "UAT Automation",
+      "category": "project",
+      "candidateId": "project-uat-automation-r1-01-canonical-amplification",
+      "sourcePath": "design/career-world/concept-tournaments/project-uat-automation-r1/project-uat-automation-r1-01-canonical-amplification.png",
+      "sourceSha256": "3ec5f4bc3585412867988ecaae0dd67ca55b89c43aa833afee853c13273e3594",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 119.2,
+          "brightnessCompensation": 0.939,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 0,
+            "minY": 8,
+            "maxX": 1534,
+            "maxY": 1020
+          },
+          "sampledLongAxisOccupancy": 0.999,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/vendy-vm-platform@v1",
+      "name": "Vendy VM Platform",
+      "category": "project",
+      "candidateId": "project-vendy-vm-platform-r3-02-three-arm-service-yard",
+      "sourcePath": "design/career-world/targeted-regeneration/city-project-r3/project-vendy-vm-platform-r3-02-three-arm-service-yard.png",
+      "sourceSha256": "415d2bbad6da2d0de33115a667c78a0ef2b8829e3dac7a2587a858b273640b47",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "One provisioning surface feeds three visibly different environment classes; clearer than the generic shared campus.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 43,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 106.6,
+          "brightnessCompensation": 1.05,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 48,
+            "minY": 64,
+            "maxX": 1502,
+            "maxY": 956
+          },
+          "sampledLongAxisOccupancy": 0.947,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "project/xsearch@v1",
+      "name": "xSearch",
+      "category": "project",
+      "candidateId": "project-xsearch-r1-06-modular-batch",
+      "sourcePath": "design/career-world/concept-tournaments/project-xsearch-r1/project-xsearch-r1-06-modular-batch.png",
+      "sourceSha256": "77987108bb09e62392f60c6bd1e31443c9ed1d504c9761116c4ecdc3f248ad49",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 114.9,
+          "brightnessCompensation": 0.974,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 154,
+            "minY": 128,
+            "maxX": 1400,
+            "maxY": 866
+          },
+          "sampledLongAxisOccupancy": 0.812,
+          "targetLongAxisOccupancy": 0.72,
+          "sourceFrameScale": 0.887,
+          "mapRoleScale": 0.44,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/ai@v1",
+      "name": "AI",
+      "category": "skill",
+      "candidateId": "skill-ai-r3-01-routing-courts",
+      "sourcePath": "design/career-world/targeted-regeneration/skills-ai-java-r3/skill-ai-r3-01-routing-courts.png",
+      "sourceSha256": "cc2210833f8d624404205d0e841c8f2dcf704fc70d2d62f789bce55ed8d8c35c",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Distinct routing and reasoning courts replace accelerator imagery; the alternative is a generic symmetric hub.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 15,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 117.3,
+          "brightnessCompensation": 0.955,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 226,
+            "minY": 90,
+            "maxX": 1322,
+            "maxY": 904
+          },
+          "sampledLongAxisOccupancy": 0.796,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.804,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/atlassian@v1",
+      "name": "Atlassian",
+      "category": "skill",
+      "candidateId": "skill-atlassian-r1-05-layered-system",
+      "sourcePath": "design/career-world/concept-tournaments/skill-atlassian-r1/skill-atlassian-r1-05-layered-system.png",
+      "sourceSha256": "65176bbd0cb2c7c5a937a6cbba1fcda89665eed3e8342d6ae992ac899cacb696",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 114.6,
+          "brightnessCompensation": 0.977,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 118,
+            "minY": 76,
+            "maxX": 1424,
+            "maxY": 906
+          },
+          "sampledLongAxisOccupancy": 0.851,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/aws@v1",
+      "name": "AWS",
+      "category": "skill",
+      "candidateId": "skill-aws-r1-05-layered-system",
+      "sourcePath": "design/career-world/concept-tournaments/skill-aws-r1/skill-aws-r1-05-layered-system.png",
+      "sourceSha256": "6ba4859922ab48a86ee0e30293fe461b1b49a8ba44c4d462e4e59f5e33df0ff6",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 104.7,
+          "brightnessCompensation": 1.07,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 256,
+            "minY": 70,
+            "maxX": 1278,
+            "maxY": 942
+          },
+          "sampledLongAxisOccupancy": 0.853,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/ci-cd@v1",
+      "name": "CI/CD",
+      "category": "skill",
+      "candidateId": "skill-ci-cd-r1-06-modular-field",
+      "sourcePath": "design/career-world/concept-tournaments/skill-ci-cd-r1/skill-ci-cd-r1-06-modular-field.png",
+      "sourceSha256": "5ab18e2a1618c7aa9b6aad6e0a2f4e25bbcfbc65144fde0a19db2864c96dcc93",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 117.8,
+          "brightnessCompensation": 0.951,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 62,
+            "minY": 62,
+            "maxX": 1434,
+            "maxY": 958
+          },
+          "sampledLongAxisOccupancy": 0.894,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/context-compression@v1",
+      "name": "Context compression",
+      "category": "skill",
+      "candidateId": "skill-context-compression-r1-04-interface-bridge",
+      "sourcePath": "design/career-world/concept-tournaments/skill-context-compression-r1/skill-context-compression-r1-04-interface-bridge.png",
+      "sourceSha256": "8116f6c16f73a8b1341e06ffe012ae8fcb377c4e9998c4866d609f3fa7e9551e",
+      "lockType": "director-completed-review-lock",
+      "selectionReason": "Completed review had no negative note; calibration leader is the strongest available completed result.",
+      "sourceReviewStatus": "reviewed",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 110.5,
+          "brightnessCompensation": 1.014,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 166,
+            "minY": 42,
+            "maxX": 1406,
+            "maxY": 966
+          },
+          "sampledLongAxisOccupancy": 0.903,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/csharp@v1",
+      "name": "C#",
+      "category": "skill",
+      "candidateId": "skill-csharp-r2-01-sharp-grid-foundry",
+      "sourcePath": "design/career-world/concept-tournaments/skill-csharp-r2/skill-csharp-r2-01-sharp-grid-foundry.png",
+      "sourceSha256": "0005d616871ae1a34aa18d6f5b0a7bb62fbf3fd130b5b8ff3a1d47895f6535df",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 106.3,
+          "brightnessCompensation": 1.053,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 234,
+            "minY": 104,
+            "maxX": 1320,
+            "maxY": 890
+          },
+          "sampledLongAxisOccupancy": 0.769,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.833,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/data-contracts@v1",
+      "name": "Data contracts",
+      "category": "skill",
+      "candidateId": "skill-data-contracts-r1-07-verified-core",
+      "sourcePath": "design/career-world/concept-tournaments/skill-data-contracts-r1/skill-data-contracts-r1-07-verified-core.png",
+      "sourceSha256": "92d46aec11fd00e17053ccebec5c8aea9a7890a157c847bb04c1139ac4064433",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 111.5,
+          "brightnessCompensation": 1.004,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 12,
+            "minY": 86,
+            "maxX": 1522,
+            "maxY": 934
+          },
+          "sampledLongAxisOccupancy": 0.984,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/databricks@v1",
+      "name": "Databricks",
+      "category": "skill",
+      "candidateId": "skill-databricks-r1-02-core-mechanism",
+      "sourcePath": "design/career-world/concept-tournaments/skill-databricks-r1/skill-databricks-r1-02-core-mechanism.png",
+      "sourceSha256": "b52a794f5e754944163b128067c7894f8edba24741d99fdfe5ccfa9617a3c1a1",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 107.5,
+          "brightnessCompensation": 1.042,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 162,
+            "minY": 46,
+            "maxX": 1388,
+            "maxY": 996
+          },
+          "sampledLongAxisOccupancy": 0.929,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/docker@v1",
+      "name": "Docker",
+      "category": "skill",
+      "candidateId": "skill-docker-r1-08-scale-engine",
+      "sourcePath": "design/career-world/concept-tournaments/skill-docker-r1/skill-docker-r1-08-scale-engine.png",
+      "sourceSha256": "512b971b533dfdf6d3ca134771c2a6bebe7693f974728c7797131e5b82309209",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 115.9,
+          "brightnessCompensation": 0.966,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 50,
+            "minY": 38,
+            "maxX": 1488,
+            "maxY": 984
+          },
+          "sampledLongAxisOccupancy": 0.937,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/electron@v1",
+      "name": "Electron",
+      "category": "skill",
+      "candidateId": "skill-electron-r1-09-compact-primitive",
+      "sourcePath": "design/career-world/concept-tournaments/skill-electron-r1/skill-electron-r1-09-compact-primitive.png",
+      "sourceSha256": "4ac52630c76a2ee98bdd8a191dbbb857305650cad3b9581f941a14b44017e29b",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 106.3,
+          "brightnessCompensation": 1.054,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 80,
+            "minY": 50,
+            "maxX": 1382,
+            "maxY": 1004
+          },
+          "sampledLongAxisOccupancy": 0.933,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/go@v1",
+      "name": "Go",
+      "category": "skill",
+      "candidateId": "skill-go-r2-09-gopher-burrow-easter-egg",
+      "sourcePath": "design/career-world/concept-tournaments/skill-go-r2/skill-go-r2-09-gopher-burrow-easter-egg.png",
+      "sourceSha256": "c5c454c2401742387a23fb44645ffc557815265732f7f3ec8f48ed9f8d473f67",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 102.5,
+          "brightnessCompensation": 1.092,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 92,
+            "minY": 96,
+            "maxX": 1402,
+            "maxY": 902
+          },
+          "sampledLongAxisOccupancy": 0.854,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/informatica@v1",
+      "name": "Informatica",
+      "category": "skill",
+      "candidateId": "skill-informatica-r1-01-canonical-instrument",
+      "sourcePath": "design/career-world/concept-tournaments/skill-informatica-r1/skill-informatica-r1-01-canonical-instrument.png",
+      "sourceSha256": "edaec1f69410aacc64335f24501428686546e58fda934a55b14221092cbd3a49",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 116.3,
+          "brightnessCompensation": 0.963,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 26,
+            "minY": 12,
+            "maxX": 1504,
+            "maxY": 1004
+          },
+          "sampledLongAxisOccupancy": 0.97,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/java@v1",
+      "name": "Java",
+      "category": "skill",
+      "candidateId": "skill-java-r3-01-runtime-keep",
+      "sourcePath": "design/career-world/targeted-regeneration/skills-ai-java-r3/skill-java-r3-01-runtime-keep.png",
+      "sourceSha256": "43cf2bad2d1db05a278a42ac716409d51162650e1fa93f6386eb7fd5e75f7b78",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Compact layered runtime landmark; the alternative is still capital-scale and overbuilt.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 13,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 114.6,
+          "brightnessCompensation": 0.977,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 110,
+            "minY": 98,
+            "maxX": 1394,
+            "maxY": 902
+          },
+          "sampledLongAxisOccupancy": 0.837,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/localdb@v1",
+      "name": "LocalDB",
+      "category": "skill",
+      "candidateId": "skill-localdb-r1-07-verified-core",
+      "sourcePath": "design/career-world/concept-tournaments/skill-localdb-r1/skill-localdb-r1-07-verified-core.png",
+      "sourceSha256": "edf0e3db77a31f564e46f730537677a728c3a28e94a79e15ced6b67b6874f87c",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 99.9,
+          "brightnessCompensation": 1.121,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 58,
+            "minY": 74,
+            "maxX": 1474,
+            "maxY": 962
+          },
+          "sampledLongAxisOccupancy": 0.923,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/macstadium@v1",
+      "name": "MacStadium",
+      "category": "skill",
+      "candidateId": "skill-macstadium-r1-07-verified-core",
+      "sourcePath": "design/career-world/concept-tournaments/skill-macstadium-r1/skill-macstadium-r1-07-verified-core.png",
+      "sourceSha256": "b70d29439d83a8baac7f6add3239a7028b1c21387d71730f844a5367c6209fe4",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 105.8,
+          "brightnessCompensation": 1.059,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 70,
+            "minY": 46,
+            "maxX": 1470,
+            "maxY": 924
+          },
+          "sampledLongAxisOccupancy": 0.912,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/mcp@v1",
+      "name": "MCP",
+      "category": "skill",
+      "candidateId": "skill-mcp-r2-02-capability-handshake-lock",
+      "sourcePath": "design/career-world/concept-tournaments/skill-mcp-r2/skill-mcp-r2-02-capability-handshake-lock.png",
+      "sourceSha256": "4218736cc1a4bc2f01eb0d9529982e78d7224a606df00a555118c57c4259bf27",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 113.9,
+          "brightnessCompensation": 0.984,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 168,
+            "minY": 74,
+            "maxX": 1392,
+            "maxY": 952
+          },
+          "sampledLongAxisOccupancy": 0.858,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/openapi@v1",
+      "name": "OpenAPI",
+      "category": "skill",
+      "candidateId": "skill-openapi-r3-01-contract-hub",
+      "sourcePath": "design/career-world/targeted-regeneration/skills-openapi-react-r3/skill-openapi-r3-01-contract-hub.png",
+      "sourceSha256": "016bd1740a09b143aa70b9c5cf657bf38b59a518cacd9e8b76bd353b7d659466",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Three ingress paths visibly mediate through one contract hub into two response paths; the archive alternative reads as a generic temple.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 10,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 100,
+          "brightnessCompensation": 1.12,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 130,
+            "minY": 130,
+            "maxX": 1398,
+            "maxY": 930
+          },
+          "sampledLongAxisOccupancy": 0.826,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/operator-control@v1",
+      "name": "Operator control",
+      "category": "skill",
+      "candidateId": "skill-operator-control-r1-09-compact-primitive",
+      "sourcePath": "design/career-world/concept-tournaments/skill-operator-control-r1/skill-operator-control-r1-09-compact-primitive.png",
+      "sourceSha256": "8a7a8a92263432b5affe399a874a4f00514d6b9daede18379d26e75d7013bf54",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 94.8,
+          "brightnessCompensation": 1.18,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 306,
+            "minY": 78,
+            "maxX": 1228,
+            "maxY": 916
+          },
+          "sampledLongAxisOccupancy": 0.819,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.781,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/postgresql@v1",
+      "name": "PostgreSQL",
+      "category": "skill",
+      "candidateId": "skill-postgresql-r1-05-layered-system",
+      "sourcePath": "design/career-world/concept-tournaments/skill-postgresql-r1/skill-postgresql-r1-05-layered-system.png",
+      "sourceSha256": "ed4ab39beb4eacc7b96eda54c11de2bfb96b87fa361e7544ac45f85508cd7eaf",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 122.7,
+          "brightnessCompensation": 0.913,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 334,
+            "minY": 56,
+            "maxX": 1210,
+            "maxY": 984
+          },
+          "sampledLongAxisOccupancy": 0.907,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/python@v1",
+      "name": "Python",
+      "category": "skill",
+      "candidateId": "skill-python-r2-10-python-language-synthesis",
+      "sourcePath": "design/career-world/concept-tournaments/skill-python-r2/skill-python-r2-10-python-language-synthesis.png",
+      "sourceSha256": "a69b5ff5792b8e842dff18ecdf289d9c0886809c998e1d7e018da185183811cb",
+      "lockType": "director-completed-review-lock",
+      "selectionReason": "Stable consensus and calibration agree on the Python-specific synthesis; the TypeScript annotation does not relabel TypeScript.",
+      "sourceReviewStatus": "reviewed",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 90.8,
+          "brightnessCompensation": 1.18,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 42,
+            "minY": 40,
+            "maxX": 1506,
+            "maxY": 974
+          },
+          "sampledLongAxisOccupancy": 0.954,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/react@v1",
+      "name": "React",
+      "category": "skill",
+      "candidateId": "skill-react-r3-02-state-circuit",
+      "sourcePath": "design/career-world/targeted-regeneration/skills-openapi-react-r3/skill-react-r3-02-state-circuit.png",
+      "sourceSha256": "32c8d844c0567aba8d752d8c17de0d4e7ef15e66796cea3befd20306efdc647f",
+      "lockType": "director-targeted-regeneration-lock",
+      "selectionReason": "Parent-to-child component route and return state circuit are legible; the alternative reads as a generic courtyard.",
+      "sourceReviewStatus": "redo",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 13,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 105.8,
+          "brightnessCompensation": 1.059,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 312,
+            "minY": 42,
+            "maxX": 1302,
+            "maxY": 940
+          },
+          "sampledLongAxisOccupancy": 0.878,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/redis@v1",
+      "name": "Redis",
+      "category": "skill",
+      "candidateId": "skill-redis-r1-06-modular-field",
+      "sourcePath": "design/career-world/concept-tournaments/skill-redis-r1/skill-redis-r1-06-modular-field.png",
+      "sourceSha256": "d04ed18805dcc9786d54f2344b5e42c0ef8e778677787816c48dc0d8969963be",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 131.3,
+          "brightnessCompensation": 0.853,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 66,
+            "minY": 100,
+            "maxX": 1456,
+            "maxY": 914
+          },
+          "sampledLongAxisOccupancy": 0.906,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/typescript@v1",
+      "name": "TypeScript",
+      "category": "skill",
+      "candidateId": "skill-typescript-r2-10-typescript-synthesis",
+      "sourcePath": "design/career-world/concept-tournaments/skill-typescript-r2/skill-typescript-r2-10-typescript-synthesis.png",
+      "sourceSha256": "144e851d4646cf9eca78674d282c1227106a596b9209d6430e896a83eee528fd",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 103.4,
+          "brightnessCompensation": 1.083,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 162,
+            "minY": 26,
+            "maxX": 1366,
+            "maxY": 988
+          },
+          "sampledLongAxisOccupancy": 0.94,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/vmware@v1",
+      "name": "VMware",
+      "category": "skill",
+      "candidateId": "skill-vmware-r1-05-layered-system",
+      "sourcePath": "design/career-world/concept-tournaments/skill-vmware-r1/skill-vmware-r1-05-layered-system.png",
+      "sourceSha256": "aea1bba66601e9670ed1760c09e3b781ac121b840c029d11f084d4ad92cc1212",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 98.9,
+          "brightnessCompensation": 1.132,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 138,
+            "minY": 26,
+            "maxX": 1396,
+            "maxY": 1022
+          },
+          "sampledLongAxisOccupancy": 0.974,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    },
+    {
+      "assetId": "skill/workflow-orchestration@v1",
+      "name": "Workflow orchestration",
+      "category": "skill",
+      "candidateId": "skill-workflow-orchestration-r1-05-layered-system",
+      "sourcePath": "design/career-world/concept-tournaments/skill-workflow-orchestration-r1/skill-workflow-orchestration-r1-05-layered-system.png",
+      "sourceSha256": "bd891c9da1dc4fa4cc96f3c916b2fedfea2de5df3010b58ebacbfc9b34b7cc8b",
+      "lockType": "explicit-user-review-lock",
+      "selectionReason": "Preserved exact explicit review lock.",
+      "sourceReviewStatus": "locked",
+      "audit": {
+        "dimensions": {
+          "width": 1536,
+          "height": 1024
+        },
+        "channelAudit": {
+          "maxSampledRgbDelta": 0,
+          "policy": "runtime grayscale filter is mandatory for every locked asset; source pixels remain unmodified"
+        },
+        "toneAudit": {
+          "sampledForegroundMeanLuma": 121,
+          "brightnessCompensation": 0.926,
+          "policy": "apply after grayscale conversion during final compositing"
+        },
+        "framingAudit": {
+          "sampledForegroundBounds": {
+            "minX": 204,
+            "minY": 76,
+            "maxX": 1322,
+            "maxY": 958
+          },
+          "sampledLongAxisOccupancy": 0.862,
+          "targetLongAxisOccupancy": 0.64,
+          "sourceFrameScale": 0.78,
+          "mapRoleScale": 0.28,
+          "policy": "sourceFrameScale normalizes differing concept margins; mapRoleScale preserves capital > project > skill"
+        },
+        "projectionAudit": {
+          "status": "director-contact-sheet-pass",
+          "target": "orthographic true-isometric; azimuth 225 degrees; elevation 35.264 degrees; roll 0",
+          "policy": "reject perspective convergence or opposite-facing assets before final stitching"
+        }
+      }
+    }
+  ]
+}

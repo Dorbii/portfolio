@@ -1,0 +1,197 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "skill-aws-r1-2026-07-18",
+  "name": "AWS · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/skill-aws-r1",
+  "domainSummary": "A cloud infrastructure capability composed from regional and Availability Zone boundaries, elastic compute, managed services, storage, networking, and explicit failure-domain design rather than one monolithic facility.",
+  "evidenceBoundary": "Avoid AWS logos, orange accents, literal data centers, cloud icons, or a one-to-one service diagram. Express distribution and isolation through connected architecture.",
+  "researchSources": [
+    {
+      "title": "AWS Regions and Availability Zones",
+      "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html",
+      "use": "Official isolation, regional distribution, and fault-tolerance model."
+    }
+  ],
+  "assets": [
+    {
+      "id": "skill-aws-r1-01-canonical-instrument",
+      "name": "AWS · Canonical Instrument",
+      "src": "skill-aws-r1-01-canonical-instrument.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into a precise compact technical instrument building; emphasize regional and zone separation",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "canonical-instrument",
+        "regional-and-zone-separation",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "The accepted skill identity is tested in its clearest production form. This version emphasizes regional and zone separation.",
+      "businessCue": "regional and zone separation"
+    },
+    {
+      "id": "skill-aws-r1-02-core-mechanism",
+      "name": "AWS · Core Mechanism",
+      "src": "skill-aws-r1-02-core-mechanism.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the skill's defining mechanism the central architectural mass; emphasize elastic resource capacity",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "core-mechanism",
+        "elastic-resource-capacity",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "One unmistakable mechanism carries the identity. This version emphasizes elastic resource capacity.",
+      "businessCue": "elastic resource capacity"
+    },
+    {
+      "id": "skill-aws-r1-03-flow-spine",
+      "name": "AWS · Flow Spine",
+      "src": "skill-aws-r1-03-flow-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize inputs, work, and outputs along one connected linear spine; emphasize managed service composition",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "flow-spine",
+        "managed-service-composition",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "A legible flow tests the skill as a transformation process. This version emphasizes managed service composition.",
+      "businessCue": "managed service composition"
+    },
+    {
+      "id": "skill-aws-r1-04-interface-bridge",
+      "name": "AWS · Interface Bridge",
+      "src": "skill-aws-r1-04-interface-bridge.png",
+      "role": "broad-concept",
+      "controlledVariable": "join two unequal functional masses through one explicit inhabited interface bridge; emphasize networked service boundaries",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "interface-bridge",
+        "networked-service-boundaries",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "The skill is expressed as a reliable boundary between systems. This version emphasizes networked service boundaries.",
+      "businessCue": "networked service boundaries"
+    },
+    {
+      "id": "skill-aws-r1-05-layered-system",
+      "name": "AWS · Layered System",
+      "src": "skill-aws-r1-05-layered-system.png",
+      "role": "broad-concept",
+      "controlledVariable": "stack several connected layers with visibly different responsibilities; emphasize fault-tolerant distributed topology",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "layered-system",
+        "fault-tolerant-distributed-topology",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "Layering tests separation of concerns and system depth. This version emphasizes fault-tolerant distributed topology.",
+      "businessCue": "fault-tolerant distributed topology"
+    },
+    {
+      "id": "skill-aws-r1-06-modular-field",
+      "name": "AWS · Modular Field",
+      "src": "skill-aws-r1-06-modular-field.png",
+      "role": "broad-concept",
+      "controlledVariable": "repeat small interoperable units on one shared base with a clear coordinating core; emphasize regional and zone separation",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "modular-field",
+        "regional-and-zone-separation",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "Modularity and composition become the identity. This version emphasizes regional and zone separation.",
+      "businessCue": "regional and zone separation"
+    },
+    {
+      "id": "skill-aws-r1-07-verified-core",
+      "name": "AWS · Verified Core",
+      "src": "skill-aws-r1-07-verified-core.png",
+      "role": "broad-concept",
+      "controlledVariable": "protect a compact central chamber behind explicit gates, checks, or controlled thresholds; emphasize elastic resource capacity",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "verified-core",
+        "elastic-resource-capacity",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "Correctness and validation dominate the architectural metaphor. This version emphasizes elastic resource capacity.",
+      "businessCue": "elastic resource capacity"
+    },
+    {
+      "id": "skill-aws-r1-08-scale-engine",
+      "name": "AWS · Scale Engine",
+      "src": "skill-aws-r1-08-scale-engine.png",
+      "role": "broad-concept",
+      "controlledVariable": "extend the building through repeated service bays and resilient parallel paths; emphasize managed service composition",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "scale-engine",
+        "managed-service-composition",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "Performance and scale are expressed through structure, not speed lines. This version emphasizes managed service composition.",
+      "businessCue": "managed service composition"
+    },
+    {
+      "id": "skill-aws-r1-09-compact-primitive",
+      "name": "AWS · Compact Primitive",
+      "src": "skill-aws-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the skill to a minimal but complete map-readable technical building; emphasize networked service boundaries",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "compact-primitive",
+        "networked-service-boundaries",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "The primitive tests the smallest recognizable expression of the skill. This version emphasizes networked service boundaries.",
+      "businessCue": "networked service boundaries"
+    },
+    {
+      "id": "skill-aws-r1-10-skill-synthesis",
+      "name": "AWS · Skill Synthesis",
+      "src": "skill-aws-r1-10-skill-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "combine mechanism, flow, interface, validation, and scale in one balanced supporting building; emphasize fault-tolerant distributed topology",
+      "parentConcept": "AWS research profile",
+      "tags": [
+        "skill",
+        "skill-synthesis",
+        "fault-tolerant-distributed-topology",
+        "aws",
+        "cloud",
+        "distributed"
+      ],
+      "thesis": "The synthesis tests a complete skill identity while remaining subordinate to projects and cities. This version emphasizes fault-tolerant distributed topology.",
+      "businessCue": "fault-tolerant distributed topology"
+    }
+  ]
+};

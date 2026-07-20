@@ -32,17 +32,20 @@ test("server-renders Career World as the default route", async () => {
 
   assert.match(html, /Career World/);
   assert.match(html, /Illustrative world .* entertainment, not measured outcomes\./);
-  assert.match(html, /aria-label="Career World landmark navigation"/i);
-  for (const employer of [
-    "NinjaOne",
-    "Tanium",
-    "Independent",
-    "ACE Hardware",
-    "Column Technologies",
-  ]) {
-    assert.match(html, new RegExp(employer));
-  }
-  assert.match(html, /Choose an employer city to reveal its project and skill buildings\./);
+  assert.match(html, /aria-label="Interactive Career World map"/i);
+  assert.match(html, /data-scene-layer="coordinate-grid"/);
+  assert.match(html, /data-grid-major-unit="100"/);
+  assert.match(html, /data-grid-half-unit="50"/);
+  assert.match(html, /data-grid-minor-unit="20"/);
+  assert.match(html, /data-visible-node-count="0"/);
+  assert.doesNotMatch(html, /data-instance-id=/);
+  assert.match(html, /Scroll to zoom/);
+  assert.match(html, /Drag to pan/);
+  assert.match(html, /Select a city or project/);
+  assert.doesNotMatch(
+    html,
+    /Career World landmark navigation|Choose an employer city to reveal/i,
+  );
   assert.match(html, /steven-doris-resume\.pdf/);
   assert.match(html, /steven-doris-resume\.docx/);
   assert.doesNotMatch(html, /og:image|og\.png/);

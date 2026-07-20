@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 
 import { ProjectDrawer } from "./project-drawer";
-import { WorldHitTargets } from "./world-hit-targets";
 import { WorldScene } from "./world-scene";
 import { useCareerWorldState } from "../hooks/use-career-world-state";
 import {
@@ -12,7 +11,7 @@ import {
   type CareerProjectId,
   type EmployerId,
 } from "../model/world-registry";
-import { semanticLodForFocus, zoomCameraAt } from "../rendering/world-camera";
+import { detailForZoom, zoomCameraAt } from "../rendering/world-camera";
 
 const SVG_VIEWPORT = { width: 1600, height: 900 };
 
@@ -36,11 +35,7 @@ export function CareerWorld() {
       : state.focus.kind === "project"
         ? projectById.get(state.focus.projectId)?.employerId ?? null
         : null;
-  const lod = semanticLodForFocus(
-    state.camera.zoom,
-    activeEmployerId !== null,
-    activeProjectId !== null,
-  );
+  const detail = detailForZoom(state.camera.zoom);
   const activeProject = activeProjectId
     ? projectById.get(activeProjectId)
     : null;
@@ -60,7 +55,7 @@ export function CareerWorld() {
     <div
       className="career-world-app"
       data-reduced-motion={state.reducedMotion || undefined}
-      data-lod={lod}
+      data-lod={detail}
     >
       <main ref={mainRef}>
         <header className="career-world-header">
@@ -71,7 +66,7 @@ export function CareerWorld() {
             <h1>Career World</h1>
           </div>
           <div className="career-world-header-status" aria-live="polite">
-            <span>{lod} view</span>
+            <span>{detail} view</span>
             <span>{Math.round(state.camera.zoom * 100)}%</span>
           </div>
           <div
@@ -87,15 +82,6 @@ export function CareerWorld() {
           <h2 id="career-world-map-title" className="sr-only">
             Illustrative Career World map
           </h2>
-
-          <div className="career-world-navigation-region">
-            <WorldHitTargets
-              activeEmployerId={activeEmployerId}
-              activeProjectId={activeProjectId}
-              onEmployer={state.openEmployer}
-              onProject={(projectId, target) => openProject(projectId, target)}
-            />
-          </div>
 
           <div className="career-world-canvas-region">
             <WorldScene

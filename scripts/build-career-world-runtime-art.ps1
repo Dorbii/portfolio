@@ -17,8 +17,8 @@ if (-not (Test-Path -LiteralPath $builderPath)) {
 }
 
 $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-$transparentRecords = @($manifest.records | Where-Object { -not $_.asset_id.StartsWith("world/") })
-foreach ($record in $transparentRecords) {
+$records = @($manifest.records)
+foreach ($record in $records) {
   # A fresh process per image provides a hard memory boundary. The builder
   # disables the Sharp cache and fixes libvips concurrency at one.
   & $Node $builderPath "--asset=$($record.asset_id)" "--from-source"
@@ -27,4 +27,4 @@ foreach ($record in $transparentRecords) {
   }
 }
 
-Write-Output "Rebuilt $($transparentRecords.Count) transparent Career World assets without FFmpeg; preserved opaque world art."
+Write-Output "Rebuilt $($records.Count) Career World assets without FFmpeg, including the exact 1600x900 world plane."

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="680" viewBox="0 0 920 680" role="img" aria-labelledby="title desc">
+<title id="title">Independent standalone territory layout</title>
+<desc id="desc">Maker peninsula / triangular review cut; 9 placed canonical nodes.</desc>
+<defs>
+<pattern id="iso-grid" width="48" height="28" patternUnits="userSpaceOnUse">
+<path d="M0 14 L24 0 L48 14 L24 28 Z" fill="none" stroke="#273039" stroke-width="0.65"/>
+</pattern>
+<filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<style>
+.frame{fill:#0a0d10}.grid{fill:url(#iso-grid);opacity:.7}.land{fill:#252c32;stroke:#a7b1ba;stroke-width:2.2}.land-inner{fill:none;stroke:#cbd2d8;stroke-width:1;opacity:.2}.contour{fill:none;stroke:#87939d;stroke-width:1.25;opacity:.52;stroke-dasharray:7 7}.water-cut{fill:#101820;stroke:#7f8b94;stroke-width:1.4}.route{fill:none;stroke-linecap:round}.route-primary{stroke:#d9e0e5;stroke-width:4;opacity:.45}.route-evidence{stroke:#aeb8c0;stroke-width:1.5;opacity:.28;stroke-dasharray:5 7}.node polygon{stroke-width:1.35;vector-effect:non-scaling-stroke}.node-shadow{fill:#000;opacity:.34;filter:url(#soft-shadow)}.node-core{fill:#f4f6f7;stroke:#111820;stroke-width:2}.node-label{fill:#f4f6f7;font:600 12px Inter,Segoe UI,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#0a0d10;stroke-width:3px;stroke-linejoin:round}.node-role{fill:#93a0aa;font:700 8px Inter,Segoe UI,sans-serif;text-anchor:middle;letter-spacing:1.6px;paint-order:stroke;stroke:#0a0d10;stroke-width:2px}.heading{fill:#f6f8f9;font:700 22px Inter,Segoe UI,sans-serif;letter-spacing:.3px}.subheading{fill:#9da8b0;font:500 12px Inter,Segoe UI,sans-serif}.meta{fill:#7f8b94;font:600 10px Inter,Segoe UI,sans-serif;letter-spacing:1.1px}.legend-text{fill:#aeb7bf;font:500 10px Inter,Segoe UI,sans-serif}.safe-line{fill:none;stroke:#6d7780;stroke-width:1;stroke-dasharray:3 8;opacity:.35}
+</style>
+<rect class="frame" width="920" height="680"/>
+<rect class="grid" width="920" height="680"/>
+<path d="M80 194 C137 86 286 58 413 101 C535 50 720 82 824 181 C903 257 883 402 814 485 C731 584 590 637 447 612 C327 663 178 612 106 520 C42 437 39 273 80 194 Z" class="land"/>
+<path d="M80 194 C137 86 286 58 413 101 C535 50 720 82 824 181 C903 257 883 402 814 485 C731 584 590 637 447 612 C327 663 178 612 106 520 C42 437 39 273 80 194 Z" class="land-inner" transform="translate(0 5)"/>
+<path d="M136 211 C196 132 300 114 407 145 C510 104 651 126 747 195" class="contour contour-0"/>
+<path d="M183 255 C245 194 326 183 412 206 C501 173 610 188 692 242" class="contour contour-1"/>
+<path d="M232 310 C287 263 351 255 417 272 C480 247 554 259 616 297" class="contour contour-2"/>
+<path d="M422 338 L515 451 L332 456 Z" class="water-cut"/>
+<path d="M659 570 C722 518 802 509 844 548 C809 625 730 649 659 570 Z" class="water-cut"/>
+<rect x="54" y="54" width="812" height="572" rx="28" class="safe-line"/>
+<path d="M 414.92424415021014 334.917194445256 L 268.56232692148103 399.58873926725255" class="route route-primary" data-from="instance/independent/capital/01" data-to="instance/independent/project/contextforge/01"/>
+<path d="M 224.392 394.544 L 136.648 328.736" class="route route-evidence" data-project="contextforge" data-skill="context-compression"/>
+<path d="M 237.01386934835557 385.5091993349571 L 174.51389993353814 193.84262646285032" class="route route-evidence" data-project="contextforge" data-skill="workflow-orchestration"/>
+<path d="M 253.88249783862688 385.81986699484906 L 329.9794577433848 178.66703169856356" class="route route-evidence" data-project="contextforge" data-skill="data-contracts"/>
+<path d="M 263.96367781652003 392.5656510396509 L 544.2813994950104 134.85419723845817" class="route route-evidence" data-project="contextforge" data-skill="typescript"/>
+<path d="M 507.03677331756626 329.69899166173946 L 675.4125957658176 382.316436176818" class="route route-primary" data-from="instance/independent/capital/01" data-to="instance/independent/project/career-world-portfolio/01"/>
+<path d="M 710.3250931643477 366.3997870529196 L 762.5928679473158 246.93058754899246" class="route route-evidence" data-project="career-world-portfolio" data-skill="react"/>
+<path d="M 687.6349059395698 367.4017246481792 L 561.9889662080693 137.7729382423335" class="route route-evidence" data-project="career-world-portfolio" data-skill="typescript"/>
+<path d="M 677.5482141636716 402.6291295329347 L 472.69013982053343 517.8617963509499" class="route route-evidence" data-project="career-world-portfolio" data-skill="operator-control"/>
+<path d="M 678.071601949388 376.48249435236244 L 347.3943119416503 172.6403292790995" class="route route-evidence" data-project="career-world-portfolio" data-skill="data-contracts"/>
+<g class="node node-skill" data-node-id="instance/independent/skill/typescript/01" data-asset-id="skill/typescript@v1">
+<ellipse cx="555" cy="159" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="529,125 555,143 555,154 529,136" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="555,143 581,125 581,136 555,154" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="555,107 581,125 555,143 529,125" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="555" cy="125" r="3.5" class="node-core"/>
+<text x="555" y="173" class="node-label">TypeScript</text>
+<text x="555" y="186" class="node-role">SKILL</text>
+</g>
+<g class="node node-skill" data-node-id="instance/independent/skill/data-contracts/01" data-asset-id="skill/data-contracts@v1">
+<ellipse cx="335" cy="199" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="309,165 335,183 335,194 309,176" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="335,183 361,165 361,176 335,194" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="335,147 361,165 335,183 309,165" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="335" cy="165" r="3.5" class="node-core"/>
+<text x="335" y="213" class="node-label">Data contracts</text>
+<text x="335" y="226" class="node-role">SKILL</text>
+</g>
+<g class="node node-skill" data-node-id="instance/independent/skill/workflow-orchestration/01" data-asset-id="skill/workflow-orchestration@v1">
+<ellipse cx="170" cy="214" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="144,180 170,198 170,209 144,191" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="170,198 196,180 196,191 170,209" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="170,162 196,180 170,198 144,180" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="170" cy="180" r="3.5" class="node-core"/>
+<text x="170" y="228" class="node-label">Workflow orchestration</text>
+<text x="170" y="241" class="node-role">SKILL</text>
+</g>
+<g class="node node-skill" data-node-id="instance/independent/skill/react/01" data-asset-id="skill/react@v1">
+<ellipse cx="770" cy="270" rx="24.419999999999998" ry="8.16" class="node-shadow"/>
+<polygon points="737,230 770,254 770,265 737,241" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="770,254 803,230 803,241 770,265" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="770,206 803,230 770,254 737,230" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="770" cy="230" r="3.5" class="node-core"/>
+<text x="770" y="284" class="node-label">React</text>
+<text x="770" y="297" class="node-role">SKILL</text>
+</g>
+<g class="node node-capital" data-node-id="instance/independent/capital/01" data-asset-id="city/independent@v1">
+<ellipse cx="460" cy="400" rx="65.12" ry="19.040000000000003" class="node-shadow"/>
+<polygon points="372,315 460,371 460,395 372,339" fill="#20272c" stroke="#f1f4f6"/>
+<polygon points="460,371 548,315 548,339 460,395" fill="#2b343b" stroke="#f1f4f6"/>
+<polygon points="460,259 548,315 460,371 372,315" fill="#65717b" stroke="#f1f4f6"/>
+<circle cx="460" cy="315" r="8" class="node-core"/>
+<text x="460" y="414" class="node-label">Independent</text>
+<text x="460" y="427" class="node-role">CAPITAL</text>
+</g>
+<g class="node node-skill" data-node-id="instance/independent/skill/context-compression/01" data-asset-id="skill/context-compression@v1">
+<ellipse cx="125" cy="354" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="99,320 125,338 125,349 99,331" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="125,338 151,320 151,331 125,349" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="125,302 151,320 125,338 99,320" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="125" cy="320" r="3.5" class="node-core"/>
+<text x="125" y="368" class="node-label">Context compression</text>
+<text x="125" y="381" class="node-role">SKILL</text>
+</g>
+<g class="node node-project" data-node-id="instance/independent/project/career-world-portfolio/01" data-asset-id="project/career-world-portfolio@v1">
+<ellipse cx="700" cy="442" rx="34.04" ry="10.200000000000001" class="node-shadow"/>
+<polygon points="654,390 700,420 700,437 654,407" fill="#20272c" stroke="#d8dee3"/>
+<polygon points="700,420 746,390 746,407 700,437" fill="#2b343b" stroke="#d8dee3"/>
+<polygon points="700,360 746,390 700,420 654,390" fill="#4d5962" stroke="#d8dee3"/>
+<circle cx="700" cy="390" r="5" class="node-core"/>
+<text x="700" y="456" class="node-label">Career World Portfolio</text>
+<text x="700" y="469" class="node-role">PROJECT</text>
+</g>
+<g class="node node-project" data-node-id="instance/independent/project/contextforge/01" data-asset-id="project/contextforge@v1">
+<ellipse cx="245" cy="462" rx="34.04" ry="10.200000000000001" class="node-shadow"/>
+<polygon points="199,410 245,440 245,457 199,427" fill="#20272c" stroke="#d8dee3"/>
+<polygon points="245,440 291,410 291,427 245,457" fill="#2b343b" stroke="#d8dee3"/>
+<polygon points="245,380 291,410 245,440 199,410" fill="#4d5962" stroke="#d8dee3"/>
+<circle cx="245" cy="410" r="5" class="node-core"/>
+<text x="245" y="476" class="node-label">ContextForge</text>
+<text x="245" y="489" class="node-role">PROJECT</text>
+</g>
+<g class="node node-skill" data-node-id="instance/independent/skill/operator-control/01" data-asset-id="skill/operator-control@v1">
+<ellipse cx="460" cy="559" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="434,525 460,543 460,554 434,536" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="460,543 486,525 486,536 460,554" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="460,507 486,525 460,543 434,525" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="460" cy="525" r="3.5" class="node-core"/>
+<text x="460" y="573" class="node-label">Operator control</text>
+<text x="460" y="586" class="node-role">SKILL</text>
+</g>
+<g transform="translate(34 34)">
+<rect x="-14" y="-18" width="470" height="72" rx="10" fill="#0a0d10" opacity=".9" stroke="#39434b"/>
+<text class="heading" x="0" y="8">Independent</text>
+<text class="subheading" x="0" y="29">Maker peninsula / triangular review cut</text>
+<text class="meta" x="0" y="47">LOCAL 920×680 · WEIGHT 14 · 9 NODES</text>
+</g>
+<g transform="translate(646 641)">
+<rect x="-13" y="-19" width="252" height="32" rx="8" fill="#0a0d10" opacity=".88" stroke="#39434b"/>
+<text class="legend-text" x="0" y="2">solid: capital route</text>
+<text class="legend-text" x="123" y="2">dashed: evidence link</text>
+</g>
+</svg>

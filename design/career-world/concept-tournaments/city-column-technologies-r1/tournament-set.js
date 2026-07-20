@@ -1,0 +1,216 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "city-column-technologies-r1-2026-07-18",
+  "name": "Column Technologies City · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/city-column-technologies-r1",
+  "domainSummary": "A historical enterprise-technology consulting capital expressing IT service and case management, workflow design, implementation, DevOps toolchain integration, managed services, and the bridge between business needs and technology.",
+  "researchSources": [
+    {
+      "title": "Atlassian: No complex lingo, just simple IT with Column Technologies",
+      "url": "https://community.atlassian.com/t5/Agile-articles/No-complex-lingo-just-simple-IT-with-Column-Technologies/ba-p/990251",
+      "use": "Historical description of Column's ITSM, DevOps assessment, toolchain architecture, implementation, training, hosting, custom development, and managed services."
+    },
+    {
+      "title": "Carahsoft: Highmetric (previously Column Technologies)",
+      "url": "https://www.carahsoft.com/highmetric",
+      "use": "Documented bridge between organizational needs and technology, plus digital workflows, planning, design, implementation, governance, and operations."
+    },
+    {
+      "title": "Career World canonical Column brief",
+      "path": "docs/career-world-production/briefs/art-batch-b.json",
+      "use": "Accepted five-fin colonnaded capital identity and prohibition on real-campus implication."
+    }
+  ],
+  "assets": [
+    {
+      "id": "column-r1-01-service-management-colonnade",
+      "name": "Service Management Colonnade",
+      "src": "column-r1-01-service-management-colonnade.png",
+      "role": "broad-concept",
+      "controlledVariable": "service-intake colonnade around a resolution court",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "itsm",
+        "colonnade",
+        "intake",
+        "resolution",
+        "request-court",
+        "five-fins",
+        "civic"
+      ],
+      "thesis": "Many controlled intake portals converge into one legible service-resolution chamber.",
+      "businessCue": "Enterprise IT service and request management."
+    },
+    {
+      "id": "column-r1-02-workflow-bridge-capitol",
+      "name": "Workflow Bridge Capitol",
+      "src": "column-r1-02-workflow-bridge-capitol.png",
+      "role": "broad-concept",
+      "controlledVariable": "inhabited bridge between business and technical wings",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "workflow",
+        "bridge",
+        "translation",
+        "handoff",
+        "two-wings",
+        "forum",
+        "five-fins"
+      ],
+      "thesis": "An inhabited bridge makes translation between business need and technical implementation the capital gesture.",
+      "businessCue": "Bridging organizational requirements and technology."
+    },
+    {
+      "id": "column-r1-03-toolchain-exchange",
+      "name": "Toolchain Exchange",
+      "src": "column-r1-03-toolchain-exchange.png",
+      "role": "broad-concept",
+      "controlledVariable": "distinct delivery halls joined by an integration spine",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "toolchain",
+        "integration-spine",
+        "delivery-halls",
+        "exchange",
+        "connectors",
+        "devops",
+        "civic"
+      ],
+      "thesis": "Different tool and delivery halls retain their rhythms while one exchange spine reconciles them.",
+      "businessCue": "Best-of-breed DevOps toolchain architecture and integration."
+    },
+    {
+      "id": "column-r1-04-case-management-forum",
+      "name": "Case Management Forum",
+      "src": "column-r1-04-case-management-forum.png",
+      "role": "broad-concept",
+      "controlledVariable": "nested traceable case chambers",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "case-management",
+        "nested",
+        "ordered-stages",
+        "archive-fins",
+        "hearing-court",
+        "thresholds",
+        "civic"
+      ],
+      "thesis": "Nested chambers and ordered thresholds imply traceable case progression without ticket or form imagery.",
+      "businessCue": "Case management and repeatable enterprise workflows."
+    },
+    {
+      "id": "column-r1-05-integration-gate-capital",
+      "name": "Integration Gate Capital",
+      "src": "column-r1-05-integration-gate-capital.png",
+      "role": "broad-concept",
+      "controlledVariable": "layered thresholds in a central bridge-house",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "integration",
+        "gateway",
+        "bridge-house",
+        "thresholds",
+        "galleries",
+        "five-blades",
+        "transverse-hall"
+      ],
+      "thesis": "Layered gateways and joined galleries make heterogeneous systems meet in one coherent structure.",
+      "businessCue": "Platform integration and implementation services."
+    },
+    {
+      "id": "column-r1-06-managed-services-bastion",
+      "name": "Managed Services Bastion",
+      "src": "column-r1-06-managed-services-bastion.png",
+      "role": "broad-concept",
+      "controlledVariable": "continuous redundant operations ring",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "managed-services",
+        "operations-ring",
+        "redundant",
+        "maintenance",
+        "protected",
+        "continuous",
+        "bastion"
+      ],
+      "thesis": "A continuous ring with redundant routes expresses durable operation and support after delivery.",
+      "businessCue": "Ongoing managed and operational services."
+    },
+    {
+      "id": "column-r1-07-consulting-atelier-capitol",
+      "name": "Consulting Atelier Capitol",
+      "src": "column-r1-07-consulting-atelier-capitol.png",
+      "role": "broad-concept",
+      "controlledVariable": "diagnose-design-implement spatial sequence",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "consulting",
+        "diagnosis",
+        "design",
+        "implementation",
+        "review-court",
+        "sequence",
+        "atelier"
+      ],
+      "thesis": "Changing architectural character stages assessment, design, implementation, and support as one connected practice.",
+      "businessCue": "Technology assessment, architecture, implementation, and training."
+    },
+    {
+      "id": "column-r1-08-devops-delivery-spine",
+      "name": "DevOps Delivery Spine",
+      "src": "column-r1-08-devops-delivery-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "bidirectional delivery nave with alternating bays",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "devops",
+        "delivery",
+        "spine",
+        "build-bays",
+        "validation-courts",
+        "release-halls",
+        "operations-loop"
+      ],
+      "thesis": "Alternating production and validation spaces form a visible delivery cadence along one spine.",
+      "businessCue": "Software delivery toolchains and DevOps services."
+    },
+    {
+      "id": "column-r1-09-enterprise-service-commons",
+      "name": "Enterprise Service Commons",
+      "src": "column-r1-09-enterprise-service-commons.png",
+      "role": "broad-concept",
+      "controlledVariable": "unequal departmental wings sharing one service core",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "enterprise-service",
+        "commons",
+        "departments",
+        "shared-core",
+        "governance",
+        "cross-court",
+        "reusable"
+      ],
+      "thesis": "Unequal wings converge on a reusable service commons without erasing departmental differences.",
+      "businessCue": "Extending structured service workflows across an enterprise."
+    },
+    {
+      "id": "column-r1-10-bridged-platform-synthesis",
+      "name": "Bridged Platform Synthesis",
+      "src": "column-r1-10-bridged-platform-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "five-fin capital balancing workflow, integration, and operations",
+      "parentConcept": "Column Technologies research",
+      "tags": [
+        "synthesis",
+        "five-fins",
+        "roof-bridge",
+        "forecourt",
+        "request-court",
+        "integration-galleries",
+        "operations-ring"
+      ],
+      "thesis": "The synthesis joins the accepted five-fin identity to workflow, integration, and operational continuity.",
+      "businessCue": "Consulting-led enterprise technology delivery and ongoing service."
+    }
+  ]
+};

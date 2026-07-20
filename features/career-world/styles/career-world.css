@@ -172,360 +172,6 @@ a { color: #b8e7e2; }
   transform-origin: 0 0;
 }
 
-.career-world-grid {
-  color: #18384b;
-  opacity: .38;
-}
-
-.career-world-water-lines {
-  fill: none;
-  stroke: #1b536d;
-  stroke-width: 1.2;
-  stroke-dasharray: 3 13;
-  opacity: .34;
-  animation: cw-water-drift 26s linear infinite;
-}
-
-.career-world-water-lines path:nth-child(2) { animation-delay: -8s; opacity: .55; }
-.career-world-water-lines path:nth-child(3) { animation-delay: -17s; opacity: .42; }
-
-.career-world-continent {
-  filter: drop-shadow(0 14px 18px #000a);
-}
-
-.career-world-geometry path {
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  stroke-width: 1.15;
-}
-
-.career-world-continent > .career-world-geometry [data-fill-slot="terrain.claim"] {
-  fill: #0e1c23;
-}
-
-.career-world-continent > .career-world-geometry [data-fill-slot="structure.base"] {
-  fill: #13252c;
-}
-
-.career-world-continent > .career-world-geometry .career-world-primary-path {
-  stroke-width: 1.6;
-  opacity: .9;
-}
-
-.career-world-coast-pulse {
-  fill: none;
-  stroke: #3e94b2;
-  stroke-width: 2;
-  stroke-dasharray: 2 14;
-  vector-effect: non-scaling-stroke;
-  opacity: .34;
-  animation: cw-route-flow 18s linear infinite;
-}
-
-.career-world-coast-pulse-b {
-  stroke: #8dd9df;
-  stroke-dasharray: 1 22;
-  opacity: .2;
-  animation-duration: 29s;
-  animation-direction: reverse;
-}
-
-.career-world-world-routes path,
-.career-world-project-roads path,
-.career-world-project-skill-links path,
-.career-world-city-traffic > path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-}
-
-.career-world-world-routes path {
-  stroke: #5c8290;
-  stroke-width: 1.25;
-  stroke-dasharray: 3 10;
-  opacity: .55;
-  animation: cw-route-flow 20s linear infinite;
-}
-
-.career-world-world-routes path:nth-child(even) { animation-direction: reverse; }
-
-.career-world-ambient-object {
-  opacity: .8;
-  filter: drop-shadow(0 5px 7px #000b);
-}
-
-.career-world-ambient-object-0 { animation: cw-boat-drift 9s ease-in-out infinite alternate; }
-.career-world-ambient-object-1,
-.career-world-ambient-object-2 { animation: cw-buoy-rock 4.8s ease-in-out infinite; }
-.career-world-ambient-object-2 { animation-delay: -2.1s; }
-
-.career-world-city-node {
-  cursor: pointer;
-  opacity: .96;
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.career-world-city-node:hover,
-.career-world-city-node.is-active {
-  filter: url(#career-world-soft-glow);
-}
-
-.career-world-city-node.is-muted { opacity: .22; }
-
-.career-world-lod-project .career-world-city-node.is-active {
-  opacity: .16;
-  filter: none;
-  pointer-events: none;
-}
-
-.career-world-lod-project .career-world-city-node.is-active .career-world-city-label,
-.career-world-lod-project .career-world-city-node.is-active .career-world-city-meta,
-.career-world-lod-project .career-world-city-node.is-active .career-world-city-beacon,
-.career-world-lod-project .career-world-city-node.is-active .career-world-city-field {
-  display: none;
-}
-
-.career-world-city-field {
-  fill: #0b2632aa;
-  stroke: #66b0bd;
-  stroke-width: 1;
-  stroke-dasharray: 2 8;
-  vector-effect: non-scaling-stroke;
-  opacity: .46;
-  animation: cw-city-field 5.5s ease-in-out infinite;
-}
-
-.career-world-city-node.is-active .career-world-city-field {
-  fill: #12384699;
-  stroke: #c9f5ee;
-  opacity: .8;
-}
-
-.career-world-city-beacon circle:first-child {
-  fill: #d6ffff;
-  filter: url(#career-world-glow);
-}
-
-.career-world-city-beacon circle:last-child {
-  fill: none;
-  stroke: #73d8e6;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-  opacity: .6;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: cw-beacon 2.9s ease-out infinite;
-}
-
-.career-world-city-label,
-.career-world-city-meta,
-.career-world-instance-label,
-.career-world-district-title,
-.career-world-district-subtitle,
-.career-world-easter-egg {
-  paint-order: stroke;
-  stroke: #06101a;
-  stroke-linejoin: round;
-  text-anchor: middle;
-  pointer-events: none;
-}
-
-.career-world-city-label {
-  fill: #ecf7f5;
-  stroke-width: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-}
-
-.career-world-city-meta {
-  fill: #8eb0bb;
-  stroke-width: 3px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 7px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.career-world-district-ring {
-  fill: none;
-  stroke: #4c7b88;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  opacity: .46;
-}
-
-.career-world-district-ring-outer {
-  stroke-dasharray: 1 10;
-  animation: cw-route-flow 28s linear infinite;
-}
-
-.career-world-district-ring-inner {
-  stroke: #7298a2;
-  stroke-dasharray: 4 13;
-  animation: cw-route-flow 22s linear infinite reverse;
-}
-
-.career-world-district-title {
-  fill: #dceeed;
-  stroke-width: 3px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-.career-world-district-subtitle {
-  fill: #809ca8;
-  stroke-width: 3px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 5.5px;
-  letter-spacing: .06em;
-}
-
-.career-world-project-roads path {
-  stroke: #597985;
-  stroke-width: 1.1;
-  stroke-dasharray: 2 5;
-  opacity: .62;
-}
-
-.career-world-route-packet,
-.career-world-skill-packet {
-  fill: #b7ffff;
-  filter: url(#career-world-glow);
-}
-
-.career-world-instance {
-  transition: opacity 260ms ease, filter 260ms ease;
-}
-
-.career-world-instance-project {
-  cursor: pointer;
-  filter: drop-shadow(0 6px 8px #000b);
-}
-
-.career-world-instance-project:hover,
-.career-world-instance-project.is-focused {
-  filter: url(#career-world-soft-glow) drop-shadow(0 8px 12px #000d);
-}
-
-.career-world-instance-skill { filter: drop-shadow(0 3px 5px #000b); }
-
-.career-world-instance.is-deemphasized { opacity: .18; }
-.career-world-instance.is-linked { opacity: 1; }
-
-.career-world-instance-geometry {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.career-world-lod-city .career-world-instance-geometry [data-fill-slot="accent.emissive"],
-.career-world-lod-city .career-world-facade-signals,
-.career-world-lod-project .career-world-instance-geometry [data-fill-slot="accent.emissive"],
-.career-world-lod-project .career-world-instance-geometry [data-stroke-slot="accent.emissive"],
-.career-world-lod-project .career-world-facade-signals {
-  animation: cw-facade-live 3.8s ease-in-out infinite;
-  animation-delay: calc(var(--instance-index, 0) * -0.18s);
-}
-
-.career-world-lod-project .career-world-instance.is-focused .career-world-instance-geometry {
-  animation: cw-building-breathe 4.6s ease-in-out infinite;
-}
-
-.career-world-instance-label {
-  fill: #cfe1e3;
-  stroke-width: 3px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 5.5px;
-  letter-spacing: .035em;
-}
-
-.career-world-instance-label-project {
-  fill: #f1f6f3;
-  font-size: 6.5px;
-  font-weight: 650;
-  letter-spacing: .055em;
-  text-transform: uppercase;
-}
-
-.career-world-lod-city .career-world-instance-label-skill { opacity: .8; }
-
-.career-world-project-orbit,
-.career-world-project-scan {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-}
-
-.career-world-project-orbit {
-  stroke: #d9ef9b;
-  stroke-width: 1.2;
-  stroke-dasharray: 2 7;
-  opacity: .78;
-  animation: cw-route-flow 9s linear infinite;
-}
-
-.career-world-project-scan {
-  stroke: #7edce6;
-  stroke-width: 1;
-  opacity: .38;
-  animation: cw-project-scan 3.4s ease-in-out infinite;
-}
-
-.career-world-facade-signals circle {
-  fill: #9af4ff;
-  filter: url(#career-world-glow);
-}
-
-.career-world-facade-signals circle:nth-child(2) { animation-delay: -1.1s; }
-.career-world-facade-signals circle:nth-child(3) { animation-delay: -2.2s; }
-
-.career-world-project-skill-links path {
-  stroke: #88ced7;
-  stroke-width: 1;
-  stroke-dasharray: 1 5;
-  opacity: .68;
-  animation: cw-route-flow 11s linear infinite;
-}
-
-.career-world-project-skill-links g:nth-child(even) path { animation-direction: reverse; }
-
-.career-world-easter-egg {
-  fill: #d8e997;
-  stroke-width: 2.4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 4.2px;
-  letter-spacing: .04em;
-  opacity: .82;
-}
-
-.career-world-city-traffic > path {
-  stroke: #55717c;
-  stroke-width: 1;
-  stroke-dasharray: 2 8;
-  opacity: .36;
-}
-
-.career-world-service-vehicle rect { fill: #c7e7e8; }
-.career-world-service-vehicle circle { fill: #07131f; stroke: #a8e8ec; stroke-width: .6; }
-.career-world-service-vehicle { filter: url(#career-world-soft-glow); }
-
-.career-world-compass circle {
-  fill: #07131fd9;
-  stroke: #5b7a87;
-  stroke-width: 1;
-}
-
-.career-world-compass path { fill: #a7dde0; }
-
-.career-world-compass text {
-  fill: #8faab5;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px;
-  text-anchor: middle;
-}
-
 .career-world-interaction-hint {
   position: absolute;
   z-index: 3;
@@ -547,115 +193,14 @@ a { color: #b8e7e2; }
   text-transform: uppercase;
 }
 
-.career-world-navigation-region {
-  position: absolute;
-  z-index: 4;
-  top: 18px;
-  bottom: 86px;
-  left: 18px;
-  width: min(286px, calc(100vw - 36px));
-  min-width: 0;
-  pointer-events: none;
-}
-
-.career-world-navigation {
-  display: grid;
-  max-height: 100%;
-  gap: 15px;
-  padding: 15px;
-  overflow: auto;
-  border: 1px solid #4a6b78;
-  border-radius: 3px;
-  background:
-    linear-gradient(180deg, #091924f2, #06121cec),
-    repeating-linear-gradient(0deg, transparent 0 29px, #34526118 29px 30px);
-  box-shadow: 0 14px 40px #0009;
-  pointer-events: auto;
-  scrollbar-color: #355968 #0a1922;
-  scrollbar-width: thin;
-}
-
-.career-world-navigation section { min-width: 0; }
-
-.career-world-navigation-note {
-  max-width: 230px;
-  margin: 0;
-  padding: 11px;
-  border-left: 2px solid #6ba8af;
-  background: #0b1c26;
-  color: #92aab4;
-  font-size: .7rem;
-  line-height: 1.45;
-}
-
-.career-world-control-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.career-world-navigation section:nth-child(2) .career-world-control-list {
-  grid-template-columns: 1fr;
-}
-
-.career-world-landmark-control,
 .career-world-camera-controls button,
-.career-world-drawer button,
-.career-world-project-index select {
+.career-world-drawer button {
   border: 1px solid #3b6171;
   border-radius: 2px;
   background: #0d202bdf;
   color: #dcebec;
   cursor: pointer;
 }
-
-.career-world-landmark-control {
-  display: grid;
-  min-width: 0;
-  min-height: 38px;
-  align-content: center;
-  gap: 3px;
-  padding: 7px 8px;
-  text-align: left;
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-}
-
-.career-world-landmark-control span {
-  overflow: hidden;
-  font-size: .7rem;
-  font-weight: 650;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-}
-
-.career-world-landmark-control small {
-  color: #7896a4;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: .5rem;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.career-world-landmark-control:hover {
-  border-color: #7bbec5;
-  background: #15303b;
-  transform: translateY(-1px);
-}
-
-.career-world-landmark-control[aria-pressed="true"] {
-  border-color: var(--cw-lime);
-  background: #24352b;
-  box-shadow: inset 3px 0 0 var(--cw-lime);
-}
-
-.career-world-project-index {
-  display: grid;
-  gap: 6px;
-  color: #a8bec7;
-  font-size: .72rem;
-}
-
-.career-world-project-index select { width: 100%; padding: 7px 9px; }
 
 .career-world-status-region {
   position: absolute;
@@ -824,54 +369,9 @@ a { color: #b8e7e2; }
 
 :focus-visible { outline: 3px solid #fff2a8; outline-offset: 3px; }
 
-@keyframes cw-water-drift {
-  to { transform: translate3d(76px, -12px, 0); }
-}
-
-@keyframes cw-route-flow {
-  to { stroke-dashoffset: -120; }
-}
-
-@keyframes cw-city-field {
-  0%, 100% { opacity: .34; transform: scale(.98); }
-  50% { opacity: .62; transform: scale(1.03); }
-}
-
-@keyframes cw-beacon {
-  0% { opacity: .75; transform: scale(.45); }
-  100% { opacity: 0; transform: scale(1.9); }
-}
-
-@keyframes cw-boat-drift {
-  from { transform: translate(-7px, 3px); }
-  to { transform: translate(9px, -4px); }
-}
-
-@keyframes cw-buoy-rock {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-3px) rotate(1deg); }
-}
-
-@keyframes cw-facade-live {
-  0%, 100% { opacity: .48; }
-  45% { opacity: 1; }
-  62% { opacity: .68; }
-}
-
-@keyframes cw-building-breathe {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.25); }
-}
-
-@keyframes cw-project-scan {
-  0%, 100% { opacity: .2; transform: scale(.8); }
-  50% { opacity: .74; transform: scale(1.12); }
-}
-
 @media (max-width: 900px) {
   .career-world-header { grid-template-columns: 1fr auto; }
   .career-world-header-status { display: none; }
-  .career-world-navigation-region { width: 250px; }
   .career-world-interaction-hint span:nth-child(3) { display: none; }
   .career-world-disclosure { max-width: 360px; }
 }
@@ -885,20 +385,6 @@ a { color: #b8e7e2; }
   .career-world-eyebrow { font-size: .54rem; }
   .career-world-resume-links a { padding: 6px; font-size: .56rem; }
   .career-world-map { min-height: calc(100svh - 70px); }
-  .career-world-navigation-region {
-    top: 10px;
-    right: 10px;
-    bottom: auto;
-    left: 10px;
-    width: auto;
-  }
-  .career-world-navigation { max-height: 174px; padding: 10px; gap: 8px; }
-  .career-world-control-list { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .career-world-landmark-control { min-height: 34px; padding: 5px; }
-  .career-world-landmark-control span { font-size: .55rem; }
-  .career-world-landmark-control small { display: none; }
-  .career-world-navigation section:nth-child(2) { display: none; }
-  .career-world-project-index { display: grid; }
   .career-world-status-region {
     right: 10px;
     bottom: 10px;
@@ -939,15 +425,16 @@ a { color: #b8e7e2; }
 }
 
 /*
- * Asset-backed 2.5D scene
+ * Cohesive asset-backed 2.5D world
  *
- * The finished art boards are cropped and compressed offline. The browser
- * moves a small number of raster layers; it no longer reconstructs buildings
- * from hundreds of animated SVG paths.
+ * The 1600 x 900 terrain plate and every node share one coordinate space.
+ * Zoom changes which nodes React mounts; CSS never substitutes geography or
+ * changes an asset envelope between detail tiers.
  */
 .career-world-scene {
   position: relative;
   contain: layout paint style;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 38%, #102231 0, #07131f 48%, #030811 100%);
 }
@@ -958,7 +445,8 @@ a { color: #b8e7e2; }
 }
 
 .career-world-camera {
-  transition: transform 360ms cubic-bezier(.2, .72, .22, 1);
+  transform-origin: 0 0;
+  transition: transform 320ms cubic-bezier(.2, .72, .22, 1);
 }
 
 .career-world-scene[data-interacting="true"] .career-world-camera {
@@ -967,211 +455,181 @@ a { color: #b8e7e2; }
 }
 
 .career-world-world-layer {
+  opacity: 1;
   pointer-events: none;
 }
 
 .career-world-world-art {
   display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
   pointer-events: none;
   user-select: none;
 }
 
-.career-world-lod-city .career-world-world-layer {
-  opacity: .46;
-}
-
-.career-world-lod-project .career-world-world-layer {
-  opacity: .2;
-}
-
-.career-world-world-cities,
-.career-world-district-layer,
-.career-world-project-layer {
-  isolation: auto;
-}
-
-.career-world-city-pad {
-  height: 96px;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #edf7f5;
-  cursor: pointer;
-  outline: 1px solid transparent;
-  outline-offset: 5px;
-  text-align: center;
-  transition: outline-color 140ms ease, box-shadow 140ms ease;
-}
-
-.career-world-city-pad-art {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  mix-blend-mode: normal;
-  opacity: 1;
-}
-
-.career-world-city-pad:hover,
-.career-world-city-pad:focus-visible {
-  outline-color: #91ced2cc;
-  box-shadow: 0 0 18px #67bec033;
-}
-
-.career-world-city-pad-label {
+.career-world-coordinate-grid {
   position: absolute;
-  top: calc(100% + 2px);
-  left: 50%;
-  display: block;
-  margin: 0;
-  color: #eef8f6;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: .12em;
-  line-height: 1.25;
-  text-shadow: 0 2px 3px #02060a, 0 0 8px #02060a;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-.career-world-route-overlay {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  z-index: 1;
+  inset: 0;
+  border: 1px solid rgb(145 206 210 / 42%);
+  background-image:
+    linear-gradient(to right, rgb(145 206 210 / 30%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(145 206 210 / 30%) 1px, transparent 1px),
+    linear-gradient(to right, rgb(145 206 210 / 20%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(145 206 210 / 20%) 1px, transparent 1px),
+    linear-gradient(to right, rgb(145 206 210 / 11%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(145 206 210 / 11%) 1px, transparent 1px);
+  background-size:
+    100px 100px,
+    100px 100px,
+    50px 50px,
+    50px 50px,
+    20px 20px,
+    20px 20px;
   pointer-events: none;
 }
 
-.career-world-route-overlay path {
-  fill: none;
-  stroke: #7a9da7;
-  stroke-width: 1.3;
-  stroke-dasharray: 4 8;
-  vector-effect: non-scaling-stroke;
-  opacity: .48;
-  animation: cw-art-route 18s linear infinite;
-}
-
-.career-world-project-route-overlay path {
-  stroke: #92dbe0;
-  stroke-width: 1.15;
-  stroke-dasharray: 2 7;
-  opacity: .62;
-  animation-duration: 12s;
-}
-
-.career-world-art-instance {
-  --art-envelope-height: 90px;
-  height: var(--art-height, var(--art-envelope-height));
-  contain: layout style;
+.career-world-scene-node {
+  position: absolute;
   z-index: 2;
+  contain: layout style;
   overflow: visible;
+  opacity: 1;
   pointer-events: none;
 }
 
-.career-world-art-instance.is-capital {
-  --art-envelope-height: 96px;
-  z-index: 3;
+.career-world-scene-node--ambient,
+.career-world-scene-node.is-ambient {
+  z-index: 1;
+  opacity: .82;
 }
 
-.career-world-art-instance.is-project {
-  --art-envelope-height: 90px;
+.career-world-scene-node--skill,
+.career-world-scene-node.is-skill {
+  z-index: 2;
+}
+
+.career-world-scene-node--project,
+.career-world-scene-node.is-project {
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.career-world-scene-node--capital,
+.career-world-scene-node.is-capital {
   z-index: 4;
   pointer-events: auto;
 }
 
-.career-world-art-instance.is-skill {
-  --art-envelope-height: 68px;
-  z-index: 2;
+.career-world-scene-node.is-focused {
+  z-index: 8;
+  opacity: 1;
 }
 
-.career-world-art-instance.is-focused { z-index: 6; }
+.career-world-scene-node.is-dimmed,
+.career-world-scene-node.is-context {
+  opacity: .14;
+}
 
-.career-world-art-card,
-.career-world-art-button {
-  position: relative;
+button.career-world-scene-node,
+.career-world-scene-node > button,
+.career-world-scene-node button {
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: 100%;
+  height: auto;
+  min-height: 0;
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
-  outline: 1px solid transparent;
-  outline-offset: 3px;
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 4px;
   text-align: center;
 }
 
-.career-world-art-button {
-  cursor: pointer;
-  transition: outline-color 140ms ease, box-shadow 140ms ease;
+button.career-world-scene-node {
+  position: absolute;
 }
 
-.career-world-art-image {
+.career-world-scene-node > button,
+.career-world-scene-node button {
+  position: relative;
+}
+
+button.career-world-scene-node:hover,
+.career-world-scene-node > button:hover,
+.career-world-scene-node button:hover {
+  outline-color: #91ced266;
+}
+
+button.career-world-scene-node:focus-visible,
+.career-world-scene-node > button:focus-visible,
+.career-world-scene-node button:focus-visible {
+  outline-color: #91ced2;
+  outline-width: .75px;
+  outline-offset: 1px;
+}
+
+.career-world-scene-node-art {
   display: block;
   width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: contain;
-  object-position: center bottom;
-  mix-blend-mode: normal;
-  opacity: 1;
+  height: auto;
+  max-width: none;
+  pointer-events: none;
   user-select: none;
 }
 
-.career-world-art-button:hover,
-.career-world-art-button:focus-visible {
-  outline-color: #91ced2cc;
-  box-shadow: 0 0 16px #67bec02e;
-}
-
-.career-world-art-label {
+.career-world-scene-node-label {
   position: absolute;
-  top: calc(100% + 1px);
+  top: calc(100% + 2px);
   left: 50%;
   display: block;
-  width: 190%;
+  width: max-content;
+  max-width: 220%;
   margin: 0;
   color: #cfe4e6;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 4.2px;
+  font-size: 5px;
   font-weight: 620;
-  letter-spacing: .045em;
+  letter-spacing: .055em;
   line-height: 1.2;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  text-align: center;
   text-shadow: 0 1px 2px #02060a, 0 0 5px #02060a;
   text-transform: uppercase;
   transform: translateX(-50%);
+}
+
+.career-world-scene-node--capital .career-world-scene-node-label,
+.career-world-scene-node.is-capital .career-world-scene-node-label {
+  color: #eef8f6;
+  font-size: 9px;
+  font-weight: 680;
+  letter-spacing: .12em;
   white-space: nowrap;
 }
 
-.career-world-art-instance.is-project .career-world-art-label {
+.career-world-scene-node--project .career-world-scene-node-label,
+.career-world-scene-node.is-project .career-world-scene-node-label {
   color: #f1f6f3;
+  font-size: 6.5px;
+  font-weight: 650;
+  letter-spacing: .075em;
+}
+
+.career-world-scene-node--skill .career-world-scene-node-label,
+.career-world-scene-node.is-skill .career-world-scene-node-label {
+  color: #9fc5cb;
   font-size: 5px;
 }
 
-.career-world-art-instance.is-focused .career-world-art-label {
-  width: 140%;
-  color: #f4fbf9;
-  font-size: 5.2px;
-  letter-spacing: .08em;
+.career-world-scene-node.is-focused .career-world-scene-node-label {
+  color: #fff;
 }
 
-.career-world-art-instance.is-skill .career-world-art-label {
-  color: #9fc5cb;
-  font-size: 3.6px;
-}
-
-@keyframes cw-art-route {
-  to { stroke-dashoffset: -120; }
-}
-
-.career-world-scene[data-reduced-motion="true"] .career-world-route-overlay path,
-.career-world-scene[data-reduced-motion="true"] .career-world-art-button,
-.career-world-scene[data-reduced-motion="true"] .career-world-city-pad {
-  animation: none !important;
-  transition: none !important;
+.career-world-scene[data-reduced-motion="true"] .career-world-camera {
+  transition: none;
 }

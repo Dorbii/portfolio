@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "run_id": "cw-rendered-cities-20260719",
+  "slice_id": "qa-rendered-cities",
+  "lane_id": "qa-rendered-cities",
+  "role": "read-only visual QA",
+  "thread_id": "/root/qa_rendered_cities",
+  "parent_thread_id": "019f7b4a-a9ef-7171-8aef-9a670eba952c",
+  "status": "done",
+  "verdict": "PASS",
+  "summary": "PASS. The final targeted rebuild resolves the remaining Tanium polish risk: Workflow orchestration's satellite-platform connector now visibly meets the harbor breakwater. Electron, React, and Workflow orchestration remain on explicit neutral-grayscale isometric satellite platforms at their locked coordinates; Column Technologies' work-skiff remains in its water basin. The updated contact sheet and manifest preserve five distinct standalone territories, 56 unique canonical nodes, zero footprint collisions, zero clipped placements, exact neutral grayscale finals, legible capital/project/skill hierarchy, no rectangular source mattes, and no global-map reuse or stitch.",
+  "severity_ordered_findings": [],
+  "resolved_findings": [
+    {
+      "territory": "tanium",
+      "finding": "Workflow orchestration's connector endpoint now visually meets the breakwater.",
+      "evidence": "Original-resolution inspection of design/career-world/rendered-cities/tanium/tanium-rendered-r1.png shows the connector from the satellite platform at (900,650) extending to the breakwater endpoint at approximately (1012,648), with no visible gap."
+    },
+    {
+      "territory": "tanium",
+      "finding": "All three offshore canonical skills read as authored satellite nodes rather than unsupported sprites.",
+      "evidence": "Electron, React, and Workflow orchestration each have an isometric foundation and a deliberate connector/tether consistent with the territory topology."
+    },
+    {
+      "territory": "column-technologies",
+      "finding": "The work-skiff remains correctly located in the left water basin.",
+      "evidence": "The updated contact sheet preserves the corrected Column Technologies ambient placement."
+    }
+  ],
+  "skills": {
+    "requested": [],
+    "loaded": [
+      "task-packet-execution"
+    ],
+    "used": [
+      {
+        "name": "task-packet-execution",
+        "why": "Enforced the final read-only artifact fence and structured verdict report."
+      }
+    ],
+    "skipped": []
+  },
+  "files_changed": [
+    {
+      "path": "design/career-world/rendered-cities/_orchestration/reports/qa-rendered-cities.json",
+      "sections": [
+        "final verdict",
+        "targeted connector recheck",
+        "manifest and pixel evidence"
+      ]
+    }
+  ],
+  "gates_run": [
+    {
+      "command": "view_image(detail=original) on the final rebuilt Tanium render",
+      "result": "PASS",
+      "artifact_path": "design/career-world/rendered-cities/tanium/tanium-rendered-r1.png",
+      "summary": "Workflow orchestration's connector now reaches the harbor breakwater. All three Tanium satellite landmarks remain grounded on explicit isometric platforms, with no material topology, perspective, matte, hierarchy, or clipping defect visible.",
+      "failure_block": "",
+      "tail": ""
+    },
+    {
+      "command": "view_image(detail=original) on the final rebuilt five-territory contact sheet",
+      "result": "PASS",
+      "artifact_path": "design/career-world/rendered-cities/audit/rendered-cities-contact-sheet.png",
+      "summary": "The corrected Tanium causeway reads at overview scale; Column's skiff remains in water; all five standalone territories retain distinct topology and the established scale hierarchy.",
+      "failure_block": "",
+      "tail": ""
+    },
+    {
+      "command": "PowerShell targeted manifest reconciliation for Tanium and batch totals",
+      "result": "PASS",
+      "artifact_path": "design/career-world/rendered-cities/render-manifest.json",
+      "summary": "The batch remains 5 territories, 56 expected and 56 rendered canonical nodes, 0 reserved-footprint collisions, 0 clipped placements, and 5 exact neutral grayscale renders. Tanium remains 15/15 with 15 unique node IDs, no declared or computed canvas-bound clips, and no declared footprint collisions. globalMapUsed=false and stitched=false.",
+      "failure_block": "",
+      "tail": "Tanium manifest byte count is 860129."
+    },
+    {
+      "command": "Sharp raw-pixel RGB channel-delta and metadata audit for the final rebuilt Tanium PNG",
+      "result": "PASS",
+      "artifact_path": "design/career-world/rendered-cities/tanium/tanium-rendered-r1.png",
+      "summary": "The final Tanium render is 1160x820, 4-channel PNG, 860129 bytes, and maxRgbChannelDelta=0, matching the manifest and exact-neutral-grayscale requirement.",
+      "failure_block": "",
+      "tail": ""
+    }
+  ],
+  "claims": [
+    {
+      "claim": "The final Tanium causeway alignment issue is resolved.",
+      "path": "design/career-world/rendered-cities/tanium/tanium-rendered-r1.png",
+      "line": null,
+      "evidence": "The Workflow orchestration platform connector visibly terminates on the harbor breakwater rather than ending in open water."
+    },
+    {
+      "claim": "Tanium preserves all 15 canonical landmarks without duplication, collision, or clipping.",
+      "path": "design/career-world/rendered-cities/render-manifest.json",
+      "line": 402,
+      "evidence": "Direct parsing confirms 15 expected, 15 rendered, 15 unique placement IDs, zero declared footprint collisions, zero declared clips, and zero computed canvas-bound clips."
+    },
+    {
+      "claim": "The final Tanium render remains exact neutral grayscale.",
+      "path": "design/career-world/rendered-cities/render-manifest.json",
+      "line": 407,
+      "evidence": "Manifest grayscale audit reports maxRgbChannelDelta=0 and exactNeutralGrayscale=true; independent raw-pixel analysis also measured max channel delta 0."
+    },
+    {
+      "claim": "The complete output remains five standalone, visually distinct territories without global-map reuse or stitching.",
+      "path": "design/career-world/rendered-cities/render-manifest.json",
+      "line": 10,
+      "evidence": "globalMapUsed=false and stitched=false; the updated contact sheet shows five separate landforms with different topology."
+    },
+    {
+      "claim": "The complete batch satisfies the packet's final PASS criteria.",
+      "path": "design/career-world/rendered-cities/audit/rendered-cities-contact-sheet.png",
+      "line": null,
+      "evidence": "No missing or duplicated canonical landmark, obvious perspective reversal, rectangular source matte, clipped asset, non-grayscale final, or materially incoherent topology remains visible or declared."
+    }
+  ],
+  "telemetry": {
+    "context_start_pct": null,
+    "context_end_pct": null,
+    "tool_output_chars": null
+  },
+  "deviations": [],
+  "risks_blockers": [],
+  "follow_ups": [],
+  "ledger_updates": [
+    {
+      "lane_id": "qa-rendered-cities",
+      "status": "done",
+      "verdict": "PASS",
+      "integration": "unblocked"
+    }
+  ]
+}

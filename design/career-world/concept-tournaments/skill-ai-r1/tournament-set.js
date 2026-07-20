@@ -1,0 +1,197 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "skill-ai-r1-2026-07-18",
+  "name": "AI · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/skill-ai-r1",
+  "domainSummary": "A non-agentic analytical capability that turns governed data into trained models and bounded inference, with explicit evaluation, calibration, uncertainty, monitoring, and human oversight across the lifecycle.",
+  "evidenceBoundary": "Keep this an analytical instrument rather than an autonomous agent, robot, brain, face, or science-fiction intelligence. Do not imply sentience or guaranteed correctness.",
+  "researchSources": [
+    {
+      "title": "NIST AI Risk Management Framework",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "use": "Lifecycle governance, measurement, evaluation, monitoring, and risk-aware operation."
+    }
+  ],
+  "assets": [
+    {
+      "id": "skill-ai-r1-01-canonical-instrument",
+      "name": "AI · Canonical Instrument",
+      "src": "skill-ai-r1-01-canonical-instrument.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into a precise compact technical instrument building; emphasize governed data intake and preparation",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "canonical-instrument",
+        "governed-data-intake-and-preparation",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "The accepted skill identity is tested in its clearest production form. This version emphasizes governed data intake and preparation.",
+      "businessCue": "governed data intake and preparation"
+    },
+    {
+      "id": "skill-ai-r1-02-core-mechanism",
+      "name": "AI · Core Mechanism",
+      "src": "skill-ai-r1-02-core-mechanism.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the skill's defining mechanism the central architectural mass; emphasize training and representation layers",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "core-mechanism",
+        "training-and-representation-layers",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "One unmistakable mechanism carries the identity. This version emphasizes training and representation layers.",
+      "businessCue": "training and representation layers"
+    },
+    {
+      "id": "skill-ai-r1-03-flow-spine",
+      "name": "AI · Flow Spine",
+      "src": "skill-ai-r1-03-flow-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize inputs, work, and outputs along one connected linear spine; emphasize evaluation and calibration chambers",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "flow-spine",
+        "evaluation-and-calibration-chambers",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "A legible flow tests the skill as a transformation process. This version emphasizes evaluation and calibration chambers.",
+      "businessCue": "evaluation and calibration chambers"
+    },
+    {
+      "id": "skill-ai-r1-04-interface-bridge",
+      "name": "AI · Interface Bridge",
+      "src": "skill-ai-r1-04-interface-bridge.png",
+      "role": "broad-concept",
+      "controlledVariable": "join two unequal functional masses through one explicit inhabited interface bridge; emphasize bounded inference path",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "interface-bridge",
+        "bounded-inference-path",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "The skill is expressed as a reliable boundary between systems. This version emphasizes bounded inference path.",
+      "businessCue": "bounded inference path"
+    },
+    {
+      "id": "skill-ai-r1-05-layered-system",
+      "name": "AI · Layered System",
+      "src": "skill-ai-r1-05-layered-system.png",
+      "role": "broad-concept",
+      "controlledVariable": "stack several connected layers with visibly different responsibilities; emphasize monitoring and uncertainty controls",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "layered-system",
+        "monitoring-and-uncertainty-controls",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "Layering tests separation of concerns and system depth. This version emphasizes monitoring and uncertainty controls.",
+      "businessCue": "monitoring and uncertainty controls"
+    },
+    {
+      "id": "skill-ai-r1-06-modular-field",
+      "name": "AI · Modular Field",
+      "src": "skill-ai-r1-06-modular-field.png",
+      "role": "broad-concept",
+      "controlledVariable": "repeat small interoperable units on one shared base with a clear coordinating core; emphasize governed data intake and preparation",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "modular-field",
+        "governed-data-intake-and-preparation",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "Modularity and composition become the identity. This version emphasizes governed data intake and preparation.",
+      "businessCue": "governed data intake and preparation"
+    },
+    {
+      "id": "skill-ai-r1-07-verified-core",
+      "name": "AI · Verified Core",
+      "src": "skill-ai-r1-07-verified-core.png",
+      "role": "broad-concept",
+      "controlledVariable": "protect a compact central chamber behind explicit gates, checks, or controlled thresholds; emphasize training and representation layers",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "verified-core",
+        "training-and-representation-layers",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "Correctness and validation dominate the architectural metaphor. This version emphasizes training and representation layers.",
+      "businessCue": "training and representation layers"
+    },
+    {
+      "id": "skill-ai-r1-08-scale-engine",
+      "name": "AI · Scale Engine",
+      "src": "skill-ai-r1-08-scale-engine.png",
+      "role": "broad-concept",
+      "controlledVariable": "extend the building through repeated service bays and resilient parallel paths; emphasize evaluation and calibration chambers",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "scale-engine",
+        "evaluation-and-calibration-chambers",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "Performance and scale are expressed through structure, not speed lines. This version emphasizes evaluation and calibration chambers.",
+      "businessCue": "evaluation and calibration chambers"
+    },
+    {
+      "id": "skill-ai-r1-09-compact-primitive",
+      "name": "AI · Compact Primitive",
+      "src": "skill-ai-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the skill to a minimal but complete map-readable technical building; emphasize bounded inference path",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "compact-primitive",
+        "bounded-inference-path",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "The primitive tests the smallest recognizable expression of the skill. This version emphasizes bounded inference path.",
+      "businessCue": "bounded inference path"
+    },
+    {
+      "id": "skill-ai-r1-10-skill-synthesis",
+      "name": "AI · Skill Synthesis",
+      "src": "skill-ai-r1-10-skill-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "combine mechanism, flow, interface, validation, and scale in one balanced supporting building; emphasize monitoring and uncertainty controls",
+      "parentConcept": "AI research profile",
+      "tags": [
+        "skill",
+        "skill-synthesis",
+        "monitoring-and-uncertainty-controls",
+        "ai",
+        "evaluation",
+        "analytics"
+      ],
+      "thesis": "The synthesis tests a complete skill identity while remaining subordinate to projects and cities. This version emphasizes monitoring and uncertainty controls.",
+      "businessCue": "monitoring and uncertainty controls"
+    }
+  ]
+};

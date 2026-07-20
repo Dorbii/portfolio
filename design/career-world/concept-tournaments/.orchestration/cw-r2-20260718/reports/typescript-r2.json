@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "run_id": "cw-r2-20260718",
+  "slice_id": "typescript-r2",
+  "lane_id": "director-typescript",
+  "role": "director-worker",
+  "thread_id": "019f7276-e8bb-7050-831f-86b124cf308c",
+  "parent_thread_id": "",
+  "status": "done",
+  "summary": "Rendered, normalized, and visually reviewed ten TypeScript R2 concepts. Compile-time structure and runtime behavior are differentiated through outer type frames, compatible shape courts, strictness gates, inference chambers, erasure scaffolds, union/intersection bridges, interfaces, and generic constraints.",
+  "skills": {
+    "requested": ["imagegen", "task-packet-execution"],
+    "loaded": ["imagegen", "task-packet-execution"],
+    "used": [
+      {"name": "imagegen", "why": "Generated ten separate TypeScript concepts with the built-in image tool and R1 reference."},
+      {"name": "task-packet-execution", "why": "Kept generation, normalization, review, and reporting within the TypeScript R2 lane."}
+    ],
+    "skipped": []
+  },
+  "files_changed": [
+    {"path": "design/career-world/concept-tournaments/skill-typescript-r2", "sections": ["ten named PNG concepts"]},
+    {"path": "design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/typescript-r2/skill-typescript-r2-contact-sheet.png", "sections": ["visual QA contact sheet"]}
+  ],
+  "gates_run": [
+    {
+      "command": "python scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/skill-typescript-r2",
+      "result": "pass",
+      "artifact_path": "design/career-world/concept-tournaments/skill-typescript-r2",
+      "summary": "All ten PNGs normalized to 1536x1024 exact RGB grayscale.",
+      "failure_block": "",
+      "tail": "10/10 normalized"
+    },
+    {
+      "command": "python scripts/build-concept-contact-sheets.py --output-dir design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/typescript-r2 design/career-world/concept-tournaments/skill-typescript-r2",
+      "result": "pass",
+      "artifact_path": "design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/typescript-r2/skill-typescript-r2-contact-sheet.png",
+      "summary": "Director inspected the labeled contact sheet at original detail; all concepts are single-panel, isometric, uncropped, distinct, and correctly mapped.",
+      "failure_block": "",
+      "tail": ""
+    }
+  ],
+  "claims": [
+    {
+      "claim": "The TypeScript R2 folder contains exactly ten named concepts matching its prompt set.",
+      "path": "design/career-world/concept-tournaments/skill-typescript-r2",
+      "line": null,
+      "evidence": "The normalization gate processed all ten explicit output names and the final contact sheet contains ten labeled cells."
+    },
+    {
+      "claim": "The set makes TypeScript's compile-time type system visible without literal logos or text.",
+      "path": "design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/typescript-r2/skill-typescript-r2-contact-sheet.png",
+      "line": null,
+      "evidence": "The visual set includes runtime cores inside larger checking frames, progressive strictness thresholds, inference structures, removable compilation scaffolds, compatibility gates, and constraint towers."
+    }
+  ],
+  "telemetry": {"context_start_pct": null, "context_end_pct": null, "tool_output_chars": null},
+  "deviations": [],
+  "risks_blockers": [],
+  "follow_ups": ["Route the catalog to skill-typescript-r2 after all revised lanes pass."],
+  "ledger_updates": ["Mark typescript-r2 done and attach its contact sheet and report."]
+}

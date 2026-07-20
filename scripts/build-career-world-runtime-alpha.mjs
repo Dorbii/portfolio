@@ -33,6 +33,7 @@ const CATEGORY_LIMITS = Object.freeze({
   project: Object.freeze({ width: 860, height: 680 }),
   skill: Object.freeze({ width: 620, height: 560 }),
 });
+const WORLD_OUTPUT = Object.freeze({ width: 1600, height: 900 });
 const TRANSPARENT_GUARD_PX = 2;
 
 function evenFloor(value) {
@@ -343,8 +344,32 @@ for (const record of manifest.records) {
   const destinationPath = previewOutput ? resolve(previewOutput) : outputPath;
   await mkdir(dirname(destinationPath), { recursive: true });
   if (record.asset_id.startsWith("world/")) {
-    // The geography is the only intentionally opaque runtime asset. It is
-    // already canonical and must not be touched by the transparent-sprite job.
+    if (rebuildFromSource) {
+      const sourcePath = join(repositoryRoot, record.source_path);
+      const crop = record.crop;
+      const temporaryPath = `${destinationPath}.world.webp`;
+      await sharp(sourcePath)
+        .extract({
+          left: crop.x,
+          top: crop.y,
+          width: crop.width,
+          height: crop.height,
+        })
+        .resize({
+          width: WORLD_OUTPUT.width,
+          height: WORLD_OUTPUT.height,
+          fit: "fill",
+          kernel: sharp.kernel.lanczos3,
+        })
+        .webp({ quality: 90, effort: 6 })
+        .toFile(temporaryPath);
+      await rename(temporaryPath, destinationPath);
+      if (!previewOutput) {
+        record.output.width = WORLD_OUTPUT.width;
+        record.output.height = WORLD_OUTPUT.height;
+        record.output.bytes = (await stat(outputPath)).size;
+      }
+    }
     processedCount += 1;
     continue;
   }
@@ -428,5 +453,5 @@ if (!previewOutput) {
 }
 
 console.log(
-  `Built ${processedCount} requested asset(s) with tight transparent silhouettes; opaque world art was preserved.`,
+  `Built ${processedCount} requested asset(s); transparent sprites retain tight silhouettes and the world uses its exact 1600x900 plane.`,
 );

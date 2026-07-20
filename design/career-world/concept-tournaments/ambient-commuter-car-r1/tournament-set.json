@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "id": "ambient-commuter-car-r1-2026-07-18",
+  "name": "Commuter Car · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1",
+  "domainSummary": "A generic compact four-door commuter car with balanced hood, cabin, and rear volumes, short overhangs, a stable everyday wheelbase, and prominent wheel arches for recognition at small scale.",
+  "evidenceBoundary": "Keep the car generic and unowned. Do not imply make, model, era, performance class, occupant, direction, or route.",
+  "researchSources": [
+    {
+      "title": "Career World ambient expansion inventory",
+      "path": "scripts/build-concept-tournament-index.mjs",
+      "use": "Accepted commuter-car role and canonical map-scale baseline."
+    },
+    {
+      "title": "Tournament production ledger",
+      "path": "design/career-world/concept-tournaments/tournament-production-ledger.json",
+      "use": "Canonical commuter-car geometry and identity boundary."
+    }
+  ],
+  "assets": [
+    {
+      "id": "ambient-commuter-car-r1-01-canonical-production",
+      "name": "Commuter Car · Canonical Production",
+      "src": "ambient-commuter-car-r1-01-canonical-production.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into its clearest production-ready map prop; emphasize four-door cabin volume",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "canonical-production",
+        "four-door-cabin-volume",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "The accepted identity is tested in its most resolved reusable form. This version emphasizes four-door cabin volume.",
+      "businessCue": "four-door cabin volume"
+    },
+    {
+      "id": "ambient-commuter-car-r1-02-silhouette-contrast",
+      "name": "Commuter Car · Silhouette Contrast",
+      "src": "ambient-commuter-car-r1-02-silhouette-contrast.png",
+      "role": "broad-concept",
+      "controlledVariable": "push the outer contour and negative spaces for instant recognition at map scale; emphasize short front and rear overhangs",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "silhouette-contrast",
+        "short-front-and-rear-overhangs",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "A distinct silhouette tests recognition without labels or color. This version emphasizes short front and rear overhangs.",
+      "businessCue": "short front and rear overhangs"
+    },
+    {
+      "id": "ambient-commuter-car-r1-03-weighted-asymmetry",
+      "name": "Commuter Car · Weighted Asymmetry",
+      "src": "ambient-commuter-car-r1-03-weighted-asymmetry.png",
+      "role": "broad-concept",
+      "controlledVariable": "shift the dominant mass off-center while preserving the asset's practical balance; emphasize balanced hood cabin and rear masses",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "weighted-asymmetry",
+        "balanced-hood-cabin-and-rear-masses",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "Controlled asymmetry creates identity without sacrificing function. This version emphasizes balanced hood cabin and rear masses.",
+      "businessCue": "balanced hood cabin and rear masses"
+    },
+    {
+      "id": "ambient-commuter-car-r1-04-functional-exposure",
+      "name": "Commuter Car · Functional Exposure",
+      "src": "ambient-commuter-car-r1-04-functional-exposure.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the asset's defining working parts structurally legible without diagrams; emphasize visible wheel arches",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "functional-exposure",
+        "visible-wheel-arches",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "Exposed function tests whether the object reads through construction rather than decoration. This version emphasizes visible wheel arches.",
+      "businessCue": "visible wheel arches"
+    },
+    {
+      "id": "ambient-commuter-car-r1-05-rugged-structure",
+      "name": "Commuter Car · Rugged Structure",
+      "src": "ambient-commuter-car-r1-05-rugged-structure.png",
+      "role": "broad-concept",
+      "controlledVariable": "strengthen load-bearing edges, joints, guards, and contact points; emphasize compact everyday road stance",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "rugged-structure",
+        "compact-everyday-road-stance",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "Rugged construction tests a durable working-world interpretation. This version emphasizes compact everyday road stance.",
+      "businessCue": "compact everyday road stance"
+    },
+    {
+      "id": "ambient-commuter-car-r1-06-modular-rhythm",
+      "name": "Commuter Car · Modular Rhythm",
+      "src": "ambient-commuter-car-r1-06-modular-rhythm.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize repeated functional elements into a clear unequal rhythm on one coherent object or shared base; emphasize four-door cabin volume",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "modular-rhythm",
+        "four-door-cabin-volume",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "A modular cadence tests reuse and system belonging. This version emphasizes four-door cabin volume.",
+      "businessCue": "four-door cabin volume"
+    },
+    {
+      "id": "ambient-commuter-car-r1-07-low-profile",
+      "name": "Commuter Car · Low Profile",
+      "src": "ambient-commuter-car-r1-07-low-profile.png",
+      "role": "broad-concept",
+      "controlledVariable": "compress height and emphasize a long stable footprint while retaining every defining feature; emphasize short front and rear overhangs",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "low-profile",
+        "short-front-and-rear-overhangs",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "A low profile tests legibility in dense map placement. This version emphasizes short front and rear overhangs.",
+      "businessCue": "short front and rear overhangs"
+    },
+    {
+      "id": "ambient-commuter-car-r1-08-vertical-accent",
+      "name": "Commuter Car · Vertical Accent",
+      "src": "ambient-commuter-car-r1-08-vertical-accent.png",
+      "role": "broad-concept",
+      "controlledVariable": "give one legitimate functional element a taller focal role while keeping the overall prop subordinate to buildings; emphasize balanced hood cabin and rear masses",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "vertical-accent",
+        "balanced-hood-cabin-and-rear-masses",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "A vertical accent tests landmark readability without turning the prop into architecture. This version emphasizes balanced hood cabin and rear masses.",
+      "businessCue": "balanced hood cabin and rear masses"
+    },
+    {
+      "id": "ambient-commuter-car-r1-09-compact-primitive",
+      "name": "Commuter Car · Compact Primitive",
+      "src": "ambient-commuter-car-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the asset to the smallest complete form that preserves its exact identity and component count; emphasize visible wheel arches",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "compact-primitive",
+        "visible-wheel-arches",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "The primitive reveals which cues are essential. This version emphasizes visible wheel arches.",
+      "businessCue": "visible wheel arches"
+    },
+    {
+      "id": "ambient-commuter-car-r1-10-ambient-synthesis",
+      "name": "Commuter Car · Ambient Synthesis",
+      "src": "ambient-commuter-car-r1-10-ambient-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "balance silhouette, function, construction, modular detail, and map-scale restraint in one production-ready prop; emphasize compact everyday road stance",
+      "parentConcept": "Commuter Car research profile",
+      "tags": [
+        "ambient",
+        "ambient-synthesis",
+        "compact-everyday-road-stance",
+        "ambient",
+        "vehicle",
+        "car"
+      ],
+      "thesis": "The synthesis tests the complete ambient identity for repeated world use. This version emphasizes compact everyday road stance.",
+      "businessCue": "compact everyday road stance"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "generator": "built-in image generation",
+  "canvas": "1536x1024",
+  "shared_constraints": "Exact neutral grayscale only; dark near-black technical drafting background with a faint isometric grid; lighter mid-gray faces; crisp light edges; exact parallel orthographic true-isometric elevated three-quarter camera; a single isolated coherent compact structure centered with generous margin; no text, logo, people, landscape, water, UI, arrows, code, color cast, glow, inset, or contact sheet.",
+  "prompts": [
+    {
+      "output": "skill-openapi-r3-01-contract-hub.png",
+      "prompt": "OpenAPI candidate A: create a compact architectural landmark that makes a machine-readable API contract visible as one central faceted specification vault mediating three shallow inbound request channels and two outbound response channels. The vault is a low ribbed polygonal building on a compact raised plinth. The approach lanes terminate at fitted intake thresholds and the release corridors exit the opposite side. The architecture must show contract mediation without words, code, screens, logos, or arrows; it must remain visibly smaller and lower than a project landmark or capital."
+    },
+    {
+      "output": "skill-openapi-r3-02-schema-archive.png",
+      "prompt": "OpenAPI candidate B: create a compact architectural landmark with a single rectangular layered schema archive of nested stepped slabs and exposed fitted bays. Four short inlet spines from adjacent sides terminate at precise interfaces; two narrow output bridges emerge from opposite sides with the same structural rhythm. It must communicate a shared machine-readable contract mediating requests and responses, not a generic gate, temple, or castle; keep it low and skill-scale."
+    },
+    {
+      "output": "skill-react-r3-01-component-court.png",
+      "prompt": "React candidate A: create four reusable stepped terrace modules of one construction vocabulary, nested into a compact square-ish assembly around a central open state court. A raised ordered walkway cascades from one root terrace through three child terraces in one direction; a low enclosed service route returns around the base to the central court, implying controlled state updates. It must communicate reusable components, one-way flow, and state update cycles without an atom, orbital rings, literal logo, screens, browser chrome, code, labels, or arrows."
+    },
+    {
+      "output": "skill-react-r3-02-state-circuit.png",
+      "prompt": "React candidate B: create a compact hierarchy of five repeated component pavilions with a consistent roof and terrace language around one recessed central state chamber. An elevated trunk starts at one root pavilion and steps through smaller nested pavilions in a parent-to-child cascade. A separate low rectangular update conduit loops from outer child pavilions back into the central chamber. The silhouette must not read as a city block, plaza, temple, atom, generic campus, literal logo, screen, code, label, or arrow."
+    }
+  ]
+}

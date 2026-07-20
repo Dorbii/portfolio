@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "run_id": "career-world-2026-07-16",
-  "updated_at": "2026-07-17T13:53:38-05:00",
+  "updated_at": "2026-07-17T15:49:37-05:00",
   "source": {
     "authoritative_plan_path": "docs/career-world-production/architecture.md",
     "queue_path": "docs/career-world-production/queue.yaml",
@@ -15,9 +15,9 @@
   "current": {
     "slice_id": "CW-007",
     "queue_item_id": "CW-007",
-    "status": "desktop_city_stability_green_responsive_qa_pending",
-    "next_action": "Run the remaining responsive, keyboard, touch, and reduced-motion certification; desktop world, city, project, zoom-continuity, and bounded-memory checks are green",
-    "expected_exit_gate": "Build, lint, tests, fixed-coordinate continuity, browser world/city/project behavior, responsive, keyboard, touch, reduced-motion, and visual checks are green"
+    "status": "cohesive_static_world_implemented_final_review_in_progress",
+    "next_action": "Complete independent code and runtime visual review, then freeze the static cohesive-world baseline before authorizing any animation lane",
+    "expected_exit_gate": "Build, lint, contract tests, exact 1600x900 terrain, five-zone overview, fixed-coordinate zoom continuity, viewport culling, palette routing, map-native accessibility, and live desktop world/territory/project checks are green"
   },
   "lanes": [
     {
@@ -385,6 +385,12 @@
       "id": "D-017",
       "summary": "Supersede D-011's non-visible-anchor clause: each employer anchor is the authored overview pad and the single district origin reused by world, city, and project focus. Every capital, project, and skill keeps one asset, one world coordinate, and one fixed visual envelope across zoom. Project focus may change routes and emphasis only; it does not relocate, resize, remount, or recenter the district",
       "evidence": "latest explicit user correction, features/career-world/model/world-registry.ts, features/career-world/model/scene-composition.ts, features/career-world/components/world-scene.tsx, and tests/career-world.test.mjs",
+      "decided_at": "2026-07-17"
+    },
+    {
+      "id": "D-018",
+      "summary": "Supersede D-017's overview-pad/district-origin and no-remount wording: one exact 1600x900 terrain plane contains NinjaOne, Tanium, and Independent on one mainland plus ACE Hardware and Column Technologies on two lower islands. All 58 registry instances keep one absolute coordinate, footprint, ground anchor, and visual width. One persistent renderer uses zoom-only detail and viewport culling; focus changes camera and emphasis only. Employer colors are deterministic static palette variants, and all animation, video, and 3D work remains disabled until the static baseline is accepted",
+      "evidence": "latest explicit user direction, docs/career-world-asset-map.md, design/career-world/concepts/world/career-world-v2.png, features/career-world/model/scene-composition.ts, features/career-world/components/world-scene.tsx, public/career-world/art/runtime-palette-manifest.json, and tests/career-world.test.mjs",
       "decided_at": "2026-07-17"
     }
   ],

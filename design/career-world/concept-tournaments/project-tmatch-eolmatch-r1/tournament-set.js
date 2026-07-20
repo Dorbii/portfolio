@@ -1,0 +1,197 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "project-tmatch-eolmatch-r1-2026-07-18",
+  "name": "T-Match / EOLMatch · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/project-tmatch-eolmatch-r1",
+  "domainSummary": "A Go normalization and similarity-matching foundation for inconsistent software names and versions, coupled to a bounded end-of-life data workflow that fetches canonical product data and produces scored inventory matches.",
+  "evidenceBoundary": "Keep the public algorithmic foundation distinct from the private Tanium application and do not expose private inventory data.",
+  "researchSources": [
+    {
+      "title": "Project walkthrough: T-Match / EOLMatch",
+      "path": "docs/project-walkthrough-draft.md",
+      "use": "Public-repo-backed normalization, Jaro-Winkler matching, lifecycle workflow, and public/private boundary."
+    }
+  ],
+  "assets": [
+    {
+      "id": "project-tmatch-eolmatch-r1-01-canonical-amplification",
+      "name": "T-Match / EOLMatch · Canonical Amplification",
+      "src": "project-tmatch-eolmatch-r1-01-canonical-amplification.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine and amplify the accepted baseline geometry while preserving its defining silhouette; emphasize software-name normalization",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "canonical-amplification",
+        "software-name-normalization",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "The accepted identity is tested at its most resolved supporting-landmark scale. This version emphasizes software-name normalization.",
+      "businessCue": "software-name normalization"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-02-process-spine",
+      "name": "T-Match / EOLMatch · Process Spine",
+      "src": "project-tmatch-eolmatch-r1-02-process-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "recompose the landmark along a clear sequential service spine with repeated but unequal chambers; emphasize configurable similarity adjudication",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "process-spine",
+        "configurable-similarity-adjudication",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "A visible spatial sequence makes the project's process legible without arrows or diagrams. This version emphasizes configurable similarity adjudication.",
+      "businessCue": "configurable similarity adjudication"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-03-exchange-bridge",
+      "name": "T-Match / EOLMatch · Exchange Bridge",
+      "src": "project-tmatch-eolmatch-r1-03-exchange-bridge.png",
+      "role": "broad-concept",
+      "controlledVariable": "divide the major functions into unequal connected masses joined by one inhabited structural bridge; emphasize canonical product matching",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "exchange-bridge",
+        "canonical-product-matching",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "A physical bridge tests whether handoff and exchange should dominate the identity. This version emphasizes canonical product matching.",
+      "businessCue": "canonical product matching"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-04-checkpoint-court",
+      "name": "T-Match / EOLMatch · Checkpoint Court",
+      "src": "project-tmatch-eolmatch-r1-04-checkpoint-court.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize the building around a protected validation court with layered thresholds and one decisive exit; emphasize local lifecycle data cache",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "checkpoint-court",
+        "local-lifecycle-data-cache",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "A central court makes review, validation, or adjudication the primary metaphor. This version emphasizes local lifecycle data cache.",
+      "businessCue": "local lifecycle data cache"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-05-terraced-escalation",
+      "name": "T-Match / EOLMatch · Terraced Escalation",
+      "src": "project-tmatch-eolmatch-r1-05-terraced-escalation.png",
+      "role": "broad-concept",
+      "controlledVariable": "step the landmark upward through three or four connected terraces toward one compact focus; emphasize scored auditable output",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "terraced-escalation",
+        "scored-auditable-output",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "Terraced hierarchy expresses staged progress and increasing commitment. This version emphasizes scored auditable output.",
+      "businessCue": "scored auditable output"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-06-modular-batch",
+      "name": "T-Match / EOLMatch · Modular Batch",
+      "src": "project-tmatch-eolmatch-r1-06-modular-batch.png",
+      "role": "broad-concept",
+      "controlledVariable": "build the landmark from repeatable unequal modules locked to one continuous service base; emphasize software-name normalization",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "modular-batch",
+        "software-name-normalization",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "Repeatable modules test batch, scale, and replaceability without detached pieces. This version emphasizes software-name normalization.",
+      "businessCue": "software-name normalization"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-07-guarded-recovery",
+      "name": "T-Match / EOLMatch · Guarded Recovery",
+      "src": "project-tmatch-eolmatch-r1-07-guarded-recovery.png",
+      "role": "broad-concept",
+      "controlledVariable": "place a protected core inside redundant connected routes with one visibly joined recovery annex; emphasize configurable similarity adjudication",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "guarded-recovery",
+        "configurable-similarity-adjudication",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "Guardrails and recovery become architectural without implying an unverified implementation. This version emphasizes configurable similarity adjudication.",
+      "businessCue": "configurable similarity adjudication"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-08-asymmetric-landmark",
+      "name": "T-Match / EOLMatch · Asymmetric Landmark",
+      "src": "project-tmatch-eolmatch-r1-08-asymmetric-landmark.png",
+      "role": "broad-concept",
+      "controlledVariable": "concentrate height and mass off-center to create one singular project-scale skyline; emphasize canonical product matching",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "asymmetric-landmark",
+        "canonical-product-matching",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "A deliberately asymmetric silhouette tests recognition at map scale. This version emphasizes canonical product matching.",
+      "businessCue": "canonical product matching"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-09-compact-deployment",
+      "name": "T-Match / EOLMatch · Compact Deployment",
+      "src": "project-tmatch-eolmatch-r1-09-compact-deployment.png",
+      "role": "broad-concept",
+      "controlledVariable": "compress the domain into the smallest dense, coherent project building that retains the accepted identity; emphasize local lifecycle data cache",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "compact-deployment",
+        "local-lifecycle-data-cache",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "Compression tests which visual cues are essential rather than merely decorative. This version emphasizes local lifecycle data cache.",
+      "businessCue": "local lifecycle data cache"
+    },
+    {
+      "id": "project-tmatch-eolmatch-r1-10-domain-synthesis",
+      "name": "T-Match / EOLMatch · Domain Synthesis",
+      "src": "project-tmatch-eolmatch-r1-10-domain-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "balance the strongest baseline, process, validation, exchange, and recovery cues in one resolved composition; emphasize scored auditable output",
+      "parentConcept": "T-Match / EOLMatch research profile",
+      "tags": [
+        "project",
+        "domain-synthesis",
+        "scored-auditable-output",
+        "matching",
+        "normalization",
+        "go"
+      ],
+      "thesis": "The synthesis tests a mature all-around project identity without becoming a city capital. This version emphasizes scored auditable output.",
+      "businessCue": "scored auditable output"
+    }
+  ]
+};

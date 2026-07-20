@@ -1,0 +1,43 @@
+{
+  "run_id": "cw-rendered-cities-20260719",
+  "lane_id": "terrain-ninjaone",
+  "status": "complete",
+  "generation_mode": "built-in imagegen",
+  "generation_count": 1,
+  "composition_reference": "design/career-world/territories/ninjaone-territory.png",
+  "output_path": "design/career-world/rendered-cities/environment-plates/ninjaone-environment-r1.png",
+  "output": {
+    "format": "png",
+    "width": 1513,
+    "height": 1040,
+    "channels": 3,
+    "color_space": "srgb"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: production environment plate for a 2.5D isometric career-world map\nPrimary request: Transform the supplied NinjaOne territory layout into a finished standalone terrain/environment plate while preserving its composition. The reference is the sole composition reference; follow its outer territory silhouette and spatial organization precisely, but render only terrain, water/void, elevation, routes, and empty placement clearings.\nInput image: Image 1 is the sole composition reference. Preserve the broad rounded asymmetric island/plate silhouette, the protected southwest basin cutout, the central raised plateau, and the nested concentric circulation pattern.\nScene/backdrop: A self-contained dark-water/near-black void around a sculpted technical landmass. The landmass has a restrained central rise, subtle stepped elevation bands, a distinctly sheltered southwest basin, shallow perimeter shelves, and a network of elegant concentric routes and connector paths embedded into the terrain. Leave generous, clearly readable empty placement zones matching the reference node distribution, especially the central capital zone and the larger east and southwest project zones.\nStyle/medium: polished grayscale game-environment render, exact orthographic 2.5D isometric perspective, coherent with premium monochrome strategy-map concept art; crisp but not sterile; gently modeled terrain with restrained technical contour linework.\nComposition/framing: landscape framing, full territory visible with comfortable dark margin on every side. Camera must be a consistent orthographic isometric view with parallel axes and no perspective convergence. Preserve the reference silhouette and the southwest basin location; do not rotate, mirror, crop, or reinterpret the region.\nLighting/mood: consistent soft upper-left key light, controlled ambient occlusion, readable elevation without dramatic shadows.\nColor palette: strictly neutral grayscale only, charcoal-black surrounding water/void, slate and graphite land, pale gray route and contour accents. No colored tint.\nMaterials/textures: low-sheen carved stone/engineered terrain, subtle fine-grain surface variation, shallow dark water; terrain remains visually quiet enough for future asset placement.\nConstraints: environment plate only. Keep all placement zones vacant. Preserve the region silhouette, protected southwest basin, central rise, nested/concentric routes, and clear node-sized placement clearings from the composition reference.\nAvoid: all labels, title cards, legends, typography, letters, numbers, node diamonds, pins, dots, icons, markers, landmark buildings, generic buildings, structures, towers, logos, brand marks, people, characters, vehicles, ships, decorative props, trees blocking placement zones, colored lighting, bloom, fog obscuring terrain, perspective camera, side-on view, photoreal aerial photography, UI overlays, borders, watermark.",
+  "visual_self_check": {
+    "full_output_inspected": true,
+    "orthographic_2_5d_isometric": true,
+    "territory_silhouette_preserved": true,
+    "southwest_basin_preserved": true,
+    "central_rise_present": true,
+    "concentric_routes_present": true,
+    "clear_placement_zones_present": true,
+    "placement_zones_are_terrain_integrated_and_vacant": true,
+    "labels_absent": true,
+    "node_diamonds_and_icons_absent": true,
+    "landmark_buildings_absent": true,
+    "logos_and_text_absent": true,
+    "people_and_vehicles_absent": true,
+    "neutral_grayscale": true,
+    "dark_water_or_background": true,
+    "restrained_technical_linework": true,
+    "upper_left_lighting": true,
+    "watermark_absent": true
+  },
+  "gate": {
+    "output_exists": true,
+    "output_is_png": true,
+    "passed": true
+  },
+  "notes": "One directed generation only. Circular and polygonal raised areas are empty terrain-integrated placement clearings, not node icons or populated landmarks."
+}

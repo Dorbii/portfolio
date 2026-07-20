@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Art Concept Tournament</title>
+  <link rel="stylesheet" href="concept-tournament.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span>CT</span></div>
+        <div>
+          <p class="eyebrow">Art direction tool</p>
+          <h1>Art Concept Tournament</h1>
+        </div>
+      </div>
+      <div class="local-note"><a href="concept-tournaments/index.html">Tournament catalog</a><span>Local files and progress stay in this browser profile</span></div>
+    </header>
+
+    <main>
+      <section id="setup-screen" class="screen" aria-labelledby="setup-title">
+        <div class="hero">
+          <h2 id="setup-title">Choose an asset. <em>Start the review.</em></h2>
+          <p class="hero-copy">Each tournament contains ten prepared concepts. You’ll compare them blind across two randomized brackets, then calibrate the strongest four.</p>
+        </div>
+
+        <div class="setup-grid">
+          <section class="panel setup-card" aria-labelledby="tournament-label">
+            <div id="batch-loader" class="batch-loader">
+              <div class="batch-loader-head">
+                <label id="tournament-label" class="field-label mono" for="tournament-select">Art asset tournament</label>
+                <span id="batch-progress" class="batch-progress">Loading local catalog...</span>
+              </div>
+              <select id="tournament-select" class="select-field" disabled>
+                <option value="">Loading local tournament catalog...</option>
+              </select>
+              <div class="batch-actions">
+                <button id="next-unlocked-setup" class="btn btn-quiet" type="button" disabled>Next asset</button>
+                <button id="batch-export-setup" class="btn btn-quiet" type="button" disabled>Export telemetry</button>
+              </div>
+              <p class="batch-help">Each Start review creates a fresh choice session. Reviews, notes, and production-art approvals stay local, but only the latest completed attempt per asset is retained for telemetry export.</p>
+            </div>
+
+            <div class="review-ready">
+              <div>
+                <span class="field-label mono">Selected asset</span>
+                <strong id="review-ready-name" class="review-ready-name">Select a tournament above</strong>
+                <p id="comparison-estimate" class="review-ready-meta">Choose a tournament to begin.</p>
+              </div>
+              <button id="start-button" class="btn btn-primary btn-large" type="button" disabled>Select a tournament</button>
+            </div>
+            <p id="load-error" class="error" role="alert"></p>
+
+            <div hidden aria-hidden="true">
+              <input id="set-name" type="hidden">
+              <input id="file-input" type="file" accept="image/*,.svg" multiple>
+              <input id="folder-input" type="file" multiple webkitdirectory directory>
+              <p id="loaded-source" hidden></p>
+              <span id="asset-count">0 / 64 loaded</span>
+              <div id="asset-empty"></div>
+              <div id="asset-list" hidden></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="play-screen" class="screen" hidden aria-labelledby="match-title">
+        <div class="tournament-head">
+          <div id="run-label" class="run-label mono">Run 1 of 2</div>
+          <h2 id="match-title" class="tournament-title">Choose the better concept</h2>
+          <div class="head-actions">
+            <button id="toggle-names" class="btn btn-quiet" type="button" aria-pressed="false">Reveal names</button>
+            <button id="undo-button" class="btn btn-quiet" type="button" disabled>Undo</button>
+          </div>
+        </div>
+
+        <div class="progress-wrap" aria-label="Tournament progress">
+          <div class="progress-meta"><span id="round-label">Round 1</span><span id="progress-label">0 / 0 decisions</span></div>
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+        </div>
+
+        <div class="match-stage">
+          <button id="candidate-left" class="candidate" type="button" aria-label="Choose left concept">
+            <span class="candidate-image"><img id="left-image" alt="Left concept"></span>
+            <span class="candidate-foot">
+              <span class="candidate-key">1</span>
+              <span class="candidate-copy">
+                <span class="candidate-kicker">Left concept</span>
+                <span id="left-name" class="candidate-name">Name hidden</span>
+              </span>
+              <span class="candidate-prompt">Choose</span>
+            </span>
+          </button>
+
+          <div class="versus" aria-hidden="true">VS</div>
+
+          <button id="candidate-right" class="candidate" type="button" aria-label="Choose right concept">
+            <span class="candidate-image"><img id="right-image" alt="Right concept"></span>
+            <span class="candidate-foot">
+              <span class="candidate-key">2</span>
+              <span class="candidate-copy">
+                <span class="candidate-kicker">Right concept</span>
+                <span id="right-name" class="candidate-name">Name hidden</span>
+              </span>
+              <span class="candidate-prompt">Choose</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="match-help" aria-hidden="true">
+          <span><kbd>1</kbd> or <kbd>←</kbd> choose left</span>
+          <span><kbd>2</kbd> or <kbd>→</kbd> choose right</span>
+          <span><kbd>U</kbd> undo</span>
+          <span><kbd>N</kbd> reveal names</span>
+        </div>
+        <div class="telemetry-strip" aria-label="Telemetry status">
+          <span class="telemetry-live">Telemetry active</span>
+          <span id="telemetry-session">Session pending</span>
+          <span id="telemetry-decisions">0 recorded decisions</span>
+        </div>
+
+        <section class="bracket-section" aria-labelledby="bracket-title">
+          <div class="section-head">
+            <h3 id="bracket-title">Live bracket</h3>
+            <p id="bracket-note">Automatic byes are marked and do not require a vote.</p>
+          </div>
+          <div class="bracket-scroll"><div id="bracket" class="bracket"></div></div>
+        </section>
+      </section>
+
+      <section id="between-screen" class="screen decision-screen" hidden aria-labelledby="between-title">
+        <article class="panel decision-card">
+          <div class="decision-copy">
+            <p class="eyebrow">Run 1 champion</p>
+            <h2 id="between-title">First pass complete</h2>
+            <p>The bracket will now reseed the same concepts. Run 2 is an independent pass; previous choices are not carried forward.</p>
+          </div>
+          <div class="champion-image"><img id="first-champion-image" alt="Run 1 champion"></div>
+          <div class="decision-actions">
+            <button id="between-undo" class="btn btn-quiet" type="button">Undo last choice</button>
+            <button id="second-run-button" class="btn btn-primary btn-large" type="button">Reseed &amp; start run 2 →</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="results-screen" class="screen decision-screen" hidden aria-labelledby="results-title">
+        <article class="panel decision-card review-decision-card">
+          <div class="decision-copy">
+            <p class="eyebrow">Two-pass result</p>
+            <h2 id="results-title">Decision complete</h2>
+            <p id="result-summary"></p>
+            <div id="result-verdict" class="verdict"></div>
+          </div>
+          <section class="telemetry-grid" aria-label="Choice telemetry summary">
+            <div class="telemetry-metric"><span>Recorded decisions</span><strong id="metric-decisions">0</strong></div>
+            <div class="telemetry-metric"><span>Median decision time</span><strong id="metric-median">0.0s</strong></div>
+            <div class="telemetry-metric"><span>Selected side</span><strong id="metric-side">Balanced</strong></div>
+            <div class="telemetry-metric"><span>Repeat-pair agreement</span><strong id="metric-repeat">No repeats</strong></div>
+          </section>
+          <div class="result-grid">
+            <section class="result-entry">
+              <div class="champion-image"><img id="result-one-image" alt="Run 1 champion"></div>
+              <div class="result-meta"><span>Run 1 champion</span><strong id="result-one-name"></strong></div>
+            </section>
+            <section class="result-entry">
+              <div class="champion-image"><img id="result-two-image" alt="Run 2 champion"></div>
+              <div class="result-meta"><span>Run 2 champion</span><strong id="result-two-name"></strong></div>
+            </section>
+          </div>
+          <section class="review-board" aria-labelledby="review-board-title">
+            <div class="review-board-head">
+              <div>
+                <p class="eyebrow">Final visual review</p>
+                <h3 id="review-board-title">Turn preference into art direction</h3>
+                <p class="review-board-copy">The bracket identified promising directions. Review every concept now, select one to inspect, and mark the exact areas the next art pass should keep, change, or avoid.</p>
+              </div>
+              <div class="annotation-legend" aria-label="Annotation legend">
+                <span class="is-keep"><i aria-hidden="true"></i>Keep</span>
+                <span class="is-change"><i aria-hidden="true"></i>Change</span>
+                <span class="is-avoid"><i aria-hidden="true"></i>Avoid</span>
+              </div>
+            </div>
+            <div id="concept-contact-sheet" class="concept-contact-sheet" aria-label="All concepts in this tournament"></div>
+            <div class="annotation-workspace">
+              <section class="annotation-stage" aria-labelledby="annotation-concept-name">
+                <div class="annotation-stage-head">
+                  <span>Selected concept</span>
+                  <strong id="annotation-concept-name">Select a concept</strong>
+                </div>
+                <div id="annotation-surface" class="annotation-surface" aria-describedby="annotation-instruction">
+                  <img id="annotation-image" alt="Selected concept for detailed review" draggable="false">
+                  <div id="annotation-overlay" class="annotation-overlay" aria-hidden="true"></div>
+                  <div id="annotation-draft" class="annotation-draft" hidden aria-hidden="true"></div>
+                </div>
+                <p id="annotation-instruction" class="annotation-instruction">Choose a mark type and category, add an optional note, then drag across the image. A click creates a small point mark.</p>
+              </section>
+              <aside class="annotation-controls" aria-label="Art direction annotation controls">
+                <div class="annotation-control-grid">
+                  <div class="annotation-control">
+                    <label class="field-label mono" for="annotation-kind">Direction</label>
+                    <select id="annotation-kind" class="select-field">
+                      <option value="keep">Keep this</option>
+                      <option value="change">Change or adapt</option>
+                      <option value="avoid">Avoid this</option>
+                    </select>
+                  </div>
+                  <div class="annotation-control">
+                    <label class="field-label mono" for="annotation-category">Area</label>
+                    <select id="annotation-category" class="select-field">
+                      <option value="overall-form">Overall form</option>
+                      <option value="silhouette">Silhouette</option>
+                      <option value="orientation">Orientation</option>
+                      <option value="layout">Building layout</option>
+                      <option value="domain-cue">Company / technology cue</option>
+                      <option value="scale">Scale and grandeur</option>
+                      <option value="detail-density">Detail density</option>
+                      <option value="facade-entrance">Facade / entrance</option>
+                      <option value="roof-tower">Roof / tower</option>
+                      <option value="negative-space">Negative space</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="annotation-control is-wide">
+                    <label class="field-label mono" for="annotation-note">Why</label>
+                    <textarea id="annotation-note" class="notes-field annotation-note" maxlength="500" placeholder="Optional: explain what should carry forward or what needs to change."></textarea>
+                  </div>
+                  <div class="annotation-control is-wide">
+                    <div class="annotation-actions">
+                      <button id="annotation-whole" class="btn btn-quiet" type="button">Mark the whole concept</button>
+                    </div>
+                  </div>
+                </div>
+                <p id="annotation-summary" class="annotation-summary" aria-live="polite">No structured direction recorded yet.</p>
+                <div class="annotation-list-head">
+                  <h4>Marked areas</h4>
+                  <span id="annotation-count">0 marks</span>
+                </div>
+                <div id="annotation-list" class="annotation-list"></div>
+                <p id="annotation-empty" class="annotation-empty">This concept has no marked areas yet.</p>
+              </aside>
+            </div>
+          </section>
+          <section class="lock-panel" aria-labelledby="lock-title">
+            <label id="lock-title" class="field-label mono" for="lock-candidate">Production art approval</label>
+            <select id="lock-candidate" class="select-field"></select>
+            <div class="lock-actions">
+              <button id="lock-button" class="btn btn-primary" type="button">Approve as production art</button>
+              <button id="unlock-button" class="btn btn-quiet" type="button" hidden>Resume iteration</button>
+            </div>
+            <p id="lock-status" class="lock-status">Approve only when no more concept iteration is needed and the selected image should become production art.</p>
+            <section id="concept-intent" class="concept-intent" aria-labelledby="concept-intent-name" aria-live="polite">
+              <div class="concept-intent-head">
+                <span>Creator intent</span>
+                <strong id="concept-intent-name">Selected concept</strong>
+              </div>
+              <dl id="concept-intent-grid" class="concept-intent-grid">
+                <div class="concept-intent-item">
+                  <dt>Domain idea</dt>
+                  <dd id="concept-intent-cue"></dd>
+                </div>
+                <div class="concept-intent-item">
+                  <dt>Architectural move</dt>
+                  <dd id="concept-intent-geometry"></dd>
+                </div>
+                <div class="concept-intent-item">
+                  <dt>Why this version exists</dt>
+                  <dd id="concept-intent-thesis"></dd>
+                </div>
+              </dl>
+              <p id="concept-intent-empty" class="concept-intent-empty" hidden>No authored intent metadata was provided for this concept.</p>
+            </section>
+            <div class="review-fields">
+              <div class="review-field">
+                <label class="field-label mono" for="review-disposition">What should happen next?</label>
+                <select id="review-disposition" class="select-field">
+                  <option value="reviewed">Reviewed - keep direction available</option>
+                  <option value="refine">Refine the selected concept</option>
+                  <option value="combine">Combine annotated concepts</option>
+                  <option value="redo">Full redesign required</option>
+                  <option value="removed">Remove this asset</option>
+                </select>
+                <p class="review-help">Refine and combine preserve this round as input to the next batch. Full redesign rejects the current direction. Removed assets stay documented but leave the queue.</p>
+              </div>
+              <div class="review-field">
+                <label class="field-label mono" for="review-notes">Review notes</label>
+                <textarea id="review-notes" class="notes-field" maxlength="4000" placeholder="Add overall direction, combination instructions, or context that does not belong to one marked area."></textarea>
+                <div class="review-save-row">
+                  <button id="confirm-review-button" class="btn btn-primary" type="button">Save review</button>
+                  <p id="review-save-status" class="review-save-status" aria-live="polite">Drafts save locally as you work. Select Save review when finished.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <div class="decision-actions">
+            <button id="next-tournament-button" class="btn btn-primary btn-large" type="button">Save review &amp; next asset &rarr;</button>
+            <button id="batch-export-results" class="btn" type="button">Export batch telemetry</button>
+            <button id="rerun-button" class="btn btn-quiet" type="button">Run same set again</button>
+            <button id="results-undo" class="btn btn-quiet" type="button">Undo last choice</button>
+            <button id="export-button" class="btn btn-quiet" type="button">Export this asset</button>
+            <button id="new-set-button" class="btn btn-quiet" type="button">Return to asset selector</button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+
+  <script src="concept-tournaments/tournament-catalog.js"></script>
+  <script src="concept-tournament.js"></script>
+</body>
+</html>

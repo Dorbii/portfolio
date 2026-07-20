@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T17:56:14.006Z",
+  "status": "locked-as-mixed-variation-pool",
+  "selectionMode": "shuffle-without-immediate-local-repeat",
+  "rule": "Use all approved family variants; do not promote a single tournament winner.",
+  "domains": {
+    "road": [
+      "ambient/city-shuttle@v1",
+      "ambient/commuter-car@v1",
+      "ambient/delivery-van@v1",
+      "ambient/service-truck@v1"
+    ],
+    "water": [
+      "ambient/cargo-boat@v1",
+      "ambient/harbor-ferry@v1",
+      "ambient/work-skiff@v1"
+    ]
+  },
+  "families": [
+    {
+      "assetId": "ambient/city-shuttle@v1",
+      "domain": "road",
+      "minimumDistinctInView": 2,
+      "name": "City Shuttle",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-city-shuttle-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-city-shuttle-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-city-shuttle-r1/ambient-city-shuttle-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/commuter-car@v1",
+      "domain": "road",
+      "minimumDistinctInView": 3,
+      "name": "Commuter Car",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-commuter-car-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-commuter-car-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-commuter-car-r1/ambient-commuter-car-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/delivery-van@v1",
+      "domain": "road",
+      "minimumDistinctInView": 2,
+      "name": "Delivery Van",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-delivery-van-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-delivery-van-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-delivery-van-r1/ambient-delivery-van-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/cargo-boat@v1",
+      "domain": "water",
+      "minimumDistinctInView": 1,
+      "name": "Cargo Boat",
+      "sourceReviewStatus": "reviewed",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-cargo-boat-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-cargo-boat-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1/ambient-cargo-boat-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/harbor-ferry@v1",
+      "domain": "water",
+      "minimumDistinctInView": 1,
+      "name": "Harbor Ferry",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-harbor-ferry-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-harbor-ferry-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-harbor-ferry-r1/ambient-harbor-ferry-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/service-truck@v1",
+      "domain": "road",
+      "minimumDistinctInView": 2,
+      "name": "Service Truck",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-service-truck-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-service-truck-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-service-truck-r1/ambient-service-truck-r1-10-ambient-synthesis.png"
+        }
+      ]
+    },
+    {
+      "assetId": "ambient/work-skiff@v1",
+      "domain": "water",
+      "minimumDistinctInView": 1,
+      "name": "Work Skiff",
+      "sourceReviewStatus": "pending",
+      "variantCount": 10,
+      "variants": [
+        {
+          "candidateId": "ambient-work-skiff-r1-01-canonical-production",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-01-canonical-production.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-02-silhouette-contrast",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-02-silhouette-contrast.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-03-weighted-asymmetry",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-03-weighted-asymmetry.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-04-functional-exposure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-04-functional-exposure.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-05-rugged-structure",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-05-rugged-structure.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-06-modular-rhythm",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-06-modular-rhythm.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-07-low-profile",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-07-low-profile.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-08-vertical-accent",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-08-vertical-accent.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-09-compact-primitive",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-09-compact-primitive.png"
+        },
+        {
+          "candidateId": "ambient-work-skiff-r1-10-ambient-synthesis",
+          "sourcePath": "design/career-world/concept-tournaments/ambient-work-skiff-r1/ambient-work-skiff-r1-10-ambient-synthesis.png"
+        }
+      ]
+    }
+  ],
+  "totalVariantCount": 70
+}

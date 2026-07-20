@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Career World Art Reference Map</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --background: #080b10;
+        --surface: #0d1219;
+        --surface-raised: #121a24;
+        --border: #263445;
+        --text: #f0eee7;
+        --muted: #98a8b9;
+        --accent: #8ce8f8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgb(140 232 248 / 8%), transparent 34rem),
+          var(--background);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      main {
+        width: min(1440px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0 80px;
+      }
+
+      header {
+        max-width: 920px;
+        margin-bottom: 32px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 12px;
+        font-size: clamp(2rem, 5vw, 4.25rem);
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
+
+      .lede {
+        max-width: 72ch;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .controls {
+        position: sticky;
+        z-index: 20;
+        top: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 0 -8px 40px;
+        padding: 12px 8px;
+        border-bottom: 1px solid var(--border);
+        background: rgb(8 11 16 / 92%);
+        backdrop-filter: blur(14px);
+      }
+
+      .controls a,
+      .count {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      .controls a:hover,
+      .controls a:focus-visible {
+        color: var(--accent);
+      }
+
+      .count {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+      }
+
+      label {
+        position: relative;
+        flex: 1 1 300px;
+        max-width: 520px;
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        outline: 2px solid rgb(140 232 248 / 20%);
+        outline-offset: 2px;
+      }
+
+      section {
+        margin-top: 56px;
+        scroll-margin-top: 90px;
+      }
+
+      .section-heading {
+        display: flex;
+        gap: 12px;
+        align-items: baseline;
+        margin-bottom: 14px;
+      }
+
+      h2 {
+        margin-bottom: 0;
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        letter-spacing: -0.025em;
+      }
+
+      .section-count {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      .table-frame {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        padding: 16px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-raised);
+        color: var(--muted);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      th:first-child,
+      td:first-child {
+        width: 270px;
+      }
+
+      tbody tr + tr td {
+        border-top: 1px solid var(--border);
+      }
+
+      tbody tr:hover td {
+        background: rgb(140 232 248 / 3%);
+      }
+
+      .asset-name {
+        position: sticky;
+        top: 74px;
+        display: block;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .asset-id,
+      .asset-path {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        font-size: 0.72rem;
+        overflow-wrap: anywhere;
+      }
+
+      .asset-link {
+        position: relative;
+        display: block;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #05070a;
+      }
+
+      .asset-link:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        filter: grayscale(1);
+      }
+
+      .asset-link:hover img {
+        filter: grayscale(1) brightness(1.08);
+      }
+
+      .asset-path {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .asset-path:hover,
+      .asset-path:focus-visible {
+        text-decoration: underline;
+      }
+
+      tr[hidden],
+      section[hidden] {
+        display: none;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          width: min(100% - 20px, 1440px);
+          padding-top: 28px;
+        }
+
+        .controls {
+          align-items: stretch;
+        }
+
+        .count {
+          width: 100%;
+          margin-left: 0;
+        }
+
+        th,
+        td {
+          padding: 10px;
+        }
+
+        th:first-child,
+        td:first-child {
+          width: 145px;
+        }
+
+        .asset-name {
+          top: 126px;
+          font-size: 0.9rem;
+        }
+
+        .asset-id,
+        .asset-path {
+          font-size: 0.62rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Career World / Canonical Concepts</p>
+        <h1>Art Reference Map</h1>
+        <p class="lede">
+          Name-to-concept mapping for the 48 requested city, project, and skill assets.
+          Each row displays only the independently selected high-detail panel, in grayscale,
+          from its full-resolution canonical source sheet. Click an image to inspect that source.
+          The complete promoted inventory contains 56 assets; the world sheet and seven ambient
+          assets are intentionally excluded here.
+        </p>
+      </header>
+
+      <nav class="controls" aria-label="Reference map controls">
+        <label>
+          <span class="eyebrow">Filter by name</span>
+          <input id="filter" type="search" placeholder="Try React, Kaizen, Tanium…" autocomplete="off" />
+        </label>
+        <a href="#cities">Cities</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="concept-tournaments/index.html">Tournaments</a>
+        <span id="visible-count" class="count" aria-live="polite">48 assets</span>
+      </nav>
+
+      <section id="cities" data-section>
+        <div class="section-heading">
+          <h2>Cities</h2>
+          <span class="section-count">5 assets</span>
+        </div>
+        <div class="table-frame">
+          <table>
+            <thead>
+              <tr><th scope="col">Name</th><th scope="col">Art asset</th></tr>
+            </thead>
+            <tbody>
+              <tr data-search="ninjaone city/ninjaone@v1">
+                <td><span class="asset-name">NinjaOne</span><code class="asset-id">city/ninjaone@v1</code></td>
+                <td><a class="asset-link" href="concepts/cities/ninjaone-v1.png" target="_blank"><img src="concepts/cities/ninjaone-v1.png" alt="NinjaOne canonical city concept sheet" /></a><a class="asset-path" href="concepts/cities/ninjaone-v1.png" target="_blank">concepts/cities/ninjaone-v1.png</a></td>
+              </tr>
+              <tr data-search="tanium city/tanium@v1">
+                <td><span class="asset-name">Tanium</span><code class="asset-id">city/tanium@v1</code></td>
+                <td><a class="asset-link" href="concepts/cities/tanium-v1.png" target="_blank"><img src="concepts/cities/tanium-v1.png" alt="Tanium canonical city concept sheet" /></a><a class="asset-path" href="concepts/cities/tanium-v1.png" target="_blank">concepts/cities/tanium-v1.png</a></td>
+              </tr>
+              <tr data-search="independent city/independent@v1">
+                <td><span class="asset-name">Independent</span><code class="asset-id">city/independent@v1</code></td>
+                <td><a class="asset-link" href="concepts/cities/independent-v1.png" target="_blank"><img src="concepts/cities/independent-v1.png" alt="Independent canonical city concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/cities/independent-v1.png" target="_blank">concepts/cities/independent-v1.png</a></td>
+              </tr>
+              <tr data-search="ace hardware city/ace-hardware@v1">
+                <td><span class="asset-name">ACE Hardware</span><code class="asset-id">city/ace-hardware@v1</code></td>
+                <td><a class="asset-link" href="concepts/cities/ace-hardware-v1.png" target="_blank"><img src="concepts/cities/ace-hardware-v1.png" alt="ACE Hardware canonical city concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/cities/ace-hardware-v1.png" target="_blank">concepts/cities/ace-hardware-v1.png</a></td>
+              </tr>
+              <tr data-search="column technologies city/column-technologies@v1">
+                <td><span class="asset-name">Column Technologies</span><code class="asset-id">city/column-technologies@v1</code></td>
+                <td><a class="asset-link" href="concepts/cities/column-technologies-v1.png" target="_blank"><img src="concepts/cities/column-technologies-v1.png" alt="Column Technologies canonical city concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/cities/column-technologies-v1.png" target="_blank">concepts/cities/column-technologies-v1.png</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="projects" data-section>
+        <div class="section-heading">
+          <h2>Projects</h2>
+          <span class="section-count">16 assets</span>
+        </div>
+        <div class="table-frame">
+          <table>
+            <thead>
+              <tr><th scope="col">Name</th><th scope="col">Art asset</th></tr>
+            </thead>
+            <tbody>
+              <tr data-search="kaizen agent platform project/kaizen-agent-platform@v1"><td><span class="asset-name">Kaizen Agent Platform</span><code class="asset-id">project/kaizen-agent-platform@v1</code></td><td><a class="asset-link" href="concepts/projects/kaizen-agent-platform-v1.png" target="_blank"><img src="concepts/projects/kaizen-agent-platform-v1.png" alt="Kaizen Agent Platform canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/kaizen-agent-platform-v1.png" target="_blank">concepts/projects/kaizen-agent-platform-v1.png</a></td></tr>
+              <tr data-search="vendy vm platform project/vendy-vm-platform@v1"><td><span class="asset-name">Vendy VM Platform</span><code class="asset-id">project/vendy-vm-platform@v1</code></td><td><a class="asset-link" href="concepts/projects/vendy-vm-platform-v1.png" target="_blank"><img src="concepts/projects/vendy-vm-platform-v1.png" alt="Vendy VM Platform canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/vendy-vm-platform-v1.png" target="_blank">concepts/projects/vendy-vm-platform-v1.png</a></td></tr>
+              <tr data-search="kaizen metrics engineering metrics pipeline project/kaizen-metrics@v1"><td><span class="asset-name">Kaizen Metrics</span><code class="asset-id">project/kaizen-metrics@v1</code></td><td><a class="asset-link" href="concepts/projects/kaizen-metrics-v1.png" target="_blank"><img src="concepts/projects/kaizen-metrics-v1.png" alt="Kaizen Metrics canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/kaizen-metrics-v1.png" target="_blank">concepts/projects/kaizen-metrics-v1.png</a></td></tr>
+              <tr data-search="tanium risk assessment project/tanium-risk-assessment@v1"><td><span class="asset-name">Tanium Risk Assessment</span><code class="asset-id">project/tanium-risk-assessment@v1</code></td><td><a class="asset-link" href="concepts/projects/tanium-risk-assessment-v1.png" target="_blank"><img src="concepts/projects/tanium-risk-assessment-v1.png" alt="Tanium Risk Assessment canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/tanium-risk-assessment-v1.png" target="_blank">concepts/projects/tanium-risk-assessment-v1.png</a></td></tr>
+              <tr data-search="uat automation project/uat-automation@v1"><td><span class="asset-name">UAT Automation</span><code class="asset-id">project/uat-automation@v1</code></td><td><a class="asset-link" href="concepts/projects/uat-automation-v1.png" target="_blank"><img src="concepts/projects/uat-automation-v1.png" alt="UAT Automation canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/uat-automation-v1.png" target="_blank">concepts/projects/uat-automation-v1.png</a></td></tr>
+              <tr data-search="cablecar project/cablecar@v1"><td><span class="asset-name">CableCar</span><code class="asset-id">project/cablecar@v1</code></td><td><a class="asset-link" href="concepts/projects/cablecar-v1.png" target="_blank"><img src="concepts/projects/cablecar-v1.png" alt="CableCar canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/cablecar-v1.png" target="_blank">concepts/projects/cablecar-v1.png</a></td></tr>
+              <tr data-search="xsearch project/xsearch@v1"><td><span class="asset-name">xSearch</span><code class="asset-id">project/xsearch@v1</code></td><td><a class="asset-link" href="concepts/projects/xsearch-v1.png" target="_blank"><img src="concepts/projects/xsearch-v1.png" alt="xSearch canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/xsearch-v1.png" target="_blank">concepts/projects/xsearch-v1.png</a></td></tr>
+              <tr data-search="t-match eolmatch tmatch project/tmatch-eolmatch@v1"><td><span class="asset-name">T-Match / EOLMatch</span><code class="asset-id">project/tmatch-eolmatch@v1</code></td><td><a class="asset-link" href="concepts/projects/tmatch-eolmatch-v1.png" target="_blank"><img src="concepts/projects/tmatch-eolmatch-v1.png" alt="T-Match and EOLMatch canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/tmatch-eolmatch-v1.png" target="_blank">concepts/projects/tmatch-eolmatch-v1.png</a></td></tr>
+              <tr data-search="contextforge project/contextforge@v1"><td><span class="asset-name">ContextForge</span><code class="asset-id">project/contextforge@v1</code></td><td><a class="asset-link" href="concepts/projects/contextforge-v1.png" target="_blank"><img src="concepts/projects/contextforge-v1.png" alt="ContextForge canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/contextforge-v1.png" target="_blank">concepts/projects/contextforge-v1.png</a></td></tr>
+              <tr data-search="career world portfolio project/career-world-portfolio@v1"><td><span class="asset-name">Career World Portfolio</span><code class="asset-id">project/career-world-portfolio@v1</code></td><td><a class="asset-link" href="concepts/projects/career-world-portfolio-v1.png" target="_blank"><img src="concepts/projects/career-world-portfolio-v1.png" alt="Career World Portfolio canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/career-world-portfolio-v1.png" target="_blank">concepts/projects/career-world-portfolio-v1.png</a></td></tr>
+              <tr data-search="ticket validation automation project/ticket-validation-automation@v1"><td><span class="asset-name">Ticket Validation Automation</span><code class="asset-id">project/ticket-validation-automation@v1</code></td><td><a class="asset-link" href="concepts/projects/ticket-validation-automation-v1.png" target="_blank"><img src="concepts/projects/ticket-validation-automation-v1.png" alt="Ticket Validation Automation canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/ticket-validation-automation-v1.png" target="_blank">concepts/projects/ticket-validation-automation-v1.png</a></td></tr>
+              <tr data-search="sap table update integration project/sap-table-update-integration@v1"><td><span class="asset-name">SAP Table Update Integration</span><code class="asset-id">project/sap-table-update-integration@v1</code></td><td><a class="asset-link" href="concepts/projects/sap-table-update-integration-v1.png" target="_blank"><img src="concepts/projects/sap-table-update-integration-v1.png" alt="SAP Table Update Integration canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/sap-table-update-integration-v1.png" target="_blank">concepts/projects/sap-table-update-integration-v1.png</a></td></tr>
+              <tr data-search="qc alm extractor project/qc-alm-extractor@v1"><td><span class="asset-name">QC ALM Extractor</span><code class="asset-id">project/qc-alm-extractor@v1</code></td><td><a class="asset-link" href="concepts/projects/qc-alm-extractor-v1.png" target="_blank"><img src="concepts/projects/qc-alm-extractor-v1.png" alt="QC ALM Extractor canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/qc-alm-extractor-v1.png" target="_blank">concepts/projects/qc-alm-extractor-v1.png</a></td></tr>
+              <tr data-search="atlassian platform automation project/atlassian-platform-automation@v1"><td><span class="asset-name">Atlassian Platform Automation</span><code class="asset-id">project/atlassian-platform-automation@v1</code></td><td><a class="asset-link" href="concepts/projects/atlassian-platform-automation-v1.png" target="_blank"><img src="concepts/projects/atlassian-platform-automation-v1.png" alt="Atlassian Platform Automation canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/atlassian-platform-automation-v1.png" target="_blank">concepts/projects/atlassian-platform-automation-v1.png</a></td></tr>
+              <tr data-search="atlassian data center resilience project/atlassian-data-center-resilience@v1"><td><span class="asset-name">Atlassian Data Center Resilience</span><code class="asset-id">project/atlassian-data-center-resilience@v1</code></td><td><a class="asset-link" href="concepts/projects/atlassian-data-center-resilience-v1.png" target="_blank"><img src="concepts/projects/atlassian-data-center-resilience-v1.png" alt="Atlassian Data Center Resilience canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/atlassian-data-center-resilience-v1.png" target="_blank">concepts/projects/atlassian-data-center-resilience-v1.png</a></td></tr>
+              <tr data-search="client devops delivery implementations project/client-devops-delivery-implementations@v1"><td><span class="asset-name">Client DevOps Delivery Implementations</span><code class="asset-id">project/client-devops-delivery-implementations@v1</code></td><td><a class="asset-link" href="concepts/projects/client-devops-delivery-implementations-v1.png" target="_blank"><img src="concepts/projects/client-devops-delivery-implementations-v1.png" alt="Client DevOps Delivery Implementations canonical project concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/projects/client-devops-delivery-implementations-v1.png" target="_blank">concepts/projects/client-devops-delivery-implementations-v1.png</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="skills" data-section>
+        <div class="section-heading">
+          <h2>Skills</h2>
+          <span class="section-count">27 assets</span>
+        </div>
+        <div class="table-frame">
+          <table>
+            <thead>
+              <tr><th scope="col">Name</th><th scope="col">Art asset</th></tr>
+            </thead>
+            <tbody>
+              <tr data-search="safe writes skill/safe-writes@v1"><td><span class="asset-name">Safe writes</span><code class="asset-id">skill/safe-writes@v1</code></td><td><a class="asset-link" href="concepts/skills/safe-writes-v1.png" target="_blank"><img src="concepts/skills/safe-writes-v1.png" alt="Safe writes canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/safe-writes-v1.png" target="_blank">concepts/skills/safe-writes-v1.png</a></td></tr>
+              <tr data-search="context compression skill/context-compression@v1"><td><span class="asset-name">Context compression</span><code class="asset-id">skill/context-compression@v1</code></td><td><a class="asset-link" href="concepts/skills/context-compression-v1.png" target="_blank"><img src="concepts/skills/context-compression-v1.png" alt="Context compression canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/context-compression-v1.png" target="_blank">concepts/skills/context-compression-v1.png</a></td></tr>
+              <tr data-search="workflow orchestration skill/workflow-orchestration@v1"><td><span class="asset-name">Workflow orchestration</span><code class="asset-id">skill/workflow-orchestration@v1</code></td><td><a class="asset-link" href="concepts/skills/workflow-orchestration-v1.png" target="_blank"><img src="concepts/skills/workflow-orchestration-v1.png" alt="Workflow orchestration canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/workflow-orchestration-v1.png" target="_blank">concepts/skills/workflow-orchestration-v1.png</a></td></tr>
+              <tr data-search="operator control skill/operator-control@v1"><td><span class="asset-name">Operator control</span><code class="asset-id">skill/operator-control@v1</code></td><td><a class="asset-link" href="concepts/skills/operator-control-v1.png" target="_blank"><img src="concepts/skills/operator-control-v1.png" alt="Operator control canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/operator-control-v1.png" target="_blank">concepts/skills/operator-control-v1.png</a></td></tr>
+              <tr data-search="data contracts skill/data-contracts@v1"><td><span class="asset-name">Data contracts</span><code class="asset-id">skill/data-contracts@v1</code></td><td><a class="asset-link" href="concepts/skills/data-contracts-v1.png" target="_blank"><img src="concepts/skills/data-contracts-v1.png" alt="Data contracts canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/data-contracts-v1.png" target="_blank">concepts/skills/data-contracts-v1.png</a></td></tr>
+              <tr data-search="go golang skill/go@v1"><td><span class="asset-name">Go</span><code class="asset-id">skill/go@v1</code></td><td><a class="asset-link" href="concepts/skills/go-v1.png" target="_blank"><img src="concepts/skills/go-v1.png" alt="Go canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/go-v1.png" target="_blank">concepts/skills/go-v1.png</a></td></tr>
+              <tr data-search="typescript skill/typescript@v1"><td><span class="asset-name">TypeScript</span><code class="asset-id">skill/typescript@v1</code></td><td><a class="asset-link" href="concepts/skills/typescript-v1.png" target="_blank"><img src="concepts/skills/typescript-v1.png" alt="TypeScript canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/typescript-v1.png" target="_blank">concepts/skills/typescript-v1.png</a></td></tr>
+              <tr data-search="react skill/react@v1"><td><span class="asset-name">React</span><code class="asset-id">skill/react@v1</code></td><td><a class="asset-link" href="concepts/skills/react-v1.png" target="_blank"><img src="concepts/skills/react-v1.png" alt="React canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/react-v1.png" target="_blank">concepts/skills/react-v1.png</a></td></tr>
+              <tr data-search="aws amazon web services skill/aws@v1"><td><span class="asset-name">AWS</span><code class="asset-id">skill/aws@v1</code></td><td><a class="asset-link" href="concepts/skills/aws-v1.png" target="_blank"><img src="concepts/skills/aws-v1.png" alt="AWS canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/aws-v1.png" target="_blank">concepts/skills/aws-v1.png</a></td></tr>
+              <tr data-search="postgresql postgres skill/postgresql@v1"><td><span class="asset-name">PostgreSQL</span><code class="asset-id">skill/postgresql@v1</code></td><td><a class="asset-link" href="concepts/skills/postgresql-v1.png" target="_blank"><img src="concepts/skills/postgresql-v1.png" alt="PostgreSQL canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/postgresql-v1.png" target="_blank">concepts/skills/postgresql-v1.png</a></td></tr>
+              <tr data-search="redis skill/redis@v1"><td><span class="asset-name">Redis</span><code class="asset-id">skill/redis@v1</code></td><td><a class="asset-link" href="concepts/skills/redis-v1.png" target="_blank"><img src="concepts/skills/redis-v1.png" alt="Redis canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/redis-v1.png" target="_blank">concepts/skills/redis-v1.png</a></td></tr>
+              <tr data-search="mcp model context protocol skill/mcp@v1"><td><span class="asset-name">MCP</span><code class="asset-id">skill/mcp@v1</code></td><td><a class="asset-link" href="concepts/skills/mcp-v1.png" target="_blank"><img src="concepts/skills/mcp-v1.png" alt="MCP canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/mcp-v1.png" target="_blank">concepts/skills/mcp-v1.png</a></td></tr>
+              <tr data-search="openapi open api skill/openapi@v1"><td><span class="asset-name">OpenAPI</span><code class="asset-id">skill/openapi@v1</code></td><td><a class="asset-link" href="concepts/skills/openapi-v1.png" target="_blank"><img src="concepts/skills/openapi-v1.png" alt="OpenAPI canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/openapi-v1.png" target="_blank">concepts/skills/openapi-v1.png</a></td></tr>
+              <tr data-search="python skill/python@v1"><td><span class="asset-name">Python</span><code class="asset-id">skill/python@v1</code></td><td><a class="asset-link" href="concepts/skills/python-v1.png" target="_blank"><img src="concepts/skills/python-v1.png" alt="Python canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/python-v1.png" target="_blank">concepts/skills/python-v1.png</a></td></tr>
+              <tr data-search="docker containers skill/docker@v1"><td><span class="asset-name">Docker</span><code class="asset-id">skill/docker@v1</code></td><td><a class="asset-link" href="concepts/skills/docker-v1.png" target="_blank"><img src="concepts/skills/docker-v1.png" alt="Docker canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/docker-v1.png" target="_blank">concepts/skills/docker-v1.png</a></td></tr>
+              <tr data-search="databricks skill/databricks@v1"><td><span class="asset-name">Databricks</span><code class="asset-id">skill/databricks@v1</code></td><td><a class="asset-link" href="concepts/skills/databricks-v1.png" target="_blank"><img src="concepts/skills/databricks-v1.png" alt="Databricks canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/databricks-v1.png" target="_blank">concepts/skills/databricks-v1.png</a></td></tr>
+              <tr data-search="csharp c# .net skill/csharp@v1"><td><span class="asset-name">C#</span><code class="asset-id">skill/csharp@v1</code></td><td><a class="asset-link" href="concepts/skills/csharp-v1.png" target="_blank"><img src="concepts/skills/csharp-v1.png" alt="C sharp canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/csharp-v1.png" target="_blank">concepts/skills/csharp-v1.png</a></td></tr>
+              <tr data-search="localdb local db sql server skill/localdb@v1"><td><span class="asset-name">LocalDB</span><code class="asset-id">skill/localdb@v1</code></td><td><a class="asset-link" href="concepts/skills/localdb-v1.png" target="_blank"><img src="concepts/skills/localdb-v1.png" alt="LocalDB canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/localdb-v1.png" target="_blank">concepts/skills/localdb-v1.png</a></td></tr>
+              <tr data-search="manifest v3 browser extension skill/manifest-v3@v1"><td><span class="asset-name">Manifest V3</span><code class="asset-id">skill/manifest-v3@v1</code></td><td><a class="asset-link" href="concepts/skills/manifest-v3-v1.png" target="_blank"><img src="concepts/skills/manifest-v3-v1.png" alt="Manifest V3 canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/manifest-v3-v1.png" target="_blank">concepts/skills/manifest-v3-v1.png</a></td></tr>
+              <tr data-search="java skill/java@v1"><td><span class="asset-name">Java</span><code class="asset-id">skill/java@v1</code></td><td><a class="asset-link" href="concepts/skills/java-v1.png" target="_blank"><img src="concepts/skills/java-v1.png" alt="Java canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/java-v1.png" target="_blank">concepts/skills/java-v1.png</a></td></tr>
+              <tr data-search="ai artificial intelligence skill/ai@v1"><td><span class="asset-name">AI</span><code class="asset-id">skill/ai@v1</code></td><td><a class="asset-link" href="concepts/skills/ai-v1.png" target="_blank"><img src="concepts/skills/ai-v1.png" alt="AI canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/ai-v1.png" target="_blank">concepts/skills/ai-v1.png</a></td></tr>
+              <tr data-search="vmware virtualization skill/vmware@v1"><td><span class="asset-name">VMware</span><code class="asset-id">skill/vmware@v1</code></td><td><a class="asset-link" href="concepts/skills/vmware-v1.png" target="_blank"><img src="concepts/skills/vmware-v1.png" alt="VMware canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/vmware-v1.png" target="_blank">concepts/skills/vmware-v1.png</a></td></tr>
+              <tr data-search="macstadium mac stadium skill/macstadium@v1"><td><span class="asset-name">MacStadium</span><code class="asset-id">skill/macstadium@v1</code></td><td><a class="asset-link" href="concepts/skills/macstadium-v1.png" target="_blank"><img src="concepts/skills/macstadium-v1.png" alt="MacStadium canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/macstadium-v1.png" target="_blank">concepts/skills/macstadium-v1.png</a></td></tr>
+              <tr data-search="electron desktop skill/electron@v1"><td><span class="asset-name">Electron</span><code class="asset-id">skill/electron@v1</code></td><td><a class="asset-link" href="concepts/skills/electron-v1.png" target="_blank"><img src="concepts/skills/electron-v1.png" alt="Electron canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/electron-v1.png" target="_blank">concepts/skills/electron-v1.png</a></td></tr>
+              <tr data-search="informatica etl skill/informatica@v1"><td><span class="asset-name">Informatica</span><code class="asset-id">skill/informatica@v1</code></td><td><a class="asset-link" href="concepts/skills/informatica-v1.png" target="_blank"><img src="concepts/skills/informatica-v1.png" alt="Informatica canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/informatica-v1.png" target="_blank">concepts/skills/informatica-v1.png</a></td></tr>
+              <tr data-search="atlassian jira confluence skill/atlassian@v1"><td><span class="asset-name">Atlassian</span><code class="asset-id">skill/atlassian@v1</code></td><td><a class="asset-link" href="concepts/skills/atlassian-v1.png" target="_blank"><img src="concepts/skills/atlassian-v1.png" alt="Atlassian canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/atlassian-v1.png" target="_blank">concepts/skills/atlassian-v1.png</a></td></tr>
+              <tr data-search="ci cd continuous integration delivery skill/ci-cd@v1"><td><span class="asset-name">CI/CD</span><code class="asset-id">skill/ci-cd@v1</code></td><td><a class="asset-link" href="concepts/skills/ci-cd-v1.png" target="_blank"><img src="concepts/skills/ci-cd-v1.png" alt="CI/CD canonical skill concept sheet" loading="lazy" /></a><a class="asset-path" href="concepts/skills/ci-cd-v1.png" target="_blank">concepts/skills/ci-cd-v1.png</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const filter = document.querySelector("#filter");
+      const count = document.querySelector("#visible-count");
+      const rows = [...document.querySelectorAll("tbody tr")];
+      const sections = [...document.querySelectorAll("[data-section]")];
+
+      const cropBounds = Object.freeze({
+        "city/ace-hardware@v1": [0.028, 0.025, 0.505, 0.5],
+        "city/column-technologies@v1": [0.1, 0.02, 0.92, 0.46],
+        "city/independent@v1": [0.06, 0.49, 0.49, 0.95],
+        "city/ninjaone@v1": [0, 0, 1, 1],
+        "city/tanium@v1": [0.01, 0.01, 0.99, 0.64],
+        "project/atlassian-data-center-resilience@v1": [0.007, 0.01, 0.495, 0.492],
+        "project/atlassian-platform-automation@v1": [0.02, 0.03, 0.98, 0.635],
+        "project/cablecar@v1": [0.007, 0.51, 0.495, 0.99],
+        "project/career-world-portfolio@v1": [0.5, 0.02, 0.97, 0.49],
+        "project/client-devops-delivery-implementations@v1": [0.495, 0.01, 0.744, 0.497],
+        "project/contextforge@v1": [0, 0, 1, 1],
+        "project/kaizen-agent-platform@v1": [0.005, 0.51, 0.49, 0.98],
+        "project/kaizen-metrics@v1": [0.02, 0.02, 0.49, 0.49],
+        "project/qc-alm-extractor@v1": [0.25, 0.02, 0.75, 0.56],
+        "project/sap-table-update-integration@v1": [0.18, 0.01, 0.82, 0.65],
+        "project/tanium-risk-assessment@v1": [0, 0, 1, 1],
+        "project/ticket-validation-automation@v1": [0.261, 0.618, 0.494, 0.94],
+        "project/tmatch-eolmatch@v1": [0.082, 0.025, 0.47, 0.495],
+        "project/uat-automation@v1": [0.095, 0.035, 0.925, 0.535],
+        "project/vendy-vm-platform@v1": [0, 0, 1, 1],
+        "project/xsearch@v1": [0.18, 0.02, 0.78, 0.6],
+        "skill/ai@v1": [0.015, 0.52, 0.555, 0.98],
+        "skill/atlassian@v1": [0, 0, 1, 1],
+        "skill/aws@v1": [0.007, 0.012, 0.642, 0.59],
+        "skill/ci-cd@v1": [0.14, 0.04, 0.82, 0.61],
+        "skill/context-compression@v1": [0, 0, 1, 1],
+        "skill/csharp@v1": [0.25, 0.025, 0.8, 0.58],
+        "skill/data-contracts@v1": [0.09, 0.03, 0.91, 0.52],
+        "skill/databricks@v1": [0.025, 0.012, 0.55, 0.63],
+        "skill/docker@v1": [0.012, 0.017, 0.493, 0.454],
+        "skill/electron@v1": [0.07, 0.03, 0.5, 0.57],
+        "skill/go@v1": [0.15, 0.03, 0.9, 0.665],
+        "skill/informatica@v1": [0.13, 0.02, 0.81, 0.6],
+        "skill/java@v1": [0, 0, 1, 1],
+        "skill/localdb@v1": [0.013, 0.02, 0.573, 0.65],
+        "skill/macstadium@v1": [0.507, 0.583, 0.76, 0.875],
+        "skill/manifest-v3@v1": [0.01, 0.02, 0.63, 0.82],
+        "skill/mcp@v1": [0.015, 0.015, 0.985, 0.6],
+        "skill/openapi@v1": [0, 0, 1, 1],
+        "skill/operator-control@v1": [0, 0, 1, 1],
+        "skill/postgresql@v1": [0.501, 0.025, 0.735, 0.484],
+        "skill/python@v1": [0.18, 0.03, 0.78, 0.54],
+        "skill/react@v1": [0, 0, 1, 1],
+        "skill/redis@v1": [0.1, 0.06, 0.9, 0.43],
+        "skill/safe-writes@v1": [0.006, 0.01, 0.994, 0.557],
+        "skill/typescript@v1": [0.01, 0.02, 0.26, 0.73],
+        "skill/vmware@v1": [0.23, 0.025, 0.75, 0.625],
+        "skill/workflow-orchestration@v1": [0, 0, 1, 1],
+      });
+
+      rows.forEach((row) => {
+        const assetId = row.querySelector(".asset-id")?.textContent?.trim();
+        const link = row.querySelector(".asset-link");
+        const image = link?.querySelector("img");
+        const bounds = assetId ? cropBounds[assetId] : undefined;
+
+        if (!link || !image || !bounds) return;
+
+        const applyCrop = () => {
+          const [xMin, yMin, xMax, yMax] = bounds;
+          const cropWidth = xMax - xMin;
+          const cropHeight = yMax - yMin;
+          const cropRatio = (image.naturalWidth * cropWidth) / (image.naturalHeight * cropHeight);
+
+          link.style.aspectRatio = String(cropRatio);
+          image.style.width = `${100 / cropWidth}%`;
+          image.style.left = `${(-xMin / cropWidth) * 100}%`;
+          image.style.top = `${(-yMin / cropHeight) * 100}%`;
+        };
+
+        if (image.complete && image.naturalWidth > 0) {
+          applyCrop();
+        } else {
+          image.addEventListener("load", applyCrop, { once: true });
+        }
+      });
+
+      filter.addEventListener("input", () => {
+        const query = filter.value.trim().toLocaleLowerCase();
+
+        rows.forEach((row) => {
+          row.hidden = !row.dataset.search.includes(query);
+        });
+
+        sections.forEach((section) => {
+          const visibleRows = [...section.querySelectorAll("tbody tr:not([hidden])")];
+          section.hidden = visibleRows.length === 0;
+          section.querySelector(".section-count").textContent = `${visibleRows.length} ${visibleRows.length === 1 ? "asset" : "assets"}`;
+        });
+
+        const visible = rows.filter((row) => !row.hidden).length;
+        count.textContent = `${visible} ${visible === 1 ? "asset" : "assets"}`;
+      });
+    </script>
+  </body>
+</html>

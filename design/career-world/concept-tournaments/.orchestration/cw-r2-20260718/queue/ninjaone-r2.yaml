@@ -1,0 +1,55 @@
+schema_version: 1
+run_id: cw-r2-20260718
+id: ninjaone-r2
+title: Render and validate ten NinjaOne City R2 concepts
+status: done
+priority: 1
+route_id: career-world-r2-ninjaone
+spawn_mode: worker-lane
+context_budget: bounded-one-folder
+owner: { role: worker, thread_id: "/root/ninjaone_r2", parent_thread_id: "019f7276-e8bb-7050-831f-86b124cf308c", claimed_at: "2026-07-18T19:00:00Z", completed_at: "2026-07-18T19:43:00Z" }
+lane:
+  lane_id: ninjaone-r2-worker
+  worker_report_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/ninjaone-r2.json
+  ledger_path: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/run-ledger.json
+  log_artifact_dir: design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/ninjaone-r2
+dependencies: []
+source:
+  authoritative_plan_path: scripts/build-career-world-r2-sets.mjs
+  plan_section: city/ninjaone@v1
+  created_from_prompt: User requested NinjaOne holograms, ninja identity details, and more company personality.
+scope:
+  allowed_files:
+    - design/career-world/concept-tournaments/city-ninjaone-r2/*.png
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/reports/ninjaone-r2.json
+    - design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/ninjaone-r2/**
+  forbidden_files:
+    - design/career-world/concept-tournament.html
+    - scripts/**
+    - design/career-world/concept-tournaments/**/tournament-set.*
+    - design/career-world/concept-tournaments/**/prompt-set.json
+    - design/career-world/concept-tournaments/**/concept-set.md
+  required_context:
+    - design/career-world/concept-tournaments/city-ninjaone-r2/prompt-set.json
+    - design/career-world/concept-tournaments/city-ninjaone-r1/ninjaone-r1-03-relay-crown-capitol.png
+skills:
+  full_skills: [imagegen, task-packet-execution]
+acceptance_criteria:
+  - Exactly ten PNGs exist with filenames from prompt-set.json.
+  - Every PNG is 1536x1024 exact RGB grayscale after normalization.
+  - Each concept is a single uncropped isometric city capital and visibly follows its authored intent.
+  - No exact NinjaOne logo or wordmark is reproduced.
+  - A contact sheet is created and visually inspected before completion.
+gate_commands:
+  - python scripts/normalize-concept-tournament-images.py design/career-world/concept-tournaments/city-ninjaone-r2
+  - python scripts/build-concept-contact-sheets.py --output-dir design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/ninjaone-r2 design/career-world/concept-tournaments/city-ninjaone-r2
+stop_conditions:
+  - Prompt or reference file is missing.
+  - Any required output would need an out-of-fence edit.
+  - The same visual failure repeats after two targeted regeneration attempts.
+max_failed_loops: 2
+tool_output_budget: { max_carried_command_output_chars: 12000, full_logs_as_artifacts: true, failure_tail_lines: 40 }
+expected_output:
+  worker_report_schema: templates/worker-report.template.json
+  expected_exit_gate: ten-normalized-pngs-plus-contact-sheet
+communication: { mode: silent-unless-critical }

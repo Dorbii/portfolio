@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="600" viewBox="0 0 780 600" role="img" aria-labelledby="title desc">
+<title id="title">ACE Hardware standalone territory layout</title>
+<desc id="desc">Workshop cove / low cooperative island; 5 placed canonical nodes.</desc>
+<defs>
+<pattern id="iso-grid" width="48" height="28" patternUnits="userSpaceOnUse">
+<path d="M0 14 L24 0 L48 14 L24 28 Z" fill="none" stroke="#273039" stroke-width="0.65"/>
+</pattern>
+<filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<style>
+.frame{fill:#0a0d10}.grid{fill:url(#iso-grid);opacity:.7}.land{fill:#252c32;stroke:#a7b1ba;stroke-width:2.2}.land-inner{fill:none;stroke:#cbd2d8;stroke-width:1;opacity:.2}.contour{fill:none;stroke:#87939d;stroke-width:1.25;opacity:.52;stroke-dasharray:7 7}.water-cut{fill:#101820;stroke:#7f8b94;stroke-width:1.4}.route{fill:none;stroke-linecap:round}.route-primary{stroke:#d9e0e5;stroke-width:4;opacity:.45}.route-evidence{stroke:#aeb8c0;stroke-width:1.5;opacity:.28;stroke-dasharray:5 7}.node polygon{stroke-width:1.35;vector-effect:non-scaling-stroke}.node-shadow{fill:#000;opacity:.34;filter:url(#soft-shadow)}.node-core{fill:#f4f6f7;stroke:#111820;stroke-width:2}.node-label{fill:#f4f6f7;font:600 12px Inter,Segoe UI,sans-serif;text-anchor:middle;paint-order:stroke;stroke:#0a0d10;stroke-width:3px;stroke-linejoin:round}.node-role{fill:#93a0aa;font:700 8px Inter,Segoe UI,sans-serif;text-anchor:middle;letter-spacing:1.6px;paint-order:stroke;stroke:#0a0d10;stroke-width:2px}.heading{fill:#f6f8f9;font:700 22px Inter,Segoe UI,sans-serif;letter-spacing:.3px}.subheading{fill:#9da8b0;font:500 12px Inter,Segoe UI,sans-serif}.meta{fill:#7f8b94;font:600 10px Inter,Segoe UI,sans-serif;letter-spacing:1.1px}.legend-text{fill:#aeb7bf;font:500 10px Inter,Segoe UI,sans-serif}.safe-line{fill:none;stroke:#6d7780;stroke-width:1;stroke-dasharray:3 8;opacity:.35}
+</style>
+<rect class="frame" width="780" height="600"/>
+<rect class="grid" width="780" height="600"/>
+<path d="M103 126 C221 62 393 70 522 111 C669 157 728 260 685 403 C649 519 501 555 355 536 C215 563 100 503 66 397 C31 289 40 185 103 126 Z" class="land"/>
+<path d="M103 126 C221 62 393 70 522 111 C669 157 728 260 685 403 C649 519 501 555 355 536 C215 563 100 503 66 397 C31 289 40 185 103 126 Z" class="land-inner" transform="translate(0 5)"/>
+<path d="M143 157 C244 108 381 112 489 145 C604 179 655 257 622 367" class="contour contour-0"/>
+<path d="M187 199 C275 162 375 166 460 190 C545 216 584 269 558 342" class="contour contour-1"/>
+<path d="M235 243 C305 218 374 220 433 237 C486 253 510 284 493 324" class="contour contour-2"/>
+<path d="M600 171 C682 201 725 259 699 332 C653 351 606 325 576 283 Z" class="water-cut"/>
+<rect x="54" y="54" width="672" height="492" rx="28" class="safe-line"/>
+<path d="M 340.77083033843644 252.76231046992893 L 195.7334295958173 246.16970134526443" class="route route-primary" data-from="instance/ace-hardware/capital/01" data-to="instance/ace-hardware/project/qc-alm-extractor/01"/>
+<path d="M 355.1537778231269 289.8462221768731 L 253.21507068336547 391.78492931663453" class="route route-primary" data-from="instance/ace-hardware/capital/01" data-to="instance/ace-hardware/project/ticket-validation-automation/01"/>
+<path d="M 428.59170256471594 285.64635203668615 L 539.8270645684439 373.98031598082315" class="route route-primary" data-from="instance/ace-hardware/capital/01" data-to="instance/ace-hardware/project/sap-table-update-integration/01"/>
+<g class="node node-skill" data-node-id="instance/ace-hardware/skill/informatica/01" data-asset-id="skill/informatica@v1">
+<ellipse cx="545" cy="204" rx="19.24" ry="6.12" class="node-shadow"/>
+<polygon points="519,170 545,188 545,199 519,181" fill="#20272c" stroke="#aeb8c0"/>
+<polygon points="545,188 571,170 571,181 545,199" fill="#2b343b" stroke="#aeb8c0"/>
+<polygon points="545,152 571,170 545,188 519,170" fill="#38424a" stroke="#aeb8c0"/>
+<circle cx="545" cy="170" r="3.5" class="node-core"/>
+<text x="545" y="218" class="node-label">Informatica</text>
+<text x="545" y="231" class="node-role">SKILL</text>
+</g>
+<g class="node node-project" data-node-id="instance/ace-hardware/project/qc-alm-extractor/01" data-asset-id="project/qc-alm-extractor@v1">
+<ellipse cx="170" cy="297" rx="34.04" ry="10.200000000000001" class="node-shadow"/>
+<polygon points="124,245 170,275 170,292 124,262" fill="#20272c" stroke="#d8dee3"/>
+<polygon points="170,275 216,245 216,262 170,292" fill="#2b343b" stroke="#d8dee3"/>
+<polygon points="170,215 216,245 170,275 124,245" fill="#4d5962" stroke="#d8dee3"/>
+<circle cx="170" cy="245" r="5" class="node-core"/>
+<text x="170" y="311" class="node-label">QC ALM Extractor</text>
+<text x="170" y="324" class="node-role">PROJECT</text>
+</g>
+<g class="node node-capital" data-node-id="instance/ace-hardware/capital/01" data-asset-id="city/ace-hardware@v1">
+<ellipse cx="390" cy="340" rx="65.12" ry="19.040000000000003" class="node-shadow"/>
+<polygon points="302,255 390,311 390,335 302,279" fill="#20272c" stroke="#f1f4f6"/>
+<polygon points="390,311 478,255 478,279 390,335" fill="#2b343b" stroke="#f1f4f6"/>
+<polygon points="390,199 478,255 390,311 302,255" fill="#65717b" stroke="#f1f4f6"/>
+<circle cx="390" cy="255" r="8" class="node-core"/>
+<text x="390" y="354" class="node-label">ACE Hardware</text>
+<text x="390" y="367" class="node-role">CAPITAL</text>
+</g>
+<g class="node node-project" data-node-id="instance/ace-hardware/project/sap-table-update-integration/01" data-asset-id="project/sap-table-update-integration@v1">
+<ellipse cx="560" cy="442" rx="34.04" ry="10.200000000000001" class="node-shadow"/>
+<polygon points="514,390 560,420 560,437 514,407" fill="#20272c" stroke="#d8dee3"/>
+<polygon points="560,420 606,390 606,407 560,437" fill="#2b343b" stroke="#d8dee3"/>
+<polygon points="560,360 606,390 560,420 514,390" fill="#4d5962" stroke="#d8dee3"/>
+<circle cx="560" cy="390" r="5" class="node-core"/>
+<text x="560" y="456" class="node-label">SAP Table Update Integration</text>
+<text x="560" y="469" class="node-role">PROJECT</text>
+</g>
+<g class="node node-project" data-node-id="instance/ace-hardware/project/ticket-validation-automation/01" data-asset-id="project/ticket-validation-automation@v1">
+<ellipse cx="235" cy="462" rx="34.04" ry="10.200000000000001" class="node-shadow"/>
+<polygon points="189,410 235,440 235,457 189,427" fill="#20272c" stroke="#d8dee3"/>
+<polygon points="235,440 281,410 281,427 235,457" fill="#2b343b" stroke="#d8dee3"/>
+<polygon points="235,380 281,410 235,440 189,410" fill="#4d5962" stroke="#d8dee3"/>
+<circle cx="235" cy="410" r="5" class="node-core"/>
+<text x="235" y="476" class="node-label">Ticket Validation Automation</text>
+<text x="235" y="489" class="node-role">PROJECT</text>
+</g>
+<g transform="translate(34 34)">
+<rect x="-14" y="-18" width="470" height="72" rx="10" fill="#0a0d10" opacity=".9" stroke="#39434b"/>
+<text class="heading" x="0" y="8">ACE Hardware</text>
+<text class="subheading" x="0" y="29">Workshop cove / low cooperative island</text>
+<text class="meta" x="0" y="47">LOCAL 780×600 · WEIGHT 11 · 5 NODES</text>
+</g>
+<g transform="translate(506 561)">
+<rect x="-13" y="-19" width="252" height="32" rx="8" fill="#0a0d10" opacity=".88" stroke="#39434b"/>
+<text class="legend-text" x="0" y="2">solid: capital route</text>
+<text class="legend-text" x="123" y="2">dashed: evidence link</text>
+</g>
+</svg>

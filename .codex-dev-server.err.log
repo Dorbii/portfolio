@@ -1,0 +1,17 @@
+Error: listen UNKNOWN: unknown error 0.0.0.0:9229
+    at Server.setupListenHandle [as _listen2] (node:net:1917:21)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33685:9
+    at new Promise (<anonymous>)
+    at checkAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33681:41)
+    at getAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33695:9)
+    at getPorts (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33734:29)
+    at getFirstAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:48782:9)
+    at getInputInspectorPort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:48777:77) {
+  code: 'UNKNOWN',
+  errno: -4094,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 9229
+}

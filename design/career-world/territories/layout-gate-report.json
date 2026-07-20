@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T17:57:56.814Z",
+  "status": "PASS",
+  "layoutSha256": "861768c4b078f0536c65258cbec4f15fedbf6f813bbc8d9b0288ab9ba747ca73",
+  "checks": {
+    "passed": true,
+    "failures": [],
+    "expectedTerritories": 5,
+    "actualTerritories": 5,
+    "expectedNodes": 56,
+    "actualNodes": 56,
+    "excludedAssetsAbsent": true,
+    "finalStitchCreated": false,
+    "registryReconciliation": {
+      "status": "PASS",
+      "registryInstancesAfterExclusions": 56,
+      "placedInstances": 56,
+      "missingRegistryIds": [],
+      "unexpectedLayoutIds": []
+    }
+  },
+  "renders": [
+    {
+      "id": "ninjaone",
+      "svg": "design\\career-world\\territories\\ninjaone-territory.svg",
+      "png": "design\\career-world\\territories\\ninjaone-territory.png",
+      "rasterized": true
+    },
+    {
+      "id": "tanium",
+      "svg": "design\\career-world\\territories\\tanium-territory.svg",
+      "png": "design\\career-world\\territories\\tanium-territory.png",
+      "rasterized": true
+    },
+    {
+      "id": "independent",
+      "svg": "design\\career-world\\territories\\independent-territory.svg",
+      "png": "design\\career-world\\territories\\independent-territory.png",
+      "rasterized": true
+    },
+    {
+      "id": "column-technologies",
+      "svg": "design\\career-world\\territories\\column-technologies-territory.svg",
+      "png": "design\\career-world\\territories\\column-technologies-territory.png",
+      "rasterized": true
+    },
+    {
+      "id": "ace-hardware",
+      "svg": "design\\career-world\\territories\\ace-hardware-territory.svg",
+      "png": "design\\career-world\\territories\\ace-hardware-territory.png",
+      "rasterized": true
+    }
+  ],
+  "stopBoundary": {
+    "standaloneTerritoriesComplete": true,
+    "finalStitchCreated": false,
+    "runtimeMapModifiedByThisScript": false
+  }
+}

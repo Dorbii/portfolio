@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "id": "ambient-cargo-boat-r1-2026-07-18",
+  "name": "Cargo Boat · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/ambient-cargo-boat-r1",
+  "domainSummary": "A neutral low-profile cargo barge whose identity comes from a blunt load-bearing bow, an empty central freight well, a raised aft wheelhouse, a broad working deck, and protective side rub rails.",
+  "evidenceBoundary": "Keep this a generic unowned working vessel. Do not imply a company, route, cargo type, throughput, motion, or destination.",
+  "researchSources": [
+    {
+      "title": "Career World canonical ambient briefs",
+      "path": "docs/career-world-production/concept-briefs.json",
+      "use": "Accepted cargo-boat silhouette, component arrangement, projection, and neutral-evidence boundary."
+    }
+  ],
+  "assets": [
+    {
+      "id": "ambient-cargo-boat-r1-01-canonical-production",
+      "name": "Cargo Boat · Canonical Production",
+      "src": "ambient-cargo-boat-r1-01-canonical-production.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into its clearest production-ready map prop; emphasize flat load-bearing working deck",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "canonical-production",
+        "flat-load-bearing-working-deck",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "The accepted identity is tested in its most resolved reusable form. This version emphasizes flat load-bearing working deck.",
+      "businessCue": "flat load-bearing working deck"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-02-silhouette-contrast",
+      "name": "Cargo Boat · Silhouette Contrast",
+      "src": "ambient-cargo-boat-r1-02-silhouette-contrast.png",
+      "role": "broad-concept",
+      "controlledVariable": "push the outer contour and negative spaces for instant recognition at map scale; emphasize blunt stable bow",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "silhouette-contrast",
+        "blunt-stable-bow",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "A distinct silhouette tests recognition without labels or color. This version emphasizes blunt stable bow.",
+      "businessCue": "blunt stable bow"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-03-weighted-asymmetry",
+      "name": "Cargo Boat · Weighted Asymmetry",
+      "src": "ambient-cargo-boat-r1-03-weighted-asymmetry.png",
+      "role": "broad-concept",
+      "controlledVariable": "shift the dominant mass off-center while preserving the asset's practical balance; emphasize open central cargo well",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "weighted-asymmetry",
+        "open-central-cargo-well",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "Controlled asymmetry creates identity without sacrificing function. This version emphasizes open central cargo well.",
+      "businessCue": "open central cargo well"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-04-functional-exposure",
+      "name": "Cargo Boat · Functional Exposure",
+      "src": "ambient-cargo-boat-r1-04-functional-exposure.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the asset's defining working parts structurally legible without diagrams; emphasize raised aft wheelhouse",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "functional-exposure",
+        "raised-aft-wheelhouse",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "Exposed function tests whether the object reads through construction rather than decoration. This version emphasizes raised aft wheelhouse.",
+      "businessCue": "raised aft wheelhouse"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-05-rugged-structure",
+      "name": "Cargo Boat · Rugged Structure",
+      "src": "ambient-cargo-boat-r1-05-rugged-structure.png",
+      "role": "broad-concept",
+      "controlledVariable": "strengthen load-bearing edges, joints, guards, and contact points; emphasize side rub rails and fenders",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "rugged-structure",
+        "side-rub-rails-and-fenders",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "Rugged construction tests a durable working-world interpretation. This version emphasizes side rub rails and fenders.",
+      "businessCue": "side rub rails and fenders"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-06-modular-rhythm",
+      "name": "Cargo Boat · Modular Rhythm",
+      "src": "ambient-cargo-boat-r1-06-modular-rhythm.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize repeated functional elements into a clear unequal rhythm on one coherent object or shared base; emphasize flat load-bearing working deck",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "modular-rhythm",
+        "flat-load-bearing-working-deck",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "A modular cadence tests reuse and system belonging. This version emphasizes flat load-bearing working deck.",
+      "businessCue": "flat load-bearing working deck"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-07-low-profile",
+      "name": "Cargo Boat · Low Profile",
+      "src": "ambient-cargo-boat-r1-07-low-profile.png",
+      "role": "broad-concept",
+      "controlledVariable": "compress height and emphasize a long stable footprint while retaining every defining feature; emphasize blunt stable bow",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "low-profile",
+        "blunt-stable-bow",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "A low profile tests legibility in dense map placement. This version emphasizes blunt stable bow.",
+      "businessCue": "blunt stable bow"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-08-vertical-accent",
+      "name": "Cargo Boat · Vertical Accent",
+      "src": "ambient-cargo-boat-r1-08-vertical-accent.png",
+      "role": "broad-concept",
+      "controlledVariable": "give one legitimate functional element a taller focal role while keeping the overall prop subordinate to buildings; emphasize open central cargo well",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "vertical-accent",
+        "open-central-cargo-well",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "A vertical accent tests landmark readability without turning the prop into architecture. This version emphasizes open central cargo well.",
+      "businessCue": "open central cargo well"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-09-compact-primitive",
+      "name": "Cargo Boat · Compact Primitive",
+      "src": "ambient-cargo-boat-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the asset to the smallest complete form that preserves its exact identity and component count; emphasize raised aft wheelhouse",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "compact-primitive",
+        "raised-aft-wheelhouse",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "The primitive reveals which cues are essential. This version emphasizes raised aft wheelhouse.",
+      "businessCue": "raised aft wheelhouse"
+    },
+    {
+      "id": "ambient-cargo-boat-r1-10-ambient-synthesis",
+      "name": "Cargo Boat · Ambient Synthesis",
+      "src": "ambient-cargo-boat-r1-10-ambient-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "balance silhouette, function, construction, modular detail, and map-scale restraint in one production-ready prop; emphasize side rub rails and fenders",
+      "parentConcept": "Cargo Boat research profile",
+      "tags": [
+        "ambient",
+        "ambient-synthesis",
+        "side-rub-rails-and-fenders",
+        "ambient",
+        "vessel",
+        "cargo"
+      ],
+      "thesis": "The synthesis tests the complete ambient identity for repeated world use. This version emphasizes side rub rails and fenders.",
+      "businessCue": "side rub rails and fenders"
+    }
+  ]
+}

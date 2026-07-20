@@ -1,0 +1,197 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "skill-go-r1-2026-07-18",
+  "name": "Go · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/skill-go-r1",
+  "domainSummary": "A compiled systems and service language centered on simple composition, packages, explicit error handling, lightweight goroutines, channel communication, interfaces, efficient tooling, and readable convention-driven code.",
+  "evidenceBoundary": "Do not depict the Go gopher, wordmark, code, letters, or mascots. Express concurrency and simplicity through a restrained workshop structure.",
+  "researchSources": [
+    {
+      "title": "Effective Go",
+      "url": "https://go.dev/doc/effective_go",
+      "use": "Official idioms, packages, interfaces, errors, goroutines, channels, and clarity principles."
+    }
+  ],
+  "assets": [
+    {
+      "id": "skill-go-r1-01-canonical-instrument",
+      "name": "Go · Canonical Instrument",
+      "src": "skill-go-r1-01-canonical-instrument.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into a precise compact technical instrument building; emphasize simple package composition",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "canonical-instrument",
+        "simple-package-composition",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "The accepted skill identity is tested in its clearest production form. This version emphasizes simple package composition.",
+      "businessCue": "simple package composition"
+    },
+    {
+      "id": "skill-go-r1-02-core-mechanism",
+      "name": "Go · Core Mechanism",
+      "src": "skill-go-r1-02-core-mechanism.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the skill's defining mechanism the central architectural mass; emphasize explicit error and resource handling",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "core-mechanism",
+        "explicit-error-and-resource-handling",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "One unmistakable mechanism carries the identity. This version emphasizes explicit error and resource handling.",
+      "businessCue": "explicit error and resource handling"
+    },
+    {
+      "id": "skill-go-r1-03-flow-spine",
+      "name": "Go · Flow Spine",
+      "src": "skill-go-r1-03-flow-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize inputs, work, and outputs along one connected linear spine; emphasize lightweight concurrent workers",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "flow-spine",
+        "lightweight-concurrent-workers",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "A legible flow tests the skill as a transformation process. This version emphasizes lightweight concurrent workers.",
+      "businessCue": "lightweight concurrent workers"
+    },
+    {
+      "id": "skill-go-r1-04-interface-bridge",
+      "name": "Go · Interface Bridge",
+      "src": "skill-go-r1-04-interface-bridge.png",
+      "role": "broad-concept",
+      "controlledVariable": "join two unequal functional masses through one explicit inhabited interface bridge; emphasize channel-based coordination",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "interface-bridge",
+        "channel-based-coordination",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "The skill is expressed as a reliable boundary between systems. This version emphasizes channel-based coordination.",
+      "businessCue": "channel-based coordination"
+    },
+    {
+      "id": "skill-go-r1-05-layered-system",
+      "name": "Go · Layered System",
+      "src": "skill-go-r1-05-layered-system.png",
+      "role": "broad-concept",
+      "controlledVariable": "stack several connected layers with visibly different responsibilities; emphasize small interface boundaries",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "layered-system",
+        "small-interface-boundaries",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "Layering tests separation of concerns and system depth. This version emphasizes small interface boundaries.",
+      "businessCue": "small interface boundaries"
+    },
+    {
+      "id": "skill-go-r1-06-modular-field",
+      "name": "Go · Modular Field",
+      "src": "skill-go-r1-06-modular-field.png",
+      "role": "broad-concept",
+      "controlledVariable": "repeat small interoperable units on one shared base with a clear coordinating core; emphasize simple package composition",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "modular-field",
+        "simple-package-composition",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "Modularity and composition become the identity. This version emphasizes simple package composition.",
+      "businessCue": "simple package composition"
+    },
+    {
+      "id": "skill-go-r1-07-verified-core",
+      "name": "Go · Verified Core",
+      "src": "skill-go-r1-07-verified-core.png",
+      "role": "broad-concept",
+      "controlledVariable": "protect a compact central chamber behind explicit gates, checks, or controlled thresholds; emphasize explicit error and resource handling",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "verified-core",
+        "explicit-error-and-resource-handling",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "Correctness and validation dominate the architectural metaphor. This version emphasizes explicit error and resource handling.",
+      "businessCue": "explicit error and resource handling"
+    },
+    {
+      "id": "skill-go-r1-08-scale-engine",
+      "name": "Go · Scale Engine",
+      "src": "skill-go-r1-08-scale-engine.png",
+      "role": "broad-concept",
+      "controlledVariable": "extend the building through repeated service bays and resilient parallel paths; emphasize lightweight concurrent workers",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "scale-engine",
+        "lightweight-concurrent-workers",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "Performance and scale are expressed through structure, not speed lines. This version emphasizes lightweight concurrent workers.",
+      "businessCue": "lightweight concurrent workers"
+    },
+    {
+      "id": "skill-go-r1-09-compact-primitive",
+      "name": "Go · Compact Primitive",
+      "src": "skill-go-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the skill to a minimal but complete map-readable technical building; emphasize channel-based coordination",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "compact-primitive",
+        "channel-based-coordination",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "The primitive tests the smallest recognizable expression of the skill. This version emphasizes channel-based coordination.",
+      "businessCue": "channel-based coordination"
+    },
+    {
+      "id": "skill-go-r1-10-skill-synthesis",
+      "name": "Go · Skill Synthesis",
+      "src": "skill-go-r1-10-skill-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "combine mechanism, flow, interface, validation, and scale in one balanced supporting building; emphasize small interface boundaries",
+      "parentConcept": "Go research profile",
+      "tags": [
+        "skill",
+        "skill-synthesis",
+        "small-interface-boundaries",
+        "go",
+        "concurrency",
+        "language"
+      ],
+      "thesis": "The synthesis tests a complete skill identity while remaining subordinate to projects and cities. This version emphasizes small interface boundaries.",
+      "businessCue": "small interface boundaries"
+    }
+  ]
+};

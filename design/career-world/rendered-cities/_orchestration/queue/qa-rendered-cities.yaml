@@ -1,0 +1,26 @@
+run_id: cw-rendered-cities-20260719
+lane_id: qa-rendered-cities
+parent_thread_id: 019f7b4a-a9ef-7171-8aef-9a670eba952c
+plan_or_queue_item_path: design/career-world/rendered-cities/_orchestration/run-ledger.json
+diff_or_artifact_scope:
+  - design/career-world/rendered-cities/render-manifest.json
+  - design/career-world/rendered-cities/audit/rendered-cities-contact-sheet.png
+  - design/career-world/rendered-cities/ninjaone/ninjaone-rendered-r1.png
+  - design/career-world/rendered-cities/tanium/tanium-rendered-r1.png
+  - design/career-world/rendered-cities/independent/independent-rendered-r1.png
+  - design/career-world/rendered-cities/column-technologies/column-technologies-rendered-r1.png
+  - design/career-world/rendered-cities/ace-hardware/ace-hardware-rendered-r1.png
+ledger_path: design/career-world/rendered-cities/_orchestration/run-ledger.json
+worker_report_path: design/career-world/rendered-cities/_orchestration/reports/qa-rendered-cities.json
+log_artifact_dir: design/career-world/rendered-cities/_orchestration/logs/qa-rendered-cities
+required_gates:
+  - Inspect the contact sheet and every full-resolution final render.
+  - Verify manifest counts, exact grayscale, clipping, and footprint collision fields.
+  - Check that environment plates are distinct, assets read in one orthographic isometric family, capital-project-skill hierarchy is legible, and no rectangular source backgrounds remain.
+  - Check that the output is five standalone territories and does not reuse or stitch a global map.
+pass_fail_criteria:
+  - FAIL for missing or duplicated canonical landmarks, obvious perspective reversal, rectangular source matte, clipped asset, non-grayscale final, or materially incoherent topology.
+  - PASS_WITH_RISK for minor pad alignment, line density, or polish issues that do not invalidate this city-layout stage.
+  - PASS only if no material issue is visible.
+evidence_output_path: design/career-world/rendered-cities/_orchestration/reports/qa-rendered-cities.json
+communication: verdict-only

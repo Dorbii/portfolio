@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <title>Career World exact terrain placement guide</title>
+  <desc>Colored shapes are protected terrain plots. White dots are bottom-center ground anchors. Guide color must not be baked into final terrain.</desc>
+  <rect width="1600" height="900" fill="#050b14"/>
+  <g fill="#111b29" stroke="#718092" stroke-width="2">
+    <path d="M 40 285 C 80 145 220 70 410 55 C 600 25 720 55 850 40 C 1015 20 1160 70 1280 65 C 1460 55 1560 155 1570 300 C 1585 430 1490 535 1340 575 C 1180 615 1050 570 900 600 C 740 630 610 580 475 600 C 300 625 150 555 70 450 C 30 395 20 340 40 285 Z"/>
+<path d="M 60 735 C 75 620 205 575 355 590 C 520 580 635 660 645 785 C 650 875 520 900 350 898 C 175 900 45 855 60 735 Z"/>
+<path d="M 950 745 C 970 620 1090 580 1260 590 C 1435 585 1550 665 1555 785 C 1560 875 1430 900 1250 898 C 1070 900 940 855 950 745 Z"/>
+  </g>
+  <g class="zone-hulls"><path d="M 75 365 L 95 225 L 180 135 L 330 110 L 500 140 L 620 245 L 610 425 L 540 565 L 360 610 L 185 575 L 80 485 Z" fill="#3b8b9b" fill-opacity="0.12" stroke="#8ed9e5" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="10 9"/>
+<path d="M 515 330 L 550 180 L 690 90 L 900 95 L 1045 180 L 1080 345 L 1025 500 L 880 590 L 670 570 L 535 475 Z" fill="#a9552d" fill-opacity="0.12" stroke="#ef9a68" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="10 9"/>
+<path d="M 995 330 L 1040 200 L 1200 120 L 1400 135 L 1535 245 L 1550 400 L 1460 545 L 1280 590 L 1100 540 L 1005 445 Z" fill="#704c89" fill-opacity="0.12" stroke="#c79de1" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="10 9"/>
+<path d="M 70 745 L 115 640 L 260 600 L 440 610 L 590 680 L 640 800 L 560 880 L 380 900 L 190 880 L 75 820 Z" fill="#9d3937" fill-opacity="0.12" stroke="#ef8580" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="10 9"/>
+<path d="M 955 750 L 1010 645 L 1160 600 L 1340 610 L 1495 675 L 1545 795 L 1470 880 L 1290 900 L 1100 880 L 970 825 Z" fill="#4d7188" fill-opacity="0.12" stroke="#9bc4dc" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="10 9"/></g>
+  <g class="landscape-reserves" fill="none" stroke="#667689" stroke-width="7" stroke-opacity="0.55" stroke-linecap="round" stroke-dasharray="2 14">
+    <path d="M 120 145 C 260 75 430 80 575 145" class="ridge"/>
+<path d="M 610 120 C 760 55 930 65 1035 130" class="ridge"/>
+<path d="M 1080 145 C 1260 70 1440 105 1510 185" class="ridge"/>
+<path d="M 90 470 C 170 525 250 560 330 575" class="ravine"/>
+<path d="M 575 430 C 645 520 745 550 825 560" class="quarry"/>
+<path d="M 1080 500 C 1170 545 1260 560 1350 535" class="ravine"/>
+<path d="M 120 660 C 220 620 300 620 390 650" class="forest"/>
+<path d="M 1030 675 C 1140 620 1260 625 1360 660" class="quarry"/>
+  </g>
+  <g class="roads"><polyline points="75,365 280,438 360,307 590,260 620,325" fill="none" stroke="#8ed9e5" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="360,307 380,397 450,480 250,316" fill="none" stroke="#8ed9e5" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="280,438 150,430 140,275 250,150 245,205 160,205 205,256 480,288 565,314" fill="none" stroke="#8ed9e5" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="280,438 210,361 135,360 220,490 520,445 360,464 250,316" fill="none" stroke="#8ed9e5" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="590,260 495,367 550,385 450,480" fill="none" stroke="#8ed9e5" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="520,320 637,299 792,313 935,284 1070,305" fill="none" stroke="#ef9a68" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="637,299 645,209 792,313 687,382 781,447" fill="none" stroke="#ef9a68" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="637,299 564,307 580,390 885,440 700,150 763,170 861,196 1015,255 1055,325" fill="none" stroke="#ef9a68" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="935,284 885,378 985,335 781,447" fill="none" stroke="#ef9a68" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="1000,320 1118,378 1252,320 1390,377 1540,405" fill="none" stroke="#c79de1" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="1118,378 1052,310 1004,247 1115,250 1250,170 1378,273" fill="none" stroke="#c79de1" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="1118,378 1117,440" fill="none" stroke="#c79de1" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="470,600 433,680 295,680 350,755" fill="none" stroke="#ef8580" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="295,680 195,755" fill="none" stroke="#ef8580" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="350,755 174,680" fill="none" stroke="#ef8580" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/>
+<polyline points="1110,600 1030,630 1000,705 1160,700 1333,686" fill="none" stroke="#9bc4dc" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="1160,700 1300,795 1370,760" fill="none" stroke="#9bc4dc" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="1000,705 1060,762" fill="none" stroke="#9bc4dc" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6"/></g>
+  <g class="protected-plots"><path data-instance-id="instance/ninjaone/skill/data-contracts/01" data-kind="skill" d="M 220 122 L 280 122 L 285 127 L 285 153 L 280 158 L 220 158 L 215 153 L 215 127 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="250" cy="150" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/operator-control/01" data-kind="skill" d="M 677 114 L 723 114 L 728 119 L 728 153 L 723 158 L 677 158 L 672 153 L 672 119 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="700" cy="150" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/data-contracts/01" data-kind="skill" d="M 733 142 L 793 142 L 798 147 L 798 173 L 793 178 L 733 178 L 728 173 L 728 147 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="763" cy="170" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/typescript/01" data-kind="skill" d="M 1232 122 L 1268 122 L 1273 127 L 1273 173 L 1268 178 L 1232 178 L 1227 173 L 1227 127 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1250" cy="170" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/csharp/01" data-kind="skill" d="M 838 160 L 884 160 L 889 165 L 889 199 L 884 204 L 838 204 L 833 199 L 833 165 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="861" cy="196" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/go/01" data-kind="skill" d="M 217 171 L 273 171 L 278 176 L 278 208 L 273 213 L 217 213 L 212 208 L 212 176 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="245" cy="205" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/redis/01" data-kind="skill" d="M 130 177 L 190 177 L 195 182 L 195 208 L 190 213 L 130 213 L 125 208 L 125 182 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="160" cy="205" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/project/uat-automation/01" data-kind="project" d="M 601 169 L 689 169 L 698 178 L 698 212 L 689 221 L 601 221 L 592 212 L 592 178 Z" fill="#a9552d" fill-opacity="0.58" stroke="#ef9a68" stroke-width="2"/>
+<circle cx="645" cy="209" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/workflow-orchestration/01" data-kind="skill" d="M 975 201 L 1033 201 L 1038 206 L 1038 250 L 1033 255 L 975 255 L 970 250 L 970 206 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1004" cy="247" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/data-contracts/01" data-kind="skill" d="M 1085 222 L 1145 222 L 1150 227 L 1150 253 L 1145 258 L 1085 258 L 1080 253 L 1080 227 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1115" cy="250" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/localdb/01" data-kind="skill" d="M 992 219 L 1038 219 L 1043 224 L 1043 258 L 1038 263 L 992 263 L 987 258 L 987 224 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="1015" cy="255" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/mcp/01" data-kind="skill" d="M 182 220 L 228 220 L 233 225 L 233 259 L 228 264 L 182 264 L 177 259 L 177 225 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="205" cy="256" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/project/vendy-vm-platform/01" data-kind="project" d="M 558 196 L 622 196 L 631 205 L 631 263 L 622 272 L 558 272 L 549 263 L 549 205 Z" fill="#3b8b9b" fill-opacity="0.58" stroke="#8ed9e5" stroke-width="2"/>
+<circle cx="590" cy="260" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/react/01" data-kind="skill" d="M 1355 237 L 1401 237 L 1406 242 L 1406 276 L 1401 281 L 1355 281 L 1350 276 L 1350 242 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1378" cy="273" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/safe-writes/01" data-kind="skill" d="M 112 241 L 168 241 L 173 246 L 173 278 L 168 283 L 112 283 L 107 278 L 107 246 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="140" cy="275" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/project/cablecar/01" data-kind="project" d="M 893 236 L 977 236 L 986 245 L 986 287 L 977 296 L 893 296 L 884 287 L 884 245 Z" fill="#a9552d" fill-opacity="0.58" stroke="#ef9a68" stroke-width="2"/>
+<circle cx="935" cy="284" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/openapi/01" data-kind="skill" d="M 462 240 L 498 240 L 503 245 L 503 291 L 498 296 L 462 296 L 457 291 L 457 245 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="480" cy="288" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/project/tanium-risk-assessment/01" data-kind="project" d="M 610 237 L 664 237 L 673 246 L 673 302 L 664 311 L 610 311 L 601 302 L 601 246 Z" fill="#a9552d" fill-opacity="0.58" stroke="#ef9a68" stroke-width="2"/>
+<circle cx="637" cy="299" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/capital/01" data-kind="capital" d="M 286 183 L 434 183 L 450 199 L 450 309 L 434 325 L 286 325 L 270 309 L 270 199 Z" fill="#3b8b9b" fill-opacity="0.78" stroke="#8ed9e5" stroke-width="3"/>
+<circle cx="360" cy="307" r="5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/python/01" data-kind="skill" d="M 536 273 L 592 273 L 597 278 L 597 310 L 592 315 L 536 315 L 531 310 L 531 278 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="564" cy="307" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/context-compression/01" data-kind="skill" d="M 1034 262 L 1070 262 L 1075 267 L 1075 313 L 1070 318 L 1034 318 L 1029 313 L 1029 267 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1052" cy="310" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/capital/01" data-kind="capital" d="M 710 205 L 874 205 L 890 221 L 890 315 L 874 331 L 710 331 L 694 315 L 694 221 Z" fill="#a9552d" fill-opacity="0.78" stroke="#ef9a68" stroke-width="3"/>
+<circle cx="792" cy="313" r="5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/workflow-orchestration/01" data-kind="skill" d="M 536 268 L 594 268 L 599 273 L 599 317 L 594 322 L 536 322 L 531 317 L 531 273 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="565" cy="314" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/postgresql/01" data-kind="skill" d="M 232 268 L 268 268 L 273 273 L 273 319 L 268 324 L 232 324 L 227 319 L 227 273 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="250" cy="316" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/capital/01" data-kind="capital" d="M 1170 212 L 1334 212 L 1350 228 L 1350 322 L 1334 338 L 1170 338 L 1154 322 L 1154 228 Z" fill="#704c89" fill-opacity="0.78" stroke="#c79de1" stroke-width="3"/>
+<circle cx="1252" cy="320" r="5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/react/01" data-kind="skill" d="M 1032 289 L 1078 289 L 1083 294 L 1083 328 L 1078 333 L 1032 333 L 1027 328 L 1027 294 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="1055" cy="325" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/electron/01" data-kind="skill" d="M 956 289 L 1014 289 L 1019 294 L 1019 338 L 1014 343 L 956 343 L 951 338 L 951 294 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="985" cy="335" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/databricks/01" data-kind="skill" d="M 106 314 L 164 314 L 169 319 L 169 363 L 164 368 L 106 368 L 101 363 L 101 319 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="135" cy="360" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/docker/01" data-kind="skill" d="M 187 325 L 233 325 L 238 330 L 238 364 L 233 369 L 187 369 L 182 364 L 182 330 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="210" cy="361" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/operator-control/01" data-kind="skill" d="M 472 331 L 518 331 L 523 336 L 523 370 L 518 375 L 472 375 L 467 370 L 467 336 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="495" cy="367" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/project/career-world-portfolio/01" data-kind="project" d="M 1358 313 L 1422 313 L 1431 322 L 1431 380 L 1422 389 L 1358 389 L 1349 380 L 1349 322 Z" fill="#704c89" fill-opacity="0.58" stroke="#c79de1" stroke-width="2"/>
+<circle cx="1390" cy="377" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/project/xsearch/01" data-kind="project" d="M 843 330 L 927 330 L 936 339 L 936 381 L 927 390 L 843 390 L 834 381 L 834 339 Z" fill="#a9552d" fill-opacity="0.58" stroke="#ef9a68" stroke-width="2"/>
+<circle cx="885" cy="378" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/project/contextforge/01" data-kind="project" d="M 1076 330 L 1160 330 L 1169 339 L 1169 381 L 1160 390 L 1076 390 L 1067 381 L 1067 339 Z" fill="#704c89" fill-opacity="0.58" stroke="#c79de1" stroke-width="2"/>
+<circle cx="1118" cy="378" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/project/tmatch-eolmatch/01" data-kind="project" d="M 655 318 L 719 318 L 728 327 L 728 385 L 719 394 L 655 394 L 646 385 L 646 327 Z" fill="#a9552d" fill-opacity="0.58" stroke="#ef9a68" stroke-width="2"/>
+<circle cx="687" cy="382" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/react/01" data-kind="skill" d="M 527 349 L 573 349 L 578 354 L 578 388 L 573 393 L 527 393 L 522 388 L 522 354 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="550" cy="385" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/go/01" data-kind="skill" d="M 552 356 L 608 356 L 613 361 L 613 393 L 608 398 L 552 398 L 547 393 L 547 361 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="580" cy="390" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/project/engineering-metrics-pipeline/01" data-kind="project" d="M 346 345 L 414 345 L 423 354 L 423 400 L 414 409 L 346 409 L 337 400 L 337 354 Z" fill="#3b8b9b" fill-opacity="0.58" stroke="#8ed9e5" stroke-width="2"/>
+<circle cx="380" cy="397" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/ai/01" data-kind="skill" d="M 122 396 L 178 396 L 183 401 L 183 433 L 178 438 L 122 438 L 117 433 L 117 401 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="150" cy="430" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/project/kaizen-agent-platform/01" data-kind="project" d="M 246 386 L 314 386 L 323 395 L 323 441 L 314 450 L 246 450 L 237 441 L 237 395 Z" fill="#3b8b9b" fill-opacity="0.58" stroke="#8ed9e5" stroke-width="2"/>
+<circle cx="280" cy="438" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/workflow-orchestration/01" data-kind="skill" d="M 856 394 L 914 394 L 919 399 L 919 443 L 914 448 L 856 448 L 851 443 L 851 399 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="885" cy="440" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/independent/skill/operator-control/01" data-kind="skill" d="M 1094 404 L 1140 404 L 1145 409 L 1145 443 L 1140 448 L 1094 448 L 1089 443 L 1089 409 Z" fill="#704c89" fill-opacity="0.38" stroke="#c79de1" stroke-width="1.25"/>
+<circle cx="1117" cy="440" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/macstadium/01" data-kind="skill" d="M 492 411 L 548 411 L 553 416 L 553 448 L 548 453 L 492 453 L 487 448 L 487 416 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="520" cy="445" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/tanium/skill/manifest-v3/01" data-kind="skill" d="M 752 401 L 810 401 L 815 406 L 815 450 L 810 455 L 752 455 L 747 450 L 747 406 Z" fill="#a9552d" fill-opacity="0.38" stroke="#ef9a68" stroke-width="1.25"/>
+<circle cx="781" cy="447" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/vmware/01" data-kind="skill" d="M 331 418 L 389 418 L 394 423 L 394 467 L 389 472 L 331 472 L 326 467 L 326 423 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="360" cy="464" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/aws/01" data-kind="skill" d="M 421 434 L 479 434 L 484 439 L 484 483 L 479 488 L 421 488 L 416 483 L 416 439 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="450" cy="480" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ninjaone/skill/python/01" data-kind="skill" d="M 192 456 L 248 456 L 253 461 L 253 493 L 248 498 L 192 498 L 187 493 L 187 461 Z" fill="#3b8b9b" fill-opacity="0.38" stroke="#8ed9e5" stroke-width="1.25"/>
+<circle cx="220" cy="490" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/skill/ci-cd/01" data-kind="skill" d="M 1000 602 L 1060 602 L 1065 607 L 1065 633 L 1060 638 L 1000 638 L 995 633 L 995 607 Z" fill="#4d7188" fill-opacity="0.38" stroke="#9bc4dc" stroke-width="1.25"/>
+<circle cx="1030" cy="630" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ace-hardware/capital/01" data-kind="capital" d="M 213 572 L 377 572 L 393 588 L 393 682 L 377 698 L 213 698 L 197 682 L 197 588 Z" fill="#9d3937" fill-opacity="0.78" stroke="#ef8580" stroke-width="3"/>
+<circle cx="295" cy="680" r="5" fill="#ffffff"/>
+<path data-instance-id="instance/ace-hardware/project/sap-table-update-integration/01" data-kind="project" d="M 391 632 L 475 632 L 484 641 L 484 683 L 475 692 L 391 692 L 382 683 L 382 641 Z" fill="#9d3937" fill-opacity="0.58" stroke="#ef8580" stroke-width="2"/>
+<circle cx="433" cy="680" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ace-hardware/skill/informatica/01" data-kind="skill" d="M 146 646 L 202 646 L 207 651 L 207 683 L 202 688 L 146 688 L 141 683 L 141 651 Z" fill="#9d3937" fill-opacity="0.38" stroke="#ef8580" stroke-width="1.25"/>
+<circle cx="174" cy="680" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/project/atlassian-data-center-resilience/01" data-kind="project" d="M 1291 638 L 1375 638 L 1384 647 L 1384 689 L 1375 698 L 1291 698 L 1282 689 L 1282 647 Z" fill="#4d7188" fill-opacity="0.58" stroke="#9bc4dc" stroke-width="2"/>
+<circle cx="1333" cy="686" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/capital/01" data-kind="capital" d="M 1085 586 L 1235 586 L 1251 602 L 1251 702 L 1235 718 L 1085 718 L 1069 702 L 1069 602 Z" fill="#4d7188" fill-opacity="0.78" stroke="#9bc4dc" stroke-width="3"/>
+<circle cx="1160" cy="700" r="5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/project/atlassian-platform-automation/01" data-kind="project" d="M 966 653 L 1034 653 L 1043 662 L 1043 708 L 1034 717 L 966 717 L 957 708 L 957 662 Z" fill="#4d7188" fill-opacity="0.58" stroke="#9bc4dc" stroke-width="2"/>
+<circle cx="1000" cy="705" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ace-hardware/project/ticket-validation-automation/01" data-kind="project" d="M 306 715 L 394 715 L 403 724 L 403 758 L 394 767 L 306 767 L 297 758 L 297 724 Z" fill="#9d3937" fill-opacity="0.58" stroke="#ef8580" stroke-width="2"/>
+<circle cx="350" cy="755" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/ace-hardware/project/qc-alm-extractor/01" data-kind="project" d="M 163 691 L 227 691 L 236 700 L 236 758 L 227 767 L 163 767 L 154 758 L 154 700 Z" fill="#9d3937" fill-opacity="0.58" stroke="#ef8580" stroke-width="2"/>
+<circle cx="195" cy="755" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/skill/docker/01" data-kind="skill" d="M 1347 724 L 1393 724 L 1398 729 L 1398 763 L 1393 768 L 1347 768 L 1342 763 L 1342 729 Z" fill="#4d7188" fill-opacity="0.38" stroke="#9bc4dc" stroke-width="1.25"/>
+<circle cx="1370" cy="760" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/skill/atlassian/01" data-kind="skill" d="M 1032 728 L 1088 728 L 1093 733 L 1093 765 L 1088 770 L 1032 770 L 1027 765 L 1027 733 Z" fill="#4d7188" fill-opacity="0.38" stroke="#9bc4dc" stroke-width="1.25"/>
+<circle cx="1060" cy="762" r="2.5" fill="#ffffff"/>
+<path data-instance-id="instance/column-technologies/project/client-devops-delivery-implementations/01" data-kind="project" d="M 1273 733 L 1327 733 L 1336 742 L 1336 798 L 1327 807 L 1273 807 L 1264 798 L 1264 742 Z" fill="#4d7188" fill-opacity="0.58" stroke="#9bc4dc" stroke-width="2"/>
+<circle cx="1300" cy="795" r="2.5" fill="#ffffff"/></g>
+</svg>

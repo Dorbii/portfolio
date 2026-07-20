@@ -1,0 +1,197 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "skill-java-r1-2026-07-18",
+  "name": "Java · Round 1",
+  "sourcePath": "design/career-world/concept-tournaments/skill-java-r1",
+  "domainSummary": "A strongly typed, class-based language and managed runtime capability that compiles to portable JVM bytecode, loads linked classes, manages memory, supports concurrent execution, and optimizes long-running applications through the virtual machine.",
+  "evidenceBoundary": "Do not draw coffee cups, steam, logos, code, or letters. Express runtime stability, portability, and managed execution through nonliteral architecture.",
+  "researchSources": [
+    {
+      "title": "Java Virtual Machine structure",
+      "url": "https://docs.oracle.com/en/java/javase/26/docs/specs/jvms/jvms-2.html",
+      "use": "Official runtime data areas, class loading, bytecode execution, threads, and JVM structure."
+    }
+  ],
+  "assets": [
+    {
+      "id": "skill-java-r1-01-canonical-instrument",
+      "name": "Java · Canonical Instrument",
+      "src": "skill-java-r1-01-canonical-instrument.png",
+      "role": "broad-concept",
+      "controlledVariable": "refine the accepted baseline into a precise compact technical instrument building; emphasize portable bytecode runtime",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "canonical-instrument",
+        "portable-bytecode-runtime",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "The accepted skill identity is tested in its clearest production form. This version emphasizes portable bytecode runtime.",
+      "businessCue": "portable bytecode runtime"
+    },
+    {
+      "id": "skill-java-r1-02-core-mechanism",
+      "name": "Java · Core Mechanism",
+      "src": "skill-java-r1-02-core-mechanism.png",
+      "role": "broad-concept",
+      "controlledVariable": "make the skill's defining mechanism the central architectural mass; emphasize class loading and linking",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "core-mechanism",
+        "class-loading-and-linking",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "One unmistakable mechanism carries the identity. This version emphasizes class loading and linking.",
+      "businessCue": "class loading and linking"
+    },
+    {
+      "id": "skill-java-r1-03-flow-spine",
+      "name": "Java · Flow Spine",
+      "src": "skill-java-r1-03-flow-spine.png",
+      "role": "broad-concept",
+      "controlledVariable": "organize inputs, work, and outputs along one connected linear spine; emphasize managed memory and execution",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "flow-spine",
+        "managed-memory-and-execution",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "A legible flow tests the skill as a transformation process. This version emphasizes managed memory and execution.",
+      "businessCue": "managed memory and execution"
+    },
+    {
+      "id": "skill-java-r1-04-interface-bridge",
+      "name": "Java · Interface Bridge",
+      "src": "skill-java-r1-04-interface-bridge.png",
+      "role": "broad-concept",
+      "controlledVariable": "join two unequal functional masses through one explicit inhabited interface bridge; emphasize concurrent thread coordination",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "interface-bridge",
+        "concurrent-thread-coordination",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "The skill is expressed as a reliable boundary between systems. This version emphasizes concurrent thread coordination.",
+      "businessCue": "concurrent thread coordination"
+    },
+    {
+      "id": "skill-java-r1-05-layered-system",
+      "name": "Java · Layered System",
+      "src": "skill-java-r1-05-layered-system.png",
+      "role": "broad-concept",
+      "controlledVariable": "stack several connected layers with visibly different responsibilities; emphasize stable cross-platform library surface",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "layered-system",
+        "stable-cross-platform-library-surface",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "Layering tests separation of concerns and system depth. This version emphasizes stable cross-platform library surface.",
+      "businessCue": "stable cross-platform library surface"
+    },
+    {
+      "id": "skill-java-r1-06-modular-field",
+      "name": "Java · Modular Field",
+      "src": "skill-java-r1-06-modular-field.png",
+      "role": "broad-concept",
+      "controlledVariable": "repeat small interoperable units on one shared base with a clear coordinating core; emphasize portable bytecode runtime",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "modular-field",
+        "portable-bytecode-runtime",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "Modularity and composition become the identity. This version emphasizes portable bytecode runtime.",
+      "businessCue": "portable bytecode runtime"
+    },
+    {
+      "id": "skill-java-r1-07-verified-core",
+      "name": "Java · Verified Core",
+      "src": "skill-java-r1-07-verified-core.png",
+      "role": "broad-concept",
+      "controlledVariable": "protect a compact central chamber behind explicit gates, checks, or controlled thresholds; emphasize class loading and linking",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "verified-core",
+        "class-loading-and-linking",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "Correctness and validation dominate the architectural metaphor. This version emphasizes class loading and linking.",
+      "businessCue": "class loading and linking"
+    },
+    {
+      "id": "skill-java-r1-08-scale-engine",
+      "name": "Java · Scale Engine",
+      "src": "skill-java-r1-08-scale-engine.png",
+      "role": "broad-concept",
+      "controlledVariable": "extend the building through repeated service bays and resilient parallel paths; emphasize managed memory and execution",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "scale-engine",
+        "managed-memory-and-execution",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "Performance and scale are expressed through structure, not speed lines. This version emphasizes managed memory and execution.",
+      "businessCue": "managed memory and execution"
+    },
+    {
+      "id": "skill-java-r1-09-compact-primitive",
+      "name": "Java · Compact Primitive",
+      "src": "skill-java-r1-09-compact-primitive.png",
+      "role": "broad-concept",
+      "controlledVariable": "reduce the skill to a minimal but complete map-readable technical building; emphasize concurrent thread coordination",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "compact-primitive",
+        "concurrent-thread-coordination",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "The primitive tests the smallest recognizable expression of the skill. This version emphasizes concurrent thread coordination.",
+      "businessCue": "concurrent thread coordination"
+    },
+    {
+      "id": "skill-java-r1-10-skill-synthesis",
+      "name": "Java · Skill Synthesis",
+      "src": "skill-java-r1-10-skill-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "combine mechanism, flow, interface, validation, and scale in one balanced supporting building; emphasize stable cross-platform library surface",
+      "parentConcept": "Java research profile",
+      "tags": [
+        "skill",
+        "skill-synthesis",
+        "stable-cross-platform-library-surface",
+        "java",
+        "jvm",
+        "language"
+      ],
+      "thesis": "The synthesis tests a complete skill identity while remaining subordinate to projects and cities. This version emphasizes stable cross-platform library surface.",
+      "businessCue": "stable cross-platform library surface"
+    }
+  ]
+};

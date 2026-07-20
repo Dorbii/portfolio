@@ -1,6 +1,8 @@
 # Career World Canonical Asset and Identity Map
 
-Status: accepted concept and runtime contract; desktop coordinate, zoom, and asset-fidelity QA passed, with responsive/input recertification still pending.
+Status: accepted cohesive-world contract and implemented desktop baseline. Animation and responsive polish remain deferred until the static composition is accepted.
+
+> **Regional-layout supersession (2026-07-19):** the current land image, `1600 × 900` geography, employer anchors, zone rectangles, and absolute scene coordinates below describe the implemented runtime baseline only. They are not layout authority for the next map. Five independent territory-local layouts in `design/career-world/territories/` now precede any future global stitch; see `docs/career-world-production/regional-territory-contract.md`. Employer/project identity, evidence boundaries, local skill-instance ownership, accepted art, hierarchy, and projection rules remain binding.
 
 This document is the anti-drift source of truth for the Career World visual system. It supersedes any earlier mock or handoff interpretation that changes architecture between zoom levels, treats an employer as multiple cities, treats a project as a different building at each depth, or generates a new skill building for every use.
 
@@ -20,28 +22,28 @@ The active 2.5D runtime uses optimized derivatives of the approved concept art. 
 
 | Layer | Source | Locked responsibility |
 |---|---|---|
-| Approved runtime art | `public/career-world/art/runtime-art-manifest.json` and `public/career-world/art/**` | Exactly 56 optimized WebP derivatives with source paths, crop receipts, dimensions, and byte receipts |
-| Evidence/identity registry | `features/career-world/model/world-registry.ts` | Employer, project, skill, and evidence relationships plus the five canonical authored district origins |
-| Visual placement map | `features/career-world/model/scene-composition.ts` | Exactly 58 city-local capital, project, and skill instances derived from those origins with fixed world coordinates and envelopes |
-| Asset-backed scene | `features/career-world/components/world-scene.tsx` and `features/career-world/rendering/runtime-art.ts` | World, city, and project composition, semantic zoom, pan/zoom input, and lightweight route overlays without a 3D or procedural-geometry runtime |
+| Approved runtime art | `public/career-world/art/runtime-art-manifest.json`, `public/career-world/art/runtime-palette-manifest.json`, and `public/career-world/art/**` | 56 optimized canonical derivatives plus exactly 58 employer-palette instance variants with source, alpha, luminance, dimension, and byte receipts |
+| Evidence/identity registry | `features/career-world/model/world-registry.ts` | Employer, project, skill, evidence, and instance identity plus the five canonical world anchors |
+| Visual placement map | `features/career-world/model/scene-composition.ts` | Exactly 58 capital, project, and employer-local skill instances with fixed absolute world coordinates, ground anchors, footprint classes, and detail thresholds |
+| Asset-backed scene | `features/career-world/components/world-scene.tsx` and `features/career-world/rendering/runtime-art.ts` | One persistent terrain/node renderer, zoom-only detail, viewport culling, accessible map selection, and pan/zoom input without 3D, video, or active animation |
 
-The registry origins plus the visual placement map are the anti-drift authority for city composition. Moving an employer pad is a controlled anchor change in the registry; moving a project or skill is a controlled offset change in the placement map. Zooming, palette changes, animation, and project focus must not mutate the resulting coordinates, resize the visual envelope, remount a smaller asset subset, or substitute another asset.
+The registry anchors plus the visual placement map are the anti-drift authority for city composition. Moving a capital is a controlled anchor change in the registry; moving a project or skill is a controlled absolute-coordinate change in the placement map. Zooming, palette changes, future animation, and project focus must not mutate the resulting coordinates, resize the visual envelope, or substitute another asset. Detail thresholds and viewport intersection may mount a smaller visible subset; that culling is a view optimization over the same fixed registry, not a new layout.
 
 | Employer district | Canonical authored origin |
 |---|---:|
-| NinjaOne | `(552, 302)` |
-| Tanium | `(855, 280)` |
-| Independent | `(1176, 298)` |
-| ACE Hardware | `(456, 688)` |
-| Column Technologies | `(1196, 712)` |
+| NinjaOne | `(350, 350)` |
+| Tanium | `(800, 345)` |
+| Independent | `(1300, 350)` |
+| ACE Hardware | `(350, 760)` |
+| Column Technologies | `(1250, 760)` |
 
-These are the overview-pad coordinates and the city origins. There is no second set of city-focus anchors. Project focus retains the same district DOM, asset IDs, coordinates, and base envelopes; only route emphasis and visual context may change.
+These anchors and every project/skill coordinate live on the same `1600 × 900` plane as the terrain. There is no second set of overview, city-focus, or project-focus coordinates. Camera focus, contextual opacity, labels, and culling may change; identity, ground point, footprint, and visual width do not.
 
 The latest user direction supersedes only the visual-runtime clauses of D-010 and D-012. Approved art derivatives, not reconstructed code-native geometry, are the active visual authority. Stable registry IDs, factual evidence boundaries, reuse rules, fixed placement, and zoom continuity remain binding. Source PNG preservation through Git LFS also remains binding.
 
 Two narrow source overrides are intentional and recorded in the runtime manifest:
 
-- `world/career-world@v1` uses `design/career-world/concepts/tracer/world-career-world-v1.png`, because it is the approved one-mainland/two-lower-island composition.
+- `world/career-world@v1` uses `design/career-world/concepts/world/career-world-v2.png`, because it is the approved cohesive `1600 × 900` terrain with one upper mainland, three mainland employer zones, and two lower employer islands.
 - `project/kaizen-metrics@v1` uses `design/career-world/concepts/tracer/project-kaizen-metrics-v1.png`, because it is the approved observatory landmark.
 
 ## Concept map
@@ -133,12 +135,13 @@ Employer is the city. Project is a unique building or landmark within that city.
 
 ## Zoom continuity map
 
-| Level | Visible assets | Added motion | Continuity requirement |
+| Detail tier | Visible assets | Current motion | Continuity requirement |
 |---|---|---|---|
-| 1. Career world | Geography, employer cities/capitals, roads, islands, boats | Slow water lines, coastline traces, route flow, city beacons, ambient drift | City silhouettes and positions match their closer views |
-| 2. Employer city | Same city/capital plus its project and city-local skill buildings | Project-road packets, facade signals, district rings, service traffic | Every project and skill building is its canonical asset in a fixed city position |
-| 3. Project focus | Same project building plus its related city skill buildings | Focus scan, richer facade emission, project-to-skill packets, localized stack easter eggs | Project and skill geometry, orientation, footprint, and city coordinates remain unchanged; only camera scale, emphasis, detail, and motion density change |
-| 4. Project summary | Exact Level 3 map state plus an overlay drawer | Underlying motion continues unless reduced-motion is active | Drawer occludes the map; it does not reflow, pan, zoom, or regenerate it |
+| World, `<1.45×` | Exact terrain, five capitals, all sixteen project buildings, sparse neutral ambient | None | All five employers coexist; three remain on the mainland and ACE/Column remain on their islands regardless of URL focus |
+| Territory, `1.45–2.54×` | Same terrain/capitals/projects plus employer-local skill buildings intersecting the viewport | None | New nodes reveal at their fixed world coordinates; active-employer project labels may appear without moving assets |
+| District, `2.55–3.49×` | Same visible node set plus skill labels and tighter viewport culling | None | Coordinates, visual widths, ground anchors, architecture, and employer palette remain unchanged |
+| Close, `3.5–4×` | Same fixed nodes at maximum authored raster detail | None | Reserved for later static attachments and animation density; it does not authorize substitute art or layouts |
+| Project summary | Exact current camera/map state plus the factual drawer | None | Drawer occludes the map; it does not reflow, pan, zoom, regenerate, or start a video |
 
 There is no separate system-tour level.
 
@@ -148,7 +151,7 @@ There is no separate system-tour level.
 - Lock one camera azimuth, elevation, and north direction. Users may pan and zoom, but the authored asset view does not rotate.
 - Use the locked overview's restrained technical-cartography language: near-black navy field, desaturated contour lines, thin isometric strokes, limited emissive accents, tracked uppercase labels, and low bloom.
 - Greater zoom may add doors, windows, roof equipment, roads, vegetation, packets, and interior line detail. It may not change the primary masses or silhouette.
-- Employer color treatment is applied around the approved asset, not by regenerating or redrawing its architecture.
+- Employer color treatment is a prebuilt static derivative of the approved asset. Runtime CSS filters, blend modes, stacked masks, regeneration, and redrawn architecture are not allowed.
 - Skill identity comes from architecture first. A small fixed glyph/sign slot may reinforce identity, but a logo cube is not the building.
 - Roads are physical map infrastructure. Packet motion may briefly show a selected project-to-city-skill relationship, but it is not a permanent relationship graph.
 
@@ -177,7 +180,7 @@ Employer palettes fill those slots:
 | ACE Hardware | Cool red |
 | Column Technologies | One muted steel-blue family |
 
-The same runtime skill-art file is reused for every city-local instance of that skill. Any employer-specific tint, accent, or surrounding terrain treatment must leave the source architecture and silhouette unchanged.
+Every city-local skill instance derives from the same canonical skill-art file. The build emits one static palette WebP per employer use so runtime rendering stays cheap; every variant must preserve source dimensions, alpha, luminance, architecture, and silhouette.
 
 ## Canonical registry model
 
@@ -237,11 +240,13 @@ instance/ninjaone/skill/go/01
 design/career-world/concepts/        # preserved full-resolution approved sources
 public/career-world/art/
 +-- runtime-art-manifest.json        # source, crop, output, and byte receipts
++-- runtime-palette-manifest.json    # exact employer-instance palette variants and transform receipts
 +-- world/*.webp
 +-- city/*.webp
 +-- project/*.webp
 +-- skill/*.webp
-`-- ambient/*.webp
++-- ambient/*.webp
+`-- palette/{employer}/{kind}/*.webp
 ```
 
 The public derivatives are the only concept-art files served by the active runtime. Full-resolution sources remain design artifacts. The manifest must keep one record per canonical registry asset and must preserve the identity, reuse, projection, crop, and source lineage of each derivative.
@@ -254,7 +259,7 @@ The public derivatives are the only concept-art files served by the active runti
 4. Mark the asset `accepted` and increment its version only for an intentional redesign.
 5. Select and record the approved source panel; do not average or blend conflicting panels.
 6. Build an optimized runtime derivative and record its crop, dimensions, and byte receipt in the runtime manifest.
-7. Produce employer appearances through non-destructive palette treatment around the same accepted asset.
+7. Produce employer appearances through the deterministic build-time palette pipeline; validate exact alpha, bounded luminance error, dimensions, and cardinality before promotion.
 8. Compose employer cities from registry instances; do not ask an image model to reinvent buildings inside a complete scene.
 9. Produce closer zooms from the same composition and asset definitions.
 10. Add UI overlays after the map state is fixed.
@@ -280,18 +285,19 @@ Before accepting any new city, project, skill, or zoom mock, verify:
 
 | Asset | Status | Note |
 |---|---|---|
-| Career-world geography | Active optimized art | Approved tracer world derivative preserves one mainland, two lower islands, five fixed employer pads, and two sea routes |
-| Employer cities and palettes | Active optimized art | Five canonical city derivatives; placement and employer identity remain registry-controlled |
+| Career-world geography | Active optimized art | Approved cohesive-world v2 derivative provides one upper mainland with NinjaOne/Tanium/Independent zones and two lower ACE/Column islands on the exact runtime coordinate plane |
+| Employer cities and palettes | Active optimized art | Five canonical city derivatives plus deterministic static palette variants; placement and employer identity remain registry-controlled |
 | Project buildings | Active optimized art | Sixteen unique canonical derivatives, including the approved Kaizen Metrics observatory override, with one fixed instance in each owning city |
 | Skill buildings | Active optimized art | Twenty-seven canonical derivatives; thirty-seven employer-local instances reuse them by ID |
 | Ambient kit | Active optimized art | Seven reusable derivatives; placement and motion remain illustrative |
-| 58-instance visual composition | Active | Fixed in `scene-composition.ts`; zoom changes detail and animation, not identity or position |
+| 58-instance visual composition | Active | Fixed in `scene-composition.ts`; zoom changes detail membership, labels, and camera scale, not identity or position |
 | Legacy code-native geometry | Superseded as visual runtime | Preserved for historical traceability and tests; not imported by the active asset-backed scene |
 | Old Blender/system-tour media | Retired | Removed from the site |
 | Experimental 3D asset kit | Deferred | Preserved on disk; no further modeling, QA, scene work, or runtime integration |
 
 ## Remaining content work
 
-- Continue visual QA for collisions, label density, animation timing, and responsive framing without changing canonical identity.
+- Keep animation disabled until the static overview, five territory views, zoom continuity, culling, and desktop interaction baseline are explicitly accepted.
+- Responsive/mobile framing is a later recertification lane; it may change camera defaults and UI density, not world coordinates or asset identity.
 - Keep ACE Hardware and Column Technologies project landmarks explicitly identity-only until public-safe evidence records exist. Their visuals cannot create factual copy, skill links, metrics, real-campus implications, or technical claims.
 - Add or revise project evidence only through the factual evidence registry and drawers. Entertainment overlays and easter eggs are never evidence.

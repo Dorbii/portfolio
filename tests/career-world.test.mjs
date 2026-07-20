@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile, readdir, stat } from "node:fs/promises";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -18,30 +19,24 @@ async function render() {
   );
 }
 
-test("server-renders the bounded Career World tracer without retired media", async () => {
+test("server-renders one accessible Career World map without the retired navigation panel or media", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Career World/);
   assert.match(html, /Illustrative world .* entertainment, not measured outcomes\./);
-  for (const employer of [
-    "NinjaOne",
-    "Tanium",
-    "Independent",
-    "ACE Hardware",
-    "Column Technologies",
-  ]) {
-    assert.match(html, new RegExp(employer));
-  }
+  assert.match(html, /data-scene-layer="coordinate-grid"/);
+  assert.match(html, /data-visible-node-count="0"/);
+  assert.doesNotMatch(html, /data-map-select="(?:employer|project)"/);
+  assert.match(html, /role="region" aria-label="Interactive Career World map"/);
   assert.doesNotMatch(html, /data-project-control=/);
-  assert.doesNotMatch(html, /data-project-control="tanium-risk-assessment"/);
-  assert.match(html, /Choose an employer city to reveal its project and skill buildings\./);
+  assert.doesNotMatch(html, /Choose an employer city|career-world-navigation-region|data-project-index-control/);
   assert.match(html, /steven-doris-resume\.pdf/);
   assert.match(html, /steven-doris-resume\.docx/);
   assert.doesNotMatch(html, /<video|autoplay|system-tour|ProjectMediaStage/i);
 });
 
-test("keeps the full canonical registry, evidence holds, and frozen tracer coordinates stable", async (t) => {
+test("keeps the full canonical registry, evidence holds, and fixed employer anchors stable", async (t) => {
   const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
   t.after(() => vite.close());
   const registry = await vite.ssrLoadModule("/features/career-world/model/world-registry.ts");
@@ -69,29 +64,22 @@ test("keeps the full canonical registry, evidence holds, and frozen tracer coord
     manifest.assets.map(({ id, category, evidence_status }) => [id, category, evidence_status]).sort(),
   );
   assert.deepEqual(registry.ACCEPTED_EMPLOYER_ANCHOR_TUPLES, [
-    ["ninjaone", 552, 302],
-    ["tanium", 855, 280],
-    ["independent", 1176, 298],
-    ["ace-hardware", 456, 688],
-    ["column-technologies", 1196, 712],
-  ]);
-  assert.deepEqual(registry.ACCEPTED_NINJAONE_LOCAL_COORDINATE_TUPLES, [
-    ["instance/ninjaone/capital/01", 420, 500],
-    ["instance/ninjaone/project/kaizen-agent-platform/01", 620, 245],
-    ["instance/ninjaone/project/vendy-vm-platform/01", 780, 500],
-    ["instance/ninjaone/project/engineering-metrics-pipeline/01", 600, 760],
-    ["instance/ninjaone/skill/go/01", 825, 700],
+    ["ninjaone", 360, 307],
+    ["tanium", 792, 313],
+    ["independent", 1252, 320],
+    ["ace-hardware", 295, 680],
+    ["column-technologies", 1160, 700],
   ]);
   const capitals = registry.careerWorldRegistry.instances.filter((instance) => instance.kind === "capital");
   assert.equal(capitals.length, 5);
   assert.deepEqual(
-    capitals.map((instance) => [instance.id, instance.assetId, instance.employerId, instance.localPosition, instance.worldPosition]),
+    capitals.map((instance) => [instance.id, instance.assetId, instance.employerId, instance.projectId ?? null]),
     [
-      ["instance/ninjaone/capital/01", "city/ninjaone@v1", "ninjaone", { x: 420, y: 500 }, { x: 528.08, y: 298.88 }],
-      ["instance/tanium/capital/01", "city/tanium@v1", "tanium", null, null],
-      ["instance/independent/capital/01", "city/independent@v1", "independent", null, null],
-      ["instance/ace-hardware/capital/01", "city/ace-hardware@v1", "ace-hardware", null, null],
-      ["instance/column-technologies/capital/01", "city/column-technologies@v1", "column-technologies", null, null],
+      ["instance/ninjaone/capital/01", "city/ninjaone@v1", "ninjaone", null],
+      ["instance/tanium/capital/01", "city/tanium@v1", "tanium", null],
+      ["instance/independent/capital/01", "city/independent@v1", "independent", null],
+      ["instance/ace-hardware/capital/01", "city/ace-hardware@v1", "ace-hardware", null],
+      ["instance/column-technologies/capital/01", "city/column-technologies@v1", "column-technologies", null],
     ],
   );
   for (const employer of registry.careerWorldRegistry.employers) {
@@ -101,8 +89,6 @@ test("keeps the full canonical registry, evidence holds, and frozen tracer coord
     assert.equal(registry.careerWorldRegistry.assets.find((asset) => asset.id === employerCapitals[0].assetId).category, "city");
   }
   assert.equal(registry.careerWorldRegistry.instances.some((instance) => instance.kind === "city"), false);
-  const cityAssetIds = new Set(registry.careerWorldRegistry.assets.filter((asset) => asset.category === "city").map((asset) => asset.id));
-  assert.equal(registry.careerWorldRegistry.instances.some((instance) => cityAssetIds.has(instance.assetId) && instance.worldPosition && registry.careerWorldRegistry.employers.some((employer) => instance.worldPosition.x === employer.anchor.x && instance.worldPosition.y === employer.anchor.y)), false);
   assert.deepEqual(
     registry.careerWorldRegistry.projects.map((project) => [project.id, project.employerId, project.assetId, project.evidenceStatus, project.evidenceTraceId]),
     [
@@ -158,9 +144,12 @@ test("keeps the full canonical registry, evidence holds, and frozen tracer coord
     assert.ok(instance);
     assert.equal(registry.careerWorldRegistry.projectSkillLinks.some((link) => link.skillInstanceId === instance.id), false);
   }
-  assert.equal(registry.careerWorldRegistry.instances.filter((instance) => instance.kind === "project" && instance.localPosition === null && instance.worldPosition === null).length, 13);
-  assert.deepEqual(registry.positionedNavigableProjects.map((project) => project.id), ["kaizen-agent-platform", "vendy-vm-platform", "engineering-metrics-pipeline"]);
-  assert.deepEqual(registry.careerWorldRegistry.instances.filter((instance) => instance.localPosition !== null).map((instance) => [instance.id, instance.localPosition.x, instance.localPosition.y]), registry.ACCEPTED_NINJAONE_LOCAL_COORDINATE_TUPLES);
+  assert.equal(
+    registry.careerWorldRegistry.instances.every(
+      (instance) => !("localPosition" in instance) && !("worldPosition" in instance),
+    ),
+    true,
+  );
   const cloneRegistry = () => JSON.parse(JSON.stringify(registry.careerWorldRegistry));
   const validationText = (candidate) => registry.validateCareerWorldRegistry(candidate).join("\n");
   const duplicateAsset = cloneRegistry(); duplicateAsset.assets.push(duplicateAsset.assets[0]); assert.match(validationText(duplicateAsset), /duplicate asset/);
@@ -170,33 +159,49 @@ test("keeps the full canonical registry, evidence holds, and frozen tracer coord
   const missingCapital = cloneRegistry(); missingCapital.instances = missingCapital.instances.filter((instance) => instance.id !== "instance/tanium/capital/01"); assert.match(validationText(missingCapital), /capital instance count tanium/);
   const duplicateCapital = cloneRegistry(); const taniumCapital = duplicateCapital.instances.find((instance) => instance.id === "instance/tanium/capital/01"); duplicateCapital.instances.push({ ...taniumCapital, id: "instance/tanium/capital/duplicate" }); assert.match(validationText(duplicateCapital), /capital instance count tanium/);
   const mismatchedCapitalAsset = cloneRegistry(); mismatchedCapitalAsset.instances.find((instance) => instance.id === "instance/tanium/capital/01").assetId = "project/tanium-risk-assessment@v1"; const mismatchedCapitalText = validationText(mismatchedCapitalAsset); assert.match(mismatchedCapitalText, /mismatched employer capital tanium/); assert.match(mismatchedCapitalText, /mismatched capital asset tanium/);
-  const duplicateCityIdentity = cloneRegistry(); duplicateCityIdentity.instances.push({ id: "instance/tanium/project/city-duplicate/01", assetId: "city/tanium@v1", kind: "project", employerId: "tanium", localPosition: null, worldPosition: null }); assert.match(validationText(duplicateCityIdentity), /city asset on non-capital instance instance\/tanium\/project\/city-duplicate\/01/);
-  const legacyCity = cloneRegistry(); legacyCity.instances.push({ id: "instance/tanium/city/legacy", assetId: "city/tanium@v1", kind: "city", employerId: "tanium", localPosition: null, worldPosition: { x: 855, y: 280 } }); const legacyCityText = validationText(legacyCity); assert.match(legacyCityText, /unknown instance kind instance\/tanium\/city\/legacy/); assert.match(legacyCityText, /city asset at employer anchor instance\/tanium\/city\/legacy/);
+  const duplicateCityIdentity = cloneRegistry(); duplicateCityIdentity.instances.push({ id: "instance/tanium/project/city-duplicate/01", assetId: "city/tanium@v1", kind: "project", employerId: "tanium" }); assert.match(validationText(duplicateCityIdentity), /city asset on non-capital instance instance\/tanium\/project\/city-duplicate\/01/);
+  const legacyCity = cloneRegistry(); legacyCity.instances.push({ id: "instance/tanium/city/legacy", assetId: "city/tanium@v1", kind: "city", employerId: "tanium" }); const legacyCityText = validationText(legacyCity); assert.match(legacyCityText, /unknown instance kind instance\/tanium\/city\/legacy/); assert.match(legacyCityText, /city asset on non-capital instance instance\/tanium\/city\/legacy/);
   const danglingLink = cloneRegistry(); danglingLink.projectSkillLinks.push({ projectId: "kaizen-agent-platform", skillInstanceId: "instance/ninjaone/skill/missing/01" }); assert.match(validationText(danglingLink), /unknown skill link/);
   const duplicateLink = cloneRegistry(); duplicateLink.projectSkillLinks.push(duplicateLink.projectSkillLinks[0]); assert.match(validationText(duplicateLink), /duplicate project skill link/);
   assert.equal(new Set(registry.registryIdentityTuples.map((tuple) => tuple.join("|"))).size, registry.registryIdentityTuples.length);
   assert.ok(Object.isFrozen(registry.careerWorldRegistry));
 });
 
-test("assembles every canonical 2.5D asset into one stable 58-instance scene map", async (t) => {
+test("assembles every registry instance into one stable five-zone scene composition", async (t) => {
   const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
   t.after(() => vite.close());
-  const [registry, geometry, composition] = await Promise.all([
+  const [registry, composition] = await Promise.all([
     vite.ssrLoadModule("/features/career-world/model/world-registry.ts"),
-    vite.ssrLoadModule("/features/career-world/definitions/geometry-registry.ts"),
     vite.ssrLoadModule("/features/career-world/model/scene-composition.ts"),
   ]);
 
-  assert.equal(geometry.CAREER_WORLD_GEOMETRY_DEFINITIONS.length, 56);
-  assert.equal(geometry.geometryDefinitionByAssetId.size, 56);
   assert.deepEqual(
-    [...geometry.geometryDefinitionByAssetId.keys()].sort(),
-    registry.careerWorldRegistry.assets.map((asset) => asset.id).sort(),
+    composition.worldZones.map((zone) => [zone.id, zone.topology, zone.origin]),
+    [
+      ["ninjaone", "mainland", { x: 360, y: 307 }],
+      ["tanium", "mainland", { x: 792, y: 313 }],
+      ["independent", "mainland", { x: 1252, y: 320 }],
+      ["ace-hardware", "island", { x: 295, y: 680 }],
+      ["column-technologies", "island", { x: 1160, y: 700 }],
+    ],
+  );
+  assert.deepEqual(
+    composition.worldZones.map((zone) => zone.paletteId),
+    registry.careerWorldRegistry.employers.map((employer) => employer.palette),
   );
   assert.equal(composition.scenePlacements.length, 58);
   assert.equal(composition.scenePlacementByInstanceId.size, 58);
   assert.equal(composition.projectScenePlacementByProjectId.size, 16);
   assert.equal(new Set(composition.scenePlacements.map((placement) => placement.instanceId)).size, 58);
+  assert.equal(
+    new Set(
+      composition.scenePlacements.map(
+        (placement) => `${placement.position.x},${placement.position.y}`,
+      ),
+    ).size,
+    58,
+    "registry-backed nodes must not share a world coordinate",
+  );
 
   for (const instance of registry.careerWorldRegistry.instances) {
     const placement = composition.scenePlacementByInstanceId.get(instance.id);
@@ -205,20 +210,107 @@ test("assembles every canonical 2.5D asset into one stable 58-instance scene map
     assert.equal(placement.employerId, instance.employerId);
     assert.ok(Number.isFinite(placement.position.x));
     assert.ok(Number.isFinite(placement.position.y));
-    assert.ok(placement.scale > 0);
+    assert.deepEqual(placement.groundAnchor, { x: 0.5, y: 0.96 });
+    assert.ok(placement.visualWidth > 0);
+    assert.ok(placement.footprint.width > 0);
+    assert.ok(placement.footprint.depth > 0);
+    assert.equal(Object.isFrozen(placement), true);
+    assert.equal(Object.isFrozen(placement.position), true);
+    assert.equal(Object.isFrozen(placement.groundAnchor), true);
+    const employer = registry.employerById.get(instance.employerId);
+    assert.deepEqual(placement.localPosition, {
+      x: placement.position.x - employer.anchor.x,
+      y: placement.position.y - employer.anchor.y,
+    });
+    const zone = composition.worldZones.find((candidate) => candidate.id === instance.employerId);
+    assert.ok(zone);
+    assert.ok(placement.position.x >= zone.bounds.x && placement.position.x <= zone.bounds.x + zone.bounds.width);
+    assert.ok(placement.position.y >= zone.bounds.y && placement.position.y <= zone.bounds.y + zone.bounds.height);
   }
 
-  const goInstances = composition.scenePlacements.filter(
-    (placement) => placement.assetId === "skill/go@v1",
-  );
-  assert.ok(goInstances.length > 1);
+  const placementContract = composition.scenePlacements.map((placement) => [
+    placement.instanceId,
+    placement.position.x,
+    placement.position.y,
+    placement.visualWidth,
+    placement.footprintClass,
+    placement.footprint.width,
+    placement.footprint.depth,
+    placement.groundAnchor.x,
+    placement.groundAnchor.y,
+    placement.minDetail,
+    placement.labelDetail,
+  ]);
   assert.equal(
-    new Set(goInstances.map((placement) => geometry.geometryForAsset(placement.assetId).masterGeometryHash)).size,
-    1,
+    createHash("sha256")
+      .update(JSON.stringify(placementContract))
+      .digest("hex"),
+    "5ce0d6df0ee798bb4a32a4788380a131921ebf8cd19708e4b60ae24c9a2fd44e",
+    "scene coordinates and footprints changed; update only with an intentional map-composition decision",
   );
 });
 
-test("camera math preserves anchors and LOD does not mutate registry tuples", async (t) => {
+test("keeps employer-local sprites collision-free at territory detail", async (t) => {
+  const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
+  t.after(() => vite.close());
+  const composition = await vite.ssrLoadModule(
+    "/features/career-world/model/scene-composition.ts",
+  );
+  const paletteManifest = JSON.parse(
+    await readFile(
+      new URL(
+        "../public/career-world/art/runtime-palette-manifest.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const sourceSizeByInstanceId = new Map(
+    paletteManifest.records.map((record) => [
+      record.instance_id,
+      { width: record.output.width, height: record.output.height },
+    ]),
+  );
+  const bounds = composition.scenePlacements.map((placement) => {
+    const source = sourceSizeByInstanceId.get(placement.instanceId);
+    assert.ok(source, `missing source dimensions for ${placement.instanceId}`);
+    const height = placement.visualWidth * (source.height / source.width);
+    return {
+      id: placement.instanceId,
+      employerId: placement.employerId,
+      left: placement.position.x - placement.visualWidth * placement.groundAnchor.x,
+      right:
+        placement.position.x +
+        placement.visualWidth * (1 - placement.groundAnchor.x),
+      top: placement.position.y - height * placement.groundAnchor.y,
+      bottom: placement.position.y + height * (1 - placement.groundAnchor.y),
+    };
+  });
+  const collisions = [];
+  const spriteGutter = 6;
+  for (let leftIndex = 0; leftIndex < bounds.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < bounds.length; rightIndex += 1) {
+      const left = bounds[leftIndex];
+      const right = bounds[rightIndex];
+      if (left.employerId !== right.employerId) continue;
+      if (
+        left.left < right.right + spriteGutter &&
+        left.right + spriteGutter > right.left &&
+        left.top < right.bottom + spriteGutter &&
+        left.bottom + spriteGutter > right.top
+      ) {
+        collisions.push(`${left.id} <> ${right.id}`);
+      }
+    }
+  }
+  assert.deepEqual(
+    collisions,
+    [],
+    "same-employer sprites must not overlap before terrain is authored around them",
+  );
+});
+
+test("camera math preserves anchors and zoom detail does not mutate registry tuples", async (t) => {
   const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
   t.after(() => vite.close());
   const [camera, registry] = await Promise.all([
@@ -226,34 +318,175 @@ test("camera math preserves anchors and LOD does not mutate registry tuples", as
     vite.ssrLoadModule("/features/career-world/model/world-registry.ts"),
   ]);
   const viewport = { width: 1600, height: 900 };
-  const point = { x: 552, y: 302 };
+  const point = { x: 350, y: 350 };
   const screen = camera.worldToScreen(point, camera.WORLD_CAMERA, viewport);
   assert.deepEqual(camera.screenToWorld(screen, camera.WORLD_CAMERA, viewport), point);
   const anchor = { x: 1180, y: 650 };
   const before = camera.screenToWorld(anchor, camera.cameraForPoint(point, 2.5), viewport);
-  const zoomed = camera.zoomCameraAt(camera.cameraForPoint(point, 2.5), anchor, 4.5, viewport);
+  const zoomed = camera.zoomCameraAt(camera.cameraForPoint(point, 2.5), anchor, 4, viewport);
   assert.deepEqual(camera.screenToWorld(anchor, zoomed, viewport), before);
-  assert.deepEqual([camera.lodForZoom(1), camera.lodForZoom(2.5), camera.lodForZoom(4.5)], ["world", "city", "project"]);
+  assert.deepEqual(
+    [camera.detailForZoom(1), camera.detailForZoom(1.45), camera.detailForZoom(2.55), camera.detailForZoom(3.5)],
+    ["world", "territory", "district", "close"],
+  );
+  assert.equal(camera.detailForZoom.length, 1, "detail selection must depend on zoom only");
+  assert.deepEqual(
+    ["world", "territory", "district", "close"].map((detail) =>
+      ["world", "territory", "district", "close"].map((minimum) =>
+        camera.detailIncludes(detail, minimum),
+      ),
+    ),
+    [
+      [true, false, false, false],
+      [true, true, false, false],
+      [true, true, true, false],
+      [true, true, true, true],
+    ],
+  );
   const identityBefore = JSON.stringify(registry.registryIdentityTuples);
-  [1, 2.5, 4.5, 1].forEach((zoom) => camera.lodForZoom(zoom));
+  [1, 1.45, 2.55, 3.5, 1].forEach((zoom) => camera.detailForZoom(zoom));
   assert.equal(JSON.stringify(registry.registryIdentityTuples), identityBefore);
 });
 
-test("keeps semantic LOD, camera bounds, and employer capitals stable", async (t) => {
+test("fits employer focus around canonical territory nodes without moving the grid", async (t) => {
   const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
   t.after(() => vite.close());
-  const [camera, registry, composition] = await Promise.all([
+  const [state, camera, composition, registry] = await Promise.all([
+    vite.ssrLoadModule("/features/career-world/hooks/use-career-world-state.ts"),
+    vite.ssrLoadModule("/features/career-world/rendering/world-camera.ts"),
+    vite.ssrLoadModule("/features/career-world/model/scene-composition.ts"),
+    vite.ssrLoadModule("/features/career-world/model/world-registry.ts"),
+  ]);
+  const stage = { width: camera.WORLD_STAGE_WIDTH, height: camera.WORLD_STAGE_HEIGHT };
+  const gutter = 16;
+  const epsilon = 1e-6;
+  const positionsBefore = composition.sceneNodes.map((node) => [node.instanceId, node.position.x, node.position.y]);
+
+  for (const employer of registry.careerWorldRegistry.employers) {
+    const focusCamera = state.cameraForFocus({ kind: "employer", employerId: employer.id });
+    assert.equal(camera.detailForZoom(focusCamera.zoom), "territory");
+    assert.ok(focusCamera.zoom <= 2);
+    assert.deepEqual(camera.constrainWorldCamera(focusCamera), focusCamera);
+    const zone = composition.worldZones.find((candidate) => candidate.id === employer.id);
+    const rects = [
+      zone.bounds,
+      ...composition.sceneNodes
+        .filter((node) => node.employerId === employer.id)
+        .map(camera.sceneNodeBounds),
+    ];
+    for (const rect of rects) {
+      const topLeft = camera.worldToScreen({ x: rect.x, y: rect.y }, focusCamera, stage);
+      const bottomRight = camera.worldToScreen(
+        { x: rect.x + rect.width, y: rect.y + rect.height },
+        focusCamera,
+        stage,
+      );
+      assert.ok(
+        topLeft.x >= gutter - epsilon &&
+          topLeft.y >= gutter - epsilon &&
+          bottomRight.x <= stage.width - gutter + epsilon &&
+          bottomRight.y <= stage.height - gutter + epsilon,
+        `${employer.id} clips canonical rect ${JSON.stringify(rect)}`,
+      );
+    }
+  }
+
+  assert.deepEqual(
+    composition.sceneNodes.map((node) => [node.instanceId, node.position.x, node.position.y]),
+    positionsBefore,
+  );
+  const metrics = composition.projectScenePositionById.get("engineering-metrics-pipeline");
+  assert.deepEqual(
+    state.cameraForFocus({ kind: "project", projectId: "engineering-metrics-pipeline" }),
+    camera.cameraForPoint(metrics, 4.5),
+  );
+});
+
+test("keeps zoom-only detail, viewport culling, camera bounds, and employer capitals stable", async (t) => {
+  const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
+  t.after(() => vite.close());
+  const [camera, registry, composition, sceneRenderer] = await Promise.all([
     vite.ssrLoadModule("/features/career-world/rendering/world-camera.ts"),
     vite.ssrLoadModule("/features/career-world/model/world-registry.ts"),
     vite.ssrLoadModule("/features/career-world/model/scene-composition.ts"),
+    vite.ssrLoadModule("/features/career-world/components/world-scene.tsx"),
   ]);
 
-  for (const zoom of [-10, 1, 2, 4, 6, 20]) {
-    assert.notEqual(camera.semanticLodForFocus(zoom, false, false), "project");
-    assert.equal(camera.semanticLodForFocus(zoom, true, false), "city");
-  }
-  assert.equal(camera.semanticLodForFocus(6, true, false), "city");
-  assert.equal(camera.semanticLodForFocus(1, false, true), "project");
+  assert.deepEqual(
+    [-10, 1, 1.44, 1.45, 2.54, 2.55, 3.49, 3.5, 20].map((zoom) => camera.detailForZoom(zoom)),
+    ["world", "world", "world", "territory", "territory", "district", "district", "close", "close"],
+  );
+  const worldNodes = camera.visibleSceneNodes(
+    composition.sceneNodes,
+    camera.WORLD_CAMERA,
+    5_000,
+  );
+  assert.equal(worldNodes.length, 0);
+  const territoryNodes = camera.visibleSceneNodes(
+    composition.sceneNodes,
+    camera.cameraForPoint({ x: 800, y: 450 }, 1.45),
+    5_000,
+  );
+  assert.equal(territoryNodes.filter((node) => node.kind === "capital").length, 5);
+  assert.equal(territoryNodes.filter((node) => node.kind === "project").length, 16);
+  assert.equal(territoryNodes.filter((node) => node.kind === "skill").length, 0);
+  assert.equal(territoryNodes.filter((node) => node.kind === "ambient").length, 6);
+  const districtNodes = camera.visibleSceneNodes(
+    composition.sceneNodes,
+    camera.cameraForPoint({ x: 800, y: 450 }, 2.55),
+    5_000,
+  );
+  assert.equal(districtNodes.filter((node) => node.kind === "skill").length, 37);
+
+  const closeCamera = camera.cameraForPoint({ x: 350, y: 350 }, 4);
+  const closeViewport = camera.worldViewportRect(closeCamera);
+  const closeNodes = camera.visibleSceneNodes(composition.sceneNodes, closeCamera, 0);
+  assert.ok(closeNodes.length > 0);
+  assert.ok(closeNodes.length < composition.sceneNodes.length);
+  assert.ok(
+    closeNodes.every((node) =>
+      camera.rectsIntersect(closeViewport, camera.sceneNodeBounds(node)),
+    ),
+  );
+  assert.equal(
+    closeNodes.some((node) => node.employerId === "column-technologies"),
+    false,
+    "off-viewport island nodes should be culled",
+  );
+
+  const renderScene = (sceneCamera, focusEmployerId) =>
+    renderToStaticMarkup(
+      createElement(sceneRenderer.WorldScene, {
+        camera: sceneCamera,
+        focusEmployerId,
+        focusProjectId: null,
+        reducedMotion: true,
+        onCameraChange() {},
+        onEmployer() {},
+        onProject() {},
+      }),
+    );
+  const worldMarkup = renderScene(camera.WORLD_CAMERA, "independent");
+  assert.match(worldMarkup, /data-scene-layer="coordinate-grid"/);
+  assert.match(worldMarkup, /data-grid-major-unit="100"/);
+  assert.match(worldMarkup, /data-grid-half-unit="50"/);
+  assert.match(worldMarkup, /data-grid-minor-unit="20"/);
+  assert.match(worldMarkup, /data-visible-node-count="0"/);
+  assert.doesNotMatch(worldMarkup, /data-instance-id=/);
+  const territoryMarkup = renderScene(
+    camera.cameraForPoint({ x: 800, y: 450 }, 1.45),
+    "independent",
+  );
+  assert.doesNotMatch(territoryMarkup, /data-scene-layer="coordinate-grid"/);
+  assert.match(territoryMarkup, /data-instance-id=/);
+  assert.match(territoryMarkup, /career-world-scene-node[^"\n]*is-context/);
+  assert.deepEqual(
+    [...territoryMarkup.matchAll(/career-world-scene-node-label">([^<]+)</g)]
+      .map((match) => match[1])
+      .sort(),
+    ["Career World Portfolio", "ContextForge", "Independent"].sort(),
+    "focused territory labels must stay scoped to the active employer",
+  );
 
   const viewport = {
     width: camera.WORLD_STAGE_WIDTH,
@@ -539,11 +772,14 @@ test("ships the complete approved art library through a bounded asset-backed 2.5
     {
       source_path: recordById.get("world/career-world@v1")?.source_path,
       source_role: recordById.get("world/career-world@v1")?.source_role,
+      width: recordById.get("world/career-world@v1")?.output.width,
+      height: recordById.get("world/career-world@v1")?.output.height,
     },
     {
-      source_path:
-        "design/career-world/concepts/tracer/world-career-world-v1.png",
-      source_role: "approved-island-world-override",
+      source_path: "design/career-world/concepts/world/career-world-v3.png",
+      source_role: "approved-placement-first-world-v3",
+      width: 1600,
+      height: 900,
     },
   );
   assert.deepEqual(
@@ -560,7 +796,7 @@ test("ships the complete approved art library through a bounded asset-backed 2.5
 
   assert.match(scene, /<img\b/);
   assert.match(scene, /data-art-asset=/);
-  assert.match(scene, /runtimeArtPath\(/);
+  assert.match(scene, /runtimeArtPath\(node\.assetId, node\.employerId\)/);
   assert.doesNotMatch(
     scene,
     /GeometryRenderer|geometryForAsset|geometry-registry|from\s+["'][^"']*\/geometry\//,
@@ -569,7 +805,80 @@ test("ships the complete approved art library through a bounded asset-backed 2.5
   assert.doesNotMatch(scene, /<canvas\b|WebGL|three|babylon/i);
 });
 
-test("keeps one fixed-envelope district mounted through city and project focus", async () => {
+test("ships exactly one employer-palette runtime file for every registry scene instance", async (t) => {
+  const vite = await createServer({ configFile: false, server: { middlewareMode: true }, appType: "custom", logLevel: "silent" });
+  t.after(() => vite.close());
+  const [registry, runtimeArt] = await Promise.all([
+    vite.ssrLoadModule("/features/career-world/model/world-registry.ts"),
+    vite.ssrLoadModule("/features/career-world/rendering/runtime-art.ts"),
+  ]);
+  const manifest = JSON.parse(
+    await readFile(
+      new URL(
+        "../public/career-world/art/runtime-palette-manifest.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+
+  assert.equal(manifest.schema_version, "career-world-runtime-palette/v1");
+  assert.equal(manifest.runtime_path_pattern, "/career-world/art/palette/{employer}/{category}/{slug}.webp");
+  assert.deepEqual(manifest.counts, {
+    total: 58,
+    capital: 5,
+    project: 16,
+    skill: 37,
+  });
+  assert.equal(manifest.records.length, 58);
+  assert.equal(new Set(manifest.records.map((record) => record.instance_id)).size, 58);
+  assert.equal(new Set(manifest.records.map((record) => record.runtime_path)).size, 58);
+  assert.deepEqual(
+    manifest.records.map((record) => record.instance_id).sort(),
+    registry.careerWorldRegistry.instances.map((instance) => instance.id).sort(),
+  );
+
+  for (const record of manifest.records) {
+    const instance = registry.instanceById.get(record.instance_id);
+    assert.ok(instance, record.instance_id);
+    assert.equal(record.asset_id, instance.assetId);
+    assert.equal(record.employer_id, instance.employerId);
+    assert.equal(record.palette_id, registry.employerById.get(instance.employerId).palette);
+    assert.match(
+      record.runtime_path,
+      new RegExp(`^/career-world/art/palette/${instance.employerId}/(?:city|project|skill)/[a-z0-9-]+\\.webp$`),
+    );
+    const runtimeFile = await stat(new URL(`../${record.file_path}`, import.meta.url));
+    assert.equal(runtimeFile.isFile(), true, record.file_path);
+    assert.equal(runtimeFile.size, record.output.bytes, `${record.file_path} byte receipt drifted`);
+  }
+  const paletteFiles = (
+    await readdir(
+      new URL("../public/career-world/art/palette/", import.meta.url),
+      { recursive: true },
+    )
+  ).filter((path) => path.endsWith(".webp"));
+  assert.equal(paletteFiles.length, 58);
+
+  assert.equal(
+    runtimeArt.runtimeArtPath("skill/go@v1", "ninjaone"),
+    "/career-world/art/palette/ninjaone/skill/go.webp?v=placement-first-world-v3",
+  );
+  assert.equal(
+    runtimeArt.runtimeArtPath("ambient/cargo-boat@v1", null),
+    "/career-world/art/ambient/cargo-boat.webp?v=placement-first-world-v3",
+  );
+  assert.equal(
+    runtimeArt.runtimeArtPath("world/career-world@v1"),
+    "/career-world/art/world/career-world.webp?v=placement-first-world-v3",
+  );
+  assert.throws(
+    () => runtimeArt.runtimeArtPath("project/contextforge@v1"),
+    /requires an employerId for palette routing/,
+  );
+});
+
+test("keeps one persistent culled scene tree mounted through camera and project focus", async () => {
   const [scene, state] = await Promise.all([
     readFile(
       new URL(
@@ -594,55 +903,49 @@ test("keeps one fixed-envelope district mounted through city and project focus",
     return source.slice(start, end);
   };
 
-  assert.doesNotMatch(scene, /\bprojectSkillPositions?\b/);
-
-  const envelopes = sourceBetween(
+  assert.match(scene, /const CULL_OVERSCAN_SCREEN_PIXELS = 180;/);
+  assert.match(scene, /const CULLING_REFRESH_SCREEN_PIXELS = 72;/);
+  assert.match(scene, /\bsceneNodes\b/);
+  assert.doesNotMatch(
     scene,
-    "const ART_ENVELOPES",
-    "type ArtInstanceProps",
+    /if\s*\(\s*detail\s*===\s*["']world["']\s*\)\s*return\s*\[\]/,
+    "overview visibility must come from each node's minDetail contract",
   );
-  for (const kind of ["capital", "project", "skill"]) {
-    assert.match(
-      envelopes,
-      new RegExp(
-        `${kind}:\\s*Object\\.freeze\\(\\{\\s*width:\\s*\\d+,\\s*height:\\s*\\d+\\s*\\}\\)`,
-      ),
-      `${kind} must declare a fixed width and height`,
-    );
-  }
-
-  const artInstance = sourceBetween(
-    scene,
-    "function ArtInstance",
-    "export function WorldScene",
-  );
-  const artInstanceProps = sourceBetween(
-    scene,
-    "type ArtInstanceProps",
-    "function ArtInstance",
-  );
-  assert.match(artInstance, /const\s+position\s*=\s*placement\.position\s*;/);
-  assert.doesNotMatch(artInstanceProps, /^\s*position\??\s*:/m);
-  const envelopeCalls = [...artInstance.matchAll(/artEnvelope\(([^)]*)\)/g)];
-  assert.equal(envelopeCalls.length, 1);
-  assert.equal(envelopeCalls[0][1].trim(), "placement.kind");
-  assert.match(artInstance, /width:\s*envelope\.width/);
-  assert.match(artInstance, /height:\s*envelope\.height/);
-
   assert.match(
     scene,
-    /\{lod\s*!==\s*["']world["']\s*&&\s*activeEmployer\s*&&\s*\(/,
+    /visibleSceneNodes\(\s*sceneNodes,\s*[^,]+,\s*CULL_OVERSCAN_SCREEN_PIXELS/,
   );
   assert.equal(
-    [...scene.matchAll(/<ArtInstance\b/g)].length,
+    [...scene.matchAll(/visibleNodes\.map\(/g)].length,
     1,
-    "world-scene must render one complete district, not a second project-only subset",
+    "the renderer must mount one persistent scene-node collection",
   );
+  assert.equal(
+    [...scene.matchAll(/<SceneArtNode\b/g)].length,
+    1,
+    "the renderer must use one node path for capitals, projects, and skills",
+  );
+  assert.doesNotMatch(scene, /lod\s*[!=]==?\s*["']world["']/);
+  assert.doesNotMatch(scene, /semanticLodForFocus|activePlacements|projectSkillPositions?/);
+  assert.doesNotMatch(scene, /worldRoutes|career-world-route|routeGeometry|<animate(?:Motion|Transform)?\b|<path\b/i);
+  assert.match(scene, /left:\s*node\.position\.x/);
+  assert.match(scene, /top:\s*node\.position\.y/);
+  assert.match(scene, /node\.groundAnchor\.x/);
+  assert.match(scene, /node\.groundAnchor\.y/);
+  assert.match(scene, /runtimeArtPath\(node\.assetId, node\.employerId\)/);
+  assert.match(scene, /data-position-x/);
+  assert.match(scene, /data-position-y/);
+  assert.match(scene, /data-footprint/);
 
   const pointerDown = sourceBetween(
     scene,
     "const handlePointerDown",
     "const handlePointerMove",
+  );
+  assert.match(
+    pointerDown,
+    /event\.target\s+instanceof\s+Element[\s\S]*event\.target\.closest\(["']\[data-map-select\]["']\)[\s\S]*return;[\s\S]*setPointerCapture\(event\.pointerId\)/,
+    "map controls must return before the scene captures their pointer",
   );
   assert.match(
     pointerDown,
@@ -736,11 +1039,10 @@ test("uses registry-derived factual project drawers and preserves the modal-only
     assert.equal(registry.careerWorldRegistry.projectSkillLinks.filter((link) => link.projectId === projectId).length, 0);
   }
 
-  const [drawer, state, scene, hitTargets, styles] = await Promise.all([
+  const [drawer, state, scene, styles] = await Promise.all([
     readFile(new URL("../features/career-world/components/project-drawer.tsx", import.meta.url), "utf8"),
     readFile(new URL("../features/career-world/components/career-world.tsx", import.meta.url), "utf8"),
     readFile(new URL("../features/career-world/components/world-scene.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../features/career-world/components/world-hit-targets.tsx", import.meta.url), "utf8"),
     readFile(new URL("../features/career-world/styles/career-world.css", import.meta.url), "utf8"),
   ]);
   assert.match(drawer, /role="dialog"/);
@@ -756,35 +1058,37 @@ test("uses registry-derived factual project drawers and preserves the modal-only
   assert.match(state, /data-project-control/);
   assert.match(state, /useRef<HTMLElement/);
   assert.match(state, /getClientRects\(\)\.length > 0/);
-  assert.match(scene, /aria-hidden="true"/);
+  assert.match(scene, /role="region"/);
+  assert.match(scene, /aria-label="Interactive Career World map"/);
+  assert.match(scene, /data-map-select="employer"/);
+  assert.match(scene, /data-map-select="project"/);
+  assert.doesNotMatch(scene, /className="career-world-scene"[^>]*aria-hidden=/);
   assert.doesNotMatch(scene, /instance\.kind !== "city"/);
-  assert.match(hitTargets, /target: HTMLElement/);
-  assert.match(hitTargets, /onProject\(projectId, event\.currentTarget\)/);
-  assert.match(hitTargets, /data-project-index-control/);
-  assert.doesNotMatch(hitTargets, /document\.querySelector/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(styles, /\.career-world-app\[data-reduced-motion\]/);
+  const contextOpacity = styles.match(
+    /\.career-world-scene-node\.is-context\s*\{[^}]*opacity:\s*([0-9.]+)/,
+  );
+  assert.ok(contextOpacity);
+  assert.ok(Number(contextOpacity[1]) > 0 && Number(contextOpacity[1]) <= 0.2);
   assert.doesNotMatch(`${drawer}\n${state}\n${scene}`, /WebGL|three|babylon|<video|autoplay/i);
 });
 
-test("keeps the immersive map mounted beneath accessible overlay controls", async () => {
+test("keeps the accessible map mounted without a top-left navigation panel", async () => {
   const [shell, styles] = await Promise.all([
     readFile(new URL("../features/career-world/components/career-world.tsx", import.meta.url), "utf8"),
     readFile(new URL("../features/career-world/styles/career-world.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(shell, /career-world-navigation-region[\s\S]*<WorldHitTargets/);
   assert.match(shell, /career-world-canvas-region[\s\S]*<WorldScene/);
   assert.match(shell, /career-world-status-region[\s\S]*career-world-disclosure[\s\S]*career-world-camera-controls/);
-  const navigationIndex = shell.indexOf('className="career-world-navigation-region"');
   const canvasIndex = shell.indexOf('className="career-world-canvas-region"');
   const statusIndex = shell.indexOf('className="career-world-status-region"');
-  assert.ok(navigationIndex < canvasIndex && canvasIndex < statusIndex);
+  assert.ok(canvasIndex >= 0 && canvasIndex < statusIndex);
+  assert.doesNotMatch(shell, /WorldHitTargets|career-world-navigation-region/);
   assert.match(styles, /\.career-world-map\s*\{[^}]*position:\s*relative;/);
   assert.match(styles, /\.career-world-canvas-region\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;/);
-  assert.match(styles, /\.career-world-navigation-region\s*\{[^}]*position:\s*absolute;/);
   assert.match(styles, /\.career-world-status-region\s*\{[^}]*position:\s*absolute;/);
-  assert.match(styles, /@media \(max-width:\s*720px\)[\s\S]*\.career-world-navigation-region\s*\{/);
   assert.match(styles, /\.career-world-scene\s*\{[^}]*touch-action:\s*none;/);
 });
 

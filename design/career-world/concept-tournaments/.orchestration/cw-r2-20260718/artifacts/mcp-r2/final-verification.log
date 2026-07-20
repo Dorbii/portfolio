@@ -1,0 +1,12 @@
+expected=10 actual=10 exact-names=true
+skill-mcp-r2-01-host-client-server-exchange.png 1536x1024 RGB exact-grayscale=true sha256=cebd3e9a9c73d5e8b1d5981bfcb4ad837bcfa0b63c515867dc983a99591530c3
+skill-mcp-r2-02-capability-handshake-lock.png 1536x1024 RGB exact-grayscale=true sha256=4218736cc1a4bc2f01eb0d9529982e78d7224a606df00a555118c57c4259bf27
+skill-mcp-r2-03-three-primitive-foundry.png 1536x1024 RGB exact-grayscale=true sha256=f7af4a238d2c2d5d9c4900cf58b1b8178a7d24b7a2f46986f5d54dc141363934
+skill-mcp-r2-04-json-rpc-switchyard.png 1536x1024 RGB exact-grayscale=true sha256=7a1f61c7b73201cd58fcdec85e9f430d2dc46d7201ecaf426b02bf03ae82d250
+skill-mcp-r2-05-dual-transport-engine.png 1536x1024 RGB exact-grayscale=true sha256=62dbb17bda31fd37af49c582ce563f152f6e0d434857e4780bd54d2ddfdaaf69
+skill-mcp-r2-06-lifecycle-observatory.png 1536x1024 RGB exact-grayscale=true sha256=3ea771d768c498ff2f54016ce073656c01894d374278c829a17c605a7384d6b8
+skill-mcp-r2-07-session-multiplexer.png 1536x1024 RGB exact-grayscale=true sha256=752bb77ff3f58212051d521f7cb351555844744a76c5645ac1866283a5740cdd
+skill-mcp-r2-08-consent-boundary-vault.png 1536x1024 RGB exact-grayscale=true sha256=9bf68f9258e382e2c61e6c779a43ac4ff6f52389c0f083987c210f44624e3034
+skill-mcp-r2-09-dynamic-discovery-archive.png 1536x1024 RGB exact-grayscale=true sha256=b5d0992ee48f53fb600b857c5e6812a98cd84c5000809554edddcc61ba1e3000
+skill-mcp-r2-10-protocol-synthesis.png 1536x1024 RGB exact-grayscale=true sha256=1dd121c7f1d1cd20e0e1ed3e29fd5d86f2a7bfe8ddc828c9ab8a4f21cf17d5cc
+contact-sheet 960x1820 channels=3 ok=true path=design/career-world/concept-tournaments/.orchestration/cw-r2-20260718/artifacts/mcp-r2/skill-mcp-r2-contact-sheet.png

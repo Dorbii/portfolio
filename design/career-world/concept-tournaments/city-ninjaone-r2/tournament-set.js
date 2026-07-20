@@ -1,0 +1,203 @@
+window.__CONCEPT_TOURNAMENT_SET__ = {
+  "schemaVersion": 1,
+  "id": "city-ninjaone-r2-2026-07-18",
+  "catalogId": "city/ninjaone@v1",
+  "name": "NinjaOne City · Round 2",
+  "sourcePath": "design/career-world/concept-tournaments/city-ninjaone-r2",
+  "domainSummary": "A cloud-native unified IT operations capital that makes endpoint management simple through one centralized console, one lightweight agent, policy automation, real-time remote support, resilience, and a manage-protect-support operating model.",
+  "evidenceBoundary": "Keep the selected nested-ring relay crown as structural DNA, but remove its anonymous fantasy-citadel character. Use NinjaOne-inspired katana cuts and an abstract N only as architectural geometry, never as an exact logo or wordmark. Monochrome wireframe holograms may depict abstract endpoint classes and status constellations.",
+  "iterationBasis": {
+    "telemetryExport": "career-world-tournament-batch-2026-07-18 (1).json",
+    "selectedR1": "Relay Crown Capitol",
+    "strategy": "preserve selected structural DNA and add visible domain identity"
+  },
+  "researchSources": [
+    {
+      "title": "NinjaOne Platform",
+      "url": "https://www.ninjaone.com/platform/",
+      "use": "Unified manage, protect, and support platform; one agent, one console, automation, resilience, and endpoint diversity."
+    },
+    {
+      "title": "NinjaOne About",
+      "url": "https://www.ninjaone.com/about-us/",
+      "use": "Customer-first culture and a mission to simplify IT."
+    },
+    {
+      "title": "NinjaOne Brand Guide v1.5",
+      "url": "https://www.ninjaone.com/wp-content/uploads/2026/01/NinjaOne-Brand-Guide-v1.5.pdf",
+      "use": "Katana-shaped letter details, N icon, iconic line art, and abstract endpoint and automation patterns."
+    }
+  ],
+  "assets": [
+    {
+      "id": "city-ninjaone-r2-01-endpoint-hologram-crown",
+      "name": "NinjaOne City · Endpoint Hologram Crown",
+      "src": "city-ninjaone-r2-01-endpoint-hologram-crown.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Preserve the nested circular capital and six inhabited relay bridges. Replace the generic spired crown with a clean operations lantern projecting a large monochrome wireframe constellation of laptop, server, mobile, and network endpoint silhouettes above the central forum. Cut a subtle angular N-shaped void through the lantern frame.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "holograms",
+        "endpoint-constellation",
+        "relay-crown"
+      ],
+      "thesis": "One console with real-time visibility across every endpoint.",
+      "businessCue": "One console with real-time visibility across every endpoint."
+    },
+    {
+      "id": "city-ninjaone-r2-02-katana-relay-citadel",
+      "name": "NinjaOne City · Katana Relay Citadel",
+      "src": "city-ninjaone-r2-02-katana-relay-citadel.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Sharpen the bridge roofs and central crown into restrained diagonal katana-like planes. Arrange two crossing diagonal braces and the central negative space so the roof plan quietly suggests an N without displaying a logo. Keep the ring civic, open, and technologically clean rather than militaristic.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "katana-geometry",
+        "n-negative-space",
+        "remote-support"
+      ],
+      "thesis": "NinjaOne brand geometry translated into a unified remote-support capital.",
+      "businessCue": "NinjaOne brand geometry translated into a unified remote-support capital."
+    },
+    {
+      "id": "city-ninjaone-r2-03-unified-console-rotunda",
+      "name": "NinjaOne City · Unified Console Rotunda",
+      "src": "city-ninjaone-r2-03-unified-console-rotunda.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Organize the ring into three clearly different but connected civic sectors for manage, protect, and support: an ordered device colonnade, a shielded recovery archive, and an open technician service arcade. All three converge on one elevated console rotunda with restrained holographic status bands.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "manage-protect-support",
+        "central-console",
+        "rotunda"
+      ],
+      "thesis": "Manage, protect, and support through one unified platform.",
+      "businessCue": "Manage, protect, and support through one unified platform."
+    },
+    {
+      "id": "city-ninjaone-r2-04-lightweight-agent-constellation",
+      "name": "NinjaOne City · Lightweight Agent Constellation",
+      "src": "city-ninjaone-r2-04-lightweight-agent-constellation.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Make the capital broad and comparatively uncluttered. Place many small identical endpoint pylons around the outer ring, each connected by a thin structural relay to one compact central agent beacon. Use sparse wireframe holographic arcs to show status returning inward without becoming a diagram.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "lightweight-agent",
+        "distributed-endpoints",
+        "simplicity"
+      ],
+      "thesis": "One lightweight agent coordinating a large distributed endpoint estate.",
+      "businessCue": "One lightweight agent coordinating a large distributed endpoint estate."
+    },
+    {
+      "id": "city-ninjaone-r2-05-policy-automation-cascade",
+      "name": "NinjaOne City · Policy Automation Cascade",
+      "src": "city-ninjaone-r2-05-policy-automation-cascade.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Turn the nested rings into a visible policy cascade: repeated gates, roof shutters, and maintenance bays change state in an orderly sequence moving outward from the center. Keep every ring physically connected and give the center a precise automation clockwork rather than decorative towers.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "policy",
+        "automation",
+        "patch-cascade"
+      ],
+      "thesis": "Policy-driven automation and autonomous patching at scale.",
+      "businessCue": "Policy-driven automation and autonomous patching at scale."
+    },
+    {
+      "id": "city-ninjaone-r2-06-secure-remote-support-gate",
+      "name": "NinjaOne City · Secure Remote Support Gate",
+      "src": "city-ninjaone-r2-06-secure-remote-support-gate.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Make one grand inhabited bridge the primary silhouette, spanning from a technician operations hall into the circular endpoint estate through two guarded relay portals. Add small monochrome holographic device silhouettes inside the bridge windows and a katana-cut canopy over the secure rendezvous chamber.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "remote-access",
+        "support-bridge",
+        "secure-relay"
+      ],
+      "thesis": "Fast secure remote access and technician support.",
+      "businessCue": "Fast secure remote access and technician support."
+    },
+    {
+      "id": "city-ninjaone-r2-07-multi-tenant-shadow-court",
+      "name": "NinjaOne City · Multi-Tenant Shadow Court",
+      "src": "city-ninjaone-r2-07-multi-tenant-shadow-court.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Divide the ring into four independently enclosed tenant wedges with different endpoint roof profiles, separated by narrow shadow courts but governed by one shared center. Give each wedge its own small agent pylon and route all four through isolated bridges to the central console.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "multi-tenant",
+        "segmentation",
+        "shared-governance"
+      ],
+      "thesis": "Multi-tenant governance without losing centralized control.",
+      "businessCue": "Multi-tenant governance without losing centralized control."
+    },
+    {
+      "id": "city-ninjaone-r2-08-resilience-recovery-crown",
+      "name": "NinjaOne City · Resilience Recovery Crown",
+      "src": "city-ninjaone-r2-08-resilience-recovery-crown.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Build the relay crown over a visibly protected lower archive vault. Provide two redundant circulation paths around the ring, paired backup chambers, and a raised recovery lantern whose holographic geometry shows an endpoint silhouette being reconstructed from layered fragments.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "backup",
+        "recovery",
+        "redundancy"
+      ],
+      "thesis": "Integrated backup, recovery, and operational resilience.",
+      "businessCue": "Integrated backup, recovery, and operational resilience."
+    },
+    {
+      "id": "city-ninjaone-r2-09-iconic-line-art-capital",
+      "name": "NinjaOne City · Iconic Line-Art Capital",
+      "src": "city-ninjaone-r2-09-iconic-line-art-capital.png",
+      "role": "directed-exploration",
+      "controlledVariable": "Simplify the large forms into confident clean rings, broad apertures, and generous spacing, then concentrate detail in a family of abstract line-art endpoint holograms, fast diagonal automation patterns, and small N-like structural brackets. Avoid ornamental gothic language entirely.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "iconic-line-art",
+        "abstract-endpoints",
+        "clean-geometry"
+      ],
+      "thesis": "A powerfully simple platform with an iconic, approachable visual language.",
+      "businessCue": "A powerfully simple platform with an iconic, approachable visual language."
+    },
+    {
+      "id": "city-ninjaone-r2-10-unified-ninja-synthesis",
+      "name": "NinjaOne City · Unified Ninja Synthesis",
+      "src": "city-ninjaone-r2-10-unified-ninja-synthesis.png",
+      "role": "synthesis",
+      "controlledVariable": "Synthesize the selected relay crown with a clean operations lantern, manage-protect-support sectors, lightweight endpoint pylons, a secure remote-support bridge, katana roof cuts, subtle N negative space, and a restrained endpoint hologram. Keep the hierarchy legible and avoid piling every detail at equal intensity.",
+      "parentConcept": "Relay Crown Capitol",
+      "tags": [
+        "city",
+        "round-2",
+        "synthesis",
+        "ninjaone-identity",
+        "unified-operations"
+      ],
+      "thesis": "A distinctive NinjaOne capital unifying simplicity, automation, support, and resilience.",
+      "businessCue": "A distinctive NinjaOne capital unifying simplicity, automation, support, and resilience."
+    }
+  ]
+};
