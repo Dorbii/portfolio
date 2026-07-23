@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/world-land-plate@r7",
+  "status": "phase-3-runtime",
+  "projection": "orthographic-plan",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "visual": {
+    "path": "../textures/world-land-plate-r7.png",
+    "sha256": "36F821D2967E44B2DEF97BFD1562315A0BF1E3E4604B8F9EBBA1D2207F5FEF4A",
+    "mode": "RGBA"
+  },
+  "detailVisual": {
+    "path": "../textures/world-land-plate-r7-detail-4x.png",
+    "sha256": "11FE77E79F63035D8859AE62BEE3B1872F70FAC9C849E47D6A9242B9E11A96C1",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA",
+    "role": "registered territory LOD; not a capital-detail substitute"
+  },
+  "mask": {
+    "path": "../masks/world-land-plate-r6-mask.png",
+    "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98",
+    "unchangedFrom": "career-world/world-land-plate@r6"
+  },
+  "derivation": {
+    "source": "world-land-plate-r6.png",
+    "sourceSha256": "AF159138DEFEE8D7CE70B478D6799B7A8733288BAA6C13F429CC06E57E924CC3",
+    "operation": "bake a restrained inner contact value into RGB, preserve alpha, and premultiply alpha while resampling the territory LOD",
+    "alphaPreserved": true,
+    "worldLightDirection": [
+      -0.42,
+      -0.36,
+      0.83
+    ]
+  }
+}

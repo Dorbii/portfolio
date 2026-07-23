@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/coast-geometry@r1",
+  "status": "phase-3-runtime",
+  "coordinateSpace": "normalized-world-top-left",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "texture": {
+    "path": "../fields/coast-geometry-r1.png",
+    "sha256": "70989945728B9812BD8FA145C4A7F76B1FFB60DFBA166A8D3FDFF59104A362DB",
+    "mode": "RGBA"
+  },
+  "detailTexture": {
+    "path": "../fields/coast-geometry-r1-4x.png",
+    "sha256": "2D4274D44ACB760E7FBC7DEC17E81A36C5D1A53753C701804DEDBD1424172681",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA"
+  },
+  "channels": {
+    "r": "binary land occupancy",
+    "g": "continuous 42px exterior shelf falloff",
+    "b": "continuous 2.8px exterior contact falloff",
+    "a": "reserved"
+  },
+  "source": {
+    "path": "../../territory-landform/masks/world-land-plate-r6-mask.png",
+    "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98"
+  },
+  "policy": [
+    "The land mask owns geography.",
+    "Every shoreline uses this same deterministic derivation.",
+    "The runtime derives shore normals from the shelf gradient.",
+    "Sparse authored crash accents belong to actors-effects in Phase 7."
+  ]
+}

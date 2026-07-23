@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/deferred-coast-accents@r1",
+  "status": "deferred-phase-7",
+  "coordinateSpace": "normalized-world-top-left",
+  "baseGeometry": "../../water-surface/manifests/coast-geometry-r1.json",
+  "policy": [
+    "Phase 3 derives continuous base shelf and contact response from the land mask.",
+    "These nodes are sparse authored exceptions for future expressive crash behavior.",
+    "No Phase 3 water renderer imports this manifest.",
+    "A node may modify water response but may not redraw land geography."
+  ],
+  "nodes": [
+    {
+      "id": "mainland-western-headlands",
+      "kind": "exposed-surf",
+      "center": [0.085, 0.38],
+      "radius": [0.07, 0.15],
+      "strength": 0.72,
+      "phaseOffset": 0.12,
+      "response": {
+        "contactFoam": 1.35,
+        "wash": 0.88,
+        "swell": 1.24
+      }
+    },
+    {
+      "id": "mainland-central-inlet",
+      "kind": "sheltered-harbor",
+      "center": [0.485, 0.47],
+      "radius": [0.11, 0.1],
+      "strength": 0.66,
+      "phaseOffset": 0.44,
+      "response": {
+        "contactFoam": 0.38,
+        "wash": 1.08,
+        "swell": 0.42
+      }
+    },
+    {
+      "id": "mainland-southern-shelf",
+      "kind": "beach-wash",
+      "center": [0.33, 0.73],
+      "radius": [0.14, 0.08],
+      "strength": 0.6,
+      "phaseOffset": 0.71,
+      "response": {
+        "contactFoam": 0.86,
+        "wash": 1.42,
+        "swell": 0.72
+      }
+    },
+    {
+      "id": "column-island-east-reef",
+      "kind": "reef-break",
+      "center": [0.9, 0.6],
+      "radius": [0.07, 0.12],
+      "strength": 0.68,
+      "phaseOffset": 0.28,
+      "response": {
+        "contactFoam": 1.18,
+        "wash": 0.76,
+        "swell": 1.3
+      }
+    },
+    {
+      "id": "ace-island-southern-delta",
+      "kind": "delta-foam",
+      "center": [0.58, 0.9],
+      "radius": [0.09, 0.055],
+      "strength": 0.56,
+      "phaseOffset": 0.86,
+      "response": {
+        "contactFoam": 0.74,
+        "wash": 1.28,
+        "swell": 0.58
+      }
+    }
+  ]
+}
+

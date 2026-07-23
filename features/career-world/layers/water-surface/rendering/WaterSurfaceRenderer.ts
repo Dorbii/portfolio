@@ -1,0 +1,301 @@
+import type { CameraView } from "../../../shared/camera";
+import {
+  CAREER_WORLD_THEME,
+  hexToUnitRgb,
+} from "../../../shared/theme";
+import {
+  resolveDetailState,
+  type DetailState,
+} from "../../../shared/lod";
+import { WATER_ASSETS } from "../model/assets";
+import {
+  normalizeWaterSurfaceState,
+  type WaterSurfaceState,
+  windVectorFromDegrees,
+} from "../model/state";
+import {
+  WATER_FRAGMENT_SHADER,
+  WATER_VERTEX_SHADER,
+} from "./shaders";
+import {
+  createTexture,
+  linkProgram,
+  loadImage,
+} from "./webgl";
+
+type UniformMap = Readonly<Record<string, WebGLUniformLocation>>;
+
+interface TextureBinding {
+  readonly texture: WebGLTexture;
+  readonly unit: number;
+}
+
+export interface WaterRenderInfo {
+  readonly width: number;
+  readonly height: number;
+  readonly devicePixelRatio: number;
+  readonly textureCount: number;
+  readonly renderer: string;
+}
+
+const TEXTURE_PATHS = [
+  ["worldAlbedo", WATER_ASSETS.worldAlbedo, "clamp"],
+  ["closeAlbedo", WATER_ASSETS.closeAlbedo, "mirror"],
+  ["macroHeight", WATER_ASSETS.macroHeight, "mirror"],
+  ["microHeight", WATER_ASSETS.microHeight, "mirror"],
+  ["coastGeometry", WATER_ASSETS.coastGeometry, "clamp"],
+  ["hydrology", WATER_ASSETS.hydrology, "clamp"],
+] as const;
+
+const SAMPLER_UNIFORMS = Object.freeze({
+  worldAlbedo: "u_worldAlbedo",
+  closeAlbedo: "u_closeAlbedo",
+  macroHeight: "u_macroHeight",
+  microHeight: "u_microHeight",
+  coastGeometry: "u_coastGeometry",
+  hydrology: "u_hydrology",
+});
+
+const UNIFORM_NAMES = [
+  "u_time",
+  "u_resolution",
+  "u_cameraOrigin",
+  "u_cameraSpan",
+  "u_wind",
+  "u_coastTexel",
+  "u_motion",
+  "u_waveStrength",
+  "u_weather",
+  "u_opacity",
+  "u_detailScale",
+  "u_territoryLod",
+  "u_capitalLod",
+  "u_lightDirection",
+  "u_abyssColor",
+  "u_deepColor",
+  "u_bodyColor",
+  "u_swellColor",
+  "u_shallowColor",
+  "u_highlightColor",
+  "u_foamColor",
+  "u_stormColor",
+  ...Object.values(SAMPLER_UNIFORMS),
+] as const;
+
+function normalize3(
+  values: readonly [number, number, number],
+): readonly [number, number, number] {
+  const length = Math.hypot(...values);
+  if (length === 0) {
+    throw new Error("World light direction cannot be zero.");
+  }
+  return values.map((value) => value / length) as [number, number, number];
+}
+
+export class WaterSurfaceRenderer {
+  static async create(canvas: HTMLCanvasElement): Promise<WaterSurfaceRenderer> {
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      preserveDrawingBuffer: false,
+      powerPreference: "high-performance",
+    });
+
+    if (!gl) {
+      throw new Error("WebGL 2 is unavailable.");
+    }
+
+    const program = linkProgram(
+      gl,
+      WATER_VERTEX_SHADER,
+      WATER_FRAGMENT_SHADER,
+    );
+    const images = await Promise.all(
+      TEXTURE_PATHS.map(([, path]) => loadImage(path)),
+    );
+    const coastImage = images[4];
+    const textures = Object.fromEntries(
+      TEXTURE_PATHS.map(([name, , wrap], index) => [
+        name,
+        {
+          texture: createTexture(gl, images[index], wrap),
+          unit: index,
+        },
+      ]),
+    ) as Record<string, TextureBinding>;
+
+    return new WaterSurfaceRenderer(
+      canvas,
+      gl,
+      program,
+      textures,
+      [1 / coastImage.naturalWidth, 1 / coastImage.naturalHeight],
+    );
+  }
+
+  readonly canvas: HTMLCanvasElement;
+  private readonly gl: WebGL2RenderingContext;
+  private readonly program: WebGLProgram;
+  private readonly buffer: WebGLBuffer;
+  private readonly textures: Record<string, TextureBinding>;
+  private readonly uniforms: UniformMap;
+  private readonly coastTexel: readonly [number, number];
+  private camera: CameraView = {
+    origin: [0, 0],
+    span: [1, 1],
+  };
+  private state: WaterSurfaceState = normalizeWaterSurfaceState();
+  private detailState: DetailState = resolveDetailState(this.camera);
+  private pixelRatio = 1;
+  private canvasScale = 1;
+
+  private constructor(
+    canvas: HTMLCanvasElement,
+    gl: WebGL2RenderingContext,
+    program: WebGLProgram,
+    textures: Record<string, TextureBinding>,
+    coastTexel: readonly [number, number],
+  ) {
+    this.canvas = canvas;
+    this.gl = gl;
+    this.program = program;
+    this.textures = textures;
+    this.coastTexel = coastTexel;
+
+    const buffer = gl.createBuffer();
+    if (!buffer) {
+      throw new Error("WebGL could not allocate the world-plane buffer.");
+    }
+    this.buffer = buffer;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
+
+    const position = gl.getAttribLocation(program, "a_position");
+    if (position < 0) {
+      throw new Error("Water shader is missing a_position.");
+    }
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    this.uniforms = Object.fromEntries(
+      UNIFORM_NAMES.map((name) => {
+        const location = gl.getUniformLocation(program, name);
+        if (!location) {
+          throw new Error(`Water shader is missing uniform ${name}.`);
+        }
+        return [name, location];
+      }),
+    );
+
+    gl.useProgram(program);
+    for (const [name, uniformName] of Object.entries(SAMPLER_UNIFORMS)) {
+      gl.uniform1i(this.uniforms[uniformName], textures[name].unit);
+    }
+  }
+
+  setCamera(camera: CameraView): void {
+    this.camera = camera;
+    this.detailState = resolveDetailState(camera);
+    this.canvasScale = this.detailState.canvasScale;
+  }
+
+  setState(state: Partial<WaterSurfaceState>): void {
+    this.state = normalizeWaterSurfaceState(state);
+  }
+
+  render(elapsedSeconds: number): void {
+    const gl = this.gl;
+    this.resize();
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.useProgram(this.program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+    for (const binding of Object.values(this.textures)) {
+      gl.activeTexture(gl.TEXTURE0 + binding.unit);
+      gl.bindTexture(gl.TEXTURE_2D, binding.texture);
+    }
+
+    const wind = windVectorFromDegrees(this.state.windDirectionDegrees);
+    gl.uniform1f(this.uniforms.u_time, elapsedSeconds);
+    gl.uniform2f(
+      this.uniforms.u_resolution,
+      this.canvas.width,
+      this.canvas.height,
+    );
+    gl.uniform2fv(this.uniforms.u_cameraOrigin, this.camera.origin);
+    gl.uniform2fv(this.uniforms.u_cameraSpan, this.camera.span);
+    gl.uniform2fv(this.uniforms.u_wind, wind);
+    gl.uniform2fv(this.uniforms.u_coastTexel, this.coastTexel);
+    gl.uniform1f(this.uniforms.u_motion, this.state.motion);
+    gl.uniform1f(this.uniforms.u_waveStrength, this.state.waveStrength);
+    gl.uniform1f(this.uniforms.u_weather, this.state.weather);
+    gl.uniform1f(this.uniforms.u_opacity, this.state.opacity);
+    gl.uniform1f(this.uniforms.u_detailScale, this.state.detailScale);
+    gl.uniform1f(
+      this.uniforms.u_territoryLod,
+      this.detailState.worldToTerritory,
+    );
+    gl.uniform1f(
+      this.uniforms.u_capitalLod,
+      this.detailState.territoryToCapital,
+    );
+
+    const light = normalize3(
+      CAREER_WORLD_THEME.lighting.worldDirection,
+    );
+    gl.uniform3fv(this.uniforms.u_lightDirection, light);
+    const water = CAREER_WORLD_THEME.colors.water;
+    gl.uniform3fv(this.uniforms.u_abyssColor, hexToUnitRgb(water.abyss));
+    gl.uniform3fv(this.uniforms.u_deepColor, hexToUnitRgb(water.deep));
+    gl.uniform3fv(this.uniforms.u_bodyColor, hexToUnitRgb(water.body));
+    gl.uniform3fv(this.uniforms.u_swellColor, hexToUnitRgb(water.swell));
+    gl.uniform3fv(this.uniforms.u_shallowColor, hexToUnitRgb(water.shallow));
+    gl.uniform3fv(
+      this.uniforms.u_highlightColor,
+      hexToUnitRgb(water.highlight),
+    );
+    gl.uniform3fv(this.uniforms.u_foamColor, hexToUnitRgb(water.foam));
+    gl.uniform3fv(this.uniforms.u_stormColor, hexToUnitRgb(water.storm));
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  getRenderInfo(): WaterRenderInfo {
+    const gl = this.gl;
+    return Object.freeze({
+      width: this.canvas.width,
+      height: this.canvas.height,
+      devicePixelRatio: this.pixelRatio,
+      textureCount: Object.keys(this.textures).length,
+      renderer: gl.getParameter(gl.RENDERER) as string,
+    });
+  }
+
+  destroy(): void {
+    for (const binding of Object.values(this.textures)) {
+      this.gl.deleteTexture(binding.texture);
+    }
+    this.gl.deleteBuffer(this.buffer);
+    this.gl.deleteProgram(this.program);
+  }
+
+  private resize(): void {
+    const bounds = this.canvas.getBoundingClientRect();
+    this.pixelRatio = Math.min(
+      (window.devicePixelRatio || 1) * this.canvasScale,
+      2,
+    );
+    const width = Math.max(1, Math.round(bounds.width * this.pixelRatio));
+    const height = Math.max(1, Math.round(bounds.height * this.pixelRatio));
+
+    if (this.canvas.width !== width || this.canvas.height !== height) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+    }
+  }
+}

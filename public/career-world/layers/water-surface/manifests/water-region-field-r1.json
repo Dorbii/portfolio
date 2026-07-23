@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/water-region-field@r1",
+  "status": "candidate",
+  "coordinateSpace": "normalized-world-top-left",
+  "dimensions": [1672, 941],
+  "texture": {
+    "path": "../fields/water-region-field-r1.png",
+    "sha256": "303859D61DA537093570866B61E9E4AB76FE76100A0661AD36437B3D36DE7292",
+    "mode": "L"
+  },
+  "sources": {
+    "landMask": {
+      "path": "../../territory-landform/masks/world-land-plate-r6-mask.png",
+      "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98"
+    },
+    "regions": {
+      "path": "water-regions-r1.json",
+      "sha256": "DBA80300C486C7791DFA99F0E0182DADEFEE852032D6969ED88A9CCD6CB8EDF0"
+    }
+  },
+  "channels": {
+    "r": "sheltered-lagoon influence; zero is default open ocean",
+    "g": "reserved",
+    "b": "reserved",
+    "a": "decoded image alpha; not semantic data"
+  },
+  "generation": {
+    "script": "career-world/qa/build-water-region-field.py",
+    "landClipped": true
+  }
+}

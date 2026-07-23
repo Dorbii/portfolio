@@ -1,5 +1,6 @@
 import { CareerWorld } from "@/features/career-world";
 
-export default function Home() {
+export default function HomePage() {
   return <CareerWorld />;
 }
+

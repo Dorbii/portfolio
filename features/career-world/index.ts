@@ -1,1 +1,2 @@
-export { CareerWorld } from "./components/career-world";
+export { CareerWorld } from "./components/CareerWorld";
+

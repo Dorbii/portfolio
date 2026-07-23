@@ -1,2 +1,45 @@
-@import "tailwindcss";
-@import "../features/career-world/styles/career-world.css";
+:root {
+  color-scheme: dark;
+  background: #050908;
+  color: #d9ddce;
+  font-family:
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #050908;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 78% 16%, rgb(30 54 48 / 18%), transparent 32rem),
+    linear-gradient(180deg, #080d0b 0%, #030605 100%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+::selection {
+  color: #07100d;
+  background: #c4cf9e;
+}
+

@@ -1,17 +1,206 @@
-Error: listen UNKNOWN: unknown error 0.0.0.0:9229
-    at Server.setupListenHandle [as _listen2] (node:net:1917:21)
-    at listenInCluster (node:net:1996:12)
-    at Server.listen (node:net:2101:7)
-    at file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33685:9
-    at new Promise (<anonymous>)
-    at checkAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33681:41)
-    at getAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33695:9)
-    at getPorts (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:33734:29)
-    at getFirstAvailablePort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:48782:9)
-    at getInputInspectorPort (file:///C:/Users/Steve/Documents/Github/portfolio/node_modules/@cloudflare/vite-plugin/dist/index.mjs:48777:77) {
-  code: 'UNKNOWN',
-  errno: -4094,
-  syscall: 'listen',
-  address: '0.0.0.0',
-  port: 9229
-}
+(node:41572) ExperimentalWarning: glob is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[2m11:27:18 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'id')
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:7:27)
+    at Object.react_stack_bottom_frame (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:12868:12)
+    at renderWithHooks (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:4213:19)
+    at updateFunctionComponent (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:5569:16)
+    at beginWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:6140:20)
+    at runWithFiberInDEV (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:851:66)
+    at performUnitOfWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8429:92)
+    at workLoopSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8325:37)
+    at renderRootSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8309:6)
+    at performWorkOnRoot (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:7994:27)
+[2m11:27:18 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mThe above error occurred in a React component:
+
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:5:37)
+    at div (<anonymous>)
+    at WorldScene (http://localhost:4174/features/career-world/composition/WorldScene.tsx?t=1784824036693:12:30)
+    at main (<anonymous>)
+    at CareerWorld [Server] (<anonymous>)
+    at CareerWorld (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/features/career-world/components/CareerWorld.tsx?6:71:26)
+    at TerritoryLandformPreviewPage (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/career-world/previews/territory-landform/page.tsx?5:8:25)
+    at AwaitAppRenderDependencies [Server] (<anonymous>)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at Children (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:64:17)
+    at body (<anonymous>)
+    at html (<anonymous>)
+    at RootLayout [Server] (<anonymous>)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at NavigationCommitSignal (http://localhost:4174/node_modules/vinext/dist/server/app-browser-navigation-controller.js?v=712a2c78:184:36)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at DevRecoveryBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:268:3)
+    at BrowserRoot (http://localhost:4174/node_modules/vinext/dist/server/app-browser-entry.js?v=712a2c78:209:24)
+[2m11:27:19 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'id')
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:7:27)
+    at Object.react_stack_bottom_frame (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:12868:12)
+    at renderWithHooks (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:4213:19)
+    at updateFunctionComponent (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:5569:16)
+    at beginWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:6140:20)
+    at runWithFiberInDEV (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:851:66)
+    at performUnitOfWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8429:92)
+    at workLoopSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8325:37)
+    at renderRootSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8309:6)
+    at performWorkOnRoot (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:7994:27)
+[2m11:27:19 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mThe above error occurred in a React component:
+
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:5:37)
+    at div (<anonymous>)
+    at WorldScene (http://localhost:4174/features/career-world/composition/WorldScene.tsx?t=1784824036693:12:30)
+    at main (<anonymous>)
+    at CareerWorld [Server] (<anonymous>)
+    at CareerWorld (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/features/career-world/components/CareerWorld.tsx?6:71:26)
+    at TerritoryLandformPreviewPage (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/career-world/previews/territory-landform/page.tsx?5:8:25)
+    at AwaitAppRenderDependencies [Server] (<anonymous>)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at Children (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:64:17)
+    at body (<anonymous>)
+    at html (<anonymous>)
+    at RootLayout [Server] (<anonymous>)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at NavigationCommitSignal (http://localhost:4174/node_modules/vinext/dist/server/app-browser-navigation-controller.js?v=712a2c78:184:36)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at DevRecoveryBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:268:3)
+    at BrowserRoot (http://localhost:4174/node_modules/vinext/dist/server/app-browser-entry.js?v=712a2c78:209:24)
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m
+[2m11:49:26 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'id')
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:7:27)
+    at Object.react_stack_bottom_frame (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:12868:12)
+    at renderWithHooks (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:4213:19)
+    at updateFunctionComponent (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:5569:16)
+    at beginWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:6140:20)
+    at runWithFiberInDEV (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:851:66)
+    at performUnitOfWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8429:92)
+    at workLoopSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8325:37)
+    at renderRootSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8309:6)
+    at performWorkOnRoot (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:7994:27)
+[2m11:49:26 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mThe above error occurred in a React component:
+
+    at TerritoryLandform (http://localhost:4174/features/career-world/layers/territory-landform/components/TerritoryLandform.tsx?t=1784824038510:5:37)
+    at div (<anonymous>)
+    at WorldScene (http://localhost:4174/features/career-world/composition/WorldScene.tsx?t=1784825366763:13:30)
+    at main (<anonymous>)
+    at CareerWorld [Server] (<anonymous>)
+    at CareerWorld (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/features/career-world/components/CareerWorld.tsx?6:71:26)
+    at TerritoryLandformPreviewPage (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/career-world/previews/territory-landform/page.tsx?5:8:25)
+    at AwaitAppRenderDependencies [Server] (<anonymous>)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at Children (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:64:17)
+    at body (<anonymous>)
+    at html (<anonymous>)
+    at RootLayout [Server] (<anonymous>)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at NavigationCommitSignal (http://localhost:4174/node_modules/vinext/dist/server/app-browser-navigation-controller.js?v=712a2c78:184:36)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at DevRecoveryBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:268:3)
+    at BrowserRoot (http://localhost:4174/node_modules/vinext/dist/server/app-browser-entry.js?v=712a2c78:209:24)
+[2m11:49:27 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mTypeError: Cannot read properties of undefined (reading 'label')
+    at WorldInterface (http://localhost:4174/features/career-world/layers/interface/components/WorldInterface.tsx?t=1784824039443:35:28)
+    at Object.react_stack_bottom_frame (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:12868:12)
+    at renderWithHooks (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:4213:19)
+    at updateFunctionComponent (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:5569:16)
+    at beginWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:6140:20)
+    at runWithFiberInDEV (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:851:66)
+    at performUnitOfWork (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8429:92)
+    at workLoopSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8325:37)
+    at renderRootSync (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:8309:6)
+    at performWorkOnRoot (http://localhost:4174/node_modules/.vite/deps/react-dom_client.js?v=65274ebb:7994:27)
+[2m11:49:27 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mThe above error occurred in a React component:
+
+    at WorldInterface (http://localhost:4174/features/career-world/layers/interface/components/WorldInterface.tsx?t=1784824039443:3:34)
+    at div (<anonymous>)
+    at WorldScene (http://localhost:4174/features/career-world/composition/WorldScene.tsx?t=1784825366763:13:30)
+    at main (<anonymous>)
+    at CareerWorld [Server] (<anonymous>)
+    at CareerWorld (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/features/career-world/components/CareerWorld.tsx?6:71:26)
+    at TerritoryLandformPreviewPage (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/career-world/previews/territory-landform/page.tsx?5:8:25)
+    at AwaitAppRenderDependencies [Server] (<anonymous>)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at Children (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:64:17)
+    at body (<anonymous>)
+    at html (<anonymous>)
+    at RootLayout [Server] (<anonymous>)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at default (about://React/Server/C:/Users/Steve/Documents/Github/portfolio/app/layout.tsx?1:53:26)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at LayoutSegmentProvider (http://localhost:4174/node_modules/vinext/dist/shims/layout-segment-context.js?v=712a2c78:32:34)
+    at Slot (http://localhost:4174/node_modules/vinext/dist/shims/slot.js?v=712a2c78:42:17)
+    at NavigationCommitSignal (http://localhost:4174/node_modules/vinext/dist/server/app-browser-navigation-controller.js?v=712a2c78:184:36)
+    at RedirectErrorBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:56:3)
+    at RedirectBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:86:29)
+    at DevRecoveryBoundary (http://localhost:4174/node_modules/vinext/dist/shims/error-boundary.js?v=712a2c78:268:3)
+    at BrowserRoot (http://localhost:4174/node_modules/vinext/dist/server/app-browser-entry.js?v=712a2c78:209:24)
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+Detected multiple renderers concurrently rendering the same context provider. This is currently unsupported.
+[33mAssets in public directory cannot be imported from JavaScript.
+If you intend to import that asset, put the file in the src directory, and use [36m/src/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m instead of [36m/public/career-world/layers/territory-landform/manifests/world-territories-r4.json[33m.
+If you intend to use the URL of that asset, use [36m/career-world/layers/territory-landform/manifests/world-territories-r4.json?url[33m.[39m

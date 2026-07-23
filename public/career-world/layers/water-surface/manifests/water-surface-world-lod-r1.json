@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/water-surface-world-lod@r1",
+  "status": "candidate",
+  "coordinateSpace": "normalized-world",
+  "role": "world-view albedo and etched-ripple source",
+  "source": {
+    "path": "water-surface-world-lod-r1-source.png",
+    "dimensions": [1672, 941],
+    "sha256": "90BEAF47EFF6F38C363E9CA5D69673136A309CED17663BA8E270FFEA7E127127"
+  },
+  "runtime": {
+    "path": "../textures/water-surface-world-lod-r1-3840x2160.png",
+    "dimensions": [3840, 2160],
+    "sha256": "AEB801E20133C7B28B2F554EC07CA7A4E8E8CA3E556D31CB5FD25F492CC274B0"
+  },
+  "generation": {
+    "sourceMethod": "image-generation study against the accepted water style and aerial coastline references",
+    "runtimeScript": "career-world/qa/prepare-world-water-lod.py",
+    "resampling": "Pillow Lanczos"
+  },
+  "constraints": [
+    "This is a distinct world-scale source, not a blur, crop, or repeated tile of the close-view water.",
+    "The renderer blends to the accepted close-view source as the planar camera zooms.",
+    "Neither source changes world registration or animation phase."
+  ]
+}

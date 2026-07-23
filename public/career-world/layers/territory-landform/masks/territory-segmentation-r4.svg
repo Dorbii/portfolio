@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1672 941" role="img" aria-labelledby="title description">
+  <title id="title">Career World five-territory segmentation r4</title>
+  <desc id="description">Five unequal organic regions clipped by the exact r6 raster land mask and exposed only for selection and QA.</desc>
+  <defs>
+    <mask id="land-alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1672" height="941" style="mask-type:luminance">
+      <image href="world-land-plate-r6-mask.png" x="0" y="0" width="1672" height="941"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#land-alpha)">
+    <path id="territory-ninjaone" fill="#71b7d3" d="M-100-100H1300V340C1120 372 1020 328 905 350C800 370 752 447 650 410C520 363 430 382 320 407C170 440 70 369-100 390Z"/>
+    <path id="territory-tanium" fill="#d58a6d" d="M650 410C752 447 800 370 905 350C1020 328 1120 372 1300 340V941H545C565 820 530 760 575 700C620 640 552 585 606 530C665 470 615 430 650 410Z"/>
+    <path id="territory-independent" fill="#a9ba72" d="M-100 390C70 369 170 440 320 407C430 382 520 363 650 410C615 430 665 470 606 530C552 585 620 640 575 700C530 760 565 820 545 941H-100Z"/>
+    <path id="territory-column-technologies" fill="#9b82ce" d="M1050 320H1772V1041H1050Z"/>
+    <path id="territory-ace-hardware" fill="#d8bb65" d="M720 675H1135V1041H720Z"/>
+  </g>
+</svg>

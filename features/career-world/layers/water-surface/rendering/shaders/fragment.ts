@@ -1,0 +1,19 @@
+import { WATER_SHADER_COAST } from "./coast";
+import { WATER_SHADER_COMMON } from "./common";
+import { WATER_SHADER_OPEN_WATER } from "./open-water";
+
+export const WATER_FRAGMENT_SHADER = `#version 300 es
+${WATER_SHADER_COMMON}
+${WATER_SHADER_OPEN_WATER}
+${WATER_SHADER_COAST}
+
+void main() {
+  vec2 screenUv = vec2(v_uv.x, 1.0 - v_uv.y);
+  vec2 worldUv = u_cameraOrigin + screenUv * u_cameraSpan;
+  float lagoon = texture(u_hydrology, worldUv).r;
+  OpenWaterSample water = sampleOpenWater(worldUv, lagoon);
+  CoastSample coast = applyCoast(worldUv, water, lagoon);
+  outColor = vec4(coast.color, u_opacity);
+}
+`;
+
