@@ -6,7 +6,7 @@ export const CAREER_WORLD_THEME = Object.freeze({
       deep: "#0a222c",
       body: "#123742",
       swell: "#2d5960",
-      shallow: "#315f5e",
+      shallow: "#23494b",
       highlight: "#87aaa4",
       foam: "#c5cfc0",
       storm: "#101a20",
@@ -24,11 +24,6 @@ export const CAREER_WORLD_THEME = Object.freeze({
       panel: "#08100dcf",
       border: "#546557",
     }),
-  }),
-  lighting: Object.freeze({
-    worldDirection: Object.freeze(
-      [-0.42, -0.36, 0.83] as [number, number, number],
-    ),
   }),
 });
 

@@ -9,12 +9,12 @@
   ],
   "texture": {
     "path": "../fields/coast-geometry-r1.png",
-    "sha256": "70989945728B9812BD8FA145C4A7F76B1FFB60DFBA166A8D3FDFF59104A362DB",
+    "sha256": "B668B5179A14B3D53311F20EDB373C2F9B76903971A7991A8C55235B2C8DD658",
     "mode": "RGBA"
   },
   "detailTexture": {
     "path": "../fields/coast-geometry-r1-4x.png",
-    "sha256": "2D4274D44ACB760E7FBC7DEC17E81A36C5D1A53753C701804DEDBD1424172681",
+    "sha256": "80492F01DBC0B7B64706F0C71EDB6A8E8AAA2CC35E50F2159212FAB4AEA410F3",
     "dimensions": [
       6688,
       3764
@@ -25,7 +25,7 @@
     "r": "binary land occupancy",
     "g": "continuous 42px exterior shelf falloff",
     "b": "continuous 2.8px exterior contact falloff",
-    "a": "reserved"
+    "a": "authored land luminance continued beneath the exterior shelf"
   },
   "source": {
     "path": "../../territory-landform/masks/world-land-plate-r6-mask.png",
@@ -34,6 +34,7 @@
   "policy": [
     "The land mask owns geography.",
     "Every shoreline uses this same deterministic derivation.",
+    "The packed substrate value joins land material to shallow water.",
     "The runtime derives shore normals from the shelf gradient.",
     "Sparse authored crash accents belong to actors-effects in Phase 7."
   ]

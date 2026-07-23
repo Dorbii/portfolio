@@ -2,11 +2,12 @@ import type { CameraView } from "./camera";
 
 export type DetailTierId = "world" | "territory" | "capital";
 
+export const PHASE_3_MINIMUM_SPAN = 0.29;
+
 export interface DetailTier {
   readonly id: DetailTierId;
   readonly label: string;
   readonly maximumSpan: number;
-  readonly canvasScale: number;
   readonly requiresAuthoredTile: boolean;
 }
 
@@ -14,37 +15,36 @@ export interface DetailState {
   readonly tier: DetailTier;
   readonly worldToTerritory: number;
   readonly territoryToCapital: number;
-  readonly canvasScale: number;
+  readonly renderScale: number;
+  readonly shouldLoadTerritoryAssets: boolean;
 }
 
 export interface DetailNodePolicy {
   readonly minimumTier: DetailTierId;
 }
 
-export const DETAIL_TIERS: readonly DetailTier[] = Object.freeze([
+const DETAIL_TIERS: readonly DetailTier[] = Object.freeze([
   Object.freeze({
     id: "capital",
     label: "Capital tile required",
     maximumSpan: 0.2,
-    canvasScale: 1.3,
     requiresAuthoredTile: true,
   }),
   Object.freeze({
     id: "territory",
     label: "Territory detail",
     maximumSpan: 0.78,
-    canvasScale: 1.16,
     requiresAuthoredTile: false,
   }),
   Object.freeze({
     id: "world",
     label: "World detail",
     maximumSpan: 1,
-    canvasScale: 1,
     requiresAuthoredTile: false,
   }),
 ]);
 
+const TERRITORY_ASSET_PRELOAD_SPAN = 0.9;
 const WORLD_TO_TERRITORY_START = 0.86;
 const WORLD_TO_TERRITORY_END = 0.64;
 const TERRITORY_TO_CAPITAL_START = 0.23;
@@ -83,15 +83,12 @@ export function resolveDetailState(camera: CameraView): DetailState {
     tier,
     worldToTerritory,
     territoryToCapital,
-    canvasScale:
+    renderScale:
       1
-      + worldToTerritory * 0.16
-      + territoryToCapital * 0.14,
+      + worldToTerritory * 0.5
+      + territoryToCapital * 0.5,
+    shouldLoadTerritoryAssets: span <= TERRITORY_ASSET_PRELOAD_SPAN,
   });
-}
-
-export function resolveDetailTier(camera: CameraView): DetailTier {
-  return resolveDetailState(camera).tier;
 }
 
 export function resolveNodeVisibility(

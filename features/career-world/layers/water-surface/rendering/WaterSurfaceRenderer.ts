@@ -3,10 +3,8 @@ import {
   CAREER_WORLD_THEME,
   hexToUnitRgb,
 } from "../../../shared/theme";
-import {
-  resolveDetailState,
-  type DetailState,
-} from "../../../shared/lod";
+import type { DetailState } from "../../../shared/lod";
+import type { WorldLight } from "../../../shared/lighting";
 import { WATER_ASSETS } from "../model/assets";
 import {
   normalizeWaterSurfaceState,
@@ -40,16 +38,16 @@ export interface WaterRenderInfo {
 
 const TEXTURE_PATHS = [
   ["worldAlbedo", WATER_ASSETS.worldAlbedo, "clamp"],
-  ["closeAlbedo", WATER_ASSETS.closeAlbedo, "mirror"],
   ["macroHeight", WATER_ASSETS.macroHeight, "mirror"],
   ["microHeight", WATER_ASSETS.microHeight, "mirror"],
-  ["coastGeometry", WATER_ASSETS.coastGeometry, "clamp"],
+  ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp"],
   ["hydrology", WATER_ASSETS.hydrology, "clamp"],
 ] as const;
+const TERRITORY_ALBEDO_UNIT = TEXTURE_PATHS.length;
 
 const SAMPLER_UNIFORMS = Object.freeze({
   worldAlbedo: "u_worldAlbedo",
-  closeAlbedo: "u_closeAlbedo",
+  territoryAlbedo: "u_territoryAlbedo",
   macroHeight: "u_macroHeight",
   microHeight: "u_microHeight",
   coastGeometry: "u_coastGeometry",
@@ -76,6 +74,7 @@ const UNIFORM_NAMES = [
   "u_bodyColor",
   "u_swellColor",
   "u_shallowColor",
+  "u_substrateColor",
   "u_highlightColor",
   "u_foamColor",
   "u_stormColor",
@@ -93,7 +92,10 @@ function normalize3(
 }
 
 export class WaterSurfaceRenderer {
-  static async create(canvas: HTMLCanvasElement): Promise<WaterSurfaceRenderer> {
+  static async create(
+    canvas: HTMLCanvasElement,
+    light: WorldLight,
+  ): Promise<WaterSurfaceRenderer> {
     const gl = canvas.getContext("webgl2", {
       alpha: false,
       antialias: false,
@@ -114,7 +116,7 @@ export class WaterSurfaceRenderer {
     const images = await Promise.all(
       TEXTURE_PATHS.map(([, path]) => loadImage(path)),
     );
-    const coastImage = images[4];
+    const coastImage = images[3];
     const textures = Object.fromEntries(
       TEXTURE_PATHS.map(([name, , wrap], index) => [
         name,
@@ -131,6 +133,7 @@ export class WaterSurfaceRenderer {
       program,
       textures,
       [1 / coastImage.naturalWidth, 1 / coastImage.naturalHeight],
+      light,
     );
   }
 
@@ -140,15 +143,19 @@ export class WaterSurfaceRenderer {
   private readonly buffer: WebGLBuffer;
   private readonly textures: Record<string, TextureBinding>;
   private readonly uniforms: UniformMap;
-  private readonly coastTexel: readonly [number, number];
+  private coastTexel: readonly [number, number];
   private camera: CameraView = {
     origin: [0, 0],
     span: [1, 1],
   };
   private state: WaterSurfaceState = normalizeWaterSurfaceState();
-  private detailState: DetailState = resolveDetailState(this.camera);
+  private detailState: DetailState | null = null;
+  private lightDirection: readonly [number, number, number];
   private pixelRatio = 1;
-  private canvasScale = 1;
+  private renderScale = 1;
+  private territoryAssetsLoading: Promise<void> | null = null;
+  private territoryAssetsFailed = false;
+  private destroyed = false;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -156,12 +163,14 @@ export class WaterSurfaceRenderer {
     program: WebGLProgram,
     textures: Record<string, TextureBinding>,
     coastTexel: readonly [number, number],
+    light: WorldLight,
   ) {
     this.canvas = canvas;
     this.gl = gl;
     this.program = program;
     this.textures = textures;
     this.coastTexel = coastTexel;
+    this.lightDirection = normalize3(light.direction);
 
     const buffer = gl.createBuffer();
     if (!buffer) {
@@ -194,14 +203,22 @@ export class WaterSurfaceRenderer {
 
     gl.useProgram(program);
     for (const [name, uniformName] of Object.entries(SAMPLER_UNIFORMS)) {
-      gl.uniform1i(this.uniforms[uniformName], textures[name].unit);
+      const binding = textures[name] ?? textures.worldAlbedo;
+      gl.uniform1i(this.uniforms[uniformName], binding.unit);
     }
   }
 
-  setCamera(camera: CameraView): void {
+  setView(camera: CameraView, detailState: DetailState): void {
     this.camera = camera;
-    this.detailState = resolveDetailState(camera);
-    this.canvasScale = this.detailState.canvasScale;
+    this.detailState = detailState;
+    this.renderScale = detailState.renderScale;
+    if (detailState.shouldLoadTerritoryAssets) {
+      this.loadTerritoryAssets();
+    }
+  }
+
+  setLight(light: WorldLight): void {
+    this.lightDirection = normalize3(light.direction);
   }
 
   setState(state: Partial<WaterSurfaceState>): void {
@@ -209,6 +226,11 @@ export class WaterSurfaceRenderer {
   }
 
   render(elapsedSeconds: number): void {
+    const detailState = this.detailState;
+    if (!detailState) {
+      throw new Error("Water view must be set before rendering.");
+    }
+
     const gl = this.gl;
     this.resize();
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -238,23 +260,24 @@ export class WaterSurfaceRenderer {
     gl.uniform1f(this.uniforms.u_detailScale, this.state.detailScale);
     gl.uniform1f(
       this.uniforms.u_territoryLod,
-      this.detailState.worldToTerritory,
+      detailState.worldToTerritory,
     );
     gl.uniform1f(
       this.uniforms.u_capitalLod,
-      this.detailState.territoryToCapital,
+      detailState.territoryToCapital,
     );
 
-    const light = normalize3(
-      CAREER_WORLD_THEME.lighting.worldDirection,
-    );
-    gl.uniform3fv(this.uniforms.u_lightDirection, light);
+    gl.uniform3fv(this.uniforms.u_lightDirection, this.lightDirection);
     const water = CAREER_WORLD_THEME.colors.water;
     gl.uniform3fv(this.uniforms.u_abyssColor, hexToUnitRgb(water.abyss));
     gl.uniform3fv(this.uniforms.u_deepColor, hexToUnitRgb(water.deep));
     gl.uniform3fv(this.uniforms.u_bodyColor, hexToUnitRgb(water.body));
     gl.uniform3fv(this.uniforms.u_swellColor, hexToUnitRgb(water.swell));
     gl.uniform3fv(this.uniforms.u_shallowColor, hexToUnitRgb(water.shallow));
+    gl.uniform3fv(
+      this.uniforms.u_substrateColor,
+      hexToUnitRgb(CAREER_WORLD_THEME.colors.land.body),
+    );
     gl.uniform3fv(
       this.uniforms.u_highlightColor,
       hexToUnitRgb(water.highlight),
@@ -277,6 +300,7 @@ export class WaterSurfaceRenderer {
   }
 
   destroy(): void {
+    this.destroyed = true;
     for (const binding of Object.values(this.textures)) {
       this.gl.deleteTexture(binding.texture);
     }
@@ -287,7 +311,7 @@ export class WaterSurfaceRenderer {
   private resize(): void {
     const bounds = this.canvas.getBoundingClientRect();
     this.pixelRatio = Math.min(
-      (window.devicePixelRatio || 1) * this.canvasScale,
+      (window.devicePixelRatio || 1) * this.renderScale,
       2,
     );
     const width = Math.max(1, Math.round(bounds.width * this.pixelRatio));
@@ -297,5 +321,59 @@ export class WaterSurfaceRenderer {
       this.canvas.width = width;
       this.canvas.height = height;
     }
+  }
+
+  private loadTerritoryAssets(): void {
+    if (
+      this.territoryAssetsLoading
+      || this.territoryAssetsFailed
+      || this.canvas.dataset.detailAssetState === "ready"
+    ) {
+      return;
+    }
+
+    this.canvas.dataset.detailAssetState = "loading";
+    this.territoryAssetsLoading = Promise.all([
+      loadImage(WATER_ASSETS.territoryAlbedo),
+      loadImage(WATER_ASSETS.coastGeometry.territory),
+    ])
+      .then(([territoryAlbedo, coastGeometry]) => {
+        if (this.destroyed) {
+          return;
+        }
+        const previousCoast = this.textures.coastGeometry;
+        this.textures.territoryAlbedo = {
+          texture: createTexture(this.gl, territoryAlbedo, "mirror"),
+          unit: TERRITORY_ALBEDO_UNIT,
+        };
+        this.textures.coastGeometry = {
+          texture: createTexture(this.gl, coastGeometry, "clamp"),
+          unit: previousCoast.unit,
+        };
+        this.coastTexel = [
+          1 / coastGeometry.naturalWidth,
+          1 / coastGeometry.naturalHeight,
+        ];
+        this.gl.useProgram(this.program);
+        this.gl.uniform1i(
+          this.uniforms.u_territoryAlbedo,
+          TERRITORY_ALBEDO_UNIT,
+        );
+        this.gl.deleteTexture(previousCoast.texture);
+        this.canvas.dataset.detailAssetState = "ready";
+      })
+      .catch((error: unknown) => {
+        if (this.destroyed) {
+          return;
+        }
+        this.territoryAssetsFailed = true;
+        this.canvas.dataset.detailAssetState = "fallback";
+        this.canvas.dataset.detailAssetError = error instanceof Error
+          ? error.message
+          : String(error);
+      })
+      .finally(() => {
+        this.territoryAssetsLoading = null;
+      });
   }
 }

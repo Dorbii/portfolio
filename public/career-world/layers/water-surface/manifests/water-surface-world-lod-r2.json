@@ -13,7 +13,7 @@
     "mode": "RGB"
   },
   "derivation": {
-    "source": "water-surface-world-lod-r1-3840x2160.png",
+    "source": "../sources/water-surface-world-authored-r1.png",
     "sourceSha256": "AEB801E20133C7B28B2F554EC07CA7A4E8E8CA3E556D31CB5FD25F492CC274B0",
     "operation": "replace only center-band low-frequency discontinuity while preserving authored high-frequency linework",
     "centerX": 1920,

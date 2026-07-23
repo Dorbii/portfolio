@@ -24,12 +24,13 @@ uniform vec3 u_deepColor;
 uniform vec3 u_bodyColor;
 uniform vec3 u_swellColor;
 uniform vec3 u_shallowColor;
+uniform vec3 u_substrateColor;
 uniform vec3 u_highlightColor;
 uniform vec3 u_foamColor;
 uniform vec3 u_stormColor;
 
 uniform sampler2D u_worldAlbedo;
-uniform sampler2D u_closeAlbedo;
+uniform sampler2D u_territoryAlbedo;
 uniform sampler2D u_macroHeight;
 uniform sampler2D u_microHeight;
 uniform sampler2D u_coastGeometry;

@@ -6,13 +6,11 @@ import { LAND_ASSETS } from "../model/assets";
 interface TerritoryLandformProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
-  readonly showTerritoryQa: boolean;
 }
 
 export function TerritoryLandform({
   camera,
   detailState,
-  showTerritoryQa,
 }: TerritoryLandformProps) {
   const style = cameraLayerStyle(camera) as CSSProperties;
   const detailOpacity = detailState.worldToTerritory;
@@ -36,7 +34,7 @@ export function TerritoryLandform({
         src={LAND_ASSETS.plate}
         style={style}
       />
-      {detailOpacity > 0 ? (
+      {detailState.shouldLoadTerritoryAssets ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt=""
@@ -52,16 +50,6 @@ export function TerritoryLandform({
             ...style,
             opacity: detailOpacity,
           }}
-        />
-      ) : null}
-      {showTerritoryQa ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          alt=""
-          className="career-world__world-plane career-world__territory-qa"
-          draggable={false}
-          src={LAND_ASSETS.territoryQa}
-          style={style}
         />
       ) : null}
     </div>

@@ -8,10 +8,10 @@ struct OpenWaterSample {
 
 OpenWaterSample sampleOpenWater(vec2 worldUv, float lagoon) {
   float time = u_time * u_motion;
-  float closeMix = u_territoryLod;
+  float territoryMix = u_territoryLod;
   float capitalMix = u_capitalLod;
   float localDetail =
-    mix(0.18, 1.0, closeMix)
+    mix(0.18, 1.0, territoryMix)
     * mix(1.0, 1.28, capitalMix)
     * u_detailScale;
   float lagoonWave = mix(1.0, 0.34, lagoon);
@@ -37,7 +37,7 @@ OpenWaterSample sampleOpenWater(vec2 worldUv, float lagoon) {
   );
   vec2 microCoordinate =
     worldUv
-    * mix(vec2(7.2, 6.1), vec2(12.5, 10.6), closeMix)
+    * mix(vec2(7.2, 6.1), vec2(12.5, 10.6), territoryMix)
     * mix(1.0, 1.36, capitalMix)
     + u_wind * time * 0.018
     - crossWind * time * 0.006;
@@ -54,19 +54,19 @@ OpenWaterSample sampleOpenWater(vec2 worldUv, float lagoon) {
 
   vec2 movedUv = clamp(worldUv + displacement, 0.001, 0.999);
   vec3 worldArt = texture(u_worldAlbedo, movedUv).rgb;
-  vec2 closeUvA =
+  vec2 territoryUvA =
     movedUv * vec2(2.25, 2.05)
     + displacement * 0.42
     + vec2(0.17, 0.29);
   mat2 detailRotation = mat2(0.82, -0.57, 0.57, 0.82);
-  vec2 closeUvB =
+  vec2 territoryUvB =
     detailRotation * (movedUv - 0.5) * 3.65
     + vec2(0.71, 0.38)
     - displacement * 0.24;
-  vec3 closeArtA = texture(u_closeAlbedo, closeUvA).rgb;
-  vec3 closeArtB = texture(u_closeAlbedo, closeUvB).rgb;
-  vec3 closeArt = mix(closeArtA, closeArtB, 0.38);
-  vec3 authored = mix(worldArt, closeArt, closeMix * 0.78);
+  vec3 territoryArtA = texture(u_territoryAlbedo, territoryUvA).rgb;
+  vec3 territoryArtB = texture(u_territoryAlbedo, territoryUvB).rgb;
+  vec3 territoryArt = mix(territoryArtA, territoryArtB, 0.38);
+  vec3 authored = mix(worldArt, territoryArt, territoryMix * 0.78);
 
   float aspect = u_resolution.x / max(u_resolution.y, 1.0);
   vec2 physicalUv = vec2(worldUv.x * aspect, worldUv.y);
@@ -97,7 +97,11 @@ OpenWaterSample sampleOpenWater(vec2 worldUv, float lagoon) {
   palette = mix(palette, u_swellColor, expression * 0.24);
   palette = mix(palette, authored, 0.62);
   palette *= lighting;
-  palette = mix(palette, u_highlightColor, crest * (0.08 + closeMix * 0.08));
+  palette = mix(
+    palette,
+    u_highlightColor,
+    crest * (0.08 + territoryMix * 0.08)
+  );
   palette = mix(palette, u_stormColor, u_weather * 0.26);
 
   OpenWaterSample result;

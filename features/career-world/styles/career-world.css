@@ -98,7 +98,11 @@
 .career-world__backdrop {
   z-index: 1;
   background:
-    radial-gradient(circle at 72% 32%, #183029 0, transparent 38%),
+    radial-gradient(
+      circle at var(--world-light-x) var(--world-light-y),
+      var(--world-light-color) 0,
+      transparent 38%
+    ),
     #040807;
 }
 
@@ -139,12 +143,6 @@
   will-change: opacity;
 }
 
-.career-world__territory-qa {
-  z-index: 2;
-  opacity: 0.55;
-  mix-blend-mode: screen;
-}
-
 .career-world__interface {
   position: absolute;
   z-index: 8;
@@ -157,7 +155,36 @@
   pointer-events: none;
 }
 
+.career-world__qa-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.career-world__territory-qa {
+  opacity: 0.44;
+  mix-blend-mode: screen;
+  mask:
+    url("/career-world/layers/territory-landform/masks/world-land-plate-r6-mask.png")
+    0 0 / 100% 100% no-repeat;
+  mask-mode: luminance;
+}
+
+.career-world__development-qa {
+  overflow: visible;
+  opacity: 0.92;
+}
+
+.career-world__development-qa rect {
+  stroke-width: 1.5;
+  stroke-dasharray: 7 5;
+}
+
 .career-world__status-panel {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: fit-content;
   min-width: 11rem;
@@ -198,6 +225,8 @@
 }
 
 .career-world__controls {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

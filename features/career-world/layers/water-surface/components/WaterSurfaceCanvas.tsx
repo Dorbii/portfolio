@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import type { CameraView } from "../../../shared/camera";
-import { resolveDetailState } from "../../../shared/lod";
+import type { DetailState } from "../../../shared/lod";
+import type { WorldLight } from "../../../shared/lighting";
 import { WaterSurfaceController } from "../rendering/WaterSurfaceController";
 import { WaterSurfaceRenderer } from "../rendering/WaterSurfaceRenderer";
 
@@ -10,21 +11,37 @@ export type WaterRenderState = "loading" | "ready" | "fallback";
 
 interface WaterSurfaceCanvasProps {
   readonly camera: CameraView;
+  readonly detailState: DetailState;
+  readonly light: WorldLight;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
 }
 
 export function WaterSurfaceCanvas({
   camera,
+  detailState,
+  light,
   onRenderStateChange,
 }: WaterSurfaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
-  const detailState = resolveDetailState(camera);
+  const sceneRef = useRef({ camera, detailState, light });
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
   }, [onRenderStateChange]);
+
+  useEffect(() => {
+    sceneRef.current = { camera, detailState, light };
+  }, [camera, detailState, light]);
+
+  useEffect(() => {
+    controllerRef.current?.setView(camera, detailState);
+  }, [camera, detailState]);
+
+  useEffect(() => {
+    controllerRef.current?.setLight(light);
+  }, [light]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,7 +54,7 @@ export function WaterSurfaceCanvas({
     canvas.dataset.renderState = "loading";
     statusCallbackRef.current?.("loading");
 
-    void WaterSurfaceRenderer.create(canvas)
+    void WaterSurfaceRenderer.create(canvas, light)
       .then((renderer) => {
         if (cancelled) {
           renderer.destroy();
@@ -51,7 +68,9 @@ export function WaterSurfaceCanvas({
           reduceMotion,
         });
         controllerRef.current = localController;
-        localController.setCamera(camera);
+        const scene = sceneRef.current;
+        localController.setView(scene.camera, scene.detailState);
+        localController.setLight(scene.light);
         localController.start();
         canvas.dataset.renderState = "ready";
         delete canvas.dataset.renderError;
@@ -74,14 +93,10 @@ export function WaterSurfaceCanvas({
         controllerRef.current = null;
       }
     };
-    // Renderer creation is intentionally mount-only. Camera updates have a
+    // Renderer creation is intentionally mount-only. Scene updates have a
     // separate effect so changing focus never resets the water clock.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    controllerRef.current?.setCamera(camera);
-  }, [camera]);
 
   return (
     <canvas

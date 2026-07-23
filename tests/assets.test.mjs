@@ -79,12 +79,12 @@ async function decodePng(relativePath) {
   return { width, height, channels, pixels };
 }
 
-test("generated land plate preserves accepted geography and alpha", async () => {
+test("authored land plate preserves accepted geography and alpha", async () => {
   const base = await decodePng(
-    "public/career-world/layers/territory-landform/textures/world-land-plate-r6.png",
+    "public/career-world/layers/territory-landform/sources/world-land-plate-r6.png",
   );
   const baked = await decodePng(
-    "public/career-world/layers/territory-landform/textures/world-land-plate-r7.png",
+    "public/career-world/layers/territory-landform/textures/world-land-plate-r8.png",
   );
   assert.deepEqual(
     [baked.width, baked.height, baked.channels],
@@ -93,6 +93,82 @@ test("generated land plate preserves accepted geography and alpha", async () => 
   assert.equal(baked.channels, 4);
   for (let offset = 3; offset < base.pixels.length; offset += 4) {
     assert.equal(baked.pixels[offset], base.pixels[offset]);
+  }
+});
+
+test("every territory reserves a registered city-ready development envelope", async () => {
+  const manifest = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+  ), "utf8"));
+  const land = await decodePng(
+    "public/career-world/layers/territory-landform/textures/world-land-plate-r8.png",
+  );
+
+  assert.equal(manifest.territories.length, 5);
+  assert.deepEqual(
+    manifest.developmentContract.consumerLayers,
+    ["infrastructure", "structures"],
+  );
+  assert.ok(
+    manifest.territories
+      .find(({ id }) => id === "tanium")
+      .development.reservedProgram.includes("mountain-cableway"),
+  );
+
+  for (const territory of manifest.territories) {
+    const { capitalAnchor, authoringEnvelope } = territory.development;
+    const [originX, originY] = authoringEnvelope.origin;
+    const [spanX, spanY] = authoringEnvelope.span;
+    const [focusX, focusY] = territory.focusView.origin;
+    const [focusWidth, focusHeight] = territory.focusView.span;
+
+    assert.ok(capitalAnchor[0] >= originX);
+    assert.ok(capitalAnchor[0] <= originX + spanX);
+    assert.ok(capitalAnchor[1] >= originY);
+    assert.ok(capitalAnchor[1] <= originY + spanY);
+    assert.ok(originX >= focusX);
+    assert.ok(originY >= focusY);
+    assert.ok(originX + spanX <= focusX + focusWidth);
+    assert.ok(originY + spanY <= focusY + focusHeight);
+    assert.equal(territory.development.firstDetailTier, "territory");
+    assert.equal(
+      territory.development.terrainPolicy,
+      "conform-to-landform",
+    );
+
+    const anchorX = Math.min(
+      land.width - 1,
+      Math.floor(capitalAnchor[0] * land.width),
+    );
+    const anchorY = Math.min(
+      land.height - 1,
+      Math.floor(capitalAnchor[1] * land.height),
+    );
+    const anchorOffset = (anchorY * land.width + anchorX) * land.channels;
+    assert.ok(
+      land.pixels[anchorOffset + 3] >= 128,
+      `${territory.id} capital anchor must be on accepted land`,
+    );
+
+    const startX = Math.floor(originX * land.width);
+    const endX = Math.ceil((originX + spanX) * land.width);
+    const startY = Math.floor(originY * land.height);
+    const endY = Math.ceil((originY + spanY) * land.height);
+    let landPixels = 0;
+    let totalPixels = 0;
+    for (let y = startY; y < endY; y += 1) {
+      for (let x = startX; x < endX; x += 1) {
+        const offset = (y * land.width + x) * land.channels;
+        landPixels += land.pixels[offset + 3] >= 128 ? 1 : 0;
+        totalPixels += 1;
+      }
+    }
+    const coverage = landPixels / totalPixels;
+    assert.ok(
+      coverage >= territory.development.minimumLandCoverage,
+      `${territory.id} envelope coverage ${coverage.toFixed(3)} is too low`,
+    );
   }
 });
 
@@ -107,6 +183,7 @@ test("coast field is derived across the complete accepted shoreline", async () =
   assert.equal(coast.channels, 4);
 
   let boundaryPixels = 0;
+  const substrateValues = new Set();
   for (let y = 1; y < mask.height - 1; y += 1) {
     for (let x = 1; x < mask.width - 1; x += 1) {
       const maskOffset = y * mask.width + x;
@@ -125,16 +202,44 @@ test("coast field is derived across the complete accepted shoreline", async () =
       if (neighborLand) {
         boundaryPixels += 1;
         assert.ok(coast.pixels[coastOffset + 2] > 0);
+        substrateValues.add(coast.pixels[coastOffset + 3]);
       }
     }
   }
   assert.ok(boundaryPixels > 1000);
+  assert.ok(
+    substrateValues.size > 8,
+    "coast substrate must continue authored land value instead of a constant",
+  );
+});
+
+test("authored water regions compile into a land-clipped hydrology field", async () => {
+  const mask = await decodePng(
+    "public/career-world/layers/territory-landform/masks/world-land-plate-r6-mask.png",
+  );
+  const hydrology = await decodePng(
+    "public/career-world/layers/water-surface/fields/water-region-field-r1.png",
+  );
+  assert.deepEqual(
+    [hydrology.width, hydrology.height, hydrology.channels],
+    [mask.width, mask.height, 1],
+  );
+
+  let waterInfluencePixels = 0;
+  for (let index = 0; index < mask.pixels.length; index += 1) {
+    if (mask.pixels[index] >= 128) {
+      assert.equal(hydrology.pixels[index], 0);
+    } else if (hydrology.pixels[index] > 0) {
+      waterInfluencePixels += 1;
+    }
+  }
+  assert.ok(waterInfluencePixels > 1000);
 });
 
 test("generated asset manifests carry exact content hashes", async () => {
   const landManifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/world-land-plate-r7.json",
+    "public/career-world/layers/territory-landform/manifests/world-land-plate-r8.json",
   ), "utf8"));
   const coastManifest = JSON.parse(await readFile(path.join(
     root,
@@ -144,11 +249,15 @@ test("generated asset manifests carry exact content hashes", async () => {
     root,
     "public/career-world/layers/water-surface/manifests/water-surface-world-lod-r2.json",
   ), "utf8"));
+  const hydrologyManifest = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/water-surface/manifests/water-region-field-r1.json",
+  ), "utf8"));
 
   assert.equal(
     landManifest.visual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/world-land-plate-r7.png",
+      "public/career-world/layers/territory-landform/textures/world-land-plate-r8.png",
     ),
   );
   assert.equal(
@@ -160,7 +269,7 @@ test("generated asset manifests carry exact content hashes", async () => {
   assert.equal(
     landManifest.detailVisual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/world-land-plate-r7-detail-4x.png",
+      "public/career-world/layers/territory-landform/textures/world-land-plate-r8-detail-4x.png",
     ),
   );
   assert.equal(
@@ -175,4 +284,11 @@ test("generated asset manifests carry exact content hashes", async () => {
       "public/career-world/layers/water-surface/textures/water-surface-world-lod-r2-3840x2160.png",
     ),
   );
+  assert.equal(
+    hydrologyManifest.texture.sha256,
+    await sha256(
+      "public/career-world/layers/water-surface/fields/water-region-field-r1.png",
+    ),
+  );
+  assert.equal(hydrologyManifest.generation.landClipped, true);
 });

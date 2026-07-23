@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "career-world/world-land-layout@r1",
-  "status": "candidate",
+  "status": "phase-3-runtime",
   "authority": "macro-geography",
   "coordinateSpace": {
     "viewBox": [0, 0, 1672, 941],
@@ -11,10 +11,10 @@
     "cameraTransitionRequired": false
   },
   "activeConcept": {
-    "visual": "../textures/world-land-plate-r7.png",
+    "visual": "../textures/world-land-plate-r8.png",
     "mask": "../masks/world-land-plate-r6-mask.png",
     "territories": "world-territories-r4.json",
-    "metadata": "world-land-plate-r7.json"
+    "metadata": "world-land-plate-r8.json"
   },
   "landmasses": [
     {
@@ -56,6 +56,7 @@
     "Territory and city views are crops of this coordinate space.",
     "The world view composes primary and secondary land weights near rule-of-thirds intersections with deliberate ocean negative space.",
     "Zoom may add detail but may not move, rescale, rotate, or redraw macro geography.",
+    "Territory development envelopes register future city detail without drawing infrastructure or structures during Phase 3.",
     "Employer territory placement does not determine landmass count or equal territory area.",
     "Territory seams are irregular selection data and are not permanent world-view decoration.",
     "Water, shoreline foam, infrastructure, structures, actors, and interface data are separate layers."

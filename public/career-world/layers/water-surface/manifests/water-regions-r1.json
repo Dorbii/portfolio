@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "career-world/water-regions@r1",
-  "status": "candidate-authoring",
+  "status": "phase-3-runtime",
   "coordinateSpace": "normalized-world-top-left",
   "policy": [
     "Water regions classify hydrology without changing land geography.",

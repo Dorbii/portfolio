@@ -27,7 +27,11 @@ import {
   zoomCameraViewAt,
   type CameraView,
 } from "../shared/camera";
-import { resolveDetailState } from "../shared/lod";
+import {
+  PHASE_3_MINIMUM_SPAN,
+  resolveDetailState,
+} from "../shared/lod";
+import { WORLD_LIGHT } from "../shared/lighting";
 
 interface WorldSceneProps {
   readonly initialInterfaceMode: "world" | "water";
@@ -54,7 +58,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
   const detailState = resolveDetailState(camera);
 
   const commitCamera = useCallback((next: CameraView) => {
-    const normalized = normalizeCameraView(next);
+    const normalized = normalizeCameraView(next, PHASE_3_MINIMUM_SPAN);
     cameraRef.current = normalized;
     setCamera(normalized);
   }, []);
@@ -105,7 +109,12 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
     const scale = Math.exp(event.deltaY * 0.00135);
-    commitCamera(zoomCameraViewAt(cameraRef.current, anchor, scale));
+    commitCamera(zoomCameraViewAt(
+      cameraRef.current,
+      anchor,
+      scale,
+      PHASE_3_MINIMUM_SPAN,
+    ));
     setActiveViewId("custom");
   }, [cancelFocusAnimation, commitCamera]);
 
@@ -190,6 +199,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
           cameraRef.current,
           [0.5, 0.5],
           event.key === "-" ? 1.18 : 0.84,
+          PHASE_3_MINIMUM_SPAN,
         ));
         setActiveViewId("custom");
       }
@@ -203,6 +213,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       className="career-world__viewport"
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
+      data-camera-minimum-span={PHASE_3_MINIMUM_SPAN}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-detail-tier={detailState.tier.id}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
@@ -216,18 +227,20 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       role="application"
       tabIndex={0}
     >
-      <WorldBackdrop />
+      <WorldBackdrop light={WORLD_LIGHT} />
       <WaterSurfaceCanvas
         camera={camera}
+        detailState={detailState}
+        light={WORLD_LIGHT}
         onRenderStateChange={setRenderState}
       />
       <TerritoryLandform
         camera={camera}
         detailState={detailState}
-        showTerritoryQa={showTerritoryQa}
       />
       <WorldInterface
         activeViewId={activeViewId}
+        camera={camera}
         detailState={detailState}
         mode={initialInterfaceMode}
         onFocus={handleFocus}

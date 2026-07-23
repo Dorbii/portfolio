@@ -1,4 +1,6 @@
 import type { CameraView } from "../../../shared/camera";
+import type { DetailState } from "../../../shared/lod";
+import type { WorldLight } from "../../../shared/lighting";
 import type { WaterSurfaceState } from "../model/state";
 import { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
 
@@ -24,14 +26,19 @@ export class WaterSurfaceController {
     document.addEventListener("visibilitychange", this.handleVisibility);
   }
 
-  setCamera(camera: CameraView): void {
-    this.renderer.setCamera(camera);
-    this.renderOnce();
+  setView(camera: CameraView, detailState: DetailState): void {
+    this.renderer.setView(camera, detailState);
+    this.renderIfIdle();
+  }
+
+  setLight(light: WorldLight): void {
+    this.renderer.setLight(light);
+    this.renderIfIdle();
   }
 
   setState(state: Partial<WaterSurfaceState>): void {
     this.renderer.setState(state);
-    this.renderOnce();
+    this.renderIfIdle();
   }
 
   start(): void {
@@ -90,5 +97,10 @@ export class WaterSurfaceController {
   private renderOnce(): void {
     this.renderer.render(this.elapsedSeconds);
   }
-}
 
+  private renderIfIdle(): void {
+    if (!this.running) {
+      this.renderOnce();
+    }
+  }
+}

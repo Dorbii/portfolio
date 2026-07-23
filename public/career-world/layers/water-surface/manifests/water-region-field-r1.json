@@ -1,12 +1,15 @@
 {
   "schemaVersion": 1,
   "id": "career-world/water-region-field@r1",
-  "status": "candidate",
+  "status": "phase-3-runtime",
   "coordinateSpace": "normalized-world-top-left",
-  "dimensions": [1672, 941],
+  "dimensions": [
+    1672,
+    941
+  ],
   "texture": {
     "path": "../fields/water-region-field-r1.png",
-    "sha256": "303859D61DA537093570866B61E9E4AB76FE76100A0661AD36437B3D36DE7292",
+    "sha256": "E898EA71928815B3ABA38B939ACA3E0A91F2AE1F57664BDB4AEF2DB63F486E91",
     "mode": "L"
   },
   "sources": {
@@ -16,17 +19,17 @@
     },
     "regions": {
       "path": "water-regions-r1.json",
-      "sha256": "DBA80300C486C7791DFA99F0E0182DADEFEE852032D6969ED88A9CCD6CB8EDF0"
+      "sha256": "8D100E8459416BE8AE1A4BEEEB59F4CC4DF67D7DF5C1513C67CA03565142A8D2"
     }
   },
   "channels": {
-    "r": "sheltered-lagoon influence; zero is default open ocean",
-    "g": "reserved",
-    "b": "reserved",
+    "r": "sheltered-water influence; zero is default open ocean",
+    "g": "decoded image copy; not semantic data",
+    "b": "decoded image copy; not semantic data",
     "a": "decoded image alpha; not semantic data"
   },
   "generation": {
-    "script": "career-world/qa/build-water-region-field.py",
+    "script": "scripts/build-career-world-assets.py",
     "landClipped": true
   }
 }

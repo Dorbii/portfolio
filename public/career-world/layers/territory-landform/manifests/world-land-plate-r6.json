@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "career-world/world-land-plate@r6",
-  "status": "candidate",
+  "status": "registration-source",
   "projection": "orthographic-plan",
   "worldLodOnly": true,
   "dimensions": [1672, 941],
   "visual": {
-    "path": "../textures/world-land-plate-r6.png",
+    "path": "../sources/world-land-plate-r6.png",
     "sha256": "AF159138DEFEE8D7CE70B478D6799B7A8733288BAA6C13F429CC06E57E924CC3",
     "mode": "RGBA"
   },

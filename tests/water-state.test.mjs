@@ -5,9 +5,9 @@ import {
   windVectorFromDegrees,
 } from "../features/career-world/layers/water-surface/model/state.ts";
 import {
+  PHASE_3_MINIMUM_SPAN,
   resolveDetailState,
   resolveNodeVisibility,
-  resolveDetailTier,
 } from "../features/career-world/shared/lod.ts";
 
 test("water state clamps external inputs without changing its contract", () => {
@@ -38,17 +38,17 @@ test("wind direction produces a normalized world vector", () => {
 
 test("one camera span resolves the detail tier for every layer", () => {
   assert.equal(
-    resolveDetailTier({ origin: [0, 0], span: [1, 1] }).id,
+    resolveDetailState({ origin: [0, 0], span: [1, 1] }).tier.id,
     "world",
   );
   assert.equal(
-    resolveDetailTier({ origin: [0.2, 0.2], span: [0.5, 0.5] }).id,
+    resolveDetailState({ origin: [0.2, 0.2], span: [0.5, 0.5] }).tier.id,
     "territory",
   );
-  const capital = resolveDetailTier({
+  const capital = resolveDetailState({
     origin: [0.45, 0.45],
     span: [0.15, 0.15],
-  });
+  }).tier;
   assert.equal(capital.id, "capital");
   assert.equal(capital.requiresAuthoredTile, true);
 });
@@ -79,9 +79,11 @@ test("LOD assets and future nodes blend continuously across shared thresholds", 
   assert.equal(territory.worldToTerritory, 1);
   assert.equal(territory.territoryToCapital, 0);
   assert.equal(capital.territoryToCapital, 1);
-  assert.ok(world.canvasScale < transition.canvasScale);
-  assert.ok(transition.canvasScale < territory.canvasScale);
-  assert.ok(territory.canvasScale < capital.canvasScale);
+  assert.ok(world.renderScale < transition.renderScale);
+  assert.ok(transition.renderScale < territory.renderScale);
+  assert.ok(territory.renderScale < capital.renderScale);
+  assert.equal(world.shouldLoadTerritoryAssets, false);
+  assert.equal(transition.shouldLoadTerritoryAssets, true);
 
   assert.equal(
     resolveNodeVisibility({ minimumTier: "world" }, world),
@@ -98,5 +100,9 @@ test("LOD assets and future nodes blend continuously across shared thresholds", 
   assert.equal(
     resolveNodeVisibility({ minimumTier: "capital" }, capital),
     1,
+  );
+  assert.ok(
+    PHASE_3_MINIMUM_SPAN > 0.2,
+    "Phase 3 preview must not expose the unauthored capital tier.",
   );
 });

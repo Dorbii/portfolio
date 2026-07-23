@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/world-light@r1",
+  "status": "foundation-runtime",
+  "direction": [-0.42, -0.36, 0.83],
+  "color": "#c9c6a8",
+  "ambientColor": "#17282d",
+  "intensity": 1,
+  "policy": [
+    "The backdrop owns the visible environmental light cue.",
+    "Every rendered layer consumes this shared direction and palette.",
+    "Static authored assets record the same light contract in their manifests."
+  ]
+}

@@ -1,9 +1,12 @@
 import type { WaterRenderState } from "../../water-surface";
 import type { Territory } from "../../territory-landform/model/territories";
+import type { CameraView } from "../../../shared/camera";
 import type { DetailState } from "../../../shared/lod";
+import { TerritoryQaOverlay } from "./TerritoryQaOverlay";
 
 interface WorldInterfaceProps {
   readonly activeViewId: string;
+  readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly mode: "world" | "water";
   readonly renderState: WaterRenderState;
@@ -16,6 +19,7 @@ interface WorldInterfaceProps {
 
 export function WorldInterface({
   activeViewId,
+  camera,
   detailState,
   mode,
   renderState,
@@ -27,6 +31,9 @@ export function WorldInterface({
 }: WorldInterfaceProps) {
   return (
     <div className="career-world__interface" data-layer="interface">
+      {showTerritoryQa ? (
+        <TerritoryQaOverlay camera={camera} territories={territories} />
+      ) : null}
       <div className="career-world__status-panel">
         <span className="career-world__eyebrow">
           {mode === "water" ? "Water surface" : "Career World"}

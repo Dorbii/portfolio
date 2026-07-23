@@ -1,5 +1,14 @@
 import manifest from "@/public/career-world/layers/territory-landform/manifests/world-territories-r4.json";
-import type { CameraView } from "../../../shared/camera";
+import type { CameraView, Pair } from "../../../shared/camera";
+
+export interface TerritoryDevelopment {
+  readonly capitalAnchor: Pair;
+  readonly authoringEnvelope: CameraView;
+  readonly minimumLandCoverage: number;
+  readonly firstDetailTier: "territory";
+  readonly terrainPolicy: "conform-to-landform";
+  readonly reservedProgram: readonly string[];
+}
 
 export interface Territory {
   readonly id: string;
@@ -7,10 +16,34 @@ export interface Territory {
   readonly landmassId: string;
   readonly maskColor: string;
   readonly focusView: CameraView;
+  readonly development: TerritoryDevelopment;
 }
 
 function pair(values: number[]): readonly [number, number] {
   return Object.freeze([values[0], values[1]] as [number, number]);
+}
+
+function development(
+  source: (typeof manifest.territories)[number]["development"],
+): TerritoryDevelopment {
+  if (
+    source.firstDetailTier !== "territory"
+    || source.terrainPolicy !== "conform-to-landform"
+  ) {
+    throw new TypeError("Territory development policy is not supported.");
+  }
+
+  return Object.freeze({
+    ...source,
+    capitalAnchor: pair(source.capitalAnchor),
+    authoringEnvelope: Object.freeze({
+      origin: pair(source.authoringEnvelope.origin),
+      span: pair(source.authoringEnvelope.span),
+    }),
+    firstDetailTier: source.firstDetailTier,
+    terrainPolicy: source.terrainPolicy,
+    reservedProgram: Object.freeze([...source.reservedProgram]),
+  });
 }
 
 export const TERRITORIES: readonly Territory[] = Object.freeze(
@@ -20,5 +53,6 @@ export const TERRITORIES: readonly Territory[] = Object.freeze(
       origin: pair(territory.focusView.origin),
       span: pair(territory.focusView.span),
     }),
+    development: development(territory.development),
   })),
 );

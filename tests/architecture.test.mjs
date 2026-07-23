@@ -100,3 +100,70 @@ test("deferred crash accents are isolated in actors-effects", async () => {
   );
 });
 
+test("one backdrop-owned light contract drives static and rendered layers", async () => {
+  const light = await readJson(
+    "public/career-world/layers/world-backdrop/manifests/world-light-r1.json",
+  );
+  const land = await readJson(
+    "public/career-world/layers/territory-landform/manifests/world-land-plate-r8.json",
+  );
+  const renderer = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "WaterSurfaceRenderer.ts",
+    ),
+    "utf8",
+  );
+  const scene = await readFile(
+    path.join(root, "features", "career-world", "composition", "WorldScene.tsx"),
+    "utf8",
+  );
+  const backdrop = await readFile(
+    path.join(featureLayers, "world-backdrop", "index.tsx"),
+    "utf8",
+  );
+
+  assert.equal(light.direction.length, 3);
+  assert.deepEqual(land.derivation.worldLightDirection, light.direction);
+  assert.match(scene, /<WorldBackdrop light=\{WORLD_LIGHT\}/);
+  assert.match(scene, /light=\{WORLD_LIGHT\}/);
+  assert.match(backdrop, /light: WorldLight/);
+  assert.match(renderer, /setLight\(light: WorldLight\)/);
+  assert.doesNotMatch(renderer, /WORLD_LIGHT/);
+  assert.doesNotMatch(renderer, /\[-0\.42,\s*-0\.36,\s*0\.83\]/);
+});
+
+test("composition resolves semantic zoom once and passes it downward", async () => {
+  const scene = await readFile(
+    path.join(root, "features", "career-world", "composition", "WorldScene.tsx"),
+    "utf8",
+  );
+  const waterCanvas = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "components",
+      "WaterSurfaceCanvas.tsx",
+    ),
+    "utf8",
+  );
+  const waterRenderer = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "WaterSurfaceRenderer.ts",
+    ),
+    "utf8",
+  );
+
+  assert.equal(
+    (scene.match(/resolveDetailState\(/g) ?? []).length,
+    1,
+  );
+  assert.doesNotMatch(waterCanvas, /resolveDetailState/);
+  assert.doesNotMatch(waterRenderer, /resolveDetailState/);
+  assert.match(scene, /detailState=\{detailState\}/);
+});

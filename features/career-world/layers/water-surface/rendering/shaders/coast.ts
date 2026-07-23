@@ -32,6 +32,7 @@ CoastSample applyCoast(
   vec4 geometry = texture(u_coastGeometry, worldUv);
   float rawShelf = geometry.g;
   float contact = geometry.b;
+  float substrate = geometry.a;
   float zoom = max(u_territoryLod, u_capitalLod);
   float shelf = pow(
     saturate(rawShelf),
@@ -52,9 +53,10 @@ CoastSample applyCoast(
   float time = u_time * u_motion;
   vec2 tangent = vec2(-shoreNormal.y, shoreNormal.x);
   float alongShore = dot(worldUv, tangent) * 510.0;
+  // Shelf rises toward land, so positive time sends constant phase shoreward.
   float approachPhase =
     (1.0 - shelf) * 15.0
-    - time * (1.12 + exposure * 0.34)
+    + time * (1.12 + exposure * 0.34)
     + alongShore * 0.018;
   float advancingBand = smoother(0.58, 0.94, sin(approachPhase) * 0.5 + 0.5);
   float brokenArc = smoother(
@@ -66,12 +68,27 @@ CoastSample applyCoast(
     )
   );
 
+  float shelfVariation = mix(
+    0.58,
+    1.04,
+    heightSample(
+      u_macroHeight,
+      worldUv * vec2(3.7, 3.1) + vec2(0.19, 0.43)
+    )
+  );
   float shallowAmount =
     shelf
-    * mix(0.48, 0.3, lagoon)
+    * mix(0.25, 0.17, lagoon)
     * mix(1.0, 0.84, zoom);
-  vec3 color = mix(water.color, u_shallowColor, shallowAmount);
-  color = mix(color, u_deepColor, contact * 0.07);
+  shallowAmount *= shelfVariation;
+  vec3 seabed = mix(
+    u_deepColor,
+    u_substrateColor,
+    0.16 + substrate * 0.2
+  );
+  seabed = mix(seabed, u_shallowColor, 0.68);
+  vec3 color = mix(water.color, seabed, shallowAmount);
+  color = mix(color, u_abyssColor, contact * 0.07);
   color = mix(
     color,
     u_highlightColor,
