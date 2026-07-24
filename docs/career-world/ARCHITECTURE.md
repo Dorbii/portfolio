@@ -13,7 +13,7 @@ substitutes a separately authored city canvas.
 | --- | --- | --- | --- |
 | 1 | `world-backdrop` | Atmosphere behind the world | Water or land color |
 | 2 | `water-surface` | Open water, hydrology, water-side shelf/contact response | Land pixels |
-| 3 | `territory-landform` | Geography, land material, baked inner contact edge, territory masks | Foam or moving water |
+| 3 | `territory-landform` | Geography, elevation, slope, terrain relief, territory masks | Foam, wet contact, or moving water |
 | 4 | `infrastructure` | Roads, trails, docks, bridges, plazas | Terrain or buildings |
 | 5 | `environment` | Vegetation, rocks, logs, signs | Infrastructure |
 | 6 | `structures` | Employer, project, skill, and landmark structures | Evidence UI |
@@ -21,9 +21,10 @@ substitutes a separately authored city canvas.
 | 8 | `interface` | Labels, focus controls, selections, evidence links, QA overlays | World art |
 
 Coastline is an interface between land geometry and water behavior, not a ninth
-scene layer. Land publishes the mask. Water derives a continuous shelf and
-contact field from it. Phase 7 may add sparse authored crash accents without
-redrawing the coast.
+scene layer. Land publishes the mask, elevation, and slope. Water derives
+continuous shelf and bidirectional distance fields from the mask, then derives
+beach, rocky-shelf, and cliff response from the same topology. Phase 7 may add
+sparse authored crash accents without redrawing the coast.
 
 ## Runtime boundaries
 
@@ -37,8 +38,14 @@ redrawing the coast.
   resolved detail and light state; they do not recalculate global policy.
 - Deferred layers expose a typed contract and no speculative renderer.
 - Authoring scripts are deterministic and never run in the browser.
-- Static raster art may carry authored lighting; its generation must use the
-  same world-light contract as procedural layers.
+- `terrain-dem-authored-r3.png` is the canonical Phase 3 elevation source.
+  Terrain slope is measured from an elevation continuation across the hidden
+  mask boundary so the coastline itself does not create a false cliff.
+- A deterministic low-frequency ground material is authored independently from
+  elevation, then the generated terrain relief lights that material with the
+  same world-light contract as procedural layers. Elevation remains available
+  independently so a later day/night pass can relight terrain without replacing
+  geography or its substrate.
 
 The current light is intentionally fixed. A moving day/night light is deferred
 until land detail can relight with the same source; animating only procedural
@@ -49,40 +56,57 @@ water against baked land lighting would violate the shared-light contract.
 The camera is global; detail selection is global policy. Composition resolves
 the tier, transition weights, render scale, and asset-preload flag once from
 the camera span, then passes that state to every layer. Layers may provide
-different assets or procedural frequencies for a tier, but they may not own
-separate thresholds.
+different assets or fixed-world procedural sources for a tier, but they may not
+own separate thresholds.
 
 | Tier | Approximate span | Purpose | Geography rule |
 | --- | --- | --- | --- |
-| World | `0.78–1.0` | Read landmasses, water bodies, macro terrain | Authoritative silhouette |
-| Territory | `0.20–0.78` | Read territory terrain and capital placement | Same coast, seams, and major anchors |
-| Capital | `0.10–0.20` | Roads, districts, capital and project/skill structures | Registered detail tile; no projection or coastline replacement |
+| World | `0.78-1.0` | Read landmasses, water bodies, macro terrain | Authoritative silhouette |
+| Territory | `0.20-0.78` | Read territory terrain and capital placement | Same coast, seams, and major anchors |
+| Capital | `0.10-0.20` | Roads, districts, capital and project/skill structures | Registered detail tile; no projection or coastline replacement |
 
 Transitions occupy overlap bands around the tier boundaries. Territory assets
 start loading before their opacity blend begins. Land crossfades registered
-rasters, water progressively raises simulation frequency, and scene nodes use
-the same transition weight as their reveal opacity. Render scale rises from
-`1x` at world view to `1.5x` at territory view; total device pixel ratio is
-capped at `2x` to bound GPU cost.
+relief derivatives, water reveals fixed-world procedural line detail, and scene
+nodes use the same transition weight as their reveal opacity. Render scale
+rises from `1x` at world view to `1.5x` at territory view; total device pixel
+ratio is capped at `2x` to bound GPU cost.
+
+`shared/lod.ts` owns the only tier thresholds, transition weights, preload
+boundary, and render-resolution budget. Each active layer publishes a typed
+detail-source contract against those tiers. A registered raster must declare
+its dimensions and world bounds; a procedural source must declare a fixed
+world frequency. A full-world raster with the same dimensions as the world
+asset may still be a material reference, but it may not be represented as
+higher-density territory detail.
 
 Water loads the world coast field initially and replaces it with the registered
 `4x` field only when territory assets are needed. Both fields carry the same
-land mask, shelf, contact, and underwater substrate channels. Hydrology is
-rasterized and land-clipped by the same deterministic asset build, so bays and
-lagoons cannot drift from accepted geography.
+land mask, shelf, bidirectional shore distance, and underwater substrate
+channels. Coast geometry and coast material retain independent texel-size
+uniforms because only geometry swaps to a `4x` asset; coupling those texel
+sizes erases the base-resolution bathymetry gradient at territory zoom. The
+coast-material field continues terrain height across that shelf in addition to
+deriving beach and cliff affinity from elevation and slope, so submerged
+formations, shoreline materials, and breakers cannot drift from terrain or
+encode one-off edge fixes. Hydrology is rasterized and land-clipped by the same
+deterministic asset build, so bays and lagoons cannot drift from accepted
+geography.
 
-The landscape may be **re-expressed** at a higher tier—more pixels, denser
+The landscape may be **re-expressed** at a higher tier: more pixels, denser
 linework, resolved vegetation, and locally quieter ground around structures.
 It may not reshape the territory, move major terrain anchors, or create a
 perspective transition. A capital is therefore a registered subregion inside a
 territory, not a replacement map.
 
-The full-world 4x land plate is a premultiplied-alpha resample used only to
-preserve Phase 3 line fidelity through territory zoom. It does not claim to add
-terrain detail. Production capital views require authored territory-local
-detail tiles so a full-world 10K+ raster is never required. Until that tile
-exists, entering the capital tier must remain visibly marked as an authoring
-requirement rather than presenting an enlarged world plate as finished detail.
+The full-world 4x surface is regenerated from the registered ground material,
+canonical elevation, and shared light rather than sharpening a painted map. It
+preserves crisp Phase 3 macro relief through territory zoom but does not claim
+to add vegetation, structures, or capital detail. Production capital views
+require registered territory-local detail tiles so a full-world 10K+ raster is
+never required. Until that tile exists, entering the capital tier must remain
+visibly marked as an authoring requirement rather than presenting an enlarged
+world asset as finished detail.
 
 The Phase 3 preview therefore caps its camera span at `0.29`, the smallest
 accepted territory focus view. The resolver and node contracts include capital
@@ -111,7 +135,8 @@ project or skill structures without drawing Phase 4 or Phase 6 content early.
 3. Land and water receive the identical camera transform.
 4. The water animation keeps one continuous world clock through focus changes.
 5. Every shoreline receives the same base shelf/contact derivation.
-6. The land runtime uses one composited plate; no corrective overlay sits above it.
+6. Land relief, topology QA, and coast materials derive from one canonical
+   elevation model; no corrective visual overlay changes runtime geography.
 7. WebGL shader compilation is verified in a real browser and fallback is
    observable through `data-render-state`.
 8. Authored crash nodes remain deferred to Phase 7.

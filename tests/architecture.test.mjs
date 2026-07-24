@@ -30,6 +30,28 @@ test("source directories implement the declared eight-layer order", async () => 
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("coastline"), false);
 });
 
+test("topography and territory QA remain independent interface diagnostics", async () => {
+  const scene = await readFile(path.join(
+    root,
+    "features/career-world/composition/WorldScene.tsx",
+  ), "utf8");
+  const controls = await readFile(path.join(
+    featureLayers,
+    "interface/components/WorldInterface.tsx",
+  ), "utf8");
+  const overlay = await readFile(path.join(
+    featureLayers,
+    "interface/components/TerritoryQaOverlay.tsx",
+  ), "utf8");
+
+  assert.match(scene, /showTopography/);
+  assert.match(scene, /showTerritoryQa/);
+  assert.match(controls, />\s*Topography\s*</);
+  assert.match(controls, />\s*Territory QA\s*</);
+  assert.match(overlay, /showTopography\s*\?/);
+  assert.match(overlay, /showTerritories\s*\?/);
+});
+
 test("five focus views remain valid crops of one world plane", async () => {
   const manifest = await readJson(
     "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
@@ -93,7 +115,7 @@ test("deferred crash accents are isolated in actors-effects", async () => {
         publicLayers,
         "water-surface",
         "manifests",
-        "coast-geometry-r1.json",
+        "coast-geometry-r4.json",
       ),
     ).then(() => true),
     true,
@@ -105,7 +127,7 @@ test("one backdrop-owned light contract drives static and rendered layers", asyn
     "public/career-world/layers/world-backdrop/manifests/world-light-r1.json",
   );
   const land = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-land-plate-r8.json",
+    "public/career-world/layers/territory-landform/manifests/terrain-relief-r3.json",
   );
   const renderer = await readFile(
     path.join(
@@ -166,4 +188,166 @@ test("composition resolves semantic zoom once and passes it downward", async () 
   assert.doesNotMatch(waterCanvas, /resolveDetailState/);
   assert.doesNotMatch(waterRenderer, /resolveDetailState/);
   assert.match(scene, /detailState=\{detailState\}/);
+});
+
+test("water zoom adds detail without suppressing world swell or bathymetry", async () => {
+  const openWater = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "shaders",
+      "open-water.ts",
+    ),
+    "utf8",
+  );
+  const coast = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "shaders",
+      "coast.ts",
+    ),
+    "utf8",
+  );
+  const common = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "shaders",
+      "common.ts",
+    ),
+    "utf8",
+  );
+  const renderer = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "WaterSurfaceRenderer.ts",
+    ),
+    "utf8",
+  );
+  const assets = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "model",
+      "assets.ts",
+    ),
+    "utf8",
+  );
+  const landAssets = await readFile(
+    path.join(
+      featureLayers,
+      "territory-landform",
+      "model",
+      "assets.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    assets,
+    /directionalAlbedo:[\s\S]*DIRECTIONAL_ALBEDO/,
+  );
+  assert.match(assets, /WATER_DETAIL_CONTRACT/);
+  assert.match(
+    assets,
+    /id:\s*"territory-line-field"[\s\S]*kind:\s*"world-procedural"[\s\S]*minimumTier:\s*"territory"/,
+  );
+  const waterContract = assets.slice(
+    assets.indexOf("export const WATER_DETAIL_CONTRACT"),
+  );
+  assert.doesNotMatch(
+    waterContract,
+    /DIRECTIONAL_ALBEDO/,
+    "the same-resolution directional reference must not masquerade as an LOD",
+  );
+  assert.match(landAssets, /LAND_DETAIL_CONTRACT/);
+  assert.match(
+    landAssets,
+    /id:\s*"territory-land-plate"[\s\S]*dimensions:\s*\[6688,\s*3764\]/,
+  );
+  assert.equal(
+    (
+      assets.match(
+        /water-surface-world-lod-r2-3840x2160\.png/g,
+      ) ?? []
+    ).length,
+    1,
+  );
+  assert.match(landAssets, /world-land-plate-r10\.png/);
+  assert.match(landAssets, /world-land-plate-r10-detail-4x\.png/);
+  assert.match(landAssets, /terrain-contours-r3-detail-4x\.png/);
+  assert.match(openWater, /u_directionalAlbedo/);
+  assert.match(
+    openWater,
+    /microCoordinate\s*=\s*bodyUv\s*\*\s*u_microFrequency\s*\*\s*u_waveDensity/,
+  );
+  assert.match(
+    openWater,
+    /macroCoordinate\s*=\s*bodyUv\s*\*\s*vec2\(1\.72,\s*1\.34\)/,
+  );
+  assert.doesNotMatch(openWater, /u_territoryCoverage|territoryFrequency/);
+  assert.doesNotMatch(openWater, /\/\s*max\(viewSpan/);
+  assert.match(
+    openWater,
+    /texture\(\s*u_directionalAlbedo,\s*authoredUv,\s*-0\.35\s*\)/,
+  );
+  assert.match(
+    openWater,
+    /directionalFine[\s\S]*directionalBroad[\s\S]*directionalContrast/,
+  );
+  assert.match(
+    openWater,
+    /territoryLineDetail\s*=[\s\S]*territoryMix[\s\S]*u_detailScale/,
+  );
+  assert.match(
+    openWater,
+    /microGradient[\s\S]*u_territoryNormalStrength[\s\S]*territoryMix/,
+  );
+  assert.match(openWater, /transformWaterCoordinate\(/);
+  assert.match(
+    openWater,
+    /hydrology\.r[\s\S]*u_basinRippleFrequency/,
+  );
+  assert.match(openWater, /hydrology\.g[\s\S]*u_lakeRippleFrequency/);
+  assert.match(openWater, /u_basinTextureOrigin/);
+  assert.match(openWater, /rippleDistance\s*\*\s*rippleFrequency/);
+  assert.match(openWater, /openFoam/);
+  assert.match(openWater, /palette,\s*authored,\s*0\.7/);
+  assert.doesNotMatch(
+    openWater,
+    /semanticFrequency|territoryArtB/,
+  );
+  assert.doesNotMatch(
+    openWater,
+    /displacement\s*\*=\s*mix\(\s*1\.0,\s*viewSpan/,
+  );
+  assert.match(coast, /coastProfileGradient/);
+  assert.match(coast, /u_coastMaterialTexel/);
+  assert.match(coast, /bathymetryLight/);
+  assert.doesNotMatch(common, /fwidth\(coordinate\)/);
+  assert.match(renderer, /private readonly coastMaterialTexel/);
+  assert.match(renderer, /u_coastMaterialTexel/);
+  assert.doesNotMatch(renderer, /resolveWaterTextureCoverage/);
+  assert.match(
+    renderer,
+    /createTexture\(this\.gl,\s*directionalAlbedo,\s*"clamp"\)/,
+  );
+  assert.match(
+    renderer,
+    /this\.textures\.directionalAlbedo\s*!==\s*undefined/,
+  );
+  assert.match(
+    renderer,
+    /DETAIL_POLICY\.renderScale\.maximumDevicePixelRatio/,
+  );
+  assert.doesNotMatch(
+    renderer,
+    /canvas\.dataset\.detailAssetState\s*===\s*"ready"/,
+  );
 });

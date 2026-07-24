@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/coast-material-field@r5",
+  "status": "phase-3-runtime",
+  "coordinateSpace": "normalized-world-top-left",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "texture": {
+    "path": "../fields/coast-material-field-r5.png",
+    "sha256": "BF805897355A51D702FBD85A9EFCF06CEE6AA07CB859CA2B3857C7CA134B7D81",
+    "mode": "RGB"
+  },
+  "channels": {
+    "r": "low-elevation low-slope beach affinity",
+    "g": "height-and-slope-derived cliff affinity",
+    "b": "continuous terrain height extended beneath the visible shelf"
+  },
+  "defaultMaterial": "rocky-shelf",
+  "sources": {
+    "height": {
+      "path": "../../territory-landform/fields/terrain-height-r3.png",
+      "sha256": "96CEC209B60CBE6FDA0188D1CFCF562F7FF4257BF41699542012306178E5B707"
+    },
+    "slope": {
+      "path": "../../territory-landform/fields/terrain-slope-r3.png",
+      "sha256": "B160CD97949B5AA72B0F3EFB5BA448A6073F90121FE55B821C5521BD72F29803"
+    }
+  },
+  "policy": [
+    "Coast material is a terrain derivative, not a corrective overlay.",
+    "Low, gentle coast becomes beach; high or steep coast becomes cliff.",
+    "Ambiguous shoreline uses the rocky-shelf default.",
+    "The land mask remains the sole coastline geometry authority.",
+    "The same topology drives land relief and water-side coast response."
+  ]
+}

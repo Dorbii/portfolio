@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "career-world/world-land-layout@r1",
   "status": "phase-3-runtime",
-  "authority": "macro-geography",
+  "authority": "macro-geography-and-topology",
   "coordinateSpace": {
     "viewBox": [0, 0, 1672, 941],
     "aspectRatio": "16:9",
@@ -11,10 +11,15 @@
     "cameraTransitionRequired": false
   },
   "activeConcept": {
-    "visual": "../textures/world-land-plate-r8.png",
-    "mask": "../masks/world-land-plate-r6-mask.png",
+    "visual": "../textures/world-land-plate-r10.png",
+    "detailVisual": "../textures/world-land-plate-r10-detail-4x.png",
+    "mask": "../masks/world-land-mask-r2.png",
+    "height": "../fields/terrain-height-r3.png",
+    "slope": "../fields/terrain-slope-r3.png",
     "territories": "world-territories-r4.json",
-    "metadata": "world-land-plate-r8.json"
+    "authoring": "terrain-dem-r3.json",
+    "metadata": "world-land-plate-r10.json",
+    "topologyMetadata": "terrain-relief-r3.json"
   },
   "landmasses": [
     {
@@ -56,6 +61,8 @@
     "Territory and city views are crops of this coordinate space.",
     "The world view composes primary and secondary land weights near rule-of-thirds intersections with deliberate ocean negative space.",
     "Zoom may add detail but may not move, rescale, rotate, or redraw macro geography.",
+    "Elevation and slope are canonical Phase 3 data; relief and coastline material are derivatives.",
+    "Vegetation and decorative ground marks are deferred to the environment layer.",
     "Territory development envelopes register future city detail without drawing infrastructure or structures during Phase 3.",
     "Employer territory placement does not determine landmass count or equal territory area.",
     "Territory seams are irregular selection data and are not permanent world-view decoration.",

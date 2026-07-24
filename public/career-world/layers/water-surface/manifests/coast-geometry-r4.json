@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/coast-geometry@r4",
+  "status": "phase-3-runtime",
+  "coordinateSpace": "normalized-world-top-left",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "texture": {
+    "path": "../fields/coast-geometry-r4.png",
+    "sha256": "CAC0EC67BBAE337F159550FCD989237C757EECA74FE3D6E625DD04BAAA92186A",
+    "mode": "RGBA"
+  },
+  "detailTexture": {
+    "path": "../fields/coast-geometry-r4-4x.png",
+    "sha256": "2E1CA5CD8C7AF5B80086790867E8FE7D130D4BD515830A9ED392F3F252161A33",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA"
+  },
+  "channels": {
+    "r": "antialiased land coverage anchored to binary occupancy",
+    "g": "continuous 58px exterior shelf falloff",
+    "b": "continuous 14px bidirectional shore-distance falloff; runtime coast materials choose the visible contact width",
+    "a": "authored land luminance continued beneath the exterior shelf"
+  },
+  "source": {
+    "path": "../../territory-landform/masks/world-land-mask-r2.png",
+    "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98"
+  },
+  "policy": [
+    "The land mask owns geography.",
+    "Every shoreline uses this same deterministic derivation.",
+    "Terrain relief supplies the packed underwater substrate value.",
+    "The 4x field resamples continuous distances and reconstructs coverage.",
+    "The runtime derives shore normals from the shelf gradient.",
+    "Sparse authored crash accents belong to actors-effects in Phase 7."
+  ]
+}

@@ -3,6 +3,7 @@ import type { Pair } from "../../../shared/camera";
 export interface WaterSurfaceState {
   readonly motion: number;
   readonly waveStrength: number;
+  readonly waveDensity: number;
   readonly weather: number;
   readonly opacity: number;
   readonly detailScale: number;
@@ -12,6 +13,7 @@ export interface WaterSurfaceState {
 export const DEFAULT_WATER_SURFACE_STATE: WaterSurfaceState = Object.freeze({
   motion: 0.68,
   waveStrength: 0.7,
+  waveDensity: 1,
   weather: 0.14,
   opacity: 1,
   detailScale: 0.58,
@@ -40,6 +42,7 @@ export function normalizeWaterSurfaceState(
   return Object.freeze({
     motion: clamp(finiteOr(candidate.motion, 0.68), 0, 2),
     waveStrength: clamp(finiteOr(candidate.waveStrength, 0.7), 0, 2),
+    waveDensity: clamp(finiteOr(candidate.waveDensity, 1), 0.5, 2),
     weather: clamp(finiteOr(candidate.weather, 0.14), 0, 1),
     opacity: clamp(finiteOr(candidate.opacity, 1), 0.2, 1),
     detailScale: clamp(finiteOr(candidate.detailScale, 0.58), 0, 1),
@@ -53,4 +56,3 @@ export function windVectorFromDegrees(degrees: number): Pair {
   const radians = (wrapDegrees(degrees) * Math.PI) / 180;
   return Object.freeze([Math.cos(radians), Math.sin(radians)]);
 }
-

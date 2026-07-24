@@ -5,7 +5,13 @@ import {
   windVectorFromDegrees,
 } from "../features/career-world/layers/water-surface/model/state.ts";
 import {
+  SHELTERED_BASIN_STYLE,
+  SMALL_INLAND_LAKE_STYLE,
+} from "../features/career-world/layers/water-surface/model/bodies.ts";
+import {
+  DETAIL_POLICY,
   PHASE_3_MINIMUM_SPAN,
+  defineLayerDetailContract,
   resolveDetailState,
   resolveNodeVisibility,
 } from "../features/career-world/shared/lod.ts";
@@ -15,6 +21,7 @@ test("water state clamps external inputs without changing its contract", () => {
     normalizeWaterSurfaceState({
       motion: -3,
       waveStrength: 9,
+      waveDensity: 7,
       weather: 2,
       opacity: 0,
       detailScale: Number.NaN,
@@ -23,12 +30,35 @@ test("water state clamps external inputs without changing its contract", () => {
     {
       motion: 0,
       waveStrength: 2,
+      waveDensity: 2,
       weather: 1,
       opacity: 0.2,
       detailScale: 0.58,
       windDirectionDegrees: 270,
     },
   );
+});
+
+test("inland water bodies have independent fixed transforms", () => {
+  const bodies = [
+    SHELTERED_BASIN_STYLE,
+    SMALL_INLAND_LAKE_STYLE,
+  ];
+  assert.deepEqual(
+    bodies.map(({ id }) => id),
+    ["mainland-inner-sea", "mainland-southwest-lake"],
+  );
+  for (const body of bodies) {
+    const { texture } = body;
+    assert.equal(texture.worldAnchor.length, 2);
+    assert.equal(texture.textureOrigin.length, 2);
+    assert.equal(texture.textureScale.length, 2);
+    assert.notEqual(texture.rotationRadians, 0);
+    assert.notDeepEqual(texture.worldAnchor, texture.textureOrigin);
+    assert.ok(body.rippleFrequency > 0);
+    assert.ok(body.rippleMix > 0.5);
+    assert.ok(body.tintMix > 0);
+  }
 });
 
 test("wind direction produces a normalized world vector", () => {
@@ -51,6 +81,72 @@ test("one camera span resolves the detail tier for every layer", () => {
   }).tier;
   assert.equal(capital.id, "capital");
   assert.equal(capital.requiresAuthoredTile, true);
+});
+
+test("one central LOD policy owns thresholds and render budget", () => {
+  assert.equal(
+    PHASE_3_MINIMUM_SPAN,
+    DETAIL_POLICY.phase3MinimumSpan,
+  );
+  assert.ok(
+    DETAIL_POLICY.worldToTerritory.startSpan
+      > DETAIL_POLICY.worldToTerritory.endSpan,
+  );
+  assert.deepEqual(
+    DETAIL_POLICY.tierMaximumSpan,
+    {
+      world: 1,
+      territory: 0.78,
+      capital: 0.2,
+    },
+  );
+  assert.equal(
+    DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
+    2,
+  );
+});
+
+test("layer detail contracts require a world source", () => {
+  const contract = defineLayerDetailContract({
+    layer: "water-surface",
+    sources: [
+      {
+        id: "world",
+        kind: "registered-raster",
+        minimumTier: "world",
+        path: "/world.png",
+        dimensions: [3840, 2160],
+        worldBounds: {
+          origin: [0, 0],
+          span: [1, 1],
+        },
+      },
+      {
+        id: "territory",
+        kind: "world-procedural",
+        minimumTier: "territory",
+        path: "/detail.png",
+        fixedWorldFrequency: [12, 10],
+      },
+    ],
+  });
+  assert.ok(Object.isFrozen(contract));
+  assert.ok(Object.isFrozen(contract.sources));
+  assert.throws(
+    () => defineLayerDetailContract({
+      layer: "water-surface",
+      sources: [
+        {
+          id: "territory-only",
+          kind: "world-procedural",
+          minimumTier: "territory",
+          path: "/detail.png",
+          fixedWorldFrequency: [12, 10],
+        },
+      ],
+    }),
+    /needs a world source/,
+  );
 });
 
 test("LOD assets and future nodes blend continuously across shared thresholds", () => {

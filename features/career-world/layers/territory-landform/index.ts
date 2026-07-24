@@ -9,9 +9,8 @@ export const TERRITORY_LANDFORM_LAYER: LayerDescriptor = Object.freeze({
   status: "active",
   owns: Object.freeze([
     "land geography",
-    "land material",
-    "baked inner contact edge",
+    "macro elevation and slope",
+    "registered terrain relief",
     "territory masks",
   ]),
 });
-

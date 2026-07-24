@@ -10,10 +10,12 @@ interface WorldInterfaceProps {
   readonly detailState: DetailState;
   readonly mode: "world" | "water";
   readonly renderState: WaterRenderState;
+  readonly showTopography: boolean;
   readonly showTerritoryQa: boolean;
   readonly territories: readonly Territory[];
   readonly onFocus: (id: string) => void;
   readonly onReset: () => void;
+  readonly onToggleTopography: () => void;
   readonly onToggleTerritoryQa: () => void;
 }
 
@@ -23,16 +25,23 @@ export function WorldInterface({
   detailState,
   mode,
   renderState,
+  showTopography,
   showTerritoryQa,
   territories,
   onFocus,
   onReset,
+  onToggleTopography,
   onToggleTerritoryQa,
 }: WorldInterfaceProps) {
   return (
     <div className="career-world__interface" data-layer="interface">
-      {showTerritoryQa ? (
-        <TerritoryQaOverlay camera={camera} territories={territories} />
+      {showTopography || showTerritoryQa ? (
+        <TerritoryQaOverlay
+          camera={camera}
+          showTopography={showTopography}
+          showTerritories={showTerritoryQa}
+          territories={territories}
+        />
       ) : null}
       <div className="career-world__status-panel">
         <span className="career-world__eyebrow">
@@ -78,6 +87,14 @@ export function WorldInterface({
             {territory.label}
           </button>
         ))}
+        <button
+          aria-pressed={showTopography}
+          className="career-world__qa-toggle"
+          onClick={onToggleTopography}
+          type="button"
+        >
+          Topography
+        </button>
         <button
           aria-pressed={showTerritoryQa}
           className="career-world__qa-toggle"

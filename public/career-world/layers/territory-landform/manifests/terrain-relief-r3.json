@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/terrain-relief@r3",
+  "status": "phase-3-runtime",
+  "projection": "orthographic-plan",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "visual": {
+    "path": "../textures/terrain-relief-r3.png",
+    "sha256": "7A328F8A7993F0C487B79EF8CD46B5576E93B180178BF74237CD0FFC77C46817",
+    "mode": "RGBA"
+  },
+  "detailVisual": {
+    "path": "../textures/terrain-relief-r3-detail-4x.png",
+    "sha256": "FAE2E3ADF9F53C9E8F46C2737490351318676147E4CA49D09AAB389B429770F8",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA",
+    "role": "registered material and relief; no local biome decoration"
+  },
+  "baseMaterial": {
+    "path": "../textures/terrain-material-r1.png",
+    "sha256": "EA54EEB10761AC51817EBFC33C8E08782085F25FC1AD286B75EE59F40F15A158",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "mode": "RGBA",
+    "role": "deterministic low-frequency ground material before DEM lighting"
+  },
+  "topologyQa": {
+    "path": "../overlays/terrain-contours-r3-detail-4x.png",
+    "sha256": "A1F29795576636352E2D09F0B9915697DDA62754CF2E73B9AE67C71DF1D8DB74",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA"
+  },
+  "mask": {
+    "path": "../masks/world-land-mask-r2.png",
+    "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98"
+  },
+  "fields": {
+    "height": {
+      "path": "../fields/terrain-height-r3.png",
+      "sha256": "96CEC209B60CBE6FDA0188D1CFCF562F7FF4257BF41699542012306178E5B707",
+      "mode": "L"
+    },
+    "slope": {
+      "path": "../fields/terrain-slope-r3.png",
+      "sha256": "B160CD97949B5AA72B0F3EFB5BA448A6073F90121FE55B821C5521BD72F29803",
+      "mode": "L"
+    }
+  },
+  "derivation": {
+    "source": "../sources/terrain-dem-authored-r3.png",
+    "sourceSha256": "7CB18FE2CE01FB52CF34289B09F4B95ED4DFA67236FF0C0403287C894FFA3BC3",
+    "authoring": "terrain-dem-r3.json",
+    "authoringSha256": "26BD6A1390E043EF86B15E3EDD761263002345EB12896092B1B4904D284AB4E6",
+    "operation": "normalize and mask one authored DEM; preserve five future development shelves; derive boundary-safe slope and coast response; light a separate deterministic ground material; publish registered detail relief and QA contours",
+    "worldLightDirection": [
+      -0.42,
+      -0.36,
+      0.83
+    ],
+    "decorativeGroundTexture": true,
+    "materialRecipe": "seeded low-frequency dry, moss, stone, and alpine fields; DEM-derived ridge and valley ink; topology-classified land-side beach, rocky shelf, and cliff transitions; no structure marks",
+    "landCoastWidthPixels": 11.0,
+    "vegetationIncluded": false
+  }
+}

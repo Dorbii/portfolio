@@ -3,9 +3,19 @@ import {
   CAREER_WORLD_THEME,
   hexToUnitRgb,
 } from "../../../shared/theme";
-import type { DetailState } from "../../../shared/lod";
+import {
+  DETAIL_POLICY,
+  type DetailState,
+} from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
-import { WATER_ASSETS } from "../model/assets";
+import {
+  WATER_ASSETS,
+  WATER_TERRITORY_DETAIL,
+} from "../model/assets";
+import {
+  SHELTERED_BASIN_STYLE,
+  SMALL_INLAND_LAKE_STYLE,
+} from "../model/bodies";
 import {
   normalizeWaterSurfaceState,
   type WaterSurfaceState,
@@ -41,16 +51,18 @@ const TEXTURE_PATHS = [
   ["macroHeight", WATER_ASSETS.macroHeight, "mirror"],
   ["microHeight", WATER_ASSETS.microHeight, "mirror"],
   ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp"],
+  ["coastMaterial", WATER_ASSETS.coastMaterial, "clamp"],
   ["hydrology", WATER_ASSETS.hydrology, "clamp"],
 ] as const;
-const TERRITORY_ALBEDO_UNIT = TEXTURE_PATHS.length;
+const DIRECTIONAL_ALBEDO_UNIT = TEXTURE_PATHS.length;
 
 const SAMPLER_UNIFORMS = Object.freeze({
   worldAlbedo: "u_worldAlbedo",
-  territoryAlbedo: "u_territoryAlbedo",
+  directionalAlbedo: "u_directionalAlbedo",
   macroHeight: "u_macroHeight",
   microHeight: "u_microHeight",
   coastGeometry: "u_coastGeometry",
+  coastMaterial: "u_coastMaterial",
   hydrology: "u_hydrology",
 });
 
@@ -61,15 +73,33 @@ const UNIFORM_NAMES = [
   "u_cameraSpan",
   "u_wind",
   "u_coastTexel",
+  "u_coastMaterialTexel",
   "u_motion",
   "u_waveStrength",
+  "u_waveDensity",
   "u_weather",
   "u_opacity",
   "u_detailScale",
   "u_territoryLod",
   "u_capitalLod",
+  "u_microFrequency",
+  "u_territoryLineStrength",
+  "u_territoryNormalStrength",
   "u_lightDirection",
-  "u_abyssColor",
+  "u_basinWorldAnchor",
+  "u_basinTextureOrigin",
+  "u_basinTextureScale",
+  "u_basinTextureRotation",
+  "u_basinRippleFrequency",
+  "u_basinRippleMix",
+  "u_basinTintMix",
+  "u_lakeWorldAnchor",
+  "u_lakeTextureOrigin",
+  "u_lakeTextureScale",
+  "u_lakeTextureRotation",
+  "u_lakeRippleFrequency",
+  "u_lakeRippleMix",
+  "u_lakeTintMix",
   "u_deepColor",
   "u_bodyColor",
   "u_swellColor",
@@ -97,9 +127,10 @@ export class WaterSurfaceRenderer {
     light: WorldLight,
   ): Promise<WaterSurfaceRenderer> {
     const gl = canvas.getContext("webgl2", {
-      alpha: false,
+      alpha: true,
       antialias: false,
       depth: false,
+      premultipliedAlpha: false,
       preserveDrawingBuffer: false,
       powerPreference: "high-performance",
     });
@@ -117,6 +148,7 @@ export class WaterSurfaceRenderer {
       TEXTURE_PATHS.map(([, path]) => loadImage(path)),
     );
     const coastImage = images[3];
+    const coastMaterialImage = images[4];
     const textures = Object.fromEntries(
       TEXTURE_PATHS.map(([name, , wrap], index) => [
         name,
@@ -133,6 +165,10 @@ export class WaterSurfaceRenderer {
       program,
       textures,
       [1 / coastImage.naturalWidth, 1 / coastImage.naturalHeight],
+      [
+        1 / coastMaterialImage.naturalWidth,
+        1 / coastMaterialImage.naturalHeight,
+      ],
       light,
     );
   }
@@ -144,6 +180,7 @@ export class WaterSurfaceRenderer {
   private readonly textures: Record<string, TextureBinding>;
   private readonly uniforms: UniformMap;
   private coastTexel: readonly [number, number];
+  private readonly coastMaterialTexel: readonly [number, number];
   private camera: CameraView = {
     origin: [0, 0],
     span: [1, 1],
@@ -163,6 +200,7 @@ export class WaterSurfaceRenderer {
     program: WebGLProgram,
     textures: Record<string, TextureBinding>,
     coastTexel: readonly [number, number],
+    coastMaterialTexel: readonly [number, number],
     light: WorldLight,
   ) {
     this.canvas = canvas;
@@ -170,6 +208,7 @@ export class WaterSurfaceRenderer {
     this.program = program;
     this.textures = textures;
     this.coastTexel = coastTexel;
+    this.coastMaterialTexel = coastMaterialTexel;
     this.lightDirection = normalize3(light.direction);
 
     const buffer = gl.createBuffer();
@@ -222,7 +261,10 @@ export class WaterSurfaceRenderer {
   }
 
   setState(state: Partial<WaterSurfaceState>): void {
-    this.state = normalizeWaterSurfaceState(state);
+    this.state = normalizeWaterSurfaceState({
+      ...this.state,
+      ...state,
+    });
   }
 
   render(elapsedSeconds: number): void {
@@ -253,8 +295,13 @@ export class WaterSurfaceRenderer {
     gl.uniform2fv(this.uniforms.u_cameraSpan, this.camera.span);
     gl.uniform2fv(this.uniforms.u_wind, wind);
     gl.uniform2fv(this.uniforms.u_coastTexel, this.coastTexel);
+    gl.uniform2fv(
+      this.uniforms.u_coastMaterialTexel,
+      this.coastMaterialTexel,
+    );
     gl.uniform1f(this.uniforms.u_motion, this.state.motion);
     gl.uniform1f(this.uniforms.u_waveStrength, this.state.waveStrength);
+    gl.uniform1f(this.uniforms.u_waveDensity, this.state.waveDensity);
     gl.uniform1f(this.uniforms.u_weather, this.state.weather);
     gl.uniform1f(this.uniforms.u_opacity, this.state.opacity);
     gl.uniform1f(this.uniforms.u_detailScale, this.state.detailScale);
@@ -266,10 +313,79 @@ export class WaterSurfaceRenderer {
       this.uniforms.u_capitalLod,
       detailState.territoryToCapital,
     );
+    gl.uniform2fv(
+      this.uniforms.u_microFrequency,
+      WATER_TERRITORY_DETAIL.fixedWorldFrequency,
+    );
+    gl.uniform1f(
+      this.uniforms.u_territoryLineStrength,
+      WATER_TERRITORY_DETAIL.lineStrength,
+    );
+    gl.uniform1f(
+      this.uniforms.u_territoryNormalStrength,
+      WATER_TERRITORY_DETAIL.normalStrength,
+    );
+    const basinTexture = SHELTERED_BASIN_STYLE.texture;
+    gl.uniform2fv(
+      this.uniforms.u_basinWorldAnchor,
+      basinTexture.worldAnchor,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_basinTextureOrigin,
+      basinTexture.textureOrigin,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_basinTextureScale,
+      basinTexture.textureScale,
+    );
+    gl.uniform1f(
+      this.uniforms.u_basinTextureRotation,
+      basinTexture.rotationRadians,
+    );
+    gl.uniform1f(
+      this.uniforms.u_basinRippleFrequency,
+      SHELTERED_BASIN_STYLE.rippleFrequency,
+    );
+    gl.uniform1f(
+      this.uniforms.u_basinRippleMix,
+      SHELTERED_BASIN_STYLE.rippleMix,
+    );
+    gl.uniform1f(
+      this.uniforms.u_basinTintMix,
+      SHELTERED_BASIN_STYLE.tintMix,
+    );
+    const lakeTexture = SMALL_INLAND_LAKE_STYLE.texture;
+    gl.uniform2fv(
+      this.uniforms.u_lakeWorldAnchor,
+      lakeTexture.worldAnchor,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_lakeTextureOrigin,
+      lakeTexture.textureOrigin,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_lakeTextureScale,
+      lakeTexture.textureScale,
+    );
+    gl.uniform1f(
+      this.uniforms.u_lakeTextureRotation,
+      lakeTexture.rotationRadians,
+    );
+    gl.uniform1f(
+      this.uniforms.u_lakeRippleFrequency,
+      SMALL_INLAND_LAKE_STYLE.rippleFrequency,
+    );
+    gl.uniform1f(
+      this.uniforms.u_lakeRippleMix,
+      SMALL_INLAND_LAKE_STYLE.rippleMix,
+    );
+    gl.uniform1f(
+      this.uniforms.u_lakeTintMix,
+      SMALL_INLAND_LAKE_STYLE.tintMix,
+    );
 
     gl.uniform3fv(this.uniforms.u_lightDirection, this.lightDirection);
     const water = CAREER_WORLD_THEME.colors.water;
-    gl.uniform3fv(this.uniforms.u_abyssColor, hexToUnitRgb(water.abyss));
     gl.uniform3fv(this.uniforms.u_deepColor, hexToUnitRgb(water.deep));
     gl.uniform3fv(this.uniforms.u_bodyColor, hexToUnitRgb(water.body));
     gl.uniform3fv(this.uniforms.u_swellColor, hexToUnitRgb(water.swell));
@@ -312,7 +428,7 @@ export class WaterSurfaceRenderer {
     const bounds = this.canvas.getBoundingClientRect();
     this.pixelRatio = Math.min(
       (window.devicePixelRatio || 1) * this.renderScale,
-      2,
+      DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
     );
     const width = Math.max(1, Math.round(bounds.width * this.pixelRatio));
     const height = Math.max(1, Math.round(bounds.height * this.pixelRatio));
@@ -327,24 +443,25 @@ export class WaterSurfaceRenderer {
     if (
       this.territoryAssetsLoading
       || this.territoryAssetsFailed
-      || this.canvas.dataset.detailAssetState === "ready"
+      || this.textures.directionalAlbedo !== undefined
     ) {
       return;
     }
 
     this.canvas.dataset.detailAssetState = "loading";
+    delete this.canvas.dataset.detailAssetError;
     this.territoryAssetsLoading = Promise.all([
-      loadImage(WATER_ASSETS.territoryAlbedo),
+      loadImage(WATER_ASSETS.directionalAlbedo),
       loadImage(WATER_ASSETS.coastGeometry.territory),
     ])
-      .then(([territoryAlbedo, coastGeometry]) => {
+      .then(([directionalAlbedo, coastGeometry]) => {
         if (this.destroyed) {
           return;
         }
         const previousCoast = this.textures.coastGeometry;
-        this.textures.territoryAlbedo = {
-          texture: createTexture(this.gl, territoryAlbedo, "mirror"),
-          unit: TERRITORY_ALBEDO_UNIT,
+        this.textures.directionalAlbedo = {
+          texture: createTexture(this.gl, directionalAlbedo, "clamp"),
+          unit: DIRECTIONAL_ALBEDO_UNIT,
         };
         this.textures.coastGeometry = {
           texture: createTexture(this.gl, coastGeometry, "clamp"),
@@ -356,11 +473,12 @@ export class WaterSurfaceRenderer {
         ];
         this.gl.useProgram(this.program);
         this.gl.uniform1i(
-          this.uniforms.u_territoryAlbedo,
-          TERRITORY_ALBEDO_UNIT,
+          this.uniforms.u_directionalAlbedo,
+          DIRECTIONAL_ALBEDO_UNIT,
         );
         this.gl.deleteTexture(previousCoast.texture);
         this.canvas.dataset.detailAssetState = "ready";
+        delete this.canvas.dataset.detailAssetError;
       })
       .catch((error: unknown) => {
         if (this.destroyed) {

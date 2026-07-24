@@ -66,12 +66,12 @@
   aspect-ratio: 16 / 9;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--world-border);
+  border: 0;
   outline: none;
   background: #061018;
   box-shadow:
     0 1.4rem 5rem rgb(0 0 0 / 48%),
-    inset 0 0 0 1px rgb(218 222 197 / 5%);
+    inset 0 0 2.5rem rgb(0 0 0 / 16%);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -82,7 +82,8 @@
 }
 
 .career-world__viewport:focus-visible {
-  border-color: #a8b892;
+  outline: 2px solid #a8b892;
+  outline-offset: 2px;
   box-shadow:
     0 0 0 3px rgb(168 184 146 / 24%),
     0 1.4rem 5rem rgb(0 0 0 / 48%);
@@ -119,6 +120,11 @@
 
 .career-world__water-canvas[data-render-state="fallback"] {
   filter: saturate(0.92) brightness(0.86);
+}
+
+.career-world__water-canvas[data-render-state="ready"] {
+  z-index: 4;
+  background: none;
 }
 
 .career-world__land-layer {
@@ -163,13 +169,22 @@
   pointer-events: none;
 }
 
+.career-world__territory-qa,
+.career-world__topology-qa {
+  mask:
+    url("/career-world/layers/territory-landform/masks/world-land-mask-r2.png")
+    0 0 / 100% 100% no-repeat;
+  mask-mode: luminance;
+}
+
 .career-world__territory-qa {
   opacity: 0.44;
   mix-blend-mode: screen;
-  mask:
-    url("/career-world/layers/territory-landform/masks/world-land-plate-r6-mask.png")
-    0 0 / 100% 100% no-repeat;
-  mask-mode: luminance;
+}
+
+.career-world__topology-qa {
+  opacity: 0.68;
+  mix-blend-mode: screen;
 }
 
 .career-world__development-qa {

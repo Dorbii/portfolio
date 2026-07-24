@@ -5,33 +5,39 @@
   "coordinateSpace": "normalized-world-top-left",
   "policy": [
     "Water regions classify hydrology without changing land geography.",
-    "A region is authored once in world coordinates and remains registered through every planar crop.",
+    "Each region owns an independent world-anchored water-body transform.",
+    "Seeded enclosed-water components follow the canonical land mask.",
     "Open-ocean behavior is the default; masks only identify materially different bodies of water."
   ],
   "regions": [
     {
       "id": "mainland-inner-sea",
-      "kind": "sheltered-lagoon",
-      "polygon": [
-        [0.34, 0.32],
-        [0.43, 0.29],
-        [0.51, 0.31],
-        [0.57, 0.37],
-        [0.58, 0.47],
-        [0.54, 0.56],
-        [0.47, 0.60],
-        [0.38, 0.57],
-        [0.32, 0.50],
-        [0.31, 0.40]
-      ],
-      "transitionPixels": 18,
+      "kind": "inland-lake",
+      "channel": "r",
+      "seed": [0.455, 0.417],
+      "transitionPixels": 0,
       "response": {
-        "surfaceStyle": "calm-inland-sea",
-        "waveHeightMultiplier": 0.32,
-        "crestMultiplier": 0.2,
-        "openFoamMultiplier": 0.12,
+        "surfaceStyle": "radial-inland-water",
+        "waveHeightMultiplier": 0.54,
+        "crestMultiplier": 0.58,
+        "openFoamMultiplier": 0,
         "coastFoamMultiplier": 0.32,
-        "bodyTintMix": 0.45
+        "bodyTintMix": 0.28
+      }
+    },
+    {
+      "id": "mainland-southwest-lake",
+      "kind": "inland-lake",
+      "channel": "g",
+      "seed": [0.179, 0.547],
+      "transitionPixels": 0,
+      "response": {
+        "surfaceStyle": "radial-inland-water",
+        "waveHeightMultiplier": 0.54,
+        "crestMultiplier": 0.58,
+        "openFoamMultiplier": 0,
+        "coastFoamMultiplier": 0.28,
+        "bodyTintMix": 0.34
       }
     }
   ]

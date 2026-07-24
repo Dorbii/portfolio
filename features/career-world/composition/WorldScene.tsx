@@ -54,6 +54,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
   const [activeViewId, setActiveViewId] = useState("world");
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
+  const [showTopography, setShowTopography] = useState(false);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
   const detailState = resolveDetailState(camera);
 
@@ -245,8 +246,10 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
         mode={initialInterfaceMode}
         onFocus={handleFocus}
         onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
+        onToggleTopography={() => setShowTopography((visible) => !visible)}
         onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
         renderState={renderState}
+        showTopography={showTopography}
         showTerritoryQa={showTerritoryQa}
         territories={TERRITORIES}
       />

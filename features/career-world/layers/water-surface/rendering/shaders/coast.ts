@@ -1,7 +1,8 @@
 export const WATER_SHADER_COAST = `
 struct CoastSample {
   vec3 color;
-  float contactFoam;
+  float overlayAlpha;
+  float landMask;
 };
 
 vec2 coastShelfGradient(vec2 worldUv) {
@@ -24,20 +25,89 @@ vec2 coastShelfGradient(vec2 worldUv) {
   return vec2(right - left, down - up);
 }
 
+vec2 coastProfileGradient(vec2 worldUv) {
+  float left = texture(
+    u_coastMaterial,
+    worldUv - vec2(u_coastMaterialTexel.x, 0.0)
+  ).b;
+  float right = texture(
+    u_coastMaterial,
+    worldUv + vec2(u_coastMaterialTexel.x, 0.0)
+  ).b;
+  float up = texture(
+    u_coastMaterial,
+    worldUv - vec2(0.0, u_coastMaterialTexel.y)
+  ).b;
+  float down = texture(
+    u_coastMaterial,
+    worldUv + vec2(0.0, u_coastMaterialTexel.y)
+  ).b;
+  return vec2(right - left, down - up);
+}
+
 CoastSample applyCoast(
   vec2 worldUv,
   OpenWaterSample water,
   float lagoon
 ) {
   vec4 geometry = texture(u_coastGeometry, worldUv);
+  vec3 material = texture(u_coastMaterial, worldUv).rgb;
   float rawShelf = geometry.g;
-  float contact = geometry.b;
+  float rawContact = geometry.b;
   float substrate = geometry.a;
   float zoom = max(u_territoryLod, u_capitalLod);
-  float shelf = pow(
+  float beach = saturate(material.r);
+  float cliff = saturate(material.g) * (1.0 - beach);
+  float rocky = 1.0 - max(beach, cliff);
+  float profileHeight = saturate(material.b);
+  float land = geometry.r;
+  float waterMask = 1.0 - land;
+
+  float coastMacro = heightSample(
+    u_macroHeight,
+    worldUv * vec2(4.1, 3.6) + vec2(0.13, 0.47)
+  );
+  float coastFine = heightSample(
+    u_microHeight,
+    worldUv * vec2(17.0, 14.0) + vec2(0.37, 0.11)
+  );
+  float profileVariation =
+    mix(0.82, 1.18, coastMacro)
+    * mix(0.9, 1.1, coastFine);
+
+  float rockyContact = smoother(mix(0.82, 0.68, zoom), 0.98, rawContact);
+  float beachContact = smoother(
+    mix(0.78, 0.52, zoom) / profileVariation,
+    0.98,
+    rawContact
+  );
+  float cliffContact = smoother(
+    mix(0.84, 0.67, zoom) / mix(0.94, 1.08, coastMacro),
+    0.99,
+    rawContact
+  );
+  float contact =
+    rockyContact * rocky
+    + beachContact * beach
+    + cliffContact * cliff;
+
+  float rockyShelf = pow(
     saturate(rawShelf),
     mix(0.78, 1.38, zoom)
   );
+  float beachShelf = pow(
+    saturate(rawShelf),
+    mix(1.45, 1.08, zoom) / profileVariation
+  );
+  float cliffShelf = smoother(
+    mix(0.72, 0.58, zoom),
+    0.98,
+    rawShelf
+  );
+  float shelf =
+    rockyShelf * rocky
+    + beachShelf * beach
+    + cliffShelf * cliff;
   vec2 gradient = coastShelfGradient(worldUv);
   float gradientLength = length(gradient);
   vec2 shoreNormal = gradientLength > 0.0001
@@ -51,21 +121,29 @@ CoastSample applyCoast(
   exposure = mix(exposure, 0.24, lagoon * 0.74);
 
   float time = u_time * u_motion;
-  vec2 tangent = vec2(-shoreNormal.y, shoreNormal.x);
-  float alongShore = dot(worldUv, tangent) * 510.0;
-  // Shelf rises toward land, so positive time sends constant phase shoreward.
+  // Offset each stretch of coast with the existing height fields so breakers
+  // arrive locally instead of flashing around the whole landmass at once.
+  float coastPhaseOffset =
+    (coastMacro - 0.5) * 6.4
+    + (coastFine - 0.5) * 2.1;
+  // Shelf rises toward land, so positive time sends each local crest shoreward.
   float approachPhase =
-    (1.0 - shelf) * 15.0
-    + time * (1.12 + exposure * 0.34)
-    + alongShore * 0.018;
-  float advancingBand = smoother(0.58, 0.94, sin(approachPhase) * 0.5 + 0.5);
+    (1.0 - shelf) * 7.2
+    + time * (0.92 + exposure * 0.24)
+    + coastPhaseOffset;
+  float advancingBand = smoother(0.62, 0.94, sin(approachPhase) * 0.5 + 0.5);
+  float arcMacro = heightSample(
+    u_macroHeight,
+    worldUv * vec2(12.7, 10.9) + vec2(time * 0.0012, -time * 0.0004)
+  );
+  float arcFine = heightSample(
+    u_microHeight,
+    worldUv * vec2(29.0, 25.0) + vec2(-time * 0.0022, time * 0.0008)
+  );
   float brokenArc = smoother(
-    0.24,
-    0.79,
-    heightSample(
-      u_macroHeight,
-      worldUv * vec2(5.3, 4.7) + vec2(time * 0.003, -time * 0.001)
-    )
+    0.43,
+    0.69,
+    arcMacro * 0.42 + arcFine * 0.58
   );
 
   float shelfVariation = mix(
@@ -76,53 +154,169 @@ CoastSample applyCoast(
       worldUv * vec2(3.7, 3.1) + vec2(0.19, 0.43)
     )
   );
+  float materialShallow =
+    rocky * 0.58
+    + beach * 0.78
+    + cliff * 0.32;
   float shallowAmount =
     shelf
-    * mix(0.25, 0.17, lagoon)
-    * mix(1.0, 0.84, zoom);
-  shallowAmount *= shelfVariation;
+    * materialShallow
+    * mix(1.0, 0.72, lagoon)
+    * mix(0.8, 1.0, zoom);
+  shallowAmount *= shelfVariation * mix(
+    1.0,
+    mix(0.72, 1.08, brokenArc),
+    beach
+  );
   vec3 seabed = mix(
     u_deepColor,
     u_substrateColor,
-    0.16 + substrate * 0.2
+    0.24 + substrate * 0.2 + profileHeight * 0.28
   );
-  seabed = mix(seabed, u_shallowColor, 0.68);
+  seabed = mix(seabed, u_shallowColor, 0.7);
+  vec3 beachShallow = mix(u_shallowColor, u_substrateColor, 0.1);
+  seabed = mix(
+    seabed,
+    beachShallow,
+    beach * mix(0.24, 0.38, zoom)
+  );
+  seabed = mix(seabed, u_deepColor, cliff * 0.24);
+  vec2 profileGradient = coastProfileGradient(worldUv);
+  vec3 profileNormal = normalize(vec3(
+    -profileGradient * mix(34.0, 56.0, zoom),
+    1.0
+  ));
+  float profileLight = dot(profileNormal, normalize(u_lightDirection));
+  float bathymetryLight = mix(
+    0.82,
+    1.18,
+    saturate(profileLight * 0.5 + 0.5)
+  );
+  seabed *= mix(
+    1.0,
+    bathymetryLight,
+    shelf * waterMask * mix(0.42, 0.7, zoom)
+  );
+  seabed *= mix(
+    0.88,
+    1.16,
+    profileHeight
+  );
   vec3 color = mix(water.color, seabed, shallowAmount);
-  color = mix(color, u_abyssColor, contact * 0.07);
+  color = mix(
+    color,
+    seabed,
+    contact * (1.0 - geometry.r) * mix(0.12, 0.2, beach)
+  );
+
+  vec2 horizontalLight = normalize(u_lightDirection.xy);
+  vec2 seawardNormal = -shoreNormal;
+  float cliffRelief =
+    cliff
+    * mix(0.48, 1.08, profileHeight)
+    * mix(0.64, 1.0, brokenArc);
+  float cliffShadowFacing = smoother(
+    -0.18,
+    0.76,
+    dot(seawardNormal, -horizontalLight)
+  );
+  float cliffShadow =
+    waterMask
+    * cliffShelf
+    * cliffRelief
+    * cliffShadowFacing
+    * mix(0.16, 0.3, zoom);
+  color = mix(color, u_deepColor, cliffShadow);
+  vec2 screenWorldTexel = u_cameraSpan / max(u_resolution, vec2(1.0));
+  float shadowPixels =
+    mix(2.0, mix(4.0, 10.0, profileHeight), zoom)
+    * mix(0.72, 1.18, brokenArc);
+  vec2 castSampleOffset =
+    horizontalLight * screenWorldTexel * shadowPixels;
+  float displacedLand = texture(
+    u_coastGeometry,
+    clamp(worldUv + castSampleOffset * 0.7, 0.001, 0.999)
+  ).r * 0.25;
+  displacedLand += texture(
+    u_coastGeometry,
+    clamp(worldUv + castSampleOffset, 0.001, 0.999)
+  ).r * 0.5;
+  displacedLand += texture(
+    u_coastGeometry,
+    clamp(worldUv + castSampleOffset * 1.3, 0.001, 0.999)
+  ).r * 0.25;
+  float castShadow =
+    waterMask
+    * displacedLand
+    * cliffRelief
+    * mix(0.18, 0.3, zoom);
+  color = mix(color, u_deepColor, castShadow);
   color = mix(
     color,
     u_highlightColor,
-    shelf * water.crest * mix(0.055, 0.035, zoom)
+    shelf
+      * water.crest
+      * mix(0.05, 0.066, zoom)
+      * mix(1.0, 1.24, beach)
+      * mix(1.0, 0.58, cliff)
   );
 
   float breakerBand =
-    smoother(0.18, 0.42, shelf)
-    * (1.0 - smoother(0.66, 0.91, shelf));
+    smoother(0.55, 0.75, shelf)
+    * (1.0 - smoother(0.9, 0.98, shelf));
+  float foamContact = smoother(mix(0.9, 0.78, zoom), 0.995, rawContact);
   float breakerFoam =
     breakerBand
     * advancingBand
-    * brokenArc
-    * mix(0.08, 0.3, exposure)
+    * mix(brokenArc, 0.35 + brokenArc * 0.65, beach)
+    * mix(0.22, 0.62, exposure)
+    * mix(1.0, 1.45, beach)
+    * mix(1.0, 0.72, cliff)
     * mix(1.0, 0.36, lagoon);
 
   float contactFoam =
     (
-      contact
+      waterMask
+      * foamContact
       * advancingBand
       * brokenArc
-      * mix(0.08, 0.32, exposure)
+      * mix(0.2, 0.58, exposure)
+      * mix(1.0, 0.9, beach)
+      * mix(1.0, 1.55, cliff)
       * mix(1.0, 0.42, lagoon)
     )
     + breakerFoam;
+  contactFoam += (
+    waterMask
+    * foamContact
+    * brokenArc
+    * mix(0.08, 0.18, exposure)
+    * mix(1.0, 0.72, beach)
+    * mix(1.0, 1.5, cliff)
+    * mix(1.0, 0.35, lagoon)
+  );
   color = mix(
     color,
     u_foamColor,
-    contactFoam * mix(0.52, 0.38, zoom)
+    contactFoam * mix(0.7, 0.88, zoom)
   );
+
+  float landWash =
+    land
+    * smoother(0.925, 0.998, rawContact)
+    * advancingBand
+    * brokenArc
+    * mix(0.12, 0.38, exposure)
+    * mix(1.0, 1.24, beach)
+    * mix(1.0, 0.74, cliff)
+    * mix(1.0, 0.42, lagoon);
+  color = mix(color, u_foamColor, land);
+  float overlayAlpha = landWash * mix(0.22, 0.36, zoom);
 
   CoastSample result;
   result.color = color;
-  result.contactFoam = contactFoam;
+  result.overlayAlpha = saturate(overlayAlpha);
+  result.landMask = land;
   return result;
 }
 `;

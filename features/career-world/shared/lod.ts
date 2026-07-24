@@ -1,8 +1,33 @@
-import type { CameraView } from "./camera";
+import type { CameraView, Pair } from "./camera";
+import type { CareerWorldLayerId } from "./layers";
 
 export type DetailTierId = "world" | "territory" | "capital";
 
-export const PHASE_3_MINIMUM_SPAN = 0.29;
+export const DETAIL_POLICY = Object.freeze({
+  phase3MinimumSpan: 0.29,
+  territoryAssetPreloadSpan: 0.9,
+  tierMaximumSpan: Object.freeze({
+    world: 1,
+    territory: 0.78,
+    capital: 0.2,
+  }),
+  worldToTerritory: Object.freeze({
+    startSpan: 0.86,
+    endSpan: 0.64,
+  }),
+  territoryToCapital: Object.freeze({
+    startSpan: 0.23,
+    endSpan: 0.15,
+  }),
+  renderScale: Object.freeze({
+    world: 1,
+    territoryGain: 0.5,
+    capitalGain: 0.5,
+    maximumDevicePixelRatio: 2,
+  }),
+});
+
+export const PHASE_3_MINIMUM_SPAN = DETAIL_POLICY.phase3MinimumSpan;
 
 export interface DetailTier {
   readonly id: DetailTierId;
@@ -23,32 +48,64 @@ export interface DetailNodePolicy {
   readonly minimumTier: DetailTierId;
 }
 
+export interface RegisteredRasterDetailSource {
+  readonly id: string;
+  readonly kind: "registered-raster";
+  readonly minimumTier: DetailTierId;
+  readonly path: string;
+  readonly dimensions: Pair;
+  readonly worldBounds: CameraView;
+}
+
+export interface WorldProceduralDetailSource {
+  readonly id: string;
+  readonly kind: "world-procedural";
+  readonly minimumTier: DetailTierId;
+  readonly path: string;
+  readonly fixedWorldFrequency: Pair;
+}
+
+export type LayerDetailSource =
+  | RegisteredRasterDetailSource
+  | WorldProceduralDetailSource;
+
+export interface LayerDetailContract {
+  readonly layer: CareerWorldLayerId;
+  readonly sources: readonly LayerDetailSource[];
+}
+
+export function defineLayerDetailContract<
+  const Contract extends LayerDetailContract,
+>(contract: Contract): Contract {
+  if (!contract.sources.some((source) => source.minimumTier === "world")) {
+    throw new Error(`${contract.layer} detail contract needs a world source.`);
+  }
+  return Object.freeze({
+    ...contract,
+    sources: Object.freeze([...contract.sources]),
+  }) as Contract;
+}
+
 const DETAIL_TIERS: readonly DetailTier[] = Object.freeze([
   Object.freeze({
     id: "capital",
     label: "Capital tile required",
-    maximumSpan: 0.2,
+    maximumSpan: DETAIL_POLICY.tierMaximumSpan.capital,
     requiresAuthoredTile: true,
   }),
   Object.freeze({
     id: "territory",
     label: "Territory detail",
-    maximumSpan: 0.78,
+    maximumSpan: DETAIL_POLICY.tierMaximumSpan.territory,
     requiresAuthoredTile: false,
   }),
   Object.freeze({
     id: "world",
     label: "World detail",
-    maximumSpan: 1,
+    maximumSpan: DETAIL_POLICY.tierMaximumSpan.world,
     requiresAuthoredTile: false,
   }),
 ]);
-
-const TERRITORY_ASSET_PRELOAD_SPAN = 0.9;
-const WORLD_TO_TERRITORY_START = 0.86;
-const WORLD_TO_TERRITORY_END = 0.64;
-const TERRITORY_TO_CAPITAL_START = 0.23;
-const TERRITORY_TO_CAPITAL_END = 0.15;
 
 function descendingSmoothstep(
   span: number,
@@ -70,13 +127,13 @@ export function resolveDetailState(camera: CameraView): DetailState {
   );
   const worldToTerritory = descendingSmoothstep(
     span,
-    WORLD_TO_TERRITORY_START,
-    WORLD_TO_TERRITORY_END,
+    DETAIL_POLICY.worldToTerritory.startSpan,
+    DETAIL_POLICY.worldToTerritory.endSpan,
   );
   const territoryToCapital = descendingSmoothstep(
     span,
-    TERRITORY_TO_CAPITAL_START,
-    TERRITORY_TO_CAPITAL_END,
+    DETAIL_POLICY.territoryToCapital.startSpan,
+    DETAIL_POLICY.territoryToCapital.endSpan,
   );
 
   return Object.freeze({
@@ -84,10 +141,11 @@ export function resolveDetailState(camera: CameraView): DetailState {
     worldToTerritory,
     territoryToCapital,
     renderScale:
-      1
-      + worldToTerritory * 0.5
-      + territoryToCapital * 0.5,
-    shouldLoadTerritoryAssets: span <= TERRITORY_ASSET_PRELOAD_SPAN,
+      DETAIL_POLICY.renderScale.world
+      + worldToTerritory * DETAIL_POLICY.renderScale.territoryGain
+      + territoryToCapital * DETAIL_POLICY.renderScale.capitalGain,
+    shouldLoadTerritoryAssets:
+      span <= DETAIL_POLICY.territoryAssetPreloadSpan,
   });
 }
 

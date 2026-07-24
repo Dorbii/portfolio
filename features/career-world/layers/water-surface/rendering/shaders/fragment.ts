@@ -10,10 +10,14 @@ ${WATER_SHADER_COAST}
 void main() {
   vec2 screenUv = vec2(v_uv.x, 1.0 - v_uv.y);
   vec2 worldUv = u_cameraOrigin + screenUv * u_cameraSpan;
-  float lagoon = texture(u_hydrology, worldUv).r;
-  OpenWaterSample water = sampleOpenWater(worldUv, lagoon);
-  CoastSample coast = applyCoast(worldUv, water, lagoon);
-  outColor = vec4(coast.color, u_opacity);
+  vec2 hydrology = texture(u_hydrology, worldUv).rg;
+  float shelter = max(hydrology.r, hydrology.g);
+  OpenWaterSample water = sampleOpenWater(worldUv, hydrology);
+  CoastSample coast = applyCoast(worldUv, water, shelter);
+  float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
+  outColor = vec4(
+    coast.color,
+    u_opacity * max(waterVisibility, coast.overlayAlpha)
+  );
 }
 `;
-

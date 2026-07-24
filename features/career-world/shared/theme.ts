@@ -15,6 +15,7 @@ export const CAREER_WORLD_THEME = Object.freeze({
       shadow: "#24271d",
       body: "#777452",
       light: "#b0a473",
+      sand: "#b7a36f",
       line: "#26251f",
     }),
     interface: Object.freeze({

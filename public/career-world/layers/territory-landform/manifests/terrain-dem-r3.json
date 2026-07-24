@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/terrain-dem@r3",
+  "status": "phase-3-authoring",
+  "coordinateSpace": "normalized-world-top-left",
+  "geography": {
+    "mask": "../masks/world-land-mask-r2.png",
+    "policy": "The mask is authoritative. Elevation may not move the coast."
+  },
+  "source": {
+    "path": "../sources/terrain-dem-authored-r3.png",
+    "mode": "L",
+    "dimensions": [1672, 941],
+    "semantics": {
+      "black": "sea level",
+      "white": "highest summit",
+      "intermediate": "continuous relative elevation"
+    }
+  },
+  "processing": {
+    "blackPoint": 0.0157,
+    "whitePoint": 0.949,
+    "gamma": 1.08,
+    "smoothingPixels": 1.15,
+    "finalSmoothingPixels": 0.7,
+    "minimumLandElevation": 0.026,
+    "slopeContinuationPixels": 15,
+    "slopeSmoothingPixels": 1.45
+  },
+  "developmentShelves": [
+    {
+      "id": "ninjaone-development-basin",
+      "center": [0.5173, 0.2253],
+      "targetElevation": 0.31,
+      "strength": 0.58,
+      "radius": 0.047
+    },
+    {
+      "id": "tanium-mountain-saddle",
+      "center": [0.4605, 0.5441],
+      "targetElevation": 0.58,
+      "strength": 0.72,
+      "radius": 0.03
+    },
+    {
+      "id": "independent-western-plain",
+      "center": [0.1884, 0.4995],
+      "targetElevation": 0.23,
+      "strength": 0.62,
+      "radius": 0.044
+    },
+    {
+      "id": "column-southern-shelf",
+      "center": [0.8523, 0.7067],
+      "targetElevation": 0.34,
+      "strength": 0.58,
+      "radius": 0.038
+    },
+    {
+      "id": "ace-development-shelf",
+      "center": [0.5773, 0.882],
+      "targetElevation": 0.37,
+      "strength": 0.8,
+      "radius": 0.038
+    }
+  ],
+  "policy": [
+    "The authored DEM is the canonical Phase 3 elevation source.",
+    "The DEM encodes branching ridges, saddles, valleys, basins, and varied coast approaches without decorative ground detail.",
+    "Tanium retains two connected peaks and a saddle for a later mountain cableway.",
+    "Development shelves constrain local slope without changing geography or projection.",
+    "Runtime relief, QA contours, slope, and coast materials are deterministic derivatives.",
+    "Vegetation, roads, structures, and decorative line work remain deferred to later scene layers."
+  ]
+}

@@ -104,6 +104,7 @@ export function WaterSurfaceCanvas({
       className="career-world__water-canvas"
       data-layer="water-surface"
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
+      data-lod-tier={detailState.tier.id}
       data-render-state="loading"
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
       ref={canvasRef}

@@ -10,16 +10,34 @@ uniform vec2 u_cameraOrigin;
 uniform vec2 u_cameraSpan;
 uniform vec2 u_wind;
 uniform vec2 u_coastTexel;
+uniform vec2 u_coastMaterialTexel;
 uniform float u_motion;
 uniform float u_waveStrength;
+uniform float u_waveDensity;
 uniform float u_weather;
 uniform float u_opacity;
 uniform float u_detailScale;
 uniform float u_territoryLod;
 uniform float u_capitalLod;
+uniform vec2 u_microFrequency;
+uniform float u_territoryLineStrength;
+uniform float u_territoryNormalStrength;
 uniform vec3 u_lightDirection;
+uniform vec2 u_basinWorldAnchor;
+uniform vec2 u_basinTextureOrigin;
+uniform vec2 u_basinTextureScale;
+uniform float u_basinTextureRotation;
+uniform float u_basinRippleFrequency;
+uniform float u_basinRippleMix;
+uniform float u_basinTintMix;
+uniform vec2 u_lakeWorldAnchor;
+uniform vec2 u_lakeTextureOrigin;
+uniform vec2 u_lakeTextureScale;
+uniform float u_lakeTextureRotation;
+uniform float u_lakeRippleFrequency;
+uniform float u_lakeRippleMix;
+uniform float u_lakeTintMix;
 
-uniform vec3 u_abyssColor;
 uniform vec3 u_deepColor;
 uniform vec3 u_bodyColor;
 uniform vec3 u_swellColor;
@@ -30,10 +48,11 @@ uniform vec3 u_foamColor;
 uniform vec3 u_stormColor;
 
 uniform sampler2D u_worldAlbedo;
-uniform sampler2D u_territoryAlbedo;
+uniform sampler2D u_directionalAlbedo;
 uniform sampler2D u_macroHeight;
 uniform sampler2D u_microHeight;
 uniform sampler2D u_coastGeometry;
+uniform sampler2D u_coastMaterial;
 uniform sampler2D u_hydrology;
 
 float saturate(float value) {
