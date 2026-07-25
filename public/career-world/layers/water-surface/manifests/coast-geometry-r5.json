@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "career-world/coast-geometry@r4",
+  "id": "career-world/coast-geometry@r5",
   "status": "phase-3-runtime",
   "coordinateSpace": "normalized-world-top-left",
   "dimensions": [
@@ -8,13 +8,13 @@
     941
   ],
   "texture": {
-    "path": "../fields/coast-geometry-r4.png",
-    "sha256": "CAC0EC67BBAE337F159550FCD989237C757EECA74FE3D6E625DD04BAAA92186A",
+    "path": "../fields/coast-geometry-r5.png",
+    "sha256": "0E1D1BEF9093553AEF37928ECCD9F435201EEB7BDDB18778FE892E7567C4B070",
     "mode": "RGBA"
   },
   "detailTexture": {
-    "path": "../fields/coast-geometry-r4-4x.png",
-    "sha256": "2E1CA5CD8C7AF5B80086790867E8FE7D130D4BD515830A9ED392F3F252161A33",
+    "path": "../fields/coast-geometry-r5-4x.png",
+    "sha256": "09944A4C9F9B70D36B688216AA0507D92F74E046D72F53854749B3647F23EF0C",
     "dimensions": [
       6688,
       3764
@@ -28,8 +28,8 @@
     "a": "authored land luminance continued beneath the exterior shelf"
   },
   "source": {
-    "path": "../../territory-landform/masks/world-land-mask-r2.png",
-    "sha256": "3F7A3D5CDA9A9960D2849A1B17749D95CEBEA6D91D565819E09A08DE578F2A98"
+    "path": "../../territory-landform/masks/world-land-mask-r3.png",
+    "sha256": "22CEE71270D21280326710DEABD6FBC27480E5116C00476A38D5EBD2D6B96F3C"
   },
   "policy": [
     "The land mask owns geography.",

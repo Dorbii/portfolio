@@ -20,6 +20,13 @@ The accepted authored assets live under
 the matching `features/career-world/layers/<layer-name>/` directory.
 
 `scripts/build-career-world-assets.py` deterministically compiles the Phase 3
-terrain, coast, and hydrology derivatives. It does not rewrite the accepted
-world-water albedo unless the author explicitly passes
-`--refresh-locked-water`.
+terrain, registered land LOD, coast, and hydrology derivatives from one
+canonical mask and DEM. Rebuild all Phase 3 derivatives with:
+
+```text
+python scripts/build-career-world-assets.py
+```
+
+The builder does not rewrite the accepted world-water albedo unless the author
+explicitly passes `--refresh-locked-water`. The accepted water textures and
+height fields are hash-locked by the asset tests.

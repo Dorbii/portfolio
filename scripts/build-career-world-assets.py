@@ -24,39 +24,39 @@ WATER_ROOT = PUBLIC / "water-surface"
 WORLD_LIGHT_MANIFEST = (
     PUBLIC / "world-backdrop" / "manifests" / "world-light-r1.json"
 )
-LAND_MASK = LAND_ROOT / "masks" / "world-land-mask-r2.png"
+LAND_MASK = LAND_ROOT / "masks" / "world-land-mask-r3.png"
 TERRAIN_DEM_SOURCE = (
     LAND_ROOT / "sources" / "terrain-dem-authored-r3.png"
 )
+AUTHORED_LAND_SOURCE = (
+    LAND_ROOT / "sources" / "world-land-surface-authored-r9.png"
+)
 TERRAIN_DEM_MANIFEST = (
-    LAND_ROOT / "manifests" / "terrain-dem-r3.json"
+    LAND_ROOT / "manifests" / "terrain-dem-r4.json"
 )
-TERRAIN_HEIGHT = LAND_ROOT / "fields" / "terrain-height-r3.png"
-TERRAIN_SLOPE = LAND_ROOT / "fields" / "terrain-slope-r3.png"
-LAND_OUTPUT = LAND_ROOT / "textures" / "terrain-relief-r3.png"
+TERRAIN_HEIGHT = LAND_ROOT / "fields" / "terrain-height-r4.png"
+TERRAIN_SLOPE = LAND_ROOT / "fields" / "terrain-slope-r4.png"
+LAND_OUTPUT = LAND_ROOT / "textures" / "terrain-relief-r6.png"
 LAND_DETAIL_OUTPUT = (
-    LAND_ROOT / "textures" / "terrain-relief-r3-detail-4x.png"
-)
-LAND_MATERIAL_OUTPUT = (
-    LAND_ROOT / "textures" / "terrain-material-r1.png"
+    LAND_ROOT / "textures" / "terrain-relief-r6-detail-4x.png"
 )
 TERRAIN_CONTOURS = (
-    LAND_ROOT / "overlays" / "terrain-contours-r3-detail-4x.png"
+    LAND_ROOT / "overlays" / "terrain-contours-r4-detail-4x.png"
 )
-LAND_MANIFEST = LAND_ROOT / "manifests" / "terrain-relief-r3.json"
-COAST_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r4.png"
-COAST_DETAIL_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r4-4x.png"
-COAST_MANIFEST = WATER_ROOT / "manifests" / "coast-geometry-r4.json"
+LAND_MANIFEST = LAND_ROOT / "manifests" / "terrain-relief-r6.json"
+COAST_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r5.png"
+COAST_DETAIL_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r5-4x.png"
+COAST_MANIFEST = WATER_ROOT / "manifests" / "coast-geometry-r5.json"
 COAST_MATERIAL_OUTPUT = (
-    WATER_ROOT / "fields" / "coast-material-field-r5.png"
+    WATER_ROOT / "fields" / "coast-material-field-r6.png"
 )
 COAST_MATERIAL_MANIFEST = (
-    WATER_ROOT / "manifests" / "coast-material-field-r5.json"
+    WATER_ROOT / "manifests" / "coast-material-field-r6.json"
 )
 WATER_REGIONS_MANIFEST = WATER_ROOT / "manifests" / "water-regions-r1.json"
-WATER_REGION_OUTPUT = WATER_ROOT / "fields" / "water-region-field-r2.png"
+WATER_REGION_OUTPUT = WATER_ROOT / "fields" / "water-region-field-r3.png"
 WATER_REGION_MANIFEST = (
-    WATER_ROOT / "manifests" / "water-region-field-r2.json"
+    WATER_ROOT / "manifests" / "water-region-field-r3.json"
 )
 WATER_WORLD_SOURCE = (
     WATER_ROOT
@@ -81,10 +81,10 @@ DETAIL_CONTOUR_SMOOTH_RADIUS = 1.0
 DETAIL_COVERAGE_LOW = 116.0
 DETAIL_COVERAGE_HIGH = 140.0
 TERRAIN_SLOPE_REFERENCE = 0.026
-TERRAIN_RELIEF_SCALE = 38.0
 TERRAIN_CONTOUR_LEVELS = 12
-LAND_COAST_WIDTH_PIXELS = 11.0
-LAND_WET_EDGE_PIXELS = 2.4
+INLAND_FERTILITY_WIDTH_PIXELS = 108.0
+INLAND_FERTILITY_COLOR = (54.0, 110.0, 40.0)
+INLAND_FERTILITY_STRENGTH = 0.52
 WATER_SEAM_HALF_WIDTH = 116
 WATER_SEAM_SAMPLE_OFFSET = 148
 
@@ -174,6 +174,70 @@ def development_shelf_weight(
     )
 
 
+def polyline_weight(
+    width: int,
+    height: int,
+    points: list[list[float]],
+    radius: float,
+) -> np.ndarray:
+    """Return an aspect-correct soft field around one authored polyline."""
+
+    if len(points) < 2 or radius <= 0:
+        raise RuntimeError("Mountain ranges require two points and a radius.")
+    y, x = np.mgrid[0:height, 0:width]
+    aspect = width / height
+    sample_x = x.astype(np.float32) / max(width - 1, 1) * aspect
+    sample_y = y.astype(np.float32) / max(height - 1, 1)
+    distance_squared = np.full((height, width), np.inf, dtype=np.float32)
+    authored = np.asarray(points, dtype=np.float32)
+    authored[:, 0] *= aspect
+    for start, end in zip(authored[:-1], authored[1:]):
+        segment = end - start
+        length_squared = float(np.dot(segment, segment))
+        if length_squared <= 0:
+            raise RuntimeError("Mountain range points must not repeat.")
+        projection = np.clip(
+            (
+                (sample_x - start[0]) * segment[0]
+                + (sample_y - start[1]) * segment[1]
+            ) / length_squared,
+            0.0,
+            1.0,
+        )
+        nearest_x = start[0] + projection * segment[0]
+        nearest_y = start[1] + projection * segment[1]
+        candidate = (
+            (sample_x - nearest_x) ** 2
+            + (sample_y - nearest_y) ** 2
+        )
+        distance_squared = np.minimum(distance_squared, candidate)
+    return np.exp(-0.5 * distance_squared / (radius * radius)).astype(
+        np.float32,
+    )
+
+
+def mountain_range_field(width: int, height: int) -> np.ndarray:
+    """Compile the declared mountain belts into one world-space field."""
+
+    authoring = json.loads(TERRAIN_DEM_MANIFEST.read_text(encoding="utf-8"))
+    ranges = authoring.get("mountainRanges", [])
+    if not ranges:
+        raise RuntimeError("Terrain authoring must declare mountain ranges.")
+    field = np.zeros((height, width), dtype=np.float32)
+    for mountain_range in ranges:
+        weight = polyline_weight(
+            width,
+            height,
+            mountain_range["points"],
+            float(mountain_range["radius"]),
+        )
+        field = np.maximum(
+            field,
+            weight * float(mountain_range["strength"]),
+        )
+    return np.clip(field, 0.0, 1.0)
+
+
 def build_terrain_fields(
     mask: Image.Image,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -214,6 +278,16 @@ def build_terrain_fields(
         height[land],
         float(processing["minimumLandElevation"]),
     )
+
+    # The painted DEM contains narrow summit traces, but those traces alone
+    # read as veins when the world is viewed at map scale. The authored range
+    # corridors establish the broad elevation mass first; the DEM then keeps
+    # the irregular peaks and valleys within that mass.
+    range_field = mountain_range_field(mask.width, mask.height)
+    range_shoulders = smooth_unit((range_field - 0.04) / 0.70)
+    range_core = smooth_unit((range_field - 0.25) / 0.65)
+    range_elevation = range_shoulders * (0.24 + range_core * 0.54)
+    height = np.maximum(height, range_elevation * land)
 
     for plain in authoring.get("developmentShelves", []):
         influence = development_shelf_weight(
@@ -401,17 +475,17 @@ def build_coast_geometry(mask: Image.Image) -> None:
     )
     write_json(COAST_MANIFEST, {
         "schemaVersion": 1,
-        "id": "career-world/coast-geometry@r4",
+        "id": "career-world/coast-geometry@r5",
         "status": "phase-3-runtime",
         "coordinateSpace": "normalized-world-top-left",
         "dimensions": [mask.width, mask.height],
         "texture": {
-            "path": "../fields/coast-geometry-r4.png",
+            "path": "../fields/coast-geometry-r5.png",
             "sha256": sha256(COAST_OUTPUT),
             "mode": "RGBA",
         },
         "detailTexture": {
-            "path": "../fields/coast-geometry-r4-4x.png",
+            "path": "../fields/coast-geometry-r5-4x.png",
             "sha256": sha256(COAST_DETAIL_OUTPUT),
             "dimensions": [
                 mask.width * DETAIL_SCALE,
@@ -432,7 +506,7 @@ def build_coast_geometry(mask: Image.Image) -> None:
             ),
         },
         "source": {
-            "path": "../../territory-landform/masks/world-land-mask-r2.png",
+            "path": "../../territory-landform/masks/world-land-mask-r3.png",
             "sha256": sha256(LAND_MASK),
         },
         "policy": [
@@ -472,6 +546,65 @@ def continued_land_field(
     return np.clip(continued, 0.0, 1.0), coverage_array
 
 
+def coast_material_arrays(
+    height: np.ndarray,
+    slope: np.ndarray,
+    land: np.ndarray,
+    *,
+    sample_scale: float = 1.0,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Return the one shared beach, cliff, rock, and substrate classification."""
+
+    # The literal edge of a DEM trends toward sea level even when a mountain
+    # reaches the coast. Inspect the near-coast approach as well as the edge
+    # pixel so real cliff fronts do not collapse into a uniform beach rim.
+    approach_radius = 7.0 * sample_scale
+    approach_height = np.asarray(
+        Image.fromarray(
+            np.round(np.clip(height, 0.0, 1.0) * 255.0).astype(np.uint8),
+            mode="L",
+        ).filter(ImageFilter.GaussianBlur(approach_radius)),
+        dtype=np.float32,
+    ) / 255.0
+    approach_slope = np.asarray(
+        Image.fromarray(
+            np.round(np.clip(slope, 0.0, 1.0) * 255.0).astype(np.uint8),
+            mode="L",
+        ).filter(ImageFilter.GaussianBlur(approach_radius)),
+        dtype=np.float32,
+    ) / 255.0
+    classification_height = np.maximum(height, approach_height * 1.12)
+    classification_slope = np.maximum(slope, approach_slope * 1.18)
+
+    coast_height, coverage = continued_land_field(
+        classification_height,
+        land,
+        SHELF_WIDTH_PIXELS * 0.9 * sample_scale,
+    )
+    coast_slope, _ = continued_land_field(
+        classification_slope,
+        land,
+        SHELF_WIDTH_PIXELS * 0.9 * sample_scale,
+    )
+    substrate_height, _ = continued_land_field(
+        height,
+        land,
+        SHELF_WIDTH_PIXELS * 0.9 * sample_scale,
+    )
+    support = smooth_unit(np.clip(coverage * 3.2, 0.0, 1.0))
+    cliff_signal = coast_height * 0.72 + coast_slope * 0.58
+    cliff = smooth_unit((cliff_signal - 0.34) / 0.42) * support
+    beach = (
+        smooth_unit((0.58 - coast_height) / 0.42)
+        * smooth_unit((0.62 - coast_slope) / 0.5)
+        * (1.0 - cliff)
+        * support
+    )
+    rock = np.clip(support - beach - cliff, 0.0, 1.0)
+    profile = substrate_height * support
+    return beach, cliff, rock, profile
+
+
 def build_coast_material_field(
     mask: Image.Image,
     height: np.ndarray,
@@ -480,32 +613,7 @@ def build_coast_material_field(
     """Derive beach, rock, and cliff response from terrain topology."""
 
     land = np.asarray(mask.convert("L"), dtype=np.uint8) >= 128
-    coast_height, coverage = continued_land_field(
-        height,
-        land,
-        SHELF_WIDTH_PIXELS * 0.9,
-    )
-    coast_slope, _ = continued_land_field(
-        slope,
-        land,
-        SHELF_WIDTH_PIXELS * 0.9,
-    )
-    support = smooth_unit(np.clip(coverage * 3.2, 0.0, 1.0))
-    cliff_signal = (
-        coast_height * 0.72
-        + coast_slope * 0.58
-    )
-    cliff = smooth_unit((cliff_signal - 0.34) / 0.42) * support
-    beach = (
-        smooth_unit((0.58 - coast_height) / 0.42)
-        * smooth_unit((0.62 - coast_slope) / 0.5)
-        * (1.0 - cliff)
-        * support
-    )
-    # Preserve continuous terrain height beneath the complete visible shelf.
-    # Beach/cliff classification controls response, while this channel remains
-    # a genuine bathymetric field that the shader can light independently.
-    profile = coast_height * support
+    beach, cliff, _, profile = coast_material_arrays(height, slope, land)
 
     packed = np.stack(
         (
@@ -521,12 +629,12 @@ def build_coast_material_field(
     )
     write_json(COAST_MATERIAL_MANIFEST, {
         "schemaVersion": 1,
-        "id": "career-world/coast-material-field@r5",
+        "id": "career-world/coast-material-field@r6",
         "status": "phase-3-runtime",
         "coordinateSpace": "normalized-world-top-left",
         "dimensions": [mask.width, mask.height],
         "texture": {
-            "path": "../fields/coast-material-field-r5.png",
+            "path": "../fields/coast-material-field-r6.png",
             "sha256": sha256(COAST_MATERIAL_OUTPUT),
             "mode": "RGB",
         },
@@ -540,11 +648,11 @@ def build_coast_material_field(
         "defaultMaterial": "rocky-shelf",
         "sources": {
             "height": {
-                "path": "../../territory-landform/fields/terrain-height-r3.png",
+                "path": "../../territory-landform/fields/terrain-height-r4.png",
                 "sha256": sha256(TERRAIN_HEIGHT),
             },
             "slope": {
-                "path": "../../territory-landform/fields/terrain-slope-r3.png",
+                "path": "../../territory-landform/fields/terrain-slope-r4.png",
                 "sha256": sha256(TERRAIN_SLOPE),
             },
         },
@@ -558,8 +666,8 @@ def build_coast_material_field(
     })
 
 
-def build_water_region_field(mask: Image.Image) -> None:
-    """Rasterize authored hydrology regions into the world coordinate space."""
+def rasterize_water_regions(mask: Image.Image) -> np.ndarray:
+    """Rasterize authored hydrology regions into world-space RGB channels."""
 
     data = json.loads(WATER_REGIONS_MANIFEST.read_text(encoding="utf-8"))
     field = np.zeros((mask.height, mask.width, 3), dtype=np.uint8)
@@ -617,15 +725,22 @@ def build_water_region_field(mask: Image.Image) -> None:
 
     land = np.asarray(mask.convert("L"), dtype=np.uint8) >= 128
     field[land, :] = 0
+    return field
+
+
+def build_water_region_field(mask: Image.Image) -> None:
+    """Publish authored hydrology regions in the shared world coordinate space."""
+
+    field = rasterize_water_regions(mask)
     save_png_atomic(Image.fromarray(field, mode="RGB"), WATER_REGION_OUTPUT)
     write_json(WATER_REGION_MANIFEST, {
         "schemaVersion": 1,
-        "id": "career-world/water-region-field@r2",
+        "id": "career-world/water-region-field@r3",
         "status": "phase-3-runtime",
         "coordinateSpace": "normalized-world-top-left",
         "dimensions": [mask.width, mask.height],
         "texture": {
-            "path": "../fields/water-region-field-r2.png",
+            "path": "../fields/water-region-field-r3.png",
             "sha256": sha256(WATER_REGION_OUTPUT),
             "mode": "RGB",
         },
@@ -633,7 +748,7 @@ def build_water_region_field(mask: Image.Image) -> None:
             "landMask": {
                 "path": (
                     "../../territory-landform/masks/"
-                    "world-land-mask-r2.png"
+                    "world-land-mask-r3.png"
                 ),
                 "sha256": sha256(LAND_MASK),
             },
@@ -737,254 +852,88 @@ def detail_land_coverage(mask: Image.Image) -> np.ndarray:
     return np.round(coverage * 255.0).astype(np.uint8)
 
 
-def terrain_palette(height: np.ndarray) -> np.ndarray:
-    """Map elevation to a restrained tint used by the relief pass."""
+def detail_micro_relief(width: int, height: int) -> np.ndarray:
+    """Generate sub-world terrain relief for the territory plate only."""
 
-    stops = np.asarray([0.0, 0.1, 0.3, 0.58, 1.0], dtype=np.float32)
-    colors = np.asarray(
-        [
-            [126, 113, 78],
-            [116, 115, 76],
-            [102, 107, 77],
-            [113, 108, 91],
-            [148, 141, 121],
-        ],
-        dtype=np.float32,
+    generator = np.random.default_rng(0xD37A11)
+    grid = generator.integers(
+        0,
+        256,
+        size=(max(24, height // 18), max(24, width // 18)),
+        dtype=np.uint8,
     )
-    return np.stack(
-        [
-            np.interp(height, stops, colors[:, channel])
-            for channel in range(3)
-        ],
-        axis=-1,
-    ).astype(np.float32)
-
-
-def low_frequency_field(
-    width: int,
-    height: int,
-    grid_width: int,
-    grid_height: int,
-    seed: int,
-) -> np.ndarray:
-    """Build one deterministic, non-repeating world-space material field."""
-
-    generator = np.random.default_rng(seed)
-    grid = generator.random(
-        (grid_height, grid_width),
-        dtype=np.float32,
-    )
-    field = Image.fromarray(
-        np.round(grid * 255.0).astype(np.uint8),
-        mode="L",
-    ).resize(
+    noise = Image.fromarray(grid, mode="L").resize(
         (width, height),
         Image.Resampling.BICUBIC,
     )
-    return np.asarray(field, dtype=np.float32) / 255.0
+    broad = noise.filter(ImageFilter.GaussianBlur(radius=9.0))
+    return (
+        np.asarray(noise, dtype=np.float32)
+        - np.asarray(broad, dtype=np.float32)
+    ) / 255.0
+
+
+def build_inland_fertility_field(mask: Image.Image) -> np.ndarray:
+    """Return a broad land-side moisture halo around classified inland water."""
+
+    regions = rasterize_water_regions(mask)
+    inland_water = np.any(regions >= 128, axis=-1)
+    if not np.any(inland_water):
+        return np.zeros((mask.height, mask.width), dtype=np.float32)
+    distance = distance_from_feature(
+        Image.fromarray(
+            np.where(inland_water, 255, 0).astype(np.uint8),
+            mode="L",
+        ),
+    ).astype(np.float32)
+    land = np.asarray(mask.convert("L"), dtype=np.uint8) >= 128
+    normalized = np.clip(
+        1.0 - distance / INLAND_FERTILITY_WIDTH_PIXELS,
+        0.0,
+        1.0,
+    )
+    return np.where(land, smooth_unit(normalized), 0.0).astype(np.float32)
 
 
 def render_terrain_material(
     height: np.ndarray,
     slope: np.ndarray,
-) -> np.ndarray:
-    """Author a restrained illustrated base independently from lighting."""
-
-    image_height, image_width = height.shape
-    broad = low_frequency_field(
-        image_width,
-        image_height,
-        10,
-        6,
-        0xC411,
-    )
-    regional = low_frequency_field(
-        image_width,
-        image_height,
-        28,
-        16,
-        0x51A7,
-    )
-    meso = low_frequency_field(
-        image_width,
-        image_height,
-        72,
-        41,
-        0x7E22,
-    )
-
-    dry = np.asarray([124, 105, 65], dtype=np.float32)
-    moss = np.asarray([61, 86, 55], dtype=np.float32)
-    stone = np.asarray([103, 97, 84], dtype=np.float32)
-    alpine = np.asarray([145, 137, 119], dtype=np.float32)
-
-    moisture = smooth_unit(
-        broad * 0.55
-        + regional * 0.3
-        + (1.0 - height) * 0.2
-        - 0.05
-    )
-    color = (
-        dry[np.newaxis, np.newaxis, :] * (1.0 - moisture[..., np.newaxis])
-        + moss[np.newaxis, np.newaxis, :] * moisture[..., np.newaxis]
-    )
-    exposed_rock = smooth_unit(
-        (slope - 0.24) / 0.58
-    ) * smooth_unit((height + 0.08) / 0.72)
-    color = (
-        color * (1.0 - exposed_rock[..., np.newaxis] * 0.54)
-        + stone[np.newaxis, np.newaxis, :]
-        * exposed_rock[..., np.newaxis]
-        * 0.54
-    )
-    alpine_amount = smooth_unit((height - 0.7) / 0.3)
-    color = (
-        color * (1.0 - alpine_amount[..., np.newaxis] * 0.46)
-        + alpine[np.newaxis, np.newaxis, :]
-        * alpine_amount[..., np.newaxis]
-        * 0.46
-    )
-    value_variation = (
-        (broad - 0.5) * 12.0
-        + (regional - 0.5) * 6.0
-        + (meso - 0.5) * 2.5
-    )
-    color += value_variation[..., np.newaxis]
-    return np.clip(color, 0.0, 255.0).astype(np.float32)
-
-
-def blur_unit_field(values: np.ndarray, radius: float) -> np.ndarray:
-    """Blur one normalized field without introducing out-of-range values."""
-
-    image = Image.fromarray(
-        np.round(np.clip(values, 0.0, 1.0) * 255.0).astype(np.uint8),
-        mode="L",
-    ).filter(ImageFilter.GaussianBlur(radius=radius))
-    return np.asarray(image, dtype=np.float32) / 255.0
-
-
-def apply_land_side_coast_material(
-    color: np.ndarray,
-    height: np.ndarray,
-    slope: np.ndarray,
-    land: np.ndarray,
-    distance: np.ndarray,
-) -> np.ndarray:
-    """Blend beaches and rock into land without drawing a uniform outline."""
-
-    coast = 1.0 - smooth_unit(distance / LAND_COAST_WIDTH_PIXELS)
-    wet_edge = 1.0 - smooth_unit(distance / LAND_WET_EDGE_PIXELS)
-
-    cliff_signal = height * 0.72 + slope * 0.58
-    cliff = smooth_unit((cliff_signal - 0.34) / 0.42)
-    beach = (
-        smooth_unit((0.58 - height) / 0.42)
-        * smooth_unit((0.62 - slope) / 0.5)
-        * (1.0 - cliff)
-    )
-    rock = np.clip(1.0 - beach - cliff, 0.0, 1.0)
-
-    dry_sand = np.asarray([148, 128, 82], dtype=np.float32)
-    wet_sand = np.asarray([91, 88, 66], dtype=np.float32)
-    shelf_rock = np.asarray([91, 88, 76], dtype=np.float32)
-    cliff_rock = np.asarray([72, 72, 67], dtype=np.float32)
-    sand_color = (
-        dry_sand[np.newaxis, np.newaxis, :]
-        * (1.0 - wet_edge[..., np.newaxis])
-        + wet_sand[np.newaxis, np.newaxis, :]
-        * wet_edge[..., np.newaxis]
-    )
-
-    beach_mix = (coast * beach * 0.9 * land)[..., np.newaxis]
-    rock_mix = (coast * rock * 0.52 * land)[..., np.newaxis]
-    cliff_mix = (
-        (1.0 - smooth_unit(distance / 7.0))
-        * cliff
-        * 0.66
-        * land
-    )[..., np.newaxis]
-    result = color * (1.0 - beach_mix) + sand_color * beach_mix
-    result = result * (1.0 - rock_mix) + shelf_rock * rock_mix
-    result = result * (1.0 - cliff_mix) + cliff_rock * cliff_mix
-    return result
-
-
-def render_terrain_relief(
-    height: np.ndarray,
-    slope: np.ndarray,
-    material: np.ndarray,
-    land: np.ndarray,
-    coast_distance: np.ndarray,
+    inland_fertility: np.ndarray,
     *,
     sample_scale: float,
 ) -> np.ndarray:
-    """Light and etch the base material from the canonical elevation field."""
+    """Scale one authored land material and add only LOD-local detail."""
 
-    # The DEM is zero outside the mask for data correctness, but differentiating
-    # that discontinuity invents a vertical wall around every coast. Continue
-    # local terrain just beyond the hidden boundary before computing normals.
-    shading_height, _ = continued_land_field(
-        height,
-        land,
-        10.0 * sample_scale,
-    )
-    gradient_y, gradient_x = np.gradient(shading_height)
-    horizontal_scale = TERRAIN_RELIEF_SCALE * sample_scale
-    slope_amount = np.clip(
-        np.hypot(gradient_x, gradient_y)
-        * sample_scale
-        / TERRAIN_SLOPE_REFERENCE,
-        0.0,
-        1.0,
-    )
-    normal_x = -gradient_x * horizontal_scale
-    normal_y = -gradient_y * horizontal_scale
-    normal_z = np.ones_like(height)
-    normal_length = np.sqrt(
-        normal_x * normal_x
-        + normal_y * normal_y
-        + normal_z * normal_z
-    )
-    light = np.asarray(world_light_direction(), dtype=np.float32)
-    light /= np.linalg.norm(light)
-    light_amount = (
-        normal_x * light[0]
-        + normal_y * light[1]
-        + normal_z * light[2]
-    ) / normal_length
-    lighting = 0.56 + smooth_unit(light_amount * 0.5 + 0.5) * 0.54
-    elevation_tint = terrain_palette(height)
-    color = material * 0.88 + elevation_tint * 0.12
-    color *= lighting[..., np.newaxis]
+    image_height, image_width = height.shape
+    source = Image.open(AUTHORED_LAND_SOURCE).convert("RGB")
+    if source.size != (image_width, image_height):
+        source = source.resize(
+            (image_width, image_height),
+            Image.Resampling.LANCZOS,
+        )
+    color = np.asarray(source, dtype=np.float32)
 
-    # Multi-scale local relief supplies restrained illustrated linework tied to
-    # actual ridges and drainage instead of a repeated surface-noise pattern.
-    fine_relief = height - blur_unit_field(
-        shading_height,
-        1.8 * sample_scale,
+    # Inland water supports a restrained fertile halo without replacing the
+    # authored material. This is a material tint, not a second texture style.
+    fertile = np.asarray(INLAND_FERTILITY_COLOR, dtype=np.float32)
+    fertility = (
+        inland_fertility
+        * smooth_unit((0.72 - height) / 0.5)
+        * smooth_unit((0.78 - slope) / 0.55)
+        * INLAND_FERTILITY_STRENGTH
     )
-    meso_relief = height - blur_unit_field(
-        shading_height,
-        7.0 * sample_scale,
+    color = (
+        color * (1.0 - fertility[..., np.newaxis])
+        + fertile[np.newaxis, np.newaxis, :] * fertility[..., np.newaxis]
     )
-    relief_ink = np.tanh(fine_relief * 34.0 + meso_relief * 9.0)
-    color += (
-        relief_ink
-        * (10.0 + slope_amount * 16.0)
-        * land
-    )[..., np.newaxis]
-    color *= (
-        1.0
-        - np.maximum(slope_amount, slope) * 0.1
-    )[..., np.newaxis]
-    color = apply_land_side_coast_material(
-        color,
-        height,
-        slope,
-        land,
-        coast_distance,
-    )
-    return np.round(np.clip(color, 0.0, 255.0)).astype(np.uint8)
+
+    # The territory plate receives new, world-registered micro relief instead
+    # of merely enlarging the world pixels. Macro forms remain authored once.
+    if sample_scale > 1.0:
+        micro = detail_micro_relief(image_width, image_height)
+        micro_gain = 3.5 + smooth_unit((slope - 0.08) / 0.66) * 3.0
+        color += (micro * micro_gain)[..., np.newaxis]
+    return np.clip(color, 0.0, 255.0).astype(np.float32)
 
 
 def build_terrain_contours(
@@ -1027,37 +976,15 @@ def build_land_plate(
     """Publish calm terrain relief and a registered high-resolution derivative."""
 
     visible_land = np.asarray(mask.convert("L"), dtype=np.uint8) >= 128
-    water_feature = Image.fromarray(
-        np.where(visible_land, 0, 255).astype(np.uint8),
-        mode="L",
-    )
-    coast_distance = distance_from_feature(water_feature).astype(np.float32)
     alpha = antialiased_land_alpha(mask)
-    base_material = render_terrain_material(height, slope)
-    material_edge_safe_color = bleed_transparent_edge_color(
-        base_material,
-        alpha,
-    )
-    material_output = np.concatenate(
-        (
-            np.round(material_edge_safe_color).astype(np.uint8),
-            alpha[..., np.newaxis],
-        ),
-        axis=-1,
-    )
-    save_png_atomic(
-        Image.fromarray(material_output, mode="RGBA"),
-        LAND_MATERIAL_OUTPUT,
-    )
-
-    base_color = render_terrain_relief(
+    inland_fertility = build_inland_fertility_field(mask)
+    base_material = render_terrain_material(
         height,
         slope,
-        base_material,
-        visible_land,
-        coast_distance,
+        inland_fertility,
         sample_scale=1.0,
     )
+    base_color = np.round(base_material).astype(np.uint8)
     edge_safe_color = bleed_transparent_edge_color(
         base_color.astype(np.float32),
         alpha,
@@ -1091,21 +1018,39 @@ def build_land_plate(
     ) / 255.0
     detail_alpha = detail_land_coverage(mask)
     detail_land = detail_alpha >= 128
-    detail_coast_distance = np.asarray(
+    detail_fertility = np.asarray(
         Image.fromarray(
-            coast_distance,
-            mode="F",
+            np.round(inland_fertility * 255.0).astype(np.uint8),
+            mode="L",
         ).resize(detail_size, Image.Resampling.BICUBIC),
         dtype=np.float32,
+    ) / 255.0
+    micro_relief = detail_micro_relief(*detail_size)
+    micro_strength = (
+        0.018
+        + smooth_unit((detail_slope - 0.08) / 0.58) * 0.032
     )
-    detail_material = render_terrain_material(detail_height, detail_slope)
-    detail_color = render_terrain_relief(
-        detail_height,
+    detail_render_height = np.clip(
+        detail_height + micro_relief * micro_strength * detail_land,
+        0.0,
+        1.0,
+    )
+    detail_material = render_terrain_material(
+        detail_render_height,
         detail_slope,
-        detail_material,
-        detail_land,
-        detail_coast_distance,
+        detail_fertility,
         sample_scale=DETAIL_SCALE,
+    )
+    detail_color = np.round(detail_material).astype(np.uint8)
+    detail_color = np.asarray(
+        Image.fromarray(detail_color, mode="RGB").filter(
+            ImageFilter.UnsharpMask(
+                radius=1.25,
+                percent=112,
+                threshold=2,
+            ),
+        ),
+        dtype=np.uint8,
     )
     detail_edge_safe_color = bleed_transparent_edge_color(
         detail_color.astype(np.float32),
@@ -1129,17 +1074,17 @@ def build_land_plate(
 
     write_json(LAND_MANIFEST, {
         "schemaVersion": 1,
-        "id": "career-world/terrain-relief@r3",
+        "id": "career-world/terrain-relief@r6",
         "status": "phase-3-runtime",
         "projection": "orthographic-plan",
         "dimensions": [mask.width, mask.height],
         "visual": {
-            "path": "../textures/terrain-relief-r3.png",
+            "path": "../textures/terrain-relief-r6.png",
             "sha256": sha256(LAND_OUTPUT),
             "mode": "RGBA",
         },
         "detailVisual": {
-            "path": "../textures/terrain-relief-r3-detail-4x.png",
+            "path": "../textures/terrain-relief-r6-detail-4x.png",
             "sha256": sha256(LAND_DETAIL_OUTPUT),
             "dimensions": [
                 mask.width * DETAIL_SCALE,
@@ -1147,20 +1092,12 @@ def build_land_plate(
             ],
             "mode": "RGBA",
             "role": (
-                "registered material and relief; no local biome decoration"
-            ),
-        },
-        "baseMaterial": {
-            "path": "../textures/terrain-material-r1.png",
-            "sha256": sha256(LAND_MATERIAL_OUTPUT),
-            "dimensions": [mask.width, mask.height],
-            "mode": "RGBA",
-            "role": (
-                "deterministic low-frequency ground material before DEM lighting"
+                "authored macro relief plus registered territory-only micro "
+                "relief; no later-layer environment or structure decoration"
             ),
         },
         "topologyQa": {
-            "path": "../overlays/terrain-contours-r3-detail-4x.png",
+            "path": "../overlays/terrain-contours-r4-detail-4x.png",
             "sha256": sha256(TERRAIN_CONTOURS),
             "dimensions": [
                 mask.width * DETAIL_SCALE,
@@ -1169,17 +1106,17 @@ def build_land_plate(
             "mode": "RGBA",
         },
         "mask": {
-            "path": "../masks/world-land-mask-r2.png",
+            "path": "../masks/world-land-mask-r3.png",
             "sha256": sha256(LAND_MASK),
         },
         "fields": {
             "height": {
-                "path": "../fields/terrain-height-r3.png",
+                "path": "../fields/terrain-height-r4.png",
                 "sha256": sha256(TERRAIN_HEIGHT),
                 "mode": "L",
             },
             "slope": {
-                "path": "../fields/terrain-slope-r3.png",
+                "path": "../fields/terrain-slope-r4.png",
                 "sha256": sha256(TERRAIN_SLOPE),
                 "mode": "L",
             },
@@ -1187,23 +1124,33 @@ def build_land_plate(
         "derivation": {
             "source": "../sources/terrain-dem-authored-r3.png",
             "sourceSha256": sha256(TERRAIN_DEM_SOURCE),
-            "authoring": "terrain-dem-r3.json",
+            "authoredSurfaceSource": (
+                "../sources/world-land-surface-authored-r9.png"
+            ),
+            "authoredSurfaceSourceSha256": sha256(AUTHORED_LAND_SOURCE),
+            "authoring": "terrain-dem-r4.json",
             "authoringSha256": sha256(TERRAIN_DEM_MANIFEST),
             "operation": (
-                "normalize and mask one authored DEM; preserve five future "
-                "development shelves; derive boundary-safe slope and coast "
-                "response; light a separate deterministic ground material; "
-                "publish registered detail relief and QA contours"
+                "mask one authored land-and-coast material with canonical "
+                "geography; preserve five future development shelves in the "
+                "separate topology field; add registered territory-only micro "
+                "relief; publish topology QA and coast response derivatives"
             ),
             "worldLightDirection": world_light_direction(),
-            "decorativeGroundTexture": True,
+            "authoredSurfaceTexture": True,
             "materialRecipe": (
-                "seeded low-frequency dry, moss, stone, and alpine fields; "
-                "DEM-derived ridge and valley ink; topology-classified "
-                "land-side beach, rocky shelf, and cliff transitions; "
-                "no structure marks"
+                "single authored bas-relief surface with connected mountain "
+                "massifs, foothills, plains, and terrain-specific beach, rock "
+                "shelf, and cliff stretches; hydrology-derived inland fertility "
+                "tint; no pasted line-art pass and no structure marks"
             ),
-            "landCoastWidthPixels": LAND_COAST_WIDTH_PIXELS,
+            "inlandFertilityWidthPixels": INLAND_FERTILITY_WIDTH_PIXELS,
+            "inlandFertilityColor": list(INLAND_FERTILITY_COLOR),
+            "inlandFertilityStrength": INLAND_FERTILITY_STRENGTH,
+            "detailPolicy": (
+                "world and territory plates share one authored macro material; "
+                "the territory plate adds deterministic registered micro relief"
+            ),
             "vegetationIncluded": False,
         },
     })
@@ -1279,12 +1226,12 @@ def verify() -> None:
     required = [
         LAND_MASK,
         TERRAIN_DEM_SOURCE,
+        AUTHORED_LAND_SOURCE,
         TERRAIN_DEM_MANIFEST,
         TERRAIN_HEIGHT,
         TERRAIN_SLOPE,
         LAND_OUTPUT,
         LAND_DETAIL_OUTPUT,
-        LAND_MATERIAL_OUTPUT,
         TERRAIN_CONTOURS,
         LAND_MANIFEST,
         COAST_OUTPUT,
@@ -1306,7 +1253,6 @@ def verify() -> None:
 
     land = Image.open(LAND_OUTPUT).convert("RGBA")
     land_detail = Image.open(LAND_DETAIL_OUTPUT).convert("RGBA")
-    land_material = Image.open(LAND_MATERIAL_OUTPUT).convert("RGBA")
     terrain_contours = Image.open(TERRAIN_CONTOURS).convert("RGBA")
     terrain_height = Image.open(TERRAIN_HEIGHT).convert("L")
     terrain_slope = Image.open(TERRAIN_SLOPE).convert("L")
@@ -1318,7 +1264,6 @@ def verify() -> None:
     if (
         land.size != coast.size
         or land.size != mask.size
-        or land.size != land_material.size
         or land.size != terrain_height.size
         or land.size != terrain_slope.size
     ):
@@ -1370,11 +1315,6 @@ def verify() -> None:
     if land_manifest["visual"]["sha256"] != sha256(LAND_OUTPUT):
         raise RuntimeError("Land manifest hash does not match the generated plate.")
     if (
-        land_manifest["baseMaterial"]["sha256"]
-        != sha256(LAND_MATERIAL_OUTPUT)
-    ):
-        raise RuntimeError("Land material hash does not match its manifest.")
-    if (
         land_manifest["detailVisual"]["sha256"]
         != sha256(LAND_DETAIL_OUTPUT)
     ):
@@ -1396,6 +1336,8 @@ def verify() -> None:
         != sha256(TERRAIN_DEM_SOURCE)
         or land_manifest["derivation"]["authoringSha256"]
         != sha256(TERRAIN_DEM_MANIFEST)
+        or land_manifest["derivation"]["authoredSurfaceSourceSha256"]
+        != sha256(AUTHORED_LAND_SOURCE)
     ):
         raise RuntimeError("Terrain source hashes do not match their manifest.")
     if coast_manifest["texture"]["sha256"] != sha256(COAST_OUTPUT):

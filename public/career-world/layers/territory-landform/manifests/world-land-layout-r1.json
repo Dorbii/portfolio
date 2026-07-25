@@ -11,15 +11,14 @@
     "cameraTransitionRequired": false
   },
   "activeConcept": {
-    "visual": "../textures/world-land-plate-r10.png",
-    "detailVisual": "../textures/world-land-plate-r10-detail-4x.png",
-    "mask": "../masks/world-land-mask-r2.png",
-    "height": "../fields/terrain-height-r3.png",
-    "slope": "../fields/terrain-slope-r3.png",
+    "visual": "../textures/terrain-relief-r6.png",
+    "detailVisual": "../textures/terrain-relief-r6-detail-4x.png",
+    "mask": "../masks/world-land-mask-r3.png",
+    "height": "../fields/terrain-height-r4.png",
+    "slope": "../fields/terrain-slope-r4.png",
     "territories": "world-territories-r4.json",
-    "authoring": "terrain-dem-r3.json",
-    "metadata": "world-land-plate-r10.json",
-    "topologyMetadata": "terrain-relief-r3.json"
+    "authoring": "terrain-dem-r4.json",
+    "metadata": "terrain-relief-r6.json"
   },
   "landmasses": [
     {

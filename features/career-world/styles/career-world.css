@@ -172,7 +172,7 @@
 .career-world__territory-qa,
 .career-world__topology-qa {
   mask:
-    url("/career-world/layers/territory-landform/masks/world-land-mask-r2.png")
+    url("/career-world/layers/territory-landform/masks/world-land-mask-r3.png")
     0 0 / 100% 100% no-repeat;
   mask-mode: luminance;
 }

@@ -3,7 +3,7 @@
   "id": "career-world/deferred-coast-accents@r1",
   "status": "deferred-phase-7",
   "coordinateSpace": "normalized-world-top-left",
-  "baseGeometry": "../../water-surface/manifests/coast-geometry-r4.json",
+  "baseGeometry": "../../water-surface/manifests/coast-geometry-r5.json",
   "policy": [
     "Phase 3 derives continuous base shelf and contact response from the land mask.",
     "These nodes are sparse authored exceptions for future expressive crash behavior.",

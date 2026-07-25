@@ -115,7 +115,7 @@ test("deferred crash accents are isolated in actors-effects", async () => {
         publicLayers,
         "water-surface",
         "manifests",
-        "coast-geometry-r4.json",
+        "coast-geometry-r5.json",
       ),
     ).then(() => true),
     true,
@@ -127,7 +127,7 @@ test("one backdrop-owned light contract drives static and rendered layers", asyn
     "public/career-world/layers/world-backdrop/manifests/world-light-r1.json",
   );
   const land = await readJson(
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r3.json",
+    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
   );
   const renderer = await readFile(
     path.join(
@@ -279,9 +279,9 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     ).length,
     1,
   );
-  assert.match(landAssets, /world-land-plate-r10\.png/);
-  assert.match(landAssets, /world-land-plate-r10-detail-4x\.png/);
-  assert.match(landAssets, /terrain-contours-r3-detail-4x\.png/);
+  assert.match(landAssets, /terrain-relief-r6\.png/);
+  assert.match(landAssets, /terrain-relief-r6-detail-4x\.png/);
+  assert.match(landAssets, /terrain-contours-r4-detail-4x\.png/);
   assert.match(openWater, /u_directionalAlbedo/);
   assert.match(
     openWater,

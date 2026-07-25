@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "career-world/coast-material-field@r5",
+  "id": "career-world/coast-material-field@r6",
   "status": "phase-3-runtime",
   "coordinateSpace": "normalized-world-top-left",
   "dimensions": [
@@ -8,8 +8,8 @@
     941
   ],
   "texture": {
-    "path": "../fields/coast-material-field-r5.png",
-    "sha256": "BF805897355A51D702FBD85A9EFCF06CEE6AA07CB859CA2B3857C7CA134B7D81",
+    "path": "../fields/coast-material-field-r6.png",
+    "sha256": "3D9E019AB8850DF0F8503690E31CE71E52F64011B3F8D185C0BB3DD4D89B463D",
     "mode": "RGB"
   },
   "channels": {
@@ -20,12 +20,12 @@
   "defaultMaterial": "rocky-shelf",
   "sources": {
     "height": {
-      "path": "../../territory-landform/fields/terrain-height-r3.png",
-      "sha256": "96CEC209B60CBE6FDA0188D1CFCF562F7FF4257BF41699542012306178E5B707"
+      "path": "../../territory-landform/fields/terrain-height-r4.png",
+      "sha256": "C17508318E203D4FE35D6469C0FB6FEC59017B5DD8DDE8C33E3C49C1B9FE444A"
     },
     "slope": {
-      "path": "../../territory-landform/fields/terrain-slope-r3.png",
-      "sha256": "B160CD97949B5AA72B0F3EFB5BA448A6073F90121FE55B821C5521BD72F29803"
+      "path": "../../territory-landform/fields/terrain-slope-r4.png",
+      "sha256": "026AFBD8400390190000ACC16274ED7A009C3FC2A3D2A150412E7A68250DC51F"
     }
   },
   "policy": [

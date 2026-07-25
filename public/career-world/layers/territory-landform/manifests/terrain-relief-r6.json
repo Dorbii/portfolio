@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/terrain-relief@r6",
+  "status": "phase-3-runtime",
+  "projection": "orthographic-plan",
+  "dimensions": [
+    1672,
+    941
+  ],
+  "visual": {
+    "path": "../textures/terrain-relief-r6.png",
+    "sha256": "814812E4937AC1F144610D7840C23EB2E948CB06A0101ABEE6749BEEA8A50EF8",
+    "mode": "RGBA"
+  },
+  "detailVisual": {
+    "path": "../textures/terrain-relief-r6-detail-4x.png",
+    "sha256": "F52CB2DBDA376585E0F4CF823F4CFC11BEFD0580896B5CE863F727080888ED9E",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA",
+    "role": "authored macro relief plus registered territory-only micro relief; no later-layer environment or structure decoration"
+  },
+  "topologyQa": {
+    "path": "../overlays/terrain-contours-r4-detail-4x.png",
+    "sha256": "4C998C952D5BBFB2EEF49305847F92100F1531086501670189E1D50575C2AF1F",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "mode": "RGBA"
+  },
+  "mask": {
+    "path": "../masks/world-land-mask-r3.png",
+    "sha256": "22CEE71270D21280326710DEABD6FBC27480E5116C00476A38D5EBD2D6B96F3C"
+  },
+  "fields": {
+    "height": {
+      "path": "../fields/terrain-height-r4.png",
+      "sha256": "99693A9AB321783A6095B2AC640F5815C6E7B2989B1CBDCC369A6F6CEE472708",
+      "mode": "L"
+    },
+    "slope": {
+      "path": "../fields/terrain-slope-r4.png",
+      "sha256": "9D0E7B8D5992A312CAC730DD8DC6A01E30FCDF0EDE94431178AC1F4AD6E17ED4",
+      "mode": "L"
+    }
+  },
+  "derivation": {
+    "source": "../sources/terrain-dem-authored-r3.png",
+    "sourceSha256": "7CB18FE2CE01FB52CF34289B09F4B95ED4DFA67236FF0C0403287C894FFA3BC3",
+    "authoredSurfaceSource": "../sources/world-land-surface-authored-r9.png",
+    "authoredSurfaceSourceSha256": "B922D8A5CBC7BE9B847CEFE249F80737819F80D49226B9088763F572D535CFBF",
+    "authoring": "terrain-dem-r4.json",
+    "authoringSha256": "4A2A8606EFDFA54677AF346F438FE625DAE909CF24573B4D569069F8F06C6395",
+    "operation": "mask one authored land-and-coast material with canonical geography; preserve five future development shelves in the separate topology field; add registered territory-only micro relief; publish topology QA and coast response derivatives",
+    "worldLightDirection": [
+      -0.42,
+      -0.36,
+      0.83
+    ],
+    "authoredSurfaceTexture": true,
+    "materialRecipe": "single authored bas-relief surface with connected mountain massifs, foothills, plains, and terrain-specific beach, rock shelf, and cliff stretches; hydrology-derived inland fertility tint; no pasted line-art pass and no structure marks",
+    "inlandFertilityWidthPixels": 108.0,
+    "inlandFertilityColor": [
+      54.0,
+      110.0,
+      40.0
+    ],
+    "inlandFertilityStrength": 0.52,
+    "detailPolicy": "world and territory plates share one authored macro material; the territory plate adds deterministic registered micro relief",
+    "vegetationIncluded": false
+  }
+}

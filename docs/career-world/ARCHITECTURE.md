@@ -23,8 +23,11 @@ substitutes a separately authored city canvas.
 Coastline is an interface between land geometry and water behavior, not a ninth
 scene layer. Land publishes the mask, elevation, and slope. Water derives
 continuous shelf and bidirectional distance fields from the mask, then derives
-beach, rocky-shelf, and cliff response from the same topology. Phase 7 may add
-sparse authored crash accents without redrawing the coast.
+one serialized beach, rocky-shelf, and cliff classification from the same
+topology. The single Phase 3 compiler uses that classification for the
+land-side profile and publishes it for water-side shelf, breaker, and shadow
+response. Neither layer may invent a second coastline material map. Phase 7 may
+add sparse authored crash accents without redrawing the coast.
 
 ## Runtime boundaries
 
@@ -46,6 +49,9 @@ sparse authored crash accents without redrawing the coast.
   same world-light contract as procedural layers. Elevation remains available
   independently so a later day/night pass can relight terrain without replacing
   geography or its substrate.
+- The accepted illustrated land source contributes only highland peak/ridge
+  form accents. It is not a runtime plate and cannot override the canonical
+  mask, DEM, ground material, coast classification, or shared light.
 
 The current light is intentionally fixed. A moving day/night light is deferred
 until land detail can relight with the same source; animating only procedural
@@ -142,3 +148,5 @@ project or skill structures without drawing Phase 4 or Phase 6 content early.
 8. Authored crash nodes remain deferred to Phase 7.
 9. Every territory development envelope contains an on-land capital anchor,
    stays inside its focus view, and meets its declared land-coverage floor.
+10. Inland-water fertility is a terrain material response only; vegetation and
+    structures remain absent until their owning phases.

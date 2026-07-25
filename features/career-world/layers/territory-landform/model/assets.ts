@@ -1,17 +1,17 @@
 import { defineLayerDetailContract } from "../../../shared/lod";
 
 const WORLD_PLATE =
-  "/career-world/layers/territory-landform/textures/world-land-plate-r10.png";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6.png";
 const TERRITORY_PLATE =
-  "/career-world/layers/territory-landform/textures/world-land-plate-r10-detail-4x.png";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png";
 
 export const LAND_ASSETS = Object.freeze({
   plate: WORLD_PLATE,
   detailPlate: TERRITORY_PLATE,
   mask:
-    "/career-world/layers/territory-landform/masks/world-land-mask-r2.png",
+    "/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
   topologyQa:
-    "/career-world/layers/territory-landform/overlays/terrain-contours-r3-detail-4x.png",
+    "/career-world/layers/territory-landform/overlays/terrain-contours-r4-detail-4x.png",
   territoryQa:
     "/career-world/layers/territory-landform/masks/territory-segmentation-r4.svg",
 });

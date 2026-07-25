@@ -9,9 +9,9 @@ const MACRO_HEIGHT =
 const MICRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-micro-r1-1024x1024.png";
 const COAST_GEOMETRY_WORLD =
-  "/career-world/layers/water-surface/fields/coast-geometry-r4.png";
+  "/career-world/layers/water-surface/fields/coast-geometry-r5.png";
 const COAST_GEOMETRY_TERRITORY =
-  "/career-world/layers/water-surface/fields/coast-geometry-r4-4x.png";
+  "/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png";
 
 export const WATER_TERRITORY_DETAIL = Object.freeze({
   fixedWorldFrequency: Object.freeze([12.5, 10.6] as const),
@@ -29,9 +29,9 @@ export const WATER_ASSETS = Object.freeze({
     territory: COAST_GEOMETRY_TERRITORY,
   }),
   coastMaterial:
-    "/career-world/layers/water-surface/fields/coast-material-field-r5.png",
+    "/career-world/layers/water-surface/fields/coast-material-field-r6.png",
   hydrology:
-    "/career-world/layers/water-surface/fields/water-region-field-r2.png",
+    "/career-world/layers/water-surface/fields/water-region-field-r3.png",
 });
 
 export const WATER_DETAIL_CONTRACT = defineLayerDetailContract({
