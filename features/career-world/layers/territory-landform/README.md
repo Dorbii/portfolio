@@ -11,6 +11,18 @@ crossfades using composition-owned detail state; it is not a sharpened world
 bitmap. The accepted illustrated source contributes only gated mountain-form
 accents, not geography or an all-over texture.
 
+Close views use a registered 12 by 8 tile manifest authored from that same
+detail plate, canonical elevation and slope fields, and two land-only
+high-resolution material references. Deterministic world-space sampling adds
+microrelief without moving geography or repeating at tile boundaries. Runtime
+keeps only the camera intersection plus a bounded prefetch ring resident,
+evicts tiles beyond the retention ring, and caps residency at twelve. These
+capital-tier tiles establish actual source information across the whole land
+plane during the territory-to-capital transition. Capital-local authored
+foundation tiles are site-tier overrides during the capital-to-site transition,
+rather than the only sharp region. Both classes use the centralized semantic
+visibility resolver.
+
 The land-side coast profile consumes the shared topology-derived
 classification: sheltered low terrain receives a broad beach ramp, ambiguous
 terrain keeps a restrained rocky shelf, and high or steep terrain receives a

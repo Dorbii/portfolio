@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capital-structures@r1",
+  "status": "phase-6-checkpoint",
+  "coordinateSpace": "normalized-world-top-left",
+  "anchorSource": "../../../territory-landform/manifests/world-territories-r4.json#territories[].development.capitalAnchor",
+  "minimumTier": "territory",
+  "projection": {
+    "type": "orthographic-high-oblique",
+    "viewBearing": "south-southeast-to-north-northwest",
+    "pitchDegreesFromHorizontal": 72,
+    "lightSource": "career-world/world-light@r1"
+  },
+  "nodes": [
+    {
+      "id": "capital-ninjaone",
+      "territoryId": "ninjaone",
+      "archetype": "command-citadel",
+      "assetPath": "/career-world/layers/structures/textures/ninjaone-capital-r2.png",
+      "groundAnchor": [0.5, 0.79],
+      "footprintSpan": [0.0178, 0.0316]
+    },
+    {
+      "id": "capital-tanium",
+      "territoryId": "tanium",
+      "archetype": "ridge-forum",
+      "assetPath": "/career-world/layers/structures/textures/tanium-capital-r1.png",
+      "groundAnchor": [0.5, 0.77],
+      "footprintSpan": [0.0185, 0.0329]
+    },
+    {
+      "id": "capital-independent",
+      "territoryId": "independent",
+      "archetype": "maker-court",
+      "assetPath": "/career-world/layers/structures/textures/independent-capital-r1.png",
+      "groundAnchor": [0.5, 0.79],
+      "footprintSpan": [0.019, 0.0338]
+    },
+    {
+      "id": "capital-column-technologies",
+      "territoryId": "column-technologies",
+      "archetype": "column-archive",
+      "assetPath": "/career-world/layers/structures/textures/column-capital-r1.png",
+      "groundAnchor": [0.5, 0.81],
+      "footprintSpan": [0.017, 0.0302]
+    },
+    {
+      "id": "capital-ace-hardware",
+      "territoryId": "ace-hardware",
+      "archetype": "hardware-guildhall",
+      "assetPath": "/career-world/layers/structures/textures/ace-hardware-capital-r1.png",
+      "groundAnchor": [0.5, 0.81],
+      "footprintSpan": [0.0155, 0.0276]
+    }
+  ],
+  "policy": [
+    "Capital anchors are consumed from the Phase 3 territory manifest and are never duplicated here.",
+    "Every capital is a fixed-world structure whose footprint remains inside its registered development envelope.",
+    "Visible asset alpha and the lower structure base must remain supported by the canonical land mask.",
+    "Territory-review structures are deliberately compact: each manifest footprint is the final world size and is not multiplied by a second runtime scale.",
+    "Every authored structure exposes a normalized ground-contact anchor so its base, rather than the center of its square source canvas, lands on the territory anchor.",
+    "Approved capital sites use registered territory-landform tiles for terrain transitions; structure sprites never own surrounding ground.",
+    "Every authored raster shares one projection bearing and the root world-light direction; finished assets are never rotated at runtime.",
+    "World view remains terrain-only; capitals use the shared territory reveal weight.",
+    "Project buildings, skill buildings, roads, vegetation, labels, interaction, and effects remain deferred."
+  ]
+}

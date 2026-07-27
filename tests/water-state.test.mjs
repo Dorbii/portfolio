@@ -10,10 +10,10 @@ import {
 } from "../features/career-world/layers/water-surface/model/bodies.ts";
 import {
   DETAIL_POLICY,
-  PHASE_3_MINIMUM_SPAN,
   defineLayerDetailContract,
   resolveDetailState,
   resolveNodeVisibility,
+  resolveRegisteredRasterVisibility,
 } from "../features/career-world/shared/lod.ts";
 
 test("water state clamps external inputs without changing its contract", () => {
@@ -81,12 +81,23 @@ test("one camera span resolves the detail tier for every layer", () => {
   }).tier;
   assert.equal(capital.id, "capital");
   assert.equal(capital.requiresAuthoredTile, true);
+  const site = resolveDetailState({
+    origin: [0.45, 0.45],
+    span: [0.075, 0.075],
+  }).tier;
+  assert.equal(site.id, "site");
+  assert.equal(site.requiresAuthoredTile, true);
 });
 
 test("one central LOD policy owns thresholds and render budget", () => {
-  assert.equal(
-    PHASE_3_MINIMUM_SPAN,
-    DETAIL_POLICY.phase3MinimumSpan,
+  assert.equal(DETAIL_POLICY.cameraMinimumSpan, 0.055);
+  assert.ok(
+    DETAIL_POLICY.capitalAssetPreloadSpan
+      > DETAIL_POLICY.territoryToCapital.startSpan,
+  );
+  assert.ok(
+    DETAIL_POLICY.siteAssetPreloadSpan
+      > DETAIL_POLICY.capitalToSite.startSpan,
   );
   assert.ok(
     DETAIL_POLICY.worldToTerritory.startSpan
@@ -98,6 +109,7 @@ test("one central LOD policy owns thresholds and render budget", () => {
       world: 1,
       territory: 0.78,
       capital: 0.2,
+      site: 0.1,
     },
   );
   assert.equal(
@@ -149,7 +161,7 @@ test("layer detail contracts require a world source", () => {
   );
 });
 
-test("LOD assets and future nodes blend continuously across shared thresholds", () => {
+test("LOD nodes blend while registered rasters activate as coherent sets", () => {
   const world = resolveDetailState({
     origin: [0, 0],
     span: [1, 1],
@@ -166,6 +178,10 @@ test("LOD assets and future nodes blend continuously across shared thresholds", 
     origin: [0.4, 0.4],
     span: [0.12, 0.12],
   });
+  const site = resolveDetailState({
+    origin: [0.45, 0.45],
+    span: [0.075, 0.075],
+  });
 
   assert.equal(world.worldToTerritory, 0);
   assert.ok(
@@ -175,11 +191,18 @@ test("LOD assets and future nodes blend continuously across shared thresholds", 
   assert.equal(territory.worldToTerritory, 1);
   assert.equal(territory.territoryToCapital, 0);
   assert.equal(capital.territoryToCapital, 1);
+  assert.ok(capital.capitalToSite > 0 && capital.capitalToSite < 1);
+  assert.equal(site.capitalToSite, 1);
   assert.ok(world.renderScale < transition.renderScale);
   assert.ok(transition.renderScale < territory.renderScale);
   assert.ok(territory.renderScale < capital.renderScale);
+  assert.ok(capital.renderScale < site.renderScale);
   assert.equal(world.shouldLoadTerritoryAssets, false);
   assert.equal(transition.shouldLoadTerritoryAssets, true);
+  assert.equal(territory.shouldLoadCapitalAssets, false);
+  assert.equal(capital.shouldLoadCapitalAssets, true);
+  assert.equal(territory.shouldLoadSiteAssets, false);
+  assert.equal(capital.shouldLoadSiteAssets, true);
 
   assert.equal(
     resolveNodeVisibility({ minimumTier: "world" }, world),
@@ -197,8 +220,40 @@ test("LOD assets and future nodes blend continuously across shared thresholds", 
     resolveNodeVisibility({ minimumTier: "capital" }, capital),
     1,
   );
+  assert.equal(
+    resolveNodeVisibility({ minimumTier: "site" }, site),
+    1,
+  );
+  assert.equal(
+    resolveRegisteredRasterVisibility(
+      { minimumTier: "capital" },
+      territory,
+    ),
+    0,
+  );
+  assert.equal(
+    resolveRegisteredRasterVisibility(
+      { minimumTier: "capital" },
+      resolveDetailState({
+        origin: [0.3, 0.3],
+        span: [
+          DETAIL_POLICY.capitalAssetPreloadSpan,
+          DETAIL_POLICY.capitalAssetPreloadSpan,
+        ],
+      }),
+    ),
+    1,
+  );
+  assert.equal(
+    resolveRegisteredRasterVisibility(
+      { minimumTier: "site" },
+      capital,
+    ),
+    1,
+  );
   assert.ok(
-    PHASE_3_MINIMUM_SPAN > 0.2,
-    "Phase 3 preview must not expose the unauthored capital tier.",
+    DETAIL_POLICY.cameraMinimumSpan
+      <= DETAIL_POLICY.tierMaximumSpan.site,
+    "The central camera policy must make the streamed site tier reachable.",
   );
 });

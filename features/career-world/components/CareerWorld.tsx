@@ -2,10 +2,12 @@ import { WorldScene } from "../composition/WorldScene";
 import "../styles/career-world.css";
 
 interface CareerWorldProps {
+  readonly enableDevelopmentTools?: boolean;
   readonly initialInterfaceMode?: "world" | "water";
 }
 
 export function CareerWorld({
+  enableDevelopmentTools = false,
   initialInterfaceMode = "world",
 }: CareerWorldProps) {
   return (
@@ -20,11 +22,13 @@ export function CareerWorld({
           the geography does not change underneath it.
         </p>
       </header>
-      <WorldScene initialInterfaceMode={initialInterfaceMode} />
+      <WorldScene
+        enableDevelopmentTools={enableDevelopmentTools}
+        initialInterfaceMode={initialInterfaceMode}
+      />
       <footer className="career-world__footer">
-        Phase 3 foundation · orthographic world source of truth
+        Phase 6 · capital-core and coastline validation review
       </footer>
     </main>
   );
 }
-

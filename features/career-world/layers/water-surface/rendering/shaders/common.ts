@@ -19,6 +19,7 @@ uniform float u_opacity;
 uniform float u_detailScale;
 uniform float u_territoryLod;
 uniform float u_capitalLod;
+uniform float u_siteLod;
 uniform vec2 u_microFrequency;
 uniform float u_territoryLineStrength;
 uniform float u_territoryNormalStrength;

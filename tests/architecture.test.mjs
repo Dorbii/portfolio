@@ -40,16 +40,28 @@ test("topography and territory QA remain independent interface diagnostics", asy
     "interface/components/WorldInterface.tsx",
   ), "utf8");
   const overlay = await readFile(path.join(
-    featureLayers,
-    "interface/components/TerritoryQaOverlay.tsx",
+    root,
+    "features/career-world/development/DevelopmentOverlay.tsx",
+  ), "utf8");
+  const preview = await readFile(path.join(
+    root,
+    "app/career-world/previews/territory-landform/page.tsx",
   ), "utf8");
 
   assert.match(scene, /showTopography/);
   assert.match(scene, /showTerritoryQa/);
+  assert.match(scene, /showGrid/);
+  assert.match(scene, /INTERACTIVE_TARGET_SELECTOR/);
+  assert.match(scene, /target\.closest\(INTERACTIVE_TARGET_SELECTOR\)/);
   assert.match(controls, />\s*Topography\s*</);
   assert.match(controls, />\s*Territory QA\s*</);
+  assert.match(controls, />\s*Grid\s*</);
+  assert.match(controls, /disabled=\{!isInteractive\}/);
+  assert.match(controls, /data-ready=\{isInteractive\}/);
   assert.match(overlay, /showTopography\s*\?/);
   assert.match(overlay, /showTerritories\s*\?/);
+  assert.match(overlay, /showGrid\s*\?/);
+  assert.match(preview, /<CareerWorld enableDevelopmentTools \/>/);
 });
 
 test("five focus views remain valid crops of one world plane", async () => {
@@ -185,9 +197,129 @@ test("composition resolves semantic zoom once and passes it downward", async () 
     (scene.match(/resolveDetailState\(/g) ?? []).length,
     1,
   );
+  assert.match(scene, /DETAIL_POLICY\.cameraMinimumSpan/);
+  assert.doesNotMatch(scene, /PHASE_3_MINIMUM_SPAN/);
   assert.doesNotMatch(waterCanvas, /resolveDetailState/);
   assert.doesNotMatch(waterRenderer, /resolveDetailState/);
   assert.match(scene, /detailState=\{detailState\}/);
+});
+
+test("camera-driven DOM and water layers update before the same paint", async () => {
+  const scene = await readFile(
+    path.join(root, "features/career-world/composition/WorldScene.tsx"),
+    "utf8",
+  );
+  const waterCanvas = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "components",
+      "WaterSurfaceCanvas.tsx",
+    ),
+    "utf8",
+  );
+  const waterController = await readFile(
+    path.join(
+      featureLayers,
+      "water-surface",
+      "rendering",
+      "WaterSurfaceController.ts",
+    ),
+    "utf8",
+  );
+  const land = await readFile(
+    path.join(
+      featureLayers,
+      "territory-landform",
+      "components",
+      "TerritoryLandform.tsx",
+    ),
+    "utf8",
+  );
+
+  assert.match(scene, /const queueCamera = useCallback/);
+  assert.match(scene, /cameraFrameRef\.current = requestAnimationFrame/);
+  assert.match(waterCanvas, /useLayoutEffect\(\(\) => \{/);
+  assert.match(
+    waterCanvas,
+    /controllerRef\.current\?\.setView\(camera,\s*detailState\)/,
+  );
+  assert.match(
+    waterController,
+    /setView\(camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState\);[\s\S]*this\.renderOnce\(\);/,
+  );
+  assert.match(land, /useLayoutEffect\(\(\) => \{/);
+  assert.match(land, /detailState\.renderScale/);
+  assert.match(land, /context\.drawImage\(/);
+  assert.match(
+    land,
+    /resolveRegisteredRasterVisibility\([\s\S]*detailState\)/,
+  );
+  assert.match(land, /detailState\.shouldLoadCapitalAssets/);
+  assert.doesNotMatch(land, /cameraLayerStyle/);
+});
+
+test("capital-detail land streaming follows the centralized LOD contract", async () => {
+  const land = await readFile(
+    path.join(
+      featureLayers,
+      "territory-landform",
+      "components",
+      "TerritoryLandform.tsx",
+    ),
+    "utf8",
+  );
+  const streamModel = await readFile(
+    path.join(
+      featureLayers,
+      "territory-landform",
+      "model",
+      "streamTiles.ts",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    land,
+    /const streamVisibility =[\s\S]*resolveRegisteredRasterVisibility\([\s\S]*detailState\)/,
+  );
+  assert.match(
+    land,
+    /const streamReady = visibleStreamTiles\.every/,
+  );
+  assert.match(
+    land,
+    /if \(streamVisibility > 0 && streamReady\)/,
+  );
+  assert.doesNotMatch(
+    land,
+    /drawRegisteredTile\(\s*tile,\s*image,\s*detailState\.capitalToSite\s*\)/,
+  );
+  assert.match(
+    land,
+    /const requestedTiles = detailState\.shouldLoadCapitalAssets/,
+  );
+  assert.doesNotMatch(
+    land,
+    /const requestedTiles = detailState\.shouldLoadSiteAssets/,
+  );
+  assert.match(
+    land,
+    /tile\.minimumTier === "site"[\s\S]*&& detailState\.shouldLoadSiteAssets/,
+  );
+  assert.match(land, /terrainTilesNearCamera\(/);
+  assert.match(land, /TERRAIN_STREAM_POLICY\.prefetchPadding/);
+  assert.match(land, /TERRAIN_STREAM_POLICY\.retentionPadding/);
+  assert.match(land, /streamTileRefs\.current\.delete\(id\)/);
+  assert.match(streamModel, /maximumResidentTiles/);
+  assert.match(
+    streamModel,
+    /\.slice\(0,\s*limit\)/,
+  );
+  assert.match(
+    land,
+    /for \(const tile of requestedTiles\) \{[\s\S]*image\.src = tile\.path/,
+  );
 });
 
 test("water zoom adds detail without suppressing world swell or bathymetry", async () => {
@@ -221,6 +353,12 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     ),
     "utf8",
   );
+
+  assert.doesNotMatch(openWater, /u_siteLod/);
+  assert.match(coast, /u_siteLod/);
+  assert.match(coast, /siteSwash/);
+  assert.match(coast, /recedingBand/);
+  assert.match(coast, /wetContact/);
   const renderer = await readFile(
     path.join(
       featureLayers,

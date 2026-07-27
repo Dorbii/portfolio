@@ -10,7 +10,7 @@ export const WORLD_CAMERA_VIEW: CameraView = Object.freeze({
   span: Object.freeze([1, 1] as [number, number]),
 });
 
-export const DEFAULT_MINIMUM_SPAN = 0.1;
+export const CAMERA_MINIMUM_SPAN = 0.055;
 
 function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value));
@@ -29,7 +29,7 @@ function finitePair(value: Pair, label: string): Pair {
 
 export function normalizeCameraView(
   view: CameraView,
-  minimumSpan = DEFAULT_MINIMUM_SPAN,
+  minimumSpan = CAMERA_MINIMUM_SPAN,
 ): CameraView {
   if (!Number.isFinite(minimumSpan) || minimumSpan <= 0 || minimumSpan > 1) {
     throw new RangeError("Camera minimum span must be within (0, 1].");
@@ -52,7 +52,7 @@ export function zoomCameraViewAt(
   view: CameraView,
   viewportAnchor: Pair,
   scale: number,
-  minimumSpan = DEFAULT_MINIMUM_SPAN,
+  minimumSpan = CAMERA_MINIMUM_SPAN,
 ): CameraView {
   if (!Number.isFinite(scale) || scale <= 0) {
     throw new RangeError("Camera zoom scale must be positive.");
@@ -135,10 +135,37 @@ export function interpolateCameraView(
 
 export function cameraLayerStyle(view: CameraView) {
   const normalized = normalizeCameraView(view);
+  const scaleX = 1 / normalized.span[0];
+  const scaleY = 1 / normalized.span[1];
+  const translateX = -normalized.origin[0] * scaleX * 100;
+  const translateY = -normalized.origin[1] * scaleY * 100;
+
   return {
-    width: `${100 / normalized.span[0]}%`,
-    height: `${100 / normalized.span[1]}%`,
-    left: `${(-normalized.origin[0] / normalized.span[0]) * 100}%`,
-    top: `${(-normalized.origin[1] / normalized.span[1]) * 100}%`,
+    width: "100%",
+    height: "100%",
+    left: "0",
+    top: "0",
+    transformOrigin: "0 0",
+    transform:
+      `translate3d(${translateX}%, ${translateY}%, 0) `
+      + `scale(${scaleX}, ${scaleY})`,
   };
+}
+
+export function cameraViewBox(view: CameraView, dimensions: Pair): string {
+  const normalized = normalizeCameraView(view);
+  const [width, height] = finitePair(
+    dimensions,
+    "Camera view-box dimensions",
+  );
+  if (width <= 0 || height <= 0) {
+    throw new RangeError("Camera view-box dimensions must be positive.");
+  }
+
+  return [
+    normalized.origin[0] * width,
+    normalized.origin[1] * height,
+    normalized.span[0] * width,
+    normalized.span[1] * height,
+  ].join(" ");
 }

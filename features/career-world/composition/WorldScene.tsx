@@ -18,7 +18,9 @@ import {
   TERRITORIES,
   TerritoryLandform,
 } from "../layers/territory-landform";
+import { StructuresLayer } from "../layers/structures";
 import { WorldInterface } from "../layers/interface";
+import { DevelopmentOverlay } from "../development";
 import {
   interpolateCameraView,
   normalizeCameraView,
@@ -27,13 +29,11 @@ import {
   zoomCameraViewAt,
   type CameraView,
 } from "../shared/camera";
-import {
-  PHASE_3_MINIMUM_SPAN,
-  resolveDetailState,
-} from "../shared/lod";
+import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
 
 interface WorldSceneProps {
+  readonly enableDevelopmentTools: boolean;
   readonly initialInterfaceMode: "world" | "water";
 }
 
@@ -44,10 +44,22 @@ interface DragState {
 }
 
 const FOCUS_DURATION_MS = 680;
+const INTERACTIVE_TARGET_SELECTOR = [
+  "button",
+  "a",
+  "input",
+  "select",
+  "textarea",
+  "[role='button']",
+].join(",");
 
-export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
+export function WorldScene({
+  enableDevelopmentTools,
+  initialInterfaceMode,
+}: WorldSceneProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<CameraView>(WORLD_CAMERA_VIEW);
+  const cameraFrameRef = useRef(0);
   const dragRef = useRef<DragState | null>(null);
   const focusFrameRef = useRef(0);
   const [camera, setCamera] = useState<CameraView>(WORLD_CAMERA_VIEW);
@@ -56,12 +68,35 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
     useState<WaterRenderState>("loading");
   const [showTopography, setShowTopography] = useState(false);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   const detailState = resolveDetailState(camera);
 
   const commitCamera = useCallback((next: CameraView) => {
-    const normalized = normalizeCameraView(next, PHASE_3_MINIMUM_SPAN);
+    const normalized = normalizeCameraView(
+      next,
+      DETAIL_POLICY.cameraMinimumSpan,
+    );
+    if (cameraFrameRef.current) {
+      cancelAnimationFrame(cameraFrameRef.current);
+      cameraFrameRef.current = 0;
+    }
     cameraRef.current = normalized;
     setCamera(normalized);
+  }, []);
+
+  const queueCamera = useCallback((next: CameraView) => {
+    cameraRef.current = normalizeCameraView(
+      next,
+      DETAIL_POLICY.cameraMinimumSpan,
+    );
+    if (cameraFrameRef.current) {
+      return;
+    }
+
+    cameraFrameRef.current = requestAnimationFrame(() => {
+      cameraFrameRef.current = 0;
+      setCamera(cameraRef.current);
+    });
   }, []);
 
   const cancelFocusAnimation = useCallback(() => {
@@ -71,7 +106,12 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
     }
   }, []);
 
-  useEffect(() => cancelFocusAnimation, [cancelFocusAnimation]);
+  useEffect(() => () => {
+    cancelFocusAnimation();
+    if (cameraFrameRef.current) {
+      cancelAnimationFrame(cameraFrameRef.current);
+    }
+  }, [cancelFocusAnimation]);
 
   const animateTo = useCallback((target: CameraView, id: string) => {
     cancelFocusAnimation();
@@ -114,7 +154,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       cameraRef.current,
       anchor,
       scale,
-      PHASE_3_MINIMUM_SPAN,
+      DETAIL_POLICY.cameraMinimumSpan,
     ));
     setActiveViewId("custom");
   }, [cancelFocusAnimation, commitCamera]);
@@ -124,6 +164,13 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       if (event.button !== 0) {
         return;
       }
+      const target = event.target;
+      if (
+        target instanceof Element
+        && target.closest(INTERACTIVE_TARGET_SELECTOR)
+      ) {
+        return;
+      }
       cancelFocusAnimation();
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
@@ -131,6 +178,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
         x: event.clientX,
         y: event.clientY,
       };
+      setActiveViewId("custom");
       event.currentTarget.dataset.dragging = "true";
     },
     [cancelFocusAnimation],
@@ -144,7 +192,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
         return;
       }
 
-      commitCamera(panCameraViewByPixels(
+      queueCamera(panCameraViewByPixels(
         cameraRef.current,
         [event.clientX - drag.x, event.clientY - drag.y],
         [bounds.width, bounds.height],
@@ -154,9 +202,8 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
         x: event.clientX,
         y: event.clientY,
       };
-      setActiveViewId("custom");
     },
-    [commitCamera],
+    [queueCamera],
   );
 
   const finishPointer = useCallback((event: PointerEvent<HTMLDivElement>) => {
@@ -200,7 +247,7 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
           cameraRef.current,
           [0.5, 0.5],
           event.key === "-" ? 1.18 : 0.84,
-          PHASE_3_MINIMUM_SPAN,
+          DETAIL_POLICY.cameraMinimumSpan,
         ));
         setActiveViewId("custom");
       }
@@ -214,9 +261,10 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
       className="career-world__viewport"
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
-      data-camera-minimum-span={PHASE_3_MINIMUM_SPAN}
+      data-camera-minimum-span={DETAIL_POLICY.cameraMinimumSpan}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-detail-tier={detailState.tier.id}
+      data-site-lod={detailState.capitalToSite.toFixed(3)}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
       onKeyDown={handleKeyDown}
       onPointerCancel={finishPointer}
@@ -239,16 +287,33 @@ export function WorldScene({ initialInterfaceMode }: WorldSceneProps) {
         camera={camera}
         detailState={detailState}
       />
-      <WorldInterface
-        activeViewId={activeViewId}
+      <StructuresLayer
         camera={camera}
         detailState={detailState}
+        light={WORLD_LIGHT}
+      />
+      {enableDevelopmentTools
+          && (showGrid || showTopography || showTerritoryQa) ? (
+        <DevelopmentOverlay
+          camera={camera}
+          showGrid={showGrid}
+          showTopography={showTopography}
+          showTerritories={showTerritoryQa}
+          territories={TERRITORIES}
+        />
+      ) : null}
+      <WorldInterface
+        activeViewId={activeViewId}
+        detailState={detailState}
+        enableDevelopmentTools={enableDevelopmentTools}
         mode={initialInterfaceMode}
         onFocus={handleFocus}
         onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
+        onToggleGrid={() => setShowGrid((visible) => !visible)}
         onToggleTopography={() => setShowTopography((visible) => !visible)}
         onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
         renderState={renderState}
+        showGrid={showGrid}
         showTopography={showTopography}
         showTerritoryQa={showTerritoryQa}
         territories={TERRITORIES}

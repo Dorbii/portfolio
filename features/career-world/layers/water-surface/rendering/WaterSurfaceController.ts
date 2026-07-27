@@ -28,7 +28,9 @@ export class WaterSurfaceController {
 
   setView(camera: CameraView, detailState: DetailState): void {
     this.renderer.setView(camera, detailState);
-    this.renderIfIdle();
+    // Camera-dependent transparency sits above the DOM land plate. Render the
+    // new view immediately so both layers reach the next paint atomically.
+    this.renderOnce();
   }
 
   setLight(light: WorldLight): void {

@@ -133,20 +133,32 @@
   pointer-events: none;
 }
 
+.career-world__land-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .career-world__world-plane {
   position: absolute;
   display: block;
   max-width: none;
   pointer-events: none;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-.career-world__land-plate {
-  object-fit: fill;
+.career-world__structures-layer {
+  z-index: 6;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
 }
 
-.career-world__land-detail {
-  z-index: 1;
-  will-change: opacity;
+.capital-structure__asset {
+  overflow: visible;
 }
 
 .career-world__interface {
@@ -161,40 +173,56 @@
   pointer-events: none;
 }
 
-.career-world__qa-layer {
+.career-world__development-overlay {
   position: absolute;
-  z-index: 0;
+  z-index: 7;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.career-world__territory-qa,
-.career-world__topology-qa {
-  mask:
-    url("/career-world/layers/territory-landform/masks/world-land-mask-r3.png")
-    0 0 / 100% 100% no-repeat;
-  mask-mode: luminance;
-}
-
-.career-world__territory-qa {
-  opacity: 0.44;
-  mix-blend-mode: screen;
-}
-
-.career-world__topology-qa {
-  opacity: 0.68;
-  mix-blend-mode: screen;
-}
-
-.career-world__development-qa {
+.career-world__development-plane {
   overflow: visible;
-  opacity: 0.92;
+  pointer-events: none;
 }
 
-.career-world__development-qa rect {
+.career-world__development-topography {
+  opacity: 0.76;
+  mix-blend-mode: color-dodge;
+}
+
+.career-world__development-territories {
+  opacity: 0.58;
+}
+
+.career-world__development-envelopes {
+  opacity: 0.96;
+}
+
+.career-world__development-envelopes rect {
   stroke-width: 1.5;
   stroke-dasharray: 7 5;
+}
+
+.career-world__development-envelopes text,
+.career-world__development-grid text {
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  paint-order: stroke fill;
+  stroke: rgb(4 10 8 / 92%);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.career-world__development-grid line {
+  stroke: rgb(229 214 143 / 48%);
+  stroke-width: 1;
+  stroke-dasharray: 5 5;
+}
+
+.career-world__development-grid text {
+  fill: rgb(244 229 157 / 86%);
 }
 
 .career-world__status-panel {
@@ -275,6 +303,12 @@
   border-color: #b8aa71;
   color: #07100d;
   background: #b8aa71;
+}
+
+.career-world__controls button:disabled {
+  color: rgb(203 210 195 / 48%);
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .career-world__controls .career-world__qa-toggle {

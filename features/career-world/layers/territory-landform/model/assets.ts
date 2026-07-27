@@ -1,4 +1,6 @@
 import { defineLayerDetailContract } from "../../../shared/lod";
+import { TERRAIN_SITE_TILES } from "./siteTiles";
+import { TERRAIN_STREAM_TILES } from "./streamTiles";
 
 const WORLD_PLATE =
   "/career-world/layers/territory-landform/textures/terrain-relief-r6.png";
@@ -41,5 +43,21 @@ export const LAND_DETAIL_CONTRACT = defineLayerDetailContract({
         span: [1, 1],
       },
     },
+    ...TERRAIN_SITE_TILES.map((tile) => ({
+      id: tile.id,
+      kind: "registered-raster" as const,
+      minimumTier: tile.minimumTier,
+      path: tile.path,
+      dimensions: tile.dimensions,
+      worldBounds: tile.worldBounds,
+    })),
+    ...TERRAIN_STREAM_TILES.map((tile) => ({
+      id: tile.id,
+      kind: "registered-raster" as const,
+      minimumTier: tile.minimumTier,
+      path: tile.path,
+      dimensions: tile.dimensions,
+      worldBounds: tile.worldBounds,
+    })),
   ],
 });

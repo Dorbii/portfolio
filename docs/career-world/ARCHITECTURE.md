@@ -29,6 +29,13 @@ land-side profile and publishes it for water-side shelf, breaker, and shadow
 response. Neither layer may invent a second coastline material map. Phase 7 may
 add sparse authored crash accents without redrawing the coast.
 
+Persistent shoreline motion belongs under `water-surface/coastlines/` when it
+is implemented. That code consumes the land-published profile to render swash,
+wet-edge, and repeating breaker response; it does not live inside the land
+directory. Transient impact foam, spray, and exceptional crash events remain
+Phase 7 `actors-effects` nodes. This keeps static geography, continuous water
+behavior, and event effects independently replaceable.
+
 ## Runtime boundaries
 
 - `composition/` wires layers, owns stacking, and resolves one immutable detail
@@ -57,6 +64,10 @@ The current light is intentionally fixed. A moving day/night light is deferred
 until land detail can relight with the same source; animating only procedural
 water against baked land lighting would violate the shared-light contract.
 
+Accepted but non-blocking coastline debt is tracked in
+[`DEFERRED-CLEANUP.md`](./DEFERRED-CLEANUP.md). That record does not reopen
+Phase 3 or unlock the accepted water art.
+
 ## Camera and detail hierarchy
 
 The camera is global; detail selection is global policy. Composition resolves
@@ -70,13 +81,42 @@ own separate thresholds.
 | World | `0.78-1.0` | Read landmasses, water bodies, macro terrain | Authoritative silhouette |
 | Territory | `0.20-0.78` | Read territory terrain and capital placement | Same coast, seams, and major anchors |
 | Capital | `0.10-0.20` | Roads, districts, capital and project/skill structures | Registered detail tile; no projection or coastline replacement |
+| Site | `0.055-0.10` | Read one capital site and its immediate terrain | Streamed registered crops plus bounded local overrides |
 
 Transitions occupy overlap bands around the tier boundaries. Territory assets
-start loading before their opacity blend begins. Land crossfades registered
-relief derivatives, water reveals fixed-world procedural line detail, and scene
-nodes use the same transition weight as their reveal opacity. Render scale
-rises from `1x` at world view to `1.5x` at territory view; total device pixel
-ratio is capped at `2x` to bound GPU cost.
+start loading before their reveal begins. Scene nodes and fixed-world
+procedural effects may use the continuous transition weights. Registered land
+rasters do not crossfade across a wheel-step sequence: they activate as one
+coherent visible set after every intersecting tile is decoded. This avoids
+softening sharp close material over an enlarged lower tier. Render scale rises
+from `1x` at world view to `2.25x` at site view; total device pixel ratio is
+capped at `2x` to bound GPU cost.
+
+The land layer draws the active camera crop from its registered raster into a
+viewport-sized canvas at that shared render scale. This avoids enlarging a
+compositor-cached world image and preserves the pixels already present in the
+`4x` territory plate. Structure SVGs use a camera-derived `viewBox` for the same
+reason: source art is resampled for the current crop instead of scaling one
+previously rasterized DOM surface.
+
+At capital and site detail the land renderer requests only tiles intersecting
+the camera plus a fixed prefetch ring. Tiles outside a larger retention ring
+are evicted, and residency is capped independently of how far the user pans.
+The complete tile manifest covers the authored land plane; the browser never
+mounts that complete set at once. The full territory crop remains underneath
+until the complete visible stream set has decoded, so a partial tile set cannot
+create mixed sharp and soft bands during entry.
+
+Stream tiles are offline-authored from the registered land plate, canonical
+height and slope fields, and dedicated close-ground and close-rock material
+references. The high-frequency material owns the visible close-tier RGB;
+registered macro color contributes only restrained palette and geography
+continuity. Material residuals, lighting normals, and deterministic noise are
+sampled in world coordinates so adjacent tiles share one continuous field.
+This is real close-tier information rather than a sharpened enlargement. A
+narrow analytic alpha contact may hand off between authored material plates,
+but no output RGB is blurred. Site tiles add only bounded structure-contact
+material over that sharp stream baseline.
 
 `shared/lod.ts` owns the only tier thresholds, transition weights, preload
 boundary, and render-resolution budget. Each active layer publishes a typed
@@ -107,17 +147,21 @@ territory, not a replacement map.
 
 The full-world 4x surface is regenerated from the registered ground material,
 canonical elevation, and shared light rather than sharpening a painted map. It
-preserves crisp Phase 3 macro relief through territory zoom but does not claim
-to add vegetation, structures, or capital detail. Production capital views
-require registered territory-local detail tiles so a full-world 10K+ raster is
-never required. Until that tile exists, entering the capital tier must remain
-visibly marked as an authoring requirement rather than presenting an enlarged
-world asset as finished detail.
+preserves Phase 3 macro relief through territory zoom but does not claim to add
+vegetation, structures, or capital detail. During the territory-to-capital
+transition, bounded world-aligned stream tiles establish higher-frequency
+ground and rock information across the camera. During the capital-to-site
+transition, authored local foundation tiles add only site-specific contact
+material. This preserves the same geography while avoiding both a monolithic
+close-view raster and a blurry enlargement of the territory plate.
 
-The Phase 3 preview therefore caps its camera span at `0.29`, the smallest
-accepted territory focus view. The resolver and node contracts include capital
-LOD so later phases can implement it without changing camera semantics, but the
-live preview does not expose unsupported art.
+The camera now reaches the shared `0.055` site minimum across the complete land
+plane. A twelve-by-eight grid streams only the camera intersection and bounded
+prefetch ring at capital detail. Every capital publishes one registered
+site-tier terrain override above that established baseline; each preserves
+canonical source alpha and remains inside its development envelope. Both
+classes use the shared registered-raster activation policy rather than owning
+component-local transition weights.
 
 ## City readiness without premature city work
 
@@ -133,6 +177,34 @@ surfaces, and finer linework inside an envelope. They may not move its anchor,
 change the coastline, erase a major ridge, or replace the orthographic
 projection. This preserves enough capacity for a capital, circulation, and
 project or skill structures without drawing Phase 4 or Phase 6 content early.
+
+## Phase 6 capital-core slice
+
+Phase 6 begins with exactly one employer capital core per registered territory.
+The structure manifest owns each capital's identity, archetype, orientation,
+palette key, and footprint. Its position is joined from the Phase 3
+`capitalAnchor`; duplicating anchors inside the structures layer is forbidden.
+
+Capital cores are fixed-world SVG structures. Composition passes them the same
+camera, semantic-detail state, and world-light contract used by land and water.
+They remain absent at world detail and crossfade with the shared
+world-to-territory weight. Each capital uses the same ground-anchor contract
+and one territory-owned local site tile above the capital-tier streamed
+baseline. These overrides are separately registered, bounded, and replaceable.
+
+Capital placement is validated against more than the anchor point. The
+transparent asset silhouette and its lower base are sampled against the
+canonical land mask, preventing a nominally valid anchor from leaving the
+visible structure suspended over a lake, coastline, or neighboring water body.
+Local site terrain remains owned by the territory-landform layer. Its world
+bounds are registered inside the development envelope, its outer transition
+reuses the exact territory source, and its alpha preserves the accepted land
+mask so it cannot cover the locked water layer.
+
+Roads, plazas, cable lines, vegetation, effects, labels, hit targets, and
+evidence interaction remain in their owning later phases. Structure art may
+show a building foundation or integrated porch, but not a surrounding road or
+city pad.
 
 ## Phase 3 acceptance gates
 

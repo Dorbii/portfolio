@@ -1,15 +1,21 @@
 import type { CameraView, Pair } from "./camera";
 import type { CareerWorldLayerId } from "./layers";
 
-export type DetailTierId = "world" | "territory" | "capital";
+export type DetailTierId = "world" | "territory" | "capital" | "site";
+
+const POLICY_CAMERA_MINIMUM_SPAN:
+  typeof import("./camera").CAMERA_MINIMUM_SPAN = 0.055;
 
 export const DETAIL_POLICY = Object.freeze({
-  phase3MinimumSpan: 0.29,
+  cameraMinimumSpan: POLICY_CAMERA_MINIMUM_SPAN,
   territoryAssetPreloadSpan: 0.9,
+  capitalAssetPreloadSpan: 0.26,
+  siteAssetPreloadSpan: 0.16,
   tierMaximumSpan: Object.freeze({
     world: 1,
     territory: 0.78,
     capital: 0.2,
+    site: 0.1,
   }),
   worldToTerritory: Object.freeze({
     startSpan: 0.86,
@@ -19,15 +25,18 @@ export const DETAIL_POLICY = Object.freeze({
     startSpan: 0.23,
     endSpan: 0.15,
   }),
+  capitalToSite: Object.freeze({
+    startSpan: 0.15,
+    endSpan: 0.1,
+  }),
   renderScale: Object.freeze({
     world: 1,
     territoryGain: 0.5,
     capitalGain: 0.5,
+    siteGain: 0.25,
     maximumDevicePixelRatio: 2,
   }),
 });
-
-export const PHASE_3_MINIMUM_SPAN = DETAIL_POLICY.phase3MinimumSpan;
 
 export interface DetailTier {
   readonly id: DetailTierId;
@@ -40,8 +49,11 @@ export interface DetailState {
   readonly tier: DetailTier;
   readonly worldToTerritory: number;
   readonly territoryToCapital: number;
+  readonly capitalToSite: number;
   readonly renderScale: number;
   readonly shouldLoadTerritoryAssets: boolean;
+  readonly shouldLoadCapitalAssets: boolean;
+  readonly shouldLoadSiteAssets: boolean;
 }
 
 export interface DetailNodePolicy {
@@ -88,8 +100,14 @@ export function defineLayerDetailContract<
 
 const DETAIL_TIERS: readonly DetailTier[] = Object.freeze([
   Object.freeze({
+    id: "site",
+    label: "Site detail",
+    maximumSpan: DETAIL_POLICY.tierMaximumSpan.site,
+    requiresAuthoredTile: true,
+  }),
+  Object.freeze({
     id: "capital",
-    label: "Capital tile required",
+    label: "Capital detail",
     maximumSpan: DETAIL_POLICY.tierMaximumSpan.capital,
     requiresAuthoredTile: true,
   }),
@@ -135,17 +153,28 @@ export function resolveDetailState(camera: CameraView): DetailState {
     DETAIL_POLICY.territoryToCapital.startSpan,
     DETAIL_POLICY.territoryToCapital.endSpan,
   );
+  const capitalToSite = descendingSmoothstep(
+    span,
+    DETAIL_POLICY.capitalToSite.startSpan,
+    DETAIL_POLICY.capitalToSite.endSpan,
+  );
 
   return Object.freeze({
     tier,
     worldToTerritory,
     territoryToCapital,
+    capitalToSite,
     renderScale:
       DETAIL_POLICY.renderScale.world
       + worldToTerritory * DETAIL_POLICY.renderScale.territoryGain
-      + territoryToCapital * DETAIL_POLICY.renderScale.capitalGain,
+      + territoryToCapital * DETAIL_POLICY.renderScale.capitalGain
+      + capitalToSite * DETAIL_POLICY.renderScale.siteGain,
     shouldLoadTerritoryAssets:
       span <= DETAIL_POLICY.territoryAssetPreloadSpan,
+    shouldLoadCapitalAssets:
+      span <= DETAIL_POLICY.capitalAssetPreloadSpan,
+    shouldLoadSiteAssets:
+      span <= DETAIL_POLICY.siteAssetPreloadSpan,
   });
 }
 
@@ -156,7 +185,30 @@ export function resolveNodeVisibility(
   if (policy.minimumTier === "world") {
     return 1;
   }
-  return policy.minimumTier === "territory"
-    ? state.worldToTerritory
-    : state.territoryToCapital;
+  if (policy.minimumTier === "territory") {
+    return state.worldToTerritory;
+  }
+  return policy.minimumTier === "capital"
+    ? state.territoryToCapital
+    : state.capitalToSite;
+}
+
+export function resolveRegisteredRasterVisibility(
+  policy: DetailNodePolicy,
+  state: DetailState,
+): number {
+  // Registered raster sets swap coherently once their complete visible set is
+  // resident. Crossfading raster pixels over an enlarged lower tier creates a
+  // false "blur transition"; the renderer owns readiness, while this shared
+  // policy owns the activation boundary.
+  if (policy.minimumTier === "world") {
+    return 1;
+  }
+  if (policy.minimumTier === "territory") {
+    return state.shouldLoadTerritoryAssets ? 1 : 0;
+  }
+  if (policy.minimumTier === "capital") {
+    return state.shouldLoadCapitalAssets ? 1 : 0;
+  }
+  return state.shouldLoadSiteAssets ? 1 : 0;
 }

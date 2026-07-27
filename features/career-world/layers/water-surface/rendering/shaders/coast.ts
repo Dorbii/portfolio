@@ -55,7 +55,7 @@ CoastSample applyCoast(
   float rawShelf = geometry.g;
   float rawContact = geometry.b;
   float substrate = geometry.a;
-  float zoom = max(u_territoryLod, u_capitalLod);
+  float zoom = max(max(u_territoryLod, u_capitalLod), u_siteLod);
   float beach = saturate(material.r);
   float cliff = saturate(material.g) * (1.0 - beach);
   float rocky = 1.0 - max(beach, cliff);
@@ -132,6 +132,11 @@ CoastSample applyCoast(
     + time * (0.92 + exposure * 0.24)
     + coastPhaseOffset;
   float advancingBand = smoother(0.62, 0.94, sin(approachPhase) * 0.5 + 0.5);
+  float recedingBand = smoother(
+    0.58,
+    0.93,
+    sin(approachPhase - 1.72) * 0.5 + 0.5
+  ) * (1.0 - advancingBand * 0.72);
   float arcMacro = heightSample(
     u_macroHeight,
     worldUv * vec2(12.7, 10.9) + vec2(time * 0.0012, -time * 0.0004)
@@ -144,6 +149,24 @@ CoastSample applyCoast(
     0.43,
     0.69,
     arcMacro * 0.42 + arcFine * 0.58
+  );
+  float siteArc = smoother(
+    0.52,
+    0.74,
+    heightSample(
+      u_microHeight,
+      worldUv * vec2(53.0, 47.0)
+        + vec2(-time * 0.0031, time * 0.0014)
+    )
+  );
+  float siteSwash = smoother(
+    0.68,
+    0.96,
+    sin(
+      (1.0 - shelf) * 13.4
+        + time * (1.24 + exposure * 0.18)
+        + coastPhaseOffset * 1.55
+    ) * 0.5 + 0.5
   );
 
   float shelfVariation = mix(
@@ -295,23 +318,80 @@ CoastSample applyCoast(
     * mix(1.0, 1.5, cliff)
     * mix(1.0, 0.35, lagoon)
   );
+  contactFoam += (
+    u_siteLod
+    * waterMask
+    * foamContact
+    * siteSwash
+    * siteArc
+    * mix(0.08, 0.24, exposure)
+    * mix(1.2, 0.78, cliff)
+    * mix(1.0, 0.3, lagoon)
+  );
+  contactFoam += (
+    u_capitalLod
+    * waterMask
+    * foamContact
+    * recedingBand
+    * brokenArc
+    * mix(0.035, 0.11, exposure)
+    * mix(1.16, 0.82, cliff)
+    * mix(1.0, 0.34, lagoon)
+  );
   color = mix(
     color,
     u_foamColor,
-    contactFoam * mix(0.7, 0.88, zoom)
+    contactFoam * mix(0.72, 0.94, zoom)
   );
 
+  float wetContact =
+    land
+    * smoother(0.94, 0.999, rawContact)
+    * mix(0.045, 0.12, zoom)
+    * mix(0.66, 1.0, brokenArc)
+    * mix(1.0, 0.72, cliff)
+    * mix(1.0, 0.45, lagoon);
   float landWash =
     land
     * smoother(0.925, 0.998, rawContact)
     * advancingBand
     * brokenArc
-    * mix(0.12, 0.38, exposure)
+    * mix(0.18, 0.52, exposure)
     * mix(1.0, 1.24, beach)
     * mix(1.0, 0.74, cliff)
     * mix(1.0, 0.42, lagoon);
-  color = mix(color, u_foamColor, land);
-  float overlayAlpha = landWash * mix(0.22, 0.36, zoom);
+  landWash += (
+    u_siteLod
+    * land
+    * smoother(0.94, 0.998, rawContact)
+    * siteSwash
+    * siteArc
+    * mix(0.055, 0.16, exposure)
+    * mix(1.15, 0.7, cliff)
+    * mix(1.0, 0.3, lagoon)
+  );
+  landWash += (
+    u_capitalLod
+    * land
+    * smoother(0.945, 0.999, rawContact)
+    * recedingBand
+    * brokenArc
+    * mix(0.025, 0.09, exposure)
+    * mix(1.12, 0.74, cliff)
+    * mix(1.0, 0.36, lagoon)
+  );
+  float landOverlayMix = saturate(
+    landWash / max(landWash + wetContact, 0.0001)
+  );
+  vec3 wetColor = mix(u_deepColor, u_shallowColor, 0.42);
+  color = mix(
+    color,
+    mix(wetColor, u_foamColor, landOverlayMix),
+    land
+  );
+  float overlayAlpha =
+    wetContact * mix(0.12, 0.2, zoom)
+    + landWash * mix(0.28, 0.48, zoom);
 
   CoastSample result;
   result.color = color;

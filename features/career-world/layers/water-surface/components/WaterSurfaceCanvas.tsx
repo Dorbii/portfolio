@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CameraView } from "../../../shared/camera";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
@@ -35,7 +35,7 @@ export function WaterSurfaceCanvas({
     sceneRef.current = { camera, detailState, light };
   }, [camera, detailState, light]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     controllerRef.current?.setView(camera, detailState);
   }, [camera, detailState]);
 
@@ -106,6 +106,7 @@ export function WaterSurfaceCanvas({
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-lod-tier={detailState.tier.id}
       data-render-state="loading"
+      data-site-lod={detailState.capitalToSite.toFixed(3)}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
       ref={canvasRef}
       role="img"

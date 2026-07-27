@@ -26,13 +26,19 @@ repainting the coast.
 the number of visible wave periods, and `detailScale` controls the micro-normal
 contribution. Weather, opacity, and wind direction remain independent inputs.
 
-The shared scene LOD supplies continuous world-to-territory and
-territory-to-capital weights. Macro swell remains world-anchored. The
+The shared scene LOD supplies continuous world-to-territory,
+territory-to-capital, and capital-to-site weights. Macro swell remains
+world-anchored. The
 directional reference is not represented as a higher-resolution LOD asset:
 both accepted albedos are full-world `3840x2160` rasters. Territory fidelity
 comes from the registered 4x coast field and the fixed-world micro-line field.
 LOD changes their contribution, never their frequency or coordinate origin.
 Camera span therefore cannot resize or rephase either source.
+
+The site weight affects only a secondary water-side swash/contact pass sampled
+from the existing coast fields. It does not recolor, rescale, replace, or
+rephase accepted open water. This narrow pass is the Phase 6 diagnostic for
+whether close land shelves, beaches, and cliff contacts provide usable depth.
 
 The directional raster contributes zero-centered local contrast instead of
 replacing the world raster's RGB color. The micro-line field adds resolved

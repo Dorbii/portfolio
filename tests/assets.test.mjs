@@ -631,6 +631,290 @@ test("every territory reserves a registered city-ready development envelope", as
   }
 });
 
+test("visible capital sprites remain supported by their registered terrain", async () => {
+  const structures = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/structures/manifests/capital-structures-r1.json",
+  ), "utf8"));
+  const territories = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+  ), "utf8"));
+  const land = await decodePng(
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+  );
+
+  for (const capital of structures.nodes) {
+    const territory = territories.territories.find(
+      ({ id }) => id === capital.territoryId,
+    );
+    assert.ok(territory, capital.territoryId);
+
+    const sampleCoverage = (asset) => {
+      assert.equal(asset.channels, 4, capital.id);
+      let visiblePixels = 0;
+      let supportedPixels = 0;
+      let basePixels = 0;
+      let supportedBasePixels = 0;
+      const sampleStep = 6;
+      for (let y = 0; y < asset.height; y += sampleStep) {
+        for (let x = 0; x < asset.width; x += sampleStep) {
+          const assetOffset = (y * asset.width + x) * asset.channels;
+          if (asset.pixels[assetOffset + 3] < 24) {
+            continue;
+          }
+
+          const worldX = (
+            territory.development.capitalAnchor[0]
+            + (
+              (x + 0.5) / asset.width - capital.groundAnchor[0]
+            ) * capital.footprintSpan[0]
+          );
+          const worldY = (
+            territory.development.capitalAnchor[1]
+            + (
+              (y + 0.5) / asset.height - capital.groundAnchor[1]
+            ) * capital.footprintSpan[1]
+          );
+          const landX = Math.max(
+            0,
+            Math.min(land.width - 1, Math.floor(worldX * land.width)),
+          );
+          const landY = Math.max(
+            0,
+            Math.min(land.height - 1, Math.floor(worldY * land.height)),
+          );
+          const supported = land.pixels[landY * land.width + landX] >= 128;
+          const isBase = y >= asset.height / 2;
+
+          visiblePixels += 1;
+          supportedPixels += supported ? 1 : 0;
+          basePixels += isBase ? 1 : 0;
+          supportedBasePixels += supported && isBase ? 1 : 0;
+        }
+      }
+
+      return {
+        visible: supportedPixels / visiblePixels,
+        base: supportedBasePixels / basePixels,
+      };
+    };
+
+    const asset = await decodePng(`public${capital.assetPath}`);
+    const structureCoverage = sampleCoverage(asset);
+    assert.ok(
+      structureCoverage.visible >= 0.94,
+      `${capital.id} visible land coverage `
+        + `${structureCoverage.visible.toFixed(3)} is too low`,
+    );
+    assert.ok(
+      structureCoverage.base >= 0.97,
+      `${capital.id} base land coverage `
+        + `${structureCoverage.base.toFixed(3)} is too low`,
+    );
+
+  }
+});
+
+test("capital site tiles stay bounded to land and add local density", async () => {
+  const manifest = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/territory-landform/manifests/terrain-site-tiles-r2.json",
+  ), "utf8"));
+  const source = await decodePng(`public${manifest.sourceDetailPath}`);
+  assert.deepEqual(
+    [source.width, source.height],
+    manifest.sourceDimensions,
+  );
+
+  for (const site of manifest.tiles) {
+    assert.equal(site.minimumTier, "site");
+    const tile = await decodePng(`public${site.path}`);
+    assert.deepEqual(
+      [tile.width, tile.height, tile.channels],
+      [...site.dimensions, 4],
+    );
+    assert.equal(site.sha256, await sha256(`public${site.path}`));
+
+    const [cropX, cropY] = site.sourceCropPixels.origin;
+    const [cropWidth, cropHeight] = site.sourceCropPixels.size;
+    let sourceWaterSamples = 0;
+    let waterLeakSamples = 0;
+    let outerSamples = 0;
+    let visibleOuterSamples = 0;
+    let visibleSamples = 0;
+
+    for (let y = 0; y < tile.height; y += 8) {
+      for (let x = 0; x < tile.width; x += 8) {
+        const sourceX = cropX + Math.min(
+          cropWidth - 1,
+          Math.floor((x + 0.5) / tile.width * cropWidth),
+        );
+        const sourceY = cropY + Math.min(
+          cropHeight - 1,
+          Math.floor((y + 0.5) / tile.height * cropHeight),
+        );
+        const tileOffset = (y * tile.width + x) * tile.channels;
+        const sourceOffset = (
+          sourceY * source.width + sourceX
+        ) * source.channels;
+        const sourceAlpha = source.pixels[sourceOffset + 3];
+        const tileAlpha = tile.pixels[tileOffset + 3];
+        visibleSamples += tileAlpha >= 24 ? 1 : 0;
+
+        if (sourceAlpha < 24) {
+          sourceWaterSamples += 1;
+          waterLeakSamples += tileAlpha >= 24 ? 1 : 0;
+        }
+
+        const isOuterEdge = (
+          x < tile.width * 0.04
+          || x >= tile.width * 0.96
+          || y < tile.height * 0.04
+          || y >= tile.height * 0.96
+        );
+        if (isOuterEdge) {
+          outerSamples += 1;
+          visibleOuterSamples += tileAlpha >= 24 ? 1 : 0;
+        }
+      }
+    }
+
+    if (sourceWaterSamples > 0) {
+      assert.ok(
+        waterLeakSamples / sourceWaterSamples < 0.01,
+        `${site.id} must not cover accepted water pixels`,
+      );
+    }
+    assert.ok(visibleSamples > 2_000, `${site.id} has no material support`);
+    assert.ok(outerSamples > 100, site.id);
+    assert.ok(
+      visibleOuterSamples / outerSamples < 0.12,
+      `${site.id} outer band must fade to the streamed terrain`,
+    );
+    const pixelsPerWorldWidth =
+      site.dimensions[0] / site.worldBounds.span[0];
+    assert.ok(
+      pixelsPerWorldWidth > source.width * 2,
+      `${site.id} must provide more than 2x territory plate density`,
+    );
+  }
+});
+
+test("close land detail is split into bounded camera-streamed tiles", async () => {
+  const manifest = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r1.json",
+  ), "utf8"));
+  const [sourceWidth, sourceHeight] = manifest.sourceDimensions;
+  const { columns, rows, outputScale } = manifest.grid;
+  const {
+    maximumResidentTiles,
+    prefetchPadding,
+    retentionPadding,
+  } = manifest.streaming;
+
+  assert.deepEqual([columns, rows, outputScale], [12, 8, 5]);
+  assert.ok(prefetchPadding > 0);
+  assert.ok(retentionPadding > prefetchPadding);
+  assert.ok(maximumResidentTiles <= 12);
+  assert.ok(
+    manifest.tiles.length > maximumResidentTiles * 4,
+    "the manifest must provide world coverage without making it all resident",
+  );
+  assert.equal(
+    new Set(manifest.tiles.map(({ id }) => id)).size,
+    manifest.tiles.length,
+  );
+
+  for (const tile of manifest.tiles) {
+    assert.equal(tile.minimumTier, "capital");
+    assert.equal(tile.sourceAlphaPolicy, "preserve-exactly");
+    assert.match(
+      tile.path,
+      /^\/career-world\/layers\/territory-landform\/tiles\/stream-r1\/.+\.webp$/,
+    );
+    const bytes = await readFile(path.join(root, "public", tile.path));
+    assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP");
+    assert.equal(tile.sha256, await sha256(`public${tile.path}`));
+
+    const [cropX, cropY] = tile.sourceCropPixels.origin;
+    const [cropWidth, cropHeight] = tile.sourceCropPixels.size;
+    assert.deepEqual(
+      tile.dimensions,
+      [cropWidth * outputScale, cropHeight * outputScale],
+    );
+    assert.ok(Math.abs(
+      tile.worldBounds.origin[0] - cropX / sourceWidth,
+    ) < 1e-12);
+    assert.ok(Math.abs(
+      tile.worldBounds.origin[1] - cropY / sourceHeight,
+    ) < 1e-12);
+    assert.ok(Math.abs(
+      tile.worldBounds.span[0] - cropWidth / sourceWidth,
+    ) < 1e-12);
+    assert.ok(Math.abs(
+      tile.worldBounds.span[1] - cropHeight / sourceHeight,
+    ) < 1e-12);
+    assert.ok(
+      tile.dimensions[0] / tile.worldBounds.span[0]
+        >= sourceWidth * outputScale,
+    );
+  }
+});
+
+test("close land tiles are authored from dedicated high-fidelity materials", async () => {
+  const ground = await decodePng(
+    "public/career-world/layers/territory-landform/materials/close-ground-r1.png",
+  );
+  const rock = await decodePng(
+    "public/career-world/layers/territory-landform/materials/close-rock-r1.png",
+  );
+  const authoringScript = await readFile(path.join(
+    root,
+    "scripts/build-career-world-land-stream-tiles.py",
+  ), "utf8");
+
+  for (const material of [ground, rock]) {
+    assert.ok(material.width >= 1024);
+    assert.ok(material.height >= 1024);
+    assert.equal(material.channels, 3);
+  }
+  assert.match(authoringScript, /LOWLAND_MATERIAL/);
+  assert.match(authoringScript, /ROCK_MATERIAL/);
+  assert.match(authoringScript, /sample_mirrored_detail/);
+  assert.match(authoringScript, /sample_noise/);
+  assert.match(
+    authoringScript,
+    /color = matched_material \* 0\.88 \+ albedo \* 0\.12/,
+  );
+
+  const closeTerrainBody = authoringScript.slice(
+    authoringScript.indexOf("def add_close_terrain_detail("),
+    authoringScript.indexOf("def apply_authored_mountain_reference("),
+  );
+  assert.doesNotMatch(
+    closeTerrainBody,
+    /ImageFilter\.GaussianBlur/,
+    "Visible close-terrain RGB must not be authored through a blur filter.",
+  );
+
+  const siteAuthoringScript = await readFile(path.join(
+    root,
+    "scripts/build-career-world-capital-site-tiles.py",
+  ), "utf8");
+  const generatedSiteBody = siteAuthoringScript.slice(
+    siteAuthoringScript.indexOf("def build_generated_site("),
+    siteAuthoringScript.indexOf("def main()"),
+  );
+  assert.doesNotMatch(
+    generatedSiteBody,
+    /ImageFilter\.GaussianBlur/,
+    "Visible site RGB must remain sharp; only alpha-support helpers may blur.",
+  );
+});
+
 test("coast field is derived across the complete authored shoreline", async () => {
   const mask = await decodePng(
     "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",

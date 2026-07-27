@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "id": "career-world/terrain-site-tiles@r2",
+  "status": "phase-6-capital-sites",
+  "coordinateSpace": "normalized-world-top-left",
+  "sourceDetailPath": "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+  "sourceDimensions": [
+    6688,
+    3764
+  ],
+  "tiles": [
+    {
+      "id": "ninjaone-capital-site",
+      "territoryId": "ninjaone",
+      "minimumTier": "site",
+      "path": "/career-world/layers/territory-landform/tiles/ninjaone-capital-site-r1.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "worldBounds": {
+        "origin": [
+          0.49491626794258375,
+          0.18544102019128586
+        ],
+        "span": [
+          0.04485645933014354,
+          0.07970244420828905
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3310,
+          698
+        ],
+        "size": [
+          300,
+          300
+        ]
+      },
+      "sourceAlphaPolicy": "bounded-subset",
+      "sha256": "D9D3A0388DBDEFBB21B521EB0C1731B0C75159A5799D69F321FC326705AB559A"
+    },
+    {
+      "id": "tanium-capital-site",
+      "territoryId": "tanium",
+      "minimumTier": "site",
+      "path": "/career-world/layers/territory-landform/tiles/tanium-capital-site-r1.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "worldBounds": {
+        "origin": [
+          0.42090311004784686,
+          0.5023910733262487
+        ],
+        "span": [
+          0.04485645933014354,
+          0.07970244420828905
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          2815,
+          1891
+        ],
+        "size": [
+          300,
+          300
+        ]
+      },
+      "sourceAlphaPolicy": "bounded-subset",
+      "sha256": "9F266DE7DCB0325417886473F41C7B6D32BC7E775EECFDA15FF75D10AF5AEDA3"
+    },
+    {
+      "id": "independent-capital-site",
+      "territoryId": "independent",
+      "minimumTier": "site",
+      "path": "/career-world/layers/territory-landform/tiles/independent-capital-site-r3.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "worldBounds": {
+        "origin": [
+          0.1827153110047847,
+          0.4495217853347503
+        ],
+        "span": [
+          0.05502392344497608,
+          0.09776833156216791
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          1222,
+          1692
+        ],
+        "size": [
+          368,
+          368
+        ]
+      },
+      "sourceAlphaPolicy": "bounded-subset",
+      "sha256": "08747480BC06FF0540F9FD5BD2C412A526289550FEE9A869A6D0A92DD0912377",
+      "authoredSourcePath": "/career-world/layers/territory-landform/sources/independent-capital-site-authored-r2.png"
+    },
+    {
+      "id": "column-technologies-capital-site",
+      "territoryId": "column-technologies",
+      "minimumTier": "site",
+      "path": "/career-world/layers/territory-landform/tiles/column-technologies-capital-site-r1.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "worldBounds": {
+        "origin": [
+          0.8177332535885168,
+          0.665249734325186
+        ],
+        "span": [
+          0.04485645933014354,
+          0.07970244420828905
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          5469,
+          2504
+        ],
+        "size": [
+          300,
+          300
+        ]
+      },
+      "sourceAlphaPolicy": "bounded-subset",
+      "sha256": "7ECC5BCD9F526BA52FD2DC3A6FCB05039DA689406D1912FA5C6F1ECD48B52974"
+    },
+    {
+      "id": "ace-hardware-capital-site",
+      "territoryId": "ace-hardware",
+      "minimumTier": "site",
+      "path": "/career-world/layers/territory-landform/tiles/ace-hardware-capital-site-r1.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "worldBounds": {
+        "origin": [
+          0.5548744019138756,
+          0.8421891604675876
+        ],
+        "span": [
+          0.04485645933014354,
+          0.07970244420828905
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3711,
+          3170
+        ],
+        "size": [
+          300,
+          300
+        ]
+      },
+      "sourceAlphaPolicy": "bounded-subset",
+      "sha256": "F4C9C67E97E3E3EB7A5FD9A02FB1015234E91096F080C4E2668C2E4406F9121F"
+    }
+  ],
+  "policy": [
+    "One bounded terrain-owned ground transition is registered for each capital.",
+    "Wide-area close terrain is camera-streamed; local site overlays contain only foundation contact detail.",
+    "Every site alpha is a subset of the registered land alpha and cannot cover the locked water layer.",
+    "Static shore geometry and material remain land-owned; persistent swash and wet-edge motion remain water-owned.",
+    "Roads, paths, vegetation, actors, labels, and transient effects remain in their later owning phases."
+  ]
+}

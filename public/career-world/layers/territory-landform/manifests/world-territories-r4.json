@@ -52,7 +52,7 @@
         "span": [0.52, 0.52]
       },
       "development": {
-        "capitalAnchor": [0.4605, 0.5441],
+        "capitalAnchor": [0.4433, 0.5422],
         "authoringEnvelope": {
           "origin": [0.3977, 0.4782],
           "span": [0.1256, 0.1328]
@@ -78,7 +78,7 @@
         "span": [0.62, 0.62]
       },
       "development": {
-        "capitalAnchor": [0.1884, 0.4995],
+        "capitalAnchor": [0.2103, 0.4983],
         "authoringEnvelope": {
           "origin": [0.1376, 0.4463],
           "span": [0.1017, 0.1063]
@@ -103,7 +103,7 @@
         "span": [0.58, 0.58]
       },
       "development": {
-        "capitalAnchor": [0.8523, 0.7067],
+        "capitalAnchor": [0.8401, 0.7052],
         "authoringEnvelope": {
           "origin": [0.8014, 0.6482],
           "span": [0.1017, 0.1169]

@@ -82,6 +82,7 @@ const UNIFORM_NAMES = [
   "u_detailScale",
   "u_territoryLod",
   "u_capitalLod",
+  "u_siteLod",
   "u_microFrequency",
   "u_territoryLineStrength",
   "u_territoryNormalStrength",
@@ -312,6 +313,10 @@ export class WaterSurfaceRenderer {
     gl.uniform1f(
       this.uniforms.u_capitalLod,
       detailState.territoryToCapital,
+    );
+    gl.uniform1f(
+      this.uniforms.u_siteLod,
+      detailState.capitalToSite,
     );
     gl.uniform2fv(
       this.uniforms.u_microFrequency,

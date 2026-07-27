@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cameraLayerStyle,
+  cameraViewBox,
   interpolateCameraView,
   normalizeCameraView,
   panCameraViewByPixels,
@@ -17,7 +18,7 @@ test("camera normalization keeps every view on the world plane", () => {
     }),
     {
       origin: [0, 0.4],
-      span: [0.1, 0.6],
+      span: [0.055, 0.6],
     },
   );
 });
@@ -65,10 +66,22 @@ test("CSS world-plane transform is derived from the same camera contract", () =>
   assert.deepEqual(
     cameraLayerStyle({ origin: [0.25, 0.1], span: [0.5, 0.5] }),
     {
-      width: "200%",
-      height: "200%",
-      left: "-50%",
-      top: "-20%",
+      width: "100%",
+      height: "100%",
+      left: "0",
+      top: "0",
+      transformOrigin: "0 0",
+      transform: "translate3d(-50%, -20%, 0) scale(2, 2)",
     },
+  );
+});
+
+test("SVG camera crops rerasterize from the same normalized view", () => {
+  assert.equal(
+    cameraViewBox(
+      { origin: [0.25, 0.1], span: [0.5, 0.5] },
+      [1672, 941],
+    ),
+    "418 94.10000000000001 836 470.5",
   );
 });
