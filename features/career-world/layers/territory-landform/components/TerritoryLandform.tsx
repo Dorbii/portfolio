@@ -20,6 +20,7 @@ import {
   TERRAIN_STREAM_TILES,
   terrainTileIntersectsCamera,
   terrainTilesNearCamera,
+  type TerrainStreamSourceTier,
   type TerrainStreamTile,
 } from "../model/streamTiles";
 
@@ -38,6 +39,22 @@ function shouldLoadTile(
   );
 }
 
+function streamImageKey(
+  tileId: string,
+  tier: TerrainStreamSourceTier,
+): string {
+  return `${tier}:${tileId}`;
+}
+
+function releaseImage(image: HTMLImageElement | undefined): void {
+  if (!image) {
+    return;
+  }
+  image.onload = null;
+  image.onerror = null;
+  image.src = "";
+}
+
 export function TerritoryLandform({
   camera,
   detailState,
@@ -47,8 +64,21 @@ export function TerritoryLandform({
   const detailPlateRef = useRef<HTMLImageElement | null>(null);
   const siteTileRefs = useRef(new Map<string, HTMLImageElement>());
   const streamTileRefs = useRef(new Map<string, HTMLImageElement>());
+  const renderFrameRef = useRef(0);
   const renderRef = useRef<() => void>(() => undefined);
   const detailOpacity = detailState.worldToTerritory;
+  const preferredStreamTier: TerrainStreamSourceTier =
+    detailState.capitalToSite > 0 ? "site" : "capital";
+
+  const queueRender = useCallback(() => {
+    if (renderFrameRef.current) {
+      return;
+    }
+    renderFrameRef.current = requestAnimationFrame(() => {
+      renderFrameRef.current = 0;
+      renderRef.current();
+    });
+  }, []);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -158,18 +188,43 @@ export function TerritoryLandform({
         detailState,
       )
       : 0;
+    const streamTierReady = (tier: TerrainStreamSourceTier) =>
+      visibleStreamTiles.every((tile) => {
+        const image = streamTileRefs.current.get(
+          streamImageKey(tile.id, tier),
+        );
+        return Boolean(image?.complete && image.naturalWidth);
+      });
+    const resolvedStreamTier = (
+      preferredStreamTier === "site"
+      && !streamTierReady("site")
+    )
+      ? "capital"
+      : preferredStreamTier;
     const streamReady = visibleStreamTiles.every((tile) => {
-      const image = streamTileRefs.current.get(tile.id);
+      const image = streamTileRefs.current.get(
+        streamImageKey(tile.id, resolvedStreamTier),
+      );
       return Boolean(image?.complete && image.naturalWidth);
     });
     if (streamVisibility > 0 && streamReady) {
       for (const tile of visibleStreamTiles) {
-        const image = streamTileRefs.current.get(tile.id);
+        const image = streamTileRefs.current.get(
+          streamImageKey(tile.id, resolvedStreamTier),
+        );
         if (image) {
           drawRegisteredTile(tile, image, streamVisibility);
         }
       }
     }
+    canvas.dataset.streamResolutionTier = resolvedStreamTier;
+    canvas.dataset.streamResidentPixelCount = String(
+      [...streamTileRefs.current.values()].reduce(
+        (total, image) =>
+          total + image.naturalWidth * image.naturalHeight,
+        0,
+      ),
+    );
 
     for (const tile of TERRAIN_SITE_TILES) {
       const visibility = resolveRegisteredRasterVisibility(
@@ -195,6 +250,7 @@ export function TerritoryLandform({
     camera,
     detailOpacity,
     detailState,
+    preferredStreamTier,
   ]);
 
   useEffect(() => {
@@ -203,24 +259,25 @@ export function TerritoryLandform({
     const worldPlate = new Image();
     worldPlate.decoding = "async";
     worldPlate.src = LAND_ASSETS.plate;
-    worldPlate.onload = () => renderRef.current();
+    worldPlate.onload = queueRender;
     worldPlateRef.current = worldPlate;
 
     return () => {
+      if (renderFrameRef.current) {
+        cancelAnimationFrame(renderFrameRef.current);
+      }
       worldPlate.onload = null;
       if (detailPlateRef.current) {
         detailPlateRef.current.onload = null;
       }
       for (const image of siteTileImages.values()) {
-        image.onload = null;
-        image.src = "";
+        releaseImage(image);
       }
       for (const image of streamTileImages.values()) {
-        image.onload = null;
-        image.src = "";
+        releaseImage(image);
       }
     };
-  }, []);
+  }, [queueRender]);
 
   useEffect(() => {
     if (
@@ -233,9 +290,9 @@ export function TerritoryLandform({
     const detailPlate = new Image();
     detailPlate.decoding = "async";
     detailPlate.src = LAND_ASSETS.detailPlate;
-    detailPlate.onload = () => renderRef.current();
+    detailPlate.onload = queueRender;
     detailPlateRef.current = detailPlate;
-  }, [detailState.shouldLoadTerritoryAssets]);
+  }, [detailState.shouldLoadTerritoryAssets, queueRender]);
 
   useEffect(() => {
     const prefetchPadding = TERRAIN_STREAM_POLICY.prefetchPadding;
@@ -250,6 +307,7 @@ export function TerritoryLandform({
       ) {
         continue;
       }
+      releaseImage(siteTileRefs.current.get(id));
       siteTileRefs.current.delete(id);
     }
 
@@ -264,7 +322,7 @@ export function TerritoryLandform({
       const image = new Image();
       image.decoding = "async";
       image.src = tile.path;
-      image.onload = () => renderRef.current();
+      image.onload = queueRender;
       siteTileRefs.current.set(tile.id, image);
     }
     if (canvasRef.current) {
@@ -272,8 +330,8 @@ export function TerritoryLandform({
         siteTileRefs.current.size,
       );
     }
-    renderRef.current();
-  }, [camera, detailState]);
+    queueRender();
+  }, [camera, detailState, queueRender]);
 
   useEffect(() => {
     const requestedTiles = detailState.shouldLoadCapitalAssets
@@ -282,41 +340,80 @@ export function TerritoryLandform({
         TERRAIN_STREAM_POLICY.prefetchPadding,
       )
       : [];
-    const retainedIds = new Set(
-      (
-        detailState.shouldLoadCapitalAssets
-          ? terrainTilesNearCamera(
-            camera,
-            TERRAIN_STREAM_POLICY.retentionPadding,
-          )
-          : []
-      ).map(({ id }) => id),
-    );
+    const retentionTiles = detailState.shouldLoadCapitalAssets
+      ? terrainTilesNearCamera(
+        camera,
+        TERRAIN_STREAM_POLICY.retentionPadding,
+      )
+      : [];
+    const retainedIds = new Set<string>();
+    for (const tile of [...requestedTiles, ...retentionTiles]) {
+      if (
+        retainedIds.size
+        >= TERRAIN_STREAM_POLICY.maximumResidentTiles
+      ) {
+        break;
+      }
+      retainedIds.add(tile.id);
+    }
 
-    for (const id of streamTileRefs.current.keys()) {
-      if (retainedIds.has(id)) {
+    const retainedKeys = new Set<string>();
+    for (const id of retainedIds) {
+      retainedKeys.add(streamImageKey(id, "capital"));
+      if (detailState.shouldLoadSiteAssets) {
+        retainedKeys.add(streamImageKey(id, "site"));
+      }
+    }
+
+    for (const [key, image] of streamTileRefs.current) {
+      if (retainedKeys.has(key)) {
         continue;
       }
-      streamTileRefs.current.delete(id);
+      releaseImage(image);
+      streamTileRefs.current.delete(key);
+    }
+
+    const requestedTiers: TerrainStreamSourceTier[] = ["capital"];
+    if (detailState.shouldLoadSiteAssets) {
+      requestedTiers.push("site");
     }
 
     for (const tile of requestedTiles) {
-      if (streamTileRefs.current.has(tile.id)) {
-        continue;
+      for (const tier of requestedTiers) {
+        const key = streamImageKey(tile.id, tier);
+        if (streamTileRefs.current.has(key)) {
+          continue;
+        }
+        const image = new Image();
+        image.decoding = "async";
+        image.src = tile.sources[tier].path;
+        image.onload = queueRender;
+        image.onerror = () => {
+          if (streamTileRefs.current.get(key) !== image) {
+            return;
+          }
+          releaseImage(image);
+          streamTileRefs.current.delete(key);
+          queueRender();
+        };
+        streamTileRefs.current.set(key, image);
       }
-      const image = new Image();
-      image.decoding = "async";
-      image.src = tile.path;
-      image.onload = () => renderRef.current();
-      streamTileRefs.current.set(tile.id, image);
     }
     if (canvasRef.current) {
       canvasRef.current.dataset.streamResidentTileCount = String(
+        retainedIds.size,
+      );
+      canvasRef.current.dataset.streamResidentSourceCount = String(
         streamTileRefs.current.size,
       );
     }
-    renderRef.current();
-  }, [camera, detailState.shouldLoadCapitalAssets]);
+    queueRender();
+  }, [
+    camera,
+    detailState.shouldLoadCapitalAssets,
+    detailState.shouldLoadSiteAssets,
+    queueRender,
+  ]);
 
   useLayoutEffect(() => {
     renderRef.current = render;
@@ -328,10 +425,10 @@ export function TerritoryLandform({
     if (!canvas) {
       return;
     }
-    const observer = new ResizeObserver(() => renderRef.current());
+    const observer = new ResizeObserver(queueRender);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, []);
+  }, [queueRender]);
 
   return (
     <canvas

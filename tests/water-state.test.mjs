@@ -203,6 +203,23 @@ test("LOD nodes blend while registered rasters activate as coherent sets", () =>
   assert.equal(capital.shouldLoadCapitalAssets, true);
   assert.equal(territory.shouldLoadSiteAssets, false);
   assert.equal(capital.shouldLoadSiteAssets, true);
+  const sitePreload = resolveDetailState({
+    origin: [0.4, 0.4],
+    span: [
+      DETAIL_POLICY.siteAssetPreloadSpan,
+      DETAIL_POLICY.siteAssetPreloadSpan,
+    ],
+  });
+  const siteActivation = resolveDetailState({
+    origin: [0.4, 0.4],
+    span: [
+      DETAIL_POLICY.capitalToSite.startSpan - 0.001,
+      DETAIL_POLICY.capitalToSite.startSpan - 0.001,
+    ],
+  });
+  assert.equal(sitePreload.shouldLoadSiteAssets, true);
+  assert.equal(sitePreload.capitalToSite, 0);
+  assert.ok(siteActivation.capitalToSite > 0);
 
   assert.equal(
     resolveNodeVisibility({ minimumTier: "world" }, world),

@@ -20,7 +20,10 @@ import {
 } from "../layers/territory-landform";
 import { StructuresLayer } from "../layers/structures";
 import { WorldInterface } from "../layers/interface";
-import { DevelopmentOverlay } from "../development";
+import {
+  DevelopmentOverlay,
+  PerformanceProbe,
+} from "../development";
 import {
   interpolateCameraView,
   normalizeCameraView,
@@ -150,14 +153,14 @@ export function WorldScene({
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
     const scale = Math.exp(event.deltaY * 0.00135);
-    commitCamera(zoomCameraViewAt(
+    queueCamera(zoomCameraViewAt(
       cameraRef.current,
       anchor,
       scale,
       DETAIL_POLICY.cameraMinimumSpan,
     ));
     setActiveViewId("custom");
-  }, [cancelFocusAnimation, commitCamera]);
+  }, [cancelFocusAnimation, queueCamera]);
 
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
@@ -187,10 +190,10 @@ export function WorldScene({
   const handlePointerMove = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       const drag = dragRef.current;
-      const bounds = event.currentTarget.getBoundingClientRect();
       if (!drag || drag.pointerId !== event.pointerId) {
         return;
       }
+      const bounds = event.currentTarget.getBoundingClientRect();
 
       queueCamera(panCameraViewByPixels(
         cameraRef.current,
@@ -318,6 +321,7 @@ export function WorldScene({
         showTerritoryQa={showTerritoryQa}
         territories={TERRITORIES}
       />
+      <PerformanceProbe enabled={enableDevelopmentTools} />
     </div>
   );
 }

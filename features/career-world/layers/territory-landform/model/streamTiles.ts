@@ -1,11 +1,24 @@
 import manifest from "@/public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r1.json";
 import type { CameraView, Pair } from "../../../shared/camera";
+import type { DetailTierId } from "../../../shared/lod";
+
+export type TerrainStreamSourceTier = Extract<
+  DetailTierId,
+  "capital" | "site"
+>;
+
+export interface TerrainStreamSource {
+  readonly path: string;
+  readonly dimensions: Pair;
+}
 
 export interface TerrainStreamTile {
   readonly id: string;
   readonly minimumTier: "capital";
-  readonly path: string;
-  readonly dimensions: Pair;
+  readonly sources: Readonly<Record<
+    TerrainStreamSourceTier,
+    TerrainStreamSource
+  >>;
   readonly worldBounds: CameraView;
 }
 
@@ -59,14 +72,6 @@ export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
     if (tile.minimumTier !== "capital") {
       throw new TypeError(`${tile.id} must use the capital detail tier.`);
     }
-    if (
-      !tile.path.startsWith(
-        "/career-world/layers/territory-landform/tiles/stream-r1/",
-      )
-    ) {
-      throw new TypeError(`${tile.id} has an invalid stream path.`);
-    }
-
     const origin = pair(
       tile.worldBounds.origin,
       `${tile.id} world origin`,
@@ -80,11 +85,44 @@ export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
       throw new TypeError(`${tile.id} exceeds the world plane.`);
     }
 
+    const sourceFor = (
+      tier: TerrainStreamSourceTier,
+    ): TerrainStreamSource => {
+      const source = tile.sources[tier];
+      if (
+        !source.path.startsWith(
+          "/career-world/layers/territory-landform/tiles/stream-r1/",
+        )
+      ) {
+        throw new TypeError(
+          `${tile.id} has an invalid ${tier} stream path.`,
+        );
+      }
+      return Object.freeze({
+        path: source.path,
+        dimensions: pair(
+          source.dimensions,
+          `${tile.id} ${tier} dimensions`,
+        ),
+      });
+    };
+    const sources = Object.freeze({
+      capital: sourceFor("capital"),
+      site: sourceFor("site"),
+    });
+    if (
+      sources.capital.dimensions[0] >= sources.site.dimensions[0]
+      || sources.capital.dimensions[1] >= sources.site.dimensions[1]
+    ) {
+      throw new TypeError(
+        `${tile.id} capital source must be smaller than its site source.`,
+      );
+    }
+
     return Object.freeze({
       id: tile.id,
       minimumTier: tile.minimumTier,
-      path: tile.path,
-      dimensions: pair(tile.dimensions, `${tile.id} dimensions`),
+      sources,
       worldBounds: Object.freeze({ origin, span }),
     });
   }),

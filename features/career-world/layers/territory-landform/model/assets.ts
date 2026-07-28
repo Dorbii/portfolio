@@ -51,13 +51,23 @@ export const LAND_DETAIL_CONTRACT = defineLayerDetailContract({
       dimensions: tile.dimensions,
       worldBounds: tile.worldBounds,
     })),
-    ...TERRAIN_STREAM_TILES.map((tile) => ({
-      id: tile.id,
-      kind: "registered-raster" as const,
-      minimumTier: tile.minimumTier,
-      path: tile.path,
-      dimensions: tile.dimensions,
-      worldBounds: tile.worldBounds,
-    })),
+    ...TERRAIN_STREAM_TILES.flatMap((tile) => ([
+      {
+        id: `${tile.id}:capital`,
+        kind: "registered-raster" as const,
+        minimumTier: "capital" as const,
+        path: tile.sources.capital.path,
+        dimensions: tile.sources.capital.dimensions,
+        worldBounds: tile.worldBounds,
+      },
+      {
+        id: `${tile.id}:site`,
+        kind: "registered-raster" as const,
+        minimumTier: "site" as const,
+        path: tile.sources.site.path,
+        dimensions: tile.sources.site.dimensions,
+        worldBounds: tile.worldBounds,
+      },
+    ])),
   ],
 });

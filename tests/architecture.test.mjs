@@ -239,6 +239,21 @@ test("camera-driven DOM and water layers update before the same paint", async ()
 
   assert.match(scene, /const queueCamera = useCallback/);
   assert.match(scene, /cameraFrameRef\.current = requestAnimationFrame/);
+  const wheelHandler = scene.match(
+    /const handleWheel[\s\S]*?\n  const handlePointerDown/,
+  )?.[0] ?? "";
+  assert.match(
+    wheelHandler,
+    /queueCamera\(zoomCameraViewAt/,
+  );
+  assert.doesNotMatch(
+    wheelHandler,
+    /commitCamera\(zoomCameraViewAt/,
+  );
+  assert.match(
+    scene,
+    /const drag = dragRef\.current;[\s\S]*if \(!drag[\s\S]*return;[\s\S]*getBoundingClientRect\(\)/,
+  );
   assert.match(waterCanvas, /useLayoutEffect\(\(\) => \{/);
   assert.match(
     waterCanvas,
@@ -285,7 +300,11 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   );
   assert.match(
     land,
-    /const streamReady = visibleStreamTiles\.every/,
+    /const streamTierReady = \(tier: TerrainStreamSourceTier\)/,
+  );
+  assert.match(
+    land,
+    /preferredStreamTier === "site"[\s\S]*!streamTierReady\("site"\)[\s\S]*\? "capital"/,
   );
   assert.match(
     land,
@@ -310,7 +329,26 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   assert.match(land, /terrainTilesNearCamera\(/);
   assert.match(land, /TERRAIN_STREAM_POLICY\.prefetchPadding/);
   assert.match(land, /TERRAIN_STREAM_POLICY\.retentionPadding/);
-  assert.match(land, /streamTileRefs\.current\.delete\(id\)/);
+  assert.match(land, /streamTileRefs\.current\.delete\(key\)/);
+  assert.match(land, /releaseImage\(image\)/);
+  assert.match(
+    land,
+    /detailState\.shouldLoadSiteAssets[\s\S]*requestedTiers\.push\("site"\)/,
+  );
+  assert.match(
+    land,
+    /const preferredStreamTier:[\s\S]*detailState\.capitalToSite > 0/,
+  );
+  assert.match(land, /dataset\.streamResidentSourceCount/);
+  assert.match(
+    land,
+    /for \(const tile of \[\.\.\.requestedTiles, \.\.\.retentionTiles\]\)/,
+  );
+  assert.match(
+    land,
+    /retainedIds\.size[\s\S]*TERRAIN_STREAM_POLICY\.maximumResidentTiles/,
+  );
+  assert.match(land, /image\.onerror = \(\) =>/);
   assert.match(streamModel, /maximumResidentTiles/);
   assert.match(
     streamModel,
@@ -318,8 +356,13 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   );
   assert.match(
     land,
-    /for \(const tile of requestedTiles\) \{[\s\S]*image\.src = tile\.path/,
+    /for \(const tile of requestedTiles\) \{[\s\S]*image\.src = tile\.sources\[tier\]\.path/,
   );
+  assert.match(land, /image\.onload = queueRender/);
+  assert.doesNotMatch(land, /image\.onload = \(\) => renderRef\.current\(\)/);
+  assert.match(streamModel, /TerrainStreamSourceTier/);
+  assert.match(streamModel, /sources\.capital\.dimensions/);
+  assert.match(streamModel, /sources\.site\.dimensions/);
 });
 
 test("water zoom adds detail without suppressing world swell or bathymetry", async () => {

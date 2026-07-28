@@ -807,14 +807,16 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
     "public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r1.json",
   ), "utf8"));
   const [sourceWidth, sourceHeight] = manifest.sourceDimensions;
-  const { columns, rows, outputScale } = manifest.grid;
+  const { columns, rows, outputScales } = manifest.grid;
   const {
     maximumResidentTiles,
     prefetchPadding,
     retentionPadding,
   } = manifest.streaming;
 
-  assert.deepEqual([columns, rows, outputScale], [12, 8, 5]);
+  assert.equal(manifest.schemaVersion, 2);
+  assert.deepEqual([columns, rows], [12, 8]);
+  assert.deepEqual(outputScales, { capital: 2, site: 5 });
   assert.ok(prefetchPadding > 0);
   assert.ok(retentionPadding > prefetchPadding);
   assert.ok(maximumResidentTiles <= 12);
@@ -827,23 +829,46 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
     manifest.tiles.length,
   );
 
+  let capitalBytes = 0;
+  let siteBytes = 0;
   for (const tile of manifest.tiles) {
     assert.equal(tile.minimumTier, "capital");
     assert.equal(tile.sourceAlphaPolicy, "preserve-exactly");
-    assert.match(
-      tile.path,
-      /^\/career-world\/layers\/territory-landform\/tiles\/stream-r1\/.+\.webp$/,
-    );
-    const bytes = await readFile(path.join(root, "public", tile.path));
-    assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
-    assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP");
-    assert.equal(tile.sha256, await sha256(`public${tile.path}`));
 
     const [cropX, cropY] = tile.sourceCropPixels.origin;
     const [cropWidth, cropHeight] = tile.sourceCropPixels.size;
-    assert.deepEqual(
-      tile.dimensions,
-      [cropWidth * outputScale, cropHeight * outputScale],
+    for (const tier of ["capital", "site"]) {
+      const source = tile.sources[tier];
+      assert.match(
+        source.path,
+        /^\/career-world\/layers\/territory-landform\/tiles\/stream-r1\/.+\.webp$/,
+      );
+      const bytes = await readFile(path.join(root, "public", source.path));
+      assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
+      assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP");
+      assert.equal(source.sha256, await sha256(`public${source.path}`));
+      assert.deepEqual(
+        source.dimensions,
+        [
+          cropWidth * outputScales[tier],
+          cropHeight * outputScales[tier],
+        ],
+      );
+      if (tier === "capital") {
+        assert.match(source.path, /-capital\.webp$/);
+        capitalBytes += bytes.length;
+      } else {
+        assert.doesNotMatch(source.path, /-capital\.webp$/);
+        siteBytes += bytes.length;
+      }
+    }
+    assert.ok(
+      tile.sources.capital.dimensions[0]
+        < tile.sources.site.dimensions[0],
+    );
+    assert.ok(
+      tile.sources.capital.dimensions[1]
+        < tile.sources.site.dimensions[1],
     );
     assert.ok(Math.abs(
       tile.worldBounds.origin[0] - cropX / sourceWidth,
@@ -858,10 +883,14 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
       tile.worldBounds.span[1] - cropHeight / sourceHeight,
     ) < 1e-12);
     assert.ok(
-      tile.dimensions[0] / tile.worldBounds.span[0]
-        >= sourceWidth * outputScale,
+      tile.sources.site.dimensions[0] / tile.worldBounds.span[0]
+        >= sourceWidth * outputScales.site,
     );
   }
+  assert.ok(
+    capitalBytes < siteBytes * 0.25,
+    "capital derivatives must stay materially cheaper than site sources",
+  );
 });
 
 test("close land tiles are authored from dedicated high-fidelity materials", async () => {

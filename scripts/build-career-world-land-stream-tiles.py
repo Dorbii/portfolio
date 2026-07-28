@@ -61,7 +61,8 @@ AUTHORED_MOUNTAIN_REFERENCES = {
 }
 GRID_COLUMNS = 12
 GRID_ROWS = 8
-OUTPUT_SCALE = 5
+CAPITAL_OUTPUT_SCALE = 2
+SITE_OUTPUT_SCALE = 5
 SOURCE_GUTTER = 12
 MINIMUM_ALPHA = 8
 # Authored cells return to the globally sampled sharp base near tile bounds.
@@ -483,8 +484,8 @@ def build_tile(
     crop = source.crop(expanded)
     enlarged = crop.resize(
         (
-            crop.width * OUTPUT_SCALE,
-            crop.height * OUTPUT_SCALE,
+            crop.width * SITE_OUTPUT_SCALE,
+            crop.height * SITE_OUTPUT_SCALE,
         ),
         Image.Resampling.LANCZOS,
     )
@@ -493,10 +494,10 @@ def build_tile(
         source.size,
         expanded,
         (
-            expanded[0] * OUTPUT_SCALE,
-            expanded[1] * OUTPUT_SCALE,
-            expanded[2] * OUTPUT_SCALE,
-            expanded[3] * OUTPUT_SCALE,
+            expanded[0] * SITE_OUTPUT_SCALE,
+            expanded[1] * SITE_OUTPUT_SCALE,
+            expanded[2] * SITE_OUTPUT_SCALE,
+            expanded[3] * SITE_OUTPUT_SCALE,
         ),
         height_field,
         slope_field,
@@ -504,13 +505,13 @@ def build_tile(
         lowland_material,
         rock_material,
     )
-    left = (x0 - expanded[0]) * OUTPUT_SCALE
-    top = (y0 - expanded[1]) * OUTPUT_SCALE
+    left = (x0 - expanded[0]) * SITE_OUTPUT_SCALE
+    top = (y0 - expanded[1]) * SITE_OUTPUT_SCALE
     return enlarged.crop((
         left,
         top,
-        left + (x1 - x0) * OUTPUT_SCALE,
-        top + (y1 - y0) * OUTPUT_SCALE,
+        left + (x1 - x0) * SITE_OUTPUT_SCALE,
+        top + (y1 - y0) * SITE_OUTPUT_SCALE,
     ))
 
 
@@ -544,7 +545,8 @@ def parse_shard(value: str) -> tuple[int, int]:
 
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument(
         "--tile",
         type=parse_tile,
         help=(
@@ -552,7 +554,7 @@ def arguments() -> argparse.Namespace:
             "rewriting the manifest."
         ),
     )
-    parser.add_argument(
+    selection.add_argument(
         "--shard",
         type=parse_shard,
         help=(
@@ -560,11 +562,110 @@ def arguments() -> argparse.Namespace:
             "manifest."
         ),
     )
+    selection.add_argument(
+        "--derive-capital-from-manifest",
+        action="store_true",
+        help=(
+            "Create capital-resolution derivatives from the accepted site "
+            "tiles and upgrade the manifest without rebuilding terrain."
+        ),
+    )
     return parser.parse_args()
+
+
+def save_webp(image: Image.Image, output: Path) -> None:
+    temporary = output.with_suffix(".tmp.webp")
+    image.save(
+        temporary,
+        format="WEBP",
+        quality=93,
+        method=4,
+        exact=True,
+    )
+    temporary.replace(output)
+
+
+def public_path(path: Path) -> str:
+    return "/" + path.relative_to(ROOT / "public").as_posix()
+
+
+def capital_variant_path(site_path: Path) -> Path:
+    return site_path.with_name(f"{site_path.stem}-capital{site_path.suffix}")
+
+
+def derive_capital_variant(
+    site_image: Image.Image,
+    source_size: tuple[int, int],
+) -> Image.Image:
+    return site_image.resize(
+        (
+            source_size[0] * CAPITAL_OUTPUT_SCALE,
+            source_size[1] * CAPITAL_OUTPUT_SCALE,
+        ),
+        Image.Resampling.LANCZOS,
+    )
+
+
+def upgrade_manifest_with_capital_variants() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    upgraded_tiles: list[dict[str, object]] = []
+
+    for tile in manifest["tiles"]:
+        source_size = tuple(tile["sourceCropPixels"]["size"])
+        existing_sources = tile.get("sources")
+        if existing_sources:
+            site_source = existing_sources["site"]
+        else:
+            site_source = {
+                "path": tile["path"],
+                "dimensions": tile["dimensions"],
+                "sha256": tile["sha256"],
+            }
+
+        site_path = ROOT / "public" / site_source["path"].lstrip("/")
+        capital_path = capital_variant_path(site_path)
+        with Image.open(site_path) as site_image:
+            capital = derive_capital_variant(
+                site_image.convert("RGBA"),
+                source_size,
+            )
+            save_webp(capital, capital_path)
+
+        upgraded = {
+            key: value
+            for key, value in tile.items()
+            if key not in {"path", "dimensions", "sha256", "sources"}
+        }
+        upgraded["sources"] = {
+            "capital": {
+                "path": public_path(capital_path),
+                "dimensions": [capital.width, capital.height],
+                "sha256": sha256(capital_path),
+            },
+            "site": site_source,
+        }
+        upgraded_tiles.append(upgraded)
+        print(f"Derived {capital_path.name}", flush=True)
+
+    manifest["schemaVersion"] = 2
+    manifest["grid"].pop("outputScale", None)
+    manifest["grid"]["outputScales"] = {
+        "capital": CAPITAL_OUTPUT_SCALE,
+        "site": SITE_OUTPUT_SCALE,
+    }
+    manifest["tiles"] = upgraded_tiles
+    write_json(MANIFEST, manifest)
+    print(
+        f"Derived {len(upgraded_tiles)} capital-resolution stream tiles."
+    )
 
 
 def main() -> None:
     options = arguments()
+    if options.derive_capital_from_manifest:
+        upgrade_manifest_with_capital_variants()
+        return
+
     source = Image.open(SOURCE).convert("RGBA")
     # The canonical field is an 8-bit Phase 3 artifact. A small source-space
     # reconstruction blur removes quantization steps before the site build
@@ -575,8 +676,8 @@ def main() -> None:
     )
     slope_field = Image.open(SLOPE_FIELD).convert("L")
     output_world_size = (
-        source.width * OUTPUT_SCALE,
-        source.height * OUTPUT_SCALE,
+        source.width * SITE_OUTPUT_SCALE,
+        source.height * SITE_OUTPUT_SCALE,
     )
     noise_lattices = {
         name: (
@@ -646,15 +747,13 @@ def main() -> None:
             revision_suffix = "-semantic-r2"
             file_name = f"{tile_id}{revision_suffix}.webp"
             output = OUTPUT_ROOT / file_name
-            temporary = output.with_suffix(".tmp.webp")
-            tile.save(
-                temporary,
-                format="WEBP",
-                quality=93,
-                method=4,
-                exact=True,
+            save_webp(tile, output)
+            capital_output = capital_variant_path(output)
+            capital_tile = derive_capital_variant(
+                tile,
+                (x1 - x0, y1 - y0),
             )
-            temporary.replace(output)
+            save_webp(capital_tile, capital_output)
             print(
                 f"[cell {processed_candidates:02d}/{total_candidates}; "
                 f"tile {completed_tiles:02d}] wrote {file_name}",
@@ -662,12 +761,22 @@ def main() -> None:
             )
             tiles.append({
                 "id": tile_id,
-                "path": (
-                    "/career-world/layers/territory-landform/"
-                    f"tiles/stream-r1/{file_name}"
-                ),
                 "minimumTier": "capital",
-                "dimensions": [tile.width, tile.height],
+                "sources": {
+                    "capital": {
+                        "path": public_path(capital_output),
+                        "dimensions": [
+                            capital_tile.width,
+                            capital_tile.height,
+                        ],
+                        "sha256": sha256(capital_output),
+                    },
+                    "site": {
+                        "path": public_path(output),
+                        "dimensions": [tile.width, tile.height],
+                        "sha256": sha256(output),
+                    },
+                },
                 "worldBounds": {
                     "origin": [
                         x0 / source.width,
@@ -683,7 +792,6 @@ def main() -> None:
                     "size": [x1 - x0, y1 - y0],
                 },
                 "sourceAlphaPolicy": "preserve-exactly",
-                "sha256": sha256(output),
             })
 
     if options.tile or options.shard:
@@ -693,7 +801,7 @@ def main() -> None:
         return
 
     write_json(MANIFEST, {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "id": "career-world/terrain-stream-tiles@r1",
         "status": "phase-6-close-detail-foundation",
         "coordinateSpace": "normalized-world-top-left",
@@ -705,7 +813,10 @@ def main() -> None:
         "grid": {
             "columns": GRID_COLUMNS,
             "rows": GRID_ROWS,
-            "outputScale": OUTPUT_SCALE,
+            "outputScales": {
+                "capital": CAPITAL_OUTPUT_SCALE,
+                "site": SITE_OUTPUT_SCALE,
+            },
         },
         "streaming": {
             "prefetchPadding": 0.035,
