@@ -29,10 +29,28 @@ Owns employer, project, skill, utility, and landmark structures.
   surrounding foundation, terrain cut, and transition, so structures can be
   revised without turning their ground into another structure sprite.
 
-Project buildings, skill buildings, labels, interactions, roads, vegetation,
-actors, and effects remain deferred. The shared camera reaches its `0.055`
-site minimum across the full land plane. A bounded capital-tier camera stream
-keeps the authored ground legible while panning, and five site-tier
-capital-local terrain tiles provide denser contact material only inside their
-registered development envelopes. Ground ownership stays in the territory
-layer.
+## NinjaOne continuous town fabric
+
+- Each NinjaOne project town and the capital owns one transparent,
+  non-evidence town-fabric atlas from capital through close tier.
+- The atlases provide attached low-rise street edges and courtyards beneath
+  the semantic capital, project, skill, and support structures. They do not
+  replace those structures or change their identities.
+- The atlas remains the same spatial base while zoom adds semantic structures,
+  infrastructure, props, and actors. Site detail never swaps in a second
+  independently arranged set of filler buildings.
+- Fabric bounds cover the full authored town-plan blocks so settlement sprawl
+  remains visible across each registered site envelope.
+- Open courtyards and partial corridors keep infrastructure-owned streets,
+  plazas, entrances, and pedestrian loops readable through the fabric.
+  Ground texture remains owned by the territory layer.
+- Town fabric renders before all semantic structures and uses the capital
+  visibility envelope; it does not affect focus or camera framing. Modular
+  ambient-building candidates are retained as authored assets but do not
+  render over owners already covered by persistent town fabric.
+
+Labels and interactions remain deferred. The shared camera reaches its
+`0.055` site minimum across the full land plane. A bounded capital-tier camera
+stream keeps the authored ground legible while panning, and site-tier local
+terrain tiles provide denser contact material inside registered development
+envelopes.

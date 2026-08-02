@@ -18,7 +18,17 @@ import {
   TERRITORIES,
   TerritoryLandform,
 } from "../layers/territory-landform";
-import { StructuresLayer } from "../layers/structures";
+import { InfrastructureLayer } from "../layers/infrastructure";
+import { EnvironmentLayer } from "../layers/environment";
+import {
+  PROJECT_STRUCTURES,
+  SKILL_STRUCTURE_INSTANCES,
+  SUPPORT_STRUCTURE_INSTANCES,
+  resolveProjectAnchor,
+  resolveProjectFocusView,
+  StructuresLayer,
+} from "../layers/structures";
+import { ActorsEffectsLayer } from "../layers/actors-effects";
 import { WorldInterface } from "../layers/interface";
 import {
   DevelopmentOverlay,
@@ -47,6 +57,44 @@ interface DragState {
 }
 
 const FOCUS_DURATION_MS = 680;
+const PROJECT_DESTINATIONS = Object.freeze(
+  PROJECT_STRUCTURES.map((project) => {
+    const supportingSkills = SKILL_STRUCTURE_INSTANCES.filter((instance) => (
+      instance.ownerKind === "project"
+      && instance.ownerId === project.id
+    ));
+    const supportingStructures = SUPPORT_STRUCTURE_INSTANCES.filter(
+      (instance) => (
+        instance.ownerKind === "project"
+        && instance.ownerId === project.id
+      ),
+    );
+    return Object.freeze({
+      id: project.id,
+      label: project.label,
+      anchor: resolveProjectAnchor(project),
+      focusView: resolveProjectFocusView(
+        project,
+        [
+          ...supportingSkills.map(({ territoryAnchor, archetype }) => ({
+            territoryAnchor,
+            footprintSpan: archetype.footprintSpan,
+            groundAnchor: archetype.groundAnchor,
+          })),
+          ...supportingStructures.map(({
+            territoryAnchor,
+            archetype,
+          }) => ({
+            territoryAnchor,
+            footprintSpan: archetype.footprintSpan,
+            groundAnchor: archetype.groundAnchor,
+          })),
+        ],
+      ),
+      supportingSkillCount: supportingSkills.length,
+    });
+  }),
+);
 const INTERACTIVE_TARGET_SELECTOR = [
   "button",
   "a",
@@ -141,6 +189,14 @@ export function WorldScene({
     const territory = TERRITORIES.find((candidate) => candidate.id === id);
     if (territory) {
       animateTo(territory.focusView, territory.id);
+      return;
+    }
+
+    const project = PROJECT_DESTINATIONS.find(
+      (candidate) => candidate.id === id,
+    );
+    if (project) {
+      animateTo(project.focusView, project.id);
     }
   }, [animateTo]);
 
@@ -266,6 +322,7 @@ export function WorldScene({
       data-camera-span={camera.span.join(",")}
       data-camera-minimum-span={DETAIL_POLICY.cameraMinimumSpan}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
+      data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
       data-site-lod={detailState.capitalToSite.toFixed(3)}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
@@ -290,6 +347,21 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
       />
+      <InfrastructureLayer
+        camera={camera}
+        detailState={detailState}
+        light={WORLD_LIGHT}
+      />
+      <EnvironmentLayer
+        camera={camera}
+        detailState={detailState}
+        light={WORLD_LIGHT}
+      />
+      <ActorsEffectsLayer
+        camera={camera}
+        detailState={detailState}
+        light={WORLD_LIGHT}
+      />
       <StructuresLayer
         camera={camera}
         detailState={detailState}
@@ -307,6 +379,7 @@ export function WorldScene({
       ) : null}
       <WorldInterface
         activeViewId={activeViewId}
+        camera={camera}
         detailState={detailState}
         enableDevelopmentTools={enableDevelopmentTools}
         mode={initialInterfaceMode}
@@ -315,6 +388,7 @@ export function WorldScene({
         onToggleGrid={() => setShowGrid((visible) => !visible)}
         onToggleTopography={() => setShowTopography((visible) => !visible)}
         onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
+        projectDestinations={PROJECT_DESTINATIONS}
         renderState={renderState}
         showGrid={showGrid}
         showTopography={showTopography}

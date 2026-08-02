@@ -11,6 +11,8 @@
 # local tooling
 /.codex/
 /.agents/
+/.pnpm-store/
+/.tmp/
 *.tsbuildinfo
 *.log
 __pycache__/

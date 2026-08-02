@@ -14,11 +14,11 @@ test("camera normalization keeps every view on the world plane", () => {
   assert.deepEqual(
     normalizeCameraView({
       origin: [-0.4, 0.95],
-      span: [0.05, 0.6],
+      span: [0.02, 0.6],
     }),
     {
       origin: [0, 0.4],
-      span: [0.055, 0.6],
+      span: [0.03, 0.6],
     },
   );
 });

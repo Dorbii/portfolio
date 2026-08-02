@@ -1,5 +1,12 @@
+import "./ambient-structures.test.mjs";
 import "./architecture.test.mjs";
 import "./assets.test.mjs";
 import "./camera.test.mjs";
+import "./lod-presentation.test.mjs";
+import "./rural-environment.test.mjs";
 import "./structures.test.mjs";
+import "./terrain-residency.test.mjs";
+import "./town-activity.test.mjs";
+import "./town-fabric.test.mjs";
+import "./town-surface.test.mjs";
 import "./water-state.test.mjs";

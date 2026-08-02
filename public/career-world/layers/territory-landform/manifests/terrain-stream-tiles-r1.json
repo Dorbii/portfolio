@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "career-world/terrain-stream-tiles@r1",
   "status": "phase-6-close-detail-foundation",
   "coordinateSpace": "normalized-world-top-left",
@@ -17,9 +17,12 @@
     }
   },
   "streaming": {
-    "prefetchPadding": 0.035,
-    "retentionPadding": 0.075,
-    "maximumResidentTiles": 12
+    "prefetchMarginPixels": 192,
+    "retentionMarginPixels": 384,
+    "maximumResidentDecodedBytes": 201326592,
+    "maximumConcurrentLoads": 2,
+    "retryBaseDelayMs": 1500,
+    "retryMaximumDelayMs": 30000
   },
   "tiles": [
     {
@@ -1227,7 +1230,7 @@
       }
     },
     {
-      "id": "close-5-3",
+      "id": "poc-close-5-3-0-0",
       "minimumTier": "capital",
       "worldBounds": {
         "origin": [
@@ -1235,8 +1238,8 @@
           0.3748671625929862
         ],
         "span": [
-          0.08343301435406698,
-          0.1251328374070138
+          0.04171650717703349,
+          0.062433581296493096
         ]
       },
       "sourceCropPixels": {
@@ -1245,32 +1248,161 @@
           1411
         ],
         "size": [
-          558,
-          471
+          279,
+          235
         ]
       },
       "sourceAlphaPolicy": "preserve-exactly",
       "sources": {
         "capital": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-5-3-semantic-r2-capital.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-0-0-capital.webp",
           "dimensions": [
-            1116,
-            942
+            558,
+            470
           ],
-          "sha256": "F547C145824CF146420BDAE91F2F6D3D0AC918D2357D5EAD3C6FDFDDD521A697"
+          "sha256": "0A2E4A51B361DEFEEF9E8FB5C48EDDE40E110A0A990CE684FFC60259C14E574F"
         },
         "site": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-5-3-semantic-r2.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-0-0-site.webp",
           "dimensions": [
-            2790,
-            2355
+            1395,
+            1175
           ],
-          "sha256": "268B17135516B3929A31B0FD8ED1000F7B8E11415A9DD6DB4BE9EC2D5186C025"
+          "sha256": "E8070A67A273F3589A2D4E0749DF0617E4B059EED8592AD7036916841756FC0A"
         }
       }
     },
     {
-      "id": "close-6-3",
+      "id": "poc-close-5-3-1-0",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.4582834928229665,
+          0.3748671625929862
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3065,
+          1411
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-1-0-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "586E218DFE26ED160D1EBE4FC8D74F599ACA3C87A7092D140EE4C115324AD205"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-1-0-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "6193D292B3AC5B51F8E60B31C69DDBEFE51A897FA2BA219BA16AEFBF4CF97915"
+        }
+      }
+    },
+    {
+      "id": "poc-close-5-3-0-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.41656698564593303,
+          0.43730074388947926
+        ],
+        "span": [
+          0.04171650717703349,
+          0.06269925611052073
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          2786,
+          1646
+        ],
+        "size": [
+          279,
+          236
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-0-1-capital.webp",
+          "dimensions": [
+            558,
+            472
+          ],
+          "sha256": "082B6B33262CD76F36C70C4B4E3C58436D97B102EB3A589AFFA1CA84D133A085"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-0-1-site.webp",
+          "dimensions": [
+            1395,
+            1180
+          ],
+          "sha256": "82C9C78D91EF49EBFB9C793B3595FB7FFFF8EB4123B6862715A652115586C3B0"
+        }
+      }
+    },
+    {
+      "id": "poc-close-5-3-1-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.4582834928229665,
+          0.43730074388947926
+        ],
+        "span": [
+          0.04171650717703349,
+          0.06269925611052073
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3065,
+          1646
+        ],
+        "size": [
+          279,
+          236
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-1-1-capital.webp",
+          "dimensions": [
+            558,
+            472
+          ],
+          "sha256": "669231E4A55FDBD71CC98412120A69AD56281B3598D886CA8FD9844251F6DEB0"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-3-1-1-site.webp",
+          "dimensions": [
+            1395,
+            1180
+          ],
+          "sha256": "BD6425185E615059F9CF0B78BF6E411A164764BFE900A2EFFE741217A506A5DB"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-3-0-0",
       "minimumTier": "capital",
       "worldBounds": {
         "origin": [
@@ -1278,8 +1410,8 @@
           0.3748671625929862
         ],
         "span": [
-          0.0832834928229665,
-          0.1251328374070138
+          0.041566985645933016,
+          0.062433581296493096
         ]
       },
       "sourceCropPixels": {
@@ -1288,27 +1420,156 @@
           1411
         ],
         "size": [
-          557,
-          471
+          278,
+          235
         ]
       },
       "sourceAlphaPolicy": "preserve-exactly",
       "sources": {
         "capital": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-6-3-semantic-r2-capital.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-0-0-capital.webp",
           "dimensions": [
-            1114,
-            942
+            556,
+            470
           ],
-          "sha256": "FA564E03D0937AC0FC1B9DE562832B064A7FE9A6C4A25529CF66158D442F1BE0"
+          "sha256": "00F6267199903D18890248F5CE06F1887E16419EB0CAB212F5F6AA7221646207"
         },
         "site": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-6-3-semantic-r2.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-0-0-site.webp",
           "dimensions": [
-            2785,
-            2355
+            1390,
+            1175
           ],
-          "sha256": "2A993608C81B178F194BAA51F61960C39BA4AF04B474E72D19B671995ED03C28"
+          "sha256": "598F9D7DC351A3BA4F33656C71BE2C5A1864CE923ADDC22EE16C1AF0AEDB304C"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-3-1-0",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.541566985645933,
+          0.3748671625929862
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3622,
+          1411
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-1-0-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "8A7CF8A07B2D31C497B458D9033433E70899640DE750694B5B8EF73A1858305D"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-1-0-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "A51B926D38E4BEB4741FF99CE5D369375E9B8AFA6070734F1A41F827B17D6B7B"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-3-0-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.43730074388947926
+        ],
+        "span": [
+          0.041566985645933016,
+          0.06269925611052073
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3344,
+          1646
+        ],
+        "size": [
+          278,
+          236
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-0-1-capital.webp",
+          "dimensions": [
+            556,
+            472
+          ],
+          "sha256": "FA602FFA9CB929774F1DB48C673A080C8517BCB3CBFCF55F4E2473FE908133E5"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-0-1-site.webp",
+          "dimensions": [
+            1390,
+            1180
+          ],
+          "sha256": "7C59063DE66241C5F9005BD5485B08A5FBD106F304A7DD2C156E08AA8B9C3BCA"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-3-1-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.541566985645933,
+          0.43730074388947926
+        ],
+        "span": [
+          0.04171650717703349,
+          0.06269925611052073
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3622,
+          1646
+        ],
+        "size": [
+          279,
+          236
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-1-1-capital.webp",
+          "dimensions": [
+            558,
+            472
+          ],
+          "sha256": "8F58315386A09D9EAA871B03C96C766DB8E2508FDDE2E1944028EB8F7F70EBF6"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-3-1-1-site.webp",
+          "dimensions": [
+            1395,
+            1180
+          ],
+          "sha256": "2983E2164A1C3C62D787972E7C5F80229D8348E1EE9403E94EE0F7A9E6778CE4"
         }
       }
     },
@@ -1657,7 +1918,7 @@
       }
     },
     {
-      "id": "close-5-4",
+      "id": "poc-close-5-4-0-0",
       "minimumTier": "capital",
       "worldBounds": {
         "origin": [
@@ -1665,8 +1926,8 @@
           0.5
         ],
         "span": [
-          0.08343301435406698,
-          0.12486716259298619
+          0.04171650717703349,
+          0.062433581296493096
         ]
       },
       "sourceCropPixels": {
@@ -1675,32 +1936,161 @@
           1882
         ],
         "size": [
-          558,
-          470
+          279,
+          235
         ]
       },
       "sourceAlphaPolicy": "preserve-exactly",
       "sources": {
         "capital": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-5-4-semantic-r2-capital.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-0-0-capital.webp",
           "dimensions": [
-            1116,
-            940
+            558,
+            470
           ],
-          "sha256": "D12EE4A713C2259C6FD0208F0091FB7A18C09D99C6821FEA7F68655B7C91ECEF"
+          "sha256": "2E028CB136DB01012225E04602BF8E63A06F5EBD7FE82EC7B39925EEFE12BA84"
         },
         "site": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-5-4-semantic-r2.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-0-0-site.webp",
           "dimensions": [
-            2790,
-            2350
+            1395,
+            1175
           ],
-          "sha256": "AAFF7CE0603C86145374DD6ED06A5DE45EA03CA90EBF418BD6D8988172670183"
+          "sha256": "582E42B4FEFDBFCE8D2DD20C827D6DB5ABBD32EF14C0F3C68746467FBC758FD9"
         }
       }
     },
     {
-      "id": "close-6-4",
+      "id": "poc-close-5-4-1-0",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.4582834928229665,
+          0.5
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3065,
+          1882
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-1-0-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "A60054DEFF40B067E8ED264A88296A9A9923158A9E9C41F57B040284BE753027"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-1-0-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "5601B7AA70AAC84FD7C80DABC65694E4FCCD2D25794D4BBE2FDF4A59EE5C46EA"
+        }
+      }
+    },
+    {
+      "id": "poc-close-5-4-0-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.41656698564593303,
+          0.5624335812964931
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          2786,
+          2117
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-0-1-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "D35AA90C7752ABD1C50760C10C28C6514CAB64D82A163D98F37888B09095B7DB"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-0-1-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "07AAE44E5B9C9A01A1186A86F9D7C6931FA76C8B1323CD2DC4EAE0CF66772CA2"
+        }
+      }
+    },
+    {
+      "id": "poc-close-5-4-1-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.4582834928229665,
+          0.5624335812964931
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3065,
+          2117
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-1-1-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "31DA5DB1F5283CA86CEFF75A325D42C3E62C87D6A7A47AA80FCD0848675B6781"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-5-4-1-1-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "4226CF655195C07CE3E07124237E8665D4DD754AD8A7A3FEF96C3DF38F9F77D0"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-4-0-0",
       "minimumTier": "capital",
       "worldBounds": {
         "origin": [
@@ -1708,8 +2098,8 @@
           0.5
         ],
         "span": [
-          0.0832834928229665,
-          0.12486716259298619
+          0.041566985645933016,
+          0.062433581296493096
         ]
       },
       "sourceCropPixels": {
@@ -1718,27 +2108,156 @@
           1882
         ],
         "size": [
-          557,
-          470
+          278,
+          235
         ]
       },
       "sourceAlphaPolicy": "preserve-exactly",
       "sources": {
         "capital": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-6-4-semantic-r2-capital.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-0-0-capital.webp",
           "dimensions": [
-            1114,
-            940
+            556,
+            470
           ],
-          "sha256": "9411B12EDEF1109E6B81313C73084F670DD6AB406B1C192AEAC440CF46761849"
+          "sha256": "CF58CCEA7F40549EFD78333021303ECC8C7331F4E68A3CCC028EFF1E6D2D9939"
         },
         "site": {
-          "path": "/career-world/layers/territory-landform/tiles/stream-r1/close-6-4-semantic-r2.webp",
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-0-0-site.webp",
           "dimensions": [
-            2785,
-            2350
+            1390,
+            1175
           ],
-          "sha256": "2127D78FB01539C51824D16C3185653D790AD13AEFA7D4583B4539D590474B79"
+          "sha256": "6E13293FEBAAF7739CEA3875E4F7E3523D1697970539A92EE4128F4C73D09EE4"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-4-1-0",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.541566985645933,
+          0.5
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3622,
+          1882
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-1-0-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "1D9B4F8AFE7FB4BD126EA3FABBEAC12CA2DCFD0C3B0D27F6BBE4538716073FED"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-1-0-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "D0578FB7FF16560AA24E697C6778B58CC357465A3BE74EC5BDF833B48C97AB49"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-4-0-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.5624335812964931
+        ],
+        "span": [
+          0.041566985645933016,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3344,
+          2117
+        ],
+        "size": [
+          278,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-0-1-capital.webp",
+          "dimensions": [
+            556,
+            470
+          ],
+          "sha256": "EF3546058C848CE8654CBE3453A08675C79AA7B8E916F753B16758E7CA4CFA22"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-0-1-site.webp",
+          "dimensions": [
+            1390,
+            1175
+          ],
+          "sha256": "B57138F2F90808D769BED83453584FEC91490C5D924BF43EDDD9BBB43D5FEAC2"
+        }
+      }
+    },
+    {
+      "id": "poc-close-6-4-1-1",
+      "minimumTier": "capital",
+      "worldBounds": {
+        "origin": [
+          0.541566985645933,
+          0.5624335812964931
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          3622,
+          2117
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-1-1-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "sha256": "6B8D24C24124F5B8E63AF630156AF0971F48C4E2265113BA3218083459A198A6"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r1/poc-close-6-4-1-1-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "sha256": "4BE109011D0ACDA8BD179461DF98DF3EC3EB540D06F2CDC0034D6886DC928376"
         }
       }
     },

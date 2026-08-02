@@ -268,8 +268,11 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   assert.match(land, /context\.drawImage\(/);
   assert.match(
     land,
-    /resolveRegisteredRasterVisibility\([\s\S]*detailState\)/,
+    /const streamVisibility =[\s\S]*resolveRegisteredRasterVisibility\(\s*visibleStreamTiles\[0\],\s*detailState,/,
   );
+  assert.match(land, /resolveLodCohortTransition\(/);
+  assert.match(land, /resolveLodCohortKeyOpacity\(/);
+  assert.match(land, /resolveLodCrossfadeTargets\(/);
   assert.match(land, /detailState\.shouldLoadCapitalAssets/);
   assert.doesNotMatch(land, /cameraLayerStyle/);
 });
@@ -293,22 +296,70 @@ test("capital-detail land streaming follows the centralized LOD contract", async
     ),
     "utf8",
   );
+  const streamGenerator = await readFile(
+    path.join(
+      root,
+      "scripts",
+      "build-career-world-land-stream-tiles.py",
+    ),
+    "utf8",
+  );
 
   assert.match(
     land,
-    /const streamVisibility =[\s\S]*resolveRegisteredRasterVisibility\([\s\S]*detailState\)/,
+    /const streamVisibility =[\s\S]*resolveRegisteredRasterVisibility\(\s*visibleStreamTiles\[0\],\s*detailState,/,
   );
   assert.match(
     land,
-    /const streamTierReady = \(tier: TerrainStreamSourceTier\)/,
+    /const capitalCohortReady = isLodCohortReady\(\s*visibleCapitalKeys,\s*decodedStreamKeysRef\.current,/,
   );
   assert.match(
     land,
-    /preferredStreamTier === "site"[\s\S]*!streamTierReady\("site"\)[\s\S]*\? "capital"/,
+    /const siteCohortReady = isLodCohortReady\(\s*visibleSiteKeys,\s*decodedStreamKeysRef\.current,/,
   );
   assert.match(
     land,
-    /if \(streamVisibility > 0 && streamReady\)/,
+    /capitalCohortRef\.current = resolveLodCohortTransition\(\s*visibleCapitalKeys,\s*decodedStreamKeysRef\.current,\s*capitalCohortRef\.current,\s*now,/,
+  );
+  assert.match(
+    land,
+    /siteCohortRef\.current = resolveLodCohortTransition\(\s*visibleSiteKeys,\s*decodedStreamKeysRef\.current,\s*siteCohortRef\.current,\s*now,/,
+  );
+  assert.match(
+    land,
+    /const currentCapitalCohortReady = isCurrentLodCohort\(\s*visibleCapitalKeys,\s*capitalCohortRef\.current,/,
+  );
+  assert.match(
+    land,
+    /const baseReplacementReady = \([\s\S]*const crossfadeTargets = resolveLodCrossfadeTargets\(\{[\s\S]*lowerReady: \([\s\S]*capitalCohortReady[\s\S]*hasCapitalCohort[\s\S]*baseReplacementReady[\s\S]*lowerVisibility: streamVisibility,[\s\S]*upperReady: siteCohortReady \|\| hasSiteCohort,[\s\S]*upperVisibility: siteVisibility,[\s\S]*let capitalTarget = crossfadeTargets\.lower;[\s\S]*let siteTarget = crossfadeTargets\.upper;/,
+  );
+  assert.match(
+    land,
+    /advanceLodPresentationFade\([\s\S]*capitalTarget[\s\S]*advanceLodPresentationFade\([\s\S]*siteTarget/,
+  );
+  assert.match(
+    land,
+    /const sourceOpacity = resolveLodCohortKeyOpacity\(\s*cohort,\s*key,\s*now,/,
+  );
+  assert.doesNotMatch(
+    land,
+    /resolveLodSourceOpacity\(decodedAt, now\)|const streamTierReady/,
+  );
+  assert.match(
+    land,
+    /if \(needsPresentationFrame\) \{[\s\S]*queueRender\(\)/,
+  );
+  assert.match(
+    land,
+    /canvas\.dataset\.streamCapitalTransition = capitalOpacity\.toFixed\(3\)/,
+  );
+  assert.match(
+    land,
+    /canvas\.dataset\.streamSiteTransition = siteOpacity\.toFixed\(3\)/,
+  );
+  assert.match(
+    land,
+    /data-stream-transition-ms=\{LOD_PRESENTATION_TRANSITION_MS\}/,
   );
   assert.doesNotMatch(
     land,
@@ -316,53 +367,118 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   );
   assert.match(
     land,
-    /const requestedTiles = detailState\.shouldLoadCapitalAssets/,
-  );
-  assert.doesNotMatch(
-    land,
-    /const requestedTiles = detailState\.shouldLoadSiteAssets/,
+    /const retainCapitalPresentation = \([\s\S]*shouldRetainLodSource\([\s\S]*const retainSitePresentation = \([\s\S]*shouldRetainLodSource\(/,
   );
   assert.match(
     land,
-    /tile\.minimumTier === "site"[\s\S]*&& detailState\.shouldLoadSiteAssets/,
+    /const needsCapitalFallback = \([\s\S]*!retainSitePresentation[\s\S]*detailState\.capitalToSite[\s\S]*capitalPresentationRef\.current\.value/,
   );
-  assert.match(land, /terrainTilesNearCamera\(/);
-  assert.match(land, /TERRAIN_STREAM_POLICY\.prefetchPadding/);
-  assert.match(land, /TERRAIN_STREAM_POLICY\.retentionPadding/);
+  assert.match(
+    land,
+    /const requestedTiers:[\s\S]*retainCapitalPresentation && needsCapitalFallback[\s\S]*retainSitePresentation/,
+  );
+  assert.match(
+    land,
+    /planTerrainResidencyWithTierFallback\(\{[\s\S]*policy: residencyPolicy,[\s\S]*requestedTierCandidates,[\s\S]*residentSourceKeys:[\s\S]*tiles: residencyTiles,[\s\S]*viewportPixels,[\s\S]*const plan = admission\.plan;[\s\S]*const admittedTiers = admission\.requestedTiers;/,
+  );
+  assert.match(land, /plan\.requestedTiles/);
+  assert.match(land, /plan\.retainedTiles/);
+  assert.match(
+    land,
+    /activeStreamKeysRef\.current\.size[\s\S]*TERRAIN_STREAM_POLICY\.maximumConcurrentLoads/,
+  );
+  assert.match(
+    land,
+    /const eligibleVisibleRequestCount = queue\.filter\([\s\S]*visibleStreamKeysRef\.current\.has\(candidate\.key\)[\s\S]*failure\.retryAt <= now/,
+  );
+  assert.match(
+    land,
+    /prefetchSourcesToPreempt\(\{[\s\S]*activeSourceKeys: activeStreamKeysRef\.current,[\s\S]*eligibleVisibleRequestCount,[\s\S]*maximumConcurrentLoads,[\s\S]*visibleSourceKeys: visibleStreamKeysRef\.current,[\s\S]*for \(const key of prefetchKeysToCancel\)[\s\S]*cancelStreamSource\(key\)/,
+  );
+  assert.match(
+    land,
+    /expectedCanvasDecodedBytes\([\s\S]*canvas,[\s\S]*detailState\.renderScale/,
+  );
   assert.match(land, /streamTileRefs\.current\.delete\(key\)/);
   assert.match(land, /releaseImage\(image\)/);
   assert.match(
     land,
-    /detailState\.shouldLoadSiteAssets[\s\S]*requestedTiers\.push\("site"\)/,
+    /streamRequestQueueRef\.current = \[[\s\S]*\.\.\.visibleRequests,[\s\S]*\.\.\.prefetchRequests/,
   );
+  assert.doesNotMatch(land, /preferredStreamTier/);
   assert.match(
     land,
-    /const preferredStreamTier:[\s\S]*detailState\.capitalToSite > 0/,
+    /dataset\.streamResolutionTier = siteOpacity > 0\.5[\s\S]*\? "site"[\s\S]*: "capital"/,
   );
   assert.match(land, /dataset\.streamResidentSourceCount/);
+  assert.match(land, /dataset\.streamEstimatedDecodedBytes/);
+  assert.match(land, /dataset\.streamVisibleOverBudget/);
+  assert.match(land, /dataset\.landEstimatedDecodedBytes/);
+  assert.match(land, /dataset\.landMaximumDecodedBytes/);
+  assert.match(land, /image\.onerror = failRequest/);
+  assert.match(land, /const loadWorldPlate[\s\S]*image\.decode\(\)/);
+  assert.match(land, /const loadDetailPlate[\s\S]*image\.decode\(\)/);
   assert.match(
     land,
-    /for \(const tile of \[\.\.\.requestedTiles, \.\.\.retentionTiles\]\)/,
+    /TERRAIN_SITE_RESIDENCY_TILES[\s\S]*\.\.\.TERRAIN_SITE_RESIDENCY_TILES/,
   );
   assert.match(
     land,
-    /retainedIds\.size[\s\S]*TERRAIN_STREAM_POLICY\.maximumResidentTiles/,
+    /setTimeout\([\s\S]*failRequest,[\s\S]*TERRAIN_STREAM_POLICY\.requestTimeoutMs/,
   );
-  assert.match(land, /image\.onerror = \(\) =>/);
-  assert.match(streamModel, /maximumResidentTiles/);
   assert.match(
     streamModel,
-    /\.slice\(0,\s*limit\)/,
+    /terrain-stream-tiles-r3\.json/,
   );
   assert.match(
-    land,
-    /for \(const tile of requestedTiles\) \{[\s\S]*image\.src = tile\.sources\[tier\]\.path/,
+    streamModel,
+    /maximumResidentDecodedBytes/,
   );
-  assert.match(land, /image\.onload = queueRender/);
-  assert.doesNotMatch(land, /image\.onload = \(\) => renderRef\.current\(\)/);
+  assert.match(streamModel, /maximumConcurrentLoads/);
+  assert.match(streamModel, /prefetchMarginPixels/);
+  assert.match(streamModel, /retentionMarginPixels/);
+  assert.match(streamModel, /retryBaseDelayMs/);
+  assert.match(streamModel, /retryMaximumDelayMs/);
+  assert.match(streamModel, /requestTimeoutMs/);
+  assert.match(streamModel, /maximumLandLayerDecodedBytes/);
+  assert.match(streamModel, /decodedBytes/);
+  assert.match(
+    streamModel,
+    /tiles\/stream-r3\//,
+  );
+  assert.doesNotMatch(streamModel, /tiles\/stream-r1\//);
   assert.match(streamModel, /TerrainStreamSourceTier/);
   assert.match(streamModel, /sources\.capital\.dimensions/);
   assert.match(streamModel, /sources\.site\.dimensions/);
+  assert.match(streamGenerator, /CHILD_COLUMNS = 2/);
+  assert.match(streamGenerator, /CHILD_ROWS = 2/);
+  assert.match(
+    streamGenerator,
+    /STREAM_GRID_COLUMNS = GRID_COLUMNS \* CHILD_COLUMNS/,
+  );
+  assert.match(
+    streamGenerator,
+    /STREAM_GRID_ROWS = GRID_ROWS \* CHILD_ROWS/,
+  );
+  assert.match(streamGenerator, /tiles" \/ "stream-r3"/);
+  assert.match(streamGenerator, /terrain-stream-tiles-r3\.json/);
+  assert.match(streamGenerator, /"decodedBytes":/);
+  assert.match(
+    streamGenerator,
+    /site_tile\.getchannel\("A"\)\.getextrema\(\)\[1\][\s\S]*MINIMUM_ALPHA/,
+  );
+  assert.doesNotMatch(
+    streamGenerator,
+    /--derive-capital-from-manifest/,
+  );
+  assert.doesNotMatch(
+    streamGenerator,
+    /upgrade_manifest_with_capital_variants/,
+  );
+  assert.doesNotMatch(
+    streamGenerator,
+    /terrain-stream-tiles-r1\.json/,
+  );
 });
 
 test("water zoom adds detail without suppressing world swell or bathymetry", async () => {
@@ -450,7 +566,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   assert.match(landAssets, /LAND_DETAIL_CONTRACT/);
   assert.match(
     landAssets,
-    /id:\s*"territory-land-plate"[\s\S]*dimensions:\s*\[6688,\s*3764\]/,
+    /const TERRITORY_PLATE_DIMENSIONS = \[6688, 3764\][\s\S]*id:\s*"territory-land-plate"[\s\S]*dimensions:\s*TERRITORY_PLATE_DIMENSIONS/,
   );
   assert.equal(
     (

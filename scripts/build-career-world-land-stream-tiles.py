@@ -25,8 +25,8 @@ HEIGHT_FIELD = LAND_ROOT / "fields" / "terrain-height-r4.png"
 SLOPE_FIELD = LAND_ROOT / "fields" / "terrain-slope-r4.png"
 LOWLAND_MATERIAL = LAND_ROOT / "materials" / "close-ground-r1.png"
 ROCK_MATERIAL = LAND_ROOT / "materials" / "close-rock-r1.png"
-OUTPUT_ROOT = LAND_ROOT / "tiles" / "stream-r1"
-MANIFEST = LAND_ROOT / "manifests" / "terrain-stream-tiles-r1.json"
+OUTPUT_ROOT = LAND_ROOT / "tiles" / "stream-r3"
+MANIFEST = LAND_ROOT / "manifests" / "terrain-stream-tiles-r3.json"
 AUTHORED_MOUNTAIN_REFERENCES = {
     (2, 3): (
         LAND_ROOT
@@ -61,6 +61,10 @@ AUTHORED_MOUNTAIN_REFERENCES = {
 }
 GRID_COLUMNS = 12
 GRID_ROWS = 8
+CHILD_COLUMNS = 2
+CHILD_ROWS = 2
+STREAM_GRID_COLUMNS = GRID_COLUMNS * CHILD_COLUMNS
+STREAM_GRID_ROWS = GRID_ROWS * CHILD_ROWS
 CAPITAL_OUTPUT_SCALE = 2
 SITE_OUTPUT_SCALE = 5
 SOURCE_GUTTER = 12
@@ -290,7 +294,7 @@ def add_close_terrain_detail(
         1.65,
     )
     matched_material = material * palette_scale
-    color = matched_material * 0.88 + albedo * 0.12
+    color = matched_material.copy()
 
     # Calculate macro normals at the canonical field's own sample density, then
     # resample the vectors. Differentiating the 8-bit field after a 20x resize
@@ -550,8 +554,8 @@ def arguments() -> argparse.Namespace:
         "--tile",
         type=parse_tile,
         help=(
-            "Build one COLUMN,ROW tile for visual iteration without "
-            "rewriting the manifest."
+            "Build one authored COLUMN,ROW parent and its four child stream "
+            "tiles for visual iteration without rewriting the manifest."
         ),
     )
     selection.add_argument(
@@ -560,14 +564,6 @@ def arguments() -> argparse.Namespace:
         help=(
             "Build one zero-based INDEX/COUNT shard without rewriting the "
             "manifest."
-        ),
-    )
-    selection.add_argument(
-        "--derive-capital-from-manifest",
-        action="store_true",
-        help=(
-            "Create capital-resolution derivatives from the accepted site "
-            "tiles and upgrade the manifest without rebuilding terrain."
         ),
     )
     return parser.parse_args()
@@ -589,10 +585,6 @@ def public_path(path: Path) -> str:
     return "/" + path.relative_to(ROOT / "public").as_posix()
 
 
-def capital_variant_path(site_path: Path) -> Path:
-    return site_path.with_name(f"{site_path.stem}-capital{site_path.suffix}")
-
-
 def derive_capital_variant(
     site_image: Image.Image,
     source_size: tuple[int, int],
@@ -606,65 +598,8 @@ def derive_capital_variant(
     )
 
 
-def upgrade_manifest_with_capital_variants() -> None:
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    upgraded_tiles: list[dict[str, object]] = []
-
-    for tile in manifest["tiles"]:
-        source_size = tuple(tile["sourceCropPixels"]["size"])
-        existing_sources = tile.get("sources")
-        if existing_sources:
-            site_source = existing_sources["site"]
-        else:
-            site_source = {
-                "path": tile["path"],
-                "dimensions": tile["dimensions"],
-                "sha256": tile["sha256"],
-            }
-
-        site_path = ROOT / "public" / site_source["path"].lstrip("/")
-        capital_path = capital_variant_path(site_path)
-        with Image.open(site_path) as site_image:
-            capital = derive_capital_variant(
-                site_image.convert("RGBA"),
-                source_size,
-            )
-            save_webp(capital, capital_path)
-
-        upgraded = {
-            key: value
-            for key, value in tile.items()
-            if key not in {"path", "dimensions", "sha256", "sources"}
-        }
-        upgraded["sources"] = {
-            "capital": {
-                "path": public_path(capital_path),
-                "dimensions": [capital.width, capital.height],
-                "sha256": sha256(capital_path),
-            },
-            "site": site_source,
-        }
-        upgraded_tiles.append(upgraded)
-        print(f"Derived {capital_path.name}", flush=True)
-
-    manifest["schemaVersion"] = 2
-    manifest["grid"].pop("outputScale", None)
-    manifest["grid"]["outputScales"] = {
-        "capital": CAPITAL_OUTPUT_SCALE,
-        "site": SITE_OUTPUT_SCALE,
-    }
-    manifest["tiles"] = upgraded_tiles
-    write_json(MANIFEST, manifest)
-    print(
-        f"Derived {len(upgraded_tiles)} capital-resolution stream tiles."
-    )
-
-
 def main() -> None:
     options = arguments()
-    if options.derive_capital_from_manifest:
-        upgrade_manifest_with_capital_variants()
-        return
 
     source = Image.open(SOURCE).convert("RGBA")
     # The canonical field is an 8-bit Phase 3 artifact. A small source-space
@@ -689,10 +624,13 @@ def main() -> None:
     lowland_material = build_material_field(LOWLAND_MATERIAL)
     rock_material = build_material_field(ROCK_MATERIAL)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-    tiles: list[dict[str, object]] = []
+    if not options.tile and not options.shard:
+        for previous_output in OUTPUT_ROOT.glob("*.webp"):
+            previous_output.unlink()
+    tile_records: list[tuple[int, int, dict[str, object]]] = []
     total_candidates = GRID_COLUMNS * GRID_ROWS
     processed_candidates = 0
-    completed_tiles = 0
+    completed_parents = 0
 
     for row in range(GRID_ROWS):
         y0 = math.floor(row * source.height / GRID_ROWS)
@@ -720,13 +658,14 @@ def main() -> None:
             if int(alpha.max()) < MINIMUM_ALPHA:
                 continue
 
-            completed_tiles += 1
+            completed_parents += 1
             print(
                 f"[cell {processed_candidates:02d}/{total_candidates}; "
-                f"tile {completed_tiles:02d}] building close-{column}-{row}",
+                f"parent {completed_parents:02d}] "
+                f"building close-{column}-{row}",
                 flush=True,
             )
-            tile = build_tile(
+            parent_site_tile = build_tile(
                 source,
                 (x0, y0, x1, y1),
                 height_field,
@@ -739,60 +678,147 @@ def main() -> None:
                 (column, row)
             )
             if mountain_reference:
-                tile = apply_authored_mountain_reference(
-                    tile,
+                parent_site_tile = apply_authored_mountain_reference(
+                    parent_site_tile,
                     mountain_reference,
                 )
-            tile_id = f"close-{column}-{row}"
-            revision_suffix = "-semantic-r2"
-            file_name = f"{tile_id}{revision_suffix}.webp"
-            output = OUTPUT_ROOT / file_name
-            save_webp(tile, output)
-            capital_output = capital_variant_path(output)
-            capital_tile = derive_capital_variant(
-                tile,
+            parent_capital_tile = derive_capital_variant(
+                parent_site_tile,
                 (x1 - x0, y1 - y0),
             )
-            save_webp(capital_tile, capital_output)
+            parent_source_width = x1 - x0
+            parent_source_height = y1 - y0
+            emitted_children = 0
+
+            for child_row_offset in range(CHILD_ROWS):
+                child_source_y0 = math.floor(
+                    child_row_offset
+                    * parent_source_height
+                    / CHILD_ROWS
+                )
+                child_source_y1 = (
+                    parent_source_height
+                    if child_row_offset == CHILD_ROWS - 1
+                    else math.floor(
+                        (child_row_offset + 1)
+                        * parent_source_height
+                        / CHILD_ROWS
+                    )
+                )
+                for child_column_offset in range(CHILD_COLUMNS):
+                    child_source_x0 = math.floor(
+                        child_column_offset
+                        * parent_source_width
+                        / CHILD_COLUMNS
+                    )
+                    child_source_x1 = (
+                        parent_source_width
+                        if child_column_offset == CHILD_COLUMNS - 1
+                        else math.floor(
+                            (child_column_offset + 1)
+                            * parent_source_width
+                            / CHILD_COLUMNS
+                        )
+                    )
+                    stream_column = (
+                        column * CHILD_COLUMNS + child_column_offset
+                    )
+                    stream_row = row * CHILD_ROWS + child_row_offset
+                    tile_id = f"close-{stream_column}-{stream_row}"
+                    site_output = OUTPUT_ROOT / f"{tile_id}-site.webp"
+                    capital_output = (
+                        OUTPUT_ROOT / f"{tile_id}-capital.webp"
+                    )
+
+                    site_tile = parent_site_tile.crop((
+                        child_source_x0 * SITE_OUTPUT_SCALE,
+                        child_source_y0 * SITE_OUTPUT_SCALE,
+                        child_source_x1 * SITE_OUTPUT_SCALE,
+                        child_source_y1 * SITE_OUTPUT_SCALE,
+                    ))
+                    if (
+                        site_tile.getchannel("A").getextrema()[1]
+                        < MINIMUM_ALPHA
+                    ):
+                        continue
+                    capital_tile = parent_capital_tile.crop((
+                        child_source_x0 * CAPITAL_OUTPUT_SCALE,
+                        child_source_y0 * CAPITAL_OUTPUT_SCALE,
+                        child_source_x1 * CAPITAL_OUTPUT_SCALE,
+                        child_source_y1 * CAPITAL_OUTPUT_SCALE,
+                    ))
+                    save_webp(site_tile, site_output)
+                    save_webp(capital_tile, capital_output)
+                    emitted_children += 1
+
+                    source_child_x0 = x0 + child_source_x0
+                    source_child_y0 = y0 + child_source_y0
+                    source_child_width = child_source_x1 - child_source_x0
+                    source_child_height = child_source_y1 - child_source_y0
+                    tile_records.append((
+                        stream_row,
+                        stream_column,
+                        {
+                            "id": tile_id,
+                            "minimumTier": "capital",
+                            "sources": {
+                                "capital": {
+                                    "path": public_path(capital_output),
+                                    "dimensions": [
+                                        capital_tile.width,
+                                        capital_tile.height,
+                                    ],
+                                    "decodedBytes": (
+                                        capital_tile.width
+                                        * capital_tile.height
+                                        * 4
+                                    ),
+                                    "sha256": sha256(capital_output),
+                                },
+                                "site": {
+                                    "path": public_path(site_output),
+                                    "dimensions": [
+                                        site_tile.width,
+                                        site_tile.height,
+                                    ],
+                                    "decodedBytes": (
+                                        site_tile.width
+                                        * site_tile.height
+                                        * 4
+                                    ),
+                                    "sha256": sha256(site_output),
+                                },
+                            },
+                            "worldBounds": {
+                                "origin": [
+                                    source_child_x0 / source.width,
+                                    source_child_y0 / source.height,
+                                ],
+                                "span": [
+                                    source_child_width / source.width,
+                                    source_child_height / source.height,
+                                ],
+                            },
+                            "sourceCropPixels": {
+                                "origin": [
+                                    source_child_x0,
+                                    source_child_y0,
+                                ],
+                                "size": [
+                                    source_child_width,
+                                    source_child_height,
+                                ],
+                            },
+                            "sourceAlphaPolicy": "preserve-exactly",
+                        },
+                    ))
+
             print(
                 f"[cell {processed_candidates:02d}/{total_candidates}; "
-                f"tile {completed_tiles:02d}] wrote {file_name}",
+                f"parent {completed_parents:02d}] wrote "
+                f"{emitted_children} r3 child tiles",
                 flush=True,
             )
-            tiles.append({
-                "id": tile_id,
-                "minimumTier": "capital",
-                "sources": {
-                    "capital": {
-                        "path": public_path(capital_output),
-                        "dimensions": [
-                            capital_tile.width,
-                            capital_tile.height,
-                        ],
-                        "sha256": sha256(capital_output),
-                    },
-                    "site": {
-                        "path": public_path(output),
-                        "dimensions": [tile.width, tile.height],
-                        "sha256": sha256(output),
-                    },
-                },
-                "worldBounds": {
-                    "origin": [
-                        x0 / source.width,
-                        y0 / source.height,
-                    ],
-                    "span": [
-                        (x1 - x0) / source.width,
-                        (y1 - y0) / source.height,
-                    ],
-                },
-                "sourceCropPixels": {
-                    "origin": [x0, y0],
-                    "size": [x1 - x0, y1 - y0],
-                },
-                "sourceAlphaPolicy": "preserve-exactly",
-            })
 
     if options.tile or options.shard:
         print(
@@ -800,9 +826,16 @@ def main() -> None:
         )
         return
 
+    tiles = [
+        tile
+        for _, _, tile in sorted(
+            tile_records,
+            key=lambda record: (record[0], record[1]),
+        )
+    ]
     write_json(MANIFEST, {
-        "schemaVersion": 2,
-        "id": "career-world/terrain-stream-tiles@r1",
+        "schemaVersion": 3,
+        "id": "career-world/terrain-stream-tiles@r3",
         "status": "phase-6-close-detail-foundation",
         "coordinateSpace": "normalized-world-top-left",
         "sourceDetailPath": (
@@ -811,17 +844,22 @@ def main() -> None:
         ),
         "sourceDimensions": [source.width, source.height],
         "grid": {
-            "columns": GRID_COLUMNS,
-            "rows": GRID_ROWS,
+            "columns": STREAM_GRID_COLUMNS,
+            "rows": STREAM_GRID_ROWS,
             "outputScales": {
                 "capital": CAPITAL_OUTPUT_SCALE,
                 "site": SITE_OUTPUT_SCALE,
             },
         },
         "streaming": {
-            "prefetchPadding": 0.035,
-            "retentionPadding": 0.075,
-            "maximumResidentTiles": 12,
+            "prefetchMarginPixels": 192,
+            "retentionMarginPixels": 384,
+            "maximumLandLayerDecodedBytes": 335544320,
+            "maximumResidentDecodedBytes": 201326592,
+            "maximumConcurrentLoads": 2,
+            "retryBaseDelayMs": 1500,
+            "retryMaximumDelayMs": 30000,
+            "requestTimeoutMs": 15000,
         },
         "tiles": tiles,
         "policy": [

@@ -6,6 +6,8 @@ import { TERRITORIES, type Territory } from "./territories";
 export interface TerrainSiteTile {
   readonly id: string;
   readonly territory: Territory;
+  readonly ownerKind: "capital" | "project";
+  readonly ownerId: string;
   readonly minimumTier: Extract<DetailTierId, "site">;
   readonly path: string;
   readonly dimensions: Pair;
@@ -57,35 +59,45 @@ export const TERRAIN_SITE_TILES: readonly TerrainSiteTile[] = Object.freeze(
         `Terrain site tile ${tile.id} has an invalid detail tier.`,
       );
     }
-
-    const envelope = territory.focusView;
     if (
-      origin[0] < envelope.origin[0]
-      || origin[1] < envelope.origin[1]
-      || origin[0] + span[0] > envelope.origin[0] + envelope.span[0]
-      || origin[1] + span[1] > envelope.origin[1] + envelope.span[1]
+      (tile.ownerKind !== "capital" && tile.ownerKind !== "project")
+      || !tile.ownerId
     ) {
       throw new TypeError(
-        `Terrain site tile ${tile.id} exceeds its `
-          + `${tile.minimumTier} authoring bounds.`,
+        `Terrain site tile ${tile.id} has an invalid owner.`,
       );
     }
 
-    const anchor = territory.development.capitalAnchor;
-    if (
-      anchor[0] < origin[0]
-      || anchor[1] < origin[1]
-      || anchor[0] > origin[0] + span[0]
-      || anchor[1] > origin[1] + span[1]
-    ) {
-      throw new TypeError(
-        `Terrain site tile ${tile.id} does not contain its capital anchor.`,
-      );
+    if (tile.ownerKind === "capital") {
+      const envelope = territory.development.capitalEnvelope;
+      if (
+        origin[0] < envelope.origin[0]
+        || origin[1] < envelope.origin[1]
+        || origin[0] + span[0] > envelope.origin[0] + envelope.span[0]
+        || origin[1] + span[1] > envelope.origin[1] + envelope.span[1]
+      ) {
+        throw new TypeError(
+          `Terrain site tile ${tile.id} exceeds its capital envelope.`,
+        );
+      }
+      const anchor = territory.development.capitalAnchor;
+      if (
+        anchor[0] < origin[0]
+        || anchor[1] < origin[1]
+        || anchor[0] > origin[0] + span[0]
+        || anchor[1] > origin[1] + span[1]
+      ) {
+        throw new TypeError(
+          `Terrain site tile ${tile.id} does not contain its capital anchor.`,
+        );
+      }
     }
 
     return Object.freeze({
       id: tile.id,
       territory,
+      ownerKind: tile.ownerKind,
+      ownerId: tile.ownerId,
       minimumTier: tile.minimumTier,
       path: tile.path,
       dimensions: pair(tile.dimensions, `${tile.id} dimensions`),

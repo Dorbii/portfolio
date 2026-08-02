@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/ninjaone-town-activity@r1",
+  "status": "authored-frontage-activity",
+  "coordinateSpace": "normalized-world-top-left",
+  "territoryId": "ninjaone",
+  "minimumTier": "site",
+  "instances": [
+    {
+      "id": "kaizen-agent-project-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent",
+      "offset": [-0.0021, 0.0016],
+      "headingDegrees": 18
+    },
+    {
+      "id": "kaizen-agent-data-stall",
+      "kind": "stall",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-data-contracts",
+      "offset": [0.005, 0.008],
+      "headingDegrees": 4
+    },
+    {
+      "id": "kaizen-agent-safe-writes-bench",
+      "kind": "bench",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-safe-writes",
+      "offset": [-0.0022, 0.002],
+      "headingDegrees": 176
+    },
+    {
+      "id": "kaizen-agent-gateway-cart",
+      "kind": "cart",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-protocol-gateway",
+      "offset": [-0.0028, -0.0016],
+      "headingDegrees": 192
+    },
+    {
+      "id": "kaizen-agent-east-workshop-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-workshop-east",
+      "offset": [0.0019, -0.0016],
+      "headingDegrees": 12
+    },
+    {
+      "id": "kaizen-agent-project-garden-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent",
+      "offset": [0.0075, 0.0015],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-project-west-garden-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-housing-northwest",
+      "offset": [0.006, 0.0015],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-west-court-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-data-contracts",
+      "offset": [0.01, 0.0065],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-east-court-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-safe-writes",
+      "offset": [-0.0065, 0.0065],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-west-service-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-workshop-west",
+      "offset": [0.0075, 0.008],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-east-service-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-workshop-east",
+      "offset": [-0.0055, 0.008],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-south-court-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-protocol-gateway",
+      "offset": [0.006, 0.009],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-northeast-promenade-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-housing-northeast",
+      "offset": [-0.004, 0.004],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-northwest-promenade-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-housing-northwest",
+      "offset": [-0.005, 0.006],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-west-depot-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-depot-southwest",
+      "offset": [0.006, -0.005],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-east-depot-tree",
+      "kind": "street-tree",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-depot-southeast",
+      "offset": [-0.006, -0.005],
+      "headingDegrees": 0
+    },
+    {
+      "id": "kaizen-agent-service-market-stall",
+      "kind": "stall",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-protocol-gateway",
+      "offset": [-0.009, 0.008],
+      "headingDegrees": 14
+    },
+    {
+      "id": "kaizen-agent-west-craft-cart",
+      "kind": "cart",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-data-contracts",
+      "offset": [-0.008, 0.004],
+      "headingDegrees": 164
+    },
+    {
+      "id": "kaizen-agent-east-court-bench",
+      "kind": "bench",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "project-kaizen-agent-safe-writes",
+      "offset": [0.007, 0.002],
+      "headingDegrees": 188
+    },
+    {
+      "id": "kaizen-agent-station-approach-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "entranceStructureId": "kaizen-agent-housing-northwest",
+      "offset": [-0.009, -0.008],
+      "headingDegrees": 24
+    },
+    {
+      "id": "vendy-project-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "entranceStructureId": "project-vendy",
+      "offset": [-0.002, 0.0018],
+      "headingDegrees": 344
+    },
+    {
+      "id": "vendy-workflow-stall",
+      "kind": "stall",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "entranceStructureId": "project-vendy-workflow-orchestration",
+      "offset": [0.0025, 0.002],
+      "headingDegrees": 8
+    },
+    {
+      "id": "vendy-cloud-cart",
+      "kind": "cart",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "entranceStructureId": "project-vendy-cloud-infrastructure",
+      "offset": [-0.0027, 0.0015],
+      "headingDegrees": 184
+    },
+    {
+      "id": "vendy-operator-bench",
+      "kind": "bench",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "entranceStructureId": "project-vendy-operator-control",
+      "offset": [-0.0023, 0.002],
+      "headingDegrees": 172
+    },
+    {
+      "id": "vendy-south-depot-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "entranceStructureId": "vendy-depot-south",
+      "offset": [0.002, -0.0015],
+      "headingDegrees": 22
+    },
+    {
+      "id": "kaizen-metrics-project-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "entranceStructureId": "project-kaizen-metrics",
+      "offset": [-0.0022, 0.0017],
+      "headingDegrees": 350
+    },
+    {
+      "id": "kaizen-metrics-python-bench",
+      "kind": "bench",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "entranceStructureId": "project-kaizen-metrics-python",
+      "offset": [0.0023, 0.0018],
+      "headingDegrees": 6
+    },
+    {
+      "id": "kaizen-metrics-databricks-stall",
+      "kind": "stall",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "entranceStructureId": "project-kaizen-metrics-databricks",
+      "offset": [0.0024, 0.0019],
+      "headingDegrees": 24
+    },
+    {
+      "id": "kaizen-metrics-data-cart",
+      "kind": "cart",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "entranceStructureId": "project-kaizen-metrics-data-contracts",
+      "offset": [-0.0027, 0.0017],
+      "headingDegrees": 196
+    },
+    {
+      "id": "kaizen-metrics-depot-lamp",
+      "kind": "lamp",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "entranceStructureId": "kaizen-metrics-depot-south",
+      "offset": [-0.0021, -0.0017],
+      "headingDegrees": 16
+    },
+    {
+      "id": "ninjaone-capital-gate-lamp",
+      "kind": "lamp",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone",
+      "offset": [-0.0024, 0.002],
+      "headingDegrees": 354
+    },
+    {
+      "id": "ninjaone-capital-safe-writes-bench",
+      "kind": "bench",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-safe-writes",
+      "offset": [0.0024, 0.002],
+      "headingDegrees": 8
+    },
+    {
+      "id": "ninjaone-capital-data-stall",
+      "kind": "stall",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-data-contracts",
+      "offset": [0.0025, 0.002],
+      "headingDegrees": 14
+    },
+    {
+      "id": "ninjaone-capital-gateway-cart",
+      "kind": "cart",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-protocol-gateway",
+      "offset": [-0.0028, 0.0015],
+      "headingDegrees": 188
+    },
+    {
+      "id": "ninjaone-capital-workflow-lamp",
+      "kind": "lamp",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-workflow-orchestration",
+      "offset": [0.0022, 0.0017],
+      "headingDegrees": 20
+    },
+    {
+      "id": "ninjaone-capital-operator-bench",
+      "kind": "bench",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-operator-control",
+      "offset": [-0.0024, 0.0016],
+      "headingDegrees": 174
+    },
+    {
+      "id": "ninjaone-capital-cloud-stall",
+      "kind": "stall",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-cloud-infrastructure",
+      "offset": [0.0026, 0.0018],
+      "headingDegrees": 10
+    },
+    {
+      "id": "ninjaone-capital-databricks-lamp",
+      "kind": "lamp",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "capital-ninjaone-databricks",
+      "offset": [-0.0022, 0.0019],
+      "headingDegrees": 342
+    },
+    {
+      "id": "ninjaone-capital-west-housing-bench",
+      "kind": "bench",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "ninjaone-capital-housing-west",
+      "offset": [0.0024, -0.0018],
+      "headingDegrees": 82
+    },
+    {
+      "id": "ninjaone-capital-southeast-depot-cart",
+      "kind": "cart",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "entranceStructureId": "ninjaone-capital-depot-southeast",
+      "offset": [-0.0028, -0.0017],
+      "headingDegrees": 202
+    }
+  ],
+  "notes": [
+    "Every prop is explicitly authored against an existing town-plan entrance; no runtime distribution or random placement is allowed.",
+    "Signed offsets are normalized world-space deltas resolved from the current entrance model at load time.",
+    "Project towns carry five sparse frontage props each and the capital carries ten."
+  ]
+}

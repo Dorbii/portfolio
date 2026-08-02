@@ -1,12 +1,32 @@
-import { useSyncExternalStore } from "react";
+import {
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import type { WaterRenderState } from "../../water-surface";
 import type { Territory } from "../../territory-landform/model/territories";
-import type { DetailState } from "../../../shared/lod";
+import type { CameraView, Pair } from "../../../shared/camera";
+import {
+  LOD_PRESENTATION_EPSILON,
+  LOD_PRESENTATION_TRANSITION_MS,
+  resolveProjectDestinationVisibility,
+  resolveWorldDestinationVisibility,
+  type DetailState,
+} from "../../../shared/lod";
+
+interface ProjectDestination {
+  readonly id: string;
+  readonly label: string;
+  readonly anchor: Pair;
+  readonly supportingSkillCount: number;
+}
+
 interface WorldInterfaceProps {
   readonly activeViewId: string;
+  readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly enableDevelopmentTools: boolean;
   readonly mode: "world" | "water";
+  readonly projectDestinations: readonly ProjectDestination[];
   readonly renderState: WaterRenderState;
   readonly showGrid: boolean;
   readonly showTopography: boolean;
@@ -21,11 +41,130 @@ interface WorldInterfaceProps {
 
 const subscribeToHydration = () => () => {};
 
+function markerStyle(
+  anchor: Pair,
+  camera: CameraView,
+  visibility: number,
+): CSSProperties {
+  return {
+    left: `${(anchor[0] - camera.origin[0]) / camera.span[0] * 100}%`,
+    opacity: visibility,
+    position: "absolute",
+    top: `${(anchor[1] - camera.origin[1]) / camera.span[1] * 100}%`,
+    transform: "translate(-50%, -50%)",
+    "--career-world-lod-transition-ms":
+      `${LOD_PRESENTATION_TRANSITION_MS}ms`,
+  } as CSSProperties;
+}
+
+function projectGlyph(label: string): string {
+  return label
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function NinjaOneWorldSeal({
+  camera,
+  detailState,
+  enabled,
+  territory,
+  onFocus,
+}: {
+  readonly camera: CameraView;
+  readonly detailState: DetailState;
+  readonly enabled: boolean;
+  readonly territory: Territory;
+  readonly onFocus: (id: string) => void;
+}) {
+  const visibility = resolveWorldDestinationVisibility(detailState);
+  const anchor = territory.development.capitalAnchor;
+  const style = markerStyle(anchor, camera, visibility);
+  const isVisible = visibility > LOD_PRESENTATION_EPSILON;
+
+  return (
+    <button
+      aria-label="Explore NinjaOne territory"
+      className="career-world__world-seal"
+      data-ready={enabled}
+      data-territory-id={territory.id}
+      data-visible={isVisible}
+      data-world-seal-visibility={visibility.toFixed(3)}
+      disabled={!enabled || !isVisible}
+      onClick={() => onFocus(territory.id)}
+      style={style}
+      tabIndex={isVisible ? 0 : -1}
+      title="Explore NinjaOne territory"
+      type="button"
+    >
+      <span aria-hidden="true" className="career-world__world-seal-ring">
+        <span className="career-world__world-seal-mark">N1</span>
+      </span>
+      <span className="career-world__world-seal-label">NinjaOne</span>
+    </button>
+  );
+}
+
+function ProjectTownDestination({
+  active,
+  camera,
+  destination,
+  detailState,
+  enabled,
+  onFocus,
+}: {
+  readonly active: boolean;
+  readonly camera: CameraView;
+  readonly destination: ProjectDestination;
+  readonly detailState: DetailState;
+  readonly enabled: boolean;
+  readonly onFocus: (id: string) => void;
+}) {
+  const visibility = resolveProjectDestinationVisibility(detailState);
+  const isVisible = visibility > LOD_PRESENTATION_EPSILON;
+  const skillSiteLabel = destination.supportingSkillCount === 1
+    ? "1 skill site"
+    : `${destination.supportingSkillCount} skill sites`;
+
+  return (
+    <button
+      aria-label={`Open ${destination.label} project town`}
+      aria-pressed={active}
+      className="career-world__project-destination"
+      data-active={active}
+      data-project-destination-id={destination.id}
+      data-project-destination-visibility={visibility.toFixed(3)}
+      data-visible={isVisible}
+      disabled={!enabled || !isVisible}
+      onClick={() => onFocus(destination.id)}
+      style={markerStyle(destination.anchor, camera, visibility)}
+      tabIndex={isVisible ? 0 : -1}
+      title={`Open ${destination.label} project town`}
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        className="career-world__project-destination-sigil"
+      >
+        {projectGlyph(destination.label)}
+      </span>
+      <span className="career-world__project-destination-copy">
+        <strong>{destination.label}</strong>
+        <span>{skillSiteLabel}</span>
+      </span>
+    </button>
+  );
+}
+
 export function WorldInterface({
   activeViewId,
+  camera,
   detailState,
   enableDevelopmentTools,
   mode,
+  projectDestinations,
   renderState,
   showGrid,
   showTopography,
@@ -42,6 +181,13 @@ export function WorldInterface({
     () => true,
     () => false,
   );
+  const ninjaOne = territories.find(({ id }) => id === "ninjaone");
+  const activeProject = projectDestinations.find(
+    ({ id }) => id === activeViewId,
+  );
+  const activeTerritory = territories.find(
+    ({ id }) => id === activeViewId,
+  );
 
   return (
     <div className="career-world__interface" data-layer="interface">
@@ -54,7 +200,9 @@ export function WorldInterface({
             ? "Full world extent"
             : activeViewId === "custom"
               ? "Free camera"
-              : territories.find(({ id }) => id === activeViewId)?.label}
+              : activeProject
+                ? `${activeProject.label} project town`
+                : activeTerritory?.label}
         </strong>
         <span
           className="career-world__render-state"
@@ -65,6 +213,40 @@ export function WorldInterface({
         <span className="career-world__lod-state">
           {detailState.tier.label}
         </span>
+      </div>
+
+      <div
+        className="career-world__world-markers"
+        data-project-destination-count={projectDestinations.length}
+        data-world-marker-count={
+          (ninjaOne ? 1 : 0) + projectDestinations.length
+        }
+        style={{
+          inset: 0,
+          pointerEvents: "none",
+          position: "absolute",
+        }}
+      >
+        {ninjaOne ? (
+          <NinjaOneWorldSeal
+            camera={camera}
+            detailState={detailState}
+            enabled={isInteractive}
+            onFocus={onFocus}
+            territory={ninjaOne}
+          />
+        ) : null}
+        {projectDestinations.map((destination) => (
+          <ProjectTownDestination
+            active={activeViewId === destination.id}
+            camera={camera}
+            destination={destination}
+            detailState={detailState}
+            enabled={isInteractive}
+            key={destination.id}
+            onFocus={onFocus}
+          />
+        ))}
       </div>
 
       <div

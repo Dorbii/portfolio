@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
+import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -541,7 +542,7 @@ test("terrain authoring declares five connected mountain systems", async () => {
   }
 });
 
-test("every territory reserves a registered city-ready development envelope", async () => {
+test("every territory reserves a registered city-ready capital envelope", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
@@ -565,9 +566,9 @@ test("every territory reserves a registered city-ready development envelope", as
   );
 
   for (const territory of manifest.territories) {
-    const { capitalAnchor, authoringEnvelope } = territory.development;
-    const [originX, originY] = authoringEnvelope.origin;
-    const [spanX, spanY] = authoringEnvelope.span;
+    const { capitalAnchor, capitalEnvelope } = territory.development;
+    const [originX, originY] = capitalEnvelope.origin;
+    const [spanX, spanY] = capitalEnvelope.span;
     const [focusX, focusY] = territory.focusView.origin;
     const [focusWidth, focusHeight] = territory.focusView.span;
 
@@ -622,12 +623,222 @@ test("every territory reserves a registered city-ready development envelope", as
     const coverage = landPixels / totalPixels;
     assert.ok(
       coverage >= territory.development.minimumLandCoverage,
-      `${territory.id} envelope coverage ${coverage.toFixed(3)} is too low`,
+      `${territory.id} capital envelope coverage ${coverage.toFixed(3)} is too low`,
     );
     assert.ok(
       buildablePixels / Math.max(landPixels, 1) >= 0.58,
-      `${territory.id} envelope lacks a broad buildable terrain shelf`,
+      `${territory.id} capital envelope lacks a broad buildable terrain shelf`,
     );
+  }
+});
+
+test("NinjaOne project-town anchors use accepted land across the territory", async () => {
+  const projects = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/structures/manifests/project-structures-r1.json",
+  ), "utf8"));
+  const land = await decodePng(
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+  );
+
+  const anchorXs = [];
+  for (const project of projects.nodes) {
+    const [worldX, worldY] = project.territoryAnchor;
+    const x = Math.min(land.width - 1, Math.floor(worldX * land.width));
+    const y = Math.min(land.height - 1, Math.floor(worldY * land.height));
+    const offset = y * land.width + x;
+    anchorXs.push(worldX);
+    assert.ok(
+      land.pixels[offset] >= 128,
+      `${project.id} territory anchor must be on accepted land`,
+    );
+  }
+
+  assert.ok(
+    Math.max(...anchorXs) - Math.min(...anchorXs) >= 0.4,
+    "NinjaOne project towns must span the territory instead of one city site",
+  );
+});
+
+test("NinjaOne town-plan paving stays on accepted terrain", async () => {
+  const infrastructure = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/infrastructure/manifests/ninjaone-project-towns-r1.json",
+  ), "utf8"));
+  const land = await decodePng(
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+  );
+  const plans = [
+    ...infrastructure.towns.map(({ id, townPlan }) => ({ id, townPlan })),
+    {
+      id: infrastructure.capitalCampus.id,
+      townPlan: infrastructure.capitalCampus.townPlan,
+    },
+  ];
+  const toMaskPoint = ([worldX, worldY]) => [
+    worldX / WORLD_PLANE.width * land.width,
+    worldY / WORLD_PLANE.height * land.height,
+  ];
+  const assertLandAtWorldPoint = ([worldX, worldY], label) => {
+    const [maskX, maskY] = toMaskPoint([worldX, worldY]);
+    const x = Math.floor(maskX);
+    const y = Math.floor(maskY);
+    assert.ok(
+      x >= 0 && x < land.width && y >= 0 && y < land.height,
+      `${label} leaves the world plane`,
+    );
+    assert.ok(
+      land.pixels[y * land.width + x] >= 128,
+      `${label} covers water at ${x},${y}`,
+    );
+  };
+  const pointInPolygon = (x, y, points) => {
+    let inside = false;
+    for (
+      let current = 0, previous = points.length - 1;
+      current < points.length;
+      previous = current, current += 1
+    ) {
+      const [currentX, currentY] = points[current];
+      const [previousX, previousY] = points[previous];
+      if (
+        (currentY > y) !== (previousY > y)
+        && x < (
+          (previousX - currentX) * (y - currentY)
+          / (previousY - currentY)
+          + currentX
+        )
+      ) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  };
+  const assertPolygonOnLand = (points, label) => {
+    const worldPoints = points.map(([x, y]) => [
+      x * WORLD_PLANE.width,
+      y * WORLD_PLANE.height,
+    ]);
+    const maskPoints = worldPoints.map(toMaskPoint);
+    worldPoints.forEach((point, index) => {
+      assertLandAtWorldPoint(point, `${label} vertex ${index}`);
+    });
+    const xs = maskPoints.map(([x]) => x);
+    const ys = maskPoints.map(([, y]) => y);
+    const minimumX = Math.max(0, Math.floor(Math.min(...xs)));
+    const maximumX = Math.min(land.width - 1, Math.ceil(Math.max(...xs)));
+    const minimumY = Math.max(0, Math.floor(Math.min(...ys)));
+    const maximumY = Math.min(land.height - 1, Math.ceil(Math.max(...ys)));
+    let interiorSamples = 0;
+    for (let y = minimumY; y <= maximumY; y += 1) {
+      for (let x = minimumX; x <= maximumX; x += 1) {
+        if (!pointInPolygon(x + 0.5, y + 0.5, maskPoints)) {
+          continue;
+        }
+        interiorSamples += 1;
+        assert.ok(
+          land.pixels[y * land.width + x] >= 128,
+          `${label} interior covers water at ${x},${y}`,
+        );
+      }
+    }
+    assert.ok(interiorSamples > 0, `${label} needs rasterized interior`);
+  };
+  const assertCorridorOnLand = (waypoints, halfWidthWorld, label) => {
+    const lateralOffsets = [-halfWidthWorld, halfWidthWorld];
+    for (
+      let offset = Math.ceil(-halfWidthWorld);
+      offset <= Math.floor(halfWidthWorld);
+      offset += 1
+    ) {
+      lateralOffsets.push(offset);
+    }
+    for (let segment = 1; segment < waypoints.length; segment += 1) {
+      const start = [
+        waypoints[segment - 1][0] * WORLD_PLANE.width,
+        waypoints[segment - 1][1] * WORLD_PLANE.height,
+      ];
+      const end = [
+        waypoints[segment][0] * WORLD_PLANE.width,
+        waypoints[segment][1] * WORLD_PLANE.height,
+      ];
+      const deltaX = end[0] - start[0];
+      const deltaY = end[1] - start[1];
+      const length = Math.hypot(deltaX, deltaY);
+      assert.ok(length > 0, `${label} segment ${segment} has zero length`);
+      const normal = [-deltaY / length, deltaX / length];
+      const [startMaskX, startMaskY] = toMaskPoint(start);
+      const [endMaskX, endMaskY] = toMaskPoint(end);
+      const steps = Math.max(
+        1,
+        Math.ceil(Math.hypot(
+          endMaskX - startMaskX,
+          endMaskY - startMaskY,
+        )),
+      );
+      for (let step = 0; step <= steps; step += 1) {
+        const progress = step / steps;
+        const center = [
+          start[0] + deltaX * progress,
+          start[1] + deltaY * progress,
+        ];
+        for (const offset of lateralOffsets) {
+          assertLandAtWorldPoint(
+            [
+              center[0] + normal[0] * offset,
+              center[1] + normal[1] * offset,
+            ],
+            `${label} segment ${segment}`,
+          );
+        }
+      }
+    }
+  };
+
+  assert.equal(plans.length, 4);
+  for (const { id, townPlan } of plans) {
+    assert.ok(townPlan, `${id} needs a town plan`);
+    for (const block of townPlan.blocks) {
+      assertPolygonOnLand(block.points, `${id} block ${block.id}`);
+    }
+    for (const plaza of townPlan.plazas) {
+      assertPolygonOnLand(plaza.points, `${id} plaza ${plaza.id}`);
+    }
+    for (const street of townPlan.streets) {
+      assertCorridorOnLand(
+        street.waypoints,
+        4.1,
+        `${id} street ${street.id}`,
+      );
+    }
+    for (const loop of townPlan.pedestrianLoops) {
+      assertCorridorOnLand(
+        loop.waypoints,
+        1.9,
+        `${id} pedestrian loop ${loop.id}`,
+      );
+    }
+    for (const seam of townPlan.terrainSeams) {
+      assertCorridorOnLand(
+        seam.waypoints,
+        0.925,
+        `${id} terrain seam ${seam.id}`,
+      );
+    }
+    for (const entrance of townPlan.entrances) {
+      const center = [
+        entrance.point[0] * WORLD_PLANE.width,
+        entrance.point[1] * WORLD_PLANE.height,
+      ];
+      for (let offsetY = -1.4; offsetY <= 1.4; offsetY += 0.7) {
+        for (let offsetX = -2; offsetX <= 2; offsetX += 1) {
+          assertLandAtWorldPoint(
+            [center[0] + offsetX, center[1] + offsetY],
+            `${id} entrance ${entrance.structureId}`,
+          );
+        }
+      }
+    }
   }
 });
 
@@ -726,9 +937,57 @@ test("capital site tiles stay bounded to land and add local density", async () =
     [source.width, source.height],
     manifest.sourceDimensions,
   );
+  const ninjaOneSourceCrops = new Map([
+    ["ninjaone-capital-site", {
+      origin: [3310, 698],
+      size: [300, 300],
+      pathSuffix: "ninjaone-capital-site-r4.png",
+    }],
+    ["project-kaizen-agent-site", {
+      origin: [1428, 601],
+      size: [220, 220],
+      pathSuffix: "ninjaone-kaizen-agent-site-r2.png",
+    }],
+    ["project-vendy-site", {
+      origin: [2298, 568],
+      size: [220, 220],
+      pathSuffix: "ninjaone-vendy-site-r2.png",
+    }],
+    ["project-kaizen-metrics-site", {
+      origin: [4304, 643],
+      size: [220, 220],
+      pathSuffix: "ninjaone-kaizen-metrics-site-r2.png",
+    }],
+  ]);
+  assert.equal(
+    manifest.tiles.filter(({ territoryId }) => territoryId === "ninjaone")
+      .length,
+    ninjaOneSourceCrops.size,
+  );
 
   for (const site of manifest.tiles) {
     assert.equal(site.minimumTier, "site");
+    if (site.territoryId === "ninjaone") {
+      const expected = ninjaOneSourceCrops.get(site.id);
+      assert.ok(expected, `${site.id} is not a registered NinjaOne site`);
+      assert.deepEqual(site.sourceCropPixels, {
+        origin: expected.origin,
+        size: expected.size,
+      });
+      assert.deepEqual(site.worldBounds, {
+        origin: [
+          expected.origin[0] / source.width,
+          expected.origin[1] / source.height,
+        ],
+        span: [
+          expected.size[0] / source.width,
+          expected.size[1] / source.height,
+        ],
+      });
+      assert.ok(site.path.endsWith(expected.pathSuffix), site.path);
+      assert.equal("authoredSourcePath" in site, false);
+      assert.equal("authoredCropPixels" in site, false);
+    }
     const tile = await decodePng(`public${site.path}`);
     assert.deepEqual(
       [tile.width, tile.height, tile.channels],
@@ -804,44 +1063,139 @@ test("capital site tiles stay bounded to land and add local density", async () =
 test("close land detail is split into bounded camera-streamed tiles", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r1.json",
+    "public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r3.json",
   ), "utf8"));
   const [sourceWidth, sourceHeight] = manifest.sourceDimensions;
   const { columns, rows, outputScales } = manifest.grid;
   const {
-    maximumResidentTiles,
-    prefetchPadding,
-    retentionPadding,
+    maximumLandLayerDecodedBytes,
+    maximumConcurrentLoads,
+    maximumResidentDecodedBytes,
+    prefetchMarginPixels,
+    retentionMarginPixels,
+    retryBaseDelayMs,
+    retryMaximumDelayMs,
+    requestTimeoutMs,
   } = manifest.streaming;
 
-  assert.equal(manifest.schemaVersion, 2);
-  assert.deepEqual([columns, rows], [12, 8]);
+  assert.equal(manifest.schemaVersion, 3);
+  assert.equal(manifest.id, "career-world/terrain-stream-tiles@r3");
+  assert.deepEqual([columns, rows], [24, 16]);
   assert.deepEqual(outputScales, { capital: 2, site: 5 });
-  assert.ok(prefetchPadding > 0);
-  assert.ok(retentionPadding > prefetchPadding);
-  assert.ok(maximumResidentTiles <= 12);
+  assert.deepEqual(
+    Object.keys(manifest.streaming).sort(),
+    [
+      "maximumConcurrentLoads",
+      "maximumLandLayerDecodedBytes",
+      "maximumResidentDecodedBytes",
+      "prefetchMarginPixels",
+      "requestTimeoutMs",
+      "retentionMarginPixels",
+      "retryBaseDelayMs",
+      "retryMaximumDelayMs",
+    ],
+  );
+  assert.ok(prefetchMarginPixels > 0);
+  assert.ok(retentionMarginPixels > prefetchMarginPixels);
+  assert.ok(maximumConcurrentLoads > 0);
+  assert.ok(maximumConcurrentLoads <= 4);
+  assert.ok(maximumResidentDecodedBytes > 0);
+  assert.ok(maximumLandLayerDecodedBytes >= maximumResidentDecodedBytes);
+  assert.ok(retryBaseDelayMs > 0);
+  assert.ok(retryMaximumDelayMs >= retryBaseDelayMs);
+  assert.ok(requestTimeoutMs > 0);
   assert.ok(
-    manifest.tiles.length > maximumResidentTiles * 4,
+    manifest.tiles.length > 100,
     "the manifest must provide world coverage without making it all resident",
+  );
+  assert.ok(
+    manifest.tiles.length < columns * rows,
+    "fully transparent child cells must not become decoded image surfaces",
   );
   assert.equal(
     new Set(manifest.tiles.map(({ id }) => id)).size,
     manifest.tiles.length,
   );
 
+  const streamDirectory = path.join(
+    root,
+    "public/career-world/layers/territory-landform/tiles/stream-r3",
+  );
+  const manifestPaths = manifest.tiles.flatMap((tile) =>
+    Object.values(tile.sources).map(({ path: sourcePath }) => sourcePath)
+  ).sort();
+  const onDiskPaths = (await readdir(streamDirectory, {
+    withFileTypes: true,
+  }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".webp"))
+    .map((entry) =>
+      `/career-world/layers/territory-landform/tiles/stream-r3/${entry.name}`
+    )
+    .sort();
+  assert.deepEqual(
+    onDiskPaths,
+    manifestPaths,
+    "the r3 directory must contain only active manifest WebPs",
+  );
+  assert.equal(new Set(manifestPaths).size, manifestPaths.length);
+
   let capitalBytes = 0;
   let siteBytes = 0;
   for (const tile of manifest.tiles) {
     assert.equal(tile.minimumTier, "capital");
     assert.equal(tile.sourceAlphaPolicy, "preserve-exactly");
+    const idMatch = /^close-(\d+)-(\d+)$/.exec(tile.id);
+    assert.ok(idMatch, tile.id);
+    const column = Number(idMatch[1]);
+    const row = Number(idMatch[2]);
+    assert.ok(column >= 0 && column < columns, tile.id);
+    assert.ok(row >= 0 && row < rows, tile.id);
+
+    const parentColumn = Math.floor(column / 2);
+    const parentRow = Math.floor(row / 2);
+    const parentX0 = Math.floor(parentColumn * sourceWidth / 12);
+    const parentX1 = parentColumn === 11
+      ? sourceWidth
+      : Math.floor((parentColumn + 1) * sourceWidth / 12);
+    const parentY0 = Math.floor(parentRow * sourceHeight / 8);
+    const parentY1 = parentRow === 7
+      ? sourceHeight
+      : Math.floor((parentRow + 1) * sourceHeight / 8);
+    const childColumn = column % 2;
+    const childRow = row % 2;
+    const expectedX0 = parentX0 + Math.floor(
+      childColumn * (parentX1 - parentX0) / 2,
+    );
+    const expectedX1 = childColumn === 1
+      ? parentX1
+      : parentX0 + Math.floor((parentX1 - parentX0) / 2);
+    const expectedY0 = parentY0 + Math.floor(
+      childRow * (parentY1 - parentY0) / 2,
+    );
+    const expectedY1 = childRow === 1
+      ? parentY1
+      : parentY0 + Math.floor((parentY1 - parentY0) / 2);
 
     const [cropX, cropY] = tile.sourceCropPixels.origin;
     const [cropWidth, cropHeight] = tile.sourceCropPixels.size;
+    assert.deepEqual(
+      [cropX, cropY, cropWidth, cropHeight],
+      [
+        expectedX0,
+        expectedY0,
+        expectedX1 - expectedX0,
+        expectedY1 - expectedY0,
+      ],
+      `${tile.id} must be its deterministic 2x2 parent subdivision`,
+    );
     for (const tier of ["capital", "site"]) {
       const source = tile.sources[tier];
       assert.match(
         source.path,
-        /^\/career-world\/layers\/territory-landform\/tiles\/stream-r1\/.+\.webp$/,
+        new RegExp(
+          "^/career-world/layers/territory-landform/tiles/stream-r3/"
+            + `${tile.id}-${tier}\\.webp$`,
+        ),
       );
       const bytes = await readFile(path.join(root, "public", source.path));
       assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
@@ -854,11 +1208,21 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
           cropHeight * outputScales[tier],
         ],
       );
+      assert.equal(
+        source.decodedBytes,
+        source.dimensions[0] * source.dimensions[1] * 4,
+        `${tile.id} ${tier} decoded byte metadata`,
+      );
+      assert.ok(
+        Number.isSafeInteger(source.decodedBytes)
+          && source.decodedBytes > 0,
+        `${tile.id} ${tier} decoded byte metadata`,
+      );
       if (tier === "capital") {
         assert.match(source.path, /-capital\.webp$/);
         capitalBytes += bytes.length;
       } else {
-        assert.doesNotMatch(source.path, /-capital\.webp$/);
+        assert.match(source.path, /-site\.webp$/);
         siteBytes += bytes.length;
       }
     }
@@ -887,6 +1251,7 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
         >= sourceWidth * outputScales.site,
     );
   }
+
   assert.ok(
     capitalBytes < siteBytes * 0.25,
     "capital derivatives must stay materially cheaper than site sources",
@@ -914,14 +1279,19 @@ test("close land tiles are authored from dedicated high-fidelity materials", asy
   assert.match(authoringScript, /ROCK_MATERIAL/);
   assert.match(authoringScript, /sample_mirrored_detail/);
   assert.match(authoringScript, /sample_noise/);
-  assert.match(
-    authoringScript,
-    /color = matched_material \* 0\.88 \+ albedo \* 0\.12/,
-  );
-
   const closeTerrainBody = authoringScript.slice(
     authoringScript.indexOf("def add_close_terrain_detail("),
     authoringScript.indexOf("def apply_authored_mountain_reference("),
+  );
+  assert.match(
+    closeTerrainBody,
+    /color = matched_material(?:\.copy\(\))?/,
+    "Close-terrain output RGB must use the sampled material as authority.",
+  );
+  assert.doesNotMatch(
+    closeTerrainBody,
+    /color\s*=\s*matched_material\s*\*|color\s*=.*\balbedo\b/,
+    "The enlarged plate must not be blended back into close-terrain output RGB.",
   );
   assert.doesNotMatch(
     closeTerrainBody,

@@ -11,9 +11,9 @@
     "coordinateSpace": "normalized-world-top-left",
     "consumerLayers": ["infrastructure", "structures"],
     "policy": [
-      "The envelope is a registered authoring boundary, not a pre-drawn city.",
-      "Capital, roads, and structure sites must conform to the accepted terrain inside the envelope.",
-      "Higher-detail tiles may re-express local terrain but may not move the envelope, anchor, coast, or major terrain features."
+      "The capital envelope is a registered boundary for the capital core, not the boundary of its territory or project towns.",
+      "Capital-core work conforms to the accepted terrain inside the capital envelope; project towns are independently placed inside the owning territory mask.",
+      "Higher-detail tiles may re-express local terrain but may not move the territory mask, capital envelope, anchor, coast, or major terrain features."
     ]
   },
   "territories": [
@@ -28,7 +28,7 @@
       },
       "development": {
         "capitalAnchor": [0.5173, 0.2253],
-        "authoringEnvelope": {
+        "capitalEnvelope": {
           "origin": [0.4545, 0.1594],
           "span": [0.1256, 0.1328]
         },
@@ -38,7 +38,8 @@
         "reservedProgram": [
           "capital-core",
           "circulation-network",
-          "structure-sites"
+          "structure-sites",
+          "project-towns"
         ]
       }
     },
@@ -53,7 +54,7 @@
       },
       "development": {
         "capitalAnchor": [0.4433, 0.5422],
-        "authoringEnvelope": {
+        "capitalEnvelope": {
           "origin": [0.3977, 0.4782],
           "span": [0.1256, 0.1328]
         },
@@ -79,7 +80,7 @@
       },
       "development": {
         "capitalAnchor": [0.2103, 0.4983],
-        "authoringEnvelope": {
+        "capitalEnvelope": {
           "origin": [0.1376, 0.4463],
           "span": [0.1017, 0.1063]
         },
@@ -104,7 +105,7 @@
       },
       "development": {
         "capitalAnchor": [0.8401, 0.7052],
-        "authoringEnvelope": {
+        "capitalEnvelope": {
           "origin": [0.8014, 0.6482],
           "span": [0.1017, 0.1169]
         },
@@ -129,7 +130,7 @@
       },
       "development": {
         "capitalAnchor": [0.5773, 0.882],
-        "authoringEnvelope": {
+        "capitalEnvelope": {
           "origin": [0.5323, 0.8289],
           "span": [0.0897, 0.1063]
         },
@@ -152,6 +153,7 @@
     "The world view uses thirds while functional territory crops may re-center over ocean margins.",
     "Focus views change only normalized origin and span.",
     "The land and water receive the same view transform.",
-    "Every territory publishes one development envelope and capital anchor before infrastructure or structure authoring begins."
+    "Every territory publishes one capital envelope and capital anchor before infrastructure or structure authoring begins.",
+    "Project towns use territory-owned anchors and may not treat the capital envelope as the employer boundary."
   ]
 }

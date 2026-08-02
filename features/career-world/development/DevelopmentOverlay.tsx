@@ -2,6 +2,12 @@ import type { CSSProperties } from "react";
 import { LAND_ASSETS } from "../layers/territory-landform/model/assets";
 import type { Territory } from "../layers/territory-landform/model/territories";
 import {
+  NINJAONE_CITY_ALLOCATION_COVERAGE,
+  NINJAONE_CITY_ALLOCATIONS,
+  PROJECT_STRUCTURES,
+  resolveProjectAnchor,
+} from "../layers/structures";
+import {
   cameraLayerStyle,
   type CameraView,
 } from "../shared/camera";
@@ -88,7 +94,7 @@ export function DevelopmentOverlay({
             />
             <g className="career-world__development-envelopes">
               {territories.map((territory) => {
-                const envelope = territory.development.authoringEnvelope;
+                const envelope = territory.development.capitalEnvelope;
                 const anchor = territory.development.capitalAnchor;
                 const x = anchor[0] * WORLD_WIDTH;
                 const y = anchor[1] * WORLD_HEIGHT;
@@ -121,7 +127,87 @@ export function DevelopmentOverlay({
                       x={x + 9 * labelScale}
                       y={y - 9 * labelScale}
                     >
-                      {territory.label}
+                      {territory.label} capital
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+            <g className="career-world__development-project-towns">
+              {PROJECT_STRUCTURES.map((project) => {
+                const anchor = resolveProjectAnchor(project);
+                const x = anchor[0] * WORLD_WIDTH;
+                const y = anchor[1] * WORLD_HEIGHT;
+                return (
+                  <g
+                    data-project-town={project.id}
+                    key={project.id}
+                  >
+                    <circle
+                      cx={x}
+                      cy={y}
+                      fill={project.territory.maskColor}
+                      r={4 * labelScale}
+                      stroke="#050b09"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <text
+                      fill={project.territory.maskColor}
+                      fontSize={labelSize * 0.86}
+                      x={x + 8 * labelScale}
+                      y={y - 8 * labelScale}
+                    >
+                      {project.label} town
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+            <g
+              className="career-world__development-city-allocations"
+              data-ninjaone-land-coverage={
+                NINJAONE_CITY_ALLOCATION_COVERAGE.toFixed(4)
+              }
+            >
+              {NINJAONE_CITY_ALLOCATIONS.map((allocation) => {
+                const { origin, span } = allocation.bounds;
+                const x = origin[0] * WORLD_WIDTH;
+                const y = origin[1] * WORLD_HEIGHT;
+                const width = span[0] * WORLD_WIDTH;
+                const height = span[1] * WORLD_HEIGHT;
+                return (
+                  <g
+                    data-city-allocation={allocation.id}
+                    data-city-allocation-owner={allocation.ownerId}
+                    key={allocation.id}
+                  >
+                    <rect
+                      className="career-world__development-allocation-fill"
+                      fill={allocation.color}
+                      height={height}
+                      mask="url(#career-world-development-land-mask)"
+                      width={width}
+                      x={x}
+                      y={y}
+                    />
+                    <rect
+                      className="career-world__development-allocation-boundary"
+                      fill="none"
+                      height={height}
+                      stroke={allocation.color}
+                      vectorEffect="non-scaling-stroke"
+                      width={width}
+                      x={x}
+                      y={y}
+                    />
+                    <text
+                      fill={allocation.color}
+                      fontSize={labelSize * 0.78}
+                      x={x + 7 * labelScale}
+                      y={y + 17 * labelScale}
+                    >
+                      {allocation.label}
                     </text>
                   </g>
                 );

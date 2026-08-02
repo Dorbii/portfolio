@@ -62,7 +62,7 @@
     "Zoom may add detail but may not move, rescale, rotate, or redraw macro geography.",
     "Elevation and slope are canonical Phase 3 data; relief and coastline material are derivatives.",
     "Vegetation and decorative ground marks are deferred to the environment layer.",
-    "Territory development envelopes register future city detail without drawing infrastructure or structures during Phase 3.",
+    "Territory capital envelopes register future capital detail without constraining later project towns to one city site.",
     "Employer territory placement does not determine landmass count or equal territory area.",
     "Territory seams are irregular selection data and are not permanent world-view decoration.",
     "Water, shoreline foam, infrastructure, structures, actors, and interface data are separate layers."

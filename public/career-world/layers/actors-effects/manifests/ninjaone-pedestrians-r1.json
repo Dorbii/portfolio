@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/ninjaone-pedestrians@r1",
+  "status": "active-close-detail",
+  "coordinateSpace": "normalized-world-top-left",
+  "territoryId": "ninjaone",
+  "minimumTier": "close",
+  "reducedMotionRestProgress": 0.5,
+  "policy": [
+    "Pedestrians are explicit authored instances attached to retained structure entrances.",
+    "The owning town plan's existing closed pedestrian loop is the authoritative local walkable-road route.",
+    "Animated pedestrians fade at the entrance endpoint before the route repeats.",
+    "Reduced-motion presentation keeps each pedestrian visible halfway along its first directed route segment, away from structure entrances.",
+    "Weather, particles, and sparse crash or foam accents remain deferred."
+  ],
+  "pedestrians": [
+    {
+      "id": "kaizen-agent-project-runner",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "startEntranceStructureId": "project-kaizen-agent",
+      "direction": "clockwise",
+      "durationSeconds": 31,
+      "appearance": {
+        "coat": "#8f6b38",
+        "trousers": "#263b40",
+        "skin": "#b88b69",
+        "hair": "#27241f"
+      }
+    },
+    {
+      "id": "kaizen-agent-data-steward",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "startEntranceStructureId": "project-kaizen-agent-data-contracts",
+      "direction": "counterclockwise",
+      "durationSeconds": 35,
+      "appearance": {
+        "coat": "#466977",
+        "trousers": "#292f32",
+        "skin": "#8f654f",
+        "hair": "#1e1c19"
+      }
+    },
+    {
+      "id": "kaizen-agent-gateway-operator",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "startEntranceStructureId": "project-kaizen-agent-protocol-gateway",
+      "direction": "clockwise",
+      "durationSeconds": 39,
+      "appearance": {
+        "coat": "#7b4e43",
+        "trousers": "#283239",
+        "skin": "#c79b78",
+        "hair": "#4a3427"
+      }
+    },
+    {
+      "id": "kaizen-agent-safe-writes-courier",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "startEntranceStructureId": "project-kaizen-agent-safe-writes",
+      "direction": "counterclockwise",
+      "durationSeconds": 43,
+      "appearance": {
+        "coat": "#667447",
+        "trousers": "#343029",
+        "skin": "#a87758",
+        "hair": "#35261d"
+      }
+    },
+    {
+      "id": "vendy-project-runner",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "startEntranceStructureId": "project-vendy",
+      "direction": "clockwise",
+      "durationSeconds": 32,
+      "appearance": {
+        "coat": "#86623b",
+        "trousers": "#26383d",
+        "skin": "#b88b69",
+        "hair": "#27241f"
+      }
+    },
+    {
+      "id": "vendy-workflow-steward",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "startEntranceStructureId": "project-vendy-workflow-orchestration",
+      "direction": "counterclockwise",
+      "durationSeconds": 36,
+      "appearance": {
+        "coat": "#456b74",
+        "trousers": "#293237",
+        "skin": "#8f654f",
+        "hair": "#1d1a18"
+      }
+    },
+    {
+      "id": "vendy-cloud-operator",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "startEntranceStructureId": "project-vendy-cloud-infrastructure",
+      "direction": "clockwise",
+      "durationSeconds": 41,
+      "appearance": {
+        "coat": "#744b45",
+        "trousers": "#26343c",
+        "skin": "#c79b78",
+        "hair": "#51382a"
+      }
+    },
+    {
+      "id": "kaizen-metrics-project-runner",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "startEntranceStructureId": "project-kaizen-metrics",
+      "direction": "clockwise",
+      "durationSeconds": 34,
+      "appearance": {
+        "coat": "#90683a",
+        "trousers": "#27383d",
+        "skin": "#b88b69",
+        "hair": "#27241f"
+      }
+    },
+    {
+      "id": "kaizen-metrics-python-steward",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "startEntranceStructureId": "project-kaizen-metrics-python",
+      "direction": "counterclockwise",
+      "durationSeconds": 38,
+      "appearance": {
+        "coat": "#496b75",
+        "trousers": "#2a3135",
+        "skin": "#8f654f",
+        "hair": "#1e1b19"
+      }
+    },
+    {
+      "id": "kaizen-metrics-databricks-operator",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "startEntranceStructureId": "project-kaizen-metrics-databricks",
+      "direction": "clockwise",
+      "durationSeconds": 43,
+      "appearance": {
+        "coat": "#7b4f46",
+        "trousers": "#26343c",
+        "skin": "#c79b78",
+        "hair": "#4b3428"
+      }
+    },
+    {
+      "id": "ninjaone-capital-courier",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "capital-ninjaone",
+      "direction": "clockwise",
+      "durationSeconds": 29,
+      "appearance": {
+        "coat": "#9a713d",
+        "trousers": "#26373c",
+        "skin": "#b88b69",
+        "hair": "#27241f"
+      }
+    },
+    {
+      "id": "ninjaone-capital-safe-writes-steward",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "capital-ninjaone-safe-writes",
+      "direction": "counterclockwise",
+      "durationSeconds": 32,
+      "appearance": {
+        "coat": "#486d77",
+        "trousers": "#293237",
+        "skin": "#8f654f",
+        "hair": "#1e1b19"
+      }
+    },
+    {
+      "id": "ninjaone-capital-north-resident",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "ninjaone-capital-housing-north",
+      "direction": "clockwise",
+      "durationSeconds": 35,
+      "appearance": {
+        "coat": "#7d5148",
+        "trousers": "#28343a",
+        "skin": "#c79b78",
+        "hair": "#50372a"
+      }
+    },
+    {
+      "id": "ninjaone-capital-workshop-runner",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "ninjaone-capital-workshop-north",
+      "direction": "counterclockwise",
+      "durationSeconds": 38,
+      "appearance": {
+        "coat": "#6f6847",
+        "trousers": "#2b3335",
+        "skin": "#a9785d",
+        "hair": "#31251f"
+      }
+    },
+    {
+      "id": "ninjaone-capital-gateway-operator",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "capital-ninjaone-protocol-gateway",
+      "direction": "clockwise",
+      "durationSeconds": 45,
+      "appearance": {
+        "coat": "#416773",
+        "trousers": "#26343a",
+        "skin": "#b88b69",
+        "hair": "#24211e"
+      }
+    },
+    {
+      "id": "ninjaone-capital-cloud-steward",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "capital-ninjaone-cloud-infrastructure",
+      "direction": "counterclockwise",
+      "durationSeconds": 49,
+      "appearance": {
+        "coat": "#825248",
+        "trousers": "#28363d",
+        "skin": "#8f654f",
+        "hair": "#1d1b19"
+      }
+    },
+    {
+      "id": "ninjaone-capital-south-resident",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "ninjaone-capital-housing-south",
+      "direction": "clockwise",
+      "durationSeconds": 53,
+      "appearance": {
+        "coat": "#8b673d",
+        "trousers": "#293238",
+        "skin": "#c79b78",
+        "hair": "#4d3529"
+      }
+    },
+    {
+      "id": "ninjaone-capital-depot-runner",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "startEntranceStructureId": "ninjaone-capital-depot-southeast",
+      "direction": "counterclockwise",
+      "durationSeconds": 57,
+      "appearance": {
+        "coat": "#566a4a",
+        "trousers": "#26343a",
+        "skin": "#a9785d",
+        "hair": "#31251f"
+      }
+    }
+  ]
+}

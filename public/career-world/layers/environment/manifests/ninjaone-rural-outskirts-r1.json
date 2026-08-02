@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/ninjaone-rural-outskirts@r1",
+  "status": "decorative-rural-outskirts",
+  "coordinateSpace": "normalized-world-top-left",
+  "territoryId": "ninjaone",
+  "minimumTier": "close",
+  "scenery": [
+    {
+      "id": "ninjaone-northwest-furrows",
+      "kind": "field-furrows",
+      "anchor": [0.082, 0.118],
+      "footprintSpan": [0.022, 0.014],
+      "headingDegrees": 8,
+      "scale": 1.08
+    },
+    {
+      "id": "ninjaone-northwest-grove",
+      "kind": "grove",
+      "anchor": [0.166, 0.105],
+      "footprintSpan": [0.017, 0.016],
+      "headingDegrees": 350,
+      "scale": 0.96
+    },
+    {
+      "id": "ninjaone-upper-meadow-wall",
+      "kind": "stone-wall",
+      "anchor": [0.18, 0.135],
+      "footprintSpan": [0.021, 0.011],
+      "headingDegrees": 14,
+      "scale": 1.04
+    },
+    {
+      "id": "ninjaone-vendy-north-furrows",
+      "kind": "field-furrows",
+      "anchor": [0.353, 0.105],
+      "footprintSpan": [0.023, 0.014],
+      "headingDegrees": 354,
+      "scale": 1.12
+    },
+    {
+      "id": "ninjaone-crown-grove",
+      "kind": "grove",
+      "anchor": [0.465, 0.105],
+      "footprintSpan": [0.018, 0.017],
+      "headingDegrees": 12,
+      "scale": 1.03
+    },
+    {
+      "id": "ninjaone-capital-north-lookout",
+      "kind": "lookout",
+      "anchor": [0.535, 0.125],
+      "footprintSpan": [0.015, 0.016],
+      "headingDegrees": 18,
+      "scale": 0.92
+    },
+    {
+      "id": "ninjaone-northeast-grove",
+      "kind": "grove",
+      "anchor": [0.67, 0.1],
+      "footprintSpan": [0.019, 0.017],
+      "headingDegrees": 342,
+      "scale": 1.08
+    },
+    {
+      "id": "ninjaone-metrics-east-wall",
+      "kind": "stone-wall",
+      "anchor": [0.72, 0.185],
+      "footprintSpan": [0.022, 0.011],
+      "headingDegrees": 336,
+      "scale": 1.06
+    },
+    {
+      "id": "ninjaone-eastern-camp",
+      "kind": "camp",
+      "anchor": [0.71, 0.275],
+      "footprintSpan": [0.017, 0.014],
+      "headingDegrees": 326,
+      "scale": 0.94
+    },
+    {
+      "id": "ninjaone-southeast-clearing",
+      "kind": "clearing",
+      "anchor": [0.65, 0.315],
+      "footprintSpan": [0.021, 0.015],
+      "headingDegrees": 6,
+      "scale": 1.06
+    },
+    {
+      "id": "ninjaone-civic-south-hedgerow",
+      "kind": "hedgerow",
+      "anchor": [0.55, 0.325],
+      "footprintSpan": [0.023, 0.012],
+      "headingDegrees": 176,
+      "scale": 1.1
+    },
+    {
+      "id": "ninjaone-south-valley-furrows",
+      "kind": "field-furrows",
+      "anchor": [0.42, 0.325],
+      "footprintSpan": [0.024, 0.015],
+      "headingDegrees": 186,
+      "scale": 1.14
+    },
+    {
+      "id": "ninjaone-kaizen-south-clearing",
+      "kind": "clearing",
+      "anchor": [0.24, 0.35],
+      "footprintSpan": [0.019, 0.015],
+      "headingDegrees": 10,
+      "scale": 0.98
+    },
+    {
+      "id": "ninjaone-western-hedgerow",
+      "kind": "hedgerow",
+      "anchor": [0.105, 0.305],
+      "footprintSpan": [0.022, 0.012],
+      "headingDegrees": 164,
+      "scale": 1.04
+    }
+  ],
+  "easterEggSlots": [
+    {
+      "id": "ninjaone-easter-egg-slot-northwest-hollow",
+      "anchor": [0.12, 0.17],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    },
+    {
+      "id": "ninjaone-easter-egg-slot-kaizen-south",
+      "anchor": [0.165, 0.34],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    },
+    {
+      "id": "ninjaone-easter-egg-slot-vendy-west",
+      "anchor": [0.3, 0.23],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    },
+    {
+      "id": "ninjaone-easter-egg-slot-capital-northeast",
+      "anchor": [0.6, 0.11],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    },
+    {
+      "id": "ninjaone-easter-egg-slot-east-highlands",
+      "anchor": [0.735, 0.12],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    },
+    {
+      "id": "ninjaone-easter-egg-slot-south-meadow",
+      "anchor": [0.35, 0.35],
+      "footprintSpan": [0.012, 0.012],
+      "headingDegrees": 0,
+      "content": null
+    }
+  ],
+  "policy": [
+    "Rural scenery is decorative close-detail only; it never carries project, skill, evidence, destination, selection, or navigation semantics.",
+    "Every footprint is authored inside an accepted NinjaOne city-allocation envelope and outside the current town-fabric bounds.",
+    "Easter-egg slots reserve stable rural coordinates but remain empty and render nothing until separately authored content is approved.",
+    "No scenery or slot is distributed, randomized, or inferred at runtime."
+  ]
+}

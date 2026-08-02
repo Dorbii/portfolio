@@ -1,9 +1,9 @@
-"""Build bounded terrain-owned ground transitions for every capital.
+"""Build bounded terrain-owned ground transitions for capitals and town sites.
 
-Capital sprites stay independent from the landform. These tiles provide only
-the flattened, material-matched ground contact beneath each structure. Their
-alpha is always a subset of the registered land plate, so they cannot cover
-the locked water layer or silently redraw geography.
+Structure sprites and town fabric stay independent from the landform. These
+tiles provide only the flattened, material-matched ground contact beneath each
+site. Their alpha is always a subset of the registered land plate, so they
+cannot cover the locked water layer or silently redraw geography.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ LOWLAND_MATERIAL = LAND_ROOT / "materials" / "close-ground-r1.png"
 ROCK_MATERIAL = LAND_ROOT / "materials" / "close-rock-r1.png"
 TERRITORIES = LAND_ROOT / "manifests" / "world-territories-r4.json"
 STRUCTURES = STRUCTURE_ROOT / "manifests" / "capital-structures-r1.json"
+PROJECTS = STRUCTURE_ROOT / "manifests" / "project-structures-r1.json"
 MANIFEST = LAND_ROOT / "manifests" / "terrain-site-tiles-r2.json"
 INDEPENDENT_SOURCE = (
     LAND_ROOT / "sources" / "independent-capital-site-authored-r2.png"
@@ -33,6 +34,12 @@ INDEPENDENT_SOURCE = (
 OUTPUT_SIZE = 1254
 GENERATED_CROP_SIZE = 300
 INDEPENDENT_CROP_SIZE = 368
+NINJAONE_SITE_SOURCE_CROPS = {
+    "capital-ninjaone": (3310, 698, 3610, 998),
+    "project-kaizen-agent": (1428, 601, 1648, 821),
+    "project-vendy": (2298, 568, 2518, 788),
+    "project-kaizen-metrics": (4304, 643, 4524, 863),
+}
 
 
 def smooth_unit(values: np.ndarray) -> np.ndarray:
@@ -182,6 +189,7 @@ def main() -> None:
     rock = Image.open(ROCK_MATERIAL).convert("RGB")
     territories = json.loads(TERRITORIES.read_text(encoding="utf-8"))
     structures = json.loads(STRUCTURES.read_text(encoding="utf-8"))
+    projects = json.loads(PROJECTS.read_text(encoding="utf-8"))
     territory_by_id = {
         territory["id"]: territory
         for territory in territories["territories"]
@@ -200,7 +208,11 @@ def main() -> None:
             if territory_id == "independent"
             else GENERATED_CROP_SIZE
         )
-        bounds = centered_crop(anchor, crop_size, registered_source.size)
+        bounds = (
+            NINJAONE_SITE_SOURCE_CROPS[capital["id"]]
+            if territory_id == "ninjaone"
+            else centered_crop(anchor, crop_size, registered_source.size)
+        )
 
         if territory_id == "independent":
             image = build_authored_independent(registered_source, bounds)
@@ -209,6 +221,15 @@ def main() -> None:
                 "/career-world/layers/territory-landform/"
                 "sources/independent-capital-site-authored-r2.png"
             )
+        elif territory_id == "ninjaone":
+            image = build_generated_site(
+                registered_source,
+                bounds,
+                lowland,
+                rock,
+            )
+            revision = "r4"
+            authored_source_path = None
         else:
             image = build_generated_site(
                 registered_source,
@@ -229,6 +250,8 @@ def main() -> None:
         tile = {
             "id": f"{territory_id}-capital-site",
             "territoryId": territory_id,
+            "ownerKind": "capital",
+            "ownerId": capital["id"],
             "minimumTier": "site",
             "path": (
                 "/career-world/layers/territory-landform/tiles/"
@@ -257,10 +280,56 @@ def main() -> None:
         tiles.append(tile)
         print(f"Built {output.relative_to(ROOT)} ({tile['sha256']}).")
 
+    for project in projects["nodes"]:
+        bounds = NINJAONE_SITE_SOURCE_CROPS[project["id"]]
+        image = build_generated_site(
+            registered_source,
+            bounds,
+            lowland,
+            rock,
+        )
+        project_slug = project["id"].removeprefix("project-")
+        file_name = f"ninjaone-{project_slug}-site-r2.png"
+        output = output_root / file_name
+        temporary = output.with_suffix(".tmp.png")
+        image.save(temporary, format="PNG", optimize=True)
+        temporary.replace(output)
+        left, top, right, bottom = bounds
+        tile = {
+            "id": f"{project['id']}-site",
+            "territoryId": "ninjaone",
+            "ownerKind": "project",
+            "ownerId": project["id"],
+            "minimumTier": "site",
+            "path": (
+                "/career-world/layers/territory-landform/tiles/"
+                f"{file_name}"
+            ),
+            "dimensions": [image.width, image.height],
+            "worldBounds": {
+                "origin": [
+                    left / registered_source.width,
+                    top / registered_source.height,
+                ],
+                "span": [
+                    (right - left) / registered_source.width,
+                    (bottom - top) / registered_source.height,
+                ],
+            },
+            "sourceCropPixels": {
+                "origin": [left, top],
+                "size": [right - left, bottom - top],
+            },
+            "sourceAlphaPolicy": "bounded-subset",
+            "sha256": sha256(output),
+        }
+        tiles.append(tile)
+        print(f"Built {output.relative_to(ROOT)} ({tile['sha256']}).")
+
     write_json(MANIFEST, {
         "schemaVersion": 2,
         "id": "career-world/terrain-site-tiles@r2",
-        "status": "phase-6-capital-sites",
+        "status": "phase-6-structure-sites",
         "coordinateSpace": "normalized-world-top-left",
         "sourceDetailPath": (
             "/career-world/layers/territory-landform/"
@@ -270,12 +339,12 @@ def main() -> None:
         "tiles": tiles,
         "policy": [
             (
-                "One bounded terrain-owned ground transition is registered "
-                "for each capital."
+                "Every capital and registered project district owns one "
+                "bounded terrain-owned ground transition."
             ),
             (
                 "Wide-area close terrain is camera-streamed; local site "
-                "overlays contain only foundation contact detail."
+                "overlays contain only material-matched foundation contact."
             ),
             (
                 "Every site alpha is a subset of the registered land alpha "
@@ -286,8 +355,17 @@ def main() -> None:
                 "persistent swash and wet-edge motion remain water-owned."
             ),
             (
-                "Roads, paths, vegetation, actors, labels, and transient "
-                "effects remain in their later owning phases."
+                "Ground-only material contacts support structures without "
+                "redrawing geography or defining infrastructure."
+            ),
+            (
+                "NinjaOne project contacts are distributed across territory-"
+                "owned anchors rather than compressed inside the capital "
+                "envelope."
+            ),
+            (
+                "Vegetation, actors, labels, and transient effects remain "
+                "in their later owning phases."
             ),
         ],
     })

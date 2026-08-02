@@ -6,6 +6,17 @@ const WORLD_PLATE =
   "/career-world/layers/territory-landform/textures/terrain-relief-r6.png";
 const TERRITORY_PLATE =
   "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png";
+const WORLD_PLATE_DIMENSIONS = [1672, 941] as const;
+const TERRITORY_PLATE_DIMENSIONS = [6688, 3764] as const;
+
+export const LAND_PLATE_DECODED_BYTES = Object.freeze({
+  world:
+    WORLD_PLATE_DIMENSIONS[0] * WORLD_PLATE_DIMENSIONS[1] * 4,
+  territory:
+    TERRITORY_PLATE_DIMENSIONS[0]
+    * TERRITORY_PLATE_DIMENSIONS[1]
+    * 4,
+});
 
 export const LAND_ASSETS = Object.freeze({
   plate: WORLD_PLATE,
@@ -26,7 +37,7 @@ export const LAND_DETAIL_CONTRACT = defineLayerDetailContract({
       kind: "registered-raster",
       minimumTier: "world",
       path: WORLD_PLATE,
-      dimensions: [1672, 941],
+      dimensions: WORLD_PLATE_DIMENSIONS,
       worldBounds: {
         origin: [0, 0],
         span: [1, 1],
@@ -37,7 +48,7 @@ export const LAND_DETAIL_CONTRACT = defineLayerDetailContract({
       kind: "registered-raster",
       minimumTier: "territory",
       path: TERRITORY_PLATE,
-      dimensions: [6688, 3764],
+      dimensions: TERRITORY_PLATE_DIMENSIONS,
       worldBounds: {
         origin: [0, 0],
         span: [1, 1],

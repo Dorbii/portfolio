@@ -1,0 +1,1813 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/ambient-structures@r1",
+  "status": "phase-10-close-detail-modular-town-fabric",
+  "coordinateSpace": "normalized-world-top-left",
+  "territoryId": "ninjaone",
+  "minimumTier": "site",
+  "visualFamily": "career-world-fantasy-ambient-buildings@r1",
+  "archetypes": [
+    {
+      "id": "fantasy-townhouse",
+      "label": "Fantasy townhouse",
+      "assetPath": "/career-world/layers/structures/textures/ambient/townhouse-r1.png",
+      "sourceDimensions": [
+        456,
+        456
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0037,
+        0.0068
+      ]
+    },
+    {
+      "id": "fantasy-guildhouse",
+      "label": "Fantasy guildhouse",
+      "assetPath": "/career-world/layers/structures/textures/ambient/guildhouse-r1.png",
+      "sourceDimensions": [
+        470,
+        470
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0043,
+        0.0074
+      ]
+    },
+    {
+      "id": "fantasy-chapel",
+      "label": "Fantasy chapel",
+      "assetPath": "/career-world/layers/structures/textures/ambient/chapel-r1.png",
+      "sourceDimensions": [
+        456,
+        456
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.004,
+        0.0072
+      ]
+    },
+    {
+      "id": "fantasy-inn",
+      "label": "Fantasy inn",
+      "assetPath": "/career-world/layers/structures/textures/ambient/inn-r1.png",
+      "sourceDimensions": [
+        496,
+        496
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0042,
+        0.0074
+      ]
+    },
+    {
+      "id": "fantasy-conservatory",
+      "label": "Fantasy conservatory",
+      "assetPath": "/career-world/layers/structures/textures/ambient/conservatory-r1.png",
+      "sourceDimensions": [
+        422,
+        422
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0041,
+        0.007
+      ]
+    },
+    {
+      "id": "fantasy-watchtower",
+      "label": "Fantasy watchtower",
+      "assetPath": "/career-world/layers/structures/textures/ambient/watchtower-r1.png",
+      "sourceDimensions": [
+        490,
+        490
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0038,
+        0.0072
+      ]
+    },
+    {
+      "id": "kaizen-artisan-rowhouse",
+      "label": "Kaizen artisan rowhouse",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/artisan-rowhouse-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0065,
+        0.0116
+      ]
+    },
+    {
+      "id": "kaizen-machinist-workshop",
+      "label": "Kaizen machinist workshop",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/machinist-workshop-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0092,
+        0.0123
+      ]
+    },
+    {
+      "id": "kaizen-corner-tenement",
+      "label": "Kaizen corner tenement",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/corner-tenement-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0057,
+        0.0129
+      ]
+    },
+    {
+      "id": "kaizen-guild-annex",
+      "label": "Kaizen guild annex",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/guild-annex-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0068,
+        0.0122
+      ]
+    },
+    {
+      "id": "kaizen-carriage-warehouse",
+      "label": "Kaizen carriage warehouse",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/carriage-warehouse-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0118,
+        0.0124
+      ]
+    },
+    {
+      "id": "kaizen-municipal-pump-house",
+      "label": "Kaizen municipal pump house",
+      "assetPath": "/career-world/layers/structures/textures/ambient/kaizen-agent/municipal-pump-house-r1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0074,
+        0.0112
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "kaizen-agent-foundry-core-filler-01",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-carriage-warehouse",
+      "territoryAnchor": [
+        0.207,
+        0.144
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-02",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-machinist-workshop",
+      "territoryAnchor": [
+        0.226,
+        0.154
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-03",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.24,
+        0.157
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-04",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.208,
+        0.178
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-05",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-guild-annex",
+      "territoryAnchor": [
+        0.244,
+        0.178
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-01",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.218,
+        0.216
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-02",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.214,
+        0.242
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-04",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.219,
+        0.246
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-06",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "kaizen-municipal-pump-house",
+      "territoryAnchor": [
+        0.214,
+        0.232
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-01",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.251,
+        0.216
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-02",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.238,
+        0.214
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-04",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.256,
+        0.225
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-06",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "kaizen-municipal-pump-house",
+      "territoryAnchor": [
+        0.242,
+        0.268
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-05",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.24,
+        0.313
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-06",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.269,
+        0.316
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-07",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.238,
+        0.327
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-08",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-guild-annex",
+      "territoryAnchor": [
+        0.256,
+        0.329
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-06",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.203,
+        0.165
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-07",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.212,
+        0.141
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-08",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-guild-annex",
+      "territoryAnchor": [
+        0.218,
+        0.153
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-09",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-municipal-pump-house",
+      "territoryAnchor": [
+        0.224,
+        0.165
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-10",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "kaizen-machinist-workshop",
+      "territoryAnchor": [
+        0.236,
+        0.165
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-11",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.245,
+        0.189
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-08",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.213,
+        0.255
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-09",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.216,
+        0.267
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-10",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.231,
+        0.231
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-08",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "kaizen-guild-annex",
+      "territoryAnchor": [
+        0.244,
+        0.221
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-10",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "kaizen-municipal-pump-house",
+      "territoryAnchor": [
+        0.25,
+        0.263
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-09",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.223,
+        0.276
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-11",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-corner-tenement",
+      "territoryAnchor": [
+        0.232,
+        0.324
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-12",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "kaizen-artisan-rowhouse",
+      "territoryAnchor": [
+        0.244,
+        0.324
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-12",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.223512,
+        0.213305
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-14",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.238392,
+        0.213305
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-15",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.219048,
+        0.191822
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-11",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.234548,
+        0.269655
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-12",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.230208,
+        0.250962
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-13",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.228472,
+        0.211499
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-14",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.23802,
+        0.219807
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-16",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.23802,
+        0.25927
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-17",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.222396,
+        0.263424
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-11",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.262055,
+        0.24892
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-14",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.238619,
+        0.231064
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-15",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.259544,
+        0.235032
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-16",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.244478,
+        0.256856
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-18",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.244478,
+        0.231064
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-19",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.246989,
+        0.246936
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-13",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.254358,
+        0.270205
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-15",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.237928,
+        0.270205
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-16",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.251072,
+        0.295594
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-17",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.259287,
+        0.307312
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-18",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.26093,
+        0.283876
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-19",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.231356,
+        0.301453
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-20",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.242857,
+        0.287782
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-16",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.214862,
+        0.161238
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-17",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.208411,
+        0.16863
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-18",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.236981,
+        0.198198
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-19",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.216706,
+        0.187849
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-20",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.218549,
+        0.171586
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-21",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.217627,
+        0.21446
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-19",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.217474,
+        0.239786
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-20",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.228763,
+        0.217918
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-21",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.216398,
+        0.211486
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-22",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.22715,
+        0.246218
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-23",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.23844,
+        0.225636
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-24",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.223387,
+        0.214058
+      ]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-25",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.229838,
+        0.22435
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-20",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.243279,
+        0.250059
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-21",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.245871,
+        0.215653
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-22",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.248463,
+        0.211966
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-23",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.253647,
+        0.268491
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-24",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.241206,
+        0.214424
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-25",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.255202,
+        0.231627
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-26",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.250537,
+        0.245144
+      ]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-27",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.237577,
+        0.220568
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-21",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.2445,
+        0.309177
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-22",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.228218,
+        0.297081
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-23",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.234324,
+        0.27047
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-24",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.229236,
+        0.281356
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-25",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.253658,
+        0.309177
+      ]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-26",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.257729,
+        0.293452
+      ]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-22",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.211531, 0.151197]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-23",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.203333, 0.153076]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-24",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.20509, 0.158712]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-25",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.227928, 0.213197]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-26",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [0.21036, 0.174682]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-27",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [0.220901, 0.175621]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-28",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.206846, 0.164348]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-29",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.214459, 0.184076]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-30",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.203918, 0.1465]
+    },
+    {
+      "id": "kaizen-agent-foundry-core-filler-31",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-foundry-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.213288, 0.155894]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-26",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.236273, 0.214795]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-27",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.223292, 0.244222]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-28",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.221926, 0.269561]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-29",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.217826, 0.232778]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-30",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [0.220901, 0.258935]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-31",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [0.220901, 0.21643]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-32",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.228416, 0.228691]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-34",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.219534, 0.263839]
+    },
+    {
+      "id": "kaizen-agent-west-skill-block-filler-35",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-west-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.215094, 0.236865]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-28",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.238959, 0.264766]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-29",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.241594, 0.231192]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-30",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.24423, 0.263205]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-31",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.23863, 0.225726]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-32",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [0.24423, 0.245246]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-33",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [0.2495, 0.257739]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-34",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.258064, 0.230411]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-35",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.250159, 0.207768]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-36",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.250818, 0.26789]
+    },
+    {
+      "id": "kaizen-agent-east-skill-block-filler-37",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-east-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.245877, 0.252274]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-27",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.262605, 0.30488]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-29",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.241267, 0.276442]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-30",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.257432, 0.274136]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-31",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [0.239974, 0.307955]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-32",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [0.260018, 0.277979]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-33",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [0.236741, 0.306417]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-34",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [0.250966, 0.289508]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-35",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [0.225749, 0.278748]
+    },
+    {
+      "id": "kaizen-agent-south-service-block-filler-36",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "blockId": "kaizen-agent-south-service-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [0.254846, 0.294888]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-01",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.3769018,
+        0.195471
+      ]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-02",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.3434866,
+        0.195471
+      ]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-03",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.3657634,
+        0.1998364
+      ]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-04",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.354625,
+        0.1998364
+      ]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-05",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.3434866,
+        0.1867402
+      ]
+    },
+    {
+      "id": "vendy-orchestration-core-ambient-06",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-orchestration-core",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.3769018,
+        0.1867402
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-01",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.37003,
+        0.2493196
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-02",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.350374,
+        0.2493196
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-03",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.379858,
+        0.2388806
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-04",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.340546,
+        0.2388806
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-05",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.366754,
+        0.2388806
+      ]
+    },
+    {
+      "id": "vendy-south-freight-block-ambient-06",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "blockId": "vendy-south-freight-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.35365,
+        0.2388806
+      ]
+    },
+    {
+      "id": "kaizen-metrics-west-skill-block-ambient-01",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "blockId": "kaizen-metrics-west-skill-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.6295968,
+        0.2085219
+      ]
+    },
+    {
+      "id": "kaizen-metrics-north-skill-block-ambient-01",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "blockId": "kaizen-metrics-north-skill-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.6365736,
+        0.1796991
+      ]
+    },
+    {
+      "id": "kaizen-metrics-north-skill-block-ambient-02",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "blockId": "kaizen-metrics-north-skill-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.6365736,
+        0.1718151
+      ]
+    },
+    {
+      "id": "ninjaone-capital-civic-core-ambient-01",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-civic-core",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.506734,
+        0.22369
+      ]
+    },
+    {
+      "id": "ninjaone-capital-civic-core-ambient-02",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-civic-core",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.5136136,
+        0.2213175
+      ]
+    },
+    {
+      "id": "ninjaone-capital-civic-core-ambient-03",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-civic-core",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.5365456,
+        0.2308075
+      ]
+    },
+    {
+      "id": "ninjaone-capital-civic-core-ambient-04",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-civic-core",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.5113204,
+        0.228435
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-01",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.4870351,
+        0.24176
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-02",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.4737673,
+        0.230372
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-03",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.4737673,
+        0.221831
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-04",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.5003029,
+        0.233219
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-05",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.4870351,
+        0.218984
+      ]
+    },
+    {
+      "id": "ninjaone-capital-west-archives-block-ambient-06",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-west-archives-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.4848238,
+        0.236066
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-01",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.5052611,
+        0.2957204
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-02",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.4860146,
+        0.290406
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-03",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.5052611,
+        0.2797772
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-04",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.4898639,
+        0.2824344
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-05",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.5245076,
+        0.290406
+      ]
+    },
+    {
+      "id": "ninjaone-capital-south-operations-block-ambient-06",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-south-operations-block",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.5206583,
+        0.2824344
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-01",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-watchtower",
+      "territoryAnchor": [
+        0.5629564,
+        0.2605008
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-02",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-townhouse",
+      "territoryAnchor": [
+        0.5440375,
+        0.2382942
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-03",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-guildhouse",
+      "territoryAnchor": [
+        0.5440375,
+        0.2753052
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-04",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-chapel",
+      "territoryAnchor": [
+        0.5386321,
+        0.2419953
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-05",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-inn",
+      "territoryAnchor": [
+        0.557551,
+        0.2567997
+      ]
+    },
+    {
+      "id": "ninjaone-capital-east-data-ridge-ambient-06",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "blockId": "ninjaone-capital-east-data-ridge",
+      "archetypeId": "fantasy-conservatory",
+      "territoryAnchor": [
+        0.5494429,
+        0.2419953
+      ]
+    }
+  ],
+  "policy": [
+    "Ambient buildings are deterministic decorative-only close-detail fabric with no project, skill, evidence, selection, or navigation semantics.",
+    "Every ambient anchor stays inside its authored block and outside physical road, pedestrian-loop, plaza, entrance, and semantic-structure clearances.",
+    "Ambient candidates remain available for future aligned authoring but do not replace owners already covered by persistent town fabric."
+  ]
+}

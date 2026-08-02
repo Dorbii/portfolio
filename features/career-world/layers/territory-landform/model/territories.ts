@@ -3,7 +3,7 @@ import type { CameraView, Pair } from "../../../shared/camera";
 
 export interface TerritoryDevelopment {
   readonly capitalAnchor: Pair;
-  readonly authoringEnvelope: CameraView;
+  readonly capitalEnvelope: CameraView;
   readonly minimumLandCoverage: number;
   readonly firstDetailTier: "territory";
   readonly terrainPolicy: "conform-to-landform";
@@ -36,9 +36,9 @@ function development(
   return Object.freeze({
     ...source,
     capitalAnchor: pair(source.capitalAnchor),
-    authoringEnvelope: Object.freeze({
-      origin: pair(source.authoringEnvelope.origin),
-      span: pair(source.authoringEnvelope.span),
+    capitalEnvelope: Object.freeze({
+      origin: pair(source.capitalEnvelope.origin),
+      span: pair(source.capitalEnvelope.span),
     }),
     firstDetailTier: source.firstDetailTier,
     terrainPolicy: source.terrainPolicy,

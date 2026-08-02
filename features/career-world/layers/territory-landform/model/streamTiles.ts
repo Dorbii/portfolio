@@ -1,6 +1,7 @@
-import manifest from "@/public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r1.json";
+import manifest from "@/public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r3.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
+import type { TerrainResidencyPolicy } from "./residency";
 
 export type TerrainStreamSourceTier = Extract<
   DetailTierId,
@@ -8,8 +9,9 @@ export type TerrainStreamSourceTier = Extract<
 >;
 
 export interface TerrainStreamSource {
-  readonly path: string;
+  readonly decodedBytes: number;
   readonly dimensions: Pair;
+  readonly path: string;
 }
 
 export interface TerrainStreamTile {
@@ -20,12 +22,6 @@ export interface TerrainStreamTile {
     TerrainStreamSource
   >>;
   readonly worldBounds: CameraView;
-}
-
-export interface TerrainStreamPolicy {
-  readonly prefetchPadding: number;
-  readonly retentionPadding: number;
-  readonly maximumResidentTiles: number;
 }
 
 function pair(values: number[], label: string, allowZero = false): Pair {
@@ -39,36 +35,75 @@ function pair(values: number[], label: string, allowZero = false): Pair {
   return Object.freeze([values[0], values[1]] as [number, number]);
 }
 
-function boundedUnit(value: number, label: string): number {
-  if (!Number.isFinite(value) || value < 0 || value > 1) {
-    throw new TypeError(`${label} must be within [0, 1].`);
+function positiveInteger(value: number, label: string): number {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new TypeError(`${label} must be a positive integer.`);
   }
   return value;
 }
 
-export const TERRAIN_STREAM_POLICY: TerrainStreamPolicy = Object.freeze({
-  prefetchPadding: boundedUnit(
-    manifest.streaming.prefetchPadding,
-    "Terrain prefetch padding",
+function positiveIntegerPair(values: number[], label: string): Pair {
+  const parsed = pair(values, label);
+  if (parsed.some((value) => !Number.isInteger(value))) {
+    throw new TypeError(`${label} must contain two positive integers.`);
+  }
+  return parsed;
+}
+
+export const TERRAIN_STREAM_POLICY: TerrainResidencyPolicy = Object.freeze({
+  maximumLandLayerDecodedBytes: positiveInteger(
+    manifest.streaming.maximumLandLayerDecodedBytes,
+    "Terrain maximum land-layer decoded bytes",
   ),
-  retentionPadding: boundedUnit(
-    manifest.streaming.retentionPadding,
-    "Terrain retention padding",
+  maximumConcurrentLoads: positiveInteger(
+    manifest.streaming.maximumConcurrentLoads,
+    "Terrain maximum concurrent loads",
   ),
-  maximumResidentTiles: manifest.streaming.maximumResidentTiles,
+  maximumResidentDecodedBytes: positiveInteger(
+    manifest.streaming.maximumResidentDecodedBytes,
+    "Terrain maximum resident decoded bytes",
+  ),
+  prefetchMarginPixels: positiveInteger(
+    manifest.streaming.prefetchMarginPixels,
+    "Terrain prefetch margin",
+  ),
+  retentionMarginPixels: positiveInteger(
+    manifest.streaming.retentionMarginPixels,
+    "Terrain retention margin",
+  ),
+  retryBaseDelayMs: positiveInteger(
+    manifest.streaming.retryBaseDelayMs,
+    "Terrain retry base delay",
+  ),
+  retryMaximumDelayMs: positiveInteger(
+    manifest.streaming.retryMaximumDelayMs,
+    "Terrain retry maximum delay",
+  ),
+  requestTimeoutMs: positiveInteger(
+    manifest.streaming.requestTimeoutMs,
+    "Terrain request timeout",
+  ),
 });
 
 if (
-  !Number.isInteger(TERRAIN_STREAM_POLICY.maximumResidentTiles)
-  || TERRAIN_STREAM_POLICY.maximumResidentTiles < 1
-  || TERRAIN_STREAM_POLICY.retentionPadding
-    < TERRAIN_STREAM_POLICY.prefetchPadding
+  TERRAIN_STREAM_POLICY.retentionMarginPixels
+    < TERRAIN_STREAM_POLICY.prefetchMarginPixels
+  || TERRAIN_STREAM_POLICY.retryMaximumDelayMs
+    < TERRAIN_STREAM_POLICY.retryBaseDelayMs
+  || TERRAIN_STREAM_POLICY.maximumLandLayerDecodedBytes
+    < TERRAIN_STREAM_POLICY.maximumResidentDecodedBytes
 ) {
   throw new TypeError("Terrain stream policy is invalid.");
 }
 
+const registeredTileIds = new Set<string>();
+
 export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
   manifest.tiles.map((tile) => {
+    if (registeredTileIds.has(tile.id)) {
+      throw new TypeError(`Duplicate terrain stream tile ${tile.id}.`);
+    }
+    registeredTileIds.add(tile.id);
     if (tile.minimumTier !== "capital") {
       throw new TypeError(`${tile.id} must use the capital detail tier.`);
     }
@@ -91,19 +126,30 @@ export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
       const source = tile.sources[tier];
       if (
         !source.path.startsWith(
-          "/career-world/layers/territory-landform/tiles/stream-r1/",
+          "/career-world/layers/territory-landform/tiles/stream-r3/",
         )
       ) {
         throw new TypeError(
           `${tile.id} has an invalid ${tier} stream path.`,
         );
       }
+      const dimensions = positiveIntegerPair(
+        source.dimensions,
+        `${tile.id} ${tier} dimensions`,
+      );
+      const decodedBytes = positiveInteger(
+        source.decodedBytes,
+        `${tile.id} ${tier} decoded bytes`,
+      );
+      if (decodedBytes !== dimensions[0] * dimensions[1] * 4) {
+        throw new TypeError(
+          `${tile.id} has inconsistent ${tier} decoded bytes.`,
+        );
+      }
       return Object.freeze({
+        decodedBytes,
+        dimensions,
         path: source.path,
-        dimensions: pair(
-          source.dimensions,
-          `${tile.id} ${tier} dimensions`,
-        ),
       });
     };
     const sources = Object.freeze({
@@ -127,67 +173,3 @@ export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
     });
   }),
 );
-
-function distanceSquaredFromCamera(
-  tile: TerrainStreamTile,
-  camera: CameraView,
-): number {
-  const tileCenterX =
-    tile.worldBounds.origin[0] + tile.worldBounds.span[0] / 2;
-  const tileCenterY =
-    tile.worldBounds.origin[1] + tile.worldBounds.span[1] / 2;
-  const cameraCenterX = camera.origin[0] + camera.span[0] / 2;
-  const cameraCenterY = camera.origin[1] + camera.span[1] / 2;
-  return (
-    (tileCenterX - cameraCenterX) ** 2
-    + (tileCenterY - cameraCenterY) ** 2
-  );
-}
-
-export function terrainTileIntersectsCamera(
-  tile: { readonly worldBounds: CameraView },
-  camera: CameraView,
-  padding = 0,
-): boolean {
-  const left = Math.max(0, camera.origin[0] - padding);
-  const top = Math.max(0, camera.origin[1] - padding);
-  const right = Math.min(
-    1,
-    camera.origin[0] + camera.span[0] + padding,
-  );
-  const bottom = Math.min(
-    1,
-    camera.origin[1] + camera.span[1] + padding,
-  );
-  const tileRight =
-    tile.worldBounds.origin[0] + tile.worldBounds.span[0];
-  const tileBottom =
-    tile.worldBounds.origin[1] + tile.worldBounds.span[1];
-  return (
-    tile.worldBounds.origin[0] < right
-    && tileRight > left
-    && tile.worldBounds.origin[1] < bottom
-    && tileBottom > top
-  );
-}
-
-export function terrainTilesNearCamera(
-  camera: CameraView,
-  padding: number,
-  limit = TERRAIN_STREAM_POLICY.maximumResidentTiles,
-): readonly TerrainStreamTile[] {
-  return TERRAIN_STREAM_TILES
-    .filter((tile) => terrainTileIntersectsCamera(tile, camera, padding))
-    .sort((left, right) => {
-      const leftVisible = terrainTileIntersectsCamera(left, camera);
-      const rightVisible = terrainTileIntersectsCamera(right, camera);
-      if (leftVisible !== rightVisible) {
-        return leftVisible ? -1 : 1;
-      }
-      return (
-        distanceSquaredFromCamera(left, camera)
-        - distanceSquaredFromCamera(right, camera)
-      );
-    })
-    .slice(0, limit);
-}

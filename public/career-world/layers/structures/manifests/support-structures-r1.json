@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 2,
+  "id": "career-world/support-structures@r2",
+  "status": "phase-10-fantasy-support-fabric",
+  "coordinateSpace": "normalized-world-top-left",
+  "territoryId": "ninjaone",
+  "minimumTier": "site",
+  "archetypes": [
+    {
+      "id": "vendy-worker-housing",
+      "label": "Worker housing",
+      "role": "housing",
+      "assetPath": "/career-world/layers/structures/textures/support/vendy-worker-housing-r2.png",
+      "sourceDimensions": [
+        538,
+        538
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.0065,
+        0.01144
+      ]
+    },
+    {
+      "id": "vendy-maintenance-workshop",
+      "label": "Maintenance workshop",
+      "role": "workshop",
+      "assetPath": "/career-world/layers/structures/textures/support/vendy-maintenance-workshop-r2.png",
+      "sourceDimensions": [
+        580,
+        580
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.00624,
+        0.01014
+      ]
+    },
+    {
+      "id": "vendy-cargo-depot",
+      "label": "Cargo depot",
+      "role": "depot",
+      "assetPath": "/career-world/layers/structures/textures/support/vendy-cargo-depot-r2.png",
+      "sourceDimensions": [
+        626,
+        626
+      ],
+      "groundAnchor": [
+        0.5,
+        0.92
+      ],
+      "footprintSpan": [
+        0.00702,
+        0.01053
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ninjaone-capital-housing-northwest",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.47985,
+        0.22135
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-north",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.47985,
+        0.23695
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-northeast",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.53055,
+        0.22135
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-east",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.56305,
+        0.23825
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-southeast",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.52795,
+        0.27985
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-south",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.51495,
+        0.28895
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-southwest",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.49675,
+        0.28895
+      ]
+    },
+    {
+      "id": "ninjaone-capital-housing-west",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.47595,
+        0.25775
+      ]
+    },
+    {
+      "id": "ninjaone-capital-workshop-north",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.53055,
+        0.23695
+      ]
+    },
+    {
+      "id": "ninjaone-capital-workshop-east",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.55135,
+        0.26815
+      ]
+    },
+    {
+      "id": "ninjaone-capital-depot-southwest",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.48115,
+        0.27725
+      ]
+    },
+    {
+      "id": "ninjaone-capital-depot-southeast",
+      "ownerKind": "capital",
+      "ownerId": "capital-ninjaone",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.53575,
+        0.27335
+      ]
+    },
+    {
+      "id": "kaizen-agent-housing-northwest",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.22,
+        0.205
+      ]
+    },
+    {
+      "id": "kaizen-agent-housing-northeast",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.245,
+        0.201
+      ]
+    },
+    {
+      "id": "kaizen-agent-workshop-west",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.225,
+        0.254
+      ]
+    },
+    {
+      "id": "kaizen-agent-workshop-east",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.254,
+        0.254
+      ]
+    },
+    {
+      "id": "kaizen-agent-depot-southwest",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.232,
+        0.289
+      ]
+    },
+    {
+      "id": "kaizen-agent-depot-southeast",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-agent",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.265,
+        0.289
+      ]
+    },
+    {
+      "id": "vendy-housing-northwest",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.34975,
+        0.19005
+      ]
+    },
+    {
+      "id": "vendy-housing-northeast",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.37055,
+        0.19005
+      ]
+    },
+    {
+      "id": "vendy-housing-west",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.34975,
+        0.21345
+      ]
+    },
+    {
+      "id": "vendy-housing-east",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.37055,
+        0.21345
+      ]
+    },
+    {
+      "id": "vendy-workshop-west",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.33675,
+        0.21345
+      ]
+    },
+    {
+      "id": "vendy-workshop-east",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.38355,
+        0.21345
+      ]
+    },
+    {
+      "id": "vendy-depot-southwest",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.34715,
+        0.23035
+      ]
+    },
+    {
+      "id": "vendy-depot-southeast",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.37315,
+        0.23035
+      ]
+    },
+    {
+      "id": "vendy-depot-south",
+      "ownerKind": "project",
+      "ownerId": "project-vendy",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.36015,
+        0.24595
+      ]
+    },
+    {
+      "id": "kaizen-metrics-housing-west",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.6345096,
+        0.1942119
+      ]
+    },
+    {
+      "id": "kaizen-metrics-housing-north",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.6417096,
+        0.1714119
+      ]
+    },
+    {
+      "id": "kaizen-metrics-housing-east",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-worker-housing",
+      "territoryAnchor": [
+        0.6633096,
+        0.1738119
+      ]
+    },
+    {
+      "id": "kaizen-metrics-workshop-west",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.6345096,
+        0.2098119
+      ]
+    },
+    {
+      "id": "kaizen-metrics-workshop-east",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-maintenance-workshop",
+      "territoryAnchor": [
+        0.6645096,
+        0.2086119
+      ]
+    },
+    {
+      "id": "kaizen-metrics-depot-south",
+      "ownerKind": "project",
+      "ownerId": "project-kaizen-metrics",
+      "archetypeId": "vendy-cargo-depot",
+      "territoryAnchor": [
+        0.6537096,
+        0.2122119
+      ]
+    }
+  ],
+  "policy": [
+    "Support structures are non-evidence town fabric owned per capital or project instance.",
+    "Support anchors are the sole placement source; town plans reference IDs without duplicating structure transforms.",
+    "All support structures share the centralized site-detail visibility envelope with their local streets, yards, and terrain seams.",
+    "The three reusable low-rise archetypes create block edges and service courts without inventing additional portfolio claims.",
+    "Every instance stays on accepted NinjaOne land and leaves the authored terrain visible."
+  ],
+  "visualFamily": "career-world-fantasy-support-buildings@r2",
+  "artRevision": 2,
+  "artScale": 1.3,
+  "layoutScales": {
+    "project-kaizen-agent": 1.3,
+    "project-vendy": 1.3,
+    "project-kaizen-metrics": 1.2,
+    "capital-ninjaone": 1.3
+  }
+}
