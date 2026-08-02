@@ -676,6 +676,49 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
     contrast(0.99);
 }
 
+.kaizen-neighborhood-fabric__asset--close {
+  filter:
+    saturate(0.96)
+    brightness(1.005)
+    contrast(1.01);
+}
+
+.career-world__structures-layer[data-lod-tier="close"]
+  g[data-project-id="project-kaizen-agent"]
+  .structure-sprite__grounding,
+.career-world__structures-layer[data-lod-tier="close"]
+  g[data-owner-id="project-kaizen-agent"]
+  .structure-sprite__grounding {
+  fill: rgb(35 27 17 / 34%);
+  filter: blur(0.5px);
+  opacity: 0.58;
+  transform: scale(0.6 0.42);
+}
+
+.career-world__structures-layer[data-lod-tier="close"]
+  g[data-project-id="project-kaizen-agent"].project-structure {
+  filter:
+    saturate(0.99)
+    brightness(1.002)
+    contrast(0.97)
+    drop-shadow(0 0.58px 0.48px rgb(21 18 13 / 52%));
+}
+
+.career-world__structures-layer[data-lod-tier="close"]
+  g[data-owner-id="project-kaizen-agent"].skill-structure {
+  filter:
+    saturate(0.95)
+    brightness(1.002)
+    contrast(0.95)
+    drop-shadow(0 0.46px 0.42px rgb(21 18 13 / 48%));
+}
+
+.career-world__structures-layer[data-lod-tier="close"]
+  g[data-project-id="project-kaizen-agent"]
+  .structure-sprite__asset {
+  filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .town-district-fabric__steam {
     animation: none;

@@ -17,6 +17,7 @@ function KaizenNeighborhoodModuleNode({
   const height = module.span[1] * WORLD_PLANE.height;
   const x = module.anchor[0] * WORLD_PLANE.width - width * 0.5;
   const y = module.anchor[1] * WORLD_PLANE.height - height * 0.91;
+  const isCloseFoundation = module.kind === "city-foundation-refinement";
 
   return (
     <g
@@ -39,7 +40,12 @@ function KaizenNeighborhoodModuleNode({
         y={y}
       >
         <image
-          className="kaizen-neighborhood-fabric__asset"
+          className={[
+            "kaizen-neighborhood-fabric__asset",
+            isCloseFoundation
+              ? "kaizen-neighborhood-fabric__asset--close"
+              : "",
+          ].filter(Boolean).join(" ")}
           height={atlasHeight}
           href={module.assetPath}
           preserveAspectRatio="none"

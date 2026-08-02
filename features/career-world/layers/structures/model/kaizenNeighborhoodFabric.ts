@@ -6,7 +6,7 @@ export const KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC =
 
 export const KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC =
   "/career-world/layers/structures/textures/ambient/kaizen-agent/"
-  + "kaizen-city-foundation-close-r2.webp";
+  + "kaizen-city-foundation-close-r3.webp";
 
 export const KAIZEN_NEIGHBORHOOD_DETAIL_ATLAS_SRC =
   "/career-world/layers/structures/textures/ambient/kaizen-agent/"
@@ -18,8 +18,8 @@ export const KAIZEN_NEIGHBORHOOD_ATLAS_DIMENSIONS = Object.freeze([
 ] as Pair);
 
 export const KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS = Object.freeze([
-  3762,
-  3762,
+  5016,
+  5016,
 ] as Pair);
 
 export const KAIZEN_NEIGHBORHOOD_MODULE_LODS = [
@@ -96,7 +96,7 @@ function closeFoundationModule(): KaizenNeighborhoodModule {
     anchor: Object.freeze([0.228, 0.308] as Pair),
     assetPath: KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC,
     blockId: "kaizen-agent-city-foundation",
-    crop: Object.freeze([0, 0, 3762, 3762] as const),
+    crop: Object.freeze([0, 0, 5016, 5016] as const),
     id: "kaizen-city-foundation-close",
     kind: "city-foundation-refinement",
     lod: "close",

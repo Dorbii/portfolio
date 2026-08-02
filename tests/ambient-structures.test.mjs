@@ -508,7 +508,7 @@ test("Kaizen close LOD refines one registered city image without morphing", asyn
   assert.deepEqual(siteModules[0].crop, [0, 0, 1254, 1254]);
   assert.equal(closeFoundations.length, 1);
   assert.equal(closeFoundations[0].kind, "city-foundation-refinement");
-  assert.deepEqual(closeFoundations[0].crop, [0, 0, 3762, 3762]);
+  assert.deepEqual(closeFoundations[0].crop, [0, 0, 5016, 5016]);
   assert.deepEqual(closeFoundations[0].anchor, siteModules[0].anchor);
   assert.deepEqual(closeFoundations[0].span, siteModules[0].span);
   assert.equal(closeFoundations[0].blockId, siteModules[0].blockId);
@@ -553,7 +553,7 @@ test("Kaizen close LOD refines one registered city image without morphing", asyn
   assert.match(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC, /city-foundation-r1\.png$/);
   assert.match(
     KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC,
-    /city-foundation-close-r2\.webp$/,
+    /city-foundation-close-r3\.webp$/,
   );
   assert.match(KAIZEN_NEIGHBORHOOD_DETAIL_ATLAS_SRC, /detail-atlas-r4\.png$/);
 
