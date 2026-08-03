@@ -1,6 +1,7 @@
 import { WORLD_PLANE } from "../../../shared/world";
 import {
   KAIZEN_NEIGHBORHOOD_MODULES,
+  KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
   type KaizenNeighborhoodModule,
 } from "../model/kaizenNeighborhoodFabric";
 
@@ -16,7 +17,8 @@ function KaizenNeighborhoodModuleNode({
   const width = module.span[0] * WORLD_PLANE.width;
   const height = module.span[1] * WORLD_PLANE.height;
   const x = module.anchor[0] * WORLD_PLANE.width - width * 0.5;
-  const y = module.anchor[1] * WORLD_PLANE.height - height * 0.91;
+  const y = module.anchor[1] * WORLD_PLANE.height
+    - height * KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y;
   const isCloseFoundation = module.kind === "city-foundation-refinement";
 
   return (

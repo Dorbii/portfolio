@@ -1,4 +1,10 @@
-import type { Pair } from "../../../shared/camera";
+import {
+  DEFAULT_WORLD_WIND_STATE,
+  wrapDegrees,
+  windVectorFromDegrees,
+} from "../../../shared/weather.ts";
+
+export { windVectorFromDegrees } from "../../../shared/weather.ts";
 
 export interface WaterSurfaceState {
   readonly motion: number;
@@ -11,13 +17,13 @@ export interface WaterSurfaceState {
 }
 
 export const DEFAULT_WATER_SURFACE_STATE: WaterSurfaceState = Object.freeze({
-  motion: 0.68,
+  motion: DEFAULT_WORLD_WIND_STATE.motion,
   waveStrength: 0.7,
   waveDensity: 1,
   weather: 0.14,
   opacity: 1,
   detailScale: 0.58,
-  windDirectionDegrees: 24,
+  windDirectionDegrees: DEFAULT_WORLD_WIND_STATE.directionDegrees,
 });
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -27,11 +33,6 @@ function clamp(value: number, minimum: number, maximum: number): number {
 function finiteOr(value: unknown, fallback: number): number {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : fallback;
-}
-
-function wrapDegrees(value: number): number {
-  const wrapped = value % 360;
-  return wrapped < 0 ? wrapped + 360 : wrapped;
 }
 
 export function normalizeWaterSurfaceState(
@@ -50,9 +51,4 @@ export function normalizeWaterSurfaceState(
       finiteOr(candidate.windDirectionDegrees, 24),
     ),
   });
-}
-
-export function windVectorFromDegrees(degrees: number): Pair {
-  const radians = (wrapDegrees(degrees) * Math.PI) / 180;
-  return Object.freeze([Math.cos(radians), Math.sin(radians)]);
 }

@@ -13,6 +13,7 @@ import {
   type DetailState,
 } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
+import { resolveTownPresentationAnchor } from "../../../shared/townPresentation";
 import {
   AMBIENT_NODE_POLICY,
   AMBIENT_STRUCTURE_INSTANCES,
@@ -52,7 +53,17 @@ import {
   TOWN_FABRIC_NODE_POLICY,
   type TownFabricInstance,
 } from "../model/townFabric";
-import { resolveKaizenStructurePresentationScale } from "../model/kaizenPresentation";
+import {
+  resolveKaizenStructurePresentationAnchor,
+  resolveKaizenStructurePresentationScale,
+} from "../model/kaizenPresentation";
+import { resolveKaizenSemanticStructureAsset } from "../model/kaizenSemanticAssets";
+import {
+  NINJAONE_CITY_ASSET_POOL,
+  NINJAONE_CITY_ASSET_POOL_ID,
+  resolveNinjaOneCityAssetPath,
+  resolveNinjaOneCityAssetResource,
+} from "../model/ninjaOneCityAssets";
 
 const ASSET_SIZE = 1254;
 const INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set([
@@ -98,11 +109,15 @@ function compareStructureDepth(
 function structurePresentationVisibility(
   ownerId: string,
   defaultVisibility: number,
-  individualTownVisibility: number,
+  authoredTownVisibility: number,
+  representation: "plate-owned" | "semantic",
 ): number {
-  return INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS.has(ownerId)
-    ? individualTownVisibility
-    : defaultVisibility;
+  if (!INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS.has(ownerId)) {
+    return defaultVisibility;
+  }
+  return representation === "semantic"
+    ? Math.max(defaultVisibility, authoredTownVisibility)
+    : defaultVisibility * (1 - authoredTownVisibility);
 }
 
 function shouldRenderStructureOwner(
@@ -135,32 +150,80 @@ function structureTransform(
 }
 
 function StructureAsset({
+  assetOwnsGrounding = false,
   assetPath,
   groundAnchor,
+  interactionHull,
+  interactionOverlay = false,
   sourceDimensions,
 }: {
+  readonly assetOwnsGrounding?: boolean;
   readonly assetPath: string;
   readonly groundAnchor: Pair;
+  readonly interactionHull?: readonly Pair[];
+  readonly interactionOverlay?: boolean;
   readonly sourceDimensions: Pair;
 }) {
+  const [sourceWidth, sourceHeight] = sourceDimensions;
+  const imageX = -groundAnchor[0] * sourceWidth;
+  const imageY = -groundAnchor[1] * sourceHeight;
+  const interactionPoints = interactionHull?.map(([x, y]) => (
+    `${x + imageX},${y + imageY}`
+  )).join(" ");
+
   return (
     <>
-      <ellipse
-        className="structure-sprite__grounding"
-        cx={0}
-        cy={sourceDimensions[1] * -0.008}
-        rx={sourceDimensions[0] * 0.2}
-        ry={sourceDimensions[1] * 0.012}
-      />
+      {!assetOwnsGrounding ? (
+        <>
+          <ellipse
+            className={
+              "structure-sprite__grounding structure-sprite__grounding--ambient"
+            }
+            cx={0}
+            cy={sourceHeight * -0.014}
+            rx={sourceWidth * 0.2}
+            ry={sourceHeight * 0.012}
+          />
+          <ellipse
+            className={
+              "structure-sprite__grounding structure-sprite__grounding--contact"
+            }
+            cx={0}
+            cy={sourceHeight * -0.007}
+            rx={sourceWidth * 0.26}
+            ry={sourceHeight * 0.006}
+          />
+        </>
+      ) : null}
       <image
-        className="structure-sprite__asset"
-        height={sourceDimensions[1]}
+        className={[
+          "structure-sprite__asset",
+          assetOwnsGrounding
+            ? "structure-sprite__asset--concept-native"
+            : "",
+          interactionOverlay
+            ? "structure-sprite__asset--semantic-overlay"
+            : "",
+        ].filter(Boolean).join(" ")}
+        data-grounding-ownership={
+          assetOwnsGrounding ? "asset-owned" : "generated"
+        }
+        height={sourceHeight}
         href={assetPath}
+        pointerEvents={interactionOverlay ? "none" : undefined}
         preserveAspectRatio="xMidYMid meet"
-        width={sourceDimensions[0]}
-        x={-groundAnchor[0] * sourceDimensions[0]}
-        y={-groundAnchor[1] * sourceDimensions[1]}
+        width={sourceWidth}
+        x={imageX}
+        y={imageY}
       />
+      {interactionOverlay && interactionPoints ? (
+        <polygon
+          aria-hidden="true"
+          className="structure-sprite__interaction-silhouette"
+          points={interactionPoints}
+          pointerEvents="fill"
+        />
+      ) : null}
     </>
   );
 }
@@ -171,6 +234,10 @@ function TownFabricNode({
   readonly instance: TownFabricInstance;
 }) {
   const { origin, span } = instance.worldBounds;
+  const presentedOrigin = resolveTownPresentationAnchor(
+    instance.ownerId,
+    origin,
+  );
 
   return (
     <image
@@ -183,8 +250,8 @@ function TownFabricNode({
       href={instance.assetPath}
       preserveAspectRatio="xMidYMid meet"
       width={span[0] * WORLD_PLANE.width}
-      x={origin[0] * WORLD_PLANE.width}
-      y={origin[1] * WORLD_PLANE.height}
+      x={presentedOrigin[0] * WORLD_PLANE.width}
+      y={presentedOrigin[1] * WORLD_PLANE.height}
     />
   );
 }
@@ -214,35 +281,73 @@ function CapitalNode({ capital }: { readonly capital: CapitalStructure }) {
   );
 }
 
-function ProjectNode({ project }: { readonly project: ProjectStructure }) {
-  const presentationScale = resolveKaizenStructurePresentationScale({
+function ProjectNode({
+  project,
+}: {
+  readonly project: ProjectStructure;
+}) {
+  const conceptAsset = resolveKaizenSemanticStructureAsset({
     ownerId: project.id,
     role: "project",
     visualId: project.id,
   });
+  const presentationScale = conceptAsset
+    ? 1
+    : resolveKaizenStructurePresentationScale({
+      ownerId: project.id,
+      role: "project",
+      visualId: project.id,
+    });
+  const anchor = resolveTownPresentationAnchor(
+    project.id,
+    conceptAsset?.territoryAnchor
+    ?? resolveKaizenStructurePresentationAnchor({
+      anchor: resolveProjectAnchor(project),
+      ownerId: project.id,
+      role: "project",
+      visualId: project.id,
+    }),
+  );
+  const assetPath = conceptAsset?.assetPath ?? project.assetPath;
+  const footprintSpan = conceptAsset?.footprintSpan ?? project.footprintSpan;
+  const groundAnchor = conceptAsset?.groundAnchor ?? project.groundAnchor;
+  const sourceDimensions = conceptAsset?.sourceDimensions
+    ?? project.sourceDimensions;
 
   return (
     <g
-      className="project-structure"
+      aria-label={`${project.label} project landmark`}
+      className={
+        "project-structure career-world__semantic-structure"
+      }
       data-archetype={project.archetype}
       data-evidence-id={project.evidenceId}
       data-project-id={project.id}
       data-structure-role="project-landmark"
       data-presentation-scale={presentationScale}
+      data-scene-resource-id={conceptAsset?.id}
+      data-semantic-registration={conceptAsset?.registration}
       data-terrain-contact-id={project.terrainContact.id}
       data-territory-id={project.territory.id}
       data-visual-family={PROJECT_STRUCTURE_VISUAL_FAMILY}
+      data-semantic-structure="true"
+      role="img"
+      tabIndex={0}
       transform={structureTransform(
-        resolveProjectAnchor(project),
-        project.footprintSpan,
-        project.sourceDimensions,
+        anchor,
+        footprintSpan,
+        sourceDimensions,
         presentationScale,
       )}
     >
+      <title>{project.label}</title>
       <StructureAsset
-        assetPath={project.assetPath}
-        groundAnchor={project.groundAnchor}
-        sourceDimensions={project.sourceDimensions}
+        assetOwnsGrounding={conceptAsset?.grounding === "asset-owned"}
+        assetPath={assetPath}
+        groundAnchor={groundAnchor}
+        interactionHull={conceptAsset?.interactionHull}
+        interactionOverlay={Boolean(conceptAsset)}
+        sourceDimensions={sourceDimensions}
       />
     </g>
   );
@@ -253,35 +358,69 @@ function SkillNode({
 }: {
   readonly instance: SkillStructureInstance;
 }) {
-  const presentationScale = resolveKaizenStructurePresentationScale({
+  const conceptAsset = resolveKaizenSemanticStructureAsset({
     ownerId: instance.ownerId,
     role: "skill",
     visualId: instance.archetype.id,
   });
+  const presentationScale = conceptAsset
+    ? 1
+    : resolveKaizenStructurePresentationScale({
+      ownerId: instance.ownerId,
+      role: "skill",
+      visualId: instance.archetype.id,
+    });
+  const anchor = resolveTownPresentationAnchor(
+    instance.ownerId,
+    conceptAsset?.territoryAnchor
+    ?? resolveKaizenStructurePresentationAnchor({
+      anchor: resolveSkillAnchor(instance),
+      ownerId: instance.ownerId,
+      role: "skill",
+      visualId: instance.archetype.id,
+    }),
+  );
+  const assetPath = conceptAsset?.assetPath ?? instance.archetype.assetPath;
+  const footprintSpan = conceptAsset?.footprintSpan
+    ?? instance.archetype.footprintSpan;
+  const groundAnchor = conceptAsset?.groundAnchor
+    ?? instance.archetype.groundAnchor;
+  const sourceDimensions = conceptAsset?.sourceDimensions
+    ?? instance.archetype.sourceDimensions;
 
   return (
     <g
-      className="skill-structure"
+      aria-label={`${instance.archetype.label} skill building`}
+      className="skill-structure career-world__semantic-structure"
       data-building-type={instance.archetype.buildingType}
       data-owner-id={instance.ownerId}
       data-owner-kind={instance.ownerKind}
       data-presentation-scale={presentationScale}
+      data-scene-resource-id={conceptAsset?.id}
+      data-semantic-registration={conceptAsset?.registration}
       data-skill-archetype-id={instance.archetype.id}
       data-skill-instance-id={instance.id}
       data-structure-role="skill-building"
       data-territory-variant={instance.territoryVariant}
       data-visual-family={SKILL_STRUCTURE_VISUAL_FAMILY}
+      data-semantic-structure="true"
+      role="img"
+      tabIndex={0}
       transform={structureTransform(
-        resolveSkillAnchor(instance),
-        instance.archetype.footprintSpan,
-        instance.archetype.sourceDimensions,
+        anchor,
+        footprintSpan,
+        sourceDimensions,
         presentationScale,
       )}
     >
+      <title>{instance.archetype.label}</title>
       <StructureAsset
-        assetPath={instance.archetype.assetPath}
-        groundAnchor={instance.archetype.groundAnchor}
-        sourceDimensions={instance.archetype.sourceDimensions}
+        assetOwnsGrounding={conceptAsset?.grounding === "asset-owned"}
+        assetPath={assetPath}
+        groundAnchor={groundAnchor}
+        interactionHull={conceptAsset?.interactionHull}
+        interactionOverlay={Boolean(conceptAsset)}
+        sourceDimensions={sourceDimensions}
       />
     </g>
   );
@@ -309,7 +448,10 @@ function SupportNode({
       data-structure-role="support-building"
       data-visual-family={SUPPORT_STRUCTURE_VISUAL_FAMILY}
       transform={structureTransform(
-        resolveSupportAnchor(instance),
+        resolveTownPresentationAnchor(
+          instance.ownerId,
+          resolveSupportAnchor(instance),
+        ),
         instance.archetype.footprintSpan,
         instance.archetype.sourceDimensions,
         presentationScale,
@@ -329,6 +471,9 @@ function AmbientNode({
 }: {
   readonly instance: AmbientStructureInstance;
 }) {
+  const pooledResource = resolveNinjaOneCityAssetResource(
+    instance.archetype.id,
+  );
   const presentationScale = resolveKaizenStructurePresentationScale({
     ownerId: instance.ownerId,
     role: "ambient",
@@ -343,18 +488,27 @@ function AmbientNode({
       data-block-id={instance.blockId}
       data-owner-id={instance.ownerId}
       data-owner-kind={instance.ownerKind}
+      data-scene-asset-pool={
+        pooledResource ? NINJAONE_CITY_ASSET_POOL_ID : undefined
+      }
+      data-scene-resource-id={pooledResource?.id}
       data-presentation-scale={presentationScale}
       data-structure-role="ambient-building"
       data-visual-family={AMBIENT_STRUCTURE_VISUAL_FAMILY}
       transform={structureTransform(
-        resolveAmbientAnchor(instance),
+        resolveTownPresentationAnchor(
+          instance.ownerId,
+          resolveAmbientAnchor(instance),
+        ),
         instance.archetype.footprintSpan,
         instance.archetype.sourceDimensions,
         presentationScale,
       )}
     >
       <StructureAsset
-        assetPath={instance.archetype.assetPath}
+        assetPath={pooledResource
+          ? resolveNinjaOneCityAssetPath(pooledResource)
+          : instance.archetype.assetPath}
         groundAnchor={instance.archetype.groundAnchor}
         sourceDimensions={instance.archetype.sourceDimensions}
       />
@@ -477,7 +631,19 @@ export function StructuresLayer({
           shouldRenderIndividualTownAssets,
         )
       )).map((project) => ({
-        anchor: resolveProjectAnchor(project),
+        anchor: resolveTownPresentationAnchor(
+          project.id,
+          resolveKaizenSemanticStructureAsset({
+            ownerId: project.id,
+            role: "project",
+            visualId: project.id,
+          })?.territoryAnchor ?? resolveKaizenStructurePresentationAnchor({
+            anchor: resolveProjectAnchor(project),
+            ownerId: project.id,
+            role: "project",
+            visualId: project.id,
+          }),
+        ),
         id: project.id,
         node: (
           <g
@@ -488,6 +654,7 @@ export function StructuresLayer({
                 project.id,
                 projectPresentationVisibility,
                 townOverviewVisibility,
+                "semantic",
               ),
               transitionDuration: "0ms",
             }}
@@ -506,7 +673,19 @@ export function StructuresLayer({
           shouldRenderIndividualTownAssets,
         )
       )).map((instance) => ({
-        anchor: resolveSkillAnchor(instance),
+        anchor: resolveTownPresentationAnchor(
+          instance.ownerId,
+          resolveKaizenSemanticStructureAsset({
+            ownerId: instance.ownerId,
+            role: "skill",
+            visualId: instance.archetype.id,
+          })?.territoryAnchor ?? resolveKaizenStructurePresentationAnchor({
+            anchor: resolveSkillAnchor(instance),
+            ownerId: instance.ownerId,
+            role: "skill",
+            visualId: instance.archetype.id,
+          }),
+        ),
         id: instance.id,
         node: (
           <g
@@ -517,6 +696,7 @@ export function StructuresLayer({
                 instance.ownerId,
                 skillPresentationVisibility,
                 townOverviewVisibility,
+                "semantic",
               ),
               transitionDuration: "0ms",
             }}
@@ -535,7 +715,10 @@ export function StructuresLayer({
           shouldRenderIndividualTownAssets,
         )
       )).map((instance) => ({
-        anchor: resolveSupportAnchor(instance),
+        anchor: resolveTownPresentationAnchor(
+          instance.ownerId,
+          resolveSupportAnchor(instance),
+        ),
         id: instance.id,
         node: (
           <g
@@ -546,6 +729,7 @@ export function StructuresLayer({
                 instance.ownerId,
                 supportPresentationVisibility,
                 townOverviewVisibility,
+                "plate-owned",
               ),
               transitionDuration: "0ms",
             }}
@@ -564,7 +748,10 @@ export function StructuresLayer({
           shouldRenderIndividualTownAssets,
         )
       )).map((instance) => ({
-        anchor: resolveAmbientAnchor(instance),
+        anchor: resolveTownPresentationAnchor(
+          instance.ownerId,
+          resolveAmbientAnchor(instance),
+        ),
         id: instance.id,
         node: (
           <g
@@ -575,6 +762,7 @@ export function StructuresLayer({
                 instance.ownerId,
                 ambientPresentationVisibility,
                 townOverviewVisibility,
+                "plate-owned",
               ),
               transitionDuration: "0ms",
             }}
@@ -592,7 +780,7 @@ export function StructuresLayer({
 
   return (
     <svg
-      aria-hidden="true"
+      aria-label="Career World structures"
       className="career-world__layer career-world__structures-layer"
       data-ambient-candidate-count={AMBIENT_STRUCTURE_INSTANCES.length}
       data-ambient-structure-count={
@@ -615,6 +803,8 @@ export function StructuresLayer({
       data-structure-visibility={visibility.toFixed(3)}
       data-support-structure-count={SUPPORT_STRUCTURE_INSTANCES.length}
       data-support-visibility={supportPresentationVisibility.toFixed(3)}
+      data-shared-city-asset-count={NINJAONE_CITY_ASSET_POOL.length}
+      data-shared-city-asset-pool={NINJAONE_CITY_ASSET_POOL_ID}
       data-town-detail-visibility={townDetailVisibility.toFixed(3)}
       data-town-neighborhood-close-visibility={
         neighborhoodCloseVisibility.toFixed(3)

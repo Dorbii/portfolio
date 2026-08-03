@@ -13,21 +13,34 @@ import {
   type DetailState,
 } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
+import { resolveTownPresentationAnchor } from "../../../shared/townPresentation";
+import {
+  DEFAULT_WORLD_WIND_STATE,
+  windVectorFromDegrees,
+} from "../../../shared/weather";
 import {
   ACTIVITY_PROP_INSTANCES,
   ACTIVITY_PROP_SITE_POLICY,
   type ActivityPropInstance,
 } from "../model/activityProps";
 import {
+  KAIZEN_FOLIAGE_INSTANCES,
+  NINJAONE_FOLIAGE_ATLAS_DIMENSIONS,
+  NINJAONE_FOLIAGE_ATLAS_PATH,
+  NINJAONE_FOLIAGE_POOL_ID,
+  NINJAONE_FOLIAGE_RESOURCES,
+  resolveNinjaOneFoliageResource,
+  type FoliageInstance,
+} from "../model/kaizenFoliage";
+import {
   RURAL_OUTSKIRTS_CLOSE_POLICY,
   RURAL_SCENERY_INSTANCES,
   type RuralSceneryInstance,
 } from "../model/ruralOutskirts";
-import {
-  KAIZEN_AGENT_OWNER_ID,
-  KaizenStreetMarketAsset,
-  KaizenStreetTreeAsset,
-} from "./KaizenStreetscapeAssets";
+
+const KAIZEN_FOLIAGE_NODE_POLICY = Object.freeze({
+  minimumTier: "site" as const,
+});
 
 interface EnvironmentLayerProps {
   readonly camera: CameraView;
@@ -63,6 +76,14 @@ Readonly<Record<ActivityPropInstance["kind"], number>> = Object.freeze({
   bench: 0.42,
   "street-tree": 0.48,
 });
+const AUTHORED_TOWN_FOUNDATION_OWNER_IDS = new Set([
+  "project-kaizen-agent",
+]);
+const RENDERED_ACTIVITY_PROP_INSTANCES = Object.freeze(
+  ACTIVITY_PROP_INSTANCES.filter(
+    ({ ownerId }) => !AUTHORED_TOWN_FOUNDATION_OWNER_IDS.has(ownerId),
+  ),
+);
 
 const RURAL_COLORS = Object.freeze({
   earth: "#66573c",
@@ -614,24 +635,17 @@ function glyphFor(
     case "lamp":
       return <LampGlyph light={light} />;
     case "stall":
-      return instance.ownerId === KAIZEN_AGENT_OWNER_ID
-        ? <KaizenStreetMarketAsset />
-        : <StallGlyph light={light} />;
+      return <StallGlyph light={light} />;
     case "cart":
       return <CartGlyph light={light} />;
     case "bench":
       return <BenchGlyph light={light} />;
     case "street-tree":
-      return <KaizenStreetTreeAsset instance={instance} />;
+      return null;
   }
 }
 
 function activityPropScale(instance: ActivityPropInstance): number {
-  if (instance.ownerId === KAIZEN_AGENT_OWNER_ID) {
-    if (instance.kind === "stall" || instance.kind === "street-tree") {
-      return 0.62;
-    }
-  }
   return ACTIVITY_PROP_SCALE[instance.kind];
 }
 
@@ -639,15 +653,15 @@ function ActivityPropGlyph({
   instance,
   light,
 }: ActivityPropGlyphProps) {
-  const [x, y] = worldPoint(instance.anchor);
+  const [x, y] = worldPoint(resolveTownPresentationAnchor(
+    instance.ownerId,
+    instance.anchor,
+  ));
   return (
     <g
       className={[
         "town-activity-prop",
         `town-activity-prop--${instance.kind}`,
-        instance.ownerId === KAIZEN_AGENT_OWNER_ID
-          ? "town-activity-prop--kaizen-agent"
-          : null,
       ].filter(Boolean).join(" ")}
       data-activity-prop-id={instance.id}
       data-activity-prop-kind={instance.kind}
@@ -689,6 +703,73 @@ function RuralSceneryGlyph({
   );
 }
 
+function FoliageResourceDefinitions() {
+  const [atlasWidth, atlasHeight] = NINJAONE_FOLIAGE_ATLAS_DIMENSIONS;
+  return (
+    <defs data-foliage-resource-pool={NINJAONE_FOLIAGE_POOL_ID}>
+      {NINJAONE_FOLIAGE_RESOURCES.map((resource) => {
+        const [x, y, width, height] = resource.crop;
+        return (
+          <symbol
+            id={`career-world-foliage-${resource.id}`}
+            key={resource.id}
+            preserveAspectRatio="xMidYMid meet"
+            viewBox={`${x} ${y} ${width} ${height}`}
+          >
+            <image
+              height={atlasHeight}
+              href={NINJAONE_FOLIAGE_ATLAS_PATH}
+              width={atlasWidth}
+              x={0}
+              y={0}
+            />
+          </symbol>
+        );
+      })}
+    </defs>
+  );
+}
+
+function FoliageInstanceGlyph({
+  instance,
+  windVector,
+}: {
+  readonly instance: FoliageInstance;
+  readonly windVector: Pair;
+}) {
+  const resource = resolveNinjaOneFoliageResource(instance.resourceId);
+  const [, , width, height] = resource.crop;
+  const [x, y] = worldPoint(instance.anchor);
+  const motion = DEFAULT_WORLD_WIND_STATE.motion;
+  const tilt = windVector[0] * motion * 0.72;
+  const breezeStyle = {
+    "--foliage-breeze-drift-x": `${(windVector[0] * motion * 5).toFixed(3)}px`,
+    "--foliage-breeze-drift-y": `${(windVector[1] * motion * 1.4).toFixed(3)}px`,
+    "--foliage-breeze-tilt-start": `${(-tilt * 0.42).toFixed(3)}deg`,
+    "--foliage-breeze-tilt-end": `${tilt.toFixed(3)}deg`,
+    animationDelay: `${instance.phaseSeconds}s`,
+    animationDuration: `${instance.durationSeconds}s`,
+  } as CSSProperties;
+
+  return (
+    <g
+      data-foliage-instance-id={instance.id}
+      data-foliage-resource-id={resource.id}
+      transform={`translate(${x} ${y}) scale(${instance.scale})`}
+    >
+      <g className="career-world__foliage-breeze" style={breezeStyle}>
+        <use
+          height={height}
+          href={`#career-world-foliage-${resource.id}`}
+          width={width}
+          x={-width * 0.5}
+          y={-height}
+        />
+      </g>
+    </g>
+  );
+}
+
 export function EnvironmentLayer({
   camera,
   detailState,
@@ -698,10 +779,16 @@ export function EnvironmentLayer({
     ACTIVITY_PROP_SITE_POLICY,
     detailState,
   );
-  const kaizenVisibility = detailState.shouldLoadSiteAssets ? 1 : visibility;
   const ruralVisibility = resolveNodeVisibility(
     RURAL_OUTSKIRTS_CLOSE_POLICY,
     detailState,
+  );
+  const foliageVisibility = resolveNodeVisibility(
+    KAIZEN_FOLIAGE_NODE_POLICY,
+    detailState,
+  );
+  const windVector = windVectorFromDegrees(
+    DEFAULT_WORLD_WIND_STATE.directionDegrees,
   );
   const style = {
     "--career-world-lod-transition-ms":
@@ -718,23 +805,30 @@ export function EnvironmentLayer({
     ...detailStyle,
     opacity: ruralVisibility,
   } as CSSProperties;
-  const kaizenStyle = {
+  const foliageStyle = {
     ...detailStyle,
-    opacity: kaizenVisibility,
+    opacity: foliageVisibility,
   } as CSSProperties;
-
   return (
     <svg
       aria-hidden="true"
       className="career-world__layer career-world__environment-layer"
-      data-activity-prop-count={ACTIVITY_PROP_INSTANCES.length}
-      data-kaizen-activity-visibility={kaizenVisibility.toFixed(3)}
+      data-activity-prop-count={RENDERED_ACTIVITY_PROP_INSTANCES.length}
+      data-authored-town-activity-suppression-count={
+        ACTIVITY_PROP_INSTANCES.length - RENDERED_ACTIVITY_PROP_INSTANCES.length
+      }
       data-layer="environment"
       data-light-source={light.id}
       data-lod-tier={detailState.tier.id}
+      data-foliage-instance-count={KAIZEN_FOLIAGE_INSTANCES.length}
+      data-foliage-resource-count={NINJAONE_FOLIAGE_RESOURCES.length}
+      data-foliage-resource-pool={NINJAONE_FOLIAGE_POOL_ID}
+      data-foliage-visibility={foliageVisibility.toFixed(3)}
       data-rural-scenery-count={RURAL_SCENERY_INSTANCES.length}
       data-rural-scenery-visibility={ruralVisibility.toFixed(3)}
       data-site-detail-visibility={visibility.toFixed(3)}
+      data-world-wind-direction={DEFAULT_WORLD_WIND_STATE.directionDegrees}
+      data-world-wind-motion={DEFAULT_WORLD_WIND_STATE.motion}
       focusable="false"
       height="100%"
       preserveAspectRatio="none"
@@ -745,27 +839,12 @@ export function EnvironmentLayer({
       )}
       width="100%"
     >
+      {foliageVisibility > LOD_PRESENTATION_EPSILON ? (
+        <FoliageResourceDefinitions />
+      ) : null}
       {visibility > LOD_PRESENTATION_EPSILON ? (
         <g className="town-activity-props" style={detailStyle}>
-          {ACTIVITY_PROP_INSTANCES
-            .filter(({ ownerId }) => ownerId !== KAIZEN_AGENT_OWNER_ID)
-            .map((instance) => (
-              <ActivityPropGlyph
-                instance={instance}
-                key={instance.id}
-                light={light}
-              />
-            ))}
-        </g>
-      ) : null}
-      {kaizenVisibility > LOD_PRESENTATION_EPSILON ? (
-        <g
-          className="town-activity-props town-activity-props--kaizen-overview"
-          style={kaizenStyle}
-        >
-          {ACTIVITY_PROP_INSTANCES
-            .filter(({ ownerId }) => ownerId === KAIZEN_AGENT_OWNER_ID)
-            .map((instance) => (
+          {RENDERED_ACTIVITY_PROP_INSTANCES.map((instance) => (
               <ActivityPropGlyph
                 instance={instance}
                 key={instance.id}
@@ -784,6 +863,21 @@ export function EnvironmentLayer({
               instance={instance}
               key={instance.id}
               light={light}
+            />
+          ))}
+        </g>
+      ) : null}
+      {foliageVisibility > LOD_PRESENTATION_EPSILON ? (
+        <g
+          className="career-world__foliage-instances"
+          data-foliage-animation="shared-world-wind"
+          style={foliageStyle}
+        >
+          {KAIZEN_FOLIAGE_INSTANCES.map((instance) => (
+            <FoliageInstanceGlyph
+              instance={instance}
+              key={instance.id}
+              windVector={windVector}
             />
           ))}
         </g>

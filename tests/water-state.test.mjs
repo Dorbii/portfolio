@@ -104,7 +104,7 @@ test("one camera span resolves the detail tier for every layer", () => {
 });
 
 test("one central LOD policy owns thresholds and render budget", () => {
-  assert.equal(DETAIL_POLICY.cameraMinimumSpan, 0.03);
+  assert.equal(DETAIL_POLICY.cameraMinimumSpan, 0.04);
   assert.ok(
     DETAIL_POLICY.capitalAssetPreloadSpan
       > DETAIL_POLICY.territoryToCapital.startSpan,

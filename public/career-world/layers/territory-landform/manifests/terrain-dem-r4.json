@@ -4,7 +4,7 @@
   "status": "phase-3-authoring",
   "coordinateSpace": "normalized-world-top-left",
   "geography": {
-    "mask": "../masks/world-land-mask-r3.png",
+    "mask": "../masks/world-land-mask-r4.png",
     "policy": "The mask is authoritative. Elevation may not move the coast."
   },
   "source": {

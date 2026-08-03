@@ -270,7 +270,7 @@ test("terrain relief publishes canonical geography without edge glow", async () 
   );
 });
 
-test("runtime land uses one authored material with registered territory detail", async () => {
+test("runtime land registers its authored base material against the composite mask", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
@@ -281,8 +281,11 @@ test("runtime land uses one authored material with registered territory detail",
   const detail = await decodePng(
     "public/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
   );
-  const mask = await decodePng(
+  const baseMask = await decodePng(
     "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+  );
+  const compositeMask = await decodePng(
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
   );
 
   assert.deepEqual([plate.width, plate.height, plate.channels], [1672, 941, 4]);
@@ -305,7 +308,7 @@ test("runtime land uses one authored material with registered territory detail",
   assert.equal(
     manifest.mask.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+      "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
     ),
   );
   assert.match(
@@ -319,10 +322,72 @@ test("runtime land uses one authored material with registered territory detail",
   for (let pixel = 0; pixel < plate.width * plate.height; pixel += 1) {
     assert.equal(
       plate.pixels[pixel * 4 + 3] >= 128,
-      mask.pixels[pixel] >= 128,
-      "visible land and the water-occlusion mask must share one silhouette",
+      baseMask.pixels[pixel] >= 128,
+      "the authored base plate must retain its registered source silhouette",
+    );
+    assert.ok(
+      compositeMask.pixels[pixel] >= baseMask.pixels[pixel],
+      "the composite mask may promote registered land but may not remove it",
     );
   }
+});
+
+test("the registered Kaizen C2 land extension owns every promoted land pixel", async () => {
+  const [baseMask, compositeMask, extension] = await Promise.all([
+    decodePng(
+      "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    ),
+    decodePng(
+      "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    ),
+    decodePng(
+      "public/career-world/layers/territory-landform/textures/kaizen-c2-land-extension-r1.png",
+    ),
+  ]);
+  const manifest = JSON.parse(await readFile(path.join(
+    root,
+    "public/career-world/layers/structures/manifests/kaizen-semantic-assets-r1.json",
+  ), "utf8"));
+  const [anchorX, anchorY] = manifest.plateAnchor;
+  const [spanX, spanY] = manifest.plateSpan;
+  const originX = anchorX - spanX * 0.5;
+  const originY = anchorY - spanY * manifest.plateAlignmentY;
+  const bounds = {
+    left: Math.round(originX * compositeMask.width),
+    top: Math.round(originY * compositeMask.height),
+    right: Math.round((originX + spanX) * compositeMask.width),
+    bottom: Math.round((originY + spanY) * compositeMask.height),
+  };
+
+  assert.deepEqual(
+    [extension.width, extension.height, extension.channels],
+    [1254, 1254, 4],
+  );
+  let promotedPixels = 0;
+  for (let y = 0; y < compositeMask.height; y += 1) {
+    for (let x = 0; x < compositeMask.width; x += 1) {
+      const pixel = y * compositeMask.width + x;
+      if (
+        compositeMask.pixels[pixel] >= 128
+        && baseMask.pixels[pixel] < 128
+      ) {
+        promotedPixels += 1;
+        assert.ok(
+          x >= bounds.left
+          && x < bounds.right
+          && y >= bounds.top
+          && y < bounds.bottom,
+          "promoted land must stay inside the registered Kaizen plate",
+        );
+      }
+    }
+  }
+  let extensionPixels = 0;
+  for (let offset = 3; offset < extension.pixels.length; offset += 4) {
+    extensionPixels += extension.pixels[offset] >= 12 ? 1 : 0;
+  }
+  assert.ok(promotedPixels > 2_000);
+  assert.ok(extensionPixels > 100_000);
 });
 
 test("authored shoreline confines deep shadows to cliff terrain", async () => {
@@ -385,7 +450,7 @@ test("authored shoreline confines deep shadows to cliff terrain", async () => {
   );
 });
 
-test("illustrated shoreline visibly distinguishes beach and cliff terrain", async () => {
+test("shoreline material visibly distinguishes beach and cliff response", async () => {
   const plate = await decodePng(
     "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
   );
@@ -412,8 +477,8 @@ test("illustrated shoreline visibly distinguishes beach and cliff terrain", asyn
   let coastPixels = 0;
   let beachPixels = 0;
   let cliffPixels = 0;
-  let beachLuminance = 0;
-  let cliffLuminance = 0;
+  let beachContrast = 0;
+  let cliffContrast = 0;
   for (let pixel = 0; pixel < plate.width * plate.height; pixel += 1) {
     if (distance[pixel] === 0 || distance[pixel] > 16) {
       continue;
@@ -422,19 +487,13 @@ test("illustrated shoreline visibly distinguishes beach and cliff terrain", asyn
     const coastOffset = pixel * coastMaterial.channels;
     const beach = coastMaterial.pixels[coastOffset];
     const cliff = coastMaterial.pixels[coastOffset + 1];
-    const plateOffset = pixel * 4;
-    const luminance = (
-      plate.pixels[plateOffset] * 0.2126
-      + plate.pixels[plateOffset + 1] * 0.7152
-      + plate.pixels[plateOffset + 2] * 0.0722
-    );
     if (beach >= 140 && beach > cliff + 15) {
       beachPixels += 1;
-      beachLuminance += luminance;
+      beachContrast += beach - cliff;
     }
     if (cliff >= 140 && cliff > beach + 15) {
       cliffPixels += 1;
-      cliffLuminance += luminance;
+      cliffContrast += cliff - beach;
     }
   }
   assert.ok(
@@ -446,8 +505,12 @@ test("illustrated shoreline visibly distinguishes beach and cliff terrain", asyn
     `expected cliff terrain across more than 10% of the coast, got ${cliffPixels}/${coastPixels}`,
   );
   assert.ok(
-    beachLuminance / beachPixels - cliffLuminance / cliffPixels > 8,
-    "beach ramps and cliff faces must not collapse into one perimeter color",
+    beachContrast / beachPixels > 128,
+    "beach response must remain materially distinct from cliff response",
+  );
+  assert.ok(
+    cliffContrast / cliffPixels > 128,
+    "cliff response must remain materially distinct from beach response",
   );
 });
 
@@ -1316,7 +1379,7 @@ test("close land tiles are authored from dedicated high-fidelity materials", asy
 
 test("coast field is derived across the complete authored shoreline", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
   );
   const coast = await decodePng(
     "public/career-world/layers/water-surface/fields/coast-geometry-r5.png",

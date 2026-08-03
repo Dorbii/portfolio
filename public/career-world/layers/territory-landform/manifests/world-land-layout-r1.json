@@ -13,7 +13,7 @@
   "activeConcept": {
     "visual": "../textures/terrain-relief-r6.png",
     "detailVisual": "../textures/terrain-relief-r6-detail-4x.png",
-    "mask": "../masks/world-land-mask-r3.png",
+    "mask": "../masks/world-land-mask-r4.png",
     "height": "../fields/terrain-height-r4.png",
     "slope": "../fields/terrain-slope-r4.png",
     "territories": "world-territories-r4.json",

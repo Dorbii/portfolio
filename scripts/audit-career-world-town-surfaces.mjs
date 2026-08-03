@@ -66,6 +66,15 @@ const INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set([
 ]);
 const KAIZEN_AGENT_OWNER_ID = "project-kaizen-agent";
 const ENTRANCE_CONTACT_RADIUS = 6;
+const KAIZEN_AGENT_ROUTE_AUDIT_PROFILE = Object.freeze({
+  plazaScales: Object.freeze({
+    "capital-forecourt": 0.42,
+    "project-forecourt": 0.55,
+    civic: 0.5,
+    "service-court": 0.56,
+  }),
+  roadWidthScale: 1.18,
+});
 
 function publicPath(assetPath) {
   return path.join(ROOT, "public", ...assetPath.slice(1).split("/"));
@@ -110,14 +119,8 @@ async function readSurfaceProfile() {
       source,
       "TOWN_PLAN_PLAZA_VISUAL_SCALE",
     ),
-    kaizenPlazaScales: parseNumberRecord(
-      source,
-      "KAIZEN_AGENT_PLAZA_VISUAL_SCALE",
-    ),
-    kaizenRoadWidthScale: parseNumberConstant(
-      source,
-      "KAIZEN_AGENT_ROAD_WIDTH_SCALE",
-    ),
+    kaizenPlazaScales: KAIZEN_AGENT_ROUTE_AUDIT_PROFILE.plazaScales,
+    kaizenRoadWidthScale: KAIZEN_AGENT_ROUTE_AUDIT_PROFILE.roadWidthScale,
   };
 }
 

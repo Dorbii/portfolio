@@ -1,6 +1,9 @@
 import type { LayerDescriptor } from "../../shared/layers";
 
-export { WorldInterface } from "./components/WorldInterface";
+export {
+  WorldInterface,
+  type LandmarkLabel,
+} from "./components/WorldInterface";
 
 export const INTERFACE_LAYER: LayerDescriptor = Object.freeze({
   id: "interface",
@@ -13,4 +16,3 @@ export const INTERFACE_LAYER: LayerDescriptor = Object.freeze({
     "render diagnostics",
   ]),
 });
-

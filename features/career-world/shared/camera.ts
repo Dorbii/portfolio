@@ -10,7 +10,7 @@ export const WORLD_CAMERA_VIEW: CameraView = Object.freeze({
   span: Object.freeze([1, 1] as [number, number]),
 });
 
-export const CAMERA_MINIMUM_SPAN = 0.03;
+export const CAMERA_MINIMUM_SPAN = 0.04;
 
 function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value));

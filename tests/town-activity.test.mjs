@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import sharp from "sharp";
 
 const root = process.cwd();
 
@@ -229,7 +228,7 @@ test("NinjaOne town activity is explicit, route-bound, and bounded", async () =>
   );
 });
 
-test("Kaizen large streetscape assets keep authored clearance", async () => {
+test("Kaizen semantic activity anchors keep authored clearance", async () => {
   const [towns, props] = await Promise.all([
     readJson(
       "public/career-world/layers/infrastructure/manifests/"
@@ -294,58 +293,38 @@ test("Kaizen large streetscape assets keep authored clearance", async () => {
   assert.deepEqual(overlaps, []);
 });
 
-test("Kaizen street life uses authored transparent isometric assets", async () => {
-  const [component, assetsComponent] = await Promise.all([
-    readFile(
-      path.join(
-        root,
-        "features/career-world/layers/environment/components/EnvironmentLayer.tsx",
-      ),
-      "utf8",
+test("Kaizen authored foundation suppresses duplicate activity visuals", async () => {
+  const component = await readFile(
+    path.join(
+      root,
+      "features/career-world/layers/environment/components/EnvironmentLayer.tsx",
     ),
-    readFile(
-      path.join(
-        root,
-        "features/career-world/layers/environment/components/KaizenStreetscapeAssets.tsx",
-      ),
-      "utf8",
-    ),
-  ]);
-  const assetPaths = [
-    "/career-world/layers/environment/assets/kaizen-agent/civic-planter-r1.png",
-    "/career-world/layers/environment/assets/kaizen-agent/garden-bench-r1.png",
-    "/career-world/layers/environment/assets/kaizen-agent/street-market-r1.png",
+    "utf8",
+  );
+  const removedPaths = [
+    "features/career-world/layers/environment/components/"
+      + "KaizenStreetscapeAssets.tsx",
+    "public/career-world/layers/environment/assets/kaizen-agent",
   ];
 
-  for (const assetPath of assetPaths) {
-    assert.match(
-      assetsComponent,
-      new RegExp(assetPath.replaceAll("/", "\\/")),
-    );
-    const file = path.join(root, "public", assetPath.replace(/^\//, ""));
-    const metadata = await sharp(file).metadata();
-    const { data, info } = await sharp(file)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    const alpha = data.filter((_, index) => index % info.channels === 3);
-    const cornerAlpha = [
-      data[3],
-      data[(info.width - 1) * info.channels + 3],
-      data[((info.height - 1) * info.width) * info.channels + 3],
-      data[(info.width * info.height - 1) * info.channels + 3],
-    ];
+  assert.match(
+    component,
+    /AUTHORED_TOWN_FOUNDATION_OWNER_IDS = new Set\(\[[\s\S]*project-kaizen-agent/,
+  );
+  assert.match(
+    component,
+    /RENDERED_ACTIVITY_PROP_INSTANCES = Object\.freeze\([\s\S]*!AUTHORED_TOWN_FOUNDATION_OWNER_IDS\.has\(ownerId\)/,
+  );
+  assert.match(component, /data-authored-town-activity-suppression-count=/);
+  assert.doesNotMatch(component, /KaizenStreetTreeAsset/);
+  assert.doesNotMatch(component, /KaizenStreetMarketAsset/);
+  assert.doesNotMatch(component, /town-activity-props--kaizen-overview/);
 
-    assert.equal(metadata.hasAlpha, true, assetPath);
-    assert.ok(info.width >= 1000 && info.height >= 1000, assetPath);
-    assert.ok(cornerAlpha.every((value) => value === 0), assetPath);
-    assert.ok(alpha.some((value) => value === 0), assetPath);
-    assert.ok(alpha.some((value) => value === 255), assetPath);
+  for (const removedPath of removedPaths) {
+    await assert.rejects(access(path.join(root, removedPath)), {
+      code: "ENOENT",
+    });
   }
-
-  assert.match(component, /function activityPropScale/);
-  assert.match(component, /KaizenStreetTreeAsset/);
-  assert.match(assetsComponent, /LONG_PLANTER_IDS/);
 });
 
 test("town activity uses the declared layer order and centralized LOD", async () => {
@@ -416,18 +395,12 @@ test("town activity uses the declared layer order and centralized LOD", async ()
     environmentModel,
     /ACTIVITY_PROP_SITE_POLICY:[\s\S]*minimumTier: "site"/,
   );
+  assert.match(environmentComponent, /RENDERED_ACTIVITY_PROP_INSTANCES\.map/);
   assert.match(
     environmentComponent,
-    /const kaizenVisibility = detailState\.shouldLoadSiteAssets \? 1 : visibility/,
+    /data-authored-town-activity-suppression-count=/,
   );
-  assert.match(
-    environmentComponent,
-    /town-activity-props--kaizen-overview/,
-  );
-  assert.match(
-    environmentComponent,
-    /data-kaizen-activity-visibility=\{kaizenVisibility\.toFixed\(3\)\}/,
-  );
+  assert.doesNotMatch(environmentComponent, /data-kaizen-activity-visibility=/);
   assert.match(
     actorsModel,
     /PEDESTRIAN_NODE_POLICY:[\s\S]*minimumTier: "close"/,
@@ -481,5 +454,71 @@ test("town activity uses the declared layer order and centralized LOD", async ()
     actorsModel,
   ]) {
     assert.doesNotMatch(source, /Math\.random|requestAnimationFrame/);
+  }
+});
+
+test("Kaizen foliage reuses one atlas and one shared world-wind animation", async () => {
+  const [component, foliageModel, weather, waterState, styles] =
+    await Promise.all([
+      readFile(path.join(
+        root,
+        "features/career-world/layers/environment/components/"
+          + "EnvironmentLayer.tsx",
+      ), "utf8"),
+      readFile(path.join(
+        root,
+        "features/career-world/layers/environment/model/"
+          + "kaizenFoliage.ts",
+      ), "utf8"),
+      readFile(path.join(
+        root,
+        "features/career-world/shared/weather.ts",
+      ), "utf8"),
+      readFile(path.join(
+        root,
+        "features/career-world/layers/water-surface/model/state.ts",
+      ), "utf8"),
+      readFile(path.join(
+        root,
+        "features/career-world/styles/career-world.css",
+      ), "utf8"),
+    ]);
+  const foliageResourceIds = [...foliageModel.matchAll(
+    /id: "(?:street-tree-planter|paired-street-trees|fern-cluster|flowering-hedge)"/g,
+  )];
+  const foliageInstanceIds = [...foliageModel.matchAll(
+    /id: "kaizen-(?:tree|pair|fern|hedge)-\d+"/g,
+  )];
+  const atlasPath = foliageModel.match(
+    /NINJAONE_FOLIAGE_ATLAS_PATH\s*=\s*\n?\s*"([^"]+)"/,
+  )?.[1];
+
+  assert.equal(foliageResourceIds.length, 4);
+  assert.equal(foliageInstanceIds.length, 12);
+  assert.ok(atlasPath);
+  await access(path.join(root, "public", atlasPath.replace(/^\//, "")));
+  assert.match(component, /<FoliageResourceDefinitions \/>/);
+  assert.match(component, /<symbol/);
+  assert.match(component, /<use/);
+  assert.match(component, /KAIZEN_FOLIAGE_INSTANCES\.map/);
+  assert.match(component, /data-foliage-resource-count=/);
+  assert.match(component, /data-foliage-instance-count=/);
+  assert.match(component, /data-foliage-animation="shared-world-wind"/);
+  assert.match(component, /windVectorFromDegrees\(/);
+  assert.match(component, /DEFAULT_WORLD_WIND_STATE\.motion/);
+  assert.match(weather, /directionDegrees: 24/);
+  assert.match(weather, /motion: 0\.68/);
+  assert.match(waterState, /DEFAULT_WORLD_WIND_STATE\.motion/);
+  assert.match(waterState, /DEFAULT_WORLD_WIND_STATE\.directionDegrees/);
+  assert.match(styles, /@keyframes career-world-foliage-breeze/);
+  assert.match(
+    styles,
+    /prefers-reduced-motion: reduce[\s\S]*\.career-world__foliage-breeze[\s\S]*animation: none/,
+  );
+  for (const source of [component, foliageModel]) {
+    assert.doesNotMatch(
+      source,
+      /Math\.random|requestAnimationFrame|setInterval|setTimeout/,
+    );
   }
 });

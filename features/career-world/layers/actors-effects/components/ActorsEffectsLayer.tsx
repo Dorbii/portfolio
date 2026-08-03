@@ -19,6 +19,7 @@ import {
   type DetailState,
 } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
+import { resolveTownPresentationOffset } from "../../../shared/townPresentation";
 import {
   PEDESTRIAN_INSTANCES,
   PEDESTRIAN_NODE_POLICY,
@@ -172,39 +173,52 @@ function PedestrianNode({
   readonly prefersReducedMotion: boolean;
 }) {
   const [restX, restY] = worldPoint(instance.restPoint);
+  const [offsetX, offsetY] = resolveTownPresentationOffset(instance.ownerId);
   const transform = prefersReducedMotion
     ? `translate(${restX} ${restY})`
     : undefined;
 
   return (
     <g
-      className="town-pedestrian"
-      data-direction={instance.direction}
       data-owner-id={instance.ownerId}
-      data-owner-kind={instance.ownerKind}
-      data-pedestrian-id={instance.id}
-      data-pedestrian-loop-id={instance.loop.id}
-      data-start-entrance={instance.startEntranceStructureId}
-      transform={transform}
+      data-town-pedestrian-placement={instance.id}
+      transform={
+        offsetX === 0 && offsetY === 0
+          ? undefined
+          : `translate(${offsetX * WORLD_PLANE.width} ${
+            offsetY * WORLD_PLANE.height
+          })`
+      }
     >
-      <PedestrianGlyph appearance={instance.appearance} light={light} />
-      {prefersReducedMotion ? null : (
-        <>
-          <animate
-            attributeName="opacity"
-            dur={`${instance.durationSeconds}s`}
-            keyTimes={ENDPOINT_VISIBILITY_KEY_TIMES}
-            repeatCount="indefinite"
-            values={ENDPOINT_VISIBILITY_VALUES}
-          />
-          <animateMotion
-            dur={`${instance.durationSeconds}s`}
-            path={motionPath(instance.motionPath)}
-            repeatCount="indefinite"
-            rotate="0"
-          />
-        </>
-      )}
+      <g
+        className="town-pedestrian"
+        data-direction={instance.direction}
+        data-owner-id={instance.ownerId}
+        data-owner-kind={instance.ownerKind}
+        data-pedestrian-id={instance.id}
+        data-pedestrian-loop-id={instance.loop.id}
+        data-start-entrance={instance.startEntranceStructureId}
+        transform={transform}
+      >
+        <PedestrianGlyph appearance={instance.appearance} light={light} />
+        {prefersReducedMotion ? null : (
+          <>
+            <animate
+              attributeName="opacity"
+              dur={`${instance.durationSeconds}s`}
+              keyTimes={ENDPOINT_VISIBILITY_KEY_TIMES}
+              repeatCount="indefinite"
+              values={ENDPOINT_VISIBILITY_VALUES}
+            />
+            <animateMotion
+              dur={`${instance.durationSeconds}s`}
+              path={motionPath(instance.motionPath)}
+              repeatCount="indefinite"
+              rotate="0"
+            />
+          </>
+        )}
+      </g>
     </g>
   );
 }

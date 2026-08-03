@@ -32,8 +32,8 @@
     "mode": "RGBA"
   },
   "mask": {
-    "path": "../masks/world-land-mask-r3.png",
-    "sha256": "22CEE71270D21280326710DEABD6FBC27480E5116C00476A38D5EBD2D6B96F3C"
+    "path": "../masks/world-land-mask-r4.png",
+    "sha256": "1335488F111EBBFC80D037D392BA20AC874040D01D7E595D0DE699FE16401847"
   },
   "fields": {
     "height": {
@@ -53,7 +53,7 @@
     "authoredSurfaceSource": "../sources/world-land-surface-authored-r9.png",
     "authoredSurfaceSourceSha256": "B922D8A5CBC7BE9B847CEFE249F80737819F80D49226B9088763F572D535CFBF",
     "authoring": "terrain-dem-r4.json",
-    "authoringSha256": "6869A803143E662A717E2B625204A3AA2B07F1B380861859C4C9E51764DEF263",
+    "authoringSha256": "5D0C436C965CB0BE2C709C662962B2A1DB1263A67B711157893732CF7D17ABB8",
     "operation": "mask one authored land-and-coast material with canonical geography; preserve five future development shelves in the separate topology field; add registered territory-only micro relief; publish topology QA and coast response derivatives",
     "worldLightDirection": [
       -0.42,

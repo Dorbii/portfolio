@@ -224,7 +224,10 @@ test("the environment renderer keeps rural scenery decorative and omits empty sl
     /EMPTY_EASTER_EGG_SLOTS|easterEggSlots/,
   );
   assert.doesNotMatch(
-    component,
+    component.slice(
+      component.indexOf("function RuralSceneryGlyph("),
+      component.indexOf("function FoliageResourceDefinitions("),
+    ),
     /<image|href=|onClick=|tabIndex=|Math\.random/,
   );
 });

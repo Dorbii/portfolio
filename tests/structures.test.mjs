@@ -956,19 +956,13 @@ test("town-plan rendering keeps mixed surfaces sparse and hierarchical", async (
   assert.match(layer, /data-street-kind=\{street\.kind\}/);
   assert.match(layer, /data-road-layer-count=\{3\}/);
   assert.match(layer, /data-road-grammar="hierarchical-mixed-surface"/);
-  assert.match(
-    layer,
-    /data-road-union=\{[\s\S]*"streets-by-hierarchy-with-three-layer-junction-caps"[\s\S]*"streets-by-hierarchy"/,
-  );
-  assert.match(
-    layer,
-    /data-ground-union=\{[\s\S]*"feathered-authored-blocks-and-plazas"[\s\S]*"plazas-only"/,
-  );
+  assert.match(layer, /data-road-union="streets-by-hierarchy"/);
+  assert.match(layer, /data-ground-union="plazas-only"/);
   assert.match(layer, /data-paved-block-count=\{0\}/);
   assert.match(layer, /<TownPlanStreetGroup/);
   assert.match(layer, /className="town-plan__road-beds"/);
   assert.match(layer, /className="town-plan__plaza-material"/);
-  assert.match(layer, /<mask[\s\S]*id=\{districtMaskId\}/);
+  assert.doesNotMatch(layer, /<mask[\s\S]*id=\{districtMaskId\}/);
   assert.doesNotMatch(layer, /function townPlanGroundHull\(/);
   assert.doesNotMatch(layer, /town-plan__road-mask-pedestrian-loop/);
   assert.match(layer, /data-entrance-structure-id=\{entrance\.structureId\}/);
@@ -978,16 +972,18 @@ test("town-plan rendering keeps mixed surfaces sparse and hierarchical", async (
   );
   assert.match(
     layer,
-    /data-kaizen-overview-visibility=\{kaizenOverviewVisibility\.toFixed\(3\)\}/,
+    /AUTHORED_TOWN_FOUNDATION_OWNER_IDS[\s\S]*KAIZEN_AGENT_TOWN_OWNER_ID/,
   );
   assert.match(
     layer,
-    /const kaizenOverviewVisibility = detailState\.shouldLoadSiteAssets[\s\S]*\? 1[\s\S]*: infrastructureVisibility/,
+    /scope === "all"[\s\S]*!AUTHORED_TOWN_FOUNDATION_OWNER_IDS\.has\(ownerId\)/,
   );
+  assert.match(layer, /scope="procedural-only"/);
   assert.match(
     layer,
-    /className="town-plan__site-surface town-plan__site-surface--kaizen-overview"[\s\S]*scope="kaizen-only"/,
+    /data-authored-town-foundation-count=\{[\s\S]*AUTHORED_TOWN_FOUNDATION_OWNER_IDS\.size/,
   );
+  assert.doesNotMatch(layer, /scope="kaizen-only"|kaizenOverviewVisibility/);
   assert.match(layer, /detailState\.shouldLoadSiteAssets/);
   assert.match(layer, /resolveAtomicTierVisibility\(/);
   assert.match(
@@ -1177,4 +1173,16 @@ test("NinjaOne controls expose progressive map destinations without affecting la
     controls,
     /territories\.map\([\s\S]*onClick=\{\(\) => onFocus\(territory\.id\)\}/,
   );
+  assert.match(scene, /const LANDMARK_LABELS:/);
+  assert.match(
+    scene,
+    /SKILL_STRUCTURE_INSTANCES\.map\([\s\S]*anchor: skillPresentationStructure\(instance\)\.territoryAnchor/,
+  );
+  assert.match(scene, /\[showLandmarkLabels, setShowLandmarkLabels\]/);
+  assert.match(controls, /<LandmarkLabels/);
+  assert.match(controls, /data-landmark-label-count=/);
+  assert.match(controls, /data-landmark-labels-visible=/);
+  assert.match(controls, /aria-pressed=\{showLandmarkLabels\}/);
+  assert.match(controls, /onClick=\{onToggleLandmarkLabels\}/);
+  assert.match(controls, />\s*Labels\s*</);
 });

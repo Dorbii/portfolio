@@ -10,7 +10,7 @@ import sys
 import time
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
@@ -24,7 +24,20 @@ WATER_ROOT = PUBLIC / "water-surface"
 WORLD_LIGHT_MANIFEST = (
     PUBLIC / "world-backdrop" / "manifests" / "world-light-r1.json"
 )
-LAND_MASK = LAND_ROOT / "masks" / "world-land-mask-r3.png"
+LAND_MASK = LAND_ROOT / "masks" / "world-land-mask-r4.png"
+KAIZEN_C2_CITY_PLATE = (
+    ROOT
+    / "public"
+    / "career-world"
+    / "layers"
+    / "structures"
+    / "textures"
+    / "ambient"
+    / "kaizen-agent"
+    / "kaizen-city-foundation-integrated-r1.png"
+)
+KAIZEN_C2_WORLD_ORIGIN = (0.25925, 0.135737)
+KAIZEN_C2_WORLD_SPAN = (0.1065, 0.1893)
 TERRAIN_DEM_SOURCE = (
     LAND_ROOT / "sources" / "terrain-dem-authored-r3.png"
 )
@@ -506,7 +519,7 @@ def build_coast_geometry(mask: Image.Image) -> None:
             ),
         },
         "source": {
-            "path": "../../territory-landform/masks/world-land-mask-r3.png",
+            "path": "../../territory-landform/masks/world-land-mask-r4.png",
             "sha256": sha256(LAND_MASK),
         },
         "policy": [
@@ -748,7 +761,7 @@ def build_water_region_field(mask: Image.Image) -> None:
             "landMask": {
                 "path": (
                     "../../territory-landform/masks/"
-                    "world-land-mask-r3.png"
+                    "world-land-mask-r4.png"
                 ),
                 "sha256": sha256(LAND_MASK),
             },
@@ -1106,7 +1119,7 @@ def build_land_plate(
             "mode": "RGBA",
         },
         "mask": {
-            "path": "../masks/world-land-mask-r3.png",
+            "path": "../masks/world-land-mask-r4.png",
             "sha256": sha256(LAND_MASK),
         },
         "fields": {
@@ -1280,7 +1293,34 @@ def verify() -> None:
         raise RuntimeError("Coast material field does not match the world plane.")
     if water_regions.size != mask.size:
         raise RuntimeError("Water region field does not match the world plane.")
-    land_alpha = np.asarray(land.getchannel("A"), dtype=np.uint8) >= 128
+    accepted_land_alpha = land.getchannel("A").point(
+        lambda value: 255 if value >= 128 else 0,
+    )
+    city = Image.open(KAIZEN_C2_CITY_PLATE).convert("RGBA")
+    city_box = (
+        round(KAIZEN_C2_WORLD_ORIGIN[0] * mask.width),
+        round(KAIZEN_C2_WORLD_ORIGIN[1] * mask.height),
+        round(
+            (KAIZEN_C2_WORLD_ORIGIN[0] + KAIZEN_C2_WORLD_SPAN[0])
+            * mask.width,
+        ),
+        round(
+            (KAIZEN_C2_WORLD_ORIGIN[1] + KAIZEN_C2_WORLD_SPAN[1])
+            * mask.height,
+        ),
+    )
+    city_alpha = city.getchannel("A").resize(
+        (city_box[2] - city_box[0], city_box[3] - city_box[1]),
+        Image.Resampling.BILINEAR,
+    ).filter(ImageFilter.MaxFilter(9)).point(
+        lambda value: 255 if value >= 12 else 0,
+    )
+    accepted_crop = accepted_land_alpha.crop(city_box)
+    accepted_land_alpha.paste(
+        ImageChops.lighter(accepted_crop, city_alpha),
+        city_box,
+    )
+    land_alpha = np.asarray(accepted_land_alpha, dtype=np.uint8) >= 128
     accepted_silhouette = np.asarray(mask, dtype=np.uint8) >= 128
     if not np.array_equal(land_alpha, accepted_silhouette):
         raise RuntimeError(
@@ -1378,16 +1418,50 @@ def main() -> None:
             "water-owned derivative."
         ),
     )
+    parser.add_argument(
+        "--water-derivatives-only",
+        action="store_true",
+        help=(
+            "Regenerate only mask-owned coast geometry, coast material, and "
+            "water-region fields from the existing terrain height/slope "
+            "fields. This does not rewrite accepted land artwork."
+        ),
+    )
     args = parser.parse_args()
+    selected_modes = sum((
+        bool(args.check),
+        bool(args.land_only),
+        bool(args.water_derivatives_only),
+    ))
+    if selected_modes > 1:
+        parser.error(
+            "--check, --land-only, and --water-derivatives-only are mutually "
+            "exclusive.",
+        )
+    if args.water_derivatives_only and args.refresh_locked_water:
+        parser.error(
+            "--water-derivatives-only cannot refresh the locked water albedo.",
+        )
     if args.check and args.refresh_locked_water:
         parser.error("--check and --refresh-locked-water are mutually exclusive.")
-    if args.check and args.land_only:
-        parser.error("--check and --land-only are mutually exclusive.")
     if args.land_only and args.refresh_locked_water:
         parser.error(
             "--land-only and --refresh-locked-water are mutually exclusive.",
         )
-    if not args.check:
+    if args.water_derivatives_only:
+        mask = load_land_mask()
+        height_image = Image.open(TERRAIN_HEIGHT).convert("L")
+        slope_image = Image.open(TERRAIN_SLOPE).convert("L")
+        if height_image.size != mask.size or slope_image.size != mask.size:
+            raise RuntimeError(
+                "Existing terrain fields do not match the canonical land mask.",
+            )
+        height = np.asarray(height_image, dtype=np.float32) / 255.0
+        slope = np.asarray(slope_image, dtype=np.float32) / 255.0
+        build_coast_geometry(mask)
+        build_coast_material_field(mask, height, slope)
+        build_water_region_field(mask)
+    elif not args.check:
         mask = load_land_mask()
         height, slope = build_terrain_fields(mask)
         build_land_plate(mask, height, slope)

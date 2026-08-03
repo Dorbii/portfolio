@@ -21,15 +21,27 @@ import {
 import { InfrastructureLayer } from "../layers/infrastructure";
 import { EnvironmentLayer } from "../layers/environment";
 import {
+  CAPITAL_STRUCTURES,
+  KAIZEN_NEIGHBORHOOD_ANCHOR,
+  KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
+  KAIZEN_NEIGHBORHOOD_SPAN,
   PROJECT_STRUCTURES,
   SKILL_STRUCTURE_INSTANCES,
   SUPPORT_STRUCTURE_INSTANCES,
+  resolveKaizenSemanticStructureAsset,
+  resolveKaizenStructurePresentationAnchor,
   resolveProjectAnchor,
   resolveProjectFocusView,
+  resolveSkillAnchor,
   StructuresLayer,
+  type ProjectStructure,
+  type SkillStructureInstance,
 } from "../layers/structures";
 import { ActorsEffectsLayer } from "../layers/actors-effects";
-import { WorldInterface } from "../layers/interface";
+import {
+  WorldInterface,
+  type LandmarkLabel,
+} from "../layers/interface";
 import {
   DevelopmentOverlay,
   PerformanceProbe,
@@ -44,6 +56,7 @@ import {
 } from "../shared/camera";
 import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
+import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 
 interface WorldSceneProps {
   readonly enableDevelopmentTools: boolean;
@@ -57,6 +70,49 @@ interface DragState {
 }
 
 const FOCUS_DURATION_MS = 680;
+
+function projectPresentationAnchor(project: ProjectStructure) {
+  const semanticAsset = resolveKaizenSemanticStructureAsset({
+    ownerId: project.id,
+    role: "project",
+    visualId: project.id,
+  });
+  return resolveTownPresentationAnchor(
+    project.id,
+    semanticAsset?.territoryAnchor
+      ?? resolveKaizenStructurePresentationAnchor({
+        anchor: resolveProjectAnchor(project),
+        ownerId: project.id,
+        role: "project",
+        visualId: project.id,
+      }),
+  );
+}
+
+function skillPresentationStructure(instance: SkillStructureInstance) {
+  const semanticAsset = resolveKaizenSemanticStructureAsset({
+    ownerId: instance.ownerId,
+    role: "skill",
+    visualId: instance.archetype.id,
+  });
+  return Object.freeze({
+    territoryAnchor: resolveTownPresentationAnchor(
+      instance.ownerId,
+      semanticAsset?.territoryAnchor
+        ?? resolveKaizenStructurePresentationAnchor({
+          anchor: resolveSkillAnchor(instance),
+          ownerId: instance.ownerId,
+          role: "skill",
+          visualId: instance.archetype.id,
+        }),
+    ),
+    footprintSpan: semanticAsset?.footprintSpan
+      ?? instance.archetype.footprintSpan,
+    groundAnchor: semanticAsset?.groundAnchor
+      ?? instance.archetype.groundAnchor,
+  });
+}
+
 const PROJECT_DESTINATIONS = Object.freeze(
   PROJECT_STRUCTURES.map((project) => {
     const supportingSkills = SKILL_STRUCTURE_INSTANCES.filter((instance) => (
@@ -69,32 +125,75 @@ const PROJECT_DESTINATIONS = Object.freeze(
         && instance.ownerId === project.id
       ),
     );
+    const semanticProject = resolveKaizenSemanticStructureAsset({
+      ownerId: project.id,
+      role: "project",
+      visualId: project.id,
+    });
+    const presentedProject = Object.freeze({
+      ...project,
+      territoryAnchor: projectPresentationAnchor(project),
+      footprintSpan: semanticProject?.footprintSpan ?? project.footprintSpan,
+      groundAnchor: semanticProject?.groundAnchor ?? project.groundAnchor,
+    });
+    const presentedSkills = supportingSkills.map(skillPresentationStructure);
+    const presentedSupport = supportingStructures.map(({
+      ownerId,
+      territoryAnchor,
+      archetype,
+    }) => ({
+      territoryAnchor: resolveTownPresentationAnchor(
+        ownerId,
+        territoryAnchor,
+      ),
+      footprintSpan: archetype.footprintSpan,
+      groundAnchor: archetype.groundAnchor,
+    }));
+    const focusStructures = project.id === "project-kaizen-agent"
+      ? [
+        ...presentedSkills,
+        {
+          territoryAnchor: KAIZEN_NEIGHBORHOOD_ANCHOR,
+          footprintSpan: KAIZEN_NEIGHBORHOOD_SPAN,
+          groundAnchor: [
+            0.5,
+            KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
+          ] as const,
+        },
+      ]
+      : [...presentedSkills, ...presentedSupport];
     return Object.freeze({
       id: project.id,
       label: project.label,
-      anchor: resolveProjectAnchor(project),
+      anchor: presentedProject.territoryAnchor,
       focusView: resolveProjectFocusView(
-        project,
-        [
-          ...supportingSkills.map(({ territoryAnchor, archetype }) => ({
-            territoryAnchor,
-            footprintSpan: archetype.footprintSpan,
-            groundAnchor: archetype.groundAnchor,
-          })),
-          ...supportingStructures.map(({
-            territoryAnchor,
-            archetype,
-          }) => ({
-            territoryAnchor,
-            footprintSpan: archetype.footprintSpan,
-            groundAnchor: archetype.groundAnchor,
-          })),
-        ],
+        presentedProject,
+        focusStructures,
       ),
       supportingSkillCount: supportingSkills.length,
     });
   }),
 );
+const LANDMARK_LABELS: readonly LandmarkLabel[] = Object.freeze([
+  ...CAPITAL_STRUCTURES.map((capital) => Object.freeze({
+    id: capital.id,
+    label: `${capital.territory.label} Capital`,
+    anchor: capital.territory.development.capitalAnchor,
+    role: "capital" as const,
+  })),
+  ...PROJECT_STRUCTURES.map((project) => Object.freeze({
+    id: project.id,
+    label: project.label,
+    anchor: projectPresentationAnchor(project),
+    role: "project" as const,
+  })),
+  ...SKILL_STRUCTURE_INSTANCES.map((instance) => Object.freeze({
+    id: instance.id,
+    label: instance.archetype.label,
+    anchor: skillPresentationStructure(instance).territoryAnchor,
+    role: "skill" as const,
+  })),
+]);
 const INTERACTIVE_TARGET_SELECTOR = [
   "button",
   "a",
@@ -102,6 +201,7 @@ const INTERACTIVE_TARGET_SELECTOR = [
   "select",
   "textarea",
   "[role='button']",
+  "[data-semantic-structure]",
 ].join(",");
 
 export function WorldScene({
@@ -120,6 +220,7 @@ export function WorldScene({
   const [showTopography, setShowTopography] = useState(false);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
+  const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const detailState = resolveDetailState(camera);
 
   const commitCamera = useCallback((next: CameraView) => {
@@ -382,15 +483,20 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
         enableDevelopmentTools={enableDevelopmentTools}
+        landmarkLabels={LANDMARK_LABELS}
         mode={initialInterfaceMode}
         onFocus={handleFocus}
         onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
         onToggleGrid={() => setShowGrid((visible) => !visible)}
+        onToggleLandmarkLabels={() => (
+          setShowLandmarkLabels((visible) => !visible)
+        )}
         onToggleTopography={() => setShowTopography((visible) => !visible)}
         onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
         projectDestinations={PROJECT_DESTINATIONS}
         renderState={renderState}
         showGrid={showGrid}
+        showLandmarkLabels={showLandmarkLabels}
         showTopography={showTopography}
         showTerritoryQa={showTerritoryQa}
         territories={TERRITORIES}

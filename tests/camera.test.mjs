@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  CAMERA_MINIMUM_SPAN,
   cameraLayerStyle,
   cameraViewBox,
   interpolateCameraView,
@@ -18,7 +19,7 @@ test("camera normalization keeps every view on the world plane", () => {
     }),
     {
       origin: [0, 0.4],
-      span: [0.03, 0.6],
+      span: [CAMERA_MINIMUM_SPAN, 0.6],
     },
   );
 });

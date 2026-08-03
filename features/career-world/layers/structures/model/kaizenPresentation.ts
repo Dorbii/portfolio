@@ -1,3 +1,5 @@
+import type { Pair } from "../../../shared/camera";
+
 export const KAIZEN_AGENT_STRUCTURE_OWNER_ID = "project-kaizen-agent";
 
 export type KaizenStructurePresentationRole =
@@ -14,6 +16,12 @@ const KAIZEN_SKILL_SCALES = Object.freeze({
   "data-contracts": 0.82,
   "protocol-gateway": 0.86,
   "safe-writes": 0.83,
+} as const);
+
+const KAIZEN_SKILL_PRESENTATION_ANCHORS = Object.freeze({
+  "data-contracts": Object.freeze([0.217214, 0.226311] as Pair),
+  "protocol-gateway": Object.freeze([0.262863, 0.281033] as Pair),
+  "safe-writes": Object.freeze([0.236748, 0.246124] as Pair),
 } as const);
 
 const KAIZEN_SUPPORT_SCALES = Object.freeze({
@@ -74,4 +82,32 @@ export function resolveKaizenStructurePresentationScale({
     case "ambient":
       return requireScale(KAIZEN_AMBIENT_SCALES, visualId, role);
   }
+}
+
+export function resolveKaizenStructurePresentationAnchor({
+  anchor,
+  ownerId,
+  role,
+  visualId,
+}: {
+  readonly anchor: Pair;
+  readonly ownerId: string;
+  readonly role: KaizenStructurePresentationRole;
+  readonly visualId: string;
+}): Pair {
+  if (
+    ownerId !== KAIZEN_AGENT_STRUCTURE_OWNER_ID
+    || role !== "skill"
+  ) {
+    return anchor;
+  }
+
+  const presentationAnchor = KAIZEN_SKILL_PRESENTATION_ANCHORS[
+    visualId as keyof typeof KAIZEN_SKILL_PRESENTATION_ANCHORS
+  ];
+  if (!presentationAnchor) {
+    return anchor;
+  }
+
+  return presentationAnchor;
 }

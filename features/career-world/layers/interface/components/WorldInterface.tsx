@@ -20,21 +20,31 @@ interface ProjectDestination {
   readonly supportingSkillCount: number;
 }
 
+export interface LandmarkLabel {
+  readonly id: string;
+  readonly label: string;
+  readonly anchor: Pair;
+  readonly role: "capital" | "project" | "skill";
+}
+
 interface WorldInterfaceProps {
   readonly activeViewId: string;
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly enableDevelopmentTools: boolean;
   readonly mode: "world" | "water";
+  readonly landmarkLabels: readonly LandmarkLabel[];
   readonly projectDestinations: readonly ProjectDestination[];
   readonly renderState: WaterRenderState;
   readonly showGrid: boolean;
+  readonly showLandmarkLabels: boolean;
   readonly showTopography: boolean;
   readonly showTerritoryQa: boolean;
   readonly territories: readonly Territory[];
   readonly onFocus: (id: string) => void;
   readonly onReset: () => void;
   readonly onToggleGrid: () => void;
+  readonly onToggleLandmarkLabels: () => void;
   readonly onToggleTopography: () => void;
   readonly onToggleTerritoryQa: () => void;
 }
@@ -64,6 +74,66 @@ function projectGlyph(label: string): string {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+}
+
+function landmarkLabelVisibility(
+  label: LandmarkLabel,
+  detailState: DetailState,
+): number {
+  switch (label.role) {
+    case "capital":
+      return detailState.worldToTerritory;
+    case "project":
+      return detailState.territoryToCapital;
+    case "skill":
+      return detailState.capitalToSite;
+  }
+}
+
+function LandmarkLabels({
+  camera,
+  detailState,
+  labels,
+  visible,
+}: {
+  readonly camera: CameraView;
+  readonly detailState: DetailState;
+  readonly labels: readonly LandmarkLabel[];
+  readonly visible: boolean;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className="career-world__landmark-labels"
+      data-landmark-label-count={labels.length}
+      data-landmark-labels-visible={visible}
+    >
+      {visible ? labels.map((label) => {
+        const visibility = landmarkLabelVisibility(label, detailState);
+        if (visibility <= LOD_PRESENTATION_EPSILON) {
+          return null;
+        }
+        return (
+          <span
+            className={[
+              "career-world__landmark-label",
+              `career-world__landmark-label--${label.role}`,
+            ].join(" ")}
+            data-landmark-id={label.id}
+            data-landmark-role={label.role}
+            key={label.id}
+            style={{
+              ...markerStyle(label.anchor, camera, visibility),
+              transform: "translate(-50%, 0.7rem)",
+            }}
+          >
+            <strong>{label.label}</strong>
+            <span>{label.role}</span>
+          </span>
+        );
+      }) : null}
+    </div>
+  );
 }
 
 function NinjaOneWorldSeal({
@@ -163,16 +233,19 @@ export function WorldInterface({
   camera,
   detailState,
   enableDevelopmentTools,
+  landmarkLabels,
   mode,
   projectDestinations,
   renderState,
   showGrid,
+  showLandmarkLabels,
   showTopography,
   showTerritoryQa,
   territories,
   onFocus,
   onReset,
   onToggleGrid,
+  onToggleLandmarkLabels,
   onToggleTopography,
   onToggleTerritoryQa,
 }: WorldInterfaceProps) {
@@ -214,6 +287,13 @@ export function WorldInterface({
           {detailState.tier.label}
         </span>
       </div>
+
+      <LandmarkLabels
+        camera={camera}
+        detailState={detailState}
+        labels={landmarkLabels}
+        visible={showLandmarkLabels}
+      />
 
       <div
         className="career-world__world-markers"
@@ -274,6 +354,14 @@ export function WorldInterface({
             {territory.label}
           </button>
         ))}
+        <button
+          aria-pressed={showLandmarkLabels}
+          disabled={!isInteractive}
+          onClick={onToggleLandmarkLabels}
+          type="button"
+        >
+          Labels
+        </button>
         {enableDevelopmentTools ? (
           <>
             <button

@@ -9,7 +9,7 @@ export type DetailTierId =
   | "close";
 
 const POLICY_CAMERA_MINIMUM_SPAN:
-  typeof import("./camera").CAMERA_MINIMUM_SPAN = 0.03;
+  typeof import("./camera").CAMERA_MINIMUM_SPAN = 0.04;
 
 export const DETAIL_POLICY = Object.freeze({
   cameraMinimumSpan: POLICY_CAMERA_MINIMUM_SPAN,
