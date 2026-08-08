@@ -4,7 +4,6 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
-  DETAIL_POLICY,
   resolveDetailState,
   resolveNodeVisibility,
 } from "../features/career-world/shared/lod.ts";
@@ -16,22 +15,29 @@ async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(root, relativePath), "utf8"));
 }
 
-test("Phase 6 registers one distinct capital core per territory", async () => {
+test("capital registry omits NinjaOne while retaining other territory capitals", async () => {
   const structures = await readJson(
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const territories = await readJson(
     "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
   );
-  const territoryIds = territories.territories.map(({ id }) => id).sort();
+  const expectedTerritoryIds = territories.territories
+    .map(({ id }) => id)
+    .filter((id) => id !== "ninjaone")
+    .sort();
   const capitalTerritoryIds = structures.nodes
     .map(({ territoryId }) => territoryId)
     .sort();
 
   assert.equal(structures.status, "phase-6-checkpoint");
   assert.equal(structures.minimumTier, "territory");
-  assert.equal(structures.nodes.length, 5);
-  assert.deepEqual(capitalTerritoryIds, territoryIds);
+  assert.equal(structures.nodes.length, 4);
+  assert.deepEqual(capitalTerritoryIds, expectedTerritoryIds);
+  assert.equal(
+    structures.nodes.some(({ territoryId }) => territoryId === "ninjaone"),
+    false,
+  );
   assert.equal(
     new Set(structures.nodes.map(({ id }) => id)).size,
     structures.nodes.length,
@@ -44,10 +50,6 @@ test("Phase 6 registers one distinct capital core per territory", async () => {
   assert.equal(
     structures.projection.lightSource,
     "career-world/world-light@r1",
-  );
-  assert.equal(
-    structures.nodes.some((capital) => "rotation" in capital),
-    false,
   );
 });
 
@@ -132,7 +134,10 @@ test("every capital ground integration is territory-owned and bounded", async ()
   const territories = await readJson(
     "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
   );
-  const territoryIds = territories.territories.map(({ id }) => id).sort();
+  const territoryIds = territories.territories
+    .map(({ id }) => id)
+    .filter((id) => id !== "ninjaone")
+    .sort();
   const capitalTiles = siteManifest.tiles.filter(
     ({ ownerKind }) => ownerKind === "capital",
   );
@@ -197,7 +202,7 @@ test("every capital ground integration is territory-owned and bounded", async ()
   }
 });
 
-test("NinjaOne projects occupy distinct territory-owned districts", async () => {
+test("Kaizen Agent is the only retained NinjaOne project city", async () => {
   const projects = await readJson(
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
   );
@@ -209,354 +214,131 @@ test("NinjaOne projects occupy distinct territory-owned districts", async () => 
   );
   const ninjaOne = territories.territories.find(({ id }) => id === "ninjaone");
   const projectTiles = sites.tiles.filter(
-    ({ ownerKind }) => ownerKind === "project",
+    ({ ownerKind, territoryId }) => (
+      ownerKind === "project" && territoryId === "ninjaone"
+    ),
   );
 
   assert.ok(ninjaOne);
-  assert.equal(projects.status, "phase-10-fantasy-town-landmarks");
-  assert.equal(projects.artRevision, 2);
-  assert.equal(projects.artScale, 1.3);
-  assert.equal(
-    projects.coordinateSpace,
-    "normalized-world-top-left",
-  );
-  assert.equal(projects.nodes.length, 3);
-  assert.equal(projectTiles.length, projects.nodes.length);
-  assert.equal(
-    new Set(
-      projects.nodes.map(({ territoryAnchor }) => territoryAnchor.join(",")),
-    )
-      .size,
-    projects.nodes.length,
-    "Projects must not collapse onto one shared site.",
+  assert.deepEqual(projects.nodes.map(({ id }) => id), ["project-kaizen-agent"]);
+  assert.equal(projectTiles.length, 1);
+  assert.doesNotMatch(
+    JSON.stringify(projects),
+    /project-vendy|project-kaizen-metrics|capital-ninjaone/,
   );
 
-  const projectXs = projects.nodes.map(
-    ({ territoryAnchor }) => territoryAnchor[0],
+  const project = projects.nodes[0];
+  const tile = projectTiles[0];
+  const anchor = project.territoryAnchor;
+  assert.equal(tile.ownerId, project.id);
+  assert.equal(tile.minimumTier, "site");
+  assert.equal(tile.sourceAlphaPolicy, "bounded-subset");
+  assert.ok(
+    anchor[0] >= tile.worldBounds.origin[0]
+      && anchor[0] <= tile.worldBounds.origin[0] + tile.worldBounds.span[0],
   );
   assert.ok(
-    Math.max(...projectXs) - Math.min(...projectXs) >= 0.4,
-    "Project towns must span western, central, and eastern NinjaOne.",
+    anchor[1] >= tile.worldBounds.origin[1]
+      && anchor[1] <= tile.worldBounds.origin[1] + tile.worldBounds.span[1],
   );
-  const capitalEnvelope = ninjaOne.development.capitalEnvelope;
-  for (const project of projects.nodes) {
-    const tile = projectTiles.find(({ ownerId }) => ownerId === project.id);
-    assert.ok(tile, `${project.id} must own a terrain contact`);
-    assert.equal(tile.territoryId, projects.territoryId);
-    assert.equal(tile.minimumTier, "site");
-    assert.equal(tile.sourceAlphaPolicy, "bounded-subset");
-
-    const anchor = project.territoryAnchor;
-    assert.ok(
-      anchor[0] >= tile.worldBounds.origin[0]
-        && anchor[0]
-          <= tile.worldBounds.origin[0] + tile.worldBounds.span[0],
-      `${project.id} x anchor must remain inside its contact`,
-    );
-    assert.ok(
-      anchor[1] >= tile.worldBounds.origin[1]
-        && anchor[1]
-          <= tile.worldBounds.origin[1] + tile.worldBounds.span[1],
-      `${project.id} y anchor must remain inside its contact`,
-    );
-    assert.ok(
-      anchor[0] < capitalEnvelope.origin[0]
-        || anchor[0] > capitalEnvelope.origin[0] + capitalEnvelope.span[0]
-        || anchor[1] < capitalEnvelope.origin[1]
-        || anchor[1] > capitalEnvelope.origin[1] + capitalEnvelope.span[1],
-      `${project.id} must not collapse back into the capital envelope`,
-    );
-    assert.ok(
-      anchor[0] >= ninjaOne.focusView.origin[0]
-        && anchor[0]
-          <= ninjaOne.focusView.origin[0] + ninjaOne.focusView.span[0],
-      `${project.id} x anchor must remain in the territory focus`,
-    );
-    assert.ok(
-      anchor[1] >= ninjaOne.focusView.origin[1]
-        && anchor[1]
-          <= ninjaOne.focusView.origin[1] + ninjaOne.focusView.span[1],
-      `${project.id} y anchor must remain in the territory focus`,
-    );
-
-    const projectAsset = await stat(path.join(root, "public", project.assetPath));
-    const contactAsset = await stat(path.join(root, "public", tile.path));
-    assert.ok(projectAsset.size > 100_000, project.assetPath);
-    assert.ok(contactAsset.size > 100_000, tile.path);
-  }
+  assert.ok(
+    anchor[0] >= ninjaOne.focusView.origin[0]
+      && anchor[0] <= ninjaOne.focusView.origin[0] + ninjaOne.focusView.span[0],
+  );
+  assert.ok(
+    anchor[1] >= ninjaOne.focusView.origin[1]
+      && anchor[1] <= ninjaOne.focusView.origin[1] + ninjaOne.focusView.span[1],
+  );
+  const projectAsset = await stat(path.join(root, "public", project.assetPath));
+  const contactAsset = await stat(path.join(root, "public", tile.path));
+  assert.ok(projectAsset.size > 100_000, project.assetPath);
+  assert.ok(contactAsset.size > 100_000, tile.path);
 });
 
-test("NinjaOne skills remain universal definitions with local instances", async () => {
+test("shared skill definitions instantiate only for Kaizen Agent", async () => {
   const projects = await readJson(
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
-  );
-  const capitals = await readJson(
-    "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const skills = await readJson(
     "public/career-world/layers/structures/manifests/skill-structures-r1.json",
   );
-  const projectById = new Map(
-    projects.nodes.map((project) => [project.id, project]),
-  );
+  const project = projects.nodes[0];
   const archetypeById = new Map(
     skills.archetypes.map((archetype) => [archetype.id, archetype]),
   );
 
   assert.equal(skills.definitionScope, "universal");
   assert.equal(skills.minimumTier, "site");
-  assert.equal(
-    skills.visualFamily,
-    "career-world-universal-skill-buildings@r2",
-  );
-  assert.match(
-    skills.variantPolicy,
-    /Core silhouette, foundation, and skill crest remain universal/,
-  );
-  assert.equal(
-    projects.visualFamily,
-    "career-world-bespoke-project-landmarks@r2",
-  );
-  assert.notEqual(skills.visualFamily, projects.visualFamily);
   assert.equal(skills.archetypes.length, 8);
-  assert.equal(skills.instances.length, 17);
-  assert.equal(
-    skills.instances.filter(({ ownerKind }) => ownerKind === "project").length,
-    9,
-  );
-  assert.equal(
-    skills.instances.filter(({ ownerKind }) => ownerKind === "capital").length,
-    skills.archetypes.length,
-  );
-  assert.equal(
-    skills.instances.filter(
-      ({ archetypeId, ownerKind }) => (
-        ownerKind === "project" && archetypeId === "data-contracts"
-      ),
-    ).length,
-    2,
-    "A repeated local instance proves the universal definition contract.",
-  );
+  assert.equal(skills.instances.length, 3);
   assert.deepEqual(
-    skills.instances
-      .filter(({ ownerKind }) => ownerKind === "capital")
-      .map(({ archetypeId }) => archetypeId)
-      .sort(),
-    skills.archetypes.map(({ id }) => id).sort(),
-    "The NinjaOne capital campus must expose one of every skill archetype.",
+    skills.instances.map(({ archetypeId }) => archetypeId).sort(),
+    [...project.supportedSkillArchetypeIds].sort(),
+  );
+  assert.ok(skills.instances.every(({ ownerKind, ownerId }) => (
+    ownerKind === "project" && ownerId === "project-kaizen-agent"
+  )));
+  assert.equal(
+    skills.instances.some(({ ownerKind }) => ownerKind === "capital"),
+    false,
   );
 
   for (const archetype of skills.archetypes) {
     const asset = await stat(path.join(root, "public", archetype.assetPath));
     assert.ok(asset.size > 40_000, archetype.assetPath);
-    assert.ok(archetype.footprintSpan[0] >= 0.0082, archetype.id);
-    assert.ok(archetype.footprintSpan[1] >= 0.01458, archetype.id);
   }
   for (const instance of skills.instances) {
     assert.ok(archetypeById.has(instance.archetypeId), instance.id);
-    assert.equal(instance.territoryAnchor.length, 2, instance.id);
+    assert.ok(project.supportedSkillArchetypeIds.includes(instance.archetypeId));
     assert.ok(instance.territoryAnchor.every(
-      (value) => value >= 0 && value <= 1,
-    ), instance.id);
-    assert.equal(instance.territoryVariant, projects.territoryId);
-    if (instance.ownerKind === "project") {
-      const project = projectById.get(instance.ownerId);
-      assert.ok(project, instance.id);
-      assert.ok(
-        project.supportedSkillArchetypeIds.includes(instance.archetypeId),
-        instance.id,
-      );
-    } else {
-      assert.equal(instance.ownerKind, "capital", instance.id);
-      assert.ok(
-        capitals.nodes.some(({ id }) => id === instance.ownerId),
-        instance.id,
-      );
-    }
+      (value) => Number.isFinite(value) && value >= 0 && value <= 1,
+    ));
   }
-
-  for (const project of projects.nodes) {
-    const projectSkills = skills.instances.filter(
-      ({ ownerKind, ownerId }) => (
-        ownerKind === "project" && ownerId === project.id
-      ),
-    );
-    const anchors = [
-      project.territoryAnchor,
-      ...projectSkills.map(({ territoryAnchor }) => territoryAnchor),
-    ];
-    const xs = anchors.map(([x]) => x);
-    const ys = anchors.map(([, y]) => y);
-    const framedSpan = Math.max(
-      Math.max(...xs) - Math.min(...xs),
-      Math.max(...ys) - Math.min(...ys),
-    ) * 1.2;
-    assert.ok(
-      framedSpan <= DETAIL_POLICY.siteAssetPreloadSpan,
-      `${project.id} cannot preload its complete city at the project focus`,
-    );
-  }
-
-  const projectsModel = await readFile(
-    path.join(
-      root,
-      "features/career-world/layers/structures/model/projects.ts",
-    ),
-    "utf8",
-  );
-  assert.match(
-    projectsModel,
-    /PROJECT_FOCUS_PADDING_MULTIPLIER = 1\.12/,
-  );
-  assert.match(projectsModel, /footprintSpan/);
-  assert.match(projectsModel, /groundAnchor/);
-  assert.match(projectsModel, /left: x - width \* groundX/);
-  assert.match(
-    projectsModel,
-    /PROJECT_FOCUS_VERTICAL_BIAS = 0\.02/,
-  );
 });
 
-test("NinjaOne support structures use per-instance owners across every town plan", async () => {
+test("removed NinjaOne cities leave no legacy support structures", async () => {
   const supports = await readJson(
     "public/career-world/layers/structures/manifests/support-structures-r1.json",
   );
-  const projects = await readJson(
-    "public/career-world/layers/structures/manifests/project-structures-r1.json",
-  );
-  const capitals = await readJson(
-    "public/career-world/layers/structures/manifests/capital-structures-r1.json",
-  );
-  const ninjaOneCapital = capitals.nodes.find(
-    ({ territoryId }) => territoryId === projects.territoryId,
-  );
-  const archetypeById = new Map(
-    supports.archetypes.map((archetype) => [archetype.id, archetype]),
-  );
-  const validOwnerKeys = new Set([
-    ...projects.nodes.map(({ id }) => `project:${id}`),
-    `capital:${ninjaOneCapital?.id}`,
-  ]);
 
-  assert.ok(ninjaOneCapital);
   assert.equal(supports.coordinateSpace, "normalized-world-top-left");
   assert.equal(supports.minimumTier, "site");
-  assert.equal("ownerProjectId" in supports, false);
-  assert.equal(supports.archetypes.length, 3);
-  assert.deepEqual(
-    supports.archetypes.map(({ role }) => role).sort(),
-    ["depot", "housing", "workshop"],
-  );
-  assert.equal(
-    new Set(supports.instances.map(({ id }) => id)).size,
-    supports.instances.length,
-  );
-  assert.deepEqual(
-    new Set(
-      supports.instances.map(
-        ({ ownerKind, ownerId }) => `${ownerKind}:${ownerId}`,
-      ),
-    ),
-    validOwnerKeys,
-    "Every project town and the capital need low-rise support fabric.",
-  );
-
-  for (const archetype of supports.archetypes) {
-    const asset = await stat(path.join(root, "public", archetype.assetPath));
-    assert.ok(asset.size > 100_000, archetype.assetPath);
-    assert.match(
-      archetype.assetPath,
-      /^\/career-world\/layers\/structures\/textures\/support\/.+\.png$/,
-    );
-    assert.ok(archetype.footprintSpan[0] < 0.0082, archetype.id);
-    assert.ok(archetype.footprintSpan[1] < 0.01458, archetype.id);
-  }
-
-  for (const instance of supports.instances) {
-    const archetype = archetypeById.get(instance.archetypeId);
-    assert.ok(archetype, instance.id);
-    assert.ok(
-      validOwnerKeys.has(`${instance.ownerKind}:${instance.ownerId}`),
-      instance.id,
-    );
-    assert.equal(instance.territoryAnchor.length, 2, instance.id);
-    assert.ok(
-      instance.territoryAnchor.every(
-        (value) => Number.isFinite(value) && value >= 0 && value <= 1,
-      ),
-      instance.id,
-    );
-  }
-
-  const layer = await readFile(path.join(
-    root,
-    "features/career-world/layers/structures/components/StructuresLayer.tsx",
-  ), "utf8");
-  assert.match(layer, /resolveNodeVisibility\(\s*SUPPORT_NODE_POLICY/);
-  assert.match(
-    layer,
-    /detailState\.shouldLoadSiteAssets[\s\S]*supportVisibility > LOD_PRESENTATION_EPSILON/,
-  );
-  assert.match(layer, /className="support-structures"/);
-  assert.match(layer, /data-support-role=\{instance\.archetype\.role\}/);
-  assert.match(layer, /data-structure-role="support-building"/);
-  assert.match(layer, /data-structure-role="project-landmark"/);
-  assert.match(layer, /data-structure-role="skill-building"/);
-  assert.match(layer, /data-visual-family=/);
+  assert.deepEqual(supports.archetypes, []);
+  assert.deepEqual(supports.instances, []);
+  assert.deepEqual(supports.layoutScales, {});
   assert.doesNotMatch(
-    layer,
-    /HumanScaleProbe|scale-probe/,
-    "People belong to actors-effects, not the structures renderer.",
+    JSON.stringify(supports),
+    /project-vendy|project-kaizen-metrics|capital-ninjaone/,
   );
 });
 
-test("NinjaOne city allocations measure broad QA coverage without driving placement", async () => {
-  const projects = await readJson(
-    "public/career-world/layers/structures/manifests/project-structures-r1.json",
-  );
-  const skills = await readJson(
-    "public/career-world/layers/structures/manifests/skill-structures-r1.json",
-  );
-  const allocations = await readJson(
-    "public/career-world/layers/structures/manifests/ninjaone-city-allocations-r1.json",
-  );
+test("Kaizen allocation remains development-only without a broad coverage claim", async () => {
+  const [projects, skills, allocations] = await Promise.all([
+    readJson(
+      "public/career-world/layers/structures/manifests/project-structures-r1.json",
+    ),
+    readJson(
+      "public/career-world/layers/structures/manifests/skill-structures-r1.json",
+    ),
+    readJson(
+      "public/career-world/layers/structures/manifests/"
+        + "ninjaone-city-allocations-r1.json",
+    ),
+  ]);
+  const allocation = allocations.allocations[0];
   const archetypeById = new Map(
     skills.archetypes.map((archetype) => [archetype.id, archetype]),
   );
-  const allocationByOwner = new Map(
-    allocations.allocations.map((allocation) => [
-      `${allocation.ownerKind}:${allocation.ownerId}`,
-      allocation,
-    ]),
-  );
 
-  assert.equal(allocations.status, "development-qa");
-  assert.equal(allocations.coordinateSpace, "normalized-world-top-left");
-  assert.equal(allocations.allocations.length, 4);
-  assert.ok(
-    allocations.verifiedLandCoverage
-      >= allocations.minimumVerifiedLandCoverage,
-  );
-  assert.match(
-    JSON.stringify(allocations.policy),
-    /development-only composition guides/i,
-  );
-  const scene = await readFile(path.join(
-    root,
-    "features/career-world/composition/WorldScene.tsx",
-  ), "utf8");
-  const infrastructureLayer = await readFile(path.join(
-    root,
-    "features/career-world/layers/infrastructure/components/InfrastructureLayer.tsx",
-  ), "utf8");
-  assert.doesNotMatch(scene, /NINJAONE_CITY_ALLOCATIONS/);
-  assert.doesNotMatch(infrastructureLayer, /NINJAONE_CITY_ALLOCATIONS/);
+  assert.equal(allocations.allocations.length, 1);
+  assert.equal(allocation.ownerId, "project-kaizen-agent");
+  assert.equal(allocations.minimumVerifiedLandCoverage, 0);
+  assert.equal(allocations.verifiedLandCoverage, 0);
+  assert.match(JSON.stringify(allocations.policy), /development-only/i);
 
   const placedNodes = [
     ...projects.nodes.map((project) => ({
       id: project.id,
-      ownerKind: "project",
-      ownerId: project.id,
       territoryAnchor: project.territoryAnchor,
       footprintSpan: project.footprintSpan,
       groundAnchor: project.groundAnchor,
@@ -565,18 +347,14 @@ test("NinjaOne city allocations measure broad QA coverage without driving placem
       const archetype = archetypeById.get(instance.archetypeId);
       assert.ok(archetype, instance.id);
       return {
-        ...instance,
+        id: instance.id,
+        territoryAnchor: instance.territoryAnchor,
         footprintSpan: archetype.footprintSpan,
         groundAnchor: archetype.groundAnchor,
       };
     }),
   ];
-
   for (const node of placedNodes) {
-    const allocation = allocationByOwner.get(
-      `${node.ownerKind}:${node.ownerId}`,
-    );
-    assert.ok(allocation, `${node.id} needs a QA allocation`);
     const [x, y] = node.territoryAnchor;
     const [width, height] = node.footprintSpan;
     const [groundX, groundY] = node.groundAnchor;
@@ -589,15 +367,9 @@ test("NinjaOne city allocations measure broad QA coverage without driving placem
   }
 });
 
-test("NinjaOne requires authored town plans for every project and its capital", async () => {
+test("NinjaOne requires one authored town plan for Kaizen Agent", async () => {
   const projects = await readJson(
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
-  );
-  const capitals = await readJson(
-    "public/career-world/layers/structures/manifests/capital-structures-r1.json",
-  );
-  const territories = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
   );
   const skills = await readJson(
     "public/career-world/layers/structures/manifests/skill-structures-r1.json",
@@ -608,15 +380,6 @@ test("NinjaOne requires authored town plans for every project and its capital", 
   const infrastructure = await readJson(
     "public/career-world/layers/infrastructure/manifests/ninjaone-project-towns-r1.json",
   );
-  const ninjaOneCapital = capitals.nodes.find(
-    ({ territoryId }) => territoryId === projects.territoryId,
-  );
-  const ninjaOneTerritory = territories.territories.find(
-    ({ id }) => id === projects.territoryId,
-  );
-
-  assert.ok(ninjaOneCapital);
-  assert.ok(ninjaOneTerritory);
   assert.equal(
     infrastructure.coordinateSpace,
     "normalized-world-top-left",
@@ -628,25 +391,14 @@ test("NinjaOne requires authored town plans for every project and its capital", 
     infrastructure.towns.map(({ projectId }) => projectId).sort(),
     projects.nodes.map(({ id }) => id).sort(),
   );
-  assert.equal(
-    infrastructure.capitalCampus.capitalId,
-    ninjaOneCapital.id,
-  );
-  const planEntries = [
-    ...infrastructure.towns.map((town) => ({
-      id: town.id,
-      ownerId: town.projectId,
-      ownerKind: "project",
-      townPlan: town.townPlan,
-    })),
-    {
-      id: infrastructure.capitalCampus.id,
-      ownerId: infrastructure.capitalCampus.capitalId,
-      ownerKind: "capital",
-      townPlan: infrastructure.capitalCampus.townPlan,
-    },
-  ];
-  assert.equal(planEntries.length, 4);
+  assert.equal("capitalCampus" in infrastructure, false);
+  const planEntries = infrastructure.towns.map((town) => ({
+    id: town.id,
+    ownerId: town.projectId,
+    ownerKind: "project",
+    townPlan: town.townPlan,
+  }));
+  assert.equal(planEntries.length, 1);
   assert.equal(
     new Set(planEntries.map(({ id }) => id)).size,
     planEntries.length,
@@ -726,7 +478,7 @@ test("NinjaOne requires authored town plans for every project and its capital", 
       `${entry.id} needs a local street or grade transition`,
     );
 
-    const retainedStructureIds = [
+    const mountedStructureIds = [
       ownerId,
       ...skills.instances
         .filter((instance) => (
@@ -738,6 +490,17 @@ test("NinjaOne requires authored town plans for every project and its capital", 
           instance.ownerKind === ownerKind && instance.ownerId === ownerId
         ))
         .map(({ id }) => id),
+    ];
+    const isAuthoredFoundation = ownerId === "project-kaizen-agent";
+    const mountedStructureIdSet = new Set(mountedStructureIds);
+    const plateOwnedStructureIds = isAuthoredFoundation
+      ? townPlan.blocks
+        .flatMap(({ structureIds }) => structureIds)
+        .filter((id) => !mountedStructureIdSet.has(id))
+      : [];
+    const retainedStructureIds = [
+      ...mountedStructureIds,
+      ...plateOwnedStructureIds,
     ].sort();
     assert.equal(
       new Set(retainedStructureIds).size,
@@ -745,14 +508,9 @@ test("NinjaOne requires authored town plans for every project and its capital", 
       `${entry.id} retained structure IDs must be unique`,
     );
     const retainedStructures = [
-      ...(ownerKind === "project"
-        ? projects.nodes
-          .filter(({ id }) => id === ownerId)
-          .map(({ id, territoryAnchor }) => ({ id, territoryAnchor }))
-        : [{
-          id: ownerId,
-          territoryAnchor: ninjaOneTerritory.development.capitalAnchor,
-        }]),
+      ...projects.nodes
+        .filter(({ id }) => id === ownerId)
+        .map(({ id, territoryAnchor }) => ({ id, territoryAnchor })),
       ...skills.instances
         .filter((instance) => (
           instance.ownerKind === ownerKind && instance.ownerId === ownerId
@@ -766,8 +524,13 @@ test("NinjaOne requires authored town plans for every project and its capital", 
     ];
     assert.deepEqual(
       retainedStructures.map(({ id }) => id).sort(),
-      retainedStructureIds,
-      `${entry.id} needs one anchor for every retained structure`,
+      [...mountedStructureIds].sort(),
+      `${entry.id} needs one anchor for every mounted structure`,
+    );
+    assert.equal(
+      plateOwnedStructureIds.length > 0,
+      isAuthoredFoundation,
+      `${entry.id} must declare plate-owned semantics only for its authored foundation`,
     );
 
     for (const block of townPlan.blocks) {
@@ -909,8 +672,12 @@ test("town-plan model rejects invalid topology and structure coverage", async ()
   );
   assert.match(
     model,
-    /const featureIds = new Set<string>\(\)[\s\S]*manifest\.towns\.map[\s\S]*townPlan: parseTownPlan\([\s\S]*featureIds,[\s\S]*CAPITAL_CAMPUS_INFRASTRUCTURE[\s\S]*townPlan: parseTownPlan\([\s\S]*featureIds,/,
-    "Project towns and the capital must share one feature-ID namespace.",
+    /const featureIds = new Set<string>\(\)[\s\S]*manifest\.towns\.map[\s\S]*townPlan: parseTownPlan\([\s\S]*featureIds,/,
+    "Project towns must share one feature-ID namespace.",
+  );
+  assert.doesNotMatch(
+    model,
+    /CAPITAL_CAMPUS_INFRASTRUCTURE|manifest\.capitalCampus/,
   );
   assert.match(
     model,
@@ -927,6 +694,11 @@ test("town-plan model rejects invalid topology and structure coverage", async ()
   assert.match(
     model,
     /requireCompleteStructureCoverage\([\s\S]*blocks\.flatMap[\s\S]*requireCompleteStructureCoverage\([\s\S]*entrances\.map/,
+  );
+  assert.match(
+    model,
+    /AUTHORED_FOUNDATION_PROJECT_IDS[\s\S]*plateOwnedStructureIds[\s\S]*no legacy support sprites/,
+    "Authored foundations retain route IDs without restoring support sprites.",
   );
 });
 
@@ -947,10 +719,8 @@ test("town-plan rendering keeps mixed surfaces sparse and hierarchical", async (
   assert.match(layer, /cameraViewBox\(\s*camera,/);
   assert.match(layer, /<TownPlanNode/);
   assert.match(layer, /plan=\{town\.townPlan\}/);
-  assert.match(
-    layer,
-    /plan=\{CAPITAL_CAMPUS_INFRASTRUCTURE\.townPlan\}/,
-  );
+  assert.doesNotMatch(layer, /CAPITAL_CAMPUS_INFRASTRUCTURE/);
+  assert.match(layer, /data-capital-campus-count=\{0\}/);
   assert.match(layer, /data-town-plan-owner-id=\{ownerId\}/);
   assert.match(layer, /data-block-count=\{plan\.blocks\.length\}/);
   assert.match(layer, /data-street-kind=\{street\.kind\}/);

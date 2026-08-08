@@ -19,10 +19,14 @@ import {
   TerritoryLandform,
 } from "../layers/territory-landform";
 import { InfrastructureLayer } from "../layers/infrastructure";
-import { EnvironmentLayer } from "../layers/environment";
+import {
+  EnvironmentLayer,
+  FoliageLayer,
+} from "../layers/environment";
 import {
   CAPITAL_STRUCTURES,
   KAIZEN_NEIGHBORHOOD_ANCHOR,
+  KAIZEN_NEIGHBORHOOD_OWNER_ID,
   KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
   KAIZEN_NEIGHBORHOOD_SPAN,
   PROJECT_STRUCTURES,
@@ -44,6 +48,14 @@ import {
 } from "../layers/interface";
 import {
   DevelopmentOverlay,
+  NINJAONE_CAPITAL_MVP_CAMERA,
+  NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA,
+  NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID,
+  NINJAONE_ENVIRONMENT_CAMERA,
+  NINJAONE_ENVIRONMENT_PROOF_ID,
+  NinjaOneCapitalMvp,
+  NinjaOneCapitalTopologyProof,
+  NinjaOneEnvironmentProof,
   PerformanceProbe,
 } from "../development";
 import {
@@ -59,8 +71,11 @@ import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 
 interface WorldSceneProps {
+  readonly capitalMvp: boolean;
   readonly enableDevelopmentTools: boolean;
+  readonly environmentProof: boolean;
   readonly initialInterfaceMode: "world" | "water";
+  readonly topologyProof: boolean;
 }
 
 interface DragState {
@@ -70,6 +85,18 @@ interface DragState {
 }
 
 const FOCUS_DURATION_MS = 680;
+const MAX_WHEEL_ZOOM_SCALE = 1.28;
+const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
+
+function wheelZoomScale(deltaY: number): number {
+  return Math.min(
+    MAX_WHEEL_ZOOM_SCALE,
+    Math.max(
+      MIN_WHEEL_ZOOM_SCALE,
+      Math.exp(deltaY * 0.00135),
+    ),
+  );
+}
 
 function projectPresentationAnchor(project: ProjectStructure) {
   const semanticAsset = resolveKaizenSemanticStructureAsset({
@@ -149,7 +176,7 @@ const PROJECT_DESTINATIONS = Object.freeze(
       footprintSpan: archetype.footprintSpan,
       groundAnchor: archetype.groundAnchor,
     }));
-    const focusStructures = project.id === "project-kaizen-agent"
+    const focusStructures = project.id === KAIZEN_NEIGHBORHOOD_OWNER_ID
       ? [
         ...presentedSkills,
         {
@@ -171,6 +198,9 @@ const PROJECT_DESTINATIONS = Object.freeze(
         focusStructures,
       ),
       supportingSkillCount: supportingSkills.length,
+      visualMinimumTier: project.id === KAIZEN_NEIGHBORHOOD_OWNER_ID
+        ? "territory" as const
+        : "capital" as const,
     });
   }),
 );
@@ -201,27 +231,60 @@ const INTERACTIVE_TARGET_SELECTOR = [
   "select",
   "textarea",
   "[role='button']",
-  "[data-semantic-structure]",
+  "[data-semantic-structure][data-interactive='true']",
 ].join(",");
 
 export function WorldScene({
+  capitalMvp,
   enableDevelopmentTools,
+  environmentProof,
   initialInterfaceMode,
+  topologyProof,
 }: WorldSceneProps) {
+  const initialCamera = environmentProof
+    ? NINJAONE_ENVIRONMENT_CAMERA
+    : capitalMvp
+      ? NINJAONE_CAPITAL_MVP_CAMERA
+      : topologyProof
+      ? NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA
+      : WORLD_CAMERA_VIEW;
   const viewportRef = useRef<HTMLDivElement>(null);
-  const cameraRef = useRef<CameraView>(WORLD_CAMERA_VIEW);
+  const cameraRef = useRef<CameraView>(initialCamera);
   const cameraFrameRef = useRef(0);
   const dragRef = useRef<DragState | null>(null);
   const focusFrameRef = useRef(0);
-  const [camera, setCamera] = useState<CameraView>(WORLD_CAMERA_VIEW);
-  const [activeViewId, setActiveViewId] = useState("world");
+  const [camera, setCamera] = useState<CameraView>(initialCamera);
+  const [activeViewId, setActiveViewId] = useState(
+    environmentProof
+      ? "ninjaone-environment-proof"
+      : capitalMvp
+        ? "ninjaone-capital-mvp"
+        : topologyProof
+        ? "ninjaone-capital-topology-proof"
+        : "world",
+  );
+  const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
-  const [showTopography, setShowTopography] = useState(false);
+  const [showTopography, setShowTopography] = useState(topologyProof);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
-  const [showGrid, setShowGrid] = useState(false);
+  const [showGrid, setShowGrid] = useState(topologyProof);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const detailState = resolveDetailState(camera);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsPageVisible(entry.isIntersecting),
+      { root: null, rootMargin: "192px 0px" },
+    );
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
 
   const commitCamera = useCallback((next: CameraView) => {
     const normalized = normalizeCameraView(
@@ -309,15 +372,15 @@ export function WorldScene({
       (event.clientX - bounds.left) / Math.max(bounds.width, 1),
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
-    const scale = Math.exp(event.deltaY * 0.00135);
+    const scale = wheelZoomScale(event.deltaY);
     queueCamera(zoomCameraViewAt(
-      cameraRef.current,
+      camera,
       anchor,
       scale,
       DETAIL_POLICY.cameraMinimumSpan,
     ));
     setActiveViewId("custom");
-  }, [cancelFocusAnimation, queueCamera]);
+  }, [camera, cancelFocusAnimation, queueCamera]);
 
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
@@ -422,10 +485,19 @@ export function WorldScene({
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
       data-camera-minimum-span={DETAIL_POLICY.cameraMinimumSpan}
+      data-page-visible={isPageVisible}
+      data-capital-mvp={capitalMvp ? "layered-r1" : undefined}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
+      data-environment-proof={environmentProof
+        ? NINJAONE_ENVIRONMENT_PROOF_ID
+        : undefined}
+      data-kaizen-visual-ready={kaizenVisualReady}
       data-site-lod={detailState.capitalToSite.toFixed(3)}
+      data-topology-proof={topologyProof
+        ? NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID
+        : undefined}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
       onKeyDown={handleKeyDown}
       onPointerCancel={finishPointer}
@@ -439,8 +511,10 @@ export function WorldScene({
     >
       <WorldBackdrop light={WORLD_LIGHT} />
       <WaterSurfaceCanvas
+        active={isPageVisible}
         camera={camera}
         detailState={detailState}
+        foregroundHydrology={environmentProof}
         light={WORLD_LIGHT}
         onRenderStateChange={setRenderState}
       />
@@ -448,59 +522,87 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
       />
-      <InfrastructureLayer
-        camera={camera}
-        detailState={detailState}
-        light={WORLD_LIGHT}
-      />
-      <EnvironmentLayer
-        camera={camera}
-        detailState={detailState}
-        light={WORLD_LIGHT}
-      />
-      <ActorsEffectsLayer
-        camera={camera}
-        detailState={detailState}
-        light={WORLD_LIGHT}
-      />
-      <StructuresLayer
-        camera={camera}
-        detailState={detailState}
-        light={WORLD_LIGHT}
-      />
+      {topologyProof ? (
+        <NinjaOneCapitalTopologyProof camera={camera} />
+      ) : environmentProof ? (
+        <NinjaOneEnvironmentProof
+          active={isPageVisible}
+          camera={camera}
+          detailState={detailState}
+        />
+      ) : capitalMvp ? (
+        <NinjaOneCapitalMvp
+          camera={camera}
+          detailState={detailState}
+          light={WORLD_LIGHT}
+        />
+      ) : (
+        <>
+          <InfrastructureLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+          />
+          <EnvironmentLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+          />
+          <ActorsEffectsLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+          />
+          <StructuresLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+            onKaizenVisualReadyChange={setKaizenVisualReady}
+          />
+          <FoliageLayer
+            camera={camera}
+            detailState={detailState}
+          />
+        </>
+      )}
       {enableDevelopmentTools
-          && (showGrid || showTopography || showTerritoryQa) ? (
+          && (topologyProof || showGrid || showTopography || showTerritoryQa) ? (
         <DevelopmentOverlay
           camera={camera}
-          showGrid={showGrid}
+          showGrid={topologyProof || showGrid}
           showTopography={showTopography}
           showTerritories={showTerritoryQa}
           territories={TERRITORIES}
         />
       ) : null}
-      <WorldInterface
-        activeViewId={activeViewId}
-        camera={camera}
-        detailState={detailState}
-        enableDevelopmentTools={enableDevelopmentTools}
-        landmarkLabels={LANDMARK_LABELS}
-        mode={initialInterfaceMode}
-        onFocus={handleFocus}
-        onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
-        onToggleGrid={() => setShowGrid((visible) => !visible)}
-        onToggleLandmarkLabels={() => (
-          setShowLandmarkLabels((visible) => !visible)
-        )}
-        onToggleTopography={() => setShowTopography((visible) => !visible)}
-        onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
-        projectDestinations={PROJECT_DESTINATIONS}
-        renderState={renderState}
-        showGrid={showGrid}
-        showLandmarkLabels={showLandmarkLabels}
-        showTopography={showTopography}
-        showTerritoryQa={showTerritoryQa}
-        territories={TERRITORIES}
-      />
+      {!topologyProof && !capitalMvp && !environmentProof ? (
+        <WorldInterface
+          activeViewId={activeViewId}
+          camera={camera}
+          detailState={detailState}
+          enableDevelopmentTools={enableDevelopmentTools}
+          landmarkLabels={LANDMARK_LABELS}
+          mode={initialInterfaceMode}
+          onFocus={handleFocus}
+          onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
+          onToggleGrid={() => setShowGrid((visible) => !visible)}
+          onToggleLandmarkLabels={() => (
+            setShowLandmarkLabels((visible) => !visible)
+          )}
+          onToggleTopography={() => setShowTopography((visible) => !visible)}
+          onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
+          projectDestinations={PROJECT_DESTINATIONS}
+          projectVisualReadiness={{
+            [KAIZEN_NEIGHBORHOOD_OWNER_ID]: kaizenVisualReady,
+          }}
+          renderState={renderState}
+          showGrid={showGrid}
+          showLandmarkLabels={showLandmarkLabels}
+          showTopography={showTopography}
+          showTerritoryQa={showTerritoryQa}
+          territories={TERRITORIES}
+        />
+      ) : null}
       <PerformanceProbe enabled={enableDevelopmentTools} />
     </div>
   );

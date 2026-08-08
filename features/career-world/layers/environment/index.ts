@@ -17,6 +17,7 @@ export const ENVIRONMENT_LAYER: LayerDescriptor = Object.freeze({
 });
 
 export { EnvironmentLayer } from "./components/EnvironmentLayer";
+export { FoliageLayer } from "./components/FoliageLayer";
 export {
   ACTIVITY_PROP_INSTANCES,
   ACTIVITY_PROP_KINDS,

@@ -1,29 +1,30 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import sharp from "sharp";
-import { PEDESTRIAN_SPAN } from "../features/career-world/shared/humanScale.ts";
-import {
-  resolveKaizenStructurePresentationScale,
-} from "../features/career-world/layers/structures/model/kaizenPresentation.ts";
 import {
   KAIZEN_SEMANTIC_ASSET_REGISTRATION,
   KAIZEN_SEMANTIC_STRUCTURE_ASSETS,
   resolveKaizenSemanticStructureAsset,
 } from "../features/career-world/layers/structures/model/kaizenSemanticAssets.ts";
 import {
+  KAIZEN_NEIGHBORHOOD_BASE_DIMENSIONS,
   KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS,
-  KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC,
+  KAIZEN_NEIGHBORHOOD_CLOSE_GRID_ROOT,
+  KAIZEN_NEIGHBORHOOD_CLOSE_GRID_SIZE,
+  KAIZEN_NEIGHBORHOOD_CLOSE_TILE_DIMENSIONS,
   KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC,
   KAIZEN_NEIGHBORHOOD_MODULES,
+  KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC,
   KAIZEN_NEIGHBORHOOD_SITE_DIMENSIONS,
 } from "../features/career-world/layers/structures/model/kaizenNeighborhoodFabric.ts";
+import {
+  NINJAONE_CITY_ASSET_POOL,
+  NINJAONE_CITY_ASSET_POOL_ID,
+} from "../features/career-world/layers/structures/model/ninjaOneCityAssets.ts";
 
 const root = process.cwd();
-const world = { width: 1672, height: 941 };
-const visibleHeightRatioByAsset = new Map();
-
 async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(root, relativePath), "utf8"));
 }
@@ -32,104 +33,8 @@ function publicFile(assetPath) {
   return path.join(root, "public", ...assetPath.slice(1).split("/"));
 }
 
-async function alphaVisibleHeightRatio(assetPath) {
-  if (!visibleHeightRatioByAsset.has(assetPath)) {
-    visibleHeightRatioByAsset.set(assetPath, (async () => {
-      const { data, info } = await sharp(publicFile(assetPath))
-        .ensureAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
-      let firstVisibleRow = info.height;
-      let lastVisibleRow = -1;
-
-      for (let y = 0; y < info.height; y += 1) {
-        for (let x = 0; x < info.width; x += 1) {
-          const alpha = data[(y * info.width + x) * info.channels + 3];
-          if (alpha > 32) {
-            firstVisibleRow = Math.min(firstVisibleRow, y);
-            lastVisibleRow = Math.max(lastVisibleRow, y);
-            break;
-          }
-        }
-      }
-
-      assert.ok(lastVisibleRow >= firstVisibleRow, assetPath);
-      return (lastVisibleRow - firstVisibleRow + 1) / info.height;
-    })());
-  }
-
-  return visibleHeightRatioByAsset.get(assetPath);
-}
-
-async function visibleWorldHeight(structure, presentationScale) {
-  return (
-    await alphaVisibleHeightRatio(structure.assetPath)
-    * structure.footprintSpan[1]
-    * world.height
-    * presentationScale
-  );
-}
-
-function pointInsidePolygon([x, y], points) {
-  let inside = false;
-  for (
-    let current = 0, previous = points.length - 1;
-    current < points.length;
-    previous = current, current += 1
-  ) {
-    const [currentX, currentY] = points[current];
-    const [previousX, previousY] = points[previous];
-    if (
-      (currentY > y) !== (previousY > y)
-      && x < (
-        (previousX - currentX) * (y - currentY)
-        / (previousY - currentY)
-        + currentX
-      )
-    ) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
-function worldDistance(left, right) {
-  return Math.hypot(
-    (left[0] - right[0]) * world.width,
-    (left[1] - right[1]) * world.height,
-  );
-}
-
-function distanceToSegment(point, start, end) {
-  const p = [point[0] * world.width, point[1] * world.height];
-  const a = [start[0] * world.width, start[1] * world.height];
-  const b = [end[0] * world.width, end[1] * world.height];
-  const delta = [b[0] - a[0], b[1] - a[1]];
-  const lengthSquared = delta[0] ** 2 + delta[1] ** 2;
-  if (lengthSquared === 0) {
-    return Math.hypot(p[0] - a[0], p[1] - a[1]);
-  }
-  const progress = Math.max(0, Math.min(
-    1,
-    (
-      (p[0] - a[0]) * delta[0]
-      + (p[1] - a[1]) * delta[1]
-    ) / lengthSquared,
-  ));
-  return Math.hypot(
-    p[0] - (a[0] + delta[0] * progress),
-    p[1] - (a[1] + delta[1] * progress),
-  );
-}
-
-test("modular ambient structures fill every town without owning portfolio semantics", async () => {
-  const [
-    ambient,
-    infrastructure,
-    projects,
-    skills,
-    support,
-  ] = await Promise.all([
+test("removed NinjaOne cities leave no modular ambient registry", async () => {
+  const [ambient, infrastructure, projects, skills, support] = await Promise.all([
     readJson(
       "public/career-world/layers/structures/manifests/"
         + "ambient-structures-r1.json",
@@ -151,250 +56,24 @@ test("modular ambient structures fill every town without owning portfolio semant
         + "support-structures-r1.json",
     ),
   ]);
-  const ownerPlans = new Map([
-    ...infrastructure.towns.map(
-      ({ projectId, townPlan }) => [projectId, townPlan],
-    ),
-    [
-      infrastructure.capitalCampus.capitalId,
-      infrastructure.capitalCampus.townPlan,
-    ],
-  ]);
-  const archetypes = new Map(
-    ambient.archetypes.map((archetype) => [archetype.id, archetype]),
-  );
-  const sharedArchetypes = ambient.archetypes.filter(
-    ({ id }) => !id.startsWith("kaizen-"),
-  );
-  const kaizenArchetypes = ambient.archetypes.filter(
-    ({ id }) => id.startsWith("kaizen-"),
-  );
-  const ownerCounts = new Map();
-  const instanceIds = new Set();
 
-  assert.equal(ambient.schemaVersion, 1);
-  assert.equal(ambient.minimumTier, "site");
-  assert.equal(
-    ambient.visualFamily,
-    "career-world-fantasy-ambient-buildings@r1",
+  assert.deepEqual(projects.nodes.map(({ id }) => id), ["project-kaizen-agent"]);
+  assert.deepEqual(
+    infrastructure.towns.map(({ projectId }) => projectId),
+    ["project-kaizen-agent"],
   );
-  assert.equal(sharedArchetypes.length, 6);
-  assert.equal(kaizenArchetypes.length, 6);
-  assert.equal(ambient.archetypes.length, 12);
-  assert.ok(ambient.instances.length >= 48);
-
-  const largestAmbientWidth = Math.max(
-    ...sharedArchetypes.map(({ footprintSpan }) => footprintSpan[0]),
-  );
-  const largestAmbientHeight = Math.max(
-    ...sharedArchetypes.map(({ footprintSpan }) => footprintSpan[1]),
-  );
+  assert.equal("capitalCampus" in infrastructure, false);
+  assert.deepEqual(ambient.archetypes, []);
+  assert.deepEqual(ambient.instances, []);
+  assert.deepEqual(support.archetypes, []);
+  assert.deepEqual(support.instances, []);
+  assert.equal(skills.instances.length, 3);
   assert.ok(
-    projects.nodes.every(({ footprintSpan }) => (
-      footprintSpan[0] >= largestAmbientWidth * 2.4
-      && footprintSpan[1] >= largestAmbientHeight * 2.4
-    )),
-    "Project landmarks must remain materially larger than filler buildings.",
+    skills.instances.every(({ ownerId }) => ownerId === "project-kaizen-agent"),
   );
-  assert.ok(
-    skills.archetypes.every(({ footprintSpan }) => (
-      footprintSpan[0] >= largestAmbientWidth * 2.4
-      && footprintSpan[1] >= largestAmbientHeight * 2.4
-    )),
-    "Skill buildings must remain materially larger than filler buildings.",
-  );
-
-  const kaizenProject = projects.nodes.find(
-    ({ id }) => id === "project-kaizen-agent",
-  );
-  const skillArchetypesById = new Map(
-    skills.archetypes.map((archetype) => [archetype.id, archetype]),
-  );
-  const kaizenSkillArchetypes = skills.instances
-    .filter(({ ownerId }) => ownerId === "project-kaizen-agent")
-    .map(({ archetypeId }) => skillArchetypesById.get(archetypeId));
-  const supportArchetypesById = new Map(
-    support.archetypes.map((archetype) => [archetype.id, archetype]),
-  );
-  const kaizenSupportArchetypes = support.instances
-    .filter(({ ownerId }) => ownerId === "project-kaizen-agent")
-    .map(({ archetypeId }) => supportArchetypesById.get(archetypeId));
-  const kaizenAmbientArchetypeIds = new Set(
-    ambient.instances
-      .filter(({ ownerId }) => ownerId === "project-kaizen-agent")
-      .map(({ archetypeId }) => archetypeId),
-  );
-  const kaizenAmbientArchetypes = ambient.archetypes.filter(
-    ({ id }) => kaizenAmbientArchetypeIds.has(id),
-  );
-  assert.ok(kaizenProject);
-  assert.ok(kaizenSkillArchetypes.every(Boolean));
-  assert.ok(kaizenSupportArchetypes.every(Boolean));
-
-  const projectHeight = await visibleWorldHeight(
-    kaizenProject,
-    resolveKaizenStructurePresentationScale({
-      ownerId: "project-kaizen-agent",
-      role: "project",
-      visualId: kaizenProject.id,
-    }),
-  );
-  const skillHeights = await Promise.all(kaizenSkillArchetypes.map(
-    (archetype) => visibleWorldHeight(
-      archetype,
-      resolveKaizenStructurePresentationScale({
-        ownerId: "project-kaizen-agent",
-        role: "skill",
-        visualId: archetype.id,
-      }),
-    ),
-  ));
-  const supportHeights = await Promise.all(kaizenSupportArchetypes.map(
-    (archetype) => visibleWorldHeight(
-      archetype,
-      resolveKaizenStructurePresentationScale({
-        ownerId: "project-kaizen-agent",
-        role: "support",
-        visualId: archetype.id,
-      }),
-    ),
-  ));
-  const ambientHeights = await Promise.all(kaizenAmbientArchetypes.map(
-    (archetype) => visibleWorldHeight(
-      archetype,
-      resolveKaizenStructurePresentationScale({
-        ownerId: "project-kaizen-agent",
-        role: "ambient",
-        visualId: archetype.id,
-      }),
-    ),
-  ));
-  const pedestrianHeight = PEDESTRIAN_SPAN[1] * world.height;
-  const assertHumanScale = (heights, minimum, maximum, label) => {
-    for (const height of heights) {
-      const pedestrianRatio = height / pedestrianHeight;
-      assert.ok(
-        pedestrianRatio >= minimum && pedestrianRatio <= maximum,
-        `${label} visible height is ${pedestrianRatio.toFixed(1)} people`,
-      );
-    }
-  };
-
-  assertHumanScale([projectHeight], 20, 23, "Kaizen project landmark");
-  assertHumanScale(skillHeights, 15, 17, "Kaizen skill landmark");
-  assertHumanScale(supportHeights, 5.5, 9, "Kaizen support building");
-  assertHumanScale(ambientHeights, 3.3, 7, "Kaizen ambient building");
-  assert.ok(
-    projectHeight >= Math.max(...skillHeights) * 1.15,
-    "Kaizen's project landmark must remain visibly dominant over its skills.",
-  );
-  assert.ok(
-    Math.min(...skillHeights) >= Math.max(...ambientHeights) * 1.2,
-    "Kaizen skill landmarks must remain distinct from filler buildings.",
-  );
-  assert.equal(
-    resolveKaizenStructurePresentationScale({
-      ownerId: "project-vendy",
-      role: "ambient",
-      visualId: "fantasy-inn",
-    }),
-    1,
-    "The Kaizen scale correction must not alter another town.",
-  );
-
-  for (const archetype of ambient.archetypes) {
-    const asset = await stat(publicFile(archetype.assetPath));
-    assert.ok(asset.size > 50_000, archetype.assetPath);
-    assert.match(
-      archetype.assetPath,
-      /^\/career-world\/layers\/structures\/textures\/ambient\/.+\.png$/,
-    );
-  }
-
-  for (const archetype of kaizenArchetypes) {
-    const buffer = await readFile(publicFile(archetype.assetPath));
-    assert.equal(buffer.subarray(1, 4).toString("ascii"), "PNG");
-    assert.equal(buffer.readUInt32BE(16), archetype.sourceDimensions[0]);
-    assert.equal(buffer.readUInt32BE(20), archetype.sourceDimensions[1]);
-    assert.equal(buffer[24], 8, archetype.assetPath);
-    assert.equal(buffer[25], 6, `${archetype.assetPath} must be RGBA`);
-    assert.deepEqual(archetype.sourceDimensions, [1254, 1254]);
-    assert.deepEqual(archetype.groundAnchor, [0.5, 0.92]);
-  }
-
-  const semanticClearances = [
-    ...projects.nodes.map(({ id, territoryAnchor }) => ({
-      ownerId: id,
-      point: territoryAnchor,
-      clearance: 12,
-    })),
-    ...skills.instances.map(({ ownerId, territoryAnchor }) => ({
-      ownerId,
-      point: territoryAnchor,
-      clearance: 9,
-    })),
-    ...support.instances.map(({ ownerId, territoryAnchor }) => ({
-      ownerId,
-      point: territoryAnchor,
-      clearance: 8,
-    })),
-  ];
-  for (const instance of ambient.instances) {
-    assert.ok(!instanceIds.has(instance.id), instance.id);
-    instanceIds.add(instance.id);
-    assert.equal("evidenceId" in instance, false, instance.id);
-    assert.equal("projectId" in instance, false, instance.id);
-    assert.equal("skillId" in instance, false, instance.id);
-    const plan = ownerPlans.get(instance.ownerId);
-    const block = plan?.blocks.find(({ id }) => id === instance.blockId);
-    const archetype = archetypes.get(instance.archetypeId);
-    assert.ok(plan, instance.ownerId);
-    assert.ok(block, instance.blockId);
-    assert.ok(archetype, instance.archetypeId);
-    assert.ok(
-      pointInsidePolygon(instance.territoryAnchor, block.points),
-      `${instance.id} must keep its ground anchor inside its block`,
-    );
-    const roadSegments = [
-      ...plan.streets,
-      ...plan.pedestrianLoops,
-    ].flatMap(({ waypoints }) => (
-      waypoints.slice(1).map((point, index) => [
-        waypoints[index],
-        point,
-      ])
-    ));
-    assert.ok(
-      roadSegments.every(([start, end]) => (
-        distanceToSegment(instance.territoryAnchor, start, end) >= 4.24
-      )),
-      `${instance.id} must stay off the walkable road centerlines`,
-    );
-    assert.ok(
-      plan.entrances.every(({ point }) => (
-        worldDistance(instance.territoryAnchor, point) >= 4.99
-      )),
-      `${instance.id} must keep entrances clear`,
-    );
-    assert.ok(
-      semanticClearances
-        .filter(({ ownerId }) => ownerId === instance.ownerId)
-        .every(({ clearance, point }) => (
-          worldDistance(instance.territoryAnchor, point)
-            >= clearance - 0.01
-        )),
-      `${instance.id} must not crowd semantic structures`,
-    );
-    ownerCounts.set(
-      instance.ownerId,
-      (ownerCounts.get(instance.ownerId) ?? 0) + 1,
-    );
-  }
-
-  assert.deepEqual(new Set(ownerCounts.keys()), new Set(ownerPlans.keys()));
-  assert.ok(
-    [...ownerCounts.values()].every((count) => count >= 3),
-    "Every town needs enough modular fabric to read as a settlement.",
+  assert.doesNotMatch(
+    JSON.stringify({ ambient, infrastructure, projects, skills, support }),
+    /project-vendy|project-kaizen-metrics|capital-ninjaone/,
   );
 });
 
@@ -438,7 +117,11 @@ test("authored town foundations separate semantic overlays from plate-owned fill
   );
   assert.match(
     component,
-    /INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set\([\s\S]*project-kaizen-agent/,
+    /const authoredTownStructureVisibility = resolveAtomicTierVisibility\(\s*TOWN_FABRIC_NODE_POLICY,/,
+  );
+  assert.match(
+    component,
+    /INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
   assert.match(
     component,
@@ -449,10 +132,12 @@ test("authored town foundations separate semantic overlays from plate-owned fill
     /RENDERED_AMBIENT_STRUCTURE_INSTANCES[\s\S]*!TOWN_FABRIC_OWNER_IDS\.has\(ownerId\)/,
   );
   assert.match(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /shouldRenderNeighborhoodOverview/);
   assert.match(component, /data-town-neighborhood-close-visibility=/);
+  assert.match(component, /data-town-authored-structure-visibility=/);
   assert.match(
     component,
-    /Math\.max\(defaultVisibility, authoredTownVisibility\)/,
+    /Math\.max\(defaultVisibility, authoredTownVisibility\)[\s\S]*> LOD_PRESENTATION_EPSILON[\s\S]*\? 1[\s\S]*: 0/,
   );
   assert.match(
     component,
@@ -528,7 +213,7 @@ test("authored town foundations separate semantic overlays from plate-owned fill
     /\.structure-sprite__asset--semantic-overlay \{[\s\S]*pointer-events: none/,
   );
   assert.match(component, /className="structure-sprite__interaction-silhouette"/);
-  assert.match(component, /pointerEvents="fill"/);
+  assert.match(component, /pointerEvents=\{interactive \? "fill" : "none"\}/);
   assert.match(css, /\.structure-sprite__interaction-silhouette \{[\s\S]*pointer-events: fill/);
   assert.match(
     css,
@@ -540,53 +225,35 @@ test("authored town foundations separate semantic overlays from plate-owned fill
   );
 });
 
-test("NinjaOne city instances reuse one registered resource per archetype", async () => {
-  const [cityAssets, ambientManifest] = await Promise.all([
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/model/ninjaOneCityAssets.ts",
-    ), "utf8"),
-    readJson(
-      "public/career-world/layers/structures/manifests/"
-        + "ambient-structures-r1.json",
-    ),
-  ]);
-  const resourceIds = [...cityAssets.matchAll(
-    /id: "(ninjaone-[^"]+)"/g,
-  )].map((match) => match[1]);
-  const archetypeIds = [...cityAssets.matchAll(
-    /archetypeId: "([^"]+)"/g,
-  )].map((match) => match[1]);
+test("Kaizen semantic buildings reuse the registered shared city pool", async () => {
+  const cityAssets = await readFile(path.join(
+    root,
+    "features/career-world/layers/structures/model/ninjaOneCityAssets.ts",
+  ), "utf8");
+  const resourceIds = NINJAONE_CITY_ASSET_POOL.map(({ id }) => id);
+  const semanticIds = NINJAONE_CITY_ASSET_POOL.map(
+    ({ semanticAsset }) => semanticAsset.id,
+  );
 
-  assert.match(cityAssets, /"ninjaone-common-city-assets@r1"/);
-  assert.equal(resourceIds.length, 6);
+  assert.equal(NINJAONE_CITY_ASSET_POOL_ID, "ninjaone-shared-city-assets@r3");
+  assert.equal(NINJAONE_CITY_ASSET_POOL.length, 4);
   assert.equal(new Set(resourceIds).size, resourceIds.length);
-  assert.equal(archetypeIds.length, resourceIds.length);
-  assert.equal(new Set(archetypeIds).size, archetypeIds.length);
-
-  const registeredArchetypeIds = new Set(
-    ambientManifest.archetypes.map(({ id }) => id),
+  assert.deepEqual(
+    new Set(semanticIds),
+    new Set(KAIZEN_SEMANTIC_STRUCTURE_ASSETS.map(({ id }) => id)),
   );
-  for (const archetypeId of archetypeIds) {
-    assert.ok(registeredArchetypeIds.has(archetypeId), archetypeId);
-  }
-
+  assert.ok(NINJAONE_CITY_ASSET_POOL.every(({ semanticAsset, variants }) => (
+    variants.standard === semanticAsset.assetPath
+  )));
+  assert.match(cityAssets, /KAIZEN_SEMANTIC_STRUCTURE_ASSETS\.map/);
+  assert.match(cityAssets, /const ASSET_BY_SEMANTIC_ID = new Map/);
   assert.match(
     cityAssets,
-    /const archetype = requireAmbientArchetype\(config\.archetypeId\)/,
-  );
-  assert.match(
-    cityAssets,
-    /return Object\.freeze\(\{[\s\S]*archetype,[\s\S]*standard: archetype\.assetPath/,
-  );
-  assert.match(cityAssets, /const ASSET_BY_ARCHETYPE_ID = new Map/);
-  assert.match(
-    cityAssets,
-    /ASSET_BY_ARCHETYPE_ID\.get\(archetypeId\) \?\? null/,
+    /ASSET_BY_SEMANTIC_ID\.get\(semanticAssetId\) \?\? null/,
   );
 });
 
-test("Kaizen close LOD refines one registered city image without morphing", async () => {
+test("Kaizen city mounts a persistent base and derived progressive detail", async () => {
   const [component, fabricComponent] = await Promise.all([
     readFile(path.join(
       root,
@@ -599,6 +266,9 @@ test("Kaizen close LOD refines one registered city image without morphing", asyn
         + "KaizenNeighborhoodFabric.tsx",
     ), "utf8"),
   ]);
+  const baseModules = KAIZEN_NEIGHBORHOOD_MODULES.filter(
+    ({ lod }) => lod === "base",
+  );
   const siteModules = KAIZEN_NEIGHBORHOOD_MODULES.filter(
     ({ lod }) => lod === "site",
   );
@@ -609,21 +279,45 @@ test("Kaizen close LOD refines one registered city image without morphing", asyn
     KAIZEN_NEIGHBORHOOD_MODULES.map(({ assetPath }) => assetPath),
   );
 
-  assert.equal(KAIZEN_NEIGHBORHOOD_MODULES.length, 2);
-  assert.equal(assetPaths.size, 2);
-  assert.deepEqual(assetPaths, new Set([
-    KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC,
-    KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC,
-  ]));
+  assert.equal(KAIZEN_NEIGHBORHOOD_CLOSE_GRID_SIZE, 2);
+  assert.deepEqual(KAIZEN_NEIGHBORHOOD_BASE_DIMENSIONS, [768, 768]);
+  assert.deepEqual(KAIZEN_NEIGHBORHOOD_SITE_DIMENSIONS, [1254, 1254]);
+  assert.deepEqual(KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS, [2048, 2048]);
+  assert.deepEqual(
+    KAIZEN_NEIGHBORHOOD_CLOSE_TILE_DIMENSIONS,
+    [1024, 1024],
+  );
+  assert.equal(KAIZEN_NEIGHBORHOOD_MODULES.length, 6);
+  assert.equal(assetPaths.size, 6);
+  assert.equal(baseModules.length, 1);
+  assert.equal(baseModules[0].kind, "city-foundation-base");
+  assert.equal(baseModules[0].assetPath, KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC);
+  assert.deepEqual(baseModules[0].crop, [0, 0, 768, 768]);
+  assert.deepEqual(baseModules[0].region, [0, 0, 1, 1]);
   assert.equal(siteModules.length, 1);
-  assert.equal(siteModules[0].kind, "city-foundation");
+  assert.equal(siteModules[0].kind, "city-foundation-site");
+  assert.equal(
+    siteModules[0].assetPath,
+    KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC,
+  );
   assert.deepEqual(siteModules[0].crop, [0, 0, 1254, 1254]);
-  assert.equal(closeModules.length, 1);
-  assert.equal(closeModules[0].kind, "city-foundation-refinement");
-  assert.deepEqual(closeModules[0].crop, [0, 0, 1254, 1254]);
-  assert.deepEqual(closeModules[0].anchor, siteModules[0].anchor);
-  assert.deepEqual(closeModules[0].span, siteModules[0].span);
-  assert.equal(closeModules[0].blockId, siteModules[0].blockId);
+  assert.deepEqual(siteModules[0].region, [0, 0, 1, 1]);
+  assert.equal(closeModules.length, 4);
+  assert.equal(
+    new Set(closeModules.map(({ gridColumn, gridRow }) => (
+      `${gridRow}:${gridColumn}`
+    ))).size,
+    4,
+  );
+  assert.ok(closeModules.every((module) => (
+    module.kind === "city-foundation-close-tile"
+    && module.assetPath.startsWith(`${KAIZEN_NEIGHBORHOOD_CLOSE_GRID_ROOT}/`)
+    && module.blockId === baseModules[0].blockId
+  )));
+  assert.equal(
+    closeModules.reduce((sum, { region }) => sum + region[2] * region[3], 0),
+    1,
+  );
   assert.equal(
     new Set(KAIZEN_NEIGHBORHOOD_MODULES.map(({ id }) => id)).size,
     KAIZEN_NEIGHBORHOOD_MODULES.length,
@@ -644,83 +338,106 @@ test("Kaizen close LOD refines one registered city image without morphing", asyn
     );
   }
 
-  const expectedDimensions = new Map([
-    [KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC, KAIZEN_NEIGHBORHOOD_SITE_DIMENSIONS],
-    [KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC, KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS],
-  ]);
+  const expectedDimensions = new Map(KAIZEN_NEIGHBORHOOD_MODULES.map(
+    ({ assetPath, sourceDimensions }) => [assetPath, sourceDimensions],
+  ));
+  let transparentCloseTileCount = 0;
   for (const [assetPath, dimensions] of expectedDimensions) {
     const metadata = await sharp(publicFile(assetPath)).metadata();
     const stats = await sharp(publicFile(assetPath)).stats();
-    const alpha = stats.channels[3];
+    const alpha = stats.channels[3] ?? { max: 255, min: 255 };
 
     assert.equal(metadata.width, dimensions[0], assetPath);
     assert.equal(metadata.height, dimensions[1], assetPath);
-    assert.equal(metadata.hasAlpha, true, assetPath);
-    assert.equal(alpha.min, 0, `${assetPath} needs transparent padding`);
     assert.equal(alpha.max, 255, `${assetPath} needs opaque environment pixels`);
+    if (assetPath.startsWith(KAIZEN_NEIGHBORHOOD_CLOSE_GRID_ROOT)) {
+      transparentCloseTileCount += alpha.min === 0 ? 1 : 0;
+    } else {
+      assert.equal(metadata.hasAlpha, true, assetPath);
+    }
   }
-
-  assert.match(
-    KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC,
-    /city-foundation-integrated-r1\.png$/,
+  assert.equal(
+    (await sharp(publicFile(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC)).stats())
+      .channels[3].min,
+    0,
   );
-  assert.match(
-    KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC,
-    /city-foundation-close-authored-r3\.png$/,
+  assert.equal(
+    (await sharp(publicFile(KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC)).stats())
+      .channels[3].min,
+    0,
   );
-  const siteFoundation = await sharp(
-    publicFile(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC),
-  ).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const closeFoundation = await sharp(
-    publicFile(KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC),
-  ).resize(
-    siteFoundation.info.width,
-    siteFoundation.info.height,
-    { kernel: "lanczos3" },
-  ).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  let alphaIntersection = 0;
-  let alphaUnion = 0;
-  for (let offset = 0; offset < siteFoundation.data.length; offset += 4) {
-    const siteVisible = siteFoundation.data[offset + 3] > 32;
-    const closeVisible = closeFoundation.data[offset + 3] > 32;
-    alphaIntersection += siteVisible && closeVisible ? 1 : 0;
-    alphaUnion += siteVisible || closeVisible ? 1 : 0;
-  }
-  assert.ok(alphaUnion > 0);
-  assert.ok(
-    alphaIntersection / alphaUnion >= 0.99,
-    "close detail may refine color and edges but cannot move the city silhouette",
-  );
+  assert.ok(transparentCloseTileCount > 0);
+  assert.match(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC, /kaizen-base-overview-r1\.webp$/);
+  assert.match(KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC, /kaizen-base-site-r1\.webp$/);
   assert.match(component, /<KaizenNeighborhoodFabric/);
+  assert.match(
+    component,
+    /onVisualReadyChange=\{onKaizenVisualReadyChange\}/,
+  );
   assert.match(component, /shouldRenderCloseNeighborhood/);
+  assert.match(component, /shouldRenderSiteNeighborhood/);
+  assert.doesNotMatch(fabricComponent, /registrationMaskId|close-fallback/);
+  assert.match(
+    fabricComponent,
+    /persistent-base-progressive-detail-grid/,
+  );
   assert.match(fabricComponent, /data-neighborhood-lod=/);
   assert.match(
     fabricComponent,
-    /siteFoundationVisibility = siteVisibility \* \(1 - closeVisibility\)/,
+    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
   );
-  assert.match(fabricComponent, /closeFoundationVisibility = closeVisibility/);
-  assert.match(fabricComponent, /siteFoundationVisibility > 0\.001/);
+  assert.match(fabricComponent, /const image = new Image\(\)/);
+  assert.match(fabricComponent, /requestedAssetPaths/);
+  assert.match(fabricComponent, /if \(!baseModule\) \{/);
+  assert.doesNotMatch(
+    fabricComponent,
+    /foundationVisibility <= LOD_PRESENTATION_EPSILON/,
+  );
+  assert.doesNotMatch(fabricComponent, /activeLod|useCloseFoundation/);
+  assert.match(
+    fabricComponent,
+    /Math\.max\(\s*overviewVisibility,\s*siteVisibility,\s*closeVisibility,\s*\)/,
+  );
   assert.match(fabricComponent, /data-neighborhood-foundation-visibility=/);
+  assert.match(fabricComponent, /data-neighborhood-visual-ready=/);
+  assert.match(fabricComponent, /onVisualReadyChange\(baseReady\)/);
+  assert.match(fabricComponent, /shouldRenderSite && siteModule/);
+  assert.match(fabricComponent, /shouldRenderClose \? closeModules\.map/);
   assert.match(
     fabricComponent,
-    /kind === "city-foundation-refinement"/,
-  );
-  assert.match(
-    fabricComponent,
-    /data-neighborhood-refinement-contract="registered-city-foundation"/,
+    /data-neighborhood-refinement-contract=\{KAIZEN_NEIGHBORHOOD_DETAIL_CONTRACT\}/,
   );
   assert.match(fabricComponent, /shouldRenderClose/);
   assert.doesNotMatch(fabricComponent, /Pedestrian|person|people/i);
 });
 
-test("Kaizen semantic buildings use concept-native registered cutouts", async () => {
-  const manifest = await readJson(
-    "public/career-world/layers/structures/manifests/"
-      + "kaizen-semantic-assets-r1.json",
-  );
+test("Kaizen semantic buildings use registered shared transparent assets", async () => {
+  const [manifest, baseManifest, authoringManifest] = await Promise.all([
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/"
+        + "hero-buildings-runtime-r1.json",
+    ),
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/base-runtime-r1.json",
+    ),
+    readJson(
+      "scripts/assets/kaizen-city-rebuild/manifests/"
+        + "hero-assets-authoring-r2.json",
+    ),
+  ]);
 
-  assert.equal(manifest.id, "career-world/kaizen-semantic-assets@r2");
-  assert.equal(KAIZEN_SEMANTIC_ASSET_REGISTRATION, "kaizen-city-foundation@r1");
+  assert.equal(manifest.schemaVersion, 1);
+  assert.equal(
+    manifest.id,
+    "career-world/kaizen-agent/hero-buildings-runtime@r1",
+  );
+  assert.equal(manifest.registrationRef, baseManifest.registration);
+  assert.equal(KAIZEN_SEMANTIC_ASSET_REGISTRATION, "kaizen-city-layout@r2");
+  assert.equal(authoringManifest.registrationRef, manifest.registrationRef);
+  assert.ok(manifest.assets.every((asset) => !("source" in asset)));
+  assert.ok(authoringManifest.assets.every(({ source }) => (
+    source.startsWith("/scripts/assets/kaizen-city-rebuild/hero-assets-r2/")
+  )));
   assert.equal(KAIZEN_SEMANTIC_STRUCTURE_ASSETS.length, 4);
   assert.deepEqual(
     new Set(KAIZEN_SEMANTIC_STRUCTURE_ASSETS.map(({ id }) => id)),
@@ -732,10 +449,82 @@ test("Kaizen semantic buildings use concept-native registered cutouts", async ()
     ]),
   );
 
+  const plateOrigin = [
+    baseManifest.plate.anchor[0] - baseManifest.plate.span[0] * 0.5,
+    baseManifest.plate.anchor[1]
+      - baseManifest.plate.span[1] * baseManifest.plate.alignmentY,
+  ];
+  const approximatelyEqual = (actual, expected, message) => {
+    assert.ok(
+      Math.abs(actual - expected) < 1e-12,
+      `${message}: expected ${expected}, received ${actual}`,
+    );
+  };
+  const alphaMasks = [];
+
   for (const asset of KAIZEN_SEMANTIC_STRUCTURE_ASSETS) {
-    assert.match(asset.assetPath, /\/semantic\/kaizen-agent\/.*-concept-r2\.png$/);
+    const registration = manifest.assets.find(({ id }) => id === asset.id);
+    assert.ok(registration, asset.id);
+    assert.match(
+      asset.assetPath,
+      /\/career-world\/cities\/kaizen-agent\/layers\/hero-buildings\/.*-hero-r1\.png$/,
+    );
     assert.equal(asset.grounding, "asset-owned");
     assert.equal(asset.registration, KAIZEN_SEMANTIC_ASSET_REGISTRATION);
+    assert.deepEqual(
+      asset.registrationDimensions,
+      registration.registrationDimensions,
+    );
+    assert.deepEqual(asset.groundAnchor, registration.sourceGroundAnchor);
+    assert.ok(asset.cropOrigin[0] > 0, `${asset.id} registered crop x`);
+    assert.ok(asset.cropOrigin[1] > 0, `${asset.id} registered crop y`);
+    assert.ok(
+      asset.cropOrigin[0] + asset.registrationDimensions[0]
+        <= baseManifest.plate.dimensions[0],
+      `${asset.id} registered crop width`,
+    );
+    assert.ok(
+      asset.cropOrigin[1] + asset.registrationDimensions[1]
+        <= baseManifest.plate.dimensions[1],
+      `${asset.id} registered crop height`,
+    );
+    assert.ok(
+      asset.registrationDimensions[0]
+        < baseManifest.plate.dimensions[0],
+      `${asset.id} must not remain a full-plate cutout`,
+    );
+
+    // A semantic PNG owns the complete registered crop. Its rendered image
+    // rectangle must therefore start at cropOrigin regardless of transparent
+    // padding or the asset-specific alpha-ground anchor.
+    const renderedTopLeft = [
+      asset.territoryAnchor[0]
+        - asset.groundAnchor[0] * asset.footprintSpan[0],
+      asset.territoryAnchor[1]
+        - asset.groundAnchor[1] * asset.footprintSpan[1],
+    ];
+    const registeredTopLeft = [
+      plateOrigin[0]
+        + registration.cropOrigin[0]
+          / baseManifest.plate.dimensions[0]
+          * baseManifest.plate.span[0],
+      plateOrigin[1]
+        + registration.cropOrigin[1]
+          / baseManifest.plate.dimensions[1]
+          * baseManifest.plate.span[1],
+    ];
+    approximatelyEqual(
+      renderedTopLeft[0],
+      registeredTopLeft[0],
+      `${asset.id} registered x origin`,
+    );
+    approximatelyEqual(
+      renderedTopLeft[1],
+      registeredTopLeft[1],
+      `${asset.id} registered y origin`,
+    );
+    assert.ok(asset.sourceDimensions[0] >= 1_000, asset.id);
+    assert.ok(asset.sourceDimensions[1] >= 1_000, asset.id);
     assert.ok(asset.interactionHull.length >= 3, asset.id);
     for (const [x, y] of asset.interactionHull) {
       assert.ok(x >= 0 && x <= asset.sourceDimensions[0], asset.id);
@@ -756,6 +545,64 @@ test("Kaizen semantic buildings use concept-native registered cutouts", async ()
     assert.equal(stats.channels[3].min, 0, asset.id);
     assert.equal(stats.channels[3].max, 255, asset.id);
 
+    let visiblePixels = 0;
+    let alphaLeft = info.width;
+    let alphaTop = info.height;
+    let alphaRight = -1;
+    let alphaBottom = -1;
+    for (let y = 0; y < info.height; y += 1) {
+      for (let x = 0; x < info.width; x += 1) {
+        if (data[(y * info.width + x) * info.channels + 3] <= 32) {
+          continue;
+        }
+        visiblePixels += 1;
+        alphaLeft = Math.min(alphaLeft, x);
+        alphaTop = Math.min(alphaTop, y);
+        alphaRight = Math.max(alphaRight, x);
+        alphaBottom = Math.max(alphaBottom, y);
+      }
+    }
+    const visibleRatio = visiblePixels / (info.width * info.height);
+    assert.ok(
+      visibleRatio >= 0.3 && visibleRatio <= 0.75,
+      `${asset.id} alpha coverage ${visibleRatio}`,
+    );
+    const hullXs = asset.interactionHull.map(([x]) => x);
+    const hullYs = asset.interactionHull.map(([, y]) => y);
+    assert.ok(alphaLeft >= Math.min(...hullXs) - 4, asset.id);
+    assert.ok(alphaTop >= Math.min(...hullYs) - 4, asset.id);
+    assert.ok(alphaRight <= Math.max(...hullXs) + 4, asset.id);
+    assert.ok(alphaBottom <= Math.max(...hullYs) + 4, asset.id);
+    const registeredAlpha = await sharp(publicFile(asset.assetPath))
+      .resize(
+        registration.registrationDimensions[0],
+        registration.registrationDimensions[1],
+        { fit: "fill", kernel: "lanczos3" },
+      )
+      .ensureAlpha()
+      .extractChannel(3)
+      .raw()
+      .toBuffer();
+    const plateAlpha = Buffer.alloc(
+      baseManifest.plate.dimensions[0]
+        * baseManifest.plate.dimensions[1],
+    );
+    for (let y = 0; y < registration.registrationDimensions[1]; y += 1) {
+      const sourceOffset = y * registration.registrationDimensions[0];
+      const targetOffset = (
+        (registration.cropOrigin[1] + y)
+          * baseManifest.plate.dimensions[0]
+        + registration.cropOrigin[0]
+      );
+      registeredAlpha.copy(
+        plateAlpha,
+        targetOffset,
+        sourceOffset,
+        sourceOffset + registration.registrationDimensions[0],
+      );
+    }
+    alphaMasks.push({ data: plateAlpha, id: asset.id });
+
     const alphaAt = (x, y) => data[(y * info.width + x) * info.channels + 3];
     for (let x = 0; x < info.width; x += 1) {
       assert.equal(alphaAt(x, 0), 0, `${asset.id} top crop edge`);
@@ -775,22 +622,30 @@ test("Kaizen semantic buildings use concept-native registered cutouts", async ()
     }
   }
 
-  for (const filename of [
-    "project-kaizen-agent-mask-r2.png",
-    "data-contracts-mask-r2.png",
-    "safe-writes-mask-r2.png",
-    "protocol-gateway-mask-r2.png",
-  ]) {
-    const metadata = await sharp(path.join(
-      root,
-      "scripts/assets/kaizen-semantic-masks",
-      filename,
-    )).metadata();
-    assert.deepEqual(
-      [metadata.width, metadata.height],
-      manifest.plateDimensions,
-      filename,
-    );
+  for (let leftIndex = 0; leftIndex < alphaMasks.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < alphaMasks.length;
+      rightIndex += 1
+    ) {
+      const left = alphaMasks[leftIndex];
+      const right = alphaMasks[rightIndex];
+      let overlap = 0;
+      for (let pixel = 0; pixel < left.data.length; pixel += 1) {
+        const leftAlpha = left.data[pixel];
+        const rightAlpha = right.data[pixel];
+        overlap += leftAlpha > 32 && rightAlpha > 32 ? 1 : 0;
+      }
+      assert.ok(
+        overlap <= 8,
+        `${left.id} and ${right.id} alpha overlap (${overlap}px)`,
+      );
+    }
+  }
+
+  for (const { source } of authoringManifest.assets) {
+    const metadata = await sharp(path.join(root, source.slice(1))).metadata();
+    assert.ok(metadata.width > 0 && metadata.height > 0, source);
   }
 
   assert.equal(
@@ -811,7 +666,7 @@ test("Kaizen semantic buildings use concept-native registered cutouts", async ()
   );
   assert.equal(
     resolveKaizenSemanticStructureAsset({
-      ownerId: "project-vendy",
+      ownerId: "project-unknown",
       role: "skill",
       visualId: "safe-writes",
     }),
@@ -819,33 +674,76 @@ test("Kaizen semantic buildings use concept-native registered cutouts", async ()
   );
 });
 
-test("Kaizen semantic base and cutouts reconstruct the accepted concept", async () => {
-  const manifest = await readJson(
-    "public/career-world/layers/structures/manifests/"
-      + "kaizen-semantic-assets-r1.json",
+test("Kaizen runtime LODs remain registered to one high-detail master", async () => {
+  const sampleSize = 256;
+  const masterPath = publicFile(KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC);
+  const masterMetadata = await sharp(masterPath).metadata();
+  assert.deepEqual(
+    [masterMetadata.width, masterMetadata.height],
+    KAIZEN_NEIGHBORHOOD_SITE_DIMENSIONS,
   );
-  const overlays = manifest.assets.map((asset) => ({
-    input: publicFile(asset.assetPath),
-    left: asset.cropOrigin[0],
-    top: asset.cropOrigin[1],
-  }));
-  const reconstructed = await sharp(publicFile(manifest.basePlate))
-    .composite(overlays)
+  const master = await sharp(masterPath)
+    .resize(sampleSize, sampleSize, { kernel: "lanczos3" })
     .ensureAlpha()
     .raw()
     .toBuffer();
-  const accepted = await sharp(publicFile(manifest.sourcePlate))
-    .ensureAlpha()
-    .raw()
+  const closeModules = KAIZEN_NEIGHBORHOOD_MODULES.filter(
+    ({ lod }) => lod === "close",
+  );
+  const closeGrid = await sharp({
+    create: {
+      background: { alpha: 0, b: 0, g: 0, r: 0 },
+      channels: 4,
+      height: KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS[1],
+      width: KAIZEN_NEIGHBORHOOD_CLOSE_DIMENSIONS[0],
+    },
+  })
+    .composite(closeModules.map((module) => ({
+      input: publicFile(module.assetPath),
+      left: module.gridColumn * KAIZEN_NEIGHBORHOOD_CLOSE_TILE_DIMENSIONS[0],
+      top: module.gridRow * KAIZEN_NEIGHBORHOOD_CLOSE_TILE_DIMENSIONS[1],
+    })))
+    .png()
     .toBuffer();
+  const candidates = new Map([
+    ["base", sharp(publicFile(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC))],
+    ["site", sharp(masterPath)],
+    ["close-grid", sharp(closeGrid)],
+  ]);
 
-  assert.equal(reconstructed.length, accepted.length);
-  let maximumDelta = 0;
-  for (let index = 0; index < accepted.length; index += 1) {
-    maximumDelta = Math.max(
-      maximumDelta,
-      Math.abs(reconstructed[index] - accepted[index]),
+  for (const [label, pipeline] of candidates) {
+    const candidate = await pipeline
+      .resize(sampleSize, sampleSize, { kernel: "lanczos3" })
+      .ensureAlpha()
+      .raw()
+      .toBuffer();
+    let visibleReferencePixels = 0;
+    let visibleIntersectionPixels = 0;
+    let rgbDifference = 0;
+    let rgbSamples = 0;
+    for (let offset = 0; offset < master.length; offset += 4) {
+      const referenceVisible = master[offset + 3] > 32;
+      const candidateVisible = candidate[offset + 3] > 32;
+      visibleReferencePixels += referenceVisible ? 1 : 0;
+      visibleIntersectionPixels += referenceVisible && candidateVisible ? 1 : 0;
+      if (!referenceVisible || !candidateVisible) {
+        continue;
+      }
+      for (let channel = 0; channel < 3; channel += 1) {
+        rgbDifference += Math.abs(
+          master[offset + channel] - candidate[offset + channel],
+        );
+        rgbSamples += 1;
+      }
+    }
+    assert.ok(visibleReferencePixels > 0, label);
+    assert.ok(
+      visibleIntersectionPixels / visibleReferencePixels >= 0.995,
+      `${label} must preserve the master alpha registration`,
+    );
+    assert.ok(
+      rgbDifference / rgbSamples < 20,
+      `${label} must remain a visual derivative of the master`,
     );
   }
-  assert.ok(maximumDelta <= 1, `maximum reconstruction delta ${maximumDelta}`);
 });

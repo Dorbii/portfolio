@@ -246,6 +246,13 @@ test("camera-driven DOM and water layers update before the same paint", async ()
     wheelHandler,
     /queueCamera\(zoomCameraViewAt/,
   );
+  assert.match(
+    wheelHandler,
+    /const scale = wheelZoomScale\(event\.deltaY\)[\s\S]*zoomCameraViewAt\(\s*camera,/,
+    "Wheel bursts must compose from the rendered camera with bounded scale.",
+  );
+  assert.doesNotMatch(wheelHandler, /zoomCameraViewAt\(\s*cameraRef\.current/);
+  assert.match(scene, /MAX_WHEEL_ZOOM_SCALE = 1\.28/);
   assert.doesNotMatch(
     wheelHandler,
     /commitCamera\(zoomCameraViewAt/,
@@ -304,6 +311,13 @@ test("capital-detail land streaming follows the centralized LOD contract", async
     ),
     "utf8",
   );
+  const [authoringManifest, runtimeManifest] = await Promise.all([
+    readJson("scripts/assets/career-world/terrain-stream-tiles-authoring-r3.json"),
+    readJson(
+      "public/career-world/layers/territory-landform/manifests/"
+        + "terrain-stream-runtime-r4.json",
+    ),
+  ]);
 
   assert.match(
     land,
@@ -428,7 +442,7 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   );
   assert.match(
     streamModel,
-    /terrain-stream-tiles-r3\.json/,
+    /terrain-stream-runtime-r4\.json/,
   );
   assert.match(
     streamModel,
@@ -461,8 +475,22 @@ test("capital-detail land streaming follows the centralized LOD contract", async
     /STREAM_GRID_ROWS = GRID_ROWS \* CHILD_ROWS/,
   );
   assert.match(streamGenerator, /tiles" \/ "stream-r3"/);
-  assert.match(streamGenerator, /terrain-stream-tiles-r3\.json/);
+  assert.match(streamGenerator, /terrain-stream-tiles-authoring-r3\.json/);
+  assert.match(streamGenerator, /terrain-stream-runtime-r4\.json/);
   assert.match(streamGenerator, /"decodedBytes":/);
+  assert.equal(
+    authoringManifest.id,
+    "career-world/terrain-stream-tiles@r3",
+  );
+  assert.equal(
+    runtimeManifest.id,
+    "career-world/terrain-stream-runtime@r4",
+  );
+  assert.equal(runtimeManifest.tiles.length, authoringManifest.tiles.length);
+  assert.deepEqual(
+    Object.keys(runtimeManifest.tiles[0]).sort(),
+    ["id", "minimumTier", "sources", "worldBounds"],
+  );
   assert.match(
     streamGenerator,
     /site_tile\.getchannel\("A"\)\.getextrema\(\)\[1\][\s\S]*MINIMUM_ALPHA/,

@@ -41,6 +41,24 @@ export interface AmbientStructureInstance {
   readonly territoryAnchor: Pair;
 }
 
+interface RawAmbientStructureArchetype {
+  readonly id: string;
+  readonly label: string;
+  readonly assetPath: string;
+  readonly sourceDimensions: number[];
+  readonly groundAnchor: number[];
+  readonly footprintSpan: number[];
+}
+
+interface RawAmbientStructureInstance {
+  readonly id: string;
+  readonly ownerKind: string;
+  readonly ownerId: string;
+  readonly blockId: string;
+  readonly archetypeId: string;
+  readonly territoryAnchor: number[];
+}
+
 export const AMBIENT_NODE_POLICY: DetailNodePolicy = Object.freeze({
   minimumTier: "site",
 });
@@ -98,7 +116,8 @@ const archetypeIds = new Set<string>();
 
 export const AMBIENT_STRUCTURE_ARCHETYPES:
 readonly AmbientStructureArchetype[] = Object.freeze(
-  manifest.archetypes.map((archetype) => {
+  (manifest.archetypes as readonly RawAmbientStructureArchetype[]).map(
+    (archetype) => {
     requireUniqueId(
       archetype.id,
       "Ambient archetype",
@@ -131,14 +150,16 @@ readonly AmbientStructureArchetype[] = Object.freeze(
         { positive: true },
       ),
     });
-  }),
+    },
+  ),
 );
 
 const instanceIds = new Set<string>();
 
 export const AMBIENT_STRUCTURE_INSTANCES:
 readonly AmbientStructureInstance[] = Object.freeze(
-  manifest.instances.map((instance) => {
+  (manifest.instances as readonly RawAmbientStructureInstance[]).map(
+    (instance) => {
     requireUniqueId(
       instance.id,
       "Ambient instance",
@@ -209,7 +230,8 @@ readonly AmbientStructureInstance[] = Object.freeze(
       archetype,
       territoryAnchor,
     });
-  }),
+    },
+  ),
 );
 
 export function resolveAmbientAnchor(

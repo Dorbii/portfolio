@@ -3,23 +3,11 @@ import { TERRAIN_SITE_TILES } from "./siteTiles";
 import { TERRAIN_STREAM_TILES } from "./streamTiles";
 
 const WORLD_PLATE =
-  "/career-world/layers/territory-landform/textures/terrain-relief-r6.png";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6.png?v=ninjaone-coast-r2";
 const TERRITORY_PLATE =
-  "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png?v=ninjaone-coast-r2";
 const WORLD_PLATE_DIMENSIONS = [1672, 941] as const;
 const TERRITORY_PLATE_DIMENSIONS = [6688, 3764] as const;
-const KAIZEN_C2_EXTENSION_DIMENSIONS = [1254, 1254] as const;
-
-export const KAIZEN_C2_LAND_EXTENSION = Object.freeze({
-  id: "kaizen-c2-land-extension",
-  path:
-    "/career-world/layers/territory-landform/textures/kaizen-c2-land-extension-r1.png",
-  dimensions: KAIZEN_C2_EXTENSION_DIMENSIONS,
-  worldBounds: Object.freeze({
-    origin: Object.freeze([0.25925, 0.135737] as const),
-    span: Object.freeze([0.1065, 0.1893] as const),
-  }),
-});
 
 export const LAND_PLATE_DECODED_BYTES = Object.freeze({
   world:
@@ -27,10 +15,6 @@ export const LAND_PLATE_DECODED_BYTES = Object.freeze({
   territory:
     TERRITORY_PLATE_DIMENSIONS[0]
     * TERRITORY_PLATE_DIMENSIONS[1]
-    * 4,
-  kaizenC2Extension:
-    KAIZEN_C2_EXTENSION_DIMENSIONS[0]
-    * KAIZEN_C2_EXTENSION_DIMENSIONS[1]
     * 4,
 });
 
@@ -69,14 +53,6 @@ export const LAND_DETAIL_CONTRACT = defineLayerDetailContract({
         origin: [0, 0],
         span: [1, 1],
       },
-    },
-    {
-      id: KAIZEN_C2_LAND_EXTENSION.id,
-      kind: "registered-raster",
-      minimumTier: "world",
-      path: KAIZEN_C2_LAND_EXTENSION.path,
-      dimensions: KAIZEN_C2_LAND_EXTENSION.dimensions,
-      worldBounds: KAIZEN_C2_LAND_EXTENSION.worldBounds,
     },
     ...TERRAIN_SITE_TILES.map((tile) => ({
       id: tile.id,

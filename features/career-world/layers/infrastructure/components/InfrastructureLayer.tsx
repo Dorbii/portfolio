@@ -14,7 +14,6 @@ import {
 import { WORLD_PLANE } from "../../../shared/world";
 import { resolveTownPresentationOffset } from "../../../shared/townPresentation";
 import {
-  CAPITAL_CAMPUS_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE_POLICY,
   type ProjectTownPalette,
@@ -231,20 +230,6 @@ function TownPlanPhase({
             {render(town.townPlan, town.palette, town.project.id)}
           </TownPlanNode>
         ))}
-      {includesOwner(CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id) ? (
-        <TownPlanNode
-          className="capital-campus-infrastructure town-plan"
-          key={`${CAPITAL_CAMPUS_INFRASTRUCTURE.id}-${phaseId}`}
-          ownerId={CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id}
-          plan={CAPITAL_CAMPUS_INFRASTRUCTURE.townPlan}
-        >
-          {render(
-            CAPITAL_CAMPUS_INFRASTRUCTURE.townPlan,
-            CAPITAL_CAMPUS_INFRASTRUCTURE.palette,
-            CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id,
-          )}
-        </TownPlanNode>
-      ) : null}
     </g>
   );
 }
@@ -621,7 +606,7 @@ export function InfrastructureLayer({
       data-authored-town-foundation-count={
         AUTHORED_TOWN_FOUNDATION_OWNER_IDS.size
       }
-      data-capital-campus-count={1}
+      data-capital-campus-count={0}
       data-close-detail-visibility={closeVisibility.toFixed(3)}
       data-layer="infrastructure"
       data-light-source={light.id}

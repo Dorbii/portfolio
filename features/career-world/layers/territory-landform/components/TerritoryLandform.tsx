@@ -26,7 +26,6 @@ import {
   type LodPresentationFade,
 } from "../../../shared/lod";
 import {
-  KAIZEN_C2_LAND_EXTENSION,
   LAND_ASSETS,
   LAND_PLATE_DECODED_BYTES,
 } from "../model/assets";
@@ -136,8 +135,6 @@ export function TerritoryLandform({
   const detailPlateRef = useRef<HTMLImageElement | null>(null);
   const detailPlateDecodedRef = useRef(false);
   const detailPlateDecodedAtRef = useRef<number | null>(null);
-  const kaizenLandExtensionRef = useRef<HTMLImageElement | null>(null);
-  const kaizenLandExtensionDecodedRef = useRef(false);
   const streamTileRefs = useRef(new Map<string, HTMLImageElement>());
   const activeStreamKeysRef = useRef(new Set<string>());
   const decodedStreamKeysRef = useRef(new Set<string>());
@@ -217,9 +214,6 @@ export function TerritoryLandform({
         : 0)
       + (detailPlateDecodedRef.current
         ? LAND_PLATE_DECODED_BYTES.territory
-        : 0)
-      + (kaizenLandExtensionDecodedRef.current
-        ? LAND_PLATE_DECODED_BYTES.kaizenC2Extension
         : 0);
     const canvasDecodedBytes = expectedCanvasDecodedBytes(
       canvas,
@@ -516,17 +510,6 @@ export function TerritoryLandform({
     ) {
       drawPlate(detailPlate, detailPresentationOpacity);
     }
-    if (
-      kaizenLandExtensionRef.current
-      && kaizenLandExtensionDecodedRef.current
-    ) {
-      drawRegisteredTile(
-        KAIZEN_C2_LAND_EXTENSION,
-        kaizenLandExtensionRef.current,
-        1,
-      );
-    }
-
     const visibleStreamTiles = TERRAIN_STREAM_TILES.filter((tile) =>
       terrainTileIntersectsCamera(tile, camera)
     );
@@ -766,34 +749,6 @@ export function TerritoryLandform({
     publishStreamMetrics,
     queueRender,
   ]);
-
-  useEffect(() => {
-    const image = new Image();
-    let cancelled = false;
-    image.decoding = "async";
-    kaizenLandExtensionRef.current = image;
-    kaizenLandExtensionDecodedRef.current = false;
-    image.onload = () => {
-      void image.decode().then(() => {
-        if (cancelled || kaizenLandExtensionRef.current !== image) {
-          return;
-        }
-        kaizenLandExtensionDecodedRef.current = true;
-        setViewportRevision((revision) => revision + 1);
-        queueRender();
-      });
-    };
-    image.src = KAIZEN_C2_LAND_EXTENSION.path;
-
-    return () => {
-      cancelled = true;
-      releaseImage(image);
-      if (kaizenLandExtensionRef.current === image) {
-        kaizenLandExtensionRef.current = null;
-        kaizenLandExtensionDecodedRef.current = false;
-      }
-    };
-  }, [queueRender]);
 
   useEffect(() => {
     const streamTileImages = streamTileRefs.current;

@@ -44,16 +44,16 @@ OpenWaterSample blendWaterSamples(
   return result;
 }
 
-OpenWaterSample sampleWaterBody(
+OpenWaterSample sampleWaterBodyAtTime(
   vec2 worldUv,
   vec2 bodyUv,
   float shelter,
   vec2 rippleCenter,
   float rippleFrequency,
   float rippleMix,
-  float tintMix
+  float tintMix,
+  float time
 ) {
-  float time = u_time * u_motion;
   float territoryMix = u_territoryLod;
   float capitalMix = u_capitalLod;
   float localDetail =
@@ -258,6 +258,27 @@ OpenWaterSample sampleWaterBody(
   result.crest = crest;
   result.expression = expression;
   return result;
+}
+
+OpenWaterSample sampleWaterBody(
+  vec2 worldUv,
+  vec2 bodyUv,
+  float shelter,
+  vec2 rippleCenter,
+  float rippleFrequency,
+  float rippleMix,
+  float tintMix
+) {
+  return sampleWaterBodyAtTime(
+    worldUv,
+    bodyUv,
+    shelter,
+    rippleCenter,
+    rippleFrequency,
+    rippleMix,
+    tintMix,
+    u_time * u_motion
+  );
 }
 
 OpenWaterSample sampleOpenWater(

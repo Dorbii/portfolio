@@ -127,6 +127,14 @@
   background: none;
 }
 
+/* The environment proof owns opaque close-detail terrain at z-index 7. Its
+   registered stream field is still rendered by the shared water surface, so
+   that surface must sit above the proof while the shader remains transparent
+   everywhere outside authored water. */
+.career-world__water-canvas[data-foreground-hydrology="true"][data-render-state="ready"] {
+  z-index: 8;
+}
+
 .career-world__land-layer {
   z-index: 3;
   overflow: hidden;
@@ -149,6 +157,15 @@
 }
 
 .career-world__structures-layer {
+  z-index: 7;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
+}
+
+.career-world__foliage-layer {
   z-index: 7;
   overflow: visible;
   width: 100%;
@@ -274,8 +291,7 @@
 .town-fabrics,
 .town-activity-props,
 .town-pedestrians,
-.rural-outskirts,
-.career-world__foliage-instances {
+.rural-outskirts {
   transition-duration: var(--career-world-lod-transition-ms, 180ms);
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -330,13 +346,20 @@
     drop-shadow(0 0.26px 0.22px rgb(7 10 8 / 72%));
 }
 
-.career-world__foliage-breeze {
+.career-world__foliage-instances {
+  filter:
+    saturate(0.78)
+    brightness(0.88)
+    contrast(0.96)
+    drop-shadow(0 0.18px 0.2px rgb(7 10 8 / 58%));
+}
+
+.career-world__foliage-canopy {
   transform-box: fill-box;
-  transform-origin: 50% 94%;
+  transform-origin: 50% 100%;
   animation-name: career-world-foliage-breeze;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-  will-change: transform;
 }
 
 @keyframes career-world-foliage-breeze {
@@ -410,9 +433,14 @@ g[data-project-id="project-kaizen-agent"].project-structure
 }
 
 .career-world__semantic-structure {
+  cursor: default;
+  pointer-events: none;
+  outline: none;
+}
+
+.career-world__semantic-structure[data-interactive="true"] {
   cursor: help;
   pointer-events: auto;
-  outline: none;
 }
 
 .career-world__semantic-structure .structure-sprite__asset {
@@ -423,7 +451,7 @@ g[data-project-id="project-kaizen-agent"].project-structure
 
 .career-world__semantic-structure
   .structure-sprite__asset--semantic-overlay {
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -445,7 +473,7 @@ g[data-project-id="project-kaizen-agent"].project-structure
   .structure-sprite__asset--semantic-overlay,
 .career-world__semantic-structure:focus-visible
   .structure-sprite__asset--semantic-overlay {
-  opacity: 0.58;
+  opacity: 1;
 }
 
 .support-structure {
@@ -480,9 +508,7 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 }
 
 .kaizen-neighborhood-fabric__module {
-  transition-duration: var(--career-world-lod-transition-ms, 180ms);
-  transition-property: opacity;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 160ms ease;
 }
 
 .kaizen-neighborhood-fabric__asset {
@@ -509,14 +535,13 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   .town-activity-props,
   .town-pedestrians,
   .rural-outskirts,
-  .career-world__foliage-instances,
   .town-plan__macro,
   .town-plan__site-details,
   .town-plan__close-details {
     transition-duration: 0ms;
   }
 
-  .career-world__foliage-breeze {
+  .career-world__foliage-canopy {
     animation: none;
   }
 }
@@ -1056,5 +1081,644 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 @media (prefers-reduced-motion: reduce) {
   .career-world__controls button {
     scroll-behavior: auto;
+  }
+}
+
+.career-world__topology-proof-layer {
+  z-index: 8;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
+}
+
+.ninjaone-capital-topology__grid-contract rect {
+  fill: rgb(69 157 169 / 6%);
+  stroke: rgb(121 225 230 / 92%);
+  stroke-width: 1.5;
+  stroke-dasharray: 7 4;
+}
+
+.ninjaone-capital-topology__grid-contract text {
+  fill: #b7f3ef;
+  font: 700 11px/1 Consolas, "Courier New", monospace;
+  paint-order: stroke fill;
+  stroke: rgb(4 10 8 / 92%);
+  stroke-width: 3px;
+}
+
+.ninjaone-capital-topology__planning-envelope {
+  fill: rgb(238 211 104 / 5%);
+  stroke: rgb(238 211 104 / 92%);
+  stroke-width: 10;
+  stroke-dasharray: 28 18;
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__planning-label {
+  fill: #f1dd81;
+  font: 700 24px/1 Consolas, "Courier New", monospace;
+  letter-spacing: 0.06em;
+  paint-order: stroke fill;
+  stroke: rgb(5 11 9 / 92%);
+  stroke-width: 7px;
+}
+
+.ninjaone-capital-topology__registration-bed {
+  fill: rgb(19 27 24 / 88%);
+  stroke: #d3c685;
+  stroke-width: 18;
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__transition-zone {
+  fill: url("#ninjaone-capital-topology-environment-hatch");
+  stroke: rgb(145 190 104 / 78%);
+  stroke-width: 12;
+  stroke-linejoin: round;
+}
+
+#ninjaone-capital-topology-environment-hatch path {
+  stroke: rgb(125 174 91 / 48%);
+  stroke-width: 7;
+}
+
+.ninjaone-capital-topology__elevation-band {
+  stroke: rgb(25 32 29 / 90%);
+  stroke-width: 10;
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__elevation-band[data-elevation="0"] {
+  opacity: 0.94;
+}
+
+.ninjaone-capital-topology__elevation-band[data-elevation="1"] {
+  opacity: 0.97;
+}
+
+.ninjaone-capital-topology__elevation-band[data-elevation="2"] {
+  opacity: 1;
+}
+
+.ninjaone-capital-topology__retaining-wall-face,
+.ninjaone-capital-topology__retaining-wall-cap,
+.ninjaone-capital-topology__rail-grade,
+.ninjaone-capital-topology__road-edge,
+.ninjaone-capital-topology__road-surface,
+.ninjaone-capital-topology__pedestrian-loop,
+.ninjaone-capital-topology__future-rails {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__retaining-wall-face {
+  stroke: #202824;
+  stroke-width: 36;
+}
+
+.ninjaone-capital-topology__retaining-wall-cap {
+  stroke: #a2aa94;
+  stroke-width: 15;
+  stroke-dasharray: 18 8;
+}
+
+.ninjaone-capital-topology__rail-grade {
+  stroke: rgb(60 52 70 / 82%);
+}
+
+.ninjaone-capital-topology__road-edge {
+  stroke: #242b28;
+}
+
+.ninjaone-capital-topology__road-surface {
+  stroke: #bbb5a0;
+}
+
+.ninjaone-capital-topology__road-surface--ramp {
+  stroke: #b2bdad;
+  stroke-dasharray: 22 8;
+}
+
+.ninjaone-capital-topology__pedestrian-loop {
+  stroke: #7ce0d7;
+  stroke-width: 14;
+  stroke-dasharray: 22 14;
+}
+
+.ninjaone-capital-topology__stair-approach {
+  fill: none;
+  stroke: #7ce0d7;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__stair-bed {
+  stroke: #222b28;
+  stroke-linecap: round;
+  stroke-width: 50;
+}
+
+.ninjaone-capital-topology__stair-tread {
+  stroke: #e2ddc5;
+  stroke-linecap: round;
+  stroke-width: 8;
+}
+
+.ninjaone-capital-topology__landing {
+  fill: #e2ddc5;
+  stroke: #202824;
+  stroke-width: 7;
+}
+
+.ninjaone-capital-topology__plot {
+  fill: rgb(15 22 20 / 72%);
+  stroke-width: 12;
+  stroke-linejoin: round;
+  stroke-dasharray: 19 9;
+}
+
+.ninjaone-capital-topology__plot--skill {
+  stroke: #71bad1;
+}
+
+.ninjaone-capital-topology__plot--decoration {
+  stroke: #b7ac84;
+}
+
+.ninjaone-capital-topology__plot--transportation {
+  stroke: #cf8ee8;
+}
+
+.ninjaone-capital-topology__plot-access {
+  stroke: #f5edc8;
+  stroke-width: 7;
+}
+
+.ninjaone-capital-topology__plot-access-point {
+  fill: #f5edc8;
+  stroke: #202824;
+  stroke-width: 5;
+}
+
+.ninjaone-capital-topology__district-label,
+.ninjaone-capital-topology__plot-label,
+.ninjaone-capital-topology__rail-label,
+.ninjaone-capital-topology__grade-label {
+  fill: #f4efd8;
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  paint-order: stroke fill;
+  stroke: rgb(5 11 9 / 92%);
+  stroke-linejoin: round;
+}
+
+.ninjaone-capital-topology__plot-label {
+  font-size: 23px;
+  stroke-width: 6px;
+}
+
+.ninjaone-capital-topology__rail-label {
+  fill: #efb9ff;
+  font-size: 27px;
+  stroke-width: 8px;
+}
+
+.ninjaone-capital-topology__grade-label {
+  fill: #d2d9c4;
+  font-size: 23px;
+  stroke-width: 7px;
+}
+
+.ninjaone-capital-topology__district-label {
+  fill: #f5edc8;
+  font-size: 25px;
+  stroke-width: 8px;
+}
+
+.ninjaone-capital-topology__future-rails {
+  stroke: #e8a8ff;
+  stroke-width: 24;
+  stroke-dasharray: 8 18;
+}
+
+.ninjaone-capital-topology__legend {
+  position: absolute;
+  z-index: 11;
+  top: clamp(0.65rem, 1.4vw, 1rem);
+  right: clamp(0.65rem, 1.4vw, 1rem);
+  display: grid;
+  min-width: 15rem;
+  padding: 0.72rem 0.82rem;
+  gap: 0.28rem;
+  border: 1px solid rgb(152 184 172 / 62%);
+  color: #dfe9df;
+  background: rgb(5 12 10 / 90%);
+  box-shadow: 0 0.7rem 2rem rgb(0 0 0 / 42%);
+  font: 0.64rem/1.2 Consolas, "Courier New", monospace;
+  pointer-events: none;
+}
+
+.ninjaone-capital-topology__legend p,
+.ninjaone-capital-topology__legend strong {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.ninjaone-capital-topology__legend p {
+  color: #d9c878;
+  letter-spacing: 0.1em;
+}
+
+.ninjaone-capital-topology__legend strong {
+  margin-bottom: 0.2rem;
+  color: #9fb4aa;
+  font-weight: 500;
+}
+
+.ninjaone-capital-topology__legend span {
+  display: grid;
+  grid-template-columns: 0.9rem 1fr;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ninjaone-capital-topology__legend i {
+  display: block;
+  width: 0.8rem;
+  height: 0.32rem;
+  border-radius: 999px;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="road"] {
+  background: #bbb5a0;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="envelope"] {
+  background: #eedd68;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="walk"] {
+  background: #7ce0d7;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="plot"] {
+  background: #e7af58;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="rail"] {
+  background: #e8a8ff;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="green"] {
+  background: #7dae5b;
+}
+
+.ninjaone-capital-topology__legend i[data-swatch="terrain"] {
+  background: #f4f0d6;
+}
+
+.ninjaone-capital-topology__legend i[data-district-swatch="apis-integration"] {
+  background: #746b80;
+}
+
+.ninjaone-capital-topology__legend i[data-district-swatch="application-development"] {
+  background: #687967;
+}
+
+.ninjaone-capital-topology__legend i[data-district-swatch="infrastructure-data"] {
+  background: #596874;
+}
+
+.ninjaone-capital-mvp {
+  z-index: 7;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
+}
+
+.ninjaone-capital-mvp__authored-plate {
+  pointer-events: none;
+  image-rendering: auto;
+}
+
+.ninjaone-capital-mvp__authored-plate--environment {
+  filter: saturate(1.04) contrast(1.02);
+}
+
+.ninjaone-capital-mvp__rail-bed,
+.ninjaone-capital-mvp__rail-ties,
+.ninjaone-capital-mvp__rail-steel,
+.ninjaone-capital-mvp__rail-channel {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.ninjaone-capital-mvp__rail-bed {
+  stroke: #252c2c;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 22;
+}
+
+.ninjaone-capital-mvp__rail-ties {
+  stroke: #776b57;
+  stroke-dasharray: 2 8;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  stroke-width: 15;
+}
+
+.ninjaone-capital-mvp__rail-steel {
+  stroke: #a9aaa2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 11;
+}
+
+.ninjaone-capital-mvp__rail-channel {
+  stroke: #28302f;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 6;
+}
+
+.ninjaone-capital-mvp__foliage-canopy {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-name: ninjaone-capital-foliage-breeze;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes ninjaone-capital-foliage-breeze {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(var(--ninjaone-capital-foliage-tilt-start));
+  }
+
+  50% {
+    transform:
+      translate(
+        var(--ninjaone-capital-foliage-drift-x),
+        var(--ninjaone-capital-foliage-drift-y)
+      )
+      rotate(var(--ninjaone-capital-foliage-tilt-end));
+  }
+}
+
+.ninjaone-capital-mvp [data-label-contract] circle {
+  fill: rgb(8 18 16 / 88%);
+  stroke: #b7a967;
+  stroke-width: 2;
+}
+
+.ninjaone-capital-mvp [data-label-contract] text {
+  fill: #f1ead0;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #101817;
+  stroke-width: 3px;
+}
+
+.ninjaone-capital-mvp__plot-name {
+  font-size: 8px !important;
+  letter-spacing: 0.04em;
+}
+
+.ninjaone-capital-mvp__hud {
+  position: absolute;
+  z-index: 12;
+  top: clamp(0.6rem, 1.4vw, 1.15rem);
+  left: clamp(0.6rem, 1.4vw, 1.15rem);
+  display: grid;
+  min-width: min(22rem, calc(100% - 1.2rem));
+  padding: 0.72rem 0.85rem;
+  border: 1px solid rgb(139 157 132 / 56%);
+  background: rgb(8 16 13 / 86%);
+  box-shadow: 0 0.7rem 2rem rgb(0 0 0 / 30%);
+  color: #a9b5aa;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: clamp(0.58rem, 0.78vw, 0.68rem);
+  letter-spacing: 0.045em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.ninjaone-capital-mvp__hud p,
+.ninjaone-capital-mvp__hud strong,
+.ninjaone-capital-mvp__hud span {
+  margin: 0;
+}
+
+.ninjaone-capital-mvp__hud p {
+  color: #c1b77f;
+}
+
+.ninjaone-capital-mvp__hud strong {
+  color: #edf0df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.92rem, 1.25vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninjaone-capital-mvp__foliage-canopy {
+    animation: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .ninjaone-capital-mvp__hud span:nth-last-child(-n + 2) {
+    display: none;
+  }
+}
+
+.ninjaone-environment-proof {
+  z-index: 7;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
+}
+
+.ninjaone-environment-proof [data-environment-layer] {
+  image-rendering: auto;
+}
+
+.ninjaone-environment-proof mask {
+  mask-type: alpha;
+}
+
+.ninjaone-environment-proof [data-environment-layer="terrain-geology"] {
+  filter: contrast(1.035) saturate(0.96);
+}
+
+.ninjaone-environment-proof [data-environment-layer="secondary-relief"] {
+  opacity: 0.66;
+  mix-blend-mode: soft-light;
+}
+
+.ninjaone-environment-proof [data-environment-layer="tertiary-relief"] {
+  opacity: 0.48;
+  mix-blend-mode: overlay;
+}
+
+.ninjaone-environment-proof [data-environment-layer="hydrology"] {
+  filter: saturate(0.82) brightness(0.84) contrast(1.08);
+}
+
+.ninjaone-environment-proof [data-environment-layer="trails"] {
+  filter: saturate(0.68) brightness(0.8) contrast(1.06);
+}
+
+.ninjaone-environment-proof [data-environment-resource-kind="rock"] {
+  filter: saturate(0.58) brightness(0.72) contrast(1.12);
+}
+
+.ninjaone-environment-proof [data-environment-resource-kind="wildlife"] {
+  filter: saturate(0.72) brightness(0.82) contrast(1.08);
+}
+
+.ninjaone-environment-proof__shared-foliage {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: none;
+}
+
+.ninjaone-environment-native-detail {
+  transition: none;
+}
+
+.ninjaone-environment-native-detail [data-environment-native-tile] {
+  image-rendering: auto;
+}
+
+.ninjaone-environment-native-detail__canopy-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 88%;
+  animation: ninjaone-native-canopy-sway 5.6s ease-in-out infinite;
+  animation-delay: var(--ninjaone-native-phase);
+  opacity: 0.42;
+  will-change: transform;
+}
+
+@keyframes ninjaone-native-canopy-sway {
+  0%,
+  100% {
+    transform: rotate(-0.11deg) skewX(-0.05deg);
+  }
+
+  38% {
+    transform: rotate(0.13deg) skewX(0.08deg);
+  }
+
+  72% {
+    transform: rotate(-0.04deg) skewX(-0.02deg);
+  }
+}
+
+@keyframes ninjaone-environment-foliage-breeze {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-0.18deg);
+  }
+
+  50% {
+    transform:
+      translate(
+        var(--ninjaone-environment-foliage-drift-x),
+        var(--ninjaone-environment-foliage-drift-y)
+      )
+      rotate(var(--ninjaone-environment-foliage-tilt));
+  }
+}
+
+.ninjaone-environment-proof__wildlife-flight {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ninjaone-environment-wildlife-flight 7.8s ease-in-out infinite;
+}
+
+@keyframes ninjaone-environment-wildlife-flight {
+  0%,
+  100% {
+    transform: translate(-1.2px, 0.7px);
+  }
+
+  50% {
+    transform: translate(1.4px, -0.8px);
+  }
+}
+
+.ninjaone-environment-proof__hud {
+  position: absolute;
+  z-index: 12;
+  top: clamp(0.6rem, 1.4vw, 1.15rem);
+  left: clamp(0.6rem, 1.4vw, 1.15rem);
+  display: grid;
+  min-width: min(22rem, calc(100% - 1.2rem));
+  padding: 0.72rem 0.85rem;
+  border: 1px solid rgb(139 157 132 / 56%);
+  background: rgb(8 16 13 / 86%);
+  box-shadow: 0 0.7rem 2rem rgb(0 0 0 / 30%);
+  color: #a9b5aa;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: clamp(0.58rem, 0.78vw, 0.68rem);
+  letter-spacing: 0.045em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.ninjaone-environment-proof__hud p,
+.ninjaone-environment-proof__hud strong,
+.ninjaone-environment-proof__hud span {
+  margin: 0;
+}
+
+.ninjaone-environment-proof__hud p {
+  color: #c1b77f;
+}
+
+.ninjaone-environment-proof__hud strong {
+  color: #edf0df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.92rem, 1.25vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninjaone-environment-proof__shared-foliage {
+    animation: none;
+  }
+
+  .ninjaone-environment-native-detail__canopy-sway {
+    animation: none;
+  }
+
+  .ninjaone-environment-proof__wildlife-flight {
+    animation: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .ninjaone-environment-proof__hud span:nth-last-child(-n + 2) {
+    display: none;
   }
 }

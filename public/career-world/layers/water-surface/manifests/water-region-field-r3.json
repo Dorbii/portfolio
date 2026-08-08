@@ -15,7 +15,7 @@
   "sources": {
     "landMask": {
       "path": "../../territory-landform/masks/world-land-mask-r4.png",
-      "sha256": "1335488F111EBBFC80D037D392BA20AC874040D01D7E595D0DE699FE16401847"
+      "sha256": "AF1ED791596F13D90A8D9AE8B344B46809EC685E5433E7E2104FBFA96210AE80"
     },
     "regions": {
       "path": "water-regions-r1.json",

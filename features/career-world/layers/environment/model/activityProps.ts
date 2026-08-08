@@ -2,7 +2,6 @@ import manifest from "@/public/career-world/layers/environment/manifests/ninjaon
 import type { Pair } from "../../../shared/camera";
 import type { DetailNodePolicy } from "../../../shared/lod";
 import {
-  CAPITAL_CAMPUS_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE,
   type TownPlan,
 } from "../../infrastructure/model/projectTowns";
@@ -36,21 +35,22 @@ export interface ActivityPropInstance {
   readonly anchor: Pair;
 }
 
+interface RawActivityPropInstance {
+  readonly id: string;
+  readonly kind: string;
+  readonly ownerKind: string;
+  readonly ownerId: string;
+  readonly entranceStructureId: string;
+  readonly offset: number[];
+  readonly headingDegrees: number;
+}
+
 export const ACTIVITY_PROP_SITE_POLICY: DetailNodePolicy = Object.freeze({
   minimumTier: "site",
 });
 
 const MAX_NORMALIZED_OFFSET = 0.01;
 const PROJECT_PROP_COUNT_RANGE = Object.freeze([4, 6] as const);
-const KAIZEN_AGENT_PROP_COUNT_RANGE = Object.freeze([15, 20] as const);
-const CAPITAL_PROP_COUNT_RANGE = Object.freeze([8, 12] as const);
-const KAIZEN_AGENT_OWNER_ID = "project-kaizen-agent";
-const CAPITAL_REQUIRED_PROP_KINDS = Object.freeze([
-  "lamp",
-  "stall",
-  "cart",
-  "bench",
-] satisfies readonly ActivityPropKind[]);
 
 function includes<const Value extends string>(
   values: readonly Value[],
@@ -119,9 +119,7 @@ function townPlanForOwner(
   ownerId: string,
 ): TownPlan | undefined {
   if (ownerKind === "capital") {
-    return CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id === ownerId
-      ? CAPITAL_CAMPUS_INFRASTRUCTURE.townPlan
-      : undefined;
+    return undefined;
   }
   return PROJECT_TOWN_INFRASTRUCTURE.find(
     ({ project }) => project.id === ownerId,
@@ -152,7 +150,7 @@ const ownerKinds = new Map<string, Set<ActivityPropKind>>();
 
 export const ACTIVITY_PROP_INSTANCES:
 readonly ActivityPropInstance[] = Object.freeze(
-  manifest.instances.map((config) => {
+  (manifest.instances as readonly RawActivityPropInstance[]).map((config) => {
     if (
       !includes(ACTIVITY_PROP_KINDS, config.kind)
       || !includes(ACTIVITY_PROP_OWNER_KINDS, config.ownerKind)
@@ -202,15 +200,23 @@ readonly ActivityPropInstance[] = Object.freeze(
   }),
 );
 
-for (const { project } of PROJECT_TOWN_INFRASTRUCTURE) {
+for (const {
+  project,
+  plateOwnedStructureIds,
+} of PROJECT_TOWN_INFRASTRUCTURE) {
   const ownerKey = `project:${project.id}`;
-  const countRange = project.id === KAIZEN_AGENT_OWNER_ID
-    ? KAIZEN_AGENT_PROP_COUNT_RANGE
-    : PROJECT_PROP_COUNT_RANGE;
+  if (plateOwnedStructureIds.length > 0) {
+    if (ownerCounts.has(ownerKey)) {
+      throw new TypeError(
+        `${project.id} must not duplicate authored-foundation activity visuals.`,
+      );
+    }
+    continue;
+  }
   if (
     !countInRange(
       ownerCounts.get(ownerKey) ?? 0,
-      countRange,
+      PROJECT_PROP_COUNT_RANGE,
     )
     || (ownerKinds.get(ownerKey)?.size ?? 0) < 3
   ) {
@@ -220,24 +226,10 @@ for (const { project } of PROJECT_TOWN_INFRASTRUCTURE) {
   }
 }
 
-const capitalOwnerKey =
-  `capital:${CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id}`;
 if (
-  !countInRange(
-    ownerCounts.get(capitalOwnerKey) ?? 0,
-    CAPITAL_PROP_COUNT_RANGE,
-  )
-  || !CAPITAL_REQUIRED_PROP_KINDS.every(
-    (kind) => ownerKinds.get(capitalOwnerKey)?.has(kind),
-  )
-) {
-  throw new TypeError(
-    "The NinjaOne capital requires eight to twelve differentiated props.",
-  );
-}
-
-if (
-  ownerCounts.size !== PROJECT_TOWN_INFRASTRUCTURE.length + 1
+  ownerCounts.size !== PROJECT_TOWN_INFRASTRUCTURE.filter(
+    ({ plateOwnedStructureIds }) => plateOwnedStructureIds.length === 0,
+  ).length
   || ACTIVITY_PROP_INSTANCES.length
     !== [...ownerCounts.values()].reduce((sum, count) => sum + count, 0)
 ) {

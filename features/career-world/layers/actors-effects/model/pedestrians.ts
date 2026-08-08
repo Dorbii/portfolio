@@ -2,7 +2,6 @@ import manifest from "@/public/career-world/layers/actors-effects/manifests/ninj
 import type { Pair } from "../../../shared/camera";
 import type { DetailNodePolicy } from "../../../shared/lod";
 import {
-  CAPITAL_CAMPUS_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE,
   type TownPlan,
   type TownPlanEntrance,
@@ -164,11 +163,6 @@ const OWNER_TOWN_PLANS: readonly OwnerTownPlan[] = Object.freeze([
       townPlan,
     })
   )),
-  Object.freeze({
-    ownerKind: "capital" as const,
-    ownerId: CAPITAL_CAMPUS_INFRASTRUCTURE.capital.id,
-    townPlan: CAPITAL_CAMPUS_INFRASTRUCTURE.townPlan,
-  }),
 ]);
 
 if (

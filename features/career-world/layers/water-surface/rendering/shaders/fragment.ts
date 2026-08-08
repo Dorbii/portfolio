@@ -1,11 +1,13 @@
 import { WATER_SHADER_COAST } from "./coast";
 import { WATER_SHADER_COMMON } from "./common";
+import { WATER_SHADER_NINJAONE_STREAMS } from "./ninjaone-streams";
 import { WATER_SHADER_OPEN_WATER } from "./open-water";
 
 export const WATER_FRAGMENT_SHADER = `#version 300 es
 ${WATER_SHADER_COMMON}
 ${WATER_SHADER_OPEN_WATER}
 ${WATER_SHADER_COAST}
+${WATER_SHADER_NINJAONE_STREAMS}
 
 void main() {
   vec2 screenUv = vec2(v_uv.x, 1.0 - v_uv.y);
@@ -15,9 +17,12 @@ void main() {
   OpenWaterSample water = sampleOpenWater(worldUv, hydrology);
   CoastSample coast = applyCoast(worldUv, water, shelter);
   float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
+  NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv);
+  float streamMix = smoother(0.01, 0.08, stream.alpha);
+  vec3 color = mix(coast.color, stream.color, streamMix);
   outColor = vec4(
-    coast.color,
-    u_opacity * max(waterVisibility, coast.overlayAlpha)
+    color,
+    u_opacity * max(max(waterVisibility, coast.overlayAlpha), stream.alpha)
   );
 }
 `;

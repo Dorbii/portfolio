@@ -2,13 +2,19 @@ import { WorldScene } from "../composition/WorldScene";
 import "../styles/career-world.css";
 
 interface CareerWorldProps {
+  readonly capitalMvp?: boolean;
   readonly enableDevelopmentTools?: boolean;
+  readonly environmentProof?: boolean;
   readonly initialInterfaceMode?: "world" | "water";
+  readonly topologyProof?: boolean;
 }
 
 export function CareerWorld({
+  capitalMvp = false,
   enableDevelopmentTools = false,
+  environmentProof = false,
   initialInterfaceMode = "world",
+  topologyProof = false,
 }: CareerWorldProps) {
   return (
     <main className="career-world">
@@ -23,8 +29,11 @@ export function CareerWorld({
         </p>
       </header>
       <WorldScene
+        capitalMvp={capitalMvp}
         enableDevelopmentTools={enableDevelopmentTools}
+        environmentProof={environmentProof}
         initialInterfaceMode={initialInterfaceMode}
+        topologyProof={topologyProof}
       />
       <footer className="career-world__footer">
         Phase 6 · capital-core and coastline validation review

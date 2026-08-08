@@ -19,7 +19,6 @@ export const INFRASTRUCTURE_LAYER: LayerDescriptor = Object.freeze({
 
 export { InfrastructureLayer } from "./components/InfrastructureLayer";
 export {
-  CAPITAL_CAMPUS_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE,
   PROJECT_TOWN_INFRASTRUCTURE_POLICY,
   PROJECT_TOWN_SITE_POLICY,
@@ -27,7 +26,6 @@ export {
   TOWN_PLAN_PLAZA_KINDS,
   TOWN_PLAN_STREET_KINDS,
   TOWN_PLAN_TERRAIN_SEAM_KINDS,
-  type CapitalCampusInfrastructure,
   type ProjectTownInfrastructure,
   type ProjectTownPalette,
   type ProjectTownTerrainProfile,

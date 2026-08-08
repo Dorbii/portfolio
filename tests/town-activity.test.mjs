@@ -2,6 +2,17 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+import {
+  KAIZEN_FOLIAGE_GROUP_INSTANCES,
+  KAIZEN_FOLIAGE_GROUP_RESOURCES,
+  KAIZEN_FOLIAGE_LAYOUT_ID,
+  KAIZEN_FOLIAGE_PLACEMENT_BASIS,
+  KAIZEN_FOLIAGE_SINGULAR_INSTANCES,
+  KAIZEN_FOREST_GROUP_INSTANCES,
+  NINJAONE_FOLIAGE_RESOURCES,
+  resolveKaizenFoliageGroupResource,
+} from "../features/career-world/layers/environment/model/kaizenFoliage.ts";
+import { KAIZEN_CITY_PIXEL_TO_WORLD } from "../features/career-world/shared/kaizenCityRegistration.ts";
 
 const root = process.cwd();
 
@@ -47,7 +58,7 @@ function directedRoute(loop, entrance, direction) {
   return [...directed, directed[0]];
 }
 
-test("NinjaOne town activity is explicit, route-bound, and bounded", async () => {
+test("retained Kaizen activity is explicit, route-bound, and bounded", async () => {
   const [towns, props, pedestrians] = await Promise.all([
     readJson(
       "public/career-world/layers/infrastructure/manifests/"
@@ -67,11 +78,8 @@ test("NinjaOne town activity is explicit, route-bound, and bounded", async () =>
       `project:${town.projectId}`,
       town.townPlan,
     ]),
-    [
-      `capital:${towns.capitalCampus.capitalId}`,
-      towns.capitalCampus.townPlan,
-    ],
   ]);
+  assert.equal("capitalCampus" in towns, false);
   const propKinds = new Set([
     "lamp",
     "stall",
@@ -192,7 +200,11 @@ test("NinjaOne town activity is explicit, route-bound, and bounded", async () =>
 
   assert.deepEqual(
     new Set(propOwnerCounts.keys()),
-    new Set(ownerPlans.keys()),
+    new Set(
+      [...ownerPlans.keys()].filter(
+        (ownerKey) => ownerKey !== "project:project-kaizen-agent",
+      ),
+    ),
   );
   assert.deepEqual(
     new Set(pedestrianOwnerCounts.keys()),
@@ -203,12 +215,15 @@ test("NinjaOne town activity is explicit, route-bound, and bounded", async () =>
     const isKaizenAgent = ownerKey === "project:project-kaizen-agent";
     const propCount = propOwnerCounts.get(ownerKey);
     const pedestrianCount = pedestrianOwnerCounts.get(ownerKey);
+    if (isKaizenAgent) {
+      assert.equal(propCount, undefined, ownerKey);
+      assert.ok(pedestrianCount >= 2 && pedestrianCount <= 4, ownerKey);
+      continue;
+    }
     assert.ok(
       isCapital
         ? propCount >= 8 && propCount <= 12
-        : isKaizenAgent
-          ? propCount >= 15 && propCount <= 20
-          : propCount >= 4 && propCount <= 6,
+        : propCount >= 4 && propCount <= 6,
       ownerKey,
     );
     assert.ok(
@@ -218,79 +233,25 @@ test("NinjaOne town activity is explicit, route-bound, and bounded", async () =>
       ownerKey,
     );
   }
-  assert.ok(
-    props.instances.filter(
-      ({ kind, ownerId }) => (
-        kind === "street-tree" && ownerId === "project-kaizen-agent"
-      ),
-    ).length >= 10,
-    "Kaizen Agent needs an authored planted streetscape.",
+  assert.deepEqual(
+    props.instances.filter(({ ownerId }) => ownerId === "project-kaizen-agent"),
+    [],
   );
+  assert.equal(props.instances.length, 0);
+  assert.equal(pedestrians.pedestrians.length, 4);
 });
 
-test("Kaizen semantic activity anchors keep authored clearance", async () => {
-  const [towns, props] = await Promise.all([
-    readJson(
-      "public/career-world/layers/infrastructure/manifests/"
-        + "ninjaone-project-towns-r1.json",
-    ),
-    readJson(
-      "public/career-world/layers/environment/manifests/"
-        + "ninjaone-town-activity-r1.json",
-    ),
-  ]);
-  const plan = towns.towns.find(
-    ({ projectId }) => projectId === "project-kaizen-agent",
-  )?.townPlan;
-  assert.ok(plan);
-  const entrances = new Map(plan.entrances.map(
-    ({ point, structureId }) => [structureId, point],
-  ));
-  const dimensionsByKind = new Map([
-    ["stall", [10.1 * 0.62, 7.4 * 0.62]],
-    ["street-tree", [12.8 * 0.62, 9.4 * 0.62]],
-  ]);
-  const worldSize = [1672, 941];
-  const bounds = props.instances
-    .filter(({ kind, ownerId }) => (
-      ownerId === "project-kaizen-agent" && dimensionsByKind.has(kind)
-    ))
-    .map((instance) => {
-      const entrance = entrances.get(instance.entranceStructureId);
-      const dimensions = dimensionsByKind.get(instance.kind);
-      assert.ok(entrance, instance.id);
-      assert.ok(dimensions, instance.id);
-      const anchor = entrance.map((value, index) => (
-        (value + instance.offset[index]) * worldSize[index]
-      ));
-      return {
-        id: instance.id,
-        left: anchor[0] - dimensions[0] / 2,
-        right: anchor[0] + dimensions[0] / 2,
-        top: anchor[1] - dimensions[1],
-        bottom: anchor[1],
-      };
-    });
-  const overlaps = [];
-  for (let leftIndex = 0; leftIndex < bounds.length; leftIndex += 1) {
-    for (
-      let rightIndex = leftIndex + 1;
-      rightIndex < bounds.length;
-      rightIndex += 1
-    ) {
-      const left = bounds[leftIndex];
-      const right = bounds[rightIndex];
-      if (
-        Math.min(left.right, right.right) > Math.max(left.left, right.left)
-        && Math.min(left.bottom, right.bottom) > Math.max(left.top, right.top)
-      ) {
-        overlaps.push([left.id, right.id]);
-      }
-    }
-  }
+test("Kaizen authored foundation has no legacy manifest activity props", async () => {
+  const props = await readJson(
+    "public/career-world/layers/environment/manifests/"
+      + "ninjaone-town-activity-r1.json",
+  );
 
-  assert.ok(bounds.length >= 10);
-  assert.deepEqual(overlaps, []);
+  assert.deepEqual(
+    props.instances.filter(({ ownerId }) => ownerId === "project-kaizen-agent"),
+    [],
+  );
+  assert.ok(props.notes.some((note) => note.includes("foundation")));
 });
 
 test("Kaizen authored foundation suppresses duplicate activity visuals", async () => {
@@ -331,6 +292,7 @@ test("town activity uses the declared layer order and centralized LOD", async ()
   const [
     scene,
     environmentComponent,
+    foliageComponent,
     environmentModel,
     actorsComponent,
     actorsModel,
@@ -345,6 +307,11 @@ test("town activity uses the declared layer order and centralized LOD", async ()
       root,
       "features/career-world/layers/environment/components/"
         + "EnvironmentLayer.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/environment/components/"
+        + "FoliageLayer.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
@@ -377,6 +344,7 @@ test("town activity uses the declared layer order and centralized LOD", async ()
     "<EnvironmentLayer",
     "<ActorsEffectsLayer",
     "<StructuresLayer",
+    "<FoliageLayer",
     "<WorldInterface",
   ].map((token) => scene.indexOf(token));
 
@@ -384,13 +352,25 @@ test("town activity uses the declared layer order and centralized LOD", async ()
   assert.deepEqual(layerOrder, [...layerOrder].sort((left, right) => (
     left - right
   )));
-  for (const component of [environmentComponent, actorsComponent]) {
+  for (const component of [
+    environmentComponent,
+    actorsComponent,
+  ]) {
     assert.match(component, /cameraViewBox\(\s*camera,/);
     assert.match(component, /resolveNodeVisibility\(/);
     assert.match(component, /LOD_PRESENTATION_TRANSITION_MS/);
     assert.match(component, /aria-hidden="true"/);
     assert.doesNotMatch(component, /cameraLayerStyle/);
   }
+  assert.match(foliageComponent, /cameraViewBox\(\s*camera,/);
+  assert.match(foliageComponent, /resolveAtomicTierVisibility\(/);
+  assert.match(foliageComponent, /aria-hidden="true"/);
+  assert.doesNotMatch(foliageComponent, /cameraLayerStyle/);
+  assert.doesNotMatch(
+    foliageComponent,
+    /LOD_PRESENTATION_TRANSITION_MS/,
+    "pooled foliage must not crossfade duplicate raster states",
+  );
   assert.match(
     environmentModel,
     /ACTIVITY_PROP_SITE_POLICY:[\s\S]*minimumTier: "site"/,
@@ -457,13 +437,22 @@ test("town activity uses the declared layer order and centralized LOD", async ()
   }
 });
 
-test("Kaizen foliage reuses one atlas and one shared world-wind animation", async () => {
-  const [component, foliageModel, weather, waterState, styles] =
+test("Kaizen foliage reuses authored city and forest groups with pooled wind", async () => {
+  const [placementManifest, baseManifest] = await Promise.all([
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/"
+        + "environment-runtime-r1.json",
+    ),
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/base-runtime-r1.json",
+    ),
+  ]);
+  const [component, foliageModel, weather, waterState, styles, scene] =
     await Promise.all([
       readFile(path.join(
         root,
         "features/career-world/layers/environment/components/"
-          + "EnvironmentLayer.tsx",
+          + "FoliageLayer.tsx",
       ), "utf8"),
       readFile(path.join(
         root,
@@ -482,30 +471,201 @@ test("Kaizen foliage reuses one atlas and one shared world-wind animation", asyn
         root,
         "features/career-world/styles/career-world.css",
       ), "utf8"),
+      readFile(path.join(
+        root,
+        "features/career-world/composition/WorldScene.tsx",
+      ), "utf8"),
     ]);
-  const foliageResourceIds = [...foliageModel.matchAll(
-    /id: "(?:street-tree-planter|paired-street-trees|fern-cluster|flowering-hedge)"/g,
-  )];
-  const foliageInstanceIds = [...foliageModel.matchAll(
-    /id: "kaizen-(?:tree|pair|fern|hedge)-\d+"/g,
-  )];
-  const atlasPath = foliageModel.match(
-    /NINJAONE_FOLIAGE_ATLAS_PATH\s*=\s*\n?\s*"([^"]+)"/,
-  )?.[1];
+  const foliageResourceIds = NINJAONE_FOLIAGE_RESOURCES.map(({ id }) => id);
+  const atlasPaths = [
+    ...new Set(NINJAONE_FOLIAGE_RESOURCES.map(({ atlasPath }) => atlasPath)),
+  ];
+  const allInstances = [
+    ...KAIZEN_FOLIAGE_GROUP_INSTANCES,
+    ...KAIZEN_FOREST_GROUP_INSTANCES,
+    ...KAIZEN_FOLIAGE_SINGULAR_INSTANCES,
+  ];
+  const allGroupInstances = [
+    ...KAIZEN_FOLIAGE_GROUP_INSTANCES,
+    ...KAIZEN_FOREST_GROUP_INSTANCES,
+  ];
+  const estimatedPlantCount = KAIZEN_FOLIAGE_SINGULAR_INSTANCES.length
+    + allGroupInstances.reduce((total, instance) => (
+      total
+      + resolveKaizenFoliageGroupResource(instance.groupId).visualPlantCount
+    ), 0);
+  const manifestCityGroups = placementManifest.groupInstances.filter(
+    ({ forest }) => !forest,
+  );
+  const manifestForestGroups = placementManifest.groupInstances.filter(
+    ({ forest }) => forest,
+  );
+  const manifestInstanceById = new Map([
+    ...placementManifest.groupInstances.map((instance) => [instance.id, instance]),
+    ...placementManifest.singularInstances.map((instance) => [instance.id, instance]),
+  ]);
 
-  assert.equal(foliageResourceIds.length, 4);
-  assert.equal(foliageInstanceIds.length, 12);
-  assert.ok(atlasPath);
-  await access(path.join(root, "public", atlasPath.replace(/^\//, "")));
-  assert.match(component, /<FoliageResourceDefinitions \/>/);
+  assert.equal(foliageResourceIds.length, 10);
+  assert.equal(new Set(foliageResourceIds).size, 10);
+  assert.equal(NINJAONE_FOLIAGE_RESOURCES.length, 10);
+  assert.equal(KAIZEN_FOLIAGE_GROUP_RESOURCES.length, 6);
+  assert.equal(KAIZEN_FOLIAGE_GROUP_INSTANCES.length, manifestCityGroups.length);
+  assert.equal(KAIZEN_FOREST_GROUP_INSTANCES.length, manifestForestGroups.length);
+  assert.equal(
+    KAIZEN_FOLIAGE_SINGULAR_INSTANCES.length,
+    placementManifest.singularInstances.length,
+  );
+  assert.equal(allInstances.length, manifestInstanceById.size);
+  assert.ok(
+    allInstances.length >= 52 && allInstances.length <= 64,
+    "shared accents must restore city and forest density without node sprawl",
+  );
+  assert.ok(
+    estimatedPlantCount >= 540 && estimatedPlantCount <= 650,
+    "grouped shared accents must preserve visible motion without node sprawl",
+  );
+  assert.ok(
+    KAIZEN_FOLIAGE_SINGULAR_INSTANCES.length > 0
+      && KAIZEN_FOLIAGE_SINGULAR_INSTANCES.length <= 12,
+    "singular trees must stay a bounded accent over grouped foliage",
+  );
+  assert.ok(manifestCityGroups.length > 0);
+  assert.ok(manifestForestGroups.length > 0);
+  assert.equal(
+    new Set(allInstances.map(({ id }) => id)).size,
+    allInstances.length,
+  );
+  assert.equal(
+    KAIZEN_FOLIAGE_LAYOUT_ID,
+    placementManifest.id,
+  );
+  assert.deepEqual(
+    KAIZEN_FOLIAGE_GROUP_INSTANCES.filter(
+      ({ groupId }) => groupId.includes("planter"),
+    ),
+    [],
+    "city overlays must not reintroduce floating hardscape planter shapes",
+  );
+  assert.equal(KAIZEN_FOLIAGE_PLACEMENT_BASIS, placementManifest.placementBasis);
+  assert.equal(placementManifest.registrationRef, baseManifest.registration);
+  assert.deepEqual(
+    Object.keys(placementManifest.staticFiller).sort(),
+    ["capital", "close", "site"],
+    "static foliage is a registered raster layer rather than a node manifest",
+  );
+  assert.match(
+    placementManifest.staticFiller.site.path,
+    /static-foliage-site-r1\.webp$/,
+  );
+  assert.equal(atlasPaths.length, 3);
+  assert.equal(new Set(atlasPaths).size, 3);
+  for (const atlasPath of atlasPaths) {
+    await access(path.join(root, "public", atlasPath.replace(/^\//, "")));
+  }
+  assert.equal(
+    allInstances.filter(({ minimumTier }) => minimumTier === "capital").length,
+    [...placementManifest.groupInstances, ...placementManifest.singularInstances]
+      .filter(({ minimumTier }) => minimumTier === "capital").length,
+  );
+  assert.equal(
+    allInstances.filter(({ minimumTier }) => minimumTier === "site").length,
+    [...placementManifest.groupInstances, ...placementManifest.singularInstances]
+      .filter(({ minimumTier }) => minimumTier === "site").length,
+  );
+  assert.equal(
+    allInstances.filter(({ minimumTier }) => minimumTier === "close").length,
+    [...placementManifest.groupInstances, ...placementManifest.singularInstances]
+      .filter(({ minimumTier }) => minimumTier === "close").length,
+  );
+  for (const instance of allInstances) {
+    const authored = manifestInstanceById.get(instance.id);
+    assert.ok(authored, instance.id);
+    const plateOrigin = [
+      baseManifest.plate.anchor[0] - baseManifest.plate.span[0] * 0.5,
+      baseManifest.plate.anchor[1]
+        - baseManifest.plate.span[1] * baseManifest.plate.alignmentY,
+    ];
+    const expectedAnchor = [
+      plateOrigin[0]
+        + authored.anchor[0] / baseManifest.plate.dimensions[0]
+          * baseManifest.plate.span[0],
+      plateOrigin[1]
+        + authored.anchor[1] / baseManifest.plate.dimensions[1]
+          * baseManifest.plate.span[1],
+    ];
+    assert.ok(Math.abs(instance.anchor[0] - expectedAnchor[0]) < 1e-12, instance.id);
+    assert.ok(Math.abs(instance.anchor[1] - expectedAnchor[1]) < 1e-12, instance.id);
+    assert.equal(instance.scale, authored.scale, instance.id);
+    assert.equal(instance.minimumTier, authored.minimumTier, instance.id);
+    assert.equal(instance.mirror ?? false, authored.mirror ?? false, instance.id);
+    if ("groupId" in instance) {
+      assert.equal(instance.groupId, authored.groupId, instance.id);
+      assert.ok(
+        foliageResourceIds.includes(
+          resolveKaizenFoliageGroupResource(instance.groupId).resourceId,
+        ),
+        instance.id,
+      );
+    } else {
+      assert.equal(instance.resourceId, authored.resourceId, instance.id);
+      assert.ok(foliageResourceIds.includes(instance.resourceId), instance.id);
+    }
+  }
+  assert.ok(KAIZEN_FOLIAGE_GROUP_RESOURCES.every(({ visualPlantCount }) => (
+    visualPlantCount >= 4 && visualPlantCount <= 14
+  )));
+  assert.equal(
+    new Set(KAIZEN_FOLIAGE_GROUP_RESOURCES.map(({ resourceId }) => resourceId))
+      .size,
+    KAIZEN_FOLIAGE_GROUP_RESOURCES.length,
+  );
+  assert.match(
+    component,
+    /<FoliageResourceDefinitions[\s\S]*resources=\{visibleResources\}[\s\S]*windVector=\{windVector\}/,
+  );
+  assert.doesNotMatch(component, /FoliageGroupDefinitions|group\.atoms/);
   assert.match(component, /<symbol/);
   assert.match(component, /<use/);
-  assert.match(component, /KAIZEN_FOLIAGE_INSTANCES\.map/);
+  assert.match(component, /className="career-world__foliage-canopy"/);
+  assert.doesNotMatch(component, /career-world__foliage-group-sway/);
+  assert.match(component, /KAIZEN_FOLIAGE_GROUP_INSTANCES/);
+  assert.match(component, /KAIZEN_FOREST_GROUP_INSTANCES/);
+  assert.match(component, /KAIZEN_FOLIAGE_SINGULAR_INSTANCES/);
+  assert.match(component, /visibleAtDetailTier\(/);
+  assert.match(component, /minimumTier: instance\.minimumTier/);
+  assert.match(component, /href=\{resource\.atlasPath\}/);
   assert.match(component, /data-foliage-resource-count=/);
   assert.match(component, /data-foliage-instance-count=/);
-  assert.match(component, /data-foliage-animation="shared-world-wind"/);
+  assert.match(component, /data-foliage-mounted-instance-count=/);
+  assert.match(component, /data-foliage-group-instance-count=/);
+  assert.match(component, /data-foliage-forest-group-count=/);
+  assert.match(component, /data-foliage-singular-instance-count=/);
+  assert.match(component, /data-foliage-estimated-plant-count=/);
+  assert.match(component, /data-foliage-mounted-estimated-plant-count=/);
+  assert.match(component, /data-foliage-placement-basis=/);
+  assert.match(component, /data-foliage-capital-instance-count=/);
+  assert.match(component, /data-foliage-site-instance-count=/);
+  assert.match(component, /data-foliage-close-instance-count=/);
+  assert.match(
+    component,
+    /data-foliage-animation="pooled-cohesive-group-canopy-wind"/,
+  );
   assert.match(component, /windVectorFromDegrees\(/);
   assert.match(component, /DEFAULT_WORLD_WIND_STATE\.motion/);
+  assert.doesNotMatch(component, /instance\.(?:phaseSeconds|durationSeconds)/);
+  assert.doesNotMatch(
+    component,
+    /LOD_PRESENTATION_TRANSITION_MS|transitionDuration/,
+  );
+  assert.match(
+    foliageModel,
+    /environment-runtime-r1\.json/,
+  );
+  assert.doesNotMatch(foliageModel, /street-tree-planter|paired-street-trees/);
+  assert.ok(
+    scene.indexOf("<StructuresLayer") < scene.indexOf("<FoliageLayer"),
+    "pooled foliage must render after the opaque city plate",
+  );
   assert.match(weather, /directionDegrees: 24/);
   assert.match(weather, /motion: 0\.68/);
   assert.match(waterState, /DEFAULT_WORLD_WIND_STATE\.motion/);
@@ -513,7 +673,7 @@ test("Kaizen foliage reuses one atlas and one shared world-wind animation", asyn
   assert.match(styles, /@keyframes career-world-foliage-breeze/);
   assert.match(
     styles,
-    /prefers-reduced-motion: reduce[\s\S]*\.career-world__foliage-breeze[\s\S]*animation: none/,
+    /prefers-reduced-motion: reduce[\s\S]*\.career-world__foliage-canopy[\s\S]*animation: none/,
   );
   for (const source of [component, foliageModel]) {
     assert.doesNotMatch(
@@ -521,4 +681,238 @@ test("Kaizen foliage reuses one atlas and one shared world-wind animation", asyn
       /Math\.random|requestAnimationFrame|setInterval|setTimeout/,
     );
   }
+});
+
+test("Kaizen integration art is an anchor-derived additive layer stack", async () => {
+  const [
+    integration,
+    integrationAuthoring,
+    structureShadows,
+    structureShadowsAuthoring,
+    base,
+    layerStack,
+    fabric,
+    seams,
+    shadows,
+    structures,
+  ] = await Promise.all([
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/"
+        + "integration-runtime-r1.json",
+    ),
+    readJson(
+      "scripts/assets/kaizen-city-rebuild/manifests/"
+        + "integration-authoring-r1.json",
+    ),
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/"
+        + "structure-shadows-runtime-r1.json",
+    ),
+    readJson(
+      "scripts/assets/kaizen-city-rebuild/manifests/"
+        + "structure-shadows-authoring-r1.json",
+    ),
+    readJson(
+      "public/career-world/cities/kaizen-agent/manifests/"
+        + "base-runtime-r1.json",
+    ),
+    readJson(
+      "scripts/assets/kaizen-city-rebuild/manifests/"
+        + "layer-stack-authoring-r1.json",
+    ),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "KaizenNeighborhoodFabric.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "KaizenIntegrationSeams.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "KaizenStructureShadowLayer.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "StructuresLayer.tsx",
+    ), "utf8"),
+  ]);
+
+  assert.equal(integration.schemaVersion, 1);
+  assert.equal(
+    integration.id,
+    "career-world/kaizen-agent/integration-runtime@r1",
+  );
+  assert.equal(integration.registrationRef, base.registration);
+  assert.equal(
+    integration.contract,
+    "anchor-derived-additive-seam-plates",
+  );
+  assert.deepEqual(
+    integrationAuthoring.anchorSources,
+    {
+      heroBuildings:
+        "/scripts/assets/kaizen-city-rebuild/manifests/hero-assets-authoring-r2.json",
+      supportBuildings:
+        "/scripts/assets/kaizen-city-rebuild/manifests/decorations-authoring-r2.json",
+    },
+  );
+  assert.equal("instances" in integrationAuthoring, false);
+  assert.equal("ground" in integration, false);
+  assert.ok(
+    Object.values(integration.foreground).reduce(
+      (total, source) => total + source.placementCount,
+      0,
+    ) >= 36,
+  );
+  assert.deepEqual(
+    Object.keys(integration.foreground).sort(),
+    ["capital", "close", "site"],
+  );
+  for (const source of Object.values(integration.foreground)) {
+    assert.ok(source.placementCount > 0);
+    await access(path.join(root, "public", source.path.replace(/^\//, "")));
+  }
+  assert.equal(
+    structureShadows.contract,
+    "anchor-derived-world-light-vectors",
+  );
+  assert.equal(structureShadows.registrationRef, base.registration);
+  assert.equal(
+    structureShadows.lightSource,
+    "career-world/world-light@r1",
+  );
+  assert.deepEqual(
+    structureShadows.anchorSources,
+    integrationAuthoring.anchorSources,
+  );
+  assert.deepEqual(
+    structureShadowsAuthoring.anchorSources,
+    integrationAuthoring.anchorSources,
+  );
+  assert.equal("instances" in structureShadows, false);
+  assert.equal("instances" in structureShadowsAuthoring, false);
+  assert.deepEqual(
+    layerStack.layers.map(({ id }) => id),
+    [
+      "base-layout",
+      "environment-static",
+      "dynamic-structure-shadows",
+      "decoration-buildings",
+      "hero-buildings",
+      "integration-foreground",
+      "environment-shared",
+    ],
+  );
+  assert.ok(
+    fabric.indexOf("<KaizenStructureShadowLayer")
+      < fabric.indexOf("data-kaizen-decoration-layer"),
+    "dynamic structure shadows must render below pooled structures",
+  );
+  assert.ok(
+    structures.indexOf("mountedStructures.map")
+      < structures.indexOf("<KaizenIntegrationSeams"),
+    "foreground seams must render above hero structures",
+  );
+  assert.match(seams, /data-kaizen-integration-layer="foreground-seams"/);
+  assert.match(seams, /pointerEvents="none"/);
+  assert.match(shadows, /data-kaizen-shadow-layer="dynamic-world-light"/);
+  assert.match(shadows, /light\.direction\[2\]/);
+  assert.match(shadows, /KAIZEN_DECORATION_INSTANCES/);
+  assert.match(shadows, /KAIZEN_SEMANTIC_STRUCTURE_ASSETS/);
+  assert.doesNotMatch(shadows, /Math\.random|#[0-9a-f]*(?:6f|7f|8f)[0-9a-f]*/i);
+});
+
+test("registered sprite scales convert plate pixels into world units", async () => {
+  const [foliage, fabric] = await Promise.all([
+    readFile(path.join(
+      root,
+      "features/career-world/layers/environment/components/FoliageLayer.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "KaizenNeighborhoodFabric.tsx",
+    ), "utf8"),
+  ]);
+
+  assert.ok(KAIZEN_CITY_PIXEL_TO_WORLD.every((value) => (
+    value > 0 && value < 0.2
+  )));
+  assert.match(
+    foliage,
+    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[0\]/,
+  );
+  assert.match(
+    foliage,
+    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[1\]/,
+  );
+  assert.match(
+    fabric,
+    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[0\]/,
+  );
+  assert.match(
+    fabric,
+    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[1\]/,
+  );
+});
+
+test("Kaizen click targets wait for their visual assets to load", async () => {
+  const [scene, structures, fabric, worldInterface] = await Promise.all([
+    readFile(path.join(
+      root,
+      "features/career-world/composition/WorldScene.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/StructuresLayer.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/structures/components/"
+        + "KaizenNeighborhoodFabric.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/interface/components/WorldInterface.tsx",
+    ), "utf8"),
+  ]);
+
+  assert.match(
+    scene,
+    /\[kaizenVisualReady, setKaizenVisualReady\] = useState\(false\)/,
+  );
+  assert.match(
+    scene,
+    /onKaizenVisualReadyChange=\{setKaizenVisualReady\}/,
+  );
+  assert.match(scene, /projectVisualReadiness=\{\{/);
+  assert.match(
+    fabric,
+    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
+  );
+  assert.match(fabric, /onVisualReadyChange\(baseReady\)/);
+  assert.match(fabric, /const image = new Image\(\)/);
+  assert.match(fabric, /image\.src = assetPath/);
+  assert.match(fabric, /requestedAssetPaths/);
+  assert.match(fabric, /onError=\{\(\) => onAssetError\(module\.assetPath\)\}/);
+  assert.match(fabric, /onLoad=\{\(\) => onAssetLoad\(module\.assetPath\)\}/);
+  assert.doesNotMatch(fabric, /activeModule|readyAssetPath/);
+  assert.match(structures, /const assetReady = loadedAssetPath === assetPath/);
+  assert.match(
+    structures,
+    /const interactionReady = interactive && assetReady/,
+  );
+  assert.match(structures, /data-asset-ready=\{assetReady\}/);
+  assert.match(
+    worldInterface,
+    /const interactionReady = enabled && visualReady && isVisible/,
+  );
+  assert.match(worldInterface, /data-project-visual-ready=\{visualReady\}/);
+  assert.match(worldInterface, /disabled=\{!interactionReady\}/);
+  assert.match(worldInterface, /tabIndex=\{interactionReady \? 0 : -1\}/);
 });

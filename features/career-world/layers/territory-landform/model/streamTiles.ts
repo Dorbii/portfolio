@@ -1,6 +1,7 @@
-import manifest from "@/public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r3.json";
+import manifest from "@/public/career-world/layers/territory-landform/manifests/terrain-stream-runtime-r4.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
+import { KAIZEN_CITY_OCCLUDED_TERRAIN_TILE_IDS } from "../../../shared/kaizenCityRegistration.ts";
 import type { TerrainResidencyPolicy } from "./residency";
 
 export type TerrainStreamSourceTier = Extract<
@@ -22,6 +23,14 @@ export interface TerrainStreamTile {
     TerrainStreamSource
   >>;
   readonly worldBounds: CameraView;
+}
+
+if (
+  manifest.schemaVersion !== 1
+  || manifest.id !== "career-world/terrain-stream-runtime@r4"
+  || manifest.coordinateSpace !== "normalized-world-top-left"
+) {
+  throw new TypeError("Terrain stream runtime manifest is invalid.");
 }
 
 function pair(values: number[], label: string, allowZero = false): Pair {
@@ -99,7 +108,9 @@ if (
 const registeredTileIds = new Set<string>();
 
 export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
-  manifest.tiles.map((tile) => {
+  manifest.tiles
+  .filter(({ id }) => !KAIZEN_CITY_OCCLUDED_TERRAIN_TILE_IDS.has(id))
+  .map((tile) => {
     if (registeredTileIds.has(tile.id)) {
       throw new TypeError(`Duplicate terrain stream tile ${tile.id}.`);
     }

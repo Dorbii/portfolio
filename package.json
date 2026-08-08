@@ -10,6 +10,8 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
+    "build:environment-native": "node scripts/build-ninjaone-environment-native-detail.mjs",
+    "repair:ninjaone-coast-mask": "node scripts/repair-ninjaone-north-coast-mask.mjs",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint .",
     "test": "node --experimental-strip-types --test tests/index.test.mjs",

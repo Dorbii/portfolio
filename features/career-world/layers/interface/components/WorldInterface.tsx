@@ -9,7 +9,9 @@ import {
   LOD_PRESENTATION_EPSILON,
   LOD_PRESENTATION_TRANSITION_MS,
   resolveProjectDestinationVisibility,
+  resolveNodeVisibility,
   resolveWorldDestinationVisibility,
+  type DetailTierId,
   type DetailState,
 } from "../../../shared/lod";
 
@@ -18,6 +20,7 @@ interface ProjectDestination {
   readonly label: string;
   readonly anchor: Pair;
   readonly supportingSkillCount: number;
+  readonly visualMinimumTier: DetailTierId;
 }
 
 export interface LandmarkLabel {
@@ -35,6 +38,7 @@ interface WorldInterfaceProps {
   readonly mode: "world" | "water";
   readonly landmarkLabels: readonly LandmarkLabel[];
   readonly projectDestinations: readonly ProjectDestination[];
+  readonly projectVisualReadiness: Readonly<Record<string, boolean>>;
   readonly renderState: WaterRenderState;
   readonly showGrid: boolean;
   readonly showLandmarkLabels: boolean;
@@ -184,6 +188,7 @@ function ProjectTownDestination({
   detailState,
   enabled,
   onFocus,
+  visualReady,
 }: {
   readonly active: boolean;
   readonly camera: CameraView;
@@ -191,9 +196,18 @@ function ProjectTownDestination({
   readonly detailState: DetailState;
   readonly enabled: boolean;
   readonly onFocus: (id: string) => void;
+  readonly visualReady: boolean;
 }) {
-  const visibility = resolveProjectDestinationVisibility(detailState);
+  const visualVisibility = resolveNodeVisibility(
+    { minimumTier: destination.visualMinimumTier },
+    detailState,
+  );
+  const visibility = Math.min(
+    resolveProjectDestinationVisibility(detailState),
+    visualVisibility,
+  );
   const isVisible = visibility > LOD_PRESENTATION_EPSILON;
+  const interactionReady = enabled && visualReady && isVisible;
   const skillSiteLabel = destination.supportingSkillCount === 1
     ? "1 skill site"
     : `${destination.supportingSkillCount} skill sites`;
@@ -206,11 +220,13 @@ function ProjectTownDestination({
       data-active={active}
       data-project-destination-id={destination.id}
       data-project-destination-visibility={visibility.toFixed(3)}
+      data-project-visual-ready={visualReady}
+      data-project-visual-visibility={visualVisibility.toFixed(3)}
       data-visible={isVisible}
-      disabled={!enabled || !isVisible}
+      disabled={!interactionReady}
       onClick={() => onFocus(destination.id)}
       style={markerStyle(destination.anchor, camera, visibility)}
-      tabIndex={isVisible ? 0 : -1}
+      tabIndex={interactionReady ? 0 : -1}
       title={`Open ${destination.label} project town`}
       type="button"
     >
@@ -236,6 +252,7 @@ export function WorldInterface({
   landmarkLabels,
   mode,
   projectDestinations,
+  projectVisualReadiness,
   renderState,
   showGrid,
   showLandmarkLabels,
@@ -325,6 +342,7 @@ export function WorldInterface({
             enabled={isInteractive}
             key={destination.id}
             onFocus={onFocus}
+            visualReady={projectVisualReadiness[destination.id] ?? true}
           />
         ))}
       </div>

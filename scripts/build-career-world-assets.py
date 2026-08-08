@@ -42,7 +42,12 @@ TERRAIN_DEM_SOURCE = (
     LAND_ROOT / "sources" / "terrain-dem-authored-r3.png"
 )
 AUTHORED_LAND_SOURCE = (
-    LAND_ROOT / "sources" / "world-land-surface-authored-r9.png"
+    LAND_ROOT / "sources" / "world-land-surface-authored-r11.png"
+)
+AUTHORED_LAND_DETAIL_SOURCE = (
+    LAND_ROOT
+    / "sources"
+    / "world-land-surface-authored-r11-detail-4x.png"
 )
 TERRAIN_DEM_MANIFEST = (
     LAND_ROOT / "manifests" / "terrain-dem-r4.json"
@@ -918,7 +923,12 @@ def render_terrain_material(
     """Scale one authored land material and add only LOD-local detail."""
 
     image_height, image_width = height.shape
-    source = Image.open(AUTHORED_LAND_SOURCE).convert("RGB")
+    source_path = (
+        AUTHORED_LAND_DETAIL_SOURCE
+        if sample_scale > 1.0
+        else AUTHORED_LAND_SOURCE
+    )
+    source = Image.open(source_path).convert("RGB")
     if source.size != (image_width, image_height):
         source = source.resize(
             (image_width, image_height),
@@ -1138,9 +1148,15 @@ def build_land_plate(
             "source": "../sources/terrain-dem-authored-r3.png",
             "sourceSha256": sha256(TERRAIN_DEM_SOURCE),
             "authoredSurfaceSource": (
-                "../sources/world-land-surface-authored-r9.png"
+                "../sources/world-land-surface-authored-r11.png"
             ),
             "authoredSurfaceSourceSha256": sha256(AUTHORED_LAND_SOURCE),
+            "authoredSurfaceDetailSource": (
+                "../sources/world-land-surface-authored-r11-detail-4x.png"
+            ),
+            "authoredSurfaceDetailSourceSha256": sha256(
+                AUTHORED_LAND_DETAIL_SOURCE
+            ),
             "authoring": "terrain-dem-r4.json",
             "authoringSha256": sha256(TERRAIN_DEM_MANIFEST),
             "operation": (

@@ -94,6 +94,8 @@ export {
 } from "./model/kaizenSemanticAssets";
 export {
   KAIZEN_NEIGHBORHOOD_ANCHOR,
+  KAIZEN_NEIGHBORHOOD_OVERVIEW_POLICY,
+  KAIZEN_NEIGHBORHOOD_OWNER_ID,
   KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
   KAIZEN_NEIGHBORHOOD_SPAN,
 } from "./model/kaizenNeighborhoodFabric";

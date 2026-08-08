@@ -188,13 +188,13 @@ function channelDistanceField(image, channel, threshold, maximumDistance) {
 
 test("terrain relief publishes canonical geography without edge glow", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
   );
   const relief = await decodePng(
     "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
   );
   const authoredSurface = await decodePng(
-    "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r9.png",
+    "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
   );
   assert.deepEqual(
     [relief.width, relief.height],
@@ -207,7 +207,7 @@ test("terrain relief publishes canonical geography without edge glow", async () 
   );
   assert.notEqual(
     await sha256(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r9.png",
+      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
     ),
     await sha256(
       "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
@@ -319,21 +319,44 @@ test("runtime land registers its authored base material against the composite ma
     manifest.derivation.detailPolicy,
     /share one authored macro material/,
   );
+  const removedNorthCoastBounds = [
+    { left: 461, top: 38, right: 484, bottom: 52 },
+    { left: 503, top: 68, right: 519, bottom: 83 },
+    { left: 484, top: 73, right: 508, bottom: 93 },
+  ];
+  let removedNorthCoastPixels = 0;
   for (let pixel = 0; pixel < plate.width * plate.height; pixel += 1) {
     assert.equal(
       plate.pixels[pixel * 4 + 3] >= 128,
-      baseMask.pixels[pixel] >= 128,
-      "the authored base plate must retain its registered source silhouette",
+      compositeMask.pixels[pixel] >= 128,
+      "the authored base plate must use the canonical composite silhouette",
     );
-    assert.ok(
-      compositeMask.pixels[pixel] >= baseMask.pixels[pixel],
-      "the composite mask may promote registered land but may not remove it",
-    );
+    if (compositeMask.pixels[pixel] < baseMask.pixels[pixel]) {
+      const x = pixel % plate.width;
+      const y = Math.floor(pixel / plate.width);
+      assert.ok(
+        removedNorthCoastBounds.some((bounds) => (
+          x >= bounds.left
+          && x <= bounds.right
+          && y >= bounds.top
+          && y <= bounds.bottom
+        )),
+        "only the three rejected north-coast island components may be removed",
+      );
+      removedNorthCoastPixels += 1;
+    }
   }
+  assert.equal(removedNorthCoastPixels, 753);
 });
 
-test("the registered Kaizen C2 land extension owns every promoted land pixel", async () => {
-  const [baseMask, compositeMask, extension] = await Promise.all([
+test("the canonical mainland owns the accepted Kaizen C2 footprint", async () => {
+  const [
+    baseMask,
+    compositeMask,
+    cityPlate,
+    baseSurface,
+    compositeSurface,
+  ] = await Promise.all([
     decodePng(
       "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
     ),
@@ -341,7 +364,13 @@ test("the registered Kaizen C2 land extension owns every promoted land pixel", a
       "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
     ),
     decodePng(
-      "public/career-world/layers/territory-landform/textures/kaizen-c2-land-extension-r1.png",
+      "public/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-integrated-r1.png",
+    ),
+    decodePng(
+      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r9.png",
+    ),
+    decodePng(
+      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
     ),
   ]);
   const manifest = JSON.parse(await readFile(path.join(
@@ -359,11 +388,14 @@ test("the registered Kaizen C2 land extension owns every promoted land pixel", a
     bottom: Math.round((originY + spanY) * compositeMask.height),
   };
 
-  assert.deepEqual(
-    [extension.width, extension.height, extension.channels],
-    [1254, 1254, 4],
-  );
+  const padding = { left: 48, top: 48, right: 48, bottom: 48 };
   let promotedPixels = 0;
+  let promotedAbovePlate = 0;
+  let promotedLuminance = 0;
+  let donorLuminance = 0;
+  let donorColorDistance = 0;
+  let replacedBasePixels = 0;
+  const promotedByRowAbovePlate = new Uint16Array(bounds.top);
   for (let y = 0; y < compositeMask.height; y += 1) {
     for (let x = 0; x < compositeMask.width; x += 1) {
       const pixel = y * compositeMask.width + x;
@@ -372,22 +404,116 @@ test("the registered Kaizen C2 land extension owns every promoted land pixel", a
         && baseMask.pixels[pixel] < 128
       ) {
         promotedPixels += 1;
-        assert.ok(
-          x >= bounds.left
-          && x < bounds.right
-          && y >= bounds.top
-          && y < bounds.bottom,
-          "promoted land must stay inside the registered Kaizen plate",
+        const surfaceOffset = pixel * 3;
+        // The r11 shelf clones the registered C2 donor beginning at
+        // (280, 205) into the complete feather support beginning at
+        // (404, 72), so promoted pixels retain this fixed source mapping.
+        const donorOffset = (
+          (y + 133) * compositeMask.width + (x - 124)
+        ) * 3;
+        const red = compositeSurface.pixels[surfaceOffset];
+        const green = compositeSurface.pixels[surfaceOffset + 1];
+        const blue = compositeSurface.pixels[surfaceOffset + 2];
+        const baseRed = baseSurface.pixels[surfaceOffset];
+        const baseGreen = baseSurface.pixels[surfaceOffset + 1];
+        const baseBlue = baseSurface.pixels[surfaceOffset + 2];
+        const donorRed = baseSurface.pixels[donorOffset];
+        const donorGreen = baseSurface.pixels[donorOffset + 1];
+        const donorBlue = baseSurface.pixels[donorOffset + 2];
+        promotedLuminance += red * 0.2126 + green * 0.7152 + blue * 0.0722;
+        donorLuminance += (
+          donorRed * 0.2126 + donorGreen * 0.7152 + donorBlue * 0.0722
         );
+        donorColorDistance += (
+          Math.abs(red - donorRed)
+          + Math.abs(green - donorGreen)
+          + Math.abs(blue - donorBlue)
+        ) / 3;
+        replacedBasePixels += (
+          Math.abs(red - baseRed)
+          + Math.abs(green - baseGreen)
+          + Math.abs(blue - baseBlue)
+        ) >= 15 ? 1 : 0;
+        assert.ok(
+          x >= bounds.left - padding.left
+          && x < bounds.right + padding.right
+          && y >= bounds.top - padding.top
+          && y < bounds.bottom + padding.bottom,
+          "promoted mainland must stay inside the authored C2 registration area",
+        );
+        assert.ok(
+          x > bounds.left - padding.left
+          && x < bounds.right + padding.right - 1
+          && y > bounds.top - padding.top
+          && y < bounds.bottom + padding.bottom - 1,
+          "promoted mainland must not terminate on its registration boundary",
+        );
+        if (y < bounds.top) {
+          promotedAbovePlate += 1;
+          promotedByRowAbovePlate[y] += 1;
+        }
       }
     }
   }
-  let extensionPixels = 0;
-  for (let offset = 3; offset < extension.pixels.length; offset += 4) {
-    extensionPixels += extension.pixels[offset] >= 12 ? 1 : 0;
+
+  let registeredCityPixels = 0;
+  for (let y = bounds.top; y < bounds.bottom; y += 1) {
+    for (let x = bounds.left; x < bounds.right; x += 1) {
+      const cityX = Math.min(
+        cityPlate.width - 1,
+        Math.floor(
+          ((x - bounds.left + 0.5) / (bounds.right - bounds.left))
+          * cityPlate.width,
+        ),
+      );
+      const cityY = Math.min(
+        cityPlate.height - 1,
+        Math.floor(
+          ((y - bounds.top + 0.5) / (bounds.bottom - bounds.top))
+          * cityPlate.height,
+        ),
+      );
+      const cityAlpha = cityPlate.pixels[
+        (cityY * cityPlate.width + cityX) * cityPlate.channels + 3
+      ];
+      if (cityAlpha < 64) {
+        continue;
+      }
+      registeredCityPixels += 1;
+      const maskPixel = y * compositeMask.width + x;
+      assert.ok(
+        compositeMask.pixels[maskPixel] >= 128,
+        "visible Kaizen city pixels must sit on canonical mainland",
+      );
+    }
   }
-  assert.ok(promotedPixels > 2_000);
-  assert.ok(extensionPixels > 100_000);
+  const broadShelfRows = promotedByRowAbovePlate.reduce(
+    (count, width) => count + (width >= 64 ? 1 : 0),
+    0,
+  );
+  assert.ok(promotedPixels > 4_000);
+  assert.ok(promotedAbovePlate > 1_500);
+  assert.ok(
+    broadShelfRows >= 12,
+    "the C2 mainland connection must remain a broad shelf, not a thin neck",
+  );
+  assert.ok(registeredCityPixels > 20_000);
+  assert.ok(
+    promotedLuminance / promotedPixels > 72,
+    "promoted mainland must not expose the old dark water material",
+  );
+  assert.ok(
+    Math.abs(promotedLuminance - donorLuminance) / promotedPixels < 4,
+    "promoted mainland luminance must match the neighboring terrain donor",
+  );
+  assert.ok(
+    donorColorDistance / promotedPixels < 4,
+    "promoted mainland color must match the neighboring terrain donor",
+  );
+  assert.ok(
+    replacedBasePixels / promotedPixels > 0.7,
+    "promoted mainland must replace the old hidden base material across most of the shelf",
+  );
 });
 
 test("authored shoreline confines deep shadows to cliff terrain", async () => {
@@ -516,7 +642,7 @@ test("shoreline material visibly distinguishes beach and cliff response", async 
 
 test("one topology model publishes elevation, slope, and QA contours", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
   );
   const height = await decodePng(
     "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
@@ -695,7 +821,7 @@ test("every territory reserves a registered city-ready capital envelope", async 
   }
 });
 
-test("NinjaOne project-town anchors use accepted land across the territory", async () => {
+test("the Kaizen Agent project anchor uses accepted NinjaOne land", async () => {
   const projects = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
@@ -704,23 +830,20 @@ test("NinjaOne project-town anchors use accepted land across the territory", asy
     "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
   );
 
-  const anchorXs = [];
+  assert.deepEqual(projects.nodes.map(({ id }) => id), [
+    "project-kaizen-agent",
+  ]);
   for (const project of projects.nodes) {
     const [worldX, worldY] = project.territoryAnchor;
     const x = Math.min(land.width - 1, Math.floor(worldX * land.width));
     const y = Math.min(land.height - 1, Math.floor(worldY * land.height));
     const offset = y * land.width + x;
-    anchorXs.push(worldX);
     assert.ok(
       land.pixels[offset] >= 128,
       `${project.id} territory anchor must be on accepted land`,
     );
   }
 
-  assert.ok(
-    Math.max(...anchorXs) - Math.min(...anchorXs) >= 0.4,
-    "NinjaOne project towns must span the territory instead of one city site",
-  );
 });
 
 test("NinjaOne town-plan paving stays on accepted terrain", async () => {
@@ -733,11 +856,9 @@ test("NinjaOne town-plan paving stays on accepted terrain", async () => {
   );
   const plans = [
     ...infrastructure.towns.map(({ id, townPlan }) => ({ id, townPlan })),
-    {
-      id: infrastructure.capitalCampus.id,
-      townPlan: infrastructure.capitalCampus.townPlan,
-    },
   ];
+  assert.equal("capitalCampus" in infrastructure, false);
+  assert.equal(plans.length, 1);
   const toMaskPoint = ([worldX, worldY]) => [
     worldX / WORLD_PLANE.width * land.width,
     worldY / WORLD_PLANE.height * land.height,
@@ -858,7 +979,7 @@ test("NinjaOne town-plan paving stays on accepted terrain", async () => {
     }
   };
 
-  assert.equal(plans.length, 4);
+  assert.equal(plans.length, 1);
   for (const { id, townPlan } of plans) {
     assert.ok(townPlan, `${id} needs a town plan`);
     for (const block of townPlan.blocks) {
@@ -1001,25 +1122,10 @@ test("capital site tiles stay bounded to land and add local density", async () =
     manifest.sourceDimensions,
   );
   const ninjaOneSourceCrops = new Map([
-    ["ninjaone-capital-site", {
-      origin: [3310, 698],
-      size: [300, 300],
-      pathSuffix: "ninjaone-capital-site-r4.png",
-    }],
     ["project-kaizen-agent-site", {
       origin: [1428, 601],
       size: [220, 220],
       pathSuffix: "ninjaone-kaizen-agent-site-r2.png",
-    }],
-    ["project-vendy-site", {
-      origin: [2298, 568],
-      size: [220, 220],
-      pathSuffix: "ninjaone-vendy-site-r2.png",
-    }],
-    ["project-kaizen-metrics-site", {
-      origin: [4304, 643],
-      size: [220, 220],
-      pathSuffix: "ninjaone-kaizen-metrics-site-r2.png",
     }],
   ]);
   assert.equal(
@@ -1676,7 +1782,7 @@ test("generated asset manifests carry exact content hashes", async () => {
   assert.equal(
     landManifest.derivation.authoredSurfaceSourceSha256,
     await sha256(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r9.png",
+      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
     ),
   );
   assert.equal(hydrologyManifest.generation.landClipped, true);

@@ -1,18 +1,36 @@
 {
-  "schemaVersion": 1,
-  "id": "career-world/kaizen-semantic-assets@r2",
-  "sourcePlate": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-integrated-r1.png",
-  "basePlate": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-concept-base-r1.png",
-  "closePlate": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-close-authored-r3.png",
+  "schemaVersion": 2,
+  "id": "career-world/kaizen-semantic-assets@r9",
+  "sourcePlate": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-base-mvp-r4.webp",
+  "sitePlate": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-site-mvp-r4.webp",
   "ownerId": "project-kaizen-agent",
   "plateDimensions": [
-    1254,
-    1254
+    1024,
+    1024
+  ],
+  "sitePlateDimensions": [
+    2048,
+    2048
   ],
   "closePlateDimensions": [
+    4096,
+    4096
+  ],
+  "semanticRegistrationDimensions": [
     1254,
     1254
   ],
+  "placementBasis": "kaizen-city-layered-template-r1",
+  "detailPyramid": {
+    "contract": "max-detail-hybrid-static-foliage-master-derived-pyramid",
+    "gridSize": 4,
+    "tileDimensions": [
+      1024,
+      1024
+    ],
+    "assetRoot": "/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-detail-grid-mvp-r4",
+    "assetPattern": "kaizen-city-close-r{row}-c{column}-mvp-r4.webp"
+  },
   "plateAnchor": [
     0.3125,
     0.308
@@ -22,475 +40,619 @@
     0.1893
   ],
   "plateAlignmentY": 0.91,
-  "registration": "kaizen-city-foundation@r1",
+  "registration": "kaizen-city-layered-template@r1",
   "assets": [
     {
       "id": "project-kaizen-agent",
       "role": "project",
-      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/project-kaizen-agent-concept-r2.png",
+      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/project-kaizen-agent-layered-r3.png",
       "cropOrigin": [
-        498,
-        179
+        518,
+        137
       ],
       "sourceDimensions": [
-        227,
-        263
+        1165,
+        1350
+      ],
+      "registrationDimensions": [
+        273,
+        316
       ],
       "groundAnchor": [
         0.5,
-        1.0
+        0.985
+      ],
+      "sourceGroundAnchor": [
+        0.5,
+        0.985
       ],
       "grounding": "asset-owned",
       "interactionHull": [
         [
-          4,
-          164
+          5.155,
+          218.157
         ],
         [
-          8,
-          119
+          7.733,
+          164.788
         ],
         [
-          9,
-          111
+          11.482,
+          132.72
         ],
         [
-          10,
-          106
+          11.717,
+          131.784
         ],
         [
-          18,
-          90
+          22.262,
+          104.865
         ],
         [
-          64,
-          34
+          78.971,
+          37.452
         ],
         [
-          65,
-          33
+          79.205,
+          37.218
         ],
         [
-          118,
-          9
+          143.647,
+          5.852
         ],
         [
-          120,
-          9
+          143.882,
+          5.852
         ],
         [
-          214,
-          124
+          251.91,
+          141.381
         ],
         [
-          219,
-          134
+          263.158,
+          160.107
         ],
         [
-          220,
-          145
+          264.564,
+          174.151
         ],
         [
-          223,
-          186
+          269.251,
+          221.902
         ],
         [
-          223,
-          207
+          269.719,
+          227.052
         ],
         [
-          220,
-          210
+          271.125,
+          249.055
         ],
         [
-          181,
-          241
+          271.125,
+          258.418
         ],
         [
-          149,
-          259
+          270.422,
+          259.12
         ],
         [
-          138,
-          259
+          248.629,
+          279.25
         ],
         [
-          75,
-          240
+          247.692,
+          279.953
         ],
         [
-          67,
-          237
+          245.114,
+          281.825
         ],
         [
-          46,
-          224
+          240.427,
+          285.102
         ],
         [
-          40,
-          219
+          234.569,
+          289.081
         ],
         [
-          4,
-          186
+          234.1,
+          289.316
+        ],
+        [
+          187.936,
+          312.021
+        ],
+        [
+          187.468,
+          312.021
+        ],
+        [
+          94.203,
+          289.55
+        ],
+        [
+          92.094,
+          288.613
+        ],
+        [
+          50.616,
+          269.653
+        ],
+        [
+          46.164,
+          267.547
+        ],
+        [
+          5.155,
+          221.2
         ]
       ]
     },
     {
       "id": "data-contracts",
       "role": "skill",
-      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/data-contracts-concept-r2.png",
+      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/data-contracts-layered-r3.png",
       "cropOrigin": [
-        376,
-        528
+        396,
+        401
       ],
       "sourceDimensions": [
-        212,
-        244
+        1170,
+        1345
+      ],
+      "registrationDimensions": [
+        230,
+        264
       ],
       "groundAnchor": [
         0.5,
-        1.0
+        0.985
+      ],
+      "sourceGroundAnchor": [
+        0.5,
+        0.985
       ],
       "grounding": "asset-owned",
       "interactionHull": [
         [
-          4,
-          179
+          7.863,
+          198.638
         ],
         [
-          11,
-          117
+          9.239,
+          144.464
         ],
         [
-          22,
-          76
+          27.718,
+          82.439
         ],
         [
-          40,
-          51
+          46.983,
+          54.959
         ],
         [
-          93,
-          6
+          106.94,
+          7.655
         ],
         [
-          95,
-          6
+          107.137,
+          7.655
         ],
         [
-          144,
-          25
+          157.462,
+          32.19
         ],
         [
-          188,
-          72
+          198.154,
+          72.428
         ],
         [
-          192,
-          78
+          198.35,
+          72.625
         ],
         [
-          195,
-          84
+          211.521,
+          98.534
         ],
         [
-          197,
-          89
+          211.718,
+          98.926
         ],
         [
-          201,
-          113
+          213.684,
+          104.815
         ],
         [
-          202,
-          123
+          218.795,
+          130.332
         ],
         [
-          208,
-          191
+          221.35,
+          155.652
         ],
         [
-          208,
-          193
+          222.53,
+          189.216
         ],
         [
-          205,
-          196
+          222.923,
+          203.349
         ],
         [
-          190,
-          209
+          222.923,
+          204.526
         ],
         [
-          187,
-          211
+          222.333,
+          205.115
         ],
         [
-          164,
-          226
+          219.188,
+          207.274
         ],
         [
-          137,
-          240
+          152.547,
+          253.008
         ],
         [
-          121,
-          240
+          149.205,
+          255.167
         ],
         [
-          66,
-          233
+          147.043,
+          256.541
         ],
         [
-          62,
-          232
+          146.65,
+          256.738
         ],
         [
-          41,
-          224
+          145.667,
+          256.738
         ],
         [
-          36,
-          222
+          73.128,
+          250.849
         ],
         [
-          5,
-          198
+          72.538,
+          250.653
         ],
         [
-          4,
-          197
+          48.162,
+          239.857
+        ],
+        [
+          44.821,
+          238.287
+        ],
+        [
+          40.889,
+          235.343
+        ],
+        [
+          40.692,
+          235.146
+        ],
+        [
+          8.06,
+          200.012
+        ],
+        [
+          7.863,
+          199.619
         ]
       ]
     },
     {
       "id": "safe-writes",
       "role": "skill",
-      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/safe-writes-concept-r2.png",
+      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/safe-writes-layered-r3.png",
       "cropOrigin": [
-        788,
-        399
+        715,
+        474
       ],
       "sourceDimensions": [
-        225,
-        218
+        1254,
+        1254
+      ],
+      "registrationDimensions": [
+        271,
+        271
       ],
       "groundAnchor": [
         0.5,
-        1.0
+        0.985
+      ],
+      "sourceGroundAnchor": [
+        0.5,
+        0.985
       ],
       "grounding": "asset-owned",
       "interactionHull": [
         [
-          5,
-          137
+          8.644,
+          177.209
         ],
         [
-          17,
-          84
+          9.725,
+          171.59
         ],
         [
-          18,
-          82
+          22.691,
+          105.461
         ],
         [
-          49,
-          47
+          22.907,
+          104.596
         ],
         [
-          50,
-          46
+          29.175,
+          83.418
         ],
         [
-          81,
-          22
+          29.391,
+          83.202
         ],
         [
-          121,
-          5
+          66.345,
+          48.408
         ],
         [
-          123,
-          5
+          95.736,
+          25.501
         ],
         [
-          197,
-          70
+          146.522,
+          4.754
         ],
         [
-          198,
-          71
+          233.829,
+          79.096
         ],
         [
-          218,
-          112
+          260.411,
+          133.771
         ],
         [
-          221,
-          146
+          260.627,
+          134.419
         ],
         [
-          221,
-          165
+          263.652,
+          147.17
         ],
         [
-          173,
-          197
+          264.517,
+          155.598
         ],
         [
-          139,
-          214
+          268.191,
+          198.82
         ],
         [
-          131,
-          214
+          268.407,
+          202.926
         ],
         [
-          89,
-          204
+          268.407,
+          205.735
         ],
         [
-          40,
-          186
+          267.758,
+          206.384
         ],
         [
-          36,
-          183
+          264.301,
+          208.761
         ],
         [
-          5,
-          156
+          218.702,
+          239.016
+        ],
+        [
+          212.435,
+          243.122
+        ],
+        [
+          212.002,
+          243.338
+        ],
+        [
+          173.103,
+          261.707
+        ],
+        [
+          172.455,
+          261.707
+        ],
+        [
+          95.304,
+          247.228
+        ],
+        [
+          86.011,
+          243.986
+        ],
+        [
+          48.841,
+          227.346
+        ],
+        [
+          44.086,
+          225.185
+        ],
+        [
+          42.357,
+          224.321
+        ],
+        [
+          8.644,
+          183.908
         ]
       ]
     },
     {
       "id": "protocol-gateway",
       "role": "skill",
-      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/protocol-gateway-concept-r2.png",
+      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/protocol-gateway-layered-r3.png",
       "cropOrigin": [
-        725,
-        717
+        629,
+        675
       ],
       "sourceDimensions": [
-        210,
-        176
+        1367,
+        1151
+      ],
+      "registrationDimensions": [
+        234,
+        197
       ],
       "groundAnchor": [
         0.5,
-        1.0
+        0.985
+      ],
+      "sourceGroundAnchor": [
+        0.5,
+        0.985
       ],
       "grounding": "asset-owned",
       "interactionHull": [
         [
-          5,
-          110
+          8.217,
+          143.086
         ],
         [
-          6,
-          79
+          10.271,
+          85.578
         ],
         [
-          7,
-          71
+          10.784,
+          80.785
         ],
         [
-          9,
-          59
+          12.325,
+          70.687
         ],
         [
-          18,
-          46
+          24.821,
+          45.356
         ],
         [
-          47,
-          19
+          24.992,
+          45.014
         ],
         [
-          101,
-          6
+          55.804,
+          18.656
         ],
         [
-          104,
-          6
+          114.176,
+          4.792
         ],
         [
-          181,
-          38
+          114.347,
+          4.792
         ],
         [
-          182,
-          39
+          193.089,
+          36.285
         ],
         [
-          183,
-          41
+          193.26,
+          36.456
         ],
         [
-          198,
-          72
+          220.477,
+          91.226
         ],
         [
-          205,
-          131
+          225.955,
+          103.72
         ],
         [
-          205,
-          136
+          226.126,
+          110.053
         ],
         [
-          202,
-          154
+          226.982,
+          152.157
         ],
         [
-          201,
-          158
+          226.982,
+          158.148
         ],
         [
-          199,
-          160
+          226.811,
+          158.319
         ],
         [
-          190,
-          167
+          223.216,
+          160.544
         ],
         [
-          187,
-          169
+          186.07,
+          182.452
         ],
         [
-          157,
-          171
+          163.132,
+          195.802
         ],
         [
-          156,
-          171
+          162.105,
+          196.315
         ],
         [
-          126,
-          169
+          161.249,
+          196.315
         ],
         [
-          100,
-          166
+          154.231,
+          196.144
         ],
         [
-          18,
-          149
+          110.581,
+          194.946
         ],
         [
-          7,
-          138
+          109.554,
+          194.604
         ],
         [
-          6,
-          131
+          61.453,
+          177.146
         ],
         [
-          5,
-          118
+          59.741,
+          176.461
+        ],
+        [
+          54.948,
+          174.407
+        ],
+        [
+          54.263,
+          174.065
+        ],
+        [
+          8.217,
+          146.338
         ]
       ]
     }
-  ]
+  ],
+  "layeredSourceContract": {
+    "base": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-0-base-r1.png",
+    "buildings": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-1-buildings-r1.png",
+    "buildingMatte": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-1-buildings-matte-r1.png",
+    "foliage": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-2-foliage-r1.png",
+    "foliageMatte": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-2-foliage-matte-r1.png",
+    "crispDetailMaster": "/scripts/assets/kaizen-city-rebuild/kaizen-city-detail-master-r1.png",
+    "staticFoliageLayer": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-2-foliage-r1.png",
+    "staticFoliageMaster": "/scripts/assets/kaizen-city-rebuild/kaizen-city-hybrid-detail-master-r3.png",
+    "semanticDetailSource": "/scripts/assets/kaizen-city-rebuild/shared-buildings-r1/*-isolated-chroma-generated-r1.png",
+    "derivation": "registered-diff-anchor-high-resolution-cutouts"
+  }
 }

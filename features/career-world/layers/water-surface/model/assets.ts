@@ -1,3 +1,4 @@
+import nativeDetailManifest from "../../../../../public/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json" with { type: "json" };
 import { defineLayerDetailContract } from "../../../shared/lod";
 
 const WORLD_ALBEDO =
@@ -9,9 +10,25 @@ const MACRO_HEIGHT =
 const MICRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-micro-r1-1024x1024.png";
 const COAST_GEOMETRY_WORLD =
-  "/career-world/layers/water-surface/fields/coast-geometry-r5.png";
+  "/career-world/layers/water-surface/fields/coast-geometry-r5.png?v=ninjaone-coast-r2";
 const COAST_GEOMETRY_TERRITORY =
-  "/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png";
+  "/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png?v=ninjaone-coast-r2";
+const NINJAONE_STREAM_FLOW = nativeDetailManifest.layers.hydrology.flowField.path;
+const [ninjaOneStreamWidth = 0, ninjaOneStreamHeight = 0] =
+  nativeDetailManifest.layers.hydrology.flowField.dimensions;
+
+if (ninjaOneStreamWidth <= 0 || ninjaOneStreamHeight <= 0) {
+  throw new RangeError("NinjaOne stream flow texture dimensions are invalid.");
+}
+
+export const NINJAONE_STREAM_REGISTRATION = Object.freeze({
+  textureDimensions: Object.freeze([
+    ninjaOneStreamWidth,
+    ninjaOneStreamHeight,
+  ] as const),
+  worldOrigin: Object.freeze([0.125, 0] as const),
+  worldSpan: Object.freeze([0.25, 1 / 3] as const),
+});
 
 export const WATER_TERRITORY_DETAIL = Object.freeze({
   fixedWorldFrequency: Object.freeze([12.5, 10.6] as const),
@@ -29,9 +46,10 @@ export const WATER_ASSETS = Object.freeze({
     territory: COAST_GEOMETRY_TERRITORY,
   }),
   coastMaterial:
-    "/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+    "/career-world/layers/water-surface/fields/coast-material-field-r6.png?v=ninjaone-coast-r2",
   hydrology:
-    "/career-world/layers/water-surface/fields/water-region-field-r3.png",
+    "/career-world/layers/water-surface/fields/water-region-field-r3.png?v=ninjaone-coast-r2",
+  ninjaOneStreamFlow: NINJAONE_STREAM_FLOW,
 });
 
 export const WATER_DETAIL_CONTRACT = defineLayerDetailContract({
@@ -64,6 +82,17 @@ export const WATER_DETAIL_CONTRACT = defineLayerDetailContract({
       worldBounds: {
         origin: [0, 0],
         span: [1, 1],
+      },
+    },
+    {
+      id: "ninjaone-stream-flow",
+      kind: "registered-raster",
+      minimumTier: "site",
+      path: NINJAONE_STREAM_FLOW,
+      dimensions: NINJAONE_STREAM_REGISTRATION.textureDimensions,
+      worldBounds: {
+        origin: NINJAONE_STREAM_REGISTRATION.worldOrigin,
+        span: NINJAONE_STREAM_REGISTRATION.worldSpan,
       },
     },
   ],

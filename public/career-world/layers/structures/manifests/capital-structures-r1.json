@@ -13,20 +13,6 @@
   },
   "nodes": [
     {
-      "id": "capital-ninjaone",
-      "territoryId": "ninjaone",
-      "archetype": "command-citadel",
-      "assetPath": "/career-world/layers/structures/textures/ninjaone-capital-r3.png",
-      "groundAnchor": [
-        0.5,
-        0.92
-      ],
-      "footprintSpan": [
-        0.02314,
-        0.04108
-      ]
-    },
-    {
       "id": "capital-tanium",
       "territoryId": "tanium",
       "archetype": "ridge-forum",
@@ -93,7 +79,5 @@
     "Every authored raster shares one projection bearing and the root world-light direction; finished assets are never rotated at runtime.",
     "World view remains terrain-only; capitals use the shared territory reveal weight.",
     "Project buildings, skill buildings, roads, vegetation, labels, interaction, and effects remain deferred."
-  ],
-  "ninjaOneArtRevision": 3,
-  "ninjaOneLayoutScale": 1.3
+  ]
 }

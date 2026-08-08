@@ -18,14 +18,14 @@
       "evidenceId": "governed-agent-tooling",
       "label": "Kaizen Agent",
       "archetype": "governance-foundry",
-      "assetPath": "/career-world/layers/structures/textures/projects/kaizen-agent-r2.png",
+      "assetPath": "/career-world/layers/structures/textures/semantic/kaizen-agent/project-kaizen-agent-layered-r2.png",
       "sourceDimensions": [
-        572,
-        572
+        1165,
+        1350
       ],
       "groundAnchor": [
         0.5,
-        0.92
+        0.988148
       ],
       "footprintSpan": [
         0.0146,
@@ -40,80 +40,17 @@
         "data-contracts",
         "protocol-gateway"
       ]
-    },
-    {
-      "id": "project-vendy",
-      "evidenceId": "cross-provider-orchestration",
-      "label": "Vendy",
-      "archetype": "orchestration-yard",
-      "assetPath": "/career-world/layers/structures/textures/projects/vendy-r2.png",
-      "sourceDimensions": [
-        612,
-        612
-      ],
-      "groundAnchor": [
-        0.5,
-        0.92
-      ],
-      "footprintSpan": [
-        0.01144,
-        0.020332
-      ],
-      "territoryAnchor": [
-        0.36015,
-        0.1881
-      ],
-      "supportedSkillArchetypeIds": [
-        "workflow-orchestration",
-        "operator-control",
-        "cloud-infrastructure"
-      ]
-    },
-    {
-      "id": "project-kaizen-metrics",
-      "evidenceId": "engineering-metrics-pipeline",
-      "label": "Kaizen Metrics",
-      "archetype": "metrics-observatory",
-      "assetPath": "/career-world/layers/structures/textures/projects/kaizen-metrics-r2.png",
-      "sourceDimensions": [
-        564,
-        564
-      ],
-      "groundAnchor": [
-        0.5,
-        0.92
-      ],
-      "footprintSpan": [
-        0.01079,
-        0.019188
-      ],
-      "territoryAnchor": [
-        0.6585096,
-        0.1978119
-      ],
-      "supportedSkillArchetypeIds": [
-        "python",
-        "databricks",
-        "data-contracts"
-      ]
     }
   ],
   "policy": [
-    "Project towns use authored world anchors validated against the NinjaOne territory mask and accepted land alpha.",
-    "The three project towns occupy western, central, and eastern districts across the territory instead of collapsing into the capital core.",
-    "Each project district owns one bounded territory-landform contact tile; roads between districts remain infrastructure work.",
-    "Each project building is a local evidence node owned by NinjaOne and uses the shared world projection and light.",
-    "Project footprints are smaller than the employer capital and are fixed world sizes rather than screen-space icons.",
-    "Project structures own no terrain, roads, labels, actors, or interaction effects.",
-    "Universal skill archetypes may be instantiated once inside every project town that has supporting evidence.",
-    "The pilot intentionally proves three distinct project towns across the full territory before the pattern is expanded to other employers."
+    "Kaizen Agent is the only active NinjaOne project city in the current MVP.",
+    "Its authored world anchor is validated against the NinjaOne territory mask and accepted land alpha.",
+    "The project building and its supported skill structures use fixed world sizes, shared projection, and shared light.",
+    "The project structure owns no terrain, roads, labels, actors, or interaction effects."
   ],
   "artRevision": 2,
   "artScale": 1.3,
   "layoutScales": {
-    "project-kaizen-agent": 1.3,
-    "project-vendy": 1.3,
-    "project-kaizen-metrics": 1.2,
-    "capital-ninjaone": 1.3
+    "project-kaizen-agent": 1.3
   }
 }

@@ -28,34 +28,9 @@ const neighborhoodModelPath = path.join(
     + "kaizenNeighborhoodFabric.ts",
 );
 
-test("town-plan semantics retain sparse, traversable Kaizen geometry", async () => {
+test("procedural town-plan surfaces exclude the authored Kaizen foundation", async () => {
   const reports = await auditTownSurfaces();
-  const kaizenReport = reports.find(
-    ({ id }) => id === "kaizen-agent-town-fabric",
-  );
-
-  assert.equal(reports.length, 4);
-  assert.ok(kaizenReport);
-  assert.equal(kaizenReport.structureRepresentation, "individual-sprites");
-  assert.equal(
-    kaizenReport.auditedBuildingSurface,
-    "roads-including-registered-entrances",
-  );
-  assert.equal(kaizenReport.buildingContactPixels, 0);
-  assert.equal(
-    kaizenReport.connectedEntranceCount,
-    kaizenReport.registeredEntranceCount,
-  );
-  assert.deepEqual(kaizenReport.disconnectedEntrances, []);
-  assert.equal(kaizenReport.pedestrianLoopOffRoadSamples, 0);
-  assert.deepEqual(kaizenReport.buildingOverlapByStructure, []);
-
-  for (const report of reports) {
-    assert.ok(report.totalSurfaceCoverage <= 0.08, report.id);
-    assert.ok(report.hardscapeCoverage <= 0.04, report.id);
-    assert.equal(report.buildingOverlapPixels, 0, report.id);
-    assert.equal(report.buildingOverlapRatio, 0, report.id);
-  }
+  assert.deepEqual(reports, []);
 });
 
 test("Kaizen route and structure semantics stay on buildable topography", async () => {
@@ -105,26 +80,40 @@ test("Kaizen visual infrastructure has one authored source of truth", async () =
   assert.match(structures, /<KaizenNeighborhoodFabric/);
   assert.match(
     neighborhoodComponent,
-    /data-neighborhood-renderer="registered-foundation-lod"/,
+    /data-neighborhood-renderer="persistent-base-progressive-detail-grid"/,
   );
   assert.match(
     neighborhoodComponent,
-    /siteFoundationVisibility = siteVisibility \* \(1 - closeVisibility\)/,
+    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
   );
-  assert.match(neighborhoodComponent, /closeFoundationVisibility = closeVisibility/);
+  assert.match(
+    neighborhoodComponent,
+    /Math\.max\(\s*overviewVisibility,\s*siteVisibility,\s*closeVisibility,\s*\)/,
+  );
+  assert.doesNotMatch(neighborhoodComponent, /close-fallback|registrationMaskId/);
+  assert.doesNotMatch(neighborhoodComponent, /activeModule|useCloseFoundation/);
+  assert.match(neighborhoodComponent, /const image = new Image\(\)/);
+  assert.match(neighborhoodComponent, /requestedAssetPaths/);
+  assert.match(neighborhoodComponent, /shouldRenderSite && siteModule/);
+  assert.match(neighborhoodComponent, /shouldRenderClose \? closeModules\.map/);
   assert.match(
     neighborhoodModel,
-    /kaizen-semantic-assets-r1\.json/,
+    /base-runtime-r1\.json/,
   );
-  assert.match(neighborhoodModel, /semanticManifest\.sourcePlate/);
+  assert.match(neighborhoodModel, /baseManifest\.lod\.base\.path/);
+  assert.match(neighborhoodModel, /baseManifest\.lod\.site\.path/);
+  assert.match(neighborhoodModel, /KAIZEN_CITY_PLATE_ANCHOR/);
+  assert.match(neighborhoodModel, /KAIZEN_CITY_PLATE_SPAN/);
   assert.doesNotMatch(neighborhoodModel, /foundation-integrated/);
+  assert.doesNotMatch(neighborhoodModel, /kaizen-semantic-assets-r1/);
   assert.match(
     neighborhoodModel,
-    /KAIZEN_NEIGHBORHOOD_CLOSE_FOUNDATION_SRC =\s*\n\s*semanticManifest\.closePlate/,
+    /KAIZEN_NEIGHBORHOOD_CLOSE_GRID_ROOT =\s*\n\s*baseManifest\.lod\.close\.assetRoot/,
   );
-  assert.match(neighborhoodModel, /semanticManifest\.closePlateDimensions/);
+  assert.match(neighborhoodModel, /baseManifest\.lod\.close\.dimensions/);
+  assert.match(neighborhoodModel, /KAIZEN_NEIGHBORHOOD_CLOSE_GRID_SIZE/);
+  assert.match(neighborhoodModel, /\.\.\.CLOSE_MODULES/);
   assert.doesNotMatch(neighborhoodModel, /detail-atlas/);
-  assert.doesNotMatch(neighborhoodModel, /detailModule/);
 });
 
 test("obsolete Kaizen procedural visual pipeline stays removed", async () => {

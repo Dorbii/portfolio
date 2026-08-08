@@ -2,10 +2,6 @@ import manifest from "@/public/career-world/layers/infrastructure/manifests/ninj
 import type { Pair } from "../../../shared/camera";
 import type { DetailNodePolicy } from "../../../shared/lod";
 import {
-  CAPITAL_STRUCTURES,
-  type CapitalStructure,
-} from "../../structures/model/capitals";
-import {
   PROJECT_STRUCTURES,
   type ProjectStructure,
 } from "../../structures/model/projects";
@@ -114,13 +110,7 @@ export interface ProjectTownInfrastructure {
   readonly id: string;
   readonly project: ProjectStructure;
   readonly terrainProfile: ProjectTownTerrainProfile;
-  readonly townPlan: TownPlan;
-  readonly palette: ProjectTownPalette;
-}
-
-export interface CapitalCampusInfrastructure {
-  readonly id: string;
-  readonly capital: CapitalStructure;
+  readonly plateOwnedStructureIds: readonly string[];
   readonly townPlan: TownPlan;
   readonly palette: ProjectTownPalette;
 }
@@ -440,6 +430,7 @@ if (
 const featureIds = new Set<string>();
 const townIds = new Set<string>();
 const projectIds = new Set<string>();
+const AUTHORED_FOUNDATION_PROJECT_IDS = new Set(["project-kaizen-agent"]);
 const ninjaOneProjects = PROJECT_STRUCTURES.filter(
   ({ territory }) => territory.id === manifest.territoryId,
 );
@@ -466,9 +457,29 @@ readonly ProjectTownInfrastructure[] = Object.freeze(
       instance.ownerKind === "project"
       && instance.ownerId === project.id
     ));
-    if (skills.length === 0 || supports.length === 0) {
+    const authoredFoundation = AUTHORED_FOUNDATION_PROJECT_IDS.has(project.id);
+    const mountedStructureIds = new Set([
+      project.id,
+      ...skills.map(({ id }) => id),
+      ...supports.map(({ id }) => id),
+    ]);
+    const plateOwnedStructureIds = authoredFoundation
+      ? [...new Set(
+        town.townPlan.blocks
+          .flatMap(({ structureIds }) => structureIds)
+          .filter((id) => !mountedStructureIds.has(id)),
+      )]
+      : [];
+    if (
+      skills.length === 0
+      || (authoredFoundation
+        ? supports.length > 0 || plateOwnedStructureIds.length === 0
+        : supports.length === 0)
+    ) {
       throw new TypeError(
-        `${town.id} requires owned skill and support structures.`,
+        authoredFoundation
+          ? `${town.id} requires plate-owned support semantics and no legacy support sprites.`
+          : `${town.id} requires owned skill and support structures.`,
       );
     }
 
@@ -476,6 +487,7 @@ readonly ProjectTownInfrastructure[] = Object.freeze(
       id: town.id,
       project,
       terrainProfile: town.terrainProfile,
+      plateOwnedStructureIds: Object.freeze(plateOwnedStructureIds),
       townPlan: parseTownPlan(
         town.townPlan,
         town.id,
@@ -483,6 +495,7 @@ readonly ProjectTownInfrastructure[] = Object.freeze(
           project.id,
           ...skills.map(({ id }) => id),
           ...supports.map(({ id }) => id),
+          ...plateOwnedStructureIds,
         ],
         featureIds,
       ),
@@ -499,43 +512,3 @@ if (
     "Project-town infrastructure must cover every NinjaOne project once.",
   );
 }
-
-const capitalConfig = manifest.capitalCampus;
-requireUniqueId(capitalConfig.id, "Capital campus", townIds);
-const capital = CAPITAL_STRUCTURES.find(
-  ({ id }) => id === capitalConfig.capitalId,
-);
-if (!capital || capital.territory.id !== manifest.territoryId) {
-  throw new TypeError("NinjaOne capital campus has an invalid capital.");
-}
-
-const capitalSkills = SKILL_STRUCTURE_INSTANCES.filter((instance) => (
-  instance.ownerKind === "capital"
-  && instance.ownerId === capital.id
-));
-const capitalSupports = SUPPORT_STRUCTURE_INSTANCES.filter((instance) => (
-  instance.ownerKind === "capital"
-  && instance.ownerId === capital.id
-));
-if (capitalSkills.length === 0 || capitalSupports.length === 0) {
-  throw new TypeError(
-    "NinjaOne capital campus requires owned skill and support structures.",
-  );
-}
-
-export const CAPITAL_CAMPUS_INFRASTRUCTURE:
-CapitalCampusInfrastructure = Object.freeze({
-  id: capitalConfig.id,
-  capital,
-  townPlan: parseTownPlan(
-    capitalConfig.townPlan,
-    capitalConfig.id,
-    [
-      capital.id,
-      ...capitalSkills.map(({ id }) => id),
-      ...capitalSupports.map(({ id }) => id),
-    ],
-    featureIds,
-  ),
-  palette: palette(capitalConfig.palette, capitalConfig.id),
-});

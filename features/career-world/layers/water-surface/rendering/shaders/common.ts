@@ -20,6 +20,10 @@ uniform float u_detailScale;
 uniform float u_territoryLod;
 uniform float u_capitalLod;
 uniform float u_siteLod;
+uniform float u_closeAssetsReady;
+uniform vec2 u_ninjaOneStreamOrigin;
+uniform vec2 u_ninjaOneStreamSpan;
+uniform vec2 u_ninjaOneStreamTexel;
 uniform vec2 u_microFrequency;
 uniform float u_territoryLineStrength;
 uniform float u_territoryNormalStrength;
@@ -55,6 +59,7 @@ uniform sampler2D u_microHeight;
 uniform sampler2D u_coastGeometry;
 uniform sampler2D u_coastMaterial;
 uniform sampler2D u_hydrology;
+uniform sampler2D u_ninjaOneStreamFlow;
 
 float saturate(float value) {
   return clamp(value, 0.0, 1.0);

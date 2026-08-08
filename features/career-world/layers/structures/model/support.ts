@@ -49,6 +49,24 @@ export interface SupportStructureInstance {
   readonly territoryAnchor: Pair;
 }
 
+interface RawSupportStructureArchetype {
+  readonly id: string;
+  readonly label: string;
+  readonly role: string;
+  readonly assetPath: string;
+  readonly sourceDimensions: number[];
+  readonly groundAnchor: number[];
+  readonly footprintSpan: number[];
+}
+
+interface RawSupportStructureInstance {
+  readonly id: string;
+  readonly ownerKind: string;
+  readonly ownerId: string;
+  readonly archetypeId: string;
+  readonly territoryAnchor: number[];
+}
+
 export const SUPPORT_NODE_POLICY: DetailNodePolicy = Object.freeze({
   minimumTier: "site",
 });
@@ -106,7 +124,8 @@ const archetypeIds = new Set<string>();
 
 export const SUPPORT_STRUCTURE_ARCHETYPES:
 readonly SupportStructureArchetype[] = Object.freeze(
-  manifest.archetypes.map((archetype) => {
+  (manifest.archetypes as readonly RawSupportStructureArchetype[]).map(
+    (archetype) => {
     requireUniqueId(
       archetype.id,
       "Support archetype",
@@ -139,14 +158,16 @@ readonly SupportStructureArchetype[] = Object.freeze(
         { positive: true },
       ),
     });
-  }),
+    },
+  ),
 );
 
 const instanceIds = new Set<string>();
 
 export const SUPPORT_STRUCTURE_INSTANCES:
 readonly SupportStructureInstance[] = Object.freeze(
-  manifest.instances.map((instance) => {
+  (manifest.instances as readonly RawSupportStructureInstance[]).map(
+    (instance) => {
     requireUniqueId(
       instance.id,
       "Support instance",
@@ -210,7 +231,8 @@ readonly SupportStructureInstance[] = Object.freeze(
       archetype,
       territoryAnchor,
     });
-  }),
+    },
+  ),
 );
 
 export function resolveSupportAnchor(

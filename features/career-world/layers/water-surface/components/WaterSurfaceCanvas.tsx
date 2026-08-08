@@ -10,30 +10,38 @@ import { WaterSurfaceRenderer } from "../rendering/WaterSurfaceRenderer";
 export type WaterRenderState = "loading" | "ready" | "fallback";
 
 interface WaterSurfaceCanvasProps {
+  readonly active: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
+  readonly foregroundHydrology?: boolean;
   readonly light: WorldLight;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
 }
 
 export function WaterSurfaceCanvas({
+  active,
   camera,
   detailState,
+  foregroundHydrology = false,
   light,
   onRenderStateChange,
 }: WaterSurfaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
-  const sceneRef = useRef({ camera, detailState, light });
+  const sceneRef = useRef({ active, camera, detailState, light });
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
   }, [onRenderStateChange]);
 
   useEffect(() => {
-    sceneRef.current = { camera, detailState, light };
-  }, [camera, detailState, light]);
+    sceneRef.current = { active, camera, detailState, light };
+  }, [active, camera, detailState, light]);
+
+  useEffect(() => {
+    controllerRef.current?.setActive(active);
+  }, [active]);
 
   useLayoutEffect(() => {
     controllerRef.current?.setView(camera, detailState);
@@ -69,6 +77,7 @@ export function WaterSurfaceCanvas({
         });
         controllerRef.current = localController;
         const scene = sceneRef.current;
+        localController.setActive(scene.active);
         localController.setView(scene.camera, scene.detailState);
         localController.setLight(scene.light);
         localController.start();
@@ -103,6 +112,8 @@ export function WaterSurfaceCanvas({
       aria-label="Animated dark-fantasy ocean surface"
       className="career-world__water-canvas"
       data-layer="water-surface"
+      data-foreground-hydrology={foregroundHydrology}
+      data-page-visible={active}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-lod-tier={detailState.tier.id}
       data-render-state="loading"

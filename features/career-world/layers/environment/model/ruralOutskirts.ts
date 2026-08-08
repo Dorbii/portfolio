@@ -167,7 +167,12 @@ function intersects(left: Bounds, right: Bounds): boolean {
 const allocationBounds = allocationsManifest.allocations.map(
   ({ bounds }) => boundsFromOrigin(bounds.origin, bounds.span),
 );
-const townFabricBounds = townFabricManifest.instances.map(
+const townFabricBounds = (townFabricManifest.instances as readonly {
+  readonly worldBounds: {
+    readonly origin: number[];
+    readonly span: number[];
+  };
+}[]).map(
   ({ worldBounds }) => (
     boundsFromOrigin(worldBounds.origin, worldBounds.span)
   ),

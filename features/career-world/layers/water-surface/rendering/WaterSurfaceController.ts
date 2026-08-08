@@ -10,6 +10,7 @@ export class WaterSurfaceController {
   private readonly reduceMotion: boolean;
   private frameRequest = 0;
   private running = false;
+  private active = true;
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
 
@@ -30,7 +31,26 @@ export class WaterSurfaceController {
     this.renderer.setView(camera, detailState);
     // Camera-dependent transparency sits above the DOM land plate. Render the
     // new view immediately so both layers reach the next paint atomically.
-    this.renderOnce();
+    if (this.active) {
+      this.renderOnce();
+    }
+  }
+
+  setActive(active: boolean): void {
+    if (this.active === active) {
+      return;
+    }
+    this.active = active;
+    this.lastTimestamp = 0;
+    if (!active && this.frameRequest) {
+      cancelAnimationFrame(this.frameRequest);
+      this.frameRequest = 0;
+      return;
+    }
+    if (active) {
+      this.renderOnce();
+      this.schedule();
+    }
   }
 
   setLight(light: WorldLight): void {
@@ -44,7 +64,9 @@ export class WaterSurfaceController {
   }
 
   start(): void {
-    this.renderOnce();
+    if (this.active) {
+      this.renderOnce();
+    }
     if (this.reduceMotion || this.running) {
       return;
     }
@@ -65,13 +87,13 @@ export class WaterSurfaceController {
 
   private readonly tick = (timestamp: number): void => {
     this.frameRequest = 0;
-    if (!this.running || document.hidden) {
+    if (!this.running || !this.active || document.hidden) {
       return;
     }
 
     if (this.lastTimestamp > 0) {
       this.elapsedSeconds += Math.min(
-        0.05,
+        0.25,
         Math.max(0, (timestamp - this.lastTimestamp) / 1000),
       );
     }
@@ -85,23 +107,25 @@ export class WaterSurfaceController {
     if (document.hidden && this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
       this.frameRequest = 0;
-    } else if (this.running) {
+    } else if (this.running && this.active) {
       this.schedule();
     }
   };
 
   private schedule(): void {
-    if (!this.frameRequest && this.running && !document.hidden) {
+    if (!this.frameRequest && this.running && this.active && !document.hidden) {
       this.frameRequest = requestAnimationFrame(this.tick);
     }
   }
 
   private renderOnce(): void {
-    this.renderer.render(this.elapsedSeconds);
+    if (this.active) {
+      this.renderer.render(this.elapsedSeconds);
+    }
   }
 
   private renderIfIdle(): void {
-    if (!this.running) {
+    if (this.active && !this.running) {
       this.renderOnce();
     }
   }

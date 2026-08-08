@@ -1,5 +1,12 @@
-import manifest from "../../../../../public/career-world/layers/structures/manifests/kaizen-semantic-assets-r1.json" with { type: "json" };
+import manifest from "../../../../../public/career-world/cities/kaizen-agent/manifests/hero-buildings-runtime-r1.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
+import {
+  KAIZEN_CITY_OWNER_ID,
+  KAIZEN_CITY_PLATE_DIMENSIONS,
+  KAIZEN_CITY_PLATE_ORIGIN,
+  KAIZEN_CITY_PLATE_SPAN,
+  KAIZEN_CITY_REGISTRATION,
+} from "../../../shared/kaizenCityRegistration.ts";
 import type { KaizenStructurePresentationRole } from "./kaizenPresentation";
 
 export type KaizenSemanticAssetRole = "project" | "skill";
@@ -12,6 +19,8 @@ export interface KaizenSemanticStructureAsset {
   readonly grounding: "asset-owned";
   readonly id: string;
   readonly interactionHull: readonly Pair[];
+  readonly registrationDimensions: Pair;
+  readonly registrationGroundAnchor: Pair;
   readonly registration: string;
   readonly role: KaizenSemanticAssetRole;
   readonly sourceDimensions: Pair;
@@ -42,40 +51,18 @@ function pair(
 
 if (
   manifest.schemaVersion !== 1
-  || manifest.registration !== "kaizen-city-foundation@r1"
-  || manifest.ownerId !== "project-kaizen-agent"
-  || manifest.plateDimensions.length !== 2
-  || manifest.closePlateDimensions.length !== 2
-  || !manifest.sourcePlate.startsWith(
-    "/career-world/layers/structures/textures/ambient/kaizen-agent/",
-  )
-  || !manifest.closePlate.startsWith(
-    "/career-world/layers/structures/textures/ambient/kaizen-agent/",
-  )
+  || manifest.id !== "career-world/kaizen-agent/hero-buildings-runtime@r1"
+  || manifest.registrationRef !== KAIZEN_CITY_REGISTRATION
+  || manifest.ownerId !== KAIZEN_CITY_OWNER_ID
 ) {
   throw new TypeError("Kaizen semantic asset manifest is invalid.");
 }
 
-const plateDimensions = pair(
-  manifest.plateDimensions,
-  "Kaizen semantic plate dimensions",
-);
-const plateAnchor = pair(
-  manifest.plateAnchor,
-  "Kaizen semantic plate anchor",
-  { allowZero: true, normalized: true },
-);
-const plateSpan = pair(
-  manifest.plateSpan,
-  "Kaizen semantic plate span",
-  { normalized: true },
-);
-const plateOrigin = Object.freeze([
-  plateAnchor[0] - plateSpan[0] * 0.5,
-  plateAnchor[1] - plateSpan[1] * manifest.plateAlignmentY,
-] as Pair);
+const plateDimensions = KAIZEN_CITY_PLATE_DIMENSIONS;
+const plateSpan = KAIZEN_CITY_PLATE_SPAN;
+const plateOrigin = KAIZEN_CITY_PLATE_ORIGIN;
 
-export const KAIZEN_SEMANTIC_ASSET_REGISTRATION = manifest.registration;
+export const KAIZEN_SEMANTIC_ASSET_REGISTRATION = manifest.registrationRef;
 
 export const KAIZEN_SEMANTIC_STRUCTURE_ASSETS:
 readonly KaizenSemanticStructureAsset[] = Object.freeze(
@@ -84,7 +71,7 @@ readonly KaizenSemanticStructureAsset[] = Object.freeze(
       (asset.role !== "project" && asset.role !== "skill")
       || asset.grounding !== "asset-owned"
       || !asset.assetPath.startsWith(
-        "/career-world/layers/structures/textures/semantic/kaizen-agent/",
+        "/career-world/cities/kaizen-agent/layers/hero-buildings/",
       )
     ) {
       throw new TypeError(`Kaizen semantic asset ${asset.id} is invalid.`);
@@ -99,9 +86,18 @@ readonly KaizenSemanticStructureAsset[] = Object.freeze(
       asset.sourceDimensions,
       `${asset.id} source dimensions`,
     );
-    const groundAnchor = pair(
+    const registrationDimensions = pair(
+      asset.registrationDimensions,
+      `${asset.id} registration dimensions`,
+    );
+    const registrationGroundAnchor = pair(
       asset.groundAnchor,
-      `${asset.id} ground anchor`,
+      `${asset.id} registration ground anchor`,
+      { allowZero: true, normalized: true },
+    );
+    const groundAnchor = pair(
+      asset.sourceGroundAnchor,
+      `${asset.id} source ground anchor`,
       { allowZero: true, normalized: true },
     );
     if (asset.interactionHull.length < 3) {
@@ -115,26 +111,31 @@ readonly KaizenSemanticStructureAsset[] = Object.freeze(
           { allowZero: true },
         );
         if (
-          vertex[0] > sourceDimensions[0]
-          || vertex[1] > sourceDimensions[1]
+          vertex[0] > registrationDimensions[0]
+          || vertex[1] > registrationDimensions[1]
         ) {
           throw new RangeError(
             `${asset.id} interaction hull must stay inside its source crop.`,
           );
         }
-        return vertex;
+        return Object.freeze([
+          vertex[0] / registrationDimensions[0] * sourceDimensions[0],
+          vertex[1] / registrationDimensions[1] * sourceDimensions[1],
+        ] as Pair);
       }),
     );
     const footprintSpan = Object.freeze([
-      sourceDimensions[0] / plateDimensions[0] * plateSpan[0],
-      sourceDimensions[1] / plateDimensions[1] * plateSpan[1],
+      registrationDimensions[0] / plateDimensions[0] * plateSpan[0],
+      registrationDimensions[1] / plateDimensions[1] * plateSpan[1],
     ] as Pair);
     const territoryAnchor = Object.freeze([
       plateOrigin[0] + (
-        cropOrigin[0] + sourceDimensions[0] * groundAnchor[0]
+        cropOrigin[0]
+        + registrationDimensions[0] * groundAnchor[0]
       ) / plateDimensions[0] * plateSpan[0],
       plateOrigin[1] + (
-        cropOrigin[1] + sourceDimensions[1] * groundAnchor[1]
+        cropOrigin[1]
+        + registrationDimensions[1] * groundAnchor[1]
       ) / plateDimensions[1] * plateSpan[1],
     ] as Pair);
 
@@ -146,7 +147,9 @@ readonly KaizenSemanticStructureAsset[] = Object.freeze(
       grounding: asset.grounding,
       id: asset.id,
       interactionHull,
-      registration: manifest.registration,
+      registrationDimensions,
+      registrationGroundAnchor,
+      registration: manifest.registrationRef,
       role: asset.role,
       sourceDimensions,
       territoryAnchor,

@@ -1,10 +1,7 @@
 import type { Pair } from "./camera";
 
 export const TOWN_PRESENTATION_OFFSETS:
-Readonly<Record<string, Pair>> = Object.freeze({
-  // Vendy is intentionally parked in B1/B2 while its authored city is rebuilt.
-  "project-vendy": Object.freeze([-0.14, -0.085] as Pair),
-});
+Readonly<Record<string, Pair>> = Object.freeze({});
 
 const ZERO_OFFSET = Object.freeze([0, 0] as Pair);
 

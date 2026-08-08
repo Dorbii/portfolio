@@ -637,7 +637,6 @@ async function auditTownSurfaces() {
   ]);
   const plans = new Map([
     ...towns.towns.map((town) => [town.projectId, town.townPlan]),
-    [towns.capitalCampus.capitalId, towns.capitalCampus.townPlan],
   ]);
   const reports = [];
 

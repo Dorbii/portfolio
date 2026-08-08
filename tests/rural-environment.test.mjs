@@ -82,8 +82,6 @@ test("NinjaOne rural outskirts are deterministic close-detail outside towns", as
     "stone-wall",
     "grove",
     "clearing",
-    "lookout",
-    "camp",
   ]);
   const allocationBounds = allocations.allocations.map(
     ({ bounds }) => boundsFromOrigin(bounds.origin, bounds.span),
@@ -100,7 +98,7 @@ test("NinjaOne rural outskirts are deterministic close-detail outside towns", as
   assert.equal(rural.territoryId, "ninjaone");
   assert.equal(rural.minimumTier, "close");
   assert.equal(rural.status, "decorative-rural-outskirts");
-  assert.ok(rural.scenery.length >= 12);
+  assert.equal(rural.scenery.length, 5);
 
   for (const item of [...rural.scenery, ...rural.easterEggSlots]) {
     assert.ok(!seenIds.has(item.id), item.id);
@@ -173,10 +171,6 @@ test("rural easter-egg slots are stable, empty, and semantically inert", async (
   assert.deepEqual(actualSlotIds, [
     "ninjaone-easter-egg-slot-northwest-hollow",
     "ninjaone-easter-egg-slot-kaizen-south",
-    "ninjaone-easter-egg-slot-vendy-west",
-    "ninjaone-easter-egg-slot-capital-northeast",
-    "ninjaone-easter-egg-slot-east-highlands",
-    "ninjaone-easter-egg-slot-south-meadow",
   ]);
   assert.ok(
     rural.easterEggSlots.every(({ content }) => content === null),
@@ -224,10 +218,10 @@ test("the environment renderer keeps rural scenery decorative and omits empty sl
     /EMPTY_EASTER_EGG_SLOTS|easterEggSlots/,
   );
   assert.doesNotMatch(
-    component.slice(
-      component.indexOf("function RuralSceneryGlyph("),
-      component.indexOf("function FoliageResourceDefinitions("),
-    ),
+      component.slice(
+        component.indexOf("function RuralSceneryGlyph("),
+        component.indexOf("export function EnvironmentLayer("),
+      ),
     /<image|href=|onClick=|tabIndex=|Math\.random/,
   );
 });

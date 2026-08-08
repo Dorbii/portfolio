@@ -1,165 +1,282 @@
+import manifest from "../../../../../public/career-world/cities/kaizen-agent/manifests/environment-runtime-r1.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
+import {
+  KAIZEN_CITY_PLATE_DIMENSIONS,
+  KAIZEN_CITY_REGISTRATION,
+  kaizenRegistrationPointToWorld,
+} from "../../../shared/kaizenCityRegistration.ts";
+import type { DetailTierId } from "../../../shared/lod";
+
+type FoliageDetailTier = Extract<
+  DetailTierId,
+  "capital" | "site" | "close"
+>;
 
 export interface FoliageResource {
+  readonly atlasDimensions: Pair;
+  readonly atlasPath: string;
+  readonly canopySplit: number;
   readonly crop: readonly [number, number, number, number];
+  readonly durationSeconds: number;
   readonly id: string;
+  readonly motionScale: number;
+  readonly phaseSeconds: number;
+  readonly presentation:
+    | "tree"
+    | "ground-cover"
+    | "hedge"
+    | "copse";
 }
 
 export interface FoliageInstance {
   readonly anchor: Pair;
-  readonly durationSeconds: number;
   readonly id: string;
-  readonly phaseSeconds: number;
+  readonly minimumTier: FoliageDetailTier;
+  readonly mirror?: boolean;
   readonly resourceId: FoliageResource["id"];
   readonly scale: number;
 }
 
-export const NINJAONE_FOLIAGE_POOL_ID = "ninjaone-foliage-pool-r1";
-export const NINJAONE_FOLIAGE_ATLAS_PATH =
-  "/career-world/layers/environment/textures/ninjaone/ninjaone-foliage-atlas-r1.png";
-export const NINJAONE_FOLIAGE_ATLAS_DIMENSIONS = [1254, 1254] as const;
-
-export const NINJAONE_FOLIAGE_RESOURCES: readonly FoliageResource[] =
-  Object.freeze([
-    Object.freeze({
-      crop: Object.freeze([192, 103, 314, 494] as const),
-      id: "street-tree-planter",
-    }),
-    Object.freeze({
-      crop: Object.freeze([676, 88, 485, 539] as const),
-      id: "paired-street-trees",
-    }),
-    Object.freeze({
-      crop: Object.freeze([130, 706, 406, 376] as const),
-      id: "fern-cluster",
-    }),
-    Object.freeze({
-      crop: Object.freeze([670, 627, 468, 513] as const),
-      id: "flowering-hedge",
-    }),
-  ]);
-
-const KAIZEN_PLATE_ORIGIN = [0.25925, 0.135737] as const;
-const KAIZEN_PLATE_SPAN = [0.1065, 0.1893] as const;
-const KAIZEN_PLATE_SIZE = 1254;
-
-function kaizenPlateAnchor(x: number, y: number): Pair {
-  return Object.freeze([
-    KAIZEN_PLATE_ORIGIN[0] + (x / KAIZEN_PLATE_SIZE) * KAIZEN_PLATE_SPAN[0],
-    KAIZEN_PLATE_ORIGIN[1] + (y / KAIZEN_PLATE_SIZE) * KAIZEN_PLATE_SPAN[1],
-  ]);
+export interface FoliageGroupResource {
+  readonly id: string;
+  readonly presentation:
+    | "wall-border"
+    | "understory"
+    | "natural-copse";
+  readonly resourceId: FoliageResource["id"];
+  readonly visualPlantCount: number;
 }
 
-export const KAIZEN_FOLIAGE_INSTANCES: readonly FoliageInstance[] =
-  Object.freeze([
-    {
-      anchor: kaizenPlateAnchor(276, 342),
-      durationSeconds: 6.4,
-      id: "kaizen-tree-01",
-      phaseSeconds: -1.1,
-      resourceId: "street-tree-planter",
-      scale: 0.025,
+export interface FoliageGroupInstance {
+  readonly anchor: Pair;
+  readonly groupId: FoliageGroupResource["id"];
+  readonly id: string;
+  readonly minimumTier: FoliageDetailTier;
+  readonly mirror?: boolean;
+  readonly scale: number;
+}
+
+interface RawFoliageInstance {
+  readonly id: string;
+  readonly resourceId: string;
+  readonly anchor: number[];
+  readonly scale: number;
+  readonly minimumTier: string;
+  readonly mirror?: boolean;
+}
+
+if (
+  manifest.schemaVersion !== 1
+  || manifest.id !== "career-world/kaizen-agent/environment-runtime@r1"
+  || manifest.registrationRef !== KAIZEN_CITY_REGISTRATION
+  || manifest.placementBasis !== "base-layout-r2-curated-environment-anchor-plate"
+) {
+  throw new TypeError("Kaizen foliage placement manifest is invalid.");
+}
+
+export const NINJAONE_FOLIAGE_POOL_ID = manifest.poolId;
+export const KAIZEN_FOLIAGE_LAYOUT_ID = manifest.id;
+export const KAIZEN_FOLIAGE_PLACEMENT_BASIS = manifest.placementBasis;
+export const NINJAONE_FOLIAGE_RESOURCES: readonly FoliageResource[] =
+  Object.freeze(manifest.resources.map((definition) => {
+    if (
+      !definition.atlasPath.startsWith(
+        "/career-world/shared-assets/environment/foliage/",
+      )
+      || definition.atlasDimensions.length !== 2
+      || definition.crop.length !== 4
+      || !["tree", "ground-cover", "hedge", "copse"].includes(
+        definition.presentation,
+      )
+    ) {
+      throw new TypeError(`Invalid shared foliage resource ${definition.id}.`);
+    }
+    return Object.freeze({
+      atlasDimensions: Object.freeze([
+        definition.atlasDimensions[0],
+        definition.atlasDimensions[1],
+      ] as Pair),
+      atlasPath: definition.atlasPath,
+      canopySplit: definition.canopySplit,
+      crop: Object.freeze([
+        definition.crop[0],
+        definition.crop[1],
+        definition.crop[2],
+        definition.crop[3],
+      ] as const),
+      durationSeconds: definition.durationSeconds,
+      id: definition.id,
+      motionScale: definition.motionScale,
+      phaseSeconds: definition.phaseSeconds,
+      presentation: definition.presentation as FoliageResource["presentation"],
+    });
+  }));
+
+export const KAIZEN_FOLIAGE_GROUP_RESOURCES:
+readonly FoliageGroupResource[] = Object.freeze(
+  manifest.groupResources.map((definition) => Object.freeze({
+    id: definition.id,
+    presentation: definition.presentation as FoliageGroupResource["presentation"],
+    resourceId: definition.resourceId,
+    visualPlantCount: definition.visualPlantCount,
+  })),
+);
+
+const KAIZEN_PLATE_SIZE = KAIZEN_CITY_PLATE_DIMENSIONS[0];
+
+if (KAIZEN_PLATE_SIZE !== KAIZEN_CITY_PLATE_DIMENSIONS[1]) {
+  throw new TypeError("Kaizen foliage registration must stay square.");
+}
+
+function kaizenPlateAnchor(x: number, y: number): Pair {
+  return kaizenRegistrationPointToWorld([x, y]);
+}
+
+function groupInstance(
+  id: string,
+  groupId: FoliageGroupResource["id"],
+  x: number,
+  y: number,
+  scale: number,
+  minimumTier: FoliageGroupInstance["minimumTier"],
+  mirror = false,
+): FoliageGroupInstance {
+  return Object.freeze({
+    anchor: kaizenPlateAnchor(x, y),
+    groupId,
+    id,
+    minimumTier,
+    mirror,
+    scale,
+  });
+}
+
+function singularInstance(
+  id: string,
+  resourceId: FoliageResource["id"],
+  x: number,
+  y: number,
+  scale: number,
+  minimumTier: FoliageInstance["minimumTier"],
+  mirror = false,
+): FoliageInstance {
+  return Object.freeze({
+    anchor: kaizenPlateAnchor(x, y),
+    id,
+    minimumTier,
+    mirror,
+    resourceId,
+    scale,
+  });
+}
+
+function foliageTier(value: string): FoliageDetailTier {
+  if (value !== "capital" && value !== "site" && value !== "close") {
+    throw new TypeError(`Unknown Kaizen foliage detail tier: ${value}`);
+  }
+  return value;
+}
+
+const authoredGroupInstances = Object.freeze(
+  manifest.groupInstances.map((definition) => {
+    if (
+      !KAIZEN_FOLIAGE_GROUP_RESOURCES.some(({ id }) => (
+        id === definition.groupId
+      ))
+      || definition.anchor.length !== 2
+      || definition.anchor.some((value) => (
+        !Number.isFinite(value) || value < 0 || value > KAIZEN_PLATE_SIZE
+      ))
+      || !Number.isFinite(definition.scale)
+      || definition.scale <= 0
+    ) {
+      throw new TypeError(`Invalid Kaizen foliage group ${definition.id}.`);
+    }
+    return Object.freeze({
+      forest: definition.forest,
+      instance: groupInstance(
+        definition.id,
+        definition.groupId as FoliageGroupResource["id"],
+        definition.anchor[0],
+        definition.anchor[1],
+        definition.scale,
+        foliageTier(definition.minimumTier),
+        definition.mirror,
+      ),
+    });
+  }),
+);
+
+export const KAIZEN_FOLIAGE_GROUP_INSTANCES:
+readonly FoliageGroupInstance[] = Object.freeze(
+  authoredGroupInstances.flatMap(({ forest, instance }) => (
+    forest ? [] : [instance]
+  )),
+);
+
+export const KAIZEN_FOREST_GROUP_INSTANCES:
+readonly FoliageGroupInstance[] = Object.freeze(
+  authoredGroupInstances.flatMap(({ forest, instance }) => (
+    forest ? [instance] : []
+  )),
+);
+
+export const KAIZEN_FOLIAGE_SINGULAR_INSTANCES:
+readonly FoliageInstance[] = Object.freeze(
+  (manifest.singularInstances as readonly RawFoliageInstance[]).map(
+    (definition) => {
+    if (
+      !NINJAONE_FOLIAGE_RESOURCES.some(({ id }) => (
+        id === definition.resourceId
+      ))
+      || definition.anchor.length !== 2
+      || definition.anchor.some((value) => (
+        !Number.isFinite(value) || value < 0 || value > KAIZEN_PLATE_SIZE
+      ))
+      || !Number.isFinite(definition.scale)
+      || definition.scale <= 0
+    ) {
+      throw new TypeError(`Invalid Kaizen singular foliage ${definition.id}.`);
+    }
+    return singularInstance(
+      definition.id,
+      definition.resourceId as FoliageResource["id"],
+      definition.anchor[0],
+      definition.anchor[1],
+      definition.scale,
+      foliageTier(definition.minimumTier),
+      definition.mirror,
+    );
     },
-    {
-      anchor: kaizenPlateAnchor(1010, 385),
-      durationSeconds: 6.9,
-      id: "kaizen-tree-02",
-      phaseSeconds: -4.2,
-      resourceId: "street-tree-planter",
-      scale: 0.023,
-    },
-    {
-      anchor: kaizenPlateAnchor(302, 781),
-      durationSeconds: 5.9,
-      id: "kaizen-tree-03",
-      phaseSeconds: -2.8,
-      resourceId: "street-tree-planter",
-      scale: 0.024,
-    },
-    {
-      anchor: kaizenPlateAnchor(969, 864),
-      durationSeconds: 6.7,
-      id: "kaizen-tree-04",
-      phaseSeconds: -5.4,
-      resourceId: "street-tree-planter",
-      scale: 0.022,
-    },
-    {
-      anchor: kaizenPlateAnchor(535, 484),
-      durationSeconds: 7.1,
-      id: "kaizen-pair-01",
-      phaseSeconds: -3.3,
-      resourceId: "paired-street-trees",
-      scale: 0.019,
-    },
-    {
-      anchor: kaizenPlateAnchor(744, 675),
-      durationSeconds: 6.2,
-      id: "kaizen-pair-02",
-      phaseSeconds: -0.7,
-      resourceId: "paired-street-trees",
-      scale: 0.018,
-    },
-    {
-      anchor: kaizenPlateAnchor(190, 632),
-      durationSeconds: 5.4,
-      id: "kaizen-fern-01",
-      phaseSeconds: -3.9,
-      resourceId: "fern-cluster",
-      scale: 0.02,
-    },
-    {
-      anchor: kaizenPlateAnchor(1090, 692),
-      durationSeconds: 5.8,
-      id: "kaizen-fern-02",
-      phaseSeconds: -1.8,
-      resourceId: "fern-cluster",
-      scale: 0.019,
-    },
-    {
-      anchor: kaizenPlateAnchor(623, 1044),
-      durationSeconds: 5.2,
-      id: "kaizen-fern-03",
-      phaseSeconds: -4.7,
-      resourceId: "fern-cluster",
-      scale: 0.018,
-    },
-    {
-      anchor: kaizenPlateAnchor(421, 895),
-      durationSeconds: 7.3,
-      id: "kaizen-hedge-01",
-      phaseSeconds: -2.1,
-      resourceId: "flowering-hedge",
-      scale: 0.019,
-    },
-    {
-      anchor: kaizenPlateAnchor(850, 958),
-      durationSeconds: 6.6,
-      id: "kaizen-hedge-02",
-      phaseSeconds: -5.6,
-      resourceId: "flowering-hedge",
-      scale: 0.018,
-    },
-    {
-      anchor: kaizenPlateAnchor(740, 318),
-      durationSeconds: 7,
-      id: "kaizen-hedge-03",
-      phaseSeconds: -0.4,
-      resourceId: "flowering-hedge",
-      scale: 0.017,
-    },
-  ].map((instance) => Object.freeze(instance)));
+  ),
+);
 
 const RESOURCE_BY_ID = new Map(
-  NINJAONE_FOLIAGE_RESOURCES.map((resource) => [resource.id, resource]),
+  NINJAONE_FOLIAGE_RESOURCES.map((definition) => [definition.id, definition]),
+);
+const GROUP_RESOURCE_BY_ID = new Map(
+  KAIZEN_FOLIAGE_GROUP_RESOURCES.map((definition) => [
+    definition.id,
+    definition,
+  ]),
 );
 
 export function resolveNinjaOneFoliageResource(
   id: FoliageResource["id"],
 ): FoliageResource {
-  const resource = RESOURCE_BY_ID.get(id);
-  if (!resource) {
+  const definition = RESOURCE_BY_ID.get(id);
+  if (!definition) {
     throw new Error(`Unknown NinjaOne foliage resource: ${id}`);
   }
-  return resource;
+  return definition;
+}
+
+export function resolveKaizenFoliageGroupResource(
+  id: FoliageGroupResource["id"],
+): FoliageGroupResource {
+  const definition = GROUP_RESOURCE_BY_ID.get(id);
+  if (!definition) {
+    throw new Error(`Unknown Kaizen foliage group resource: ${id}`);
+  }
+  return definition;
 }

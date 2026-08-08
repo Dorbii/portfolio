@@ -1,8 +1,8 @@
-"""Build the NinjaOne project and shared skill structure sprites.
+"""Build the shared NinjaOne skill structure sprites.
 
-The authored contact sheets are source artifacts. Runtime assets are exact,
-transparent cell crops so every project and skill keeps one stable pixel grid
-and can be positioned by manifest data without runtime image processing.
+The authored contact sheet is a source artifact. Runtime assets are exact,
+transparent cell crops so every skill keeps one stable pixel grid and can be
+positioned by manifest data without runtime image processing.
 """
 
 from __future__ import annotations
@@ -16,18 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 STRUCTURES_ROOT = (
     ROOT / "public" / "career-world" / "layers" / "structures"
 )
-PROJECT_SOURCE = (
-    STRUCTURES_ROOT / "sources" / "ninjaone-project-kit-alpha-r1.png"
-)
 SKILL_SOURCE = (
     STRUCTURES_ROOT / "sources" / "universal-skill-kit-alpha-r1.png"
 )
 
-PROJECT_OUTPUTS = (
-    "kaizen-agent-r1.png",
-    "vendy-r1.png",
-    "kaizen-metrics-r1.png",
-)
 SKILL_OUTPUTS = (
     "safe-writes-r1.png",
     "data-contracts-r1.png",
@@ -80,12 +72,6 @@ def write_cells(
 
 
 def main() -> None:
-    write_cells(
-        PROJECT_SOURCE,
-        2,
-        STRUCTURES_ROOT / "textures" / "projects",
-        PROJECT_OUTPUTS,
-    )
     write_cells(
         SKILL_SOURCE,
         3,

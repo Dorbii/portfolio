@@ -35,10 +35,7 @@ OUTPUT_SIZE = 1254
 GENERATED_CROP_SIZE = 300
 INDEPENDENT_CROP_SIZE = 368
 NINJAONE_SITE_SOURCE_CROPS = {
-    "capital-ninjaone": (3310, 698, 3610, 998),
     "project-kaizen-agent": (1428, 601, 1648, 821),
-    "project-vendy": (2298, 568, 2518, 788),
-    "project-kaizen-metrics": (4304, 643, 4524, 863),
 }
 
 

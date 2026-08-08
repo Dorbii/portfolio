@@ -35,6 +35,19 @@ export interface TownFabricInstance {
   readonly blockIds: readonly string[];
 }
 
+interface RawTownFabricInstance {
+  readonly id: string;
+  readonly ownerKind: string;
+  readonly ownerId: string;
+  readonly assetPath: string;
+  readonly sourceDimensions: number[];
+  readonly worldBounds: {
+    readonly origin: number[];
+    readonly span: number[];
+  };
+  readonly blockIds: string[];
+}
+
 export const TOWN_FABRIC_NODE_POLICY: DetailNodePolicy = Object.freeze({
   minimumTier: "capital",
 });
@@ -78,7 +91,10 @@ if (
 
 const expectedOwnerIds = new Set([
   ...PROJECT_STRUCTURES
-    .filter(({ territory }) => territory.id === manifest.territoryId)
+    .filter(({ territory, id }) => (
+      territory.id === manifest.territoryId
+      && id !== "project-kaizen-agent"
+    ))
     .map(({ id }) => id),
   ...CAPITAL_STRUCTURES
     .filter(({ territory }) => territory.id === manifest.territoryId)
@@ -90,7 +106,7 @@ const ownerIds = new Set<string>();
 
 export const TOWN_FABRIC_INSTANCES:
 readonly TownFabricInstance[] = Object.freeze(
-  manifest.instances.map((instance) => {
+  (manifest.instances as readonly RawTownFabricInstance[]).map((instance) => {
     if (
       instance.id.trim().length === 0
       || instanceIds.has(instance.id)

@@ -26,7 +26,16 @@ SLOPE_FIELD = LAND_ROOT / "fields" / "terrain-slope-r4.png"
 LOWLAND_MATERIAL = LAND_ROOT / "materials" / "close-ground-r1.png"
 ROCK_MATERIAL = LAND_ROOT / "materials" / "close-rock-r1.png"
 OUTPUT_ROOT = LAND_ROOT / "tiles" / "stream-r3"
-MANIFEST = LAND_ROOT / "manifests" / "terrain-stream-tiles-r3.json"
+AUTHORING_MANIFEST = (
+    ROOT
+    / "scripts"
+    / "assets"
+    / "career-world"
+    / "terrain-stream-tiles-authoring-r3.json"
+)
+RUNTIME_MANIFEST = (
+    LAND_ROOT / "manifests" / "terrain-stream-runtime-r4.json"
+)
 AUTHORED_MOUNTAIN_REFERENCES = {
     (2, 3): (
         LAND_ROOT
@@ -469,6 +478,53 @@ def write_json(path: Path, payload: object) -> None:
     temporary.replace(path)
 
 
+def write_compact_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(f"{path.suffix}.tmp")
+    temporary.write_text(
+        json.dumps(payload, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
+
+
+def compile_runtime_manifest(authoring: dict[str, object]) -> dict[str, object]:
+    if (
+        authoring.get("schemaVersion") != 3
+        or authoring.get("id") != "career-world/terrain-stream-tiles@r3"
+        or authoring.get("coordinateSpace") != "normalized-world-top-left"
+    ):
+        raise ValueError("Terrain stream authoring manifest is invalid.")
+    runtime_tiles = []
+    for tile in authoring["tiles"]:
+        runtime_sources = {
+            tier: {
+                "path": source["path"],
+                "dimensions": source["dimensions"],
+                "decodedBytes": source["decodedBytes"],
+            }
+            for tier, source in tile["sources"].items()
+        }
+        runtime_tiles.append({
+            "id": tile["id"],
+            "minimumTier": tile["minimumTier"],
+            "sources": runtime_sources,
+            "worldBounds": tile["worldBounds"],
+        })
+    return {
+        "schemaVersion": 1,
+        "id": "career-world/terrain-stream-runtime@r4",
+        "coordinateSpace": authoring["coordinateSpace"],
+        "streaming": authoring["streaming"],
+        "tiles": runtime_tiles,
+    }
+
+
+def write_manifest_pair(authoring: dict[str, object]) -> None:
+    write_json(AUTHORING_MANIFEST, authoring)
+    write_compact_json(RUNTIME_MANIFEST, compile_runtime_manifest(authoring))
+
+
 def build_tile(
     source: Image.Image,
     bounds: tuple[int, int, int, int],
@@ -555,7 +611,7 @@ def arguments() -> argparse.Namespace:
         type=parse_tile,
         help=(
             "Build one authored COLUMN,ROW parent and its four child stream "
-            "tiles for visual iteration without rewriting the manifest."
+            "tiles and refresh only their manifest records."
         ),
     )
     selection.add_argument(
@@ -565,6 +621,11 @@ def arguments() -> argparse.Namespace:
             "Build one zero-based INDEX/COUNT shard without rewriting the "
             "manifest."
         ),
+    )
+    selection.add_argument(
+        "--compile-manifest-only",
+        action="store_true",
+        help="Compile the compact runtime index without rebuilding tile images.",
     )
     return parser.parse_args()
 
@@ -578,11 +639,47 @@ def save_webp(image: Image.Image, output: Path) -> None:
         method=4,
         exact=True,
     )
-    temporary.replace(output)
+    try:
+        temporary.replace(output)
+    except PermissionError:
+        # Files produced by a prior Windows sandbox identity can be writable
+        # without being replaceable. Preserve the atomic path where possible,
+        # but fall back to an in-place overwrite so a selected tile rebuild
+        # does not strand the freshly rendered asset in a .tmp file.
+        output.write_bytes(temporary.read_bytes())
+        temporary.unlink()
 
 
 def public_path(path: Path) -> str:
     return "/" + path.relative_to(ROOT / "public").as_posix()
+
+
+def refresh_tile_manifest(
+    parent: tuple[int, int],
+    tile_records: list[tuple[int, int, dict[str, object]]],
+) -> None:
+    """Replace one selected parent's child records without a full rebuild."""
+
+    payload = json.loads(AUTHORING_MANIFEST.read_text(encoding="utf-8"))
+    column, row = parent
+    expected_ids = {
+        f"close-{column * CHILD_COLUMNS + child_column}-"
+        f"{row * CHILD_ROWS + child_row}"
+        for child_row in range(CHILD_ROWS)
+        for child_column in range(CHILD_COLUMNS)
+    }
+    retained = [
+        tile
+        for tile in payload["tiles"]
+        if tile["id"] not in expected_ids
+    ]
+    retained.extend(record for _, _, record in tile_records)
+    retained.sort(key=lambda tile: (
+        tile["worldBounds"]["origin"][1],
+        tile["worldBounds"]["origin"][0],
+    ))
+    payload["tiles"] = retained
+    write_manifest_pair(payload)
 
 
 def derive_capital_variant(
@@ -600,6 +697,15 @@ def derive_capital_variant(
 
 def main() -> None:
     options = arguments()
+
+    if options.compile_manifest_only:
+        payload = json.loads(AUTHORING_MANIFEST.read_text(encoding="utf-8"))
+        write_compact_json(RUNTIME_MANIFEST, compile_runtime_manifest(payload))
+        print(
+            f"Compiled {len(payload['tiles'])} terrain records into the compact "
+            "runtime index."
+        )
+        return
 
     source = Image.open(SOURCE).convert("RGBA")
     # The canonical field is an 8-bit Phase 3 artifact. A small source-space
@@ -820,7 +926,14 @@ def main() -> None:
                 flush=True,
             )
 
-    if options.tile or options.shard:
+    if options.tile:
+        refresh_tile_manifest(options.tile, tile_records)
+        print(
+            "Built selected streamed land tiles and refreshed their manifest "
+            "records."
+        )
+        return
+    if options.shard:
         print(
             "Built selected streamed land tiles without rewriting the manifest."
         )
@@ -833,7 +946,7 @@ def main() -> None:
             key=lambda record: (record[0], record[1]),
         )
     ]
-    write_json(MANIFEST, {
+    write_manifest_pair({
         "schemaVersion": 3,
         "id": "career-world/terrain-stream-tiles@r3",
         "status": "phase-6-close-detail-foundation",

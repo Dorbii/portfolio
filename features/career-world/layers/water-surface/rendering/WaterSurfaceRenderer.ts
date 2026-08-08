@@ -9,6 +9,7 @@ import {
 } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
 import {
+  NINJAONE_STREAM_REGISTRATION,
   WATER_ASSETS,
   WATER_TERRITORY_DETAIL,
 } from "../model/assets";
@@ -53,6 +54,7 @@ const TEXTURE_PATHS = [
   ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp"],
   ["coastMaterial", WATER_ASSETS.coastMaterial, "clamp"],
   ["hydrology", WATER_ASSETS.hydrology, "clamp"],
+  ["ninjaOneStreamFlow", WATER_ASSETS.ninjaOneStreamFlow, "clamp"],
 ] as const;
 const DIRECTIONAL_ALBEDO_UNIT = TEXTURE_PATHS.length;
 
@@ -64,6 +66,7 @@ const SAMPLER_UNIFORMS = Object.freeze({
   coastGeometry: "u_coastGeometry",
   coastMaterial: "u_coastMaterial",
   hydrology: "u_hydrology",
+  ninjaOneStreamFlow: "u_ninjaOneStreamFlow",
 });
 
 const UNIFORM_NAMES = [
@@ -83,6 +86,10 @@ const UNIFORM_NAMES = [
   "u_territoryLod",
   "u_capitalLod",
   "u_siteLod",
+  "u_closeAssetsReady",
+  "u_ninjaOneStreamOrigin",
+  "u_ninjaOneStreamSpan",
+  "u_ninjaOneStreamTexel",
   "u_microFrequency",
   "u_territoryLineStrength",
   "u_territoryNormalStrength",
@@ -317,6 +324,23 @@ export class WaterSurfaceRenderer {
     gl.uniform1f(
       this.uniforms.u_siteLod,
       detailState.capitalToSite,
+    );
+    gl.uniform1f(
+      this.uniforms.u_closeAssetsReady,
+      detailState.shouldLoadCloseAssets ? 1 : 0,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_ninjaOneStreamOrigin,
+      NINJAONE_STREAM_REGISTRATION.worldOrigin,
+    );
+    gl.uniform2fv(
+      this.uniforms.u_ninjaOneStreamSpan,
+      NINJAONE_STREAM_REGISTRATION.worldSpan,
+    );
+    gl.uniform2f(
+      this.uniforms.u_ninjaOneStreamTexel,
+      1 / NINJAONE_STREAM_REGISTRATION.textureDimensions[0],
+      1 / NINJAONE_STREAM_REGISTRATION.textureDimensions[1],
     );
     gl.uniform2fv(
       this.uniforms.u_microFrequency,

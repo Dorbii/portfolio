@@ -107,11 +107,16 @@ export const PROJECT_STRUCTURES: readonly ProjectStructure[] = Object.freeze(
         `Project ${node.id} is missing its territory-owned contact tile.`,
       );
     }
-    if (
-      !node.assetPath.startsWith(
-        "/career-world/layers/structures/textures/projects/",
+    const isProjectTexture = node.assetPath.startsWith(
+      "/career-world/layers/structures/textures/projects/",
+    );
+    const isRegisteredKaizenSharedTexture = (
+      node.id === "project-kaizen-agent"
+      && node.assetPath.startsWith(
+        "/career-world/layers/structures/textures/semantic/kaizen-agent/",
       )
-    ) {
+    );
+    if (!isProjectTexture && !isRegisteredKaizenSharedTexture) {
       throw new TypeError(`Project ${node.id} has an invalid asset path.`);
     }
 
