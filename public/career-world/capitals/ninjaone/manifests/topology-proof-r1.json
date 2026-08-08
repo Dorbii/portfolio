@@ -1,0 +1,650 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/topology-proof@r1",
+  "status": "qa-only",
+  "coordinateSpace": "registered-plate-pixels",
+  "registration": {
+    "id": "ninjaone-capital-b2-c1-c2-terrain-conformed-topology@r1",
+    "gridCells": ["B2", "C1", "C2"],
+    "artboard": [1800, 1350],
+    "terrainAuthority": {
+      "worldLayoutId": "career-world/world-land-layout@r1",
+      "territoryManifestId": "career-world/world-territories@r4",
+      "territoryId": "ninjaone",
+      "landMaskPath": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "heightFieldPath": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "slopeFieldPath": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "elevationOverlayPath": "/career-world/layers/territory-landform/overlays/terrain-contours-r4-detail-4x.png",
+      "landThreshold": 128,
+      "buildableSlopeThreshold": 112,
+      "minimumCityLandCoverage": 1,
+      "minimumCityBuildableCoverage": 0.8,
+      "minimumPlotLandCoverage": 1,
+      "minimumPlotBuildableCoverage": 0.8
+    }
+  },
+  "capitalProgram": {
+    "territoryId": "ninjaone",
+    "cityRole": "capital",
+    "projectPlotsAllowed": false,
+    "skillProgramId": "career-world/capitals/ninjaone/skill-program@r1",
+    "minimumDecorativePlotCount": 6
+  },
+  "planningEnvelope": {
+    "id": "ninjaone-capital-b2-c1-c2-planning-envelope@r1",
+    "polygon": [
+      [860, 20],
+      [1380, 0],
+      [1800, 180],
+      [1800, 1280],
+      [1360, 1350],
+      [660, 1340],
+      [0, 1160],
+      [0, 650],
+      [700, 563],
+      [857.143, 562.5]
+    ]
+  },
+  "perspective": {
+    "projection": "parallel-isometric",
+    "primaryAxisDegrees": 16,
+    "secondaryAxisDegrees": -16,
+    "verticalsRemainVertical": true
+  },
+  "ownership": {
+    "base": [
+      "terrain-grades",
+      "retaining-walls",
+      "roads",
+      "walkways",
+      "empty-building-plots",
+      "rail-right-of-way-grade"
+    ],
+    "transportation": [
+      "rails",
+      "ties",
+      "switches",
+      "signals",
+      "station-building",
+      "platforms",
+      "train"
+    ],
+    "environment": [
+      "static-filler-foliage",
+      "shared-animated-foliage",
+      "rocks"
+    ],
+    "integration": [
+      "foundation-seams",
+      "edge-overlaps",
+      "contact-detail"
+    ],
+    "lighting": [
+      "dynamic-cast-shadows",
+      "dynamic-contact-occlusion"
+    ]
+  },
+  "boundary": [
+    [1040, 130],
+    [1380, 80],
+    [1730, 220],
+    [1780, 780],
+    [1680, 1120],
+    [1300, 1320],
+    [720, 1300],
+    [120, 1220],
+    [80, 850],
+    [180, 640],
+    [700, 570],
+    [857.143, 562.5],
+    [900, 300]
+  ],
+  "elevationBands": [
+    {
+      "id": "north-citadel-terrace",
+      "elevation": 2,
+      "polygon": [
+        [1040, 130],
+        [1380, 80],
+        [1730, 220],
+        [1760, 520],
+        [1450, 600],
+        [1050, 540],
+        [857.143, 562.5],
+        [900, 300]
+      ]
+    },
+    {
+      "id": "station-civic-terrace",
+      "elevation": 1,
+      "polygon": [
+        [180, 640],
+        [700, 570],
+        [857.143, 562.5],
+        [1050, 540],
+        [1450, 600],
+        [1760, 520],
+        [1780, 780],
+        [1680, 1010],
+        [1300, 1040],
+        [760, 980],
+        [240, 1050],
+        [80, 850]
+      ]
+    },
+    {
+      "id": "south-market-terrace",
+      "elevation": 0,
+      "polygon": [
+        [80, 850],
+        [240, 1050],
+        [760, 980],
+        [1300, 1040],
+        [1680, 1010],
+        [1680, 1120],
+        [1300, 1320],
+        [720, 1300],
+        [120, 1220]
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "apis-integration",
+      "elevationBandId": "north-citadel-terrace",
+      "labelPoint": [1230, 165]
+    },
+    {
+      "id": "application-development",
+      "elevationBandId": "station-civic-terrace",
+      "labelPoint": [900, 970]
+    },
+    {
+      "id": "infrastructure-data",
+      "elevationBandId": "south-market-terrace",
+      "labelPoint": [920, 1285]
+    }
+  ],
+  "retainingWalls": [
+    {
+      "id": "upper-west-wall",
+      "elevationAbove": 2,
+      "elevationBelow": 1,
+      "points": [[857.143, 562.5], [880, 560]]
+    },
+    {
+      "id": "upper-center-west-wall",
+      "elevationAbove": 2,
+      "elevationBelow": 1,
+      "points": [[980, 548], [1150, 556]]
+    },
+    {
+      "id": "upper-center-east-wall",
+      "elevationAbove": 2,
+      "elevationBelow": 1,
+      "points": [[1280, 574], [1500, 594], [1630, 555]]
+    },
+    {
+      "id": "lower-far-west-wall",
+      "elevationAbove": 1,
+      "elevationBelow": 0,
+      "points": [[80, 850], [125, 920]]
+    },
+    {
+      "id": "lower-west-center-wall",
+      "elevationAbove": 1,
+      "elevationBelow": 0,
+      "points": [[280, 1045], [760, 980], [940, 1000]]
+    },
+    {
+      "id": "lower-east-center-wall",
+      "elevationAbove": 1,
+      "elevationBelow": 0,
+      "points": [[1100, 1018], [1400, 1020]]
+    },
+    {
+      "id": "lower-far-east-wall",
+      "elevationAbove": 1,
+      "elevationBelow": 0,
+      "points": [[1580, 1018], [1680, 1010]]
+    }
+  ],
+  "roads": [
+    {
+      "id": "south-gate-approach",
+      "kind": "arterial",
+      "fromElevation": 0,
+      "toElevation": 0,
+      "width": 62,
+      "points": [[1020, 1350], [1020, 1260], [1020, 1200]]
+    },
+    {
+      "id": "lower-market-circuit",
+      "kind": "collector",
+      "fromElevation": 0,
+      "toElevation": 0,
+      "width": 52,
+      "closed": true,
+      "points": [[1020, 1200], [650, 1260], [300, 1160], [260, 1070], [720, 1040], [1080, 1090], [1500, 1050], [1600, 1160], [1350, 1270], [1020, 1200]]
+    },
+    {
+      "id": "west-lower-ramp",
+      "kind": "ramp",
+      "fromElevation": 0,
+      "toElevation": 1,
+      "width": 54,
+      "maximumGradePercent": 7,
+      "points": [[300, 1160], [220, 1100], [170, 1010], [150, 900], [180, 760]]
+    },
+    {
+      "id": "middle-civic-circuit",
+      "kind": "collector",
+      "fromElevation": 1,
+      "toElevation": 1,
+      "width": 54,
+      "closed": true,
+      "points": [[1080, 880], [700, 930], [300, 900], [180, 760], [480, 650], [900, 660], [1320, 650], [1660, 720], [1580, 900], [1200, 940], [1080, 880]]
+    },
+    {
+      "id": "east-upper-ramp",
+      "kind": "ramp",
+      "fromElevation": 1,
+      "toElevation": 2,
+      "width": 54,
+      "maximumGradePercent": 7,
+      "points": [[1660, 720], [1740, 640], [1740, 520], [1660, 410]]
+    },
+    {
+      "id": "upper-citadel-circuit",
+      "kind": "collector",
+      "fromElevation": 2,
+      "toElevation": 2,
+      "width": 50,
+      "closed": true,
+      "points": [[1320, 430], [1100, 500], [920, 430], [980, 260], [1260, 180], [1580, 260], [1660, 410], [1500, 500], [1320, 430]]
+    },
+    {
+      "id": "station-forecourt-approach",
+      "kind": "local",
+      "fromElevation": 1,
+      "toElevation": 1,
+      "width": 44,
+      "points": [[1080, 880], [1080, 800], [1040, 760]]
+    }
+  ],
+  "pedestrianLoops": [
+    {
+      "id": "upper-pedestrian-loop",
+      "elevation": 2,
+      "points": [[1320, 450], [1100, 500], [940, 420], [1000, 280], [1260, 210], [1540, 280], [1600, 400], [1480, 470], [1320, 450]]
+    },
+    {
+      "id": "middle-pedestrian-loop",
+      "elevation": 1,
+      "points": [[1040, 760], [700, 850], [340, 850], [220, 740], [500, 670], [900, 700], [1300, 690], [1580, 750], [1500, 850], [1200, 900], [1040, 760]]
+    },
+    {
+      "id": "lower-pedestrian-loop",
+      "elevation": 0,
+      "points": [[1000, 1120], [700, 1180], [360, 1140], [320, 1080], [720, 1060], [1080, 1110], [1450, 1080], [1520, 1160], [1320, 1240], [1000, 1120]]
+    }
+  ],
+  "stairs": [
+    {
+      "id": "upper-central-stair",
+      "fromElevation": 1,
+      "toElevation": 2,
+      "bottomLanding": [1200, 620],
+      "bottomApproach": [[1300, 690], [1200, 620]],
+      "topLanding": [1200, 555],
+      "topApproach": [[1100, 500], [1200, 555]],
+      "width": 54
+    },
+    {
+      "id": "upper-west-garden-stair",
+      "fromElevation": 1,
+      "toElevation": 2,
+      "bottomLanding": [900, 620],
+      "bottomApproach": [[900, 700], [900, 620]],
+      "topLanding": [920, 540],
+      "topApproach": [[940, 420], [920, 540]],
+      "width": 34
+    },
+    {
+      "id": "lower-central-stair",
+      "fromElevation": 0,
+      "toElevation": 1,
+      "bottomLanding": [1030, 1060],
+      "bottomApproach": [[1080, 1110], [1030, 1060]],
+      "topLanding": [1030, 990],
+      "topApproach": [[1200, 900], [1030, 990]],
+      "width": 54
+    },
+    {
+      "id": "lower-east-garden-stair",
+      "fromElevation": 0,
+      "toElevation": 1,
+      "bottomLanding": [1500, 1055],
+      "bottomApproach": [[1450, 1080], [1500, 1055]],
+      "topLanding": [1500, 985],
+      "topApproach": [[1500, 850], [1500, 985]],
+      "width": 34
+    }
+  ],
+  "plots": [
+    {
+      "id": "skill-golang",
+      "label": "Go (Golang)",
+      "skillId": "golang",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[1380, 640], [1435, 605], [1505, 625], [1525, 675], [1470, 715], [1400, 695]],
+      "accessPoint": [1420, 720]
+    },
+    {
+      "id": "skill-grpc-rest",
+      "label": "gRPC / REST",
+      "skillId": "grpc-rest",
+      "districtId": "apis-integration",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 2,
+      "polygon": [[1550, 225], [1620, 195], [1690, 215], [1700, 270], [1630, 300], [1560, 275]],
+      "accessPoint": [1620, 253]
+    },
+    {
+      "id": "skill-openapi-swagger",
+      "label": "OpenAPI / Swagger",
+      "skillId": "openapi-swagger",
+      "districtId": "apis-integration",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 2,
+      "polygon": [[1200, 255], [1270, 225], [1340, 250], [1350, 320], [1280, 350], [1205, 320]],
+      "accessPoint": [1260, 210]
+    },
+    {
+      "id": "skill-mcp",
+      "label": "MCP",
+      "skillId": "mcp",
+      "districtId": "apis-integration",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 2,
+      "polygon": [[1400, 205], [1470, 205], [1530, 240], [1520, 295], [1450, 320], [1390, 275]],
+      "accessPoint": [1450, 258]
+    },
+    {
+      "id": "skill-capability-contracts",
+      "label": "Capability Contracts",
+      "skillId": "capability-contracts",
+      "districtId": "apis-integration",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 2,
+      "polygon": [[1540, 315], [1610, 300], [1680, 335], [1690, 390], [1620, 420], [1550, 390]],
+      "accessPoint": [1600, 400]
+    },
+    {
+      "id": "skill-tool-generation",
+      "label": "Tool Generation",
+      "skillId": "tool-generation",
+      "districtId": "apis-integration",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 2,
+      "polygon": [[1430, 405], [1490, 385], [1550, 415], [1545, 470], [1485, 495], [1425, 465]],
+      "accessPoint": [1480, 470]
+    },
+    {
+      "id": "north-civic-archive",
+      "label": "Civic Archive",
+      "districtId": "apis-integration",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 2,
+      "polygon": [[1225, 405], [1290, 385], [1360, 410], [1360, 475], [1295, 505], [1220, 475]],
+      "accessPoint": [1320, 450]
+    },
+    {
+      "id": "north-observatory",
+      "label": "Observatory",
+      "districtId": "apis-integration",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 2,
+      "polygon": [[1040, 420], [1100, 400], [1170, 425], [1170, 480], [1105, 510], [1035, 480]],
+      "accessPoint": [1100, 500]
+    },
+    {
+      "id": "train-station",
+      "label": "Train Station",
+      "districtId": "application-development",
+      "layerOwner": "transportation",
+      "role": "station",
+      "elevation": 1,
+      "polygon": [[820, 600], [1030, 560], [1270, 590], [1360, 650], [1300, 730], [1040, 760], [820, 690]],
+      "accessPoint": [1040, 760]
+    },
+    {
+      "id": "middle-west-guild-court",
+      "label": "Guild Court",
+      "districtId": "application-development",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 1,
+      "polygon": [[440, 920], [490, 895], [540, 920], [540, 975], [485, 1000], [440, 975]],
+      "accessPoint": [520, 900]
+    },
+    {
+      "id": "skill-typescript",
+      "label": "TypeScript",
+      "skillId": "typescript",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[250, 690], [320, 665], [390, 690], [395, 750], [330, 780], [255, 755]],
+      "accessPoint": [300, 720]
+    },
+    {
+      "id": "skill-react",
+      "label": "React",
+      "skillId": "react",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[265, 785], [335, 765], [405, 790], [410, 835], [345, 860], [275, 840]],
+      "accessPoint": [340, 850]
+    },
+    {
+      "id": "skill-tanstack",
+      "label": "TanStack",
+      "skillId": "tanstack",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[460, 640], [530, 625], [600, 650], [610, 705], [540, 735], [465, 705]],
+      "accessPoint": [500, 670]
+    },
+    {
+      "id": "skill-csharp",
+      "label": "C#",
+      "skillId": "csharp",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[505, 760], [575, 740], [650, 765], [655, 820], [585, 850], [510, 825]],
+      "accessPoint": [700, 850]
+    },
+    {
+      "id": "skill-python",
+      "label": "Python",
+      "skillId": "python",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[540, 875], [610, 855], [685, 880], [690, 935], [620, 965], [545, 935]],
+      "accessPoint": [520, 930]
+    },
+    {
+      "id": "skill-postgresql",
+      "label": "PostgreSQL",
+      "skillId": "postgresql",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[930, 810], [1000, 790], [1070, 815], [1075, 870], [1005, 900], [930, 870]],
+      "accessPoint": [1040, 760]
+    },
+    {
+      "id": "skill-redis",
+      "label": "Redis",
+      "skillId": "redis",
+      "districtId": "application-development",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 1,
+      "polygon": [[1140, 820], [1210, 800], [1285, 825], [1290, 880], [1220, 910], [1145, 880]],
+      "accessPoint": [1200, 900]
+    },
+    {
+      "id": "middle-application-forum",
+      "label": "Application Forum",
+      "districtId": "application-development",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 1,
+      "polygon": [[1370, 770], [1440, 750], [1515, 775], [1520, 830], [1450, 860], [1375, 830]],
+      "accessPoint": [1500, 850]
+    },
+    {
+      "id": "middle-station-market",
+      "label": "Station Market",
+      "districtId": "application-development",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 1,
+      "polygon": [[1580, 690], [1650, 675], [1720, 705], [1715, 760], [1650, 785], [1580, 750]],
+      "accessPoint": [1580, 750]
+    },
+    {
+      "id": "skill-databricks",
+      "label": "Databricks",
+      "skillId": "databricks",
+      "districtId": "infrastructure-data",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 0,
+      "polygon": [[270, 1080], [340, 1060], [415, 1085], [420, 1140], [350, 1170], [275, 1140]],
+      "accessPoint": [360, 1140]
+    },
+    {
+      "id": "skill-aws",
+      "label": "AWS",
+      "skillId": "aws",
+      "districtId": "infrastructure-data",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 0,
+      "polygon": [[480, 1085], [550, 1065], [625, 1090], [630, 1145], [560, 1175], [485, 1145]],
+      "accessPoint": [700, 1180]
+    },
+    {
+      "id": "skill-docker",
+      "label": "Docker",
+      "skillId": "docker",
+      "districtId": "infrastructure-data",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 0,
+      "polygon": [[690, 1150], [755, 1130], [825, 1155], [830, 1210], [765, 1235], [695, 1210]],
+      "accessPoint": [700, 1180]
+    },
+    {
+      "id": "lower-market-core",
+      "label": "Market Hall",
+      "districtId": "infrastructure-data",
+      "layerOwner": "decoration",
+      "role": "decoration",
+      "elevation": 0,
+      "polygon": [[890, 1140], [960, 1120], [1035, 1145], [1040, 1200], [970, 1230], [895, 1200]],
+      "accessPoint": [1000, 1120]
+    },
+    {
+      "id": "skill-vmware",
+      "label": "VMware",
+      "skillId": "vmware",
+      "districtId": "infrastructure-data",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 0,
+      "polygon": [[1120, 1080], [1200, 1060], [1280, 1085], [1285, 1145], [1210, 1175], [1125, 1145]],
+      "accessPoint": [1080, 1110]
+    },
+    {
+      "id": "skill-macstadium",
+      "label": "MacStadium",
+      "skillId": "macstadium",
+      "districtId": "infrastructure-data",
+      "layerOwner": "skill",
+      "role": "skill",
+      "elevation": 0,
+      "polygon": [[1380, 1085], [1450, 1065], [1530, 1090], [1535, 1145], [1460, 1175], [1385, 1145]],
+      "accessPoint": [1520, 1160]
+    }
+  ],
+  "transportation": {
+    "railCorridor": {
+      "id": "intercity-rail-right-of-way",
+      "layerOwner": "transportation",
+      "baseOwnership": "graded-corridor-only",
+      "elevation": 1,
+      "width": 92,
+      "points": [[0, 545], [360, 530], [760, 540], [1120, 520], [1480, 515], [1800, 535]]
+    },
+    "stationPlotId": "train-station",
+    "stationAccessRoadId": "station-forecourt-approach"
+  },
+  "environmentTransitionZones": [
+    {
+      "id": "north-mountain-windbreak",
+      "kind": "forest-edge",
+      "polygon": [[860, 260], [1040, 100], [1380, 40], [1770, 200], [1700, 290], [1400, 160], [1050, 220], [900, 360]]
+    },
+    {
+      "id": "west-mountain-seam",
+      "kind": "terraced-green",
+      "polygon": [[0, 600], [180, 640], [80, 850], [120, 1220], [80, 1180], [0, 1100]]
+    },
+    {
+      "id": "east-foothill-seam",
+      "kind": "terraced-green",
+      "polygon": [[1760, 520], [1800, 500], [1800, 1160], [1680, 1120], [1780, 780]]
+    },
+    {
+      "id": "south-forest-transition",
+      "kind": "forest-edge",
+      "polygon": [[120, 1220], [720, 1300], [1300, 1320], [1680, 1120], [1760, 1240], [1300, 1350], [700, 1340], [80, 1240]]
+    }
+  ],
+  "acceptance": {
+    "baseContainsRailDetail": false,
+    "closedRoadCircuitCount": 3,
+    "closedPedestrianLoopCount": 3,
+    "minimumIndependentElevationConnectors": 4,
+    "maximumRoadGradePercent": 7,
+    "requiresStation": true,
+    "requiresEveryPlotAccess": true,
+    "requiresEveryRoleSkill": true,
+    "allowsProjectPlots": false,
+    "minimumDecorativePlotCount": 6
+  }
+}

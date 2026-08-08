@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/native-detail@r2",
+  "status": "accepted-close-detail",
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "grid": [
+      4,
+      4
+    ],
+    "runtimeTileDimensions": [
+      1440,
+      1080
+    ],
+    "tileArtboard": [
+      360,
+      270
+    ]
+  },
+  "budgets": {
+    "maximumAnimatedNodes": 6,
+    "maximumDecodedBytes": 33554432,
+    "maximumMountedTerrainTiles": 4
+  },
+  "tiles": [
+    {
+      "artboardBounds": {
+        "origin": [
+          720,
+          0
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 2,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r0-c2",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r0-c2-close-native-r2.png?v=d94029be5cf2",
+      "row": 0,
+      "sha256": "D94029BE5CF263C681148F516681F38F1DB301E221751270441CEACB1C9BFF69",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r0-c2-generated-r4.png",
+      "sourceSha256": "C54637121983B4563B300BEB123F44F75E95973FF6EE9B5E839B0A9C8A3C7B74"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          1080,
+          0
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 3,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r0-c3",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r0-c3-close-native-r2.png?v=67736118e550",
+      "row": 0,
+      "sha256": "67736118E550FA170272A156B55B3E8855BB22448EA5A83CF191D8114787DBD7",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r0-c3-generated-r4.png",
+      "sourceSha256": "212533F2A3554170F81130EB67593E3BC9DAF0CC548B11DB6870CB8A248EFA80"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          720,
+          270
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 2,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r1-c2",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r1-c2-close-native-r2.png?v=ee1a9eb38687",
+      "row": 1,
+      "sha256": "EE1A9EB38687DF0F9415C0A555FC2FBAE6494B6CED452A5C60DB6AE539416A16",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r1-c2-generated-r3.png",
+      "sourceSha256": "ED3AC268E8C7D0F9D52799511703F3240995A2C21FDDC199F756836DF704091E"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          1080,
+          270
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 3,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r1-c3",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r1-c3-close-native-r2.png?v=8e60ef6b71fd",
+      "row": 1,
+      "sha256": "8E60EF6B71FDBA55CA2528B95765A2330F4FF82B529C748BDC0D15A490FC10B0",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r1-c3-generated-r3.png",
+      "sourceSha256": "12A48C1E1B483100B554CC68745BEF48579951FCE8AA8B4709F99FD535E9EF7B"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          0,
+          540
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 0,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r2-c0",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r2-c0-close-native-r2.png?v=47e6e4c1ce45",
+      "row": 2,
+      "sha256": "47E6E4C1CE45343D5440653621C1380C000F6E8B2DF29EA879704FF627C4DA0A",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r2-c0-generated-r3.png",
+      "sourceSha256": "4AED2E7AF267ECEA040F65774B0B50D3D8DF735F5CD279DF452626208DEF49C0"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          360,
+          540
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 1,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r2-c1",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r2-c1-close-native-r2.png?v=2423d12e226b",
+      "row": 2,
+      "sha256": "2423D12E226BBFAC42D06D7AE1F6FC276944C4EDE8AE7E997D5BF4370AC016EC",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r2-c1-generated-r3.png",
+      "sourceSha256": "E8AD3DE6A097853DB4CA4E6DC83A65A32476B9BAC72A0699CD953EB56C955C94"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          720,
+          540
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 2,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r2-c2",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r2-c2-close-native-r2.png?v=94363f7b9e74",
+      "row": 2,
+      "sha256": "94363F7B9E74CF7094484F3B4A3CE5BE8FC3AF07E4F960DE44D59B9F1471F971",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r2-c2-generated-r3.png",
+      "sourceSha256": "D59A3039B244A0BE0EEB2105A71C1BE545D1B041330B279FA7E9518C34B3C687"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          1080,
+          540
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 3,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r2-c3",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r2-c3-close-native-r2.png?v=0d0557f71451",
+      "row": 2,
+      "sha256": "0D0557F71451810B2BB989F00A88E81F1314EC316BC320D89F9DFAE321ED432C",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated/r2-c3-generated-r3.png",
+      "sourceSha256": "8D8AE302BB2EFE69FEAB6ECCA0998795EFDBABA0BF521EDBB3DE02BD8163F57B"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          0,
+          810
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 0,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r3-c0",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r3-c0-close-native-r2.png?v=7810b4f1edb2",
+      "row": 3,
+      "sha256": "7810B4F1EDB2F0D2F0DA4F1415585433B77DB6A2B5CA8D02E4AE9C4E723F8AEC",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+      "sourceSha256": "D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          360,
+          810
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 1,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r3-c1",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r3-c1-close-native-r2.png?v=c9b586fedb93",
+      "row": 3,
+      "sha256": "C9B586FEDB9326084160C27C0CAF9C232B33CD1DDE1020689A529E661735ECEB",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png",
+      "sourceSha256": "825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          720,
+          810
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 2,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r3-c2",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r3-c2-close-native-r2.png?v=302b408cc80a",
+      "row": 3,
+      "sha256": "302B408CC80AD30AA7D7A765EB5B99F463917724D6F7824FA582A72AB64F0A0B",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+      "sourceSha256": "DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD"
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          1080,
+          810
+        ],
+        "span": [
+          360,
+          270
+        ]
+      },
+      "column": 3,
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "id": "r3-c3",
+      "path": "/career-world/capitals/ninjaone/environment/tiles/close-native-r2/r3-c3-close-native-r2.png?v=cd908d175fc7",
+      "row": 3,
+      "sha256": "CD908D175FC7970043F8068E27F9976D7BC71B100B3B4D5E42BF2E02281A95D1",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png",
+      "sourceSha256": "8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31"
+    }
+  ],
+  "layers": {
+    "foliage": {
+      "ownership": "canopy-only grouped assets; trunks, rock, and ground remain static",
+      "resources": [
+        {
+          "dimensions": [
+            140,
+            210
+          ],
+          "id": "c2-west-conifer",
+          "opaquePixels": 450,
+          "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r2/c2-west-conifer-r2.png?v=371373a72a14",
+          "sha256": "371373A72A145C9FF079C270B0EB3934EDE13B2F36A43F02129AACCE65388DAE"
+        },
+        {
+          "dimensions": [
+            330,
+            220
+          ],
+          "id": "c2-north-conifer-grove",
+          "opaquePixels": 1547,
+          "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r2/c2-north-conifer-grove-r2.png?v=47eb4784cf7c",
+          "sha256": "47EB4784CF7C1E8EA83E739779502AFFD4C5C6B8AC7FBDEC2E6F1DEE77B940BE"
+        },
+        {
+          "dimensions": [
+            190,
+            250
+          ],
+          "id": "c2-ravine-conifer-pair",
+          "opaquePixels": 682,
+          "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r2/c2-ravine-conifer-pair-r2.png?v=243192db4bed",
+          "sha256": "243192DB4BEDE7B7C68232A98411AC9E02E34A91710E8AC9EE7FC2BA199C6815"
+        },
+        {
+          "dimensions": [
+            240,
+            410
+          ],
+          "id": "c2-falls-conifer-group",
+          "opaquePixels": 1114,
+          "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r2/c2-falls-conifer-group-r2.png?v=977d80f70bdd",
+          "sha256": "977D80F70BDD502DDAC0F479ED14D7187CBF0B46836C7590C84F01F48D764534"
+        },
+        {
+          "dimensions": [
+            420,
+            530
+          ],
+          "id": "c2-south-ravine-grove",
+          "opaquePixels": 4149,
+          "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r2/c2-south-ravine-grove-r2.png?v=61d304a7dc4b",
+          "sha256": "61D304A7DC4BADFBBA236EA07BC84917F9A35DAE327545C197827AECFD1D6EB9"
+        }
+      ],
+      "instances": [
+        {
+          "animation": "canopy-sway",
+          "artboardBounds": {
+            "origin": [
+              360,
+              620
+            ],
+            "span": [
+              35,
+              52.5
+            ]
+          },
+          "id": "c2-west-conifer-instance",
+          "phaseSeconds": -0.8,
+          "resourceId": "c2-west-conifer",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "canopy-sway",
+          "artboardBounds": {
+            "origin": [
+              457.5,
+              540
+            ],
+            "span": [
+              82.5,
+              55
+            ]
+          },
+          "id": "c2-north-conifer-grove-instance",
+          "phaseSeconds": -2.4,
+          "resourceId": "c2-north-conifer-grove",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "canopy-sway",
+          "artboardBounds": {
+            "origin": [
+              520,
+              607.5
+            ],
+            "span": [
+              47.5,
+              62.5
+            ]
+          },
+          "id": "c2-ravine-conifer-pair-instance",
+          "phaseSeconds": -1.5,
+          "resourceId": "c2-ravine-conifer-pair",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "canopy-sway",
+          "artboardBounds": {
+            "origin": [
+              660,
+              652.5
+            ],
+            "span": [
+              60,
+              102.5
+            ]
+          },
+          "id": "c2-falls-conifer-group-instance",
+          "phaseSeconds": -3.2,
+          "resourceId": "c2-falls-conifer-group",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "canopy-sway",
+          "artboardBounds": {
+            "origin": [
+              572.5,
+              677.5
+            ],
+            "span": [
+              105,
+              132.5
+            ]
+          },
+          "id": "c2-south-ravine-grove-instance",
+          "phaseSeconds": -4.1,
+          "resourceId": "c2-south-ravine-grove",
+          "tileId": "r2-c1"
+        }
+      ]
+    },
+    "hydrology": {
+      "ownership": "registered flow field drives the global WebGL water renderer; authored terrain is the static fallback",
+      "flowField": {
+        "dimensions": [
+          1440,
+          1080
+        ],
+        "opaquePixels": 6268,
+        "path": "/career-world/layers/water-surface/fields/ninjaone-stream-flow-r1.png?v=35f2f1352d4e",
+        "sha256": "35F2F1352D4E433D32371A9FB72595472D22C91E4920B91FA80FED8183A20821"
+      },
+      "segments": [
+        {
+          "animation": "tarn-ripple",
+          "crop": [
+            760,
+            90,
+            440,
+            350
+          ],
+          "flowVector": [
+            0,
+            0
+          ],
+          "id": "c2-tarn-ripple",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "waterfall-flow",
+          "crop": [
+            1100,
+            370,
+            340,
+            265
+          ],
+          "flowVector": [
+            0,
+            5
+          ],
+          "id": "c2-west-upper-falls-flow",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "stream-flow",
+          "crop": [
+            1080,
+            635,
+            360,
+            265
+          ],
+          "flowVector": [
+            3,
+            5
+          ],
+          "id": "c2-west-lower-ravine-flow",
+          "tileId": "r2-c1"
+        },
+        {
+          "animation": "stream-flow",
+          "crop": [
+            0,
+            0,
+            520,
+            360
+          ],
+          "flowVector": [
+            -3.5,
+            5
+          ],
+          "id": "c2-east-headwater-flow",
+          "tileId": "r2-c2"
+        },
+        {
+          "animation": "stream-flow",
+          "crop": [
+            0,
+            360,
+            420,
+            360
+          ],
+          "flowVector": [
+            -3,
+            5
+          ],
+          "id": "c2-east-mid-ravine-flow",
+          "tileId": "r2-c2"
+        },
+        {
+          "animation": "stream-flow",
+          "crop": [
+            0,
+            720,
+            300,
+            360
+          ],
+          "flowVector": [
+            -2.5,
+            5
+          ],
+          "id": "c2-east-lower-ravine-flow",
+          "tileId": "r2-c2"
+        }
+      ]
+    },
+    "dynamicShadows": {
+      "enabled": false,
+      "ownership": "excluded from the terrain MVP"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/shared-foliage@r1",
+  "status": "shared-runtime-pool",
+  "ownership": "world-shared-assets/environment/foliage",
+  "animationContract": "split-canopy-world-wind",
+  "resources": [
+    {
+      "id": "narrow-deciduous",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-tree-atlas-r2.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [130, 30, 420, 555],
+      "canopySplit": 0.7,
+      "durationSeconds": 7.1,
+      "motionScale": 0.82,
+      "phaseSeconds": -1.1,
+      "presentation": "tree",
+      "visualPlantCount": 1
+    },
+    {
+      "id": "broad-deciduous",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-tree-atlas-r2.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [640, 30, 540, 555],
+      "canopySplit": 0.72,
+      "durationSeconds": 7.8,
+      "motionScale": 0.68,
+      "phaseSeconds": -4.2,
+      "presentation": "tree",
+      "visualPlantCount": 1
+    },
+    {
+      "id": "compact-conifer",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-tree-atlas-r2.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [150, 630, 360, 560],
+      "canopySplit": 0.82,
+      "durationSeconds": 8.4,
+      "motionScale": 0.5,
+      "phaseSeconds": -2.8,
+      "presentation": "tree",
+      "visualPlantCount": 1
+    },
+    {
+      "id": "wind-deciduous",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-tree-atlas-r2.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [705, 665, 450, 520],
+      "canopySplit": 0.72,
+      "durationSeconds": 6.6,
+      "motionScale": 0.9,
+      "phaseSeconds": -5.4,
+      "presentation": "tree",
+      "visualPlantCount": 1
+    },
+    {
+      "id": "fern-cluster",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-atlas-r1.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [115, 680, 440, 430],
+      "canopySplit": 0.86,
+      "durationSeconds": 6.9,
+      "motionScale": 0.38,
+      "phaseSeconds": -2.4,
+      "presentation": "ground-cover",
+      "visualPlantCount": 10
+    },
+    {
+      "id": "flowering-hedge",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-atlas-r1.png",
+      "atlasDimensions": [1254, 1254],
+      "crop": [650, 730, 520, 410],
+      "canopySplit": 0.82,
+      "durationSeconds": 7.7,
+      "motionScale": 0.3,
+      "phaseSeconds": -4.8,
+      "presentation": "hedge",
+      "visualPlantCount": 12
+    },
+    {
+      "id": "deciduous-copse",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-group-atlas-r1.png",
+      "atlasDimensions": [2048, 2048],
+      "crop": [58, 109, 916, 859],
+      "canopySplit": 0.76,
+      "durationSeconds": 8.7,
+      "motionScale": 0.44,
+      "phaseSeconds": -1.7,
+      "presentation": "copse",
+      "visualPlantCount": 12
+    },
+    {
+      "id": "conifer-grove",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-group-atlas-r1.png",
+      "atlasDimensions": [2048, 2048],
+      "crop": [1074, 57, 899, 936],
+      "canopySplit": 0.75,
+      "durationSeconds": 9.2,
+      "motionScale": 0.35,
+      "phaseSeconds": -5.1,
+      "presentation": "copse",
+      "visualPlantCount": 12
+    },
+    {
+      "id": "windbreak-thicket",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-group-atlas-r1.png",
+      "atlasDimensions": [2048, 2048],
+      "crop": [35, 1182, 909, 806],
+      "canopySplit": 0.78,
+      "durationSeconds": 7.9,
+      "motionScale": 0.5,
+      "phaseSeconds": -3.5,
+      "presentation": "copse",
+      "visualPlantCount": 11
+    },
+    {
+      "id": "mixed-garden-copse",
+      "atlasPath": "/career-world/shared-assets/environment/foliage/ninjaone-foliage-group-atlas-r1.png",
+      "atlasDimensions": [2048, 2048],
+      "crop": [1080, 1203, 904, 804],
+      "canopySplit": 0.76,
+      "durationSeconds": 8.4,
+      "motionScale": 0.41,
+      "phaseSeconds": -6.8,
+      "presentation": "copse",
+      "visualPlantCount": 12
+    }
+  ]
+}

@@ -1,0 +1,1052 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/kaizen-hybrid-foliage-placement@r2",
+  "placementBasis": "kaizen-city-layered-template-r1",
+  "registration": "kaizen-city-layered-template@r1",
+  "plateDimensions": [
+    1254,
+    1254
+  ],
+  "plateOrigin": [
+    0.25925,
+    0.135737
+  ],
+  "plateSpan": [
+    0.1065,
+    0.1893
+  ],
+  "poolId": "ninjaone-foliage-pool-mvp-r4",
+  "maskSource": "/scripts/assets/kaizen-city-rebuild/layered-source-r1/kaizen-city-layer-2-foliage-matte-r1.png",
+  "derivation": "registered-matte-curated-shared-accents-over-static-foliage",
+  "staticFoliageOwnership": "detail-pyramid",
+  "animation": "pooled-cohesive-group-canopy-wind",
+  "groupInstances": [
+    {
+      "id": "kaizen-diff-group-001",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        93.0,
+        1115.0
+      ],
+      "scale": 0.0135,
+      "minimumTier": "capital",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        0,
+        910,
+        184.0,
+        205.0
+      ],
+      "mattePixelCount": 16669
+    },
+    {
+      "id": "kaizen-diff-group-003",
+      "groupId": "conifer-grove-group",
+      "anchor": [
+        77.0,
+        808.0
+      ],
+      "scale": 0.012897,
+      "minimumTier": "capital",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        31,
+        564,
+        105.0,
+        244.0
+      ],
+      "mattePixelCount": 8580
+    },
+    {
+      "id": "kaizen-diff-group-004",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        1082.0,
+        1004.0
+      ],
+      "scale": 0.0135,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        989,
+        899,
+        160.0,
+        105.0
+      ],
+      "mattePixelCount": 6295
+    },
+    {
+      "id": "kaizen-diff-group-008",
+      "groupId": "mixed-garden-copse-group",
+      "anchor": [
+        1183.0,
+        987.0
+      ],
+      "scale": 0.012703,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        1150,
+        878,
+        104.0,
+        109.0
+      ],
+      "mattePixelCount": 4883
+    },
+    {
+      "id": "kaizen-diff-group-009",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        1057.0,
+        1240.0
+      ],
+      "scale": 0.012854,
+      "minimumTier": "capital",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        958,
+        1140,
+        128.0,
+        100.0
+      ],
+      "mattePixelCount": 4439
+    },
+    {
+      "id": "kaizen-diff-group-010",
+      "groupId": "mixed-garden-copse-group",
+      "anchor": [
+        934.0,
+        357.0
+      ],
+      "scale": 0.0095,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        917,
+        257,
+        105.0,
+        100.0
+      ],
+      "mattePixelCount": 4089
+    },
+    {
+      "id": "kaizen-diff-group-012",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        1222.0,
+        228.0
+      ],
+      "scale": 0.009726,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        1136,
+        157,
+        118.0,
+        71.0
+      ],
+      "mattePixelCount": 3801
+    },
+    {
+      "id": "kaizen-diff-group-014",
+      "groupId": "conifer-grove-group",
+      "anchor": [
+        497.0,
+        104.0
+      ],
+      "scale": 0.00873,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        420,
+        30,
+        90.0,
+        74.0
+      ],
+      "mattePixelCount": 3440
+    },
+    {
+      "id": "kaizen-diff-group-019",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        56.0,
+        217.0
+      ],
+      "scale": 0.006924,
+      "minimumTier": "capital",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        42,
+        149,
+        57.0,
+        68.0
+      ],
+      "mattePixelCount": 2564
+    },
+    {
+      "id": "kaizen-diff-group-022",
+      "groupId": "conifer-grove-group",
+      "anchor": [
+        562.0,
+        195.0
+      ],
+      "scale": 0.007314,
+      "minimumTier": "capital",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        526,
+        133,
+        74.0,
+        62.0
+      ],
+      "mattePixelCount": 2494
+    },
+    {
+      "id": "kaizen-diff-group-027",
+      "groupId": "understory-group",
+      "anchor": [
+        383.0,
+        343.0
+      ],
+      "scale": 0.0095,
+      "minimumTier": "capital",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        347,
+        289,
+        66.0,
+        54.0
+      ],
+      "mattePixelCount": 2202
+    },
+    {
+      "id": "kaizen-diff-group-029",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        73.0,
+        340.0
+      ],
+      "scale": 0.006751,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        54,
+        282,
+        56.0,
+        58.0
+      ],
+      "mattePixelCount": 2012
+    },
+    {
+      "id": "kaizen-diff-group-033",
+      "groupId": "conifer-grove-group",
+      "anchor": [
+        936.0,
+        140.0
+      ],
+      "scale": 0.006387,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        901,
+        62,
+        52.0,
+        78.0
+      ],
+      "mattePixelCount": 1774
+    },
+    {
+      "id": "kaizen-diff-group-035",
+      "groupId": "understory-group",
+      "anchor": [
+        415.0,
+        916.0
+      ],
+      "scale": 0.0095,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        383,
+        867,
+        65.0,
+        49.0
+      ],
+      "mattePixelCount": 1774
+    },
+    {
+      "id": "kaizen-diff-group-037",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        1108.0,
+        303.0
+      ],
+      "scale": 0.006942,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        1059,
+        249,
+        61.0,
+        54.0
+      ],
+      "mattePixelCount": 1680
+    },
+    {
+      "id": "kaizen-diff-group-038",
+      "groupId": "understory-group",
+      "anchor": [
+        387.0,
+        264.0
+      ],
+      "scale": 0.0095,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        321,
+        206,
+        76.0,
+        58.0
+      ],
+      "mattePixelCount": 1584
+    },
+    {
+      "id": "kaizen-diff-group-043",
+      "groupId": "understory-group",
+      "anchor": [
+        289.0,
+        936.0
+      ],
+      "scale": 0.008582,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        265,
+        897,
+        59.0,
+        39.0
+      ],
+      "mattePixelCount": 1280
+    },
+    {
+      "id": "kaizen-diff-group-046",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        1018.0,
+        55.0
+      ],
+      "scale": 0.004932,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": true,
+      "targetBounds": [
+        995,
+        19,
+        57.0,
+        36.0
+      ],
+      "mattePixelCount": 1237
+    },
+    {
+      "id": "kaizen-diff-group-047",
+      "groupId": "understory-group",
+      "anchor": [
+        1024.0,
+        993.0
+      ],
+      "scale": 0.0095,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        972,
+        943,
+        64.0,
+        50.0
+      ],
+      "mattePixelCount": 1218
+    },
+    {
+      "id": "kaizen-diff-group-048",
+      "groupId": "understory-group",
+      "anchor": [
+        180.0,
+        718.0
+      ],
+      "scale": 0.008803,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        145,
+        678,
+        61.0,
+        40.0
+      ],
+      "mattePixelCount": 1144
+    },
+    {
+      "id": "kaizen-diff-group-050",
+      "groupId": "flower-border-group",
+      "anchor": [
+        248.0,
+        650.0
+      ],
+      "scale": 0.006463,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        211,
+        622,
+        65.0,
+        28.0
+      ],
+      "mattePixelCount": 1076
+    },
+    {
+      "id": "kaizen-diff-group-051",
+      "groupId": "understory-group",
+      "anchor": [
+        439.0,
+        235.0
+      ],
+      "scale": 0.008582,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        396,
+        196,
+        67.0,
+        39.0
+      ],
+      "mattePixelCount": 1064
+    },
+    {
+      "id": "kaizen-diff-group-053",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        62.0,
+        57.0
+      ],
+      "scale": 0.006389,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        42,
+        0,
+        53.0,
+        57.0
+      ],
+      "mattePixelCount": 1060
+    },
+    {
+      "id": "kaizen-diff-group-055",
+      "groupId": "understory-group",
+      "anchor": [
+        1030.0,
+        819.0
+      ],
+      "scale": 0.007702,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        987,
+        784,
+        54.0,
+        35.0
+      ],
+      "mattePixelCount": 1021
+    },
+    {
+      "id": "kaizen-diff-group-058",
+      "groupId": "understory-group",
+      "anchor": [
+        542.0,
+        243.0
+      ],
+      "scale": 0.008803,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        492,
+        203,
+        60.0,
+        40.0
+      ],
+      "mattePixelCount": 948
+    },
+    {
+      "id": "kaizen-diff-group-061",
+      "groupId": "understory-group",
+      "anchor": [
+        812.0,
+        565.0
+      ],
+      "scale": 0.007042,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        787,
+        533,
+        47.0,
+        32.0
+      ],
+      "mattePixelCount": 864
+    },
+    {
+      "id": "kaizen-diff-group-065",
+      "groupId": "understory-group",
+      "anchor": [
+        662.0,
+        941.0
+      ],
+      "scale": 0.006602,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        655,
+        911,
+        57.0,
+        30.0
+      ],
+      "mattePixelCount": 834
+    },
+    {
+      "id": "kaizen-diff-group-069",
+      "groupId": "understory-group",
+      "anchor": [
+        951.0,
+        879.0
+      ],
+      "scale": 0.008363,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        921,
+        841,
+        47.0,
+        38.0
+      ],
+      "mattePixelCount": 813
+    },
+    {
+      "id": "kaizen-diff-group-072",
+      "groupId": "understory-group",
+      "anchor": [
+        1019.0,
+        724.0
+      ],
+      "scale": 0.007528,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        998,
+        689,
+        35.0,
+        35.0
+      ],
+      "mattePixelCount": 794
+    },
+    {
+      "id": "kaizen-diff-group-074",
+      "groupId": "understory-group",
+      "anchor": [
+        902.5,
+        242.0
+      ],
+      "scale": 0.006162,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        889,
+        214,
+        48.0,
+        28.0
+      ],
+      "mattePixelCount": 757
+    },
+    {
+      "id": "kaizen-diff-group-075",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        721.0,
+        1169.0
+      ],
+      "scale": 0.004384,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        690,
+        1137,
+        42.0,
+        32.0
+      ],
+      "mattePixelCount": 753
+    },
+    {
+      "id": "kaizen-diff-group-077",
+      "groupId": "understory-group",
+      "anchor": [
+        381.0,
+        492.0
+      ],
+      "scale": 0.005592,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        368,
+        448,
+        26.0,
+        44.0
+      ],
+      "mattePixelCount": 736
+    },
+    {
+      "id": "kaizen-diff-group-080",
+      "groupId": "understory-group",
+      "anchor": [
+        783.0,
+        728.0
+      ],
+      "scale": 0.006822,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        746,
+        697,
+        47.0,
+        31.0
+      ],
+      "mattePixelCount": 727
+    },
+    {
+      "id": "kaizen-diff-group-081",
+      "groupId": "understory-group",
+      "anchor": [
+        743.0,
+        213.0
+      ],
+      "scale": 0.006382,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        716,
+        184,
+        45.0,
+        29.0
+      ],
+      "mattePixelCount": 726
+    },
+    {
+      "id": "kaizen-diff-group-083",
+      "groupId": "understory-group",
+      "anchor": [
+        301.0,
+        214.0
+      ],
+      "scale": 0.007702,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        273,
+        179,
+        39.0,
+        35.0
+      ],
+      "mattePixelCount": 708
+    },
+    {
+      "id": "kaizen-diff-group-084",
+      "groupId": "understory-group",
+      "anchor": [
+        343.0,
+        1045.0
+      ],
+      "scale": 0.005807,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        330,
+        1004,
+        27.0,
+        41.0
+      ],
+      "mattePixelCount": 689
+    },
+    {
+      "id": "kaizen-diff-group-085",
+      "groupId": "flower-border-group",
+      "anchor": [
+        384.5,
+        814.0
+      ],
+      "scale": 0.005539,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        360,
+        790,
+        48.0,
+        24.0
+      ],
+      "mattePixelCount": 687
+    },
+    {
+      "id": "kaizen-diff-group-089",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        1102.0,
+        190.0
+      ],
+      "scale": 0.004581,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        1075,
+        150,
+        38.0,
+        40.0
+      ],
+      "mattePixelCount": 658
+    },
+    {
+      "id": "kaizen-diff-group-090",
+      "groupId": "understory-group",
+      "anchor": [
+        694.0,
+        197.0
+      ],
+      "scale": 0.005502,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        672,
+        172,
+        36.0,
+        25.0
+      ],
+      "mattePixelCount": 655
+    },
+    {
+      "id": "kaizen-diff-group-091",
+      "groupId": "understory-group",
+      "anchor": [
+        616.5,
+        814.0
+      ],
+      "scale": 0.007742,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        590,
+        777,
+        36.0,
+        37.0
+      ],
+      "mattePixelCount": 655
+    },
+    {
+      "id": "kaizen-diff-group-094",
+      "groupId": "understory-group",
+      "anchor": [
+        431.0,
+        700.0
+      ],
+      "scale": 0.004946,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        420,
+        657,
+        23.0,
+        43.0
+      ],
+      "mattePixelCount": 650
+    },
+    {
+      "id": "kaizen-diff-group-095",
+      "groupId": "understory-group",
+      "anchor": [
+        942.0,
+        938.0
+      ],
+      "scale": 0.007702,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        922,
+        903,
+        37.0,
+        35.0
+      ],
+      "mattePixelCount": 647
+    },
+    {
+      "id": "kaizen-diff-group-096",
+      "groupId": "understory-group",
+      "anchor": [
+        272.0,
+        688.0
+      ],
+      "scale": 0.006237,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        255,
+        656,
+        29.0,
+        32.0
+      ],
+      "mattePixelCount": 640
+    },
+    {
+      "id": "kaizen-diff-group-101",
+      "groupId": "understory-group",
+      "anchor": [
+        463.0,
+        903.0
+      ],
+      "scale": 0.006237,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        453,
+        867,
+        29.0,
+        36.0
+      ],
+      "mattePixelCount": 620
+    },
+    {
+      "id": "kaizen-diff-group-103",
+      "groupId": "understory-group",
+      "anchor": [
+        883.0,
+        776.0
+      ],
+      "scale": 0.006382,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        852,
+        747,
+        41.0,
+        29.0
+      ],
+      "mattePixelCount": 604
+    },
+    {
+      "id": "kaizen-diff-group-110",
+      "groupId": "understory-group",
+      "anchor": [
+        423.5,
+        1090.0
+      ],
+      "scale": 0.007097,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        414,
+        1053,
+        33.0,
+        37.0
+      ],
+      "mattePixelCount": 562
+    },
+    {
+      "id": "kaizen-diff-group-115",
+      "groupId": "understory-group",
+      "anchor": [
+        291.0,
+        823.0
+      ],
+      "scale": 0.005942,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        275,
+        796,
+        35.0,
+        27.0
+      ],
+      "mattePixelCount": 548
+    },
+    {
+      "id": "kaizen-diff-group-116",
+      "groupId": "understory-group",
+      "anchor": [
+        489.0,
+        1000.0
+      ],
+      "scale": 0.006162,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        474,
+        972,
+        30.0,
+        28.0
+      ],
+      "mattePixelCount": 542
+    },
+    {
+      "id": "kaizen-diff-group-117",
+      "groupId": "understory-group",
+      "anchor": [
+        179.5,
+        574.0
+      ],
+      "scale": 0.006162,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        152,
+        546,
+        38.0,
+        28.0
+      ],
+      "mattePixelCount": 530
+    },
+    {
+      "id": "kaizen-diff-group-118",
+      "groupId": "understory-group",
+      "anchor": [
+        494.0,
+        837.0
+      ],
+      "scale": 0.006162,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        467,
+        809,
+        36.0,
+        28.0
+      ],
+      "mattePixelCount": 523
+    },
+    {
+      "id": "kaizen-diff-group-129",
+      "groupId": "deciduous-copse-group",
+      "anchor": [
+        878.0,
+        1232.0
+      ],
+      "scale": 0.003014,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        864,
+        1201,
+        25.0,
+        31.0
+      ],
+      "mattePixelCount": 492
+    },
+    {
+      "id": "kaizen-diff-group-131",
+      "groupId": "understory-group",
+      "anchor": [
+        189.0,
+        904.0
+      ],
+      "scale": 0.005502,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": false,
+      "targetBounds": [
+        177,
+        879,
+        32.0,
+        25.0
+      ],
+      "mattePixelCount": 482
+    },
+    {
+      "id": "kaizen-diff-group-143",
+      "groupId": "windbreak-thicket-group",
+      "anchor": [
+        1122.0,
+        1184.0
+      ],
+      "scale": 0.00328,
+      "minimumTier": "site",
+      "mirror": false,
+      "forest": true,
+      "targetBounds": [
+        1107,
+        1159,
+        27.0,
+        25.0
+      ],
+      "mattePixelCount": 439
+    },
+    {
+      "id": "kaizen-diff-group-152",
+      "groupId": "understory-group",
+      "anchor": [
+        196.0,
+        805.0
+      ],
+      "scale": 0.004517,
+      "minimumTier": "site",
+      "mirror": true,
+      "forest": false,
+      "targetBounds": [
+        185,
+        769,
+        21.0,
+        36.0
+      ],
+      "mattePixelCount": 407
+    }
+  ],
+  "singularInstances": []
+}

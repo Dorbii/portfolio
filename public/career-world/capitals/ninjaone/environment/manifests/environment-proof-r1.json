@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/environment-proof@r1",
+  "status": "environment-only-proof",
+  "registration": {
+    "gridCells": [
+      "B2",
+      "C1",
+      "C2"
+    ],
+    "boundingWorldView": {
+      "origin": [
+        0.125,
+        0
+      ],
+      "span": [
+        0.25,
+        0.3333333333333333
+      ]
+    },
+    "artboard": [
+      1440,
+      1080
+    ],
+    "canonicalLandMaskPath": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "canonicalHeightFieldPath": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+    "canonicalSlopeFieldPath": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png"
+  },
+  "layerOrder": [
+    "terrain-geology",
+    "secondary-relief",
+    "hydrology",
+    "static-foliage",
+    "tertiary-relief",
+    "trails",
+    "shared-rocks",
+    "shared-animated-foliage",
+    "surface-ecology",
+    "wildlife",
+    "integration-detail",
+    "dynamic-shadows"
+  ],
+  "layers": {
+    "geology": {
+      "ownership": "native close-detail terrain compiled downward; open water remains owned by the global water layer",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-close-r2.png",
+      "sourceSha256": "C3E888BFA743AA456FF31D61F11C29919F2624394CFC1BE7A17D6DFE960613AF",
+      "canonicalLowFrequencyCorrelation": 0.9667218523041331,
+      "sources": {
+        "territory": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r2.webp?v=5094988ecfbf",
+          "dimensions": [
+            720,
+            540
+          ],
+          "sha256": "5094988ECFBF50B2D3A62FCEEE2A165C0C2F406DC4419A5EE64A522FB338C21C"
+        },
+        "capital": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r2.webp?v=d03bfc25c0ce",
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "sha256": "D03BFC25C0CE17D81E9ED6F04207A1720ADAA00866B43C594327B2EE9A0F19BC"
+        },
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r2.webp?v=9b3b68cd09a1",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "9B3B68CD09A1A72A4312D3C8EBF130988063E339BF22DF2441B240DA5432EEE1"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r2.webp?v=07afc922a97f",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "07AFC922A97F5E2C19EDF17BF0B23DCDB2458A820636F1E8A98F32EDAAD4D9BF"
+        }
+      }
+    },
+    "secondaryRelief": {
+      "ownership": "mid-scale ledges, ravines, shelves, and outcrop relief",
+      "sources": {
+        "capital": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/secondary-relief/ninjaone-environment-secondary-relief-capital-r1.webp",
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "sha256": "057B26392A0305EB3F8C4E618895DA68F15CD0EE2DDC0C730B4DDEA2E4C9817B"
+        },
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/secondary-relief/ninjaone-environment-secondary-relief-site-r1.webp",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "299842D5030C9D63AFC36274BF3FC7E74C35C4ACB25D6FC075BB1C6D723FE736"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/secondary-relief/ninjaone-environment-secondary-relief-close-r1.webp",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "AF71E25226ED157415B2C0C0482680ABCE5F8723DE456F036E9CD29747047734"
+        }
+      }
+    },
+    "hydrology": {
+      "ownership": "terrain-following streams, cascades, banks, and basin tarn",
+      "sources": {
+        "capital": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-capital-r1.webp",
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "sha256": "336BB9AE6668BDB354C8DD27EC82BCD07B635B3DC7ABA827CC05D07B4FBCBC73"
+        },
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-site-r1.webp",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "6D91B3A6F6C3786F490CA4FD6666B4601D399F61A06876FFB8501CEE6AE9204F"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-close-r1.webp",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "063B6E1D3D4A74C1923F00383C94F96A588B278BA1B6BB303E6DD5931A33D120"
+        }
+      }
+    },
+    "staticFoliage": {
+      "ownership": "inactive compatibility lane; static ecology is integrated into the r2 terrain master",
+      "sources": {
+        "territory": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/static-foliage/ninjaone-environment-static-foliage-territory-r1.png",
+          "dimensions": [
+            720,
+            540
+          ],
+          "sha256": "DDED0D3D4C311A1E51E2C922F70804450D93F2C291D65D368C6FB81618F8A3BD"
+        },
+        "capital": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/static-foliage/ninjaone-environment-static-foliage-capital-r1.png",
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "sha256": "0879301392477FEE3BF8F59877896B1B603CF8F4EAAC9B86E2C6DD2A0B6A69FE"
+        },
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/static-foliage/ninjaone-environment-static-foliage-site-r1.png",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "AB45B80B4C4C045206024846792810C09C5118C7E26D49D25C1076BEB6171515"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/static-foliage/ninjaone-environment-static-foliage-close-r1.png",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "4C4974FA4093AD6C9C2660709B38865AD53BB267CF0B5AFA883F2A612D6F0AE2"
+        }
+      },
+      "representedClusterCount": 0
+    },
+    "tertiaryRelief": {
+      "ownership": "site-scale strata, scree breaks, and erosion relief",
+      "sources": {
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/tertiary-relief/ninjaone-environment-tertiary-relief-site-r1.webp",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "D4AE6FD2E772A59BF2BE9ECCDF97B0BE4A175874EAE9696F4B8BB2D5F59A9D9D"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/tertiary-relief/ninjaone-environment-tertiary-relief-close-r1.webp",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "1ACF18102E3DEAB6081B21DF5B09D9C6F7A0B7A0B8E64E6646D3ECC3A5EEF4B6"
+        }
+      }
+    },
+    "trails": {
+      "ownership": "contour-following footpaths and traversable switchbacks",
+      "sources": {
+        "site": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/trails/ninjaone-environment-trails-site-r1.webp",
+          "dimensions": [
+            2160,
+            1620
+          ],
+          "sha256": "DF935144765359DFEC80B5DDAC4AE90E8B06B55732C9BD9B3B07AB8B84F92D2F"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/trails/ninjaone-environment-trails-close-r1.webp",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "37EB31511F6DF3944213AA3849355627C3C6D0F0209610305085208981FF9372"
+        }
+      }
+    },
+    "sharedRocks": {
+      "ownership": "bounded shared-resource rock and boulder habitat accents",
+      "resources": [
+        {
+          "id": "angular-boulder-group",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/angular-boulder-group-r1.png",
+          "dimensions": [
+            416,
+            368
+          ],
+          "sha256": "9277BECC28B6D3A7773D91EAFA041270019B12F3AB5EC1B974E04DA184CFCF05"
+        },
+        {
+          "id": "layered-outcrop",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/layered-outcrop-r1.png",
+          "dimensions": [
+            436,
+            287
+          ],
+          "sha256": "8A5D17363713308DB9E69D76CA17964904F01FC4CFE8B611B26C8FD9A6C2D712"
+        },
+        {
+          "id": "scree-cluster",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/scree-cluster-r1.png",
+          "dimensions": [
+            398,
+            289
+          ],
+          "sha256": "D85611153CD44AADE167C0C5251C43BABEC941FA353057B87C6737FB1CD53F22"
+        },
+        {
+          "id": "mossy-boulder-pair",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/mossy-boulder-pair-r1.png",
+          "dimensions": [
+            413,
+            327
+          ],
+          "sha256": "F7C99B766BF45F92E9D61832E2E01A2283F7BC36790A7A69BFF5EC3948D13BEF"
+        },
+        {
+          "id": "standing-stone-outcrop",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/standing-stone-outcrop-r1.png",
+          "dimensions": [
+            432,
+            399
+          ],
+          "sha256": "50BE97C65A02E895CE96411EE913C312EFAAE2357254E73A795392F80C03CF4A"
+        },
+        {
+          "id": "heather-rock-cluster",
+          "path": "/career-world/capitals/ninjaone/environment/shared/rocks/heather-rock-cluster-r1.png",
+          "dimensions": [
+            441,
+            253
+          ],
+          "sha256": "88E3E736427849313432E9ADB89A7F6EBDE1B75B9227F1C8ACA09596786BE465"
+        }
+      ],
+      "instances": [
+        {
+          "id": "rock-b2-ridge",
+          "resourceId": "angular-boulder-group",
+          "anchor": [
+            214,
+            838
+          ],
+          "width": 24,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-b2-scree",
+          "resourceId": "scree-cluster",
+          "anchor": [
+            522,
+            730
+          ],
+          "width": 21,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-b2-ledge",
+          "resourceId": "layered-outcrop",
+          "anchor": [
+            356,
+            670
+          ],
+          "width": 20,
+          "minimumTier": "close"
+        },
+        {
+          "id": "rock-b2-heather",
+          "resourceId": "heather-rock-cluster",
+          "anchor": [
+            602,
+            986
+          ],
+          "width": 22,
+          "minimumTier": "close"
+        },
+        {
+          "id": "rock-c1-headland",
+          "resourceId": "standing-stone-outcrop",
+          "anchor": [
+            1242,
+            304
+          ],
+          "width": 21,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-c1-shelf",
+          "resourceId": "layered-outcrop",
+          "anchor": [
+            934,
+            452
+          ],
+          "width": 20,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-c1-scree",
+          "resourceId": "scree-cluster",
+          "anchor": [
+            1330,
+            438
+          ],
+          "width": 18,
+          "minimumTier": "close"
+        },
+        {
+          "id": "rock-c1-moss",
+          "resourceId": "mossy-boulder-pair",
+          "anchor": [
+            842,
+            238
+          ],
+          "width": 19,
+          "minimumTier": "close"
+        },
+        {
+          "id": "rock-c2-basin",
+          "resourceId": "mossy-boulder-pair",
+          "anchor": [
+            856,
+            872
+          ],
+          "width": 22,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-c2-outcrop",
+          "resourceId": "angular-boulder-group",
+          "anchor": [
+            1248,
+            692
+          ],
+          "width": 23,
+          "minimumTier": "site"
+        },
+        {
+          "id": "rock-c2-tarn",
+          "resourceId": "heather-rock-cluster",
+          "anchor": [
+            1098,
+            836
+          ],
+          "width": 19,
+          "minimumTier": "close"
+        },
+        {
+          "id": "rock-c2-south",
+          "resourceId": "scree-cluster",
+          "anchor": [
+            1286,
+            1008
+          ],
+          "width": 20,
+          "minimumTier": "close"
+        }
+      ]
+    },
+    "sharedFoliage": {
+      "ownership": "close-only canopy assets owned by the native detail manifest",
+      "nativeDetailManifestPath": "/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json",
+      "resources": [],
+      "instances": []
+    },
+    "surfaceEcology": {
+      "ownership": "close-only flowers, reeds, fallen timber, and small stone detail",
+      "sources": {
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/surface-ecology/ninjaone-environment-surface-ecology-close-r1.webp",
+          "dimensions": [
+            2880,
+            2160
+          ],
+          "sha256": "5AF16C5B29680EDEAB0F44806B1FEC54F8E51BFADCAEB95A4A4CF0E800A2ECFF"
+        }
+      }
+    },
+    "wildlife": {
+      "ownership": "close-only shared wildlife groups placed by habitat",
+      "resources": [
+        {
+          "id": "mountain-goats",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/mountain-goats-r1.png",
+          "dimensions": [
+            314,
+            340
+          ],
+          "sha256": "82A5C33DFBDD41AE4F0CB576BE0CA7E66977D9FFFC08A28741EBE5532C496378"
+        },
+        {
+          "id": "red-deer",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/red-deer-r1.png",
+          "dimensions": [
+            333,
+            334
+          ],
+          "sha256": "575C4132C399A3F3B05462ADFE7B7B5C3E344CD88E02C2E408E3ED9B2F473D83"
+        },
+        {
+          "id": "ravens",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/ravens-r1.png",
+          "dimensions": [
+            330,
+            313
+          ],
+          "sha256": "D0D43D58565561D0D976ABAC685AE2E812EBC1D0AE19DA1815C595A5FA63692C"
+        },
+        {
+          "id": "red-fox",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/red-fox-r1.png",
+          "dimensions": [
+            310,
+            272
+          ],
+          "sha256": "7A095A5B36B29043C7030AEFD079B6ABD0E4813618A651335222397858240A2A"
+        },
+        {
+          "id": "coastal-seabirds",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/coastal-seabirds-r1.png",
+          "dimensions": [
+            285,
+            295
+          ],
+          "sha256": "D9EFA40FA6C33F29FD9662DE979B9B0040CD1D406FFA7D789F31EEB4F834FE91"
+        },
+        {
+          "id": "meadow-rabbits",
+          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/meadow-rabbits-r1.png",
+          "dimensions": [
+            344,
+            258
+          ],
+          "sha256": "1A6078603CF7A1DFA89FDA5E374B1B8CBD79C0C0ECC86BEF3528525AAA50D6FF"
+        }
+      ],
+      "instances": [
+        {
+          "id": "wildlife-b2-goats",
+          "resourceId": "mountain-goats",
+          "anchor": [
+            286,
+            746
+          ],
+          "width": 16,
+          "minimumTier": "close"
+        },
+        {
+          "id": "wildlife-c1-ravens",
+          "resourceId": "ravens",
+          "anchor": [
+            1128,
+            226
+          ],
+          "width": 15,
+          "minimumTier": "close"
+        },
+        {
+          "id": "wildlife-c1-seabirds",
+          "resourceId": "coastal-seabirds",
+          "anchor": [
+            1338,
+            382
+          ],
+          "width": 14,
+          "minimumTier": "close"
+        },
+        {
+          "id": "wildlife-c2-deer",
+          "resourceId": "red-deer",
+          "anchor": [
+            918,
+            920
+          ],
+          "width": 16,
+          "minimumTier": "close"
+        },
+        {
+          "id": "wildlife-c2-fox",
+          "resourceId": "red-fox",
+          "anchor": [
+            1188,
+            718
+          ],
+          "width": 15,
+          "minimumTier": "close"
+        },
+        {
+          "id": "wildlife-c2-rabbits",
+          "resourceId": "meadow-rabbits",
+          "anchor": [
+            1316,
+            966
+          ],
+          "width": 13,
+          "minimumTier": "close"
+        }
+      ]
+    },
+    "integrationDetail": {
+      "ownership": "future seam and contact treatment without time-of-day shadows",
+      "enabled": false
+    },
+    "dynamicShadows": {
+      "ownership": "future world-light-driven shadows only",
+      "enabled": false
+    }
+  },
+  "lod": {
+    "world": [],
+    "territory": [],
+    "capital": [
+      "terrain-geology"
+    ],
+    "site": [
+      "terrain-geology"
+    ],
+    "close": [
+      "terrain-geology",
+      "hydrology",
+      "shared-animated-foliage"
+    ]
+  }
+}
