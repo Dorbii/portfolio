@@ -1,0 +1,1171 @@
+{
+  "schemaVersion": 2,
+  "id": "career-world/capitals/ninjaone/seam-integration@r2",
+  "status": "partial-internal-accepted-intercell-unresolved",
+  "authority": {
+    "sources": [
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c2-generated-r2.png",
+        "sha256": "F351A83EA54B3EA30A8C948B68F9E70CD13C6AF0870A5827123BEB36B50E19C7",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c3-generated-r2.png",
+        "sha256": "D2E7261BAF396C85676CE37A90579762FEEAC8231EB93B2751DA5BFEE6D3E98A",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c2-generated-r2.png",
+        "sha256": "B92EBAD7F6CCC885F18D3D144E95304A206F198D8E15D06334CC371185CDA69D",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c3-generated-r2.png",
+        "sha256": "422F663D700D42D5996B844F904441D21765E1DC7384B536B00F5083D33E82AA",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c0",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+        "sha256": "5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c1",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+        "sha256": "2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+        "sha256": "2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+        "sha256": "48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c0",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+        "sha256": "D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c1",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png",
+        "sha256": "825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+        "sha256": "DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD",
+        "storage": "png-rgb-8"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png",
+        "sha256": "8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31",
+        "storage": "png-rgb-8"
+      }
+    ],
+    "statement": "12 exact native RGB 1448x1086 generated-r2 originals"
+  },
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "coordinateMathScale": 4,
+    "nativeTileDimensions": [
+      1448,
+      1086
+    ],
+    "tileArtboard": [
+      360,
+      270
+    ]
+  },
+  "derivation": {
+    "baseMutation": "none",
+    "colorOperation": "bounded symmetric low-frequency seam correction",
+    "context": "exact 32-pixel accepted internal strips; inter-cell joins are audited but intentionally unselected",
+    "interpolation": "none",
+    "resampling": "none",
+    "topologyOperation": "none"
+  },
+  "compositionEvidence": {
+    "fixedReferenceCameras": {
+      "B2": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/b2-reference-camera.png",
+      "C2": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/c2-reference-camera.png"
+    },
+    "role": "artifact-location-and-registration-only; never sampled as fidelity input"
+  },
+  "budgets": {
+    "fixedC2DecodedUnion": 33206256,
+    "fixedC2SeamDecodedBytes": 1297408,
+    "maximumApplicationOwnedDecodedUnion": 33206256,
+    "maximumCohortId": "fixedB2Internal",
+    "maximumDecodedBytes": 33554432,
+    "maximumMountedResources": 2,
+    "maximumPaintedSupplementNodes": 2,
+    "maximumSupplementalNodes": 6,
+    "rejectedIntercellDecodedBytes": 0,
+    "seamDecodedBytes": 1297408,
+    "totalAuthoredDecodedBytes": 2594816,
+    "unionBreakdown": {
+      "foliageDecodedBytes": 527600,
+      "hydrologyDirectionalFallbackDecodedBytes": 6220800,
+      "seamDecodedBytes": 1297408,
+      "terrainDecodedBytes": 25160448
+    },
+    "unionSupplementalNodeBreakdown": {
+      "foliage": 0,
+      "seam": 2
+    }
+  },
+  "fixedCheckpointDecisions": {
+    "B2": "four native seam segments repaired by two minimum-width overlays",
+    "C1": "native coast-and-void topology inspected; no seam overlay authorized",
+    "C2": "four native seam segments repaired by two minimum-width overlays with two hydrology handoffs",
+    "B2-C2": "UNRESOLVED: two inter-cell column segments have no accepted overlay",
+    "C1-C2": "UNRESOLVED: two inter-cell row segments have no accepted overlay"
+  },
+  "fullNativeSweep": [
+    {
+      "cellId": "B2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 43.101878,
+        "controlMean": 12.870729,
+        "discontinuityRatio": 3.348829,
+        "visiblePairs": 1083
+      },
+      "neighborTileIds": [
+        "r2-c0",
+        "r2-c1"
+      ],
+      "orientation": "vertical",
+      "segment": "top"
+    },
+    {
+      "cellId": "B2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 30.015152,
+        "controlMean": 11.784256,
+        "discontinuityRatio": 2.547055,
+        "visiblePairs": 1012
+      },
+      "neighborTileIds": [
+        "r3-c0",
+        "r3-c1"
+      ],
+      "orientation": "vertical",
+      "segment": "bottom"
+    },
+    {
+      "cellId": "B2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 31.824906,
+        "controlMean": 11.413507,
+        "discontinuityRatio": 2.788355,
+        "visiblePairs": 1424
+      },
+      "neighborTileIds": [
+        "r2-c0",
+        "r3-c0"
+      ],
+      "orientation": "horizontal",
+      "segment": "left"
+    },
+    {
+      "cellId": "B2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 27.981589,
+        "controlMean": 10.135659,
+        "discontinuityRatio": 2.760707,
+        "visiblePairs": 1376
+      },
+      "neighborTileIds": [
+        "r2-c1",
+        "r3-c1"
+      ],
+      "orientation": "horizontal",
+      "segment": "right"
+    },
+    {
+      "cellId": "C1",
+      "decision": "no-overlay-authorized-coast-and-void-topology-retained",
+      "metrics": {
+        "boundaryMean": 36.194444,
+        "controlMean": 6.447531,
+        "discontinuityRatio": 5.613691,
+        "visiblePairs": 108
+      },
+      "neighborTileIds": [
+        "r0-c2",
+        "r0-c3"
+      ],
+      "orientation": "vertical",
+      "segment": "top"
+    },
+    {
+      "cellId": "C1",
+      "decision": "no-overlay-authorized-coast-and-void-topology-retained",
+      "metrics": {
+        "boundaryMean": 25.266667,
+        "controlMean": 8.906625,
+        "discontinuityRatio": 2.83684,
+        "visiblePairs": 805
+      },
+      "neighborTileIds": [
+        "r1-c2",
+        "r1-c3"
+      ],
+      "orientation": "vertical",
+      "segment": "bottom"
+    },
+    {
+      "cellId": "C1",
+      "decision": "no-overlay-authorized-coast-and-void-topology-retained",
+      "metrics": {
+        "boundaryMean": 33.267618,
+        "controlMean": 8.982274,
+        "discontinuityRatio": 3.703697,
+        "visiblePairs": 771
+      },
+      "neighborTileIds": [
+        "r0-c2",
+        "r1-c2"
+      ],
+      "orientation": "horizontal",
+      "segment": "left"
+    },
+    {
+      "cellId": "C1",
+      "decision": "no-overlay-authorized-coast-and-void-topology-retained",
+      "metrics": {
+        "boundaryMean": null,
+        "controlMean": null,
+        "discontinuityRatio": null,
+        "visiblePairs": 0
+      },
+      "neighborTileIds": [
+        "r0-c3",
+        "r1-c3"
+      ],
+      "orientation": "horizontal",
+      "segment": "right"
+    },
+    {
+      "cellId": "C2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 29.759362,
+        "controlMean": 10.902394,
+        "discontinuityRatio": 2.729617,
+        "visiblePairs": 1086
+      },
+      "neighborTileIds": [
+        "r2-c2",
+        "r2-c3"
+      ],
+      "orientation": "vertical",
+      "segment": "top"
+    },
+    {
+      "cellId": "C2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 24.310927,
+        "controlMean": 8.670657,
+        "discontinuityRatio": 2.803816,
+        "visiblePairs": 1086
+      },
+      "neighborTileIds": [
+        "r3-c2",
+        "r3-c3"
+      ],
+      "orientation": "vertical",
+      "segment": "bottom"
+    },
+    {
+      "cellId": "C2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 17.877993,
+        "controlMean": 7.451312,
+        "discontinuityRatio": 2.399308,
+        "visiblePairs": 1448
+      },
+      "neighborTileIds": [
+        "r2-c2",
+        "r3-c2"
+      ],
+      "orientation": "horizontal",
+      "segment": "left"
+    },
+    {
+      "cellId": "C2",
+      "decision": "minimum-width-overlay-required",
+      "metrics": {
+        "boundaryMean": 27.181461,
+        "controlMean": 10.724804,
+        "discontinuityRatio": 2.534448,
+        "visiblePairs": 1442
+      },
+      "neighborTileIds": [
+        "r2-c3",
+        "r3-c3"
+      ],
+      "orientation": "horizontal",
+      "segment": "right"
+    },
+    {
+      "cellId": "B2-C2",
+      "decision": "UNRESOLVED-missing-accepted-intercell-overlay",
+      "metrics": {
+        "boundaryMean": 31.974648,
+        "controlMean": 9.496401,
+        "discontinuityRatio": 3.367028,
+        "visiblePairs": 1065
+      },
+      "neighborTileIds": [
+        "r2-c1",
+        "r2-c2"
+      ],
+      "orientation": "vertical",
+      "segment": "top"
+    },
+    {
+      "cellId": "B2-C2",
+      "decision": "UNRESOLVED-missing-accepted-intercell-overlay",
+      "metrics": {
+        "boundaryMean": 20.149628,
+        "controlMean": 9.155359,
+        "discontinuityRatio": 2.200856,
+        "visiblePairs": 1076
+      },
+      "neighborTileIds": [
+        "r3-c1",
+        "r3-c2"
+      ],
+      "orientation": "vertical",
+      "segment": "bottom"
+    },
+    {
+      "cellId": "C1-C2",
+      "decision": "UNRESOLVED-missing-accepted-intercell-overlay",
+      "metrics": {
+        "boundaryMean": 22.600905,
+        "controlMean": 8.576841,
+        "discontinuityRatio": 2.635108,
+        "visiblePairs": 1399
+      },
+      "neighborTileIds": [
+        "r1-c2",
+        "r2-c2"
+      ],
+      "orientation": "horizontal",
+      "segment": "left"
+    },
+    {
+      "cellId": "C1-C2",
+      "decision": "UNRESOLVED-missing-accepted-intercell-overlay",
+      "metrics": {
+        "boundaryMean": 28.723152,
+        "controlMean": 13.442585,
+        "discontinuityRatio": 2.136728,
+        "visiblePairs": 1434
+      },
+      "neighborTileIds": [
+        "r1-c3",
+        "r2-c3"
+      ],
+      "orientation": "horizontal",
+      "segment": "right"
+    }
+  ],
+  "hydrologyTransitionHandoffs": [
+    {
+      "adjacentTileIds": [
+        "r2-c1",
+        "r2-c2"
+      ],
+      "artboardBounds": [
+        712.5,
+        738,
+        728,
+        781
+      ],
+      "id": "b2-c2-r2c1-to-r2c2-waterfall",
+      "reason": "the registered inter-cell seam overlay intersects native-original lip and impact pixels across the waterfall column boundary",
+      "seamResourceId": "b2-c2-intercell-vertical-seam",
+      "status": "requires-bounded-transition-field",
+      "topologyTreatment": "no synthetic water geometry in the seam asset"
+    },
+    {
+      "adjacentTileIds": [
+        "r2-c2",
+        "r3-c2"
+      ],
+      "artboardBounds": [
+        820,
+        797,
+        875,
+        828
+      ],
+      "id": "c2-r2c2-to-r3c2",
+      "reason": "native originals leave the visible lower channel discontinuous across the row seam",
+      "seamResourceId": "c2-internal-horizontal-seam",
+      "status": "requires-bounded-transition-field",
+      "topologyTreatment": "no synthetic water geometry in the seam asset"
+    },
+    {
+      "adjacentTileIds": [
+        "r3-c2",
+        "r3-c3"
+      ],
+      "artboardBounds": [
+        1065,
+        902,
+        1095,
+        935
+      ],
+      "id": "c2-r3c2-to-r3c3",
+      "reason": "native-original stream endpoints are offset across the column seam",
+      "seamResourceId": "c2-internal-vertical-seam",
+      "status": "requires-bounded-transition-field",
+      "topologyTreatment": "no synthetic water geometry in the seam asset"
+    }
+  ],
+  "proof": {
+    "b2FullAfter": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-full-native-after-r2.png",
+    "b2FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-fixed-camera-composite-r2.png",
+    "b2FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-full-native-before-r2.png",
+    "c1FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c1-fixed-camera-composite-r2.png",
+    "c1FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c1-full-native-before-r2.png",
+    "c2FullAfter": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-full-native-after-r2.png",
+    "c2FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-fixed-camera-composite-r2.png",
+    "c2FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-full-native-before-r2.png"
+  },
+  "resources": [
+    {
+      "artboardBounds": {
+        "origin": [
+          352.04419889502765,
+          540
+        ],
+        "span": [
+          15.911602209944752,
+          540
+        ]
+      },
+      "cellId": "B2",
+      "decodedBytes": 556032,
+      "dimensions": [
+        64,
+        2172
+      ],
+      "id": "b2-internal-vertical-seam",
+      "integrationType": "native-original-seam-integration",
+      "metrics": {
+        "longestAlphaBoundaryRun": 3,
+        "nativeOriginalComparison": {
+          "candidateDetailEnergy": 18.879034,
+          "detailEnergyRatio": 0.993937,
+          "luminanceMedianDeltaPct": 1.960784,
+          "referenceDetailEnergy": 18.994196,
+          "rgbMedianDelta": {
+            "blue": 0,
+            "green": 1,
+            "red": 1
+          }
+        },
+        "segments": [
+          {
+            "after": {
+              "boundaryMean": 0.342848,
+              "controlMean": 13.642265,
+              "discontinuityRatio": 0.025131,
+              "visiblePairs": 1086
+            },
+            "before": {
+              "boundaryMean": 43.101878,
+              "controlMean": 12.870729,
+              "discontinuityRatio": 3.348829,
+              "visiblePairs": 1083
+            },
+            "neighborTileIds": [
+              "r2-c0",
+              "r2-c1"
+            ]
+          },
+          {
+            "after": {
+              "boundaryMean": 0.179251,
+              "controlMean": 11.54911,
+              "discontinuityRatio": 0.015521,
+              "visiblePairs": 1086
+            },
+            "before": {
+              "boundaryMean": 30.015152,
+              "controlMean": 11.784256,
+              "discontinuityRatio": 2.547055,
+              "visiblePairs": 1012
+            },
+            "neighborTileIds": [
+              "r3-c0",
+              "r3-c1"
+            ]
+          }
+        ]
+      },
+      "nativeOriginalComparison": {
+        "referenceCrop": [
+          0,
+          0,
+          64,
+          2172
+        ],
+        "referencePath": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/b2-internal-vertical-seam-native-neighbor-context-r2.png",
+        "referenceSha256": "A781F7CEAABC1329BE7CD4F252357BF74A62E978BF0E346EE024922DB04456FA"
+      },
+      "minimumWidthPixels": 64,
+      "nativeSeamPixel": 32,
+      "opaquePixels": 128671,
+      "orientation": "vertical",
+      "path": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/b2-internal-vertical-seam-r2.png?v=a2312732ecf9",
+      "renderOrder": 0,
+      "seamCoordinate": 1440,
+      "sha256": "A2312732ECF9B54C9631C91CE60F0BA8266D3F0710B24311E8392E97789D4526",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePaths": [
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png"
+      ],
+      "sourceStrips": [
+        {
+          "crop": [
+            1416,
+            0,
+            32,
+            1086
+          ],
+          "role": "top-left-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+          "sourceSha256": "5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520",
+          "tileId": "r2-c0"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            32,
+            1086
+          ],
+          "role": "top-right-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+          "sourceSha256": "2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F",
+          "tileId": "r2-c1"
+        },
+        {
+          "crop": [
+            1416,
+            0,
+            32,
+            1086
+          ],
+          "role": "bottom-left-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+          "sourceSha256": "D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0",
+          "tileId": "r3-c0"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            32,
+            1086
+          ],
+          "role": "bottom-right-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png",
+          "sourceSha256": "825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888",
+          "tileId": "r3-c1"
+        }
+      ]
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          0,
+          802.0441988950276
+        ],
+        "span": [
+          720,
+          15.911602209944752
+        ]
+      },
+      "cellId": "B2",
+      "decodedBytes": 741376,
+      "dimensions": [
+        2896,
+        64
+      ],
+      "id": "b2-internal-horizontal-seam",
+      "integrationType": "native-original-seam-integration",
+      "metrics": {
+        "longestAlphaBoundaryRun": 4,
+        "nativeOriginalComparison": {
+          "candidateDetailEnergy": 14.842218,
+          "detailEnergyRatio": 0.997328,
+          "luminanceMedianDeltaPct": 5,
+          "referenceDetailEnergy": 14.881986,
+          "rgbMedianDelta": {
+            "blue": 1,
+            "green": 1,
+            "red": 2
+          }
+        },
+        "segments": [
+          {
+            "after": {
+              "boundaryMean": 0.100185,
+              "controlMean": 11.727839,
+              "discontinuityRatio": 0.008542,
+              "visiblePairs": 1444
+            },
+            "before": {
+              "boundaryMean": 31.824906,
+              "controlMean": 11.413507,
+              "discontinuityRatio": 2.788355,
+              "visiblePairs": 1424
+            },
+            "neighborTileIds": [
+              "r2-c0",
+              "r3-c0"
+            ]
+          },
+          {
+            "after": {
+              "boundaryMean": 0.120056,
+              "controlMean": 10.273768,
+              "discontinuityRatio": 0.011686,
+              "visiblePairs": 1441
+            },
+            "before": {
+              "boundaryMean": 27.981589,
+              "controlMean": 10.135659,
+              "discontinuityRatio": 2.760707,
+              "visiblePairs": 1376
+            },
+            "neighborTileIds": [
+              "r2-c1",
+              "r3-c1"
+            ]
+          }
+        ]
+      },
+      "nativeOriginalComparison": {
+        "referenceCrop": [
+          0,
+          0,
+          2896,
+          64
+        ],
+        "referencePath": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/b2-internal-horizontal-seam-native-neighbor-context-r2.png",
+        "referenceSha256": "1C2EDC28D2ADD86F12B4A2A7F47E0DA2378DD73851DB17C3284E26D4A8ADF1EF"
+      },
+      "minimumWidthPixels": 64,
+      "nativeSeamPixel": 32,
+      "opaquePixels": 171698,
+      "orientation": "horizontal",
+      "path": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/b2-internal-horizontal-seam-r2.png?v=968d22aa615c",
+      "renderOrder": 1,
+      "seamCoordinate": 3240,
+      "sha256": "968D22AA615C0EA2B3000A52786E0973D7CA7B333FC4752401879E669B0EF0FD",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePaths": [
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png"
+      ],
+      "sourceStrips": [
+        {
+          "crop": [
+            0,
+            1054,
+            1448,
+            32
+          ],
+          "role": "left-top-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+          "sourceSha256": "5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520",
+          "tileId": "r2-c0"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            1448,
+            32
+          ],
+          "role": "left-bottom-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+          "sourceSha256": "D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0",
+          "tileId": "r3-c0"
+        },
+        {
+          "crop": [
+            0,
+            1054,
+            1448,
+            32
+          ],
+          "role": "right-top-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+          "sourceSha256": "2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F",
+          "tileId": "r2-c1"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            1448,
+            32
+          ],
+          "role": "right-bottom-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png",
+          "sourceSha256": "825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888",
+          "tileId": "r3-c1"
+        }
+      ]
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          1072.0441988950276,
+          540
+        ],
+        "span": [
+          15.911602209944752,
+          540
+        ]
+      },
+      "cellId": "C2",
+      "decodedBytes": 556032,
+      "dimensions": [
+        64,
+        2172
+      ],
+      "id": "c2-internal-vertical-seam",
+      "integrationType": "native-original-seam-integration",
+      "metrics": {
+        "longestAlphaBoundaryRun": 3,
+        "nativeOriginalComparison": {
+          "candidateDetailEnergy": 15.171954,
+          "detailEnergyRatio": 0.992217,
+          "luminanceMedianDeltaPct": 1.666667,
+          "referenceDetailEnergy": 15.290963,
+          "rgbMedianDelta": {
+            "blue": 1,
+            "green": 0,
+            "red": 0
+          }
+        },
+        "segments": [
+          {
+            "after": {
+              "boundaryMean": 0.27655,
+              "controlMean": 11.126304,
+              "discontinuityRatio": 0.024856,
+              "visiblePairs": 1086
+            },
+            "before": {
+              "boundaryMean": 29.759362,
+              "controlMean": 10.902394,
+              "discontinuityRatio": 2.729617,
+              "visiblePairs": 1086
+            },
+            "neighborTileIds": [
+              "r2-c2",
+              "r2-c3"
+            ]
+          },
+          {
+            "after": {
+              "boundaryMean": 0.210252,
+              "controlMean": 8.934009,
+              "discontinuityRatio": 0.023534,
+              "visiblePairs": 1086
+            },
+            "before": {
+              "boundaryMean": 24.310927,
+              "controlMean": 8.670657,
+              "discontinuityRatio": 2.803816,
+              "visiblePairs": 1086
+            },
+            "neighborTileIds": [
+              "r3-c2",
+              "r3-c3"
+            ]
+          }
+        ]
+      },
+      "nativeOriginalComparison": {
+        "referenceCrop": [
+          0,
+          0,
+          64,
+          2172
+        ],
+        "referencePath": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/c2-internal-vertical-seam-native-neighbor-context-r2.png",
+        "referenceSha256": "A5ED7EFBF9B3886458E4CF500EEE8F310C5FDB52AC987D23E0A7A433E4CFC29B"
+      },
+      "minimumWidthPixels": 64,
+      "nativeSeamPixel": 32,
+      "opaquePixels": 128671,
+      "orientation": "vertical",
+      "path": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/c2-internal-vertical-seam-r2.png?v=3e2ac2275e12",
+      "renderOrder": 0,
+      "seamCoordinate": 4320,
+      "sha256": "3E2AC2275E12DDEBF2D8DF26E8F76F977920ACFED71EA82272C55E11C78233C0",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePaths": [
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png"
+      ],
+      "sourceStrips": [
+        {
+          "crop": [
+            1416,
+            0,
+            32,
+            1086
+          ],
+          "role": "top-left-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+          "sourceSha256": "2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05",
+          "tileId": "r2-c2"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            32,
+            1086
+          ],
+          "role": "top-right-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+          "sourceSha256": "48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F",
+          "tileId": "r2-c3"
+        },
+        {
+          "crop": [
+            1416,
+            0,
+            32,
+            1086
+          ],
+          "role": "bottom-left-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+          "sourceSha256": "DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD",
+          "tileId": "r3-c2"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            32,
+            1086
+          ],
+          "role": "bottom-right-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png",
+          "sourceSha256": "8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31",
+          "tileId": "r3-c3"
+        }
+      ]
+    },
+    {
+      "artboardBounds": {
+        "origin": [
+          720,
+          802.0441988950276
+        ],
+        "span": [
+          720,
+          15.911602209944752
+        ]
+      },
+      "cellId": "C2",
+      "decodedBytes": 741376,
+      "dimensions": [
+        2896,
+        64
+      ],
+      "id": "c2-internal-horizontal-seam",
+      "integrationType": "native-original-seam-integration",
+      "metrics": {
+        "longestAlphaBoundaryRun": 4,
+        "nativeOriginalComparison": {
+          "candidateDetailEnergy": 12.949913,
+          "detailEnergyRatio": 0.995637,
+          "luminanceMedianDeltaPct": 1.960784,
+          "referenceDetailEnergy": 13.006668,
+          "rgbMedianDelta": {
+            "blue": 0,
+            "green": 1,
+            "red": 2
+          }
+        },
+        "segments": [
+          {
+            "after": {
+              "boundaryMean": 0.122468,
+              "controlMean": 7.52797,
+              "discontinuityRatio": 0.016268,
+              "visiblePairs": 1448
+            },
+            "before": {
+              "boundaryMean": 17.877993,
+              "controlMean": 7.451312,
+              "discontinuityRatio": 2.399308,
+              "visiblePairs": 1448
+            },
+            "neighborTileIds": [
+              "r2-c2",
+              "r3-c2"
+            ]
+          },
+          {
+            "after": {
+              "boundaryMean": 0.01387,
+              "controlMean": 10.88049,
+              "discontinuityRatio": 0.001275,
+              "visiblePairs": 1442
+            },
+            "before": {
+              "boundaryMean": 27.181461,
+              "controlMean": 10.724804,
+              "discontinuityRatio": 2.534448,
+              "visiblePairs": 1442
+            },
+            "neighborTileIds": [
+              "r2-c3",
+              "r3-c3"
+            ]
+          }
+        ]
+      },
+      "nativeOriginalComparison": {
+        "referenceCrop": [
+          0,
+          0,
+          2896,
+          64
+        ],
+        "referencePath": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/c2-internal-horizontal-seam-native-neighbor-context-r2.png",
+        "referenceSha256": "CA4AFCB1EA7B254A300662D6FF97C25E013D08A8DE3383BBACA74E8352A7D08E"
+      },
+      "minimumWidthPixels": 64,
+      "nativeSeamPixel": 32,
+      "opaquePixels": 171698,
+      "orientation": "horizontal",
+      "path": "/career-world/capitals/ninjaone/environment/shared/seam-integration-native-r2/c2-internal-horizontal-seam-r2.png?v=3d2851981ca0",
+      "renderOrder": 1,
+      "seamCoordinate": 3240,
+      "sha256": "3D2851981CA01AFE9565B80015D38648B945191707173CCA3FD969DD19C3312A",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourcePaths": [
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+        "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png"
+      ],
+      "sourceStrips": [
+        {
+          "crop": [
+            0,
+            1054,
+            1448,
+            32
+          ],
+          "role": "left-top-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+          "sourceSha256": "2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05",
+          "tileId": "r2-c2"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            1448,
+            32
+          ],
+          "role": "left-bottom-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+          "sourceSha256": "DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD",
+          "tileId": "r3-c2"
+        },
+        {
+          "crop": [
+            0,
+            1054,
+            1448,
+            32
+          ],
+          "role": "right-top-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+          "sourceSha256": "48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F",
+          "tileId": "r2-c3"
+        },
+        {
+          "crop": [
+            0,
+            0,
+            1448,
+            32
+          ],
+          "role": "right-bottom-neighbor",
+          "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png",
+          "sourceSha256": "8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31",
+          "tileId": "r3-c3"
+        }
+      ]
+    }
+  ],
+  "selectorCheckpoints": {
+    "fixedB2Internal": {
+      "artboardView": {
+        "origin": [
+          244.80000000000007,
+          745.2
+        ],
+        "span": [
+          230.4,
+          129.60000000000002
+        ]
+      },
+      "camera": {
+        "origin": [
+          0.1675,
+          0.23
+        ],
+        "span": [
+          0.04,
+          0.04
+        ]
+      },
+      "decodedBytes": 1297408,
+      "paintedNodeCount": 2,
+      "resourceIds": [
+        "b2-internal-vertical-seam",
+        "b2-internal-horizontal-seam"
+      ]
+    },
+    "fixedC2Internal": {
+      "artboardView": {
+        "origin": [
+          964.8,
+          745.2
+        ],
+        "span": [
+          230.4,
+          129.60000000000002
+        ]
+      },
+      "camera": {
+        "origin": [
+          0.2925,
+          0.23
+        ],
+        "span": [
+          0.04,
+          0.04
+        ]
+      },
+      "decodedBytes": 1297408,
+      "paintedNodeCount": 2,
+      "resourceIds": [
+        "c2-internal-vertical-seam",
+        "c2-internal-horizontal-seam"
+      ]
+    }
+  }
+}

@@ -264,11 +264,15 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   assert.match(waterCanvas, /useLayoutEffect\(\(\) => \{/);
   assert.match(
     waterCanvas,
-    /controllerRef\.current\?\.setView\(camera,\s*detailState\)/,
+    /controllerRef\.current\?\.setView\(\s*camera,\s*detailState,\s*nativeHydrologyAdmission,?\s*\)/,
+  );
+  assert.match(
+    waterCanvas,
+    /\[camera,\s*detailState,\s*nativeHydrologyAdmission\]/,
   );
   assert.match(
     waterController,
-    /setView\(camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState\);[\s\S]*this\.renderOnce\(\);/,
+    /setView\(camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState,\s*nativeHydrologyAdmission\);[\s\S]*this\.renderOnce\(\);/,
   );
   assert.match(land, /useLayoutEffect\(\(\) => \{/);
   assert.match(land, /detailState\.renderScale/);

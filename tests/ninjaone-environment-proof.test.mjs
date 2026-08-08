@@ -29,12 +29,12 @@ import {
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../features/career-world/development/model/ninjaOneEnvironmentProof.ts";
 import {
-  NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_INSTANCES,
-  NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_RESOURCES,
   NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES,
   NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_TILES,
+  NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_VOID_MASKS,
   NINJAONE_ENVIRONMENT_NATIVE_TILES,
+  NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS,
   selectNinjaOneEnvironmentNativeInstances,
   selectNinjaOneEnvironmentNativeTiles,
 } from "../features/career-world/development/model/ninjaOneEnvironmentNativeDetail.ts";
@@ -57,79 +57,6 @@ async function readImageMetadata(publicPath) {
     stat(absolutePath),
   ]);
   return { ...metadata, size: file.size };
-}
-
-async function adjacentVerticalEdgeMae(leftPath, rightPath) {
-  const [left, right] = await Promise.all([
-    sharp(leftPath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-    sharp(rightPath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-  ]);
-  assert.equal(left.info.width, right.info.width);
-  assert.equal(left.info.height, right.info.height);
-  let error = 0;
-  let samples = 0;
-  for (let y = 0; y < left.info.height; y += 1) {
-    for (let channel = 0; channel < 3; channel += 1) {
-      error += Math.abs(
-        left.data[(y * left.info.width + left.info.width - 1) * 3 + channel]
-        - right.data[y * right.info.width * 3 + channel],
-      );
-      samples += 1;
-    }
-  }
-  return error / samples;
-}
-
-async function adjacentHorizontalEdgeMae(topPath, bottomPath) {
-  const [top, bottom] = await Promise.all([
-    sharp(topPath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-    sharp(bottomPath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-  ]);
-  assert.equal(top.info.width, bottom.info.width);
-  assert.equal(top.info.height, bottom.info.height);
-  let error = 0;
-  let samples = 0;
-  for (let x = 0; x < top.info.width; x += 1) {
-    for (let channel = 0; channel < 3; channel += 1) {
-      error += Math.abs(
-        top.data[((top.info.height - 1) * top.info.width + x) * 3 + channel]
-        - bottom.data[x * 3 + channel],
-      );
-      samples += 1;
-    }
-  }
-  return error / samples;
-}
-
-async function adjacentOpaqueEdgeMae(firstPath, secondPath, orientation) {
-  const [first, second] = await Promise.all([
-    sharp(firstPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
-    sharp(secondPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
-  ]);
-  assert.equal(first.info.width, second.info.width);
-  assert.equal(first.info.height, second.info.height);
-  const vertical = orientation === "vertical";
-  const length = vertical ? first.info.height : first.info.width;
-  let error = 0;
-  let samples = 0;
-  for (let position = 0; position < length; position += 1) {
-    const firstPixel = vertical
-      ? position * first.info.width + first.info.width - 1
-      : (first.info.height - 1) * first.info.width + position;
-    const secondPixel = vertical ? position * second.info.width : position;
-    const firstOffset = firstPixel * 4;
-    const secondOffset = secondPixel * 4;
-    if (first.data[firstOffset + 3] < 180 || second.data[secondOffset + 3] < 180) {
-      continue;
-    }
-    for (let channel = 0; channel < 3; channel += 1) {
-      error += Math.abs(
-        first.data[firstOffset + channel] - second.data[secondOffset + channel],
-      );
-      samples += 1;
-    }
-  }
-  return { mae: samples > 0 ? error / samples : null, samples };
 }
 
 test("environment proof owns a semantic city-free B2 C1 C2 stack", async () => {
@@ -252,7 +179,7 @@ test("native close detail streams accepted lossless tiles within a bounded budge
   assert.equal(NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES, 6);
   assert.deepEqual(manifest.registration.grid, [4, 4]);
   assert.deepEqual(manifest.registration.tileArtboard, [360, 270]);
-  assert.deepEqual(manifest.registration.runtimeTileDimensions, [1440, 1080]);
+  assert.deepEqual(manifest.registration.runtimeTileDimensions, [1448, 1086]);
   assert.deepEqual(
     manifest.tiles.map(({ id }) => id),
     [
@@ -270,15 +197,13 @@ test("native close detail streams accepted lossless tiles within a bounded budge
       "r3-c3",
     ],
   );
-  assert.deepEqual(manifest.layers.hydrology.flowField.dimensions, [1440, 1080]);
-  assert.ok(manifest.layers.hydrology.flowField.opaquePixels > 1_000);
-  assert.equal(manifest.layers.hydrology.segments.length, 6);
+  assert.deepEqual(Object.keys(manifest.layers), ["dynamicShadows"]);
 
   for (const tile of NINJAONE_ENVIRONMENT_NATIVE_TILES) {
     const metadata = await readImageMetadata(tile.path);
-    assert.deepEqual([metadata.width, metadata.height], [1440, 1080]);
+    assert.deepEqual([metadata.width, metadata.height], [1448, 1086]);
     assert.equal(metadata.format, "png");
-    assert.equal(metadata.hasAlpha, true);
+    assert.equal(metadata.hasAlpha, Boolean(tile.voidMaskId));
     const bytes = await readFile(runtimeAssetFile(tile.path));
     assert.equal(
       (await import("node:crypto")).createHash("sha256").update(bytes).digest("hex").toUpperCase(),
@@ -287,27 +212,31 @@ test("native close detail streams accepted lossless tiles within a bounded budge
   }
 
   const decodedTerrainBytes = NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_TILES
-    * 1440 * 1080 * 4;
-  const largestAnimatedResources = [
-    ...NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_RESOURCES,
-  ].map(({ dimensions }) => dimensions[0] * dimensions[1] * 4)
-    .sort((left, right) => right - left)
-    .slice(0, NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
-  assert.ok(
-    decodedTerrainBytes
-      + largestAnimatedResources.reduce((total, value) => total + value, 0)
-      <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES,
-  );
+    * 1448 * 1086 * 4;
+  assert.ok(decodedTerrainBytes <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES);
+  assert.equal(NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_VOID_MASKS, 0);
 });
 
-test("native detail selection never mounts an unbounded tile or animation set", () => {
+test("native detail selection never mounts an unbounded tile or supplemental set", () => {
   const cameras = [
     { origin: [0.198, 0.18], span: [0.04, 0.04] },
     { origin: [0.235, 0.145], span: [0.05, 0.05] },
     { origin: [0.34, 0.02], span: [0.045, 0.045] },
     { origin: [0.13, 0.26], span: [0.06, 0.06] },
   ];
-  const allInstances = NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_INSTANCES;
+  const allInstances = Array.from({ length: 9 }, (_, index) => ({
+    animation: "canopy-sway",
+    artboardBounds: { origin: [430 + index, 570], span: [24, 32] },
+    id: `synthetic-supplement-${index}`,
+    phaseSeconds: -index * 0.2,
+    resource: {
+      dimensions: [96, 128],
+      id: `synthetic-resource-${index}`,
+      opaquePixels: 1,
+      path: `/synthetic-${index}.png`,
+    },
+    tileId: "r2-c1",
+  }));
   for (const camera of cameras) {
     assert.ok(
       selectNinjaOneEnvironmentNativeTiles(camera).length
@@ -325,142 +254,86 @@ test("native detail selection never mounts an unbounded tile or animation set", 
   assert.ok(selectedInstances.every(({ animation }) => animation === "canopy-sway"));
 });
 
-test("native shared foliage stays sparse and hydrology uses one registered flow field", async () => {
-  const manifest = await readJson(
-    "public/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json",
-  );
-  assert.equal(NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_RESOURCES.length, 5);
-  assert.equal(NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_INSTANCES.length, 5);
-  for (const resource of NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_RESOURCES) {
-    const file = runtimeAssetFile(resource.path);
-    const { data, info } = await sharp(file)
-      .ensureAlpha()
-      .extractChannel("alpha")
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    const nontransparent = data.reduce(
-      (total, value) => total + (value > 0 ? 1 : 0),
-      0,
-    );
-    assert.equal(nontransparent, resource.opaquePixels);
-    assert.ok(nontransparent / (info.width * info.height) < 0.42);
-  }
-  const flowField = await sharp(runtimeAssetFile(manifest.layers.hydrology.flowField.path))
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  assert.deepEqual([flowField.info.width, flowField.info.height], [1440, 1080]);
-  const flowStyles = new Set();
-  let flowPixels = 0;
-  for (let offset = 0; offset < flowField.data.length; offset += 4) {
-    if (flowField.data[offset] > 0) {
-      flowPixels += 1;
-      flowStyles.add(flowField.data[offset + 3]);
-    }
-  }
-  assert.equal(flowPixels, manifest.layers.hydrology.flowField.opaquePixels);
-  assert.deepEqual([...flowStyles].sort((left, right) => left - right), [48, 176, 255]);
-  for (const resource of NINJAONE_ENVIRONMENT_NATIVE_FOLIAGE_RESOURCES) {
-    const file = runtimeAssetFile(resource.path);
-    const { data, info } = await sharp(file)
-      .ensureAlpha()
-      .extractChannel("alpha")
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    const rootBandStart = Math.floor(info.height * 0.92);
-    let maximumRootAlpha = 0;
-    for (let y = rootBandStart; y < info.height; y += 1) {
-      for (let x = 0; x < info.width; x += 1) {
-        maximumRootAlpha = Math.max(maximumRootAlpha, data[y * info.width + x]);
-      }
-    }
-    assert.ok(
-      maximumRootAlpha <= 24,
-      `${resource.id} moves opaque pixels through its rooted lower band`,
-    );
-  }
+test("native terrain delegates foliage and hydrology to separate production manifests", async () => {
+  const [native, foliage, hydrology] = await Promise.all([
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json"),
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json"),
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json"),
+  ]);
+  assert.deepEqual(Object.keys(native.layers), ["dynamicShadows"]);
+  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r3");
+  assert.equal(hydrology.id, "career-world/capitals/ninjaone/hydrology-native@r2");
+  assert.ok(foliage.resources.length > 0);
+  assert.ok(foliage.instances.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
+  assert.deepEqual(hydrology.registration.gridCells, ["B2", "C1", "C2"]);
+  assert.ok(hydrology.metrics.waterPixels > 0);
 });
 
-test("registered native tiles use canonical grid origins and sealed opaque edges", async () => {
-  const tiles = new Map(NINJAONE_ENVIRONMENT_NATIVE_TILES.map((tile) => [tile.id, tile]));
-  for (const tile of tiles.values()) {
+test("registered native tiles keep canonical native-original provenance", () => {
+  for (const tile of NINJAONE_ENVIRONMENT_NATIVE_TILES) {
     assert.deepEqual(
       tile.artboardBounds.origin,
       [tile.column * 360, tile.row * 270],
       `${tile.id} must remain in its canonical grid slot`,
     );
-    const right = tiles.get(`r${tile.row}-c${tile.column + 1}`);
-    if (right) {
-      const edge = await adjacentOpaqueEdgeMae(
-        runtimeAssetFile(tile.path),
-        runtimeAssetFile(right.path),
-        "vertical",
-      );
-      if (edge.samples > 0) {
-        assert.ok(edge.mae <= 1, `${tile.id}/${right.id} runtime edge MAE is ${edge.mae}`);
-      }
-    }
-    const bottom = tiles.get(`r${tile.row + 1}-c${tile.column}`);
-    if (bottom) {
-      const edge = await adjacentOpaqueEdgeMae(
-        runtimeAssetFile(tile.path),
-        runtimeAssetFile(bottom.path),
-        "horizontal",
-      );
-      if (edge.samples > 0) {
-        assert.ok(edge.mae <= 1, `${tile.id}/${bottom.id} runtime edge MAE is ${edge.mae}`);
-      }
-    }
+    assert.equal(
+      tile.sourcePath,
+      "/art-source/career-world/ninjaone-environment/production-r2/"
+        + `detail-tiles-r2/generated/${tile.id}-generated-r2.png`,
+    );
+    assert.deepEqual(tile.sourceDimensions, [1448, 1086]);
+    assert.deepEqual(tile.sourceCrop, [0, 0, 1448, 1086]);
   }
 });
 
-test("contextual outpainting replaces the visible row with one seam-safe cohort", async () => {
+test("the visible row uses four independent accepted native originals", () => {
   const row = NINJAONE_ENVIRONMENT_NATIVE_TILES
     .filter(({ row }) => row === 2)
     .sort((left, right) => left.column - right.column);
   assert.equal(row.length, 4);
-  assert.ok(row.every(({ sourcePath }) => sourcePath.includes("/detail-tiles-r3/")));
-  for (let column = 0; column < row.length - 1; column += 1) {
-    const authored = await adjacentVerticalEdgeMae(
-      path.join(root, row[column].sourcePath.slice(1)),
-      path.join(root, row[column + 1].sourcePath.slice(1)),
-    );
-    const legacy = await adjacentVerticalEdgeMae(
-      path.join(root, "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated", `r2-c${column}-generated-r2.png`),
-      path.join(root, "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated", `r2-c${column + 1}-generated-r2.png`),
-    );
-    assert.ok(authored < 15, `r2-c${column}/r2-c${column + 1} edge MAE is ${authored}`);
-    assert.ok(authored < legacy * 0.5);
+  assert.deepEqual(row.map(({ id }) => id), ["r2-c0", "r2-c1", "r2-c2", "r2-c3"]);
+  assert.deepEqual(
+    row.map(({ sourceCrop }) => sourceCrop),
+    [0, 1, 2, 3].map(() => [0, 0, 1448, 1086]),
+  );
+  assert.deepEqual(
+    row.map(({ id, sourcePath }) => sourcePath.endsWith(`${id}-generated-r2.png`)),
+    [true, true, true, true],
+  );
+});
+
+test("C1 void alpha has separate source provenance and no runtime mask residency", () => {
+  assert.equal(NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS.length, 4);
+  assert.deepEqual(
+    NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS.map(({ tileId }) => tileId),
+    ["r0-c2", "r0-c3", "r1-c2", "r1-c3"],
+  );
+  for (const mask of NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS) {
+    assert.equal(mask.runtimeMounted, false);
+    assert.equal(mask.runtimeDecodedBytes, 0);
+    assert.deepEqual(mask.dimensions, [1448, 1086]);
+    assert.ok(mask.sourcePath.endsWith(`${mask.tileId}-generated-r2.png`));
   }
 });
 
-test("contextual outpainting continues the central tile north without a hard edge", async () => {
-  const tile = (id) => NINJAONE_ENVIRONMENT_NATIVE_TILES.find((value) => value.id === id);
-  const north = tile("r1-c2");
-  const center = tile("r2-c2");
-  assert.ok(north.sourcePath.includes("/detail-tiles-r3/"));
-  assert.ok(center.sourcePath.includes("/detail-tiles-r3/"));
-  const authored = await adjacentHorizontalEdgeMae(
-    path.join(root, north.sourcePath.slice(1)),
-    path.join(root, center.sourcePath.slice(1)),
-  );
-  const legacy = await adjacentHorizontalEdgeMae(
-    path.join(root, "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c2-generated-r2.png"),
-    path.join(root, "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png"),
-  );
-  assert.ok(authored < 13, `r1-c2/r2-c2 edge MAE is ${authored}`);
-  assert.ok(authored < legacy * 0.6);
-});
-
 test("close detail is atomically painted and page visibility suspends runtime work", async () => {
-  const [nativeDetail, scene, waterCanvas, waterController, styles] = await Promise.all([
+  const [nativeDetail, scene, waterCanvas, waterController] = await Promise.all([
     readFile(path.join(root, "features/career-world/development/NinjaOneEnvironmentNativeDetail.tsx"), "utf8"),
     readFile(path.join(root, "features/career-world/composition/WorldScene.tsx"), "utf8"),
     readFile(path.join(root, "features/career-world/layers/water-surface/components/WaterSurfaceCanvas.tsx"), "utf8"),
     readFile(path.join(root, "features/career-world/layers/water-surface/rendering/WaterSurfaceController.ts"), "utf8"),
-    readFile(path.join(root, "features/career-world/styles/career-world.css"), "utf8"),
   ]);
-  assert.match(nativeDetail, /active && detailState\.shouldLoadCloseAssets/);
+  assert.match(nativeDetail, /resolveNinjaOneEnvironmentNativeDemand\(\{/);
+  assert.match(nativeDetail, /previousDemand,\s+shouldLoadCloseAssets/);
+  assert.match(nativeDetail, /if \(demand !== previousDemand\)/);
+  assert.match(nativeDetail, /retargetNinjaOneEnvironmentNativeDecodeCohort\(/);
+  assert.match(nativeDetail, /const visible = presentation\.visible/);
+  assert.match(nativeDetail, /lowerDetailAvailable: true/);
+  assert.match(
+    nativeDetail,
+    /data-environment-native-no-visible-gap=\{presentation\.noVisibleGap\}/,
+  );
+  assert.match(nativeDetail, /onLoad=\{\(\) => recordDecodeEvent/);
   assert.doesNotMatch(nativeDetail, /detailState\.tier\.id === "close"/);
   assert.match(nativeDetail, /data-environment-native-visible=\{visible\}/);
   assert.match(nativeDetail, /opacity=\{visible \? 1 : 0\}/);
@@ -470,34 +343,23 @@ test("close detail is atomically painted and page visibility suspends runtime wo
   assert.match(waterCanvas, /controllerRef\.current\?\.setActive\(active\)/);
   assert.match(waterController, /setActive\(active: boolean\)/);
   assert.match(waterController, /Math\.min\(\s*0\.25/);
-  assert.match(styles, /transform-origin: 50% 88%/);
-  assert.match(styles, /opacity: 0\.42/);
-  assert.doesNotMatch(styles, /rotate\(0\.2deg\) skewX\(0\.12deg\) scaleY\(1\.0015\)/);
-  assert.doesNotMatch(styles, /translate\(1\.9px, -0\.3px\) rotate\(0\.62deg\)/);
-  assert.doesNotMatch(styles, /ninjaone-native-waterfall-flow/);
   assert.doesNotMatch(nativeDetail, /NINJAONE_ENVIRONMENT_NATIVE_HYDROLOGY/);
-  assert.match(nativeDetail, /const visible = active && ready && detailState\.shouldLoadCloseAssets/);
-  assert.doesNotMatch(nativeDetail, /detailState\.tier\.id === "close"/);
 });
 
-test("tile authoring uses one-eighth context and minimum-error seam quilting", async () => {
-  const [prepare, finalize, reconcileCorner] = await Promise.all([
-    readFile(path.join(root, "scripts/prepare-ninjaone-environment-tile-context.mjs"), "utf8"),
-    readFile(path.join(root, "scripts/finalize-ninjaone-environment-tile-outpaint.mjs"), "utf8"),
-    readFile(path.join(root, "scripts/reconcile-ninjaone-environment-corner-revision.mjs"), "utf8"),
+test("production native authoring is standalone and package-addressable", async () => {
+  const [nativeBuilder, packageJson] = await Promise.all([
+    readFile(path.join(root, "scripts/build-ninjaone-environment-native-detail.mjs"), "utf8"),
+    readJson("package.json"),
   ]);
-  assert.match(prepare, /const OVERLAP_RATIO = 1 \/ 8/);
-  assert.match(prepare, /Math\.round\(patchHeight \* 1\.5\)/);
-  assert.match(prepare, /verticalInset/);
-  assert.match(finalize, /function findVerticalSeam/);
-  assert.match(finalize, /generatedMetadata\.width \/ generatedMetadata\.height/);
-  assert.match(finalize, /direction === "north" \? resizedHeight - patchHeight : 0/);
-  assert.match(finalize, /const mix = local > seam\[y\] \? 1 : 0/);
-  assert.doesNotMatch(finalize, /const feather =/);
-  assert.match(reconcileCorner, /const lockDepth = Math\.round\(height \/ 8\)/);
-  assert.match(reconcileCorner, /const backtrack = new Int8Array/);
-  assert.match(reconcileCorner, /y < seamY \? edited : locked/);
-  assert.match(reconcileCorner, /seamMae/);
+  assert.equal(
+    packageJson.scripts["build:environment-native"],
+    "node scripts/build-ninjaone-environment-native-detail.mjs --static-only",
+  );
+  assert.match(nativeBuilder, /SOURCE_TILE_ROOT/);
+  assert.match(nativeBuilder, /VOID_MASK_TILE_IDS/);
+  assert.match(nativeBuilder, /buildNinjaOneEnvironmentStaticTerrain/);
+  assert.doesNotMatch(nativeBuilder, /master-detail-r2|detail-tiles-r3|registered-terrain-master/);
+  assert.doesNotMatch(nativeBuilder, /harmon|buildHydrology|buildFoliage|fallback/i);
 });
 
 test("isolated preview renders semantic terrain and suppresses the city stack", async () => {
@@ -508,7 +370,6 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
     builder,
     semanticBuilder,
     nativeBuilder,
-    registeredBuilder,
     waterRenderer,
     streamShader,
   ] = await Promise.all([
@@ -527,7 +388,6 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
     readFile(path.join(root, "scripts/build-ninjaone-environment-proof.mjs"), "utf8"),
     readFile(path.join(root, "scripts/build-ninjaone-environment-semantics.mjs"), "utf8"),
     readFile(path.join(root, "scripts/build-ninjaone-environment-native-detail.mjs"), "utf8"),
-    readFile(path.join(root, "scripts/lib/ninjaone-registered-terrain-master.mjs"), "utf8"),
     readFile(path.join(
       root,
       "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts",
@@ -543,7 +403,6 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
   for (const layer of [
     "terrain-geology",
     "secondary-relief",
-    "hydrology",
     "static-foliage",
     "tertiary-relief",
     "trails",
@@ -554,58 +413,48 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
   ]) {
     assert.ok(renderer.includes(`"${layer}"`), `${layer} is not rendered`);
   }
+  assert.match(scene, /<WaterSurfaceCanvas[\s\S]*?foregroundHydrology=\{environmentProof\}/);
   assert.doesNotMatch(renderer, /terrain-microdetail/);
   assert.doesNotMatch(renderer, /<InfrastructureLayer|<StructuresLayer|<NinjaOneCapitalMvp/);
   assert.match(builder, /world-land-mask-r4\.png/);
-  assert.match(builder, /ninjaone-environment-terrain-master-detail-r2\.png/);
+  assert.doesNotMatch(builder, /master-detail-r2|runtime-close-quilt-r3/);
   assert.match(builder, /native-detail-r2\.json/);
   assert.match(builder, /canonicalHeightFieldPath/);
   assert.match(builder, /canonicalSlopeFieldPath/);
   assert.match(semanticBuilder, /HYDROLOGY/);
   assert.match(semanticBuilder, /TRAILS/);
   assert.match(semanticBuilder, /WILDLIFE_RESOURCES/);
-  assert.match(nativeBuilder, /detail-tiles-r2\/generated/);
-  assert.match(nativeBuilder, /detail-tiles-r3\/generated/);
-  assert.match(nativeBuilder, /const FALLBACK_TARGET_TILES = TARGET_TILES/);
-  assert.match(nativeBuilder, /canopy-only grouped assets/);
-  assert.match(nativeBuilder, /function buildHydrologyFlowField/);
-  assert.match(nativeBuilder, /registered flow field drives the global WebGL water renderer/);
-  assert.doesNotMatch(nativeBuilder, /function hydrologySpriteRgba/);
-  assert.match(nativeBuilder, /id: "c2-east-headwater-flow"/);
-  assert.match(nativeBuilder, /flowVector: Object\.freeze\(\[-3\.5, 5\]\)/);
-  assert.doesNotMatch(nativeBuilder, /neutralizeCanopies|\.blur\(10\)/);
-  assert.match(nativeBuilder, /buildFallbackTileAlpha/);
-  assert.match(nativeBuilder, /const feather = 320/);
-  assert.match(nativeBuilder, /column \* TILE_ARTBOARD\.width/);
-  assert.match(nativeBuilder, /row \* TILE_ARTBOARD\.height/);
-  assert.doesNotMatch(nativeBuilder, /NORTHWEST_COAST_BOUNDS/);
-  assert.match(registeredBuilder, /function sealVerticalSeam/);
-  assert.match(registeredBuilder, /function sealHorizontalSeam/);
+  assert.match(nativeBuilder, /SOURCE_TILE_ROOT/);
+  assert.match(nativeBuilder, /VOID_MASK_TILE_IDS/);
+  assert.match(nativeBuilder, /buildNinjaOneEnvironmentStaticTerrain/);
+  assert.doesNotMatch(nativeBuilder, /master-detail-r2|detail-tiles-r3|registered-terrain-master/);
   assert.match(waterRenderer, /ninjaOneStreamFlow/);
   assert.match(waterRenderer, /u_ninjaOneStreamOrigin/);
-  assert.match(streamShader, /vec2 decodedFlow/);
-  assert.match(streamShader, /float waterfall/);
+  assert.match(streamShader, /float style = saturate\(encoded\.a \/ max\(coverage/);
+  assert.match(streamShader, /vec2 decodedFlow = \(encodedFlow/);
+  assert.match(
+    streamShader,
+    /primaryPhaseUvA = phaseBaseUv - flow \* flowPhaseA \* phaseAdvance/,
+  );
+  assert.match(
+    streamShader,
+    /materialBaseUv - flow \* flowPhaseA \* materialAdvance/,
+  );
+  assert.doesNotMatch(streamShader, /downhillAxis/);
+  assert.match(streamShader, /float tarnPhase =/);
+  assert.match(streamShader, /float lipAcceleration =/);
+  assert.match(streamShader, /float fallingSheet =/);
+  assert.match(streamShader, /float impactFoam =/);
+  assert.match(streamShader, /float downstreamTurbulence =/);
+  assert.match(streamShader, /float coastalFoam =/);
+  assert.match(streamShader, /float mist = impact/);
   assert.match(streamShader, /OpenWaterSample primaryOceanSurface = sampleWaterBodyAtTime/);
   assert.match(streamShader, /OpenWaterSample offsetOceanSurface = sampleWaterBodyAtTime/);
   assert.match(streamShader, /OpenWaterSample oceanSurface = blendWaterSamples/);
-  assert.match(streamShader, /float primarySurfaceMix/);
-  assert.match(streamShader, /float flowingMaterialTime/);
-  assert.match(streamShader, /float materialTime = mix\(flowingMaterialTime/);
-  assert.match(streamShader, /float downstreamSpeed/);
-  assert.match(streamShader, /float primaryFoamBreakup/);
-  assert.match(streamShader, /float offsetFoamBreakup/);
-  assert.match(streamShader, /float foamBreakup = mix/);
-  assert.match(streamShader, /float downhillDistance = centeredPixels\.y/);
-  assert.match(streamShader, /float longitudinalCoordinate/);
-  assert.match(streamShader, /float downhillPhase/);
-  assert.match(streamShader, /float crestWave/);
-  assert.match(streamShader, /float travelingCrest/);
-  assert.match(streamShader, /float travelingTrough/);
-  assert.match(streamShader, /downhillDistance \* mix\(0\.11, 0\.15, waterfall\)/);
-  assert.match(streamShader, /Coverage is topology-owned and time-invariant/);
-  assert.doesNotMatch(streamShader, /impactPulse/);
-  assert.match(streamShader, /float impactZone/);
-  assert.match(streamShader, /float mist = impactZone/);
-  assert.match(streamShader, /Keep this layer translucent/);
+  const registeredAlpha = streamShader.match(
+    /result\.alpha = mask \* \(([\s\S]*?)\);\s+return result;/,
+  );
+  assert.ok(registeredAlpha, "registered hydrology alpha assignment is missing");
+  assert.doesNotMatch(registeredAlpha[1], /time|sin|heightSample|foam|mist/);
   assert.doesNotMatch(nativeBuilder, /dynamicShadows:\s*Object\.freeze\(\{\s*enabled:\s*true/);
 });

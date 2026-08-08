@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 2,
+  "id": "career-world/capitals/ninjaone/coast-transition@r2",
+  "status": "deterministic-native-original-derived",
+  "source": {
+    "authority": "native-original-tiles",
+    "role": "hard geological rocky-shingle-foam transition only; static matte ownership excluded",
+    "tiles": [
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c2-generated-r2.png",
+        "sha256": "F351A83EA54B3EA30A8C948B68F9E70CD13C6AF0870A5827123BEB36B50E19C7",
+        "voidMaskPath": "/career-world/capitals/ninjaone/environment/masks/void-native-r2/r0-c2-void-mask-r2.png",
+        "voidMaskSha256": "338A84F0617849D185CC07548DA3BB6524172538DD1520AE9DE4C401CA533A03"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c3-generated-r2.png",
+        "sha256": "D2E7261BAF396C85676CE37A90579762FEEAC8231EB93B2751DA5BFEE6D3E98A",
+        "voidMaskPath": "/career-world/capitals/ninjaone/environment/masks/void-native-r2/r0-c3-void-mask-r2.png",
+        "voidMaskSha256": "21611320766C93935FC69A5F63CA5AE3D2C75C2A2648F51F0F532BE0ACCDE432"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c2-generated-r2.png",
+        "sha256": "B92EBAD7F6CCC885F18D3D144E95304A206F198D8E15D06334CC371185CDA69D",
+        "voidMaskPath": "/career-world/capitals/ninjaone/environment/masks/void-native-r2/r1-c2-void-mask-r2.png",
+        "voidMaskSha256": "2D26E21ECE0CF8CECA97F67AA919F90BC00640B063B735EF769BF90D8CB8C5D7"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c3-generated-r2.png",
+        "sha256": "422F663D700D42D5996B844F904441D21765E1DC7384B536B00F5083D33E82AA",
+        "voidMaskPath": "/career-world/capitals/ninjaone/environment/masks/void-native-r2/r1-c3-void-mask-r2.png",
+        "voidMaskSha256": "84AA55E510150A7E918987427D3E0FFA5C83297E4A6ABA182ED67EF996ACA36C"
+      }
+    ]
+  },
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "artboardBounds": {
+      "origin": [
+        839.8342541436464,
+        220.02762430939225
+      ],
+      "span": [
+        480.0828729281768,
+        160.11049723756906
+      ]
+    },
+    "horizontalTileSeamPixel": 966,
+    "resourcePixelOrigin": [
+      482,
+      885
+    ],
+    "tileArtboard": [
+      360,
+      270
+    ],
+    "tileDimensions": [
+      1448,
+      1086
+    ],
+    "verticalTileSeamPixel": 201
+  },
+  "budgets": {
+    "decodedBytes": 4974256,
+    "maximumDecodedBytes": 33554432,
+    "maximumMountedResources": 1,
+    "terrainDecodedBytes": 25160448,
+    "unionDecodedBytes": 30134704
+  },
+  "resources": [
+    {
+      "artboardBounds": {
+        "origin": [
+          839.8342541436464,
+          220.02762430939225
+        ],
+        "span": [
+          480.0828729281768,
+          160.11049723756906
+        ]
+      },
+      "attachmentZones": [
+        {
+          "donorTileId": "r0-c3",
+          "id": "upper-coast-bottom-crop",
+          "direction": "down"
+        },
+        {
+          "donorTileId": "r1-c2",
+          "id": "lower-shelf-top-crop",
+          "direction": "up"
+        }
+      ],
+      "baseOverlapPixels": 0,
+      "decodedBytes": 4974256,
+      "detailEnergy": {
+        "comparisons": 111731,
+        "outputEnergy": 3583935,
+        "ratio": 1,
+        "referenceEnergy": 3583935
+      },
+      "dimensions": [
+        1931,
+        644
+      ],
+      "donorPixelCounts": {
+        "r0-c2": 0,
+        "r0-c3": 51986,
+        "r1-c2": 31158,
+        "r1-c3": 0
+      },
+      "fullyOpaquePixels": 22484,
+      "id": "c1-rock-shingle-foam-transition",
+      "maximumAlpha": 255,
+      "opaquePixels": 83144,
+      "path": "/career-world/capitals/ninjaone/environment/shared/coast-transition-native-r2/c1-rock-shingle-foam-transition-r2.png?v=ee9be339ecae",
+      "rgbPolicy": "exact-native-original-pixel-copy",
+      "sha256": "EE9BE339ECAE771F0C7588BCF0C82A5CE83A15F59E032FA4138A8D833CC63D46",
+      "sourceTileIds": [
+        "r0-c2",
+        "r0-c3",
+        "r1-c2",
+        "r1-c3"
+      ],
+      "transitionBounds": [
+        143,
+        201,
+        1762,
+        493
+      ]
+    }
+  ]
+}

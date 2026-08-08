@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CameraView } from "../../../shared/camera";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
+import type { NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot } from "../../../development/model/ninjaOneEnvironmentResidency";
 import { WaterSurfaceController } from "../rendering/WaterSurfaceController";
 import { WaterSurfaceRenderer } from "../rendering/WaterSurfaceRenderer";
 
@@ -15,6 +16,8 @@ interface WaterSurfaceCanvasProps {
   readonly detailState: DetailState;
   readonly foregroundHydrology?: boolean;
   readonly light: WorldLight;
+  readonly nativeHydrologyAdmission?:
+    NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
 }
 
@@ -24,28 +27,45 @@ export function WaterSurfaceCanvas({
   detailState,
   foregroundHydrology = false,
   light,
+  nativeHydrologyAdmission = null,
   onRenderStateChange,
 }: WaterSurfaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
-  const sceneRef = useRef({ active, camera, detailState, light });
+  const sceneRef = useRef({
+    active,
+    camera,
+    detailState,
+    light,
+    nativeHydrologyAdmission,
+  });
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
   }, [onRenderStateChange]);
 
-  useEffect(() => {
-    sceneRef.current = { active, camera, detailState, light };
-  }, [active, camera, detailState, light]);
+  useLayoutEffect(() => {
+    sceneRef.current = {
+      active,
+      camera,
+      detailState,
+      light,
+      nativeHydrologyAdmission,
+    };
+  }, [active, camera, detailState, light, nativeHydrologyAdmission]);
 
   useEffect(() => {
     controllerRef.current?.setActive(active);
   }, [active]);
 
   useLayoutEffect(() => {
-    controllerRef.current?.setView(camera, detailState);
-  }, [camera, detailState]);
+    controllerRef.current?.setView(
+      camera,
+      detailState,
+      nativeHydrologyAdmission,
+    );
+  }, [camera, detailState, nativeHydrologyAdmission]);
 
   useEffect(() => {
     controllerRef.current?.setLight(light);
@@ -59,26 +79,34 @@ export function WaterSurfaceCanvas({
 
     let cancelled = false;
     let localController: WaterSurfaceController | null = null;
+    const motionPreference = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const handleMotionPreferenceChange = (event: MediaQueryListEvent) => {
+      localController?.setReduceMotion(event.matches);
+    };
+    motionPreference.addEventListener("change", handleMotionPreferenceChange);
     canvas.dataset.renderState = "loading";
     statusCallbackRef.current?.("loading");
 
-    void WaterSurfaceRenderer.create(canvas, light)
+    void WaterSurfaceRenderer.create(canvas, light, foregroundHydrology)
       .then((renderer) => {
         if (cancelled) {
           renderer.destroy();
           return;
         }
 
-        const reduceMotion = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
         localController = new WaterSurfaceController(renderer, {
-          reduceMotion,
+          reduceMotion: motionPreference.matches,
         });
         controllerRef.current = localController;
         const scene = sceneRef.current;
         localController.setActive(scene.active);
-        localController.setView(scene.camera, scene.detailState);
+        localController.setView(
+          scene.camera,
+          scene.detailState,
+          scene.nativeHydrologyAdmission,
+        );
         localController.setLight(scene.light);
         localController.start();
         canvas.dataset.renderState = "ready";
@@ -97,6 +125,10 @@ export function WaterSurfaceCanvas({
 
     return () => {
       cancelled = true;
+      motionPreference.removeEventListener(
+        "change",
+        handleMotionPreferenceChange,
+      );
       localController?.destroy();
       if (controllerRef.current === localController) {
         controllerRef.current = null;

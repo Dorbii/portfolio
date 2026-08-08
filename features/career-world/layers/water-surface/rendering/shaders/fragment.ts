@@ -20,9 +20,22 @@ void main() {
   NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv);
   float streamMix = smoother(0.01, 0.08, stream.alpha);
   vec3 color = mix(coast.color, stream.color, streamMix);
+  float globalVisibility = max(
+    max(waterVisibility, coast.overlayAlpha),
+    stream.alpha
+  );
+  // At z8 the water canvas is an overlay, not another ocean plane. Exclude
+  // global water coverage so native terrain remains visible; only registered
+  // coast interaction and NinjaOne hydrology may composite above it.
+  float registeredForegroundVisibility = max(coast.overlayAlpha, stream.alpha);
+  float visibility = mix(
+    globalVisibility,
+    registeredForegroundVisibility,
+    u_foregroundHydrology
+  );
   outColor = vec4(
     color,
-    u_opacity * max(max(waterVisibility, coast.overlayAlpha), stream.alpha)
+    u_opacity * visibility
   );
 }
 `;

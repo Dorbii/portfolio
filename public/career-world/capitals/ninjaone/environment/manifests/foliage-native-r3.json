@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 2,
+  "id": "career-world/capitals/ninjaone/foliage-native@r3",
+  "status": "coherent-native-canopy-with-neutralization",
+  "sourceCollection": {
+    "authority": "twelve-original-native-generated-r2-pngs",
+    "forbiddenSources": [
+      "ninjaone-environment-terrain-master-detail-r2.png",
+      "runtime-close-quilt-r3",
+      "browser-screenshots"
+    ],
+    "tiles": [
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c2-generated-r2.png",
+        "sha256": "F351A83EA54B3EA30A8C948B68F9E70CD13C6AF0870A5827123BEB36B50E19C7"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r0-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r0-c3-generated-r2.png",
+        "sha256": "D2E7261BAF396C85676CE37A90579762FEEAC8231EB93B2751DA5BFEE6D3E98A"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c2-generated-r2.png",
+        "sha256": "B92EBAD7F6CCC885F18D3D144E95304A206F198D8E15D06334CC371185CDA69D"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r1-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r1-c3-generated-r2.png",
+        "sha256": "422F663D700D42D5996B844F904441D21765E1DC7384B536B00F5083D33E82AA"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c0",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c0-generated-r2.png",
+        "sha256": "5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c1",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c1-generated-r2.png",
+        "sha256": "2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c2-generated-r2.png",
+        "sha256": "2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r2-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r2-c3-generated-r2.png",
+        "sha256": "48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c0",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c0-generated-r2.png",
+        "sha256": "D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c1",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c1-generated-r2.png",
+        "sha256": "825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c2",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c2-generated-r2.png",
+        "sha256": "DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD"
+      },
+      {
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "id": "r3-c3",
+        "path": "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/r3-c3-generated-r2.png",
+        "sha256": "8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31"
+      }
+    ]
+  },
+  "neutralizationSources": [
+    {
+      "dimensions": [
+        270,
+        300
+      ],
+      "id": "c2-trail-conifer-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-trail-conifer-native-neutralization-source-imagegen-r3.png?v=929e31d8bd0d",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "929E31D8BD0D7EC560E1415F33EB0498C72399F2CDDA9E4B0F7DAF5BF4F67B0F",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    },
+    {
+      "dimensions": [
+        280,
+        300
+      ],
+      "id": "c2-stream-canopy-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-stream-canopy-native-neutralization-source-imagegen-r3.png?v=3e8eb68aae7e",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "3E8EB68AAE7E44827DB9CF1C4CD81011B4A731939C76A07A33FD6A575C7F8DD5",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    }
+  ],
+  "separationEvidence": [
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 81000,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 9576,
+      "canopyLargestConnectedComponentRatio": 0.924708,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 25565,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 12700,
+        "comparedPixels": 81000,
+        "maximumChannelDifference": 120,
+        "meanMaximumChannelDifference": 1.091951
+      },
+      "id": "c2-trail-conifer-native",
+      "maskDerivation": "native-conifer-needle-color-local-contrast",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r3/source-composites/c2-trail-conifer-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 5414,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 5414,
+      "neutralizationDilationPixels": 0,
+      "neutralizedCanopyDifferenceRatio": 0.965434,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 66010,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 25565,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    },
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 84000,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 12340,
+      "canopyLargestConnectedComponentRatio": 0.946677,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 38654,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 13025,
+        "comparedPixels": 84000,
+        "maximumChannelDifference": 73,
+        "meanMaximumChannelDifference": 0.953881
+      },
+      "id": "c2-stream-canopy-native",
+      "maskDerivation": "native-yellow-leaf-chroma-hard-alpha",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r3/source-composites/c2-stream-canopy-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 3867,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 3867,
+      "neutralizationDilationPixels": 0,
+      "neutralizedCanopyDifferenceRatio": 0.960697,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 67793,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 38654,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    }
+  ],
+  "eligibility": {
+    "maxDetailEnterSpan": 0.05,
+    "maxDetailRetainSpan": 0.06
+  },
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "boundingWorldView": {
+      "origin": [
+        0.125,
+        0
+      ],
+      "span": [
+        0.25,
+        0.3333333333333333
+      ]
+    },
+    "grid": [
+      4,
+      4
+    ],
+    "gridCell": {
+      "artboardBounds": {
+        "origin": [
+          720,
+          540
+        ],
+        "span": [
+          720,
+          540
+        ]
+      },
+      "id": "C2",
+      "worldBounds": {
+        "origin": [
+          0.25,
+          0.16666666666666666
+        ],
+        "span": [
+          0.125,
+          0.16666666666666666
+        ]
+      }
+    },
+    "nativeTileDimensions": [
+      1448,
+      1086
+    ],
+    "tileArtboard": [
+      360,
+      270
+    ]
+  },
+  "ownership": "the static underlay changes RGB only beneath source-derived opaque leaf pixels and reproduces exact native RGB in genuine crown gaps; the animated canopy excludes protected trunk, rock, trail, stream, and neighbor-tree shapes",
+  "budgets": {
+    "combinedDecodedBytes": 25670896,
+    "fixedC2DecodedBytes": 25670896,
+    "foliageDecodedBytes": 510448,
+    "futureSupplementalNodeHeadroom": 2,
+    "maximumDecodedBytes": 33554432,
+    "maximumSelectedGroups": 2,
+    "maximumSupplementalNodes": 6,
+    "maximumTerrainTiles": 4,
+    "mountedFoliageNodes": 4,
+    "mountedGroups": 2,
+    "nodesPerGroup": 2,
+    "terrainDecodedBytes": 25160448
+  },
+  "resources": [
+    {
+      "alphaBounds": [
+        12,
+        12,
+        141,
+        196
+      ],
+      "alphaCoverage": 0.46573,
+      "alphaSum": 3822450,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 128744,
+      "dimensions": [
+        154,
+        209
+      ],
+      "highAlphaPixels": 14990,
+      "id": "c2-trail-conifer-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 14990,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 0.965434,
+      "opaquePixels": 14990,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-trail-conifer-native-neutralization-r3.png?v=7a50abda29a8",
+      "sha256": "7A50ABDA29A8B0A80694CECC4886B93E6F495E5DC6CA28A3265D4D25EAD616F5",
+      "sourceCrop": [
+        1116,
+        757,
+        154,
+        209
+      ],
+      "sourceTileId": "r2-c2"
+    },
+    {
+      "alphaBounds": [
+        12,
+        12,
+        141,
+        196
+      ],
+      "alphaCoverage": 0.297521,
+      "alphaSum": 2441880,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 128744,
+      "dimensions": [
+        154,
+        209
+      ],
+      "highAlphaPixels": 9576,
+      "id": "c2-trail-conifer-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 8855,
+      "largestConnectedComponentRatio": 0.924708,
+      "opaquePixels": 9576,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-trail-conifer-native-canopy-r3.png?v=84f65208a7cd",
+      "sha256": "84F65208A7CD90FB0C8BC4AC03156443AEA66F12D0C7CBEFAF8E96775C8D8628",
+      "sourceCrop": [
+        1116,
+        757,
+        154,
+        209
+      ],
+      "sourceTileId": "r2-c2"
+    },
+    {
+      "alphaBounds": [
+        12,
+        12,
+        191,
+        142
+      ],
+      "alphaCoverage": 0.512555,
+      "alphaSum": 4132785,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 126480,
+      "dimensions": [
+        204,
+        155
+      ],
+      "highAlphaPixels": 16207,
+      "id": "c2-stream-canopy-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 16207,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 0.960697,
+      "opaquePixels": 16207,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-stream-canopy-native-neutralization-r3.png?v=7a7e58dea177",
+      "sha256": "7A7E58DEA1778AAA8B4CCB5EF3D5309BCE497C280297B1CD957925AA8E3A817D",
+      "sourceCrop": [
+        1143,
+        116,
+        204,
+        155
+      ],
+      "sourceTileId": "r3-c2"
+    },
+    {
+      "alphaBounds": [
+        18,
+        12,
+        191,
+        141
+      ],
+      "alphaCoverage": 0.390259,
+      "alphaSum": 3146700,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 126480,
+      "dimensions": [
+        204,
+        155
+      ],
+      "highAlphaPixels": 12340,
+      "id": "c2-stream-canopy-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 11682,
+      "largestConnectedComponentRatio": 0.946677,
+      "opaquePixels": 12340,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/c2-stream-canopy-native-canopy-r3.png?v=33e93cd71d23",
+      "sha256": "33E93CD71D23161DF53C60C08DD94833A2B2D82791DD5A09FCDCA537106B413C",
+      "sourceCrop": [
+        1143,
+        116,
+        204,
+        155
+      ],
+      "sourceTileId": "r3-c2"
+    }
+  ],
+  "instances": [
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          997.4585635359116,
+          728.2044198895028
+        ],
+        "span": [
+          38.28729281767956,
+          51.96132596685083
+        ]
+      },
+      "bendDegrees": 0.36,
+      "canopyResourceId": "c2-trail-conifer-native-canopy",
+      "checkpoint": "c2-trail-conifer-native",
+      "durationSeconds": 6.2,
+      "gridCell": "C2",
+      "id": "c2-trail-conifer-native-instance",
+      "lagDegrees": 0.075,
+      "neutralizationResourceId": "c2-trail-conifer-native-neutralization",
+      "phaseSeconds": -0.8,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [
+        {
+          "id": "trunk",
+          "kind": "rect",
+          "rect": [
+            1193,
+            908,
+            14,
+            70
+          ]
+        },
+        {
+          "id": "rock",
+          "kind": "ellipse",
+          "rect": [
+            1227,
+            903,
+            133,
+            132
+          ]
+        },
+        {
+          "id": "trail",
+          "kind": "rect",
+          "rect": [
+            1090,
+            750,
+            36,
+            300
+          ]
+        }
+      ],
+      "sourceTileId": "r2-c2"
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1004.1712707182321,
+          838.8397790055249
+        ],
+        "span": [
+          50.71823204419889,
+          38.53591160220994
+        ]
+      },
+      "bendDegrees": 0.29,
+      "canopyResourceId": "c2-stream-canopy-native-canopy",
+      "checkpoint": "c2-stream-canopy-native",
+      "durationSeconds": 7.05,
+      "gridCell": "C2",
+      "id": "c2-stream-canopy-native-instance",
+      "lagDegrees": 0.052,
+      "neutralizationResourceId": "c2-stream-canopy-native-neutralization",
+      "phaseSeconds": -2.35,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [
+        {
+          "id": "trunk",
+          "kind": "rect",
+          "rect": [
+            1238,
+            225,
+            14,
+            95
+          ]
+        },
+        {
+          "id": "stream",
+          "kind": "rect",
+          "rect": [
+            1140,
+            288,
+            280,
+            92
+          ]
+        },
+        {
+          "id": "neighbor-tree",
+          "kind": "rect",
+          "rect": [
+            1342,
+            134,
+            78,
+            190
+          ]
+        }
+      ],
+      "sourceTileId": "r3-c2"
+    }
+  ]
+}

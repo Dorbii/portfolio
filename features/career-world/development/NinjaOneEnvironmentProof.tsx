@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { cameraViewBox, type CameraView } from "../shared/camera";
 import {
   resolveAtomicTierVisibility,
@@ -6,9 +5,11 @@ import {
 } from "../shared/lod";
 import { WORLD_PLANE } from "../shared/world";
 import { NinjaOneEnvironmentNativeDetail } from "./NinjaOneEnvironmentNativeDetail";
+import type {
+  NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot,
+} from "./model/ninjaOneEnvironmentResidency";
 import {
   NINJAONE_ENVIRONMENT_ARTBOARD,
-  NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
   NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_GRID_CELLS,
   NINJAONE_ENVIRONMENT_LAYER_ORDER,
@@ -24,18 +25,19 @@ import {
   NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
-  type NinjaOneEnvironmentFoliageInstance,
   type NinjaOneEnvironmentLayerId,
   type NinjaOneEnvironmentPlateSource,
   type NinjaOneEnvironmentPlateTier,
   type NinjaOneEnvironmentSharedInstance,
 } from "./model/ninjaOneEnvironmentProof";
-import { NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES } from "./model/ninjaOneEnvironmentNativeDetail";
 
 interface NinjaOneEnvironmentProofProps {
   readonly active: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
+  readonly onHydrologyAdmissionChange?: (
+    snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null,
+  ) => void;
 }
 
 const TIER_SUMMARIES = Object.freeze({
@@ -45,16 +47,6 @@ const TIER_SUMMARIES = Object.freeze({
   site: "Ravines / tarn / cascades / trails / groves",
   close: "Rock strata / scree / wet banks / individual flora",
 });
-
-function foliageStyle(instance: NinjaOneEnvironmentFoliageInstance): CSSProperties {
-  return {
-    "--ninjaone-environment-foliage-drift-x": "1.5px",
-    "--ninjaone-environment-foliage-drift-y": "-0.35px",
-    "--ninjaone-environment-foliage-tilt": "0.65deg",
-    animationDelay: `${instance.phaseSeconds}s`,
-    animationDuration: `${5.4 + Math.abs(instance.phaseSeconds) * 0.35}s`,
-  } as CSSProperties;
-}
 
 function PlateImage({
   layer,
@@ -104,27 +96,6 @@ function SharedAsset({
   );
 }
 
-function SharedFoliage({ instance }: {
-  readonly instance: NinjaOneEnvironmentFoliageInstance;
-}) {
-  const height = instance.width
-    * instance.resource.dimensions[1] / instance.resource.dimensions[0];
-  return (
-    <image
-      className="ninjaone-environment-proof__shared-foliage"
-      data-environment-foliage={instance.id}
-      data-shared-resource={instance.resource.id}
-      height={height}
-      href={instance.resource.path}
-      preserveAspectRatio="xMidYMid meet"
-      style={foliageStyle(instance)}
-      width={instance.width}
-      x={instance.anchor[0] - instance.width * 0.5}
-      y={instance.anchor[1] - height}
-    />
-  );
-}
-
 function visibleAtTier(
   instance: NinjaOneEnvironmentSharedInstance,
   detailState: DetailState,
@@ -139,6 +110,7 @@ export function NinjaOneEnvironmentProof({
   active,
   camera,
   detailState,
+  onHydrologyAdmissionChange,
 }: NinjaOneEnvironmentProofProps) {
   const worldX = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -171,11 +143,6 @@ export function NinjaOneEnvironmentProof({
     && visibleLayers.includes("surface-ecology")
     ? NINJAONE_ENVIRONMENT_SURFACE_ECOLOGY_SOURCES[plateTier]
     : null;
-  const visibleSharedFoliage = visibleLayers.includes("shared-animated-foliage")
-    ? NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.filter(
-      (instance) => visibleAtTier(instance, detailState),
-    )
-    : [];
   const visibleRocks = visibleLayers.includes("shared-rocks")
     ? NINJAONE_ENVIRONMENT_ROCK_INSTANCES.filter(
       (instance) => visibleAtTier(instance, detailState),
@@ -186,13 +153,7 @@ export function NinjaOneEnvironmentProof({
       (instance) => visibleAtTier(instance, detailState),
     )
     : [];
-  const sharedNodeCount = visibleSharedFoliage.length
-    + visibleRocks.length
-    + visibleWildlife.length
-    + (visibleLayers.includes("hydrology")
-      || visibleLayers.includes("shared-animated-foliage")
-      ? NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES
-      : 0);
+  const sharedNodeCount = visibleRocks.length + visibleWildlife.length;
   const environmentOpacity = detailState.tier.id === "capital"
     ? Math.max(0, Math.min(1, (detailState.territoryToCapital - 0.35) / 0.65))
     : detailState.tier.id === "world" || detailState.tier.id === "territory"
@@ -248,8 +209,8 @@ export function NinjaOneEnvironmentProof({
             active={active}
             camera={camera}
             detailState={detailState}
+            onHydrologyAdmissionChange={onHydrologyAdmissionChange}
             showFoliage={visibleLayers.includes("shared-animated-foliage")}
-            showHydrology={visibleLayers.includes("hydrology")}
           />
           <g mask="url(#ninjaone-environment-proof-alpha)">
             {secondaryReliefSource ? (
@@ -266,13 +227,6 @@ export function NinjaOneEnvironmentProof({
               <g data-environment-layer="shared-rocks">
                 {visibleRocks.map((instance) => (
                   <SharedAsset instance={instance} key={instance.id} layer="rock" />
-                ))}
-              </g>
-            ) : null}
-            {visibleSharedFoliage.length > 0 ? (
-              <g data-environment-layer="shared-animated-foliage">
-                {visibleSharedFoliage.map((instance) => (
-                  <SharedFoliage instance={instance} key={instance.id} />
                 ))}
               </g>
             ) : null}

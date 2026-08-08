@@ -1607,27 +1607,48 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   image-rendering: auto;
 }
 
+.ninjaone-environment-native-detail__canopy-neutralization {
+  image-rendering: auto;
+}
+
 .ninjaone-environment-native-detail__canopy-sway {
   transform-box: fill-box;
-  transform-origin: 50% 88%;
-  animation: ninjaone-native-canopy-sway 5.6s ease-in-out infinite;
-  animation-delay: var(--ninjaone-native-phase);
-  opacity: 0.42;
+  transform-origin: 50% var(--ninjaone-foliage-pivot-y, 94%);
+  animation:
+    ninjaone-native-canopy-sway
+    var(--ninjaone-foliage-duration, 6.4s)
+    cubic-bezier(0.42, 0.08, 0.58, 0.92)
+    infinite;
+  animation-delay:
+    var(--ninjaone-foliage-phase, var(--ninjaone-native-phase, 0s));
+  opacity: 1;
   will-change: transform;
 }
 
 @keyframes ninjaone-native-canopy-sway {
   0%,
   100% {
-    transform: rotate(-0.11deg) skewX(-0.05deg);
+    transform:
+      rotate(var(--ninjaone-foliage-bend-start, -0.16deg))
+      skewX(var(--ninjaone-foliage-lag-start, -0.04deg));
   }
 
-  38% {
-    transform: rotate(0.13deg) skewX(0.08deg);
+  37% {
+    transform:
+      rotate(var(--ninjaone-foliage-bend-peak, 0.32deg))
+      skewX(var(--ninjaone-foliage-lag-peak, 0.08deg));
   }
 
-  72% {
-    transform: rotate(-0.04deg) skewX(-0.02deg);
+  64% {
+    transform:
+      rotate(var(--ninjaone-foliage-bend-lag, -0.06deg))
+      skewX(var(--ninjaone-foliage-lag-start, -0.04deg));
+  }
+
+  84% {
+    transform:
+      rotate(var(--ninjaone-foliage-bend-return, 0.08deg))
+      skewX(0deg);
   }
 }
 

@@ -69,6 +69,13 @@ import {
 import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
+import {
+  createNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
+  ninjaOneEnvironmentNativeHydrologyAdmissionIsCurrent,
+  recordNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
+  retargetNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
+  type NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot,
+} from "../development/model/ninjaOneEnvironmentResidency";
 
 interface WorldSceneProps {
   readonly capitalMvp: boolean;
@@ -253,7 +260,11 @@ export function WorldScene({
   const cameraFrameRef = useRef(0);
   const dragRef = useRef<DragState | null>(null);
   const focusFrameRef = useRef(0);
-  const [camera, setCamera] = useState<CameraView>(initialCamera);
+  const [cameraPublication, setCameraPublication] = useState(() => ({
+    camera: initialCamera,
+    generation: 0,
+  }));
+  const { camera, generation: cameraGeneration } = cameraPublication;
   const [activeViewId, setActiveViewId] = useState(
     environmentProof
       ? "ninjaone-environment-proof"
@@ -266,12 +277,38 @@ export function WorldScene({
   const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
+  const [nativeHydrologyAdmissionHandoff, setNativeHydrologyAdmissionHandoff] =
+    useState(createNinjaOneEnvironmentNativeHydrologyAdmissionHandoff);
   const [showTopography, setShowTopography] = useState(topologyProof);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
   const [showGrid, setShowGrid] = useState(topologyProof);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const detailState = resolveDetailState(camera);
+  const currentNativeHydrologyAdmissionHandoff =
+    retargetNinjaOneEnvironmentNativeHydrologyAdmissionHandoff(
+      nativeHydrologyAdmissionHandoff,
+      cameraGeneration,
+    );
+  const currentNativeHydrologyAdmission =
+    ninjaOneEnvironmentNativeHydrologyAdmissionIsCurrent(
+      currentNativeHydrologyAdmissionHandoff.snapshot,
+      camera,
+      currentNativeHydrologyAdmissionHandoff.minimumEpoch,
+    )
+      ? currentNativeHydrologyAdmissionHandoff.snapshot
+      : null;
+  const handleNativeHydrologyAdmissionChange = useCallback((
+    snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null,
+  ) => {
+    setNativeHydrologyAdmissionHandoff((current) => (
+      recordNinjaOneEnvironmentNativeHydrologyAdmissionHandoff(current, {
+        camera,
+        cameraGeneration,
+        snapshot,
+      })
+    ));
+  }, [camera, cameraGeneration]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -296,7 +333,10 @@ export function WorldScene({
       cameraFrameRef.current = 0;
     }
     cameraRef.current = normalized;
-    setCamera(normalized);
+    setCameraPublication((current) => ({
+      camera: normalized,
+      generation: current.generation + 1,
+    }));
   }, []);
 
   const queueCamera = useCallback((next: CameraView) => {
@@ -310,7 +350,10 @@ export function WorldScene({
 
     cameraFrameRef.current = requestAnimationFrame(() => {
       cameraFrameRef.current = 0;
-      setCamera(cameraRef.current);
+      setCameraPublication((current) => ({
+        camera: cameraRef.current,
+        generation: current.generation + 1,
+      }));
     });
   }, []);
 
@@ -516,6 +559,7 @@ export function WorldScene({
         detailState={detailState}
         foregroundHydrology={environmentProof}
         light={WORLD_LIGHT}
+        nativeHydrologyAdmission={currentNativeHydrologyAdmission}
         onRenderStateChange={setRenderState}
       />
       <TerritoryLandform
@@ -529,6 +573,7 @@ export function WorldScene({
           active={isPageVisible}
           camera={camera}
           detailState={detailState}
+          onHydrologyAdmissionChange={handleNativeHydrologyAdmissionChange}
         />
       ) : capitalMvp ? (
         <NinjaOneCapitalMvp

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/coast-transition@r1",
+  "status": "deterministic-master-derived",
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "masterPixelsPerArtboardUnit": 4
+  },
+  "budgets": {
+    "maximumDecodedBytes": 3686400,
+    "maximumMountedResources": 1
+  },
+  "resources": [
+    {
+      "artboardBounds": {
+        "origin": [
+          840,
+          220
+        ],
+        "span": [
+          360,
+          160
+        ]
+      },
+      "boundarySpan": [
+        131,
+        1378
+      ],
+      "copiedRgbPixels": 13439,
+      "decodedBytes": 3686400,
+      "dimensions": [
+        1440,
+        640
+      ],
+      "id": "c1-rock-shingle-transition",
+      "maximumAlpha": 176,
+      "opaquePixels": 13439,
+      "path": "/career-world/capitals/ninjaone/environment/shared/coast-transition-native-r1/c1-rock-shingle-transition-r1.png?v=590a1718577f",
+      "sha256": "590A1718577FF388A39370C77896EAD83E1E6401B20BAB3E73859C1543DA0B30",
+      "sourceCrop": [
+        3360,
+        880,
+        1440,
+        640
+      ],
+      "sourceDimensions": [
+        5760,
+        4320
+      ],
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+      "sourceSha256": "E0F4A0DB50AB6383B585A8DDBDE4102E554EE0284AAF2C975EFA18E98CBD57F4"
+    }
+  ]
+}

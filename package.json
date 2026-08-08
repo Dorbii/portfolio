@@ -10,12 +10,17 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "build:environment-native": "node scripts/build-ninjaone-environment-native-detail.mjs",
-    "repair:ninjaone-coast-mask": "node scripts/repair-ninjaone-north-coast-mask.mjs",
+    "build:environment-native": "node scripts/build-ninjaone-environment-native-detail.mjs --static-only",
+    "build:environment-hydrology": "node scripts/build-ninjaone-environment-hydrology-r2.mjs",
+    "build:ninjaone-environment-foliage": "node scripts/build-ninjaone-environment-foliage-r3.mjs",
+    "build:ninjaone-environment-seams": "node scripts/build-ninjaone-environment-seam-integration-r2.mjs",
+    "capture:ninjaone-environment-mvp": "node scripts/capture-ninjaone-environment-mvp.mjs",
+    "extract:ninjaone-foliage-isolation-crops": "node scripts/extract-ninjaone-foliage-isolation-crops.mjs",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint .",
     "test": "node --experimental-strip-types --test tests/index.test.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "verify:ninjaone-environment-mvp": "node scripts/verify-ninjaone-environment-mvp.mjs"
   },
   "dependencies": {
     "next": "16.2.11",
@@ -32,6 +37,7 @@
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "react-server-dom-webpack": "19.2.6",
+    "sharp": "0.34.5",
     "typescript": "5.9.3",
     "vinext": "0.0.50",
     "vite": "8.1.5",

@@ -1,7 +1,6 @@
 import {
   DEFAULT_WORLD_WIND_STATE,
   wrapDegrees,
-  windVectorFromDegrees,
 } from "../../../shared/weather.ts";
 
 export { windVectorFromDegrees } from "../../../shared/weather.ts";

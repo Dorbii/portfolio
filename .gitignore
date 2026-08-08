@@ -26,4 +26,14 @@ __pycache__/
 Thumbs.db
 /.codex-tmp/
 /tmp/
-/scripts/
+/scripts/*
+!/scripts/build-ninjaone-environment-foliage-r3.mjs
+!/scripts/build-ninjaone-environment-hydrology-r2.mjs
+!/scripts/build-ninjaone-environment-native-detail.mjs
+!/scripts/build-ninjaone-environment-seam-integration-r2.mjs
+!/scripts/capture-ninjaone-environment-mvp.mjs
+!/scripts/extract-ninjaone-foliage-isolation-crops.mjs
+!/scripts/verify-ninjaone-environment-mvp.mjs
+!/scripts/lib/
+/scripts/lib/*
+!/scripts/lib/ninjaone-environment-mvp-verification.mjs

@@ -11,6 +11,78 @@ float insideUnitSquare(vec2 value) {
     * step(value.y, 1.0);
 }
 
+float ninjaOneStyleBand(float style, float center, float radius) {
+  return 1.0 - smoother(radius * 0.45, radius, abs(style - center));
+}
+
+vec4 ninjaOneFetchRegion0(ivec2 coordinate) {
+  ivec2 dimensions = ivec2(u_ninjaOneStreamRegion0.zw);
+  if (
+    any(lessThan(coordinate, ivec2(0)))
+    || any(greaterThanEqual(coordinate, dimensions))
+  ) {
+    return vec4(0.0);
+  }
+  return texelFetch(u_ninjaOneStreamFlow0, coordinate, 0);
+}
+
+vec4 ninjaOneFetchRegion1(ivec2 coordinate) {
+  ivec2 dimensions = ivec2(u_ninjaOneStreamRegion1.zw);
+  if (
+    any(lessThan(coordinate, ivec2(0)))
+    || any(greaterThanEqual(coordinate, dimensions))
+  ) {
+    return vec4(0.0);
+  }
+  return texelFetch(u_ninjaOneStreamFlow1, coordinate, 0);
+}
+
+vec4 ninjaOneSampleRegion0(vec2 fullTexelCoordinate) {
+  if (u_ninjaOneStreamSlotCount < 0.5) return vec4(0.0);
+  vec2 localCoordinate = fullTexelCoordinate - u_ninjaOneStreamRegion0.xy;
+  ivec2 lower = ivec2(floor(localCoordinate));
+  vec2 blend = fract(localCoordinate);
+  vec4 top = mix(
+    ninjaOneFetchRegion0(lower),
+    ninjaOneFetchRegion0(lower + ivec2(1, 0)),
+    blend.x
+  );
+  vec4 bottom = mix(
+    ninjaOneFetchRegion0(lower + ivec2(0, 1)),
+    ninjaOneFetchRegion0(lower + ivec2(1, 1)),
+    blend.x
+  );
+  return mix(top, bottom, blend.y);
+}
+
+vec4 ninjaOneSampleRegion1(vec2 fullTexelCoordinate) {
+  if (u_ninjaOneStreamSlotCount < 1.5) return vec4(0.0);
+  vec2 localCoordinate = fullTexelCoordinate - u_ninjaOneStreamRegion1.xy;
+  ivec2 lower = ivec2(floor(localCoordinate));
+  vec2 blend = fract(localCoordinate);
+  vec4 top = mix(
+    ninjaOneFetchRegion1(lower),
+    ninjaOneFetchRegion1(lower + ivec2(1, 0)),
+    blend.x
+  );
+  vec4 bottom = mix(
+    ninjaOneFetchRegion1(lower + ivec2(0, 1)),
+    ninjaOneFetchRegion1(lower + ivec2(1, 1)),
+    blend.x
+  );
+  return mix(top, bottom, blend.y);
+}
+
+vec4 sampleNinjaOneRegionalField(vec2 streamUv) {
+  // Convert to the texel-center coordinate of the original uncropped field.
+  // Each crop contributes transparent zero beyond its exact source bounds, so
+  // summing two disjoint slots reconstructs the authored full field without
+  // CLAMP_TO_EDGE smearing a bank across the crop boundary.
+  vec2 fullTexelCoordinate = streamUv / u_ninjaOneStreamTexel - vec2(0.5);
+  return ninjaOneSampleRegion0(fullTexelCoordinate)
+    + ninjaOneSampleRegion1(fullTexelCoordinate);
+}
+
 NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   NinjaOneStreamSample result;
   result.color = u_bodyColor;
@@ -22,94 +94,147 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     return result;
   }
 
-  vec4 encoded = texture(
-    u_ninjaOneStreamFlow,
-    clamp(streamUv, u_ninjaOneStreamTexel, 1.0 - u_ninjaOneStreamTexel)
-  );
-  float mask = smoother(0.035, 0.56, encoded.r) * registered;
+  vec4 encoded = sampleNinjaOneRegionalField(streamUv);
+  float coverage = encoded.r;
+  float mask = smoother(0.02, 0.58, coverage) * registered;
   if (mask <= 0.001) {
     return result;
   }
 
-  vec2 decodedFlow = (encoded.gb - vec2(128.0 / 255.0)) * (255.0 / 127.0);
+  // Occupied field texels have R=255. At a linearly filtered bank both R and
+  // A attenuate by the same amount, so their ratio recovers the authored style
+  // instead of turning every antialiased stream edge into a false tarn.
+  float style = saturate(encoded.a / max(coverage, 1.0 / 255.0));
+  float tarn = ninjaOneStyleBand(style, 32.0 / 255.0, 0.055);
+  float stream = ninjaOneStyleBand(style, 96.0 / 255.0, 0.07);
+  float turbulence = ninjaOneStyleBand(style, 120.0 / 255.0, 0.055);
+  float lip = ninjaOneStyleBand(style, 148.0 / 255.0, 0.055);
+  float waterfall = ninjaOneStyleBand(style, 192.0 / 255.0, 0.065);
+  float impact = ninjaOneStyleBand(style, 224.0 / 255.0, 0.055);
+  float coast = ninjaOneStyleBand(style, 252.0 / 255.0, 0.035);
+  float channel = saturate(stream + turbulence);
+
+  // G/B are stored on occupied texels and linearly attenuate with R at the
+  // bank. Divide by coverage before decoding so filtered edge pixels preserve
+  // the same local vector instead of bending toward the zero-filled exterior.
+  vec2 encodedFlow = encoded.gb / max(coverage, 1.0 / 255.0);
+  vec2 decodedFlow = (encodedFlow - vec2(128.0 / 255.0)) * (255.0 / 127.0);
   float flowLength = length(decodedFlow);
   vec2 flow = flowLength > 0.035
     ? decodedFlow / flowLength
-    : normalize(vec2(0.72, 0.69));
-  vec2 crossFlow = vec2(-flow.y, flow.x);
-  float style = encoded.a;
-  float waterfall = smoother(0.78, 0.98, style);
-  float channel = smoother(0.42, 0.72, style) * (1.0 - waterfall);
-  float tarn = 1.0 - smoother(0.22, 0.5, style);
-
-  vec2 streamPixels = streamUv / u_ninjaOneStreamTexel;
-  vec2 streamCenter = 0.5 / u_ninjaOneStreamTexel;
-  vec2 centeredPixels = streamPixels - streamCenter;
-  float along = dot(centeredPixels, flow);
-  float across = dot(centeredPixels, crossFlow);
-  // Every registered ravine descends toward increasing artboard Y. Use that
-  // shared elevation axis as the longitudinal phase so a crest remains
-  // continuous when it crosses between adjacent flow-vector regions. The
-  // local vector still rotates the material across each individual channel.
-  float downhillDistance = centeredPixels.y;
-  float longitudinalCoordinate = mix(downhillDistance, along, tarn);
+    : vec2(0.0);
+  // Phase/material coordinates stay in the canonical 1440 x 1080 artboard,
+  // so a detail/fallback cohort swap changes sampling resolution, not phase.
+  vec2 streamPixels = streamUv * u_ninjaOneStreamArtboardDimensions;
   float time = u_time * u_motion;
 
-  // The flow field owns direction only. The surface itself is sampled through
-  // the exact open-water material pipeline used by the ocean so the palette,
-  // authored albedo, normal response, crests, and texture character stay one
-  // visual system. The local basis rotates that material into the downhill
-  // direction; translating its longitudinal axis makes it travel downstream.
-  float flowScale = mix(0.00042, 0.00056, waterfall);
-  float downstreamSpeed =
-    mix(0.018, 0.055, channel)
-    + waterfall * 0.14;
-  downstreamSpeed = mix(downstreamSpeed, 0.006, tarn);
-  vec2 rawFlowUv =
-    vec2(0.47, 0.53)
-    + vec2(across * flowScale * 0.82, longitudinalCoordinate * flowScale)
-    - vec2(0.0, time * downstreamSpeed);
-  vec2 flowAlignedUv = vec2(
-    clamp(rawFlowUv.x, 0.04, 0.96),
-    fract(rawFlowUv.y)
+  // Two-phase flow mapping bounds local displacement and crossfades every
+  // reset. Both crest phase and material UVs are advected by the decoded
+  // per-pixel vector; there is no global transport axis or in-place flicker.
+  float flowRate =
+    stream * 0.68
+    + turbulence * 0.92
+    + lip * 1.18
+    + waterfall * 1.55
+    + impact * 0.88
+    + coast * 0.52;
+  float flowProgress = time * flowRate;
+  float flowPhaseA = fract(flowProgress);
+  float flowPhaseB = fract(flowProgress + 0.5);
+  float flowPhaseBlend = abs(flowPhaseA * 2.0 - 1.0);
+  float phaseAdvance =
+    stream * 0.26
+    + turbulence * 0.38
+    + lip * 0.48
+    + waterfall * 0.64
+    + impact * 0.42
+    + coast * 0.3;
+  vec2 phaseBaseUv = streamPixels * 0.021;
+  vec2 primaryPhaseUvA = phaseBaseUv - flow * flowPhaseA * phaseAdvance;
+  vec2 primaryPhaseUvB = phaseBaseUv - flow * flowPhaseB * phaseAdvance;
+  vec2 secondaryPhaseOffset = vec2(0.37, 0.53);
+  float primaryTravelSignal = mix(
+    heightSample(u_microHeight, primaryPhaseUvB),
+    heightSample(u_microHeight, primaryPhaseUvA),
+    flowPhaseBlend
   );
-  vec2 offsetFlowUv = vec2(
-    flowAlignedUv.x,
-    fract(rawFlowUv.y + 0.5)
+  float secondaryTravelSignal = mix(
+    heightSample(u_microHeight, primaryPhaseUvB + secondaryPhaseOffset),
+    heightSample(u_microHeight, primaryPhaseUvA + secondaryPhaseOffset),
+    flowPhaseBlend
   );
-  float longitudinalEdge = min(flowAlignedUv.y, 1.0 - flowAlignedUv.y);
-  float primarySurfaceMix = smoother(0.06, 0.18, longitudinalEdge);
-  vec2 tarnCenterUv = vec2(735.0, 598.0) * u_ninjaOneStreamTexel;
+
+  vec2 tarnCenterUv = vec2(606.0 / 1440.0, 616.0 / 1080.0);
+  vec2 tarnDeltaPixels =
+    (streamUv - tarnCenterUv) * u_ninjaOneStreamArtboardDimensions;
+  float tarnRadius = length(tarnDeltaPixels);
+  float tarnAngle = atan(tarnDeltaPixels.y, tarnDeltaPixels.x);
+  float tarnPhase =
+    tarnRadius * 0.41
+    - time * 1.55
+    + sin(tarnAngle * 3.0) * 0.22;
+  float primaryPhase = mix(
+    (primaryTravelSignal - 0.5) * 6.2831853,
+    tarnPhase,
+    tarn
+  );
+  float secondaryPhase = mix(
+    (secondaryTravelSignal - 0.5) * 6.2831853,
+    tarnPhase * 0.71 + 1.7,
+    tarn
+  );
+
+  float flowScale =
+    0.00031
+    + turbulence * 0.00003
+    + waterfall * 0.00014
+    + coast * 0.00004;
+  float materialAdvance =
+    channel * 0.024
+    + lip * 0.05
+    + waterfall * 0.115
+    + impact * 0.06
+    + coast * 0.022;
+  materialAdvance = mix(materialAdvance, 0.0045, tarn);
+  vec2 materialBaseUv = vec2(0.47, 0.53) + streamPixels * flowScale;
+  vec2 flowAlignedUv = fract(
+    materialBaseUv - flow * flowPhaseA * materialAdvance
+  );
+  vec2 offsetFlowUv = fract(
+    materialBaseUv - flow * flowPhaseB * materialAdvance
+  );
+  float primarySurfaceMix = flowPhaseBlend;
   vec2 tarnWorldCenter =
     u_ninjaOneStreamOrigin + tarnCenterUv * u_ninjaOneStreamSpan;
-  float streamShelter = mix(0.62, 0.1, waterfall);
-  streamShelter = mix(streamShelter, 0.9, tarn);
-  // Reuse the open-water animation clock as well as its textures, palette,
-  // displacement, normals, and foam response. The flow-aligned UV supplies
-  // downhill travel; this shared clock preserves the ocean's surface life.
-  // The tarn remains slower because standing water should ripple rather than
-  // race through the basin.
-  float flowingMaterialTime = time * mix(0.62, 1.05, waterfall);
-  float materialTime = mix(flowingMaterialTime, time * 0.36, tarn);
+  float streamShelter =
+    0.62
+    - waterfall * 0.48
+    - lip * 0.24
+    + tarn * 0.3
+    + coast * 0.08;
+  // Registered material UVs already travel along the decoded local field.
+  // Suppress sampleWaterBodyAtTime's global wind-time transport here so it
+  // cannot add an unrelated axis beneath stream, fall, impact, or coast foam.
+  // Tarn motion remains the explicit radial tarnPhase above.
   OpenWaterSample primaryOceanSurface = sampleWaterBodyAtTime(
     worldUv,
     flowAlignedUv,
-    streamShelter,
+    saturate(streamShelter),
     tarnWorldCenter,
-    430.0,
-    tarn * 0.84,
-    0.02 + tarn * 0.12,
-    materialTime
+    1450.0,
+    tarn * 0.32,
+    0.025 + tarn * 0.055,
+    0.0
   );
   OpenWaterSample offsetOceanSurface = sampleWaterBodyAtTime(
     worldUv,
     offsetFlowUv,
-    streamShelter,
+    saturate(streamShelter),
     tarnWorldCenter,
-    430.0,
-    tarn * 0.84,
-    0.02 + tarn * 0.12,
-    materialTime
+    1450.0,
+    tarn * 0.32,
+    0.025 + tarn * 0.055,
+    0.0
   );
   OpenWaterSample oceanSurface = blendWaterSamples(
     offsetOceanSurface,
@@ -117,162 +242,136 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     primarySurfaceMix
   );
 
-  float maskLeft = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv - vec2(u_ninjaOneStreamTexel.x, 0.0),
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
+  float maskLeft = sampleNinjaOneRegionalField(
+    streamUv - vec2(u_ninjaOneStreamTexel.x, 0.0)
   ).r;
-  float maskRight = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv + vec2(u_ninjaOneStreamTexel.x, 0.0),
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
+  float maskRight = sampleNinjaOneRegionalField(
+    streamUv + vec2(u_ninjaOneStreamTexel.x, 0.0)
   ).r;
-  float maskUp = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv - vec2(0.0, u_ninjaOneStreamTexel.y),
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
+  float maskUp = sampleNinjaOneRegionalField(
+    streamUv - vec2(0.0, u_ninjaOneStreamTexel.y)
   ).r;
-  float maskDown = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv + vec2(0.0, u_ninjaOneStreamTexel.y),
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
+  float maskDown = sampleNinjaOneRegionalField(
+    streamUv + vec2(0.0, u_ninjaOneStreamTexel.y)
   ).r;
   float bankEdge = saturate(
-    length(vec2(maskRight - maskLeft, maskDown - maskUp)) * 2.6
+    length(vec2(maskRight - maskLeft, maskDown - maskUp)) * 2.35
   );
 
-  vec2 flowStep = flow * u_ninjaOneStreamTexel * 3.5;
-  float upstreamStyle = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv - flowStep,
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
-  ).a;
-  float downstreamStyle = texture(
-    u_ninjaOneStreamFlow,
-    clamp(
-      streamUv + flowStep,
-      u_ninjaOneStreamTexel,
-      1.0 - u_ninjaOneStreamTexel
-    )
-  ).a;
-  float lipZone = waterfall
-    * (1.0 - smoother(0.78, 0.98, upstreamStyle));
-  float impactZone = waterfall
-    * (1.0 - smoother(0.78, 0.98, downstreamStyle));
-
-  float crest = oceanSurface.crest;
-  float flowFilament = smoother(
-    0.5,
-    0.88,
-    oceanSurface.height * 0.5 + 0.5
-  ) * mix(0.5, 1.0, oceanSurface.expression);
-  float fallingSheet = waterfall * smoother(
-    0.46,
-    0.86,
-    flowFilament * 0.62
-      + crest * 0.24
-      + oceanSurface.expression * 0.14
+  float primaryBreakup = heightSample(
+    u_microHeight,
+    flowAlignedUv * vec2(4.2, 6.8)
   );
-  float primaryFoamBreakup = smoother(
-    0.5,
-    0.82,
-    heightSample(
-      u_microHeight,
-      flowAlignedUv * vec2(4.2, 6.8)
-    )
-  );
-  float offsetFoamBreakup = smoother(
-    0.5,
-    0.82,
-    heightSample(
-      u_microHeight,
-      offsetFlowUv * vec2(4.2, 6.8)
-    )
+  float offsetBreakup = heightSample(
+    u_microHeight,
+    offsetFlowUv * vec2(4.2, 6.8)
   );
   float foamBreakup = mix(
-    offsetFoamBreakup,
-    primaryFoamBreakup,
+    offsetBreakup,
+    primaryBreakup,
     primarySurfaceMix
   );
-  // A crest must move through space, not merely brighten in place. The along
-  // phase uses one continuous high-to-low coordinate. Keeping the advected
-  // breakup outside the sine prevents noise changes from reversing or locally
-  // stalling the visible ribbon.
-  float downhillPhase =
-    downhillDistance * mix(0.11, 0.15, waterfall)
-    - time * mix(4.4, 11.5, waterfall);
-  float crestWave = sin(downhillPhase) * 0.5 + 0.5;
   float travelingCrest = smoother(
-    0.72,
+    0.62,
+    0.93,
+    sin(primaryPhase) * 0.5 + 0.5
+  ) * mix(0.54, 1.0, foamBreakup);
+  float offsetCrest = smoother(
+    0.67,
     0.94,
-    crestWave
-  ) * mix(0.48, 1.0, foamBreakup);
+    sin(secondaryPhase) * 0.5 + 0.5
+  );
   float travelingTrough = smoother(
-    0.7,
+    0.68,
     0.94,
-    sin(downhillPhase - 1.9) * 0.5 + 0.5
+    sin(primaryPhase - 1.86) * 0.5 + 0.5
+  );
+  float tarnCrest = tarn * smoother(
+    0.68,
+    0.94,
+    sin(tarnPhase) * 0.5 + 0.5
+  );
+
+  // The style field separates each waterfall stage. The lip accelerates into
+  // a brighter narrow crest, the fall becomes a vertically traveling sheet,
+  // the registered impact mask owns base foam and restrained mist, and the
+  // next downstream style retains turbulence without widening the channel.
+  float lipAcceleration = lip * (
+    0.34 + travelingCrest * 0.66
+  );
+  float fallFilament = smoother(
+    0.48,
+    0.9,
+    secondaryTravelSignal
+  );
+  float fallingSheet = waterfall * (
+    0.26
+      + travelingCrest * 0.48
+      + fallFilament * offsetCrest * 0.34
+  );
+  float impactFoam = impact * (
+    0.5
+      + travelingCrest * 0.3
+      + offsetCrest * 0.36
+  );
+  float downstreamTurbulence = turbulence * (
+    travelingCrest * 0.54
+      + offsetCrest * 0.34
+      + bankEdge * 0.18
+  );
+  float coastalFoam = coast * (
+    travelingCrest * 0.18
+      + offsetCrest * 0.1
+      + bankEdge * 0.05
   );
   float foam = saturate(
-    crest * mix(0.12, 0.42, waterfall)
-      + bankEdge * channel * 0.18
-      + fallingSheet * foamBreakup * 0.72
-      + lipZone * foamBreakup * 0.4
-      + impactZone * foamBreakup * 0.86
-      + travelingCrest * (channel * 0.42 + waterfall * 0.78)
-  );
-  float primaryMistNoise = mix(
-    heightSample(u_macroHeight, flowAlignedUv * vec2(2.1, 3.4)),
-    heightSample(u_microHeight, flowAlignedUv * vec2(5.7, 4.6)),
-    0.42
-  );
-  float offsetMistNoise = mix(
-    heightSample(u_macroHeight, offsetFlowUv * vec2(2.1, 3.4)),
-    heightSample(u_microHeight, offsetFlowUv * vec2(5.7, 4.6)),
-    0.42
+    oceanSurface.crest * (channel * 0.16 + waterfall * 0.2)
+      + bankEdge * channel * 0.15
+      + travelingCrest * stream * 0.44
+      + lipAcceleration * 0.42
+      + fallingSheet * 0.38
+      + impactFoam * 0.48
+      + downstreamTurbulence * 0.72
+      + coastalFoam * 0.32
+      + tarnCrest * 0.06
   );
   float mistNoise = mix(
-    offsetMistNoise,
-    primaryMistNoise,
-    primarySurfaceMix
+    heightSample(u_macroHeight, offsetFlowUv * vec2(2.1, 3.4)),
+    heightSample(u_microHeight, flowAlignedUv * vec2(5.7, 4.6)),
+    0.44
   );
-  float mist = impactZone
-    * smoother(0.48, 0.78, mistNoise);
+  float mist = impact
+    * smoother(0.56, 0.82, mistNoise)
+    * (0.12 + offsetCrest * 0.1);
+
   vec3 waterColor = oceanSurface.color;
   waterColor = mix(
     waterColor,
     u_deepColor,
-    travelingTrough * (channel * 0.08 + waterfall * 0.13)
+    travelingTrough * (channel * 0.1 + waterfall * 0.14)
   );
-  waterColor = mix(waterColor, u_foamColor, foam * 0.82);
-  waterColor = mix(waterColor, u_foamColor, mist * 0.46);
+  waterColor = mix(
+    waterColor,
+    u_highlightColor,
+    tarnCrest * 0.1
+  );
+  waterColor = mix(waterColor, u_foamColor, foam * 0.86);
+  waterColor = mix(waterColor, u_foamColor, mist * 0.34);
 
   result.color = waterColor;
-  // The registered terrain already owns the exact banks, rocks, and base
-  // water. Keep this layer translucent so it adds motion without repainting
-  // that accepted artwork or turning nearby terrain into a moving sticker.
-  // Coverage is topology-owned and time-invariant. Moving highlights may
-  // change color inside the registered water, but they must never make the
-  // channel blink by changing its alpha from frame to frame.
-  result.alpha = mask * (
-    0.44
-      + channel * 0.08
-      + waterfall * 0.18
-      + tarn * 0.06
+  // Coverage and alpha contain no time term. Only color/material phase moves,
+  // so accepted banks, rocks, and shoreline geometry remain invariant.
+  // Native coast masks follow authored foam around rocks and shingle. Keep
+  // that interaction subordinate to the source material instead of fully
+  // replacing every registered micro-edge with a bright contour.
+  float baseAlpha = mix(0.27, 0.03, coast);
+  result.alpha = mask * u_ninjaOneHydrologyOpacity * (
+    baseAlpha
+      + tarn * 0.03
+      + channel * 0.045
+      + lip * 0.1
+      + waterfall * 0.12
+      + impact * 0.11
   );
   return result;
 }

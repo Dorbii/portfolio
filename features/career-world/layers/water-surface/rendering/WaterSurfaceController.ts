@@ -1,15 +1,17 @@
 import type { CameraView } from "../../../shared/camera";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
+import type { NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot } from "../../../development/model/ninjaOneEnvironmentResidency";
 import type { WaterSurfaceState } from "../model/state";
-import { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
+import type { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
 
 export class WaterSurfaceController {
   private readonly renderer: WaterSurfaceRenderer;
   private readonly resizeObserver: ResizeObserver | null;
-  private readonly reduceMotion: boolean;
+  private reduceMotion: boolean;
   private frameRequest = 0;
   private running = false;
+  private started = false;
   private active = true;
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
@@ -20,6 +22,8 @@ export class WaterSurfaceController {
   ) {
     this.renderer = renderer;
     this.reduceMotion = options.reduceMotion;
+    this.renderer.setReduceMotion(options.reduceMotion);
+    this.renderer.setInvalidationHandler(this.handleRendererInvalidation);
     this.resizeObserver = typeof ResizeObserver === "undefined"
       ? null
       : new ResizeObserver(() => this.renderOnce());
@@ -27,8 +31,13 @@ export class WaterSurfaceController {
     document.addEventListener("visibilitychange", this.handleVisibility);
   }
 
-  setView(camera: CameraView, detailState: DetailState): void {
-    this.renderer.setView(camera, detailState);
+  setView(
+    camera: CameraView,
+    detailState: DetailState,
+    nativeHydrologyAdmission:
+      NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null = null,
+  ): void {
+    this.renderer.setView(camera, detailState, nativeHydrologyAdmission);
     // Camera-dependent transparency sits above the DOM land plate. Render the
     // new view immediately so both layers reach the next paint atomically.
     if (this.active) {
@@ -63,7 +72,30 @@ export class WaterSurfaceController {
     this.renderIfIdle();
   }
 
+  setReduceMotion(reduceMotion: boolean): void {
+    if (this.reduceMotion === reduceMotion) {
+      return;
+    }
+    this.reduceMotion = reduceMotion;
+    this.renderer.setReduceMotion(reduceMotion);
+    this.lastTimestamp = 0;
+    if (reduceMotion) {
+      this.running = false;
+      if (this.frameRequest) {
+        cancelAnimationFrame(this.frameRequest);
+        this.frameRequest = 0;
+      }
+      this.renderOnce();
+      return;
+    }
+    if (this.started) {
+      this.running = true;
+      this.schedule();
+    }
+  }
+
   start(): void {
+    this.started = true;
     if (this.active) {
       this.renderOnce();
     }
@@ -76,14 +108,20 @@ export class WaterSurfaceController {
   }
 
   destroy(): void {
+    this.started = false;
     this.running = false;
     if (this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
     }
     this.resizeObserver?.disconnect();
     document.removeEventListener("visibilitychange", this.handleVisibility);
+    this.renderer.setInvalidationHandler(null);
     this.renderer.destroy();
   }
+
+  private readonly handleRendererInvalidation = (): void => {
+    this.renderOnce();
+  };
 
   private readonly tick = (timestamp: number): void => {
     this.frameRequest = 0;
