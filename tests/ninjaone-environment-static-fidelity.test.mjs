@@ -963,3 +963,98 @@ test("native registration and baked masks remain inside the decoded budget", asy
     worstCaseDecodedBytes,
   })}`);
 });
+
+test("registered B1 uses native quadrants and its C1 join stays below local detail", async (t) => {
+  const assembler = await readFile(
+    path.join(root, "scripts/assemble-ninjaone-environment-terrain-master-r2.mjs"),
+    "utf8",
+  );
+  const b1Sources = Object.freeze([
+    "r0-c0-generated-r3.png",
+    "r0-c1-generated-r3.png",
+    "r1-c0-generated-r3.png",
+    "r1-c1-generated-r3.png",
+  ]);
+  assert.doesNotMatch(assembler, /b1-continuity-raw-r2/);
+  assert.match(assembler, /correctNativeB1Seam/);
+  assert.match(assembler, /metadata\.width < TILE\.width/);
+  assert.match(assembler, /metadata\.height < TILE\.height/);
+  for (const source of b1Sources) {
+    assert.match(assembler, new RegExp(source.replaceAll(".", "\\.")));
+    const metadata = await sharp(path.join(
+      root,
+      "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r3/generated",
+      source,
+    )).metadata();
+    assert.deepEqual(
+      [metadata.width, metadata.height, metadata.channels, metadata.hasAlpha],
+      [1448, 1086, 3, false],
+      source,
+    );
+  }
+
+  function opaqueAdjacentMean(data, width, limit, firstX, secondX) {
+    let samples = 0;
+    let total = 0;
+    for (let y = 0; y < limit; y += 1) {
+      const first = ((y * width) + firstX) * 4;
+      const second = ((y * width) + secondX) * 4;
+      if (data[first + 3] < 192 || data[second + 3] < 192) continue;
+      for (let channel = 0; channel < 3; channel += 1) {
+        total += Math.abs(data[first + channel] - data[second + channel]);
+        samples += 1;
+      }
+    }
+    return Object.freeze({ mean: total / samples, samples });
+  }
+
+  const tiers = Object.freeze({
+    territory: Object.freeze([720, 540]),
+    capital: Object.freeze([1440, 1080]),
+    site: Object.freeze([2880, 2160]),
+    close: Object.freeze([5760, 4320]),
+  });
+  const seamMetrics = {};
+  for (const [tier, dimensions] of Object.entries(tiers)) {
+    const output = path.join(
+      root,
+      `public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-${tier}-r2.webp`,
+    );
+    const { data, info } = await sharp(output)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    assert.deepEqual([info.width, info.height], dimensions, tier);
+    const seam = info.width / 2;
+    const controlDistance = Math.max(2, Math.round(info.width / 360));
+    const boundary = opaqueAdjacentMean(data, info.width, info.height / 2, seam - 1, seam);
+    const leftControl = opaqueAdjacentMean(
+      data,
+      info.width,
+      info.height / 2,
+      seam - controlDistance - 1,
+      seam - controlDistance,
+    );
+    const rightControl = opaqueAdjacentMean(
+      data,
+      info.width,
+      info.height / 2,
+      seam + controlDistance - 1,
+      seam + controlDistance,
+    );
+    const controlMean = (leftControl.mean + rightControl.mean) / 2;
+    const discontinuityRatio = boundary.mean / controlMean;
+    assert.ok(boundary.samples >= 400, `${tier} opaque B1-C1 seam sample count`);
+    assert.ok(
+      discontinuityRatio <= 1.05,
+      `${tier} B1-C1 discontinuity ${discontinuityRatio} exceeds local detail`,
+    );
+    seamMetrics[tier] = Object.freeze({
+      boundaryMean: boundary.mean,
+      controlMean,
+      discontinuityRatio,
+      samples: boundary.samples,
+    });
+  }
+  t.diagnostic(`STATIC_B1_C1_SEAM ${JSON.stringify(seamMetrics)}`);
+});

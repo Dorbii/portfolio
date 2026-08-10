@@ -40,9 +40,7 @@ export class WaterSurfaceController {
     this.renderer.setView(camera, detailState, nativeHydrologyAdmission);
     // Camera-dependent transparency sits above the DOM land plate. Render the
     // new view immediately so both layers reach the next paint atomically.
-    if (this.active) {
-      this.renderOnce();
-    }
+    this.renderOnce();
   }
 
   setActive(active: boolean): void {

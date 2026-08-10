@@ -18,20 +18,42 @@ void main() {
   CoastSample coast = applyCoast(worldUv, water, shelter);
   float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
   NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv);
-  float streamMix = smoother(0.01, 0.08, stream.alpha);
-  vec3 color = mix(coast.color, stream.color, streamMix);
+  float streamBodyMix = smoother(0.01, 0.08, stream.bodyAlpha);
+  vec3 streamBodyComposite = mix(
+    coast.color,
+    stream.bodyColor,
+    streamBodyMix
+  );
+  vec3 color = mix(
+    streamBodyComposite,
+    stream.effectsColor,
+    stream.effectsAlpha
+  );
+  float registeredStreamVisibility = max(
+    stream.bodyAlpha,
+    stream.effectsAlpha
+  );
   float globalVisibility = max(
     max(waterVisibility, coast.overlayAlpha),
-    stream.alpha
+    registeredStreamVisibility
   );
-  // At z8 the water canvas is an overlay, not another ocean plane. Exclude
-  // global water coverage so native terrain remains visible; only registered
-  // coast interaction and NinjaOne hydrology may composite above it.
-  float registeredForegroundVisibility = max(coast.overlayAlpha, stream.alpha);
+  // The foreground-only contract belongs to site/close inspection. Keeping it
+  // enabled at world and territory tiers removes the shared ocean entirely and
+  // exposes the scene's black underlay around the registered land plate.
+  // Site/close water is composited above the opaque authored terrain. Use the
+  // canonical land mask here, not the coast wash alpha: overlayAlpha is
+  // intentionally allowed to feather inland and made small coastal islands
+  // look translucent when this foreground pass crossed them.
+  float registeredForegroundVisibility = max(
+    waterVisibility,
+    registeredStreamVisibility
+  );
+  float foregroundOverlay = u_foregroundHydrology
+    * smoother(0.08, 0.45, u_siteLod);
   float visibility = mix(
     globalVisibility,
     registeredForegroundVisibility,
-    u_foregroundHydrology
+    foregroundOverlay
   );
   outColor = vec4(
     color,

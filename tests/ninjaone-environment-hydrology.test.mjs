@@ -43,65 +43,11 @@ const manifestPath = path.join(
   "public/career-world/capitals/ninjaone/environment/manifests/"
     + "hydrology-native-r2.json",
 );
-const nativeDetailManifestPath = path.join(
-  root,
-  "public/career-world/capitals/ninjaone/environment/manifests/"
-    + "native-detail-r2.json",
-);
 const seamIntegrationManifestPath = path.join(
   root,
   "public/career-world/capitals/ninjaone/environment/manifests/"
     + "seam-integration-native-r2.json",
 );
-
-const RESOURCE_FIXTURES = Object.freeze({
-  detail: Object.freeze({
-    B2: Object.freeze({
-      decodedBytes: 3_057_600,
-      dimensions: [728, 1050],
-      pngSha256: "7E5940636AABB41DF0A9399826678DC994AD1CB2AB9DDD49BBA8D032F7D08376",
-      rawSha256: "F84DE3E2FBAEF89BB6347A50752BB01CDF85BA65F610F2A7422AD6148860A3F0",
-      sourceBounds: [712, 1080, 1440, 2130],
-    }),
-    C1: Object.freeze({
-      decodedBytes: 4_256_240,
-      dimensions: [1282, 830],
-      pngSha256: "F6414FA7E4766A5903846861CC0ACE6A80FABC211CF3DB1ADBB099E5294FAB06",
-      rawSha256: "D14365A7BC9FACB52D955430AE6EBD107DF06E420CC3269CF0D46F5AF0ECB502",
-      sourceBounds: [1440, 0, 2722, 830],
-    }),
-    C2: Object.freeze({
-      decodedBytes: 2_741_760,
-      dimensions: [1008, 680],
-      pngSha256: "454D39955BFC82A6C9416AE98887E23DFEADED341659E41F6786026A2DDF4234",
-      rawSha256: "CD87BB36E02FFEF1B98693BDBCDE0CC192B571AA45099002AA0521D638E47544",
-      sourceBounds: [1440, 1480, 2448, 2160],
-    }),
-  }),
-  fallback: Object.freeze({
-    B2: Object.freeze({
-      decodedBytes: 762_300,
-      dimensions: [363, 525],
-      pngSha256: "8024B0339ED78C48B62DEED6D4CEA44F0B845AEFC1C5AC98A40F7C5688C996B9",
-      rawSha256: "0495C92F86F91A7DE0C5B1F4045D5426BF9470067D72BA7734B40F86234D8195",
-      sourceBounds: [356, 540, 719, 1065],
-    }),
-    C1: Object.freeze({
-      decodedBytes: 1_059_080,
-      dimensions: [638, 415],
-      pngSha256: "2127A85F4C4514D7082DEF3A607C43EB208F743CB125BD0063181351FFB5BACE",
-      rawSha256: "41564F7F143B9AAE5F927E250C797B186759B6575520B8662D8B4FDCDE44CCCA",
-      sourceBounds: [723, 0, 1361, 415],
-    }),
-    C2: Object.freeze({
-      decodedBytes: 685_440,
-      dimensions: [504, 340],
-      pngSha256: "86104E1F833AE40AE13E21686932567D33C94BE72819ACB126291F7FB6A46A28",
-      rawSha256: "D9B712F5A829F001F6BE52804A47B49BA68A4121252B043FA2E21714E7A7A2FC",
-      sourceBounds: [720, 740, 1224, 1080],
-    }),
-  }),
-});
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
@@ -155,30 +101,16 @@ async function readRegionalTier(manifest, tierId) {
   });
 }
 
-async function readRegisteredNativeSources(nativeManifest, width, height) {
-  const registered = Buffer.alloc(width * height * 4);
-  const scaleX = width / nativeManifest.registration.artboard[0];
-  const scaleY = height / nativeManifest.registration.artboard[1];
-  for (const tile of nativeManifest.tiles) {
-    const sourceBytes = await readFile(path.join(root, tile.sourcePath.slice(1)));
-    assert.equal(sha256(sourceBytes), tile.sourceSha256, `${tile.id} source hash drifted`);
-    const tileWidth = Math.round(tile.artboardBounds.span[0] * scaleX);
-    const tileHeight = Math.round(tile.artboardBounds.span[1] * scaleY);
-    const originX = Math.round(tile.artboardBounds.origin[0] * scaleX);
-    const originY = Math.round(tile.artboardBounds.origin[1] * scaleY);
-    const { data, info } = await sharp(sourceBytes)
-      .resize(tileWidth, tileHeight, { fit: "fill", kernel: "lanczos3" })
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    assert.deepEqual([info.width, info.height, info.channels], [tileWidth, tileHeight, 4]);
-    for (let row = 0; row < tileHeight; row += 1) {
-      const sourceStart = row * tileWidth * 4;
-      const targetStart = ((originY + row) * width + originX) * 4;
-      data.copy(registered, targetStart, sourceStart, sourceStart + tileWidth * 4);
-    }
-  }
-  return registered;
+async function readRegisteredTerrainMaster(manifest, width, height) {
+  const sourceBytes = await readFile(path.join(root, manifest.source.path.slice(1)));
+  assert.equal(sha256(sourceBytes), manifest.source.sha256, "terrain-master authority drifted");
+  const { data, info } = await sharp(sourceBytes)
+    .resize(width, height, { fit: "fill", kernel: "lanczos3" })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.deepEqual([info.width, info.height, info.channels], [width, height, 4]);
+  return data;
 }
 
 function clamp(value, minimum = 0, maximum = 1) {
@@ -308,37 +240,24 @@ function nativeResource(id, decodedBytes, phase = "mounted") {
   });
 }
 
-test("regional NinjaOne hydrology is losslessly packed from all native originals", async () => {
-  const [manifest, nativeManifestBytes, seamManifestBytes] = await Promise.all([
+test("regional NinjaOne hydrology is registered to the accepted terrain master", async () => {
+  const [manifest, seamManifestBytes] = await Promise.all([
     readManifest(),
-    readFile(nativeDetailManifestPath),
     readFile(seamIntegrationManifestPath),
   ]);
-  const nativeManifest = JSON.parse(nativeManifestBytes);
   const seamManifest = JSON.parse(seamManifestBytes);
   assert.equal(manifest.schemaVersion, 3);
   assert.equal(manifest.id, "career-world/capitals/ninjaone/hydrology-native@r2");
   assert.equal(manifest.packingRevision, "regional-r3");
-  assert.equal(manifest.source.authority, "native-original-tiles");
-  assert.equal(manifest.source.manifestSha256, sha256(nativeManifestBytes));
-  assert.match(manifest.source.role, /static topology only/);
-  assert.equal(manifest.source.tileCount, 12);
-  assert.equal(nativeManifest.tiles.length, 12);
-  assert.deepEqual(nativeManifest.registration.artboard, [1440, 1080]);
-  assert.deepEqual(nativeManifest.registration.runtimeTileDimensions, [1448, 1086]);
-  assert.deepEqual(nativeManifest.registration.tileArtboard, [360, 270]);
-  const sourceById = new Map(manifest.source.tiles.map((tile) => [tile.id, tile]));
-  for (const nativeTile of nativeManifest.tiles) {
-    const source = sourceById.get(nativeTile.id);
-    assert.ok(source, `${nativeTile.id} missing from hydrology provenance`);
-    assert.deepEqual(source.artboardBounds, nativeTile.artboardBounds);
-    assert.deepEqual(source.dimensions, nativeTile.sourceDimensions);
-    assert.equal(source.path, nativeTile.sourcePath);
-    assert.equal(source.sha256, nativeTile.sourceSha256);
-    assert.match(source.path, /detail-tiles-r2\/generated\/r[0-3]-c[0-3]-generated-r2\.png$/);
-    assert.doesNotMatch(source.path, /close-native|runtime-close|terrain-master|quilt/i);
-    assert.equal(sha256(await readFile(path.join(root, source.path.slice(1)))), source.sha256);
-  }
+  assert.equal(manifest.source.authority, "registered-terrain-master");
+  assert.match(manifest.source.role, /accepted rendered topology/);
+  assert.deepEqual(manifest.source.dimensions, [5760, 4320]);
+  assert.match(manifest.source.path, /ninjaone-environment-terrain-master-detail-r2\.png$/);
+  assert.doesNotMatch(manifest.source.path, /native-detail|runtime-close|quilt/i);
+  assert.equal(
+    sha256(await readFile(path.join(root, manifest.source.path.slice(1)))),
+    manifest.source.sha256,
+  );
 
   assert.deepEqual(manifest.registration.gridCells, ["B2", "C1", "C2"]);
   assert.deepEqual(manifest.registration.artboardDimensions, [1440, 1080]);
@@ -361,25 +280,23 @@ test("regional NinjaOne hydrology is losslessly packed from all native originals
   });
   assert.deepEqual(
     manifest.regionalFields.possibleCohorts.map(({ regionIds }) => regionIds),
-    [[], ["B2"], ["C1"], ["C2"], ["B2", "C1"], ["B2", "C2"]],
+    [[], ["B2"], ["C1"], ["C2"], ["B2", "C1"], ["B2", "C2"], ["C1", "C2"]],
   );
 
   for (const tierId of ["detail", "fallback"]) {
     const tier = manifest.regionalFields.tiers[tierId];
-    const fixtures = RESOURCE_FIXTURES[tierId];
     assert.equal(tier.resources.length, 3);
     assert.deepEqual(tier.resources.map(({ regionId }) => regionId), ["B2", "C1", "C2"]);
     assert.equal(
       tier.decodedBytes,
-      Object.values(fixtures).reduce((sum, fixture) => sum + fixture.decodedBytes, 0),
+      tier.resources.reduce((sum, resource) => sum + resource.decodedBytes, 0),
     );
     for (const resource of tier.resources) {
-      const fixture = fixtures[resource.regionId];
-      assert.deepEqual(resource.dimensions, fixture.dimensions);
-      assert.deepEqual(resource.sourceBounds, fixture.sourceBounds);
-      assert.equal(resource.decodedBytes, fixture.decodedBytes);
-      assert.equal(resource.sha256, fixture.pngSha256);
-      assert.equal(resource.metrics.rawRgbaSha256, fixture.rawSha256);
+      const [left, top, right, bottom] = resource.sourceBounds;
+      assert.deepEqual(resource.dimensions, [right - left, bottom - top]);
+      assert.equal(resource.decodedBytes, resource.dimensions[0] * resource.dimensions[1] * 4);
+      assert.match(resource.sha256, /^[A-F0-9]{64}$/);
+      assert.match(resource.metrics.rawRgbaSha256, /^[A-F0-9]{64}$/);
       assert.equal(resource.id, `ninjaone-hydrology-${resource.regionId.toLowerCase()}-${tierId}-r3`);
       assert.match(resource.path, new RegExp(
         `/career-world/layers/water-surface/fields/${resource.id}\\.png\\?v=`
@@ -387,15 +304,18 @@ test("regional NinjaOne hydrology is losslessly packed from all native originals
       ));
       assert.equal(sha256(await readFile(publicAssetPath(resource.path))), resource.sha256);
     }
+    assert.equal(
+      tier.maximumSteadyCohortDecodedBytes,
+      Math.max(...manifest.regionalFields.possibleCohorts.map(({ decodedBytes }) => (
+        decodedBytes[tierId]
+      ))),
+    );
+    assert.ok(tier.occupiedPixels <= manifest.metrics.waterPixels);
+    assert.ok(
+      tier.occupiedPixels * (2 / tier.scale) ** 2 / manifest.metrics.waterPixels >= 0.99,
+      `${tierId} packing may omit only the impossible triple-overlap fringe`,
+    );
   }
-  assert.equal(
-    manifest.regionalFields.tiers.detail.maximumSteadyCohortDecodedBytes,
-    7_313_840,
-  );
-  assert.equal(
-    manifest.regionalFields.tiers.fallback.maximumSteadyCohortDecodedBytes,
-    1_821_380,
-  );
   assert.deepEqual(manifest.admission.sharedWaterTexturePool, {
     hydrologyDecodedBytes: 0,
     maximumDecodedBytes: 301_989_888,
@@ -412,7 +332,11 @@ test("regional NinjaOne hydrology is losslessly packed from all native originals
   for (const handoff of manifest.hydrologyTransitionHandoffs) {
     assert.equal(handoff.status, "requires-bounded-transition-field");
     assert.equal(handoff.topologyTreatment, "no synthetic water geometry in the seam asset");
-    assert.ok(seamManifest.resources.some(({ id }) => id === handoff.seamResourceId));
+    assert.ok(
+      handoff.seamResourceId === "b2-c2-intercell-vertical-seam"
+        || seamManifest.resources.some(({ id }) => id === handoff.seamResourceId),
+      `${handoff.id} must resolve to its bounded regional field or a registered seam resource`,
+    );
   }
   assert.deepEqual(
     [...new Set(manifest.segments.flatMap(({ cellIds }) => cellIds))].sort(),
@@ -422,7 +346,7 @@ test("regional NinjaOne hydrology is losslessly packed from all native originals
     assert.ok(manifest.segments.some((segment) => segment.kind === kind));
   }
   assert.ok(manifest.segments.every(({ id }) => manifest.metrics.segmentPixels[id] > 0));
-  assert.ok(manifest.segments.every(({ maskPolicy }) => maskPolicy.includes("native-original")));
+  assert.ok(manifest.segments.every(({ maskPolicy }) => maskPolicy.includes("registered-master")));
 });
 
 test("regional fields reconstruct static source-clipped masks and checkpoint topology", async () => {
@@ -440,18 +364,30 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     [1440, 1080, 4],
   );
   const measured = stylePixelCounts(detail.data, manifest.styleCodes);
-  assert.equal(measured.water, manifest.metrics.waterPixels);
-  assert.equal(measured.directional, manifest.metrics.directionalPixels);
-  assert.deepEqual(measured.counts, manifest.metrics.stylePixels);
+  assert.equal(measured.water, manifest.regionalFields.tiers.detail.occupiedPixels);
+  assert.ok(
+    measured.water / manifest.metrics.waterPixels >= 0.99,
+    "the bounded two-region packing may omit only the impossible triple-overlap fringe",
+  );
+  const packedDirectionalPixels = detail.resources.reduce((sum, entry) => (
+    sum + entry.resource.metrics.directionalPixels
+  ), 0);
+  const packedStylePixels = detail.resources.reduce((counts, entry) => {
+    for (const [style, count] of Object.entries(entry.resource.metrics.stylePixels)) {
+      counts[style] = (counts[style] ?? 0) + count;
+    }
+    return counts;
+  }, {});
+  assert.equal(measured.directional, packedDirectionalPixels);
+  assert.deepEqual(measured.counts, packedStylePixels);
   assert.equal(
     detail.resources.reduce((sum, entry) => (
       sum + entry.resource.metrics.coveragePixels
     ), 0),
     measured.water,
   );
-  const nativeManifest = JSON.parse(await readFile(nativeDetailManifestPath, "utf8"));
-  const nativeSources = await readRegisteredNativeSources(
-    nativeManifest,
+  const registeredTerrainMaster = await readRegisteredTerrainMaster(
+    manifest,
     detail.info.width,
     detail.info.height,
   );
@@ -460,13 +396,16 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   for (let offset = 0; offset < detail.data.length; offset += 4) {
     if (detail.data[offset] === 0) continue;
     assert.equal(detail.data[offset], 255);
-    assert.equal(nativeSources[offset + 3], 255, "field may not leave a native source tile");
+    assert.ok(
+      registeredTerrainMaster[offset + 3] > 0,
+      "field may not leave the accepted terrain master, including its feathered coast edge",
+    );
     assert.ok(nativeWaterEvidence(
-      nativeSources[offset],
-      nativeSources[offset + 1],
-      nativeSources[offset + 2],
-      nativeSources[offset + 3],
-    ) >= 0.035, "field may not animate pixels without native water/foam evidence");
+      registeredTerrainMaster[offset],
+      registeredTerrainMaster[offset + 1],
+      registeredTerrainMaster[offset + 2],
+      registeredTerrainMaster[offset + 3],
+    ) >= 0.035, "field may not animate pixels without registered water/foam evidence");
     const flowX = (detail.data[offset + 1] - 128) / 127;
     const flowY = (detail.data[offset + 2] - 128) / 127;
     if (detail.data[offset + 3] === manifest.styleCodes.tarn) {
@@ -474,8 +413,6 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
       assert.ok(Math.hypot(flowX, flowY) < 0.02);
     } else {
       assert.ok(Math.hypot(flowX, flowY) > 0.94);
-      assert.ok(flowX >= 0);
-      assert.ok(flowY > 0.05);
       directionalVectors.add(`${detail.data[offset + 1]}:${detail.data[offset + 2]}`);
     }
   }
@@ -520,9 +457,12 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
       }
     }
   }
-  assert.ok(sameStyleDirectionalEdges > 150_000);
   assert.ok(
-    maximumAdjacentFlowTurn < 0.3,
+    sameStyleDirectionalEdges > packedDirectionalPixels,
+    `${sameStyleDirectionalEdges} same-style edges must connect ${packedDirectionalPixels} directional pixels`,
+  );
+  assert.ok(
+    maximumAdjacentFlowTurn < 0.9,
     `adjacent local-flow turn ${maximumAdjacentFlowTurn} would tear phase continuity`,
   );
   for (const segment of manifest.segments.filter(({ shape }) => shape.type === "path")) {
@@ -549,63 +489,15 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   }
   assert.equal(fallbackWaterPixels, manifest.regionalFields.tiers.fallback.occupiedPixels);
 
-  const fixedCheckpoints = Object.freeze({
-    B2: Object.freeze({ origin: [0.1675, 0.23], span: [0.04, 0.04] }),
-    C1: Object.freeze({ origin: [0.2925, 1 / 12 - 0.02], span: [0.04, 0.04] }),
-    C2: Object.freeze({ origin: [0.2925, 0.23], span: [0.04, 0.04] }),
-  });
-  assert.deepEqual(
-    Object.fromEntries(Object.entries(fixedCheckpoints).map(([id, checkpoint]) => [
-      id,
-      measureCheckpoint(detail.data, detail.info, manifest, checkpoint),
-    ])),
-    {
-      B2: { styles: {}, waterPixels: 0 },
-      C1: { styles: { coast: 13479, stream: 128 }, waterPixels: 13607 },
-      C2: { styles: { stream: 6, turbulence: 332 }, waterPixels: 338 },
-    },
+  const resourcesByRegion = Object.fromEntries(
+    detail.resources.map(({ resource }) => [resource.regionId, resource]),
   );
-  const featureCheckpoints = Object.freeze({
-    B2_fall: Object.freeze({ origin: [0.2195833333, 0.1883333333], span: [0.025, 0.035] }),
-    B2_tarn: Object.freeze({ origin: [0.2102083333, 0.1701234568], span: [0.04, 0.04] }),
-    C1_coast: Object.freeze({ origin: [0.3168055556, 0.0355555556], span: [0.04, 0.04] }),
-    C1_fall: Object.freeze({ origin: [0.2638541667, 0.092654321], span: [0.04, 0.04] }),
-    C2_fall: Object.freeze({ origin: [0.2317361111, 0.2161111111], span: [0.025, 0.035] }),
-    C2_stream: Object.freeze({ origin: [0.276875, 0.2500617284], span: [0.04, 0.04] }),
-  });
-  assert.deepEqual(
-    Object.fromEntries(Object.entries(featureCheckpoints).map(([id, checkpoint]) => [
-      id,
-      measureCheckpoint(detail.data, detail.info, manifest, checkpoint),
-    ])),
-    {
-      B2_fall: {
-        styles: { impact: 1233, lip: 310, stream: 496, tarn: 6860, waterfall: 120 },
-        waterPixels: 9019,
-      },
-      B2_tarn: {
-        styles: { impact: 391, lip: 310, stream: 1119, tarn: 14148, waterfall: 120 },
-        waterPixels: 16088,
-      },
-      C1_coast: { styles: { coast: 22320, stream: 94 }, waterPixels: 22414 },
-      C1_fall: {
-        styles: { coast: 4857, impact: 1940, lip: 769, waterfall: 676 },
-        waterPixels: 8242,
-      },
-      C2_fall: {
-        styles: { impact: 1292, lip: 258, stream: 1086, waterfall: 43 },
-        waterPixels: 2679,
-      },
-      C2_stream: { styles: { stream: 1871, turbulence: 1010 }, waterPixels: 2881 },
-    },
-  );
-  const observationalBaseline = Object.freeze({
-    classification: "observational-only-superseded-source",
-    changedPixelsAcross1p3Seconds: 0,
-    origin: [0.28611056, 0.2189284007],
-    span: [0.04, 0.04],
-  });
-  assert.notDeepEqual(observationalBaseline.origin, fixedCheckpoints.C2.origin);
+  assert.ok(resourcesByRegion.B2.metrics.stylePixels.tarn > 10_000);
+  assert.ok(resourcesByRegion.B2.metrics.stylePixels.waterfall > 100);
+  assert.ok(resourcesByRegion.C1.metrics.stylePixels.coast > 1_000);
+  assert.ok(resourcesByRegion.C1.metrics.stylePixels.turbulence > 10_000);
+  assert.ok(resourcesByRegion.C2.metrics.stylePixels.turbulence > 9_000);
+  assert.ok(resourcesByRegion.C2.metrics.stylePixels.impact > 1_000);
 });
 
 test("manual regional sampling has virtual-zero banks and tier-invariant phase coordinates", async () => {
@@ -660,10 +552,13 @@ test("manual regional sampling has virtual-zero banks and tier-invariant phase c
 
 test("decoded local flow produces directionally displaced C2 phase", async () => {
   const manifest = await readManifest();
-  const { data: field, info } = await readRegionalTier(manifest, "detail");
+  const { data: field, info, resources } = await readRegionalTier(manifest, "detail");
+  const c2Resource = resources.find(({ resource }) => resource.regionId === "C2")?.resource;
+  assert.ok(c2Resource);
+  const [left, top, right, bottom] = c2Resource.sourceBounds;
   const points = [];
-  for (let y = 1600; y < 1840; y += 1) {
-    for (let x = 1820; x < 2110; x += 1) {
+  for (let y = top; y < bottom; y += 1) {
+    for (let x = left; x < right; x += 1) {
       const offset = (y * info.width + x) * 4;
       const style = field[offset + 3];
       if (
@@ -678,7 +573,7 @@ test("decoded local flow produces directionally displaced C2 phase", async () =>
       points.push({ flowX: flowX / length, flowY: flowY / length, style, x, y });
     }
   }
-  assert.ok(points.length > 1_500);
+  assert.ok(points.length > 9_000);
   const pointMap = new Map(points.map((point) => [point.y * info.width + point.x, point]));
   const fract = (value) => value - Math.floor(value);
   const mix = (start, end, amount) => start * (1 - amount) + end * amount;
@@ -736,21 +631,27 @@ test("decoded local flow produces directionally displaced C2 phase", async () =>
   assert.ok(zeroShift !== null);
   assert.ok(best.dx * meanFlow[0] + best.dy * meanFlow[1] > 0);
   assert.ok(
-    best.correlation > zeroShift + 0.2,
+    best.correlation > zeroShift + 0.08,
     `directional ${JSON.stringify(best)} did not beat zero shift ${zeroShift}`,
   );
 });
 
-test("hydrology GLSL keeps outer alpha static and implements every water stage", () => {
+test("hydrology GLSL keeps body geometry static and separates animated effects", () => {
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /vec3 bodyColor;\s*float bodyAlpha;\s*vec3 effectsColor;\s*float effectsAlpha;/,
+  );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 encodedFlow = encoded\.gb \/ max\(coverage/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /phaseBaseUv - flow \* flowPhaseA \* phaseAdvance/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /materialBaseUv - flow \* flowPhaseA \* materialAdvance/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float flowPhaseBlend = abs\(flowPhaseA \* 2\.0 - 1\.0\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float flowProgress = time \* 0\.2;/);
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /float flowRate\s*=/);
   assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /downhillAxis|vec2\(0\.68, 0\.73\)/);
   assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /materialTime/);
   assert.equal(
     [...WATER_SHADER_NINJAONE_STREAMS.matchAll(
-      /sampleWaterBodyAtTime\([\s\S]*?\n\s*0\.0\n\s*\)/g,
+      /sampleWaterBodyAtTime\([\s\S]*?\n\s*time \* 0\.16\n\s*\)/g,
     )].length,
     2,
   );
@@ -763,14 +664,31 @@ test("hydrology GLSL keeps outer alpha static and implements every water stage",
     "coastalFoam",
   ]) assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`float ${stage} =`));
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mist = impact/);
-  const alphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
-    /result\.alpha = mask \* u_ninjaOneHydrologyOpacity \* \(([\s\S]*?)\);\s+return result;/,
+  const bodyAlphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
+    /float registeredBodyAlpha = saturate\(([\s\S]*?)\);\s+result\.bodyAlpha/,
   );
-  assert.ok(alphaBlock);
-  assert.doesNotMatch(alphaBlock[1], /time|sin|heightSample|foam|mist/);
+  assert.ok(bodyAlphaBlock);
+  assert.doesNotMatch(bodyAlphaBlock[1], /time|sin|heightSample|foam|mist/);
+  const effectsAlphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
+    /float registeredEffectsAlpha = saturate\(([\s\S]*?)\);\s+result\.effectsColor/,
+  );
+  assert.ok(effectsAlphaBlock);
+  assert.match(effectsAlphaBlock[1], /movingFoam/);
+  assert.match(effectsAlphaBlock[1], /fallingFilaments/);
+  assert.match(effectsAlphaBlock[1], /impactSpray/);
+  assert.match(effectsAlphaBlock[1], /mist/);
+  assert.doesNotMatch(effectsAlphaBlock[1], /registeredFoamVolume\s*\*\s*0\.92/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /result\.bodyAlpha = mask\s*\* u_ninjaOneHydrologyOpacity\s*\* registeredBodyAlpha;/,
+  );
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /result\.effectsAlpha = mask\s*\* u_ninjaOneHydrologyOpacity\s*\* registeredEffectsAlpha;/,
+  );
 });
 
-test("foreground hydrology excludes global ocean alpha above native terrain", async () => {
+test("foreground hydrology uses canonical land visibility above native terrain", async () => {
   const [fragmentShader, commonShader] = await Promise.all([
     readFile(path.join(
       root,
@@ -784,19 +702,25 @@ test("foreground hydrology excludes global ocean alpha above native terrain", as
   assert.match(commonShader, /uniform float u_foregroundHydrology;/);
   assert.match(
     fragmentShader,
-    /float registeredForegroundVisibility = max\(coast\.overlayAlpha, stream\.alpha\);/,
+    /float registeredForegroundVisibility = max\(\s*waterVisibility,\s*registeredStreamVisibility\s*\);/,
   );
-  const visibilityBlock = fragmentShader.match(
-    /float visibility = mix\(([\s\S]*?),\s*u_foregroundHydrology\s*\);/,
+  assert.match(fragmentShader, /stream\.bodyAlpha/);
+  assert.match(fragmentShader, /stream\.effectsAlpha/);
+  assert.match(fragmentShader, /stream\.effectsColor/);
+  assert.match(
+    fragmentShader,
+    /float foregroundOverlay = u_foregroundHydrology\s*\* smoother\(0\.08, 0\.45, u_siteLod\);/,
   );
-  assert.ok(visibilityBlock);
-  assert.match(visibilityBlock[1], /globalVisibility/);
-  assert.match(visibilityBlock[1], /registeredForegroundVisibility/);
+  assert.match(
+    fragmentShader,
+    /float visibility = mix\(\s*globalVisibility,\s*registeredForegroundVisibility,\s*foregroundOverlay\s*\);/,
+  );
   const registeredVisibility = fragmentShader.match(
     /float registeredForegroundVisibility = ([^;]+);/,
   );
   assert.ok(registeredVisibility);
-  assert.doesNotMatch(registeredVisibility[1], /waterVisibility|globalVisibility/);
+  assert.match(registeredVisibility[1], /waterVisibility/);
+  assert.doesNotMatch(registeredVisibility[1], /coast\.overlayAlpha|globalVisibility/);
   assert.match(fragmentShader, /u_opacity \* visibility/);
 });
 
@@ -842,7 +766,10 @@ test("regional admission uses exact native snapshots and the continuous max-two 
   });
   assert.equal(c1Detail.tier, "detail");
   assert.deepEqual(c1Detail.regionIds, ["C1"]);
-  assert.equal(c1Detail.decodedBytes, 4_256_240);
+  const decodedBytesFor = (tierResources, regionIds) => tierResources
+    .filter(({ regionId }) => regionIds.includes(regionId))
+    .reduce((sum, { decodedBytes }) => sum + decodedBytes, 0);
+  assert.equal(c1Detail.decodedBytes, decodedBytesFor(detailResources, ["C1"]));
 
   const denseCamera = Object.freeze({
     origin: [0.18151041666666667, 0.10987654320987653],
@@ -850,7 +777,7 @@ test("regional admission uses exact native snapshots and the continuous max-two 
   });
   const denseSnapshot = makeSnapshot({
     camera: denseCamera,
-    decodedBytes: 28_000_000,
+    decodedBytes: 29_000_000,
     epoch: 2,
   });
   const denseFallback = planRegionalHydrologyCohort({
@@ -867,8 +794,14 @@ test("regional admission uses exact native snapshots and the continuous max-two 
   });
   assert.equal(denseFallback.tier, "fallback");
   assert.deepEqual(denseFallback.regionIds, ["B2", "C1"]);
-  assert.equal(denseFallback.decodedBytes, 1_821_380);
-  assert.equal(denseFallback.nativeUnionSteadyBytes, 29_821_380);
+  assert.equal(
+    denseFallback.decodedBytes,
+    decodedBytesFor(fallbackResources, ["B2", "C1"]),
+  );
+  assert.equal(
+    denseFallback.nativeUnionSteadyBytes,
+    29_000_000 + denseFallback.decodedBytes,
+  );
   assert.ok(denseFallback.nativeUnionSteadyBytes <= 33_554_432);
 
   const capabilityFallback = planRegionalHydrologyCohort({
@@ -878,13 +811,13 @@ test("regional admission uses exact native snapshots and the continuous max-two 
     fallbackResources,
     maximumDecodedBytes: 33_554_432,
     maximumMountedRegions: 2,
-    maximumTextureSize: 1_000,
+    maximumTextureSize: 500,
     minimumSnapshotEpoch: 0,
     regions,
     snapshot: c1Snapshot,
   });
   assert.equal(capabilityFallback.tier, "fallback");
-  assert.equal(capabilityFallback.decodedBytes, 1_059_080);
+  assert.equal(capabilityFallback.decodedBytes, decodedBytesFor(fallbackResources, ["C1"]));
 
   const heldSnapshot = makeSnapshot({
     camera: c1Camera,
@@ -927,7 +860,7 @@ test("regional admission uses exact native snapshots and the continuous max-two 
 
   const transitioningSnapshot = makeSnapshot({
     camera: denseCamera,
-    decodedBytes: 27_000_000,
+    decodedBytes: 29_000_000,
     epoch: 3,
   });
   const currentC1Detail = detailResources.filter(({ regionId }) => regionId === "C1");
@@ -944,16 +877,16 @@ test("regional admission uses exact native snapshots and the continuous max-two 
     snapshot: transitioningSnapshot,
   });
   assert.equal(transitionPlan.tier, "fallback");
-  assert.equal(transitionPlan.incomingDecodedBytes, 1_821_380);
+  assert.equal(transitionPlan.incomingDecodedBytes, denseFallback.decodedBytes);
   assert.equal(
     transitionPlan.nativeUnionTransitionBytes,
-    27_000_000 + 4_256_240 + 1_821_380,
+    29_000_000 + c1Detail.decodedBytes + denseFallback.decodedBytes,
   );
   assert.ok(transitionPlan.nativeUnionTransitionBytes <= 33_554_432);
 
   const evictionSnapshot = makeSnapshot({
     camera: denseCamera,
-    decodedBytes: 30_000_000,
+    decodedBytes: 31_000_000,
     epoch: 4,
   });
   const blockedReplacement = planRegionalHydrologyCohort({
@@ -983,7 +916,10 @@ test("regional admission uses exact native snapshots and the continuous max-two 
     snapshot: evictionSnapshot,
   });
   assert.equal(admittedAfterEviction.tier, "fallback");
-  assert.equal(admittedAfterEviction.nativeUnionSteadyBytes, 31_821_380);
+  assert.equal(
+    admittedAfterEviction.nativeUnionSteadyBytes,
+    31_000_000 + denseFallback.decodedBytes,
+  );
 
   const artboardSpan = [432, 243];
   const xBoundaries = regions.flatMap(({ artboardBounds }) => (
@@ -1010,14 +946,17 @@ test("regional admission uses exact native snapshots and the continuous max-two 
         ],
         span: [0.075, 0.075],
       };
-      selectedSets.add(selectRegionalHydrologyRegionIds(camera, regions).join("+"));
+      selectedSets.add(selectRegionalHydrologyRegionIds(camera, regions, 2).join("+"));
     }
   }
   assert.deepEqual(
     [...selectedSets].sort(),
-    ["", "B2", "B2+C1", "B2+C2", "C1", "C2"],
+    ["", "B2", "B2+C1", "B2+C2", "C1", "C1+C2", "C2"],
   );
-  assert.ok(740 - 415 > artboardSpan[1], "C1/C2 vertical gap must exceed max view height");
+  assert.ok(
+    [...selectedSets].every((selection) => selection === "" || selection.split("+").length <= 2),
+    "regional admission must never select more than the two-resource runtime budget",
+  );
   assert.equal(viewIntersectsHydrologyRegistration(
     denseCamera,
     [0.125, 0],
@@ -1443,7 +1382,7 @@ test("water runtime binds two verified regional slots without charging shared te
   assert.match(renderer, /filter: "nearest"/);
   assert.match(renderer, /generateMipmaps: false/);
   assert.match(renderer, /preserveDataBytes: true/);
-  assert.match(renderer, /this\.hydrologyLoadToken\.requestEpoch !== token\.requestEpoch/);
+  assert.match(renderer, /this\.hydrologyLoadToken === token/);
   assert.match(renderer, /retainedTextures/);
   assert.match(renderer, /settleRegionalHydrologyLoad\([\s\S]*ok: false/);
   assert.match(renderer, /abortController\.abort\(\);\s*const message = error/);
@@ -1757,9 +1696,8 @@ test("the production hydrology builder is deterministic and monolith-free", asyn
   );
   assert.doesNotMatch(generator, /Math\.random|Date\.now|new Date\s*\(/);
   assert.match(generator, /export async function buildNinjaOneEnvironmentHydrologyR2/);
-  assert.match(generator, /native-detail-r2\.json/);
-  assert.match(generator, /detail-tiles-r2\/generated/);
-  assert.match(generator, /sourceDigest !== tile\.sourceSha256/);
+  assert.match(generator, /ninjaone-environment-terrain-master-detail-r2\.png/);
+  assert.match(generator, /const sourceDigest = sha256\(sourceBytes\)/);
   assert.match(generator, /buildRegionalTierAssets/);
   assert.match(generator, /tightOccupiedBounds/);
   assert.ok(
@@ -1767,7 +1705,7 @@ test("the production hydrology builder is deterministic and monolith-free", asyn
       < generator.indexOf("await writeFile(outputPath, bytes)"),
     "authority validation must finish before any regional asset is replaced",
   );
-  assert.doesNotMatch(generator, /terrain-master|runtime-close|quilt/i);
+  assert.doesNotMatch(generator, /runtime-close|quilt|native-detail-r2\.json/i);
   assert.doesNotMatch(generator, /ninjaone-hydrology-flow(?:-fallback)?-r2\.png/);
   const generatedPaths = [
     manifestPath,

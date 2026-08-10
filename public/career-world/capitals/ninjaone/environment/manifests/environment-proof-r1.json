@@ -24,7 +24,10 @@
     ],
     "canonicalLandMaskPath": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
     "canonicalHeightFieldPath": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
-    "canonicalSlopeFieldPath": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png"
+    "canonicalSlopeFieldPath": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    "continuityBufferCells": [
+      "B1"
+    ]
   },
   "layerOrder": [
     "terrain-geology",
@@ -37,47 +40,45 @@
     "shared-animated-foliage",
     "surface-ecology",
     "wildlife",
-    "integration-detail",
     "dynamic-shadows"
   ],
   "layers": {
     "geology": {
-      "ownership": "native close-detail terrain compiled downward; open water remains owned by the global water layer",
-      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-close-r2.png",
-      "sourceSha256": "C3E888BFA743AA456FF31D61F11C29919F2624394CFC1BE7A17D6DFE960613AF",
-      "canonicalLowFrequencyCorrelation": 0.9667218523041331,
+      "ownership": "one registered B2 C1 C2 terrain geometry with B1 compiled only as a non-playable continuity buffer; open water remains owned by the global water layer",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+      "sourceSha256": "07BBA4D2487F87405C43995727ED30D7EBDB379CF868CCDD95162E37F1186E76",
       "sources": {
         "territory": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r2.webp?v=5094988ecfbf",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r2.webp?v=ad29dc429b1a",
           "dimensions": [
             720,
             540
           ],
-          "sha256": "5094988ECFBF50B2D3A62FCEEE2A165C0C2F406DC4419A5EE64A522FB338C21C"
+          "sha256": "E818FCF9A1DE608F1F8C83D74E786719EED0DBC8C288C7BCC72EE8F1B5B2E32C"
         },
         "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r2.webp?v=d03bfc25c0ce",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r2.webp?v=42744e6c7aa9",
           "dimensions": [
             1440,
             1080
           ],
-          "sha256": "D03BFC25C0CE17D81E9ED6F04207A1720ADAA00866B43C594327B2EE9A0F19BC"
+          "sha256": "23AD1E4CA88FF59763BD93B08D4A677D9C9377E7396A487A2B8C5901303A3220"
         },
         "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r2.webp?v=9b3b68cd09a1",
-          "dimensions": [
-            2160,
-            1620
-          ],
-          "sha256": "9B3B68CD09A1A72A4312D3C8EBF130988063E339BF22DF2441B240DA5432EEE1"
-        },
-        "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r2.webp?v=07afc922a97f",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r2.webp?v=56abe4793061",
           "dimensions": [
             2880,
             2160
           ],
-          "sha256": "07AFC922A97F5E2C19EDF17BF0B23DCDB2458A820636F1E8A98F32EDAAD4D9BF"
+          "sha256": "775B6CCF2ECAC663E8B38B30299CBF8FD2BC27FC483BD547C76ABBE0D408D956"
+        },
+        "close": {
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r2.webp?v=1179e06f6dee",
+          "dimensions": [
+            5760,
+            4320
+          ],
+          "sha256": "32E15DF6953AF0F65BDBC3F34D1C542A8546E50350521D8E2B5B3CF2E9FBB671"
         }
       }
     },
@@ -540,10 +541,6 @@
         }
       ]
     },
-    "integrationDetail": {
-      "ownership": "future seam and contact treatment without time-of-day shadows",
-      "enabled": false
-    },
     "dynamicShadows": {
       "ownership": "future world-light-driven shadows only",
       "enabled": false
@@ -556,7 +553,9 @@
       "terrain-geology"
     ],
     "site": [
-      "terrain-geology"
+      "terrain-geology",
+      "hydrology",
+      "shared-animated-foliage"
     ],
     "close": [
       "terrain-geology",

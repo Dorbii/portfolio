@@ -39,6 +39,31 @@ export function viewIntersectsHydrologyRegistration(
     && top + height > hydrologyTop;
 }
 
+function hydrologyRegistrationOverlapArea(
+  camera: Readonly<{
+    origin: readonly [number, number];
+    span: readonly [number, number];
+  }>,
+  worldOrigin: readonly [number, number],
+  worldSpan: readonly [number, number],
+): number {
+  const [left, top] = camera.origin;
+  const [width, height] = camera.span;
+  const [hydrologyLeft, hydrologyTop] = worldOrigin;
+  const [hydrologyWidth, hydrologyHeight] = worldSpan;
+  const overlapWidth = Math.max(
+    0,
+    Math.min(left + width, hydrologyLeft + hydrologyWidth)
+      - Math.max(left, hydrologyLeft),
+  );
+  const overlapHeight = Math.max(
+    0,
+    Math.min(top + height, hydrologyTop + hydrologyHeight)
+      - Math.max(top, hydrologyTop),
+  );
+  return overlapWidth * overlapHeight;
+}
+
 export interface RegionalHydrologySelectionRegion {
   readonly id: string;
   readonly worldBounds: Readonly<{
@@ -522,14 +547,34 @@ export function nativeHydrologyAdmissionSnapshotIsUsable(
 export function selectRegionalHydrologyRegionIds(
   camera: CameraView,
   regions: readonly RegionalHydrologySelectionRegion[],
+  maximumMountedRegions = Number.POSITIVE_INFINITY,
 ): readonly string[] {
-  return Object.freeze(regions.filter(({ worldBounds }) => (
+  const intersectingRegions = regions.filter(({ worldBounds }) => (
     viewIntersectsHydrologyRegistration(
       camera,
       worldBounds.origin,
       worldBounds.span,
     )
-  )).map(({ id }) => id).sort());
+  ));
+  if (!Number.isFinite(maximumMountedRegions)) {
+    return Object.freeze(intersectingRegions.map(({ id }) => id).sort());
+  }
+  const mountedRegionLimit = Math.max(0, Math.floor(maximumMountedRegions));
+  return Object.freeze(intersectingRegions
+    .map((region) => ({
+      id: region.id,
+      overlapArea: hydrologyRegistrationOverlapArea(
+        camera,
+        region.worldBounds.origin,
+        region.worldBounds.span,
+      ),
+    }))
+    .sort((left, right) => (
+      right.overlapArea - left.overlapArea || left.id.localeCompare(right.id)
+    ))
+    .slice(0, mountedRegionLimit)
+    .map(({ id }) => id)
+    .sort());
 }
 
 function planRegionalHydrologyTier({
@@ -627,7 +672,11 @@ export function planRegionalHydrologyCohort({
   readonly regions: readonly RegionalHydrologySelectionRegion[];
   readonly snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null;
 }): RegionalHydrologyCohortPlan {
-  const regionIds = selectRegionalHydrologyRegionIds(camera, regions);
+  const regionIds = selectRegionalHydrologyRegionIds(
+    camera,
+    regions,
+    maximumMountedRegions,
+  );
   const rejected = (
     reason: RegionalHydrologyPlanReason,
   ): RegionalHydrologyCohortPlan => Object.freeze({
@@ -642,8 +691,8 @@ export function planRegionalHydrologyCohort({
     targetKey: "",
     tier: null,
   });
+  if (maximumMountedRegions < 1) return rejected("region-limit");
   if (regionIds.length === 0) return rejected("no-regions");
-  if (regionIds.length > maximumMountedRegions) return rejected("region-limit");
   if (!nativeHydrologyAdmissionSnapshotIsUsable(
     snapshot,
     camera,

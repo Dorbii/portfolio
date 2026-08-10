@@ -335,6 +335,7 @@ export class WaterSurfaceRenderer {
   private pixelRatio = 1;
   private renderScale = 1;
   private lastRenderElapsedSeconds = 0;
+  private lastAnimationTelemetryQuarter = -1;
   private reduceMotion = false;
   private territoryAssetsLoading: Promise<void> | null = null;
   private territoryAssetsFailed = false;
@@ -388,6 +389,9 @@ export class WaterSurfaceRenderer {
     this.canvas.dataset.foregroundWaterMode = foregroundHydrology
       ? "registered-overlay"
       : "global";
+    this.canvas.dataset.waterLayerContract = "registered-body-and-effects";
+    this.canvas.dataset.waterBodyPass = "channel-coverage";
+    this.canvas.dataset.waterEffectsPass = "foam-falls-impacts-mist";
     this.canvas.dataset.hydrologyAssetState = this.hydrologyAssetState;
     this.canvas.dataset.hydrologyAssetBytes = "0";
     this.canvas.dataset.hydrologyAssetTier = "none";
@@ -513,7 +517,7 @@ export class WaterSurfaceRenderer {
     }
     this.hydrologyShouldBeResident = Boolean(
       this.foregroundHydrology
-      && detailState.shouldLoadCloseAssets
+      && (detailState.tier.id === "site" || detailState.tier.id === "close")
       && viewIntersectsHydrologyRegistration(
         camera,
         NINJAONE_STREAM_REGISTRATION.worldOrigin,
@@ -564,6 +568,13 @@ export class WaterSurfaceRenderer {
     }
 
     this.lastRenderElapsedSeconds = elapsedSeconds;
+    const animationTelemetryQuarter = Math.floor(elapsedSeconds * 4);
+    if (animationTelemetryQuarter !== this.lastAnimationTelemetryQuarter) {
+      this.lastAnimationTelemetryQuarter = animationTelemetryQuarter;
+      this.canvas.dataset.animationElapsedSeconds = elapsedSeconds.toFixed(3);
+      this.canvas.dataset.animationMotion = this.state.motion.toFixed(3);
+      this.canvas.dataset.animationReduceMotion = String(this.reduceMotion);
+    }
     this.advanceHydrologyVisibility(elapsedSeconds);
     const gl = this.gl;
     this.resize();
@@ -622,8 +633,7 @@ export class WaterSurfaceRenderer {
     );
     gl.uniform1f(
       this.uniforms.u_closeAssetsReady,
-      detailState.shouldLoadCloseAssets
-        && this.hydrologyBindings.length > 0
+      this.hydrologyBindings.length > 0
         && (
           this.hydrologyAssetState === "ready"
           || this.hydrologyAssetState === "fallback"

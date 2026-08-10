@@ -13,7 +13,6 @@ export type NinjaOneEnvironmentLayerId =
   | "shared-animated-foliage"
   | "surface-ecology"
   | "wildlife"
-  | "integration-detail"
   | "dynamic-shadows";
 
 export type NinjaOneEnvironmentPlateTier = Exclude<DetailTierId, "world">;
@@ -59,7 +58,6 @@ const EXPECTED_LAYER_ORDER: readonly NinjaOneEnvironmentLayerId[] = Object.freez
   "shared-animated-foliage",
   "surface-ecology",
   "wildlife",
-  "integration-detail",
   "dynamic-shadows",
 ]);
 const PLATE_TIERS: readonly NinjaOneEnvironmentPlateTier[] = Object.freeze([
@@ -72,8 +70,8 @@ const EXPECTED_DIMENSIONS: Readonly<Record<NinjaOneEnvironmentPlateTier, Pair>> 
   Object.freeze({
     territory: Object.freeze([720, 540] as Pair),
     capital: Object.freeze([1440, 1080] as Pair),
-    site: Object.freeze([2160, 1620] as Pair),
-    close: Object.freeze([2880, 2160] as Pair),
+    site: Object.freeze([2880, 2160] as Pair),
+    close: Object.freeze([5760, 4320] as Pair),
   });
 const EXPECTED_LOD_LAYERS: Readonly<
   Record<DetailTierId, readonly NinjaOneEnvironmentLayerId[]>
@@ -81,7 +79,11 @@ const EXPECTED_LOD_LAYERS: Readonly<
   world: Object.freeze([] as const),
   territory: Object.freeze([] as const),
   capital: Object.freeze(["terrain-geology"] as const),
-  site: Object.freeze(["terrain-geology"] as const),
+  site: Object.freeze([
+    "terrain-geology",
+    "hydrology",
+    "shared-animated-foliage",
+  ] as const),
   close: Object.freeze([
     "terrain-geology",
     "hydrology",
@@ -119,6 +121,7 @@ function plateSources(
   values: Readonly<Record<string, RawPlateSource>>,
   label: string,
   tiers: readonly NinjaOneEnvironmentPlateTier[],
+  expectedDimensions?: Readonly<Partial<Record<NinjaOneEnvironmentPlateTier, Pair>>>,
 ): Readonly<Partial<Record<NinjaOneEnvironmentPlateTier, NinjaOneEnvironmentPlateSource>>> {
   return Object.freeze(Object.fromEntries(tiers.map((tier) => {
     const source = values[tier];
@@ -128,7 +131,8 @@ function plateSources(
     const dimensions = finitePair(source.dimensions, `${label}.${tier}.dimensions`);
     if (
       !source.path.startsWith("/career-world/capitals/ninjaone/environment/plates/")
-      || dimensions.join(",") !== EXPECTED_DIMENSIONS[tier].join(",")
+      || (expectedDimensions?.[tier]
+        && dimensions.join(",") !== expectedDimensions[tier].join(","))
       || dimensions[0] / dimensions[1] !== 4 / 3
     ) {
       throw new TypeError(`${label}.${tier} is not a registered 4:3 environment plate.`);
@@ -193,7 +197,6 @@ if (
   || manifest.status !== "environment-only-proof"
   || manifest.registration.gridCells.join(",") !== EXPECTED_GRID_CELLS.join(",")
   || manifest.layerOrder.join(",") !== EXPECTED_LAYER_ORDER.join(",")
-  || manifest.layers.integrationDetail.enabled
   || manifest.layers.dynamicShadows.enabled
   || manifest.layerOrder.some((layer) => (
     /(?:^|-)(?:city|building|rail|road)(?:-|$)/.test(layer)
@@ -230,6 +233,7 @@ export const NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES = plateSources(
   manifest.layers.geology.sources,
   "layers.geology.sources",
   PLATE_TIERS,
+  EXPECTED_DIMENSIONS,
 ) as Readonly<Record<NinjaOneEnvironmentPlateTier, NinjaOneEnvironmentPlateSource>>;
 export const NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES = plateSources(
   manifest.layers.secondaryRelief.sources,

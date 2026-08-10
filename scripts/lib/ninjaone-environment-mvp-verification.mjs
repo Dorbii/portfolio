@@ -124,13 +124,13 @@ export const NINJAONE_MVP_FIXED_CAMERAS = Object.freeze({
 });
 export const NINJAONE_MVP_HYDROLOGY_BOUNDARY_TRANSITION = Object.freeze({
   fromCamera: Object.freeze({
-    origin: Object.freeze([0.17604, 0.09292777777777776]),
+    origin: Object.freeze([0.18, 0.1]),
     span: Object.freeze([0.074, 0.074]),
   }),
   fromRegionIds: Object.freeze(["B2", "C1"]),
   id: "hydrology-regional-boundary-b2-c1-to-b2",
   toCamera: Object.freeze({
-    origin: Object.freeze([0.17604, 0.12966666666666665]),
+    origin: Object.freeze([0.176, 0.12966666666666665]),
     span: Object.freeze([0.074, 0.074]),
   }),
   toRegionIds: Object.freeze(["B2"]),
@@ -186,11 +186,11 @@ export const NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES = Object.freeze([
     expectedTerrainTileCount: 2,
     id: "hydrology-B2-tarn",
     requiredStyleCounts: Object.freeze({
-      impactFoamMist: 100,
-      stream: 278,
-      tarn: 3_551,
-      waterfallLip: 77,
-      waterfallSheet: 31,
+      impactFoamMist: 99,
+      stream: 281,
+      tarn: 3_545,
+      waterfallLip: 76,
+      waterfallSheet: 29,
     }),
   }),
   Object.freeze({
@@ -201,11 +201,12 @@ export const NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES = Object.freeze([
     expectedTerrainTileCount: 2,
     id: "hydrology-B2-lip-fall",
     requiredStyleCounts: Object.freeze({
-      impactFoamMist: 307,
-      stream: 127,
-      tarn: 1_699,
-      waterfallLip: 77,
-      waterfallSheet: 31,
+      impactFoamMist: 305,
+      stream: 125,
+      tarn: 1_702,
+      turbulence: 16,
+      waterfallLip: 76,
+      waterfallSheet: 29,
     }),
   }),
 ]);
@@ -218,7 +219,7 @@ const ALPHA_PRESENT = 16;
 const FRAME_DIFF_THRESHOLD = 6;
 const MAX_MOTION_MASK_COVERAGE = 0.25;
 const MIN_FLOW_CORRELATION = 0.05;
-const HYDROLOGY_SCREEN_MASK_DILATION_PIXELS = 4;
+const HYDROLOGY_SCREEN_MASK_DILATION_PIXELS = 0;
 const NATIVE_BUDGET_SWEEP_SPANS = Object.freeze([
   0.04, 0.05, 0.055, 0.06, 0.061, 0.074, 0.075, 0.08, 0.0875, 0.09,
 ]);
@@ -277,9 +278,37 @@ export async function deriveNinjaOneHydrologyMotionContract({
     && camera.origin[1] < origin[1] + span[1]
     && camera.origin[1] + camera.span[1] > origin[1]
   );
-  const selectedRegionIds = regions.filter(({ worldBounds }) => (
+  const overlapArea = ({ origin, span }) => {
+    const overlapWidth = Math.max(
+      0,
+      Math.min(camera.origin[0] + camera.span[0], origin[0] + span[0])
+        - Math.max(camera.origin[0], origin[0]),
+    );
+    const overlapHeight = Math.max(
+      0,
+      Math.min(camera.origin[1] + camera.span[1], origin[1] + span[1])
+        - Math.max(camera.origin[1], origin[1]),
+    );
+    return overlapWidth * overlapHeight;
+  };
+  const maximumMountedRegions = manifest.regionalFields.cohortPolicy.maximumMountedRegions;
+  const intersectingRegions = regions.filter(({ worldBounds }) => (
     worldBounds && intersectsWorldBounds(worldBounds)
-  )).map(({ id }) => id).sort();
+  ));
+  const selectedRegionIds = fieldResourceIds === undefined
+    ? intersectingRegions
+      .map(({ id, worldBounds }) => ({ id, overlapArea: overlapArea(worldBounds) }))
+      .sort((left, right) => (
+        right.overlapArea - left.overlapArea || left.id.localeCompare(right.id)
+      ))
+      .slice(0, maximumMountedRegions)
+      .map(({ id }) => id)
+      .sort()
+    : [...new Set(fieldResourceIds.map((resourceId) => {
+      const resource = tier.resources.find(({ id }) => id === resourceId);
+      if (!resource) throw new Error(`Unknown mounted hydrology resource ${resourceId}.`);
+      return resource.regionId;
+    }))].sort();
   const selectedResources = selectedRegionIds.map((regionId) => {
     const matches = tier.resources.filter((resource) => (
       resource.regionId === regionId
@@ -292,7 +321,7 @@ export async function deriveNinjaOneHydrologyMotionContract({
   if (
     selectedResources.length === 0
     || selectedResources.length
-      > manifest.regionalFields.cohortPolicy.maximumMountedRegions
+      > maximumMountedRegions
   ) throw new Error("Hydrology camera has an invalid regional cohort.");
   if (
     fieldResourceIds !== undefined
@@ -383,12 +412,18 @@ export async function deriveNinjaOneHydrologyMotionContract({
   const screenX = fieldFlowX * clip.width / width;
   const screenY = fieldFlowY * clip.height / height;
   const screenLength = Math.hypot(screenX, screenY);
-  const renderMask = (data) => sharp(data, {
-    raw: { channels: 4, height, width },
-  }).resize(clip.width, clip.height, {
-    fit: "fill",
-    kernel: "nearest",
-  }).dilate(HYDROLOGY_SCREEN_MASK_DILATION_PIXELS).png().toBuffer();
+  const renderMask = (data) => {
+    let pipeline = sharp(data, {
+      raw: { channels: 4, height, width },
+    }).resize(clip.width, clip.height, {
+      fit: "fill",
+      kernel: "nearest",
+    });
+    if (HYDROLOGY_SCREEN_MASK_DILATION_PIXELS > 0) {
+      pipeline = pipeline.dilate(HYDROLOGY_SCREEN_MASK_DILATION_PIXELS);
+    }
+    return pipeline.png().toBuffer();
+  };
   const [fullMaskPng, maskPng] = await Promise.all([
     renderMask(fullMask),
     renderMask(directionalMask),
@@ -1072,15 +1107,26 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
     for (const x of axisOrigins(0)) {
       for (const y of axisOrigins(1)) {
         const camera = { origin: [x, y], span: [span, span] };
-        const ids = regionContracts.filter(({ worldBounds }) => (
-          camera.origin[0] < worldBounds.origin[0] + worldBounds.span[0]
-          && camera.origin[0] + span > worldBounds.origin[0]
-          && camera.origin[1] < worldBounds.origin[1] + worldBounds.span[1]
-          && camera.origin[1] + span > worldBounds.origin[1]
-        )).map(({ id }) => id).sort();
-        if (ids.length <= (regionalFields?.cohortPolicy?.maximumMountedRegions ?? 0)) {
-          cohortSets.set(ids.join("+"), ids);
-        }
+        const maximumMountedRegions =
+          regionalFields?.cohortPolicy?.maximumMountedRegions ?? 0;
+        const ids = regionContracts.map(({ id, worldBounds }) => {
+          const overlapWidth = Math.max(0, Math.min(
+            camera.origin[0] + span,
+            worldBounds.origin[0] + worldBounds.span[0],
+          ) - Math.max(camera.origin[0], worldBounds.origin[0]));
+          const overlapHeight = Math.max(0, Math.min(
+            camera.origin[1] + span,
+            worldBounds.origin[1] + worldBounds.span[1],
+          ) - Math.max(camera.origin[1], worldBounds.origin[1]));
+          return { id, overlapArea: overlapWidth * overlapHeight };
+        }).filter(({ overlapArea }) => overlapArea > 0)
+          .sort((left, right) => (
+            right.overlapArea - left.overlapArea || left.id.localeCompare(right.id)
+          ))
+          .slice(0, maximumMountedRegions)
+          .map(({ id }) => id)
+          .sort();
+        cohortSets.set(ids.join("+"), ids);
       }
     }
   }
@@ -1141,13 +1187,43 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
       resources: Object.freeze(resourceAudits),
     });
   }
-  const sourceManifestSha256 = manifest?.source?.manifestPath
-    ? await fileSha256(resolveRepoAsset(root, manifest.source.manifestPath)).catch(() => null)
+  const sourceManifestSha256 = manifest?.source?.path
+    ? await fileSha256(resolveRepoAsset(root, manifest.source.path)).catch(() => null)
     : null;
   const sharedPool = manifest?.admission?.sharedWaterTexturePool;
   const authority = nativeUnion?.authority;
+  const authorityConstituents = Array.isArray(authority?.constituents)
+    ? authority.constituents
+    : [];
+  const authorityConstituentPasses = await Promise.all(
+    authorityConstituents.map(async (constituent) => (
+      typeof constituent?.path === "string"
+      && typeof constituent?.sha256 === "string"
+      && constituent.sha256
+        === await fileSha256(resolveRepoAsset(root, constituent.path)).catch(() => null)
+    )),
+  );
+  const fallbackWorstCohort = nativeUnion?.eventBounds?.fallbackWorstCohort;
+  const fallbackBytesByRegion = new Map(
+    (regionalFields?.tiers?.fallback?.resources ?? []).map((resource) => [
+      resource.regionId,
+      resource.decodedBytes,
+    ]),
+  );
+  const fallbackWorstRegionIds = fallbackWorstCohort?.regionIds ?? [];
+  const fallbackWorstCohortPass = fallbackWorstRegionIds.length > 0
+    && fallbackWorstRegionIds.length
+      <= (regionalFields?.cohortPolicy?.maximumMountedRegions ?? 0)
+    && new Set(fallbackWorstRegionIds).size === fallbackWorstRegionIds.length
+    && fallbackWorstRegionIds.every((id) => expectedRegions.includes(id))
+    && fallbackWorstRegionIds.reduce(
+      (total, id) => total + (fallbackBytesByRegion.get(id) ?? 0),
+      0,
+    ) === fallbackWorstCohort?.decodedBytes
+    && fallbackWorstCohort?.decodedBytes
+      === tierAudits.fallback.maximumCohortDecodedBytes;
   const pass = manifest?.schemaVersion === 3
-    && manifest?.id === "career-world/capitals/ninjaone/hydrology-native@r3"
+    && manifest?.id === "career-world/capitals/ninjaone/hydrology-native@r2"
     && manifest?.field === undefined
     && manifest?.fallbackField === undefined
     && regionalFields?.cohortPolicy?.atomic === true
@@ -1160,16 +1236,14 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
     && tierAudits.detail.pass
     && tierAudits.fallback.pass
     && nativeUnion?.maximumDecodedBytes === NINJAONE_MVP_LIMITS.maximumDecodedBytes
-    && nativeUnion?.eventBounds?.fallbackWorstCohort?.decodedBytes
-      === tierAudits.fallback.maximumCohortDecodedBytes
-    && sameStringSet(
-      nativeUnion?.eventBounds?.fallbackWorstCohort?.regionIds ?? [],
-      ["B2", "C1"],
-    )
-    && manifest?.source?.manifestSha256 === sourceManifestSha256
-    && Array.isArray(authority?.constituents)
-    && authority.constituents.length === 4
-    && /frozen/i.test(authority?.status ?? "")
+    && fallbackWorstCohortPass
+    && manifest?.source?.authority === "registered-terrain-master"
+    && manifest?.source?.dimensions?.[0] === 5760
+    && manifest?.source?.dimensions?.[1] === 4320
+    && manifest?.source?.sha256 === sourceManifestSha256
+    && authorityConstituents.length > 0
+    && authorityConstituentPasses.every(Boolean)
+    && /(?:provisional|frozen)/i.test(authority?.status ?? "")
     && sharedPool?.maximumDecodedBytes
       === NINJAONE_MVP_WATER_TEXTURE_LIMITS.budgetBytes
     && sharedPool?.steadyDecodedBytes
@@ -1794,12 +1868,23 @@ function expectedHydrologyRegionIds(camera, resourceCatalog) {
     if (resource.kind !== "hydrology" || !resource.worldBounds) continue;
     regions.set(resource.regionId, resource.worldBounds);
   }
-  return [...regions.entries()].filter(([, bounds]) => (
-    camera.origin[0] < bounds.origin[0] + bounds.span[0]
-    && camera.origin[0] + camera.span[0] > bounds.origin[0]
-    && camera.origin[1] < bounds.origin[1] + bounds.span[1]
-    && camera.origin[1] + camera.span[1] > bounds.origin[1]
-  )).map(([id]) => id).sort();
+  return [...regions.entries()].map(([id, bounds]) => {
+    const overlapWidth = Math.max(0, Math.min(
+      camera.origin[0] + camera.span[0],
+      bounds.origin[0] + bounds.span[0],
+    ) - Math.max(camera.origin[0], bounds.origin[0]));
+    const overlapHeight = Math.max(0, Math.min(
+      camera.origin[1] + camera.span[1],
+      bounds.origin[1] + bounds.span[1],
+    ) - Math.max(camera.origin[1], bounds.origin[1]));
+    return { id, overlapArea: overlapWidth * overlapHeight };
+  }).filter(({ overlapArea }) => overlapArea > 0)
+    .sort((left, right) => (
+      right.overlapArea - left.overlapArea || left.id.localeCompare(right.id)
+    ))
+    .slice(0, 2)
+    .map(({ id }) => id)
+    .sort();
 }
 
 function regionalHydrologyResources(resourceCatalog, regionIds, tier) {
@@ -2809,6 +2894,7 @@ export function auditNinjaOneEnvironmentHydrologyBoundaryTransition({
     contract.toCamera,
     resourceCatalog,
   );
+  const expectsNativeTerrain = expectedFromTerrainIds.length > 0;
   if (
     capture?.id !== contract.id
     || !sameCamera(capture?.fromCamera, contract.fromCamera)
@@ -2816,8 +2902,7 @@ export function auditNinjaOneEnvironmentHydrologyBoundaryTransition({
     || !sameStringRecord(capture?.isolation, NINJAONE_MVP_HYDROLOGY_BOUNDARY_ISOLATION)
   ) failures.push(`${label}.contract_mismatch`);
   if (
-    expectedFromTerrainIds.length === 0
-    || !sameStringSet(expectedFromTerrainIds, expectedToTerrainIds)
+    !sameStringSet(expectedFromTerrainIds, expectedToTerrainIds)
   ) failures.push(`${label}.camera_terrain_cohort_mismatch`);
   if (
     !sameStringSet(expectedFromRegionIds, contract.fromRegionIds)
@@ -2850,16 +2935,33 @@ export function auditNinjaOneEnvironmentHydrologyBoundaryTransition({
       !Array.isArray(sample?.camera?.origin)
       || !Array.isArray(sample?.camera?.span)
       || sample.camera.span.some((value) => Math.abs(value - 0.074) > 1e-8)
-      || Math.abs(sample.camera.origin[0] - contract.fromCamera.origin[0]) > 1e-8
-      || sample.camera.origin[1] < contract.fromCamera.origin[1] - 1e-8
-      || sample.camera.origin[1] > contract.toCamera.origin[1] + 1e-8
+      || sample.camera.origin[0] < Math.min(
+        contract.fromCamera.origin[0],
+        contract.toCamera.origin[0],
+      ) - 1e-8
+      || sample.camera.origin[0] > Math.max(
+        contract.fromCamera.origin[0],
+        contract.toCamera.origin[0],
+      ) + 1e-8
+      || sample.camera.origin[1] < Math.min(
+        contract.fromCamera.origin[1],
+        contract.toCamera.origin[1],
+      ) - 1e-8
+      || sample.camera.origin[1] > Math.max(
+        contract.fromCamera.origin[1],
+        contract.toCamera.origin[1],
+      ) + 1e-8
     ) failures.push(`${label}.sample_${index}.camera_escape`);
     if (
       !sameStringSet(expectedTerrainIds, expectedFromTerrainIds)
       || !sameStringSet(mountedTerrainIds, expectedFromTerrainIds)
       || runtime?.terrainTileCount !== expectedFromTerrainIds.length
-      || runtime?.nativeVisible !== true
-      || runtime?.nativeState !== "ready"
+      || runtime?.nativeVisible !== expectsNativeTerrain
+      || (
+        expectsNativeTerrain
+          ? runtime?.nativeState !== "ready"
+          : !new Set(["idle", undefined]).has(runtime?.nativeState)
+      )
       || runtime?.cohortPhase !== "active"
       || runtime?.noVisibleGap !== true
       || runtime?.waterRenderState !== "ready"
@@ -3038,8 +3140,8 @@ export function auditNinjaOneEnvironmentHydrologyBoundaryTransition({
         !== "runtime-state-before-and-after-cdp-screenshot"
       || frame.runtime?.waterHydrologyTransitionState !== expectedState
       || frame.runtimeAfter?.waterHydrologyTransitionState !== expectedState
-      || frame.runtime?.nativeVisible !== true
-      || frame.runtimeAfter?.nativeVisible !== true
+      || frame.runtime?.nativeVisible !== expectsNativeTerrain
+      || frame.runtimeAfter?.nativeVisible !== expectsNativeTerrain
       || frame.runtime?.lowerWaterVisibleCount < 1
       || frame.runtimeAfter?.lowerWaterVisibleCount < 1
     ) failures.push(`${label}.frame_${frame.id}.synchronization_invalid`);

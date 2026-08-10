@@ -1,7 +1,9 @@
 export const WATER_SHADER_NINJAONE_STREAMS = `
 struct NinjaOneStreamSample {
-  vec3 color;
-  float alpha;
+  vec3 bodyColor;
+  float bodyAlpha;
+  vec3 effectsColor;
+  float effectsAlpha;
 };
 
 float insideUnitSquare(vec2 value) {
@@ -85,8 +87,10 @@ vec4 sampleNinjaOneRegionalField(vec2 streamUv) {
 
 NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   NinjaOneStreamSample result;
-  result.color = u_bodyColor;
-  result.alpha = 0.0;
+  result.bodyColor = u_bodyColor;
+  result.bodyAlpha = 0.0;
+  result.effectsColor = u_foamColor;
+  result.effectsAlpha = 0.0;
 
   vec2 streamUv = (worldUv - u_ninjaOneStreamOrigin) / u_ninjaOneStreamSpan;
   float registered = insideUnitSquare(streamUv) * u_closeAssetsReady;
@@ -131,36 +135,31 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   // Two-phase flow mapping bounds local displacement and crossfades every
   // reset. Both crest phase and material UVs are advected by the decoded
   // per-pixel vector; there is no global transport axis or in-place flicker.
-  float flowRate =
-    stream * 0.68
-    + turbulence * 0.92
-    + lip * 1.18
-    + waterfall * 1.55
-    + impact * 0.88
-    + coast * 0.52;
-  float flowProgress = time * flowRate;
+  // At the half-cycle, phase A is the continuous sample and phase B resets;
+  // at the full-cycle, phase B is continuous while phase A resets. Mixing A
+  // into B in that order prevents the reset from becoming a visible flash.
+  // Every registered water style shares one transport clock. Driving the
+  // body clock from the discrete style bands made neighboring stream,
+  // turbulence, lip, and impact texels visibly slide as separate segments.
+  // Local waterfall energy belongs in the effects layer below, not in the
+  // base material phase.
+  float flowProgress = time * 0.2;
   float flowPhaseA = fract(flowProgress);
   float flowPhaseB = fract(flowProgress + 0.5);
   float flowPhaseBlend = abs(flowPhaseA * 2.0 - 1.0);
-  float phaseAdvance =
-    stream * 0.26
-    + turbulence * 0.38
-    + lip * 0.48
-    + waterfall * 0.64
-    + impact * 0.42
-    + coast * 0.3;
+  float phaseAdvance = mix(0.22, 0.055, tarn);
   vec2 phaseBaseUv = streamPixels * 0.021;
   vec2 primaryPhaseUvA = phaseBaseUv - flow * flowPhaseA * phaseAdvance;
   vec2 primaryPhaseUvB = phaseBaseUv - flow * flowPhaseB * phaseAdvance;
   vec2 secondaryPhaseOffset = vec2(0.37, 0.53);
   float primaryTravelSignal = mix(
-    heightSample(u_microHeight, primaryPhaseUvB),
     heightSample(u_microHeight, primaryPhaseUvA),
+    heightSample(u_microHeight, primaryPhaseUvB),
     flowPhaseBlend
   );
   float secondaryTravelSignal = mix(
-    heightSample(u_microHeight, primaryPhaseUvB + secondaryPhaseOffset),
     heightSample(u_microHeight, primaryPhaseUvA + secondaryPhaseOffset),
+    heightSample(u_microHeight, primaryPhaseUvB + secondaryPhaseOffset),
     flowPhaseBlend
   );
 
@@ -171,7 +170,7 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   float tarnAngle = atan(tarnDeltaPixels.y, tarnDeltaPixels.x);
   float tarnPhase =
     tarnRadius * 0.41
-    - time * 1.55
+    - time * 0.28
     + sin(tarnAngle * 3.0) * 0.22;
   float primaryPhase = mix(
     (primaryTravelSignal - 0.5) * 6.2831853,
@@ -189,13 +188,11 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     + turbulence * 0.00003
     + waterfall * 0.00014
     + coast * 0.00004;
-  float materialAdvance =
-    channel * 0.024
-    + lip * 0.05
-    + waterfall * 0.115
-    + impact * 0.06
-    + coast * 0.022;
-  materialAdvance = mix(materialAdvance, 0.0045, tarn);
+  // Keep the base material displacement continuous across style boundaries.
+  // The decoded flow vector still bends with the authored topology, while
+  // foam/falls can accelerate independently without cutting the river body
+  // into visible moving regions.
+  float materialAdvance = mix(0.014, 0.0035, tarn);
   vec2 materialBaseUv = vec2(0.47, 0.53) + streamPixels * flowScale;
   vec2 flowAlignedUv = fract(
     materialBaseUv - flow * flowPhaseA * materialAdvance
@@ -212,10 +209,10 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     - lip * 0.24
     + tarn * 0.3
     + coast * 0.08;
-  // Registered material UVs already travel along the decoded local field.
-  // Suppress sampleWaterBodyAtTime's global wind-time transport here so it
-  // cannot add an unrelated axis beneath stream, fall, impact, or coast foam.
-  // Tarn motion remains the explicit radial tarnPhase above.
+  // Registered material UVs travel primarily along the decoded local field.
+  // A restrained share of the open-water time term retains the same moving
+  // crest and micro-normal language as the ocean without overpowering the
+  // downhill stream direction. Tarn motion remains radial via tarnPhase.
   OpenWaterSample primaryOceanSurface = sampleWaterBodyAtTime(
     worldUv,
     flowAlignedUv,
@@ -224,7 +221,7 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     1450.0,
     tarn * 0.32,
     0.025 + tarn * 0.055,
-    0.0
+    time * 0.16
   );
   OpenWaterSample offsetOceanSurface = sampleWaterBodyAtTime(
     worldUv,
@@ -234,11 +231,11 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     1450.0,
     tarn * 0.32,
     0.025 + tarn * 0.055,
-    0.0
+    time * 0.16
   );
   OpenWaterSample oceanSurface = blendWaterSamples(
-    offsetOceanSurface,
     primaryOceanSurface,
+    offsetOceanSurface,
     primarySurfaceMix
   );
 
@@ -267,8 +264,8 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     offsetFlowUv * vec2(4.2, 6.8)
   );
   float foamBreakup = mix(
-    offsetBreakup,
     primaryBreakup,
+    offsetBreakup,
     primarySurfaceMix
   );
   float travelingCrest = smoother(
@@ -341,38 +338,100 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     0.44
   );
   float mist = impact
-    * smoother(0.56, 0.82, mistNoise)
-    * (0.12 + offsetCrest * 0.1);
+    * smoother(0.44, 0.78, mistNoise)
+    * (0.2 + offsetCrest * 0.2);
 
-  vec3 waterColor = oceanSurface.color;
-  waterColor = mix(
-    waterColor,
+  vec3 streamPalette = mix(u_deepColor, u_bodyColor, 0.68);
+  // The ocean material is the single water-body language for oceans, tarns,
+  // streams, and falls. Registered hydrology controls direction and coverage;
+  // it must not replace that material with a flat blue corridor.
+  float authoredSurfaceMix = mix(
+    0.88,
+    0.8,
+    saturate(lip + waterfall + impact)
+  );
+  vec3 registeredBodyColor = mix(
+    streamPalette,
+    oceanSurface.color,
+    authoredSurfaceMix
+  );
+  registeredBodyColor = mix(
+    registeredBodyColor,
     u_deepColor,
     travelingTrough * (channel * 0.1 + waterfall * 0.14)
   );
-  waterColor = mix(
-    waterColor,
+  registeredBodyColor = mix(
+    registeredBodyColor,
     u_highlightColor,
     tarnCrest * 0.1
   );
-  waterColor = mix(waterColor, u_foamColor, foam * 0.86);
-  waterColor = mix(waterColor, u_foamColor, mist * 0.34);
+  result.bodyColor = registeredBodyColor;
 
-  result.color = waterColor;
-  // Coverage and alpha contain no time term. Only color/material phase moves,
-  // so accepted banks, rocks, and shoreline geometry remain invariant.
+  // Foam, waterfall sheets, impact spray, and mist are a separate semantic
+  // layer over the registered water body. They reuse the same field/material
+  // samplers, but their volume can move independently without making the
+  // channel itself translucent or revealing the baked whitewater beneath it.
+  float registeredFoamVolume = saturate(
+    oceanSurface.crest * (channel * 0.1 + waterfall * 0.14)
+      + travelingCrest * stream * 0.26
+      + lipAcceleration * 0.46
+      + fallingSheet * 0.5
+      + impactFoam * 0.56
+      + downstreamTurbulence * 0.42
+      + coastalFoam * 0.2
+      + tarnCrest * 0.03
+  );
+  // The broader foam calculation carries the bank, turbulence, and cascade
+  // detail that was previously discarded before compositing. Merge it into
+  // the registered volume so the neutral water plate regains animated
+  // whitewater instead of reading as stagnant dark-blue fill.
+  registeredFoamVolume = max(registeredFoamVolume, foam * 0.82);
+  float brokenFoamVolume = registeredFoamVolume
+    * mix(0.46, 1.0, foamBreakup);
+  float movingFoam = smoother(0.08, 0.38, brokenFoamVolume);
+  float fallingFilaments = waterfall
+    * smoother(0.3, 0.72, mix(foamBreakup, fallFilament, 0.56))
+    * (0.36 + travelingCrest * 0.5);
+  float impactSpray = impact
+    * smoother(0.34, 0.7, mix(mistNoise, offsetCrest, 0.48))
+    * (0.22 + travelingCrest * 0.28);
+  float registeredEffectsAlpha = saturate(
+    movingFoam * 0.78
+      + fallingFilaments * 0.72
+      + impactSpray * 0.58
+      + mist * 0.5
+  );
+  result.effectsColor = mix(
+    u_highlightColor,
+    u_foamColor,
+    saturate(0.5 + brokenFoamVolume * 0.34)
+  );
+
+  // Body coverage contains no time term, so accepted banks, rocks, and
+  // shoreline geometry remain invariant. Only the effects layer changes
+  // volume over time, and it remains clipped to the same registered mask.
   // Native coast masks follow authored foam around rocks and shingle. Keep
   // that interaction subordinate to the source material instead of fully
   // replacing every registered micro-edge with a bright contour.
-  float baseAlpha = mix(0.27, 0.03, coast);
-  result.alpha = mask * u_ninjaOneHydrologyOpacity * (
-    baseAlpha
-      + tarn * 0.03
-      + channel * 0.045
-      + lip * 0.1
-      + waterfall * 0.12
-      + impact * 0.11
+  // The neutral terrain plate owns no whitewater. The registered body still
+  // needs nearly opaque coverage so all water scales share one moving ocean
+  // material, while the thin effects pass supplies foam and fall filaments.
+  // Coast remains deliberately light so authored shoreline rock and shingle
+  // stay dominant.
+  float registeredBodyAlpha = saturate(
+    tarn * 0.34
+      + channel * 0.82
+      + lip * 0.96
+      + waterfall * 0.98
+      + impact * 0.94
+      + coast * 0.08
   );
+  result.bodyAlpha = mask
+    * u_ninjaOneHydrologyOpacity
+    * registeredBodyAlpha;
+  result.effectsAlpha = mask
+    * u_ninjaOneHydrologyOpacity
+    * registeredEffectsAlpha;
   return result;
 }
 `;

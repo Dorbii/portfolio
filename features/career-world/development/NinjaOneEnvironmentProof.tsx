@@ -168,6 +168,7 @@ export function NinjaOneEnvironmentProof({
         data-environment-grid-cells={NINJAONE_ENVIRONMENT_GRID_CELLS.join(",")}
         data-environment-layer-order={NINJAONE_ENVIRONMENT_LAYER_ORDER.join(",")}
         data-environment-loaded-layer-count={visibleLayers.length}
+        data-environment-neighbor-integration="compiled-b1-buffer"
         data-environment-proof={NINJAONE_ENVIRONMENT_PROOF_ID}
         data-environment-semantic-summary={TIER_SUMMARIES[detailState.tier.id]}
         data-environment-shared-node-count={sharedNodeCount}
@@ -205,14 +206,17 @@ export function NinjaOneEnvironmentProof({
           {geologySource ? (
             <PlateImage layer="terrain-geology" source={geologySource} />
           ) : null}
-          <NinjaOneEnvironmentNativeDetail
-            active={active}
-            camera={camera}
-            detailState={detailState}
-            onHydrologyAdmissionChange={onHydrologyAdmissionChange}
-            showFoliage={visibleLayers.includes("shared-animated-foliage")}
-          />
-          <g mask="url(#ninjaone-environment-proof-alpha)">
+          <g mask={geologySource
+            ? "url(#ninjaone-environment-proof-alpha)"
+            : undefined}>
+            <NinjaOneEnvironmentNativeDetail
+              active={active}
+              camera={camera}
+              detailState={detailState}
+              onHydrologyAdmissionChange={onHydrologyAdmissionChange}
+              showFoliage={visibleLayers.includes("shared-animated-foliage")}
+              showHydrology={visibleLayers.includes("hydrology")}
+            />
             {secondaryReliefSource ? (
               <PlateImage layer="secondary-relief" source={secondaryReliefSource} />
             ) : null}

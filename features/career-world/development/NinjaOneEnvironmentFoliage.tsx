@@ -158,7 +158,7 @@ export function NinjaOneEnvironmentFoliage({
   const instances = useMemo(
     () => active
       && showFoliage
-      && detailState.shouldLoadCloseAssets
+      && detailState.shouldLoadSiteAssets
       && maxDetailEligible
       ? selectNinjaOneEnvironmentFoliageInstances(
           camera,
@@ -169,7 +169,7 @@ export function NinjaOneEnvironmentFoliage({
     [
       active,
       camera,
-      detailState.shouldLoadCloseAssets,
+      detailState.shouldLoadSiteAssets,
       maxDetailEligible,
       maximumGroups,
       showFoliage,
@@ -279,7 +279,7 @@ export function NinjaOneEnvironmentFoliage({
       : "loading";
   const visible = active
     && showFoliage
-    && detailState.shouldLoadCloseAssets
+    && detailState.shouldLoadSiteAssets
     && maxDetailEligible
     && loadStatus === "ready";
   const selectedResourceIds = selectedResources.map(({ id }) => id).join(",");

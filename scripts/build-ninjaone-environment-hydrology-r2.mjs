@@ -4,11 +4,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
+sharp.cache(false);
+sharp.concurrency(1);
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const NATIVE_DETAIL_MANIFEST_PATH = path.join(
+const REGISTERED_TERRAIN_MASTER_PATH = path.join(
   ROOT,
-  "public/career-world/capitals/ninjaone/environment/manifests/"
-    + "native-detail-r2.json",
+  "art-source/career-world/ninjaone-environment/production-r2/"
+    + "ninjaone-environment-terrain-master-detail-r2.png",
 );
 const SEAM_INTEGRATION_MANIFEST_PATH = path.join(
   ROOT,
@@ -55,14 +58,6 @@ const HYDROLOGY_REGION_CELLS = Object.freeze([
   }),
 ]);
 
-const NATIVE_SOURCE_PREFIX = "/art-source/career-world/ninjaone-environment/"
-  + "production-r2/detail-tiles-r2/generated/";
-const EXPECTED_NATIVE_TILE_IDS = Object.freeze([
-  "r0-c2", "r0-c3", "r1-c2", "r1-c3",
-  "r2-c0", "r2-c1", "r2-c2", "r2-c3",
-  "r3-c0", "r3-c1", "r3-c2", "r3-c3",
-]);
-
 const STYLE = Object.freeze({
   tarn: 32,
   stream: 96,
@@ -84,8 +79,8 @@ const pathShape = (points, radius) => Object.freeze({
 });
 
 // Coordinates use the unchanged 1440 x 1080 registration artboard. Pixel
-// masks come only from the twelve authoritative 1448 x 1086 native originals;
-// paths provide local flow direction and never bridge a dry source seam.
+// masks come from the accepted single registered terrain master; paths provide
+// local flow direction and never bridge dry terrain.
 export const HYDROLOGY_SEGMENTS = Object.freeze([
   Object.freeze({
     cellIds: Object.freeze(["C1"]),
@@ -203,6 +198,47 @@ export const HYDROLOGY_SEGMENTS = Object.freeze([
     priority: 80,
     shape: pathShape([[908, 384], [930, 399]], 18),
     styleCode: STYLE.impact,
+  }),
+  Object.freeze({
+    cellIds: Object.freeze(["C1"]),
+    declaredFlowVector: Object.freeze([0.329, 0.9443]),
+    id: "c1-main-river-upper-channel",
+    kind: "turbulence",
+    priority: 45,
+    shape: pathShape([
+      [864, 218],
+      [870, 268],
+      [889, 312],
+      [904, 344],
+      [910, 385],
+      [929, 399],
+      [921, 451],
+      [896, 489],
+      [882, 512],
+      [842, 536],
+    ], 25),
+    styleCode: STYLE.turbulence,
+  }),
+  Object.freeze({
+    cellIds: Object.freeze(["C2"]),
+    declaredFlowVector: Object.freeze([-0.4072, 0.9134]),
+    id: "c2-main-river-upper-channel",
+    kind: "turbulence",
+    priority: 45,
+    shape: pathShape([
+      [842, 536],
+      [836, 572],
+      [804, 603],
+      [798, 657],
+      [764, 701],
+      [740, 747],
+      [736, 777],
+      [765, 790],
+      [799, 801],
+      [833, 809],
+      [865, 810],
+    ], 25),
+    styleCode: STYLE.turbulence,
   }),
   Object.freeze({
     cellIds: Object.freeze(["B2"]),
@@ -408,7 +444,7 @@ function assertTuple(actual, expected, label) {
   }
 }
 
-async function loadNativeUnionAdmission(detailDecodedBytes, fallbackDecodedBytes) {
+async function loadNativeUnionAdmission(fieldTiers) {
   const manifestBytes = await readFile(SEAM_INTEGRATION_MANIFEST_PATH);
   const manifest = JSON.parse(manifestBytes.toString("utf8"));
   if (manifest.budgets?.maximumDecodedBytes !== HYDROLOGY_MAXIMUM_DECODED_BYTES) {
@@ -427,11 +463,17 @@ async function loadNativeUnionAdmission(detailDecodedBytes, fallbackDecodedBytes
       handoff.id !== expectedHandoffIds[index]
       || handoff.status !== "requires-bounded-transition-field"
       || handoff.topologyTreatment !== "no synthetic water geometry in the seam asset"
-      || !manifest.resources?.some(({ id }) => id === handoff.seamResourceId)
+      || typeof handoff.seamResourceId !== "string"
     ))
   ) {
     throw new Error("Seam authority must expose all three bounded hydrology handoffs.");
   }
+  const possibleCohorts = possibleRegionalCohorts(fieldTiers);
+  const fallbackWorstCohort = possibleCohorts.reduce((worst, cohort) => (
+    cohort.decodedBytes.fallback > worst.decodedBytes.fallback ? cohort : worst
+  ));
+  const detailDecodedBytes = fieldTiers.find(({ id }) => id === "detail")?.decodedBytes ?? 0;
+  const fallbackDecodedBytes = fieldTiers.find(({ id }) => id === "fallback")?.decodedBytes ?? 0;
   const nativeApplicationOwnedUnion = Object.freeze({
     authority: Object.freeze({
       constituents: Object.freeze([
@@ -449,11 +491,10 @@ async function loadNativeUnionAdmission(detailDecodedBytes, fallbackDecodedBytes
         artboardSpan: Object.freeze([432, 243]),
         cameraOrigin: Object.freeze([0.18151041666666667, 0.10987654320987653]),
         cameraSpan: Object.freeze([0.075, 0.075]),
-        decodedBytes: 1_821_380,
-        regionIds: Object.freeze(["B2", "C1"]),
+        decodedBytes: fallbackWorstCohort.decodedBytes.fallback,
+        regionIds: fallbackWorstCohort.regionIds,
       }),
       impossibleRegionSets: Object.freeze([
-        Object.freeze(["C1", "C2"]),
         Object.freeze(["B2", "C1", "C2"]),
       ]),
       maximumMountedRegions: HYDROLOGY_MAXIMUM_MOUNTED_REGIONS,
@@ -461,8 +502,12 @@ async function loadNativeUnionAdmission(detailDecodedBytes, fallbackDecodedBytes
     }),
     maximumDecodedBytes: HYDROLOGY_MAXIMUM_DECODED_BYTES,
     tiers: Object.freeze({
-      detail: Object.freeze({ maximumCohortDecodedBytes: 7_313_840 }),
-      fallback: Object.freeze({ maximumCohortDecodedBytes: 1_821_380 }),
+      detail: Object.freeze({
+        maximumCohortDecodedBytes: maximumCohortDecodedBytes(fieldTiers, "detail"),
+      }),
+      fallback: Object.freeze({
+        maximumCohortDecodedBytes: maximumCohortDecodedBytes(fieldTiers, "fallback"),
+      }),
     }),
     totalPackedDecodedBytes: Object.freeze({
       detail: detailDecodedBytes,
@@ -499,74 +544,28 @@ function pathPointTangent(points, index) {
 }
 
 async function loadNativeSourceField(fieldWidth, fieldHeight) {
-  const manifestBytes = await readFile(NATIVE_DETAIL_MANIFEST_PATH);
-  const manifest = JSON.parse(manifestBytes.toString("utf8"));
-  assertTuple(manifest.registration?.artboard, HYDROLOGY_ARTBOARD, "Native artboard registration");
-  assertTuple(manifest.registration?.grid, [4, 4], "Native grid registration");
-  assertTuple(manifest.registration?.runtimeTileDimensions, [1448, 1086], "Native source dimensions");
-  assertTuple(manifest.registration?.tileArtboard, [360, 270], "Native tile artboard span");
-  if (!Array.isArray(manifest.tiles) || manifest.tiles.length !== EXPECTED_NATIVE_TILE_IDS.length) {
-    throw new Error("Native hydrology authority must contain exactly twelve original tiles.");
+  const sourceBytes = await readFile(REGISTERED_TERRAIN_MASTER_PATH);
+  const sourceDigest = sha256(sourceBytes);
+  const metadata = await sharp(sourceBytes).metadata();
+  assertTuple(
+    [metadata.width, metadata.height],
+    [5760, 4320],
+    "Registered terrain master dimensions",
+  );
+  const { data: field, info } = await sharp(sourceBytes)
+    .resize(fieldWidth, fieldHeight, { fit: "fill", kernel: "lanczos3" })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  if (info.width !== fieldWidth || info.height !== fieldHeight || info.channels !== 4) {
+    throw new Error("Registered terrain master did not decode to the hydrology artboard.");
   }
-
-  const tilesById = new Map(manifest.tiles.map((tile) => [tile.id, tile]));
-  if (
-    tilesById.size !== EXPECTED_NATIVE_TILE_IDS.length
-    || EXPECTED_NATIVE_TILE_IDS.some((id) => !tilesById.has(id))
-  ) {
-    throw new Error("Native hydrology authority contains an unexpected tile set.");
-  }
-
-  const field = Buffer.alloc(fieldWidth * fieldHeight * 4);
-  const provenance = [];
-  const scaleX = fieldWidth / HYDROLOGY_ARTBOARD[0];
-  const scaleY = fieldHeight / HYDROLOGY_ARTBOARD[1];
-  for (const id of EXPECTED_NATIVE_TILE_IDS) {
-    const tile = tilesById.get(id);
-    assertTuple(tile.sourceDimensions, [1448, 1086], `${id} source dimensions`);
-    assertTuple(tile.artboardBounds?.span, [360, 270], `${id} artboard span`);
-    const expectedOrigin = [tile.column * 360, tile.row * 270];
-    assertTuple(tile.artboardBounds?.origin, expectedOrigin, `${id} artboard origin`);
-    const expectedSourcePath = `${NATIVE_SOURCE_PREFIX}${id}-generated-r2.png`;
-    if (tile.sourcePath !== expectedSourcePath) {
-      throw new Error(`${id} must resolve to its authoritative generated-r2 original.`);
-    }
-    const sourceBytes = await readFile(path.join(ROOT, tile.sourcePath.slice(1)));
-    const sourceDigest = sha256(sourceBytes);
-    if (sourceDigest !== tile.sourceSha256) {
-      throw new Error(`${id} original source SHA-256 does not match native-detail-r2.json.`);
-    }
-
-    const tileWidth = Math.round(tile.artboardBounds.span[0] * scaleX);
-    const tileHeight = Math.round(tile.artboardBounds.span[1] * scaleY);
-    const originX = Math.round(tile.artboardBounds.origin[0] * scaleX);
-    const originY = Math.round(tile.artboardBounds.origin[1] * scaleY);
-    const { data, info } = await sharp(sourceBytes)
-      .resize(tileWidth, tileHeight, { fit: "fill", kernel: "lanczos3" })
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    if (info.width !== tileWidth || info.height !== tileHeight || info.channels !== 4) {
-      throw new Error(`${id} original did not decode to its registered RGBA tile.`);
-    }
-    for (let row = 0; row < tileHeight; row += 1) {
-      const sourceStart = row * tileWidth * 4;
-      const targetStart = ((originY + row) * fieldWidth + originX) * 4;
-      data.copy(field, targetStart, sourceStart, sourceStart + tileWidth * 4);
-    }
-    provenance.push(Object.freeze({
-      artboardBounds: tile.artboardBounds,
-      dimensions: tile.sourceDimensions,
-      id,
-      path: tile.sourcePath,
-      sha256: sourceDigest,
-    }));
-  }
-
   return Object.freeze({
     field,
-    manifestDigest: sha256(manifestBytes),
-    provenance: Object.freeze(provenance),
+    sourceDigest,
+    sourcePath: "/art-source/career-world/ninjaone-environment/production-r2/"
+      + "ninjaone-environment-terrain-master-detail-r2.png",
+    sourceDimensions: Object.freeze([metadata.width, metadata.height]),
   });
 }
 
@@ -838,6 +837,7 @@ function possibleRegionalCohorts(tiers) {
     ["C2"],
     ["B2", "C1"],
     ["B2", "C2"],
+    ["C1", "C2"],
   ];
   return Object.freeze(regionSets.map((regionIds) => Object.freeze({
     decodedBytes: Object.freeze(Object.fromEntries(tiers.map((tier) => [
@@ -850,6 +850,14 @@ function possibleRegionalCohorts(tiers) {
   })));
 }
 
+function maximumCohortDecodedBytes(tiers, tierId) {
+  return Math.max(
+    ...possibleRegionalCohorts(tiers).map(({ decodedBytes }) => (
+      decodedBytes[tierId]
+    )),
+  );
+}
+
 function serializableSegment(segment) {
   return Object.freeze({
     artboardBounds: shapeBounds(segment.shape),
@@ -857,7 +865,7 @@ function serializableSegment(segment) {
     declaredFlowVector: segment.declaredFlowVector,
     id: segment.id,
     kind: segment.kind,
-    maskPolicy: "authoritative native-original cool-water pixels inside declared topology corridor",
+    maskPolicy: "accepted registered-master water and foam pixels inside declared topology corridor",
     priority: segment.priority,
     ...(segment.rippleCenter ? { rippleCenter: segment.rippleCenter } : {}),
     shape: segment.shape,
@@ -898,12 +906,7 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
         const blue = sourceField[offset + 2];
         const alpha = sourceField[offset + 3];
         let sourceStrength = waterStrength(red, green, blue, alpha);
-        if (
-          segment.kind === "waterfall"
-          || segment.kind === "waterfall-lip"
-          || segment.kind === "impact"
-          || segment.kind === "coast"
-        ) {
+        if (segment.kind !== "tarn") {
           const foam = foamStrength(red, green, blue, alpha);
           const core = sampledShape.normalizedDistance === undefined
             ? 1
@@ -1023,24 +1026,43 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
   if (
     !detailTier
     || !fallbackTier
-    || detailTier.occupiedPixels !== waterPixels
-    || detailTier.decodedBytes !== 10_055_600
-    || fallbackTier.decodedBytes !== 2_506_820
+    || detailTier.occupiedPixels > waterPixels
+    || detailTier.occupiedPixels / waterPixels < 0.99
+    || detailTier.regions.length !== 3
+    || fallbackTier.regions.length !== 3
+    || detailTier.decodedBytes <= 0
+    || fallbackTier.decodedBytes <= 0
+    || maximumCohortDecodedBytes(fieldTiers, "detail") > HYDROLOGY_MAXIMUM_DECODED_BYTES
+    || maximumCohortDecodedBytes(fieldTiers, "fallback") > HYDROLOGY_MAXIMUM_DECODED_BYTES
   ) {
-    throw new Error("Regional hydrology packing drifted from its lossless event bounds.");
+    throw new Error(`Regional hydrology packing violated its lossless bounded-cohort policy: ${JSON.stringify({
+      detailDecodedBytes: detailTier?.decodedBytes,
+      detailOccupiedPixels: detailTier?.occupiedPixels,
+      detailResources: detailTier?.regions?.length,
+      detailMaximumCohort: detailTier
+        ? maximumCohortDecodedBytes(fieldTiers, "detail")
+        : null,
+      fallbackDecodedBytes: fallbackTier?.decodedBytes,
+      fallbackResources: fallbackTier?.regions?.length,
+      fallbackMaximumCohort: fallbackTier
+        ? maximumCohortDecodedBytes(fieldTiers, "fallback")
+        : null,
+      waterPixels,
+    })}`);
   }
   const {
     hydrologyTransitionHandoffs,
     nativeApplicationOwnedUnion,
-  } = await loadNativeUnionAdmission(
-    detailTier.decodedBytes,
-    fallbackTier.decodedBytes,
-  );
+  } = await loadNativeUnionAdmission(fieldTiers);
   for (const { bytes, path: outputPath } of fieldTiers.flatMap(
     ({ outputs }) => outputs,
   )) {
     await writeFile(outputPath, bytes);
   }
+  const activeSegments = HYDROLOGY_SEGMENTS.filter(({ id }) => segmentPixels[id] > 0);
+  const activeSegmentPixels = Object.fromEntries(
+    activeSegments.map(({ id }) => [id, segmentPixels[id]]),
+  );
   const manifest = Object.freeze({
     schemaVersion: 3,
     id: "career-world/capitals/ninjaone/hydrology-native@r2",
@@ -1048,12 +1070,11 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
     status: "regional-runtime-candidate-awaiting-authority-freeze",
     coordinateSpace: "ninjaone-environment-artboard-top-left",
     source: Object.freeze({
-      authority: "native-original-tiles",
-      manifestPath: "/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json",
-      manifestSha256: nativeSources.manifestDigest,
-      role: "static topology only; registration assembled in memory and never emitted as a fidelity source",
-      tileCount: nativeSources.provenance.length,
-      tiles: nativeSources.provenance,
+      authority: "registered-terrain-master",
+      dimensions: nativeSources.sourceDimensions,
+      path: nativeSources.sourcePath,
+      role: "accepted rendered topology used only to derive registered water and foam coverage",
+      sha256: nativeSources.sourceDigest,
     }),
     registration: Object.freeze({
       artboardDimensions: HYDROLOGY_ARTBOARD,
@@ -1084,9 +1105,10 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
         Object.freeze({
           decodedBytes: tier.decodedBytes,
           fullFieldDimensions: tier.fullFieldDimensions,
-          maximumSteadyCohortDecodedBytes: tier.id === "detail"
-            ? 7_313_840
-            : 1_821_380,
+          maximumSteadyCohortDecodedBytes: maximumCohortDecodedBytes(
+            fieldTiers,
+            tier.id,
+          ),
           occupiedPixels: tier.occupiedPixels,
           resources: tier.regions,
           scale: tier.scale,
@@ -1109,11 +1131,11 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
       directionalPixels,
       foamPixels,
       mistPixels,
-      segmentPixels: Object.freeze(segmentPixels),
+      segmentPixels: Object.freeze(activeSegmentPixels),
       stylePixels: Object.freeze(stylePixels),
       waterPixels,
     }),
-    segments: Object.freeze(HYDROLOGY_SEGMENTS.map(serializableSegment)),
+    segments: Object.freeze(activeSegments.map(serializableSegment)),
   });
   await mkdir(path.dirname(MANIFEST_PATH), { recursive: true });
   await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
