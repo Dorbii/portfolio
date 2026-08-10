@@ -18,20 +18,27 @@ void main() {
   CoastSample coast = applyCoast(worldUv, water, shelter);
   float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
   NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv);
-  float streamBodyMix = smoother(0.01, 0.08, stream.bodyAlpha);
+  // Preserve the opaque body in channel interiors while letting the water-side
+  // antialias fringe blend beneath accepted bank silhouettes.
+  float streamBodyMix = smoother(0.02, 0.72, stream.bodyAlpha);
   vec3 streamBodyComposite = mix(
     coast.color,
     stream.bodyColor,
     streamBodyMix
   );
-  vec3 color = mix(
+  vec3 effectsComposite = mix(
     streamBodyComposite,
     stream.effectsColor,
     stream.effectsAlpha
   );
+  vec3 color = mix(
+    effectsComposite,
+    stream.mistColor,
+    stream.mistAlpha
+  );
   float registeredStreamVisibility = max(
-    stream.bodyAlpha,
-    stream.effectsAlpha
+    max(stream.bodyAlpha, stream.effectsAlpha),
+    stream.mistAlpha
   );
   float globalVisibility = max(
     max(waterVisibility, coast.overlayAlpha),

@@ -2481,20 +2481,20 @@ test("motion evidence derives its mask and vector from the mounted fallback fiel
 test("B2 tarn and waterfall feature contracts separate full coverage from flow", async () => {
   const expected = {
     "hydrology-B2-lip-fall": {
-      coveragePixels: 2_253,
-      directionalPixels: 551,
+      coveragePixels: 3_781,
+      directionalPixels: 1_515,
       fullMaskSha256:
-        "2921FFDD9F9DF3864A5775CA4FA801D79365A688F0BF27A047D6E65E1394C8C3",
+        "6AD64193FE4C58F2F74DE47F8A302ECA5E914E5AB202EF861BE6EF22C85FB786",
       maskSha256:
-        "7846E7B8CF91991ED8B101F6598386EA627663D66B995DC52DEFB6CB81C55BB5",
+        "AB704A347A8848F0FF03EB13B2F7790C83A13745CFE7FC75E60A866B6BD1A53E",
     },
     "hydrology-B2-tarn": {
-      coveragePixels: 4_030,
-      directionalPixels: 485,
+      coveragePixels: 6_241,
+      directionalPixels: 1_610,
       fullMaskSha256:
-        "0617439A2B46E222DB98B4D64977B30C2FEE9A016AB3B75D1250C852ADA1E378",
+        "F5D7EB1E034F83DD66B47B6799FF51F1E1AE3268F1C398DF5EDA7A0D66AF8CF4",
       maskSha256:
-        "E09F3D8C01F3E52E143ED2B1328633027CEAA643AAF9233974434FD8C6DB736D",
+        "F283BCEB37C2564F2F129220B9ABFFA87F229D79820847E8B499C783BFDC2456",
     },
   };
   for (const feature of NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES) {

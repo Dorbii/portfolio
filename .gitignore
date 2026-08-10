@@ -31,6 +31,7 @@ Thumbs.db
 !/scripts/build-ninjaone-environment-hydrology-r2.mjs
 !/scripts/build-ninjaone-environment-native-detail.mjs
 !/scripts/build-ninjaone-environment-seam-integration-r2.mjs
+!/scripts/build-waterfall-vfx-sprite-r1.mjs
 !/scripts/capture-ninjaone-environment-mvp.mjs
 !/scripts/extract-ninjaone-foliage-isolation-crops.mjs
 !/scripts/verify-ninjaone-environment-mvp.mjs

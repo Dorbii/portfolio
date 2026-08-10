@@ -35,6 +35,9 @@ import {
   loadVerifiedImage,
   releaseDecodedImage,
 } from "../features/career-world/layers/water-surface/rendering/webgl.ts";
+import {
+  WATER_SHADER_COMMON,
+} from "../features/career-world/layers/water-surface/rendering/shaders/common.ts";
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -65,6 +68,7 @@ async function readRegionalTier(manifest, tierId) {
   const tier = manifest.regionalFields.tiers[tierId];
   const [width, height] = tier.fullFieldDimensions;
   const field = Buffer.alloc(width * height * 4);
+  const auxiliary = Buffer.alloc(width * height * 4);
   const owned = new Uint8Array(width * height);
   const decodedResources = [];
   for (const resource of tier.resources) {
@@ -78,22 +82,48 @@ async function readRegionalTier(manifest, tierId) {
       [...resource.dimensions, 4],
     );
     assert.equal(data.length, resource.decodedBytes);
-    assert.equal(sha256(data), resource.metrics.rawRgbaSha256);
     const [left, top, right, bottom] = resource.sourceBounds;
-    assert.deepEqual([right - left, bottom - top], resource.dimensions);
-    for (let row = 0; row < info.height; row += 1) {
-      for (let column = 0; column < info.width; column += 1) {
+    const [fieldWidth, fieldHeight] = resource.fieldDimensions;
+    assert.deepEqual([right - left, bottom - top], resource.fieldDimensions);
+    assert.deepEqual(resource.dimensions, [fieldWidth * 2, fieldHeight]);
+    const primaryData = Buffer.alloc(fieldWidth * fieldHeight * 4);
+    const auxiliaryData = Buffer.alloc(fieldWidth * fieldHeight * 4);
+    for (let row = 0; row < fieldHeight; row += 1) {
+      const packedStart = row * info.width * 4;
+      const logicalStart = row * fieldWidth * 4;
+      data.copy(
+        primaryData,
+        logicalStart,
+        packedStart,
+        packedStart + fieldWidth * 4,
+      );
+      data.copy(
+        auxiliaryData,
+        logicalStart,
+        packedStart + fieldWidth * 4,
+        packedStart + fieldWidth * 8,
+      );
+      for (let column = 0; column < fieldWidth; column += 1) {
         const targetPixel = (top + row) * width + left + column;
         assert.equal(owned[targetPixel], 0, `${resource.id} overlaps another crop`);
         owned[targetPixel] = 1;
       }
-      const sourceStart = row * info.width * 4;
+      const sourceStart = row * fieldWidth * 4;
       const targetStart = ((top + row) * width + left) * 4;
-      data.copy(field, targetStart, sourceStart, sourceStart + info.width * 4);
+      primaryData.copy(field, targetStart, sourceStart, sourceStart + fieldWidth * 4);
+      auxiliaryData.copy(auxiliary, targetStart, sourceStart, sourceStart + fieldWidth * 4);
     }
-    decodedResources.push(Object.freeze({ data, info, resource }));
+    assert.equal(sha256(primaryData), resource.metrics.rawPrimaryRgbaSha256);
+    assert.equal(sha256(auxiliaryData), resource.metrics.rawAuxiliaryRgbaSha256);
+    decodedResources.push(Object.freeze({
+      auxiliaryData,
+      data: primaryData,
+      info: Object.freeze({ channels: 4, height: fieldHeight, width: fieldWidth }),
+      resource,
+    }));
   }
   return Object.freeze({
+    auxiliary,
     data: field,
     info: Object.freeze({ channels: 4, height, width }),
     owned,
@@ -122,7 +152,7 @@ function smoothstep(edge0, edge1, value) {
   return amount * amount * (3 - 2 * amount);
 }
 
-function nativeWaterEvidence(red, green, blue, alpha) {
+function nativeWaterAuthorityEvidence(red, green, blue, alpha) {
   if (alpha < 24) return 0;
   const coolDark = Math.min(
     smoothstep(2, 22, blue - red),
@@ -134,76 +164,285 @@ function nativeWaterEvidence(red, green, blue, alpha) {
     smoothstep(-5, 12, green - red),
     smoothstep(78, 170, blue),
   );
+  return clamp(Math.max(coolDark, coolBright) * smoothstep(24, 170, alpha));
+}
+
+function nativeFoamEvidence(red, green, blue, alpha) {
+  if (alpha < 24) return 0;
   const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
   const coolNeutral = Math.min(
     smoothstep(-10, 8, blue - red),
     smoothstep(-14, 4, green - red),
   );
-  return Math.max(coolDark, coolBright, smoothstep(105, 210, luminance) * coolNeutral);
+  return clamp(smoothstep(105, 210, luminance) * coolNeutral);
 }
 
-function stylePixelCounts(field, styleCodes) {
-  const counts = Object.fromEntries(Object.keys(styleCodes).map((name) => [name, 0]));
-  const names = new Map(Object.entries(styleCodes).map(([name, code]) => [code, name]));
+function connectedNativeEvidenceMask(source, width, height) {
+  const pixelCount = width * height;
+  const connected = new Uint8Array(pixelCount);
+  const foamCandidate = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let queueHead = 0;
+  let queueLength = 0;
+  let isolatedFoamCandidates = 0;
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    const offset = pixel * 4;
+    const rgba = source.subarray(offset, offset + 4);
+    const water = nativeWaterAuthorityEvidence(...rgba);
+    const foam = nativeFoamEvidence(...rgba);
+    if (water >= 0.035) {
+      connected[pixel] = 1;
+      queue[queueLength] = pixel;
+      queueLength += 1;
+    } else if (foam >= 0.035) {
+      foamCandidate[pixel] = 1;
+      isolatedFoamCandidates += 1;
+    }
+  }
+  while (queueHead < queueLength) {
+    const pixel = queue[queueHead];
+    queueHead += 1;
+    const x = pixel % width;
+    const y = Math.floor(pixel / width);
+    for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
+      const neighborY = y + deltaY;
+      if (neighborY < 0 || neighborY >= height) continue;
+      for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
+        if (deltaX === 0 && deltaY === 0) continue;
+        const neighborX = x + deltaX;
+        if (neighborX < 0 || neighborX >= width) continue;
+        const neighbor = neighborY * width + neighborX;
+        if (foamCandidate[neighbor] === 0) continue;
+        foamCandidate[neighbor] = 0;
+        connected[neighbor] = 1;
+        isolatedFoamCandidates -= 1;
+        queue[queueLength] = neighbor;
+        queueLength += 1;
+      }
+    }
+  }
+  return Object.freeze({ connected, isolatedFoamCandidates });
+}
+
+function hydraulicPixelCounts(field, auxiliary) {
   let water = 0;
   let directional = 0;
+  let deep = 0;
+  let whitewater = 0;
+  let wake = 0;
+  let mist = 0;
+  let cascade = 0;
   for (let offset = 0; offset < field.length; offset += 4) {
     if (field[offset] === 0) continue;
     water += 1;
-    const name = names.get(field[offset + 3]);
-    assert.ok(name, `unknown style code ${field[offset + 3]}`);
-    counts[name] += 1;
+    if (field[offset + 3] >= 128) deep += 1;
     const flowX = (field[offset + 1] - 128) / 127;
     const flowY = (field[offset + 2] - 128) / 127;
     if (Math.hypot(flowX, flowY) > 0.1) directional += 1;
+    if (auxiliary[offset] >= 32) whitewater += 1;
+    if (auxiliary[offset + 1] > 0) wake += 1;
+    if (auxiliary[offset + 2] > 0) mist += 1;
+    if (auxiliary[offset + 3] > 0) cascade += 1;
   }
-  return { counts, directional, water };
+  return { cascade, deep, directional, mist, wake, water, whitewater };
 }
 
-function measureCheckpoint(field, info, manifest, checkpoint) {
-  const [originX, originY] = checkpoint.origin;
-  const [spanX, spanY] = checkpoint.span;
-  const left = Math.max(0, Math.floor((originX - 0.125) / 0.25 * info.width));
-  const right = Math.min(info.width, Math.ceil((originX + spanX - 0.125) / 0.25 * info.width));
-  const top = Math.max(0, Math.floor(originY / (1 / 3) * info.height));
-  const bottom = Math.min(info.height, Math.ceil((originY + spanY) / (1 / 3) * info.height));
-  const styleNameByCode = new Map(
-    Object.entries(manifest.styleCodes).map(([name, code]) => [code, name]),
-  );
-  const styles = {};
-  let waterPixels = 0;
-  for (let y = top; y < bottom; y += 1) {
-    for (let x = left; x < right; x += 1) {
-      const offset = (y * info.width + x) * 4;
-      if (field[offset] === 0) continue;
-      waterPixels += 1;
-      const styleName = styleNameByCode.get(field[offset + 3]);
-      assert.ok(styleName);
-      styles[styleName] = (styles[styleName] ?? 0) + 1;
+function labelCoverageComponents(field, width, height) {
+  const labels = new Int32Array(width * height);
+  const queue = new Int32Array(width * height);
+  const sizes = [0];
+  let nextLabel = 0;
+  for (let pixel = 0; pixel < width * height; pixel += 1) {
+    if (field[pixel * 4] === 0 || labels[pixel] !== 0) continue;
+    const label = nextLabel + 1;
+    nextLabel = label;
+    labels[pixel] = label;
+    let queueHead = 0;
+    let queueLength = 1;
+    let size = 0;
+    queue[0] = pixel;
+    while (queueHead < queueLength) {
+      const current = queue[queueHead];
+      queueHead += 1;
+      size += 1;
+      const x = current % width;
+      const y = Math.floor(current / width);
+      for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
+        const neighborY = y + deltaY;
+        if (neighborY < 0 || neighborY >= height) continue;
+        for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
+          if (deltaX === 0 && deltaY === 0) continue;
+          const neighborX = x + deltaX;
+          if (neighborX < 0 || neighborX >= width) continue;
+          const neighbor = neighborY * width + neighborX;
+          if (labels[neighbor] !== 0 || field[neighbor * 4] === 0) continue;
+          labels[neighbor] = label;
+          queue[queueLength] = neighbor;
+          queueLength += 1;
+        }
+      }
+    }
+    sizes[label] = size;
+  }
+  return Object.freeze({ labels, sizes: Object.freeze(sizes) });
+}
+
+function nearestCoverageRegistration(
+  decodedResource,
+  components,
+  artboardPoint,
+  scale,
+  maximumDistanceArtboard = 3,
+) {
+  const [left, top] = decodedResource.resource.sourceBounds;
+  const targetX = artboardPoint[0] * scale - left;
+  const targetY = artboardPoint[1] * scale - top;
+  const radius = maximumDistanceArtboard * scale;
+  let nearest = null;
+  for (
+    let y = Math.max(0, Math.floor(targetY - radius));
+    y <= Math.min(decodedResource.info.height - 1, Math.ceil(targetY + radius));
+    y += 1
+  ) {
+    for (
+      let x = Math.max(0, Math.floor(targetX - radius));
+      x <= Math.min(decodedResource.info.width - 1, Math.ceil(targetX + radius));
+      x += 1
+    ) {
+      const pixel = y * decodedResource.info.width + x;
+      if (decodedResource.data[pixel * 4] === 0) continue;
+      const distanceArtboard = Math.hypot(
+        x + 0.5 - targetX,
+        y + 0.5 - targetY,
+      ) / scale;
+      if (
+        distanceArtboard <= maximumDistanceArtboard
+        && (!nearest || distanceArtboard < nearest.distanceArtboard)
+      ) {
+        const label = components.labels[pixel];
+        nearest = Object.freeze({
+          componentSize: components.sizes[label],
+          distanceArtboard,
+          label,
+        });
+      }
     }
   }
-  return { styles, waterPixels };
+  return nearest;
 }
 
-function pearsonCorrelation(pairs) {
-  if (pairs.length < 200) return null;
-  let sumA = 0;
-  let sumB = 0;
-  let sumAA = 0;
-  let sumBB = 0;
-  let sumAB = 0;
-  for (const [a, b] of pairs) {
-    sumA += a;
-    sumB += b;
-    sumAA += a * a;
-    sumBB += b * b;
-    sumAB += a * b;
+function lineCoverageRatio(decodedResource, start, end, radiusArtboard, scale) {
+  const [left, top] = decodedResource.resource.sourceBounds;
+  const deltaX = end[0] - start[0];
+  const deltaY = end[1] - start[1];
+  const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+  let covered = 0;
+  let sampled = 0;
+  const startFieldX = Math.floor((Math.min(start[0], end[0]) - radiusArtboard) * scale);
+  const endFieldX = Math.ceil((Math.max(start[0], end[0]) + radiusArtboard) * scale);
+  const startFieldY = Math.floor((Math.min(start[1], end[1]) - radiusArtboard) * scale);
+  const endFieldY = Math.ceil((Math.max(start[1], end[1]) + radiusArtboard) * scale);
+  for (let fieldY = startFieldY; fieldY < endFieldY; fieldY += 1) {
+    for (let fieldX = startFieldX; fieldX < endFieldX; fieldX += 1) {
+      const x = (fieldX + 0.5) / scale;
+      const y = (fieldY + 0.5) / scale;
+      const amount = lengthSquared <= 1e-9
+        ? 0
+        : clamp(
+          ((x - start[0]) * deltaX + (y - start[1]) * deltaY) / lengthSquared,
+        );
+      const distance = Math.hypot(
+        x - (start[0] + deltaX * amount),
+        y - (start[1] + deltaY * amount),
+      );
+      if (distance > radiusArtboard) continue;
+      sampled += 1;
+      const localX = fieldX - left;
+      const localY = fieldY - top;
+      if (
+        localX >= 0
+        && localY >= 0
+        && localX < decodedResource.info.width
+        && localY < decodedResource.info.height
+        && decodedResource.data[(localY * decodedResource.info.width + localX) * 4] > 0
+      ) covered += 1;
+    }
   }
-  const count = pairs.length;
-  const covariance = sumAB - sumA * sumB / count;
-  const varianceA = sumAA - sumA * sumA / count;
-  const varianceB = sumBB - sumB * sumB / count;
-  return covariance / Math.sqrt(varianceA * varianceB);
+  return sampled === 0 ? 0 : covered / sampled;
+}
+
+function impactCoverageRatio(decodedResource, cascade, scale) {
+  const [left, top] = decodedResource.resource.sourceBounds;
+  const [centerX, centerY] = cascade.impact.center;
+  const [alongRadius, acrossRadius] = cascade.impact.radiiPixels;
+  const direction = cascade.fall.direction;
+  const cross = [-direction[1], direction[0]];
+  const envelopeRadius = Math.max(alongRadius, acrossRadius);
+  let covered = 0;
+  let sampled = 0;
+  for (
+    let fieldY = Math.floor((centerY - envelopeRadius) * scale);
+    fieldY < Math.ceil((centerY + envelopeRadius) * scale);
+    fieldY += 1
+  ) {
+    for (
+      let fieldX = Math.floor((centerX - envelopeRadius) * scale);
+      fieldX < Math.ceil((centerX + envelopeRadius) * scale);
+      fieldX += 1
+    ) {
+      const delta = [
+        (fieldX + 0.5) / scale - centerX,
+        (fieldY + 0.5) / scale - centerY,
+      ];
+      const normalizedDistance = Math.hypot(
+        (delta[0] * direction[0] + delta[1] * direction[1]) / alongRadius,
+        (delta[0] * cross[0] + delta[1] * cross[1]) / acrossRadius,
+      );
+      if (normalizedDistance > 1) continue;
+      sampled += 1;
+      const localX = fieldX - left;
+      const localY = fieldY - top;
+      if (
+        localX >= 0
+        && localY >= 0
+        && localX < decodedResource.info.width
+        && localY < decodedResource.info.height
+        && decodedResource.data[(localY * decodedResource.info.width + localX) * 4] > 0
+      ) covered += 1;
+    }
+  }
+  return sampled === 0 ? 0 : covered / sampled;
+}
+
+function countChannelInArtboardDisc(
+  field,
+  width,
+  height,
+  center,
+  radius,
+  scale,
+  channel = 0,
+  minimum = 1,
+) {
+  let covered = 0;
+  for (
+    let fieldY = Math.max(0, Math.floor((center[1] - radius) * scale));
+    fieldY < Math.min(height, Math.ceil((center[1] + radius) * scale));
+    fieldY += 1
+  ) {
+    for (
+      let fieldX = Math.max(0, Math.floor((center[0] - radius) * scale));
+      fieldX < Math.min(width, Math.ceil((center[0] + radius) * scale));
+      fieldX += 1
+    ) {
+      if (
+        Math.hypot((fieldX + 0.5) / scale - center[0], (fieldY + 0.5) / scale - center[1])
+          <= radius
+        && field[(fieldY * width + fieldX) * 4 + channel] >= minimum
+      ) covered += 1;
+    }
+  }
+  return covered;
 }
 
 function sampleVirtualRegion(region, fullTexelCoordinate) {
@@ -241,14 +480,15 @@ function nativeResource(id, decodedBytes, phase = "mounted") {
 }
 
 test("regional NinjaOne hydrology is registered to the accepted terrain master", async () => {
-  const [manifest, seamManifestBytes] = await Promise.all([
+  const [manifest, seamManifestBytes, builderSource] = await Promise.all([
     readManifest(),
     readFile(seamIntegrationManifestPath),
+    readFile(path.join(root, "scripts/build-ninjaone-environment-hydrology-r2.mjs"), "utf8"),
   ]);
   const seamManifest = JSON.parse(seamManifestBytes);
-  assert.equal(manifest.schemaVersion, 3);
+  assert.equal(manifest.schemaVersion, 4);
   assert.equal(manifest.id, "career-world/capitals/ninjaone/hydrology-native@r2");
-  assert.equal(manifest.packingRevision, "regional-r3");
+  assert.equal(manifest.packingRevision, "regional-r4-field-driven");
   assert.equal(manifest.source.authority, "registered-terrain-master");
   assert.match(manifest.source.role, /accepted rendered topology/);
   assert.deepEqual(manifest.source.dimensions, [5760, 4320]);
@@ -265,12 +505,90 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
   assert.equal(manifest.registration.maximumMountedRegions, 2);
   assert.deepEqual(manifest.registration.worldOrigin, [0.125, 0]);
   assert.deepEqual(manifest.registration.worldSpan, [0.25, 1 / 3]);
-  assert.deepEqual(manifest.regionalFields.channelEncoding, {
-    r: "time-invariant registered water coverage",
-    g: "signed unit downhill flow x encoded as 128 + value * 127",
-    b: "signed unit downhill flow y encoded as 128 + value * 127",
-    a: "hydrology style code",
-  });
+  assert.equal(manifest.cascades.length, 4);
+  assert.equal(new Set(manifest.cascades.map(({ id }) => id)).size, 4);
+  assert.deepEqual(
+    manifest.cascades
+      .filter(({ regionId }) => regionId === "B2")
+      .map(({ id }) => id),
+    [
+      "b2-tarn-upper-drop",
+      "b2-tarn-lower-drop",
+    ],
+  );
+  assert.ok(manifest.cascades.every(({ id }) => !id.startsWith("b2-r3c1-")));
+  assert.ok(manifest.segments.every(({ id }) => !id.startsWith("b2-r3c1-")));
+  assert.doesNotMatch(builderSource, /b2-r3c1-(?:cascade|main-drop|downstream)/);
+  const [upperTarnDrop, lowerTarnDrop] = manifest.cascades.filter(
+    ({ regionId }) => regionId === "B2",
+  );
+  assert.deepEqual(upperTarnDrop.impact.center, [656, 665]);
+  assert.deepEqual(lowerTarnDrop.impact.center, [656, 698]);
+  assert.equal(upperTarnDrop.fall.extentPixels, 20);
+  assert.equal(lowerTarnDrop.fall.extentPixels, 17);
+  const upperImpactEnd = upperTarnDrop.impact.center[1]
+    + upperTarnDrop.impact.radiiPixels[1];
+  const lowerCrestMidpointY = (
+    lowerTarnDrop.crest.start[1] + lowerTarnDrop.crest.end[1]
+  ) * 0.5;
+  assert.ok(
+    upperImpactEnd < lowerCrestMidpointY,
+    "the two major sheets need a recovery run instead of overlapping as stairs",
+  );
+  const b2OutletSegments = manifest.segments.filter(({ id }) => (
+    id.startsWith("b2-tarn-outlet-")
+  ));
+  assert.deepEqual(b2OutletSegments.map(({ id }) => id), ["b2-tarn-outlet-run"]);
+  assert.equal(b2OutletSegments[0].kind, "stream");
+  assert.ok(b2OutletSegments[0].shape.points.length >= 10);
+  assert.match(builderSource, /smoothstep\(7, 20, cascade\.fall\.extentPixels\)/);
+  assert.match(builderSource, /smoothstep\(0\.88, 1, fallEnergy\)/);
+  for (const cascade of manifest.cascades) {
+    const crestMidpoint = cascade.crest.start.map((value, index) => (
+      (value + cascade.crest.end[index]) * 0.5
+    ));
+    const downstreamOffset = cascade.impact.center.map((value, index) => (
+      value - crestMidpoint[index]
+    ));
+    assert.ok(
+      downstreamOffset[0] * cascade.fall.direction[0]
+        + downstreamOffset[1] * cascade.fall.direction[1] > 0,
+      `${cascade.id} impact must be downstream of its crest`,
+    );
+    assert.ok(Math.abs(Math.hypot(...cascade.fall.direction) - 1) < 0.01);
+    assert.ok(Math.abs(Math.hypot(...cascade.mist.driftVector) - 1) < 0.01);
+    assert.ok(cascade.crest.thicknessPixels > 0);
+    assert.ok(cascade.approach.extentPixels > 0);
+    assert.ok(cascade.approach.widthPixels > 0);
+    assert.ok(cascade.fall.extentPixels > 0);
+    assert.ok(cascade.fall.widthPixels > 0);
+    assert.ok(cascade.impact.radiiPixels.every((value) => value > 0));
+    assert.ok(cascade.mist.radiusPixels > 0);
+    assert.ok(cascade.pool.radiiPixels.every((value) => value > 0));
+    assert.ok(cascade.pool.outflowExtentPixels > 0);
+    assert.match(cascade.maskPolicy, /registered water remains exact/);
+    assert.match(cascade.maskPolicy, /descriptor-bounded/);
+  }
+  const b2CascadeImpactRows = manifest.cascades
+    .filter(({ regionId }) => regionId === "B2")
+    .map(({ impact }) => impact.center[1]);
+  assert.deepEqual(b2CascadeImpactRows, [...b2CascadeImpactRows].sort((a, b) => a - b));
+  assert.match(builderSource, /export const HYDROLOGY_CASCADES = Object\.freeze\(\[/);
+  assert.match(builderSource, /cascades: HYDROLOGY_CASCADES/);
+  assert.equal(manifest.obstacles.length, 2);
+  assert.ok(manifest.obstacles.every(({ regionId }) => regionId === "B2"));
+  assert.ok(manifest.obstacles.every(({ maskPolicy }) => (
+    maskPolicy.includes("accepted registered water coverage")
+  )));
+  assert.match(builderSource, /obstacles: HYDROLOGY_OBSTACLES/);
+  assert.match(manifest.regionalFields.channelEncoding.layout, /side-by-side/);
+  assert.match(manifest.regionalFields.channelEncoding.primary.r, /exact registered water coverage/);
+  assert.match(manifest.regionalFields.channelEncoding.primary.g, /velocity x with local magnitude/);
+  assert.match(manifest.regionalFields.channelEncoding.primary.a, /bank-distance transform/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.r, /whitewater potential/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.g, /obstacle bow/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.b, /mist potential/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.a, /cascade stage support/);
   assert.deepEqual(manifest.regionalFields.cohortPolicy, {
     atomic: true,
     maximumMountedRegions: 2,
@@ -293,11 +611,16 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
     );
     for (const resource of tier.resources) {
       const [left, top, right, bottom] = resource.sourceBounds;
-      assert.deepEqual(resource.dimensions, [right - left, bottom - top]);
+      assert.deepEqual(resource.fieldDimensions, [right - left, bottom - top]);
+      assert.deepEqual(resource.dimensions, [
+        resource.fieldDimensions[0] * 2,
+        resource.fieldDimensions[1],
+      ]);
       assert.equal(resource.decodedBytes, resource.dimensions[0] * resource.dimensions[1] * 4);
       assert.match(resource.sha256, /^[A-F0-9]{64}$/);
-      assert.match(resource.metrics.rawRgbaSha256, /^[A-F0-9]{64}$/);
-      assert.equal(resource.id, `ninjaone-hydrology-${resource.regionId.toLowerCase()}-${tierId}-r3`);
+      assert.match(resource.metrics.rawPrimaryRgbaSha256, /^[A-F0-9]{64}$/);
+      assert.match(resource.metrics.rawAuxiliaryRgbaSha256, /^[A-F0-9]{64}$/);
+      assert.equal(resource.id, `ninjaone-hydrology-${resource.regionId.toLowerCase()}-${tierId}-r4`);
       assert.match(resource.path, new RegExp(
         `/career-world/layers/water-surface/fields/${resource.id}\\.png\\?v=`
           + resource.sha256.slice(0, 12).toLowerCase(),
@@ -363,7 +686,7 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     [fallback.info.width, fallback.info.height, fallback.info.channels],
     [1440, 1080, 4],
   );
-  const measured = stylePixelCounts(detail.data, manifest.styleCodes);
+  const measured = hydraulicPixelCounts(detail.data, detail.auxiliary);
   assert.equal(measured.water, manifest.regionalFields.tiers.detail.occupiedPixels);
   assert.ok(
     measured.water / manifest.metrics.waterPixels >= 0.99,
@@ -372,14 +695,7 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   const packedDirectionalPixels = detail.resources.reduce((sum, entry) => (
     sum + entry.resource.metrics.directionalPixels
   ), 0);
-  const packedStylePixels = detail.resources.reduce((counts, entry) => {
-    for (const [style, count] of Object.entries(entry.resource.metrics.stylePixels)) {
-      counts[style] = (counts[style] ?? 0) + count;
-    }
-    return counts;
-  }, {});
   assert.equal(measured.directional, packedDirectionalPixels);
-  assert.deepEqual(measured.counts, packedStylePixels);
   assert.equal(
     detail.resources.reduce((sum, entry) => (
       sum + entry.resource.metrics.coveragePixels
@@ -391,35 +707,70 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     detail.info.width,
     detail.info.height,
   );
-  let tarnPixels = 0;
+  const {
+    connected: connectedNativeEvidence,
+    isolatedFoamCandidates,
+  } = connectedNativeEvidenceMask(
+    registeredTerrainMaster,
+    detail.info.width,
+    detail.info.height,
+  );
+  assert.ok(
+    isolatedFoamCandidates > 0,
+    "the source fixture must contain isolated bright neutral pixels that hydrology rejects",
+  );
   const directionalVectors = new Set();
+  const velocityMagnitudes = new Set();
+  let admittedConnectedFoamPixels = 0;
   for (let offset = 0; offset < detail.data.length; offset += 4) {
-    if (detail.data[offset] === 0) continue;
+    if (detail.data[offset] === 0) {
+      assert.deepEqual(
+        [...detail.auxiliary.subarray(offset, offset + 4)],
+        [0, 0, 0, 0],
+        "auxiliary events may not expand the exact water mask",
+      );
+      continue;
+    }
     assert.equal(detail.data[offset], 255);
+    assert.ok(detail.data[offset + 3] > 0, "occupied water needs offline visual depth");
     assert.ok(
       registeredTerrainMaster[offset + 3] > 0,
       "field may not leave the accepted terrain master, including its feathered coast edge",
     );
-    assert.ok(nativeWaterEvidence(
-      registeredTerrainMaster[offset],
-      registeredTerrainMaster[offset + 1],
-      registeredTerrainMaster[offset + 2],
-      registeredTerrainMaster[offset + 3],
-    ) >= 0.035, "field may not animate pixels without registered water/foam evidence");
+    const sourceRgba = registeredTerrainMaster.subarray(offset, offset + 4);
+    const waterAuthority = nativeWaterAuthorityEvidence(...sourceRgba);
+    const foamEvidence = nativeFoamEvidence(...sourceRgba);
+    assert.equal(
+      connectedNativeEvidence[offset / 4],
+      1,
+      "primary coverage requires water authority or foam connected to authoritative water",
+    );
+    if (waterAuthority < 0.035) {
+      assert.ok(
+        foamEvidence >= 0.035,
+        "non-water primary coverage must be registered whitewater, never neutral rock",
+      );
+      admittedConnectedFoamPixels += 1;
+    }
     const flowX = (detail.data[offset + 1] - 128) / 127;
     const flowY = (detail.data[offset + 2] - 128) / 127;
-    if (detail.data[offset + 3] === manifest.styleCodes.tarn) {
-      tarnPixels += 1;
-      assert.ok(Math.hypot(flowX, flowY) < 0.02);
-    } else {
-      assert.ok(Math.hypot(flowX, flowY) > 0.94);
+    const magnitude = Math.hypot(flowX, flowY);
+    if (magnitude > 0.1) {
       directionalVectors.add(`${detail.data[offset + 1]}:${detail.data[offset + 2]}`);
+      velocityMagnitudes.add(Math.round(magnitude * 100));
     }
   }
-  assert.equal(tarnPixels, manifest.metrics.stylePixels.tarn);
   assert.ok(directionalVectors.size > 40);
+  assert.ok(admittedConnectedFoamPixels > 0, "real connected whitewater must remain hole-free");
+  assert.ok(velocityMagnitudes.size >= 5, "velocity field must preserve meaningful local magnitude");
+  assert.ok(measured.deep > 5_000, "bank-distance field needs a deep interior population");
+  assert.ok(measured.whitewater > 1_000);
+  assert.ok(measured.whitewater < measured.water * 0.7, "whitewater support must remain localized");
+  assert.ok(measured.wake > 0 && measured.wake < measured.water * 0.08);
+  assert.ok(measured.mist > 0 && measured.mist < measured.water * 0.15);
+  assert.ok(measured.cascade > 0 && measured.cascade < measured.water * 0.35);
   let maximumAdjacentFlowTurn = 0;
-  let sameStyleDirectionalEdges = 0;
+  let connectedDirectionalEdges = 0;
   for (let y = 0; y < detail.info.height; y += 1) {
     for (let x = 0; x < detail.info.width; x += 1) {
       const offset = (y * detail.info.width + x) * 4;
@@ -429,10 +780,7 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
         const neighborY = y + dy;
         if (neighborX >= detail.info.width || neighborY >= detail.info.height) continue;
         const neighborOffset = (neighborY * detail.info.width + neighborX) * 4;
-        if (
-          detail.data[neighborOffset] === 0
-          || detail.data[neighborOffset + 3] !== detail.data[offset + 3]
-        ) continue;
+        if (detail.data[neighborOffset] === 0) continue;
         const flow = [
           (detail.data[offset + 1] - 128) / 127,
           (detail.data[offset + 2] - 128) / 127,
@@ -444,7 +792,7 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
         const flowLength = Math.hypot(...flow);
         const neighborLength = Math.hypot(...neighborFlow);
         if (flowLength <= 0.1 || neighborLength <= 0.1) continue;
-        sameStyleDirectionalEdges += 1;
+        connectedDirectionalEdges += 1;
         maximumAdjacentFlowTurn = Math.max(
           maximumAdjacentFlowTurn,
           Math.acos(clamp(
@@ -458,11 +806,11 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     }
   }
   assert.ok(
-    sameStyleDirectionalEdges > packedDirectionalPixels,
-    `${sameStyleDirectionalEdges} same-style edges must connect ${packedDirectionalPixels} directional pixels`,
+    connectedDirectionalEdges > packedDirectionalPixels,
+    `${connectedDirectionalEdges} edges must connect ${packedDirectionalPixels} directional pixels`,
   );
   assert.ok(
-    maximumAdjacentFlowTurn < 0.9,
+    maximumAdjacentFlowTurn < 1.05,
     `adjacent local-flow turn ${maximumAdjacentFlowTurn} would tear phase continuity`,
   );
   for (const segment of manifest.segments.filter(({ shape }) => shape.type === "path")) {
@@ -484,20 +832,136 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
         [...detail.data.subarray(detailOffset, detailOffset + 4)],
         `fallback texel ${x},${y} is not the deterministic nearest sample`,
       );
+      assert.deepEqual(
+        [...fallback.auxiliary.subarray(fallbackOffset, fallbackOffset + 4)],
+        [...detail.auxiliary.subarray(detailOffset, detailOffset + 4)],
+        `fallback auxiliary texel ${x},${y} is not the deterministic nearest sample`,
+      );
       if (fallback.data[fallbackOffset] > 0) fallbackWaterPixels += 1;
     }
   }
   assert.equal(fallbackWaterPixels, manifest.regionalFields.tiers.fallback.occupiedPixels);
 
-  const resourcesByRegion = Object.fromEntries(
-    detail.resources.map(({ resource }) => [resource.regionId, resource]),
+  const b2 = detail.resources.find(({ resource }) => resource.regionId === "B2");
+  assert.ok(b2);
+  const b2Measured = hydraulicPixelCounts(b2.data, b2.auxiliaryData);
+  assert.ok(b2Measured.wake > 0, "B2 packed field must carry obstacle wakes");
+  assert.ok(b2Measured.mist > 0, "B2 packed field must carry cascade mist potential");
+  const b2Components = labelCoverageComponents(
+    b2.data,
+    b2.info.width,
+    b2.info.height,
   );
-  assert.ok(resourcesByRegion.B2.metrics.stylePixels.tarn > 10_000);
-  assert.ok(resourcesByRegion.B2.metrics.stylePixels.waterfall > 100);
-  assert.ok(resourcesByRegion.C1.metrics.stylePixels.coast > 1_000);
-  assert.ok(resourcesByRegion.C1.metrics.stylePixels.turbulence > 10_000);
-  assert.ok(resourcesByRegion.C2.metrics.stylePixels.turbulence > 9_000);
-  assert.ok(resourcesByRegion.C2.metrics.stylePixels.impact > 1_000);
+  const detailScale = manifest.regionalFields.tiers.detail.scale;
+  for (const cascade of manifest.cascades.filter(({ regionId }) => regionId === "B2")) {
+    const crestMidpoint = cascade.crest.start.map((value, index) => (
+      (value + cascade.crest.end[index]) * 0.5
+    ));
+    const crestRegistration = nearestCoverageRegistration(
+      b2,
+      b2Components,
+      crestMidpoint,
+      detailScale,
+    );
+    const impactRegistration = nearestCoverageRegistration(
+      b2,
+      b2Components,
+      cascade.impact.center,
+      detailScale,
+    );
+    assert.ok(crestRegistration, `${cascade.id} crest misses primary water coverage`);
+    assert.ok(impactRegistration, `${cascade.id} impact misses primary water coverage`);
+    assert.ok(
+      crestRegistration.distanceArtboard <= cascade.crest.thicknessPixels,
+      `${cascade.id} crest is ${crestRegistration.distanceArtboard}px from registered water`,
+    );
+    assert.ok(
+      impactRegistration.distanceArtboard <= 1,
+      `${cascade.id} impact is ${impactRegistration.distanceArtboard}px from registered water`,
+    );
+    assert.equal(
+      crestRegistration.label,
+      impactRegistration.label,
+      `${cascade.id} crest and impact must share one contiguous water component`,
+    );
+    assert.ok(
+      crestRegistration.componentSize >= 512,
+      `${cascade.id} may not register to an isolated bright-rock component`,
+    );
+    const crestCoverage = lineCoverageRatio(
+      b2,
+      cascade.crest.start,
+      cascade.crest.end,
+      cascade.crest.thicknessPixels * 1.2,
+      detailScale,
+    );
+    const centerlineCoverage = lineCoverageRatio(
+      b2,
+      crestMidpoint,
+      cascade.impact.center,
+      Math.min(2.5, cascade.fall.widthPixels * 0.3),
+      detailScale,
+    );
+    const impactCoverage = impactCoverageRatio(b2, cascade, detailScale);
+    assert.ok(
+      crestCoverage >= 0.3,
+      `${cascade.id} crest coverage ${crestCoverage}`,
+    );
+    assert.ok(centerlineCoverage >= 0.45, `${cascade.id} fall coverage ${centerlineCoverage}`);
+    assert.ok(impactCoverage >= 0.35, `${cascade.id} impact coverage ${impactCoverage}`);
+  }
+  const [upperDrop, lowerDrop] = manifest.cascades.filter(({ regionId }) => regionId === "B2");
+  assert.ok(
+    countChannelInArtboardDisc(
+      detail.auxiliary,
+      detail.info.width,
+      detail.info.height,
+      upperDrop.impact.center,
+      upperDrop.mist.radiusPixels,
+      detailScale,
+      2,
+      12,
+    ) > 0,
+    "the primary tarn drop must retain localized mist potential",
+  );
+  assert.equal(
+    countChannelInArtboardDisc(
+      detail.auxiliary,
+      detail.info.width,
+      detail.info.height,
+      lowerDrop.impact.center,
+      lowerDrop.mist.radiusPixels,
+      detailScale,
+      2,
+      12,
+    ),
+    0,
+    "the secondary tarn drop must stay below the major-impact mist gate",
+  );
+  assert.equal(
+    countChannelInArtboardDisc(
+      detail.data,
+      detail.info.width,
+      detail.info.height,
+      [373, 906],
+      16,
+      detailScale,
+    ),
+    0,
+    "the removed dry-rock B2 crest corridor must stay outside primary coverage",
+  );
+  assert.equal(
+    countChannelInArtboardDisc(
+      detail.data,
+      detail.info.width,
+      detail.info.height,
+      [438, 953],
+      28,
+      detailScale,
+    ),
+    0,
+    "the removed dry-rock B2 impact corridor must stay outside primary coverage",
+  );
 });
 
 test("manual regional sampling has virtual-zero banks and tier-invariant phase coordinates", async () => {
@@ -518,7 +982,7 @@ test("manual regional sampling has virtual-zero banks and tier-invariant phase c
     "a crop edge must decay into transparent zero instead of clamping its last texel",
   );
   const [left, top, right, bottom] = b2.resource.sourceBounds;
-  assert.deepEqual([right - left, bottom - top], b2.resource.dimensions);
+  assert.deepEqual([right - left, bottom - top], b2.resource.fieldDimensions);
   const rightEdgeHasWater = Array.from({ length: b2.info.height }, (_, y) => (
     b2.data[(y * b2.info.width + b2.info.width - 1) * 4]
   )).some((coverage) => coverage > 0);
@@ -534,14 +998,19 @@ test("manual regional sampling has virtual-zero banks and tier-invariant phase c
   assert.deepEqual(canonicalDetail, canonicalFallback);
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /vec2 streamPixels = streamUv \* u_ninjaOneStreamArtboardDimensions;/,
+    /vec2 pixels = streamUv \* u_ninjaOneStreamArtboardDimensions;/,
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /texelFetch\(u_ninjaOneStreamFlow0/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /texelFetch\(u_ninjaOneStreamFlow1/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /return vec4\(0\.0\);/);
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /ninjaOneSampleRegion0\(fullTexelCoordinate\)[\s\S]*ninjaOneSampleRegion1\(fullTexelCoordinate\)/,
+    /ninjaOneBilinear0\(coordinate, false\)[\s\S]*ninjaOneBilinear1\(coordinate, false\)/,
+  );
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /coordinate \+ ivec2\(dimensions\.x, 0\)/,
+    "the auxiliary half must be fetched from the packed logical-width offset",
   );
   assert.doesNotMatch(
     WATER_SHADER_NINJAONE_STREAMS,
@@ -550,7 +1019,7 @@ test("manual regional sampling has virtual-zero banks and tier-invariant phase c
   );
 });
 
-test("decoded local flow produces directionally displaced C2 phase", async () => {
+test("decoded local velocity preserves magnitude for advected transport", async () => {
   const manifest = await readManifest();
   const { data: field, info, resources } = await readRegionalTier(manifest, "detail");
   const c2Resource = resources.find(({ resource }) => resource.regionId === "C2")?.resource;
@@ -560,132 +1029,124 @@ test("decoded local flow produces directionally displaced C2 phase", async () =>
   for (let y = top; y < bottom; y += 1) {
     for (let x = left; x < right; x += 1) {
       const offset = (y * info.width + x) * 4;
-      const style = field[offset + 3];
-      if (
-        field[offset] === 0
-        || (style !== manifest.styleCodes.stream
-          && style !== manifest.styleCodes.turbulence)
-      ) continue;
+      if (field[offset] === 0) continue;
       const flowX = (field[offset + 1] - 128) / 127;
       const flowY = (field[offset + 2] - 128) / 127;
       const length = Math.hypot(flowX, flowY);
       if (length <= 0.1) continue;
-      points.push({ flowX: flowX / length, flowY: flowY / length, style, x, y });
+      points.push({ flowX, flowY, length, x, y });
     }
   }
   assert.ok(points.length > 9_000);
-  const pointMap = new Map(points.map((point) => [point.y * info.width + point.x, point]));
-  const fract = (value) => value - Math.floor(value);
-  const mix = (start, end, amount) => start * (1 - amount) + end * amount;
-  const pattern = (x, y) => (
-    Math.sin(x * 6.1 + y * 3.7)
-    + Math.sin(x * 2.9 - y * 5.3 + 1.2) * 0.61
-    + Math.cos(x * 8.3 + y * 1.7) * 0.27
+  const magnitudes = points.map(({ length }) => length);
+  assert.ok(Math.min(...magnitudes) < 0.35, "ordinary channel water must remain slower than falls");
+  assert.ok(Math.max(...magnitudes) > 0.85, "fall water must retain a high velocity magnitude");
+  assert.ok(new Set(magnitudes.map((value) => Math.round(value * 100))).size >= 5);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float speed = length\(velocity\);/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /mix\(0\.18, 1\.0, smoother\(0\.02, 0\.34, speed\)\)/,
+    "transport must respond to velocity magnitude rather than normalize it away",
   );
-  const signal = (point, elapsedSeconds) => {
-    const turbulence = point.style === manifest.styleCodes.turbulence;
-    const rate = turbulence ? 0.92 : 0.68;
-    const advance = turbulence ? 0.38 : 0.26;
-    const progress = elapsedSeconds * rate;
-    const phaseA = fract(progress);
-    const phaseB = fract(progress + 0.5);
-    const blend = Math.abs(phaseA * 2 - 1);
-    const baseX = point.x / 2 * 0.021;
-    const baseY = point.y / 2 * 0.021;
-    const sampleAt = (phase) => pattern(
-      baseX - point.flowX * phase * advance,
-      baseY - point.flowY * phase * advance,
-    );
-    return mix(sampleAt(phaseB), sampleAt(phaseA), blend);
-  };
-  for (const point of points) {
-    const maximumAdvance = point.style === manifest.styleCodes.turbulence ? 0.38 : 0.26;
-    assert.ok(Math.hypot(point.flowX, point.flowY) * maximumAdvance <= 0.381);
-  }
-  const correlationAt = (dx, dy) => {
-    const pairs = [];
-    for (const point of points) {
-      const shifted = pointMap.get((point.y + dy) * info.width + point.x + dx);
-      if (shifted) pairs.push([signal(point, 0), signal(shifted, 0.22)]);
-    }
-    return pearsonCorrelation(pairs);
-  };
-  const meanFlow = points.reduce((sum, point) => [
-    sum[0] + point.flowX / points.length,
-    sum[1] + point.flowY / points.length,
-  ], [0, 0]);
-  const zeroShift = correlationAt(0, 0);
-  let best = { correlation: -1, dx: 0, dy: 0 };
-  for (let dy = -12; dy <= 12; dy += 1) {
-    for (let dx = -12; dx <= 12; dx += 1) {
-      if (dx === 0 && dy === 0) continue;
-      const length = Math.hypot(dx, dy);
-      const alignment = (dx * meanFlow[0] + dy * meanFlow[1]) / length;
-      if (alignment < 0.8) continue;
-      const correlation = correlationAt(dx, dy);
-      if (correlation !== null && correlation > best.correlation) {
-        best = { correlation, dx, dy };
-      }
-    }
-  }
-  assert.ok(zeroShift !== null);
-  assert.ok(best.dx * meanFlow[0] + best.dy * meanFlow[1] > 0);
-  assert.ok(
-    best.correlation > zeroShift + 0.08,
-    `directional ${JSON.stringify(best)} did not beat zero shift ${zeroShift}`,
-  );
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /dot\(pixels, flowAxis\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /ninjaOneAdvectedHeight\(/);
 });
 
 test("hydrology GLSL keeps body geometry static and separates animated effects", () => {
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /vec3 bodyColor;\s*float bodyAlpha;\s*vec3 effectsColor;\s*float effectsAlpha;/,
+    /vec3 bodyColor;\s*float bodyAlpha;\s*vec3 effectsColor;\s*float effectsAlpha;\s*vec3 mistColor;\s*float mistAlpha;/,
   );
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 encodedFlow = encoded\.gb \/ max\(coverage/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /phaseBaseUv - flow \* flowPhaseA \* phaseAdvance/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /materialBaseUv - flow \* flowPhaseA \* materialAdvance/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float flowPhaseBlend = abs\(flowPhaseA \* 2\.0 - 1\.0\)/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float flowProgress = time \* 0\.2;/);
-  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /float flowRate\s*=/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /struct NinjaOneFieldSample/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.primary = ninjaOneBilinear0/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.auxiliary = ninjaOneBilinear0/);
+  assert.doesNotMatch(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /ninjaOneFetchVisual|ninjaOneBilinearVisual|result\.visual|vec4 visual/,
+  );
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 packed = encoded\.gb \/ max\(coverage/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float visualDepth = decodeNinjaOneScalar/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float whitewaterPotential = decodeNinjaOneScalar/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float obstaclePotential = decodeNinjaOneScalar/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mistPotential = decodeNinjaOneScalar/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float cascadePotential = decodeNinjaOneScalar/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float bankContact = bodyCoverage/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float shallowShelf = bodyCoverage/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float intermittentBank = bankContact/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float materialBreakup = smoother/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /NinjaOneCascadeSample cascade = sampleNinjaOneCascades/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float analyticCascadeSupport = max/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /bodyCoverage <= 0\.001 && analyticCascadeSupport <= 0\.001/,
+  );
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float crestFlecks = cascade\.crest/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float fallFilaments = cascade\.fall/);
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /impactRing/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactFroth = impactShape/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float downstreamFroth = cascade\.wake/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /aggregate = candidate/);
+  for (let slot = 0; slot < 8; slot += 1) {
+    assert.match(
+      WATER_SHADER_COMMON,
+      new RegExp(`uniform vec4 u_ninjaOneCascadeApproach${slot};`),
+    );
+    assert.match(
+      WATER_SHADER_COMMON,
+      new RegExp(`uniform vec4 u_ninjaOneCascadePool${slot};`),
+    );
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeApproach${slot}`));
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeCrest${slot}`));
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeFall${slot}`));
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeImpact${slot}`));
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeMist${slot}`));
+    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadePool${slot}`));
+  }
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float approachExtent = max\(approach\.x, 1\.0\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float approachWidth = max\(approach\.y, 1\.0\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float wakeLength = max\(pool\.z, 1\.0\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.approach \* currentRibbon/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.pool \* 0\.92/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /undertowCore \* 0\.72/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 recoveryAxis = speed > 0\.015 \? flowAxis/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.wake = recoverySupport/);
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /plungeRing|ringFrequency|ringSpeed/);
   assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /downhillAxis|vec2\(0\.68, 0\.73\)/);
-  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /materialTime/);
-  assert.equal(
-    [...WATER_SHADER_NINJAONE_STREAMS.matchAll(
-      /sampleWaterBodyAtTime\([\s\S]*?\n\s*time \* 0\.16\n\s*\)/g,
-    )].length,
-    2,
+  const broadRiverMaterial = WATER_SHADER_NINJAONE_STREAMS.slice(
+    WATER_SHADER_NINJAONE_STREAMS.indexOf("vec2 macroUv"),
+    WATER_SHADER_NINJAONE_STREAMS.indexOf("NinjaOneCascadeSample cascade"),
   );
-  for (const stage of [
-    "tarnPhase",
-    "lipAcceleration",
-    "fallingSheet",
-    "impactFoam",
-    "downstreamTurbulence",
-    "coastalFoam",
-  ]) assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`float ${stage} =`));
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mist = impact/);
+  assert.doesNotMatch(
+    broadRiverMaterial,
+    /sin\(/,
+    "broad river material must not use repeated analytic hatch bands",
+  );
+  assert.ok(
+    WATER_SHADER_NINJAONE_STREAMS.indexOf("analyticCascadeSupport <= 0.001")
+      < WATER_SHADER_NINJAONE_STREAMS.indexOf("float mistMacro"),
+    "pixels outside both registered water and bounded cascade VFX must return before noise sampling",
+  );
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float cascadeFoamAuthority = mix\(0\.6, 1\.0, cascadePotential\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float effectsCompositeCoverage = max/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float sheetEffectsAlpha = analyticEffectsCoverage \* min/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(\s*0\.68,\s*crestAccent \* 0\.78/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactEffectsAlpha = registered \* min/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /min\(\s*0\.4,\s*max\(\s*impactAccent \* 0\.34/,
+  );
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.effectsAlpha = u_ninjaOneHydrologyOpacity \* max/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mistCompositeCoverage = max/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.mistAlpha = mistCompositeCoverage/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(0\.13, mistVolume/);
   const bodyAlphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
-    /float registeredBodyAlpha = saturate\(([\s\S]*?)\);\s+result\.bodyAlpha/,
+    /float registeredBodyAlpha = ([\s\S]*?)result\.bodyAlpha = max\([\s\S]*?\);/,
   );
   assert.ok(bodyAlphaBlock);
-  assert.doesNotMatch(bodyAlphaBlock[1], /time|sin|heightSample|foam|mist/);
-  const effectsAlphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
-    /float registeredEffectsAlpha = saturate\(([\s\S]*?)\);\s+result\.effectsColor/,
-  );
-  assert.ok(effectsAlphaBlock);
-  assert.match(effectsAlphaBlock[1], /movingFoam/);
-  assert.match(effectsAlphaBlock[1], /fallingFilaments/);
-  assert.match(effectsAlphaBlock[1], /impactSpray/);
-  assert.match(effectsAlphaBlock[1], /mist/);
-  assert.doesNotMatch(effectsAlphaBlock[1], /registeredFoamVolume\s*\*\s*0\.92/);
-  assert.match(
-    WATER_SHADER_NINJAONE_STREAMS,
-    /result\.bodyAlpha = mask\s*\* u_ninjaOneHydrologyOpacity\s*\* registeredBodyAlpha;/,
-  );
-  assert.match(
-    WATER_SHADER_NINJAONE_STREAMS,
-    /result\.effectsAlpha = mask\s*\* u_ninjaOneHydrologyOpacity\s*\* registeredEffectsAlpha;/,
-  );
+  assert.doesNotMatch(bodyAlphaBlock[1], /time|heightSample|foam|mist/);
+  assert.match(bodyAlphaBlock[1], /dryLipShadowAlpha[\s\S]*\* 0\.22/);
+  assert.match(bodyAlphaBlock[1], /drySheetBodyAlpha[\s\S]*min\(0\.5/);
+  assert.match(bodyAlphaBlock[1], /dryImpactBodyAlpha[\s\S]*min\(0\.34/);
 });
 
 test("foreground hydrology uses canonical land visibility above native terrain", async () => {
@@ -705,8 +1166,18 @@ test("foreground hydrology uses canonical land visibility above native terrain",
     /float registeredForegroundVisibility = max\(\s*waterVisibility,\s*registeredStreamVisibility\s*\);/,
   );
   assert.match(fragmentShader, /stream\.bodyAlpha/);
+  assert.match(
+    fragmentShader,
+    /float streamBodyMix = smoother\(0\.02, 0\.72, stream\.bodyAlpha\);/,
+  );
   assert.match(fragmentShader, /stream\.effectsAlpha/);
   assert.match(fragmentShader, /stream\.effectsColor/);
+  assert.match(fragmentShader, /stream\.mistAlpha/);
+  assert.match(fragmentShader, /stream\.mistColor/);
+  assert.match(
+    fragmentShader,
+    /max\(\s*max\(stream\.bodyAlpha, stream\.effectsAlpha\),\s*stream\.mistAlpha\s*\)/,
+  );
   assert.match(
     fragmentShader,
     /float foregroundOverlay = u_foregroundHydrology\s*\* smoother\(0\.08, 0\.45, u_siteLod\);/,
@@ -811,7 +1282,7 @@ test("regional admission uses exact native snapshots and the continuous max-two 
     fallbackResources,
     maximumDecodedBytes: 33_554_432,
     maximumMountedRegions: 2,
-    maximumTextureSize: 500,
+    maximumTextureSize: 800,
     minimumSnapshotEpoch: 0,
     regions,
     snapshot: c1Snapshot,
@@ -860,7 +1331,7 @@ test("regional admission uses exact native snapshots and the continuous max-two 
 
   const transitioningSnapshot = makeSnapshot({
     camera: denseCamera,
-    decodedBytes: 29_000_000,
+    decodedBytes: 26_000_000,
     epoch: 3,
   });
   const currentC1Detail = detailResources.filter(({ regionId }) => regionId === "C1");
@@ -876,11 +1347,12 @@ test("regional admission uses exact native snapshots and the continuous max-two 
     regions,
     snapshot: transitioningSnapshot,
   });
-  assert.equal(transitionPlan.tier, "fallback");
-  assert.equal(transitionPlan.incomingDecodedBytes, denseFallback.decodedBytes);
+  assert.equal(transitionPlan.tier, "detail");
+  const incomingB2DetailBytes = decodedBytesFor(detailResources, ["B2"]);
+  assert.equal(transitionPlan.incomingDecodedBytes, incomingB2DetailBytes);
   assert.equal(
     transitionPlan.nativeUnionTransitionBytes,
-    29_000_000 + c1Detail.decodedBytes + denseFallback.decodedBytes,
+    26_000_000 + c1Detail.decodedBytes + incomingB2DetailBytes,
   );
   assert.ok(transitionPlan.nativeUnionTransitionBytes <= 33_554_432);
 
@@ -1397,6 +1869,8 @@ test("water runtime binds two verified regional slots without charging shared te
   );
   assert.match(renderer, /dataset\.hydrologyAssetRegionIds/);
   assert.match(renderer, /dataset\.hydrologyAssetResourcePaths/);
+  assert.match(renderer, /dataset\.hydrologyFieldPacking/);
+  assert.match(renderer, /dataset\.hydrologySchemaVersion/);
   assert.match(renderer, /dataset\.hydrologyRequestedRegionIds/);
   assert.match(renderer, /dataset\.hydrologyNativeUnionCurrentBytes/);
   assert.match(renderer, /dataset\.hydrologyNativeUnionTransitionPeakBytes/);
@@ -1412,6 +1886,24 @@ test("water runtime binds two verified regional slots without charging shared te
   assert.match(renderer, /beginRegionalHydrologyFadeIn\(/);
   assert.match(renderer, /advanceRegionalHydrologyVisibility\(/);
   assert.match(renderer, /u_ninjaOneHydrologyOpacity/);
+  assert.match(renderer, /NINJAONE_WATER_FEATURES\.cascades/);
+  assert.match(renderer, /NINJAONE_MAX_CASCADES/);
+  assert.match(
+    renderer,
+    /CASCADE_UNIFORM_NAMES\.approach\[slot\][\s\S]*feature\?\.approach\.extentPixels[\s\S]*feature\?\.approach\.widthPixels/,
+  );
+  assert.match(
+    renderer,
+    /CASCADE_UNIFORM_NAMES\.pool\[slot\][\s\S]*feature\?\.pool\.radiiPixels\[0\][\s\S]*feature\?\.pool\.outflowExtentPixels/,
+  );
+  assert.match(renderer, /dataset\.waterCascadeCount/);
+  assert.match(renderer, /dataset\.waterProfile = CAREER_WORLD_WATER_REALISM_PROFILE\.id/);
+  assert.match(renderer, /dataset\.waterMistPass = "cascade-impact-drift-envelope"/);
+  assert.match(renderer, /u_riverSurfaceProfile/);
+  assert.match(renderer, /u_riverInteractionProfile/);
+  assert.match(renderer, /u_waterfallSheetProfile/);
+  assert.match(renderer, /u_waterfallImpactProfile/);
+  assert.match(renderer, /u_mistProfile/);
   assert.match(renderer, /dataset\.foregroundWaterMode = foregroundHydrology[\s\S]*registered-overlay/);
   assert.match(renderer, /dataset\.sharedWaterTextureBytes/);
   const cohortLoader = renderer.match(

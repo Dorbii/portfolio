@@ -12,6 +12,7 @@
     "start": "vinext start",
     "build:environment-native": "node scripts/build-ninjaone-environment-native-detail.mjs --static-only",
     "build:environment-hydrology": "node scripts/build-ninjaone-environment-hydrology-r2.mjs",
+    "build:waterfall-vfx": "node scripts/build-waterfall-vfx-sprite-r1.mjs",
     "build:ninjaone-environment-foliage": "node scripts/build-ninjaone-environment-foliage-r3.mjs",
     "build:ninjaone-environment-seams": "node scripts/build-ninjaone-environment-seam-integration-r2.mjs",
     "capture:ninjaone-environment-mvp": "node scripts/capture-ninjaone-environment-mvp.mjs",

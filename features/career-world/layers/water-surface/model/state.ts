@@ -2,6 +2,7 @@ import {
   DEFAULT_WORLD_WIND_STATE,
   wrapDegrees,
 } from "../../../shared/weather.ts";
+import { CAREER_WORLD_WATER_REALISM_PROFILE } from "./profiles.ts";
 
 export { windVectorFromDegrees } from "../../../shared/weather.ts";
 
@@ -17,11 +18,11 @@ export interface WaterSurfaceState {
 
 export const DEFAULT_WATER_SURFACE_STATE: WaterSurfaceState = Object.freeze({
   motion: DEFAULT_WORLD_WIND_STATE.motion,
-  waveStrength: 0.7,
-  waveDensity: 1,
-  weather: 0.14,
+  waveStrength: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.waveStrength,
+  waveDensity: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.waveDensity,
+  weather: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.weather,
   opacity: 1,
-  detailScale: 0.58,
+  detailScale: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.detailScale,
   windDirectionDegrees: DEFAULT_WORLD_WIND_STATE.directionDegrees,
 });
 

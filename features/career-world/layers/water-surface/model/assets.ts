@@ -1,5 +1,5 @@
 import hydrologyManifest from "../../../../../public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json" with { type: "json" };
-import { defineLayerDetailContract } from "../../../shared/lod";
+import { defineLayerDetailContract } from "../../../shared/lod.ts";
 
 const WORLD_ALBEDO =
   "/career-world/layers/water-surface/textures/water-surface-world-lod-r2-3840x2160.png";
@@ -9,6 +9,8 @@ const MACRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-macro-r1-1024x1024.png";
 const MICRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-micro-r1-1024x1024.png";
+const WATERFALL_VFX_SPRITE =
+  "/career-world/layers/water-surface/fields/waterfall-vfx-sprite-r1-384x512.png";
 const COAST_GEOMETRY_WORLD =
   "/career-world/layers/water-surface/fields/coast-geometry-r5.png?v=ninjaone-coast-r2";
 const COAST_GEOMETRY_TERRITORY =
@@ -19,6 +21,7 @@ export interface NinjaOneHydrologyRegionResource {
   readonly artboardBounds: readonly [number, number, number, number];
   readonly decodedBytes: number;
   readonly dimensions: readonly [number, number];
+  readonly fieldDimensions: readonly [number, number];
   readonly id: string;
   readonly path: string;
   readonly regionId: string;
@@ -30,6 +33,58 @@ export interface NinjaOneHydrologyRegionResource {
     span: readonly [number, number];
   }>;
 }
+
+export interface NinjaOneWaterFeature {
+  readonly id: string;
+  readonly origin: readonly [number, number];
+  readonly radiusPixels: number;
+  readonly regionId: string;
+}
+
+export interface NinjaOneCascadeFeature {
+  readonly approach: Readonly<{
+    readonly extentPixels: number;
+    readonly widthPixels: number;
+  }>;
+  readonly crest: Readonly<{
+    readonly end: readonly [number, number];
+    readonly start: readonly [number, number];
+    readonly thicknessPixels: number;
+  }>;
+  readonly fall: Readonly<{
+    readonly direction: readonly [number, number];
+    readonly extentPixels: number;
+    readonly widthPixels: number;
+  }>;
+  readonly id: string;
+  readonly impact: Readonly<{
+    readonly origin: readonly [number, number];
+    readonly radiiPixels: readonly [number, number];
+  }>;
+  readonly mist: Readonly<{
+    readonly drift: readonly [number, number];
+    readonly radiusPixels: number;
+  }>;
+  readonly pool: Readonly<{
+    readonly outflowExtentPixels: number;
+    readonly radiiPixels: readonly [number, number];
+  }>;
+  readonly regionId: string;
+}
+
+export interface NinjaOneObstacleFeature {
+  readonly bowExtentPixels: number;
+  readonly center: readonly [number, number];
+  readonly flowDirection: readonly [number, number];
+  readonly id: string;
+  readonly intensity: number;
+  readonly radiusPixels: number;
+  readonly regionId: string;
+  readonly wakeExtentPixels: number;
+  readonly wakeWidthPixels: number;
+}
+
+export const NINJAONE_MAX_CASCADES = 8;
 
 function tuple2(values: readonly number[]): readonly [number, number] {
   return Object.freeze([values[0] ?? Number.NaN, values[1] ?? Number.NaN]);
@@ -52,6 +107,7 @@ function normalizeHydrologyResource(
   tier: NinjaOneHydrologyTierId,
 ): NinjaOneHydrologyRegionResource {
   const dimensions = tuple2(resource.dimensions);
+  const fieldDimensions = tuple2(resource.fieldDimensions);
   const sourceBounds = tuple4(resource.sourceBounds);
   const artboardBounds = tuple4(resource.artboardBounds);
   const worldOrigin = tuple2(resource.worldBounds.origin);
@@ -61,8 +117,10 @@ function normalizeHydrologyResource(
     || !/^[A-F\d]{64}$/.test(resource.sha256)
     || dimensions.some((value) => !Number.isSafeInteger(value) || value <= 0)
     || resource.decodedBytes !== dimensions[0] * dimensions[1] * 4
-    || sourceBounds[2] - sourceBounds[0] !== dimensions[0]
-    || sourceBounds[3] - sourceBounds[1] !== dimensions[1]
+    || sourceBounds[2] - sourceBounds[0] !== fieldDimensions[0]
+    || sourceBounds[3] - sourceBounds[1] !== fieldDimensions[1]
+    || dimensions[0] !== fieldDimensions[0] * 2
+    || dimensions[1] !== fieldDimensions[1]
     || [...artboardBounds, ...worldOrigin, ...worldSpan].some(
       (value) => !Number.isFinite(value),
     )
@@ -74,6 +132,7 @@ function normalizeHydrologyResource(
     artboardBounds,
     decodedBytes: resource.decodedBytes,
     dimensions,
+    fieldDimensions,
     id: resource.id,
     path: resource.path,
     regionId: resource.regionId,
@@ -115,9 +174,174 @@ const resourceIdentities = [
   ...detailHydrologyResources,
   ...fallbackHydrologyResources,
 ];
+const [hydrologyArtboardWidth = 0, hydrologyArtboardHeight = 0] =
+  hydrologyManifest.registration.artboardDimensions;
+
+function normalizeWaterFeature(
+  segment: (typeof hydrologyManifest.segments)[number],
+  originPixels: readonly [number, number],
+  radiusPixels: number,
+): NinjaOneWaterFeature {
+  const [regionId] = segment.cellIds;
+  const origin = Object.freeze([
+    originPixels[0] / hydrologyArtboardWidth,
+    originPixels[1] / hydrologyArtboardHeight,
+  ] as const);
+  if (
+    segment.cellIds.length !== 1
+    || !regionId
+    || !origin.every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
+    || !Number.isFinite(radiusPixels)
+    || radiusPixels <= 0
+  ) {
+    throw new RangeError(`NinjaOne water feature ${segment.id} is invalid.`);
+  }
+  return Object.freeze({
+    id: segment.id,
+    origin,
+    radiusPixels,
+    regionId,
+  });
+}
+
+function normalizeArtboardPoint(
+  values: readonly number[],
+): readonly [number, number] {
+  const [x, y] = tuple2(values);
+  return Object.freeze([
+    x / hydrologyArtboardWidth,
+    y / hydrologyArtboardHeight,
+  ] as const);
+}
+
+function normalizeCascadeFeature(
+  cascade: (typeof hydrologyManifest.cascades)[number],
+): NinjaOneCascadeFeature {
+  const crestStart = normalizeArtboardPoint(cascade.crest.start);
+  const crestEnd = normalizeArtboardPoint(cascade.crest.end);
+  const impactOrigin = normalizeArtboardPoint(cascade.impact.center);
+  const fallDirection = tuple2(cascade.fall.direction);
+  const mistDrift = tuple2(cascade.mist.driftVector);
+  const impactRadii = tuple2(cascade.impact.radiiPixels);
+  const poolRadii = tuple2(cascade.pool.radiiPixels);
+  const fallLength = Math.hypot(...fallDirection);
+  const mistLength = Math.hypot(...mistDrift);
+  if (
+    !cascade.id
+    || !expectedHydrologyRegionIds.includes(cascade.regionId)
+    || [crestStart, crestEnd, impactOrigin].some((point) => (
+      point.some((value) => !Number.isFinite(value) || value < 0 || value > 1)
+    ))
+    || Math.abs(fallLength - 1) > 0.01
+    || Math.abs(mistLength - 1) > 0.01
+    || [
+      cascade.crest.thicknessPixels,
+      cascade.approach.extentPixels,
+      cascade.approach.widthPixels,
+      cascade.fall.extentPixels,
+      cascade.fall.widthPixels,
+      cascade.mist.radiusPixels,
+      cascade.pool.outflowExtentPixels,
+      ...impactRadii,
+      ...poolRadii,
+    ].some((value) => !Number.isFinite(value) || value <= 0)
+    || !cascade.maskPolicy.includes("registered water remains exact")
+    || !cascade.maskPolicy.includes("descriptor-bounded")
+  ) {
+    throw new RangeError(`NinjaOne cascade ${cascade.id} is invalid.`);
+  }
+  return Object.freeze({
+    approach: Object.freeze({
+      extentPixels: cascade.approach.extentPixels,
+      widthPixels: cascade.approach.widthPixels,
+    }),
+    crest: Object.freeze({
+      end: crestEnd,
+      start: crestStart,
+      thicknessPixels: cascade.crest.thicknessPixels,
+    }),
+    fall: Object.freeze({
+      direction: fallDirection,
+      extentPixels: cascade.fall.extentPixels,
+      widthPixels: cascade.fall.widthPixels,
+    }),
+    id: cascade.id,
+    impact: Object.freeze({
+      origin: impactOrigin,
+      radiiPixels: impactRadii,
+    }),
+    mist: Object.freeze({
+      drift: mistDrift,
+      radiusPixels: cascade.mist.radiusPixels,
+    }),
+    pool: Object.freeze({
+      outflowExtentPixels: cascade.pool.outflowExtentPixels,
+      radiiPixels: poolRadii,
+    }),
+    regionId: cascade.regionId,
+  });
+}
+
+function normalizeObstacleFeature(
+  obstacle: (typeof hydrologyManifest.obstacles)[number],
+): NinjaOneObstacleFeature {
+  const center = normalizeArtboardPoint(obstacle.center);
+  const flowDirection = tuple2(obstacle.flowDirection);
+  const flowLength = Math.hypot(...flowDirection);
+  if (
+    !obstacle.id
+    || !expectedHydrologyRegionIds.includes(obstacle.regionId)
+    || center.some((value) => !Number.isFinite(value) || value < 0 || value > 1)
+    || Math.abs(flowLength - 1) > 0.01
+    || obstacle.intensity <= 0
+    || obstacle.intensity > 1
+    || [
+      obstacle.bowExtentPixels,
+      obstacle.radiusPixels,
+      obstacle.wakeExtentPixels,
+      obstacle.wakeWidthPixels,
+    ].some((value) => !Number.isFinite(value) || value <= 0)
+    || !obstacle.maskPolicy.includes("accepted registered water coverage")
+  ) {
+    throw new RangeError(`NinjaOne obstacle ${obstacle.id} is invalid.`);
+  }
+  return Object.freeze({
+    bowExtentPixels: obstacle.bowExtentPixels,
+    center,
+    flowDirection,
+    id: obstacle.id,
+    intensity: obstacle.intensity,
+    radiusPixels: obstacle.radiusPixels,
+    regionId: obstacle.regionId,
+    wakeExtentPixels: obstacle.wakeExtentPixels,
+    wakeWidthPixels: obstacle.wakeWidthPixels,
+  });
+}
+
+const cascadeFeatures = Object.freeze(
+  hydrologyManifest.cascades.map(normalizeCascadeFeature),
+);
+const obstacleFeatures = Object.freeze(
+  hydrologyManifest.obstacles.map(normalizeObstacleFeature),
+);
+const tarnSegment = hydrologyManifest.segments.find(
+  (segment) => segment.kind === "tarn" && "rippleCenter" in segment,
+);
+const tarnFeature = tarnSegment
+  && "rippleCenter" in tarnSegment
+  && Array.isArray(tarnSegment.rippleCenter)
+  ? normalizeWaterFeature(
+    tarnSegment,
+    tuple2(tarnSegment.rippleCenter),
+    Math.max(
+      tarnSegment.artboardBounds[2] - tarnSegment.artboardBounds[0],
+      tarnSegment.artboardBounds[3] - tarnSegment.artboardBounds[1],
+    ) * 0.5,
+  )
+  : null;
 
 if (
-  hydrologyManifest.schemaVersion !== 3
+  hydrologyManifest.schemaVersion !== 4
   || hydrologyManifest.regionalFields.cohortPolicy.atomic !== true
   || hydrologyManifest.regionalFields.cohortPolicy.mixedTierAllowed !== false
   || hydrologyManifest.registration.maximumMountedRegions !== 2
@@ -133,6 +357,16 @@ if (
     !== resourceIdentities.length
   || new Set(resourceIdentities.map(({ path }) => path)).size
     !== resourceIdentities.length
+  || hydrologyArtboardWidth <= 0
+  || hydrologyArtboardHeight <= 0
+  || cascadeFeatures.length === 0
+  || cascadeFeatures.length > NINJAONE_MAX_CASCADES
+  || new Set(cascadeFeatures.map(({ id }) => id)).size
+    !== cascadeFeatures.length
+  || obstacleFeatures.length === 0
+  || new Set(obstacleFeatures.map(({ id }) => id)).size
+    !== obstacleFeatures.length
+  || tarnFeature === null
   || !Number.isFinite(ninjaOneOriginX)
   || !Number.isFinite(ninjaOneOriginY)
   || ninjaOneSpanX <= 0
@@ -145,6 +379,8 @@ if (
 export const NINJAONE_STREAM_REGISTRATION = Object.freeze({
   artboardDimensions: tuple2(hydrologyManifest.registration.artboardDimensions),
   maximumMountedRegions: hydrologyManifest.registration.maximumMountedRegions,
+  packingRevision: hydrologyManifest.packingRevision,
+  schemaVersion: hydrologyManifest.schemaVersion,
   nativeApplicationOwnedUnion: Object.freeze({
     maximumDecodedBytes: nativeApplicationOwnedUnion.maximumDecodedBytes,
   }),
@@ -169,10 +405,17 @@ export const NINJAONE_STREAM_REGISTRATION = Object.freeze({
   worldSpan: Object.freeze([ninjaOneSpanX, ninjaOneSpanY] as const),
 });
 
+export const NINJAONE_WATER_FEATURES = Object.freeze({
+  cascades: cascadeFeatures,
+  obstacles: obstacleFeatures,
+  tarn: tarnFeature,
+});
+
 export const WATER_RUNTIME_TEXTURE_BUDGET_BYTES = 288 * 1024 * 1024;
 export const WATER_TERRITORY_TEXTURE_DIMENSIONS = Object.freeze({
   coastGeometry: Object.freeze([6688, 3764] as const),
   directionalAlbedo: Object.freeze([3840, 2160] as const),
+  waterfallVfx: Object.freeze([384, 512] as const),
 });
 
 export const WATER_TERRITORY_DETAIL = Object.freeze({
@@ -186,6 +429,7 @@ export const WATER_ASSETS = Object.freeze({
   directionalAlbedo: DIRECTIONAL_ALBEDO,
   macroHeight: MACRO_HEIGHT,
   microHeight: MICRO_HEIGHT,
+  waterfallVfx: WATERFALL_VFX_SPRITE,
   coastGeometry: Object.freeze({
     world: COAST_GEOMETRY_WORLD,
     territory: COAST_GEOMETRY_TERRITORY,

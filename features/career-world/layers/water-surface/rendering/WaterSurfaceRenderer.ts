@@ -13,7 +13,9 @@ import {
   type NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot,
 } from "../../../development/model/ninjaOneEnvironmentResidency";
 import {
+  NINJAONE_MAX_CASCADES,
   NINJAONE_STREAM_REGISTRATION,
+  NINJAONE_WATER_FEATURES,
   type NinjaOneHydrologyRegionResource,
   WATER_ASSETS,
   WATER_RUNTIME_TEXTURE_BUDGET_BYTES,
@@ -24,6 +26,7 @@ import {
   SHELTERED_BASIN_STYLE,
   SMALL_INLAND_LAKE_STYLE,
 } from "../model/bodies";
+import { CAREER_WORLD_WATER_REALISM_PROFILE } from "../model/profiles";
 import {
   normalizeWaterSurfaceState,
   type WaterSurfaceState,
@@ -93,6 +96,7 @@ const TEXTURE_PATHS = [
   ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp", true, true],
   ["coastMaterial", WATER_ASSETS.coastMaterial, "clamp", true, true],
   ["hydrology", WATER_ASSETS.hydrology, "clamp", true, true],
+  ["waterfallVfx", WATER_ASSETS.waterfallVfx, "clamp", true, false],
 ] as const;
 const DIRECTIONAL_ALBEDO_UNIT = TEXTURE_PATHS.length;
 const NINJAONE_HYDROLOGY_UNITS = Object.freeze([
@@ -108,6 +112,34 @@ const SAMPLER_UNIFORMS = Object.freeze({
   coastGeometry: "u_coastGeometry",
   coastMaterial: "u_coastMaterial",
   hydrology: "u_hydrology",
+  waterfallVfx: "u_waterfallVfx",
+});
+
+const CASCADE_UNIFORM_NAMES = Object.freeze({
+  approach: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadeApproach${slot}`,
+  )),
+  crest: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadeCrest${slot}`,
+  )),
+  fall: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadeFall${slot}`,
+  )),
+  impact: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadeImpact${slot}`,
+  )),
+  mist: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadeMist${slot}`,
+  )),
+  pool: Object.freeze(Array.from(
+    { length: NINJAONE_MAX_CASCADES },
+    (_, slot) => `u_ninjaOneCascadePool${slot}`,
+  )),
 });
 
 const UNIFORM_NAMES = [
@@ -137,6 +169,18 @@ const UNIFORM_NAMES = [
   "u_ninjaOneStreamSlotCount",
   "u_ninjaOneStreamRegion0",
   "u_ninjaOneStreamRegion1",
+  "u_ninjaOneTarnFeature",
+  ...CASCADE_UNIFORM_NAMES.approach,
+  ...CASCADE_UNIFORM_NAMES.crest,
+  ...CASCADE_UNIFORM_NAMES.fall,
+  ...CASCADE_UNIFORM_NAMES.impact,
+  ...CASCADE_UNIFORM_NAMES.mist,
+  ...CASCADE_UNIFORM_NAMES.pool,
+  "u_riverSurfaceProfile",
+  "u_riverInteractionProfile",
+  "u_waterfallSheetProfile",
+  "u_waterfallImpactProfile",
+  "u_mistProfile",
   "u_microFrequency",
   "u_territoryLineStrength",
   "u_territoryNormalStrength",
@@ -391,8 +435,18 @@ export class WaterSurfaceRenderer {
       : "global";
     this.canvas.dataset.waterLayerContract = "registered-body-and-effects";
     this.canvas.dataset.waterBodyPass = "channel-coverage";
-    this.canvas.dataset.waterEffectsPass = "foam-falls-impacts-mist";
+    this.canvas.dataset.waterCascadeCount = String(
+      NINJAONE_WATER_FEATURES.cascades.length,
+    );
+    this.canvas.dataset.waterEffectsPass = "foam-ripples-staged-cascades";
+    this.canvas.dataset.waterMistPass = "cascade-impact-drift-envelope";
+    this.canvas.dataset.waterProfile = CAREER_WORLD_WATER_REALISM_PROFILE.id;
     this.canvas.dataset.hydrologyAssetState = this.hydrologyAssetState;
+    this.canvas.dataset.hydrologyFieldPacking =
+      NINJAONE_STREAM_REGISTRATION.packingRevision;
+    this.canvas.dataset.hydrologySchemaVersion = String(
+      NINJAONE_STREAM_REGISTRATION.schemaVersion,
+    );
     this.canvas.dataset.hydrologyAssetBytes = "0";
     this.canvas.dataset.hydrologyAssetTier = "none";
     this.canvas.dataset.hydrologyBudgetOwner = foregroundHydrology
@@ -682,6 +736,108 @@ export class WaterSurfaceRenderer {
         sourceBounds ? sourceBounds[3] - sourceBounds[1] : 1,
       );
     }
+    const tarnFeature = NINJAONE_WATER_FEATURES.tarn;
+    const tarnActive = Boolean(
+      tarnFeature
+      && this.hydrologyBindings.some(
+        ({ resource }) => resource.regionId === tarnFeature.regionId,
+      ),
+    );
+    gl.uniform4f(
+      this.uniforms.u_ninjaOneTarnFeature,
+      tarnFeature?.origin[0] ?? 0,
+      tarnFeature?.origin[1] ?? 0,
+      tarnFeature?.radiusPixels ?? 1,
+      tarnActive ? 1 : 0,
+    );
+    for (const [slot, crestUniformName] of
+      CASCADE_UNIFORM_NAMES.crest.entries()) {
+      const feature = NINJAONE_WATER_FEATURES.cascades[slot];
+      const active = Boolean(
+        feature
+        && this.hydrologyBindings.some(
+          ({ resource }) => resource.regionId === feature.regionId,
+        ),
+      );
+      gl.uniform4f(
+        this.uniforms[CASCADE_UNIFORM_NAMES.approach[slot]],
+        feature?.approach.extentPixels ?? 1,
+        feature?.approach.widthPixels ?? 1,
+        0,
+        0,
+      );
+      gl.uniform4f(
+        this.uniforms[crestUniformName],
+        feature?.crest.start[0] ?? 0,
+        feature?.crest.start[1] ?? 0,
+        feature?.crest.end[0] ?? 0,
+        feature?.crest.end[1] ?? 0,
+      );
+      gl.uniform4f(
+        this.uniforms[CASCADE_UNIFORM_NAMES.fall[slot]],
+        feature?.fall.direction[0] ?? 0,
+        feature?.fall.direction[1] ?? 1,
+        feature?.fall.extentPixels ?? 1,
+        feature?.fall.widthPixels ?? 1,
+      );
+      gl.uniform4f(
+        this.uniforms[CASCADE_UNIFORM_NAMES.impact[slot]],
+        feature?.impact.origin[0] ?? 0,
+        feature?.impact.origin[1] ?? 0,
+        feature?.impact.radiiPixels[0] ?? 1,
+        feature?.impact.radiiPixels[1] ?? 1,
+      );
+      gl.uniform4f(
+        this.uniforms[CASCADE_UNIFORM_NAMES.mist[slot]],
+        feature?.mist.drift[0] ?? 0,
+        feature?.mist.drift[1] ?? 1,
+        active ? (feature?.mist.radiusPixels ?? 0) : 0,
+        active ? (feature?.crest.thicknessPixels ?? 1) : 0,
+      );
+      gl.uniform4f(
+        this.uniforms[CASCADE_UNIFORM_NAMES.pool[slot]],
+        feature?.pool.radiiPixels[0] ?? 1,
+        feature?.pool.radiiPixels[1] ?? 1,
+        feature?.pool.outflowExtentPixels ?? 1,
+        active ? 1 : 0,
+      );
+    }
+    const waterProfile = CAREER_WORLD_WATER_REALISM_PROFILE;
+    gl.uniform4f(
+      this.uniforms.u_riverSurfaceProfile,
+      waterProfile.riverSurface.transportCyclesPerSecond,
+      waterProfile.riverSurface.macroWaveFrequency,
+      waterProfile.riverSurface.microWaveFrequency,
+      waterProfile.riverSurface.surfaceRelief,
+    );
+    gl.uniform4f(
+      this.uniforms.u_riverInteractionProfile,
+      waterProfile.riverInteraction.depthMix,
+      waterProfile.riverInteraction.bankContactShadow,
+      waterProfile.riverInteraction.bankFoam,
+      waterProfile.riverInteraction.eddyStrength,
+    );
+    gl.uniform4f(
+      this.uniforms.u_waterfallSheetProfile,
+      waterProfile.waterfallSheet.transportCyclesPerSecond,
+      waterProfile.waterfallSheet.filamentFrequency,
+      waterProfile.waterfallSheet.sheetStrength,
+      waterProfile.waterfallSheet.crestStrength,
+    );
+    gl.uniform4f(
+      this.uniforms.u_waterfallImpactProfile,
+      waterProfile.waterfallImpact.breakupFrequency,
+      waterProfile.waterfallImpact.advectionSpeed,
+      waterProfile.waterfallImpact.foamStrength,
+      waterProfile.waterfallImpact.turbulenceStrength,
+    );
+    gl.uniform4f(
+      this.uniforms.u_mistProfile,
+      waterProfile.mist.radiusScale,
+      waterProfile.mist.opacity,
+      waterProfile.mist.breakup,
+      waterProfile.mist.dissipation,
+    );
     gl.uniform2fv(
       this.uniforms.u_microFrequency,
       WATER_TERRITORY_DETAIL.fixedWorldFrequency,

@@ -180,17 +180,16 @@ export const NINJAONE_MVP_HYDROLOGY_BOUNDARY_ISOLATION = Object.freeze({
 export const NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES = Object.freeze([
   Object.freeze({
     camera: Object.freeze({
-      origin: Object.freeze([0.2102083333, 0.1701234568]),
+      origin: Object.freeze([0.21785, 0.18062]),
       span: Object.freeze([0.04, 0.04]),
     }),
     expectedTerrainTileCount: 2,
     id: "hydrology-B2-tarn",
     requiredStyleCounts: Object.freeze({
-      impactFoamMist: 99,
-      stream: 281,
-      tarn: 3_545,
-      waterfallLip: 76,
-      waterfallSheet: 29,
+      cascadeStage: 633,
+      mist: 141,
+      obstacleWake: 443,
+      whitewater: 1_635,
     }),
   }),
   Object.freeze({
@@ -201,12 +200,10 @@ export const NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES = Object.freeze([
     expectedTerrainTileCount: 2,
     id: "hydrology-B2-lip-fall",
     requiredStyleCounts: Object.freeze({
-      impactFoamMist: 305,
-      stream: 125,
-      tarn: 1_702,
-      turbulence: 16,
-      waterfallLip: 76,
-      waterfallSheet: 29,
+      cascadeStage: 633,
+      mist: 141,
+      obstacleWake: 443,
+      whitewater: 1_540,
     }),
   }),
 ]);
@@ -223,15 +220,12 @@ const HYDROLOGY_SCREEN_MASK_DILATION_PIXELS = 0;
 const NATIVE_BUDGET_SWEEP_SPANS = Object.freeze([
   0.04, 0.05, 0.055, 0.06, 0.061, 0.074, 0.075, 0.08, 0.0875, 0.09,
 ]);
-const HYDROLOGY_STYLE_NAMES = Object.freeze({
-  32: "tarn",
-  96: "stream",
-  120: "turbulence",
-  148: "waterfallLip",
-  192: "waterfallSheet",
-  224: "impactFoamMist",
-  252: "coastFoam",
-});
+const HYDROLOGY_AUXILIARY_CHANNELS = Object.freeze([
+  "whitewater",
+  "obstacleWake",
+  "mist",
+  "cascadeStage",
+]);
 
 function round(value, digits = 4) {
   if (!Number.isFinite(value)) return null;
@@ -261,7 +255,7 @@ export async function deriveNinjaOneHydrologyMotionContract({
   const tier = manifest?.regionalFields?.tiers?.[fieldTier];
   const regions = manifest?.regionalFields?.regions;
   if (
-    manifest?.schemaVersion !== 3
+    manifest?.schemaVersion !== 4
     || !tier
     || !Array.isArray(tier.fullFieldDimensions)
     || tier.fullFieldDimensions.length !== 2
@@ -343,10 +337,14 @@ export async function deriveNinjaOneHydrologyMotionContract({
       || image.info.height !== resource.dimensions[1]
       || resource.decodedBytes !== expectedBytes
       || actualSha256 !== resource.sha256
+      || !Array.isArray(resource.fieldDimensions)
+      || resource.fieldDimensions.length !== 2
+      || image.info.width !== resource.fieldDimensions[0] * 2
+      || image.info.height !== resource.fieldDimensions[1]
       || !Array.isArray(resource.sourceBounds)
       || resource.sourceBounds.length !== 4
-      || resource.sourceBounds[2] - resource.sourceBounds[0] !== image.info.width
-      || resource.sourceBounds[3] - resource.sourceBounds[1] !== image.info.height
+      || resource.sourceBounds[2] - resource.sourceBounds[0] !== resource.fieldDimensions[0]
+      || resource.sourceBounds[3] - resource.sourceBounds[1] !== resource.fieldDimensions[1]
     ) throw new Error(`${resource.id} does not match its regional manifest contract.`);
     return { image, resource };
   }));
@@ -391,9 +389,12 @@ export async function deriveNinjaOneHydrologyMotionContract({
       const source = (sourceY * decoded.image.info.width + sourceX) * 4;
       if (decoded.image.data[source] === 0) continue;
       coveragePixels += 1;
-      const styleCode = decoded.image.data[source + 3];
-      const styleName = HYDROLOGY_STYLE_NAMES[styleCode] ?? `code-${styleCode}`;
-      styleCounts[styleName] = (styleCounts[styleName] ?? 0) + 1;
+      const auxiliary = source + decoded.resource.fieldDimensions[0] * 4;
+      HYDROLOGY_AUXILIARY_CHANNELS.forEach((name, channel) => {
+        if (decoded.image.data[auxiliary + channel] > 0) {
+          styleCounts[name] = (styleCounts[name] ?? 0) + 1;
+        }
+      });
       const target = ((y - top) * width + x - left) * 4;
       fullMask.fill(255, target, target + 4);
       const flowX = (decoded.image.data[source + 1] - 128) / 127;
@@ -1137,6 +1138,7 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
     const resources = Array.isArray(tier?.resources) ? tier.resources : [];
     const resourceAudits = await Promise.all(resources.map(async (resource) => {
       const dimensions = resource?.dimensions ?? [];
+      const fieldDimensions = resource?.fieldDimensions ?? [];
       const sourceBounds = resource?.sourceBounds ?? [];
       const decodedBytes = dimensions.length === 2
         ? dimensions[0] * dimensions[1] * 4
@@ -1148,12 +1150,15 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
         && expectedRegions.includes(resource?.regionId)
         && decodedBytes > 0
         && resource?.decodedBytes === decodedBytes
+        && fieldDimensions.length === 2
+        && dimensions[0] === fieldDimensions[0] * 2
+        && dimensions[1] === fieldDimensions[1]
         && sourceBounds.length === 4
-        && sourceBounds[2] - sourceBounds[0] === dimensions[0]
-        && sourceBounds[3] - sourceBounds[1] === dimensions[1]
+        && sourceBounds[2] - sourceBounds[0] === fieldDimensions[0]
+        && sourceBounds[3] - sourceBounds[1] === fieldDimensions[1]
         && resource?.sha256 === sha256
         && new RegExp(
-          `^/career-world/layers/water-surface/fields/ninjaone-hydrology-(b2|c1|c2)-${tierId}-r3\\.png\\?v=[a-f\\d]{12}$`,
+          `^/career-world/layers/water-surface/fields/ninjaone-hydrology-(b2|c1|c2)-${tierId}-r4\\.png\\?v=[a-f\\d]{12}$`,
         ).test(resource?.path ?? "")
         && !/hydrology-flow(?:-fallback)?-r2/.test(resource?.path ?? "");
       return Object.freeze({
@@ -1222,7 +1227,7 @@ export async function auditHydrologyRuntimeBudget({ manifest, root = process.cwd
     ) === fallbackWorstCohort?.decodedBytes
     && fallbackWorstCohort?.decodedBytes
       === tierAudits.fallback.maximumCohortDecodedBytes;
-  const pass = manifest?.schemaVersion === 3
+  const pass = manifest?.schemaVersion === 4
     && manifest?.id === "career-world/capitals/ninjaone/hydrology-native@r2"
     && manifest?.field === undefined
     && manifest?.fallbackField === undefined
@@ -4698,11 +4703,9 @@ export async function auditRuntimeCaptureEvidence({
         if (!contractMatches) {
           failures.push(`motion.${capture.id}.field_contract_mismatch`);
         }
-        const requiredStyles = checkpointId === "C1"
-          ? ["coastFoam", "stream"]
-          : checkpointId === "C2"
-            ? ["stream", "turbulence"]
-            : [];
+        const requiredStyles = new Set(["C1", "C2"]).has(checkpointId)
+          ? ["whitewater"]
+          : [];
         if (requiredStyles.some((style) => !(capture.contract?.styleCounts?.[style] > 0))) {
           failures.push(`motion.${capture.id}.required_feature_style_missing`);
         }
@@ -4930,7 +4933,7 @@ export function auditCameraDecodedBudgets({
   seamInstances = [],
 }) {
   if (
-    hydrologyManifest?.schemaVersion !== 3
+    hydrologyManifest?.schemaVersion !== 4
     || hydrologyManifest?.regionalFields?.cohortPolicy?.maximumMountedRegions !== 2
     || hydrologyManifest?.regionalFields?.cohortPolicy?.mixedTierAllowed !== false
   ) throw new TypeError("Regional hydrology budget contract is invalid.");

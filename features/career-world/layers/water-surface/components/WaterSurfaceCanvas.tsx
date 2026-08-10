@@ -141,7 +141,7 @@ export function WaterSurfaceCanvas({
 
   return (
     <canvas
-      aria-label="Animated dark-fantasy ocean surface"
+      aria-label="Animated ocean, river, and waterfall water surface"
       className="career-world__water-canvas"
       data-layer="water-surface"
       data-foreground-hydrology={foregroundHydrology}

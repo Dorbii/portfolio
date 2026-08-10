@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "id": "career-world/capitals/ninjaone/hydrology-native@r2",
-  "packingRevision": "regional-r3",
+  "packingRevision": "regional-r4-field-driven",
   "status": "regional-runtime-candidate-awaiting-authority-freeze",
   "coordinateSpace": "ninjaone-environment-artboard-top-left",
   "source": {
@@ -11,8 +11,13 @@
       4320
     ],
     "path": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
-    "role": "accepted rendered topology used only to derive registered water and foam coverage",
+    "role": "accepted rendered topology used only to derive registered water and water-connected foam coverage",
     "sha256": "C6E2107C9A1AB425E5103964DC617E4DEE30865DF1EB50528007AF7BDF58BDA9"
+  },
+  "visualReference": {
+    "path": "/art-source/career-world/water-surface/waterfall-reference-template-r1.png",
+    "role": "style-only waterfall reference sampled into descriptor-bounded aeration support; never a terrain or mask authority",
+    "sha256": "F8F2070D72CB28010F105604415197BEE42F7F769BB630EB8117238B52F77077"
   },
   "registration": {
     "artboardDimensions": [
@@ -40,10 +45,19 @@
   },
   "regionalFields": {
     "channelEncoding": {
-      "r": "time-invariant registered water coverage",
-      "g": "signed unit downhill flow x encoded as 128 + value * 127",
-      "b": "signed unit downhill flow y encoded as 128 + value * 127",
-      "a": "hydrology style code"
+      "layout": "primary and auxiliary equal-width RGBA planes packed side-by-side in each regional texture",
+      "primary": {
+        "a": "deterministic visual depth from offline bank-distance transform; zero on dry pixels",
+        "b": "signed velocity y with local magnitude encoded as 128 + value * 127",
+        "g": "signed velocity x with local magnitude encoded as 128 + value * 127",
+        "r": "time-invariant exact registered water coverage from water authority or water-connected foam"
+      },
+      "auxiliary": {
+        "a": "localized cascade stage support",
+        "b": "localized impact mist potential",
+        "g": "terrain-registered obstacle bow, shoulder, and wake support",
+        "r": "localized whitewater potential"
+      }
     },
     "cohortPolicy": {
       "atomic": true,
@@ -65,8 +79,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 3017632,
-          "fallback": 739820
+          "detail": 1473784,
+          "fallback": 368640
         },
         "regionIds": [
           "B2"
@@ -74,8 +88,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 2069040,
-          "fallback": 509312
+          "detail": 4115712,
+          "fallback": 1018624
         },
         "regionIds": [
           "C1"
@@ -83,8 +97,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 4197876,
-          "fallback": 1039500
+          "detail": 8323920,
+          "fallback": 2079000
         },
         "regionIds": [
           "C2"
@@ -92,8 +106,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 5086672,
-          "fallback": 1249132
+          "detail": 5589496,
+          "fallback": 1387264
         },
         "regionIds": [
           "B2",
@@ -102,8 +116,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 7215508,
-          "fallback": 1779320
+          "detail": 9797704,
+          "fallback": 2447640
         },
         "regionIds": [
           "B2",
@@ -112,8 +126,8 @@
       },
       {
         "decodedBytes": {
-          "detail": 6266916,
-          "fallback": 1548812
+          "detail": 12439632,
+          "fallback": 3097624
         },
         "regionIds": [
           "C1",
@@ -124,27 +138,27 @@
     "regions": [
       {
         "artboardBounds": [
-          358,
+          528,
           540,
           720,
-          1061
+          780.5
         ],
         "id": "B2",
         "worldBounds": {
           "origin": [
-            0.18715277777777778,
+            0.21666666666666667,
             0.16666666666666666
           ],
           "span": [
-            0.06284722222222222,
-            0.16080246913580246
+            0.03333333333333333,
+            0.07422839506172839
           ]
         }
       },
       {
         "artboardBounds": [
           724,
-          170,
+          172,
           1073.5,
           540
         ],
@@ -152,11 +166,11 @@
         "worldBounds": {
           "origin": [
             0.25069444444444444,
-            0.05246913580246913
+            0.05308641975308642
           ],
           "span": [
             0.06067708333333333,
-            0.11419753086419754
+            0.11358024691358024
           ]
         }
       },
@@ -164,8 +178,8 @@
         "artboardBounds": [
           720,
           540,
-          1215.5,
-          1069.5
+          1215,
+          1065.5
         ],
         "id": "C2",
         "worldBounds": {
@@ -174,108 +188,103 @@
             0.16666666666666666
           ],
           "span": [
-            0.08602430555555556,
-            0.16342592592592592
+            0.0859375,
+            0.16219135802469134
           ]
         }
       }
     ],
     "tiers": {
       "detail": {
-        "decodedBytes": 9284548,
+        "decodedBytes": 13913416,
         "fullFieldDimensions": [
           2880,
           2160
         ],
-        "maximumSteadyCohortDecodedBytes": 7215508,
-        "occupiedPixels": 77760,
+        "maximumSteadyCohortDecodedBytes": 12439632,
+        "occupiedPixels": 77535,
         "resources": [
           {
             "artboardBounds": [
-              358,
+              528.5,
               540,
               720,
-              1061
+              780.5
             ],
-            "decodedBytes": 3017632,
+            "decodedBytes": 1473784,
             "dimensions": [
-              724,
-              1042
+              766,
+              481
             ],
-            "id": "ninjaone-hydrology-b2-detail-r3",
+            "fieldDimensions": [
+              383,
+              481
+            ],
+            "id": "ninjaone-hydrology-b2-detail-r4",
             "metrics": {
-              "coveragePixels": 33207,
-              "directionalPixels": 9423,
+              "coveragePixels": 33106,
+              "directionalPixels": 10628,
               "meanFlowVector": [
-                0.6412040965543794,
-                0.7673703842095303
+                0.5642461970036248,
+                0.8256065825603298
               ],
-              "rawRgbaSha256": "F5EF729A1E17C90C81D4998C152E2BB4F442FA3014CC23D869A1B2E65A6E23B2",
-              "stylePixels": {
-                "stream": 5663,
-                "tarn": 23784,
-                "lip": 1121,
-                "waterfall": 288,
-                "impact": 2350,
-                "turbulence": 1
-              }
+              "rawAuxiliaryRgbaSha256": "0F509FE12DD6C9ED52DDEB2A36C39AFA6F0EB7602077CB0AD590E15109D4B737",
+              "rawPrimaryRgbaSha256": "81AEC1FF1027A43C385BE3910F56C3370E9AC71C1174D1C4F7A71D027191E0CD"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-b2-detail-r3.png?v=f15f0b48c8a9",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-b2-detail-r4.png?v=e5aebef6a94c",
             "regionId": "B2",
-            "sha256": "F15F0B48C8A97A21A88594378274FFF0737A5CD8F9FA9B1A87C9C400AE3B0EBE",
+            "sha256": "E5AEBEF6A94C77A9BDCF88A07D25546673AE03F1ECFDCBB4AE2633C2762D3BD3",
             "sourceBounds": [
-              716,
+              1057,
               1080,
               1440,
-              2122
+              1561
             ],
             "tier": "detail",
             "worldBounds": {
               "origin": [
-                0.18715277777777778,
+                0.21675347222222222,
                 0.16666666666666666
               ],
               "span": [
-                0.06284722222222222,
-                0.16080246913580246
+                0.03324652777777778,
+                0.07422839506172839
               ]
             }
           },
           {
             "artboardBounds": [
               724,
-              170,
+              172,
               1073.5,
               540
             ],
-            "decodedBytes": 2069040,
+            "decodedBytes": 4115712,
             "dimensions": [
-              699,
-              740
+              1398,
+              736
             ],
-            "id": "ninjaone-hydrology-c1-detail-r3",
+            "fieldDimensions": [
+              699,
+              736
+            ],
+            "id": "ninjaone-hydrology-c1-detail-r4",
             "metrics": {
-              "coveragePixels": 23961,
-              "directionalPixels": 23961,
+              "coveragePixels": 23885,
+              "directionalPixels": 22292,
               "meanFlowVector": [
-                -0.021950862560128518,
-                0.9997590507881718
+                -0.14630463900834453,
+                0.9892395830154787
               ],
-              "rawRgbaSha256": "D319D8B8260485932392F1AD7698AF49BCC77AE584E5F35B46EF6BE97115D956",
-              "stylePixels": {
-                "coast": 1651,
-                "turbulence": 19478,
-                "lip": 46,
-                "waterfall": 240,
-                "impact": 2546
-              }
+              "rawAuxiliaryRgbaSha256": "0B26DC9AF3FC1E196571FE54BA615C65465304FC44EC62FFD9F4004131189E77",
+              "rawPrimaryRgbaSha256": "221AD3E8A9215B75EA60BA0CE617D1DD4195FB57F6B53B2D120DFADA8B6F7FEF"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-detail-r3.png?v=2eb49ddd3337",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-detail-r4.png?v=ea91145d6377",
             "regionId": "C1",
-            "sha256": "2EB49DDD3337CC4849B4CB8BCB293B40CF23D1108BCE256156418FEFDA92A468",
+            "sha256": "EA91145D63778A441FD307007F0E8EEBB7CA9F0FA132C458BBC79D89E56E75D1",
             "sourceBounds": [
               1448,
-              340,
+              344,
               2147,
               1080
             ],
@@ -283,11 +292,11 @@
             "worldBounds": {
               "origin": [
                 0.25069444444444444,
-                0.05246913580246913
+                0.05308641975308642
               ],
               "span": [
                 0.06067708333333333,
-                0.11419753086419754
+                0.11358024691358024
               ]
             }
           },
@@ -295,39 +304,37 @@
             "artboardBounds": [
               720,
               540,
-              1215.5,
-              1069.5
+              1215,
+              1065.5
             ],
-            "decodedBytes": 4197876,
+            "decodedBytes": 8323920,
             "dimensions": [
-              991,
-              1059
+              1980,
+              1051
             ],
-            "id": "ninjaone-hydrology-c2-detail-r3",
+            "fieldDimensions": [
+              990,
+              1051
+            ],
+            "id": "ninjaone-hydrology-c2-detail-r4",
             "metrics": {
-              "coveragePixels": 20592,
-              "directionalPixels": 20592,
+              "coveragePixels": 20544,
+              "directionalPixels": 20544,
               "meanFlowVector": [
-                -0.16328263940080742,
-                0.9865793326794889
+                -0.1708568012647473,
+                0.9852958710263525
               ],
-              "rawRgbaSha256": "138DB4D98CE8C1316A9CC6337AC09311B65607D716046F8981A454CE3224905B",
-              "stylePixels": {
-                "turbulence": 17837,
-                "lip": 194,
-                "waterfall": 109,
-                "impact": 2235,
-                "stream": 217
-              }
+              "rawAuxiliaryRgbaSha256": "6EA5E16251ECFE277F6471F78CD567C0AFF8FE84F6807957CAB88820CDA62911",
+              "rawPrimaryRgbaSha256": "6676304B565CE6020BCAD4BB383B8D057AE9ACFF0B9AFB408E0B44DC1A82072B"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-detail-r3.png?v=79873132972b",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-detail-r4.png?v=ae1aeb385b35",
             "regionId": "C2",
-            "sha256": "79873132972B2F19926AF4B936FEE22817530F7C8D71FE8D10769A39068AE5B4",
+            "sha256": "AE1AEB385B35C5C726DBD84BCCB980200AF1FD728C7F8AD53BB4424347AE54A7",
             "sourceBounds": [
               1440,
               1080,
-              2431,
-              2139
+              2430,
+              2131
             ],
             "tier": "detail",
             "worldBounds": {
@@ -336,8 +343,8 @@
                 0.16666666666666666
               ],
               "span": [
-                0.08602430555555556,
-                0.16342592592592592
+                0.0859375,
+                0.16219135802469134
               ]
             }
           }
@@ -345,61 +352,59 @@
         "scale": 2
       },
       "fallback": {
-        "decodedBytes": 2288632,
+        "decodedBytes": 3466264,
         "fullFieldDimensions": [
           1440,
           1080
         ],
-        "maximumSteadyCohortDecodedBytes": 1779320,
-        "occupiedPixels": 19399,
+        "maximumSteadyCohortDecodedBytes": 3097624,
+        "occupiedPixels": 19344,
         "resources": [
           {
             "artboardBounds": [
-              365,
+              528,
               540,
               720,
-              1061
+              780
             ],
-            "decodedBytes": 739820,
+            "decodedBytes": 368640,
             "dimensions": [
-              355,
-              521
+              384,
+              240
             ],
-            "id": "ninjaone-hydrology-b2-fallback-r3",
+            "fieldDimensions": [
+              192,
+              240
+            ],
+            "id": "ninjaone-hydrology-b2-fallback-r4",
             "metrics": {
-              "coveragePixels": 8291,
-              "directionalPixels": 2349,
+              "coveragePixels": 8267,
+              "directionalPixels": 2648,
               "meanFlowVector": [
-                0.6426484344556592,
-                0.7661612034628811
+                0.5653662467419064,
+                0.8248399887523455
               ],
-              "rawRgbaSha256": "3DEE5F99E7014F069E48E5AB6568089085505D48F97A485D3FB2336F908801F2",
-              "stylePixels": {
-                "stream": 1417,
-                "tarn": 5942,
-                "lip": 275,
-                "waterfall": 72,
-                "impact": 585
-              }
+              "rawAuxiliaryRgbaSha256": "B67F52B72521E9D2D665BF1AE3FFC6C2C2D05FB76F923D98C1BD0AD3156C037C",
+              "rawPrimaryRgbaSha256": "38BEF91AC90DF68A776D70A1613172A6D125BA3CA372F80506F213D7A9F215E4"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-b2-fallback-r3.png?v=8c84525c2e39",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-b2-fallback-r4.png?v=2360dfd7692d",
             "regionId": "B2",
-            "sha256": "8C84525C2E3972886CABD179D3034B882F73AC8CBBA508576F5709FDD9CE46B7",
+            "sha256": "2360DFD7692DE1CE7E965F6CC859E3AE4A0D6C68C839D397054D84841874CB3E",
             "sourceBounds": [
-              365,
+              528,
               540,
               720,
-              1061
+              780
             ],
             "tier": "fallback",
             "worldBounds": {
               "origin": [
-                0.18836805555555555,
+                0.21666666666666667,
                 0.16666666666666666
               ],
               "span": [
-                0.06163194444444445,
-                0.16080246913580246
+                0.03333333333333333,
+                0.07407407407407407
               ]
             }
           },
@@ -410,31 +415,29 @@
               1073,
               540
             ],
-            "decodedBytes": 509312,
+            "decodedBytes": 1018624,
             "dimensions": [
+              692,
+              368
+            ],
+            "fieldDimensions": [
               346,
               368
             ],
-            "id": "ninjaone-hydrology-c1-fallback-r3",
+            "id": "ninjaone-hydrology-c1-fallback-r4",
             "metrics": {
-              "coveragePixels": 5978,
-              "directionalPixels": 5978,
+              "coveragePixels": 5961,
+              "directionalPixels": 5565,
               "meanFlowVector": [
-                -0.02396963062981778,
-                0.9997126871293924
+                -0.14750781493025206,
+                0.9890608902057055
               ],
-              "rawRgbaSha256": "2A56CDEE73E4EE4CE682990B6AFE46348A70D8B8EF8A4F64DBECCADB20718EAD",
-              "stylePixels": {
-                "coast": 410,
-                "turbulence": 4865,
-                "lip": 10,
-                "waterfall": 55,
-                "impact": 638
-              }
+              "rawAuxiliaryRgbaSha256": "D8B97FF9FDF54A22E934E3F8691B74B009C969999665E693603A5F7BCB1723E4",
+              "rawPrimaryRgbaSha256": "F4A662FD3EF5B511E643D14E8B1E749433C8ACADE11756FC2D57859D0CDF2FBF"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-fallback-r3.png?v=2378276dde07",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-fallback-r4.png?v=c049a8d69b85",
             "regionId": "C1",
-            "sha256": "2378276DDE07484BF1A9722CAAAB69AD34433AD2E2C99BD190245BC5F6615854",
+            "sha256": "C049A8D69B85BDA2CEDAB460601305887AAF334E17F73D5D53E63B88D83AE4D3",
             "sourceBounds": [
               727,
               172,
@@ -460,31 +463,29 @@
               1215,
               1065
             ],
-            "decodedBytes": 1039500,
+            "decodedBytes": 2079000,
             "dimensions": [
+              990,
+              525
+            ],
+            "fieldDimensions": [
               495,
               525
             ],
-            "id": "ninjaone-hydrology-c2-fallback-r3",
+            "id": "ninjaone-hydrology-c2-fallback-r4",
             "metrics": {
-              "coveragePixels": 5130,
-              "directionalPixels": 5130,
+              "coveragePixels": 5116,
+              "directionalPixels": 5116,
               "meanFlowVector": [
-                -0.16383746453896578,
-                0.986487346707216
+                -0.1715046987253944,
+                0.985183301886056
               ],
-              "rawRgbaSha256": "A32D8C36767A97E07796924BFE8BC4C1DEECF8ADA185408E997AD8408D5DBF71",
-              "stylePixels": {
-                "turbulence": 4451,
-                "lip": 46,
-                "waterfall": 27,
-                "impact": 556,
-                "stream": 50
-              }
+              "rawAuxiliaryRgbaSha256": "2C2A60546F50545404A8237AF463DBCCA531180216673BBF1CBE512CF6DC412E",
+              "rawPrimaryRgbaSha256": "18A509E62FECDC2AABA5F5DFEF42DED3613AEDE880C9B042B4940EA458158821"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-fallback-r3.png?v=21d8392099fb",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-fallback-r4.png?v=250b49b01a9f",
             "regionId": "C2",
-            "sha256": "21D8392099FB6D1B0230DDA5DD421CF5685453DD018D5B1EA7846B199380E897",
+            "sha256": "250B49B01A9F8615CB09A1E44133EAC7834DEF3931F3A7CF5806B62BBC46494E",
             "sourceBounds": [
               720,
               540,
@@ -515,7 +516,7 @@
           {
             "id": "seam-integration",
             "path": "/career-world/capitals/ninjaone/environment/manifests/seam-integration-native-r2.json",
-            "sha256": "EB4C49FA39CB3C6CF417B67560E692D159A6CC47DD1622518C5B89408295827F"
+            "sha256": "52D664E96AA473EA4FD916CE37FDF50C01754FB4403E7F15F6DE0B366A74F28D"
           }
         ],
         "status": "provisional-pending-static-foliage-seam-coast-freeze"
@@ -538,9 +539,9 @@
             0.075,
             0.075
           ],
-          "decodedBytes": 1779320,
+          "decodedBytes": 3097624,
           "regionIds": [
-            "B2",
+            "C1",
             "C2"
           ]
         },
@@ -560,15 +561,15 @@
       "maximumDecodedBytes": 33554432,
       "tiers": {
         "detail": {
-          "maximumCohortDecodedBytes": 7215508
+          "maximumCohortDecodedBytes": 12439632
         },
         "fallback": {
-          "maximumCohortDecodedBytes": 1779320
+          "maximumCohortDecodedBytes": 3097624
         }
       },
       "totalPackedDecodedBytes": {
-        "detail": 9284548,
-        "fallback": 2288632
+        "detail": 13913416,
+        "fallback": 3466264
       }
     },
     "sharedWaterTexturePool": {
@@ -588,10 +589,258 @@
     "impact": 224,
     "coast": 252
   },
+  "cascades": [
+    {
+      "approach": {
+        "extentPixels": 29,
+        "widthPixels": 21
+      },
+      "crest": {
+        "end": [
+          916.4,
+          340.5
+        ],
+        "start": [
+          892.6,
+          343.5
+        ],
+        "thicknessPixels": 4
+      },
+      "fall": {
+        "direction": [
+          0.124,
+          0.9923
+        ],
+        "extentPixels": 46,
+        "widthPixels": 26
+      },
+      "id": "c1-r1c2-main-drop",
+      "impact": {
+        "center": [
+          919,
+          392
+        ],
+        "radiiPixels": [
+          26,
+          18
+        ]
+      },
+      "maskPolicy": "registered water remains exact; only descriptor-bounded crest, falling sheet, impact spray, and mist may overlay land",
+      "mist": {
+        "driftVector": [
+          0.7809,
+          0.6247
+        ],
+        "radiusPixels": 26
+      },
+      "pool": {
+        "outflowExtentPixels": 44,
+        "radiiPixels": [
+          35,
+          21
+        ]
+      },
+      "regionId": "C1"
+    },
+    {
+      "approach": {
+        "extentPixels": 12,
+        "widthPixels": 8.5
+      },
+      "crest": {
+        "end": [
+          659,
+          642
+        ],
+        "start": [
+          644,
+          647
+        ],
+        "thicknessPixels": 4
+      },
+      "fall": {
+        "direction": [
+          0.212,
+          0.9773
+        ],
+        "extentPixels": 20,
+        "widthPixels": 10
+      },
+      "id": "b2-tarn-upper-drop",
+      "impact": {
+        "center": [
+          656,
+          665
+        ],
+        "radiiPixels": [
+          5.5,
+          7
+        ]
+      },
+      "maskPolicy": "registered water remains exact; only descriptor-bounded crest, falling sheet, impact spray, and mist may overlay land",
+      "mist": {
+        "driftVector": [
+          -0.5,
+          -0.866
+        ],
+        "radiusPixels": 10
+      },
+      "pool": {
+        "outflowExtentPixels": 9,
+        "radiiPixels": [
+          7,
+          8
+        ]
+      },
+      "regionId": "B2"
+    },
+    {
+      "approach": {
+        "extentPixels": 11,
+        "widthPixels": 7
+      },
+      "crest": {
+        "end": [
+          663.5,
+          677.5
+        ],
+        "start": [
+          646,
+          684
+        ],
+        "thicknessPixels": 3
+      },
+      "fall": {
+        "direction": [
+          0.082,
+          0.9966
+        ],
+        "extentPixels": 17,
+        "widthPixels": 9
+      },
+      "id": "b2-tarn-lower-drop",
+      "impact": {
+        "center": [
+          656,
+          698
+        ],
+        "radiiPixels": [
+          5,
+          7
+        ]
+      },
+      "maskPolicy": "registered water remains exact; only descriptor-bounded crest, falling sheet, impact spray, and mist may overlay land",
+      "mist": {
+        "driftVector": [
+          0.082,
+          0.9966
+        ],
+        "radiusPixels": 9
+      },
+      "pool": {
+        "outflowExtentPixels": 9,
+        "radiiPixels": [
+          7,
+          8
+        ]
+      },
+      "regionId": "B2"
+    },
+    {
+      "approach": {
+        "extentPixels": 15,
+        "widthPixels": 18
+      },
+      "crest": {
+        "end": [
+          731,
+          745
+        ],
+        "start": [
+          714,
+          757
+        ],
+        "thicknessPixels": 3
+      },
+      "fall": {
+        "direction": [
+          0.5547,
+          0.8321
+        ],
+        "extentPixels": 24,
+        "widthPixels": 22
+      },
+      "id": "c2-r2c2-main-drop",
+      "impact": {
+        "center": [
+          733,
+          774
+        ],
+        "radiiPixels": [
+          19,
+          15
+        ]
+      },
+      "maskPolicy": "registered water remains exact; only descriptor-bounded crest, falling sheet, impact spray, and mist may overlay land",
+      "mist": {
+        "driftVector": [
+          0.8321,
+          0.5547
+        ],
+        "radiusPixels": 24
+      },
+      "pool": {
+        "outflowExtentPixels": 33,
+        "radiiPixels": [
+          26,
+          17
+        ]
+      },
+      "regionId": "C2"
+    }
+  ],
+  "obstacles": [
+    {
+      "bowExtentPixels": 9,
+      "center": [
+        629,
+        652
+      ],
+      "flowDirection": [
+        0.212,
+        0.9773
+      ],
+      "id": "b2-tarn-outlet-boulder",
+      "intensity": 0.78,
+      "maskPolicy": "wake support is evaluated only inside accepted registered water coverage",
+      "radiusPixels": 7,
+      "regionId": "B2",
+      "wakeExtentPixels": 30,
+      "wakeWidthPixels": 12
+    },
+    {
+      "bowExtentPixels": 5,
+      "center": [
+        655,
+        675
+      ],
+      "flowDirection": [
+        0.4301,
+        0.9028
+      ],
+      "id": "b2-tarn-channel-split-rock",
+      "intensity": 0.52,
+      "maskPolicy": "wake support is evaluated only inside accepted registered water coverage",
+      "radiusPixels": 4,
+      "regionId": "B2",
+      "wakeExtentPixels": 17,
+      "wakeWidthPixels": 7
+    }
+  ],
   "masks": {
-    "foam": "water coverage where style code is lip, waterfall, impact, or coast",
-    "mist": "water coverage where style code is impact; shader keeps opacity restrained",
-    "water": "field red channel greater than zero"
+    "foam": "auxiliary red potential multiplied by exact primary red coverage",
+    "mist": "auxiliary blue potential multiplied by exact primary red coverage",
+    "water": "primary red channel greater than zero from water authority or water-connected foam; auxiliary support cannot expand it"
   },
   "hydrologyTransitionHandoffs": [
     {
@@ -648,49 +897,41 @@
   ],
   "metrics": {
     "cellPixels": {
-      "B2": 33207,
-      "C1": 23961,
-      "C2": 20592
+      "B2": 33106,
+      "C1": 23885,
+      "C2": 20544
     },
-    "directionalPixels": 54369,
-    "foamPixels": 10780,
-    "mistPixels": 7131,
+    "directionalPixels": 53857,
+    "foamPixels": 44783,
+    "mistPixels": 5788,
     "segmentPixels": {
-      "c1-r0c2-mainland-coast": 1553,
-      "c1-r1c2-north-coast": 98,
+      "c1-r0c2-mainland-coast": 1511,
+      "c1-r1c2-north-coast": 82,
       "c1-r1c2-waterfall-lip": 46,
       "c1-r1c2-vertical-fall": 240,
-      "c1-r1c2-base-foam": 2546,
-      "c1-main-river-upper-channel": 20547,
-      "c2-main-river-upper-channel": 19981,
+      "c1-r1c2-base-foam": 2544,
+      "c1-main-river-upper-channel": 20530,
+      "c2-main-river-upper-channel": 19952,
       "b2-tarn-inlet": 3825,
-      "b2-tarn-ripple": 23784,
-      "b2-tarn-outlet-lip": 834,
-      "b2-tarn-vertical-fall": 224,
-      "b2-tarn-base-foam": 2292,
-      "b2-r2c1-lower-pools": 2143,
-      "b2-r3c1-cascade-lip": 70,
-      "b2-r3c1-cascade-fall": 64,
-      "b2-r3c1-cascade-impact": 47,
-      "b2-r3c1-downstream": 88,
+      "b2-tarn-ripple": 22521,
+      "b2-tarn-outlet-run": 6924,
       "c2-r2c2-waterfall-lip": 411,
       "c2-r2c2-vertical-fall": 109,
       "c2-r2c2-base-foam": 2246,
-      "c2-r2c2-lower-channel": 1,
-      "c2-r3c2-channel": 115,
-      "c2-r3c2-turbulence": 39,
-      "c2-r3c3-channel": 104
+      "c2-r3c2-channel": 104,
+      "c2-r3c2-turbulence": 38,
+      "c2-r3c3-channel": 91
     },
     "stylePixels": {
-      "tarn": 23784,
-      "stream": 6273,
-      "turbulence": 37316,
-      "lip": 1361,
-      "waterfall": 637,
-      "impact": 7131,
-      "coast": 1651
+      "tarn": 22521,
+      "stream": 10944,
+      "turbulence": 40520,
+      "lip": 457,
+      "waterfall": 349,
+      "impact": 4790,
+      "coast": 1593
     },
-    "waterPixels": 78153
+    "waterPixels": 77928
   },
   "segments": [
     {
@@ -709,7 +950,7 @@
       ],
       "id": "c1-r0c2-mainland-coast",
       "kind": "coast",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 10,
       "shape": {
         "points": [
@@ -750,7 +991,7 @@
       ],
       "id": "c1-r1c2-north-coast",
       "kind": "coast",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 10,
       "shape": {
         "points": [
@@ -795,7 +1036,7 @@
       ],
       "id": "c1-r1c2-waterfall-lip",
       "kind": "waterfall-lip",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 75,
       "shape": {
         "points": [
@@ -829,7 +1070,7 @@
       ],
       "id": "c1-r1c2-vertical-fall",
       "kind": "waterfall",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 70,
       "shape": {
         "points": [
@@ -863,7 +1104,7 @@
       ],
       "id": "c1-r1c2-base-foam",
       "kind": "impact",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 80,
       "shape": {
         "points": [
@@ -897,7 +1138,7 @@
       ],
       "id": "c1-main-river-upper-channel",
       "kind": "turbulence",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 45,
       "shape": {
         "points": [
@@ -963,7 +1204,7 @@
       ],
       "id": "c2-main-river-upper-channel",
       "kind": "turbulence",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 45,
       "shape": {
         "points": [
@@ -1033,7 +1274,7 @@
       ],
       "id": "b2-tarn-inlet",
       "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 35,
       "shape": {
         "points": [
@@ -1075,7 +1316,7 @@
       ],
       "id": "b2-tarn-ripple",
       "kind": "tarn",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 20,
       "rippleCenter": [
         606,
@@ -1130,288 +1371,78 @@
     },
     {
       "artboardBounds": [
-        638,
-        626,
-        664,
-        665
+        623,
+        621,
+        706,
+        747
       ],
       "cellIds": [
         "B2"
       ],
       "declaredFlowVector": [
-        0.1104,
-        0.9939
+        0.4833,
+        0.8755
       ],
-      "id": "b2-tarn-outlet-lip",
-      "kind": "waterfall-lip",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 75,
+      "id": "b2-tarn-outlet-run",
+      "kind": "stream",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
+      "priority": 40,
       "shape": {
         "points": [
           [
-            650,
-            638
+            638,
+            636
           ],
           [
-            652,
-            653
-          ]
-        ],
-        "radius": 12,
-        "type": "path"
-      },
-      "styleCode": 148
-    },
-    {
-      "artboardBounds": [
-        641,
-        639,
-        667,
-        695
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.124,
-        0.9923
-      ],
-      "id": "b2-tarn-vertical-fall",
-      "kind": "waterfall",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 70,
-      "shape": {
-        "points": [
+            644,
+            642
+          ],
           [
-            652,
-            650
+            653,
+            647
+          ],
+          [
+            650,
+            652
+          ],
+          [
+            655,
+            660
           ],
           [
             656,
-            684
+            670
+          ],
+          [
+            660,
+            680
+          ],
+          [
+            662,
+            690
+          ],
+          [
+            660,
+            700
+          ],
+          [
+            666,
+            710
+          ],
+          [
+            674,
+            718
+          ],
+          [
+            678,
+            724
+          ],
+          [
+            691,
+            732
           ]
         ],
-        "radius": 11,
-        "type": "path"
-      },
-      "styleCode": 192
-    },
-    {
-      "artboardBounds": [
-        638,
-        666,
-        692,
-        716
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.7809,
-        0.6247
-      ],
-      "id": "b2-tarn-base-foam",
-      "kind": "impact",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 80,
-      "shape": {
-        "points": [
-          [
-            655,
-            683
-          ],
-          [
-            675,
-            699
-          ]
-        ],
-        "radius": 17,
-        "type": "path"
-      },
-      "styleCode": 224
-    },
-    {
-      "artboardBounds": [
-        647,
-        678,
-        708,
-        751
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.7682,
-        0.6402
-      ],
-      "id": "b2-r2c1-lower-pools",
-      "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 35,
-      "shape": {
-        "points": [
-          [
-            665,
-            696
-          ],
-          [
-            677,
-            712
-          ],
-          [
-            690,
-            733
-          ]
-        ],
-        "radius": 18,
-        "type": "path"
-      },
-      "styleCode": 96
-    },
-    {
-      "artboardBounds": [
-        354,
-        889,
-        392,
-        923
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.8,
-        0.6
-      ],
-      "id": "b2-r3c1-cascade-lip",
-      "kind": "waterfall-lip",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 75,
-      "shape": {
-        "points": [
-          [
-            365,
-            900
-          ],
-          [
-            381,
-            912
-          ]
-        ],
-        "radius": 11,
-        "type": "path"
-      },
-      "styleCode": 148
-    },
-    {
-      "artboardBounds": [
-        366,
-        896,
-        444,
-        962
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.8,
-        0.6
-      ],
-      "id": "b2-r3c1-cascade-fall",
-      "kind": "waterfall",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 70,
-      "shape": {
-        "points": [
-          [
-            380,
-            910
-          ],
-          [
-            406,
-            930
-          ],
-          [
-            430,
-            948
-          ]
-        ],
-        "radius": 14,
-        "type": "path"
-      },
-      "styleCode": 192
-    },
-    {
-      "artboardBounds": [
-        409,
-        927,
-        466,
-        979
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.7962,
-        0.605
-      ],
-      "id": "b2-r3c1-cascade-impact",
-      "kind": "impact",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 80,
-      "shape": {
-        "points": [
-          [
-            426,
-            944
-          ],
-          [
-            449,
-            962
-          ]
-        ],
-        "radius": 17,
-        "type": "path"
-      },
-      "styleCode": 224
-    },
-    {
-      "artboardBounds": [
-        425,
-        941,
-        557,
-        1067
-      ],
-      "cellIds": [
-        "B2"
-      ],
-      "declaredFlowVector": [
-        0.727,
-        0.6866
-      ],
-      "id": "b2-r3c1-downstream",
-      "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 35,
-      "shape": {
-        "points": [
-          [
-            442,
-            958
-          ],
-          [
-            475,
-            985
-          ],
-          [
-            510,
-            1017
-          ],
-          [
-            540,
-            1050
-          ]
-        ],
-        "radius": 17,
+        "radius": 15,
         "type": "path"
       },
       "styleCode": 96
@@ -1432,7 +1463,7 @@
       ],
       "id": "c2-r2c2-waterfall-lip",
       "kind": "waterfall-lip",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 75,
       "shape": {
         "points": [
@@ -1466,7 +1497,7 @@
       ],
       "id": "c2-r2c2-vertical-fall",
       "kind": "waterfall",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 70,
       "shape": {
         "points": [
@@ -1500,7 +1531,7 @@
       ],
       "id": "c2-r2c2-base-foam",
       "kind": "impact",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 80,
       "shape": {
         "points": [
@@ -1520,48 +1551,6 @@
     },
     {
       "artboardBounds": [
-        719,
-        760,
-        849,
-        826
-      ],
-      "cellIds": [
-        "C2"
-      ],
-      "declaredFlowVector": [
-        0.9231,
-        0.3846
-      ],
-      "id": "c2-r2c2-lower-channel",
-      "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
-      "priority": 35,
-      "shape": {
-        "points": [
-          [
-            736,
-            777
-          ],
-          [
-            765,
-            790
-          ],
-          [
-            799,
-            801
-          ],
-          [
-            832,
-            809
-          ]
-        ],
-        "radius": 17,
-        "type": "path"
-      },
-      "styleCode": 96
-    },
-    {
-      "artboardBounds": [
         848,
         794,
         1094,
@@ -1576,7 +1565,7 @@
       ],
       "id": "c2-r3c2-channel",
       "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 35,
       "shape": {
         "points": [
@@ -1626,7 +1615,7 @@
       ],
       "id": "c2-r3c2-turbulence",
       "kind": "turbulence",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 45,
       "shape": {
         "points": [
@@ -1664,7 +1653,7 @@
       ],
       "id": "c2-r3c3-channel",
       "kind": "stream",
-      "maskPolicy": "accepted registered-master water and foam pixels inside declared topology corridor",
+      "maskPolicy": "accepted registered-master water or water-connected foam inside declared topology corridor",
       "priority": 35,
       "shape": {
         "points": [

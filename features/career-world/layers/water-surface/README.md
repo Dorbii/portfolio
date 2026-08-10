@@ -26,6 +26,35 @@ repainting the coast.
 the number of visible wave periods, and `detailScale` controls the micro-normal
 contribution. Weather, opacity, and wind direction remain independent inputs.
 
+`CAREER_WORLD_WATER_REALISM_PROFILE` is the revisioned material contract above
+that runtime state. It keeps ocean settings plus bounded river-surface,
+bank/depth, waterfall-sheet, impact, and mist parameters in one validated,
+deeply frozen record. A future territory reuses the renderer by publishing one
+packed regional texture: primary coverage, vector velocity with magnitude, and
+offline bank distance in the left half; localized whitewater, obstacle wake,
+mist, and cascade support in the right half. Tarn segments provide a
+`rippleCenter`. Each waterfall publishes a data-driven cascade descriptor for
+approach, crest, falling sheet, impact, plunge pool/outflow, and mist. Explicit
+obstacle descriptors produce terrain-registered bow/shoulder/wake fields. The
+runtime uploads authored approach and pool/outflow dimensions alongside crest,
+sheet, impact, and mist geometry; it does not synthesize a generic wake length
+from drop energy. All coordinates come from that manifest rather than territory
+constants in shader source.
+
+Registered inland water has three alpha owners. The source field exclusively
+owns river, tarn, bank, wake, and pool coverage. A cascade descriptor may add a
+bounded dark sheet underlay, bright aerated crest/fall/impact detail, and
+light-only major-impact mist over the cliff pixels named by that descriptor;
+dry terrain outside those envelopes remains unchanged. Broken crest flecks,
+falling filaments, impact froth, obstacle wakes, and mist scale with descriptor
+fall extent and packed support. Advected texture breakup and separate sheet,
+impact, and mist alpha ceilings keep the support geometry from appearing as a
+hatch field, rectangle, ring, or opaque decal. Close rivers deliberately use
+two transformed samples of the broad macro height field: the dense
+crossing-wave micro field remains ocean-only because it resolves as
+rain/hatching at river scale. Canvas telemetry exposes schema and packing
+revision so captures can prove that the field-driven resources are resident.
+
 The shared scene LOD supplies continuous world-to-territory,
 territory-to-capital, and capital-to-site weights. Macro swell remains
 world-anchored. The
