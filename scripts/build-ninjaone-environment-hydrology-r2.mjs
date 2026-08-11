@@ -13,6 +13,47 @@ const REGISTERED_TERRAIN_MASTER_PATH = path.join(
   "art-source/career-world/ninjaone-environment/production-r2/"
     + "ninjaone-environment-terrain-master-detail-r2.png",
 );
+const REGISTERED_WATER_EFFECTS_MASK_PATH = path.join(
+  ROOT,
+  "art-source/career-world/ninjaone-environment/production-r2/"
+    + "water-base-r1/registered-water-effects-source-mask-r1.png",
+);
+const DECLARED_WATER_CORRIDOR_MASK_PATH = path.join(
+  ROOT,
+  "art-source/career-world/ninjaone-environment/production-r2/"
+    + "water-base-r1/declared-inland-water-corridor-r1.png",
+);
+const REGISTERED_INLAND_WATER_MASK_PATH = path.join(
+  ROOT,
+  "art-source/career-world/ninjaone-environment/production-r2/"
+    + "water-base-r1/registered-inland-water-mask-r1.png",
+);
+const WATER_INTENT_REFERENCES = Object.freeze([
+  Object.freeze({
+    dimensions: Object.freeze([1448, 1086]),
+    path: "art-source/career-world/ninjaone-environment/production-r2/"
+      + "water-base-r1/neutral-water-reference-r1.png",
+    role: "full-concept authority for watercourse direction and feature classification",
+  }),
+  Object.freeze({
+    dimensions: Object.freeze([2880, 2160]),
+    path: "art-source/career-world/ninjaone-environment/production-r2/"
+      + "water-base-r1/declared-inland-water-corridor-r1.png",
+    role: "declared inland-water topology corridor; not a waterfall-placement inference map",
+  }),
+  Object.freeze({
+    dimensions: Object.freeze([2880, 2160]),
+    path: "art-source/career-world/ninjaone-environment/production-r2/"
+      + "water-base-r1/registered-inland-water-mask-r1.png",
+    role: "registered inland-water body evidence inside the declared topology corridor",
+  }),
+  Object.freeze({
+    dimensions: Object.freeze([2880, 2160]),
+    path: "art-source/career-world/ninjaone-environment/production-r2/"
+      + "water-base-r1/registered-water-effects-source-mask-r1.png",
+    role: "source-registered rapid and foam placement; never body topology",
+  }),
+]);
 const SEAM_INTEGRATION_MANIFEST_PATH = path.join(
   ROOT,
   "public/career-world/capitals/ninjaone/environment/manifests/"
@@ -26,10 +67,6 @@ const MANIFEST_PATH = path.join(
   ROOT,
   "public/career-world/capitals/ninjaone/environment/manifests/"
     + "hydrology-native-r2.json",
-);
-const WATERFALL_REFERENCE_TEMPLATE_PATH = path.join(
-  ROOT,
-  "art-source/career-world/water-surface/waterfall-reference-template-r1.png",
 );
 
 export const HYDROLOGY_ARTBOARD = Object.freeze([1440, 1080]);
@@ -89,6 +126,15 @@ const WHITEWATER_BY_KIND = Object.freeze({
   waterfall: 0.9,
   "waterfall-lip": 0.7,
 });
+const TRANSPARENT_CHANNEL_SEGMENT_IDS = new Set([
+  "c1-main-river-upper-channel",
+  "c2-main-river-upper-channel",
+  "b2-tarn-outlet-run",
+  "c2-gorge-lower-channel",
+  "c2-lower-river-channel",
+  "c2-lower-river-turbulence",
+  "c2-terminal-river-channel",
+]);
 
 const polygon = (points) => Object.freeze({
   points: Object.freeze(points.map((point) => Object.freeze(point))),
@@ -196,33 +242,6 @@ export const HYDROLOGY_SEGMENTS = Object.freeze([
   }),
   Object.freeze({
     cellIds: Object.freeze(["C1"]),
-    declaredFlowVector: Object.freeze([0.0624, 0.9981]),
-    id: "c1-r1c2-waterfall-lip",
-    kind: "waterfall-lip",
-    priority: 75,
-    shape: pathShape([[904, 334], [905, 350]], 12),
-    styleCode: STYLE.lip,
-  }),
-  Object.freeze({
-    cellIds: Object.freeze(["C1"]),
-    declaredFlowVector: Object.freeze([0.124, 0.9923]),
-    id: "c1-r1c2-vertical-fall",
-    kind: "waterfall",
-    priority: 70,
-    shape: pathShape([[905, 346], [910, 386]], 13),
-    styleCode: STYLE.waterfall,
-  }),
-  Object.freeze({
-    cellIds: Object.freeze(["C1"]),
-    declaredFlowVector: Object.freeze([0.8321, 0.5547]),
-    id: "c1-r1c2-base-foam",
-    kind: "impact",
-    priority: 80,
-    shape: pathShape([[908, 384], [930, 399]], 18),
-    styleCode: STYLE.impact,
-  }),
-  Object.freeze({
-    cellIds: Object.freeze(["C1"]),
     declaredFlowVector: Object.freeze([0.329, 0.9443]),
     id: "c1-main-river-upper-channel",
     kind: "turbulence",
@@ -254,11 +273,9 @@ export const HYDROLOGY_SEGMENTS = Object.freeze([
       [798, 657],
       [764, 701],
       [740, 747],
-      [736, 777],
-      [765, 790],
-      [799, 801],
-      [833, 809],
-      [865, 810],
+      [741, 777],
+      [745, 802],
+      [752, 816],
     ], 25),
     styleCode: STYLE.turbulence,
   }),
@@ -317,79 +334,86 @@ export const HYDROLOGY_SEGMENTS = Object.freeze([
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.4472, 0.8944]),
-    id: "c2-r2c2-waterfall-lip",
+    declaredFlowVector: Object.freeze([0.5145, 0.8575]),
+    id: "c2-gorge-cascade-lip",
     kind: "waterfall-lip",
     priority: 75,
-    shape: pathShape([[721, 747], [724, 755]], 10),
+    shape: pathShape([[749, 814], [758, 829]], 9),
     styleCode: STYLE.lip,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
     declaredFlowVector: Object.freeze([0.5547, 0.8321]),
-    id: "c2-r2c2-vertical-fall",
+    id: "c2-gorge-cascade-fall",
     kind: "waterfall",
     priority: 70,
-    shape: pathShape([[724, 753], [727, 770]], 12),
+    shape: pathShape([[753, 821], [771, 850]], 10),
     styleCode: STYLE.waterfall,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.8321, 0.5547]),
-    id: "c2-r2c2-base-foam",
+    declaredFlowVector: Object.freeze([0.7071, 0.7071]),
+    id: "c2-gorge-cascade-impact",
     kind: "impact",
     priority: 80,
-    shape: pathShape([[726, 768], [740, 780]], 17),
+    shape: pathShape([[767, 844], [781, 858]], 11),
     styleCode: STYLE.impact,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.9231, 0.3846]),
-    id: "c2-r2c2-lower-channel",
+    declaredFlowVector: Object.freeze([0.8107, 0.5855]),
+    id: "c2-gorge-lower-channel",
     kind: "stream",
     priority: 35,
-    shape: pathShape([[736, 777], [765, 790], [799, 801], [832, 809]], 17),
+    shape: pathShape([
+      [775, 854],
+      [790, 866],
+      [805, 879],
+      [820, 890],
+      [840, 901],
+    ], 18),
     styleCode: STYLE.stream,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.8253, 0.5647]),
-    id: "c2-r3c2-channel",
+    declaredFlowVector: Object.freeze([0.7071, 0.7071]),
+    id: "c2-lower-river-channel",
     kind: "stream",
     priority: 35,
     shape: pathShape([
-      [864, 810],
-      [900, 825],
-      [940, 846],
-      [980, 870],
-      [1020, 895],
-      [1078, 920],
+      [838, 900],
+      [855, 918],
+      [872, 936],
+      [890, 953],
+      [908, 970],
+      [925, 987],
     ], 16),
     styleCode: STYLE.stream,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.8423, 0.5391]),
-    id: "c2-r3c2-turbulence",
+    declaredFlowVector: Object.freeze([0.7071, 0.7071]),
+    id: "c2-lower-river-turbulence",
     kind: "turbulence",
     priority: 45,
-    shape: pathShape([[952, 852], [990, 876], [1030, 901]], 13),
+    shape: pathShape([[805, 879], [825, 897], [845, 914], [865, 932]], 13),
     styleCode: STYLE.turbulence,
   }),
   Object.freeze({
     cellIds: Object.freeze(["C2"]),
-    declaredFlowVector: Object.freeze([0.5683, 0.8228]),
-    id: "c2-r3c3-channel",
+    declaredFlowVector: Object.freeze([0.7071, 0.7071]),
+    id: "c2-terminal-river-channel",
     kind: "stream",
     priority: 35,
     shape: pathShape([
-      [1080, 922],
-      [1114, 950],
-      [1140, 982],
-      [1162, 1016],
-      [1187, 1050],
-      [1210, 1080],
-    ], 17),
+      [923, 985],
+      [943, 1002],
+      [970, 1017],
+      [1000, 1028],
+      [1020, 1045],
+      [1023, 1064],
+      [1016, 1078],
+    ], 16),
     styleCode: STYLE.stream,
   }),
 ]);
@@ -455,73 +479,28 @@ function cascadeDescriptor({
   });
 }
 
-// Waterfall stages are explicit authored geometry. The B2 tarn outlet has two
-// major cliff drops separated by a real pool/run gap. The short diagonal marks
-// in the visual registration are downstream recovery, not extra waterfalls;
-// pool wakes follow the registered velocity field between the two falls.
+// Waterfall stages are explicit source-registered geometry. The middle B2 tarn
+// and its outlet are a lake plus rapid/run in the accepted city composition,
+// not vertical falls, so they deliberately have no sheet, impact, or mist
+// descriptors. C1 is also a continuous rapid/riffle run. Only the visible C2
+// southeast gorge remains a source-proven cascade.
 export const HYDROLOGY_CASCADES = Object.freeze([
   cascadeDescriptor({
-    crestEnd: [916.4, 340.5],
-    crestStart: [892.6, 343.5],
-    crestThicknessPixels: 4,
-    fallDirection: [0.124, 0.9923],
-    fallExtentPixels: 46,
-    fallWidthPixels: 26,
-    id: "c1-r1c2-main-drop",
-    impactCenter: [919, 392],
-    impactRadiiPixels: [26, 18],
-    mistDriftVector: [0.7809, 0.6247],
-    mistRadiusPixels: 26,
-    regionId: "C1",
-  }),
-  cascadeDescriptor({
-    approachExtentPixels: 12,
-    approachWidthPixels: 8.5,
-    crestEnd: [659, 642],
-    crestStart: [644, 647],
-    crestThicknessPixels: 4,
-    fallDirection: [0.212, 0.9773],
-    fallExtentPixels: 20,
-    fallWidthPixels: 10,
-    id: "b2-tarn-upper-drop",
-    impactCenter: [656, 665],
-    impactRadiiPixels: [5.5, 7],
-    mistDriftVector: [-0.5, -0.866],
-    mistRadiusPixels: 10,
-    outflowExtentPixels: 9,
-    poolRadiiPixels: [7, 8],
-    regionId: "B2",
-  }),
-  cascadeDescriptor({
-    approachExtentPixels: 11,
-    approachWidthPixels: 7,
-    crestEnd: [663.5, 677.5],
-    crestStart: [646, 684],
-    crestThicknessPixels: 3,
-    fallDirection: [0.082, 0.9966],
-    fallExtentPixels: 17,
-    fallWidthPixels: 9,
-    id: "b2-tarn-lower-drop",
-    impactCenter: [656, 698],
-    impactRadiiPixels: [5, 7],
-    mistDriftVector: [0.082, 0.9966],
-    mistRadiusPixels: 9,
-    outflowExtentPixels: 9,
-    poolRadiiPixels: [7, 8],
-    regionId: "B2",
-  }),
-  cascadeDescriptor({
-    crestEnd: [731, 745],
-    crestStart: [714, 757],
+    approachExtentPixels: 14,
+    approachWidthPixels: 11,
+    crestEnd: [749, 830],
+    crestStart: [760, 822],
     crestThicknessPixels: 3,
     fallDirection: [0.5547, 0.8321],
-    fallExtentPixels: 24,
-    fallWidthPixels: 22,
-    id: "c2-r2c2-main-drop",
-    impactCenter: [733, 774],
-    impactRadiiPixels: [19, 15],
+    fallExtentPixels: 29,
+    fallWidthPixels: 11,
+    id: "c2-gorge-main-drop",
+    impactCenter: [771, 850],
+    impactRadiiPixels: [9, 7],
     mistDriftVector: [0.8321, 0.5547],
-    mistRadiusPixels: 24,
+    mistRadiusPixels: 12,
+    outflowExtentPixels: 22,
+    poolRadiiPixels: [15, 10],
     regionId: "C2",
   }),
 ]);
@@ -613,46 +592,6 @@ function cascadeNoise(x, y, seed) {
   return valueNoise2(x, y, seed) * 0.58
     + valueNoise2(x * 2.03 + 7.1, y * 2.03 - 3.7, seed + 19) * 0.28
     + valueNoise2(x * 4.11 - 2.6, y * 4.11 + 5.3, seed + 43) * 0.14;
-}
-
-function sampleWaterfallReference(reference, u, v) {
-  const x = clamp(u) * (reference.width - 1);
-  const y = clamp(v) * (reference.height - 1);
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const x1 = Math.min(reference.width - 1, x0 + 1);
-  const y1 = Math.min(reference.height - 1, y0 + 1);
-  const tx = x - x0;
-  const ty = y - y0;
-  const result = [0, 0, 0, 0];
-  for (let channel = 0; channel < 4; channel += 1) {
-    const top = reference.data[(y0 * reference.width + x0) * 4 + channel] * (1 - tx)
-      + reference.data[(y0 * reference.width + x1) * 4 + channel] * tx;
-    const bottom = reference.data[(y1 * reference.width + x0) * 4 + channel] * (1 - tx)
-      + reference.data[(y1 * reference.width + x1) * 4 + channel] * tx;
-    result[channel] = (top * (1 - ty) + bottom * ty) / 255;
-  }
-  return result;
-}
-
-async function loadWaterfallReference() {
-  const sourceBytes = await readFile(WATERFALL_REFERENCE_TEMPLATE_PATH);
-  const { data, info } = await sharp(sourceBytes)
-    .extract({ height: 512, left: 256, top: 0, width: 256 })
-    .resize(128, 256, { fit: "fill", kernel: "lanczos3" })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  if (info.width !== 128 || info.height !== 256 || info.channels !== 4) {
-    throw new Error("Waterfall reference must resolve to one 128 x 256 RGBA plane.");
-  }
-  return Object.freeze({
-    data,
-    height: info.height,
-    sourceDigest: sha256(sourceBytes),
-    sourcePath: `/${path.relative(ROOT, WATERFALL_REFERENCE_TEMPLATE_PATH).replaceAll("\\", "/")}`,
-    width: info.width,
-  });
 }
 
 function sha256(bytes) {
@@ -794,6 +733,90 @@ async function loadNativeSourceField(fieldWidth, fieldHeight) {
   });
 }
 
+async function loadRegisteredWaterEffectsField(fieldWidth, fieldHeight) {
+  const sourceBytes = await readFile(REGISTERED_WATER_EFFECTS_MASK_PATH);
+  const { data: field, info } = await sharp(sourceBytes)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assertTuple(
+    [info.width, info.height],
+    [fieldWidth, fieldHeight],
+    "Registered water effects mask dimensions",
+  );
+  if (info.channels !== 1) {
+    throw new Error("Registered water effects mask must decode to one channel.");
+  }
+  return Object.freeze({
+    field,
+    sourceDigest: sha256(sourceBytes),
+    sourcePath: `/${path.relative(ROOT, REGISTERED_WATER_EFFECTS_MASK_PATH).replaceAll("\\", "/")}`,
+  });
+}
+
+async function loadDeclaredWaterCorridorField(fieldWidth, fieldHeight) {
+  const sourceBytes = await readFile(DECLARED_WATER_CORRIDOR_MASK_PATH);
+  const { data: field, info } = await sharp(sourceBytes)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assertTuple(
+    [info.width, info.height],
+    [fieldWidth, fieldHeight],
+    "Declared inland-water corridor dimensions",
+  );
+  if (info.channels !== 1) {
+    throw new Error("Declared inland-water corridor must decode to one channel.");
+  }
+  return Object.freeze({
+    field,
+    sourceDigest: sha256(sourceBytes),
+    sourcePath: `/${path.relative(ROOT, DECLARED_WATER_CORRIDOR_MASK_PATH).replaceAll("\\", "/")}`,
+  });
+}
+
+async function loadRegisteredInlandWaterField(fieldWidth, fieldHeight) {
+  const sourceBytes = await readFile(REGISTERED_INLAND_WATER_MASK_PATH);
+  const { data: field, info } = await sharp(sourceBytes)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assertTuple(
+    [info.width, info.height],
+    [fieldWidth, fieldHeight],
+    "Registered inland-water mask dimensions",
+  );
+  if (info.channels !== 1) {
+    throw new Error("Registered inland-water mask must decode to one channel.");
+  }
+  return Object.freeze({
+    field,
+    sourceDigest: sha256(sourceBytes),
+    sourcePath: `/${path.relative(ROOT, REGISTERED_INLAND_WATER_MASK_PATH).replaceAll("\\", "/")}`,
+  });
+}
+
+async function loadWaterIntentReferences() {
+  return Object.freeze(await Promise.all(WATER_INTENT_REFERENCES.map(
+    async ({ dimensions, path: referencePath, role }) => {
+      const absolutePath = path.join(ROOT, referencePath);
+      const bytes = await readFile(absolutePath);
+      const metadata = await sharp(bytes).metadata();
+      assertTuple(
+        [metadata.width, metadata.height],
+        dimensions,
+        `Water intent reference ${referencePath} dimensions`,
+      );
+      return Object.freeze({
+        dimensions,
+        path: `/${referencePath.replaceAll("\\", "/")}`,
+        role,
+        sha256: sha256(bytes),
+      });
+    },
+  )));
+}
+
 function pointInPolygon(x, y, points) {
   let inside = false;
   for (let index = 0, previous = points.length - 1; index < points.length; previous = index++) {
@@ -835,6 +858,37 @@ function nearestPathSample(x, y, points) {
   return best;
 }
 
+function nearestDeclaredCorridorSample(cellId, x, y) {
+  let best = null;
+  for (const segment of HYDROLOGY_SEGMENTS) {
+    if (
+      !segment.cellIds.includes(cellId)
+      || !["stream", "tarn", "turbulence"].includes(segment.kind)
+    ) continue;
+    if (segment.shape.type === "polygon") {
+      if (pointInPolygon(x, y, segment.shape.points)) {
+        return Object.freeze({
+          distanceRatio: 0,
+          flow: segment.declaredFlowVector,
+          segment,
+        });
+      }
+      continue;
+    }
+    const sample = nearestPathSample(x, y, segment.shape.points);
+    if (!sample) continue;
+    const distanceRatio = sample.distance / Math.max(segment.shape.radius, 1);
+    if (!best || distanceRatio < best.distanceRatio) {
+      best = {
+        distanceRatio,
+        flow: sample.flow,
+        segment,
+      };
+    }
+  }
+  return best ? Object.freeze(best) : null;
+}
+
 function waterStrength(red, green, blue, alpha) {
   if (alpha < 24) return 0;
   const coolDark = Math.min(
@@ -848,6 +902,113 @@ function waterStrength(red, green, blue, alpha) {
     smoothstep(78, 170, blue),
   );
   return clamp(Math.max(coolDark, coolBright) * smoothstep(24, 170, alpha));
+}
+
+function registeredTerrainWaterStrength(red, green, blue, alpha) {
+  // The frozen regional terrain master represents exposed channel water in
+  // two legitimate ways: cool authored water pixels and transparent cutouts
+  // where the shared water layer is meant to show through. Rejecting the
+  // latter produced disconnected opaque material islands over one continuous
+  // river. Segment corridors still provide the topology fence, so transparent
+  // exterior pixels cannot invent a new channel.
+  const transparentChannel = 1 - smoothstep(12, 96, alpha);
+  return Math.max(
+    waterStrength(red, green, blue, alpha),
+    transparentChannel,
+  );
+}
+
+function smoothRegisteredVelocityField(field, velocitySeed, width, height) {
+  const pixelCount = width * height;
+  let velocityX = new Float32Array(pixelCount);
+  let velocityY = new Float32Array(pixelCount);
+  let nextVelocityX = new Float32Array(pixelCount);
+  let nextVelocityY = new Float32Array(pixelCount);
+  let minimumX = width;
+  let minimumY = height;
+  let maximumX = -1;
+  let maximumY = -1;
+
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    const offset = pixel * 4;
+    if (field[offset] === 0) continue;
+    const x = pixel % width;
+    const y = Math.floor(pixel / width);
+    minimumX = Math.min(minimumX, x);
+    minimumY = Math.min(minimumY, y);
+    maximumX = Math.max(maximumX, x);
+    maximumY = Math.max(maximumY, y);
+    velocityX[pixel] = (field[offset + 1] - 128) / 127;
+    velocityY[pixel] = (field[offset + 2] - 128) / 127;
+  }
+  if (maximumX < minimumX || maximumY < minimumY) return 0;
+
+  const iterations = 24;
+  for (let iteration = 0; iteration < iterations; iteration += 1) {
+    for (let y = minimumY; y <= maximumY; y += 1) {
+      for (let x = minimumX; x <= maximumX; x += 1) {
+        const pixel = y * width + x;
+        const offset = pixel * 4;
+        if (field[offset] === 0) {
+          nextVelocityX[pixel] = 0;
+          nextVelocityY[pixel] = 0;
+          continue;
+        }
+        let sumX = 0;
+        let sumY = 0;
+        let neighbors = 0;
+        if (x > 0 && field[offset - 4] > 0) {
+          sumX += velocityX[pixel - 1];
+          sumY += velocityY[pixel - 1];
+          neighbors += 1;
+        }
+        if (x + 1 < width && field[offset + 4] > 0) {
+          sumX += velocityX[pixel + 1];
+          sumY += velocityY[pixel + 1];
+          neighbors += 1;
+        }
+        if (y > 0 && field[offset - width * 4] > 0) {
+          sumX += velocityX[pixel - width];
+          sumY += velocityY[pixel - width];
+          neighbors += 1;
+        }
+        if (y + 1 < height && field[offset + width * 4] > 0) {
+          sumX += velocityX[pixel + width];
+          sumY += velocityY[pixel + width];
+          neighbors += 1;
+        }
+        if (neighbors === 0) {
+          nextVelocityX[pixel] = velocityX[pixel];
+          nextVelocityY[pixel] = velocityY[pixel];
+          continue;
+        }
+        const averageX = sumX / neighbors;
+        const averageY = sumY / neighbors;
+        if (velocitySeed[pixel] > 0) {
+          const sourceX = (field[offset + 1] - 128) / 127;
+          const sourceY = (field[offset + 2] - 128) / 127;
+          nextVelocityX[pixel] = sourceX * 0.86 + averageX * 0.14;
+          nextVelocityY[pixel] = sourceY * 0.86 + averageY * 0.14;
+        } else {
+          nextVelocityX[pixel] = velocityX[pixel] * 0.18 + averageX * 0.82;
+          nextVelocityY[pixel] = velocityY[pixel] * 0.18 + averageY * 0.82;
+        }
+      }
+    }
+    [velocityX, nextVelocityX] = [nextVelocityX, velocityX];
+    [velocityY, nextVelocityY] = [nextVelocityY, velocityY];
+  }
+
+  for (let y = minimumY; y <= maximumY; y += 1) {
+    for (let x = minimumX; x <= maximumX; x += 1) {
+      const pixel = y * width + x;
+      const offset = pixel * 4;
+      if (field[offset] === 0) continue;
+      field[offset + 1] = Math.round(128 + clamp(velocityX[pixel], -1, 1) * 127);
+      field[offset + 2] = Math.round(128 + clamp(velocityY[pixel], -1, 1) * 127);
+    }
+  }
+  return iterations;
 }
 
 function foamStrength(red, green, blue, alpha) {
@@ -1107,7 +1268,7 @@ function cascadeSupport(cascade, x, y) {
   };
 }
 
-function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReference) {
+function cascadeAerationDetail(cascade, support, cascadeIndex) {
   const supportPresence = Math.max(
     support.approach,
     support.crest,
@@ -1117,83 +1278,89 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
     support.outflow,
     support.pool,
   );
-  if (supportPresence <= 0.0001) {
-    return Object.freeze({
-      aeration: 0,
-      body: 0,
-      color: Object.freeze([0, 0, 0]),
-      coverage: 0,
-      impact: 0,
-      mist: 0,
-    });
-  }
+  if (supportPresence <= 0.0001) return 0;
+
   const seed = 173 + cascadeIndex * 271;
   const fallWidth = Math.max(cascade.fall.widthPixels, 1);
   const acrossUnit = support.across / fallWidth;
   const progress = support.fallProgress;
+  const threadWarpNoise = cascadeNoise(
+    support.along * 0.11,
+    cascadeIndex * 0.31,
+    seed + 61,
+  ) - 0.5;
   const sheetWarp = (
     cascadeNoise(support.along * 0.055, cascadeIndex * 0.73, seed + 7) - 0.5
-  ) * 0.24;
+  ) * 0.15 + threadWarpNoise * 0.08;
   const sheetNoise = cascadeNoise(
     support.across * 0.12 + sheetWarp * 2.1,
     support.along * 0.07,
     seed + 17,
   );
-  const referenceSheetColor = sampleWaterfallReference(
-      waterfallReference,
-      0.5 + acrossUnit * 0.9,
-      0.18 + progress * 0.46,
+  const secondaryNoise = cascadeNoise(
+    support.across * 0.19 - sheetWarp,
+    support.along * 0.11,
+    seed + 43,
   );
-  const referenceSheetLuma = referenceSheetColor[0] * 0.2126
-    + referenceSheetColor[1] * 0.7152
-    + referenceSheetColor[2] * 0.0722;
-  const referenceSheet = smoothstep(
-    0.1,
-    0.58,
-    referenceSheetLuma,
+  const centerThreadCenter = sheetWarp * 0.42
+    + threadWarpNoise * 0.09
+    + Math.sin(support.along * 0.23 + cascadeIndex * 0.7) * 0.022;
+  const centerThread = inverseSmoothstep(
+    0.025,
+    0.105,
+    Math.abs(acrossUnit - centerThreadCenter),
   );
-  const primaryCenter = sheetWarp
-    + Math.sin(support.along * 0.17 + cascadeIndex * 1.9) * 0.055;
-  const primaryBreakup = 0.24 + smoothstep(
-    0.3,
+  const leftThreadCenter = -0.19
+    + sheetWarp * 0.72
+    - threadWarpNoise * 0.085
+    + Math.sin(support.along * 0.17 + cascadeIndex * 0.9) * 0.04;
+  const rightThreadCenter = 0.2
+    + sheetWarp * 0.64
+    + threadWarpNoise * 0.1
+    + Math.sin(support.along * 0.13 + cascadeIndex * 1.3 + 1.8) * 0.045;
+  const leftThread = inverseSmoothstep(
+    0.018,
+    0.072,
+    Math.abs(acrossUnit - leftThreadCenter),
+  );
+  const rightThread = inverseSmoothstep(
+    0.02,
+    0.082,
+    Math.abs(acrossUnit - rightThreadCenter),
+  );
+  const sheetProfile = inverseSmoothstep(
+    0.17,
+    0.5,
+    Math.abs(acrossUnit - sheetWarp),
+  );
+  const centerGate = 0.04 + smoothstep(
+    0.4,
     0.7,
-    cascadeNoise(
-      support.along * 0.12,
-      support.across * 0.09,
-      seed + 37,
-    ),
-  ) * 0.76;
-  const primaryStreak = inverseSmoothstep(
-    0.055,
-    0.19,
-    Math.abs(acrossUnit - primaryCenter),
-  ) * primaryBreakup;
-  const secondaryCenter = -0.27
-    + Math.sin(support.along * 0.105 + 1.4 + cascadeIndex) * 0.09
-    + sheetWarp * 0.42;
-  const secondaryStreak = inverseSmoothstep(
-    0.045,
-    0.14,
-    Math.abs(acrossUnit - secondaryCenter),
-  ) * intervalSupport(progress, 0.14, 0.86, 0.12)
-    * smoothstep(
-      0.38,
-      0.7,
-      cascadeNoise(
-        support.along * 0.1,
-        support.across * 0.15,
-        seed + 61,
-      ),
-    );
-  const brokenVeil = 0.015
-    + progress * 0.045
-    + smoothstep(0.46, 0.76, sheetNoise) * 0.1;
-  const fall = support.fall * clamp(
-    brokenVeil
-      + primaryStreak * 0.34
-      + secondaryStreak * 0.2
-      + referenceSheet * 0.72,
+    cascadeNoise(support.along * 0.13, cascadeIndex * 0.8, seed + 97),
+  ) * 0.96;
+  const leftGate = 0.025 + smoothstep(
+    0.38,
+    0.72,
+    cascadeNoise(support.along * 0.16, cascadeIndex * 1.1, seed + 131),
+  ) * 0.975;
+  const rightGate = 0.025 + smoothstep(
+    0.41,
+    0.74,
+    cascadeNoise(support.along * 0.145, cascadeIndex * 1.4, seed + 167),
+  ) * 0.975;
+  const braidedThreads = Math.max(
+    centerThread * centerGate * (0.44 + sheetNoise * 0.56),
+    leftThread * leftGate * (0.34 + secondaryNoise * 0.58),
+    rightThread * rightGate * (0.32 + sheetNoise * 0.62),
   );
+  const sheetBreakup = 0.08
+    + smoothstep(0.32, 0.74, sheetNoise) * 0.92;
+  const translucentVeil = sheetProfile * (
+    0.03 + smoothstep(0.42, 0.76, secondaryNoise) * 0.085
+  );
+  const fall = support.fall
+    * clamp(translucentVeil + braidedThreads * sheetBreakup)
+    * (0.72 + progress * 0.28);
 
   const crestNoise = cascadeNoise(
     support.across * 0.18,
@@ -1209,25 +1376,7 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
     support.impactAlong * 0.13,
     seed + 109,
   );
-  const referenceImpactColor = sampleWaterfallReference(
-    waterfallReference,
-    0.5 + support.impactAcross
-      / Math.max(cascade.impact.radiiPixels[1], 1) * 0.36,
-    0.66 + support.impactAlong
-      / Math.max(cascade.impact.radiiPixels[0], 1) * 0.13,
-  );
-  const referenceImpactLuma = referenceImpactColor[0] * 0.2126
-    + referenceImpactColor[1] * 0.7152
-    + referenceImpactColor[2] * 0.0722;
-  const referenceImpact = smoothstep(
-    0.1,
-    0.54,
-    referenceImpactLuma,
-  );
-  const impactPattern = Math.max(
-    smoothstep(0.42, 0.74, impactNoise) * 0.55,
-    referenceImpact,
-  );
+  const impactPattern = 0.22 + smoothstep(0.34, 0.74, impactNoise) * 0.78;
   const impactCore = support.impact * impactPattern;
   const asymmetricSplash = support.impact
     * inverseSmoothstep(
@@ -1248,65 +1397,14 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
   const recovery = Math.max(support.pool * 0.18, support.outflow * 0.12)
     * smoothstep(0.36, 0.72, recoveryNoise);
 
-  const bodyNoise = cascadeNoise(
-    support.across * 0.07,
-    support.along * 0.045,
-    seed + 191,
-  );
-  const bodyCenter = sheetWarp
-    + Math.sin(support.along * 0.11 + seed * 0.013) * 0.045;
-  const bodyHalfWidth = 0.31
-    + progress * 0.055
-    + (bodyNoise - 0.5) * 0.075;
-  const sheetBody = intervalSupport(
-    support.along,
-    0,
-    cascade.fall.extentPixels,
-    1.5,
-  ) * inverseSmoothstep(
-    bodyHalfWidth * 0.72,
-    bodyHalfWidth,
-    Math.abs(acrossUnit - bodyCenter),
-  ) * (0.62 + bodyNoise * 0.22 + referenceSheet * 0.16);
-  const impactBody = support.impact * (0.3 + impactNoise * 0.24);
-  const mistNoise = cascadeNoise(
-    support.impactAcross * 0.08,
-    support.impactAlong * 0.07,
-    seed + 229,
-  );
-  const sheetCoverage = sheetBody * 0.82;
-  const impactCoverage = Math.max(
-    impactCore * 0.7,
-    asymmetricSplash * 0.78,
-  );
-  const useImpactReference = impactCoverage > sheetCoverage;
-  const referenceColor = useImpactReference
-    ? referenceImpactColor
-    : referenceSheetColor;
-
-  return Object.freeze({
-    aeration: clamp(Math.max(
-      support.approach * 0.08 * smoothstep(0.34, 0.7, sheetNoise),
-      crest,
-      fall,
-      impactCore,
-      asymmetricSplash,
-      recovery,
-    )),
-    body: clamp(Math.max(
-      support.crest * 0.3,
-      sheetBody,
-      impactBody,
-    )),
-    color: Object.freeze(referenceColor.slice(0, 3)),
-    coverage: clamp(Math.max(sheetCoverage, impactCoverage)),
-    impact: clamp(Math.max(
-      impactCore * 0.78,
-      asymmetricSplash,
-      recovery * 0.42,
-    )),
-    mist: clamp(support.mist * (0.28 + mistNoise * 0.72)),
-  });
+  return clamp(Math.max(
+    support.approach * 0.08 * smoothstep(0.34, 0.7, sheetNoise),
+    crest,
+    fall,
+    impactCore,
+    asymmetricSplash,
+    recovery,
+  ));
 }
 
 function obstacleSupport(obstacle, x, y) {
@@ -1358,7 +1456,6 @@ function obstacleSupport(obstacle, x, y) {
 function applyHydraulicEventFields(
   field,
   auxiliary,
-  waterfallReference,
   width,
   height,
   scale,
@@ -1393,12 +1490,31 @@ function applyHydraulicEventFields(
           cascade,
           support,
           cascadeIndex,
-          waterfallReference,
         );
-        if (!occupied) continue;
+        if (!occupied) {
+          const dryVfxSupport = Math.max(
+            support.crest,
+            support.fall,
+            support.impact,
+          );
+          whitewater = Math.max(
+            whitewater,
+            authoredAeration
+              * dryVfxSupport
+              * (0.68 + fallEnergy * 0.3),
+          );
+          mist = Math.max(mist, support.mist * mistEnergy);
+          cascadeStage = Math.max(
+            cascadeStage,
+            support.crest * 0.72,
+            support.fall,
+            support.impact * 0.82,
+          );
+          continue;
+        }
         const cascadeWhitewater = Math.max(
           support.approach * 0.06,
-          authoredAeration.aeration * (0.68 + fallEnergy * 0.3),
+          authoredAeration * (0.68 + fallEnergy * 0.3),
           support.crest * (0.16 + fallEnergy * 0.1),
           support.impact * (0.12 + fallEnergy * 0.08),
           support.pool * fallEnergy * 0.08,
@@ -1429,7 +1545,13 @@ function applyHydraulicEventFields(
         }
       }
 
-      if (!occupied) continue;
+      if (!occupied) {
+        auxiliary[offset] = Math.round(clamp(whitewater) * 255);
+        auxiliary[offset + 1] = 0;
+        auxiliary[offset + 2] = Math.round(clamp(mist) * 255);
+        auxiliary[offset + 3] = Math.round(clamp(cascadeStage) * 255);
+        continue;
+      }
 
       for (const obstacle of HYDROLOGY_OBSTACLES) {
         const support = obstacleSupport(obstacle, x, y);
@@ -1708,9 +1830,18 @@ function serializableSegment(segment) {
 
 export async function buildNinjaOneEnvironmentHydrologyR2() {
   const [fieldWidth, fieldHeight] = HYDROLOGY_FIELD_DIMENSIONS;
-  const [nativeSources, waterfallReference] = await Promise.all([
+  const [
+    nativeSources,
+    intentReferences,
+    registeredEffects,
+    declaredCorridor,
+    registeredInlandWater,
+  ] = await Promise.all([
     loadNativeSourceField(fieldWidth, fieldHeight),
-    loadWaterfallReference(),
+    loadWaterIntentReferences(),
+    loadRegisteredWaterEffectsField(fieldWidth, fieldHeight),
+    loadDeclaredWaterCorridorField(fieldWidth, fieldHeight),
+    loadRegisteredInlandWaterField(fieldWidth, fieldHeight),
   ]);
   const sourceField = nativeSources.field;
   const connectedNativeEvidence = buildConnectedNativeEvidenceField(
@@ -1722,10 +1853,12 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
   const field = Buffer.alloc(fieldWidth * fieldHeight * 4);
   const auxiliaryField = Buffer.alloc(fieldWidth * fieldHeight * 4);
   const ownerPriority = new Uint8Array(fieldWidth * fieldHeight);
+  const velocitySeed = new Uint8Array(fieldWidth * fieldHeight);
   const segmentPixels = Object.fromEntries(HYDROLOGY_SEGMENTS.map(({ id }) => [id, 0]));
   const stylePixels = Object.fromEntries(Object.keys(STYLE).map((key) => [key, 0]));
   const styleNameByCode = new Map(Object.entries(STYLE).map(([name, code]) => [code, name]));
   const cellPixels = { B2: 0, C1: 0, C2: 0 };
+  let corridorCompletionPixels = 0;
   const scaleX = fieldWidth / HYDROLOGY_ARTBOARD[0];
   const scaleY = fieldHeight / HYDROLOGY_ARTBOARD[1];
 
@@ -1747,7 +1880,9 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
         const green = sourceField[offset + 1];
         const blue = sourceField[offset + 2];
         const alpha = sourceField[offset + 3];
-        const water = waterStrength(red, green, blue, alpha);
+        const water = TRANSPARENT_CHANNEL_SEGMENT_IDS.has(segment.id)
+          ? registeredTerrainWaterStrength(red, green, blue, alpha)
+          : waterStrength(red, green, blue, alpha);
         const core = sampledShape.normalizedDistance === undefined
           ? 1
           : smoothstep(0.62, 0.18, sampledShape.normalizedDistance);
@@ -1774,21 +1909,88 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
         field[offset + 2] = Math.round(128 + normalizedFlow[1] * speed * 127);
         // Filled after all segments have established the immutable water mask.
         field[offset + 3] = 1;
+        velocitySeed[pixel] = 1;
         const sourceFoam = foamStrength(red, green, blue, alpha);
         const authoredWhitewater = WHITEWATER_BY_KIND[segment.kind];
-        auxiliaryField[offset] = Math.round(
-          clamp(authoredWhitewater * (0.68 + sourceFoam * 0.32)) * 255,
-        );
+        const registeredEffect = registeredEffects.field[pixel] / 255;
+        const observedAeration = Math.max(sourceFoam, registeredEffect);
+        const whitewater = segment.kind === "turbulence"
+          ? 0.025 + observedAeration * 0.46
+          : segment.kind === "stream"
+            ? 0.012 + observedAeration * 0.24
+            : authoredWhitewater * (0.68 + observedAeration * 0.32);
+        auxiliaryField[offset] = Math.round(clamp(whitewater) * 255);
         ownerPriority[pixel] = segment.priority;
       }
     }
   }
 
+  // The declared corridor is the complete inland-water topology authority.
+  // Segment tubes provide centerlines and local tangents, but are not body
+  // masks: using them as body coverage left most wide pools and channels on the
+  // ocean material. Complete only terrain-registered water/transparent cutouts
+  // inside this authored corridor; opaque rocks and land remain excluded.
+  for (let fieldY = 0; fieldY < fieldHeight; fieldY += 1) {
+    const artboardY = (fieldY + 0.5) / scaleY;
+    for (let fieldX = 0; fieldX < fieldWidth; fieldX += 1) {
+      const pixel = fieldY * fieldWidth + fieldX;
+      const offset = pixel * 4;
+      if (field[offset] > 0 || declaredCorridor.field[pixel] < 9) continue;
+      const cellId = fieldY >= fieldHeight / 2
+        ? fieldX < fieldWidth / 2 ? "B2" : "C2"
+        : fieldX >= fieldWidth / 2 ? "C1" : null;
+      if (!cellId) continue;
+      const red = sourceField[offset];
+      const green = sourceField[offset + 1];
+      const blue = sourceField[offset + 2];
+      const alpha = sourceField[offset + 3];
+      const sourceStrength = registeredTerrainWaterStrength(red, green, blue, alpha);
+      const corridorStrength = declaredCorridor.field[pixel] / 255;
+      const registeredWaterStrength = registeredInlandWater.field[pixel] / 255;
+      if (Math.max(sourceStrength, registeredWaterStrength) * corridorStrength < 0.035) {
+        continue;
+      }
+      const artboardX = (fieldX + 0.5) / scaleX;
+      const nearest = nearestDeclaredCorridorSample(
+        cellId,
+        artboardX,
+        artboardY,
+      );
+      if (!nearest) continue;
+      const channelWeight = 1 - smoothstep(0.82, 3.8, nearest.distanceRatio);
+      const baseSpeed = SPEED_BY_KIND[nearest.segment.kind];
+      const speed = 0.065 + (baseSpeed - 0.065) * channelWeight;
+      field[offset] = 255;
+      field[offset + 1] = Math.round(128 + nearest.flow[0] * speed * 127);
+      field[offset + 2] = Math.round(128 + nearest.flow[1] * speed * 127);
+      field[offset + 3] = 1;
+      const observedAeration = Math.max(
+        foamStrength(red, green, blue, alpha),
+        registeredEffects.field[pixel] / 255,
+      );
+      const channelWhitewater = nearest.segment.kind === "turbulence"
+        ? 0.025 + observedAeration * 0.46
+        : 0.012 + observedAeration * 0.24;
+      const poolWhitewater = 0.006 + observedAeration * 0.18;
+      auxiliaryField[offset] = Math.round(clamp(
+        poolWhitewater + (channelWhitewater - poolWhitewater) * channelWeight,
+      ) * 255);
+      ownerPriority[pixel] = nearest.segment.priority;
+      corridorCompletionPixels += 1;
+    }
+  }
+
+  const velocitySmoothingIterations = smoothRegisteredVelocityField(
+    field,
+    velocitySeed,
+    fieldWidth,
+    fieldHeight,
+  );
+
   deriveVisualDepthField(field, fieldWidth, fieldHeight, scaleX);
   applyHydraulicEventFields(
     field,
     auxiliaryField,
-    waterfallReference,
     fieldWidth,
     fieldHeight,
     scaleX,
@@ -1941,15 +2143,19 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
     coordinateSpace: "ninjaone-environment-artboard-top-left",
     source: Object.freeze({
       authority: "registered-terrain-master",
+      depthPolicy: "offline bank distance inside exact registered coverage; terrain gaps or slope changes never imply waterfalls",
       dimensions: nativeSources.sourceDimensions,
+      effectsEvidence: Object.freeze({
+        dimensions: HYDROLOGY_FIELD_DIMENSIONS,
+        path: registeredEffects.sourcePath,
+        role: "source-registered rapid and foam placement; never body topology",
+        sha256: registeredEffects.sourceDigest,
+      }),
+      intentReferences,
       path: nativeSources.sourcePath,
       role: "accepted rendered topology used only to derive registered water and water-connected foam coverage",
       sha256: nativeSources.sourceDigest,
-    }),
-    visualReference: Object.freeze({
-      path: waterfallReference.sourcePath,
-      role: "style-only waterfall reference sampled into descriptor-bounded aeration support; never a terrain or mask authority",
-      sha256: waterfallReference.sourceDigest,
+      waterfallPolicy: "only explicit source-proven cascade descriptors may emit falling-water or impact VFX",
     }),
     registration: Object.freeze({
       artboardDimensions: HYDROLOGY_ARTBOARD,
@@ -1969,10 +2175,10 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
           r: "time-invariant exact registered water coverage from water authority or water-connected foam",
         }),
         auxiliary: Object.freeze({
-          a: "localized cascade stage support",
-          b: "localized impact mist potential",
+          a: "localized cascade stage support, including descriptor-bounded dry-cliff VFX",
+          b: "localized impact mist potential, including descriptor-bounded drift over land",
           g: "terrain-registered obstacle bow, shoulder, and wake support",
-          r: "localized whitewater potential",
+          r: "localized whitewater potential, including descriptor-bounded falling sheet and impact spray",
         }),
       }),
       cohortPolicy: Object.freeze({
@@ -2007,13 +2213,14 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
     cascades: HYDROLOGY_CASCADES,
     obstacles: HYDROLOGY_OBSTACLES,
     masks: Object.freeze({
-      foam: "auxiliary red potential multiplied by exact primary red coverage",
-      mist: "auxiliary blue potential multiplied by exact primary red coverage",
-      water: "primary red channel greater than zero from water authority or water-connected foam; auxiliary support cannot expand it",
+      auxiliaryVfx: "red, blue, and alpha may extend beyond primary coverage only inside authored crest, falling-sheet, impact-spray, or mist envelopes; green obstacle support remains water-clipped",
+      water: "primary red channel greater than zero from water authority or water-connected foam; auxiliary support never expands body coverage",
     }),
     hydrologyTransitionHandoffs,
     metrics: Object.freeze({
       cellPixels: Object.freeze(cellPixels),
+      corridorCompletionPixels,
+      velocitySmoothingIterations,
       directionalPixels,
       foamPixels,
       mistPixels,

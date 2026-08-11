@@ -143,6 +143,21 @@ async function readRegisteredTerrainMaster(manifest, width, height) {
   return data;
 }
 
+async function readGreyscaleIntentReference(manifest, filename, width, height) {
+  const reference = manifest.source.intentReferences.find(({ path: sourcePath }) => (
+    sourcePath.endsWith(`/${filename}`)
+  ));
+  assert.ok(reference, `${filename} is missing from the intent references`);
+  const sourceBytes = await readFile(path.join(root, reference.path.slice(1)));
+  assert.equal(sha256(sourceBytes), reference.sha256, `${filename} authority drifted`);
+  const { data, info } = await sharp(sourceBytes)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.deepEqual([info.width, info.height, info.channels], [width, height, 1]);
+  return data;
+}
+
 function clamp(value, minimum = 0, maximum = 1) {
   return Math.min(maximum, Math.max(minimum, value));
 }
@@ -150,6 +165,64 @@ function clamp(value, minimum = 0, maximum = 1) {
 function smoothstep(edge0, edge1, value) {
   const amount = clamp((value - edge0) / Math.max(edge1 - edge0, 1e-9));
   return amount * amount * (3 - 2 * amount);
+}
+
+function distanceToSegment(point, start, end) {
+  const deltaX = end[0] - start[0];
+  const deltaY = end[1] - start[1];
+  const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+  const amount = lengthSquared <= 1e-9
+    ? 0
+    : clamp(
+      ((point[0] - start[0]) * deltaX + (point[1] - start[1]) * deltaY)
+        / lengthSquared,
+    );
+  return Math.hypot(
+    point[0] - (start[0] + deltaX * amount),
+    point[1] - (start[1] + deltaY * amount),
+  );
+}
+
+function pointWithinCascadeVfxEnvelope(point, cascade, tolerance = 0) {
+  const crestCenter = cascade.crest.start.map((value, index) => (
+    (value + cascade.crest.end[index]) * 0.5
+  ));
+  const direction = cascade.fall.direction;
+  const cross = [-direction[1], direction[0]];
+  const fallDelta = [point[0] - crestCenter[0], point[1] - crestCenter[1]];
+  const fallAlong = fallDelta[0] * direction[0] + fallDelta[1] * direction[1];
+  const fallAcross = fallDelta[0] * cross[0] + fallDelta[1] * cross[1];
+  const insideCrest = distanceToSegment(
+    point,
+    cascade.crest.start,
+    cascade.crest.end,
+  ) <= cascade.crest.thicknessPixels * 1.2 + tolerance;
+  const insideFall = (
+    fallAlong >= -2 - tolerance
+    && fallAlong <= cascade.fall.extentPixels + 2 + tolerance
+    && Math.abs(fallAcross) <= cascade.fall.widthPixels * 0.55 + tolerance
+  );
+  const impactDelta = [
+    point[0] - cascade.impact.center[0],
+    point[1] - cascade.impact.center[1],
+  ];
+  const impactAlong = impactDelta[0] * direction[0] + impactDelta[1] * direction[1];
+  const impactAcross = impactDelta[0] * cross[0] + impactDelta[1] * cross[1];
+  const insideImpact = Math.hypot(
+    impactAlong / (cascade.impact.radiiPixels[0] + tolerance),
+    impactAcross / (cascade.impact.radiiPixels[1] + tolerance),
+  ) <= 1.05;
+  return insideCrest || insideFall || insideImpact;
+}
+
+function pointWithinCascadeMistEnvelope(point, cascade, tolerance = 0) {
+  const mistCenter = cascade.impact.center.map((value, index) => (
+    value + cascade.mist.driftVector[index] * cascade.mist.radiusPixels * 0.16
+  ));
+  return Math.hypot(
+    point[0] - mistCenter[0],
+    point[1] - mistCenter[1],
+  ) <= cascade.mist.radiusPixels + tolerance;
 }
 
 function nativeWaterAuthorityEvidence(red, green, blue, alpha) {
@@ -165,6 +238,10 @@ function nativeWaterAuthorityEvidence(red, green, blue, alpha) {
     smoothstep(78, 170, blue),
   );
   return clamp(Math.max(coolDark, coolBright) * smoothstep(24, 170, alpha));
+}
+
+function nativeTransparentChannelEvidence(alpha) {
+  return 1 - smoothstep(12, 96, alpha);
 }
 
 function nativeFoamEvidence(red, green, blue, alpha) {
@@ -490,6 +567,59 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
   assert.equal(manifest.id, "career-world/capitals/ninjaone/hydrology-native@r2");
   assert.equal(manifest.packingRevision, "regional-r4-field-driven");
   assert.equal(manifest.source.authority, "registered-terrain-master");
+  assert.equal(
+    manifest.source.depthPolicy,
+    "offline bank distance inside exact registered coverage; terrain gaps or slope changes never imply waterfalls",
+  );
+  assert.equal(
+    manifest.source.waterfallPolicy,
+    "only explicit source-proven cascade descriptors may emit falling-water or impact VFX",
+  );
+  assert.deepEqual(
+    manifest.source.intentReferences.map(({ dimensions, path, role }) => ({
+      dimensions,
+      path,
+      role,
+    })),
+    [
+      {
+        dimensions: [1448, 1086],
+        path: "/art-source/career-world/ninjaone-environment/production-r2/water-base-r1/neutral-water-reference-r1.png",
+        role: "full-concept authority for watercourse direction and feature classification",
+      },
+      {
+        dimensions: [2880, 2160],
+        path: "/art-source/career-world/ninjaone-environment/production-r2/water-base-r1/declared-inland-water-corridor-r1.png",
+        role: "declared inland-water topology corridor; not a waterfall-placement inference map",
+      },
+      {
+        dimensions: [2880, 2160],
+        path: "/art-source/career-world/ninjaone-environment/production-r2/water-base-r1/registered-inland-water-mask-r1.png",
+        role: "registered inland-water body evidence inside the declared topology corridor",
+      },
+      {
+        dimensions: [2880, 2160],
+        path: "/art-source/career-world/ninjaone-environment/production-r2/water-base-r1/registered-water-effects-source-mask-r1.png",
+        role: "source-registered rapid and foam placement; never body topology",
+      },
+    ],
+  );
+  assert.ok(manifest.source.intentReferences.every(({ sha256 }) => (
+    /^[A-F0-9]{64}$/.test(sha256)
+  )));
+  assert.deepEqual(
+    {
+      dimensions: manifest.source.effectsEvidence.dimensions,
+      path: manifest.source.effectsEvidence.path,
+      role: manifest.source.effectsEvidence.role,
+    },
+    {
+      dimensions: [2880, 2160],
+      path: "/art-source/career-world/ninjaone-environment/production-r2/water-base-r1/registered-water-effects-source-mask-r1.png",
+      role: "source-registered rapid and foam placement; never body topology",
+    },
+  );
+  assert.match(manifest.source.effectsEvidence.sha256, /^[A-F0-9]{64}$/);
   assert.match(manifest.source.role, /accepted rendered topology/);
   assert.deepEqual(manifest.source.dimensions, [5760, 4320]);
   assert.match(manifest.source.path, /ninjaone-environment-terrain-master-detail-r2\.png$/);
@@ -505,35 +635,39 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
   assert.equal(manifest.registration.maximumMountedRegions, 2);
   assert.deepEqual(manifest.registration.worldOrigin, [0.125, 0]);
   assert.deepEqual(manifest.registration.worldSpan, [0.25, 1 / 3]);
-  assert.equal(manifest.cascades.length, 4);
-  assert.equal(new Set(manifest.cascades.map(({ id }) => id)).size, 4);
+  assert.equal(manifest.cascades.length, 1);
+  assert.equal(new Set(manifest.cascades.map(({ id }) => id)).size, 1);
   assert.deepEqual(
     manifest.cascades
       .filter(({ regionId }) => regionId === "B2")
       .map(({ id }) => id),
-    [
-      "b2-tarn-upper-drop",
-      "b2-tarn-lower-drop",
-    ],
+    [],
   );
   assert.ok(manifest.cascades.every(({ id }) => !id.startsWith("b2-r3c1-")));
   assert.ok(manifest.segments.every(({ id }) => !id.startsWith("b2-r3c1-")));
   assert.doesNotMatch(builderSource, /b2-r3c1-(?:cascade|main-drop|downstream)/);
-  const [upperTarnDrop, lowerTarnDrop] = manifest.cascades.filter(
-    ({ regionId }) => regionId === "B2",
+  assert.ok(manifest.cascades.every(({ regionId }) => regionId !== "C1"));
+  assert.ok(manifest.segments.every(({ id }) => ![
+    "c1-r1c2-waterfall-lip",
+    "c1-r1c2-vertical-fall",
+    "c1-r1c2-base-foam",
+  ].includes(id)));
+  assert.doesNotMatch(
+    builderSource,
+    /c1-r1c2-(?:main-drop|waterfall-lip|vertical-fall|base-foam)/,
   );
-  assert.deepEqual(upperTarnDrop.impact.center, [656, 665]);
-  assert.deepEqual(lowerTarnDrop.impact.center, [656, 698]);
-  assert.equal(upperTarnDrop.fall.extentPixels, 20);
-  assert.equal(lowerTarnDrop.fall.extentPixels, 17);
-  const upperImpactEnd = upperTarnDrop.impact.center[1]
-    + upperTarnDrop.impact.radiiPixels[1];
-  const lowerCrestMidpointY = (
-    lowerTarnDrop.crest.start[1] + lowerTarnDrop.crest.end[1]
-  ) * 0.5;
-  assert.ok(
-    upperImpactEnd < lowerCrestMidpointY,
-    "the two major sheets need a recovery run instead of overlapping as stairs",
+  const c2Cascade = manifest.cascades.find(({ regionId }) => regionId === "C2");
+  assert.equal(c2Cascade?.id, "c2-gorge-main-drop");
+  assert.deepEqual(c2Cascade?.impact.center, [771, 850]);
+  assert.equal(c2Cascade?.fall.widthPixels, 11);
+  assert.ok(manifest.segments.every(({ id }) => !(
+    /^c2-r2c2-(?:waterfall-lip|vertical-fall|base-foam|lower-channel)$/.test(id)
+      || /^c2-r3c2-(?:channel|turbulence)$/.test(id)
+      || id === "c2-r3c3-channel"
+  )));
+  assert.doesNotMatch(
+    builderSource,
+    /c2-r2c2-(?:waterfall-lip|vertical-fall|base-foam|lower-channel)|c2-r3c2-(?:channel|turbulence)|c2-r3c3-channel/,
   );
   const b2OutletSegments = manifest.segments.filter(({ id }) => (
     id.startsWith("b2-tarn-outlet-")
@@ -589,6 +723,11 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
   assert.match(manifest.regionalFields.channelEncoding.auxiliary.g, /obstacle bow/);
   assert.match(manifest.regionalFields.channelEncoding.auxiliary.b, /mist potential/);
   assert.match(manifest.regionalFields.channelEncoding.auxiliary.a, /cascade stage support/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.r, /descriptor-bounded/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.b, /descriptor-bounded/);
+  assert.match(manifest.regionalFields.channelEncoding.auxiliary.a, /descriptor-bounded/);
+  assert.match(manifest.masks.auxiliaryVfx, /may extend beyond primary coverage only inside authored/);
+  assert.match(manifest.masks.water, /auxiliary support never expands body coverage/);
   assert.deepEqual(manifest.regionalFields.cohortPolicy, {
     atomic: true,
     maximumMountedRegions: 2,
@@ -672,7 +811,7 @@ test("regional NinjaOne hydrology is registered to the accepted terrain master",
   assert.ok(manifest.segments.every(({ maskPolicy }) => maskPolicy.includes("registered-master")));
 });
 
-test("regional fields reconstruct static source-clipped masks and checkpoint topology", async () => {
+test("regional fields reconstruct exact water masks and descriptor-bounded waterfall VFX", async () => {
   const manifest = await readManifest();
   const [detail, fallback] = await Promise.all([
     readRegionalTier(manifest, "detail"),
@@ -707,6 +846,20 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     detail.info.width,
     detail.info.height,
   );
+  const [declaredCorridor, registeredInlandWater] = await Promise.all([
+    readGreyscaleIntentReference(
+      manifest,
+      "declared-inland-water-corridor-r1.png",
+      detail.info.width,
+      detail.info.height,
+    ),
+    readGreyscaleIntentReference(
+      manifest,
+      "registered-inland-water-mask-r1.png",
+      detail.info.width,
+      detail.info.height,
+    ),
+  ]);
   const {
     connected: connectedNativeEvidence,
     isolatedFoamCandidates,
@@ -722,35 +875,80 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   const directionalVectors = new Set();
   const velocityMagnitudes = new Set();
   let admittedConnectedFoamPixels = 0;
+  let dryMistPixels = 0;
+  let dryWaterfallVfxPixels = 0;
+  const dryWaterfallLevels = new Set();
+  const detailFieldScale = manifest.regionalFields.tiers.detail.scale;
+  const envelopeTolerance = 1 / detailFieldScale;
   for (let offset = 0; offset < detail.data.length; offset += 4) {
     if (detail.data[offset] === 0) {
       assert.deepEqual(
-        [...detail.auxiliary.subarray(offset, offset + 4)],
+        [...detail.data.subarray(offset, offset + 4)],
         [0, 0, 0, 0],
-        "auxiliary events may not expand the exact water mask",
+        "primary geometry must remain completely empty off registered water",
       );
+      const auxiliary = detail.auxiliary.subarray(offset, offset + 4);
+      assert.equal(auxiliary[1], 0, "obstacle wakes must remain clipped to registered water");
+      if (auxiliary[0] > 0 || auxiliary[3] > 0) {
+        const pixel = offset / 4;
+        const point = [
+          (pixel % detail.info.width + 0.5) / detailFieldScale,
+          (Math.floor(pixel / detail.info.width) + 0.5) / detailFieldScale,
+        ];
+        assert.ok(
+          manifest.cascades.some((cascade) => (
+            pointWithinCascadeVfxEnvelope(point, cascade, envelopeTolerance)
+          )),
+          `dry waterfall VFX escaped every descriptor envelope at ${point.join(",")}`,
+        );
+        dryWaterfallVfxPixels += 1;
+        if (auxiliary[0] > 0) dryWaterfallLevels.add(auxiliary[0]);
+      }
+      if (auxiliary[2] > 0) {
+        const pixel = offset / 4;
+        const point = [
+          (pixel % detail.info.width + 0.5) / detailFieldScale,
+          (Math.floor(pixel / detail.info.width) + 0.5) / detailFieldScale,
+        ];
+        assert.ok(
+          manifest.cascades.some((cascade) => (
+            pointWithinCascadeMistEnvelope(point, cascade, envelopeTolerance)
+          )),
+          `dry mist escaped every descriptor envelope at ${point.join(",")}`,
+        );
+        dryMistPixels += 1;
+      }
       continue;
     }
     assert.equal(detail.data[offset], 255);
     assert.ok(detail.data[offset + 3] > 0, "occupied water needs offline visual depth");
-    assert.ok(
-      registeredTerrainMaster[offset + 3] > 0,
-      "field may not leave the accepted terrain master, including its feathered coast edge",
-    );
     const sourceRgba = registeredTerrainMaster.subarray(offset, offset + 4);
     const waterAuthority = nativeWaterAuthorityEvidence(...sourceRgba);
+    const transparentChannel = nativeTransparentChannelEvidence(sourceRgba[3]);
     const foamEvidence = nativeFoamEvidence(...sourceRgba);
-    assert.equal(
-      connectedNativeEvidence[offset / 4],
-      1,
-      "primary coverage requires water authority or foam connected to authoritative water",
+    const registeredBodyEvidence = registeredInlandWater[offset / 4] >= 9;
+    assert.ok(
+      transparentChannel >= 0.035
+        || connectedNativeEvidence[offset / 4] === 1
+        || registeredBodyEvidence,
+      "primary coverage requires transparent terrain, connected native water/foam, or registered body evidence",
     );
-    if (waterAuthority < 0.035) {
+    if (
+      registeredBodyEvidence
+      && transparentChannel < 0.035
+      && connectedNativeEvidence[offset / 4] !== 1
+    ) {
       assert.ok(
-        foamEvidence >= 0.035,
-        "non-water primary coverage must be registered whitewater, never neutral rock",
+        declaredCorridor[offset / 4] >= 9,
+        "registered body completion must stay inside the declared inland-water corridor",
       );
-      admittedConnectedFoamPixels += 1;
+    }
+    if (waterAuthority < 0.035 && transparentChannel < 0.035) {
+      assert.ok(
+        registeredBodyEvidence || foamEvidence >= 0.035,
+        "non-terrain primary coverage must be registered water or connected whitewater, never neutral rock",
+      );
+      if (!registeredBodyEvidence) admittedConnectedFoamPixels += 1;
     }
     const flowX = (detail.data[offset + 1] - 128) / 127;
     const flowY = (detail.data[offset + 2] - 128) / 127;
@@ -762,6 +960,12 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   }
   assert.ok(directionalVectors.size > 40);
   assert.ok(admittedConnectedFoamPixels > 0, "real connected whitewater must remain hole-free");
+  assert.ok(dryWaterfallVfxPixels > 0, "falling sheets must retain deterministic dry-cliff detail");
+  assert.ok(
+    dryWaterfallLevels.size >= 96,
+    "dry-cliff waterfall detail must retain authored breakup rather than a flat alpha stamp",
+  );
+  assert.ok(dryMistPixels > 0, "major impacts must retain descriptor-bounded mist over land");
   assert.ok(velocityMagnitudes.size >= 5, "velocity field must preserve meaningful local magnitude");
   assert.ok(measured.deep > 5_000, "bank-distance field needs a deep interior population");
   assert.ok(measured.whitewater > 1_000);
@@ -846,98 +1050,14 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
   assert.ok(b2);
   const b2Measured = hydraulicPixelCounts(b2.data, b2.auxiliaryData);
   assert.ok(b2Measured.wake > 0, "B2 packed field must carry obstacle wakes");
-  assert.ok(b2Measured.mist > 0, "B2 packed field must carry cascade mist potential");
-  const b2Components = labelCoverageComponents(
-    b2.data,
-    b2.info.width,
-    b2.info.height,
+  assert.equal(b2Measured.mist, 0, "B2 tarn is not a waterfall mist source");
+  assert.equal(b2Measured.cascade, 0, "B2 tarn is not a staged cascade");
+  assert.equal(
+    manifest.cascades.filter(({ regionId }) => regionId === "B2").length,
+    0,
+    "B2 must not regain inferred waterfall descriptors",
   );
   const detailScale = manifest.regionalFields.tiers.detail.scale;
-  for (const cascade of manifest.cascades.filter(({ regionId }) => regionId === "B2")) {
-    const crestMidpoint = cascade.crest.start.map((value, index) => (
-      (value + cascade.crest.end[index]) * 0.5
-    ));
-    const crestRegistration = nearestCoverageRegistration(
-      b2,
-      b2Components,
-      crestMidpoint,
-      detailScale,
-    );
-    const impactRegistration = nearestCoverageRegistration(
-      b2,
-      b2Components,
-      cascade.impact.center,
-      detailScale,
-    );
-    assert.ok(crestRegistration, `${cascade.id} crest misses primary water coverage`);
-    assert.ok(impactRegistration, `${cascade.id} impact misses primary water coverage`);
-    assert.ok(
-      crestRegistration.distanceArtboard <= cascade.crest.thicknessPixels,
-      `${cascade.id} crest is ${crestRegistration.distanceArtboard}px from registered water`,
-    );
-    assert.ok(
-      impactRegistration.distanceArtboard <= 1,
-      `${cascade.id} impact is ${impactRegistration.distanceArtboard}px from registered water`,
-    );
-    assert.equal(
-      crestRegistration.label,
-      impactRegistration.label,
-      `${cascade.id} crest and impact must share one contiguous water component`,
-    );
-    assert.ok(
-      crestRegistration.componentSize >= 512,
-      `${cascade.id} may not register to an isolated bright-rock component`,
-    );
-    const crestCoverage = lineCoverageRatio(
-      b2,
-      cascade.crest.start,
-      cascade.crest.end,
-      cascade.crest.thicknessPixels * 1.2,
-      detailScale,
-    );
-    const centerlineCoverage = lineCoverageRatio(
-      b2,
-      crestMidpoint,
-      cascade.impact.center,
-      Math.min(2.5, cascade.fall.widthPixels * 0.3),
-      detailScale,
-    );
-    const impactCoverage = impactCoverageRatio(b2, cascade, detailScale);
-    assert.ok(
-      crestCoverage >= 0.3,
-      `${cascade.id} crest coverage ${crestCoverage}`,
-    );
-    assert.ok(centerlineCoverage >= 0.45, `${cascade.id} fall coverage ${centerlineCoverage}`);
-    assert.ok(impactCoverage >= 0.35, `${cascade.id} impact coverage ${impactCoverage}`);
-  }
-  const [upperDrop, lowerDrop] = manifest.cascades.filter(({ regionId }) => regionId === "B2");
-  assert.ok(
-    countChannelInArtboardDisc(
-      detail.auxiliary,
-      detail.info.width,
-      detail.info.height,
-      upperDrop.impact.center,
-      upperDrop.mist.radiusPixels,
-      detailScale,
-      2,
-      12,
-    ) > 0,
-    "the primary tarn drop must retain localized mist potential",
-  );
-  assert.equal(
-    countChannelInArtboardDisc(
-      detail.auxiliary,
-      detail.info.width,
-      detail.info.height,
-      lowerDrop.impact.center,
-      lowerDrop.mist.radiusPixels,
-      detailScale,
-      2,
-      12,
-    ),
-    0,
-    "the secondary tarn drop must stay below the major-impact mist gate",
-  );
   assert.equal(
     countChannelInArtboardDisc(
       detail.data,
@@ -961,6 +1081,127 @@ test("regional fields reconstruct static source-clipped masks and checkpoint top
     ),
     0,
     "the removed dry-rock B2 impact corridor must stay outside primary coverage",
+  );
+
+  const c2 = detail.resources.find(({ resource }) => resource.regionId === "C2");
+  const c2Cascade = manifest.cascades.find(({ regionId }) => regionId === "C2");
+  assert.ok(c2 && c2Cascade);
+  const c2Components = labelCoverageComponents(
+    c2.data,
+    c2.info.width,
+    c2.info.height,
+  );
+  const c2CrestMidpoint = c2Cascade.crest.start.map((value, index) => (
+    (value + c2Cascade.crest.end[index]) * 0.5
+  ));
+  const c2CrestRegistration = nearestCoverageRegistration(
+    c2,
+    c2Components,
+    c2CrestMidpoint,
+    detailScale,
+    4,
+  );
+  const c2ImpactRegistration = nearestCoverageRegistration(
+    c2,
+    c2Components,
+    c2Cascade.impact.center,
+    detailScale,
+    4,
+  );
+  assert.ok(c2CrestRegistration, "C2 visible gorge crest misses primary water");
+  assert.ok(c2ImpactRegistration, "C2 visible gorge impact misses primary water");
+  assert.ok(
+    c2CrestRegistration.componentSize >= 512,
+    "C2 crest must register to material upstream water rather than isolated rock",
+  );
+  assert.ok(
+    c2ImpactRegistration.componentSize >= 256,
+    "C2 impact must register to a material plunge-pool component",
+  );
+  const c2CrestCoverage = lineCoverageRatio(
+    c2,
+    c2Cascade.crest.start,
+    c2Cascade.crest.end,
+    c2Cascade.crest.thicknessPixels * 1.2,
+    detailScale,
+  );
+  assert.ok(
+    c2CrestCoverage >= 0.05,
+    `C2 authored crest coverage ${c2CrestCoverage} misses visible gorge water`,
+  );
+  const c2CenterlineCoverage = lineCoverageRatio(
+    c2,
+    c2CrestMidpoint,
+    c2Cascade.impact.center,
+    Math.min(2.5, c2Cascade.fall.widthPixels * 0.3),
+    detailScale,
+  );
+  assert.ok(
+    c2CenterlineCoverage >= 0.01,
+    `C2 falling-sheet centerline coverage ${c2CenterlineCoverage} misses source whitewater`,
+  );
+  assert.ok(
+    impactCoverageRatio(c2, c2Cascade, detailScale) >= 0.2,
+    "C2 impact ellipse must register to its source plunge pool",
+  );
+  const c2RiverCheckpoints = [
+    [752, 816],
+    [771, 850],
+    [820, 890],
+    [850, 920],
+    [900, 960],
+    [950, 1005],
+    [1000, 1030],
+    [1020, 1060],
+  ];
+  for (const checkpoint of c2RiverCheckpoints) {
+    assert.ok(
+      countChannelInArtboardDisc(
+        detail.data,
+        detail.info.width,
+        detail.info.height,
+        checkpoint,
+        6,
+        detailScale,
+      ) >= 16,
+      `C2 downstream checkpoint ${checkpoint.join(",")} lacks material water coverage`,
+    );
+    assert.ok(
+      nearestCoverageRegistration(
+        c2,
+        c2Components,
+        checkpoint,
+        detailScale,
+        6,
+      ),
+      `C2 downstream checkpoint ${checkpoint.join(",")} is unregistered`,
+    );
+  }
+  assert.equal(
+    countChannelInArtboardDisc(
+      detail.auxiliary,
+      detail.info.width,
+      detail.info.height,
+      [733, 774],
+      18,
+      detailScale,
+      3,
+    ),
+    0,
+    "the removed C2 pool-side fake cascade must not retain stage support",
+  );
+  assert.ok(
+    countChannelInArtboardDisc(
+      detail.auxiliary,
+      detail.info.width,
+      detail.info.height,
+      c2Cascade.impact.center,
+      c2Cascade.mist.radiusPixels,
+      detailScale,
+      2,
+      12,
+    ) > 0,
+    "the visible C2 gorge impact must retain localized mist potential",
   );
 });
 
@@ -1052,10 +1293,20 @@ test("decoded local velocity preserves magnitude for advected transport", async 
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /ninjaOneAdvectedHeight\(/);
 });
 
-test("hydrology GLSL keeps body geometry static and separates animated effects", () => {
+test("hydrology GLSL preserves the shared body and exposes registered effects only", async () => {
+  const fragmentShader = await readFile(path.join(
+    root,
+    "features/career-world/layers/water-surface/rendering/shaders/fragment.ts",
+  ), "utf8");
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /vec3 bodyColor;\s*float bodyAlpha;\s*vec3 effectsColor;\s*float effectsAlpha;\s*vec3 mistColor;\s*float mistAlpha;/,
+    /struct NinjaOneStreamSample \{\s*vec3 effectsColor;\s*float effectsAlpha;\s*vec3 mistColor;\s*float mistAlpha;/,
+  );
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /result\.body|bodyAlpha/);
+  assert.doesNotMatch(fragmentShader, /stream\.body|streamBody/);
+  assert.match(
+    fragmentShader,
+    /sampleNinjaOneStreams\(worldUv, coast\.color\)/,
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /struct NinjaOneFieldSample/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.primary = ninjaOneBilinear0/);
@@ -1066,109 +1317,64 @@ test("hydrology GLSL keeps body geometry static and separates animated effects",
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 packed = encoded\.gb \/ max\(coverage/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float visualDepth = decodeNinjaOneScalar/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float whitewaterPotential = decodeNinjaOneScalar/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float obstaclePotential = decodeNinjaOneScalar/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mistPotential = decodeNinjaOneScalar/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float cascadePotential = decodeNinjaOneScalar/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float bankContact = bodyCoverage/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float shallowShelf = bodyCoverage/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float intermittentBank = bankContact/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float materialBreakup = smoother/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float channelMotionAuthority = smoother/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float runSurfaceAlpha = channelMotionAuthority/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float tarnSurfaceAlpha = tarn/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /max\(runSurfaceAlpha, tarnSurfaceAlpha\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float riffleWaveletAuthority = runRegime/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /smoother\(0\.04, 0\.28, whitewaterPotential\)/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float combinedEffectsAlpha = foamAlpha/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.effectsAlpha = combinedEffectsAlpha/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /NinjaOneCascadeSample cascade = sampleNinjaOneCascades/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float analyticCascadeSupport = max/);
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
     /bodyCoverage <= 0\.001 && analyticCascadeSupport <= 0\.001/,
   );
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float crestFlecks = cascade\.crest/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float fallFilaments = cascade\.fall/);
-  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /impactRing/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactFroth = impactShape/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float downstreamFroth = cascade\.wake/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /aggregate = candidate/);
-  for (let slot = 0; slot < 8; slot += 1) {
-    assert.match(
-      WATER_SHADER_COMMON,
-      new RegExp(`uniform vec4 u_ninjaOneCascadeApproach${slot};`),
-    );
-    assert.match(
-      WATER_SHADER_COMMON,
-      new RegExp(`uniform vec4 u_ninjaOneCascadePool${slot};`),
-    );
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeApproach${slot}`));
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeCrest${slot}`));
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeFall${slot}`));
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeImpact${slot}`));
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadeMist${slot}`));
-    assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(`u_ninjaOneCascadePool${slot}`));
-  }
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float approachExtent = max\(approach\.x, 1\.0\)/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float approachWidth = max\(approach\.y, 1\.0\)/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float wakeLength = max\(pool\.z, 1\.0\)/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.approach \* currentRibbon/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.pool \* 0\.92/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /undertowCore \* 0\.72/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 recoveryAxis = speed > 0\.015 \? flowAxis/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.wake = recoverySupport/);
-  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /plungeRing|ringFrequency|ringSpeed/);
-  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /downhillAxis|vec2\(0\.68, 0\.73\)/);
-  const broadRiverMaterial = WATER_SHADER_NINJAONE_STREAMS.slice(
-    WATER_SHADER_NINJAONE_STREAMS.indexOf("vec2 macroUv"),
-    WATER_SHADER_NINJAONE_STREAMS.indexOf("NinjaOneCascadeSample cascade"),
-  );
-  assert.doesNotMatch(
-    broadRiverMaterial,
-    /sin\(/,
-    "broad river material must not use repeated analytic hatch bands",
-  );
-  assert.ok(
-    WATER_SHADER_NINJAONE_STREAMS.indexOf("analyticCascadeSupport <= 0.001")
-      < WATER_SHADER_NINJAONE_STREAMS.indexOf("float mistMacro"),
-    "pixels outside both registered water and bounded cascade VFX must return before noise sampling",
-  );
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float cascadeFoamAuthority = mix\(0\.6, 1\.0, cascadePotential\)/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float effectsCompositeCoverage = max/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float sheetEffectsAlpha = analyticEffectsCoverage \* min/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(\s*0\.68,\s*crestAccent \* 0\.78/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactEffectsAlpha = registered \* min/);
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /min\(\s*0\.4,\s*max\(\s*impactAccent \* 0\.34/,
+    /cascade\.fallCoordinates\.x \* 0\.058 - time \* 0\.42,\s*cascade\.fallCoordinates\.y \* 0\.086/,
+    "C2 rapid breakup must travel along the registered fall axis",
   );
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.effectsAlpha = u_ninjaOneHydrologyOpacity \* max/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mistCompositeCoverage = max/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.mistAlpha = mistCompositeCoverage/);
-  assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(0\.13, mistVolume/);
-  const bodyAlphaBlock = WATER_SHADER_NINJAONE_STREAMS.match(
-    /float registeredBodyAlpha = ([\s\S]*?)result\.bodyAlpha = max\([\s\S]*?\);/,
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactFroth = cascade\.impact/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float downstreamFroth = cascade\.wake/);
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /impactRing|plungeRing|ringFrequency|ringSpeed/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /vec2 recoveryAxis = speed > 0\.015 \? flowAxis/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /cascade\.wake = recoverySupport/);
+  assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /downhillAxis|vec2\(0\.68, 0\.73\)/);
+  assert.ok(
+    WATER_SHADER_NINJAONE_STREAMS.indexOf("analyticCascadeSupport <= 0.001")
+      < WATER_SHADER_NINJAONE_STREAMS.indexOf("float channelWarp"),
+    "pixels outside registered water and C2 rapid VFX must return before material sampling",
   );
-  assert.ok(bodyAlphaBlock);
-  assert.doesNotMatch(bodyAlphaBlock[1], /time|heightSample|foam|mist/);
-  assert.match(bodyAlphaBlock[1], /dryLipShadowAlpha[\s\S]*\* 0\.22/);
-  assert.match(bodyAlphaBlock[1], /drySheetBodyAlpha[\s\S]*min\(0\.5/);
-  assert.match(bodyAlphaBlock[1], /dryImpactBodyAlpha[\s\S]*min\(0\.34/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /float majorImpactMist = smoother/);
+  assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(0\.052, mistVolume/);
+  for (let slot = 0; slot < 8; slot += 1) {
+    for (const field of ["Approach", "Crest", "Fall", "Impact", "Mist", "Pool"]) {
+      assert.match(WATER_SHADER_COMMON, new RegExp(
+        `uniform vec4 u_ninjaOneCascade${field}${slot};`,
+      ));
+      assert.match(WATER_SHADER_NINJAONE_STREAMS, new RegExp(
+        `u_ninjaOneCascade${field}${slot}`,
+      ));
+    }
+  }
 });
 
-test("foreground hydrology uses canonical land visibility above native terrain", async () => {
-  const [fragmentShader, commonShader] = await Promise.all([
-    readFile(path.join(
-      root,
-      "features/career-world/layers/water-surface/rendering/shaders/fragment.ts",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/water-surface/rendering/shaders/common.ts",
-    ), "utf8"),
-  ]);
-  assert.match(commonShader, /uniform float u_foregroundHydrology;/);
+test("foreground hydrology source-over composites shared water and regional effects", async () => {
+  const fragmentShader = await readFile(path.join(
+    root,
+    "features/career-world/layers/water-surface/rendering/shaders/fragment.ts",
+  ), "utf8");
+  assert.match(WATER_SHADER_COMMON, /uniform float u_foregroundHydrology;/);
+  assert.doesNotMatch(fragmentShader, /stream\.body|streamBody/);
   assert.match(
     fragmentShader,
-    /float registeredForegroundVisibility = max\(\s*waterVisibility,\s*registeredStreamVisibility\s*\);/,
-  );
-  assert.match(fragmentShader, /stream\.bodyAlpha/);
-  assert.match(
-    fragmentShader,
-    /float streamBodyMix = smoother\(0\.02, 0\.72, stream\.bodyAlpha\);/,
+    /float baseVisibility = mix\(\s*max\(waterVisibility, coast\.overlayAlpha\),\s*waterVisibility,\s*foregroundOverlay\s*\);/,
   );
   assert.match(fragmentShader, /stream\.effectsAlpha/);
   assert.match(fragmentShader, /stream\.effectsColor/);
@@ -1176,23 +1382,19 @@ test("foreground hydrology uses canonical land visibility above native terrain",
   assert.match(fragmentShader, /stream\.mistColor/);
   assert.match(
     fragmentShader,
-    /max\(\s*max\(stream\.bodyAlpha, stream\.effectsAlpha\),\s*stream\.mistAlpha\s*\)/,
-  );
-  assert.match(
-    fragmentShader,
     /float foregroundOverlay = u_foregroundHydrology\s*\* smoother\(0\.08, 0\.45, u_siteLod\);/,
   );
   assert.match(
     fragmentShader,
-    /float visibility = mix\(\s*globalVisibility,\s*registeredForegroundVisibility,\s*foregroundOverlay\s*\);/,
+    /composite\.rgb = stream\.effectsColor \* streamEffectsAlpha\s*\+ composite\.rgb \* \(1\.0 - streamEffectsAlpha\);/,
   );
-  const registeredVisibility = fragmentShader.match(
-    /float registeredForegroundVisibility = ([^;]+);/,
+  assert.match(
+    fragmentShader,
+    /composite\.rgb = stream\.mistColor \* streamMistAlpha\s*\+ composite\.rgb \* \(1\.0 - streamMistAlpha\);/,
   );
-  assert.ok(registeredVisibility);
-  assert.match(registeredVisibility[1], /waterVisibility/);
-  assert.doesNotMatch(registeredVisibility[1], /coast\.overlayAlpha|globalVisibility/);
-  assert.match(fragmentShader, /u_opacity \* visibility/);
+  assert.match(fragmentShader, /vec3 color = composite\.rgb \/ max\(composite\.a, 0\.00001\);/);
+  assert.match(fragmentShader, /u_opacity \* composite\.a/);
+  assert.doesNotMatch(fragmentShader, /registeredStreamVisibility|streamBodyMix/);
 });
 
 test("regional admission uses exact native snapshots and the continuous max-two event bound", async () => {
@@ -1898,7 +2100,7 @@ test("water runtime binds two verified regional slots without charging shared te
   );
   assert.match(renderer, /dataset\.waterCascadeCount/);
   assert.match(renderer, /dataset\.waterProfile = CAREER_WORLD_WATER_REALISM_PROFILE\.id/);
-  assert.match(renderer, /dataset\.waterMistPass = "cascade-impact-drift-envelope"/);
+  assert.match(renderer, /dataset\.waterMistPass = "c2-impact-drift-envelope"/);
   assert.match(renderer, /u_riverSurfaceProfile/);
   assert.match(renderer, /u_riverInteractionProfile/);
   assert.match(renderer, /u_waterfallSheetProfile/);
@@ -1937,6 +2139,60 @@ test("water runtime binds two verified regional slots without charging shared te
   assert.doesNotMatch(assets, /ninjaOneStreamFlowFallback|NINJAONE_STREAM_FLOW/);
   assert.match(assets, /WATER_RUNTIME_TEXTURE_BUDGET_BYTES = 288 \* 1024 \* 1024/);
   assert.match(assets, /maximumMountedRegions/);
+});
+
+test("regional hydrology has no legacy waterfall raster authority", async () => {
+  const [
+    assets,
+    renderer,
+    commonShader,
+    streamShader,
+    builder,
+    packageJson,
+    manifest,
+  ] = await Promise.all([
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/model/assets.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/shaders/common.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/shaders/ninjaone-streams.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "scripts/build-ninjaone-environment-hydrology-r2.mjs",
+    ), "utf8"),
+    readFile(path.join(root, "package.json"), "utf8").then(JSON.parse),
+    readFile(path.join(
+      root,
+      "public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json",
+    ), "utf8").then(JSON.parse),
+  ]);
+
+  for (const source of [assets, renderer, commonShader, streamShader, builder]) {
+    assert.doesNotMatch(
+      source,
+      /waterfall-vfx|waterfall-reference-template|u_waterfallVfx|waterfallVfx/,
+    );
+  }
+  assert.equal(packageJson.scripts["build:waterfall-vfx"], undefined);
+  assert.equal(manifest.visualReference, undefined);
+  await assert.rejects(
+    access(path.join(
+      root,
+      "public/career-world/layers/water-surface/fields/ninjaone-stream-flow-r1.png",
+    )),
+    /ENOENT/,
+  );
 });
 
 test("numeric upload and decoded-image ownership clean every lifecycle", { concurrency: false }, async () => {

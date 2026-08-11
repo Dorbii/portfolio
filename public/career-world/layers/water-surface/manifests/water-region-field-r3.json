@@ -15,11 +15,11 @@
   "sources": {
     "landMask": {
       "path": "../../territory-landform/masks/world-land-mask-r4.png",
-      "sha256": "AF1ED791596F13D90A8D9AE8B344B46809EC685E5433E7E2104FBFA96210AE80"
+      "sha256": "8801722B801B2ECABD048DC71AC99FF7F0C566E69E06A50D9C4E41706DD7003A"
     },
     "regions": {
       "path": "water-regions-r1.json",
-      "sha256": "8A59C912A2541F06231986B60D29DEE7C6750B26082C057F7421753FF6BEEA43"
+      "sha256": "3B1B2A9FB1C35990A7F117B45C9365910E7E4720129C16B8DDB6B30F65A7DBEF"
     }
   },
   "channels": {

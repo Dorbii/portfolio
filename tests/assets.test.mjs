@@ -1643,6 +1643,26 @@ test("generated asset manifests carry exact content hashes", async () => {
       "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
     ),
   );
+  const canonicalLandMaskHash = await sha256(
+    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+  );
+  assert.equal(coastManifest.source.sha256, canonicalLandMaskHash);
+  assert.equal(
+    hydrologyManifest.sources.landMask.sha256,
+    canonicalLandMaskHash,
+  );
+  assert.equal(
+    coastMaterialManifest.sources.height.sha256,
+    await sha256(
+      "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+    ),
+  );
+  assert.equal(
+    coastMaterialManifest.sources.slope.sha256,
+    await sha256(
+      "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    ),
+  );
   assert.equal(
     landManifest.fields.height.sha256,
     await sha256(

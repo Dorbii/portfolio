@@ -17,7 +17,7 @@ export const NINJAONE_MVP_FOLIAGE_ISOLATION_PRODUCER_ID =
 export const NINJAONE_MVP_FOLIAGE_ISOLATION_BINDING_PATHS = Object.freeze([
   NINJAONE_MVP_CAPTURE_PRODUCER_PATH,
   NINJAONE_MVP_VERIFICATION_LIBRARY_PATH,
-  "app/career-world/previews/ninjaone-environment/page.tsx",
+  "app/page.tsx",
   "features/career-world/shared/camera.ts",
   "features/career-world/shared/lod/policy.ts",
   "features/career-world/composition/WorldScene.tsx",
@@ -55,7 +55,7 @@ export const NINJAONE_MVP_CAPTURE_BINDING_PATHS = Object.freeze([
   "features/career-world/shared/camera.ts",
   "features/career-world/shared/lod/policy.ts",
   "features/career-world/composition/WorldScene.tsx",
-  "app/career-world/previews/ninjaone-environment/page.tsx",
+  "app/page.tsx",
   "public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json",
   "features/career-world/layers/water-surface/components/WaterSurfaceCanvas.tsx",
   "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts",
@@ -186,24 +186,21 @@ export const NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES = Object.freeze([
     expectedTerrainTileCount: 2,
     id: "hydrology-B2-tarn",
     requiredStyleCounts: Object.freeze({
-      cascadeStage: 633,
-      mist: 141,
-      obstacleWake: 443,
-      whitewater: 1_635,
+      obstacleWake: 543,
+      whitewater: 2_219,
     }),
   }),
   Object.freeze({
     camera: Object.freeze({
-      origin: Object.freeze([0.2195833333, 0.1883333333]),
-      span: Object.freeze([0.035, 0.035]),
+      origin: Object.freeze([0.23694, 0.2337]),
+      span: Object.freeze([0.04, 0.04]),
     }),
     expectedTerrainTileCount: 2,
-    id: "hydrology-B2-lip-fall",
+    id: "hydrology-C2-rapid",
     requiredStyleCounts: Object.freeze({
-      cascadeStage: 633,
-      mist: 141,
-      obstacleWake: 443,
-      whitewater: 1_540,
+      cascadeStage: 202,
+      mist: 114,
+      whitewater: 1_992,
     }),
   }),
 ]);
@@ -3624,7 +3621,8 @@ export async function auditFoliageIsolationEvidence({
     || !producerUrl
     || producerUrl.protocol !== "http:"
     || !new Set(["localhost", "127.0.0.1", "[::1]"]).has(producerUrl.hostname)
-    || producerUrl.pathname !== "/career-world/previews/ninjaone-environment"
+    || producerUrl.pathname !== "/"
+    || producerUrl.searchParams.get("view") !== "ninjaone-environment"
     || !Number.isFinite(Date.parse(evidence?.producer?.capturedAt ?? ""))
   ) failures.push("foliage_isolation.producer_contract");
   try {
@@ -4036,7 +4034,8 @@ export async function auditRuntimeCaptureEvidence({
     || !producerUrl
     || producerUrl.protocol !== "http:"
     || !localHostnames.has(producerUrl.hostname)
-    || producerUrl.pathname !== "/career-world/previews/ninjaone-environment"
+    || producerUrl.pathname !== "/"
+    || producerUrl.searchParams.get("view") !== "ninjaone-environment"
     || !Number.isFinite(Date.parse(evidence?.producer?.capturedAt ?? ""))
     || !Number.isSafeInteger(evidence?.producer?.viewport?.width)
     || !Number.isSafeInteger(evidence?.producer?.viewport?.height)

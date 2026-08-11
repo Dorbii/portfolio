@@ -11,7 +11,6 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_GRID_CELLS,
-  NINJAONE_ENVIRONMENT_HYDROLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_LAYER_ORDER,
   NINJAONE_ENVIRONMENT_LOD_LAYERS,
   NINJAONE_ENVIRONMENT_PROOF_ID,
@@ -59,14 +58,14 @@ async function readImageMetadata(publicPath) {
   return { ...metadata, size: file.size };
 }
 
-test("environment proof owns a semantic city-free B2 C1 C2 stack", async () => {
+test("environment proof owns a semantic city-free B1 B2 C1 C2 stack", async () => {
   const manifest = await readJson(
     "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
   );
   assert.equal(manifest.id, NINJAONE_ENVIRONMENT_PROOF_ID);
   assert.equal(manifest.status, "environment-only-proof");
-  assert.deepEqual(NINJAONE_ENVIRONMENT_GRID_CELLS, ["B2", "C1", "C2"]);
-  assert.deepEqual(manifest.registration.gridCells, ["B2", "C1", "C2"]);
+  assert.deepEqual(NINJAONE_ENVIRONMENT_GRID_CELLS, ["B1", "B2", "C1", "C2"]);
+  assert.deepEqual(manifest.registration.gridCells, ["B1", "B2", "C1", "C2"]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_ORIGIN, [0.125, 0]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_SPAN, [0.25, 1 / 3]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_ARTBOARD, [1440, 1080]);
@@ -129,7 +128,6 @@ test("registered plates retain one 4:3 geometry and transparent layering", async
     [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES, ["territory", "capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES, ["territory", "capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES, ["capital", "site", "close"]],
-    [NINJAONE_ENVIRONMENT_HYDROLOGY_SOURCES, ["capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_TERTIARY_RELIEF_SOURCES, ["site", "close"]],
     [NINJAONE_ENVIRONMENT_TRAIL_SOURCES, ["site", "close"]],
     [NINJAONE_ENVIRONMENT_SURFACE_ECOLOGY_SOURCES, ["close"]],
@@ -144,6 +142,22 @@ test("registered plates retain one 4:3 geometry and transparent layering", async
       assert.ok(metadata.size > 1_000, `${source.path} is unexpectedly empty`);
     }
   }
+});
+
+test("environment registration does not expose a legacy static hydrology plate", async () => {
+  const [manifest, model] = await Promise.all([
+    readJson(
+      "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
+    ),
+    readFile(path.join(
+      root,
+      "features/career-world/development/model/ninjaOneEnvironmentProof.ts",
+    ), "utf8"),
+  ]);
+
+  assert.equal(manifest.layers.hydrology, undefined);
+  assert.doesNotMatch(model, /NINJAONE_ENVIRONMENT_HYDROLOGY_SOURCES/);
+  assert.doesNotMatch(model, /layers\.hydrology\.sources/);
 });
 
 test("environment density uses bounded shared resource pools", async () => {
@@ -362,20 +376,18 @@ test("production native authoring is standalone and package-addressable", async 
   assert.doesNotMatch(nativeBuilder, /harmon|buildHydrology|buildFoliage|fallback/i);
 });
 
-test("isolated preview renders semantic terrain and suppresses the city stack", async () => {
+test("the root-selectable environment proof renders semantic terrain and suppresses the city stack", async () => {
   const [
     page,
     scene,
     renderer,
-    builder,
-    semanticBuilder,
     nativeBuilder,
     waterRenderer,
     streamShader,
   ] = await Promise.all([
     readFile(path.join(
       root,
-      "app/career-world/previews/ninjaone-environment/page.tsx",
+      "app/page.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
@@ -385,8 +397,6 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
       root,
       "features/career-world/development/NinjaOneEnvironmentProof.tsx",
     ), "utf8"),
-    readFile(path.join(root, "scripts/build-ninjaone-environment-proof.mjs"), "utf8"),
-    readFile(path.join(root, "scripts/build-ninjaone-environment-semantics.mjs"), "utf8"),
     readFile(path.join(root, "scripts/build-ninjaone-environment-native-detail.mjs"), "utf8"),
     readFile(path.join(
       root,
@@ -397,9 +407,15 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
       "features/career-world/layers/water-surface/rendering/shaders/ninjaone-streams.ts",
     ), "utf8"),
   ]);
-  assert.match(page, /<CareerWorld enableDevelopmentTools environmentProof \/>/);
-  assert.match(scene, /environmentProof \? \(/);
-  assert.match(scene, /<NinjaOneEnvironmentProof/);
+  assert.match(
+    page,
+    /case "ninjaone-environment":[\s\S]*?<CareerWorld enableDevelopmentTools environmentProof \/>/,
+  );
+  assert.match(scene, /const showNinjaOneEnvironment = !topologyProof && !capitalMvp/);
+  assert.match(
+    scene,
+    /<NinjaOneEnvironmentProof[\s\S]*?proofMode=\{environmentProof\}/,
+  );
   for (const layer of [
     "terrain-geology",
     "secondary-relief",
@@ -413,55 +429,48 @@ test("isolated preview renders semantic terrain and suppresses the city stack", 
   ]) {
     assert.ok(renderer.includes(`"${layer}"`), `${layer} is not rendered`);
   }
-  assert.match(scene, /<WaterSurfaceCanvas[\s\S]*?foregroundHydrology=\{environmentProof\}/);
+  assert.match(
+    scene,
+    /<WaterSurfaceCanvas[\s\S]*?foregroundHydrology=\{showNinjaOneEnvironment\}/,
+  );
   assert.doesNotMatch(renderer, /terrain-microdetail/);
   assert.doesNotMatch(renderer, /<InfrastructureLayer|<StructuresLayer|<NinjaOneCapitalMvp/);
-  assert.match(builder, /world-land-mask-r4\.png/);
-  assert.doesNotMatch(builder, /master-detail-r2|runtime-close-quilt-r3/);
-  assert.match(builder, /native-detail-r2\.json/);
-  assert.match(builder, /canonicalHeightFieldPath/);
-  assert.match(builder, /canonicalSlopeFieldPath/);
-  assert.match(semanticBuilder, /HYDROLOGY/);
-  assert.match(semanticBuilder, /TRAILS/);
-  assert.match(semanticBuilder, /WILDLIFE_RESOURCES/);
   assert.match(nativeBuilder, /SOURCE_TILE_ROOT/);
   assert.match(nativeBuilder, /VOID_MASK_TILE_IDS/);
   assert.match(nativeBuilder, /buildNinjaOneEnvironmentStaticTerrain/);
   assert.doesNotMatch(nativeBuilder, /master-detail-r2|detail-tiles-r3|registered-terrain-master/);
   assert.match(waterRenderer, /ninjaOneStreamFlow/);
   assert.match(waterRenderer, /u_ninjaOneStreamOrigin/);
-  assert.match(streamShader, /float style = saturate\(encoded\.a \/ max\(coverage/);
-  assert.match(streamShader, /vec2 decodedFlow = \(encodedFlow/);
   assert.match(
     streamShader,
-    /primaryPhaseUvA = phaseBaseUv - flow \* flowPhaseA \* phaseAdvance/,
+    /NinjaOneFieldSample sampleNinjaOneRegionalField\(vec2 streamUv\)/,
   );
   assert.match(
     streamShader,
-    /materialBaseUv - flow \* flowPhaseA \* materialAdvance/,
+    /result\.primary = ninjaOneBilinear0\(coordinate, false\)[\s\S]*?result\.auxiliary = ninjaOneBilinear0\(coordinate, true\)/,
   );
+  assert.match(streamShader, /vec2 decodeNinjaOneVelocity\(vec4 encoded\)/);
+  assert.match(streamShader, /float visualDepth = decodeNinjaOneScalar\(field\.primary\.a, coverage\)/);
+  assert.match(streamShader, /float whitewaterPotential = mix\([\s\S]*field\.auxiliary\.r/);
+  assert.match(streamShader, /float obstaclePotential = mix\([\s\S]*field\.auxiliary\.g/);
+  assert.match(streamShader, /float mistPotential = mix\([\s\S]*field\.auxiliary\.b/);
+  assert.match(streamShader, /float cascadePotential = mix\([\s\S]*field\.auxiliary\.a/);
   assert.doesNotMatch(streamShader, /downhillAxis/);
-  assert.match(streamShader, /float tarnPhase =/);
-  assert.match(streamShader, /float lipAcceleration =/);
-  assert.match(streamShader, /float fallingSheet =/);
-  assert.match(streamShader, /float impactFoam =/);
-  assert.match(streamShader, /float downstreamTurbulence =/);
-  assert.match(streamShader, /float coastalFoam =/);
-  assert.match(streamShader, /float mist = impact/);
-  assert.match(streamShader, /OpenWaterSample primaryOceanSurface = sampleWaterBodyAtTime/);
-  assert.match(streamShader, /OpenWaterSample offsetOceanSurface = sampleWaterBodyAtTime/);
-  assert.match(streamShader, /OpenWaterSample oceanSurface = blendWaterSamples/);
   assert.match(
     streamShader,
-    /vec3 bodyColor;\s*float bodyAlpha;\s*vec3 effectsColor;\s*float effectsAlpha;/,
+    /struct NinjaOneStreamSample \{\s*vec3 effectsColor;\s*float effectsAlpha;\s*vec3 mistColor;\s*float mistAlpha;/,
   );
-  const registeredBodyAlpha = streamShader.match(
-    /float registeredBodyAlpha = saturate\(([\s\S]*?)\);\s+result\.bodyAlpha/,
+  assert.doesNotMatch(streamShader, /result\.body|bodyAlpha/);
+  assert.match(waterRenderer, /waterLayerContract = "shared-body-and-regional-effects"/);
+  assert.match(waterRenderer, /waterBodyPass = "shared-coast-surface"/);
+  assert.match(streamShader, /float channelMotionAuthority = smoother/);
+  assert.match(streamShader, /float runSurfaceAlpha = channelMotionAuthority/);
+  assert.match(streamShader, /float tarnSurfaceAlpha = tarn/);
+  assert.match(streamShader, /float waterFoamAlpha = effectsCoverage \* min/);
+  assert.match(streamShader, /float cascadeFoamAlpha = registered \* min/);
+  assert.match(
+    streamShader,
+    /result\.effectsAlpha = combinedEffectsAlpha/,
   );
-  assert.ok(registeredBodyAlpha, "registered hydrology body alpha is missing");
-  assert.doesNotMatch(registeredBodyAlpha[1], /time|sin|heightSample|foam|mist/);
-  assert.match(streamShader, /float registeredFoamVolume = saturate/);
-  assert.match(streamShader, /float registeredEffectsAlpha = saturate/);
-  assert.match(streamShader, /result\.effectsAlpha = mask/);
   assert.doesNotMatch(nativeBuilder, /dynamicShadows:\s*Object\.freeze\(\{\s*enabled:\s*true/);
 });

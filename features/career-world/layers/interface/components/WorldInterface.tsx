@@ -35,7 +35,6 @@ interface WorldInterfaceProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly enableDevelopmentTools: boolean;
-  readonly mode: "world" | "water";
   readonly landmarkLabels: readonly LandmarkLabel[];
   readonly projectDestinations: readonly ProjectDestination[];
   readonly projectVisualReadiness: Readonly<Record<string, boolean>>;
@@ -250,7 +249,6 @@ export function WorldInterface({
   detailState,
   enableDevelopmentTools,
   landmarkLabels,
-  mode,
   projectDestinations,
   projectVisualReadiness,
   renderState,
@@ -282,9 +280,7 @@ export function WorldInterface({
   return (
     <div className="career-world__interface" data-layer="interface">
       <div className="career-world__status-panel">
-        <span className="career-world__eyebrow">
-          {mode === "water" ? "Water surface" : "Career World"}
-        </span>
+        <span className="career-world__eyebrow">Career World</span>
         <strong>
           {activeViewId === "world"
             ? "Full world extent"

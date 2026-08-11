@@ -2209,11 +2209,14 @@ test("regional hydrology boundary alpha proof rejects missing flat and unregiste
   const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "ninjaone-boundary-alpha-"));
   try {
     const clip = { height: 900, scale: 1, width: 1440, x: 0, y: 0 };
+    const rapidCamera = NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES.find(
+      ({ id }) => id === "hydrology-C2-rapid",
+    ).camera;
     const detailResource = hydrologyManifest.regionalFields.tiers.detail.resources.find(
       ({ regionId }) => regionId === "C2",
     );
     const contract = await deriveNinjaOneHydrologyMotionContract({
-      camera: FIXED_CAMERAS.C2,
+      camera: rapidCamera,
       clip,
       fieldResourceIds: [detailResource.id],
       fieldTier: "detail",
@@ -2261,7 +2264,7 @@ test("regional hydrology boundary alpha proof rejects missing flat and unregiste
     ]);
     const frame = {
       alphaBasis: "regional-minus-zero-baseline",
-      camera: FIXED_CAMERAS.C2,
+      camera: rapidCamera,
       clip,
       fieldResourceIds: [detailResource.id],
       fieldTier: "detail",
@@ -2364,7 +2367,7 @@ test("runtime evidence rejects a stale behavior-binding aggregate", async () => 
         id: "ninjaone-environment-browser-capture-r1",
         scriptPath: "scripts/capture-ninjaone-environment-mvp.mjs",
         scriptSha256: "stale",
-        url: "http://127.0.0.1:4173/career-world/previews/ninjaone-environment",
+        url: "http://127.0.0.1:4173/?view=ninjaone-environment",
         viewport: { height: 900, width: 1440 },
       },
       residencySamples: [],
@@ -2478,23 +2481,23 @@ test("motion evidence derives its mask and vector from the mounted fallback fiel
   assert.ok(contract.maskPng.length > 0);
 });
 
-test("B2 tarn and waterfall feature contracts separate full coverage from flow", async () => {
+test("B2 tarn and C2 rapid contracts separate calm coverage from downstream flow", async () => {
   const expected = {
-    "hydrology-B2-lip-fall": {
-      coveragePixels: 3_781,
-      directionalPixels: 1_515,
-      fullMaskSha256:
-        "6AD64193FE4C58F2F74DE47F8A302ECA5E914E5AB202EF861BE6EF22C85FB786",
-      maskSha256:
-        "AB704A347A8848F0FF03EB13B2F7790C83A13745CFE7FC75E60A866B6BD1A53E",
-    },
     "hydrology-B2-tarn": {
-      coveragePixels: 6_241,
-      directionalPixels: 1_610,
+      coveragePixels: 6_825,
+      directionalPixels: 1_939,
       fullMaskSha256:
-        "F5D7EB1E034F83DD66B47B6799FF51F1E1AE3268F1C398DF5EDA7A0D66AF8CF4",
+        "CED7560D9DB0E9CDF5AABABDD8E383E23FD52EC5E63780290B9CE1692A21736B",
       maskSha256:
-        "F283BCEB37C2564F2F129220B9ABFFA87F229D79820847E8B499C783BFDC2456",
+        "84B0EF7DC29A85CE8DBAF68DBFF2B978655D566065CB36EDBA14430879C44D81",
+    },
+    "hydrology-C2-rapid": {
+      coveragePixels: 1_992,
+      directionalPixels: 1_965,
+      fullMaskSha256:
+        "1159E6C6AF5AABD247FBFB400DEE710450F3ABCF9FB43614E0A69B395AC869F3",
+      maskSha256:
+        "CD23F6F660AE283425186D01267D51C2B2CBA8F39113510D20D76153EE3CD712",
     },
   };
   for (const feature of NINJAONE_MVP_HYDROLOGY_FEATURE_CAPTURES) {

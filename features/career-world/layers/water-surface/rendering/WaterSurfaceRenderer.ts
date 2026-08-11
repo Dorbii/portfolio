@@ -96,7 +96,6 @@ const TEXTURE_PATHS = [
   ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp", true, true],
   ["coastMaterial", WATER_ASSETS.coastMaterial, "clamp", true, true],
   ["hydrology", WATER_ASSETS.hydrology, "clamp", true, true],
-  ["waterfallVfx", WATER_ASSETS.waterfallVfx, "clamp", true, false],
 ] as const;
 const DIRECTIONAL_ALBEDO_UNIT = TEXTURE_PATHS.length;
 const NINJAONE_HYDROLOGY_UNITS = Object.freeze([
@@ -112,7 +111,6 @@ const SAMPLER_UNIFORMS = Object.freeze({
   coastGeometry: "u_coastGeometry",
   coastMaterial: "u_coastMaterial",
   hydrology: "u_hydrology",
-  waterfallVfx: "u_waterfallVfx",
 });
 
 const CASCADE_UNIFORM_NAMES = Object.freeze({
@@ -433,13 +431,13 @@ export class WaterSurfaceRenderer {
     this.canvas.dataset.foregroundWaterMode = foregroundHydrology
       ? "registered-overlay"
       : "global";
-    this.canvas.dataset.waterLayerContract = "registered-body-and-effects";
-    this.canvas.dataset.waterBodyPass = "channel-coverage";
+    this.canvas.dataset.waterLayerContract = "shared-body-and-regional-effects";
+    this.canvas.dataset.waterBodyPass = "shared-coast-surface";
     this.canvas.dataset.waterCascadeCount = String(
       NINJAONE_WATER_FEATURES.cascades.length,
     );
-    this.canvas.dataset.waterEffectsPass = "foam-ripples-staged-cascades";
-    this.canvas.dataset.waterMistPass = "cascade-impact-drift-envelope";
+    this.canvas.dataset.waterEffectsPass = "flow-detail-foam-c2-rapid";
+    this.canvas.dataset.waterMistPass = "c2-impact-drift-envelope";
     this.canvas.dataset.waterProfile = CAREER_WORLD_WATER_REALISM_PROFILE.id;
     this.canvas.dataset.hydrologyAssetState = this.hydrologyAssetState;
     this.canvas.dataset.hydrologyFieldPacking =

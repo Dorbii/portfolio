@@ -17,33 +17,7 @@ void main() {
   OpenWaterSample water = sampleOpenWater(worldUv, hydrology);
   CoastSample coast = applyCoast(worldUv, water, shelter);
   float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
-  NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv);
-  // Preserve the opaque body in channel interiors while letting the water-side
-  // antialias fringe blend beneath accepted bank silhouettes.
-  float streamBodyMix = smoother(0.02, 0.72, stream.bodyAlpha);
-  vec3 streamBodyComposite = mix(
-    coast.color,
-    stream.bodyColor,
-    streamBodyMix
-  );
-  vec3 effectsComposite = mix(
-    streamBodyComposite,
-    stream.effectsColor,
-    stream.effectsAlpha
-  );
-  vec3 color = mix(
-    effectsComposite,
-    stream.mistColor,
-    stream.mistAlpha
-  );
-  float registeredStreamVisibility = max(
-    max(stream.bodyAlpha, stream.effectsAlpha),
-    stream.mistAlpha
-  );
-  float globalVisibility = max(
-    max(waterVisibility, coast.overlayAlpha),
-    registeredStreamVisibility
-  );
+  NinjaOneStreamSample stream = sampleNinjaOneStreams(worldUv, coast.color);
   // The foreground-only contract belongs to site/close inspection. Keeping it
   // enabled at world and territory tiers removes the shared ocean entirely and
   // exposes the scene's black underlay around the registered land plate.
@@ -51,20 +25,29 @@ void main() {
   // canonical land mask here, not the coast wash alpha: overlayAlpha is
   // intentionally allowed to feather inland and made small coastal islands
   // look translucent when this foreground pass crossed them.
-  float registeredForegroundVisibility = max(
-    waterVisibility,
-    registeredStreamVisibility
-  );
   float foregroundOverlay = u_foregroundHydrology
     * smoother(0.08, 0.45, u_siteLod);
-  float visibility = mix(
-    globalVisibility,
-    registeredForegroundVisibility,
+  float baseVisibility = mix(
+    max(waterVisibility, coast.overlayAlpha),
+    waterVisibility,
     foregroundOverlay
   );
+  // Build the transparent water stack with source-over math. Mixing colors and
+  // then taking the maximum alpha double-attenuated bright waterfall foam and
+  // leaked the blue coast material across dry cliffs.
+  vec4 composite = vec4(coast.color * baseVisibility, baseVisibility);
+  float streamEffectsAlpha = saturate(stream.effectsAlpha);
+  composite.rgb = stream.effectsColor * streamEffectsAlpha
+    + composite.rgb * (1.0 - streamEffectsAlpha);
+  composite.a = streamEffectsAlpha + composite.a * (1.0 - streamEffectsAlpha);
+  float streamMistAlpha = saturate(stream.mistAlpha);
+  composite.rgb = stream.mistColor * streamMistAlpha
+    + composite.rgb * (1.0 - streamMistAlpha);
+  composite.a = streamMistAlpha + composite.a * (1.0 - streamMistAlpha);
+  vec3 color = composite.rgb / max(composite.a, 0.00001);
   outColor = vec4(
     color,
-    u_opacity * visibility
+    u_opacity * composite.a
   );
 }
 `;

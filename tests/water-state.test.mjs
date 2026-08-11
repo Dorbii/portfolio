@@ -101,7 +101,7 @@ test("water realism profile is revisioned, deeply frozen, and range checked", ()
   );
 });
 
-test("cascade and tarn features are reproducibly derived from the hydrology manifest", () => {
+test("C2 rapid and B2 tarn features are reproducibly derived from the hydrology manifest", () => {
   assert.ok(Object.isFrozen(NINJAONE_WATER_FEATURES));
   assert.ok(NINJAONE_WATER_FEATURES.tarn);
   assert.deepEqual(
@@ -110,20 +110,17 @@ test("cascade and tarn features are reproducibly derived from the hydrology mani
   );
   assert.ok(NINJAONE_WATER_FEATURES.tarn.radiusPixels > 0);
   const cascades = NINJAONE_WATER_FEATURES.cascades;
-  assert.equal(cascades.length, 4);
+  assert.equal(cascades.length, 1);
   assert.equal(new Set(cascades.map(({ id }) => id)).size, cascades.length);
   assert.deepEqual(
     new Set(cascades.map(({ regionId }) => regionId)),
-    new Set(["B2", "C1", "C2"]),
+    new Set(["C2"]),
   );
   assert.deepEqual(
     cascades
       .filter(({ regionId }) => regionId === "B2")
       .map(({ id }) => id),
-    [
-      "b2-tarn-upper-drop",
-      "b2-tarn-lower-drop",
-    ],
+    [],
   );
   for (const cascade of cascades) {
     assert.ok(Object.isFrozen(cascade));

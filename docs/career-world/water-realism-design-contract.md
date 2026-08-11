@@ -109,16 +109,16 @@ realism slice. The user-visible stop remains visual review, not production appro
   the largest packed two-region detail cohort remains below the separate 32 MiB
   native application union.
 - Use no more than eight cascade descriptors and one tarn feature in the mounted
-  profile; the current vertical slice uses two separated B2 cascade events with
-  a real pool/run gap instead of four overlapping staircase descriptors. Keep
-  all added field sampling bounded to registered water or explicit cascade
-  support; dry pixels outside both branches return before mist or surface-noise
-  sampling.
+  profile. B2 is a calm tarn and downstream run with no waterfall descriptors;
+  the current vertical slice has one source-registered C2 rock-chute rapid. Keep
+  regional animation bounded to speed-authoritative water and the explicit C2
+  support; dry pixels outside both branches return before mist or material
+  sampling. The shared coast surface remains the sole water-body route.
 - Focused tests must cover profile validation/freezing, manifest feature derivation,
   deterministic masks/flow authority, body/effects/mist alpha ownership, reduced
   motion, lifecycle cleanup, and budget telemetry.
-- Browser proof must show ocean, river/bank or confluence, waterfall/plunge/mist,
-  and site/close LOD views. Final performance repeats the same seven-wheel C1
+- Browser proof must show ocean, river/bank or confluence, calm B2 tarn, the C2
+  rock-chute rapid, and site/close LOD views. Final performance repeats the same seven-wheel C1
   cold-load workload used for baseline comparison.
 - READY requires visible target effects without analytic ring boundaries, square
   bright artifacts, or a single high-contrast effect dominating the river body;

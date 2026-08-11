@@ -46,7 +46,7 @@ export interface NinjaOneEnvironmentFoliageInstance
 }
 
 const EXPECTED_ID = "career-world/capitals/ninjaone/environment-proof@r1";
-const EXPECTED_GRID_CELLS = Object.freeze(["B2", "C1", "C2"]);
+const EXPECTED_GRID_CELLS = Object.freeze(["B1", "B2", "C1", "C2"]);
 const EXPECTED_LAYER_ORDER: readonly NinjaOneEnvironmentLayerId[] = Object.freeze([
   "terrain-geology",
   "secondary-relief",
@@ -238,11 +238,6 @@ export const NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES = plateSources(
 export const NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES = plateSources(
   manifest.layers.secondaryRelief.sources,
   "layers.secondaryRelief.sources",
-  ["capital", "site", "close"],
-);
-export const NINJAONE_ENVIRONMENT_HYDROLOGY_SOURCES = plateSources(
-  manifest.layers.hydrology.sources,
-  "layers.hydrology.sources",
   ["capital", "site", "close"],
 );
 export const NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES = plateSources(
