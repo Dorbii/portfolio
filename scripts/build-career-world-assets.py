@@ -10,7 +10,7 @@ import sys
 import time
 
 import numpy as np
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
@@ -25,19 +25,6 @@ WORLD_LIGHT_MANIFEST = (
     PUBLIC / "world-backdrop" / "manifests" / "world-light-r1.json"
 )
 LAND_MASK = LAND_ROOT / "masks" / "world-land-mask-r4.png"
-KAIZEN_C2_CITY_PLATE = (
-    ROOT
-    / "public"
-    / "career-world"
-    / "layers"
-    / "structures"
-    / "textures"
-    / "ambient"
-    / "kaizen-agent"
-    / "kaizen-city-foundation-integrated-r1.png"
-)
-KAIZEN_C2_WORLD_ORIGIN = (0.25925, 0.135737)
-KAIZEN_C2_WORLD_SPAN = (0.1065, 0.1893)
 TERRAIN_DEM_SOURCE = (
     LAND_ROOT / "sources" / "terrain-dem-authored-r3.png"
 )
@@ -1309,34 +1296,12 @@ def verify() -> None:
         raise RuntimeError("Coast material field does not match the world plane.")
     if water_regions.size != mask.size:
         raise RuntimeError("Water region field does not match the world plane.")
-    accepted_land_alpha = land.getchannel("A").point(
-        lambda value: 255 if value >= 128 else 0,
-    )
-    city = Image.open(KAIZEN_C2_CITY_PLATE).convert("RGBA")
-    city_box = (
-        round(KAIZEN_C2_WORLD_ORIGIN[0] * mask.width),
-        round(KAIZEN_C2_WORLD_ORIGIN[1] * mask.height),
-        round(
-            (KAIZEN_C2_WORLD_ORIGIN[0] + KAIZEN_C2_WORLD_SPAN[0])
-            * mask.width,
+    land_alpha = np.asarray(
+        land.getchannel("A").point(
+            lambda value: 255 if value >= 128 else 0,
         ),
-        round(
-            (KAIZEN_C2_WORLD_ORIGIN[1] + KAIZEN_C2_WORLD_SPAN[1])
-            * mask.height,
-        ),
-    )
-    city_alpha = city.getchannel("A").resize(
-        (city_box[2] - city_box[0], city_box[3] - city_box[1]),
-        Image.Resampling.BILINEAR,
-    ).filter(ImageFilter.MaxFilter(9)).point(
-        lambda value: 255 if value >= 12 else 0,
-    )
-    accepted_crop = accepted_land_alpha.crop(city_box)
-    accepted_land_alpha.paste(
-        ImageChops.lighter(accepted_crop, city_alpha),
-        city_box,
-    )
-    land_alpha = np.asarray(accepted_land_alpha, dtype=np.uint8) >= 128
+        dtype=np.uint8,
+    ) >= 128
     accepted_silhouette = np.asarray(mask, dtype=np.uint8) >= 128
     if not np.array_equal(land_alpha, accepted_silhouette):
         raise RuntimeError(

@@ -121,19 +121,20 @@ test("authored town foundations separate semantic overlays from plate-owned fill
   );
   assert.match(
     component,
-    /INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
+    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
   assert.match(
     component,
-    /RENDERED_TOWN_FABRIC_INSTANCES[\s\S]*!INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS\.has\(ownerId\)/,
+    /RENDERED_TOWN_FABRIC_INSTANCES[\s\S]*!DISABLED_STRUCTURE_OWNER_IDS\.has\(ownerId\)/,
   );
   assert.match(
     component,
-    /RENDERED_AMBIENT_STRUCTURE_INSTANCES[\s\S]*!TOWN_FABRIC_OWNER_IDS\.has\(ownerId\)/,
+    /RENDERED_PROJECT_STRUCTURES[\s\S]*!DISABLED_STRUCTURE_OWNER_IDS\.has\(id\)/,
   );
-  assert.match(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /<KaizenIntegrationSeams/);
   assert.doesNotMatch(component, /shouldRenderNeighborhoodOverview/);
-  assert.match(component, /data-town-neighborhood-close-visibility=/);
+  assert.doesNotMatch(component, /data-town-neighborhood-close-visibility=/);
   assert.match(component, /data-town-authored-structure-visibility=/);
   assert.match(
     component,
@@ -253,7 +254,7 @@ test("Kaizen semantic buildings reuse the registered shared city pool", async ()
   );
 });
 
-test("Kaizen city mounts a persistent base and derived progressive detail", async () => {
+test("Kaizen city source assets stay valid while the live mount remains disabled", async () => {
   const [component, fabricComponent] = await Promise.all([
     readFile(path.join(
       root,
@@ -369,13 +370,18 @@ test("Kaizen city mounts a persistent base and derived progressive detail", asyn
   assert.ok(transparentCloseTileCount > 0);
   assert.match(KAIZEN_NEIGHBORHOOD_FOUNDATION_SRC, /kaizen-base-overview-r1\.webp$/);
   assert.match(KAIZEN_NEIGHBORHOOD_SITE_FOUNDATION_SRC, /kaizen-base-site-r1\.webp$/);
-  assert.match(component, /<KaizenNeighborhoodFabric/);
   assert.match(
     component,
-    /onVisualReadyChange=\{onKaizenVisualReadyChange\}/,
+    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
-  assert.match(component, /shouldRenderCloseNeighborhood/);
-  assert.match(component, /shouldRenderSiteNeighborhood/);
+  assert.doesNotMatch(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /<KaizenIntegrationSeams/);
+  assert.match(
+    component,
+    /onKaizenVisualReadyChange\(false\)/,
+  );
+  assert.doesNotMatch(component, /shouldRenderCloseNeighborhood/);
+  assert.doesNotMatch(component, /shouldRenderSiteNeighborhood/);
   assert.doesNotMatch(fabricComponent, /registrationMaskId|close-fallback/);
   assert.match(
     fabricComponent,

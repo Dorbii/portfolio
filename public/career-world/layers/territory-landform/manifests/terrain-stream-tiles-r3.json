@@ -28,6 +28,51 @@
   },
   "tiles": [
     {
+      "id": "close-3-0",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-3-0-capital.webp",
+          "dimensions": [
+            558,
+            470
+          ],
+          "decodedBytes": 1049040,
+          "sha256": "E65B99A6A6C7A38380ED17C4299F63F1181ED1D8398B79614967E0100E4B4B2E"
+        },
+        "site": {
+          "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-3-0-site.webp",
+          "dimensions": [
+            1395,
+            1175
+          ],
+          "decodedBytes": 6556500,
+          "sha256": "0E20F84E5CAE9475B4D29EB0C2D918C0A45058C30A0A948CF5BA1862E6377DBC"
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.12485047846889952,
+          0.0
+        ],
+        "span": [
+          0.04171650717703349,
+          0.062433581296493096
+        ]
+      },
+      "sourceCropPixels": {
+        "origin": [
+          835,
+          0
+        ],
+        "size": [
+          279,
+          235
+        ]
+      },
+      "sourceAlphaPolicy": "preserve-exactly"
+    },
+    {
       "id": "close-4-0",
       "minimumTier": "capital",
       "sources": {
@@ -38,7 +83,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "7030256C7E8DFE210446A57934FF8C8E5C7668643D7655E618F15CD2EFCA7178"
+          "sha256": "DEAA083061071C15BE6D0E990032A5AA2E7216B40536CFB9BCBC0216514A3C82"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-4-0-site.webp",
@@ -47,7 +92,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "4A8B12DFA17E19D38E5001F56D8ACD0E2DCFA24A959351C640BE32597D9D34D0"
+          "sha256": "A0998F434588F8414C995CAB8B9C9B9A3F9603F78FD077A81D530071F01D5809"
         }
       },
       "worldBounds": {
@@ -83,7 +128,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "540DE4E2DADE81C2688DB9D7DA1F5EE4D985AF983D1A1DD0D299DCB34BE65DD6"
+          "sha256": "B9C215F3EDB48C2A168CE40DD054869B13A77AFE86DEC9F738BE606CCAB9C661"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-5-0-site.webp",
@@ -92,7 +137,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "176D7911A526FABA12D00B4973E47EA24064A9CD2BEA52986A78BC7C91236E82"
+          "sha256": "DBA28A47FD9FC27F519491667528E819920D6E86126BAF5B2D8D31AAFA936C74"
         }
       },
       "worldBounds": {
@@ -128,7 +173,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "450F81CC508D040A632BBF9F4FFB24D04423FE1D5D13FDC32F06C70EC5A15EE2"
+          "sha256": "6DDF5514D43CA27244668F1B31C0F87F8CDCC7A4AA9B7A59EBDA479BAA5CB109"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-6-0-site.webp",
@@ -137,7 +182,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "25DC1BEAAD8B076FE9DBF88BD15F2965BA80F100EFB0315ACE78A2796A494D2C"
+          "sha256": "04522FCE10CC19A40E9858394AFB5CE19A8DC557DF44EF574E0E506D14C16D6A"
         }
       },
       "worldBounds": {
@@ -173,7 +218,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "94761A00CE3CD082AD1E806D908F31963A2EF2EE6E5BAC4879E5D8AAA76F1B6A"
+          "sha256": "E5A3C33CC121C690BC32811E32E5838B36C475970F06767E9C32F185D46D1099"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-3-1-site.webp",
@@ -182,7 +227,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "0A2BAF3983661533FBEA1AEC6CD955D904ABCF42F52B446AB2535293ED78C9AF"
+          "sha256": "DE8507C06DB87A528BFE76FE44BD1EBF6278BAC0388750C4C8611C952878919B"
         }
       },
       "worldBounds": {
@@ -218,7 +263,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "B0793FDF44F1F70302A4604B87DD80B0EABD5CB149BA85EC5E8B0A51BCEA998A"
+          "sha256": "D5871B9FE4B41E247456DE1FA65C98712044B759B89536056F68475BE89915D2"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-4-1-site.webp",
@@ -227,7 +272,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "BE45D37ABA5DABDDA15B8ACF81476727BBDCB959E23FAE46F33D2647178CBB92"
+          "sha256": "39EFA96B90F4D99D73B64357130E5F8482058425DF66B8563AB4D4D0F1322246"
         }
       },
       "worldBounds": {
@@ -263,7 +308,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "0BE4064E9236E0BE0D77328546FD0165E3CEA38A532EB77A8B18C9DF33D9C0E1"
+          "sha256": "386BBD06828AD6C105A5CFA104F88960200495F5E407168CDB34DF5674CB1D8A"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-5-1-site.webp",
@@ -272,7 +317,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "527B60C9C28B43530819518E21C6BB40716DF402B01B20BDE846AF8477A90ED3"
+          "sha256": "86E203C8EF45592129DDF4BBC8DE65F890B14664CBE5A1B29D415B2BCE97F7C9"
         }
       },
       "worldBounds": {
@@ -308,7 +353,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "94C57E0716021FE3B955A07BA7DB2FEEDA82D3B07A52D309D0C51D2E544F2DA5"
+          "sha256": "D6B2B3F11BE58488BE8F003BCB2C5AF9B5FC432B6358867CD6BD22A8AEF9B5BC"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-6-1-site.webp",
@@ -317,7 +362,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "F3D84EA37D4C5F862140AA7AE79F2B35DE58CE72A49A0220CF5719ABFB3CC956"
+          "sha256": "06F3752B19D0157F0A78CA5391536FC9CFE7F32CEA3419805155F38C2E3F687E"
         }
       },
       "worldBounds": {
@@ -353,7 +398,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "F484363FA4AA875E42C2222E27873D9A6EA9E23AA857C76F6F3F4AF08D461757"
+          "sha256": "C302F94F26607FF035B7B6B599BCD69CB0F98B8A99FFB70B130335803E912BDA"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-7-1-site.webp",
@@ -362,7 +407,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "7EDEC3D981A04C5DB045F2E9F3DD34A3902561E7CD358872E3895ACA3B22EA9F"
+          "sha256": "BAADE82DC337122D76A51421BB285900A01423B935DD17408CF17A454F471846"
         }
       },
       "worldBounds": {
@@ -398,7 +443,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "ADE1E6795D8A5C9252C0A10A9150C87A7A2DCE7D74359E3AD56922D52ADD4BA5"
+          "sha256": "C3A4B1E21B8EC3EE6C58AF174B1F7C7266BC6F57B17F09CBC8A37AECF7DB5E4A"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-8-1-site.webp",
@@ -407,7 +452,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "02D66F01D45D7EBF25F91D7C611488612116CD989BAA3FFDDF2E71608C7F40E0"
+          "sha256": "5AA2D7D42CA2715F98DFB2EADFAF3EB81DFB06E128C8BB417AE172F74C799A81"
         }
       },
       "worldBounds": {
@@ -443,7 +488,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "DFD0D1BD7D271DDAE61606E5B46A5AF0306A3EE514E636A4933FD33BDA2B53A4"
+          "sha256": "2F4E42B79D464D36EA10CDC5F9D62626BAD61975435C28DC318C3504978693F4"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-9-1-site.webp",
@@ -452,7 +497,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "768A1BAED631C9A0A89DBC78F7DC6331BEB704524A8AD051CE29E37EC1FB3807"
+          "sha256": "520BA70795302C961C6818F7E282D5D3A73A87678FC84E7646CD993C94FD9A5D"
         }
       },
       "worldBounds": {
@@ -623,7 +668,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "A681F799BDBD71443994CEFE787FD01F80553AEE2AB875A26D4F40B8250D8C25"
+          "sha256": "F35BED994BD33F0140FFD1BF840EC08E89FB6C7093D7051F9F965C002EC4C244"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-2-2-site.webp",
@@ -632,7 +677,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "0EE68FAF521DD7157F0FE109CB71030B90E58C02CA5853630A1C226A5C042402"
+          "sha256": "F0D9DA9C0462A1DD081B6BA24C8331C63B961C460C48B1E42EF11B4083C209E8"
         }
       },
       "worldBounds": {
@@ -668,7 +713,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "1D31DEF99A91091C7ACDD3F5C0077B38E9AE5CEF4B03F4CB4F18F494F2D77EDB"
+          "sha256": "72DB106EFB4A9495F03617BBCB0B9D4F4A346BA1B6F9CFFC1B8BFE688A45A66F"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-3-2-site.webp",
@@ -677,7 +722,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "0EAE18DD6608FD882F38A194B92A67FB745AC7B0CFF736B52F2824ACA2D93CB3"
+          "sha256": "9F1248B70402B7856CFD6440B8CABA97676A96C871BD7CB3663F1CADC56C1644"
         }
       },
       "worldBounds": {
@@ -713,7 +758,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "B31D2DEFD150F51B991B7D97E5BD3A5441D91AD12670EF1F05C9CB2A8124BBC1"
+          "sha256": "D72C013A4CD8DA51F133850583B5FAAA35D8C9026F3F154096376DE04241E43E"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-4-2-site.webp",
@@ -722,7 +767,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "A9B407F77D780F394AF2C8A699929C5C45F3D440B1707405F3C68AFA8E5DA337"
+          "sha256": "D2B5F5FC8B8CB1343737D1F540D6C2784E58FECDEA6A5258AA5EDF1EAACA025A"
         }
       },
       "worldBounds": {
@@ -758,7 +803,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "4C26877B7152EA152AC2B6F72CAF45EE60D17B404C74E6B70857E93DADCDC07F"
+          "sha256": "0066851FF57A732004394F6A1F8EF585028BA71E4939B8741415BFDB6557F78F"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-5-2-site.webp",
@@ -767,7 +812,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "3D3F1C83F435361B9B842714AA35D1571D70D0A08BF2A47004188F92667B202D"
+          "sha256": "E1393C08FF578B57C887813B134FB2D4CBB4BF45C3418224AD325F2BAA63070F"
         }
       },
       "worldBounds": {
@@ -803,7 +848,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "660FFF5B5BB0424C68795058EFDBB67EC3A84B527E117EB03D341F5A981280BE"
+          "sha256": "72F5F218AE32045EEAC059CBE535C0C2E90614185EB87891AF7F131F2828F07C"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-6-2-site.webp",
@@ -812,7 +857,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "B37FBCD945B95B6100D9BC79160198735166FD58936E77752989C33E68B4E455"
+          "sha256": "D4CE7F8892D15F2CEC713A1B1F438B2EEF0EEDD99FE55FA4BF99746C1E803BEE"
         }
       },
       "worldBounds": {
@@ -848,7 +893,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "1E5F4D627AD790C6C03E4F5902DE2FB5B8774B59D69887E8B9CF9E0DD773E830"
+          "sha256": "C4932C2DBB8C5F63EC7E35A870252B79226B3ACAA585D4CEA3A6FC13BB5A857D"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-7-2-site.webp",
@@ -857,7 +902,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "073886CAAED2BAEC351FE3BC56CA7CB1A5D7CD96969970BFCEF9910C4A255ACA"
+          "sha256": "6D9723AE483B644A540EB6C2558857C666D4B55D68578207D1ED62282222C52D"
         }
       },
       "worldBounds": {
@@ -893,7 +938,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "279CAE81ACE502BE41D7917F3B56E7B0563551C637C131D5BCDC4A30406E3D7B"
+          "sha256": "7864F8FE43B7D16BA1FF7C384B525C865847410D1F8DA4C434062DF3357CBD37"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-8-2-site.webp",
@@ -902,7 +947,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "78E2BF9696007109864F8C37C3F142B2A1A2D1F965FF97850F75C5F636616E8E"
+          "sha256": "47801CCA9C2DDB8BD877BB030F6E57DD4A6E4DFA3C8C31E998B2950B51A1C4C7"
         }
       },
       "worldBounds": {
@@ -1298,7 +1343,7 @@
             472
           ],
           "decodedBytes": 1049728,
-          "sha256": "7294B892425D79EE4414E40D7E3A6D21D22F9AC8A98072B7CCE3D22607F3CADA"
+          "sha256": "4BB70733C950161C68601799E22441F4936323009893A29D61045270392E31DF"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-2-3-site.webp",
@@ -1307,7 +1352,7 @@
             1180
           ],
           "decodedBytes": 6560800,
-          "sha256": "6F9CC23E3BC91ED747B9CFE92510BDDF88E3187717AD54A11E36A2A80CAD77CC"
+          "sha256": "831F99467F909D0263C1F5BB1832FD21BC61C123AA00E8780D1D4042059F1329"
         }
       },
       "worldBounds": {
@@ -1343,7 +1388,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "E3EF18EA76CDBAB9A9848501F5D9F5734C969DCAF35B18EDB0C08BAA75E86540"
+          "sha256": "93C654953500C9462CB3318F332CB0B9C569D3011CD7ED291E1734CC302FABFA"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-3-3-site.webp",
@@ -1352,7 +1397,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "5C2D2238FDCC595D872A2D0B0EB84F6E933C06C4A5D9976954FBBC25F80C2D4D"
+          "sha256": "A4EC76E1DA95EA7E9A06A136646DE3EEA3D7EDCBAF6883A46FA78DC41689B94F"
         }
       },
       "worldBounds": {
@@ -1388,7 +1433,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "F0902C7514C7CDC5A4577CB6EBDEE9A715B3ABAB02F7D3E6FE8C5E4DD3A7108C"
+          "sha256": "3C5DF14C8A41FCA20F02F2B407C83E59C8A62931D7A963C3F271AD211D5DD30D"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-4-3-site.webp",
@@ -1397,7 +1442,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "D4E44AC0088144D99946704DAB9B7680B62894E95458B7236464551B0D516422"
+          "sha256": "95DEEBADEE02D25733AE356F26EF01ED2DAA732C0CC49CE05861D86DE25E24E1"
         }
       },
       "worldBounds": {
@@ -1433,7 +1478,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "1604D6D1A9795713B569A7E877B31A116FB49E95F131495C384564DDB130098F"
+          "sha256": "3FFFE11CE51DECF60596E8A9B0E3C982756D41BC5918182BB28B91B70EFBDF04"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-5-3-site.webp",
@@ -1442,7 +1487,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "3B49DC753876017D625385A554E12AB223AF9996C65B4706EE053E3DE11BB74F"
+          "sha256": "740CEE6431E8E2DF34076ACE550E2EAAD3D4B0B967370D291CF370C7EB90D168"
         }
       },
       "worldBounds": {
@@ -1478,7 +1523,7 @@
             472
           ],
           "decodedBytes": 1049728,
-          "sha256": "DB9B6AFE60FCB5D43DFB42DDF9075E236FA716255D646861753B2B56A50CE72E"
+          "sha256": "929497CCCB0111116405D0F457F0247A069B73476EDB3D28E3AE77A201414FAC"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-6-3-site.webp",
@@ -1487,7 +1532,7 @@
             1180
           ],
           "decodedBytes": 6560800,
-          "sha256": "D3BA2AEA77D168AEDBB29E14F34B207A0B6E8256A90E893BEFDD80B093D9EA38"
+          "sha256": "C3BABD3C4D9B57414F97453669DACA32037726F4D48C6BC7CD242655F9E8F3BB"
         }
       },
       "worldBounds": {
@@ -1523,7 +1568,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "B7EB5411DF67AF56719A80704D2BE97A86C3688C95F4C64720480D05758BCB65"
+          "sha256": "9AFABC629B7E5CAC1383BCFE87F1F491D6828F5AEB092D9E9488B23C9D20083B"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-7-3-site.webp",
@@ -1532,7 +1577,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "1187F18B3BD189BA33EBA367DCAD24B0433445E7D9EF8C4ADD24C1188B43F23F"
+          "sha256": "441DCE592E0A3D4642FE0EE790F8B9BF25B5C7E4D680AD2AFCE5E70D219FDDAD"
         }
       },
       "worldBounds": {
@@ -1568,7 +1613,7 @@
             472
           ],
           "decodedBytes": 1049728,
-          "sha256": "246C91B5BED9F824A5C7324AF4BEA39DE7222C6AB47A104B139FF75F5B1CFD9C"
+          "sha256": "1EDF3A76009C165074A5EA08E32502B4C2A4F613B07F3373FC8BCFC527153531"
         },
         "site": {
           "path": "/career-world/layers/territory-landform/tiles/stream-r3/close-8-3-site.webp",
@@ -1577,7 +1622,7 @@
             1180
           ],
           "decodedBytes": 6560800,
-          "sha256": "683263E9627DD105E1ADCA1D2E47581A952F3316320FCD2AD1BC0E0C9E8D3B85"
+          "sha256": "E754613EF9412DE5C3081C5A3FECEDDE61AC5B628E8018C849F7A59B3F43C0AC"
         }
       },
       "worldBounds": {
