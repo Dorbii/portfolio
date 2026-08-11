@@ -9,12 +9,12 @@
   ],
   "visual": {
     "path": "../textures/terrain-relief-r6.png",
-    "sha256": "C0A3C16628189FA889372488682688CBAFE1B38B189BD4951F98625EE4C1B617",
+    "sha256": "E7799E7641F6307483724F7D1137519AFE39C932DB14DA1E04B7C5E628874427",
     "mode": "RGBA"
   },
   "detailVisual": {
     "path": "../textures/terrain-relief-r6-detail-4x.png",
-    "sha256": "DD9CEC9F6875A699C8313A2B1A7B1FDD114488CD78310850A224E7215EFB42FF",
+    "sha256": "6BAB5E350840A7F832D19ADD140FD49A7523B12FFC06899F343064D3DE07F32B",
     "dimensions": [
       6688,
       3764
@@ -24,7 +24,7 @@
   },
   "topologyQa": {
     "path": "../overlays/terrain-contours-r4-detail-4x.png",
-    "sha256": "BFDB42DA2617D66B09C91CDF1085AFDA2A766DC7DB9CD6079BEAD0F9B9261CC0",
+    "sha256": "A1CAC38C5592A7A2A2C634F209C2DB257B65F0C8F0B8AC597856DE3A65533FE8",
     "dimensions": [
       6688,
       3764
@@ -33,29 +33,29 @@
   },
   "mask": {
     "path": "../masks/world-land-mask-r4.png",
-    "sha256": "AF1ED791596F13D90A8D9AE8B344B46809EC685E5433E7E2104FBFA96210AE80"
+    "sha256": "8801722B801B2ECABD048DC71AC99FF7F0C566E69E06A50D9C4E41706DD7003A"
   },
   "fields": {
     "height": {
       "path": "../fields/terrain-height-r4.png",
-      "sha256": "06DC530531CDAFC04F669A6D6D906DEA0FB21C1DBFDF26EC5A808B71CB5D2469",
+      "sha256": "8CB7D6480A707C33E220A55611AF8557C3FC9440F0C347CF9A786ADCB1F41E3F",
       "mode": "L"
     },
     "slope": {
       "path": "../fields/terrain-slope-r4.png",
-      "sha256": "D9D845DB5FDBF116B7E427ADE986F1CF6F339D9958F3A320FC1D07C4325654EC",
+      "sha256": "C248599DAEB10E5C8D71DC15EF2CC65D3B90A8F77165AB0CFDA5C770676E6134",
       "mode": "L"
     }
   },
   "derivation": {
     "source": "../sources/terrain-dem-authored-r3.png",
-    "sourceSha256": "7CB18FE2CE01FB52CF34289B09F4B95ED4DFA67236FF0C0403287C894FFA3BC3",
+    "sourceSha256": "9BD7D1D29F4CCFD013FE521B4AFC4D9F8C1AEA8FAC7AD45982749850E2406CAB",
     "authoredSurfaceSource": "../sources/world-land-surface-authored-r11.png",
-    "authoredSurfaceSourceSha256": "B5EE839E4A7BC825F062DA33845B0FA4A53116E4EEC102DCE62CC4BFF4F7AF56",
+    "authoredSurfaceSourceSha256": "F2C7E2EA59347B9ECE2A8A5137928412F19BB8D93C0C1E490740063E17E2B661",
     "authoredSurfaceDetailSource": "../sources/world-land-surface-authored-r11-detail-4x.png",
-    "authoredSurfaceDetailSourceSha256": "D9D8AB967CDAFDBDC6D0B19B6B2C7E111BEE903738B1B4FA80F6033D3D6C87CE",
+    "authoredSurfaceDetailSourceSha256": "11B05875CB588FC19CCEFBD03B55F05282EFA6DE15D9CC4DBD7B958666B07E7F",
     "authoring": "terrain-dem-r4.json",
-    "authoringSha256": "5D0C436C965CB0BE2C709C662962B2A1DB1263A67B711157893732CF7D17ABB8",
+    "authoringSha256": "EA4B155FD38E7B2DAAC53FBA4DB9C111F5A08BDF911389A429714E7C6E636DEE",
     "operation": "mask one authored land-and-coast material with canonical geography; preserve five future development shelves in the separate topology field; add registered territory-only micro relief; publish topology QA and coast response derivatives",
     "worldLightDirection": [
       -0.42,

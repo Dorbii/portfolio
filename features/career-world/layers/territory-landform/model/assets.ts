@@ -3,9 +3,9 @@ import { TERRAIN_SITE_TILES } from "./siteTiles";
 import { TERRAIN_STREAM_TILES } from "./streamTiles";
 
 const WORLD_PLATE =
-  "/career-world/layers/territory-landform/textures/terrain-relief-r6.png?v=ninjaone-coast-r2";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6.png?v=ninjaone-b1-topology-r1";
 const TERRITORY_PLATE =
-  "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png?v=ninjaone-coast-r2";
+  "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png?v=ninjaone-b1-topology-r1";
 const WORLD_PLATE_DIMENSIONS = [1672, 941] as const;
 const TERRITORY_PLATE_DIMENSIONS = [6688, 3764] as const;
 

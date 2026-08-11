@@ -319,12 +319,13 @@ test("runtime land registers its authored base material against the composite ma
     manifest.derivation.detailPolicy,
     /share one authored macro material/,
   );
-  const removedNorthCoastBounds = [
+  const acceptedCoastRepairBounds = [
     { left: 461, top: 38, right: 484, bottom: 52 },
     { left: 503, top: 68, right: 519, bottom: 83 },
     { left: 484, top: 73, right: 508, bottom: 93 },
+    { left: 459, top: 58, right: 591, bottom: 144 },
   ];
-  let removedNorthCoastPixels = 0;
+  let acceptedCoastRepairPixels = 0;
   for (let pixel = 0; pixel < plate.width * plate.height; pixel += 1) {
     assert.equal(
       plate.pixels[pixel * 4 + 3] >= 128,
@@ -335,184 +336,76 @@ test("runtime land registers its authored base material against the composite ma
       const x = pixel % plate.width;
       const y = Math.floor(pixel / plate.width);
       assert.ok(
-        removedNorthCoastBounds.some((bounds) => (
+        acceptedCoastRepairBounds.some((bounds) => (
           x >= bounds.left
           && x <= bounds.right
           && y >= bounds.top
           && y <= bounds.bottom
         )),
-        "only the three rejected north-coast island components may be removed",
+        "removed land must stay inside the accepted north-coast and B1/B2 repair bounds",
       );
-      removedNorthCoastPixels += 1;
+      acceptedCoastRepairPixels += 1;
     }
   }
-  assert.equal(removedNorthCoastPixels, 753);
+  assert.equal(acceptedCoastRepairPixels, 887);
 });
 
-test("the canonical mainland owns the accepted Kaizen C2 footprint", async () => {
-  const [
-    baseMask,
-    compositeMask,
-    cityPlate,
-    baseSurface,
-    compositeSurface,
-  ] = await Promise.all([
+test("the canonical B1/B2 topology promotion carries registered terrain material", async () => {
+  const [baselineMask, compositeMask, compositeSurface] = await Promise.all([
     decodePng(
-      "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+      "art-source/career-world/ninjaone-environment/production-r2/topology-r3/world-land-mask-r4-baseline.png",
     ),
     decodePng(
       "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
     ),
     decodePng(
-      "public/career-world/layers/structures/textures/ambient/kaizen-agent/kaizen-city-foundation-integrated-r1.png",
-    ),
-    decodePng(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r9.png",
-    ),
-    decodePng(
       "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
     ),
   ]);
-  const manifest = JSON.parse(await readFile(path.join(
-    root,
-    "public/career-world/layers/structures/manifests/kaizen-semantic-assets-r1.json",
-  ), "utf8"));
-  const [anchorX, anchorY] = manifest.plateAnchor;
-  const [spanX, spanY] = manifest.plateSpan;
-  const originX = anchorX - spanX * 0.5;
-  const originY = anchorY - spanY * manifest.plateAlignmentY;
-  const bounds = {
-    left: Math.round(originX * compositeMask.width),
-    top: Math.round(originY * compositeMask.height),
-    right: Math.round((originX + spanX) * compositeMask.width),
-    bottom: Math.round((originY + spanY) * compositeMask.height),
-  };
+  assert.deepEqual(
+    [baselineMask.width, baselineMask.height],
+    [compositeMask.width, compositeMask.height],
+  );
+  assert.deepEqual(
+    [compositeSurface.width, compositeSurface.height, compositeSurface.channels],
+    [compositeMask.width, compositeMask.height, 3],
+  );
 
-  const padding = { left: 48, top: 48, right: 48, bottom: 48 };
   let promotedPixels = 0;
-  let promotedAbovePlate = 0;
+  let removedPixels = 0;
+  let b1PromotedPixels = 0;
+  let b2PromotedPixels = 0;
   let promotedLuminance = 0;
-  let donorLuminance = 0;
-  let donorColorDistance = 0;
-  let replacedBasePixels = 0;
-  const promotedByRowAbovePlate = new Uint16Array(bounds.top);
+  let nearBlackPromotedPixels = 0;
   for (let y = 0; y < compositeMask.height; y += 1) {
     for (let x = 0; x < compositeMask.width; x += 1) {
       const pixel = y * compositeMask.width + x;
-      if (
-        compositeMask.pixels[pixel] >= 128
-        && baseMask.pixels[pixel] < 128
-      ) {
-        promotedPixels += 1;
-        const surfaceOffset = pixel * 3;
-        // The r11 shelf clones the registered C2 donor beginning at
-        // (280, 205) into the complete feather support beginning at
-        // (404, 72), so promoted pixels retain this fixed source mapping.
-        const donorOffset = (
-          (y + 133) * compositeMask.width + (x - 124)
-        ) * 3;
-        const red = compositeSurface.pixels[surfaceOffset];
-        const green = compositeSurface.pixels[surfaceOffset + 1];
-        const blue = compositeSurface.pixels[surfaceOffset + 2];
-        const baseRed = baseSurface.pixels[surfaceOffset];
-        const baseGreen = baseSurface.pixels[surfaceOffset + 1];
-        const baseBlue = baseSurface.pixels[surfaceOffset + 2];
-        const donorRed = baseSurface.pixels[donorOffset];
-        const donorGreen = baseSurface.pixels[donorOffset + 1];
-        const donorBlue = baseSurface.pixels[donorOffset + 2];
-        promotedLuminance += red * 0.2126 + green * 0.7152 + blue * 0.0722;
-        donorLuminance += (
-          donorRed * 0.2126 + donorGreen * 0.7152 + donorBlue * 0.0722
-        );
-        donorColorDistance += (
-          Math.abs(red - donorRed)
-          + Math.abs(green - donorGreen)
-          + Math.abs(blue - donorBlue)
-        ) / 3;
-        replacedBasePixels += (
-          Math.abs(red - baseRed)
-          + Math.abs(green - baseGreen)
-          + Math.abs(blue - baseBlue)
-        ) >= 15 ? 1 : 0;
-        assert.ok(
-          x >= bounds.left - padding.left
-          && x < bounds.right + padding.right
-          && y >= bounds.top - padding.top
-          && y < bounds.bottom + padding.bottom,
-          "promoted mainland must stay inside the authored C2 registration area",
-        );
-        assert.ok(
-          x > bounds.left - padding.left
-          && x < bounds.right + padding.right - 1
-          && y > bounds.top - padding.top
-          && y < bounds.bottom + padding.bottom - 1,
-          "promoted mainland must not terminate on its registration boundary",
-        );
-        if (y < bounds.top) {
-          promotedAbovePlate += 1;
-          promotedByRowAbovePlate[y] += 1;
-        }
+      const wasLand = baselineMask.pixels[pixel] >= 128;
+      const isLand = compositeMask.pixels[pixel] >= 128;
+      removedPixels += wasLand && !isLand ? 1 : 0;
+      if (!isLand || wasLand) {
+        continue;
       }
+      promotedPixels += 1;
+      if (x >= 209 && x < 418 && y < 157) b1PromotedPixels += 1;
+      if (x >= 418 && x < 627 && y < 157) b2PromotedPixels += 1;
+      const offset = pixel * 3;
+      const red = compositeSurface.pixels[offset];
+      const green = compositeSurface.pixels[offset + 1];
+      const blue = compositeSurface.pixels[offset + 2];
+      promotedLuminance += red * 0.2126 + green * 0.7152 + blue * 0.0722;
+      nearBlackPromotedPixels += Math.max(red, green, blue) <= 12 ? 1 : 0;
     }
   }
 
-  let registeredCityPixels = 0;
-  for (let y = bounds.top; y < bounds.bottom; y += 1) {
-    for (let x = bounds.left; x < bounds.right; x += 1) {
-      const cityX = Math.min(
-        cityPlate.width - 1,
-        Math.floor(
-          ((x - bounds.left + 0.5) / (bounds.right - bounds.left))
-          * cityPlate.width,
-        ),
-      );
-      const cityY = Math.min(
-        cityPlate.height - 1,
-        Math.floor(
-          ((y - bounds.top + 0.5) / (bounds.bottom - bounds.top))
-          * cityPlate.height,
-        ),
-      );
-      const cityAlpha = cityPlate.pixels[
-        (cityY * cityPlate.width + cityX) * cityPlate.channels + 3
-      ];
-      if (cityAlpha < 64) {
-        continue;
-      }
-      registeredCityPixels += 1;
-      const maskPixel = y * compositeMask.width + x;
-      assert.ok(
-        compositeMask.pixels[maskPixel] >= 128,
-        "visible Kaizen city pixels must sit on canonical mainland",
-      );
-    }
-  }
-  const broadShelfRows = promotedByRowAbovePlate.reduce(
-    (count, width) => count + (width >= 64 ? 1 : 0),
-    0,
-  );
-  assert.ok(promotedPixels > 4_000);
-  assert.ok(promotedAbovePlate > 1_500);
+  assert.equal(promotedPixels, 6_414);
+  assert.equal(removedPixels, 250);
+  assert.equal(b1PromotedPixels, 4_120);
+  assert.equal(b2PromotedPixels, 2_294);
+  assert.equal(nearBlackPromotedPixels, 0);
   assert.ok(
-    broadShelfRows >= 12,
-    "the C2 mainland connection must remain a broad shelf, not a thin neck",
-  );
-  assert.ok(registeredCityPixels > 20_000);
-  assert.ok(
-    promotedLuminance / promotedPixels > 72,
-    "promoted mainland must not expose the old dark water material",
-  );
-  assert.ok(
-    Math.abs(promotedLuminance - donorLuminance) / promotedPixels < 4,
-    "promoted mainland luminance must match the neighboring terrain donor",
-  );
-  assert.ok(
-    donorColorDistance / promotedPixels < 4,
-    "promoted mainland color must match the neighboring terrain donor",
-  );
-  assert.ok(
-    replacedBasePixels / promotedPixels > 0.7,
-    "promoted mainland must replace the old hidden base material across most of the shelf",
+    promotedLuminance / promotedPixels > 80,
+    "promoted B1/B2 terrain must not expose hidden ocean material",
   );
 });
 
@@ -703,13 +596,13 @@ test("one topology model publishes elevation, slope, and QA contours", async () 
   );
 });
 
-test("terrain authoring declares five connected mountain systems", async () => {
+test("terrain authoring declares six connected mountain systems", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/territory-landform/manifests/terrain-dem-r4.json",
   ), "utf8"));
 
-  assert.equal(manifest.mountainRanges.length, 5);
+  assert.equal(manifest.mountainRanges.length, 6);
   assert.deepEqual(
     manifest.mountainRanges.map((range) => range.id),
     [
@@ -718,6 +611,7 @@ test("terrain authoring declares five connected mountain systems", async () => {
       "southern-spine-range",
       "column-landmark-range",
       "ace-ridge",
+      "ninjaone-northwest-crown",
     ],
   );
   for (const range of manifest.mountainRanges) {

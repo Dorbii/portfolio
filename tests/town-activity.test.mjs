@@ -683,7 +683,7 @@ test("Kaizen foliage reuses authored city and forest groups with pooled wind", a
   }
 });
 
-test("Kaizen integration art is an anchor-derived additive layer stack", async () => {
+test("Kaizen integration art remains authored but unmounted from the live stack", async () => {
   const [
     integration,
     integrationAuthoring,
@@ -813,11 +813,12 @@ test("Kaizen integration art is an anchor-derived additive layer stack", async (
       < fabric.indexOf("data-kaizen-decoration-layer"),
     "dynamic structure shadows must render below pooled structures",
   );
-  assert.ok(
-    structures.indexOf("mountedStructures.map")
-      < structures.indexOf("<KaizenIntegrationSeams"),
-    "foreground seams must render above hero structures",
+  assert.match(
+    structures,
+    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
+  assert.doesNotMatch(structures, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(structures, /<KaizenIntegrationSeams/);
   assert.match(seams, /data-kaizen-integration-layer="foreground-seams"/);
   assert.match(seams, /pointerEvents="none"/);
   assert.match(shadows, /data-kaizen-shadow-layer="dynamic-world-light"/);
@@ -861,8 +862,8 @@ test("registered sprite scales convert plate pixels into world units", async () 
   );
 });
 
-test("Kaizen click targets wait for their visual assets to load", async () => {
-  const [scene, structures, fabric, worldInterface] = await Promise.all([
+test("Kaizen live click target and label stay disabled", async () => {
+  const [scene, structures, worldInterface] = await Promise.all([
     readFile(path.join(
       root,
       "features/career-world/composition/WorldScene.tsx",
@@ -873,35 +874,28 @@ test("Kaizen click targets wait for their visual assets to load", async () => {
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenNeighborhoodFabric.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
       "features/career-world/layers/interface/components/WorldInterface.tsx",
     ), "utf8"),
   ]);
 
+  assert.match(scene, /const LIVE_PROJECT_STRUCTURES = Object\.freeze\(/);
   assert.match(
     scene,
-    /\[kaizenVisualReady, setKaizenVisualReady\] = useState\(false\)/,
+    /PROJECT_STRUCTURES\.filter\(\(\{ id \}\) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID\)/,
+  );
+  assert.match(scene, /LIVE_PROJECT_STRUCTURES\.map\(\(project\) =>/);
+  assert.match(scene, /projectVisualReadiness=\{\{\}\}/);
+  assert.match(
+    structures,
+    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
   assert.match(
-    scene,
-    /onKaizenVisualReadyChange=\{setKaizenVisualReady\}/,
+    structures,
+    /RENDERED_PROJECT_STRUCTURES[\s\S]*!DISABLED_STRUCTURE_OWNER_IDS\.has\(id\)/,
   );
-  assert.match(scene, /projectVisualReadiness=\{\{/);
-  assert.match(
-    fabric,
-    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
-  );
-  assert.match(fabric, /onVisualReadyChange\(baseReady\)/);
-  assert.match(fabric, /const image = new Image\(\)/);
-  assert.match(fabric, /image\.src = assetPath/);
-  assert.match(fabric, /requestedAssetPaths/);
-  assert.match(fabric, /onError=\{\(\) => onAssetError\(module\.assetPath\)\}/);
-  assert.match(fabric, /onLoad=\{\(\) => onAssetLoad\(module\.assetPath\)\}/);
-  assert.doesNotMatch(fabric, /activeModule|readyAssetPath/);
+  assert.doesNotMatch(structures, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(structures, /<KaizenIntegrationSeams/);
+  assert.match(structures, /onKaizenVisualReadyChange\(false\)/);
   assert.match(structures, /const assetReady = loadedAssetPath === assetPath/);
   assert.match(
     structures,

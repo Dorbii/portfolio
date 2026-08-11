@@ -1,0 +1,60 @@
+{
+  "global": {
+    "baselineMaskSha256": "6FD3183BE37361B9AF32DB3CCF79076B2977F73FE1F37643386C9BC7F295EB9A",
+    "promotedMaskSha256": "8801722B801B2ECABD048DC71AC99FF7F0C566E69E06A50D9C4E41706DD7003A",
+    "addedLandPixels": 6414,
+    "removedLandPixels": 250,
+    "localAddedLandPixels": 76025,
+    "localRemovedLandPixels": 2946,
+    "axisAlignedCoastRunBefore": {
+      "horizontal": 102,
+      "vertical": 65
+    },
+    "axisAlignedCoastRunAfter": {
+      "horizontal": 29,
+      "vertical": 19
+    },
+    "axisAlignedCoastRunCheckPassed": true
+  },
+  "regional": {
+    "detailMasterSha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02",
+    "detailMasterDimensions": [
+      5760,
+      4320
+    ],
+    "detailAlphaSourceSha256": "6BAB5E350840A7F832D19ADD140FD49A7523B12FFC06899F343064D3DE07F32B",
+    "capitalNormalizedDarkLandPixels": 0,
+    "capitalNormalizedPromotedRawDarkPixels": 559,
+    "darkComponentMinimumRepairPixels": 32
+  },
+  "runtimeLods": {
+    "territory": {
+      "sha256": "EC4004DDBB3B83C24615FDEF9BAD813D71CA917F6F6F478DBFBE69F5A3ED770B",
+      "dimensions": [
+        720,
+        540
+      ]
+    },
+    "capital": {
+      "sha256": "DDE6CADC19153A69AB9F2E8514CC9EE59CD655543BFEE97B8C91D30F43579EC8",
+      "dimensions": [
+        1440,
+        1080
+      ]
+    },
+    "site": {
+      "sha256": "E0731E39FFEB402EA4B3CEC967957BFCB916A52E86BDAE0B8FF05F017B7F8777",
+      "dimensions": [
+        2880,
+        2160
+      ]
+    },
+    "close": {
+      "sha256": "1AD347E40A1628B99F6661E4D09B3130CE6F50D5267FF33C351D7EA84546DE0A",
+      "dimensions": [
+        5760,
+        4320
+      ]
+    }
+  }
+}
