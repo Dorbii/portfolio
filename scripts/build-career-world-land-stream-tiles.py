@@ -33,6 +33,9 @@ AUTHORING_MANIFEST = (
     / "career-world"
     / "terrain-stream-tiles-authoring-r3.json"
 )
+PUBLIC_AUTHORING_MANIFEST = (
+    LAND_ROOT / "manifests" / "terrain-stream-tiles-r3.json"
+)
 RUNTIME_MANIFEST = (
     LAND_ROOT / "manifests" / "terrain-stream-runtime-r4.json"
 )
@@ -522,6 +525,7 @@ def compile_runtime_manifest(authoring: dict[str, object]) -> dict[str, object]:
 
 def write_manifest_pair(authoring: dict[str, object]) -> None:
     write_json(AUTHORING_MANIFEST, authoring)
+    write_json(PUBLIC_AUTHORING_MANIFEST, authoring)
     write_compact_json(RUNTIME_MANIFEST, compile_runtime_manifest(authoring))
 
 
@@ -668,6 +672,10 @@ def refresh_tile_manifest(
         for child_row in range(CHILD_ROWS)
         for child_column in range(CHILD_COLUMNS)
     }
+    emitted_ids = {record["id"] for _, _, record in tile_records}
+    for stale_id in expected_ids - emitted_ids:
+        for tier in ("capital", "site"):
+            (OUTPUT_ROOT / f"{stale_id}-{tier}.webp").unlink(missing_ok=True)
     retained = [
         tile
         for tile in payload["tiles"]

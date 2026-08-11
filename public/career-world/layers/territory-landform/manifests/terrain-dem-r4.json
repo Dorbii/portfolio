@@ -10,7 +10,10 @@
   "source": {
     "path": "../sources/terrain-dem-authored-r3.png",
     "mode": "L",
-    "dimensions": [1672, 941],
+    "dimensions": [
+      1672,
+      941
+    ],
     "semantics": {
       "black": "sea level",
       "white": "highest summit",
@@ -30,49 +33,119 @@
   "developmentShelves": [
     {
       "id": "ninjaone-development-basin",
-      "center": [0.5173, 0.2253],
+      "center": [
+        0.5173,
+        0.2253
+      ],
       "targetElevation": 0.31,
       "strength": 0.58,
       "radius": 0.047
     },
     {
       "id": "tanium-mountain-saddle",
-      "center": [0.4605, 0.5441],
+      "center": [
+        0.4605,
+        0.5441
+      ],
       "targetElevation": 0.58,
       "strength": 0.72,
       "radius": 0.03
     },
     {
       "id": "independent-western-plain",
-      "center": [0.1884, 0.4995],
+      "center": [
+        0.1884,
+        0.4995
+      ],
       "targetElevation": 0.23,
       "strength": 0.62,
       "radius": 0.044
     },
     {
       "id": "column-southern-shelf",
-      "center": [0.8523, 0.7067],
+      "center": [
+        0.8523,
+        0.7067
+      ],
       "targetElevation": 0.27,
       "strength": 0.88,
       "radius": 0.074
     },
     {
       "id": "ace-development-shelf",
-      "center": [0.5773, 0.882],
+      "center": [
+        0.5773,
+        0.882
+      ],
       "targetElevation": 0.37,
       "strength": 0.8,
       "radius": 0.038
+    },
+    {
+      "id": "ninjaone-upper-capital-plateau",
+      "center": [
+        0.245,
+        0.09
+      ],
+      "targetElevation": 0.48,
+      "strength": 0.82,
+      "radius": 0.035
+    },
+    {
+      "id": "ninjaone-northwest-approach",
+      "center": [
+        0.173,
+        0.112
+      ],
+      "targetElevation": 0.35,
+      "strength": 0.78,
+      "radius": 0.03
+    },
+    {
+      "id": "ninjaone-western-route-shelf",
+      "center": [
+        0.188,
+        0.205
+      ],
+      "targetElevation": 0.31,
+      "strength": 0.72,
+      "radius": 0.034
+    },
+    {
+      "id": "ninjaone-eastern-district-shelf",
+      "center": [
+        0.295,
+        0.18
+      ],
+      "targetElevation": 0.37,
+      "strength": 0.7,
+      "radius": 0.031
     }
   ],
   "mountainRanges": [
     {
       "id": "western-crown-range",
       "points": [
-        [0.218, 0.115],
-        [0.224, 0.205],
-        [0.248, 0.292],
-        [0.287, 0.365],
-        [0.336, 0.425]
+        [
+          0.218,
+          0.115
+        ],
+        [
+          0.224,
+          0.205
+        ],
+        [
+          0.248,
+          0.292
+        ],
+        [
+          0.287,
+          0.365
+        ],
+        [
+          0.336,
+          0.425
+        ]
       ],
       "radius": 0.06,
       "strength": 1.0
@@ -80,9 +153,18 @@
     {
       "id": "tanium-saddle-range",
       "points": [
-        [0.326, 0.42],
-        [0.385, 0.47],
-        [0.445, 0.53]
+        [
+          0.326,
+          0.42
+        ],
+        [
+          0.385,
+          0.47
+        ],
+        [
+          0.445,
+          0.53
+        ]
       ],
       "radius": 0.045,
       "strength": 0.84
@@ -90,9 +172,18 @@
     {
       "id": "southern-spine-range",
       "points": [
-        [0.326, 0.47],
-        [0.35, 0.56],
-        [0.37, 0.69]
+        [
+          0.326,
+          0.47
+        ],
+        [
+          0.35,
+          0.56
+        ],
+        [
+          0.37,
+          0.69
+        ]
       ],
       "radius": 0.043,
       "strength": 0.82
@@ -100,9 +191,18 @@
     {
       "id": "column-landmark-range",
       "points": [
-        [0.79, 0.43],
-        [0.82, 0.52],
-        [0.82, 0.62]
+        [
+          0.79,
+          0.43
+        ],
+        [
+          0.82,
+          0.52
+        ],
+        [
+          0.82,
+          0.62
+        ]
       ],
       "radius": 0.052,
       "strength": 0.88
@@ -110,11 +210,44 @@
     {
       "id": "ace-ridge",
       "points": [
-        [0.57, 0.79],
-        [0.59, 0.84]
+        [
+          0.57,
+          0.79
+        ],
+        [
+          0.59,
+          0.84
+        ]
       ],
       "radius": 0.034,
       "strength": 0.72
+    },
+    {
+      "id": "ninjaone-northwest-crown",
+      "points": [
+        [
+          0.155,
+          0.125
+        ],
+        [
+          0.177,
+          0.075
+        ],
+        [
+          0.215,
+          0.047
+        ],
+        [
+          0.265,
+          0.061
+        ],
+        [
+          0.303,
+          0.105
+        ]
+      ],
+      "radius": 0.034,
+      "strength": 0.88
     }
   ],
   "policy": [
@@ -124,6 +257,7 @@
     "Development shelves constrain local slope without changing projection.",
     "Column Technologies retains a mountain landmark but owns a broad eastern city plain around its registered capital envelope.",
     "Runtime relief, QA contours, slope, and coast materials are deterministic derivatives.",
-    "Vegetation, roads, structures, and decorative line work remain deferred to later scene layers."
+    "Vegetation, roads, structures, and decorative line work remain deferred to later scene layers.",
+    "NinjaOne B1 reserves an upper capital plateau, northwest approach, western route shelf, and eastern district shelf; its authored B1/B2 shore removes axis-aligned ocean cuts without moving the central river corridor."
   ]
 }

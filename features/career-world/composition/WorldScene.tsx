@@ -25,10 +25,7 @@ import {
 } from "../layers/environment";
 import {
   CAPITAL_STRUCTURES,
-  KAIZEN_NEIGHBORHOOD_ANCHOR,
   KAIZEN_NEIGHBORHOOD_OWNER_ID,
-  KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
-  KAIZEN_NEIGHBORHOOD_SPAN,
   PROJECT_STRUCTURES,
   SKILL_STRUCTURE_INSTANCES,
   SUPPORT_STRUCTURE_INSTANCES,
@@ -94,6 +91,19 @@ interface DragState {
 const FOCUS_DURATION_MS = 680;
 const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
+const LIVE_PROJECT_STRUCTURES = Object.freeze(
+  PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
+);
+const LIVE_SKILL_STRUCTURE_INSTANCES = Object.freeze(
+  SKILL_STRUCTURE_INSTANCES.filter(
+    ({ ownerId }) => ownerId !== KAIZEN_NEIGHBORHOOD_OWNER_ID,
+  ),
+);
+const LIVE_SUPPORT_STRUCTURE_INSTANCES = Object.freeze(
+  SUPPORT_STRUCTURE_INSTANCES.filter(
+    ({ ownerId }) => ownerId !== KAIZEN_NEIGHBORHOOD_OWNER_ID,
+  ),
+);
 
 function wheelZoomScale(deltaY: number): number {
   return Math.min(
@@ -148,12 +158,12 @@ function skillPresentationStructure(instance: SkillStructureInstance) {
 }
 
 const PROJECT_DESTINATIONS = Object.freeze(
-  PROJECT_STRUCTURES.map((project) => {
-    const supportingSkills = SKILL_STRUCTURE_INSTANCES.filter((instance) => (
+  LIVE_PROJECT_STRUCTURES.map((project) => {
+    const supportingSkills = LIVE_SKILL_STRUCTURE_INSTANCES.filter((instance) => (
       instance.ownerKind === "project"
       && instance.ownerId === project.id
     ));
-    const supportingStructures = SUPPORT_STRUCTURE_INSTANCES.filter(
+    const supportingStructures = LIVE_SUPPORT_STRUCTURE_INSTANCES.filter(
       (instance) => (
         instance.ownerKind === "project"
         && instance.ownerId === project.id
@@ -183,19 +193,7 @@ const PROJECT_DESTINATIONS = Object.freeze(
       footprintSpan: archetype.footprintSpan,
       groundAnchor: archetype.groundAnchor,
     }));
-    const focusStructures = project.id === KAIZEN_NEIGHBORHOOD_OWNER_ID
-      ? [
-        ...presentedSkills,
-        {
-          territoryAnchor: KAIZEN_NEIGHBORHOOD_ANCHOR,
-          footprintSpan: KAIZEN_NEIGHBORHOOD_SPAN,
-          groundAnchor: [
-            0.5,
-            KAIZEN_NEIGHBORHOOD_PLATE_ALIGNMENT_Y,
-          ] as const,
-        },
-      ]
-      : [...presentedSkills, ...presentedSupport];
+    const focusStructures = [...presentedSkills, ...presentedSupport];
     return Object.freeze({
       id: project.id,
       label: project.label,
@@ -205,9 +203,7 @@ const PROJECT_DESTINATIONS = Object.freeze(
         focusStructures,
       ),
       supportingSkillCount: supportingSkills.length,
-      visualMinimumTier: project.id === KAIZEN_NEIGHBORHOOD_OWNER_ID
-        ? "territory" as const
-        : "capital" as const,
+      visualMinimumTier: "capital" as const,
     });
   }),
 );
@@ -218,13 +214,13 @@ const LANDMARK_LABELS: readonly LandmarkLabel[] = Object.freeze([
     anchor: capital.territory.development.capitalAnchor,
     role: "capital" as const,
   })),
-  ...PROJECT_STRUCTURES.map((project) => Object.freeze({
+  ...LIVE_PROJECT_STRUCTURES.map((project) => Object.freeze({
     id: project.id,
     label: project.label,
     anchor: projectPresentationAnchor(project),
     role: "project" as const,
   })),
-  ...SKILL_STRUCTURE_INSTANCES.map((instance) => Object.freeze({
+  ...LIVE_SKILL_STRUCTURE_INSTANCES.map((instance) => Object.freeze({
     id: instance.id,
     label: instance.archetype.label,
     anchor: skillPresentationStructure(instance).territoryAnchor,
@@ -637,9 +633,7 @@ export function WorldScene({
           onToggleTopography={() => setShowTopography((visible) => !visible)}
           onToggleTerritoryQa={() => setShowTerritoryQa((visible) => !visible)}
           projectDestinations={PROJECT_DESTINATIONS}
-          projectVisualReadiness={{
-            [KAIZEN_NEIGHBORHOOD_OWNER_ID]: kaizenVisualReady,
-          }}
+          projectVisualReadiness={{}}
           renderState={renderState}
           showGrid={showGrid}
           showLandmarkLabels={showLandmarkLabels}

@@ -33,7 +33,7 @@ test("Kaizen authored foundation replaces the modular NinjaOne town registry", a
   assert.equal("capitalCampus" in towns, false);
 });
 
-test("Kaizen uses one authored city layout without legacy town atlases", async () => {
+test("Kaizen authored city layout stays isolated from the live structure stack", async () => {
   const [component, model, siteTiles] = await Promise.all([
     readFile(path.join(
       root,
@@ -82,17 +82,18 @@ test("Kaizen uses one authored city layout without legacy town atlases", async (
   );
   assert.match(
     component,
-    /INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
+    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
   );
   assert.match(
     component,
-    /RENDERED_TOWN_FABRIC_INSTANCES[\s\S]*!INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS\.has\(ownerId\)/,
+    /RENDERED_TOWN_FABRIC_INSTANCES[\s\S]*!DISABLED_STRUCTURE_OWNER_IDS\.has\(ownerId\)/,
   );
   assert.match(
     component,
     /RENDERED_AMBIENT_STRUCTURE_INSTANCES[\s\S]*!TOWN_FABRIC_OWNER_IDS\.has\(ownerId\)/,
   );
-  assert.match(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /<KaizenNeighborhoodFabric/);
+  assert.doesNotMatch(component, /<KaizenIntegrationSeams/);
   assert.match(
     component,
     /mountedStructures:[\s\S]*\.sort\(compareStructureDepth\)/,

@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   cameraViewBox,
   type CameraView,
@@ -21,8 +21,6 @@ import {
   resolveAmbientAnchor,
   type AmbientStructureInstance,
 } from "../model/ambient";
-import { KaizenNeighborhoodFabric } from "./KaizenNeighborhoodFabric";
-import { KaizenIntegrationSeams } from "./KaizenIntegrationSeams";
 import {
   CAPITAL_NODE_POLICY,
   CAPITAL_STRUCTURES,
@@ -54,10 +52,7 @@ import {
   TOWN_FABRIC_NODE_POLICY,
   type TownFabricInstance,
 } from "../model/townFabric";
-import {
-  KAIZEN_NEIGHBORHOOD_OVERVIEW_POLICY,
-  KAIZEN_NEIGHBORHOOD_OWNER_ID,
-} from "../model/kaizenNeighborhoodFabric";
+import { KAIZEN_NEIGHBORHOOD_OWNER_ID } from "../model/kaizenNeighborhoodFabric";
 import {
   resolveKaizenStructurePresentationAnchor,
   resolveKaizenStructurePresentationScale,
@@ -71,20 +66,37 @@ import {
 } from "../model/ninjaOneCityAssets";
 
 const ASSET_SIZE = 1254;
-const INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set([
+const DISABLED_STRUCTURE_OWNER_IDS = new Set([
   KAIZEN_NEIGHBORHOOD_OWNER_ID,
 ]);
+const INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS = new Set<string>();
 const TOWN_FABRIC_OWNER_IDS = new Set(
   TOWN_FABRIC_INSTANCES.map(({ ownerId }) => ownerId),
 );
 const RENDERED_TOWN_FABRIC_INSTANCES = Object.freeze(
   TOWN_FABRIC_INSTANCES.filter(
-    ({ ownerId }) => !INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS.has(ownerId),
+    ({ ownerId }) => !DISABLED_STRUCTURE_OWNER_IDS.has(ownerId),
+  ),
+);
+const RENDERED_PROJECT_STRUCTURES = Object.freeze(
+  PROJECT_STRUCTURES.filter(({ id }) => !DISABLED_STRUCTURE_OWNER_IDS.has(id)),
+);
+const RENDERED_SKILL_STRUCTURE_INSTANCES = Object.freeze(
+  SKILL_STRUCTURE_INSTANCES.filter(
+    ({ ownerId }) => !DISABLED_STRUCTURE_OWNER_IDS.has(ownerId),
+  ),
+);
+const RENDERED_SUPPORT_STRUCTURE_INSTANCES = Object.freeze(
+  SUPPORT_STRUCTURE_INSTANCES.filter(
+    ({ ownerId }) => !DISABLED_STRUCTURE_OWNER_IDS.has(ownerId),
   ),
 );
 const RENDERED_AMBIENT_STRUCTURE_INSTANCES = Object.freeze(
   AMBIENT_STRUCTURE_INSTANCES.filter(
-    ({ ownerId }) => !TOWN_FABRIC_OWNER_IDS.has(ownerId),
+    ({ ownerId }) => (
+      !TOWN_FABRIC_OWNER_IDS.has(ownerId)
+      && !DISABLED_STRUCTURE_OWNER_IDS.has(ownerId)
+    ),
   ),
 );
 
@@ -576,6 +588,10 @@ export function StructuresLayer({
   light,
   onKaizenVisualReadyChange,
 }: StructuresLayerProps) {
+  useEffect(() => {
+    onKaizenVisualReadyChange(false);
+  }, [onKaizenVisualReadyChange]);
+
   const visibility = resolveNodeVisibility(CAPITAL_NODE_POLICY, detailState);
   const projectVisibility = resolveNodeVisibility(
     PROJECT_NODE_POLICY,
@@ -595,10 +611,6 @@ export function StructuresLayer({
   );
   const townOverviewVisibility = resolveNodeVisibility(
     TOWN_FABRIC_NODE_POLICY,
-    detailState,
-  );
-  const neighborhoodOverviewVisibility = resolveNodeVisibility(
-    KAIZEN_NEIGHBORHOOD_OVERVIEW_POLICY,
     detailState,
   );
   const townDetailVisibility = resolveAtomicTierVisibility(
@@ -625,18 +637,6 @@ export function StructuresLayer({
   const ambientPresentationVisibility = Math.min(
     ambientVisibility,
     townDetailVisibility,
-  );
-  const neighborhoodCloseVisibility = Math.min(
-    townOverviewVisibility,
-    detailState.siteToClose,
-  );
-  const neighborhoodCapitalVisibility = Math.min(
-    neighborhoodOverviewVisibility,
-    detailState.territoryToCapital,
-  );
-  const neighborhoodSiteVisibility = Math.min(
-    neighborhoodOverviewVisibility,
-    detailState.capitalToSite,
   );
   const shouldRenderCapitalAssets = (
     detailState.shouldLoadCapitalAssets
@@ -666,18 +666,6 @@ export function StructuresLayer({
     detailState.shouldLoadCapitalAssets
     || townOverviewVisibility > LOD_PRESENTATION_EPSILON
   );
-  const shouldRenderCloseNeighborhood = (
-    detailState.shouldLoadCloseAssets
-    || neighborhoodCloseVisibility > LOD_PRESENTATION_EPSILON
-  );
-  const shouldRenderCapitalNeighborhood = (
-    detailState.shouldLoadCapitalAssets
-    || neighborhoodCapitalVisibility > LOD_PRESENTATION_EPSILON
-  );
-  const shouldRenderSiteNeighborhood = (
-    detailState.shouldLoadSiteAssets
-    || neighborhoodSiteVisibility > LOD_PRESENTATION_EPSILON
-  );
   const mountedStructures: MountedStructureNode[] = [
     ...(shouldRenderCapitalAssets
       ? CAPITAL_STRUCTURES.map((capital) => ({
@@ -703,7 +691,7 @@ export function StructuresLayer({
       : []),
     ...(shouldRenderProjectAssets
       || shouldRenderIndividualTownAssets
-      ? PROJECT_STRUCTURES.filter((project) => (
+      ? RENDERED_PROJECT_STRUCTURES.filter((project) => (
         shouldRenderStructureOwner(
           project.id,
           shouldRenderProjectAssets,
@@ -754,7 +742,7 @@ export function StructuresLayer({
       : []),
     ...(shouldRenderSkillAssets
       || shouldRenderIndividualTownAssets
-      ? SKILL_STRUCTURE_INSTANCES.filter((instance) => (
+      ? RENDERED_SKILL_STRUCTURE_INSTANCES.filter((instance) => (
         shouldRenderStructureOwner(
           instance.ownerId,
           shouldRenderSkillAssets,
@@ -805,7 +793,7 @@ export function StructuresLayer({
       : []),
     ...(shouldRenderSupportAssets
       || shouldRenderIndividualTownAssets
-      ? SUPPORT_STRUCTURE_INSTANCES.filter((instance) => (
+      ? RENDERED_SUPPORT_STRUCTURE_INSTANCES.filter((instance) => (
         shouldRenderStructureOwner(
           instance.ownerId,
           shouldRenderSupportAssets,
@@ -888,29 +876,23 @@ export function StructuresLayer({
       data-layer="structures"
       data-light-source={light.id}
       data-lod-tier={detailState.tier.id}
-      data-project-count={PROJECT_STRUCTURES.length}
+      data-project-count={RENDERED_PROJECT_STRUCTURES.length}
       data-project-visibility={projectPresentationVisibility.toFixed(3)}
       data-skill-archetype-count={
         new Set(
-          SKILL_STRUCTURE_INSTANCES.map(({ archetype }) => archetype.id),
+          RENDERED_SKILL_STRUCTURE_INSTANCES.map(({ archetype }) => archetype.id),
         ).size
       }
-      data-skill-instance-count={SKILL_STRUCTURE_INSTANCES.length}
+      data-skill-instance-count={RENDERED_SKILL_STRUCTURE_INSTANCES.length}
       data-skill-visibility={skillPresentationVisibility.toFixed(3)}
       data-structure-visibility={visibility.toFixed(3)}
-      data-support-structure-count={SUPPORT_STRUCTURE_INSTANCES.length}
+      data-support-structure-count={RENDERED_SUPPORT_STRUCTURE_INSTANCES.length}
       data-support-visibility={supportPresentationVisibility.toFixed(3)}
       data-shared-city-asset-count={NINJAONE_CITY_ASSET_POOL.length}
       data-shared-city-asset-pool={NINJAONE_CITY_ASSET_POOL_ID}
       data-town-detail-visibility={townDetailVisibility.toFixed(3)}
       data-town-authored-structure-visibility={
         authoredTownStructureVisibility.toFixed(3)
-      }
-      data-town-neighborhood-close-visibility={
-        neighborhoodCloseVisibility.toFixed(3)
-      }
-      data-town-neighborhood-overview-visibility={
-        neighborhoodOverviewVisibility.toFixed(3)
       }
       data-individual-structure-town-count={
         INDIVIDUAL_STRUCTURE_TOWN_OWNER_IDS.size
@@ -941,26 +923,7 @@ export function StructuresLayer({
           ))}
         </g>
       ) : null}
-      <KaizenNeighborhoodFabric
-        capitalVisibility={neighborhoodCapitalVisibility}
-        closeVisibility={neighborhoodCloseVisibility}
-        light={light}
-        onVisualReadyChange={onKaizenVisualReadyChange}
-        overviewVisibility={neighborhoodOverviewVisibility}
-        shouldRenderCapital={shouldRenderCapitalNeighborhood}
-        shouldRenderClose={shouldRenderCloseNeighborhood}
-        shouldRenderSite={shouldRenderSiteNeighborhood}
-        siteVisibility={neighborhoodSiteVisibility}
-      />
       {mountedStructures.map(({ node }) => node)}
-      <KaizenIntegrationSeams
-        capitalVisibility={neighborhoodCapitalVisibility}
-        closeVisibility={neighborhoodCloseVisibility}
-        shouldRenderCapital={shouldRenderCapitalNeighborhood}
-        shouldRenderClose={shouldRenderCloseNeighborhood}
-        shouldRenderSite={shouldRenderSiteNeighborhood}
-        siteVisibility={neighborhoodSiteVisibility}
-      />
     </svg>
   );
 }
