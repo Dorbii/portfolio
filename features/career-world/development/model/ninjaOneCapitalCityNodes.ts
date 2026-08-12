@@ -367,7 +367,9 @@ export const NINJAONE_CAPITAL_CITY_CAMERA: CameraView = Object.freeze({
   span: NINJAONE_CAPITAL_CITY_WORLD_SPAN,
 });
 
-function localCameraBounds(camera: CameraView): readonly [number, number, number, number] {
+export function ninjaOneCapitalLocalCameraBounds(
+  camera: CameraView,
+): readonly [number, number, number, number] {
   const worldX = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[1] * WORLD_PLANE.height;
   const scaleX = NINJAONE_CAPITAL_CITY_WORLD_SPAN[0] * WORLD_PLANE.width
@@ -393,7 +395,7 @@ export function ninjaOneCapitalVisiblePopulationCues(
   if (detailTier !== "site" && detailTier !== "close") {
     return Object.freeze([]);
   }
-  const [left, top, right, bottom] = localCameraBounds(camera);
+  const [left, top, right, bottom] = ninjaOneCapitalLocalCameraBounds(camera);
   const margin = detailTier === "close" ? 48 : 96;
   return Object.freeze(NINJAONE_CAPITAL_CITY_POPULATION_CUES.filter((cue) => (
     (detailTier === "close" || cue.minimumDetailTier === "site")
@@ -419,7 +421,7 @@ export function ninjaOneCapitalVisibleCityNodes(
   if (detailTier === "territory") {
     return Object.freeze([]);
   }
-  const [left, top, right, bottom] = localCameraBounds(camera);
+  const [left, top, right, bottom] = ninjaOneCapitalLocalCameraBounds(camera);
   const margin = detailTier === "close"
     ? 120
     : detailTier === "site"
@@ -440,7 +442,7 @@ export function ninjaOneCapitalAnimatedCityNodeId(
   if (detailTier !== "site" && detailTier !== "close") {
     return null;
   }
-  const [left, top, right, bottom] = localCameraBounds(camera);
+  const [left, top, right, bottom] = ninjaOneCapitalLocalCameraBounds(camera);
   const center: Pair = [(left + right) * 0.5, (top + bottom) * 0.5];
   const candidates = ninjaOneCapitalVisibleCityNodes(camera, detailTier).filter(
     (node) => node.assetNodeReady && node.renderMode === "animated-master",

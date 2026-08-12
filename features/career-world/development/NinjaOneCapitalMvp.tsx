@@ -17,6 +17,7 @@ import {
 } from "./model/ninjaOneCapitalCityNodes";
 import { NinjaOneCapitalPopulation } from "./NinjaOneCapitalPopulation";
 import { NinjaOneCapitalSkillNodes } from "./NinjaOneCapitalSkillNodes";
+import { NinjaOneStationRiverDetail } from "./NinjaOneStationRiverDetail";
 
 interface NinjaOneCapitalMvpProps {
   readonly camera: CameraView;
@@ -171,6 +172,10 @@ export function NinjaOneCapitalMvp({
                   <RegisteredRaster
                     asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.underlay}
                     layer="streets-retaining-and-support-fabric"
+                  />
+                  <NinjaOneStationRiverDetail
+                    camera={camera}
+                    detailState={detailState}
                   />
                 </g>
                 <g data-capital-layer="territory-rail-supports">

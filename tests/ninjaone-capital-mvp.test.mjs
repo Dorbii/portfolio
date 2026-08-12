@@ -45,12 +45,21 @@ test("capital preview camera and runtime registration use the full B1/B2/C1/C2 c
 });
 
 test("capital preview mounts distinct territory and detailed city stacks without obsolete terrace plates", async () => {
-  const [city, page, scene, renderer, skillRenderer, developmentIndex] = await Promise.all([
+  const [
+    city,
+    page,
+    scene,
+    renderer,
+    skillRenderer,
+    stationRiverDetailRenderer,
+    developmentIndex,
+  ] = await Promise.all([
     manifest(),
     source("app/page.tsx"),
     source("features/career-world/composition/WorldScene.tsx"),
     source("features/career-world/development/NinjaOneCapitalMvp.tsx"),
     source("features/career-world/development/NinjaOneCapitalSkillNodes.tsx"),
+    source("features/career-world/development/NinjaOneStationRiverDetail.tsx"),
     source("features/career-world/development/index.ts"),
   ]);
 
@@ -77,6 +86,16 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.match(renderer, /phase\?: "contact" \| "city" \| "all"/);
   assert.match(renderer, /data-capital-layer="territory-settlement-overview"/);
   assert.match(scene, /phase="contact"[\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?phase="city"/);
+  assert.match(renderer, /<NinjaOneStationRiverDetail/);
+  assert.match(stationRiverDetailRenderer, /shouldLoadSiteAssets/);
+  assert.match(stationRiverDetailRenderer, /capitalToSite/);
+  assert.match(stationRiverDetailRenderer, /ninjaOneCapitalVisibleStationRiverDetailTiles/);
+  assert.match(stationRiverDetailRenderer, /data-station-river-detail-tile=/);
+  assert.ok(
+    renderer.indexOf("<NinjaOneStationRiverDetail")
+      < renderer.indexOf('data-capital-layer="territory-rail-supports"'),
+    "station/river detail must remain below rail, station, and building layers",
+  );
 
   for (const layer of city.layerOrder) {
     if (layer === "external-terrain") {

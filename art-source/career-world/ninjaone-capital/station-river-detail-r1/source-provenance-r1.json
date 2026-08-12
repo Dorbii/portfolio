@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/ninjaone-capital/station-river-detail-source@r1",
+  "generationMode": "built-in-imagegen",
+  "reference": {
+    "path": "public/career-world/capitals/ninjaone/city-r1/qa/city-node-composition-preview-r3.png",
+    "role": "style-and-palette-reference-only"
+  },
+  "sources": [
+    {
+      "id": "station-river-cobblestone-material",
+      "path": "art-source/career-world/ninjaone-capital/station-river-detail-r1/generated/station-river-cobblestone-material-r1.png",
+      "sha256": "f4af99f799d3fa987d3be64c06d5c2846c27d676f1136f9d5d24162bdfdab1f1",
+      "prompt": "Use case: stylized-concept\nAsset type: seamless game-environment material source\nInput images: Image 1 is a style and palette reference only, not an edit target and not a layout reference.\nPrimary request: create one continuous, high-detail, seamless-looking surface texture for the worn gray limestone and dark cobblestone circulation surfaces of this isometric mountain city.\nStyle/medium: hand-painted high-fidelity 2D game texture matching Image 1's restrained dark fantasy realism, crisp material grain, fine cracks, irregular fitted stone, subtle age, sparse tiny moss in joints.\nComposition/framing: straight orthographic material swatch filling the entire canvas; uniform texture density; no horizon, no camera perspective, no central focal point.\nLighting/mood: neutral diffuse overcast illumination with very low directional shadow so it can be relit and composited.\nColor palette: charcoal gray, weathered warm gray, muted olive traces; match Image 1 without copying its scene.\nConstraints: material texture only; no roads or road edges; no stairs; no buildings; no walls; no rivers; no water; no vegetation clumps; no props; no people; no text; no logos; no watermark; no frame, border, grid, panels, or separated samples.\nAvoid: scene composition, recognizable architecture, large unique marks, baked cast shadows, glossy modern paving, photorealistic photography."
+    },
+    {
+      "id": "station-river-wet-bank-material",
+      "path": "art-source/career-world/ninjaone-capital/station-river-detail-r1/generated/station-river-wet-bank-material-r1.png",
+      "sha256": "b16ef037dba58905d7e4af0796d16ff66f6d59bbd63e2b074a2b9a49cbcf4ae9",
+      "prompt": "Use case: stylized-concept\nAsset type: seamless game-environment material source\nInput images: Image 1 is a style and palette reference only, not an edit target and not a layout reference.\nPrimary request: create one continuous high-detail surface texture of rugged mountain-river bank material: small slate and granite rocks, dark wet stone, compact gravel, thin restrained olive moss, sparse brown roots, and subtle water-darkened mineral staining.\nStyle/medium: hand-painted high-fidelity 2D game texture matching Image 1's dark fantasy realism and material sharpness.\nComposition/framing: straight orthographic material swatch filling the canvas; uniform texture density; no shoreline shape, no river channel, no horizon, no camera perspective, no focal point.\nLighting/mood: neutral diffuse overcast illumination, minimal directional shadow, readable microtexture.\nColor palette: charcoal slate, muted warm gray, deep wet green, restrained olive moss, very small earthy brown accents.\nConstraints: material texture only; no water surface; no river edge; no bank silhouette; no roads; no paving patterns; no buildings; no stairs; no bridges; no props; no people; no text; no logos; no watermark; no frame, border, grid, panels, or separated samples.\nAvoid: scene composition, large boulders, large plants, waterfalls, foam, glossy plastic wetness, photographic macro depth of field, unique recognizable marks."
+    }
+  ]
+}

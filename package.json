@@ -15,6 +15,7 @@
     "build:ninjaone-environment-seams": "node scripts/build-ninjaone-environment-seam-integration-r2.mjs",
     "build:ninjaone-inland-water": "node scripts/build-ninjaone-inland-water-r1.mjs",
     "build:ninjaone-station-river-lock": "node scripts/build-ninjaone-station-river-layout-lock-r1.mjs --refresh-layout-lock",
+    "build:ninjaone-station-river-detail": "node scripts/build-ninjaone-station-river-detail-r1.mjs",
     "capture:ninjaone-environment-mvp": "node scripts/capture-ninjaone-environment-mvp.mjs",
     "extract:ninjaone-foliage-isolation-crops": "node scripts/extract-ninjaone-foliage-isolation-crops.mjs",
     "typecheck": "tsc --noEmit --incremental false",
