@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
 import {
   normalizeWaterSurfaceState,
@@ -138,6 +140,50 @@ test("one central LOD policy owns thresholds and render budget", () => {
   assert.equal(
     DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
     2,
+  );
+  assert.equal(
+    DETAIL_POLICY.renderScale.maximumAnimatedWaterDevicePixelRatio,
+    1.5,
+  );
+});
+
+test("animated water resizes only when its observer or LOD requests it", async () => {
+  const [openWaterRenderer, inlandRenderer, openWaterController, inlandController] =
+    await Promise.all([
+      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/NinjaOneInlandWaterRenderer.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/WaterSurfaceController.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/NinjaOneInlandWaterController.ts"), "utf8"),
+    ]);
+
+  for (const renderer of [openWaterRenderer, inlandRenderer]) {
+    assert.match(renderer, /private resizePending = true/);
+    assert.match(renderer, /if \(this\.resizePending\) \{\s*this\.resize\(\);\s*this\.resizePending = false;/);
+    assert.match(renderer, /requestResize\(\): void \{\s*this\.resizePending = true;/);
+    assert.match(renderer, /maximumAnimatedWaterDevicePixelRatio/);
+    assert.doesNotMatch(renderer, /const gl = this\.gl;\s*this\.resize\(\);/);
+  }
+  for (const controller of [openWaterController, inlandController]) {
+    assert.match(controller, /new ResizeObserver\(\(\) => \{\s*this\.renderer\.requestResize\(\);\s*this\.renderOnce\(\);/);
+  }
+});
+
+test("live foliage does not trigger full-page layout on every animation frame", async () => {
+  const styles = await readFile(
+    path.join(process.cwd(), "features/career-world/styles/career-world.css"),
+    "utf8",
+  );
+  assert.match(
+    styles,
+    /\.career-world__foliage-canopy\s*\{[\s\S]*?animation: none;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /\.career-world__foliage-canopy\s*\{[\s\S]*?animation-name:\s*career-world-foliage-breeze;/,
+  );
+  assert.match(
+    styles,
+    /\.ninjaone-capital-population__cue\s*\{[\s\S]*?animation: none;/,
   );
 });
 

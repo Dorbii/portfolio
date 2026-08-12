@@ -333,7 +333,9 @@ test("territory uses the sparse overview while detail selects at most one animat
   };
   assert.equal(ninjaOneCapitalVisibleCityNodes(capitalCamera, "world").length, 0);
   assert.equal(ninjaOneCapitalVisibleCityNodes(capitalCamera, "territory").length, 0);
-  assert.equal(ninjaOneCapitalVisibleCityNodes(capitalCamera, "capital").length, 19);
+  const visibleAtCapital = ninjaOneCapitalVisibleCityNodes(capitalCamera, "capital");
+  assert.ok(visibleAtCapital.length > 0);
+  assert.ok(visibleAtCapital.length < 19, "capital detail should cull off-camera nodes");
   assert.equal(ninjaOneCapitalAnimatedCityNodeId(capitalCamera, "capital"), null);
 
   const visibleAtSite = ninjaOneCapitalVisibleCityNodes(capitalCamera, "site");

@@ -20,7 +20,10 @@ export class NinjaOneInlandWaterController {
     this.reduceMotion = options.reduceMotion;
     this.resizeObserver = typeof ResizeObserver === "undefined"
       ? null
-      : new ResizeObserver(() => this.renderOnce());
+      : new ResizeObserver(() => {
+        this.renderer.requestResize();
+        this.renderOnce();
+      });
     this.resizeObserver?.observe(renderer.canvas);
     document.addEventListener("visibilitychange", this.handleVisibility);
   }

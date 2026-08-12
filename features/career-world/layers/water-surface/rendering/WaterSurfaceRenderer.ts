@@ -179,6 +179,7 @@ export class WaterSurfaceRenderer {
   private territoryAssetsLoading: Promise<void> | null = null;
   private territoryAssetsFailed = false;
   private destroyed = false;
+  private resizePending = true;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -236,7 +237,10 @@ export class WaterSurfaceRenderer {
   setView(camera: CameraView, detailState: DetailState): void {
     this.camera = camera;
     this.detailState = detailState;
-    this.renderScale = detailState.renderScale;
+    if (this.renderScale !== detailState.renderScale) {
+      this.renderScale = detailState.renderScale;
+      this.resizePending = true;
+    }
     if (detailState.shouldLoadTerritoryAssets) {
       this.loadTerritoryAssets();
     }
@@ -260,7 +264,10 @@ export class WaterSurfaceRenderer {
     }
 
     const gl = this.gl;
-    this.resize();
+    if (this.resizePending) {
+      this.resize();
+      this.resizePending = false;
+    }
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -354,6 +361,10 @@ export class WaterSurfaceRenderer {
     });
   }
 
+  requestResize(): void {
+    this.resizePending = true;
+  }
+
   destroy(): void {
     this.destroyed = true;
     for (const binding of Object.values(this.textures)) {
@@ -367,7 +378,7 @@ export class WaterSurfaceRenderer {
     const bounds = this.canvas.getBoundingClientRect();
     this.pixelRatio = Math.min(
       (window.devicePixelRatio || 1) * this.renderScale,
-      DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
+      DETAIL_POLICY.renderScale.maximumAnimatedWaterDevicePixelRatio,
     );
     const width = Math.max(1, Math.round(bounds.width * this.pixelRatio));
     const height = Math.max(1, Math.round(bounds.height * this.pixelRatio));

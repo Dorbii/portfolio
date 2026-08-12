@@ -46,6 +46,7 @@ export const DETAIL_POLICY = Object.freeze({
     siteGain: 0.25,
     closeGain: 0.25,
     maximumDevicePixelRatio: 2,
+    maximumAnimatedWaterDevicePixelRatio: 1.5,
   }),
 });
 

@@ -175,6 +175,7 @@ export class NinjaOneInlandWaterRenderer {
   private lightDirection: readonly [number, number, number];
   private pixelRatio = 1;
   private renderScale = 1;
+  private resizePending = true;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -237,7 +238,10 @@ export class NinjaOneInlandWaterRenderer {
   setView(camera: CameraView, detailState: DetailState): void {
     this.camera = camera;
     this.detailState = detailState;
-    this.renderScale = detailState.renderScale;
+    if (this.renderScale !== detailState.renderScale) {
+      this.renderScale = detailState.renderScale;
+      this.resizePending = true;
+    }
   }
 
   setLight(light: WorldLight): void {
@@ -250,7 +254,10 @@ export class NinjaOneInlandWaterRenderer {
       throw new Error("Inland-water view must be set before rendering.");
     }
     const gl = this.gl;
-    this.resize();
+    if (this.resizePending) {
+      this.resize();
+      this.resizePending = false;
+    }
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -292,11 +299,15 @@ export class NinjaOneInlandWaterRenderer {
     this.gl.deleteProgram(this.program);
   }
 
+  requestResize(): void {
+    this.resizePending = true;
+  }
+
   private resize(): void {
     const bounds = this.canvas.getBoundingClientRect();
     this.pixelRatio = Math.min(
       (window.devicePixelRatio || 1) * this.renderScale,
-      DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
+      DETAIL_POLICY.renderScale.maximumAnimatedWaterDevicePixelRatio,
     );
     const width = Math.max(1, Math.round(bounds.width * this.pixelRatio));
     const height = Math.max(1, Math.round(bounds.height * this.pixelRatio));

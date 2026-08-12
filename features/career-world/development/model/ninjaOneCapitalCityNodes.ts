@@ -39,6 +39,15 @@ export interface NinjaOneCapitalCityStation extends NinjaOneCapitalCityRasterAss
   readonly id: string;
 }
 
+export interface NinjaOneCapitalCityPopulationCue extends NinjaOneCapitalCityRasterAsset {
+  readonly anchor: Pair;
+  readonly displayHeight: number;
+  readonly id: string;
+  readonly minimumDetailTier: Extract<DetailTierId, "site" | "close">;
+  readonly mirrored: boolean;
+  readonly species: string;
+}
+
 export interface NinjaOneCapitalCityNode {
   readonly anchor: Pair;
   readonly assetNodeReady: boolean;
@@ -322,6 +331,37 @@ export const NINJAONE_CAPITAL_CITY_POPULATION_CLOSE_DETAIL_CUE_COUNT =
     ({ minimumDetailTier }) => minimumDetailTier === "close",
   ).length;
 
+export const NINJAONE_CAPITAL_CITY_POPULATION_CUES:
+readonly NinjaOneCapitalCityPopulationCue[] = Object.freeze(
+  cityNodeManifest.populationScaleCues.cues.map((cue, index) => {
+    const label = `populationScaleCues.cues[${index}]`;
+    const localPosition = finiteRecordPair(
+      cue.localPosition,
+      ["x", "y"],
+      `${label}.localPosition`,
+    );
+    const minimumDetailTier = cue.minimumDetailTier;
+    if (
+      (minimumDetailTier !== "site" && minimumDetailTier !== "close")
+      || cue.displayHeight <= 0
+    ) {
+      throw new TypeError(`${label} has an invalid scale-cue presentation.`);
+    }
+    return Object.freeze({
+      ...parseRasterAsset(cue, label),
+      anchor: finitePair([
+        localPosition[0] * NINJAONE_CAPITAL_CITY_ARTBOARD[0],
+        localPosition[1] * NINJAONE_CAPITAL_CITY_ARTBOARD[1],
+      ], `${label}.anchor`),
+      displayHeight: cue.displayHeight,
+      id: cue.id,
+      minimumDetailTier,
+      mirrored: cue.mirrored,
+      species: cue.species,
+    });
+  }),
+);
+
 export const NINJAONE_CAPITAL_CITY_CAMERA: CameraView = Object.freeze({
   origin: NINJAONE_CAPITAL_CITY_WORLD_ORIGIN,
   span: NINJAONE_CAPITAL_CITY_WORLD_SPAN,
@@ -346,6 +386,24 @@ function localCameraBounds(camera: CameraView): readonly [number, number, number
   ]);
 }
 
+export function ninjaOneCapitalVisiblePopulationCues(
+  camera: CameraView,
+  detailTier: DetailTierId,
+): readonly NinjaOneCapitalCityPopulationCue[] {
+  if (detailTier !== "site" && detailTier !== "close") {
+    return Object.freeze([]);
+  }
+  const [left, top, right, bottom] = localCameraBounds(camera);
+  const margin = detailTier === "close" ? 48 : 96;
+  return Object.freeze(NINJAONE_CAPITAL_CITY_POPULATION_CUES.filter((cue) => (
+    (detailTier === "close" || cue.minimumDetailTier === "site")
+    && cue.anchor[0] >= left - margin
+    && cue.anchor[0] <= right + margin
+    && cue.anchor[1] >= top - margin
+    && cue.anchor[1] <= bottom + margin
+  )));
+}
+
 export function ninjaOneCapitalVisibleCityNodes(
   camera: CameraView,
   detailTier: DetailTierId,
@@ -361,11 +419,12 @@ export function ninjaOneCapitalVisibleCityNodes(
   if (detailTier === "territory") {
     return Object.freeze([]);
   }
-  if (detailTier === "capital") {
-    return NINJAONE_CAPITAL_CITY_NODES;
-  }
   const [left, top, right, bottom] = localCameraBounds(camera);
-  const margin = detailTier === "close" ? 120 : 220;
+  const margin = detailTier === "close"
+    ? 120
+    : detailTier === "site"
+      ? 220
+      : 280;
   return Object.freeze(NINJAONE_CAPITAL_CITY_NODES.filter((node) => (
     node.anchor[0] + node.displayWidth >= left - margin
     && node.anchor[0] - node.displayWidth <= right + margin

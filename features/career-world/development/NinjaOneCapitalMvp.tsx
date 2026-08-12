@@ -7,9 +7,7 @@ import {
   NINJAONE_CAPITAL_CITY_NODE_COUNT,
   NINJAONE_CAPITAL_CITY_NODE_LAYER_ORDER,
   NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS,
-  NINJAONE_CAPITAL_CITY_POPULATION_CLOSE_DETAIL_CUE_COUNT,
   NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT,
-  NINJAONE_CAPITAL_CITY_POPULATION_SITE_CUE_COUNT,
   NINJAONE_CAPITAL_CITY_RAIL_EXIT,
   NINJAONE_CAPITAL_CITY_STATION,
   NINJAONE_CAPITAL_CITY_VISUAL_LAYERS,
@@ -17,13 +15,17 @@ import {
   NINJAONE_CAPITAL_CITY_WORLD_SPAN,
   type NinjaOneCapitalCityRasterAsset,
 } from "./model/ninjaOneCapitalCityNodes";
+import { NinjaOneCapitalPopulation } from "./NinjaOneCapitalPopulation";
 import { NinjaOneCapitalSkillNodes } from "./NinjaOneCapitalSkillNodes";
 
 interface NinjaOneCapitalMvpProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly light: WorldLight;
+  readonly phase?: "contact" | "city" | "all";
 }
+
+const CAPITAL_OVERVIEW_SWITCH_SPAN = 0.125;
 
 function RegisteredRaster({
   asset,
@@ -82,6 +84,7 @@ export function NinjaOneCapitalMvp({
   camera,
   detailState,
   light,
+  phase = "all",
 }: NinjaOneCapitalMvpProps) {
   const worldX = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -89,23 +92,28 @@ export function NinjaOneCapitalMvp({
     / NINJAONE_CAPITAL_CITY_ARTBOARD[0];
   const scaleY = NINJAONE_CAPITAL_CITY_WORLD_SPAN[1] * WORLD_PLANE.height
     / NINJAONE_CAPITAL_CITY_ARTBOARD[1];
-  const territoryOverviewVisible = detailState.tier.id === "territory";
+  const cameraSpan = Math.max(...camera.span);
+  const territoryOverviewVisible = (
+    detailState.tier.id === "territory"
+    || (detailState.tier.id === "capital" && cameraSpan > CAPITAL_OVERVIEW_SWITCH_SPAN)
+  );
   const detailedCityVisible = (
-    detailState.tier.id === "capital"
+    (detailState.tier.id === "capital" && cameraSpan <= CAPITAL_OVERVIEW_SWITCH_SPAN)
     || detailState.tier.id === "site"
     || detailState.tier.id === "close"
   );
-  const sitePopulationVisible = (
-    detailState.tier.id === "site" || detailState.tier.id === "close"
-  );
-  const closePopulationVisible = detailState.tier.id === "close";
   const cityVisible = territoryOverviewVisible || detailedCityVisible;
+  const contactPhase = phase === "contact" || phase === "all";
+  const cityPhase = phase === "city" || phase === "all";
 
   return (
     <>
       <svg
-        aria-label="Layered NinjaOne Capital city composition preview"
-        className="career-world__layer ninjaone-capital-mvp"
+        aria-hidden={cityPhase ? undefined : true}
+        aria-label={cityPhase
+          ? "Layered NinjaOne Capital city composition preview"
+          : undefined}
+        className={`career-world__layer ninjaone-capital-mvp ninjaone-capital-mvp--${phase}`}
         data-capital-city-artboard={NINJAONE_CAPITAL_CITY_ARTBOARD.join(",")}
         data-capital-layer-order={NINJAONE_CAPITAL_CITY_NODE_LAYER_ORDER.join(",")}
         data-capital-mvp="career-world/capitals/ninjaone/city-node-composition@r1"
@@ -125,9 +133,10 @@ export function NinjaOneCapitalMvp({
         data-capital-skill-node-terrain-binding={NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS}
         data-lod-tier={detailState.tier.id}
         preserveAspectRatio="none"
-        role="img"
+        role={cityPhase ? "img" : undefined}
         viewBox={cameraViewBox(camera, [WORLD_PLANE.width, WORLD_PLANE.height])}
       >
+        {cityPhase ? (
         <defs>
           <filter height="180%" id="ninjaone-capital-shadow-soften" width="180%" x="-40%" y="-40%">
             <feGaussianBlur stdDeviation="8" />
@@ -136,10 +145,11 @@ export function NinjaOneCapitalMvp({
             <feGaussianBlur stdDeviation="3" />
           </filter>
         </defs>
+        ) : null}
 
         {cityVisible ? (
           <g transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}>
-            {territoryOverviewVisible ? (
+            {territoryOverviewVisible && cityPhase ? (
               <g data-capital-layer="territory-settlement-overview">
                 <RegisteredRaster
                   asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.overviewSettlement}
@@ -147,14 +157,16 @@ export function NinjaOneCapitalMvp({
                 />
               </g>
             ) : null}
-            {detailedCityVisible ? (
+            {detailedCityVisible && contactPhase ? (
+              <g data-capital-layer="city-terrain-contact">
+                <RegisteredRaster
+                  asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.terrainContact}
+                  layer="city-terrain-contact"
+                />
+              </g>
+            ) : null}
+            {detailedCityVisible && cityPhase ? (
               <>
-                <g data-capital-layer="city-terrain-contact">
-                  <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.terrainContact}
-                    layer="city-terrain-contact"
-                  />
-                </g>
                 <g data-capital-layer="streets-retaining-and-support-fabric">
                   <RegisteredRaster
                     asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.underlay}
@@ -207,44 +219,26 @@ export function NinjaOneCapitalMvp({
                     layer="city-foliage-and-contact-details"
                   />
                 </g>
-                {sitePopulationVisible ? (
-                  <g
-                    data-capital-layer="temporary-population-site-scale-cues"
-                    data-population-cue-count={NINJAONE_CAPITAL_CITY_POPULATION_SITE_CUE_COUNT}
-                    data-temporary-swappable-layer="true"
-                  >
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.populationSiteScaleCues}
-                      layer="temporary-population-site-scale-cues"
-                    />
-                  </g>
-                ) : null}
-                {closePopulationVisible ? (
-                  <g
-                    data-capital-layer="temporary-population-close-detail-cues"
-                    data-population-cue-count={NINJAONE_CAPITAL_CITY_POPULATION_CLOSE_DETAIL_CUE_COUNT}
-                    data-temporary-swappable-layer="true"
-                  >
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.populationCloseDetailCues}
-                      layer="temporary-population-close-detail-cues"
-                    />
-                  </g>
-                ) : null}
+                <NinjaOneCapitalPopulation
+                  camera={camera}
+                  detailState={detailState}
+                />
               </>
             ) : null}
           </g>
         ) : null}
       </svg>
 
-      <aside className="ninjaone-capital-mvp__hud" aria-label="Capital layer status">
-        <p>NINJAONE CAPITAL · CITY COMPOSITION R1</p>
-        <strong>{detailState.tier.label}</strong>
-        <span>{NINJAONE_CAPITAL_CITY_NODE_COUNT} skill buildings · terrain-led districts</span>
-        <span>{NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT} temporary fantasy scale cues</span>
-        <span>Intercity rail exits {NINJAONE_CAPITAL_CITY_RAIL_EXIT.direction}</span>
-        <span>Integration preview · independent train loop pending</span>
-      </aside>
+      {cityPhase && cityVisible ? (
+        <aside className="ninjaone-capital-mvp__hud" aria-label="Capital layer status">
+          <p>NINJAONE CAPITAL · CITY COMPOSITION R1</p>
+          <strong>{detailState.tier.label}</strong>
+          <span>{NINJAONE_CAPITAL_CITY_NODE_COUNT} skill buildings · terrain-led districts</span>
+          <span>{NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT} temporary fantasy scale cues</span>
+          <span>Intercity rail exits {NINJAONE_CAPITAL_CITY_RAIL_EXIT.direction}</span>
+          <span>Integration preview · independent train loop pending</span>
+        </aside>
+      ) : null}
     </>
   );
 }

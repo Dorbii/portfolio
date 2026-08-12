@@ -363,9 +363,7 @@
 .career-world__foliage-canopy {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation-name: career-world-foliage-breeze;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  animation: none;
 }
 
 @keyframes career-world-foliage-breeze {
@@ -1409,6 +1407,37 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   shape-rendering: geometricPrecision;
 }
 
+.ninjaone-capital-mvp--contact {
+  z-index: 6;
+  filter: saturate(0.92) brightness(1.08) contrast(0.96);
+}
+
+.ninjaone-capital-mvp--city [data-capital-layer="territory-settlement-overview"] {
+  filter: saturate(0.9) brightness(1.08) contrast(0.97);
+}
+
+.ninjaone-capital-mvp--city [data-capital-layer="station-rear-and-platforms"],
+.ninjaone-capital-mvp--city [data-capital-layer="skill-building-nodes"] {
+  filter: saturate(0.94) brightness(0.98) contrast(0.97);
+}
+
+.ninjaone-capital-population__cue {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: none;
+}
+
+.ninjaone-capital-population__sprite {
+  filter:
+    drop-shadow(0 1px 1px rgb(3 7 7 / 92%))
+    saturate(1.08)
+    brightness(1.09);
+}
+
+.ninjaone-capital-population__shadow {
+  fill: rgb(3 7 7 / 52%);
+}
+
 .ninjaone-capital-mvp__authored-plate {
   pointer-events: none;
   image-rendering: auto;
@@ -1541,7 +1570,8 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ninjaone-capital-mvp__foliage-canopy {
+  .ninjaone-capital-mvp__foliage-canopy,
+  .ninjaone-capital-population__cue {
     animation: none;
   }
 }

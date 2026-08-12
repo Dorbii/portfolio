@@ -14,6 +14,7 @@ import {
   NINJAONE_CAPITAL_CITY_RAIL_EXIT,
   NINJAONE_CAPITAL_CITY_WORLD_ORIGIN,
   NINJAONE_CAPITAL_CITY_WORLD_SPAN,
+  ninjaOneCapitalVisiblePopulationCues,
 } from "../features/career-world/development/model/ninjaOneCapitalCityNodes.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -72,13 +73,21 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.match(renderer, /city-node-composition@r1/);
   assert.match(renderer, /territoryOverviewVisible/);
   assert.match(renderer, /detailedCityVisible/);
+  assert.match(renderer, /CAPITAL_OVERVIEW_SWITCH_SPAN = 0\.125/);
+  assert.match(renderer, /phase\?: "contact" \| "city" \| "all"/);
   assert.match(renderer, /data-capital-layer="territory-settlement-overview"/);
+  assert.match(scene, /phase="contact"[\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?phase="city"/);
 
   for (const layer of city.layerOrder) {
     if (layer === "external-terrain") {
       assert.match(scene, /<TerritoryLandform/);
     } else if (layer === "building-ground-shadows") {
       assert.match(skillRenderer, /data-capital-city-node-layer="building-ground-shadows"/);
+    } else if (
+      layer === "temporary-population-site-scale-cues"
+      || layer === "temporary-population-close-detail-cues"
+    ) {
+      assert.match(renderer, /<NinjaOneCapitalPopulation/);
     } else {
       assert.match(renderer, new RegExp(`data-capital-layer="${layer}"`), layer);
     }
@@ -92,9 +101,10 @@ test("capital preview mounts distinct territory and detailed city stacks without
 });
 
 test("rail, station, and temporary population stay independent at runtime", async () => {
-  const renderer = await source(
-    "features/career-world/development/NinjaOneCapitalMvp.tsx",
-  );
+  const [renderer, populationRenderer] = await Promise.all([
+    source("features/career-world/development/NinjaOneCapitalMvp.tsx"),
+    source("features/career-world/development/NinjaOneCapitalPopulation.tsx"),
+  ]);
   assert.equal(NINJAONE_CAPITAL_CITY_RAIL_EXIT.direction, "south-southeast");
   assert.equal(NINJAONE_CAPITAL_CITY_RAIL_EXIT.entryDirection, "station-terminal");
   assert.equal(NINJAONE_CAPITAL_CITY_RAIL_EXIT.offCapitalEntry, false);
@@ -110,9 +120,24 @@ test("rail, station, and temporary population stay independent at runtime", asyn
   assert.match(renderer, /data-capital-rail-off-capital-entry/);
   assert.match(renderer, /data-capital-rail-terminates-at-building/);
   assert.match(renderer, /data-asset-status="production-loop-not-yet-recovered"/);
-  assert.match(renderer, /data-temporary-swappable-layer="true"/);
-  assert.match(renderer, /sitePopulationVisible \? \(/);
-  assert.match(renderer, /closePopulationVisible \? \(/);
-  assert.match(renderer, /temporary-population-site-scale-cues/);
-  assert.match(renderer, /temporary-population-close-detail-cues/);
+  assert.match(renderer, /<NinjaOneCapitalPopulation/);
+  assert.match(populationRenderer, /data-temporary-swappable-layer="true"/);
+  assert.match(populationRenderer, /data-population-render-mode="camera-culled-individual-sprites"/);
+  assert.match(populationRenderer, /ninjaOneCapitalVisiblePopulationCues/);
+});
+
+test("population cues are culled to the current detailed camera", () => {
+  const site = {
+    origin: [0.24, 0.08],
+    span: [0.09, 0.09],
+  };
+  const close = {
+    origin: [0.24, 0.08],
+    span: [0.06, 0.06],
+  };
+  assert.equal(ninjaOneCapitalVisiblePopulationCues(site, "capital").length, 0);
+  assert.ok(ninjaOneCapitalVisiblePopulationCues(site, "site").every(
+    ({ minimumDetailTier }) => minimumDetailTier === "site",
+  ));
+  assert.ok(ninjaOneCapitalVisiblePopulationCues(close, "close").length <= 16);
 });

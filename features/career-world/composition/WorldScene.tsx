@@ -84,6 +84,7 @@ interface DragState {
 const FOCUS_DURATION_MS = 680;
 const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
+const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN = 0.06;
 const LIVE_PROJECT_STRUCTURES = Object.freeze(
   PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
 );
@@ -106,6 +107,22 @@ function wheelZoomScale(deltaY: number): number {
       Math.exp(deltaY * 0.00135),
     ),
   );
+}
+
+function interactiveCameraMinimumSpan(camera: CameraView): number {
+  const center = camera.origin.map(
+    (value, index) => value + camera.span[index] * 0.5,
+  );
+  const capitalMaximum = NINJAONE_CAPITAL_MVP_CAMERA.origin.map(
+    (value, index) => value + NINJAONE_CAPITAL_MVP_CAMERA.span[index],
+  );
+  const centeredOnCapital = center.every((value, index) => (
+    value >= NINJAONE_CAPITAL_MVP_CAMERA.origin[index]
+    && value <= capitalMaximum[index]
+  ));
+  return centeredOnCapital
+    ? NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN
+    : DETAIL_POLICY.cameraMinimumSpan;
 }
 
 function projectPresentationAnchor(project: ProjectStructure) {
@@ -359,7 +376,11 @@ export function WorldScene({
   const handleFocus = useCallback((id: string) => {
     const territory = TERRITORIES.find((candidate) => candidate.id === id);
     if (territory) {
-      animateTo(territory.focusView, territory.id);
+      if (territory.id === "ninjaone") {
+        animateTo(territory.development.capitalEnvelope, territory.id);
+      } else {
+        animateTo(territory.focusView, territory.id);
+      }
       return;
     }
 
@@ -380,11 +401,12 @@ export function WorldScene({
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
     const scale = wheelZoomScale(event.deltaY);
+    const minimumSpan = interactiveCameraMinimumSpan(camera);
     queueCamera(zoomCameraViewAt(
       camera,
       anchor,
       scale,
-      DETAIL_POLICY.cameraMinimumSpan,
+      minimumSpan,
     ));
     setActiveViewId("custom");
   }, [camera, cancelFocusAnimation, queueCamera]);
@@ -477,7 +499,7 @@ export function WorldScene({
           cameraRef.current,
           [0.5, 0.5],
           event.key === "-" ? 1.18 : 0.84,
-          DETAIL_POLICY.cameraMinimumSpan,
+          interactiveCameraMinimumSpan(cameraRef.current),
         ));
         setActiveViewId("custom");
       }
@@ -491,7 +513,7 @@ export function WorldScene({
       className="career-world__viewport"
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
-      data-camera-minimum-span={DETAIL_POLICY.cameraMinimumSpan}
+      data-camera-minimum-span={interactiveCameraMinimumSpan(camera)}
       data-page-visible={isPageVisible}
       data-capital-mvp={capitalMvp ? "layered-r1" : undefined}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
@@ -528,6 +550,14 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
       />
+      {showNinjaOneCapital ? (
+        <NinjaOneCapitalMvp
+          camera={camera}
+          detailState={detailState}
+          light={WORLD_LIGHT}
+          phase="contact"
+        />
+      ) : null}
       {showNinjaOneInlandWater ? (
         <NinjaOneInlandWaterCanvas
           active={isPageVisible}
@@ -541,6 +571,7 @@ export function WorldScene({
           camera={camera}
           detailState={detailState}
           light={WORLD_LIGHT}
+          phase="city"
         />
       ) : null}
       {topologyProof ? (

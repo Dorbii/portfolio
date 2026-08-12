@@ -670,7 +670,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   );
   assert.match(
     renderer,
-    /DETAIL_POLICY\.renderScale\.maximumDevicePixelRatio/,
+    /DETAIL_POLICY\.renderScale\.maximumAnimatedWaterDevicePixelRatio/,
   );
   assert.doesNotMatch(
     renderer,
