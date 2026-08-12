@@ -5,7 +5,6 @@ import type { DetailTierId } from "../../shared/lod";
 export type NinjaOneEnvironmentLayerId =
   | "terrain-geology"
   | "secondary-relief"
-  | "hydrology"
   | "static-foliage"
   | "tertiary-relief"
   | "trails"
@@ -46,11 +45,10 @@ export interface NinjaOneEnvironmentFoliageInstance
 }
 
 const EXPECTED_ID = "career-world/capitals/ninjaone/environment-proof@r1";
-const EXPECTED_GRID_CELLS = Object.freeze(["B2", "C1", "C2"]);
+const EXPECTED_GRID_CELLS = Object.freeze(["B1", "B2", "C1", "C2"]);
 const EXPECTED_LAYER_ORDER: readonly NinjaOneEnvironmentLayerId[] = Object.freeze([
   "terrain-geology",
   "secondary-relief",
-  "hydrology",
   "static-foliage",
   "tertiary-relief",
   "trails",
@@ -78,15 +76,15 @@ const EXPECTED_LOD_LAYERS: Readonly<
 > = Object.freeze({
   world: Object.freeze([] as const),
   territory: Object.freeze([] as const),
-  capital: Object.freeze(["terrain-geology"] as const),
+  capital: Object.freeze([
+    "terrain-geology",
+  ] as const),
   site: Object.freeze([
     "terrain-geology",
-    "hydrology",
     "shared-animated-foliage",
   ] as const),
   close: Object.freeze([
     "terrain-geology",
-    "hydrology",
     "shared-animated-foliage",
   ] as const),
 });

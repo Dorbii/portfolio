@@ -1,0 +1,2063 @@
+{
+  "schemaVersion": 1,
+  "status": "concept-substrate-and-node-scale-proof-only",
+  "productionReady": false,
+  "runtimeEligible": false,
+  "terrainBinding": "frozen-regional-terrain",
+  "conceptRegistration": {
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0
+    ],
+    "authority": "identity-pixel-registration",
+    "evidence": "Concept master and frozen regional terrain edge correlation peaks at scale 1.0 with zero x/y offset."
+  },
+  "referenceSha256": "dc94cc3c90eaf3a20976f5eeb4d0622a491782682837eefdce6d97f62c45d308",
+  "regionalTerrainSha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02",
+  "selectedSourceSha256": "0c94ae6f6bf9aac91a0c8f9a880b54d95bed1d9a6bb340967c162a2ff5d5f5b5",
+  "overlaySha256": "ef98bc5e240ec6956f11985d2180f3324d47bb974580a9e67df77fb2f354fcf3",
+  "proofSha256": "1406e392630f62f184937689a548147d036af6a0adb36cbdfa9b2018fb878d9f",
+  "selectedOverlaySha256": "1025946caeaf91f0956dc550689e699c7f16bd4c2e2d07548e926fbc7feee72c",
+  "selectedProofSha256": "63273c3dadb956113e401ce476c30e0261e6c14e4fc34cc7ac6d4bc1ae645f50",
+  "aperturedOverlaySha256": "0a190807d90a89d48983f771469a20223ec50c6ecde2e43a8087395db9376104",
+  "apertureQaSha256": "311642fb5231fc64b753d60ac88daa8efa25cb011260942de9163fcc814b7a36",
+  "summitOwnershipQaSha256": "c0cbf94beba0e549c34823a90e35baf9d3a65b4d9b6d947e6efdc7d88ab90f64",
+  "nodeScaleProofSha256": "eee1cc4ea419aa936e958778a1d5a28ae6c73e24bb447ee71f2e039e17b794e3",
+  "infrastructureAtlasSha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
+  "nodeEnvironmentDetailSha256": "a682f71cd011be9a60a1c396252fefa50793dd559d23d0f590a8aed83dd877d3",
+  "nodeEnvironmentDetailProofSha256": "083016e48a61627d060fcc145835a520c3474f2a51d00b9bdfc89f6445b69c4e",
+  "nodeTransitionForegroundSha256": "93dac9f761ff1df1be57aef6efb023a3e9c29d8c6c590abf8ef719d587717a59",
+  "nodeIntegratedProofSha256": "d0f9d308af34fe9f91a738ed9b51335c7df1f7e6b8458807a209aa526c4bc4a1",
+  "railSegmentSourceSha256": "83ae9b929e8131dc0ea12febede5279a6e12ecd66cfb17213281e91c122c92d8",
+  "railSegmentAlphaSha256": "2fa88e2728f3cc8b06bd86fd0520f1a6c2b8c30663bac5872d0eb06269875ed8",
+  "railSupportSha256": "d8d265956fe93396f79c6802baae5e06c6312676a23a177b4ff398e1d326a68b",
+  "railBedSha256": "01b4690e3175fddc028406befd424d2390e1430ceac7fffa36a6aa4c60192ad5",
+  "railPortalBackSha256": "c642f036950f05cfd1b656161e44d7b5f8ff5926c68767a2ed586a7c86e19d2f",
+  "railTrackSha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
+  "railPortalForegroundSha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
+  "railStationForegroundSha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
+  "railIntegratedProofSha256": "b813553c8603fcca2b4e9e6d921bc580b98a0dd106403c25fa78ebdc6860344c",
+  "railRegistrationQaSha256": "60d537a191571e18bb97a67162da9d70a654401cd69fd8b741ec8d208dd0b274",
+  "rail": {
+    "renderMethod": "authored-isometric-segment-chains",
+    "segmentCount": 13,
+    "chainCount": 2,
+    "segments": [
+      {
+        "id": "station-portal-straight",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.374,
+          0.46
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          887,
+          832,
+          1037,
+          942
+        ]
+      },
+      {
+        "id": "station-terminal-curve",
+        "chainIndex": 0,
+        "sourceCell": [
+          2,
+          0
+        ],
+        "conceptCenter": [
+          0.418,
+          0.508
+        ],
+        "displayWidth": 146,
+        "displayHeight": 141,
+        "kind": "ground-curve-nw-sse",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1002,
+          910,
+          1148,
+          1051
+        ]
+      },
+      {
+        "id": "south-portal-curve",
+        "chainIndex": 1,
+        "sourceCell": [
+          2,
+          0
+        ],
+        "conceptCenter": [
+          0.315,
+          0.56
+        ],
+        "displayWidth": 146,
+        "displayHeight": 141,
+        "kind": "ground-curve-nw-sse",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          737,
+          1010,
+          883,
+          1151
+        ]
+      },
+      {
+        "id": "south-ravine-viaduct-curve",
+        "chainIndex": 1,
+        "sourceCell": [
+          2,
+          1
+        ],
+        "conceptCenter": [
+          0.348,
+          0.627
+        ],
+        "displayWidth": 157,
+        "displayHeight": 170,
+        "kind": "elevated-curve-sse",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          816,
+          1124,
+          973,
+          1294
+        ]
+      },
+      {
+        "id": "south-ravine-viaduct",
+        "chainIndex": 1,
+        "sourceCell": [
+          1,
+          1
+        ],
+        "conceptCenter": [
+          0.392,
+          0.7
+        ],
+        "displayWidth": 157,
+        "displayHeight": 156,
+        "kind": "elevated-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          930,
+          1272,
+          1087,
+          1428
+        ]
+      },
+      {
+        "id": "south-egress-1",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.444,
+          0.731
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1067,
+          1355,
+          1217,
+          1465
+        ]
+      },
+      {
+        "id": "south-egress-2",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.4915,
+          0.772
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1189,
+          1434,
+          1339,
+          1544
+        ]
+      },
+      {
+        "id": "south-egress-3",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.539,
+          0.813
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1311,
+          1513,
+          1461,
+          1623
+        ]
+      },
+      {
+        "id": "south-egress-4",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.5865,
+          0.854
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1433,
+          1592,
+          1583,
+          1702
+        ]
+      },
+      {
+        "id": "south-egress-5",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.634,
+          0.895
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1555,
+          1671,
+          1705,
+          1781
+        ]
+      },
+      {
+        "id": "south-egress-6",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.6815,
+          0.936
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1677,
+          1751,
+          1827,
+          1861
+        ]
+      },
+      {
+        "id": "south-egress-7",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.729,
+          0.977
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1799,
+          1830,
+          1949,
+          1940
+        ]
+      },
+      {
+        "id": "south-southeast-exit",
+        "chainIndex": 1,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.7765,
+          1.018
+        ],
+        "displayWidth": 150,
+        "displayHeight": 110,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1921,
+          1909,
+          2071,
+          2019
+        ]
+      }
+    ],
+    "segmentJoins": [
+      {
+        "from": "station-portal-straight",
+        "to": "station-terminal-curve",
+        "alphaOverlapPixels": 351,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-portal-curve",
+        "to": "south-ravine-viaduct-curve",
+        "alphaOverlapPixels": 309,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-ravine-viaduct-curve",
+        "to": "south-ravine-viaduct",
+        "alphaOverlapPixels": 211,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-ravine-viaduct",
+        "to": "south-egress-1",
+        "alphaOverlapPixels": 107,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-1",
+        "to": "south-egress-2",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-2",
+        "to": "south-egress-3",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-3",
+        "to": "south-egress-4",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-4",
+        "to": "south-egress-5",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-5",
+        "to": "south-egress-6",
+        "alphaOverlapPixels": 236,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-6",
+        "to": "south-egress-7",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      },
+      {
+        "from": "south-egress-7",
+        "to": "south-southeast-exit",
+        "alphaOverlapPixels": 245,
+        "alphaThreshold": 16
+      }
+    ],
+    "stationContactPixels": 2974,
+    "stationPortalContactPixels": 2006,
+    "southPortalContactPixels": 1773,
+    "hiddenTunnelSurfaceTrackPixels": 0,
+    "southSoutheastBottomExitPixels": 1909,
+    "forbiddenTopLeftRightEdgePixels": 0,
+    "portalRecords": [
+      {
+        "id": "station-mountain-portal",
+        "conceptPosition": [
+          0.358,
+          0.432
+        ],
+        "visibleEnvelope": [
+          0.055,
+          0.065
+        ],
+        "placedBounds": [
+          854,
+          773,
+          985,
+          898
+        ],
+        "openingDimensions": [
+          55,
+          72
+        ],
+        "source": "infrastructure-transition-atlas-rock-foliage-cell"
+      },
+      {
+        "id": "south-mountain-portal",
+        "conceptPosition": [
+          0.295,
+          0.525
+        ],
+        "visibleEnvelope": [
+          0.05,
+          0.06
+        ],
+        "placedBounds": [
+          698,
+          957,
+          819,
+          1073
+        ],
+        "openingDimensions": [
+          51,
+          67
+        ],
+        "source": "infrastructure-transition-atlas-rock-foliage-cell"
+      }
+    ],
+    "westExitAllowed": false,
+    "trainBakedIntoRail": false,
+    "stationBakedIntoRail": false,
+    "changesTerrainAuthority": false,
+    "rotationDegrees": 0,
+    "stationPlatformForegroundPixels": 4314
+  },
+  "populationScaleCues": {
+    "status": "site-and-close-detail-lod-proof",
+    "registration": "identity-concept-master",
+    "siteCueCount": 8,
+    "closeSupplementCueCount": 8,
+    "siteSpecies": [
+      "dwarf",
+      "elf",
+      "gnome",
+      "human",
+      "orc"
+    ],
+    "closeSupplementSpecies": [
+      "dwarf",
+      "elf",
+      "gnome",
+      "human",
+      "orc"
+    ],
+    "siteVisibleTiers": [
+      "site",
+      "close"
+    ],
+    "closeSupplementVisibleTiers": [
+      "close"
+    ],
+    "hiddenTiers": [
+      "world",
+      "territory",
+      "capital"
+    ],
+    "affectsTerrain": false,
+    "affectsBuildingGeometry": false,
+    "siteLayerSha256": "a479fba083595b485d8f4c2551c57ef8ecbdc6b70328d0ea5fa708ce42f8490e",
+    "closeDetailLayerSha256": "0c15a1ff22ebb3760f0a754398ed804068a283367832dcbd3cd0d88946f80da5",
+    "siteProofSha256": "56ff16683769623ecc21de048dd726af1f688333057eee5efc328dfaac6d8e41",
+    "closeProofSha256": "dccbc81d7641351f0e28950d1dc554c019b15a333d96cb4666193c4c91187d3a",
+    "closeupQaSha256": "73cb08b37aebc2644a4ca49258f5b3ba6a744c3057eafb714c41849c8a1cee5a",
+    "siteTransparentRgbUnderZeroAlpha": 0,
+    "closeTransparentRgbUnderZeroAlpha": 0,
+    "displayHeightRange": [
+      21,
+      36
+    ],
+    "terrainSupport": [
+      {
+        "id": "dwarf-mason",
+        "species": "dwarf",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.505,
+          "y": 0.335
+        },
+        "displayHeight": 26,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "gnome-rail-engineer",
+        "species": "gnome",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.408,
+          "y": 0.535
+        },
+        "displayHeight": 23,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "elf-archivist",
+        "species": "elf",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.59,
+          "y": 0.445
+        },
+        "displayHeight": 33,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "orc-foundry-artisan",
+        "species": "orc",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.665,
+          "y": 0.686
+        },
+        "displayHeight": 36,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "human-station-porter",
+        "species": "human",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.442,
+          "y": 0.552
+        },
+        "displayHeight": 31,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "dwarf-surveyor",
+        "species": "dwarf",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.575,
+          "y": 0.705
+        },
+        "displayHeight": 27,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "elf-ranger",
+        "species": "elf",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.392,
+          "y": 0.292
+        },
+        "displayHeight": 33,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "gnome-courier",
+        "species": "gnome",
+        "minimumDetailTier": "site",
+        "conceptPosition": {
+          "x": 0.706,
+          "y": 0.603
+        },
+        "displayHeight": 21,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "human-market-vendor",
+        "species": "human",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.748,
+          "y": 0.612
+        },
+        "displayHeight": 30,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "orc-freight-handler",
+        "species": "orc",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.468,
+          "y": 0.575
+        },
+        "displayHeight": 36,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "dwarf-bridgewright",
+        "species": "dwarf",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.535,
+          "y": 0.646
+        },
+        "displayHeight": 26,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "gnome-signalkeeper",
+        "species": "gnome",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.38,
+          "y": 0.505
+        },
+        "displayHeight": 23,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "elf-citadel-steward",
+        "species": "elf",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.46,
+          "y": 0.235
+        },
+        "displayHeight": 33,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "human-overlook-visitor",
+        "species": "human",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.41,
+          "y": 0.245
+        },
+        "displayHeight": 31,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "orc-rail-mason",
+        "species": "orc",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.405,
+          "y": 0.675
+        },
+        "displayHeight": 36,
+        "terrainSupportAlpha": 255
+      },
+      {
+        "id": "dwarf-service-engineer",
+        "species": "dwarf",
+        "minimumDetailTier": "close",
+        "conceptPosition": {
+          "x": 0.62,
+          "y": 0.82
+        },
+        "displayHeight": 27,
+        "terrainSupportAlpha": 255
+      }
+    ]
+  },
+  "dimensions": [
+    2571,
+    1929
+  ],
+  "cornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "nonzeroAlphaPixels": 1881098,
+  "selectedNonzeroAlphaPixels": 1796737,
+  "selectedMagentaEdgePixelsBeforeRepair": 29891,
+  "selectedMagentaEdgePixelsAfterRepair": 0,
+  "selectedUnassignedChromaPixelsRemoved": 923,
+  "selectedPlumBoundaryPixelsBeforeRepair": 4817,
+  "selectedPlumBoundaryPixelsCleared": 252,
+  "selectedPlumBoundaryPixelsAfterRepair": 0,
+  "selectedSilhouetteUsesSourceAlpha": true,
+  "terrainAlphaClipsSelectedOverhangs": false,
+  "bridgePixelCount": 93362,
+  "nodeApertureCount": 20,
+  "skillNodeCount": 19,
+  "nodeScaleAuthority": "city-node-manifest-displayWidth",
+  "scaleClassControlsDisplayWidth": false,
+  "allNodeDisplayWidthsMatchManifest": true,
+  "skillDisplayWidthRange": [
+    124,
+    228
+  ],
+  "stationDisplayWidth": 343,
+  "stationIsIndependentAsset": true,
+  "aperturesCreateOffTerrainHoles": false,
+  "aperturePixelCount": 489557,
+  "nodeTransitionForegroundPixelCount": 50053,
+  "nodeTransitionForegroundSource": "selected-city-environment-source-pixels",
+  "nodeEnvironmentDetailPlacementCount": 19,
+  "nodeEnvironmentDetailPlacements": [
+    {
+      "id": "ai-agent-systems-contact",
+      "skillId": "ai-agent-systems",
+      "atlasCell": [
+        0,
+        2
+      ],
+      "conceptPosition": [
+        0.447,
+        0.21
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 228,
+      "placedBounds": [
+        1001,
+        290,
+        1297,
+        520
+      ],
+      "visibleDimensions": [
+        296,
+        230
+      ]
+    },
+    {
+      "id": "mcp-contact",
+      "skillId": "mcp",
+      "atlasCell": [
+        0,
+        1
+      ],
+      "conceptPosition": [
+        0.405,
+        0.27
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 133,
+      "placedBounds": [
+        954,
+        454,
+        1127,
+        587
+      ],
+      "visibleDimensions": [
+        173,
+        133
+      ]
+    },
+    {
+      "id": "openapi-swagger-contact",
+      "skillId": "openapi-swagger",
+      "atlasCell": [
+        1,
+        0
+      ],
+      "conceptPosition": [
+        0.515,
+        0.29
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 141,
+      "placedBounds": [
+        1231,
+        472,
+        1417,
+        646
+      ],
+      "visibleDimensions": [
+        186,
+        174
+      ]
+    },
+    {
+      "id": "grpc-rest-contact",
+      "skillId": "grpc-rest",
+      "atlasCell": [
+        0,
+        0
+      ],
+      "conceptPosition": [
+        0.355,
+        0.35
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 150,
+      "placedBounds": [
+        816,
+        606,
+        1011,
+        745
+      ],
+      "visibleDimensions": [
+        195,
+        139
+      ]
+    },
+    {
+      "id": "capability-contracts-contact",
+      "skillId": "capability-contracts",
+      "atlasCell": [
+        0,
+        2
+      ],
+      "conceptPosition": [
+        0.47,
+        0.375
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 141,
+      "placedBounds": [
+        1119,
+        654,
+        1297,
+        792
+      ],
+      "visibleDimensions": [
+        178,
+        138
+      ]
+    },
+    {
+      "id": "tool-generation-contact",
+      "skillId": "tool-generation",
+      "atlasCell": [
+        0,
+        1
+      ],
+      "conceptPosition": [
+        0.555,
+        0.38
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 150,
+      "placedBounds": [
+        1331,
+        660,
+        1523,
+        807
+      ],
+      "visibleDimensions": [
+        192,
+        147
+      ]
+    },
+    {
+      "id": "typescript-contact",
+      "skillId": "typescript",
+      "atlasCell": [
+        1,
+        0
+      ],
+      "conceptPosition": [
+        0.655,
+        0.465
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 141,
+      "placedBounds": [
+        1592,
+        812,
+        1775,
+        983
+      ],
+      "visibleDimensions": [
+        183,
+        171
+      ]
+    },
+    {
+      "id": "react-contact",
+      "skillId": "react",
+      "atlasCell": [
+        0,
+        2
+      ],
+      "conceptPosition": [
+        0.773,
+        0.482
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 163,
+      "placedBounds": [
+        1884,
+        850,
+        2089,
+        1009
+      ],
+      "visibleDimensions": [
+        205,
+        159
+      ]
+    },
+    {
+      "id": "tanstack-contact",
+      "skillId": "tanstack",
+      "atlasCell": [
+        0,
+        0
+      ],
+      "conceptPosition": [
+        0.635,
+        0.55
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 163,
+      "placedBounds": [
+        1527,
+        986,
+        1739,
+        1137
+      ],
+      "visibleDimensions": [
+        212,
+        151
+      ]
+    },
+    {
+      "id": "golang-contact",
+      "skillId": "golang",
+      "atlasCell": [
+        1,
+        2
+      ],
+      "conceptPosition": [
+        0.745,
+        0.575
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 163,
+      "placedBounds": [
+        1810,
+        1009,
+        2019,
+        1209
+      ],
+      "visibleDimensions": [
+        209,
+        200
+      ]
+    },
+    {
+      "id": "csharp-contact",
+      "skillId": "csharp",
+      "atlasCell": [
+        0,
+        1
+      ],
+      "conceptPosition": [
+        0.6,
+        0.63
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 141,
+      "placedBounds": [
+        1453,
+        1146,
+        1633,
+        1284
+      ],
+      "visibleDimensions": [
+        180,
+        138
+      ]
+    },
+    {
+      "id": "python-contact",
+      "skillId": "python",
+      "atlasCell": [
+        0,
+        2
+      ],
+      "conceptPosition": [
+        0.69,
+        0.65
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 146,
+      "placedBounds": [
+        1683,
+        1184,
+        1865,
+        1325
+      ],
+      "visibleDimensions": [
+        182,
+        141
+      ]
+    },
+    {
+      "id": "postgresql-contact",
+      "skillId": "postgresql",
+      "atlasCell": [
+        1,
+        0
+      ],
+      "conceptPosition": [
+        0.785,
+        0.67
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 154,
+      "placedBounds": [
+        1918,
+        1198,
+        2118,
+        1385
+      ],
+      "visibleDimensions": [
+        200,
+        187
+      ]
+    },
+    {
+      "id": "redis-contact",
+      "skillId": "redis",
+      "atlasCell": [
+        0,
+        0
+      ],
+      "conceptPosition": [
+        0.635,
+        0.73
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 124,
+      "placedBounds": [
+        1554,
+        1352,
+        1713,
+        1465
+      ],
+      "visibleDimensions": [
+        159,
+        113
+      ]
+    },
+    {
+      "id": "aws-contact",
+      "skillId": "aws",
+      "atlasCell": [
+        1,
+        2
+      ],
+      "conceptPosition": [
+        0.75,
+        0.745
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 159,
+      "placedBounds": [
+        1824,
+        1338,
+        2031,
+        1536
+      ],
+      "visibleDimensions": [
+        207,
+        198
+      ]
+    },
+    {
+      "id": "databricks-contact",
+      "skillId": "databricks",
+      "atlasCell": [
+        0,
+        1
+      ],
+      "conceptPosition": [
+        0.588,
+        0.818
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 163,
+      "placedBounds": [
+        1408,
+        1498,
+        1617,
+        1658
+      ],
+      "visibleDimensions": [
+        209,
+        160
+      ]
+    },
+    {
+      "id": "docker-contact",
+      "skillId": "docker",
+      "atlasCell": [
+        1,
+        0
+      ],
+      "conceptPosition": [
+        0.725,
+        0.815
+      ],
+      "mirrored": true,
+      "nodeDisplayWidth": 159,
+      "placedBounds": [
+        1762,
+        1476,
+        1966,
+        1667
+      ],
+      "visibleDimensions": [
+        204,
+        191
+      ]
+    },
+    {
+      "id": "vmware-contact",
+      "skillId": "vmware",
+      "atlasCell": [
+        0,
+        0
+      ],
+      "conceptPosition": [
+        0.716,
+        0.869
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 163,
+      "placedBounds": [
+        1735,
+        1600,
+        1947,
+        1751
+      ],
+      "visibleDimensions": [
+        212,
+        151
+      ]
+    },
+    {
+      "id": "macstadium-contact",
+      "skillId": "macstadium",
+      "atlasCell": [
+        0,
+        2
+      ],
+      "conceptPosition": [
+        0.785,
+        0.885
+      ],
+      "mirrored": false,
+      "nodeDisplayWidth": 167,
+      "placedBounds": [
+        1914,
+        1626,
+        2121,
+        1787
+      ],
+      "visibleDimensions": [
+        207,
+        161
+      ]
+    }
+  ],
+  "nodeEnvironmentDetailVisualOnly": true,
+  "nodeEnvironmentDetailChangesTerrainAuthority": false,
+  "allSkillNodesHaveDetailTransitions": true,
+  "nodeTransitionCoverageGate": {
+    "minimumEnvironmentDetailPixels": 1000,
+    "minimumEnvironmentDetailCoverageRatio": 0.25,
+    "minimumForegroundOcclusionPixels": 600,
+    "minimumForegroundOcclusionCoverageRatio": 0.08
+  },
+  "nodeTransitionCoverage": [
+    {
+      "skillId": "ai-agent-systems",
+      "localMaskPixels": 26607,
+      "environmentDetailPixels": 24286,
+      "environmentDetailCoverageRatio": 0.912767,
+      "foregroundOcclusionPixels": 6810,
+      "foregroundOcclusionCoverageRatio": 0.255948,
+      "passes": true
+    },
+    {
+      "skillId": "mcp",
+      "localMaskPixels": 8399,
+      "environmentDetailPixels": 7819,
+      "environmentDetailCoverageRatio": 0.930944,
+      "foregroundOcclusionPixels": 1070,
+      "foregroundOcclusionCoverageRatio": 0.127396,
+      "passes": true
+    },
+    {
+      "skillId": "openapi-swagger",
+      "localMaskPixels": 9107,
+      "environmentDetailPixels": 6252,
+      "environmentDetailCoverageRatio": 0.686505,
+      "foregroundOcclusionPixels": 1502,
+      "foregroundOcclusionCoverageRatio": 0.164928,
+      "passes": true
+    },
+    {
+      "skillId": "grpc-rest",
+      "localMaskPixels": 10465,
+      "environmentDetailPixels": 7059,
+      "environmentDetailCoverageRatio": 0.674534,
+      "foregroundOcclusionPixels": 1625,
+      "foregroundOcclusionCoverageRatio": 0.15528,
+      "passes": true
+    },
+    {
+      "skillId": "capability-contracts",
+      "localMaskPixels": 9107,
+      "environmentDetailPixels": 8436,
+      "environmentDetailCoverageRatio": 0.92632,
+      "foregroundOcclusionPixels": 1154,
+      "foregroundOcclusionCoverageRatio": 0.126716,
+      "passes": true
+    },
+    {
+      "skillId": "tool-generation",
+      "localMaskPixels": 10465,
+      "environmentDetailPixels": 9634,
+      "environmentDetailCoverageRatio": 0.920592,
+      "foregroundOcclusionPixels": 1508,
+      "foregroundOcclusionCoverageRatio": 0.144099,
+      "passes": true
+    },
+    {
+      "skillId": "typescript",
+      "localMaskPixels": 9107,
+      "environmentDetailPixels": 6209,
+      "environmentDetailCoverageRatio": 0.681783,
+      "foregroundOcclusionPixels": 1088,
+      "foregroundOcclusionCoverageRatio": 0.119469,
+      "passes": true
+    },
+    {
+      "skillId": "react",
+      "localMaskPixels": 13489,
+      "environmentDetailPixels": 12190,
+      "environmentDetailCoverageRatio": 0.903699,
+      "foregroundOcclusionPixels": 1916,
+      "foregroundOcclusionCoverageRatio": 0.142042,
+      "passes": true
+    },
+    {
+      "skillId": "tanstack",
+      "localMaskPixels": 13489,
+      "environmentDetailPixels": 8798,
+      "environmentDetailCoverageRatio": 0.652235,
+      "foregroundOcclusionPixels": 1640,
+      "foregroundOcclusionCoverageRatio": 0.121581,
+      "passes": true
+    },
+    {
+      "skillId": "golang",
+      "localMaskPixels": 15129,
+      "environmentDetailPixels": 12703,
+      "environmentDetailCoverageRatio": 0.839646,
+      "foregroundOcclusionPixels": 1824,
+      "foregroundOcclusionCoverageRatio": 0.120563,
+      "passes": true
+    },
+    {
+      "skillId": "csharp",
+      "localMaskPixels": 9107,
+      "environmentDetailPixels": 8482,
+      "environmentDetailCoverageRatio": 0.931371,
+      "foregroundOcclusionPixels": 944,
+      "foregroundOcclusionCoverageRatio": 0.103657,
+      "passes": true
+    },
+    {
+      "skillId": "python",
+      "localMaskPixels": 9735,
+      "environmentDetailPixels": 8972,
+      "environmentDetailCoverageRatio": 0.921623,
+      "foregroundOcclusionPixels": 1042,
+      "foregroundOcclusionCoverageRatio": 0.107036,
+      "passes": true
+    },
+    {
+      "skillId": "postgresql",
+      "localMaskPixels": 12203,
+      "environmentDetailPixels": 8016,
+      "environmentDetailCoverageRatio": 0.656888,
+      "foregroundOcclusionPixels": 1426,
+      "foregroundOcclusionCoverageRatio": 0.116857,
+      "passes": true
+    },
+    {
+      "skillId": "redis",
+      "localMaskPixels": 5979,
+      "environmentDetailPixels": 4338,
+      "environmentDetailCoverageRatio": 0.725539,
+      "foregroundOcclusionPixels": 983,
+      "foregroundOcclusionCoverageRatio": 0.164409,
+      "passes": true
+    },
+    {
+      "skillId": "aws",
+      "localMaskPixels": 12907,
+      "environmentDetailPixels": 11292,
+      "environmentDetailCoverageRatio": 0.874874,
+      "foregroundOcclusionPixels": 1965,
+      "foregroundOcclusionCoverageRatio": 0.152243,
+      "passes": true
+    },
+    {
+      "skillId": "databricks",
+      "localMaskPixels": 13903,
+      "environmentDetailPixels": 12266,
+      "environmentDetailCoverageRatio": 0.882256,
+      "foregroundOcclusionPixels": 1712,
+      "foregroundOcclusionCoverageRatio": 0.123139,
+      "passes": true
+    },
+    {
+      "skillId": "docker",
+      "localMaskPixels": 13179,
+      "environmentDetailPixels": 8469,
+      "environmentDetailCoverageRatio": 0.642613,
+      "foregroundOcclusionPixels": 1435,
+      "foregroundOcclusionCoverageRatio": 0.108885,
+      "passes": true
+    },
+    {
+      "skillId": "vmware",
+      "localMaskPixels": 13903,
+      "environmentDetailPixels": 9969,
+      "environmentDetailCoverageRatio": 0.717039,
+      "foregroundOcclusionPixels": 1832,
+      "foregroundOcclusionCoverageRatio": 0.13177,
+      "passes": true
+    },
+    {
+      "skillId": "macstadium",
+      "localMaskPixels": 15759,
+      "environmentDetailPixels": 13764,
+      "environmentDetailCoverageRatio": 0.873406,
+      "foregroundOcclusionPixels": 1990,
+      "foregroundOcclusionCoverageRatio": 0.126277,
+      "passes": true
+    }
+  ],
+  "nodePlacements": [
+    {
+      "skillId": "ai-agent-systems",
+      "scaleClass": "citadel",
+      "conceptPosition": [
+        0.447,
+        0.21
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/ai-agent-systems-static.png",
+      "assetSha256": "74bd0fc8e1d8bfd69f16c744be02f8027361bf98910cdf4bb37ab2dd980d56d5",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 228,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        28,
+        19,
+        1352,
+        1125
+      ],
+      "placedBounds": [
+        1035,
+        215,
+        1263,
+        405
+      ],
+      "visibleDimensions": [
+        228,
+        190
+      ]
+    },
+    {
+      "skillId": "mcp",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.405,
+        0.27
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/mcp-r4.png",
+      "assetSha256": "68f55b3297a2f65705694f4687dd8f6ec45af95ba89c5d59074daf075064b79a",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 133,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        15,
+        215,
+        624,
+        627
+      ],
+      "placedBounds": [
+        974,
+        431,
+        1107,
+        521
+      ],
+      "visibleDimensions": [
+        133,
+        90
+      ]
+    },
+    {
+      "skillId": "openapi-swagger",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.515,
+        0.29
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/openapi-swagger-r2.png",
+      "assetSha256": "9a79f4f01c20128a8018bafcde5139d4c44fe7ce738808c9252b0cb12f663653",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 141,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        25,
+        55,
+        615,
+        618
+      ],
+      "placedBounds": [
+        1254,
+        424,
+        1395,
+        559
+      ],
+      "visibleDimensions": [
+        141,
+        135
+      ]
+    },
+    {
+      "skillId": "grpc-rest",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.355,
+        0.35
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/grpc-rest-r4.png",
+      "assetSha256": "5a54484b1580b774d5e2fc6e00e10bccb90e057c6e7a38a8c2e744d39627d5eb",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 150,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        25,
+        71,
+        615,
+        618
+      ],
+      "placedBounds": [
+        838,
+        536,
+        988,
+        675
+      ],
+      "visibleDimensions": [
+        150,
+        139
+      ]
+    },
+    {
+      "skillId": "capability-contracts",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.47,
+        0.375
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/capability-contracts-r6.png",
+      "assetSha256": "796b583b714338c3167f1f0f3e58bfdd960a41a9b710c6df6dcef1f3d0b84fbe",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 141,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        25,
+        213,
+        615,
+        617
+      ],
+      "placedBounds": [
+        1138,
+        626,
+        1279,
+        723
+      ],
+      "visibleDimensions": [
+        141,
+        97
+      ]
+    },
+    {
+      "skillId": "tool-generation",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.555,
+        0.38
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tool-generation-static.png",
+      "assetSha256": "fc2a2d6672413a80b97e8911737433d123fa0eca5608c0ee609f3760369e346a",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 150,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        11,
+        16,
+        1240,
+        1227
+      ],
+      "placedBounds": [
+        1352,
+        585,
+        1502,
+        733
+      ],
+      "visibleDimensions": [
+        150,
+        148
+      ]
+    },
+    {
+      "skillId": "typescript",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.655,
+        0.465
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/typescript-r7.png",
+      "assetSha256": "1cac0682a5b62d96bf4c1bb969bcd2591d5a83c8b15087fa05b4f3f07a33b6df",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 141,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        25,
+        110,
+        615,
+        618
+      ],
+      "placedBounds": [
+        1614,
+        776,
+        1755,
+        897
+      ],
+      "visibleDimensions": [
+        141,
+        121
+      ]
+    },
+    {
+      "skillId": "react",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.773,
+        0.482
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/react-static.png",
+      "assetSha256": "b5d7f0bd17b89d81fcdbba9ea97f5b9a2aad4850f91cf3ff43e21fcf54f9cafb",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 163,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        54,
+        41,
+        1385,
+        1054
+      ],
+      "placedBounds": [
+        1906,
+        806,
+        2069,
+        930
+      ],
+      "visibleDimensions": [
+        163,
+        124
+      ]
+    },
+    {
+      "skillId": "tanstack",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.635,
+        0.55
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tanstack-static.png",
+      "assetSha256": "5455fe5d7038d8b39ef9c60a74a0a480c661af1d21156eacf83e0a9c27685967",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 163,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        70,
+        35,
+        1386,
+        1062
+      ],
+      "placedBounds": [
+        1552,
+        934,
+        1715,
+        1061
+      ],
+      "visibleDimensions": [
+        163,
+        127
+      ]
+    },
+    {
+      "skillId": "golang",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.745,
+        0.575
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-alpha-r3.png",
+      "assetSha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 163,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.86,
+        "depth": 0.32
+      },
+      "sourceContentBox": [
+        9,
+        29,
+        636,
+        646
+      ],
+      "placedBounds": [
+        1834,
+        943,
+        1997,
+        1103
+      ],
+      "visibleDimensions": [
+        163,
+        160
+      ]
+    },
+    {
+      "skillId": "csharp",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.6,
+        0.63
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/csharp-r2.png",
+      "assetSha256": "94af1b69b5cd271680f709494cf5acb7a14f386944ad2077449ad22b606ab6e8",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 141,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        25,
+        108,
+        617,
+        546
+      ],
+      "placedBounds": [
+        1472,
+        1111,
+        1613,
+        1215
+      ],
+      "visibleDimensions": [
+        141,
+        104
+      ]
+    },
+    {
+      "skillId": "python",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.69,
+        0.65
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/python-r2.png",
+      "assetSha256": "42194a2974542d5b1e3788d57f12442135fa9cc28613385e1688c7426283574e",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 146,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "sourceContentBox": [
+        12,
+        37,
+        635,
+        599
+      ],
+      "placedBounds": [
+        1701,
+        1122,
+        1847,
+        1254
+      ],
+      "visibleDimensions": [
+        146,
+        132
+      ]
+    },
+    {
+      "skillId": "postgresql",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.785,
+        0.67
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/postgresql-r4.png",
+      "assetSha256": "85ec84e26668ce55d0d8006b34c553af273449786d713d1e58d5f542621f8389",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 154,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        25,
+        193,
+        615,
+        618
+      ],
+      "placedBounds": [
+        1941,
+        1181,
+        2095,
+        1292
+      ],
+      "visibleDimensions": [
+        154,
+        111
+      ]
+    },
+    {
+      "skillId": "redis",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.635,
+        0.73
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/redis-r2.png",
+      "assetSha256": "c12ada9ea632d64bf56e02c4437639890024c84f84060b8675780e75c3dc98b5",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 124,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.72,
+        "depth": 0.26
+      },
+      "sourceContentBox": [
+        109,
+        34,
+        530,
+        618
+      ],
+      "placedBounds": [
+        1571,
+        1236,
+        1695,
+        1408
+      ],
+      "visibleDimensions": [
+        124,
+        172
+      ]
+    },
+    {
+      "skillId": "aws",
+      "scaleClass": "major",
+      "conceptPosition": [
+        0.75,
+        0.745
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/aws-r1.png",
+      "assetSha256": "1ce7edbeb339a61499d1e61debb36396b2044e998a8aae9204a54ab1a6c674d5",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 159,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        29,
+        120,
+        623,
+        534
+      ],
+      "placedBounds": [
+        1848,
+        1326,
+        2007,
+        1437
+      ],
+      "visibleDimensions": [
+        159,
+        111
+      ]
+    },
+    {
+      "skillId": "databricks",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.588,
+        0.818
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/databricks-r3.png",
+      "assetSha256": "a8362591df59a2ca52d4946f4b6ab8f457b1ddfd18080aeccfd86b2fe3c378eb",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 163,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        6,
+        58,
+        631,
+        579
+      ],
+      "placedBounds": [
+        1431,
+        1442,
+        1594,
+        1578
+      ],
+      "visibleDimensions": [
+        163,
+        136
+      ]
+    },
+    {
+      "skillId": "docker",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.725,
+        0.815
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/docker-r4.png",
+      "assetSha256": "18aff84b4489a126ff056fe488c0b42a34e78cce5e011e7b50591fb1fdad9a0a",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 159,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        25,
+        266,
+        615,
+        618
+      ],
+      "placedBounds": [
+        1784,
+        1477,
+        1943,
+        1572
+      ],
+      "visibleDimensions": [
+        159,
+        95
+      ]
+    },
+    {
+      "skillId": "vmware",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.716,
+        0.869
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/vmware-r2.png",
+      "assetSha256": "dafe3455b2c1c9cd7b66f7a9bbada2cfdc1ddd2df9c2db47f8148020706dd2ba",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 163,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "sourceContentBox": [
+        6,
+        15,
+        632,
+        619
+      ],
+      "placedBounds": [
+        1760,
+        1519,
+        1923,
+        1676
+      ],
+      "visibleDimensions": [
+        163,
+        157
+      ]
+    },
+    {
+      "skillId": "macstadium",
+      "scaleClass": "standard",
+      "conceptPosition": [
+        0.785,
+        0.885
+      ],
+      "assetPath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/macstadium-r3.png",
+      "assetSha256": "cb9c3b3c416af0847a0d8f66a802a5119b6e1563746ba26f0f2cb6ea0eda521b",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 167,
+      "displayWidthDeltaPixels": 0,
+      "footprintFraction": {
+        "width": 0.86,
+        "depth": 0.32
+      },
+      "sourceContentBox": [
+        1,
+        15,
+        640,
+        624
+      ],
+      "placedBounds": [
+        1935,
+        1548,
+        2102,
+        1707
+      ],
+      "visibleDimensions": [
+        167,
+        159
+      ]
+    },
+    {
+      "skillId": null,
+      "id": "intercity-station",
+      "conceptPosition": [
+        0.438,
+        0.54
+      ],
+      "assetPath": "/career-world/shared-assets/transportation/train/stations/ninjaone-intercity-station-r2.png",
+      "assetSha256": "9ba92ef5132c4953f0477274fdaa89552ee2c10f0c41d5a49cc7b7195525ab8e",
+      "scaleAuthority": "city-node-manifest-displayWidth",
+      "manifestDisplayWidth": 343,
+      "displayWidthDeltaPixels": 0,
+      "sourceContentBox": [
+        12,
+        159,
+        1240,
+        1066
+      ],
+      "placedBounds": [
+        954,
+        789,
+        1297,
+        1042
+      ],
+      "visibleDimensions": [
+        343,
+        253
+      ]
+    }
+  ],
+  "summitPlaceholderOwnership": {
+    "skillId": "ai-agent-systems",
+    "replacementSlotId": "summit-citadel",
+    "source": "selected-city-environment-source-pixels",
+    "ownershipPolygon": [
+      [
+        0.395,
+        0.225
+      ],
+      [
+        0.395,
+        0.018
+      ],
+      [
+        0.57,
+        0.018
+      ],
+      [
+        0.57,
+        0.225
+      ]
+    ],
+    "sourceOwnedPixels": 80261,
+    "aperturedResidualPixels": 0,
+    "foregroundResidualPixels": 0,
+    "retainedPlateElements": [
+      "lower retaining wall",
+      "summit approach stairs",
+      "civic circulation loop",
+      "surrounding foliage and cliff"
+    ],
+    "passes": true
+  },
+  "ownershipStillPending": [
+    "moving train runtime binding to independent rail centerline",
+    "per-node animated layer and foreground depth registration",
+    "animated layer runtime binding"
+  ],
+  "ownershipDelegated": [
+    "city-water and civic-bridge detail owned by separate task"
+  ]
+}

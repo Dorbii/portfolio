@@ -31,7 +31,6 @@
   "layerOrder": [
     "terrain-geology",
     "secondary-relief",
-    "hydrology",
     "static-foliage",
     "tertiary-relief",
     "trails",
@@ -524,12 +523,10 @@
     ],
     "site": [
       "terrain-geology",
-      "hydrology",
       "shared-animated-foliage"
     ],
     "close": [
       "terrain-geology",
-      "hydrology",
       "shared-animated-foliage"
     ]
   }

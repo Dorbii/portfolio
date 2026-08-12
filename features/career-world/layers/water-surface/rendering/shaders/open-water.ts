@@ -6,44 +6,6 @@ struct OpenWaterSample {
   float expression;
 };
 
-vec2 transformWaterCoordinate(
-  vec2 worldUv,
-  vec2 worldAnchor,
-  vec2 textureOrigin,
-  vec2 textureScale,
-  float textureRotation
-) {
-  vec2 local = worldUv - worldAnchor;
-  float cosine = cos(textureRotation);
-  float sine = sin(textureRotation);
-  vec2 rotated = vec2(
-    local.x * cosine - local.y * sine,
-    local.x * sine + local.y * cosine
-  );
-  return clamp(
-    textureOrigin + rotated * textureScale,
-    0.001,
-    0.999
-  );
-}
-
-OpenWaterSample blendWaterSamples(
-  OpenWaterSample base,
-  OpenWaterSample body,
-  float amount
-) {
-  OpenWaterSample result;
-  result.color = mix(base.color, body.color, amount);
-  result.height = mix(base.height, body.height, amount);
-  result.crest = mix(base.crest, body.crest, amount);
-  result.expression = mix(
-    base.expression,
-    body.expression,
-    amount
-  );
-  return result;
-}
-
 OpenWaterSample sampleWaterBodyAtTime(
   vec2 worldUv,
   vec2 bodyUv,
@@ -260,83 +222,16 @@ OpenWaterSample sampleWaterBodyAtTime(
   return result;
 }
 
-OpenWaterSample sampleWaterBody(
-  vec2 worldUv,
-  vec2 bodyUv,
-  float shelter,
-  vec2 rippleCenter,
-  float rippleFrequency,
-  float rippleMix,
-  float tintMix
-) {
+OpenWaterSample sampleOpenWater(vec2 worldUv) {
   return sampleWaterBodyAtTime(
-    worldUv,
-    bodyUv,
-    shelter,
-    rippleCenter,
-    rippleFrequency,
-    rippleMix,
-    tintMix,
-    u_time * u_motion
-  );
-}
-
-OpenWaterSample sampleOpenWater(
-  vec2 worldUv,
-  vec2 hydrology
-) {
-  OpenWaterSample result = sampleWaterBody(
     worldUv,
     worldUv,
     0.0,
     vec2(0.0),
     1.0,
     0.0,
-    0.0
+    0.0,
+    u_time * u_motion
   );
-
-  float basinMix = smoother(0.08, 0.92, hydrology.r);
-  if (basinMix > 0.001) {
-    vec2 basinUv = transformWaterCoordinate(
-      worldUv,
-      u_basinWorldAnchor,
-      u_basinTextureOrigin,
-      u_basinTextureScale,
-      u_basinTextureRotation
-    );
-    OpenWaterSample basin = sampleWaterBody(
-      worldUv,
-      basinUv,
-      1.0,
-      u_basinWorldAnchor,
-      u_basinRippleFrequency,
-      u_basinRippleMix,
-      u_basinTintMix
-    );
-    result = blendWaterSamples(result, basin, basinMix);
-  }
-
-  float lakeMix = smoother(0.08, 0.92, hydrology.g);
-  if (lakeMix > 0.001) {
-    vec2 lakeUv = transformWaterCoordinate(
-      worldUv,
-      u_lakeWorldAnchor,
-      u_lakeTextureOrigin,
-      u_lakeTextureScale,
-      u_lakeTextureRotation
-    );
-    OpenWaterSample lake = sampleWaterBody(
-      worldUv,
-      lakeUv,
-      1.0,
-      u_lakeWorldAnchor,
-      u_lakeRippleFrequency,
-      u_lakeRippleMix,
-      u_lakeTintMix
-    );
-    result = blendWaterSamples(result, lake, lakeMix);
-  }
-
-  return result;
 }
 `;

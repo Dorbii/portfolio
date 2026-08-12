@@ -5,9 +5,6 @@ import {
 } from "../shared/lod";
 import { WORLD_PLANE } from "../shared/world";
 import { NinjaOneEnvironmentNativeDetail } from "./NinjaOneEnvironmentNativeDetail";
-import type {
-  NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot,
-} from "./model/ninjaOneEnvironmentResidency";
 import {
   NINJAONE_ENVIRONMENT_ARTBOARD,
   NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
@@ -35,9 +32,6 @@ interface NinjaOneEnvironmentProofProps {
   readonly active: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
-  readonly onHydrologyAdmissionChange?: (
-    snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null,
-  ) => void;
   readonly proofMode?: boolean;
 }
 
@@ -48,6 +42,10 @@ const TIER_SUMMARIES = Object.freeze({
   site: "Ravines / tarn / cascades / trails / groves",
   close: "Rock strata / scree / wet banks / individual flora",
 });
+
+const INLAND_WATER_FIELD_PATH =
+  "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png";
+const INLAND_WATER_FIELD_CROP = Object.freeze([480, 168, 576, 912] as const);
 
 function PlateImage({
   layer,
@@ -111,7 +109,6 @@ export function NinjaOneEnvironmentProof({
   active,
   camera,
   detailState,
-  onHydrologyAdmissionChange,
   proofMode = false,
 }: NinjaOneEnvironmentProofProps) {
   const worldX = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] * WORLD_PLANE.width;
@@ -191,6 +188,24 @@ export function NinjaOneEnvironmentProof({
         >
           {geologySource ? (
             <defs>
+              <filter
+                colorInterpolationFilters="sRGB"
+                height="100%"
+                id="ninjaone-environment-water-cutout-filter"
+                width="100%"
+                x="0"
+                y="0"
+              >
+                <feColorMatrix
+                  type="matrix"
+                  values={[
+                    "-12 0 0 0 6.5",
+                    "-12 0 0 0 6.5",
+                    "-12 0 0 0 6.5",
+                    "0 0 0 0 1",
+                  ].join(" ")}
+                />
+              </filter>
               <mask
                 height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
                 id="ninjaone-environment-proof-alpha"
@@ -208,22 +223,51 @@ export function NinjaOneEnvironmentProof({
                   y="0"
                 />
               </mask>
+              <mask
+                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
+                id="ninjaone-environment-water-cutout"
+                maskUnits="userSpaceOnUse"
+                style={{ maskType: "luminance" }}
+                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
+                x="0"
+                y="0"
+              >
+                <rect
+                  fill="white"
+                  height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
+                  width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
+                  x="0"
+                  y="0"
+                />
+                <image
+                  filter="url(#ninjaone-environment-water-cutout-filter)"
+                  height={INLAND_WATER_FIELD_CROP[3]}
+                  href={INLAND_WATER_FIELD_PATH}
+                  preserveAspectRatio="none"
+                  width={INLAND_WATER_FIELD_CROP[2]}
+                  x={INLAND_WATER_FIELD_CROP[0]}
+                  y={INLAND_WATER_FIELD_CROP[1]}
+                />
+              </mask>
             </defs>
           ) : null}
           {geologySource ? (
-            <PlateImage layer="terrain-geology" source={geologySource} />
+            <g mask="url(#ninjaone-environment-water-cutout)">
+              <PlateImage layer="terrain-geology" source={geologySource} />
+            </g>
           ) : null}
           <g mask={geologySource
-            ? "url(#ninjaone-environment-proof-alpha)"
+            ? "url(#ninjaone-environment-water-cutout)"
             : undefined}>
-            <NinjaOneEnvironmentNativeDetail
-              active={active}
-              camera={camera}
-              detailState={detailState}
-              onHydrologyAdmissionChange={onHydrologyAdmissionChange}
-              showFoliage={visibleLayers.includes("shared-animated-foliage")}
-              showHydrology={visibleLayers.includes("hydrology")}
-            />
+            <g mask={geologySource
+              ? "url(#ninjaone-environment-proof-alpha)"
+              : undefined}>
+              <NinjaOneEnvironmentNativeDetail
+                active={active}
+                camera={camera}
+                detailState={detailState}
+                showFoliage={visibleLayers.includes("shared-animated-foliage")}
+              />
             {secondaryReliefSource ? (
               <PlateImage layer="secondary-relief" source={secondaryReliefSource} />
             ) : null}
@@ -244,20 +288,21 @@ export function NinjaOneEnvironmentProof({
             {surfaceEcologySource ? (
               <PlateImage layer="surface-ecology" source={surfaceEcologySource} />
             ) : null}
-            {visibleWildlife.length > 0 ? (
-              <g data-environment-layer="wildlife">
-                {visibleWildlife.map((instance) => (
-                  <SharedAsset
-                    className={instance.resource.id === "ravens"
-                      ? "ninjaone-environment-proof__wildlife-flight"
-                      : undefined}
-                    instance={instance}
-                    key={instance.id}
-                    layer="wildlife"
-                  />
-                ))}
-              </g>
-            ) : null}
+              {visibleWildlife.length > 0 ? (
+                <g data-environment-layer="wildlife">
+                  {visibleWildlife.map((instance) => (
+                    <SharedAsset
+                      className={instance.resource.id === "ravens"
+                        ? "ninjaone-environment-proof__wildlife-flight"
+                        : undefined}
+                      instance={instance}
+                      key={instance.id}
+                      layer="wildlife"
+                    />
+                  ))}
+                </g>
+              ) : null}
+            </g>
           </g>
         </g>
       </svg>

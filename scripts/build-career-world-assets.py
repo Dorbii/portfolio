@@ -59,10 +59,6 @@ COAST_MATERIAL_MANIFEST = (
     WATER_ROOT / "manifests" / "coast-material-field-r6.json"
 )
 WATER_REGIONS_MANIFEST = WATER_ROOT / "manifests" / "water-regions-r1.json"
-WATER_REGION_OUTPUT = WATER_ROOT / "fields" / "water-region-field-r3.png"
-WATER_REGION_MANIFEST = (
-    WATER_ROOT / "manifests" / "water-region-field-r3.json"
-)
 WATER_WORLD_SOURCE = (
     WATER_ROOT
     / "sources"
@@ -733,48 +729,6 @@ def rasterize_water_regions(mask: Image.Image) -> np.ndarray:
     return field
 
 
-def build_water_region_field(mask: Image.Image) -> None:
-    """Publish authored hydrology regions in the shared world coordinate space."""
-
-    field = rasterize_water_regions(mask)
-    save_png_atomic(Image.fromarray(field, mode="RGB"), WATER_REGION_OUTPUT)
-    write_json(WATER_REGION_MANIFEST, {
-        "schemaVersion": 1,
-        "id": "career-world/water-region-field@r3",
-        "status": "phase-3-runtime",
-        "coordinateSpace": "normalized-world-top-left",
-        "dimensions": [mask.width, mask.height],
-        "texture": {
-            "path": "../fields/water-region-field-r3.png",
-            "sha256": sha256(WATER_REGION_OUTPUT),
-            "mode": "RGB",
-        },
-        "sources": {
-            "landMask": {
-                "path": (
-                    "../../territory-landform/masks/"
-                    "world-land-mask-r4.png"
-                ),
-                "sha256": sha256(LAND_MASK),
-            },
-            "regions": {
-                "path": "water-regions-r1.json",
-                "sha256": sha256(WATER_REGIONS_MANIFEST),
-            },
-        },
-        "channels": {
-            "r": "mainland-inner-sea independent water-body influence",
-            "g": "mainland-southwest-lake independent water-body influence",
-            "b": "reserved for another materially distinct water body",
-        },
-        "generation": {
-            "script": "scripts/build-career-world-assets.py",
-            "landClipped": True,
-            "seededComponentMasks": True,
-        },
-    })
-
-
 def bleed_transparent_edge_color(
     color: np.ndarray,
     alpha: np.ndarray,
@@ -1256,8 +1210,6 @@ def verify() -> None:
         COAST_MATERIAL_OUTPUT,
         COAST_MATERIAL_MANIFEST,
         WATER_REGIONS_MANIFEST,
-        WATER_REGION_OUTPUT,
-        WATER_REGION_MANIFEST,
         WATER_WORLD_SOURCE,
         WATER_WORLD_OUTPUT,
         WATER_WORLD_MANIFEST,
@@ -1275,7 +1227,6 @@ def verify() -> None:
     coast = Image.open(COAST_OUTPUT).convert("RGBA")
     coast_detail = Image.open(COAST_DETAIL_OUTPUT).convert("RGBA")
     coast_material = Image.open(COAST_MATERIAL_OUTPUT).convert("RGB")
-    water_regions = Image.open(WATER_REGION_OUTPUT).convert("L")
     mask = Image.open(LAND_MASK).convert("L")
     if (
         land.size != coast.size
@@ -1294,8 +1245,6 @@ def verify() -> None:
         raise RuntimeError("Terrain detail assets do not match the 4x world plane.")
     if coast_material.size != mask.size:
         raise RuntimeError("Coast material field does not match the world plane.")
-    if water_regions.size != mask.size:
-        raise RuntimeError("Water region field does not match the world plane.")
     land_alpha = np.asarray(
         land.getchannel("A").point(
             lambda value: 255 if value >= 128 else 0,
@@ -1318,17 +1267,10 @@ def verify() -> None:
         raise RuntimeError("Terrain height field has no meaningful highlands.")
     if int(np.max(slope_array)) < 96:
         raise RuntimeError("Terrain slope field has no meaningful relief.")
-    region_array = np.asarray(water_regions, dtype=np.uint8)
-    if np.any(region_array[land_array] != 0):
-        raise RuntimeError("Water region field overlaps accepted land.")
-
     land_manifest = json.loads(LAND_MANIFEST.read_text(encoding="utf-8"))
     coast_manifest = json.loads(COAST_MANIFEST.read_text(encoding="utf-8"))
     coast_material_manifest = json.loads(
         COAST_MATERIAL_MANIFEST.read_text(encoding="utf-8"),
-    )
-    region_manifest = json.loads(
-        WATER_REGION_MANIFEST.read_text(encoding="utf-8"),
     )
     water_manifest = json.loads(
         WATER_WORLD_MANIFEST.read_text(encoding="utf-8"),
@@ -1370,8 +1312,6 @@ def verify() -> None:
         != sha256(COAST_MATERIAL_OUTPUT)
     ):
         raise RuntimeError("Coast material manifest hash does not match its field.")
-    if region_manifest["texture"]["sha256"] != sha256(WATER_REGION_OUTPUT):
-        raise RuntimeError("Water region manifest hash does not match its field.")
     if water_manifest["texture"]["sha256"] != sha256(WATER_WORLD_OUTPUT):
         raise RuntimeError("Water manifest hash does not match repaired albedo.")
 
@@ -1441,7 +1381,6 @@ def main() -> None:
         slope = np.asarray(slope_image, dtype=np.float32) / 255.0
         build_coast_geometry(mask)
         build_coast_material_field(mask, height, slope)
-        build_water_region_field(mask)
     elif not args.check:
         mask = load_land_mask()
         height, slope = build_terrain_fields(mask)
@@ -1449,14 +1388,12 @@ def main() -> None:
         if not args.land_only:
             build_coast_geometry(mask)
             build_coast_material_field(mask, height, slope)
-            build_water_region_field(mask)
             if args.refresh_locked_water:
                 build_water_world_albedo()
     verify()
     print(f"verified {LAND_OUTPUT.relative_to(ROOT)}")
     print(f"verified {COAST_OUTPUT.relative_to(ROOT)}")
     print(f"verified {COAST_MATERIAL_OUTPUT.relative_to(ROOT)}")
-    print(f"verified {WATER_REGION_OUTPUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

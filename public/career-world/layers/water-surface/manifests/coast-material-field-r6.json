@@ -9,7 +9,7 @@
   ],
   "texture": {
     "path": "../fields/coast-material-field-r6.png",
-    "sha256": "EB2F1877CC18BD3CC4CB8A1605F10191925510D8F593BF7EDAB2E730C9A2B202",
+    "sha256": "BBF093F8A88E5C8E41BE1D65185A9963046E5CC2A8515D4D4F21DE1270D30E8C",
     "mode": "RGB"
   },
   "channels": {
@@ -21,11 +21,11 @@
   "sources": {
     "height": {
       "path": "../../territory-landform/fields/terrain-height-r4.png",
-      "sha256": "22CF5C55BE0BB59B6DE85570E3937F3CD6E5887FE7862AAF2D83FD82D770218F"
+      "sha256": "8CB7D6480A707C33E220A55611AF8557C3FC9440F0C347CF9A786ADCB1F41E3F"
     },
     "slope": {
       "path": "../../territory-landform/fields/terrain-slope-r4.png",
-      "sha256": "A73788746D30917BDC90EEF61196DA7EE4DA2840B12820F46E12BE2F4FFF5693"
+      "sha256": "C248599DAEB10E5C8D71DC15EF2CC65D3B90A8F77165AB0CFDA5C770676E6134"
     }
   },
   "policy": [

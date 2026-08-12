@@ -158,9 +158,9 @@
     "role": "artifact-location-and-registration-only; never sampled as fidelity input"
   },
   "budgets": {
-    "fixedC2DecodedUnion": 33206256,
+    "fixedC2DecodedUnion": 26985456,
     "fixedC2SeamDecodedBytes": 1297408,
-    "maximumApplicationOwnedDecodedUnion": 33206256,
+    "maximumApplicationOwnedDecodedUnion": 26985456,
     "maximumCohortId": "fixedB2Internal",
     "maximumDecodedBytes": 33554432,
     "maximumMountedResources": 2,
@@ -171,7 +171,6 @@
     "totalAuthoredDecodedBytes": 2594816,
     "unionBreakdown": {
       "foliageDecodedBytes": 527600,
-      "hydrologyDirectionalFallbackDecodedBytes": 6220800,
       "seamDecodedBytes": 1297408,
       "terrainDecodedBytes": 25160448
     },
@@ -183,7 +182,7 @@
   "fixedCheckpointDecisions": {
     "B2": "four native seam segments repaired by two minimum-width overlays",
     "C1": "native coast-and-void topology inspected; no seam overlay authorized",
-    "C2": "four native seam segments repaired by two minimum-width overlays with two hydrology handoffs",
+    "C2": "four native seam segments repaired by two minimum-width overlays",
     "B2-C2": "UNRESOLVED: two inter-cell column segments have no accepted overlay",
     "C1-C2": "UNRESOLVED: two inter-cell row segments have no accepted overlay"
   },
@@ -443,59 +442,6 @@
       ],
       "orientation": "horizontal",
       "segment": "right"
-    }
-  ],
-  "hydrologyTransitionHandoffs": [
-    {
-      "adjacentTileIds": [
-        "r2-c1",
-        "r2-c2"
-      ],
-      "artboardBounds": [
-        712.5,
-        738,
-        728,
-        781
-      ],
-      "id": "b2-c2-r2c1-to-r2c2-waterfall",
-      "reason": "the registered inter-cell seam overlay intersects native-original lip and impact pixels across the waterfall column boundary",
-      "seamResourceId": "b2-c2-intercell-vertical-seam",
-      "status": "requires-bounded-transition-field",
-      "topologyTreatment": "no synthetic water geometry in the seam asset"
-    },
-    {
-      "adjacentTileIds": [
-        "r2-c2",
-        "r3-c2"
-      ],
-      "artboardBounds": [
-        820,
-        797,
-        875,
-        828
-      ],
-      "id": "c2-r2c2-to-r3c2",
-      "reason": "native originals leave the visible lower channel discontinuous across the row seam",
-      "seamResourceId": "c2-internal-horizontal-seam",
-      "status": "requires-bounded-transition-field",
-      "topologyTreatment": "no synthetic water geometry in the seam asset"
-    },
-    {
-      "adjacentTileIds": [
-        "r3-c2",
-        "r3-c3"
-      ],
-      "artboardBounds": [
-        1065,
-        902,
-        1095,
-        935
-      ],
-      "id": "c2-r3c2-to-r3c3",
-      "reason": "native-original stream endpoints are offset across the column seam",
-      "seamResourceId": "c2-internal-vertical-seam",
-      "status": "requires-bounded-transition-field",
-      "topologyTreatment": "no synthetic water geometry in the seam asset"
     }
   ],
   "proof": {

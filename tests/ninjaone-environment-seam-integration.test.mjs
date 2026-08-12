@@ -8,7 +8,6 @@ import test from "node:test";
 import sharp from "sharp";
 
 import {
-  NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_HYDROLOGY_HANDOFFS,
   NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION,
   NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_MOUNTED_RESOURCES,
@@ -311,21 +310,16 @@ test("full native sweep fails closed on all four unselected inter-cell segments"
   assert.equal(NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_DECODED_BYTES, 1_297_408);
 });
 
-test("maximum seam union keeps the accepted internal cohort within its declared fallback budget", () => {
+test("maximum seam union keeps the accepted internal cohort within its declared budget", () => {
   const breakdown = manifest.budgets.unionBreakdown;
   assert.equal(breakdown.terrainDecodedBytes, 4 * 1448 * 1086 * 4);
   assert.equal(breakdown.foliageDecodedBytes, 527_600);
-  assert.equal(
-    breakdown.hydrologyDirectionalFallbackDecodedBytes,
-    6_220_800,
-  );
   assert.equal(breakdown.seamDecodedBytes, 1_297_408);
   assert.equal(manifest.budgets.rejectedIntercellDecodedBytes, 0);
   assert.equal(manifest.budgets.fixedC2SeamDecodedBytes, 1_297_408);
   assert.equal(
     manifest.budgets.fixedC2DecodedUnion,
     breakdown.terrainDecodedBytes
-      + breakdown.hydrologyDirectionalFallbackDecodedBytes
       + breakdown.foliageDecodedBytes
       + manifest.budgets.fixedC2SeamDecodedBytes,
   );
@@ -335,12 +329,12 @@ test("maximum seam union keeps the accepted internal cohort within its declared 
   );
   assert.equal(
     NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION,
-    33_206_256,
+    26_985_456,
   );
   assert.ok(NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION < 32 * 1024 * 1024);
   assert.equal(
     32 * 1024 * 1024 - NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION,
-    348_176,
+    6_568_976,
   );
   assert.deepEqual(manifest.budgets.unionSupplementalNodeBreakdown, {
     foliage: 0,
@@ -362,30 +356,6 @@ test("maximum seam union keeps the accepted internal cohort within its declared 
       fixedC2Internal: 2,
     },
   );
-
-  assert.equal(manifest.hydrologyTransitionHandoffs.length, 3);
-  assert.deepEqual(
-    NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_HYDROLOGY_HANDOFFS.map(({ id }) => id),
-    [
-      "b2-c2-r2c1-to-r2c2-waterfall",
-      "c2-r2c2-to-r3c2",
-      "c2-r3c2-to-r3c3",
-    ],
-  );
-  assert.deepEqual(manifest.hydrologyTransitionHandoffs[0], {
-    adjacentTileIds: ["r2-c1", "r2-c2"],
-    artboardBounds: [712.5, 738, 728, 781],
-    id: "b2-c2-r2c1-to-r2c2-waterfall",
-    reason: "the registered inter-cell seam overlay intersects native-original lip and impact pixels across the waterfall column boundary",
-    seamResourceId: "b2-c2-intercell-vertical-seam",
-    status: "requires-bounded-transition-field",
-    topologyTreatment: "no synthetic water geometry in the seam asset",
-  });
-  assert.ok(manifest.hydrologyTransitionHandoffs.slice(1).every((handoff) => (
-    handoff.status === "requires-bounded-transition-field"
-    && handoff.topologyTreatment === "no synthetic water geometry in the seam asset"
-    && manifest.resources.some(({ id }) => id === handoff.seamResourceId)
-  )));
 });
 
 test("full-resolution before-after and fixed-camera proof is native-sized and lossless", async () => {
@@ -532,7 +502,7 @@ test("r2 generator is deterministic and idempotent without mutating native sourc
     const output = JSON.parse(result.stdout);
     assert.deepEqual(output.resourceIds, manifest.resources.map(({ id }) => id));
     assert.equal(output.seamDecodedBytes, 1_297_408);
-    assert.equal(output.decodedUnion, 33_206_256);
+    assert.equal(output.decodedUnion, 26_985_456);
   }
   assert.deepEqual(await hashes(productionFiles), beforeProduction);
   assert.deepEqual(await hashes(sourceFiles), beforeSources);

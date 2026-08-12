@@ -27,10 +27,14 @@ Thumbs.db
 /.codex-tmp/
 /tmp/
 /scripts/*
+!/scripts/build-ninjaone-inland-water-r1.mjs
 !/scripts/build-ninjaone-environment-foliage-r3.mjs
 !/scripts/build-ninjaone-environment-hydrology-r2.mjs
 !/scripts/build-ninjaone-environment-native-detail.mjs
 !/scripts/build-ninjaone-environment-seam-integration-r2.mjs
+!/scripts/build-ninjaone-capital-city-nodes-r1.py
+!/scripts/build-ninjaone-capital-concept-substrate-proof-r1.py
+!/scripts/build-ninjaone-capital-master-layout-proof-r1.py
 !/scripts/build-waterfall-vfx-sprite-r1.mjs
 !/scripts/capture-ninjaone-environment-mvp.mjs
 !/scripts/extract-ninjaone-foliage-isolation-crops.mjs

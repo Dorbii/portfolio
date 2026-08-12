@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CameraView } from "../../../shared/camera";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
-import type { NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot } from "../../../development/model/ninjaOneEnvironmentResidency";
 import { WaterSurfaceController } from "../rendering/WaterSurfaceController";
 import { WaterSurfaceRenderer } from "../rendering/WaterSurfaceRenderer";
 
@@ -14,10 +13,7 @@ interface WaterSurfaceCanvasProps {
   readonly active: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
-  readonly foregroundHydrology?: boolean;
   readonly light: WorldLight;
-  readonly nativeHydrologyAdmission?:
-    NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
 }
 
@@ -25,47 +21,29 @@ export function WaterSurfaceCanvas({
   active,
   camera,
   detailState,
-  foregroundHydrology = false,
   light,
-  nativeHydrologyAdmission = null,
   onRenderStateChange,
 }: WaterSurfaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
-  const sceneRef = useRef({
-    active,
-    camera,
-    detailState,
-    light,
-    nativeHydrologyAdmission,
-  });
+  const sceneRef = useRef({ active, camera, detailState, light });
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
   }, [onRenderStateChange]);
 
-  useLayoutEffect(() => {
-    sceneRef.current = {
-      active,
-      camera,
-      detailState,
-      light,
-      nativeHydrologyAdmission,
-    };
-  }, [active, camera, detailState, light, nativeHydrologyAdmission]);
+  useEffect(() => {
+    sceneRef.current = { active, camera, detailState, light };
+  }, [active, camera, detailState, light]);
 
   useEffect(() => {
     controllerRef.current?.setActive(active);
   }, [active]);
 
   useLayoutEffect(() => {
-    controllerRef.current?.setView(
-      camera,
-      detailState,
-      nativeHydrologyAdmission,
-    );
-  }, [camera, detailState, nativeHydrologyAdmission]);
+    controllerRef.current?.setView(camera, detailState);
+  }, [camera, detailState]);
 
   useEffect(() => {
     controllerRef.current?.setLight(light);
@@ -79,36 +57,27 @@ export function WaterSurfaceCanvas({
 
     let cancelled = false;
     let localController: WaterSurfaceController | null = null;
-    const motionPreference = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
-    const handleMotionPreferenceChange = (event: MediaQueryListEvent) => {
-      localController?.setReduceMotion(event.matches);
-    };
-    motionPreference.addEventListener("change", handleMotionPreferenceChange);
     canvas.dataset.renderState = "loading";
     statusCallbackRef.current?.("loading");
 
-    void WaterSurfaceRenderer.create(canvas, light, foregroundHydrology)
+    void WaterSurfaceRenderer.create(canvas, light)
       .then((renderer) => {
         if (cancelled) {
           renderer.destroy();
           return;
         }
 
+        const reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
         localController = new WaterSurfaceController(renderer, {
-          reduceMotion: motionPreference.matches,
+          reduceMotion,
         });
         controllerRef.current = localController;
         const scene = sceneRef.current;
-        localController.setActive(scene.active);
-        localController.setView(
-          scene.camera,
-          scene.detailState,
-          scene.nativeHydrologyAdmission,
-        );
+        localController.setView(scene.camera, scene.detailState);
         localController.setLight(scene.light);
-        localController.start();
+        localController.setActive(scene.active);
         canvas.dataset.renderState = "ready";
         delete canvas.dataset.renderError;
         statusCallbackRef.current?.("ready");
@@ -125,10 +94,6 @@ export function WaterSurfaceCanvas({
 
     return () => {
       cancelled = true;
-      motionPreference.removeEventListener(
-        "change",
-        handleMotionPreferenceChange,
-      );
       localController?.destroy();
       if (controllerRef.current === localController) {
         controllerRef.current = null;
@@ -141,11 +106,10 @@ export function WaterSurfaceCanvas({
 
   return (
     <canvas
-      aria-label="Animated ocean, river, and waterfall water surface"
+      aria-label="Animated dark-fantasy ocean surface"
       className="career-world__water-canvas"
       data-layer="water-surface"
-      data-foreground-hydrology={foregroundHydrology}
-      data-page-visible={active}
+      data-active={active}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-lod-tier={detailState.tier.id}
       data-render-state="loading"

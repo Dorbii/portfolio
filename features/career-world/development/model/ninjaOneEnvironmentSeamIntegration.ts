@@ -61,16 +61,6 @@ interface RawResource {
   readonly sourceStrips: readonly RawSourceStrip[];
 }
 
-interface RawHydrologyHandoff {
-  readonly adjacentTileIds: readonly string[];
-  readonly artboardBounds: readonly number[];
-  readonly id: string;
-  readonly reason: string;
-  readonly seamResourceId: string;
-  readonly status: string;
-  readonly topologyTreatment: string;
-}
-
 export interface NinjaOneEnvironmentSeamIntegrationResource {
   readonly artboardBounds: CameraView;
   readonly cellId: "B2" | "C2";
@@ -84,15 +74,6 @@ export interface NinjaOneEnvironmentSeamIntegrationResource {
   readonly renderOrder: number;
   readonly sha256: string;
   readonly sourcePaths: readonly string[];
-}
-
-export interface NinjaOneEnvironmentSeamHydrologyHandoff {
-  readonly adjacentTileIds: readonly [string, string];
-  readonly artboardBounds: readonly [number, number, number, number];
-  readonly id: string;
-  readonly reason: string;
-  readonly seamResourceId: string;
-  readonly status: "requires-bounded-transition-field";
 }
 
 export interface NinjaOneEnvironmentSeamLoadCohort {
@@ -176,24 +157,6 @@ const EXPECTED_RESOURCES = Object.freeze({
     sourceIds: Object.freeze(["r2-c2", "r3-c2", "r2-c3", "r3-c3"]),
   }),
 } as const);
-const EXPECTED_HYDROLOGY_HANDOFFS = Object.freeze({
-  "b2-c2-r2c1-to-r2c2-waterfall": Object.freeze({
-    adjacentTileIds: "r2-c1,r2-c2",
-    artboardBounds: "712.5,738,728,781",
-    seamResourceId: "b2-c2-intercell-vertical-seam",
-  }),
-  "c2-r2c2-to-r3c2": Object.freeze({
-    adjacentTileIds: "r2-c2,r3-c2",
-    artboardBounds: "820,797,875,828",
-    seamResourceId: "c2-internal-horizontal-seam",
-  }),
-  "c2-r3c2-to-r3c3": Object.freeze({
-    adjacentTileIds: "r3-c2,r3-c3",
-    artboardBounds: "1065,902,1095,935",
-    seamResourceId: "c2-internal-vertical-seam",
-  }),
-} as const);
-
 function finiteTuple<const Length extends number>(
   values: readonly number[],
   length: Length,
@@ -345,45 +308,8 @@ export const NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_RESOURCES = Object.freeze(
   }),
 );
 
-export const NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_HYDROLOGY_HANDOFFS =
-  Object.freeze((manifest.hydrologyTransitionHandoffs as readonly RawHydrologyHandoff[])
-    .map((raw) => {
-      const expected = EXPECTED_HYDROLOGY_HANDOFFS[
-        raw.id as keyof typeof EXPECTED_HYDROLOGY_HANDOFFS
-      ];
-      const artboardBounds = finiteTuple(
-        raw.artboardBounds,
-        4,
-        `${raw.id}.artboardBounds`,
-      );
-      if (
-        !expected
-        || raw.adjacentTileIds.join(",") !== expected.adjacentTileIds
-        || raw.artboardBounds.join(",") !== expected.artboardBounds
-        || raw.seamResourceId !== expected.seamResourceId
-        || raw.adjacentTileIds.some((id) => typeof id !== "string" || id.length === 0)
-        || raw.status !== "requires-bounded-transition-field"
-        || raw.topologyTreatment !== "no synthetic water geometry in the seam asset"
-        || (raw.seamResourceId !== "b2-c2-intercell-vertical-seam"
-          && !NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_RESOURCES.some(
-            ({ id }) => id === raw.seamResourceId,
-          ))
-      ) {
-        throw new TypeError(`NinjaOne seam hydrology handoff ${raw.id} is invalid.`);
-      }
-      return Object.freeze({
-        adjacentTileIds: Object.freeze([...raw.adjacentTileIds]) as readonly [string, string],
-        artboardBounds: artboardBounds as readonly [number, number, number, number],
-        id: raw.id,
-        reason: raw.reason,
-        seamResourceId: raw.seamResourceId,
-        status: raw.status,
-      } satisfies NinjaOneEnvironmentSeamHydrologyHandoff);
-    }));
-
 if (
-  NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_HYDROLOGY_HANDOFFS.length !== 3
-  || manifest.fullNativeSweep.length !== 16
+  manifest.fullNativeSweep.length !== 16
   || manifest.fullNativeSweep.filter(({ cellId }) => cellId.includes("-")).length !== 4
   || manifest.fullNativeSweep.filter(({ cellId }) => cellId.includes("-")).some(
     ({ decision }) => decision !== "UNRESOLVED-missing-accepted-intercell-overlay",
@@ -392,7 +318,7 @@ if (
     ({ decision }) => decision !== "no-overlay-authorized-coast-and-void-topology-retained",
   )
 ) {
-  throw new TypeError("NinjaOne seam sweep or hydrology handoff contract is invalid.");
+  throw new TypeError("NinjaOne seam sweep contract is invalid.");
 }
 
 export const NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_DECODED_BYTES =

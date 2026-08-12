@@ -103,7 +103,7 @@ export function NinjaOneCapitalTopologyProof({
   return (
     <>
       <svg
-        aria-label="NinjaOne Capital B2, C1, and C2 topology proof"
+        aria-label="NinjaOne Capital B1, B2, C1, and C2 topology proof"
         className="career-world__layer career-world__topology-proof-layer"
         data-grid-cells={NINJAONE_CAPITAL_TOPOLOGY_GRID_CELLS.join(",")}
         data-registration={NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID}
