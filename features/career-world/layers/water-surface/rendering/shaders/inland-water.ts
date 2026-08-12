@@ -120,21 +120,32 @@ void main() {
   );
   float edgeAa = clamp(pixelFootprint * 0.72, 0.72, 3.2);
   float waterCoverage = smoothstep(-edgeAa, edgeAa, signedDistance) * inField;
+  vec4 inlandMeta = texture(u_inlandOwnership, sampleUv);
+  float inlandOwnership = inlandMeta.r;
+  float fallProgress = inlandMeta.g;
+  float cascadeImpact = inlandMeta.b;
+  float ownershipBlend = smoothstep(0.0, 1.0, inlandOwnership);
   float fall = smoothstep(0.70, 0.90, speed);
   float fallEdgeNoise = decodeDetailAlpha(texture(
     u_inlandDetail,
     localPx / vec2(7.0, 17.0) + vec2(0.31, -u_time * 0.026)
   ).a);
+  float fallEdgeBreakup = mix(
+    3.2,
+    7.0,
+    smoothstep(0.24, 0.96, fallProgress)
+  );
+  float fallInset = mix(
+    0.40,
+    2.40,
+    smoothstep(0.12, 0.94, fallProgress)
+  );
   float fallCoverage = smoothstep(
     -edgeAa,
-    edgeAa + 3.5,
-    signedDistance + (fallEdgeNoise - 0.5) * 5.8 - 0.8
+    edgeAa + 2.2,
+    signedDistance + (fallEdgeNoise - 0.5) * fallEdgeBreakup - fallInset
   ) * inField;
   waterCoverage = mix(waterCoverage, fallCoverage, fall);
-  vec4 inlandMeta = texture(u_inlandOwnership, sampleUv);
-  float inlandOwnership = inlandMeta.r;
-  float fallProgress = inlandMeta.g;
-  float ownershipBlend = smoothstep(0.0, 1.0, inlandOwnership);
   waterCoverage *= ownershipBlend;
 
   float territoryDetail = mix(0.30, 0.68, saturate(u_territoryLod));
@@ -315,7 +326,10 @@ void main() {
     u_surfaceAlbedo,
     waterfallAtlasUv(
       flowSpace / vec2(38.0, 176.0)
-        + vec2(0.17, -u_time * 0.083)
+        + vec2(
+          0.17,
+          -u_time * mix(0.060, 0.148, smoothstep(0.06, 0.94, fallProgress))
+        )
     )
   ).rgb;
   float fallRibbonLuma = dot(
@@ -327,36 +341,65 @@ void main() {
       u_surfaceAlbedo,
       waterfallAtlasUv(
         flowSpace / vec2(17.0, 124.0)
-          + vec2(0.63, -u_time * 0.121)
+          + vec2(
+            0.63,
+            -u_time * mix(0.092, 0.188, smoothstep(0.08, 0.96, fallProgress))
+          )
       )
     ).rgb,
     vec3(0.2126, 0.7152, 0.0722)
   );
   float fallStrand = smoothstep(
-    0.20,
-    0.57,
-    fallRibbonLuma * 0.44 + fallRibbonFine * 0.36 + fineFoam * 0.20
+    0.36,
+    0.68,
+    fallRibbonLuma * 0.42 + fallRibbonFine * 0.40 + fineFoam * 0.18
   ) * fall * detail;
   float fallVeil = smoothstep(
-    0.12,
-    0.64,
-    fallRibbonLuma * 0.30 + fallRibbonFine * 0.46 + broadFoam * 0.24
+    0.34,
+    0.72,
+    fallRibbonLuma * 0.26 + fallRibbonFine * 0.48 + broadFoam * 0.26
   ) * fall;
+  float fallCrest = fall * (1.0 - smoothstep(0.035, 0.20, fallProgress));
+  float fallRelease = fall * smoothstep(0.04, 0.22, fallProgress);
+  float fallEdge = fall
+    * (1.0 - smoothstep(0.25, 3.4, signedDistance));
   float fallMaterialEnvelope = smoothstep(-0.05, 0.16, fallProgress)
     * (1.0 - smoothstep(0.80, 1.05, fallProgress));
-  float fallMaterialMix = fall * (0.12 + 0.88 * fallMaterialEnvelope);
+  float fallMaterialMix = fall * (0.34 + 0.66 * fallMaterialEnvelope);
+  float fallSheetSignal = saturate(
+    fallRibbonLuma * 0.52
+      + fallRibbonFine * 0.30
+      + broadFoam * 0.10
+      + fallEdge * 0.08
+  );
+  float fallSheetLuma = smoothstep(0.20, 0.64, fallSheetSignal);
   vec3 fallingSheet = mix(
-    vec3(0.100, 0.220, 0.250),
-    vec3(0.420, 0.580, 0.580),
-    fallStrand
+    vec3(0.045, 0.120, 0.145),
+    vec3(0.285, 0.430, 0.440),
+    fallSheetLuma
   );
   surface = mix(
     surface,
     fallingSheet,
-    fallMaterialMix * (0.50 + fallVeil * 0.28)
+    fallMaterialMix * (0.64 + fallVeil * 0.16)
   );
-  surface += vec3(0.58, 0.72, 0.70)
-    * fallStrand * 0.40 * (0.18 + 0.82 * fallMaterialEnvelope);
+  surface += vec3(0.46, 0.62, 0.62)
+    * fallStrand * 0.30 * (0.20 + 0.80 * fallMaterialEnvelope);
+  float crestBreakup = smoothstep(
+    0.48,
+    0.78,
+    broadFoam * 0.54 + fineFoam * 0.46
+  );
+  surface = mix(
+    surface,
+    vec3(0.58, 0.69, 0.67),
+    fallCrest * (0.24 + crestBreakup * 0.38)
+  );
+  float fallLip = fall * (1.0 - smoothstep(0.02, 0.09, fallProgress));
+  surface += vec3(0.32, 0.42, 0.41)
+    * fallLip * (0.12 + crestBreakup * 0.22);
+  surface += vec3(0.20, 0.29, 0.28)
+    * fallRelease * fallEdge * crestBreakup * 0.16;
   float innerContact = (1.0 - smoothstep(
     0.0,
     mix(1.0, 2.4, bedVariation),
@@ -378,19 +421,30 @@ void main() {
     eventNoise * 0.64 + fineFoam * 0.36
   );
   float eventFoam = eventEnergy * (0.04 + eventBreakup * 0.78);
-  float impactFoam = smoothstep(0.32, 0.62, aeration)
-    * eventBreakup * (1.0 - fall);
+  float explicitImpact = smoothstep(0.06, 0.82, cascadeImpact);
+  float impactCore = smoothstep(0.46, 0.90, cascadeImpact);
+  float impactRing = smoothstep(0.10, 0.42, cascadeImpact)
+    * (1.0 - smoothstep(0.76, 1.0, cascadeImpact));
+  float impactFoam = explicitImpact
+    * (0.28 + eventBreakup * 0.72)
+    * (1.0 - fall * 0.92)
+    * waterCoverage;
   float bankTurbulence = (1.0 - smoothstep(0.0, 8.5, signedDistance))
     * river * smoothstep(0.64, 0.90, fineFoam);
   float foam = saturate(
     aeration * brokenFoam * mix(0.58, 0.24, fall)
     + bankTurbulence * 0.10
-    + fall * streamThread * 0.15
+    + fall * streamThread * 0.08
+    + fallCrest * (0.12 + eventBreakup * 0.24)
     + eventFoam * 0.82
   ) * waterCoverage;
   vec3 foamColor = vec3(0.65, 0.76, 0.76);
   surface = mix(surface, foamColor, foam * mix(0.44, 0.56, fall));
-  surface = mix(surface, vec3(0.70, 0.80, 0.79), impactFoam * 0.32);
+  surface = mix(
+    surface,
+    vec3(0.67, 0.76, 0.74),
+    impactFoam * (0.34 + impactCore * 0.22 + impactRing * 0.10)
+  );
   vec3 estuaryMatch = vec3(0.120, 0.190, 0.205);
   surface = mix(
     estuaryMatch,
@@ -428,7 +482,7 @@ void main() {
       * (1.0 - externalWater);
   bankAlpha *= inlandOwnership;
 
-  float outsideMist = aeration * (1.0 - waterCoverage) * inField;
+  float outsideMist = cascadeImpact * (1.0 - waterCoverage) * inField;
   float mistNoise = decodeDetailAlpha(texture(
     u_inlandDetail,
     localPx / vec2(24.0, 19.0) + vec2(u_time * 0.041, -u_time * 0.057)
@@ -438,28 +492,46 @@ void main() {
     localPx / vec2(9.0, 13.0) + vec2(-u_time * 0.063, u_time * 0.034)
   ).a);
   float mistTexture = saturate(mistNoise * 0.58 + mistFine * 0.42);
-  float impactSpray = smoothstep(0.40, 0.58, aeration)
-    * (1.0 - fall) * (0.12 + mistTexture * 0.30);
+  float impactSpray = explicitImpact
+    * (1.0 - fall)
+    * (0.04 + mistTexture * 0.16);
   float mist = max(
-    smoothstep(0.025, 0.28, outsideMist) * (0.18 + mistTexture * 0.42),
+    smoothstep(0.08, 0.58, outsideMist) * (0.10 + mistTexture * 0.28),
     impactSpray
   );
   vec3 mistColor = vec3(0.58, 0.68, 0.67);
 
   float fallOpacity = saturate(
-    0.74 + fallVeil * 0.08 + fallStrand * 0.22 + fineGlint * 0.04
+    0.88 + fallVeil * 0.03 + fallStrand * 0.08 + fineGlint * 0.01
   );
-  float fallEnvelope = 0.18 + 0.82
+  float fallEnvelope = 0.86 + 0.14
     * smoothstep(-0.04, 0.09, fallProgress)
     * (1.0 - smoothstep(0.84, 1.04, fallProgress));
   fallOpacity *= mix(1.0, fallEnvelope, fall);
   float waterAlpha = waterCoverage * mix(1.0, fallOpacity, fall);
-  float baseAlpha = max(waterAlpha, bankAlpha);
-  float surfaceColorCoverage = max(
-    waterCoverage,
-    fall * ownershipBlend * inField
+  float fallSilhouette = fall * ownershipBlend * inField;
+  float baseAlpha = max(
+    max(waterAlpha, bankAlpha),
+    fallSilhouette * 0.96
   );
+  float surfaceColorCoverage = waterCoverage;
   vec3 composed = mix(bankColor, surface, surfaceColorCoverage);
+  vec3 fallBacking = texture(
+    u_riverbedAlbedo,
+    flowSpace / vec2(24.0, 32.0) + vec2(0.37, 0.58)
+  ).rgb;
+  fallBacking = pow(max(fallBacking, vec3(0.002)), vec3(0.88));
+  float fallBackingLuma = dot(
+    fallBacking,
+    vec3(0.2126, 0.7152, 0.0722)
+  );
+  fallBacking = mix(vec3(fallBackingLuma), fallBacking, 0.38)
+    * vec3(0.58, 0.61, 0.53);
+  composed = mix(
+    composed,
+    fallBacking,
+    fallSilhouette * (1.0 - waterCoverage) * 0.96
+  );
   composed = mix(composed, mistColor, mist * 0.52);
   float alpha = max(baseAlpha, mist * 0.24) * inField;
   alpha *= step(1.0, u_resolution.x + u_resolution.y);

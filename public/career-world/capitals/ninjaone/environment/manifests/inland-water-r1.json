@@ -40,7 +40,7 @@
     ],
     "artboardScale": 3,
     "decodedBytes": 18911232,
-    "sha256": "6D53320194F081F8EFFC5734CB0F501489D7A809E8DC4E6C0EEC813BEBBC7886",
+    "sha256": "9142F2B5C9091EAC6440E75264F3664BF344541A2EFF5768C83BD5E6E67EB1E1",
     "channels": {
       "r": "signed bank distance over +/-24 artboard pixels; 0.5 is the water edge",
       "g": "downstream velocity x encoded as 0.5 + value * 0.5",
@@ -108,7 +108,7 @@
       912
     ],
     "decodedBytes": 2101248,
-    "sha256": "6776C512AD0015EE96A2C332A43440DA91579687C7A69E635A00715DF3839871",
+    "sha256": "C56469F7F346A1F9E1314D72C56B1CF76E039F7CC5FCCF15D869FDE839D49657",
     "artboardCrop": [
       480,
       168,
@@ -118,7 +118,7 @@
     "channels": {
       "r": "inland renderer ownership",
       "g": "normalized waterfall progress from crest to impact",
-      "b": "reserved",
+      "b": "explicit cascade impact energy for plunge-pool foam and mist",
       "a": "terrain erase coverage"
     }
   },
@@ -786,6 +786,8 @@
   ],
   "metrics": {
     "occupiedPixels": 347832,
+    "cascadeImpactPixels": 23563,
+    "maximumCascadeImpact": 1,
     "meanFlowVector": [
       0.02980838541174998,
       0.23803487365409542

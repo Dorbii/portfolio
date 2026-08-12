@@ -267,6 +267,7 @@ async function buildTerrainEraseMask(
   ownership,
   forceErase,
   fallProgress,
+  cascadeImpact,
   width,
   height,
 ) {
@@ -277,6 +278,7 @@ async function buildTerrainEraseMask(
       let coverage = 0;
       let ownershipCoverage = 0;
       let fallProgressCoverage = 0;
+      let cascadeImpactCoverage = 0;
       for (let offsetY = 0; offsetY < FIELD_SCALE; offsetY += 1) {
         for (let offsetX = 0; offsetX < FIELD_SCALE; offsetX += 1) {
           const sourcePixel = (y * FIELD_SCALE + offsetY) * width
@@ -287,6 +289,7 @@ async function buildTerrainEraseMask(
           );
           ownershipCoverage += ownership[sourcePixel];
           fallProgressCoverage += fallProgress[sourcePixel];
+          cascadeImpactCoverage += cascadeImpact[sourcePixel];
         }
       }
       const offset = (y * outputWidth + x) * 4;
@@ -296,7 +299,9 @@ async function buildTerrainEraseMask(
       erase[offset + 1] = Math.round(
         fallProgressCoverage / (FIELD_SCALE * FIELD_SCALE) * 255,
       );
-      erase[offset + 2] = 255;
+      erase[offset + 2] = Math.round(
+        cascadeImpactCoverage / (FIELD_SCALE * FIELD_SCALE) * 255,
+      );
       erase[offset + 3] = Math.round(
         coverage / (FIELD_SCALE * FIELD_SCALE) * 255,
       );
@@ -318,7 +323,7 @@ async function buildTerrainEraseMask(
     channels: {
       r: "inland renderer ownership",
       g: "normalized waterfall progress from crest to impact",
-      b: "reserved",
+      b: "explicit cascade impact energy for plunge-pool foam and mist",
       a: "terrain erase coverage",
     },
   });
@@ -640,18 +645,25 @@ function cascadeImpactSupport(cascade, x, y) {
   const along = delta[0] * direction[0] + delta[1] * direction[1];
   const across = delta[0] * cross[0] + delta[1] * cross[1];
   const radius = cascade.mistRadius;
-  const ellipse = Math.hypot(
-    across / Math.max(radius * 1.30, 1),
-    (along + radius * 0.10) / Math.max(radius * 0.72, 1),
+  const plungeEllipse = Math.hypot(
+    across / Math.max(radius * 1.24, 1),
+    (along + radius * 0.04) / Math.max(radius * 0.68, 1),
   );
-  const core = (1 - smoothstep(0.04, 0.38, ellipse)) * 0.14;
-  const sprayShell = smoothstep(0.08, 0.28, ellipse)
-    * (1 - smoothstep(0.42, 1.0, ellipse));
+  const impactCore = 1 - smoothstep(0.05, 0.34, plungeEllipse);
+  const impactRing = smoothstep(0.10, 0.28, plungeEllipse)
+    * (1 - smoothstep(0.48, 0.92, plungeEllipse));
+  const downstreamTail = smoothstep(-radius * 0.10, radius * 0.18, along)
+    * (1 - smoothstep(radius * 0.82, radius * 1.55, along))
+    * (1 - smoothstep(radius * 0.28, radius * 0.90, Math.abs(across)));
   const breakup = (
     Math.sin(x * 0.91 + y * 0.57 + cascade.impact[0])
       * Math.sin(x * 0.37 - y * 1.13 + cascade.impact[1])
   ) * 0.5 + 0.5;
-  return clamp(core + sprayShell * (0.24 + breakup * 0.42));
+  return clamp(
+    impactCore * 0.96
+      + impactRing * (0.38 + breakup * 0.34)
+      + downstreamTail * (0.24 + breakup * 0.22),
+  );
 }
 
 export async function buildNinjaOneInlandWaterR1() {
@@ -684,6 +696,7 @@ export async function buildNinjaOneInlandWaterR1() {
   const flowY = new Float32Array(mask.length);
   const inlandOwnership = new Float32Array(mask.length);
   const fallProgress = new Float32Array(mask.length);
+  const cascadeImpact = new Float32Array(mask.length);
   const whitewater = new Float32Array(mask.length);
 
   for (let y = 0; y < height; y += 1) {
@@ -811,6 +824,8 @@ export async function buildNinjaOneInlandWaterR1() {
   let occupiedPixels = 0;
   let flowSumX = 0;
   let flowSumY = 0;
+  let cascadeImpactPixels = 0;
+  let maximumCascadeImpact = 0;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const pixel = y * width + x;
@@ -822,17 +837,23 @@ export async function buildNinjaOneInlandWaterR1() {
         inside ? distanceToLand[pixel] : -distanceToWater[pixel]
       ) / (3 * FIELD_SCALE);
       field[offset] = Math.round(128 + clamp(signedDistance / DISTANCE_RANGE, -1, 1) * 127);
-      let cascadeImpact = 0;
+      let localCascadeImpact = 0;
       for (const cascade of authority.cascades) {
-        cascadeImpact = Math.max(
-          cascadeImpact,
+        localCascadeImpact = Math.max(
+          localCascadeImpact,
           cascadeImpactSupport(cascade, sampleX, sampleY),
         );
       }
+      cascadeImpact[pixel] = localCascadeImpact;
+      if (localCascadeImpact >= 0.05) cascadeImpactPixels += 1;
+      maximumCascadeImpact = Math.max(
+        maximumCascadeImpact,
+        localCascadeImpact,
+      );
       if (!inside) {
-        field[offset + 3] = cascadeImpact > 0.002
+        field[offset + 3] = localCascadeImpact > 0.002
           ? SUPPORT_ALPHA_BASELINE
-            + Math.round(clamp(cascadeImpact * 0.52) * SUPPORT_ALPHA_RANGE)
+            + Math.round(clamp(localCascadeImpact * 0.42) * SUPPORT_ALPHA_RANGE)
           : sourceWaterField[pixel] >= 0.08
             ? EXTERNAL_WATER_ALPHA
             : SUPPORT_ALPHA_BASELINE;
@@ -870,7 +891,7 @@ export async function buildNinjaOneInlandWaterR1() {
       }
       whitewater[pixel] = Math.max(
         whitewater[pixel],
-        cascadeImpact * 0.55,
+        localCascadeImpact * 0.72,
       );
       flowSumX += localFlowX;
       flowSumY += localFlowY;
@@ -903,6 +924,7 @@ export async function buildNinjaOneInlandWaterR1() {
       renderOwnership,
       terrainEraseOnly,
       fallProgress,
+      cascadeImpact,
       width,
       height,
     ),
@@ -939,6 +961,8 @@ export async function buildNinjaOneInlandWaterR1() {
     obstacles: authority.obstacles,
     metrics: {
       occupiedPixels,
+      cascadeImpactPixels,
+      maximumCascadeImpact,
       meanFlowVector: [flowSumX / occupiedPixels, flowSumY / occupiedPixels],
       maximumDecodedBytes: width * height * 4
         + detail.decodedBytes
