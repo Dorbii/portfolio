@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 1,
+  "status": "layout-proof-only",
+  "layoutPath": "art-source/career-world/ninjaone-capital/city-layer-r1/concept-master-layout-registration-r1.json",
+  "previewPath": "public/career-world/capitals/ninjaone/city-r1/qa/city-master-layout-registration-r1.png",
+  "comparisonPath": "public/career-world/capitals/ninjaone/city-r1/qa/city-master-layout-reference-comparison-r1.png",
+  "referenceTracePath": "public/career-world/capitals/ninjaone/city-r1/qa/city-master-layout-reference-trace-r1.png",
+  "skillSocketCount": 19,
+  "bridgeCount": 4,
+  "bridgeFailures": [],
+  "bridges": [
+    {
+      "id": "upper-water-bridge",
+      "center": [
+        1594,
+        702
+      ],
+      "endpoints": [
+        [
+          1504,
+          702
+        ],
+        [
+          1684,
+          702
+        ]
+      ],
+      "centerWater": true,
+      "endpointWaterFractions": [
+        0.0,
+        0.0
+      ],
+      "lineWaterSamples": 34,
+      "passes": true
+    },
+    {
+      "id": "station-civic-bridge",
+      "center": [
+        1478,
+        1004
+      ],
+      "endpoints": [
+        [
+          1578,
+          995
+        ],
+        [
+          1378,
+          1013
+        ]
+      ],
+      "centerWater": true,
+      "endpointWaterFractions": [
+        0.0,
+        0.0
+      ],
+      "lineWaterSamples": 37,
+      "passes": true
+    },
+    {
+      "id": "central-civic-bridge",
+      "center": [
+        1363,
+        1227
+      ],
+      "endpoints": [
+        [
+          1323,
+          1158
+        ],
+        [
+          1403,
+          1296
+        ]
+      ],
+      "centerWater": true,
+      "endpointWaterFractions": [
+        0.0,
+        0.0
+      ],
+      "lineWaterSamples": 30,
+      "passes": true
+    },
+    {
+      "id": "lower-works-bridge",
+      "center": [
+        1337,
+        1429
+      ],
+      "endpoints": [
+        [
+          1248,
+          1413
+        ],
+        [
+          1426,
+          1445
+        ]
+      ],
+      "centerWater": true,
+      "endpointWaterFractions": [
+        0.0,
+        0.0
+      ],
+      "lineWaterSamples": 45,
+      "passes": true
+    }
+  ],
+  "stationCount": 1,
+  "citadelCount": 1,
+  "tunnelPortalCount": 2,
+  "reservedCivicSpaceCount": 4,
+  "conceptRegistration": {
+    "offset": [
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0
+    ],
+    "authority": "identity-pixel-registration",
+    "evidence": "Concept master and frozen regional terrain edge correlation peaks at scale 1.0 with zero x/y offset."
+  },
+  "railTopologyOverride": {
+    "reason": "The concept master is spatial authority for the capital, but the live territory network has no connected landmass west of NinjaOne.",
+    "stationIsNorthernTerminus": true,
+    "independentAnimatedRailAsset": true,
+    "bakedIntoCitySubstrate": false,
+    "mountainTunnelRequired": true,
+    "stationPortalId": "station-mountain-portal",
+    "southPortalId": "south-mountain-portal",
+    "westExitAllowed": false,
+    "exitEdge": "south-southeast",
+    "connectsToOtherTerritoryCities": true
+  },
+  "railSegments": [
+    {
+      "id": "station-to-mountain",
+      "kind": "surface"
+    },
+    {
+      "id": "mountain-tunnel",
+      "kind": "hidden-tunnel"
+    },
+    {
+      "id": "south-southeast-egress",
+      "kind": "surface"
+    }
+  ],
+  "railExitDirection": "south-southeast",
+  "terrainAdmissionFailures": [],
+  "sockets": [
+    {
+      "skillId": "ai-agent-systems",
+      "localPosition": [
+        0.447,
+        0.21
+      ],
+      "scaleClass": "citadel",
+      "terrainAdmission": {
+        "sampleCount": 265,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 146.638,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "mcp",
+      "localPosition": [
+        0.405,
+        0.27
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 83,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 158.831,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "openapi-swagger",
+      "localPosition": [
+        0.515,
+        0.29
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 90,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 117.922,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "grpc-rest",
+      "localPosition": [
+        0.355,
+        0.35
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 105,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 179.943,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "capability-contracts",
+      "localPosition": [
+        0.47,
+        0.375
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 92,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 154.478,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "tool-generation",
+      "localPosition": [
+        0.555,
+        0.38
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 104,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.951923,
+        "meanLandHeight": 91.558,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "typescript",
+      "localPosition": [
+        0.655,
+        0.465
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 89,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.820225,
+        "meanLandHeight": 50.91,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "react",
+      "localPosition": [
+        0.773,
+        0.482
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 138,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 75.754,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "tanstack",
+      "localPosition": [
+        0.635,
+        0.55
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 131,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 90.466,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "golang",
+      "localPosition": [
+        0.745,
+        0.575
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 154,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 77.799,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "csharp",
+      "localPosition": [
+        0.6,
+        0.63
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 92,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.869565,
+        "meanLandHeight": 102.435,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "python",
+      "localPosition": [
+        0.69,
+        0.65
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 96,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 80.667,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "postgresql",
+      "localPosition": [
+        0.785,
+        0.67
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 121,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 74.14,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "redis",
+      "localPosition": [
+        0.635,
+        0.73
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 62,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.83871,
+        "meanLandHeight": 89.0,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "aws",
+      "localPosition": [
+        0.75,
+        0.745
+      ],
+      "scaleClass": "major",
+      "terrainAdmission": {
+        "sampleCount": 130,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.838462,
+        "meanLandHeight": 89.177,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "databricks",
+      "localPosition": [
+        0.588,
+        0.818
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 137,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.832117,
+        "meanLandHeight": 181.182,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "docker",
+      "localPosition": [
+        0.725,
+        0.815
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 129,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 93.651,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "vmware",
+      "localPosition": [
+        0.716,
+        0.869
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 136,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.889706,
+        "meanLandHeight": 88.331,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    },
+    {
+      "skillId": "macstadium",
+      "localPosition": [
+        0.785,
+        0.885
+      ],
+      "scaleClass": "standard",
+      "terrainAdmission": {
+        "sampleCount": 162,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 95.71,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "passes": true
+    }
+  ],
+  "productionReady": false,
+  "runtimeEligible": false
+}

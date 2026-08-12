@@ -4,6 +4,7 @@ import "./assets.test.mjs";
 import "./camera.test.mjs";
 import "./ninjaone-capital-topology-proof.test.mjs";
 import "./ninjaone-capital-mvp.test.mjs";
+import "./ninjaone-capital-city-nodes.test.mjs";
 import "./ninjaone-environment-foliage.test.mjs";
 import "./ninjaone-environment-proof.test.mjs";
 import "./ninjaone-environment-runtime.test.mjs";

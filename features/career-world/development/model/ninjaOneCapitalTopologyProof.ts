@@ -138,12 +138,18 @@ export interface NinjaOneCapitalTopologyRailCorridor {
 }
 
 export interface NinjaOneCapitalTopologyGridCell {
-  readonly id: "B2" | "C1" | "C2";
+  readonly id: "B1" | "B2" | "C1" | "C2";
   readonly origin: Pair;
   readonly span: Pair;
 }
 
 const GRID_CELL_BOUNDS = Object.freeze({
+  B1: Object.freeze({
+    bottom: 1 / 6,
+    left: 1 / 8,
+    right: 2 / 8,
+    top: 0,
+  }),
   B2: Object.freeze({
     bottom: 2 / 6,
     left: 1 / 8,
@@ -306,7 +312,7 @@ function requireGridCell(
   value: string,
   label: string,
 ): NinjaOneCapitalTopologyGridCell["id"] {
-  if (value !== "B2" && value !== "C1" && value !== "C2") {
+  if (value !== "B1" && value !== "B2" && value !== "C1" && value !== "C2") {
     throw new TypeError(`${label} is not an approved topology grid cell.`);
   }
   return value;
@@ -323,8 +329,8 @@ if (
   || manifest.status !== "qa-only"
   || manifest.coordinateSpace !== "registered-plate-pixels"
   || manifest.registration.id
-    !== "ninjaone-capital-b2-c1-c2-terrain-conformed-topology@r1"
-  || manifest.registration.gridCells.join(",") !== "B2,C1,C2"
+    !== "ninjaone-capital-b1-b2-c1-c2-terrain-conformed-topology@r1"
+  || manifest.registration.gridCells.join(",") !== "B1,B2,C1,C2"
   || manifest.registration.terrainAuthority.territoryId !== "ninjaone"
   || manifest.registration.terrainAuthority.territoryManifestId
     !== territoryManifest.id
@@ -347,7 +353,7 @@ if (
   || skillProgramManifest.sourceSection !== "Technical Skills"
 ) {
   throw new TypeError(
-    "NinjaOne Capital B2/C1/C2 topology proof identity is invalid.",
+    "NinjaOne Capital B1/B2/C1/C2 topology proof identity is invalid.",
   );
 }
 
@@ -533,7 +539,7 @@ for (const [label, points] of [
   ["city boundary", NINJAONE_CAPITAL_TOPOLOGY_BOUNDARY],
 ] as const) {
   if (!points.every(topologyPointInsideAllowedGrid)) {
-    throw new RangeError(`NinjaOne Capital ${label} leaves B2, C1, or C2.`);
+    throw new RangeError(`NinjaOne Capital ${label} leaves B1, B2, C1, or C2.`);
   }
 }
 
