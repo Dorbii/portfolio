@@ -46,7 +46,7 @@ export interface NinjaOneEnvironmentFoliageInstance
 }
 
 const EXPECTED_ID = "career-world/capitals/ninjaone/environment-proof@r1";
-const EXPECTED_GRID_CELLS = Object.freeze(["B2", "C1", "C2"]);
+const EXPECTED_GRID_CELLS = Object.freeze(["B1", "B2", "C1", "C2"]);
 const EXPECTED_LAYER_ORDER: readonly NinjaOneEnvironmentLayerId[] = Object.freeze([
   "terrain-geology",
   "secondary-relief",

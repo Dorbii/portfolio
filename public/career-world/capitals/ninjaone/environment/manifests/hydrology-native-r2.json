@@ -12,7 +12,7 @@
     ],
     "path": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
     "role": "accepted rendered topology used only to derive registered water and water-connected foam coverage",
-    "sha256": "C6E2107C9A1AB425E5103964DC617E4DEE30865DF1EB50528007AF7BDF58BDA9"
+    "sha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02"
   },
   "visualReference": {
     "path": "/art-source/career-world/water-surface/waterfall-reference-template-r1.png",
@@ -202,7 +202,7 @@
           2160
         ],
         "maximumSteadyCohortDecodedBytes": 12439632,
-        "occupiedPixels": 77535,
+        "occupiedPixels": 68432,
         "resources": [
           {
             "artboardBounds": [
@@ -270,18 +270,18 @@
             ],
             "id": "ninjaone-hydrology-c1-detail-r4",
             "metrics": {
-              "coveragePixels": 23885,
-              "directionalPixels": 22292,
+              "coveragePixels": 14788,
+              "directionalPixels": 13264,
               "meanFlowVector": [
-                -0.14630463900834453,
-                0.9892395830154787
+                -0.09568495657327196,
+                0.9954116681481944
               ],
-              "rawAuxiliaryRgbaSha256": "0B26DC9AF3FC1E196571FE54BA615C65465304FC44EC62FFD9F4004131189E77",
-              "rawPrimaryRgbaSha256": "221AD3E8A9215B75EA60BA0CE617D1DD4195FB57F6B53B2D120DFADA8B6F7FEF"
+              "rawAuxiliaryRgbaSha256": "7CC1D05870D401D7BAF5C7BB80C02C2511A1EE39E99DB8B1354E172A77CE6C8A",
+              "rawPrimaryRgbaSha256": "3CD92F53211D90DE39E255C3B073755ECB81BAE855301B348D90CA34C1542783"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-detail-r4.png?v=ea91145d6377",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-detail-r4.png?v=6e2dbc7747af",
             "regionId": "C1",
-            "sha256": "EA91145D63778A441FD307007F0E8EEBB7CA9F0FA132C458BBC79D89E56E75D1",
+            "sha256": "6E2DBC7747AF27F2E092822641CC09516EF6888E62696B2808BC3BE810E81680",
             "sourceBounds": [
               1448,
               344,
@@ -318,18 +318,18 @@
             ],
             "id": "ninjaone-hydrology-c2-detail-r4",
             "metrics": {
-              "coveragePixels": 20544,
-              "directionalPixels": 20544,
+              "coveragePixels": 20538,
+              "directionalPixels": 20538,
               "meanFlowVector": [
-                -0.1708568012647473,
-                0.9852958710263525
+                -0.1711018467040891,
+                0.9852533471419674
               ],
-              "rawAuxiliaryRgbaSha256": "6EA5E16251ECFE277F6471F78CD567C0AFF8FE84F6807957CAB88820CDA62911",
-              "rawPrimaryRgbaSha256": "6676304B565CE6020BCAD4BB383B8D057AE9ACFF0B9AFB408E0B44DC1A82072B"
+              "rawAuxiliaryRgbaSha256": "55E7B7E922EAD354B3F876F68081DD7122F9D8409B03F28A2C827CC64D4C8205",
+              "rawPrimaryRgbaSha256": "B3CA3E0E71A477BA1EAD888FA942BEB5D716B01083A386B0DAD8075ADC6BC087"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-detail-r4.png?v=ae1aeb385b35",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-detail-r4.png?v=100dcdc5ab8b",
             "regionId": "C2",
-            "sha256": "AE1AEB385B35C5C726DBD84BCCB980200AF1FD728C7F8AD53BB4424347AE54A7",
+            "sha256": "100DCDC5AB8B6CB313D8AD782A03A334A72308AFC2D25C0E82D19E633680C641",
             "sourceBounds": [
               1440,
               1080,
@@ -358,7 +358,7 @@
           1080
         ],
         "maximumSteadyCohortDecodedBytes": 3097624,
-        "occupiedPixels": 19344,
+        "occupiedPixels": 17087,
         "resources": [
           {
             "artboardBounds": [
@@ -426,18 +426,18 @@
             ],
             "id": "ninjaone-hydrology-c1-fallback-r4",
             "metrics": {
-              "coveragePixels": 5961,
-              "directionalPixels": 5565,
+              "coveragePixels": 3704,
+              "directionalPixels": 3323,
               "meanFlowVector": [
-                -0.14750781493025206,
-                0.9890608902057055
+                -0.09607569708420255,
+                0.9953740304176036
               ],
-              "rawAuxiliaryRgbaSha256": "D8B97FF9FDF54A22E934E3F8691B74B009C969999665E693603A5F7BCB1723E4",
-              "rawPrimaryRgbaSha256": "F4A662FD3EF5B511E643D14E8B1E749433C8ACADE11756FC2D57859D0CDF2FBF"
+              "rawAuxiliaryRgbaSha256": "2A7C2D2A78A8A09C8B3A3CAD8FF661437AA9BA22A179F9D4EF9873185E626AC1",
+              "rawPrimaryRgbaSha256": "DB55C7AB98E9EDB6FBE98AE865D266DFB2952EA522BDE84BB6108A6009D00A26"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-fallback-r4.png?v=c049a8d69b85",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c1-fallback-r4.png?v=a7b4c76e9117",
             "regionId": "C1",
-            "sha256": "C049A8D69B85BDA2CEDAB460601305887AAF334E17F73D5D53E63B88D83AE4D3",
+            "sha256": "A7B4C76E91171975BCE5E73C6D05E4BA1E7C80B36D1188387BBABF6D3AA87F03",
             "sourceBounds": [
               727,
               172,
@@ -477,15 +477,15 @@
               "coveragePixels": 5116,
               "directionalPixels": 5116,
               "meanFlowVector": [
-                -0.1715046987253944,
-                0.985183301886056
+                -0.17150808954245517,
+                0.9851827115928788
               ],
-              "rawAuxiliaryRgbaSha256": "2C2A60546F50545404A8237AF463DBCCA531180216673BBF1CBE512CF6DC412E",
-              "rawPrimaryRgbaSha256": "18A509E62FECDC2AABA5F5DFEF42DED3613AEDE880C9B042B4940EA458158821"
+              "rawAuxiliaryRgbaSha256": "AF706C1A87AE3123B8AAD7002B20E5F39A61E511F41495AA643E215B401DF728",
+              "rawPrimaryRgbaSha256": "4ABF8E3482294DED14916DEF3FEEBE270DEFFED66B4300F2FFDDD2CDCA83E463"
             },
-            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-fallback-r4.png?v=250b49b01a9f",
+            "path": "/career-world/layers/water-surface/fields/ninjaone-hydrology-c2-fallback-r4.png?v=574cc798e9c2",
             "regionId": "C2",
-            "sha256": "250B49B01A9F8615CB09A1E44133EAC7834DEF3931F3A7CF5806B62BBC46494E",
+            "sha256": "574CC798E9C299241DB043412CAE04CD42898B971568C9B80C87794F9DD42E53",
             "sourceBounds": [
               720,
               540,
@@ -898,19 +898,19 @@
   "metrics": {
     "cellPixels": {
       "B2": 33106,
-      "C1": 23885,
-      "C2": 20544
+      "C1": 14788,
+      "C2": 20538
     },
-    "directionalPixels": 53857,
-    "foamPixels": 44783,
-    "mistPixels": 5788,
+    "directionalPixels": 44823,
+    "foamPixels": 35755,
+    "mistPixels": 4815,
     "segmentPixels": {
-      "c1-r0c2-mainland-coast": 1511,
-      "c1-r1c2-north-coast": 82,
+      "c1-r0c2-mainland-coast": 1505,
+      "c1-r1c2-north-coast": 19,
       "c1-r1c2-waterfall-lip": 46,
-      "c1-r1c2-vertical-fall": 240,
-      "c1-r1c2-base-foam": 2544,
-      "c1-main-river-upper-channel": 20530,
+      "c1-r1c2-vertical-fall": 44,
+      "c1-r1c2-base-foam": 1119,
+      "c1-main-river-upper-channel": 13123,
       "c2-main-river-upper-channel": 19952,
       "b2-tarn-inlet": 3825,
       "b2-tarn-ripple": 22521,
@@ -920,18 +920,18 @@
       "c2-r2c2-base-foam": 2246,
       "c2-r3c2-channel": 104,
       "c2-r3c2-turbulence": 38,
-      "c2-r3c3-channel": 91
+      "c2-r3c3-channel": 85
     },
     "stylePixels": {
       "tarn": 22521,
-      "stream": 10944,
-      "turbulence": 40520,
+      "stream": 10938,
+      "turbulence": 33113,
       "lip": 457,
-      "waterfall": 349,
-      "impact": 4790,
-      "coast": 1593
+      "waterfall": 153,
+      "impact": 3365,
+      "coast": 1524
     },
-    "waterPixels": 77928
+    "waterPixels": 68825
   },
   "segments": [
     {

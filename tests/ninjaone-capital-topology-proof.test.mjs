@@ -263,8 +263,9 @@ function samplePath(points, closed = false) {
   ));
 }
 
-test("NinjaOne Capital topology uses only the approved B2, C1, and C2 envelope", () => {
-  assert.deepEqual(NINJAONE_CAPITAL_TOPOLOGY_GRID_CELLS, ["B2", "C1", "C2"]);
+test("NinjaOne Capital topology uses the approved B1, B2, C1, and C2 envelope", () => {
+  assert.deepEqual(NINJAONE_CAPITAL_TOPOLOGY_GRID_CELLS, ["B1", "B2", "C1", "C2"]);
+  assert.deepEqual(NINJAONE_CAPITAL_TOPOLOGY_ARTBOARD, [2571, 1929]);
 
   const scaleX = NINJAONE_CAPITAL_TOPOLOGY_WORLD_SPAN[0] * WORLD_PLANE.width
     / NINJAONE_CAPITAL_TOPOLOGY_ARTBOARD[0];
@@ -295,7 +296,7 @@ test("NinjaOne Capital topology uses only the approved B2, C1, and C2 envelope",
     for (const point of samplePath(path.points, path.closed)) {
       assert.ok(
         pointInAllowedGridCells(topologyPointToWorld(point)),
-        `${path.id} leaves the approved B2/C1/C2 planning envelope at ${point}`,
+        `${path.id} leaves the approved B1/B2/C1/C2 planning envelope at ${point}`,
       );
     }
   }

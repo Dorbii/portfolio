@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "manifest": "/career-world/capitals/ninjaone/manifests/city-node-composition-r1.json",
+  "manifestSha256": "4b578338d1fff09b967c0cdc5c5cfe00f533d9ca73ff7bb05ad0ef8d8dfef3b7",
+  "nodeCount": 19,
+  "districtCount": 3,
+  "animatedMasterCount": 14,
+  "semanticLayerNodeCount": 1,
+  "staticNodeCount": 4,
+  "assetNodeReadyCount": 19,
+  "visiblyPlacedNodeCount": 19,
+  "visiblyPlacedSkillIds": [
+    "ai-agent-systems",
+    "aws",
+    "capability-contracts",
+    "csharp",
+    "databricks",
+    "docker",
+    "golang",
+    "grpc-rest",
+    "macstadium",
+    "mcp",
+    "openapi-swagger",
+    "postgresql",
+    "python",
+    "react",
+    "redis",
+    "tanstack",
+    "tool-generation",
+    "typescript",
+    "vmware"
+  ],
+  "detailedRenderedSkillIds": [
+    "ai-agent-systems",
+    "mcp",
+    "openapi-swagger",
+    "grpc-rest",
+    "capability-contracts",
+    "tool-generation",
+    "typescript",
+    "react",
+    "tanstack",
+    "golang",
+    "csharp",
+    "python",
+    "postgresql",
+    "redis",
+    "aws",
+    "databricks",
+    "docker",
+    "vmware",
+    "macstadium"
+  ],
+  "territoryRenderedSkillIds": [
+    "ai-agent-systems",
+    "mcp",
+    "openapi-swagger",
+    "grpc-rest",
+    "capability-contracts",
+    "tool-generation",
+    "typescript",
+    "react",
+    "tanstack",
+    "golang",
+    "csharp",
+    "python",
+    "postgresql",
+    "redis",
+    "aws",
+    "databricks",
+    "docker",
+    "vmware",
+    "macstadium"
+  ],
+  "alphaBlockers": [],
+  "golangAlphaRecovery": {
+    "dimensions": [
+      640,
+      668
+    ],
+    "frameCount": 1,
+    "durationMs": 100,
+    "maximumCornerAlpha": 0,
+    "mode": "RGBA",
+    "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-alpha-r3.png",
+    "sha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+    "sourcePath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-clean-r2.png",
+    "sourceSha256": "afb3de7530580b4d19eb6b20d776cd660b26a4962955096cb80b47b342cfeacd",
+    "transparentRgbUnderZeroAlpha": 0,
+    "alphaBoundingBox": [
+      8,
+      28,
+      637,
+      647
+    ],
+    "qaPath": "/career-world/capitals/ninjaone/city-r1/qa/golang-static-alpha-backgrounds-r3.png",
+    "qaSha256": "1255ab94239d964fbe69d306b1d9d55c03ce3f91811444a08f396f02b5172054"
+  },
+  "assetHashMismatches": [],
+  "footprintOverlaps": [],
+  "globalAuthorityHashMismatches": [],
+  "regionalTerrainHashMatch": true,
+  "terrainAdmissionFailures": [],
+  "referenceHashMatch": true,
+  "stationHashMatch": true,
+  "cityFabricSourceHashMatch": true,
+  "cityCirculationSourceHashMatch": true,
+  "infrastructureAtlasHashMatch": true,
+  "railSegmentAtlasHashMatch": true,
+  "infrastructurePlacementCount": 11,
+  "cityFabricConnectivity": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-fabric-connectivity-r3.png",
+    "sha256": "d030e9b42c2877cddd44b5e2fa1a32df2213b5618d1e7992fcc0826f8fd8c75c",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "replacementSlotCount": 19,
+  "retainedSupportSlotCount": 8,
+  "trainAndStationIndependent": true,
+  "railExit": {
+    "renderMethod": "authored-isometric-segment-chain",
+    "screenSpaceRibbonForbidden": true,
+    "segmentCount": 14,
+    "segmentJoinCount": 13,
+    "minimumConsecutiveJoinOverlapPixels": 119,
+    "scaleReference": {
+      "qaOnly": true,
+      "populationRuntimeTiers": [
+        "site",
+        "close"
+      ],
+      "territoryOverviewPopulationVisible": false,
+      "humanHeightPixels": 31,
+      "dwarfHeightPixels": 26,
+      "elfHeightPixels": 33,
+      "trackEnvelopeTargetPixels": [
+        16,
+        20
+      ],
+      "viaductClearanceTargetHumanHeights": [
+        3,
+        5
+      ]
+    },
+    "segmentAtlas": {
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "transparentRgbUnderZeroAlpha": 0
+    },
+    "direction": "south-southeast",
+    "entryDirection": "station-terminal",
+    "offCapitalEntry": false,
+    "offCapitalEndpoint": true,
+    "terminatesAtBuilding": false,
+    "gatewayMatchesBuildingNode": false,
+    "lastControlPoint": {
+      "x": 1.02,
+      "y": 1.025
+    },
+    "firstControlPoint": {
+      "x": 0.392312,
+      "y": 0.40822200000000003
+    },
+    "stationLocalPosition": {
+      "x": 0.392312,
+      "y": 0.458222
+    },
+    "stationTrackCenterLocalPosition": {
+      "x": 0.392312,
+      "y": 0.40822200000000003
+    },
+    "minimumStationControlPointDistance": 0.0,
+    "layers": {
+      "support": {
+        "dimensions": [
+          2571,
+          1929
+        ],
+        "frameCount": 1,
+        "durationMs": 100,
+        "maximumCornerAlpha": 0,
+        "mode": "RGBA",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-support-r1.png",
+        "sha256": "21a7886d8b2ccb7e47fbabea854605ed768b72f6d888e091e36f59d7a20a9510"
+      },
+      "bed": {
+        "dimensions": [
+          2571,
+          1929
+        ],
+        "frameCount": 1,
+        "durationMs": 100,
+        "maximumCornerAlpha": 0,
+        "mode": "RGBA",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-bed-r1.png",
+        "sha256": "11fb31afcb946c4c7889c3fedf35cd6eed5229d849d5b453c1f84357190d8eab"
+      },
+      "track": {
+        "dimensions": [
+          2571,
+          1929
+        ],
+        "frameCount": 1,
+        "durationMs": 100,
+        "maximumCornerAlpha": 0,
+        "mode": "RGBA",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-track-r1.png",
+        "sha256": "913dd291238a472691079a17475caf06b9dc6a033a67fc70f466650c219dd7ac"
+      }
+    }
+  },
+  "cityFabricLayers": {
+    "overviewSettlement": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-settlement-overview-r2.png",
+      "sha256": "a12921bc72b26daf441de71f9cfea1b551c2439e4aab4d5344522837714f76d9"
+    },
+    "terrainContact": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-terrain-contact-r3.png",
+      "sha256": "f445fc3d8ae39e173ecff91120eadf1ea0842971745ffcec36ee8fd19a89f147"
+    },
+    "underlay": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-underlay-r3.png",
+      "sha256": "5271f080c01a75e0bc5be94f3f6f6e1e0008fc8468e40466307b9ca9e9e9ba4d"
+    },
+    "foreground": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-foreground-r3.png",
+      "sha256": "124771e2527f50473fcb29a5a051f9eeaa7030810710b37a148c8a4a0e906cc5"
+    },
+    "environmentTransitionDetail": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-environment-transition-detail-r3.png",
+      "sha256": "b3490f3d6ba220c6a49be6b6064f8bfa4d20608a24b6572d2070e99b1ea31eca"
+    }
+  },
+  "populationScaleCues": {
+    "cueCount": 16,
+    "siteCueCount": 8,
+    "closeSupplementCueCount": 8,
+    "species": [
+      "dwarf",
+      "elf",
+      "gnome",
+      "human",
+      "orc"
+    ],
+    "siteSpecies": [
+      "dwarf",
+      "elf",
+      "gnome",
+      "human",
+      "orc"
+    ],
+    "closeSupplementSpecies": [
+      "dwarf",
+      "elf",
+      "gnome",
+      "human",
+      "orc"
+    ],
+    "identityConceptRegistration": true,
+    "sourceHashMatch": true,
+    "alphaAtlas": {
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-citizens-atlas-alpha-r1.png",
+      "sha256": "5b24e41540395ff249b6e68242ae9f48517580c3f33b8f8870b6c1369275008e",
+      "transparentRgbUnderZeroAlpha": 0
+    },
+    "compositedLayer": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-scale-cues-r1.png",
+      "sha256": "7e046168f043d2fa440691a363ec0cced23ce56711ebce76fdd4a1f897b2b3df",
+      "transparentRgbUnderZeroAlpha": 0
+    },
+    "siteLayer": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-site-r1.png",
+      "sha256": "a479fba083595b485d8f4c2551c57ef8ecbdc6b70328d0ea5fa708ce42f8490e",
+      "transparentRgbUnderZeroAlpha": 0
+    },
+    "closeDetailLayer": {
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "frameCount": 1,
+      "durationMs": 100,
+      "maximumCornerAlpha": 0,
+      "mode": "RGBA",
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-close-supplement-r1.png",
+      "sha256": "0c15a1ff22ebb3760f0a754398ed804068a283367832dcbd3cd0d88946f80da5",
+      "transparentRgbUnderZeroAlpha": 0
+    }
+  },
+  "terrainBindingBlocked": true,
+  "preview": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-node-composition-preview-r3.png",
+    "sha256": "fcc24615220ad6900fe2126113ab54993fd454abf9aef4715b917fcb856dc532",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "territoryOverviewPreview": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-settlement-overview-preview-r2.png",
+    "sha256": "01b446e5db3d88bdc1a10b51573748e944be45b7cbaa88aaa99cd3e43071ae79",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "placementOverlay": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-node-placement-overlay-r1.png",
+    "sha256": "8a4a17a5bd023222095db621c534bf4ced72019e0b18dafb088f013d41e653fc",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "referenceComparison": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-node-reference-comparison-r1.png",
+    "sha256": "7164754c2833a89968d32ec52439d9702752d147aa176f63b5ed5af684909c9e",
+    "dimensions": [
+      1800,
+      750
+    ]
+  },
+  "terrainAdmissionOverlay": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-node-terrain-admission-overlay-r1.png",
+    "sha256": "01e807b2a5772cdd13585d87bc4c02b40baa1569a3fd55f6d21aaac0f157a742",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "cityFabricReplacementSlots": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/city-fabric-replacement-slots-r1.png",
+    "sha256": "29fa4a02fcade95cc7745f8bdd7e87eb6316da192ff49863936a0f6e999e06af",
+    "dimensions": [
+      2571,
+      1929
+    ]
+  },
+  "golangAlphaBackgrounds": {
+    "path": "/career-world/capitals/ninjaone/city-r1/qa/golang-static-alpha-backgrounds-r3.png",
+    "sha256": "1255ab94239d964fbe69d306b1d9d55c03ce3f91811444a08f396f02b5172054",
+    "dimensions": [
+      640,
+      668
+    ]
+  },
+  "productionReady": false,
+  "runtimeEligible": false
+}

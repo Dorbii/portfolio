@@ -1,0 +1,5518 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-node-composition@r1",
+  "status": "integration-preview",
+  "productionReady": false,
+  "runtimeEligible": false,
+  "artboard": {
+    "coordinateSpace": "capital-local-registered-plate-pixels",
+    "dimensions": [
+      2571,
+      1929
+    ],
+    "worldOrigin": [
+      0.125,
+      0.0
+    ],
+    "worldSpan": [
+      0.25,
+      0.3333333333333333
+    ],
+    "visualScaleCalibration": {
+      "preB1Dimensions": [
+        1800,
+        1350
+      ],
+      "expandedCanvasScale": 1.428333,
+      "nodeSourceScale": 0.6,
+      "effectiveNodeScale": 0.857,
+      "purpose": "retain concept-socket and population scale after B1 expansion",
+      "changesTerrainGeometry": false
+    }
+  },
+  "visualAuthority": {
+    "goalReference": {
+      "path": "/career-world/capitals/ninjaone/city-r1/references/capital-master-direction-r1.png",
+      "sha256": "dc94cc3c90eaf3a20976f5eeb4d0622a491782682837eefdce6d97f62c45d308",
+      "role": "hierarchy-and-integration-reference-only",
+      "bakedBuildingsAreNotRuntimeAssets": true
+    },
+    "registeredTerrainBase": {
+      "repoPath": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+      "sha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02",
+      "capitalPixelBounds": [
+        0,
+        0,
+        5760,
+        4320
+      ],
+      "role": "frozen-regional-placement-and-contact-authority"
+    },
+    "conceptDerivedCityFabric": {
+      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-support-fabric-components-alpha-r1.png",
+      "sourceSha256": "789b9b393857df248546fec423753513d2be80ca3fd689cb9dd8c300b53dddf0",
+      "role": "rejected monolithic plate retained only as provenance and layout evidence",
+      "isCityDesignAuthority": false,
+      "designAuthority": "/career-world/capitals/ninjaone/city-r1/references/capital-master-direction-r1.png",
+      "oldTerraceCityAssetsUsed": false
+    },
+    "conceptLedCityCirculation": {
+      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-fabric-alpha-r3.png",
+      "sourceSha256": "180cd52b09a95ade8630e10a6f7dff94a66cf1122ee0264b2d02d4876a79a632",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "role": "connected-city-circulation-and-terrain-transition-design-authority",
+      "containsBuildings": false,
+      "containsStation": false,
+      "containsTrainOrTrack": false,
+      "changesTerrainGeometry": false
+    },
+    "modularInfrastructureAtlas": {
+      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/infrastructure-transition-atlas-alpha-r2.png",
+      "sourceSha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "role": "independent paths stairs bridges plazas and terrain-transition seams",
+      "isFullCityPlate": false,
+      "placementCount": 11
+    },
+    "requiredHierarchy": [
+      "mountain citadel",
+      "station and territory-rail hinge",
+      "river-separated connected districts",
+      "lower infrastructure works",
+      "terrain, retaining, foliage, and contact seams"
+    ]
+  },
+  "terrainBinding": {
+    "status": "blocked-pending-final-hydrology",
+    "canonicalLandMask": {
+      "path": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "sha256": "8801722b801b2ecabd048dc71ac99ff7f0c566e69e06a50d9c4e41706dd7003a",
+      "contentHashStatus": "frozen-global-authority",
+      "rule": "every non-land pixel is hard no-structure space"
+    },
+    "heightField": {
+      "path": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "sha256": "8cb7d6480a707c33e220a55611af8557c3fc9440f0c347cf9a786adcb1f41e3f",
+      "contentHashStatus": "frozen-global-authority"
+    },
+    "slopeField": {
+      "path": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "sha256": "c248599daeb10e5c8d71dc15ef2cc65d3b90a8f77165ab0cfda5c770676e6134",
+      "contentHashStatus": "frozen-global-authority",
+      "rule": "no structures on bright high-slope cliff bands"
+    },
+    "globalVisualBase": {
+      "path": "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+      "sha256": "6bab5e350840a7f832d19add140fd49a7523b12ffc06899f343064d3de07f32b",
+      "contentHashStatus": "frozen-global-authority"
+    },
+    "hydrology": {
+      "manifestPath": "/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json",
+      "currentBranchSha256": "7f96f22b6976045d7ee50a95c5e708153165d75008ad2f176d4b003cf5d7c41d",
+      "fieldPathsStable": true,
+      "fieldContentHashesFrozen": false,
+      "numericShorelineSetbackVerified": false,
+      "rule": "remain visibly clear of registered water channels; do not invent a numeric buffer"
+    },
+    "regionalTerrainMaster": {
+      "status": "frozen-regional-authority",
+      "repoPath": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+      "sha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02",
+      "capitalPixelBounds": [
+        0,
+        0,
+        5760,
+        4320
+      ]
+    },
+    "gridRegistration": {
+      "regionalOrigin": [
+        0.125,
+        0.0
+      ],
+      "regionalSpan": [
+        0.25,
+        0.3333333333333333
+      ],
+      "regionalDimensions": [
+        5760,
+        4320
+      ],
+      "cells": {
+        "B1": {
+          "pixelBounds": [
+            0,
+            0,
+            2880,
+            2160
+          ],
+          "worldOrigin": [
+            0.125,
+            0.0
+          ],
+          "worldSpan": [
+            0.125,
+            0.16666666666666666
+          ]
+        },
+        "B2": {
+          "pixelBounds": [
+            2880,
+            0,
+            5760,
+            2160
+          ],
+          "worldOrigin": [
+            0.25,
+            0.0
+          ],
+          "worldSpan": [
+            0.125,
+            0.16666666666666666
+          ]
+        },
+        "C1": {
+          "pixelBounds": [
+            0,
+            2160,
+            2880,
+            4320
+          ],
+          "worldOrigin": [
+            0.125,
+            0.16666666666666666
+          ],
+          "worldSpan": [
+            0.125,
+            0.16666666666666666
+          ]
+        },
+        "C2": {
+          "pixelBounds": [
+            2880,
+            2160,
+            5760,
+            4320
+          ],
+          "worldOrigin": [
+            0.25,
+            0.16666666666666666
+          ],
+          "worldSpan": [
+            0.125,
+            0.16666666666666666
+          ]
+        }
+      }
+    }
+  },
+  "layerOrder": [
+    "external-terrain",
+    "territory-settlement-overview",
+    "city-terrain-contact",
+    "streets-retaining-and-support-fabric",
+    "territory-rail-supports",
+    "territory-rail-bed",
+    "territory-track",
+    "station-rear-and-platforms",
+    "building-ground-shadows",
+    "skill-building-nodes",
+    "city-fabric-transition-foreground",
+    "moving-train",
+    "station-and-terrain-foreground-occluders",
+    "city-foliage-and-contact-details",
+    "temporary-population-site-scale-cues",
+    "temporary-population-close-detail-cues"
+  ],
+  "districts": [
+    {
+      "id": "knowledge-api-citadel",
+      "label": "Knowledge and API Citadel",
+      "primaryGridCell": "B1",
+      "gridCells": [
+        "B1",
+        "C1"
+      ],
+      "elevationBand": 2,
+      "sourceFabricEnvelope": {
+        "x": 0.27,
+        "y": 0.1,
+        "width": 0.37,
+        "height": 0.31
+      },
+      "localEnvelope": {
+        "x": 0.2906,
+        "y": 0.15800000000000003,
+        "width": 0.2886,
+        "height": 0.24180000000000001
+      }
+    },
+    {
+      "id": "application-core",
+      "label": "Application Development Core",
+      "primaryGridCell": "C2",
+      "gridCells": [
+        "C1",
+        "C2"
+      ],
+      "elevationBand": 1,
+      "sourceFabricEnvelope": {
+        "x": 0.5,
+        "y": 0.34,
+        "width": 0.42,
+        "height": 0.34
+      },
+      "localEnvelope": {
+        "x": 0.47000000000000003,
+        "y": 0.34520000000000006,
+        "width": 0.3276,
+        "height": 0.26520000000000005
+      }
+    },
+    {
+      "id": "infrastructure-works",
+      "label": "Infrastructure and Data Works",
+      "primaryGridCell": "B2",
+      "gridCells": [
+        "B2",
+        "C2"
+      ],
+      "elevationBand": 0,
+      "sourceFabricEnvelope": {
+        "x": 0.52,
+        "y": 0.66,
+        "width": 0.42,
+        "height": 0.28
+      },
+      "localEnvelope": {
+        "x": 0.48560000000000003,
+        "y": 0.5948,
+        "width": 0.3276,
+        "height": 0.21840000000000004
+      }
+    }
+  ],
+  "transport": {
+    "station": {
+      "id": "ninjaone-intercity-station-r2",
+      "path": "/career-world/shared-assets/transportation/train/stations/ninjaone-intercity-station-r2.png",
+      "sha256": "9ba92ef5132c4953f0477274fdaa89552ee2c10f0c41d5a49cc7b7195525ab8e",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "localPosition": {
+        "x": 0.392312,
+        "y": 0.458222
+      },
+      "displayWidth": 343,
+      "groundAnchor": [
+        0.5,
+        0.85
+      ],
+      "independentAsset": true,
+      "ownsTrack": false,
+      "ownsTrain": false
+    },
+    "rail": {
+      "owner": "territory-transport-layer",
+      "renderMethod": "authored-isometric-segment-chain",
+      "screenSpaceRibbonForbidden": true,
+      "centerlineStatus": "authored-station-to-south-southeast-exit-r3",
+      "stationLocalPosition": {
+        "x": 0.392312,
+        "y": 0.458222
+      },
+      "stationTrackCenterLocalPosition": {
+        "x": 0.392312,
+        "y": 0.40822200000000003
+      },
+      "sourceGatewayPosition": {
+        "x": 0.4153,
+        "y": 0.8206
+      },
+      "gatewayLocalPosition": {
+        "x": 0.403934,
+        "y": 0.7200679999999999
+      },
+      "controlPoints": [
+        {
+          "x": 0.392312,
+          "y": 0.40822200000000003
+        },
+        {
+          "x": 0.434,
+          "y": 0.456
+        },
+        {
+          "x": 0.467,
+          "y": 0.523
+        },
+        {
+          "x": 0.511,
+          "y": 0.596
+        },
+        {
+          "x": 0.563,
+          "y": 0.627
+        },
+        {
+          "x": 0.658,
+          "y": 0.709
+        },
+        {
+          "x": 0.753,
+          "y": 0.791
+        },
+        {
+          "x": 0.848,
+          "y": 0.873
+        },
+        {
+          "x": 0.943,
+          "y": 0.955
+        },
+        {
+          "x": 1.02,
+          "y": 1.025
+        }
+      ],
+      "exitDirection": "south-southeast",
+      "entryDirection": "station-terminal",
+      "offCapitalEntry": false,
+      "offCapitalEndpoint": true,
+      "terminatesAtBuilding": false,
+      "segmentAtlas": {
+        "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/transport/rail-perspective-segment-atlas-chroma-r1.png",
+        "sourceSha256": "83ae9b929e8131dc0ea12febede5279a6e12ecd66cfb17213281e91c122c92d8",
+        "sourceDimensions": [
+          1448,
+          1086
+        ],
+        "alphaPath": "/career-world/capitals/ninjaone/city-r1/fabric/rail-perspective-segment-atlas-alpha-r1.png",
+        "alphaSha256": "2fa88e2728f3cc8b06bd86fd0520f1a6c2b8c30663bac5872d0eb06269875ed8",
+        "alphaDimensions": [
+          1448,
+          1086
+        ],
+        "cameraConstraint": "direction-specific-source-isometric-no-arbitrary-rotation"
+      },
+      "segments": [
+        {
+          "id": "station-through",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.39,
+            "y": 0.408
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "station-exit-curve",
+          "sourceCell": [
+            2,
+            0
+          ],
+          "localCenter": {
+            "x": 0.434,
+            "y": 0.456
+          },
+          "displayWidth": 146,
+          "kind": "ground-curve-nw-sse",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "ravine-viaduct-curve",
+          "sourceCell": [
+            2,
+            1
+          ],
+          "localCenter": {
+            "x": 0.467,
+            "y": 0.523
+          },
+          "displayWidth": 157,
+          "kind": "elevated-curve-sse",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-viaduct",
+          "sourceCell": [
+            1,
+            1
+          ],
+          "localCenter": {
+            "x": 0.511,
+            "y": 0.596
+          },
+          "displayWidth": 157,
+          "kind": "elevated-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "gateway-run-1",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.563,
+            "y": 0.627
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "gateway-run-2",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.6105,
+            "y": 0.668
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-1",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.658,
+            "y": 0.709
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-2",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.7055,
+            "y": 0.75
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-3",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.753,
+            "y": 0.791
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-4",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.8005,
+            "y": 0.832
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-5",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.848,
+            "y": 0.873
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-6",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.8955,
+            "y": 0.914
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-approach-7",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.943,
+            "y": 0.955
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-southeast-exit",
+          "sourceCell": [
+            0,
+            0
+          ],
+          "localCenter": {
+            "x": 0.9905,
+            "y": 0.996
+          },
+          "displayWidth": 150,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0
+        }
+      ],
+      "segmentJoins": [
+        {
+          "from": "station-through",
+          "to": "station-exit-curve",
+          "alphaOverlapPixels": 364,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "station-exit-curve",
+          "to": "ravine-viaduct-curve",
+          "alphaOverlapPixels": 277,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "ravine-viaduct-curve",
+          "to": "south-viaduct",
+          "alphaOverlapPixels": 211,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-viaduct",
+          "to": "gateway-run-1",
+          "alphaOverlapPixels": 119,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "gateway-run-1",
+          "to": "gateway-run-2",
+          "alphaOverlapPixels": 219,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "gateway-run-2",
+          "to": "south-approach-1",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-1",
+          "to": "south-approach-2",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-2",
+          "to": "south-approach-3",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-3",
+          "to": "south-approach-4",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-4",
+          "to": "south-approach-5",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-5",
+          "to": "south-approach-6",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-6",
+          "to": "south-approach-7",
+          "alphaOverlapPixels": 245,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-approach-7",
+          "to": "south-southeast-exit",
+          "alphaOverlapPixels": 226,
+          "alphaThreshold": 16
+        }
+      ],
+      "scaleReference": {
+        "qaOnly": true,
+        "populationRuntimeTiers": [
+          "site",
+          "close"
+        ],
+        "territoryOverviewPopulationVisible": false,
+        "humanHeightPixels": 31,
+        "dwarfHeightPixels": 26,
+        "elfHeightPixels": 33,
+        "trackEnvelopeTargetPixels": [
+          16,
+          20
+        ],
+        "viaductClearanceTargetHumanHeights": [
+          3,
+          5
+        ]
+      },
+      "supportLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-support-r1.png",
+        "sha256": "21a7886d8b2ccb7e47fbabea854605ed768b72f6d888e091e36f59d7a20a9510",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "bedLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-bed-r1.png",
+        "sha256": "11fb31afcb946c4c7889c3fedf35cd6eed5229d849d5b453c1f84357190d8eab",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "trackLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-track-r1.png",
+        "sha256": "913dd291238a472691079a17475caf06b9dc6a033a67fc70f466650c219dd7ac",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "mustEnterAndExitCapital": true,
+      "cityOnlyLoopForbidden": true
+    },
+    "train": {
+      "owner": "moving-vehicle-layer",
+      "assetStatus": "production-loop-not-yet-recovered",
+      "path": null,
+      "independentAsset": true,
+      "bakedIntoStation": false,
+      "bakedIntoCityPlate": false
+    }
+  },
+  "cityFabric": {
+    "activeCirculationSource": {
+      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-fabric-alpha-r3.png",
+      "sha256": "180cd52b09a95ade8630e10a6f7dff94a66cf1122ee0264b2d02d4876a79a632",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "runtimeUsage": "registered-independent-visual-underlay",
+      "proceduralPadsOrCorridors": false
+    },
+    "connectivity": {
+      "primaryComponentRatio": 0.999501,
+      "minimumNodeFabricCoverage": 0.722948,
+      "allNodesPass": true,
+      "nodes": [
+        {
+          "skillId": "ai-agent-systems",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "mcp",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "openapi-swagger",
+          "fabricCoverage": 0.869358,
+          "passes": true
+        },
+        {
+          "skillId": "grpc-rest",
+          "fabricCoverage": 0.988511,
+          "passes": true
+        },
+        {
+          "skillId": "capability-contracts",
+          "fabricCoverage": 0.928792,
+          "passes": true
+        },
+        {
+          "skillId": "tool-generation",
+          "fabricCoverage": 0.812515,
+          "passes": true
+        },
+        {
+          "skillId": "typescript",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "react",
+          "fabricCoverage": 0.827365,
+          "passes": true
+        },
+        {
+          "skillId": "tanstack",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "golang",
+          "fabricCoverage": 0.722948,
+          "passes": true
+        },
+        {
+          "skillId": "csharp",
+          "fabricCoverage": 0.833143,
+          "passes": true
+        },
+        {
+          "skillId": "python",
+          "fabricCoverage": 0.983361,
+          "passes": true
+        },
+        {
+          "skillId": "postgresql",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "redis",
+          "fabricCoverage": 1.0,
+          "passes": true
+        },
+        {
+          "skillId": "aws",
+          "fabricCoverage": 0.757276,
+          "passes": true
+        },
+        {
+          "skillId": "databricks",
+          "fabricCoverage": 0.911557,
+          "passes": true
+        },
+        {
+          "skillId": "docker",
+          "fabricCoverage": 0.965491,
+          "passes": true
+        },
+        {
+          "skillId": "vmware",
+          "fabricCoverage": 0.944363,
+          "passes": true
+        },
+        {
+          "skillId": "macstadium",
+          "fabricCoverage": 0.874661,
+          "passes": true
+        }
+      ]
+    },
+    "sourceEvidence": {
+      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-support-fabric-components-alpha-r1.png",
+      "sha256": "789b9b393857df248546fec423753513d2be80ca3fd689cb9dd8c300b53dddf0",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "maximumCornerAlpha": 0,
+      "runtimeUsage": "none-rejected-monolithic-plate"
+    },
+    "infrastructureAtlas": {
+      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/infrastructure-transition-atlas-alpha-r2.png",
+      "sha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "placementIds": [
+        "summit-plaza",
+        "upper-west-stairs",
+        "west-river-bridge",
+        "station-threshold",
+        "east-civic-curve",
+        "east-market-plaza",
+        "central-river-bridge",
+        "lower-works-curve",
+        "rail-gateway-stairs",
+        "west-cliff-seam",
+        "east-cliff-seam"
+      ]
+    },
+    "overviewSettlement": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-settlement-overview-r2.png",
+      "sha256": "a12921bc72b26daf441de71f9cfea1b551c2439e4aab4d5344522837714f76d9",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "lod": "territory-only",
+      "containsTerrainPixels": false,
+      "containsPopulation": false
+    },
+    "contactLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-terrain-contact-r3.png",
+      "sha256": "f445fc3d8ae39e173ecff91120eadf1ea0842971745ffcec36ee8fd19a89f147",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "underlay": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-underlay-r3.png",
+      "sha256": "5271f080c01a75e0bc5be94f3f6f6e1e0008fc8468e40466307b9ca9e9e9ba4d",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "foreground": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-foreground-r3.png",
+      "sha256": "124771e2527f50473fcb29a5a051f9eeaa7030810710b37a148c8a4a0e906cc5",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "environmentTransitionDetail": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-environment-transition-detail-r3.png",
+      "sha256": "b3490f3d6ba220c6a49be6b6064f8bfa4d20608a24b6572d2070e99b1ea31eca",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "visualOnly": true,
+      "affectsLandMask": false,
+      "affectsHeight": false,
+      "affectsSlope": false,
+      "affectsCollision": false,
+      "allowedFeatures": [
+        "cliff-face rock and moss",
+        "foliage and contact occlusion",
+        "retaining facias and drainage",
+        "bridge decks piers arches and rail-bed dressing where topology already supports them"
+      ]
+    },
+    "replacementModel": {
+      "replacedGenericBuildingCount": 19,
+      "replacementSlotIds": [
+        "summit-citadel",
+        "upper-west-gatehouse",
+        "upper-east-archive",
+        "upper-west-bridgehouse",
+        "upper-central-court",
+        "upper-east-workshop",
+        "middle-west-press",
+        "middle-east-observatory",
+        "middle-east-cache-yard",
+        "middle-east-forge",
+        "middle-west-foundry",
+        "middle-central-alembic",
+        "middle-west-cistern",
+        "middle-east-storehouse",
+        "lower-east-skyworks",
+        "lower-central-masonry",
+        "lower-east-dockworks",
+        "lower-central-migration-yard",
+        "lower-east-orchard-cloister"
+      ],
+      "retainedSupportSlots": [
+        {
+          "slotId": "upper-west-civic-overlook",
+          "sourceFabricPosition": [
+            0.3105,
+            0.1797
+          ],
+          "localPosition": [
+            0.32219000000000003,
+            0.22016600000000003
+          ],
+          "role": "retained-populated-civic-plaza"
+        },
+        {
+          "slotId": "intercity-station",
+          "sourceFabricPosition": [
+            0.4004,
+            0.4849
+          ],
+          "localPosition": [
+            0.392312,
+            0.458222
+          ],
+          "role": "independent-station"
+        },
+        {
+          "slotId": "west-river-plaza",
+          "sourceFabricPosition": [
+            0.1372,
+            0.4735
+          ],
+          "localPosition": [
+            0.18701600000000002,
+            0.44933
+          ],
+          "role": "retained-plaza"
+        },
+        {
+          "slotId": "east-market-square",
+          "sourceFabricPosition": [
+            0.7613,
+            0.6344
+          ],
+          "localPosition": [
+            0.6738139999999999,
+            0.574832
+          ],
+          "role": "retained-plaza"
+        },
+        {
+          "slotId": "central-viaduct-yard",
+          "sourceFabricPosition": [
+            0.5334,
+            0.7024
+          ],
+          "localPosition": [
+            0.496052,
+            0.627872
+          ],
+          "role": "retained-support-architecture"
+        },
+        {
+          "slotId": "lower-west-rail-court",
+          "sourceFabricPosition": [
+            0.1904,
+            0.7382
+          ],
+          "localPosition": [
+            0.228512,
+            0.6557959999999999
+          ],
+          "role": "retained-plaza"
+        },
+        {
+          "slotId": "lower-west-service-court",
+          "sourceFabricPosition": [
+            0.3214,
+            0.7875
+          ],
+          "localPosition": [
+            0.33069200000000004,
+            0.6942499999999999
+          ],
+          "role": "retained-support-architecture"
+        },
+        {
+          "slotId": "southbound-rail-gateway",
+          "sourceFabricPosition": [
+            0.4153,
+            0.8206
+          ],
+          "localPosition": [
+            0.403934,
+            0.7200679999999999
+          ],
+          "role": "independent-territory-rail-gateway"
+        }
+      ],
+      "rule": "independent skill buildings sit on sparse modular civic infrastructure; the rejected monolithic plate is never rendered"
+    }
+  },
+  "populationScaleCues": {
+    "status": "temporary-swappable-art-direction-layer",
+    "role": "diegetic species-scale reference for city and building proportion",
+    "affectsTerrain": false,
+    "affectsBuildingGeometry": false,
+    "source": {
+      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/population/temporary-fantasy-citizens-checker-source-r1.png",
+      "sha256": "827bdfb3f5ff04000df913d642f59273092172f9ed603fe2f4e2dbeb5d70bdb4",
+      "generatedBackgroundWasCheckerboard": true
+    },
+    "alphaAtlas": {
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-citizens-atlas-alpha-r1.png",
+      "sha256": "5b24e41540395ff249b6e68242ae9f48517580c3f33b8f8870b6c1369275008e",
+      "dimensions": [
+        1536,
+        1024
+      ]
+    },
+    "compositedLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-scale-cues-r1.png",
+      "sha256": "7e046168f043d2fa440691a363ec0cced23ce56711ebce76fdd4a1f897b2b3df",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "siteLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-site-r1.png",
+      "sha256": "a479fba083595b485d8f4c2551c57ef8ecbdc6b70328d0ea5fa708ce42f8490e",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "minimumDetailTier": "site",
+      "cueCount": 8
+    },
+    "closeDetailLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-fantasy-population-close-supplement-r1.png",
+      "sha256": "0c15a1ff22ebb3760f0a754398ed804068a283367832dcbd3cd0d88946f80da5",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "minimumDetailTier": "close",
+      "cueCount": 8
+    },
+    "visibilityPolicy": {
+      "world": [],
+      "territory": [],
+      "capital": [],
+      "site": [
+        "siteLayer"
+      ],
+      "close": [
+        "siteLayer",
+        "closeDetailLayer"
+      ]
+    },
+    "registration": "identity-concept-master",
+    "cues": [
+      {
+        "id": "dwarf-mason",
+        "species": "dwarf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.505,
+          "y": 0.335
+        },
+        "conceptPosition": {
+          "x": 0.505,
+          "y": 0.335
+        },
+        "localPosition": {
+          "x": 0.505,
+          "y": 0.335
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 18,
+        "displayHeight": 26,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-mason-r1.png",
+        "sha256": "b659c40e8150e9b8aefafb38fbd19813d5b94c670d039988532e9576f72e3eba",
+        "dimensions": [
+          265,
+          374
+        ]
+      },
+      {
+        "id": "gnome-rail-engineer",
+        "species": "gnome",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.408,
+          "y": 0.535
+        },
+        "conceptPosition": {
+          "x": 0.408,
+          "y": 0.535
+        },
+        "localPosition": {
+          "x": 0.408,
+          "y": 0.535
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 16,
+        "displayHeight": 23,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-rail-engineer-r1.png",
+        "sha256": "76ea2ebe9fbbc6d0800836cc0ce114c33c768dc0a45c909d59e4a9bf0e4f5fd6",
+        "dimensions": [
+          243,
+          317
+        ]
+      },
+      {
+        "id": "elf-archivist",
+        "species": "elf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.59,
+          "y": 0.445
+        },
+        "conceptPosition": {
+          "x": 0.59,
+          "y": 0.445
+        },
+        "localPosition": {
+          "x": 0.59,
+          "y": 0.445
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 23,
+        "displayHeight": 33,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-archivist-r1.png",
+        "sha256": "456b415fc3fb82643219f8f6d21cbce6e4d5d1b57dae8e9648aa59e5aec46422",
+        "dimensions": [
+          356,
+          411
+        ]
+      },
+      {
+        "id": "orc-foundry-artisan",
+        "species": "orc",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.665,
+          "y": 0.686
+        },
+        "conceptPosition": {
+          "x": 0.665,
+          "y": 0.686
+        },
+        "localPosition": {
+          "x": 0.665,
+          "y": 0.686
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 25,
+        "displayHeight": 36,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-foundry-artisan-r1.png",
+        "sha256": "aa3cfadf37b1ef0022d7843407b89134ec7c13aef9bb4e0f6c539ab77d91363a",
+        "dimensions": [
+          229,
+          432
+        ]
+      },
+      {
+        "id": "human-station-porter",
+        "species": "human",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.442,
+          "y": 0.552
+        },
+        "conceptPosition": {
+          "x": 0.442,
+          "y": 0.552
+        },
+        "localPosition": {
+          "x": 0.442,
+          "y": 0.552
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 22,
+        "displayHeight": 31,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-station-porter-r1.png",
+        "sha256": "fd1ae87548783480106c52755553dc40a1bd23b8ab25be31db272271062609f0",
+        "dimensions": [
+          230,
+          411
+        ]
+      },
+      {
+        "id": "dwarf-surveyor",
+        "species": "dwarf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.575,
+          "y": 0.705
+        },
+        "conceptPosition": {
+          "x": 0.575,
+          "y": 0.705
+        },
+        "localPosition": {
+          "x": 0.575,
+          "y": 0.705
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 19,
+        "displayHeight": 27,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-surveyor-r1.png",
+        "sha256": "c13caa02445f750c41870589f79b4543f29276e3bd257f83067e79ab839aa773",
+        "dimensions": [
+          250,
+          365
+        ]
+      },
+      {
+        "id": "elf-ranger",
+        "species": "elf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.392,
+          "y": 0.292
+        },
+        "conceptPosition": {
+          "x": 0.392,
+          "y": 0.292
+        },
+        "localPosition": {
+          "x": 0.392,
+          "y": 0.292
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 23,
+        "displayHeight": 33,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-ranger-r1.png",
+        "sha256": "5e61dde6a034bbc18b47454e6cf86117869902365e86a0930ddc6f9444bfb13f",
+        "dimensions": [
+          215,
+          409
+        ]
+      },
+      {
+        "id": "gnome-courier",
+        "species": "gnome",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.706,
+          "y": 0.603
+        },
+        "conceptPosition": {
+          "x": 0.706,
+          "y": 0.603
+        },
+        "localPosition": {
+          "x": 0.706,
+          "y": 0.603
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "site",
+        "sourceDisplayHeight": 15,
+        "displayHeight": 21,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-courier-r1.png",
+        "sha256": "47cec636768ffeb0da3b4756a8c1dce816c9537f5073e4f04f9f3ad28e09e385",
+        "dimensions": [
+          191,
+          288
+        ]
+      },
+      {
+        "id": "human-market-vendor",
+        "species": "human",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.748,
+          "y": 0.612
+        },
+        "conceptPosition": {
+          "x": 0.748,
+          "y": 0.612
+        },
+        "localPosition": {
+          "x": 0.748,
+          "y": 0.612
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 21,
+        "displayHeight": 30,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-market-vendor-r1.png",
+        "sha256": "6dd6b673a6820e177001c6e1071649c55317cfe165b01512bb6c06260cff46e2",
+        "dimensions": [
+          230,
+          411
+        ]
+      },
+      {
+        "id": "orc-freight-handler",
+        "species": "orc",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.468,
+          "y": 0.575
+        },
+        "conceptPosition": {
+          "x": 0.468,
+          "y": 0.575
+        },
+        "localPosition": {
+          "x": 0.468,
+          "y": 0.575
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 25,
+        "displayHeight": 36,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-freight-handler-r1.png",
+        "sha256": "9f202ac5330bd6a602fd41e158e61933842b275032c244e4955fa494031a6260",
+        "dimensions": [
+          229,
+          432
+        ]
+      },
+      {
+        "id": "dwarf-bridgewright",
+        "species": "dwarf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.535,
+          "y": 0.646
+        },
+        "conceptPosition": {
+          "x": 0.535,
+          "y": 0.646
+        },
+        "localPosition": {
+          "x": 0.535,
+          "y": 0.646
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 18,
+        "displayHeight": 26,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-bridgewright-r1.png",
+        "sha256": "13f987e0ad7bd76dbddbfa0407305d8d078b7f7697107713b35901b86670f0b4",
+        "dimensions": [
+          265,
+          374
+        ]
+      },
+      {
+        "id": "gnome-signalkeeper",
+        "species": "gnome",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.38,
+          "y": 0.505
+        },
+        "conceptPosition": {
+          "x": 0.38,
+          "y": 0.505
+        },
+        "localPosition": {
+          "x": 0.38,
+          "y": 0.505
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 16,
+        "displayHeight": 23,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-signalkeeper-r1.png",
+        "sha256": "c0dadc492c22ff3d4329fad9772c098fba0734c4dc37b91fa5139ce15f357b02",
+        "dimensions": [
+          243,
+          317
+        ]
+      },
+      {
+        "id": "elf-citadel-steward",
+        "species": "elf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.46,
+          "y": 0.235
+        },
+        "conceptPosition": {
+          "x": 0.46,
+          "y": 0.235
+        },
+        "localPosition": {
+          "x": 0.46,
+          "y": 0.235
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 23,
+        "displayHeight": 33,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-citadel-steward-r1.png",
+        "sha256": "e8c1e6547dbd0fbe90376b782d4629786b773a51cff756f3334b5ef9d57056e4",
+        "dimensions": [
+          356,
+          411
+        ]
+      },
+      {
+        "id": "human-overlook-visitor",
+        "species": "human",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.41,
+          "y": 0.245
+        },
+        "conceptPosition": {
+          "x": 0.41,
+          "y": 0.245
+        },
+        "localPosition": {
+          "x": 0.41,
+          "y": 0.245
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 22,
+        "displayHeight": 31,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-overlook-visitor-r1.png",
+        "sha256": "fd1ae87548783480106c52755553dc40a1bd23b8ab25be31db272271062609f0",
+        "dimensions": [
+          230,
+          411
+        ]
+      },
+      {
+        "id": "orc-rail-mason",
+        "species": "orc",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.405,
+          "y": 0.675
+        },
+        "conceptPosition": {
+          "x": 0.405,
+          "y": 0.675
+        },
+        "localPosition": {
+          "x": 0.405,
+          "y": 0.675
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 25,
+        "displayHeight": 36,
+        "mirrored": false,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-rail-mason-r1.png",
+        "sha256": "aa3cfadf37b1ef0022d7843407b89134ec7c13aef9bb4e0f6c539ab77d91363a",
+        "dimensions": [
+          229,
+          432
+        ]
+      },
+      {
+        "id": "dwarf-service-engineer",
+        "species": "dwarf",
+        "temporaryScaleCue": true,
+        "sourceFabricPosition": {
+          "x": 0.62,
+          "y": 0.82
+        },
+        "conceptPosition": {
+          "x": 0.62,
+          "y": 0.82
+        },
+        "localPosition": {
+          "x": 0.62,
+          "y": 0.82
+        },
+        "registration": "identity-concept-master",
+        "minimumDetailTier": "close",
+        "sourceDisplayHeight": 19,
+        "displayHeight": 27,
+        "mirrored": true,
+        "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-service-engineer-r1.png",
+        "sha256": "a3aec1ad9e18e2552940dc00ea8d5be7ab961a1e4a93d08e0a208c98176398a2",
+        "dimensions": [
+          250,
+          365
+        ]
+      }
+    ],
+    "speciesScalePolicy": "building proportions may read as human elf dwarf gnome or orc scale without changing canonical terrain"
+  },
+  "nodes": [
+    {
+      "slotId": "skill-ai-agent-systems",
+      "replacementSlotId": "summit-citadel",
+      "sourceFabricPosition": [
+        0.4646,
+        0.1337
+      ],
+      "terrainNudgePixels": [
+        -13,
+        14
+      ],
+      "skillId": "ai-agent-systems",
+      "label": "AI / Agent Systems",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.4373316017113964,
+        "y": 0.1915436464489373
+      },
+      "supersededPlanningPosition": [
+        0.47,
+        0.205
+      ],
+      "elevationBand": 2,
+      "displayWidth": 228,
+      "slotDisplayScale": 1.3,
+      "unscaledDisplayWidth": 205,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "revision": null,
+      "productionState": "provisional-static",
+      "frameCount": 1,
+      "durationMs": 100,
+      "zBias": 0,
+      "provisionalSkill": true,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/ai-agent-systems-poster.png",
+      "posterSha256": "d1907d9604a9f8aa788d4347bead2697dc8723d8cf32451f71e0d0c08a0e60a1",
+      "sourceDimensions": [
+        1374,
+        1145
+      ],
+      "groundAnchor": [
+        0.502183,
+        0.982533
+      ],
+      "renderMode": "static",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/ai-agent-systems-static.png",
+          "sha256": "74bd0fc8e1d8bfd69f16c744be02f8027361bf98910cdf4bb37ab2dd980d56d5",
+          "dimensions": [
+            1374,
+            1145
+          ],
+          "frameCount": 1,
+          "durationMs": 100,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 261,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.996169,
+        "meanLandHeight": 156.341,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1260.34,
+            369.49
+          ],
+          [
+            1241.28,
+            392.62
+          ],
+          [
+            1220.52,
+            415.41
+          ],
+          [
+            1177.95,
+            431.27
+          ],
+          [
+            1124.38,
+            428.64
+          ],
+          [
+            1074.93,
+            426.51
+          ],
+          [
+            1035.86,
+            411.77
+          ],
+          [
+            998.77,
+            394.34
+          ],
+          [
+            997.85,
+            369.49
+          ],
+          [
+            998.77,
+            344.64
+          ],
+          [
+            1025.39,
+            322.2
+          ],
+          [
+            1076.99,
+            314.84
+          ],
+          [
+            1124.38,
+            307.76
+          ],
+          [
+            1172.29,
+            314.24
+          ],
+          [
+            1220.52,
+            323.57
+          ],
+          [
+            1241.28,
+            346.36
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1015.94,
+            358.54
+          ],
+          [
+            1043.05,
+            353.07
+          ],
+          [
+            1070.16,
+            364.02
+          ],
+          [
+            1097.27,
+            364.02
+          ],
+          [
+            1124.38,
+            366.75
+          ],
+          [
+            1151.49,
+            364.02
+          ],
+          [
+            1178.6,
+            350.34
+          ],
+          [
+            1205.71,
+            358.54
+          ],
+          [
+            1232.82,
+            358.54
+          ],
+          [
+            1232.82,
+            391.9
+          ],
+          [
+            1187.27,
+            411.1
+          ],
+          [
+            1124.38,
+            418.57
+          ],
+          [
+            1059.32,
+            410.04
+          ],
+          [
+            1015.94,
+            390.83
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-mcp",
+      "replacementSlotId": "upper-west-gatehouse",
+      "sourceFabricPosition": [
+        0.2591,
+        0.2723
+      ],
+      "terrainNudgePixels": [
+        7,
+        1
+      ],
+      "skillId": "mcp",
+      "label": "MCP",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.2848206760015558,
+        "y": 0.29291240331778123
+      },
+      "supersededPlanningPosition": [
+        0.315,
+        0.28
+      ],
+      "elevationBand": 2,
+      "displayWidth": 133,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 155,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "revision": "r4",
+      "productionState": "selected",
+      "frameCount": 210,
+      "durationMs": 21000,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/mcp-poster.png",
+      "posterSha256": "e9905290f38d95400c267784f04f39f936fc7c8ac424b8b3c7925c45326fd1ed",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.499219,
+        0.979688
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/mcp-r4.png",
+          "sha256": "68f55b3297a2f65705694f4687dd8f6ec45af95ba89c5d59074daf075064b79a",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 210,
+          "durationMs": 21000,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 83,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.807229,
+        "meanLandHeight": 156.446,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            807.35,
+            565.03
+          ],
+          [
+            803.76,
+            578.56
+          ],
+          [
+            786.44,
+            589.78
+          ],
+          [
+            759.25,
+            594.78
+          ],
+          [
+            732.27,
+            599.33
+          ],
+          [
+            705.6,
+            594.46
+          ],
+          [
+            683.52,
+            587.31
+          ],
+          [
+            662.91,
+            578.16
+          ],
+          [
+            654.9,
+            565.03
+          ],
+          [
+            661.5,
+            551.63
+          ],
+          [
+            682.44,
+            542.26
+          ],
+          [
+            703.54,
+            533.33
+          ],
+          [
+            732.27,
+            533.17
+          ],
+          [
+            758.66,
+            535.92
+          ],
+          [
+            785.36,
+            540.77
+          ],
+          [
+            803.76,
+            551.5
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            670.56,
+            554.6
+          ],
+          [
+            685.99,
+            565.03
+          ],
+          [
+            701.42,
+            557.58
+          ],
+          [
+            716.85,
+            562.05
+          ],
+          [
+            732.27,
+            557.58
+          ],
+          [
+            747.7,
+            554.6
+          ],
+          [
+            763.13,
+            563.54
+          ],
+          [
+            778.56,
+            554.6
+          ],
+          [
+            793.99,
+            554.6
+          ],
+          [
+            793.99,
+            577.23
+          ],
+          [
+            768.07,
+            587.68
+          ],
+          [
+            732.27,
+            591.75
+          ],
+          [
+            695.25,
+            587.1
+          ],
+          [
+            670.56,
+            576.65
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-openapi-swagger",
+      "replacementSlotId": "upper-east-archive",
+      "sourceFabricPosition": [
+        0.593,
+        0.2852
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "openapi-swagger",
+      "label": "OpenAPI / Swagger",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.54254,
+        "y": 0.302456
+      },
+      "supersededPlanningPosition": [
+        0.49,
+        0.28
+      ],
+      "elevationBand": 2,
+      "displayWidth": 141,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 165,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "revision": "r2",
+      "productionState": "selected",
+      "frameCount": 186,
+      "durationMs": 18600,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/openapi-swagger-poster.png",
+      "posterSha256": "c09b9fed4245c3001d70f1a530c1652d4978a564d9191361362ef254e969985c",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/openapi-swagger-r2.png",
+          "sha256": "9a79f4f01c20128a8018bafcde5139d4c44fe7ce738808c9252b0cb12f663653",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 186,
+          "durationMs": 18600,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 89,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.966292,
+        "meanLandHeight": 115.371,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1466.93,
+            583.44
+          ],
+          [
+            1468.03,
+            597.64
+          ],
+          [
+            1453.1,
+            610.73
+          ],
+          [
+            1425.78,
+            618.41
+          ],
+          [
+            1394.87,
+            619.81
+          ],
+          [
+            1366.08,
+            616.01
+          ],
+          [
+            1343.92,
+            607.32
+          ],
+          [
+            1328.3,
+            596.36
+          ],
+          [
+            1315.68,
+            583.44
+          ],
+          [
+            1318.79,
+            568.67
+          ],
+          [
+            1337.76,
+            556.67
+          ],
+          [
+            1365.17,
+            549.84
+          ],
+          [
+            1394.87,
+            548.18
+          ],
+          [
+            1422.45,
+            552.24
+          ],
+          [
+            1445.82,
+            559.56
+          ],
+          [
+            1468.03,
+            569.24
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1331.08,
+            573.96
+          ],
+          [
+            1347.03,
+            578.7
+          ],
+          [
+            1362.98,
+            575.54
+          ],
+          [
+            1378.92,
+            583.44
+          ],
+          [
+            1394.87,
+            578.7
+          ],
+          [
+            1410.82,
+            573.96
+          ],
+          [
+            1426.76,
+            581.86
+          ],
+          [
+            1442.71,
+            575.54
+          ],
+          [
+            1458.66,
+            573.96
+          ],
+          [
+            1458.66,
+            596.37
+          ],
+          [
+            1431.87,
+            607.46
+          ],
+          [
+            1394.87,
+            611.77
+          ],
+          [
+            1356.6,
+            606.84
+          ],
+          [
+            1331.08,
+            595.76
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-grpc-rest",
+      "replacementSlotId": "upper-west-bridgehouse",
+      "sourceFabricPosition": [
+        0.1816,
+        0.348
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "grpc-rest",
+      "label": "gRPC / REST",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.221648,
+        "y": 0.35144000000000003
+      },
+      "supersededPlanningPosition": [
+        0.3,
+        0.34
+      ],
+      "elevationBand": 2,
+      "displayWidth": 150,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 175,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "revision": "r4",
+      "productionState": "review",
+      "frameCount": 192,
+      "durationMs": 19200,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/grpc-rest-poster.png",
+      "posterSha256": "f526e8193b6905b6e4d897398c89c0654ca6463784463d8ca2e4b8fc109278c6",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/grpc-rest-r4.png",
+          "sha256": "5a54484b1580b774d5e2fc6e00e10bccb90e057c6e7a38a8c2e744d39627d5eb",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 192,
+          "durationMs": 19200,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 105,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 100.924,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            653.67,
+            677.93
+          ],
+          [
+            649.68,
+            693.04
+          ],
+          [
+            625.45,
+            703.33
+          ],
+          [
+            601.27,
+            712.58
+          ],
+          [
+            569.86,
+            718.99
+          ],
+          [
+            540.1,
+            710.76
+          ],
+          [
+            509.37,
+            705.57
+          ],
+          [
+            492.43,
+            692.58
+          ],
+          [
+            483.46,
+            677.93
+          ],
+          [
+            497.22,
+            664.18
+          ],
+          [
+            511.82,
+            651.41
+          ],
+          [
+            535.47,
+            639.99
+          ],
+          [
+            569.86,
+            642.4
+          ],
+          [
+            602.59,
+            641.82
+          ],
+          [
+            629.12,
+            650.85
+          ],
+          [
+            649.68,
+            662.82
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            500.26,
+            677.93
+          ],
+          [
+            517.66,
+            672.89
+          ],
+          [
+            535.06,
+            676.25
+          ],
+          [
+            552.46,
+            666.17
+          ],
+          [
+            569.86,
+            674.57
+          ],
+          [
+            587.26,
+            672.89
+          ],
+          [
+            604.66,
+            671.21
+          ],
+          [
+            622.06,
+            666.17
+          ],
+          [
+            639.46,
+            677.93
+          ],
+          [
+            639.46,
+            691.69
+          ],
+          [
+            610.23,
+            703.48
+          ],
+          [
+            569.86,
+            708.07
+          ],
+          [
+            528.1,
+            702.83
+          ],
+          [
+            500.26,
+            691.03
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-capability-contracts",
+      "replacementSlotId": "upper-central-court",
+      "sourceFabricPosition": [
+        0.511,
+        0.3584
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "capability-contracts",
+      "label": "Capability Contracts",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.47858000000000006,
+        "y": 0.35955200000000004
+      },
+      "supersededPlanningPosition": [
+        0.58,
+        0.35
+      ],
+      "elevationBand": 2,
+      "displayWidth": 141,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 165,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "revision": "r6",
+      "productionState": "review",
+      "frameCount": 157,
+      "durationMs": 15700,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/capability-contracts-poster.png",
+      "posterSha256": "64494977ed89a81d6bc487c539b7927a8879ab7d359a341ad2636ff067cded7b",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.964063
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/capability-contracts-r6.png",
+          "sha256": "796b583b714338c3167f1f0f3e58bfdd960a41a9b710c6df6dcef1f3d0b84fbe",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 157,
+          "durationMs": 15700,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 90,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 145.678,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1309.61,
+            693.58
+          ],
+          [
+            1302.12,
+            707.49
+          ],
+          [
+            1283.06,
+            718.24
+          ],
+          [
+            1258.31,
+            725.12
+          ],
+          [
+            1230.43,
+            726.98
+          ],
+          [
+            1203.16,
+            724.43
+          ],
+          [
+            1178.92,
+            717.72
+          ],
+          [
+            1157.27,
+            707.78
+          ],
+          [
+            1152.83,
+            693.58
+          ],
+          [
+            1161.66,
+            680.23
+          ],
+          [
+            1178.92,
+            669.43
+          ],
+          [
+            1203.16,
+            662.72
+          ],
+          [
+            1230.43,
+            660.18
+          ],
+          [
+            1258.31,
+            662.03
+          ],
+          [
+            1286.42,
+            667.33
+          ],
+          [
+            1302.12,
+            679.66
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1166.64,
+            685.68
+          ],
+          [
+            1182.59,
+            684.1
+          ],
+          [
+            1198.53,
+            685.68
+          ],
+          [
+            1214.48,
+            685.68
+          ],
+          [
+            1230.43,
+            685.68
+          ],
+          [
+            1246.38,
+            682.52
+          ],
+          [
+            1262.32,
+            682.52
+          ],
+          [
+            1278.27,
+            682.52
+          ],
+          [
+            1294.22,
+            685.68
+          ],
+          [
+            1294.22,
+            706.51
+          ],
+          [
+            1267.43,
+            717.6
+          ],
+          [
+            1230.43,
+            721.91
+          ],
+          [
+            1192.16,
+            716.98
+          ],
+          [
+            1166.64,
+            705.89
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-tool-generation",
+      "replacementSlotId": "upper-east-workshop",
+      "sourceFabricPosition": [
+        0.6828,
+        0.4071
+      ],
+      "terrainNudgePixels": [
+        -27,
+        20
+      ],
+      "skillId": "tool-generation",
+      "label": "Tool Generation",
+      "layoutDistrictId": "knowledge-api-citadel",
+      "localPosition": {
+        "x": 0.6020822497082846,
+        "y": 0.4079060663556247
+      },
+      "supersededPlanningPosition": [
+        0.43,
+        0.39
+      ],
+      "elevationBand": 2,
+      "displayWidth": 150,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 175,
+      "footprintFraction": {
+        "width": 0.8,
+        "depth": 0.28
+      },
+      "revision": null,
+      "productionState": "animation-pending",
+      "frameCount": 1,
+      "durationMs": 100,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/tool-generation-poster.png",
+      "posterSha256": "71b4c1eee83f089cf9e1e171d99d5f4ac55904d7a8724274c61c5a3007a58039",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "groundAnchor": [
+        0.498804,
+        0.978469
+      ],
+      "renderMode": "static",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tool-generation-static.png",
+          "sha256": "fc2a2d6672413a80b97e8911737433d123fa0eca5608c0ee609f3760369e346a",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "frameCount": 1,
+          "durationMs": 100,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 99,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.929293,
+        "meanLandHeight": 62.97,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1635.22,
+            786.85
+          ],
+          [
+            1622.99,
+            801.05
+          ],
+          [
+            1605.99,
+            813.37
+          ],
+          [
+            1580.69,
+            822.96
+          ],
+          [
+            1547.95,
+            826.33
+          ],
+          [
+            1514.23,
+            824.06
+          ],
+          [
+            1486.86,
+            814.77
+          ],
+          [
+            1467.33,
+            802.11
+          ],
+          [
+            1466.74,
+            786.85
+          ],
+          [
+            1472.12,
+            772.5
+          ],
+          [
+            1487.47,
+            759.21
+          ],
+          [
+            1514.89,
+            750.38
+          ],
+          [
+            1547.95,
+            746.58
+          ],
+          [
+            1581.02,
+            750.38
+          ],
+          [
+            1609.66,
+            758.66
+          ],
+          [
+            1622.99,
+            772.65
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1478.35,
+            780.13
+          ],
+          [
+            1495.75,
+            776.77
+          ],
+          [
+            1513.15,
+            783.49
+          ],
+          [
+            1530.55,
+            778.45
+          ],
+          [
+            1547.95,
+            776.77
+          ],
+          [
+            1565.35,
+            783.49
+          ],
+          [
+            1582.75,
+            778.45
+          ],
+          [
+            1600.15,
+            785.17
+          ],
+          [
+            1617.55,
+            780.13
+          ],
+          [
+            1617.55,
+            800.61
+          ],
+          [
+            1588.32,
+            812.4
+          ],
+          [
+            1547.95,
+            816.99
+          ],
+          [
+            1506.19,
+            811.75
+          ],
+          [
+            1478.35,
+            799.95
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-typescript",
+      "replacementSlotId": "middle-west-press",
+      "sourceFabricPosition": [
+        0.3222,
+        0.4517
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "typescript",
+      "label": "TypeScript",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.331316,
+        "y": 0.43232600000000004
+      },
+      "supersededPlanningPosition": [
+        0.59,
+        0.45
+      ],
+      "elevationBand": 1,
+      "displayWidth": 141,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 165,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "revision": "r7",
+      "productionState": "selected",
+      "frameCount": 112,
+      "durationMs": 11200,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/typescript-poster.png",
+      "posterSha256": "0825585af4e87116a4e7413732243c53a3fbc7af809d5603867e09ad7cd1ee0a",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/typescript-r7.png",
+          "sha256": "1cac0682a5b62d96bf4c1bb969bcd2591d5a83c8b15087fa05b4f3f07a33b6df",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 112,
+          "durationMs": 11200,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 91,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.978022,
+        "meanLandHeight": 181.099,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            933.37,
+            833.96
+          ],
+          [
+            927.17,
+            848.58
+          ],
+          [
+            905.01,
+            858.89
+          ],
+          [
+            880.3,
+            866.19
+          ],
+          [
+            851.81,
+            869.21
+          ],
+          [
+            821.81,
+            867.9
+          ],
+          [
+            798.06,
+            859.15
+          ],
+          [
+            776.46,
+            848.58
+          ],
+          [
+            770.25,
+            833.96
+          ],
+          [
+            782.31,
+            820.47
+          ],
+          [
+            799.18,
+            809.29
+          ],
+          [
+            823.03,
+            801.38
+          ],
+          [
+            851.81,
+            797.22
+          ],
+          [
+            880.9,
+            801.04
+          ],
+          [
+            909.49,
+            806.93
+          ],
+          [
+            927.17,
+            819.33
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            788.03,
+            830.8
+          ],
+          [
+            803.97,
+            827.64
+          ],
+          [
+            819.92,
+            833.96
+          ],
+          [
+            835.87,
+            826.06
+          ],
+          [
+            851.81,
+            829.22
+          ],
+          [
+            867.76,
+            826.06
+          ],
+          [
+            883.71,
+            830.8
+          ],
+          [
+            899.65,
+            829.22
+          ],
+          [
+            915.6,
+            830.8
+          ],
+          [
+            915.6,
+            846.89
+          ],
+          [
+            888.81,
+            857.98
+          ],
+          [
+            851.81,
+            862.29
+          ],
+          [
+            813.54,
+            857.36
+          ],
+          [
+            788.03,
+            846.27
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-react",
+      "replacementSlotId": "middle-east-observatory",
+      "sourceFabricPosition": [
+        0.8103,
+        0.4935
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "react",
+      "label": "React",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.712034,
+        "y": 0.46493
+      },
+      "supersededPlanningPosition": [
+        0.7,
+        0.47
+      ],
+      "elevationBand": 1,
+      "displayWidth": 163,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 190,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "revision": null,
+      "productionState": "animation-pending",
+      "frameCount": 1,
+      "durationMs": 100,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/react-poster.png",
+      "posterSha256": "e36f75bc818a9cc538dd84f461409cd51adba6d03cba749e0a457e632a9841ed",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "groundAnchor": [
+        0.496892,
+        0.970534
+      ],
+      "renderMode": "static",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/react-static.png",
+          "sha256": "b5d7f0bd17b89d81fcdbba9ea97f5b9a2aad4850f91cf3ff43e21fcf54f9cafb",
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "frameCount": 1,
+          "durationMs": 100,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 136,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.977941,
+        "meanLandHeight": 80.184,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1924.95,
+            896.85
+          ],
+          [
+            1910.66,
+            912.68
+          ],
+          [
+            1895.97,
+            928.05
+          ],
+          [
+            1866.36,
+            938.04
+          ],
+          [
+            1830.64,
+            942.36
+          ],
+          [
+            1795.65,
+            937.19
+          ],
+          [
+            1764.63,
+            928.38
+          ],
+          [
+            1743.51,
+            914.09
+          ],
+          [
+            1744.03,
+            896.85
+          ],
+          [
+            1745.29,
+            879.96
+          ],
+          [
+            1764.63,
+            865.32
+          ],
+          [
+            1794.18,
+            854.81
+          ],
+          [
+            1830.64,
+            853.18
+          ],
+          [
+            1866.36,
+            855.66
+          ],
+          [
+            1897.33,
+            865.0
+          ],
+          [
+            1910.66,
+            881.02
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1753.12,
+            883.16
+          ],
+          [
+            1772.5,
+            885.11
+          ],
+          [
+            1791.88,
+            883.16
+          ],
+          [
+            1811.26,
+            889.03
+          ],
+          [
+            1830.64,
+            896.85
+          ],
+          [
+            1850.02,
+            887.07
+          ],
+          [
+            1869.4,
+            894.89
+          ],
+          [
+            1888.78,
+            887.07
+          ],
+          [
+            1908.16,
+            883.16
+          ],
+          [
+            1908.16,
+            912.87
+          ],
+          [
+            1875.6,
+            926.6
+          ],
+          [
+            1830.64,
+            931.94
+          ],
+          [
+            1784.13,
+            925.84
+          ],
+          [
+            1753.12,
+            912.11
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-tanstack",
+      "replacementSlotId": "middle-east-cache-yard",
+      "sourceFabricPosition": [
+        0.681,
+        0.5603
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "tanstack",
+      "label": "TanStack",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.6111800000000001,
+        "y": 0.517034
+      },
+      "supersededPlanningPosition": [
+        0.81,
+        0.51
+      ],
+      "elevationBand": 1,
+      "displayWidth": 163,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 190,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "revision": null,
+      "productionState": "animation-pending",
+      "frameCount": 1,
+      "durationMs": 100,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/tanstack-poster.png",
+      "posterSha256": "f2a13eeaaae4d86488e555f40156817edc0dc2062fbd55a681dd868572533bbd",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "groundAnchor": [
+        0.502762,
+        0.977901
+      ],
+      "renderMode": "static",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tanstack-static.png",
+          "sha256": "5455fe5d7038d8b39ef9c60a74a0a480c661af1d21156eacf83e0a9c27685967",
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "frameCount": 1,
+          "durationMs": 100,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 136,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 79.912,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1660.84,
+            997.36
+          ],
+          [
+            1662.92,
+            1015.48
+          ],
+          [
+            1632.59,
+            1026.61
+          ],
+          [
+            1607.43,
+            1038.98
+          ],
+          [
+            1571.34,
+            1041.03
+          ],
+          [
+            1538.2,
+            1035.58
+          ],
+          [
+            1502.61,
+            1030.19
+          ],
+          [
+            1488.66,
+            1013.72
+          ],
+          [
+            1472.22,
+            997.36
+          ],
+          [
+            1491.33,
+            981.53
+          ],
+          [
+            1504.66,
+            965.51
+          ],
+          [
+            1536.36,
+            957.01
+          ],
+          [
+            1571.34,
+            955.99
+          ],
+          [
+            1608.54,
+            954.47
+          ],
+          [
+            1634.63,
+            967.13
+          ],
+          [
+            1662.92,
+            979.24
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1493.82,
+            989.53
+          ],
+          [
+            1513.2,
+            987.58
+          ],
+          [
+            1532.58,
+            989.53
+          ],
+          [
+            1551.96,
+            983.67
+          ],
+          [
+            1571.34,
+            983.67
+          ],
+          [
+            1590.72,
+            989.53
+          ],
+          [
+            1610.11,
+            985.62
+          ],
+          [
+            1629.49,
+            983.67
+          ],
+          [
+            1648.87,
+            989.53
+          ],
+          [
+            1648.87,
+            1013.38
+          ],
+          [
+            1616.31,
+            1027.11
+          ],
+          [
+            1571.34,
+            1032.45
+          ],
+          [
+            1524.83,
+            1026.35
+          ],
+          [
+            1493.82,
+            1012.62
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-golang",
+      "replacementSlotId": "middle-east-forge",
+      "sourceFabricPosition": [
+        0.8398,
+        0.5846
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "golang",
+      "label": "Go (Golang)",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.735044,
+        "y": 0.535988
+      },
+      "supersededPlanningPosition": [
+        0.53,
+        0.56
+      ],
+      "elevationBand": 1,
+      "displayWidth": 163,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 190,
+      "footprintFraction": {
+        "width": 0.86,
+        "depth": 0.32
+      },
+      "revision": "production-r2",
+      "productionState": "selected",
+      "frameCount": 100,
+      "durationMs": 10000,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/golang-poster-alpha-r3.png",
+      "posterSha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+      "sourceDimensions": [
+        640,
+        668
+      ],
+      "groundAnchor": [
+        0.5,
+        1.0
+      ],
+      "renderMode": "semantic-layers",
+      "renderLayers": [
+        {
+          "id": "static-base",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-alpha-r3.png",
+          "sha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 1,
+          "durationMs": 100,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA",
+          "generatedFrom": {
+            "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-clean-r2.png",
+            "sha256": "afb3de7530580b4d19eb6b20d776cd660b26a4962955096cb80b47b342cfeacd",
+            "method": "deterministic-edge-connected-presentation-matte-extraction"
+          }
+        },
+        {
+          "id": "architectural-signal",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-architectural-signal-r2.webp",
+          "sha256": "ba79c365d3c7795b57da951e0e0bedf28e33fc5ae9404977b99ed72bfbed94e9",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 58,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "roof-semaphore",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-roof-channel-semaphore-r2.webp",
+          "sha256": "1ee48e620fc0d3c9f958a85bf2df2c9111e0a749b381331b5a95a8dade70e5a5",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 30,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "forge-pressure",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-forge-pressure-r2.webp",
+          "sha256": "e961804cd9c449b3f9f2b2acd100e6a241698d4a5655d28b57d57880dad3fd06",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 30,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "hoist-transfer",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-hoist-transfer-r2.webp",
+          "sha256": "3c5232a255de6e523185dc0f069b797d072b8650b47bcfd39737336de1bcc5f2",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 63,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "courier-dispatch",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-courier-dispatch-r2.webp",
+          "sha256": "809303417000cf0f850e47b44d794897e0b755a1896c98a9d92c64d6949bbf9d",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 48,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "courier-exhaust",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-courier-exhaust-r2.webp",
+          "sha256": "b338ce7ce0e188b8922b06395303323b10036e6260100b3b94bd41c7f19a9b9a",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 56,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        },
+        {
+          "id": "yard-worker",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-yard-worker-r2.webp",
+          "sha256": "9424ba7c0f996418284741398f60574dccfbeb2067541b1e45554f023952122c",
+          "dimensions": [
+            640,
+            668
+          ],
+          "frameCount": 12,
+          "durationMs": 10000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "alphaRecovery": {
+        "dimensions": [
+          640,
+          668
+        ],
+        "frameCount": 1,
+        "durationMs": 100,
+        "maximumCornerAlpha": 0,
+        "mode": "RGBA",
+        "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-alpha-r3.png",
+        "sha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+        "sourcePath": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-clean-r2.png",
+        "sourceSha256": "afb3de7530580b4d19eb6b20d776cd660b26a4962955096cb80b47b342cfeacd",
+        "transparentRgbUnderZeroAlpha": 0,
+        "alphaBoundingBox": [
+          8,
+          28,
+          637,
+          647
+        ],
+        "qaPath": "/career-world/capitals/ninjaone/city-r1/qa/golang-static-alpha-backgrounds-r3.png",
+        "qaSha256": "1255ab94239d964fbe69d306b1d9d55c03ce3f91811444a08f396f02b5172054"
+      },
+      "terrainAdmissionPreview": {
+        "sampleCount": 152,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 80.809,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1995.77,
+            1033.92
+          ],
+          [
+            1982.11,
+            1052.5
+          ],
+          [
+            1963.31,
+            1069.63
+          ],
+          [
+            1929.97,
+            1081.03
+          ],
+          [
+            1889.8,
+            1080.01
+          ],
+          [
+            1853.11,
+            1076.95
+          ],
+          [
+            1820.57,
+            1067.55
+          ],
+          [
+            1791.89,
+            1053.62
+          ],
+          [
+            1789.88,
+            1033.92
+          ],
+          [
+            1793.75,
+            1014.59
+          ],
+          [
+            1815.58,
+            997.86
+          ],
+          [
+            1853.49,
+            991.34
+          ],
+          [
+            1889.8,
+            987.34
+          ],
+          [
+            1927.26,
+            989.98
+          ],
+          [
+            1964.73,
+            997.52
+          ],
+          [
+            1982.11,
+            1015.35
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1808.49,
+            1033.92
+          ],
+          [
+            1828.82,
+            1025.58
+          ],
+          [
+            1849.15,
+            1031.83
+          ],
+          [
+            1869.47,
+            1031.83
+          ],
+          [
+            1889.8,
+            1031.83
+          ],
+          [
+            1910.12,
+            1021.4
+          ],
+          [
+            1930.45,
+            1029.75
+          ],
+          [
+            1950.78,
+            1023.49
+          ],
+          [
+            1971.1,
+            1033.92
+          ],
+          [
+            1971.1,
+            1051.01
+          ],
+          [
+            1936.95,
+            1065.65
+          ],
+          [
+            1889.8,
+            1071.35
+          ],
+          [
+            1841.02,
+            1064.84
+          ],
+          [
+            1808.49,
+            1050.19
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-csharp",
+      "replacementSlotId": "middle-west-foundry",
+      "sourceFabricPosition": [
+        0.1835,
+        0.6384
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "csharp",
+      "label": "C#",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.22313,
+        "y": 0.577952
+      },
+      "supersededPlanningPosition": [
+        0.65,
+        0.56
+      ],
+      "elevationBand": 1,
+      "displayWidth": 141,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 165,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "revision": "r2",
+      "productionState": "selected",
+      "frameCount": 128,
+      "durationMs": 12800,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/csharp-poster.png",
+      "posterSha256": "05e0e3454ff16daa94132e4c72a0eff3d2ca191146eabfe1b27a4d1b3f1088fc",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.501563,
+        0.853125
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/csharp-r2.png",
+          "sha256": "94af1b69b5cd271680f709494cf5acb7a14f386944ad2077449ad22b606ab6e8",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 128,
+          "durationMs": 12800,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 89,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 89.337,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            646.52,
+            1114.87
+          ],
+          [
+            650.48,
+            1129.78
+          ],
+          [
+            628.54,
+            1140.59
+          ],
+          [
+            601.24,
+            1146.07
+          ],
+          [
+            573.67,
+            1149.01
+          ],
+          [
+            542.76,
+            1149.84
+          ],
+          [
+            514.87,
+            1142.42
+          ],
+          [
+            506.36,
+            1127.94
+          ],
+          [
+            490.52,
+            1114.87
+          ],
+          [
+            501.97,
+            1100.95
+          ],
+          [
+            522.71,
+            1090.99
+          ],
+          [
+            545.79,
+            1083.33
+          ],
+          [
+            573.67,
+            1077.02
+          ],
+          [
+            605.49,
+            1078.87
+          ],
+          [
+            625.18,
+            1090.73
+          ],
+          [
+            650.48,
+            1099.96
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            509.88,
+            1106.97
+          ],
+          [
+            525.83,
+            1113.29
+          ],
+          [
+            541.77,
+            1108.55
+          ],
+          [
+            557.72,
+            1110.13
+          ],
+          [
+            573.67,
+            1105.39
+          ],
+          [
+            589.61,
+            1110.13
+          ],
+          [
+            605.56,
+            1103.82
+          ],
+          [
+            621.51,
+            1113.29
+          ],
+          [
+            637.46,
+            1106.97
+          ],
+          [
+            637.46,
+            1127.8
+          ],
+          [
+            610.66,
+            1138.89
+          ],
+          [
+            573.67,
+            1143.2
+          ],
+          [
+            535.39,
+            1138.27
+          ],
+          [
+            509.88,
+            1127.19
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-python",
+      "replacementSlotId": "middle-central-alembic",
+      "sourceFabricPosition": [
+        0.628,
+        0.6601
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "python",
+      "label": "Python",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.56984,
+        "y": 0.594878
+      },
+      "supersededPlanningPosition": [
+        0.78,
+        0.61
+      ],
+      "elevationBand": 1,
+      "displayWidth": 146,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 170,
+      "footprintFraction": {
+        "width": 0.78,
+        "depth": 0.28
+      },
+      "revision": "r2",
+      "productionState": "selected",
+      "frameCount": 128,
+      "durationMs": 12800,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/python-poster.png",
+      "posterSha256": "f93f900bbb55c56325f342ea3b262012b8876f70e83fa6dbe7136238a1cc6705",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.505469,
+        0.935937
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/python-r2.png",
+          "sha256": "42194a2974542d5b1e3788d57f12442135fa9cc28613385e1688c7426283574e",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 128,
+          "durationMs": 12800,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 99,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 125.152,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1547.87,
+            1147.52
+          ],
+          [
+            1533.24,
+            1160.75
+          ],
+          [
+            1520.72,
+            1173.6
+          ],
+          [
+            1496.44,
+            1183.02
+          ],
+          [
+            1465.06,
+            1183.64
+          ],
+          [
+            1433.68,
+            1183.02
+          ],
+          [
+            1412.3,
+            1172.25
+          ],
+          [
+            1388.55,
+            1162.37
+          ],
+          [
+            1391.26,
+            1147.52
+          ],
+          [
+            1392.34,
+            1133.4
+          ],
+          [
+            1407.08,
+            1120.35
+          ],
+          [
+            1435.56,
+            1114.15
+          ],
+          [
+            1465.06,
+            1109.09
+          ],
+          [
+            1493.61,
+            1115.21
+          ],
+          [
+            1523.62,
+            1120.08
+          ],
+          [
+            1533.24,
+            1134.28
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1399.01,
+            1140.98
+          ],
+          [
+            1415.52,
+            1137.71
+          ],
+          [
+            1432.03,
+            1136.07
+          ],
+          [
+            1448.55,
+            1140.98
+          ],
+          [
+            1465.06,
+            1139.34
+          ],
+          [
+            1481.57,
+            1137.71
+          ],
+          [
+            1498.08,
+            1137.71
+          ],
+          [
+            1514.6,
+            1144.25
+          ],
+          [
+            1531.11,
+            1140.98
+          ],
+          [
+            1531.11,
+            1160.91
+          ],
+          [
+            1503.37,
+            1172.39
+          ],
+          [
+            1465.06,
+            1176.86
+          ],
+          [
+            1425.43,
+            1171.75
+          ],
+          [
+            1399.01,
+            1160.27
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-postgresql",
+      "replacementSlotId": "middle-west-cistern",
+      "sourceFabricPosition": [
+        0.255,
+        0.6741
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "postgresql",
+      "label": "PostgreSQL",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.27890000000000004,
+        "y": 0.6057980000000001
+      },
+      "supersededPlanningPosition": [
+        0.56,
+        0.67
+      ],
+      "elevationBand": 1,
+      "displayWidth": 154,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 180,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "revision": "r4",
+      "productionState": "selected",
+      "frameCount": 160,
+      "durationMs": 16000,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/postgresql-poster.png",
+      "posterSha256": "c687842cc68cc01880e44392ea5e8e7c4c4b6a4c4b9c93bf04b76c30f21d0574",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/postgresql-r4.png",
+          "sha256": "85ec84e26668ce55d0d8006b34c553af273449786d713d1e58d5f542621f8389",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 160,
+          "durationMs": 16000,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 124,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 106.952,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            804.34,
+            1168.58
+          ],
+          [
+            796.85,
+            1184.37
+          ],
+          [
+            777.49,
+            1197.45
+          ],
+          [
+            752.19,
+            1209.11
+          ],
+          [
+            717.05,
+            1211.14
+          ],
+          [
+            683.3,
+            1207.5
+          ],
+          [
+            656.62,
+            1197.45
+          ],
+          [
+            636.41,
+            1184.54
+          ],
+          [
+            630.68,
+            1168.58
+          ],
+          [
+            638.09,
+            1152.96
+          ],
+          [
+            652.12,
+            1137.57
+          ],
+          [
+            682.95,
+            1129.26
+          ],
+          [
+            717.05,
+            1126.46
+          ],
+          [
+            749.76,
+            1130.87
+          ],
+          [
+            778.77,
+            1139.1
+          ],
+          [
+            796.85,
+            1152.8
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            643.81,
+            1166.74
+          ],
+          [
+            662.12,
+            1159.34
+          ],
+          [
+            680.43,
+            1157.5
+          ],
+          [
+            698.74,
+            1159.34
+          ],
+          [
+            717.05,
+            1161.19
+          ],
+          [
+            735.36,
+            1157.5
+          ],
+          [
+            753.67,
+            1166.74
+          ],
+          [
+            771.98,
+            1161.19
+          ],
+          [
+            790.29,
+            1166.74
+          ],
+          [
+            790.29,
+            1183.72
+          ],
+          [
+            759.53,
+            1196.69
+          ],
+          [
+            717.05,
+            1201.74
+          ],
+          [
+            673.11,
+            1195.97
+          ],
+          [
+            643.81,
+            1183.0
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-redis",
+      "replacementSlotId": "middle-east-storehouse",
+      "sourceFabricPosition": [
+        0.8988,
+        0.7134
+      ],
+      "terrainNudgePixels": [
+        -160,
+        -35
+      ],
+      "skillId": "redis",
+      "label": "Redis",
+      "layoutDistrictId": "application-core",
+      "localPosition": {
+        "x": 0.7188314056787242,
+        "y": 0.6183078838776568
+      },
+      "supersededPlanningPosition": [
+        0.7,
+        0.69
+      ],
+      "elevationBand": 1,
+      "displayWidth": 124,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 145,
+      "footprintFraction": {
+        "width": 0.72,
+        "depth": 0.26
+      },
+      "revision": "r2",
+      "productionState": "selected",
+      "frameCount": 160,
+      "durationMs": 16000,
+      "zBias": 4,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/redis-poster.png",
+      "posterSha256": "00f36d8e2b1a963cceb7be43978968bcfcbe3670bef2bdabb21b543e3e88829e",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.499219,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/redis-r2.png",
+          "sha256": "c12ada9ea632d64bf56e02c4437639890024c84f84060b8675780e75c3dc98b5",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 160,
+          "durationMs": 16000,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 62,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 79.5,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1911.11,
+            1192.72
+          ],
+          [
+            1908.69,
+            1204.55
+          ],
+          [
+            1891.75,
+            1213.29
+          ],
+          [
+            1871.24,
+            1219.03
+          ],
+          [
+            1848.12,
+            1223.32
+          ],
+          [
+            1822.29,
+            1222.11
+          ],
+          [
+            1805.39,
+            1212.86
+          ],
+          [
+            1789.91,
+            1204.08
+          ],
+          [
+            1782.55,
+            1192.72
+          ],
+          [
+            1791.1,
+            1181.58
+          ],
+          [
+            1805.39,
+            1172.57
+          ],
+          [
+            1823.27,
+            1164.44
+          ],
+          [
+            1848.12,
+            1160.9
+          ],
+          [
+            1871.24,
+            1166.4
+          ],
+          [
+            1892.66,
+            1171.72
+          ],
+          [
+            1908.69,
+            1180.89
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1796.33,
+            1183.69
+          ],
+          [
+            1809.28,
+            1184.98
+          ],
+          [
+            1822.22,
+            1187.56
+          ],
+          [
+            1835.17,
+            1187.56
+          ],
+          [
+            1848.12,
+            1188.85
+          ],
+          [
+            1861.06,
+            1191.43
+          ],
+          [
+            1874.01,
+            1191.43
+          ],
+          [
+            1886.95,
+            1192.72
+          ],
+          [
+            1899.9,
+            1183.69
+          ],
+          [
+            1899.9,
+            1203.28
+          ],
+          [
+            1878.15,
+            1212.33
+          ],
+          [
+            1848.12,
+            1215.85
+          ],
+          [
+            1817.05,
+            1211.83
+          ],
+          [
+            1796.33,
+            1202.77
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-aws",
+      "replacementSlotId": "lower-east-skyworks",
+      "sourceFabricPosition": [
+        0.8298,
+        0.7708
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "aws",
+      "label": "AWS",
+      "layoutDistrictId": "infrastructure-works",
+      "localPosition": {
+        "x": 0.727244,
+        "y": 0.681224
+      },
+      "supersededPlanningPosition": [
+        0.61,
+        0.75
+      ],
+      "elevationBand": 0,
+      "displayWidth": 159,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 185,
+      "footprintFraction": {
+        "width": 0.82,
+        "depth": 0.3
+      },
+      "revision": "r1",
+      "productionState": "review",
+      "frameCount": 170,
+      "durationMs": 17000,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/aws-poster.png",
+      "posterSha256": "05cce79a33048e0a1d7071b7676a99997572f35fd15bf296a54acda364ff8cbd",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.509375,
+        0.834375
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/aws-r1.png",
+          "sha256": "1ce7edbeb339a61499d1e61debb36396b2044e998a8aae9204a54ab1a6c674d5",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 170,
+          "durationMs": 17000,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 128,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 77.172,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1961.74,
+            1314.08
+          ],
+          [
+            1949.53,
+            1329.87
+          ],
+          [
+            1934.13,
+            1344.84
+          ],
+          [
+            1902.08,
+            1351.36
+          ],
+          [
+            1869.74,
+            1356.68
+          ],
+          [
+            1837.05,
+            1351.78
+          ],
+          [
+            1801.37,
+            1346.74
+          ],
+          [
+            1784.75,
+            1330.9
+          ],
+          [
+            1783.38,
+            1314.08
+          ],
+          [
+            1785.62,
+            1297.44
+          ],
+          [
+            1810.0,
+            1285.55
+          ],
+          [
+            1835.62,
+            1274.73
+          ],
+          [
+            1869.74,
+            1273.28
+          ],
+          [
+            1906.75,
+            1271.41
+          ],
+          [
+            1934.8,
+            1283.01
+          ],
+          [
+            1949.53,
+            1298.3
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1794.12,
+            1300.73
+          ],
+          [
+            1813.03,
+            1310.27
+          ],
+          [
+            1831.93,
+            1308.36
+          ],
+          [
+            1850.84,
+            1306.45
+          ],
+          [
+            1869.74,
+            1300.73
+          ],
+          [
+            1888.65,
+            1304.54
+          ],
+          [
+            1907.55,
+            1310.27
+          ],
+          [
+            1926.46,
+            1300.73
+          ],
+          [
+            1945.36,
+            1300.73
+          ],
+          [
+            1945.36,
+            1329.71
+          ],
+          [
+            1913.6,
+            1343.1
+          ],
+          [
+            1869.74,
+            1348.31
+          ],
+          [
+            1824.37,
+            1342.36
+          ],
+          [
+            1794.12,
+            1328.96
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-databricks",
+      "replacementSlotId": "lower-central-masonry",
+      "sourceFabricPosition": [
+        0.6706,
+        0.8006
+      ],
+      "terrainNudgePixels": [
+        6,
+        -34
+      ],
+      "skillId": "databricks",
+      "label": "Databricks",
+      "layoutDistrictId": "infrastructure-works",
+      "localPosition": {
+        "x": 0.6054017222870478,
+        "y": 0.686842287195438
+      },
+      "supersededPlanningPosition": [
+        0.7,
+        0.77
+      ],
+      "elevationBand": 0,
+      "displayWidth": 163,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 190,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "revision": "r3",
+      "productionState": "review",
+      "frameCount": 180,
+      "durationMs": 18000,
+      "zBias": 2,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/databricks-poster.png",
+      "posterSha256": "7e03115b461dc89aed01425c4fb16186b3690844d28cd4ae8cb78fc981c1e482",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.497656,
+        0.904687
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/databricks-r3.png",
+          "sha256": "a8362591df59a2ca52d4946f4b6ab8f457b1ddfd18080aeccfd86b2fe3c378eb",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 180,
+          "durationMs": 18000,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 137,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.817518,
+        "meanLandHeight": 107.336,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1648.17,
+            1324.92
+          ],
+          [
+            1643.92,
+            1341.81
+          ],
+          [
+            1619.23,
+            1354.17
+          ],
+          [
+            1590.82,
+            1363.56
+          ],
+          [
+            1556.49,
+            1366.29
+          ],
+          [
+            1518.01,
+            1368.24
+          ],
+          [
+            1484.69,
+            1358.4
+          ],
+          [
+            1471.79,
+            1341.28
+          ],
+          [
+            1461.85,
+            1324.92
+          ],
+          [
+            1474.52,
+            1309.09
+          ],
+          [
+            1493.05,
+            1295.34
+          ],
+          [
+            1522.53,
+            1286.7
+          ],
+          [
+            1556.49,
+            1278.03
+          ],
+          [
+            1595.35,
+            1281.18
+          ],
+          [
+            1621.32,
+            1294.69
+          ],
+          [
+            1643.92,
+            1308.03
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1477.07,
+            1317.09
+          ],
+          [
+            1496.93,
+            1319.05
+          ],
+          [
+            1516.78,
+            1313.18
+          ],
+          [
+            1536.63,
+            1311.23
+          ],
+          [
+            1556.49,
+            1313.18
+          ],
+          [
+            1576.34,
+            1311.23
+          ],
+          [
+            1596.19,
+            1311.23
+          ],
+          [
+            1616.05,
+            1322.96
+          ],
+          [
+            1635.9,
+            1317.09
+          ],
+          [
+            1635.9,
+            1340.94
+          ],
+          [
+            1602.55,
+            1354.67
+          ],
+          [
+            1556.49,
+            1360.01
+          ],
+          [
+            1508.84,
+            1353.91
+          ],
+          [
+            1477.07,
+            1340.18
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-docker",
+      "replacementSlotId": "lower-east-dockworks",
+      "sourceFabricPosition": [
+        0.7671,
+        0.8196
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "docker",
+      "label": "Docker",
+      "layoutDistrictId": "infrastructure-works",
+      "localPosition": {
+        "x": 0.678338,
+        "y": 0.7192879999999999
+      },
+      "supersededPlanningPosition": [
+        0.83,
+        0.8
+      ],
+      "elevationBand": 0,
+      "displayWidth": 159,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 185,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "revision": "r4",
+      "productionState": "selected",
+      "frameCount": 169,
+      "durationMs": 16900,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/docker-poster.png",
+      "posterSha256": "49c88be5b19ce562c18b1e92aa0397b7e794df391b7d5e1e166339dd4560b8c9",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.5,
+        0.965625
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/docker-r4.png",
+          "sha256": "18aff84b4489a126ff056fe488c0b42a34e78cce5e011e7b50591fb1fdad9a0a",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 169,
+          "durationMs": 16900,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 129,
+        "landCoverage": 1.0,
+        "buildableCoverage": 1.0,
+        "meanLandHeight": 86.07,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1838.25,
+            1387.51
+          ],
+          [
+            1833.74,
+            1404.84
+          ],
+          [
+            1808.6,
+            1417.63
+          ],
+          [
+            1781.54,
+            1429.76
+          ],
+          [
+            1744.01,
+            1431.45
+          ],
+          [
+            1709.41,
+            1426.45
+          ],
+          [
+            1679.41,
+            1417.63
+          ],
+          [
+            1656.94,
+            1404.32
+          ],
+          [
+            1646.88,
+            1387.51
+          ],
+          [
+            1659.61,
+            1371.21
+          ],
+          [
+            1674.65,
+            1355.17
+          ],
+          [
+            1707.94,
+            1346.91
+          ],
+          [
+            1744.01,
+            1345.36
+          ],
+          [
+            1778.97,
+            1348.15
+          ],
+          [
+            1810.64,
+            1356.44
+          ],
+          [
+            1833.74,
+            1370.18
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1666.54,
+            1374.15
+          ],
+          [
+            1685.91,
+            1387.51
+          ],
+          [
+            1705.27,
+            1385.6
+          ],
+          [
+            1724.64,
+            1377.97
+          ],
+          [
+            1744.01,
+            1381.78
+          ],
+          [
+            1763.37,
+            1376.06
+          ],
+          [
+            1782.74,
+            1377.97
+          ],
+          [
+            1802.11,
+            1377.97
+          ],
+          [
+            1821.47,
+            1374.15
+          ],
+          [
+            1821.47,
+            1403.13
+          ],
+          [
+            1788.94,
+            1416.53
+          ],
+          [
+            1744.01,
+            1421.74
+          ],
+          [
+            1697.53,
+            1415.78
+          ],
+          [
+            1666.54,
+            1402.39
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-vmware",
+      "replacementSlotId": "lower-central-migration-yard",
+      "sourceFabricPosition": [
+        0.6124,
+        0.8749
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "vmware",
+      "label": "VMware",
+      "layoutDistrictId": "infrastructure-works",
+      "localPosition": {
+        "x": 0.5576720000000001,
+        "y": 0.762422
+      },
+      "supersededPlanningPosition": [
+        0.68,
+        0.845
+      ],
+      "elevationBand": 0,
+      "displayWidth": 163,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 190,
+      "footprintFraction": {
+        "width": 0.84,
+        "depth": 0.3
+      },
+      "revision": "r2",
+      "productionState": "selected",
+      "frameCount": 116,
+      "durationMs": 11600,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/vmware-poster.png",
+      "posterSha256": "287862c9dd55fab5d1f61ce8529bb8726909a73b82e72f5ac3f301f07d0ead0f",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.498437,
+        0.967187
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/vmware-r2.png",
+          "sha256": "dafe3455b2c1c9cd7b66f7a9bbada2cfdc1ddd2df9c2db47f8148020706dd2ba",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 116,
+          "durationMs": 11600,
+          "maximumCornerAlpha": 1,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 140,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.828571,
+        "meanLandHeight": 182.979,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1524.47,
+            1470.71
+          ],
+          [
+            1515.75,
+            1486.54
+          ],
+          [
+            1498.6,
+            1500.94
+          ],
+          [
+            1472.26,
+            1514.03
+          ],
+          [
+            1433.77,
+            1517.6
+          ],
+          [
+            1399.07,
+            1509.78
+          ],
+          [
+            1364.76,
+            1502.89
+          ],
+          [
+            1349.98,
+            1486.9
+          ],
+          [
+            1345.05,
+            1470.71
+          ],
+          [
+            1349.07,
+            1454.35
+          ],
+          [
+            1362.67,
+            1437.56
+          ],
+          [
+            1395.29,
+            1427.4
+          ],
+          [
+            1433.77,
+            1428.42
+          ],
+          [
+            1471.12,
+            1428.67
+          ],
+          [
+            1497.91,
+            1440.81
+          ],
+          [
+            1515.75,
+            1454.88
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1354.36,
+            1460.93
+          ],
+          [
+            1374.21,
+            1457.02
+          ],
+          [
+            1394.07,
+            1464.84
+          ],
+          [
+            1413.92,
+            1458.98
+          ],
+          [
+            1433.77,
+            1464.84
+          ],
+          [
+            1453.63,
+            1458.98
+          ],
+          [
+            1473.48,
+            1462.89
+          ],
+          [
+            1493.33,
+            1458.98
+          ],
+          [
+            1513.19,
+            1460.93
+          ],
+          [
+            1513.19,
+            1486.73
+          ],
+          [
+            1479.83,
+            1500.46
+          ],
+          [
+            1433.77,
+            1505.8
+          ],
+          [
+            1386.13,
+            1499.7
+          ],
+          [
+            1354.36,
+            1485.97
+          ]
+        ]
+      }
+    },
+    {
+      "slotId": "skill-macstadium",
+      "replacementSlotId": "lower-east-orchard-cloister",
+      "sourceFabricPosition": [
+        0.7414,
+        0.8967
+      ],
+      "terrainNudgePixels": [
+        0,
+        0
+      ],
+      "skillId": "macstadium",
+      "label": "MacStadium",
+      "layoutDistrictId": "infrastructure-works",
+      "localPosition": {
+        "x": 0.658292,
+        "y": 0.7794260000000001
+      },
+      "supersededPlanningPosition": [
+        0.78,
+        0.9
+      ],
+      "elevationBand": 0,
+      "displayWidth": 167,
+      "slotDisplayScale": 1.0,
+      "unscaledDisplayWidth": 195,
+      "footprintFraction": {
+        "width": 0.86,
+        "depth": 0.32
+      },
+      "revision": "r3",
+      "productionState": "independent-go-metadata-pending",
+      "frameCount": 160,
+      "durationMs": 16000,
+      "zBias": 0,
+      "provisionalSkill": false,
+      "posterPath": "/career-world/capitals/ninjaone/city-r1/posters/macstadium-poster.png",
+      "posterSha256": "5d596cdea4ae141d23e5488ffcab5182d7acdc06d0d7b5cff79f3ff72bf65797",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "groundAnchor": [
+        0.500781,
+        0.975
+      ],
+      "renderMode": "animated-master",
+      "renderLayers": [
+        {
+          "id": "building-master",
+          "path": "/career-world/capitals/ninjaone/city-r1/skill-buildings/macstadium-r3.png",
+          "sha256": "cb9c3b3c416af0847a0d8f66a802a5119b6e1563746ba26f0f2cb6ea0eda521b",
+          "dimensions": [
+            640,
+            640
+          ],
+          "frameCount": 160,
+          "durationMs": 16000,
+          "maximumCornerAlpha": 0,
+          "mode": "RGBA"
+        }
+      ],
+      "assetNodeReady": true,
+      "integrationBlockers": [],
+      "terrainAdmissionPreview": {
+        "sampleCount": 165,
+        "landCoverage": 1.0,
+        "buildableCoverage": 0.981818,
+        "meanLandHeight": 86.152,
+        "landThreshold": 128,
+        "buildableSlopeThreshold": 112
+      },
+      "terrainTransition": {
+        "version": "registered-city-fabric-transition-r1",
+        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "underlayPoints": [
+          [
+            1794.84,
+            1503.51
+          ],
+          [
+            1787.05,
+            1522.54
+          ],
+          [
+            1769.24,
+            1540.81
+          ],
+          [
+            1729.27,
+            1546.67
+          ],
+          [
+            1692.47,
+            1550.23
+          ],
+          [
+            1654.08,
+            1548.53
+          ],
+          [
+            1623.74,
+            1536.9
+          ],
+          [
+            1597.89,
+            1522.54
+          ],
+          [
+            1590.1,
+            1503.51
+          ],
+          [
+            1592.16,
+            1483.33
+          ],
+          [
+            1624.47,
+            1470.48
+          ],
+          [
+            1655.67,
+            1460.35
+          ],
+          [
+            1692.47,
+            1454.79
+          ],
+          [
+            1729.67,
+            1459.89
+          ],
+          [
+            1764.86,
+            1468.35
+          ],
+          [
+            1787.05,
+            1484.48
+          ]
+        ],
+        "foregroundPoints": [
+          [
+            1609.17,
+            1490.69
+          ],
+          [
+            1629.99,
+            1494.96
+          ],
+          [
+            1650.82,
+            1501.38
+          ],
+          [
+            1671.64,
+            1503.51
+          ],
+          [
+            1692.47,
+            1494.96
+          ],
+          [
+            1713.29,
+            1501.38
+          ],
+          [
+            1734.12,
+            1497.1
+          ],
+          [
+            1754.94,
+            1494.96
+          ],
+          [
+            1775.77,
+            1490.69
+          ],
+          [
+            1775.77,
+            1521.02
+          ],
+          [
+            1740.78,
+            1536.03
+          ],
+          [
+            1692.47,
+            1541.86
+          ],
+          [
+            1642.49,
+            1535.19
+          ],
+          [
+            1609.17,
+            1520.19
+          ]
+        ]
+      }
+    }
+  ],
+  "knownBlockers": [
+    "B2/C1/C2 hydrology field hashes are pending; B1 use remains canonical-land-gated",
+    "React, TanStack, and Tool Generation still need accepted animation loops",
+    "AI / Agent Systems is provisional and still needs an accepted animation loop",
+    "train production loop is not present"
+  ]
+}
