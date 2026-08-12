@@ -240,11 +240,6 @@ export const NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES = plateSources(
   "layers.secondaryRelief.sources",
   ["capital", "site", "close"],
 );
-export const NINJAONE_ENVIRONMENT_HYDROLOGY_SOURCES = plateSources(
-  manifest.layers.hydrology.sources,
-  "layers.hydrology.sources",
-  ["capital", "site", "close"],
-);
 export const NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES = plateSources(
   manifest.layers.staticFoliage.sources,
   "layers.staticFoliage.sources",

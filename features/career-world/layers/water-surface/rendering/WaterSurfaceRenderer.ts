@@ -96,7 +96,6 @@ const TEXTURE_PATHS = [
   ["coastGeometry", WATER_ASSETS.coastGeometry.world, "clamp", true, true],
   ["coastMaterial", WATER_ASSETS.coastMaterial, "clamp", true, true],
   ["hydrology", WATER_ASSETS.hydrology, "clamp", true, true],
-  ["waterfallVfx", WATER_ASSETS.waterfallVfx, "clamp", true, false],
 ] as const;
 const DIRECTIONAL_ALBEDO_UNIT = TEXTURE_PATHS.length;
 const NINJAONE_HYDROLOGY_UNITS = Object.freeze([
@@ -112,7 +111,6 @@ const SAMPLER_UNIFORMS = Object.freeze({
   coastGeometry: "u_coastGeometry",
   coastMaterial: "u_coastMaterial",
   hydrology: "u_hydrology",
-  waterfallVfx: "u_waterfallVfx",
 });
 
 const CASCADE_UNIFORM_NAMES = Object.freeze({

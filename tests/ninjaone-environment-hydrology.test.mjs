@@ -1082,6 +1082,11 @@ test("hydrology GLSL keeps body geometry static and separates animated effects",
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float crestFlecks = cascade\.crest/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float fallFilaments = cascade\.fall/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /vec2\(\s*cascade\.fallCoordinates\.x \* 0\.055 - time \* 0\.28,\s*movingSheetAcross \* 0\.055/,
+    "fall breakup must run with the sheet instead of forming cross-channel ladder bands",
+  );
   assert.doesNotMatch(WATER_SHADER_NINJAONE_STREAMS, /impactRing/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactFroth = impactShape/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float downstreamFroth = cascade\.wake/);
@@ -1127,13 +1132,21 @@ test("hydrology GLSL keeps body geometry static and separates animated effects",
     "pixels outside both registered water and bounded cascade VFX must return before noise sampling",
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float cascadeFoamAuthority = mix\(0\.6, 1\.0, cascadePotential\)/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /float analyticSheetAeration = cascade\.fall[\s\S]*float sheetAuthority = max\(registeredAeration, analyticSheetAeration\)/,
+  );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float effectsCompositeCoverage = max/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float sheetEffectsAlpha = analyticEffectsCoverage \* min/);
+  assert.match(
+    WATER_SHADER_NINJAONE_STREAMS,
+    /float sheetEffectsAlpha = analyticEffectsCoverage \* min\(\s*0\.58,\s*fallFilaments \* 0\.9/,
+  );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /min\(\s*0\.68,\s*crestAccent \* 0\.78/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float impactEffectsAlpha = registered \* min/);
   assert.match(
     WATER_SHADER_NINJAONE_STREAMS,
-    /min\(\s*0\.4,\s*max\(\s*impactAccent \* 0\.34/,
+    /float impactShoulderFoam = cascade\.impact[\s\S]*min\(\s*0\.58,\s*max\(\s*impactShoulderFoam \* 0\.78/,
   );
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /result\.effectsAlpha = u_ninjaOneHydrologyOpacity \* max/);
   assert.match(WATER_SHADER_NINJAONE_STREAMS, /float mistCompositeCoverage = max/);
@@ -1145,8 +1158,8 @@ test("hydrology GLSL keeps body geometry static and separates animated effects",
   assert.ok(bodyAlphaBlock);
   assert.doesNotMatch(bodyAlphaBlock[1], /time|heightSample|foam|mist/);
   assert.match(bodyAlphaBlock[1], /dryLipShadowAlpha[\s\S]*\* 0\.22/);
-  assert.match(bodyAlphaBlock[1], /drySheetBodyAlpha[\s\S]*min\(0\.5/);
-  assert.match(bodyAlphaBlock[1], /dryImpactBodyAlpha[\s\S]*min\(0\.34/);
+  assert.match(bodyAlphaBlock[1], /drySheetBodyAlpha[\s\S]*min\(0\.3/);
+  assert.match(bodyAlphaBlock[1], /dryImpactBodyAlpha[\s\S]*min\(0\.18/);
 });
 
 test("foreground hydrology uses canonical land visibility above native terrain", async () => {
@@ -1937,6 +1950,60 @@ test("water runtime binds two verified regional slots without charging shared te
   assert.doesNotMatch(assets, /ninjaOneStreamFlowFallback|NINJAONE_STREAM_FLOW/);
   assert.match(assets, /WATER_RUNTIME_TEXTURE_BUDGET_BYTES = 288 \* 1024 \* 1024/);
   assert.match(assets, /maximumMountedRegions/);
+});
+
+test("regional hydrology has no legacy waterfall raster authority", async () => {
+  const [
+    assets,
+    renderer,
+    commonShader,
+    streamShader,
+    builder,
+    packageJson,
+    manifest,
+  ] = await Promise.all([
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/model/assets.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/shaders/common.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/water-surface/rendering/shaders/ninjaone-streams.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "scripts/build-ninjaone-environment-hydrology-r2.mjs",
+    ), "utf8"),
+    readFile(path.join(root, "package.json"), "utf8").then(JSON.parse),
+    readFile(path.join(
+      root,
+      "public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json",
+    ), "utf8").then(JSON.parse),
+  ]);
+
+  for (const source of [assets, renderer, commonShader, streamShader, builder]) {
+    assert.doesNotMatch(
+      source,
+      /waterfall-vfx|waterfall-reference-template|u_waterfallVfx|waterfallVfx/,
+    );
+  }
+  assert.equal(packageJson.scripts["build:waterfall-vfx"], undefined);
+  assert.equal(manifest.visualReference, undefined);
+  await assert.rejects(
+    access(path.join(
+      root,
+      "public/career-world/layers/water-surface/fields/ninjaone-stream-flow-r1.png",
+    )),
+    /ENOENT/,
+  );
 });
 
 test("numeric upload and decoded-image ownership clean every lifecycle", { concurrency: false }, async () => {

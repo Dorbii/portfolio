@@ -240,8 +240,8 @@ NinjaOneCascadeSample ninjaOneCascadeCandidate(
   float sheetCenterOffset = sin(alongFall * 0.3) * fall.w * 0.08
     + sin(alongFall * 0.13 + 1.7) * fall.w * 0.04;
   float sheetAcross = acrossFall - sheetCenterOffset;
-  float sheetInnerWidth = fall.w * mix(0.14, 0.22, fallProgress);
-  float sheetOuterWidth = fall.w * mix(0.3, 0.46, fallProgress);
+  float sheetInnerWidth = fall.w * mix(0.2, 0.28, fallProgress);
+  float sheetOuterWidth = fall.w * mix(0.42, 0.54, fallProgress);
   result.fall = featureActive
     * fallEnvelope
     * (1.0 - smoother(
@@ -370,13 +370,6 @@ float ninjaOneAdvectedHeight(
   return mix(sampleA, sampleB, blend);
 }
 
-vec4 ninjaOneWaterfallArtSample(vec2 artUv) {
-  float bounds = insideUnitSquare(artUv);
-  vec4 art = texture(u_waterfallVfx, artUv);
-  art.a *= bounds;
-  return art;
-}
-
 NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   NinjaOneStreamSample result;
   result.bodyColor = u_bodyColor;
@@ -455,135 +448,6 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   float alongFlow = dot(pixels, flowAxis);
   float acrossFlow = dot(pixels, crossAxis);
   float time = u_time * u_motion;
-  vec4 waterfallDecalArt = vec4(0.0);
-  float waterfallDecalProgress = 0.0;
-  float waterfallStagePresence = max(
-    max(max(cascade.crest, cascade.fall), cascade.fallShadow),
-    max(max(cascade.impact, cascade.pool), cascade.wake)
-  );
-  if (waterfallStagePresence > 0.001) {
-    float wakeStageProgress = saturate(
-      (cascade.fallCoordinates.x - cascade.fallExtent)
-        / max(cascade.outflowExtent, 1.0)
-    );
-    waterfallDecalProgress = mix(
-      cascade.fallProgress * 0.58,
-      mix(0.58, 1.0, wakeStageProgress),
-      step(cascade.fallExtent - 0.5, cascade.fallCoordinates.x)
-    );
-    float eventWidth = mix(
-      cascade.fallWidth,
-      cascade.poolRadii.y * 1.05,
-      smoother(0.5, 0.78, waterfallDecalProgress)
-    );
-    float waterfallSourceCenter = mix(
-      0.61,
-      0.64,
-      smoother(0.32, 0.74, waterfallDecalProgress)
-    );
-    vec2 waterfallDecalUv = vec2(
-      waterfallSourceCenter
-        + cascade.fallCoordinates.y / max(eventWidth * 1.78, 1.0),
-      waterfallDecalProgress
-    );
-    float decalMotionGate = smoother(0.06, 0.92, waterfallDecalProgress);
-    waterfallDecalUv += vec2(
-      sin(time * 1.35 + waterfallDecalProgress * 19.0) * 0.004,
-      sin(time * 1.7 + waterfallDecalUv.x * 15.0) * 0.003
-    ) * decalMotionGate;
-    waterfallDecalArt = ninjaOneWaterfallArtSample(waterfallDecalUv);
-  }
-  float waterfallOpaqueCore = smoother(0.34, 0.78, waterfallDecalArt.a);
-  float waterfallMajorMist = smoother(0.88, 1.0, cascade.energy);
-  float waterfallImpactMistGate = mix(
-    waterfallMajorMist,
-    1.0,
-    waterfallOpaqueCore
-  );
-  float waterfallDecalAlpha = waterfallDecalArt.a
-    * smoother(0.001, 0.12, waterfallStagePresence)
-    * mix(
-      1.0,
-      waterfallImpactMistGate,
-      smoother(0.5, 0.7, waterfallDecalProgress)
-    );
-  float waterfallSheetArtAlpha = waterfallDecalAlpha
-    * max(max(cascade.crest, cascade.fall), cascade.fallShadow * 0.46)
-    * (1.0 - smoother(0.56, 0.7, waterfallDecalProgress));
-  float waterfallImpactArtAlpha = waterfallDecalAlpha
-    * max(cascade.impact, cascade.pool * 0.48)
-    * smoother(0.5, 0.62, waterfallDecalProgress)
-    * (1.0 - smoother(0.74, 0.9, waterfallDecalProgress))
-    * 0.42;
-  float waterfallWakeArtAlpha = waterfallDecalAlpha
-    * max(cascade.wake, cascade.pool * 0.22)
-    * smoother(0.68, 0.8, waterfallDecalProgress)
-    * mix(0.34, 1.0, whitewaterPotential);
-  float waterfallArtAlpha = saturate(max(
-    waterfallSheetArtAlpha,
-    max(waterfallImpactArtAlpha, waterfallWakeArtAlpha)
-  )) * mix(0.72, 1.0, cascade.energy);
-  float waterfallArtWeight = waterfallSheetArtAlpha
-    + waterfallImpactArtAlpha
-    + waterfallWakeArtAlpha;
-  float waterfallSheetLuma = dot(
-    waterfallDecalArt.rgb,
-    vec3(0.2126, 0.7152, 0.0722)
-  );
-  float waterfallImpactLuma = waterfallSheetLuma;
-  float waterfallWakeLuma = waterfallSheetLuma;
-  float waterfallSheetFoam = smoother(0.14, 0.5, waterfallSheetLuma);
-  float waterfallImpactFoam = smoother(0.16, 0.56, waterfallImpactLuma);
-  float waterfallWakeFoam = smoother(0.16, 0.52, waterfallWakeLuma);
-  vec3 waterfallSheetColor = mix(
-    mix(u_stormColor, u_swellColor, 0.58),
-    waterfallDecalArt.rgb,
-    0.32 + waterfallSheetFoam * 0.46
-  );
-  vec3 waterfallImpactColor = mix(
-    mix(u_stormColor, u_swellColor, 0.42),
-    waterfallDecalArt.rgb,
-    0.42 + waterfallImpactFoam * 0.38
-  );
-  vec3 waterfallWakeColor = mix(
-    u_deepColor,
-    waterfallDecalArt.rgb,
-    0.32 + waterfallWakeFoam * 0.34
-  );
-  vec3 waterfallArtColor = (
-    waterfallSheetColor * waterfallSheetArtAlpha
-      + waterfallImpactColor * waterfallImpactArtAlpha
-      + waterfallWakeColor * waterfallWakeArtAlpha
-  ) / max(waterfallArtWeight, 0.001);
-  float waterfallArtLuma = dot(
-    waterfallArtColor,
-    vec3(0.2126, 0.7152, 0.0722)
-  );
-  float waterfallArtAeration = max(
-    waterfallSheetArtAlpha * waterfallSheetFoam,
-    max(
-      waterfallImpactArtAlpha * waterfallImpactFoam,
-      waterfallWakeArtAlpha * waterfallWakeFoam
-    )
-  );
-  float waterfallArtBodyBlend = saturate(
-    waterfallSheetArtAlpha * 0.68
-      + waterfallImpactArtAlpha * 0.78
-      + waterfallWakeArtAlpha * 0.5
-  );
-  float waterfallDisplayFoam = max(
-    waterfallSheetFoam,
-    max(waterfallImpactFoam, waterfallWakeFoam)
-  );
-  vec3 waterfallArtDisplayColor = mix(
-    mix(
-      mix(u_stormColor, u_swellColor, 0.62),
-      mix(u_swellColor, u_foamColor, 0.72),
-      waterfallDisplayFoam
-    ),
-    waterfallDecalArt.rgb,
-    0.62
-  );
   float transport = time * u_riverSurfaceProfile.x
     * mix(0.18, 1.0, smoother(0.02, 0.34, speed));
   float tarnDistance = length(
@@ -644,6 +508,9 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   float broadSignedFlow = (broadFlowSignal - 0.5) * 2.0 * runStrength;
   float broadCurrentLight = max(broadSignedFlow, 0.0);
   float broadCurrentDark = max(-broadSignedFlow, 0.0);
+  float flowRibbon = saturate((broadFlowSignal - 0.3) * 1.4)
+    * flowEnergy
+    * activeFlow;
 
   float bankContact = bodyCoverage
     * (1.0 - smoother(0.08, 0.46, visualDepth));
@@ -686,23 +553,26 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     mix(u_shallowColor, u_highlightColor, 0.26),
     wetBankGlint * 0.22
   );
-  bodyColor = mix(bodyColor, u_deepColor, broadCurrentDark * 0.18);
+  bodyColor = mix(bodyColor, u_deepColor, broadCurrentDark * 0.2);
   bodyColor = mix(
     bodyColor,
     mix(u_swellColor, u_highlightColor, 0.14),
-    broadCurrentLight * 0.16
+    broadCurrentLight * 0.22
+  );
+  bodyColor = mix(
+    bodyColor,
+    mix(u_swellColor, u_highlightColor, 0.24),
+    flowRibbon * 0.18
   );
   float microSheen = smoother(0.48, 0.72, microSignal)
     * materialBreakup
-    * speed
-    * eventSupport
-    * 0.004;
+    * flowEnergy
+    * activeFlow
+    * (1.0 - tarn * 0.55)
+    * 0.1;
   bodyColor = mix(bodyColor, u_highlightColor, microSheen);
 
-  float currentRibbon = saturate((broadFlowSignal - 0.28) * 1.4)
-    * flowEnergy
-    * eventSupport
-    * activeFlow;
+  float currentRibbon = flowRibbon * mix(0.36, 1.0, eventSupport);
   float hydraulicCompression = cascadePotential
     * speed
     * (1.0 - max(cascade.crest, cascade.impact) * 0.62);
@@ -738,11 +608,6 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     bodyColor,
     mix(u_stormColor, u_deepColor, 0.76),
     sheetCavity * 0.72
-  );
-  bodyColor = mix(
-    bodyColor,
-    mix(u_stormColor, u_deepColor, 0.62),
-    waterfallArtAlpha * 0.18
   );
   float lipUndercut = cascade.fall
     * (1.0 - smoother(0.03, 0.16, cascade.fallProgress))
@@ -828,8 +693,8 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     localSheetNoise = heightSample(
       u_macroHeight,
       vec2(
-        movingSheetAcross * 0.12,
-        cascade.fallCoordinates.x * 0.055 - time * 0.28
+        cascade.fallCoordinates.x * 0.055 - time * 0.28,
+        movingSheetAcross * 0.055
       ) + vec2(0.31, 0.47)
     );
     localImpactNoise = heightSample(
@@ -848,10 +713,17 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   float registeredAeration = smoother(
     0.08,
     0.5,
-    max(whitewaterPotential, waterfallArtAeration)
+    max(whitewaterPotential, cascadePotential * 0.38)
   );
-  float sheetTexture = registeredAeration
-    * mix(0.82, 1.0, sheetBreakup)
+  // Auxiliary fields are intentionally clipped to registered water. The
+  // falling veil crosses the dry cliff face, so its descriptor must carry a
+  // bounded aeration floor there or the waterfall becomes a dark decal.
+  float analyticSheetAeration = cascade.fall
+    * mix(0.56, 0.92, sheetBreakup)
+    * mix(0.74, 1.0, cascade.energy);
+  float sheetAuthority = max(registeredAeration, analyticSheetAeration);
+  float sheetTexture = sheetAuthority
+    * mix(0.44, 1.0, sheetBreakup)
     * (1.0 - smoother(0.42, 0.7, abs(normalizedSheetAcross)));
   float sheetAeration = mix(0.68, 1.0, cascade.fallProgress);
   float sheetLaunch = mix(
@@ -885,7 +757,7 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     * mix(0.22, 1.0, pow(localImpactNoise, 1.6))
     * mix(0.72, 1.0, cascade.energy);
   float impactShape = cascade.impact
-    * waterfallArtAeration
+    * registeredAeration
     * mix(0.64, 1.0, impactBreakup);
   impactShape = max(
     impactShape,
@@ -928,32 +800,20 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     * sheetAeration
     * sheetLaunch
     * mix(1.05, 1.45, u_waterfallSheetProfile.z);
-  fallFilaments = max(
-    fallFilaments * 0.52,
-    waterfallSheetArtAlpha
-      * waterfallSheetFoam
-      * mix(0.28, 1.0, pow(localSheetNoise, 2.2))
-      * 0.42
-  );
+  fallFilaments *= 0.86;
   float impactFroth = impactShape
     * impactFoamAuthority
     * mix(0.78, 1.0, cascade.energy)
     * mix(0.7, 1.0, impactRhythm)
     * mix(0.9, 1.3, u_waterfallImpactProfile.z);
-  impactFroth = max(
-    impactFroth * 0.56,
-    waterfallImpactArtAlpha * waterfallImpactFoam * 0.82
-  );
+  impactFroth *= 0.56;
   float downstreamFroth = cascade.wake
     * whitewaterPotential
     * mix(0.46, 1.0, wakeRhythm * 0.6 + localImpactNoise * 0.4)
     * mix(0.4, 1.0, wakeShoulders)
     * (1.0 - cascade.wakeCoordinates.x * 0.42)
     * u_waterfallImpactProfile.w;
-  downstreamFroth = max(
-    downstreamFroth * 0.62,
-    waterfallWakeArtAlpha * waterfallWakeFoam * 0.68
-  );
+  downstreamFroth *= 0.62;
   float foamVolume = saturate(
     fieldFoam * 0.24
       + obstacleFoam * 0.42
@@ -967,7 +827,7 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   );
   float analyticDrySheet = cascade.fall
     * (1.0 - smoother(0.68, 1.0, abs(normalizedSheetAcross)))
-    * mix(0.38, 1.0, pow(localSheetNoise, 1.7));
+    * mix(0.18, 1.0, pow(localSheetNoise, 1.7));
   float sheetBodyPresence = analyticDrySheet
     * mix(0.72, 1.0, cascade.energy);
   bodyColor = mix(
@@ -976,14 +836,16 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     sheetBodyPresence * 0.62
   );
   float drySheetBody = (1.0 - bodyCoverage)
-    * max(waterfallSheetArtAlpha, analyticDrySheet * 0.68)
+    * analyticDrySheet
+    * 0.68
     * registered;
   float drySheetShadow = (1.0 - bodyCoverage)
     * cascade.fallShadow
     * mix(0.74, 1.0, cascade.energy)
     * registered;
   float dryImpactBody = (1.0 - bodyCoverage)
-    * waterfallImpactArtAlpha
+    * cascade.impact
+    * registeredAeration
     * registered;
   float dryPoolWetContact = (1.0 - bodyCoverage)
     * cascade.pool
@@ -996,21 +858,13 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   );
   bodyColor = mix(
     bodyColor,
-    mix(u_stormColor, u_deepColor, 0.68),
-    drySheetBody * 0.72
+    mix(u_stormColor, u_swellColor, 0.3),
+    drySheetBody * 0.4
   );
   bodyColor = mix(
     bodyColor,
     mix(u_stormColor, u_deepColor, 0.74),
     dryPoolWetContact * 0.18
-  );
-  float waterfallArtPulse = 0.86 + 0.14 * (
-    sin(cascade.fallProgress * 16.0 - time * 1.35) * 0.5 + 0.5
-  );
-  bodyColor = mix(
-    bodyColor,
-    waterfallArtDisplayColor * waterfallArtPulse,
-    waterfallArtAlpha * 0.76
   );
   float receivingPocket = max(
     cascade.pool * 0.56,
@@ -1038,12 +892,11 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     mix(u_deepColor, u_stormColor, 0.52),
     lipUndercut * 0.82
   );
-  float waterfallCrestWhite = cascade.crest
-    * waterfallSheetArtAlpha
-    * mix(0.34, 1.0, waterfallSheetFoam)
+  float fieldCrestWhite = cascade.crest
+    * registeredAeration
     * mix(0.72, 1.0, cascade.energy);
-  float waterfallImpactWhite = waterfallImpactArtAlpha
-    * mix(0.24, 1.0, waterfallImpactFoam)
+  float fieldImpactWhite = cascade.impact
+    * registeredAeration
     * mix(0.72, 1.0, cascade.energy);
   float waterfallTexturedImpact = cascade.impact
     * smoother(0.22, 0.6, impactComposite)
@@ -1054,13 +907,31 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     * (1.0 - smoother(0.44, 0.7, cascade.impactRadius))
     * mix(0.22, 1.0, pow(impactComposite, 1.6))
     * mix(0.72, 1.0, cascade.energy);
+  vec2 impactCrossAxis = vec2(
+    -cascade.fallDirection.y,
+    cascade.fallDirection.x
+  );
+  float impactAlongNormalized = dot(
+    cascade.impactDelta,
+    cascade.fallDirection
+  ) / max(cascade.impactRadii.x, 1.0);
+  float impactAcrossNormalized = dot(
+    cascade.impactDelta,
+    impactCrossAxis
+  ) / max(cascade.impactRadii.y, 1.0);
+  float impactShoulderFoam = cascade.impact
+    * smoother(0.08, 0.28, abs(impactAcrossNormalized))
+    * (1.0 - smoother(0.5, 0.88, abs(impactAcrossNormalized)))
+    * (1.0 - smoother(0.16, 0.7, abs(impactAlongNormalized)))
+    * mix(0.42, 1.0, impactComposite)
+    * mix(0.72, 1.0, cascade.energy);
   bodyColor = mix(
     bodyColor,
     mix(u_swellColor, u_foamColor, 0.58),
     min(
       0.68,
-      waterfallCrestWhite * 0.52
-        + waterfallImpactWhite * 0.24
+      fieldCrestWhite * 0.52
+        + fieldImpactWhite * 0.24
         + crestAccent * 0.96
         + impactAccent * 0.9
         + compactImpact * 0.82
@@ -1069,8 +940,8 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     )
   );
   float aeratedSheetVeil = cascade.fall
-    * waterfallArtAeration
-    * mix(0.12, 0.22, sheetBreakup)
+    * sheetAuthority
+    * mix(0.18, 0.34, sheetBreakup)
     * mix(0.7, 1.0, cascade.energy);
   bodyColor = mix(
     bodyColor,
@@ -1089,9 +960,9 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
   vec3 aeratedWhite = mix(u_foamColor, u_highlightColor, 0.28);
   vec3 genericEffectsColor = mix(u_highlightColor, u_foamColor, 0.24);
   vec3 cascadeEffectsColor = mix(
-    mix(u_stormColor, u_swellColor, 0.42),
+    mix(u_swellColor, u_foamColor, 0.56),
     aeratedWhite,
-    smoother(0.18, 0.86, aeratedWater) * 0.86
+    smoother(0.04, 0.62, aeratedWater) * 0.72
   );
   float cascadeColorPresence = max(
     max(cascade.crest, cascade.fall),
@@ -1113,14 +984,17 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     crestAccent * 0.78
   );
   float sheetEffectsAlpha = analyticEffectsCoverage * min(
-    0.34,
-    fallFilaments * 0.78
-  ) * mix(1.0, 0.24, waterfallArtAlpha);
+    0.58,
+    fallFilaments * 0.9
+  );
   float impactEffectsAlpha = registered * min(
-    0.4,
+    0.58,
     max(
-      impactAccent * 0.34,
-      max(compactImpact * 0.3, impactCollar * 0.38)
+      impactShoulderFoam * 0.78,
+      max(
+        impactAccent * 0.46,
+        max(compactImpact * 0.26, impactCollar * 0.5)
+      )
     )
   );
   float wakeEffectsAlpha = effectsCoverage * min(
@@ -1173,8 +1047,8 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
 
   result.bodyColor = bodyColor;
   float registeredBodyOpacity = mix(
-    0.56,
-    0.9,
+    0.34,
+    0.68,
     smoother(0.035, 0.62, visualDepth)
   );
   float registeredBodyAlpha = bodyCoverage
@@ -1185,18 +1059,15 @@ NinjaOneStreamSample sampleNinjaOneStreams(vec2 worldUv) {
     * u_ninjaOneHydrologyOpacity
     * 0.22;
   float drySheetBodyAlpha = u_ninjaOneHydrologyOpacity
-    * min(0.5, drySheetBody * 0.72);
+    * min(0.3, drySheetBody * 0.42);
   float drySheetShadowAlpha = u_ninjaOneHydrologyOpacity
     * min(0.34, drySheetShadow * 0.42);
   float dryImpactBodyAlpha = u_ninjaOneHydrologyOpacity
-    * min(0.34, dryImpactBody * 0.58);
+    * min(0.18, dryImpactBody * 0.3);
   float dryPoolContactAlpha = u_ninjaOneHydrologyOpacity
     * min(0.12, dryPoolWetContact * 0.12);
-  float waterfallArtBodyAlpha = waterfallArtAlpha
-    * u_ninjaOneHydrologyOpacity
-    * 0.84;
   result.bodyAlpha = max(
-    max(registeredBodyAlpha, waterfallArtBodyAlpha),
+    registeredBodyAlpha,
     max(
       dryLipShadowAlpha,
       max(

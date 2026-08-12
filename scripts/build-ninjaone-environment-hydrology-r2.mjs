@@ -27,10 +27,6 @@ const MANIFEST_PATH = path.join(
   "public/career-world/capitals/ninjaone/environment/manifests/"
     + "hydrology-native-r2.json",
 );
-const WATERFALL_REFERENCE_TEMPLATE_PATH = path.join(
-  ROOT,
-  "art-source/career-world/water-surface/waterfall-reference-template-r1.png",
-);
 
 export const HYDROLOGY_ARTBOARD = Object.freeze([1440, 1080]);
 export const HYDROLOGY_FIELD_DIMENSIONS = Object.freeze([2880, 2160]);
@@ -615,46 +611,6 @@ function cascadeNoise(x, y, seed) {
     + valueNoise2(x * 4.11 - 2.6, y * 4.11 + 5.3, seed + 43) * 0.14;
 }
 
-function sampleWaterfallReference(reference, u, v) {
-  const x = clamp(u) * (reference.width - 1);
-  const y = clamp(v) * (reference.height - 1);
-  const x0 = Math.floor(x);
-  const y0 = Math.floor(y);
-  const x1 = Math.min(reference.width - 1, x0 + 1);
-  const y1 = Math.min(reference.height - 1, y0 + 1);
-  const tx = x - x0;
-  const ty = y - y0;
-  const result = [0, 0, 0, 0];
-  for (let channel = 0; channel < 4; channel += 1) {
-    const top = reference.data[(y0 * reference.width + x0) * 4 + channel] * (1 - tx)
-      + reference.data[(y0 * reference.width + x1) * 4 + channel] * tx;
-    const bottom = reference.data[(y1 * reference.width + x0) * 4 + channel] * (1 - tx)
-      + reference.data[(y1 * reference.width + x1) * 4 + channel] * tx;
-    result[channel] = (top * (1 - ty) + bottom * ty) / 255;
-  }
-  return result;
-}
-
-async function loadWaterfallReference() {
-  const sourceBytes = await readFile(WATERFALL_REFERENCE_TEMPLATE_PATH);
-  const { data, info } = await sharp(sourceBytes)
-    .extract({ height: 512, left: 256, top: 0, width: 256 })
-    .resize(128, 256, { fit: "fill", kernel: "lanczos3" })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  if (info.width !== 128 || info.height !== 256 || info.channels !== 4) {
-    throw new Error("Waterfall reference must resolve to one 128 x 256 RGBA plane.");
-  }
-  return Object.freeze({
-    data,
-    height: info.height,
-    sourceDigest: sha256(sourceBytes),
-    sourcePath: `/${path.relative(ROOT, WATERFALL_REFERENCE_TEMPLATE_PATH).replaceAll("\\", "/")}`,
-    width: info.width,
-  });
-}
-
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
 }
@@ -1107,7 +1063,7 @@ function cascadeSupport(cascade, x, y) {
   };
 }
 
-function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReference) {
+function cascadeAerationDetail(cascade, support, cascadeIndex) {
   const supportPresence = Math.max(
     support.approach,
     support.crest,
@@ -1117,16 +1073,8 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
     support.outflow,
     support.pool,
   );
-  if (supportPresence <= 0.0001) {
-    return Object.freeze({
-      aeration: 0,
-      body: 0,
-      color: Object.freeze([0, 0, 0]),
-      coverage: 0,
-      impact: 0,
-      mist: 0,
-    });
-  }
+  if (supportPresence <= 0.0001) return 0;
+
   const seed = 173 + cascadeIndex * 271;
   const fallWidth = Math.max(cascade.fall.widthPixels, 1);
   const acrossUnit = support.across / fallWidth;
@@ -1139,61 +1087,17 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
     support.along * 0.07,
     seed + 17,
   );
-  const referenceSheetColor = sampleWaterfallReference(
-      waterfallReference,
-      0.5 + acrossUnit * 0.9,
-      0.18 + progress * 0.46,
+  const sheetProfile = inverseSmoothstep(
+    0.2,
+    0.52,
+    Math.abs(acrossUnit - sheetWarp),
   );
-  const referenceSheetLuma = referenceSheetColor[0] * 0.2126
-    + referenceSheetColor[1] * 0.7152
-    + referenceSheetColor[2] * 0.0722;
-  const referenceSheet = smoothstep(
-    0.1,
-    0.58,
-    referenceSheetLuma,
-  );
-  const primaryCenter = sheetWarp
-    + Math.sin(support.along * 0.17 + cascadeIndex * 1.9) * 0.055;
-  const primaryBreakup = 0.24 + smoothstep(
-    0.3,
-    0.7,
-    cascadeNoise(
-      support.along * 0.12,
-      support.across * 0.09,
-      seed + 37,
-    ),
-  ) * 0.76;
-  const primaryStreak = inverseSmoothstep(
-    0.055,
-    0.19,
-    Math.abs(acrossUnit - primaryCenter),
-  ) * primaryBreakup;
-  const secondaryCenter = -0.27
-    + Math.sin(support.along * 0.105 + 1.4 + cascadeIndex) * 0.09
-    + sheetWarp * 0.42;
-  const secondaryStreak = inverseSmoothstep(
-    0.045,
-    0.14,
-    Math.abs(acrossUnit - secondaryCenter),
-  ) * intervalSupport(progress, 0.14, 0.86, 0.12)
-    * smoothstep(
-      0.38,
-      0.7,
-      cascadeNoise(
-        support.along * 0.1,
-        support.across * 0.15,
-        seed + 61,
-      ),
-    );
-  const brokenVeil = 0.015
-    + progress * 0.045
-    + smoothstep(0.46, 0.76, sheetNoise) * 0.1;
-  const fall = support.fall * clamp(
-    brokenVeil
-      + primaryStreak * 0.34
-      + secondaryStreak * 0.2
-      + referenceSheet * 0.72,
-  );
+  const sheetBreakup = 0.18
+    + smoothstep(0.28, 0.72, sheetNoise) * 0.58;
+  const fall = support.fall
+    * sheetProfile
+    * sheetBreakup
+    * (0.72 + progress * 0.28);
 
   const crestNoise = cascadeNoise(
     support.across * 0.18,
@@ -1209,25 +1113,7 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
     support.impactAlong * 0.13,
     seed + 109,
   );
-  const referenceImpactColor = sampleWaterfallReference(
-    waterfallReference,
-    0.5 + support.impactAcross
-      / Math.max(cascade.impact.radiiPixels[1], 1) * 0.36,
-    0.66 + support.impactAlong
-      / Math.max(cascade.impact.radiiPixels[0], 1) * 0.13,
-  );
-  const referenceImpactLuma = referenceImpactColor[0] * 0.2126
-    + referenceImpactColor[1] * 0.7152
-    + referenceImpactColor[2] * 0.0722;
-  const referenceImpact = smoothstep(
-    0.1,
-    0.54,
-    referenceImpactLuma,
-  );
-  const impactPattern = Math.max(
-    smoothstep(0.42, 0.74, impactNoise) * 0.55,
-    referenceImpact,
-  );
+  const impactPattern = 0.22 + smoothstep(0.34, 0.74, impactNoise) * 0.78;
   const impactCore = support.impact * impactPattern;
   const asymmetricSplash = support.impact
     * inverseSmoothstep(
@@ -1248,65 +1134,14 @@ function cascadeAerationDetail(cascade, support, cascadeIndex, waterfallReferenc
   const recovery = Math.max(support.pool * 0.18, support.outflow * 0.12)
     * smoothstep(0.36, 0.72, recoveryNoise);
 
-  const bodyNoise = cascadeNoise(
-    support.across * 0.07,
-    support.along * 0.045,
-    seed + 191,
-  );
-  const bodyCenter = sheetWarp
-    + Math.sin(support.along * 0.11 + seed * 0.013) * 0.045;
-  const bodyHalfWidth = 0.31
-    + progress * 0.055
-    + (bodyNoise - 0.5) * 0.075;
-  const sheetBody = intervalSupport(
-    support.along,
-    0,
-    cascade.fall.extentPixels,
-    1.5,
-  ) * inverseSmoothstep(
-    bodyHalfWidth * 0.72,
-    bodyHalfWidth,
-    Math.abs(acrossUnit - bodyCenter),
-  ) * (0.62 + bodyNoise * 0.22 + referenceSheet * 0.16);
-  const impactBody = support.impact * (0.3 + impactNoise * 0.24);
-  const mistNoise = cascadeNoise(
-    support.impactAcross * 0.08,
-    support.impactAlong * 0.07,
-    seed + 229,
-  );
-  const sheetCoverage = sheetBody * 0.82;
-  const impactCoverage = Math.max(
-    impactCore * 0.7,
-    asymmetricSplash * 0.78,
-  );
-  const useImpactReference = impactCoverage > sheetCoverage;
-  const referenceColor = useImpactReference
-    ? referenceImpactColor
-    : referenceSheetColor;
-
-  return Object.freeze({
-    aeration: clamp(Math.max(
-      support.approach * 0.08 * smoothstep(0.34, 0.7, sheetNoise),
-      crest,
-      fall,
-      impactCore,
-      asymmetricSplash,
-      recovery,
-    )),
-    body: clamp(Math.max(
-      support.crest * 0.3,
-      sheetBody,
-      impactBody,
-    )),
-    color: Object.freeze(referenceColor.slice(0, 3)),
-    coverage: clamp(Math.max(sheetCoverage, impactCoverage)),
-    impact: clamp(Math.max(
-      impactCore * 0.78,
-      asymmetricSplash,
-      recovery * 0.42,
-    )),
-    mist: clamp(support.mist * (0.28 + mistNoise * 0.72)),
-  });
+  return clamp(Math.max(
+    support.approach * 0.08 * smoothstep(0.34, 0.7, sheetNoise),
+    crest,
+    fall,
+    impactCore,
+    asymmetricSplash,
+    recovery,
+  ));
 }
 
 function obstacleSupport(obstacle, x, y) {
@@ -1358,7 +1193,6 @@ function obstacleSupport(obstacle, x, y) {
 function applyHydraulicEventFields(
   field,
   auxiliary,
-  waterfallReference,
   width,
   height,
   scale,
@@ -1393,12 +1227,11 @@ function applyHydraulicEventFields(
           cascade,
           support,
           cascadeIndex,
-          waterfallReference,
         );
         if (!occupied) continue;
         const cascadeWhitewater = Math.max(
           support.approach * 0.06,
-          authoredAeration.aeration * (0.68 + fallEnergy * 0.3),
+          authoredAeration * (0.68 + fallEnergy * 0.3),
           support.crest * (0.16 + fallEnergy * 0.1),
           support.impact * (0.12 + fallEnergy * 0.08),
           support.pool * fallEnergy * 0.08,
@@ -1708,10 +1541,7 @@ function serializableSegment(segment) {
 
 export async function buildNinjaOneEnvironmentHydrologyR2() {
   const [fieldWidth, fieldHeight] = HYDROLOGY_FIELD_DIMENSIONS;
-  const [nativeSources, waterfallReference] = await Promise.all([
-    loadNativeSourceField(fieldWidth, fieldHeight),
-    loadWaterfallReference(),
-  ]);
+  const nativeSources = await loadNativeSourceField(fieldWidth, fieldHeight);
   const sourceField = nativeSources.field;
   const connectedNativeEvidence = buildConnectedNativeEvidenceField(
     sourceField,
@@ -1788,7 +1618,6 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
   applyHydraulicEventFields(
     field,
     auxiliaryField,
-    waterfallReference,
     fieldWidth,
     fieldHeight,
     scaleX,
@@ -1945,11 +1774,6 @@ export async function buildNinjaOneEnvironmentHydrologyR2() {
       path: nativeSources.sourcePath,
       role: "accepted rendered topology used only to derive registered water and water-connected foam coverage",
       sha256: nativeSources.sourceDigest,
-    }),
-    visualReference: Object.freeze({
-      path: waterfallReference.sourcePath,
-      role: "style-only waterfall reference sampled into descriptor-bounded aeration support; never a terrain or mask authority",
-      sha256: waterfallReference.sourceDigest,
     }),
     registration: Object.freeze({
       artboardDimensions: HYDROLOGY_ARTBOARD,

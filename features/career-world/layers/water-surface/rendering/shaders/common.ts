@@ -119,7 +119,6 @@ uniform sampler2D u_microHeight;
 uniform sampler2D u_coastGeometry;
 uniform sampler2D u_coastMaterial;
 uniform sampler2D u_hydrology;
-uniform sampler2D u_waterfallVfx;
 uniform sampler2D u_ninjaOneStreamFlow0;
 uniform sampler2D u_ninjaOneStreamFlow1;
 

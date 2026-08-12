@@ -43,9 +43,9 @@ test("topography and territory QA remain independent interface diagnostics", asy
     root,
     "features/career-world/development/DevelopmentOverlay.tsx",
   ), "utf8");
-  const preview = await readFile(path.join(
+  const rootPage = await readFile(path.join(
     root,
-    "app/career-world/previews/territory-landform/page.tsx",
+    "app/page.tsx",
   ), "utf8");
 
   assert.match(scene, /showTopography/);
@@ -61,7 +61,10 @@ test("topography and territory QA remain independent interface diagnostics", asy
   assert.match(overlay, /showTopography\s*\?/);
   assert.match(overlay, /showTerritories\s*\?/);
   assert.match(overlay, /showGrid\s*\?/);
-  assert.match(preview, /<CareerWorld enableDevelopmentTools \/>/);
+  assert.match(
+    rootPage,
+    /case "territory-landform":[\s\S]*?<CareerWorld enableDevelopmentTools \/>/,
+  );
 });
 
 test("five focus views remain valid crops of one world plane", async () => {
@@ -272,7 +275,7 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   );
   assert.match(
     waterController,
-    /setView\(camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState,\s*nativeHydrologyAdmission\);[\s\S]*this\.renderOnce\(\);/,
+    /setView\(\s*camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState,\s*nativeHydrologyAdmission\);[\s\S]*this\.renderOnce\(\);/,
   );
   assert.match(land, /useLayoutEffect\(\(\) => \{/);
   assert.match(land, /detailState\.renderScale/);

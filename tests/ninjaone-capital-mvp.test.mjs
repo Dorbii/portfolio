@@ -246,7 +246,7 @@ test("the isolated MVP route preserves explicit ownership and excludes legacy ci
   const [page, scene, renderer, model] = await Promise.all([
     readFile(path.join(
       root,
-      "app/career-world/previews/ninjaone-capital-mvp/page.tsx",
+      "app/page.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
@@ -262,7 +262,10 @@ test("the isolated MVP route preserves explicit ownership and excludes legacy ci
     ), "utf8"),
   ]);
 
-  assert.match(page, /<CareerWorld capitalMvp enableDevelopmentTools \/>/);
+  assert.match(
+    page,
+    /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld capitalMvp enableDevelopmentTools \/>/,
+  );
   assert.match(scene, /topologyProof \? \([\s\S]*: capitalMvp \? \(/);
   assert.match(scene, /<NinjaOneCapitalMvp[\s\S]*light=\{WORLD_LIGHT\}/);
   assert.match(scene, /!topologyProof && !capitalMvp/);

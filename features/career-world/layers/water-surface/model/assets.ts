@@ -1,4 +1,7 @@
 import hydrologyManifest from "../../../../../public/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json" with { type: "json" };
+import coastGeometryManifest from "../../../../../public/career-world/layers/water-surface/manifests/coast-geometry-r5.json" with { type: "json" };
+import coastMaterialManifest from "../../../../../public/career-world/layers/water-surface/manifests/coast-material-field-r6.json" with { type: "json" };
+import waterRegionManifest from "../../../../../public/career-world/layers/water-surface/manifests/water-region-field-r3.json" with { type: "json" };
 import { defineLayerDetailContract } from "../../../shared/lod.ts";
 
 const WORLD_ALBEDO =
@@ -9,12 +12,10 @@ const MACRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-macro-r1-1024x1024.png";
 const MICRO_HEIGHT =
   "/career-world/layers/water-surface/fields/water-height-micro-r1-1024x1024.png";
-const WATERFALL_VFX_SPRITE =
-  "/career-world/layers/water-surface/fields/waterfall-vfx-sprite-r1-384x512.png";
 const COAST_GEOMETRY_WORLD =
-  "/career-world/layers/water-surface/fields/coast-geometry-r5.png?v=ninjaone-coast-r2";
+  `/career-world/layers/water-surface/fields/coast-geometry-r5.png?v=${coastGeometryManifest.texture.sha256.slice(0, 12).toLowerCase()}`;
 const COAST_GEOMETRY_TERRITORY =
-  "/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png?v=ninjaone-coast-r2";
+  `/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png?v=${coastGeometryManifest.detailTexture.sha256.slice(0, 12).toLowerCase()}`;
 export type NinjaOneHydrologyTierId = "detail" | "fallback";
 
 export interface NinjaOneHydrologyRegionResource {
@@ -415,7 +416,6 @@ export const WATER_RUNTIME_TEXTURE_BUDGET_BYTES = 288 * 1024 * 1024;
 export const WATER_TERRITORY_TEXTURE_DIMENSIONS = Object.freeze({
   coastGeometry: Object.freeze([6688, 3764] as const),
   directionalAlbedo: Object.freeze([3840, 2160] as const),
-  waterfallVfx: Object.freeze([384, 512] as const),
 });
 
 export const WATER_TERRITORY_DETAIL = Object.freeze({
@@ -429,15 +429,14 @@ export const WATER_ASSETS = Object.freeze({
   directionalAlbedo: DIRECTIONAL_ALBEDO,
   macroHeight: MACRO_HEIGHT,
   microHeight: MICRO_HEIGHT,
-  waterfallVfx: WATERFALL_VFX_SPRITE,
   coastGeometry: Object.freeze({
     world: COAST_GEOMETRY_WORLD,
     territory: COAST_GEOMETRY_TERRITORY,
   }),
   coastMaterial:
-    "/career-world/layers/water-surface/fields/coast-material-field-r6.png?v=ninjaone-coast-r2",
+    `/career-world/layers/water-surface/fields/coast-material-field-r6.png?v=${coastMaterialManifest.texture.sha256.slice(0, 12).toLowerCase()}`,
   hydrology:
-    "/career-world/layers/water-surface/fields/water-region-field-r3.png?v=ninjaone-coast-r2",
+    `/career-world/layers/water-surface/fields/water-region-field-r3.png?v=${waterRegionManifest.texture.sha256.slice(0, 12).toLowerCase()}`,
 });
 
 export const WATER_DETAIL_CONTRACT = defineLayerDetailContract({

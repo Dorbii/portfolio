@@ -110,35 +110,6 @@
         }
       }
     },
-    "hydrology": {
-      "ownership": "terrain-following streams, cascades, banks, and basin tarn",
-      "sources": {
-        "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-capital-r1.webp",
-          "dimensions": [
-            1440,
-            1080
-          ],
-          "sha256": "336BB9AE6668BDB354C8DD27EC82BCD07B635B3DC7ABA827CC05D07B4FBCBC73"
-        },
-        "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-site-r1.webp",
-          "dimensions": [
-            2160,
-            1620
-          ],
-          "sha256": "6D91B3A6F6C3786F490CA4FD6666B4601D399F61A06876FFB8501CEE6AE9204F"
-        },
-        "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/hydrology/ninjaone-environment-hydrology-close-r1.webp",
-          "dimensions": [
-            2880,
-            2160
-          ],
-          "sha256": "063B6E1D3D4A74C1923F00383C94F96A588B278BA1B6BB303E6DD5931A33D120"
-        }
-      }
-    },
     "staticFoliage": {
       "ownership": "inactive compatibility lane; static ecology is integrated into the r2 terrain master",
       "sources": {

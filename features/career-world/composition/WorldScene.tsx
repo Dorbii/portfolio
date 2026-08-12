@@ -78,7 +78,6 @@ interface WorldSceneProps {
   readonly capitalMvp: boolean;
   readonly enableDevelopmentTools: boolean;
   readonly environmentProof: boolean;
-  readonly initialInterfaceMode: "world" | "water";
   readonly topologyProof: boolean;
 }
 
@@ -241,9 +240,9 @@ export function WorldScene({
   capitalMvp,
   enableDevelopmentTools,
   environmentProof,
-  initialInterfaceMode,
   topologyProof,
 }: WorldSceneProps) {
+  const showNinjaOneEnvironment = !topologyProof && !capitalMvp;
   const initialCamera = environmentProof
     ? NINJAONE_ENVIRONMENT_CAMERA
     : capitalMvp
@@ -553,7 +552,7 @@ export function WorldScene({
         active={isPageVisible}
         camera={camera}
         detailState={detailState}
-        foregroundHydrology={environmentProof}
+        foregroundHydrology={showNinjaOneEnvironment}
         light={WORLD_LIGHT}
         nativeHydrologyAdmission={currentNativeHydrologyAdmission}
         onRenderStateChange={setRenderState}
@@ -564,13 +563,6 @@ export function WorldScene({
       />
       {topologyProof ? (
         <NinjaOneCapitalTopologyProof camera={camera} />
-      ) : environmentProof ? (
-        <NinjaOneEnvironmentProof
-          active={isPageVisible}
-          camera={camera}
-          detailState={detailState}
-          onHydrologyAdmissionChange={handleNativeHydrologyAdmissionChange}
-        />
       ) : capitalMvp ? (
         <NinjaOneCapitalMvp
           camera={camera}
@@ -579,31 +571,42 @@ export function WorldScene({
         />
       ) : (
         <>
-          <InfrastructureLayer
+          <NinjaOneEnvironmentProof
+            active={isPageVisible}
             camera={camera}
             detailState={detailState}
-            light={WORLD_LIGHT}
+            onHydrologyAdmissionChange={handleNativeHydrologyAdmissionChange}
+            proofMode={environmentProof}
           />
-          <EnvironmentLayer
-            camera={camera}
-            detailState={detailState}
-            light={WORLD_LIGHT}
-          />
-          <ActorsEffectsLayer
-            camera={camera}
-            detailState={detailState}
-            light={WORLD_LIGHT}
-          />
-          <StructuresLayer
-            camera={camera}
-            detailState={detailState}
-            light={WORLD_LIGHT}
-            onKaizenVisualReadyChange={setKaizenVisualReady}
-          />
-          <FoliageLayer
-            camera={camera}
-            detailState={detailState}
-          />
+          {!environmentProof ? (
+            <>
+              <InfrastructureLayer
+                camera={camera}
+                detailState={detailState}
+                light={WORLD_LIGHT}
+              />
+              <EnvironmentLayer
+                camera={camera}
+                detailState={detailState}
+                light={WORLD_LIGHT}
+              />
+              <ActorsEffectsLayer
+                camera={camera}
+                detailState={detailState}
+                light={WORLD_LIGHT}
+              />
+              <StructuresLayer
+                camera={camera}
+                detailState={detailState}
+                light={WORLD_LIGHT}
+                onKaizenVisualReadyChange={setKaizenVisualReady}
+              />
+              <FoliageLayer
+                camera={camera}
+                detailState={detailState}
+              />
+            </>
+          ) : null}
         </>
       )}
       {enableDevelopmentTools
@@ -623,7 +626,6 @@ export function WorldScene({
           detailState={detailState}
           enableDevelopmentTools={enableDevelopmentTools}
           landmarkLabels={LANDMARK_LABELS}
-          mode={initialInterfaceMode}
           onFocus={handleFocus}
           onReset={() => animateTo(WORLD_CAMERA_VIEW, "world")}
           onToggleGrid={() => setShowGrid((visible) => !visible)}

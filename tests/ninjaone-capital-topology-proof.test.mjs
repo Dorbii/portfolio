@@ -711,7 +711,7 @@ test("the isolated capital preview mounts only the topology proof visual layers"
   const [page, scene, proof] = await Promise.all([
     readFile(path.join(
       root,
-      "app/career-world/previews/ninjaone-capital-topology/page.tsx",
+      "app/page.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
@@ -722,14 +722,17 @@ test("the isolated capital preview mounts only the topology proof visual layers"
       "features/career-world/development/NinjaOneCapitalTopologyProof.tsx",
     ), "utf8"),
   ]);
-  assert.match(page, /<CareerWorld enableDevelopmentTools topologyProof/);
+  assert.match(
+    page,
+    /case "ninjaone-capital-topology":[\s\S]*?<CareerWorld enableDevelopmentTools topologyProof/,
+  );
   assert.match(
     scene,
     /topologyProof \? \(\s*<NinjaOneCapitalTopologyProof camera=\{camera\} \/>/,
   );
   assert.match(
     scene,
-    /\) : \(\s*<>\s*<InfrastructureLayer[\s\S]*<FoliageLayer/,
+    /!environmentProof \? \(\s*<>\s*<InfrastructureLayer[\s\S]*<FoliageLayer/,
   );
   assert.match(proof, /data-topology-layer="base-road-network"/);
   assert.match(proof, /data-topology-layer="plot-labels"/);

@@ -38,6 +38,7 @@ interface NinjaOneEnvironmentProofProps {
   readonly onHydrologyAdmissionChange?: (
     snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null,
   ) => void;
+  readonly proofMode?: boolean;
 }
 
 const TIER_SUMMARIES = Object.freeze({
@@ -111,6 +112,7 @@ export function NinjaOneEnvironmentProof({
   camera,
   detailState,
   onHydrologyAdmissionChange,
+  proofMode = false,
 }: NinjaOneEnvironmentProofProps) {
   const worldX = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -163,13 +165,18 @@ export function NinjaOneEnvironmentProof({
   return (
     <>
       <svg
-        aria-label="City-free NinjaOne B2 C1 C2 natural environment proof"
+        aria-label={proofMode
+          ? "City-free NinjaOne B2 C1 C2 natural environment proof"
+          : "NinjaOne authored natural environment"}
         className="career-world__layer ninjaone-environment-proof"
         data-environment-grid-cells={NINJAONE_ENVIRONMENT_GRID_CELLS.join(",")}
         data-environment-layer-order={NINJAONE_ENVIRONMENT_LAYER_ORDER.join(",")}
         data-environment-loaded-layer-count={visibleLayers.length}
         data-environment-neighbor-integration="compiled-b1-buffer"
-        data-environment-proof={NINJAONE_ENVIRONMENT_PROOF_ID}
+        data-environment-proof={proofMode
+          ? NINJAONE_ENVIRONMENT_PROOF_ID
+          : undefined}
+        data-environment-role={proofMode ? "isolated-proof" : "production-layer"}
         data-environment-semantic-summary={TIER_SUMMARIES[detailState.tier.id]}
         data-environment-shared-node-count={sharedNodeCount}
         data-lod-tier={detailState.tier.id}
@@ -255,18 +262,20 @@ export function NinjaOneEnvironmentProof({
         </g>
       </svg>
 
-      <aside
-        aria-label="Environment layer status"
-        className="ninjaone-environment-proof__hud"
-      >
-        <p>NINJAONE TERRAIN / AUTHORED MASTER R2</p>
-        <strong>{detailState.tier.label}</strong>
-        <span>B2 / C1 / C2 / one registered geometry</span>
-        <span>{TIER_SUMMARIES[detailState.tier.id]}</span>
-        <span>{visibleLayers.length}/{NINJAONE_ENVIRONMENT_LAYER_ORDER.length} layers mounted</span>
-        <span>{NINJAONE_ENVIRONMENT_STATIC_CLUSTER_COUNT} detached baked groups / {sharedNodeCount} supplemental nodes</span>
-        <span>City / roads / rail / buildings disabled</span>
-      </aside>
+      {proofMode ? (
+        <aside
+          aria-label="Environment layer status"
+          className="ninjaone-environment-proof__hud"
+        >
+          <p>NINJAONE TERRAIN / AUTHORED MASTER R2</p>
+          <strong>{detailState.tier.label}</strong>
+          <span>B2 / C1 / C2 / one registered geometry</span>
+          <span>{TIER_SUMMARIES[detailState.tier.id]}</span>
+          <span>{visibleLayers.length}/{NINJAONE_ENVIRONMENT_LAYER_ORDER.length} layers mounted</span>
+          <span>{NINJAONE_ENVIRONMENT_STATIC_CLUSTER_COUNT} detached baked groups / {sharedNodeCount} supplemental nodes</span>
+          <span>City / roads / rail / buildings disabled</span>
+        </aside>
+      ) : null}
     </>
   );
 }

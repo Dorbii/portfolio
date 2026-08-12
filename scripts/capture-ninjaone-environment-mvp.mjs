@@ -30,7 +30,7 @@ import {
 } from "./lib/ninjaone-environment-mvp-verification.mjs";
 
 const DEFAULT_URL =
-  "http://127.0.0.1:4173/career-world/previews/ninjaone-environment";
+  "http://127.0.0.1:4173/?view=ninjaone-environment";
 const DEFAULT_OUTPUT =
   ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-capture-r1/evidence.json";
 const DEFAULT_VIEWPORT = Object.freeze({ height: 900, width: 1440 });

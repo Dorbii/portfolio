@@ -2364,7 +2364,7 @@ test("runtime evidence rejects a stale behavior-binding aggregate", async () => 
         id: "ninjaone-environment-browser-capture-r1",
         scriptPath: "scripts/capture-ninjaone-environment-mvp.mjs",
         scriptSha256: "stale",
-        url: "http://127.0.0.1:4173/career-world/previews/ninjaone-environment",
+        url: "http://127.0.0.1:4173/?view=ninjaone-environment",
         viewport: { height: 900, width: 1440 },
       },
       residencySamples: [],

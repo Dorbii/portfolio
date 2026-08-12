@@ -9,12 +9,12 @@
   ],
   "texture": {
     "path": "../fields/coast-geometry-r5.png",
-    "sha256": "197C7D52D5D9B03EAA8CA1DD87C7C735DA5ABE3A2D4E2B92218C2F2E8E7597CE",
+    "sha256": "EF12627B317AF078539180A86B2A72257078F8E98DB3584CEE8EE898AB8B669B",
     "mode": "RGBA"
   },
   "detailTexture": {
     "path": "../fields/coast-geometry-r5-4x.png",
-    "sha256": "7E140A5A095D41773F5820C102FB88B8CC0FADFE1232AB291E7660F1973E8E45",
+    "sha256": "DDBB6E2BD8476C3847FA745EC8349AA3F02D67DA279873029DA550DBA54AFFC6",
     "dimensions": [
       6688,
       3764
@@ -29,7 +29,7 @@
   },
   "source": {
     "path": "../../territory-landform/masks/world-land-mask-r4.png",
-    "sha256": "AF1ED791596F13D90A8D9AE8B344B46809EC685E5433E7E2104FBFA96210AE80"
+    "sha256": "D1ECB59685555E887BABE65283B008F6927437F6D684E2AC4414F346676D9917"
   },
   "policy": [
     "The land mask owns geography.",
