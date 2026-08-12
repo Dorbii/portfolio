@@ -27,6 +27,7 @@ Thumbs.db
 /.codex-tmp/
 /tmp/
 /scripts/*
+!/scripts/build-ninjaone-inland-water-r1.mjs
 !/scripts/build-ninjaone-environment-foliage-r3.mjs
 !/scripts/build-ninjaone-environment-hydrology-r2.mjs
 !/scripts/build-ninjaone-environment-native-detail.mjs

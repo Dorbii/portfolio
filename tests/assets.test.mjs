@@ -145,47 +145,6 @@ function landDistanceField(image, maximumDistance) {
   return distance;
 }
 
-function channelDistanceField(image, channel, threshold, maximumDistance) {
-  const total = image.width * image.height;
-  const distance = new Uint16Array(total);
-  distance.fill(0xffff);
-  const queue = new Int32Array(total);
-  let queueStart = 0;
-  let queueEnd = 0;
-
-  for (let pixel = 0; pixel < total; pixel += 1) {
-    if (image.pixels[pixel * image.channels + channel] >= threshold) {
-      distance[pixel] = 0;
-      queue[queueEnd] = pixel;
-      queueEnd += 1;
-    }
-  }
-
-  while (queueStart < queueEnd) {
-    const pixel = queue[queueStart];
-    queueStart += 1;
-    const nextDistance = distance[pixel] + 1;
-    if (nextDistance > maximumDistance) {
-      continue;
-    }
-    const x = pixel % image.width;
-    const neighbors = [
-      x > 0 ? pixel - 1 : -1,
-      x < image.width - 1 ? pixel + 1 : -1,
-      pixel >= image.width ? pixel - image.width : -1,
-      pixel < total - image.width ? pixel + image.width : -1,
-    ];
-    for (const neighbor of neighbors) {
-      if (neighbor >= 0 && distance[neighbor] > nextDistance) {
-        distance[neighbor] = nextDistance;
-        queue[queueEnd] = neighbor;
-        queueEnd += 1;
-      }
-    }
-  }
-  return distance;
-}
-
 test("terrain relief publishes canonical geography without edge glow", async () => {
   const mask = await decodePng(
     "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
@@ -1437,88 +1396,6 @@ test("coast field is derived across the complete authored shoreline", async () =
   );
 });
 
-test("authored water regions compile into a land-clipped hydrology field", async () => {
-  const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
-  );
-  const hydrology = await decodePng(
-    "public/career-world/layers/water-surface/fields/water-region-field-r3.png",
-  );
-  assert.deepEqual(
-    [hydrology.width, hydrology.height, hydrology.channels],
-    [mask.width, mask.height, 3],
-  );
-
-  const waterInfluencePixels = [0, 0];
-  for (let index = 0; index < mask.pixels.length; index += 1) {
-    const offset = index * hydrology.channels;
-    if (mask.pixels[index] >= 128) {
-      assert.equal(hydrology.pixels[offset], 0);
-      assert.equal(hydrology.pixels[offset + 1], 0);
-    } else {
-      waterInfluencePixels[0] += (
-        hydrology.pixels[offset] > 0 ? 1 : 0
-      );
-      waterInfluencePixels[1] += (
-        hydrology.pixels[offset + 1] > 0 ? 1 : 0
-      );
-    }
-  }
-  assert.ok(waterInfluencePixels[0] > 10_000);
-  assert.ok(waterInfluencePixels[1] > 1_000);
-});
-
-test("the main inland lake produces a broad fertile land basin", async () => {
-  const manifest = JSON.parse(await readFile(path.join(
-    root,
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
-  ), "utf8"));
-  const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
-  );
-  const material = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
-  );
-  const hydrology = await decodePng(
-    "public/career-world/layers/water-surface/fields/water-region-field-r3.png",
-  );
-  const distance = channelDistanceField(hydrology, 0, 128, 220);
-  let nearCount = 0;
-  let farCount = 0;
-  let nearGreenChroma = 0;
-  let farGreenChroma = 0;
-
-  for (let pixel = 0; pixel < mask.width * mask.height; pixel += 1) {
-    if (mask.pixels[pixel] < 128) {
-      continue;
-    }
-    const offset = pixel * material.channels;
-    const chroma = (
-      material.pixels[offset + 1]
-      - (material.pixels[offset] + material.pixels[offset + 2]) / 2
-    );
-    if (distance[pixel] >= 8 && distance[pixel] <= 90) {
-      nearCount += 1;
-      nearGreenChroma += chroma;
-    } else if (distance[pixel] >= 150 && distance[pixel] <= 220) {
-      farCount += 1;
-      farGreenChroma += chroma;
-    }
-  }
-
-  assert.ok(nearCount > 20_000);
-  assert.ok(farCount > 20_000);
-  assert.ok(
-    nearGreenChroma / nearCount - farGreenChroma / farCount > 7,
-    "the oasis basin must read greener than distant land without vegetation art",
-  );
-  assert.deepEqual(
-    manifest.derivation.inlandFertilityColor,
-    [54, 110, 40],
-  );
-  assert.equal(manifest.derivation.inlandFertilityStrength, 0.52);
-});
-
 test("coast materials derive beach and cliff variation from topology", async () => {
   const material = await decodePng(
     "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
@@ -1592,10 +1469,6 @@ test("generated asset manifests carry exact content hashes", async () => {
     root,
     "public/career-world/layers/water-surface/manifests/water-surface-world-lod-r2.json",
   ), "utf8"));
-  const hydrologyManifest = JSON.parse(await readFile(path.join(
-    root,
-    "public/career-world/layers/water-surface/manifests/water-region-field-r3.json",
-  ), "utf8"));
   const coastMaterialManifest = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/water-surface/manifests/coast-material-field-r6.json",
@@ -1632,12 +1505,6 @@ test("generated asset manifests carry exact content hashes", async () => {
     ),
   );
   assert.equal(
-    hydrologyManifest.texture.sha256,
-    await sha256(
-      "public/career-world/layers/water-surface/fields/water-region-field-r3.png",
-    ),
-  );
-  assert.equal(
     coastMaterialManifest.texture.sha256,
     await sha256(
       "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
@@ -1647,10 +1514,6 @@ test("generated asset manifests carry exact content hashes", async () => {
     "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
   );
   assert.equal(coastManifest.source.sha256, canonicalLandMaskHash);
-  assert.equal(
-    hydrologyManifest.sources.landMask.sha256,
-    canonicalLandMaskHash,
-  );
   assert.equal(
     coastMaterialManifest.sources.height.sha256,
     await sha256(
@@ -1699,7 +1562,6 @@ test("generated asset manifests carry exact content hashes", async () => {
       "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
     ),
   );
-  assert.equal(hydrologyManifest.generation.landClipped, true);
 });
 
 test("accepted Phase 3 water checkpoint remains immutable", async () => {

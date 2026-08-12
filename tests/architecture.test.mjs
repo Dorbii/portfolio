@@ -267,15 +267,15 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   assert.match(waterCanvas, /useLayoutEffect\(\(\) => \{/);
   assert.match(
     waterCanvas,
-    /controllerRef\.current\?\.setView\(\s*camera,\s*detailState,\s*nativeHydrologyAdmission,?\s*\)/,
+    /controllerRef\.current\?\.setView\(camera, detailState\)/,
   );
   assert.match(
     waterCanvas,
-    /\[camera,\s*detailState,\s*nativeHydrologyAdmission\]/,
+    /\[camera, detailState\]/,
   );
   assert.match(
     waterController,
-    /setView\(\s*camera:[\s\S]*this\.renderer\.setView\(camera,\s*detailState,\s*nativeHydrologyAdmission\);[\s\S]*this\.renderOnce\(\);/,
+    /setView\(camera: CameraView, detailState: DetailState\): void \{[\s\S]*this\.renderer\.setView\(camera, detailState\);[\s\S]*this\.renderOnce\(\);/,
   );
   assert.match(land, /useLayoutEffect\(\(\) => \{/);
   assert.match(land, /detailState\.renderScale/);
@@ -641,14 +641,8 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     openWater,
     /microGradient[\s\S]*u_territoryNormalStrength[\s\S]*territoryMix/,
   );
-  assert.match(openWater, /transformWaterCoordinate\(/);
-  assert.match(
-    openWater,
-    /hydrology\.r[\s\S]*u_basinRippleFrequency/,
-  );
-  assert.match(openWater, /hydrology\.g[\s\S]*u_lakeRippleFrequency/);
-  assert.match(openWater, /u_basinTextureOrigin/);
-  assert.match(openWater, /rippleDistance\s*\*\s*rippleFrequency/);
+  assert.doesNotMatch(openWater, /transformWaterCoordinate\(/);
+  assert.doesNotMatch(openWater, /hydrology|basinRipple|lakeRipple|u_basinTextureOrigin/i);
   assert.match(openWater, /openFoam/);
   assert.match(openWater, /palette,\s*authored,\s*0\.7/);
   assert.doesNotMatch(

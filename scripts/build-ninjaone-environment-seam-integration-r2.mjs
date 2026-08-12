@@ -56,9 +56,6 @@ const INTERCELL_HORIZONTAL_STRIP_PIXELS = 22;
 const RGB_CHANNELS = 3;
 const RGBA_CHANNELS = 4;
 const TERRAIN_TILE_DECODED_BYTES = TILE_DIMENSIONS[0] * TILE_DIMENSIONS[1] * 4;
-const HYDROLOGY_FALLBACK_DECODED_BYTES = WIDE_AUTHORED_PROTOTYPE
-  ? 1_447_740
-  : 1440 * 1080 * 4;
 const C2_FOLIAGE_DECODED_BYTES = 527_600;
 const MAXIMUM_DECODED_BYTES = 32 * 1024 * 1024;
 const MAXIMUM_SUPPLEMENTAL_NODES = 6;
@@ -2187,11 +2184,9 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
     .filter(({ definition }) => definition.cellId === "C2")
     .reduce((total, { manifestResource }) => total + manifestResource.decodedBytes, 0);
   const fixedC2DecodedUnion = TERRAIN_TILE_DECODED_BYTES * 4
-    + HYDROLOGY_FALLBACK_DECODED_BYTES
     + C2_FOLIAGE_DECODED_BYTES
     + fixedC2SeamDecodedBytes;
   const maximumRequiredDecodedUnion = TERRAIN_TILE_DECODED_BYTES * 4
-    + HYDROLOGY_FALLBACK_DECODED_BYTES
     + seamDecodedBytes;
   const maximumApplicationOwnedDecodedUnion = Math.max(
     fixedC2DecodedUnion,
@@ -2212,35 +2207,6 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
       storage: "png-rgb-8",
     })),
   );
-  const hydrologyTransitionHandoffs = Object.freeze([
-    Object.freeze({
-      adjacentTileIds: Object.freeze(["r2-c1", "r2-c2"]),
-      artboardBounds: Object.freeze([712.5, 738, 728, 781]),
-      id: "b2-c2-r2c1-to-r2c2-waterfall",
-      reason: "the registered inter-cell seam overlay intersects native-original lip and impact pixels across the waterfall column boundary",
-      seamResourceId: "b2-c2-intercell-vertical-seam",
-      status: "requires-bounded-transition-field",
-      topologyTreatment: "no synthetic water geometry in the seam asset",
-    }),
-    Object.freeze({
-      adjacentTileIds: Object.freeze(["r2-c2", "r3-c2"]),
-      artboardBounds: Object.freeze([820, 797, 875, 828]),
-      id: "c2-r2c2-to-r3c2",
-      reason: "native originals leave the visible lower channel discontinuous across the row seam",
-      seamResourceId: "c2-internal-horizontal-seam",
-      status: "requires-bounded-transition-field",
-      topologyTreatment: "no synthetic water geometry in the seam asset",
-    }),
-    Object.freeze({
-      adjacentTileIds: Object.freeze(["r3-c2", "r3-c3"]),
-      artboardBounds: Object.freeze([1065, 902, 1095, 935]),
-      id: "c2-r3c2-to-r3c3",
-      reason: "native-original stream endpoints are offset across the column seam",
-      seamResourceId: "c2-internal-vertical-seam",
-      status: "requires-bounded-transition-field",
-      topologyTreatment: "no synthetic water geometry in the seam asset",
-    }),
-  ]);
   const manifest = Object.freeze({
     schemaVersion: 2,
     id: "career-world/capitals/ninjaone/seam-integration@r2",
@@ -2287,7 +2253,6 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
       ),
       unionBreakdown: Object.freeze({
         foliageDecodedBytes: C2_FOLIAGE_DECODED_BYTES,
-        hydrologyDirectionalFallbackDecodedBytes: HYDROLOGY_FALLBACK_DECODED_BYTES,
         seamDecodedBytes,
         terrainDecodedBytes: TERRAIN_TILE_DECODED_BYTES * 4,
       }),
@@ -2299,12 +2264,11 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
     fixedCheckpointDecisions: Object.freeze({
       B2: "four native seam segments repaired by two minimum-width overlays",
       C1: "native coast-and-void topology inspected; no seam overlay authorized",
-      C2: "four native seam segments repaired by two minimum-width overlays with two hydrology handoffs",
+      C2: "four native seam segments repaired by two minimum-width overlays",
       "B2-C2": "UNRESOLVED: two inter-cell column segments have no accepted overlay",
       "C1-C2": "UNRESOLVED: two inter-cell row segments have no accepted overlay",
     }),
     fullNativeSweep: sweep,
-    hydrologyTransitionHandoffs,
     proof,
     resources: Object.freeze(builtResources.map(({ manifestResource }) => manifestResource)),
     selectorCheckpoints,
@@ -2318,7 +2282,6 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
     path.join(ARTIFACT_ROOT, "seam-integration-runtime-contract-r2-recovery.json"),
     `${JSON.stringify({
       budgets: manifest.budgets,
-      hydrologyTransitionHandoffs,
       manifestId: manifest.id,
       resources: manifest.resources.map((resource) => ({
         artboardBounds: resource.artboardBounds,

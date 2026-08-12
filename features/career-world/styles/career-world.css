@@ -91,7 +91,8 @@
 
 .career-world__backdrop,
 .career-world__layer,
-.career-world__water-canvas {
+.career-world__water-canvas,
+.career-world__inland-water-canvas {
   position: absolute;
   inset: 0;
 }
@@ -127,12 +128,17 @@
   background: none;
 }
 
-/* The environment proof owns opaque close-detail terrain at z-index 7. Its
-   registered stream field is still rendered by the shared water surface, so
-   that surface must sit above the proof while the shader remains transparent
-   everywhere outside authored water. */
-.career-world__water-canvas[data-foreground-hydrology="true"][data-render-state="ready"] {
-  z-index: 8;
+.career-world__inland-water-canvas {
+  z-index: 7;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+.career-world__inland-water-canvas[data-render-state="fallback"] {
+  visibility: hidden;
 }
 
 .career-world__land-layer {
@@ -1575,10 +1581,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 .ninjaone-environment-proof [data-environment-layer="tertiary-relief"] {
   opacity: 0.48;
   mix-blend-mode: overlay;
-}
-
-.ninjaone-environment-proof [data-environment-layer="hydrology"] {
-  filter: saturate(0.82) brightness(0.84) contrast(1.08);
 }
 
 .ninjaone-environment-proof [data-environment-layer="trails"] {

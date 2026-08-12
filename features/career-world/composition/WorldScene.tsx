@@ -11,6 +11,7 @@ import {
 } from "react";
 import { WorldBackdrop } from "../layers/world-backdrop";
 import {
+  NinjaOneInlandWaterCanvas,
   WaterSurfaceCanvas,
   type WaterRenderState,
 } from "../layers/water-surface";
@@ -66,13 +67,6 @@ import {
 import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
-import {
-  createNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
-  ninjaOneEnvironmentNativeHydrologyAdmissionIsCurrent,
-  recordNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
-  retargetNinjaOneEnvironmentNativeHydrologyAdmissionHandoff,
-  type NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot,
-} from "../development/model/ninjaOneEnvironmentResidency";
 
 interface WorldSceneProps {
   readonly capitalMvp: boolean;
@@ -259,7 +253,7 @@ export function WorldScene({
     camera: initialCamera,
     generation: 0,
   }));
-  const { camera, generation: cameraGeneration } = cameraPublication;
+  const { camera } = cameraPublication;
   const [activeViewId, setActiveViewId] = useState(
     environmentProof
       ? "ninjaone-environment-proof"
@@ -272,38 +266,12 @@ export function WorldScene({
   const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
-  const [nativeHydrologyAdmissionHandoff, setNativeHydrologyAdmissionHandoff] =
-    useState(createNinjaOneEnvironmentNativeHydrologyAdmissionHandoff);
   const [showTopography, setShowTopography] = useState(topologyProof);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
   const [showGrid, setShowGrid] = useState(topologyProof);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const detailState = resolveDetailState(camera);
-  const currentNativeHydrologyAdmissionHandoff =
-    retargetNinjaOneEnvironmentNativeHydrologyAdmissionHandoff(
-      nativeHydrologyAdmissionHandoff,
-      cameraGeneration,
-    );
-  const currentNativeHydrologyAdmission =
-    ninjaOneEnvironmentNativeHydrologyAdmissionIsCurrent(
-      currentNativeHydrologyAdmissionHandoff.snapshot,
-      camera,
-      currentNativeHydrologyAdmissionHandoff.minimumEpoch,
-    )
-      ? currentNativeHydrologyAdmissionHandoff.snapshot
-      : null;
-  const handleNativeHydrologyAdmissionChange = useCallback((
-    snapshot: NinjaOneEnvironmentNativeHydrologyAdmissionSnapshot | null,
-  ) => {
-    setNativeHydrologyAdmissionHandoff((current) => (
-      recordNinjaOneEnvironmentNativeHydrologyAdmissionHandoff(current, {
-        camera,
-        cameraGeneration,
-        snapshot,
-      })
-    ));
-  }, [camera, cameraGeneration]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -552,9 +520,7 @@ export function WorldScene({
         active={isPageVisible}
         camera={camera}
         detailState={detailState}
-        foregroundHydrology={showNinjaOneEnvironment}
         light={WORLD_LIGHT}
-        nativeHydrologyAdmission={currentNativeHydrologyAdmission}
         onRenderStateChange={setRenderState}
       />
       <TerritoryLandform
@@ -575,8 +541,13 @@ export function WorldScene({
             active={isPageVisible}
             camera={camera}
             detailState={detailState}
-            onHydrologyAdmissionChange={handleNativeHydrologyAdmissionChange}
             proofMode={environmentProof}
+          />
+          <NinjaOneInlandWaterCanvas
+            active={isPageVisible && showNinjaOneEnvironment}
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
           />
           {!environmentProof ? (
             <>

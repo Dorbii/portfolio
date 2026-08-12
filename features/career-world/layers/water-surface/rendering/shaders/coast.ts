@@ -394,9 +394,12 @@ CoastSample applyCoast(
     + landWash * mix(0.28, 0.48, zoom);
 
   CoastSample result;
-  result.color = color;
-  result.overlayAlpha = saturate(overlayAlpha);
-  result.landMask = land;
+  vec2 inlandOverride = inlandWaterOverrideAt(worldUv);
+  float inlandSurfaceOverride = inlandOverride.x;
+  float terrainWaterReveal = inlandOverride.y;
+  result.color = mix(color, water.color, inlandSurfaceOverride);
+  result.overlayAlpha = saturate(overlayAlpha) * (1.0 - terrainWaterReveal);
+  result.landMask = land * (1.0 - terrainWaterReveal);
   return result;
 }
 `;

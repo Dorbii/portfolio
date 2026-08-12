@@ -5,16 +5,9 @@ import {
   windVectorFromDegrees,
 } from "../features/career-world/layers/water-surface/model/state.ts";
 import {
-  NINJAONE_WATER_FEATURES,
-} from "../features/career-world/layers/water-surface/model/assets.ts";
-import {
   CAREER_WORLD_WATER_REALISM_PROFILE,
   defineWaterRealismProfile,
 } from "../features/career-world/layers/water-surface/model/profiles.ts";
-import {
-  SHELTERED_BASIN_STYLE,
-  SMALL_INLAND_LAKE_STYLE,
-} from "../features/career-world/layers/water-surface/model/bodies.ts";
 import {
   advanceLodPresentationFade,
   DETAIL_POLICY,
@@ -54,22 +47,11 @@ test("water state clamps external inputs without changing its contract", () => {
   );
 });
 
-test("water realism profile is revisioned, deeply frozen, and range checked", () => {
+test("ocean realism profile is revisioned, deeply frozen, and range checked", () => {
   const profile = CAREER_WORLD_WATER_REALISM_PROFILE;
-  assert.equal(profile.id, "natural-water@r2");
+  assert.equal(profile.id, "natural-ocean@r1");
   assert.ok(Object.isFrozen(profile));
-  for (const section of [
-    profile.mist,
-    profile.ocean,
-    profile.riverInteraction,
-    profile.riverSurface,
-    profile.waterfallImpact,
-    profile.waterfallSheet,
-  ]) assert.ok(Object.isFrozen(section));
-  assert.equal(profile.waterfallImpact.advectionSpeed, 0.72);
-  assert.equal(profile.waterfallImpact.breakupFrequency, 0.38);
-  assert.equal("ringFrequency" in profile.waterfallImpact, false);
-  assert.equal("ringSpeed" in profile.waterfallImpact, false);
+  assert.ok(Object.isFrozen(profile.ocean));
   assert.deepEqual(
     normalizeWaterSurfaceState(),
     {
@@ -85,94 +67,10 @@ test("water realism profile is revisioned, deeply frozen, and range checked", ()
   assert.throws(
     () => defineWaterRealismProfile({
       ...profile,
-      mist: { ...profile.mist, opacity: 0.61 },
+      ocean: { ...profile.ocean, waveDensity: 4.01 },
     }),
-    /mist\.opacity must be finite and between 0 and 0\.6/,
+    /ocean\.waveDensity must be finite and between 0\.25 and 4/,
   );
-  assert.throws(
-    () => defineWaterRealismProfile({
-      ...profile,
-      waterfallImpact: {
-        ...profile.waterfallImpact,
-        advectionSpeed: 3.01,
-      },
-    }),
-    /waterfallImpact\.advectionSpeed must be finite and between 0 and 3/,
-  );
-});
-
-test("C2 rapid and B2 tarn features are reproducibly derived from the hydrology manifest", () => {
-  assert.ok(Object.isFrozen(NINJAONE_WATER_FEATURES));
-  assert.ok(NINJAONE_WATER_FEATURES.tarn);
-  assert.deepEqual(
-    NINJAONE_WATER_FEATURES.tarn.origin,
-    [606 / 1440, 616 / 1080],
-  );
-  assert.ok(NINJAONE_WATER_FEATURES.tarn.radiusPixels > 0);
-  const cascades = NINJAONE_WATER_FEATURES.cascades;
-  assert.equal(cascades.length, 1);
-  assert.equal(new Set(cascades.map(({ id }) => id)).size, cascades.length);
-  assert.deepEqual(
-    new Set(cascades.map(({ regionId }) => regionId)),
-    new Set(["C2"]),
-  );
-  assert.deepEqual(
-    cascades
-      .filter(({ regionId }) => regionId === "B2")
-      .map(({ id }) => id),
-    [],
-  );
-  for (const cascade of cascades) {
-    assert.ok(Object.isFrozen(cascade));
-    assert.ok(Object.isFrozen(cascade.approach));
-    assert.ok(Object.isFrozen(cascade.crest));
-    assert.ok(Object.isFrozen(cascade.fall));
-    assert.ok(Object.isFrozen(cascade.impact));
-    assert.ok(Object.isFrozen(cascade.mist));
-    assert.ok(Object.isFrozen(cascade.pool));
-    assert.ok(cascade.crest.start.every((value) => value >= 0 && value <= 1));
-    assert.ok(cascade.crest.end.every((value) => value >= 0 && value <= 1));
-    assert.ok(cascade.impact.origin.every((value) => value >= 0 && value <= 1));
-    assert.ok(Math.abs(Math.hypot(...cascade.fall.direction) - 1) < 0.01);
-    assert.ok(Math.abs(Math.hypot(...cascade.mist.drift) - 1) < 0.01);
-    assert.ok(cascade.fall.extentPixels > 0);
-    assert.ok(cascade.fall.widthPixels > 0);
-    assert.ok(cascade.impact.radiiPixels.every((value) => value > 0));
-    assert.ok(cascade.mist.radiusPixels > 0);
-    assert.ok(cascade.approach.extentPixels > 0);
-    assert.ok(cascade.pool.radiiPixels.every((value) => value > 0));
-  }
-  const obstacles = NINJAONE_WATER_FEATURES.obstacles;
-  assert.equal(obstacles.length, 2);
-  assert.ok(obstacles.every(({ regionId }) => regionId === "B2"));
-  assert.ok(obstacles.every(({ center }) => center.every(
-    (value) => value >= 0 && value <= 1,
-  )));
-  assert.ok(obstacles.every(({ flowDirection }) => (
-    Math.abs(Math.hypot(...flowDirection) - 1) < 0.01
-  )));
-});
-
-test("inland water bodies have independent fixed transforms", () => {
-  const bodies = [
-    SHELTERED_BASIN_STYLE,
-    SMALL_INLAND_LAKE_STYLE,
-  ];
-  assert.deepEqual(
-    bodies.map(({ id }) => id),
-    ["mainland-inner-sea", "mainland-southwest-lake"],
-  );
-  for (const body of bodies) {
-    const { texture } = body;
-    assert.equal(texture.worldAnchor.length, 2);
-    assert.equal(texture.textureOrigin.length, 2);
-    assert.equal(texture.textureScale.length, 2);
-    assert.notEqual(texture.rotationRadians, 0);
-    assert.notDeepEqual(texture.worldAnchor, texture.textureOrigin);
-    assert.ok(body.rippleFrequency > 0);
-    assert.ok(body.rippleMix > 0.5);
-    assert.ok(body.tintMix > 0);
-  }
 });
 
 test("wind direction produces a normalized world vector", () => {
