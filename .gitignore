@@ -28,6 +28,7 @@ Thumbs.db
 /tmp/
 /scripts/*
 !/scripts/build-ninjaone-inland-water-r1.mjs
+!/scripts/build-ninjaone-station-river-layout-lock-r1.mjs
 !/scripts/build-ninjaone-environment-foliage-r3.mjs
 !/scripts/build-ninjaone-environment-hydrology-r2.mjs
 !/scripts/build-ninjaone-environment-native-detail.mjs
@@ -42,3 +43,4 @@ Thumbs.db
 !/scripts/lib/
 /scripts/lib/*
 !/scripts/lib/ninjaone-environment-mvp-verification.mjs
+!/scripts/lib/ninjaone-station-river-detail-contract.mjs
