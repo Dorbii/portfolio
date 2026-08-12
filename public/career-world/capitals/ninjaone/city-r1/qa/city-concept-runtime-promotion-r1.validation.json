@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "status": "concept-master-runtime-integration-preview",
+  "productionReady": false,
+  "runtimeEligible": true,
+  "manifestPath": "/career-world/capitals/ninjaone/manifests/city-node-composition-r1.json",
+  "manifestSha256": "d0a9b55fc6c97cfdbc6476aa73952d7fa45c0c2ad5257493a48c4a8e80240bcc",
+  "layoutPath": "art-source/career-world/ninjaone-capital/city-layer-r1/concept-master-layout-registration-r1.json",
+  "layoutSha256": "07c0f89300ebd3579233fd23d0d209419035c5166115683e5840259ee599f80d",
+  "skillSocketCount": 19,
+  "runtimeNodeCount": 19,
+  "allRuntimeNodesMatchConceptSockets": true,
+  "stationMatchesConceptLandmark": true,
+  "r3RuntimePaths": [],
+  "runtimeRasterAssets": {
+    "overviewSettlement": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-capital-coherent-base-r1.png",
+      "sha256": "c5714b4699e569c745e92b38413e7c1ad126ebaf14b42554de76d71f2f622c82",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "lod": "capital-site-close-static-coherent-base",
+      "runtimeVisible": true,
+      "role": "single-draw-city-only-composition-base",
+      "containsTransitionTerrainPixels": true,
+      "containsPopulation": false,
+      "containsRailPixels": false,
+      "containsWaterPixels": false,
+      "ownsBakedStation": false,
+      "ownsBakedCityRail": false,
+      "ownsBakedDistrictBuildings": true,
+      "visualOnly": true,
+      "affectsLandMask": false,
+      "affectsHeight": false,
+      "affectsSlope": false,
+      "affectsCollision": false,
+      "artboardCoverageRatio": 0.233354,
+      "edgeFeatherPixels": 30
+    },
+    "contactLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-selected-environment-source-alpha-r1.png",
+      "sha256": "8d9e3d4726ae530ea57b46ec0aac61c8613e50f99b64bac69772c5047719b373",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "role": "source-evidence-only-rejected-terrain-bearing-composite",
+      "containsTerrainPixels": true,
+      "runtimeVisible": false,
+      "rejectionReason": "duplicates-frozen-production-terrain-and-baked-city",
+      "aperturePolicy": "source-proof-only",
+      "ownsBakedStation": true
+    },
+    "waterTransition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-water-transition-foreground-r1.png",
+      "sha256": "0e4c2330971a6cd3ccc69986089ce0570849a74b295245796733d4b9e7161395",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "role": "four-isolated-registered-bridges-above-inland-water",
+      "containsTerrainPixels": false,
+      "runtimeVisible": true,
+      "shorelineTransitionStatus": "deferred-to-terrain-owned-detail-layer",
+      "visualOnly": true,
+      "affectsLandMask": false,
+      "affectsHeight": false,
+      "affectsSlope": false,
+      "affectsCollision": false
+    }
+  },
+  "runtimeRailAssets": {
+    "supportLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-support-r1.png",
+      "sha256": "28d8bdbdcaa70f1f51cd8b24aca418659dd4b9e7251da67ffde94ea36669f9fc",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "bedLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-bed-r1.png",
+      "sha256": "218c0cc856d287e5deabc50952ac3c3d7e4f8288dc7a6eccd2ae50f81e0f2dfa",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "portalBackLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-backs-r1.png",
+      "sha256": "c642f036950f05cfd1b656161e44d7b5f8ff5926c68767a2ed586a7c86e19d2f",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "trackLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-track-r1.png",
+      "sha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "portalForegroundLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-foreground-r1.png",
+      "sha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    },
+    "stationForegroundLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-station-platform-track-r1.png",
+      "sha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
+      "dimensions": [
+        2571,
+        1929
+      ]
+    }
+  },
+  "territoryOverviewVisible": false,
+  "capitalOverviewVisible": true,
+  "worldAndTerritoryCityVisibility": false,
+  "frozenTerrainGeometryUnchanged": true
+}

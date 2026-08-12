@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "career-world/capitals/ninjaone/city-node-composition@r1",
-  "status": "integration-preview",
+  "status": "concept-master-runtime-integration-preview",
   "productionReady": false,
-  "runtimeEligible": false,
+  "runtimeEligible": true,
   "artboard": {
     "coordinateSpace": "capital-local-registered-plate-pixels",
     "dimensions": [
@@ -89,7 +89,7 @@
     ]
   },
   "terrainBinding": {
-    "status": "blocked-pending-final-hydrology",
+    "status": "concept-master-registered-current-hydrology-integration-preview",
     "canonicalLandMask": {
       "path": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
       "sha256": "8801722b801b2ecabd048dc71ac99ff7f0c566e69e06a50d9c4e41706dd7003a",
@@ -215,19 +215,11 @@
   },
   "layerOrder": [
     "external-terrain",
-    "territory-settlement-overview",
-    "city-terrain-contact",
-    "streets-retaining-and-support-fabric",
-    "territory-rail-supports",
-    "territory-rail-bed",
-    "territory-track",
-    "station-rear-and-platforms",
-    "building-ground-shadows",
-    "skill-building-nodes",
-    "city-fabric-transition-foreground",
-    "moving-train",
-    "station-and-terrain-foreground-occluders",
-    "city-foliage-and-contact-details",
+    "inland-water",
+    "capital-settlement-overview",
+    "registered-water-shoreline-and-bridges",
+    "single-centerline-transport-site-close",
+    "single-focused-building-close",
     "temporary-population-site-scale-cues",
     "temporary-population-close-detail-cues"
   ],
@@ -309,8 +301,8 @@
         1254
       ],
       "localPosition": {
-        "x": 0.392312,
-        "y": 0.458222
+        "x": 0.438,
+        "y": 0.54
       },
       "displayWidth": 343,
       "groundAnchor": [
@@ -323,16 +315,16 @@
     },
     "rail": {
       "owner": "territory-transport-layer",
-      "renderMethod": "authored-isometric-segment-chain",
+      "renderMethod": "concept-master-authored-isometric-segment-chains",
       "screenSpaceRibbonForbidden": true,
-      "centerlineStatus": "authored-station-to-south-southeast-exit-r3",
+      "centerlineStatus": "concept-master-registered-r1",
       "stationLocalPosition": {
-        "x": 0.392312,
-        "y": 0.458222
+        "x": 0.438,
+        "y": 0.54
       },
       "stationTrackCenterLocalPosition": {
-        "x": 0.392312,
-        "y": 0.40822200000000003
+        "x": 0.418,
+        "y": 0.508
       },
       "sourceGatewayPosition": {
         "x": 0.4153,
@@ -344,44 +336,36 @@
       },
       "controlPoints": [
         {
-          "x": 0.392312,
-          "y": 0.40822200000000003
+          "x": 0.295,
+          "y": 0.525
         },
         {
-          "x": 0.434,
-          "y": 0.456
+          "x": 0.33,
+          "y": 0.6
         },
         {
-          "x": 0.467,
-          "y": 0.523
+          "x": 0.38,
+          "y": 0.67
         },
         {
-          "x": 0.511,
-          "y": 0.596
+          "x": 0.44,
+          "y": 0.74
         },
         {
-          "x": 0.563,
-          "y": 0.627
+          "x": 0.5,
+          "y": 0.8
         },
         {
-          "x": 0.658,
-          "y": 0.709
+          "x": 0.58,
+          "y": 0.87
         },
         {
-          "x": 0.753,
-          "y": 0.791
+          "x": 0.67,
+          "y": 0.94
         },
         {
-          "x": 0.848,
-          "y": 0.873
-        },
-        {
-          "x": 0.943,
-          "y": 0.955
-        },
-        {
-          "x": 1.02,
-          "y": 1.025
+          "x": 0.75,
+          "y": 1.03
         }
       ],
       "exitDirection": "south-southeast",
@@ -406,182 +390,180 @@
       },
       "segments": [
         {
-          "id": "station-through",
+          "id": "station-portal-straight",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.39,
-            "y": 0.408
+            "x": 0.374,
+            "y": 0.46
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "station-exit-curve",
+          "id": "station-terminal-curve",
+          "chainIndex": 0,
           "sourceCell": [
             2,
             0
           ],
           "localCenter": {
-            "x": 0.434,
-            "y": 0.456
+            "x": 0.418,
+            "y": 0.508
           },
           "displayWidth": 146,
           "kind": "ground-curve-nw-sse",
           "rotationDegrees": 0
         },
         {
-          "id": "ravine-viaduct-curve",
+          "id": "south-portal-curve",
+          "chainIndex": 1,
+          "sourceCell": [
+            2,
+            0
+          ],
+          "localCenter": {
+            "x": 0.315,
+            "y": 0.56
+          },
+          "displayWidth": 146,
+          "kind": "ground-curve-nw-sse",
+          "rotationDegrees": 0
+        },
+        {
+          "id": "south-ravine-viaduct-curve",
+          "chainIndex": 1,
           "sourceCell": [
             2,
             1
           ],
           "localCenter": {
-            "x": 0.467,
-            "y": 0.523
+            "x": 0.348,
+            "y": 0.627
           },
           "displayWidth": 157,
           "kind": "elevated-curve-sse",
           "rotationDegrees": 0
         },
         {
-          "id": "south-viaduct",
+          "id": "south-ravine-viaduct",
+          "chainIndex": 1,
           "sourceCell": [
             1,
             1
           ],
           "localCenter": {
-            "x": 0.511,
-            "y": 0.596
+            "x": 0.392,
+            "y": 0.7
           },
           "displayWidth": 157,
           "kind": "elevated-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "gateway-run-1",
+          "id": "south-egress-1",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.563,
-            "y": 0.627
+            "x": 0.444,
+            "y": 0.731
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "gateway-run-2",
+          "id": "south-egress-2",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.6105,
-            "y": 0.668
+            "x": 0.4915,
+            "y": 0.772
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "south-approach-1",
+          "id": "south-egress-3",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.658,
-            "y": 0.709
+            "x": 0.539,
+            "y": 0.813
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "south-approach-2",
+          "id": "south-egress-4",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.7055,
-            "y": 0.75
+            "x": 0.5865,
+            "y": 0.854
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "south-approach-3",
+          "id": "south-egress-5",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.753,
-            "y": 0.791
+            "x": 0.634,
+            "y": 0.895
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "south-approach-4",
+          "id": "south-egress-6",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.8005,
-            "y": 0.832
+            "x": 0.6815,
+            "y": 0.936
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
           "rotationDegrees": 0
         },
         {
-          "id": "south-approach-5",
+          "id": "south-egress-7",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.848,
-            "y": 0.873
-          },
-          "displayWidth": 150,
-          "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
-        },
-        {
-          "id": "south-approach-6",
-          "sourceCell": [
-            0,
-            0
-          ],
-          "localCenter": {
-            "x": 0.8955,
-            "y": 0.914
-          },
-          "displayWidth": 150,
-          "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
-        },
-        {
-          "id": "south-approach-7",
-          "sourceCell": [
-            0,
-            0
-          ],
-          "localCenter": {
-            "x": 0.943,
-            "y": 0.955
+            "x": 0.729,
+            "y": 0.977
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
@@ -589,13 +571,14 @@
         },
         {
           "id": "south-southeast-exit",
+          "chainIndex": 1,
           "sourceCell": [
             0,
             0
           ],
           "localCenter": {
-            "x": 0.9905,
-            "y": 0.996
+            "x": 0.7765,
+            "y": 1.018
           },
           "displayWidth": 150,
           "kind": "ground-straight-nw-se",
@@ -604,81 +587,69 @@
       ],
       "segmentJoins": [
         {
-          "from": "station-through",
-          "to": "station-exit-curve",
-          "alphaOverlapPixels": 364,
+          "from": "station-portal-straight",
+          "to": "station-terminal-curve",
+          "alphaOverlapPixels": 351,
           "alphaThreshold": 16
         },
         {
-          "from": "station-exit-curve",
-          "to": "ravine-viaduct-curve",
-          "alphaOverlapPixels": 277,
+          "from": "south-portal-curve",
+          "to": "south-ravine-viaduct-curve",
+          "alphaOverlapPixels": 309,
           "alphaThreshold": 16
         },
         {
-          "from": "ravine-viaduct-curve",
-          "to": "south-viaduct",
+          "from": "south-ravine-viaduct-curve",
+          "to": "south-ravine-viaduct",
           "alphaOverlapPixels": 211,
           "alphaThreshold": 16
         },
         {
-          "from": "south-viaduct",
-          "to": "gateway-run-1",
-          "alphaOverlapPixels": 119,
+          "from": "south-ravine-viaduct",
+          "to": "south-egress-1",
+          "alphaOverlapPixels": 107,
           "alphaThreshold": 16
         },
         {
-          "from": "gateway-run-1",
-          "to": "gateway-run-2",
-          "alphaOverlapPixels": 219,
-          "alphaThreshold": 16
-        },
-        {
-          "from": "gateway-run-2",
-          "to": "south-approach-1",
+          "from": "south-egress-1",
+          "to": "south-egress-2",
           "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         },
         {
-          "from": "south-approach-1",
-          "to": "south-approach-2",
+          "from": "south-egress-2",
+          "to": "south-egress-3",
           "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         },
         {
-          "from": "south-approach-2",
-          "to": "south-approach-3",
+          "from": "south-egress-3",
+          "to": "south-egress-4",
           "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         },
         {
-          "from": "south-approach-3",
-          "to": "south-approach-4",
+          "from": "south-egress-4",
+          "to": "south-egress-5",
           "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         },
         {
-          "from": "south-approach-4",
-          "to": "south-approach-5",
+          "from": "south-egress-5",
+          "to": "south-egress-6",
+          "alphaOverlapPixels": 236,
+          "alphaThreshold": 16
+        },
+        {
+          "from": "south-egress-6",
+          "to": "south-egress-7",
           "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         },
         {
-          "from": "south-approach-5",
-          "to": "south-approach-6",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
-        },
-        {
-          "from": "south-approach-6",
-          "to": "south-approach-7",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
-        },
-        {
-          "from": "south-approach-7",
+          "from": "south-egress-7",
           "to": "south-southeast-exit",
-          "alphaOverlapPixels": 226,
+          "alphaOverlapPixels": 245,
           "alphaThreshold": 16
         }
       ],
@@ -702,31 +673,147 @@
         ]
       },
       "supportLayer": {
-        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-support-r1.png",
-        "sha256": "21a7886d8b2ccb7e47fbabea854605ed768b72f6d888e091e36f59d7a20a9510",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-support-r1.png",
+        "sha256": "28d8bdbdcaa70f1f51cd8b24aca418659dd4b9e7251da67ffde94ea36669f9fc",
         "dimensions": [
           2571,
           1929
         ]
       },
       "bedLayer": {
-        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-bed-r1.png",
-        "sha256": "11fb31afcb946c4c7889c3fedf35cd6eed5229d849d5b453c1f84357190d8eab",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-bed-r1.png",
+        "sha256": "218c0cc856d287e5deabc50952ac3c3d7e4f8288dc7a6eccd2ae50f81e0f2dfa",
         "dimensions": [
           2571,
           1929
         ]
       },
       "trackLayer": {
-        "path": "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-track-r1.png",
-        "sha256": "913dd291238a472691079a17475caf06b9dc6a033a67fc70f466650c219dd7ac",
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-track-r1.png",
+        "sha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
         "dimensions": [
           2571,
           1929
         ]
       },
       "mustEnterAndExitCapital": true,
-      "cityOnlyLoopForbidden": true
+      "cityOnlyLoopForbidden": true,
+      "conceptTopology": {
+        "stationPortalId": "station-mountain-portal",
+        "southPortalId": "south-mountain-portal",
+        "mountainTunnelRequired": true,
+        "segments": [
+          {
+            "id": "station-to-mountain",
+            "kind": "surface",
+            "conceptPoints": [
+              [
+                0.438,
+                0.54
+              ],
+              [
+                0.418,
+                0.5
+              ],
+              [
+                0.39,
+                0.462
+              ],
+              [
+                0.358,
+                0.432
+              ]
+            ]
+          },
+          {
+            "id": "mountain-tunnel",
+            "kind": "hidden-tunnel",
+            "conceptPoints": [
+              [
+                0.358,
+                0.432
+              ],
+              [
+                0.335,
+                0.455
+              ],
+              [
+                0.315,
+                0.49
+              ],
+              [
+                0.295,
+                0.525
+              ]
+            ]
+          },
+          {
+            "id": "south-southeast-egress",
+            "kind": "surface",
+            "conceptPoints": [
+              [
+                0.295,
+                0.525
+              ],
+              [
+                0.33,
+                0.6
+              ],
+              [
+                0.38,
+                0.67
+              ],
+              [
+                0.44,
+                0.74
+              ],
+              [
+                0.5,
+                0.8
+              ],
+              [
+                0.58,
+                0.87
+              ],
+              [
+                0.67,
+                0.94
+              ],
+              [
+                0.75,
+                1.03
+              ]
+            ]
+          }
+        ]
+      },
+      "portalBackLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-backs-r1.png",
+        "sha256": "c642f036950f05cfd1b656161e44d7b5f8ff5926c68767a2ed586a7c86e19d2f",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "portalForegroundLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-foreground-r1.png",
+        "sha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "stationForegroundLayer": {
+        "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-station-platform-track-r1.png",
+        "sha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
+        "dimensions": [
+          2571,
+          1929
+        ]
+      },
+      "runtimeVisible": true,
+      "rejectionReason": null,
+      "minimumDetailTier": "site"
     },
     "train": {
       "owner": "moving-vehicle-layer",
@@ -882,58 +969,43 @@
       ]
     },
     "overviewSettlement": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-settlement-overview-r2.png",
-      "sha256": "a12921bc72b26daf441de71f9cfea1b551c2439e4aab4d5344522837714f76d9",
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-capital-coherent-base-r1.png",
+      "sha256": "c5714b4699e569c745e92b38413e7c1ad126ebaf14b42554de76d71f2f622c82",
       "dimensions": [
         2571,
         1929
       ],
-      "lod": "territory-only",
-      "containsTerrainPixels": false,
-      "containsPopulation": false
-    },
-    "contactLayer": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-terrain-contact-r3.png",
-      "sha256": "f445fc3d8ae39e173ecff91120eadf1ea0842971745ffcec36ee8fd19a89f147",
-      "dimensions": [
-        2571,
-        1929
-      ]
-    },
-    "underlay": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-underlay-r3.png",
-      "sha256": "5271f080c01a75e0bc5be94f3f6f6e1e0008fc8468e40466307b9ca9e9e9ba4d",
-      "dimensions": [
-        2571,
-        1929
-      ]
-    },
-    "foreground": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-foreground-r3.png",
-      "sha256": "124771e2527f50473fcb29a5a051f9eeaa7030810710b37a148c8a4a0e906cc5",
-      "dimensions": [
-        2571,
-        1929
-      ]
-    },
-    "environmentTransitionDetail": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-environment-transition-detail-r3.png",
-      "sha256": "b3490f3d6ba220c6a49be6b6064f8bfa4d20608a24b6572d2070e99b1ea31eca",
-      "dimensions": [
-        2571,
-        1929
-      ],
+      "lod": "capital-site-close-static-coherent-base",
+      "runtimeVisible": true,
+      "role": "single-draw-city-only-composition-base",
+      "containsTransitionTerrainPixels": true,
+      "containsPopulation": false,
+      "containsRailPixels": false,
+      "containsWaterPixels": false,
+      "ownsBakedStation": false,
+      "ownsBakedCityRail": false,
+      "ownsBakedDistrictBuildings": true,
       "visualOnly": true,
       "affectsLandMask": false,
       "affectsHeight": false,
       "affectsSlope": false,
       "affectsCollision": false,
-      "allowedFeatures": [
-        "cliff-face rock and moss",
-        "foliage and contact occlusion",
-        "retaining facias and drainage",
-        "bridge decks piers arches and rail-bed dressing where topology already supports them"
-      ]
+      "artboardCoverageRatio": 0.233354,
+      "edgeFeatherPixels": 30
+    },
+    "contactLayer": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-selected-environment-source-alpha-r1.png",
+      "sha256": "8d9e3d4726ae530ea57b46ec0aac61c8613e50f99b64bac69772c5047719b373",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "role": "source-evidence-only-rejected-terrain-bearing-composite",
+      "containsTerrainPixels": true,
+      "runtimeVisible": false,
+      "rejectionReason": "duplicates-frozen-production-terrain-and-baked-city",
+      "aperturePolicy": "source-proof-only",
+      "ownsBakedStation": true
     },
     "replacementModel": {
       "replacedGenericBuildingCount": 19,
@@ -1057,6 +1129,34 @@
         }
       ],
       "rule": "independent skill buildings sit on sparse modular civic infrastructure; the rejected monolithic plate is never rendered"
+    },
+    "runtimeAuthority": {
+      "id": "career-world/ninjaone-capital/concept-master-layout-registration@r1",
+      "status": "promoted-integration-preview",
+      "layoutPath": "art-source/career-world/ninjaone-capital/city-layer-r1/concept-master-layout-registration-r1.json",
+      "layoutSha256": "07c0f89300ebd3579233fd23d0d209419035c5166115683e5840259ee599f80d",
+      "identityRegistration": true,
+      "frozenTerrainGeometryUnchanged": true,
+      "selectedSourceSha256": "0c94ae6f6bf9aac91a0c8f9a880b54d95bed1d9a6bb340967c162a2ff5d5f5b5",
+      "rejectedTerrainContactFamily": "city-selected-environment-source-alpha-r1",
+      "restoredCompositionFamily": "bounded-concept-city-contact-r1"
+    },
+    "waterTransition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-water-transition-foreground-r1.png",
+      "sha256": "0e4c2330971a6cd3ccc69986089ce0570849a74b295245796733d4b9e7161395",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "role": "four-isolated-registered-bridges-above-inland-water",
+      "containsTerrainPixels": false,
+      "runtimeVisible": true,
+      "shorelineTransitionStatus": "deferred-to-terrain-owned-detail-layer",
+      "visualOnly": true,
+      "affectsLandMask": false,
+      "affectsHeight": false,
+      "affectsSlope": false,
+      "affectsCollision": false
     }
   },
   "populationScaleCues": {
@@ -1579,15 +1679,15 @@
         0.1337
       ],
       "terrainNudgePixels": [
-        -13,
-        14
+        0,
+        0
       ],
       "skillId": "ai-agent-systems",
       "label": "AI / Agent Systems",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.4373316017113964,
-        "y": 0.1915436464489373
+        "x": 0.447,
+        "y": 0.21
       },
       "supersededPlanningPosition": [
         0.47,
@@ -1770,7 +1870,12 @@
             390.83
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.447,
+        "y": 0.21
+      },
+      "scaleClass": "citadel"
     },
     {
       "slotId": "skill-mcp",
@@ -1780,15 +1885,15 @@
         0.2723
       ],
       "terrainNudgePixels": [
-        7,
-        1
+        0,
+        0
       ],
       "skillId": "mcp",
       "label": "MCP",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.2848206760015558,
-        "y": 0.29291240331778123
+        "x": 0.405,
+        "y": 0.27
       },
       "supersededPlanningPosition": [
         0.315,
@@ -1971,7 +2076,12 @@
             576.65
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.405,
+        "y": 0.27
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-openapi-swagger",
@@ -1988,8 +2098,8 @@
       "label": "OpenAPI / Swagger",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.54254,
-        "y": 0.302456
+        "x": 0.515,
+        "y": 0.29
       },
       "supersededPlanningPosition": [
         0.49,
@@ -2172,7 +2282,12 @@
             595.76
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.515,
+        "y": 0.29
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-grpc-rest",
@@ -2189,8 +2304,8 @@
       "label": "gRPC / REST",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.221648,
-        "y": 0.35144000000000003
+        "x": 0.355,
+        "y": 0.35
       },
       "supersededPlanningPosition": [
         0.3,
@@ -2373,7 +2488,12 @@
             691.03
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.355,
+        "y": 0.35
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-capability-contracts",
@@ -2390,8 +2510,8 @@
       "label": "Capability Contracts",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.47858000000000006,
-        "y": 0.35955200000000004
+        "x": 0.47,
+        "y": 0.375
       },
       "supersededPlanningPosition": [
         0.58,
@@ -2574,7 +2694,12 @@
             705.89
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.47,
+        "y": 0.375
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-tool-generation",
@@ -2584,15 +2709,15 @@
         0.4071
       ],
       "terrainNudgePixels": [
-        -27,
-        20
+        0,
+        0
       ],
       "skillId": "tool-generation",
       "label": "Tool Generation",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.6020822497082846,
-        "y": 0.4079060663556247
+        "x": 0.555,
+        "y": 0.38
       },
       "supersededPlanningPosition": [
         0.43,
@@ -2775,7 +2900,12 @@
             799.95
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.555,
+        "y": 0.38
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-typescript",
@@ -2792,8 +2922,8 @@
       "label": "TypeScript",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.331316,
-        "y": 0.43232600000000004
+        "x": 0.655,
+        "y": 0.465
       },
       "supersededPlanningPosition": [
         0.59,
@@ -2976,7 +3106,12 @@
             846.27
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.655,
+        "y": 0.465
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-react",
@@ -2993,8 +3128,8 @@
       "label": "React",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.712034,
-        "y": 0.46493
+        "x": 0.773,
+        "y": 0.482
       },
       "supersededPlanningPosition": [
         0.7,
@@ -3177,7 +3312,12 @@
             912.11
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.773,
+        "y": 0.482
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-tanstack",
@@ -3194,8 +3334,8 @@
       "label": "TanStack",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.6111800000000001,
-        "y": 0.517034
+        "x": 0.635,
+        "y": 0.55
       },
       "supersededPlanningPosition": [
         0.81,
@@ -3378,7 +3518,12 @@
             1012.62
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.635,
+        "y": 0.55
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-golang",
@@ -3395,8 +3540,8 @@
       "label": "Go (Golang)",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.735044,
-        "y": 0.535988
+        "x": 0.745,
+        "y": 0.575
       },
       "supersededPlanningPosition": [
         0.53,
@@ -3698,7 +3843,12 @@
             1050.19
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.745,
+        "y": 0.575
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-csharp",
@@ -3715,8 +3865,8 @@
       "label": "C#",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.22313,
-        "y": 0.577952
+        "x": 0.6,
+        "y": 0.63
       },
       "supersededPlanningPosition": [
         0.65,
@@ -3899,7 +4049,12 @@
             1127.19
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.6,
+        "y": 0.63
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-python",
@@ -3916,8 +4071,8 @@
       "label": "Python",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.56984,
-        "y": 0.594878
+        "x": 0.69,
+        "y": 0.65
       },
       "supersededPlanningPosition": [
         0.78,
@@ -4100,7 +4255,12 @@
             1160.27
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.69,
+        "y": 0.65
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-postgresql",
@@ -4117,8 +4277,8 @@
       "label": "PostgreSQL",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.27890000000000004,
-        "y": 0.6057980000000001
+        "x": 0.785,
+        "y": 0.67
       },
       "supersededPlanningPosition": [
         0.56,
@@ -4301,7 +4461,12 @@
             1183.0
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.785,
+        "y": 0.67
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-redis",
@@ -4311,15 +4476,15 @@
         0.7134
       ],
       "terrainNudgePixels": [
-        -160,
-        -35
+        0,
+        0
       ],
       "skillId": "redis",
       "label": "Redis",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.7188314056787242,
-        "y": 0.6183078838776568
+        "x": 0.635,
+        "y": 0.73
       },
       "supersededPlanningPosition": [
         0.7,
@@ -4502,7 +4667,12 @@
             1202.77
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.635,
+        "y": 0.73
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-aws",
@@ -4519,8 +4689,8 @@
       "label": "AWS",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.727244,
-        "y": 0.681224
+        "x": 0.75,
+        "y": 0.745
       },
       "supersededPlanningPosition": [
         0.61,
@@ -4703,7 +4873,12 @@
             1328.96
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.75,
+        "y": 0.745
+      },
+      "scaleClass": "major"
     },
     {
       "slotId": "skill-databricks",
@@ -4713,15 +4888,15 @@
         0.8006
       ],
       "terrainNudgePixels": [
-        6,
-        -34
+        0,
+        0
       ],
       "skillId": "databricks",
       "label": "Databricks",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.6054017222870478,
-        "y": 0.686842287195438
+        "x": 0.588,
+        "y": 0.818
       },
       "supersededPlanningPosition": [
         0.7,
@@ -4904,7 +5079,12 @@
             1340.18
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.588,
+        "y": 0.818
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-docker",
@@ -4921,8 +5101,8 @@
       "label": "Docker",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.678338,
-        "y": 0.7192879999999999
+        "x": 0.725,
+        "y": 0.815
       },
       "supersededPlanningPosition": [
         0.83,
@@ -5105,7 +5285,12 @@
             1402.39
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.725,
+        "y": 0.815
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-vmware",
@@ -5122,8 +5307,8 @@
       "label": "VMware",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.5576720000000001,
-        "y": 0.762422
+        "x": 0.716,
+        "y": 0.869
       },
       "supersededPlanningPosition": [
         0.68,
@@ -5306,7 +5491,12 @@
             1485.97
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.716,
+        "y": 0.869
+      },
+      "scaleClass": "standard"
     },
     {
       "slotId": "skill-macstadium",
@@ -5323,8 +5513,8 @@
       "label": "MacStadium",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.658292,
-        "y": 0.7794260000000001
+        "x": 0.785,
+        "y": 0.885
       },
       "supersededPlanningPosition": [
         0.78,
@@ -5507,13 +5697,18 @@
             1520.19
           ]
         ]
-      }
+      },
+      "conceptPosition": {
+        "x": 0.785,
+        "y": 0.885
+      },
+      "scaleClass": "standard"
     }
   ],
   "knownBlockers": [
-    "B2/C1/C2 hydrology field hashes are pending; B1 use remains canonical-land-gated",
-    "React, TanStack, and Tool Generation still need accepted animation loops",
-    "AI / Agent Systems is provisional and still needs an accepted animation loop",
-    "train production loop is not present"
+    "territory-scale city visibility remains disabled pending a readable low-frequency silhouette",
+    "focused building aperture and contact-shadow require live multi-tier acceptance",
+    "inland-water continuity to the southeast lake requires a separate hydrology revision",
+    "train vehicle asset is not yet available for the centerline-bound production loop"
   ]
 }

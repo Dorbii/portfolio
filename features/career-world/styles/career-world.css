@@ -1407,20 +1407,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   shape-rendering: geometricPrecision;
 }
 
-.ninjaone-capital-mvp--contact {
-  z-index: 6;
-  filter: saturate(0.92) brightness(1.08) contrast(0.96);
-}
-
-.ninjaone-capital-mvp--city [data-capital-layer="territory-settlement-overview"] {
-  filter: saturate(0.9) brightness(1.08) contrast(0.97);
-}
-
-.ninjaone-capital-mvp--city [data-capital-layer="station-rear-and-platforms"],
-.ninjaone-capital-mvp--city [data-capital-layer="skill-building-nodes"] {
-  filter: saturate(0.94) brightness(0.98) contrast(0.97);
-}
-
 .ninjaone-capital-population__cue {
   transform-box: fill-box;
   transform-origin: 50% 100%;

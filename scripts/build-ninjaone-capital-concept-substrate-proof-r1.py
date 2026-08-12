@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import time
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +45,8 @@ SELECTED_PROOF_PATH = QA_ROOT / "city-selected-environment-substrate-proof-r1.pn
 SELECTED_ALPHA_PATH = QA_ROOT / "city-selected-environment-substrate-alpha-r1.png"
 APERTURED_OVERLAY_PATH = FABRIC_ROOT / "city-selected-environment-apertured-r1.png"
 NODE_FOREGROUND_PATH = FABRIC_ROOT / "city-node-transition-foreground-r1.png"
-NODE_ENVIRONMENT_DETAIL_PATH = FABRIC_ROOT / "city-node-environment-detail-r1.png"
+WATER_TRANSITION_PATH = FABRIC_ROOT / "city-water-transition-foreground-r1.png"
+CAPITAL_COHERENT_BASE_PATH = FABRIC_ROOT / "city-capital-coherent-base-r1.png"
 RAIL_SEGMENT_SOURCE_PATH = (
     REPO
     / "art-source/career-world/ninjaone-capital/city-layer-r1/transport/"
@@ -61,8 +63,11 @@ NODE_PROOF_PATH = QA_ROOT / "city-selected-environment-node-scale-proof-r1.png"
 NODE_INTEGRATED_PROOF_PATH = (
     QA_ROOT / "city-selected-environment-node-integrated-proof-r1.png"
 )
-NODE_ENVIRONMENT_DETAIL_PROOF_PATH = (
-    QA_ROOT / "city-selected-environment-detail-underlay-proof-r1.png"
+WATER_TRANSITION_PROOF_PATH = (
+    QA_ROOT / "city-water-transition-layer-proof-r1.png"
+)
+CAPITAL_COHERENT_BASE_PROOF_PATH = (
+    QA_ROOT / "city-capital-coherent-base-proof-r1.png"
 )
 RAIL_INTEGRATED_PROOF_PATH = (
     QA_ROOT / "city-selected-environment-rail-integrated-proof-r1.png"
@@ -103,6 +108,21 @@ INFRASTRUCTURE_ATLAS_PATH = (
     / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
     "infrastructure-transition-atlas-alpha-r2.png"
 )
+BRIDGE_ATLAS_PATH = (
+    REPO
+    / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
+    "city-bridge-atlas-alpha-r1.png"
+)
+BRIDGE_STEEP_PATH = (
+    REPO
+    / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
+    "city-bridge-steep-alpha-r1.png"
+)
+INLAND_WATER_MANIFEST_PATH = (
+    REPO
+    / "public/career-world/capitals/ninjaone/environment/manifests/"
+    "inland-water-r1.json"
+)
 
 ARTBOARD = (2571, 1929)
 EXPECTED_REFERENCE_SHA256 = (
@@ -116,6 +136,12 @@ EXPECTED_SELECTED_SOURCE_SHA256 = (
 )
 EXPECTED_INFRASTRUCTURE_ATLAS_SHA256 = (
     "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb"
+)
+EXPECTED_BRIDGE_ATLAS_SHA256 = (
+    "dc49fe8d16ec245999b983e48b1e1766052486dad00ef7b2cedddba24c838a62"
+)
+EXPECTED_BRIDGE_STEEP_SHA256 = (
+    "ce104fe8954417334d6de254da7e1c1748b7d9e7ad2426705cca1ffd54b5c67a"
 )
 EXPECTED_RAIL_SEGMENT_SOURCE_SHA256 = (
     "83ae9b929e8131dc0ea12febede5279a6e12ecd66cfb17213281e91c122c92d8"
@@ -140,32 +166,6 @@ SUMMIT_PLACEHOLDER_OWNERSHIP_POLYGON: tuple[tuple[float, float], ...] = (
     (0.395, 0.018),
     (0.570, 0.018),
     (0.570, 0.225),
-)
-
-# Independent, source-authored city detail. These pieces do not alter the
-# frozen land, height, slope, hydrology, or collision authorities. They sit
-# between the apertured dense city plate and the independent building nodes.
-# Atlas cells: straight, curve / stairs, bridge / plaza, rocky foliage seam.
-NODE_ENVIRONMENT_DETAIL_PLACEMENTS: tuple[dict[str, Any], ...] = (
-    {"skillId": "ai-agent-systems", "cell": (0, 2), "widthFactor": 1.30},
-    {"skillId": "mcp", "cell": (0, 1), "widthFactor": 1.30, "mirror": True},
-    {"skillId": "openapi-swagger", "cell": (1, 0), "widthFactor": 1.32},
-    {"skillId": "grpc-rest", "cell": (0, 0), "widthFactor": 1.30},
-    {"skillId": "capability-contracts", "cell": (0, 2), "widthFactor": 1.26},
-    {"skillId": "tool-generation", "cell": (0, 1), "widthFactor": 1.28},
-    {"skillId": "typescript", "cell": (1, 0), "widthFactor": 1.30, "mirror": True},
-    {"skillId": "react", "cell": (0, 2), "widthFactor": 1.26},
-    {"skillId": "tanstack", "cell": (0, 0), "widthFactor": 1.30, "mirror": True},
-    {"skillId": "golang", "cell": (1, 2), "widthFactor": 1.28},
-    {"skillId": "csharp", "cell": (0, 1), "widthFactor": 1.28},
-    {"skillId": "python", "cell": (0, 2), "widthFactor": 1.25, "mirror": True},
-    {"skillId": "postgresql", "cell": (1, 0), "widthFactor": 1.30},
-    {"skillId": "redis", "cell": (0, 0), "widthFactor": 1.28},
-    {"skillId": "aws", "cell": (1, 2), "widthFactor": 1.30, "mirror": True},
-    {"skillId": "databricks", "cell": (0, 1), "widthFactor": 1.28, "mirror": True},
-    {"skillId": "docker", "cell": (1, 0), "widthFactor": 1.28, "mirror": True},
-    {"skillId": "vmware", "cell": (0, 0), "widthFactor": 1.30},
-    {"skillId": "macstadium", "cell": (0, 2), "widthFactor": 1.24},
 )
 
 # Direction-specific source-camera pieces only. No raster is arbitrarily
@@ -276,6 +276,20 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def save_png_atomic(image: Image.Image, path: Path) -> None:
+    """Replace generated PNGs without truncating a file the dev server reads."""
+    temporary = path.with_name(f"{path.stem}.generating{path.suffix}")
+    image.save(temporary, optimize=True)
+    for attempt in range(8):
+        try:
+            temporary.replace(path)
+            return
+        except PermissionError:
+            if attempt == 7:
+                raise
+            time.sleep(0.075 * (attempt + 1))
 
 
 def pixel(point: list[float] | tuple[float, float]) -> tuple[int, int]:
@@ -559,6 +573,9 @@ def build_city_mask(
     )
 
     # Keep the accepted districts visually continuous at city-detail scale.
+    # Do not expand the selected source along the hydrology spine: that earlier
+    # shortcut admitted large source-plate fragments into open water. Water
+    # crossings have their own registered bridge corridors below.
     draw.line(
         [
             pixel((0.447, 0.210)),
@@ -570,16 +587,17 @@ def build_city_mask(
         width=150,
         joint="curve",
     )
-    draw.line(
-        [pixel(point) for point in layout["waterSpineConceptPoints"]],
-        fill=255,
-        width=118,
-        joint="curve",
-    )
 
-    core = core.filter(ImageFilter.MaxFilter(101))
-    core = core.filter(ImageFilter.GaussianBlur(34))
+    core = core.filter(ImageFilter.MaxFilter(41))
+    core = core.filter(ImageFilter.GaussianBlur(12))
     land_city = ImageChops.multiply(core, terrain_alpha)
+
+    # Towers, cliff lips, and isometric retaining walls may legitimately
+    # overhang the terrain alpha, but only near supported terrain. A bounded
+    # dilation preserves those silhouettes without permitting district-wide
+    # leakage into the coast.
+    terrain_overhang_support = terrain_alpha.filter(ImageFilter.MaxFilter(81))
+    supported_selected_city = ImageChops.multiply(core, terrain_overhang_support)
 
     bridge_mask = Image.new("L", ARTBOARD, 0)
     bridge_draw = ImageDraw.Draw(bridge_mask)
@@ -595,8 +613,264 @@ def build_city_mask(
     return (
         ImageChops.lighter(land_city, bridge_mask),
         bridge_mask,
-        ImageChops.lighter(core, bridge_mask),
+        ImageChops.lighter(supported_selected_city, bridge_mask),
     )
+
+
+def build_registered_inland_water_mask() -> Image.Image:
+    manifest = json.loads(INLAND_WATER_MANIFEST_PATH.read_text(encoding="utf-8"))
+    if (
+        manifest["id"] != "career-world/capitals/ninjaone/inland-water@r1"
+        or manifest["status"] != "production-runtime"
+    ):
+        raise RuntimeError("Unexpected inland-water runtime authority.")
+
+    field_record = manifest["field"]
+    ownership_record = manifest["terrainEraseMask"]
+    field_path = public_asset_path(field_record["path"])
+    ownership_path = public_asset_path(ownership_record["path"])
+    if sha256(field_path).upper() != field_record["sha256"].upper():
+        raise RuntimeError("Inland-water field hash drift.")
+    if sha256(ownership_path).upper() != ownership_record["sha256"].upper():
+        raise RuntimeError("Inland-water ownership hash drift.")
+
+    with Image.open(field_path) as source:
+        field_red = source.convert("RGBA").getchannel("R")
+    with Image.open(ownership_path) as source:
+        ownership_red = source.convert("RGBA").getchannel("R")
+    ownership_dimensions = tuple(ownership_record["dimensions"])
+    if ownership_red.size != ownership_dimensions:
+        raise RuntimeError("Inland-water ownership dimensions drift.")
+    field_red = field_red.resize(ownership_dimensions, Image.Resampling.BILINEAR)
+
+    field_pixels = np.asarray(field_red, dtype=np.uint8)
+    ownership_pixels = np.asarray(ownership_red, dtype=np.uint8)
+    owned_water = (
+        (field_pixels >= 128)
+        & (ownership_pixels >= 8)
+    ).astype(np.uint8) * 255
+    crop_mask = Image.fromarray(owned_water, "L")
+
+    full_dimensions = tuple(field_record["artboardDimensions"])
+    crop = field_record["artboardCrop"]
+    if crop[2:] != list(ownership_dimensions):
+        raise RuntimeError("Inland-water crop and ownership dimensions disagree.")
+    full_mask = Image.new("L", full_dimensions, 0)
+    full_mask.paste(crop_mask, (crop[0], crop[1]))
+    registered = full_mask.resize(ARTBOARD, Image.Resampling.LANCZOS)
+    return registered.point(lambda value: 255 if value >= 96 else 0)
+
+
+def build_water_transition_layer(
+    selected: Image.Image,
+    bridge_mask: Image.Image,
+    water_mask: Image.Image,
+    layout: dict[str, Any],
+) -> tuple[Image.Image, dict[str, Any]]:
+    water_manifest = json.loads(
+        INLAND_WATER_MANIFEST_PATH.read_text(encoding="utf-8")
+    )
+    hard_water = water_mask.point(lambda value: 255 if value >= 128 else 0)
+    hard_bridge = bridge_mask.point(lambda value: 255 if value >= 32 else 0)
+
+    # The selected concept source remains layout evidence only. Even a narrow
+    # shoreline crop repaints the frozen production terrain with pixels from a
+    # different terrain plate, so this runtime layer may contain only isolated
+    # bridge assets. Bank transitions need their own terrain-owned authoring pass.
+    shoreline_reach = hard_water.filter(ImageFilter.MaxFilter(35))
+    land_shoreline = ImageChops.multiply(
+        ImageChops.subtract(shoreline_reach, hard_water),
+        ImageChops.invert(hard_bridge),
+    )
+    transition = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
+
+    with Image.open(BRIDGE_ATLAS_PATH) as source:
+        bridge_atlas = source.convert("RGBA")
+    steep_bridge, _ = load_node_asset(BRIDGE_STEEP_PATH)
+    bridge_cells = {
+        "upper-water-bridge": (0, 0),
+        "station-civic-bridge": (1, 0),
+        "lower-works-bridge": (0, 1),
+    }
+    registered_bridge_visuals = Image.new("L", ARTBOARD, 0)
+    bridge_asset_records: list[dict[str, Any]] = []
+    for landmark in layout["landmarks"]:
+        if landmark["kind"] != "bridge":
+            continue
+        if landmark["id"] == "central-civic-bridge":
+            bridge = steep_bridge.copy()
+            source_id = "city-bridge-steep-alpha-r1"
+        else:
+            bridge = bridge_atlas_component(
+                bridge_atlas,
+                bridge_cells[landmark["id"]],
+            )
+            source_id = (
+                f"city-bridge-atlas-alpha-r1 cell {bridge_cells[landmark['id']]}"
+            )
+        bridge_alpha = bridge.getchannel("A")
+        bridge_rgb = ImageEnhance.Color(bridge.convert("RGB")).enhance(0.78)
+        bridge_rgb = ImageEnhance.Brightness(bridge_rgb).enhance(0.74)
+        bridge = bridge_rgb.convert("RGBA")
+        bridge.putalpha(bridge_alpha)
+        # The generated bridge plates are intentionally compact overlays.  The
+        # landmarks describe the complete crossing corridor, not the width of a
+        # freestanding building footprint; using the old 2.20 multiplier made
+        # every bridge read as a detached city block at runtime.
+        display_width = round(
+            landmark["halfLengthNormalized"] * ARTBOARD[0] * 1.18
+        )
+        display_height = round(display_width * bridge.height / bridge.width)
+        bridge = bridge.resize(
+            (display_width, display_height),
+            Image.Resampling.LANCZOS,
+        )
+        center = pixel(landmark["conceptPosition"])
+        top_left = (
+            round(center[0] - bridge.width / 2),
+            round(center[1] - bridge.height * 0.51),
+        )
+        transition.alpha_composite(bridge, dest=top_left)
+        world_alpha = Image.new("L", ARTBOARD, 0)
+        world_alpha.paste(bridge.getchannel("A"), top_left)
+        registered_bridge_visuals = ImageChops.lighter(
+            registered_bridge_visuals,
+            world_alpha.point(lambda value: 255 if value >= 16 else 0),
+        )
+        bridge_asset_records.append(
+            {
+                "id": landmark["id"],
+                "source": source_id,
+                "displayWidth": display_width,
+                "topLeft": list(top_left),
+            }
+        )
+    transition_alpha = transition.getchannel("A")
+
+    visible = transition_alpha.point(lambda value: 255 if value >= 16 else 0)
+    unregistered_water_overlap = ImageChops.multiply(
+        ImageChops.multiply(visible, hard_water),
+        ImageChops.invert(registered_bridge_visuals),
+    ).histogram()[255]
+    if unregistered_water_overlap != 0:
+        raise RuntimeError("Water transition leaked outside registered bridge corridors.")
+
+    bridge_records: list[dict[str, Any]] = []
+    for landmark in layout["landmarks"]:
+        if landmark["kind"] != "bridge":
+            continue
+        local_corridor = Image.new("L", ARTBOARD, 0)
+        ImageDraw.Draw(local_corridor).line(
+            bridge_endpoints(landmark),
+            fill=255,
+            width=74,
+        )
+        visible_pixels = ImageChops.multiply(visible, local_corridor).histogram()[255]
+        over_water_pixels = ImageChops.multiply(
+            ImageChops.multiply(visible, local_corridor),
+            hard_water,
+        ).histogram()[255]
+        if visible_pixels < 300 or over_water_pixels < 40:
+            raise RuntimeError(
+                f"Registered bridge lacks visible above-water structure: {landmark['id']}"
+            )
+        bridge_records.append(
+            {
+                "id": landmark["id"],
+                "visiblePixels": visible_pixels,
+                "overWaterPixels": over_water_pixels,
+                "endpoints": [list(point) for point in bridge_endpoints(landmark)],
+                "independentAuthoredAsset": True,
+            }
+        )
+
+    return transition, {
+        "authority": water_manifest["authorityId"],
+        "bridgeCount": len(bridge_records),
+        "bridges": bridge_records,
+        "independentBridgeAssetCount": len(bridge_asset_records),
+        "independentBridgeAssets": bridge_asset_records,
+        "shorelinePixels": 0,
+        "terrainPixelsExcluded": True,
+        "unregisteredWaterOverlapPixels": unregistered_water_overlap,
+        "changesHydrologyAuthority": False,
+        "changesTerrainAuthority": False,
+    }
+
+
+def build_capital_coherent_base(
+    selected: Image.Image,
+    water_mask: Image.Image,
+) -> tuple[Image.Image, dict[str, Any]]:
+    """Create the bounded visual city/contact base without owning terrain geometry."""
+    source_alpha = selected.getchannel("A")
+    hard_source = source_alpha.point(lambda value: 255 if value >= 16 else 0)
+
+    # The selected source includes immediate retaining slopes and bank contacts.
+    # Keep that transition material, but feather its outer district silhouette so
+    # the canonical terrain remains visible outside the city envelope.
+    inner = hard_source.filter(ImageFilter.MinFilter(61))
+    feather = inner.filter(ImageFilter.GaussianBlur(30))
+    coherent_alpha = ImageChops.multiply(source_alpha, feather)
+
+    # Live inland water is a separate owner. It must remain visible through the
+    # city base; registered bridge sprites are composited later above the water.
+    hard_water = water_mask.point(lambda value: 255 if value >= 128 else 0)
+    coherent_alpha = ImageChops.subtract(coherent_alpha, hard_water)
+
+    coherent = selected.copy()
+    coherent.putalpha(coherent_alpha)
+    coherent_pixels = np.asarray(coherent, dtype=np.uint8).copy()
+    coherent_pixels[coherent_pixels[:, :, 3] == 0, :3] = 0
+    coherent = Image.fromarray(coherent_pixels, "RGBA")
+
+    visible = coherent_alpha.point(lambda value: 255 if value >= 8 else 0)
+    visible_pixels = visible.histogram()[255]
+    water_overlap = ImageChops.multiply(visible, hard_water).histogram()[255]
+    transparent_rgb = int(np.count_nonzero(
+        (coherent_pixels[:, :, 3] == 0)
+        & np.any(coherent_pixels[:, :, :3] != 0, axis=2)
+    ))
+    coverage_ratio = visible_pixels / (ARTBOARD[0] * ARTBOARD[1])
+    if water_overlap != 0:
+        raise RuntimeError("Capital city base overlaps registered inland water.")
+    if coverage_ratio >= 0.28:
+        raise RuntimeError("Capital city base exceeds its bounded visual footprint.")
+    if transparent_rgb != 0:
+        raise RuntimeError("Capital city base retains RGB beneath zero alpha.")
+
+    return coherent, {
+        "role": "bounded-city-and-immediate-contact-transition",
+        "containsTransitionTerrainPixels": True,
+        "containsRegisteredWaterPixels": False,
+        "waterOverlapPixels": water_overlap,
+        "visiblePixels": visible_pixels,
+        "artboardCoverageRatio": round(coverage_ratio, 6),
+        "transparentRgbUnderZeroAlpha": transparent_rgb,
+        "edgeFeatherPixels": 30,
+        "visualOnly": True,
+        "affectsLandMask": False,
+        "affectsHeight": False,
+        "affectsSlope": False,
+        "affectsCollision": False,
+    }
+
+
+def build_water_transition_proof(
+    terrain: Image.Image,
+    apertured: Image.Image,
+    water_mask: Image.Image,
+    water_transition: Image.Image,
+) -> Image.Image:
+    proof = terrain.copy()
+    proof.alpha_composite(apertured)
+    water_preview = Image.new("RGBA", ARTBOARD, (15, 53, 62, 0))
+    water_preview.putalpha(
+        water_mask.point(lambda value: round(value * 0.86))
+    )
+    proof.alpha_composite(water_preview)
+    proof.alpha_composite(water_transition)
+    return proof
 
 
 def public_asset_path(runtime_path: str) -> Path:
@@ -856,6 +1130,8 @@ def build_registered_rail_layers(
     support = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
     bed = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
     track = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
+    ground_track_alpha = Image.new("L", ARTBOARD, 0)
+    elevated_track_alpha = Image.new("L", ARTBOARD, 0)
     joins: list[dict[str, Any]] = []
     placements: list[dict[str, Any]] = []
     segment_count = 0
@@ -901,36 +1177,18 @@ def build_registered_rail_layers(
                     }
                 )
 
+            segment_alpha = Image.new("L", ARTBOARD, 0)
+            segment_alpha.paste(component.getchannel("A"), position)
             if segment["kind"].startswith("ground-"):
-                local_bed_alpha = component.getchannel("A").filter(
-                    ImageFilter.MaxFilter(13)
+                ground_track_alpha = ImageChops.lighter(
+                    ground_track_alpha,
+                    segment_alpha,
                 )
-                local_bed_alpha = local_bed_alpha.filter(ImageFilter.GaussianBlur(3.2))
-                local_bed_alpha = local_bed_alpha.point(
-                    lambda value: round(value * 0.30)
+            else:
+                elevated_track_alpha = ImageChops.lighter(
+                    elevated_track_alpha,
+                    segment_alpha,
                 )
-                local_bed = Image.new("RGBA", component.size, (31, 30, 24, 0))
-                local_bed.putalpha(local_bed_alpha)
-                bed.alpha_composite(local_bed, dest=position)
-
-            shadow_alpha = component.getchannel("A").filter(
-                ImageFilter.GaussianBlur(4.5)
-            )
-            shadow_strength = (
-                0.46 if segment["kind"].startswith("elevated-") else 0.20
-            )
-            shadow_alpha = shadow_alpha.point(
-                lambda value, amount=shadow_strength: round(value * amount)
-            )
-            shadow = Image.new("RGBA", component.size, (2, 5, 6, 0))
-            shadow.putalpha(shadow_alpha)
-            support.alpha_composite(
-                shadow,
-                dest=(
-                    position[0] + 5,
-                    position[1] + (8 if shadow_strength > 0.4 else 4),
-                ),
-            )
             track.alpha_composite(component, dest=position)
             placements.append(
                 {
@@ -953,6 +1211,25 @@ def build_registered_rail_layers(
             previous = (segment, component, position)
             segment_count += 1
 
+    # Contacts are derived from the joined route silhouette, not one shadow or
+    # ballast patch per atlas cell. That removes the repeated hard rectangles
+    # and density bands previously visible at otherwise valid segment joins.
+    bed_alpha = ground_track_alpha.filter(ImageFilter.MaxFilter(17))
+    bed_alpha = bed_alpha.filter(ImageFilter.GaussianBlur(4.0))
+    bed_alpha = bed_alpha.point(lambda value: round(value * 0.24))
+    bed.putalpha(bed_alpha)
+
+    ground_shadow = ground_track_alpha.filter(ImageFilter.GaussianBlur(5.0))
+    ground_shadow = ground_shadow.point(lambda value: round(value * 0.17))
+    elevated_shadow = elevated_track_alpha.filter(ImageFilter.GaussianBlur(6.5))
+    elevated_shadow = elevated_shadow.point(lambda value: round(value * 0.42))
+    shifted_ground_shadow = Image.new("L", ARTBOARD, 0)
+    shifted_ground_shadow.paste(ground_shadow, (4, 4))
+    shifted_elevated_shadow = Image.new("L", ARTBOARD, 0)
+    shifted_elevated_shadow.paste(elevated_shadow, (6, 9))
+    support.putalpha(
+        ImageChops.lighter(shifted_ground_shadow, shifted_elevated_shadow)
+    )
     portal_back, portal_foreground, portal_records = build_rail_portal_layers(layout)
     track_alpha = track.getchannel("A")
     landmark_by_id = {landmark["id"]: landmark for landmark in layout["landmarks"]}
@@ -1048,6 +1325,36 @@ def build_registered_rail_layers(
     )
 
 
+def bridge_atlas_component(
+    atlas: Image.Image,
+    cell: tuple[int, int],
+) -> Image.Image:
+    cell_width = atlas.width // 2
+    cell_height = atlas.height // 2
+    component = atlas.crop(
+        (
+            cell[0] * cell_width,
+            cell[1] * cell_height,
+            (cell[0] + 1) * cell_width,
+            (cell[1] + 1) * cell_height,
+        )
+    )
+    visible_bounds = component.getchannel("A").point(
+        lambda value: 255 if value >= 8 else 0
+    ).getbbox()
+    if visible_bounds is None:
+        raise RuntimeError(f"Bridge atlas cell {cell} has no visible pixels.")
+    padding = 6
+    return component.crop(
+        (
+            max(0, visible_bounds[0] - padding),
+            max(0, visible_bounds[1] - padding),
+            min(component.width, visible_bounds[2] + padding),
+            min(component.height, visible_bounds[3] + padding),
+        )
+    )
+
+
 def manifest_nodes_by_skill(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
     nodes = {node["skillId"]: node for node in manifest["nodes"]}
     if len(nodes) != len(manifest["nodes"]):
@@ -1069,95 +1376,6 @@ def node_footprint_dimensions(node: dict[str, Any]) -> tuple[float, float]:
         display_width * float(footprint["width"]),
         display_width * float(footprint["depth"]),
     )
-
-
-def build_node_environment_detail(
-    layout: dict[str, Any],
-    manifest: dict[str, Any],
-    aperture_mask: Image.Image,
-) -> tuple[Image.Image, list[dict[str, Any]]]:
-    atlas_hash = sha256(INFRASTRUCTURE_ATLAS_PATH)
-    if atlas_hash != EXPECTED_INFRASTRUCTURE_ATLAS_SHA256:
-        raise RuntimeError("The modular infrastructure transition atlas has drifted.")
-    with Image.open(INFRASTRUCTURE_ATLAS_PATH) as source:
-        atlas = source.convert("RGBA")
-    if atlas.size != (1024, 1536):
-        raise RuntimeError(f"Unexpected infrastructure atlas dimensions: {atlas.size}")
-
-    sockets_by_skill = {
-        socket["skillId"]: socket for socket in layout["skillSockets"]
-    }
-    nodes_by_skill = manifest_nodes_by_skill(manifest)
-    layer = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
-    records: list[dict[str, Any]] = []
-    prepared: list[tuple[int, Image.Image, tuple[int, int], dict[str, Any]]] = []
-
-    for placement in NODE_ENVIRONMENT_DETAIL_PLACEMENTS:
-        socket = sockets_by_skill[placement["skillId"]]
-        placement_id = f"{placement['skillId']}-contact"
-        concept_position = tuple(socket["conceptPosition"])
-        node = nodes_by_skill[placement["skillId"]]
-        target_width = round(node_display_width(node) * placement["widthFactor"])
-        component = infrastructure_component(atlas, tuple(placement["cell"]))
-        if placement.get("mirror", False):
-            component = component.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        component_alpha = component.getchannel("A")
-        component_rgb = ImageEnhance.Color(component.convert("RGB")).enhance(0.82)
-        component_rgb = ImageEnhance.Brightness(component_rgb).enhance(0.74)
-        component = component_rgb.convert("RGBA")
-        component.putalpha(component_alpha)
-        target_height = max(1, round(component.height * target_width / component.width))
-        component = component.resize(
-            (target_width, target_height),
-            Image.Resampling.LANCZOS,
-        )
-        center_x, center_y = pixel(concept_position)
-        top_left = (
-            round(center_x - component.width / 2),
-            round(center_y - component.height / 2),
-        )
-        bounds = (
-            top_left[0],
-            top_left[1],
-            top_left[0] + component.width,
-            top_left[1] + component.height,
-        )
-        if (
-            bounds[0] < 0
-            or bounds[1] < 0
-            or bounds[2] > ARTBOARD[0]
-            or bounds[3] > ARTBOARD[1]
-        ):
-            raise RuntimeError(
-                f"Infrastructure detail falls outside artboard: {placement_id} {bounds}"
-            )
-        prepared.append((bounds[3], component, top_left, placement))
-        records.append(
-            {
-                "id": placement_id,
-                "skillId": placement.get("skillId"),
-                "atlasCell": list(placement["cell"]),
-                "conceptPosition": list(concept_position),
-                "mirrored": placement.get("mirror", False),
-                "nodeDisplayWidth": node_display_width(node),
-                "placedBounds": list(bounds),
-                "visibleDimensions": list(component.size),
-            }
-        )
-
-    for _, component, top_left, _ in sorted(prepared, key=lambda entry: entry[0]):
-        layer.alpha_composite(component, dest=top_left)
-    # Full atlas tiles are too legible as repeated prefabs. Keep only a soft
-    # sleeve around the registered node/station apertures. The independent
-    # nodes cover the center; the surviving material supplies local paving,
-    # rubble, retaining stone, and foliage at the contact perimeter.
-    binary_aperture = aperture_mask.point(lambda value: 255 if value >= 64 else 0)
-    contact_sleeve = binary_aperture.filter(ImageFilter.MaxFilter(51))
-    contact_sleeve = contact_sleeve.filter(ImageFilter.GaussianBlur(3.0))
-    layer.putalpha(
-        ImageChops.multiply(layer.getchannel("A"), contact_sleeve)
-    )
-    return layer, records
 
 
 def fit_node_asset(
@@ -1218,9 +1436,9 @@ def build_node_aperture_mask(
         node = nodes_by_skill[socket["skillId"]]
         footprint_width, footprint_depth = node_footprint_dimensions(node)
         center_x, center_y = pixel(socket["conceptPosition"])
-        aperture_width = round(footprint_width * 0.96)
-        aperture_height = round(footprint_depth * 1.35)
-        center_y -= round(footprint_depth * 0.20)
+        aperture_width = round(footprint_width * 0.86)
+        aperture_height = round(footprint_depth * 1.08)
+        center_y -= round(footprint_depth * 0.12)
         draw.ellipse(
             (
                 center_x - aperture_width // 2,
@@ -1238,9 +1456,9 @@ def build_node_aperture_mask(
     )
     station_x, station_y = pixel(station["conceptPosition"])
     station_display_width = int(manifest["transport"]["station"]["displayWidth"])
-    station_width = round(station_display_width * 0.84)
-    station_height = round(station_display_width * 0.25)
-    station_y -= round(station_display_width * 0.045)
+    station_width = round(station_display_width * 0.72)
+    station_height = round(station_display_width * 0.18)
+    station_y -= round(station_display_width * 0.035)
     draw.ellipse(
         (
             station_x - station_width // 2,
@@ -1281,6 +1499,8 @@ def build_node_foreground(
     manifest: dict[str, Any],
     aperture_mask: Image.Image,
     summit_ownership_mask: Image.Image,
+    terrain_alpha: Image.Image,
+    water_mask: Image.Image,
 ) -> Image.Image:
     binary_aperture = aperture_mask.point(lambda value: 255 if value >= 64 else 0)
     expanded = binary_aperture.filter(ImageFilter.MaxFilter(31))
@@ -1339,11 +1559,21 @@ def build_node_foreground(
         ImageChops.multiply(contact_band, lower_gate),
         material_mask,
     )
+    # Generic socket contact belongs to land only. Shoreline stone and every
+    # above-water bridge pixel are owned by build_water_transition_layer();
+    # letting this later foreground pass cross that boundary reintroduced the
+    # source plate's rock fragments over the animated river.
+    hard_terrain = terrain_alpha.point(lambda value: 255 if value >= 16 else 0)
+    hard_water = water_mask.point(lambda value: 255 if value >= 128 else 0)
+    land_only = ImageChops.multiply(hard_terrain, ImageChops.invert(hard_water))
     foreground = selected.copy()
     foreground.putalpha(
         ImageChops.multiply(
-            ImageChops.multiply(selected.getchannel("A"), foreground_mask),
-            ImageChops.invert(summit_ownership_mask),
+            ImageChops.multiply(
+                ImageChops.multiply(selected.getchannel("A"), foreground_mask),
+                ImageChops.invert(summit_ownership_mask),
+            ),
+            land_only,
         )
     )
     return foreground
@@ -1452,15 +1682,20 @@ def validate_summit_placeholder_ownership(
 def measure_node_transition_coverage(
     layout: dict[str, Any],
     manifest: dict[str, Any],
-    environment_detail: Image.Image,
+    selected: Image.Image,
+    aperture_mask: Image.Image,
     foreground: Image.Image,
+    terrain_alpha: Image.Image,
+    summit_ownership_mask: Image.Image,
 ) -> list[dict[str, Any]]:
-    detail_alpha = environment_detail.getchannel("A").point(
+    selected_alpha = selected.getchannel("A").point(
         lambda value: 255 if value >= 8 else 0
     )
+    aperture_alpha = aperture_mask.point(lambda value: 255 if value >= 64 else 0)
     foreground_alpha = foreground.getchannel("A").point(
         lambda value: 255 if value >= 8 else 0
     )
+    hard_terrain = terrain_alpha.point(lambda value: 255 if value >= 16 else 0)
     records: list[dict[str, Any]] = []
     nodes_by_skill = manifest_nodes_by_skill(manifest)
     for socket in layout["skillSockets"]:
@@ -1480,28 +1715,55 @@ def measure_node_transition_coverage(
             fill=255,
         )
         local_mask_pixels = local_mask.histogram()[255]
-        detail_pixels = ImageChops.multiply(
-            detail_alpha,
+        local_aperture = ImageChops.multiply(aperture_alpha, local_mask)
+        aperture_pixels = local_aperture.histogram()[255]
+        raw_off_terrain_aperture = ImageChops.multiply(
+            local_aperture,
+            ImageChops.invert(hard_terrain),
+        )
+        authorized_ownership_transfer = Image.new("L", ARTBOARD, 0)
+        if socket["skillId"] == "ai-agent-systems":
+            authorized_ownership_transfer = ImageChops.multiply(
+                raw_off_terrain_aperture,
+                summit_ownership_mask.point(
+                    lambda value: 255 if value >= 64 else 0
+                ),
+            )
+        off_terrain_aperture_pixels = ImageChops.subtract(
+            raw_off_terrain_aperture,
+            authorized_ownership_transfer,
+        ).histogram()[255]
+        authorized_ownership_transfer_pixels = (
+            authorized_ownership_transfer.histogram()[255]
+        )
+        perimeter = local_aperture.filter(ImageFilter.MaxFilter(27))
+        perimeter = ImageChops.subtract(perimeter, local_aperture)
+        retained_source_perimeter_pixels = ImageChops.multiply(
+            ImageChops.multiply(selected_alpha, perimeter),
             local_mask,
         ).histogram()[255]
         foreground_pixels = ImageChops.multiply(
             foreground_alpha,
             local_mask,
         ).histogram()[255]
-        detail_ratio = detail_pixels / max(1, local_mask_pixels)
         foreground_ratio = foreground_pixels / max(1, local_mask_pixels)
         passes = (
-            detail_pixels >= 1000
-            and detail_ratio >= 0.25
-            and foreground_pixels >= 600
-            and foreground_ratio >= 0.08
+            aperture_pixels >= 140
+            and off_terrain_aperture_pixels == 0
+            and retained_source_perimeter_pixels >= 180
+            and foreground_pixels >= 250
+            and foreground_ratio >= 0.025
         )
         records.append(
             {
                 "skillId": socket["skillId"],
                 "localMaskPixels": local_mask_pixels,
-                "environmentDetailPixels": detail_pixels,
-                "environmentDetailCoverageRatio": round(detail_ratio, 6),
+                "aperturePixels": aperture_pixels,
+                "offTerrainAperturePixels": off_terrain_aperture_pixels,
+                "authorizedSummitOwnershipTransferPixels": (
+                    authorized_ownership_transfer_pixels
+                ),
+                "retainedSourcePerimeterPixels": retained_source_perimeter_pixels,
                 "foregroundOcclusionPixels": foreground_pixels,
                 "foregroundOcclusionCoverageRatio": round(foreground_ratio, 6),
                 "passes": passes,
@@ -1511,7 +1773,11 @@ def measure_node_transition_coverage(
         failures = [
             {
                 "skillId": record["skillId"],
-                "environmentDetailPixels": record["environmentDetailPixels"],
+                "aperturePixels": record["aperturePixels"],
+                "offTerrainAperturePixels": record["offTerrainAperturePixels"],
+                "retainedSourcePerimeterPixels": record[
+                    "retainedSourcePerimeterPixels"
+                ],
                 "foregroundOcclusionPixels": record["foregroundOcclusionPixels"],
             }
             for record in records
@@ -1527,7 +1793,6 @@ def measure_node_transition_coverage(
 def build_node_scale_proof(
     terrain: Image.Image,
     selected: Image.Image,
-    environment_detail: Image.Image,
     aperture_mask: Image.Image,
     layout: dict[str, Any],
     manifest: dict[str, Any],
@@ -1614,7 +1879,6 @@ def build_node_scale_proof(
 
     proof = terrain.copy()
     proof.alpha_composite(apertured)
-    proof.alpha_composite(environment_detail)
     for _, asset, top_left in sorted(render_queue, key=lambda entry: entry[0]):
         proof.alpha_composite(asset, dest=top_left)
 
@@ -1639,7 +1903,8 @@ def build_node_scale_proof(
 def build_rail_integrated_proof(
     terrain: Image.Image,
     apertured: Image.Image,
-    environment_detail: Image.Image,
+    water_mask: Image.Image,
+    water_transition: Image.Image,
     rail_support: Image.Image,
     rail_bed: Image.Image,
     rail_portal_back: Image.Image,
@@ -1649,9 +1914,12 @@ def build_rail_integrated_proof(
     render_queue: list[tuple[int, Image.Image, tuple[int, int]]],
     node_foreground: Image.Image,
 ) -> Image.Image:
-    proof = terrain.copy()
-    proof.alpha_composite(apertured)
-    proof.alpha_composite(environment_detail)
+    proof = build_water_transition_proof(
+        terrain,
+        apertured,
+        water_mask,
+        water_transition,
+    )
     proof.alpha_composite(rail_support)
     proof.alpha_composite(rail_bed)
     proof.alpha_composite(rail_portal_back)
@@ -1701,10 +1969,10 @@ def build_population_scale_proofs(
 
     site_proof = base_proof.copy()
     site_proof.alpha_composite(site_layer)
-    site_proof.save(POPULATION_SITE_PROOF_PATH, optimize=True)
+    save_png_atomic(site_proof, POPULATION_SITE_PROOF_PATH)
     close_proof = site_proof.copy()
     close_proof.alpha_composite(close_layer)
-    close_proof.save(POPULATION_CLOSE_PROOF_PATH, optimize=True)
+    save_png_atomic(close_proof, POPULATION_CLOSE_PROOF_PATH)
 
     cues = population["cues"]
     expected_species = {"dwarf", "elf", "gnome", "human", "orc"}
@@ -1786,7 +2054,7 @@ def build_population_scale_proofs(
             f"{cue['minimumDetailTier'].upper()} / {cue['species'].upper()} / {cue_id}",
             fill=(235, 226, 197, 255),
         )
-    closeup_qa.save(POPULATION_CLOSEUP_QA_PATH, optimize=True)
+    save_png_atomic(closeup_qa, POPULATION_CLOSEUP_QA_PATH)
 
     return {
         "status": "site-and-close-detail-lod-proof",
@@ -1918,6 +2186,10 @@ def main() -> None:
         raise RuntimeError("The frozen regional terrain has drifted.")
     if selected_source_hash != EXPECTED_SELECTED_SOURCE_SHA256:
         raise RuntimeError("The selected city-environment source has drifted.")
+    if sha256(BRIDGE_ATLAS_PATH) != EXPECTED_BRIDGE_ATLAS_SHA256:
+        raise RuntimeError("The independent city bridge atlas has drifted.")
+    if sha256(BRIDGE_STEEP_PATH) != EXPECTED_BRIDGE_STEEP_SHA256:
+        raise RuntimeError("The independent steep city bridge has drifted.")
 
     layout = json.loads(LAYOUT_PATH.read_text(encoding="utf-8"))
     manifest = json.loads(CITY_MANIFEST_PATH.read_text(encoding="utf-8"))
@@ -1970,27 +2242,22 @@ def main() -> None:
 
     FABRIC_ROOT.mkdir(parents=True, exist_ok=True)
     QA_ROOT.mkdir(parents=True, exist_ok=True)
-    concept.save(OVERLAY_PATH, optimize=True)
-    selected.save(SELECTED_OVERLAY_PATH, optimize=True)
+    save_png_atomic(concept, OVERLAY_PATH)
+    save_png_atomic(selected, SELECTED_OVERLAY_PATH)
 
     proof = terrain.copy()
     proof.alpha_composite(concept)
-    proof.save(PROOF_PATH, optimize=True)
+    save_png_atomic(proof, PROOF_PATH)
 
     selected_proof = terrain.copy()
     selected_proof.alpha_composite(selected)
-    selected_proof.save(SELECTED_PROOF_PATH, optimize=True)
+    save_png_atomic(selected_proof, SELECTED_PROOF_PATH)
 
     aperture_mask, summit_ownership_mask = build_node_aperture_mask(
         layout,
         manifest,
         terrain.getchannel("A"),
     )
-    node_environment_detail, environment_detail_placements = (
-        build_node_environment_detail(layout, manifest, aperture_mask)
-    )
-    node_environment_detail.save(NODE_ENVIRONMENT_DETAIL_PATH, optimize=True)
-
     (
         apertured,
         node_proof,
@@ -2000,31 +2267,51 @@ def main() -> None:
     ) = build_node_scale_proof(
         terrain,
         selected,
-        node_environment_detail,
         aperture_mask,
         layout,
         manifest,
     )
-    apertured.save(APERTURED_OVERLAY_PATH, optimize=True)
-    node_proof.save(NODE_PROOF_PATH, optimize=True)
-    environment_detail_proof = terrain.copy()
-    environment_detail_proof.alpha_composite(apertured)
-    environment_detail_proof.alpha_composite(node_environment_detail)
-    environment_detail_proof.save(
-        NODE_ENVIRONMENT_DETAIL_PROOF_PATH,
-        optimize=True,
+    save_png_atomic(apertured, APERTURED_OVERLAY_PATH)
+    save_png_atomic(node_proof, NODE_PROOF_PATH)
+
+    water_mask = build_registered_inland_water_mask()
+    capital_coherent_base, capital_coherent_base_validation = (
+        build_capital_coherent_base(selected, water_mask)
     )
+    save_png_atomic(capital_coherent_base, CAPITAL_COHERENT_BASE_PATH)
+    capital_coherent_base_proof = terrain.copy()
+    capital_coherent_base_proof.alpha_composite(capital_coherent_base)
+    save_png_atomic(
+        capital_coherent_base_proof,
+        CAPITAL_COHERENT_BASE_PROOF_PATH,
+    )
+    water_transition, water_transition_validation = build_water_transition_layer(
+        apertured,
+        bridge_mask,
+        water_mask,
+        layout,
+    )
+    save_png_atomic(water_transition, WATER_TRANSITION_PATH)
+    water_transition_proof = build_water_transition_proof(
+        terrain,
+        apertured,
+        water_mask,
+        water_transition,
+    )
+    save_png_atomic(water_transition_proof, WATER_TRANSITION_PROOF_PATH)
     node_foreground = build_node_foreground(
         selected,
         layout,
         manifest,
         aperture_mask,
         summit_ownership_mask,
+        terrain.getchannel("A"),
+        water_mask,
     )
     node_foreground.alpha_composite(
         build_summit_transition_foreground(terrain, summit_ownership_mask)
     )
-    node_foreground.save(NODE_FOREGROUND_PATH, optimize=True)
+    save_png_atomic(node_foreground, NODE_FOREGROUND_PATH)
     summit_ownership = validate_summit_placeholder_ownership(
         selected,
         apertured,
@@ -2034,12 +2321,20 @@ def main() -> None:
     node_transition_coverage = measure_node_transition_coverage(
         layout,
         manifest,
-        node_environment_detail,
+        selected,
+        aperture_mask,
         node_foreground,
+        terrain.getchannel("A"),
+        summit_ownership_mask,
     )
-    integrated_node_proof = node_proof.copy()
+    integrated_node_proof = water_transition_proof.copy()
+    for _, asset, top_left in sorted(
+        node_render_queue,
+        key=lambda entry: entry[0],
+    ):
+        integrated_node_proof.alpha_composite(asset, dest=top_left)
     integrated_node_proof.alpha_composite(node_foreground)
-    integrated_node_proof.save(NODE_INTEGRATED_PROOF_PATH, optimize=True)
+    save_png_atomic(integrated_node_proof, NODE_INTEGRATED_PROOF_PATH)
     (
         rail_support,
         rail_bed,
@@ -2048,11 +2343,11 @@ def main() -> None:
         rail_portal_foreground,
         rail_validation,
     ) = build_registered_rail_layers(layout)
-    rail_support.save(RAIL_SUPPORT_PATH, optimize=True)
-    rail_bed.save(RAIL_BED_PATH, optimize=True)
-    rail_portal_back.save(RAIL_PORTAL_BACK_PATH, optimize=True)
-    rail_track.save(RAIL_TRACK_PATH, optimize=True)
-    rail_portal_foreground.save(RAIL_PORTAL_FOREGROUND_PATH, optimize=True)
+    save_png_atomic(rail_support, RAIL_SUPPORT_PATH)
+    save_png_atomic(rail_bed, RAIL_BED_PATH)
+    save_png_atomic(rail_portal_back, RAIL_PORTAL_BACK_PATH)
+    save_png_atomic(rail_track, RAIL_TRACK_PATH)
+    save_png_atomic(rail_portal_foreground, RAIL_PORTAL_FOREGROUND_PATH)
     station_track_foreground = build_station_track_foreground(rail_track, layout)
     station_track_foreground_pixels = sum(
         1
@@ -2064,11 +2359,12 @@ def main() -> None:
     rail_validation["stationPlatformForegroundPixels"] = (
         station_track_foreground_pixels
     )
-    station_track_foreground.save(RAIL_STATION_FOREGROUND_PATH, optimize=True)
+    save_png_atomic(station_track_foreground, RAIL_STATION_FOREGROUND_PATH)
     rail_integrated_proof = build_rail_integrated_proof(
         terrain,
         apertured,
-        node_environment_detail,
+        water_mask,
+        water_transition,
         rail_support,
         rail_bed,
         rail_portal_back,
@@ -2078,7 +2374,7 @@ def main() -> None:
         node_render_queue,
         node_foreground,
     )
-    rail_integrated_proof.save(RAIL_INTEGRATED_PROOF_PATH, optimize=True)
+    save_png_atomic(rail_integrated_proof, RAIL_INTEGRATED_PROOF_PATH)
     population_validation = build_population_scale_proofs(
         rail_integrated_proof,
         terrain,
@@ -2088,10 +2384,10 @@ def main() -> None:
         rail_integrated_proof,
         layout,
     )
-    rail_registration_qa.save(RAIL_REGISTRATION_QA_PATH, optimize=True)
+    save_png_atomic(rail_registration_qa, RAIL_REGISTRATION_QA_PATH)
     aperture_qa = terrain.copy()
     aperture_qa.alpha_composite(apertured)
-    aperture_qa.save(APERTURE_QA_PATH, optimize=True)
+    save_png_atomic(aperture_qa, APERTURE_QA_PATH)
 
     summit_qa = selected.copy()
     summit_overlay = Image.new("RGBA", ARTBOARD, (0, 0, 0, 0))
@@ -2102,15 +2398,15 @@ def main() -> None:
     summit_pixels[:, :, 2] = 54
     summit_overlay = Image.fromarray(summit_pixels, "RGBA")
     summit_qa.alpha_composite(summit_overlay)
-    summit_qa.save(SUMMIT_OWNERSHIP_QA_PATH, optimize=True)
+    save_png_atomic(summit_qa, SUMMIT_OWNERSHIP_QA_PATH)
 
     alpha_qa = Image.new("RGBA", ARTBOARD, (28, 34, 42, 255))
     alpha_qa.alpha_composite(concept)
-    alpha_qa.save(ALPHA_PATH, optimize=True)
+    save_png_atomic(alpha_qa, ALPHA_PATH)
 
     selected_alpha_qa = Image.new("RGBA", ARTBOARD, (28, 34, 42, 255))
     selected_alpha_qa.alpha_composite(selected)
-    selected_alpha_qa.save(SELECTED_ALPHA_PATH, optimize=True)
+    save_png_atomic(selected_alpha_qa, SELECTED_ALPHA_PATH)
 
     alpha = concept.getchannel("A")
     validation = {
@@ -2132,10 +2428,16 @@ def main() -> None:
         "summitOwnershipQaSha256": sha256(SUMMIT_OWNERSHIP_QA_PATH),
         "nodeScaleProofSha256": sha256(NODE_PROOF_PATH),
         "infrastructureAtlasSha256": sha256(INFRASTRUCTURE_ATLAS_PATH),
-        "nodeEnvironmentDetailSha256": sha256(NODE_ENVIRONMENT_DETAIL_PATH),
-        "nodeEnvironmentDetailProofSha256": sha256(
-            NODE_ENVIRONMENT_DETAIL_PROOF_PATH
+        "bridgeAtlasSha256": sha256(BRIDGE_ATLAS_PATH),
+        "bridgeSteepSha256": sha256(BRIDGE_STEEP_PATH),
+        "waterTransitionSha256": sha256(WATER_TRANSITION_PATH),
+        "waterTransitionProofSha256": sha256(WATER_TRANSITION_PROOF_PATH),
+        "waterTransition": water_transition_validation,
+        "capitalCoherentBaseSha256": sha256(CAPITAL_COHERENT_BASE_PATH),
+        "capitalCoherentBaseProofSha256": sha256(
+            CAPITAL_COHERENT_BASE_PROOF_PATH
         ),
+        "capitalCoherentBase": capital_coherent_base_validation,
         "nodeTransitionForegroundSha256": sha256(NODE_FOREGROUND_PATH),
         "nodeIntegratedProofSha256": sha256(NODE_INTEGRATED_PROOF_PATH),
         "railSegmentSourceSha256": sha256(RAIL_SEGMENT_SOURCE_PATH),
@@ -2212,18 +2514,23 @@ def main() -> None:
             if value > 0
         ),
         "nodeTransitionForegroundSource": "selected-city-environment-source-pixels",
-        "nodeEnvironmentDetailPlacementCount": len(environment_detail_placements),
-        "nodeEnvironmentDetailPlacements": environment_detail_placements,
-        "nodeEnvironmentDetailVisualOnly": True,
-        "nodeEnvironmentDetailChangesTerrainAuthority": False,
+        "nodeTransitionForegroundUnregisteredWaterOverlapPixels": (
+            ImageChops.multiply(
+                node_foreground.getchannel("A").point(
+                    lambda value: 255 if value >= 16 else 0
+                ),
+                water_mask.point(lambda value: 255 if value >= 128 else 0),
+            ).histogram()[255]
+        ),
         "allSkillNodesHaveDetailTransitions": all(
             record["passes"] for record in node_transition_coverage
         ),
         "nodeTransitionCoverageGate": {
-            "minimumEnvironmentDetailPixels": 1000,
-            "minimumEnvironmentDetailCoverageRatio": 0.25,
-            "minimumForegroundOcclusionPixels": 600,
-            "minimumForegroundOcclusionCoverageRatio": 0.08,
+            "minimumAperturePixels": 140,
+            "maximumOffTerrainAperturePixels": 0,
+            "minimumRetainedSourcePerimeterPixels": 180,
+            "minimumForegroundOcclusionPixels": 250,
+            "minimumForegroundOcclusionCoverageRatio": 0.025,
         },
         "nodeTransitionCoverage": node_transition_coverage,
         "nodePlacements": node_placements,
@@ -2233,9 +2540,7 @@ def main() -> None:
             "per-node animated layer and foreground depth registration",
             "animated layer runtime binding",
         ],
-        "ownershipDelegated": [
-            "city-water and civic-bridge detail owned by separate task",
-        ],
+        "ownershipDelegated": [],
     }
     if not validation["allNodeDisplayWidthsMatchManifest"]:
         raise RuntimeError("Rendered node widths drift from the city manifest authority.")

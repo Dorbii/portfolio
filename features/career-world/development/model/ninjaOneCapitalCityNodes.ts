@@ -215,9 +215,9 @@ function parseNode(
 if (
   cityNodeManifest.schemaVersion !== 1
   || cityNodeManifest.id !== "career-world/capitals/ninjaone/city-node-composition@r1"
-  || cityNodeManifest.status !== "integration-preview"
+  || cityNodeManifest.status !== "concept-master-runtime-integration-preview"
   || cityNodeManifest.productionReady !== false
-  || cityNodeManifest.runtimeEligible !== false
+  || cityNodeManifest.runtimeEligible !== true
   || cityNodeManifest.nodes.length !== 19
   || cityNodeManifest.transport.station.independentAsset !== true
   || cityNodeManifest.transport.station.ownsTrack !== false
@@ -245,19 +245,12 @@ if (NINJAONE_CAPITAL_CITY_NODES.some(({ assetNodeReady }) => !assetNodeReady)) {
 }
 
 export const NINJAONE_CAPITAL_CITY_NODE_COUNT = NINJAONE_CAPITAL_CITY_NODES.length;
-export const NINJAONE_CAPITAL_CITY_NODE_RUNTIME_ELIGIBLE = false;
+export const NINJAONE_CAPITAL_CITY_NODE_RUNTIME_ELIGIBLE =
+  cityNodeManifest.runtimeEligible;
 export const NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS =
   cityNodeManifest.terrainBinding.status;
 
 export const NINJAONE_CAPITAL_CITY_VISUAL_LAYERS = Object.freeze({
-  environmentTransitionDetail: parseRasterAsset(
-    cityNodeManifest.cityFabric.environmentTransitionDetail,
-    "cityFabric.environmentTransitionDetail",
-  ),
-  foreground: parseRasterAsset(
-    cityNodeManifest.cityFabric.foreground,
-    "cityFabric.foreground",
-  ),
   overviewSettlement: parseRasterAsset(
     cityNodeManifest.cityFabric.overviewSettlement,
     "cityFabric.overviewSettlement",
@@ -274,21 +267,29 @@ export const NINJAONE_CAPITAL_CITY_VISUAL_LAYERS = Object.freeze({
     cityNodeManifest.transport.rail.bedLayer,
     "transport.rail.bedLayer",
   ),
+  railPortalBack: parseRasterAsset(
+    cityNodeManifest.transport.rail.portalBackLayer,
+    "transport.rail.portalBackLayer",
+  ),
+  railPortalForeground: parseRasterAsset(
+    cityNodeManifest.transport.rail.portalForegroundLayer,
+    "transport.rail.portalForegroundLayer",
+  ),
   railSupport: parseRasterAsset(
     cityNodeManifest.transport.rail.supportLayer,
     "transport.rail.supportLayer",
+  ),
+  railStationForeground: parseRasterAsset(
+    cityNodeManifest.transport.rail.stationForegroundLayer,
+    "transport.rail.stationForegroundLayer",
   ),
   railTrack: parseRasterAsset(
     cityNodeManifest.transport.rail.trackLayer,
     "transport.rail.trackLayer",
   ),
-  terrainContact: parseRasterAsset(
-    cityNodeManifest.cityFabric.contactLayer,
-    "cityFabric.contactLayer",
-  ),
-  underlay: parseRasterAsset(
-    cityNodeManifest.cityFabric.underlay,
-    "cityFabric.underlay",
+  waterTransition: parseRasterAsset(
+    cityNodeManifest.cityFabric.waterTransition,
+    "cityFabric.waterTransition",
   ),
 });
 
@@ -365,6 +366,14 @@ readonly NinjaOneCapitalCityPopulationCue[] = Object.freeze(
 export const NINJAONE_CAPITAL_CITY_CAMERA: CameraView = Object.freeze({
   origin: NINJAONE_CAPITAL_CITY_WORLD_ORIGIN,
   span: NINJAONE_CAPITAL_CITY_WORLD_SPAN,
+});
+
+// Registration owns the complete B1/B2/C1/C2 artboard above. Presentation uses
+// a capital-tier crop of that unchanged registration so the capital preset does
+// not open on a tier where the detailed city is intentionally hidden.
+export const NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA: CameraView = Object.freeze({
+  origin: Object.freeze([0.135, 0.01] as Pair),
+  span: Object.freeze([0.31, 0.31] as Pair),
 });
 
 export function ninjaOneCapitalLocalCameraBounds(
@@ -445,7 +454,11 @@ export function ninjaOneCapitalAnimatedCityNodeId(
   const [left, top, right, bottom] = ninjaOneCapitalLocalCameraBounds(camera);
   const center: Pair = [(left + right) * 0.5, (top + bottom) * 0.5];
   const candidates = ninjaOneCapitalVisibleCityNodes(camera, detailTier).filter(
-    (node) => node.assetNodeReady && node.renderMode === "animated-master",
+    (node) => (
+      node.assetNodeReady
+      && node.renderMode !== "static"
+      && node.renderLayers.some(({ frameCount }) => frameCount > 1)
+    ),
   );
   return candidates.reduce<NinjaOneCapitalCityNode | null>((closest, node) => {
     if (!closest) {

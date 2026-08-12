@@ -17,16 +17,12 @@ import {
 } from "./model/ninjaOneCapitalCityNodes";
 import { NinjaOneCapitalPopulation } from "./NinjaOneCapitalPopulation";
 import { NinjaOneCapitalSkillNodes } from "./NinjaOneCapitalSkillNodes";
-import { NinjaOneStationRiverDetail } from "./NinjaOneStationRiverDetail";
 
 interface NinjaOneCapitalMvpProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly light: WorldLight;
-  readonly phase?: "contact" | "city" | "all";
 }
-
-const CAPITAL_OVERVIEW_SWITCH_SPAN = 0.125;
 
 function RegisteredRaster({
   asset,
@@ -63,11 +59,11 @@ function IndependentStation() {
     >
       <ellipse
         cx={station.anchor[0]}
-        cy={station.anchor[1] + 1}
-        fill="rgba(3, 7, 7, 0.32)"
+        cy={station.anchor[1] + 2}
+        fill="rgba(5, 9, 9, 0.28)"
         filter="url(#ninjaone-capital-contact-soften)"
-        rx={station.displayWidth * 0.65}
-        ry={Math.max(7, station.displayWidth * 0.09)}
+        rx={station.displayWidth * 0.4}
+        ry={Math.max(7, station.displayWidth * 0.065)}
       />
       <image
         height={height}
@@ -85,7 +81,6 @@ export function NinjaOneCapitalMvp({
   camera,
   detailState,
   light,
-  phase = "all",
 }: NinjaOneCapitalMvpProps) {
   const worldX = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -93,28 +88,22 @@ export function NinjaOneCapitalMvp({
     / NINJAONE_CAPITAL_CITY_ARTBOARD[0];
   const scaleY = NINJAONE_CAPITAL_CITY_WORLD_SPAN[1] * WORLD_PLANE.height
     / NINJAONE_CAPITAL_CITY_ARTBOARD[1];
-  const cameraSpan = Math.max(...camera.span);
-  const territoryOverviewVisible = (
-    detailState.tier.id === "territory"
-    || (detailState.tier.id === "capital" && cameraSpan > CAPITAL_OVERVIEW_SWITCH_SPAN)
-  );
   const detailedCityVisible = (
-    (detailState.tier.id === "capital" && cameraSpan <= CAPITAL_OVERVIEW_SWITCH_SPAN)
+    detailState.tier.id === "capital"
     || detailState.tier.id === "site"
     || detailState.tier.id === "close"
   );
-  const cityVisible = territoryOverviewVisible || detailedCityVisible;
-  const contactPhase = phase === "contact" || phase === "all";
-  const cityPhase = phase === "city" || phase === "all";
+  const cityVisible = detailedCityVisible;
+  const siteDetailVisible = (
+    detailState.tier.id === "site"
+    || detailState.tier.id === "close"
+  );
 
   return (
     <>
       <svg
-        aria-hidden={cityPhase ? undefined : true}
-        aria-label={cityPhase
-          ? "Layered NinjaOne Capital city composition preview"
-          : undefined}
-        className={`career-world__layer ninjaone-capital-mvp ninjaone-capital-mvp--${phase}`}
+        aria-label="Layered NinjaOne Capital city composition preview"
+        className="career-world__layer ninjaone-capital-mvp"
         data-capital-city-artboard={NINJAONE_CAPITAL_CITY_ARTBOARD.join(",")}
         data-capital-layer-order={NINJAONE_CAPITAL_CITY_NODE_LAYER_ORDER.join(",")}
         data-capital-mvp="career-world/capitals/ninjaone/city-node-composition@r1"
@@ -132,12 +121,12 @@ export function NinjaOneCapitalMvp({
         )}
         data-capital-skill-node-count={NINJAONE_CAPITAL_CITY_NODE_COUNT}
         data-capital-skill-node-terrain-binding={NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS}
+        data-capital-world-light-direction={light.direction.join(",")}
         data-lod-tier={detailState.tier.id}
         preserveAspectRatio="none"
-        role={cityPhase ? "img" : undefined}
+        role="img"
         viewBox={cameraViewBox(camera, [WORLD_PLANE.width, WORLD_PLANE.height])}
       >
-        {cityPhase ? (
         <defs>
           <filter height="180%" id="ninjaone-capital-shadow-soften" width="180%" x="-40%" y="-40%">
             <feGaussianBlur stdDeviation="8" />
@@ -146,95 +135,70 @@ export function NinjaOneCapitalMvp({
             <feGaussianBlur stdDeviation="3" />
           </filter>
         </defs>
-        ) : null}
 
         {cityVisible ? (
           <g transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}>
-            {territoryOverviewVisible && cityPhase ? (
-              <g data-capital-layer="territory-settlement-overview">
-                <RegisteredRaster
-                  asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.overviewSettlement}
-                  layer="territory-settlement-overview"
-                />
-              </g>
-            ) : null}
-            {detailedCityVisible && contactPhase ? (
-              <g data-capital-layer="city-terrain-contact">
-                <RegisteredRaster
-                  asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.terrainContact}
-                  layer="city-terrain-contact"
-                />
-              </g>
-            ) : null}
-            {detailedCityVisible && cityPhase ? (
-              <>
-                <g data-capital-layer="streets-retaining-and-support-fabric">
+            {detailedCityVisible ? (
+              <g>
+                <g data-capital-layer="capital-settlement-overview">
                   <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.underlay}
-                    layer="streets-retaining-and-support-fabric"
-                  />
-                  <NinjaOneStationRiverDetail
-                    camera={camera}
-                    detailState={detailState}
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.overviewSettlement}
+                    layer="capital-settlement-overview"
                   />
                 </g>
-                <g data-capital-layer="territory-rail-supports">
+                <g data-capital-layer="registered-water-shoreline-and-bridges">
                   <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railSupport}
-                    layer="territory-rail-supports"
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.waterTransition}
+                    layer="registered-water-shoreline-and-bridges"
                   />
                 </g>
-                <g data-capital-layer="territory-rail-bed">
-                  <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railBed}
-                    layer="territory-rail-bed"
-                  />
-                </g>
-                <g data-capital-layer="territory-track">
-                  <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railTrack}
-                    layer="territory-track"
-                  />
-                </g>
-                <g data-capital-layer="station-rear-and-platforms">
-                  <IndependentStation />
-                </g>
-                <g data-capital-layer="skill-building-nodes">
+                {siteDetailVisible ? (
+                  <g data-capital-layer="single-centerline-transport">
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railSupport}
+                      layer="rail-supports"
+                    />
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railBed}
+                      layer="rail-bed"
+                    />
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalBack}
+                      layer="rail-portal-backs"
+                    />
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railTrack}
+                      layer="rail-track"
+                    />
+                    <IndependentStation />
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railStationForeground}
+                      layer="rail-station-foreground"
+                    />
+                    <RegisteredRaster
+                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalForeground}
+                      layer="rail-portal-foreground"
+                    />
+                  </g>
+                ) : null}
+                {detailState.tier.id === "close" ? (
                   <NinjaOneCapitalSkillNodes
                     camera={camera}
                     detailState={detailState}
                     light={light}
                   />
-                </g>
-                <g data-capital-layer="city-fabric-transition-foreground">
-                  <g data-capital-layer="station-and-terrain-foreground-occluders">
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.foreground}
-                      layer="city-fabric-transition-foreground"
-                    />
-                  </g>
-                </g>
-                <g
-                  data-asset-status="production-loop-not-yet-recovered"
-                  data-capital-layer="moving-train"
-                />
-                <g data-capital-layer="city-foliage-and-contact-details">
-                  <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.environmentTransitionDetail}
-                    layer="city-foliage-and-contact-details"
-                  />
-                </g>
+                ) : null}
                 <NinjaOneCapitalPopulation
                   camera={camera}
                   detailState={detailState}
                 />
-              </>
+              </g>
             ) : null}
           </g>
         ) : null}
       </svg>
 
-      {cityPhase && cityVisible ? (
+      {cityVisible ? (
         <aside className="ninjaone-capital-mvp__hud" aria-label="Capital layer status">
           <p>NINJAONE CAPITAL · CITY COMPOSITION R1</p>
           <strong>{detailState.tier.label}</strong>

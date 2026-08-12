@@ -132,7 +132,7 @@ test("one central LOD policy owns thresholds and render budget", () => {
     {
       world: 1,
       territory: 0.78,
-      capital: 0.2,
+      capital: 0.34,
       site: 0.1,
       close: 0.05,
     },

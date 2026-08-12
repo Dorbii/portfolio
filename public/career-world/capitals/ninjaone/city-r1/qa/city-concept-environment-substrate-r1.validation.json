@@ -19,29 +19,162 @@
   "referenceSha256": "dc94cc3c90eaf3a20976f5eeb4d0622a491782682837eefdce6d97f62c45d308",
   "regionalTerrainSha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02",
   "selectedSourceSha256": "0c94ae6f6bf9aac91a0c8f9a880b54d95bed1d9a6bb340967c162a2ff5d5f5b5",
-  "overlaySha256": "ef98bc5e240ec6956f11985d2180f3324d47bb974580a9e67df77fb2f354fcf3",
-  "proofSha256": "1406e392630f62f184937689a548147d036af6a0adb36cbdfa9b2018fb878d9f",
-  "selectedOverlaySha256": "1025946caeaf91f0956dc550689e699c7f16bd4c2e2d07548e926fbc7feee72c",
-  "selectedProofSha256": "63273c3dadb956113e401ce476c30e0261e6c14e4fc34cc7ac6d4bc1ae645f50",
-  "aperturedOverlaySha256": "0a190807d90a89d48983f771469a20223ec50c6ecde2e43a8087395db9376104",
-  "apertureQaSha256": "311642fb5231fc64b753d60ac88daa8efa25cb011260942de9163fcc814b7a36",
-  "summitOwnershipQaSha256": "c0cbf94beba0e549c34823a90e35baf9d3a65b4d9b6d947e6efdc7d88ab90f64",
-  "nodeScaleProofSha256": "eee1cc4ea419aa936e958778a1d5a28ae6c73e24bb447ee71f2e039e17b794e3",
+  "overlaySha256": "6a69720909db57bfb6f9f3303feede4b557d7fb28719f55571a0b1c52740360d",
+  "proofSha256": "41db0dea3ed28dbfa51384be93befc1c883b6756e34c40d49dff3e95737a49eb",
+  "selectedOverlaySha256": "8d9e3d4726ae530ea57b46ec0aac61c8613e50f99b64bac69772c5047719b373",
+  "selectedProofSha256": "3be88207f75c63a3693a51bc0ac5894a922b87f97078836e9b75ebe27e7f96a3",
+  "aperturedOverlaySha256": "977919e11f9b808c68b73ad5f06d38e6d440667e114802d4e7c7b02f3e0cf17f",
+  "apertureQaSha256": "8156f23fca219731bee1b1fb7038d8cf2af47838fc6e3254bb3c97a6f2728b48",
+  "summitOwnershipQaSha256": "6fc489f6ec87becd91faf821e19a7c4cd0636aeaa3a48011f6bd6498c75eb2c2",
+  "nodeScaleProofSha256": "fa23161504dfd2e701310869018b674685bec5dcbc7c84cea4130330506af04d",
   "infrastructureAtlasSha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
-  "nodeEnvironmentDetailSha256": "a682f71cd011be9a60a1c396252fefa50793dd559d23d0f590a8aed83dd877d3",
-  "nodeEnvironmentDetailProofSha256": "083016e48a61627d060fcc145835a520c3474f2a51d00b9bdfc89f6445b69c4e",
-  "nodeTransitionForegroundSha256": "93dac9f761ff1df1be57aef6efb023a3e9c29d8c6c590abf8ef719d587717a59",
-  "nodeIntegratedProofSha256": "d0f9d308af34fe9f91a738ed9b51335c7df1f7e6b8458807a209aa526c4bc4a1",
+  "bridgeAtlasSha256": "dc49fe8d16ec245999b983e48b1e1766052486dad00ef7b2cedddba24c838a62",
+  "bridgeSteepSha256": "ce104fe8954417334d6de254da7e1c1748b7d9e7ad2426705cca1ffd54b5c67a",
+  "waterTransitionSha256": "0e4c2330971a6cd3ccc69986089ce0570849a74b295245796733d4b9e7161395",
+  "waterTransitionProofSha256": "ef55d26030edb8401c624976c6ba48f7996ebd613cd8e684e7df9411d4c23847",
+  "waterTransition": {
+    "authority": "career-world/capitals/ninjaone/inland-water-authority@r1",
+    "bridgeCount": 4,
+    "bridges": [
+      {
+        "id": "upper-water-bridge",
+        "visiblePixels": 4906,
+        "overWaterPixels": 3338,
+        "endpoints": [
+          [
+            1504,
+            702
+          ],
+          [
+            1684,
+            702
+          ]
+        ],
+        "independentAuthoredAsset": true
+      },
+      {
+        "id": "station-civic-bridge",
+        "visiblePixels": 5932,
+        "overWaterPixels": 2239,
+        "endpoints": [
+          [
+            1578,
+            995
+          ],
+          [
+            1378,
+            1013
+          ]
+        ],
+        "independentAuthoredAsset": true
+      },
+      {
+        "id": "central-civic-bridge",
+        "visiblePixels": 3760,
+        "overWaterPixels": 1026,
+        "endpoints": [
+          [
+            1323,
+            1158
+          ],
+          [
+            1403,
+            1296
+          ]
+        ],
+        "independentAuthoredAsset": true
+      },
+      {
+        "id": "lower-works-bridge",
+        "visiblePixels": 4949,
+        "overWaterPixels": 3082,
+        "endpoints": [
+          [
+            1248,
+            1413
+          ],
+          [
+            1426,
+            1445
+          ]
+        ],
+        "independentAuthoredAsset": true
+      }
+    ],
+    "independentBridgeAssetCount": 4,
+    "independentBridgeAssets": [
+      {
+        "id": "upper-water-bridge",
+        "source": "city-bridge-atlas-alpha-r1 cell (0, 0)",
+        "displayWidth": 106,
+        "topLeft": [
+          1541,
+          656
+        ]
+      },
+      {
+        "id": "station-civic-bridge",
+        "source": "city-bridge-atlas-alpha-r1 cell (1, 0)",
+        "displayWidth": 118,
+        "topLeft": [
+          1419,
+          951
+        ]
+      },
+      {
+        "id": "central-civic-bridge",
+        "source": "city-bridge-steep-alpha-r1",
+        "displayWidth": 94,
+        "topLeft": [
+          1316,
+          1178
+        ]
+      },
+      {
+        "id": "lower-works-bridge",
+        "source": "city-bridge-atlas-alpha-r1 cell (0, 1)",
+        "displayWidth": 106,
+        "topLeft": [
+          1284,
+          1383
+        ]
+      }
+    ],
+    "shorelinePixels": 0,
+    "terrainPixelsExcluded": true,
+    "unregisteredWaterOverlapPixels": 0,
+    "changesHydrologyAuthority": false,
+    "changesTerrainAuthority": false
+  },
+  "capitalCoherentBaseSha256": "c5714b4699e569c745e92b38413e7c1ad126ebaf14b42554de76d71f2f622c82",
+  "capitalCoherentBaseProofSha256": "19082bc06d8c347e3e2682082869a2e937310724856979db6349b8c051449ae2",
+  "capitalCoherentBase": {
+    "role": "bounded-city-and-immediate-contact-transition",
+    "containsTransitionTerrainPixels": true,
+    "containsRegisteredWaterPixels": false,
+    "waterOverlapPixels": 0,
+    "visiblePixels": 1157309,
+    "artboardCoverageRatio": 0.233354,
+    "transparentRgbUnderZeroAlpha": 0,
+    "edgeFeatherPixels": 30,
+    "visualOnly": true,
+    "affectsLandMask": false,
+    "affectsHeight": false,
+    "affectsSlope": false,
+    "affectsCollision": false
+  },
+  "nodeTransitionForegroundSha256": "e4dc8790179701bae3205ea41db763e8d18d17e273f187c2115b3c0f72b287b9",
+  "nodeIntegratedProofSha256": "1b4f96702ca632a6db66aa1d067acb85ed5472c200c5c47512e9bd0b72d1b166",
   "railSegmentSourceSha256": "83ae9b929e8131dc0ea12febede5279a6e12ecd66cfb17213281e91c122c92d8",
   "railSegmentAlphaSha256": "2fa88e2728f3cc8b06bd86fd0520f1a6c2b8c30663bac5872d0eb06269875ed8",
-  "railSupportSha256": "d8d265956fe93396f79c6802baae5e06c6312676a23a177b4ff398e1d326a68b",
-  "railBedSha256": "01b4690e3175fddc028406befd424d2390e1430ceac7fffa36a6aa4c60192ad5",
+  "railSupportSha256": "28d8bdbdcaa70f1f51cd8b24aca418659dd4b9e7251da67ffde94ea36669f9fc",
+  "railBedSha256": "218c0cc856d287e5deabc50952ac3c3d7e4f8288dc7a6eccd2ae50f81e0f2dfa",
   "railPortalBackSha256": "c642f036950f05cfd1b656161e44d7b5f8ff5926c68767a2ed586a7c86e19d2f",
   "railTrackSha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
   "railPortalForegroundSha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
   "railStationForegroundSha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
-  "railIntegratedProofSha256": "b813553c8603fcca2b4e9e6d921bc580b98a0dd106403c25fa78ebdc6860344c",
-  "railRegistrationQaSha256": "60d537a191571e18bb97a67162da9d70a654401cd69fd8b741ec8d208dd0b274",
+  "railIntegratedProofSha256": "6851ff7f3cfe7cd1917fe16884d3a9704c34788170a7078687ba6687b1c3b227",
+  "railRegistrationQaSha256": "191103ea00d6b3d026e7586d518a9dabdc337dec7ee7178b3509d6bef1189271",
   "rail": {
     "renderMethod": "authored-isometric-segment-chains",
     "segmentCount": 13,
@@ -496,9 +629,9 @@
     "affectsBuildingGeometry": false,
     "siteLayerSha256": "a479fba083595b485d8f4c2551c57ef8ecbdc6b70328d0ea5fa708ce42f8490e",
     "closeDetailLayerSha256": "0c15a1ff22ebb3760f0a754398ed804068a283367832dcbd3cd0d88946f80da5",
-    "siteProofSha256": "56ff16683769623ecc21de048dd726af1f688333057eee5efc328dfaac6d8e41",
-    "closeProofSha256": "dccbc81d7641351f0e28950d1dc554c019b15a333d96cb4666193c4c91187d3a",
-    "closeupQaSha256": "73cb08b37aebc2644a4ca49258f5b3ba6a744c3057eafb714c41849c8a1cee5a",
+    "siteProofSha256": "b3e92e6ea5dd2aea8fe8380d224bc1f9201c04ddd196f2f789ee4211890ad629",
+    "closeProofSha256": "25b30b2dab25c5ff3f78264351a5f58f77328c5f99af3bbeaed17ad7f5659511",
+    "closeupQaSha256": "fc7c95f2cff2b9fe696d2547b5790397188168922f94caebf74aad4f2b851bf1",
     "siteTransparentRgbUnderZeroAlpha": 0,
     "closeTransparentRgbUnderZeroAlpha": 0,
     "displayHeightRange": [
@@ -694,13 +827,13 @@
     0,
     0
   ],
-  "nonzeroAlphaPixels": 1881098,
-  "selectedNonzeroAlphaPixels": 1796737,
-  "selectedMagentaEdgePixelsBeforeRepair": 29891,
+  "nonzeroAlphaPixels": 1431403,
+  "selectedNonzeroAlphaPixels": 1347838,
+  "selectedMagentaEdgePixelsBeforeRepair": 21212,
   "selectedMagentaEdgePixelsAfterRepair": 0,
-  "selectedUnassignedChromaPixelsRemoved": 923,
-  "selectedPlumBoundaryPixelsBeforeRepair": 4817,
-  "selectedPlumBoundaryPixelsCleared": 252,
+  "selectedUnassignedChromaPixelsRemoved": 793,
+  "selectedPlumBoundaryPixelsBeforeRepair": 3410,
+  "selectedPlumBoundaryPixelsCleared": 156,
   "selectedPlumBoundaryPixelsAfterRepair": 0,
   "selectedSilhouetteUsesSourceAlpha": true,
   "terrainAlphaClipsSelectedOverhangs": false,
@@ -717,483 +850,26 @@
   "stationDisplayWidth": 343,
   "stationIsIndependentAsset": true,
   "aperturesCreateOffTerrainHoles": false,
-  "aperturePixelCount": 489557,
-  "nodeTransitionForegroundPixelCount": 50053,
+  "aperturePixelCount": 435638,
+  "nodeTransitionForegroundPixelCount": 54582,
   "nodeTransitionForegroundSource": "selected-city-environment-source-pixels",
-  "nodeEnvironmentDetailPlacementCount": 19,
-  "nodeEnvironmentDetailPlacements": [
-    {
-      "id": "ai-agent-systems-contact",
-      "skillId": "ai-agent-systems",
-      "atlasCell": [
-        0,
-        2
-      ],
-      "conceptPosition": [
-        0.447,
-        0.21
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 228,
-      "placedBounds": [
-        1001,
-        290,
-        1297,
-        520
-      ],
-      "visibleDimensions": [
-        296,
-        230
-      ]
-    },
-    {
-      "id": "mcp-contact",
-      "skillId": "mcp",
-      "atlasCell": [
-        0,
-        1
-      ],
-      "conceptPosition": [
-        0.405,
-        0.27
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 133,
-      "placedBounds": [
-        954,
-        454,
-        1127,
-        587
-      ],
-      "visibleDimensions": [
-        173,
-        133
-      ]
-    },
-    {
-      "id": "openapi-swagger-contact",
-      "skillId": "openapi-swagger",
-      "atlasCell": [
-        1,
-        0
-      ],
-      "conceptPosition": [
-        0.515,
-        0.29
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 141,
-      "placedBounds": [
-        1231,
-        472,
-        1417,
-        646
-      ],
-      "visibleDimensions": [
-        186,
-        174
-      ]
-    },
-    {
-      "id": "grpc-rest-contact",
-      "skillId": "grpc-rest",
-      "atlasCell": [
-        0,
-        0
-      ],
-      "conceptPosition": [
-        0.355,
-        0.35
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 150,
-      "placedBounds": [
-        816,
-        606,
-        1011,
-        745
-      ],
-      "visibleDimensions": [
-        195,
-        139
-      ]
-    },
-    {
-      "id": "capability-contracts-contact",
-      "skillId": "capability-contracts",
-      "atlasCell": [
-        0,
-        2
-      ],
-      "conceptPosition": [
-        0.47,
-        0.375
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 141,
-      "placedBounds": [
-        1119,
-        654,
-        1297,
-        792
-      ],
-      "visibleDimensions": [
-        178,
-        138
-      ]
-    },
-    {
-      "id": "tool-generation-contact",
-      "skillId": "tool-generation",
-      "atlasCell": [
-        0,
-        1
-      ],
-      "conceptPosition": [
-        0.555,
-        0.38
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 150,
-      "placedBounds": [
-        1331,
-        660,
-        1523,
-        807
-      ],
-      "visibleDimensions": [
-        192,
-        147
-      ]
-    },
-    {
-      "id": "typescript-contact",
-      "skillId": "typescript",
-      "atlasCell": [
-        1,
-        0
-      ],
-      "conceptPosition": [
-        0.655,
-        0.465
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 141,
-      "placedBounds": [
-        1592,
-        812,
-        1775,
-        983
-      ],
-      "visibleDimensions": [
-        183,
-        171
-      ]
-    },
-    {
-      "id": "react-contact",
-      "skillId": "react",
-      "atlasCell": [
-        0,
-        2
-      ],
-      "conceptPosition": [
-        0.773,
-        0.482
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 163,
-      "placedBounds": [
-        1884,
-        850,
-        2089,
-        1009
-      ],
-      "visibleDimensions": [
-        205,
-        159
-      ]
-    },
-    {
-      "id": "tanstack-contact",
-      "skillId": "tanstack",
-      "atlasCell": [
-        0,
-        0
-      ],
-      "conceptPosition": [
-        0.635,
-        0.55
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 163,
-      "placedBounds": [
-        1527,
-        986,
-        1739,
-        1137
-      ],
-      "visibleDimensions": [
-        212,
-        151
-      ]
-    },
-    {
-      "id": "golang-contact",
-      "skillId": "golang",
-      "atlasCell": [
-        1,
-        2
-      ],
-      "conceptPosition": [
-        0.745,
-        0.575
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 163,
-      "placedBounds": [
-        1810,
-        1009,
-        2019,
-        1209
-      ],
-      "visibleDimensions": [
-        209,
-        200
-      ]
-    },
-    {
-      "id": "csharp-contact",
-      "skillId": "csharp",
-      "atlasCell": [
-        0,
-        1
-      ],
-      "conceptPosition": [
-        0.6,
-        0.63
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 141,
-      "placedBounds": [
-        1453,
-        1146,
-        1633,
-        1284
-      ],
-      "visibleDimensions": [
-        180,
-        138
-      ]
-    },
-    {
-      "id": "python-contact",
-      "skillId": "python",
-      "atlasCell": [
-        0,
-        2
-      ],
-      "conceptPosition": [
-        0.69,
-        0.65
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 146,
-      "placedBounds": [
-        1683,
-        1184,
-        1865,
-        1325
-      ],
-      "visibleDimensions": [
-        182,
-        141
-      ]
-    },
-    {
-      "id": "postgresql-contact",
-      "skillId": "postgresql",
-      "atlasCell": [
-        1,
-        0
-      ],
-      "conceptPosition": [
-        0.785,
-        0.67
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 154,
-      "placedBounds": [
-        1918,
-        1198,
-        2118,
-        1385
-      ],
-      "visibleDimensions": [
-        200,
-        187
-      ]
-    },
-    {
-      "id": "redis-contact",
-      "skillId": "redis",
-      "atlasCell": [
-        0,
-        0
-      ],
-      "conceptPosition": [
-        0.635,
-        0.73
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 124,
-      "placedBounds": [
-        1554,
-        1352,
-        1713,
-        1465
-      ],
-      "visibleDimensions": [
-        159,
-        113
-      ]
-    },
-    {
-      "id": "aws-contact",
-      "skillId": "aws",
-      "atlasCell": [
-        1,
-        2
-      ],
-      "conceptPosition": [
-        0.75,
-        0.745
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 159,
-      "placedBounds": [
-        1824,
-        1338,
-        2031,
-        1536
-      ],
-      "visibleDimensions": [
-        207,
-        198
-      ]
-    },
-    {
-      "id": "databricks-contact",
-      "skillId": "databricks",
-      "atlasCell": [
-        0,
-        1
-      ],
-      "conceptPosition": [
-        0.588,
-        0.818
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 163,
-      "placedBounds": [
-        1408,
-        1498,
-        1617,
-        1658
-      ],
-      "visibleDimensions": [
-        209,
-        160
-      ]
-    },
-    {
-      "id": "docker-contact",
-      "skillId": "docker",
-      "atlasCell": [
-        1,
-        0
-      ],
-      "conceptPosition": [
-        0.725,
-        0.815
-      ],
-      "mirrored": true,
-      "nodeDisplayWidth": 159,
-      "placedBounds": [
-        1762,
-        1476,
-        1966,
-        1667
-      ],
-      "visibleDimensions": [
-        204,
-        191
-      ]
-    },
-    {
-      "id": "vmware-contact",
-      "skillId": "vmware",
-      "atlasCell": [
-        0,
-        0
-      ],
-      "conceptPosition": [
-        0.716,
-        0.869
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 163,
-      "placedBounds": [
-        1735,
-        1600,
-        1947,
-        1751
-      ],
-      "visibleDimensions": [
-        212,
-        151
-      ]
-    },
-    {
-      "id": "macstadium-contact",
-      "skillId": "macstadium",
-      "atlasCell": [
-        0,
-        2
-      ],
-      "conceptPosition": [
-        0.785,
-        0.885
-      ],
-      "mirrored": false,
-      "nodeDisplayWidth": 167,
-      "placedBounds": [
-        1914,
-        1626,
-        2121,
-        1787
-      ],
-      "visibleDimensions": [
-        207,
-        161
-      ]
-    }
-  ],
-  "nodeEnvironmentDetailVisualOnly": true,
-  "nodeEnvironmentDetailChangesTerrainAuthority": false,
+  "nodeTransitionForegroundUnregisteredWaterOverlapPixels": 0,
   "allSkillNodesHaveDetailTransitions": true,
   "nodeTransitionCoverageGate": {
-    "minimumEnvironmentDetailPixels": 1000,
-    "minimumEnvironmentDetailCoverageRatio": 0.25,
-    "minimumForegroundOcclusionPixels": 600,
-    "minimumForegroundOcclusionCoverageRatio": 0.08
+    "minimumAperturePixels": 140,
+    "maximumOffTerrainAperturePixels": 0,
+    "minimumRetainedSourcePerimeterPixels": 180,
+    "minimumForegroundOcclusionPixels": 250,
+    "minimumForegroundOcclusionCoverageRatio": 0.025
   },
   "nodeTransitionCoverage": [
     {
       "skillId": "ai-agent-systems",
       "localMaskPixels": 26607,
-      "environmentDetailPixels": 24286,
-      "environmentDetailCoverageRatio": 0.912767,
+      "aperturePixels": 22000,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 2459,
+      "retainedSourcePerimeterPixels": 2743,
       "foregroundOcclusionPixels": 6810,
       "foregroundOcclusionCoverageRatio": 0.255948,
       "passes": true
@@ -1201,163 +877,199 @@
     {
       "skillId": "mcp",
       "localMaskPixels": 8399,
-      "environmentDetailPixels": 7819,
-      "environmentDetailCoverageRatio": 0.930944,
-      "foregroundOcclusionPixels": 1070,
-      "foregroundOcclusionCoverageRatio": 0.127396,
+      "aperturePixels": 4183,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3328,
+      "foregroundOcclusionPixels": 1450,
+      "foregroundOcclusionCoverageRatio": 0.17264,
       "passes": true
     },
     {
       "skillId": "openapi-swagger",
       "localMaskPixels": 9107,
-      "environmentDetailPixels": 6252,
-      "environmentDetailCoverageRatio": 0.686505,
-      "foregroundOcclusionPixels": 1502,
-      "foregroundOcclusionCoverageRatio": 0.164928,
+      "aperturePixels": 4431,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3581,
+      "foregroundOcclusionPixels": 2102,
+      "foregroundOcclusionCoverageRatio": 0.230811,
       "passes": true
     },
     {
       "skillId": "grpc-rest",
       "localMaskPixels": 10465,
-      "environmentDetailPixels": 7059,
-      "environmentDetailCoverageRatio": 0.674534,
-      "foregroundOcclusionPixels": 1625,
-      "foregroundOcclusionCoverageRatio": 0.15528,
+      "aperturePixels": 4989,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3350,
+      "foregroundOcclusionPixels": 1651,
+      "foregroundOcclusionCoverageRatio": 0.157764,
       "passes": true
     },
     {
       "skillId": "capability-contracts",
       "localMaskPixels": 9107,
-      "environmentDetailPixels": 8436,
-      "environmentDetailCoverageRatio": 0.92632,
-      "foregroundOcclusionPixels": 1154,
-      "foregroundOcclusionCoverageRatio": 0.126716,
+      "aperturePixels": 4431,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3581,
+      "foregroundOcclusionPixels": 1584,
+      "foregroundOcclusionCoverageRatio": 0.173932,
       "passes": true
     },
     {
       "skillId": "tool-generation",
       "localMaskPixels": 10465,
-      "environmentDetailPixels": 9634,
-      "environmentDetailCoverageRatio": 0.920592,
-      "foregroundOcclusionPixels": 1508,
-      "foregroundOcclusionCoverageRatio": 0.144099,
+      "aperturePixels": 4989,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 2752,
+      "foregroundOcclusionPixels": 1314,
+      "foregroundOcclusionCoverageRatio": 0.125561,
       "passes": true
     },
     {
       "skillId": "typescript",
       "localMaskPixels": 9107,
-      "environmentDetailPixels": 6209,
-      "environmentDetailCoverageRatio": 0.681783,
-      "foregroundOcclusionPixels": 1088,
-      "foregroundOcclusionCoverageRatio": 0.119469,
+      "aperturePixels": 4299,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3634,
+      "foregroundOcclusionPixels": 1150,
+      "foregroundOcclusionCoverageRatio": 0.126276,
       "passes": true
     },
     {
       "skillId": "react",
       "localMaskPixels": 13489,
-      "environmentDetailPixels": 12190,
-      "environmentDetailCoverageRatio": 0.903699,
-      "foregroundOcclusionPixels": 1916,
-      "foregroundOcclusionCoverageRatio": 0.142042,
+      "aperturePixels": 6335,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4587,
+      "foregroundOcclusionPixels": 2363,
+      "foregroundOcclusionCoverageRatio": 0.17518,
       "passes": true
     },
     {
       "skillId": "tanstack",
       "localMaskPixels": 13489,
-      "environmentDetailPixels": 8798,
-      "environmentDetailCoverageRatio": 0.652235,
-      "foregroundOcclusionPixels": 1640,
-      "foregroundOcclusionCoverageRatio": 0.121581,
+      "aperturePixels": 6335,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4587,
+      "foregroundOcclusionPixels": 2123,
+      "foregroundOcclusionCoverageRatio": 0.157388,
       "passes": true
     },
     {
       "skillId": "golang",
       "localMaskPixels": 15129,
-      "environmentDetailPixels": 12703,
-      "environmentDetailCoverageRatio": 0.839646,
-      "foregroundOcclusionPixels": 1824,
-      "foregroundOcclusionCoverageRatio": 0.120563,
+      "aperturePixels": 7073,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4972,
+      "foregroundOcclusionPixels": 2480,
+      "foregroundOcclusionCoverageRatio": 0.163924,
       "passes": true
     },
     {
       "skillId": "csharp",
       "localMaskPixels": 9107,
-      "environmentDetailPixels": 8482,
-      "environmentDetailCoverageRatio": 0.931371,
-      "foregroundOcclusionPixels": 944,
-      "foregroundOcclusionCoverageRatio": 0.103657,
+      "aperturePixels": 4431,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3098,
+      "foregroundOcclusionPixels": 821,
+      "foregroundOcclusionCoverageRatio": 0.09015,
       "passes": true
     },
     {
       "skillId": "python",
       "localMaskPixels": 9735,
-      "environmentDetailPixels": 8972,
-      "environmentDetailCoverageRatio": 0.921623,
-      "foregroundOcclusionPixels": 1042,
-      "foregroundOcclusionCoverageRatio": 0.107036,
+      "aperturePixels": 4789,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3725,
+      "foregroundOcclusionPixels": 1394,
+      "foregroundOcclusionCoverageRatio": 0.143195,
       "passes": true
     },
     {
       "skillId": "postgresql",
       "localMaskPixels": 12203,
-      "environmentDetailPixels": 8016,
-      "environmentDetailCoverageRatio": 0.656888,
-      "foregroundOcclusionPixels": 1426,
-      "foregroundOcclusionCoverageRatio": 0.116857,
+      "aperturePixels": 5805,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4226,
+      "foregroundOcclusionPixels": 1730,
+      "foregroundOcclusionCoverageRatio": 0.141768,
       "passes": true
     },
     {
       "skillId": "redis",
       "localMaskPixels": 5979,
-      "environmentDetailPixels": 4338,
-      "environmentDetailCoverageRatio": 0.725539,
-      "foregroundOcclusionPixels": 983,
-      "foregroundOcclusionCoverageRatio": 0.164409,
+      "aperturePixels": 3071,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 2412,
+      "foregroundOcclusionPixels": 1445,
+      "foregroundOcclusionCoverageRatio": 0.241679,
       "passes": true
     },
     {
       "skillId": "aws",
       "localMaskPixels": 12907,
-      "environmentDetailPixels": 11292,
-      "environmentDetailCoverageRatio": 0.874874,
-      "foregroundOcclusionPixels": 1965,
-      "foregroundOcclusionCoverageRatio": 0.152243,
+      "aperturePixels": 6237,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4412,
+      "foregroundOcclusionPixels": 2459,
+      "foregroundOcclusionCoverageRatio": 0.190517,
       "passes": true
     },
     {
       "skillId": "databricks",
       "localMaskPixels": 13903,
-      "environmentDetailPixels": 12266,
-      "environmentDetailCoverageRatio": 0.882256,
-      "foregroundOcclusionPixels": 1712,
-      "foregroundOcclusionCoverageRatio": 0.123139,
+      "aperturePixels": 6529,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 3548,
+      "foregroundOcclusionPixels": 1355,
+      "foregroundOcclusionCoverageRatio": 0.097461,
       "passes": true
     },
     {
       "skillId": "docker",
       "localMaskPixels": 13179,
-      "environmentDetailPixels": 8469,
-      "environmentDetailCoverageRatio": 0.642613,
-      "foregroundOcclusionPixels": 1435,
-      "foregroundOcclusionCoverageRatio": 0.108885,
+      "aperturePixels": 6335,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4458,
+      "foregroundOcclusionPixels": 1982,
+      "foregroundOcclusionCoverageRatio": 0.150391,
       "passes": true
     },
     {
       "skillId": "vmware",
       "localMaskPixels": 13903,
-      "environmentDetailPixels": 9969,
-      "environmentDetailCoverageRatio": 0.717039,
-      "foregroundOcclusionPixels": 1832,
-      "foregroundOcclusionCoverageRatio": 0.13177,
+      "aperturePixels": 6529,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 4625,
+      "foregroundOcclusionPixels": 2332,
+      "foregroundOcclusionCoverageRatio": 0.167734,
       "passes": true
     },
     {
       "skillId": "macstadium",
       "localMaskPixels": 15759,
-      "environmentDetailPixels": 13764,
-      "environmentDetailCoverageRatio": 0.873406,
-      "foregroundOcclusionPixels": 1990,
-      "foregroundOcclusionCoverageRatio": 0.126277,
+      "aperturePixels": 7491,
+      "offTerrainAperturePixels": 0,
+      "authorizedSummitOwnershipTransferPixels": 0,
+      "retainedSourcePerimeterPixels": 5060,
+      "foregroundOcclusionPixels": 2473,
+      "foregroundOcclusionCoverageRatio": 0.156926,
       "passes": true
     }
   ],
@@ -2041,7 +1753,7 @@
         0.225
       ]
     ],
-    "sourceOwnedPixels": 80261,
+    "sourceOwnedPixels": 62533,
     "aperturedResidualPixels": 0,
     "foregroundResidualPixels": 0,
     "retainedPlateElements": [
@@ -2057,7 +1769,5 @@
     "per-node animated layer and foreground depth registration",
     "animated layer runtime binding"
   ],
-  "ownershipDelegated": [
-    "city-water and civic-bridge detail owned by separate task"
-  ]
+  "ownershipDelegated": []
 }

@@ -84,11 +84,17 @@ const TERRAIN_SITE_RESIDENCY_TILES: readonly TerrainResidencyTile[] =
     worldBounds: tile.worldBounds,
   })));
 
+const CAMERA_SETTLE_DURATION_MS = 180;
+
 function streamImageKey(
   tileId: string,
   tier: TerrainStreamSourceTier,
 ): string {
   return `${tier}:${tileId}`;
+}
+
+function cameraIdentity(camera: CameraView): string {
+  return `${camera.origin.join(",")}|${camera.span.join(",")}`;
 }
 
 function releaseImage(image: HTMLImageElement | undefined): void {
@@ -174,7 +180,20 @@ export function TerritoryLandform({
   const [presentationRevision, setPresentationRevision] = useState(0);
   const [viewportRevision, setViewportRevision] = useState(0);
   const [detailPlateRetired, setDetailPlateRetired] = useState(false);
+  const nextCameraIdentity = cameraIdentity(camera);
+  const [settledCameraIdentity, setSettledCameraIdentity] = useState(
+    nextCameraIdentity,
+  );
+  const cameraSettled = settledCameraIdentity === nextCameraIdentity;
   const detailOpacity = detailState.worldToTerritory;
+
+  useEffect(() => {
+    const settleTimer = window.setTimeout(
+      () => setSettledCameraIdentity(nextCameraIdentity),
+      CAMERA_SETTLE_DURATION_MS,
+    );
+    return () => window.clearTimeout(settleTimer);
+  }, [nextCameraIdentity]);
 
   const queueRender = useCallback(() => {
     if (renderFrameRef.current) {
@@ -412,10 +431,13 @@ export function TerritoryLandform({
       return;
     }
 
-    const pixelRatio = Math.min(
+    const settledPixelRatio = Math.min(
       (window.devicePixelRatio || 1) * detailState.renderScale,
       DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
     );
+    const pixelRatio = cameraSettled
+      ? settledPixelRatio
+      : Math.min(window.devicePixelRatio || 1, 1.25);
     const width = Math.max(1, Math.round(bounds.width * pixelRatio));
     const height = Math.max(1, Math.round(bounds.height * pixelRatio));
     if (canvas.width !== width || canvas.height !== height) {
@@ -701,8 +723,13 @@ export function TerritoryLandform({
         drawRegisteredTile(tile, image, tierOpacity * sourceOpacity);
       }
     };
-    drawStreamTier("capital", capitalOpacity);
-    drawStreamTier("site", siteOpacity);
+    const movingCapitalOpacity = cameraSettled
+      ? capitalOpacity
+      : Math.max(capitalOpacity, Math.min(1, siteOpacity));
+    drawStreamTier("capital", movingCapitalOpacity);
+    if (cameraSettled) {
+      drawStreamTier("site", siteOpacity);
+    }
     canvas.dataset.streamResolutionTier = siteOpacity > 0.5
       ? "site"
       : "capital";
@@ -710,6 +737,8 @@ export function TerritoryLandform({
     canvas.dataset.streamSiteTransition = siteOpacity.toFixed(3);
     canvas.dataset.streamCapitalCohortReady = String(capitalCohortReady);
     canvas.dataset.streamSiteCohortReady = String(siteCohortReady);
+    canvas.dataset.cameraSettled = String(cameraSettled);
+    canvas.dataset.activeDevicePixelRatio = pixelRatio.toFixed(3);
     canvas.dataset.streamResidentPixelCount = String(
       [...decodedStreamKeysRef.current].reduce((total, key) => {
         const image = streamTileRefs.current.get(key);
@@ -720,7 +749,7 @@ export function TerritoryLandform({
     );
     publishStreamMetrics();
 
-    for (const tile of visibleSiteTiles) {
+    for (const tile of cameraSettled ? visibleSiteTiles : []) {
       if (siteOpacity <= LOD_PRESENTATION_EPSILON) {
         continue;
       }
@@ -763,6 +792,7 @@ export function TerritoryLandform({
     }
   }, [
     camera,
+    cameraSettled,
     detailOpacity,
     detailPlateRetired,
     detailState,
@@ -1226,6 +1256,7 @@ export function TerritoryLandform({
         + "career-world__land-canvas"
       }
       data-layer="territory-landform"
+      data-camera-settled={cameraSettled}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-capital-site-tile-count={
         TERRAIN_SITE_TILES.length

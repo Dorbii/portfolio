@@ -57,30 +57,33 @@ function cameraForLocalRect(left, top, width, height) {
   };
 }
 
-test("station and river detail lock freezes the accepted city layout contract", async () => {
-  const [city, water, lock] = await Promise.all([
+test("station and river detail remains quarantined after the active city layout changes", async () => {
+  const [city, water, lock, detailManifest, renderer] = await Promise.all([
     json(NINJAONE_STATION_RIVER_PATHS.cityManifest),
     json(NINJAONE_STATION_RIVER_PATHS.waterManifest),
     json(NINJAONE_STATION_RIVER_PATHS.fixture),
+    json(detailManifestPath),
+    readFile(absolute(
+      "features/career-world/development/NinjaOneCapitalMvp.tsx",
+    ), "utf8"),
   ]);
   assert.equal(lock.baseCommit, NINJAONE_STATION_RIVER_BASE_COMMIT);
   assert.deepEqual(lock.envelope, NINJAONE_STATION_RIVER_ENVELOPE);
-  assert.equal(lock.layoutContractSha256, layoutContractSha256(city, water));
+  assert.equal(detailManifest.layoutLock.layoutContractSha256, lock.layoutContractSha256);
+  assert.notEqual(lock.layoutContractSha256, layoutContractSha256(city, water));
+  assert.doesNotMatch(renderer, /NinjaOneStationRiverDetail/);
 });
 
-test("station and river detail lock freezes every registered source alpha", async () => {
-  const [city, lock] = await Promise.all([
-    json(NINJAONE_STATION_RIVER_PATHS.cityManifest),
-    json(NINJAONE_STATION_RIVER_PATHS.fixture),
-  ]);
-  const dimensions = city.artboard.dimensions;
+test("station and river archive freezes every source alpha from its accepted layout", async () => {
+  const lock = await json(NINJAONE_STATION_RIVER_PATHS.fixture);
+  const dimensions = [2571, 1929];
   const sources = {
-    contact: city.cityFabric.contactLayer.path,
-    foreground: city.cityFabric.foreground.path,
-    railBed: city.transport.rail.bedLayer.path,
-    railSupport: city.transport.rail.supportLayer.path,
-    railTrack: city.transport.rail.trackLayer.path,
-    underlay: city.cityFabric.underlay.path,
+    contact: "/career-world/capitals/ninjaone/city-r1/fabric/city-terrain-contact-r3.png",
+    foreground: "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-foreground-r3.png",
+    railBed: "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-bed-r1.png",
+    railSupport: "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-support-r1.png",
+    railTrack: "/career-world/capitals/ninjaone/city-r1/fabric/territory-rail-southbound-track-r1.png",
+    underlay: "/career-world/capitals/ninjaone/city-r1/fabric/city-fabric-underlay-r3.png",
   };
   for (const [id, assetPath] of Object.entries(sources)) {
     assert.equal(

@@ -17,7 +17,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     case "ninjaone-environment":
       return <CareerWorld enableDevelopmentTools environmentProof />;
     case "ninjaone-capital-mvp":
-      return <CareerWorld capitalMvp enableDevelopmentTools />;
+      return <CareerWorld enableDevelopmentTools initialView="ninjaone-capital" />;
     case "ninjaone-capital-topology":
       return <CareerWorld enableDevelopmentTools topologyProof />;
     case "territory-landform":

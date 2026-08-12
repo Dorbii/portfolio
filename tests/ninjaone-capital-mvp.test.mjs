@@ -8,6 +8,7 @@ import {
   NINJAONE_CAPITAL_CITY_ARTBOARD,
   NINJAONE_CAPITAL_CITY_CAMERA,
   NINJAONE_CAPITAL_CITY_NODE_LAYER_ORDER,
+  NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA,
   NINJAONE_CAPITAL_CITY_POPULATION_CLOSE_DETAIL_CUE_COUNT,
   NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT,
   NINJAONE_CAPITAL_CITY_POPULATION_SITE_CUE_COUNT,
@@ -38,6 +39,10 @@ test("capital preview camera and runtime registration use the full B1/B2/C1/C2 c
     origin: [0.125, 0],
     span: [0.25, 1 / 3],
   });
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA, {
+    origin: [0.135, 0.01],
+    span: [0.31, 0.31],
+  });
   assert.deepEqual(city.artboard.dimensions, NINJAONE_CAPITAL_CITY_ARTBOARD);
   assert.deepEqual(city.artboard.worldOrigin, NINJAONE_CAPITAL_CITY_WORLD_ORIGIN);
   assert.deepEqual(city.artboard.worldSpan, NINJAONE_CAPITAL_CITY_WORLD_SPAN);
@@ -51,7 +56,6 @@ test("capital preview mounts distinct territory and detailed city stacks without
     scene,
     renderer,
     skillRenderer,
-    stationRiverDetailRenderer,
     developmentIndex,
   ] = await Promise.all([
     manifest(),
@@ -59,14 +63,14 @@ test("capital preview mounts distinct territory and detailed city stacks without
     source("features/career-world/composition/WorldScene.tsx"),
     source("features/career-world/development/NinjaOneCapitalMvp.tsx"),
     source("features/career-world/development/NinjaOneCapitalSkillNodes.tsx"),
-    source("features/career-world/development/NinjaOneStationRiverDetail.tsx"),
     source("features/career-world/development/index.ts"),
   ]);
 
   assert.match(
     page,
-    /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld capitalMvp enableDevelopmentTools \/>/,
+    /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld enableDevelopmentTools initialView="ninjaone-capital" \/>/,
   );
+  assert.doesNotMatch(page, /capitalMvp/);
   assert.match(page, /default:[\s\S]*?return <CareerWorld \/>/);
   assert.match(scene, /<TerritoryLandform/);
   assert.match(
@@ -78,28 +82,36 @@ test("capital preview mounts distinct territory and detailed city stacks without
     scene,
     /showNinjaOneCapital \? \([\s\S]*?<NinjaOneCapitalMvp[\s\S]*?light=\{WORLD_LIGHT\}/,
   );
-  assert.match(developmentIndex, /NINJAONE_CAPITAL_CITY_CAMERA as NINJAONE_CAPITAL_MVP_CAMERA/);
-  assert.match(renderer, /city-node-composition@r1/);
-  assert.match(renderer, /territoryOverviewVisible/);
-  assert.match(renderer, /detailedCityVisible/);
-  assert.match(renderer, /CAPITAL_OVERVIEW_SWITCH_SPAN = 0\.125/);
-  assert.match(renderer, /phase\?: "contact" \| "city" \| "all"/);
-  assert.match(renderer, /data-capital-layer="territory-settlement-overview"/);
-  assert.match(scene, /phase="contact"[\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?phase="city"/);
-  assert.match(renderer, /<NinjaOneStationRiverDetail/);
-  assert.match(stationRiverDetailRenderer, /shouldLoadSiteAssets/);
-  assert.match(stationRiverDetailRenderer, /capitalToSite/);
-  assert.match(stationRiverDetailRenderer, /ninjaOneCapitalVisibleStationRiverDetailTiles/);
-  assert.match(stationRiverDetailRenderer, /data-station-river-detail-tile=/);
-  assert.ok(
-    renderer.indexOf("<NinjaOneStationRiverDetail")
-      < renderer.indexOf('data-capital-layer="territory-rail-supports"'),
-    "station/river detail must remain below rail, station, and building layers",
+  assert.match(
+    developmentIndex,
+    /NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA as NINJAONE_CAPITAL_MVP_CAMERA/,
   );
+  assert.match(renderer, /city-node-composition@r1/);
+  assert.match(renderer, /detailedCityVisible/);
+  assert.doesNotMatch(renderer, /phase\?: "contact" \| "city" \| "all"/);
+  assert.match(scene, /<TerritoryLandform[\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?<NinjaOneCapitalMvp/);
+  for (const productionLayer of [
+    "InfrastructureLayer",
+    "EnvironmentLayer",
+    "ActorsEffectsLayer",
+    "StructuresLayer",
+    "FoliageLayer",
+  ]) {
+    assert.match(scene, new RegExp(`<${productionLayer}`));
+  }
+  assert.match(renderer, /detailState\.tier\.id === "capital"/);
+  assert.match(renderer, /cityDetailOpacity = detailState\.territoryToCapital/);
+  assert.doesNotMatch(renderer, /territory-settlement-overview/);
+  assert.doesNotMatch(renderer, /NinjaOneStationRiverDetail/);
+  assert.doesNotMatch(renderer, /city-terrain-contact/);
+  assert.match(scene, /detailState\.tier\.id !== "world"/);
+  assert.match(scene, /detailState\.tier\.id !== "territory"/);
 
   for (const layer of city.layerOrder) {
     if (layer === "external-terrain") {
       assert.match(scene, /<TerritoryLandform/);
+    } else if (layer === "inland-water") {
+      assert.match(scene, /<NinjaOneInlandWaterCanvas/);
     } else if (layer === "building-ground-shadows") {
       assert.match(skillRenderer, /data-capital-city-node-layer="building-ground-shadows"/);
     } else if (
@@ -117,6 +129,9 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.doesNotMatch(renderer, /data-capital-plate="(?:base|static-environment)"/);
   assert.doesNotMatch(renderer, /data-shared-asset="(?:structure|foliage)"/);
   assert.doesNotMatch(`${renderer}\n${skillRenderer}`, /Kaizen/i);
+  assert.equal(city.cityFabric.contactLayer.containsTerrainPixels, true);
+  assert.equal(city.cityFabric.contactLayer.runtimeVisible, false);
+  assert.equal(city.layerOrder.includes("city-terrain-contact"), false);
 });
 
 test("rail, station, and temporary population stay independent at runtime", async () => {

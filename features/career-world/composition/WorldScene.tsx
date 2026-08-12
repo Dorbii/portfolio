@@ -69,9 +69,9 @@ import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 
 interface WorldSceneProps {
-  readonly capitalMvp: boolean;
   readonly enableDevelopmentTools: boolean;
   readonly environmentProof: boolean;
+  readonly initialView: "world" | "ninjaone-capital";
   readonly topologyProof: boolean;
 }
 
@@ -248,16 +248,15 @@ const INTERACTIVE_TARGET_SELECTOR = [
 ].join(",");
 
 export function WorldScene({
-  capitalMvp,
   enableDevelopmentTools,
   environmentProof,
+  initialView,
   topologyProof,
 }: WorldSceneProps) {
-  const showNinjaOneInlandWater = !topologyProof;
   const showNinjaOneCapital = !topologyProof && !environmentProof;
   const initialCamera = environmentProof
     ? NINJAONE_ENVIRONMENT_CAMERA
-    : capitalMvp
+    : initialView === "ninjaone-capital"
       ? NINJAONE_CAPITAL_MVP_CAMERA
       : topologyProof
       ? NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA
@@ -275,7 +274,7 @@ export function WorldScene({
   const [activeViewId, setActiveViewId] = useState(
     environmentProof
       ? "ninjaone-environment-proof"
-      : capitalMvp
+      : initialView === "ninjaone-capital"
         ? "ninjaone-capital-mvp"
         : topologyProof
         ? "ninjaone-capital-topology-proof"
@@ -290,6 +289,11 @@ export function WorldScene({
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const detailState = resolveDetailState(camera);
+  const showNinjaOneInlandWater = (
+    !topologyProof
+    && detailState.tier.id !== "world"
+    && detailState.tier.id !== "territory"
+  );
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -515,7 +519,6 @@ export function WorldScene({
       data-camera-span={camera.span.join(",")}
       data-camera-minimum-span={interactiveCameraMinimumSpan(camera)}
       data-page-visible={isPageVisible}
-      data-capital-mvp={capitalMvp ? "layered-r1" : undefined}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
@@ -523,6 +526,7 @@ export function WorldScene({
         ? NINJAONE_ENVIRONMENT_PROOF_ID
         : undefined}
       data-kaizen-visual-ready={kaizenVisualReady}
+      data-initial-view={initialView}
       data-site-lod={detailState.capitalToSite.toFixed(3)}
       data-topology-proof={topologyProof
         ? NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID
@@ -550,14 +554,6 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
       />
-      {showNinjaOneCapital ? (
-        <NinjaOneCapitalMvp
-          camera={camera}
-          detailState={detailState}
-          light={WORLD_LIGHT}
-          phase="contact"
-        />
-      ) : null}
       {showNinjaOneInlandWater ? (
         <NinjaOneInlandWaterCanvas
           active={isPageVisible}
@@ -571,13 +567,10 @@ export function WorldScene({
           camera={camera}
           detailState={detailState}
           light={WORLD_LIGHT}
-          phase="city"
         />
       ) : null}
       {topologyProof ? (
         <NinjaOneCapitalTopologyProof camera={camera} />
-      ) : capitalMvp ? (
-        null
       ) : (
         <>
           <NinjaOneEnvironmentProof
@@ -627,7 +620,7 @@ export function WorldScene({
           territories={TERRITORIES}
         />
       ) : null}
-      {!topologyProof && !capitalMvp && !environmentProof ? (
+      {!topologyProof && !environmentProof ? (
         <WorldInterface
           activeViewId={activeViewId}
           camera={camera}

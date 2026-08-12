@@ -2,16 +2,16 @@ import { WorldScene } from "../composition/WorldScene";
 import "../styles/career-world.css";
 
 interface CareerWorldProps {
-  readonly capitalMvp?: boolean;
   readonly enableDevelopmentTools?: boolean;
   readonly environmentProof?: boolean;
+  readonly initialView?: "world" | "ninjaone-capital";
   readonly topologyProof?: boolean;
 }
 
 export function CareerWorld({
-  capitalMvp = false,
   enableDevelopmentTools = false,
   environmentProof = false,
+  initialView = "world",
   topologyProof = false,
 }: CareerWorldProps) {
   return (
@@ -27,9 +27,9 @@ export function CareerWorld({
         </p>
       </header>
       <WorldScene
-        capitalMvp={capitalMvp}
         enableDevelopmentTools={enableDevelopmentTools}
         environmentProof={environmentProof}
+        initialView={initialView}
         topologyProof={topologyProof}
       />
       <footer className="career-world__footer">

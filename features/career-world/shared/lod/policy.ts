@@ -13,13 +13,13 @@ const POLICY_CAMERA_MINIMUM_SPAN:
 export const DETAIL_POLICY = Object.freeze({
   cameraMinimumSpan: POLICY_CAMERA_MINIMUM_SPAN,
   territoryAssetPreloadSpan: 0.9,
-  capitalAssetPreloadSpan: 0.26,
+  capitalAssetPreloadSpan: 0.4,
   siteAssetPreloadSpan: 0.16,
   closeAssetPreloadSpan: 0.075,
   tierMaximumSpan: Object.freeze({
     world: 1,
     territory: 0.78,
-    capital: 0.2,
+    capital: 0.34,
     site: 0.1,
     close: 0.05,
   }),
@@ -28,8 +28,8 @@ export const DETAIL_POLICY = Object.freeze({
     endSpan: 0.64,
   }),
   territoryToCapital: Object.freeze({
-    startSpan: 0.23,
-    endSpan: 0.15,
+    startSpan: 0.38,
+    endSpan: 0.27,
   }),
   capitalToSite: Object.freeze({
     startSpan: 0.15,

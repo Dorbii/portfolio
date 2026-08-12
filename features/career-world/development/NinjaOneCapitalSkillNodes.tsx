@@ -91,28 +91,39 @@ function CityNodeAsset({
   if (!node.assetNodeReady) {
     return <BlockedGoPad closeLabels={closeLabels} node={node} />;
   }
-  const source = animated ? node.renderLayers[0].path : node.posterPath;
+  const sources = animated
+    ? node.renderLayers
+    : [{
+        dimensions: node.sourceDimensions,
+        id: "poster",
+        path: node.posterPath,
+      }];
   const width = node.displayWidth;
-  const height = width;
+  const height = width * node.sourceDimensions[1] / node.sourceDimensions[0];
   const x = node.anchor[0] - width * node.groundAnchor[0];
   const y = node.anchor[1] - height * node.groundAnchor[1];
   return (
     <g
       data-capital-city-node-animated={animated ? "true" : "false"}
-      data-capital-city-node-asset={source}
+      data-capital-city-node-asset={sources[0].path}
+      data-capital-city-node-layer-count={sources.length}
       data-capital-city-node-production-state={node.productionState}
       data-capital-city-node-skill={node.skillId}
       data-capital-city-node-slot={node.slotId}
     >
       <title>{node.label}</title>
-      <image
-        height={height}
-        href={source}
-        preserveAspectRatio="xMidYMid meet"
-        width={width}
-        x={x}
-        y={y}
-      />
+      {sources.map((source) => (
+        <image
+          data-capital-city-node-render-layer={source.id}
+          height={height}
+          href={source.path}
+          key={source.id}
+          preserveAspectRatio="xMidYMid meet"
+          width={width}
+          x={x}
+          y={y}
+        />
+      ))}
       {closeLabels ? (
         <text
           fill="rgba(237, 230, 207, 0.96)"

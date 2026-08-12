@@ -4,11 +4,14 @@ import type { WorldLight } from "../../../shared/lighting";
 import type { WaterSurfaceState } from "../model/state";
 import { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
 
+const CAMERA_SETTLE_DURATION_MS = 180;
+
 export class WaterSurfaceController {
   private readonly renderer: WaterSurfaceRenderer;
   private readonly resizeObserver: ResizeObserver | null;
   private readonly reduceMotion: boolean;
   private frameRequest = 0;
+  private cameraSettleTimer: ReturnType<typeof setTimeout> | null = null;
   private running = false;
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
@@ -31,6 +34,7 @@ export class WaterSurfaceController {
 
   setView(camera: CameraView, detailState: DetailState): void {
     this.renderer.setView(camera, detailState);
+    this.suspendContinuousAnimationForCameraMotion();
     // Camera-dependent transparency sits above the DOM land plate. Render the
     // new view immediately so both layers reach the next paint atomically.
     this.renderOnce();
@@ -53,6 +57,7 @@ export class WaterSurfaceController {
     }
     this.running = false;
     this.lastTimestamp = 0;
+    this.clearCameraSettleTimer();
     if (this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
       this.frameRequest = 0;
@@ -71,6 +76,7 @@ export class WaterSurfaceController {
 
   destroy(): void {
     this.running = false;
+    this.clearCameraSettleTimer();
     if (this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
     }
@@ -109,6 +115,29 @@ export class WaterSurfaceController {
   private schedule(): void {
     if (!this.frameRequest && this.running && !document.hidden) {
       this.frameRequest = requestAnimationFrame(this.tick);
+    }
+  }
+
+  private suspendContinuousAnimationForCameraMotion(): void {
+    if (!this.running || this.reduceMotion) {
+      return;
+    }
+    if (this.frameRequest) {
+      cancelAnimationFrame(this.frameRequest);
+      this.frameRequest = 0;
+    }
+    this.lastTimestamp = 0;
+    this.clearCameraSettleTimer();
+    this.cameraSettleTimer = setTimeout(() => {
+      this.cameraSettleTimer = null;
+      this.schedule();
+    }, CAMERA_SETTLE_DURATION_MS);
+  }
+
+  private clearCameraSettleTimer(): void {
+    if (this.cameraSettleTimer !== null) {
+      clearTimeout(this.cameraSettleTimer);
+      this.cameraSettleTimer = null;
     }
   }
 
