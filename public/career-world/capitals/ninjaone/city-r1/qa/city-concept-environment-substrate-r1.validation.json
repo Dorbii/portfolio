@@ -23,15 +23,15 @@
   "proofSha256": "1406e392630f62f184937689a548147d036af6a0adb36cbdfa9b2018fb878d9f",
   "selectedOverlaySha256": "1025946caeaf91f0956dc550689e699c7f16bd4c2e2d07548e926fbc7feee72c",
   "selectedProofSha256": "63273c3dadb956113e401ce476c30e0261e6c14e4fc34cc7ac6d4bc1ae645f50",
-  "aperturedOverlaySha256": "4c4a72b3b4f795678e5851f8c3b4c043b2f2094c04f49e53f37caec20a5dc2ae",
-  "apertureQaSha256": "f85e276eda98b9cc7f4f69d255b596587da8ba8211721011375a6c3c3a96741f",
-  "summitOwnershipQaSha256": "9a78f183b7bc2799dc3a4a185ae6c4973e94683d35335263fb67b1d792ceee62",
-  "nodeScaleProofSha256": "8a0f5ff7e755be9852598eb45ba31d21c7c303e7ec35df50c297f67da0da5314",
+  "aperturedOverlaySha256": "0a190807d90a89d48983f771469a20223ec50c6ecde2e43a8087395db9376104",
+  "apertureQaSha256": "311642fb5231fc64b753d60ac88daa8efa25cb011260942de9163fcc814b7a36",
+  "summitOwnershipQaSha256": "c0cbf94beba0e549c34823a90e35baf9d3a65b4d9b6d947e6efdc7d88ab90f64",
+  "nodeScaleProofSha256": "eee1cc4ea419aa936e958778a1d5a28ae6c73e24bb447ee71f2e039e17b794e3",
   "infrastructureAtlasSha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
-  "nodeEnvironmentDetailSha256": "5914c442ce06a0216479d41eec998224228a4e2b26ec790a2d16ad56956d0575",
-  "nodeEnvironmentDetailProofSha256": "154bf18ec4c963f16d04cb8569cca50e643a02463c8e83cb7c3f9cb0983a5c91",
-  "nodeTransitionForegroundSha256": "06431ac2ff6048050e9f24aa9910ea77e23a3b68ed6c5685a9b7499e02b2c7aa",
-  "nodeIntegratedProofSha256": "19c07988a53e1f48e11ab4e67e02de991f8ef509192cac54f748a20538f68590",
+  "nodeEnvironmentDetailSha256": "a682f71cd011be9a60a1c396252fefa50793dd559d23d0f590a8aed83dd877d3",
+  "nodeEnvironmentDetailProofSha256": "083016e48a61627d060fcc145835a520c3474f2a51d00b9bdfc89f6445b69c4e",
+  "nodeTransitionForegroundSha256": "93dac9f761ff1df1be57aef6efb023a3e9c29d8c6c590abf8ef719d587717a59",
+  "nodeIntegratedProofSha256": "d0f9d308af34fe9f91a738ed9b51335c7df1f7e6b8458807a209aa526c4bc4a1",
   "railSegmentSourceSha256": "83ae9b929e8131dc0ea12febede5279a6e12ecd66cfb17213281e91c122c92d8",
   "railSegmentAlphaSha256": "2fa88e2728f3cc8b06bd86fd0520f1a6c2b8c30663bac5872d0eb06269875ed8",
   "railSupportSha256": "d8d265956fe93396f79c6802baae5e06c6312676a23a177b4ff398e1d326a68b",
@@ -40,8 +40,8 @@
   "railTrackSha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
   "railPortalForegroundSha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
   "railStationForegroundSha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
-  "railIntegratedProofSha256": "765a2708836a3839cc8bfe93fac6ff34ba3e127ab321afc75271753092bf7d6e",
-  "railRegistrationQaSha256": "82c85063deff2c188d5321eb9f8760fecbfbc4e79506705967c99ea6efb25745",
+  "railIntegratedProofSha256": "b813553c8603fcca2b4e9e6d921bc580b98a0dd106403c25fa78ebdc6860344c",
+  "railRegistrationQaSha256": "60d537a191571e18bb97a67162da9d70a654401cd69fd8b741ec8d208dd0b274",
   "rail": {
     "renderMethod": "authored-isometric-segment-chains",
     "segmentCount": 13,
@@ -496,9 +496,9 @@
     "affectsBuildingGeometry": false,
     "siteLayerSha256": "a479fba083595b485d8f4c2551c57ef8ecbdc6b70328d0ea5fa708ce42f8490e",
     "closeDetailLayerSha256": "0c15a1ff22ebb3760f0a754398ed804068a283367832dcbd3cd0d88946f80da5",
-    "siteProofSha256": "4bf8ceb6c08622789b3322d58d7e8529b3ce57e993b10e72a519721db6293886",
-    "closeProofSha256": "74fb360a408ae1fe9bd2f7e10991d1401f662899ce254d8106748907a16a164c",
-    "closeupQaSha256": "e762d77f001f1f481f750b33a3395921042f30718f77c9a8f87758e51ade5097",
+    "siteProofSha256": "56ff16683769623ecc21de048dd726af1f688333057eee5efc328dfaac6d8e41",
+    "closeProofSha256": "dccbc81d7641351f0e28950d1dc554c019b15a333d96cb4666193c4c91187d3a",
+    "closeupQaSha256": "73cb08b37aebc2644a4ca49258f5b3ba6a744c3057eafb714c41849c8a1cee5a",
     "siteTransparentRgbUnderZeroAlpha": 0,
     "closeTransparentRgbUnderZeroAlpha": 0,
     "displayHeightRange": [
@@ -717,8 +717,8 @@
   "stationDisplayWidth": 343,
   "stationIsIndependentAsset": true,
   "aperturesCreateOffTerrainHoles": false,
-  "aperturePixelCount": 331444,
-  "nodeTransitionForegroundPixelCount": 32713,
+  "aperturePixelCount": 489557,
+  "nodeTransitionForegroundPixelCount": 50053,
   "nodeTransitionForegroundSource": "selected-city-environment-source-pixels",
   "nodeEnvironmentDetailPlacementCount": 19,
   "nodeEnvironmentDetailPlacements": [
@@ -1192,10 +1192,10 @@
     {
       "skillId": "ai-agent-systems",
       "localMaskPixels": 26607,
-      "environmentDetailPixels": 24283,
-      "environmentDetailCoverageRatio": 0.912655,
-      "foregroundOcclusionPixels": 2649,
-      "foregroundOcclusionCoverageRatio": 0.09956,
+      "environmentDetailPixels": 24286,
+      "environmentDetailCoverageRatio": 0.912767,
+      "foregroundOcclusionPixels": 6810,
+      "foregroundOcclusionCoverageRatio": 0.255948,
       "passes": true
     },
     {
@@ -2025,67 +2025,23 @@
     "source": "selected-city-environment-source-pixels",
     "ownershipPolygon": [
       [
-        0.404,
-        0.206
+        0.395,
+        0.225
       ],
       [
-        0.405,
-        0.172
+        0.395,
+        0.018
       ],
       [
-        0.424,
-        0.143
+        0.57,
+        0.018
       ],
       [
-        0.432,
-        0.096
-      ],
-      [
-        0.444,
-        0.032
-      ],
-      [
-        0.462,
-        0.126
-      ],
-      [
-        0.488,
-        0.09
-      ],
-      [
-        0.512,
-        0.151
-      ],
-      [
-        0.538,
-        0.13
-      ],
-      [
-        0.558,
-        0.198
-      ],
-      [
-        0.548,
-        0.202
-      ],
-      [
-        0.52,
-        0.208
-      ],
-      [
-        0.482,
-        0.21
-      ],
-      [
-        0.445,
-        0.207
-      ],
-      [
-        0.42,
-        0.21
+        0.57,
+        0.225
       ]
     ],
-    "sourceOwnedPixels": 17858,
+    "sourceOwnedPixels": 80261,
     "aperturedResidualPixels": 0,
     "foregroundResidualPixels": 0,
     "retainedPlateElements": [

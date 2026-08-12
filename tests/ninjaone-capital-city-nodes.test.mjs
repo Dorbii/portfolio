@@ -114,7 +114,19 @@ test("NinjaOne city composition publishes 19 independent skill nodes but remains
     assert.equal(node.terrainAdmissionPreview.landCoverage, 1, node.skillId);
     assert.ok(node.terrainAdmissionPreview.buildableCoverage >= 0.8, node.skillId);
   }
-  assert.equal(manifest.terrainBinding.hydrology.fieldContentHashesFrozen, false);
+  assert.equal(
+    manifest.terrainBinding.hydrology.manifestPath,
+    "/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+  );
+  assert.equal(
+    manifest.terrainBinding.hydrology.authorityId,
+    "career-world/capitals/ninjaone/inland-water-authority@r1",
+  );
+  assert.equal(
+    manifest.terrainBinding.hydrology.fieldPath,
+    "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+  );
+  assert.equal(manifest.terrainBinding.hydrology.fieldContentHashesFrozen, true);
   assert.equal(manifest.terrainBinding.hydrology.numericShorelineSetbackVerified, false);
 });
 
@@ -169,6 +181,12 @@ test("concept proof preserves each runtime building width instead of rescaling b
   assert.equal(validation.allSkillNodesHaveDetailTransitions, true);
   assert.deepEqual(validation.skillDisplayWidthRange, [124, 228]);
   assert.equal(validation.stationDisplayWidth, manifest.transport.station.displayWidth);
+  assert.equal(validation.summitPlaceholderOwnership.passes, true);
+  assert.equal(validation.summitPlaceholderOwnership.skillId, "ai-agent-systems");
+  assert.equal(validation.summitPlaceholderOwnership.replacementSlotId, "summit-citadel");
+  assert.ok(validation.summitPlaceholderOwnership.sourceOwnedPixels >= 75_000);
+  assert.equal(validation.summitPlaceholderOwnership.aperturedResidualPixels, 0);
+  assert.equal(validation.summitPlaceholderOwnership.foregroundResidualPixels, 0);
 
   const skillPlacements = validation.nodePlacements.filter(({ skillId }) => skillId !== null);
   assert.equal(skillPlacements.length, 19);

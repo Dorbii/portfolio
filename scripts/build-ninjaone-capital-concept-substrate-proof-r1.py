@@ -136,24 +136,10 @@ NODE_SCALE_AUTHORITY = "city-node-manifest-displayWidth"
 # the lower retaining wall, stairs, civic loop, foliage, and cliff remain owned
 # by the concept plate and its transition foreground.
 SUMMIT_PLACEHOLDER_OWNERSHIP_POLYGON: tuple[tuple[float, float], ...] = (
-    (0.400, 0.220),
-    (0.402, 0.165),
-    (0.424, 0.135),
-    (0.443, 0.142),
-    (0.454, 0.105),
-    (0.461, 0.040),
-    (0.486, 0.034),
-    (0.497, 0.135),
-    (0.502, 0.081),
-    (0.523, 0.067),
-    (0.533, 0.154),
-    (0.538, 0.121),
-    (0.553, 0.127),
-    (0.563, 0.194),
-    (0.557, 0.220),
-    (0.523, 0.225),
-    (0.480, 0.226),
-    (0.438, 0.224),
+    (0.395, 0.225),
+    (0.395, 0.018),
+    (0.570, 0.018),
+    (0.570, 0.225),
 )
 
 # Independent, source-authored city detail. These pieces do not alter the
@@ -1363,6 +1349,50 @@ def build_node_foreground(
     return foreground
 
 
+def build_summit_transition_foreground(
+    terrain: Image.Image,
+    summit_ownership_mask: Image.Image,
+) -> Image.Image:
+    """Retain real summit rock/foliage in front of the independent citadel."""
+    terrain_pixels = np.asarray(terrain.convert("RGBA"), dtype=np.uint8)
+    red = terrain_pixels[:, :, 0].astype(np.int16)
+    green = terrain_pixels[:, :, 1].astype(np.int16)
+    blue = terrain_pixels[:, :, 2].astype(np.int16)
+    alpha = terrain_pixels[:, :, 3]
+    luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722
+    dark_rock = luminance <= 80
+    foliage = (
+        (luminance <= 122)
+        & (green >= red - 10)
+        & (green >= blue - 5)
+    )
+    material = Image.fromarray(
+        (((dark_rock | foliage) & (alpha >= 16)) * 255).astype(np.uint8),
+        "L",
+    )
+    contact_band = summit_ownership_mask.filter(ImageFilter.MaxFilter(45))
+    contact_band = ImageChops.subtract(contact_band, summit_ownership_mask)
+    lower_gate = Image.new("L", ARTBOARD, 0)
+    ImageDraw.Draw(lower_gate).polygon(
+        [
+            pixel((0.392, 0.195)),
+            pixel((0.570, 0.190)),
+            pixel((0.575, 0.310)),
+            pixel((0.385, 0.310)),
+        ],
+        fill=255,
+    )
+    foreground_alpha = ImageChops.multiply(
+        ImageChops.multiply(contact_band, lower_gate),
+        material,
+    )
+    foreground = terrain.copy()
+    foreground.putalpha(
+        ImageChops.multiply(terrain.getchannel("A"), foreground_alpha)
+    )
+    return foreground
+
+
 def validate_summit_placeholder_ownership(
     selected: Image.Image,
     apertured: Image.Image,
@@ -1990,6 +2020,9 @@ def main() -> None:
         manifest,
         aperture_mask,
         summit_ownership_mask,
+    )
+    node_foreground.alpha_composite(
+        build_summit_transition_foreground(terrain, summit_ownership_mask)
     )
     node_foreground.save(NODE_FOREGROUND_PATH, optimize=True)
     summit_ownership = validate_summit_placeholder_ownership(

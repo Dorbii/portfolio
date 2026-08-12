@@ -113,10 +113,11 @@
       "contentHashStatus": "frozen-global-authority"
     },
     "hydrology": {
-      "manifestPath": "/career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json",
-      "currentBranchSha256": "7f96f22b6976045d7ee50a95c5e708153165d75008ad2f176d4b003cf5d7c41d",
-      "fieldPathsStable": true,
-      "fieldContentHashesFrozen": false,
+      "manifestPath": "/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+      "currentBranchSha256": "8c11bdc23c6e8821ae8ad9947acff4d7f021b0e066df3fd0d55b0983c282c3ca",
+      "authorityId": "career-world/capitals/ninjaone/inland-water-authority@r1",
+      "fieldPath": "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+      "fieldContentHashesFrozen": true,
       "numericShorelineSetbackVerified": false,
       "rule": "remain visibly clear of registered water channels; do not invent a numeric buffer"
     },

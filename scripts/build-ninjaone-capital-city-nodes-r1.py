@@ -145,7 +145,7 @@ REGIONAL_TERRAIN_PATH = (
 )
 HYDROLOGY_MANIFEST_PATH = (
     PUBLIC
-    / "career-world/capitals/ninjaone/environment/manifests/hydrology-native-r2.json"
+    / "career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json"
 )
 STATION_PATH = (
     PUBLIC
@@ -2702,8 +2702,9 @@ def main() -> None:
             "hydrology": {
                 "manifestPath": public_url(HYDROLOGY_MANIFEST_PATH),
                 "currentBranchSha256": sha256(HYDROLOGY_MANIFEST_PATH),
-                "fieldPathsStable": True,
-                "fieldContentHashesFrozen": False,
+                "authorityId": "career-world/capitals/ninjaone/inland-water-authority@r1",
+                "fieldPath": "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+                "fieldContentHashesFrozen": True,
                 "numericShorelineSetbackVerified": False,
                 "rule": "remain visibly clear of registered water channels; do not invent a numeric buffer",
             },

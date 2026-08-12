@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageChops, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -29,7 +29,7 @@ REFERENCE_TRACE_PATH = OUTPUT_PATH.with_name(
 HYDROLOGY_MANIFEST_PATH = (
     REPO
     / "public/career-world/capitals/ninjaone/environment/manifests/"
-    "hydrology-native-r2.json"
+    "inland-water-r1.json"
 )
 
 
@@ -78,28 +78,24 @@ def draw_dashed_path(
 
 def prepare_registered_hydrology_mask(city: Any) -> Image.Image:
     manifest = json.loads(HYDROLOGY_MANIFEST_PATH.read_text(encoding="utf-8"))
-    source_width, source_height = manifest["registration"]["artboardDimensions"]
+    field_path = REPO / "public" / manifest["field"]["path"].lstrip("/")
+    with Image.open(field_path) as source:
+        signed_distance = source.convert("RGBA").getchannel("R")
+    crop_left, crop_top, crop_width, crop_height = manifest["field"]["artboardCrop"]
+    artboard_width, artboard_height = manifest["registration"]["artboard"]
+    crop_box = (
+        round(crop_left / artboard_width * city.ARTBOARD[0]),
+        round(crop_top / artboard_height * city.ARTBOARD[1]),
+        round((crop_left + crop_width) / artboard_width * city.ARTBOARD[0]),
+        round((crop_top + crop_height) / artboard_height * city.ARTBOARD[1]),
+    )
+    coverage = signed_distance.point(lambda value: 255 if value >= 128 else 0)
+    coverage = coverage.resize(
+        (max(1, crop_box[2] - crop_box[0]), max(1, crop_box[3] - crop_box[1])),
+        Image.Resampling.NEAREST,
+    )
     mask = Image.new("L", city.ARTBOARD, 0)
-    for resource in manifest["regionalFields"]["tiers"]["detail"]["resources"]:
-        field_path = REPO / "public" / resource["path"].split("?", 1)[0].lstrip("/")
-        with Image.open(field_path) as source:
-            field = source.convert("RGBA")
-        primary_width = resource["fieldDimensions"][0]
-        coverage = field.crop((0, 0, primary_width, field.height)).getchannel("R")
-        left, top, right, bottom = resource["artboardBounds"]
-        target_box = (
-            round(left / source_width * city.ARTBOARD[0]),
-            round(top / source_height * city.ARTBOARD[1]),
-            round(right / source_width * city.ARTBOARD[0]),
-            round(bottom / source_height * city.ARTBOARD[1]),
-        )
-        coverage = coverage.resize(
-            (max(1, target_box[2] - target_box[0]), max(1, target_box[3] - target_box[1])),
-            Image.Resampling.NEAREST,
-        )
-        region_layer = Image.new("L", city.ARTBOARD, 0)
-        region_layer.paste(coverage, target_box[:2])
-        mask = ImageChops.lighter(mask, region_layer)
+    mask.paste(coverage, crop_box[:2])
     return mask
 
 

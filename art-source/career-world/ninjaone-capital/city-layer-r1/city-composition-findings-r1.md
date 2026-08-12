@@ -70,21 +70,24 @@ This is the ordered visual-fix queue for the isolated city-composition worktree.
 - Acceptance: typical skill buildings read at the same inhabited scale as nearby stairs and figures, fill their intended courtyards, and remain subordinate to the station/citadel without reading as miniature sheds.
 - Resolution: all 19 proof nodes now render at their exact runtime widths (124-228 px), the independent station renders at its 343 px runtime width, and transition apertures/foreground coverage scale with each node's footprint. The focused critic returned GO on citadel/station/node hierarchy and architectural detail density. Eight scale/rail artifacts rebuild byte-identically, typecheck passes, and all 18 focused city/topology tests pass, including the new manifest-width invariant.
 
-## Active
-
-### CCF-11 - baked placeholder citadel conflicts with the independent summit building
-
-- Evidence: `codex-clipboard-f212d9ca-5b0a-4d5b-a609-6850d602e4f7.png` shows the independent AI / Agent Systems citadel sitting in front of a taller baked generic citadel from the selected environment substrate. Live layer inspection confirms the AI asset occupies `[1035, 215]-[1263, 405]`, while the summit region of `city-selected-environment-apertured-r1.png` still retains 222,979 alpha pixels and `city-node-transition-foreground-r1.png` retains another 6,148 pixels derived from the same source.
-- Root cause: the current aperture is sized from the independent node's small ground footprint, not the full visible silhouette of the placeholder building being replaced. That leaves the generic towers and may reintroduce fragments through the source-derived foreground layer.
-- Correction boundary: expand only the summit replacement ownership mask to remove the full baked citadel silhouette, then rebuild a terrain/civic transition around the independent AI building. Preserve surrounding retaining walls, paths, foliage, cliff detail, and all other nodes. Do not regenerate the baseplate and do not touch water.
-- Acceptance: exactly one summit citadel reads at site/close tiers; no baked towers or duplicate facade survive behind it, while the summit remains connected to the accepted urban fabric.
-
-### CCF-05 - scale cues need fantasy population variation (closed)
+### CCF-05 - scale cues need fantasy population variation
 
 - Evidence: uniform building scale lacked an explanation for intentionally different structure proportions, and the original 16-cue raster used the rejected 0.78 fabric transform with no separate close-tier enhancement.
 - Correction boundary: temporary independent site/close population layers with human, elf, dwarf, gnome, and orc silhouettes; never bake figures into buildings or terrain.
 - Acceptance: population clarifies scale at site/close tiers without cluttering territory overview.
 - Resolution: retained the accepted eight-character alpha atlas, identity-registered all cues to the concept layout, split them into eight sparse site cues plus eight close-detail additions, and moved them onto actual plazas, station frontage, paths, and service courts. Both tiers include all five races, all 16 anchors have canonical terrain support, world/territory/capital tiers render no population, and the existing critic returned GO. Nine population artifacts rebuild byte-identically.
+
+### CCF-11 - baked placeholder citadel conflicts with the independent summit building
+
+- Evidence: `codex-clipboard-f212d9ca-5b0a-4d5b-a609-6850d602e4f7.png` showed the independent AI / Agent Systems citadel sitting in front of a taller baked generic citadel from the selected environment substrate. Live layer inspection confirmed the AI asset occupies `[1035, 215]-[1263, 405]`, while the old summit region retained both source substrate and source-derived foreground pixels.
+- Root cause: the ordinary aperture was sized from the independent node's small ground footprint, not the full visible silhouette of the placeholder being replaced. Terrain-alpha clipping also prevented the aperture from removing towers that rose above the frozen land silhouette.
+- Correction boundary: transfer only the upper summit placeholder silhouette to the independent node while preserving the lower retaining wall, summit approach, civic loop, surrounding foliage/cliff, frozen terrain, and every neighboring node. Water remains delegated.
+- Acceptance: exactly one summit citadel reads at site/close tiers; no baked towers or duplicate facade survive behind it, while the summit remains connected to the accepted urban fabric.
+- Resolution: added a summit-specific replacement-ownership mask that may clear explicit baked-building pixels above the terrain skyline while ordinary ground apertures remain terrain-clipped. The mask removes the complete generic upper citadel and suppresses its source-derived foreground; the independent AI building is now the sole summit structure. A separate frozen-terrain rock/foliage foreground restores physical contact without restoring generic architecture. The close crop retains the lower terrace, steps, wall, foliage, and cliff; the hard ownership gate reports zero substrate and zero foreground residual pixels inside the strict mask.
+
+## Active
+
+No city finding is active. The summit ownership fix passed its final test and critic gate.
 
 ## Delegated / paused
 
