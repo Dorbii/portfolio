@@ -126,6 +126,10 @@ test("NinjaOne city composition publishes 19 independent skill nodes but remains
     manifest.terrainBinding.hydrology.fieldPath,
     "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
   );
+  assert.equal(
+    manifest.terrainBinding.hydrology.currentBranchSha256,
+    await sha256(absolutePublicPath(manifest.terrainBinding.hydrology.manifestPath)),
+  );
   assert.equal(manifest.terrainBinding.hydrology.fieldContentHashesFrozen, true);
   assert.equal(manifest.terrainBinding.hydrology.numericShorelineSetbackVerified, false);
 });

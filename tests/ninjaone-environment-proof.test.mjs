@@ -396,7 +396,11 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     page,
     /case "ninjaone-environment":[\s\S]*?<CareerWorld enableDevelopmentTools environmentProof \/>/,
   );
-  assert.match(scene, /const showNinjaOneEnvironment = !topologyProof && !capitalMvp/);
+  assert.match(scene, /const showNinjaOneInlandWater = !topologyProof/);
+  assert.match(
+    scene,
+    /showNinjaOneInlandWater \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible\}/,
+  );
   assert.match(
     scene,
     /<NinjaOneEnvironmentProof[\s\S]*?proofMode=\{environmentProof\}/,

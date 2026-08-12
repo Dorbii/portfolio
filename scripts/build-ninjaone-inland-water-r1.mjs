@@ -851,6 +851,8 @@ export async function buildNinjaOneInlandWaterR1() {
         localCascadeImpact,
       );
       if (!inside) {
+        field[offset + 1] = 128;
+        field[offset + 2] = 128;
         field[offset + 3] = localCascadeImpact > 0.002
           ? SUPPORT_ALPHA_BASELINE
             + Math.round(clamp(localCascadeImpact * 0.42) * SUPPORT_ALPHA_RANGE)

@@ -100,3 +100,30 @@ test("inland ownership texture localizes waterfall impact energy", async () => {
     );
   }
 });
+
+test("non-water field pixels encode neutral flow", async () => {
+  const manifest = await readJson(
+    "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+  );
+  const { data, info } = await sharp(
+    runtimeAssetFile(manifest.field.path),
+  ).raw().toBuffer({ resolveWithObject: true });
+
+  let nonWaterPixels = 0;
+  let nonNeutralFlowPixels = 0;
+  for (let pixel = 0; pixel < info.width * info.height; pixel += 1) {
+    const offset = pixel * info.channels;
+    if (data[offset] >= 128) continue;
+    nonWaterPixels += 1;
+    if (data[offset + 1] !== 128 || data[offset + 2] !== 128) {
+      nonNeutralFlowPixels += 1;
+    }
+  }
+
+  assert.ok(nonWaterPixels > 4_000_000);
+  assert.equal(
+    nonNeutralFlowPixels,
+    0,
+    "land and mist support texels must not decode as high-speed water",
+  );
+});

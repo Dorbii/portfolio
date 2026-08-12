@@ -37,6 +37,30 @@ float decodeDetailAlpha(float encoded) {
   return saturate((encoded - 64.0 / 255.0) / (191.0 / 255.0));
 }
 
+float hash21(vec2 point) {
+  vec3 value = fract(vec3(point.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  value += dot(value, value.yzx + 33.33);
+  return fract((value.x + value.y) * value.z);
+}
+
+float fishSilhouette(vec2 point) {
+  float body = 1.0 - smoothstep(
+    1.05,
+    1.82,
+    length(vec2(point.x, point.y * 0.42))
+  );
+  float tailEnvelope = smoothstep(-4.8, -3.9, point.y)
+    * (1.0 - smoothstep(-1.7, -0.9, point.y));
+  float tailProgress = saturate((-point.y - 0.9) / 3.9);
+  float tailWidth = mix(0.18, 1.55, tailProgress);
+  float tail = (1.0 - smoothstep(
+    max(0.0, tailWidth - 0.32),
+    tailWidth + 0.28,
+    abs(point.x)
+  )) * tailEnvelope;
+  return saturate(max(body, tail));
+}
+
 vec4 sampleFlowDetail(
   vec2 localPx,
   vec2 flowDirection,
@@ -101,7 +125,8 @@ void main() {
   vec2 sampleUv = clamp(fieldUv, vec2(0.0), vec2(1.0));
   vec4 field = texture(u_inlandField, sampleUv);
   float signedDistance = (field.r * 2.0 - 1.0) * DISTANCE_RANGE;
-  vec2 velocity = field.gb * 2.0 - 1.0;
+  float waterInterior = step(0.0, signedDistance);
+  vec2 velocity = (field.gb * 2.0 - 1.0) * waterInterior;
   float speed = length(velocity);
   vec2 flowDirection = safeDirection(velocity);
   vec2 flowNormal = vec2(-flowDirection.y, flowDirection.x);
@@ -125,7 +150,8 @@ void main() {
   float fallProgress = inlandMeta.g;
   float cascadeImpact = inlandMeta.b;
   float ownershipBlend = smoothstep(0.0, 1.0, inlandOwnership);
-  float fall = smoothstep(0.70, 0.90, speed);
+  float fallVelocity = mix(materialSpeed, speed, 0.78);
+  float fall = smoothstep(0.62, 0.84, fallVelocity);
   float fallEdgeNoise = decodeDetailAlpha(texture(
     u_inlandDetail,
     localPx / vec2(7.0, 17.0) + vec2(0.31, -u_time * 0.026)
@@ -313,6 +339,27 @@ void main() {
     * smoothstep(0.18, 0.58, waveEnergy) * detail;
   surface += vec3(0.30, 0.40, 0.40)
     * fineGlint * (river * 0.12 + lake * 0.055 + fall * 0.16);
+  float waveClock = u_time * mix(0.34, 1.08, saturate(materialSpeed));
+  float broadWavePhase = dot(flowSpace, vec2(0.024, 0.058)) - waveClock;
+  float crossingWavePhase = dot(flowSpace, vec2(-0.052, 0.031))
+    - waveClock * 0.57 + broadFoam * 1.8;
+  float broadWaveTrain = pow(
+    0.5 + 0.5 * sin(broadWavePhase),
+    mix(5.8, 2.8, river)
+  );
+  float crossingWaveTrain = pow(
+    0.5 + 0.5 * sin(crossingWavePhase),
+    7.0
+  );
+  float resolvedWave = (
+    broadWaveTrain * mix(0.34, 0.78, river)
+    + crossingWaveTrain * (river * 0.34 + lake * 0.13)
+  ) * detail * (1.0 - fall * 0.72);
+  float waveShadow = (1.0 - broadWaveTrain)
+    * smoothstep(0.14, 0.62, waveEnergy)
+    * (river * 0.045 + lake * 0.022) * detail;
+  surface *= 1.0 - waveShadow;
+  surface += vec3(0.28, 0.39, 0.40) * resolvedWave * 0.11;
   float directionalVein = (
     smoothstep(0.61, 0.77, fineFoam)
     - smoothstep(0.80, 0.93, fineFoam)
@@ -322,6 +369,36 @@ void main() {
   float shallowCaustic = smoothstep(0.68, 0.91, fineFoam + waveEnergy * 0.18)
     * shallow * (1.0 - depth) * detail;
   surface += vec3(0.12, 0.16, 0.13) * shallowCaustic * 0.11;
+  vec2 aquaticCell = floor(localPx / vec2(92.0, 78.0));
+  vec2 aquaticUv = fract(localPx / vec2(92.0, 78.0)) - 0.5;
+  float aquaticSeed = hash21(aquaticCell);
+  float schoolWindow = step(0.84, aquaticSeed)
+    * smoothstep(0.56, 0.82, u_siteLod);
+  float fishDirection = mix(-1.0, 1.0, step(0.5, aquaticSeed));
+  float fishSwim = fract(
+    aquaticUv.y + u_time * mix(0.018, 0.034, aquaticSeed) * fishDirection
+  ) - 0.5;
+  vec2 fishPoint = vec2(
+    (aquaticUv.x + (hash21(aquaticCell + 7.0) - 0.5) * 0.34) * 23.0,
+    fishSwim * 24.0
+  );
+  fishPoint.x += sin(u_time * 1.15 + aquaticSeed * 17.0) * 0.42;
+  float fish = fishSilhouette(fishPoint)
+    * schoolWindow
+    * smoothstep(0.34, 0.72, depth)
+    * (lake * 0.82 + river * 0.38)
+    * (1.0 - smoothstep(0.48, 0.78, materialSpeed))
+    * waterCoverage;
+  float companionFish = fishSilhouette(
+    vec2(fishPoint.x + 2.7, fishPoint.y + 5.2)
+  ) * schoolWindow * smoothstep(0.93, 0.985, aquaticSeed)
+    * smoothstep(0.34, 0.72, depth)
+    * lake * waterCoverage;
+  surface = mix(
+    surface,
+    surface * vec3(0.36, 0.43, 0.37),
+    saturate(fish * 0.38 + companionFish * 0.26)
+  );
   vec3 fallRibbonSample = texture(
     u_surfaceAlbedo,
     waterfallAtlasUv(
@@ -421,6 +498,19 @@ void main() {
     eventNoise * 0.64 + fineFoam * 0.36
   );
   float eventFoam = eventEnergy * (0.04 + eventBreakup * 0.78);
+  float shorelineShelf = (1.0 - smoothstep(0.0, 6.8, signedDistance))
+    * waterCoverage * (1.0 - fall * 0.88);
+  float shoreWave = pow(
+    0.5 + 0.5 * sin(
+      flowSpace.y * 0.105 - u_time * 0.92 + bedVariation * 2.4
+    ),
+    5.0
+  );
+  float shoreFoam = shorelineShelf
+    * smoothstep(0.36, 0.82, bedVariation * 0.52 + fineFoam * 0.48)
+    * (0.16 + shoreWave * 0.52)
+    * (river * 0.72 + lake * 0.31)
+    * detail;
   float explicitImpact = smoothstep(0.06, 0.82, cascadeImpact);
   float impactCore = smoothstep(0.46, 0.90, cascadeImpact);
   float impactRing = smoothstep(0.10, 0.42, cascadeImpact)
@@ -434,6 +524,7 @@ void main() {
   float foam = saturate(
     aeration * brokenFoam * mix(0.58, 0.24, fall)
     + bankTurbulence * 0.10
+    + shoreFoam * 0.18
     + fall * streamThread * 0.08
     + fallCrest * (0.12 + eventBreakup * 0.24)
     + eventFoam * 0.82
@@ -509,29 +600,12 @@ void main() {
     * (1.0 - smoothstep(0.84, 1.04, fallProgress));
   fallOpacity *= mix(1.0, fallEnvelope, fall);
   float waterAlpha = waterCoverage * mix(1.0, fallOpacity, fall);
-  float fallSilhouette = fall * ownershipBlend * inField;
-  float baseAlpha = max(
-    max(waterAlpha, bankAlpha),
-    fallSilhouette * 0.96
+  float baseAlpha = max(waterAlpha, bankAlpha);
+  float surfaceColorCoverage = max(
+    waterCoverage,
+    fall * ownershipBlend * inField
   );
-  float surfaceColorCoverage = waterCoverage;
   vec3 composed = mix(bankColor, surface, surfaceColorCoverage);
-  vec3 fallBacking = texture(
-    u_riverbedAlbedo,
-    flowSpace / vec2(24.0, 32.0) + vec2(0.37, 0.58)
-  ).rgb;
-  fallBacking = pow(max(fallBacking, vec3(0.002)), vec3(0.88));
-  float fallBackingLuma = dot(
-    fallBacking,
-    vec3(0.2126, 0.7152, 0.0722)
-  );
-  fallBacking = mix(vec3(fallBackingLuma), fallBacking, 0.38)
-    * vec3(0.58, 0.61, 0.53);
-  composed = mix(
-    composed,
-    fallBacking,
-    fallSilhouette * (1.0 - waterCoverage) * 0.96
-  );
   composed = mix(composed, mistColor, mist * 0.52);
   float alpha = max(baseAlpha, mist * 0.24) * inField;
   alpha *= step(1.0, u_resolution.x + u_resolution.y);

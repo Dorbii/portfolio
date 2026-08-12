@@ -236,7 +236,7 @@ export function WorldScene({
   environmentProof,
   topologyProof,
 }: WorldSceneProps) {
-  const showNinjaOneEnvironment = !topologyProof && !capitalMvp;
+  const showNinjaOneInlandWater = !topologyProof;
   const initialCamera = environmentProof
     ? NINJAONE_ENVIRONMENT_CAMERA
     : capitalMvp
@@ -527,6 +527,14 @@ export function WorldScene({
         camera={camera}
         detailState={detailState}
       />
+      {showNinjaOneInlandWater ? (
+        <NinjaOneInlandWaterCanvas
+          active={isPageVisible}
+          camera={camera}
+          detailState={detailState}
+          light={WORLD_LIGHT}
+        />
+      ) : null}
       {topologyProof ? (
         <NinjaOneCapitalTopologyProof camera={camera} />
       ) : capitalMvp ? (
@@ -542,12 +550,6 @@ export function WorldScene({
             camera={camera}
             detailState={detailState}
             proofMode={environmentProof}
-          />
-          <NinjaOneInlandWaterCanvas
-            active={isPageVisible && showNinjaOneEnvironment}
-            camera={camera}
-            detailState={detailState}
-            light={WORLD_LIGHT}
           />
           {!environmentProof ? (
             <>

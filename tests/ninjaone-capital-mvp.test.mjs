@@ -58,6 +58,10 @@ test("capital preview mounts distinct territory and detailed city stacks without
     /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld capitalMvp enableDevelopmentTools \/>/,
   );
   assert.match(scene, /<TerritoryLandform/);
+  assert.match(
+    scene,
+    /showNinjaOneInlandWater \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible\}/,
+  );
   assert.match(scene, /<NinjaOneCapitalMvp[\s\S]*light=\{WORLD_LIGHT\}/);
   assert.match(developmentIndex, /NINJAONE_CAPITAL_CITY_CAMERA as NINJAONE_CAPITAL_MVP_CAMERA/);
   assert.match(renderer, /city-node-composition@r1/);
