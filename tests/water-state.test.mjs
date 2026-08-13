@@ -5,11 +5,11 @@ import test from "node:test";
 import {
   normalizeWaterSurfaceState,
   windVectorFromDegrees,
-} from "../features/career-world/layers/water-surface/model/state.ts";
+} from "../features/career-world/layers/ocean/model/state.ts";
 import {
   CAREER_WORLD_WATER_REALISM_PROFILE,
   defineWaterRealismProfile,
-} from "../features/career-world/layers/water-surface/model/profiles.ts";
+} from "../features/career-world/layers/ocean/model/profiles.ts";
 import {
   advanceLodPresentationFade,
   DETAIL_POLICY,
@@ -150,10 +150,10 @@ test("one central LOD policy owns thresholds and render budget", () => {
 test("animated water resizes only when its observer or LOD requests it", async () => {
   const [openWaterRenderer, inlandRenderer, openWaterController, inlandController] =
     await Promise.all([
-      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts"), "utf8"),
-      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/NinjaOneInlandWaterRenderer.ts"), "utf8"),
-      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/WaterSurfaceController.ts"), "utf8"),
-      readFile(path.join(process.cwd(), "features/career-world/layers/water-surface/rendering/NinjaOneInlandWaterController.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/ocean/rendering/WaterSurfaceRenderer.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/inland-water/rendering/NinjaOneInlandWaterRenderer.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/ocean/rendering/WaterSurfaceController.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "features/career-world/layers/inland-water/rendering/NinjaOneInlandWaterController.ts"), "utf8"),
     ]);
 
   for (const renderer of [openWaterRenderer, inlandRenderer]) {
@@ -190,7 +190,7 @@ test("live foliage does not trigger full-page layout on every animation frame", 
 
 test("layer detail contracts require a world source", () => {
   const contract = defineLayerDetailContract({
-    layer: "water-surface",
+    layer: "ocean",
     sources: [
       {
         id: "world",
@@ -216,7 +216,7 @@ test("layer detail contracts require a world source", () => {
   assert.ok(Object.isFrozen(contract.sources));
   assert.throws(
     () => defineLayerDetailContract({
-      layer: "water-surface",
+      layer: "ocean",
       sources: [
         {
           id: "territory-only",

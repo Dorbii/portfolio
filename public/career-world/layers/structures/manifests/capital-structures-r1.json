@@ -3,7 +3,7 @@
   "id": "career-world/capital-structures@r1",
   "status": "phase-6-checkpoint",
   "coordinateSpace": "normalized-world-top-left",
-  "anchorSource": "../../../territory-landform/manifests/world-territories-r4.json#territories[].development.capitalAnchor",
+  "anchorSource": "../../terrain/authority/manifests/world-territories-r4.json#territories[].development.capitalAnchor",
   "minimumTier": "territory",
   "projection": {
     "type": "orthographic-high-oblique",

@@ -13,14 +13,15 @@ import { WorldBackdrop } from "../layers/world-backdrop";
 import { WaterSurfaceCanvas, type WaterRenderState } from "../layers/ocean";
 import { NinjaOneInlandWaterCanvas } from "../layers/inland-water";
 import {
-  TERRITORIES,
-} from "../layers/territory-landform";
-import { TerritoryLandform } from "../layers/terrain";
-import { InfrastructureLayer } from "../layers/infrastructure";
-import {
-  EnvironmentLayer,
+  NINJAONE_ENVIRONMENT_CAMERA,
+  NINJAONE_ENVIRONMENT_PROOF_ID,
   FoliageLayer,
-} from "../layers/environment";
+  NinjaOneEnvironmentProof,
+  TERRITORIES,
+  TerrainDetailLayer,
+  TerritoryLandform,
+} from "../layers/terrain";
+import { InfrastructureLayer } from "../layers/infrastructure";
 import {
   CAPITAL_STRUCTURES,
   KAIZEN_NEIGHBORHOOD_OWNER_ID,
@@ -49,11 +50,8 @@ import {
   NINJAONE_CAPITAL_MVP_CAMERA,
   NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA,
   NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID,
-  NINJAONE_ENVIRONMENT_CAMERA,
-  NINJAONE_ENVIRONMENT_PROOF_ID,
   NinjaOneCapitalMvp,
   NinjaOneCapitalTopologyProof,
-  NinjaOneEnvironmentProof,
   PerformanceProbe,
 } from "../development";
 import {
@@ -648,11 +646,13 @@ export function WorldScene({
                 detailState={detailState}
                 light={WORLD_LIGHT}
               />
-              <EnvironmentLayer
-                camera={camera}
-                detailState={detailState}
-                light={WORLD_LIGHT}
-              />
+              {terrainDetailVisible ? (
+                <TerrainDetailLayer
+                  camera={camera}
+                  detailState={detailState}
+                  light={WORLD_LIGHT}
+                />
+              ) : null}
               <ActorsEffectsLayer
                 camera={camera}
                 detailState={detailState}
@@ -664,10 +664,12 @@ export function WorldScene({
                 light={WORLD_LIGHT}
                 onKaizenVisualReadyChange={setKaizenVisualReady}
               />
-              <FoliageLayer
-                camera={camera}
-                detailState={detailState}
-              />
+              {terrainDetailVisible ? (
+                <FoliageLayer
+                  camera={camera}
+                  detailState={detailState}
+                />
+              ) : null}
             </>
           ) : null}
         </>

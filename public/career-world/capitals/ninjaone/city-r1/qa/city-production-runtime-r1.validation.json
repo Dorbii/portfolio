@@ -64,7 +64,7 @@
       "containsBakedBuildings": false,
       "containsWaterPixels": false,
       "minimumDetailTier": "capital",
-      "source": "city-environment-transition-detail-r3-current-hydrology-aperture"
+      "source": "alpha-derived-dry-terrain-contact-r1"
     },
     "bridgeTransition": {
       "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridge-transition-r2.png",

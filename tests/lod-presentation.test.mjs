@@ -339,7 +339,7 @@ test("territory renderer consumes cohort epochs and retains outgoing sources", a
       "features",
       "career-world",
       "layers",
-      "territory-landform",
+      "terrain",
       "components",
       "TerritoryLandform.tsx",
     ),

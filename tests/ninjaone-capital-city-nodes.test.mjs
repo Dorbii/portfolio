@@ -34,14 +34,6 @@ const validationPath = path.join(
   root,
   "public/career-world/capitals/ninjaone/city-r1/qa/city-node-composition-r1.validation.json",
 );
-const conceptSubstrateValidationPath = path.join(
-  root,
-  "public/career-world/capitals/ninjaone/city-r1/qa/city-concept-environment-substrate-r1.validation.json",
-);
-const conceptRuntimeValidationPath = path.join(
-  root,
-  "public/career-world/capitals/ninjaone/city-r1/qa/city-concept-runtime-promotion-r1.validation.json",
-);
 const productionRuntimeValidationPath = path.join(
   root,
   "public/career-world/capitals/ninjaone/city-r1/qa/city-production-runtime-r1.validation.json",
@@ -66,7 +58,6 @@ function absolutePublicPath(publicPath) {
 
 test("NinjaOne production composition registers 19 admitted skill nodes without a concept raster", async () => {
   const manifest = await readJson(manifestPath);
-  const promotion = await readJson(conceptRuntimeValidationPath);
   assert.equal(manifest.id, "career-world/capitals/ninjaone/city-node-composition@r1");
   assert.equal(manifest.status, "production-component-recovery-baseline");
   assert.equal(manifest.productionReady, false);
@@ -101,8 +92,6 @@ test("NinjaOne production composition registers 19 admitted skill nodes without 
     NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS,
     manifest.terrainBinding.status,
   );
-  assert.equal(promotion.conceptDerivedRuntimeRasterCount, 0);
-  assert.equal(promotion.stationMatchesConceptLandmark, true);
   for (const node of manifest.nodes) {
     assert.ok(Number.isFinite(node.localPosition.x), node.skillId);
     assert.ok(Number.isFinite(node.localPosition.y), node.skillId);
@@ -147,7 +136,7 @@ test("NinjaOne production composition registers 19 admitted skill nodes without 
   );
   assert.equal(
     manifest.terrainBinding.hydrology.fieldPath,
-    "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+    "/career-world/layers/inland-water/authority/fields/ninjaone-inland-water-field-r1.png",
   );
   assert.equal(
     manifest.terrainBinding.hydrology.currentBranchSha256,
@@ -162,12 +151,12 @@ test("all 19 skill buildings own renderable assets in the production composition
   const validation = await readJson(validationPath);
   const alphaBlocked = manifest.nodes.filter(({ assetNodeReady }) => !assetNodeReady);
   assert.deepEqual(alphaBlocked, []);
-  assert.equal(validation.assetNodeReadyCount, 19);
-  assert.equal(validation.visiblyPlacedNodeCount, 19);
-  assert.deepEqual(
-    new Set(validation.detailedRenderedSkillIds),
-    new Set(manifest.nodes.map(({ skillId }) => skillId)),
-  );
+  assert.equal(validation.nodeCount, 19);
+  assert.equal(validation.uniqueSkillIds, 19);
+  assert.equal(validation.renderableNodeCount, 19);
+  assert.equal(validation.runtimeLayerCount, 4);
+  assert.equal(validation.legacyRuntimeLayerCount, 0);
+  assert.equal(validation.individualScaleAuditPasses, true);
 
   const golang = manifest.nodes.find(({ skillId }) => skillId === "golang");
   assert.ok(golang);
@@ -307,16 +296,15 @@ test("station, territory rail, and moving train retain independent ownership", a
   }
 });
 
-test("city fabric and temporary fantasy population remain independent registered layers", async () => {
+test("current city layers and temporary scale cues remain independently registered", async () => {
   const manifest = await readJson(manifestPath);
-  const conceptValidation = await readJson(conceptSubstrateValidationPath);
   const productionValidation = await readJson(productionRuntimeValidationPath);
   assert.equal(NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT, 16);
   assert.equal(NINJAONE_CAPITAL_CITY_POPULATION_SITE_CUE_COUNT, 8);
   assert.equal(NINJAONE_CAPITAL_CITY_POPULATION_CLOSE_DETAIL_CUE_COUNT, 8);
   assert.equal(manifest.populationScaleCues.affectsTerrain, false);
   assert.equal(manifest.populationScaleCues.affectsBuildingGeometry, false);
-  assert.equal(manifest.populationScaleCues.registration, "compact-authored-city-fabric-r3");
+  assert.equal(manifest.populationScaleCues.registration, "production-city-circulation-r1");
   assert.deepEqual(manifest.populationScaleCues.visibilityPolicy, {
     world: [],
     territory: [],
@@ -331,51 +319,22 @@ test("city fabric and temporary fantasy population remain independent registered
     && Number.isFinite(cue.localPosition.x)
     && Number.isFinite(cue.localPosition.y)
   )));
-  assert.equal(conceptValidation.populationScaleCues.registration, "identity-concept-master");
-  assert.deepEqual(conceptValidation.populationScaleCues.hiddenTiers, [
-    "world",
-    "territory",
-    "capital",
-  ]);
-  assert.deepEqual(conceptValidation.populationScaleCues.siteVisibleTiers, ["site", "close"]);
-  assert.deepEqual(conceptValidation.populationScaleCues.closeSupplementVisibleTiers, ["close"]);
-  assert.equal(conceptValidation.populationScaleCues.siteCueCount, 8);
-  assert.equal(conceptValidation.populationScaleCues.closeSupplementCueCount, 8);
-  assert.deepEqual(conceptValidation.populationScaleCues.displayHeightRange, [15, 25]);
-  assert.ok(conceptValidation.populationScaleCues.terrainSupport.every(
-    ({ terrainSupportAlpha }) => terrainSupportAlpha >= 32,
-  ));
   assert.deepEqual(
     new Set(manifest.populationScaleCues.cues.map(({ species }) => species)),
     new Set(["dwarf", "elf", "gnome", "human", "orc"]),
   );
-  assert.equal(manifest.cityFabric.contactLayer.containsTerrainPixels, true);
-  assert.equal(manifest.cityFabric.contactLayer.runtimeVisible, false);
-  assert.equal(
-    manifest.cityFabric.contactLayer.rejectionReason,
-    "duplicates-frozen-production-terrain-and-baked-city",
-  );
   assert.equal(manifest.layerOrder.includes("city-terrain-contact"), false);
   assert.equal(manifest.cityFabric.environmentTransitionDetail, undefined);
-  assert.equal(manifest.cityFabric.waterTransition.containsTerrainPixels, false);
-  assert.equal(manifest.cityFabric.waterTransition.runtimeVisible, false);
-  assert.equal(conceptValidation.waterTransition.terrainPixelsExcluded, true);
-  assert.equal(conceptValidation.waterTransition.shorelinePixels, 0);
-  assert.equal(conceptValidation.waterTransition.independentBridgeAssetCount, 4);
-  assert.equal(manifest.cityFabric.sourceEvidence.runtimeUsage, "none-rejected-monolithic-plate");
-  assert.equal(
-    manifest.cityFabric.overviewSettlement.lod,
-    "qa-reference-only",
-  );
-  assert.equal(manifest.cityFabric.overviewSettlement.runtimeVisible, false);
+  assert.equal(manifest.cityFabric.contactLayer, undefined);
+  assert.equal(manifest.cityFabric.waterTransition, undefined);
+  assert.equal(manifest.cityFabric.sourceEvidence, undefined);
+  assert.equal(manifest.cityFabric.overviewSettlement, undefined);
   assert.equal(manifest.cityFabric.runtimeAuthority.id, (
     "career-world/ninjaone-capital/production-component-runtime@r1"
   ));
   assert.equal(manifest.cityFabric.runtimeAuthority.layoutReferenceIsRuntimeRaster, false);
   assert.equal(productionValidation.conceptDerivedRuntimeRasterCount, 0);
-  assert.equal(manifest.cityFabric.overviewSettlement.containsTransitionTerrainPixels, true);
-  assert.equal(manifest.cityFabric.overviewSettlement.containsPopulation, false);
-  assert.ok(manifest.cityFabric.infrastructureAtlas.placementIds.length >= 8);
+  assert.equal(manifest.cityFabric.infrastructureAtlas, undefined);
   assert.equal(manifest.cityFabric.productionCirculation.runtimeVisible, true);
   assert.equal(manifest.cityFabric.productionTransitionDetail.runtimeVisible, true);
   assert.equal(manifest.cityFabric.productionBridgeTransition.runtimeVisible, true);

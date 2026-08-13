@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { LAND_ASSETS } from "../layers/territory-landform/model/assets";
-import type { Territory } from "../layers/territory-landform/model/territories";
+import { LAND_ASSETS } from "../layers/terrain/model/assets";
+import type { Territory } from "../layers/terrain/model/territories";
 import {
   NINJAONE_CITY_ALLOCATION_COVERAGE,
   NINJAONE_CITY_ALLOCATIONS,

@@ -25,7 +25,7 @@ art while working through the authored coast profile, masks, or registered
 water-body segmentation.
 
 The ownership split is explicit: land publishes the static coast geometry and
-material profile; `water-surface/coastlines/` owns persistent animated swash and
+material profile; `ocean/coastal-ambience/` owns persistent animated swash and
 wet-edge response; Phase 7 `actors-effects` owns transient crash foam and
 spray. A land-side animation folder would couple geography to water timing and
 is therefore intentionally rejected.
@@ -50,3 +50,15 @@ region: the relief language changes abruptly at a tile boundary. The tile
 registry, bounded residency, exact land alpha, and camera contract are correct;
 the remaining work is a seam-safe authored overlap or shared semantic atlas,
 not more sharpening, resolution, blur, or a runtime patch over one coordinate.
+
+The NinjaOne B1 terrain cell no longer exposes the original hard rectangular
+contact after the deterministic r3 low-frequency harmonization and shared
+irregular contact mask. A broader resolution and texture-frequency transition
+remains visible at parts of the regional plate boundary. Treat that remaining
+transition as an L2 terrain-authority defect, not an effects-layer problem.
+The durable repair is an expanded high-detail neighboring buffer authored in
+the same material language; further blur or coordinate-specific overlays are
+rejected. The repair must keep geography, city registration, water
+registration, and camera coordinates fixed. Acceptance requires fixed-camera
+comparisons at capital, site, and close zoom with no visible straight-line or
+resolution-step transition.

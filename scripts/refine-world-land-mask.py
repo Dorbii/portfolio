@@ -10,7 +10,9 @@ from PIL import Image, ImageDraw, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LAND_ROOT = ROOT / "public" / "career-world" / "layers" / "territory-landform"
+LAND_ROOT = (
+    ROOT / "public" / "career-world" / "layers" / "terrain" / "authority"
+)
 SOURCE = LAND_ROOT / "masks" / "world-land-mask-r2.png"
 OUTPUT = LAND_ROOT / "masks" / "world-land-mask-r3.png"
 

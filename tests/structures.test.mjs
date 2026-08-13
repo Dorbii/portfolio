@@ -20,7 +20,7 @@ test("capital registry omits NinjaOne while retaining other territory capitals",
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const territories = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   );
   const expectedTerritoryIds = territories.territories
     .map(({ id }) => id)
@@ -70,7 +70,7 @@ test("every capital footprint stays inside its capital envelope", async () => {
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const territories = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   );
 
   for (const capital of structures.nodes) {
@@ -129,10 +129,10 @@ test("every capital ground integration is territory-owned and bounded", async ()
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const siteManifest = await readJson(
-    "public/career-world/layers/territory-landform/manifests/terrain-site-tiles-r2.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-site-tiles-r2.json",
   );
   const territories = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   );
   const territoryIds = territories.territories
     .map(({ id }) => id)
@@ -178,7 +178,7 @@ test("every capital ground integration is territory-owned and bounded", async ()
     assert.equal(tile.sourceAlphaPolicy, "bounded-subset");
     assert.match(
       tile.path,
-      /^\/career-world\/layers\/territory-landform\/tiles\/.+\.png$/,
+      /^\/career-world\/layers\/terrain\/authority\/tiles\/.+\.png$/,
     );
     const siteAsset = await stat(path.join(root, "public", tile.path));
     assert.ok(siteAsset.size > 100_000);
@@ -207,10 +207,10 @@ test("Kaizen Agent is the only retained NinjaOne project city", async () => {
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
   );
   const sites = await readJson(
-    "public/career-world/layers/territory-landform/manifests/terrain-site-tiles-r2.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-site-tiles-r2.json",
   );
   const territories = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   );
   const ninjaOne = territories.territories.find(({ id }) => id === "ninjaone");
   const projectTiles = sites.tiles.filter(

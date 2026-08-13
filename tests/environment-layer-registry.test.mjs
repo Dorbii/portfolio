@@ -42,10 +42,25 @@ test("unavailable layers cannot become effectively visible", () => {
   const forced = Object.freeze({
     ...DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
     L1_2: true,
-    L2_2: true,
     L2_3: true,
   });
   assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L1_2"), false);
-  assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L2_2"), false);
   assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L2_3"), false);
+});
+
+test("admitted terrain detail and wildlife are independently toggleable", () => {
+  assert.equal(
+    isEnvironmentLayerEffectivelyVisible(
+      DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
+      "L2_1",
+    ),
+    true,
+  );
+  assert.equal(
+    isEnvironmentLayerEffectivelyVisible(
+      DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
+      "L2_2",
+    ),
+    true,
+  );
 });

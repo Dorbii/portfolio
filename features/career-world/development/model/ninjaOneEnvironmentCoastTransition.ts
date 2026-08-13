@@ -1,6 +1,6 @@
 import manifest from "../../../../public/career-world/capitals/ninjaone/environment/manifests/coast-transition-native-r1.json" with { type: "json" };
 import type { CameraView, Pair } from "../../shared/camera";
-import { environmentCameraArtboardView } from "./ninjaOneEnvironmentNativeDetail";
+import { environmentCameraArtboardView } from "../../layers/terrain/detail/model/ninjaOneEnvironmentNativeDetail";
 
 interface RawBounds {
   readonly origin: readonly number[];

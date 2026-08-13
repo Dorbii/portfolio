@@ -1,9 +1,8 @@
 export const CAREER_WORLD_LAYER_ORDER = [
   "world-backdrop",
-  "water-surface",
-  "territory-landform",
+  "ocean",
+  "terrain",
   "infrastructure",
-  "environment",
   "structures",
   "actors-effects",
   "interface",
@@ -17,4 +16,3 @@ export interface LayerDescriptor {
   readonly status: "active" | "deferred";
   readonly owns: readonly string[];
 }
-

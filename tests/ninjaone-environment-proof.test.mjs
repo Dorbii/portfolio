@@ -26,7 +26,7 @@ import {
   NINJAONE_ENVIRONMENT_WILDLIFE_RESOURCES,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
-} from "../features/career-world/development/model/ninjaOneEnvironmentProof.ts";
+} from "../features/career-world/layers/terrain/model/ninjaOneEnvironmentProof.ts";
 import {
   NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES,
   NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES,
@@ -36,7 +36,7 @@ import {
   NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS,
   selectNinjaOneEnvironmentNativeInstances,
   selectNinjaOneEnvironmentNativeTiles,
-} from "../features/career-world/development/model/ninjaOneEnvironmentNativeDetail.ts";
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentNativeDetail.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -97,7 +97,7 @@ test("zoom tiers retain one authored terrain geometry without detached asset sub
   for (const tier of ["capital", "site"]) {
     assert.match(
       NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[tier].path,
-      /-r2\.webp\?v=[a-f0-9]{12}$/,
+      /-r3\.webp\?v=[a-f0-9]{12}$/,
     );
   }
   assert.deepEqual(NINJAONE_ENVIRONMENT_LOD_LAYERS.site, [
@@ -110,7 +110,7 @@ test("zoom tiers retain one authored terrain geometry without detached asset sub
   ]);
   assert.match(
     NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close.path,
-    /-r2\.webp\?v=[a-f0-9]{12}$/,
+    /-r3\.webp\?v=[a-f0-9]{12}$/,
   );
   assert.deepEqual(
     ["territory", "capital", "site", "close"].map(
@@ -141,6 +141,33 @@ test("registered plates retain one 4:3 geometry and transparent layering", async
   }
 });
 
+test("regional terrain detail uses one live r3 cohort and a registered contact mask", async () => {
+  const manifest = await readJson(
+    "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
+  );
+  const contactMask = manifest.layers.geology.contactMask;
+  assert.equal(
+    manifest.layers.geology.sourcePath.endsWith(
+      "ninjaone-environment-terrain-master-detail-r3.png",
+    ),
+    true,
+  );
+  assert.deepEqual(Object.keys(manifest.layers.geology.sources), [
+    "territory",
+    "capital",
+    "site",
+    "close",
+  ]);
+  for (const source of Object.values(manifest.layers.geology.sources)) {
+    assert.match(source.path, /-r3\.webp\?v=[a-f0-9]{12}$/);
+    assert.equal(await stat(runtimeAssetFile(source.path)).then(() => true), true);
+  }
+  assert.deepEqual(contactMask.dimensions, [1440, 1080]);
+  assert.deepEqual(contactMask.contactEdges, ["left", "right", "bottom"]);
+  assert.equal(contactMask.shape, "deterministic-multiscale-irregular");
+  assert.equal((await sharp(runtimeAssetFile(contactMask.path)).metadata()).format, "png");
+});
+
 test("environment registration does not expose a legacy static hydrology plate", async () => {
   const [manifest, model] = await Promise.all([
     readJson(
@@ -148,7 +175,7 @@ test("environment registration does not expose a legacy static hydrology plate",
     ),
     readFile(path.join(
       root,
-      "features/career-world/development/model/ninjaOneEnvironmentProof.ts",
+      "features/career-world/layers/terrain/model/ninjaOneEnvironmentProof.ts",
     ), "utf8"),
   ]);
 
@@ -328,10 +355,10 @@ test("C1 void alpha has separate source provenance and no runtime mask residency
 
 test("close detail mounts additive layers only and page visibility suspends runtime work", async () => {
   const [nativeDetail, scene, waterCanvas, waterController] = await Promise.all([
-    readFile(path.join(root, "features/career-world/development/NinjaOneEnvironmentNativeDetail.tsx"), "utf8"),
+    readFile(path.join(root, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentNativeDetail.tsx"), "utf8"),
     readFile(path.join(root, "features/career-world/composition/WorldScene.tsx"), "utf8"),
-    readFile(path.join(root, "features/career-world/layers/water-surface/components/WaterSurfaceCanvas.tsx"), "utf8"),
-    readFile(path.join(root, "features/career-world/layers/water-surface/rendering/WaterSurfaceController.ts"), "utf8"),
+    readFile(path.join(root, "features/career-world/layers/ocean/components/WaterSurfaceCanvas.tsx"), "utf8"),
+    readFile(path.join(root, "features/career-world/layers/ocean/rendering/WaterSurfaceController.ts"), "utf8"),
   ]);
   assert.match(nativeDetail, /data-environment-native-render-mode="additive-only"/);
   assert.match(nativeDetail, /data-environment-native-terrain-node-count="0"/);
@@ -384,12 +411,12 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/development/NinjaOneEnvironmentProof.tsx",
+      "features/career-world/layers/terrain/components/NinjaOneEnvironmentProof.tsx",
     ), "utf8"),
     readFile(path.join(root, "scripts/build-ninjaone-environment-native-detail.mjs"), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/water-surface/rendering/WaterSurfaceRenderer.ts",
+      "features/career-world/layers/ocean/rendering/WaterSurfaceRenderer.ts",
     ), "utf8"),
   ]);
   assert.match(

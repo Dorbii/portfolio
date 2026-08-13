@@ -43,4 +43,7 @@ test("L1 L2 and L3 expose authority roots and explicit child modules", async () 
   assert.match(inlandMotion, /INLAND_WATER_SURFACE_MOTION_LAYER_ID = "L3_1"/);
   assert.match(inlandEffects, /INLAND_WATER_EFFECTS_LAYER_ID = "L3_2"/);
   assert.match(inlandLife, /INLAND_WATER_AQUATIC_LIFE_LAYER_ID = "L3_3"/);
+  assert.doesNotMatch(oceanAuthority, /water-surface/);
+  assert.doesNotMatch(terrainAuthority, /territory-landform/);
+  assert.doesNotMatch(inlandAuthority, /water-surface/);
 });

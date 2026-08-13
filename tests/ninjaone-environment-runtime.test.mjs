@@ -12,7 +12,7 @@ import {
   NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_VOID_MASKS,
   NINJAONE_ENVIRONMENT_NATIVE_TILES,
   NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS,
-} from "../features/career-world/development/model/ninjaOneEnvironmentNativeDetail.ts";
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentNativeDetail.ts";
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
@@ -21,7 +21,7 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   resolveNinjaOneEnvironmentFoliageEligibility,
   selectNinjaOneEnvironmentFoliageInstances,
-} from "../features/career-world/development/model/ninjaOneEnvironmentFoliage.ts";
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts";
 import {
   NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_RESOURCES,
   selectNinjaOneEnvironmentSeamIntegration,
@@ -49,7 +49,7 @@ import {
   retargetNinjaOneEnvironmentFoliageNodeLoadCohort,
   retargetNinjaOneEnvironmentNativeDecodeCohort,
   retargetNinjaOneEnvironmentRequiredPresentationCohort,
-} from "../features/career-world/development/model/ninjaOneEnvironmentResidency.ts";
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentResidency.ts";
 import {
   resolveDetailState,
 } from "../features/career-world/shared/lod/policy.ts";
@@ -462,11 +462,11 @@ test("close detail has one r3 foliage pool and no legacy shared-foliage mapping"
   const [proofSource, nativeDetailSource, worldSceneSource] = await Promise.all([
     readFile(path.join(
       root,
-      "features/career-world/development/NinjaOneEnvironmentProof.tsx",
+      "features/career-world/layers/terrain/components/NinjaOneEnvironmentProof.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/development/NinjaOneEnvironmentNativeDetail.tsx",
+      "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentNativeDetail.tsx",
     ), "utf8"),
     readFile(path.join(
       root,

@@ -27,7 +27,7 @@ interface PerformanceMetrics {
 const SETTLE_DURATION_MS = 850;
 const MAXIMUM_RUN_DURATION_MS = 15_000;
 const PROFILE_RESOURCE_MARKERS = [
-  "/career-world/layers/territory-landform/tiles/",
+  "/career-world/layers/terrain/authority/tiles/",
   "/career-world/layers/structures/textures/",
 ];
 

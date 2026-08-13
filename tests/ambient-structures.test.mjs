@@ -254,19 +254,11 @@ test("Kaizen semantic buildings reuse the registered shared city pool", async ()
   );
 });
 
-test("Kaizen city source assets stay valid while the live mount remains disabled", async () => {
-  const [component, fabricComponent] = await Promise.all([
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "StructuresLayer.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenNeighborhoodFabric.tsx",
-    ), "utf8"),
-  ]);
+test("Kaizen city source assets stay registered while the live mount remains disabled", async () => {
+  const component = await readFile(path.join(
+    root,
+    "features/career-world/layers/structures/components/StructuresLayer.tsx",
+  ), "utf8");
   const baseModules = KAIZEN_NEIGHBORHOOD_MODULES.filter(
     ({ lod }) => lod === "base",
   );
@@ -382,53 +374,16 @@ test("Kaizen city source assets stay valid while the live mount remains disabled
   );
   assert.doesNotMatch(component, /shouldRenderCloseNeighborhood/);
   assert.doesNotMatch(component, /shouldRenderSiteNeighborhood/);
-  assert.doesNotMatch(fabricComponent, /registrationMaskId|close-fallback/);
-  assert.match(
-    fabricComponent,
-    /persistent-base-progressive-detail-grid/,
-  );
-  assert.match(fabricComponent, /data-neighborhood-lod=/);
-  assert.match(
-    fabricComponent,
-    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
-  );
-  assert.match(fabricComponent, /const image = new Image\(\)/);
-  assert.match(fabricComponent, /requestedAssetPaths/);
-  assert.match(fabricComponent, /if \(!baseModule\) \{/);
-  assert.doesNotMatch(
-    fabricComponent,
-    /foundationVisibility <= LOD_PRESENTATION_EPSILON/,
-  );
-  assert.doesNotMatch(fabricComponent, /activeLod|useCloseFoundation/);
-  assert.match(
-    fabricComponent,
-    /Math\.max\(\s*overviewVisibility,\s*siteVisibility,\s*closeVisibility,\s*\)/,
-  );
-  assert.match(fabricComponent, /data-neighborhood-foundation-visibility=/);
-  assert.match(fabricComponent, /data-neighborhood-visual-ready=/);
-  assert.match(fabricComponent, /onVisualReadyChange\(baseReady\)/);
-  assert.match(fabricComponent, /shouldRenderSite && siteModule/);
-  assert.match(fabricComponent, /shouldRenderClose \? closeModules\.map/);
-  assert.match(
-    fabricComponent,
-    /data-neighborhood-refinement-contract=\{KAIZEN_NEIGHBORHOOD_DETAIL_CONTRACT\}/,
-  );
-  assert.match(fabricComponent, /shouldRenderClose/);
-  assert.doesNotMatch(fabricComponent, /Pedestrian|person|people/i);
 });
 
 test("Kaizen semantic buildings use registered shared transparent assets", async () => {
-  const [manifest, baseManifest, authoringManifest] = await Promise.all([
+  const [manifest, baseManifest] = await Promise.all([
     readJson(
       "public/career-world/cities/kaizen-agent/manifests/"
         + "hero-buildings-runtime-r1.json",
     ),
     readJson(
       "public/career-world/cities/kaizen-agent/manifests/base-runtime-r1.json",
-    ),
-    readJson(
-      "scripts/assets/kaizen-city-rebuild/manifests/"
-        + "hero-assets-authoring-r2.json",
     ),
   ]);
 
@@ -439,11 +394,7 @@ test("Kaizen semantic buildings use registered shared transparent assets", async
   );
   assert.equal(manifest.registrationRef, baseManifest.registration);
   assert.equal(KAIZEN_SEMANTIC_ASSET_REGISTRATION, "kaizen-city-layout@r2");
-  assert.equal(authoringManifest.registrationRef, manifest.registrationRef);
   assert.ok(manifest.assets.every((asset) => !("source" in asset)));
-  assert.ok(authoringManifest.assets.every(({ source }) => (
-    source.startsWith("/scripts/assets/kaizen-city-rebuild/hero-assets-r2/")
-  )));
   assert.equal(KAIZEN_SEMANTIC_STRUCTURE_ASSETS.length, 4);
   assert.deepEqual(
     new Set(KAIZEN_SEMANTIC_STRUCTURE_ASSETS.map(({ id }) => id)),
@@ -647,11 +598,6 @@ test("Kaizen semantic buildings use registered shared transparent assets", async
         `${left.id} and ${right.id} alpha overlap (${overlap}px)`,
       );
     }
-  }
-
-  for (const { source } of authoringManifest.assets) {
-    const metadata = await sharp(path.join(root, source.slice(1))).metadata();
-    assert.ok(metadata.width > 0 && metadata.height > 0, source);
   }
 
   assert.equal(

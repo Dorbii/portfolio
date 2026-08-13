@@ -19,8 +19,9 @@ from world_mask_fields import distance_from_feature, exterior_falloff  # noqa: E
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public" / "career-world" / "layers"
-LAND_ROOT = PUBLIC / "territory-landform"
-WATER_ROOT = PUBLIC / "water-surface"
+LAND_ROOT = PUBLIC / "terrain" / "authority"
+OCEAN_AUTHORITY_ROOT = PUBLIC / "ocean" / "authority"
+OCEAN_MOTION_ROOT = PUBLIC / "ocean" / "surface-motion"
 WORLD_LIGHT_MANIFEST = (
     PUBLIC / "world-backdrop" / "manifests" / "world-light-r1.json"
 )
@@ -49,28 +50,28 @@ TERRAIN_CONTOURS = (
     LAND_ROOT / "overlays" / "terrain-contours-r4-detail-4x.png"
 )
 LAND_MANIFEST = LAND_ROOT / "manifests" / "terrain-relief-r6.json"
-COAST_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r5.png"
-COAST_DETAIL_OUTPUT = WATER_ROOT / "fields" / "coast-geometry-r5-4x.png"
-COAST_MANIFEST = WATER_ROOT / "manifests" / "coast-geometry-r5.json"
+COAST_OUTPUT = OCEAN_AUTHORITY_ROOT / "fields" / "coast-geometry-r5.png"
+COAST_DETAIL_OUTPUT = OCEAN_AUTHORITY_ROOT / "fields" / "coast-geometry-r5-4x.png"
+COAST_MANIFEST = OCEAN_AUTHORITY_ROOT / "manifests" / "coast-geometry-r5.json"
 COAST_MATERIAL_OUTPUT = (
-    WATER_ROOT / "fields" / "coast-material-field-r6.png"
+    OCEAN_AUTHORITY_ROOT / "fields" / "coast-material-field-r6.png"
 )
 COAST_MATERIAL_MANIFEST = (
-    WATER_ROOT / "manifests" / "coast-material-field-r6.json"
+    OCEAN_AUTHORITY_ROOT / "manifests" / "coast-material-field-r6.json"
 )
-WATER_REGIONS_MANIFEST = WATER_ROOT / "manifests" / "water-regions-r1.json"
+WATER_REGIONS_MANIFEST = OCEAN_AUTHORITY_ROOT / "manifests" / "water-regions-r1.json"
 WATER_WORLD_SOURCE = (
-    WATER_ROOT
+    OCEAN_MOTION_ROOT
     / "sources"
     / "water-surface-world-authored-r1.png"
 )
 WATER_WORLD_OUTPUT = (
-    WATER_ROOT
+    OCEAN_MOTION_ROOT
     / "textures"
     / "water-surface-world-lod-r2-3840x2160.png"
 )
 WATER_WORLD_MANIFEST = (
-    WATER_ROOT / "manifests" / "water-surface-world-lod-r2.json"
+    OCEAN_MOTION_ROOT / "manifests" / "water-surface-world-lod-r2.json"
 )
 
 SHELF_WIDTH_PIXELS = 58.0
@@ -507,7 +508,7 @@ def build_coast_geometry(mask: Image.Image) -> None:
             ),
         },
         "source": {
-            "path": "../../territory-landform/masks/world-land-mask-r4.png",
+            "path": "../../../terrain/authority/masks/world-land-mask-r4.png",
             "sha256": sha256(LAND_MASK),
         },
         "policy": [
@@ -649,11 +650,11 @@ def build_coast_material_field(
         "defaultMaterial": "rocky-shelf",
         "sources": {
             "height": {
-                "path": "../../territory-landform/fields/terrain-height-r4.png",
+                "path": "../../../terrain/authority/fields/terrain-height-r4.png",
                 "sha256": sha256(TERRAIN_HEIGHT),
             },
             "slope": {
-                "path": "../../territory-landform/fields/terrain-slope-r4.png",
+                "path": "../../../terrain/authority/fields/terrain-slope-r4.png",
                 "sha256": sha256(TERRAIN_SLOPE),
             },
         },

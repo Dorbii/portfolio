@@ -11,7 +11,7 @@ import {
   KAIZEN_FOREST_GROUP_INSTANCES,
   NINJAONE_FOLIAGE_RESOURCES,
   resolveKaizenFoliageGroupResource,
-} from "../features/career-world/layers/environment/model/kaizenFoliage.ts";
+} from "../features/career-world/layers/terrain/detail/model/kaizenFoliage.ts";
 import { KAIZEN_CITY_PIXEL_TO_WORLD } from "../features/career-world/shared/kaizenCityRegistration.ts";
 
 const root = process.cwd();
@@ -65,7 +65,7 @@ test("retained Kaizen activity is explicit, route-bound, and bounded", async () 
         + "ninjaone-project-towns-r1.json",
     ),
     readJson(
-      "public/career-world/layers/environment/manifests/"
+      "public/career-world/layers/terrain/detail/manifests/"
         + "ninjaone-town-activity-r1.json",
     ),
     readJson(
@@ -243,7 +243,7 @@ test("retained Kaizen activity is explicit, route-bound, and bounded", async () 
 
 test("Kaizen authored foundation has no legacy manifest activity props", async () => {
   const props = await readJson(
-    "public/career-world/layers/environment/manifests/"
+    "public/career-world/layers/terrain/detail/manifests/"
       + "ninjaone-town-activity-r1.json",
   );
 
@@ -258,7 +258,7 @@ test("Kaizen authored foundation suppresses duplicate activity visuals", async (
   const component = await readFile(
     path.join(
       root,
-      "features/career-world/layers/environment/components/EnvironmentLayer.tsx",
+      "features/career-world/layers/terrain/detail/components/TerrainDetailLayer.tsx",
     ),
     "utf8",
   );
@@ -305,17 +305,17 @@ test("town activity uses the declared layer order and centralized LOD", async ()
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/environment/components/"
-        + "EnvironmentLayer.tsx",
+      "features/career-world/layers/terrain/detail/components/"
+        + "TerrainDetailLayer.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/environment/components/"
+      "features/career-world/layers/terrain/detail/components/"
         + "FoliageLayer.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/environment/model/"
+      "features/career-world/layers/terrain/detail/model/"
         + "activityProps.ts",
     ), "utf8"),
     readFile(path.join(
@@ -341,7 +341,7 @@ test("town activity uses the declared layer order and centralized LOD", async ()
   const layerOrder = [
     "<TerritoryLandform",
     "<InfrastructureLayer",
-    "<EnvironmentLayer",
+    "<TerrainDetailLayer",
     "<ActorsEffectsLayer",
     "<StructuresLayer",
     "<FoliageLayer",
@@ -451,12 +451,12 @@ test("Kaizen foliage reuses authored city and forest groups with pooled wind", a
     await Promise.all([
       readFile(path.join(
         root,
-        "features/career-world/layers/environment/components/"
+        "features/career-world/layers/terrain/detail/components/"
           + "FoliageLayer.tsx",
       ), "utf8"),
       readFile(path.join(
         root,
-        "features/career-world/layers/environment/model/"
+        "features/career-world/layers/terrain/detail/model/"
           + "kaizenFoliage.ts",
       ), "utf8"),
       readFile(path.join(
@@ -465,7 +465,7 @@ test("Kaizen foliage reuses authored city and forest groups with pooled wind", a
       ), "utf8"),
       readFile(path.join(
         root,
-        "features/career-world/layers/water-surface/model/state.ts",
+        "features/career-world/layers/ocean/model/state.ts",
       ), "utf8"),
       readFile(path.join(
         root,
@@ -683,163 +683,11 @@ test("Kaizen foliage reuses authored city and forest groups with pooled wind", a
   }
 });
 
-test("Kaizen integration art remains authored but unmounted from the live stack", async () => {
-  const [
-    integration,
-    integrationAuthoring,
-    structureShadows,
-    structureShadowsAuthoring,
-    base,
-    layerStack,
-    fabric,
-    seams,
-    shadows,
-    structures,
-  ] = await Promise.all([
-    readJson(
-      "public/career-world/cities/kaizen-agent/manifests/"
-        + "integration-runtime-r1.json",
-    ),
-    readJson(
-      "scripts/assets/kaizen-city-rebuild/manifests/"
-        + "integration-authoring-r1.json",
-    ),
-    readJson(
-      "public/career-world/cities/kaizen-agent/manifests/"
-        + "structure-shadows-runtime-r1.json",
-    ),
-    readJson(
-      "scripts/assets/kaizen-city-rebuild/manifests/"
-        + "structure-shadows-authoring-r1.json",
-    ),
-    readJson(
-      "public/career-world/cities/kaizen-agent/manifests/"
-        + "base-runtime-r1.json",
-    ),
-    readJson(
-      "scripts/assets/kaizen-city-rebuild/manifests/"
-        + "layer-stack-authoring-r1.json",
-    ),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenNeighborhoodFabric.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenIntegrationSeams.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenStructureShadowLayer.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "StructuresLayer.tsx",
-    ), "utf8"),
-  ]);
-
-  assert.equal(integration.schemaVersion, 1);
-  assert.equal(
-    integration.id,
-    "career-world/kaizen-agent/integration-runtime@r1",
-  );
-  assert.equal(integration.registrationRef, base.registration);
-  assert.equal(
-    integration.contract,
-    "anchor-derived-additive-seam-plates",
-  );
-  assert.deepEqual(
-    integrationAuthoring.anchorSources,
-    {
-      heroBuildings:
-        "/scripts/assets/kaizen-city-rebuild/manifests/hero-assets-authoring-r2.json",
-      supportBuildings:
-        "/scripts/assets/kaizen-city-rebuild/manifests/decorations-authoring-r2.json",
-    },
-  );
-  assert.equal("instances" in integrationAuthoring, false);
-  assert.equal("ground" in integration, false);
-  assert.ok(
-    Object.values(integration.foreground).reduce(
-      (total, source) => total + source.placementCount,
-      0,
-    ) >= 36,
-  );
-  assert.deepEqual(
-    Object.keys(integration.foreground).sort(),
-    ["capital", "close", "site"],
-  );
-  for (const source of Object.values(integration.foreground)) {
-    assert.ok(source.placementCount > 0);
-    await access(path.join(root, "public", source.path.replace(/^\//, "")));
-  }
-  assert.equal(
-    structureShadows.contract,
-    "anchor-derived-world-light-vectors",
-  );
-  assert.equal(structureShadows.registrationRef, base.registration);
-  assert.equal(
-    structureShadows.lightSource,
-    "career-world/world-light@r1",
-  );
-  assert.deepEqual(
-    structureShadows.anchorSources,
-    integrationAuthoring.anchorSources,
-  );
-  assert.deepEqual(
-    structureShadowsAuthoring.anchorSources,
-    integrationAuthoring.anchorSources,
-  );
-  assert.equal("instances" in structureShadows, false);
-  assert.equal("instances" in structureShadowsAuthoring, false);
-  assert.deepEqual(
-    layerStack.layers.map(({ id }) => id),
-    [
-      "base-layout",
-      "environment-static",
-      "dynamic-structure-shadows",
-      "decoration-buildings",
-      "hero-buildings",
-      "integration-foreground",
-      "environment-shared",
-    ],
-  );
-  assert.ok(
-    fabric.indexOf("<KaizenStructureShadowLayer")
-      < fabric.indexOf("data-kaizen-decoration-layer"),
-    "dynamic structure shadows must render below pooled structures",
-  );
-  assert.match(
-    structures,
-    /DISABLED_STRUCTURE_OWNER_IDS = new Set\([\s\S]*KAIZEN_NEIGHBORHOOD_OWNER_ID/,
-  );
-  assert.doesNotMatch(structures, /<KaizenNeighborhoodFabric/);
-  assert.doesNotMatch(structures, /<KaizenIntegrationSeams/);
-  assert.match(seams, /data-kaizen-integration-layer="foreground-seams"/);
-  assert.match(seams, /pointerEvents="none"/);
-  assert.match(shadows, /data-kaizen-shadow-layer="dynamic-world-light"/);
-  assert.match(shadows, /light\.direction\[2\]/);
-  assert.match(shadows, /KAIZEN_DECORATION_INSTANCES/);
-  assert.match(shadows, /KAIZEN_SEMANTIC_STRUCTURE_ASSETS/);
-  assert.doesNotMatch(shadows, /Math\.random|#[0-9a-f]*(?:6f|7f|8f)[0-9a-f]*/i);
-});
-
 test("registered sprite scales convert plate pixels into world units", async () => {
-  const [foliage, fabric] = await Promise.all([
-    readFile(path.join(
-      root,
-      "features/career-world/layers/environment/components/FoliageLayer.tsx",
-    ), "utf8"),
-    readFile(path.join(
-      root,
-      "features/career-world/layers/structures/components/"
-        + "KaizenNeighborhoodFabric.tsx",
-    ), "utf8"),
-  ]);
+  const foliage = await readFile(path.join(
+    root,
+    "features/career-world/layers/terrain/detail/components/FoliageLayer.tsx",
+  ), "utf8");
 
   assert.ok(KAIZEN_CITY_PIXEL_TO_WORLD.every((value) => (
     value > 0 && value < 0.2
@@ -850,14 +698,6 @@ test("registered sprite scales convert plate pixels into world units", async () 
   );
   assert.match(
     foliage,
-    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[1\]/,
-  );
-  assert.match(
-    fabric,
-    /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[0\]/,
-  );
-  assert.match(
-    fabric,
     /instance\.scale \* KAIZEN_CITY_PIXEL_TO_WORLD\[1\]/,
   );
 });

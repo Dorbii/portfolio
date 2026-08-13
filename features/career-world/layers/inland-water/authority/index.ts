@@ -1,6 +1,4 @@
-// Transitional implementation boundary: L3 owns inland-water registration.
-// The renderer remains in water-surface until its shared WebGL utilities are
-// extracted without changing the accepted geometry or animation behavior.
-export { NinjaOneInlandWaterCanvas } from "../../water-surface/components/NinjaOneInlandWaterCanvas";
+export { NinjaOneInlandWaterCanvas } from "../components/NinjaOneInlandWaterCanvas";
+export { NINJAONE_INLAND_TERRAIN_ERASE_MASK } from "./assets";
 
 export const INLAND_WATER_AUTHORITY_LAYER_ID = "L3" as const;

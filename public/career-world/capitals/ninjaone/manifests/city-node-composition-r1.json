@@ -48,37 +48,13 @@
       ],
       "role": "frozen-regional-placement-and-contact-authority"
     },
-    "conceptDerivedCityFabric": {
-      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-support-fabric-components-alpha-r1.png",
-      "sourceSha256": "789b9b393857df248546fec423753513d2be80ca3fd689cb9dd8c300b53dddf0",
-      "role": "rejected monolithic plate retained only as provenance and layout evidence",
-      "isCityDesignAuthority": false,
-      "designAuthority": "/career-world/capitals/ninjaone/city-r1/references/capital-master-direction-r1.png",
-      "oldTerraceCityAssetsUsed": false
-    },
-    "conceptLedCityCirculation": {
-      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-fabric-alpha-r3.png",
-      "sourceSha256": "180cd52b09a95ade8630e10a6f7dff94a66cf1122ee0264b2d02d4876a79a632",
-      "dimensions": [
-        1448,
-        1086
-      ],
-      "role": "connected-city-circulation-and-terrain-transition-design-authority",
-      "containsBuildings": false,
-      "containsStation": false,
-      "containsTrainOrTrack": false,
+    "productionCirculation": {
+      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-infill-alpha-r7.png",
+      "sourceSha256": "8790e045e48700b9916019cb8bb103f725bcdf5b5c970dd5bfd0af2d1457221b",
+      "role": "current hydrology-apertured city circulation authority",
+      "isConceptReference": false,
+      "containsSkillBuildings": false,
       "changesTerrainGeometry": false
-    },
-    "modularInfrastructureAtlas": {
-      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/infrastructure-transition-atlas-alpha-r2.png",
-      "sourceSha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
-      "dimensions": [
-        1024,
-        1536
-      ],
-      "role": "independent paths stairs bridges plazas and terrain-transition seams",
-      "isFullCityPlate": false,
-      "placementCount": 11
     },
     "requiredHierarchy": [
       "mountain citadel",
@@ -91,32 +67,32 @@
   "terrainBinding": {
     "status": "frozen-terrain-live-water-production-component-recovery",
     "canonicalLandMask": {
-      "path": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "path": "/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
       "sha256": "8801722b801b2ecabd048dc71ac99ff7f0c566e69e06a50d9c4e41706dd7003a",
       "contentHashStatus": "frozen-global-authority",
       "rule": "every non-land pixel is hard no-structure space"
     },
     "heightField": {
-      "path": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "path": "/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
       "sha256": "8cb7d6480a707c33e220a55611af8557c3fc9440f0c347cf9a786adcb1f41e3f",
       "contentHashStatus": "frozen-global-authority"
     },
     "slopeField": {
-      "path": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "path": "/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
       "sha256": "c248599daeb10e5c8d71dc15ef2cc65d3b90a8f77165ab0cfda5c770676e6134",
       "contentHashStatus": "frozen-global-authority",
       "rule": "no structures on bright high-slope cliff bands"
     },
     "globalVisualBase": {
-      "path": "/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+      "path": "/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png",
       "sha256": "6bab5e350840a7f832d19add140fd49a7523b12ffc06899f343064d3de07f32b",
       "contentHashStatus": "frozen-global-authority"
     },
     "hydrology": {
       "manifestPath": "/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
-      "currentBranchSha256": "8ebe5104de102e49537d0b2e660a1992d522dfc0d22149a79dc55244fe4ff118",
+      "currentBranchSha256": "d051b80bd82eb5a20d3245b07ad95e67119626d4a829864e4e6a9281b1cce97d",
       "authorityId": "career-world/capitals/ninjaone/inland-water-authority@r1",
-      "fieldPath": "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+      "fieldPath": "/career-world/layers/inland-water/authority/fields/ninjaone-inland-water-field-r1.png",
       "fieldContentHashesFrozen": true,
       "numericShorelineSetbackVerified": false,
       "rule": "remain visibly clear of registered water channels; do not invent a numeric buffer"
@@ -1206,189 +1182,6 @@
     }
   },
   "cityFabric": {
-    "activeCirculationSource": {
-      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-fabric-alpha-r3.png",
-      "sha256": "180cd52b09a95ade8630e10a6f7dff94a66cf1122ee0264b2d02d4876a79a632",
-      "dimensions": [
-        1448,
-        1086
-      ],
-      "runtimeUsage": "registered-independent-visual-underlay",
-      "proceduralPadsOrCorridors": false
-    },
-    "connectivity": {
-      "primaryComponentRatio": 0.999501,
-      "minimumNodeFabricCoverage": 0.722948,
-      "allNodesPass": true,
-      "nodes": [
-        {
-          "skillId": "ai-agent-systems",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "mcp",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "openapi-swagger",
-          "fabricCoverage": 0.869358,
-          "passes": true
-        },
-        {
-          "skillId": "grpc-rest",
-          "fabricCoverage": 0.988511,
-          "passes": true
-        },
-        {
-          "skillId": "capability-contracts",
-          "fabricCoverage": 0.928792,
-          "passes": true
-        },
-        {
-          "skillId": "tool-generation",
-          "fabricCoverage": 0.812515,
-          "passes": true
-        },
-        {
-          "skillId": "typescript",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "react",
-          "fabricCoverage": 0.827365,
-          "passes": true
-        },
-        {
-          "skillId": "tanstack",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "golang",
-          "fabricCoverage": 0.722948,
-          "passes": true
-        },
-        {
-          "skillId": "csharp",
-          "fabricCoverage": 0.833143,
-          "passes": true
-        },
-        {
-          "skillId": "python",
-          "fabricCoverage": 0.983361,
-          "passes": true
-        },
-        {
-          "skillId": "postgresql",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "redis",
-          "fabricCoverage": 1.0,
-          "passes": true
-        },
-        {
-          "skillId": "aws",
-          "fabricCoverage": 0.757276,
-          "passes": true
-        },
-        {
-          "skillId": "databricks",
-          "fabricCoverage": 0.911557,
-          "passes": true
-        },
-        {
-          "skillId": "docker",
-          "fabricCoverage": 0.965491,
-          "passes": true
-        },
-        {
-          "skillId": "vmware",
-          "fabricCoverage": 0.944363,
-          "passes": true
-        },
-        {
-          "skillId": "macstadium",
-          "fabricCoverage": 0.874661,
-          "passes": true
-        }
-      ]
-    },
-    "sourceEvidence": {
-      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-support-fabric-components-alpha-r1.png",
-      "sha256": "789b9b393857df248546fec423753513d2be80ca3fd689cb9dd8c300b53dddf0",
-      "dimensions": [
-        1448,
-        1086
-      ],
-      "maximumCornerAlpha": 0,
-      "runtimeUsage": "none-rejected-monolithic-plate"
-    },
-    "infrastructureAtlas": {
-      "repoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/infrastructure-transition-atlas-alpha-r2.png",
-      "sha256": "f48b2fd0da75cdfb477bf174debac1de3d8a9e838a0906875c4daeed98a8b9bb",
-      "dimensions": [
-        1024,
-        1536
-      ],
-      "placementIds": [
-        "summit-plaza",
-        "upper-west-stairs",
-        "west-river-bridge",
-        "station-threshold",
-        "east-civic-curve",
-        "east-market-plaza",
-        "central-river-bridge",
-        "lower-works-curve",
-        "rail-gateway-stairs",
-        "west-cliff-seam",
-        "east-cliff-seam"
-      ]
-    },
-    "overviewSettlement": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-capital-coherent-base-r1.png",
-      "sha256": "c5714b4699e569c745e92b38413e7c1ad126ebaf14b42554de76d71f2f622c82",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "lod": "qa-reference-only",
-      "runtimeVisible": false,
-      "role": "concept-derived-layout-reference-never-rendered",
-      "containsTransitionTerrainPixels": true,
-      "containsPopulation": false,
-      "containsRailPixels": false,
-      "containsWaterPixels": false,
-      "ownsBakedStation": false,
-      "ownsBakedCityRail": false,
-      "ownsBakedDistrictBuildings": true,
-      "visualOnly": true,
-      "affectsLandMask": false,
-      "affectsHeight": false,
-      "affectsSlope": false,
-      "affectsCollision": false,
-      "artboardCoverageRatio": 0.233354,
-      "edgeFeatherPixels": 30,
-      "rejectionReason": "contains baked concept city and terrain-contact pixels"
-    },
-    "contactLayer": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-selected-environment-source-alpha-r1.png",
-      "sha256": "8d9e3d4726ae530ea57b46ec0aac61c8613e50f99b64bac69772c5047719b373",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "role": "source-evidence-only-rejected-terrain-bearing-composite",
-      "containsTerrainPixels": true,
-      "runtimeVisible": false,
-      "rejectionReason": "duplicates-frozen-production-terrain-and-baked-city",
-      "aperturePolicy": "source-proof-only",
-      "ownsBakedStation": true
-    },
     "replacementModel": {
       "replacedGenericBuildingCount": 19,
       "replacementSlotIds": [
@@ -1519,31 +1312,14 @@
       "layoutReferenceIsRuntimeRaster": false,
       "frozenTerrainGeometryUnchanged": true,
       "productionPixelSources": [
-        "city-fabric-underlay-r3-current-hydrology-aperture",
-        "city-environment-transition-detail-r3-current-hydrology-aperture",
+        "city-circulation-infill-alpha-r7-current-hydrology-aperture",
+        "alpha-derived-dry-terrain-contact-r1",
         "city-production-bridges-r3",
         "city-production-bridge-transition-r2",
         "independent skill-building assets",
         "independent intercity station",
         "independent rail layers"
       ]
-    },
-    "waterTransition": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-water-transition-foreground-r1.png",
-      "sha256": "0e4c2330971a6cd3ccc69986089ce0570849a74b295245796733d4b9e7161395",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "role": "superseded-bridge-proof-only",
-      "containsTerrainPixels": false,
-      "runtimeVisible": false,
-      "shorelineTransitionStatus": "deferred-to-terrain-owned-detail-layer",
-      "visualOnly": true,
-      "affectsLandMask": false,
-      "affectsHeight": false,
-      "affectsSlope": false,
-      "affectsCollision": false
     },
     "productionCirculation": {
       "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-circulation-r1.png",
@@ -1574,7 +1350,7 @@
       "containsBakedBuildings": false,
       "containsWaterPixels": false,
       "minimumDetailTier": "capital",
-      "source": "city-environment-transition-detail-r3-current-hydrology-aperture"
+      "source": "alpha-derived-dry-terrain-contact-r1"
     },
     "productionBridgeTransition": {
       "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridge-transition-r2.png",
@@ -1604,29 +1380,6 @@
       "bridgeCount": "authored-network-crossings",
       "minimumDetailTier": "capital",
       "source": "authored-circulation-water-crossing-split-r3"
-    },
-    "productionSubstrate": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-substrate-r1.png",
-      "sha256": "5d3cacacac708cbef9d522641646a457c1799220b1f68e95ec3670d8b50bf16e",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "runtimeVisible": true,
-      "role": "production-only-city-substrate-with-registered-apertures",
-      "conceptPixelsRendered": false,
-      "frozenTerrainGeometryUnchanged": true
-    },
-    "productionNodeForeground": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-node-foreground-r1.png",
-      "sha256": "6910f4252df8c436cd36614e28d2fd3417ea332ae8a2e45c801cfc2828fc1cf3",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "runtimeVisible": true,
-      "role": "production-substrate-derived-node-contact-foreground",
-      "conceptPixelsRendered": false
     }
   },
   "populationScaleCues": {
@@ -1687,7 +1440,7 @@
         "closeDetailLayer"
       ]
     },
-    "registration": "compact-authored-city-fabric-r3",
+    "registration": "production-city-circulation-r1",
     "cues": [
       {
         "id": "dwarf-mason",
@@ -1705,7 +1458,7 @@
           "x": 0.47280000000000005,
           "y": 0.3076
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 18,
         "displayHeight": 18,
@@ -1733,7 +1486,7 @@
           "x": 0.41848,
           "y": 0.41960000000000003
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 16,
         "displayHeight": 16,
@@ -1761,7 +1514,7 @@
           "x": 0.5204,
           "y": 0.36920000000000003
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 23,
         "displayHeight": 23,
@@ -1789,7 +1542,7 @@
           "x": 0.5624,
           "y": 0.50416
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 25,
         "displayHeight": 25,
@@ -1817,7 +1570,7 @@
           "x": 0.43752,
           "y": 0.42912000000000006
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 22,
         "displayHeight": 22,
@@ -1845,7 +1598,7 @@
           "x": 0.512,
           "y": 0.5148
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 19,
         "displayHeight": 19,
@@ -1873,7 +1626,7 @@
           "x": 0.40952,
           "y": 0.28352
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 23,
         "displayHeight": 23,
@@ -1901,7 +1654,7 @@
           "x": 0.58536,
           "y": 0.45768000000000003
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 15,
         "displayHeight": 15,
@@ -1929,7 +1682,7 @@
           "x": 0.6088800000000001,
           "y": 0.46272
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 21,
         "displayHeight": 21,
@@ -1957,7 +1710,7 @@
           "x": 0.45208000000000004,
           "y": 0.442
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 25,
         "displayHeight": 25,
@@ -1985,7 +1738,7 @@
           "x": 0.48960000000000004,
           "y": 0.48176
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 18,
         "displayHeight": 18,
@@ -2013,7 +1766,7 @@
           "x": 0.40280000000000005,
           "y": 0.40280000000000005
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 16,
         "displayHeight": 16,
@@ -2041,7 +1794,7 @@
           "x": 0.44760000000000005,
           "y": 0.2516
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 23,
         "displayHeight": 23,
@@ -2069,7 +1822,7 @@
           "x": 0.4196,
           "y": 0.2572
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 22,
         "displayHeight": 22,
@@ -2097,7 +1850,7 @@
           "x": 0.41680000000000006,
           "y": 0.49800000000000005
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 25,
         "displayHeight": 25,
@@ -2125,7 +1878,7 @@
           "x": 0.5372,
           "y": 0.5791999999999999
         },
-        "registration": "compact-authored-city-fabric-r3",
+        "registration": "production-city-circulation-r1",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 19,
         "displayHeight": 19,

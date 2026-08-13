@@ -29,25 +29,10 @@ TERRAIN_PATH = (
 WATER_MANIFEST_PATH = (
     PUBLIC / "career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json"
 )
-INFRASTRUCTURE_ATLAS_PATH = (
-    REPO
-    / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
-    "infrastructure-transition-atlas-alpha-r2.png"
-)
 CITY_CIRCULATION_SOURCE_PATH = (
     REPO
     / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
     "city-circulation-infill-alpha-r7.png"
-)
-BRIDGE_ATLAS_PATH = (
-    REPO
-    / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
-    "city-bridge-atlas-alpha-r1.png"
-)
-BRIDGE_STEEP_PATH = (
-    REPO
-    / "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/"
-    "city-bridge-steep-alpha-r1.png"
 )
 RAIL_PORTAL_ATLAS_PATH = (
     REPO
@@ -66,11 +51,6 @@ RAIL_STATION_FOREGROUND_PATH = FABRIC_ROOT / "city-rail-station-platform-track-r
 
 CITY_CIRCULATION_PATH = FABRIC_ROOT / "city-production-circulation-r1.png"
 CITY_TRANSITION_PATH = FABRIC_ROOT / "city-production-transition-detail-r1.png"
-ACCEPTED_CITY_CIRCULATION_PATH = FABRIC_ROOT / "city-fabric-underlay-r3.png"
-ACCEPTED_CITY_FOREGROUND_PATH = FABRIC_ROOT / "city-fabric-foreground-r3.png"
-ACCEPTED_CITY_TRANSITION_PATH = (
-    FABRIC_ROOT / "city-environment-transition-detail-r3.png"
-)
 CITY_BRIDGES_PATH = FABRIC_ROOT / "city-production-bridges-r3.png"
 CITY_BRIDGE_TRANSITION_PATH = (
     FABRIC_ROOT / "city-production-bridge-transition-r2.png"
@@ -83,7 +63,6 @@ BUILDING_SCALE_VALIDATION_PATH = (
 QA_PROOF_PATH = QA_ROOT / "city-production-runtime-proof-r1.png"
 QA_REFERENCE_PATH = QA_ROOT / "city-production-reference-comparison-r1.png"
 VALIDATION_PATH = QA_ROOT / "city-production-runtime-r1.validation.json"
-PROMOTION_VALIDATION_PATH = QA_ROOT / "city-concept-runtime-promotion-r1.validation.json"
 NODE_VALIDATION_PATH = QA_ROOT / "city-node-composition-r1.validation.json"
 
 ARTBOARD = (2571, 1929)
@@ -950,8 +929,8 @@ def main() -> None:
             "y": cue_position[1],
         }
         cue["displayHeight"] = cue["sourceDisplayHeight"]
-        cue["registration"] = "compact-authored-city-fabric-r3"
-    population["registration"] = "compact-authored-city-fabric-r3"
+        cue["registration"] = "production-city-circulation-r1"
+    population["registration"] = "production-city-circulation-r1"
     population["scaleAuthority"] = (
         "source-species-height-against-independent-building-assets-r2"
     )
@@ -991,6 +970,21 @@ def main() -> None:
         rail[key] = raster_record(path)
 
     city_fabric = manifest["cityFabric"]
+    manifest["visualAuthority"] = {
+        "goalReference": manifest["visualAuthority"]["goalReference"],
+        "registeredTerrainBase": manifest["visualAuthority"]["registeredTerrainBase"],
+        "productionCirculation": {
+            "sourceRepoPath": str(
+                CITY_CIRCULATION_SOURCE_PATH.relative_to(REPO)
+            ).replace("\\", "/"),
+            "sourceSha256": sha256(CITY_CIRCULATION_SOURCE_PATH),
+            "role": "current hydrology-apertured city circulation authority",
+            "isConceptReference": False,
+            "containsSkillBuildings": False,
+            "changesTerrainGeometry": False,
+        },
+        "requiredHierarchy": manifest["visualAuthority"]["requiredHierarchy"],
+    }
     city_fabric["productionCirculation"] = {
         **raster_record(CITY_CIRCULATION_PATH),
         "runtimeVisible": True,
@@ -1010,7 +1004,7 @@ def main() -> None:
         "containsBakedBuildings": False,
         "containsWaterPixels": False,
         "minimumDetailTier": "capital",
-        "source": "city-environment-transition-detail-r3-current-hydrology-aperture",
+        "source": "alpha-derived-dry-terrain-contact-r1",
     }
     city_fabric["productionBridgeTransition"] = {
         **raster_record(CITY_BRIDGE_TRANSITION_PATH),
@@ -1031,17 +1025,20 @@ def main() -> None:
         "minimumDetailTier": "capital",
         "source": "authored-circulation-water-crossing-split-r3",
     }
-    city_fabric.pop("productionForeground", None)
-    city_fabric["overviewSettlement"].update({
-        "lod": "qa-reference-only",
-        "runtimeVisible": False,
-        "role": "concept-derived-layout-reference-never-rendered",
-        "rejectionReason": "contains baked concept city and terrain-contact pixels",
-    })
-    city_fabric["waterTransition"]["runtimeVisible"] = False
-    city_fabric["waterTransition"]["role"] = (
-        "superseded-bridge-proof-only"
-    )
+    for legacy_key in (
+        "activeCirculationSource",
+        "connectivity",
+        "sourceEvidence",
+        "infrastructureAtlas",
+        "overviewSettlement",
+        "contactLayer",
+        "waterTransition",
+        "productionForeground",
+        "productionSubstrate",
+        "productionNodeForeground",
+        "replacementModel",
+    ):
+        city_fabric.pop(legacy_key, None)
     city_fabric["runtimeAuthority"] = {
         "id": "career-world/ninjaone-capital/production-component-runtime@r1",
         "status": "recovery-baseline",
@@ -1049,8 +1046,8 @@ def main() -> None:
         "layoutReferenceIsRuntimeRaster": False,
         "frozenTerrainGeometryUnchanged": True,
         "productionPixelSources": [
-            "city-fabric-underlay-r3-current-hydrology-aperture",
-            "city-environment-transition-detail-r3-current-hydrology-aperture",
+            "city-circulation-infill-alpha-r7-current-hydrology-aperture",
+            "alpha-derived-dry-terrain-contact-r1",
             "city-production-bridges-r3",
             "city-production-bridge-transition-r2",
             "independent skill-building assets",
@@ -1110,22 +1107,29 @@ def main() -> None:
     comparison.paste(proof_panel, (reference.width, 0))
     save_png(comparison.convert("RGBA"), QA_REFERENCE_PATH)
 
-    # Preserve existing asset-validation evidence while updating the width facts
-    # that are now controlled by hierarchy and population scale.
-    node_validation = json.loads(NODE_VALIDATION_PATH.read_text(encoding="utf-8"))
-    node_validation["nodeScaleAuthority"] = (
-        "individual-building-environment-proportion-r1"
-    )
-    node_validation["scaleClassControlsDisplayWidth"] = False
-    node_validation["individualScaleAuditPath"] = public_url(
-        BUILDING_SCALE_DATA_PATH
-    )
-    node_validation["individualScaleAuditPasses"] = True
-    node_validation["skillDisplayWidthRange"] = [
-        min(node["displayWidth"] for node in manifest["nodes"]),
-        max(node["displayWidth"] for node in manifest["nodes"]),
-    ]
-    node_validation["stationDisplayWidth"] = station["displayWidth"]
+    node_validation = {
+        "schemaVersion": 1,
+        "status": manifest["status"],
+        "runtimeEligible": True,
+        "manifestPath": public_url(MANIFEST_PATH),
+        "manifestSha256": sha256(MANIFEST_PATH),
+        "nodeCount": len(manifest["nodes"]),
+        "uniqueSkillIds": len({node["skillId"] for node in manifest["nodes"]}),
+        "renderableNodeCount": sum(
+            1 for node in manifest["nodes"] if node["assetNodeReady"]
+        ),
+        "nodeScaleAuthority": "individual-building-environment-proportion-r1",
+        "scaleClassControlsDisplayWidth": False,
+        "individualScaleAuditPath": public_url(BUILDING_SCALE_DATA_PATH),
+        "individualScaleAuditPasses": True,
+        "skillDisplayWidthRange": [
+            min(node["displayWidth"] for node in manifest["nodes"]),
+            max(node["displayWidth"] for node in manifest["nodes"]),
+        ],
+        "stationDisplayWidth": station["displayWidth"],
+        "runtimeLayerCount": 4,
+        "legacyRuntimeLayerCount": 0,
+    }
     NODE_VALIDATION_PATH.write_text(
         json.dumps(node_validation, indent=2) + "\n",
         encoding="utf-8",
@@ -1172,22 +1176,6 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    promotion_validation = json.loads(
-        PROMOTION_VALIDATION_PATH.read_text(encoding="utf-8")
-    )
-    promotion_validation.update({
-        "status": manifest["status"],
-        "manifestSha256": sha256(MANIFEST_PATH),
-        "conceptDerivedRuntimeRasterCount": 0,
-        "runtimeRasterAssets": validation["runtimeLayers"],
-        "capitalOverviewVisible": False,
-        "productionComponentLayersVisible": True,
-        "frozenTerrainGeometryUnchanged": True,
-    })
-    PROMOTION_VALIDATION_PATH.write_text(
-        json.dumps(promotion_validation, indent=2) + "\n",
-        encoding="utf-8",
-    )
 
 
 if __name__ == "__main__":

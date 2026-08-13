@@ -92,7 +92,7 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.match(scene, /<TerritoryLandform[\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?<NinjaOneCapitalMvp/);
   for (const productionLayer of [
     "InfrastructureLayer",
-    "EnvironmentLayer",
+    "TerrainDetailLayer",
     "ActorsEffectsLayer",
     "StructuresLayer",
     "FoliageLayer",
@@ -133,11 +133,14 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.doesNotMatch(renderer, /data-capital-plate="(?:base|static-environment)"/);
   assert.doesNotMatch(renderer, /data-shared-asset="(?:structure|foliage)"/);
   assert.doesNotMatch(`${renderer}\n${skillRenderer}`, /Kaizen/i);
-  assert.equal(city.cityFabric.contactLayer.containsTerrainPixels, true);
-  assert.equal(city.cityFabric.contactLayer.runtimeVisible, false);
+  assert.equal(city.cityFabric.productionCirculation.runtimeVisible, true);
+  assert.equal(city.cityFabric.productionTransitionDetail.runtimeVisible, true);
+  assert.equal(city.cityFabric.productionBridgeTransition.runtimeVisible, true);
+  assert.equal(city.cityFabric.productionBridges.runtimeVisible, true);
   assert.equal(city.layerOrder.includes("city-terrain-contact"), false);
-  assert.equal(city.cityFabric.overviewSettlement.runtimeVisible, false);
-  assert.equal(city.cityFabric.waterTransition.runtimeVisible, false);
+  assert.equal(city.cityFabric.contactLayer, undefined);
+  assert.equal(city.cityFabric.overviewSettlement, undefined);
+  assert.equal(city.cityFabric.waterTransition, undefined);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionCirculation/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionTransitionDetail/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionBridgeTransition/);

@@ -15,15 +15,15 @@
       "sha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02"
     },
     "landMask": {
-      "path": "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "path": "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
       "sha256": "8801722B801B2ECABD048DC71AC99FF7F0C566E69E06A50D9C4E41706DD7003A"
     },
     "height": {
-      "path": "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "path": "public/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
       "sha256": "8CB7D6480A707C33E220A55611AF8557C3FC9440F0C347CF9A786ADCB1F41E3F"
     },
     "slope": {
-      "path": "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "path": "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
       "sha256": "C248599DAEB10E5C8D71DC15EF2CC65D3B90A8F77165AB0CFDA5C770676E6134"
     },
     "riverbed": {

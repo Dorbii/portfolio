@@ -20,11 +20,6 @@ const structuresLayerPath = path.join(
   root,
   "features/career-world/layers/structures/components/StructuresLayer.tsx",
 );
-const neighborhoodComponentPath = path.join(
-  root,
-  "features/career-world/layers/structures/components/"
-    + "KaizenNeighborhoodFabric.tsx",
-);
 const neighborhoodModelPath = path.join(
   root,
   "features/career-world/layers/structures/model/"
@@ -53,11 +48,10 @@ test("Kaizen route and structure semantics stay on buildable topography", async 
 });
 
 intentTest("disabled Kaizen authored visual sources are not duplicated in live structures", async () => {
-  const [infrastructure, structures, neighborhoodComponent, neighborhoodModel] =
+  const [infrastructure, structures, neighborhoodModel] =
     await Promise.all([
       readFile(infrastructureLayerPath, "utf8"),
       readFile(structuresLayerPath, "utf8"),
-      readFile(neighborhoodComponentPath, "utf8"),
       readFile(neighborhoodModelPath, "utf8"),
     ]);
 
@@ -83,24 +77,6 @@ intentTest("disabled Kaizen authored visual sources are not duplicated in live s
   assert.doesNotMatch(structures, /<KaizenNeighborhoodFabric/);
   assert.doesNotMatch(structures, /<KaizenIntegrationSeams/);
   assert.match(
-    neighborhoodComponent,
-    /data-neighborhood-renderer="persistent-base-progressive-detail-grid"/,
-  );
-  assert.match(
-    neighborhoodComponent,
-    /decodedAssetPaths\.has\(baseModule\.assetPath\)/,
-  );
-  assert.match(
-    neighborhoodComponent,
-    /Math\.max\(\s*overviewVisibility,\s*siteVisibility,\s*closeVisibility,\s*\)/,
-  );
-  assert.doesNotMatch(neighborhoodComponent, /close-fallback|registrationMaskId/);
-  assert.doesNotMatch(neighborhoodComponent, /activeModule|useCloseFoundation/);
-  assert.match(neighborhoodComponent, /const image = new Image\(\)/);
-  assert.match(neighborhoodComponent, /requestedAssetPaths/);
-  assert.match(neighborhoodComponent, /shouldRenderSite && siteModule/);
-  assert.match(neighborhoodComponent, /shouldRenderClose \? closeModules\.map/);
-  assert.match(
     neighborhoodModel,
     /base-runtime-r1\.json/,
   );
@@ -109,7 +85,6 @@ intentTest("disabled Kaizen authored visual sources are not duplicated in live s
   assert.match(neighborhoodModel, /KAIZEN_CITY_PLATE_ANCHOR/);
   assert.match(neighborhoodModel, /KAIZEN_CITY_PLATE_SPAN/);
   assert.doesNotMatch(neighborhoodModel, /foundation-integrated/);
-  assert.doesNotMatch(neighborhoodModel, /kaizen-semantic-assets-r1/);
   assert.match(
     neighborhoodModel,
     /KAIZEN_NEIGHBORHOOD_CLOSE_GRID_ROOT =\s*\n\s*baseManifest\.lod\.close\.assetRoot/,
@@ -130,6 +105,12 @@ test("obsolete Kaizen procedural visual pipeline stays removed", async () => {
     "public/career-world/layers/infrastructure/textures/kaizen-agent",
     "public/career-world/layers/structures/textures/ambient/kaizen-agent/"
       + "heroic-neighborhood-detail-atlas-r4.png",
+    "features/career-world/layers/structures/components/"
+      + "KaizenNeighborhoodFabric.tsx",
+    "features/career-world/layers/structures/components/"
+      + "KaizenIntegrationSeams.tsx",
+    "features/career-world/layers/structures/components/"
+      + "KaizenStructureShadowLayer.tsx",
   ].map((relativePath) => path.join(root, relativePath));
 
   for (const removedPath of removedPaths) {

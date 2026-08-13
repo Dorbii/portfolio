@@ -20,7 +20,7 @@ import {
   environmentFoliageResourceCohort,
   resolveNinjaOneEnvironmentFoliageEligibility,
   selectNinjaOneEnvironmentFoliageInstances,
-} from "../features/career-world/development/model/ninjaOneEnvironmentFoliage.ts";
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const MANIFEST_PATH = path.join(
@@ -462,7 +462,7 @@ test("resource cohorts are canonical and same-set camera churn cannot restart hi
   assert.equal(forward.split("\n").length, 4);
 
   const component = await readFile(
-    path.join(ROOT, "features/career-world/development/NinjaOneEnvironmentFoliage.tsx"),
+    path.join(ROOT, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx"),
     "utf8",
   );
   assert.match(component, /environmentFoliageResourceCohort\(selectedResources\)/);
@@ -485,7 +485,7 @@ test("resource cohorts are canonical and same-set camera churn cannot restart hi
 test("component mounts static neutralization before animated canopy and exposes actual accounting", async () => {
   const [component, css] = await Promise.all([
     readFile(
-      path.join(ROOT, "features/career-world/development/NinjaOneEnvironmentFoliage.tsx"),
+      path.join(ROOT, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx"),
       "utf8",
     ),
     readFile(path.join(ROOT, "features/career-world/styles/career-world.css"), "utf8"),

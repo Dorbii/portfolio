@@ -2,8 +2,8 @@ import {
   useSyncExternalStore,
   type CSSProperties,
 } from "react";
-import type { WaterRenderState } from "../../water-surface";
-import type { Territory } from "../../territory-landform/model/territories";
+import type { WaterRenderState } from "../../ocean";
+import type { Territory } from "../../terrain/model/territories";
 import type { CameraView, Pair } from "../../../shared/camera";
 import {
   LOD_PRESENTATION_EPSILON,

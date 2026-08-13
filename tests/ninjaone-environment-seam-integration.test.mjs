@@ -110,13 +110,8 @@ test("r2 seam authority binds all exact native originals and excludes banned fid
     resampling: "none",
     topologyOperation: "none",
   });
-  assert.deepEqual(manifest.compositionEvidence, {
-    fixedReferenceCameras: {
-      B2: ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/b2-reference-camera.png",
-      C2: ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/c2-reference-camera.png",
-    },
-    role: "artifact-location-and-registration-only; never sampled as fidelity input",
-  });
+  assert.equal(manifest.compositionEvidence, undefined);
+  assert.equal(manifest.proof, undefined);
 
   for (const source of manifest.authority.sources) {
     assert.equal(source.path, `${SOURCE_PREFIX}${source.id}-generated-r2.png`);
@@ -356,37 +351,6 @@ test("maximum seam union keeps the accepted internal cohort within its declared 
       fixedC2Internal: 2,
     },
   );
-});
-
-test("full-resolution before-after and fixed-camera proof is native-sized and lossless", async () => {
-  for (const cellId of ["b2", "c2"]) {
-    const before = path.join(ROOT, manifest.proof[`${cellId}FullBefore`]);
-    const after = path.join(ROOT, manifest.proof[`${cellId}FullAfter`]);
-    const fixed = path.join(ROOT, manifest.proof[`${cellId}FixedCamera`]);
-    const [beforeBytes, afterBytes, beforeMetadata, afterMetadata, fixedMetadata] = await Promise.all([
-      readFile(before),
-      readFile(after),
-      sharp(before).metadata(),
-      sharp(after).metadata(),
-      sharp(fixed).metadata(),
-    ]);
-    assert.deepEqual([beforeMetadata.width, beforeMetadata.height], [2896, 2172]);
-    assert.deepEqual([afterMetadata.width, afterMetadata.height], [2896, 2172]);
-    assert.deepEqual([fixedMetadata.width, fixedMetadata.height], [928, 522]);
-    assert.notEqual(sha256(beforeBytes), sha256(afterBytes), `${cellId} overlay had no effect`);
-  }
-  const c1Before = path.join(ROOT, manifest.proof.c1FullBefore);
-  const c1Fixed = path.join(ROOT, manifest.proof.c1FixedCamera);
-  assert.deepEqual(
-    [(await sharp(c1Before).metadata()).width, (await sharp(c1Before).metadata()).height],
-    [2896, 2172],
-  );
-  assert.deepEqual(
-    [(await sharp(c1Fixed).metadata()).width, (await sharp(c1Fixed).metadata()).height],
-    [928, 522],
-  );
-  assert.equal(Object.hasOwn(manifest.proof, "c1FullAfter"), false);
-  assert.equal(Object.keys(manifest.proof).some((key) => key.startsWith("intercell")), false);
 });
 
 test("canonical cohort epochs reject A-B-A stale completions and preserve same-set identity", () => {

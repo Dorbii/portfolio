@@ -1,6 +1,6 @@
 import manifest from "../../../../public/career-world/capitals/ninjaone/manifests/topology-proof-r1.json" with { type: "json" };
 import skillProgramManifest from "../../../../public/career-world/capitals/ninjaone/manifests/skill-program-r1.json" with { type: "json" };
-import territoryManifest from "../../../../public/career-world/layers/territory-landform/manifests/world-territories-r4.json" with { type: "json" };
+import territoryManifest from "../../../../public/career-world/layers/terrain/authority/manifests/world-territories-r4.json" with { type: "json" };
 import type { CameraView } from "../../shared/camera";
 import type { Pair } from "../../shared/camera";
 

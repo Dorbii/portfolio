@@ -64,7 +64,7 @@ function collectKeys(value, keys = new Set()) {
 test("NinjaOne rural outskirts are deterministic close-detail outside towns", async () => {
   const [rural, allocations, fabrics] = await Promise.all([
     readJson(
-      "public/career-world/layers/environment/manifests/"
+      "public/career-world/layers/terrain/detail/manifests/"
         + "ninjaone-rural-outskirts-r1.json",
     ),
     readJson(
@@ -152,7 +152,7 @@ test("NinjaOne rural outskirts are deterministic close-detail outside towns", as
 
 test("rural easter-egg slots are stable, empty, and semantically inert", async () => {
   const ruralPath =
-    "public/career-world/layers/environment/manifests/"
+    "public/career-world/layers/terrain/detail/manifests/"
       + "ninjaone-rural-outskirts-r1.json";
   const raw = await readFile(path.join(root, ruralPath), "utf8");
   const rural = JSON.parse(raw);
@@ -185,12 +185,12 @@ test("the environment renderer keeps rural scenery decorative and omits empty sl
   const [component, model] = await Promise.all([
     readFile(path.join(
       root,
-      "features/career-world/layers/environment/components/"
-        + "EnvironmentLayer.tsx",
+      "features/career-world/layers/terrain/detail/components/"
+        + "TerrainDetailLayer.tsx",
     ), "utf8"),
     readFile(path.join(
       root,
-      "features/career-world/layers/environment/model/"
+      "features/career-world/layers/terrain/detail/model/"
         + "ruralOutskirts.ts",
     ), "utf8"),
   ]);
@@ -220,7 +220,7 @@ test("the environment renderer keeps rural scenery decorative and omits empty sl
   assert.doesNotMatch(
       component.slice(
         component.indexOf("function RuralSceneryGlyph("),
-        component.indexOf("export function EnvironmentLayer("),
+        component.indexOf("export function TerrainDetailLayer("),
       ),
     /<image|href=|onClick=|tabIndex=|Math\.random/,
   );

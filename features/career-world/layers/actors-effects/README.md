@@ -9,4 +9,4 @@ same authored instances visible at deterministic interior points on their
 routes instead of parking them in structure entrances.
 
 Weather, particles, and sparse authored crash/foam accents remain deferred.
-Base shoreline response remains water-surface behavior.
+Base shoreline response remains ocean behavior.

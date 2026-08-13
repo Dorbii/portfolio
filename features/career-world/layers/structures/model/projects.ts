@@ -2,9 +2,9 @@ import manifest from "@/public/career-world/layers/structures/manifests/project-
 import {
   TERRAIN_SITE_TILES,
   TERRITORIES,
-} from "../../territory-landform";
-import type { TerrainSiteTile } from "../../territory-landform/model/siteTiles";
-import type { Territory } from "../../territory-landform/model/territories";
+} from "../../terrain";
+import type { TerrainSiteTile } from "../../terrain/model/siteTiles";
+import type { Territory } from "../../terrain/model/territories";
 import {
   normalizeCameraView,
   type CameraView,

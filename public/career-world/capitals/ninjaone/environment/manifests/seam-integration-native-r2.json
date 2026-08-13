@@ -150,13 +150,6 @@
     "resampling": "none",
     "topologyOperation": "none"
   },
-  "compositionEvidence": {
-    "fixedReferenceCameras": {
-      "B2": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/b2-reference-camera.png",
-      "C2": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/c2-reference-camera.png"
-    },
-    "role": "artifact-location-and-registration-only; never sampled as fidelity input"
-  },
   "budgets": {
     "fixedC2DecodedUnion": 26985456,
     "fixedC2SeamDecodedBytes": 1297408,
@@ -444,16 +437,6 @@
       "segment": "right"
     }
   ],
-  "proof": {
-    "b2FullAfter": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-full-native-after-r2.png",
-    "b2FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-fixed-camera-composite-r2.png",
-    "b2FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/b2-full-native-before-r2.png",
-    "c1FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c1-fixed-camera-composite-r2.png",
-    "c1FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c1-full-native-before-r2.png",
-    "c2FullAfter": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-full-native-after-r2.png",
-    "c2FixedCamera": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-fixed-camera-composite-r2.png",
-    "c2FullBefore": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/seam-integration-r2-recovery/c2-full-native-before-r2.png"
-  },
   "resources": [
     {
       "artboardBounds": {

@@ -19,10 +19,10 @@ export const NINJAONE_MVP_FOLIAGE_ISOLATION_BINDING_PATHS = Object.freeze([
   "features/career-world/shared/camera.ts",
   "features/career-world/shared/lod/policy.ts",
   "features/career-world/composition/WorldScene.tsx",
-  "features/career-world/development/NinjaOneEnvironmentProof.tsx",
-  "features/career-world/development/NinjaOneEnvironmentNativeDetail.tsx",
-  "features/career-world/development/NinjaOneEnvironmentFoliage.tsx",
-  "features/career-world/development/model/ninjaOneEnvironmentFoliage.ts",
+  "features/career-world/layers/terrain/components/NinjaOneEnvironmentProof.tsx",
+  "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentNativeDetail.tsx",
+  "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx",
+  "features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts",
   "features/career-world/styles/career-world.css",
   "scripts/build-ninjaone-environment-foliage-r3.mjs",
   "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json",
@@ -686,10 +686,6 @@ export async function auditNativeStaticFidelity({ manifest, root }) {
   });
 }
 
-function mipTextureBytes([width, height]) {
-  return Math.ceil(width * height * 4 * 4 / 3);
-}
-
 function alphaBoundaryRun(image) {
   const { data, info: { height, width } } = image;
   const boundary = new Uint8Array(width * height);
@@ -1089,35 +1085,9 @@ export function createNinjaOneEnvironmentMvpResourceCatalog({
   return Object.freeze(catalog);
 }
 
-function uniqueStringArray(value, failures, label) {
-  if (
-    !Array.isArray(value)
-    || value.some((entry) => typeof entry !== "string" || entry.length === 0)
-  ) {
-    failures.push(`${label}_missing`);
-    return [];
-  }
-  if (new Set(value).size !== value.length) failures.push(`${label}_duplicate`);
-  return value;
-}
-
 function sameStringSet(first, second) {
   return first.length === second.length
     && [...first].sort().every((value, index) => value === [...second].sort()[index]);
-}
-
-function sameStringRecord(actual, expected) {
-  if (!actual || typeof actual !== "object" || Array.isArray(actual)) return false;
-  const actualEntries = Object.entries(actual).sort(([left], [right]) => (
-    left.localeCompare(right)
-  ));
-  const expectedEntries = Object.entries(expected).sort(([left], [right]) => (
-    left.localeCompare(right)
-  ));
-  return actualEntries.length === expectedEntries.length
-    && actualEntries.every(([key, value], index) => (
-      key === expectedEntries[index][0] && value === expectedEntries[index][1]
-    ));
 }
 
 function resourcePaintedNodeCount(resource) {
@@ -1131,26 +1101,6 @@ function resourcePaintedNodeCount(resource) {
 
 function resolveEvidencePath(evidenceDirectory, value) {
   return path.isAbsolute(value) ? value : path.resolve(evidenceDirectory, value);
-}
-
-function validCaptureClip(clip, viewport) {
-  return clip
-    && viewport
-    && Number.isSafeInteger(clip.x)
-    && Number.isSafeInteger(clip.y)
-    && Number.isSafeInteger(clip.width)
-    && Number.isSafeInteger(clip.height)
-    && clip.scale === 1
-    && clip.x >= 0
-    && clip.y >= 0
-    && clip.width > 0
-    && clip.height > 0
-    && clip.x + clip.width <= viewport.width
-    && clip.y + clip.height <= viewport.height;
-}
-
-function frameMatchesClip(frame, clip) {
-  return frame.width === clip.width && frame.height === clip.height;
 }
 
 async function registeredMaskedDifference(firstPath, secondPath, maskPath) {

@@ -993,7 +993,7 @@ intentTest("rendered B1 and C1 remain continuous at every authored LOD", async (
   for (const [tier, dimensions] of Object.entries(tiers)) {
     const output = path.join(
       root,
-      `public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-${tier}-r2.webp`,
+      `public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-${tier}-r3.webp`,
     );
     const { data, info } = await sharp(output)
       .ensureAlpha()

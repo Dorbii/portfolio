@@ -7,7 +7,7 @@ export {
 
 export const INTERFACE_LAYER: LayerDescriptor = Object.freeze({
   id: "interface",
-  order: 8,
+  order: 7,
   status: "active",
   owns: Object.freeze([
     "focus controls",

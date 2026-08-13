@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +7,7 @@ import sharp from "sharp";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const WIDE_AUTHORED_PROTOTYPE = process.argv.includes("--wide-authored-prototype");
+const WRITE_REVIEW_ARTIFACTS = process.argv.includes("--write-review-artifacts");
 const SOURCE_ROOT = path.join(
   ROOT,
   "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated",
@@ -43,6 +44,23 @@ const REJECTED_INTERCELL_OUTPUT_FILES = Object.freeze([
   "c1-c2-intercell-horizontal-seam-r2.png",
   "c1-c2-intercell-horizontal-seam-native-neighbor-context-r2.png",
 ]);
+
+async function writeJsonAtomically(targetPath, value) {
+  const temporaryPath = `${targetPath}.next-${process.pid}`;
+  await writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`);
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      await rename(temporaryPath, targetPath);
+      return;
+    } catch (error) {
+      if (attempt === 7) {
+        await rm(temporaryPath, { force: true });
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 20 * (attempt + 1)));
+    }
+  }
+}
 
 const ARTBOARD = Object.freeze([1440, 1080]);
 const TILE_ARTBOARD = Object.freeze([360, 270]);
@@ -2055,7 +2073,9 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
   await mkdir(OUTPUT_ROOT, { recursive: true });
   await removeRejectedIntercellOutputs();
   await mkdir(path.dirname(MANIFEST_PATH), { recursive: true });
-  await mkdir(ARTIFACT_ROOT, { recursive: true });
+  if (WRITE_REVIEW_ARTIFACTS) {
+    await mkdir(ARTIFACT_ROOT, { recursive: true });
+  }
   const builtResources = [];
 
   for (const definition of RESOURCE_DEFINITIONS) {
@@ -2196,7 +2216,9 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
     throw new RangeError("The seam integration exceeds the 32 MiB decoded union.");
   }
 
-  const proof = await writeProofs(sources, builtResources);
+  if (WRITE_REVIEW_ARTIFACTS) {
+    await writeProofs(sources, builtResources);
+  }
   const sweep = fullSweep(sources);
   const authoritySources = Object.freeze(
     [...sources.values()].map((source) => Object.freeze({
@@ -2228,13 +2250,6 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
       interpolation: "none",
       resampling: "none",
       topologyOperation: "none",
-    }),
-    compositionEvidence: Object.freeze({
-      fixedReferenceCameras: Object.freeze({
-        B2: ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/b2-reference-camera.png",
-        C2: ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-gates-r1-native/c2-reference-camera.png",
-      }),
-      role: "artifact-location-and-registration-only; never sampled as fidelity input",
     }),
     budgets: Object.freeze({
       fixedC2DecodedUnion,
@@ -2269,31 +2284,32 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
       "C1-C2": "UNRESOLVED: two inter-cell row segments have no accepted overlay",
     }),
     fullNativeSweep: sweep,
-    proof,
     resources: Object.freeze(builtResources.map(({ manifestResource }) => manifestResource)),
     selectorCheckpoints,
   });
-  await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
-  await writeFile(
-    path.join(ARTIFACT_ROOT, "native-boundary-sweep-metrics-r2-recovery.json"),
-    `${JSON.stringify({ authoritySources, sweep }, null, 2)}\n`,
-  );
-  await writeFile(
-    path.join(ARTIFACT_ROOT, "seam-integration-runtime-contract-r2-recovery.json"),
-    `${JSON.stringify({
-      budgets: manifest.budgets,
-      manifestId: manifest.id,
-      resources: manifest.resources.map((resource) => ({
-        artboardBounds: resource.artboardBounds,
-        decodedBytes: resource.decodedBytes,
-        id: resource.id,
-        orientation: resource.orientation,
-        path: resource.path,
-        renderOrder: resource.renderOrder,
-      })),
-      selectorCheckpoints,
-    }, null, 2)}\n`,
-  );
+  await writeJsonAtomically(MANIFEST_PATH, manifest);
+  if (WRITE_REVIEW_ARTIFACTS) {
+    await writeFile(
+      path.join(ARTIFACT_ROOT, "native-boundary-sweep-metrics-r2-recovery.json"),
+      `${JSON.stringify({ authoritySources, sweep }, null, 2)}\n`,
+    );
+    await writeFile(
+      path.join(ARTIFACT_ROOT, "seam-integration-runtime-contract-r2-recovery.json"),
+      `${JSON.stringify({
+        budgets: manifest.budgets,
+        manifestId: manifest.id,
+        resources: manifest.resources.map((resource) => ({
+          artboardBounds: resource.artboardBounds,
+          decodedBytes: resource.decodedBytes,
+          id: resource.id,
+          orientation: resource.orientation,
+          path: resource.path,
+          renderOrder: resource.renderOrder,
+        })),
+        selectorCheckpoints,
+      }, null, 2)}\n`,
+    );
+  }
   return manifest;
 }
 

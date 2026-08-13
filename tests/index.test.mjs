@@ -5,7 +5,6 @@ import "./ninjaone-capital-topology-proof.test.mjs";
 import "./ninjaone-capital-city-nodes.test.mjs";
 import "./environment-layer-boundaries.test.mjs";
 import "./environment-layer-registry.test.mjs";
-import "./ninjaone-station-river-detail.test.mjs";
 import "./ninjaone-environment-foliage.test.mjs";
 import "./ninjaone-inland-water.test.mjs";
 import "./ninjaone-environment-seam-integration.test.mjs";

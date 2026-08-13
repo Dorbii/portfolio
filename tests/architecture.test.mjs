@@ -19,9 +19,14 @@ async function readJson(relativePath) {
 }
 
 test("composition and environment registries expose unique ordered layer contracts", () => {
-  assert.equal(CAREER_WORLD_LAYER_ORDER.length, 8);
-  assert.equal(new Set(CAREER_WORLD_LAYER_ORDER).size, 8);
+  assert.equal(CAREER_WORLD_LAYER_ORDER.length, 7);
+  assert.equal(new Set(CAREER_WORLD_LAYER_ORDER).size, 7);
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("coastline"), false);
+  assert.equal(CAREER_WORLD_LAYER_ORDER.includes("water-surface"), false);
+  assert.equal(CAREER_WORLD_LAYER_ORDER.includes("territory-landform"), false);
+  assert.ok(CAREER_WORLD_LAYER_ORDER.includes("ocean"));
+  assert.ok(CAREER_WORLD_LAYER_ORDER.includes("terrain"));
+  assert.equal(CAREER_WORLD_LAYER_ORDER.includes("environment"), false);
   assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 11);
   assert.equal(
     new Set(ENVIRONMENT_LAYER_DEFINITIONS.map(({ id }) => id)).size,
@@ -69,13 +74,13 @@ test("topography and territory QA remain independent interface diagnostics", asy
   assert.match(overlay, /showGrid\s*\?/);
   assert.match(
     rootPage,
-    /case "territory-landform":[\s\S]*?<CareerWorld enableDevelopmentTools \/>/,
+    /case "terrain":[\s\S]*?<CareerWorld enableDevelopmentTools \/>/,
   );
 });
 
 test("five focus views remain valid crops of one world plane", async () => {
   const manifest = await readJson(
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   );
   assert.equal(manifest.territories.length, 5);
   assert.equal(new Set(manifest.territories.map(({ id }) => id)).size, 5);
@@ -93,7 +98,7 @@ test("five focus views remain valid crops of one world plane", async () => {
 });
 
 test("coast ownership stays out of composition and land runtime patches", async () => {
-  const waterRoot = path.join(featureLayers, "water-surface");
+  const waterRoot = path.join(featureLayers, "ocean");
   const files = [];
 
   async function collect(directory) {
@@ -134,7 +139,8 @@ test("deferred crash accents are isolated in actors-effects", async () => {
     await stat(
       path.join(
         publicLayers,
-        "water-surface",
+        "ocean",
+        "authority",
         "manifests",
         "coast-geometry-r5.json",
       ),
@@ -148,12 +154,12 @@ test("one backdrop-owned light contract drives static and rendered layers", asyn
     "public/career-world/layers/world-backdrop/manifests/world-light-r1.json",
   );
   const land = await readJson(
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-relief-r6.json",
   );
   const renderer = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "WaterSurfaceRenderer.ts",
     ),
@@ -186,7 +192,7 @@ test("composition resolves semantic zoom once and passes it downward", async () 
   const waterCanvas = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "components",
       "WaterSurfaceCanvas.tsx",
     ),
@@ -195,7 +201,7 @@ test("composition resolves semantic zoom once and passes it downward", async () 
   const waterRenderer = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "WaterSurfaceRenderer.ts",
     ),
@@ -221,7 +227,7 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   const waterCanvas = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "components",
       "WaterSurfaceCanvas.tsx",
     ),
@@ -230,7 +236,7 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   const waterController = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "WaterSurfaceController.ts",
     ),
@@ -239,7 +245,7 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   const land = await readFile(
     path.join(
       featureLayers,
-      "territory-landform",
+      "terrain",
       "components",
       "TerritoryLandform.tsx",
     ),
@@ -301,7 +307,7 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   const land = await readFile(
     path.join(
       featureLayers,
-      "territory-landform",
+      "terrain",
       "components",
       "TerritoryLandform.tsx",
     ),
@@ -310,7 +316,7 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   const streamModel = await readFile(
     path.join(
       featureLayers,
-      "territory-landform",
+      "terrain",
       "model",
       "streamTiles.ts",
     ),
@@ -325,9 +331,12 @@ test("capital-detail land streaming follows the centralized LOD contract", async
     "utf8",
   );
   const [authoringManifest, runtimeManifest] = await Promise.all([
-    readJson("scripts/assets/career-world/terrain-stream-tiles-authoring-r3.json"),
     readJson(
-      "public/career-world/layers/territory-landform/manifests/"
+      "public/career-world/layers/terrain/authority/manifests/"
+        + "terrain-stream-tiles-r3.json",
+    ),
+    readJson(
+      "public/career-world/layers/terrain/authority/manifests/"
         + "terrain-stream-runtime-r4.json",
     ),
   ]);
@@ -488,7 +497,8 @@ test("capital-detail land streaming follows the centralized LOD contract", async
     /STREAM_GRID_ROWS = GRID_ROWS \* CHILD_ROWS/,
   );
   assert.match(streamGenerator, /tiles" \/ "stream-r3"/);
-  assert.match(streamGenerator, /terrain-stream-tiles-authoring-r3\.json/);
+  assert.match(streamGenerator, /terrain-stream-tiles-r3\.json/);
+  assert.doesNotMatch(streamGenerator, /scripts["']\s*\/\s*["']assets/);
   assert.match(streamGenerator, /terrain-stream-runtime-r4\.json/);
   assert.match(streamGenerator, /"decodedBytes":/);
   assert.equal(
@@ -526,7 +536,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const openWater = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "shaders",
       "open-water.ts",
@@ -536,7 +546,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const coast = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "shaders",
       "coast.ts",
@@ -546,7 +556,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const common = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "shaders",
       "common.ts",
@@ -562,7 +572,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const renderer = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "rendering",
       "WaterSurfaceRenderer.ts",
     ),
@@ -571,7 +581,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const assets = await readFile(
     path.join(
       featureLayers,
-      "water-surface",
+      "ocean",
       "model",
       "assets.ts",
     ),
@@ -580,7 +590,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   const landAssets = await readFile(
     path.join(
       featureLayers,
-      "territory-landform",
+      "terrain",
       "model",
       "assets.ts",
     ),

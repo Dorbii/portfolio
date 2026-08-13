@@ -4,8 +4,9 @@ import argparse
 import hashlib
 import importlib.util
 import json
-import subprocess
+import os
 import sys
+import time
 from collections import deque
 from pathlib import Path
 
@@ -14,7 +15,9 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LAND_ROOT = ROOT / "public" / "career-world" / "layers" / "territory-landform"
+LAND_ROOT = (
+    ROOT / "public" / "career-world" / "layers" / "terrain" / "authority"
+)
 ENVIRONMENT_ROOT = (
     ROOT / "public" / "career-world" / "capitals" / "ninjaone" / "environment"
 )
@@ -29,6 +32,13 @@ PRODUCTION_MASK = LAND_ROOT / "masks" / "world-land-mask-r4.png"
 TOPOLOGY_CONCEPT = TOPOLOGY_ROOT / "ninjaone-b1-topology-concept-r1.png"
 COASTLINE_CONCEPT = TOPOLOGY_ROOT / "ninjaone-coastline-repair-source-r1.png"
 DETAIL_MASTER = SOURCE_ROOT / "ninjaone-environment-terrain-master-detail-r2.png"
+HARMONIZED_DETAIL_MASTER = (
+    SOURCE_ROOT / "ninjaone-environment-terrain-master-detail-r3.png"
+)
+CONTACT_MASK = (
+    ENVIRONMENT_ROOT / "plates" / "geology"
+    / "ninjaone-environment-geology-contact-r3.png"
+)
 ENVIRONMENT_MANIFEST = ENVIRONMENT_ROOT / "manifests" / "environment-proof-r1.json"
 VALIDATION = TOPOLOGY_ROOT / "ninjaone-b1-b2-topology-validation-r1.json"
 CONTACT_SHEET = TOPOLOGY_ROOT / "ninjaone-b1-b2-topology-contact-sheet-r1.png"
@@ -49,10 +59,24 @@ TIERS = {
     "site": (2880, 2160),
     "close": (5760, 4320),
 }
+BOUNDARY_TRANSITION_PIXELS = 720
+BOUNDARY_LOW_FREQUENCY_RADIUS = 36
+INTERNAL_CONTACT_HALF_WIDTH = 300
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
+
+
+def replace_with_retry(source: Path, target: Path) -> None:
+    for attempt in range(8):
+        try:
+            os.replace(source, target)
+            return
+        except PermissionError:
+            if attempt == 7:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 
 def require_sources() -> None:
@@ -621,49 +645,192 @@ def patch_detail_master(final: np.ndarray, baseline_local: np.ndarray, final_loc
     }
 
 
-def build_runtime_lods() -> dict[str, dict]:
-    subprocess.run(
-        ["node", "scripts/assemble-ninjaone-environment-terrain-master-r2.mjs", "--lod-only"],
-        cwd=ROOT,
-        check=True,
+def build_harmonized_detail_master() -> dict[str, object]:
+    """Bind the regional plate edges to the exact canonical L2 terrain.
+
+    The r2 master remains the frozen high-resolution authoring source. The r3
+    derivative changes no alpha or geography: it only replaces RGB near the
+    left, right, and bottom registration contacts with the registered global
+    terrain crop, then eases back to the r2 master over a broad band. This
+    prevents a second terrain authority from exposing a rectangular edge.
+    """
+    with Image.open(DETAIL_MASTER) as source_image:
+        source = source_image.convert("RGBA")
+    relief_box = tuple(value * 4 for value in REGION)
+    canonical_path = LAND_ROOT / "textures" / "terrain-relief-r6-detail-4x.png"
+    with Image.open(canonical_path) as canonical_image:
+        canonical = canonical_image.convert("RGB").crop(relief_box).resize(
+            source.size,
+            Image.Resampling.LANCZOS,
+        )
+
+    width, height = source.size
+    y, x = np.mgrid[0:height, 0:width]
+    contact_distance = np.minimum.reduce(
+        (x, width - 1 - x, height - 1 - y)
+    ).astype(np.float32)
+    low_frequency_weight = np.clip(
+        contact_distance / float(BOUNDARY_TRANSITION_PIXELS),
+        0.0,
+        1.0,
     )
+    low_frequency_weight = (
+        low_frequency_weight
+        * low_frequency_weight
+        * (3.0 - 2.0 * low_frequency_weight)
+    )
+    source_rgb = source.convert("RGB")
+    source_low_frequency = source_rgb.filter(
+        ImageFilter.GaussianBlur(BOUNDARY_LOW_FREQUENCY_RADIUS),
+    )
+    source_array = np.asarray(source_rgb, dtype=np.float32)
+    source_low_array = np.asarray(source_low_frequency, dtype=np.float32)
+    canonical_array = np.asarray(canonical, dtype=np.float32)
+
+    # The accepted source was assembled from four cells. Preserve its authored
+    # fine detail, but make the low-frequency illumination/material field
+    # continuous across both internal cell contacts. Pixel-adjacency checks are
+    # insufficient here: the visible defect spans a much wider band.
+    internal_low = source_low_array.copy()
+    center_x = width // 2
+    center_y = height // 2
+    half = INTERNAL_CONTACT_HALF_WIDTH
+    vertical_mix = np.linspace(0.0, 1.0, half * 2, dtype=np.float32)[None, :, None]
+    vertical_left = source_low_array[:, center_x - half, :][:, None, :]
+    vertical_right = source_low_array[:, center_x + half - 1, :][:, None, :]
+    internal_low[:, center_x - half:center_x + half, :] = (
+        vertical_left * (1.0 - vertical_mix) + vertical_right * vertical_mix
+    )
+    horizontal_mix = np.linspace(0.0, 1.0, half * 2, dtype=np.float32)[:, None, None]
+    horizontal_top = internal_low[center_y - half, :, :][None, :, :]
+    horizontal_bottom = internal_low[center_y + half - 1, :, :][None, :, :]
+    internal_low[center_y - half:center_y + half, :, :] = (
+        horizontal_top * (1.0 - horizontal_mix)
+        + horizontal_bottom * horizontal_mix
+    )
+    low_weight = low_frequency_weight[:, :, None]
+    harmonized_array = (
+        canonical_array * (1.0 - low_weight)
+        + internal_low * low_weight
+        + (source_array - source_low_array)
+    )
+    harmonized_array[contact_distance >= BOUNDARY_TRANSITION_PIXELS] = (
+        source_array[contact_distance >= BOUNDARY_TRANSITION_PIXELS]
+    )
+    harmonized_rgb = Image.fromarray(
+        np.clip(np.round(harmonized_array), 0, 255).astype(np.uint8),
+        "RGB",
+    )
+    harmonized = harmonized_rgb.convert("RGBA")
+    harmonized.putalpha(source.getchannel("A"))
+    temporary = HARMONIZED_DETAIL_MASTER.with_suffix(".next.png")
+    harmonized.save(temporary, compress_level=6)
+    replace_with_retry(temporary, HARMONIZED_DETAIL_MASTER)
+    return {
+        "sourceSha256": sha256(DETAIL_MASTER),
+        "harmonizedSha256": sha256(HARMONIZED_DETAIL_MASTER),
+        "dimensions": list(source.size),
+        "transitionPixels": BOUNDARY_TRANSITION_PIXELS,
+        "lowFrequencyRadius": BOUNDARY_LOW_FREQUENCY_RADIUS,
+        "internalContactHalfWidth": INTERNAL_CONTACT_HALF_WIDTH,
+        "internalContacts": ["B1-C1", "B1-B2", "C1-C2", "B2-C2"],
+        "method": "frequency-separated-detail-preserving-contact",
+        "alphaPreserved": True,
+        "contactEdges": ["left", "right", "bottom"],
+    }
+
+
+def build_runtime_lods() -> dict[str, dict]:
     outputs: dict[str, dict] = {}
-    for tier, dimensions in TIERS.items():
-        path = ENVIRONMENT_ROOT / "plates" / "geology" / f"ninjaone-environment-geology-{tier}-r2.webp"
-        with Image.open(path) as image:
-            actual = image.size
-        if actual != dimensions:
-            raise RuntimeError(f"{tier} geology LOD is {actual}, expected {dimensions}.")
-        outputs[tier] = {
-            "path": path,
-            "sha256": sha256(path),
-            "dimensions": list(actual),
-        }
+    with Image.open(HARMONIZED_DETAIL_MASTER) as source_image:
+        source = source_image.convert("RGBA")
+        for tier, dimensions in TIERS.items():
+            path = (
+                ENVIRONMENT_ROOT
+                / "plates"
+                / "geology"
+                / f"ninjaone-environment-geology-{tier}-r3.webp"
+            )
+            resized = source.resize(dimensions, Image.Resampling.LANCZOS)
+            temporary = path.with_suffix(".next.webp")
+            resized.save(temporary, "WEBP", quality=90, method=6, exact=True)
+            replace_with_retry(temporary, path)
+            outputs[tier] = {
+                "path": path,
+                "sha256": sha256(path),
+                "dimensions": list(dimensions),
+            }
     return outputs
 
 
-def update_environment_manifest(runtime: dict[str, dict]) -> None:
+def build_contact_mask() -> dict[str, object]:
+    """Author an irregular, deterministic contact instead of a rectangle."""
+    width, height = LOCAL_SIZE
+    y, x = np.mgrid[0:height, 0:width]
+    left_variation = 13.0 + 7.0 * np.sin(y / 37.0) + 4.0 * np.sin(y / 13.0)
+    right_variation = 13.0 + 7.0 * np.sin(y / 43.0 + 1.7) + 4.0 * np.sin(y / 17.0)
+    bottom_variation = 18.0 + 9.0 * np.sin(x / 51.0 + 0.8) + 5.0 * np.sin(x / 19.0)
+    contact_distance = np.minimum.reduce(
+        (
+            x - left_variation,
+            width - 1 - x - right_variation,
+            height - 1 - y - bottom_variation,
+        )
+    )
+    feather = np.clip(contact_distance / 28.0, 0.0, 1.0)
+    feather = feather * feather * (3.0 - 2.0 * feather)
+    mask = Image.fromarray(np.round(feather * 255).astype(np.uint8), "L")
+    temporary = CONTACT_MASK.with_suffix(".next.png")
+    mask.save(temporary, compress_level=9)
+    replace_with_retry(temporary, CONTACT_MASK)
+    return {
+        "path": (
+            "/career-world/capitals/ninjaone/environment/plates/geology/"
+            "ninjaone-environment-geology-contact-r3.png"
+        ),
+        "sha256": sha256(CONTACT_MASK),
+        "dimensions": list(LOCAL_SIZE),
+        "featherPixels": 28,
+        "contactEdges": ["left", "right", "bottom"],
+        "shape": "deterministic-multiscale-irregular",
+    }
+
+
+def update_environment_manifest(
+    runtime: dict[str, dict],
+    contact_mask: dict[str, object],
+) -> None:
     manifest = json.loads(ENVIRONMENT_MANIFEST.read_text(encoding="utf-8"))
     registration = manifest["registration"]
     registration["gridCells"] = ["B1", "B2", "C1", "C2"]
     registration["continuityBufferCells"] = []
     geology = manifest["layers"]["geology"]
     geology["ownership"] = (
-        "one canonical-mask-registered B1 B2 C1 C2 terrain geometry; open water "
-        "remains owned by the global water layer"
+        "canonical-mask-registered B1 B2 C1 C2 regional detail; boundary color "
+        "and lighting are derived from canonical L2 terrain; open water remains "
+        "owned by the global water layer"
     )
-    geology["sourceSha256"] = sha256(DETAIL_MASTER)
+    geology["sourcePath"] = (
+        "/art-source/career-world/ninjaone-environment/production-r2/"
+        "ninjaone-environment-terrain-master-detail-r3.png"
+    )
+    geology["sourceSha256"] = sha256(HARMONIZED_DETAIL_MASTER)
+    geology["contactMask"] = contact_mask
     for tier, item in runtime.items():
         digest = item["sha256"]
         source = geology["sources"][tier]
-        source["path"] = source["path"].split("?", 1)[0] + f"?v={digest[:12].lower()}"
+        source["path"] = (
+            f"/career-world/capitals/ninjaone/environment/plates/geology/"
+            f"ninjaone-environment-geology-{tier}-r3.webp"
+            f"?v={digest[:12].lower()}"
+        )
         source["sha256"] = digest
         source["dimensions"] = item["dimensions"]
     ENVIRONMENT_MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
 def build_contact_sheet(final_local: np.ndarray) -> None:
-    master = Image.open(DETAIL_MASTER).convert("RGBA")
+    master = Image.open(HARMONIZED_DETAIL_MASTER).convert("RGBA")
     background = Image.new("RGBA", master.size, (4, 12, 16, 255))
     flattened = Image.alpha_composite(background, master).convert("RGB")
     sheet = Image.new("RGB", (1440, 1160), (5, 10, 13))
@@ -734,13 +901,22 @@ def main() -> None:
             after_runs["horizontal"] <= 40 and after_runs["vertical"] <= 30
         ),
     }
-    result: dict = {"global": global_metrics, "regional": {}, "runtimeLods": {}}
+    result: dict = {
+        "global": global_metrics,
+        "regional": {},
+        "boundaryHarmonization": {},
+        "runtimeLods": {},
+    }
     if not arguments.global_only:
         regional = patch_detail_master(final, baseline_local, final_local)
+        boundary_harmonization = build_harmonized_detail_master()
         runtime = build_runtime_lods()
-        update_environment_manifest(runtime)
+        contact_mask = build_contact_mask()
+        update_environment_manifest(runtime, contact_mask)
         build_contact_sheet(final_local)
         result["regional"] = regional
+        result["boundaryHarmonization"] = boundary_harmonization
+        result["boundaryHarmonization"]["contactMask"] = contact_mask
         result["runtimeLods"] = {
             tier: {key: value for key, value in item.items() if key != "path"}
             for tier, item in runtime.items()

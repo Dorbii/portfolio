@@ -12,13 +12,29 @@ substitutes a separately authored city canvas.
 | Order | Directory | Owns | Does not own |
 | --- | --- | --- | --- |
 | 1 | `world-backdrop` | Atmosphere behind the world | Water or land color |
-| 2 | `water-surface` | Open water, hydrology, water-side shelf/contact response | Land pixels |
-| 3 | `territory-landform` | Geography, elevation, slope, terrain relief, territory masks | Foam, wet contact, or moving water |
+| 2 | `ocean` | Open-water authority, surface motion, and coastal ambience | Land pixels or inland-water geometry |
+| 3 | `terrain` | Geography, elevation, slope, relief, detail, wildlife, and territory masks | Foam, wet contact, or moving water |
 | 4 | `infrastructure` | Roads, trails, docks, bridges, plazas | Terrain or buildings |
-| 5 | `environment` | Vegetation, rocks, logs, signs | Infrastructure |
-| 6 | `structures` | Employer, project, skill, and landmark structures | Evidence UI |
-| 7 | `actors-effects` | Actors, weather, particles, authored crash/foam accents | Base shoreline response |
-| 8 | `interface` | Labels, focus controls, selections, evidence links, QA overlays | World art |
+| 5 | `structures` | Employer, project, skill, and landmark structures | Evidence UI |
+| 6 | `actors-effects` | Actors, weather, particles, authored crash/foam accents | Base shoreline response |
+| 7 | `interface` | Labels, focus controls, selections, evidence links, QA overlays | World art |
+
+Environmental ownership is expressed through authority layers and their
+toggleable sublayers instead of a generic `environment` bucket:
+
+| ID | Directory | Responsibility |
+| --- | --- | --- |
+| L1 | `ocean/authority` | Registered open-water extent and coastline contact |
+| L1_1 | `ocean/surface-motion` | Time-varying open-water surface |
+| L1_2 | `ocean/coastal-ambience` | Isolated swash, spray, and marine accents |
+| L2 | `terrain/authority` | Frozen geography and registered terrain assets |
+| L2_1 | `terrain/detail` | Relief, trails, rocks, foliage, and ecology |
+| L2_2 | `terrain/wildlife` | LOD-gated habitat accents |
+| L2_3 | `terrain/dynamic-shadows` | Future supplemental relighting |
+| L3 | `inland-water/authority` | Rivers, lakes, rapids, and waterfall geometry |
+| L3_1 | `inland-water/surface-motion` | Currents, ripples, flow, and reflections |
+| L3_2 | `inland-water/effects` | Foam, impact rings, mist, and spray |
+| L3_3 | `inland-water/aquatic-life` | LOD-gated fish silhouettes |
 
 Coastline is an interface between land geometry and water behavior, not a ninth
 scene layer. Land publishes the mask, elevation, and slope. Water derives
@@ -29,7 +45,7 @@ land-side profile and publishes it for water-side shelf, breaker, and shadow
 response. Neither layer may invent a second coastline material map. Phase 7 may
 add sparse authored crash accents without redrawing the coast.
 
-Persistent shoreline motion belongs under `water-surface/coastlines/` when it
+Persistent shoreline motion belongs under `ocean/coastal-ambience/` when it
 is implemented. That code consumes the land-published profile to render swash,
 wet-edge, and repeating breaker response; it does not live inside the land
 directory. Transient impact foam, spray, and exceptional crash events remain
@@ -196,7 +212,7 @@ Capital placement is validated against more than the anchor point. The
 transparent asset silhouette and its lower base are sampled against the
 canonical land mask, preventing a nominally valid anchor from leaving the
 visible structure suspended over a lake, coastline, or neighboring water body.
-Local site terrain remains owned by the territory-landform layer. Its world
+Local site terrain remains owned by `terrain/authority`. Its world
 bounds are registered inside the development envelope, its outer transition
 reuses the exact territory source, and its alpha preserves the accepted land
 mask so it cannot cover the locked water layer.

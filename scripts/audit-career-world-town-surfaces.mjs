@@ -40,7 +40,8 @@ const TERRAIN_HEIGHT_PATH = path.join(
   "public",
   "career-world",
   "layers",
-  "territory-landform",
+  "terrain",
+  "authority",
   "fields",
   "terrain-height-r4.png",
 );
@@ -49,7 +50,8 @@ const TERRAIN_SLOPE_PATH = path.join(
   "public",
   "career-world",
   "layers",
-  "territory-landform",
+  "terrain",
+  "authority",
   "fields",
   "terrain-slope-r4.png",
 );

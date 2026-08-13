@@ -19,20 +19,15 @@ from PIL import Image, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LAND_ROOT = ROOT / "public" / "career-world" / "layers" / "territory-landform"
+LAND_ROOT = (
+    ROOT / "public" / "career-world" / "layers" / "terrain" / "authority"
+)
 SOURCE = LAND_ROOT / "textures" / "terrain-relief-r6-detail-4x.png"
 HEIGHT_FIELD = LAND_ROOT / "fields" / "terrain-height-r4.png"
 SLOPE_FIELD = LAND_ROOT / "fields" / "terrain-slope-r4.png"
 LOWLAND_MATERIAL = LAND_ROOT / "materials" / "close-ground-r1.png"
 ROCK_MATERIAL = LAND_ROOT / "materials" / "close-rock-r1.png"
 OUTPUT_ROOT = LAND_ROOT / "tiles" / "stream-r3"
-AUTHORING_MANIFEST = (
-    ROOT
-    / "scripts"
-    / "assets"
-    / "career-world"
-    / "terrain-stream-tiles-authoring-r3.json"
-)
 PUBLIC_AUTHORING_MANIFEST = (
     LAND_ROOT / "manifests" / "terrain-stream-tiles-r3.json"
 )
@@ -524,7 +519,6 @@ def compile_runtime_manifest(authoring: dict[str, object]) -> dict[str, object]:
 
 
 def write_manifest_pair(authoring: dict[str, object]) -> None:
-    write_json(AUTHORING_MANIFEST, authoring)
     write_json(PUBLIC_AUTHORING_MANIFEST, authoring)
     write_compact_json(RUNTIME_MANIFEST, compile_runtime_manifest(authoring))
 
@@ -664,7 +658,7 @@ def refresh_tile_manifest(
 ) -> None:
     """Replace one selected parent's child records without a full rebuild."""
 
-    payload = json.loads(AUTHORING_MANIFEST.read_text(encoding="utf-8"))
+    payload = json.loads(PUBLIC_AUTHORING_MANIFEST.read_text(encoding="utf-8"))
     column, row = parent
     expected_ids = {
         f"close-{column * CHILD_COLUMNS + child_column}-"
@@ -707,7 +701,7 @@ def main() -> None:
     options = arguments()
 
     if options.compile_manifest_only:
-        payload = json.loads(AUTHORING_MANIFEST.read_text(encoding="utf-8"))
+        payload = json.loads(PUBLIC_AUTHORING_MANIFEST.read_text(encoding="utf-8"))
         write_compact_json(RUNTIME_MANIFEST, compile_runtime_manifest(payload))
         print(
             f"Compiled {len(payload['tiles'])} terrain records into the compact "
@@ -960,7 +954,7 @@ def main() -> None:
         "status": "phase-6-close-detail-foundation",
         "coordinateSpace": "normalized-world-top-left",
         "sourceDetailPath": (
-            "/career-world/layers/territory-landform/"
+            "/career-world/layers/terrain/authority/"
             "textures/terrain-relief-r6-detail-4x.png"
         ),
         "sourceDimensions": [source.width, source.height],

@@ -115,7 +115,7 @@
   height: 100%;
   background:
     #071b24
-    url("/career-world/layers/water-surface/textures/water-surface-world-lod-r2-3840x2160.png")
+    url("/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png")
     center / cover no-repeat;
 }
 

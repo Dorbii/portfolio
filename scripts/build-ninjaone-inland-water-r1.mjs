@@ -16,27 +16,27 @@ const AUTHORITY_PATH = path.join(
 );
 const FIELD_PATH = path.join(
   ROOT,
-  "public/career-world/layers/water-surface/fields/"
+  "public/career-world/layers/inland-water/authority/fields/"
     + "ninjaone-inland-water-field-r1.png",
 );
 const DETAIL_PATH = path.join(
   ROOT,
-  "public/career-world/layers/water-surface/textures/"
+  "public/career-world/layers/inland-water/surface-motion/textures/"
     + "ninjaone-inland-water-detail-r1.png",
 );
 const RIVERBED_PATH = path.join(
   ROOT,
-  "public/career-world/layers/water-surface/textures/"
+  "public/career-world/layers/inland-water/surface-motion/textures/"
     + "ninjaone-inland-riverbed-r1.png",
 );
 const SURFACE_PATH = path.join(
   ROOT,
-  "public/career-world/layers/water-surface/textures/"
+  "public/career-world/layers/inland-water/surface-motion/textures/"
     + "ninjaone-inland-water-surface-r1.png",
 );
 const TERRAIN_ERASE_MASK_PATH = path.join(
   ROOT,
-  "public/career-world/layers/water-surface/masks/"
+  "public/career-world/layers/inland-water/authority/masks/"
     + "ninjaone-inland-terrain-erase-r1.png",
 );
 const MANIFEST_PATH = path.join(
@@ -183,7 +183,7 @@ async function buildDetailTexture() {
     .toFile(DETAIL_PATH);
   const bytes = await readFile(DETAIL_PATH);
   return Object.freeze({
-    path: "/career-world/layers/water-surface/textures/ninjaone-inland-water-detail-r1.png",
+    path: "/career-world/layers/inland-water/surface-motion/textures/ninjaone-inland-water-detail-r1.png",
     dimensions: DETAIL_DIMENSIONS,
     decodedBytes: width * height * 4,
     sha256: sha256(bytes),
@@ -205,7 +205,7 @@ async function buildRiverbedTexture(sourcePath) {
     .toFile(RIVERBED_PATH);
   const bytes = await readFile(RIVERBED_PATH);
   return Object.freeze({
-    path: "/career-world/layers/water-surface/textures/ninjaone-inland-riverbed-r1.png",
+    path: "/career-world/layers/inland-water/surface-motion/textures/ninjaone-inland-riverbed-r1.png",
     dimensions: RIVERBED_DIMENSIONS,
     decodedBytes: width * height * 4,
     sha256: sha256(bytes),
@@ -246,7 +246,7 @@ async function buildSurfaceTexture(sourcePath, waterfallSourcePath) {
     .toFile(SURFACE_PATH);
   const bytes = await readFile(SURFACE_PATH);
   return Object.freeze({
-    path: "/career-world/layers/water-surface/textures/ninjaone-inland-water-surface-r1.png",
+    path: "/career-world/layers/inland-water/surface-motion/textures/ninjaone-inland-water-surface-r1.png",
     dimensions: SURFACE_DIMENSIONS,
     decodedBytes: width * height * 4,
     sha256: sha256(bytes),
@@ -269,7 +269,6 @@ async function buildTerrainEraseMask(
   fallProgress,
   cascadeImpact,
   width,
-  height,
 ) {
   const [outputWidth, outputHeight] = TERRAIN_ERASE_MASK_DIMENSIONS;
   const erase = Buffer.alloc(outputWidth * outputHeight * 4);
@@ -315,7 +314,7 @@ async function buildTerrainEraseMask(
     .toFile(TERRAIN_ERASE_MASK_PATH);
   const bytes = await readFile(TERRAIN_ERASE_MASK_PATH);
   return Object.freeze({
-    path: "/career-world/layers/water-surface/masks/ninjaone-inland-terrain-erase-r1.png",
+    path: "/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png",
     dimensions: TERRAIN_ERASE_MASK_DIMENSIONS,
     decodedBytes: outputWidth * outputHeight * 4,
     sha256: sha256(bytes),
@@ -516,50 +515,6 @@ function closeOnePixel(mask, width, height) {
     }
   }
   return closed;
-}
-
-function dilateOnePixel(mask, width, height) {
-  const dilated = new Uint8Array(mask.length);
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const pixel = y * width + x;
-      for (let offsetY = -1; offsetY <= 1 && !dilated[pixel]; offsetY += 1) {
-        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
-          const sampleX = x + offsetX;
-          const sampleY = y + offsetY;
-          if (
-            sampleX >= 0 && sampleX < width
-            && sampleY >= 0 && sampleY < height
-            && mask[sampleY * width + sampleX]
-          ) {
-            dilated[pixel] = 1;
-            break;
-          }
-        }
-      }
-    }
-  }
-  return dilated;
-}
-
-function erodeOnePixel(mask, width, height) {
-  const eroded = new Uint8Array(mask.length);
-  for (let y = 1; y < height - 1; y += 1) {
-    for (let x = 1; x < width - 1; x += 1) {
-      const pixel = y * width + x;
-      let keep = 1;
-      for (let offsetY = -1; offsetY <= 1 && keep; offsetY += 1) {
-        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
-          if (!mask[(y + offsetY) * width + x + offsetX]) {
-            keep = 0;
-            break;
-          }
-        }
-      }
-      eroded[pixel] = keep;
-    }
-  }
-  return eroded;
 }
 
 function closeRadius(mask, width, height, radius) {
@@ -928,7 +883,6 @@ export async function buildNinjaOneInlandWaterR1() {
       fallProgress,
       cascadeImpact,
       width,
-      height,
     ),
   ]);
   const manifest = {
@@ -938,7 +892,7 @@ export async function buildNinjaOneInlandWaterR1() {
     authorityId: authority.id,
     registration: authority.registration,
     field: {
-      path: "/career-world/layers/water-surface/fields/ninjaone-inland-water-field-r1.png",
+      path: "/career-world/layers/inland-water/authority/fields/ninjaone-inland-water-field-r1.png",
       dimensions: FIELD_DIMENSIONS,
       artboardCrop: FIELD_CROP,
       artboardDimensions: ARTBOARD_DIMENSIONS,

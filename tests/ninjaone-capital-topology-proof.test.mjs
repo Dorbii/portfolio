@@ -305,7 +305,7 @@ test("NinjaOne Capital topology uses the approved B1, B2, C1, and C2 envelope", 
 test("NinjaOne Capital registration and plots conform to canonical terrain", async () => {
   const territories = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   ), "utf8"));
   const ninjaOne = territories.territories.find(({ id }) => id === "ninjaone");
   assert.ok(ninjaOne);

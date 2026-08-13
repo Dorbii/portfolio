@@ -147,13 +147,13 @@ function landDistanceField(image, maximumDistance) {
 
 test("terrain relief publishes canonical geography without edge glow", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
   );
   const relief = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+    "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
   );
   const authoredSurface = await decodePng(
-    "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
+    "public/career-world/layers/terrain/authority/sources/world-land-surface-authored-r11.png",
   );
   assert.deepEqual(
     [relief.width, relief.height],
@@ -166,10 +166,10 @@ test("terrain relief publishes canonical geography without edge glow", async () 
   );
   assert.notEqual(
     await sha256(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
+      "public/career-world/layers/terrain/authority/sources/world-land-surface-authored-r11.png",
     ),
     await sha256(
-      "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+      "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
     ),
     "the authored source must be compiled into the canonical runtime silhouette",
   );
@@ -232,19 +232,19 @@ test("terrain relief publishes canonical geography without edge glow", async () 
 test("runtime land registers its authored base material against the composite mask", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-relief-r6.json",
   ), "utf8"));
   const plate = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+    "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
   );
   const detail = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+    "public/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png",
   );
   const baseMask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
   const compositeMask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
   );
 
   assert.deepEqual([plate.width, plate.height, plate.channels], [1672, 941, 4]);
@@ -255,19 +255,19 @@ test("runtime land registers its authored base material against the composite ma
   assert.equal(
     manifest.visual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+      "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
     ),
   );
   assert.equal(
     manifest.detailVisual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+      "public/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png",
     ),
   );
   assert.equal(
     manifest.mask.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
     ),
   );
   assert.match(
@@ -315,10 +315,10 @@ test("the canonical B1/B2 topology promotion carries registered terrain material
       "art-source/career-world/ninjaone-environment/production-r2/topology-r3/world-land-mask-r4-baseline.png",
     ),
     decodePng(
-      "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+      "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
     ),
     decodePng(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
+      "public/career-world/layers/terrain/authority/sources/world-land-surface-authored-r11.png",
     ),
   ]);
   assert.deepEqual(
@@ -370,10 +370,10 @@ test("the canonical B1/B2 topology promotion carries registered terrain material
 
 test("authored shoreline confines deep shadows to cliff terrain", async () => {
   const plate = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+    "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
   );
   const coastMaterial = await decodePng(
-    "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+    "public/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
   );
   const total = plate.width * plate.height;
   const distance = landDistanceField(plate, 16);
@@ -430,14 +430,14 @@ test("authored shoreline confines deep shadows to cliff terrain", async () => {
 
 test("shoreline material visibly distinguishes beach and cliff response", async () => {
   const plate = await decodePng(
-    "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+    "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
   );
   const coastMaterial = await decodePng(
-    "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+    "public/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
   );
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/water-surface/manifests/coast-material-field-r6.json",
+    "public/career-world/layers/ocean/authority/manifests/coast-material-field-r6.json",
   ), "utf8"));
   assert.deepEqual(
     [coastMaterial.width, coastMaterial.height],
@@ -446,7 +446,7 @@ test("shoreline material visibly distinguishes beach and cliff response", async 
   assert.equal(
     manifest.texture.sha256,
     await sha256(
-      "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+      "public/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
     ),
   );
   assert.equal(manifest.defaultMaterial, "rocky-shelf");
@@ -494,20 +494,20 @@ test("shoreline material visibly distinguishes beach and cliff response", async 
 
 test("one topology model publishes elevation, slope, and QA contours", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
   );
   const height = await decodePng(
-    "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+    "public/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
   );
   const slope = await decodePng(
-    "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
   );
   const contours = await decodePng(
-    "public/career-world/layers/territory-landform/overlays/terrain-contours-r4-detail-4x.png",
+    "public/career-world/layers/terrain/authority/overlays/terrain-contours-r4-detail-4x.png",
   );
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-relief-r6.json",
   ), "utf8"));
 
   assert.deepEqual(
@@ -558,7 +558,7 @@ test("one topology model publishes elevation, slope, and QA contours", async () 
 test("terrain authoring declares six connected mountain systems", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-dem-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-dem-r4.json",
   ), "utf8"));
 
   assert.equal(manifest.mountainRanges.length, 6);
@@ -587,13 +587,13 @@ test("terrain authoring declares six connected mountain systems", async () => {
 test("every territory reserves a registered city-ready capital envelope", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
   const slope = await decodePng(
-    "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
   );
 
   assert.equal(manifest.territories.length, 5);
@@ -680,7 +680,7 @@ test("the Kaizen Agent project anchor uses accepted NinjaOne land", async () => 
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
 
   assert.deepEqual(projects.nodes.map(({ id }) => id), [
@@ -705,7 +705,7 @@ test("NinjaOne town-plan paving stays on accepted terrain", async () => {
     "public/career-world/layers/infrastructure/manifests/ninjaone-project-towns-r1.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
   const plans = [
     ...infrastructure.towns.map(({ id, townPlan }) => ({ id, townPlan })),
@@ -886,10 +886,10 @@ test("visible capital sprites remain supported by their registered terrain", asy
   ), "utf8"));
   const territories = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/world-territories-r4.json",
+    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
 
   for (const capital of structures.nodes) {
@@ -967,7 +967,7 @@ test("visible capital sprites remain supported by their registered terrain", asy
 test("capital site tiles stay bounded to land and add local density", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-site-tiles-r2.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-site-tiles-r2.json",
   ), "utf8"));
   const source = await decodePng(`public${manifest.sourceDetailPath}`);
   assert.deepEqual(
@@ -1085,7 +1085,7 @@ test("capital site tiles stay bounded to land and add local density", async () =
 test("close land detail is split into bounded camera-streamed tiles", async () => {
   const manifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-stream-tiles-r3.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-stream-tiles-r3.json",
   ), "utf8"));
   const [sourceWidth, sourceHeight] = manifest.sourceDimensions;
   const { columns, rows, outputScales } = manifest.grid;
@@ -1141,7 +1141,7 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
 
   const streamDirectory = path.join(
     root,
-    "public/career-world/layers/territory-landform/tiles/stream-r3",
+    "public/career-world/layers/terrain/authority/tiles/stream-r3",
   );
   const manifestPaths = manifest.tiles.flatMap((tile) =>
     Object.values(tile.sources).map(({ path: sourcePath }) => sourcePath)
@@ -1151,7 +1151,7 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
   }))
     .filter((entry) => entry.isFile() && entry.name.endsWith(".webp"))
     .map((entry) =>
-      `/career-world/layers/territory-landform/tiles/stream-r3/${entry.name}`
+      `/career-world/layers/terrain/authority/tiles/stream-r3/${entry.name}`
     )
     .sort();
   assert.deepEqual(
@@ -1215,7 +1215,7 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
       assert.match(
         source.path,
         new RegExp(
-          "^/career-world/layers/territory-landform/tiles/stream-r3/"
+          "^/career-world/layers/terrain/authority/tiles/stream-r3/"
             + `${tile.id}-${tier}\\.webp$`,
         ),
       );
@@ -1282,10 +1282,10 @@ test("close land detail is split into bounded camera-streamed tiles", async () =
 
 test("close land tiles are authored from dedicated high-fidelity materials", async () => {
   const ground = await decodePng(
-    "public/career-world/layers/territory-landform/materials/close-ground-r1.png",
+    "public/career-world/layers/terrain/authority/materials/close-ground-r1.png",
   );
   const rock = await decodePng(
-    "public/career-world/layers/territory-landform/materials/close-rock-r1.png",
+    "public/career-world/layers/terrain/authority/materials/close-rock-r1.png",
   );
   const authoringScript = await readFile(path.join(
     root,
@@ -1338,10 +1338,10 @@ test("close land tiles are authored from dedicated high-fidelity materials", asy
 
 test("coast field is derived across the complete authored shoreline", async () => {
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
   );
   const coast = await decodePng(
-    "public/career-world/layers/water-surface/fields/coast-geometry-r5.png",
+    "public/career-world/layers/ocean/authority/fields/coast-geometry-r5.png",
   );
   assert.deepEqual([coast.width, coast.height], [mask.width, mask.height]);
   assert.equal(coast.channels, 4);
@@ -1398,16 +1398,16 @@ test("coast field is derived across the complete authored shoreline", async () =
 
 test("coast materials derive beach and cliff variation from topology", async () => {
   const material = await decodePng(
-    "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+    "public/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
   );
   const mask = await decodePng(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
   );
   const height = await decodePng(
-    "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+    "public/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
   );
   const slope = await decodePng(
-    "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
   );
   assert.deepEqual(
     [material.width, material.height, material.channels],
@@ -1459,107 +1459,107 @@ test("coast materials derive beach and cliff variation from topology", async () 
 test("generated asset manifests carry exact content hashes", async () => {
   const landManifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/territory-landform/manifests/terrain-relief-r6.json",
+    "public/career-world/layers/terrain/authority/manifests/terrain-relief-r6.json",
   ), "utf8"));
   const coastManifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/water-surface/manifests/coast-geometry-r5.json",
+    "public/career-world/layers/ocean/authority/manifests/coast-geometry-r5.json",
   ), "utf8"));
   const waterManifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/water-surface/manifests/water-surface-world-lod-r2.json",
+    "public/career-world/layers/ocean/surface-motion/manifests/water-surface-world-lod-r2.json",
   ), "utf8"));
   const coastMaterialManifest = JSON.parse(await readFile(path.join(
     root,
-    "public/career-world/layers/water-surface/manifests/coast-material-field-r6.json",
+    "public/career-world/layers/ocean/authority/manifests/coast-material-field-r6.json",
   ), "utf8"));
 
   assert.equal(
     landManifest.visual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/terrain-relief-r6.png",
+      "public/career-world/layers/terrain/authority/textures/terrain-relief-r6.png",
     ),
   );
   assert.equal(
     coastManifest.texture.sha256,
     await sha256(
-      "public/career-world/layers/water-surface/fields/coast-geometry-r5.png",
+      "public/career-world/layers/ocean/authority/fields/coast-geometry-r5.png",
     ),
   );
   assert.equal(
     landManifest.detailVisual.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/textures/terrain-relief-r6-detail-4x.png",
+      "public/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png",
     ),
   );
   assert.equal(
     coastManifest.detailTexture.sha256,
     await sha256(
-      "public/career-world/layers/water-surface/fields/coast-geometry-r5-4x.png",
+      "public/career-world/layers/ocean/authority/fields/coast-geometry-r5-4x.png",
     ),
   );
   assert.equal(
     waterManifest.texture.sha256,
     await sha256(
-      "public/career-world/layers/water-surface/textures/water-surface-world-lod-r2-3840x2160.png",
+      "public/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png",
     ),
   );
   assert.equal(
     coastMaterialManifest.texture.sha256,
     await sha256(
-      "public/career-world/layers/water-surface/fields/coast-material-field-r6.png",
+      "public/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
     ),
   );
   const canonicalLandMaskHash = await sha256(
-    "public/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
   );
   assert.equal(coastManifest.source.sha256, canonicalLandMaskHash);
   assert.equal(
     coastMaterialManifest.sources.height.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "public/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
     ),
   );
   assert.equal(
     coastMaterialManifest.sources.slope.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
     ),
   );
   assert.equal(
     landManifest.fields.height.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/fields/terrain-height-r4.png",
+      "public/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
     ),
   );
   assert.equal(
     landManifest.fields.slope.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+      "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
     ),
   );
   assert.equal(
     landManifest.topologyQa.sha256,
     await sha256(
-      "public/career-world/layers/territory-landform/overlays/terrain-contours-r4-detail-4x.png",
+      "public/career-world/layers/terrain/authority/overlays/terrain-contours-r4-detail-4x.png",
     ),
   );
   assert.equal(
     landManifest.derivation.sourceSha256,
     await sha256(
-      "public/career-world/layers/territory-landform/sources/terrain-dem-authored-r3.png",
+      "public/career-world/layers/terrain/authority/sources/terrain-dem-authored-r3.png",
     ),
   );
   assert.equal(
     landManifest.derivation.authoringSha256,
     await sha256(
-      "public/career-world/layers/territory-landform/manifests/terrain-dem-r4.json",
+      "public/career-world/layers/terrain/authority/manifests/terrain-dem-r4.json",
     ),
   );
   assert.equal(
     landManifest.derivation.authoredSurfaceSourceSha256,
     await sha256(
-      "public/career-world/layers/territory-landform/sources/world-land-surface-authored-r11.png",
+      "public/career-world/layers/terrain/authority/sources/world-land-surface-authored-r11.png",
     ),
   );
 });
@@ -1567,19 +1567,19 @@ test("generated asset manifests carry exact content hashes", async () => {
 test("accepted Phase 3 water checkpoint remains immutable", async () => {
   const acceptedAssets = [
     [
-      "public/career-world/layers/water-surface/textures/water-surface-world-lod-r2-3840x2160.png",
+      "public/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png",
       "57408A1192B5DAC45DB9BEA2713E558B7BFB751CAC714AAF59A8FD0DAF941896",
     ],
     [
-      "public/career-world/layers/water-surface/textures/water-surface-reference-r2-3840x2160.png",
+      "public/career-world/layers/ocean/surface-motion/textures/water-surface-reference-r2-3840x2160.png",
       "CD8786E2C4CF27A104CE8B53C037AB9BC5428CEF4B803A1D1F5F6BCC3AF2E9D1",
     ],
     [
-      "public/career-world/layers/water-surface/fields/water-height-macro-r1-1024x1024.png",
+      "public/career-world/layers/ocean/surface-motion/fields/water-height-macro-r1-1024x1024.png",
       "0D47733EE33A3D6BBC1D667E2214AE937DB051341F2E2B62B73CA60FD987CDE5",
     ],
     [
-      "public/career-world/layers/water-surface/fields/water-height-micro-r1-1024x1024.png",
+      "public/career-world/layers/ocean/surface-motion/fields/water-height-micro-r1-1024x1024.png",
       "6681E2DACCA2F5105A9F4C478B112D4C05F1479B9EAC26C02975295A71C6DCB3",
     ],
   ];

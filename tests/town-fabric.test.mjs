@@ -45,7 +45,7 @@ test("Kaizen authored city layout stays isolated from the live structure stack",
       "features/career-world/layers/structures/model/townFabric.ts",
     ), "utf8"),
     readJson(
-      "public/career-world/layers/territory-landform/manifests/"
+      "public/career-world/layers/terrain/authority/manifests/"
         + "terrain-site-tiles-r2.json",
     ),
   ]);

@@ -18,7 +18,7 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = ROOT / "public" / "career-world" / "layers"
-LAND_ROOT = PUBLIC_ROOT / "territory-landform"
+LAND_ROOT = PUBLIC_ROOT / "terrain" / "authority"
 STRUCTURE_ROOT = PUBLIC_ROOT / "structures"
 SOURCE = LAND_ROOT / "textures" / "terrain-relief-r6-detail-4x.png"
 LOWLAND_MATERIAL = LAND_ROOT / "materials" / "close-ground-r1.png"
@@ -215,7 +215,7 @@ def main() -> None:
             image = build_authored_independent(registered_source, bounds)
             revision = "r3"
             authored_source_path = (
-                "/career-world/layers/territory-landform/"
+                "/career-world/layers/terrain/authority/"
                 "sources/independent-capital-site-authored-r2.png"
             )
         elif territory_id == "ninjaone":
@@ -251,7 +251,7 @@ def main() -> None:
             "ownerId": capital["id"],
             "minimumTier": "site",
             "path": (
-                "/career-world/layers/territory-landform/tiles/"
+                "/career-world/layers/terrain/authority/tiles/"
                 f"{file_name}"
             ),
             "dimensions": [image.width, image.height],
@@ -299,7 +299,7 @@ def main() -> None:
             "ownerId": project["id"],
             "minimumTier": "site",
             "path": (
-                "/career-world/layers/territory-landform/tiles/"
+                "/career-world/layers/terrain/authority/tiles/"
                 f"{file_name}"
             ),
             "dimensions": [image.width, image.height],
@@ -329,7 +329,7 @@ def main() -> None:
         "status": "phase-6-structure-sites",
         "coordinateSpace": "normalized-world-top-left",
         "sourceDetailPath": (
-            "/career-world/layers/territory-landform/"
+            "/career-world/layers/terrain/authority/"
             "textures/terrain-relief-r6-detail-4x.png"
         ),
         "sourceDimensions": list(registered_source.size),

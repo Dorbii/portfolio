@@ -23,9 +23,9 @@
       1440,
       1080
     ],
-    "canonicalLandMaskPath": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
-    "canonicalHeightFieldPath": "/career-world/layers/territory-landform/fields/terrain-height-r4.png",
-    "canonicalSlopeFieldPath": "/career-world/layers/territory-landform/fields/terrain-slope-r4.png",
+    "canonicalLandMaskPath": "/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
+    "canonicalHeightFieldPath": "/career-world/layers/terrain/authority/fields/terrain-height-r4.png",
+    "canonicalSlopeFieldPath": "/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
     "continuityBufferCells": []
   },
   "layerOrder": [
@@ -42,42 +42,57 @@
   ],
   "layers": {
     "geology": {
-      "ownership": "one canonical-mask-registered B1 B2 C1 C2 terrain geometry; open water remains owned by the global water layer",
-      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
-      "sourceSha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02",
+      "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; boundary color and lighting are derived from canonical L2 terrain; open water remains owned by the global water layer",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r3.png",
+      "sourceSha256": "4CD2EE330FC0BF5840C490F1CEE4FF0A8FDFBB808AD7D60DA994A585A17EE19C",
       "sources": {
         "territory": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r2.webp?v=ec4004ddbb3b",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r3.webp?v=493de564ce8f",
           "dimensions": [
             720,
             540
           ],
-          "sha256": "EC4004DDBB3B83C24615FDEF9BAD813D71CA917F6F6F478DBFBE69F5A3ED770B"
+          "sha256": "493DE564CE8F6CA130A4A40C6E89AA70C1F88740043AE64D5E34320E97A5809C"
         },
         "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r2.webp?v=dde6cadc1915",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r3.webp?v=d299b9faebaf",
           "dimensions": [
             1440,
             1080
           ],
-          "sha256": "DDE6CADC19153A69AB9F2E8514CC9EE59CD655543BFEE97B8C91D30F43579EC8"
+          "sha256": "D299B9FAEBAFDCFECD5ECD5EEF38C78BC82172E39EE8F6D57266A1C09E5EFAED"
         },
         "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r2.webp?v=e0731e39ffeb",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r3.webp?v=08af2affc94e",
           "dimensions": [
             2880,
             2160
           ],
-          "sha256": "E0731E39FFEB402EA4B3CEC967957BFCB916A52E86BDAE0B8FF05F017B7F8777"
+          "sha256": "08AF2AFFC94E09FB7E822B01F6095BEEF86FFAB3226276BD3E5E2120F8D1277A"
         },
         "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r2.webp?v=1ad347e40a16",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r3.webp?v=1c65c5e198ce",
           "dimensions": [
             5760,
             4320
           ],
-          "sha256": "1AD347E40A1628B99F6661E4D09B3130CE6F50D5267FF33C351D7EA84546DE0A"
+          "sha256": "1C65C5E198CE7588874ECB3DE3DE165EF32E941FCA037ED02F8A043419C23396"
         }
+      },
+      "contactMask": {
+        "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-contact-r3.png",
+        "sha256": "F329DDECABABD610E3064376ECF31239F0E0BAAD4A26E4DA03A56905565BEE77",
+        "dimensions": [
+          1440,
+          1080
+        ],
+        "featherPixels": 28,
+        "contactEdges": [
+          "left",
+          "right",
+          "bottom"
+        ],
+        "shape": "deterministic-multiscale-irregular"
       }
     },
     "secondaryRelief": {

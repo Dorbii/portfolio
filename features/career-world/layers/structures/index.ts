@@ -2,7 +2,7 @@ import type { LayerDescriptor } from "../../shared/layers";
 
 export const STRUCTURES_LAYER: LayerDescriptor = Object.freeze({
   id: "structures",
-  order: 6,
+  order: 5,
   status: "active",
   owns: Object.freeze([
     "employer structures",

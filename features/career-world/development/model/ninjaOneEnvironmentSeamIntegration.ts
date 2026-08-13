@@ -1,6 +1,6 @@
 import manifest from "../../../../public/career-world/capitals/ninjaone/environment/manifests/seam-integration-native-r2.json" with { type: "json" };
 import type { CameraView, Pair } from "../../shared/camera";
-import { environmentCameraArtboardView } from "./ninjaOneEnvironmentNativeDetail.ts";
+import { environmentCameraArtboardView } from "../../layers/terrain/detail/model/ninjaOneEnvironmentNativeDetail.ts";
 
 interface RawBounds {
   readonly origin: readonly number[];

@@ -264,7 +264,7 @@ async function evaluate(connection, sessionId, expression, awaitPromise = true) 
 
 const RUNTIME_SAMPLE_EXPRESSION = `(() => {
   const native = document.querySelector('.ninjaone-environment-native-detail');
-  const water = document.querySelector('canvas[data-layer="water-surface"]');
+  const water = document.querySelector('canvas[data-layer="ocean"]');
   if (!native || !water) return null;
   return {
     cohortPhase: native.dataset.environmentNativeCohortPhase,
@@ -621,7 +621,7 @@ async function captureFoliageIsolationProof({
       + '.career-world__header, .career-world__footer { visibility: hidden !important; } '
       + '[data-environment-layer="wildlife"] { display: none !important; } '
       + '[data-environment-seam-integration-state] { visibility: hidden !important; } '
-      + 'canvas[data-layer="water-surface"] { visibility: hidden !important; }';
+      + 'canvas[data-layer="ocean"] { visibility: hidden !important; }';
     document.head.append(style);
   })()`);
   const clip = Object.freeze({

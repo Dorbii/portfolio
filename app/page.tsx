@@ -20,7 +20,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       return <CareerWorld enablePerformanceProbe initialView="ninjaone-capital" />;
     case "ninjaone-capital-topology":
       return <CareerWorld enableDevelopmentTools topologyProof />;
-    case "territory-landform":
+    case "terrain":
       return <CareerWorld enableDevelopmentTools />;
     default:
       return <CareerWorld />;

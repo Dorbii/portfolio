@@ -6,7 +6,7 @@ import {
   planTerrainResidency,
   planTerrainResidencyWithTierFallback,
   prefetchSourcesToPreempt,
-} from "../features/career-world/layers/territory-landform/model/residency.ts";
+} from "../features/career-world/layers/terrain/model/residency.ts";
 
 const policy = Object.freeze({
   maximumLandLayerDecodedBytes: 100_000,
@@ -206,11 +206,11 @@ test("pinned outgoing sources survive reverse zoom and count once", () => {
 
 test("real 4K site view stages territory retirement within the land budget", () => {
   const streamManifest = loadManifest(
-    "public/career-world/layers/territory-landform/"
+    "public/career-world/layers/terrain/authority/"
       + "manifests/terrain-stream-tiles-r3.json",
   );
   const siteManifest = loadManifest(
-    "public/career-world/layers/territory-landform/"
+    "public/career-world/layers/terrain/authority/"
       + "manifests/terrain-site-tiles-r2.json",
   );
   const realTiles = [

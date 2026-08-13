@@ -1,6 +1,6 @@
 import manifest from "@/public/career-world/layers/structures/manifests/capital-structures-r1.json";
-import { TERRITORIES } from "../../territory-landform";
-import type { Territory } from "../../territory-landform/model/territories";
+import { TERRITORIES } from "../../terrain";
+import type { Territory } from "../../terrain/model/territories";
 import type { Pair } from "../../../shared/camera";
 import type { DetailNodePolicy } from "../../../shared/lod";
 

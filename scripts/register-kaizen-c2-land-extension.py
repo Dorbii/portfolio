@@ -19,11 +19,14 @@ sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = ROOT / "public" / "career-world" / "layers"
-SEMANTIC_MANIFEST = (
-    PUBLIC_ROOT
-    / "structures"
+CITY_BASE_MANIFEST = (
+    ROOT
+    / "public"
+    / "career-world"
+    / "cities"
+    / "kaizen-agent"
     / "manifests"
-    / "kaizen-semantic-assets-r1.json"
+    / "base-runtime-r1.json"
 )
 CITY_PLATE = (
     PUBLIC_ROOT
@@ -35,31 +38,36 @@ CITY_PLATE = (
 )
 SOURCE_MASK = (
     PUBLIC_ROOT
-    / "territory-landform"
+    / "terrain"
+    / "authority"
     / "masks"
     / "world-land-mask-r3.png"
 )
 OUTPUT_MASK = (
     PUBLIC_ROOT
-    / "territory-landform"
+    / "terrain"
+    / "authority"
     / "masks"
     / "world-land-mask-r4.png"
 )
 AUTHORED_SURFACE_SOURCE = (
     PUBLIC_ROOT
-    / "territory-landform"
+    / "terrain"
+    / "authority"
     / "sources"
     / "world-land-surface-authored-r9.png"
 )
 OUTPUT_AUTHORED_SURFACE = (
     PUBLIC_ROOT
-    / "territory-landform"
+    / "terrain"
+    / "authority"
     / "sources"
     / "world-land-surface-authored-r11.png"
 )
 OUTPUT_AUTHORED_SURFACE_DETAIL = (
     PUBLIC_ROOT
-    / "territory-landform"
+    / "terrain"
+    / "authority"
     / "sources"
     / "world-land-surface-authored-r11-detail-4x.png"
 )
@@ -273,10 +281,11 @@ def _padded_box(
 
 
 def main() -> None:
-    manifest = json.loads(SEMANTIC_MANIFEST.read_text(encoding="utf-8"))
-    anchor = tuple(float(value) for value in manifest["plateAnchor"])
-    span = tuple(float(value) for value in manifest["plateSpan"])
-    alignment_y = float(manifest["plateAlignmentY"])
+    manifest = json.loads(CITY_BASE_MANIFEST.read_text(encoding="utf-8"))
+    plate = manifest["plate"]
+    anchor = tuple(float(value) for value in plate["anchor"])
+    span = tuple(float(value) for value in plate["span"])
+    alignment_y = float(plate["alignmentY"])
     origin = (
         anchor[0] - span[0] * 0.5,
         anchor[1] - span[1] * alignment_y,
