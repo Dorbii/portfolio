@@ -97,7 +97,7 @@ test("zoom tiers retain one authored terrain geometry without detached asset sub
   for (const tier of ["capital", "site"]) {
     assert.match(
       NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[tier].path,
-      /-r3\.webp\?v=[a-f0-9]{12}$/,
+      /-r\d+\.webp\?v=[a-f0-9]{12}$/,
     );
   }
   assert.deepEqual(NINJAONE_ENVIRONMENT_LOD_LAYERS.site, [
@@ -110,7 +110,7 @@ test("zoom tiers retain one authored terrain geometry without detached asset sub
   ]);
   assert.match(
     NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close.path,
-    /-r3\.webp\?v=[a-f0-9]{12}$/,
+    /-r\d+\.webp\?v=[a-f0-9]{12}$/,
   );
   assert.deepEqual(
     ["territory", "capital", "site", "close"].map(
@@ -141,17 +141,13 @@ test("registered plates retain one 4:3 geometry and transparent layering", async
   }
 });
 
-test("regional terrain detail uses one live r3 cohort and a registered contact mask", async () => {
+test("regional terrain detail uses one coherent cohort and a registered contact repair", async () => {
   const manifest = await readJson(
     "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
   );
   const contactMask = manifest.layers.geology.contactMask;
-  assert.equal(
-    manifest.layers.geology.sourcePath.endsWith(
-      "ninjaone-environment-terrain-master-detail-r3.png",
-    ),
-    true,
-  );
+  const revision = manifest.layers.geology.sourcePath.match(/-r(\d+)\.png$/)?.[1];
+  assert.ok(revision, "terrain source must declare a revision");
   assert.deepEqual(Object.keys(manifest.layers.geology.sources), [
     "territory",
     "capital",
@@ -159,9 +155,12 @@ test("regional terrain detail uses one live r3 cohort and a registered contact m
     "close",
   ]);
   for (const source of Object.values(manifest.layers.geology.sources)) {
-    assert.match(source.path, /-r3\.webp\?v=[a-f0-9]{12}$/);
+    assert.match(source.path, new RegExp(`-r${revision}\\.webp\\?v=[a-f0-9]{12}$`));
     assert.equal(await stat(runtimeAssetFile(source.path)).then(() => true), true);
   }
+  assert.equal(manifest.layers.geology.contactRepair.alphaPreserved, true);
+  assert.equal(manifest.layers.geology.contactRepair.projectionChanged, false);
+  assert.deepEqual(manifest.layers.geology.contactRepair.contacts, ["B1-B2", "B1-C1"]);
   assert.deepEqual(contactMask.dimensions, [1440, 1080]);
   assert.deepEqual(contactMask.contactEdges, ["left", "right", "bottom"]);
   assert.equal(contactMask.shape, "deterministic-multiscale-irregular");

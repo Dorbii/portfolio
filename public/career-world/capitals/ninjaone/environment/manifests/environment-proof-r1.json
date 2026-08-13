@@ -42,41 +42,41 @@
   ],
   "layers": {
     "geology": {
-      "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; boundary color and lighting are derived from canonical L2 terrain; open water remains owned by the global water layer",
-      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r3.png",
-      "sourceSha256": "4CD2EE330FC0BF5840C490F1CEE4FF0A8FDFBB808AD7D60DA994A585A17EE19C",
+      "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; semantic contact repairs use neighbor-context outpainting while preserving canonical alpha and geography; open water remains owned by the global water layer",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r4.png",
+      "sourceSha256": "DAFD44FF8016CE5EA2439F0566EE364B5F9AE7E43BB56C81E366DD0808FFFA63",
       "sources": {
         "territory": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r3.webp?v=493de564ce8f",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r4.webp?v=463020703502",
           "dimensions": [
             720,
             540
           ],
-          "sha256": "493DE564CE8F6CA130A4A40C6E89AA70C1F88740043AE64D5E34320E97A5809C"
+          "sha256": "463020703502C1F677C78856E14A293AEA27294CC203240833D5AF9897279F19"
         },
         "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r3.webp?v=d299b9faebaf",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r4.webp?v=b6b13e994438",
           "dimensions": [
             1440,
             1080
           ],
-          "sha256": "D299B9FAEBAFDCFECD5ECD5EEF38C78BC82172E39EE8F6D57266A1C09E5EFAED"
+          "sha256": "B6B13E9944384C43AA631E1EC79B24F4F336504D96A6C65529E8D32D6CA82E06"
         },
         "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r3.webp?v=08af2affc94e",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r4.webp?v=37d0dee2c949",
           "dimensions": [
             2880,
             2160
           ],
-          "sha256": "08AF2AFFC94E09FB7E822B01F6095BEEF86FFAB3226276BD3E5E2120F8D1277A"
+          "sha256": "37D0DEE2C949FF91DBF4E9D956C2E9C74CB90CB57A331101CB8E1BC41D81DB11"
         },
         "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r3.webp?v=1c65c5e198ce",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r4.webp?v=b8a5b16ea575",
           "dimensions": [
             5760,
             4320
           ],
-          "sha256": "1C65C5E198CE7588874ECB3DE3DE165EF32E941FCA037ED02F8A043419C23396"
+          "sha256": "B8A5B16EA575A01BF67263CBC97D4862E46324773CE56B876A4CF5534653E698"
         }
       },
       "contactMask": {
@@ -93,6 +93,21 @@
           "bottom"
         ],
         "shape": "deterministic-multiscale-irregular"
+      },
+      "contactRepair": {
+        "method": "neighbor-context-outpaint-narrow-band-composite",
+        "reportPath": "/art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/integration-report.json",
+        "alphaPreserved": true,
+        "projectionChanged": false,
+        "contacts": [
+          "B1-B2",
+          "B1-C1"
+        ],
+        "core": 96,
+        "feather": 96,
+        "windowFeather": 96,
+        "colorFieldRadius": 48,
+        "colorFieldMethod": "source-low-frequency-plus-generated-high-frequency"
       }
     },
     "secondaryRelief": {

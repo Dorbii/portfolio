@@ -1,0 +1,133 @@
+{
+  "source": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r3.png",
+  "cohortLayout": [
+    2,
+    2
+  ],
+  "targetCell": [
+    0,
+    0
+  ],
+  "targetDimensions": [
+    2880,
+    2160
+  ],
+  "window": 1024,
+  "overlap": 256,
+  "outpaintBand": 256,
+  "projectionChanged": false,
+  "contexts": [
+    {
+      "id": "east-00",
+      "contact": "east",
+      "sourceBox": [
+        2368,
+        0,
+        3392,
+        1024
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-00.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-00-outpaint.png"
+    },
+    {
+      "id": "east-01",
+      "contact": "east",
+      "sourceBox": [
+        2368,
+        768,
+        3392,
+        1792
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-01.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-01-outpaint.png"
+    },
+    {
+      "id": "east-02",
+      "contact": "east",
+      "sourceBox": [
+        2368,
+        1136,
+        3392,
+        2160
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-02.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/east-02-outpaint.png"
+    },
+    {
+      "id": "south-00",
+      "contact": "south",
+      "sourceBox": [
+        0,
+        1648,
+        1024,
+        2672
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-00.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-00-outpaint.png"
+    },
+    {
+      "id": "south-01",
+      "contact": "south",
+      "sourceBox": [
+        768,
+        1648,
+        1792,
+        2672
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-01.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-01-outpaint.png"
+    },
+    {
+      "id": "south-02",
+      "contact": "south",
+      "sourceBox": [
+        1536,
+        1648,
+        2560,
+        2672
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-02.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-02-outpaint.png"
+    },
+    {
+      "id": "south-03",
+      "contact": "south",
+      "sourceBox": [
+        1856,
+        1648,
+        2880,
+        2672
+      ],
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "path": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-03.png",
+      "outpaintPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/contexts/south-03-outpaint.png"
+    }
+  ]
+}
